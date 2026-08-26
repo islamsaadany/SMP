@@ -151,7 +151,7 @@ var NEWSET = { name: "", team: "", owner: "", pick: "smo" };
    held here rather than recomputed on every paint, because the person
    answering it may go and look at the row it names and come back. */
 var ADDROLE = null, ADDROLE_KIND = "owner";
-/* ── WHY THE LAST PICK DID NOT LAND (§108) ────────────────────────────
+/* ── WHY THE LAST PICK DID NOT LAND (§110) ────────────────────────────
    `{key, why}`, or null. A property of the screen and never of the person
    (§25.2) — it is the outcome of one press, cleared by the press that
    succeeds, by opening the picker again and by leaving the row. */
@@ -741,7 +741,7 @@ function rowEditLive(){
   var t = rowEditTable();
   return (t && ROWFIND[t]) ? ROWFIND[t](rowEditKey()) : null;
 }
-/* ── AND WHAT POINTS AT THE ROW, NOT ONLY WHAT IS IN IT (§108) ───────
+/* ── AND WHAT POINTS AT THE ROW, NOT ONLY WHAT IS IN IT (§110) ───────
    A person's roles are not ON the person: a unit's `head` and a function's
    `custodian` point AT them (§33), and `ROWWAS` is a copy of the row. So Cancel
    restored `p.unit` and left the grant standing — press it after giving
@@ -2106,7 +2106,7 @@ function roleKeyByName(name){
    file naming it would be asking for a role that arrives by itself, so the
    template does not offer it and the reader says so plainly. */
 function roleIsGrantable(key){ return !!key && !SMPRules.isOwnLinesRole(key); }
-/* ── THE WORD FOR WHERE A ROLE IS HELD (§108) ─────────────────────────
+/* ── THE WORD FOR WHERE A ROLE IS HELD (§110) ─────────────────────────
    For the sentence a refused pick shows, and for nothing else. It is a LABEL,
    not a second rule: `roleWheres()` still decides what may be held where, and
    this only says it in English — so a role whose list changes cannot end up
@@ -3942,6 +3942,49 @@ function reportState(c, key){
   if (REVIEW.submitted && REVIEW.submitted[key]) return { key:"done", label:"Submitted" };
   if (!c.done) return { key:"late", label:"Not started" };
   return { key:"part", label:"In progress" };
+}
+
+/* ── HOW THE CYCLE IS GOING, ASKED ONCE (§108.9) ──────────────────────
+   The Reporting cycle page computed this inline, which was right while it was
+   the only page that wanted it. The Overview opens on the same four numbers,
+   and a second loop over activeKeys() would be two answers to one question —
+   the drift §53.5 exists to catch, invited deliberately by a page whose whole
+   job is to summarise other pages.
+
+   `progress` is DERIVED rather than counted, and that is the cycle page's own
+   arithmetic moved rather than re-reasoned: a unit is in progress when it is
+   neither submitted nor untouched, so it is the remainder and can never
+   disagree with the other two. */
+/* WHICH SUPPORTING FUNCTIONS ARE ON THE BOARD (§105, named once in §108.1).
+   The filter was written inline in renderCycle(); the totals need exactly the
+   same list, and two copies of it is how a board and its own summary come to
+   disagree about how many things were asked for. */
+function boardFunctionKeys(){
+  return Object.keys(FUNCTIONS).filter(function(fk){
+    return fnShows(fk) && !fnPlansInPillars(FUNCTIONS[fk]) && capsOfFunction(fk).length;
+  });
+}
+
+function cycleTotals(){
+  var t = { done:0, total:0, sub:0, none:0, units:0 };
+  function add(c, st){
+    t.done += c.done; t.total += c.total;
+    if (st.key === "done") t.sub++;
+    if (st.key === "late") t.none++;
+    t.units++;
+  }
+  activeKeys().forEach(function(k){ add(reportedCount(UNITS[k]), unitState(UNITS[k])); });
+  /* THE FUNCTIONS COUNT TOO (§105). They report, they submit, and they are on
+     the board — so leaving them out of the headline would say 6 of 10 on a
+     page listing fifteen rows. */
+  boardFunctionKeys().forEach(function(fk){ add(fnReportedCount(fk), fnState(fk)); });
+  /* DERIVED, NEVER COUNTED: in progress is whatever is neither submitted nor
+     untouched, so it cannot disagree with the other two. It also FIXES a real
+     miscount — the inline version divided by `activeKeys().length` while
+     `sub` and `none` had already grown to include the functions, so every
+     submitted function took one off "in progress" (§108.1). */
+  t.progress = t.units - t.sub - t.none;
+  return t;
 }
 
 /* Two units are genuinely mid-report: some figures in, some not. Without this

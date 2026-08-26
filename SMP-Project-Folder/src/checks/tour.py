@@ -320,8 +320,22 @@ def knowledge_base(pg):
     btn = pg.query_selector("[data-tour-replay]")
     check(btn is not None, "the Knowledge base carries no tour entry for a custodian")
     if btn:
-        btn.click(); pg.wait_for_timeout(400)
+        btn.click(); pg.wait_for_timeout(500)
         check(state(pg)["running"], "the Knowledge base entry did not start the tour")
+        # ── AND IT TAKES YOU TO THE MAIN PAGE (Islam, after replaying it) ──
+        # THIS IS WHAT THE FIRST VERSION OF THIS CHECK MISSED. It asserted
+        # the tour was RUNNING and stopped there — which was true while the
+        # welcome card was being drawn over Setup › Knowledge base, with the
+        # first card explaining "this row is the business" above a page that
+        # has no business row on it. "It started" is not "it went anywhere",
+        # and a check that asks the weaker question passes the bug (§94.2).
+        w = where(pg)
+        check(w["dest"] is not None,
+              "replay left the platform on Setup — no destination is selected")
+        check(pg.query_selector("[data-tour-replay]") is None,
+              "replay left the Knowledge base on screen behind the welcome card")
+        check(pg.eval_on_selector_all("#subtabs [data-s]", "e=>e.length") > 0,
+              "replay left the platform somewhere with no tabs to tour")
         pg.evaluate("""() => { const b = document.getElementById('tclose'); b && b.click(); }""")
         pg.wait_for_timeout(120)
         if pg.query_selector("[data-t=never]"):

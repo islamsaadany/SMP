@@ -191,7 +191,7 @@ with sync_playwright() as p:
     ck("...and no where control was left waiting",
        pg.query_selector('[data-prole-where="%s"]' % floor) is None)
 
-    # A ROLE WITH A REAL CHOICE READS THE UNIT CELL (§108, reversing the
+    # A ROLE WITH A REAL CHOICE READS THE UNIT CELL (§110, reversing the
     # second half of §92's shape).
     #
     # §92 said a role with one destination is granted on the pick and a role

@@ -883,7 +883,7 @@ function saidWhereNote(p, editable){
    separately and simply has nothing to show from a file. */
 var SAIDWHERE = null;  /* key -> the `at` they picked, once asked */
 
-/* ── THE THREE COUNTS THE OVERVIEW AND THE REGISTER SHARE (§108.10) ──
+/* ── THE THREE COUNTS THE OVERVIEW AND THE REGISTER SHARE (§101.10) ──
    NULL IS "WE HAVE NOT ASKED", AND IT IS NOT ZERO. Both of these depend on a
    server fact fetched separately from the state graph, so there are three
    answers and not two: a number, "nothing waiting", and "we do not know yet".
@@ -1079,7 +1079,7 @@ function renderPeople(){
   var reach = live ? passwordReach() : [];
   var noCust = unitsWithoutCustodian();
   /* A FAILED ASK IS NOT AN ANSWER (§93), and the test now lives in
-     noPasswordCount() so the Overview counts what this chip counts (§108.10).
+     noPasswordCount() so the Overview counts what this chip counts (§101.10).
      `|| 0` is the coercion this page wants and the Overview does not: here a
      null means "draw no chip", there it means "draw no row". */
   var noPw = noPasswordCount() || 0;
@@ -1125,8 +1125,9 @@ function renderPeople(){
 
   function roleCell(p){
     /* The role chips' × and the picker belong to the OPEN row, not to a page
-       mode (§79.2). Computed here rather than passed, because a parameter the
-       caller forgot would put an × on a closed row. */
+       mode (§79.2). Computed here rather than passed, because roleCell and
+       roleWhereCell are two halves of one control (§69.1) and a parameter one
+       of them forgot would put an × on a closed row. */
     var editable = rowOpen(p);
     var rs = personRoles(p);
     var home = belongsKey(p);
@@ -1179,47 +1180,22 @@ function renderPeople(){
          being typed, not read. */
       : (editable && ADDROLE === p.key ? '' : '<span class="pill none">No role</span>');
     if (!editable) return held;
-    /* ── A RETIRED ROW HOLDS NOTHING, SO IT IS NOT OFFERED A ROLE ─────
-       `SMPRules.personRoles()` opens with "a retired person holds nothing" and
-       returns [] — but the picker was drawn on a retired row anyway, so giving
-       one Business unit owner WROTE the grant (the unit's `head` now points at
-       them) while the row went on reading "No role": the rule that decides what
-       a row SHOWS is not the one the grant went through, and nothing compared
-       them.
+    /* ── HALF THE PICKER. The other half is in the Unit column ────────
+       Islam: "keep the unit selection in the unit and keep the role selection
+       in the role so I can choose both but each in it's right placement."
 
-       Two silent wrongs in one press — nothing said the grant had happened, and
-       a unit was left pointed at somebody who cannot sign in, which is exactly
-       the state §93.4's custodian count exists to find. Refused where the
-       control was, and the refusal says the way out (§62). */
-    if (!personActive(p))
-      return held + '<span class="rolestop">Retired \u2014 restore this person ' +
-        'before giving them a role.</span>';
-    /* ── ONE DROPDOWN: THE UNIT CELL ALREADY SAYS WHERE (§110) ───────
-       Islam, of the second half this used to draw: "choose where is very
-       strange sentence. make it Unit and it's already in a cell what am I
-       missing here?"
+       Right, and the old control was the giveaway: it opened a role select AND
+       a where select inside the Roles cell, so the Unit column sat empty
+       beside a dropdown naming a unit. One control spanning two columns is a
+       control that belongs in neither.
 
-       Nothing, and it was worse than redundant. `personAtChoices()` — the Unit
-       cell's own dropdown — offers the group, every unit, every function and
-       every company: item for item the list `roleWheres()` was drawing from, a
-       superset of every role's where. And `grantPersonRole()` WRITES IT BACK
-       every time — owner and unit custodian set `p.unit`, fnhead sets `p.fn`,
-       cceo sets `p.company` — so the second dropdown asked a question the first
-       had already answered and then forced its own answer onto it. The two
-       could never disagree, because the grant made them agree.
-
-       §69.1's split survives in the half that mattered: the unit selection is
-       in the Unit column and the role selection is in Roles. What goes is the
-       DUPLICATE, not the arrangement. §46.4's "where somebody sits and where a
-       role reaches are two different facts" stayed true of the CONCEPTS and was
-       never true of the code.
-
-       AND IT IS WHY THEY NO LONGER BLOCK EACH OTHER (Islam: "the role and the
-       unit shouldn't block each other but they only function together"). Two
-       ordinary fields on the row, set in either order, neither emptying the
-       other; both have to say something before somebody holds a role somewhere,
-       and where they cannot agree the row explains it rather than doing
-       nothing. */
+       NO GIVE AND NO CANCEL. A pair of dropdowns whose result carries its own
+       × is already a selection somebody can take back (§62's "the refusal is
+       where the confirmation would be", turned round: the undo is where the
+       confirmation would be). So the role is granted the moment BOTH halves
+       have been chosen — which is why both start on a blank "Choose…" option
+       rather than pre-selected: a picker that commits on its own must never
+       commit something nobody picked. */
     var addRole = ADDROLE === p.key;
     return held +
       (addRole
@@ -1229,45 +1205,37 @@ function renderPeople(){
             ROLES.filter(function(r){ return roleIsGrantable(r.key); }).map(function(r){
               return '<option value="' + r.key + '"' + (r.key === ADDROLE_KIND ? " selected" : "") +
                 '>' + esc(r.name) + '</option>';
-            }).join("") + '</select>' + roleStop(p)
+            }).join("") + '</select>'
         : '<button class="linkbu" data-prole-open="' + p.key + '">+ role</button>');
   }
 
-  /* ── A PICK THAT CANNOT LAND SAYS SO, WHERE IT WAS MADE (§110) ─────
-     The one thing the old pair could not do. It committed on the second answer,
-     so "not yet" and "never" looked identical from the outside: nothing
-     happened, and nothing was said.
-
-     TWO REFUSALS, TWO SENTENCES, because they have different ways out — one
-     wants a Unit set at all, the other wants a different KIND of Unit. What
-     each role may be held at is still `roleWheres()` and nothing else: this
-     asks that list rather than carrying a second opinion about it (§42), and
-     only the WORD for a kind is written here.
-
-     `ROLESTOP` is the outcome of the last pick and lives on the screen, never
-     on the person (§25.2) — cleared by the pick that succeeds, by opening the
-     picker again, and by leaving the row. */
-  function roleStop(p){
-    if (!ROLESTOP || ROLESTOP.key !== p.key) return "";
-    return '<span class="rolestop">' + esc(ROLESTOP.why) + '</span>';
+  /* The second half, drawn in the Unit column and nowhere else. It is only
+     ever present while a role is being given, and it is EMPTY until a role has
+     been picked, because which places are offered depends on which role it is:
+     a company CEO is seated at a company, a function head at a function, and
+     one combined list would offer Company CEO of Mobile (§35). */
+  function roleWhereCell(p){
+    if (!rowOpen(p)) return "";
+    if (ADDROLE !== p.key) return "";
+    if (!ADDROLE_KIND) {
+      return '<span class="why rolewhy" style="margin:0">pick a role first</span>';
+    }
+    var wheres = roleWheres(ADDROLE_KIND);
+    /* A ROLE WITH ONE PLACE IS ALREADY GIVEN (§92). This used to render a
+       select holding a single option and wait to be told which of the one to
+       use — the comment here even claimed it "says it rather than offering a
+       list of one", which is what it should have done and not what it did.
+       The grant happens on the role pick now, so this cell is never reached
+       for those; the guard stays because a role list that gains a
+       single-destination entry later must not fall back into asking. */
+    if (wheres.length <= 1) return "";
+    return '<select class="fld rolewhere" data-prole-where="' + p.key + '" ' +
+      'aria-label="Where ' + esc(p.name) + ' holds it">' +
+      '<option value="" selected>Choose where\u2026</option>' +
+      wheres.map(function(w){
+        return '<option value="' + esc(w.v) + '">' + esc(w.label) + '</option>';
+      }).join("") + '</select>';
   }
-
-  /* roleWhereCell() was here. It drew the picker's second half — "Choose
-     where\u2026" — in the Unit column, and §110 deleted it rather than renaming
-     it: the cell's own dropdown already answers that question and the grant
-     already writes the answer back, so the two could never disagree. Removed
-     with its call site rather than left returning "" (§24), because a function
-     nothing calls is one the next reader has to prove is dead before touching
-     anything near it.
-
-     It also carried a bug worth remembering. `.cfg table td` is
-     `white-space:nowrap` (§88's one-line standard), so the cell laid its two
-     controls SIDE BY SIDE rather than stacking them: the second started 150px
-     into a 158px cell, ran 133px past its own right edge and landed under the
-     Email field, which took every click. Present, enabled, correctly sized and
-     unreachable — §93.4 for the third time, and invisible to every check in the
-     suite, because all of them ask whether a control is in the document.
-     `elementFromPoint` at its own centre returned the Email input. */
 
   /* contactCell() was here. It stacked the address over the number in one
      cell, and the two are two columns now (§69.16) — a function nothing calls
@@ -1686,7 +1654,13 @@ function renderPeople(){
                 ? '<span class="why" style="margin:0">&mdash; the list says ' +
                   esc(whereLabel(drift)) + '</span>'
                 : '<span class="why" style="margin:0">&mdash;</span>'))) +
-        saidWhereNote(p, ed) + '</td>' : '') +
+        saidWhereNote(p, ed) +
+        /* The role picker's second half (§69). It sits UNDER what the cell
+           already says rather than replacing it: where somebody sits and where
+           a role reaches are two different facts (§46.4), and a picker that
+           hid the first while choosing the second would be asking the question
+           with the answer covered up. */
+        roleWhereCell(p) + '</td>' : '') +
       /* Email above the number. Both are how you reach somebody, and giving
          each a column of its own made an eleven-column register — the pair is
          one answer to one question. */
@@ -2973,32 +2947,13 @@ function renderKB(){
       ["mail","Email"]
     ].map(function(x){ return '<a href="#kb-' + x[0] + '">' + x[1] + '</a>'; }).join("") + '</div>';
 
-  /* ── THE TOUR'S ONE WAY BACK IN (spec 017) ───────────────────────
-     Explanation lives here (v3.5), so the replay of the guided tour lives
-     here too rather than growing furniture of its own on a page somebody
-     visits for another reason (§90).
-
-     ABSENT, NEVER DISABLED, when this viewer's roles match no story: a
-     button that explains it cannot help you is worse than no button, and
-     there is nothing the person could do to earn it. */
-  var tourStory = (typeof TOUR !== "undefined") ? TOUR.storyFor(viewer()) : null;
-  var tourBlock = tourStory
-    ? '<div class="kb-sec" id="kb-tour"><h3>The guided tour</h3>' +
-      '<p class="kb-p">A short walk through the platform on the worked example — ' +
-      'the demo data, labelled the whole time, so nothing you see belongs to your ' +
-      'own tenant and nothing can be saved. It opens by itself the first time you ' +
-      'sign in; this is how you see it again.</p>' +
-      '<p><button type="button" class="editbtn" data-tour-replay="' + esc(tourStory) +
-      '">Start the tour</button></p></div>'
-    : '';
-
   return cfgHead("Knowledge base",
       ['<span class="pill kind">Everyone</span>', secs.length + ' sections'],
       null, false) +
     '<p class="kb-lede">How the platform works, in one place. This grows — anything we ' +
       'settle that a reader would need to know belongs here rather than in a note under ' +
       'the screen it happens to affect.</p>' +
-    toc + '<div class="kb">' + tourBlock + secs.join("") + '</div>';
+    toc + '<div class="kb">' + secs.join("") + '</div>';
 }
 
 
@@ -3041,32 +2996,6 @@ function renderBandsExtra(){
    against the number rather than the name alone. */
 var FSET = { unit:"mobile" };
 
-/* THE SWITCH LIVES ON THE PAGE IT GOVERNS (§102), which is §90's shape and
-   §98's row: five chat settings went into a dropdown on the Messages page
-   rather than a Setup page of their own, because a switch behind its own rail
-   entry is a door behind a door (§32).
-
-   AND THE PAGE STAYS REACHABLE WHILE IT IS OFF. §61's trap, exactly: if
-   turning focus off removed the page that carries the switch, the only way to
-   turn it back on would be to turn it on first. So the page always renders,
-   and while off it says what is being kept. */
-function focusSwitch(){
-  var on = focusOn();
-  var marks = Object.keys(CYCLE.focus || {}).length;
-  if (!inOffice()) {
-    return on ? '' : '<div class="note">Focus measures are switched off for this ' +
-      'platform. The Strategy Office can turn them back on.</div>';
-  }
-  return '<div class="phead2"><div class="hright">' +
-    '<button class="editbtn' + (on ? ' on' : '') + '" data-focusswitch="' + (on ? "0" : "1") + '">' +
-      (on ? "Focus measures are on" : "Focus measures are off") + '</button>' +
-    '</div></div>' +
-    (on ? '' : '<div class="note">Nothing is shown anywhere in the platform, and ' +
-      '<b>' + marks + ' ' + plural(marks, "mark") + '</b> ' +
-      (marks === 1 ? "is" : "are") + ' being kept. Turning it back on restores ' +
-      (marks === 1 ? "it" : "them") + '.</div>');
-}
-
 function renderFocusSetup(){
   /* Marking is the CEO's and the SMO's — a rule now, not a cell (§37).
      mayMarkFocus() carries the lock too, so there is one gate, not two. */
@@ -3074,7 +3003,7 @@ function renderFocusSetup(){
   var u = UNITS[FSET.unit];
 
   var pick = function(m, src){
-    var on = focusMarked(m.id);   /* the RAW map, never isFocus (§102) */
+    var on = isFocus(m.id);
     return '<div class="pick ' + (on ? "on" : "off") + '">' +
       (editable
         ? '<button class="fmark-btn' + (on ? ' on' : '') + '" data-focus="' + m.id + '" ' +
@@ -3109,8 +3038,7 @@ function renderFocusSetup(){
         esc(UNITS[k].name) + (c ? "  \u2014 " + c + " marked" : "") + '</option>';
     }).join("") + '</select>';
 
-  return focusSwitch() +
-    '<div class="kv"><span class="pill kind">CEO &amp; SMO</span>' +
+  return '<div class="kv"><span class="pill kind">CEO &amp; SMO</span>' +
       '<span class="pill ' + (CYCLE.locked ? "none" : "good") + '">' +
         (CYCLE.locked ? "Locked for the cycle" : "Open for marking") + '</span>' +
       '<span class="pill kind">reward begins at ' + CYCLE.rewardAt + '%</span></div>' +
@@ -4009,7 +3937,7 @@ function renderArchives(){
     '</tr></thead><tbody>' + rows + '</tbody></table></div>');
 }
 
-/* ══ SETUP · OVERVIEW (§108.10, spec 018) ════════════════════════════════
+/* ══ SETUP · OVERVIEW (§101.10, spec 016) ════════════════════════════════
    Islam, on the makeover: Option A, and the gear lands here.
 
    THE PAGE ANSWERS ONE QUESTION — *is anything waiting on me?* — and before it
@@ -4028,7 +3956,7 @@ function renderArchives(){
 
    NULL DRAWS NOTHING; ZERO IS AN ANSWER. Three of these depend on a server
    fact fetched outside the state graph, so "we have not asked" is a real third
-   state and it is not "nothing is waiting" (§93, §108.10). A row whose count
+   state and it is not "nothing is waiting" (§93, §101.10). A row whose count
    is null is absent — never a 0, and never a spinner, because a page that
    shows five zeroes while it is thinking has told somebody they are clear when
    it does not know.
@@ -4065,7 +3993,7 @@ function attentionRows(){
 }
 
 /* The label a row's destination wears in the rail, asked of the rail's own
-   list rather than written out again — rename a page and this follows (§108.3
+   list rather than written out again — rename a page and this follows (§101.3
    renamed three of them in one afternoon). */
 function attnDestLabel(k){
   var d = (typeof setupDefs === "function" ? setupDefs() : []).filter(
@@ -4075,39 +4003,13 @@ function attnDestLabel(k){
 
 var OVQUEUE = null;   /* {waiting,flagged} | {__error} | null — asked once per visit */
 
-/* ── THE SAME COUNTS, ON THE RAIL (§108.15) ────────────────────────────
-   A pill beside a rail entry says "there is something here for you" without
-   opening it, which is HR_ERP's practice and the last piece of the makeover.
-   It is deliberately LAST: a pill is only worth drawing once the count behind
-   it is real, and until the Overview existed there was no shared, agreed count
-   to draw — a rail badge computed on its own would have been the drift §108.10
-   was built to prevent, in the one place nobody would ever see it disagree.
-
-   SO IT IS THE OVERVIEW'S OWN LIST, SUMMED BY DESTINATION. Several rows point
-   at the People register — custodians, passwords, declarations — and "7 things
-   waiting on the register" is exactly what somebody wants from a rail badge.
-   Nothing new is counted here, which is the whole point.
-
-   NEVER FOR SOMEBODY WHO CANNOT CLEAR IT (§69). The Performance dot was shown
-   to readers until it was noticed that asking a person to act on something
-   they hold no control over is how a screen nags. These counts are the
-   office's queue, so they are drawn for the office and for nobody else. */
-function attentionByPage(){
-  var by = {};
-  if (typeof inOffice === "function" && !inOffice()) return by;
-  attentionRows().forEach(function(r){
-    by[r.dest] = (by[r.dest] || 0) + (r.n | 0);
-  });
-  return by;
-}
-
 function renderOverview(){
   var open = REVIEW.state === "open";
   var t = cycleTotals();
   var att = attentionRows();
 
   /* THE CYCLE STRIP IS THE SAME FOUR NUMBERS THE CYCLE PAGE OPENS WITH, from
-     cycleTotals() (§108.9) — read here and acted on there, which is why the
+     cycleTotals() (§101.9) — read here and acted on there, which is why the
      strip carries a way through rather than any control of its own. */
   var strip =
     '<div class="ovcycle">' +
@@ -4157,12 +4059,6 @@ function renderOverview(){
    The SMO can close with gaps: waiting for the last number means never
    closing, and a cycle that never closes writes no history. Unreported items
    close as unreported and stay visibly so \u2014 a stronger prompt than an email. */
-/* "1 need notes" was on the unit half for as long as it has existed and went
-   unnoticed while it was rare; §105 put it on seven more rows and it stopped
-   being rare. ONE function, because the two halves saying it differently is
-   the fault this board was just built to avoid (§53.5). */
-function notesOwed(n){ return n === 1 ? "1 needs a note" : n + " need notes"; }
-
 function renderCycle(){
   var can = grant("c_cycle") === "edit";
   var open = REVIEW.state === "open";
@@ -4187,83 +4083,12 @@ function renderCycle(){
       '<td class="num">' + by.obj[0] + '/' + by.obj[1] + '</td>' +
       '<td class="num">' + by.mea[0] + '/' + by.mea[1] + '</td>' +
       '<td class="num">' + by.tac[0] + '/' + by.tac[1] + '</td>' +
-      '<td class="cc">' + (miss ? '<span class="badge b-late">' + notesOwed(miss) + '</span>' : '') + '</td>' +
+      '<td class="cc">' + (miss ? '<span class="badge b-late">' + miss + ' need notes</span>' : '') + '</td>' +
       '<td class="cc"><span class="badge b-' + st.key + '">' + st.label + '</span></td></tr>';
   }).join("");
 
-  /* ── THE FUNCTIONS ARE ON THE BOARD TOO (§105) ────────────────────
-     A submission the SMO cannot see anywhere is half a feature. They go in the
-     SAME table rather than a second one, because "who has reported" is one
-     question -- but a function's three counts are its own vocabulary (key
-     objectives, deliverables and outcomes, milestones) and a unit's are not,
-     so the half opens with a band and a quiet column strip. §99's answer to
-     exactly this problem, and the reason nothing about the unit half changes:
-     the two vocabularies never share a heading. */
-  var fnKeys = Object.keys(FUNCTIONS).filter(function(fk){
-    return fnShows(fk) && !fnPlansInPillars(FUNCTIONS[fk]) && capsOfFunction(fk).length;
-  });
-  var fnRows = fnKeys.map(function(fk){
-    var c = fnReportedCount(fk), st = fnState(fk);
-    var f = FUNCTIONS[fk] || {};
-    /* Custodian first, head second -- the same order the unit row asks in, so
-       the board names the same kind of person on both halves (§53.5). */
-    var who = personName(f.custodian) || personName(f.head) || "\u2014";
-    var pctD = c.total ? Math.round(c.done / c.total * 100) : 0;
-    var miss = fnMissingNotes(fk).length;
-    /* THE THREE COLUMNS ARE THREE LAYERS, NOT TWO VOCABULARIES (§105.2).
-       The first drawing gave the function half its own column strip and it
-       COLLIDED: the strip's widths come from the table's own <thead> -- a
-       unit's words -- and "DELIVERABLES" alone is wider than the Measures
-       column at every width from 1920 down, so it ran over Milestones with
-       nothing to stop it. Wrapping could not save it; a word that does not fit
-       does not fit.
-
-       The better answer was underneath the problem. A unit's three columns are
-       what we are judged on, what we measure, and the work: objectives,
-       measures, tactics. A function has the same three -- key objectives, its
-       OUTCOMES (a direction, a target and an actual: that is a measure), and
-       its deliverables and milestones (work that happened or did not). Mapped
-       onto the same headings the counts become COMPARABLE down the page, which
-       is more than the strip ever bought, and the vocabulary is named once in
-       the band above where nothing can collide. */
-    var by = { ko:[0,0], mea:[0,0], tac:[0,0] };
-    var deliv = 0, mile = 0;
-    fnAskedItems(fk).forEach(function(x){
-      var slot = x.kind === "objective" ? "ko" : x.kind === "outcome" ? "mea" : "tac";
-      if (x.kind === "deliverable") deliv++;
-      if (x.kind === "milestone") mile++;
-      by[slot][1]++;
-      var got = (x.kind === "deliverable" || x.kind === "milestone")
-        ? statusGiven(x.obj) : (x.obj.actual != null && x.obj.actual !== "");
-      if (got) by[slot][0]++;
-    });
-    var tacTitle = plural(deliv, "deliverable") + " \u00b7 " + plural(mile, "milestone") +
-      ", asked this cycle";
-    return '<tr><td><b>' + esc(f.name) + '</b></td>' +
-      '<td class="why" style="margin:0">' + esc(who) + '</td>' +
-      '<td><div class="repcell"><span class="repbar' + (pctD < 100 ? " part" : "") + '">' +
-        '<i style="width:' + pctD + '%"></i></span>' +
-        '<span class="mono why" style="margin:0">' + c.done + '/' + c.total + '</span></div></td>' +
-      '<td class="num" title="Key objectives">' + by.ko[0] + '/' + by.ko[1] + '</td>' +
-      '<td class="num" title="Outcomes asked this cycle">' + by.mea[0] + '/' + by.mea[1] + '</td>' +
-      '<td class="num" title="' + esc(tacTitle) + '">' + by.tac[0] + '/' + by.tac[1] + '</td>' +
-      '<td class="cc">' + (miss ? '<span class="badge b-late">' + notesOwed(miss) + '</span>' : '') + '</td>' +
-      '<td class="cc"><span class="badge b-' + st.key + '">' + st.label + '</span></td></tr>';
-  }).join("");
-  if (fnRows) {
-    /* `dxband` is §99's own rule, orphaned when §99.7 removed the split that
-       used it (§24 would have had it deleted). It is the right shape for
-       exactly this and it is used again. Its `em` slot carries the vocabulary,
-       which is the one place in this table wide enough to hold it. */
-    fnRows = '<tr class="dxband"><th colspan="8">Supporting functions' +
-        '<em>' + plural(fnKeys.length, "function") + ' reporting in capabilities \u2014 ' +
-        'key objectives, outcomes, and deliverables and milestones</em></th></tr>' + fnRows;
-  }
-
-  /* ONE ANSWER, TWO PAGES (§108.1). The totals were computed inline here and
-     the Overview opens on the same four numbers; cycleTotals() in
-     config-data.js is now the only place they are worked out, and it counts
-     the FUNCTIONS this page put on the board (§105) as well as the units. */
+  /* ONE ANSWER, TWO PAGES (§101.9). Lifted into config-data.js so the Overview
+     summarises this page rather than recomputing it. */
   var t = cycleTotals();
 
   var head =
@@ -4362,7 +4187,7 @@ function renderCycle(){
       '<div class="cfg"><table><thead><tr><th style="width:17%">Business unit</th><th>Reporting</th>' +
         '<th style="width:20%">Progress</th><th class="cc">Objectives</th><th class="cc">Measures</th>' +
         '<th class="cc">Tactics</th><th class="cc">Notes</th><th class="cc">State</th></tr></thead>' +
-        '<tbody>' + rows + fnRows + '</tbody></table></div>' +
+        '<tbody>' + rows + '</tbody></table></div>' +
       (open
         ? '<div class="note"><b>A cycle can be closed with gaps.</b> Waiting for the last number ' +
           'means never closing, and a cycle that never closes writes no history. Whatever is ' +

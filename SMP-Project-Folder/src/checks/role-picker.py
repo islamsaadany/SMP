@@ -1,4 +1,4 @@
-"""GIVING SOMEBODY A ROLE ON THE REGISTER (§108).
+"""GIVING SOMEBODY A ROLE ON THE REGISTER (§110).
 
 WHY THIS IS ITS OWN CHECK, AND WHY EVERY ASSERTION PRESSES SOMETHING.
 
@@ -20,7 +20,7 @@ build that had lost the whole picker would satisfy every one of those, which is
 why each absence is paired with the presence that makes it meaningful.
 
 PROVED ABLE TO FAIL BEFORE IT WAS BELIEVED (§94.5). Run it against a build from
-before §108 — `python3 checks/role-picker.py ../strategy-management-platform-v3.22.html`
+before §110 — `python3 checks/role-picker.py ../strategy-management-platform-v3.22.html`
 — and sections 1, 2, 5, 6, 7 and 8 fail. The default target is the built file.
 """
 import json
@@ -331,7 +331,7 @@ with sync_playwright() as p:
         # 53px and 23px. Nothing is clipped when they do, which is what the
         # assertion above measures; pinning them would mean reserving 133px of
         # empty column on all 33 read rows to spare the one being edited, and
-        # that is a worse trade. Recorded rather than hidden (§108).
+        # that is a worse trade. Recorded rather than hidden (§110).
         grew = [(i, closed[i], out["heads"][i])
                 for i in range(min(len(closed), len(out["heads"])) - 1)
                 if out["heads"][i] - closed[i] > 2]

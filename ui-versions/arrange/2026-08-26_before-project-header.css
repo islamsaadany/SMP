@@ -365,8 +365,7 @@
      it did nothing: this selector is (0,3,1) against that file's (0,2,1) AND
      later in build.py's concatenation, so it won twice over. */
   .cfg .peoplecfg select.rolepick { min-width:150px; max-width:186px; }
-  /* `select.rolewhere` was here and went with the control (§110, §24): the Unit
-     cell answers where, so there is no second select to bound. */
+  .cfg .peoplecfg select.rolewhere { min-width:132px; max-width:170px; }
   /* AND THE ROW'S OWN TWO, WHICH §69 MISSED (§93.10). Exactly the same fault
      and exactly the same 920px: the role picker's pair were bounded and the
      pair that appear when a ROW is opened for editing were not, because they
@@ -1119,38 +1118,3 @@
      "Missing" a plan puts against an unset target keeps behaving as it does. */
   .pctneed { display:block; margin-top:3px; font-size:11.5px; line-height:1.25;
              white-space:nowrap; }
-
-  /* ── A PROJECT'S FRONT MATTER (§109) ─────────────────────────────────
-     One box, one ground, one hairline down the middle: who and when on the
-     left, what and with whom on the right. In arrange.css because that file is
-     concatenated LAST of the four and config.css has now held the same rule
-     block twice on four separate occasions (§29.2, §51.5, §53.6, §88). */
-  .pfront { display:grid; grid-template-columns:300px minmax(0,1fr);
-            border:1px solid var(--line); border-radius:var(--r-md);
-            background:var(--surface-2); overflow:hidden; margin:18px 0 4px; }
-  .pfcol { min-width:0; }
-  .pfright { border-left:1px solid var(--line); background:var(--surface); }
-  .pfrow { display:grid; grid-template-columns:64px minmax(0,1fr); gap:14px;
-           padding:11px 14px; align-items:baseline; }
-  .pfrow + .pfrow { border-top:1px solid var(--line); }
-  .pfrow em { font:700 9.5px/1.6 var(--sans); letter-spacing:.1em; font-style:normal;
-              text-transform:uppercase; color:var(--ink-3); }
-  .pfval { font:600 13px/1.5 var(--sans); color:var(--ink); min-width:0; }
-  .pfval p { margin:0; font-weight:400; font-size:13.5px; line-height:1.55;
-             color:var(--ink-2); }
-  /* THE RIGHT COLUMN'S LABEL TRACK IS SIZED TO ITS OWN LONGEST WORD, so the
-     brief's first letter and the first stakeholder chip start at one x. A
-     single width for both columns would either clip "Stakeholders" or waste
-     40px beside "Owner". */
-  .pfright .pfrow { grid-template-columns:96px minmax(0,1fr); gap:18px;
-                    padding:13px 16px; }
-  /* A pill is written to sit INSIDE a sentence, so it carries a leading margin
-     that would push the chips right of the brief above them. Pulled back here
-     only -- the pill itself is used in thirty other places. */
-  .pfval > .pill.kind:first-child { margin-left:0; }
-  .pfval .pill.kind { margin-top:0; margin-bottom:0; }
-  .pfront .fld, .pfront input, .pfront textarea { width:100%; max-width:none; }
-  @media (max-width: 1180px) {
-    .pfront { grid-template-columns:1fr; }
-    .pfright { border-left:0; border-top:1px solid var(--line); }
-  }

@@ -6,7 +6,7 @@ version (rules A2 / A11, changed 2026-08-20) — those go only when asked for.
 
 **Where it runs:** Vercel, production tracks `main`. Static files plus two
 serverless functions (`/api/state`, `/api/auth`) against Neon Postgres.
-**Latest version:** v3.31 shipped (live) · **v3.32 in progress on the branch**
+**Latest version:** v3.33 on `main` · **v3.34 in progress on the branch**
 **Last updated:** 2026-08-26
 **Sign in as:** `SMO` / `1234` — a password change is forced at once (§43.1,
 reversing §19.4).
@@ -52,7 +52,44 @@ Nothing proceeds past this line without an answer.
 
 ---
 
+## Known red, on purpose
+
+- **`checks/no-jump.py` — "sorting a column" (1 JUMPED).** Real defect,
+  diagnosed 2026-08-26 (§109.5): with a register row open for editing, sorting
+  collapses the page 1457px → 913px (the open row keeps its class, loses its
+  height) and the scroll clamps up. Pre-dates the §109 merge; needs its own
+  fix in the register's sort, not a merge-widening patch. Until then this red
+  is a true signal — do not silence it.
+
 ## Built and verified
+
+### v3.34 — a project's front matter (§109)
+
+Islam: *"any project needs 3 things at its starting part — the brief,
+stakeholders, start and end date."*
+
+- **The start and end were stored and shown nowhere.** They appeared in exactly
+  one place in the whole product — the review deck — so the page that *authors*
+  a project could not say when it runs.
+- **One box, divided:** owner · start · end down the left, the brief and the
+  stakeholders as two labelled rows on the right. Settled from a mockup made of
+  the real platform, over two other arrangements.
+- **Deliberately not a `<table>`.** The platform's global
+  `table { min-width: 620px }` makes any small table overflow its own grid track
+  by 300px — Islam caught it in the mockup, and the column was 320px throughout.
+- **Both value columns start at one x**, which was the ask: each column's label
+  track is sized to its own longest label, and a pill's leading margin is pulled
+  back so the chip's border meets the brief's first letter.
+- **The Timeline pill is gone.** It once decided how every date was read; §104
+  ended that, and its one remaining effect was to *suppress* a true overrun
+  warning. The field and the import template are untouched.
+- **Plan pane only** — Performance and Reporting show no dates, confirmed as
+  right by Islam rather than assumed.
+
+**Verified:** new `src/checks/project-header.py` **all passed**, both halves
+proved able to fail first (an `auto` label track reproduces the exact
+misalignment, 627 vs 687; wiring one field to a bare `<input>` fails twice) ·
+every other check clean against the merged build · qa.py clean.
 
 ### v3.32 — the onboarding tour (§107, spec 017)
 
@@ -85,6 +122,15 @@ Found by measuring rather than reasoning: a step that disagreed with itself
 once a function walked it (§107.7), a tenant's label inflected into *"the
 pillarss"* (§107.8), and a contrast measurement proved real by wrecking the
 card's text and watching it report 1.6:1.
+
+Corrected after Islam replayed it (§107.14): the tour now takes you to the
+main page before the welcome card, rather than drawing it over the Knowledge
+base — and the dataset swap moved ahead of resolving where to tour, because
+`own` was being read from the client's own tenant and looked up in the demo
+tenant's navigation. The check had asserted the tour was *running* and stopped
+there; **"it started" is not "it went anywhere"**, and it now asserts a
+destination is selected, the Knowledge base is off screen, and there are tabs
+to tour.
 
 **Waiting on Islam:** the owner story's copy. The custodian's is his, word
 for word off the signed-off mockup; the owner's is mine until he has read it.

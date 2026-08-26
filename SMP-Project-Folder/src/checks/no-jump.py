@@ -89,7 +89,7 @@ with sync_playwright() as p:
     trial("sorting a column", None,
       """() => { document.querySelector('[data-tksort]').click(); }""")
 
-    # ── AND THE ACT OF OPENING A ROW, ON THE OTHER SIX TABLES (§108) ──
+    # ── AND THE ACT OF OPENING A ROW, ON THE OTHER SIX TABLES (§110) ──
     # Everything above opens a row FIRST and then measures repaints, so the
     # press that opens one had never been measured — and it was the press that
     # jumped: a plain focus() lets the browser haul the focused field to the top

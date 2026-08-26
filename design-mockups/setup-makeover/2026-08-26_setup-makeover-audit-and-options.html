@@ -1,0 +1,450 @@
+<title>Setup Makeover</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Source+Serif+4:opsz,wght@8..60,600;8..60,700&display=swap">
+<style>
+  :root{
+    --ground:#F7F8FA; --surface:#FFFFFF; --surface-2:#EFF2F6;
+    --line:#D6DCE5; --line-soft:#E6EAF0;
+    --ink:#171B22; --ink-2:#414A58; --ink-3:#636C79;
+    --navy:#16325C; --navy-ink:#FFFFFF; --navy-quiet:#9FB0C9;
+    --gold:#C9A24D; --gold-deep:#8A6B22;
+    --good:#2E7D5B; --good-bg:#E4F0EA; --attn:#B8860B; --attn-bg:#F7EFD6;
+    --bad:#B04434; --bad-bg:#F7E3E0;
+  }
+  @media (prefers-color-scheme: dark){
+    :root:not([data-theme="light"]){
+      --ground:#14161A; --surface:#1C2027; --surface-2:#242932;
+      --line:#333A45; --line-soft:#2A303A;
+      --ink:#E9ECF1; --ink-2:#B4BCC8; --ink-3:#949DAA;
+      --navy:#0F2242; --navy-ink:#E9ECF1; --navy-quiet:#8DA0BE;
+      --gold:#D9B665; --gold-deep:#C9A24D;
+      --good:#5FB68C; --good-bg:#0E2A1E; --attn:#D9B23C; --attn-bg:#2E2610;
+      --bad:#D97066; --bad-bg:#2E1616;
+    }
+  }
+  :root[data-theme="dark"]{
+    --ground:#14161A; --surface:#1C2027; --surface-2:#242932;
+    --line:#333A45; --line-soft:#2A303A;
+    --ink:#E9ECF1; --ink-2:#B4BCC8; --ink-3:#949DAA;
+    --navy:#0F2242; --navy-ink:#E9ECF1; --navy-quiet:#8DA0BE;
+    --gold:#D9B665; --gold-deep:#C9A24D;
+    --good:#5FB68C; --good-bg:#0E2A1E; --attn:#D9B23C; --attn-bg:#2E2610;
+    --bad:#D97066; --bad-bg:#2E1616;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--ground);color:var(--ink);
+    font:14px/1.55 -apple-system,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;}
+  .wrap{max-width:1180px;margin:0 auto;padding:36px 28px 80px}
+  .eyebrow{font-size:10.5px;font-weight:800;letter-spacing:.09em;text-transform:uppercase;color:var(--gold-deep)}
+  h1{font-family:"Source Serif 4",Georgia,serif;font-size:32px;line-height:1.15;margin:6px 0 8px;text-wrap:balance}
+  .lede{color:var(--ink-2);max-width:64ch;margin:0 0 8px}
+  h2{font-family:"Source Serif 4",Georgia,serif;font-size:21px;margin:0 0 4px}
+  .secnote{color:var(--ink-3);font-size:13px;margin:0 0 16px;max-width:70ch}
+  section{margin-top:44px}
+  .snum{display:inline-block;min-width:22px;padding:1px 7px;border-radius:99px;background:var(--navy);
+    color:var(--navy-ink);font-size:11px;font-weight:800;text-align:center;vertical-align:2px;margin-right:8px}
+
+  /* audit findings */
+  .findings{display:grid;gap:10px}
+  .find{background:var(--surface);border:1px solid var(--line);border-left:3px solid var(--gold);
+    border-radius:10px;padding:12px 16px}
+  .find b{display:block;font-size:13.5px}
+  .find p{margin:3px 0 0;color:var(--ink-2);font-size:13px;max-width:90ch}
+  .find .meas{color:var(--ink-3);font-size:12px}
+
+  /* practices */
+  .prax{display:grid;grid-template-columns:repeat(auto-fit,minmax(210px,1fr));gap:10px}
+  .prax div{background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:11px 14px;font-size:12.5px;color:var(--ink-2)}
+  .prax b{display:block;color:var(--ink);font-size:12.5px;margin-bottom:2px}
+
+  /* option header */
+  .opt-h{display:flex;align-items:baseline;gap:10px;flex-wrap:wrap}
+  .rec{font-size:10.5px;font-weight:800;letter-spacing:.07em;text-transform:uppercase;
+    background:var(--gold);color:#171B22;border-radius:99px;padding:2px 9px}
+  .notrec{font-size:10.5px;font-weight:700;letter-spacing:.07em;text-transform:uppercase;
+    color:var(--ink-3);border:1px solid var(--line);border-radius:99px;padding:2px 9px}
+
+  /* ── the mock frames: deliberate light-mode depictions of the product ── */
+  .mockwrap{overflow-x:auto;border:1px solid var(--line);border-radius:12px;
+    box-shadow:0 8px 28px rgba(15,23,42,.10);margin:14px 0 10px}
+  .mock{min-width:1060px;background:#F7F8FA;color:#171B22;
+    font:12px/1.45 -apple-system,"Segoe UI",Roboto,Arial,sans-serif}
+  .m-top{background:#16325C;color:#fff;display:flex;align-items:center;gap:14px;padding:9px 16px}
+  .m-top .t{font-weight:700;font-size:12.5px}
+  .m-top .org{color:#C9A24D;font-weight:600}
+  .m-top .right{margin-left:auto;color:#9FB0C9;font-size:10px;letter-spacing:.06em;text-transform:uppercase}
+  .m-nav{background:#16325C;border-top:1px solid rgba(255,255,255,.12);display:flex;align-items:center;gap:2px;padding:6px 12px}
+  .m-nav .grp{color:#fff;font-size:12px;padding:5px 10px;border:1px solid rgba(255,255,255,.25);border-radius:7px;margin-right:6px}
+  .m-nav .sw{display:flex;border:1px solid rgba(255,255,255,.3);border-radius:7px;overflow:hidden;margin-right:8px}
+  .m-nav .sw span{padding:5px 10px;color:#C7D2E4;font-size:11.5px}
+  .m-nav .sw .on{background:rgba(255,255,255,.16);color:#fff;font-weight:700}
+  .m-nav .u{color:#C7D2E4;font-size:12px;padding:5px 9px}
+  .m-nav .gear{margin-left:auto;background:#C9A24D;color:#16325C;border-radius:7px;padding:4px 9px;font-weight:800}
+  .m-body{display:flex;align-items:flex-start;gap:18px;padding:16px 18px 22px}
+
+  /* mock rail */
+  .m-rail{width:236px;flex:none;background:#fff;border:1px solid #D6DCE5;border-radius:10px;overflow:hidden}
+  .m-rail .rh{background:#16325C;color:#fff;font-size:11px;font-weight:800;letter-spacing:.09em;padding:9px 12px}
+  .m-search{margin:8px;display:flex;align-items:center;gap:6px;border:1px solid #D6DCE5;border-radius:7px;
+    padding:5px 9px;color:#636C79;background:#F7F8FA}
+  .m-search .ph{font-size:11.5px}
+  .m-rgrp{display:flex;align-items:center;font-size:9.5px;font-weight:800;letter-spacing:.08em;
+    text-transform:uppercase;color:#414A58;background:#EFF2F6;padding:6px 12px;border-top:1px solid #E6EAF0}
+  .m-row{display:flex;align-items:center;gap:7px;padding:7px 12px;font-size:12.5px;border-top:1px solid #F1F3F6;color:#171B22}
+  .m-row .gl{width:16px;color:#636C79;text-align:center;flex:none}
+  .m-row.on{background:#F7EFD6;border-left:3px solid #C9A24D;padding-left:9px;font-weight:700}
+  .pill{margin-left:auto;background:#C9A24D;color:#16325C;font-weight:800;font-size:10px;
+    border-radius:99px;min-width:17px;text-align:center;padding:1px 5px;flex:none}
+  .gpill{margin-left:auto;background:#C9A24D;color:#16325C;font-weight:800;font-size:9.5px;border-radius:99px;padding:0 6px}
+
+  /* mock pane */
+  .m-pane{flex:1;min-width:0}
+  .m-pane h3{font-size:17px;margin:2px 0 10px;font-family:inherit}
+  .m-cyc{background:#fff;border:1px solid #D6DCE5;border-radius:10px;padding:12px 16px;display:flex;align-items:center;gap:18px}
+  .m-cyc .big{font-size:24px;font-weight:800}
+  .m-cyc .big small{font-size:12px;font-weight:400;color:#636C79}
+  .m-cyc .meta{color:#414A58;font-size:12px}
+  .m-cyc .open{color:#2E7D5B;font-weight:800;font-size:11px;letter-spacing:.05em}
+  .m-cyc .go{margin-left:auto;border:1.5px solid #8A6B22;color:#8A6B22;font-weight:700;border-radius:8px;padding:6px 12px;white-space:nowrap}
+  .m-h4{font-size:10.5px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:#414A58;margin:18px 0 6px;display:flex;align-items:center;gap:8px}
+  .m-h4 .rule{flex:1;height:1px;background:#D6DCE5}
+  .m-att{background:#fff;border:1px solid #D6DCE5;border-radius:10px;overflow:hidden}
+  .m-arow{display:flex;align-items:center;gap:10px;padding:9px 14px;border-top:1px solid #F1F3F6;font-size:12.5px}
+  .m-arow:first-child{border-top:0}
+  .m-arow .ic{width:22px;height:22px;border-radius:6px;background:#F7EFD6;color:#8A6B22;
+    display:grid;place-items:center;font-size:11px;flex:none}
+  .m-arow .to{margin-left:auto;color:#8A6B22;font-weight:700;font-size:11.5px;white-space:nowrap}
+  .m-quiet{color:#636C79;font-size:12px;margin-top:10px}
+
+  /* mock hub (option B) */
+  .m-hub{flex:1;min-width:0}
+  .m-hubtop{display:flex;align-items:center;gap:14px;margin-bottom:12px}
+  .m-hubtop h3{margin:0;font-size:17px}
+  .m-hubsearch{margin-left:auto;display:flex;align-items:center;gap:6px;border:1px solid #D6DCE5;
+    border-radius:7px;padding:6px 10px;color:#636C79;background:#fff;width:300px}
+  .m-cols{display:grid;grid-template-columns:1fr 1fr;gap:0 20px;align-items:start}
+  .m-cat{margin-bottom:16px}
+  .m-cath{display:flex;align-items:center;gap:8px;margin-bottom:5px}
+  .m-cath .dot{width:6px;height:6px;border-radius:99px;background:#C9A24D}
+  .m-cath .l{font-size:10px;font-weight:800;letter-spacing:.09em;text-transform:uppercase;color:#16325C}
+  .m-cath .rule{flex:1;height:1px;background:#D6DCE5}
+  .m-cath .n{font-size:10px;color:#636C79}
+  .m-card{background:#fff;border:1px solid #D6DCE5;border-radius:10px;overflow:hidden}
+  .m-hrow{display:flex;align-items:center;gap:9px;padding:8px 12px;border-top:1px solid #F1F3F6}
+  .m-hrow:first-child{border-top:0}
+  .m-hrow .ic{width:22px;height:22px;border-radius:6px;background:#EFF2F6;color:#16325C;
+    display:grid;place-items:center;font-size:11px;flex:none}
+  .m-hrow .ic.hot{background:#F7EFD6;color:#8A6B22}
+  .m-hrow .nm{font-weight:700;font-size:12.5px;white-space:nowrap}
+  .m-hrow .ds{color:#636C79;font-size:11px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+
+  .caption{color:var(--ink-3);font-size:12px;margin:2px 0 0}
+  .tradeoff{background:var(--surface-2);border:1px solid var(--line);border-radius:10px;padding:11px 16px;
+    font-size:13px;color:var(--ink-2);margin-top:10px}
+  .tradeoff b{color:var(--ink)}
+
+  /* naming table */
+  table{width:100%;border-collapse:collapse;background:var(--surface);border:1px solid var(--line);
+    border-radius:10px;overflow:hidden;font-size:13px}
+  th{background:var(--navy);color:var(--navy-ink);text-align:left;font-size:10.5px;letter-spacing:.07em;
+    text-transform:uppercase;padding:8px 12px}
+  td{border-top:1px solid var(--line-soft);padding:8px 12px;vertical-align:top}
+  td.cur{white-space:nowrap;color:var(--ink-2)}
+  td.new{white-space:nowrap;font-weight:700}
+  td.new .keep{color:var(--ink-3);font-weight:400;font-style:italic}
+  td.why{color:var(--ink-2);font-size:12.5px}
+  .tblwrap{overflow-x:auto;border-radius:10px}
+
+  /* questions */
+  .qs{counter-reset:q;display:grid;gap:10px}
+  .q{background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:12px 16px 12px 46px;position:relative}
+  .q::before{counter-increment:q;content:counter(q);position:absolute;left:14px;top:12px;
+    width:22px;height:22px;border-radius:99px;background:var(--gold);color:#171B22;
+    font-weight:800;font-size:12px;display:grid;place-items:center}
+  .q b{font-size:13.5px}
+  .q p{margin:3px 0 0;color:var(--ink-2);font-size:13px}
+  .q .r{color:var(--gold-deep);font-weight:700}
+
+  .foot{margin-top:48px;padding-top:14px;border-top:1px solid var(--line);color:var(--ink-3);font-size:12px}
+  @media (max-width:760px){ .m-cols{grid-template-columns:1fr} }
+</style>
+
+<div class="wrap">
+  <div class="eyebrow">SMP · Design decision · 2026-08-26</div>
+  <h1>The Setup makeover</h1>
+  <p class="lede">The audit of the Setup page as it is today, the practices worth taking from HR_ERP's
+  admin home, two structures to choose between, and the naming decisions that apply to either.
+  Nothing in the real sources has been touched — this page is the proposal.</p>
+
+  <!-- ═══ 1 · AUDIT ═══ -->
+  <section>
+    <h2><span class="snum">1</span>The audit — seven findings, worst first</h2>
+    <p class="secnote">Measured on the current build (v3.29 sources), signed in as the SMO, 1600×1000 window.</p>
+    <div class="findings">
+      <div class="find"><b>The rail is taller than the window.</b>
+        <p>18 entries under 5 group headers run past 1,000px — <span class="meas">measured: “How it looks”
+        (Branding, Communication) sits below the fold at a 1000px-tall window.</span> A control below the fold
+        is a control that does nothing (§90's own lesson). Folding groups helps only if you already know
+        which group to unfold.</p></div>
+      <div class="find"><b>Nothing tells the SMO team what is waiting on them.</b>
+        <p>The gear lands on Reporting cycle. Unanswered conversations, an open figure-set claim, units with
+        no custodian, people never issued a password, a “they said where they work” declaration — each lives on
+        its own page, so finding out whether anything needs you is a walk through five pages. The group badges
+        count <em>entries</em> (6 · 3 · 4 · 3 · 2): numbers that never change, wearing the shape of numbers that should.</p></div>
+      <div class="find"><b>Three names from one word family, in three different groups.</b>
+        <p>“Messages” (the office inbox), “Send a message” (the broadcast composer), “Communication”
+        (email settings). HR_ERP hit exactly this — “Announcements” beside “Communications” — and fixed it by
+        merging and renaming until each name meant one thing.</p></div>
+      <div class="find"><b>Daily work is one group out of five; set-once pages take the other twelve rows.</b>
+        <p>“Running the cycle” is where the SMO team lives every week. The other four groups are visited
+        rarely — yet they occupy two-thirds of the rail every day, which is most of why finding number 1 exists.</p></div>
+      <div class="find"><b>Several names don't say what is behind them.</b>
+        <p>“Import” (of what? — plans), “Labels” (it renames the tenant's vocabulary), “Official BU list” sitting
+        two rows from “Business units” (a pair §54/§58 can tell apart and a new SMO team member cannot),
+        “Communication” beside “Send a message”.</p></div>
+      <div class="find"><b>No search.</b>
+        <p>18 entries is past the size where scanning beats typing — and some errands don't know their page:
+        “where do I change the logo?” is Branding, “where do I reset a password?” is People register.</p></div>
+      <div class="find"><b>Related halves live apart.</b>
+        <p>Import and Archived plans are two pages about one subject — a plan arriving, and the plan it replaced.
+        Figure sets vs Figures I report split the setting from the doing across two groups. Figure sets itself
+        already settled this shape once: one page, two sections (§46.2).</p></div>
+    </div>
+  </section>
+
+  <!-- ═══ 2 · HR_ERP PRACTICES ═══ -->
+  <section>
+    <h2><span class="snum">2</span>What HR_ERP's admin home does right</h2>
+    <p class="secnote">Read from its source, not from memory. Five practices carry over; the two options below
+    differ only in how far they take them.</p>
+    <div class="prax">
+      <div><b>Attention pills, never “0”</b>A row where something waits carries a gold count; a row with
+        nothing waiting carries nothing. Zero states never render a pill.</div>
+      <div><b>The daily queue leads</b>Sections are ordered by workflow — the one where things wait on the
+        admin comes first, the registry second, set-once last.</div>
+      <div><b>Grouped rows, one screen</b>Destinations are compact rows dealt into two balanced columns,
+        so the whole admin fits without scrolling.</div>
+      <div><b>Description beside the name</b>Every destination says in one line what you'd walk into,
+        so nobody opens a page to find out what it is.</div>
+      <div><b>One quiet glyph per row</b>Drawn marks that inherit the text colour — never emoji —
+        so a lit row reads as attention, not decoration.</div>
+    </div>
+  </section>
+
+  <!-- ═══ 3 · OPTION A ═══ -->
+  <section>
+    <h2 class="opt-h"><span><span class="snum">3</span>Option A — the rail keeps the door, an Overview opens it</span>
+      <span class="rec">Recommended</span></h2>
+    <p class="secnote">The railed page stays (§47.7's one door holds). Three additions: an <b>Overview</b> landing
+    that shows the cycle and everything waiting on the office; a <b>search</b> at the top of the rail; and
+    <b>attention pills</b> on the rows that owe something. Plus the regrouping and renames from section 5,
+    and Import + Archived plans merged into one page with two sections.</p>
+
+    <div class="mockwrap"><div class="mock">
+      <div class="m-top"><span class="t">Strategy Management Platform</span><span class="org">· Raya Trade</span>
+        <span class="right">Viewing as Mohamed Essam · Super user</span></div>
+      <div class="m-nav"><span class="grp">Group ▾</span>
+        <span class="sw"><span class="on">Units</span><span>Functions</span></span>
+        <span class="u">Mobile</span><span class="u">Retail Stores</span><span class="u">B2B Ecomm</span>
+        <span class="u">Consumer Electronics</span><span class="u">Online Shop</span><span class="u">Corporate</span>
+        <span class="u">Care</span><span class="u">IT Dist.</span><span class="u">Logistics</span><span class="u">Nigeria</span>
+        <span class="gear">⚙</span></div>
+      <div class="m-body">
+        <div class="m-rail">
+          <div class="rh">SETUP</div>
+          <div class="m-search"><span>⌕</span><span class="ph">Find a setting…</span></div>
+          <div class="m-row on"><span class="gl">⌂</span>Overview<span class="pill">11</span></div>
+          <div class="m-rgrp">Running the cycle<span class="gpill">4</span></div>
+          <div class="m-row"><span class="gl">◔</span>Reporting cycle<span class="pill">1</span></div>
+          <div class="m-row"><span class="gl">✉</span>Inbox<span class="pill">3</span></div>
+          <div class="m-row"><span class="gl">➤</span>Send a message</div>
+          <div class="m-row"><span class="gl">◎</span>Focus measures</div>
+          <div class="m-row"><span class="gl">№</span>Figures I report</div>
+          <div class="m-row"><span class="gl">⇅</span>Plan import &amp; archives</div>
+          <div class="m-row"><span class="gl">▣</span>Knowledge base</div>
+          <div class="m-rgrp">People &amp; access<span class="gpill">7</span></div>
+          <div class="m-row"><span class="gl">☰</span>People register<span class="pill">7</span></div>
+          <div class="m-row"><span class="gl">⚿</span>Roles &amp; access</div>
+          <div class="m-row"><span class="gl">⌗</span>Official BU list</div>
+          <div class="m-rgrp">The organisation</div>
+          <div class="m-row"><span class="gl">▤</span>Business units</div>
+          <div class="m-row"><span class="gl">◫</span>Companies</div>
+          <div class="m-row"><span class="gl">◇</span>Functions</div>
+          <div class="m-row"><span class="gl">◈</span>Capabilities</div>
+          <div class="m-rgrp">Measurement</div>
+          <div class="m-row"><span class="gl">Σ</span>Figure sets</div>
+          <div class="m-row"><span class="gl">▥</span>Scoring bands</div>
+          <div class="m-row"><span class="gl">“</span>Terminology</div>
+          <div class="m-rgrp">Branding &amp; email</div>
+          <div class="m-row"><span class="gl">◐</span>Branding</div>
+          <div class="m-row"><span class="gl">✉</span>Email</div>
+        </div>
+        <div class="m-pane">
+          <h3>Overview</h3>
+          <div class="m-cyc">
+            <div><div class="open">H1 2026 · OPEN</div><div class="meta">Jan – Jun 2026 · due 15 Jul · as of Q2</div></div>
+            <div class="big">163 <small>of 184 items reported</small></div>
+            <div class="meta">6 submitted · 3 in progress · 1 not started</div>
+            <div class="go">Open the cycle page ›</div>
+          </div>
+          <div class="m-h4">Waiting on the office<span class="rule"></span></div>
+          <div class="m-att">
+            <div class="m-arow"><span class="ic">✉</span>3 conversations waiting for an answer<span class="to">Inbox ›</span></div>
+            <div class="m-arow"><span class="ic">Σ</span>1 claim on Financial Figures to answer<span class="to">Reporting cycle ›</span></div>
+            <div class="m-arow"><span class="ic">☰</span>2 units with no custodian<span class="to">People register ›</span></div>
+            <div class="m-arow"><span class="ic">⚿</span>4 people never issued a password<span class="to">People register ›</span></div>
+            <div class="m-arow"><span class="ic">◎</span>1 person said where they work — accept or dismiss<span class="to">People register ›</span></div>
+          </div>
+          <div class="m-quiet">Everything else is quiet. The rest of Setup is in the rail on the left.</div>
+        </div>
+      </div>
+    </div></div>
+    <p class="caption">The gear lands here. Typing in the search filters the rail live — by name and by hidden
+    keywords, so “logo” finds Branding and “password” finds People register. Counts in this picture are
+    illustrative, marked per the demo-data rule.</p>
+
+    <div class="tradeoff"><b>What it costs.</b> A new page that must stay truthful — its counts have to come from
+    the same functions the pages themselves use, or the Overview becomes a page that lies (§53.5's drift, invited
+    on purpose, so the check must assert agreement). The rail's group badges change meaning from entry-count to
+    waiting-count, and rows gain a glyph column the rest of the product's rails don't have. Merging Import with
+    Archived plans is a small reversal of their §46 split, recorded as one.</div>
+  </section>
+
+  <!-- ═══ 4 · OPTION B ═══ -->
+  <section>
+    <h2 class="opt-h"><span><span class="snum">4</span>Option B — the hub, HR_ERP's shape taken whole</span>
+      <span class="notrec">Alternative</span></h2>
+    <p class="secnote">No rail. The gear opens a hub: every destination as a described row, grouped, dealt into
+    two balanced columns, pills where something waits, search on top. Each page then carries a “‹ Setup” way back.</p>
+
+    <div class="mockwrap"><div class="mock">
+      <div class="m-top"><span class="t">Strategy Management Platform</span><span class="org">· Raya Trade</span>
+        <span class="right">Viewing as Mohamed Essam · Super user</span></div>
+      <div class="m-nav"><span class="grp">Group ▾</span>
+        <span class="sw"><span class="on">Units</span><span>Functions</span></span>
+        <span class="u">Mobile</span><span class="u">Retail Stores</span><span class="u">B2B Ecomm</span>
+        <span class="u">Consumer Electronics</span><span class="u">Online Shop</span><span class="u">Corporate</span>
+        <span class="u">Care</span><span class="u">IT Dist.</span><span class="u">Logistics</span><span class="u">Nigeria</span>
+        <span class="gear">⚙</span></div>
+      <div class="m-body"><div class="m-hub">
+        <div class="m-hubtop"><h3>Setup</h3>
+          <div class="m-hubsearch"><span>⌕</span><span>Find a setting or an errand…</span></div></div>
+        <div class="m-cyc" style="margin-bottom:14px">
+          <div><div class="open">H1 2026 · OPEN</div><div class="meta">due 15 Jul · as of Q2</div></div>
+          <div class="big">163 <small>of 184 reported</small></div>
+          <div class="go">Open the cycle page ›</div>
+        </div>
+        <div class="m-cols">
+          <div>
+            <div class="m-cat"><div class="m-cath"><span class="dot"></span><span class="l">Running the cycle</span><span class="rule"></span><span class="n">7</span></div>
+              <div class="m-card">
+                <div class="m-hrow"><span class="ic hot">◔</span><span class="nm">Reporting cycle</span><span class="ds">Open, watch and close the half-year</span><span class="pill">1</span></div>
+                <div class="m-hrow"><span class="ic hot">✉</span><span class="nm">Inbox</span><span class="ds">Conversations from the corner bubble</span><span class="pill">3</span></div>
+                <div class="m-hrow"><span class="ic">➤</span><span class="nm">Send a message</span><span class="ds">Email chosen people or a whole role</span></div>
+                <div class="m-hrow"><span class="ic">◎</span><span class="nm">Focus measures</span><span class="ds">Mark what the group watches this cycle</span></div>
+                <div class="m-hrow"><span class="ic">№</span><span class="nm">Figures I report</span><span class="ds">The numbers you are named on</span></div>
+                <div class="m-hrow"><span class="ic">⇅</span><span class="nm">Plan import &amp; archives</span><span class="ds">A plan arrives; the outgoing one is kept</span></div>
+                <div class="m-hrow"><span class="ic">▣</span><span class="nm">Knowledge base</span><span class="ds">How the platform reasons, explained</span></div>
+              </div></div>
+            <div class="m-cat"><div class="m-cath"><span class="dot"></span><span class="l">Measurement</span><span class="rule"></span><span class="n">3</span></div>
+              <div class="m-card">
+                <div class="m-hrow"><span class="ic">Σ</span><span class="nm">Figure sets</span><span class="ds">Numbers owned by a named set, not a unit</span></div>
+                <div class="m-hrow"><span class="ic">▥</span><span class="nm">Scoring bands</span><span class="ds">Where green, amber and red begin</span></div>
+                <div class="m-hrow"><span class="ic">“</span><span class="nm">Terminology</span><span class="ds">What this tenant calls things</span></div>
+              </div></div>
+          </div>
+          <div>
+            <div class="m-cat"><div class="m-cath"><span class="dot"></span><span class="l">People &amp; access</span><span class="rule"></span><span class="n">3</span></div>
+              <div class="m-card">
+                <div class="m-hrow"><span class="ic hot">☰</span><span class="nm">People register</span><span class="ds">Everyone, their roles, their passwords</span><span class="pill">7</span></div>
+                <div class="m-hrow"><span class="ic">⚿</span><span class="nm">Roles &amp; access</span><span class="ds">What each role may see and edit</span></div>
+                <div class="m-hrow"><span class="ic">⌗</span><span class="nm">Official BU list</span><span class="ds">The client's own names, mapped here</span></div>
+              </div></div>
+            <div class="m-cat"><div class="m-cath"><span class="dot"></span><span class="l">The organisation</span><span class="rule"></span><span class="n">4</span></div>
+              <div class="m-card">
+                <div class="m-hrow"><span class="ic">▤</span><span class="nm">Business units</span><span class="ds">The units, their weights, their marks</span></div>
+                <div class="m-hrow"><span class="ic">◫</span><span class="nm">Companies</span><span class="ds">The layer between group and unit</span></div>
+                <div class="m-hrow"><span class="ic">◇</span><span class="nm">Functions</span><span class="ds">Supporting functions and how they plan</span></div>
+                <div class="m-hrow"><span class="ic">◈</span><span class="nm">Capabilities</span><span class="ds">Capabilities and their projects</span></div>
+              </div></div>
+            <div class="m-cat"><div class="m-cath"><span class="dot"></span><span class="l">Branding &amp; email</span><span class="rule"></span><span class="n">2</span></div>
+              <div class="m-card">
+                <div class="m-hrow"><span class="ic">◐</span><span class="nm">Branding</span><span class="ds">Colours, marks, what the tenant wears</span></div>
+                <div class="m-hrow"><span class="ic">✉</span><span class="nm">Email</span><span class="ds">The name, footer and look of what leaves</span></div>
+              </div></div>
+          </div>
+        </div>
+      </div></div>
+    </div></div>
+    <p class="caption">Descriptions sit on the row rather than behind a hover — SMP's hub has the room, and a
+    description you can read without hunting is the better half of that practice.</p>
+
+    <div class="tradeoff"><b>What it costs.</b> Every hop between two Setup pages goes through the hub — one extra
+    click, dozens of times a day for the SMO team, which is exactly who this makeover is for. It abandons the rail
+    pattern the rest of the product uses (a unit's plan, a capability's projects), and it reverses §47.7's page
+    shape, which would be recorded as a reversal. This is why A is the recommendation: A's Overview page gives the
+    hub's one real gift — seeing everything waiting at a glance — without giving up one-click movement.</div>
+  </section>
+
+  <!-- ═══ 5 · NAMINGS ═══ -->
+  <section>
+    <h2><span class="snum">5</span>The namings — each row is its own decision</h2>
+    <p class="secnote">Stored keys never change (§30.2, §58 — renaming a stored field is a migration for a word);
+    every rename below is a label. Accept, edit or refuse them row by row.</p>
+    <div class="tblwrap"><table>
+      <tr><th>Today</th><th>Proposed</th><th>The argument</th></tr>
+      <tr><td class="cur">Messages</td><td class="new">Inbox</td>
+        <td class="why">“Messages” and “Send a message” read as the same thing. Inbox says which one you answer;
+        Send a message stays what it is.</td></tr>
+      <tr><td class="cur">Communication</td><td class="new">Email</td>
+        <td class="why">The page sets the email's display name, reply-to, kicker and footer — nothing else.
+        Naming it Email ends the three-way collision.</td></tr>
+      <tr><td class="cur">Import + Archived plans</td><td class="new">Plan import &amp; archives</td>
+        <td class="why">Two pages, one subject: the plan arriving and the plan it replaced. One page, two
+        sections — the shape Figure sets already settled (§46.2).</td></tr>
+      <tr><td class="cur">Labels</td><td class="new">Terminology</td>
+        <td class="why">The page renames what the tenant calls a pillar, a theme, an aspiration. “Labels”
+        sounds like stickers; Terminology says vocabulary.</td></tr>
+      <tr><td class="cur">Official BU list</td><td class="new"><span class="keep">keep</span></td>
+        <td class="why">“Official BU” is the client's own word (§58) and the page exists to hold it. The confusion
+        with Business units is answered by the one-line description beside it, not by a new name.</td></tr>
+      <tr><td class="cur">Who</td><td class="new">People &amp; access</td>
+        <td class="why">Group names below are the §46 question-style set, invited for rethink. “Who” is the
+        question; People &amp; access is the answer, and answers scan faster in a rail.</td></tr>
+      <tr><td class="cur">What we run</td><td class="new">The organisation</td>
+        <td class="why">Units, companies, functions, capabilities — the shape of the business, in one word
+        the client already uses.</td></tr>
+      <tr><td class="cur">How it's measured</td><td class="new">Measurement</td>
+        <td class="why">Same answer-not-question move.</td></tr>
+      <tr><td class="cur">How it looks</td><td class="new">Branding &amp; email</td>
+        <td class="why">With Communication renamed Email, the group's two rows are Branding and Email —
+        the name can simply say so.</td></tr>
+      <tr><td class="cur">Running the cycle</td><td class="new"><span class="keep">keep</span></td>
+        <td class="why">It already names exactly what the group is, and it is the one group name people
+        have lived with daily since §46.</td></tr>
+    </table></div>
+  </section>
+
+  <!-- ═══ 6 · QUESTIONS ═══ -->
+  <section>
+    <h2><span class="snum">6</span>What I need from you</h2>
+    <div class="qs">
+      <div class="q"><b>Pick the structure.</b><p>A, B, or A with changes. <span class="r">My recommendation is A</span> —
+        the Overview gives the hub's visibility without the extra click on every hop.</p></div>
+      <div class="q"><b>Where does the gear land?</b><p>On the new Overview (A's default, drawn above), or keep
+        landing on Reporting cycle with Overview one row above it. <span class="r">I recommend landing on Overview</span> —
+        it answers “is anything waiting on me?” before anything else.</p></div>
+      <div class="q"><b>How deep does search go?</b><p>Page names + hidden keywords (“logo” → Branding) as the first
+        step, or also live data — a typed person's name jumping to their register row, a unit name to its page.
+        <span class="r">I recommend keywords first</span>; data-search is a real feature with its own decisions and
+        can be a later step.</p></div>
+      <div class="q"><b>The namings.</b><p>Accept, edit or refuse section 5 row by row — none of them blocks the rest.</p></div>
+      <div class="q"><b>Anything else from HR_ERP's admin you want that I didn't take?</b><p>I took the pills, the
+        grouping discipline, the descriptions and the glyphs. I left its hover-only descriptions (A's rail rows are
+        too narrow; B puts them on the row) and its two-column card home (that <em>is</em> Option B).</p></div>
+    </div>
+  </section>
+
+  <div class="foot">Record: <code>design-mockups/setup-makeover/2026-08-26_setup-makeover-audit-and-options.html</code> ·
+    All counts in the mocks are illustrative, drawn from the demo tenant's shape ·
+    Built pages, checks, docs and specs remain untouched until a structure is chosen — then step by step, as agreed.</div>
+</div>

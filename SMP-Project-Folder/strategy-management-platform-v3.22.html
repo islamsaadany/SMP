@@ -1793,10 +1793,141 @@
                        border-top:1px solid var(--line-soft);
                        border-bottom:1px solid var(--line-soft); }
   .setuprail .rgroup:first-of-type { border-top:0; }
-  .setuprail .ritem { display:block; width:100%; text-align:left; background:none;
+
+  /* ══ THE RAIL FITS THE WINDOW (§108.5) ════════════════════════════
+     Islam, on the makeover: "would the rail stay fit to the window with an
+     internal scroll down?" — and it did not. Measured before touching it, as
+     the SMO with every group open: the rail is 984px tall and pins 128px from
+     the top, so it hangs 112px below a 1000px window, 212px below a 900px one
+     and 312px below an 800px one. What falls off the bottom is Branding and
+     Email — and a control below the fold is a control that does nothing, which
+     is §90's fault by the one road §90 did not walk.
+
+     THE CAP IS SAFE HERE, AND §28.3 SAYS IT WOULD NOT BE. That rule — "the
+     sticky OFFSET may read --chrome-h, a max-height never may" — was written
+     against v2.8's oscillation, where the loop ran measured chrome height →
+     rail height → page height → scroll clamp → header CONDENSE → measured
+     chrome height. The condense was deleted in v3.3, so the loop is broken at
+     a link and not merely argued away: --chrome-h is now a constant (measured:
+     73px, identical at 1000, 900 and 800px tall). Nothing above the rail moves
+     when the rail gets shorter, which is exactly the test §100.5 applied to
+     the office's inbox a version ago and the same conclusion.
+
+     THE HEAD STAYS, THE LIST SCROLLS. Capping the whole rail and letting it
+     scroll as one would carry "Setup" and the collapse control off the top,
+     so the rows sit in `.raillist` and only that scrolls. `min-height:0` on it
+     is load-bearing: a flex child refuses to shrink below its content without
+     it, and the cap would be pushed back out by the content it is capping.
+
+     THE NUMBER IS THE PINNED OFFSET, AND THE PROTOTYPE SITS 33px LOWER. This
+     file carries the yellow "Prototype · group shape" banner ABOVE the chrome,
+     so at scroll 0 the rail's flow position is 128px while its sticky pin is
+     95px — measured, and it is the banner's own height. The cap is written
+     against the PIN, because that is where the rail spends its life and where
+     a real deployment (which has no banner) puts it at scroll 0 as well. The
+     cost is 13px of the rail below the fold at scroll 0 in the prototype only,
+     and it is self-correcting: the banner is itself 33px of scrollable page,
+     so the scroll that hides it is always available and pins the rail. Sizing
+     against the flow position instead would need JS and would waste 33px of
+     rail forever on every screen, to fix a state that lasts one scroll. */
+  .setuprail { display:flex; flex-direction:column; overflow:hidden;
+               max-height:calc(100dvh - var(--chrome-h, 118px)
+                                      - var(--rail-gap, 22px) - 20px);
+               /* Below this it stops shrinking and the page scrolls instead —
+                  §100.5's floor, for the same reason: a rail squeezed into a
+                  few rows is not navigation, and a window that short is
+                  somebody's split view rather than their screen. */
+               min-height:260px; }
+  .setuprail .rhead { flex:none; }
+
+  /* ══ FINDING A SETTING (§108.13) ═══════════════════════════════════
+     IN THE HEAD, ABOVE THE SCROLLING LIST, and `flex:none` for the same reason
+     `.rhead` is: §108.5 caps `.raillist` to the window, so anything that must
+     stay reachable while the list scrolls has to sit outside it. A search box
+     that scrolls away from its own results is §90's control-below-the-fold by
+     another road. */
+  .setuprail .railfind { flex:none; position:relative; padding:8px 10px 9px;
+                         border-bottom:1px solid var(--line); }
+  .setuprail .railq { width:100%; box-sizing:border-box; font:400 12.5px/1.3 var(--sans);
+                      color:var(--ink); background:var(--ground);
+                      border:1px solid var(--line); border-radius:var(--r-sm);
+                      padding:6px 26px 6px 9px; }
+  .setuprail .railq::placeholder { color:var(--ink-3); }
+  .setuprail .railq:focus { outline:none; border-color:var(--gold);
+                            box-shadow:0 0 0 2px var(--accent-glow); }
+  /* The browser's own clear affordance is inconsistent across engines and
+     invisible in dark mode on some, so the product draws its own and hides
+     theirs — one control, behaving the same everywhere. */
+  .setuprail .railq::-webkit-search-cancel-button { display:none; }
+  .setuprail .railqx { position:absolute; right:16px; top:50%; transform:translateY(-50%);
+                       background:none; border:0; cursor:pointer; line-height:1;
+                       font-size:15px; color:var(--ink-3); padding:2px 4px; }
+  .setuprail .railqx:hover { color:var(--ink); }
+  .setuprail .railqx:focus-visible { outline:2px solid var(--gold); outline-offset:1px; }
+  /* A rail that empties itself reads as a rail that broke (§45.2, §108.10). */
+  .setuprail .railnone { padding:14px 13px; color:var(--ink-3);
+                         font:400 12px/1.5 var(--sans); }
+
+  .setuprail .raillist { overflow-y:auto; min-height:0;
+                         /* A visible track rather than an overlay one: on macOS
+                            a scrollbar that only appears once you are already
+                            scrolling cannot tell you that scrolling is possible. */
+                         scrollbar-width:thin;
+                         scrollbar-color:var(--line) transparent; }
+
+  /* ── AND IT NEVER SAYS "IT ENDS HERE" (§108.6, answering §100.5) ──────
+     §100.5 refused to cap this rail six days ago, and its reason was not
+     §28.3's loop — it was that "a list that says it ends here when it does not
+     is worse than a page that scrolls." That objection is right, and it is
+     about the AFFORDANCE rather than the cap: a capped list with no sign of
+     more below is a list that lies. So the cap comes with the sign.
+
+     A STICKY PSEUDO-ELEMENT, WHICH GETS OUT OF ITS OWN WAY. `::after` is the
+     last box in the scroller's flow, so `position:sticky; bottom:0` holds it
+     against the bottom edge while there is content beneath — and at the end of
+     the scroll it comes to rest AFTER the last row, where it has nothing left
+     to cover. That is the whole trick: it is true exactly when it is showing,
+     and it needs no JS, no scroll listener and no measurement to know it.
+
+     IT COSTS ITS OWN HEIGHT, AND TRYING NOT TO BROKE IT. The first build
+     carried `margin-top:-22px` to give that height back, on the reasoning that
+     a fade must not push the last row out of reach. It does the opposite: the
+     negative margin takes 22px off the SCROLLABLE height, so the list could no
+     longer scroll far enough to reach its own end — the check named the last
+     five entries (Figure sets, Scoring bands, Terminology, Branding, Email) as
+     unreachable, which is precisely the fault this element exists to prevent,
+     arriving by the other road. The 22px is real and is paid: at the foot of
+     the scroll there is a fade's worth of blank under the last row, and the
+     last row is reachable. */
+  .setuprail .raillist::after {
+    content:""; display:block; position:sticky; bottom:0; z-index:1;
+    height:22px; pointer-events:none;
+    background:linear-gradient(to top, var(--surface), rgba(0,0,0,0)); }
+  /* FLEX SO A PILL CAN SIT AT THE END. The padding and the type are unchanged,
+     so a row without a pill is the row it always was (§108.15). */
+  .setuprail .ritem { display:flex; align-items:center; gap:8px;
+                      width:100%; text-align:left; background:none;
                       border:0; border-bottom:1px solid var(--line-soft);
                       padding:8px 13px; cursor:pointer;
                       font:500 13px/1.35 var(--sans); color:var(--ink-2); }
+  .setuprail .rilab { min-width:0; }
+  /* ── THE PILLS (§108.15) ──────────────────────────────────────────
+     THE ACCENT, AND ONE OF THE FEW SOLID FILLS IN THE PRODUCT (§41's budget).
+     It is spent here because the pill has exactly one meaning — something is
+     waiting — and it is never drawn for a zero, so a lit rail row is always
+     true. `--gold` on `--on-accent` is the pair declared for a filled accent,
+     so this cannot become white-on-gold (§38.4, six times). */
+  .setuprail .riwait, .setuprail .rgwait {
+      margin-left:auto; flex:none; background:var(--gold); color:var(--on-accent);
+      font:800 10px/1 var(--sans); letter-spacing:0; font-variant-numeric:tabular-nums;
+      min-width:17px; text-align:center; border-radius:99px; padding:3px 5px; }
+  /* SMALLER ON A HEADING, and that is not decoration: the heading is 9.5px
+     uppercase at .14em, so a row-sized pill beside it pushed "People & access"
+     onto a second line and made a folded group taller than an open row. The
+     heading also stops wrapping, or the pill can never be safe. */
+  .setuprail .rgroup { flex-wrap:nowrap; }
+  .setuprail .rgwait { margin-left:auto; margin-right:5px;
+                       font-size:9px; min-width:14px; padding:2px 4px; }
   .setuprail .ritem:hover { background:var(--surface-2); color:var(--ink); }
   .setuprail .ritem.on { background:var(--surface-2); color:var(--ink); font-weight:650;
                          box-shadow:inset 3px 0 0 var(--gold); }
@@ -1819,10 +1950,81 @@
   .setuppane .secrow button:focus-visible { outline:2px solid var(--gold); outline-offset:2px; }
   @media (max-width:900px){
     .setupsplit { grid-template-columns:1fr; }
-    .setuprail { display:flex; flex-wrap:wrap; }
+    /* THE CAP COMES OFF WHERE THE RAIL IS NOT A RAIL (§108.5). Below 900px the
+       split stacks and this becomes a wrapping band ABOVE the page rather than
+       a column beside it — so it is no longer competing with the window for
+       height, and capping it would put a second scroll inside a page that is
+       already scrolling. `flex-direction:row` is restored explicitly: the base
+       rule turns it into a column, and inheriting that here would stack every
+       row full-width down the screen. */
+    .setuprail { display:flex; flex-direction:row; flex-wrap:wrap;
+                 max-height:none; min-height:0; overflow:visible; }
     .setuprail .rhead { width:100%; }
     .setuprail .rgroup { width:100%; }
+    .setuprail .raillist { display:contents; }
   }
+
+  /* ══ SETUP · OVERVIEW (§108.10) ═══════════════════════════════════
+     The page the gear lands on: one strip saying how the cycle is going, and
+     a list of what is waiting on the office.
+
+     IT BORROWS `.fstrip`'s VOCABULARY WITHOUT BORROWING `.fstrip` — the same
+     ground, the same header rule, the same `.badge` chips, because this is
+     the Reporting cycle's own numbers and two different-looking versions of
+     one strip is how a summary stops reading as a summary (§B5). What it does
+     NOT borrow is the layout: `.fstrip` is a card with a titled head and a
+     body, and this is one row that ends in a way through. */
+  .ovcycle { display:flex; align-items:center; gap:22px; flex-wrap:wrap;
+             background:var(--surface); border:1px solid var(--line);
+             border-radius:var(--r); padding:14px 18px; margin:0 0 22px; }
+  .ovcyc-name { font:700 13.5px/1.3 var(--sans); color:var(--ink);
+                display:flex; align-items:center; gap:9px; }
+  .ovcyc-meta { color:var(--ink-3); font-size:12px; margin-top:3px; }
+  /* THE NUMBER IS THE SERIF ONE THE CYCLE PAGE USES, at the size a summary
+     wants rather than the size the page it summarises wants. */
+  .ovcyc-n { display:flex; align-items:baseline; gap:7px; font-family:var(--serif);
+             margin-left:auto; }
+  .ovcyc-n b { font-size:27px; font-weight:400; color:var(--ink); }
+  .ovcyc-n span { font-size:13px; color:var(--ink-3); font-family:var(--sans); }
+  .ovcyc-chips { display:flex; gap:7px; flex-wrap:wrap; }
+  .ovcyc-go { white-space:nowrap; }
+
+  .ovh { font:700 10.5px/1 var(--sans); letter-spacing:.11em; text-transform:uppercase;
+         color:var(--ink-2); margin:0 0 8px; display:flex; align-items:center; gap:10px; }
+  .ovh::after { content:""; flex:1; height:1px; background:var(--line); }
+
+  /* A ROW IS A DOOR, SO IT IS A BUTTON. Each one names something outstanding
+     and goes to the page that fixes it — never a page that merely mentions it
+     (§16.7's rule, applied to a notice rather than to a refusal). */
+  .ovlist { border:1px solid var(--line); border-radius:var(--r);
+            background:var(--surface); overflow:hidden; }
+  .ovrow { display:flex; align-items:center; gap:11px; width:100%; text-align:left;
+           background:none; border:0; border-top:1px solid var(--line-soft);
+           padding:11px 15px; cursor:pointer; font:500 13px/1.4 var(--sans);
+           color:var(--ink); }
+  .ovrow:first-child { border-top:0; }
+  .ovrow:hover { background:var(--surface-2); }
+  .ovrow:focus-visible { outline:2px solid var(--gold); outline-offset:-2px; }
+  /* THE MARK IS LIT, BECAUSE EVERY ROW HERE IS SOMETHING OUTSTANDING — there
+     is no quiet state to distinguish it from, so the accent is carrying the
+     one meaning it has on this page. It stays inside §41's budget: a 24px
+     square, and the page draws no other fill. */
+  .ovico { width:24px; height:24px; border-radius:var(--r-sm); flex:none;
+           display:grid; place-items:center; font-size:12px;
+           background:var(--attn-bg); color:var(--attn-tx); }
+  .ovtext { min-width:0; }
+  .ovto { margin-left:auto; flex:none; font:700 11.5px/1 var(--sans);
+          color:var(--gold-deep); white-space:nowrap; }
+  .ovrow:hover .ovto { text-decoration:underline; }
+
+  /* SAYING NO IS THE PAGE'S JOB TOO (§45.2 turned round): a page that exists
+     to report whether anything is waiting must be able to report that nothing
+     is, or an absent list reads as a list that failed to load. */
+  .ovquiet { border:1px solid var(--line); border-radius:var(--r);
+             background:var(--surface); padding:16px 18px;
+             display:flex; flex-direction:column; gap:4px; }
+  .ovquiet b { font-size:13.5px; color:var(--ink); }
+  .ovquiet span { font-size:12.5px; color:var(--ink-3); line-height:1.5; }
 
   /* ══ FILL A FIGURE SET: THE FLAT TABLE (§46.5) ════════════════════ */
   .srctools { display:flex; flex-wrap:wrap; gap:8px; align-items:center; margin:0 0 12px; }
@@ -2012,7 +2214,7 @@
      so the two can never disagree about where the column ends. */
   .peoplecfg td.namecell input.fld { max-width:100%; box-sizing:border-box; }
   /* ── AND EVERY OTHER FIELD IN AN OPEN ROW, WHICH `max-width` COULD NOT
-     DO (§108) ──────────────────────────────────────────────────────────
+     DO (§110) ──────────────────────────────────────────────────────────
      Islam, with a screenshot of an open row: "the boxes are overflowing on each
      other." Measured at 1440: the Job title field is 170px in a 158px cell and
      paints 21px over its neighbour, Email 11px, Official BU 1px — an `<input>`
@@ -2394,7 +2596,7 @@
                            color:var(--ink-2); }
   .hmenu-panel.pwset .cq b { color:var(--ink); font-weight:700; }
 
-  /* ── The role picker: one dropdown, and why a pick did not land (§108)
+  /* ── The role picker: one dropdown, and why a pick did not land (§110)
      `select.rolewhere` and `.rolewhy` were the second half's, deleted with it
      (§24) — the Unit cell answers where, and the widths those two needed were
      the whole reason this block existed.
@@ -2402,7 +2604,7 @@
      THE REFUSAL WRAPS, AND IT HAS TO SAY SO OUT LOUD. `.cfg table td` is
      `white-space:nowrap` (§88), which is right for a value and wrong for a
      sentence — left alone it would run the sentence off the side of the cell,
-     which is precisely the fault §108 came from. Bounded at 230px so it cannot
+     which is precisely the fault §110 came from. Bounded at 230px so it cannot
      hold the Roles column open either: `td.roles` is one of §88's exemptions
      (`max-width:none`), so nothing above it would stop it. */
   .rolestop { display:block; margin:6px 0 0; max-width:230px;
@@ -3419,7 +3621,7 @@
      it did nothing: this selector is (0,3,1) against that file's (0,2,1) AND
      later in build.py's concatenation, so it won twice over. */
   .cfg .peoplecfg select.rolepick { min-width:150px; max-width:186px; }
-  /* `select.rolewhere` was here and went with the control (§108, §24): the Unit
+  /* `select.rolewhere` was here and went with the control (§110, §24): the Unit
      cell answers where, so there is no second select to bound. */
   /* AND THE ROW'S OWN TWO, WHICH §69 MISSED (§93.10). Exactly the same fault
      and exactly the same 920px: the role picker's pair were bounded and the
@@ -4173,6 +4375,41 @@
      "Missing" a plan puts against an unset target keeps behaving as it does. */
   .pctneed { display:block; margin-top:3px; font-size:11.5px; line-height:1.25;
              white-space:nowrap; }
+
+  /* ── A PROJECT'S FRONT MATTER (§109) ─────────────────────────────────
+     One box, one ground, one hairline down the middle: who and when on the
+     left, what and with whom on the right. In arrange.css because that file is
+     concatenated LAST of the four and config.css has now held the same rule
+     block twice on four separate occasions (§29.2, §51.5, §53.6, §88). */
+  .pfront { display:grid; grid-template-columns:300px minmax(0,1fr);
+            border:1px solid var(--line); border-radius:var(--r-md);
+            background:var(--surface-2); overflow:hidden; margin:18px 0 4px; }
+  .pfcol { min-width:0; }
+  .pfright { border-left:1px solid var(--line); background:var(--surface); }
+  .pfrow { display:grid; grid-template-columns:64px minmax(0,1fr); gap:14px;
+           padding:11px 14px; align-items:baseline; }
+  .pfrow + .pfrow { border-top:1px solid var(--line); }
+  .pfrow em { font:700 9.5px/1.6 var(--sans); letter-spacing:.1em; font-style:normal;
+              text-transform:uppercase; color:var(--ink-3); }
+  .pfval { font:600 13px/1.5 var(--sans); color:var(--ink); min-width:0; }
+  .pfval p { margin:0; font-weight:400; font-size:13.5px; line-height:1.55;
+             color:var(--ink-2); }
+  /* THE RIGHT COLUMN'S LABEL TRACK IS SIZED TO ITS OWN LONGEST WORD, so the
+     brief's first letter and the first stakeholder chip start at one x. A
+     single width for both columns would either clip "Stakeholders" or waste
+     40px beside "Owner". */
+  .pfright .pfrow { grid-template-columns:96px minmax(0,1fr); gap:18px;
+                    padding:13px 16px; }
+  /* A pill is written to sit INSIDE a sentence, so it carries a leading margin
+     that would push the chips right of the brief above them. Pulled back here
+     only -- the pill itself is used in thirty other places. */
+  .pfval > .pill.kind:first-child { margin-left:0; }
+  .pfval .pill.kind { margin-top:0; margin-bottom:0; }
+  .pfront .fld, .pfront input, .pfront textarea { width:100%; max-width:none; }
+  @media (max-width: 1180px) {
+    .pfront { grid-template-columns:1fr; }
+    .pfright { border-left:0; border-top:1px solid var(--line); }
+  }
 
   /* ── Presentation mode ────────────────────────────────────────────
      A mode, not a page: it takes the whole window, the app chrome disappears,
@@ -7905,7 +8142,7 @@ var NEWSET = { name: "", team: "", owner: "", pick: "smo" };
    held here rather than recomputed on every paint, because the person
    answering it may go and look at the row it names and come back. */
 var ADDROLE = null, ADDROLE_KIND = "owner";
-/* ── WHY THE LAST PICK DID NOT LAND (§108) ────────────────────────────
+/* ── WHY THE LAST PICK DID NOT LAND (§110) ────────────────────────────
    `{key, why}`, or null. A property of the screen and never of the person
    (§25.2) — it is the outcome of one press, cleared by the press that
    succeeds, by opening the picker again and by leaving the row. */
@@ -8495,7 +8732,7 @@ function rowEditLive(){
   var t = rowEditTable();
   return (t && ROWFIND[t]) ? ROWFIND[t](rowEditKey()) : null;
 }
-/* ── AND WHAT POINTS AT THE ROW, NOT ONLY WHAT IS IN IT (§108) ───────
+/* ── AND WHAT POINTS AT THE ROW, NOT ONLY WHAT IS IN IT (§110) ───────
    A person's roles are not ON the person: a unit's `head` and a function's
    `custodian` point AT them (§33), and `ROWWAS` is a copy of the row. So Cancel
    restored `p.unit` and left the grant standing — press it after giving
@@ -9860,7 +10097,7 @@ function roleKeyByName(name){
    file naming it would be asking for a role that arrives by itself, so the
    template does not offer it and the reader says so plainly. */
 function roleIsGrantable(key){ return !!key && !SMPRules.isOwnLinesRole(key); }
-/* ── THE WORD FOR WHERE A ROLE IS HELD (§108) ─────────────────────────
+/* ── THE WORD FOR WHERE A ROLE IS HELD (§110) ─────────────────────────
    For the sentence a refused pick shows, and for nothing else. It is a LABEL,
    not a second rule: `roleWheres()` still decides what may be held where, and
    this only says it in English — so a role whose list changes cannot end up
@@ -11696,6 +11933,49 @@ function reportState(c, key){
   if (REVIEW.submitted && REVIEW.submitted[key]) return { key:"done", label:"Submitted" };
   if (!c.done) return { key:"late", label:"Not started" };
   return { key:"part", label:"In progress" };
+}
+
+/* ── HOW THE CYCLE IS GOING, ASKED ONCE (§108.9) ──────────────────────
+   The Reporting cycle page computed this inline, which was right while it was
+   the only page that wanted it. The Overview opens on the same four numbers,
+   and a second loop over activeKeys() would be two answers to one question —
+   the drift §53.5 exists to catch, invited deliberately by a page whose whole
+   job is to summarise other pages.
+
+   `progress` is DERIVED rather than counted, and that is the cycle page's own
+   arithmetic moved rather than re-reasoned: a unit is in progress when it is
+   neither submitted nor untouched, so it is the remainder and can never
+   disagree with the other two. */
+/* WHICH SUPPORTING FUNCTIONS ARE ON THE BOARD (§105, named once in §108.1).
+   The filter was written inline in renderCycle(); the totals need exactly the
+   same list, and two copies of it is how a board and its own summary come to
+   disagree about how many things were asked for. */
+function boardFunctionKeys(){
+  return Object.keys(FUNCTIONS).filter(function(fk){
+    return fnShows(fk) && !fnPlansInPillars(FUNCTIONS[fk]) && capsOfFunction(fk).length;
+  });
+}
+
+function cycleTotals(){
+  var t = { done:0, total:0, sub:0, none:0, units:0 };
+  function add(c, st){
+    t.done += c.done; t.total += c.total;
+    if (st.key === "done") t.sub++;
+    if (st.key === "late") t.none++;
+    t.units++;
+  }
+  activeKeys().forEach(function(k){ add(reportedCount(UNITS[k]), unitState(UNITS[k])); });
+  /* THE FUNCTIONS COUNT TOO (§105). They report, they submit, and they are on
+     the board — so leaving them out of the headline would say 6 of 10 on a
+     page listing fifteen rows. */
+  boardFunctionKeys().forEach(function(fk){ add(fnReportedCount(fk), fnState(fk)); });
+  /* DERIVED, NEVER COUNTED: in progress is whatever is neither submitted nor
+     untouched, so it cannot disagree with the other two. It also FIXES a real
+     miscount — the inline version divided by `activeKeys().length` while
+     `sub` and `none` had already grown to include the functions, so every
+     submitted function took one off "in progress" (§108.1). */
+  t.progress = t.units - t.sub - t.none;
+  return t;
 }
 
 /* Two units are genuinely mid-report: some figures in, some not. Without this
@@ -19517,6 +19797,59 @@ function projEditing(){
 function projArranging(fk){
   return arranging("unit", "fn:" + fk) || projEditing();
 }
+/* ── A PROJECT'S FRONT MATTER (§109) ─────────────────────────────────────
+   Islam: "any project needs 3 things at its starting part which are the brief,
+   stakeholders, start and end date."
+
+   THE START AND END WERE STORED AND SHOWN NOWHERE. They appeared in exactly
+   one place in the whole product -- the review deck -- so the one page that
+   AUTHORS a project could not tell you when it runs. The overrun note was the
+   only thing that mentioned the end date, and only when a milestone overshot
+   it. That is the gap; the arrangement is the answer to it.
+
+   ONE BOX, DIVIDED: who and when down the left, what and with whom on the
+   right. Not a `<table>`, deliberately -- the platform sets a global
+   `table { min-width: 620px }` so its data tables never squash, which makes any
+   small table overflow its own grid track by 300px. A grid of rows has no such
+   inheritance, and the labels still line up in a column, which is the whole
+   reason a table was asked for.
+
+   BOTH VALUE COLUMNS START AT THE SAME X. The left column is sized to the
+   longest label there and the right to the longest label there, so "the brief
+   begins where the pills begin" is a property of the grid rather than
+   something that happens to be true today. */
+function projFrontMatter(p, ed){
+  var row = function(side, label, value){
+    return '<div class="pfrow"><em>' + label + '</em><div class="pfval">' + value + '</div></div>';
+  };
+  var f = function(v, setter){
+    return ed ? inputOr("plan", v == null ? "" : v, "", setter)
+              : (v ? esc(v) : '<span class="missing">Missing</span>');
+  };
+  /* The pills carry their own leading margin, which is right in a sentence and
+     wrong as the first thing in a cell -- `.pfval` neutralises it so the chip's
+     BORDER lines up with the brief's first letter, not its text. */
+  var stake = ed
+    ? inputOr("plan", collabText({ collaborators: p.stakeholders }), "",
+        function(v){ p.stakeholders = collabParse(v); })
+    : ((p.stakeholders || []).length
+        ? (p.stakeholders || []).map(function(x){
+            return '<span class="pill kind">' + esc(x) + '</span>'; }).join(" ")
+        : '<span class="missing">None named</span>');
+  return '<div class="pfront">' +
+    '<div class="pfcol">' +
+      row("l", "Owner", f(p.owner, function(v){ p.owner = v; })) +
+      row("l", "Start", f(p.start, function(v){ p.start = v; })) +
+      row("l", "End",   f(p.end,   function(v){ p.end   = v; })) +
+    '</div>' +
+    '<div class="pfcol pfright">' +
+      row("r", "Brief", ed ? fieldOr("plan", p.brief || "", "", function(v){ p.brief = v; })
+                           : '<p>' + esc(p.brief || "") + '</p>') +
+      row("r", "Stakeholders", stake) +
+    '</div>' +
+  '</div>';
+}
+
 function projPlanBody(p, fk){
   /* NO DUE AND NO OWNER (§53.4). Islam: a deliverable is delivered when the
      project ends, so a date of its own was a second answer to a question the
@@ -19583,33 +19916,22 @@ function projPlanBody(p, fk){
      band carries the project's NAME, so in edit mode it has to become a field
      or the one thing a new project needs most cannot be typed — the same
      exception the pillar heading makes (see unitPlanBody). */
+  /* THE BAND IS IDENTITY, THE BLOCK IS THE FACTS (§109). The owner moved into
+     the front matter below, and the Timeline pill is GONE -- not relocated.
+     Islam asked what it was for and the honest answer was almost nothing: it
+     once decided how every date on the project was read, §104 ended that
+     (either form is right on any row), and the only thing it still gated was
+     projOverruns(), which needs two parseable dates and gives up without them
+     anyway. Its one remaining effect was to SUPPRESS a true overrun warning on
+     a project marked "By quarter" whose end date happened to be a date. The
+     field is untouched in the data and on the import template; what goes is a
+     pill nobody could act on. */
   var band = ed
     ? '<div class="pband"><span class="pband-code">' + esc(projCode(fk, p)) + '</span>' +
         '<span class="pband-name">' +
-          inputOr("plan", p.name, "", function(v){ p.name = v; }) + '</span>' +
-        '<span class="pband-r">' +
-          inputOr("plan", p.owner || "", "", function(v){ p.owner = v; }) +
-          '<span class="pill kind">' + (p.timeline === "date" ? "By date" : "By quarter") +
-        '</span></span></div>'
-    : pillarBand(projCode(fk, p), p.name,
-        (p.owner ? '<span class="pband-n">' + esc(p.owner) + '</span>' : '') +
-        '<span class="pill kind">' + (p.timeline === "date" ? "By date" : "By quarter") + '</span>');
-  return band + paneActs("plan", "u_plan") +
-
-    '<h4 class="mini">Brief</h4><p class="sub" style="margin:0">' +
-      (ed ? fieldOr("plan", p.brief || "", "", function(v){ p.brief = v; }) : esc(p.brief)) + '</p>' +
-    '<h4 class="mini">Stakeholders</h4>' +
-    /* Typed as one line and stored as a list, through collabParse/collabNames
-       — the same pair the tactics table uses for collaborators (§50.2), so
-       "how is a list of names typed" has one answer in the platform. */
-    /* collabText() takes the ROW and reads `.collaborators` off it; a project's
-       list is `.stakeholders`, so it is handed a row-shaped object rather than
-       the array — which returned [] and would have blanked every stakeholder
-       list the moment the pen went on. */
-    (ed ? inputOr("plan", collabText({ collaborators: p.stakeholders }), "",
-            function(v){ p.stakeholders = collabParse(v); })
-        : (p.stakeholders || []).map(function(x){
-            return '<span class="pill kind">' + esc(x) + '</span> '; }).join("")) +
+          inputOr("plan", p.name, "", function(v){ p.name = v; }) + '</span></div>'
+    : pillarBand(projCode(fk, p), p.name, "");
+  return band + paneActs("plan", "u_plan") + projFrontMatter(p, ed) +
     '<h4 class="mini">' + DX_HEADING +
       ' <em>\u2014 what the project hands over, and what it is meant to change</em></h4>' +
     miniTable(["#","Deliverables &amp; outcomes","Type","Direction","Target"], dxr) +
@@ -21155,6 +21477,45 @@ function saidWhereNote(p, editable){
    separately and simply has nothing to show from a file. */
 var SAIDWHERE = null;  /* key -> the `at` they picked, once asked */
 
+/* ── THE THREE COUNTS THE OVERVIEW AND THE REGISTER SHARE (§108.10) ──
+   NULL IS "WE HAVE NOT ASKED", AND IT IS NOT ZERO. Both of these depend on a
+   server fact fetched separately from the state graph, so there are three
+   answers and not two: a number, "nothing waiting", and "we do not know yet".
+   §93 is the whole reason — the register reported everybody as having no
+   password because a failed ask was being counted as an absence, and the dash
+   that replaced it means exactly this null. The Overview draws no row at all
+   for a null, which is the same decision one surface further out: a summary
+   that prints 0 for a question it never asked is worse than a summary that
+   stays quiet.
+
+   EXTRACTED RATHER THAN COPIED. The register computed both inline, which was
+   right while it was the only page that wanted them; the Overview exists to
+   summarise this page, so a second copy would be two answers to one question
+   in the one place a disagreement is guaranteed to be seen (§53.5). */
+function noPasswordCount(){
+  var live = typeof SYNC !== "undefined" && SYNC.isLive();
+  /* A FAILED ASK IS NOT AN ANSWER (§93): PWSTATES carries {__error} when the
+     server refused, and counting over it would read every key as absent. */
+  if (!live || !PWSTATES || PWSTATES.__error) return null;
+  /* COUNTED OVER WHO THIS VIEWER MAY ACTUALLY REACH (§89) — the same set the
+     register counts and the same set the server would issue to. */
+  return passwordReach().filter(function(p){
+    return PWSTATES[p.key] === "none";
+  }).length;
+}
+/* Somebody said where they work and it disagrees with where they are attached
+   — which is exactly `saidWhereNote()`'s own test, asked of the whole register
+   rather than of one row. Silent agreement is not an outstanding item (§56). */
+function saidWhereCount(){
+  var live = typeof SYNC !== "undefined" && SYNC.isLive();
+  if (!live || !SAIDWHERE || SAIDWHERE.__error) return null;
+  return PEOPLE.filter(function(p){
+    if (!personActive(p)) return false;
+    var said = SAIDWHERE[p.key];
+    return !!said && said !== personAt(p);
+  }).length;
+}
+
 /* ══ WHICH COLUMNS THE REGISTER SHOWS (§47.1) ═════════════════════════
    Islam: "add a columns filter to mark what to show of the columns and make
    the contact unchecked by default."
@@ -21311,14 +21672,11 @@ function renderPeople(){
      number the server is going to shrink (§35: the server picks the set). */
   var reach = live ? passwordReach() : [];
   var noCust = unitsWithoutCustodian();
-  /* A FAILED ASK IS NOT AN ANSWER (§93). PWSTATES holds {__error} when the
-     server refused or could not be reached, and counting over it would read
-     every key as absent and report nobody as missing a password — the same
-     shape of quiet-wrong-answer the dash itself was. */
-  var pwOk = !!PWSTATES && !PWSTATES.__error;
-  var noPw = live && pwOk
-    ? reach.filter(function(p){ return PWSTATES[p.key] === "none"; }).length
-    : 0;
+  /* A FAILED ASK IS NOT AN ANSWER (§93), and the test now lives in
+     noPasswordCount() so the Overview counts what this chip counts (§108.10).
+     `|| 0` is the coercion this page wants and the Overview does not: here a
+     null means "draw no chip", there it means "draw no row". */
+  var noPw = noPasswordCount() || 0;
 
   /* Lifted out of this function 2026-08-23: restoring a person names the
      places their roles were held, and a second copy of this in the shell is
@@ -21430,7 +21788,7 @@ function renderPeople(){
     if (!personActive(p))
       return held + '<span class="rolestop">Retired \u2014 restore this person ' +
         'before giving them a role.</span>';
-    /* ── ONE DROPDOWN: THE UNIT CELL ALREADY SAYS WHERE (§108) ───────
+    /* ── ONE DROPDOWN: THE UNIT CELL ALREADY SAYS WHERE (§110) ───────
        Islam, of the second half this used to draw: "choose where is very
        strange sentence. make it Unit and it's already in a cell what am I
        missing here?"
@@ -21469,7 +21827,7 @@ function renderPeople(){
         : '<button class="linkbu" data-prole-open="' + p.key + '">+ role</button>');
   }
 
-  /* ── A PICK THAT CANNOT LAND SAYS SO, WHERE IT WAS MADE (§108) ─────
+  /* ── A PICK THAT CANNOT LAND SAYS SO, WHERE IT WAS MADE (§110) ─────
      The one thing the old pair could not do. It committed on the second answer,
      so "not yet" and "never" looked identical from the outside: nothing
      happened, and nothing was said.
@@ -21489,7 +21847,7 @@ function renderPeople(){
   }
 
   /* roleWhereCell() was here. It drew the picker's second half — "Choose
-     where\u2026" — in the Unit column, and §108 deleted it rather than renaming
+     where\u2026" — in the Unit column, and §110 deleted it rather than renaming
      it: the cell's own dropdown already answers that question and the grant
      already writes the answer back, so the two could never disagree. Removed
      with its call site rather than left returning "" (§24), because a function
@@ -24245,6 +24603,147 @@ function renderArchives(){
     '</tr></thead><tbody>' + rows + '</tbody></table></div>');
 }
 
+/* ══ SETUP · OVERVIEW (§108.10, spec 018) ════════════════════════════════
+   Islam, on the makeover: Option A, and the gear lands here.
+
+   THE PAGE ANSWERS ONE QUESTION — *is anything waiting on me?* — and before it
+   existed the answer took a walk through five pages, because each outstanding
+   thing lived only on the page that fixes it. That is right for the thing and
+   wrong for the question: nobody opens Setup to read the People register, they
+   open it to find out whether the register needs them.
+
+   EVERY ROW NAMES THE FUNCTION IT COUNTS, and that is the whole design. A
+   summary page is the one place a disagreement with the page it summarises is
+   guaranteed to be seen and impossible to explain, so no row is allowed to
+   compute anything: each declares a `count` that calls the SAME function the
+   destination page calls, and `checks/setup-overview.py` asserts the two agree
+   rather than asserting the number (§53.5, §94.8). Add a row here with fresh
+   arithmetic in it and the check cannot help you.
+
+   NULL DRAWS NOTHING; ZERO IS AN ANSWER. Three of these depend on a server
+   fact fetched outside the state graph, so "we have not asked" is a real third
+   state and it is not "nothing is waiting" (§93, §108.10). A row whose count
+   is null is absent — never a 0, and never a spinner, because a page that
+   shows five zeroes while it is thinking has told somebody they are clear when
+   it does not know.
+
+   THE DESTINATION IS THE PAGE THAT FIXES IT, never a page that merely mentions
+   it — the row is a door, and §16.7's rule that a refusal must send somebody
+   somewhere applies just as much to a notice. */
+function attentionRows(){
+  var rows = [
+    { k:"chat",  dest:"chat",   glyph:"✉",
+      count: function(){ return OVQUEUE && !OVQUEUE.__error
+                                ? (OVQUEUE.waiting | 0) : null; },
+      text:  function(n){ return plural(n, "conversation") + " waiting for an answer"; } },
+    { k:"claims", dest:"cycle", glyph:"Σ",
+      count: function(){ return openClaimsList().length; },
+      text:  function(n){ return plural(n, "claim request") + " to answer"; } },
+    { k:"nocust", dest:"people", glyph:"☰",
+      count: function(){ return unitsWithoutCustodian().length; },
+      text:  function(n){ return plural(n, "unit") + " with no custodian"; } },
+    { k:"nopw",   dest:"people", glyph:"⚿",
+      count: noPasswordCount,
+      text:  function(n){ return n + (n === 1 ? " person has" : " people have") +
+                                 " never been issued a password"; } },
+    { k:"said",   dest:"people", glyph:"◎",
+      count: saidWhereCount,
+      text:  function(n){ return plural(n, "person", "people") +
+                                 " said where they work — accept or dismiss"; } }
+  ];
+  return rows.map(function(r){
+    var n = r.count();
+    return { k:r.k, n:n, dest:r.dest, glyph:r.glyph,
+             text: (n == null || n <= 0) ? null : r.text(n) };
+  }).filter(function(r){ return r.text !== null; });
+}
+
+/* The label a row's destination wears in the rail, asked of the rail's own
+   list rather than written out again — rename a page and this follows (§108.3
+   renamed three of them in one afternoon). */
+function attnDestLabel(k){
+  var d = (typeof setupDefs === "function" ? setupDefs() : []).filter(
+    function(x){ return x.k === k; })[0];
+  return d ? d.label : k;
+}
+
+var OVQUEUE = null;   /* {waiting,flagged} | {__error} | null — asked once per visit */
+
+/* ── THE SAME COUNTS, ON THE RAIL (§108.15) ────────────────────────────
+   A pill beside a rail entry says "there is something here for you" without
+   opening it, which is HR_ERP's practice and the last piece of the makeover.
+   It is deliberately LAST: a pill is only worth drawing once the count behind
+   it is real, and until the Overview existed there was no shared, agreed count
+   to draw — a rail badge computed on its own would have been the drift §108.10
+   was built to prevent, in the one place nobody would ever see it disagree.
+
+   SO IT IS THE OVERVIEW'S OWN LIST, SUMMED BY DESTINATION. Several rows point
+   at the People register — custodians, passwords, declarations — and "7 things
+   waiting on the register" is exactly what somebody wants from a rail badge.
+   Nothing new is counted here, which is the whole point.
+
+   NEVER FOR SOMEBODY WHO CANNOT CLEAR IT (§69). The Performance dot was shown
+   to readers until it was noticed that asking a person to act on something
+   they hold no control over is how a screen nags. These counts are the
+   office's queue, so they are drawn for the office and for nobody else. */
+function attentionByPage(){
+  var by = {};
+  if (typeof inOffice === "function" && !inOffice()) return by;
+  attentionRows().forEach(function(r){
+    by[r.dest] = (by[r.dest] || 0) + (r.n | 0);
+  });
+  return by;
+}
+
+function renderOverview(){
+  var open = REVIEW.state === "open";
+  var t = cycleTotals();
+  var att = attentionRows();
+
+  /* THE CYCLE STRIP IS THE SAME FOUR NUMBERS THE CYCLE PAGE OPENS WITH, from
+     cycleTotals() (§108.9) — read here and acted on there, which is why the
+     strip carries a way through rather than any control of its own. */
+  var strip =
+    '<div class="ovcycle">' +
+      '<div class="ovcyc-l">' +
+        '<div class="ovcyc-name">' + esc(REVIEW.name) +
+          ' <span class="badge b-' + (open ? "open" : "none") + '">' +
+          (open ? "Open" : "Closed") + '</span></div>' +
+        '<div class="ovcyc-meta">' + esc(REVIEW.from) + ' to ' + esc(REVIEW.to) +
+          ' &middot; due ' + esc(REVIEW.due) +
+          ' &middot; as of Q' + REVIEW.endsQuarter + '</div>' +
+      '</div>' +
+      '<div class="ovcyc-n"><b>' + t.done + '</b><span>of ' + t.total +
+        ' items reported</span></div>' +
+      '<div class="ovcyc-chips">' +
+        '<span class="badge b-done">' + t.sub + ' submitted</span>' +
+        '<span class="badge b-part">' + t.progress + ' in progress</span>' +
+        (t.none ? '<span class="badge b-late">' + t.none + ' not started</span>' : '') +
+      '</div>' +
+      '<button type="button" class="editbtn ovcyc-go" data-setupgo="cycle">' +
+        'Open the cycle page</button>' +
+    '</div>';
+
+  var body = att.length
+    ? '<div class="ovlist">' + att.map(function(r){
+        return '<button type="button" class="ovrow" data-setupgo="' + esc(r.dest) + '">' +
+          '<span class="ovico" aria-hidden="true">' + r.glyph + '</span>' +
+          '<span class="ovtext">' + esc(r.text) + '</span>' +
+          '<span class="ovto">' + esc(attnDestLabel(r.dest)) + ' ›</span></button>';
+      }).join("") + '</div>'
+    /* NOT AN EMPTY BOX (§45.2 turned round). A page whose one job is to say
+       whether anything is waiting has to be able to say NO — an absent section
+       would read as a section that failed to load. */
+    : '<div class="ovquiet"><b>Nothing is waiting on the office.</b>' +
+      '<span>Everything the Overview watches is clear. The rest of Setup is in ' +
+      'the list on the left.</span></div>';
+
+  return cfgHead("Overview", [], null, false, null, null, "") +
+    strip +
+    '<div class="ovh">Waiting on the office</div>' +
+    body;
+}
+
 /* ── Setup · Reporting cycle ────────────────────────────────────────
    Opening turns a plan into a request. Closing snapshots it, which is the
    only way the product ever acquires a past to compare against.
@@ -24355,17 +24854,11 @@ function renderCycle(){
         'key objectives, outcomes, and deliverables and milestones</em></th></tr>' + fnRows;
   }
 
-  var t = { done:0, total:0, sub:0, none:0 };
-  activeKeys().forEach(function(k){
-    var c = reportedCount(UNITS[k]); t.done += c.done; t.total += c.total;
-    var st = unitState(UNITS[k]);
-    if (st.key === "done") t.sub++; if (st.key === "late") t.none++;
-  });
-  fnKeys.forEach(function(fk){
-    var c = fnReportedCount(fk); t.done += c.done; t.total += c.total;
-    var st = fnState(fk);
-    if (st.key === "done") t.sub++; if (st.key === "late") t.none++;
-  });
+  /* ONE ANSWER, TWO PAGES (§108.1). The totals were computed inline here and
+     the Overview opens on the same four numbers; cycleTotals() in
+     config-data.js is now the only place they are worked out, and it counts
+     the FUNCTIONS this page put on the board (§105) as well as the units. */
+  var t = cycleTotals();
 
   var head =
     '<div class="fstrip" style="margin-bottom:20px"><div class="fstrip-head">' +
@@ -24418,7 +24911,7 @@ function renderCycle(){
     '<div class="fstrip-body">' +
       '<div class="kpi"><b>' + t.done + '</b><span>of ' + t.total + ' items reported</span></div>' +
       '<div class="fchips"><span class="badge b-done">' + t.sub + ' submitted</span>' +
-        '<span class="badge b-part">' + (activeKeys().length - t.sub - t.none) + ' in progress</span>' +
+        '<span class="badge b-part">' + t.progress + ' in progress</span>' +
         (t.none ? '<span class="badge b-late">' + t.none + ' not started</span>' : '') + '</div>' +
       '<div class="fmean">plan edits: ' + (open ? "SMO only while open" : "open to unit owners") + '</div>' +
     '</div></div>';
@@ -28669,7 +29162,28 @@ var CHAT = (function(){
     renderInbox: renderInbox,
     wireInbox: wireInbox,
     open: function(){ setOpen(true); },
-    unread: function(){ return state.unread; }
+    unread: function(){ return state.unread; },
+    /* ── HOW MANY ARE WAITING, FOR THE OVERVIEW (§108.10) ──────────────
+       The same `queue` action the inbox already calls, whose answer already
+       carries the two counts — so this is a second READER of one endpoint and
+       not a second endpoint, and the number the Overview prints is by
+       construction the number the Inbox's own tab prints.
+
+       IT DOES NOT TOUCH `box`. The office's page state belongs to the page:
+       writing box.threads from here would leave a half-built queue behind for
+       whenever the inbox is next opened, and `drawQueue()` would be painting
+       into a document that does not have it. The Overview wants two integers.
+
+       `null` RATHER THAN 0 ON EVERY FAILURE, including no server at all — the
+       caller draws nothing for a null and "nothing is waiting" for a 0, and
+       those are different things to say (§108.10, §93). */
+    officeQueue: function(cb){
+      if (!servable()) return cb(null, null);
+      post({ action:"queue" }, function(err, j){
+        if (err || !j) return cb(err || new Error("no answer"), null);
+        cb(null, { waiting: j.waiting | 0, flagged: j.flagged | 0 });
+      });
+    }
   };
 })();
 
@@ -28860,7 +29374,11 @@ var TOUR = (function(){
     custodian: {
       role: "Strategy custodian",
       steps: [
-        { kind:"welcome",
+        /* THE WELCOME CARD CARRIES A DESTINATION, and that is the point:
+           replaying from the Knowledge base used to draw it over the
+           Knowledge base. The platform is moved to the person's own place
+           before the first word is read. */
+        { kind:"welcome", dest:"$own", tab:"strategy", sec:"plan",
           title:"Welcome to the Strategy Management Platform",
           body:"This two-minute tour shows you around on <b>demo data</b> — a full worked " +
                "example, labelled the whole time. Nothing in it is your own data, and nothing " +
@@ -28969,7 +29487,11 @@ var TOUR = (function(){
     owner: {
       role: "Business unit / function owner",
       steps: [
-        { kind:"welcome",
+        /* THE WELCOME CARD CARRIES A DESTINATION, and that is the point:
+           replaying from the Knowledge base used to draw it over the
+           Knowledge base. The platform is moved to the person's own place
+           before the first word is read. */
+        { kind:"welcome", dest:"$own", tab:"strategy", sec:"plan",
           title:"Welcome to the Strategy Management Platform",
           body:"This two-minute tour shows you around on <b>demo data</b> — a full worked " +
                "example, labelled the whole time. Nothing in it is your own data, and nothing " +
@@ -29325,25 +29847,48 @@ var TOUR = (function(){
     mount();
     if (!dock) return;
     story = key;
-    /* `viewer()` is the platform's own answer to "who is this", and it
-       RESOLVES rather than returning a maybe — including after a hydration or
-       a dataset swap moved the register under us, which this function is
-       about to do. */
-    own = ownPlace(viewer()) || firstDest();
-    steps = resolve(STORIES[key].steps, own);
-    /* Remembered BEFORE the switch, or the way back is lost. Read through
-       `demoMode()`, which the platform already exports — null means live, so
-       there is no new export to keep in step with `mode`.
 
-       FROM file:// THERE IS NOTHING TO SWITCH: `DEMO` is only captured when a
-       server answered, and the baked globals ARE the worked example, so the
-       platform is already showing exactly what the tour wants. setMode()
-       no-ops there by its own guard; prevMode stays null and end() puts
-       nothing back, which is correct rather than merely harmless. */
+    /* ── THE ORDER OF THESE FOUR LINES IS THE WHOLE FIX ───────────────
+       Islam, replaying from the Knowledge base: "make it take me by
+       default to the main page rather than in the knowledge base so the
+       tour can actually happen."
+
+       TWO FAULTS, ONE ROOT — the tour used to decide WHERE it was touring
+       before the world it would tour had arrived.
+
+       1. The mode was swapped AFTER `own` was resolved. `setMode("demo")`
+          replaces PEOPLE, UNITS and the whole register, so `own` was a key
+          from the CLIENT'S OWN tenant being looked up in the DEMO tenant's
+          navigation. On this deployment the two happen to match, because
+          the client IS the worked example — on any real client they share
+          no keys at all, `destBtn()` would find nothing, and the tour would
+          light nothing while cheerfully reporting nine steps. Invisible to
+          a file:// check, where there is no live dataset to swap away from
+          (§94.11's trap, exactly).
+
+       2. Nothing moved the platform off the page you replayed FROM. The
+          welcome card was drawn over Setup › Knowledge base, and only the
+          first Next left it — so the tour opened by explaining "this row is
+          the business" over a page that has no business row in view.
+
+       So: switch first, then read who and where from the world that is now
+       on screen, then CHECK that place is actually reachable, and only then
+       walk — the welcome step carries the same destination as step one, so
+       the platform is on the main page before the first card is read. */
     prevMode = (window.SYNC && SYNC.demoMode) ? (SYNC.demoMode() || "live") : null;
     if (prevMode && prevMode !== "demo" && SYNC.setMode) {
       try { SYNC.setMode("demo"); } catch(e){}
     }
+    /* `viewer()` is the platform's own answer to "who is this", and it
+       RESOLVES rather than returning a maybe — including after the swap
+       above has just moved the register under us. */
+    own = ownPlace(viewer()) || firstDest();
+    /* AND IT MUST BE SOMEWHERE THIS NAVIGATION CAN GO. A place that is not
+       on the row is a place nothing can press, and a tour pressing nothing
+       is the fault above wearing a different hat — so it falls back to the
+       first real destination rather than touring a key that is not there. */
+    if (!destBtn(own)) own = firstDest();
+    steps = resolve(STORIES[key].steps, own);
     dock.hidden = false;
     go(0);
   }
@@ -30190,22 +30735,22 @@ var SYNC = (function () {
          anybody opens Setup to answer. It used to be a section at the bottom
          of Roles & access, which is a matrix page — a staff list is not a
          matrix. */
-      { k:"people", ac:"c_people", grp:"who", label:"People register", primary:true, render:renderPeople },
+      { k:"people", ac:"c_people", grp:"who", label:"People register", find:"register staff employees person password reset retire add custodian owner emp id email", primary:true, render:renderPeople },
       /* The client's own names for parts of the business, and what each one
          opens here (§54.1). In *Who* rather than *What we run*, and sharing
          c_people rather than taking a key of its own: it is not another thing
          being planned, it is the vocabulary the register's own data arrives
          in, and Companies already shares c_units on exactly this argument. */
-      { k:"mainbu", ac:"c_people", grp:"who", label:"Official BU list",      render:renderMainbus },
-      { k:"access", ac:"c_access", grp:"who", label:"Roles & access",        render:renderAccess },
+      { k:"mainbu", ac:"c_people", grp:"who", label:"Official BU list", find:"departments official bu client names mapping",      render:renderMainbus },
+      { k:"access", ac:"c_access", grp:"who", label:"Roles & access", find:"permissions matrix roles rights who can edit view grant",        render:renderAccess },
 
-      { k:"units",  ac:"c_units",  grp:"run", label:"Business units",        render:renderUnits },
+      { k:"units",  ac:"c_units",  grp:"run", label:"Business units", find:"business units weight weighting logo mark rename retire",        render:renderUnits },
       /* Its own tab since 3.5. It shares c_units - the same person manages
          both - but it answers a different question from "which units exist",
          and it was being pushed off the top of a ten-row table. */
-      { k:"companies", ac:"c_units", grp:"run", label:"Companies",           render:renderCompanies },
-      { k:"fns",    ac:"c_fns",    grp:"run", label:"Functions",             render:renderFunctions },
-      { k:"caps",   ac:"c_caps",   grp:"run", label:"Capabilities",          render:renderCaps },
+      { k:"companies", ac:"c_units", grp:"run", label:"Companies", find:"company companies grouping layer",           render:renderCompanies },
+      { k:"fns",    ac:"c_fns",    grp:"run", label:"Functions", find:"supporting functions plans in pillars capabilities",             render:renderFunctions },
+      { k:"caps",   ac:"c_caps",   grp:"run", label:"Capabilities", find:"capabilities projects enhancement deliverables",          render:renderCaps },
 
       /* Spec 008, restructured 2026-08-22 (§46.2). Configuring the sets and
          FILLING one were two Setup pages; they are one page with two sections
@@ -30218,23 +30763,33 @@ var SYNC = (function () {
          who is not the SMO gets only Fill; anybody else gets no entry at all,
          because paint() drops a def whose every section is refused. Gate the
          parent on c_sets and the owner loses the page they exist for. */
-      { k:"sets",   ac:"c_source", grp:"meas", label:"Figure sets", sections: function(){
+      { k:"sets",   ac:"c_source", grp:"meas", label:"Figure sets", find:"figure sets owner claim source of figures numbers finance", sections: function(){
           return [{ k:"cfg",  ac:"c_sets",   label:"Sets configuration", render:renderSetsSetup },
                   { k:"fill", ac:"c_source", label:"Fill a figure set",
                     when: canPickSets,                                 render:renderSourceSetup }];
         } },
-      { k:"bands",  ac:"c_bands",  grp:"meas", label:"Scoring bands",        render:function(){ return renderBands() + renderBandsExtra(); } },
-      { k:"labels", ac:"c_labels", grp:"meas", label:"Labels",               render:renderLabels },
+      { k:"bands",  ac:"c_bands",  grp:"meas", label:"Scoring bands", find:"scoring bands green amber red threshold colours ranges",        render:function(){ return renderBands() + renderBandsExtra(); } },
+      /* TERMINOLOGY, NOT "LABELS" (§108.3). The page holds what THIS tenant
+         calls a pillar, a theme, an aspiration — its vocabulary, and the one
+         contract every other screen reads its words from. "Labels" is what a
+         developer calls that; to everybody else it sounds like stickers on a
+         chart. The key `c_labels` and the stored map are untouched. */
+      { k:"labels", ac:"c_labels", grp:"meas", label:"Terminology", find:"terminology rename wording vocabulary words naming pillar theme aspiration labels",          render:renderLabels },
 
       /* Last in Setup: it changes how everything else LOOKS, which is a thing
          you do once the things themselves exist (§39). */
-      { k:"brand",  ac:"c_brand",  grp:"look", label:"Branding",             render:renderBranding },
+      { k:"brand",  ac:"c_brand",  grp:"look", label:"Branding", find:"branding logo colour color mark palette theme look accent",             render:renderBranding },
       /* §72. In *How it looks* rather than a group of its own, and that is the
          argument rather than the leftover: an email leaves wearing the tenant's
          accent, the tenant's name and the tenant's footer, so what it looks
          like is the same subject Branding answers — one step further out, where
          the reader is not in the platform at all. */
-      { k:"comms",  ac:"c_comms",  grp:"look", label:"Communication",         render:renderComms }
+      /* EMAIL, NOT "COMMUNICATION" (§108.3). The third of the colliding three,
+         and the easiest to settle because the page is narrower than its name:
+         it sets the display name, the reply-to, the kicker and the footer of
+         what LEAVES the platform — an email, and nothing else. Naming it Email
+         is what lets "Send a message" and "Inbox" each mean one thing too. */
+      { k:"comms",  ac:"c_comms",  grp:"look", label:"Email", find:"email sender reply-to footer kicker display name outgoing from address",                 render:renderComms }
     ],
     /* ONE DESTINATION, NOT TWO (§47.7). Manage and Setup were split in §46.1
        because a flat menu of sixteen was doing two jobs — and that argument
@@ -30246,9 +30801,22 @@ var SYNC = (function () {
        label and its own answer to "may this person reach anything here"; they
        are concatenated into the setup list by defsFor(). */
     manage: [
-      /* FIRST, because it is the page you open before the others — and now
-         also because the gear lands on whichever def is `primary`. */
-      { k:"cycle",    ac:"c_cycle", grp:"cycle",  label:"Reporting cycle", primary:true, render:renderCycle },
+      /* ── WHERE THE GEAR LANDS (§108.10, spec 018) ─────────────────────
+         FIRST AND `primary`, taking both from Reporting cycle: the office's
+         first question on opening Setup is not "how is the cycle going" but
+         "is anything waiting on me", and until this page existed the answer
+         took a walk through five pages.
+
+         THE OFFICE'S, BY THE SAME `when` AS Send a message AND Inbox — the
+         page says "waiting on the office", so for anybody else it would be a
+         page about somebody else's work. It is not a matrix cell for the same
+         reason those two are not (§37, §89): reading everything outstanding
+         across the whole tenant is not a tick somebody could set on a bad
+         afternoon. A non-office viewer's gear falls through to `st[0]`, which
+         is Reporting cycle — where it landed before this page existed. */
+      { k:"overview", ac:"c_cycle", grp:"cycle",  label:"Overview", find:"waiting attention outstanding needs me summary home todo", primary:true,
+        when: inOffice,                                                 render:renderOverview },
+      { k:"cycle",    ac:"c_cycle", grp:"cycle",  label:"Reporting cycle", find:"open close due quarter period submit submissions progress reporting", render:renderCycle },
       /* ── WHERE THE OFFICE ANSWERS THE CORNER (§97.2) ──────────────────
          Second in the group, immediately under the cycle it is mostly about.
 
@@ -30260,33 +30828,61 @@ var SYNC = (function () {
          done here). `inOffice()` is the SMO team as well as the Super user, or
          the office would be one person deep on the one page that has to be
          answered the day somebody is on leave. */
-      { k:"chat",     ac:"c_chat",  grp:"cycle",  label:"Messages",
+      /* INBOX, NOT "MESSAGES" (§108.3). Three rows in this rail came out of one
+         word family — Messages (the office answering the corner), Send a message
+         (the broadcast composer) and Communication (what an email wears) — and a
+         name that could be any of the three is a name that identifies none of
+         them. "Inbox" says which one you answer; "Send a message" is left alone,
+         because it already says the other thing; "Communication" becomes Email.
+         HR_ERP settled exactly this collision — Announcements beside
+         Communications — the same way, by renaming until each name meant one
+         thing. The KEY stays `chat`, which is what the page def, the endpoint,
+         `GROUP.chat` and checks/office-chat.py all name. */
+      { k:"chat",     ac:"c_chat",  grp:"cycle",  label:"Inbox", find:"messages chat conversations questions replies feedback answer",
         when: function(){ return inOffice() && CHAT.servable(); },
         render:function(){ return CHAT.renderInbox(); } },
-      /* EDIT, NOT VIEW — the page IS the action (§48.2). `a_cycle` defaults to
-         `view` for every role, so gating the row on "not none" put Import in
-         the rail of a contributor, a unit owner, a custodian and a company
-         CEO. They could apply a file, watch the receipt say it worked, and
-         then have the server refuse the save. There is nothing to READ on this
-         page, so restriction is by removing it (§37) rather than trimming it. */
-      { k:"import",   ac:"c_import", grp:"cycle", label:"Import",
-        when: function(){ return grant("c_import") === "edit"; },        render:renderImport },
-      { k:"archives", ac:"c_import", grp:"cycle", label:"Archived plans",                 render:renderArchives },
-      { k:"focusset", ac:"c_focus", grp:"cycle",  label:"Focus measures",                render:renderFocusSetup },
+      /* §74. A DOING page, so it sits with the cycle rather than beside the
+         Email SETTINGS — and gated at edit for Import's reason (§48.2): there
+         is nothing to read on a composer, so a view grant would open a page
+         whose every control the server then refuses. */
+      { k:"send",     ac:"c_send", grp:"cycle",   label:"Send a message", find:"broadcast announce notify everyone email the team",
+        when: function(){ return inOffice(); },                          render:renderSendMessage },
+      { k:"focusset", ac:"c_focus", grp:"cycle",  label:"Focus measures", find:"focus watch highlight measures",                render:renderFocusSetup },
       /* Only for somebody who has actually been named on a figure. Its reach
          is not a setting (§16.7), so `when` hides it outright rather than the
          matrix answering "none" — a menu entry that opens an empty page is
          worse than no entry. */
+      { k:"myfig",    ac:"c_myfig", grp:"cycle",  label:"Figures I report", find:"figures i report my numbers named",
+        when: ownsAnySource,                                render:renderMySources },
+
+      /* ── ONE PAGE, TWO SECTIONS (§108.4) ──────────────────────────────
+         Import and Archived plans were two rails rows about ONE subject: a
+         plan arriving, and the plan it displaced. They are inseparable by
+         construction — §22 made importing an ARCHIVING act, so every visit to
+         one is a question about the other ("did that replace something?",
+         "put the old one back"). This is the shape Figure sets already settled
+         (§46.2): two halves of one subject, one entry, sections inside.
+
+         THE KEY STAYS `import`, and `archives` is the key that goes. Nothing
+         outside this list ever named it, while `import` is what the rail walk
+         and three checks click — so the merge costs no selector.
+
+         EACH SECTION KEEPS ITS OWN GATE, which is the whole reason this is
+         safe: §48.2 closed Import to anybody without `edit` because there is
+         nothing to READ on it, and that `when` moves onto the section rather
+         than being softened into the parent. paint() drops a def whose every
+         section is refused, so a view-only holder of c_import sees Archived
+         plans alone and somebody with neither sees no entry — exactly what the
+         two separate rows did, in one row. */
+      { k:"import",   ac:"c_import", grp:"cycle", label:"Plan import & archives", find:"upload excel xlsx spreadsheet template plan archive archived restore replace",
+        sections: function(){
+          return [{ k:"in",   ac:"c_import", label:"Import a plan",
+                    when: function(){ return grant("c_import") === "edit"; },
+                                                                        render:renderImport },
+                  { k:"arch", ac:"c_import", label:"Archived plans",    render:renderArchives }];
+        } },
       /* Last in its group: it explains the rest, so it is not where you start. */
-      /* §74. A DOING page, so it sits with the cycle rather than beside the
-         Communication SETTINGS — and gated at edit for Import's reason
-         (§48.2): there is nothing to read on a composer, so a view grant would
-         open a page whose every control the server then refuses. */
-      { k:"send",     ac:"c_send", grp:"cycle",   label:"Send a message",
-        when: function(){ return inOffice(); },                          render:renderSendMessage },
-      { k:"kb",       ac:"c_kb", grp:"cycle",     label:"Knowledge base",                render:renderKB },
-      { k:"myfig",    ac:"c_myfig", grp:"cycle",  label:"Figures I report",
-        when: ownsAnySource,                                render:renderMySources }
+      { k:"kb",       ac:"c_kb", grp:"cycle",     label:"Knowledge base", find:"help explain how documentation guide reference reasoning",                render:renderKB }
     ]
   };
 
@@ -30594,12 +31190,25 @@ var SYNC = (function () {
      other. */
   function setupDefs(){ return SUBS.manage.concat(SUBS.setup); }
 
+  /* THE GROUP NAMES ANSWER RATHER THAN ASK (§108.2). §46 named these as the
+     QUESTION you came to answer — "Who", "What we run", "How it's measured" —
+     and the argument was right about the grouping and wrong about the words:
+     a rail is scanned, not read, and at 9.5px uppercase a question reads a beat
+     slower than the answer to it. Four are renamed to the thing they hold;
+     "Running the cycle" is untouched, because it already names exactly what is
+     behind it and it is the one group the office lives in daily.
+
+     THE KEYS DO NOT MOVE. `cycle`/`who`/`run`/`meas`/`look` are what `grp` on
+     every def points at AND what the folded-state map is keyed by in
+     localStorage — renaming a key would silently unfold every group for
+     everybody who has ever touched one (§30.2). The label is the only thing
+     that changes here. */
   var SETUP_GROUPS = [
     { k:"cycle", label:"Running the cycle", note:"What you do while a cycle is open" },
-    { k:"who",  label:"Who",              note:"Who exists, and what may they touch" },
-    { k:"run",  label:"What we run",      note:"The things being planned" },
-    { k:"meas", label:"How it's measured", note:"What the numbers mean" },
-    { k:"look", label:"How it looks",     note:"What it wears" }
+    { k:"who",  label:"People & access",   note:"Who exists, and what may they touch" },
+    { k:"run",  label:"The organisation",  note:"The things being planned" },
+    { k:"meas", label:"Measurement",       note:"What the numbers mean" },
+    { k:"look", label:"Branding & email",  note:"What the tenant wears, in here and on the way out" }
   ];
 
   /* ══ THE RAIL COLLAPSES (§47.3) ═══════════════════════════════════
@@ -30645,6 +31254,74 @@ var SYNC = (function () {
     try { localStorage.setItem("smp.setup.groups", JSON.stringify(RAILSHUT)); } catch (e) {}
   }
 
+  /* ── THE QUERY LIVES HERE, NOT IN THE BOX (§108.13) ────────────────
+     TYPING MUST NEVER REPAINT (§35, §45.5), so the filter hides rows in place
+     and the input is never rebuilt while somebody is in it. But an UNRELATED
+     repaint can still arrive mid-word — the Overview's three fetches each end
+     in paint(), and they answer a second or so after the page opens, which is
+     exactly when somebody is typing. So the query is held here and rendered
+     back into the box, or the first answer to arrive would wipe it (§30.1's
+     family, and §63's "the word has to survive the redraw that reports it").
+
+     NOT in localStorage: a search is what you are doing, not how you like your
+     screen (§25, §47.1). It is cleared on navigation, because arriving
+     somewhere is the end of the errand and a rail still filtered afterwards is
+     a rail lying about what Setup holds. */
+  var RAILQ = "";
+
+  /* Applied over the DOM after every paint and on every keystroke. It decides
+     visibility ALONE while a query is live — fold state included — so there is
+     never a fight between a CSS fold and a JS filter over the same row. */
+  function railFilter(){
+    var rail = document.querySelector(".setuprail");
+    if (!rail) return;
+    var q = String(RAILQ || "").trim().toLowerCase();
+    var shown = 0, total = 0;
+    /* EVERY WORD MUST MATCH, in any order and anywhere — "reset password" and
+       "password reset" are the same errand, and somebody who types both words
+       means both. A single blob per row, so this never needs to know which
+       field a word came from. */
+    var words = q ? q.split(/\s+/) : [];
+    rail.querySelectorAll("[data-railitems]").forEach(function(box){
+      var k = box.dataset.railitems;
+      var head = rail.querySelector('.rgroup[data-railgrp="' + k + '"]');
+      var any = 0;
+      box.querySelectorAll(".ritem").forEach(function(it){
+        total++;
+        var hay = it.dataset.find || "";
+        var ok = !words.length || words.every(function(w){ return hay.indexOf(w) > -1; });
+        it.hidden = !ok;
+        if (ok) { any++; shown++; }
+      });
+      if (!words.length) {
+        /* BACK TO THE FOLD, not to "everything open". Clearing a search must
+           put the rail back exactly as it was found. */
+        box.hidden = !!(head && head.classList.contains("shut"));
+        if (head) head.hidden = false;
+        var gw0 = head && head.querySelector(".rgwait");
+        if (gw0) gw0.hidden = false;
+      } else {
+        /* A MATCH INSIDE A SHUT GROUP IS STILL A MATCH, so a live query opens
+           whatever holds one — and closes the groups holding none, heading and
+           all, because a heading over nothing is noise in a list this long. */
+        box.hidden = !any;
+        if (head) head.hidden = !any;
+        /* A SHUT GROUP OPENED BY A SEARCH SHOWS ITS ROWS, so its heading's
+           pill would repeat what those rows now say (§108.15). Restored by
+           the branch above the moment the query is cleared. */
+        var gw = head && head.querySelector(".rgwait");
+        if (gw) gw.hidden = true;
+      }
+    });
+    var none = rail.querySelector("[data-railnone]");
+    if (none) {
+      none.hidden = !(words.length && !shown);
+      if (!none.hidden) none.textContent = "Nothing in Setup matches \u201c" + q + "\u201d";
+    }
+    var x = rail.querySelector("[data-railqx]");
+    if (x) x.hidden = !q;
+  }
+
   function setupRail(defs, activeKey){
     if (!RAIL_OPEN) {
       return '<div class="rail setuprail shut">' +
@@ -30652,25 +31329,91 @@ var SYNC = (function () {
           'title="Show the Setup list" aria-label="Show the Setup list" ' +
           'aria-expanded="false">' + ICO_CHEV + '</button></div>';
     }
+    /* Asked ONCE for the whole rail rather than per row: every row would
+       otherwise re-run five counts, two of which walk the register (§108.15). */
+    var ATT = (typeof attentionByPage === "function") ? attentionByPage() : {};
     var rows = SETUP_GROUPS.map(function(g){
       var items = defs.filter(function(d){ return d.grp === g.k; });
       if (!items.length) return "";       /* a group with nothing in it is not a heading */
       var here = items.some(function(d){ return d.k === activeKey; });
       var shut = !!RAILSHUT[g.k] && !here;
+      var gwait = items.reduce(function(n, d){ return n + (ATT[d.k] || 0); }, 0);
+      /* THE FOLDED ITEMS STAY IN THE DOM (§108.14). They used to be omitted
+         entirely, which was fine while folding was the only thing that hid a
+         row — and impossible to search, because the filter runs over the DOM
+         and cannot reveal a row that was never rendered. Hiding is `hidden`
+         on the container now, so the fold is a STATE rather than an omission
+         and a match inside a shut group can be shown without a repaint (§35:
+         typing must never repaint).
+
+         `hidden` rather than a class, and set at RENDER time, or a shut group
+         would be visible for the frame between paint and wire. */
       return '<button type="button" class="rgroup' + (shut ? " shut" : "") +
           '" data-railgrp="' + g.k + '" title="' + esc(g.note) + '" ' +
           'aria-expanded="' + (!shut) + '">' +
           '<span class="rgtw" aria-hidden="true">' + (shut ? "\u25b8" : "\u25be") + '</span>' +
-          esc(g.label) + '<span class="rgn">' + items.length + '</span></button>' +
-        (shut ? '' : items.map(function(d){
-          return '<button type="button" class="ritem' + (d.k === activeKey ? " on" : "") +
-            '" data-setupgo="' + d.k + '">' + esc(d.label) + '</button>';
-        }).join(""));
+          esc(g.label) +
+          /* ONLY WHILE FOLDED, and that is not a detail: an open group's rows
+             carry their own pills, so a heading repeating their sum would be
+             the same number twice. Folded, the rows cannot speak, and this is
+             the only thing that can say something behind here needs you. */
+          (shut && gwait
+            ? '<span class="rgwait" title="' + gwait +
+              ' waiting behind this group">' + gwait + '</span>'
+            : '') +
+          /* The entry count KEEPS its job and its quiet shape. The audit's
+             complaint was that it wore the shape of a number that changes
+             while never changing — answered by giving the changing number a
+             different shape, not by taking this one away: folded, it is the
+             only thing that says how much is behind the heading. */
+          '<span class="rgn">' + items.length + '</span></button>' +
+        '<div class="rgitems" data-railitems="' + g.k + '"' + (shut ? " hidden" : "") + '>' +
+          items.map(function(d){
+            var w = ATT[d.k] || 0;
+            return '<button type="button" class="ritem' + (d.k === activeKey ? " on" : "") +
+              '" data-setupgo="' + d.k + '" data-find="' +
+              esc(((d.label || "") + " " + (d.find || "") + " " + g.label).toLowerCase()) +
+              '"><span class="rilab">' + esc(d.label) + '</span>' +
+              /* NEVER A ZERO (§108.10, and HR_ERP's own rule): a row with
+                 nothing waiting carries no pill at all, so the pill means one
+                 thing and reads at a glance. */
+              (w ? '<span class="riwait" title="' + w +
+                   ' waiting on this page">' + w + '</span>' : '') +
+              '</button>';
+          }).join("") + '</div>';
     }).join("");
+    /* THE LIST SCROLLS, THE HEAD DOES NOT (§108.5). The rows go inside their
+       own container so the rail can be capped to the window and still keep
+       "Setup" and the collapse control on screen — see the note in config.css
+       for why a max-height is safe here and was not in v2.8. */
+    /* ── FINDING A SETTING BY THE ERRAND (§108.13) ────────────────────
+       Eighteen entries is past the size where scanning beats typing, and some
+       errands do not know their page at all: "where do I change the logo" is
+       Branding, "where do I reset a password" is the People register. So each
+       row carries the words somebody would actually type, in `find` on the def
+       beside its label — one list, so a rename cannot orphan them (§108.3
+       renamed three pages in an afternoon).
+
+       IN THE HEAD, NOT IN THE LIST, so it cannot scroll away from the list it
+       filters — §108.5 capped that list to the window, and a search box that
+       leaves the screen when you scroll to read your own results is a control
+       below the fold by another road (§90). */
     return '<div class="rail setuprail"><div class="rhead">Setup' +
       '<button type="button" class="railtog" data-railtog="0" ' +
         'title="Hide the Setup list" aria-label="Hide the Setup list" ' +
-        'aria-expanded="true">' + ICO_CHEV + '</button></div>' + rows + '</div>';
+        'aria-expanded="true">' + ICO_CHEV + '</button></div>' +
+      '<div class="railfind">' +
+        '<input type="search" class="railq" data-railq="1" autocomplete="off" ' +
+          'placeholder="Find a setting\u2026" aria-label="Find a setting" ' +
+          'value="' + esc(RAILQ) + '">' +
+        '<button type="button" class="railqx" data-railqx="1" title="Clear the search" ' +
+          'aria-label="Clear the search"' + (RAILQ ? "" : " hidden") + '>\u00d7</button>' +
+      '</div>' +
+      '<div class="raillist">' + rows +
+        /* SAYING NO IS THE LIST'S JOB TOO (§45.2, §108.10): a rail that empties
+           itself reads as a rail that broke, so it says what was searched for. */
+        '<div class="railnone" data-railnone="1" hidden></div>' +
+      '</div></div>';
   }
 
   function menuGroups(){
@@ -31476,8 +32219,38 @@ var SYNC = (function () {
     document.querySelectorAll("[data-railtog]").forEach(function(b){
       b.addEventListener("click", function(){ setRailOpen(b.dataset.railtog === "1"); paint(); });
     });
+    /* ── THE RAIL'S SEARCH (§108.13) ────────────────────────────────
+       `input` filters and NEVER paints, so the caret is never disturbed and a
+       half-typed word is never thrown away (§35). Re-applied at the end of
+       every paint below, so a repaint arriving mid-errand restores the filter
+       rather than silently showing everything again. */
+    document.querySelectorAll("[data-railq]").forEach(function(inp){
+      inp.addEventListener("input", function(){ RAILQ = inp.value; railFilter(); });
+      /* ESCAPE CLEARS, and only clears — it must not also close the rail or
+         leave the page, because the one thing somebody wants after a search
+         that found nothing is the list back. */
+      inp.addEventListener("keydown", function(e){
+        if (e.key !== "Escape") return;
+        e.stopPropagation();
+        if (!RAILQ) return;
+        RAILQ = ""; inp.value = ""; railFilter();
+      });
+    });
+    document.querySelectorAll("[data-railqx]").forEach(function(b){
+      b.addEventListener("click", function(){
+        RAILQ = "";
+        var inp = document.querySelector("[data-railq]");
+        if (inp) { inp.value = ""; inp.focus(); }
+        railFilter();
+      });
+    });
+
     document.querySelectorAll("[data-setupgo]").forEach(function(b){
       b.addEventListener("click", function(){
+        /* ARRIVING IS THE END OF THE ERRAND. A rail still filtered after you
+           have landed is a rail telling you Setup holds four things (§108.13).
+           Cleared before paint(), so the box below is rendered empty. */
+        RAILQ = "";
         /* CALLS leaveModes() RATHER THAN REPEATING THREE OF ITS LINES.
            This was a copy of part of it, and a partial copy is worse than none:
            every mode added since — the open row, the composed message, the
@@ -32970,7 +33743,7 @@ var SYNC = (function () {
         ADDROLE = b.dataset.proleOpen; ADDROLE_KIND = ""; ROLESTOP = null; paint();
       });
     });
-    /* ── THE ROLE LANDS WHERE THE UNIT CELL ALREADY SAYS (§108) ──────
+    /* ── THE ROLE LANDS WHERE THE UNIT CELL ALREADY SAYS (§110) ──────
        There is no second dropdown any more. The picker's other half asked a
        question the Unit cell had already answered and then wrote its own answer
        into that same cell (see roleCell in config-render.js); one control is
@@ -32986,7 +33759,7 @@ var SYNC = (function () {
        place the person is in is on it, which keeps one definition (§42) and
        makes a role added later correct here on the day it is added. */
     /* ── AND IT IS TRIED AGAIN WHEN THE UNIT CHANGES ────────────────
-       Found by a check, and it is the same family of fault as the one §108
+       Found by a check, and it is the same family of fault as the one §110
        started from. A refused pick leaves the picker open — which is right, so
        the Unit can be set and the role taken again — but the role select is
        still SHOWING that role, so picking it a second time fires no `change` at
@@ -33071,7 +33844,7 @@ var SYNC = (function () {
         var p = personBy(sel.dataset.pat);
         if (!p) return;
         attachPersonAt(p, sel.value || null);
-        /* THE OTHER HALF OF "EITHER ORDER" (§108). If a role is picked and
+        /* THE OTHER HALF OF "EITHER ORDER" (§110). If a role is picked and
            standing refused on this row, moving the person is the answer it was
            waiting for — so it is taken now, rather than leaving somebody to
            re-pick a role the select is already showing. Only while a refusal is
@@ -33291,7 +34064,7 @@ var SYNC = (function () {
       });
     });
 
-    /* ── PUTTING THE CURSOR IN A FIELD MUST NOT MOVE THE ROW (§108) ──
+    /* ── PUTTING THE CURSOR IN A FIELD MUST NOT MOVE THE ROW (§110) ──
        Islam: "once I open the edit of a line the line jumps to the first line,
        that is the wrong behaviour."
 
@@ -33351,7 +34124,7 @@ var SYNC = (function () {
         focusNoScroll(document.querySelector(".tk-firstfield"));
       });
     });
-    /* LEAVING THE ROW TAKES THE PICKER WITH IT (§108). `ADDROLE` and
+    /* LEAVING THE ROW TAKES THE PICKER WITH IT (§110). `ADDROLE` and
        `ROLESTOP` are both properties of one open row, and neither was being
        cleared when the row closed — so a refusal answered by pressing Cancel
        came back the next time that row was opened, about a pick nobody had just
@@ -34014,9 +34787,23 @@ var SYNC = (function () {
        threw, nothing was logged, and the passwords themselves were never
        touched — `credentials` is its own table outside the state graph (§19).
 
-       KEYED ON THE TABLE NOW, which is the thing that is actually there when
-       this is worth asking. */
-    var onRegister = !!document.querySelector(".peoplecfg");
+       KEYED ON THE PAGE NOW, NOT ON ITS MARKUP (§108.11). §93.2 keyed it on
+       `.peoplecfg`, the register's table — better than the pen it replaced,
+       and still the same KIND of thing: a class name, which a restyle can
+       retire without anything failing. It asks the two pages that want the
+       answer by NAME, which is data rather than markup and cannot silently
+       stop matching. The Overview joins the list because it counts these two
+       facts (§108.10) — and gating it on the register's markup would have
+       given it a permanent, silent null, which draws no row: this exact fault
+       twice already, and in the safe-looking direction both times. */
+    /* THE FILTER IS RE-APPLIED AFTER EVERY PAINT, or a repaint that arrives
+       while somebody is reading their own results would quietly show them the
+       whole list again (§108.13). The box's value is rendered from RAILQ, so
+       the two can never disagree. */
+    railFilter();
+
+    var WANTS_PEOPLE_FACTS = { people:1, overview:1 };
+    var onRegister = !!WANTS_PEOPLE_FACTS[currentSub];
     if (PWSTATES === null && onRegister &&
         typeof SYNC !== "undefined" && SYNC.isLive() && inOffice()) {
       PWSTATES = {};
@@ -34037,8 +34824,28 @@ var SYNC = (function () {
         typeof SYNC !== "undefined" && SYNC.isLive() && inOffice()) {
       SAIDWHERE = {};
       SYNC.declarations(function(err, said){
-        if (err) return;
+        /* AND IT SAYS SO NOW TOO (§108.11). This was `if (err) return`, which
+           leaves SAIDWHERE as {} — "asked, and nobody declared anything" —
+           the exact shape §93 removed from the passwords beside it and did not
+           come back for. It costs the register nothing (a note per row, absent
+           either way) and it costs the Overview a false all-clear, which is
+           the one thing that page must never give. */
+        if (err) { SAIDWHERE = { __error: String(err.message || err) }; return; }
         SAIDWHERE = said;
+        paint();
+      });
+    }
+    /* ── AND WHAT THE INBOX IS HOLDING (§108.10) ─────────────────────
+       Asked only on the Overview, because the Inbox counts its own queue when
+       it is open and the corner has its own cadence (§98.1) — a third asker
+       polling in the background is what §98 was about. Once per visit: this is
+       a summary somebody reads and then acts on, not a live board. */
+    if (OVQUEUE === null && currentSub === "overview" &&
+        typeof CHAT !== "undefined" && CHAT.servable && CHAT.servable() && inOffice()) {
+      OVQUEUE = {};
+      CHAT.officeQueue(function(err, q){
+        if (err || !q) { OVQUEUE = { __error: String((err && err.message) || err || "no answer") }; return; }
+        OVQUEUE = q;
         paint();
       });
     }

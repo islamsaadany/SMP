@@ -406,141 +406,10 @@
                        border-top:1px solid var(--line-soft);
                        border-bottom:1px solid var(--line-soft); }
   .setuprail .rgroup:first-of-type { border-top:0; }
-
-  /* ══ THE RAIL FITS THE WINDOW (§108.5) ════════════════════════════
-     Islam, on the makeover: "would the rail stay fit to the window with an
-     internal scroll down?" — and it did not. Measured before touching it, as
-     the SMO with every group open: the rail is 984px tall and pins 128px from
-     the top, so it hangs 112px below a 1000px window, 212px below a 900px one
-     and 312px below an 800px one. What falls off the bottom is Branding and
-     Email — and a control below the fold is a control that does nothing, which
-     is §90's fault by the one road §90 did not walk.
-
-     THE CAP IS SAFE HERE, AND §28.3 SAYS IT WOULD NOT BE. That rule — "the
-     sticky OFFSET may read --chrome-h, a max-height never may" — was written
-     against v2.8's oscillation, where the loop ran measured chrome height →
-     rail height → page height → scroll clamp → header CONDENSE → measured
-     chrome height. The condense was deleted in v3.3, so the loop is broken at
-     a link and not merely argued away: --chrome-h is now a constant (measured:
-     73px, identical at 1000, 900 and 800px tall). Nothing above the rail moves
-     when the rail gets shorter, which is exactly the test §100.5 applied to
-     the office's inbox a version ago and the same conclusion.
-
-     THE HEAD STAYS, THE LIST SCROLLS. Capping the whole rail and letting it
-     scroll as one would carry "Setup" and the collapse control off the top,
-     so the rows sit in `.raillist` and only that scrolls. `min-height:0` on it
-     is load-bearing: a flex child refuses to shrink below its content without
-     it, and the cap would be pushed back out by the content it is capping.
-
-     THE NUMBER IS THE PINNED OFFSET, AND THE PROTOTYPE SITS 33px LOWER. This
-     file carries the yellow "Prototype · group shape" banner ABOVE the chrome,
-     so at scroll 0 the rail's flow position is 128px while its sticky pin is
-     95px — measured, and it is the banner's own height. The cap is written
-     against the PIN, because that is where the rail spends its life and where
-     a real deployment (which has no banner) puts it at scroll 0 as well. The
-     cost is 13px of the rail below the fold at scroll 0 in the prototype only,
-     and it is self-correcting: the banner is itself 33px of scrollable page,
-     so the scroll that hides it is always available and pins the rail. Sizing
-     against the flow position instead would need JS and would waste 33px of
-     rail forever on every screen, to fix a state that lasts one scroll. */
-  .setuprail { display:flex; flex-direction:column; overflow:hidden;
-               max-height:calc(100dvh - var(--chrome-h, 118px)
-                                      - var(--rail-gap, 22px) - 20px);
-               /* Below this it stops shrinking and the page scrolls instead —
-                  §100.5's floor, for the same reason: a rail squeezed into a
-                  few rows is not navigation, and a window that short is
-                  somebody's split view rather than their screen. */
-               min-height:260px; }
-  .setuprail .rhead { flex:none; }
-
-  /* ══ FINDING A SETTING (§108.13) ═══════════════════════════════════
-     IN THE HEAD, ABOVE THE SCROLLING LIST, and `flex:none` for the same reason
-     `.rhead` is: §108.5 caps `.raillist` to the window, so anything that must
-     stay reachable while the list scrolls has to sit outside it. A search box
-     that scrolls away from its own results is §90's control-below-the-fold by
-     another road. */
-  .setuprail .railfind { flex:none; position:relative; padding:8px 10px 9px;
-                         border-bottom:1px solid var(--line); }
-  .setuprail .railq { width:100%; box-sizing:border-box; font:400 12.5px/1.3 var(--sans);
-                      color:var(--ink); background:var(--ground);
-                      border:1px solid var(--line); border-radius:var(--r-sm);
-                      padding:6px 26px 6px 9px; }
-  .setuprail .railq::placeholder { color:var(--ink-3); }
-  .setuprail .railq:focus { outline:none; border-color:var(--gold);
-                            box-shadow:0 0 0 2px var(--accent-glow); }
-  /* The browser's own clear affordance is inconsistent across engines and
-     invisible in dark mode on some, so the product draws its own and hides
-     theirs — one control, behaving the same everywhere. */
-  .setuprail .railq::-webkit-search-cancel-button { display:none; }
-  .setuprail .railqx { position:absolute; right:16px; top:50%; transform:translateY(-50%);
-                       background:none; border:0; cursor:pointer; line-height:1;
-                       font-size:15px; color:var(--ink-3); padding:2px 4px; }
-  .setuprail .railqx:hover { color:var(--ink); }
-  .setuprail .railqx:focus-visible { outline:2px solid var(--gold); outline-offset:1px; }
-  /* A rail that empties itself reads as a rail that broke (§45.2, §108.10). */
-  .setuprail .railnone { padding:14px 13px; color:var(--ink-3);
-                         font:400 12px/1.5 var(--sans); }
-
-  .setuprail .raillist { overflow-y:auto; min-height:0;
-                         /* A visible track rather than an overlay one: on macOS
-                            a scrollbar that only appears once you are already
-                            scrolling cannot tell you that scrolling is possible. */
-                         scrollbar-width:thin;
-                         scrollbar-color:var(--line) transparent; }
-
-  /* ── AND IT NEVER SAYS "IT ENDS HERE" (§108.6, answering §100.5) ──────
-     §100.5 refused to cap this rail six days ago, and its reason was not
-     §28.3's loop — it was that "a list that says it ends here when it does not
-     is worse than a page that scrolls." That objection is right, and it is
-     about the AFFORDANCE rather than the cap: a capped list with no sign of
-     more below is a list that lies. So the cap comes with the sign.
-
-     A STICKY PSEUDO-ELEMENT, WHICH GETS OUT OF ITS OWN WAY. `::after` is the
-     last box in the scroller's flow, so `position:sticky; bottom:0` holds it
-     against the bottom edge while there is content beneath — and at the end of
-     the scroll it comes to rest AFTER the last row, where it has nothing left
-     to cover. That is the whole trick: it is true exactly when it is showing,
-     and it needs no JS, no scroll listener and no measurement to know it.
-
-     IT COSTS ITS OWN HEIGHT, AND TRYING NOT TO BROKE IT. The first build
-     carried `margin-top:-22px` to give that height back, on the reasoning that
-     a fade must not push the last row out of reach. It does the opposite: the
-     negative margin takes 22px off the SCROLLABLE height, so the list could no
-     longer scroll far enough to reach its own end — the check named the last
-     five entries (Figure sets, Scoring bands, Terminology, Branding, Email) as
-     unreachable, which is precisely the fault this element exists to prevent,
-     arriving by the other road. The 22px is real and is paid: at the foot of
-     the scroll there is a fade's worth of blank under the last row, and the
-     last row is reachable. */
-  .setuprail .raillist::after {
-    content:""; display:block; position:sticky; bottom:0; z-index:1;
-    height:22px; pointer-events:none;
-    background:linear-gradient(to top, var(--surface), rgba(0,0,0,0)); }
-  /* FLEX SO A PILL CAN SIT AT THE END. The padding and the type are unchanged,
-     so a row without a pill is the row it always was (§108.15). */
-  .setuprail .ritem { display:flex; align-items:center; gap:8px;
-                      width:100%; text-align:left; background:none;
+  .setuprail .ritem { display:block; width:100%; text-align:left; background:none;
                       border:0; border-bottom:1px solid var(--line-soft);
                       padding:8px 13px; cursor:pointer;
                       font:500 13px/1.35 var(--sans); color:var(--ink-2); }
-  .setuprail .rilab { min-width:0; }
-  /* ── THE PILLS (§108.15) ──────────────────────────────────────────
-     THE ACCENT, AND ONE OF THE FEW SOLID FILLS IN THE PRODUCT (§41's budget).
-     It is spent here because the pill has exactly one meaning — something is
-     waiting — and it is never drawn for a zero, so a lit rail row is always
-     true. `--gold` on `--on-accent` is the pair declared for a filled accent,
-     so this cannot become white-on-gold (§38.4, six times). */
-  .setuprail .riwait, .setuprail .rgwait {
-      margin-left:auto; flex:none; background:var(--gold); color:var(--on-accent);
-      font:800 10px/1 var(--sans); letter-spacing:0; font-variant-numeric:tabular-nums;
-      min-width:17px; text-align:center; border-radius:99px; padding:3px 5px; }
-  /* SMALLER ON A HEADING, and that is not decoration: the heading is 9.5px
-     uppercase at .14em, so a row-sized pill beside it pushed "People & access"
-     onto a second line and made a folded group taller than an open row. The
-     heading also stops wrapping, or the pill can never be safe. */
-  .setuprail .rgroup { flex-wrap:nowrap; }
-  .setuprail .rgwait { margin-left:auto; margin-right:5px;
-                       font-size:9px; min-width:14px; padding:2px 4px; }
   .setuprail .ritem:hover { background:var(--surface-2); color:var(--ink); }
   .setuprail .ritem.on { background:var(--surface-2); color:var(--ink); font-weight:650;
                          box-shadow:inset 3px 0 0 var(--gold); }
@@ -563,81 +432,10 @@
   .setuppane .secrow button:focus-visible { outline:2px solid var(--gold); outline-offset:2px; }
   @media (max-width:900px){
     .setupsplit { grid-template-columns:1fr; }
-    /* THE CAP COMES OFF WHERE THE RAIL IS NOT A RAIL (§108.5). Below 900px the
-       split stacks and this becomes a wrapping band ABOVE the page rather than
-       a column beside it — so it is no longer competing with the window for
-       height, and capping it would put a second scroll inside a page that is
-       already scrolling. `flex-direction:row` is restored explicitly: the base
-       rule turns it into a column, and inheriting that here would stack every
-       row full-width down the screen. */
-    .setuprail { display:flex; flex-direction:row; flex-wrap:wrap;
-                 max-height:none; min-height:0; overflow:visible; }
+    .setuprail { display:flex; flex-wrap:wrap; }
     .setuprail .rhead { width:100%; }
     .setuprail .rgroup { width:100%; }
-    .setuprail .raillist { display:contents; }
   }
-
-  /* ══ SETUP · OVERVIEW (§108.10) ═══════════════════════════════════
-     The page the gear lands on: one strip saying how the cycle is going, and
-     a list of what is waiting on the office.
-
-     IT BORROWS `.fstrip`'s VOCABULARY WITHOUT BORROWING `.fstrip` — the same
-     ground, the same header rule, the same `.badge` chips, because this is
-     the Reporting cycle's own numbers and two different-looking versions of
-     one strip is how a summary stops reading as a summary (§B5). What it does
-     NOT borrow is the layout: `.fstrip` is a card with a titled head and a
-     body, and this is one row that ends in a way through. */
-  .ovcycle { display:flex; align-items:center; gap:22px; flex-wrap:wrap;
-             background:var(--surface); border:1px solid var(--line);
-             border-radius:var(--r); padding:14px 18px; margin:0 0 22px; }
-  .ovcyc-name { font:700 13.5px/1.3 var(--sans); color:var(--ink);
-                display:flex; align-items:center; gap:9px; }
-  .ovcyc-meta { color:var(--ink-3); font-size:12px; margin-top:3px; }
-  /* THE NUMBER IS THE SERIF ONE THE CYCLE PAGE USES, at the size a summary
-     wants rather than the size the page it summarises wants. */
-  .ovcyc-n { display:flex; align-items:baseline; gap:7px; font-family:var(--serif);
-             margin-left:auto; }
-  .ovcyc-n b { font-size:27px; font-weight:400; color:var(--ink); }
-  .ovcyc-n span { font-size:13px; color:var(--ink-3); font-family:var(--sans); }
-  .ovcyc-chips { display:flex; gap:7px; flex-wrap:wrap; }
-  .ovcyc-go { white-space:nowrap; }
-
-  .ovh { font:700 10.5px/1 var(--sans); letter-spacing:.11em; text-transform:uppercase;
-         color:var(--ink-2); margin:0 0 8px; display:flex; align-items:center; gap:10px; }
-  .ovh::after { content:""; flex:1; height:1px; background:var(--line); }
-
-  /* A ROW IS A DOOR, SO IT IS A BUTTON. Each one names something outstanding
-     and goes to the page that fixes it — never a page that merely mentions it
-     (§16.7's rule, applied to a notice rather than to a refusal). */
-  .ovlist { border:1px solid var(--line); border-radius:var(--r);
-            background:var(--surface); overflow:hidden; }
-  .ovrow { display:flex; align-items:center; gap:11px; width:100%; text-align:left;
-           background:none; border:0; border-top:1px solid var(--line-soft);
-           padding:11px 15px; cursor:pointer; font:500 13px/1.4 var(--sans);
-           color:var(--ink); }
-  .ovrow:first-child { border-top:0; }
-  .ovrow:hover { background:var(--surface-2); }
-  .ovrow:focus-visible { outline:2px solid var(--gold); outline-offset:-2px; }
-  /* THE MARK IS LIT, BECAUSE EVERY ROW HERE IS SOMETHING OUTSTANDING — there
-     is no quiet state to distinguish it from, so the accent is carrying the
-     one meaning it has on this page. It stays inside §41's budget: a 24px
-     square, and the page draws no other fill. */
-  .ovico { width:24px; height:24px; border-radius:var(--r-sm); flex:none;
-           display:grid; place-items:center; font-size:12px;
-           background:var(--attn-bg); color:var(--attn-tx); }
-  .ovtext { min-width:0; }
-  .ovto { margin-left:auto; flex:none; font:700 11.5px/1 var(--sans);
-          color:var(--gold-deep); white-space:nowrap; }
-  .ovrow:hover .ovto { text-decoration:underline; }
-
-  /* SAYING NO IS THE PAGE'S JOB TOO (§45.2 turned round): a page that exists
-     to report whether anything is waiting must be able to report that nothing
-     is, or an absent list reads as a list that failed to load. */
-  .ovquiet { border:1px solid var(--line); border-radius:var(--r);
-             background:var(--surface); padding:16px 18px;
-             display:flex; flex-direction:column; gap:4px; }
-  .ovquiet b { font-size:13.5px; color:var(--ink); }
-  .ovquiet span { font-size:12.5px; color:var(--ink-3); line-height:1.5; }
 
   /* ══ FILL A FIGURE SET: THE FLAT TABLE (§46.5) ════════════════════ */
   .srctools { display:flex; flex-wrap:wrap; gap:8px; align-items:center; margin:0 0 12px; }
@@ -826,35 +624,11 @@
   /* And the input is bounded BY the cell rather than by a number of its own,
      so the two can never disagree about where the column ends. */
   .peoplecfg td.namecell input.fld { max-width:100%; box-sizing:border-box; }
-  /* ── AND EVERY OTHER FIELD IN AN OPEN ROW, WHICH `max-width` COULD NOT
-     DO (§110) ──────────────────────────────────────────────────────────
-     Islam, with a screenshot of an open row: "the boxes are overflowing on each
-     other." Measured at 1440: the Job title field is 170px in a 158px cell and
-     paints 21px over its neighbour, Email 11px, Official BU 1px — an `<input>`
-     with no size takes about 170px of intrinsic width and `overflow:visible`
-     (§93.10, kept on purpose so a control is never cut off) lets it spill.
-
-     `max-width:100%` DOES NOTHING HERE, and that is the trap worth recording:
-     a percentage resolves against the containing block, which under
-     `table-layout:auto` is a width the cell has not settled yet — so the
-     browser treats it as `none`. §93.10 met the same wall from the other side
-     and wrote down that "a px cap computed correctly and changed nothing on
-     screen"; measured again here, a px cap still moves nothing. `width:100%`
-     does, because a definite width makes the field stop CONTRIBUTING its
-     intrinsic size to the column in the first place — and `min-width:0` is what
-     lets it, since a form control's automatic minimum size is otherwise its
-     intrinsic width and would hold the column open by another road.
-
-     THE MEASURE IS THAT NOTHING MOVES, not that nothing overflows. Every
-     content column now holds exactly its closed width when a row opens — Name
-     216, Job title 150, Unit 150, Roles 227, all +0, where before the table
-     grew 188px the moment a pen was pressed. The one column that still widens
-     is the actions column (49 → 133px), which is Save and Cancel replacing the
-     ⋮; it is the LAST column and it is frozen, so nothing to its left moves.
-     §93.10's promise, kept for the first time. */
-  .cfg table tr.tk-open td input.fld,
-  .cfg table tr.tk-open td textarea.fld {
-    width:100%; min-width:0; box-sizing:border-box; }
+  /* AND EVERY OTHER FIELD IN AN OPEN ROW, for the same reason (§93.10): bounded
+     BY the cell rather than by a number of its own, so the two can never
+     disagree about where the column ends. It is what kept the name column
+     honest since §69 and was never extended to the rest of the row. */
+  .peoplecfg tr.tk-open input.fld { max-width:100%; box-sizing:border-box; }
   /* THE OFFSET IS A MEASUREMENT, SO THE WIDTH HAS TO BE ONE TOO. `left` for
      the second frozen column must equal the first one's rendered BORDER-BOX
      width, and under `table-layout:auto` a `width` is a suggestion the browser
@@ -1209,20 +983,18 @@
                            color:var(--ink-2); }
   .hmenu-panel.pwset .cq b { color:var(--ink); font-weight:700; }
 
-  /* ── The role picker: one dropdown, and why a pick did not land (§110)
-     `select.rolewhere` and `.rolewhy` were the second half's, deleted with it
-     (§24) — the Unit cell answers where, and the widths those two needed were
-     the whole reason this block existed.
+  /* ── The role picker, one half per column (§69) ──────────────────
+     Both are bounded. A `select.fld` in this table is `width:100%` with no
+     intrinsic minimum, so under the auto layout the register uses it claims
+     the whole box and crushes the name columns — measured at 920px before this
+     existed. The Unit column's is the narrower of the two: it holds a unit
+     name, where the Roles one holds "Strategy custodian".
 
-     THE REFUSAL WRAPS, AND IT HAS TO SAY SO OUT LOUD. `.cfg table td` is
-     `white-space:nowrap` (§88), which is right for a value and wrong for a
-     sentence — left alone it would run the sentence off the side of the cell,
-     which is precisely the fault §110 came from. Bounded at 230px so it cannot
-     hold the Roles column open either: `td.roles` is one of §88's exemptions
-     (`max-width:none`), so nothing above it would stop it. */
-  .rolestop { display:block; margin:6px 0 0; max-width:230px;
-              white-space:normal; font-size:11.5px; line-height:1.4;
-              color:var(--bad); }
+     The two widths themselves are NOT here: `.cfg .unitcfg select.fld` in
+     arrange.css is (0,3,1) and later in the concatenation, so it beats
+     anything this file can say about them. They live beside it (§69). */
+  .peoplecfg select.rolewhere { margin-top:5px; }
+  .peoplecfg .rolewhy { display:block; margin:5px 0 0; }
   /* The two collective actions, side by side and plainly different weights. */
   .bulkrow { display:flex; flex-wrap:wrap; gap:10px; margin:12px 0 0; }
   .bulkrow button { display:inline-flex; align-items:center; gap:8px; }

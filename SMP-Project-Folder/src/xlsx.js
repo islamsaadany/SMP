@@ -805,6 +805,9 @@ function progressFromWorkbook(u, sheets){
 var DELIV_KINDS = ["Delivered / not", "% delivered"];
 var TIMELINES = ["Quarters", "Dates"];
 var MS_STATUSES = ["Not started", "In progress", "Completed"];
+/* The same three states, one word apart: a deliverable is DELIVERED where a
+   milestone is COMPLETED, and that difference is right (§104). */
+var MS_STATUSES_D = ["Not started", "In progress", "Delivered"];
 
 /* ONE NAMING IN THE FILE (§51.19, Islam: "I don't think we should have the
    capability file with 2 namings capability and function. we can just upload
@@ -833,6 +836,7 @@ function capReadme(kind, capNames, picked){
        ["Dropdowns", "Direction, Compile, Kind, Timeline and the Project columns are lists. Unit suggests rather than insists: type your own if it is not offered."],
        ["Owners", "Type the person's name."],
        ["Targets", "The number in Target, the unit beside it \u2014 12 and d, not \"12 d\". A blank target is allowed: the outcome is recorded and left unscored."],
+       ["Milestone due dates", "A month and a year \u2014 July 2026. A STATUS is not a due date: Done and Pending belong in the reporting cycle, not here. A quarter or a full date is still read, so a file written earlier still uploads; anything that is not a time at all is saved as entered and said out loud on upload."],
        ["Milestone dates", "A milestone may finish after its project ends. It is saved exactly as entered and said out loud, never refused."],
        ["Blank rows", "Ignored."],
        ["Codes", "There are none to type. The platform assigns every code itself when the file arrives."],
@@ -893,20 +897,23 @@ function capPlanWorkbook(c){
        deliverable is delivered when the project ends, and the project's owner
        is the project's. A column the platform no longer reads is worse than
        no column — somebody fills it in and nothing happens. */
-    { name:"Deliverables", widths:[34, 52, 18],
-      head:["Project", "Deliverable", "Kind"],
+    { name:"Deliverables", widths:[34, 60],
+      /* §104.8: NO DUE DATE COLUMN, and no Kind either. A deliverable's
+         direction and target are written by the platform, and Islam took the
+         date off the templates "for now" -- the field survives in the model
+         and nothing asks for it, so every deliverable is simply always asked,
+         which is what the product did before §104 put the date back. */
+      head:["Project", "Deliverable"],
       validations:[{ range:"A2:A400", from:PROJECT_RANGE,
                      error:"Choose a project from the Projects sheet." },
                    { range:"C2:C400", list:DELIV_KINDS }],
       rows:(c.projects || []).reduce(function(acc, p){
-        (p.deliverables || []).forEach(function(d){
-          acc.push([p.name, d.name, d.kind === "pct" ? "% delivered" : "Delivered / not"]);
-        });
+        (p.deliverables || []).forEach(function(d){ acc.push([p.name, d.name]); });
         return acc;
       }, []) },
 
     { name:"Outcomes", widths:[34, 44, 11, 12, 12, 14],
-      head:["Project", "Outcome", "Direction", "Target", "Unit", "Measure date"],
+      head:["Project", "Outcome", "Direction", "Target", "Unit", "Due date"],
       numCols:[3],
       validations:[{ range:"A2:A400", from:PROJECT_RANGE,
                      error:"Choose a project from the Projects sheet." },
@@ -921,7 +928,7 @@ function capPlanWorkbook(c){
       }, []) },
 
     { name:"Milestones", widths:[34, 38, 52, 16, 14],
-      head:["Project", "Milestone", "What it covers", "Owner", "Due date"],
+      head:["Project", "Milestone", "Description", "Owner", "Due date"],
       validations:[{ range:"A2:A400", from:PROJECT_RANGE,
                      error:"Choose a project from the Projects sheet." }],
       rows:(c.projects || []).reduce(function(acc, p){
@@ -944,12 +951,16 @@ function capProgressWorkbook(c){
                 m.actual == null ? "" : String(m.actual), "", m.id];
       }) },
 
-    { name:"Deliverables", widths:[30, 44, 18, 18, 18, 16], lockedCols:[5],
-      head:["Project", "Deliverable", "Kind", "Currently recorded", "New value", "ID"],
+    /* §104: a status and a per-cent, the pair the Milestones sheet has always
+       had. "New %" is read only for In progress -- the word decides the
+       figure at both ends, and a per-cent behind "Delivered" is a number
+       nobody can see. */
+    { name:"Deliverables", widths:[30, 48, 18, 18, 12, 16], lockedCols:[5],
+      head:["Project", "Deliverable", "Current status", "New status", "New %", "ID"],
+      validations:[{ range:"D2:D400", list:MS_STATUSES_D }],
       rows:(c.projects || []).reduce(function(acc, p){
         (p.deliverables || []).forEach(function(d){
-          acc.push([p.name, d.name, d.kind === "pct" ? "% delivered" : "Delivered / not",
-                    d.actual == null ? "" : String(d.actual), "", d.id]);
+          acc.push([p.name, d.name, delivStatusWord(d.status), "", "", d.id]);
         });
         return acc;
       }, []) },
@@ -964,12 +975,13 @@ function capProgressWorkbook(c){
         return acc;
       }, []) },
 
-    { name:"Milestones", widths:[30, 40, 14, 16, 18, 16], lockedCols:[5],
-      head:["Project", "Milestone", "Due date", "Current status", "New status", "ID"],
+    { name:"Milestones", widths:[30, 40, 14, 16, 18, 12, 16], lockedCols:[6],
+      head:["Project", "Milestone", "Due date", "Current status", "New status", "New %", "ID"],
       validations:[{ range:"E2:E400", list:MS_STATUSES }],
       rows:(c.projects || []).reduce(function(acc, p){
         (p.milestones || []).forEach(function(m){
-          acc.push([p.name, m.name, m.finish || "", msStatusWord(m.status), "", m.id]);
+          acc.push([p.name, m.name, m.finish || "", msStatusWord(m.status), "",
+                    m.pct == null ? "" : String(m.pct), m.id]);
         });
         return acc;
       }, []) }
@@ -1016,17 +1028,24 @@ function capPlanFromWorkbook(c, sheets){
     });
   }
   child("Deliverables", "DELIVERABLE", "Deliverable", "D", function(row, r){
-    row.kind = delivKindKey(r["Kind"]) || r["Kind"];
+    /* Due date since §104; a workbook written before it has a Kind column
+       instead, which is read and ignored (§58: write the new label, read
+       whatever arrives). */
+    row.finish = r["Due date"] != null ? r["Due date"] : "";
   });
   child("Outcomes", "OUTCOME", "Outcome", "O", function(row, r){
     row.direction = r["Direction"]; row.value = r["Target"];
     row.unit = r["Unit"];
     /* Measure date since §99, read as either — the same contract the milestone
        column keeps below, and for the same reason. */
-    row.measure_at = r["Measure date"] != null ? r["Measure date"] : r["Measured at"];
+    row.measure_at = r["Due date"] != null ? r["Due date"]
+                   : r["Measure date"] != null ? r["Measure date"] : r["Measured at"];
   });
   child("Milestones", "MILESTONE", "Milestone", "M", function(row, r){
-    row.covers = r["What it covers"]; row.owner = r["Owner"];
+    /* Description since §103, read as either (§58). The STORED field keeps its
+       spelling -- `covers` is an identifier, "Description" is a label. */
+    row.covers = r["Description"] != null ? r["Description"] : r["What it covers"];
+    row.owner = r["Owner"];
     /* WRITE THE NEW LABEL, READ EITHER (§58, §65). The column is called Due
        date from §99; somebody is holding a workbook downloaded before that,
        and a header is a contract. The STORED field keeps its own spelling —

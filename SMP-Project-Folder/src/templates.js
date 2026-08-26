@@ -606,6 +606,39 @@ function applyProgress(u, d){
   });
 }
 
+/* ── WHAT COUNTS AS A DUE DATE (§103) ─────────────────────────────────────
+   A milestone's due date is written in its PROJECT'S units: a project run by
+   quarters says "Q1 2026", one run by dates says "20 Mar 2026". The field has
+   always taken any text and always will -- see the notice in validateCapPlan for
+   why -- so this decides only whether the platform SAYS something, never
+   whether it accepts something.
+
+   `Date.parse` is the same reader `projOverruns` and the overrun notice
+   already use, so a date this calls good is a date the platform can compare;
+   anything else would be a second definition of "a date" (§42's rule, in the
+   small). A bare quarter with no year passes, because 55 of the 60 milestones
+   in the worked example are written that way and they are not wrong -- the
+   project's own start and end carry the year.
+
+   With NO timeline on the project, either shape passes: the platform does not
+   know which units were meant, and inventing an answer to complain about is
+   worse than staying quiet. */
+var MS_STATUS_WORDS = ["done", "pending", "completed", "complete", "not started",
+                       "in progress", "wip", "ongoing", "todo", "open", "closed",
+                       "n/a", "na", "tbd", "planned", "delayed"];
+/* §104: EITHER FORM IS RIGHT ON ANY ROW, so this no longer asks the project's
+   timeline. A workshop lands on a day and a report lands in a month, and one
+   project has both -- the platform's job is to notice what is not a time at
+   all, which is still exactly the case that started this: "Done" and
+   "Pending" sitting in a due-date column.
+
+   `monthsOf` is the reader the PRODUCT uses to decide whether a row is due,
+   so anything it can read is a date the platform can compare. Asking a second
+   question here would be a second definition of "a date" (§42, in the small). */
+function dueFits(v){
+  return monthsOf(v) != null;
+}
+
 /* ── Capability templates (§16.4, §15.12) ─────────────────────────────────
    Capability projects arrive the way a unit's plan does: Manage → Import,
    with the capability as the scope. Same parser, same validation shape, same
@@ -664,7 +697,7 @@ function capPlanTemplate(c){
       timeline:p.timeline || "quarter", start:p.start, end:p.end, notes:p.notes }));
     (p.deliverables || []).forEach(function(d){
       rows.push(csvRow(CAPP_COLS, { id:d.id, type:"DELIVERABLE", parent_id:p.id, name:d.name,
-        kind:d.kind }));
+        finish:d.due }));
     });
     (p.outcomes || []).forEach(function(o){
       var a = splitTarget(o.target);
@@ -682,6 +715,15 @@ function capPlanTemplate(c){
 /* Progress statuses are written as words and read back as either the words or
    the stored keys — a sheet filled by hand should not need to know that "In
    progress" is spelled "wip" inside the platform. */
+/* A deliverable says Delivered where a milestone says Completed; the stored
+   key is the same in both (§104), so one pair of functions with the word
+   passed in rather than two pairs that can drift. */
+function delivStatusWord(s){ return s === "done" ? "Delivered" : msStatusWord(s); }
+function delivStatusKey(v){
+  var t = String(v == null ? "" : v).trim().toLowerCase();
+  if (t === "delivered") return "done";
+  return msStatusKey(v);
+}
 function msStatusWord(s){
   return s === "done" ? "Completed" : s === "wip" ? "In progress" : s === "todo" ? "Not started" : "";
 }
@@ -692,12 +734,6 @@ function msStatusKey(v){
   if (s === "wip" || s === "in progress") return "wip";
   if (s === "todo" || s === "not started") return "todo";
   return null;
-}
-function delivKindKey(v){
-  var s = String(v == null ? "" : v).trim().toLowerCase();
-  if (s === "binary" || s.indexOf("delivered") === 0) return "binary";
-  if (s === "pct" || s.indexOf("%") > -1) return "pct";
-  return s ? null : "";
 }
 function timelineKey(v){
   var s = String(v == null ? "" : v).trim().toLowerCase();
@@ -719,7 +755,7 @@ function capProgressTemplate(c){
     (p.deliverables || []).forEach(function(d){
       rows.push(csvRow(CAPPROG_COLS, { id:d.id, type:"DELIVERABLE", parent_id:p.id,
         parent_name:p.name, name:d.name,
-        kind:d.kind === "pct" ? "% delivered" : "Delivered / not",
+        finish:d.due,
         current:(d.actual == null ? "" : d.actual), new_value:"" }));
     });
     (p.outcomes || []).forEach(function(o){
@@ -823,6 +859,16 @@ function validateCapPlan(c, rows){
   rows.forEach(function(r){
     if (r.type === "PROJECT" && timelineKey(r.timeline) === "date" && r.end) projEnd[r.id] = r.end;
   });
+  /* A DUE DATE IS READ AGAINST ITS PROJECT'S TIMELINE (§103). A live plan
+     arrived with "Done" and "Pending" in the Due date column -- statuses,
+     which belong to the reporting cycle -- and the platform said nothing,
+     because the field takes any text. It still takes any text: refusing the
+     file would block work over a column nobody can fix without the file, and
+     §22's whole contract is that an upload AUTHORS a plan rather than
+     arguing with it. So it is a NOTICE, which is the same weight the overrun
+     rule carries, and for the same reason -- both are "we saved what you
+     typed, and here is what we noticed". */
+
 
   rows.forEach(function(r, n){
     var at = "row " + (n + 2) + (r.name ? " — " + r.name : "");
@@ -848,11 +894,24 @@ function validateCapPlan(c, rows){
     }
     if (r.type === "PROJECT" && r.timeline && timelineKey(r.timeline) == null)
       problems.push({ at:at, msg:'timeline "' + r.timeline + '" is not Quarters or Dates' });
-    if (r.type === "DELIVERABLE" && delivKindKey(r.kind) == null)
-      problems.push({ at:at, msg:'kind "' + r.kind + '" is not "Delivered / not" or "% delivered"' });
+
     if (r.type === "OUTCOME") {
       if (!r.value) notices.push({ at:at, msg:"no target — recorded, not scored" });
       if (!r.measure_at) notices.push({ at:at, msg:"no measurement time — will be asked every cycle" });
+    }
+    if (r.type === "MILESTONE" || r.type === "DELIVERABLE") {
+      var due = String(r.finish == null ? "" : r.finish).trim();
+      if (!due) {
+        notices.push({ at:at, msg:"no due date" });
+      } else if (!dueFits(due)) {
+        /* NAMED AS WHAT IT IS, never as "invalid". The two words this exists
+           for are Done and Pending, and telling somebody their status is
+           invalid does not tell them where it goes. */
+        notices.push({ at:at, msg:'due date "' + due + '" is not a date, a month or a quarter' +
+          (MS_STATUS_WORDS.indexOf(due.toLowerCase()) > -1
+            ? " \u2014 that is a status, and a status is reported each cycle rather than planned"
+            : "") + " \u2014 saved exactly as entered" });
+      }
     }
     if (r.type === "MILESTONE" && r.finish && r.parent_id && projEnd[r.parent_id]) {
       var f = Date.parse(r.finish), e = Date.parse(projEnd[r.parent_id]);
@@ -895,7 +954,7 @@ function diffCapPlan(c, rows){
       cmp("end", hit.obj.end, r.end);
     } else if (hit.kind === "DELIVERABLE") {
       cmp("name", hit.obj.name, r.name);
-      cmp("kind", hit.obj.kind, delivKindKey(r.kind) || "");
+      cmp("due", hit.obj.due, r.finish || "");
     } else if (hit.kind === "OUTCOME") {
       cmp("name", hit.obj.name, r.name); cmp("direction", hit.obj.dir, r.direction);
       if (r.value !== "" && targetChanged(hit.obj.target, r.value, r.unit))
@@ -951,7 +1010,7 @@ function createFromCapPlan(c, d){
       made++;
     } else if (x.type === "DELIVERABLE") {
       var p = projectById(x.parent_id); if (!p) return;
-      p.deliverables.push({ id:x.id, name:x.name, kind:delivKindKey(x.kind) || "binary",
+      p.deliverables.push({ id:x.id, name:x.name, due:x.finish || "",
         actual:null });
       made++;
     } else if (x.type === "OUTCOME") {
@@ -988,7 +1047,7 @@ function applyCapPlan(c, d){
       if (ch.f === "timeline")       o.timeline = timelineKey(ch.now) || o.timeline;
       if (ch.f === "start")          o.start = ch.now;
       if (ch.f === "end")            o.end = ch.now;
-      if (ch.f === "kind")           o.kind = delivKindKey(ch.now) || o.kind;
+      if (ch.f === "due")            o.due = ch.now;
       if (ch.f === "measured at")    o.measureAt = ch.now;
       if (ch.f === "what it covers") o.covers = ch.now;
       if (ch.f === "finish")         o.finish = ch.now;

@@ -159,6 +159,21 @@ A drift between specs and code is a documentation bug — report it before silen
   checks before pushing. Two branches each adding a `var pf` to `wire()` merged
   with no textual conflict at all and broke a page (§56.7) — a clean merge is
   not a working one.
+- **`main` MUST HOLD A SHA NO OTHER REF HOLDS, UNTIL PRODUCTION HAS SERVED IT
+  (§91, taught three times now — §91.4, §107.15, §108.17).** Vercel
+  deduplicates by SHA, so a SHA on two refs is ONE deployment and which ref
+  gets it is a race. **Order does not fix it** (§91.4), **delay does not fix
+  it** (§108.17 — 32 minutes of not-building is not proof the race is over, it
+  is proof the build has not started, which is the worst moment to offer a
+  second candidate), and **neither does the standard procedure**: "merge main
+  INTO the branch, resolve, fast-forward" creates the merge commit ON THE
+  BRANCH, so pushing that branch hands Vercel the SHA on a preview ref first
+  and `main` arriving later is a no-op (§107.15 — the same author's first
+  merge of the day deployed and the second did not, differing only in when the
+  branch was pushed). **Push the branch freely for every commit that is not
+  the merge commit; hold the merge commit's branch push until §91.5's live
+  check says production built.** The way back is a commit `main` holds and the
+  branch does not, and it must be one worth making.
 - **NEVER PUSH ONE COMMIT TO TWO REFS AT ONCE (§91, corrected).** Vercel
   deduplicates by commit SHA, so a SHA that reaches `main` and the branch within
   a second of each other produces exactly ONE deployment — and which ref it is
@@ -1030,6 +1045,171 @@ console errors (in this cloud environment, run it via a wrapper that points Play
   label off the page and compares the two halves to each other (§53.5) —
   *a check written against the problem survives somebody changing their mind
   about the wording.*
+  **NOT DUE IS A LABEL, NOT A LOCK (§104.8):** the comment over the reporting
+  pane said exactly that from the day it was written and the code under it did
+  the opposite — `if (notDue)` **replaced** the picker with the words *Not
+  asked*, so reporting early (asked for outright: *"they can report on it
+  exceptional"*) was the one act the pane refused. **A comment can describe an
+  intention the code never carried out, and nothing in a build compares the
+  two.** The same gate on Performance printed a dash against a row that HAD
+  been delivered early while its 100% went on counting toward the score
+  (`projDeliverySide()` averages every deliverable, due or not) — *a figure
+  that counts and is not shown is a screen arguing with its own score.* The
+  gate moves from **"is this due"** to **"has this been answered"**;
+  `notDueCell()` and `reportedAny()` are the one pair the two panes and the
+  two tables ask, because four copies of a predicate drift. **THE FIRST CHECK
+  PASSED ON A REVERTED BUILD** — FIN01's five milestones are all due, so three
+  of the four paths went unmeasured, and §94.2 from the inverse side explains
+  why every OTHER assertion stayed green: they ask whether a cell is
+  *answered*, and a row replaced wholesale by a word answers every cell. It
+  MAKES the four cases now, and each of the three reversions was put back and
+  watched to fail before the green run was believed — the third needing its
+  own assertion, that **Status and % must agree about whether a row was
+  answered**. Deliberately not widened: the unit's tactic table has the
+  identical lock and is untouched.
+  **THE SCORE COLUMN SAYS WHAT IT HOLDS, NOT WHAT IT IS MEASURED IN (§104.9):**
+  `%` is a unit, not a name — it says what the cell is measured in and nothing
+  about what it measures, on the one column somebody runs their eye down. It is
+  **Performance** on the deliverables and outcomes (*how well*, the word the
+  card above the table and the group's projects table already use) and
+  **Progress** on the milestones (*how far*). **§99.8's objection to Progress
+  expired**: it read *the milestone table below uses it for a STATUS*, which
+  was true when that table's only column was `Status` and stopped being true
+  the moment the milestones gained a per-cent of their own — the §87 twin is
+  gone, so the reason goes with it. `DX_PCT` / `MS_PCT` are declared once
+  beside `DX_HEADING`, because the two panes and the deck are **three surfaces
+  onto one column** and the third is the one left behind (§59). **The check
+  asks for the two names and not for either**, or a build putting one word on
+  both tables would pass. Measured at 1920/1500/1280/1000 (§27.1) and in the
+  deck **in present mode**, the only place a slide has a width at all (§69): no
+  header wraps, nothing scrolls. **Flagged, not changed**: the deck still
+  carries a **Due date** column the three panes lost in §104.8 — the ask named
+  the tables and the templates, and a column on a projector that is absent in
+  the product is a decision, not a tidy-up.
+  **AN IN PROGRESS WITH NO NUMBER IS NOT NOUGHT (§104.10):** the box opened and
+  nothing else did — nothing said the number was owed, and `statusReads()`
+  returned **0** for a wip with no per-cent, so the average COUNTED it: project
+  performance 63 → 50 and Execution 49 → 41 **the instant the dropdown
+  changed**, before the person who changed it had said anything. §99.8's own
+  ruling from the other direction — *an In progress state with no number forces
+  the score to invent one* — applied to the state itself. It returns **null**,
+  so `sideAvg()` leaves it out the way it already leaves out an unmeasured
+  outcome; the row is not forgiven but **outstanding** (`statusPending()`, the
+  tally, and *Needs a %* in the same `.missing` a plan uses for an unset
+  target). **`x.pct === ""` HAD TO BE NAMED**: `Number("")` is 0, not NaN, so
+  an empty box would have gone on reading as a genuine nought through a fix
+  aimed at exactly that — a typed `0` still reads 0, and both are asserted.
+  `statusGiven()` IS `statusReads(x) != null` now, because two predicates that
+  must agree about one row are how *given* and *reads* drift apart.
+  **`capExec()` KEEPS ITS `|| 0` ON PURPOSE** — a milestone nobody has TOUCHED
+  is Not started and nought is what it is; only one halfway through a sentence
+  leaves. **THE PARITY CHECK HAD TO BE REWRITTEN, NOT SILENCED**: §104's
+  "nobody's score moves" fixture stripped per-cents and left the statuses,
+  which stopped modelling the old formula the moment this landed — it went red
+  on all eight capabilities and would have called a deliberate decision a
+  regression for ever. It settles every In progress too, and **today's claim is
+  asserted separately** (all 18 In progress milestones in the demo carry a
+  number, so `pending` is 0 and no existing figure moved).
+  **A SUPPORTING FUNCTION SUBMITS, AND EVERYTHING BUT THE BUTTON WAS ALREADY
+  BUILT (§105):** `canSpeakFor()`, `CURRENT_REPORT_KEY`, `reportSectionState()`,
+  `reportPending()` and **`lib/authorize.js`'s `reportState` case** all carried
+  an explicit `fn:` branch — **§71's fault exactly**, the back half built and
+  the control never drawn, which is why the dot had been telling a function
+  head they owed a submission with nothing that would clear it (§69.9, broken
+  by the section that wrote it). **ONE PER FUNCTION, KEYED `fn:<key>`** — the
+  shape all five already expect; a second shape would mean a second answer in
+  five places. **THE REFUSAL IS ONE FUNCTION FOR BOTH SIDES**
+  (`submitBlockers` / `submitRefusal` take a TARGET), because two Submits
+  explaining themselves differently is §53.5's drift — and the old handler read
+  `UNITS[b.dataset.submit]`, so a function's button wired to it would have
+  submitted `undefined` and reported nothing in the way. Two rules stop it: a
+  figure at risk with no note (the unit's, with `rowReads()` teaching
+  `needsNote()` to read a deliverable and a milestone) and a row that said In
+  progress and never said how far (§104.10). **Measured before building: every
+  function is blocked by the note rule today, and so is every unit but
+  Nigeria** — the demo behaves identically on both sides, which is the evidence
+  the generalisation is faithful rather than over-strict.
+  **THREE COLUMNS ARE THREE LAYERS, NOT TWO VOCABULARIES (§105.2):** the board's
+  function half first got its own column strip and it **collided** — a strip's
+  widths come from the table's own `<thead>`, and `DELIVERABLES` alone is wider
+  than the Measures column at every width from 1920 down. Wrapping cannot save
+  a word that does not fit. A unit's three columns are *judged on · measured ·
+  the work*, and **a function has the same three** (key objectives; its
+  OUTCOMES, which have a direction, a target and an actual; its deliverables
+  and milestones) — so the counts become COMPARABLE down the page and the
+  vocabulary is named once in the band, where nothing can collide. **A TABLE
+  CELL RETURNS ONE CLIENT RECT HOWEVER MANY LINES IT HOLDS** (§88 somewhere
+  new): ask a `Range` over its contents instead, or a detector reports four
+  false positives. And `tr.dxband th`'s `nowrap` is right for a short label and
+  wrong for a band spanning the table — it pushed the table 8px past its box
+  rather than taking a second line. **AND THE SERVER HAD NEVER BEEN ASKED**:
+  `test-authorize.js` had no `fn:` submission test at all, because there was no
+  control, so no test had a reason to exist — it asks BOTH ends now, or the
+  branch could accept anybody and the first assertion would still print ok.
+  **AND "1 NEED NOTES" HAD BEEN WRONG SINCE THE COLUMN EXISTED (§105.4)** —
+  unnoticed because it was rare, until the function rows put it on seven more.
+  `notesOwed()` is one function: two halves of one board saying it differently
+  is the fault §105.2 was built to avoid. *A defect can hide behind how seldom
+  it is reached, and adding rows is a way of finding one.*
+  **ASKED FOR AND NOT BUILT — THE REFUSAL (§104.10):** *"refuse the
+  submission"* has nothing to attach to: **a capability's Reporting page has no
+  Submit button.** One `data-submit` exists in the whole platform and it is on
+  a UNIT; a function's reporting bar carries the tally and *Save draft* and
+  nothing else. Worse, **`reportPending()` already returns true for an `fn:`
+  target**, so a function head sees the dot saying they owe a submission and
+  there is no control that would clear it — §69's own rule broken by the thing
+  that wrote it. A function's Submit is a feature, not a fix, and what it means
+  (one per function, or one per capability) is a decision. **ANSWERED THE
+  SAME DAY, in §105 above:** one per function, and the server had been ready
+  for it all along.
+  **WHAT A MERGE DOES TO A PLAN ALREADY UPLOADED (§106):** nothing is deleted —
+  migration 024 is score-preserving by construction and only `deliverables.due`
+  and `milestones.pct` are new, so every existing row has them empty. **TWO
+  THINGS CHANGE, AND THE FIRST IS NOT SMALL.** Measured with every milestone
+  per-cent stripped (the shape of a tenant running on `main`), **Execution
+  rises 8–27 points on all eight capabilities** — today an In progress
+  milestone reads NOUGHT and §104.10 made it OUTSTANDING, so it leaves the
+  average. Correct, and silent, and *a score that moves for a reason nothing on
+  the page states is a score nobody can defend*: the card prints
+  **`5 of 12 milestones · 2 not counted yet`**, only when there is one.
+  **AND A DUE DATE THAT IS NOT ONE IS FINALLY NOTICED IN A STORED PLAN**
+  (§106.2) — the upload has warned since §103 and **nothing ever looked at the
+  database**, so a tenant that uploaded before that check is told nothing.
+  `dueNote()` names the **value AND the row** ("Pending on Solution design"),
+  beside `overrunNote()` whose shape it borrows, with the count on the RAIL so
+  the project holding them is findable without opening each (§93.4, one press
+  from where the gap is closed). `dueFits()` is the same reader the upload and
+  the product already use — a second question would be a second definition of
+  "a date". **MILESTONES ONLY**: their date is on that page and the pen edits
+  it, so the note points at something fixable; a deliverable's is drawn on no
+  pane since §104.8 and naming a bad one would send somebody after a control
+  that is not there (§61). **Resolved THERE, never here** — a plan is the
+  client's. **Still not run: migration 024 against a real Postgres.**
+  **A PROJECT'S FRONT MATTER, AND IT IS NOT A `<TABLE>` (§109):** `start` and
+  `end` were stored and shown in **exactly one place in the product — the
+  review deck** — so the page that AUTHORS a project could not say when it
+  runs. One box, divided: owner · start · end down the left, brief and
+  stakeholders as two rows on the right. **A grid of rows, deliberately**: the
+  platform sets a global `table { min-width:620px }` so its data tables never
+  squash, which makes any small table **overflow its own grid track by 300px** —
+  the grid column measured 320px the whole time, and it was found by asking
+  `document.styleSheets` what the browser holds (§93.11), not by reading the
+  cascade. **BOTH VALUE COLUMNS START AT ONE X** because each column's label
+  track is sized to ITS OWN longest label (96px right, 64px left); one width
+  would clip *Stakeholders* or waste 40px beside *Owner*. And **a pill's
+  leading margin is right in a sentence and wrong as the first thing in a
+  cell** — pulled back in `.pfval` only. **THE TIMELINE PILL IS GONE**: it once
+  decided how every date was read, §104 ended that, and its one remaining
+  effect was to SUPPRESS a true overrun warning on a "By quarter" project whose
+  end date is a date; the field and the template are untouched, and the guard
+  is a separate decision. **THE CHECK ASSERTS THE TWO THINGS NOTHING ELSE
+  WOULD** — that the alignment holds at three widths in both themes (an `auto`
+  track reproduces the exact fault: 627 vs 687), and that **the five fields
+  WRITE** (§96: an editor wired to nothing looks identical and discards every
+  keystroke). **A LABEL WIDER THAN ITS TRACK DOES NOT MOVE THE VALUE COLUMN** —
+  both rows stay aligned and the WORD is what clips, so that is asserted with a
+  `Range` separately. Plan pane only; the other two panes still show no dates,
+  flagged rather than assumed.
   **STILL BROKEN AND DELIBERATELY NOT FIXED (§99.6):** `projPlanBody` defines
   `sortAttr()` and applies it to NEITHER table, so a project's drag grips are
   bound to nothing — §63's fault on the capability side. Flagged, not fixed:
@@ -1135,6 +1315,30 @@ console errors (in this cloud environment, run it via a wrapper that points Play
   by `checks/office-chat.py` §6 (which passed for the wrong reason first — it
   pressed the bubble to open a panel that was already open, closing it) and by
   `scripts/test-chat.js`.
+- **A CHECK THAT ASSERTS AGREEMENT PASSES WHEN BOTH SIDES VANISH (§113.8):**
+  the knowledge base's contents are derived, and the check asserts one link per
+  section — so when a fix pushed `undefined` into `secs` and the tour section
+  left the page entirely, the count was sixteen and sixteen and it went GREEN.
+  **Agreement is preserved by removing both sides**, which is the blind spot of
+  every *these two must match* assertion. `checks/tour.py` caught it because it
+  asserts PRESENCE. Neither alone was enough: **one check guards the
+  relationship, another guards that there is anything to relate.** (The bug was
+  `var` — the unshift sat twenty lines above the assignment, the declaration
+  hoists and the value does not, so it pushed `undefined` in silence.)
+- **A MIGRATION THAT READS A COLUMN `schema.sql` NO LONGER CREATES IS BROKEN ON
+  EVERY FRESH DEPLOYMENT AND PERFECT ON YOURS (§113.7):** `024-one-row-shape`
+  read `deliverables.actual` in four UPDATEs before dropping it, and
+  `schema.sql` had stopped creating it — so an empty database could not even
+  PARSE the statement (42703) while an existing tenant migrated flawlessly.
+  **Production was never at risk and no new client could have been set up**,
+  and nothing anybody was testing against would show it, because everybody
+  tests against a database that already exists. **THE MIRROR OF §33.5**, which
+  recorded the fault invisible to every fresh-deploy test; this one was
+  invisible to every existing-database test. Fix: `ADD COLUMN IF NOT EXISTS`
+  before the reads, so a fresh database gets NULL in a table still empty at
+  pre-phase and the DROP takes it away again — idempotent on both. **RUN THE
+  ROUND TRIP ON A VIRGIN DATABASE AFTER EVERY MERGE**, not only after touching
+  the schema yourself: this arrived from somebody else's branch.
 - **THE CONVERSATION YOU HAVE OPEN NEVER LEAVES THE LIST (since v3.31, §105):**
   Islam — *"I replied and the chat disappeared from all places."* **Nothing was
   deleted** (the only DELETE is the Super user's drop): replying marks a
@@ -1275,6 +1479,91 @@ console errors (in this cloud environment, run it via a wrapper that points Play
   Proved by asking the screen AND the shared rule for five viewers and
   asserting BOTH ENDS (§94.2), by PRESSING the button (§70, §93.4), and by
   forcing each half false to watch the checks fail (§94.5).
+- **THE UNIT CELL SAYS WHERE, THE ROLES CELL SAYS WHAT (since v3.34, §110):**
+  Islam, of the picker's second half: *"choose where is very strange sentence.
+  make it Unit and it's already in a cell what am I missing here?"* **Nothing,
+  and it was worse than redundant** — `personAtChoices()` offers the group,
+  every unit, every function and every company, item for item the list
+  `roleWheres()` drew from, and `grantPersonRole()` WRITES IT BACK on every
+  grant (`p.unit` / `p.fn` / `p.company`). The second dropdown asked a question
+  the first had already answered and then forced its own answer onto it. §69.1's
+  split survives in the half that mattered; the DUPLICATE goes, with
+  `roleWhereCell`, `select.rolewhere` and `.rolewhy` (§24). **IT WAS ALSO
+  UNREACHABLE:** `.cfg table td` is `white-space:nowrap` (§88), so the cell laid
+  its two controls SIDE BY SIDE — the second started 150px into a 158px cell,
+  ran 133px past its edge and landed under the Email field, which took every
+  click. Present, enabled, correctly sized and hitting something else (§93.4,
+  third time) — `elementFromPoint` at its own centre returned the Email input,
+  and it only ever bit the roles with a real choice, because §92 grants a
+  one-destination role on the pick. **A PICK THAT CANNOT LAND SAYS SO**, in two
+  sentences because there are two ways out, and **`roleWheres()` remains the
+  only definition** of what may be held where — `roleAtWord()` derives even the
+  wording from it. **EITHER HALF FINISHES IT** (`tryGrantRole()`, called from
+  the role select and from the Unit select while a refusal stands): a refused
+  pick leaves that role SHOWING, so picking it again fires no `change` at all.
+  **A RETIRED ROW IS OFFERED NOTHING** — the grant used to be written while the
+  row read *No role*, leaving a unit pointed at somebody who cannot sign in.
+  **CANCEL RESTORES THE POINTERS, NOT THE ROLE LIST**: granting an owner
+  OVERWRITES whoever held it, so undoing by revoking left the unit headless —
+  `ROWHELD` copies both maps whole.
+- **PUTTING THE CURSOR IN A FIELD MUST NOT MOVE THE ROW (§110.7):** *"once I
+  open the edit of a line the line jumps to the first line."* The cursor, not
+  the repaint — the register is its own scrolling box and a plain `focus()`
+  lets the browser scroll the field into view, hauling row 20 of 33 from y=638
+  to y=105. `focusNoScroll()` is declared ONCE for both pens (§85).
+  **`no-jump.py` had been green throughout**: it opens a row and then measures
+  repaints, so the press that opens one was never measured (§94.2) — and one of
+  its own trials was keyed on `[data-prole-kind]`, a selector that has never
+  existed, behind a silent `if(!el) return` (§51.11).
+- **`max-width:100%` ON A FIELD IN AN AUTO-LAYOUT TABLE DOES NOTHING (§110.8):**
+  a percentage resolves against a containing block the cell has not settled, so
+  the browser treats it as `none` — which is why an open row's fields painted
+  21px over their neighbours. A px cap changes nothing either (§93.10 recorded
+  that once already). **`width:100%` with `min-width:0`** is the fix: a definite
+  width stops the field contributing its intrinsic size to the column. **The
+  measure is that nothing MOVES** — every content column now holds its closed
+  width, where the table used to grow 188px the moment a pen was pressed, and
+  the check asserts that no content column GROWS rather than that none changes.
+- **THE ONBOARDING TOUR IS TOLD WHERE THE PERSON WORKS (since v3.30, §107;
+  spec 017):** a first-sign-in guided tour on **demo data**, two stories
+  (strategy custodian; unit/function owner), told on a unit or a function —
+  whichever the person actually holds their role over. `src/tour.js` mounts to
+  `<body>` like the chat corner, **never calls `paint()`**, **holds selectors
+  and not nodes** (re-anchored by `TOUR.onPaint()` at the end of `paint()`),
+  and **navigates by pressing the platform's own `[data-u]` / `[data-s]` /
+  `[data-sub2]` controls** rather than keeping a second copy of the shell's
+  navigation. Roles come from the platform's own `personRoles()`, never from
+  `SMPRules` directly — `world()` is the ONE builder and its comment records
+  what happens twice in an afternoon otherwise. **A STEP NAMES A CONCEPT AND A
+  PLACE SPELLS IT**: `resolve()` turns `strategy`/`plan` into `fnstrat`/`proj`
+  for a function and DROPS the step a place cannot show (a function has no
+  SWOT), so the counter counts what is actually walked (§61). **AND THE
+  TARGETS SAY `$tab` / `$sec`** rather than repeating the key — the first
+  build resolved the fields and left the selectors spelling a unit's keys, so
+  a step disagreed with itself and lit nothing on four of eight steps.
+  **A TENANT'S LABEL IS NEVER INFLECTED** (§107.8): `L("pillar","bu")` is
+  *"Pillars"*, so `+ "s"` printed *the pillarss* — there is no singular to
+  reach for, and every sentence takes the label exactly as given. **COPY THAT
+  NAMES A PLACE IS A FUNCTION** (§64 again), or a constant evaluated before
+  hydration holds the baked example's vocabulary on a client's deployment.
+  Memory is `localStorage` (*never*) and `sessionStorage` (*skip for now*, so
+  a new sign-in is a new session), and **a throwing store reads as
+  already-marked** — a tour nobody can dismiss is worse than no tour.
+  **AND IT TAKES YOU TO THE MAIN PAGE FIRST (§107.14):** replaying from the
+  Knowledge base drew the welcome card OVER the Knowledge base, and worse,
+  `setMode("demo")` ran AFTER `own` was resolved — so a key from the CLIENT'S
+  tenant was looked up in the DEMO tenant's navigation, which matches only
+  because this deployment IS the worked example. **Switch the mode, THEN read
+  who and where, THEN check the place is reachable** (`if (!destBtn(own)) own
+  = firstDest()`), and the welcome step carries a destination. The check had
+  asked whether the tour was RUNNING and stopped there — **"it started" is not
+  "it went anywhere"** (§94.2).
+  `src/checks/tour.py` walks **every story as every role** and was **proved
+  able to fail first** (§94.5) — the first deliberate break set a value to
+  what it already was and caught nothing, which is §94.5's own example.
+  **`own_it` is not a function custodian for checking purposes**: they hold it
+  on the IT unit AND the IT function, so the walk measures the unit twice
+  while looking like it covers functions — `fn_mkt2` is the true case.
 - **THE CORNER MINIMISES, AND THE INBOX FOLLOWS THE WINDOW (since v3.29,
   §100.4, §100.5):** **the bubble is not drawn while the panel is open** —
   it sat underneath in the same dock column, pushing the panel a bubble's height
@@ -1455,8 +1744,22 @@ SMP/
 cd SMP-Project-Folder/src
 python3 build.py     # assembles strategy-management-platform.html (must be byte-identical to the shipped vX.Y file)
 python3 qa.py        # walks every page as every viewer, reports console errors (needs Playwright + Chromium)
+python3 checks/role-picker.py   # giving somebody a role: every control PRESSED,
+                                # both ends asked, and the absences asserted (§110)
+python3 checks/no-jump.py       # nothing moves the register under you — the act of
+                                # OPENING a row included, since §110.7
 python3 checks/office-chat.py   # the chat's client half — serves the built file over HTTP,
                                 # because the whole feature is invisible over file:// (§97.9)
+python3 checks/setup-rail.py    # the Setup rail fits the window, every entry is reachable
+                                # by scrolling the LIST, and the cap does not move --chrome-h
+                                # (§101.5 — that last one is what licenses the cap at all)
+python3 checks/setup-overview.py      # the Overview agrees with the pages it summarises; it
+                                      # MAKES the state, because the demo tenant is all-clear
+python3 checks/setup-overview-live.py # ...and its three server-backed rows, over HTTP, where
+                                      # they exist at all (§101.12)
+python3 checks/setup-search.py  # the rail's search: typing NEVER repaints, a repaint keeps
+                                # the filter, and a match inside a FOLDED group is findable
+                                # (§101.13, §101.14 — all three fail silently)
 ```
 In this cloud image, run any sweep through the wrapper so Playwright finds the
 Chromium that is already here:
@@ -1491,8 +1794,8 @@ prior sessions (on HR_ERP) accidentally reverted agreed-upon designs.
 
 ---
 
-*Last Updated: 2026-08-26 &mdash; **v3.31: the assistant (&sect;103,
-&sect;104), and a chat that vanished (&sect;105)**. The last one came from
+*Last Updated: 2026-08-26 &mdash; **v3.37: the assistant (&sect;111,
+&sect;112), and a chat that vanished (&sect;113)**. The last one came from
 production and is the one worth reading: *"the chat was a user, he sent to me
 and I replied and the chat disappeared from all places."* **NOTHING WAS
 DELETED**, and establishing that first is most of the work &mdash; the only
@@ -1516,44 +1819,195 @@ showed the identical failure. A fix tested against the wrong bytes looks exactly
 like a fix that does not work, and the next move would have been to hunt a
 second cause that was not there.
 
-*Earlier the same day: **&sect;103 and &sect;104, the assistant**. Islam, mid-build:
-*"I need a switch to turn off AI response and just keep it to the SMO inbox"*
-&mdash; which was already the design and is now the DEFAULT, because the chat's
-four existing settings ship on to describe a chat that already worked and this
-one describes a capability that did not. **OFF IS ENFORCED ON THE SERVER**,
-where the model is simply never called: with the assistant off there is nothing
-on screen to hide, so the guard IS the feature, and the check asserts a call
-count of ZERO rather than an absent button. **ORDER IS THE WHOLE ROBUSTNESS
-ARGUMENT** &mdash; the message is stored and the thread is already waiting
-before the model is asked, so no key, a refusal, a timeout and a malformed
-answer all land on exactly the chat as it worked before; four failure modes,
-injected separately, because a build that lost the degradation passes every
-happy-path assertion. **THE HANDOFF IS A FLAG AND NEVER A SENTENCE**, or the
-thread reads as answered and drops out of the queue with nobody coming. Gemini
-rather than Claude, at Islam's choice, with **no SDK** (one POST, and the repo
-carries `pg` and nothing else) and the **model name in an environment
-variable**, because provider names are retired on somebody else's schedule.
+*Earlier: 2026-08-26 &mdash; **v3.34: giving somebody a role**
+(&sect;110). Islam: *"in the people registry I'm trying to set business unit
+owners as roles and it keeps failing with no error message."* **THE CONTROL WAS
+PRESENT, ENABLED, CORRECTLY SIZED AND UNREACHABLE.** &sect;69.1 put the picker's
+second half in the Unit column at his own request; &sect;88 then made every
+Setup cell one line, so the cell laid its two controls SIDE BY SIDE &mdash; the
+second started 150px into a 158px cell, ran 133px past its own edge, and landed
+under the Email field, which took every click. All that survived on screen was
+the letter **C** of *Choose where&hellip;*. Every check in the suite was green
+on it for as long as it existed, because all of them ask whether a control is in
+the document: `elementFromPoint` at its own centre returned the Email input, and
+a real click was refused outright. &sect;93.4, third time. **AND IT ONLY BIT THE
+ROLES WITH A REAL CHOICE** &mdash; &sect;92 grants a one-destination role on the
+pick, so the SMO worked and a unit owner never could, which is exactly the
+difference between his two reports. **THEN THE BETTER QUESTION**: *"make it Unit
+and it's already in a cell what am I missing here?"* Nothing, and it was worse
+than redundant &mdash; the Unit cell's own dropdown offers every place a role
+can be held, item for item the list the second one drew from, and
+`grantPersonRole()` WRITES THAT SAME FIELD BACK on every grant. **The second
+dropdown asked a question the first had already answered and then forced its own
+answer onto it.** So it is not renamed, it is removed, and &sect;46.4's "two
+different facts" turns out to have been true of the concepts and never of the
+code. **A PICK THAT CANNOT LAND NOW SAYS SO** &mdash; the one thing the old pair
+could not do, since it committed on the second answer and made *not yet* and
+*never* look identical. **AND EITHER HALF FINISHES IT**, which a check found: a
+refused pick leaves that role SHOWING, so picking it again fires no `change` at
+all, and setting the Unit had to be the other way in. Three more, each its own
+silence: a **retired** row was offered the picker and the grant was WRITTEN
+while the row read *No role*, leaving a unit pointed at somebody who cannot sign
+in; **Cancel** restored the person and left the grant standing, and restoring by
+revoking was not enough either, because granting an owner overwrites whoever
+held it; and **opening a row threw it to the top of the register** &mdash; the
+cursor, not the repaint, hauling row 20 from y=638 to y=105, with `no-jump.py`
+green throughout because it opens a row and then measures repaints. **AND THE
+BOXES OVERFLOWED EACH OTHER** (his last note): `max-width:100%` on a field in an
+auto-layout table does nothing at all, a px cap does nothing either
+(&sect;93.10 wrote that down once already), and `width:100%` with `min-width:0`
+does &mdash; every content column now holds its closed width, where the table
+used to grow 188px the moment a pen was pressed. The new check **presses** every
+control and asks BOTH ENDS of each, and was proved able to fail before its green
+run was believed: **17 failures** against the previous build.*
+*Earlier: 2026-08-26 &mdash; **v3.33: the Setup makeover, complete &mdash;
+the words, the window, the Overview, the search and the pills** (&sect;108, spec 018). Islam asked for the whole settings page
+to be rethought &mdash; design, grouping, arrangement, a search bar, the namings
+&mdash; and for HR_ERP's admin page to be considered. Settled from a mockup
+carrying the audit, two drawn structures and a per-row naming table: he chose
+**Option A**, the rail keeping the door with an Overview page opening it.
+**THE AUDIT IS IN NUMBERS RATHER THAN ADJECTIVES**: the rail is **984px tall and
+pins 128px down**, so it hung **112px** below a 1000px window and **312px**
+below an 800px one, and what fell off the bottom was Branding and Communication
+&mdash; &sect;90's "a control below the fold is a control that does nothing", by
+a road &sect;90 did not walk. **THREE ROWS CAME OUT OF ONE WORD FAMILY** &mdash;
+Messages, Send a message, Communication, in three different groups &mdash; which
+is the collision HR_ERP hit with *Announcements* beside *Communications* and
+settled the same way: **Inbox** is what the office ANSWERS, **Email** is what
+the page actually sets (the display name, reply-to, kicker and footer of what
+LEAVES), and **Terminology** is the tenant's vocabulary rather than stickers.
+**Official BU list is deliberately NOT renamed**: it is the client's own word
+(&sect;58), and the confusion with Business units is answered by a description
+beside it, not by taking their word away. The group names **answer rather than
+ask** &mdash; &sect;46 was right about the grouping and wrong about the words,
+because a rail is scanned and a question reads a beat slower than its answer
+&mdash; while **the keys do not move**, or every folded group would silently
+unfold for everybody who ever touched one (&sect;30.2). **Import and Archived
+plans become one page with two sections**, inseparable by construction since
+&sect;22 made importing an archiving act, **with each section keeping its own
+gate** so &sect;48.2's edit-only Import survives the merge. **AND THE RAIL FITS
+THE WINDOW, WHICH &sect;28.3 SAYS IT MUST NOT** (&sect;108.5): that rule was
+written against v2.8's oscillation, whose loop ran through the header CONDENSE
+&mdash; deleted in v3.3 &mdash; so it is broken at a link rather than argued
+away, and `--chrome-h` is now a constant (73px at every height swept).
+**&sect;100.5 REFUSED THIS SAME CAP SIX DAYS AGO** and its reason was not the
+loop but the affordance: *a list that says "it ends here" when it does not is
+worse than a page that scrolls.* That objection is right, so the cap ships with
+the sign &mdash; a visible scrollbar track and a **sticky fade that gets out of
+its own way**, coming to rest after the last row where it has nothing left to
+cover. **AND TWO ATTEMPTS TO BE CLEVER BROKE THE THING IT PROTECTS**: a
+`margin-top:-22px` meant to give back the fade's height took it off the
+SCROLLABLE height and stranded the last five entries, and removing it did not
+fix them &mdash; the real cause was a speculative **`scroll-behavior:smooth`**
+in the same edit, which makes `scrollIntoView` asynchronous so the check
+measured before the scroll landed. *A nicety nobody asked for broke a real
+reachability assertion, and it was not the cause I suspected first.* The check
+**asserts the problem, not the numbers**, and was **proved able to fail before
+it was trusted** &mdash; 8 failures with the cap removed.
+**AND THE OVERVIEW IS BUILT** (&sect;108.10, spec 018): the gear lands on it, and
+it answers the one question the office opens Setup to ask &mdash; *is anything
+waiting on me?* &mdash; which before it existed took a walk through five pages,
+because each outstanding thing lives only on the page that fixes it. **NO ROW
+COMPUTES ANYTHING**: each declares a `count` calling the SAME function its
+destination page calls, and the check asserts the two AGREE rather than asserting
+the number (&sect;53.5, &sect;94.8) &mdash; a summary page is the one place a
+disagreement is guaranteed to be seen and impossible to explain. Two sources were
+already shared; the other three are **extracted rather than copied**, and
+`CHAT.officeQueue()` is a second READER of the `queue` action the inbox already
+calls rather than a second endpoint, so the Overview's number is by construction
+the Inbox tab's number. **A COUNT HAS THREE ANSWERS, NOT TWO** &mdash; a number,
+zero, and *we have not asked* &mdash; so a null draws no row, a zero says nothing
+is waiting, and the page never prints `0`: &sect;93's fault one surface out,
+because a summary showing five zeroes while it is still thinking has told
+somebody they are clear when it does not know. **AND SAYING NO IS THE PAGE'S JOB
+TOO** (&sect;45.2 turned round), or an absent list reads as a list that failed to
+load. Three old faults arrived in new places: the password and declaration
+fetches were **keyed on the register's MARKUP** and are keyed on the page NAME
+now (the third time that class of gate has silently stopped matching, in the
+safe-looking direction every time); the declarations fetch **never said it
+failed**, leaving `{}` &mdash; harmless on the register, a false all-clear on the
+Overview; and the demo tenant is entirely clear, so the check **MAKES the state
+it measures** or every attention row ships unexercised (&sect;45.2, &sect;94.2).
+**AND THE FIRST LIVE RUN'S ONE FAILURE WAS THE CHECK, NOT THE PRODUCT**: it
+asserted the password count equalled the stub's own number, and the page said 2
+where the stub marked 3 &mdash; because the first people on the seed are the SMO
+and a Super user, and &sect;89 excludes the office from issuing. It asserts the
+RELATIONSHIP now, **with the raw number asserted to differ**, or it would quietly
+pass again the day that exclusion broke. **AND THE SEARCH AND THE PILLS FINISH IT.**
+**THE KEYWORDS LIVE ON THE DEF** (&sect;108.13), beside the label, because some
+errands do not know their page at all &mdash; *"where do I change the logo"* is
+Branding &mdash; and a second table of them would have been the fourth place to
+edit the day a page is renamed (&sect;108.3 renamed three in an afternoon). Every
+typed word must match in any order, since *"reset password"* and *"password
+reset"* are one errand. **TYPING NEVER REPAINTS** (&sect;35), and the query is
+held in a variable rather than only in the box, because the Overview's own three
+fetches each end in `paint()` about a second after the page opens &mdash;
+exactly when somebody is typing; the filter is re-applied after every paint, or
+a repaint quietly shows the whole list to somebody who believes they are reading
+their results. **AND THE FOLD HAD TO STOP OMITTING ROWS** (&sect;108.14): a
+filter cannot reveal a row that was never drawn, and that failure would have
+looked exactly like *"there is no such setting"*. **THE PILLS ARE THE OVERVIEW'S
+OWN ROWS SUMMED BY DESTINATION** (&sect;108.15) &mdash; nothing new is counted,
+so a rail badge cannot disagree with the page it points at; never a zero, never
+for somebody who cannot clear it (&sect;69's dot), and on a group heading only
+while that group is FOLDED, because an open group's rows already speak. **AND
+&sect;51.11 BIT IN MY OWN CHECK**: the row gained a label span and a pill, so
+`.ritem`'s `textContent` became `"People register2"` and three assertions broke
+&mdash; grep every check when a control changes shape, not the one that failed
+first. **AND THE CONTRAST SCARE WAS THE MEASURING SCRIPT** (&sect;68.10): a
+throwaway sweep reported eight failures including the pill at 1.64:1, because
+its transparency test compared `'rgba(0,0,0,0)'` against `'rgba(0, 0, 0, 0)'`
+&mdash; a spelling, not a value &mdash; so everything was measured against
+BLACK. Testing the alpha instead: **0 failures**, the pill at 5.32:1 light and
+9.34:1 dark. *A correct build reported broken is the same class of fault as a
+broken build reported clean, and the first instinct &mdash; to go and change a
+colour &mdash; would have damaged a working palette.*
 
-*Earlier the same day: **&sect;103, the knowledge base's missing half**. The assistant's corpus is the feature's
-actual project and it did not exist: the knowledge base explained how things
-WORK and barely how to DO them &mdash; four mentions of pressing anything across
-693 lines of `PAGE_INFO` &mdash; while *"how do I submit my report"* is what
-somebody types into a bubble in the corner. **43 recipes, and they are DATA**,
-so `scripts/extract-kb.js` reads the same array into `db/kb.json` and the words
-a person reads are the words the assistant answers from (&sect;42, applied to
-prose). **THE LESSON THAT BIT THREE TIMES IN ONE HOUR**: you cannot stub a
-function the file declares &mdash; a declaration hoists over anything a `vm`
-sandbox supplies, so `L()` and `kbRecipes()` had to be fed the DATA they read
-and `kbSection()` had to be replaced AFTER evaluation. The third **silently
-captured nothing** and would have shipped a corpus missing a third of itself;
-it did not, because the extractor throws when it captures nothing rather than
-writing what it has (&sect;54.5, earning its place within minutes of being
-written). **And the table of contents was a second copy that was already
-wrong** &mdash; nine sections, eight links, the people register missing since
-the day it was added, found only because seven more groups were being added to
-it. Corpus today: **~9,800 words, about 13,200 tokens**, still one prompt.
+*Earlier: 2026-08-26 &mdash; **v3.32: the onboarding tour** (&sect;107,
+spec 017). *"For first time users we need some orientation flow that takes them
+through the platform … highlighting some areas while dimming the rest of the
+page … in a user story mode."* Settled over **four reviewed revisions of a
+working mockup** before a line of `src/` was touched, and that is the part
+worth keeping: **three of the five decisions are reversals of something drawn
+first**, and not one of them could have been argued in the abstract.
+**THE INTERACTIVE TOUR WAS BUILT AND THEN REVERSED** &mdash; the first
+alignment said *"let them click, that would be more interactive"*, and demo
+mode made it safe to let a first-time user press real controls, because a
+dataset that refuses every write is the licence for that. Then: *"skip the
+buttons clicking overall."* **A tour that waits for a press is a tour that can
+be got wrong, by the one person in the tenant with no idea which button was
+meant** &mdash; narrating costs nothing the pressing bought. **SKIP TOUR WENT
+AND THE &times; STARTED ASKING** (*Don't show again* / *Skip for now*, with a
+way back for a stray press), because two controls for one act is one too many.
+**AND THE SPOTLIGHT HAD TO SAY WHERE YOU ARE**: lighting the whole navigation
+row names the SET and not the SELECTION, which is the one question a
+first-time viewer actually has &mdash; and lighting one button while ALSO
+lighting a section and its content is what forced the dim to become an **SVG
+mask**, since a box-shadow cutout can only ever have one hole. Built to hold
+**no copy of anything**: it never calls `paint()`, holds selectors rather than
+nodes, navigates by pressing the platform's own controls, and reads roles
+through the platform's own `personRoles()`. **A STEP NAMES A CONCEPT AND A
+PLACE SPELLS IT** &mdash; and the first build resolved the step's FIELDS while
+leaving its SELECTORS spelling a unit's keys, so a step disagreed with itself
+and the first function to walk the owner story lit nothing on four of eight
+steps; `checks/tour.py` caught it within a minute of that story existing,
+which is &sect;53.5's argument for walking both sides paid back immediately.
+**THE CHECK WAS PROVED ABLE TO FAIL BEFORE ITS GREEN RUN WAS BELIEVED**
+(&sect;94.5) **and the first attempt could not**: the deliberate break set a
+step's section to the value it already held, a no-op caught by nothing, which
+is exactly the fault &sect;94.5 records in `test-authorize.js`. Two more found
+only by measuring: `own_it` holds custodian on the IT unit AND the IT
+function, so adding them walked the unit twice while looking like it covered
+functions; and the contrast measurement was proved real by wrecking the card's
+text colour and watching it report 1.6:1, because a measurement that returns
+nothing looks identical whether it is clean or blind. **AND THE WORDS WERE
+WRONG WHILE EVERY ASSERTION WAS TRUE** (&sect;107.8): `L("pillar","bu")` is
+*"Pillars"*, so the card read *"Strategy &rsaquo; Plan &mdash; the pillarss"*
+&mdash; found by printing the nine titles and READING them, which no check
+would have done. A tenant's label is never inflected.*
 
-*Earlier the same day: **v3.30: reordering comes back
+*Earlier: 2026-08-26 &mdash; **v3.30: reordering comes back
+
 (&sect;101), and focus measures get a switch (&sect;102)**. The second one
 carries the bug worth reading: the switch was wired, the rule was written, the
 writer worked &mdash; and flipping it changed nothing at all. **`worldOf()` does
@@ -2755,7 +3209,14 @@ bought 22px on a 47px header. Gone: the listener, the `scrolled` class, every
 `body.scrolled` rule. `--chrome-h` stays and now reports a constant. Also: the
 rail lost its `max-height` (a capped rail cut lists off mid-row — a navigation
 list must never say "it ends here"); **the sticky OFFSET may read `--chrome-h`,
-a max-height never may** (§28.3, the v2.8 loop); Manage is a gear with the word
+a max-height never may** (§28.3, the v2.8 loop — **AMENDED BY §101.5/§101.6**:
+the loop ran through the header CONDENSE, which this same version deleted, so
+`--chrome-h` is now a constant and a max-height fed by it closes nothing. The
+Setup rail is capped to the window since v3.30. Two conditions, both asserted by
+`checks/setup-rail.py`: **nothing above the box may move when the box resizes**,
+and the capped list must **say that it continues** — a visible scrollbar track
+and a sticky fade, because §100.5's objection is right even where its refusal is
+not); Manage is a gear with the word
 in its `title`; a unit opens on Strategy › Plan; and `section()` omits an empty
 header rather than rendering a blank `<h2>` that still spends its margin (§28).*
 

@@ -809,6 +809,40 @@ console.log("\n10 · a function that plans in pillars");
    function (§62). It is asserted rather than assumed, because the whole point
    of that rule is that nobody has to remember it, and the way to keep it
    honest is to check it the day the feature lands. */
+/* ── 10b · A FUNCTION SUBMITS ITS REPORT (§105) ────────────────────
+   The server has carried an explicit `fn:` branch in the `reportState` case
+   since spec 006, and nothing ever asked it a question -- the control was
+   never drawn, so no test had a reason to exist. §94.2 says a check that only
+   looks at something present cannot see a closed door, so BOTH ends are asked:
+   the function's own head may submit, and the head of another may not. */
+console.log("\n10b · a function submits its report");
+(function () {
+  const keys = Object.keys(SEED.functions || {});
+  const withHead = keys.filter(function (k) { return (SEED.functions[k] || {}).head; });
+  if (withHead.length < 2) {
+    check("the seed carries two functions with heads to test with", false); return;
+  }
+  const A1 = withHead[0], A2 = withHead[1];
+  const mine = function (fk) {
+    const base = clone(SEED), inc = clone(base);
+    inc.review.submitted = Object.assign({}, inc.review.submitted);
+    inc.review.submitted["fn:" + fk] = true;
+    return { base: base, inc: inc };
+  };
+  let t = mine(A1);
+  let v = A.authorize(t.base, t.inc, personOf(t.base, SEED.functions[A1].head));
+  check("a function head submits their own function's report", v.ok, v.refusals.join(" / "));
+  const kinds = A.collect(t.base, t.inc, R.worldOf(t.base))
+                 .map(function (c) { return c.kind + ":" + c.target; });
+  check("...classified as reportState against the fn: target",
+        kinds.indexOf("reportState:fn:" + A1) > -1, kinds.join());
+  /* THE CLOSED DOOR. Without this the branch could accept anybody and the
+     test above would still print ok. */
+  t = mine(A2);
+  v = A.authorize(t.base, t.inc, personOf(t.base, SEED.functions[A1].head));
+  check("...and may NOT submit another function's", !v.ok, "it was allowed");
+})();
+
 console.log("\n11 · a row leaving the register");
 (function () {
   const victim = SEED.people.filter(function (p) {

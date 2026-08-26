@@ -151,6 +151,11 @@ var NEWSET = { name: "", team: "", owner: "", pick: "smo" };
    held here rather than recomputed on every paint, because the person
    answering it may go and look at the row it names and come back. */
 var ADDROLE = null, ADDROLE_KIND = "owner";
+/* ── WHY THE LAST PICK DID NOT LAND (§110) ────────────────────────────
+   `{key, why}`, or null. A property of the screen and never of the person
+   (§25.2) — it is the outcome of one press, cleared by the press that
+   succeeds, by opening the picker again and by leaving the row. */
+var ROLESTOP = null;
 var NEWPERSON = { name:"", empId:"", email:"", hit:null, hitBy:null, warn:null };
 function newPersonReset(){
   NEWPERSON = { name:"", empId:"", email:"", hit:null, hitBy:null, warn:null };
@@ -742,9 +747,56 @@ function rowEditLive(){
   var t = rowEditTable();
   return (t && ROWFIND[t]) ? ROWFIND[t](rowEditKey()) : null;
 }
+/* ── AND WHAT POINTS AT THE ROW, NOT ONLY WHAT IS IN IT (§110) ───────
+   A person's roles are not ON the person: a unit's `head` and a function's
+   `custodian` point AT them (§33), and `ROWWAS` is a copy of the row. So Cancel
+   restored `p.unit` and left the grant standing — press it after giving
+   somebody Business unit owner of Nigeria and they read as its owner while
+   sitting at the group. One fact contradicting itself, from one press.
+
+   `ROWHELD` is every one of those pointers as it stood when the row opened.
+   Not the person's ROLE LIST, which was the first answer and was not enough:
+   granting an owner OVERWRITES whoever held it, so undoing the grant by
+   revoking it left the unit with no head at all — the displaced person was
+   gone and nothing remembered them. What has to come back is the pointers, and
+   they are what is copied.
+
+   Both maps whole, because a grant can move a seat this row never named — a
+   custodian handed to a function moves `FUNCTIONS[k].custodian` — and they are
+   two small objects (ten units, eight functions, two keys each), which is
+   cheaper than working out in advance which of them a press might reach. */
+var ROWHELD = null;
+function rolePointers(){
+  var out = { units:{}, fns:{} };
+  UNIT_KEYS.forEach(function(k){
+    var r = UNIT_ROLES[k] || {};
+    out.units[k] = { head:r.head || null, custodian:r.custodian || null };
+  });
+  FUNCTION_KEYS.forEach(function(k){
+    var f = FUNCTIONS[k] || {};
+    out.fns[k] = { head:f.head || null, custodian:f.custodian || null };
+  });
+  return out;
+}
+/* PUT BACK IN PLACE, never by replacing the object — the same rule
+   rowEditCancel already follows for the person, and for the same reason: an
+   open menu or a chip may be holding a reference to the one that is there. */
+function restoreRolePointers(was){
+  if (!was) return;
+  Object.keys(was.units).forEach(function(k){
+    var r = unitRolesFor(k);
+    r.head = was.units[k].head; r.custodian = was.units[k].custodian;
+  });
+  Object.keys(was.fns).forEach(function(k){
+    var f = FUNCTIONS[k];
+    if (!f) return;
+    f.head = was.fns[k].head; f.custodian = was.fns[k].custodian;
+  });
+}
 function rowEditOpen(table, key, obj){
   ROWEDIT = table + ":" + key;
   ROWWAS = obj ? JSON.parse(JSON.stringify(obj)) : null;
+  ROWHELD = (table === "people" && obj) ? rolePointers() : null;
 }
 /* PUT BACK IN PLACE, never by replacing the object. Something else may already
    hold a reference to this person — the viewer switcher, a role chip, an open
@@ -755,13 +807,18 @@ function rowEditOpen(table, key, obj){
    a row that still exists. */
 function rowEditCancel(obj){
   if (obj === undefined) obj = rowEditLive();
+  /* The pointers first and the row second, so that a grant's two halves are
+     undone in the order they were written: grantPersonRole() writes the
+     pointer AND the person's own attachment, and ROWWAS is what puts the
+     second one back. */
+  restoreRolePointers(ROWHELD);
   if (obj && ROWWAS) {
     Object.keys(obj).forEach(function(k){ if (!(k in ROWWAS)) delete obj[k]; });
     Object.keys(ROWWAS).forEach(function(k){ obj[k] = ROWWAS[k]; });
   }
-  ROWEDIT = null; ROWWAS = null;
+  ROWEDIT = null; ROWWAS = null; ROWHELD = null;
 }
-function rowEditClose(){ ROWEDIT = null; ROWWAS = null; }
+function rowEditClose(){ ROWEDIT = null; ROWWAS = null; ROWHELD = null; }
 
 var SHORT_NAME_WORDS = 3;
 function shortName(name){ return nameWords(name, SHORT_NAME_WORDS); }
@@ -2055,6 +2112,28 @@ function roleKeyByName(name){
    file naming it would be asking for a role that arrives by itself, so the
    template does not offer it and the reader says so plainly. */
 function roleIsGrantable(key){ return !!key && !SMPRules.isOwnLinesRole(key); }
+/* ── THE WORD FOR WHERE A ROLE IS HELD (§110) ─────────────────────────
+   For the sentence a refused pick shows, and for nothing else. It is a LABEL,
+   not a second rule: `roleWheres()` still decides what may be held where, and
+   this only says it in English — so a role whose list changes cannot end up
+   with a sentence that contradicts the list.
+
+   Derived from the list rather than written beside it, for the same reason:
+   the kinds actually offered are what the person has to pick from. */
+function roleAtWord(roleKey){
+  var kinds = {};
+  roleWheres(roleKey).forEach(function(w){
+    kinds[w.v === "group" ? "group"
+        : String(w.v).indexOf("fn:") === 0 ? "fn"
+        : String(w.v).indexOf("co:") === 0 ? "co" : "unit"] = 1;
+  });
+  var WORD = { group:"the group", unit:"a business unit",
+               fn:"a supporting function", co:"a company" };
+  var out = Object.keys(kinds).map(function(k){ return WORD[k]; });
+  if (!out.length) return "somewhere that does not exist yet";
+  if (out.length === 1) return out[0];
+  return out.slice(0, -1).join(", ") + " or " + out[out.length - 1];
+}
 
 /* Reads the sheet against the stored world and says what would happen. It
    changes NOTHING — the review step exists so that an upload is looked at
@@ -2943,11 +3022,51 @@ function capKOScore(c){
 
 /* A deliverable reads 100 or 0 when it is delivered-or-not, and its own
    percentage when it is a percentage. Nothing reported is absent, not zero. */
-function delivReads(d){
-  if (d.actual == null || d.actual === "") return null;
-  if (d.kind === "pct") return Math.max(0, Math.min(100, Number(d.actual)));
-  return String(d.actual).toLowerCase() === "yes" ? 100 : 0;
+/* ── WHAT A STATUS READS AS (§104) ────────────────────────────────────────
+   A deliverable and a milestone are reported the same way now: Not started,
+   In progress with a per-cent, Delivered (or Completed). The figure follows
+   the word at both ends and only the middle is typed, which is why `kind` --
+   the plan's old choice between "delivered or not" and "a percentage" -- has
+   nothing left to decide and is gone (§24).
+
+   AN IN-PROGRESS ROW WITH NO PER-CENT READS 0, not null. The reporting page
+   asks for the number and the tally does not count the row until it has one,
+   so this case only arises in data that arrived another way -- and every
+   milestone in every tenant is in exactly that state on the day this ships.
+   Reading it as 0 is what makes the Execution figure identical to the count
+   it replaces; excluding it would raise every tenant's score overnight. */
+/* ── AN IN PROGRESS WITH NO NUMBER IS NOT NOUGHT (§104.10) ───────────────
+   It returned 0, so the average COUNTED it -- and a project's figure fell the
+   instant a dropdown changed, before the person who changed it had said
+   anything at all. That is the platform putting a number in somebody's mouth,
+   which is precisely why an In progress state with no figure was refused in
+   the first place (§99.8): the score would have to invent one.
+
+   It returns NULL, so `sideAvg()` leaves it out the way it already leaves out
+   an outcome nobody has measured. The row is not forgiven -- it is
+   OUTSTANDING: the tally counts it as unanswered, the pane marks it, and the
+   figure beside it is honestly built on what has been said.
+
+   `x.pct === ""` is the case that has to be named: Number("") is 0, not NaN,
+   so an empty box would have read as a genuine nought. */
+function statusReads(x){
+  if (!x || !x.status) return null;
+  if (x.status === "done") return 100;
+  if (x.status === "todo") return 0;
+  if (x.pct == null || x.pct === "") return null;
+  var p = Number(x.pct);
+  return isNaN(p) ? null : Math.max(0, Math.min(100, p));
 }
+function delivReads(d){ return statusReads(d); }
+function msReads(m){ return statusReads(m); }
+/* Reported means ANSWERED, and In progress is not answered without its
+   number -- which is the whole of "in progress requires a % of completion".
+   ONE QUESTION, asked of the reading: two predicates that had to agree about
+   the same row are how "given" and "reads" drift apart. */
+function statusGiven(x){ return statusReads(x) != null; }
+/* Said something, and did not finish saying it. Not the same as "unanswered":
+   a row nobody has touched is silent, this one is halfway through a sentence. */
+function statusPending(x){ return !!x && x.status === "wip" && statusReads(x) == null; }
 function sideAvg(vals){
   var v = vals.filter(function(x){ return x != null && !isNaN(x); });
   if (!v.length) return null;
@@ -2990,14 +3109,33 @@ function projOverruns(p){
 function capPerf(c){
   return sideAvg((c.projects || []).map(projPerf));
 }
+/* EXECUTION IS AN AVERAGE NOW, AND IT IS THE SAME NUMBER (§104). It was
+   `done / total`: a milestone in progress counted as nothing. With a per-cent
+   on the milestone it is the mean of what each one reads -- 100 done, 0 not
+   started, its own figure in between -- and those are identical arithmetic
+   while no per-cent has been entered, which is every tenant on day one.
+   Measured across all eight capabilities in the worked example before it was
+   built: 50/50, 50/50, 50/50, 40/40, 40/40, 33/33, 42/42, 40/40.
+
+   The counts stay beside it. "5 of 12 completed" and "42%" answer two
+   different questions and both are worth having. */
 function capExec(c){
-  var done = 0, total = 0, wip = 0, todo = 0;
+  var done = 0, total = 0, wip = 0, todo = 0, sum = 0, scored = 0;
   (c.projects || []).forEach(function(p){
     var m = projMilestones(p);
     done += m.done; wip += m.wip; todo += m.todo; total += m.total;
+    (p.milestones || []).forEach(function(x){
+      /* §104.10: a milestone halfway through a sentence leaves the average
+         rather than dragging it down. `|| 0` still stands for a milestone
+         NOBODY has touched -- projMilestones() counts that one as Not started,
+         so nought is what it is, not what we assumed. */
+      if (statusPending(x)) return;
+      scored++; sum += msReads(x) || 0;
+    });
   });
   return { done: done, wip: wip, todo: todo, total: total,
-           pct: total ? Math.round(done / total * 100) : null };
+           pending: total - scored,
+           pct: scored ? Math.round(sum / scored) : null };
 }
 function capDeliverySide(c){ return sideAvg((c.projects || []).map(projDeliverySide)); }
 function capOutcomeSide(c){ return sideAvg((c.projects || []).map(projOutcomeSide)); }
@@ -3005,16 +3143,121 @@ function capOutcomeSide(c){ return sideAvg((c.projects || []).map(projOutcomeSid
 /* What a capability asks for this cycle: its key objectives, plus everything in
    its projects whose time has come. An outcome measured at Q4 is not an empty
    box somebody forgot in Q2 \u2014 it is not asked. */
-function outcomeDue(o){
-  if (!o.measureAt) return true;
-  var q = String(o.measureAt).match(/Q([1-4])\s*(\d{4})?/);
-  if (!q) return true;
-  var cq = String(REVIEW.name || "").match(/Q([1-4])\s*(\d{4})?/);
-  if (!cq) return true;
-  var oy = q[2] ? +q[2] : 0, cy = cq[2] ? +cq[2] : 0;
-  if (oy && cy && oy !== cy) return oy < cy;
-  return +q[1] <= +cq[1];
+/* ── WHEN A ROW IS DUE (§104) ──────────────────────────────────────────────
+   One reader, four written shapes, because the plan is written by people and
+   people write dates four ways:
+
+       July 26            a deliverable's or an outcome's due date
+       W3 Mar 26          a milestone's, one step finer
+       Q3 2026 / Q3       every plan authored before this version
+       31 May 2026        the one real project, and every date-timelined plan
+
+   Everything resolves to a MONTH NUMBER since year zero, which is the coarsest
+   unit any of them share -- a week inside March is still March, and comparing
+   a week to a cycle that runs six months would be precision nobody asked for.
+
+   `Date.parse` is deliberately the LAST resort rather than the first: it reads
+   "Q3 2026" as nothing and "W3 Mar 26" as nothing, but it also reads bare
+   numbers and stray words as dates in ways that would quietly turn a typo into
+   a deadline. The named shapes are matched first and explicitly.
+
+   THE CYCLE IS READ BY THE SAME FUNCTION, which is the part that was broken:
+   the old test compared quarter to quarter and answered "due" for EVERYTHING
+   when the cycle was called "H1 2026" -- which is what the demo cycle is
+   called and what a half-yearly review is always called. A cycle resolves to
+   its LAST month, because a cycle asks for everything due by the time it
+   closes. */
+/* MONTH_KEYS, NOT MONTHS -- there is already a `var MONTHS` in this file
+   1,400 lines below, holding the same twelve words CAPITALISED for
+   formatting a date. Two `var`s of one name in one scope is one binding, the
+   later wins, and this read every month as unknown: `indexOf("jul")` against
+   ["Jan",...] is -1. NOTHING THREW. `monthsOf` returned null, `dueThisCycle`
+   reads null as "always asked", and every row on every pane quietly read as
+   due -- which is the EXACT fault the old quarter-only reader had, restored
+   by accident on the day it was removed. §56.7 in a third place, and it
+   failed the way that rule says it always does: silently, in the safe
+   direction. */
+var MONTH_KEYS = ["jan","feb","mar","apr","may","jun","jul","aug","sep","oct","nov","dec"];
+function monthIndex(w){
+  var t = String(w || "").slice(0, 3).toLowerCase();
+  return MONTH_KEYS.indexOf(t);
 }
+function fullYear(y){
+  var n = +y;
+  if (!n && n !== 0) return null;
+  /* "26" is 2026, not 26 AD. Two digits are a century short, and a plan is
+     never written about the year 26. */
+  return n < 100 ? 2000 + n : n;
+}
+/* Months since year zero, so two dates in different years compare with one
+   subtraction. Null when the text is not a time at all -- which is what the
+   upload notice reports and what "Done" in a due-date column produces. */
+function monthsOf(v, last){
+  var s = String(v == null ? "" : v).trim();
+  if (!s) return null;
+  var m;
+  /* W3 Mar 26 / Week 3 March 2026 -- the week is read and discarded, because
+     the comparison is monthly. It is kept in the TEXT for the person. */
+  if ((m = /^w(?:eek)?\s*[1-5]\s+([a-z]+)\.?\s*'?(\d{2,4})$/i.exec(s)))
+    return monthIndex(m[1]) < 0 ? null : fullYear(m[2]) * 12 + monthIndex(m[1]);
+  /* July 26 / Jul 2026 / Dec 26 */
+  if ((m = /^([a-z]+)\.?\s*'?(\d{2,4})$/i.exec(s)))
+    return monthIndex(m[1]) < 0 ? null : fullYear(m[2]) * 12 + monthIndex(m[1]);
+  /* Q3 2026 / Q3 -- a quarter is its FIRST month, or its last when `last`
+     is asked for, which is how a cycle named Q2 covers April to June. */
+  if ((m = /^q([1-4])\s*'?(\d{2,4})?$/i.exec(s))) {
+    var qy = m[2] ? fullYear(m[2]) : cycleYear();
+    return qy == null ? null : qy * 12 + (+m[1] - 1) * 3 + (last ? 2 : 0);
+  }
+  /* H1 2026 / H2 26 -- a half year, which is what a review is usually called
+     and what the old reader could not see at all. */
+  if ((m = /^h([12])\s*'?(\d{2,4})?$/i.exec(s))) {
+    var hy = m[2] ? fullYear(m[2]) : cycleYear();
+    return hy == null ? null : hy * 12 + (+m[1] - 1) * 6 + (last ? 5 : 0);
+  }
+  /* FY26 / 2026 -- a whole year. */
+  if ((m = /^(?:fy)?\s*'?(\d{4})$/i.exec(s)))
+    return fullYear(m[1]) * 12 + (last ? 11 : 0);
+  /* 31 May 2026, and anything else a browser genuinely reads as a date. */
+  var t = Date.parse(s);
+  if (!isNaN(t)) { var d = new Date(t); return d.getFullYear() * 12 + d.getMonth(); }
+  return null;
+}
+/* THE CYCLE'S OWN CLOSING MONTH, taken from `REVIEW.to` -- which has said
+   "Jun 2026" since the review model existed -- rather than parsed out of its
+   NAME. The name is a label somebody types ("H1 2026", "Half 1", "First
+   half"); `to` is the field that means it. The name is the fallback, not the
+   source.
+
+   55 of the 60 milestones in the worked example are a bare quarter with no
+   year, so a year has to come from somewhere: it comes from the cycle, which
+   is the only year the platform actually knows. */
+function cycleYear(){
+  var m = /(\d{4})/.exec(String(REVIEW.to || "") + " " + String(REVIEW.name || "") +
+                         " " + String(REVIEW.due || ""));
+  return m ? +m[1] : null;
+}
+function cycleMonth(){
+  var t = monthsOf(REVIEW.to);
+  return t != null ? t : monthsOf(REVIEW.name, true);
+}
+/* IS THIS ROW ASKED FOR THIS CYCLE? A row with no date is always asked: the
+   plan did not say when, so the platform does not get to decide it is early.
+   A row whose date cannot be read is also asked, for the same reason -- the
+   upload said so at the time, and silently not asking would hide it. */
+function dueThisCycle(v){
+  var m = monthsOf(v), c = cycleMonth();
+  if (m == null || c == null) return true;
+  return m <= c;
+}
+/* A row past its date and not finished. Distinct from not-due and drawn
+   differently, because "late" and "not yet" are opposite readings. */
+function overdue(v, done){
+  if (done) return false;
+  var m = monthsOf(v), c = cycleMonth();
+  return m != null && c != null && m < c;
+}
+function outcomeDue(o){ return dueThisCycle(o.measureAt); }
 /* THERE IS NO delivDue(). A deliverable used to carry a quarter of its own,
    and one later than the cycle meant "not asked": a row the reporting page
    dimmed and the tally left out. Islam, 2026-08-23: a deliverable belongs to
@@ -3023,11 +3266,20 @@ function outcomeDue(o){
    the predicate went too, at all four of its call sites, rather than being
    left behind always answering true (§24). An OUTCOME still has one, because
    a measurement time is a real thing somebody chose. */
+/* THE TALLY MEANS "WHAT YOU OWE THIS CYCLE" (§104), not "everything in the
+   plan". A deliverable due next December is not an empty box somebody forgot
+   in June -- it is not asked, exactly as an outcome measured in Q4 has never
+   been asked in Q2. It leaves the count and it leaves the submit gate.
+
+   Submitting therefore gets easier early in a project and no easier late,
+   which is the right way round: a unit is chased for what is late, never for
+   what has not started. */
 function projReported(p){
   var n = 0, total = 0;
   (p.deliverables || []).forEach(function(d){
+    if (!dueThisCycle(d.due)) return;
     total++;
-    if (d.actual != null && d.actual !== "") n++;
+    if (statusGiven(d)) n++;
   });
   (p.outcomes || []).forEach(function(o){
     if (!outcomeDue(o)) return;
@@ -3035,8 +3287,9 @@ function projReported(p){
     if (o.actual != null && o.actual !== "") n++;
   });
   (p.milestones || []).forEach(function(m){
+    if (!dueThisCycle(m.finish)) return;
     total++;
-    if (m.status) n++;
+    if (statusGiven(m)) n++;
   });
   return { done: n, total: total };
 }
@@ -3262,9 +3515,9 @@ function clearCapability(cap, what, why){
   }
   (cap.keyObjectives || []).forEach(function(m){ m.actual = ""; m.progress = null; m.note = ""; });
   (cap.projects || []).forEach(function(p){
-    (p.deliverables || []).forEach(function(d){ d.actual = null; d.note = ""; });
+    (p.deliverables || []).forEach(function(d){ d.status = null; d.pct = null; d.note = ""; });
     (p.outcomes || []).forEach(function(o){ o.actual = null; o.progress = null; o.note = ""; });
-    (p.milestones || []).forEach(function(m){ m.status = null; m.note = ""; });
+    (p.milestones || []).forEach(function(m){ m.status = null; m.pct = null; m.note = ""; });
   });
 }
 /* One function may carry several capabilities \u2014 Marketing carries two \u2014 so
@@ -3598,18 +3851,146 @@ function reportedCount(u){
 }
 /* A note is required where a figure lands in the bottom two bands. A red
    number with no explanation is the thing a review meeting stalls on. */
+/* WHAT A ROW READS, whatever kind of row it is. A tactic is a ratio, a
+   deliverable and a milestone are a status-and-per-cent (§104.10), and
+   everything else carries `progress`. One reader, because the note rule and
+   the board both ask and two copies would disagree about a deliverable. */
+function rowReads(x){
+  if (x.kind === "tactic") return tacticRatio(x.obj);
+  if (x.kind === "deliverable" || x.kind === "milestone") return statusReads(x.obj);
+  return x.obj.progress;
+}
 function needsNote(x){
-  var p = x.kind === "tactic" ? tacticRatio(x.obj) : x.obj.progress;
+  var p = rowReads(x);
   if (p == null) return false;
   var k = bandOf(p).key;
   return (k === "bad" || k === "warn") && !(x.obj.note && x.obj.note.trim());
 }
 function missingNotes(u){ return askedItems(u).filter(needsNote); }
-function unitState(u){
-  if (REVIEW.submitted[u.ukey]) return { key:"done", label:"Submitted" };
-  var c = reportedCount(u);
+
+/* ── A SUPPORTING FUNCTION REPORTS AND SUBMITS (§105) ────────────────────
+   The same three answers a unit has, over a function's own vocabulary: key
+   objectives, deliverables and outcomes, milestones. `reportItems()` could not
+   be reused -- a unit's rows hang off pillars and a function's off
+   capabilities -- but everything downstream is shared, which is why `kind` is
+   the only thing that differs and `rowReads()` above is one function.
+
+   ASKED is per row and per cycle, exactly as `tacticDue()` is for a unit: a
+   milestone due in December is not an empty box somebody forgot in June. */
+function fnReportItems(fk){
+  var out = [];
+  capsOfFunction(fk).forEach(function(c){
+    (c.keyObjectives || []).forEach(function(m){
+      out.push({ id:m.id, obj:m, kind:"objective", group:c.name, sub:"", asked:true });
+    });
+    (c.projects || []).forEach(function(p){
+      var head = c.name + " \u00b7 " + (p.code || p.name);
+      (p.deliverables || []).forEach(function(d){
+        out.push({ id:d.id, obj:d, kind:"deliverable", group:head, sub:"",
+                   asked:dueThisCycle(d.due), owner:p.owner });
+      });
+      (p.outcomes || []).forEach(function(o){
+        out.push({ id:o.id, obj:o, kind:"outcome", group:head, sub:"",
+                   asked:outcomeDue(o), owner:p.owner });
+      });
+      (p.milestones || []).forEach(function(m){
+        out.push({ id:m.id, obj:m, kind:"milestone", group:head, sub:"",
+                   asked:dueThisCycle(m.finish), owner:m.owner || p.owner });
+      });
+    });
+  });
+  return out;
+}
+function fnAskedItems(fk){
+  return fnReportItems(fk).filter(function(x){ return x.asked; });
+}
+function fnReportedCount(fk){
+  var a = fnAskedItems(fk), n = 0;
+  a.forEach(function(x){
+    if (x.kind === "deliverable" || x.kind === "milestone") { if (statusGiven(x.obj)) n++; }
+    else if (x.obj.actual != null && x.obj.actual !== "") n++;
+  });
+  return { done:n, total:a.length };
+}
+function fnMissingNotes(fk){ return fnAskedItems(fk).filter(needsNote); }
+
+/* ── WHAT STOPS A SUBMISSION, ASKED ONCE FOR BOTH SIDES (§105) ───────────
+   A unit and a function are the same product (§53.5), so the refusal is one
+   function taking a TARGET rather than two that will drift. It returns the
+   rows, never a sentence, because the caller says it in its own words.
+
+   Two rules, and the second is new: a figure in the bottom two bands with no
+   note (a red number nobody explained is what a review meeting stalls on),
+   and a row that said In progress and never said how far (§104.10 -- the
+   score leaves it out, so submitting would file a report with a hole in it). */
+function submitBlockers(target){
+  var t = String(target || ""), fn = t.indexOf("fn:") === 0;
+  var rows = fn ? fnAskedItems(t.slice(3)) : askedItems(UNITS[t] || { keyObjectives:[], items:[] });
+  return { notes: rows.filter(needsNote),
+           pending: rows.filter(function(x){ return statusPending(x.obj); }) };
+}
+/* The refusal in words, or "" when nothing is in the way. Said in ONE place so
+   the two Submits cannot explain themselves differently. */
+function submitRefusal(target){
+  var b = submitBlockers(target), say = [];
+  if (b.pending.length) say.push(plural(b.pending.length, "row") +
+    " said In progress and did not say how far. Enter a per-cent for each.");
+  if (b.notes.length) say.push(plural(b.notes.length, "figure") +
+    " " + (b.notes.length === 1 ? "is" : "are") +
+    " at risk or off track with no note. Add a line to each.");
+  return say.join("\n\n");
+}
+function unitState(u){ return reportState(reportedCount(u), u.ukey); }
+function fnState(fk){ return reportState(fnReportedCount(fk), "fn:" + fk); }
+/* One reading of "where has this subject got to", asked of a count and a key,
+   so the board cannot describe a function differently from a unit (§53.5). */
+function reportState(c, key){
+  if (REVIEW.submitted && REVIEW.submitted[key]) return { key:"done", label:"Submitted" };
   if (!c.done) return { key:"late", label:"Not started" };
   return { key:"part", label:"In progress" };
+}
+
+/* ── HOW THE CYCLE IS GOING, ASKED ONCE (§108.9) ──────────────────────
+   The Reporting cycle page computed this inline, which was right while it was
+   the only page that wanted it. The Overview opens on the same four numbers,
+   and a second loop over activeKeys() would be two answers to one question —
+   the drift §53.5 exists to catch, invited deliberately by a page whose whole
+   job is to summarise other pages.
+
+   `progress` is DERIVED rather than counted, and that is the cycle page's own
+   arithmetic moved rather than re-reasoned: a unit is in progress when it is
+   neither submitted nor untouched, so it is the remainder and can never
+   disagree with the other two. */
+/* WHICH SUPPORTING FUNCTIONS ARE ON THE BOARD (§105, named once in §108.1).
+   The filter was written inline in renderCycle(); the totals need exactly the
+   same list, and two copies of it is how a board and its own summary come to
+   disagree about how many things were asked for. */
+function boardFunctionKeys(){
+  return Object.keys(FUNCTIONS).filter(function(fk){
+    return fnShows(fk) && !fnPlansInPillars(FUNCTIONS[fk]) && capsOfFunction(fk).length;
+  });
+}
+
+function cycleTotals(){
+  var t = { done:0, total:0, sub:0, none:0, units:0 };
+  function add(c, st){
+    t.done += c.done; t.total += c.total;
+    if (st.key === "done") t.sub++;
+    if (st.key === "late") t.none++;
+    t.units++;
+  }
+  activeKeys().forEach(function(k){ add(reportedCount(UNITS[k]), unitState(UNITS[k])); });
+  /* THE FUNCTIONS COUNT TOO (§105). They report, they submit, and they are on
+     the board — so leaving them out of the headline would say 6 of 10 on a
+     page listing fifteen rows. */
+  boardFunctionKeys().forEach(function(fk){ add(fnReportedCount(fk), fnState(fk)); });
+  /* DERIVED, NEVER COUNTED: in progress is whatever is neither submitted nor
+     untouched, so it cannot disagree with the other two. It also FIXES a real
+     miscount — the inline version divided by `activeKeys().length` while
+     `sub` and `none` had already grown to include the functions, so every
+     submitted function took one off "in progress" (§108.1). */
+  t.progress = t.units - t.sub - t.none;
+  return t;
 }
 
 /* Two units are genuinely mid-report: some figures in, some not. Without this

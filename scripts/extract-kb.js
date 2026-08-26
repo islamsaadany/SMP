@@ -46,13 +46,34 @@ function sandbox(known) {
                                 RegExp: RegExp, isNaN: isNaN, parseInt: parseInt,
                                 parseFloat: parseFloat, undefined: undefined },
                               known);
-  const noop = function () { return ""; };
+  /* THE UNKNOWN HAS TO SURVIVE BEING USED, not merely being named. A plain
+     `function(){}` answers `TOUR` and then dies on `TOUR.storyFor(...)`,
+     because a function has no arbitrary properties — which is exactly what
+     happened on the first merge after this file was written, when the
+     onboarding tour (§107) arrived in `renderKB`.
+
+     So the stand-in is a Proxy that is CALLABLE and returns ITSELF for any
+     property: `A.b.c()` and `A()` both work and both come back as the same
+     harmless thing. That is what keeps this a capture rather than a list of
+     everything config-render.js happens to touch this month — the file is
+     four thousand lines and grows, and enumerating its dependencies would
+     make this break on somebody else's unrelated change. */
+  const ANY = new Proxy(function () {}, {
+    get: function (t, k) {
+      if (k === Symbol.toPrimitive || k === "toString") return function () { return ""; };
+      if (k === Symbol.iterator) return function () { return [][Symbol.iterator](); };
+      return ANY;
+    },
+    apply: function () { return ANY; },
+    construct: function () { return ANY; },
+    has: function () { return true; }
+  });
   return new Proxy(store, {
     has: function () { return true; },              /* every name resolves */
     get: function (t, k) {
       if (k === Symbol.unscopables) return undefined;
       if (k in t) return t[k];
-      return noop;
+      return ANY;
     },
     set: function (t, k, v) { t[k] = v; return true; }
   });

@@ -6,8 +6,9 @@ version (rules A2 / A11, changed 2026-08-20) — those go only when asked for.
 
 **Where it runs:** Vercel, production tracks `main`. Static files plus two
 serverless functions (`/api/state`, `/api/auth`) against Neon Postgres.
-**Latest version:** v3.30 shipped (live) · **v3.31 in progress on the branch**
-**Last updated:** 2026-08-25
+**Latest version:** v3.36 on `main` · **v3.37 in progress on the branch**
+**Last updated:** 2026-08-26
+
 **Sign in as:** `SMO` / `1234` — a password change is forced at once (§43.1,
 reversing §19.4).
 **Direction:** rebuilding on the HR_ERP stack (§20, decided 2026-08-20).
@@ -52,11 +53,20 @@ Nothing proceeds past this line without an answer.
 
 ---
 
+## Known red, on purpose
+
+- **`checks/no-jump.py` — "sorting a column" (1 JUMPED).** Real defect,
+  diagnosed 2026-08-26 (§109.5): with a register row open for editing, sorting
+  collapses the page 1457px → 913px (the open row keeps its class, loses its
+  height) and the scroll clamps up. Pre-dates the §109 merge; needs its own
+  fix in the register's sort, not a merge-widening patch. Until then this red
+  is a true signal — do not silence it.
+
 ## Built and verified
 
-### v3.31 — the assistant (§103, §104), and a chat that vanished (§105)
+### v3.37 — the assistant (§111, §112), and a chat that vanished (§113)
 
-**§105 — reported from production.** *"I replied and the chat disappeared from
+**§113 — reported from production.** *"I replied and the chat disappeared from
 all places."* Nothing was deleted: replying marks a conversation answered, the
 inbox opens on Waiting, and Waiting excludes answered ones — so replying
 removed the row from the list the office was looking at. Two correct decisions;
@@ -72,13 +82,13 @@ nobody had asked what they do to each other.
 **Verified:** office-chat.py §9 ALL CLEAR, proved to fail (3 failures) with the
 exemption removed. Reproduced against a real database before and after.
 
-### v3.31 — the assistant (§103, §104; spec 016)
+### v3.37 — the assistant (§111, §112; spec 016)
 
-**§103 — the corpus.** 43 task recipes in `src/recipes.js`, as data, rendered
+**§111 — the corpus.** 43 task recipes in `src/recipes.js`, as data, rendered
 on the Knowledge base page and read by `scripts/extract-kb.js` into
 `db/kb.json`: 9 sections, 26 page explainers, 43 recipes, ~9,800 words.
 
-**§104 — the assistant answers first.** Gemini, at Islam's choice.
+**§112 — the assistant answers first.** Gemini, at Islam's choice.
 
 - **Off is the default**, and off means the model is never called — enforced in
   `say` on the server, asserted as a call count of zero.
@@ -98,6 +108,78 @@ knowledge-base.py ALL CLEAR · test-authorize 190/0 · qa.py clean.
 
 **Waiting on:** `GEMINI_API_KEY` in Vercel. Everything is built and tested
 against a stub; the live call is the only unexercised path.
+
+### v3.34 — a project's front matter (§109)
+
+Islam: *"any project needs 3 things at its starting part — the brief,
+stakeholders, start and end date."*
+
+- **The start and end were stored and shown nowhere.** They appeared in exactly
+  one place in the whole product — the review deck — so the page that *authors*
+  a project could not say when it runs.
+- **One box, divided:** owner · start · end down the left, the brief and the
+  stakeholders as two labelled rows on the right. Settled from a mockup made of
+  the real platform, over two other arrangements.
+- **Deliberately not a `<table>`.** The platform's global
+  `table { min-width: 620px }` makes any small table overflow its own grid track
+  by 300px — Islam caught it in the mockup, and the column was 320px throughout.
+- **Both value columns start at one x**, which was the ask: each column's label
+  track is sized to its own longest label, and a pill's leading margin is pulled
+  back so the chip's border meets the brief's first letter.
+- **The Timeline pill is gone.** It once decided how every date was read; §104
+  ended that, and its one remaining effect was to *suppress* a true overrun
+  warning. The field and the import template are untouched.
+- **Plan pane only** — Performance and Reporting show no dates, confirmed as
+  right by Islam rather than assumed.
+
+**Verified:** new `src/checks/project-header.py` **all passed**, both halves
+proved able to fail first (an `auto` label track reproduces the exact
+misalignment, 627 vs 687; wiring one field to a bare `<input>` fails twice) ·
+every other check clean against the merged build · qa.py clean.
+
+### v3.32 — the onboarding tour (§107, spec 017)
+
+A first-sign-in guided tour on demo data: the page dims, what matters stays
+lit — the one button that says where you are, or a section button together
+with its content — and a short card explains it. **Two stories** (strategy
+custodian; unit / function owner), told wherever the person actually works,
+on a unit or on a function. Next and Back only; **one exit** through the ×,
+which asks *Don't show again* or *Skip for now* with a way back for a stray
+press. Replay from the Knowledge base. Memory in the browser only.
+
+Settled over **four reviewed revisions of a working mockup** before a line of
+`src/` was touched — and three of the five decisions are reversals of
+something drawn first, none of which could have been argued in the abstract:
+the interactive click-the-real-button tour was built and then reversed
+(§107.2), Skip tour was removed in favour of the × asking (§107.3), and the
+spotlight narrowed from the whole navigation row to the one button that says
+where you are (§107.4).
+
+Built with `src/tour.js` + `tour.css`, mounted outside every region `paint()`
+rewrites, holding selectors rather than nodes, navigating by pressing the
+platform's own controls, and reading roles through the platform's own
+`personRoles()`. `src/checks/tour.py` walks every story as every role —
+custodian on a unit AND on a function, owner of a unit AND head of a
+function — and was **proved able to fail before its green run was believed**
+(§107.10); the first deliberate break was a no-op and caught nothing, which
+is §94.5's own fault repeated.
+
+Found by measuring rather than reasoning: a step that disagreed with itself
+once a function walked it (§107.7), a tenant's label inflected into *"the
+pillarss"* (§107.8), and a contrast measurement proved real by wrecking the
+card's text and watching it report 1.6:1.
+
+Corrected after Islam replayed it (§107.14): the tour now takes you to the
+main page before the welcome card, rather than drawing it over the Knowledge
+base — and the dataset swap moved ahead of resolving where to tour, because
+`own` was being read from the client's own tenant and looked up in the demo
+tenant's navigation. The check had asserted the tour was *running* and stopped
+there; **"it started" is not "it went anywhere"**, and it now asserts a
+destination is selected, the Knowledge base is off screen, and there are tabs
+to tour.
+
+**Waiting on Islam:** the owner story's copy. The custodian's is his, word
+for word off the signed-off mockup; the owner's is mine until he has read it.
 
 ### v3.30 — reordering comes back (§101), and focus gets a switch (§102)
 
@@ -123,6 +205,47 @@ safe-looking direction. Found by driving the page.
 **Verified:** test-authorize 165 → **190, 0 failed** · new
 `src/checks/plan-arrange.py` and `src/checks/focus-switch.py` **ALL CLEAR** ·
 qa.py clean · all four failure modes proved to fail before being trusted.
+
+### v3.32 — the plan's own shape, one row, and a function that submits (§103–§106)
+
+Four sections of one thread: the project tables rethought from the plan
+outwards, then the two things that thread turned up.
+
+- **§103 · The plan's own shape.** A milestone keeps a **name and** a
+  description; a deliverable gets a **due date** back (some land before the
+  project ends). Dates are read, never refused — `Done` and `Pending` in a
+  due-date column are **named as what they are**.
+- **§104 · One table, one row shape.** §99's split is undone for a better
+  reason: giving a deliverable a real direction (`=`) and target (`Y/N`) means
+  the cells it left empty now have answers. Reporting is **Not started / In
+  progress / Delivered**, the per-cent typing itself at both ends. The score
+  column is **Performance** on deliverables and outcomes, **Progress** on
+  milestones — `%` is a unit, not a name.
+- **Not due is a label, not a lock** (§104.8). The comment said so from the day
+  it was written and the code did the opposite: a not-due row had its picker
+  **replaced** by a word, so reporting early was the one act the pane refused.
+- **An In progress with no number is not nought** (§104.10). It read **0**, so
+  the average counted it and a project's figure fell the instant a dropdown
+  changed. It leaves the average now and the row is marked *Needs a %*.
+- **§105 · A supporting function submits**, and everything except the button
+  was already built — the server has carried an explicit `fn:` branch since
+  spec 006. The dot on that tab had been asking for a submission nobody could
+  make. It refuses on a row owing a per-cent or a red figure with no note, and
+  the SMO's cycle board carries the functions.
+- **§106 · What the merge does to a plan already uploaded.** Nothing is
+  deleted. **Execution rises 8–27 points on every capability**, because an In
+  progress milestone stops counting as nought — so the card now prints
+  `5 of 12 milestones · 2 not counted yet`. And a bad due date in a plan
+  **already stored** is finally noticed, named by value and row, with the count
+  on the rail.
+
+**Verified:** `src/checks/project-tables.py` all passed, every new assertion
+proved able to fail first · test-authorize **184, 0 failed** · qa.py clean ·
+main's `plan-arrange.py` and `office-chat.py` ALL CLEAR against the merged
+build. **Not run: migration 024 against a real Postgres** — score-preserving by
+construction, formula parity asserted, SQL never executed against a live schema.
+
+### v3.30 — reordering comes back, as its own grant (§101)
 
 Islam is giving arrangement back to unit people, reversing §94.3.
 

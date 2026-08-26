@@ -15549,3 +15549,137 @@ carefully styled, and a bot message is distinguished from the office's only by
 its label. Left alone deliberately: it is a visual decision on a surface this
 section was not asked to touch (rule 1c), and it is named here rather than
 silently corrected.
+
+
+---
+
+## 120 · Which key, without saying which key (v3.37)
+
+> Islam's diagnostic: **the switch WORKING, the knowledge base WORKING, the API
+> key PRESENT** — and the provider still refusing it.
+
+Everything the page could see was right, and the one fact that would explain it
+is the value itself, which must never be printed.
+
+**"Rejected" and "not the key you made" are two different errands.** The first
+sends somebody to Google's console to look at restrictions; the second sends
+them to Vercel, because **a deployment only carries the environment variables
+that existed when it was BUILT**, so a key changed since then is still the old
+one. Nothing on the screen could tell them apart.
+
+Its **length and its first four characters** are enough, and neither is a
+secret: an AI Studio key is `AIza` plus 35 characters, so a value of any other
+shape is a different **kind** of credential — an OAuth token, a service account,
+a Vertex key — and no amount of looking at Google will ever explain that one.
+Four characters of a 39-character string is not the string, and the row is
+behind the office's own door in any case.
+
+**Read after the trim** (§117), or that cleaning would make a good key report as
+malformed — asserted, because the ordering is invisible and would break
+silently. **Asserted in `test-assistant.js` and not in the browser check**,
+whose stub supplies the steps and would never run this at all (§94.2), with an
+explicit assertion that the shape carries nothing beyond a length and four
+characters.
+
+### 120.1 A real fault, found and set aside
+
+Chasing this turned up something else: **the autosave is debounced 800ms and
+nothing flushes it when the page goes away.** Measured with the chat settings
+wiped from the database — press ON, navigate 150ms later, **saves sent: none**,
+database unchanged, screen still reading ON. It is not the chat's: `sync.js` is
+the autosave for the **whole platform**, so branding, terminology and the access
+matrix all have the same hole.
+
+**It is NOT what Islam hit** — his diagnostic reads *The switch — WORKING*,
+which is the server's own answer — and it is recorded here rather than fixed,
+because a change to the save path for every page in the product on the way past
+another problem is exactly what rule 1b exists to stop.
+
+---
+
+## 121 · The settings, in the order somebody decides them (v3.37)
+
+> *"Refine the settings of chat — think of the logical sequence of the settings,
+> make the titles concise and any explanation can be a tooltip on hovering."*
+
+Settled from a mockup made of **this very panel** — the real build, with its
+rows reordered in the browser (§41.9) — before a line of `src/` was touched.
+**882px → 478px**, same seven controls, nothing removed.
+
+### 121.1 The order was not one
+
+The **master switch** — the one that decides whether any of this exists — sat
+**third**, underneath the assistant, which is a decision *about* the chat rather
+than one *above* it. And the two email settings sat **five rows apart** with
+three unrelated rows between them.
+
+It runs one way now, from *does this exist* down to *a tuning knob*, so a reader
+never has to go back up:
+
+| | |
+|---|---|
+| Chat · Promise · Screenshots | what it is, and what people get |
+| Assistant (+ Test) | who answers |
+| Handover email · Away email | how people are reached |
+| Reply checks | how it runs |
+
+**The titles are one or two words and the KEYS DO NOT MOVE** (§30.2, §65,
+§108.3): renaming a stored key would reset the setting for every tenant that had
+ever touched it, for the sake of a word nobody reads. The panel heading becomes
+**Chat settings**, Islam's own call, so it does not collide with a row now
+called Chat.
+
+### 121.2 A status is not an explanation
+
+Every line of prose became a tooltip. **"No one is set — handoffs wait in this
+inbox until somebody is chosen" did not**, because it is a fact about right now
+rather than a description of how a setting works: behind a hover, somebody turns
+Handover email on, nobody is chosen, and nothing ever says so (§35, §45.2).
+
+That is the one line drawn inside what was asked for, and it is the difference
+between prose and state.
+
+### 121.3 A tooltip that only answers a mouse
+
+Hover does not exist on a tablet, and since every explanation now lives behind
+one of these marks, a note that only answers a mouse is half this panel's
+readers unable to read it. **A tap opens it** — Islam's call when it was put to
+him — with `.on` sitting beside the `:hover` and `:focus` the platform already
+uses, so nothing about the mark changes for anybody else.
+
+**`.tip` is the platform's own**, declared once in `group-extra.css` and reused
+rather than drawn again (§53.5) — `display:none` and not `opacity:0`, for the
+reason §27.2 records at length. **Scoped to this panel deliberately**: `.tip` is
+used all over the product, and giving every one of them a tap would be a change
+to pages this was not asked to touch.
+
+**And the bubble had to stop hanging off the side.** The platform's default
+centres a 264px note on a 14px mark, which inside a 392px dropdown puts most of
+it outside the panel — and the seven marks sit at seven different x positions,
+so no single offset fixes them. Making the mark `position:static` hands the
+bubble to `.chset-row` instead, where it spans exactly the row: inside the
+panel **by construction rather than by arithmetic**.
+
+### 121.4 What proves it
+
+`checks/office-chat.py` §12 asserts **the problems, never the layout** (§94.8) —
+a check written against *"row 4 is Assistant"* has to be rewritten the day
+anything moves:
+
+- the switch that turns the whole thing off comes **first**;
+- the two email settings are **adjacent**;
+- Test is in the **assistant's own row**;
+- every setting explains itself behind a mark, and **pressing** one opens it;
+- **one at a time, and the bubble lands inside the panel**;
+- the prose is gone and **the live status is not**.
+
+Watched to fail first (§94.5): moving the master switch back down, 1 failure;
+reverting the tap, 1; reverting the anchoring, 1.
+
+**And one of those assertions could not fail when it was first written.** It
+measured the ROW against the panel — and a row is inside its own panel by
+definition, so it passed on the broken build. A `::after` is not an element and
+has no `getBoundingClientRect` (§53.7's blind spot), so the bubble's box is now
+computed from **whichever containing block `position` actually gives it**,
+following the CSS rather than assuming which rule is live. Only then did it
+report `box [899,1187] · panel [969,1361]`.

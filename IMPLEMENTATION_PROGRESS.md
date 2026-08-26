@@ -64,6 +64,46 @@ Nothing proceeds past this line without an answer.
 
 ## Built and verified
 
+### v3.37 — the settings, in the order you'd decide them (§121)
+
+Asked to rethink the chat settings' sequence, titles and explanations. Settled
+from a mockup made of that very panel, approved, then built. **882px → 478px**,
+same seven controls, nothing removed, no stored key renamed.
+
+- **The order was not one.** The master switch sat *third*, under a setting it
+  governs; the two email rows sat five apart. It now descends from *does this
+  exist* to *a tuning knob*.
+- **Every explanation is a tooltip** that opens on **hover, focus or tap** —
+  hover doesn't exist on a tablet, and these now carry the whole explanation.
+- **A status is not an explanation.** *"No one is set"* stays on the page: behind
+  a hover, somebody turns Handover email on, nobody is chosen, and nothing says
+  so.
+- **The bubble is anchored to the row, not the mark** — centring a 264px note on
+  a 14px mark hangs it off a 392px dropdown, at seven different x positions.
+
+**Verified:** office-chat.py §12 ALL CLEAR, asserting the *problems* rather than
+the layout, each watched to fail first · qa.py ERRORS: none · test-chat 52/0 ·
+test-assistant 33/0 · test-authorize 193/0. **One assertion was rewritten for
+being unfalsifiable** — it measured the row against the panel, and a row is
+inside its own panel by definition.
+
+### v3.37 — which key, without saying which key (§120)
+
+The diagnostic read *switch WORKING · knowledge base WORKING · key PRESENT*
+with Google still refusing the key. **"Rejected" and "that's not the key you
+made" send you to two different websites**, and nothing on screen could tell
+them apart.
+
+The key row now reports its **length and first four characters** — an AI Studio
+key is `AIza` plus 35, so any other shape is a different kind of credential
+entirely — and names the Vercel trap: a deployment only carries the variables
+that existed when it was **built**.
+
+**Recorded and deliberately not fixed:** the autosave is debounced 800ms with
+**no flush when the page goes away**. Press a switch, leave 150ms later, and
+nothing is saved while the screen shows the new value. It affects every setting
+in the platform, and it was **not** the fault being chased.
+
 ### v3.37 — a handoff the person can see (§119)
 
 *"Nothing happens at all"* — with the assistant on and a key the provider now

@@ -663,6 +663,95 @@ with sync_playwright() as p:
     CHAT["messages"] = []
     CHAT["thread"] = None
 
+    # ── 12 · THE SETTINGS, RE-SEQUENCED (§121) ───────────────────────────
+    # ASSERTS THE PROBLEMS, NEVER THE LAYOUT (§94.8). The faults were: the
+    # master switch sat third, under a setting it governs; the two email rows
+    # sat five rows apart; the explanations were longer than the controls; and
+    # a hover note is unreachable on a touch screen. A check written against
+    # "row 4 is Assistant" would have to be rewritten the day anything moves.
+    print("\n12 · the settings, in the order somebody decides them")
+    pg.evaluate("()=>{const b=document.querySelector('[data-chsetmenu]');"
+                " if(b && !document.querySelector('.chset')) b.click();}")
+    pg.wait_for_timeout(400)
+    # The assistant ON, so Handover email is drawn at all — it is the row that
+    # carries the one status that must NOT have become a tooltip.
+    pg.evaluate("""()=>{const b=[...document.querySelectorAll('[data-chset="assistant"]')]
+        .find(x=>x.dataset.chval==='1' && !x.closest('.seg').classList.contains('lit'));
+        if(b) b.click();}""")
+    pg.wait_for_timeout(900)
+    if not pg.query_selector('[data-chset="notify"]'):
+        pg.evaluate("""()=>{const b=[...document.querySelectorAll('[data-chset="assistant"]')]
+            .find(x=>x.dataset.chval==='1'); if(b) b.click();}""")
+        pg.wait_for_timeout(900)
+
+    seq = pg.eval_on_selector_all(
+        ".chset .chset-row .chset-lab", "n=>n.map(x=>x.childNodes[0].textContent.trim())")
+    ck("every setting is one or two words", bool(seq) and all(len(w.split()) <= 2 for w in seq), seq)
+    # THE MASTER SWITCH GOVERNS EVERY OTHER ROW, so it cannot sit under one.
+    ck("the switch that turns the whole thing off comes first",
+       seq and seq[0] == "Chat", seq)
+    # TWO SETTINGS ABOUT THE SAME ACT BELONG TOGETHER. They were five rows apart.
+    if "Handover email" in seq and "Away email" in seq:
+        ck("the two email settings are next to each other",
+           abs(seq.index("Handover email") - seq.index("Away email")) == 1, seq)
+    # TEST IS WHERE SOMEBODY STANDS AFTER FLIPPING THE ASSISTANT (§116).
+    ck("Test the assistant is in the assistant's own row",
+       pg.evaluate("""()=>{const t=document.querySelector('[data-chtest]');
+           const r=t && t.closest('.chset-row');
+           return !!r && r.querySelector('[data-chset="assistant"]') !== null;}"""), None)
+
+    marks = pg.eval_on_selector_all(".chset .tip", "n=>n.length")
+    ck("every setting explains itself behind a mark", marks == len(seq), [marks, len(seq)])
+    # A STATUS IS NOT AN EXPLANATION and must not have gone behind a hover: a
+    # tooltip cannot say "nobody is chosen" to somebody who never hovers.
+    left = pg.eval_on_selector_all(".chset .chset-hint, .chset .chset-cost",
+                                   "n=>n.map(x=>x.innerText)")
+    ck("the prose is gone from the page", len(left) <= 1, left)
+    ck("but the live status is not",
+       len(left) == 1 and ("wait" in left[0].lower() or "emailed" in left[0].lower()
+                           or "no one is set" in left[0].lower()), left)
+
+    # A TAP OPENS IT. Hover does not exist on a tablet, and every explanation
+    # now lives behind one of these — so a mark that answers only a mouse is
+    # half the readers of this panel unable to read it.
+    opened, outside = [], []
+    for i in range(marks):
+        # THE BUBBLE IS A ::after AND SO IS NOT AN ELEMENT — it has no
+        # getBoundingClientRect, and measuring the ROW instead measures
+        # something that is inside the panel by definition, which is a check
+        # that cannot fail (§53.7's blind spot, §94.5). Its box is computed
+        # from the containing block that `position` actually gives it, so the
+        # measurement follows the CSS rather than assuming which rule is live.
+        st = pg.evaluate("""(i)=>{const t=[...document.querySelectorAll('.chset .tip')][i];
+            t.click();
+            const s=getComputedStyle(t,'::after'), own=getComputedStyle(t);
+            const cb=(own.position==='static' ? t.closest('.chset-row') : t)
+                       .getBoundingClientRect();
+            const w=parseFloat(s.width)+parseFloat(s.paddingLeft)+parseFloat(s.paddingRight);
+            let left=cb.left+parseFloat(s.left||0);
+            const m=/matrix\(([^)]+)\)/.exec(s.transform||"");
+            if (m) left += parseFloat(m[1].split(',')[4]||0);
+            const panel=document.querySelector('.chset').getBoundingClientRect();
+            return { shown: s.display === 'block',
+                     text: (t.dataset.tip||'').length,
+                     box: [Math.round(left), Math.round(left+w)],
+                     panel: [Math.round(panel.left), Math.round(panel.right)],
+                     inPanel: left >= panel.left - 1 && left + w <= panel.right + 1,
+                     open: document.querySelectorAll('.chset .tip.on').length };}""", i)
+        if not st["shown"] or st["text"] < 20: opened.append([i, st])
+        if not st["inPanel"] or st["open"] != 1: outside.append([i, st])
+    ck("pressing a mark opens its note, and there is something in it", not opened, opened[:2])
+    # ONE AT A TIME, and inside the panel — the platform's default centres the
+    # bubble on a 14px icon, which hung a 264px note off the side of a 392px
+    # dropdown. Anchored to the row instead, so it holds for every row.
+    ck("one note at a time, and always inside the panel", not outside, outside[:2])
+    # AND ANY OTHER PRESS PUTS IT AWAY, or a note stands over the control that
+    # was just pressed.
+    pg.evaluate("()=>{const r=document.querySelector('.chset-h'); if(r) r.click();}")
+    pg.wait_for_timeout(250)
+    ck("and pressing anything else puts it away",
+       pg.eval_on_selector_all(".chset .tip.on", "n=>n.length") == 0)
+
     # ── 7 · AND A SESSION THE SERVER REFUSES, LAST ON PURPOSE ────────────
     # A refused session takes the corner away rather than leaving a control
     # that answers every press with a refusal. It runs AFTER the console

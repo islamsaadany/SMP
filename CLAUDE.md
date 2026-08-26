@@ -1346,6 +1346,51 @@ console errors (in this cloud environment, run it via a wrapper that points Play
   instrumenting the click: no request, no console error, and the button's own
   label unchanged, which is what says *the handler never ran* rather than *the
   request failed*. §96's family, fifth time.
+- **THE SETTINGS RUN ONE WAY, AND A STATUS IS NOT AN EXPLANATION (§121):**
+  asked to rethink the chat settings' sequence, titles and explanations, and
+  settled from a mockup made of THAT VERY PANEL (§41.9) — **882px → 478px**,
+  same seven controls, nothing removed. **THE ORDER WAS NOT ONE**: the master
+  switch sat THIRD, under the assistant, which is a decision ABOUT the chat
+  rather than one above it, and the two email rows sat five apart. It descends
+  from *does this exist* to *a tuning knob* — Chat · Promise · Screenshots →
+  Assistant (+ Test) → Handover email · Away email → Reply checks — and **the
+  KEYS DO NOT MOVE** (§30.2), or every tenant that had touched a setting would
+  have it reset for a word nobody reads. **EVERY LINE OF PROSE BECAME A
+  TOOLTIP; "No one is set" DID NOT** — it is a fact about right now, not a
+  description of how a setting works, and behind a hover somebody turns
+  Handover email on, nobody is chosen, and nothing ever says so (§35, §45.2).
+  **A TAP OPENS IT** (hover does not exist on a tablet, and the notes now carry
+  the whole explanation), reusing the platform's own `.tip` rather than drawing
+  a second one (§53.5) and **scoped to this panel**, because `.tip` is used
+  everywhere and widening it is a change to pages this was not asked to touch.
+  **AND THE BUBBLE HAD TO STOP HANGING OFF THE SIDE**: centring a 264px note on
+  a 14px mark puts most of it outside a 392px dropdown, and seven marks sit at
+  seven x positions — `position:static` hands it to `.chset-row`, where it
+  spans the row, inside the panel **by construction rather than by arithmetic**.
+  **AND THE CHECK COULD NOT FAIL WHEN FIRST WRITTEN**: it measured the ROW
+  against the panel, and a row is inside its own panel by definition. A
+  `::after` has no `getBoundingClientRect` (§53.7), so the box is computed from
+  **whichever containing block `position` actually gives it** — following the
+  CSS instead of assuming which rule is live.
+- **A DEPLOYMENT CANNOT SAY WHICH KEY IT HAS, AND MUST SAY ENOUGH (§120):**
+  the diagnostic read *switch WORKING · knowledge base WORKING · key PRESENT*
+  with the provider still refusing it — and **"rejected" and "not the key you
+  made" are two different errands**, the first to Google's console, the second
+  to Vercel (a deployment only carries the variables that existed when it was
+  BUILT). Its **length and first four characters** settle it and are not a
+  secret: an AI Studio key is `AIza` plus 35, so any other shape is a different
+  KIND of credential and no amount of looking at Google explains it. **Read
+  AFTER §117's trim**, asserted, because that ordering is invisible and would
+  break silently — and asserted in `test-assistant.js`, never the browser
+  check, whose stub supplies the steps and would never run it (§94.2).
+- **A DEBOUNCED SAVE WITH NO FLUSH LOSES THE LAST 800ms (§120.1, RECORDED NOT
+  FIXED):** press a switch, leave the page 150ms later — **saves sent: none**,
+  database unchanged, screen still showing the new value. `sync.js` is the
+  autosave for the WHOLE platform, so branding, terminology and the access
+  matrix have the same hole. **It was NOT the fault being chased** (the
+  diagnostic said the switch had saved), and it is written down rather than
+  fixed on the way past: changing the save path for every page in the product
+  while looking at something else is what rule 1b exists to stop.
 - **SAYING NOTHING IS NOT A NEUTRAL OUTCOME (§119):** with the assistant on
   and a working key, Islam got *"nothing happens at all"* — and that was §104
   working as designed. A handoff wrote NOTHING, on sound reasoning (a sentence

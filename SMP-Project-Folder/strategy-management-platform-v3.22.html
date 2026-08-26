@@ -5123,6 +5123,34 @@ body.presenting .chatdock { display:none; }
    header dropdown (§90) — the same control, so it needs no second appearance —
    and adds only the rows inside it. */
 .hmenu-panel.chset { width:392px; }
+/* THE NOTE OPENS ON A TAP (§121). `.tip` and its bubble are the platform's,
+   declared once in group-extra.css and reused here rather than drawn again
+   (§53.5) — this adds the open state and nothing else, so a mark that was
+   opened by hover and by focus is now opened by a press as well.
+
+   BELOW the mark, not above it. The platform's default hangs the bubble over
+   the top, which inside a dropdown puts the first row's note off the top of
+   the panel; here every mark has the whole panel underneath it.
+
+   AND THE PANEL MUST NOT CLIP IT: `.chset` is a dropdown, and an absolutely
+   positioned bubble inside an overflow container is cut off at the edge
+   (§45.5, which is why the searchable select's popup is fixed). Measured
+   rather than assumed — checks/office-chat.py §12 asserts the whole bubble is
+   inside the window and reachable. */
+/* ANCHORED TO THE ROW, NOT TO THE MARK. The platform's default centres the
+   bubble on a 14px icon, which for a 264px note beside a left-hand label hangs
+   most of it off the side of a 392px dropdown — and the marks sit at seven
+   different x positions, so no single offset fixes all of them. Making the
+   mark `static` hands the bubble to `.chset-row` instead, and it then spans
+   exactly the row: inside the panel for every row, by construction rather than
+   by arithmetic. */
+.chset-row { position:relative; }
+.chset .tip { vertical-align:baseline; position:static; }
+.chset .tip::after { bottom:auto; top:calc(100% + 7px);
+  left:14px; right:14px; width:auto; transform:none; }
+.chset .tip.on::after { display:block; }
+.chset .tip.on { color:var(--gold-deep); border-color:var(--gold); }
+.chset .tip:focus-visible { outline:2px solid var(--focus); outline-offset:2px; }
 .chset-h { font-size:var(--fs-micro); letter-spacing:.11em; text-transform:uppercase;
            font-weight:800; color:var(--ink-3); background:var(--surface-2);
            padding:8px 14px; border-bottom:1px solid var(--line); }
@@ -29252,6 +29280,50 @@ var CHAT = (function(){
       }).join("") + "</div>";
   }
 
+  /* ── THE SETTINGS, IN THE ORDER SOMEBODY DECIDES THEM (§121) ────────
+     Islam asked for the sequence, the titles and the explanations to be
+     rethought, and settled it from a mockup made of this very panel.
+
+     THE ORDER TODAY WAS NOT ONE. The master switch — the one that decides
+     whether any of this exists at all — sat THIRD, underneath the assistant,
+     which is a decision ABOUT the chat rather than one above it; and the two
+     email settings sat five rows apart with three unrelated rows between them.
+     It now runs one way, from "does this exist" down to "a tuning knob", so a
+     reader never has to go back up:
+
+         Chat · Promise · Screenshots      what it is, and what people get
+         Assistant (+ Test)                who answers
+         Handover email · Away email       how people are reached
+         Reply checks                      how it runs
+
+     THE TITLES ARE ONE OR TWO WORDS AND THE KEYS DO NOT MOVE (§30.2, §65,
+     §108.3): renaming a stored key would reset the setting for every tenant
+     that had ever touched it, for the sake of a word nobody reads.
+
+     AND A STATUS IS NOT AN EXPLANATION. Every line of prose became a tooltip;
+     "No one is set" did not, because it is a fact about right now rather than
+     a description of how a setting works — behind a hover, somebody turns
+     Handover email on, nobody is chosen, and nothing ever says so (§35, §45.2). */
+  function setRow(key, label, tip, ctl, extra){
+    return '<div class="chset-row"><div class="chset-lab">' + esc2(label) +
+      tipHtml(tip) + (ctl ? '<span class="chset-ctl">' + ctl + '</span>' : '') +
+      '</div>' + (extra || "") + '</div>';
+  }
+
+  /* THE PLATFORM'S OWN HOVER NOTE, not a second one (§53.5). `.tip` is the
+     14px mark used all over the product — display:none rather than opacity:0,
+     for the reason §27.2 records at length — and the only thing added here is
+     that a TAP opens it, because hover does not exist on a tablet and these
+     notes now carry the whole explanation rather than decorating it.
+
+     A <button>, so a tap gives it focus and a keyboard reaches it without a
+     tabindex of its own; `.on` is what the tap toggles, beside the :hover and
+     :focus the rest of the platform already uses. */
+  function tipHtml(t){
+    return ' <button type="button" class="tip" data-chtip="1" data-tip="' + esc2(t) +
+           '" aria-label="' + esc2(t) + '">i</button>';
+  }
+
   function settingsHtml(){
     var c = chatCfg();
     if (!SETMENU) {
@@ -29263,79 +29335,80 @@ var CHAT = (function(){
       'aria-haspopup="true" aria-expanded="true">Settings ' +
       '<span class="hcar">&#9662;</span></button>' +
       '<div class="hmenu-panel chset">' +
-        '<div class="chset-h">The chat</div>' +
+        /* "Chat settings", so the heading does not collide with the row now
+           called Chat — Islam's own call when the names were settled. */
+        '<div class="chset-h">Chat settings</div>' +
 
-        /* ── THE ASSISTANT, AND ITS SWITCH IS FIRST (§104) ────────────
-           Islam: "I need a switch to turn off AI response and just keep it to
-           the SMO inbox." It is OFF until somebody turns it on, and off is
-           enforced on the server, where the model is simply never called —
-           with the assistant off there is no control on screen to hide, so the
-           guard IS the feature (§42, §98.2). */
-        '<div class="chset-row"><div class="chset-lab">The assistant answers first' +
-          '<span class="chset-ctl">' + segHtml("assistant", "Off", "On", c.assistant, true) +
-          '</span></div>' +
-          '<div class="chset-hint">Off sends every question straight to this inbox, exactly ' +
-          'as it does today. On, it answers from the knowledge base first and hands over ' +
-          'anything it cannot answer.</div>' +
-          '<div class="chset-cost">It can only ever read the <b>knowledge base</b> &mdash; ' +
-          'the same pages everybody can already open. It cannot see a figure, a plan or a ' +
-          'score, and it says so rather than guessing.</div>' +
-          /* IS IT WORKING? (§116). The degradation is silent by design — a
-             question the assistant could not answer looks exactly like a
-             question it was never asked — so the one place somebody stands
-             after turning it on gets a button that finds out. */
+        /* ── 1 · DOES IT EXIST AT ALL. Off, nothing below it means anything. */
+        setRow("on", "Chat",
+          "Off removes the bubble from every page. Nothing is deleted \u2014 every " +
+          "conversation stays here and stays readable.",
+          segHtml("on", "Off", "On", c.on, true)) +
+
+        /* ── 2 · WHAT PEOPLE READ BEFORE THEY TYPE. */
+        setRow("promise", "Promise",
+          "Shown under \u201CStrategy Office\u201D on every open chat. It is a promise " +
+          "the office is making to the whole tenant.", null,
+          '<input class="chset-in" type="text" data-chpromise="1" ' +
+            'value="' + esc2(c.promise) + '" aria-label="What the panel promises">') +
+
+        /* ── 3 · WHAT THEY MAY SEND. */
+        setRow("shots", "Screenshots",
+          "The only thing here with real storage cost \u2014 up to 3 MB a picture, " +
+          "shrunk before it is sent.",
+          segHtml("shots", "Off", "On", c.shots, true)) +
+
+        /* ── 4 · WHO ANSWERS (§104). Off is enforced on the server, where the
+           model is simply never called — with the assistant off there is no
+           control on screen to hide, so the guard IS the feature (§42, §98.2).
+           Test stays directly beneath it: it is where somebody stands after
+           turning it on (§116). */
+        setRow("assistant", "Assistant",
+          "Off sends every question straight to this inbox. On, it answers from the " +
+          "knowledge base first \u2014 the same pages everybody can already open \u2014 " +
+          "and hands over anything it cannot answer. It cannot see a figure, a plan " +
+          "or a score, and it says so rather than guessing.",
+          segHtml("assistant", "Off", "On", c.assistant, true),
           '<div class="chset-test">' +
             '<button class="editbtn" data-chtest="1">' +
               (BOXTEST.busy ? "Testing\u2026" : "Test the assistant") + '</button>' +
             (BOXTEST.steps ? testHtml(BOXTEST.steps) : "") +
-          '</div></div>' +
+          '</div>') +
 
+        /* ── 5 · TOLD WHEN THE ASSISTANT GIVES UP. Only while the assistant is
+           on, as before: a handover that cannot happen has nobody to tell. */
         (c.assistant
-          ? '<div class="chset-row"><div class="chset-lab">Tell someone when a question ' +
-              'needs a person<span class="chset-ctl">' +
-              segHtml("notify", "Off", "On", c.notify, true) + '</span></div>' +
+          ? setRow("notify", "Handover email",
+              "Emailed the moment the assistant hands a question to a person. Off " +
+              "leaves handovers waiting in this inbox.",
+              segHtml("notify", "Off", "On", c.notify, true),
+              /* THE STATUS STAYS ON THE PAGE. This is not prose about how the
+                 setting works — it names who, or says that nobody was chosen,
+                 which is the one thing a tooltip must never swallow. */
               '<div class="chset-hint">' +
               (c.notify
                 ? (c.rep ? 'Emailed to ' + esc2(repName(c.rep)) + ' the moment it happens.'
-                         : '<b>No one is set</b> &mdash; handoffs wait in this inbox until ' +
+                         : '<b>No one is set</b> \u2014 handoffs wait in this inbox until ' +
                            'somebody is chosen below.')
                 : 'Handoffs wait here until somebody opens the page.') + '</div>' +
-              (c.notify ? '<div class="chset-ctl chset-who">' + repPicker(c.rep) + '</div>' : '') +
-            '</div>'
-          : '') +
+              (c.notify ? '<div class="chset-ctl chset-who">' + repPicker(c.rep) + '</div>' : ''))
+          : "") +
 
-        '<div class="chset-row"><div class="chset-lab">People can write to the office' +
-          '<span class="chset-ctl">' + segHtml("on", "Off", "On", c.on, true) + '</span></div>' +
-          '<div class="chset-hint">Off removes the bubble from every page. Nothing is ' +
-          'deleted &mdash; every conversation stays here and stays readable.</div></div>' +
+        /* ── 6 · TOLD WHEN A REPLY LANDS AND THEY ARE NOT LOOKING. Beside its
+           sibling at last; the two were five rows apart. */
+        setRow("mail", "Away email",
+          "A reply is emailed when they have not had the platform open for three " +
+          "minutes. Off keeps every conversation inside the platform.",
+          segHtml("mail", "Off", "On", c.mail, true)) +
 
-        '<div class="chset-row"><div class="chset-lab">Checking for replies' +
-          '<span class="chset-ctl">' + segHtml("fast", "Relaxed", "Live", c.fast, false) +
-          '</span></div>' +
-          '<div class="chset-hint">How often an open chat asks whether anything has ' +
-          'arrived &mdash; every 4 seconds, or every 15.</div>' +
-          /* THE COST, IN THE ROW WHERE THE CHOICE IS MADE. It is the whole
-             reason this is a setting rather than a number in the source. */
-          '<div class="chset-cost"><b>Relaxed cuts the busiest case by about three ' +
-          'quarters.</b> A reply takes up to 15 seconds to appear instead of 4.</div></div>' +
-
-        '<div class="chset-row"><div class="chset-lab">What the panel promises</div>' +
-          '<input class="chset-in" type="text" data-chpromise="1" ' +
-            'value="' + esc2(c.promise) + '" aria-label="What the panel promises">' +
-          '<div class="chset-hint">Shown under &ldquo;Strategy Office&rdquo; on every open ' +
-          'chat. It is a promise the office is making to the whole tenant.</div></div>' +
-
-        '<div class="chset-row"><div class="chset-lab">People can attach a screenshot' +
-          '<span class="chset-ctl">' + segHtml("shots", "Off", "On", c.shots, true) +
-          '</span></div>' +
-          '<div class="chset-hint">The only thing here with real storage cost &mdash; up to ' +
-          '3&nbsp;MB a picture, shrunk before it is sent.</div></div>' +
-
-        '<div class="chset-row"><div class="chset-lab">Email a reply to somebody who is away' +
-          '<span class="chset-ctl">' + segHtml("mail", "Off", "On", c.mail, true) +
-          '</span></div>' +
-          '<div class="chset-hint">When they have not had the platform open for three ' +
-          'minutes. Off keeps every conversation inside the platform.</div></div>' +
+        /* ── 7 · THE ONLY ROW THAT CHANGES NOTHING ANYBODY SEES, so it is last.
+           The cost is in the tooltip because it is the whole reason this is a
+           setting rather than a number in the source (§98). */
+        setRow("fast", "Reply checks",
+          "How often an open chat asks whether anything has arrived \u2014 every 4 " +
+          "seconds, or every 15. Relaxed cuts the busiest case by about three " +
+          "quarters; a reply then takes up to 15 seconds to appear instead of 4.",
+          segHtml("fast", "Relaxed", "Live", c.fast, false)) +
       '</div></span>';
   }
 
@@ -29640,6 +29713,29 @@ var CHAT = (function(){
     wrap.dataset.chwired = "1";
 
     wrap.addEventListener("click", function(e){
+      /* A TAP OPENS THE NOTE (§121). Hover does not exist on a tablet, and
+         since every explanation moved behind one of these marks, a note that
+         only answers a mouse is a note half this product's readers cannot
+         read. `.on` sits beside the :hover and :focus the platform already
+         uses, so nothing about the mark changes for anybody else.
+
+         SCOPED TO THIS PANEL DELIBERATELY. `.tip` is used all over the
+         product; giving every one of them a tap would be a change to pages
+         this was not asked to touch (rule 1c), so it is offered rather than
+         taken. FIRST, or the mark inside a row would fall through to the
+         branches below it. */
+      var tip = e.target.closest("[data-chtip]");
+      if (tip) {
+        var was = tip.classList.contains("on");
+        wrap.querySelectorAll("[data-chtip].on").forEach(function(o){ o.classList.remove("on"); });
+        if (!was) tip.classList.add("on");
+        return;
+      }
+      /* AND ANY OTHER PRESS PUTS THEM AWAY, including one that opens the menu
+         or flips a switch — a note left standing over the control somebody
+         just pressed is the fault §100.4 fixed for the panel itself. */
+      wrap.querySelectorAll("[data-chtip].on").forEach(function(o){ o.classList.remove("on"); });
+
       var t = e.target.closest("[data-chsetmenu]");
       if (t) { SETMENU = !SETMENU; setMenuPaint(); return; }
 

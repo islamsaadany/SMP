@@ -192,6 +192,7 @@
 <script src="RECIPES"></script>
 <script src="TEMPLATES"></script>
 <script src="XLSX"></script>
+<script src="PPTX"></script>
 <script src="MAIL"></script>
 <script src="RENDER"></script>
 <script src="CONFIGRENDER"></script>
@@ -320,12 +321,12 @@
          c_people rather than taking a key of its own: it is not another thing
          being planned, it is the vocabulary the register's own data arrives
          in, and Companies already shares c_units on exactly this argument. */
-      { k:"access", ac:"c_access", grp:"who", label:"Roles & access", glyph:"⚿", find:"permissions matrix roles rights who can edit view grant",        render:renderAccess },
-      /* AFTER Roles & access, which is the order the approved mockup drew
-         (§116.3). It had been left in its pre-existing position while the
-         group was renamed around it — a small drift from a signed-off
-         drawing, and the kind that is only ever caught by laying the two
-         side by side. */
+      /* MY ORDER AND GLYPHS, MAIN'S KEYWORDS. §117's split added
+         "strategy reporting split lock submit" to what finds Roles & access;
+         §119.3 put it above the BU list and gave both a mark. Neither side is
+         complete without the other, which is what a two-line conflict looks
+         like when both edits are right. */
+      { k:"access", ac:"c_access", grp:"who", label:"Roles & access", glyph:"⚿", find:"permissions matrix roles rights who can edit view grant strategy reporting split lock submit", render:renderAccess },
       { k:"mainbu", ac:"c_people", grp:"who", label:"Official BU list", glyph:"▦", find:"departments official bu client names mapping",      render:renderMainbus },
 
       { k:"units",  ac:"c_units",  grp:"run", label:"Business units", glyph:"▤", find:"business units weight weighting logo mark rename retire",        render:renderUnits },
@@ -958,7 +959,7 @@
               '" data-setupgo="' + d.k + '" data-find="' +
               esc(((d.label || "") + " " + (d.find || "") + " " + g.label).toLowerCase()) +
               '">' +
-              /* THE GLYPH THE MOCKUP DREW (§116.2). It was one of the five
+              /* THE GLYPH THE MOCKUP DREW (§119.2). It was one of the five
                  HR_ERP practices taken in §108 and the only one that did not
                  get built — the Overview's own rows had theirs, which is why
                  that page looked finished and the rail beside it did not.
@@ -1551,7 +1552,7 @@
     }).join("");
 
     var def = defs.filter(function(d){ return d.k === currentSub; })[0];
-    /* THE PAGE'S NAME, TAKEN BEFORE `def` BECOMES A SECTION (§117.1). Twenty
+    /* THE PAGE'S NAME, TAKEN BEFORE `def` BECOMES A SECTION (§120.1). Twenty
        lines down, a page with sections reassigns `def` to whichever section is
        open — so reading the name after that gives the SECTION's: Figure sets
        was titling itself "Sets configuration" and Import & archives "Import a
@@ -1583,7 +1584,7 @@
     /* The per-page Info button left the header in 2.9. The explanations in
        PAGEINFO stay \u2014 they are still reachable from the [data-modal] links
        inside the pages themselves. */
-    /* THE NAME THE SHELL IS ABOUT TO SHOW (§117.1), set BEFORE the page
+    /* THE NAME THE SHELL IS ABOUT TO SHOW (§120.1), set BEFORE the page
        renders, because cfgHead() reads it to decide whether its own heading
        would be repeating it. Cleared for every non-Setup page, or a unit's
        section called "Performance" would go unnamed on a page the rail is not
@@ -1604,7 +1605,7 @@
     document.getElementById("panel").innerHTML = railed
       ? '<div class="split setupsplit' + (RAIL_OPEN ? '' : ' shut') + '">' +
         setupRail(defs, currentSub) +
-        /* ── THE PAGE HEADER, AND IT STAYS (§117.2) ──────────────────
+        /* ── THE PAGE HEADER, AND IT STAYS (§120.2) ──────────────────
            Islam: *"this page needs to be sticky for the title."* Measured
            first: the rail's head and search already stick and the pane's
            title did not — it scrolled 600px away with everything else. It
@@ -1673,6 +1674,20 @@
     putFocus(_keep.focus);
     positionRowMenu();
     focusOpenMenu();
+    /* ── AND THE DIALOG, IF ONE IS OPEN (§116.6) ─────────────────────
+       The person dialog's own controls — the role picker, the Unit select,
+       "Use it" — are the register's, so they all end in `paint()`. That
+       repaints the page BEHIND the dialog and, before this line, left the
+       dialog itself showing the state it was built with: press "+ role" and
+       nothing appeared, because the select had been rendered into a body
+       nobody replaced.
+
+       Here rather than in each handler, for the reason §24 gives: a control
+       added to the dialog later would otherwise be silent until somebody
+       remembered. `personDialogPaint()` never calls paint(), so there is no
+       loop — and it REPLACES the body, so the bindings wire() has just made on
+       the old nodes die with them rather than doubling up (§47.2). */
+    if (PDLG && document.getElementById("modal-b")) personDialogPaint();
     /* Every mutation repaints, so this is where a change becomes a save. */
     SYNC.afterPaint();
   }
@@ -2758,6 +2773,11 @@
         var k = b.dataset.page; EDIT_PAGE[k] = !EDIT_PAGE[k]; paint();
       });
     });
+    /* The plan as slides (§117): builds and saves, repaints nothing — a
+       download must not cost anybody a half-typed field elsewhere (§35). */
+    document.querySelectorAll("[data-dlpptx]").forEach(function(b){
+      b.addEventListener("click", function(){ sendPlanPptx(b.dataset.dlpptx); });
+    });
     document.querySelectorAll("[data-sec]").forEach(function(b){
       b.addEventListener("click", function(){ GSEC = +b.dataset.sec; paint(); window.scrollTo(0,0); });
     });
@@ -3186,8 +3206,14 @@
     function fieldSaved(){
       if (typeof SYNC !== "undefined" && SYNC.afterPaint) SYNC.afterPaint();
     }
-    function fieldWire(attr, apply){
-      document.querySelectorAll("[data-" + attr + "]").forEach(function(inp){
+    /* ── SCOPED, SO THE DIALOG CAN BE WIRED WITHOUT THE PAGE (§116) ──
+       `root` defaults to the document, which is every existing caller. The
+       person dialog passes its own body: its fields are built after paint() has
+       run, so they need wiring of their own — and re-running the whole of
+       wire() would bind a second handler to everything still on the page
+       behind (§24, §47.2). */
+    function fieldWire(attr, apply, root){
+      (root || document).querySelectorAll("[data-" + attr + "]").forEach(function(inp){
         inp.addEventListener("change", function(){
           var p = personBy(inp.dataset[attr]);
           if (!p) return;
@@ -3196,20 +3222,29 @@
         });
       });
     }
-    fieldWire("pname",  function(p, v){ if (v) p.name = v; });
+    /* ── THE PERSON'S OWN FIELDS, NAMED ONCE (§116) ──────────────────
+       Called with the document by wire(), and with the dialog's body by
+       wirePersonDialog(). The register draws these fields in the dialog now and
+       nowhere else, so without a root the form would be inert — which is §96's
+       fault exactly: an editor that looks identical and discards every
+       keystroke. */
+    window.wirePersonFields = function(root){
+    fieldWire("pname",  function(p, v){ if (v) p.name = v; }, root);
     /* Name (§93.8). setKnownName() DELETES the field when it is cleared or
        matches the guess, rather than storing the guess — otherwise correcting
        the full name later would leave a stale short one standing beside it. */
-    fieldWire("pknown", function(p, v){ setKnownName(p, v); });
-    fieldWire("ptitle", function(p, v){ if (v) p.title = v; else delete p.title; });
-    fieldWire("pphone", function(p, v){ if (v) p.phone = v; else delete p.phone; });
+    fieldWire("pknown", function(p, v){ setKnownName(p, v); }, root);
+    fieldWire("ptitle", function(p, v){ if (v) p.title = v; else delete p.title; }, root);
+    fieldWire("pphone", function(p, v){ if (v) p.phone = v; else delete p.phone; }, root);
     /* The two the employee file brings (§54.2). Cleared when emptied rather
        than kept as "", so absent and blank stay one word — the codebase reads
        every optional field with == null and a stored empty string would come
        back through the round trip as a field the data never had. */
-    fieldWire("pempid", function(p, v){ if (v) p.empId = v; else delete p.empId; });
-    fieldWire("pemail", function(p, v){ if (v) p.email = v; else delete p.email; });
+    fieldWire("pempid", function(p, v){ if (v) p.empId = v; else delete p.empId; }, root);
+    fieldWire("pemail", function(p, v){ if (v) p.email = v; else delete p.email; }, root);
 
+    };
+    wirePersonFields(document);
     document.querySelectorAll("[data-pact]").forEach(function(b){
       b.addEventListener("click", function(){
         var key = b.dataset.pact;
@@ -3350,12 +3385,20 @@
       });
     });
 
+    /* ── THE REGISTER'S OWN CONTROLS, SCOPED (§116) ─────────────────
+       Everything the person dialog draws is wired here, and the dialog passes
+       its own body as the root. It was `document` throughout, which was right
+       while these controls were only ever on the page — the dialog builds them
+       after paint() has run, so without a root the picker, the Unit select and
+       "Use it" would all be decoration (§96). */
+    window.wirePersonDialogControls = function(root){
+      var R = root || document;
     /* ── THE ROLE PICKER, ONE HALF PER COLUMN (§69) ─────────────────
        It opens EMPTY. Before this it opened on "owner", so a picker somebody
        opened by mistake was already holding an answer — which was harmless
        while a Give button stood between it and the grant, and is not now that
        choosing both halves IS the grant. */
-    document.querySelectorAll("[data-prole-open]").forEach(function(b){
+    R.querySelectorAll("[data-prole-open]").forEach(function(b){
       b.addEventListener("click", function(){
         ADDROLE = b.dataset.proleOpen; ADDROLE_KIND = ""; ROLESTOP = null; paint();
       });
@@ -3418,12 +3461,12 @@
         ADDROLE = null; ADDROLE_KIND = "";
         paint();
     }
-    document.querySelectorAll("[data-prole-pick]").forEach(function(sel){
+    R.querySelectorAll("[data-prole-pick]").forEach(function(sel){
       sel.addEventListener("change", function(){
         tryGrantRole(sel.dataset.prolePick, sel.value);
       });
     });
-    document.querySelectorAll("[data-prole-off]").forEach(function(b){
+    R.querySelectorAll("[data-prole-off]").forEach(function(b){
       b.addEventListener("click", function(){
         var p = b.dataset.proleOff.split("|");
         revokePersonRole(p[0], p[1], p[2]);
@@ -3441,7 +3484,7 @@
        answer — but it is ADDED to the list unmapped, exactly as the file
        reader does, so the SMO can then point it somewhere. Two places writing
        the same fact differently is what mainbuList() exists to prevent. */
-    document.querySelectorAll("[data-pmainbu]").forEach(function(sel){
+    R.querySelectorAll("[data-pmainbu]").forEach(function(sel){
       sel.addEventListener("change", function(){
         if (grant("c_people") !== "edit") return;
         var p = personBy(sel.dataset.pmainbu);
@@ -3455,7 +3498,7 @@
         paint();
       });
     });
-    document.querySelectorAll("[data-pat]").forEach(function(sel){
+    R.querySelectorAll("[data-pat]").forEach(function(sel){
       sel.addEventListener("change", function(){
         if (grant("c_people") !== "edit") return;
         var p = personBy(sel.dataset.pat);
@@ -3483,7 +3526,7 @@
        server like every other. Nothing here touches the declaration itself: it
        stands until the person says something else, and the note stops showing
        the moment the two agree. */
-    document.querySelectorAll("[data-usesaid]").forEach(function(b){
+    R.querySelectorAll("[data-usesaid]").forEach(function(b){
       b.addEventListener("click", function(){
         var key = b.dataset.usesaid;
         var said = SAIDWHERE && SAIDWHERE[key];
@@ -3500,13 +3543,15 @@
     /* Unfolding a person's extra roles (§47.1). Not a hover: a hover cannot be
        reached on a touch screen, and this is the only place the second role
        appears on the page. */
-    document.querySelectorAll("[data-proles]").forEach(function(b){
+    R.querySelectorAll("[data-proles]").forEach(function(b){
       b.addEventListener("click", function(e){
         e.stopPropagation();
         PROLES = b.dataset.proles || null;
         paint();
       });
     });
+    };
+    wirePersonDialogControls(document);
     /* The two header menus (§47.2). Opening one closes the other. */
     /* ONE OPEN AT A TIME (§90). Three menus in one cluster, and two of them
        overlapping is two things covering each other — the same rule the row
@@ -3702,25 +3747,47 @@
        `focusNoScroll` rather than the option written twice: the register's pen
        and the six inline pens are the same act, and §85 already found out what
        happens when that pair of lines is maintained in two places. */
-    function focusNoScroll(f){
+    window.focusNoScroll = function(f){
       if (!f) return;
       try { f.focus({ preventScroll: true }); } catch (e) { f.focus(); }
       if (f.select) f.select();
-    }
+    };
     /* ── EDIT THIS ROW (§79.2, spec 012 §2.1) ───────────────────────
        It used to turn the whole page's edit mode on and put the cursor in this
        person's name — 297 inputs to change one job title. It opens the ROW now.
        The snapshot is taken here, before anything is typed, because that is the
        only moment the original still exists. */
+    /* ── EDIT OPENS THE DIALOG (§116) ────────────────────────────────
+       Islam: "the edit button can open a pop up modal with the data rather
+       than inline."
+
+       `rowEditOpen` still runs and still takes the snapshot: the dialog's
+       Cancel restores from exactly the same `ROWWAS` and `ROWHELD` the inline
+       row used (§79.2, §110.6), so what changed is where the fields are drawn
+       and nothing about what abandoning them puts back. */
     document.querySelectorAll("[data-pedit]").forEach(function(b){
       b.addEventListener("click", function(e){
         e.stopPropagation();
-        var key = b.dataset.pedit;
-        rowEditOpen("people", key, personBy(key));
-        PMENU = null;
-        ROLESTOP = null;
-        paint();
-        focusNoScroll(document.querySelector('[data-pname="' + key + '"]'));
+        openPersonDialog({ key:b.dataset.pedit, mode:"edit" });
+      });
+    });
+    /* ── ADD OPENS THE SAME ONE, EMPTY (§116.3) ──────────────────────── */
+    document.querySelectorAll("[data-padd-open]").forEach(function(b){
+      b.addEventListener("click", function(){
+        newPersonReset();
+        var d = newDraftStart();
+        openPersonDialog({ key:d.key, mode:"add" });
+      });
+    });
+    /* ── AND THE QUEUE OPENS IT ON THE FIRST PERSON WAITING (§116.2) ───
+       Islam: "a button at top showing pending requests … that opens the
+       profiles that needs attention in the pop up modal that fixes and save and
+       move to the next in the same place." */
+    document.querySelectorAll("[data-attn]").forEach(function(b){
+      b.addEventListener("click", function(){
+        var q = attentionQueue();
+        if (!q.length) return;
+        openPersonDialog({ key:q[0].key, mode:"queue", queue:q, at:0 });
       });
     });
     /* Save writes nothing of its own: every field has already written itself
@@ -4873,13 +4940,11 @@
   }
 
   function sendXlsx(sheets, name){
-    var bytes = buildXlsx(sheets);
-    var blob = new Blob([bytes], { type:"application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" });
-    var a = document.createElement("a");
-    a.href = URL.createObjectURL(blob);
-    a.download = name;
-    document.body.appendChild(a); a.click();
-    setTimeout(function(){ URL.revokeObjectURL(a.href); a.remove(); }, 0);
+    /* The blob dance itself lives in pptx.js as sendFileBytes() since §117 —
+       this was about to be one of three copies, and three is where the rule
+       says extract. */
+    sendFileBytes(buildXlsx(sheets), name,
+      "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
   }
 
   function wireImport(){
@@ -4962,11 +5027,7 @@
 
     var dl = document.querySelector("[data-dl]");
     if (dl) dl.addEventListener("click", function(){
-      var blob = new Blob([csvFor()], { type:"text/csv;charset=utf-8" });
-      var a = document.createElement("a");
-      a.href = URL.createObjectURL(blob); a.download = fileName();
-      document.body.appendChild(a); a.click();
-      setTimeout(function(){ URL.revokeObjectURL(a.href); a.remove(); }, 0);
+      sendFileBytes(csvFor(), fileName(), "text/csv;charset=utf-8");
     });
 
     var show = document.querySelector("[data-showcsv]");
@@ -5222,6 +5283,178 @@
      would leave the dialog showing a step nobody chose — and the elements its
      handlers are bound to would be gone. This is §30.1's rule from the other
      side: whoever rewrites the DOM re-wires it, in the same function (§24). */
+  /* ══ THE PERSON DIALOG'S OWN PAINT (§116) ══════════════════════════
+     `mergePaint()`'s rule, and for the same reason (§90.4): this rewrites the
+     DIALOG's body and re-wires it rather than calling paint(), because paint()
+     rebuilds the register behind an inert overlay and would leave every handler
+     in here bound to elements that no longer exist.
+
+     THE REGISTER BEHIND IS REPAINTED ONLY WHEN THE DIALOG CLOSES. Islam, asked
+     whether covering it mattered: "no problem I care more about the edit
+     dialogue I don't need to see the full register." So nothing tries to keep
+     the two in step while it is open — which is what makes this safe. */
+  function personDialogPaint(){
+    var t = PEOPLEDLG.title();
+    var el = document.getElementById("modal-t");
+    if (!el) return;
+    el.textContent = t.t;
+    document.getElementById("modal-s").textContent = t.s;
+    document.getElementById("modal-b").innerHTML =
+      PEOPLEDLG.html() + '<div class="pdfoot">' + PEOPLEDLG.foot() + '</div>';
+    wirePersonDialog();
+  }
+  function openPersonDialog(cfg){
+    PDLG = cfg;
+    PMENU = null;
+    ROLESTOP = null;
+    if (cfg.mode !== "add") rowEditOpen("people", cfg.key, personBy(cfg.key));
+    var t = PEOPLEDLG.title();
+    openModalHtml(esc(t.t), esc(t.s),
+      PEOPLEDLG.html() + '<div class="pdfoot">' + PEOPLEDLG.foot() + '</div>');
+    wirePersonDialog();
+    /* The cursor lands in the first field, and NEVER scrolls to get there
+       (§110.7) — the dialog is already in view, and letting the browser scroll
+       to a focused field is what threw the register's rows about. */
+    focusNoScroll(document.querySelector('#modal-b .pdf input.fld'));
+  }
+  /* CLOSING IS WHERE THE REGISTER CATCHES UP. One door for all four ways out,
+     so a mode that forgot to clear PDLG cannot leave the page believing a
+     dialog is open (§24). */
+  function closePersonDialog(cancel){
+    if (cancel) rowEditCancel(); else rowEditClose();
+    if (PDLG && PDLG.mode === "add") newDraftEnd();
+    PDLG = null;
+    ADDROLE = null; ADDROLE_KIND = ""; ROLESTOP = null;
+    closeModal();
+    if (typeof SYNC !== "undefined" && SYNC.afterPaint) SYNC.afterPaint();
+    paint();
+  }
+  function wirePersonDialog(){
+    var body = document.getElementById("modal-b");
+    if (!body) return;
+    /* THE FIELDS ARE THE PAGE'S OWN, so they are wired by the page's own
+       wiring. `wireFields` binds every `data-p*` on whatever it is given
+       (§71.2), which is why moving the form into a dialog needed no second set
+       of handlers — and SEARCHSEL is re-applied because these selects were
+       built a moment ago (§45.5). */
+    wirePersonFields(body);
+    if (typeof SEARCHSEL !== "undefined") SEARCHSEL.wire(body);
+    /* The Unit select, the Official BU select, the role picker and "Use it" are
+       the register's own controls and are wired by the same functions the page
+       uses — scoped to this body for the same reason the fields are. */
+    wirePersonDialogControls(body);
+    body.querySelectorAll("[data-pdlg-close]").forEach(function(b){
+      b.addEventListener("click", function(){ closePersonDialog(false); });
+    });
+    body.querySelectorAll("[data-pdlg-cancel]").forEach(function(b){
+      b.addEventListener("click", function(){ closePersonDialog(true); });
+    });
+    body.querySelectorAll("[data-pdlg-skip]").forEach(function(b){
+      b.addEventListener("click", function(){ personDialogStep(true); });
+    });
+    body.querySelectorAll("[data-pdlg-next]").forEach(function(b){
+      b.addEventListener("click", function(){ personDialogStep(false); });
+    });
+    body.querySelectorAll("[data-pdlg-add]").forEach(function(b){
+      b.addEventListener("click", personDialogAdd);
+    });
+    /* THE SECOND PRESS, and it is a different button rather than the same one
+       pressed twice (§87.3): "I have checked, they are two people" is a
+       different sentence from "Add", and a control that means one thing the
+       first time and another the second is one nobody can undo. */
+    body.querySelectorAll("[data-pdlg-anyway]").forEach(function(b){
+      b.addEventListener("click", function(){
+        NEWPERSON.forced = true;
+        personDialogAdd();
+      });
+    });
+    /* Opening the row they collided with abandons the draft — there is nothing
+       to add if the answer is "they are already here". */
+    body.querySelectorAll("[data-pgo]").forEach(function(b){
+      b.addEventListener("click", function(){
+        var k = b.dataset.pgo;
+        closePersonDialog(false);
+        openPersonDialog({ key:k, mode:"edit" });
+      });
+    });
+  }
+  /* ── SAVE AND MOVE TO THE NEXT, IN THE SAME PLACE (§116.2) ──────────
+     `skip` differs from `next` in one thing only — whether this person's edits
+     are kept — because leaving somebody for later must not also throw away what
+     was typed before deciding to leave them. Both walk the SAME stored list:
+     see PDLG's note on why the queue is not re-asked as it goes. */
+  function personDialogStep(skip){
+    if (!PDLG || !PDLG.queue) return;
+    if (skip) rowEditCancel(); else rowEditClose();
+    var at = PDLG.at + 1;
+    /* A ROW CAN LEAVE THE REGISTER WHILE THE QUEUE IS OPEN — a merge is one
+       press away from here — so each step checks the next person still exists
+       rather than trusting the list (§48.2). */
+    while (at < PDLG.queue.length && !personBy(PDLG.queue[at].key)) at++;
+    if (at >= PDLG.queue.length) { closePersonDialog(false); return; }
+    PDLG.at = at;
+    PDLG.key = PDLG.queue[at].key;
+    ADDROLE = null; ADDROLE_KIND = ""; ROLESTOP = null;
+    rowEditOpen("people", PDLG.key, personBy(PDLG.key));
+    personDialogPaint();
+    focusNoScroll(document.querySelector('#modal-b .pdf input.fld'));
+  }
+  /* ── ADDING THEM IS THE SAME LADDER THE FILE CLIMBS (§87) ───────────
+     Emp ID, then email, and no third rung. A name stops nothing — two people
+     really can share one — so a clash on either identifier is REFUSED by
+     naming who, and a matching name is only ever a warning. */
+  function personDialogAdd(){
+    if (!NEWDRAFT) return;
+    /* ── COMMIT WHATEVER IS STILL BEING TYPED (§116.3) ────────────────
+       Every field writes itself on `change`, which for a text input means on
+       BLUR — so the last box somebody typed in has not been written yet at the
+       moment they reach for this button. A mouse click blurs it on the way
+       past and the keyboard usually has too, which is exactly the kind of
+       almost-always that hides a fault: found by a check whose `fill` fires
+       `input` and never blurs, and the address it had just typed was not on the
+       draft when the identity ladder asked (§87).
+
+       So the field is closed here rather than trusted to have closed itself. */
+    if (document.activeElement && document.activeElement.blur) document.activeElement.blur();
+    var nm = String(NEWDRAFT.name || "").trim();
+    if (!nm) {
+      NEWPERSON.hit = null; NEWPERSON.warn = null;
+      NEWPERSON.err = "A name is the one thing needed.";
+      personDialogPaint();
+      return;
+    }
+    /* TWO ARGUMENTS, NOT AN OBJECT (§87). `personByIdentity(id, email)` climbs
+       the ladder — employee number, then address, and no third rung — and
+       handing it an object made every rung miss, so the stop never fired and a
+       second row for somebody already here went straight in. Found by the
+       check that exists for exactly that. */
+    var chk = personByIdentity(NEWDRAFT.empId, NEWDRAFT.email);
+    if (chk && chk.person && !NEWPERSON.forced) {
+      NEWPERSON.hit = chk.person.key; NEWPERSON.hitBy = chk.by;
+      personDialogPaint();
+      return;
+    }
+    /* THROUGH THE ONE DOOR (§54.1). `addPerson` mints the key, attaches the
+       person and is what the file importer and the assignment picker both call
+       — so the dialog hands it the same shape they do rather than pushing onto
+       PEOPLE itself. It answers with the KEY, not the person. */
+    var key = addPerson({ name:nm, title:NEWDRAFT.title, phone:NEWDRAFT.phone,
+                          empId:NEWDRAFT.empId, email:NEWDRAFT.email,
+                          mainbu:NEWDRAFT.mainbu, where:personAt(NEWDRAFT) });
+    var made = personBy(key);
+    if (!made) { closePersonDialog(false); return; }
+    /* The one field addPerson does not take: what they are CALLED, as opposed
+       to their full name (§93.8). Written through setKnownName so it is deleted
+       rather than stored when it matches the guess (§50.6). */
+    if (NEWDRAFT.known) setKnownName(made, NEWDRAFT.known);
+    newPersonReset();
+    newDraftEnd();
+    PDLG = null;
+    closeModal();
+    if (typeof SYNC !== "undefined" && SYNC.afterPaint) SYNC.afterPaint();
+    paint();
+  }
+
   function mergeOpen(){
     openModalHtml("Merge two rows", "", mergeStepHtml());
     wireMerge();
@@ -5319,11 +5552,38 @@
        dialog they have just dismissed. */
     if (modalReturn && document.contains(modalReturn)) modalReturn.focus();
     modalReturn = null;
+    /* ── AND THE BODY IS EMPTIED (§116.6) ──────────────────────────────
+       A closed dialog used to keep its markup, which was harmless while the
+       merge wizard was the only thing in here: a few buttons nobody could
+       reach. The person dialog is a FORM, and `wirePersonFields(document)` runs
+       on every paint — so a form left standing in the hidden overlay collected
+       a second handler on every repaint, for ever, each one writing the same
+       value again. §24 and §47.2's fault, arriving through a dialog rather than
+       a menu.
+
+       It also settles §3.2's older one: hidden is not gone, and a form nobody
+       can see is still in the tab order until something removes it. */
+    document.getElementById("modal-b").innerHTML = "";
+    document.getElementById("modal-t").textContent = "";
+    document.getElementById("modal-s").textContent = "";
   }
   overlay.setAttribute("aria-hidden", "true");   /* closed at boot */
-  document.getElementById("modal-x").addEventListener("click", closeModal);
-  overlay.addEventListener("click", function(e){ if (e.target === overlay) closeModal(); });
-  document.addEventListener("keydown", function(e){ if (e.key === "Escape") closeModal(); });
+  /* ── EVERY WAY OUT IS THE SAME WAY OUT (§116.6) ────────────────────
+     The × and Escape closed the overlay directly, which for the merge wizard
+     was the whole of it. The person dialog has state behind it — `PDLG`, the
+     row snapshot `ROWEDIT` holds, and a draft person that belongs to nobody —
+     so a way out that skips `closePersonDialog` leaves the page believing a
+     dialog is open and the next Cancel restoring somebody who is no longer on
+     screen. Both go through the one door now, and it treats them as KEEPING
+     what was typed: every field has already written itself (§71.2), so throwing
+     it away on the × would discard edits the register has already shown. */
+  function modalDismiss(){
+    if (PDLG) { closePersonDialog(false); return; }
+    closeModal();
+  }
+  document.getElementById("modal-x").addEventListener("click", modalDismiss);
+  overlay.addEventListener("click", function(e){ if (e.target === overlay) modalDismiss(); });
+  document.addEventListener("keydown", function(e){ if (e.key === "Escape") modalDismiss(); });
 
   /* A menu that stays open after you have looked away is a menu you have to
      dismiss. Bound once, at boot, rather than on every repaint. */

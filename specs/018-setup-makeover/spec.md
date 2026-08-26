@@ -1,6 +1,6 @@
 # 018 · The Setup makeover
 
-**Version:** v3.30 · **Decisions:** §108 · **Status:** answered; built
+**Version:** v3.30 · **Decisions:** §108, §119, §120 · **Status:** answered; built
 **Constitution:** checked against v1.1.0.
 
 Islam: *"Rethink the whole settings page. The design, the grouping, the
@@ -159,7 +159,7 @@ product beside the signed-off mockup:
 4. **The strip's way through keeps its place** — 19px from the right edge at
    every width from 1920 to 1024, and the strip never exceeds 145px.
 
-## 9 · The pages sit still (§117)
+## 9 · The pages sit still (§120)
 
 Five notes on the built product, settled from a measured mockup. Two were not
 what they looked like: the rail's head and search **already** stick (they move

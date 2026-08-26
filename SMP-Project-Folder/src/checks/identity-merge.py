@@ -53,22 +53,28 @@ with sync_playwright() as p:
       paint();
       return { name: PEOPLE[2].name, n: PEOPLE.length }; }""")
     pg.wait_for_timeout(600)
-    pg.fill("#newPersonName", "Somebody Entirely New")
-    pg.fill("#newPersonEmail", "already.here@example.com")
-    pg.click('[data-padd="1"]')
-    pg.wait_for_timeout(500)
+    # THE ADD ROW IS THE ADD DIALOG NOW (§116.3). What is asserted does not
+    # change — §87's ladder still stops a second row for somebody already here —
+    # only where the fields are. The dialog is where the warning finally has
+    # room to be read, which is half of why it moved.
+    pg.evaluate("()=>document.querySelector('[data-padd-open]').click()")
+    pg.wait_for_timeout(600)
+    pg.fill("#modal-b [data-pname]", "Somebody Entirely New")
+    pg.fill("#modal-b [data-pemail]", "already.here@example.com")
+    pg.evaluate("()=>document.querySelector('[data-pdlg-add]').click()")
+    pg.wait_for_timeout(600)
     after = pg.evaluate("PEOPLE.length")
     ck("pressing Add did not add the row", after == seed["n"], "%d -> %d" % (seed["n"], after))
-    stop = pg.eval_on_selector(".addstop", "e=>e.textContent") if pg.query_selector(".addstop") else ""
+    stop = pg.eval_on_selector(".pdband.bad", "e=>e.textContent") if pg.query_selector(".pdband.bad") else ""
     ck("the stop names who it already is", seed["name"] in stop, stop[:90])
     ck("...and says which identifier matched", "address" in stop, stop[:90])
 
     # THE SECOND PRESS IS THE ONLY WAY PAST IT. A stop that any further press
     # gets through is a message that goes away by itself.
-    pg.click('[data-padd="1"]')
+    pg.evaluate("()=>document.querySelector('[data-pdlg-add]').click()")
     pg.wait_for_timeout(400)
     ck("pressing Add again still refuses", pg.evaluate("PEOPLE.length") == seed["n"])
-    pg.click('[data-padd="anyway"]')
+    pg.evaluate("()=>document.querySelector('[data-pdlg-anyway]').click()")
     pg.wait_for_timeout(500)
     ck("Add anyway gets through", pg.evaluate("PEOPLE.length") == seed["n"] + 1)
     pg.evaluate("""() => { PEOPLE.pop(); newPersonReset(); paint(); }""")
@@ -82,18 +88,30 @@ with sync_playwright() as p:
       window.__drop = addPerson({ name:"Testcase Gamal Sadek", where:UNIT_KEYS[0], role:"owner" });
       paint(); }""")
     pg.wait_for_timeout(900)
-    soft = pg.eval_on_selector_all(".dupemark.soft", "e=>e.map(x=>x.textContent.trim())")
+    # THE WORDS ARE ON THE HOVER NOW (116.4). The mark was a phrase beside the
+    # name -- "looks like Ahmed Mostafa" -- in the frozen column, so any row
+    # carrying one wrapped and grew. What is asserted is unchanged: a
+    # resemblance is marked DIFFERENTLY from a collision (87.2), because one is
+    # a guess and the other is always wrong.
+    soft = pg.eval_on_selector_all(".dupemark.soft", "e=>e.map(x=>x.title)")
     ck("the pair is marked on the row", len(soft) >= 2, soft)
     ck("the mark says it is a resemblance, not a collision",
-       any("looks like" in m for m in soft), soft)
-    # THE COUNT IS READ OFF THE HEADER'S OWN CHIPS, not off the page's text: a
-    # substring search over the whole body would pass on the sentence in the
-    # note underneath, which says the same words and counts nothing.
-    chips = pg.eval_on_selector_all(".phead2 .hright .chip", "e=>e.map(x=>x.textContent.trim())")
-    ck("the header counts the pair",
-       any("possible duplicate" in c for c in chips), chips)
-    ck("...and counts the row with nothing to identify it",
-       any("nothing to identify" in c for c in chips), chips)
+       any("reads like" in m for m in soft), soft)
+    ck("...and it is a different mark from a collision's",
+       pg.evaluate("""()=>{const a=document.querySelector('.dupemark.soft');
+          const b=[...document.querySelectorAll('.dupemark')].find(x=>!x.classList.contains('soft'));
+          return !a || !b || a.textContent.trim() !== b.textContent.trim();}"""))
+    # COUNTED IN THE QUEUE, NOT IN A CHIP (111). The header carried a chip per
+    # kind of thing outstanding; they are one button that OPENS them, which is
+    # what Islam asked for -- "I don't know which lines I should go and check".
+    # So the count is asserted where it now lives, against the same two facts.
+    q = pg.evaluate("attentionQueue()")
+    kinds = [w["kind"] for a in q for w in a["why"]]
+    ck("the queue holds the pair", kinds.count("dupe") >= 2, kinds)
+    ck("...and the row with nothing to identify it", "noident" in kinds, kinds)
+    ck("...and the button says how many",
+       pg.evaluate("""()=>{const n=document.querySelector('[data-attn] .attnn');
+          return !!n && parseInt(n.textContent,10) === attentionQueue().length;}"""))
 
     # ── MERGING, THROUGH THE MENU ────────────────────────────────────
     print("── merging the pair")
@@ -181,8 +199,12 @@ with sync_playwright() as p:
     # unit as covered by somebody who cannot sign in.
     print("── the units with no custodian")
     def custPill():
+        # ON THE COUNT LINE, NOT IN A CHIP (111). Units with no custodian is the
+        # one outstanding thing on this page that is NOT about a person, so it
+        # cannot be a stop in a queue of people -- there would be nobody to open.
+        # It keeps a line of its own under the title, and still names the units.
         return [x for x in pg.eval_on_selector_all(
-            ".phead2 .chip .pill", "e=>e.map(x=>[x.textContent, x.title])")
+            ".pcount .pnocust", "e=>e.map(x=>[x.textContent, x.title])")
             if "custodian" in x[0]]
     ck("nothing is said while every unit has one",
        pg.evaluate("()=>unitsWithoutCustodian().length") == 0 and not custPill(),

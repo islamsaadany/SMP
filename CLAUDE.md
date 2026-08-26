@@ -473,6 +473,20 @@ console errors (in this cloud environment, run it via a wrapper that points Play
   door behind a door. A role with one place is granted on the role pick; a role
   with a real choice still asks. The × on the chip is what makes committing on
   one press safe.
+- **THE OWN COLUMNS ARE TWO QUESTIONS, AND §94'S LOCK IS A DEFAULT NOW (§117,
+  partially reversing §94 at Islam's direction):** each own column on Roles &
+  access splits into **Strategy** (the words as agreed — `a_unit_own_strat` /
+  `a_fn_own_strat`, NEW keys) and **Reporting** (the OLD keys, which is the
+  back-compat: a stored grant governed reporting, so it keeps meaning that and
+  nobody's rights move; the strategy half falls back to defaults, §30.2).
+  Strategy edit defaults to the office; **the SMO can open it to a role on the
+  table** — `mayAuthorPage()` asks the GRANT now, with one §94 remnant as a
+  rule: a non-office role never authors a unit or function it does not hold.
+  **`mayArrange()` rides the REPORTING half** or the split would have silently
+  taken §101's arrows back. **The plan downloads as slides** (`mayDownloadPlan`
+  — office + owner/custodian/fnhead): `src/pptx.js` builds a real editable
+  .pptx from `zipStore()`, plan content only, SWOT included, no reported
+  figure — asserted as absences in `checks/strategy-split.py`.
 - **THE STRATEGY TAB IS AUTHORED BY THE OFFICE, AND ONLY THE PLAN EVER WAS
   (§94):** Islam, asked whether he meant the plan or the tab — *"I tested and
   the custodian found the pens."* §31's argument (a plan correctable by the
@@ -1518,6 +1532,68 @@ console errors (in this cloud environment, run it via a wrapper that points Play
   Proved by asking the screen AND the shared rule for five viewers and
   asserting BOTH ENDS (§94.2), by PRESSING the button (§70, §93.4), and by
   forcing each half false to watch the checks fail (§94.5).
+- **THE REGISTER STOPS BEING A FORM (since v3.39, §116):** Islam's six —
+  keep my column choice and make all-on neat; edit in a dialog; *"they said"*
+  becomes a button at the top that opens the pending people one after another;
+  Add opens it too; drop the row count and the quick filters; make the top panel
+  concise. **ONE THING FOLLOWS AND IS WHY THEY HANG TOGETHER: the table no
+  longer edits anything** — every collision this register has had (§110.1's
+  *+ role* under the frozen Cancel, §110.8's fields over their neighbours, the
+  Add row's boxes under the wrong headings) was a control clicked inside a 158px
+  cell, and none survives the move. **THE SAME `data-` ATTRIBUTES**, so moving
+  the form changed where it is drawn and nothing about how it saves — but
+  `fieldWire` and the control wiring now take a ROOT, or re-running `wire()`
+  binds a second handler to the page behind (§24, §47.2). **`paint()` REPAINTS
+  THE DIALOG TOO**, one line at its end rather than one per handler: the
+  dialog's controls are the register's and all end in `paint()`, so *+ role*
+  pressed inside it changed nothing at all. **`NEWDRAFT` IS A PERSON BEFORE IT
+  IS ON THE REGISTER** — not in PEOPLE, but `personBy()` answers for it, so Add
+  and Edit are one form. **AND THE FIELD BEING TYPED IS COMMITTED BEFORE THE
+  PRESS**: fields write on `change`, which for a text input means on blur, so
+  the last box typed into has not been written when somebody reaches for the
+  button — a mouse click blurs on the way past, which is the almost-always that
+  hid it.
+- **A MARK BELONGS INSIDE THE BLOCK IT MARKS (§116.4):** the declaration note,
+  the duplicate mark and the Official BU disagreement were each placed NEXT TO a
+  value, and `.val` and `<b>` are `display:block` under §88's clip rule — so each
+  put its row at 51px against its neighbours' 39px. Three times, in one section.
+  One glyph inside the value's own line, the sentence on the hover, the full
+  words in the queue: `◎` a declaration, `‖` a collision, `≈` a resemblance,
+  `≠` a disagreement.
+- **THE COUNT AND THE QUEUE ARE ONE LIST (§116.2):** `attentionQueue()` is what
+  the button counts AND what it opens — a count that cannot take you to what it
+  counts is a count that makes work (§16.7's rule applied to a notice). **One
+  entry per person, not per problem**; worst first then by name, so it is stable
+  between two people; **and it walks the list it started with**, because fixing
+  somebody removes them and a recomputed queue renumbers under whoever is
+  working through it. **Units with no custodian cannot join it** — not a person,
+  so there would be nobody to open; it keeps its own line (§93.4).
+- **A LOCAL ALIAS IS INVISIBLE FROM ANOTHER FILE, AND ONLY OVER HTTP (§116.9):**
+  `attentionOf()` in `config-data.js` spelt half its declaration sentence with
+  `whereLabel`, which is a **`var` inside `renderPeople()`** in
+  `config-render.js` (§93.12's swap, made once rather than at five call sites).
+  Every check was green: the crash needs a declaration AND a register placement
+  that disagree, so it is invisible over `file://` (`SAIDWHERE` only ever comes
+  from a server, §94.11) **and the ternary short-circuits for anybody the
+  register has not placed** — which was every person the queue's own check had
+  made (§94.2 from the inside). It is `roleWhereLabel` on **both** halves now:
+  **a sentence that names two places and compares them must spell them the same
+  way**, or a match reads as a difference; `placeLabel` stays right for the Unit
+  CELL, where there is nothing to compare against. **AND THE COUNT AND THE QUEUE
+  HAD DRIFTED THE OTHER WAY**: the Overview's password row counts
+  `passwordReach()` (§89 excludes the office) and the queue's `nopw` counted
+  everybody, so a Super user with no password put a row in the queue that
+  whoever works through it has **no control to clear** — §16.7's fault inside
+  §116.2's own list, asked through `mayIssuePasswordTo()` now. The check asserts
+  the **relationship** (the button carries its own queue's length; every person
+  the Overview counts is findable in that queue) rather than the chip string
+  §116 removed — §51.11, loud this time only because the chip row is **gone**
+  rather than merely renamed.
+- **EVERY WAY OUT OF A DIALOG IS THE SAME WAY OUT (§116.6):** the × and Escape
+  closed the overlay directly, which was fine when it held a wizard and not when
+  it holds a form with `PDLG`, a row snapshot and a draft behind it. **And the
+  body is emptied on close** — a form left in the hidden overlay collected a
+  second handler on every repaint, for ever (§3.2: hidden is not gone).
 - **THE UNIT CELL SAYS WHERE, THE ROLES CELL SAYS WHAT (since v3.34, §110):**
   Islam, of the picker's second half: *"choose where is very strange sentence.
   make it Unit and it's already in a cell what am I missing here?"* **Nothing,
@@ -1783,8 +1859,13 @@ SMP/
 cd SMP-Project-Folder/src
 python3 build.py     # assembles strategy-management-platform.html (must be byte-identical to the shipped vX.Y file)
 python3 qa.py        # walks every page as every viewer, reports console errors (needs Playwright + Chromium)
+python3 checks/people-dialog.py # the register reads and the dialog writes: the queue,
+                                # Add, and neat with every column on (§116, over HTTP)
 python3 checks/role-picker.py   # giving somebody a role: every control PRESSED,
                                 # both ends asked, and the absences asserted (§110)
+python3 checks/strategy-split.py # the Strategy | Reporting halves: the cell pressed
+                                # open AND closed, both ends each time, and the .pptx
+                                # download unzipped and read — figures proved absent (§117)
 python3 checks/no-jump.py       # nothing moves the register under you — the act of
                                 # OPENING a row included, since §110.7
 python3 checks/office-chat.py   # the chat's client half — serves the built file over HTTP,
@@ -1801,9 +1882,9 @@ python3 checks/setup-search.py  # the rail's search: typing NEVER repaints, a re
                                 # (§108.13, §108.14 — all three fail silently)
                                 # setup-rail.py also measures every rail GLYPH against a
                                 # character guaranteed missing: a mark that is MAPPED and
-                                # not DRAWN ships as a blank box (§52, §116.2)
+                                # not DRAWN ships as a blank box (§52, §119.2)
 python3 checks/setup-pages.py   # every Setup page is named ONCE and in the rail's own word,
-                                # and the name and the table head stay on screen (§117)
+                                # and the name and the table head stay on screen (§120)
 ```
 In this cloud image, run any sweep through the wrapper so Playwright finds the
 Chromium that is already here:
@@ -1838,7 +1919,107 @@ prior sessions (on HR_ERP) accidentally reverted agreed-upon designs.
 
 ---
 
-*Last Updated: 2026-08-26 &mdash; **v3.37: the assistant (&sect;111,
+*Last Updated: 2026-08-26 &mdash; **v3.41: the CF tab, the add row, and a
+null that outlived its session (&sect;118)**. From production, within hours of
+&sect;113: *"the CF tab is not showing anything while it was showing it a
+minute ago."* The tab was fine; **the PAGE could no longer be drawn**, and a
+throw mid-`paint()` keeps the previous page on screen with the only witness
+in the hidden console &mdash; so a data fault reads as a dead click. The
+chain: the plan tables' **"+ Add" row is a `<tr>` inside the same sortable
+tbody**, defended by its own comment as safe because it cannot be *dragged*
+&mdash; and it was still **counted**, so every reorder commit carried
+`+undefined = NaN`, `applyOrder` pushed `arr[NaN]`, and one phantom entry
+joined the list per drag. On a unit that fails the save loudly (row-by-row
+tables); **on a pillars function the plan is ONE JSON blob, `undefined`
+becomes `null`, the save succeeds, and every later hydration hands the
+poison back** &mdash; "a minute ago" is exactly the save-and-rehydrate cycle.
+**THE PERSON MADE NO MISTAKE AND THAT IS A FINDING**: every hostile import is
+refused before Apply with the reason named, so nothing he could type or
+upload produces this &mdash; a control that silently does nothing is the
+product's own fault by its own rules. Three fixes, one class each:
+`makeSortable` counts rows carrying `data-oi` only; `applyOrder` refuses any
+commit that is not a permutation (untouched, never half-applied); and
+`fnPruneNulls()` heals already-saved poison at the hydration door &mdash;
+remove-only, &sect;50.6 intact. **And the tour is never offered to the
+office** (Islam: *"yes stop it to the SMO"*): the bootstrap SMO heads the SMO
+function, so `storyFor()`'s `fnhead` rung matched and the full-viewport dock
+ate every click while its welcome card waited &mdash; gated through
+`SMPRules.isOfficeRole()`, the one definition of the office.
+`checks/reorder-integrity.py` presses both reorder paths, the rail that must
+KEEP working, the refusals, the healed tenant over HTTP (file:// never
+hydrates, &sect;94.11) and both tour ends &mdash; and fails **16 ways**
+against the previous build, ending in the production error verbatim
+(&sect;94.5). Recorded, not fixed (&sect;118.7): a render that dies still
+says nothing on the page (&sect;32 one level deeper); below ~1100px a wrapped
+destination row paints under the page-tab row and its second line eats
+clicks; and no-jump.py's "sorting a column" trial fails on main's own build.*
+
+*Earlier: 2026-08-26 &mdash; **v3.40: the Strategy | Reporting split, and
+the plan as slides (&sect;117, spec 019)**. Islam: *"the strategy should be
+locked from the non SMO but the reporting should be editable by who we grant
+the access so they can submit — we need this split in the roles and access
+table"*, and a plan download in slides for the custodian and the BU owner.
+Settled from a mockup of the REAL platform and confirmed whole. The decision
+that shapes it: I recommended capping the Strategy half at view for non-office
+roles and **Islam chose that the SMO can OPEN it** &mdash; so &sect;94's lock
+is the shipped default now, not a floor, and opening a cell is a deliberate,
+logged act. **THE NEW KEY IS THE STRATEGY HALF**, which is the whole
+back-compat argument: a stored grant on the old key governed what a person
+could actually DO (reporting, because &sect;94 refused authoring by rule), so
+the old key keeps meaning Reporting and nobody's rights move on upgrade; no
+migration. **&sect;101 NEEDED A DECISION TO SURVIVE**: the plan page's grant
+moved to a half a holder reads at view, so `mayArrange()` now rides the
+holder's WORKING grant &mdash; the same stored value it tested before the
+split &mdash; or the arrows would have gone back silently. **THE .PPTX IS THE
+XLSX'S SIBLING**: a zip of XML through the same `zipStore()`, offline, no
+dependency; plan content only with the SWOT, and the reported figures are
+asserted as ABSENCES, because a builder that quietly copied an actuals column
+would pass every presence assertion (&sect;94.2 from the negative side).
+**AND THE FALSE ALARM WAS THE MEASURING TOOL**: LibreOffice refused the file
+&mdash; and refused a vanilla python-pptx file identically, because this image
+ships no Impress component at all (&sect;68.10's class). With Impress
+installed it renders cleanly. `checks/strategy-split.py` was proved able to
+fail three ways before its green was believed; `test-authorize.js` &sect;15
+fails on the pre-&sect;117 rules by construction.*
+
+*Earlier: 2026-08-26 &mdash; **v3.39: the register stops being a form**
+(&sect;116). Six decisions from Islam after two rounds of mockups, and **one
+thing follows from them that nobody asked for, which is why they hang
+together: with editing, adding and the queue all in a dialog, the table no
+longer edits anything.** Every collision this register has had &mdash;
+&sect;110.1's *+ role* under the frozen Cancel, &sect;110.8's fields painting
+over their neighbours, the Add row's three boxes under the wrong headings
+&mdash; was a control being clicked inside a 158px cell, and not one of them
+survives the move. **THE COUNT AND THE QUEUE ARE THE SAME LIST**: six alarm
+chips used to sit across the header naming numbers and pointing at rows to find
+by eye, which is exactly *"I don't know which lines I should go and check"* &mdash;
+one button now, and pressing it opens the first of them, says why above the
+fields, and walks to the next in the same place. **THREE THINGS BESIDE A VALUE
+WERE ALL ON A SECOND LINE** &mdash; the declaration note, the duplicate mark and
+the Official BU disagreement &mdash; each putting its row at 51px against its
+neighbours' 39px: &sect;88's own wrapping fault three times over, because `.val`
+and `&lt;b&gt;` are `display:block` and a mark placed BESIDE one starts a new
+line. **AND THE EMAIL FINALLY HOLDS AN EMAIL** (133px shown of 235px needed, on
+33 of 33 rows): it could not be given the room while the table still edited,
+because widening it alone pushed the controls further under the frozen columns.
+Two faults were found by rewriting the checks rather than by reading: the
+identity ladder was being called with an object instead of two arguments, so
+&sect;87's stop never fired and a second row for somebody already here went
+straight in; and the dialog had no *Add anyway*, which &sect;87.3 requires. The
+new check was proved able to fail before its green run was believed &mdash;
+**17 failures** against the previous build. **AND THE MERGE FOUND TWO MORE THAN
+THE BUILD COULD** (&sect;116.9): `attentionOf()` spelt half its declaration
+sentence with `whereLabel`, a **local `var` inside `renderPeople()` in another
+file** &mdash; green everywhere, because the crash needs a declaration AND a
+register placement that disagree, which is invisible over `file://` and
+short-circuits for anybody the register has not placed, and that was every
+person the queue's own check had made. Both halves say `roleWhereLabel` now: a
+sentence that compares two places must spell them the same way or a match reads
+as a difference. **And the count and the queue had drifted the other way** &mdash;
+the Overview counts people this viewer may issue a password TO (&sect;89) and
+the queue counted everybody, so a Super user with no password put a row in the
+list that whoever works through it has no control to clear.*
+*Earlier: 2026-08-26 &mdash; **v3.37: the assistant (&sect;111,
 &sect;112), and a chat that vanished (&sect;113)**. The last one came from
 production and is the one worth reading: *"the chat was a user, he sent to me
 and I replied and the chat disappeared from all places."* **NOTHING WAS

@@ -114,8 +114,17 @@ function handle(label){
 function makeSortable(container, itemSel, onCommit){
   var dragging = null;
 
+  /* DATA ROWS ONLY (§118). The plan pane's add row is a <tr> inside the same
+     tbody — undraggable, because it has no grip, and that was mistaken for
+     safe: it was still COUNTED on every commit. A row with no data-oi read as
+     +undefined = NaN, applyOrder pushed arr[NaN] = undefined onto the list,
+     and the autosave's JSON wrote it as null into a pillars function's plan —
+     which is stored as one blob, so the null came back on every hydration and
+     the page threw before it could replace what was on screen. Every real
+     sortable item carries data-oi; anything without one is furniture. */
   function siblings(){
-    return Array.prototype.slice.call(container.querySelectorAll(itemSel));
+    return Array.prototype.slice.call(container.querySelectorAll(itemSel))
+      .filter(function(el){ return el.dataset.oi != null; });
   }
 
   function renumber(){
@@ -184,8 +193,24 @@ function makeSortable(container, itemSel, onCommit){
   });
 }
 
-/* Apply a committed order to the underlying array. */
+/* Apply a committed order to the underlying array.
+
+   AND REFUSE ONE THAT DOES NOT ACCOUNT FOR EVERY ROW EXACTLY ONCE (§118).
+   A commit is a permutation of 0..n-1 or it is wrong: an index outside the
+   array pushes undefined (which a save turns into null — the poison that
+   broke the CF function), and a missing or doubled index silently drops or
+   duplicates a row somebody wrote. The backstop keeps the array untouched
+   rather than half-applying: with siblings() fixed above this should never
+   fire, and if it ever does, an unchanged order is the only outcome that
+   loses nothing. */
 function applyOrder(arr, order){
+  if (order.length !== arr.length) return;
+  var seen = {};
+  for (var k = 0; k < order.length; k++) {
+    var i = order[k];
+    if (typeof i !== "number" || !isFinite(i) || i < 0 || i >= arr.length || seen[i]) return;
+    seen[i] = true;
+  }
   var copy = order.map(function(i){ return arr[i]; });
   arr.length = 0;
   copy.forEach(function(x){ arr.push(x); });

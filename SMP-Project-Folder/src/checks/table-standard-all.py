@@ -49,6 +49,7 @@ with sync_playwright() as p:
           const rows = [].slice.call(t.tBodies[0].rows).filter(r=>!r.classList.contains('newrow'));
           return { wired:true, rows:rows.length,
                    bar: !!document.querySelector('[data-tkbar="'+k+'"]'),
+                   search: !!document.querySelector('[data-tksearch="'+k+'"]'),
                    chips: document.querySelectorAll('[data-tkfilter^="'+k+'|"]').length,
                    sortables: t.querySelectorAll('[data-tksort]').length,
                    flagged: rows.filter(r=>r.dataset.tkrow).length }; }""", key)
@@ -61,8 +62,15 @@ with sync_playwright() as p:
         else:
             ck("sortable headers", st["sortables"] > 0, st)
 
+        # ── THE REGISTER'S SEARCH LEFT THE BAR (§116) ────────────────
+        # Islam removed its quick filters and its row count, which left the bar
+        # holding one box on a row of its own — so the box moved into the page
+        # header and the bar went with the rest. The STANDARD is unchanged and
+        # is what is asserted: a table of nine rows or more is searchable. Where
+        # the search box lives is the page's business.
         if st["rows"] >= 9 or st["chips"]:
-            ck("has a bar (%d rows, %d chips)" % (st["rows"], st["chips"]), st["bar"], st)
+            ck("is searchable (%d rows, %d chips)" % (st["rows"], st["chips"]),
+               st["bar"] or st["search"], st)
 
         if st["bar"]:
             names = pg.evaluate(READ, key)

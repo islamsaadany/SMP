@@ -2185,10 +2185,10 @@
      and `top:0` does nothing at all. Capped against the viewport rather than
      at a fixed number so a tall screen shows more rows — the same shape
      `.cfg.srctable` already uses for the Who-enters table. */
-  /* THE TABLE REACHES THE BOTTOM OF THE WINDOW (§118.5). It was
+  /* THE TABLE REACHES THE BOTTOM OF THE WINDOW (§120.5). It was
      `calc(100vh - 300px)`, and that 300 was a GUESS at what sat above — an
      alarm-chip row, a filter row and a count line, all three of which §116 and
-     §118 removed without anybody retuning the constant. Measured, the box
+     §120 removed without anybody retuning the constant. Measured, the box
      stopped **141px above the bottom of the window at every height**, with the
      rail beside it correctly ending 20px short.
 
@@ -3315,7 +3315,7 @@
   /* The search sits in the header row now rather than on a bar of its own — the
      bar held five filter chips and a row count, and both went at Islam's word,
      which left a whole row carrying one box. */
-  /* THE SEARCH GIVES WAY FIRST (§118). Six controls and a title share this row
+  /* THE SEARCH GIVES WAY FIRST (§120). Six controls and a title share this row
      now, and the search is the only one that can be narrower without losing a
      word — so it flexes from 160px rather than 190px, which is what buys the
      single line down to 1280px. It still grows into whatever is left over. */
@@ -3324,7 +3324,7 @@
   /* THE COUNT IS A LINE, NOT A CHIP. Two counts said the same thing twice; the
      survivor is quiet, under the title, where it reads as a fact about the page
      rather than as another control. */
-  /* THE CUSTODIAN MARK IS A CHIP ON THE ROW (§118). `.pcount` and its line
+  /* THE CUSTODIAN MARK IS A CHIP ON THE ROW (§120). `.pcount` and its line
      went with the count Islam asked to remove; this is the one thing that line
      carried which is not a person, so it could not move into the Attention
      queue (§116.2) and had to move onto the row instead. It wears the warning
@@ -3376,11 +3376,11 @@
   .peoplecfg td.wrapany, .peoplecfg th.wrapany { max-width:270px; }
 
   /* ── THE DIALOG ─────────────────────────────────────────────────── */
-  /* 860px, NOT 940 (§118). Marked on the overlay by openPersonDialog() rather
+  /* 860px, NOT 940 (§120). Marked on the overlay by openPersonDialog() rather
      than loosened on `.modal`, which every dialog in the platform shares. */
   .overlay.pdlg-on .modal { width:min(860px, 100%); }
 
-  /* THREE COLUMNS, NOT TWO (§118). Islam: "that's a very wide design that even
+  /* THREE COLUMNS, NOT TWO (§120). Islam: "that's a very wide design that even
      require a scroll — make it compact with no need to scroll." Measured at
      938px wide with two 434px columns, the content ran 482px and a 720px-tall
      window cut it at 538px.
@@ -3406,7 +3406,7 @@
      control's automatic minimum size is otherwise its intrinsic width, which is
      how a grid track gets held open by an input nobody sized (§110.8). */
   .pdlg .pdf .fld, .pdlg .pdf .ssbtn { width:100%; min-width:0; box-sizing:border-box; }
-  /* A VALUE THAT CANNOT BE EDITED LOOKS LIKE ONE (§118). It sits on the
+  /* A VALUE THAT CANNOT BE EDITED LOOKS LIKE ONE (§120). It sits on the
      baseline its neighbouring inputs sit on, so the row does not go ragged,
      and the dashed edge and quiet ink are what the removed sentence used to
      say. `cursor:help` is the sign there is something on the hover. */
@@ -4530,7 +4530,7 @@
 
   /* ── One header for the configuration tables ─────────────────────── */
   .phead2{display:flex;align-items:center;gap:20px;flex-wrap:wrap;margin:0 0 14px}
-  /* BOLD (§118.5). Islam, of the People register's: "the title needs to be
+  /* BOLD (§120.5). Islam, of the People register's: "the title needs to be
      bold." ALL TWELVE Setup titles, not that one — `cfgHead()` is one function
      and one page's title in a different weight from eleven others reads as a
      mistake rather than as emphasis. */
@@ -12947,6 +12947,33 @@ function fnFormat(f){ return (f && f.format === "pillars") ? "pillars" : "projec
 function fnPlansInPillars(f){ return fnFormat(f) === "pillars"; }
 function fnItems(f){ return (f && Array.isArray(f.items)) ? f.items : []; }
 
+/* A STORED LIST NEVER HOLDS A HOLE (§118). A pillars function's plan rides in
+   one JSON blob (functions.extra), and JSON writes an array hole or an
+   undefined entry as null — which is how one poisoned reorder commit left a
+   null inside a tactics list and the CF page threw on every visit from the
+   next hydration on, while the click looked like it did nothing. The commit
+   is fixed in arrange.js; this heals what a tenant already saved. It only
+   REMOVES — a reader must never create the field it was looking for (§50.6) —
+   and the next autosave persists the clean lists, so the poison does not
+   outlive one visit. Units need none of this: their plans are stored
+   row-by-row and a null cannot survive that road. */
+function fnPruneNulls(f){
+  if (!f) return f;
+  var live = function(x){ return x != null; };
+  if (Array.isArray(f.items)) {
+    f.items = f.items.filter(live);
+    f.items.forEach(function(p){
+      if (Array.isArray(p.measures)) p.measures = p.measures.filter(live);
+      if (Array.isArray(p.tactics))  p.tactics  = p.tactics.filter(live);
+    });
+  }
+  if (Array.isArray(f.keyObjectives)) f.keyObjectives = f.keyObjectives.filter(live);
+  if (f.swot) ["s","w","o","t"].forEach(function(k){
+    if (Array.isArray(f.swot[k])) f.swot[k] = f.swot[k].filter(live);
+  });
+  return f;
+}
+
 /* WHICH function carries this pillar, if any. Returns null unless the pointer
    names a function that exists, is active AND plans in pillars — a pointer at a
    projects function or a retired one is a pointer at something that cannot
@@ -14226,8 +14253,17 @@ function handle(label){
 function makeSortable(container, itemSel, onCommit){
   var dragging = null;
 
+  /* DATA ROWS ONLY (§118). The plan pane's add row is a <tr> inside the same
+     tbody — undraggable, because it has no grip, and that was mistaken for
+     safe: it was still COUNTED on every commit. A row with no data-oi read as
+     +undefined = NaN, applyOrder pushed arr[NaN] = undefined onto the list,
+     and the autosave's JSON wrote it as null into a pillars function's plan —
+     which is stored as one blob, so the null came back on every hydration and
+     the page threw before it could replace what was on screen. Every real
+     sortable item carries data-oi; anything without one is furniture. */
   function siblings(){
-    return Array.prototype.slice.call(container.querySelectorAll(itemSel));
+    return Array.prototype.slice.call(container.querySelectorAll(itemSel))
+      .filter(function(el){ return el.dataset.oi != null; });
   }
 
   function renumber(){
@@ -14296,8 +14332,24 @@ function makeSortable(container, itemSel, onCommit){
   });
 }
 
-/* Apply a committed order to the underlying array. */
+/* Apply a committed order to the underlying array.
+
+   AND REFUSE ONE THAT DOES NOT ACCOUNT FOR EVERY ROW EXACTLY ONCE (§118).
+   A commit is a permutation of 0..n-1 or it is wrong: an index outside the
+   array pushes undefined (which a save turns into null — the poison that
+   broke the CF function), and a missing or doubled index silently drops or
+   duplicates a row somebody wrote. The backstop keeps the array untouched
+   rather than half-applying: with siblings() fixed above this should never
+   fire, and if it ever does, an unchanged order is the only outcome that
+   loses nothing. */
 function applyOrder(arr, order){
+  if (order.length !== arr.length) return;
+  var seen = {};
+  for (var k = 0; k < order.length; k++) {
+    var i = order[k];
+    if (typeof i !== "number" || !isFinite(i) || i < 0 || i >= arr.length || seen[i]) return;
+    seen[i] = true;
+  }
   var copy = order.map(function(i){ return arr[i]; });
   arr.length = 0;
   copy.forEach(function(x){ arr.push(x); });
@@ -14534,10 +14586,10 @@ var PAGE_INFO = {
        "to a role is a deliberate act made on the table, not a side effect of letting the same " +
        "people report."],
       ["Two things are rules, not settings, so they are not in the table",
-       "The <b>knowledge base</b> is readable by everyone, always &mdash; an explanation nobody " +
-       "can open is not an explanation. And <b>focus measures</b> &mdash; what carries reward " +
-       "&mdash; are marked by the group CEO and the SMO. Each of these used to be a cell in the " +
-       "matrix."],
+       "The <b>knowledge base</b> is the office's &mdash; the Super user and the SMO team &mdash; " +
+       "because it explains how the platform itself is run. And <b>focus measures</b> &mdash; " +
+       "what carries reward &mdash; are marked by the group CEO and the SMO. Each of these is a " +
+       "rule rather than a cell, so neither moves when the table does."],
       ["Page level only",
        "If a role can open a page, it sees everything on it. Restriction happens by removing the " +
        "page, never by trimming its contents &mdash; per-element permissions make a system nobody " +
@@ -17657,9 +17709,28 @@ function pptxColors(){
     bar:   strip(b.bar,    "#16325C"),      /* headers — the navigation's own */
     accent:strip(b.accent, "#C9A24D"),      /* the mark, sparingly (§41) */
     ink:   "1B2740", quiet:"5E6E88", ground:"FFFFFF", line:"DCE3ED",
-    zebra: "F2F5F9"
+    zebra: "F2F5F9",
+    /* The platform's own light --bad: what `.missing` wears on screen, worn
+       here on the slide's white ground (§119). */
+    bad:   "B04434"
   };
 }
+
+/* ── MISSING IS SAID, IN BOLD RED (§119) ─────────────────────────────
+   Islam: "identify the missing areas of the plan and type missing in bold red
+   so they know what they need to fill." The deck used to print an em-dash for
+   an empty plan fact, which reads as "nothing to say" when the truth is
+   "nobody has said it yet" — the same distinction §35 drew for the password
+   column. The product already marks an unset target `Missing` in red
+   (`.missing`, §104.10's family); the slides now speak the same word.
+
+   NOT every blank is a gap: collaborators are optional by design, and a
+   quarter column left unmarked is the mark. What gets the word is what the
+   PLAN OWES — a direction, a target, a compile rule, a tactic's owner, a
+   project's owner and dates, a capability's definition, the aspiration, and
+   an empty SWOT quadrant. */
+var PPTX_MISS = { miss: true };
+function orMiss(v){ return v ? v : PPTX_MISS; }
 
 /* ── The DrawingML fragments ────────────────────────────────────────── */
 function pptxRun(text, o){
@@ -17693,10 +17764,16 @@ function pptxText(id, box, paras, o){
    ink — §38.5: a surface with its own ground needs its own ink. */
 function pptxTable(id, box, widths, head, rows){
   var C = pptxColors();
-  function cell(text, hdr, ri){
+  function cell(c, hdr, ri){
+    /* A cell is a string, or an object: `{miss:true}` renders the bold red
+       Missing (§119); `{t, align}` carries a mark that wants centring. */
+    var o = (c !== null && typeof c === "object") ? c : { t: c };
+    var runOpts = hdr    ? { sz:1100, b:true, color:C.ground }
+                : o.miss ? { sz:1100, b:true, color:C.bad }
+                :          { sz:1100, color:C.ink };
     return '<a:tc><a:txBody><a:bodyPr/><a:lstStyle/>' +
-      pptxPara(pptxRun(text, hdr ? { sz:1100, b:true, color:C.ground }
-                                 : { sz:1100, color:C.ink })) +
+      pptxPara(pptxRun(o.miss ? "Missing" : (o.t == null ? "" : o.t), runOpts),
+               o.align ? { align: o.align } : undefined) +
       '</a:txBody><a:tcPr marL="72000" marR="72000" marT="36000" marB="36000">' +
       '<a:lnB w="6350"><a:solidFill><a:srgbClr val="' + C.line + '"/></a:solidFill></a:lnB>' +
       '<a:solidFill><a:srgbClr val="' +
@@ -17765,10 +17842,13 @@ function pptxTableSlides(kicker, title, widths, head, rows){
   return out;
 }
 
-function pptxQuarters(t){
-  var qs = ["q1","q2","q3","q4"].map(function(q, i){ return t[q] ? "Q" + (i + 1) : null; })
-    .filter(Boolean);
-  return qs.length ? qs.join(" · ") : "—";
+/* One cell per quarter, a mark where the tactic runs (§119 — Islam: "make
+   the tactics columns a column for each Q with a mark for the qs in action",
+   the shape the plan workbook's Q1–Q4 columns already have). */
+function pptxQCells(t){
+  return ["q1","q2","q3","q4"].map(function(q){
+    return { t: t[q] ? "\u2713" : "", align: "ctr" };
+  });
 }
 
 function pptxCover(orgLine, name, subLine){
@@ -17800,33 +17880,40 @@ function pptxUnitSlides(u, kicker){
     found.push(pptxPara([pptxRun(c[0] + "  ", { sz:1200, b:true, color:C.quiet }),
                          pptxRun(c[1], { sz:1200 })], { before:600 }));
   });
+  /* The Foundation slide is ALWAYS in the deck since §119: a slide skipped
+     for being empty hides exactly the gap the Missing marks exist to show. */
   var fShapes = pptxHead(kicker, "Foundation");
-  if (u.aspiration) fShapes.push(pptxText(6,
+  fShapes.push(pptxText(6,
     { x:PPTX_MX, y:PPTX_TABLE_Y, cx:PPTX_CW, cy:1188720 },
     [pptxPara(pptxRun("ASPIRATION", { sz:1000, b:true, color:C.quiet })),
-     pptxPara(pptxRun(u.aspiration, { sz:1500, i:true, color:C.bar }), { before:600 })],
+     u.aspiration
+       ? pptxPara(pptxRun(u.aspiration, { sz:1500, i:true, color:C.bar }), { before:600 })
+       : pptxPara(pptxRun("Missing", { sz:1500, b:true, color:C.bad }), { before:600 })],
     { fill:C.zebra }));
   if (found.length) fShapes.push(pptxText(7,
     { x:PPTX_MX, y:2705100, cx:PPTX_CW, cy:2971800 }, found));
-  if (u.aspiration || found.length) slides.push(pptxSlideXml(fShapes));
+  slides.push(pptxSlideXml(fShapes));
 
   var kos = u.keyObjectives || [];
   if (kos.length) slides = slides.concat(pptxTableSlides(kicker, "Key objectives",
     [4754880, 914400, 2621280, 2621280],
     ["Objective", "Dir.", "This year's target", "3-year target"],
-    kos.map(function(k){ return [k.name, k.dir || "", k.target || "—", k.target3y || "—"]; })));
+    kos.map(function(k){ return [k.name, orMiss(k.dir), orMiss(k.target), orMiss(k.target3y)]; })));
 
   /* The SWOT, asked for by name (Islam, 2026-08-26). Four boxes, two rows —
      the shape the Analysis page draws. */
   var sw = u.swot || {};
-  if ((sw.s || []).length || (sw.w || []).length || (sw.o || []).length || (sw.t || []).length) {
+  (function(){
     var half = (PPTX_CW - 228600) / 2, boxH = 2103120, id = 6;
     var quad = function(x, y, title, items){
-      return pptxText(id++, { x:x, y:y, cx:half, cy:boxH },
-        [pptxPara(pptxRun(title.toUpperCase(), { sz:1050, b:true, color:C.bar }))].concat(
-          (items || []).map(function(t){
+      var body = (items || []).length
+        ? (items || []).map(function(t){
             return pptxPara(pptxRun("·  " + t, { sz:1000 }), { before:300 });
-          })), { fill:C.zebra });
+          })
+        : [pptxPara(pptxRun("Missing", { sz:1100, b:true, color:C.bad }), { before:300 })];
+      return pptxText(id++, { x:x, y:y, cx:half, cy:boxH },
+        [pptxPara(pptxRun(title.toUpperCase(), { sz:1050, b:true, color:C.bar }))].concat(body),
+        { fill:C.zebra });
     };
     slides.push(pptxSlideXml(pptxHead(kicker, "Analysis — SWOT").concat([
       quad(PPTX_MX, PPTX_TABLE_Y, "Strengths", sw.s),
@@ -17834,7 +17921,7 @@ function pptxUnitSlides(u, kicker){
       quad(PPTX_MX, PPTX_TABLE_Y + boxH + 182880, "Opportunities", sw.o),
       quad(PPTX_MX + half + 228600, PPTX_TABLE_Y + boxH + 182880, "Threats", sw.t)
     ])));
-  }
+  })();
 
   /* One pillar, two tables, two slides — measures then tactics, the order the
      Plan pane reads them in. */
@@ -17845,14 +17932,14 @@ function pptxUnitSlides(u, kicker){
       [5303520, 914400, 2346960, 2346960],
       ["Measure", "Dir.", "Target", "Compiles"],
       (p.measures || []).map(function(m){
-        return [m.name, m.dir || "", m.target || "—", m.compile || "—"];
+        return [m.name, orMiss(m.dir), orMiss(m.target), orMiss(m.compile)];
       })));
     slides = slides.concat(pptxTableSlides(pk, p.name + " — Tactics",
-      [5303520, 2103120, 2103120, 1402080],
-      ["Tactic", "Owner", "Collaborators", "Quarters"],
+      [4571760, 2103120, 1676400, 640140, 640140, 640140, 640140],
+      ["Tactic", "Owner", "Collaborators", "Q1", "Q2", "Q3", "Q4"],
       (p.tactics || []).map(function(t){
-        return [t.name, t.owner || "—",
-                (t.collaborators || []).join(", ") || "—", pptxQuarters(t)];
+        return [t.name, orMiss(t.owner),
+                (t.collaborators || []).join(", ") || "—"].concat(pptxQCells(t));
       })));
   });
   return slides;
@@ -17870,24 +17957,27 @@ function pptxFnSlides(fk){
     "Strategy plan — as agreed, no reported figures · " + today));
   capsOfFunction(fk).forEach(function(c){
     var shapes = pptxHead(f.name, c.name);
-    if (c.def) shapes.push(pptxText(6, { x:PPTX_MX, y:PPTX_TABLE_Y, cx:PPTX_CW, cy:960120 },
+    shapes.push(pptxText(6, { x:PPTX_MX, y:PPTX_TABLE_Y, cx:PPTX_CW, cy:960120 },
       [pptxPara(pptxRun("WHAT IT IS", { sz:1000, b:true, color:C.quiet })),
-       pptxPara(pptxRun(c.def, { sz:1300, i:true, color:C.bar }), { before:600 })],
+       c.def
+         ? pptxPara(pptxRun(c.def, { sz:1300, i:true, color:C.bar }), { before:600 })
+         : pptxPara(pptxRun("Missing", { sz:1300, b:true, color:C.bad }), { before:600 })],
       { fill:C.zebra }));
     var kos = c.keyObjectives || [];
     if (kos.length) shapes.push(pptxTable(7,
-      { x:PPTX_MX, y:c.def ? 2529840 : PPTX_TABLE_Y, cx:PPTX_CW },
+      { x:PPTX_MX, y:2529840, cx:PPTX_CW },
       [5760720, 914400, 2118360, 2118360],
       ["Key objective", "Dir.", "Target", "Weight"],
       kos.slice(0, 8).map(function(k){
-        return [k.name, k.dir || "", k.target || "—", k.weight != null ? k.weight + "%" : "—"];
+        return [k.name, orMiss(k.dir), orMiss(k.target),
+                k.weight != null ? k.weight + "%" : PPTX_MISS];
       })));
     slides.push(pptxSlideXml(shapes));
     slides = slides.concat(pptxTableSlides(f.name + " · " + c.name, "Projects",
       [3931920, 1737360, 1188720, 1188720, 2865120],
       ["Project", "Owner", "Start", "End", "Carries"],
       (c.projects || []).map(function(p){
-        return [p.name, p.owner || "—", p.start || "—", p.end || "—",
+        return [p.name, orMiss(p.owner), orMiss(p.start), orMiss(p.end),
           plural((p.deliverables || []).length, "deliverable") + " · " +
           plural((p.outcomes || []).length, "outcome") + " · " +
           plural((p.milestones || []).length, "milestone")];
@@ -20711,8 +20801,20 @@ function railName(code, name){
    PREFERENCE, so it lives in localStorage beside the theme and the People
    page's columns (§25, §47.1) — putting it in the state graph would change
    the rail for everyone in the tenant. */
+/* ── COLLAPSED IS THE DEFAULT (§119) ──────────────────────────────
+   Islam: "make the default view for the pillar rail to be the collapsed one."
+   The rail's small line under each name carries counts and an owner — useful
+   once you are deep in a plan, noise when you are looking for which pillar to
+   open, and it is what makes a ten-pillar rail taller than the pane beside it.
+
+   READ THE OTHER WAY ROUND, LIKE §104'S TWO SETTINGS: absent now means TERSE,
+   so only an explicit "0" — somebody who pressed the control to bring the
+   detail back — turns it off. A stored "1" from before this change still
+   reads as terse, so nobody who had already collapsed it sees a change; and
+   the preference stays in localStorage, per screen, never the state graph
+   (§25, §47.1). */
 var RAIL_TERSE = (function(){
-  try { return localStorage.getItem("smp.rail.terse") === "1"; } catch(e){ return false; }
+  try { return localStorage.getItem("smp.rail.terse") !== "0"; } catch(e){ return true; }
 })();
 function railHead(label, n){
   return '<div class="rhead"><span class="rhl">' + label + ' <span>' + n + '</span></span>' +
@@ -20723,8 +20825,20 @@ function railHead(label, n){
     'stroke="currentColor" stroke-width="1.6" stroke-linecap="round" fill="none"/></svg>' +
     '</button></div>';
 }
-function railSub(html){
-  return (RAIL_TERSE || !html) ? "" : '<span class="rsub">' + html + '</span>';
+function railSub(html, alarm){
+  /* TERSE DROPS THE DETAIL, NEVER THE ALARM (§119). Collapsed is the default
+     now, and the routine half of this line — how many measures, how many
+     tactics, who owns it — is exactly what somebody scanning for a pillar does
+     not need. The other half is not detail: §106.2 put the count of rows
+     wanting attention HERE so the project holding them can be found without
+     opening each in turn (§93.4, the count belonging where the gap is closed),
+     and a default that hid it would have quietly undone that. So an `alarm`
+     survives terse and the rest does not; with both, terse shows the alarm
+     alone. Found by checks/project-tables.py going red on the day the default
+     flipped — the rail's line was carrying two different kinds of thing and
+     nothing had had to tell them apart before. */
+  var body = RAIL_TERSE ? (alarm || "") : [html, alarm].filter(Boolean).join(" &middot; ");
+  return body ? '<span class="rsub">' + body + '</span>' : "";
 }
 
 /* `opts` carries the two things the PLAN page's rail needs and the
@@ -20734,6 +20848,9 @@ function railSub(html){
    to author a plan from the page that reports against it. */
 function railFor(list, sel, numOf, subOf, groupOf, footNote, codeOf, opts){
   opts = opts || {};
+  /* The half of the small line that survives a collapsed rail (§119). Optional
+     and last, so every existing caller is untouched. */
+  var alarmOf = opts.alarmOf;
   var lastGroup = null;
   var rows = list.map(function(it, i){
     var g = groupOf ? groupOf(it) : null, head = "";
@@ -20749,7 +20866,7 @@ function railFor(list, sel, numOf, subOf, groupOf, footNote, codeOf, opts){
          names out as though something were there — the unit's Plan rail, which
          has never had a number, does not render one at all. */
       (numOf ? '<span class="rnum">' + numOf(it) + '</span>' : '') +
-        railSub(subOf ? subOf(it) : "") +
+        railSub(subOf ? subOf(it) : "", alarmOf ? alarmOf(it) : "") +
       '</button>';
   }).join("");
   /* THE CONTAINER SAYS WHAT IT HOLDS (§63.5): `data-item=".ritem"`, because
@@ -21348,17 +21465,18 @@ function renderFnProjects(fnKey){
        date AND the end date AND which kind of timeline, over three. */
     var rail = railFor(c.projects, sel, null,
       function(p){
-        var n = planAttention(p);
         return plural(p.deliverables.length, "deliverable") + ' &middot; ' +
           plural(p.outcomes.length, "outcome") + ' &middot; ' +
-          plural(p.milestones.length, "milestone") +
-          /* Appended to the SUB line, never passed as `numOf`: that argument
-             puts a `.rnum` on EVERY row and an empty one still takes its
-             column in the grid (the note on railFor says so). */
-          (n ? ' &middot; <span class="missing">' + plural(n, "row") + ' to check</span>' : ''); },
+          plural(p.milestones.length, "milestone"); },
       null, null,
       function(p){ return projCode(fk, p); },
-      { arranging: on, add: ed, capId: c.id });
+      { arranging: on, add: ed, capId: c.id,
+        /* Appended to the SUB line, never passed as `numOf`: that argument
+           puts a `.rnum` on EVERY row and an empty one still takes its column
+           in the grid (the note on railFor says so). */
+        alarmOf: function(p){
+          var n = planAttention(p);
+          return n ? '<span class="missing">' + plural(n, "row") + ' to check</span>' : ''; } });
     /* splitOrPane() drops the rail below railWorthIt()'s threshold, which is
        right for reading and wrong while a plan is being authored: with one
        project there would be nowhere to press Add. */
@@ -23100,7 +23218,7 @@ function renderPeople(){
      carries the snapshot Cancel restores from (§79.2, §110.6). */
   function rowOpen(p){ return mayEdit_ && rowEditIs("people", p.key); }
   var live = typeof SYNC !== "undefined" && SYNC.isLive() && inOffice();
-  /* `retired` was counted here for the header's count line, which §118
+  /* `retired` was counted here for the header's count line, which §120
      removed. Deleted rather than left standing: a variable nothing reads is
      one the next person reads as load-bearing (§24). Retired is still a row
      state, behind the search. */
@@ -23326,7 +23444,7 @@ function renderPeople(){
         '" type="email" autocomplete="off" spellcheck="false" placeholder="Email">');
     F("Mobile", '<input class="fld" value="' + esc(p.phone || "") + '" data-pphone="' + p.key +
         '" placeholder="Mobile">');
-    /* THE REASON IS ON THE HOVER (§118). It was a two-line paragraph, the
+    /* THE REASON IS ON THE HOVER (§120). It was a two-line paragraph, the
        tallest single thing in the dialog, saying the same sentence on every
        person you open — and the dialog scrolled. It reads as not-editable
        from its own look (`.pdro`, dashed and quiet) rather than from a
@@ -24120,7 +24238,7 @@ function renderPeople(){
     '<button class="addbtn" data-padd-open="1">+ Add</button>';
 
   /* THE ONE OUTSTANDING THING THAT IS NOT A PERSON (§93.4), and it is now a
-     CHIP ON THE ROW rather than a line under it (§118). It cannot join the
+     CHIP ON THE ROW rather than a line under it (§120). It cannot join the
      Attention queue — a unit is not somebody you can open — so removing the
      count line would have taken it with it, which is why it moved rather than
      went. DRAWN ONLY WHEN THERE IS ONE: a chip that is usually absent is a
@@ -24132,7 +24250,7 @@ function renderPeople(){
       'Strategy custodian role from their row here.">' +
       plural(noCust.length, "unit") + ' with no custodian</span>';
 
-  /* NO BADGE AND NO COUNT LINE (§118). Islam: "the SMO badge remove it and
+  /* NO BADGE AND NO COUNT LINE (§120). Islam: "the SMO badge remove it and
      remove the 77 people active text ... and accordingly the whole table
      should be just below the buttons line."
 
@@ -25006,9 +25124,11 @@ function renderKB(){
            'and opening it to a role is a deliberate act made on this table, not a side ' +
            'effect of letting the same people report (§117).' },
       { h: "Two things the table does not decide",
-        p: 'The <b>knowledge base</b> is readable by everyone, always. And <b>focus ' +
-           'measures</b>, what carries reward, are marked by the group CEO and the SMO. ' +
-           'These are rules; they do not change when the table does.' },
+        p: 'The <b>knowledge base</b> is the office\u2019s \u2014 the Super user and the ' +
+           'SMO team \u2014 because it explains how the platform itself is run (\u00a7119, ' +
+           'reversing \u00a730). And <b>focus measures</b>, what carries reward, are marked ' +
+           'by the group CEO and the SMO. These are rules; they do not change when the ' +
+           'table does.' },
       { h: "Companies decide reach",
         p: 'A company groups business units so a company CEO sees their own. It carries ' +
            '<b>no score and no page</b> — it decides who sees what, nothing more. Its two ' +
@@ -31090,6 +31210,19 @@ var TOUR = (function(){
   function storyFor(person){
     var rs = rolesOf(person), has = {};
     rs.forEach(function(r){ has[r.role] = r; });
+    /* THE OFFICE IS NEVER OFFERED THE TOUR (§118, Islam: "yes stop it to the
+       SMO"). The tour orients a first-time user; the office runs the
+       platform. And the gate has to sit HERE rather than only on the seat
+       role, because the bootstrap SMO also heads the SMO function — fnhead
+       matched below and the "owner" story fired for the one person in the
+       tenant it could not be for, with the dock eating every click while its
+       welcome card waited. isOfficeRole() is the one definition of the
+       office (§89, §97); no second copy of it here. */
+    if (rs.some(function(r){
+      return (typeof SMPRules !== "undefined" && SMPRules.isOfficeRole)
+        ? SMPRules.isOfficeRole(r.role)
+        : (r.role === "super" || r.role === "smoteam");
+    })) return null;
     if (has.custodian) return "custodian";
     if (has.owner || has.fnhead) return "owner";
     return null;
@@ -31865,6 +31998,13 @@ var SYNC = (function () {
     window.UNITS = state.units;
     window.FUNCTION_KEYS = state.functionKeys;
     window.FUNCTIONS = state.functions;
+    /* Heal at the one door stored plans arrive through (§118): a function's
+       plan is a JSON blob, and a blob written while a list held an undefined
+       entry holds a literal null for ever — every visit to that function's
+       pages then dies mid-paint and the tab reads as dead. Remove-only. */
+    if (typeof fnPruneNulls === "function") {
+      (window.FUNCTION_KEYS || []).forEach(function (k) { fnPruneNulls(window.FUNCTIONS[k]); });
+    }
     /* A tenant that predates the company level has neither, and an empty
        company list is a valid answer: every unit is then its own. */
     window.COMPANY_KEYS = state.companyKeys || [];
@@ -32680,8 +32820,25 @@ var SYNC = (function () {
                                                                         render:renderImport },
                   { k:"arch", ac:"c_import", label:"Archived plans",    render:renderArchives }];
         } },
-      /* Last in its group: it explains the rest, so it is not where you start. */
-      { k:"kb",       ac:"c_kb", grp:"cycle",     label:"Knowledge base", find:"help explain how documentation guide reference reasoning",                render:renderKB }
+      /* Last in its group: it explains the rest, so it is not where you start.
+
+         ── AND IT IS THE OFFICE'S NOW (§119) ──────────────────────────
+         Islam: "remove knowledge base from the view of all except the smo team
+         and the super user." It REVERSES §30's "readable by everyone, always"
+         and §37's naming of that as one of the three things too fundamental to
+         be a matrix cell — recorded as a reversal rather than overwritten
+         (Principle II), because the argument that put it there was a good one
+         and the client's is better: this knowledge base explains how the
+         PLATFORM is run — cycles, access, imports, the reasoning behind every
+         decision — which is the office's job and nobody else's reading.
+
+         `when: inOffice()`, the shape `c_send` and `c_chat` already use (§97),
+         NOT a matrix cell: who may read the office's own working notes is not
+         a tick somebody could set on a bad afternoon. `c_kb` stays `area:
+         "always"` so the grant machinery is untouched; this gate sits in front
+         of it, and nothing else reads that key. */
+      { k:"kb",       ac:"c_kb", grp:"cycle",     label:"Knowledge base", find:"help explain how documentation guide reference reasoning",
+        when: function(){ return inOffice(); },                          render:renderKB }
     ]
   };
 
@@ -33795,7 +33952,7 @@ var SYNC = (function () {
       ? '<div class="split setupsplit' + (RAIL_OPEN ? '' : ' shut') + '">' +
         setupRail(defs, currentSub) +
         '<div class="pane setuppane' +
-          /* THE REGISTER'S PANE FILLS THE WINDOW (§118.5). Islam: "the
+          /* THE REGISTER'S PANE FILLS THE WINDOW (§120.5). Islam: "the
              registry table should extend down till the end of the page." It is
              marked here rather than guessed at in CSS, because only this page
              holds a table that is meant to scroll inside its own box — every
@@ -37500,7 +37657,7 @@ var SYNC = (function () {
     var t = PEOPLEDLG.title();
     openModalHtml(esc(t.t), esc(t.s),
       PEOPLEDLG.html() + '<div class="pdfoot">' + PEOPLEDLG.foot() + '</div>');
-    /* NARROWER THAN THE PLATFORM'S OTHER DIALOGS (§118). `.modal` is
+    /* NARROWER THAN THE PLATFORM'S OTHER DIALOGS (§120). `.modal` is
        `min(940px,100%)` for every modal in the product — the merge wizard, the
        send confirmation, the paste box — so the width is marked on the OVERLAY
        for this one rather than loosened for all of them. Removed in

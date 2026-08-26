@@ -1068,7 +1068,7 @@
 
   /* ── One header for the configuration tables ─────────────────────── */
   .phead2{display:flex;align-items:center;gap:20px;flex-wrap:wrap;margin:0 0 14px}
-  /* BOLD (§118.5). Islam, of the People register's: "the title needs to be
+  /* BOLD (§120.5). Islam, of the People register's: "the title needs to be
      bold." ALL TWELVE Setup titles, not that one — `cfgHead()` is one function
      and one page's title in a different weight from eleven others reads as a
      mistake rather than as emphasis. */

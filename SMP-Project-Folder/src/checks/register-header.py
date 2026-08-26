@@ -1,4 +1,4 @@
-"""ONE LINE ABOVE THE TABLE, AND A DIALOG THAT FITS THE WINDOW (§118).
+"""ONE LINE ABOVE THE TABLE, AND A DIALOG THAT FITS THE WINDOW (§120).
 
 Islam: "the top part can include the password, the SMO badge remove it and
 remove the 77 people active text and the password can come to the same line and
@@ -163,14 +163,14 @@ with sync_playwright() as p:
 
     # ── 2. IT IS ONE ROW ─────────────────────────────────────────────
     print("\n2. one row, and the table under it")
-    # THE ASK WAS ABOUT THE HEADER, NOT ABOUT `.hright` (§118). `.phead2` wraps
+    # THE ASK WAS ABOUT THE HEADER, NOT ABOUT `.hright` (§120). `.phead2` wraps
     # too, so when the controls no longer fit beside the title the whole block
     # drops them to a line of their own — and `.hright` then reports ONE row
     # while the header is two. Measuring the inner box alone passed on the
     # build this section replaced, at every width. The height of the WHOLE
     # header is the thing Islam can see, so that is what is asserted, with the
     # inner row asserted under it because it is the one that carried Passwords.
-    # 1320 RATHER THAN 1280, AND THE 20px IS RECORDED (§118.5): the bold title
+    # 1320 RATHER THAN 1280, AND THE 20px IS RECORDED (§120.5): the bold title
     # is 28px wider than the regular one, so one line now reaches 1300 where it
     # reached 1280. Chasing that back would have meant shaving a control to buy
     # a window nobody in this tenant uses; the trade is stated instead.

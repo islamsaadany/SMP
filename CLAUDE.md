@@ -473,6 +473,29 @@ console errors (in this cloud environment, run it via a wrapper that points Play
   door behind a door. A role with one place is granted on the role pick; a role
   with a real choice still asks. The × on the chip is what makes committing on
   one press safe.
+- **TERSE DROPS THE DETAIL, NEVER THE ALARM (§119.3):** the pillar rail opens
+  COLLAPSED now (absent reads as terse, so only an explicit press turns it
+  off), and that small line had been carrying two different kinds of thing —
+  the routine counts, and §106.2's *N rows to check*, put there so the project
+  holding a bad date is findable without opening each (§93.4). `railSub(html,
+  alarm)` tells them apart. **Found by `checks/project-tables.py` going red on
+  the day the default flipped**, not by reading the rail.
+- **THE KNOWLEDGE BASE IS THE OFFICE'S (§119.4, REVERSING §30 AND §37):**
+  `when: inOffice()` on the page def, the shape `c_send` and `c_chat` use —
+  never a matrix cell, because who reads the office's own working notes is not
+  a tick somebody could set on a bad afternoon. `c_kb` stays `area:"always"`.
+  **The prose that claimed it was everyone's was corrected in the same edit**
+  (the access page and `pageinfo.js`), or the product goes on saying what it
+  stopped doing. **THE COST IS REAL AND RECORDED**: the tour's replay button
+  lives on that page and `storyFor()` fits nobody who can now open it — §61's
+  trap from the other side. The first-run tour is untouched; `checks/tour.py`
+  asserts the absent half and deliberately does not assert the unreachability.
+- **THE DECK NAMES WHAT THE PLAN OWES (§119.1):** `Missing`, bold, in the
+  platform's own `--bad` — and **the slide is drawn even when it is empty**,
+  because skipping it says *nothing is missing here*. An optional blank is not
+  a gap: collaborators and an unmarked quarter are left alone. The check MAKES
+  the gaps (§94.2) and asserts an EXACT count plus **that the filled facts are
+  untouched**, or a builder that marked everything would pass.
 - **THE OWN COLUMNS ARE TWO QUESTIONS, AND §94'S LOCK IS A DEFAULT NOW (§117,
   partially reversing §94 at Islam's direction):** each own column on Roles &
   access splits into **Strategy** (the words as agreed — `a_unit_own_strat` /
@@ -1569,7 +1592,7 @@ console errors (in this cloud environment, run it via a wrapper that points Play
   working through it. **Units with no custodian cannot join it** — not a person,
   so there would be nobody to open; it keeps its own line (§93.4).
 - **ONE LINE ABOVE THE TABLE, AND A DIALOG THAT WAS WASTEFUL RATHER THAN DENSE
-  (§118):** the badge said who you are (the chrome says it on every page) and
+  (§120):** the badge said who you are (the chrome says it on every page) and
   the count said how big the register is (**the table under it is that** — §116
   had already dropped the second copy of that count and kept this one, and
   *keeping one copy of something nobody asked for is still keeping it*). The
@@ -1591,9 +1614,9 @@ console errors (in this cloud environment, run it via a wrapper that points Play
   marked on the **overlay**, never loosened on `.modal`, which every dialog
   shares, and comes off in `closeModal()` (§116.6's one door). Steps down are
   **3 → 2 → 1**, never 3 → 1, or the scroll comes back on a narrow laptop.
-- **A CAP MADE OF A GUESSED CONSTANT GOES STALE SILENTLY (§118.5):** the
+- **A CAP MADE OF A GUESSED CONSTANT GOES STALE SILENTLY (§120.5):** the
   register's table was `calc(100vh - 300px)`, and the 300 was a guess at an
-  alarm-chip row, a filter row and a count line — §116 removed two and §118 the
+  alarm-chip row, a filter row and a count line — §116 removed two and §120 the
   third, so the table ended **141px above the fold at every height** while the
   rail beside it correctly ended 20px short. **It takes the RAIL'S OWN
   expression now** (`.panefill`), because the two halves of the split start at
@@ -1614,7 +1637,7 @@ console errors (in this cloud environment, run it via a wrapper that points Play
   check's threshold moved — *a check left asserting a number that is no longer
   true is worse than the twenty pixels.*
 - **THE CHECK MEASURED THE INNER BOX AND PASSED ON THE BUILD IT WAS WRITTEN TO
-  REJECT (§118.4):** it asked whether **`.hright`** was one row — green on the
+  REJECT (§120.4):** it asked whether **`.hright`** was one row — green on the
   previous build at every width, because **`.phead2` wraps too**, so when the
   controls stop fitting beside the title the whole block drops them onto a line
   of their own and the inner box honestly reports one row while the header is
@@ -1919,7 +1942,7 @@ python3 qa.py        # walks every page as every viewer, reports console errors 
 python3 checks/people-dialog.py # the register reads and the dialog writes: the queue,
                                 # Add, and neat with every column on (§116, over HTTP)
 python3 checks/register-header.py # one line above the table and a dialog that fits the
-                                # window — the HEADER's height, not .hright's (§118)
+                                # window — the HEADER's height, not .hright's (§120)
 python3 checks/role-picker.py   # giving somebody a role: every control PRESSED,
                                 # both ends asked, and the absences asserted (§110)
 python3 checks/strategy-split.py # the Strategy | Reporting halves: the cell pressed
@@ -1973,9 +1996,9 @@ prior sessions (on HR_ERP) accidentally reverted agreed-upon designs.
 
 ---
 
-*Last Updated: 2026-08-26 &mdash; **v3.41: one line above the table, and a
-dialog that fits the window** (&sect;118), **with a bold title and a table
-that reaches the fold** (&sect;118.5). Two asks minutes apart, both from
+*Last Updated: 2026-08-26 &mdash; **v3.43: one line above the table, and a
+dialog that fits the window** (&sect;120), **with a bold title and a table
+that reaches the fold** (&sect;120.5). Two asks minutes apart, both from
 using the register on his own laptop, and both turned out to be **waste rather
 than density**. The header: the badge said who you are, which the chrome says on
 every page, and the count said how big the register is, which the table under it
@@ -1999,7 +2022,7 @@ measured `.hright`, and `.phead2` wraps too &mdash; so when the controls stop
 fitting beside the title the whole block drops them to a line of their own, and
 the inner box honestly reports ONE row while the header is two. Assert the box
 somebody can SEE. With that corrected the previous build fails 12 times. **AND THE FOLLOW-UP FOUND A CAP
-THAT HAD GONE STALE IN SILENCE** (&sect;118.5): the table's
+THAT HAD GONE STALE IN SILENCE** (&sect;120.5): the table's
 `calc(100vh - 300px)` was a guess at three things sitting above it, all three of
 which &sect;116 and &sect;118 removed &mdash; so it ended **141px above the fold
 at every height** while the rail beside it ended 20px short. It takes the rail's
@@ -2010,6 +2033,64 @@ and both attempts to buy those pixels back made it worse, because a flex
 container **decides to wrap before it shrinks**, and `flex-basis:min-content` on
 a **wrapping** container is its widest item rather than the sum, which broke the
 row into two lines 150px earlier than the fault it was aimed at.*
+
+*Earlier: 2026-08-26 &mdash; **v3.42: the deck names its gaps, and the
+base becomes the office's (&sect;119)**. Five follow-ups from using &sect;117.
+**The plan download says `Missing` in bold red** wherever the plan owes
+something &mdash; a direction, a target, a compile rule, an owner, a date, an
+aspiration, an empty SWOT quadrant &mdash; in the platform's own `--bad`, and
+**the slide is drawn even when it is empty**, because a skipped slide is the
+strongest way of saying nothing is missing. **The tactics table becomes four
+quarter columns** with a mark in the ones in action, the shape the workbook
+already has. **The pillar rail opens collapsed**, read the other way round like
+&sect;104's two settings so only an explicit press turns it off &mdash; **and
+the alarm survives the collapse**, because that small line was carrying two
+different kinds of thing and &sect;106.2's count of rows to check had been put
+there deliberately (found by a check going red, not by reading). **The
+knowledge base becomes the office's, REVERSING &sect;30 and &sect;37** &mdash;
+gated `when: inOffice()` like `c_send`, never a matrix cell &mdash; with the
+two places the product CLAIMED it was everyone's corrected in the same edit.
+**And it leaves the tour's replay button unreachable**: the stories fit the
+custodian and the owner, who can no longer open the page, while the office, who
+can, fits none. Recorded and NOT asserted, because a check that froze it would
+freeze the mistake; the first-run tour is untouched. **One item could not be
+reproduced** (&sect;119.5: a capability's Projects pane draws the download for
+the office and the head on live production) and is asked rather than fixed.*
+
+*Earlier: 2026-08-26 &mdash; **v3.41: the CF tab, the add row, and a
+null that outlived its session (&sect;118)**. From production, within hours of
+&sect;113: *"the CF tab is not showing anything while it was showing it a
+minute ago."* The tab was fine; **the PAGE could no longer be drawn**, and a
+throw mid-`paint()` keeps the previous page on screen with the only witness
+in the hidden console &mdash; so a data fault reads as a dead click. The
+chain: the plan tables' **"+ Add" row is a `<tr>` inside the same sortable
+tbody**, defended by its own comment as safe because it cannot be *dragged*
+&mdash; and it was still **counted**, so every reorder commit carried
+`+undefined = NaN`, `applyOrder` pushed `arr[NaN]`, and one phantom entry
+joined the list per drag. On a unit that fails the save loudly (row-by-row
+tables); **on a pillars function the plan is ONE JSON blob, `undefined`
+becomes `null`, the save succeeds, and every later hydration hands the
+poison back** &mdash; "a minute ago" is exactly the save-and-rehydrate cycle.
+**THE PERSON MADE NO MISTAKE AND THAT IS A FINDING**: every hostile import is
+refused before Apply with the reason named, so nothing he could type or
+upload produces this &mdash; a control that silently does nothing is the
+product's own fault by its own rules. Three fixes, one class each:
+`makeSortable` counts rows carrying `data-oi` only; `applyOrder` refuses any
+commit that is not a permutation (untouched, never half-applied); and
+`fnPruneNulls()` heals already-saved poison at the hydration door &mdash;
+remove-only, &sect;50.6 intact. **And the tour is never offered to the
+office** (Islam: *"yes stop it to the SMO"*): the bootstrap SMO heads the SMO
+function, so `storyFor()`'s `fnhead` rung matched and the full-viewport dock
+ate every click while its welcome card waited &mdash; gated through
+`SMPRules.isOfficeRole()`, the one definition of the office.
+`checks/reorder-integrity.py` presses both reorder paths, the rail that must
+KEEP working, the refusals, the healed tenant over HTTP (file:// never
+hydrates, &sect;94.11) and both tour ends &mdash; and fails **16 ways**
+against the previous build, ending in the production error verbatim
+(&sect;94.5). Recorded, not fixed (&sect;118.7): a render that dies still
+says nothing on the page (&sect;32 one level deeper); below ~1100px a wrapped
+destination row paints under the page-tab row and its second line eats
+clicks; and no-jump.py's "sorting a column" trial fails on main's own build.*
 
 *Earlier: 2026-08-26 &mdash; **v3.40: the Strategy | Reporting split, and
 the plan as slides (&sect;117, spec 019)**. Islam: *"the strategy should be

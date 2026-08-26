@@ -461,25 +461,8 @@
                                                                         render:renderImport },
                   { k:"arch", ac:"c_import", label:"Archived plans",    render:renderArchives }];
         } },
-      /* Last in its group: it explains the rest, so it is not where you start.
-
-         ── AND IT IS THE OFFICE'S NOW (§119) ──────────────────────────
-         Islam: "remove knowledge base from the view of all except the smo team
-         and the super user." It REVERSES §30's "readable by everyone, always"
-         and §37's naming of that as one of the three things too fundamental to
-         be a matrix cell — recorded as a reversal rather than overwritten
-         (Principle II), because the argument that put it there was a good one
-         and the client's is better: this knowledge base explains how the
-         PLATFORM is run — cycles, access, imports, the reasoning behind every
-         decision — which is the office's job and nobody else's reading.
-
-         `when: inOffice()`, the shape `c_send` and `c_chat` already use (§97),
-         NOT a matrix cell: who may read the office's own working notes is not
-         a tick somebody could set on a bad afternoon. `c_kb` stays `area:
-         "always"` so the grant machinery is untouched; this gate sits in front
-         of it, and nothing else reads that key. */
-      { k:"kb",       ac:"c_kb", grp:"cycle",     label:"Knowledge base", find:"help explain how documentation guide reference reasoning",
-        when: function(){ return inOffice(); },                          render:renderKB }
+      /* Last in its group: it explains the rest, so it is not where you start. */
+      { k:"kb",       ac:"c_kb", grp:"cycle",     label:"Knowledge base", find:"help explain how documentation guide reference reasoning",                render:renderKB }
     ]
   };
 
@@ -1592,15 +1575,7 @@
     document.getElementById("panel").innerHTML = railed
       ? '<div class="split setupsplit' + (RAIL_OPEN ? '' : ' shut') + '">' +
         setupRail(defs, currentSub) +
-        '<div class="pane setuppane' +
-          /* THE REGISTER'S PANE FILLS THE WINDOW (§120.5). Islam: "the
-             registry table should extend down till the end of the page." It is
-             marked here rather than guessed at in CSS, because only this page
-             holds a table that is meant to scroll inside its own box — every
-             other Setup page is a form or a short list and should keep growing
-             the page instead. */
-          (currentSub === "people" ? " panefill" : "") + '">' +
-          secrowHTML + body + '</div></div>'
+        '<div class="pane setuppane">' + secrowHTML + body + '</div></div>'
       : body;
 
     /* Group Performance is four sections; they become a third nav row rather
@@ -5298,13 +5273,6 @@
     var t = PEOPLEDLG.title();
     openModalHtml(esc(t.t), esc(t.s),
       PEOPLEDLG.html() + '<div class="pdfoot">' + PEOPLEDLG.foot() + '</div>');
-    /* NARROWER THAN THE PLATFORM'S OTHER DIALOGS (§120). `.modal` is
-       `min(940px,100%)` for every modal in the product — the merge wizard, the
-       send confirmation, the paste box — so the width is marked on the OVERLAY
-       for this one rather than loosened for all of them. Removed in
-       closeModal(), which is the one door every way out goes through
-       (§116.6), so it can never be left on a dialog that is not this one. */
-    overlay.classList.add("pdlg-on");
     wirePersonDialog();
     /* The cursor lands in the first field, and NEVER scrolls to get there
        (§110.7) — the dialog is already in view, and letting the browser scroll
@@ -5539,7 +5507,6 @@
   function closeModal(){
     if (!overlay.classList.contains("on")) return;
     overlay.classList.remove("on");
-    overlay.classList.remove("pdlg-on");
     overlay.setAttribute("aria-hidden", "true");
     if (wrapEl) { wrapEl.inert = false; wrapEl.removeAttribute("aria-hidden"); }
     /* Back to the control that opened it — the one thing a keyboard user

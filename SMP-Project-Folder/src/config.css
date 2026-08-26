@@ -786,10 +786,10 @@
      and `top:0` does nothing at all. Capped against the viewport rather than
      at a fixed number so a tall screen shows more rows — the same shape
      `.cfg.srctable` already uses for the Who-enters table. */
-  /* THE TABLE REACHES THE BOTTOM OF THE WINDOW (§118.5). It was
+  /* THE TABLE REACHES THE BOTTOM OF THE WINDOW (§120.5). It was
      `calc(100vh - 300px)`, and that 300 was a GUESS at what sat above — an
      alarm-chip row, a filter row and a count line, all three of which §116 and
-     §118 removed without anybody retuning the constant. Measured, the box
+     §120 removed without anybody retuning the constant. Measured, the box
      stopped **141px above the bottom of the window at every height**, with the
      rail beside it correctly ending 20px short.
 
@@ -1916,7 +1916,7 @@
   /* The search sits in the header row now rather than on a bar of its own — the
      bar held five filter chips and a row count, and both went at Islam's word,
      which left a whole row carrying one box. */
-  /* THE SEARCH GIVES WAY FIRST (§118). Six controls and a title share this row
+  /* THE SEARCH GIVES WAY FIRST (§120). Six controls and a title share this row
      now, and the search is the only one that can be narrower without losing a
      word — so it flexes from 160px rather than 190px, which is what buys the
      single line down to 1280px. It still grows into whatever is left over. */
@@ -1925,7 +1925,7 @@
   /* THE COUNT IS A LINE, NOT A CHIP. Two counts said the same thing twice; the
      survivor is quiet, under the title, where it reads as a fact about the page
      rather than as another control. */
-  /* THE CUSTODIAN MARK IS A CHIP ON THE ROW (§118). `.pcount` and its line
+  /* THE CUSTODIAN MARK IS A CHIP ON THE ROW (§120). `.pcount` and its line
      went with the count Islam asked to remove; this is the one thing that line
      carried which is not a person, so it could not move into the Attention
      queue (§116.2) and had to move onto the row instead. It wears the warning
@@ -1977,11 +1977,11 @@
   .peoplecfg td.wrapany, .peoplecfg th.wrapany { max-width:270px; }
 
   /* ── THE DIALOG ─────────────────────────────────────────────────── */
-  /* 860px, NOT 940 (§118). Marked on the overlay by openPersonDialog() rather
+  /* 860px, NOT 940 (§120). Marked on the overlay by openPersonDialog() rather
      than loosened on `.modal`, which every dialog in the platform shares. */
   .overlay.pdlg-on .modal { width:min(860px, 100%); }
 
-  /* THREE COLUMNS, NOT TWO (§118). Islam: "that's a very wide design that even
+  /* THREE COLUMNS, NOT TWO (§120). Islam: "that's a very wide design that even
      require a scroll — make it compact with no need to scroll." Measured at
      938px wide with two 434px columns, the content ran 482px and a 720px-tall
      window cut it at 538px.
@@ -2007,7 +2007,7 @@
      control's automatic minimum size is otherwise its intrinsic width, which is
      how a grid track gets held open by an input nobody sized (§110.8). */
   .pdlg .pdf .fld, .pdlg .pdf .ssbtn { width:100%; min-width:0; box-sizing:border-box; }
-  /* A VALUE THAT CANNOT BE EDITED LOOKS LIKE ONE (§118). It sits on the
+  /* A VALUE THAT CANNOT BE EDITED LOOKS LIKE ONE (§120). It sits on the
      baseline its neighbouring inputs sit on, so the row does not go ragged,
      and the dashed edge and quiet ink are what the removed sentence used to
      say. `cursor:help` is the sign there is something on the hover. */

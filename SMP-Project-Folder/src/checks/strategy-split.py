@@ -258,6 +258,120 @@ with sync_playwright() as p:
            got["cap"] in d["text"] and got["proj"] in d["text"],
            got)
 
+    # ── 4 · §119'S FOUR FOLLOW-UPS ───────────────────────────────────
+    print("\n4 · the deck names its gaps, the rail opens terse, the KB is the office's")
+
+    # THE DECK MAKES ITS OWN GAPS (§94.2): the demo plan is complete, so a
+    # check that only downloads it would never once render a Missing mark.
+    be(pg, who["smo"], who["unit"], "strategy", "plan")
+    pg.evaluate("""(u) => {
+      const x = UNITS[u];
+      x.aspiration = ""; x.swot.t = [];
+      x.keyObjectives[0].target = "";
+      x.items[0].measures[0].dir = ""; x.items[0].measures[0].compile = "";
+      x.items[0].tactics[0].owner = "";
+      paint();
+    }""", who["unit"])
+    pg.wait_for_timeout(300)
+    gaps = grab(pg, "gaps.pptx")
+    ck("a plan with holes still downloads", gaps is not None)
+    if gaps:
+        z = zipfile.ZipFile(gaps)
+        A = "{http://schemas.openxmlformats.org/drawingml/2006/main}"
+        marks, plain = [], 0
+        for n in sorted(x for x in z.namelist()
+                        if x.startswith("ppt/slides/slide") and x.endswith(".xml")):
+            root = ET.fromstring(z.read(n))
+            for r in root.iter(A + "r"):
+                t = r.find(A + "t")
+                if t is None or (t.text or "") != "Missing":
+                    continue
+                pr = r.find(A + "rPr")
+                clr = pr.find(A + "solidFill/" + A + "srgbClr") if pr is not None else None
+                bold = pr is not None and pr.get("b") == "1"
+                val = clr.get("val") if clr is not None else None
+                marks.append((bold, val))
+                if not bold or val is None:
+                    plain += 1
+        # SIX GAPS WERE MADE AND SIX MUST BE NAMED — an exact count, because
+        # "at least one" passes a build that marks the aspiration and forgets
+        # every table cell.
+        ck("every gap made is named Missing (6)", len(marks) == 6, len(marks))
+        ck("...all of them bold", all(b for b, _ in marks), marks)
+        ck("...all of them in the platform's own red, not the page ink",
+           all(v == "B04434" for _, v in marks), marks)
+        # AND THE FILLED FACTS ARE NOT TOUCHED: a builder that marked
+        # everything would pass every assertion above.
+        txt = read_pptx(gaps)["text"]
+        ck("a filled target still reads its value", "32%" in txt)
+        ck("a filled owner still reads its name", "Mohamed Rizk" in txt)
+
+        # THE TACTICS TABLE IS FOUR QUARTER COLUMNS (§119, Islam: "a column for
+        # each Q with a mark for the qs in action").
+        heads, marked = None, 0
+        for n in sorted(x for x in z.namelist()
+                        if x.startswith("ppt/slides/slide") and x.endswith(".xml")):
+            root = ET.fromstring(z.read(n))
+            body = "".join(t.text or "" for t in root.iter(A + "t"))
+            if "Tactics" not in body:
+                continue
+            for tbl in root.iter(A + "tbl"):
+                rows = list(tbl.iter(A + "tr"))
+                cells = [ "".join(t.text or "" for t in c.iter(A + "t"))
+                          for c in rows[0].iter(A + "tc") ]
+                heads = heads or cells
+                for row in rows[1:]:
+                    vals = [ "".join(t.text or "" for t in c.iter(A + "t"))
+                             for c in row.iter(A + "tc") ]
+                    marked += sum(1 for v in vals[-4:] if v.strip())
+            break
+        ck("the tactics table ends in Q1 Q2 Q3 Q4",
+           heads is not None and heads[-4:] == ["Q1", "Q2", "Q3", "Q4"], heads)
+        ck("...and the quarters in action carry a mark", marked > 0, marked)
+        ck("...while the ones that are not stay empty",
+           heads is not None and marked < 4 * 12, marked)
+
+    # THE RAIL OPENS TERSE (§119). Asserted from a FRESH page, because the
+    # preference is per-browser and this one has been driven all run.
+    fresh = b.new_page(viewport={"width": 1600, "height": 1000})
+    fresh.goto(URL); fresh.wait_for_timeout(1400)
+    fresh.evaluate("""(k) => { VIEWER = k; leaveModes();
+      current = "mobile"; currentSub = "strategy"; CURSEC["strategy"] = "plan"; paint(); }""",
+      who["smo"])
+    fresh.wait_for_timeout(350)
+    r = fresh.evaluate("""() => ({
+      terse: RAIL_TERSE,
+      subs: document.querySelectorAll(".rail .rsub").length,
+      lit: !!document.querySelector(".railterse.on"),
+      names: document.querySelectorAll(".rail .ritem").length })""")
+    ck("a first visit opens the pillar rail collapsed", r["terse"] is True, r)
+    ck("...so no row carries its small line", r["subs"] == 0, r["subs"])
+    ck("...the control shows itself as on", r["lit"] is True)
+    ck("...and the names are all still there", r["names"] > 0, r["names"])
+    # BOTH ENDS: pressing it brings the detail back, or a build that had lost
+    # the sub-lines entirely would pass everything above (§94.2).
+    fresh.click(".railterse"); fresh.wait_for_timeout(350)
+    back = fresh.evaluate("() => document.querySelectorAll('.rail .rsub').length")
+    ck("pressing the control brings the detail back", back > 0, back)
+
+    # THE KNOWLEDGE BASE IS THE OFFICE'S (§119, reversing §30). Asked of the
+    # page def — the one thing the rail, the search and paint() all read.
+    kb = fresh.evaluate("""(w) => {
+      const d = setupDefs().filter(x => x.k === "kb")[0];
+      const asks = (k) => { VIEWER = k; return !d.when || d.when(); };
+      return { exists: !!d, smo: asks(w.smo), head: asks(w.head),
+               cust: asks(w.cust), fnhead: asks(w.fnhead),
+               floor: w.floor ? asks(w.floor) : null };
+    }""", who)
+    ck("the knowledge base page still exists", kb["exists"] is True)
+    ck("the office opens it", kb["smo"] is True)
+    for k, lab in [("head", "a unit owner"), ("cust", "a strategy custodian"),
+                   ("fnhead", "a function head"), ("floor", "somebody with no role")]:
+        if kb[k] is None:
+            continue
+        ck("%s does NOT" % lab, kb[k] is False, kb[k])
+    fresh.close()
+
     print("")
     ck("no page errors anywhere in the run", not errs, "; ".join(errs[:3]))
     b.close()

@@ -1,6 +1,6 @@
 # 019 · Strategy | Reporting split, and the plan as slides
 
-**Version:** v3.40 · **Decisions:** §117 · **Status:** answered; built
+**Version:** v3.40 · **Decisions:** §117 (follow-ups §119, v3.42) · **Status:** answered; built
 
 Islam: *"the accessibility should have an option that differentiate the
 strategy from the reporting — the strategy should be locked from the non SMO
@@ -49,3 +49,24 @@ Settled from a mockup made of the real platform
 read, negatives asserted; proved able to fail three ways),
 `scripts/test-authorize.js` §15 (six assertions that fail on the pre-§117
 rules), the full check suite and `qa.py` green. See §117.3.
+
+
+---
+
+## 4 · Follow-ups, §119 (v3.42)
+
+From using it, the day it shipped:
+
+1. **Missing, in bold red** on the downloaded plan wherever a plan fact is
+   owed — and the Foundation, SWOT and capability slides are drawn even when
+   empty, because a skipped slide says nothing is missing.
+2. **The tactics table is four quarter columns** with a mark in each quarter
+   in action.
+3. **The pillar rail opens collapsed**, with the rows-to-check alarm surviving
+   the collapse.
+4. **The knowledge base is the office's** (reversing §30/§37) — `when:
+   inOffice()`, not a matrix cell. Open consequence: the tour's replay button
+   is no longer reachable by anybody it fits.
+5. **Arrange/download on a capability's Projects pane** could not be
+   reproduced — both draw correctly on live production for the office and for
+   a function head — and is asked rather than fixed (§119.5).

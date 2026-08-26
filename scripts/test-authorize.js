@@ -809,7 +809,7 @@ console.log("\n10 · a function that plans in pillars");
    function (§62). It is asserted rather than assumed, because the whole point
    of that rule is that nobody has to remember it, and the way to keep it
    honest is to check it the day the feature lands. */
-/* ── 10b · A FUNCTION SUBMITS ITS REPORT (§104) ────────────────────
+/* ── 10b · A FUNCTION SUBMITS ITS REPORT (§105) ────────────────────
    The server has carried an explicit `fn:` branch in the `reportState` case
    since spec 006, and nothing ever asked it a question -- the control was
    never drawn, so no test had a reason to exist. §94.2 says a check that only
@@ -999,6 +999,51 @@ function shuffleFirstToLast(list) { list.push(list.shift()); }
   check("but a removed row is still `unitPlan`",
         kinds2.indexOf("unitPlan") > -1, "got: " + JSON.stringify(kinds2));
 })();
+
+/* ── 14 · THE FOCUS SWITCH IS NOT A BIGGER MARK (§102) ────────────
+   Marking a measure is the CEO's and the SMO's (§37); turning the whole
+   feature off for the tenant is the SMO's alone. Asserted as a PAIR, because
+   the fault this guards against is the switch quietly inheriting the marks'
+   permission — which would let a CEO remove a feature rather than use it. */
+console.log("\n14 · the focus switch");
+allows("smo", function (s) { s.group.focusOff = true; },
+  "the SMO may switch focus measures off");
+refuses("ceo", function (s) { s.group.focusOff = true; },
+  "the CEO may NOT switch focus measures off");
+refuses(headKey, function (s) { s.group.focusOff = true; },
+  "a unit head may NOT switch focus measures off");
+
+/* AND THE MARKS ARE STILL THE CEO'S, or the pair above proves only that
+   something was locked down, not that the right thing was. */
+(function () {
+  const anyId = Object.keys(SEED.cycle.focus || {})[0] ||
+                (SEED.units[UNIT].keyObjectives[0] || {}).id;
+  check("the seed has a markable id to test with", !!anyId,
+        "no id — this assertion would be measuring nothing");
+  if (!anyId) return;
+  allows("ceo", function (s) { s.cycle.focus[anyId] = !s.cycle.focus[anyId]; },
+    "the CEO may still mark a focus measure");
+})();
+
+/* THE SWITCH CLASSIFIES AS setup, NOT focus. Every assertion above would pass
+   if it were classified as something nothing guards at all (§94.5). */
+(function () {
+  const inc = clone(SEED); inc.group.focusOff = true;
+  const kinds = A.collect(SEED, inc, w).map(function (c) { return c.kind; });
+  check("the switch is classified `setup`, and never `focus`",
+        kinds.length > 0 && kinds.indexOf("setup") > -1 && kinds.indexOf("focus") === -1,
+        "got: " + JSON.stringify(kinds));
+})();
+
+/* SWITCHING IT BACK ON DELETES THE KEY, so a tenant that never answered and one
+   that turned it off and on again are byte-identical (§50.6). Asserted from the
+   rule's own default rather than from the writer, because the writer lives in
+   the browser and this file cannot reach it. */
+check("an absent key reads as ON", R.focusOn(R.worldOf({ group: {} })) === true);
+check("and `false` reads as ON too, so a stale write cannot hide the feature",
+      R.focusOn(R.worldOf({ group: { focusOff: false } })) === true);
+check("only `true` switches it off",
+      R.focusOn(R.worldOf({ group: { focusOff: true } })) === false);
 
 console.log("\n" + pass + " passed, " + fail + " failed");
 process.exit(fail ? 1 : 0);

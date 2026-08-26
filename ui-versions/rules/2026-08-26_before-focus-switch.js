@@ -248,13 +248,6 @@
       unitRoles: o.unitRoles || {}, sets: o.sets || [], claims: o.claims || [],
       functionKeys: o.functionKeys || [], functions: o.functions || {},
       companies: o.companies || {}, access: o.access || {},
-      /* TWO ALLOW-LISTS, ONE BEHIND THE OTHER (§102). worldOf() names the keys
-         it lifts off the group and W() names the keys it keeps — so a group
-         setting has to be added in BOTH, and forgetting either fails silently
-         in the safe-looking direction: the reader sees undefined and answers
-         the default, which for a switch means "on". Found by driving the real
-         page, not by reading (§44, twice now). */
-      focusOff: !!o.focusOff,
       naming: !!o.naming
     };
   }
@@ -266,13 +259,6 @@
                companies: state.companies, access: state.access,
                sets: (state.group || {}).sets,
                claims: (state.group || {}).claims,
-               /* §102, and it is §44's trap by a slightly different road: this
-                  is an ALLOW-LIST, so a group key added later is invisible to
-                  every rule until it is named here — and the failure is silent
-                  and in the safe-looking direction, because the reader simply
-                  sees undefined and answers the default. Add the key here in
-                  the same edit as the rule that reads it. */
-               focusOff: (state.group || {}).focusOff,
                naming: (state.group || {}).naming });
   }
 
@@ -549,30 +535,6 @@
      widens: a tenant that has closed a unit's plan to its own custodian keeps
      it closed. The office is answered first and separately — they arrange
      through the pen, and inOffice() is the tenth-place lesson of §89. */
-  /* ── FOCUS MEASURES HAVE A SWITCH (§102) ─────────────────────────
-     Islam: "give me the option to turn off in the product settings in general
-     to verify with the CEO later, and off means it disappears across the
-     platform" — and, asked whether off should also forget: "off and on brings
-     back history yes."
-
-     SO THE SWITCH HIDES; IT NEVER DELETES. `cycle.focus` keeps every mark, and
-     turning it back on restores the lot. §44's rule, third time: a switch that
-     destroys data is not a switch, it is a delete with a friendly label.
-
-     STORED AS AN ABSENCE. `GROUP.focusOff` exists only while the feature is
-     off, so on is what a tenant that has never been asked already has, and
-     turning it back on DELETES the key rather than writing `false` (§50.6 — a
-     reader that creates what it looked for puts a phantom change into every
-     save). Named `focusOff` and not `focus`, because `CYCLE.focus` is the
-     marks map one level away and two things called focus is exactly how §87's
-     twins get made.
-
-     NOT THE SAME PERMISSION AS MARKING. The marks are the CEO's and the SMO's
-     (§37); the switch is the SMO's alone, classified `setup` beside `naming`
-     — a CEO who may mark a measure must not be able to turn the whole feature
-     off for the tenant, and a switch anybody could flip would be no switch. */
-  function focusOn(w) { return !w || w.focusOff !== true; }
-
   var ARRANGE_ROLES = ["owner", "custodian", "fnhead"];
 
   function mayArrange(w, person, target) {
@@ -925,7 +887,6 @@
     mayIssuePasswordTo: mayIssuePasswordTo,
     STRATEGY_PAGES: STRATEGY_PAGES, isStrategyPage: isStrategyPage,
     ARRANGE_ROLES: ARRANGE_ROLES, mayArrange: mayArrange, planPageOf: planPageOf,
-    focusOn: focusOn,
     mayAuthorPage: mayAuthorPage,
     namedOn: namedOn, namedInUnit: namedInUnit,
     editingRoles: editingRoles, onlyVia: onlyVia, rolesOrFloor: rolesOrFloor,

@@ -2506,7 +2506,7 @@ function splitOrPane(list, sel, rail, pane){
    unit's. The dates are on the project's own cover line, which is where a
    date belongs; a function left holding a helper nothing calls is how a
    stylesheet ends up describing a control the product does not have (§24). */
-/* ── ONE TABLE, ONE ROW SHAPE (§103, undoing §99's split) ────────────────
+/* ── ONE TABLE, ONE ROW SHAPE (§104, undoing §99's split) ────────────────
    §99 cut the table in two because Direction, Target and Due date had nothing
    to say for a deliverable -- the em-dash was the table asking a row a
    question its kind could not answer. Islam: *"wait, I over complicated
@@ -2527,7 +2527,7 @@ function splitOrPane(list, sel, rail, pane){
    greater than, and a blank cell would put back the one thing this merge
    removed. "= Y/N" is what the row actually says. */
 var DX_HEADING = "Deliverables and outcomes";
-/* ── WHAT THE SCORE COLUMN IS CALLED (§103.9) ─────────────────────────
+/* ── WHAT THE SCORE COLUMN IS CALLED (§104.9) ─────────────────────────
    The two tables read their last column from two different numbers, so they
    say two different words. A deliverable or an outcome answers "how well" --
    PERFORMANCE, the word this pane's own card and the group's projects table
@@ -2562,7 +2562,7 @@ function dxTarget(row){
    stored field is an identifier and renaming one is a migration for a word
    nobody reads (§58, §65). `dxWhen` is the one place that knows which.
 
-   §103.8: NO SETTER. The date is off the tables and off the templates "for
+   §104.8: NO SETTER. The date is off the tables and off the templates "for
    now", so nothing writes it any more -- and a setter with no caller is the
    kind of leftover §24 exists to stop. The READER stays, because the date is
    still what decides whether a row is asked for and whether it is late, for
@@ -2572,7 +2572,7 @@ function dxWhen(row){ return dxIsDeliv(row) ? row.obj.due : row.obj.measureAt; }
    loud -- past its date, unfinished, and being asked for. Not due is quiet --
    its cycle has not come, so nothing is asked and nothing is scored. On time
    is just a date. */
-/* THE DUE DATE IS HIDDEN, NOT DELETED (§103.8). It still decides whether a
+/* THE DUE DATE IS HIDDEN, NOT DELETED (§104.8). It still decides whether a
    row is asked for this cycle and whether it is late -- it simply stopped
    being a column on the two panes people READ. So the lateness it used to
    carry moves under the name, which is where a row's own qualifiers already
@@ -2614,7 +2614,7 @@ function pctRead(x, when){
   var v = statusReads(x);
   return v == null ? "&mdash;" : v + "%";
 }
-/* ── NOT DUE IS A LABEL, NOT A LOCK (§103.8) ──────────────────────
+/* ── NOT DUE IS A LABEL, NOT A LOCK (§104.8) ──────────────────────
    The comment over the reporting pane has said exactly that since it was
    written, and the code did the opposite: a row not due this cycle had its
    control REPLACED by the word, so the one thing the sentence promised —
@@ -2629,7 +2629,7 @@ function pctRead(x, when){
 function notDueCell(){ return '<span class="pill kind">Not due</span>'; }
 /* An In progress that has not said how far is OUTSTANDING, and the pane says
    so rather than leaving an empty box that reads like the optional Note beside
-   it (§103.10). The same `.missing` the plan pane uses for a target nobody
+   it (§104.10). The same `.missing` the plan pane uses for a target nobody
    set -- one idiom for "this is owed", not a second one. */
 function needsPct(){ return '<span class="missing pctneed">Needs a %</span>'; }
 function reportedAny(x, d){
@@ -2639,8 +2639,8 @@ var MS_WORDS = [["", "\u2014"], ["todo", "Not started"], ["wip", "In progress"],
 var DX_WORDS = [["", "\u2014"], ["todo", "Not started"], ["wip", "In progress"], ["done", "Delivered"]];
 /* A milestone finishing after the project's end date is saved as entered and
    said out loud. Two things might be true and the platform picks neither. */
-/* ── A DUE DATE THAT IS NOT ONE, IN A PLAN ALREADY STORED (§105) ─────────
-   The upload has warned about this since §102 -- "Done" and "Pending" sitting
+/* ── A DUE DATE THAT IS NOT ONE, IN A PLAN ALREADY STORED (§106) ─────────
+   The upload has warned about this since §103 -- "Done" and "Pending" sitting
    in a due-date column, named as what they are rather than as "invalid". But
    NOTHING HAS EVER LOOKED AT A PLAN ALREADY IN THE DATABASE, so a tenant that
    uploaded before that check existed is told nothing at all and has to find
@@ -2652,7 +2652,7 @@ var DX_WORDS = [["", "\u2014"], ["todo", "Not started"], ["wip", "In progress"],
 
    MILESTONES ONLY, deliberately. A milestone's due date is on this page and
    the pen edits it, so the note points at something that can be fixed here. A
-   deliverable's due date is not drawn on any pane since §103.8, so naming a
+   deliverable's due date is not drawn on any pane since §104.8, so naming a
    bad one would send somebody looking for a control that is not there (§61).
    Its only door is an upload, which already validates it. */
 function badDues(p){
@@ -2711,9 +2711,9 @@ function capScoreCards(c){
     '<div class="minirow"><div><em>Deliverables</em><b>' + pct(capDeliverySide(c)) + '</b></div>' +
       '<div><em>Outcomes</em><b>' + pct(capOutcomeSide(c)) + '</b></div>' +
       '<div><em>Projects</em><b>' + c.projects.length + '</b></div></div></div>');
-  /* WHAT THE FIGURE IS BUILT ON, WHEN SOME OF IT IS MISSING (§105). An In
+  /* WHAT THE FIGURE IS BUILT ON, WHEN SOME OF IT IS MISSING (§106). An In
      progress milestone with no per-cent LEAVES the average rather than
-     counting as nought (§103.10) -- honest, and silent, so the figure rises
+     counting as nought (§104.10) -- honest, and silent, so the figure rises
      and nothing on the card says why. `capExec()` has returned the count since
      that section and nothing showed it. Only drawn when there is one: a card
      that always says "0 outstanding" is noise on every capability that has
@@ -2749,7 +2749,7 @@ function capKOTable(c){
 function projPerformanceBody(p, fk){
   /* Status holds the WORD for a deliverable and the FIGURE for an outcome --
      both are "what was reported" -- and % holds the number the score is built
-     from, for both, so the score column runs down one edge (§103). */
+     from, for both, so the score column runs down one edge (§104). */
   var dxr = dxRows(p).map(function(row, i){
     var o = row.obj, when = dxWhen(row), d = dxIsDeliv(row);
     var notDue = !dueThisCycle(when);
@@ -2908,7 +2908,7 @@ function projPlanBody(p, fk){
     return on ? ' class="sortable" data-item="tr" data-kind="' + kind +
       '" data-fk="' + esc(fk) + '" data-pid="' + esc(p.id) + '"' : '';
   };
-  /* ONE ROW SHAPE (§103). A deliverable's direction and target are written
+  /* ONE ROW SHAPE (§104). A deliverable's direction and target are written
      for it; only its due date is its own to choose. An outcome carries all
      three. Every cell answered, and no band to keep two halves aligned. */
   var dxr = dxRows(p).map(function(row, i){
@@ -2982,7 +2982,7 @@ function projPlanBody(p, fk){
       ' <em>\u2014 what the project hands over, and what it is meant to change</em></h4>' +
     miniTable(["#","Deliverables &amp; outcomes","Type","Direction","Target"], dxr) +
     '<h4 class="mini">Milestones <em>\u2014 the timeline as planned</em></h4>' +
-    /* NAME, THEN DESCRIPTION (§102). Islam: "we need the milestone name before
+    /* NAME, THEN DESCRIPTION (§103). Islam: "we need the milestone name before
        the description." So the pair stays -- a milestone is identified by a
        short name and explained by a line under it -- and only the LABEL
        changes: "What it covers" was a question, "Description" is the word the
@@ -3057,7 +3057,7 @@ function capEntryBox(x, unit, may, label){
     '" placeholder="\u2014" aria-label="Report ' + esc(label) + '">' +
     (unit ? '<span class="unitsuf">' + esc(unit) + '</span>' : '') + '</span>';
 }
-/* THE PER-CENT AN IN-PROGRESS ROW REQUIRES (§103). Its own field rather than
+/* THE PER-CENT AN IN-PROGRESS ROW REQUIRES (§104). Its own field rather than
    capEntryBox's, because that one writes `actual` -- the outcome's figure --
    and this writes `pct`. One box, two meanings, would be exactly the fault
    this whole section removed from the tables. */
@@ -3088,7 +3088,7 @@ function projReportBody(p, may, fk){
   var r = projReported(p);
   /* THE PANE SOMEBODY FILLS IN UNDER TIME PRESSURE, and the widest table in
      the product at eight columns -- the honest cost of one row shape carrying
-     Type, Due date, Target, Status, % and Note (§103).
+     Type, Due date, Target, Status, % and Note (§104).
 
      A deliverable PICKS a status and the per-cent follows: 100 for Delivered,
      0 for Not started, a box only for In progress, which is the whole of "in
@@ -3097,7 +3097,7 @@ function projReportBody(p, may, fk){
 
      A ROW NOT DUE THIS CYCLE IS NOT ASKED, and says so rather than sitting
      there as an empty box somebody forgot -- but THE CONTROL IS STILL THERE,
-     because anyone who wants to report early may (§103.8). That sentence was
+     because anyone who wants to report early may (§104.8). That sentence was
      written here first and the code under it did the opposite for a version:
      it replaced the picker with the word, so the one act the sentence
      promised was the one act the pane refused. The word now sits where the
@@ -3193,7 +3193,7 @@ function renderFnReport(fnKey){
   var done = 0, total = 0;
   caps.forEach(function(c){ var r = capReported(c); done += r.done; total += r.total; });
   var pctDone = total ? Math.round(done / total * 100) : 0;
-  /* ── A FUNCTION SUBMITS, AND IT ALWAYS COULD (§104) ──────────────────
+  /* ── A FUNCTION SUBMITS, AND IT ALWAYS COULD (§105) ──────────────────
      Every other half of this was already built: `canSpeakFor()` answers for an
      `fn:` target, `CURRENT_REPORT_KEY` is already that string,
      `reportSectionState()` already draws the Submitted badge from it, and

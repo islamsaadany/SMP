@@ -606,7 +606,7 @@ function applyProgress(u, d){
   });
 }
 
-/* ── WHAT COUNTS AS A DUE DATE (§102) ─────────────────────────────────────
+/* ── WHAT COUNTS AS A DUE DATE (§103) ─────────────────────────────────────
    A milestone's due date is written in its PROJECT'S units: a project run by
    quarters says "Q1 2026", one run by dates says "20 Mar 2026". The field has
    always taken any text and always will -- see the notice in validateCapPlan for
@@ -626,7 +626,7 @@ function applyProgress(u, d){
 var MS_STATUS_WORDS = ["done", "pending", "completed", "complete", "not started",
                        "in progress", "wip", "ongoing", "todo", "open", "closed",
                        "n/a", "na", "tbd", "planned", "delayed"];
-/* §103: EITHER FORM IS RIGHT ON ANY ROW, so this no longer asks the project's
+/* §104: EITHER FORM IS RIGHT ON ANY ROW, so this no longer asks the project's
    timeline. A workshop lands on a day and a report lands in a month, and one
    project has both -- the platform's job is to notice what is not a time at
    all, which is still exactly the case that started this: "Done" and
@@ -716,7 +716,7 @@ function capPlanTemplate(c){
    the stored keys — a sheet filled by hand should not need to know that "In
    progress" is spelled "wip" inside the platform. */
 /* A deliverable says Delivered where a milestone says Completed; the stored
-   key is the same in both (§103), so one pair of functions with the word
+   key is the same in both (§104), so one pair of functions with the word
    passed in rather than two pairs that can drift. */
 function delivStatusWord(s){ return s === "done" ? "Delivered" : msStatusWord(s); }
 function delivStatusKey(v){
@@ -859,7 +859,7 @@ function validateCapPlan(c, rows){
   rows.forEach(function(r){
     if (r.type === "PROJECT" && timelineKey(r.timeline) === "date" && r.end) projEnd[r.id] = r.end;
   });
-  /* A DUE DATE IS READ AGAINST ITS PROJECT'S TIMELINE (§102). A live plan
+  /* A DUE DATE IS READ AGAINST ITS PROJECT'S TIMELINE (§103). A live plan
      arrived with "Done" and "Pending" in the Due date column -- statuses,
      which belong to the reporting cycle -- and the platform said nothing,
      because the field takes any text. It still takes any text: refusing the

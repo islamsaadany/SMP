@@ -540,7 +540,7 @@
                   color:var(--gold-deep); font-weight:700; }
   tr.notdue td { opacity:.62; }
 
-  /* ── ONE ROW SHAPE (§103) ────────────────────────────────────────
+  /* ── ONE ROW SHAPE (§104) ────────────────────────────────────────
      The Type pill takes a fixed box: "Deliverable" and "Outcome" are seven
      characters apart, and left to themselves the column reads as two
      different marks rather than one question answered two ways. */
@@ -571,7 +571,7 @@
      IN arrange.css AND NOT config.css, deliberately: that file has now held
      the same rule block twice on four separate occasions (§29.2, §51.5,
      §53.6, §88), and this is concatenated last of the four stylesheets. */
-  /* §104.2: NOT nowrap. It spans the whole table, so it is the one row with
+  /* §105.2: NOT nowrap. It spans the whole table, so it is the one row with
      room for a sentence -- and at 1000px that sentence pushed the table 8px
      wider than its box rather than taking a second line, which is the opposite
      of what a full-width band is for. Line-height goes from 1 to 1.35 so two
@@ -587,7 +587,7 @@
      reads as a break rather than as a rule. Never on the first, which opens
      the table. */
   tr.dxband:not(:first-child) th { border-top:14px solid var(--surface); }
-  /* §104: the column strip WRAPS, and the nowrap it used to carry is why.
+  /* §105: the column strip WRAPS, and the nowrap it used to carry is why.
      Its columns are sized by the table's own <thead> -- a unit's vocabulary --
      and a function's words are longer, so "Deliverables & outcomes" ran
      straight over "Milestones" with nothing to stop it. §88's one-line rule is
@@ -1111,7 +1111,7 @@
                                max-width:none; overflow:visible;
                                text-overflow:clip; vertical-align:bottom; }
 
-  /* ── §103.10: THE MARK SITS UNDER THE BOX IT IS ABOUT ──────────────────
+  /* ── §104.10: THE MARK SITS UNDER THE BOX IT IS ABOUT ──────────────────
      Beside it there is no room -- the per-cent cell is a box and little else --
      and a mark on its own line is what makes it read as a state of the row
      rather than a label on the field. Its own class, not `td .missing`, so the

@@ -1746,6 +1746,12 @@
     wireImport();
     var lc = document.querySelector("[data-lockcycle]");
     if (lc) lc.addEventListener("click", function(){ CYCLE.locked = !CYCLE.locked; paint(); });
+    /* The focus feature's switch (§102). `this`, never a closure over the
+       element, for the reason stated three lines down. */
+    var fsw = document.querySelector("[data-focusswitch]");
+    if (fsw) fsw.addEventListener("click", function(){
+      setFocusOn(this.dataset.focusswitch === "1"); paint();
+    });
     /* `this`, NOT A CLOSURE OVER THE ELEMENT. Reading it back off the button
        that was clicked cannot go stale, and cannot be captured by whatever
        else happens to be in this scope — see the note on `pfile` below. */
@@ -1795,7 +1801,7 @@
         if (hit) { hit.obj.note = el.value.trim() || null; paint(); }
       });
     });
-    /* A DELIVERABLE AND A MILESTONE ARE PICKED THE SAME WAY NOW (§103): both
+    /* A DELIVERABLE AND A MILESTONE ARE PICKED THE SAME WAY NOW (§104): both
        write `status`, and leaving In progress CLEARS the per-cent rather than
        leaving it stranded under a word that no longer wants one. A stale 35%
        sitting behind "Delivered" is a number nobody can see and the score
@@ -2104,7 +2110,7 @@
     document.querySelectorAll("[data-unote]").forEach(function(el){
       el.addEventListener("change", function(){ REVIEW.note[el.dataset.unote] = el.value; });
     });
-    /* ONE HANDLER FOR BOTH SUBMITS (§104). The attribute carries the TARGET --
+    /* ONE HANDLER FOR BOTH SUBMITS (§105). The attribute carries the TARGET --
        a unit key, or `fn:<key>` for a supporting function -- which is the same
        string `REVIEW.submitted` is keyed by and the same one the server
        authorises. It read `UNITS[...]` before, so wiring a function's button to

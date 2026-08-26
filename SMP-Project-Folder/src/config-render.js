@@ -2960,6 +2960,32 @@ function renderBandsExtra(){
    against the number rather than the name alone. */
 var FSET = { unit:"mobile" };
 
+/* THE SWITCH LIVES ON THE PAGE IT GOVERNS (§102), which is §90's shape and
+   §98's row: five chat settings went into a dropdown on the Messages page
+   rather than a Setup page of their own, because a switch behind its own rail
+   entry is a door behind a door (§32).
+
+   AND THE PAGE STAYS REACHABLE WHILE IT IS OFF. §61's trap, exactly: if
+   turning focus off removed the page that carries the switch, the only way to
+   turn it back on would be to turn it on first. So the page always renders,
+   and while off it says what is being kept. */
+function focusSwitch(){
+  var on = focusOn();
+  var marks = Object.keys(CYCLE.focus || {}).length;
+  if (!inOffice()) {
+    return on ? '' : '<div class="note">Focus measures are switched off for this ' +
+      'platform. The Strategy Office can turn them back on.</div>';
+  }
+  return '<div class="phead2"><div class="hright">' +
+    '<button class="editbtn' + (on ? ' on' : '') + '" data-focusswitch="' + (on ? "0" : "1") + '">' +
+      (on ? "Focus measures are on" : "Focus measures are off") + '</button>' +
+    '</div></div>' +
+    (on ? '' : '<div class="note">Nothing is shown anywhere in the platform, and ' +
+      '<b>' + marks + ' ' + plural(marks, "mark") + '</b> ' +
+      (marks === 1 ? "is" : "are") + ' being kept. Turning it back on restores ' +
+      (marks === 1 ? "it" : "them") + '.</div>');
+}
+
 function renderFocusSetup(){
   /* Marking is the CEO's and the SMO's — a rule now, not a cell (§37).
      mayMarkFocus() carries the lock too, so there is one gate, not two. */
@@ -2967,7 +2993,7 @@ function renderFocusSetup(){
   var u = UNITS[FSET.unit];
 
   var pick = function(m, src){
-    var on = isFocus(m.id);
+    var on = focusMarked(m.id);   /* the RAW map, never isFocus (§102) */
     return '<div class="pick ' + (on ? "on" : "off") + '">' +
       (editable
         ? '<button class="fmark-btn' + (on ? ' on' : '') + '" data-focus="' + m.id + '" ' +
@@ -3002,7 +3028,8 @@ function renderFocusSetup(){
         esc(UNITS[k].name) + (c ? "  \u2014 " + c + " marked" : "") + '</option>';
     }).join("") + '</select>';
 
-  return '<div class="kv"><span class="pill kind">CEO &amp; SMO</span>' +
+  return focusSwitch() +
+    '<div class="kv"><span class="pill kind">CEO &amp; SMO</span>' +
       '<span class="pill ' + (CYCLE.locked ? "none" : "good") + '">' +
         (CYCLE.locked ? "Locked for the cycle" : "Open for marking") + '</span>' +
       '<span class="pill kind">reward begins at ' + CYCLE.rewardAt + '%</span></div>' +
@@ -3909,7 +3936,7 @@ function renderArchives(){
    closing, and a cycle that never closes writes no history. Unreported items
    close as unreported and stay visibly so \u2014 a stronger prompt than an email. */
 /* "1 need notes" was on the unit half for as long as it has existed and went
-   unnoticed while it was rare; §104 put it on seven more rows and it stopped
+   unnoticed while it was rare; §105 put it on seven more rows and it stopped
    being rare. ONE function, because the two halves saying it differently is
    the fault this board was just built to avoid (§53.5). */
 function notesOwed(n){ return n === 1 ? "1 needs a note" : n + " need notes"; }
@@ -3942,7 +3969,7 @@ function renderCycle(){
       '<td class="cc"><span class="badge b-' + st.key + '">' + st.label + '</span></td></tr>';
   }).join("");
 
-  /* ── THE FUNCTIONS ARE ON THE BOARD TOO (§104) ────────────────────
+  /* ── THE FUNCTIONS ARE ON THE BOARD TOO (§105) ────────────────────
      A submission the SMO cannot see anywhere is half a feature. They go in the
      SAME table rather than a second one, because "who has reported" is one
      question -- but a function's three counts are its own vocabulary (key
@@ -3961,7 +3988,7 @@ function renderCycle(){
     var who = personName(f.custodian) || personName(f.head) || "\u2014";
     var pctD = c.total ? Math.round(c.done / c.total * 100) : 0;
     var miss = fnMissingNotes(fk).length;
-    /* THE THREE COLUMNS ARE THREE LAYERS, NOT TWO VOCABULARIES (§104.2).
+    /* THE THREE COLUMNS ARE THREE LAYERS, NOT TWO VOCABULARIES (§105.2).
        The first drawing gave the function half its own column strip and it
        COLLIDED: the strip's widths come from the table's own <thead> -- a
        unit's words -- and "DELIVERABLES" alone is wider than the Measures

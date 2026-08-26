@@ -97,7 +97,7 @@ CREATE TABLE IF NOT EXISTS deliverables (
   project_id text NOT NULL REFERENCES projects(id) ON DELETE CASCADE,
   idx        int NOT NULL,
   name       text NOT NULL DEFAULT '',
-  -- §103. `kind` and `actual` are GONE. A deliverable is reported the way a
+  -- §104. `kind` and `actual` are GONE. A deliverable is reported the way a
   -- milestone is -- Not started / In progress / Delivered, with a per-cent
   -- when it is in progress -- so the plan has nothing left to choose about
   -- how it is measured, and the awkward "yes"/"no"-or-a-number `actual` that
@@ -133,7 +133,7 @@ CREATE TABLE IF NOT EXISTS milestones (
   owner      text,
   finish     text,
   status     text,
-  -- §103: a milestone in progress carries how far, exactly as a deliverable
+  -- §104: a milestone in progress carries how far, exactly as a deliverable
   -- does. Execution reads the mean of these rather than counting the done.
   pct        numeric,
   note       text,

@@ -54,33 +54,58 @@ Nothing proceeds past this line without an answer.
 
 ## Built and verified
 
-### v3.31 — the plan's own shape, one row, and a function that submits (§102–§105)
+### v3.30 — reordering comes back (§101), and focus gets a switch (§102)
+
+Two small independent changes, both agreed in words first.
+
+**§101 — reordering comes back**, reversing §94.3. `mayArrange()` is a separate
+rule, not a widening of the authoring gate: the plan's order is the unit's, its
+words stay the office's. BU owner, strategy custodian, function head; never a
+contributor. `lib/authorize.js` learned to tell a reorder from a rewrite. The
+control is up-down arrows in the pen's slot — Islam's pick over the grip mark.
+
+**§102 — focus measures get a switch.** Off hides every surface and keeps every
+mark; on restores them. Stored as an absence (`GROUP.focusOff`), so an unasked
+tenant and one switched off and on again are byte-identical. The switch is the
+SMO's alone while marking stays the CEO's, and the page carrying it survives
+being switched off (§61).
+
+**The bug worth remembering:** the switch was wired, the rule was written, and
+flipping it did nothing — `worldOf()` and `W()` are **two allow-lists, one
+behind the other**, and a group key must be named in both. Silent, and in the
+safe-looking direction. Found by driving the page.
+
+**Verified:** test-authorize 165 → **190, 0 failed** · new
+`src/checks/plan-arrange.py` and `src/checks/focus-switch.py` **ALL CLEAR** ·
+qa.py clean · all four failure modes proved to fail before being trusted.
+
+### v3.32 — the plan's own shape, one row, and a function that submits (§103–§106)
 
 Four sections of one thread: the project tables rethought from the plan
 outwards, then the two things that thread turned up.
 
-- **§102 · The plan's own shape.** A milestone keeps a **name and** a
+- **§103 · The plan's own shape.** A milestone keeps a **name and** a
   description; a deliverable gets a **due date** back (some land before the
   project ends). Dates are read, never refused — `Done` and `Pending` in a
   due-date column are **named as what they are**.
-- **§103 · One table, one row shape.** §99's split is undone for a better
+- **§104 · One table, one row shape.** §99's split is undone for a better
   reason: giving a deliverable a real direction (`=`) and target (`Y/N`) means
   the cells it left empty now have answers. Reporting is **Not started / In
   progress / Delivered**, the per-cent typing itself at both ends. The score
   column is **Performance** on deliverables and outcomes, **Progress** on
   milestones — `%` is a unit, not a name.
-- **Not due is a label, not a lock** (§103.8). The comment said so from the day
+- **Not due is a label, not a lock** (§104.8). The comment said so from the day
   it was written and the code did the opposite: a not-due row had its picker
   **replaced** by a word, so reporting early was the one act the pane refused.
-- **An In progress with no number is not nought** (§103.10). It read **0**, so
+- **An In progress with no number is not nought** (§104.10). It read **0**, so
   the average counted it and a project's figure fell the instant a dropdown
   changed. It leaves the average now and the row is marked *Needs a %*.
-- **§104 · A supporting function submits**, and everything except the button
+- **§105 · A supporting function submits**, and everything except the button
   was already built — the server has carried an explicit `fn:` branch since
   spec 006. The dot on that tab had been asking for a submission nobody could
   make. It refuses on a row owing a per-cent or a red figure with no note, and
   the SMO's cycle board carries the functions.
-- **§105 · What the merge does to a plan already uploaded.** Nothing is
+- **§106 · What the merge does to a plan already uploaded.** Nothing is
   deleted. **Execution rises 8–27 points on every capability**, because an In
   progress milestone stops counting as nought — so the card now prints
   `5 of 12 milestones · 2 not counted yet`. And a bad due date in a plan

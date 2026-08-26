@@ -1030,7 +1030,7 @@ console errors (in this cloud environment, run it via a wrapper that points Play
   label off the page and compares the two halves to each other (§53.5) —
   *a check written against the problem survives somebody changing their mind
   about the wording.*
-  **NOT DUE IS A LABEL, NOT A LOCK (§103.8):** the comment over the reporting
+  **NOT DUE IS A LABEL, NOT A LOCK (§104.8):** the comment over the reporting
   pane said exactly that from the day it was written and the code under it did
   the opposite — `if (notDue)` **replaced** the picker with the words *Not
   asked*, so reporting early (asked for outright: *"they can report on it
@@ -1052,7 +1052,7 @@ console errors (in this cloud environment, run it via a wrapper that points Play
   own assertion, that **Status and % must agree about whether a row was
   answered**. Deliberately not widened: the unit's tactic table has the
   identical lock and is untouched.
-  **THE SCORE COLUMN SAYS WHAT IT HOLDS, NOT WHAT IT IS MEASURED IN (§103.9):**
+  **THE SCORE COLUMN SAYS WHAT IT HOLDS, NOT WHAT IT IS MEASURED IN (§104.9):**
   `%` is a unit, not a name — it says what the cell is measured in and nothing
   about what it measures, on the one column somebody runs their eye down. It is
   **Performance** on the deliverables and outcomes (*how well*, the word the
@@ -1068,10 +1068,10 @@ console errors (in this cloud environment, run it via a wrapper that points Play
   both tables would pass. Measured at 1920/1500/1280/1000 (§27.1) and in the
   deck **in present mode**, the only place a slide has a width at all (§69): no
   header wraps, nothing scrolls. **Flagged, not changed**: the deck still
-  carries a **Due date** column the three panes lost in §103.8 — the ask named
+  carries a **Due date** column the three panes lost in §104.8 — the ask named
   the tables and the templates, and a column on a projector that is absent in
   the product is a decision, not a tidy-up.
-  **AN IN PROGRESS WITH NO NUMBER IS NOT NOUGHT (§103.10):** the box opened and
+  **AN IN PROGRESS WITH NO NUMBER IS NOT NOUGHT (§104.10):** the box opened and
   nothing else did — nothing said the number was owed, and `statusReads()`
   returned **0** for a wip with no per-cent, so the average COUNTED it: project
   performance 63 → 50 and Execution 49 → 41 **the instant the dropdown
@@ -1088,7 +1088,7 @@ console errors (in this cloud environment, run it via a wrapper that points Play
   must agree about one row are how *given* and *reads* drift apart.
   **`capExec()` KEEPS ITS `|| 0` ON PURPOSE** — a milestone nobody has TOUCHED
   is Not started and nought is what it is; only one halfway through a sentence
-  leaves. **THE PARITY CHECK HAD TO BE REWRITTEN, NOT SILENCED**: §103's
+  leaves. **THE PARITY CHECK HAD TO BE REWRITTEN, NOT SILENCED**: §104's
   "nobody's score moves" fixture stripped per-cents and left the statuses,
   which stopped modelling the old formula the moment this landed — it went red
   on all eight capabilities and would have called a deliberate decision a
@@ -1096,7 +1096,7 @@ console errors (in this cloud environment, run it via a wrapper that points Play
   asserted separately** (all 18 In progress milestones in the demo carry a
   number, so `pending` is 0 and no existing figure moved).
   **A SUPPORTING FUNCTION SUBMITS, AND EVERYTHING BUT THE BUTTON WAS ALREADY
-  BUILT (§104):** `canSpeakFor()`, `CURRENT_REPORT_KEY`, `reportSectionState()`,
+  BUILT (§105):** `canSpeakFor()`, `CURRENT_REPORT_KEY`, `reportSectionState()`,
   `reportPending()` and **`lib/authorize.js`'s `reportState` case** all carried
   an explicit `fn:` branch — **§71's fault exactly**, the back half built and
   the control never drawn, which is why the dot had been telling a function
@@ -1110,11 +1110,11 @@ console errors (in this cloud environment, run it via a wrapper that points Play
   submitted `undefined` and reported nothing in the way. Two rules stop it: a
   figure at risk with no note (the unit's, with `rowReads()` teaching
   `needsNote()` to read a deliverable and a milestone) and a row that said In
-  progress and never said how far (§103.10). **Measured before building: every
+  progress and never said how far (§104.10). **Measured before building: every
   function is blocked by the note rule today, and so is every unit but
   Nigeria** — the demo behaves identically on both sides, which is the evidence
   the generalisation is faithful rather than over-strict.
-  **THREE COLUMNS ARE THREE LAYERS, NOT TWO VOCABULARIES (§104.2):** the board's
+  **THREE COLUMNS ARE THREE LAYERS, NOT TWO VOCABULARIES (§105.2):** the board's
   function half first got its own column strip and it **collided** — a strip's
   widths come from the table's own `<thead>`, and `DELIVERABLES` alone is wider
   than the Measures column at every width from 1920 down. Wrapping cannot save
@@ -1131,12 +1131,12 @@ console errors (in this cloud environment, run it via a wrapper that points Play
   `test-authorize.js` had no `fn:` submission test at all, because there was no
   control, so no test had a reason to exist — it asks BOTH ends now, or the
   branch could accept anybody and the first assertion would still print ok.
-  **AND "1 NEED NOTES" HAD BEEN WRONG SINCE THE COLUMN EXISTED (§104.4)** —
+  **AND "1 NEED NOTES" HAD BEEN WRONG SINCE THE COLUMN EXISTED (§105.4)** —
   unnoticed because it was rare, until the function rows put it on seven more.
   `notesOwed()` is one function: two halves of one board saying it differently
-  is the fault §104.2 was built to avoid. *A defect can hide behind how seldom
+  is the fault §105.2 was built to avoid. *A defect can hide behind how seldom
   it is reached, and adding rows is a way of finding one.*
-  **ASKED FOR AND NOT BUILT — THE REFUSAL (§103.10):** *"refuse the
+  **ASKED FOR AND NOT BUILT — THE REFUSAL (§104.10):** *"refuse the
   submission"* has nothing to attach to: **a capability's Reporting page has no
   Submit button.** One `data-submit` exists in the whole platform and it is on
   a UNIT; a function's reporting bar carries the tally and *Save draft* and
@@ -1145,20 +1145,20 @@ console errors (in this cloud environment, run it via a wrapper that points Play
   there is no control that would clear it — §69's own rule broken by the thing
   that wrote it. A function's Submit is a feature, not a fix, and what it means
   (one per function, or one per capability) is a decision. **ANSWERED THE
-  SAME DAY, in §104 above:** one per function, and the server had been ready
+  SAME DAY, in §105 above:** one per function, and the server had been ready
   for it all along.
-  **WHAT A MERGE DOES TO A PLAN ALREADY UPLOADED (§105):** nothing is deleted —
+  **WHAT A MERGE DOES TO A PLAN ALREADY UPLOADED (§106):** nothing is deleted —
   migration 024 is score-preserving by construction and only `deliverables.due`
   and `milestones.pct` are new, so every existing row has them empty. **TWO
   THINGS CHANGE, AND THE FIRST IS NOT SMALL.** Measured with every milestone
   per-cent stripped (the shape of a tenant running on `main`), **Execution
   rises 8–27 points on all eight capabilities** — today an In progress
-  milestone reads NOUGHT and §103.10 made it OUTSTANDING, so it leaves the
+  milestone reads NOUGHT and §104.10 made it OUTSTANDING, so it leaves the
   average. Correct, and silent, and *a score that moves for a reason nothing on
   the page states is a score nobody can defend*: the card prints
   **`5 of 12 milestones · 2 not counted yet`**, only when there is one.
   **AND A DUE DATE THAT IS NOT ONE IS FINALLY NOTICED IN A STORED PLAN**
-  (§105.2) — the upload has warned since §102 and **nothing ever looked at the
+  (§106.2) — the upload has warned since §103 and **nothing ever looked at the
   database**, so a tenant that uploaded before that check is told nothing.
   `dueNote()` names the **value AND the row** ("Pending on Solution design"),
   beside `overrunNote()` whose shape it borrows, with the count on the RAIL so
@@ -1167,7 +1167,7 @@ console errors (in this cloud environment, run it via a wrapper that points Play
   the product already use — a second question would be a second definition of
   "a date". **MILESTONES ONLY**: their date is on that page and the pen edits
   it, so the note points at something fixable; a deliverable's is drawn on no
-  pane since §103.8 and naming a bad one would send somebody after a control
+  pane since §104.8 and naming a bad one would send somebody after a control
   that is not there (§61). **Resolved THERE, never here** — a plan is the
   client's. **Still not run: migration 024 against a real Postgres.**
   **STILL BROKEN AND DELIBERATELY NOT FIXED (§99.6):** `projPlanBody` defines
@@ -1275,6 +1275,34 @@ console errors (in this cloud environment, run it via a wrapper that points Play
   by `checks/office-chat.py` §6 (which passed for the wrong reason first — it
   pressed the bubble to open a panel that was already open, closing it) and by
   `scripts/test-chat.js`.
+- **THE WORLD IS TWO ALLOW-LISTS, ONE BEHIND THE OTHER (§102.4):**
+  `worldOf()` does not pass the group through — it **lifts named keys off it**
+  (`sets`, `claims`, `naming`, `focusOff`) — and **`W()` behind it names the
+  keys it keeps**. A group setting must be added in **BOTH**, in the same edit
+  as the rule that reads it, and forgetting either fails **silently and in the
+  safe-looking direction**: the reader sees `undefined` and answers the
+  default, which for a switch means *on*. Nothing throws, the page renders, the
+  control does nothing. §44 recorded this once as a client/server difference;
+  this was two filters in the same function on the same object, and only
+  driving the real page found it — unit tests build worlds by hand and pass
+  either way.
+- **FOCUS MEASURES HAVE A SWITCH, AND IT HIDES RATHER THAN FORGETS (since
+  v3.30, §102):** Islam — *"off means it disappears across the platform"*, and
+  *"off and on brings back history yes"*. `cycle.focus` keeps every mark (§44,
+  third time: a switch that destroys data is a delete with a friendly label).
+  **Stored as an ABSENCE** — `GROUP.focusOff` exists only while off, so *on* is
+  what an unasked tenant already has and turning it back on DELETES the key
+  (§50.6); only `true` switches off, so a stale `false` cannot hide it. **Named
+  `focusOff`, never `focus`**, because `CYCLE.focus` is the marks map one level
+  away (§87's twins). **ONE GATE, because there was already one chokepoint**:
+  seven surfaces read focus and all seven go through `isFocus()`.
+  **`focusMarked()` is the RAW map with exactly one caller** — the Focus
+  measures page's own ticks, or turning it off would look like losing them.
+  **THE SWITCH IS NOT A BIGGER MARK**: marking is the CEO's and the SMO's
+  (§37), the switch is the SMO's alone, classified `setup` beside `naming` —
+  asserted as a PAIR, because locking something down proves nothing unless the
+  right thing stayed open. **And the page carrying it stays reachable while it
+  is off** (§61's trap: otherwise the only way back on is to turn it on first).
 - **REORDERING IS THE UNIT'S, THE WORDS ARE THE OFFICE'S (since v3.30, §101,
   reversing §94.3):** `mayArrange()` in `lib/rules.js` is **its own rule, never
   a hole in `mayAuthorPage()`** — widening the authoring gate to let a custodian
@@ -1516,8 +1544,29 @@ prior sessions (on HR_ERP) accidentally reverted agreed-upon designs.
 
 ---
 
-*Last Updated: 2026-08-26 &mdash; **v3.30: reordering comes back, as its own
-grant** (&sect;101, reversing &sect;94.3). *"I will give it back &mdash; shall we
+*Last Updated: 2026-08-26 &mdash; **v3.30: reordering comes back
+(&sect;101), and focus measures get a switch (&sect;102)**. The second one
+carries the bug worth reading: the switch was wired, the rule was written, the
+writer worked &mdash; and flipping it changed nothing at all. **`worldOf()` does
+not pass the group through**; it lifts NAMED KEYS off it, and **`W()` behind it
+names the keys it keeps** &mdash; two allow-lists, one behind the other, in the
+same function, on the same object. A group setting has to be added in BOTH, and
+forgetting either fails **silently and in the safe-looking direction**: the
+reader sees `undefined` and answers the default, which for a switch means *on*.
+Nothing throws, the page renders, the control does nothing. &sect;44 recorded
+this once as a client/server difference and this was neither &mdash; and only
+driving the real page found it, because the unit tests build their worlds by
+hand and pass either way. The rest is settled shape: off HIDES and never
+forgets (&sect;44 for the third time), stored as an ABSENCE so an unasked tenant
+and one switched off and on again are byte-identical (&sect;50.6), one gate
+inside `isFocus()` because seven surfaces already went through it, and the page
+carrying the switch stays reachable while it is off (&sect;61's trap, or the only
+way back on is to turn it on first). **The switch is the SMO's while marking
+stays the CEO's** &mdash; asserted as a PAIR, because locking something down
+proves nothing unless the right thing stayed open.
+
+*Earlier the same day: **&sect;101, reordering comes back** (reversing
+&sect;94.3). *"I will give it back &mdash; shall we
 align where to visually have it?"* **EVERY WORD &sect;94.3 WROTE DOWN STAYED
 TRUE**, which is what makes this a reversal rather than a correction: that
 section closed reordering to the office because the order of a plan is as much

@@ -1554,6 +1554,41 @@ console errors (in this cloud environment, run it via a wrapper that points Play
   somebody removes them and a recomputed queue renumbers under whoever is
   working through it. **Units with no custodian cannot join it** — not a person,
   so there would be nobody to open; it keeps its own line (§93.4).
+- **ONE LINE ABOVE THE TABLE, AND A DIALOG THAT WAS WASTEFUL RATHER THAN DENSE
+  (§117):** the badge said who you are (the chrome says it on every page) and
+  the count said how big the register is (**the table under it is that** — §116
+  had already dropped the second copy of that count and kept this one, and
+  *keeping one copy of something nobody asked for is still keeping it*). The
+  fourth ask was not a removal and is the only one with a constraint in it:
+  **Passwords was already in `.hright` and was WRAPPING**, and dropping the
+  badge still left the row wanting 1107px. Two labels are terser and the search
+  flexes from 160px — one line to **1280px** now, from 1512px. **THE CUSTODIAN
+  MARK MOVED RATHER THAN WENT**: it is the one outstanding thing on that page
+  that is not a person, so it cannot join the Attention queue (§116.2, nobody
+  to open) and would have died with the line — a chip on the row, on the warning
+  ground because a grey word among six controls is furniture, **drawn only when
+  there is one** (§41's budget). **AND THE DIALOG WAS NOT DENSE, IT WAS
+  WASTEFUL**: 482px of content, of which a whole 56px row was EMPTY (nine
+  fields do not divide by two) and the tallest single block was a paragraph
+  repeating itself on every person opened. Three columns divide nine exactly and
+  the sentence became a `title` on a value that LOOKS un-editable — 482 → 337px,
+  no scroll to 640px tall, **and narrower too (860px)**: narrower and shorter are
+  usually a trade and were not here, because the height was waste. The width is
+  marked on the **overlay**, never loosened on `.modal`, which every dialog
+  shares, and comes off in `closeModal()` (§116.6's one door). Steps down are
+  **3 → 2 → 1**, never 3 → 1, or the scroll comes back on a narrow laptop.
+- **THE CHECK MEASURED THE INNER BOX AND PASSED ON THE BUILD IT WAS WRITTEN TO
+  REJECT (§117.4):** it asked whether **`.hright`** was one row — green on the
+  previous build at every width, because **`.phead2` wraps too**, so when the
+  controls stop fitting beside the title the whole block drops them onto a line
+  of their own and the inner box honestly reports one row while the header is
+  two. **Assert the box somebody can SEE**, and keep the inner one under it
+  because that is the one that carried the wrapped control: with both, the old
+  build fails 12 times (§94.5). Two more: **one row is not one `top` value**
+  (different heights, so a naive count reported three rows on a row that was
+  plainly one — cluster by the middle), and **the whole row is invisible over
+  `file://`** (Passwords is `live`, so the first version measured five controls
+  and called it a pass, §94.11).
 - **A LOCAL ALIAS IS INVISIBLE FROM ANOTHER FILE, AND ONLY OVER HTTP (§116.9):**
   `attentionOf()` in `config-data.js` spelt half its declaration sentence with
   `whereLabel`, which is a **`var` inside `renderPeople()`** in
@@ -1847,6 +1882,8 @@ python3 build.py     # assembles strategy-management-platform.html (must be byte
 python3 qa.py        # walks every page as every viewer, reports console errors (needs Playwright + Chromium)
 python3 checks/people-dialog.py # the register reads and the dialog writes: the queue,
                                 # Add, and neat with every column on (§116, over HTTP)
+python3 checks/register-header.py # one line above the table and a dialog that fits the
+                                # window — the HEADER's height, not .hright's (§117)
 python3 checks/role-picker.py   # giving somebody a role: every control PRESSED,
                                 # both ends asked, and the absences asserted (§110)
 python3 checks/no-jump.py       # nothing moves the register under you — the act of
@@ -1897,7 +1934,33 @@ prior sessions (on HR_ERP) accidentally reverted agreed-upon designs.
 
 ---
 
-*Last Updated: 2026-08-26 &mdash; **v3.39: the register stops being a form**
+*Last Updated: 2026-08-26 &mdash; **v3.40: one line above the table, and a
+dialog that fits the window** (&sect;117). Two asks minutes apart, both from
+using the register on his own laptop, and both turned out to be **waste rather
+than density**. The header: the badge said who you are, which the chrome says on
+every page, and the count said how big the register is, which the table under it
+is &mdash; &sect;116 had already dropped the second copy of that count for
+exactly that reason and kept this one, and *keeping one copy of something nobody
+asked for is still keeping it*. The fourth ask was the only one with a
+constraint in it: **Passwords was already on the row and was WRAPPING**, and
+removing the badge still left it wanting 1107px &mdash; so two labels are terser
+and the search flexes 30px narrower, giving one line to **1280px**, from 1512.
+**THE CUSTODIAN MARK MOVED RATHER THAN WENT**, because it is the one
+outstanding thing on that page that is not a person and so cannot join the
+Attention queue; a chip on the row, drawn only when there is one.
+**AND THE DIALOG WAS NOT DENSE** &mdash; 482px of content, of which a whole
+56px row was EMPTY (nine fields do not divide by two) and the tallest single
+block was a paragraph repeating itself on every person opened. Three columns
+divide nine exactly: **482 &rarr; 337px, no scroll down to a 640px window, and
+narrower too** (860px, not 938) &mdash; narrower and shorter are usually a trade
+and were not here, precisely because the height was waste. **THE CHECK PASSED ON
+THE BUILD IT WAS WRITTEN TO REJECT**, which is the lesson worth keeping: it
+measured `.hright`, and `.phead2` wraps too &mdash; so when the controls stop
+fitting beside the title the whole block drops them to a line of their own, and
+the inner box honestly reports ONE row while the header is two. Assert the box
+somebody can SEE. With that corrected the previous build fails 12 times.*
+
+*Earlier: 2026-08-26 &mdash; **v3.39: the register stops being a form**
 (&sect;116). Six decisions from Islam after two rounds of mockups, and **one
 thing follows from them that nobody asked for, which is why they hang
 together: with editing, adding and the queue all in a dialog, the table no

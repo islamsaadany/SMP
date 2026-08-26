@@ -3262,13 +3262,24 @@
   /* The search sits in the header row now rather than on a bar of its own — the
      bar held five filter chips and a row count, and both went at Islam's word,
      which left a whole row carrying one box. */
-  .phead2 .hsearch { flex:1 1 190px; min-width:160px; max-width:300px; }
+  /* THE SEARCH GIVES WAY FIRST (§117). Six controls and a title share this row
+     now, and the search is the only one that can be narrower without losing a
+     word — so it flexes from 160px rather than 190px, which is what buys the
+     single line down to 1280px. It still grows into whatever is left over. */
+  .phead2 .hsearch { flex:1 1 160px; min-width:150px; max-width:300px; }
   .phead2 .hsearch .tk-search { width:100%; }
   /* THE COUNT IS A LINE, NOT A CHIP. Two counts said the same thing twice; the
      survivor is quiet, under the title, where it reads as a fact about the page
      rather than as another control. */
-  .pcount { font-size:var(--fs-micro); color:var(--ink-3); margin:-6px 0 12px; }
-  .pcount .pnocust { color:var(--warn-tx); font-weight:600; cursor:help; }
+  /* THE CUSTODIAN MARK IS A CHIP ON THE ROW (§117). `.pcount` and its line
+     went with the count Islam asked to remove; this is the one thing that line
+     carried which is not a person, so it could not move into the Attention
+     queue (§116.2) and had to move onto the row instead. It wears the warning
+     ground rather than the page's quiet ink, because on a row of six controls
+     a grey word is furniture. ONE LINE, like everything else on that row. */
+  .phead2 .pnocust { font-size:11.5px; font-weight:600; cursor:help;
+    color:var(--warn-tx); background:var(--warn-bg); border-radius:var(--r-pill);
+    padding:6px 11px; white-space:nowrap; }
   /* ── THE ONE LOUD THING ON THE PAGE (§94.8's accent budget) ──────── */
   .attnbtn { display:inline-flex; align-items:center; gap:7px; border:0;
     background:var(--cta); color:var(--cta-ink); cursor:pointer;
@@ -3312,7 +3323,27 @@
   .peoplecfg td.wrapany, .peoplecfg th.wrapany { max-width:270px; }
 
   /* ── THE DIALOG ─────────────────────────────────────────────────── */
-  .pdlg { display:grid; grid-template-columns:repeat(2, minmax(210px, 1fr));
+  /* 860px, NOT 940 (§117). Marked on the overlay by openPersonDialog() rather
+     than loosened on `.modal`, which every dialog in the platform shares. */
+  .overlay.pdlg-on .modal { width:min(860px, 100%); }
+
+  /* THREE COLUMNS, NOT TWO (§117). Islam: "that's a very wide design that even
+     require a scroll — make it compact with no need to scroll." Measured at
+     938px wide with two 434px columns, the content ran 482px and a 720px-tall
+     window cut it at 538px.
+
+     THE HEIGHT WAS NOT DENSITY, IT WAS TWO FAULTS: the Unit row left the cell
+     beside it EMPTY (nine fields do not divide by two), and Sign-in name
+     carried a paragraph. Three columns divide the nine exactly, so nothing is
+     orphaned — six content rows become four, 482px becomes 285px, and the
+     dialog fits every window above 560px with no scroll at all.
+
+     AND IT IS NARROWER TOO (860px, not 938), which is the other half of the
+     ask — the two are usually a trade and here they are not, because what was
+     spending the height was waste rather than content. The cost is stated
+     rather than hidden: a 264px field is tighter than a 434px one, so a long
+     address fills its box instead of sitting inside it. */
+  .pdlg { display:grid; grid-template-columns:repeat(3, minmax(150px, 1fr));
     gap:13px 22px; align-items:start; }
   .pdlg .pdf { display:flex; flex-direction:column; gap:4px; min-width:0; }
   .pdlg .pdf.wide { grid-column:1 / -1; }
@@ -3322,6 +3353,13 @@
      control's automatic minimum size is otherwise its intrinsic width, which is
      how a grid track gets held open by an input nobody sized (§110.8). */
   .pdlg .pdf .fld, .pdlg .pdf .ssbtn { width:100%; min-width:0; box-sizing:border-box; }
+  /* A VALUE THAT CANNOT BE EDITED LOOKS LIKE ONE (§117). It sits on the
+     baseline its neighbouring inputs sit on, so the row does not go ragged,
+     and the dashed edge and quiet ink are what the removed sentence used to
+     say. `cursor:help` is the sign there is something on the hover. */
+  .pdlg .pdro { display:block; border:1px dashed var(--line); border-radius:var(--r-sm);
+    padding:11px 12px; color:var(--ink-3); background:var(--surface-2);
+    cursor:help; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
   .pdlg .pdsect { grid-column:1 / -1; font-size:10.5px; letter-spacing:.07em;
     text-transform:uppercase; font-weight:700; color:var(--gold-deep);
     border-top:1px solid var(--line-soft); padding-top:13px; margin-top:3px; }
@@ -3347,7 +3385,13 @@
     padding-top:13px; flex-wrap:wrap; }
   .pdfoot .pdrt { display:flex; align-items:center; gap:14px; margin-left:auto; }
   .pdfoot .tk-save { font-weight:700; }
-  @media (max-width: 620px) {
+  /* THE STEPS DOWN ARE 3 → 2 → 1, never 3 → 1: a dialog on a narrow laptop is
+     not a dialog on a phone, and dropping straight to one column would put the
+     scroll back that this section removed. */
+  @media (max-width: 820px) {
+    .pdlg { grid-template-columns:repeat(2, minmax(150px, 1fr)); }
+  }
+  @media (max-width: 560px) {
     .pdlg { grid-template-columns:1fr; }
   }
 
@@ -22409,7 +22453,10 @@ function renderPeople(){
      carries the snapshot Cancel restores from (§79.2, §110.6). */
   function rowOpen(p){ return mayEdit_ && rowEditIs("people", p.key); }
   var live = typeof SYNC !== "undefined" && SYNC.isLive() && inOffice();
-  var retired = PEOPLE.filter(function(p){ return !personActive(p); }).length;
+  /* `retired` was counted here for the header's count line, which §117
+     removed. Deleted rather than left standing: a variable nothing reads is
+     one the next person reads as load-bearing (§24). Retired is still a row
+     state, behind the search. */
   /* COUNTED OVER WHO THIS VIEWER MAY ACTUALLY REACH (§89). A Super user reaches
      everybody; an SMO team member reaches the client's people and not the
      office's — so a count taken over the whole register would promise them a
@@ -22632,10 +22679,16 @@ function renderPeople(){
         '" type="email" autocomplete="off" spellcheck="false" placeholder="Email">');
     F("Mobile", '<input class="fld" value="' + esc(p.phone || "") + '" data-pphone="' + p.key +
         '" placeholder="Mobile">');
+    /* THE REASON IS ON THE HOVER (§117). It was a two-line paragraph, the
+       tallest single thing in the dialog, saying the same sentence on every
+       person you open — and the dialog scrolled. It reads as not-editable
+       from its own look (`.pdro`, dashed and quiet) rather than from a
+       sentence explaining that it is. The words are UNCHANGED, and they are a
+       real `title` rather than a `.vwhy` the layout has to make room for. */
     if (!add)
-      F("Sign-in name", '<span class="mono">' + esc(p.key) + '</span>' +
-        '<span class="vwhy">Minted from the name. Their password and open sessions ' +
-        'are keyed on it, so it cannot be changed.</span>');
+      F("Sign-in name", '<span class="pdro mono" title="Minted from the name. ' +
+        'Their password and open sessions are keyed on it, so it cannot be ' +
+        'changed.">' + esc(p.key) + '</span>');
     F("Group", "where", false);
     F("Job title", '<input class="fld" value="' + esc(p.title || "") + '" data-ptitle="' + p.key +
         '" placeholder="Job title">');
@@ -23415,27 +23468,42 @@ function renderPeople(){
   var attnBtn = !mayEdit || !queue.length ? "" :
     '<button class="attnbtn" data-attn="1" ' +
       'title="Open the first of them, fix it, and move to the next">' +
-      ICO_ATTN + 'Needs attention <span class="attnn">' + queue.length + '</span></button>';
+      ICO_ATTN + 'Attention <span class="attnn">' + queue.length + '</span></button>';
   var addBtn = !mayEdit ? "" :
-    '<button class="addbtn" data-padd-open="1">+ Add someone</button>';
+    '<button class="addbtn" data-padd-open="1">+ Add</button>';
 
+  /* THE ONE OUTSTANDING THING THAT IS NOT A PERSON (§93.4), and it is now a
+     CHIP ON THE ROW rather than a line under it (§117). It cannot join the
+     Attention queue — a unit is not somebody you can open — so removing the
+     count line would have taken it with it, which is why it moved rather than
+     went. DRAWN ONLY WHEN THERE IS ONE: a chip that is usually absent is a
+     mark, and one that is always there is furniture (§41's budget). */
+  var noCustChip = !noCust.length ? "" :
+    '<span class="pnocust" title="' + esc(noCust.map(function(k){
+        return UNITS[k].name; }).join(", ")) + ' \u2014 nobody is keeping ' +
+      (noCust.length === 1 ? "this plan" : "these plans") + ' up to date. Give somebody the ' +
+      'Strategy custodian role from their row here.">' +
+      plural(noCust.length, "unit") + ' with no custodian</span>';
+
+  /* NO BADGE AND NO COUNT LINE (§117). Islam: "the SMO badge remove it and
+     remove the 77 people active text ... and accordingly the whole table
+     should be just below the buttons line."
+
+     THE BADGE SAID WHO YOU ARE, which the chrome says already and says on
+     every page. THE COUNT SAID HOW BIG THE REGISTER IS, and the table under
+     it is that — §116 had already dropped the second copy of it from the
+     filter row for the same reason, and kept this one; keeping one copy of
+     something nobody asked for is still keeping it.
+
+     AND THE TABLE FOLLOWS IMMEDIATELY, which is the part of the ask that is
+     not a removal: with nothing between the row and the table, `section("")`
+     is what puts the table there, and the header's own 14px bottom margin is
+     the whole of the gap. */
   return cfgHead("People register",
-      /* ONE COUNT, AND NOTHING ELSE. Retired is behind the search now: it is a
-         property of a row, not a state of the register. */
-      ['<span class="pill kind">SMO</span>'],
+      [],
       "people", false, null, null,
       '<span class="hsearch">' + tkSearchOnly("people", "Search the register\u2026") + '</span>' +
-      attnBtn + addBtn + fileMenu + colMenu + pwMenu) +
-    '<div class="pcount">' +
-      plural(PEOPLE.length - retired, "person").replace("persons", "people") + ' active' +
-      (retired ? ' \u00b7 ' + retired + ' retired' : '') +
-      /* The one outstanding thing that is not a person (§93.4). */
-      (noCust.length ? ' \u00b7 <span class="pnocust" title="' + esc(noCust.map(function(k){
-          return UNITS[k].name; }).join(", ")) + ' \u2014 nobody is keeping ' +
-        (noCust.length === 1 ? "this plan" : "these plans") + ' up to date. Give somebody the ' +
-        'Strategy custodian role from their row here.">' +
-        plural(noCust.length, "unit") + ' with no custodian</span>' : '') +
-    '</div>' +
+      attnBtn + noCustChip + addBtn + fileMenu + colMenu + pwMenu) +
 
     section("", "",
       "",
@@ -36773,6 +36841,13 @@ var SYNC = (function () {
     var t = PEOPLEDLG.title();
     openModalHtml(esc(t.t), esc(t.s),
       PEOPLEDLG.html() + '<div class="pdfoot">' + PEOPLEDLG.foot() + '</div>');
+    /* NARROWER THAN THE PLATFORM'S OTHER DIALOGS (§117). `.modal` is
+       `min(940px,100%)` for every modal in the product — the merge wizard, the
+       send confirmation, the paste box — so the width is marked on the OVERLAY
+       for this one rather than loosened for all of them. Removed in
+       closeModal(), which is the one door every way out goes through
+       (§116.6), so it can never be left on a dialog that is not this one. */
+    overlay.classList.add("pdlg-on");
     wirePersonDialog();
     /* The cursor lands in the first field, and NEVER scrolls to get there
        (§110.7) — the dialog is already in view, and letting the browser scroll
@@ -37007,6 +37082,7 @@ var SYNC = (function () {
   function closeModal(){
     if (!overlay.classList.contains("on")) return;
     overlay.classList.remove("on");
+    overlay.classList.remove("pdlg-on");
     overlay.setAttribute("aria-hidden", "true");
     if (wrapEl) { wrapEl.inert = false; wrapEl.removeAttribute("aria-hidden"); }
     /* Back to the control that opened it — the one thing a keyboard user

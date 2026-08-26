@@ -199,12 +199,14 @@ with sync_playwright() as p:
     # unit as covered by somebody who cannot sign in.
     print("── the units with no custodian")
     def custPill():
-        # ON THE COUNT LINE, NOT IN A CHIP (111). Units with no custodian is the
-        # one outstanding thing on this page that is NOT about a person, so it
-        # cannot be a stop in a queue of people -- there would be nobody to open.
-        # It keeps a line of its own under the title, and still names the units.
+        # A CHIP ON THE ROW, NOT A LINE UNDER IT (117). Units with no custodian
+        # is the one outstanding thing on this page that is NOT about a person,
+        # so it cannot be a stop in a queue of people -- there would be nobody
+        # to open. It kept a line of its own until Islam asked for the count
+        # line to go; it moved onto the controls row rather than going with it,
+        # and it still names the units.
         return [x for x in pg.eval_on_selector_all(
-            ".pcount .pnocust", "e=>e.map(x=>[x.textContent, x.title])")
+            ".phead2 .pnocust", "e=>e.map(x=>[x.textContent, x.title])")
             if "custodian" in x[0]]
     ck("nothing is said while every unit has one",
        pg.evaluate("()=>unitsWithoutCustodian().length") == 0 and not custPill(),

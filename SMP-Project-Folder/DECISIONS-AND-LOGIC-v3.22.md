@@ -15542,3 +15542,100 @@ somebody the register has already placed, asserting both halves of the sentence
 and that they speak one vocabulary. Proved able to fail before it was believed
 (§94.5) — put back, it reproduces the exact `ReferenceError`.
 
+---
+
+## 117 · One line above the table, and a dialog that fits the window (v3.40)
+
+Two asks, minutes apart, both from using the register on his own laptop.
+
+> "The top part can include the password, the SMO badge remove it and remove the
+> 77 people active text and the password can come to the same line and
+> accordingly the whole table should be just below the buttons line."
+
+> "That's a very wide design that even require a scroll — make it compact with
+> no need to scroll."
+
+Settled from a mockup carrying the measurements, agreed as drawn.
+
+### 117.1 Three removals and one arrival, and only the arrival had a constraint
+
+The badge said **who you are**, which the chrome says on every page. The count
+said **how big the register is**, and the table under it is that — §116 had
+already dropped the second copy of that count from the filter row for exactly
+this reason and kept this one, and *keeping one copy of something nobody asked
+for is still keeping it*.
+
+The fourth is not a removal, and it is the one that had to be measured rather
+than agreed. **Passwords was already in `.hright`; it was wrapping.** Take the
+badge away and the row still wanted **1107px**, so it would have kept wrapping
+on his own 1512px laptop at anything less than full width. Two labels are
+shorter — *Needs attention* → **Attention**, *+ Add someone* → **+ Add** — and
+the search flexes from 160px rather than 190px, because it is the only control
+on the row that can be narrower without losing a word.
+
+Measured, title and controls together: one line to **1512px** before, one line
+to **1280px** now. Below 1150 the title takes its own line, and the controls
+stay together to 1000. **The cost is recorded rather than glossed:** two labels
+are terser, bought for 140px.
+
+### 117.2 The mark that moved rather than went
+
+The count line also carried **"N units with no custodian"** — the one
+outstanding thing on this page that is not about a person, so it cannot join the
+Attention queue (§116.2: there would be nobody to open). Removing the line would
+have removed it in silence, which is how §93.4's finding gets lost.
+
+It is a **chip on the row**, wearing the warning ground rather than the page's
+quiet ink, because on a row of six controls a grey word is furniture. **Drawn
+only when there is one**: a chip that is usually absent is a mark, one that is
+always there is furniture again (§41's budget). One line, like everything else
+on that row (§88).
+
+### 117.3 The dialog was not dense, it was wasteful
+
+938px wide, two 434px columns, content **482px**, and a 720px-tall window cut it
+at 538px. What was spending that height was not content:
+
+- **Nine fields do not divide by two.** The Unit row left the cell beside it
+  empty — 56px of nothing, every time anybody opened anybody.
+- **Sign-in name carried a paragraph**, the tallest single thing in the dialog,
+  saying the same sentence on every person you open.
+
+Three columns divide nine exactly, so nothing is orphaned; the sentence is a
+`title` on a value that **looks** un-editable (`.pdro`, dashed and quiet) rather
+than one explaining that it is. Six content rows become four, **482px → 337px**,
+and it fits every window down to 640px tall with no scroll.
+
+**And it is narrower too — 860px, not 938.** Narrower and shorter are usually a
+trade and here they were not, precisely because what was spending the height was
+waste. The width is marked on the **overlay** (`.pdlg-on`), never loosened on
+`.modal`, which every dialog in the platform shares; it comes off in
+`closeModal()`, the one door all four ways out go through (§116.6). The steps
+down are **3 → 2 → 1**, never 3 → 1: a narrow laptop is not a phone, and
+dropping straight to one column would put the scroll back.
+
+**The cost, stated before it was agreed:** a 264px field is tighter than a 434px
+one, so a long address fills its box instead of sitting inside it.
+
+### 117.4 The check measured the wrong box and passed on the build it was meant to reject
+
+`checks/register-header.py` first asked whether **`.hright`** was one row — and
+that assertion was **green on the previous build at every width**. `.phead2`
+wraps too, so when the controls no longer fit beside the title the whole block
+drops them onto a line of their own, and the inner box then honestly reports one
+row while the header is two. *The thing Islam can see is the header's height,
+and that is what had to be asserted*; the inner row is asserted under it because
+it is the one that was carrying Passwords. With both, the previous build fails
+**12 times** — proved before the green run was believed (§94.5).
+
+Two more traps on the way. **One row is not one `top` value**: the controls have
+different heights, so their boxes start a pixel or two apart and a naive count
+reported three rows on a row that was plainly one — cluster by the middle.
+And **the whole thing is invisible over `file://`**: Passwords is `live`, so the
+first version measured a five-control row and called it a pass (§94.11).
+
+`.pcount` was read by two other checks, which are rewritten against the chip
+rather than deleted (§51.11, and loud rather than quiet this time only because
+the element is gone entirely). `var retired` is deleted with the line that read
+it — a variable nothing reads is one the next person reads as load-bearing
+(§24).

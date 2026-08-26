@@ -1875,24 +1875,13 @@
   /* The search sits in the header row now rather than on a bar of its own — the
      bar held five filter chips and a row count, and both went at Islam's word,
      which left a whole row carrying one box. */
-  /* THE SEARCH GIVES WAY FIRST (§117). Six controls and a title share this row
-     now, and the search is the only one that can be narrower without losing a
-     word — so it flexes from 160px rather than 190px, which is what buys the
-     single line down to 1280px. It still grows into whatever is left over. */
-  .phead2 .hsearch { flex:1 1 160px; min-width:150px; max-width:300px; }
+  .phead2 .hsearch { flex:1 1 190px; min-width:160px; max-width:300px; }
   .phead2 .hsearch .tk-search { width:100%; }
   /* THE COUNT IS A LINE, NOT A CHIP. Two counts said the same thing twice; the
      survivor is quiet, under the title, where it reads as a fact about the page
      rather than as another control. */
-  /* THE CUSTODIAN MARK IS A CHIP ON THE ROW (§117). `.pcount` and its line
-     went with the count Islam asked to remove; this is the one thing that line
-     carried which is not a person, so it could not move into the Attention
-     queue (§116.2) and had to move onto the row instead. It wears the warning
-     ground rather than the page's quiet ink, because on a row of six controls
-     a grey word is furniture. ONE LINE, like everything else on that row. */
-  .phead2 .pnocust { font-size:11.5px; font-weight:600; cursor:help;
-    color:var(--warn-tx); background:var(--warn-bg); border-radius:var(--r-pill);
-    padding:6px 11px; white-space:nowrap; }
+  .pcount { font-size:var(--fs-micro); color:var(--ink-3); margin:-6px 0 12px; }
+  .pcount .pnocust { color:var(--warn-tx); font-weight:600; cursor:help; }
   /* ── THE ONE LOUD THING ON THE PAGE (§94.8's accent budget) ──────── */
   .attnbtn { display:inline-flex; align-items:center; gap:7px; border:0;
     background:var(--cta); color:var(--cta-ink); cursor:pointer;
@@ -1936,27 +1925,7 @@
   .peoplecfg td.wrapany, .peoplecfg th.wrapany { max-width:270px; }
 
   /* ── THE DIALOG ─────────────────────────────────────────────────── */
-  /* 860px, NOT 940 (§117). Marked on the overlay by openPersonDialog() rather
-     than loosened on `.modal`, which every dialog in the platform shares. */
-  .overlay.pdlg-on .modal { width:min(860px, 100%); }
-
-  /* THREE COLUMNS, NOT TWO (§117). Islam: "that's a very wide design that even
-     require a scroll — make it compact with no need to scroll." Measured at
-     938px wide with two 434px columns, the content ran 482px and a 720px-tall
-     window cut it at 538px.
-
-     THE HEIGHT WAS NOT DENSITY, IT WAS TWO FAULTS: the Unit row left the cell
-     beside it EMPTY (nine fields do not divide by two), and Sign-in name
-     carried a paragraph. Three columns divide the nine exactly, so nothing is
-     orphaned — six content rows become four, 482px becomes 285px, and the
-     dialog fits every window above 560px with no scroll at all.
-
-     AND IT IS NARROWER TOO (860px, not 938), which is the other half of the
-     ask — the two are usually a trade and here they are not, because what was
-     spending the height was waste rather than content. The cost is stated
-     rather than hidden: a 264px field is tighter than a 434px one, so a long
-     address fills its box instead of sitting inside it. */
-  .pdlg { display:grid; grid-template-columns:repeat(3, minmax(150px, 1fr));
+  .pdlg { display:grid; grid-template-columns:repeat(2, minmax(210px, 1fr));
     gap:13px 22px; align-items:start; }
   .pdlg .pdf { display:flex; flex-direction:column; gap:4px; min-width:0; }
   .pdlg .pdf.wide { grid-column:1 / -1; }
@@ -1966,13 +1935,6 @@
      control's automatic minimum size is otherwise its intrinsic width, which is
      how a grid track gets held open by an input nobody sized (§110.8). */
   .pdlg .pdf .fld, .pdlg .pdf .ssbtn { width:100%; min-width:0; box-sizing:border-box; }
-  /* A VALUE THAT CANNOT BE EDITED LOOKS LIKE ONE (§117). It sits on the
-     baseline its neighbouring inputs sit on, so the row does not go ragged,
-     and the dashed edge and quiet ink are what the removed sentence used to
-     say. `cursor:help` is the sign there is something on the hover. */
-  .pdlg .pdro { display:block; border:1px dashed var(--line); border-radius:var(--r-sm);
-    padding:11px 12px; color:var(--ink-3); background:var(--surface-2);
-    cursor:help; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
   .pdlg .pdsect { grid-column:1 / -1; font-size:10.5px; letter-spacing:.07em;
     text-transform:uppercase; font-weight:700; color:var(--gold-deep);
     border-top:1px solid var(--line-soft); padding-top:13px; margin-top:3px; }
@@ -1998,13 +1960,7 @@
     padding-top:13px; flex-wrap:wrap; }
   .pdfoot .pdrt { display:flex; align-items:center; gap:14px; margin-left:auto; }
   .pdfoot .tk-save { font-weight:700; }
-  /* THE STEPS DOWN ARE 3 → 2 → 1, never 3 → 1: a dialog on a narrow laptop is
-     not a dialog on a phone, and dropping straight to one column would put the
-     scroll back that this section removed. */
-  @media (max-width: 820px) {
-    .pdlg { grid-template-columns:repeat(2, minmax(150px, 1fr)); }
-  }
-  @media (max-width: 560px) {
+  @media (max-width: 620px) {
     .pdlg { grid-template-columns:1fr; }
   }
 

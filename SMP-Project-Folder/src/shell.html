@@ -5273,6 +5273,13 @@
     var t = PEOPLEDLG.title();
     openModalHtml(esc(t.t), esc(t.s),
       PEOPLEDLG.html() + '<div class="pdfoot">' + PEOPLEDLG.foot() + '</div>');
+    /* NARROWER THAN THE PLATFORM'S OTHER DIALOGS (§117). `.modal` is
+       `min(940px,100%)` for every modal in the product — the merge wizard, the
+       send confirmation, the paste box — so the width is marked on the OVERLAY
+       for this one rather than loosened for all of them. Removed in
+       closeModal(), which is the one door every way out goes through
+       (§116.6), so it can never be left on a dialog that is not this one. */
+    overlay.classList.add("pdlg-on");
     wirePersonDialog();
     /* The cursor lands in the first field, and NEVER scrolls to get there
        (§110.7) — the dialog is already in view, and letting the browser scroll
@@ -5507,6 +5514,7 @@
   function closeModal(){
     if (!overlay.classList.contains("on")) return;
     overlay.classList.remove("on");
+    overlay.classList.remove("pdlg-on");
     overlay.setAttribute("aria-hidden", "true");
     if (wrapEl) { wrapEl.inert = false; wrapEl.removeAttribute("aria-hidden"); }
     /* Back to the control that opened it — the one thing a keyboard user

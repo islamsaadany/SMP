@@ -144,6 +144,14 @@ A drift between specs and code is a documentation bug — report it before silen
 - **`main`** — production/stable. Merge to main only when work is complete and verified.
 - **Commit with descriptive messages** — explain what and why.
 - **Push:** `git push -u origin <branch-name>`; retry on network errors with exponential backoff.
+- **NEVER MERGE TO `main` WITHOUT ISLAM SAYING SO, ON THAT MERGE (2026-08-26).**
+  Islam: *"don't merge without confirmation with me, not to damage things."*
+  **A go-ahead to BUILD is not a go-ahead to MERGE**, and neither is a line in
+  my own message saying the work could go to main on its own — that is me
+  describing an option, not him choosing it. This was written after I merged
+  the chat fix on exactly that inference. The word has to be about the merge,
+  and it has to be his. Building, checking and pushing the BRANCH need no
+  second ask; `main` is production, and production is his call every time.
 - **BEFORE MERGING, FETCH MAIN AND LOOK AT IT.** `git fetch origin main` and
   compare — another session may have pushed while this one was working, and it
   has: §70 landed on main mid-session on 2026-08-24 while §71 was being built.

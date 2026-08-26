@@ -63,6 +63,24 @@ Nothing proceeds past this line without an answer.
 
 ## Built and verified
 
+### v3.35 — the pen's last read-only fields, and a repeating project (§111–§112)
+
+- **§111:** a measure's direction and compile, and a tactic's quarters, are
+  editable behind the plan pen — §31's read-only reason expired with §94. The
+  Temple's own vocabulary; quarters as pressable marks; all three proved to
+  WRITE (§96).
+- **§112: a repeating project.** CX-mystery-shopping-shaped work is marked
+  *Repeats: each cycle* from the front matter pen. On a new cycle it is
+  archived, cleared and its dates shift one cycle forward (rhythm kept,
+  adjustable); an **unmarked project now keeps its figures** — before this,
+  every project was wiped on every new cycle, a landmine the live tenant had
+  not yet stepped on. The archive also stops storing a deliverable's deleted
+  `actual` and starts keeping the milestone's `pct` (stale since migration 024).
+
+**Verified:** `plan-fields.py` and `repeat-project.py` all passed, the second
+failing three ways on the pre-§112 build before its green was believed ·
+test-authorize **195** · full battery + qa.py clean.
+
 ### v3.34 — a project's front matter (§109)
 
 Islam: *"any project needs 3 things at its starting part — the brief,

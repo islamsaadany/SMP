@@ -3147,65 +3147,6 @@ function monthsOf(v, last){
    55 of the 60 milestones in the worked example are a bare quarter with no
    year, so a year has to come from somewhere: it comes from the cycle, which
    is the only year the platform actually knows. */
-/* ── SHIFTING A DATE BY A RUN (§112) ─────────────────────────────────────
-   A repeating project keeps its rhythm: fieldwork in month 2 of the run stays
-   fieldwork in month 2, so when a new cycle opens every date on a marked
-   project moves forward by the CLOSED cycle's length. One writer, mirroring
-   monthsOf() the reader shape for shape — a shape the reader cannot read is
-   returned UNCHANGED, never guessed at, because a date this cannot shift is
-   still a date somebody typed. The written style survives the shift: a
-   2-digit year stays 2-digit, "Mar" stays short, "March" stays long. */
-var MONTH_FULL = ["January","February","March","April","May","June","July",
-                  "August","September","October","November","December"];
-function shiftWhen(v, by){
-  var s0 = String(v == null ? "" : v).trim();
-  if (!s0 || !by) return v;
-  var yOut = function(orig, ny){
-    return orig.length === 2 ? ("0" + (ny % 100)).slice(-2) : String(ny);
-  };
-  var m;
-  /* W3 Mar 26 · March 2026 · Mar 26 */
-  if ((m = s0.match(/^([Ww]\d\s+)?([A-Za-z]{3,9})\s+(\d{2}|\d{4})$/))) {
-    var mi = monthIndex(m[2]);
-    if (mi < 0) return v;
-    var t = fullYear(m[3]) * 12 + mi + by;
-    var nm = ((t % 12) + 12) % 12, ny = Math.floor(t / 12);
-    var word = m[2].length > 3 ? MONTH_FULL[nm]
-             : MONTH_FULL[nm].slice(0, 3);
-    return (m[1] || "") + word + " " + yOut(m[3], ny);
-  }
-  /* Q1 2026 · Q3 (a bare quarter shifts only when the shift is whole quarters) */
-  if ((m = s0.match(/^([Qq])([1-4])(?:\s+(\d{2}|\d{4}))?$/))) {
-    if (by % 3 !== 0) return v;
-    var q = +m[2] - 1 + by / 3;
-    if (!m[3]) return m[1] + (((q % 4) + 4) % 4 + 1);
-    var qy = fullYear(m[3]) + Math.floor(q / 4);
-    return m[1] + (((q % 4) + 4) % 4 + 1) + " " + yOut(m[3], qy);
-  }
-  /* H1 2026 */
-  if ((m = s0.match(/^([Hh])([12])(?:\s+(\d{2}|\d{4}))?$/))) {
-    if (by % 6 !== 0) return v;
-    var h = +m[2] - 1 + by / 6;
-    if (!m[3]) return m[1] + (((h % 2) + 2) % 2 + 1);
-    var hy = fullYear(m[3]) + Math.floor(h / 2);
-    return m[1] + (((h % 2) + 2) % 2 + 1) + " " + yOut(m[3], hy);
-  }
-  /* 31 May 2026 — the day clamps to the month it lands in, because
-     31 November is not a date and losing the row's date to gain a correct
-     day count would be the wrong trade. */
-  if ((m = s0.match(/^(\d{1,2})\s+([A-Za-z]{3,9})\s+(\d{2}|\d{4})$/))) {
-    var mi2 = monthIndex(m[2]);
-    if (mi2 < 0) return v;
-    var t2 = fullYear(m[3]) * 12 + mi2 + by;
-    var nm2 = ((t2 % 12) + 12) % 12, ny2 = Math.floor(t2 / 12);
-    var maxDay = new Date(ny2, nm2 + 1, 0).getDate();
-    var day = Math.min(+m[1], maxDay);
-    var word2 = m[2].length > 3 ? MONTH_FULL[nm2] : MONTH_FULL[nm2].slice(0, 3);
-    return day + " " + word2 + " " + yOut(m[3], ny2);
-  }
-  return v;
-}
-
 function cycleYear(){
   var m = /(\d{4})/.exec(String(REVIEW.to || "") + " " + String(REVIEW.name || "") +
                          " " + String(REVIEW.due || ""));
@@ -4836,14 +4777,9 @@ function figuresSnapshot(){
     snap.groupCaps[c.id] = { perf:c.perf, exec:c.exec };
     (c.keyObjectives || []).forEach(function(x){ put(m, x, ["actual","progress","note"]); });
     (c.projects || []).forEach(function(p){
-      /* status/pct, NOT actual (§112): migration 024 deleted a deliverable's
-         `actual` and gave milestones a per-cent, and this snapshot was never
-         told — so every archive since the one-row shape stored `undefined`
-         for a deliverable and lost the milestone's number. §51.10's rule, in
-         the archive: when a field is renamed, find every writer. */
-      (p.deliverables || []).forEach(function(x){ put(m, x, ["status","pct","note"]); });
+      (p.deliverables || []).forEach(function(x){ put(m, x, ["actual","note"]); });
       (p.outcomes    || []).forEach(function(x){ put(m, x, ["actual","progress","note"]); });
-      (p.milestones  || []).forEach(function(x){ put(m, x, ["status","pct","note"]); });
+      (p.milestones  || []).forEach(function(x){ put(m, x, ["status","note"]); });
     });
     snap.caps[c.id] = m;
   });
@@ -4932,57 +4868,12 @@ function clearAllNotes(){
     });
   });
   (GROUP.keyObjectives || []).forEach(function(x){ x.note = ""; });
-  /* The capabilities left this function in §112 — their new-cycle behaviour
-     is a decision per PROJECT now, not a blanket clear, and it lives in
-     clearForNewCycle() where the cycle's own length is still readable. */
+  (GROUP.capabilities || []).forEach(function(c){ clearCapability(c, "nums"); });
 }
 
 /* Everything a new cycle asks again: the units' figures, the group's, the
    capabilities', the notes beneath them, and who had submitted. */
-/* ── WHAT A NEW CYCLE DOES TO A CAPABILITY (§112) ────────────────────────
-   Until §112 every project was wiped when a cycle opened — clearCapability's
-   "nums" pass, written before anyone had opened a second cycle on real data —
-   so the day H2 opened, a DELIVERED project's record would have been erased
-   and its Execution read as nought. That clear is now a decision each project
-   makes:
-
-   · a project marked `repeats: "cycle"` IS re-asked — figures archived (the
-     archive runs first, §49.1) and cleared, and every date it carries shifts
-     forward by the closed cycle's length, so the H2 run keeps H1's rhythm.
-     The pen can then adjust any date the new run does differently.
-   · an unmarked project KEEPS its figures and its notes — delivered is
-     delivered, and a note explaining a standing figure stands with it.
-
-   The capability's own key objectives clear every cycle regardless: they are
-   per-cycle figures, the function's KPIs, same as a unit's measures. */
-function capNewCycle(c, span){
-  (c.keyObjectives || []).forEach(function(m){ m.actual = ""; m.progress = null; m.note = ""; });
-  (c.projects || []).forEach(function(p){
-    if (p.repeats !== "cycle") return;
-    (p.deliverables || []).forEach(function(d){
-      d.status = null; d.pct = null; d.note = "";
-      if (d.due) d.due = shiftWhen(d.due, span);
-    });
-    (p.outcomes || []).forEach(function(o){
-      o.actual = null; o.progress = null; o.note = "";
-      if (o.measureAt) o.measureAt = shiftWhen(o.measureAt, span);
-    });
-    (p.milestones || []).forEach(function(m){
-      m.status = null; m.pct = null; m.note = "";
-      if (m.finish) m.finish = shiftWhen(m.finish, span);
-    });
-    if (p.start) p.start = shiftWhen(p.start, span);
-    if (p.end)   p.end   = shiftWhen(p.end, span);
-  });
-}
 function clearForNewCycle(){
-  /* Computed BEFORE anything clears, while REVIEW is still the cycle being
-     closed — the shell replaces REVIEW right after this returns. A cycle
-     whose dates the reader cannot parse shifts by six months, the cadence
-     this tenant runs. */
-  var a = monthsOf(REVIEW.from), b = monthsOf(REVIEW.to);
-  var span = (a != null && b != null && b >= a) ? (b - a + 1) : 6;
-  (GROUP.capabilities || []).forEach(function(c){ capNewCycle(c, span); });
   clearAllNumbers();
   clearAllNotes();
   REVIEW.note = {};

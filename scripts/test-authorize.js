@@ -843,6 +843,35 @@ console.log("\n10b · a function submits its report");
   check("...and may NOT submit another function's", !v.ok, "it was allowed");
 })();
 
+/* ── 10c · THE REPEATS MARK IS PLAN (§112) ──────────────────────────
+   `p.repeats` is a new field on a project row, so it classifies the way any
+   project change does — capPlan, the office's (§94). Both ends (§94.2): the
+   SMO may mark it, the function's own head may not, or the flag that decides
+   whether a whole run's figures are wiped each cycle would be the one plan
+   field a custodian could reach. */
+console.log("\n10c · the repeats mark is plan");
+(function () {
+  const FK = Object.keys(SEED.functions || {}).filter(function (k) {
+    return (SEED.functions[k] || {}).head;
+  })[0];
+  const cap = (SEED.group.capabilities || []).filter(function (c) {
+    return c.fn === FK && (c.projects || []).length;
+  })[0];
+  if (!FK || !cap) { check("the seed carries a function with a project", false); return; }
+  const mark = function () {
+    const base = clone(SEED), inc = clone(base);
+    const c = inc.group.capabilities.filter(function (x) { return x.id === cap.id; })[0];
+    c.projects[0].repeats = "cycle";
+    return { base: base, inc: inc };
+  };
+  let t = mark();
+  let v = A.authorize(t.base, t.inc, personOf(t.base, "smo"));
+  check("the SMO may mark a project as repeating", v.ok, v.refusals.join(" / "));
+  t = mark();
+  v = A.authorize(t.base, t.inc, personOf(t.base, SEED.functions[FK].head));
+  check("...and the function's own head may NOT", !v.ok, "it was allowed");
+})();
+
 console.log("\n11 · a row leaving the register");
 (function () {
   const victim = SEED.people.filter(function (p) {

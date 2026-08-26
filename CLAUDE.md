@@ -1210,6 +1210,37 @@ console errors (in this cloud environment, run it via a wrapper that points Play
   both rows stay aligned and the WORD is what clips, so that is asserted with a
   `Range` separately. Plan pane only; the other two panes still show no dates,
   flagged rather than assumed.
+  **THE PLAN PEN'S LAST THREE READ-ONLY FIELDS OPEN (§111):** a measure's
+  direction and compile rule, and a tactic's quarters — §31 closed them because
+  "they change what a figure MEANS", the right worry while the pen could fall
+  to the person measured, and §94 gave the pen to the office, so the reason
+  expired (§94.15's shape). The vocabulary is the Temple's own `selectOr`
+  options, never a second list (§53.5); **a stored value outside the list is
+  prepended rather than displayed wrong** (§96.2 from the display side); the
+  quarters are `qs()`'s own four marks as buttons, resolved by id (§48.2) —
+  and §42 had classified a quarter change as PLAN on the server four versions
+  before the screen could make one. `checks/plan-fields.py` presses all three
+  and reads the DATA back, both ends (§96, §94.2).
+  **A REPEATING PROJECT, AND THE CLEAR BECOMES A DECISION (§112):** Islam's CX
+  mystery shopping runs H1 and again H2 — same rows — and *"we don't want
+  things repeated in the same project."* The machinery existed POINTING THE
+  OTHER WAY: `clearCapability(c,"nums")` wiped EVERY project on every new
+  cycle (unseen — the live tenant is still in its first), so a DELIVERED
+  project's record would have been erased the day H2 opened. Now each project
+  decides: marked `repeats:"cycle"` → archived, cleared, **every date shifted
+  by the closed cycle's length** (`shiftWhen()`, `monthsOf()`'s mirror — one
+  writer, shape for shape, unreadable shapes returned UNCHANGED, 2-digit years
+  staying 2-digit, days clamping to the month they land in); unmarked →
+  **figures and notes kept, delivered is delivered**. The mark is a front
+  matter row behind the pen, drawn in read mode only when it says something;
+  No DELETES the key (§50.6); capPlan on the server, asserted both ends.
+  **AND THE ARCHIVE HAD BEEN QUIETLY INCOMPLETE SINCE MIGRATION 024** —
+  `figuresSnapshot` still stored a deliverable's deleted `actual` and never
+  took a milestone's `pct` (§51.10 in the archive). Fixed. 
+  `checks/repeat-project.py` FAILS ON THE PRE-§112 BUILD BY CONSTRUCTION and
+  was run against it to watch three failures before its green was believed;
+  it turns the cycle through the REAL close/open controls and their confirm
+  dialogs, and makes the state, because the demo has no repeating project.
   **STILL BROKEN AND DELIBERATELY NOT FIXED (§99.6):** `projPlanBody` defines
   `sortAttr()` and applies it to NEITHER table, so a project's drag grips are
   bound to nothing — §63's fault on the capability side. Flagged, not fixed:

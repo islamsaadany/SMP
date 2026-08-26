@@ -4622,22 +4622,6 @@
         paint();
       });
     });
-    /* THE QUARTER TOGGLES (§111). By id through listById, the same resolver
-       every other row control uses — and §42 has classified a quarter change
-       as PLAN on the server since before the screen could make one, so the
-       guard here matches the refusal there. */
-    document.querySelectorAll("[data-qtog]").forEach(function(b){
-      b.addEventListener("click", function(){
-        if (!mayEditPlan()) return;
-        var a = this.dataset.qtog.split("|"), id = a[0], q = +a[1];
-        var list = listById("tactics", id);
-        var t = (list || []).filter(function(x){ return x && x.id === id; })[0];
-        if (!t) return;
-        t["q" + q] = !t["q" + q];
-        paint();
-      });
-    });
-
     document.querySelectorAll("[data-rowoff]").forEach(function(b){
       b.addEventListener("click", function(){
         if (!mayEditPlan()) return;

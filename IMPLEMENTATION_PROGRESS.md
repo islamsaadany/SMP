@@ -54,6 +54,24 @@ Nothing proceeds past this line without an answer.
 
 ## Built and verified
 
+### v3.31 — the assistant (§103, §104), and a chat that vanished (§105)
+
+**§105 — reported from production.** *"I replied and the chat disappeared from
+all places."* Nothing was deleted: replying marks a conversation answered, the
+inbox opens on Waiting, and Waiting excludes answered ones — so replying
+removed the row from the list the office was looking at. Two correct decisions;
+nobody had asked what they do to each other.
+
+- **The conversation you have open is exempt from the filter**, and only that
+  one. Waiting still means Waiting.
+- **An empty list names where everything went** instead of being a dead end —
+  and the Flagged tab stops claiming there are no conversations when there are.
+- A handler that lit tabs by comparing nodes would have un-lit all three when
+  the new shortcut was pressed. Lit by value now.
+
+**Verified:** office-chat.py §9 ALL CLEAR, proved to fail (3 failures) with the
+exemption removed. Reproduced against a real database before and after.
+
 ### v3.31 — the assistant (§103, §104; spec 016)
 
 **§103 — the corpus.** 43 task recipes in `src/recipes.js`, as data, rendered

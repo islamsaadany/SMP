@@ -13445,3 +13445,91 @@ rather than composition.
 second string setting existed (`rep`), it would have stored `true` for whoever
 was chosen, silently, and the picker would then have shown nobody. **The type
 comes from the default now**, which cannot be forgotten.
+
+---
+
+## 105 · Replying made the conversation disappear (v3.31)
+
+> *"The chat was a user, he sent to me and I replied and the chat disappeared
+> from all places. Please evaluate the case to avoid this issue."*
+
+### 105.1 Nothing was deleted, and that was established before anything else
+
+The only `DELETE` in the whole chat API is the deliberate **drop this
+conversation**, gated to the Super user. A reply does exactly two things:
+inserts a message, and sets `waiting = false`.
+
+Reproduced against a real database, driving the real product:
+
+| | Waiting | All |
+|---|---|---|
+| The person sends | 1 row | 1 row |
+| The office replies | **0 rows** — *"Nobody is waiting. That is the good state."* | **1 row, intact** |
+| Leave the page and come back | **0 rows** | 1 row |
+
+The person's own panel had both messages throughout.
+
+### 105.2 The cause is two correct decisions meeting
+
+Replying marks a conversation **answered** — §71's rule, that the status you
+must remember to set is the one nobody sets, and it is right. The inbox opens
+on **Waiting**, which is the work queue and by definition excludes answered
+conversations — also right.
+
+**Together they mean the act of replying removes the row from the list you are
+looking at**, while its thread sits open beside it. And it stays gone, because
+the page always opens on Waiting: the only route back is the All tab, which
+nothing on the screen mentions.
+
+*Neither decision is wrong on its own. What was never asked is what they do to
+each other.*
+
+### 105.3 The one you have open never leaves the list
+
+**The filter is not changed and Waiting still means Waiting** — it has to, at
+thirty conversations. What was wrong is that it applied to the conversation you
+are *in*, so that one is exempt, and only that one.
+
+A search still hides it, deliberately: typing in the box is asking to see
+something else.
+
+### 105.4 An empty list says where everything went
+
+*"Nobody is waiting. That is the good state"* was true and was a dead end. It
+now names the count and offers the way back, so even somebody who loses track
+of a conversation is told where it is rather than left to know about a tab.
+
+**And the Flagged tab was saying something false** — *"No conversations yet"*
+when there are conversations and none of them is flagged. Found while
+reproducing the first fault, and it is the same shape of lie: **an empty state
+describes THIS filter, never the whole product.**
+
+### 105.5 The shortcut nearly un-lit every tab
+
+The new way-back button carries `data-chtab`, and the tab handler lit tabs by
+comparing **nodes** (`b === tab`) across every `[data-chtab]` in the page —
+fine while the only three were the tabs themselves. Pressing the shortcut would
+have lit the shortcut and un-lit all three tabs, leaving the row with nothing
+selected. **Lit by VALUE now, scoped to the tab row**, so a shortcut to a tab
+lights the tab.
+
+*A handler that compares identity is a handler that assumes it knows every
+element it will ever see.*
+
+### 105.6 What proves it
+
+`src/checks/office-chat.py` §9 asserts **both halves, because they fail at
+different moments**: the row you have open staying put (the reply itself), and
+an empty list naming where things went (coming back later, nothing selected).
+A check for only the first would pass on a build where the second is still a
+dead end. It also asserts **exactly one tab is lit**, which is §105.5.
+
+Proved able to fail before it was trusted: with the exemption removed, 3
+failures.
+
+**And the fix was measured as not working first.** The reproduction was re-run
+after the change and showed the identical failure — because `build.py` writes
+`src/strategy-management-platform.html` and the dev-server serves the shipped
+`strategy-management-platform-vX.Y.html`. **A fix tested against the wrong
+bytes looks exactly like a fix that does not work**, and the next move would
+have been to go looking for a second cause that was not there.

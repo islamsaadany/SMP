@@ -1135,6 +1135,32 @@ console errors (in this cloud environment, run it via a wrapper that points Play
   by `checks/office-chat.py` §6 (which passed for the wrong reason first — it
   pressed the bubble to open a panel that was already open, closing it) and by
   `scripts/test-chat.js`.
+- **THE CONVERSATION YOU HAVE OPEN NEVER LEAVES THE LIST (since v3.31, §105):**
+  Islam — *"I replied and the chat disappeared from all places."* **Nothing was
+  deleted** (the only DELETE is the Super user's drop): replying marks a
+  conversation ANSWERED (§71) and the inbox opens on WAITING, which excludes
+  answered ones — **so the act of replying removed the row from the list the
+  office was looking at**, while its thread sat open beside it, and it stayed
+  gone because the page always opens on Waiting. **TWO CORRECT DECISIONS
+  MEETING**: neither is wrong alone, and what was never asked is what they do
+  to each other. **THE FILTER IS NOT CHANGED** — Waiting has to mean Waiting at
+  thirty conversations — the conversation you are IN is exempt, and only that
+  one; a search still hides it, because typing is asking to see something else.
+  **AN EMPTY LIST SAYS WHERE EVERYTHING WENT**: *"Nobody is waiting"* was true
+  and was a dead end, and the Flagged tab was saying something FALSE (*"No
+  conversations yet"* with conversations present) — **an empty state describes
+  THIS filter, never the whole product**. **AND A HANDLER THAT COMPARES
+  IDENTITY ASSUMES IT KNOWS EVERY ELEMENT IT WILL EVER SEE**: the tab row lit
+  by `b === tab` across every `[data-chtab]`, so the new way-back shortcut
+  would have lit itself and un-lit all three tabs. Lit by VALUE now, scoped to
+  the tab row.
+- **A FIX TESTED AGAINST THE WRONG BYTES LOOKS EXACTLY LIKE A FIX THAT DOES NOT
+  WORK (§105.6):** `build.py` writes `src/strategy-management-platform.html`
+  and `scripts/dev-server.js` serves the shipped
+  `strategy-management-platform-vX.Y.html`. The §105 reproduction was re-run
+  after the change and showed the identical failure; the next move would have
+  been to hunt a second cause that was not there. **Copy the built file before
+  driving the dev-server**, every time.
 - **THE ASSISTANT ANSWERS FIRST, AND OFF IS THE DEFAULT (since v3.31, §104;
   spec 016):** Islam — *"I need a switch to turn off AI response and just keep
   it to the SMO inbox."* `CHAT_DEFAULTS.assistant` is **false**, and
@@ -1465,8 +1491,32 @@ prior sessions (on HR_ERP) accidentally reverted agreed-upon designs.
 
 ---
 
-*Last Updated: 2026-08-26 &mdash; **v3.31: the knowledge base gets its missing
-half (&sect;103) and the assistant answers first (&sect;104)**. Islam, mid-build:
+*Last Updated: 2026-08-26 &mdash; **v3.31: the assistant (&sect;103,
+&sect;104), and a chat that vanished (&sect;105)**. The last one came from
+production and is the one worth reading: *"the chat was a user, he sent to me
+and I replied and the chat disappeared from all places."* **NOTHING WAS
+DELETED**, and establishing that first is most of the work &mdash; the only
+DELETE in the whole chat API is the Super user's deliberate drop. What happened
+is **two correct decisions meeting**: replying marks a conversation ANSWERED
+(&sect;71's rule, that the status you must remember to set is the one nobody
+sets) and the inbox opens on WAITING, which is the work queue and by definition
+excludes answered ones. Neither is wrong alone. **Together they mean the act of
+replying removes the row from the list you are looking at**, while its thread
+sits open beside it &mdash; and it stays gone, because the page always opens on
+Waiting and nothing on the screen mentions the All tab. *What was never asked is
+what the two do to each other.* **THE FILTER IS NOT CHANGED**: the conversation
+you are IN is exempt and only that one, because Waiting has to keep meaning
+Waiting at thirty conversations. **AND AN EMPTY STATE DESCRIBES THIS FILTER,
+NEVER THE WHOLE PRODUCT** &mdash; *"Nobody is waiting"* was true and was a dead
+end, and the Flagged tab was flatly false, saying *"No conversations yet"* with
+conversations present. **THE FIX MEASURED AS NOT WORKING FIRST**, and that is
+its own lesson: `build.py` writes into `src/` and the dev-server serves the
+shipped versioned file, so the reproduction re-ran against the OLD BYTES and
+showed the identical failure. A fix tested against the wrong bytes looks exactly
+like a fix that does not work, and the next move would have been to hunt a
+second cause that was not there.
+
+*Earlier the same day: **&sect;103 and &sect;104, the assistant**. Islam, mid-build:
 *"I need a switch to turn off AI response and just keep it to the SMO inbox"*
 &mdash; which was already the design and is now the DEFAULT, because the chat's
 four existing settings ship on to describe a chat that already worked and this

@@ -1170,6 +1170,31 @@ console errors (in this cloud environment, run it via a wrapper that points Play
   pane since §104.8 and naming a bad one would send somebody after a control
   that is not there (§61). **Resolved THERE, never here** — a plan is the
   client's. **Still not run: migration 024 against a real Postgres.**
+  **A PROJECT'S FRONT MATTER, AND IT IS NOT A `<TABLE>` (§107):** `start` and
+  `end` were stored and shown in **exactly one place in the product — the
+  review deck** — so the page that AUTHORS a project could not say when it
+  runs. One box, divided: owner · start · end down the left, brief and
+  stakeholders as two rows on the right. **A grid of rows, deliberately**: the
+  platform sets a global `table { min-width:620px }` so its data tables never
+  squash, which makes any small table **overflow its own grid track by 300px** —
+  the grid column measured 320px the whole time, and it was found by asking
+  `document.styleSheets` what the browser holds (§93.11), not by reading the
+  cascade. **BOTH VALUE COLUMNS START AT ONE X** because each column's label
+  track is sized to ITS OWN longest label (96px right, 64px left); one width
+  would clip *Stakeholders* or waste 40px beside *Owner*. And **a pill's
+  leading margin is right in a sentence and wrong as the first thing in a
+  cell** — pulled back in `.pfval` only. **THE TIMELINE PILL IS GONE**: it once
+  decided how every date was read, §104 ended that, and its one remaining
+  effect was to SUPPRESS a true overrun warning on a "By quarter" project whose
+  end date is a date; the field and the template are untouched, and the guard
+  is a separate decision. **THE CHECK ASSERTS THE TWO THINGS NOTHING ELSE
+  WOULD** — that the alignment holds at three widths in both themes (an `auto`
+  track reproduces the exact fault: 627 vs 687), and that **the five fields
+  WRITE** (§96: an editor wired to nothing looks identical and discards every
+  keystroke). **A LABEL WIDER THAN ITS TRACK DOES NOT MOVE THE VALUE COLUMN** —
+  both rows stay aligned and the WORD is what clips, so that is asserted with a
+  `Range` separately. Plan pane only; the other two panes still show no dates,
+  flagged rather than assumed.
   **STILL BROKEN AND DELIBERATELY NOT FIXED (§99.6):** `projPlanBody` defines
   `sortAttr()` and applies it to NEITHER table, so a project's drag grips are
   bound to nothing — §63's fault on the capability side. Flagged, not fixed:

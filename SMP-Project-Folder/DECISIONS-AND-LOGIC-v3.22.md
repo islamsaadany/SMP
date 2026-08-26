@@ -13806,3 +13806,80 @@ nothing should be: a plan is the client's.
 by construction and the *formula* parity is asserted, but the SQL itself has
 not been executed against a live schema in this session. That is the one thing
 between here and a safe merge.
+
+## 107 · A project's front matter (v3.32)
+
+Islam: *"any project needs 3 things at its starting part which are the brief,
+stakeholders, start and end date. and we can structure it in a well designed
+table at the start of the project."*
+
+### 107.1 The start and end were stored and shown nowhere
+
+Not a layout preference — a gap. `p.start` and `p.end` have existed since the
+capability model did, and they appeared in **exactly one place in the whole
+product: the review deck**. Neither the plan pane, nor Performance, nor
+Reporting showed when a project runs, so **the one page that authors a project
+could not tell you its dates**. The overrun note was the only thing that
+mentioned the end date, and only when a milestone overshot it.
+
+### 107.2 One box, divided — and deliberately not a `<table>`
+
+Settled from a mockup made of the **real platform** (§96.6's method: the header
+block replaced in the running page, so both sides are the same build), over two
+earlier arrangements. A facts strip across the top was drawn first and killed by
+measuring it at 1000px: its cells wrap, a cell's height is the row's height, and
+the strip grew to **three lines** — §88's complaint arriving somewhere new.
+
+**It is a grid of rows, not a table, and that is load-bearing.** The platform
+sets a global `table { min-width: 620px }` so its data tables never squash —
+right for those, and it makes any small table **overflow its own grid track by
+300px**. Islam caught it in the first drawing (*"the table on the right is out
+of the screen"*); the grid column measured 320px the whole time. Found by asking
+`document.styleSheets` which rules the browser actually holds for the element
+(§93.11), not by reading the cascade. A grid of rows inherits none of it.
+
+**BOTH VALUE COLUMNS START AT ONE X.** *"Make sure the start of the brief
+description aligns with the start of the pills"* — so the right column's label
+track is sized to the longest label **there** (96px) and the left's to the
+longest label **there** (64px). A single width would either clip *Stakeholders*
+or waste 40px beside *Owner*. And **a pill carries a leading margin**, which is
+right inside a sentence and wrong as the first thing in a cell: `.pfval` pulls
+it back so the chip's border lines up with the brief's first letter.
+
+### 107.3 The Timeline pill is gone, and the answer is why
+
+Islam: *"what is the Timeline box is for?"* Almost nothing, as it turned out.
+`p.timeline` records whether a project's dates were planned as dates or as
+quarters. It **used** to decide how every date on the project was read; §104
+ended that, because either form is right on any row. Today it gates exactly one
+thing — whether `projOverruns()` runs — and even that is nearly redundant, since
+the function needs two parseable dates and returns `[]` without them. **Its one
+remaining effect is to suppress a true overrun warning** on a project marked
+*By quarter* whose end date happens to be a real date.
+
+So the pill goes: it is not a fact anybody acts on. **The field is untouched**
+in the data and on the import template, and whether that guard should go is
+recorded as a separate decision rather than taken inside a header redesign.
+
+### 107.4 What the check asserts that nothing else would
+
+`src/checks/project-header.py`, and both of its halves were proved able to fail
+before being trusted:
+
+* **The alignment is the ask**, so it is measured — at 1500 / 1280 / 1000 in
+  both themes, on the value box rather than the text, because a pill's padding
+  sits inside it and is not the alignment. Reverting the label track to `auto`
+  reproduces exactly the fault Islam saw: 627 against 687.
+* **A label wider than its track does not move the value column.** Both rows
+  stay aligned with each other and the *word* is what gets clipped, silently —
+  the first reversion passed every alignment assertion while *Stakeholders* was
+  cut off. Measured with a `Range` against the `<em>` box.
+* **The five fields must WRITE** (§96). An editor drawn and wired to nothing
+  looks identical, accepts every keystroke and discards it on the next repaint;
+  each field is typed into, read back **out of the data**, and then survives a
+  `paint()`. Wiring `Start` to a bare `<input>` fails it twice.
+
+**Still on the plan pane only.** Performance and Reporting show no dates, which
+is the same gap in two more places — flagged rather than assumed, because
+putting a brief and a stakeholder list on a pane that exists for figures is a
+decision, not a tidy-up.

@@ -100,7 +100,7 @@
    checks, and on this branch main moved 56 commits inside one such window.
    A worker caches by NAME, so the same string on both sides conflicts on
    nothing while the bytes behind it differ (§94.12). */
-const SHELL = "smp-shell-v3.38";
+const SHELL = "smp-shell-v3.39";
 const ASSETS = [
   "/",
   "/index.html",

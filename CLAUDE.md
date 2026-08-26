@@ -2021,9 +2021,13 @@ closing slide, and the overview's download (&sect;123)**. Three more from using
 the plan download on a plan still being filled in. **A tactic with NO quarter
 at all is a gap** &mdash; &sect;119.1 was right to leave a single blank quarter
 alone (a tactic marked Q2 and Q3 is saying something by leaving Q1 and Q4
-empty), and that reasoning never covered a row that answered nothing; it is
-**one Missing merged across the four columns**, never four, because the gap is
-one unanswered question and four alarms make a half-filled plan unreadable.
+empty), and that reasoning never covered a row that answered nothing; the four columns
+stay exactly as they are and **all four ticks go bold red** instead. The first
+answer merged one `Missing` across them and Islam turned it down &mdash;
+*"the template should stay the same"* &mdash; and he is right: the four columns
+are the workbook's shape, a table whose cells merge when a row is incomplete
+cannot be scanned down a column, and the alarm had been allowed to reshape the
+thing it was annotating (&sect;116.4's fault in a table).
 **The deck closes on Thank you**, which is `present.js`'s own last slide
 (&sect;53.5: two decks of the same plan should have the same manners). **And
 the Function overview carries the download too** &mdash; a capability

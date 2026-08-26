@@ -17975,17 +17975,15 @@ function pptxTable(id, box, widths, head, rows){
     /* A cell is a string, or an object: `{miss:true}` renders the bold red
        Missing (§119); `{t, align}` carries a mark that wants centring. */
     var o = (c !== null && typeof c === "object") ? c : { t: c };
-    var runOpts = hdr    ? { sz:1100, b:true, color:C.ground }
-                : o.miss ? { sz:1100, b:true, color:C.bad }
-                :          { sz:1100, color:C.ink };
-    /* `span` opens a cell across the columns after it and `merged` is each of
-       those columns saying "I am the one before me" — the pair DrawingML needs
-       for a merged run, and what lets one Missing sit across Q1–Q4 rather than
-       being printed four times (§119.7). */
-    if (o.merged) return '<a:tc hMerge="1"><a:txBody><a:bodyPr/><a:lstStyle/>' +
-      pptxPara(pptxRun("", { sz:1100 })) + '</a:txBody><a:tcPr/></a:tc>';
-    return '<a:tc' + (o.span ? ' gridSpan="' + o.span + '"' : '') +
-      '><a:txBody><a:bodyPr/><a:lstStyle/>' +
+    /* Three weights: the header, a GAP (the word Missing), and an ordinary
+       value — plus `alarm`, which is an ordinary value wearing the gap's
+       colour, for a mark that says something is owed without being a word
+       (§123.1: the quarter ticks). */
+    var runOpts = hdr     ? { sz:1100, b:true, color:C.ground }
+                : o.miss  ? { sz:1100, b:true, color:C.bad }
+                : o.alarm ? { sz:1100, b:true, color:C.bad }
+                :           { sz:1100, color:C.ink };
+    return '<a:tc><a:txBody><a:bodyPr/><a:lstStyle/>' +
       pptxPara(pptxRun(o.miss ? "Missing" : (o.t == null ? "" : o.t), runOpts),
                o.align ? { align: o.align } : undefined) +
       '</a:txBody><a:tcPr marL="72000" marR="72000" marT="36000" marB="36000">' +
@@ -18060,18 +18058,31 @@ function pptxTableSlides(kicker, title, widths, head, rows){
    the tactics columns a column for each Q with a mark for the qs in action",
    the shape the plan workbook's Q1–Q4 columns already have). */
 function pptxQCells(t){
-  /* AN UNTICKED QUARTER IS THE MARK; NO QUARTER AT ALL IS A GAP (§119.7).
-     Islam, seeing four empty columns beside a Missing owner: "in the tactics
-     slide, Qs are missing as well." §119.1 deliberately left a blank quarter
-     alone and that is still right — a tactic that runs in Q2 and Q3 is saying
-     something about Q1 and Q4 by leaving them empty. What it cannot mean is
-     ALL FOUR empty: nobody has said when this runs at all, which is exactly
-     what the plan owes. One Missing across the four, never four of them: the
-     gap is one fact, and printing it four times makes a row of alarm out of a
-     single unanswered question. */
+  /* AN UNTICKED QUARTER IS THE MARK; NO QUARTER AT ALL IS A GAP (§123.1,
+     corrected by Islam the same day).
+
+     §123 first answered this by merging one bold red `Missing` across the
+     four columns. Islam: "you changed the quarters columns format to type
+     missing that's wrong, the template should stay the same — revert the
+     columns of the quarters to separate columns and maybe make check marks in
+     bold red inside all as an indicator of missing."
+
+     THE COLUMN SHAPE IS THE TEMPLATE'S AND IS NOT MINE TO SPEND. The four Q
+     columns exist because the plan workbook has four, and a reader moves
+     between the two; a table that keeps its grid on every row can be scanned
+     down, and one whose cells merge when a row is incomplete cannot. Saying
+     the gap cost the shape that carries every other row — a bad trade, and
+     the mark can carry the alarm on its own.
+
+     SO THE MARK CHANGES COLOUR RATHER THAN THE TABLE CHANGING SHAPE: all four
+     quarters ticked in bold red says "this runs everywhere" in the one colour
+     the deck uses for nothing but a gap, beside a Missing owner in the same
+     red. §119.1 is untouched — a tactic that names SOME quarters is answering
+     the question, and its ticks stay the ordinary ink. */
   var any = ["q1","q2","q3","q4"].some(function(q){ return t[q]; });
-  if (!any) return [{ miss:true, align:"ctr", span:4 },
-                    { merged:true }, { merged:true }, { merged:true }];
+  if (!any) return ["q1","q2","q3","q4"].map(function(){
+    return { t:"\u2713", align:"ctr", alarm:true };
+  });
   return ["q1","q2","q3","q4"].map(function(q){
     return { t: t[q] ? "\u2713" : "", align: "ctr" };
   });

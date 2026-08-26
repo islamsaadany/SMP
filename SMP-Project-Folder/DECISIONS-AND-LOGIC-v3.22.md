@@ -16268,12 +16268,26 @@ said when this runs at all, and that is a fact the plan owes exactly like a
 missing owner. The rule is therefore not "flag an empty cell" but "flag a row
 that answered nothing".
 
-**ONE MISSING ACROSS THE FOUR, NEVER FOUR OF THEM.** The gap is a single
-unanswered question; printing it once per column turns one omission into a
-row of alarm and makes a half-filled plan unreadable. It is a real merged
-cell — `gridSpan="4"` on the first and `hMerge="1"` on the other three, the
-pair DrawingML needs — so it centres across the block the way a person would
-draw it.
+**THE FIRST ANSWER WAS WRONG AND IS RECORDED AS SUCH.** It merged one bold
+red `Missing` across the four columns — `gridSpan` on the first cell,
+`hMerge` on the other three. Islam: *"you changed the quarters columns format
+to type missing that's wrong, the template should stay the same — revert the
+columns of the quarters to separate columns and maybe make check marks in
+bold red inside all as an indicator of missing."*
+
+**THE COLUMN SHAPE IS THE TEMPLATE'S AND WAS NOT MINE TO SPEND.** The four Q
+columns exist because the plan workbook has four and a reader moves between
+the two; a table that keeps its grid on every row can be scanned down a
+column, and one whose cells merge whenever a row is incomplete cannot — so
+the merge cost the structure that carries every OTHER row in order to say
+one thing about this one. The same fault as putting a sentence where a mark
+belongs (§116.4): the alarm was allowed to reshape what it was annotating.
+
+**SO THE MARK CHANGES COLOUR AND THE TABLE DOES NOT CHANGE SHAPE**: all four
+quarters ticked in bold red, the one colour this deck uses for nothing but a
+gap, beside a Missing owner in that same red. It reads as "no answer here"
+without a word and without a merged cell. `gridSpan`, `hMerge` and the
+`merged` cell type are DELETED rather than left unused (§24).
 
 ### 123.2 The deck closes on Thank you
 
@@ -16311,8 +16325,8 @@ who may not author the overview may still take it away.
 
 `checks/strategy-split.py` §5 makes the state (a pillar whose tactics lose
 their quarters, with ONE tactic keeping a quarter so both halves are
-measured), reads the merged cell's `gridSpan`/`hMerge` attributes rather than
-its text alone, asserts the last slide of both decks is the Thank you, and
+measured), asserts every row keeps its four columns and NOTHING is merged, reads the
+ticks' colour and weight rather than their text, asserts the last slide of both decks is the Thank you, and
 **presses** the overview's button with an `elementFromPoint` hit test before
 downloading through it. Proved able to fail three ways (3 / 3 / 1).
 

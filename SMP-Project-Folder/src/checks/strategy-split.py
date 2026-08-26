@@ -409,21 +409,41 @@ with sync_playwright() as p:
                 for tr in list(tbl.iter(A + "tr"))[1:]:
                     tcs = list(tr.iter(A + "tc"))
                     qs = tcs[-4:]
+                    texts = ["".join(t.text or "" for t in c.iter(A + "t")) for c in qs]
+                    def red(c):
+                        clr = c.find(".//" + A + "rPr/" + A + "solidFill/" + A + "srgbClr")
+                        return clr is not None and clr.get("val") == "B04434"
+                    def bold(c):
+                        pr = c.find(".//" + A + "rPr")
+                        return pr is not None and pr.get("b") == "1"
                     rows.append({
-                        "text": "".join(t.text or "" for t in qs[0].iter(A + "t")),
+                        "cells": len(qs),
+                        "texts": texts,
+                        "reds": sum(1 for c in qs if red(c)),
+                        "bolds": sum(1 for c in qs if bold(c)),
+                        "alarm": sum(1 for c in qs if red(c)) == 4,
                         "span": qs[0].get("gridSpan"),
                         "merged": [c.get("hMerge") for c in qs[1:]] })
             break
         ck("the tactics table was found", len(rows) > 0, len(rows))
-        gapped = [r for r in rows if r["text"] == "Missing"]
-        ck("every tactic with no quarter says Missing", len(gapped) == len(rows) - 1,
-           (len(gapped), len(rows)))
-        ck("...ONCE, merged across the four columns, not four times",
-           all(r["span"] == "4" and r["merged"] == ["1", "1", "1"] for r in gapped),
-           gapped[:2])
-        # THE OTHER HALF: a tactic that DOES name a quarter is left alone.
-        kept = [r for r in rows if r["text"] != "Missing"]
+        # THE TEMPLATE'S SHAPE IS NOT SPENT ON SAYING THE GAP (§123.1, Islam's
+        # correction): four separate columns on EVERY row, no merged cell ever.
+        ck("every row keeps all four quarter columns",
+           all(r["cells"] == 4 for r in rows), [r["cells"] for r in rows])
+        ck("...and nothing is merged", all(not r["span"] and not any(r["merged"])
+                                           for r in rows), rows[:2])
+        gapped = [r for r in rows if r["alarm"]]
+        ck("a tactic with no quarter is ticked in all four",
+           all(r["texts"] == ["\u2713"] * 4 for r in gapped), gapped[:2])
+        ck("...in bold red, the colour the deck keeps for a gap",
+           all(r["reds"] == 4 and r["bolds"] == 4 for r in gapped), gapped[:2])
+        ck("...and that is every tactic but the one that names a quarter",
+           len(gapped) == len(rows) - 1, (len(gapped), len(rows)))
+        # THE OTHER HALF, or a build that painted every tick red would pass.
+        kept = [r for r in rows if not r["alarm"]]
         ck("a tactic that names a quarter is not flagged", len(kept) == 1, kept)
+        ck("...its tick is the ordinary ink, and only the named quarter carries one",
+           all(r["reds"] == 0 and r["texts"].count("\u2713") < 4 for r in kept), kept)
 
         # THE DECK CLOSES ON THANK YOU (§119.8).
         last = slidenames(z)[-1]

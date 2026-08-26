@@ -67,8 +67,9 @@ Nothing proceeds past this line without an answer.
 
 ### v3.46 — the deck's last gaps, and the overview's download (§123)
 
-- **A tactic that names no quarter is marked Missing**, once, merged across
-  Q1–Q4. A tactic that names some quarters is left alone, as before.
+- **A tactic that names no quarter is ticked in bold red in all four**
+  quarter columns — the template's four columns are untouched and nothing is
+  merged. A tactic that names some quarters is left alone, as before.
 - **Every plan deck ends on a Thank you slide**, matching the review deck.
 - **The Function overview carries the download**, beside Edit — the other half
   of a capability function's strategy tab had no way to take the plan away.

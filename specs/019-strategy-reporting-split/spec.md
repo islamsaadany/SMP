@@ -76,9 +76,10 @@ From using it, the day it shipped:
 
 ## 5 · Follow-ups, §123 (v3.46)
 
-6. **A tactic with no quarter at all** is marked Missing, once, merged across
-   the four columns; a tactic that names some quarters is untouched (§119.1
-   stands).
+6. **A tactic with no quarter at all** is ticked in **bold red in all four**
+   quarter columns; the four columns keep the template's shape and nothing is
+   merged. A tactic that names some quarters is untouched (§119.1 stands).
+   The first build merged one `Missing` across the four and was turned down.
 7. **Every plan deck closes on a Thank you slide**, the shape `present.js`
    already ends on.
 8. **The Function overview carries the download too** — the other section of a

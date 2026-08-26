@@ -2634,26 +2634,7 @@ var CYCLE = {
   }
 };
 
-/* ── THE FEATURE'S SWITCH, ASKED IN ONE PLACE (§102) ───────────────
-   Seven surfaces read focus — the mark beside a measure, the highlighted row
-   on two tables, the unit's tally, the Focus board — and every one of them
-   goes through isFocus(). So "off means it disappears across the platform"
-   (Islam) is one gate here rather than seven conditions that drift apart.
-
-   focusMarked() IS THE RAW MAP and exists for exactly one caller: the Focus
-   measures page's own ticks, which must keep showing what is stored while the
-   feature is off, or the page would look emptied and turning it back on would
-   look like it had lost everything. Nothing else may use it. */
-function focusOn(){ return SMPRules.focusOn(world()); }
-function focusMarked(id){ return !!CYCLE.focus[id]; }
-function isFocus(id){ return focusOn() && focusMarked(id); }
-
-/* Writing it. A value put back to its default deletes its key (§50.6), so a
-   tenant that has never been asked and one that turned it off and on again are
-   byte-identical — otherwise every save afterwards carries a phantom change. */
-function setFocusOn(on){
-  if (on) delete GROUP.focusOff; else GROUP.focusOff = true;
-}
+function isFocus(id){ return !!CYCLE.focus[id]; }
 function toggleFocus(id){
   if (CYCLE.locked) return false;
   if (CYCLE.focus[id]) delete CYCLE.focus[id]; else CYCLE.focus[id] = true;

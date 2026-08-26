@@ -54,7 +54,30 @@ Nothing proceeds past this line without an answer.
 
 ## Built and verified
 
-### v3.30 — reordering comes back, as its own grant (§101)
+### v3.30 — reordering comes back (§101), and focus gets a switch (§102)
+
+Two small independent changes, both agreed in words first.
+
+**§101 — reordering comes back**, reversing §94.3. `mayArrange()` is a separate
+rule, not a widening of the authoring gate: the plan's order is the unit's, its
+words stay the office's. BU owner, strategy custodian, function head; never a
+contributor. `lib/authorize.js` learned to tell a reorder from a rewrite. The
+control is up-down arrows in the pen's slot — Islam's pick over the grip mark.
+
+**§102 — focus measures get a switch.** Off hides every surface and keeps every
+mark; on restores them. Stored as an absence (`GROUP.focusOff`), so an unasked
+tenant and one switched off and on again are byte-identical. The switch is the
+SMO's alone while marking stays the CEO's, and the page carrying it survives
+being switched off (§61).
+
+**The bug worth remembering:** the switch was wired, the rule was written, and
+flipping it did nothing — `worldOf()` and `W()` are **two allow-lists, one
+behind the other**, and a group key must be named in both. Silent, and in the
+safe-looking direction. Found by driving the page.
+
+**Verified:** test-authorize 165 → **190, 0 failed** · new
+`src/checks/plan-arrange.py` and `src/checks/focus-switch.py` **ALL CLEAR** ·
+qa.py clean · all four failure modes proved to fail before being trusted.
 
 Islam is giving arrangement back to unit people, reversing §94.3.
 

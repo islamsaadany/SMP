@@ -13155,3 +13155,90 @@ assertion would pass if `arrange` were classified as something nothing guards
 **Both failure modes were proved to fail before being trusted**: with
 `mayArrange` forced false, 6 failures; with `reordered()` forced false — the
 §94.3 state exactly — 5.
+
+---
+
+## 102 · Focus measures get a switch (v3.30)
+
+> *"For the focus measures case, give me the option to turn off in the product
+> settings in general to verify with the CEO later, and off means it disappears
+> across the platform."* — and, asked whether off should also forget: *"off and
+> on brings back history yes."*
+
+### 102.1 It hides; it never deletes
+
+`cycle.focus` keeps every mark while the feature is off, and turning it back on
+restores the lot. **§44's rule for the third time: a switch that destroys data
+is not a switch, it is a delete with a friendly label.** Measured rather than
+asserted — 9 marks stored, 0 drawn while off, 9 drawn again after.
+
+**Stored as an absence.** `GROUP.focusOff` exists only while the feature is off,
+so *on* is what a tenant that has never been asked already has, and turning it
+back on **deletes** the key rather than writing `false` (§50.6 — a reader that
+creates what it looked for puts a phantom change into every save). Only `true`
+switches it off, so a stale `false` from anywhere cannot hide the feature.
+
+**Named `focusOff`, not `focus`**, because `CYCLE.focus` is the marks map one
+level away, and two things called focus is exactly how §87's twins get made.
+
+### 102.2 One gate, because there was already one chokepoint
+
+Seven surfaces read focus — the mark beside a measure, the highlighted row on
+two tables, the unit's tally, the Focus board — and every one of them goes
+through **`isFocus()`**. So *"off means it disappears across the platform"* is
+one condition there, not seven that drift apart.
+
+**`focusMarked()` is the raw map and has exactly one caller**: the Focus
+measures page's own ticks, which must keep showing what is stored while the
+feature is off — otherwise the page would look emptied and turning it back on
+would look like recovering from a loss rather than lifting a curtain.
+
+### 102.3 The switch is not a bigger version of a mark
+
+Marking a measure is **the CEO's and the SMO's** (§37). Turning the whole
+feature off is **the SMO's alone**, classified `setup` beside `naming` — a CEO
+who may mark a measure must not be able to remove the feature for the tenant,
+and a switch anybody could flip would be no switch at all. Asserted as a pair,
+because the fault this guards against is the switch quietly inheriting the
+marks' permission.
+
+**And the page carrying the switch stays reachable while it is off** — §61's
+trap exactly: if turning focus off removed the page with the switch on it, the
+only way back on would be to turn it on first. The switch sits on the page it
+governs (§90's shape, §98's row), never behind a Setup page of its own (§32).
+
+### 102.4 The world is TWO allow-lists, one behind the other
+
+**The bug worth the whole section.** `focusOn()` read the setting, the page was
+wired, the writer worked — and switching it off changed nothing at all.
+
+`worldOf()` does not pass the group through; it **lifts named keys off it**
+(`sets`, `claims`, `naming`), and `W()` behind it **names the keys it keeps**.
+So a group setting has to be added in **both**, and forgetting either fails
+**silently and in the safe-looking direction**: the reader sees `undefined` and
+answers the default, which for a switch means *on*. Nothing throws, the page
+renders, and the control does nothing.
+
+**§44 recorded this once already** — *"the browser's `world()` carried `sets`
+but not `claims`, so the page answered from a world with no requests in it"* —
+and it arrived here by a different road: not a client/server difference this
+time, but two filters in the same function, in the same file, on the same
+object. **Found by driving the real page**, not by reading; the unit tests would
+have passed either way, because they build worlds by hand.
+
+### 102.5 What proves it
+
+`src/checks/focus-switch.py` asserts the three things that fail differently:
+**every surface goes dark** (not just the mark a narrower check would look
+for), **every mark survives** as a counted number before and after, and **the
+page carrying the switch survives being switched off**, with the switch
+*pressable* rather than merely present (§70, §93.4).
+
+`scripts/test-authorize.js` section 14 asserts the pair — the SMO may flip it,
+the CEO may not, and **the CEO may still mark**, because locking something down
+proves nothing unless the right thing stayed open. It also asks the classifier
+directly, since every other assertion would pass if the switch were classified
+as something nothing guards (§94.5). 181 → 190.
+
+**Both failure modes proved to fail first**: `focusOn()` forced true, 1 failure;
+the switch left unclassified, 3.

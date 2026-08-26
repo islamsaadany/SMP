@@ -1746,6 +1746,12 @@
     wireImport();
     var lc = document.querySelector("[data-lockcycle]");
     if (lc) lc.addEventListener("click", function(){ CYCLE.locked = !CYCLE.locked; paint(); });
+    /* The focus feature's switch (§102). `this`, never a closure over the
+       element, for the reason stated three lines down. */
+    var fsw = document.querySelector("[data-focusswitch]");
+    if (fsw) fsw.addEventListener("click", function(){
+      setFocusOn(this.dataset.focusswitch === "1"); paint();
+    });
     /* `this`, NOT A CLOSURE OVER THE ELEMENT. Reading it back off the button
        that was clicked cannot go stale, and cannot be captured by whatever
        else happens to be in this scope — see the note on `pfile` below. */

@@ -2960,6 +2960,32 @@ function renderBandsExtra(){
    against the number rather than the name alone. */
 var FSET = { unit:"mobile" };
 
+/* THE SWITCH LIVES ON THE PAGE IT GOVERNS (§102), which is §90's shape and
+   §98's row: five chat settings went into a dropdown on the Messages page
+   rather than a Setup page of their own, because a switch behind its own rail
+   entry is a door behind a door (§32).
+
+   AND THE PAGE STAYS REACHABLE WHILE IT IS OFF. §61's trap, exactly: if
+   turning focus off removed the page that carries the switch, the only way to
+   turn it back on would be to turn it on first. So the page always renders,
+   and while off it says what is being kept. */
+function focusSwitch(){
+  var on = focusOn();
+  var marks = Object.keys(CYCLE.focus || {}).length;
+  if (!inOffice()) {
+    return on ? '' : '<div class="note">Focus measures are switched off for this ' +
+      'platform. The Strategy Office can turn them back on.</div>';
+  }
+  return '<div class="phead2"><div class="hright">' +
+    '<button class="editbtn' + (on ? ' on' : '') + '" data-focusswitch="' + (on ? "0" : "1") + '">' +
+      (on ? "Focus measures are on" : "Focus measures are off") + '</button>' +
+    '</div></div>' +
+    (on ? '' : '<div class="note">Nothing is shown anywhere in the platform, and ' +
+      '<b>' + marks + ' ' + plural(marks, "mark") + '</b> ' +
+      (marks === 1 ? "is" : "are") + ' being kept. Turning it back on restores ' +
+      (marks === 1 ? "it" : "them") + '.</div>');
+}
+
 function renderFocusSetup(){
   /* Marking is the CEO's and the SMO's — a rule now, not a cell (§37).
      mayMarkFocus() carries the lock too, so there is one gate, not two. */
@@ -2967,7 +2993,7 @@ function renderFocusSetup(){
   var u = UNITS[FSET.unit];
 
   var pick = function(m, src){
-    var on = isFocus(m.id);
+    var on = focusMarked(m.id);   /* the RAW map, never isFocus (§102) */
     return '<div class="pick ' + (on ? "on" : "off") + '">' +
       (editable
         ? '<button class="fmark-btn' + (on ? ' on' : '') + '" data-focus="' + m.id + '" ' +
@@ -3002,7 +3028,8 @@ function renderFocusSetup(){
         esc(UNITS[k].name) + (c ? "  \u2014 " + c + " marked" : "") + '</option>';
     }).join("") + '</select>';
 
-  return '<div class="kv"><span class="pill kind">CEO &amp; SMO</span>' +
+  return focusSwitch() +
+    '<div class="kv"><span class="pill kind">CEO &amp; SMO</span>' +
       '<span class="pill ' + (CYCLE.locked ? "none" : "good") + '">' +
         (CYCLE.locked ? "Locked for the cycle" : "Open for marking") + '</span>' +
       '<span class="pill kind">reward begins at ' + CYCLE.rewardAt + '%</span></div>' +

@@ -1135,6 +1135,34 @@ console errors (in this cloud environment, run it via a wrapper that points Play
   by `checks/office-chat.py` §6 (which passed for the wrong reason first — it
   pressed the bubble to open a panel that was already open, closing it) and by
   `scripts/test-chat.js`.
+- **THE WORLD IS TWO ALLOW-LISTS, ONE BEHIND THE OTHER (§102.4):**
+  `worldOf()` does not pass the group through — it **lifts named keys off it**
+  (`sets`, `claims`, `naming`, `focusOff`) — and **`W()` behind it names the
+  keys it keeps**. A group setting must be added in **BOTH**, in the same edit
+  as the rule that reads it, and forgetting either fails **silently and in the
+  safe-looking direction**: the reader sees `undefined` and answers the
+  default, which for a switch means *on*. Nothing throws, the page renders, the
+  control does nothing. §44 recorded this once as a client/server difference;
+  this was two filters in the same function on the same object, and only
+  driving the real page found it — unit tests build worlds by hand and pass
+  either way.
+- **FOCUS MEASURES HAVE A SWITCH, AND IT HIDES RATHER THAN FORGETS (since
+  v3.30, §102):** Islam — *"off means it disappears across the platform"*, and
+  *"off and on brings back history yes"*. `cycle.focus` keeps every mark (§44,
+  third time: a switch that destroys data is a delete with a friendly label).
+  **Stored as an ABSENCE** — `GROUP.focusOff` exists only while off, so *on* is
+  what an unasked tenant already has and turning it back on DELETES the key
+  (§50.6); only `true` switches off, so a stale `false` cannot hide it. **Named
+  `focusOff`, never `focus`**, because `CYCLE.focus` is the marks map one level
+  away (§87's twins). **ONE GATE, because there was already one chokepoint**:
+  seven surfaces read focus and all seven go through `isFocus()`.
+  **`focusMarked()` is the RAW map with exactly one caller** — the Focus
+  measures page's own ticks, or turning it off would look like losing them.
+  **THE SWITCH IS NOT A BIGGER MARK**: marking is the CEO's and the SMO's
+  (§37), the switch is the SMO's alone, classified `setup` beside `naming` —
+  asserted as a PAIR, because locking something down proves nothing unless the
+  right thing stayed open. **And the page carrying it stays reachable while it
+  is off** (§61's trap: otherwise the only way back on is to turn it on first).
 - **REORDERING IS THE UNIT'S, THE WORDS ARE THE OFFICE'S (since v3.30, §101,
   reversing §94.3):** `mayArrange()` in `lib/rules.js` is **its own rule, never
   a hole in `mayAuthorPage()`** — widening the authoring gate to let a custodian
@@ -1376,8 +1404,29 @@ prior sessions (on HR_ERP) accidentally reverted agreed-upon designs.
 
 ---
 
-*Last Updated: 2026-08-26 &mdash; **v3.30: reordering comes back, as its own
-grant** (&sect;101, reversing &sect;94.3). *"I will give it back &mdash; shall we
+*Last Updated: 2026-08-26 &mdash; **v3.30: reordering comes back
+(&sect;101), and focus measures get a switch (&sect;102)**. The second one
+carries the bug worth reading: the switch was wired, the rule was written, the
+writer worked &mdash; and flipping it changed nothing at all. **`worldOf()` does
+not pass the group through**; it lifts NAMED KEYS off it, and **`W()` behind it
+names the keys it keeps** &mdash; two allow-lists, one behind the other, in the
+same function, on the same object. A group setting has to be added in BOTH, and
+forgetting either fails **silently and in the safe-looking direction**: the
+reader sees `undefined` and answers the default, which for a switch means *on*.
+Nothing throws, the page renders, the control does nothing. &sect;44 recorded
+this once as a client/server difference and this was neither &mdash; and only
+driving the real page found it, because the unit tests build their worlds by
+hand and pass either way. The rest is settled shape: off HIDES and never
+forgets (&sect;44 for the third time), stored as an ABSENCE so an unasked tenant
+and one switched off and on again are byte-identical (&sect;50.6), one gate
+inside `isFocus()` because seven surfaces already went through it, and the page
+carrying the switch stays reachable while it is off (&sect;61's trap, or the only
+way back on is to turn it on first). **The switch is the SMO's while marking
+stays the CEO's** &mdash; asserted as a PAIR, because locking something down
+proves nothing unless the right thing stayed open.
+
+*Earlier the same day: **&sect;101, reordering comes back** (reversing
+&sect;94.3). *"I will give it back &mdash; shall we
 align where to visually have it?"* **EVERY WORD &sect;94.3 WROTE DOWN STAYED
 TRUE**, which is what makes this a reversal rather than a correction: that
 section closed reordering to the office because the order of a plan is as much

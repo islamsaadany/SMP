@@ -12868,6 +12868,33 @@ function fnFormat(f){ return (f && f.format === "pillars") ? "pillars" : "projec
 function fnPlansInPillars(f){ return fnFormat(f) === "pillars"; }
 function fnItems(f){ return (f && Array.isArray(f.items)) ? f.items : []; }
 
+/* A STORED LIST NEVER HOLDS A HOLE (§118). A pillars function's plan rides in
+   one JSON blob (functions.extra), and JSON writes an array hole or an
+   undefined entry as null — which is how one poisoned reorder commit left a
+   null inside a tactics list and the CF page threw on every visit from the
+   next hydration on, while the click looked like it did nothing. The commit
+   is fixed in arrange.js; this heals what a tenant already saved. It only
+   REMOVES — a reader must never create the field it was looking for (§50.6) —
+   and the next autosave persists the clean lists, so the poison does not
+   outlive one visit. Units need none of this: their plans are stored
+   row-by-row and a null cannot survive that road. */
+function fnPruneNulls(f){
+  if (!f) return f;
+  var live = function(x){ return x != null; };
+  if (Array.isArray(f.items)) {
+    f.items = f.items.filter(live);
+    f.items.forEach(function(p){
+      if (Array.isArray(p.measures)) p.measures = p.measures.filter(live);
+      if (Array.isArray(p.tactics))  p.tactics  = p.tactics.filter(live);
+    });
+  }
+  if (Array.isArray(f.keyObjectives)) f.keyObjectives = f.keyObjectives.filter(live);
+  if (f.swot) ["s","w","o","t"].forEach(function(k){
+    if (Array.isArray(f.swot[k])) f.swot[k] = f.swot[k].filter(live);
+  });
+  return f;
+}
+
 /* WHICH function carries this pillar, if any. Returns null unless the pointer
    names a function that exists, is active AND plans in pillars — a pointer at a
    projects function or a retired one is a pointer at something that cannot
@@ -14147,8 +14174,17 @@ function handle(label){
 function makeSortable(container, itemSel, onCommit){
   var dragging = null;
 
+  /* DATA ROWS ONLY (§118). The plan pane's add row is a <tr> inside the same
+     tbody — undraggable, because it has no grip, and that was mistaken for
+     safe: it was still COUNTED on every commit. A row with no data-oi read as
+     +undefined = NaN, applyOrder pushed arr[NaN] = undefined onto the list,
+     and the autosave's JSON wrote it as null into a pillars function's plan —
+     which is stored as one blob, so the null came back on every hydration and
+     the page threw before it could replace what was on screen. Every real
+     sortable item carries data-oi; anything without one is furniture. */
   function siblings(){
-    return Array.prototype.slice.call(container.querySelectorAll(itemSel));
+    return Array.prototype.slice.call(container.querySelectorAll(itemSel))
+      .filter(function(el){ return el.dataset.oi != null; });
   }
 
   function renumber(){
@@ -14217,8 +14253,24 @@ function makeSortable(container, itemSel, onCommit){
   });
 }
 
-/* Apply a committed order to the underlying array. */
+/* Apply a committed order to the underlying array.
+
+   AND REFUSE ONE THAT DOES NOT ACCOUNT FOR EVERY ROW EXACTLY ONCE (§118).
+   A commit is a permutation of 0..n-1 or it is wrong: an index outside the
+   array pushes undefined (which a save turns into null — the poison that
+   broke the CF function), and a missing or doubled index silently drops or
+   duplicates a row somebody wrote. The backstop keeps the array untouched
+   rather than half-applying: with siblings() fixed above this should never
+   fire, and if it ever does, an unchanged order is the only outcome that
+   loses nothing. */
 function applyOrder(arr, order){
+  if (order.length !== arr.length) return;
+  var seen = {};
+  for (var k = 0; k < order.length; k++) {
+    var i = order[k];
+    if (typeof i !== "number" || !isFinite(i) || i < 0 || i >= arr.length || seen[i]) return;
+    seen[i] = true;
+  }
   var copy = order.map(function(i){ return arr[i]; });
   arr.length = 0;
   copy.forEach(function(x){ arr.push(x); });
@@ -17580,12 +17632,12 @@ function pptxColors(){
     ink:   "1B2740", quiet:"5E6E88", ground:"FFFFFF", line:"DCE3ED",
     zebra: "F2F5F9",
     /* The platform's own light --bad: what `.missing` wears on screen, worn
-       here on the slide's white ground (§118). */
+       here on the slide's white ground (§119). */
     bad:   "B04434"
   };
 }
 
-/* ── MISSING IS SAID, IN BOLD RED (§118) ─────────────────────────────
+/* ── MISSING IS SAID, IN BOLD RED (§119) ─────────────────────────────
    Islam: "identify the missing areas of the plan and type missing in bold red
    so they know what they need to fill." The deck used to print an em-dash for
    an empty plan fact, which reads as "nothing to say" when the truth is
@@ -17635,7 +17687,7 @@ function pptxTable(id, box, widths, head, rows){
   var C = pptxColors();
   function cell(c, hdr, ri){
     /* A cell is a string, or an object: `{miss:true}` renders the bold red
-       Missing (§118); `{t, align}` carries a mark that wants centring. */
+       Missing (§119); `{t, align}` carries a mark that wants centring. */
     var o = (c !== null && typeof c === "object") ? c : { t: c };
     var runOpts = hdr    ? { sz:1100, b:true, color:C.ground }
                 : o.miss ? { sz:1100, b:true, color:C.bad }
@@ -17711,7 +17763,7 @@ function pptxTableSlides(kicker, title, widths, head, rows){
   return out;
 }
 
-/* One cell per quarter, a mark where the tactic runs (§118 — Islam: "make
+/* One cell per quarter, a mark where the tactic runs (§119 — Islam: "make
    the tactics columns a column for each Q with a mark for the qs in action",
    the shape the plan workbook's Q1–Q4 columns already have). */
 function pptxQCells(t){
@@ -17749,7 +17801,7 @@ function pptxUnitSlides(u, kicker){
     found.push(pptxPara([pptxRun(c[0] + "  ", { sz:1200, b:true, color:C.quiet }),
                          pptxRun(c[1], { sz:1200 })], { before:600 }));
   });
-  /* The Foundation slide is ALWAYS in the deck since §118: a slide skipped
+  /* The Foundation slide is ALWAYS in the deck since §119: a slide skipped
      for being empty hides exactly the gap the Missing marks exist to show. */
   var fShapes = pptxHead(kicker, "Foundation");
   fShapes.push(pptxText(6,
@@ -20670,7 +20722,7 @@ function railName(code, name){
    PREFERENCE, so it lives in localStorage beside the theme and the People
    page's columns (§25, §47.1) — putting it in the state graph would change
    the rail for everyone in the tenant. */
-/* ── COLLAPSED IS THE DEFAULT (§118) ──────────────────────────────
+/* ── COLLAPSED IS THE DEFAULT (§119) ──────────────────────────────
    Islam: "make the default view for the pillar rail to be the collapsed one."
    The rail's small line under each name carries counts and an owner — useful
    once you are deep in a plan, noise when you are looking for which pillar to
@@ -20695,7 +20747,7 @@ function railHead(label, n){
     '</button></div>';
 }
 function railSub(html, alarm){
-  /* TERSE DROPS THE DETAIL, NEVER THE ALARM (§118). Collapsed is the default
+  /* TERSE DROPS THE DETAIL, NEVER THE ALARM (§119). Collapsed is the default
      now, and the routine half of this line — how many measures, how many
      tactics, who owns it — is exactly what somebody scanning for a pillar does
      not need. The other half is not detail: §106.2 put the count of rows
@@ -20717,7 +20769,7 @@ function railSub(html, alarm){
    to author a plan from the page that reports against it. */
 function railFor(list, sel, numOf, subOf, groupOf, footNote, codeOf, opts){
   opts = opts || {};
-  /* The half of the small line that survives a collapsed rail (§118). Optional
+  /* The half of the small line that survives a collapsed rail (§119). Optional
      and last, so every existing caller is untouched. */
   var alarmOf = opts.alarmOf;
   var lastGroup = null;
@@ -24970,7 +25022,7 @@ function renderKB(){
            'effect of letting the same people report (§117).' },
       { h: "Two things the table does not decide",
         p: 'The <b>knowledge base</b> is the office\u2019s \u2014 the Super user and the ' +
-           'SMO team \u2014 because it explains how the platform itself is run (\u00a7118, ' +
+           'SMO team \u2014 because it explains how the platform itself is run (\u00a7119, ' +
            'reversing \u00a730). And <b>focus measures</b>, what carries reward, are marked ' +
            'by the group CEO and the SMO. These are rules; they do not change when the ' +
            'table does.' },
@@ -31055,6 +31107,19 @@ var TOUR = (function(){
   function storyFor(person){
     var rs = rolesOf(person), has = {};
     rs.forEach(function(r){ has[r.role] = r; });
+    /* THE OFFICE IS NEVER OFFERED THE TOUR (§118, Islam: "yes stop it to the
+       SMO"). The tour orients a first-time user; the office runs the
+       platform. And the gate has to sit HERE rather than only on the seat
+       role, because the bootstrap SMO also heads the SMO function — fnhead
+       matched below and the "owner" story fired for the one person in the
+       tenant it could not be for, with the dock eating every click while its
+       welcome card waited. isOfficeRole() is the one definition of the
+       office (§89, §97); no second copy of it here. */
+    if (rs.some(function(r){
+      return (typeof SMPRules !== "undefined" && SMPRules.isOfficeRole)
+        ? SMPRules.isOfficeRole(r.role)
+        : (r.role === "super" || r.role === "smoteam");
+    })) return null;
     if (has.custodian) return "custodian";
     if (has.owner || has.fnhead) return "owner";
     return null;
@@ -31830,6 +31895,13 @@ var SYNC = (function () {
     window.UNITS = state.units;
     window.FUNCTION_KEYS = state.functionKeys;
     window.FUNCTIONS = state.functions;
+    /* Heal at the one door stored plans arrive through (§118): a function's
+       plan is a JSON blob, and a blob written while a list held an undefined
+       entry holds a literal null for ever — every visit to that function's
+       pages then dies mid-paint and the tab reads as dead. Remove-only. */
+    if (typeof fnPruneNulls === "function") {
+      (window.FUNCTION_KEYS || []).forEach(function (k) { fnPruneNulls(window.FUNCTIONS[k]); });
+    }
     /* A tenant that predates the company level has neither, and an empty
        company list is a valid answer: every unit is then its own. */
     window.COMPANY_KEYS = state.companyKeys || [];
@@ -32647,7 +32719,7 @@ var SYNC = (function () {
         } },
       /* Last in its group: it explains the rest, so it is not where you start.
 
-         ── AND IT IS THE OFFICE'S NOW (§118) ──────────────────────────
+         ── AND IT IS THE OFFICE'S NOW (§119) ──────────────────────────
          Islam: "remove knowledge base from the view of all except the smo team
          and the super user." It REVERSES §30's "readable by everyone, always"
          and §37's naming of that as one of the three things too fundamental to

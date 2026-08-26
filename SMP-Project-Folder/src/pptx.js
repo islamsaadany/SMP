@@ -58,12 +58,12 @@ function pptxColors(){
     ink:   "1B2740", quiet:"5E6E88", ground:"FFFFFF", line:"DCE3ED",
     zebra: "F2F5F9",
     /* The platform's own light --bad: what `.missing` wears on screen, worn
-       here on the slide's white ground (§118). */
+       here on the slide's white ground (§119). */
     bad:   "B04434"
   };
 }
 
-/* ── MISSING IS SAID, IN BOLD RED (§118) ─────────────────────────────
+/* ── MISSING IS SAID, IN BOLD RED (§119) ─────────────────────────────
    Islam: "identify the missing areas of the plan and type missing in bold red
    so they know what they need to fill." The deck used to print an em-dash for
    an empty plan fact, which reads as "nothing to say" when the truth is
@@ -113,7 +113,7 @@ function pptxTable(id, box, widths, head, rows){
   var C = pptxColors();
   function cell(c, hdr, ri){
     /* A cell is a string, or an object: `{miss:true}` renders the bold red
-       Missing (§118); `{t, align}` carries a mark that wants centring. */
+       Missing (§119); `{t, align}` carries a mark that wants centring. */
     var o = (c !== null && typeof c === "object") ? c : { t: c };
     var runOpts = hdr    ? { sz:1100, b:true, color:C.ground }
                 : o.miss ? { sz:1100, b:true, color:C.bad }
@@ -189,7 +189,7 @@ function pptxTableSlides(kicker, title, widths, head, rows){
   return out;
 }
 
-/* One cell per quarter, a mark where the tactic runs (§118 — Islam: "make
+/* One cell per quarter, a mark where the tactic runs (§119 — Islam: "make
    the tactics columns a column for each Q with a mark for the qs in action",
    the shape the plan workbook's Q1–Q4 columns already have). */
 function pptxQCells(t){
@@ -227,7 +227,7 @@ function pptxUnitSlides(u, kicker){
     found.push(pptxPara([pptxRun(c[0] + "  ", { sz:1200, b:true, color:C.quiet }),
                          pptxRun(c[1], { sz:1200 })], { before:600 }));
   });
-  /* The Foundation slide is ALWAYS in the deck since §118: a slide skipped
+  /* The Foundation slide is ALWAYS in the deck since §119: a slide skipped
      for being empty hides exactly the gap the Missing marks exist to show. */
   var fShapes = pptxHead(kicker, "Foundation");
   fShapes.push(pptxText(6,

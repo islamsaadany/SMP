@@ -107,13 +107,6 @@ var SYNC = (function () {
     window.UNITS = state.units;
     window.FUNCTION_KEYS = state.functionKeys;
     window.FUNCTIONS = state.functions;
-    /* Heal at the one door stored plans arrive through (§118): a function's
-       plan is a JSON blob, and a blob written while a list held an undefined
-       entry holds a literal null for ever — every visit to that function's
-       pages then dies mid-paint and the tab reads as dead. Remove-only. */
-    if (typeof fnPruneNulls === "function") {
-      (window.FUNCTION_KEYS || []).forEach(function (k) { fnPruneNulls(window.FUNCTIONS[k]); });
-    }
     /* A tenant that predates the company level has neither, and an empty
        company list is a valid answer: every unit is then its own. */
     window.COMPANY_KEYS = state.companyKeys || [];

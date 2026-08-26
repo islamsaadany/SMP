@@ -258,7 +258,7 @@ with sync_playwright() as p:
            got["cap"] in d["text"] and got["proj"] in d["text"],
            got)
 
-    # ── 4 · §118'S FOUR FOLLOW-UPS ───────────────────────────────────
+    # ── 4 · §119'S FOUR FOLLOW-UPS ───────────────────────────────────
     print("\n4 · the deck names its gaps, the rail opens terse, the KB is the office's")
 
     # THE DECK MAKES ITS OWN GAPS (§94.2): the demo plan is complete, so a
@@ -306,7 +306,7 @@ with sync_playwright() as p:
         ck("a filled target still reads its value", "32%" in txt)
         ck("a filled owner still reads its name", "Mohamed Rizk" in txt)
 
-        # THE TACTICS TABLE IS FOUR QUARTER COLUMNS (§118, Islam: "a column for
+        # THE TACTICS TABLE IS FOUR QUARTER COLUMNS (§119, Islam: "a column for
         # each Q with a mark for the qs in action").
         heads, marked = None, 0
         for n in sorted(x for x in z.namelist()
@@ -331,7 +331,7 @@ with sync_playwright() as p:
         ck("...while the ones that are not stay empty",
            heads is not None and marked < 4 * 12, marked)
 
-    # THE RAIL OPENS TERSE (§118). Asserted from a FRESH page, because the
+    # THE RAIL OPENS TERSE (§119). Asserted from a FRESH page, because the
     # preference is per-browser and this one has been driven all run.
     fresh = b.new_page(viewport={"width": 1600, "height": 1000})
     fresh.goto(URL); fresh.wait_for_timeout(1400)
@@ -354,7 +354,7 @@ with sync_playwright() as p:
     back = fresh.evaluate("() => document.querySelectorAll('.rail .rsub').length")
     ck("pressing the control brings the detail back", back > 0, back)
 
-    # THE KNOWLEDGE BASE IS THE OFFICE'S (§118, reversing §30). Asked of the
+    # THE KNOWLEDGE BASE IS THE OFFICE'S (§119, reversing §30). Asked of the
     # page def — the one thing the rail, the search and paint() all read.
     kb = fresh.evaluate("""(w) => {
       const d = setupDefs().filter(x => x.k === "kb")[0];

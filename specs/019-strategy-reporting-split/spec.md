@@ -1,6 +1,6 @@
 # 019 · Strategy | Reporting split, and the plan as slides
 
-**Version:** v3.40 · **Decisions:** §117 (follow-ups §118, v3.41) · **Status:** answered; built
+**Version:** v3.40 · **Decisions:** §117 (follow-ups §119, v3.42) · **Status:** answered; built
 
 Islam: *"the accessibility should have an option that differentiate the
 strategy from the reporting — the strategy should be locked from the non SMO
@@ -53,7 +53,7 @@ rules), the full check suite and `qa.py` green. See §117.3.
 
 ---
 
-## 4 · Follow-ups, §118 (v3.41)
+## 4 · Follow-ups, §119 (v3.42)
 
 From using it, the day it shipped:
 
@@ -69,4 +69,4 @@ From using it, the day it shipped:
    is no longer reachable by anybody it fits.
 5. **Arrange/download on a capability's Projects pane** could not be
    reproduced — both draw correctly on live production for the office and for
-   a function head — and is asked rather than fixed (§118.5).
+   a function head — and is asked rather than fixed (§119.5).

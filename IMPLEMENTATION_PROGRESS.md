@@ -6,7 +6,8 @@ version (rules A2 / A11, changed 2026-08-20) — those go only when asked for.
 
 **Where it runs:** Vercel, production tracks `main`. Static files plus two
 serverless functions (`/api/state`, `/api/auth`) against Neon Postgres.
-**Latest version:** v3.41 on `main`
+**Latest version:** v3.42 on `main`
+**Last updated:** 2026-08-26
 **Last updated:** 2026-08-26
 
 **Sign in as:** `SMO` / `1234` — a password change is forced at once (§43.1,
@@ -63,6 +64,24 @@ Nothing proceeds past this line without an answer.
   is a true signal — do not silence it.
 
 ## Built and verified
+
+### v3.41 — the CF tab (§118)
+
+**§118 — reported from production.** *"The CF tab is not showing anything
+while it was showing it a minute ago."* Reordering a measure or tactic with
+the pen on counted the "+ Add" row, appended one phantom entry per drag, and
+the autosave wrote it as a `null` into the pillars function's plan blob —
+from the next hydration on, the function's page threw mid-paint and the tab
+read as dead, with the error only in the console. Fixed at the commit
+(`makeSortable` counts data rows only), backstopped (`applyOrder` refuses a
+non-permutation), and healed for tenants that already saved the poison
+(`fnPruneNulls()` at the hydration door — CF comes back on its next visit,
+nothing was lost). The tour is no longer offered to the office (§118.5).
+`checks/reorder-integrity.py` fails 16 ways against the previous build and
+is green on this one; qa.py and the full battery green on the merged build.
+Flagged, not fixed (§118.7): a dead render still says nothing on the page;
+the wrapped destination row eats clicks below ~1100px; no-jump.py's
+"sorting a column" trial fails on main's own build.
 
 ### v3.39 — the register stops being a form (§116) — another session's
 

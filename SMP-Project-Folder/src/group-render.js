@@ -2475,7 +2475,7 @@ function railName(code, name){
    PREFERENCE, so it lives in localStorage beside the theme and the People
    page's columns (§25, §47.1) — putting it in the state graph would change
    the rail for everyone in the tenant. */
-/* ── COLLAPSED IS THE DEFAULT (§118) ──────────────────────────────
+/* ── COLLAPSED IS THE DEFAULT (§119) ──────────────────────────────
    Islam: "make the default view for the pillar rail to be the collapsed one."
    The rail's small line under each name carries counts and an owner — useful
    once you are deep in a plan, noise when you are looking for which pillar to
@@ -2500,7 +2500,7 @@ function railHead(label, n){
     '</button></div>';
 }
 function railSub(html, alarm){
-  /* TERSE DROPS THE DETAIL, NEVER THE ALARM (§118). Collapsed is the default
+  /* TERSE DROPS THE DETAIL, NEVER THE ALARM (§119). Collapsed is the default
      now, and the routine half of this line — how many measures, how many
      tactics, who owns it — is exactly what somebody scanning for a pillar does
      not need. The other half is not detail: §106.2 put the count of rows
@@ -2522,7 +2522,7 @@ function railSub(html, alarm){
    to author a plan from the page that reports against it. */
 function railFor(list, sel, numOf, subOf, groupOf, footNote, codeOf, opts){
   opts = opts || {};
-  /* The half of the small line that survives a collapsed rail (§118). Optional
+  /* The half of the small line that survives a collapsed rail (§119). Optional
      and last, so every existing caller is untouched. */
   var alarmOf = opts.alarmOf;
   var lastGroup = null;

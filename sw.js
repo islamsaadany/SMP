@@ -107,11 +107,13 @@
    conflict only because a comment differed. Resolved to a name nobody has
    served, confirmed against origin/main at the merge and AGAIN immediately
    before the push (§94.16). */
-/* v3.41 — §118: the deck names its gaps, the rail opens terse, the
-   knowledge base becomes the office's. Confirmed against origin/main,
-   which is serving "smp-shell-v3.40" — confirm AGAIN immediately before
-   the merge push (§94.16). */
-const SHELL = "smp-shell-v3.41";
+/* v3.42 — §119: the deck names its gaps, the rail opens terse, the
+   knowledge base becomes the office's. §94.12 FOR THE SIXTH TIME: this
+   branch took v3.39, then v3.40, then v3.41, and main took each one inside
+   the window between reading it and pushing — three collisions on one piece
+   of work. Confirmed against origin/main serving "smp-shell-v3.41", and
+   again immediately before the push (§94.16). */
+const SHELL = "smp-shell-v3.42";
 const ASSETS = [
   "/",
   "/index.html",

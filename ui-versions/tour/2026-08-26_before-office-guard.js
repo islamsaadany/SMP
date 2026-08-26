@@ -100,19 +100,6 @@ var TOUR = (function(){
   function storyFor(person){
     var rs = rolesOf(person), has = {};
     rs.forEach(function(r){ has[r.role] = r; });
-    /* THE OFFICE IS NEVER OFFERED THE TOUR (§118, Islam: "yes stop it to the
-       SMO"). The tour orients a first-time user; the office runs the
-       platform. And the gate has to sit HERE rather than only on the seat
-       role, because the bootstrap SMO also heads the SMO function — fnhead
-       matched below and the "owner" story fired for the one person in the
-       tenant it could not be for, with the dock eating every click while its
-       welcome card waited. isOfficeRole() is the one definition of the
-       office (§89, §97); no second copy of it here. */
-    if (rs.some(function(r){
-      return (typeof SMPRules !== "undefined" && SMPRules.isOfficeRole)
-        ? SMPRules.isOfficeRole(r.role)
-        : (r.role === "super" || r.role === "smoteam");
-    })) return null;
     if (has.custodian) return "custodian";
     if (has.owner || has.fnhead) return "owner";
     return null;

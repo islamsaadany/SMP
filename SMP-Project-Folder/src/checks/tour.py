@@ -313,7 +313,7 @@ def knowledge_base(pg):
     tour — and it must be ABSENT for somebody no story fits, because a button
     explaining it cannot help you is worse than no button.
 
-    ── AND SINCE §118 NOBODY CAN REACH IT (recorded, not asserted) ─────
+    ── AND SINCE §119 NOBODY CAN REACH IT (recorded, not asserted) ─────
     Islam closed the Knowledge base to everybody but the office. The tour's
     stories are the custodian's and the owner's (`storyFor()`), and the office
     has none — so the page that carries this button can now only be opened by
@@ -328,7 +328,7 @@ def knowledge_base(pg):
     check that asserted it would freeze the mistake in place. The FIRST-RUN
     tour is untouched and is what every other section of this file measures.
     """
-    # THE OFFICE IS THE ONLY VIEWER THAT CAN OPEN THE PAGE (§118), and no
+    # THE OFFICE IS THE ONLY VIEWER THAT CAN OPEN THE PAGE (§119), and no
     # story fits them — so this is the ABSENT half, which is the half that
     # still means something.
     smo = pg.evaluate("() => PEOPLE.filter(p => p.role === 'super')[0].key")

@@ -2997,7 +2997,7 @@ function renderKB(){
            'effect of letting the same people report (§117).' },
       { h: "Two things the table does not decide",
         p: 'The <b>knowledge base</b> is the office\u2019s \u2014 the Super user and the ' +
-           'SMO team \u2014 because it explains how the platform itself is run (\u00a7118, ' +
+           'SMO team \u2014 because it explains how the platform itself is run (\u00a7119, ' +
            'reversing \u00a730). And <b>focus measures</b>, what carries reward, are marked ' +
            'by the group CEO and the SMO. These are rules; they do not change when the ' +
            'table does.' },

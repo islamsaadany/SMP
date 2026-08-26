@@ -15657,13 +15657,123 @@ it is not this section's, and it is recorded here rather than quietly fixed.
 `checks/plan-arrange.py` learned `SMP_CHROME` and to stop counting the new
 download button as a pen (§51.11, on the day the control changed shape).
 
-## 118 · The deck names its gaps, the rail opens terse, the base is the office's (v3.41)
+## 118 · The CF tab, the add row, and a null that outlived its session (v3.41)
+
+> *"the CF tab is not showing anything while it was showing it a minute ago"*
+> — and, asked what it looks like: *"tab there it doesn't move it stays with
+> the previous opened tab."*
+
+### 118.1 The symptom was navigation and the fault was paint
+
+Clicking a destination runs `leaveModes()`, moves `current`, and calls
+`paint()`. A throw anywhere inside the panel's render abandons the redraw
+after the navigation row has already updated — so the screen KEEPS the
+previous page, the click reads as ignored, and the only witness is the
+hidden console:
+
+    Uncaught TypeError: Cannot read properties of null (reading 'name')
+        at Array.map · unitPlanBody · renderUnitPlan · renderFnProjects · paint
+
+`t.name` on a null sitting INSIDE a pillar's `tactics` array. Nothing was
+deleted and nothing was hidden; one row in one list was a shape the page
+cannot draw, and one bad row stops the whole page.
+
+### 118.2 The chain, each link proved on the exact bytes production serves
+
+The plan pane's **"+ Add a tactic" row is a `<tr>` inside the same sortable
+tbody**. Its own comment says why that felt safe: it has no grip, so it
+cannot be *dragged*. What it never said is that the row is still **counted**
+— `makeSortable`'s commit read `+el.dataset.oi` off every `tr`, the add row
+has none, and `+undefined` is `NaN`. `applyOrder` then did `arr[NaN]`, which
+is `undefined`, and pushed it: **one reorder of a measure or tactic with the
+pen on appended one phantom entry, every time, on units and functions
+alike.** Reproduced: `["Open branches", "Second tactic", <<undefined>>]`
+after a single ArrowDown on a grip.
+
+Why only a FUNCTION died a minute later: a unit's plan is stored row by row
+(`pillars`/`measures`/`tactics` tables) and an `undefined` in the list fails
+that save loudly. **A pillars function's plan rides in ONE JSON blob**
+(`functions.extra`, §59), and `JSON.stringify` writes an undefined array
+entry as `null` — the save succeeds, the poison is now durable, and every
+hydration hands it back. It was showing "a minute ago" because the minute is
+exactly the save-and-rehydrate cycle.
+
+### 118.3 What it was NOT, established before the cause was known
+
+The import was innocent: every hostile file tried — orphan rows, duplicate
+and empty pillar names, junk quarters, full-precision Excel numbers, unknown
+themes — was refused before Apply with the reason named. The pen's fields
+were innocent. The DB round trip was innocent (create → import → save →
+reload → click, green over a real Postgres). **And the person was innocent:
+there is no file and no field that is supposed to produce this. A control
+that silently does nothing is the product's fault by its own rules, and
+"what mistake did I make?" has the answer *none*.**
+
+### 118.4 Three fixes, one class each
+
+- **`makeSortable` counts data rows only** — `siblings()` keeps elements
+  carrying `data-oi`, which every real sortable item in the product already
+  has; the add row is furniture. (Also corrects the drop geometry beside the
+  add row, which used to allow a drop *after* it.)
+- **`applyOrder` refuses a commit that is not a permutation** — wrong
+  length, out of range, `NaN`, duplicated: the array is left untouched,
+  never half-applied, because with the commit fixed this backstop should
+  never fire, and if it ever does, an unchanged order is the only outcome
+  that loses nothing.
+- **`fnPruneNulls()` at the hydration door** (`hydrate()` in sync.js) —
+  remove-only, so §50.6 stands: a reader never creates what it looked for,
+  and here it only deletes what no writer may mint. A tenant that already
+  saved the poison heals on the next visit, and the next autosave persists
+  the clean lists. Units need none of this; a null cannot survive their
+  road.
+
+### 118.5 The tour is never offered to the office
+
+Islam, told the tour fires for the SMO: *"yes stop it to the SMO."* The
+bootstrap SMO also HEADS the SMO function, so `storyFor()`'s `fnhead` rung
+matched and the "owner" story opened for the one person it cannot be for —
+with the dock (`position:fixed; inset:0`) eating every click while its
+welcome card waited. The gate is in `storyFor()` itself, asked through
+`SMPRules.isOfficeRole()` — the one definition of the office (§89, §97),
+never a second copy — so `offer()`, the Knowledge base replay list and
+checks/tour.py all answer the same way.
+
+### 118.6 The check presses the control and was proved able to fail
+
+`checks/reorder-integrity.py`, four sections, both ends throughout (§94.2):
+keyboard AND pointer reorders must still REORDER and must mint nothing; the
+rail — which has no add row — must keep working, or the fix would be
+indistinguishable from reordering dying; `applyOrder` refuses all five
+non-permutations; a stub serves a tenant whose stored blob already holds a
+null (over HTTP, because file:// never hydrates — §94.11) and the poisoned
+function's tab must open AND its plan must draw; the office gets no story
+while a custodian still does. Against the v3.36 build it fails **16 ways**,
+ending in the production error verbatim (§94.5).
+
+### 118.7 Found and deliberately not fixed
+
+- **A paint that throws leaves the previous page on screen with no message
+  anywhere** — §32 one level deeper: the refusal-says-so rule has no
+  equivalent for a render that dies. Every fault of this family will look
+  like a dead click until that changes. A decision about what the failure
+  surface should say, not a patch.
+- **Below ~1100px the destination row wraps and its second line paints
+  under the page-tab row**, which then takes every click on the wrapped
+  tabs — `.units-in` keeps a fixed one-line `height:46px` (_shared.css)
+  while arrange.css says `flex-wrap:wrap`. Measured on the live bytes:
+  `elementFromPoint` at the wrapped tab's centre returns a `data-s` button.
+  Not this fault — Islam's row is one line — and a real one.
+- **checks/no-jump.py's "sorting a column" trial fails on main's own
+  build** (page scroll 220 → 93), before this section's changes. Pre-existing,
+  recorded here so the next green run is not trusted blind.
+
+## 119 · The deck names its gaps, the rail opens terse, the base is the office's (v3.42)
 
 Five follow-ups from Islam the day §117 shipped, from using it. One arrived
 empty (his item 3) and is not guessed at; one could not be reproduced and is
-recorded as a question rather than a fix (§118.5).
+recorded as a question rather than a fix (§119.5).
 
-### 118.1 Missing, in bold red
+### 119.1 Missing, in bold red
 
 *"identify the missing areas of the plan and type missing in bold red so they
 know what they need to fill."* The deck printed an em-dash for an empty plan
@@ -15685,7 +15795,7 @@ capability's definition used to be skipped when they held nothing — which
 hides exactly the gap this section exists to show. A skipped slide is the
 strongest possible way of saying *nothing is missing here*.
 
-### 118.2 A column for each quarter
+### 119.2 A column for each quarter
 
 *"make the tactics columns a column for each Q with a mark for the qs in
 action."* `pptxQCells()` returns four centred cells carrying `✓` or nothing —
@@ -15693,7 +15803,7 @@ the shape the plan workbook's Q1–Q4 columns already have, so the deck and the
 template read the same way. `pptxQuarters()` (the `Q2 · Q3` string) is DELETED
 rather than left unused (§24).
 
-### 118.3 The pillar rail opens collapsed
+### 119.3 The pillar rail opens collapsed
 
 *"make the default view for the pillar rail to be the collapsed one."* Read
 the OTHER WAY ROUND from the four settings beside it (§104.7's rule): absent
@@ -15710,7 +15820,7 @@ and terse drops only the first. **Found by `checks/project-tables.py` going red
 on the day the default flipped** — nothing had ever had to separate them
 before, and no amount of reading the rail would have suggested it.
 
-### 118.4 The knowledge base is the office's
+### 119.4 The knowledge base is the office's
 
 *"remove knowledge base from the view of all except the smo team and the super
 user."* **IT REVERSES §30 AND §37**, recorded as a reversal rather than
@@ -15740,7 +15850,7 @@ the office and asserts the ABSENT half, and deliberately does NOT assert that
 the replay is unreachable — a check that did would freeze the mistake. Where
 that button should live is Islam's to answer.
 
-### 118.5 Asked about and not reproducible
+### 119.5 Asked about and not reproducible
 
 *"for the projects there is no arrange or download."* Measured on the live
 production file and on this build, a capability's Projects pane draws: for the
@@ -15752,7 +15862,7 @@ So either the browser was holding a cached build from before §117 merged, or
 the viewer did not hold the function. **Not fixed, because there is nothing
 yet shown to be broken** — asked instead.
 
-### 118.6 What proves it
+### 119.6 What proves it
 
 `checks/strategy-split.py` §4: the check MAKES six gaps in the plan (§94.2 —
 the demo is complete, so a check that only downloaded it would never render a

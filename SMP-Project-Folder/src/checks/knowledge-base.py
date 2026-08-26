@@ -38,7 +38,7 @@ with sync_playwright() as p:
     pg.goto(FILE, wait_until="load")
     pg.wait_for_timeout(2500)
 
-    # THE OFFICE, SINCE §118. This ran as a unit head on the argument that the
+    # THE OFFICE, SINCE §119. This ran as a unit head on the argument that the
     # knowledge base was everyone's (§37) and a check run as the SMO could not
     # see it being withheld — which was the right reader until Islam closed the
     # page to everybody but the Super user and the SMO team. The withholding is

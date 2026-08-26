@@ -151,6 +151,11 @@ var NEWSET = { name: "", team: "", owner: "", pick: "smo" };
    held here rather than recomputed on every paint, because the person
    answering it may go and look at the row it names and come back. */
 var ADDROLE = null, ADDROLE_KIND = "owner";
+/* ── WHY THE LAST PICK DID NOT LAND (§108) ────────────────────────────
+   `{key, why}`, or null. A property of the screen and never of the person
+   (§25.2) — it is the outcome of one press, cleared by the press that
+   succeeds, by opening the picker again and by leaving the row. */
+var ROLESTOP = null;
 var NEWPERSON = { name:"", empId:"", email:"", hit:null, hitBy:null, warn:null };
 function newPersonReset(){
   NEWPERSON = { name:"", empId:"", email:"", hit:null, hitBy:null, warn:null };
@@ -736,9 +741,56 @@ function rowEditLive(){
   var t = rowEditTable();
   return (t && ROWFIND[t]) ? ROWFIND[t](rowEditKey()) : null;
 }
+/* ── AND WHAT POINTS AT THE ROW, NOT ONLY WHAT IS IN IT (§108) ───────
+   A person's roles are not ON the person: a unit's `head` and a function's
+   `custodian` point AT them (§33), and `ROWWAS` is a copy of the row. So Cancel
+   restored `p.unit` and left the grant standing — press it after giving
+   somebody Business unit owner of Nigeria and they read as its owner while
+   sitting at the group. One fact contradicting itself, from one press.
+
+   `ROWHELD` is every one of those pointers as it stood when the row opened.
+   Not the person's ROLE LIST, which was the first answer and was not enough:
+   granting an owner OVERWRITES whoever held it, so undoing the grant by
+   revoking it left the unit with no head at all — the displaced person was
+   gone and nothing remembered them. What has to come back is the pointers, and
+   they are what is copied.
+
+   Both maps whole, because a grant can move a seat this row never named — a
+   custodian handed to a function moves `FUNCTIONS[k].custodian` — and they are
+   two small objects (ten units, eight functions, two keys each), which is
+   cheaper than working out in advance which of them a press might reach. */
+var ROWHELD = null;
+function rolePointers(){
+  var out = { units:{}, fns:{} };
+  UNIT_KEYS.forEach(function(k){
+    var r = UNIT_ROLES[k] || {};
+    out.units[k] = { head:r.head || null, custodian:r.custodian || null };
+  });
+  FUNCTION_KEYS.forEach(function(k){
+    var f = FUNCTIONS[k] || {};
+    out.fns[k] = { head:f.head || null, custodian:f.custodian || null };
+  });
+  return out;
+}
+/* PUT BACK IN PLACE, never by replacing the object — the same rule
+   rowEditCancel already follows for the person, and for the same reason: an
+   open menu or a chip may be holding a reference to the one that is there. */
+function restoreRolePointers(was){
+  if (!was) return;
+  Object.keys(was.units).forEach(function(k){
+    var r = unitRolesFor(k);
+    r.head = was.units[k].head; r.custodian = was.units[k].custodian;
+  });
+  Object.keys(was.fns).forEach(function(k){
+    var f = FUNCTIONS[k];
+    if (!f) return;
+    f.head = was.fns[k].head; f.custodian = was.fns[k].custodian;
+  });
+}
 function rowEditOpen(table, key, obj){
   ROWEDIT = table + ":" + key;
   ROWWAS = obj ? JSON.parse(JSON.stringify(obj)) : null;
+  ROWHELD = (table === "people" && obj) ? rolePointers() : null;
 }
 /* PUT BACK IN PLACE, never by replacing the object. Something else may already
    hold a reference to this person — the viewer switcher, a role chip, an open
@@ -749,13 +801,18 @@ function rowEditOpen(table, key, obj){
    a row that still exists. */
 function rowEditCancel(obj){
   if (obj === undefined) obj = rowEditLive();
+  /* The pointers first and the row second, so that a grant's two halves are
+     undone in the order they were written: grantPersonRole() writes the
+     pointer AND the person's own attachment, and ROWWAS is what puts the
+     second one back. */
+  restoreRolePointers(ROWHELD);
   if (obj && ROWWAS) {
     Object.keys(obj).forEach(function(k){ if (!(k in ROWWAS)) delete obj[k]; });
     Object.keys(ROWWAS).forEach(function(k){ obj[k] = ROWWAS[k]; });
   }
-  ROWEDIT = null; ROWWAS = null;
+  ROWEDIT = null; ROWWAS = null; ROWHELD = null;
 }
-function rowEditClose(){ ROWEDIT = null; ROWWAS = null; }
+function rowEditClose(){ ROWEDIT = null; ROWWAS = null; ROWHELD = null; }
 
 var SHORT_NAME_WORDS = 3;
 function shortName(name){ return nameWords(name, SHORT_NAME_WORDS); }
@@ -2049,6 +2106,28 @@ function roleKeyByName(name){
    file naming it would be asking for a role that arrives by itself, so the
    template does not offer it and the reader says so plainly. */
 function roleIsGrantable(key){ return !!key && !SMPRules.isOwnLinesRole(key); }
+/* ── THE WORD FOR WHERE A ROLE IS HELD (§108) ─────────────────────────
+   For the sentence a refused pick shows, and for nothing else. It is a LABEL,
+   not a second rule: `roleWheres()` still decides what may be held where, and
+   this only says it in English — so a role whose list changes cannot end up
+   with a sentence that contradicts the list.
+
+   Derived from the list rather than written beside it, for the same reason:
+   the kinds actually offered are what the person has to pick from. */
+function roleAtWord(roleKey){
+  var kinds = {};
+  roleWheres(roleKey).forEach(function(w){
+    kinds[w.v === "group" ? "group"
+        : String(w.v).indexOf("fn:") === 0 ? "fn"
+        : String(w.v).indexOf("co:") === 0 ? "co" : "unit"] = 1;
+  });
+  var WORD = { group:"the group", unit:"a business unit",
+               fn:"a supporting function", co:"a company" };
+  var out = Object.keys(kinds).map(function(k){ return WORD[k]; });
+  if (!out.length) return "somewhere that does not exist yet";
+  if (out.length === 1) return out[0];
+  return out.slice(0, -1).join(", ") + " or " + out[out.length - 1];
+}
 
 /* Reads the sheet against the stored world and says what would happen. It
    changes NOTHING — the review step exists so that an upload is looked at

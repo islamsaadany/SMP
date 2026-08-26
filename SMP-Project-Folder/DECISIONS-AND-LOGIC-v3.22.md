@@ -14010,3 +14010,206 @@ fact that costs nothing to forget. One press of × answers it.
 **Still open:** the SMO, CEO and contributor stories (§16 backlog), and the
 owner story's copy, which is **mine until Islam has read it** — the custodian's
 is his, word for word off the signed-off mockup.
+
+---
+
+## §108 — Giving somebody a role, without a second dropdown (2026-08-26)
+
+Islam, using the product: *"in the people registry I'm trying to set business
+unit owners as roles and it keeps failing with no error message. I tried with
+Abdelhamid Mokhtar and with Ahmed Magdy."*
+
+Four things came out of one sentence, and only the first one is the fault he
+was hitting. The other three were found by measuring, by asking him, and by a
+check.
+
+### 108.1 The control was present, enabled, correctly sized and unreachable
+
+§69.1 split the picker across two columns at Islam's own request — the role in
+Roles, *Choose where…* in Unit. §88 then made every Setup table cell one line.
+The two met and nobody noticed.
+
+`.cfg table td` is `white-space:nowrap`, so the Unit cell laid its two controls
+**side by side rather than stacking them**: the second started 150px into a
+158px cell, ran **133px past its own right edge**, and landed under the Email
+field, which took every click. `overflow:visible` (§93.10, kept on purpose so a
+control is never cut off) is what let it out of the cell, and the Email input
+being later in the DOM is what put it on top.
+
+**MEASURED, BECAUSE NOTHING ELSE WOULD HAVE FOUND IT.** `getClientRects()`
+returns 1. The select is in the document, enabled, at a sensible position, with
+the right options. `elementFromPoint` at the control's own centre returns the
+**Email input**, and a real click with no forcing is refused —
+*"input data-pemail intercepts pointer events"*. §93.4 for the third time.
+
+**AND IT ONLY BIT THE ROLES WITH A REAL CHOICE.** §92 grants a role with one
+destination on the pick, so Super user, SMO team and Group CEO never drew a
+second half and always worked. Business unit owner, Strategy custodian, Company
+CEO and Supporting function head all drew the half that could not be reached —
+which is exactly the difference between this report and §92's.
+
+**WHAT WAS RULED OUT, so it is not chased again**: both people being retired
+(asked; both active), the Unit column hidden under Columns (a real second dead
+end — the half is then drawn nowhere at all), the control scrolled off-screen
+(measured at 1600/1440/1280/1100 with every column on: visible at all four), a
+refusal from the server, and production running an older build — `/raya-trade`
+was serving this code byte for byte.
+
+### 108.2 So it is not renamed. It is removed.
+
+Islam, on the mockup: *"choose where is very strange sentence. make it Unit and
+it's already in a cell what am I missing here?"*
+
+**Nothing, and it was worse than redundant.** `personAtChoices()` — the Unit
+cell's own dropdown — offers the group, every unit, every function and every
+company: item for item the list `roleWheres()` was drawing from, a **superset**
+of every role's where. And `grantPersonRole()` writes it back on every grant —
+owner and unit custodian set `p.unit`, `fnhead` sets `p.fn`, `cceo` sets
+`p.company`. **The second dropdown asked a question the first had already
+answered and then forced its own answer onto it.** The two could never
+disagree, because the grant made them agree.
+
+§46.4's *"where somebody sits and where a role reaches are two different
+facts"* stayed true of the CONCEPTS and was never true of the code. §69.1's
+split survives in the half that mattered: the unit selection is in the Unit
+column and the role selection is in Roles. What goes is the **duplicate**, not
+the arrangement.
+
+`roleWhereCell()`, `select.rolewhere`, `.rolewhy` and `arrange.css`'s width for
+it are deleted rather than left inert (§24).
+
+### 108.3 A pick that cannot land says so, where it was made
+
+The one thing the old pair could not do. It committed on the second answer, so
+**"not yet" and "never" looked identical**: nothing happened, and nothing was
+said.
+
+Two refusals, two sentences, because they have different ways out — *"Set the
+Unit first — Business unit owner is held at a business unit"* and *"Company CEO
+is held at a company. Change the Unit."*
+
+**WHAT A ROLE MAY BE HELD AT IS STILL `roleWheres()` AND NOTHING ELSE.** The
+check asks that list whether the place the person is in is on it; only the WORD
+for a kind is written beside it, and `roleAtWord()` derives even that from the
+list. A role added later is correct here on the day it is added (§42).
+
+### 108.4 Either half can be the one that finishes it
+
+Islam: *"the role and the unit shouldn't block each other but they only
+function together — you get this?"*
+
+Two ordinary fields on the row, set in either order, neither emptying the other.
+
+**FOUND BY THE CHECK, and it is the same family as §108.1.** A refused pick
+leaves the picker open — right, so the Unit can be set and the role taken again
+— but the role select is still **showing** that role, so picking it a second
+time fires no `change` at all. Set the Unit, reach for the role, and the control
+does nothing. `tryGrantRole()` is one function called from both sides, and the
+Unit's own handler calls it **only while a refusal is standing on that row**: an
+ordinary move must stay a move.
+
+### 108.5 A retired row holds nothing, and was being given roles anyway
+
+`SMPRules.personRoles()` opens with *"a retired person holds nothing"* and
+returns `[]` — and the picker was drawn on a retired row regardless. Giving one
+Business unit owner **wrote the grant** (the unit's `head` now pointed at them)
+while the row went on reading *No role*: the rule that decides what a row SHOWS
+is not the one the grant went through, and nothing compared them.
+
+Two silent wrongs from one press — nothing said the grant had happened, and a
+unit was left pointed at somebody who cannot sign in, which is exactly the state
+§93.4's custodian count exists to find. Refused where the control was, with the
+way out in the refusal (§62).
+
+### 108.6 Cancel puts back what the grant displaced
+
+A person's roles are not ON the person: a unit's `head` points AT them (§33),
+and `ROWWAS` is a copy of the row. So Cancel restored `p.unit` and left the
+grant standing — press it after giving somebody Business unit owner of Nigeria
+and they read as its owner while sitting at the group.
+
+**THE ROLE LIST WAS THE FIRST ANSWER AND WAS NOT ENOUGH.** Granting an owner
+**overwrites** whoever held it, so undoing by revoking left the unit with no
+head at all: the displaced person was gone and nothing remembered them.
+`ROWHELD` is the pointer maps whole — ten units and eight functions, two keys
+each — restored in place rather than by replacing the objects (§79.2's rule,
+for the same reason).
+
+### 108.7 Opening a row threw it to the top of the register
+
+Islam: *"once I open the edit of a line the line jumps to the first line, that
+is the wrong behaviour."*
+
+**It is the cursor, not the repaint.** The register is its own scrolling box, and
+a plain `focus()` lets the browser scroll the focused field into view — so
+opening row 20 of 33 scrolled that box from 0 to 533px and hauled the row from
+y=638 to **y=105**, which is where the first line sits. His words, measured.
+
+`focusNoScroll()` is declared once and used by both pens: the register's, inside
+its ⋮, and the inline one the other six tables carry (§85 already found out what
+happens when that pair of lines is maintained in two places). The row stays where
+it was pressed and the cursor still lands.
+
+**AND `no-jump.py` HAD BEEN GREEN THROUGHOUT.** It opens a row and *then*
+measures repaints, so the press that opens one had never been measured — and
+that was the press that jumped. §94.2 in the file whose whole job is this: a
+check watching what happens after the door is open cannot see the door slam.
+While fixing it, one of its own trials turned out to be firing nothing: it asked
+for `[data-prole-kind]`, a selector the register has never carried, behind an
+`if(!el) return` (§51.11).
+
+### 108.8 The boxes were overflowing on each other
+
+Islam, with a screenshot of an open row. Measured at 1440: the Job title field
+is **170px in a 158px cell** and paints 21px over its neighbour, Email 11px,
+Official BU 1px. An `<input>` with no size takes about 170px of intrinsic width.
+
+**`max-width:100%` DOES NOTHING HERE**, and that is the trap worth recording: a
+percentage resolves against the containing block, which under `table-layout:auto`
+is a width the cell has not settled yet, so the browser treats it as `none`.
+§93.10 met the same wall from the other side and wrote down that *"a px cap
+computed correctly and changed nothing on screen"* — measured again here, a px
+cap still moves nothing. **`width:100%` does**, because a definite width stops
+the field CONTRIBUTING its intrinsic size to the column at all; `min-width:0` is
+what lets it, since a form control's automatic minimum size is otherwise its
+intrinsic width and would hold the column open by another road.
+
+**THE MEASURE IS THAT NOTHING MOVES, not that nothing overflows.** Every content
+column now holds exactly its closed width when a row opens — Name 216, Job title
+150, Unit 150, Roles 227, all +0 — where before the table grew **188px** the
+moment a pen was pressed. §93.10's promise, kept for the first time.
+
+**RECORDED, NOT FIXED:** at 1600px, where the table has slack to redistribute,
+the two flexible select columns give up 53px and 23px to the frozen actions
+column, which legitimately widens for Save and Cancel (49 → 133px). Nothing is
+clipped when they do. Pinning them would mean reserving 133px of empty column on
+all 33 read rows to spare the one being edited, which is a worse trade. The
+check asserts that **no content column GROWS**, which is §93.10's fault stated
+as an invariant, and allows narrowing.
+
+### 108.9 The checks
+
+`src/checks/role-picker.py` presses every control rather than looking for it in
+the document, and asks **both ends** of each: did the data change, AND does the
+row say so. Either alone can be true while the product is broken — a grant
+written and never drawn is exactly what a retired row used to do. Every absence
+is paired with the presence that makes it meaningful (§94.2): a build that had
+lost the whole picker would satisfy *"there is no second dropdown"* on its own.
+
+**PROVED ABLE TO FAIL BEFORE IT WAS BELIEVED (§94.5):** run against the build
+from before this section — `python3 checks/role-picker.py
+../strategy-management-platform-v3.22.html` — it fails **17 times**. The
+extended `no-jump.py` section fails there too (page 0 → 1129, row 1478 → 349)
+and holds on this build.
+
+`checks/smo-team.py`'s *"a unit owner is still asked which unit"* asserted the
+design this section reverses, and was rewritten against the problem rather than
+deleted (§94.8): SMO team is still granted on the pick, a unit owner now lands
+where the Unit says, and with no Unit it is refused **with a sentence**.
+
+**Found failing and NOT caused here** — both fail identically on the previous
+build, and both are recorded rather than quietly fixed: `checks/no-wrap.py`
+(the register is 160px past its box at 1440 — §88 chose a cap that costs 190px,
+so this is within what was agreed and the check is stricter than the decision),
+and `checks/strategy-office.py` (two assertions about reordering finding a
+button but no handles).

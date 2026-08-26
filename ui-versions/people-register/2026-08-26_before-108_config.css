@@ -624,35 +624,11 @@
   /* And the input is bounded BY the cell rather than by a number of its own,
      so the two can never disagree about where the column ends. */
   .peoplecfg td.namecell input.fld { max-width:100%; box-sizing:border-box; }
-  /* ── AND EVERY OTHER FIELD IN AN OPEN ROW, WHICH `max-width` COULD NOT
-     DO (§108) ──────────────────────────────────────────────────────────
-     Islam, with a screenshot of an open row: "the boxes are overflowing on each
-     other." Measured at 1440: the Job title field is 170px in a 158px cell and
-     paints 21px over its neighbour, Email 11px, Official BU 1px — an `<input>`
-     with no size takes about 170px of intrinsic width and `overflow:visible`
-     (§93.10, kept on purpose so a control is never cut off) lets it spill.
-
-     `max-width:100%` DOES NOTHING HERE, and that is the trap worth recording:
-     a percentage resolves against the containing block, which under
-     `table-layout:auto` is a width the cell has not settled yet — so the
-     browser treats it as `none`. §93.10 met the same wall from the other side
-     and wrote down that "a px cap computed correctly and changed nothing on
-     screen"; measured again here, a px cap still moves nothing. `width:100%`
-     does, because a definite width makes the field stop CONTRIBUTING its
-     intrinsic size to the column in the first place — and `min-width:0` is what
-     lets it, since a form control's automatic minimum size is otherwise its
-     intrinsic width and would hold the column open by another road.
-
-     THE MEASURE IS THAT NOTHING MOVES, not that nothing overflows. Every
-     content column now holds exactly its closed width when a row opens — Name
-     216, Job title 150, Unit 150, Roles 227, all +0, where before the table
-     grew 188px the moment a pen was pressed. The one column that still widens
-     is the actions column (49 → 133px), which is Save and Cancel replacing the
-     ⋮; it is the LAST column and it is frozen, so nothing to its left moves.
-     §93.10's promise, kept for the first time. */
-  .cfg table tr.tk-open td input.fld,
-  .cfg table tr.tk-open td textarea.fld {
-    width:100%; min-width:0; box-sizing:border-box; }
+  /* AND EVERY OTHER FIELD IN AN OPEN ROW, for the same reason (§93.10): bounded
+     BY the cell rather than by a number of its own, so the two can never
+     disagree about where the column ends. It is what kept the name column
+     honest since §69 and was never extended to the rest of the row. */
+  .peoplecfg tr.tk-open input.fld { max-width:100%; box-sizing:border-box; }
   /* THE OFFSET IS A MEASUREMENT, SO THE WIDTH HAS TO BE ONE TOO. `left` for
      the second frozen column must equal the first one's rendered BORDER-BOX
      width, and under `table-layout:auto` a `width` is a suggestion the browser
@@ -1007,20 +983,18 @@
                            color:var(--ink-2); }
   .hmenu-panel.pwset .cq b { color:var(--ink); font-weight:700; }
 
-  /* ── The role picker: one dropdown, and why a pick did not land (§108)
-     `select.rolewhere` and `.rolewhy` were the second half's, deleted with it
-     (§24) — the Unit cell answers where, and the widths those two needed were
-     the whole reason this block existed.
+  /* ── The role picker, one half per column (§69) ──────────────────
+     Both are bounded. A `select.fld` in this table is `width:100%` with no
+     intrinsic minimum, so under the auto layout the register uses it claims
+     the whole box and crushes the name columns — measured at 920px before this
+     existed. The Unit column's is the narrower of the two: it holds a unit
+     name, where the Roles one holds "Strategy custodian".
 
-     THE REFUSAL WRAPS, AND IT HAS TO SAY SO OUT LOUD. `.cfg table td` is
-     `white-space:nowrap` (§88), which is right for a value and wrong for a
-     sentence — left alone it would run the sentence off the side of the cell,
-     which is precisely the fault §108 came from. Bounded at 230px so it cannot
-     hold the Roles column open either: `td.roles` is one of §88's exemptions
-     (`max-width:none`), so nothing above it would stop it. */
-  .rolestop { display:block; margin:6px 0 0; max-width:230px;
-              white-space:normal; font-size:11.5px; line-height:1.4;
-              color:var(--bad); }
+     The two widths themselves are NOT here: `.cfg .unitcfg select.fld` in
+     arrange.css is (0,3,1) and later in the concatenation, so it beats
+     anything this file can say about them. They live beside it (§69). */
+  .peoplecfg select.rolewhere { margin-top:5px; }
+  .peoplecfg .rolewhy { display:block; margin:5px 0 0; }
   /* The two collective actions, side by side and plainly different weights. */
   .bulkrow { display:flex; flex-wrap:wrap; gap:10px; margin:12px 0 0; }
   .bulkrow button { display:inline-flex; align-items:center; gap:8px; }

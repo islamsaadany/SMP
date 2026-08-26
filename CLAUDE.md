@@ -1328,6 +1328,51 @@ console errors (in this cloud environment, run it via a wrapper that points Play
   Proved by asking the screen AND the shared rule for five viewers and
   asserting BOTH ENDS (§94.2), by PRESSING the button (§70, §93.4), and by
   forcing each half false to watch the checks fail (§94.5).
+- **THE UNIT CELL SAYS WHERE, THE ROLES CELL SAYS WHAT (since v3.33, §108):**
+  Islam, of the picker's second half: *"choose where is very strange sentence.
+  make it Unit and it's already in a cell what am I missing here?"* **Nothing,
+  and it was worse than redundant** — `personAtChoices()` offers the group,
+  every unit, every function and every company, item for item the list
+  `roleWheres()` drew from, and `grantPersonRole()` WRITES IT BACK on every
+  grant (`p.unit` / `p.fn` / `p.company`). The second dropdown asked a question
+  the first had already answered and then forced its own answer onto it. §69.1's
+  split survives in the half that mattered; the DUPLICATE goes, with
+  `roleWhereCell`, `select.rolewhere` and `.rolewhy` (§24). **IT WAS ALSO
+  UNREACHABLE:** `.cfg table td` is `white-space:nowrap` (§88), so the cell laid
+  its two controls SIDE BY SIDE — the second started 150px into a 158px cell,
+  ran 133px past its edge and landed under the Email field, which took every
+  click. Present, enabled, correctly sized and hitting something else (§93.4,
+  third time) — `elementFromPoint` at its own centre returned the Email input,
+  and it only ever bit the roles with a real choice, because §92 grants a
+  one-destination role on the pick. **A PICK THAT CANNOT LAND SAYS SO**, in two
+  sentences because there are two ways out, and **`roleWheres()` remains the
+  only definition** of what may be held where — `roleAtWord()` derives even the
+  wording from it. **EITHER HALF FINISHES IT** (`tryGrantRole()`, called from
+  the role select and from the Unit select while a refusal stands): a refused
+  pick leaves that role SHOWING, so picking it again fires no `change` at all.
+  **A RETIRED ROW IS OFFERED NOTHING** — the grant used to be written while the
+  row read *No role*, leaving a unit pointed at somebody who cannot sign in.
+  **CANCEL RESTORES THE POINTERS, NOT THE ROLE LIST**: granting an owner
+  OVERWRITES whoever held it, so undoing by revoking left the unit headless —
+  `ROWHELD` copies both maps whole.
+- **PUTTING THE CURSOR IN A FIELD MUST NOT MOVE THE ROW (§108.7):** *"once I
+  open the edit of a line the line jumps to the first line."* The cursor, not
+  the repaint — the register is its own scrolling box and a plain `focus()`
+  lets the browser scroll the field into view, hauling row 20 of 33 from y=638
+  to y=105. `focusNoScroll()` is declared ONCE for both pens (§85).
+  **`no-jump.py` had been green throughout**: it opens a row and then measures
+  repaints, so the press that opens one was never measured (§94.2) — and one of
+  its own trials was keyed on `[data-prole-kind]`, a selector that has never
+  existed, behind a silent `if(!el) return` (§51.11).
+- **`max-width:100%` ON A FIELD IN AN AUTO-LAYOUT TABLE DOES NOTHING (§108.8):**
+  a percentage resolves against a containing block the cell has not settled, so
+  the browser treats it as `none` — which is why an open row's fields painted
+  21px over their neighbours. A px cap changes nothing either (§93.10 recorded
+  that once already). **`width:100%` with `min-width:0`** is the fix: a definite
+  width stops the field contributing its intrinsic size to the column. **The
+  measure is that nothing MOVES** — every content column now holds its closed
+  width, where the table used to grow 188px the moment a pen was pressed, and
+  the check asserts that no content column GROWS rather than that none changes.
 - **THE ONBOARDING TOUR IS TOLD WHERE THE PERSON WORKS (since v3.30, §107;
   spec 017):** a first-sign-in guided tour on **demo data**, two stories
   (strategy custodian; unit/function owner), told on a unit or a function —
@@ -1539,6 +1584,10 @@ SMP/
 cd SMP-Project-Folder/src
 python3 build.py     # assembles strategy-management-platform.html (must be byte-identical to the shipped vX.Y file)
 python3 qa.py        # walks every page as every viewer, reports console errors (needs Playwright + Chromium)
+python3 checks/role-picker.py   # giving somebody a role: every control PRESSED,
+                                # both ends asked, and the absences asserted (§108)
+python3 checks/no-jump.py       # nothing moves the register under you — the act of
+                                # OPENING a row included, since §108.7
 python3 checks/office-chat.py   # the chat's client half — serves the built file over HTTP,
                                 # because the whole feature is invisible over file:// (§97.9)
 ```
@@ -1575,7 +1624,49 @@ prior sessions (on HR_ERP) accidentally reverted agreed-upon designs.
 
 ---
 
-*Last Updated: 2026-08-26 &mdash; **v3.32: the onboarding tour** (&sect;107,
+*Last Updated: 2026-08-26 &mdash; **v3.33: giving somebody a role**
+(&sect;108). Islam: *"in the people registry I'm trying to set business unit
+owners as roles and it keeps failing with no error message."* **THE CONTROL WAS
+PRESENT, ENABLED, CORRECTLY SIZED AND UNREACHABLE.** &sect;69.1 put the picker's
+second half in the Unit column at his own request; &sect;88 then made every
+Setup cell one line, so the cell laid its two controls SIDE BY SIDE &mdash; the
+second started 150px into a 158px cell, ran 133px past its own edge, and landed
+under the Email field, which took every click. All that survived on screen was
+the letter **C** of *Choose where&hellip;*. Every check in the suite was green
+on it for as long as it existed, because all of them ask whether a control is in
+the document: `elementFromPoint` at its own centre returned the Email input, and
+a real click was refused outright. &sect;93.4, third time. **AND IT ONLY BIT THE
+ROLES WITH A REAL CHOICE** &mdash; &sect;92 grants a one-destination role on the
+pick, so the SMO worked and a unit owner never could, which is exactly the
+difference between his two reports. **THEN THE BETTER QUESTION**: *"make it Unit
+and it's already in a cell what am I missing here?"* Nothing, and it was worse
+than redundant &mdash; the Unit cell's own dropdown offers every place a role
+can be held, item for item the list the second one drew from, and
+`grantPersonRole()` WRITES THAT SAME FIELD BACK on every grant. **The second
+dropdown asked a question the first had already answered and then forced its own
+answer onto it.** So it is not renamed, it is removed, and &sect;46.4's "two
+different facts" turns out to have been true of the concepts and never of the
+code. **A PICK THAT CANNOT LAND NOW SAYS SO** &mdash; the one thing the old pair
+could not do, since it committed on the second answer and made *not yet* and
+*never* look identical. **AND EITHER HALF FINISHES IT**, which a check found: a
+refused pick leaves that role SHOWING, so picking it again fires no `change` at
+all, and setting the Unit had to be the other way in. Three more, each its own
+silence: a **retired** row was offered the picker and the grant was WRITTEN
+while the row read *No role*, leaving a unit pointed at somebody who cannot sign
+in; **Cancel** restored the person and left the grant standing, and restoring by
+revoking was not enough either, because granting an owner overwrites whoever
+held it; and **opening a row threw it to the top of the register** &mdash; the
+cursor, not the repaint, hauling row 20 from y=638 to y=105, with `no-jump.py`
+green throughout because it opens a row and then measures repaints. **AND THE
+BOXES OVERFLOWED EACH OTHER** (his last note): `max-width:100%` on a field in an
+auto-layout table does nothing at all, a px cap does nothing either
+(&sect;93.10 wrote that down once already), and `width:100%` with `min-width:0`
+does &mdash; every content column now holds its closed width, where the table
+used to grow 188px the moment a pen was pressed. The new check **presses** every
+control and asks BOTH ENDS of each, and was proved able to fail before its green
+run was believed: **17 failures** against the previous build.*
+
+*Earlier: 2026-08-26 &mdash; **v3.32: the onboarding tour** (&sect;107,
 spec 017). *"For first time users we need some orientation flow that takes them
 through the platform … highlighting some areas while dimming the rest of the
 page … in a user story mode."* Settled over **four reviewed revisions of a

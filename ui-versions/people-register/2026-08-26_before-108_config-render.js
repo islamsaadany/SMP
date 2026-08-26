@@ -1089,8 +1089,9 @@ function renderPeople(){
 
   function roleCell(p){
     /* The role chips' × and the picker belong to the OPEN row, not to a page
-       mode (§79.2). Computed here rather than passed, because a parameter the
-       caller forgot would put an × on a closed row. */
+       mode (§79.2). Computed here rather than passed, because roleCell and
+       roleWhereCell are two halves of one control (§69.1) and a parameter one
+       of them forgot would put an × on a closed row. */
     var editable = rowOpen(p);
     var rs = personRoles(p);
     var home = belongsKey(p);
@@ -1143,47 +1144,22 @@ function renderPeople(){
          being typed, not read. */
       : (editable && ADDROLE === p.key ? '' : '<span class="pill none">No role</span>');
     if (!editable) return held;
-    /* ── A RETIRED ROW HOLDS NOTHING, SO IT IS NOT OFFERED A ROLE ─────
-       `SMPRules.personRoles()` opens with "a retired person holds nothing" and
-       returns [] — but the picker was drawn on a retired row anyway, so giving
-       one Business unit owner WROTE the grant (the unit's `head` now points at
-       them) while the row went on reading "No role": the rule that decides what
-       a row SHOWS is not the one the grant went through, and nothing compared
-       them.
+    /* ── HALF THE PICKER. The other half is in the Unit column ────────
+       Islam: "keep the unit selection in the unit and keep the role selection
+       in the role so I can choose both but each in it's right placement."
 
-       Two silent wrongs in one press — nothing said the grant had happened, and
-       a unit was left pointed at somebody who cannot sign in, which is exactly
-       the state §93.4's custodian count exists to find. Refused where the
-       control was, and the refusal says the way out (§62). */
-    if (!personActive(p))
-      return held + '<span class="rolestop">Retired \u2014 restore this person ' +
-        'before giving them a role.</span>';
-    /* ── ONE DROPDOWN: THE UNIT CELL ALREADY SAYS WHERE (§108) ───────
-       Islam, of the second half this used to draw: "choose where is very
-       strange sentence. make it Unit and it's already in a cell what am I
-       missing here?"
+       Right, and the old control was the giveaway: it opened a role select AND
+       a where select inside the Roles cell, so the Unit column sat empty
+       beside a dropdown naming a unit. One control spanning two columns is a
+       control that belongs in neither.
 
-       Nothing, and it was worse than redundant. `personAtChoices()` — the Unit
-       cell's own dropdown — offers the group, every unit, every function and
-       every company: item for item the list `roleWheres()` was drawing from, a
-       superset of every role's where. And `grantPersonRole()` WRITES IT BACK
-       every time — owner and unit custodian set `p.unit`, fnhead sets `p.fn`,
-       cceo sets `p.company` — so the second dropdown asked a question the first
-       had already answered and then forced its own answer onto it. The two
-       could never disagree, because the grant made them agree.
-
-       §69.1's split survives in the half that mattered: the unit selection is
-       in the Unit column and the role selection is in Roles. What goes is the
-       DUPLICATE, not the arrangement. §46.4's "where somebody sits and where a
-       role reaches are two different facts" stayed true of the CONCEPTS and was
-       never true of the code.
-
-       AND IT IS WHY THEY NO LONGER BLOCK EACH OTHER (Islam: "the role and the
-       unit shouldn't block each other but they only function together"). Two
-       ordinary fields on the row, set in either order, neither emptying the
-       other; both have to say something before somebody holds a role somewhere,
-       and where they cannot agree the row explains it rather than doing
-       nothing. */
+       NO GIVE AND NO CANCEL. A pair of dropdowns whose result carries its own
+       × is already a selection somebody can take back (§62's "the refusal is
+       where the confirmation would be", turned round: the undo is where the
+       confirmation would be). So the role is granted the moment BOTH halves
+       have been chosen — which is why both start on a blank "Choose…" option
+       rather than pre-selected: a picker that commits on its own must never
+       commit something nobody picked. */
     var addRole = ADDROLE === p.key;
     return held +
       (addRole
@@ -1193,45 +1169,37 @@ function renderPeople(){
             ROLES.filter(function(r){ return roleIsGrantable(r.key); }).map(function(r){
               return '<option value="' + r.key + '"' + (r.key === ADDROLE_KIND ? " selected" : "") +
                 '>' + esc(r.name) + '</option>';
-            }).join("") + '</select>' + roleStop(p)
+            }).join("") + '</select>'
         : '<button class="linkbu" data-prole-open="' + p.key + '">+ role</button>');
   }
 
-  /* ── A PICK THAT CANNOT LAND SAYS SO, WHERE IT WAS MADE (§108) ─────
-     The one thing the old pair could not do. It committed on the second answer,
-     so "not yet" and "never" looked identical from the outside: nothing
-     happened, and nothing was said.
-
-     TWO REFUSALS, TWO SENTENCES, because they have different ways out — one
-     wants a Unit set at all, the other wants a different KIND of Unit. What
-     each role may be held at is still `roleWheres()` and nothing else: this
-     asks that list rather than carrying a second opinion about it (§42), and
-     only the WORD for a kind is written here.
-
-     `ROLESTOP` is the outcome of the last pick and lives on the screen, never
-     on the person (§25.2) — cleared by the pick that succeeds, by opening the
-     picker again, and by leaving the row. */
-  function roleStop(p){
-    if (!ROLESTOP || ROLESTOP.key !== p.key) return "";
-    return '<span class="rolestop">' + esc(ROLESTOP.why) + '</span>';
+  /* The second half, drawn in the Unit column and nowhere else. It is only
+     ever present while a role is being given, and it is EMPTY until a role has
+     been picked, because which places are offered depends on which role it is:
+     a company CEO is seated at a company, a function head at a function, and
+     one combined list would offer Company CEO of Mobile (§35). */
+  function roleWhereCell(p){
+    if (!rowOpen(p)) return "";
+    if (ADDROLE !== p.key) return "";
+    if (!ADDROLE_KIND) {
+      return '<span class="why rolewhy" style="margin:0">pick a role first</span>';
+    }
+    var wheres = roleWheres(ADDROLE_KIND);
+    /* A ROLE WITH ONE PLACE IS ALREADY GIVEN (§92). This used to render a
+       select holding a single option and wait to be told which of the one to
+       use — the comment here even claimed it "says it rather than offering a
+       list of one", which is what it should have done and not what it did.
+       The grant happens on the role pick now, so this cell is never reached
+       for those; the guard stays because a role list that gains a
+       single-destination entry later must not fall back into asking. */
+    if (wheres.length <= 1) return "";
+    return '<select class="fld rolewhere" data-prole-where="' + p.key + '" ' +
+      'aria-label="Where ' + esc(p.name) + ' holds it">' +
+      '<option value="" selected>Choose where\u2026</option>' +
+      wheres.map(function(w){
+        return '<option value="' + esc(w.v) + '">' + esc(w.label) + '</option>';
+      }).join("") + '</select>';
   }
-
-  /* roleWhereCell() was here. It drew the picker's second half — "Choose
-     where\u2026" — in the Unit column, and §108 deleted it rather than renaming
-     it: the cell's own dropdown already answers that question and the grant
-     already writes the answer back, so the two could never disagree. Removed
-     with its call site rather than left returning "" (§24), because a function
-     nothing calls is one the next reader has to prove is dead before touching
-     anything near it.
-
-     It also carried a bug worth remembering. `.cfg table td` is
-     `white-space:nowrap` (§88's one-line standard), so the cell laid its two
-     controls SIDE BY SIDE rather than stacking them: the second started 150px
-     into a 158px cell, ran 133px past its own right edge and landed under the
-     Email field, which took every click. Present, enabled, correctly sized and
-     unreachable — §93.4 for the third time, and invisible to every check in the
-     suite, because all of them ask whether a control is in the document.
-     `elementFromPoint` at its own centre returned the Email input. */
 
   /* contactCell() was here. It stacked the address over the number in one
      cell, and the two are two columns now (§69.16) — a function nothing calls
@@ -1650,7 +1618,13 @@ function renderPeople(){
                 ? '<span class="why" style="margin:0">&mdash; the list says ' +
                   esc(whereLabel(drift)) + '</span>'
                 : '<span class="why" style="margin:0">&mdash;</span>'))) +
-        saidWhereNote(p, ed) + '</td>' : '') +
+        saidWhereNote(p, ed) +
+        /* The role picker's second half (§69). It sits UNDER what the cell
+           already says rather than replacing it: where somebody sits and where
+           a role reaches are two different facts (§46.4), and a picker that
+           hid the first while choosing the second would be asking the question
+           with the answer covered up. */
+        roleWhereCell(p) + '</td>' : '') +
       /* Email above the number. Both are how you reach somebody, and giving
          each a column of its own made an eleven-column register — the pair is
          one answer to one question. */

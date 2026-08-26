@@ -2011,11 +2011,35 @@
   /* And the input is bounded BY the cell rather than by a number of its own,
      so the two can never disagree about where the column ends. */
   .peoplecfg td.namecell input.fld { max-width:100%; box-sizing:border-box; }
-  /* AND EVERY OTHER FIELD IN AN OPEN ROW, for the same reason (§93.10): bounded
-     BY the cell rather than by a number of its own, so the two can never
-     disagree about where the column ends. It is what kept the name column
-     honest since §69 and was never extended to the rest of the row. */
-  .peoplecfg tr.tk-open input.fld { max-width:100%; box-sizing:border-box; }
+  /* ── AND EVERY OTHER FIELD IN AN OPEN ROW, WHICH `max-width` COULD NOT
+     DO (§108) ──────────────────────────────────────────────────────────
+     Islam, with a screenshot of an open row: "the boxes are overflowing on each
+     other." Measured at 1440: the Job title field is 170px in a 158px cell and
+     paints 21px over its neighbour, Email 11px, Official BU 1px — an `<input>`
+     with no size takes about 170px of intrinsic width and `overflow:visible`
+     (§93.10, kept on purpose so a control is never cut off) lets it spill.
+
+     `max-width:100%` DOES NOTHING HERE, and that is the trap worth recording:
+     a percentage resolves against the containing block, which under
+     `table-layout:auto` is a width the cell has not settled yet — so the
+     browser treats it as `none`. §93.10 met the same wall from the other side
+     and wrote down that "a px cap computed correctly and changed nothing on
+     screen"; measured again here, a px cap still moves nothing. `width:100%`
+     does, because a definite width makes the field stop CONTRIBUTING its
+     intrinsic size to the column in the first place — and `min-width:0` is what
+     lets it, since a form control's automatic minimum size is otherwise its
+     intrinsic width and would hold the column open by another road.
+
+     THE MEASURE IS THAT NOTHING MOVES, not that nothing overflows. Every
+     content column now holds exactly its closed width when a row opens — Name
+     216, Job title 150, Unit 150, Roles 227, all +0, where before the table
+     grew 188px the moment a pen was pressed. The one column that still widens
+     is the actions column (49 → 133px), which is Save and Cancel replacing the
+     ⋮; it is the LAST column and it is frozen, so nothing to its left moves.
+     §93.10's promise, kept for the first time. */
+  .cfg table tr.tk-open td input.fld,
+  .cfg table tr.tk-open td textarea.fld {
+    width:100%; min-width:0; box-sizing:border-box; }
   /* THE OFFSET IS A MEASUREMENT, SO THE WIDTH HAS TO BE ONE TOO. `left` for
      the second frozen column must equal the first one's rendered BORDER-BOX
      width, and under `table-layout:auto` a `width` is a suggestion the browser
@@ -2370,18 +2394,20 @@
                            color:var(--ink-2); }
   .hmenu-panel.pwset .cq b { color:var(--ink); font-weight:700; }
 
-  /* ── The role picker, one half per column (§69) ──────────────────
-     Both are bounded. A `select.fld` in this table is `width:100%` with no
-     intrinsic minimum, so under the auto layout the register uses it claims
-     the whole box and crushes the name columns — measured at 920px before this
-     existed. The Unit column's is the narrower of the two: it holds a unit
-     name, where the Roles one holds "Strategy custodian".
+  /* ── The role picker: one dropdown, and why a pick did not land (§108)
+     `select.rolewhere` and `.rolewhy` were the second half's, deleted with it
+     (§24) — the Unit cell answers where, and the widths those two needed were
+     the whole reason this block existed.
 
-     The two widths themselves are NOT here: `.cfg .unitcfg select.fld` in
-     arrange.css is (0,3,1) and later in the concatenation, so it beats
-     anything this file can say about them. They live beside it (§69). */
-  .peoplecfg select.rolewhere { margin-top:5px; }
-  .peoplecfg .rolewhy { display:block; margin:5px 0 0; }
+     THE REFUSAL WRAPS, AND IT HAS TO SAY SO OUT LOUD. `.cfg table td` is
+     `white-space:nowrap` (§88), which is right for a value and wrong for a
+     sentence — left alone it would run the sentence off the side of the cell,
+     which is precisely the fault §108 came from. Bounded at 230px so it cannot
+     hold the Roles column open either: `td.roles` is one of §88's exemptions
+     (`max-width:none`), so nothing above it would stop it. */
+  .rolestop { display:block; margin:6px 0 0; max-width:230px;
+              white-space:normal; font-size:11.5px; line-height:1.4;
+              color:var(--bad); }
   /* The two collective actions, side by side and plainly different weights. */
   .bulkrow { display:flex; flex-wrap:wrap; gap:10px; margin:12px 0 0; }
   .bulkrow button { display:inline-flex; align-items:center; gap:8px; }
@@ -3393,7 +3419,8 @@
      it did nothing: this selector is (0,3,1) against that file's (0,2,1) AND
      later in build.py's concatenation, so it won twice over. */
   .cfg .peoplecfg select.rolepick { min-width:150px; max-width:186px; }
-  .cfg .peoplecfg select.rolewhere { min-width:132px; max-width:170px; }
+  /* `select.rolewhere` was here and went with the control (§108, §24): the Unit
+     cell answers where, so there is no second select to bound. */
   /* AND THE ROW'S OWN TWO, WHICH §69 MISSED (§93.10). Exactly the same fault
      and exactly the same 920px: the role picker's pair were bounded and the
      pair that appear when a ROW is opened for editing were not, because they
@@ -7878,6 +7905,11 @@ var NEWSET = { name: "", team: "", owner: "", pick: "smo" };
    held here rather than recomputed on every paint, because the person
    answering it may go and look at the row it names and come back. */
 var ADDROLE = null, ADDROLE_KIND = "owner";
+/* ── WHY THE LAST PICK DID NOT LAND (§108) ────────────────────────────
+   `{key, why}`, or null. A property of the screen and never of the person
+   (§25.2) — it is the outcome of one press, cleared by the press that
+   succeeds, by opening the picker again and by leaving the row. */
+var ROLESTOP = null;
 var NEWPERSON = { name:"", empId:"", email:"", hit:null, hitBy:null, warn:null };
 function newPersonReset(){
   NEWPERSON = { name:"", empId:"", email:"", hit:null, hitBy:null, warn:null };
@@ -8463,9 +8495,56 @@ function rowEditLive(){
   var t = rowEditTable();
   return (t && ROWFIND[t]) ? ROWFIND[t](rowEditKey()) : null;
 }
+/* ── AND WHAT POINTS AT THE ROW, NOT ONLY WHAT IS IN IT (§108) ───────
+   A person's roles are not ON the person: a unit's `head` and a function's
+   `custodian` point AT them (§33), and `ROWWAS` is a copy of the row. So Cancel
+   restored `p.unit` and left the grant standing — press it after giving
+   somebody Business unit owner of Nigeria and they read as its owner while
+   sitting at the group. One fact contradicting itself, from one press.
+
+   `ROWHELD` is every one of those pointers as it stood when the row opened.
+   Not the person's ROLE LIST, which was the first answer and was not enough:
+   granting an owner OVERWRITES whoever held it, so undoing the grant by
+   revoking it left the unit with no head at all — the displaced person was
+   gone and nothing remembered them. What has to come back is the pointers, and
+   they are what is copied.
+
+   Both maps whole, because a grant can move a seat this row never named — a
+   custodian handed to a function moves `FUNCTIONS[k].custodian` — and they are
+   two small objects (ten units, eight functions, two keys each), which is
+   cheaper than working out in advance which of them a press might reach. */
+var ROWHELD = null;
+function rolePointers(){
+  var out = { units:{}, fns:{} };
+  UNIT_KEYS.forEach(function(k){
+    var r = UNIT_ROLES[k] || {};
+    out.units[k] = { head:r.head || null, custodian:r.custodian || null };
+  });
+  FUNCTION_KEYS.forEach(function(k){
+    var f = FUNCTIONS[k] || {};
+    out.fns[k] = { head:f.head || null, custodian:f.custodian || null };
+  });
+  return out;
+}
+/* PUT BACK IN PLACE, never by replacing the object — the same rule
+   rowEditCancel already follows for the person, and for the same reason: an
+   open menu or a chip may be holding a reference to the one that is there. */
+function restoreRolePointers(was){
+  if (!was) return;
+  Object.keys(was.units).forEach(function(k){
+    var r = unitRolesFor(k);
+    r.head = was.units[k].head; r.custodian = was.units[k].custodian;
+  });
+  Object.keys(was.fns).forEach(function(k){
+    var f = FUNCTIONS[k];
+    if (!f) return;
+    f.head = was.fns[k].head; f.custodian = was.fns[k].custodian;
+  });
+}
 function rowEditOpen(table, key, obj){
   ROWEDIT = table + ":" + key;
   ROWWAS = obj ? JSON.parse(JSON.stringify(obj)) : null;
+  ROWHELD = (table === "people" && obj) ? rolePointers() : null;
 }
 /* PUT BACK IN PLACE, never by replacing the object. Something else may already
    hold a reference to this person — the viewer switcher, a role chip, an open
@@ -8476,13 +8555,18 @@ function rowEditOpen(table, key, obj){
    a row that still exists. */
 function rowEditCancel(obj){
   if (obj === undefined) obj = rowEditLive();
+  /* The pointers first and the row second, so that a grant's two halves are
+     undone in the order they were written: grantPersonRole() writes the
+     pointer AND the person's own attachment, and ROWWAS is what puts the
+     second one back. */
+  restoreRolePointers(ROWHELD);
   if (obj && ROWWAS) {
     Object.keys(obj).forEach(function(k){ if (!(k in ROWWAS)) delete obj[k]; });
     Object.keys(ROWWAS).forEach(function(k){ obj[k] = ROWWAS[k]; });
   }
-  ROWEDIT = null; ROWWAS = null;
+  ROWEDIT = null; ROWWAS = null; ROWHELD = null;
 }
-function rowEditClose(){ ROWEDIT = null; ROWWAS = null; }
+function rowEditClose(){ ROWEDIT = null; ROWWAS = null; ROWHELD = null; }
 
 var SHORT_NAME_WORDS = 3;
 function shortName(name){ return nameWords(name, SHORT_NAME_WORDS); }
@@ -9776,6 +9860,28 @@ function roleKeyByName(name){
    file naming it would be asking for a role that arrives by itself, so the
    template does not offer it and the reader says so plainly. */
 function roleIsGrantable(key){ return !!key && !SMPRules.isOwnLinesRole(key); }
+/* ── THE WORD FOR WHERE A ROLE IS HELD (§108) ─────────────────────────
+   For the sentence a refused pick shows, and for nothing else. It is a LABEL,
+   not a second rule: `roleWheres()` still decides what may be held where, and
+   this only says it in English — so a role whose list changes cannot end up
+   with a sentence that contradicts the list.
+
+   Derived from the list rather than written beside it, for the same reason:
+   the kinds actually offered are what the person has to pick from. */
+function roleAtWord(roleKey){
+  var kinds = {};
+  roleWheres(roleKey).forEach(function(w){
+    kinds[w.v === "group" ? "group"
+        : String(w.v).indexOf("fn:") === 0 ? "fn"
+        : String(w.v).indexOf("co:") === 0 ? "co" : "unit"] = 1;
+  });
+  var WORD = { group:"the group", unit:"a business unit",
+               fn:"a supporting function", co:"a company" };
+  var out = Object.keys(kinds).map(function(k){ return WORD[k]; });
+  if (!out.length) return "somewhere that does not exist yet";
+  if (out.length === 1) return out[0];
+  return out.slice(0, -1).join(", ") + " or " + out[out.length - 1];
+}
 
 /* Reads the sheet against the stored world and says what would happen. It
    changes NOTHING — the review step exists so that an upload is looked at
@@ -21255,9 +21361,8 @@ function renderPeople(){
 
   function roleCell(p){
     /* The role chips' × and the picker belong to the OPEN row, not to a page
-       mode (§79.2). Computed here rather than passed, because roleCell and
-       roleWhereCell are two halves of one control (§69.1) and a parameter one
-       of them forgot would put an × on a closed row. */
+       mode (§79.2). Computed here rather than passed, because a parameter the
+       caller forgot would put an × on a closed row. */
     var editable = rowOpen(p);
     var rs = personRoles(p);
     var home = belongsKey(p);
@@ -21310,22 +21415,47 @@ function renderPeople(){
          being typed, not read. */
       : (editable && ADDROLE === p.key ? '' : '<span class="pill none">No role</span>');
     if (!editable) return held;
-    /* ── HALF THE PICKER. The other half is in the Unit column ────────
-       Islam: "keep the unit selection in the unit and keep the role selection
-       in the role so I can choose both but each in it's right placement."
+    /* ── A RETIRED ROW HOLDS NOTHING, SO IT IS NOT OFFERED A ROLE ─────
+       `SMPRules.personRoles()` opens with "a retired person holds nothing" and
+       returns [] — but the picker was drawn on a retired row anyway, so giving
+       one Business unit owner WROTE the grant (the unit's `head` now points at
+       them) while the row went on reading "No role": the rule that decides what
+       a row SHOWS is not the one the grant went through, and nothing compared
+       them.
 
-       Right, and the old control was the giveaway: it opened a role select AND
-       a where select inside the Roles cell, so the Unit column sat empty
-       beside a dropdown naming a unit. One control spanning two columns is a
-       control that belongs in neither.
+       Two silent wrongs in one press — nothing said the grant had happened, and
+       a unit was left pointed at somebody who cannot sign in, which is exactly
+       the state §93.4's custodian count exists to find. Refused where the
+       control was, and the refusal says the way out (§62). */
+    if (!personActive(p))
+      return held + '<span class="rolestop">Retired \u2014 restore this person ' +
+        'before giving them a role.</span>';
+    /* ── ONE DROPDOWN: THE UNIT CELL ALREADY SAYS WHERE (§108) ───────
+       Islam, of the second half this used to draw: "choose where is very
+       strange sentence. make it Unit and it's already in a cell what am I
+       missing here?"
 
-       NO GIVE AND NO CANCEL. A pair of dropdowns whose result carries its own
-       × is already a selection somebody can take back (§62's "the refusal is
-       where the confirmation would be", turned round: the undo is where the
-       confirmation would be). So the role is granted the moment BOTH halves
-       have been chosen — which is why both start on a blank "Choose…" option
-       rather than pre-selected: a picker that commits on its own must never
-       commit something nobody picked. */
+       Nothing, and it was worse than redundant. `personAtChoices()` — the Unit
+       cell's own dropdown — offers the group, every unit, every function and
+       every company: item for item the list `roleWheres()` was drawing from, a
+       superset of every role's where. And `grantPersonRole()` WRITES IT BACK
+       every time — owner and unit custodian set `p.unit`, fnhead sets `p.fn`,
+       cceo sets `p.company` — so the second dropdown asked a question the first
+       had already answered and then forced its own answer onto it. The two
+       could never disagree, because the grant made them agree.
+
+       §69.1's split survives in the half that mattered: the unit selection is
+       in the Unit column and the role selection is in Roles. What goes is the
+       DUPLICATE, not the arrangement. §46.4's "where somebody sits and where a
+       role reaches are two different facts" stayed true of the CONCEPTS and was
+       never true of the code.
+
+       AND IT IS WHY THEY NO LONGER BLOCK EACH OTHER (Islam: "the role and the
+       unit shouldn't block each other but they only function together"). Two
+       ordinary fields on the row, set in either order, neither emptying the
+       other; both have to say something before somebody holds a role somewhere,
+       and where they cannot agree the row explains it rather than doing
+       nothing. */
     var addRole = ADDROLE === p.key;
     return held +
       (addRole
@@ -21335,37 +21465,45 @@ function renderPeople(){
             ROLES.filter(function(r){ return roleIsGrantable(r.key); }).map(function(r){
               return '<option value="' + r.key + '"' + (r.key === ADDROLE_KIND ? " selected" : "") +
                 '>' + esc(r.name) + '</option>';
-            }).join("") + '</select>'
+            }).join("") + '</select>' + roleStop(p)
         : '<button class="linkbu" data-prole-open="' + p.key + '">+ role</button>');
   }
 
-  /* The second half, drawn in the Unit column and nowhere else. It is only
-     ever present while a role is being given, and it is EMPTY until a role has
-     been picked, because which places are offered depends on which role it is:
-     a company CEO is seated at a company, a function head at a function, and
-     one combined list would offer Company CEO of Mobile (§35). */
-  function roleWhereCell(p){
-    if (!rowOpen(p)) return "";
-    if (ADDROLE !== p.key) return "";
-    if (!ADDROLE_KIND) {
-      return '<span class="why rolewhy" style="margin:0">pick a role first</span>';
-    }
-    var wheres = roleWheres(ADDROLE_KIND);
-    /* A ROLE WITH ONE PLACE IS ALREADY GIVEN (§92). This used to render a
-       select holding a single option and wait to be told which of the one to
-       use — the comment here even claimed it "says it rather than offering a
-       list of one", which is what it should have done and not what it did.
-       The grant happens on the role pick now, so this cell is never reached
-       for those; the guard stays because a role list that gains a
-       single-destination entry later must not fall back into asking. */
-    if (wheres.length <= 1) return "";
-    return '<select class="fld rolewhere" data-prole-where="' + p.key + '" ' +
-      'aria-label="Where ' + esc(p.name) + ' holds it">' +
-      '<option value="" selected>Choose where\u2026</option>' +
-      wheres.map(function(w){
-        return '<option value="' + esc(w.v) + '">' + esc(w.label) + '</option>';
-      }).join("") + '</select>';
+  /* ── A PICK THAT CANNOT LAND SAYS SO, WHERE IT WAS MADE (§108) ─────
+     The one thing the old pair could not do. It committed on the second answer,
+     so "not yet" and "never" looked identical from the outside: nothing
+     happened, and nothing was said.
+
+     TWO REFUSALS, TWO SENTENCES, because they have different ways out — one
+     wants a Unit set at all, the other wants a different KIND of Unit. What
+     each role may be held at is still `roleWheres()` and nothing else: this
+     asks that list rather than carrying a second opinion about it (§42), and
+     only the WORD for a kind is written here.
+
+     `ROLESTOP` is the outcome of the last pick and lives on the screen, never
+     on the person (§25.2) — cleared by the pick that succeeds, by opening the
+     picker again, and by leaving the row. */
+  function roleStop(p){
+    if (!ROLESTOP || ROLESTOP.key !== p.key) return "";
+    return '<span class="rolestop">' + esc(ROLESTOP.why) + '</span>';
   }
+
+  /* roleWhereCell() was here. It drew the picker's second half — "Choose
+     where\u2026" — in the Unit column, and §108 deleted it rather than renaming
+     it: the cell's own dropdown already answers that question and the grant
+     already writes the answer back, so the two could never disagree. Removed
+     with its call site rather than left returning "" (§24), because a function
+     nothing calls is one the next reader has to prove is dead before touching
+     anything near it.
+
+     It also carried a bug worth remembering. `.cfg table td` is
+     `white-space:nowrap` (§88's one-line standard), so the cell laid its two
+     controls SIDE BY SIDE rather than stacking them: the second started 150px
+     into a 158px cell, ran 133px past its own right edge and landed under the
+     Email field, which took every click. Present, enabled, correctly sized and
+     unreachable — §93.4 for the third time, and invisible to every check in the
+     suite, because all of them ask whether a control is in the document.
+     `elementFromPoint` at its own centre returned the Email input. */
 
   /* contactCell() was here. It stacked the address over the number in one
      cell, and the two are two columns now (§69.16) — a function nothing calls
@@ -21784,13 +21922,7 @@ function renderPeople(){
                 ? '<span class="why" style="margin:0">&mdash; the list says ' +
                   esc(whereLabel(drift)) + '</span>'
                 : '<span class="why" style="margin:0">&mdash;</span>'))) +
-        saidWhereNote(p, ed) +
-        /* The role picker's second half (§69). It sits UNDER what the cell
-           already says rather than replacing it: where somebody sits and where
-           a role reaches are two different facts (§46.4), and a picker that
-           hid the first while choosing the second would be asking the question
-           with the answer covered up. */
-        roleWhereCell(p) + '</td>' : '') +
+        saidWhereNote(p, ed) + '</td>' : '') +
       /* Email above the number. Both are how you reach somebody, and giving
          each a column of its own made an eleven-column register — the pair is
          one answer to one question. */
@@ -32835,58 +32967,70 @@ var SYNC = (function () {
        choosing both halves IS the grant. */
     document.querySelectorAll("[data-prole-open]").forEach(function(b){
       b.addEventListener("click", function(){
-        ADDROLE = b.dataset.proleOpen; ADDROLE_KIND = ""; paint();
+        ADDROLE = b.dataset.proleOpen; ADDROLE_KIND = ""; ROLESTOP = null; paint();
       });
     });
-    /* Choosing the role repaints, because the SECOND select's options depend
-       on the first: a company CEO is attached to a company, a function head to
-       a function. One list of every role-times-place would offer Company CEO
-       of Mobile. Emptying it back to "Choose a role…" empties the other half
-       with it, rather than leaving a unit list standing under no role. */
-    document.querySelectorAll("[data-prole-pick]").forEach(function(sel){
-      sel.addEventListener("change", function(){
-        ADDROLE_KIND = sel.value;
-        /* ── ONE DESTINATION IS NOT A QUESTION (§92, Islam) ────────────
-           "I added SMO to Mohamed Essam but the employee role persisted and
-           SMO wasn't added." It had not been: the pair commits when the SECOND
-           half is answered (§69.1), and for a seat held over the group the
-           second half is a list of one — so the register asked which of the
-           group to pick, and doing nothing looked exactly like the control
-           being broken.
+    /* ── THE ROLE LANDS WHERE THE UNIT CELL ALREADY SAYS (§108) ──────
+       There is no second dropdown any more. The picker's other half asked a
+       question the Unit cell had already answered and then wrote its own answer
+       into that same cell (see roleCell in config-render.js); one control is
+       what was left once the duplicate went.
 
-           §32 settled this shape twice already (the gate's Starting page, the
-           Manage menu holding one item): a door behind a door. Where there is
-           one place a role can be held, it is granted here and the second half
-           never appears. Everything with a real choice — a unit owner, a
-           custodian, a company CEO — is unchanged.
+       `personAt(p)` is the ONE reader of "where does this person sit" (§54.1),
+       so the grant asks it rather than reading the `data-pat` select off the
+       screen: the select is a rendering of that fact, and reading the rendering
+       is how two answers to one question get started.
 
-           THE UNDO IS THE × ON THE CHIP, which is what let §69 drop Give and
-           Cancel in the first place: a grant that commits on one press is safe
-           precisely because taking it off is one press too. */
-        var wheres = ADDROLE_KIND ? roleWheres(ADDROLE_KIND) : [];
-        if (roleIsGrantable(ADDROLE_KIND) && wheres.length === 1) {
-          grantPersonRole(sel.dataset.prolePick, ADDROLE_KIND, wheres[0].v);
-          ADDROLE = null; ADDROLE_KIND = "";
+       WHAT A ROLE MAY BE HELD AT IS STILL `roleWheres()` AND NOTHING ELSE. This
+       does not carry a second opinion about it — it asks that list whether the
+       place the person is in is on it, which keeps one definition (§42) and
+       makes a role added later correct here on the day it is added. */
+    /* ── AND IT IS TRIED AGAIN WHEN THE UNIT CHANGES ────────────────
+       Found by a check, and it is the same family of fault as the one §108
+       started from. A refused pick leaves the picker open — which is right, so
+       the Unit can be set and the role taken again — but the role select is
+       still SHOWING that role, so picking it a second time fires no `change` at
+       all. Set the Unit, reach for the role, and the control does nothing:
+       exactly the silence this section exists to remove.
+
+       So the grant is one function and the ORDER stops mattering. Islam: "the
+       role and the unit shouldn't block each other but they only function
+       together." Whichever of the two is answered second is the one that
+       completes it. */
+    function tryGrantRole(key, role){
+        ADDROLE_KIND = role;
+        if (!roleIsGrantable(role)) { ROLESTOP = null; paint(); return; }
+        var p = personBy(key);
+        var at = personAt(p);
+        var wheres = roleWheres(role);
+        /* ── A SEAT HELD OVER THE GROUP IGNORES THE UNIT (§92) ─────────
+           Super user, SMO team and Group CEO have one destination, so the Unit
+           cell has nothing to say about them and must not be able to refuse
+           them: somebody sitting in Mobile can be the Super user. §92 granted
+           these on the role pick and that is unchanged — it is now the same
+           line as everything else rather than a special case beside it. */
+        if (wheres.length === 1) at = wheres[0].v;
+        else if (!wheres.some(function(w){ return w.v === at; })) {
+          /* NOT YET AND NEVER ARE DIFFERENT SENTENCES, because they have
+             different ways out: one wants a Unit set at all, the other wants a
+             different KIND of Unit. The old pair could say neither — it
+             committed on the second answer, so both looked like nothing
+             happening. */
+          ROLESTOP = { key:key, why: at
+            ? roleName(role) + " is held at " + roleAtWord(role) + ". Change the Unit."
+            : "Set the Unit first \u2014 " + roleName(role) + " is held at " +
+              roleAtWord(role) + "." };
+          paint();
+          return;
         }
-        paint();
-      });
-    });
-    /* NO GIVE BUTTON. The pair commits itself the moment the second half is
-       answered — Islam: "without give or cancel … eventually it's a selection
-       that I can remove after with the x button you made."
-
-       Which is why it is guarded on BOTH halves rather than on this one: a
-       change event on the where select can only fire after a role was picked,
-       but ADDROLE_KIND is a global that a repaint between the two could have
-       cleared, and granting `undefined` at a unit writes a role nothing can
-       name and nothing can take off. */
-    document.querySelectorAll("[data-prole-where]").forEach(function(sel){
-      sel.addEventListener("change", function(){
-        var key = sel.dataset.proleWhere;
-        if (!sel.value || !roleIsGrantable(ADDROLE_KIND)) return;
-        grantPersonRole(key, ADDROLE_KIND, sel.value);
+        ROLESTOP = null;
+        grantPersonRole(key, role, at);
         ADDROLE = null; ADDROLE_KIND = "";
         paint();
+    }
+    document.querySelectorAll("[data-prole-pick]").forEach(function(sel){
+      sel.addEventListener("change", function(){
+        tryGrantRole(sel.dataset.prolePick, sel.value);
       });
     });
     document.querySelectorAll("[data-prole-off]").forEach(function(b){
@@ -32927,6 +33071,17 @@ var SYNC = (function () {
         var p = personBy(sel.dataset.pat);
         if (!p) return;
         attachPersonAt(p, sel.value || null);
+        /* THE OTHER HALF OF "EITHER ORDER" (§108). If a role is picked and
+           standing refused on this row, moving the person is the answer it was
+           waiting for — so it is taken now, rather than leaving somebody to
+           re-pick a role the select is already showing. Only while a refusal is
+           standing: changing the Unit on a row nobody is granting a role on
+           stays what it has always been, a move and nothing else. */
+        if (ROLESTOP && ROLESTOP.key === p.key && ADDROLE === p.key &&
+            roleIsGrantable(ADDROLE_KIND)) {
+          tryGrantRole(p.key, ADDROLE_KIND);
+          return;
+        }
         paint();
       });
     });
@@ -33136,6 +33291,32 @@ var SYNC = (function () {
       });
     });
 
+    /* ── PUTTING THE CURSOR IN A FIELD MUST NOT MOVE THE ROW (§108) ──
+       Islam: "once I open the edit of a line the line jumps to the first line,
+       that is the wrong behaviour."
+
+       It is the CURSOR, not the repaint. The register is its own scrolling box
+       (`.cfg`), and a plain focus() lets the browser scroll the focused field
+       into view — so opening row 20 of 33 scrolled that box from 0 to 533px and
+       hauled the row from y=638 to y=105, which is where the first line sits.
+       His words exactly, and measured.
+
+       `preventScroll` holds the row where it was pressed and still lands the
+       cursor in the right field: nothing needs scrolling, because the row is
+       already where the person just clicked.
+
+       AND `no-jump.py` HAS BEEN GREEN THROUGHOUT — it opens a row and then
+       measures repaints, so it never once measured the act of opening one
+       (§94.2). It does now.
+
+       `focusNoScroll` rather than the option written twice: the register's pen
+       and the six inline pens are the same act, and §85 already found out what
+       happens when that pair of lines is maintained in two places. */
+    function focusNoScroll(f){
+      if (!f) return;
+      try { f.focus({ preventScroll: true }); } catch (e) { f.focus(); }
+      if (f.select) f.select();
+    }
     /* ── EDIT THIS ROW (§79.2, spec 012 §2.1) ───────────────────────
        It used to turn the whole page's edit mode on and put the cursor in this
        person's name — 297 inputs to change one job title. It opens the ROW now.
@@ -33147,9 +33328,9 @@ var SYNC = (function () {
         var key = b.dataset.pedit;
         rowEditOpen("people", key, personBy(key));
         PMENU = null;
+        ROLESTOP = null;
         paint();
-        var f = document.querySelector('[data-pname="' + key + '"]');
-        if (f) { f.focus(); f.select(); }
+        focusNoScroll(document.querySelector('[data-pname="' + key + '"]'));
       });
     });
     /* Save writes nothing of its own: every field has already written itself
@@ -33167,13 +33348,18 @@ var SYNC = (function () {
         var bits = b.dataset.rowedit.split("|"), table = bits[0], key = bits.slice(1).join("|");
         rowEditOpen(table, key, ROWFIND[table] ? ROWFIND[table](key) : null);
         paint();
-        var f = document.querySelector(".tk-firstfield");
-        if (f) { f.focus(); if (f.select) f.select(); }
+        focusNoScroll(document.querySelector(".tk-firstfield"));
       });
     });
+    /* LEAVING THE ROW TAKES THE PICKER WITH IT (§108). `ADDROLE` and
+       `ROLESTOP` are both properties of one open row, and neither was being
+       cleared when the row closed — so a refusal answered by pressing Cancel
+       came back the next time that row was opened, about a pick nobody had just
+       made. Screen state outliving the screen it belongs to (§25.2). */
     document.querySelectorAll("[data-rowsave]").forEach(function(b){
       b.addEventListener("click", function(){
         rowEditClose();
+        ADDROLE = null; ADDROLE_KIND = ""; ROLESTOP = null;
         if (typeof SYNC !== "undefined" && SYNC.afterPaint) SYNC.afterPaint();
         paint();
       });
@@ -33181,6 +33367,7 @@ var SYNC = (function () {
     document.querySelectorAll("[data-rowcancel]").forEach(function(b){
       b.addEventListener("click", function(){
         rowEditCancel();
+        ADDROLE = null; ADDROLE_KIND = ""; ROLESTOP = null;
         if (typeof SYNC !== "undefined" && SYNC.afterPaint) SYNC.afterPaint();
         paint();
       });

@@ -49,9 +49,17 @@ with sync_playwright() as p:
     trial("opening the role picker", None,
       """() => { const b=document.querySelector('[data-prole-open]'); if(b) b.click(); }""")
 
+    # THIS TRIAL HAD BEEN FIRING NOTHING (§51.11, in the file that exists to
+    # catch that class of thing). It asked for `[data-prole-kind]`, a selector
+    # the register has never carried — the picker's role select is
+    # `data-prole-pick` — and `if(!el) return` made the miss silent, so the
+    # trial reported "no jump" every run without touching a control. And
+    # 'contrib' is not grantable (§55: the floor is derived, never given), so
+    # even against the right selector it would have changed nothing.
     trial("choosing a role in it", None,
-      """() => { const el=document.querySelector('[data-prole-kind]');
-                 if(!el) return; el.value='contrib';
+      """() => { const el=document.querySelector('[data-prole-pick]');
+                 if(!el) throw new Error('the role picker is not there');
+                 el.value='owner';
                  el.dispatchEvent(new Event('change',{bubbles:true})); }""")
 
     trial("changing where somebody sits", None,
@@ -80,6 +88,51 @@ with sync_playwright() as p:
                  i.value='a'; i.dispatchEvent(new Event('input',{bubbles:true})); }""")
     trial("sorting a column", None,
       """() => { document.querySelector('[data-tksort]').click(); }""")
+
+    # ── AND THE ACT OF OPENING A ROW, ON THE OTHER SIX TABLES (§108) ──
+    # Everything above opens a row FIRST and then measures repaints, so the
+    # press that opens one had never been measured — and it was the press that
+    # jumped: a plain focus() lets the browser haul the focused field to the top
+    # of the register's own scrolling box. §94.2, in the file whose whole job is
+    # this: a check watching what happens after the door is open cannot see the
+    # door slam.
+    #
+    # ON AN INLINE-PEN TABLE, because the fix is shared and the register is
+    # already covered by checks/role-picker.py §7. §53.5's rule: a fix built on
+    # one side and not the other is how the two sides drift.
+    pg.click('.setuprail [data-setupgo="units"]'); pg.wait_for_timeout(700)
+    BOX2 = """() => { const t=document.querySelector('.unitcfg'); let b=t.parentElement;
+      while (b && b.scrollHeight<=b.clientHeight && b.scrollWidth<=b.clientWidth) b=b.parentElement;
+      return b ? {top:b.scrollTop, left:b.scrollLeft} : {top:0, left:0}; }"""
+    pens = pg.eval_on_selector_all("[data-rowedit]", "e=>e.map(x=>x.dataset.rowedit)")
+    if not pens:
+        bad += 1
+        print("  MISSING  Business units has no inline pen to open")
+    else:
+        last = pens[-1]
+        pg.evaluate("() => { const b=document.querySelector('.cfg'); if(b){b.scrollTop=0;} "
+                    "window.scrollTo(0,0); }")
+        pg.wait_for_timeout(150)
+        b0 = pg.evaluate(BOX2); y0 = pg.evaluate("window.pageYOffset")
+        r0 = pg.evaluate("(k)=>Math.round(document.querySelector('[data-rowedit=\"'+k+'\"]')"
+                         ".closest('tr').getBoundingClientRect().top)", last)
+        # Pressed from script: playwright scrolls a target into view before
+        # clicking it, which is the very thing under test.
+        pg.evaluate("(k)=>document.querySelector('[data-rowedit=\"'+k+'\"]').click()", last)
+        pg.wait_for_timeout(600)
+        b1 = pg.evaluate(BOX2); y1 = pg.evaluate("window.pageYOffset")
+        r1 = pg.evaluate("()=>Math.round(document.querySelector('tr.tk-open')"
+                         ".getBoundingClientRect().top)")
+        ok = (b0 == b1 and y0 == y1 and abs(r0 - r1) <= 2)
+        if not ok: bad += 1
+        print(("  ok      " if ok else "  JUMPED  ") + "opening an inline-pen row",
+              "| box", b0, "->", b1, "| page", y0, "->", y1, "| row", r0, "->", r1)
+        # And the cursor still lands, or holding the row still by never
+        # focusing would pass the line above and lose the feature.
+        cur = pg.evaluate("()=>!!document.querySelector('.tk-firstfield') && "
+                          "document.activeElement===document.querySelector('.tk-firstfield')")
+        if not cur: bad += 1
+        print(("  ok      " if cur else "  NO CURSOR ") + "...and the cursor is in the first field")
 
     print("errors:", errs or "none")
     print(("ALL STILL" if bad==0 else str(bad)+" JUMPED"))

@@ -365,8 +365,7 @@
      it did nothing: this selector is (0,3,1) against that file's (0,2,1) AND
      later in build.py's concatenation, so it won twice over. */
   .cfg .peoplecfg select.rolepick { min-width:150px; max-width:186px; }
-  /* `select.rolewhere` was here and went with the control (§108, §24): the Unit
-     cell answers where, so there is no second select to bound. */
+  .cfg .peoplecfg select.rolewhere { min-width:132px; max-width:170px; }
   /* AND THE ROW'S OWN TWO, WHICH §69 MISSED (§93.10). Exactly the same fault
      and exactly the same 920px: the role picker's pair were bounded and the
      pair that appear when a ROW is opened for editing were not, because they

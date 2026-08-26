@@ -1575,7 +1575,15 @@
     document.getElementById("panel").innerHTML = railed
       ? '<div class="split setupsplit' + (RAIL_OPEN ? '' : ' shut') + '">' +
         setupRail(defs, currentSub) +
-        '<div class="pane setuppane">' + secrowHTML + body + '</div></div>'
+        '<div class="pane setuppane' +
+          /* THE REGISTER'S PANE FILLS THE WINDOW (§118.5). Islam: "the
+             registry table should extend down till the end of the page." It is
+             marked here rather than guessed at in CSS, because only this page
+             holds a table that is meant to scroll inside its own box — every
+             other Setup page is a form or a short list and should keep growing
+             the page instead. */
+          (currentSub === "people" ? " panefill" : "") + '">' +
+          secrowHTML + body + '</div></div>'
       : body;
 
     /* Group Performance is four sections; they become a third nav row rather

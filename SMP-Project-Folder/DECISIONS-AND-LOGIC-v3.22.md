@@ -15753,3 +15753,56 @@ rather than deleted (§51.11, and loud rather than quiet this time only because
 the element is gone entirely). `var retired` is deleted with the line that read
 it — a variable nothing reads is one the next person reads as load-bearing
 (§24).
+
+### 118.5 A bold title, and a table that stopped 141px short
+
+> "1. the people register title needs to be bold. 2. the registery table should
+> extend down till the end of the page."
+
+**THE SECOND IS NOT A DESIGN DECISION, IT IS A STALE CONSTANT.**
+`.cfg.peoplebox` was capped at `calc(100vh - 300px)`, and that 300 was a guess
+at what sat above it: an alarm-chip row, a filter row and a count line. §116
+removed the first two and §118 removed the third, and nobody retuned the
+number — so the table ended **141px above the bottom of the window at every
+height measured**, with the rail beside it correctly ending 20px short.
+
+So it is not a constant any more. `.panefill` takes **the rail's own
+expression** — the two halves of this split start at the same y, so a second
+way of saying "as tall as the window allows" is exactly the drift §53.5 names —
+and the box FLEXES into what is left. That is what makes it right at narrow
+widths too: when the header takes a second line the box gets 48px shorter by
+itself, where any constant would have had to guess. Every link in the chain
+needs `min-height:0`, or a flex child refuses to shrink below its content and
+pushes the height back out by another road (§100.5, in a different tree).
+
+**Only this page's pane is capped**, and that is deliberate: every other Setup
+page is a form or a short list, and capping those would invent a scroll nobody
+asked for. The floor is the rail's floor, for the rail's reason.
+
+**THE TITLE IS BOLD ON ALL TWELVE**, not on this one. `cfgHead()` is one
+function, and one page's title in a different weight from eleven others reads
+as a mistake rather than as emphasis.
+
+**AND THE TWO ASKS INTERACT, WHICH IS WORTH THE PARAGRAPH.** At 700 the title
+measures **208px against 180px**, so the header's one-line reach went from
+1280px to **1300px**. Two attempts to buy those 20px back both made things
+worse and are recorded because each is a real trap:
+
+- **A flex container decides to WRAP from an item's hypothetical size**, and
+  only shrinks what is left on the line afterwards. So `.hright` was moved to a
+  second line before the search box was ever asked to give anything up, and
+  adding `min-width:0` to let it compress changed nothing at all.
+- **`flex-basis: min-content` on a WRAPPING flex container is its widest item,
+  not the sum of its items.** `.hright` promptly sized itself *below* its own
+  content and broke into two rows at 1150 and 1100, where it had been one — a
+  fix that made the exact fault it was aimed at appear 150px earlier.
+
+Both were reverted. Twenty pixels, on a window between 1280 and 1300, is not
+worth shaving a control for — the trade is recorded here and the check's
+threshold moved to match, rather than left asserting a number that is no longer
+true.
+
+**Still there and deliberately not changed:** `.wrap` carries
+`padding-bottom:80px`, so the page can still be scrolled about 60px past the
+table's foot. That is every railed page's behaviour, the rail does exactly the
+same thing, and it is not this section's to change.

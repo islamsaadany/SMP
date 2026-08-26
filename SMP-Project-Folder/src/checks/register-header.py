@@ -170,7 +170,11 @@ with sync_playwright() as p:
     # build this section replaced, at every width. The height of the WHOLE
     # header is the thing Islam can see, so that is what is asserted, with the
     # inner row asserted under it because it is the one that carried Passwords.
-    for w in (1920, 1600, 1400, 1280):
+    # 1320 RATHER THAN 1280, AND THE 20px IS RECORDED (§118.5): the bold title
+    # is 28px wider than the regular one, so one line now reaches 1300 where it
+    # reached 1280. Chasing that back would have meant shaving a control to buy
+    # a window nobody in this tenant uses; the trade is stated instead.
+    for w in (1920, 1600, 1400, 1320):
         pg.set_viewport_size({"width": w, "height": 900})
         land(pg)
         hh = pg.evaluate("()=>Math.round(document.querySelector('.phead2')"
@@ -196,7 +200,7 @@ with sync_playwright() as p:
     # AND FURTHER DOWN, THE TITLE MAY TAKE ITS OWN LINE — six controls and a
     # title cannot be made to fit a 1100px window — but the CONTROLS must stay
     # together, because a second control row is what the ask was about.
-    for w in (1150, 1100):
+    for w in (1240, 1150, 1100):
         pg.set_viewport_size({"width": w, "height": 900})
         land(pg)
         n = pg.evaluate(ROWS, ".phead2 .hright")
@@ -289,6 +293,54 @@ with sync_playwright() as p:
     pg.wait_for_timeout(500)
     ck("and the width mark comes off when it closes",
        not pg.evaluate("()=>document.getElementById('overlay').classList.contains('pdlg-on')"))
+
+    # ── 7. THE TITLE, AND THE TABLE REACHING THE BOTTOM ──────────────
+    print("\n7. a bold title, and a table that ends where the rail ends")
+    # THE ASSERTION IS THE AGREEMENT, NEVER THE NUMBER (§53.5, §94.8). The two
+    # halves of this split start at the same y, so they must end at the same y
+    # — a constant would be right until somebody changes a gutter, and the old
+    # `calc(100vh - 300px)` is exactly that constant having gone stale.
+    for w, h in ((1920, 1080), (1512, 860), (1440, 780), (1280, 720),
+                 (1100, 900), (1280, 560)):
+        pg.set_viewport_size({"width": w, "height": h})
+        land(pg)
+        d = pg.evaluate("""()=>{
+          const bx=document.querySelector('.peoplebox'),
+                rl=document.querySelector('.setuprail');
+          const b=bx.getBoundingClientRect(), r=rl.getBoundingClientRect();
+          return {box:Math.round(b.bottom), rail:Math.round(r.bottom),
+                  vh:innerHeight, scrolls:bx.scrollHeight>bx.clientHeight+2,
+                  weight:getComputedStyle(
+                    document.querySelector('.phead2 .secttl')).fontWeight};}""")
+        ck("%dx%d: the table ends where the rail ends" % (w, h),
+           abs(d["box"] - d["rail"]) <= 2, d)
+        # AND IT USES THE WINDOW. Ending level with the rail would also be true
+        # of a box 141px short if the rail were short too, so the height is
+        # asserted as well — never a number, but that it reaches the fold.
+        ck("%dx%d: ...and reaches the bottom of the window" % (w, h),
+           d["box"] >= d["vh"] - 40, d)
+        ck("%dx%d: the title is bold" % (w, h), int(d["weight"]) >= 600, d["weight"])
+
+    # THE FLOOR IS REAL, or a short window squeezes the table to nothing.
+    pg.set_viewport_size({"width": 1280, "height": 420})
+    land(pg)
+    ck("on a very short window it stops shrinking and the page scrolls instead",
+       pg.evaluate("()=>Math.round(document.querySelector('.peoplebox')"
+                   ".getBoundingClientRect().height)") >= 150)
+
+    # AND THE TWELVE TITLES AGREE. One page bold and eleven not is a mistake,
+    # not emphasis — asked of another Setup page so the two cannot drift.
+    pg.set_viewport_size({"width": 1512, "height": 900})
+    land(pg)
+    pg.evaluate("()=>document.querySelector('[data-setupgo=\"units\"]').click()")
+    pg.wait_for_timeout(900)
+    ck("...and every Setup title is bold, not only this one",
+       int(pg.eval_on_selector(".phead2 .secttl",
+                               "e=>getComputedStyle(e).fontWeight")) >= 600)
+    # AND ONLY THE REGISTER'S PANE IS CAPPED: every other Setup page is a form
+    # or a short list, and capping those would invent a scroll nobody asked for.
+    ck("...while another Setup page's pane is not capped",
+       not pg.evaluate("()=>!!document.querySelector('.setuppane.panefill')"))
 
     ck("no console errors", not errs, errs[:3])
     b.close()

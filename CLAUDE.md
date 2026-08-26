@@ -1591,6 +1591,28 @@ console errors (in this cloud environment, run it via a wrapper that points Play
   marked on the **overlay**, never loosened on `.modal`, which every dialog
   shares, and comes off in `closeModal()` (§116.6's one door). Steps down are
   **3 → 2 → 1**, never 3 → 1, or the scroll comes back on a narrow laptop.
+- **A CAP MADE OF A GUESSED CONSTANT GOES STALE SILENTLY (§118.5):** the
+  register's table was `calc(100vh - 300px)`, and the 300 was a guess at an
+  alarm-chip row, a filter row and a count line — §116 removed two and §118 the
+  third, so the table ended **141px above the fold at every height** while the
+  rail beside it correctly ended 20px short. **It takes the RAIL'S OWN
+  expression now** (`.panefill`), because the two halves of the split start at
+  the same y and a second way of saying "as tall as the window allows" is
+  §53.5's drift — and the box FLEXES into what is left, which is what makes it
+  right when the header takes a second line and any constant would have had to
+  guess. `min-height:0` on **every link in the chain**, or a flex child refuses
+  to shrink below its content (§100.5, another tree). **Only this pane is
+  capped**: every other Setup page is a form, and capping those invents a
+  scroll nobody asked for. **THE TITLE IS BOLD ON ALL TWELVE** — one page's in
+  a different weight from eleven others reads as a mistake, not emphasis.
+  **AND TWO ATTEMPTS TO BUY BACK THE 20px IT COST BOTH MADE IT WORSE**: a flex
+  container **decides to WRAP from an item's hypothetical size** and only
+  shrinks afterwards, so `min-width:0` on `.hright` changed nothing; and
+  **`flex-basis:min-content` on a WRAPPING container is its widest ITEM, not
+  the sum**, so the row sized itself below its own content and broke into two
+  lines 150px EARLIER. Both reverted, the 1280 → 1300 trade recorded and the
+  check's threshold moved — *a check left asserting a number that is no longer
+  true is worse than the twenty pixels.*
 - **THE CHECK MEASURED THE INNER BOX AND PASSED ON THE BUILD IT WAS WRITTEN TO
   REJECT (§118.4):** it asked whether **`.hright`** was one row — green on the
   previous build at every width, because **`.phead2` wraps too**, so when the
@@ -1952,7 +1974,8 @@ prior sessions (on HR_ERP) accidentally reverted agreed-upon designs.
 ---
 
 *Last Updated: 2026-08-26 &mdash; **v3.41: one line above the table, and a
-dialog that fits the window** (&sect;118). Two asks minutes apart, both from
+dialog that fits the window** (&sect;118), **with a bold title and a table
+that reaches the fold** (&sect;118.5). Two asks minutes apart, both from
 using the register on his own laptop, and both turned out to be **waste rather
 than density**. The header: the badge said who you are, which the chrome says on
 every page, and the count said how big the register is, which the table under it
@@ -1975,7 +1998,18 @@ THE BUILD IT WAS WRITTEN TO REJECT**, which is the lesson worth keeping: it
 measured `.hright`, and `.phead2` wraps too &mdash; so when the controls stop
 fitting beside the title the whole block drops them to a line of their own, and
 the inner box honestly reports ONE row while the header is two. Assert the box
-somebody can SEE. With that corrected the previous build fails 12 times.*
+somebody can SEE. With that corrected the previous build fails 12 times. **AND THE FOLLOW-UP FOUND A CAP
+THAT HAD GONE STALE IN SILENCE** (&sect;118.5): the table's
+`calc(100vh - 300px)` was a guess at three things sitting above it, all three of
+which &sect;116 and &sect;118 removed &mdash; so it ended **141px above the fold
+at every height** while the rail beside it ended 20px short. It takes the rail's
+own expression now and FLEXES into what is left, which is what makes it right
+when the header takes a second line. **And the two asks interact**: at 700 the
+title is 208px against 180, so one line reaches 1300 rather than 1280 &mdash;
+and both attempts to buy those pixels back made it worse, because a flex
+container **decides to wrap before it shrinks**, and `flex-basis:min-content` on
+a **wrapping** container is its widest item rather than the sum, which broke the
+row into two lines 150px earlier than the fault it was aimed at.*
 
 *Earlier: 2026-08-26 &mdash; **v3.40: the Strategy | Reporting split, and
 the plan as slides (&sect;117, spec 019)**. Islam: *"the strategy should be

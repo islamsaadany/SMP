@@ -45,7 +45,7 @@ function renderLabels(){
        explanation - it is a state that blocks saving and has to be seen. */
     : '';
 
-  return section("", "Terminology", null,
+  return section("", "Labels", null,
       '<div class="cfg"><table><thead><tr>' +
       '<th style="width:34%">Internal name<span class="why">The contract. Never changes.</span></th>' +
       '<th style="width:33%">Display at group level</th>' +
@@ -148,12 +148,10 @@ function renderAccess(){
     if (ownsAll && (areaKey === "a_unit_other" || areaKey === "a_fn_other")) {
       return "Every unit and function is theirs, so there is no “other”.";
     }
-    /* The split halves collapse exactly as their whole did (§117): no unit
-       means neither half of the unit pair can come up. */
-    if (roleKey === "fnhead" && (areaKey === "a_unit_own" || areaKey === "a_unit_own_strat")) {
+    if (roleKey === "fnhead" && areaKey === "a_unit_own") {
       return "A function head holds no business unit.";
     }
-    if (roleKey === "cceo" && (areaKey === "a_fn_own" || areaKey === "a_fn_own_strat")) {
+    if (roleKey === "cceo" && areaKey === "a_fn_own") {
       return "A company CEO holds no supporting function.";
     }
     return null;
@@ -166,32 +164,9 @@ function renderAccess(){
      stacked under seven labels made the HEAD of a 49-cell table taller than
      its body. The same answer the role column already reached in §37: the
      sentence is on hover, and the column keeps its name. */
-  /* ── TWO HEADER ROWS, BECAUSE TWO COLUMNS SHARE A NAME (§117) ──────
-     The own pair split into Strategy | Reporting halves, and the pair's name
-     is written ONCE above them rather than twice into them. Built off the
-     `pair`/`col` fields the AREAS entries carry — the header is derived from
-     the same list the cells walk, so a column cannot appear in one and not
-     the other. Entries without a pair span both rows. Consecutive same-pair
-     entries group; the AREAS order is the column order, as it always was. */
-  var headTop = '<tr><th style="width:17%" rowspan="2">Role</th>', headSub = "<tr>";
-  var hi = 0;
-  while (hi < AREAS.length) {
-    var ha = AREAS[hi];
-    if (!ha.pair) {
-      headTop += '<th class="ac" rowspan="2" title="' + esc(ha.note) + '">' + esc(ha.label) + '</th>';
-      hi++;
-      continue;
-    }
-    var span = 0;
-    while (hi + span < AREAS.length && AREAS[hi + span].pair === ha.pair) span++;
-    headTop += '<th class="ac acpair" colspan="' + span + '">' + esc(ha.pair) + '</th>';
-    for (var hj = 0; hj < span; hj++) {
-      var hb = AREAS[hi + hj];
-      headSub += '<th class="ac achalf" title="' + esc(hb.note) + '">' + esc(hb.col) + '</th>';
-    }
-    hi += span;
-  }
-  var head = headTop + "</tr>" + headSub + "</tr>";
+  var head = '<tr><th style="width:19%">Role</th>' + AREAS.map(function(a){
+    return '<th class="ac" title="' + esc(a.note) + '">' + esc(a.label) + '</th>';
+  }).join("") + '</tr>';
 
   /* ── THE LAST ROW IS NOT A ROLE (§93) ─────────────────────────────
      Employee stopped being one: nobody grants it, the × could never take it
@@ -227,10 +202,9 @@ function renderAccess(){
       }).join("") + '</tr>';
   }).join("");
 
-  return section("", "Roles & access",
+  return section("", "Who may see what",
       "Eight roles and the floor beneath them, against the kinds of page each may " +
-      "reach. Edit includes view. The own columns answer in two halves — " +
-      "Strategy is the words as agreed, Reporting is the figures entered against them. " +
+      "reach. Edit includes view. " +
       "Change any cell and the navigation above re-renders immediately for whoever is being viewed as.",
       '<div class="cfg acgrid"><table><thead>' + head + '</thead><tbody>' + body + '</tbody></table></div>' +
       '<div class="chart-legend" style="margin-top:12px">' +
@@ -399,31 +373,10 @@ var CLEARMENU = null;
    worded dropdown buttons beside the title — and Islam asked for the password
    actions to match, so the slot exists rather than each page inventing a place
    to put its own (§47.2). */
-/* ── THE PAGE IS NAMED ONCE (§121.1) ─────────────────────────────────────
-   Islam: *"there is some duplication in the titles like business unit business
-   unit"* — Business units and Companies each printed their name as the page
-   title and again as the first section's heading.
-
-   The Setup page's name is drawn by the shell now, from the RAIL'S OWN LABEL,
-   so the two can never disagree: five pages were calling themselves something
-   the rail did not (Terminology opened "Labels", Email opened "Communication"),
-   which is §108's rename reaching the navigation and stopping there.
-
-   SO A SECTION HEADING THAT REPEATS THE PAGE'S NAME IS NOT DRAWN — §28's rule
-   that a header saying nothing new still spends its line. It is compared
-   against the name the shell is showing, NOT suppressed by position: the
-   Reporting cycle's first section is "Who has reported", which is a real
-   section name and keeps its heading. The row itself survives either way,
-   because it also carries the page's controls. */
-var PAGE_TITLE = null;
-
 function cfgHead(title, chips, editKey, mayEdit, clearScope, labels, extra){
   var editing = EDITING[editKey];
   var open = CLEARMENU === editKey;
-  var dup = PAGE_TITLE != null &&
-            String(title).trim().toLowerCase() === String(PAGE_TITLE).trim().toLowerCase();
-  return '<div class="phead2' + (dup ? ' named' : '') + '">' +
-    (dup ? '' : '<h2 class="secttl">' + title + '</h2>') +
+  return '<div class="phead2"><h2 class="secttl">' + title + '</h2>' +
     '<div class="hright">' +
       chips.map(function(x){ return '<span class="chip">' + x + '</span>'; }).join("") +
       (extra || "") +
@@ -1135,10 +1088,7 @@ function renderPeople(){
      carries the snapshot Cancel restores from (§79.2, §110.6). */
   function rowOpen(p){ return mayEdit_ && rowEditIs("people", p.key); }
   var live = typeof SYNC !== "undefined" && SYNC.isLive() && inOffice();
-  /* `retired` was counted here for the header's count line, which §122
-     removed. Deleted rather than left standing: a variable nothing reads is
-     one the next person reads as load-bearing (§24). Retired is still a row
-     state, behind the search. */
+  var retired = PEOPLE.filter(function(p){ return !personActive(p); }).length;
   /* COUNTED OVER WHO THIS VIEWER MAY ACTUALLY REACH (§89). A Super user reaches
      everybody; an SMO team member reaches the client's people and not the
      office's — so a count taken over the whole register would promise them a
@@ -1361,16 +1311,10 @@ function renderPeople(){
         '" type="email" autocomplete="off" spellcheck="false" placeholder="Email">');
     F("Mobile", '<input class="fld" value="' + esc(p.phone || "") + '" data-pphone="' + p.key +
         '" placeholder="Mobile">');
-    /* THE REASON IS ON THE HOVER (§122). It was a two-line paragraph, the
-       tallest single thing in the dialog, saying the same sentence on every
-       person you open — and the dialog scrolled. It reads as not-editable
-       from its own look (`.pdro`, dashed and quiet) rather than from a
-       sentence explaining that it is. The words are UNCHANGED, and they are a
-       real `title` rather than a `.vwhy` the layout has to make room for. */
     if (!add)
-      F("Sign-in name", '<span class="pdro mono" title="Minted from the name. ' +
-        'Their password and open sessions are keyed on it, so it cannot be ' +
-        'changed.">' + esc(p.key) + '</span>');
+      F("Sign-in name", '<span class="mono">' + esc(p.key) + '</span>' +
+        '<span class="vwhy">Minted from the name. Their password and open sessions ' +
+        'are keyed on it, so it cannot be changed.</span>');
     F("Group", "where", false);
     F("Job title", '<input class="fld" value="' + esc(p.title || "") + '" data-ptitle="' + p.key +
         '" placeholder="Job title">');
@@ -2150,42 +2094,27 @@ function renderPeople(){
   var attnBtn = !mayEdit || !queue.length ? "" :
     '<button class="attnbtn" data-attn="1" ' +
       'title="Open the first of them, fix it, and move to the next">' +
-      ICO_ATTN + 'Attention <span class="attnn">' + queue.length + '</span></button>';
+      ICO_ATTN + 'Needs attention <span class="attnn">' + queue.length + '</span></button>';
   var addBtn = !mayEdit ? "" :
-    '<button class="addbtn" data-padd-open="1">+ Add</button>';
+    '<button class="addbtn" data-padd-open="1">+ Add someone</button>';
 
-  /* THE ONE OUTSTANDING THING THAT IS NOT A PERSON (§93.4), and it is now a
-     CHIP ON THE ROW rather than a line under it (§122). It cannot join the
-     Attention queue — a unit is not somebody you can open — so removing the
-     count line would have taken it with it, which is why it moved rather than
-     went. DRAWN ONLY WHEN THERE IS ONE: a chip that is usually absent is a
-     mark, and one that is always there is furniture (§41's budget). */
-  var noCustChip = !noCust.length ? "" :
-    '<span class="pnocust" title="' + esc(noCust.map(function(k){
-        return UNITS[k].name; }).join(", ")) + ' \u2014 nobody is keeping ' +
-      (noCust.length === 1 ? "this plan" : "these plans") + ' up to date. Give somebody the ' +
-      'Strategy custodian role from their row here.">' +
-      plural(noCust.length, "unit") + ' with no custodian</span>';
-
-  /* NO BADGE AND NO COUNT LINE (§122). Islam: "the SMO badge remove it and
-     remove the 77 people active text ... and accordingly the whole table
-     should be just below the buttons line."
-
-     THE BADGE SAID WHO YOU ARE, which the chrome says already and says on
-     every page. THE COUNT SAID HOW BIG THE REGISTER IS, and the table under
-     it is that — §116 had already dropped the second copy of it from the
-     filter row for the same reason, and kept this one; keeping one copy of
-     something nobody asked for is still keeping it.
-
-     AND THE TABLE FOLLOWS IMMEDIATELY, which is the part of the ask that is
-     not a removal: with nothing between the row and the table, `section("")`
-     is what puts the table there, and the header's own 14px bottom margin is
-     the whole of the gap. */
   return cfgHead("People register",
-      [],
+      /* ONE COUNT, AND NOTHING ELSE. Retired is behind the search now: it is a
+         property of a row, not a state of the register. */
+      ['<span class="pill kind">SMO</span>'],
       "people", false, null, null,
       '<span class="hsearch">' + tkSearchOnly("people", "Search the register\u2026") + '</span>' +
-      attnBtn + noCustChip + addBtn + fileMenu + colMenu + pwMenu) +
+      attnBtn + addBtn + fileMenu + colMenu + pwMenu) +
+    '<div class="pcount">' +
+      plural(PEOPLE.length - retired, "person").replace("persons", "people") + ' active' +
+      (retired ? ' \u00b7 ' + retired + ' retired' : '') +
+      /* The one outstanding thing that is not a person (§93.4). */
+      (noCust.length ? ' \u00b7 <span class="pnocust" title="' + esc(noCust.map(function(k){
+          return UNITS[k].name; }).join(", ")) + ' \u2014 nobody is keeping ' +
+        (noCust.length === 1 ? "this plan" : "these plans") + ' up to date. Give somebody the ' +
+        'Strategy custodian role from their row here.">' +
+        plural(noCust.length, "unit") + ' with no custodian</span>' : '') +
+    '</div>' +
 
     section("", "",
       "",
@@ -3033,19 +2962,12 @@ function renderKB(){
            'about what it is attached to. Owning Mobile and sitting on Finance gives the ' +
            'owner\u2019s answer for Mobile and the other-unit answer for Retail, from the ' +
            'same two roles, without either being asked about the wrong thing.' },
-      { h: "The own columns answer in two halves",
-        p: 'Strategy is the <b>words as agreed</b> — Foundation, the SWOT, the Plan, and on a ' +
-           'function a capability\u2019s definition and projects. Reporting is the <b>figures ' +
-           'entered against them</b>, drafts and submitting. Strategy edit ships with the ' +
-           'office alone, because a plan you are measured against is not yours to rewrite — ' +
-           'and opening it to a role is a deliberate act made on this table, not a side ' +
-           'effect of letting the same people report (§117).' },
-      { h: "Two things the table does not decide",
-        p: 'The <b>knowledge base</b> is the office\u2019s \u2014 the Super user and the ' +
-           'SMO team \u2014 because it explains how the platform itself is run (\u00a7119, ' +
-           'reversing \u00a730). And <b>focus measures</b>, what carries reward, are marked ' +
-           'by the group CEO and the SMO. These are rules; they do not change when the ' +
-           'table does.' },
+      { h: "Three things the table does not decide",
+        p: 'The <b>knowledge base</b> is readable by everyone, always. A <b>plan</b> is ' +
+           'corrected by the SMO alone, however much access the unit\u2019s people hold — a ' +
+           'plan you are measured against is not yours to rewrite. And <b>focus measures</b>, ' +
+           'what carries reward, are marked by the group CEO and the SMO. These are rules; ' +
+           'they do not change when the table does.' },
       { h: "Companies decide reach",
         p: 'A company groups business units so a company CEO sees their own. It carries ' +
            '<b>no score and no page</b> — it decides who sees what, nothing more. Its two ' +
@@ -4375,9 +4297,9 @@ function renderOverview(){
         '<div class="ovcyc-name">' + esc(REVIEW.name) +
           ' <span class="badge b-' + (open ? "open" : "none") + '">' +
           (open ? "Open" : "Closed") + '</span></div>' +
-        /* ONE SENTENCE, TWO SURFACES (§120.1) — and it says so when a tenant
-           has set no dates, rather than printing the separators alone. */
-        '<div class="ovcyc-meta">' + esc(cycleMeta()) + '</div>' +
+        '<div class="ovcyc-meta">' + esc(REVIEW.from) + ' to ' + esc(REVIEW.to) +
+          ' &middot; due ' + esc(REVIEW.due) +
+          ' &middot; as of Q' + REVIEW.endsQuarter + '</div>' +
       '</div>' +
       '<div class="ovcyc-n"><b>' + t.done + '</b><span>of ' + t.total +
         ' items reported</span></div>' +
@@ -4529,7 +4451,8 @@ function renderCycle(){
   var head =
     '<div class="fstrip" style="margin-bottom:20px"><div class="fstrip-head">' +
       '<span class="fstrip-t">' + esc(REVIEW.name) + '</span>' +
-      '<span class="fstrip-meta">' + esc(cycleMeta()) + '</span>' +
+      '<span class="fstrip-meta">' + esc(REVIEW.from) + ' to ' + esc(REVIEW.to) +
+        ' &middot; due ' + esc(REVIEW.due) + ' &middot; as of Q' + REVIEW.endsQuarter + '</span>' +
       '<span class="badge b-' + (open ? "open" : "none") + '">' + (open ? "Open" : "Closed") + '</span>' +
       (can
         ? (open
@@ -5252,7 +5175,7 @@ function renderComms(){
       '</span>' +
     '</span></td></tr></tbody></table></div>';
 
-  return cfgHead("Email",
+  return cfgHead("Communication",
       ['<span class="pill kind">SMO</span>',
        set ? 'set for this tenant' : 'using the defaults'],
       "comms", mayEdit, null) +

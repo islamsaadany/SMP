@@ -473,14 +473,14 @@ console errors (in this cloud environment, run it via a wrapper that points Play
   door behind a door. A role with one place is granted on the role pick; a role
   with a real choice still asks. The × on the chip is what makes committing on
   one press safe.
-- **TERSE DROPS THE DETAIL, NEVER THE ALARM (§118.3):** the pillar rail opens
+- **TERSE DROPS THE DETAIL, NEVER THE ALARM (§119.3):** the pillar rail opens
   COLLAPSED now (absent reads as terse, so only an explicit press turns it
   off), and that small line had been carrying two different kinds of thing —
   the routine counts, and §106.2's *N rows to check*, put there so the project
   holding a bad date is findable without opening each (§93.4). `railSub(html,
   alarm)` tells them apart. **Found by `checks/project-tables.py` going red on
   the day the default flipped**, not by reading the rail.
-- **THE KNOWLEDGE BASE IS THE OFFICE'S (§118.4, REVERSING §30 AND §37):**
+- **THE KNOWLEDGE BASE IS THE OFFICE'S (§119.4, REVERSING §30 AND §37):**
   `when: inOffice()` on the page def, the shape `c_send` and `c_chat` use —
   never a matrix cell, because who reads the office's own working notes is not
   a tick somebody could set on a bad afternoon. `c_kb` stays `area:"always"`.
@@ -490,7 +490,7 @@ console errors (in this cloud environment, run it via a wrapper that points Play
   lives on that page and `storyFor()` fits nobody who can now open it — §61's
   trap from the other side. The first-run tour is untouched; `checks/tour.py`
   asserts the absent half and deliberately does not assert the unreachability.
-- **THE DECK NAMES WHAT THE PLAN OWES (§118.1):** `Missing`, bold, in the
+- **THE DECK NAMES WHAT THE PLAN OWES (§119.1):** `Missing`, bold, in the
   platform's own `--bad` — and **the slide is drawn even when it is empty**,
   because skipping it says *nothing is missing here*. An optional blank is not
   a gap: collaborators and an unmarked quarter are left alone. The check MAKES
@@ -1591,6 +1591,78 @@ console errors (in this cloud environment, run it via a wrapper that points Play
   somebody removes them and a recomputed queue renumbers under whoever is
   working through it. **Units with no custodian cannot join it** — not a person,
   so there would be nobody to open; it keeps its own line (§93.4).
+- **ONE LINE ABOVE THE TABLE, AND A DIALOG THAT WAS WASTEFUL RATHER THAN DENSE
+  (§122):** the badge said who you are (the chrome says it on every page) and
+  the count said how big the register is (**the table under it is that** — §116
+  had already dropped the second copy of that count and kept this one, and
+  *keeping one copy of something nobody asked for is still keeping it*). The
+  fourth ask was not a removal and is the only one with a constraint in it:
+  **Passwords was already in `.hright` and was WRAPPING**, and dropping the
+  badge still left the row wanting 1107px. Two labels are terser and the search
+  flexes from 160px — one line to **1280px** now, from 1512px. **THE CUSTODIAN
+  MARK MOVED RATHER THAN WENT**: it is the one outstanding thing on that page
+  that is not a person, so it cannot join the Attention queue (§116.2, nobody
+  to open) and would have died with the line — a chip on the row, on the warning
+  ground because a grey word among six controls is furniture, **drawn only when
+  there is one** (§41's budget). **AND THE DIALOG WAS NOT DENSE, IT WAS
+  WASTEFUL**: 482px of content, of which a whole 56px row was EMPTY (nine
+  fields do not divide by two) and the tallest single block was a paragraph
+  repeating itself on every person opened. Three columns divide nine exactly and
+  the sentence became a `title` on a value that LOOKS un-editable — 482 → 337px,
+  no scroll to 640px tall, **and narrower too (860px)**: narrower and shorter are
+  usually a trade and were not here, because the height was waste. The width is
+  marked on the **overlay**, never loosened on `.modal`, which every dialog
+  shares, and comes off in `closeModal()` (§116.6's one door). Steps down are
+  **3 → 2 → 1**, never 3 → 1, or the scroll comes back on a narrow laptop.
+- **A CHECK THAT ARGUES WITH A DECISION IS ONE THAT GETS DELETED (§122.6):**
+  §121.2 gave every Setup pane a **sticky page title**, from another branch the
+  same day, and three things in §122 met it. **The bold had to MOVE**:
+  `cfgHead()` now drops `.secttl` where the pane's name already says it, so
+  bolding the old element alone would have styled something the register no
+  longer renders (both carry 700 now, or a page whose heading genuinely differs
+  reads in two weights). **§122's one-line header is SUPERSEDED** — §121.2
+  deliberately did not pull the controls into the sticky header, because a
+  non-sticky row slid out from under the pinned name, which is a better reason
+  than the one that put them together; what survives is the half that was ever
+  about the controls, that they are ONE row with Passwords on it and the table
+  follows them. **AND THE RAIL STOPPED BEING THE RIGHT COMPARISON**: it is a
+  max-height over a LIST, so on a tall window its content ends before its cap
+  and the two legitimately differ — the pane still takes the rail's expression,
+  but what is ASSERTED is the window, at both ends.
+- **A CAP MADE OF A GUESSED CONSTANT GOES STALE SILENTLY (§122.5):** the
+  register's table was `calc(100vh - 300px)`, and the 300 was a guess at an
+  alarm-chip row, a filter row and a count line — §116 removed two and §122 the
+  third, so the table ended **141px above the fold at every height** while the
+  rail beside it correctly ended 20px short. **It takes the RAIL'S OWN
+  expression now** (`.panefill`), because the two halves of the split start at
+  the same y and a second way of saying "as tall as the window allows" is
+  §53.5's drift — and the box FLEXES into what is left, which is what makes it
+  right when the header takes a second line and any constant would have had to
+  guess. `min-height:0` on **every link in the chain**, or a flex child refuses
+  to shrink below its content (§100.5, another tree). **Only this pane is
+  capped**: every other Setup page is a form, and capping those invents a
+  scroll nobody asked for. **THE TITLE IS BOLD ON ALL TWELVE** — one page's in
+  a different weight from eleven others reads as a mistake, not emphasis.
+  **AND TWO ATTEMPTS TO BUY BACK THE 20px IT COST BOTH MADE IT WORSE**: a flex
+  container **decides to WRAP from an item's hypothetical size** and only
+  shrinks afterwards, so `min-width:0` on `.hright` changed nothing; and
+  **`flex-basis:min-content` on a WRAPPING container is its widest ITEM, not
+  the sum**, so the row sized itself below its own content and broke into two
+  lines 150px EARLIER. Both reverted, the 1280 → 1300 trade recorded and the
+  check's threshold moved — *a check left asserting a number that is no longer
+  true is worse than the twenty pixels.*
+- **THE CHECK MEASURED THE INNER BOX AND PASSED ON THE BUILD IT WAS WRITTEN TO
+  REJECT (§122.4):** it asked whether **`.hright`** was one row — green on the
+  previous build at every width, because **`.phead2` wraps too**, so when the
+  controls stop fitting beside the title the whole block drops them onto a line
+  of their own and the inner box honestly reports one row while the header is
+  two. **Assert the box somebody can SEE**, and keep the inner one under it
+  because that is the one that carried the wrapped control: with both, the old
+  build fails 12 times (§94.5). Two more: **one row is not one `top` value**
+  (different heights, so a naive count reported three rows on a row that was
+  plainly one — cluster by the middle), and **the whole row is invisible over
+  `file://`** (Passwords is `live`, so the first version measured five controls
+  and called it a pass, §94.11).
 - **A LOCAL ALIAS IS INVISIBLE FROM ANOTHER FILE, AND ONLY OVER HTTP (§116.9):**
   `attentionOf()` in `config-data.js` spelt half its declaration sentence with
   `whereLabel`, which is a **`var` inside `renderPeople()`** in
@@ -1884,6 +1956,8 @@ python3 build.py     # assembles strategy-management-platform.html (must be byte
 python3 qa.py        # walks every page as every viewer, reports console errors (needs Playwright + Chromium)
 python3 checks/people-dialog.py # the register reads and the dialog writes: the queue,
                                 # Add, and neat with every column on (§116, over HTTP)
+python3 checks/register-header.py # one line above the table and a dialog that fits the
+                                # window — the HEADER's height, not .hright's (§122)
 python3 checks/role-picker.py   # giving somebody a role: every control PRESSED,
                                 # both ends asked, and the absences asserted (§110)
 python3 checks/strategy-split.py # the Strategy | Reporting halves: the cell pressed
@@ -1902,7 +1976,12 @@ python3 checks/setup-overview-live.py # ...and its three server-backed rows, ove
                                       # they exist at all (§101.12)
 python3 checks/setup-search.py  # the rail's search: typing NEVER repaints, a repaint keeps
                                 # the filter, and a match inside a FOLDED group is findable
-                                # (§101.13, §101.14 — all three fail silently)
+                                # (§108.13, §108.14 — all three fail silently)
+                                # setup-rail.py also measures every rail GLYPH against a
+                                # character guaranteed missing: a mark that is MAPPED and
+                                # not DRAWN ships as a blank box (§52, §120.2)
+python3 checks/setup-pages.py   # every Setup page is named ONCE and in the rail's own word,
+                                # and the name and the table head stay on screen (§121)
 ```
 In this cloud image, run any sweep through the wrapper so Playwright finds the
 Chromium that is already here:
@@ -1937,7 +2016,45 @@ prior sessions (on HR_ERP) accidentally reverted agreed-upon designs.
 
 ---
 
-*Last Updated: 2026-08-26 &mdash; **v3.42: the deck names its gaps, and the
+*Last Updated: 2026-08-26 &mdash; **v3.44: one line above the table, and a
+dialog that fits the window** (&sect;120), **with a bold title and a table
+that reaches the fold** (&sect;120.5). Two asks minutes apart, both from
+using the register on his own laptop, and both turned out to be **waste rather
+than density**. The header: the badge said who you are, which the chrome says on
+every page, and the count said how big the register is, which the table under it
+is &mdash; &sect;116 had already dropped the second copy of that count for
+exactly that reason and kept this one, and *keeping one copy of something nobody
+asked for is still keeping it*. The fourth ask was the only one with a
+constraint in it: **Passwords was already on the row and was WRAPPING**, and
+removing the badge still left it wanting 1107px &mdash; so two labels are terser
+and the search flexes 30px narrower, giving one line to **1280px**, from 1512.
+**THE CUSTODIAN MARK MOVED RATHER THAN WENT**, because it is the one
+outstanding thing on that page that is not a person and so cannot join the
+Attention queue; a chip on the row, drawn only when there is one.
+**AND THE DIALOG WAS NOT DENSE** &mdash; 482px of content, of which a whole
+56px row was EMPTY (nine fields do not divide by two) and the tallest single
+block was a paragraph repeating itself on every person opened. Three columns
+divide nine exactly: **482 &rarr; 337px, no scroll down to a 640px window, and
+narrower too** (860px, not 938) &mdash; narrower and shorter are usually a trade
+and were not here, precisely because the height was waste. **THE CHECK PASSED ON
+THE BUILD IT WAS WRITTEN TO REJECT**, which is the lesson worth keeping: it
+measured `.hright`, and `.phead2` wraps too &mdash; so when the controls stop
+fitting beside the title the whole block drops them to a line of their own, and
+the inner box honestly reports ONE row while the header is two. Assert the box
+somebody can SEE. With that corrected the previous build fails 12 times. **AND THE FOLLOW-UP FOUND A CAP
+THAT HAD GONE STALE IN SILENCE** (&sect;120.5): the table's
+`calc(100vh - 300px)` was a guess at three things sitting above it, all three of
+which &sect;116 and &sect;118 removed &mdash; so it ended **141px above the fold
+at every height** while the rail beside it ended 20px short. It takes the rail's
+own expression now and FLEXES into what is left, which is what makes it right
+when the header takes a second line. **And the two asks interact**: at 700 the
+title is 208px against 180, so one line reaches 1300 rather than 1280 &mdash;
+and both attempts to buy those pixels back made it worse, because a flex
+container **decides to wrap before it shrinks**, and `flex-basis:min-content` on
+a **wrapping** container is its widest item rather than the sum, which broke the
+row into two lines 150px earlier than the fault it was aimed at.*
+
+*Earlier: 2026-08-26 &mdash; **v3.42: the deck names its gaps, and the
 base becomes the office's (&sect;119)**. Five follow-ups from using &sect;117.
 **The plan download says `Missing` in bold red** wherever the plan owes
 something &mdash; a direction, a target, a compile rule, an owner, a date, an

@@ -15359,3 +15359,113 @@ ones proven untouched.
 **Deliberately not built:** auto-detecting repetition, a template column, and
 any per-run history UI beyond what Archived plans already shows — a handful of
 projects, and the pen is the door.
+
+## 116 · The CF tab, the add row, and a null that outlived its session (v3.38)
+
+> *"the CF tab is not showing anything while it was showing it a minute ago"*
+> — and, asked what it looks like: *"tab there it doesn't move it stays with
+> the previous opened tab."*
+
+### 116.1 The symptom was navigation and the fault was paint
+
+Clicking a destination runs `leaveModes()`, moves `current`, and calls
+`paint()`. A throw anywhere inside the panel's render abandons the redraw
+after the navigation row has already updated — so the screen KEEPS the
+previous page, the click reads as ignored, and the only witness is the
+hidden console:
+
+    Uncaught TypeError: Cannot read properties of null (reading 'name')
+        at Array.map · unitPlanBody · renderUnitPlan · renderFnProjects · paint
+
+`t.name` on a null sitting INSIDE a pillar's `tactics` array. Nothing was
+deleted and nothing was hidden; one row in one list was a shape the page
+cannot draw, and one bad row stops the whole page.
+
+### 116.2 The chain, each link proved on the exact bytes production serves
+
+The plan pane's **"+ Add a tactic" row is a `<tr>` inside the same sortable
+tbody**. Its own comment says why that felt safe: it has no grip, so it
+cannot be *dragged*. What it never said is that the row is still **counted**
+— `makeSortable`'s commit read `+el.dataset.oi` off every `tr`, the add row
+has none, and `+undefined` is `NaN`. `applyOrder` then did `arr[NaN]`, which
+is `undefined`, and pushed it: **one reorder of a measure or tactic with the
+pen on appended one phantom entry, every time, on units and functions
+alike.** Reproduced: `["Open branches", "Second tactic", <<undefined>>]`
+after a single ArrowDown on a grip.
+
+Why only a FUNCTION died a minute later: a unit's plan is stored row by row
+(`pillars`/`measures`/`tactics` tables) and an `undefined` in the list fails
+that save loudly. **A pillars function's plan rides in ONE JSON blob**
+(`functions.extra`, §59), and `JSON.stringify` writes an undefined array
+entry as `null` — the save succeeds, the poison is now durable, and every
+hydration hands it back. It was showing "a minute ago" because the minute is
+exactly the save-and-rehydrate cycle.
+
+### 116.3 What it was NOT, established before the cause was known
+
+The import was innocent: every hostile file tried — orphan rows, duplicate
+and empty pillar names, junk quarters, full-precision Excel numbers, unknown
+themes — was refused before Apply with the reason named. The pen's fields
+were innocent. The DB round trip was innocent (create → import → save →
+reload → click, green over a real Postgres). **And the person was innocent:
+there is no file and no field that is supposed to produce this. A control
+that silently does nothing is the product's fault by its own rules, and
+"what mistake did I make?" has the answer *none*.**
+
+### 116.4 Three fixes, one class each
+
+- **`makeSortable` counts data rows only** — `siblings()` keeps elements
+  carrying `data-oi`, which every real sortable item in the product already
+  has; the add row is furniture. (Also corrects the drop geometry beside the
+  add row, which used to allow a drop *after* it.)
+- **`applyOrder` refuses a commit that is not a permutation** — wrong
+  length, out of range, `NaN`, duplicated: the array is left untouched,
+  never half-applied, because with the commit fixed this backstop should
+  never fire, and if it ever does, an unchanged order is the only outcome
+  that loses nothing.
+- **`fnPruneNulls()` at the hydration door** (`hydrate()` in sync.js) —
+  remove-only, so §50.6 stands: a reader never creates what it looked for,
+  and here it only deletes what no writer may mint. A tenant that already
+  saved the poison heals on the next visit, and the next autosave persists
+  the clean lists. Units need none of this; a null cannot survive their
+  road.
+
+### 116.5 The tour is never offered to the office
+
+Islam, told the tour fires for the SMO: *"yes stop it to the SMO."* The
+bootstrap SMO also HEADS the SMO function, so `storyFor()`'s `fnhead` rung
+matched and the "owner" story opened for the one person it cannot be for —
+with the dock (`position:fixed; inset:0`) eating every click while its
+welcome card waited. The gate is in `storyFor()` itself, asked through
+`SMPRules.isOfficeRole()` — the one definition of the office (§89, §97),
+never a second copy — so `offer()`, the Knowledge base replay list and
+checks/tour.py all answer the same way.
+
+### 116.6 The check presses the control and was proved able to fail
+
+`checks/reorder-integrity.py`, four sections, both ends throughout (§94.2):
+keyboard AND pointer reorders must still REORDER and must mint nothing; the
+rail — which has no add row — must keep working, or the fix would be
+indistinguishable from reordering dying; `applyOrder` refuses all five
+non-permutations; a stub serves a tenant whose stored blob already holds a
+null (over HTTP, because file:// never hydrates — §94.11) and the poisoned
+function's tab must open AND its plan must draw; the office gets no story
+while a custodian still does. Against the v3.36 build it fails **16 ways**,
+ending in the production error verbatim (§94.5).
+
+### 116.7 Found and deliberately not fixed
+
+- **A paint that throws leaves the previous page on screen with no message
+  anywhere** — §32 one level deeper: the refusal-says-so rule has no
+  equivalent for a render that dies. Every fault of this family will look
+  like a dead click until that changes. A decision about what the failure
+  surface should say, not a patch.
+- **Below ~1100px the destination row wraps and its second line paints
+  under the page-tab row**, which then takes every click on the wrapped
+  tabs — `.units-in` keeps a fixed one-line `height:46px` (_shared.css)
+  while arrange.css says `flex-wrap:wrap`. Measured on the live bytes:
+  `elementFromPoint` at the wrapped tab's centre returns a `data-s` button.
+  Not this fault — Islam's row is one line — and a real one.
+- **checks/no-jump.py's "sorting a column" trial fails on main's own
+  build** (page scroll 220 → 93), before this section's changes. Pre-existing,
+  recorded here so the next green run is not trusted blind.

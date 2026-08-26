@@ -1833,7 +1833,42 @@ prior sessions (on HR_ERP) accidentally reverted agreed-upon designs.
 
 ---
 
-*Last Updated: 2026-08-26 &mdash; **v3.37: the assistant (&sect;111,
+*Last Updated: 2026-08-26 &mdash; **v3.38: the CF tab, the add row, and a
+null that outlived its session (&sect;116)**. From production, within hours of
+&sect;113: *"the CF tab is not showing anything while it was showing it a
+minute ago."* The tab was fine; **the PAGE could no longer be drawn**, and a
+throw mid-`paint()` keeps the previous page on screen with the only witness
+in the hidden console &mdash; so a data fault reads as a dead click. The
+chain: the plan tables' **"+ Add" row is a `<tr>` inside the same sortable
+tbody**, defended by its own comment as safe because it cannot be *dragged*
+&mdash; and it was still **counted**, so every reorder commit carried
+`+undefined = NaN`, `applyOrder` pushed `arr[NaN]`, and one phantom entry
+joined the list per drag. On a unit that fails the save loudly (row-by-row
+tables); **on a pillars function the plan is ONE JSON blob, `undefined`
+becomes `null`, the save succeeds, and every later hydration hands the
+poison back** &mdash; "a minute ago" is exactly the save-and-rehydrate cycle.
+**THE PERSON MADE NO MISTAKE AND THAT IS A FINDING**: every hostile import is
+refused before Apply with the reason named, so nothing he could type or
+upload produces this &mdash; a control that silently does nothing is the
+product's own fault by its own rules. Three fixes, one class each:
+`makeSortable` counts rows carrying `data-oi` only; `applyOrder` refuses any
+commit that is not a permutation (untouched, never half-applied); and
+`fnPruneNulls()` heals already-saved poison at the hydration door &mdash;
+remove-only, &sect;50.6 intact. **And the tour is never offered to the
+office** (Islam: *"yes stop it to the SMO"*): the bootstrap SMO heads the SMO
+function, so `storyFor()`'s `fnhead` rung matched and the full-viewport dock
+ate every click while its welcome card waited &mdash; gated through
+`SMPRules.isOfficeRole()`, the one definition of the office.
+`checks/reorder-integrity.py` presses both reorder paths, the rail that must
+KEEP working, the refusals, the healed tenant over HTTP (file:// never
+hydrates, &sect;94.11) and both tour ends &mdash; and fails **16 ways**
+against the previous build, ending in the production error verbatim
+(&sect;94.5). Recorded, not fixed (&sect;116.7): a render that dies still
+says nothing on the page (&sect;32 one level deeper); below ~1100px a wrapped
+destination row paints under the page-tab row and its second line eats
+clicks; and no-jump.py's "sorting a column" trial fails on main's own build.*
+
+*Earlier: 2026-08-26 &mdash; **v3.37: the assistant (&sect;111,
 &sect;112), and a chat that vanished (&sect;113)**. The last one came from
 production and is the one worth reading: *"the chat was a user, he sent to me
 and I replied and the chat disappeared from all places."* **NOTHING WAS

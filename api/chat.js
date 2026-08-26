@@ -350,11 +350,11 @@ module.exports = async function handler(req, res) {
          only shown when it is true. */
       if (cfg.assistant) {
         const a = await assistantAnswer(client, me, text);
-        /* SAYING NOTHING IS NOT A NEUTRAL OUTCOME (§119). A handoff used to
+        /* SAYING NOTHING IS NOT A NEUTRAL OUTCOME (§125). A handoff used to
            write nothing at all, on the sound reasoning that a sentence would
            make the thread read as answered — and the person was left looking
            at a screen identical to the one they would see if the assistant had
-           never run. §116's lesson one layer in.
+           never run. §123's lesson one layer in.
 
            SO THE LINE IS THE PRODUCT'S, NEVER THE MODEL'S: §104's rule is that
            `answered` decides and the model's words are only shown when it is
@@ -405,7 +405,7 @@ module.exports = async function handler(req, res) {
        an outsider the shape of the office. */
     if (!office) return send(res, 403, { ok: false, error: "The Strategy Office answers these." });
 
-    /* ── IS THE BOT WORKING? (§116) ───────────────────────────────────
+    /* ── IS THE BOT WORKING? (§123) ───────────────────────────────────
        Islam, having turned the assistant on and had nothing come back: "I need
        to understand if the bot is working."
 
@@ -429,7 +429,7 @@ module.exports = async function handler(req, res) {
        tokens when somebody presses it. */
     if (action === "assistantTest") {
       const steps = [];
-      /* THE WORD IS THE STEP'S TO CHOOSE (§117). "ok" is the state the row
+      /* THE WORD IS THE STEP'S TO CHOOSE (§124). "ok" is the state the row
          is drawn in; what the row SAYS about itself is a different fact, and
          the API key's is "present" rather than "working" — which is the whole
          of what this page got wrong the first time. */
@@ -449,12 +449,12 @@ module.exports = async function handler(req, res) {
                  (kb.pages || []).length + " page explainers")
               : "db/kb.json did not reach this deployment");
 
-      /* PRESENT, NOT VALID (§117). This row said "working" off a non-empty
+      /* PRESENT, NOT VALID (§124). This row said "working" off a non-empty
          variable, and Islam read that — reasonably — as the key being fine,
          while the row beneath it carried the provider's "API key not valid".
          Presence is all this step can see; whether the key is accepted is the
          model step's answer, and it now says so there. */
-      /* AND WHICH KEY, IN A SHAPE THAT GIVES NOTHING AWAY (§120). "Rejected"
+      /* AND WHICH KEY, IN A SHAPE THAT GIVES NOTHING AWAY (§126). "Rejected"
          and "not the key you made" send somebody to two different websites,
          and the deployment cannot tell them apart from the outside — so it
          says the length and the first four characters, and whether that is

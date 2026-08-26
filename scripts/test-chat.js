@@ -68,7 +68,7 @@ async function signIn(who, password) {
       [OTHER.key, await auth.hashPassword(OTHER.pw)]);
     await client.query("DELETE FROM login_attempts");
     /* THE ASSISTANT IS SOMEBODY ELSE'S SETTING, AND IT CHANGES EVERY COUNT IN
-       THIS FILE (§119.4). This tests the HUMAN path — she writes, the office
+       THIS FILE (§125.4). This tests the HUMAN path — she writes, the office
        replies — and with the assistant on and a key present her message comes
        back with a second row beside it and her conversation is no longer
        waiting, so five assertions fail for a reason that has nothing to do

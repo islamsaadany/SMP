@@ -6,7 +6,7 @@ version (rules A2 / A11, changed 2026-08-20) — those go only when asked for.
 
 **Where it runs:** Vercel, production tracks `main`. Static files plus two
 serverless functions (`/api/state`, `/api/auth`) against Neon Postgres.
-**Latest version:** v3.36 on `main` · **v3.37 in progress on the branch**
+**Latest version:** v3.45 on `main` — §114.4 (the remove button's seat) merged
 **Last updated:** 2026-08-26
 
 **Sign in as:** `SMO` / `1234` — a password change is forced at once (§43.1,
@@ -64,7 +64,7 @@ Nothing proceeds past this line without an answer.
 
 ## Built and verified
 
-### v3.37 — the settings, in the order you'd decide them (§121)
+### v3.46 — the settings, in the order you'd decide them (§127)
 
 Asked to rethink the chat settings' sequence, titles and explanations. Settled
 from a mockup made of that very panel, approved, then built. **882px → 478px**,
@@ -87,7 +87,7 @@ test-assistant 33/0 · test-authorize 193/0. **One assertion was rewritten for
 being unfalsifiable** — it measured the row against the panel, and a row is
 inside its own panel by definition.
 
-### v3.37 — which key, without saying which key (§120)
+### v3.46 — which key, without saying which key (§126)
 
 The diagnostic read *switch WORKING · knowledge base WORKING · key PRESENT*
 with Google still refusing the key. **"Rejected" and "that's not the key you
@@ -104,13 +104,13 @@ that existed when it was **built**.
 nothing is saved while the screen shows the new value. It affects every setting
 in the platform, and it was **not** the fault being chased.
 
-### v3.37 — a handoff the person can see (§119)
+### v3.46 — a handoff the person can see (§125)
 
 *"Nothing happens at all"* — with the assistant on and a key the provider now
 accepts. That was §104 working exactly as designed, and that is the problem.
 
 - **A handoff wrote nothing**, so the person saw a screen identical to the one
-  they'd see if the assistant had never been asked. §116 separated four
+  they'd see if the assistant had never been asked. §123 separated four
   failures for the *operator*; this is the same fault on the *person's* side.
 - **One line now says so** — the product's words, never the model's — and the
   conversation **stays waiting**, so the office's queue, the Waiting tab and
@@ -120,7 +120,7 @@ accepts. That was §104 working exactly as designed, and that is the problem.
   neither, and somebody is already coming.
 - **A failure still writes nothing.** No key, a refusal, a timeout, malformed
   JSON, the switch off — all unchanged. A handoff is a decision; a failure is
-  not, and saying otherwise would mask the faults §116 exists to surface.
+  not, and saying otherwise would mask the faults §123 exists to surface.
 
 **And a test was found reading a setting it did not control** — `test-chat.js`
 failed five assertions after a restart and passed on the next run, which looks
@@ -140,9 +140,9 @@ never been in the sweep at all.
 way-out button under an assistant answer is a bare browser button. A visual
 decision on a surface this work was not asked to touch.
 
-### v3.37 — the diagnostic contradicted itself (§117)
+### v3.46 — the diagnostic contradicted itself (§124)
 
-The first thing §116's button reported was **"It is not working — the model"**
+The first thing §123's button reported was **"It is not working — the model"**
 with *The API key · **WORKING*** in the row directly above the provider's
 *400: API key not valid*. Two rows on one screen disagreeing, both written by
 the diagnostic.
@@ -168,7 +168,7 @@ driven end to end against a Google stub, each landing on the step it belongs
 to · qa.py ERRORS: none · test-chat 52/0 · test-assistant 25/0 ·
 test-authorize 193/0 · extract-kb --check in step.
 
-### v3.37 — is the bot working? (§116)
+### v3.46 — is the bot working? (§123)
 
 Islam turned the assistant on, asked it something, and nothing came back — but
 the message reached the inbox. That was the designed degradation working, and
@@ -190,6 +190,65 @@ menu's `change` listener instead of `click`, and a `<button>` never fires
 outcomes, not that it appears) · all five real states driven end to end against
 a stub modelling Google · qa.py clean · test-assistant 25/0 · test-authorize
 193/0.
+### v3.41 — the CF tab (§118)
+
+**§118 — reported from production.** *"The CF tab is not showing anything
+while it was showing it a minute ago."* Reordering a measure or tactic with
+the pen on counted the "+ Add" row, appended one phantom entry per drag, and
+the autosave wrote it as a `null` into the pillars function's plan blob —
+from the next hydration on, the function's page threw mid-paint and the tab
+read as dead, with the error only in the console. Fixed at the commit
+(`makeSortable` counts data rows only), backstopped (`applyOrder` refuses a
+non-permutation), and healed for tenants that already saved the poison
+(`fnPruneNulls()` at the hydration door — CF comes back on its next visit,
+nothing was lost). The tour is no longer offered to the office (§118.5).
+`checks/reorder-integrity.py` fails 16 ways against the previous build and
+is green on this one; qa.py and the full battery green on the merged build.
+Flagged, not fixed (§118.7): a dead render still says nothing on the page;
+the wrapped destination row eats clicks below ~1100px; no-jump.py's
+"sorting a column" trial fails on main's own build.
+
+### v3.39 — the register stops being a form (§116) — another session's
+
+- Merged from main during this release: the People register edits in a dialog,
+  the attention chips become one queue, the quick filters go. See §116 in the
+  decisions document; its checks (people-dialog and the reworked register
+  checks) ride in this repo and are green on the merged build.
+
+### v3.41 — the deck names its gaps, and the base becomes the office's (§118)
+
+- **The plan download says `Missing` in bold red** wherever the plan owes
+  something, and draws the Foundation, SWOT and capability slides even when
+  they are empty — a skipped slide says "nothing is missing here".
+- **The tactics table becomes four quarter columns** (Q1–Q4) with a mark in
+  the ones in action, the shape the plan workbook already has.
+- **The pillar rail opens collapsed**; only an explicit press turns it off.
+  The rows-to-check alarm survives the collapse (§106.2 is preserved).
+- **The knowledge base is the office's** — Super user and SMO team — reversing
+  §30/§37. Cost recorded: the tour's replay button is no longer reachable by
+  the people it fits; the first-run tour is untouched, and where that button
+  should live is an open question.
+- **Not reproducible and asked instead**: "for the projects there is no arrange
+  or download" — measured on live production, the office gets pen + download
+  and a function head gets arrange + download.
+
+### v3.40 — the Strategy | Reporting split, and the plan as slides (§117, spec 019)
+
+- The Roles & access table's own columns are two halves each — **Strategy**
+  (Foundation · SWOT · Plan; a capability's definition and projects) and
+  **Reporting** (figures, drafts, submitting). Strategy edit ships with the
+  office alone; **the SMO can open it to a role deliberately** (Islam's
+  choice). A stored grant on the old key keeps meaning the Reporting half, so
+  nobody's rights move on upgrade and no migration runs.
+- §101's reorder arrows survive the split (they ride the Reporting grant), and
+  strategy-at-none hides the pane, the arrows and the download together.
+- **Download the plan as slides**: a button beside the pen on the Strategy
+  panel builds a real editable `.pptx` — plan content only, SWOT included, no
+  reported figures — for the office, the BU owner, the custodian, and a
+  function's head. Offline, no new dependency (the platform's own zip writer).
+- Proved by `checks/strategy-split.py` (both ends, both directions, the file
+  unzipped and read, proved able to fail three ways), `test-authorize.js` §15
+  (212 assertions), the full check suite and `qa.py`.
 
 ### v3.37 — the assistant (§111, §112), and a chat that vanished (§113)
 
@@ -235,6 +294,32 @@ knowledge-base.py ALL CLEAR · test-authorize 190/0 · qa.py clean.
 
 **Waiting on:** `GEMINI_API_KEY` in Vercel. Everything is built and tested
 against a stub; the live call is the only unexercised path.
+
+### v3.38 — the pen's last read-only fields, and a repeating project (§114–§115)
+
+- **§114:** a measure's direction and compile, and a tactic's quarters, are
+  editable behind the plan pen — §31's read-only reason expired with §94. The
+  Temple's own vocabulary; quarters as pressable marks; all three proved to
+  WRITE (§96).
+- **§115: a repeating project.** CX-mystery-shopping-shaped work is marked
+  *Repeats: each cycle* from the front matter pen. On a new cycle it is
+  archived, cleared and its dates shift one cycle forward (rhythm kept,
+  adjustable); an **unmarked project now keeps its figures** — before this,
+  every project was wiped on every new cycle, a landmine the live tenant had
+  not yet stepped on. The archive also stops storing a deliverable's deleted
+  `actual` and starts keeping the milestone's `pct` (stale since migration 024).
+
+- **§114.4: the remove button's seat.** The row-removing × wrapped under its
+  field (`.fld` is `width:100%`) and cost every editable row 20px. Islam picked
+  **beside the field** over inside it — inside an input, an × means clear the
+  text, not remove the row. Keyed on the pair (`td:has(> .fld + .xbtn)`), so
+  every table using the pattern is seated at once.
+
+**Verified:** `plan-fields.py` and `repeat-project.py` all passed, the second
+failing three ways on the pre-§115 build before its green was believed ·
+test-authorize **195** · full battery + qa.py clean · §114.4: pairs share one
+line and the × is hittable at its centre, proved able to fail (width rule
+removed → 1 FAILED).
 
 ### v3.34 — a project's front matter (§109)
 

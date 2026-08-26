@@ -5568,8 +5568,10 @@
   "super": {
    "a_group": "edit",
    "a_unit_own": "edit",
+   "a_unit_own_strat": "edit",
    "a_unit_other": "edit",
    "a_fn_own": "edit",
+   "a_fn_own_strat": "edit",
    "a_fn_other": "edit",
    "a_cycle": "edit",
    "a_setup": "edit"
@@ -5577,8 +5579,10 @@
   "smoteam": {
    "a_group": "edit",
    "a_unit_own": "edit",
+   "a_unit_own_strat": "edit",
    "a_unit_other": "edit",
    "a_fn_own": "edit",
+   "a_fn_own_strat": "edit",
    "a_fn_other": "edit",
    "a_cycle": "edit",
    "a_setup": "edit"
@@ -5586,8 +5590,10 @@
   "gceo": {
    "a_group": "view",
    "a_unit_own": "view",
+   "a_unit_own_strat": "view",
    "a_unit_other": "view",
    "a_fn_own": "view",
+   "a_fn_own_strat": "view",
    "a_fn_other": "view",
    "a_cycle": "view",
    "a_setup": "none"
@@ -5595,8 +5601,10 @@
   "cceo": {
    "a_group": "view",
    "a_unit_own": "view",
+   "a_unit_own_strat": "view",
    "a_unit_other": "view",
    "a_fn_own": "view",
+   "a_fn_own_strat": "view",
    "a_fn_other": "view",
    "a_cycle": "view",
    "a_setup": "none"
@@ -5604,8 +5612,10 @@
   "owner": {
    "a_group": "view",
    "a_unit_own": "edit",
+   "a_unit_own_strat": "view",
    "a_unit_other": "none",
    "a_fn_own": "view",
+   "a_fn_own_strat": "view",
    "a_fn_other": "none",
    "a_cycle": "none",
    "a_setup": "none"
@@ -5613,8 +5623,10 @@
   "custodian": {
    "a_group": "view",
    "a_unit_own": "edit",
+   "a_unit_own_strat": "view",
    "a_unit_other": "none",
    "a_fn_own": "edit",
+   "a_fn_own_strat": "view",
    "a_fn_other": "none",
    "a_cycle": "none",
    "a_setup": "none"
@@ -5622,8 +5634,10 @@
   "fnhead": {
    "a_group": "view",
    "a_unit_own": "none",
+   "a_unit_own_strat": "none",
    "a_unit_other": "none",
    "a_fn_own": "edit",
+   "a_fn_own_strat": "view",
    "a_fn_other": "none",
    "a_cycle": "none",
    "a_setup": "none"
@@ -5631,8 +5645,10 @@
   "contrib": {
    "a_group": "view",
    "a_unit_own": "view",
+   "a_unit_own_strat": "view",
    "a_unit_other": "none",
    "a_fn_own": "view",
+   "a_fn_own_strat": "view",
    "a_fn_other": "none",
    "a_cycle": "none",
    "a_setup": "none"
@@ -5640,8 +5656,10 @@
   "employee": {
    "a_group": "view",
    "a_unit_own": "view",
+   "a_unit_own_strat": "view",
    "a_unit_other": "none",
    "a_fn_own": "view",
+   "a_fn_own_strat": "view",
    "a_fn_other": "none",
    "a_cycle": "none",
    "a_setup": "none"

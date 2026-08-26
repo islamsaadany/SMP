@@ -440,7 +440,20 @@ with sync_playwright() as p:
        len(heights) == 4 and all(heights[i] > heights[i + 1] for i in range(3)), heights)
     # AND THE THREAD IS WHAT SCROLLS, not the page.
     pg.set_viewport_size({"width": 1400, "height": 760})
-    pg.wait_for_timeout(400)
+    # WAIT FOR THE THREAD, NOT FOR A CLOCK. A fixed 400ms here raced the
+    # panel's own poll: `drawThread()` rewrites this body every few seconds,
+    # and a measurement that lands mid-rewrite reads an EMPTY box and calls a
+    # working build broken. Once settled the margin is enormous (1601px of
+    # content in a 437px box), so the flake was never about the assertion —
+    # it was about measuring before there was anything to measure. The
+    # assertion itself is untouched.
+    try:
+        pg.wait_for_function(
+            "() => { const e = document.querySelector('#chtbody');"
+            " return e && e.children.length > 1; }", timeout=5000)
+    except Exception:
+        pass
+    pg.wait_for_timeout(200)
     ck("the thread scrolls inside its own box",
        pg.eval_on_selector("#chtbody", "e => e.scrollHeight > e.clientHeight + 2"))
     ck("and the queue has a scroller of its own",
@@ -503,7 +516,7 @@ with sync_playwright() as p:
                 ".find(x=>x.dataset.chtab==='waiting'); if(b) b.click();}")
     pg.wait_for_timeout(400)
 
-    # ── 10 · IS THE BOT WORKING? (§116) ──────────────────────────────────
+    # ── 10 · IS THE BOT WORKING? (§123) ──────────────────────────────────
     # Islam, having turned the assistant on and had nothing come back: "I need
     # to understand if the bot is working."
     #
@@ -549,14 +562,14 @@ with sync_playwright() as p:
         ck("a failure names the step that stopped it",
            "not working" in stopped["head"].lower() and "key" in stopped["head"].lower(), stopped)
         ck("and marks exactly one row as the stopping point", stopped["stopped"] == 1, stopped)
-        # AND THE NAME IS NOT SHOUTED DOWN (§117). The headline lowercases the
+        # AND THE NAME IS NOT SHOUTED DOWN (§124). The headline lowercases the
         # step's name so it reads as a sentence, and lowercasing the WHOLE of
         # it turned "The API key" into "the api key" in the one line somebody
         # reads first. Only the leading article moves.
         ck("an acronym in the step's name survives the headline",
            "the API key" in stopped["head"], stopped)
 
-        # ── PRESENT IS NOT VALID (§117) ──────────────────────────────────
+        # ── PRESENT IS NOT VALID (§124) ──────────────────────────────────
         # The row that says a key is there had said WORKING, off nothing but a
         # non-empty variable — while the row beneath it carried the provider
         # refusing that same key. A state is how a row is DRAWN; what it SAYS
@@ -602,7 +615,7 @@ with sync_playwright() as p:
         ck("and nothing is marked as a stopping point", good["stopped"] == 0, good)
     CHAT["test"] = None
 
-    # ── 11 · A HANDOFF IS SAID OUT LOUD (§119) ───────────────────────────
+    # ── 11 · A HANDOFF IS SAID OUT LOUD (§125) ───────────────────────────
     # It used to write nothing at all, which left the person looking at a
     # screen identical to the one they would see if the assistant had never
     # run. So what is asserted is that the two states DIFFER on screen — and
@@ -663,7 +676,7 @@ with sync_playwright() as p:
     CHAT["messages"] = []
     CHAT["thread"] = None
 
-    # ── 12 · THE SETTINGS, RE-SEQUENCED (§121) ───────────────────────────
+    # ── 12 · THE SETTINGS, RE-SEQUENCED (§127) ───────────────────────────
     # ASSERTS THE PROBLEMS, NEVER THE LAYOUT (§94.8). The faults were: the
     # master switch sat third, under a setting it governs; the two email rows
     # sat five rows apart; the explanations were longer than the controls; and
@@ -694,7 +707,7 @@ with sync_playwright() as p:
     if "Handover email" in seq and "Away email" in seq:
         ck("the two email settings are next to each other",
            abs(seq.index("Handover email") - seq.index("Away email")) == 1, seq)
-    # TEST IS WHERE SOMEBODY STANDS AFTER FLIPPING THE ASSISTANT (§116).
+    # TEST IS WHERE SOMEBODY STANDS AFTER FLIPPING THE ASSISTANT (§123).
     ck("Test the assistant is in the assistant's own row",
        pg.evaluate("""()=>{const t=document.querySelector('[data-chtest]');
            const r=t && t.closest('.chset-row');

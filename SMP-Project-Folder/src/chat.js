@@ -145,7 +145,7 @@ var CHAT = (function(){
      office's inbox. One function, so the two can never start disagreeing
      about what a message looks like. */
   function msgHtml(m, mineIsOffice, showFlag){
-    /* A HANDOFF IS NARRATED, NOT SPOKEN (§119). It is not the office's answer
+    /* A HANDOFF IS NARRATED, NOT SPOKEN (§125). It is not the office's answer
        and it is not the assistant's either — it is the product saying what
        happened, so it wears no name, no time and no bubble, and reads as the
        quiet line it is. The office sees the same line in the thread, which is
@@ -625,7 +625,7 @@ var CHAT = (function(){
   };
   var TESTWORD = { ok: "working", warn: "check this", fail: "stopped here", off: "off" };
 
-  /* ONLY THE FIRST LETTER (§117). This lowercased the whole name, so "The API
+  /* ONLY THE FIRST LETTER (§124). This lowercased the whole name, so "The API
      key" became "the api key" in the one sentence somebody reads first. */
   function unCap(t){
     return /^The /.test(t) ? "the " + t.slice(4) : t;
@@ -651,7 +651,7 @@ var CHAT = (function(){
       }).join("") + "</div>";
   }
 
-  /* ── THE SETTINGS, IN THE ORDER SOMEBODY DECIDES THEM (§121) ────────
+  /* ── THE SETTINGS, IN THE ORDER SOMEBODY DECIDES THEM (§127) ────────
      Islam asked for the sequence, the titles and the explanations to be
      rethought, and settled it from a mockup made of this very panel.
 
@@ -733,7 +733,7 @@ var CHAT = (function(){
            model is simply never called — with the assistant off there is no
            control on screen to hide, so the guard IS the feature (§42, §98.2).
            Test stays directly beneath it: it is where somebody stands after
-           turning it on (§116). */
+           turning it on (§123). */
         setRow("assistant", "Assistant",
           "Off sends every question straight to this inbox. On, it answers from the " +
           "knowledge base first \u2014 the same pages everybody can already open \u2014 " +
@@ -1084,7 +1084,7 @@ var CHAT = (function(){
     wrap.dataset.chwired = "1";
 
     wrap.addEventListener("click", function(e){
-      /* A TAP OPENS THE NOTE (§121). Hover does not exist on a tablet, and
+      /* A TAP OPENS THE NOTE (§127). Hover does not exist on a tablet, and
          since every explanation moved behind one of these marks, a note that
          only answers a mouse is a note half this product's readers cannot
          read. `.on` sits beside the :hover and :focus the platform already
@@ -1110,7 +1110,7 @@ var CHAT = (function(){
       var t = e.target.closest("[data-chsetmenu]");
       if (t) { SETMENU = !SETMENU; setMenuPaint(); return; }
 
-      /* IS IT WORKING? (§116) — and this branch was written into the `change`
+      /* IS IT WORKING? (§123) — and this branch was written into the `change`
          listener first, where a <button> can never reach it: it rendered
          perfectly, it was pressable, and pressing it did nothing at all. The
          anchor was the rep `<select>`, which genuinely does belong there.

@@ -9,7 +9,7 @@
 -- still right, and it left the person seeing NOTHING — which is exactly what
 -- they would see if the assistant had never been asked at all.
 --
--- §116 made that failure visible to the OPERATOR and left it invisible to the
+-- §123 made that failure visible to the OPERATOR and left it invisible to the
 -- person asking. This is the same lesson one layer in: the two states "it
 -- tried and could not" and "it was never asked" must not look identical.
 --

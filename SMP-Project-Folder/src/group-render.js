@@ -229,6 +229,21 @@ function qs(t){
   return '<span class="qs">' + out + "</span>";
 }
 
+/* THE QUARTERS, PRESSABLE (§114). The same four marks qs() draws, as
+   buttons, behind the pen — §42 classified a tactic's quarter as PLAN on the
+   server four versions before the screen could edit one, so this draws the
+   control the authoriser has been guarding all along. By id, never index
+   (§48.2). */
+function qsEdit(t){
+  var q = quartersOf(t), out = "";
+  for (var i = 0; i < 4; i++) {
+    out += '<button class="qtog' + (q[i] ? " on" : "") + '" data-qtog="' +
+      esc(t.id) + '|' + (i + 1) + '" title="Quarter ' + (i + 1) +
+      (q[i] ? " — planned; press to clear" : " — press to plan") + '">' + (i + 1) + '</button>';
+  }
+  return '<span class="qs qs-edit">' + out + '</span>';
+}
+
 /* Measure name reads left; every figure centres under its column. Progress
    carries the band colour, since it is the row's conclusion. */
 function measureRows(ms, opts){
@@ -655,10 +670,18 @@ function section(eyebrow, title, note, body, tipText, action){
      empty <h2> still spends its line-height and its margin, which on the unit
      Performance page was pushing the rail a heading's worth further down the
      page for a heading that rendered as blank. */
-  var head = (eyebrow || title || action)
+  /* AND A HEADING THAT REPEATS THE PAGE'S OWN NAME DOES NOT GET ONE EITHER
+     (§121.1). The Setup page's name is drawn by the shell now, so a section
+     called what the page is called says it twice — the same argument as the
+     empty header above, with the header full of a word already on screen.
+     Compared against the name being shown rather than by position: a real
+     first section keeps its heading. */
+  var dupTitle = title && typeof PAGE_TITLE !== "undefined" && PAGE_TITLE != null &&
+                 String(title).trim().toLowerCase() === String(PAGE_TITLE).trim().toLowerCase();
+  var head = (eyebrow || (title && !dupTitle) || action)
     ? '<div class="section-h">' +
         (eyebrow ? '<span class="section-n">' + eyebrow + '</span>' : '') +
-        (title ? '<h2>' + title + (tipText ? tip(tipText) : '') + '</h2>' : '') +
+        (title && !dupTitle ? '<h2>' + title + (tipText ? tip(tipText) : '') + '</h2>' : '') +
         (action || '') + '</div>'
     : '';
   return '<div class="section">' + head +
@@ -1679,8 +1702,27 @@ function editBar(page, acKey){
    somebody added a pane, and §53.5's whole rule is that a unit and a function
    must not drift apart in silence. */
 function paneActs(page, acKey){
-  var inner = penBtn(page, acKey) + arrangePaneBtn();
+  var inner = penBtn(page, acKey) + arrangePaneBtn() + dlPlanBtn(page);
   return inner ? '<div class="paneact">' + inner + '</div>' : '';
+}
+
+/* ── THE PLAN LEAVES AS SLIDES (§117) ─────────────────────────────
+   Islam: "add the access of downloading a presentation for the plan for the
+   custodian and the business unit owner through a button in the strategy
+   panel." Drawn ONLY on the plan pane — the page the ask names — and gated by
+   the shared rule, so the office, the unit's owner and custodian and a
+   function's head see it and a CEO passing through does not (§37: reaching is
+   not holding). The press asks the rule AGAIN (§48.2, in pptx.js), because
+   the viewer switcher can change who this is between paint and click. */
+function dlPlanBtn(page){
+  if (page !== "plan") return '';
+  if (!SMPRules.mayDownloadPlan(world(), viewer(), TARGET)) return '';
+  return '<button class="penbtn dlpen" data-dlpptx="' + esc(TARGET) + '"' +
+    ' title="Download the plan as slides (.pptx)"' +
+    ' aria-label="Download the plan as slides (.pptx)">' +
+    '<svg viewBox="0 0 20 20" aria-hidden="true" fill="none" stroke="currentColor"' +
+    ' stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">' +
+    '<path d="M10 3.5v8M6.8 8.7L10 11.9l3.2-3.2M4.5 15h11"/></svg></button>';
 }
 
 function arrangePaneBtn(target){
@@ -2441,8 +2483,20 @@ function railName(code, name){
    PREFERENCE, so it lives in localStorage beside the theme and the People
    page's columns (§25, §47.1) — putting it in the state graph would change
    the rail for everyone in the tenant. */
+/* ── COLLAPSED IS THE DEFAULT (§119) ──────────────────────────────
+   Islam: "make the default view for the pillar rail to be the collapsed one."
+   The rail's small line under each name carries counts and an owner — useful
+   once you are deep in a plan, noise when you are looking for which pillar to
+   open, and it is what makes a ten-pillar rail taller than the pane beside it.
+
+   READ THE OTHER WAY ROUND, LIKE §104'S TWO SETTINGS: absent now means TERSE,
+   so only an explicit "0" — somebody who pressed the control to bring the
+   detail back — turns it off. A stored "1" from before this change still
+   reads as terse, so nobody who had already collapsed it sees a change; and
+   the preference stays in localStorage, per screen, never the state graph
+   (§25, §47.1). */
 var RAIL_TERSE = (function(){
-  try { return localStorage.getItem("smp.rail.terse") === "1"; } catch(e){ return false; }
+  try { return localStorage.getItem("smp.rail.terse") !== "0"; } catch(e){ return true; }
 })();
 function railHead(label, n){
   return '<div class="rhead"><span class="rhl">' + label + ' <span>' + n + '</span></span>' +
@@ -2453,8 +2507,20 @@ function railHead(label, n){
     'stroke="currentColor" stroke-width="1.6" stroke-linecap="round" fill="none"/></svg>' +
     '</button></div>';
 }
-function railSub(html){
-  return (RAIL_TERSE || !html) ? "" : '<span class="rsub">' + html + '</span>';
+function railSub(html, alarm){
+  /* TERSE DROPS THE DETAIL, NEVER THE ALARM (§119). Collapsed is the default
+     now, and the routine half of this line — how many measures, how many
+     tactics, who owns it — is exactly what somebody scanning for a pillar does
+     not need. The other half is not detail: §106.2 put the count of rows
+     wanting attention HERE so the project holding them can be found without
+     opening each in turn (§93.4, the count belonging where the gap is closed),
+     and a default that hid it would have quietly undone that. So an `alarm`
+     survives terse and the rest does not; with both, terse shows the alarm
+     alone. Found by checks/project-tables.py going red on the day the default
+     flipped — the rail's line was carrying two different kinds of thing and
+     nothing had had to tell them apart before. */
+  var body = RAIL_TERSE ? (alarm || "") : [html, alarm].filter(Boolean).join(" &middot; ");
+  return body ? '<span class="rsub">' + body + '</span>' : "";
 }
 
 /* `opts` carries the two things the PLAN page's rail needs and the
@@ -2464,6 +2530,9 @@ function railSub(html){
    to author a plan from the page that reports against it. */
 function railFor(list, sel, numOf, subOf, groupOf, footNote, codeOf, opts){
   opts = opts || {};
+  /* The half of the small line that survives a collapsed rail (§119). Optional
+     and last, so every existing caller is untouched. */
+  var alarmOf = opts.alarmOf;
   var lastGroup = null;
   var rows = list.map(function(it, i){
     var g = groupOf ? groupOf(it) : null, head = "";
@@ -2479,7 +2548,7 @@ function railFor(list, sel, numOf, subOf, groupOf, footNote, codeOf, opts){
          names out as though something were there — the unit's Plan rail, which
          has never had a number, does not render one at all. */
       (numOf ? '<span class="rnum">' + numOf(it) + '</span>' : '') +
-        railSub(subOf ? subOf(it) : "") +
+        railSub(subOf ? subOf(it) : "", alarmOf ? alarmOf(it) : "") +
       '</button>';
   }).join("");
   /* THE CONTAINER SAYS WHAT IT HOLDS (§63.5): `data-item=".ritem"`, because
@@ -2924,11 +2993,25 @@ function projFrontMatter(p, ed){
         ? (p.stakeholders || []).map(function(x){
             return '<span class="pill kind">' + esc(x) + '</span>'; }).join(" ")
         : '<span class="missing">None named</span>');
+  /* REPEATS (§115). Read mode shows the row only when it says something — a
+     "Repeats: No" on every build-once project is noise (§41's budget, in
+     words). The setter DELETES the key on the default (§50.6): a project
+     unmarked and one never asked must be byte-identical. */
+  var repRow = "";
+  if (ed) {
+    repRow = row("l", "Repeats",
+      selectOr("plan", p.repeats === "cycle" ? "Each cycle" : "No",
+        ["No", "Each cycle"], "",
+        function(v){ if (v === "Each cycle") p.repeats = "cycle"; else delete p.repeats; }));
+  } else if (p.repeats === "cycle") {
+    repRow = row("l", "Repeats", "Each cycle");
+  }
   return '<div class="pfront">' +
     '<div class="pfcol">' +
       row("l", "Owner", f(p.owner, function(v){ p.owner = v; })) +
       row("l", "Start", f(p.start, function(v){ p.start = v; })) +
       row("l", "End",   f(p.end,   function(v){ p.end   = v; })) +
+      repRow +
     '</div>' +
     '<div class="pfcol pfright">' +
       row("r", "Brief", ed ? fieldOr("plan", p.brief || "", "", function(v){ p.brief = v; })
@@ -3064,17 +3147,18 @@ function renderFnProjects(fnKey){
        date AND the end date AND which kind of timeline, over three. */
     var rail = railFor(c.projects, sel, null,
       function(p){
-        var n = planAttention(p);
         return plural(p.deliverables.length, "deliverable") + ' &middot; ' +
           plural(p.outcomes.length, "outcome") + ' &middot; ' +
-          plural(p.milestones.length, "milestone") +
-          /* Appended to the SUB line, never passed as `numOf`: that argument
-             puts a `.rnum` on EVERY row and an empty one still takes its
-             column in the grid (the note on railFor says so). */
-          (n ? ' &middot; <span class="missing">' + plural(n, "row") + ' to check</span>' : ''); },
+          plural(p.milestones.length, "milestone"); },
       null, null,
       function(p){ return projCode(fk, p); },
-      { arranging: on, add: ed, capId: c.id });
+      { arranging: on, add: ed, capId: c.id,
+        /* Appended to the SUB line, never passed as `numOf`: that argument
+           puts a `.rnum` on EVERY row and an empty one still takes its column
+           in the grid (the note on railFor says so). */
+        alarmOf: function(p){
+          var n = planAttention(p);
+          return n ? '<span class="missing">' + plural(n, "row") + ' to check</span>' : ''; } });
     /* splitOrPane() drops the rail below railWorthIt()'s threshold, which is
        right for reading and wrong while a plan is being authored: with one
        project there would be nowhere to press Add. */
@@ -3434,7 +3518,22 @@ function unitPlanBody(it, u, railed){
       '<span class="idx-n">' + (i+1) + '</span></td>' +
       '<td>' + (ed ? inputOr("plan", m.name, "", function(v){ m.name = v; }) : esc(m.name)) +
         xb("measures", m.id) + '</td>' +
-      '<td class="cc">' + esc(m.dir) + '</td>' +
+      /* EDITABLE SINCE §114, reversing §31's read-only. That section closed the
+         direction and the compile rule because "they change what a figure
+         MEANS" — the right worry while the pen could fall to the person being
+         measured, and §94 ended that: the pen is the office's. What was left
+         was the office unable to correct exactly the fields that most need
+         correcting after an upload. The vocabulary is the Temple's own
+         (selectOr, same options), never a second list (§53.5) — and a value
+         already stored that is NOT in the list is prepended rather than
+         silently displayed wrong (§96.2: the display must not disagree with
+         the data). */
+      '<td class="cc">' + (ed
+        ? selectOr("plan", m.dir || "",
+            (m.dir && ["\u2265","\u2264"].indexOf(m.dir) < 0 ? [m.dir] : [])
+              .concat(m.dir ? [] : [""]).concat(["\u2265","\u2264"]), "mono",
+            function(v){ m.dir = v; })
+        : esc(m.dir)) + '</td>' +
       '<td class="num">' + cell(m.target, function(v){ m.target = v; }, "mono") + '</td>' +
       /* NO 3-YEAR COLUMN. Islam, 2026-08-22: "in the direction plans the key
          measures are for 1 year only". A pillar's key measures carry one
@@ -3443,7 +3542,12 @@ function unitPlanBody(it, u, railed){
          and keep theirs. `target3y` is still stored and still travels through
          import, export and the archive — this removes a column, not a field,
          so nothing a plan already carries is lost. */
-      '<td class="cc">' + esc(m.compile || "\u2014") + '</td></tr>';
+      '<td class="cc">' + (ed
+        ? selectOr("plan", m.compile || "",
+            (m.compile && ["Sum","Latest","Average"].indexOf(m.compile) < 0 ? [m.compile] : [])
+              .concat(m.compile ? [] : [""]).concat(["Sum","Latest","Average"]), "",
+            function(v){ m.compile = v; })
+        : esc(m.compile || "\u2014")) + '</td></tr>';
   }).join("");
   var tRows = it.tactics.map(function(t, i){
     return '<tr data-oi="' + i + '"><td class="idx">' +
@@ -3461,7 +3565,7 @@ function unitPlanBody(it, u, railed){
       '<td class="collabs">' + (ed
         ? inputOr("plan", collabText(t), "", function(v){ t.collaborators = collabParse(v); })
         : collabCell(t)) + '</td>' +
-      '<td>' + qs(t) + '</td></tr>';
+      '<td>' + (ed ? qsEdit(t) : qs(t)) + '</td></tr>';
   }).join("");
   var meta = pillarMeta(it);
   var head = showHead

@@ -11,7 +11,7 @@
      · with the switch off, the model is never called at all
      · `answered: true` writes a message and takes the thread out of Waiting
      · `answered: false` says so in one line of the PRODUCT's words, never
-       the model's, and leaves it Waiting (§119)
+       the model's, and leaves it Waiting (§125)
      · every failure — timeout, refusal, malformed JSON, a missing key —
        leaves the person's message stored and the thread Waiting
      · a bot message is marked as one and never wears a person's name
@@ -104,7 +104,7 @@ const stub = http.createServer(function (req, res) {
     if (cfg.assistant) {
       const out = await assistant.ask({ kb: kb, question: "a question", history: [], who: "the head of a business unit", labels: {} });
       a = (out && out.ok) ? out : null;
-      /* §119, run exactly as `say` runs it. A HANDOFF SAYS SO; a failure — `a`
+      /* §125, run exactly as `say` runs it. A HANDOFF SAYS SO; a failure — `a`
          null — still writes nothing at all, and section 4 is what holds that
          line, because telling somebody the assistant considered their question
          when it was never asked is a lie nobody can see (§112.2). */
@@ -141,9 +141,9 @@ const stub = http.createServer(function (req, res) {
      st.msgs.some(function (m) { return m.source === "headline"; }), st);
   ck("and it leaves the office's Waiting queue", st.waiting === false, st);
 
-  /* §119 REVERSES THE FIRST HALF OF THIS SECTION'S OLD TITLE. A handoff used
+  /* §125 REVERSES THE FIRST HALF OF THIS SECTION'S OLD TITLE. A handoff used
      to write nothing, and the person was left looking at a screen identical to
-     the one they would see if the assistant had never run — §116's fault one
+     the one they would see if the assistant had never run — §123's fault one
      layer in. It SAYS SO now; what has not changed, and is what the rest of
      this section holds, is that the conversation stays in the office's queue. */
   console.log("\n3 · a handoff says so, and still leaves it waiting");
@@ -170,7 +170,7 @@ const stub = http.createServer(function (req, res) {
   for (const m of ["refuse", "notfound", "garbage", "empty"]) {
     MODE = m;
     st = await run({ assistant: true });
-    /* NOTHING AT ALL, the handoff line included (§119). A failure is not a
+    /* NOTHING AT ALL, the handoff line included (§125). A failure is not a
        decision, and a deployment with no key must not tell people the
        assistant looked at their question and gave up. */
     ck("`" + m + "` writes nothing and leaves it waiting",
@@ -190,7 +190,7 @@ const stub = http.createServer(function (req, res) {
      noKey.ok === false && /GEMINI_API_KEY/.test(noKey.why), noKey);
   process.env.GEMINI_API_KEY = "test-key-not-a-real-one";
 
-  /* §120. "Rejected" and "not the key you made" are two different errands and
+  /* §126. "Rejected" and "not the key you made" are two different errands and
      the deployment cannot tell them apart from outside — so the shape is
      reported, and the one thing that must never happen is the VALUE reaching
      the screen. Asserted here rather than in the browser check, whose stub

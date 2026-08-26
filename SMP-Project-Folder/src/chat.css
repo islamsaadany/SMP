@@ -86,7 +86,7 @@ body.presenting .chatdock { display:none; }
 .chatday { text-align:center; font-size:var(--fs-micro); color:var(--ink-3);
            letter-spacing:.09em; text-transform:uppercase; font-weight:700; }
 
-/* THE PRODUCT NARRATING, at the volume of the day divider above it (§119).
+/* THE PRODUCT NARRATING, at the volume of the day divider above it (§125).
    Deliberately not a message: no bubble, no name, no accent edge — the two
    sides of this conversation are the person and the office, and a handoff is
    neither. Wider than the divider because it is a sentence rather than a date,
@@ -269,7 +269,7 @@ body.presenting .chatdock { display:none; }
    header dropdown (§90) — the same control, so it needs no second appearance —
    and adds only the rows inside it. */
 .hmenu-panel.chset { width:392px; }
-/* THE NOTE OPENS ON A TAP (§121). `.tip` and its bubble are the platform's,
+/* THE NOTE OPENS ON A TAP (§127). `.tip` and its bubble are the platform's,
    declared once in group-extra.css and reused here rather than drawn again
    (§53.5) — this adds the open state and nothing else, so a mark that was
    opened by hover and by focus is now opened by a press as well.
@@ -364,7 +364,7 @@ body.presenting .chatdock { display:none; }
   .chatbtn { align-self:flex-end; }
 }
 
-/* ── IS THE BOT WORKING? (§116) ────────────────────────────────────────
+/* ── IS THE BOT WORKING? (§123) ────────────────────────────────────────
    The office's own diagnostic, in the dropdown they are already standing in.
    Quiet until it has something to say: the chain that got that far is grey,
    and the row where it stopped is the one that carries colour. */

@@ -4426,6 +4426,18 @@
     .pfright { border-left:0; border-top:1px solid var(--line); }
   }
 
+  /* ── THE QUARTERS, PRESSABLE (§114) ──────────────────────────────────
+     The same four marks qs() draws, as buttons. The lit state borrows the
+     read-mode mark's own colours so the row reads the same with the pen on
+     and off; only the border says "pressable". */
+  .qs-edit .qtog { width:22px; height:22px; padding:0; margin:0 2px 0 0;
+    font:600 11px/1 var(--mono); color:var(--ink-3);
+    background:var(--surface); border:1px solid var(--line);
+    border-radius:5px; cursor:pointer; }
+  .qs-edit .qtog.on { background:var(--gold-deep); color:var(--on-accent);
+    border-color:var(--gold-deep); }
+  .qs-edit .qtog:hover { border-color:var(--gold-deep); }
+
   /* ── Presentation mode ────────────────────────────────────────────
      A mode, not a page: it takes the whole window, the app chrome disappears,
      and Exit returns to exactly where the presenter was standing.
@@ -11272,6 +11284,65 @@ function monthsOf(v, last){
    55 of the 60 milestones in the worked example are a bare quarter with no
    year, so a year has to come from somewhere: it comes from the cycle, which
    is the only year the platform actually knows. */
+/* ── SHIFTING A DATE BY A RUN (§115) ─────────────────────────────────────
+   A repeating project keeps its rhythm: fieldwork in month 2 of the run stays
+   fieldwork in month 2, so when a new cycle opens every date on a marked
+   project moves forward by the CLOSED cycle's length. One writer, mirroring
+   monthsOf() the reader shape for shape — a shape the reader cannot read is
+   returned UNCHANGED, never guessed at, because a date this cannot shift is
+   still a date somebody typed. The written style survives the shift: a
+   2-digit year stays 2-digit, "Mar" stays short, "March" stays long. */
+var MONTH_FULL = ["January","February","March","April","May","June","July",
+                  "August","September","October","November","December"];
+function shiftWhen(v, by){
+  var s0 = String(v == null ? "" : v).trim();
+  if (!s0 || !by) return v;
+  var yOut = function(orig, ny){
+    return orig.length === 2 ? ("0" + (ny % 100)).slice(-2) : String(ny);
+  };
+  var m;
+  /* W3 Mar 26 · March 2026 · Mar 26 */
+  if ((m = s0.match(/^([Ww]\d\s+)?([A-Za-z]{3,9})\s+(\d{2}|\d{4})$/))) {
+    var mi = monthIndex(m[2]);
+    if (mi < 0) return v;
+    var t = fullYear(m[3]) * 12 + mi + by;
+    var nm = ((t % 12) + 12) % 12, ny = Math.floor(t / 12);
+    var word = m[2].length > 3 ? MONTH_FULL[nm]
+             : MONTH_FULL[nm].slice(0, 3);
+    return (m[1] || "") + word + " " + yOut(m[3], ny);
+  }
+  /* Q1 2026 · Q3 (a bare quarter shifts only when the shift is whole quarters) */
+  if ((m = s0.match(/^([Qq])([1-4])(?:\s+(\d{2}|\d{4}))?$/))) {
+    if (by % 3 !== 0) return v;
+    var q = +m[2] - 1 + by / 3;
+    if (!m[3]) return m[1] + (((q % 4) + 4) % 4 + 1);
+    var qy = fullYear(m[3]) + Math.floor(q / 4);
+    return m[1] + (((q % 4) + 4) % 4 + 1) + " " + yOut(m[3], qy);
+  }
+  /* H1 2026 */
+  if ((m = s0.match(/^([Hh])([12])(?:\s+(\d{2}|\d{4}))?$/))) {
+    if (by % 6 !== 0) return v;
+    var h = +m[2] - 1 + by / 6;
+    if (!m[3]) return m[1] + (((h % 2) + 2) % 2 + 1);
+    var hy = fullYear(m[3]) + Math.floor(h / 2);
+    return m[1] + (((h % 2) + 2) % 2 + 1) + " " + yOut(m[3], hy);
+  }
+  /* 31 May 2026 — the day clamps to the month it lands in, because
+     31 November is not a date and losing the row's date to gain a correct
+     day count would be the wrong trade. */
+  if ((m = s0.match(/^(\d{1,2})\s+([A-Za-z]{3,9})\s+(\d{2}|\d{4})$/))) {
+    var mi2 = monthIndex(m[2]);
+    if (mi2 < 0) return v;
+    var t2 = fullYear(m[3]) * 12 + mi2 + by;
+    var nm2 = ((t2 % 12) + 12) % 12, ny2 = Math.floor(t2 / 12);
+    var maxDay = new Date(ny2, nm2 + 1, 0).getDate();
+    var day = Math.min(+m[1], maxDay);
+    var word2 = m[2].length > 3 ? MONTH_FULL[nm2] : MONTH_FULL[nm2].slice(0, 3);
+    return day + " " + word2 + " " + yOut(m[3], ny2);
+  }
+  return v;
+}
+
 function cycleYear(){
   var m = /(\d{4})/.exec(String(REVIEW.to || "") + " " + String(REVIEW.name || "") +
                          " " + String(REVIEW.due || ""));
@@ -12929,9 +13000,14 @@ function figuresSnapshot(){
     snap.groupCaps[c.id] = { perf:c.perf, exec:c.exec };
     (c.keyObjectives || []).forEach(function(x){ put(m, x, ["actual","progress","note"]); });
     (c.projects || []).forEach(function(p){
-      (p.deliverables || []).forEach(function(x){ put(m, x, ["actual","note"]); });
+      /* status/pct, NOT actual (§115): migration 024 deleted a deliverable's
+         `actual` and gave milestones a per-cent, and this snapshot was never
+         told — so every archive since the one-row shape stored `undefined`
+         for a deliverable and lost the milestone's number. §51.10's rule, in
+         the archive: when a field is renamed, find every writer. */
+      (p.deliverables || []).forEach(function(x){ put(m, x, ["status","pct","note"]); });
       (p.outcomes    || []).forEach(function(x){ put(m, x, ["actual","progress","note"]); });
-      (p.milestones  || []).forEach(function(x){ put(m, x, ["status","note"]); });
+      (p.milestones  || []).forEach(function(x){ put(m, x, ["status","pct","note"]); });
     });
     snap.caps[c.id] = m;
   });
@@ -13020,12 +13096,57 @@ function clearAllNotes(){
     });
   });
   (GROUP.keyObjectives || []).forEach(function(x){ x.note = ""; });
-  (GROUP.capabilities || []).forEach(function(c){ clearCapability(c, "nums"); });
+  /* The capabilities left this function in §115 — their new-cycle behaviour
+     is a decision per PROJECT now, not a blanket clear, and it lives in
+     clearForNewCycle() where the cycle's own length is still readable. */
 }
 
 /* Everything a new cycle asks again: the units' figures, the group's, the
    capabilities', the notes beneath them, and who had submitted. */
+/* ── WHAT A NEW CYCLE DOES TO A CAPABILITY (§115) ────────────────────────
+   Until §115 every project was wiped when a cycle opened — clearCapability's
+   "nums" pass, written before anyone had opened a second cycle on real data —
+   so the day H2 opened, a DELIVERED project's record would have been erased
+   and its Execution read as nought. That clear is now a decision each project
+   makes:
+
+   · a project marked `repeats: "cycle"` IS re-asked — figures archived (the
+     archive runs first, §49.1) and cleared, and every date it carries shifts
+     forward by the closed cycle's length, so the H2 run keeps H1's rhythm.
+     The pen can then adjust any date the new run does differently.
+   · an unmarked project KEEPS its figures and its notes — delivered is
+     delivered, and a note explaining a standing figure stands with it.
+
+   The capability's own key objectives clear every cycle regardless: they are
+   per-cycle figures, the function's KPIs, same as a unit's measures. */
+function capNewCycle(c, span){
+  (c.keyObjectives || []).forEach(function(m){ m.actual = ""; m.progress = null; m.note = ""; });
+  (c.projects || []).forEach(function(p){
+    if (p.repeats !== "cycle") return;
+    (p.deliverables || []).forEach(function(d){
+      d.status = null; d.pct = null; d.note = "";
+      if (d.due) d.due = shiftWhen(d.due, span);
+    });
+    (p.outcomes || []).forEach(function(o){
+      o.actual = null; o.progress = null; o.note = "";
+      if (o.measureAt) o.measureAt = shiftWhen(o.measureAt, span);
+    });
+    (p.milestones || []).forEach(function(m){
+      m.status = null; m.pct = null; m.note = "";
+      if (m.finish) m.finish = shiftWhen(m.finish, span);
+    });
+    if (p.start) p.start = shiftWhen(p.start, span);
+    if (p.end)   p.end   = shiftWhen(p.end, span);
+  });
+}
 function clearForNewCycle(){
+  /* Computed BEFORE anything clears, while REVIEW is still the cycle being
+     closed — the shell replaces REVIEW right after this returns. A cycle
+     whose dates the reader cannot parse shifts by six months, the cadence
+     this tenant runs. */
+  var a = monthsOf(REVIEW.from), b = monthsOf(REVIEW.to);
+  var span = (a != null && b != null && b >= a) ? (b - a + 1) : 6;
+  (GROUP.capabilities || []).forEach(function(c){ capNewCycle(c, span); });
   clearAllNumbers();
   clearAllNotes();
   REVIEW.note = {};
@@ -17490,6 +17611,21 @@ function qs(t){
   return '<span class="qs">' + out + "</span>";
 }
 
+/* THE QUARTERS, PRESSABLE (§114). The same four marks qs() draws, as
+   buttons, behind the pen — §42 classified a tactic's quarter as PLAN on the
+   server four versions before the screen could edit one, so this draws the
+   control the authoriser has been guarding all along. By id, never index
+   (§48.2). */
+function qsEdit(t){
+  var q = quartersOf(t), out = "";
+  for (var i = 0; i < 4; i++) {
+    out += '<button class="qtog' + (q[i] ? " on" : "") + '" data-qtog="' +
+      esc(t.id) + '|' + (i + 1) + '" title="Quarter ' + (i + 1) +
+      (q[i] ? " — planned; press to clear" : " — press to plan") + '">' + (i + 1) + '</button>';
+  }
+  return '<span class="qs qs-edit">' + out + '</span>';
+}
+
 /* Measure name reads left; every figure centres under its column. Progress
    carries the band colour, since it is the row's conclusion. */
 function measureRows(ms, opts){
@@ -20185,11 +20321,25 @@ function projFrontMatter(p, ed){
         ? (p.stakeholders || []).map(function(x){
             return '<span class="pill kind">' + esc(x) + '</span>'; }).join(" ")
         : '<span class="missing">None named</span>');
+  /* REPEATS (§115). Read mode shows the row only when it says something — a
+     "Repeats: No" on every build-once project is noise (§41's budget, in
+     words). The setter DELETES the key on the default (§50.6): a project
+     unmarked and one never asked must be byte-identical. */
+  var repRow = "";
+  if (ed) {
+    repRow = row("l", "Repeats",
+      selectOr("plan", p.repeats === "cycle" ? "Each cycle" : "No",
+        ["No", "Each cycle"], "",
+        function(v){ if (v === "Each cycle") p.repeats = "cycle"; else delete p.repeats; }));
+  } else if (p.repeats === "cycle") {
+    repRow = row("l", "Repeats", "Each cycle");
+  }
   return '<div class="pfront">' +
     '<div class="pfcol">' +
       row("l", "Owner", f(p.owner, function(v){ p.owner = v; })) +
       row("l", "Start", f(p.start, function(v){ p.start = v; })) +
       row("l", "End",   f(p.end,   function(v){ p.end   = v; })) +
+      repRow +
     '</div>' +
     '<div class="pfcol pfright">' +
       row("r", "Brief", ed ? fieldOr("plan", p.brief || "", "", function(v){ p.brief = v; })
@@ -20695,7 +20845,22 @@ function unitPlanBody(it, u, railed){
       '<span class="idx-n">' + (i+1) + '</span></td>' +
       '<td>' + (ed ? inputOr("plan", m.name, "", function(v){ m.name = v; }) : esc(m.name)) +
         xb("measures", m.id) + '</td>' +
-      '<td class="cc">' + esc(m.dir) + '</td>' +
+      /* EDITABLE SINCE §114, reversing §31's read-only. That section closed the
+         direction and the compile rule because "they change what a figure
+         MEANS" — the right worry while the pen could fall to the person being
+         measured, and §94 ended that: the pen is the office's. What was left
+         was the office unable to correct exactly the fields that most need
+         correcting after an upload. The vocabulary is the Temple's own
+         (selectOr, same options), never a second list (§53.5) — and a value
+         already stored that is NOT in the list is prepended rather than
+         silently displayed wrong (§96.2: the display must not disagree with
+         the data). */
+      '<td class="cc">' + (ed
+        ? selectOr("plan", m.dir || "",
+            (m.dir && ["\u2265","\u2264"].indexOf(m.dir) < 0 ? [m.dir] : [])
+              .concat(m.dir ? [] : [""]).concat(["\u2265","\u2264"]), "mono",
+            function(v){ m.dir = v; })
+        : esc(m.dir)) + '</td>' +
       '<td class="num">' + cell(m.target, function(v){ m.target = v; }, "mono") + '</td>' +
       /* NO 3-YEAR COLUMN. Islam, 2026-08-22: "in the direction plans the key
          measures are for 1 year only". A pillar's key measures carry one
@@ -20704,7 +20869,12 @@ function unitPlanBody(it, u, railed){
          and keep theirs. `target3y` is still stored and still travels through
          import, export and the archive — this removes a column, not a field,
          so nothing a plan already carries is lost. */
-      '<td class="cc">' + esc(m.compile || "\u2014") + '</td></tr>';
+      '<td class="cc">' + (ed
+        ? selectOr("plan", m.compile || "",
+            (m.compile && ["Sum","Latest","Average"].indexOf(m.compile) < 0 ? [m.compile] : [])
+              .concat(m.compile ? [] : [""]).concat(["Sum","Latest","Average"]), "",
+            function(v){ m.compile = v; })
+        : esc(m.compile || "\u2014")) + '</td></tr>';
   }).join("");
   var tRows = it.tactics.map(function(t, i){
     return '<tr data-oi="' + i + '"><td class="idx">' +
@@ -20722,7 +20892,7 @@ function unitPlanBody(it, u, railed){
       '<td class="collabs">' + (ed
         ? inputOr("plan", collabText(t), "", function(v){ t.collaborators = collabParse(v); })
         : collabCell(t)) + '</td>' +
-      '<td>' + qs(t) + '</td></tr>';
+      '<td>' + (ed ? qsEdit(t) : qs(t)) + '</td></tr>';
   }).join("");
   var meta = pillarMeta(it);
   var head = showHead
@@ -35711,6 +35881,22 @@ var SYNC = (function () {
         paint();
       });
     });
+    /* THE QUARTER TOGGLES (§114). By id through listById, the same resolver
+       every other row control uses — and §42 has classified a quarter change
+       as PLAN on the server since before the screen could make one, so the
+       guard here matches the refusal there. */
+    document.querySelectorAll("[data-qtog]").forEach(function(b){
+      b.addEventListener("click", function(){
+        if (!mayEditPlan()) return;
+        var a = this.dataset.qtog.split("|"), id = a[0], q = +a[1];
+        var list = listById("tactics", id);
+        var t = (list || []).filter(function(x){ return x && x.id === id; })[0];
+        if (!t) return;
+        t["q" + q] = !t["q" + q];
+        paint();
+      });
+    });
+
     document.querySelectorAll("[data-rowoff]").forEach(function(b){
       b.addEventListener("click", function(){
         if (!mayEditPlan()) return;

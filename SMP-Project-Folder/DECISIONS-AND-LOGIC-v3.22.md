@@ -15258,3 +15258,104 @@ next three — the rule is unchanged and is simply whoever lands first. Fourth
 renumber on this branch; anything sequential and shared is chosen in the same
 breath as the fetch-and-look that precedes every merge, never before.)*
 
+
+
+*(§111–§113 are another session's — the knowledge base's missing half, the
+assistant, and a chat fix — landed on `main` first, so they keep the numbers.
+Written as §111–§112 on its branch. Sixth renumber; whoever lands first.)*
+
+---
+
+## 114 · The plan pen's last three read-only fields (v3.38)
+
+Islam: *"the quarters in the tactics are not editable in the edit mode and for
+the measures the direction and the compiled."*
+
+**All three were read-only on purpose, and the purpose expired.** §31 closed
+the direction, the compile rule and (in §42's server half) a tactic's quarters
+because *"they change what a figure MEANS"* — the right worry while the pen
+could fall to the person being measured. §94 closed the pen to the office, and
+what was left was the office unable to correct exactly the fields that most
+need correcting after an upload. This is §94.15's shape again: a rule whose
+stated reason has expired does not get to stand on habit.
+
+**The vocabulary is the Temple's own, never a second list** (§53.5): the same
+`selectOr` with the same options (`≥ / ≤`, `Sum / Latest / Average`). **A
+stored value outside the list is prepended rather than displayed wrong** —
+§96.2's rule from the display side: a select showing "Sum" over a row that
+stores "=" is the screen disagreeing with the data.
+
+**The quarters are the same four marks `qs()` draws, as buttons** — resolved
+by id through `listById`, never by index (§48.2). The satisfying half: **§42
+classified a quarter change as PLAN on the server four versions before the
+screen could make one**, so the control the authoriser had been guarding all
+along finally exists.
+
+`checks/plan-fields.py` presses all three and reads the DATA back (§96: an
+editor wired to nothing looks identical), and asserts the closed end too —
+pen off, none of the three is drawn (§94.2).
+
+## 115 · A repeating project (v3.38)
+
+Islam: *"the CX mystery shopping happens on H1 and is repeated for H2 — same
+outcomes, same deliverables, same timeline — but we don't want things repeated
+in the same project."* Aligned before building: one repeating project over
+sub-projects and sibling copies; the score reads this run only; dates keep the
+rhythm with the ability to adjust a run; a handful of projects, so the pen is
+the door and the template is untouched.
+
+### 115.1 The machinery mostly existed — pointing the other way
+
+`clearCapability(c, "nums")` ran on every new cycle, so **every project was
+already re-asked** — archive first (§49.1), then wiped. Nobody had seen it
+because the live tenant is still inside its first cycle. The day H2 opened, a
+**delivered** project's record would have been erased and its Execution read
+as nought. So §115 is not "add repetition" — repetition was the only
+behaviour. It is **the clear becoming a decision each project makes**:
+
+* marked `repeats: "cycle"` → figures archived and cleared, **every date
+  shifted forward by the closed cycle's length** — the H2 run keeps H1's
+  rhythm, and the pen adjusts whatever the new run does differently;
+* unmarked → **figures and notes kept**. Delivered is delivered, and a note
+  explaining a standing figure stands with it.
+
+The capability's own key objectives still clear every cycle — they are the
+function's per-cycle KPIs, same as a unit's measures.
+
+### 115.2 The mark, the writer, and the snapshot's stale fields
+
+**The mark** is one row in the front matter (§109's box), behind the pen. Read
+mode draws it **only when it says something** — "Repeats: No" on every
+build-once project is noise. Choosing No **deletes the key** (§50.6): a
+project unmarked and one never asked are byte-identical. On the server it
+classifies as capPlan — the office's — asserted from both ends in
+`test-authorize.js` (the SMO may, the function's own head may not), because
+the flag that decides whether a run's figures are wiped is a plan field.
+
+**`shiftWhen()` is `monthsOf()`'s mirror** — one writer, shape for shape, and
+a shape the reader cannot read is returned **unchanged, never guessed at**.
+The written style survives: 2-digit years stay 2-digit, "Mar" stays short. A
+day clamps to the month it lands in (31 May + 6 → 30 Nov), because losing a
+row's date to gain a correct day count is the wrong trade. A bare quarter
+shifts only when the shift is whole quarters.
+
+**And the archive had been quietly incomplete since migration 024** (§51.10 in
+the archive): `figuresSnapshot` still stored a deliverable's deleted `actual`
+— `undefined`, every cycle — and never took the milestone's `pct`. Fixed to
+`status`/`pct`/`note`. Old archives restore as they are; a field they never
+held cannot be given back.
+
+### 115.3 What proves it
+
+`checks/repeat-project.py` **fails on the pre-§115 build by construction** —
+there, the unmarked project is wiped too and no date shifts — and it was run
+against that build to watch it fail three ways before its green was believed
+(§94.5). It makes the state (§94.2: the demo has no repeating project), sets
+the mark **through the real select**, turns the cycle **through the real
+close/open controls with their real confirm dialogs**, and reads the archive
+back for the renamed fields. Fifteen `shiftWhen` shapes asserted, unreadable
+ones proven untouched.
+
+**Deliberately not built:** auto-detecting repetition, a template column, and
+any per-run history UI beyond what Archived plans already shows — a handful of
+projects, and the pen is the door.

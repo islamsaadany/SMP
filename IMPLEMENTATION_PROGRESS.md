@@ -6,7 +6,7 @@ version (rules A2 / A11, changed 2026-08-20) — those go only when asked for.
 
 **Where it runs:** Vercel, production tracks `main`. Static files plus two
 serverless functions (`/api/state`, `/api/auth`) against Neon Postgres.
-**Latest version:** v3.36 on `main` · **v3.37 in progress on the branch**
+**Latest version:** v3.37 on `main` · **v3.38 in progress on the branch**
 **Last updated:** 2026-08-26
 
 **Sign in as:** `SMO` / `1234` — a password change is forced at once (§43.1,
@@ -108,6 +108,24 @@ knowledge-base.py ALL CLEAR · test-authorize 190/0 · qa.py clean.
 
 **Waiting on:** `GEMINI_API_KEY` in Vercel. Everything is built and tested
 against a stub; the live call is the only unexercised path.
+
+### v3.35 — the pen's last read-only fields, and a repeating project (§114–§115)
+
+- **§114:** a measure's direction and compile, and a tactic's quarters, are
+  editable behind the plan pen — §31's read-only reason expired with §94. The
+  Temple's own vocabulary; quarters as pressable marks; all three proved to
+  WRITE (§96).
+- **§115: a repeating project.** CX-mystery-shopping-shaped work is marked
+  *Repeats: each cycle* from the front matter pen. On a new cycle it is
+  archived, cleared and its dates shift one cycle forward (rhythm kept,
+  adjustable); an **unmarked project now keeps its figures** — before this,
+  every project was wiped on every new cycle, a landmine the live tenant had
+  not yet stepped on. The archive also stops storing a deliverable's deleted
+  `actual` and starts keeping the milestone's `pct` (stale since migration 024).
+
+**Verified:** `plan-fields.py` and `repeat-project.py` all passed, the second
+failing three ways on the pre-§115 build before its green was believed ·
+test-authorize **195** · full battery + qa.py clean.
 
 ### v3.34 — a project's front matter (§109)
 

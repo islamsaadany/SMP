@@ -144,6 +144,14 @@ A drift between specs and code is a documentation bug — report it before silen
 - **`main`** — production/stable. Merge to main only when work is complete and verified.
 - **Commit with descriptive messages** — explain what and why.
 - **Push:** `git push -u origin <branch-name>`; retry on network errors with exponential backoff.
+- **NEVER MERGE TO `main` WITHOUT ISLAM SAYING SO, ON THAT MERGE (2026-08-26).**
+  Islam: *"don't merge without confirmation with me, not to damage things."*
+  **A go-ahead to BUILD is not a go-ahead to MERGE**, and neither is a line in
+  my own message saying the work could go to main on its own — that is me
+  describing an option, not him choosing it. This was written after I merged
+  the chat fix on exactly that inference. The word has to be about the merge,
+  and it has to be his. Building, checking and pushing the BRANCH need no
+  second ask; `main` is production, and production is his call every time.
 - **BEFORE MERGING, FETCH MAIN AND LOOK AT IT.** `git fetch origin main` and
   compare — another session may have pushed while this one was working, and it
   has: §70 landed on main mid-session on 2026-08-24 while §71 was being built.
@@ -1210,6 +1218,37 @@ console errors (in this cloud environment, run it via a wrapper that points Play
   both rows stay aligned and the WORD is what clips, so that is asserted with a
   `Range` separately. Plan pane only; the other two panes still show no dates,
   flagged rather than assumed.
+  **THE PLAN PEN'S LAST THREE READ-ONLY FIELDS OPEN (§114):** a measure's
+  direction and compile rule, and a tactic's quarters — §31 closed them because
+  "they change what a figure MEANS", the right worry while the pen could fall
+  to the person measured, and §94 gave the pen to the office, so the reason
+  expired (§94.15's shape). The vocabulary is the Temple's own `selectOr`
+  options, never a second list (§53.5); **a stored value outside the list is
+  prepended rather than displayed wrong** (§96.2 from the display side); the
+  quarters are `qs()`'s own four marks as buttons, resolved by id (§48.2) —
+  and §42 had classified a quarter change as PLAN on the server four versions
+  before the screen could make one. `checks/plan-fields.py` presses all three
+  and reads the DATA back, both ends (§96, §94.2).
+  **A REPEATING PROJECT, AND THE CLEAR BECOMES A DECISION (§115):** Islam's CX
+  mystery shopping runs H1 and again H2 — same rows — and *"we don't want
+  things repeated in the same project."* The machinery existed POINTING THE
+  OTHER WAY: `clearCapability(c,"nums")` wiped EVERY project on every new
+  cycle (unseen — the live tenant is still in its first), so a DELIVERED
+  project's record would have been erased the day H2 opened. Now each project
+  decides: marked `repeats:"cycle"` → archived, cleared, **every date shifted
+  by the closed cycle's length** (`shiftWhen()`, `monthsOf()`'s mirror — one
+  writer, shape for shape, unreadable shapes returned UNCHANGED, 2-digit years
+  staying 2-digit, days clamping to the month they land in); unmarked →
+  **figures and notes kept, delivered is delivered**. The mark is a front
+  matter row behind the pen, drawn in read mode only when it says something;
+  No DELETES the key (§50.6); capPlan on the server, asserted both ends.
+  **AND THE ARCHIVE HAD BEEN QUIETLY INCOMPLETE SINCE MIGRATION 024** —
+  `figuresSnapshot` still stored a deliverable's deleted `actual` and never
+  took a milestone's `pct` (§51.10 in the archive). Fixed. 
+  `checks/repeat-project.py` FAILS ON THE PRE-§115 BUILD BY CONSTRUCTION and
+  was run against it to watch three failures before its green was believed;
+  it turns the cycle through the REAL close/open controls and their confirm
+  dialogs, and makes the state, because the demo has no repeating project.
   **STILL BROKEN AND DELIBERATELY NOT FIXED (§99.6):** `projPlanBody` defines
   `sortAttr()` and applies it to NEITHER table, so a project's drag grips are
   bound to nothing — §63's fault on the capability side. Flagged, not fixed:

@@ -151,11 +151,6 @@ var NEWSET = { name: "", team: "", owner: "", pick: "smo" };
    held here rather than recomputed on every paint, because the person
    answering it may go and look at the row it names and come back. */
 var ADDROLE = null, ADDROLE_KIND = "owner";
-/* ── WHY THE LAST PICK DID NOT LAND (§110) ────────────────────────────
-   `{key, why}`, or null. A property of the screen and never of the person
-   (§25.2) — it is the outcome of one press, cleared by the press that
-   succeeds, by opening the picker again and by leaving the row. */
-var ROLESTOP = null;
 var NEWPERSON = { name:"", empId:"", email:"", hit:null, hitBy:null, warn:null };
 function newPersonReset(){
   NEWPERSON = { name:"", empId:"", email:"", hit:null, hitBy:null, warn:null };
@@ -583,13 +578,7 @@ function chatWritable(){
 function chatSet(key, value){
   if (!Object.prototype.hasOwnProperty.call(SMPRules.CHAT_DEFAULTS, key)) return;
   var dflt = SMPRules.CHAT_DEFAULTS[key];
-  /* THE TYPE COMES FROM THE DEFAULT, not from a list of key names. This read
-     `key === "promise" ? string : boolean`, so the moment a second string
-     setting existed (`rep`, §104) it would have stored `true` for whoever was
-     chosen — silently, and in a way the picker would then show as nobody. A
-     list of exceptions is a list somebody has to remember to add to. */
-  var isText = typeof dflt === "string";
-  var v = isText ? String(value == null ? "" : value).trim() : !!value;
+  var v = (key === "promise") ? String(value == null ? "" : value).trim() : !!value;
   var c = chatWritable();
   /* The promise is stored only when it differs from the shipped sentence, so
      improving that sentence later reaches every tenant that never wrote one. */
@@ -747,56 +736,9 @@ function rowEditLive(){
   var t = rowEditTable();
   return (t && ROWFIND[t]) ? ROWFIND[t](rowEditKey()) : null;
 }
-/* ── AND WHAT POINTS AT THE ROW, NOT ONLY WHAT IS IN IT (§110) ───────
-   A person's roles are not ON the person: a unit's `head` and a function's
-   `custodian` point AT them (§33), and `ROWWAS` is a copy of the row. So Cancel
-   restored `p.unit` and left the grant standing — press it after giving
-   somebody Business unit owner of Nigeria and they read as its owner while
-   sitting at the group. One fact contradicting itself, from one press.
-
-   `ROWHELD` is every one of those pointers as it stood when the row opened.
-   Not the person's ROLE LIST, which was the first answer and was not enough:
-   granting an owner OVERWRITES whoever held it, so undoing the grant by
-   revoking it left the unit with no head at all — the displaced person was
-   gone and nothing remembered them. What has to come back is the pointers, and
-   they are what is copied.
-
-   Both maps whole, because a grant can move a seat this row never named — a
-   custodian handed to a function moves `FUNCTIONS[k].custodian` — and they are
-   two small objects (ten units, eight functions, two keys each), which is
-   cheaper than working out in advance which of them a press might reach. */
-var ROWHELD = null;
-function rolePointers(){
-  var out = { units:{}, fns:{} };
-  UNIT_KEYS.forEach(function(k){
-    var r = UNIT_ROLES[k] || {};
-    out.units[k] = { head:r.head || null, custodian:r.custodian || null };
-  });
-  FUNCTION_KEYS.forEach(function(k){
-    var f = FUNCTIONS[k] || {};
-    out.fns[k] = { head:f.head || null, custodian:f.custodian || null };
-  });
-  return out;
-}
-/* PUT BACK IN PLACE, never by replacing the object — the same rule
-   rowEditCancel already follows for the person, and for the same reason: an
-   open menu or a chip may be holding a reference to the one that is there. */
-function restoreRolePointers(was){
-  if (!was) return;
-  Object.keys(was.units).forEach(function(k){
-    var r = unitRolesFor(k);
-    r.head = was.units[k].head; r.custodian = was.units[k].custodian;
-  });
-  Object.keys(was.fns).forEach(function(k){
-    var f = FUNCTIONS[k];
-    if (!f) return;
-    f.head = was.fns[k].head; f.custodian = was.fns[k].custodian;
-  });
-}
 function rowEditOpen(table, key, obj){
   ROWEDIT = table + ":" + key;
   ROWWAS = obj ? JSON.parse(JSON.stringify(obj)) : null;
-  ROWHELD = (table === "people" && obj) ? rolePointers() : null;
 }
 /* PUT BACK IN PLACE, never by replacing the object. Something else may already
    hold a reference to this person — the viewer switcher, a role chip, an open
@@ -807,18 +749,13 @@ function rowEditOpen(table, key, obj){
    a row that still exists. */
 function rowEditCancel(obj){
   if (obj === undefined) obj = rowEditLive();
-  /* The pointers first and the row second, so that a grant's two halves are
-     undone in the order they were written: grantPersonRole() writes the
-     pointer AND the person's own attachment, and ROWWAS is what puts the
-     second one back. */
-  restoreRolePointers(ROWHELD);
   if (obj && ROWWAS) {
     Object.keys(obj).forEach(function(k){ if (!(k in ROWWAS)) delete obj[k]; });
     Object.keys(ROWWAS).forEach(function(k){ obj[k] = ROWWAS[k]; });
   }
-  ROWEDIT = null; ROWWAS = null; ROWHELD = null;
+  ROWEDIT = null; ROWWAS = null;
 }
-function rowEditClose(){ ROWEDIT = null; ROWWAS = null; ROWHELD = null; }
+function rowEditClose(){ ROWEDIT = null; ROWWAS = null; }
 
 var SHORT_NAME_WORDS = 3;
 function shortName(name){ return nameWords(name, SHORT_NAME_WORDS); }
@@ -2112,28 +2049,6 @@ function roleKeyByName(name){
    file naming it would be asking for a role that arrives by itself, so the
    template does not offer it and the reader says so plainly. */
 function roleIsGrantable(key){ return !!key && !SMPRules.isOwnLinesRole(key); }
-/* ── THE WORD FOR WHERE A ROLE IS HELD (§110) ─────────────────────────
-   For the sentence a refused pick shows, and for nothing else. It is a LABEL,
-   not a second rule: `roleWheres()` still decides what may be held where, and
-   this only says it in English — so a role whose list changes cannot end up
-   with a sentence that contradicts the list.
-
-   Derived from the list rather than written beside it, for the same reason:
-   the kinds actually offered are what the person has to pick from. */
-function roleAtWord(roleKey){
-  var kinds = {};
-  roleWheres(roleKey).forEach(function(w){
-    kinds[w.v === "group" ? "group"
-        : String(w.v).indexOf("fn:") === 0 ? "fn"
-        : String(w.v).indexOf("co:") === 0 ? "co" : "unit"] = 1;
-  });
-  var WORD = { group:"the group", unit:"a business unit",
-               fn:"a supporting function", co:"a company" };
-  var out = Object.keys(kinds).map(function(k){ return WORD[k]; });
-  if (!out.length) return "somewhere that does not exist yet";
-  if (out.length === 1) return out[0];
-  return out.slice(0, -1).join(", ") + " or " + out[out.length - 1];
-}
 
 /* Reads the sheet against the stored world and says what would happen. It
    changes NOTHING — the review step exists so that an upload is looked at
@@ -3232,65 +3147,6 @@ function monthsOf(v, last){
    55 of the 60 milestones in the worked example are a bare quarter with no
    year, so a year has to come from somewhere: it comes from the cycle, which
    is the only year the platform actually knows. */
-/* ── SHIFTING A DATE BY A RUN (§115) ─────────────────────────────────────
-   A repeating project keeps its rhythm: fieldwork in month 2 of the run stays
-   fieldwork in month 2, so when a new cycle opens every date on a marked
-   project moves forward by the CLOSED cycle's length. One writer, mirroring
-   monthsOf() the reader shape for shape — a shape the reader cannot read is
-   returned UNCHANGED, never guessed at, because a date this cannot shift is
-   still a date somebody typed. The written style survives the shift: a
-   2-digit year stays 2-digit, "Mar" stays short, "March" stays long. */
-var MONTH_FULL = ["January","February","March","April","May","June","July",
-                  "August","September","October","November","December"];
-function shiftWhen(v, by){
-  var s0 = String(v == null ? "" : v).trim();
-  if (!s0 || !by) return v;
-  var yOut = function(orig, ny){
-    return orig.length === 2 ? ("0" + (ny % 100)).slice(-2) : String(ny);
-  };
-  var m;
-  /* W3 Mar 26 · March 2026 · Mar 26 */
-  if ((m = s0.match(/^([Ww]\d\s+)?([A-Za-z]{3,9})\s+(\d{2}|\d{4})$/))) {
-    var mi = monthIndex(m[2]);
-    if (mi < 0) return v;
-    var t = fullYear(m[3]) * 12 + mi + by;
-    var nm = ((t % 12) + 12) % 12, ny = Math.floor(t / 12);
-    var word = m[2].length > 3 ? MONTH_FULL[nm]
-             : MONTH_FULL[nm].slice(0, 3);
-    return (m[1] || "") + word + " " + yOut(m[3], ny);
-  }
-  /* Q1 2026 · Q3 (a bare quarter shifts only when the shift is whole quarters) */
-  if ((m = s0.match(/^([Qq])([1-4])(?:\s+(\d{2}|\d{4}))?$/))) {
-    if (by % 3 !== 0) return v;
-    var q = +m[2] - 1 + by / 3;
-    if (!m[3]) return m[1] + (((q % 4) + 4) % 4 + 1);
-    var qy = fullYear(m[3]) + Math.floor(q / 4);
-    return m[1] + (((q % 4) + 4) % 4 + 1) + " " + yOut(m[3], qy);
-  }
-  /* H1 2026 */
-  if ((m = s0.match(/^([Hh])([12])(?:\s+(\d{2}|\d{4}))?$/))) {
-    if (by % 6 !== 0) return v;
-    var h = +m[2] - 1 + by / 6;
-    if (!m[3]) return m[1] + (((h % 2) + 2) % 2 + 1);
-    var hy = fullYear(m[3]) + Math.floor(h / 2);
-    return m[1] + (((h % 2) + 2) % 2 + 1) + " " + yOut(m[3], hy);
-  }
-  /* 31 May 2026 — the day clamps to the month it lands in, because
-     31 November is not a date and losing the row's date to gain a correct
-     day count would be the wrong trade. */
-  if ((m = s0.match(/^(\d{1,2})\s+([A-Za-z]{3,9})\s+(\d{2}|\d{4})$/))) {
-    var mi2 = monthIndex(m[2]);
-    if (mi2 < 0) return v;
-    var t2 = fullYear(m[3]) * 12 + mi2 + by;
-    var nm2 = ((t2 % 12) + 12) % 12, ny2 = Math.floor(t2 / 12);
-    var maxDay = new Date(ny2, nm2 + 1, 0).getDate();
-    var day = Math.min(+m[1], maxDay);
-    var word2 = m[2].length > 3 ? MONTH_FULL[nm2] : MONTH_FULL[nm2].slice(0, 3);
-    return day + " " + word2 + " " + yOut(m[3], ny2);
-  }
-  return v;
-}
-
 function cycleYear(){
   var m = /(\d{4})/.exec(String(REVIEW.to || "") + " " + String(REVIEW.name || "") +
                          " " + String(REVIEW.due || ""));
@@ -4435,33 +4291,6 @@ function fnFormat(f){ return (f && f.format === "pillars") ? "pillars" : "projec
 function fnPlansInPillars(f){ return fnFormat(f) === "pillars"; }
 function fnItems(f){ return (f && Array.isArray(f.items)) ? f.items : []; }
 
-/* A STORED LIST NEVER HOLDS A HOLE (§114). A pillars function's plan rides in
-   one JSON blob (functions.extra), and JSON writes an array hole or an
-   undefined entry as null — which is how one poisoned reorder commit left a
-   null inside a tactics list and the CF page threw on every visit from the
-   next hydration on, while the click looked like it did nothing. The commit
-   is fixed in arrange.js; this heals what a tenant already saved. It only
-   REMOVES — a reader must never create the field it was looking for (§50.6) —
-   and the next autosave persists the clean lists, so the poison does not
-   outlive one visit. Units need none of this: their plans are stored
-   row-by-row and a null cannot survive that road. */
-function fnPruneNulls(f){
-  if (!f) return f;
-  var live = function(x){ return x != null; };
-  if (Array.isArray(f.items)) {
-    f.items = f.items.filter(live);
-    f.items.forEach(function(p){
-      if (Array.isArray(p.measures)) p.measures = p.measures.filter(live);
-      if (Array.isArray(p.tactics))  p.tactics  = p.tactics.filter(live);
-    });
-  }
-  if (Array.isArray(f.keyObjectives)) f.keyObjectives = f.keyObjectives.filter(live);
-  if (f.swot) ["s","w","o","t"].forEach(function(k){
-    if (Array.isArray(f.swot[k])) f.swot[k] = f.swot[k].filter(live);
-  });
-  return f;
-}
-
 /* WHICH function carries this pillar, if any. Returns null unless the pointer
    names a function that exists, is active AND plans in pillars — a pointer at a
    projects function or a retired one is a pointer at something that cannot
@@ -4948,14 +4777,9 @@ function figuresSnapshot(){
     snap.groupCaps[c.id] = { perf:c.perf, exec:c.exec };
     (c.keyObjectives || []).forEach(function(x){ put(m, x, ["actual","progress","note"]); });
     (c.projects || []).forEach(function(p){
-      /* status/pct, NOT actual (§115): migration 024 deleted a deliverable's
-         `actual` and gave milestones a per-cent, and this snapshot was never
-         told — so every archive since the one-row shape stored `undefined`
-         for a deliverable and lost the milestone's number. §51.10's rule, in
-         the archive: when a field is renamed, find every writer. */
-      (p.deliverables || []).forEach(function(x){ put(m, x, ["status","pct","note"]); });
+      (p.deliverables || []).forEach(function(x){ put(m, x, ["actual","note"]); });
       (p.outcomes    || []).forEach(function(x){ put(m, x, ["actual","progress","note"]); });
-      (p.milestones  || []).forEach(function(x){ put(m, x, ["status","pct","note"]); });
+      (p.milestones  || []).forEach(function(x){ put(m, x, ["status","note"]); });
     });
     snap.caps[c.id] = m;
   });
@@ -5044,57 +4868,12 @@ function clearAllNotes(){
     });
   });
   (GROUP.keyObjectives || []).forEach(function(x){ x.note = ""; });
-  /* The capabilities left this function in §115 — their new-cycle behaviour
-     is a decision per PROJECT now, not a blanket clear, and it lives in
-     clearForNewCycle() where the cycle's own length is still readable. */
+  (GROUP.capabilities || []).forEach(function(c){ clearCapability(c, "nums"); });
 }
 
 /* Everything a new cycle asks again: the units' figures, the group's, the
    capabilities', the notes beneath them, and who had submitted. */
-/* ── WHAT A NEW CYCLE DOES TO A CAPABILITY (§115) ────────────────────────
-   Until §115 every project was wiped when a cycle opened — clearCapability's
-   "nums" pass, written before anyone had opened a second cycle on real data —
-   so the day H2 opened, a DELIVERED project's record would have been erased
-   and its Execution read as nought. That clear is now a decision each project
-   makes:
-
-   · a project marked `repeats: "cycle"` IS re-asked — figures archived (the
-     archive runs first, §49.1) and cleared, and every date it carries shifts
-     forward by the closed cycle's length, so the H2 run keeps H1's rhythm.
-     The pen can then adjust any date the new run does differently.
-   · an unmarked project KEEPS its figures and its notes — delivered is
-     delivered, and a note explaining a standing figure stands with it.
-
-   The capability's own key objectives clear every cycle regardless: they are
-   per-cycle figures, the function's KPIs, same as a unit's measures. */
-function capNewCycle(c, span){
-  (c.keyObjectives || []).forEach(function(m){ m.actual = ""; m.progress = null; m.note = ""; });
-  (c.projects || []).forEach(function(p){
-    if (p.repeats !== "cycle") return;
-    (p.deliverables || []).forEach(function(d){
-      d.status = null; d.pct = null; d.note = "";
-      if (d.due) d.due = shiftWhen(d.due, span);
-    });
-    (p.outcomes || []).forEach(function(o){
-      o.actual = null; o.progress = null; o.note = "";
-      if (o.measureAt) o.measureAt = shiftWhen(o.measureAt, span);
-    });
-    (p.milestones || []).forEach(function(m){
-      m.status = null; m.pct = null; m.note = "";
-      if (m.finish) m.finish = shiftWhen(m.finish, span);
-    });
-    if (p.start) p.start = shiftWhen(p.start, span);
-    if (p.end)   p.end   = shiftWhen(p.end, span);
-  });
-}
 function clearForNewCycle(){
-  /* Computed BEFORE anything clears, while REVIEW is still the cycle being
-     closed — the shell replaces REVIEW right after this returns. A cycle
-     whose dates the reader cannot parse shifts by six months, the cadence
-     this tenant runs. */
-  var a = monthsOf(REVIEW.from), b = monthsOf(REVIEW.to);
-  var span = (a != null && b != null && b >= a) ? (b - a + 1) : 6;
-  (GROUP.capabilities || []).forEach(function(c){ capNewCycle(c, span); });
   clearAllNumbers();
   clearAllNotes();
   REVIEW.note = {};

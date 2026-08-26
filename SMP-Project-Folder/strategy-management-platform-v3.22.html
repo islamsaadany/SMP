@@ -18846,6 +18846,46 @@ var MS_WORDS = [["", "\u2014"], ["todo", "Not started"], ["wip", "In progress"],
 var DX_WORDS = [["", "\u2014"], ["todo", "Not started"], ["wip", "In progress"], ["done", "Delivered"]];
 /* A milestone finishing after the project's end date is saved as entered and
    said out loud. Two things might be true and the platform picks neither. */
+/* ── A DUE DATE THAT IS NOT ONE, IN A PLAN ALREADY STORED (§103) ─────────
+   The upload has warned about this since §100 -- "Done" and "Pending" sitting
+   in a due-date column, named as what they are rather than as "invalid". But
+   NOTHING HAS EVER LOOKED AT A PLAN ALREADY IN THE DATABASE, so a tenant that
+   uploaded before that check existed is told nothing at all and has to find
+   them by eye across every project.
+
+   `dueFits()` is the SAME reader the upload uses and the same one the product
+   asks when it decides whether a row is due (§42, in the small) -- a second
+   question here would be a second definition of "a date".
+
+   MILESTONES ONLY, deliberately. A milestone's due date is on this page and
+   the pen edits it, so the note points at something that can be fixed here. A
+   deliverable's due date is not drawn on any pane since §101.8, so naming a
+   bad one would send somebody looking for a control that is not there (§61).
+   Its only door is an upload, which already validates it. */
+function badDues(p){
+  return (p.milestones || []).filter(function(m){
+    var v = String(m.finish == null ? "" : m.finish).trim();
+    return v !== "" && !dueFits(v);
+  });
+}
+function dueNote(p){
+  var bad = badDues(p);
+  if (!bad.length) return "";
+  var names = bad.map(function(m){
+    return '<b>' + esc(m.finish) + '</b> on ' + esc(m.name);
+  }).join("; ");
+  return '<div class="note bad-note"><b>' + plural(bad.length, "due date") +
+    ' on this project ' + (bad.length === 1 ? "is" : "are") + ' not a date, a month or a quarter.</b> ' +
+    names + '. Saved exactly as entered \u2014 the platform refuses nothing \u2014 but a date it ' +
+    'cannot read is one it cannot compare, so those rows are asked for every cycle. ' +
+    'The pen on this page corrects them.</div>';
+}
+/* How many rows on a project want attention, for the rail's small line -- so
+   the project holding them can be found without opening each one in turn
+   (§93.4: the count belongs where the gap is closed, and this points at the
+   pane one press away rather than at another screen). */
+function planAttention(p){ return badDues(p).length + projOverruns(p).length; }
+
 function overrunNote(p){
   var over = projOverruns(p);
   if (!over.length) return "";
@@ -18878,11 +18918,20 @@ function capScoreCards(c){
     '<div class="minirow"><div><em>Deliverables</em><b>' + pct(capDeliverySide(c)) + '</b></div>' +
       '<div><em>Outcomes</em><b>' + pct(capOutcomeSide(c)) + '</b></div>' +
       '<div><em>Projects</em><b>' + c.projects.length + '</b></div></div></div>');
+  /* WHAT THE FIGURE IS BUILT ON, WHEN SOME OF IT IS MISSING (§103). An In
+     progress milestone with no per-cent LEAVES the average rather than
+     counting as nought (§101.10) -- honest, and silent, so the figure rises
+     and nothing on the card says why. `capExec()` has returned the count since
+     that section and nothing showed it. Only drawn when there is one: a card
+     that always says "0 outstanding" is noise on every capability that has
+     nothing outstanding. */
   cards.push('<div class="card tight">' +
     '<div class="score-h"><h4>Execution</h4>' +
       '<span class="pill ' + band(ce.pct) + '">' + bandWord(ce.pct) + '</span></div>' +
     '<div class="headline"><span class="big" style="color:var(--' + band(ce.pct) + ')">' + pctBig(ce.pct) + '</span>' +
-      '<span class="ofplan">' + ce.done + ' of ' + ce.total + ' milestones</span></div>' +
+      '<span class="ofplan">' + ce.done + ' of ' + ce.total + ' milestones' +
+        (ce.pending ? ' &middot; <span class="missing">' + ce.pending +
+          ' not counted yet</span>' : '') + '</span></div>' +
     '<div class="minirow"><div><em>Completed</em><b>' + ce.done + '</b></div>' +
       '<div><em>In progress</em><b>' + ce.wip + '</b></div>' +
       '<div><em>Not started</em><b>' + ce.todo + '</b></div></div></div>');
@@ -19148,7 +19197,7 @@ function projPlanBody(p, fk){
        tactics sheet has always used for the same thing. The stored field keeps
        its spelling (§58, §65): `covers` is an identifier, this is a label. */
     miniTable(["#","Milestone","Description","Owner","Due date"], mRows) +
-    overrunNote(p);
+    dueNote(p) + overrunNote(p);
 }
 
 function renderFnProjects(fnKey){
@@ -19180,9 +19229,15 @@ function renderFnProjects(fnKey){
        of each thing and who owns it, in one line; this said that AND the start
        date AND the end date AND which kind of timeline, over three. */
     var rail = railFor(c.projects, sel, null,
-      function(p){ return plural(p.deliverables.length, "deliverable") + ' &middot; ' +
-        plural(p.outcomes.length, "outcome") + ' &middot; ' +
-        plural(p.milestones.length, "milestone"); },
+      function(p){
+        var n = planAttention(p);
+        return plural(p.deliverables.length, "deliverable") + ' &middot; ' +
+          plural(p.outcomes.length, "outcome") + ' &middot; ' +
+          plural(p.milestones.length, "milestone") +
+          /* Appended to the SUB line, never passed as `numOf`: that argument
+             puts a `.rnum` on EVERY row and an empty one still takes its
+             column in the grid (the note on railFor says so). */
+          (n ? ' &middot; <span class="missing">' + plural(n, "row") + ' to check</span>' : ''); },
       null, null,
       function(p){ return projCode(fk, p); },
       { arranging: on, add: ed, capId: c.id });

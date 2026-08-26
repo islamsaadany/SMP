@@ -530,6 +530,89 @@ with sync_playwright() as p:
        not pg.evaluate("() => !!REVIEW.submitted['%s']" % DEST)
        and bool(pg.query_selector("[data-submit]")))
 
+    # ── A PLAN ALREADY STORED, CHECKED (§103) ────────────────────────────
+    # Both ends (§94.2): the note must appear on a project that has the fault
+    # AND be absent from one that does not -- a note drawn always says nothing.
+    print("── a plan already stored")
+    goto(pg, DEST, "Strategy", None, False)
+
+    def look():
+        return pg.evaluate("""() => ({
+          notes: [...document.querySelectorAll('.bad-note')].map(e => e.textContent.trim()),
+          rail: [...document.querySelectorAll('.rail .ritem')].map(e => e.textContent.trim())
+        })""")
+
+    # clean first, so "it appeared" means something
+    pg.evaluate("""() => {
+      const p = capsOfFunction("finance")[0].projects[0];
+      p.milestones.forEach(m => { m.finish = "May 2026"; });
+      p.end = "31 Dec 2026"; paint();
+    }""")
+    pg.wait_for_timeout(250)
+    d = look()
+    ck("a plan with readable dates gets no note",
+       not [x for x in d["notes"] if "not a date" in x], d["notes"])
+    ck("...and the rail says nothing to check",
+       not [r for r in d["rail"] if "to check" in r], d["rail"][:1])
+
+    # now the shape a live tenant actually has
+    pg.evaluate("""() => {
+      const p = capsOfFunction("finance")[0].projects[0];
+      p.milestones[0].finish = "Pending"; p.milestones[1].finish = "Done"; paint();
+    }""")
+    pg.wait_for_timeout(250)
+    d = look()
+    note = " ".join([x for x in d["notes"] if "not a date" in x])
+    ck("a status word in a due-date column is named", bool(note), d["notes"])
+    ck("...by its value AND the row it is on",
+       "Pending" in note and "Solution design" in note and "Done" in note, note[:160])
+    ck("...and the rail says which project holds them",
+       bool([r for r in d["rail"] if "2 rows to check" in r]), d["rail"][:1])
+    # a value the reader CAN read is not flagged -- or every quarter-planned
+    # milestone in the product would be
+    ck("a quarter is a date and is not flagged",
+       pg.evaluate("() => dueFits('Q3 2026') && dueFits('July 26') && !dueFits('Pending')"))
+
+    # THE LOOP CLOSES: correcting it through the pen makes the note go
+    pg.evaluate("""() => {
+      capsOfFunction("finance")[0].projects[0].milestones[0].finish = "March 2026";
+      capsOfFunction("finance")[0].projects[0].milestones[1].finish = "April 2026";
+      paint();
+    }""")
+    pg.wait_for_timeout(250)
+    ck("correcting them clears the note",
+       not [x for x in look()["notes"] if "not a date" in x])
+
+    # ── AND THE FIGURE SAYS WHAT IT IS BUILT ON ──────────────────────────
+    goto(pg, DEST, "Performance", None, False)
+    pg.evaluate("""() => {
+      GROUP.capabilities.forEach(c => (c.projects||[]).forEach(p =>
+        (p.milestones||[]).forEach(m => { m.pct = null; })));
+      paint();
+    }""")
+    pg.wait_for_timeout(250)
+    card = pg.evaluate("""() => {
+      const c = [...document.querySelectorAll('.scores .card')]
+        .find(x => /Execution/.test(x.textContent));
+      return { text: c ? c.textContent.trim() : "",
+               mark: c ? [...c.querySelectorAll('.missing')].map(e => e.textContent.trim()) : [] };
+    }""")
+    ck("Execution says how much is not counted yet",
+       card["mark"] and "not counted yet" in card["mark"][0], card)
+    # and NOT when there is nothing outstanding
+    pg.evaluate("""() => {
+      GROUP.capabilities.forEach(c => (c.projects||[]).forEach(p =>
+        (p.milestones||[]).forEach(m => { if (m.status === "wip") m.pct = 50; })));
+      paint();
+    }""")
+    pg.wait_for_timeout(250)
+    quiet = pg.evaluate("""() => {
+      const c = [...document.querySelectorAll('.scores .card')]
+        .find(x => /Execution/.test(x.textContent));
+      return [...c.querySelectorAll('.missing')].length;
+    }""")
+    ck("...and says nothing when there is nothing outstanding", quiet == 0, quiet)
+
     # ── THE DECK ─────────────────────────────────────────────────────────
     print("── the review deck")
     deck = pg.evaluate("""() => {

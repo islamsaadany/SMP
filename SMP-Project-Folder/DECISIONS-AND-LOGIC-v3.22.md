@@ -13324,3 +13324,79 @@ differently is the exact fault §102.2 was just built to avoid (§53.5). Measure
 at 1440 / 1280 / 1000: the longer string wraps nowhere and the table is no
 wider than it was (the 2px it overflows at 1000px is the pre-existing one, and
 was measured with the function half removed).
+
+### 103 What the merge does to a plan already uploaded
+
+Islam, before merging: *"what will happen to the previously uploaded plan —
+should we resolve the changes here or is there a way to resolve the uploaded
+data against the new format and templates there?"*
+
+**Nothing is deleted.** Migration 023 remaps a deliverable's `kind`+`actual`
+into `status`(+`pct`) and is score-preserving by construction; outcomes, key
+objectives, notes and milestone statuses are untouched. Two columns are NEW,
+so every existing row has them empty: `deliverables.due` and
+`milestones.pct` — and a milestone never *had* a per-cent to migrate, because
+the old model did not ask for one.
+
+**Two things change on day one, and the first is not small.**
+
+#### 103.1 Execution rises, on every capability
+
+Measured on the demo with every milestone per-cent stripped, which is exactly
+the shape of a tenant that has been running on `main`:
+
+| Capability | today | after the merge |
+| --- | --- | --- |
+| Operational Excellence · People · Innovation and Tech | 50% | **71%** |
+| Brand Positioning · Customer Centric · Strategy | 40% | **67%** |
+| Product Mindset | 33% | **50%** |
+| Financial Infrastructure | 42% | **50%** |
+
+Between **+8 and +27 points**, all eight. Nothing is wrong: today an *In
+progress* milestone reads **nought**, and §101.10 made it **outstanding** —
+excluded from the average until it says how far. The figure settles as the
+per-cents arrive. But it rises silently, and *a score that moves for a reason
+nothing on the page states is a score nobody can defend.*
+
+So the Execution card prints what it is built on: **`5 of 12 milestones · 2 not
+counted yet`**. `capExec()` has returned that count since §101.10 and nothing
+showed it. Only drawn when there is one — a card that always says *0
+outstanding* is noise on every capability that has nothing outstanding.
+
+#### 103.2 A due date that is not one, in a plan already stored
+
+`Done`, `Pending` and a bare `Q3` stay exactly as entered, show in the Due date
+column, and read as **always due** — the safe direction, and still wrong. The
+upload has warned about this since §100; **nothing has ever looked at a plan
+already in the database**, so a tenant that uploaded before that check existed
+is told nothing and has to find them by eye across every project.
+
+`dueNote(p)` is that half, finally built. `dueFits()` is the SAME reader the
+upload uses and the same one the product asks when it decides whether a row is
+due — a second question here would be a second definition of "a date" (§42, in
+the small). The note names the **value and the row** (*"Pending on Solution
+design"*), because "2 due dates are wrong" tells nobody which. It sits beside
+`overrunNote()`, whose shape and voice it borrows, and **the rail carries the
+count** so the project holding them can be found without opening each one:
+§93.4's rule, with the count one press from where the gap is closed rather than
+on another screen.
+
+**MILESTONES ONLY, deliberately.** A milestone's due date is on that page and
+the pen edits it, so the note points at something fixable there — verified by
+typing `March 2026` over `Pending` and watching it stick, and asserted as a
+loop that closes. A deliverable's due date is drawn on no pane since §101.8, so
+naming a bad one would send somebody looking for a control that is not there
+(§61). Its only door is an upload, which already validates it.
+
+#### 103.3 Where it gets resolved: there, not here
+
+Both are per-row facts only the client can supply, and both now have a route in
+the product: the per-cents through the reporting pane (which marks each one and
+refuses the submission until it is answered — §102), the dates through the pen
+on Strategy › Projects. Nothing needs correcting in this repository, and
+nothing should be: a plan is the client's.
+
+**Still not run:** migration 023 against a real Postgres. It is score-preserving
+by construction and the *formula* parity is asserted, but the SQL itself has
+not been executed against a live schema in this session. That is the one thing
+between here and a safe merge.

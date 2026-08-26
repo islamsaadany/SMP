@@ -1147,6 +1147,29 @@ console errors (in this cloud environment, run it via a wrapper that points Play
   (one per function, or one per capability) is a decision. **ANSWERED THE
   SAME DAY, in §102 above:** one per function, and the server had been ready
   for it all along.
+  **WHAT A MERGE DOES TO A PLAN ALREADY UPLOADED (§103):** nothing is deleted —
+  migration 023 is score-preserving by construction and only `deliverables.due`
+  and `milestones.pct` are new, so every existing row has them empty. **TWO
+  THINGS CHANGE, AND THE FIRST IS NOT SMALL.** Measured with every milestone
+  per-cent stripped (the shape of a tenant running on `main`), **Execution
+  rises 8–27 points on all eight capabilities** — today an In progress
+  milestone reads NOUGHT and §101.10 made it OUTSTANDING, so it leaves the
+  average. Correct, and silent, and *a score that moves for a reason nothing on
+  the page states is a score nobody can defend*: the card prints
+  **`5 of 12 milestones · 2 not counted yet`**, only when there is one.
+  **AND A DUE DATE THAT IS NOT ONE IS FINALLY NOTICED IN A STORED PLAN**
+  (§103.2) — the upload has warned since §100 and **nothing ever looked at the
+  database**, so a tenant that uploaded before that check is told nothing.
+  `dueNote()` names the **value AND the row** ("Pending on Solution design"),
+  beside `overrunNote()` whose shape it borrows, with the count on the RAIL so
+  the project holding them is findable without opening each (§93.4, one press
+  from where the gap is closed). `dueFits()` is the same reader the upload and
+  the product already use — a second question would be a second definition of
+  "a date". **MILESTONES ONLY**: their date is on that page and the pen edits
+  it, so the note points at something fixable; a deliverable's is drawn on no
+  pane since §101.8 and naming a bad one would send somebody after a control
+  that is not there (§61). **Resolved THERE, never here** — a plan is the
+  client's. **Still not run: migration 023 against a real Postgres.**
   **STILL BROKEN AND DELIBERATELY NOT FIXED (§99.6):** `projPlanBody` defines
   `sortAttr()` and applies it to NEITHER table, so a project's drag grips are
   bound to nothing — §63's fault on the capability side. Flagged, not fixed:

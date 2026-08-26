@@ -1,4 +1,4 @@
-"""Setup · Overview: it agrees with the pages it summarises (§101.10).
+"""Setup · Overview: it agrees with the pages it summarises (§108.10).
 
 THE ONE FAULT A SUMMARY PAGE CAN HAVE IS BEING WRONG, and it is the one fault
 that is invisible from the page itself: every number here is also printed
@@ -66,15 +66,22 @@ with sync_playwright() as p:
     # THE SOURCE IS ASKED IN THE PAGE, not restated here: a literal 163 in this
     # file would pass for ever and mean nothing the day the demo data moves.
     src = pg.evaluate("()=>{const t=cycleTotals();"
-                      "return {done:t.done,total:t.total,sub:t.sub,none:t.none,prog:t.progress};}")
+                      "return {done:t.done,total:t.total,sub:t.sub,none:t.none,prog:t.progress,units:t.units};}")
     strip = pg.eval_on_selector(".ovcycle", "e=>e.textContent.replace(/\\s+/g,' ')")
     ck("done/total agree with cycleTotals()",
        ("%d" % src["done"]) in strip and ("of %d items reported" % src["total"]) in strip,
        "%s vs %s" % (src, strip[:90]))
     ck("submitted agrees", ("%d submitted" % src["sub"]) in strip, src["sub"])
     ck("in progress agrees", ("%d in progress" % src["prog"]) in strip, src["prog"])
+    # DERIVED, NOT COUNTED — and the denominator is units AND the supporting
+    # functions main's §105 put on this board. This assertion read
+    # `activeKeys().length` while it was units-only, which the merge made
+    # false: the CHECK carried the old assumption, not the product (§108.16).
     ck("in progress is the remainder, not a third count",
-       src["prog"] == pg.evaluate("activeKeys().length") - src["sub"] - src["none"], src)
+       src["prog"] == src["units"] - src["sub"] - src["none"], src)
+    ck("and the board counts the supporting functions too (§105)",
+       src["units"] == pg.evaluate("activeKeys().length + boardFunctionKeys().length")
+       and src["units"] > pg.evaluate("activeKeys().length"), src)
     ck("the strip is a way through, not a control",
        pg.eval_on_selector(".ovcyc-go", "e=>e.dataset.setupgo") == "cycle")
 
@@ -83,7 +90,7 @@ with sync_playwright() as p:
        pg.eval_on_selector_all(".ovrow", "e=>e.length") == 0)
     ck("and the page SAYS nothing is waiting",
        pg.eval_on_selector_all(".ovquiet", "e=>e.length") == 1)
-    # A NULL IS NOT A ZERO (§93, §101.10). Over file:// three sources cannot be
+    # A NULL IS NOT A ZERO (§93, §108.10). Over file:// three sources cannot be
     # asked; the row must be gone, and no "0 ..." may be printed in its place.
     ck("an unasked count draws no row and no zero",
        pg.evaluate("""()=>{
@@ -121,7 +128,7 @@ with sync_playwright() as p:
     ck("the row names its destination as the rail names it",
        "People register" in txt and "Reporting cycle" in txt, txt)
 
-    print("\n── 4b · the rail's pills are the same counts (§101.15) ──")
+    print("\n── 4b · the rail's pills are the same counts (§108.15) ──")
     # THE AGREEMENT AGAIN, one surface further out. The pill is not allowed to
     # be its own arithmetic: it is the Overview's own rows summed by
     # destination, so a rail badge can never disagree with the page it points

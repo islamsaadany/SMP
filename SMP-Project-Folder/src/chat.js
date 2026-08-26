@@ -991,7 +991,7 @@ var CHAT = (function(){
     wireInbox: wireInbox,
     open: function(){ setOpen(true); },
     unread: function(){ return state.unread; },
-    /* ── HOW MANY ARE WAITING, FOR THE OVERVIEW (§101.10) ──────────────
+    /* ── HOW MANY ARE WAITING, FOR THE OVERVIEW (§108.10) ──────────────
        The same `queue` action the inbox already calls, whose answer already
        carries the two counts — so this is a second READER of one endpoint and
        not a second endpoint, and the number the Overview prints is by
@@ -1004,7 +1004,7 @@ var CHAT = (function(){
 
        `null` RATHER THAN 0 ON EVERY FAILURE, including no server at all — the
        caller draws nothing for a null and "nothing is waiting" for a 0, and
-       those are different things to say (§101.10, §93). */
+       those are different things to say (§108.10, §93). */
     officeQueue: function(cb){
       if (!servable()) return cb(null, null);
       post({ action:"queue" }, function(err, j){

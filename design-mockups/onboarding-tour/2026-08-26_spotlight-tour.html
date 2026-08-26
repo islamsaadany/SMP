@@ -1,0 +1,500 @@
+<title>Spotlight Onboarding</title>
+<style>
+  /* ── The product's own forefront light palette, verbatim ─────────────── */
+  :root{
+    --panel:#16325C; --panel-ink:#FFFFFF; --panel-quiet:#B7C4D8; --panel-hover:#24487A;
+    --gold:#C9A24D; --gold-deep:#8A6B22; --focus:#8A6B22;
+    --ground:#F7F8FA; --surface:#FFFFFF; --surface-2:#EFF2F6;
+    --line:#D6DCE5; --line-soft:#E6EAF0;
+    --ink:#171B22; --ink-2:#414A58; --ink-3:#636C79;
+    --cta:#A4512C; --cta-ink:#FFFFFF; --cta-hover:#8F4423;
+    --dim:rgba(9,14,24,.62);
+    --ok:#2E7D4F; --warn:#B98218; --bad:#B3402F;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--ground);color:var(--ink);
+       font:13.5px/1.55 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif}
+
+  /* ── Mockup framing (not the product) ────────────────────────────────── */
+  .mkwrap{max-width:1180px;margin:0 auto;padding:26px 20px 60px}
+  .mkhead{display:flex;align-items:baseline;gap:14px;border-bottom:2px solid var(--panel);padding-bottom:12px;margin-bottom:18px}
+  .mkhead h1{font-size:19px;margin:0;letter-spacing:.01em}
+  .mkhead .mkt{font-size:10.5px;text-transform:uppercase;letter-spacing:.09em;color:var(--gold-deep);font-weight:600}
+  .mkhead .mkd{margin-left:auto;font-size:12px;color:var(--ink-3)}
+  .mknote{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:20px}
+  .mkcard{background:var(--surface);border:1px solid var(--line);border-radius:8px;padding:14px 16px}
+  .mkcard h2{font-size:10.5px;text-transform:uppercase;letter-spacing:.09em;color:var(--ink-3);margin:0 0 8px;font-weight:600}
+  .mkcard p{margin:0 0 8px;font-size:12.5px;color:var(--ink-2)}
+  .mkcard p:last-child{margin-bottom:0}
+  .mkcard ul{margin:0;padding-left:16px;font-size:12.5px;color:var(--ink-2)}
+  .mkcard li{margin-bottom:6px}
+  .mkcard li:last-child{margin-bottom:0}
+  .mkcard b{color:var(--ink)}
+  .mkcost h2{color:var(--bad)}
+  .replay{display:inline-block;margin:2px 0 16px;font-size:12px;color:var(--ink-3)}
+  .replay button{font:inherit;font-size:12px;padding:4px 12px;border:1px solid var(--line);border-radius:6px;
+                 background:var(--surface);color:var(--ink-2);cursor:pointer;margin-left:8px}
+  .replay button:hover{border-color:var(--gold-deep);color:var(--ink)}
+  #closednote{color:var(--gold-deep)}
+
+  /* ── Platform replica ────────────────────────────────────────────────── */
+  .frame{border:1px solid var(--line);border-radius:10px;overflow:hidden;background:var(--ground);
+         box-shadow:0 10px 30px rgba(22,50,92,.10);position:relative}
+  .chrome{background:var(--panel);color:var(--panel-ink)}
+  .crow1{display:flex;align-items:center;gap:14px;padding:9px 18px 7px}
+  .brand{font-weight:700;letter-spacing:.14em;font-size:13px}
+  .brand em{font-style:normal;color:var(--gold);padding:0 3px}
+  .who{margin-left:auto;font-size:11.5px;color:var(--panel-quiet)}
+  .who b{color:var(--panel-ink);font-weight:600}
+  .crow2{display:flex;gap:4px;padding:0 14px 8px;flex-wrap:wrap}
+  .navb{font:inherit;font-size:12.5px;color:var(--panel-quiet);background:none;border:0;border-radius:6px;
+        padding:5px 11px;cursor:pointer}
+  .navb:hover{background:var(--panel-hover);color:var(--panel-ink)}
+  .navb.on{color:var(--panel-ink);background:var(--panel-hover);font-weight:600}
+  .navsep{width:1px;background:rgba(255,255,255,.16);margin:5px 6px}
+  .demoband{background:#F4E8CE;color:#5C4A1E;border-bottom:1px solid #E3D2A8;
+            font-size:12px;padding:6px 18px}
+  .demoband b{color:#463607}
+  .tabs{display:flex;gap:2px;background:var(--surface);border-bottom:1px solid var(--line);padding:0 14px}
+  .tab{font:inherit;font-size:13px;color:var(--ink-3);background:none;border:0;border-bottom:2px solid transparent;
+       padding:10px 13px 8px;cursor:pointer}
+  .tab:hover{color:var(--ink)}
+  .tab.on{color:var(--ink);border-bottom-color:var(--gold-deep);font-weight:600}
+  .secrow{display:flex;gap:2px;background:var(--surface-2);border-bottom:1px solid var(--line);padding:0 14px}
+  .sec{font:inherit;font-size:12px;color:var(--ink-3);background:none;border:0;border-bottom:2px solid transparent;
+       padding:7px 11px 5px;cursor:pointer}
+  .sec.on{color:var(--ink);border-bottom-color:var(--gold-deep);font-weight:600}
+  .page{padding:18px;min-height:430px}
+
+  /* Strategy › Foundation */
+  .fgrid{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:14px}
+  .fcard{background:var(--surface);border:1px solid var(--line);border-radius:8px;padding:12px 16px}
+  .fcard h3{font-size:10.5px;text-transform:uppercase;letter-spacing:.08em;color:var(--ink-3);margin:0 0 6px;font-weight:600}
+  .fcard p{margin:0;font-size:12.5px;color:var(--ink-2)}
+  .ftbl{background:var(--surface);border:1px solid var(--line);border-radius:8px;overflow:hidden}
+
+  /* Strategy › SWOT */
+  .swot{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+  .sq{background:var(--surface);border:1px solid var(--line);border-radius:8px;padding:12px 16px}
+  .sq h3{font-size:10.5px;text-transform:uppercase;letter-spacing:.08em;margin:0 0 6px;font-weight:700;color:var(--gold-deep)}
+  .sq ul{margin:0;padding-left:16px;font-size:12.5px;color:var(--ink-2)}
+  .sq li{margin-bottom:4px}
+
+  /* Strategy › Plan: rail + pane */
+  .split{display:grid;grid-template-columns:250px 1fr;gap:14px}
+  .rail{background:var(--surface);border:1px solid var(--line);border-radius:8px;overflow:hidden;align-self:start}
+  .rhead{background:var(--panel);color:var(--panel-ink);font-size:10.5px;text-transform:uppercase;
+         letter-spacing:.09em;padding:8px 12px;font-weight:600}
+  .prow{padding:9px 12px;border-top:1px solid var(--line-soft);cursor:default}
+  .prow.on{border-left:3px solid var(--gold-deep);padding-left:9px;background:var(--surface-2)}
+  .prow .pc{font-size:10.5px;color:var(--gold-deep);font-weight:700;letter-spacing:.05em}
+  .prow .pn{font-size:12.5px;color:var(--ink);font-weight:600}
+  .prow .pm{font-size:11px;color:var(--ink-3)}
+  .pane{background:var(--surface);border:1px solid var(--line);border-radius:8px;overflow:hidden}
+  .pband{background:var(--panel);color:var(--panel-ink);padding:9px 14px;font-size:12.5px;font-weight:600}
+  .pband span{color:var(--gold);font-size:10.5px;letter-spacing:.06em;margin-right:8px}
+  table.ptab{width:100%;border-collapse:collapse;font-size:12.5px}
+  .ptab th{background:var(--panel);color:var(--panel-quiet);font-size:10.5px;text-transform:uppercase;
+           letter-spacing:.07em;text-align:left;padding:7px 12px;font-weight:600}
+  .ptab td{padding:8px 12px;border-top:1px solid var(--line-soft);color:var(--ink-2)}
+  .ptab td:first-child{color:var(--ink-3);width:34px}
+  .pill{display:inline-block;font-size:10.5px;border:1px solid var(--line);border-radius:99px;padding:1px 8px;color:var(--ink-3)}
+
+  /* Performance — the action row is the FIRST row on the page, as built
+     (renderUnitPerformance returns bands(reportBtn + presentMenu) first). */
+  .actrow{display:flex;align-items:center;gap:10px;margin-bottom:16px}
+  .repbtn{font:inherit;font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;
+          background:var(--cta);color:var(--cta-ink);border:0;border-radius:7px;padding:9px 18px;cursor:pointer}
+  .repbtn:hover{background:var(--cta-hover)}
+  .presbtn{font:inherit;font-size:12px;text-transform:uppercase;letter-spacing:.06em;font-weight:600;
+           background:var(--surface);border:1px solid var(--line);border-radius:7px;padding:8px 14px;color:var(--ink-2);cursor:pointer}
+  .legend{margin-left:auto;display:flex;gap:12px;font-size:9.5px;text-transform:uppercase;letter-spacing:.07em;color:var(--ink-3)}
+  .legend i{display:inline-block;width:10px;height:10px;border-radius:99px;margin-right:4px;vertical-align:-1px}
+  .hl{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-bottom:16px}
+  .hlc{background:var(--surface);border:1px solid var(--line);border-radius:8px;padding:12px 16px}
+  .hlc .l{font-size:10.5px;text-transform:uppercase;letter-spacing:.08em;color:var(--ink-3);font-weight:600}
+  .hlc .n{font-size:26px;font-weight:700;margin-top:2px}
+  .n.ok{color:var(--ok)} .n.warn{color:var(--warn)}
+  .perfnote{background:var(--surface);border:1px dashed var(--line);border-radius:8px;padding:22px;
+            text-align:center;color:var(--ink-3);font-size:12.5px}
+
+  /* ── The tour itself ─────────────────────────────────────────────────── */
+  /* The click-absorber: transparent — ALL dimming is painted by the SVG
+     shade, whose mask can hold SEVERAL holes at once (the active button AND
+     the section it opened), which one box-shadow cutout never could. */
+  .tdim{position:absolute;inset:0;background:transparent;z-index:40;display:none}
+  .frame.touring .tdim{display:block}
+  .tsvg{position:absolute;inset:0;width:100%;height:100%;z-index:41;pointer-events:none;display:none}
+  .frame.touring .tsvg{display:block}
+  #tshade{fill:var(--dim)}
+  .tring{fill:none;stroke:var(--gold);stroke-width:2;
+         filter:drop-shadow(0 0 6px rgba(201,162,77,.6))}
+  /* The card is a little transparent by design — where it must share space
+     with the page, what is under it stays readable through it. */
+  .tcard{position:absolute;z-index:43;width:310px;background:rgba(255,255,255,.92);
+         -webkit-backdrop-filter:blur(5px);backdrop-filter:blur(5px);
+         border:1px solid var(--line);border-radius:10px;
+         box-shadow:0 14px 40px rgba(9,14,24,.35);display:none}
+  .tcard.center{left:50%;top:50%;transform:translate(-50%,-50%);width:390px;background:var(--surface)}
+  .tctop{display:flex;align-items:center;padding:11px 14px 0}
+  .tstep{font-size:10.5px;text-transform:uppercase;letter-spacing:.09em;color:var(--gold-deep);font-weight:700}
+  .tx{margin-left:auto;font:inherit;font-size:15px;line-height:1;background:none;border:0;color:var(--ink-3);
+      cursor:pointer;padding:2px 4px;border-radius:4px}
+  .tx:hover{color:var(--ink);background:var(--surface-2)}
+  .tcard h3{font-size:14.5px;margin:6px 14px 0;letter-spacing:.005em}
+  .tcard .tbody{font-size:12.5px;color:var(--ink-2);margin:6px 14px 12px}
+  .tfoot{display:flex;align-items:center;gap:12px;border-top:1px solid var(--line-soft);padding:10px 14px}
+  .tback{font:inherit;font-size:12px;background:none;border:0;color:var(--ink-2);cursor:pointer;padding:0;font-weight:600}
+  .tback:hover{color:var(--ink);text-decoration:underline}
+  .tquiet{font:inherit;font-size:12px;background:none;border:0;color:var(--ink-3);cursor:pointer;padding:0}
+  .tquiet:hover{color:var(--ink);text-decoration:underline}
+  .tnext{font:inherit;font-size:12.5px;font-weight:600;margin-left:auto;background:var(--panel);color:var(--panel-ink);
+         border:0;border-radius:7px;padding:8px 18px;cursor:pointer}
+  .tnext:hover{background:var(--panel-hover)}
+  .tghost{font:inherit;font-size:12.5px;font-weight:600;background:var(--surface);color:var(--ink-2);
+          border:1px solid var(--line);border-radius:7px;padding:7px 14px;cursor:pointer}
+  .tghost:hover{border-color:var(--gold-deep);color:var(--ink)}
+  .tdots{display:flex;gap:5px;padding:0 14px 10px}
+  .tdots i{width:6px;height:6px;border-radius:99px;background:var(--line)}
+  .tdots i.on{background:var(--gold-deep)}
+  button:focus-visible{outline:2px solid var(--focus);outline-offset:2px}
+</style>
+
+<div class="mkwrap">
+  <div class="mkhead">
+    <span class="mkt">Design mockup · for sign-off · rev 4</span>
+    <h1>Onboarding tour — dim, spotlight, story</h1>
+    <span class="mkd">2026-08-26 · not the product</span>
+  </div>
+
+  <div class="mknote">
+    <div class="mkcard">
+      <h2>What is proposed — rev 4 after review</h2>
+      <p>First sign-in opens a guided tour <b>on demo data</b>: the page dims, what matters stays
+         lit — the one button that says where you are, or a section button together with its
+         content — and a short card explains it. <b>The tour walks itself</b>: every step
+         advances with Next and Back, and nobody has to press a product control (this reverses
+         the earlier interactive choice, at Islam's direction — do-steps are gone).</p>
+      <p><b>One exit.</b> Skip tour is removed; the &#215; is the only way out, and pressing it
+         asks: <b>Don't show again</b> (stored — the tour never auto-opens in this browser) or
+         <b>Skip for now</b> (it offers itself again next sign-in), with a quiet way back into
+         the tour for a stray click. After the Performance tab, the tour shows the page's
+         <b>headline numbers first</b>, then explains Report, then Presentation — without
+         opening its menu. 9 steps.</p>
+    </div>
+    <div class="mkcard mkcost">
+      <h2>Costs, stated</h2>
+      <ul>
+        <li><b>The tour opens demo mode itself</b> — the Demo data button is the SMO's. Demo
+            shows a filled worked example (a fresh tenant is empty), writes nothing, and is
+            labelled the whole time.</li>
+        <li><b>Tour targets rot silently when a control is renamed</b> — so a check walks every
+            story as every role and asserts each target is present and visible, or the build
+            fails.</li>
+        <li><b>Choices are per browser</b> (localStorage): Don't show again sticks here; a new
+            device offers the tour once. Replay lives in the Knowledge base.</li>
+        <li>In this replica the controls sit where the built product puts them; in the real build
+            the tour anchors to the real controls, so their place is right by construction.</li>
+      </ul>
+    </div>
+  </div>
+
+  <span class="replay">Check: press through all 9 steps · use Back · press &#215; and try both
+    choices · resize mid-step. <b id="closednote"></b>
+    <button id="restart">Restart the tour</button></span>
+
+  <!-- ════════ Platform replica ════════ -->
+  <div class="frame touring" id="frame">
+    <div class="chrome">
+      <div class="crow1">
+        <span class="brand">RAYA <em>&#9668;&#9658;</em> TRADE</span>
+        <span class="who">Signed in as <b>Amina Hassan</b> · Strategy custodian</span>
+      </div>
+      <div class="crow2" id="navrow">
+        <button class="navb">The group &#9662;</button>
+        <button class="navb on" id="navMobile">Mobile</button>
+        <button class="navb">B2B Ecomm</button>
+        <button class="navb">Retail Stores</button>
+        <button class="navb">Care</button>
+        <span class="navsep"></span>
+        <button class="navb">Finance</button>
+        <button class="navb">HR</button>
+      </div>
+    </div>
+    <div class="demoband"><b>Demo data · nothing here is saved.</b> The full worked example — you are looking at Raya Trade, not your own data.</div>
+    <div class="tabs" id="tabrow">
+      <button class="tab on" id="tabStrat">Strategy</button>
+      <button class="tab" id="tabPerf">Performance</button>
+      <button class="tab">My reporting</button>
+    </div>
+    <div class="secrow" id="secrow">
+      <button class="sec" id="secFound">Foundation</button>
+      <button class="sec" id="secSwot">SWOT</button>
+      <button class="sec on" id="secPlan">Plan</button>
+    </div>
+
+    <div class="page" id="viewFound" hidden>
+      <div id="foundBody">
+        <div class="fgrid">
+          <div class="fcard"><h3>Aspiration</h3>
+            <p>To be Egypt's most trusted mobile operator — first choice for the connected
+               household, growing value faster than the market.</p></div>
+          <div class="fcard"><h3>Who we are</h3>
+            <p>The group's consumer connectivity arm: 11m subscribers, a retail footprint in
+               every governorate, and the network the others are measured against.</p></div>
+        </div>
+        <div class="ftbl">
+          <table class="ptab">
+            <tr><th>#</th><th>Key objective</th><th>Dir.</th><th>Target</th></tr>
+            <tr><td>1</td><td>Grow service revenue</td><td>&#8593;</td><td>+12% YoY</td></tr>
+            <tr><td>2</td><td>Postpaid share of base</td><td>&#8593;</td><td>34%</td></tr>
+            <tr><td>3</td><td>Customer NPS</td><td>&#8593;</td><td>+41</td></tr>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <div class="page" id="viewSwot" hidden>
+      <div class="swot" id="swotBody">
+        <div class="sq"><h3>Strengths</h3><ul><li>Network quality leadership, 3 years running</li><li>Widest retail footprint in the group</li></ul></div>
+        <div class="sq"><h3>Weaknesses</h3><ul><li>ARPU below market on prepaid</li><li>Digital channel share of sales at 9%</li></ul></div>
+        <div class="sq"><h3>Opportunities</h3><ul><li>Household bundles with B2B Ecomm</li><li>FWA in underserved governorates</li></ul></div>
+        <div class="sq"><h3>Threats</h3><ul><li>Price-led competition in prepaid</li><li>Device cost inflation squeezing upgrades</li></ul></div>
+      </div>
+    </div>
+
+    <div class="page" id="viewPlan">
+      <div class="split">
+        <div class="rail" id="planRail">
+          <div class="rhead">Pillars</div>
+          <div class="prow on"><div class="pc">MB01</div><div class="pn">Grow subscriber revenue</div><div class="pm">4 measures · 6 tactics</div></div>
+          <div class="prow"><div class="pc">MB02</div><div class="pn">Digital-first distribution</div><div class="pm">3 measures · 5 tactics</div></div>
+          <div class="prow"><div class="pc">MB03</div><div class="pn">Network quality leadership</div><div class="pm">4 measures · 4 tactics</div></div>
+          <div class="prow"><div class="pc">MB04</div><div class="pn">Enterprise segment growth</div><div class="pm">2 measures · 3 tactics</div></div>
+        </div>
+        <div class="pane" id="planPane">
+          <div class="pband"><span>MB01</span>Grow subscriber revenue</div>
+          <table class="ptab">
+            <tr><th>#</th><th>Measure</th><th>Target</th><th>Compile</th></tr>
+            <tr><td>1</td><td>Postpaid net additions</td><td>420k</td><td><span class="pill">Sum of quarters</span></td></tr>
+            <tr><td>2</td><td>Blended ARPU</td><td>EGP 96</td><td><span class="pill">Latest</span></td></tr>
+            <tr><td>3</td><td>Churn rate</td><td>&#8804; 1.8%</td><td><span class="pill">Latest</span></td></tr>
+            <tr><td>4</td><td>Data revenue share</td><td>38%</td><td><span class="pill">Latest</span></td></tr>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <div class="page" id="viewPerf" hidden>
+      <div class="actrow">
+        <button class="repbtn" id="btnReport">Report</button>
+        <button class="presbtn" id="btnPresent">Presentation &#9662;</button>
+        <span class="legend">
+          <span><i style="background:var(--ok)"></i>On track</span>
+          <span><i style="background:var(--warn)"></i>Watch</span>
+          <span><i style="background:var(--bad)"></i>Off track</span>
+        </span>
+      </div>
+      <div class="hl" id="hlRow">
+        <div class="hlc"><div class="l">Key objectives</div><div class="n ok">78%</div></div>
+        <div class="hlc"><div class="l">Pillars</div><div class="n warn">64%</div></div>
+        <div class="hlc"><div class="l">Execution</div><div class="n ok">71%</div></div>
+      </div>
+      <div class="perfnote">Pillar and measure scores render here — the reporting cycle is open, and Mobile has not submitted yet.</div>
+    </div>
+
+    <!-- Tour machinery -->
+    <div class="tdim" id="tdim"></div>
+    <svg class="tsvg" id="tsvg">
+      <defs><mask id="tmask">
+        <rect width="100%" height="100%" fill="#fff"></rect>
+        <g id="tholes"></g>
+      </mask></defs>
+      <rect id="tshade" width="100%" height="100%" mask="url(#tmask)"></rect>
+      <g id="trings"></g>
+    </svg>
+    <div class="tcard" id="tcard">
+      <div class="tctop"><span class="tstep" id="tstep"></span>
+        <button class="tx" id="tclose" title="Close the tour" aria-label="Close the tour">&#215;</button></div>
+      <h3 id="ttitle"></h3>
+      <div class="tbody" id="tbody"></div>
+      <div class="tdots" id="tdots"></div>
+      <div class="tfoot" id="tfoot"></div>
+    </div>
+  </div>
+</div>
+
+<script>
+(function(){
+  "use strict";
+  var frame=document.getElementById("frame"),
+      holesG=document.getElementById("tholes"), ringsG=document.getElementById("trings"),
+      card=document.getElementById("tcard");
+
+  /* One place decides what the replica shows: a view key, applied by every
+     step — which is what makes Back free (going back reapplies the view). */
+  function showView(v){
+    ["Found","Swot","Plan","Perf"].forEach(function(n){
+      document.getElementById("view"+n).hidden = (v!==n.toLowerCase()); });
+    var strat = v!=="perf";
+    document.getElementById("tabStrat").classList.toggle("on",strat);
+    document.getElementById("tabPerf").classList.toggle("on",!strat);
+    document.getElementById("secrow").style.display = strat?"":"none";
+    document.getElementById("secFound").classList.toggle("on",v==="found");
+    document.getElementById("secSwot").classList.toggle("on",v==="swot");
+    document.getElementById("secPlan").classList.toggle("on",v==="plan");
+  }
+
+  /* The story: {view, targets:[selectors], title, body}. The LAST target is
+     the step's main subject (the card keeps clear of it); every target gets
+     its own hole in the one shade, so a section step lights the section
+     BUTTON and the section it opened together. The tour walks itself — Next
+     performs the navigation, nobody presses a product control (rev 4).
+     No targets = a centred card. */
+  var STORY=[
+    {kind:"welcome", view:"plan", title:"Welcome to the Strategy Management Platform",
+     body:"This two-minute tour shows you around on <b>demo data</b> — a full worked example, "+
+          "labelled the whole time. Nothing in it is your own data, and nothing it shows can "+
+          "be saved.", next:"Start the tour"},
+    {view:"plan", targets:["#navMobile"], title:"You are here: Mobile",
+     body:"This row is the business — every button a unit or a supporting function, and the "+
+          "lit one is where you are. You will only see the ones you are responsible for."},
+    {view:"plan", targets:["#tabStrat"], title:"The Strategy tab",
+     body:"<b>Strategy</b> holds what was agreed, in three sections you will see one by one. "+
+          "<b>Performance</b>, beside it, shows what the reported figures make of it."},
+    {view:"found", targets:["#secFound","#foundBody"], title:"Strategy &#8250; Foundation",
+     body:"Who the unit is: the aspiration, and the key objectives the unit is judged on."},
+    {view:"swot", targets:["#secSwot","#swotBody"], title:"Strategy &#8250; SWOT",
+     body:"The reasoning the plan was built from — strengths, weaknesses, opportunities, "+
+          "threats. The pillars answer what this table says."},
+    {view:"plan", targets:["#secPlan","#planRail"], title:"Strategy &#8250; Plan — the pillars",
+     body:"The plan itself. Each pillar on this rail holds the measures your unit is scored "+
+          "on and the tactics that deliver them."},
+    {view:"plan", targets:["#secPlan","#planPane"], title:"A pillar's measures and tactics",
+     body:"Open a pillar and this pane shows its measures, targets and how each compiles. "+
+          "This is what reporting fills with figures each cycle."},
+    {view:"perf", targets:["#tabPerf","#hlRow"], title:"Performance — the headline numbers",
+     body:"The <b>Performance</b> tab turns the plan and the reported figures into the unit's "+
+          "score. Three readings, left to right: what we are judged on, how the work we set "+
+          "ourselves is going, and whether the work happened."},
+    {view:"perf", targets:["#btnReport"], title:"Where your figures go in",
+     body:"While a reporting cycle is open, <b>Report</b> is where you enter this quarter's "+
+          "figures and submit them for the unit."},
+    {view:"perf", targets:["#btnPresent"], title:"The unit's story, as slides",
+     body:"<b>Presentation</b> turns this page into the review deck — <b>Present</b> plays it "+
+          "full-screen for a projector, and <b>Manage slides</b> lets you arrange it first, "+
+          "including picture slides of your own."},
+    {kind:"finish", view:"perf", title:"That's the essentials",
+     body:"You can replay this tour any time from the <b>Knowledge base</b>. The moment this "+
+          "closes you are back on your own data.", next:"Close"}
+  ];
+
+  var at=-1, asking=false;
+  function endTour(note){
+    frame.classList.remove("touring"); card.style.display="none";
+    showView("plan"); at=-1; asking=false;
+    document.getElementById("closednote").textContent = note||"";
+  }
+  function svgRect(g, h, cls){
+    var r=document.createElementNS("http://www.w3.org/2000/svg","rect");
+    r.setAttribute("x",h.l); r.setAttribute("y",h.t);
+    r.setAttribute("width",h.w); r.setAttribute("height",h.ht);
+    r.setAttribute("rx",9);
+    if(cls) r.setAttribute("class",cls); else r.setAttribute("fill","#000");
+    g.appendChild(r);
+  }
+
+  function place(){
+    if(at<0) return;
+    var s=STORY[at], fr=frame.getBoundingClientRect();
+    holesG.innerHTML=""; ringsG.innerHTML="";
+    if(asking || !s.targets){ card.classList.add("center");
+                    card.style.left=card.style.top=""; card.style.display="block"; return; }
+    card.classList.remove("center");
+    var pad=6, hs=s.targets.map(function(sel){
+      var r=frame.querySelector(sel).getBoundingClientRect();
+      return {l:r.left-fr.left-pad, t:r.top-fr.top-pad, w:r.width+2*pad, ht:r.height+2*pad};
+    });
+    hs.forEach(function(h){ svgRect(holesG,h); svgRect(ringsG,h,"tring"); });
+    card.style.display="block";
+    /* The card sits BESIDE the spotlights, never over one: candidates around
+       the MAIN subject (the last target), first position inside the frame
+       that clears every hole wins; corner-dock is the translucent fallback. */
+    var h=hs[hs.length-1], cw=card.offsetWidth, ch=card.offsetHeight,
+        W=frame.offsetWidth, H=frame.offsetHeight, g=14, m=8;
+    function fits(c){ return c.l>=m && c.t>=m && c.l+cw<=W-m && c.t+ch<=H-m; }
+    function clearAll(c){ return hs.every(function(x){
+      return c.l>=x.l+x.w||c.l+cw<=x.l||c.t>=x.t+x.ht||c.t+ch<=x.t; }); }
+    var cands=[{l:h.l,t:h.t+h.ht+g},{l:h.l+h.w+g,t:h.t},{l:h.l-cw-g,t:h.t},{l:h.l,t:h.t-ch-g},
+               {l:W-cw-m,t:H-ch-m},{l:m,t:H-ch-m}],
+        pick=null;
+    for(var i=0;i<cands.length;i++){
+      var c={l:Math.min(Math.max(m,cands[i].l),W-cw-m),t:cands[i].t};
+      if(fits(c)&&clearAll(c)){pick=c;break;} }
+    if(!pick) pick={l:W-cw-m, t:Math.min(Math.max(m,h.t+h.ht+g),H-ch-m)};
+    card.style.left=pick.l+"px"; card.style.top=pick.t+"px";
+  }
+
+  function paintCard(){
+    var s=STORY[at];
+    document.getElementById("tstep").textContent=
+      s.kind==="welcome" ? "The tour · strategy custodian" :
+      s.kind==="finish"  ? "The tour · done" : "Step "+at+" of "+(STORY.length-2);
+    document.getElementById("ttitle").innerHTML=s.title;
+    document.getElementById("tbody").innerHTML=s.body;
+    var dots=document.getElementById("tdots"); dots.innerHTML="";
+    for(var i=0;i<STORY.length;i++){var d=document.createElement("i");
+      if(i===at)d.className="on"; dots.appendChild(d);}
+    document.getElementById("tfoot").innerHTML=
+      (at>0 ? '<button class="tback" data-t="back">&#8249; Back</button>' : '')+
+      '<button class="tnext" data-t="next">'+(s.next||"Next")+'</button>';
+  }
+
+  /* The × is the ONE exit, and it asks before it forgets: Don't show again is
+     stored, Skip for now offers the tour again next sign-in — and a stray
+     click on × has a way back into the tour. */
+  function askClose(){
+    asking=true;
+    document.getElementById("tstep").textContent="Close the tour?";
+    document.getElementById("ttitle").textContent="Should it come back?";
+    document.getElementById("tbody").innerHTML=
+      "<b>Skip for now</b> shows the tour again next time you sign in. "+
+      "<b>Don't show again</b> puts it away for good — you can still replay it "+
+      "from the Knowledge base.";
+    document.getElementById("tdots").innerHTML="";
+    document.getElementById("tfoot").innerHTML=
+      '<button class="tquiet" data-t="resume">Keep the tour</button>'+
+      '<span style="margin-left:auto;display:flex;gap:8px">'+
+      '<button class="tghost" data-t="never">Don\'t show again</button>'+
+      '<button class="tnext" data-t="later">Skip for now</button></span>';
+    place();
+  }
+
+  function go(n){
+    if(n>=STORY.length){ endTour("Finished — in the product this stores “seen” for this browser."); return; }
+    at=Math.max(0,n); asking=false;
+    showView(STORY[at].view);
+    paintCard(); place();
+  }
+
+  frame.addEventListener("click",function(e){
+    var t=e.target.dataset&&e.target.dataset.t;
+    if(t==="next"){ go(at+1); return; }
+    if(t==="back"){ go(at-1); return; }
+    if(t==="resume"){ go(at); return; }
+    if(t==="never"){ endTour("Closed · Don't show again — in the product this is stored and the tour never auto-opens here."); return; }
+    if(t==="later"){ endTour("Closed · Skip for now — in the product the tour offers itself again next sign-in."); return; }
+    if(e.target.id==="tclose"){ askClose(); return; }
+  });
+  document.addEventListener("keydown",function(e){
+    if(e.key==="Escape"&&at>=0&&!asking) askClose(); });
+  window.addEventListener("resize",place);
+  document.getElementById("restart").addEventListener("click",function(){
+    document.getElementById("closednote").textContent="";
+    frame.classList.add("touring"); go(0);
+    frame.scrollIntoView({behavior:"smooth",block:"start"});
+  });
+
+  go(0);
+})();
+</script>

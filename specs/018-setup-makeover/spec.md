@@ -1,6 +1,6 @@
-# 016 · The Setup makeover
+# 018 · The Setup makeover
 
-**Version:** v3.30 · **Decisions:** §101 · **Status:** answered; built
+**Version:** v3.30 · **Decisions:** §108 · **Status:** answered; built
 **Constitution:** checked against v1.1.0.
 
 Islam: *"Rethink the whole settings page. The design, the grouping, the
@@ -122,20 +122,20 @@ after the last row.
 
 ## 7 · The search, and the pills
 
-**The search** (§101.13) filters the rail on the page's name plus keywords held
+**The search** (§108.13) filters the rail on the page's name plus keywords held
 in `find` on the def beside the label — one list, so a rename cannot orphan
 them. Every typed word must match, in any order. The box sits in the rail's
-head, outside the list §101.5 capped, so it cannot scroll away from its own
+head, outside the list §108.5 capped, so it cannot scroll away from its own
 results. Typing never repaints; the query is held in `RAILQ` and re-applied
 after every paint, because the Overview's own fetches call `paint()` about a
 second after the page opens — exactly when somebody is typing. It clears on
 arrival, and says so when it finds nothing.
 
-That required the fold to stop omitting rows from the DOM (§101.14): a filter
+That required the fold to stop omitting rows from the DOM (§108.14): a filter
 cannot reveal a row that was never drawn, and the failure would have looked
 exactly like "there is no such setting".
 
-**The pills** (§101.15) are the Overview's own rows summed by destination —
+**The pills** (§108.15) are the Overview's own rows summed by destination —
 nothing new is counted, so a rail badge cannot disagree with the page it points
 at. Never a zero; never for somebody who cannot clear it (§69); and on a group
 heading only while that group is folded, because an open group's rows already

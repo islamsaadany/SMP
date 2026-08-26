@@ -198,6 +198,7 @@
 <script src="SLIDES"></script>
 <script src="SEARCHSEL"></script>
 <script src="CHAT"></script>
+<script src="TOUR"></script>
 <script src="SYNC"></script>
 <script>
 
@@ -346,7 +347,7 @@
                     when: canPickSets,                                 render:renderSourceSetup }];
         } },
       { k:"bands",  ac:"c_bands",  grp:"meas", label:"Scoring bands", find:"scoring bands green amber red threshold colours ranges",        render:function(){ return renderBands() + renderBandsExtra(); } },
-      /* TERMINOLOGY, NOT "LABELS" (§101.3). The page holds what THIS tenant
+      /* TERMINOLOGY, NOT "LABELS" (§108.3). The page holds what THIS tenant
          calls a pillar, a theme, an aspiration — its vocabulary, and the one
          contract every other screen reads its words from. "Labels" is what a
          developer calls that; to everybody else it sounds like stickers on a
@@ -361,7 +362,7 @@
          accent, the tenant's name and the tenant's footer, so what it looks
          like is the same subject Branding answers — one step further out, where
          the reader is not in the platform at all. */
-      /* EMAIL, NOT "COMMUNICATION" (§101.3). The third of the colliding three,
+      /* EMAIL, NOT "COMMUNICATION" (§108.3). The third of the colliding three,
          and the easiest to settle because the page is narrower than its name:
          it sets the display name, the reply-to, the kicker and the footer of
          what LEAVES the platform — an email, and nothing else. Naming it Email
@@ -378,7 +379,7 @@
        label and its own answer to "may this person reach anything here"; they
        are concatenated into the setup list by defsFor(). */
     manage: [
-      /* ── WHERE THE GEAR LANDS (§101.10, spec 016) ─────────────────────
+      /* ── WHERE THE GEAR LANDS (§108.10, spec 018) ─────────────────────
          FIRST AND `primary`, taking both from Reporting cycle: the office's
          first question on opening Setup is not "how is the cycle going" but
          "is anything waiting on me", and until this page existed the answer
@@ -405,7 +406,7 @@
          done here). `inOffice()` is the SMO team as well as the Super user, or
          the office would be one person deep on the one page that has to be
          answered the day somebody is on leave. */
-      /* INBOX, NOT "MESSAGES" (§101.3). Three rows in this rail came out of one
+      /* INBOX, NOT "MESSAGES" (§108.3). Three rows in this rail came out of one
          word family — Messages (the office answering the corner), Send a message
          (the broadcast composer) and Communication (what an email wears) — and a
          name that could be any of the three is a name that identifies none of
@@ -432,7 +433,7 @@
       { k:"myfig",    ac:"c_myfig", grp:"cycle",  label:"Figures I report", find:"figures i report my numbers named",
         when: ownsAnySource,                                render:renderMySources },
 
-      /* ── ONE PAGE, TWO SECTIONS (§101.4) ──────────────────────────────
+      /* ── ONE PAGE, TWO SECTIONS (§108.4) ──────────────────────────────
          Import and Archived plans were two rails rows about ONE subject: a
          plan arriving, and the plan it displaced. They are inseparable by
          construction — §22 made importing an ARCHIVING act, so every visit to
@@ -767,7 +768,7 @@
      other. */
   function setupDefs(){ return SUBS.manage.concat(SUBS.setup); }
 
-  /* THE GROUP NAMES ANSWER RATHER THAN ASK (§101.2). §46 named these as the
+  /* THE GROUP NAMES ANSWER RATHER THAN ASK (§108.2). §46 named these as the
      QUESTION you came to answer — "Who", "What we run", "How it's measured" —
      and the argument was right about the grouping and wrong about the words:
      a rail is scanned, not read, and at 9.5px uppercase a question reads a beat
@@ -831,7 +832,7 @@
     try { localStorage.setItem("smp.setup.groups", JSON.stringify(RAILSHUT)); } catch (e) {}
   }
 
-  /* ── THE QUERY LIVES HERE, NOT IN THE BOX (§101.13) ────────────────
+  /* ── THE QUERY LIVES HERE, NOT IN THE BOX (§108.13) ────────────────
      TYPING MUST NEVER REPAINT (§35, §45.5), so the filter hides rows in place
      and the input is never rebuilt while somebody is in it. But an UNRELATED
      repaint can still arrive mid-word — the Overview's three fetches each end
@@ -884,7 +885,7 @@
         box.hidden = !any;
         if (head) head.hidden = !any;
         /* A SHUT GROUP OPENED BY A SEARCH SHOWS ITS ROWS, so its heading's
-           pill would repeat what those rows now say (§101.15). Restored by
+           pill would repeat what those rows now say (§108.15). Restored by
            the branch above the moment the query is cleared. */
         var gw = head && head.querySelector(".rgwait");
         if (gw) gw.hidden = true;
@@ -907,7 +908,7 @@
           'aria-expanded="false">' + ICO_CHEV + '</button></div>';
     }
     /* Asked ONCE for the whole rail rather than per row: every row would
-       otherwise re-run five counts, two of which walk the register (§101.15). */
+       otherwise re-run five counts, two of which walk the register (§108.15). */
     var ATT = (typeof attentionByPage === "function") ? attentionByPage() : {};
     var rows = SETUP_GROUPS.map(function(g){
       var items = defs.filter(function(d){ return d.grp === g.k; });
@@ -915,7 +916,7 @@
       var here = items.some(function(d){ return d.k === activeKey; });
       var shut = !!RAILSHUT[g.k] && !here;
       var gwait = items.reduce(function(n, d){ return n + (ATT[d.k] || 0); }, 0);
-      /* THE FOLDED ITEMS STAY IN THE DOM (§101.14). They used to be omitted
+      /* THE FOLDED ITEMS STAY IN THE DOM (§108.14). They used to be omitted
          entirely, which was fine while folding was the only thing that hid a
          row — and impossible to search, because the filter runs over the DOM
          and cannot reveal a row that was never rendered. Hiding is `hidden`
@@ -951,7 +952,7 @@
               '" data-setupgo="' + d.k + '" data-find="' +
               esc(((d.label || "") + " " + (d.find || "") + " " + g.label).toLowerCase()) +
               '"><span class="rilab">' + esc(d.label) + '</span>' +
-              /* NEVER A ZERO (§101.10, and HR_ERP's own rule): a row with
+              /* NEVER A ZERO (§108.10, and HR_ERP's own rule): a row with
                  nothing waiting carries no pill at all, so the pill means one
                  thing and reads at a glance. */
               (w ? '<span class="riwait" title="' + w +
@@ -959,20 +960,20 @@
               '</button>';
           }).join("") + '</div>';
     }).join("");
-    /* THE LIST SCROLLS, THE HEAD DOES NOT (§101.5). The rows go inside their
+    /* THE LIST SCROLLS, THE HEAD DOES NOT (§108.5). The rows go inside their
        own container so the rail can be capped to the window and still keep
        "Setup" and the collapse control on screen — see the note in config.css
        for why a max-height is safe here and was not in v2.8. */
-    /* ── FINDING A SETTING BY THE ERRAND (§101.13) ────────────────────
+    /* ── FINDING A SETTING BY THE ERRAND (§108.13) ────────────────────
        Eighteen entries is past the size where scanning beats typing, and some
        errands do not know their page at all: "where do I change the logo" is
        Branding, "where do I reset a password" is the People register. So each
        row carries the words somebody would actually type, in `find` on the def
-       beside its label — one list, so a rename cannot orphan them (§101.3
+       beside its label — one list, so a rename cannot orphan them (§108.3
        renamed three pages in an afternoon).
 
        IN THE HEAD, NOT IN THE LIST, so it cannot scroll away from the list it
-       filters — §101.5 capped that list to the window, and a search box that
+       filters — §108.5 capped that list to the window, and a search box that
        leaves the screen when you scroll to read your own results is a control
        below the fold by another road (§90). */
     return '<div class="rail setuprail"><div class="rhead">Setup' +
@@ -987,7 +988,7 @@
           'aria-label="Clear the search"' + (RAILQ ? "" : " hidden") + '>\u00d7</button>' +
       '</div>' +
       '<div class="raillist">' + rows +
-        /* SAYING NO IS THE LIST'S JOB TOO (§45.2, §101.10): a rail that empties
+        /* SAYING NO IS THE LIST'S JOB TOO (§45.2, §108.10): a rail that empties
            itself reads as a rail that broke, so it says what was searched for. */
         '<div class="railnone" data-railnone="1" hidden></div>' +
       '</div></div>';
@@ -1619,6 +1620,11 @@
        ten seconds (§35, §71.2). Called here so it is also the place the clock
        is STOPPED when a paint navigates away from the page. */
     CHAT.wireInbox();
+    /* The tour, if one is running. It holds SELECTORS rather than nodes —
+       this paint has just replaced every element its spotlight was drawn
+       around — so it re-resolves them and puts the shade and the card back.
+       Like the inbox above, nothing in it ever calls paint(). */
+    TOUR.onPaint();
     clipTitles();
     /* PUT THE SCREEN BACK BEFORE THE BROWSER SHOWS IT (§75). Synchronous, in
        the same frame as the rebuild, so nothing is ever drawn at the top and
@@ -1791,7 +1797,7 @@
     document.querySelectorAll("[data-railtog]").forEach(function(b){
       b.addEventListener("click", function(){ setRailOpen(b.dataset.railtog === "1"); paint(); });
     });
-    /* ── THE RAIL'S SEARCH (§101.13) ────────────────────────────────
+    /* ── THE RAIL'S SEARCH (§108.13) ────────────────────────────────
        `input` filters and NEVER paints, so the caret is never disturbed and a
        half-typed word is never thrown away (§35). Re-applied at the end of
        every paint below, so a repaint arriving mid-errand restores the filter
@@ -1820,7 +1826,7 @@
     document.querySelectorAll("[data-setupgo]").forEach(function(b){
       b.addEventListener("click", function(){
         /* ARRIVING IS THE END OF THE ERRAND. A rail still filtered after you
-           have landed is a rail telling you Setup holds four things (§101.13).
+           have landed is a rail telling you Setup holds four things (§108.13).
            Cleared before paint(), so the box below is rendered empty. */
         RAILQ = "";
         /* CALLS leaveModes() RATHER THAN REPEATING THREE OF ITS LINES.
@@ -1974,6 +1980,12 @@
     wireImport();
     var lc = document.querySelector("[data-lockcycle]");
     if (lc) lc.addEventListener("click", function(){ CYCLE.locked = !CYCLE.locked; paint(); });
+    /* The focus feature's switch (§102). `this`, never a closure over the
+       element, for the reason stated three lines down. */
+    var fsw = document.querySelector("[data-focusswitch]");
+    if (fsw) fsw.addEventListener("click", function(){
+      setFocusOn(this.dataset.focusswitch === "1"); paint();
+    });
     /* `this`, NOT A CLOSURE OVER THE ELEMENT. Reading it back off the button
        that was clicked cannot go stale, and cannot be captured by whatever
        else happens to be in this scope — see the note on `pfile` below. */
@@ -2023,12 +2035,32 @@
         if (hit) { hit.obj.note = el.value.trim() || null; paint(); }
       });
     });
+    /* A DELIVERABLE AND A MILESTONE ARE PICKED THE SAME WAY NOW (§104): both
+       write `status`, and leaving In progress CLEARS the per-cent rather than
+       leaving it stranded under a word that no longer wants one. A stale 35%
+       sitting behind "Delivered" is a number nobody can see and the score
+       would not read -- but it would come back the moment somebody picked In
+       progress again, which is the kind of surprise a report cannot afford. */
     document.querySelectorAll("[data-cpick]").forEach(function(el){
       el.addEventListener("change", function(){
         var hit = capItemById(el.dataset.cpick);
         if (!hit) return;
-        if (hit.kind === "milestone") hit.obj.status = el.value || null;
-        else hit.obj.actual = el.value || null;
+        hit.obj.status = el.value || null;
+        if (hit.obj.status !== "wip") hit.obj.pct = null;
+        paint();
+      });
+    });
+    /* The per-cent, which only an In progress row has. Out of range is
+       clamped rather than refused: somebody typing 120 means "done", and an
+       error message in a table of thirty rows is a worse answer than a
+       number. */
+    document.querySelectorAll("[data-cpct]").forEach(function(el){
+      el.addEventListener("change", function(){
+        var hit = capItemById(el.dataset.cpct);
+        if (!hit) return;
+        var v = el.value.trim();
+        if (v === "" || isNaN(Number(v))) hit.obj.pct = null;
+        else hit.obj.pct = Math.max(0, Math.min(100, Math.round(Number(v))));
         paint();
       });
     });
@@ -2312,15 +2344,16 @@
     document.querySelectorAll("[data-unote]").forEach(function(el){
       el.addEventListener("change", function(){ REVIEW.note[el.dataset.unote] = el.value; });
     });
+    /* ONE HANDLER FOR BOTH SUBMITS (§105). The attribute carries the TARGET --
+       a unit key, or `fn:<key>` for a supporting function -- which is the same
+       string `REVIEW.submitted` is keyed by and the same one the server
+       authorises. It read `UNITS[...]` before, so wiring a function's button to
+       it would have submitted `undefined` and said nothing was in the way. */
     document.querySelectorAll("[data-submit]").forEach(function(b){
       b.addEventListener("click", function(){
-        var u = UNITS[b.dataset.submit], miss = missingNotes(u);
-        if (miss.length) {
-          alert(miss.length + " figure" + (miss.length > 1 ? "s are" : " is") +
-            " at risk or off track with no note. Add a line to each before submitting.");
-          return;
-        }
-        REVIEW.submitted[b.dataset.submit] = true; paint();
+        var t = b.dataset.submit, why = submitRefusal(t);
+        if (why) { alert(why + "\n\nNothing has been submitted."); return; }
+        REVIEW.submitted[t] = true; paint();
       });
     });
     document.querySelectorAll("[data-unsubmit]").forEach(function(b){
@@ -4277,18 +4310,18 @@
        threw, nothing was logged, and the passwords themselves were never
        touched — `credentials` is its own table outside the state graph (§19).
 
-       KEYED ON THE PAGE NOW, NOT ON ITS MARKUP (§101.11). §93.2 keyed it on
+       KEYED ON THE PAGE NOW, NOT ON ITS MARKUP (§108.11). §93.2 keyed it on
        `.peoplecfg`, the register's table — better than the pen it replaced,
        and still the same KIND of thing: a class name, which a restyle can
        retire without anything failing. It asks the two pages that want the
        answer by NAME, which is data rather than markup and cannot silently
        stop matching. The Overview joins the list because it counts these two
-       facts (§101.10) — and gating it on the register's markup would have
+       facts (§108.10) — and gating it on the register's markup would have
        given it a permanent, silent null, which draws no row: this exact fault
        twice already, and in the safe-looking direction both times. */
     /* THE FILTER IS RE-APPLIED AFTER EVERY PAINT, or a repaint that arrives
        while somebody is reading their own results would quietly show them the
-       whole list again (§101.13). The box's value is rendered from RAILQ, so
+       whole list again (§108.13). The box's value is rendered from RAILQ, so
        the two can never disagree. */
     railFilter();
 
@@ -4314,7 +4347,7 @@
         typeof SYNC !== "undefined" && SYNC.isLive() && inOffice()) {
       SAIDWHERE = {};
       SYNC.declarations(function(err, said){
-        /* AND IT SAYS SO NOW TOO (§101.11). This was `if (err) return`, which
+        /* AND IT SAYS SO NOW TOO (§108.11). This was `if (err) return`, which
            leaves SAIDWHERE as {} — "asked, and nobody declared anything" —
            the exact shape §93 removed from the passwords beside it and did not
            come back for. It costs the register nothing (a note per row, absent
@@ -4325,7 +4358,7 @@
         paint();
       });
     }
-    /* ── AND WHAT THE INBOX IS HOLDING (§101.10) ─────────────────────
+    /* ── AND WHAT THE INBOX IS HOLDING (§108.10) ─────────────────────
        Asked only on the Overview, because the Inbox counts its own queue when
        it is open and the corner has its own cadence (§98.1) — a third asker
        polling in the background is what §98 was about. Once per visit: this is
@@ -4506,6 +4539,16 @@
   function wireArrange(){
     document.querySelectorAll("[data-arrange]").forEach(function(b){
       b.addEventListener("click", function(){ ARRANGE = !ARRANGE; paint(); });
+    });
+
+    /* ── REPLAYING THE GUIDED TOUR (spec 017) ────────────────────────
+       The Knowledge base's one entry. It starts the story this viewer's
+       roles map to and IGNORES the stored "don't show again" — that mark
+       answers "should it open by itself", which is a different question
+       from "show me it now", and conflating the two would leave anybody who
+       once pressed it with no way back. */
+    document.querySelectorAll("[data-tour-replay]").forEach(function(b){
+      b.addEventListener("click", function(){ TOUR.start(this.dataset.tourReplay); });
     });
 
     /* ── Reporting is a MODE now (§63.1) ─────────────────────────────

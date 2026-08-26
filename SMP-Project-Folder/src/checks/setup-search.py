@@ -1,4 +1,4 @@
-"""Setup · the rail's search (§101.13).
+"""Setup · the rail's search (§108.13).
 
 WHAT IS WORTH ASSERTING HERE IS MOSTLY NOT "IT FILTERS". A box that narrows a
 list is the easy half and the half that fails loudly. The three that fail
@@ -20,7 +20,7 @@ QUIETLY, and that this file exists for:
 3. **A match inside a FOLDED group must be findable.** Folded items used to be
    omitted from the DOM entirely, so a filter could never reveal them —
    and the failure is silent: the search simply reports nothing found, which
-   looks exactly like "no such setting" (§101.14).
+   looks exactly like "no such setting" (§108.14).
 
 Run: SMP_CHROME=... python3 qa-run.py checks/setup-search.py
 """
@@ -69,7 +69,7 @@ with sync_playwright() as p:
 
     print("\n── 1 · the box is there, and above the list it filters ──")
     ck("the rail has a search box", pg.query_selector("[data-railq]") is not None)
-    ck("it is OUTSIDE the scrolling list (§101.5 caps that list)",
+    ck("it is OUTSIDE the scrolling list (§108.5 caps that list)",
        pg.evaluate("()=>{const q=document.querySelector('[data-railq]');"
                    "return !document.querySelector('.setuprail .raillist').contains(q);}"))
     everything = shown(pg)
@@ -96,7 +96,7 @@ with sync_playwright() as p:
     ck("and the rail SAYS so rather than emptying silently",
        pg.eval_on_selector("[data-railnone]", "e=>!e.hidden && e.textContent.trim()"))
 
-    print("\n── 4 · a match inside a FOLDED group is still found (§101.14) ──")
+    print("\n── 4 · a match inside a FOLDED group is still found (§108.14) ──")
     type_q(pg, "")
     # Fold the group that holds Branding, then search for it.
     pg.evaluate("""()=>{const h=document.querySelector('.rgroup[data-railgrp=\\"look\\"]');

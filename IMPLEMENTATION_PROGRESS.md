@@ -6,8 +6,8 @@ version (rules A2 / A11, changed 2026-08-20) — those go only when asked for.
 
 **Where it runs:** Vercel, production tracks `main`. Static files plus two
 serverless functions (`/api/state`, `/api/auth`) against Neon Postgres.
-**Latest version:** v3.28 shipped (live) · **v3.29 in progress on the branch**
-**Last updated:** 2026-08-25
+**Latest version:** v3.31 shipped (live) · **v3.32 in progress on the branch**
+**Last updated:** 2026-08-26
 **Sign in as:** `SMO` / `1234` — a password change is forced at once (§43.1,
 reversing §19.4).
 **Direction:** rebuilding on the HR_ERP stack (§20, decided 2026-08-20).
@@ -53,6 +53,125 @@ Nothing proceeds past this line without an answer.
 ---
 
 ## Built and verified
+
+### v3.32 — the onboarding tour (§107, spec 017)
+
+A first-sign-in guided tour on demo data: the page dims, what matters stays
+lit — the one button that says where you are, or a section button together
+with its content — and a short card explains it. **Two stories** (strategy
+custodian; unit / function owner), told wherever the person actually works,
+on a unit or on a function. Next and Back only; **one exit** through the ×,
+which asks *Don't show again* or *Skip for now* with a way back for a stray
+press. Replay from the Knowledge base. Memory in the browser only.
+
+Settled over **four reviewed revisions of a working mockup** before a line of
+`src/` was touched — and three of the five decisions are reversals of
+something drawn first, none of which could have been argued in the abstract:
+the interactive click-the-real-button tour was built and then reversed
+(§107.2), Skip tour was removed in favour of the × asking (§107.3), and the
+spotlight narrowed from the whole navigation row to the one button that says
+where you are (§107.4).
+
+Built with `src/tour.js` + `tour.css`, mounted outside every region `paint()`
+rewrites, holding selectors rather than nodes, navigating by pressing the
+platform's own controls, and reading roles through the platform's own
+`personRoles()`. `src/checks/tour.py` walks every story as every role —
+custodian on a unit AND on a function, owner of a unit AND head of a
+function — and was **proved able to fail before its green run was believed**
+(§107.10); the first deliberate break was a no-op and caught nothing, which
+is §94.5's own fault repeated.
+
+Found by measuring rather than reasoning: a step that disagreed with itself
+once a function walked it (§107.7), a tenant's label inflected into *"the
+pillarss"* (§107.8), and a contrast measurement proved real by wrecking the
+card's text and watching it report 1.6:1.
+
+**Waiting on Islam:** the owner story's copy. The custodian's is his, word
+for word off the signed-off mockup; the owner's is mine until he has read it.
+### v3.30 — reordering comes back (§101), and focus gets a switch (§102)
+
+Two small independent changes, both agreed in words first.
+
+**§101 — reordering comes back**, reversing §94.3. `mayArrange()` is a separate
+rule, not a widening of the authoring gate: the plan's order is the unit's, its
+words stay the office's. BU owner, strategy custodian, function head; never a
+contributor. `lib/authorize.js` learned to tell a reorder from a rewrite. The
+control is up-down arrows in the pen's slot — Islam's pick over the grip mark.
+
+**§102 — focus measures get a switch.** Off hides every surface and keeps every
+mark; on restores them. Stored as an absence (`GROUP.focusOff`), so an unasked
+tenant and one switched off and on again are byte-identical. The switch is the
+SMO's alone while marking stays the CEO's, and the page carrying it survives
+being switched off (§61).
+
+**The bug worth remembering:** the switch was wired, the rule was written, and
+flipping it did nothing — `worldOf()` and `W()` are **two allow-lists, one
+behind the other**, and a group key must be named in both. Silent, and in the
+safe-looking direction. Found by driving the page.
+
+**Verified:** test-authorize 165 → **190, 0 failed** · new
+`src/checks/plan-arrange.py` and `src/checks/focus-switch.py` **ALL CLEAR** ·
+qa.py clean · all four failure modes proved to fail before being trusted.
+
+### v3.32 — the plan's own shape, one row, and a function that submits (§103–§106)
+
+Four sections of one thread: the project tables rethought from the plan
+outwards, then the two things that thread turned up.
+
+- **§103 · The plan's own shape.** A milestone keeps a **name and** a
+  description; a deliverable gets a **due date** back (some land before the
+  project ends). Dates are read, never refused — `Done` and `Pending` in a
+  due-date column are **named as what they are**.
+- **§104 · One table, one row shape.** §99's split is undone for a better
+  reason: giving a deliverable a real direction (`=`) and target (`Y/N`) means
+  the cells it left empty now have answers. Reporting is **Not started / In
+  progress / Delivered**, the per-cent typing itself at both ends. The score
+  column is **Performance** on deliverables and outcomes, **Progress** on
+  milestones — `%` is a unit, not a name.
+- **Not due is a label, not a lock** (§104.8). The comment said so from the day
+  it was written and the code did the opposite: a not-due row had its picker
+  **replaced** by a word, so reporting early was the one act the pane refused.
+- **An In progress with no number is not nought** (§104.10). It read **0**, so
+  the average counted it and a project's figure fell the instant a dropdown
+  changed. It leaves the average now and the row is marked *Needs a %*.
+- **§105 · A supporting function submits**, and everything except the button
+  was already built — the server has carried an explicit `fn:` branch since
+  spec 006. The dot on that tab had been asking for a submission nobody could
+  make. It refuses on a row owing a per-cent or a red figure with no note, and
+  the SMO's cycle board carries the functions.
+- **§106 · What the merge does to a plan already uploaded.** Nothing is
+  deleted. **Execution rises 8–27 points on every capability**, because an In
+  progress milestone stops counting as nought — so the card now prints
+  `5 of 12 milestones · 2 not counted yet`. And a bad due date in a plan
+  **already stored** is finally noticed, named by value and row, with the count
+  on the rail.
+
+**Verified:** `src/checks/project-tables.py` all passed, every new assertion
+proved able to fail first · test-authorize **184, 0 failed** · qa.py clean ·
+main's `plan-arrange.py` and `office-chat.py` ALL CLEAR against the merged
+build. **Not run: migration 024 against a real Postgres** — score-preserving by
+construction, formula parity asserted, SQL never executed against a live schema.
+
+### v3.30 — reordering comes back, as its own grant (§101)
+
+Islam is giving arrangement back to unit people, reversing §94.3.
+
+- **`mayArrange()` is a separate rule**, not a widening of the authoring gate —
+  the order of a plan is the unit's; its words stay the office's.
+- **Who:** BU owner, strategy custodian, supporting function head. Never a
+  contributor; a group or company CEO only if they hold one of those.
+- **The authoriser learned a new shape.** `same(idsOf(a), idsOf(b))` is an
+  ordered comparison, which is why §94.3's drags were refused silently.
+  `reordered()` answers by set and classifies as `arrange`.
+- **The control** is up-down arrows in the pen's slot — Islam's pick over the
+  grip mark — and is never drawn beside a pen. Settled from a mockup made of
+  the real platform.
+- Performance and Reporting needed nothing: the order **is** the array.
+
+**Verified:** test-authorize 165 → **181, 0 failed** · new
+`src/checks/plan-arrange.py` **ALL CLEAR** (five viewers, both ends, the button
+pressed, 0 → 13 handles) · qa.py clean · both failure modes proved to fail
+before being trusted.
 
 ### v3.29 — the corner, corrected again (§100.4, §100.5)
 

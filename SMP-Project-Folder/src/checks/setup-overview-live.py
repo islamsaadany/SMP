@@ -1,4 +1,4 @@
-"""Setup · Overview: the three rows that only exist when there is a server (§101.10).
+"""Setup · Overview: the three rows that only exist when there is a server (§108.10).
 
 `checks/setup-overview.py` covers the two attention rows that live in the state
 graph, and asserts the other three ABSENT — which is the right assertion over
@@ -13,7 +13,7 @@ asserts the thing that actually matters about each: **the number the Overview
 prints is the number its source answered with**, not a number this file knows.
 
 AND IT ASSERTS THE THREE-STATE CONTRACT, which is the reason the code is
-written the way it is (§93, §101.10). A count has three answers — a number,
+written the way it is (§93, §108.10). A count has three answers — a number,
 zero, and "we have not asked" — and the two that are not numbers must look
 different from each other: nothing waiting says so, and not-yet-asked draws
 nothing at all. A stub that answers 0 and a stub that refuses must therefore
@@ -24,6 +24,17 @@ Run: SMP_CHROME=... python3 qa-run.py checks/setup-overview-live.py
 """
 import json, pathlib, threading, http.server, socketserver
 from playwright.sync_api import sync_playwright
+
+# ── THE TOUR IS NOT WHAT THIS FILE MEASURES (§107, §108.16) ──────────────
+# The onboarding tour auto-opens for a first-time viewer over HTTP, and its
+# dim layer covers the page — so every click here lands on `#tdim` and times
+# out. Suppressed as a RETURNING VIEWER would have it (the tour's own
+# "Skip for now" session flag), never by deleting or disabling the tour:
+# the tour has its own check, and a suppression that reached into its
+# internals would be this file quietly asserting the tour away.
+def _no_tour(pg):
+    pg.add_init_script("try{sessionStorage.setItem('smp.tour.later','1');}catch(e){}")
+
 
 ROOT = pathlib.Path(__file__).resolve().parents[3]
 HTML = (ROOT / "SMP-Project-Folder/src/strategy-management-platform.html").read_bytes()
@@ -148,6 +159,7 @@ def rows(pg):
 with sync_playwright() as p:
     b = p.chromium.launch()
     pg = b.new_page(viewport={"width": 1600, "height": 1000})
+    _no_tour(pg)
     pg.on("pageerror", lambda e: errs.append("PAGEERROR: " + str(e)))
     pg.on("console", lambda m: errs.append(m.text) if m.type == "error" else None)
 

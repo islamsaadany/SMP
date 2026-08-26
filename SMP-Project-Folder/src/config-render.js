@@ -883,7 +883,7 @@ function saidWhereNote(p, editable){
    separately and simply has nothing to show from a file. */
 var SAIDWHERE = null;  /* key -> the `at` they picked, once asked */
 
-/* ── THE THREE COUNTS THE OVERVIEW AND THE REGISTER SHARE (§101.10) ──
+/* ── THE THREE COUNTS THE OVERVIEW AND THE REGISTER SHARE (§108.10) ──
    NULL IS "WE HAVE NOT ASKED", AND IT IS NOT ZERO. Both of these depend on a
    server fact fetched separately from the state graph, so there are three
    answers and not two: a number, "nothing waiting", and "we do not know yet".
@@ -1079,7 +1079,7 @@ function renderPeople(){
   var reach = live ? passwordReach() : [];
   var noCust = unitsWithoutCustodian();
   /* A FAILED ASK IS NOT AN ANSWER (§93), and the test now lives in
-     noPasswordCount() so the Overview counts what this chip counts (§101.10).
+     noPasswordCount() so the Overview counts what this chip counts (§108.10).
      `|| 0` is the coercion this page wants and the Overview does not: here a
      null means "draw no chip", there it means "draw no row". */
   var noPw = noPasswordCount() || 0;
@@ -2947,13 +2947,32 @@ function renderKB(){
       ["mail","Email"]
     ].map(function(x){ return '<a href="#kb-' + x[0] + '">' + x[1] + '</a>'; }).join("") + '</div>';
 
+  /* ── THE TOUR'S ONE WAY BACK IN (spec 017) ───────────────────────
+     Explanation lives here (v3.5), so the replay of the guided tour lives
+     here too rather than growing furniture of its own on a page somebody
+     visits for another reason (§90).
+
+     ABSENT, NEVER DISABLED, when this viewer's roles match no story: a
+     button that explains it cannot help you is worse than no button, and
+     there is nothing the person could do to earn it. */
+  var tourStory = (typeof TOUR !== "undefined") ? TOUR.storyFor(viewer()) : null;
+  var tourBlock = tourStory
+    ? '<div class="kb-sec" id="kb-tour"><h3>The guided tour</h3>' +
+      '<p class="kb-p">A short walk through the platform on the worked example — ' +
+      'the demo data, labelled the whole time, so nothing you see belongs to your ' +
+      'own tenant and nothing can be saved. It opens by itself the first time you ' +
+      'sign in; this is how you see it again.</p>' +
+      '<p><button type="button" class="editbtn" data-tour-replay="' + esc(tourStory) +
+      '">Start the tour</button></p></div>'
+    : '';
+
   return cfgHead("Knowledge base",
       ['<span class="pill kind">Everyone</span>', secs.length + ' sections'],
       null, false) +
     '<p class="kb-lede">How the platform works, in one place. This grows — anything we ' +
       'settle that a reader would need to know belongs here rather than in a note under ' +
       'the screen it happens to affect.</p>' +
-    toc + '<div class="kb">' + secs.join("") + '</div>';
+    toc + '<div class="kb">' + tourBlock + secs.join("") + '</div>';
 }
 
 
@@ -2996,6 +3015,32 @@ function renderBandsExtra(){
    against the number rather than the name alone. */
 var FSET = { unit:"mobile" };
 
+/* THE SWITCH LIVES ON THE PAGE IT GOVERNS (§102), which is §90's shape and
+   §98's row: five chat settings went into a dropdown on the Messages page
+   rather than a Setup page of their own, because a switch behind its own rail
+   entry is a door behind a door (§32).
+
+   AND THE PAGE STAYS REACHABLE WHILE IT IS OFF. §61's trap, exactly: if
+   turning focus off removed the page that carries the switch, the only way to
+   turn it back on would be to turn it on first. So the page always renders,
+   and while off it says what is being kept. */
+function focusSwitch(){
+  var on = focusOn();
+  var marks = Object.keys(CYCLE.focus || {}).length;
+  if (!inOffice()) {
+    return on ? '' : '<div class="note">Focus measures are switched off for this ' +
+      'platform. The Strategy Office can turn them back on.</div>';
+  }
+  return '<div class="phead2"><div class="hright">' +
+    '<button class="editbtn' + (on ? ' on' : '') + '" data-focusswitch="' + (on ? "0" : "1") + '">' +
+      (on ? "Focus measures are on" : "Focus measures are off") + '</button>' +
+    '</div></div>' +
+    (on ? '' : '<div class="note">Nothing is shown anywhere in the platform, and ' +
+      '<b>' + marks + ' ' + plural(marks, "mark") + '</b> ' +
+      (marks === 1 ? "is" : "are") + ' being kept. Turning it back on restores ' +
+      (marks === 1 ? "it" : "them") + '.</div>');
+}
+
 function renderFocusSetup(){
   /* Marking is the CEO's and the SMO's — a rule now, not a cell (§37).
      mayMarkFocus() carries the lock too, so there is one gate, not two. */
@@ -3003,7 +3048,7 @@ function renderFocusSetup(){
   var u = UNITS[FSET.unit];
 
   var pick = function(m, src){
-    var on = isFocus(m.id);
+    var on = focusMarked(m.id);   /* the RAW map, never isFocus (§102) */
     return '<div class="pick ' + (on ? "on" : "off") + '">' +
       (editable
         ? '<button class="fmark-btn' + (on ? ' on' : '') + '" data-focus="' + m.id + '" ' +
@@ -3038,7 +3083,8 @@ function renderFocusSetup(){
         esc(UNITS[k].name) + (c ? "  \u2014 " + c + " marked" : "") + '</option>';
     }).join("") + '</select>';
 
-  return '<div class="kv"><span class="pill kind">CEO &amp; SMO</span>' +
+  return focusSwitch() +
+    '<div class="kv"><span class="pill kind">CEO &amp; SMO</span>' +
       '<span class="pill ' + (CYCLE.locked ? "none" : "good") + '">' +
         (CYCLE.locked ? "Locked for the cycle" : "Open for marking") + '</span>' +
       '<span class="pill kind">reward begins at ' + CYCLE.rewardAt + '%</span></div>' +
@@ -3937,7 +3983,7 @@ function renderArchives(){
     '</tr></thead><tbody>' + rows + '</tbody></table></div>');
 }
 
-/* ══ SETUP · OVERVIEW (§101.10, spec 016) ════════════════════════════════
+/* ══ SETUP · OVERVIEW (§108.10, spec 018) ════════════════════════════════
    Islam, on the makeover: Option A, and the gear lands here.
 
    THE PAGE ANSWERS ONE QUESTION — *is anything waiting on me?* — and before it
@@ -3956,7 +4002,7 @@ function renderArchives(){
 
    NULL DRAWS NOTHING; ZERO IS AN ANSWER. Three of these depend on a server
    fact fetched outside the state graph, so "we have not asked" is a real third
-   state and it is not "nothing is waiting" (§93, §101.10). A row whose count
+   state and it is not "nothing is waiting" (§93, §108.10). A row whose count
    is null is absent — never a 0, and never a spinner, because a page that
    shows five zeroes while it is thinking has told somebody they are clear when
    it does not know.
@@ -3993,7 +4039,7 @@ function attentionRows(){
 }
 
 /* The label a row's destination wears in the rail, asked of the rail's own
-   list rather than written out again — rename a page and this follows (§101.3
+   list rather than written out again — rename a page and this follows (§108.3
    renamed three of them in one afternoon). */
 function attnDestLabel(k){
   var d = (typeof setupDefs === "function" ? setupDefs() : []).filter(
@@ -4003,12 +4049,12 @@ function attnDestLabel(k){
 
 var OVQUEUE = null;   /* {waiting,flagged} | {__error} | null — asked once per visit */
 
-/* ── THE SAME COUNTS, ON THE RAIL (§101.15) ────────────────────────────
+/* ── THE SAME COUNTS, ON THE RAIL (§108.15) ────────────────────────────
    A pill beside a rail entry says "there is something here for you" without
    opening it, which is HR_ERP's practice and the last piece of the makeover.
    It is deliberately LAST: a pill is only worth drawing once the count behind
    it is real, and until the Overview existed there was no shared, agreed count
-   to draw — a rail badge computed on its own would have been the drift §101.10
+   to draw — a rail badge computed on its own would have been the drift §108.10
    was built to prevent, in the one place nobody would ever see it disagree.
 
    SO IT IS THE OVERVIEW'S OWN LIST, SUMMED BY DESTINATION. Several rows point
@@ -4035,7 +4081,7 @@ function renderOverview(){
   var att = attentionRows();
 
   /* THE CYCLE STRIP IS THE SAME FOUR NUMBERS THE CYCLE PAGE OPENS WITH, from
-     cycleTotals() (§101.9) — read here and acted on there, which is why the
+     cycleTotals() (§108.9) — read here and acted on there, which is why the
      strip carries a way through rather than any control of its own. */
   var strip =
     '<div class="ovcycle">' +
@@ -4085,6 +4131,12 @@ function renderOverview(){
    The SMO can close with gaps: waiting for the last number means never
    closing, and a cycle that never closes writes no history. Unreported items
    close as unreported and stay visibly so \u2014 a stronger prompt than an email. */
+/* "1 need notes" was on the unit half for as long as it has existed and went
+   unnoticed while it was rare; §105 put it on seven more rows and it stopped
+   being rare. ONE function, because the two halves saying it differently is
+   the fault this board was just built to avoid (§53.5). */
+function notesOwed(n){ return n === 1 ? "1 needs a note" : n + " need notes"; }
+
 function renderCycle(){
   var can = grant("c_cycle") === "edit";
   var open = REVIEW.state === "open";
@@ -4109,12 +4161,83 @@ function renderCycle(){
       '<td class="num">' + by.obj[0] + '/' + by.obj[1] + '</td>' +
       '<td class="num">' + by.mea[0] + '/' + by.mea[1] + '</td>' +
       '<td class="num">' + by.tac[0] + '/' + by.tac[1] + '</td>' +
-      '<td class="cc">' + (miss ? '<span class="badge b-late">' + miss + ' need notes</span>' : '') + '</td>' +
+      '<td class="cc">' + (miss ? '<span class="badge b-late">' + notesOwed(miss) + '</span>' : '') + '</td>' +
       '<td class="cc"><span class="badge b-' + st.key + '">' + st.label + '</span></td></tr>';
   }).join("");
 
-  /* ONE ANSWER, TWO PAGES (§101.9). Lifted into config-data.js so the Overview
-     summarises this page rather than recomputing it. */
+  /* ── THE FUNCTIONS ARE ON THE BOARD TOO (§105) ────────────────────
+     A submission the SMO cannot see anywhere is half a feature. They go in the
+     SAME table rather than a second one, because "who has reported" is one
+     question -- but a function's three counts are its own vocabulary (key
+     objectives, deliverables and outcomes, milestones) and a unit's are not,
+     so the half opens with a band and a quiet column strip. §99's answer to
+     exactly this problem, and the reason nothing about the unit half changes:
+     the two vocabularies never share a heading. */
+  var fnKeys = Object.keys(FUNCTIONS).filter(function(fk){
+    return fnShows(fk) && !fnPlansInPillars(FUNCTIONS[fk]) && capsOfFunction(fk).length;
+  });
+  var fnRows = fnKeys.map(function(fk){
+    var c = fnReportedCount(fk), st = fnState(fk);
+    var f = FUNCTIONS[fk] || {};
+    /* Custodian first, head second -- the same order the unit row asks in, so
+       the board names the same kind of person on both halves (§53.5). */
+    var who = personName(f.custodian) || personName(f.head) || "\u2014";
+    var pctD = c.total ? Math.round(c.done / c.total * 100) : 0;
+    var miss = fnMissingNotes(fk).length;
+    /* THE THREE COLUMNS ARE THREE LAYERS, NOT TWO VOCABULARIES (§105.2).
+       The first drawing gave the function half its own column strip and it
+       COLLIDED: the strip's widths come from the table's own <thead> -- a
+       unit's words -- and "DELIVERABLES" alone is wider than the Measures
+       column at every width from 1920 down, so it ran over Milestones with
+       nothing to stop it. Wrapping could not save it; a word that does not fit
+       does not fit.
+
+       The better answer was underneath the problem. A unit's three columns are
+       what we are judged on, what we measure, and the work: objectives,
+       measures, tactics. A function has the same three -- key objectives, its
+       OUTCOMES (a direction, a target and an actual: that is a measure), and
+       its deliverables and milestones (work that happened or did not). Mapped
+       onto the same headings the counts become COMPARABLE down the page, which
+       is more than the strip ever bought, and the vocabulary is named once in
+       the band above where nothing can collide. */
+    var by = { ko:[0,0], mea:[0,0], tac:[0,0] };
+    var deliv = 0, mile = 0;
+    fnAskedItems(fk).forEach(function(x){
+      var slot = x.kind === "objective" ? "ko" : x.kind === "outcome" ? "mea" : "tac";
+      if (x.kind === "deliverable") deliv++;
+      if (x.kind === "milestone") mile++;
+      by[slot][1]++;
+      var got = (x.kind === "deliverable" || x.kind === "milestone")
+        ? statusGiven(x.obj) : (x.obj.actual != null && x.obj.actual !== "");
+      if (got) by[slot][0]++;
+    });
+    var tacTitle = plural(deliv, "deliverable") + " \u00b7 " + plural(mile, "milestone") +
+      ", asked this cycle";
+    return '<tr><td><b>' + esc(f.name) + '</b></td>' +
+      '<td class="why" style="margin:0">' + esc(who) + '</td>' +
+      '<td><div class="repcell"><span class="repbar' + (pctD < 100 ? " part" : "") + '">' +
+        '<i style="width:' + pctD + '%"></i></span>' +
+        '<span class="mono why" style="margin:0">' + c.done + '/' + c.total + '</span></div></td>' +
+      '<td class="num" title="Key objectives">' + by.ko[0] + '/' + by.ko[1] + '</td>' +
+      '<td class="num" title="Outcomes asked this cycle">' + by.mea[0] + '/' + by.mea[1] + '</td>' +
+      '<td class="num" title="' + esc(tacTitle) + '">' + by.tac[0] + '/' + by.tac[1] + '</td>' +
+      '<td class="cc">' + (miss ? '<span class="badge b-late">' + notesOwed(miss) + '</span>' : '') + '</td>' +
+      '<td class="cc"><span class="badge b-' + st.key + '">' + st.label + '</span></td></tr>';
+  }).join("");
+  if (fnRows) {
+    /* `dxband` is §99's own rule, orphaned when §99.7 removed the split that
+       used it (§24 would have had it deleted). It is the right shape for
+       exactly this and it is used again. Its `em` slot carries the vocabulary,
+       which is the one place in this table wide enough to hold it. */
+    fnRows = '<tr class="dxband"><th colspan="8">Supporting functions' +
+        '<em>' + plural(fnKeys.length, "function") + ' reporting in capabilities \u2014 ' +
+        'key objectives, outcomes, and deliverables and milestones</em></th></tr>' + fnRows;
+  }
+
+  /* ONE ANSWER, TWO PAGES (§108.1). The totals were computed inline here and
+     the Overview opens on the same four numbers; cycleTotals() in
+     config-data.js is now the only place they are worked out, and it counts
+     the FUNCTIONS this page put on the board (§105) as well as the units. */
   var t = cycleTotals();
 
   var head =
@@ -4213,7 +4336,7 @@ function renderCycle(){
       '<div class="cfg"><table><thead><tr><th style="width:17%">Business unit</th><th>Reporting</th>' +
         '<th style="width:20%">Progress</th><th class="cc">Objectives</th><th class="cc">Measures</th>' +
         '<th class="cc">Tactics</th><th class="cc">Notes</th><th class="cc">State</th></tr></thead>' +
-        '<tbody>' + rows + '</tbody></table></div>' +
+        '<tbody>' + rows + fnRows + '</tbody></table></div>' +
       (open
         ? '<div class="note"><b>A cycle can be closed with gaps.</b> Waiting for the last number ' +
           'means never closing, and a cycle that never closes writes no history. Whatever is ' +

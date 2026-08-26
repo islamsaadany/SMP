@@ -26,6 +26,17 @@ questions are actually answered.
 import json, pathlib, threading, http.server, socketserver, time
 from playwright.sync_api import sync_playwright
 
+# ── THE TOUR IS NOT WHAT THIS FILE MEASURES (§107, §108.16) ──────────────
+# The onboarding tour auto-opens for a first-time viewer over HTTP, and its
+# dim layer covers the page — so every click here lands on `#tdim` and times
+# out. Suppressed as a RETURNING VIEWER would have it (the tour's own
+# "Skip for now" session flag), never by deleting or disabling the tour:
+# the tour has its own check, and a suppression that reached into its
+# internals would be this file quietly asserting the tour away.
+def _no_tour(pg):
+    pg.add_init_script("try{sessionStorage.setItem('smp.tour.later','1');}catch(e){}")
+
+
 ROOT = pathlib.Path(__file__).resolve().parents[3]
 HTML = (ROOT / "SMP-Project-Folder/src/strategy-management-platform.html").read_bytes()
 SEED = json.loads((ROOT / "db/seed-state.json").read_text())
@@ -146,6 +157,7 @@ FILE_URL = "file://" + str(ROOT / "SMP-Project-Folder/src/strategy-management-pl
 with sync_playwright() as p:
     b = p.chromium.launch()
     pg = b.new_page(viewport={"width": 1400, "height": 950})
+    _no_tour(pg)
     pg.on("console", lambda m: errs.append(m.text) if m.type == "error" else None)
     pg.on("pageerror", lambda e: errs.append("pageerror: " + str(e)))
 
@@ -299,6 +311,7 @@ with sync_playwright() as p:
 
     # NOT FROM `file://`, WHERE THERE IS NO SERVER TO CARRY A MESSAGE.
     pg3 = b.new_page(viewport={"width": 1400, "height": 950})
+    _no_tour(pg3)
     pg3.goto(FILE_URL, wait_until="networkidle")
     pg3.wait_for_timeout(2500)
     ck("no bubble with no server behind the page",
@@ -441,6 +454,7 @@ with sync_playwright() as p:
     print("\n7 · a session the server refuses")
     CHAT["status"] = 401
     pg2 = b.new_page(viewport={"width": 1400, "height": 950})
+    _no_tour(pg2)
     pg2.goto(URL, wait_until="networkidle")
     pg2.wait_for_timeout(2500)
     ck("no bubble for somebody the server turned away",

@@ -10,7 +10,8 @@
 
      · with the switch off, the model is never called at all
      · `answered: true` writes a message and takes the thread out of Waiting
-     · `answered: false` writes NOTHING and leaves it Waiting
+     · `answered: false` says so in one line of the PRODUCT's words, never
+       the model's, and leaves it Waiting (§119)
      · every failure — timeout, refusal, malformed JSON, a missing key —
        leaves the person's message stored and the thread Waiting
      · a bot message is marked as one and never wears a person's name
@@ -53,8 +54,12 @@ const stub = http.createServer(function (req, res) {
     }
     if (MODE === "empty") return reply(200, { candidates: [] });
     if (MODE === "hang") return;                       /* never answers: the timeout path */
+    /* THE MODEL'S WORDS ON A HANDOFF ARE A TRAP, and the stub sets it (§104).
+       A provider that says something helpful-sounding while answering false is
+       exactly the case `answered` exists to decide — if this string ever
+       reaches the thread, the flag has stopped being what decides. */
     const out = MODE === "handoff"
-      ? { answered: false, reply: "", source: "" }
+      ? { answered: false, reply: "The office would know — ask the office.", source: "" }
       : { answered: true, reply: "From your key objectives, each actual against its target.",
           source: "[headline]" };
     reply(200, { candidates: [{ content: { parts: [{ text: JSON.stringify(out) }] } }] });
@@ -86,9 +91,11 @@ const stub = http.createServer(function (req, res) {
   }
   async function after() {
     const t = (await c.query("SELECT waiting FROM chat_threads WHERE person_key=$1", [WHO.key])).rows[0];
-    const m = (await c.query("SELECT bot, source, from_office, by_name, body FROM chat_messages " +
+    const m = (await c.query("SELECT bot, handoff, source, from_office, by_name, body FROM chat_messages " +
                              "WHERE person_key=$1 ORDER BY id", [WHO.key])).rows;
-    return { waiting: !!(t && t.waiting), msgs: m, bots: m.filter(function (x) { return x.bot; }).length };
+    return { waiting: !!(t && t.waiting), msgs: m,
+             bots: m.filter(function (x) { return x.bot && !x.handoff; }).length,
+             said: m.filter(function (x) { return x.handoff; }).length };
   }
   /* The one thing `say` does with the assistant, run exactly as `say` runs it. */
   async function run(cfg) {
@@ -97,6 +104,15 @@ const stub = http.createServer(function (req, res) {
     if (cfg.assistant) {
       const out = await assistant.ask({ kb: kb, question: "a question", history: [], who: "the head of a business unit", labels: {} });
       a = (out && out.ok) ? out : null;
+      /* §119, run exactly as `say` runs it. A HANDOFF SAYS SO; a failure — `a`
+         null — still writes nothing at all, and section 4 is what holds that
+         line, because telling somebody the assistant considered their question
+         when it was never asked is a lie nobody can see (§112.2). */
+      if (a && !a.answered) {
+        await c.query("INSERT INTO chat_messages (person_key, from_office, bot, handoff, by_key, by_name, body) " +
+                      "VALUES ($1,true,true,true,'assistant','Assistant',$2)",
+                      [WHO.key, assistant.HANDOFF_LINE]);
+      }
       if (a && a.answered) {
         await c.query("INSERT INTO chat_messages (person_key, from_office, bot, by_key, by_name, body, source) " +
                       "VALUES ($1,true,true,'assistant','Assistant',$2,$3)", [WHO.key, a.reply, a.source]);
@@ -125,20 +141,41 @@ const stub = http.createServer(function (req, res) {
      st.msgs.some(function (m) { return m.source === "headline"; }), st);
   ck("and it leaves the office's Waiting queue", st.waiting === false, st);
 
-  console.log("\n3 · a handoff writes nothing and leaves it waiting");
+  /* §119 REVERSES THE FIRST HALF OF THIS SECTION'S OLD TITLE. A handoff used
+     to write nothing, and the person was left looking at a screen identical to
+     the one they would see if the assistant had never run — §116's fault one
+     layer in. It SAYS SO now; what has not changed, and is what the rest of
+     this section holds, is that the conversation stays in the office's queue. */
+  console.log("\n3 · a handoff says so, and still leaves it waiting");
   MODE = "handoff";
   st = await run({ assistant: true });
-  ck("no message was written", st.bots === 0, st);
+  ck("the person is told the assistant could not answer", st.said === 1, st);
+  ck("and it is not counted as an answer", st.bots === 0, st);
   ck("the thread is still waiting", st.waiting === true, st);
   ck("and the person's own words are still there",
-     st.msgs.length === 1 && st.msgs[0].body === "a question", st);
+     st.msgs.length === 2 && st.msgs[0].body === "a question", st);
+  ck("in the product's own words, one place", st.msgs.some(function (m) {
+    return m.handoff && m.body === assistant.HANDOFF_LINE; }), st);
+  /* THE MODEL'S WORDS CANNOT REACH A CALLER ON A HANDOFF, and that is enforced
+     one layer down rather than by whoever writes the INSERT — so it is asserted
+     THERE, where it can actually fail. Asserting it on the stored row instead
+     was a no-op: `ask()` had already blanked the reply, so the assertion passed
+     however the caller behaved (§94.5 — an assertion that cannot fail is not
+     one, and this file's own break test is what showed it). */
+  const said = await assistant.ask({ kb: kb, question: "x", history: [], who: "somebody", labels: {} });
+  ck("a handoff carries no words from the model, whatever it sent",
+     said.ok === true && said.answered === false && said.reply === "" && said.source === null, said);
 
   console.log("\n4 · EVERY FAILURE LANDS ON THE CHAT AS IT WORKED BEFORE");
   for (const m of ["refuse", "notfound", "garbage", "empty"]) {
     MODE = m;
     st = await run({ assistant: true });
+    /* NOTHING AT ALL, the handoff line included (§119). A failure is not a
+       decision, and a deployment with no key must not tell people the
+       assistant looked at their question and gave up. */
     ck("`" + m + "` writes nothing and leaves it waiting",
-       st.bots === 0 && st.waiting === true && st.msgs.length === 1, { mode: m, st: st });
+       st.bots === 0 && st.said === 0 && st.waiting === true && st.msgs.length === 1,
+       { mode: m, st: st });
   }
 
   MODE = "hang";

@@ -145,20 +145,6 @@ var CHAT = (function(){
      office's inbox. One function, so the two can never start disagreeing
      about what a message looks like. */
   function msgHtml(m, mineIsOffice, showFlag){
-    /* A HANDOFF IS NARRATED, NOT SPOKEN (§119). It is not the office's answer
-       and it is not the assistant's either — it is the product saying what
-       happened, so it wears no name, no time and no bubble, and reads as the
-       quiet line it is. The office sees the same line in the thread, which is
-       the point: it says the assistant looked before this reached them.
-
-       NO WAY OUT ON IT (spec 016 §4.3). That button exists for a confident
-       WRONG answer, where the conversation has already left the queue and the
-       person would otherwise be stranded. Here the conversation is still
-       waiting and somebody is already coming — a control that asks for what is
-       happening anyway is worse than no control (§62, §110). */
-    if (m.handoff) {
-      return '<div class="chsys">' + esc2(m.body) + "</div>";
-    }
     var mine = mineIsOffice ? m.from_office : !m.from_office;
     /* AN ASSISTANT'S ANSWER NEVER WEARS A COLLEAGUE'S NAME (§104). This
        product spends a great deal of care on who is authorised to say what —

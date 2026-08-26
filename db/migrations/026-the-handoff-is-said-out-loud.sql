@@ -1,0 +1,21 @@
+-- @phase: pre
+-- ══ A HANDOFF WAS INVISIBLE TO THE PERSON WHO ASKED ═══════════════════════
+-- Islam, with the assistant on, a working key and the switch showing ON:
+-- "nothing happens at all."
+--
+-- §104 wrote nothing on a handoff, deliberately: a bot message saying "the
+-- office will get back to you" would read as an answer, and the conversation
+-- would drop out of the office's queue with nobody coming. That reasoning is
+-- still right, and it left the person seeing NOTHING — which is exactly what
+-- they would see if the assistant had never been asked at all.
+--
+-- §116 made that failure visible to the OPERATOR and left it invisible to the
+-- person asking. This is the same lesson one layer in: the two states "it
+-- tried and could not" and "it was never asked" must not look identical.
+--
+-- A COLUMN, NOT A CONVENTION, for §104's own reason: the alternative is a
+-- reserved body string or a sentinel `source`, and both are a name doing an
+-- identifier's job (§87). A handoff is a bot message that is NOT an answer, so
+-- `bot` stays TRUE and this says which kind it is — and the thread stays
+-- WAITING, so the office's queue is unchanged and somebody still comes.
+ALTER TABLE chat_messages ADD COLUMN IF NOT EXISTS handoff BOOLEAN NOT NULL DEFAULT FALSE;

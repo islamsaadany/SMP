@@ -52,7 +52,7 @@ async function signIn(who, password) {
 (async function () {
   const pool = io.getPool(pg);
   const client = await pool.connect();
-  let hadSmo = false;
+  let hadSmo = false, hadChat = null;
   try {
     await io.ensureReady(client);
 
@@ -67,6 +67,24 @@ async function signIn(who, password) {
       "INSERT INTO credentials (person_key, password_hash, must_change) VALUES ($1,$2,false)",
       [OTHER.key, await auth.hashPassword(OTHER.pw)]);
     await client.query("DELETE FROM login_attempts");
+    /* THE ASSISTANT IS SOMEBODY ELSE'S SETTING, AND IT CHANGES EVERY COUNT IN
+       THIS FILE (§119.4). This tests the HUMAN path — she writes, the office
+       replies — and with the assistant on and a key present her message comes
+       back with a second row beside it and her conversation is no longer
+       waiting, so five assertions fail for a reason that has nothing to do
+       with what any of them is about.
+
+       It cost an hour of hunting a race that did not exist: the run after a
+       restart failed and the next passed, because this file's own settings
+       section happens to clear the switch on its way past. A test that reads
+       a setting it does not control is a test whose result depends on what
+       somebody did on the screen an hour ago. Put back in the `finally`. */
+    hadChat = (await client.query(
+      "SELECT extra->'chat' AS c FROM org WHERE id = 1")).rows[0];
+    hadChat = hadChat ? hadChat.c : null;
+    await client.query(
+      "UPDATE org SET extra = jsonb_set(COALESCE(extra,'{}'::jsonb), '{chat}', " +
+      "COALESCE(extra->'chat','{}'::jsonb) || '{\"assistant\":false}'::jsonb, true) WHERE id = 1");
     /* A TEST THAT LEAVES STATE BEHIND BREAKS THE NEXT ONE. This writes into the
        office's own conversation on purpose (to prove her thread does not show
        it), so it has to know whether that conversation existed before it ran —
@@ -244,6 +262,16 @@ async function signIn(who, password) {
     await client.query("DELETE FROM credentials WHERE person_key = $1", [OTHER.key]).catch(function(){});
     await client.query("DELETE FROM people WHERE key = $1", [OTHER.key]).catch(function(){});
     await client.query("DELETE FROM login_attempts").catch(function(){});
+    /* The tenant's chat settings back exactly as they were — including absent,
+       which is not the same as `{}` (§50.6: a reader that creates what it
+       looked for puts a phantom change into every save). */
+    if (hadChat === null) {
+      await client.query("UPDATE org SET extra = extra - 'chat' WHERE id = 1").catch(function(){});
+    } else {
+      await client.query(
+        "UPDATE org SET extra = jsonb_set(COALESCE(extra,'{}'::jsonb), '{chat}', $1::jsonb, true) " +
+        "WHERE id = 1", [JSON.stringify(hadChat)]).catch(function(){});
+    }
     client.release();
     await pool.end();
   }

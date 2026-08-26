@@ -1346,6 +1346,41 @@ console errors (in this cloud environment, run it via a wrapper that points Play
   instrumenting the click: no request, no console error, and the button's own
   label unchanged, which is what says *the handler never ran* rather than *the
   request failed*. §96's family, fifth time.
+- **SAYING NOTHING IS NOT A NEUTRAL OUTCOME (§119):** with the assistant on
+  and a working key, Islam got *"nothing happens at all"* — and that was §104
+  working as designed. A handoff wrote NOTHING, on sound reasoning (a sentence
+  would read as an answer and drop the conversation out of the office's queue
+  with nobody coming), and what was never asked is what that looks like from
+  the other end: **identical to the assistant never having been asked.**
+  §116's fault one layer in, on the side §116 did not touch. It is **one line,
+  in the PRODUCT's words and never the model's** — §104 is untouched, because
+  that rule is about the model's sentence never standing in for an answer and
+  `answered` still decides — and **the thread stays WAITING**, so the queue,
+  the Waiting tab and the email chase are unchanged. **NARRATED, NOT SPOKEN**:
+  no name, no time, no bubble, because the two sides of the conversation are
+  the person and the office and a handoff is neither; **and no way out on it**,
+  since that control is for a confident WRONG answer and here somebody is
+  already coming (§62, §110). **A HANDOFF IS A DECISION; A FAILURE IS NOT** —
+  no key, a refusal, a timeout, malformed JSON and the switch off all go on
+  writing nothing at all (§112.2), because telling somebody the assistant
+  considered their question when it never saw it is a lie the operator cannot
+  see. `handoff` is a COLUMN (026) for §104's own reason, and `HANDOFF_LINE`
+  lives in `lib/assistant.js` because two files need it (§53.5). **AND ONE
+  ASSERTION WAS THROWN AWAY FOR BEING UNFALSIFIABLE** — *"never the model's own
+  words"* asked of the stored row, when `ask()` already blanks the reply, so it
+  passed however the caller behaved; asked of `ask()` now (§94.5). **THE CHAT
+  PANEL HAS NEVER BEEN IN THE CONTRAST SWEEP** (§94.11 — invisible over
+  `file://`), so the line was measured by hand: 5.00 light, 6.61 dark, at
+  `--fs-small` because `--fs-micro` is for breadcrumbs and this is a sentence.
+- **A TEST THAT READS A SETTING IT DOES NOT CONTROL IS NOT A TEST (§119.4):**
+  `test-chat.js` failed five assertions after a dev-server restart and passed
+  on the next run, twice — which looks exactly like a race and is not one.
+  **With the assistant on, her message comes back with a second row beside it
+  and her conversation is no longer waiting**, so five assertions about the
+  human path fail for a reason none of them is about; it passed second time
+  because that file's own settings section clears the switch on its way past.
+  It forces the switch off at setup and restores the tenant's settings in the
+  `finally` — **including ABSENT, which is not `{}`** (§50.6).
 - **A STATUS WORD IS A CLAIM, AND PRESENCE IS NOT PROOF (§117):** §116's own
   screen said *The API key · **WORKING*** directly above the provider's *400:
   API key not valid* — two rows contradicting each other, both written by the

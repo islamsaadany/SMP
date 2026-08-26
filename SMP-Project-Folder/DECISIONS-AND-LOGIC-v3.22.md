@@ -15438,3 +15438,114 @@ word.
 states — no key, a key it refuses, a retired model, exhausted quota, a real
 answer — because §116's own lesson is that the parts can each be right while
 the thing is not. Every one lands on the step it belongs to.
+
+
+---
+
+## 119 · A handoff was invisible to the person who asked (v3.37)
+
+> Islam, with the assistant on, a key the provider now accepts and the switch
+> showing ON: *"nothing happens at all."*
+
+### 119.1 Saying nothing is not a neutral outcome
+
+§104 wrote **nothing** on a handoff, and the reasoning was sound: a bot message
+saying *"the office will get back to you"* reads as an answer, and the
+conversation would drop out of the office's queue with nobody coming. So
+`answered` decides, and the model's words are shown only when it is true.
+
+What was never asked is **what that looks like from the other end.** The person
+sees no reply, no acknowledgement, nothing — which is byte-for-byte what they
+would see if the assistant had never been asked at all. Four states already
+looked alike to the office and §116 separated them; this is the same fault one
+layer in, on the side §116 did not touch.
+
+*A failure mode designed to be invisible must still be visible to somebody, and
+"the operator" was only half the answer.*
+
+### 119.2 It is narrated, not spoken
+
+One line, in the **product's** words and never the model's — which does not
+reverse §104, because that rule is about the model's sentence never being
+allowed to stand in for an answer, and `answered` still decides everything. The
+line is fixed text and the thread **stays waiting**, so the office's queue, the
+Waiting tab and the email chase are all exactly as they were.
+
+It wears **no name, no time and no bubble**. The two sides of this conversation
+are the person and the office, and a handoff is neither — it is the product
+saying what happened, so it reads as a break in the conversation rather than a
+turn in it. The office sees the same line in the thread, which is the point: it
+says the assistant looked before this reached them.
+
+**No way out on it.** That control (spec 016 §4.3) exists for a confident
+*wrong* answer, where the conversation has already left the queue and the
+person would otherwise be stranded. Here somebody is already coming, and a
+control asking for what is happening anyway is worse than no control (§62,
+§110).
+
+### 119.3 A handoff is a decision; a failure is not
+
+Only `answered: false` from a model that actually ran gets the line. Every one
+of §112.2's failures — no key, a refusal, a timeout, malformed JSON, the switch
+off — goes on writing **nothing at all**, exactly as the chat worked before the
+assistant existed.
+
+The difference matters: telling somebody the assistant considered their
+question when it never saw it is a lie the operator cannot see, and it would
+mask precisely the faults §116 was built to surface.
+
+`handoff` is a **column** (migration 026), for §104's own reason — the
+alternative is a reserved body string or a sentinel `source`, and both are a
+name doing an identifier's job (§87). And `HANDOFF_LINE` lives in
+`lib/assistant.js`, not beside the `INSERT` that writes it, because `api/chat.js`
+and `scripts/test-assistant.js` both need it and a string written twice drifts
+(§53.5).
+
+### 119.4 A test that reads a setting it does not control
+
+`test-chat.js` failed five assertions on the run after a dev-server restart and
+passed on the next, twice — which looks exactly like a race and is not one.
+**With the assistant on and a key present, her message comes back with a second
+row beside it and her conversation is no longer waiting**, so five assertions
+about the human path fail for a reason none of them is about. It passed on the
+second run because that file's own settings section clears the switch on its
+way past.
+
+It now forces the switch off at setup and puts the tenant's settings back in
+the `finally` — **including absent, which is not the same as `{}`** (§50.6).
+
+*An hour went into hunting a product race that did not exist. A test whose
+result depends on what somebody set on a screen an hour ago is not a test.*
+
+### 119.5 What proves it
+
+- **`scripts/test-assistant.js`** — a handoff writes exactly one row, marked as
+  a handoff and not as an answer, in the product's own words, and the thread is
+  still waiting; every failure still writes nothing at all. Both watched to
+  fail first (2 failures each way).
+- **`checks/office-chat.py` §11** — the line is on screen, narrated rather than
+  spoken, and carries no way out; **and a real answer looks different**, or a
+  build that drew the line for every bot message would pass every assertion
+  above it. Watched to fail: 3 failures with the rendering reverted.
+- **One assertion was thrown away for being unfalsifiable.** *"Never the
+  model's own words"* was written against the stored row — and `ask()` already
+  blanks the reply when `answered` is false, so it passed however the caller
+  behaved. It is asserted on `ask()` now, where it can fail. §94.5, found by
+  this file's own break test rather than by reading.
+- **Measured, not assumed**: the line is 5.00:1 light and 6.61:1 dark, at
+  `--fs-small` and not `--fs-micro` — that token is for breadcrumbs and metric
+  keys, and this is a sentence somebody has to read. **The chat panel has never
+  been in the contrast sweep at all** (§94.11: the whole feature is invisible
+  over `file://`), so this was measured by hand. Recorded as a gap rather than
+  quietly widened here.
+- Migration 026 applied to a **virgin database**, round trip PASS (§113.7).
+
+### 119.6 Found and not fixed
+
+`.chbot` and `.chout` have **no CSS anywhere in the product**. The way-out
+button under an assistant answer — *"This didn't answer it — send it to the
+office"* — renders as a bare browser button in a panel that is otherwise
+carefully styled, and a bot message is distinguished from the office's only by
+its label. Left alone deliberately: it is a visual decision on a surface this
+section was not asked to touch (rule 1c), and it is named here rather than
+silently corrected.

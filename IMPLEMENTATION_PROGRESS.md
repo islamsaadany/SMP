@@ -64,6 +64,42 @@ Nothing proceeds past this line without an answer.
 
 ## Built and verified
 
+### v3.37 — a handoff the person can see (§119)
+
+*"Nothing happens at all"* — with the assistant on and a key the provider now
+accepts. That was §104 working exactly as designed, and that is the problem.
+
+- **A handoff wrote nothing**, so the person saw a screen identical to the one
+  they'd see if the assistant had never been asked. §116 separated four
+  failures for the *operator*; this is the same fault on the *person's* side.
+- **One line now says so** — the product's words, never the model's — and the
+  conversation **stays waiting**, so the office's queue, the Waiting tab and
+  the email chase are unchanged.
+- **Narrated, not spoken**: no name, no bubble, no way out button. The two
+  sides of the conversation are the person and the office; a handoff is
+  neither, and somebody is already coming.
+- **A failure still writes nothing.** No key, a refusal, a timeout, malformed
+  JSON, the switch off — all unchanged. A handoff is a decision; a failure is
+  not, and saying otherwise would mask the faults §116 exists to surface.
+
+**And a test was found reading a setting it did not control** — `test-chat.js`
+failed five assertions after a restart and passed on the next run, which looks
+exactly like a race and is not one: with the assistant on, her message comes
+back with a second row beside it. An hour went into hunting a product race that
+did not exist.
+
+**Verified:** test-assistant 28/0 and office-chat.py ALL CLEAR, each new
+assertion watched to fail first (2 and 3 failures respectively) · one assertion
+thrown away for being unfalsifiable (§94.5) · test-chat 52/0, twice running ·
+qa.py ERRORS: none · test-authorize 193/0 · extract-kb --check in step ·
+migration 026 applied to a **virgin database**, round trip PASS (§113.7) ·
+contrast measured by hand at 5.00 light / 6.61 dark, because the chat panel has
+never been in the sweep at all.
+
+**Flagged, not fixed:** `.chbot` and `.chout` have no CSS anywhere — the
+way-out button under an assistant answer is a bare browser button. A visual
+decision on a surface this work was not asked to touch.
+
 ### v3.37 — the diagnostic contradicted itself (§117)
 
 The first thing §116's button reported was **"It is not working — the model"**

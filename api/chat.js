@@ -107,7 +107,7 @@ const str = function (v, max) {
    difference, and the whole point of the column is that the difference is
    drawn. */
 const MSG_COLS =
-  "id, at, from_office, by_key, by_name, body, flag, bot, source, " +
+  "id, at, from_office, by_key, by_name, body, flag, bot, source, handoff, " +
   "(shot IS NOT NULL) AS has_shot";
 
 /* ── WHAT THE OFFICE HAS SET ABOUT THE CHAT (§98) ───────────────────────
@@ -350,6 +350,31 @@ module.exports = async function handler(req, res) {
          only shown when it is true. */
       if (cfg.assistant) {
         const a = await assistantAnswer(client, me, text);
+        /* SAYING NOTHING IS NOT A NEUTRAL OUTCOME (§119). A handoff used to
+           write nothing at all, on the sound reasoning that a sentence would
+           make the thread read as answered — and the person was left looking
+           at a screen identical to the one they would see if the assistant had
+           never run. §116's lesson one layer in.
+
+           SO THE LINE IS THE PRODUCT'S, NEVER THE MODEL'S: §104's rule is that
+           `answered` decides and the model's words are only shown when it is
+           true, which is untouched. This is fixed text, and the thread STAYS
+           WAITING, so the office's queue and the email below are unchanged and
+           somebody still comes.
+
+           AND ONLY FOR A REAL HANDOFF — `a` is null when the assistant could
+           not be asked at all (no key, no corpus, a timeout, a refusal), and
+           every one of those must go on landing exactly as the chat worked
+           before the assistant existed (§112.2). Declining is a decision; the
+           other four are not, and telling somebody the assistant considered
+           their question when it never saw it would be a lie the operator
+           cannot see. */
+        if (a && !a.answered) {
+          await client.query(
+            "INSERT INTO chat_messages (person_key, from_office, bot, handoff, by_key, by_name, body) " +
+            "VALUES ($1,true,true,true,$2,$3,$4)",
+            [me.key, "assistant", ASSISTANT_NAME, assistant.HANDOFF_LINE]);
+        }
         if (a && a.answered) {
           await client.query(
             "INSERT INTO chat_messages (person_key, from_office, bot, by_key, by_name, body, source) " +

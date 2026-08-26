@@ -86,23 +86,6 @@ body.presenting .chatdock { display:none; }
 .chatday { text-align:center; font-size:var(--fs-micro); color:var(--ink-3);
            letter-spacing:.09em; text-transform:uppercase; font-weight:700; }
 
-/* THE PRODUCT NARRATING, at the volume of the day divider above it (§119).
-   Deliberately not a message: no bubble, no name, no accent edge — the two
-   sides of this conversation are the person and the office, and a handoff is
-   neither. Wider than the divider because it is a sentence rather than a date,
-   and centred so it reads as a break in the conversation rather than a turn
-   in it. Nothing here is a new colour: --ink-3 and --line are the panel's own
-   quiet pair, so it needs nothing from a tenant's branding.
-
-   --fs-small AND NOT --fs-micro, which is what the day divider above it uses:
-   that token is for breadcrumbs and metric keys, and this is a SENTENCE
-   somebody has to read. One step under a message (--fs-note), so it is quieter
-   than the conversation without being smaller than the product's own floor for
-   running words (§94.9). Measured: 5.00 light, 6.61 dark. */
-.chsys { align-self:center; max-width:88%; text-align:center;
-         font-size:var(--fs-small); line-height:1.5; color:var(--ink-3);
-         padding:7px 12px; border:1px dashed var(--line); border-radius:9px; }
-
 .chmsg { max-width:84%; display:flex; flex-direction:column; gap:4px; }
 .chmsg .chwho { font-size:var(--fs-micro); color:var(--ink-3); font-weight:600;
                 display:flex; gap:6px; align-items:baseline; }

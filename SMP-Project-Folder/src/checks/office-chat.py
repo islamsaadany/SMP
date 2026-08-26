@@ -602,6 +602,67 @@ with sync_playwright() as p:
         ck("and nothing is marked as a stopping point", good["stopped"] == 0, good)
     CHAT["test"] = None
 
+    # ── 11 · A HANDOFF IS SAID OUT LOUD (§119) ───────────────────────────
+    # It used to write nothing at all, which left the person looking at a
+    # screen identical to the one they would see if the assistant had never
+    # run. So what is asserted is that the two states DIFFER on screen — and
+    # that saying so did not quietly turn the thread into an answered one.
+    print("\n11 · a handoff the person can see")
+    CHAT["messages"] = [
+        {"id": 1, "at": "2026-08-26T09:00:00Z", "from_office": False, "by_key": "smo",
+         "by_name": "Mohamed Essam", "body": "Where do I change the logo?",
+         "flag": None, "bot": False, "handoff": False, "has_shot": False},
+        {"id": 2, "at": "2026-08-26T09:00:02Z", "from_office": True, "by_key": "assistant",
+         "by_name": "Assistant",
+         "body": "I could not answer this one from the knowledge base. The office has it.",
+         "flag": None, "bot": True, "handoff": True, "has_shot": False},
+    ]
+    CHAT["thread"] = {"waiting": True}
+    # NO REFRESH HOOK, AND DELIBERATELY NOT ADDING ONE. The panel has exactly
+    # one way to learn anything — its own poll (§97: nothing here ever calls
+    # paint()) — so the check waits for a beat rather than reaching into the
+    # module, and is measuring the path the product actually uses.
+    # SECTION 10 LEFT THE SETTINGS MENU OPEN, and it covers the corner — the
+    # click was refused outright rather than landing somewhere wrong, which is
+    # the good failure (§110). Put it away the way a person would.
+    pg.evaluate("()=>{const b=document.querySelector('[data-chsetmenu]'); if(b) b.click();}")
+    pg.wait_for_timeout(400)
+    if pg.eval_on_selector("#chatpanel", "e => e.hidden"):
+        pg.click("#chatbtn")
+    pg.wait_for_selector("#chatpanel:not([hidden])")
+    pg.wait_for_timeout(5600)
+    hand = pg.evaluate("""()=>({
+        sys:  [...document.querySelectorAll('#chatbody .chsys')].map(x=>x.innerText),
+        bub:  document.querySelectorAll('#chatbody .chmsg').length,
+        out:  document.querySelectorAll('#chatbody .chout').length,
+        named: [...document.querySelectorAll('#chatbody .chsys .chwho')].length })""")
+    ck("the person is told the assistant could not answer", len(hand["sys"]) == 1, hand)
+    # NOT A MESSAGE. The two sides of this conversation are the person and the
+    # office, and a handoff is neither — so it wears no name and no bubble.
+    ck("and it is narrated, not spoken by anybody",
+       hand["bub"] == 1 and hand["named"] == 0, hand)
+    # NO WAY OUT ON IT. That button is for a confident WRONG answer, where the
+    # conversation has already left the queue; here somebody is already coming
+    # and a control asking for what is happening anyway is worse than none.
+    ck("and carries no way out, because one is not needed", hand["out"] == 0, hand)
+
+    # AND THE OTHER STATE MUST LOOK DIFFERENT, or this asserts nothing: a build
+    # that drew the line for every bot message would pass every line above.
+    CHAT["messages"][1] = dict(CHAT["messages"][1],
+                               body="From your key objectives — each actual against its target.",
+                               handoff=False, source="headline")
+    CHAT["thread"] = {"waiting": False}
+    pg.wait_for_timeout(5600)
+    ans = pg.evaluate("""()=>({
+        sys: document.querySelectorAll('#chatbody .chsys').length,
+        bot: document.querySelectorAll('#chatbody .chmsg.chbot').length,
+        out: document.querySelectorAll('#chatbody .chout').length })""")
+    ck("a real answer is a message, not a narrated line",
+       ans["sys"] == 0 and ans["bot"] == 1, ans)
+    ck("and it is the answer that carries the way out", ans["out"] == 1, ans)
+    CHAT["messages"] = []
+    CHAT["thread"] = None
+
     # ── 7 · AND A SESSION THE SERVER REFUSES, LAST ON PURPOSE ────────────
     # A refused session takes the corner away rather than leaving a control
     # that answers every press with a refusal. It runs AFTER the console

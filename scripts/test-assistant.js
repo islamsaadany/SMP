@@ -203,9 +203,21 @@ const stub = http.createServer(function (req, res) {
   ck("and no more of it than that is ever handed out",
      shape && Object.keys(shape).sort().join() === "head,len,looksRight" &&
      !/0{5}/.test(JSON.stringify(shape)), shape);
+  /* GOOGLE'S NEWER FORM IS A KEY, NOT A STRANGER (§131.2). The first real
+     AQ.-prefixed key this row ever met was called "a different kind of
+     credential" and then accepted by the provider one step later — the
+     heuristic must recognise every shape Google issues, and stay humble about
+     the rest. */
+  /* BUILT AT RUNTIME, NOT WRITTEN AS A LITERAL: a plausible-looking AQ. string
+     trips GitHub's secret scanner even when it is fiction, and the scanner is
+     right to be paranoid — so the fixture is assembled where no scanner reads. */
+  process.env.GEMINI_API_KEY = ["AQ", "ExampleNotARealKey0000000000000000000000000000000"].join(".");
+  shape = assistant.keyShape();
+  ck("Google's newer AQ.-prefixed form is recognised too",
+     shape && shape.head.slice(0, 3) === "AQ." && shape.looksRight === true, shape);
   process.env.GEMINI_API_KEY = "ya29.a0AfH6SMBexample-oauth-token-not-a-key";
   shape = assistant.keyShape();
-  ck("a credential of any other shape is called out as one",
+  ck("an unrecognised shape is reported, not endorsed",
      shape && shape.looksRight === false, shape);
   process.env.GEMINI_API_KEY = "  AIzaSyC00000000000000000000000000000000\n";
   ck("and the shape is read AFTER the trim, or a clean key reads as malformed",

@@ -469,15 +469,22 @@ module.exports = async function handler(req, res) {
                     "this against the key in AI Studio: a deployment only has the " +
                     "variables that existed when it was BUILT, so a key changed " +
                     "since then needs a redeploy."
-                  : "AN AI STUDIO KEY IS " + assistant.KEY_LEN + " CHARACTERS " +
-                    "STARTING " + assistant.KEY_HEAD + ", so this is a different " +
-                    "kind of credential — an OAuth token, a service account or a " +
-                    "Vertex key will be refused however the project is set up. " +
-                    "Make one at aistudio.google.com/apikey."))
+                  /* NOT "wrong" — UNRECOGNISED (§131.2). This branch once
+                     declared any non-AIza value a different kind of credential,
+                     and the first real key it met was Google's newer AQ. form,
+                     which the provider then accepted. A heuristic never
+                     overrules the provider, so the next step still runs and
+                     the word here claims only what was measured. */
+                  : "An AI Studio key is " + assistant.KEY_LEN + " characters " +
+                    "starting " + assistant.KEY_HEAD + ", or Google's newer form " +
+                    "starting " + assistant.KEY_HEAD2 + " — this matches neither, " +
+                    "so compare it against aistudio.google.com/apikey. The next " +
+                    "step is still what decides: the provider may accept a shape " +
+                    "this page does not know."))
              : "No " + assistant.KEY_NAME + " here. Note that Vercel only " +
                "gives a deployment the variables that existed when it was " +
                "built — if it was added since, redeploy.",
-           !shape ? null : shape.looksRight ? "present" : "wrong shape");
+           !shape ? null : shape.looksRight ? "present" : "unrecognised");
 
       /* THE CALL ITSELF, only once there is something to call with. */
       if (kb && assistant.configured()) {

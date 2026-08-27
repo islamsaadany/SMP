@@ -17373,3 +17373,54 @@ correctly the name alone, and a third — which typed "Nigeria" and clicked the
 first match — started picking a PERSON in Nigeria rather than the unit, because
 the hint had joined the search. The name is read from the row's first text node
 now, and the department test picks one nobody sits in.
+
+
+---
+
+## 131 · The key was right, the model was retired, and the heuristic apologised (v3.48)
+
+> Islam's diagnostic, after re-issuing the key: **The API key — WRONG SHAPE —
+> 53 characters, starting AQ.A** … and beneath it, Google answering: *404: This
+> model models/gemini-2.5-flash is no longer available to new users. Please
+> update your code to use models/gemini-3.6-flash.*
+
+**The 404 is the good news, twice over.** It means authentication PASSED — the
+key that had been refused for two days is accepted — and Google's own message
+names the fix.
+
+### 131.1 Retired for new users, not for old ones
+
+`gemini-2.5-flash` still works in Strategy-Formulation, whose Google project
+predates the retirement, and is refused to SMP's fresh project. **The same
+default was right there and wrong here, and no code review could see it** —
+which is what §104 predicted when it made `GEMINI_MODEL` an environment
+variable: *provider names are retired on somebody else's schedule.* The
+DEFAULT moves to `gemini-3.6-flash` (Google's own recommendation, verbatim);
+the override remains for the day this one retires in its turn.
+
+### 131.2 A heuristic never overrules the provider
+
+§126's shape test knew one shape — `AIza` + 35 — and the first real key it met
+was **Google's newer `AQ.`-prefixed form**, 53 characters, which the row
+declared *"a different kind of credential"* while the provider accepted it on
+the very next step. The next step is the one proof that outranks the heuristic,
+and the row was flatly wrong in the direction that sends somebody to remake a
+working key.
+
+Both of Google's shapes are recognised now, and an unmatched shape reads
+**UNRECOGNISED, never wrong** — with the detail saying outright that the next
+step still decides, because the provider may accept a shape this page does not
+know. §124's rule caught from the other side: a word must not claim more than
+was measured, and *"wrong shape"* claimed knowledge of every shape Google will
+ever issue.
+
+### 131.3 What proves it
+
+`test-assistant.js`: the AQ. form recognised (watched to fail with the
+recognition removed — 1 failure, exactly that assertion), the classic form
+unchanged, an OAuth-shaped value still reported as unrecognised, and the shape
+still read after §124's trim. Driven end to end: an AQ. key reads PRESENT and
+the model row now says `gemini-3.6-flash`; an unrecognised value reads
+UNRECOGNISED and the provider's refusal still lands on *The key itself*.
+**Server-only** — the built file is byte-identical, so no SHELL bump (§91's
+trigger is a content change, and there is none).

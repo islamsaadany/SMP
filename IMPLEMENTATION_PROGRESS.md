@@ -124,6 +124,23 @@ test-assistant 33/0 · test-authorize 193/0. **One assertion was rewritten for
 being unfalsifiable** — it measured the row against the panel, and a row is
 inside its own panel by definition.
 
+### v3.48 — the key was right, the model was retired (§131)
+
+The re-issued key WORKS — Google's 404 proved authentication passed — and the
+404's own text named the last problem: `gemini-2.5-flash` is retired for new
+users. SF keeps using it on its old project; SMP's fresh project cannot. The
+default moves to `gemini-3.6-flash` (Google's recommendation, verbatim);
+`GEMINI_MODEL` still overrides.
+
+And §126's shape row called the newer `AQ.`-prefixed key "a different kind of
+credential" while the provider accepted it one step later. Both Google shapes
+are recognised now; an unmatched one reads UNRECOGNISED, never wrong — a
+heuristic never overrules the provider.
+
+**Verified:** test-assistant 34/0, the new assertion watched to fail · both
+cases driven end to end through the diagnostic · built file byte-identical
+(server-only, no SHELL bump).
+
 ### v3.48 — §126 resolved: the key was not the key (redeploy commit)
 
 The diagnosis held. Comparing against Strategy-Formulation's working Gemini

@@ -1,0 +1,349 @@
+<title>Fill the Gaps</title>
+<style>
+  /* SMP's own forefront palette, both themes, lifted from _shared.css verbatim. */
+  :root{
+    --ground:#F7F8FA; --surface:#FFFFFF; --surface-2:#EFF2F6;
+    --line:#D6DCE5; --line-soft:#E6EAF0;
+    --ink:#171B22; --ink-2:#414A58; --ink-3:#636C79;
+    --gold:#C9A24D; --gold-deep:#8A6B22;
+    --good:#2E7D5B; --attn:#B8860B; --bad:#B04434; --none:#676C73;
+    --attn-bg:#F7EFD6; --attn-tx:#7A5D1C; --bad-bg:#F7E3E0; --bad-tx:#8C3327;
+    --good-bg:#E4F0EA; --good-tx:#1F6248;
+    --panel:#16325C; --panel-ink:#FFFFFF;
+  }
+  @media (prefers-color-scheme: dark){
+    :root:not([data-theme="light"]){
+      --ground:#14161A; --surface:#1C2027; --surface-2:#242932;
+      --line:#333A45; --line-soft:#2A303A;
+      --ink:#E9ECF1; --ink-2:#B4BCC8; --ink-3:#949DAA;
+      --gold:#D9B665; --gold-deep:#C9A24D;
+      --good:#5FB68C; --attn:#D9B23C; --bad:#D97066; --none:#8E97A3;
+      --attn-bg:#332C16; --attn-tx:#E8CA6A; --bad-bg:#33201E; --bad-tx:#E79A93;
+      --good-bg:#1B3129; --good-tx:#8FD3B0;
+      --panel:#0E1014; --panel-ink:#EAF0FA;
+    }
+  }
+  :root[data-theme="dark"]{
+    --ground:#14161A; --surface:#1C2027; --surface-2:#242932;
+    --line:#333A45; --line-soft:#2A303A;
+    --ink:#E9ECF1; --ink-2:#B4BCC8; --ink-3:#949DAA;
+    --gold:#D9B665; --gold-deep:#C9A24D;
+    --good:#5FB68C; --attn:#D9B23C; --bad:#D97066; --none:#8E97A3;
+    --attn-bg:#332C16; --attn-tx:#E8CA6A; --bad-bg:#33201E; --bad-tx:#E79A93;
+    --good-bg:#1B3129; --good-tx:#8FD3B0;
+    --panel:#0E1014; --panel-ink:#EAF0FA;
+  }
+
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--ground);color:var(--ink);
+       font:14px/1.55 -apple-system,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;}
+  .wrap{max-width:1080px;margin:0 auto;padding:28px 24px 80px}
+
+  /* ── mockup chrome ── */
+  .mhead{background:var(--panel);color:var(--panel-ink);border-radius:10px;
+         padding:18px 22px;margin-bottom:26px}
+  .mhead h1{margin:0 0 6px;font-size:19px;font-weight:700}
+  .mhead p{margin:0;font-size:13px;opacity:.85;max-width:70ch}
+  .mhead .k{color:var(--gold);text-transform:uppercase;font-size:10.5px;
+            letter-spacing:.08em;font-weight:600;display:block;margin-bottom:4px}
+
+  .sec{margin:34px 0 0}
+  .sec > h2{font-size:15px;margin:0 0 4px}
+  .sec > h2 .n{color:var(--gold-deep);font-weight:700;margin-right:6px}
+  .sec > .why{color:var(--ink-3);font-size:12.5px;margin:0 0 12px;max-width:78ch}
+
+  .pane{background:var(--surface);border:1px solid var(--line);border-radius:10px;
+        padding:16px 18px;overflow-x:auto}
+  .pband{font-size:11px;text-transform:uppercase;letter-spacing:.07em;
+         color:var(--ink-3);font-weight:600;margin:0 0 10px;display:flex;
+         align-items:center;gap:10px;flex-wrap:wrap}
+
+  table{border-collapse:collapse;width:100%;font-size:13px}
+  th{font-size:11px;text-transform:uppercase;letter-spacing:.05em;text-align:left;
+     color:var(--panel-ink);background:var(--panel);padding:7px 10px;font-weight:600;
+     white-space:nowrap}
+  td{padding:7px 10px;border-bottom:1px solid var(--line-soft);vertical-align:middle;
+     white-space:nowrap}
+  td.name{white-space:normal;min-width:220px}
+  td.num{font-variant-numeric:tabular-nums}
+  .idx{color:var(--ink-3);width:26px}
+
+  .missing{color:var(--bad);font-weight:700}
+
+  /* ── the three-state matrix cell ── */
+  .ac{text-align:center}
+  .acpair{text-align:center;border-bottom:1px solid var(--line)}
+  .achalf{text-align:center;font-size:10px}
+  .stbtn{width:26px;height:24px;border:1px solid var(--line);background:var(--surface);
+         border-radius:6px;margin:0 2px;cursor:pointer;color:var(--none);
+         vertical-align:middle;padding:0;line-height:0}
+  .stbtn svg{width:14px;height:14px;vertical-align:middle}
+  .stbtn.on.st-view{background:var(--surface-2);color:var(--gold-deep);border-color:var(--gold-deep)}
+  .stbtn.on.st-fill{background:var(--attn-bg);color:var(--attn-tx);border-color:var(--attn)}
+  .stbtn.on.st-edit{background:var(--surface-2);color:var(--gold-deep);border-color:var(--gold-deep)}
+  .stbtn:focus-visible{outline:2px solid var(--gold-deep);outline-offset:1px}
+  .rolecell b{display:block}
+  .rolecell .whyr{color:var(--ink-3);font-size:11.5px}
+  .legend{display:flex;gap:18px;flex-wrap:wrap;font-size:12px;color:var(--ink-2);
+          margin-top:10px;align-items:center}
+  .legend i{display:inline-flex;align-items:center;justify-content:center;
+            width:22px;height:20px;border-radius:5px;margin-right:5px;
+            font-style:normal;vertical-align:middle}
+  .legend i svg{width:13px;height:13px}
+  .legend .lv{background:var(--surface-2);color:var(--gold-deep);border:1px solid var(--gold-deep)}
+  .legend .lf{background:var(--attn-bg);color:var(--attn-tx);border:1px solid var(--attn)}
+  .legend .le{background:var(--surface-2);color:var(--gold-deep);border:1px solid var(--gold-deep)}
+
+  /* ── fill-mode fields and pending marks ── */
+  .fld{border:1px solid var(--gold-deep);background:var(--surface);color:var(--ink);
+       border-radius:6px;padding:3px 8px;font:inherit;width:110px}
+  .fld.gap{border-style:dashed;border-color:var(--bad)}
+  .fld.pend{border-color:var(--attn);background:var(--attn-bg)}
+  .fld::placeholder{color:var(--bad);font-weight:600;opacity:.8}
+  .pchip{display:inline-block;background:var(--attn-bg);color:var(--attn-tx);
+         border:1px solid var(--attn);border-radius:20px;font-size:10.5px;
+         padding:1px 8px;font-weight:600;margin-left:7px;vertical-align:1px}
+  .okbtn{border:1px solid var(--good);background:var(--good-bg);color:var(--good-tx);
+         border-radius:6px;font-size:11px;font-weight:600;padding:2px 8px;
+         margin-left:6px;cursor:pointer}
+  .okbtn:focus-visible{outline:2px solid var(--good);outline-offset:1px}
+  .countchip{display:inline-block;background:var(--attn-bg);color:var(--attn-tx);
+             border:1px solid var(--attn);border-radius:20px;font-size:11px;
+             padding:2px 10px;font-weight:600;text-transform:none;letter-spacing:0}
+  .modebar{background:var(--surface-2);border:1px solid var(--line);border-radius:8px;
+           padding:8px 12px;font-size:12.5px;color:var(--ink-2);margin:0 0 12px}
+  .modebar b{color:var(--ink)}
+
+  /* ── performance card ── */
+  .score{font-weight:700}
+  .dash{color:var(--none);font-weight:700}
+  .sub{color:var(--ink-3);font-size:12.5px;margin:10px 0 0}
+  .sub b{color:var(--ink-2)}
+  .notcounted{color:var(--attn-tx)}
+
+  /* ── reporting bar ── */
+  .rbar{display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin-top:14px}
+  .btn{border:1px solid var(--line);background:var(--surface);color:var(--ink-2);
+       border-radius:7px;padding:6px 14px;font:inherit;font-weight:600;cursor:pointer}
+  .btn:focus-visible{outline:2px solid var(--gold-deep);outline-offset:1px}
+  .btn.primary{background:var(--gold);border-color:var(--gold);color:#1A1608}
+  .btn[disabled]{opacity:.55;cursor:not-allowed}
+  .refusal{font-size:12.5px;color:var(--bad-tx);background:var(--bad-bg);
+           border:1px solid var(--bad);border-radius:7px;padding:6px 12px;max-width:56ch}
+
+  .note{border-left:3px solid var(--gold);background:var(--surface);
+        border-radius:0 8px 8px 0;padding:10px 14px;font-size:12.5px;
+        color:var(--ink-2);margin-top:12px}
+  .note b{color:var(--ink)}
+  .decisions{margin:36px 0 0;background:var(--surface);border:1px solid var(--line);
+             border-radius:10px;padding:16px 20px}
+  .decisions h2{font-size:13px;text-transform:uppercase;letter-spacing:.06em;
+                color:var(--ink-3);margin:0 0 10px}
+  .decisions ul{margin:0;padding-left:18px;font-size:13px;color:var(--ink-2)}
+  .decisions li{margin:4px 0}
+  .decisions li b{color:var(--ink)}
+</style>
+
+<div class="wrap">
+  <div class="mhead">
+    <span class="k">Mockup &mdash; for sign-off, not built</span>
+    <h1>Fill the gaps</h1>
+    <p>A third level of Strategy access between View and Edit: the custodian or the BU owner
+       writes only where the plan says <b>Missing</b>. A fill stays theirs to correct until the
+       Strategy Office confirms it; performance is computed only over confirmed numbers;
+       reporting and drafts flow freely, but Submit waits.</p>
+  </div>
+
+  <!-- ── A · the matrix cell ── -->
+  <div class="sec">
+    <h2><span class="n">A</span>Roles &amp; access &mdash; the Strategy cell gains a middle state</h2>
+    <p class="why">Same cell, three toggles instead of two. The new mark is a pen over a dashed
+       line &mdash; writing into the blank. Lit, it wears amber: the same colour every pending
+       value wears, so the grant and its consequence read as one family. Nothing changes for any
+       tenant until the SMO lights it.</p>
+    <div class="pane">
+      <table>
+        <thead>
+          <tr>
+            <th rowspan="2" style="width:24%">Role</th>
+            <th class="acpair" colspan="2">Own business unit</th>
+            <th class="ac" rowspan="2">Reporting cycle</th>
+          </tr>
+          <tr><th class="achalf">Strategy</th><th class="achalf">Reporting</th></tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td class="rolecell"><b>Business unit owner</b><span class="whyr">3 people</span></td>
+            <td class="ac">
+              <button class="stbtn" title="May read" aria-pressed="false"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7-10-7-10-7z"/><circle cx="12" cy="12" r="3"/></svg></button>
+              <button class="stbtn on st-fill" title="May fill what is empty — Missing values only, until the office confirms" aria-pressed="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 5l5 5L9 20H4v-5z"/><path d="M3 22h18" stroke-dasharray="2 3"/></svg></button>
+              <button class="stbtn" title="May read and change" aria-pressed="false"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 5l5 5L7 22H2v-5z"/><path d="M12 7l5 5"/></svg></button>
+            </td>
+            <td class="ac">
+              <button class="stbtn" title="May read" aria-pressed="false"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7-10-7-10-7z"/><circle cx="12" cy="12" r="3"/></svg></button>
+              <button class="stbtn on st-edit" title="May read and change" aria-pressed="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 5l5 5L7 22H2v-5z"/><path d="M12 7l5 5"/></svg></button>
+            </td>
+            <td class="ac"><span style="color:var(--none)">none</span></td>
+          </tr>
+          <tr>
+            <td class="rolecell"><b>Strategy custodian</b><span class="whyr">8 people</span></td>
+            <td class="ac">
+              <button class="stbtn" title="May read" aria-pressed="false"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7-10-7-10-7z"/><circle cx="12" cy="12" r="3"/></svg></button>
+              <button class="stbtn on st-fill" title="May fill what is empty — Missing values only, until the office confirms" aria-pressed="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 5l5 5L9 20H4v-5z"/><path d="M3 22h18" stroke-dasharray="2 3"/></svg></button>
+              <button class="stbtn" title="May read and change" aria-pressed="false"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 5l5 5L7 22H2v-5z"/><path d="M12 7l5 5"/></svg></button>
+            </td>
+            <td class="ac">
+              <button class="stbtn" title="May read" aria-pressed="false"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7-10-7-10-7z"/><circle cx="12" cy="12" r="3"/></svg></button>
+              <button class="stbtn on st-edit" title="May read and change" aria-pressed="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 5l5 5L7 22H2v-5z"/><path d="M12 7l5 5"/></svg></button>
+            </td>
+            <td class="ac"><span style="color:var(--none)">none</span></td>
+          </tr>
+        </tbody>
+      </table>
+      <div class="legend">
+        <span><i class="lv"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7-10-7-10-7z"/><circle cx="12" cy="12" r="3"/></svg></i> may read</span>
+        <span><i class="lf"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 5l5 5L9 20H4v-5z"/><path d="M3 22h18" stroke-dasharray="2 3"/></svg></i> may fill what&rsquo;s empty</span>
+        <span><i class="le"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 5l5 5L7 22H2v-5z"/><path d="M12 7l5 5"/></svg></i> may read and change</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── B · fill mode, custodian's view ── -->
+  <div class="sec">
+    <h2><span class="n">B</span>The plan pane in fill mode &mdash; what the custodian sees</h2>
+    <p class="why">The pen opens only the blanks. Everything already written stays as text &mdash;
+       no field, no &times;, no &ldquo;+ Add&rdquo;, no drag handles. A red dashed box is a gap to
+       fill; an amber box is their own fill, still correctable because the office hasn&rsquo;t
+       confirmed it yet.</p>
+    <div class="pane">
+      <div class="modebar"><b>Filling the gaps.</b> You can write only where the plan says
+        Missing. A value you fill stays yours to correct until the Strategy Office confirms it
+        &mdash; after that, changes are the office&rsquo;s.</div>
+      <table>
+        <thead><tr><th>#</th><th>Key measure</th><th>Direction</th><th>Target</th><th>Compile</th></tr></thead>
+        <tbody>
+          <tr>
+            <td class="idx">1</td><td class="name">MB-KM1 &middot; Revenue growth</td>
+            <td>Higher is better</td><td class="num">EGP 4.2bn</td><td>Sum of quarters</td>
+          </tr>
+          <tr>
+            <td class="idx">2</td><td class="name">MB-KM2 &middot; Churn rate</td>
+            <td>Lower is better</td>
+            <td class="num"><input class="fld gap" placeholder="Missing" aria-label="Target for MB-KM2, currently missing"></td>
+            <td>Latest quarter</td>
+          </tr>
+          <tr>
+            <td class="idx">3</td><td class="name">MB-KM5 &middot; ARPU</td>
+            <td>Higher is better</td>
+            <td class="num"><input class="fld pend" value="EGP 96" aria-label="Target for MB-KM5, filled and awaiting confirmation"><span class="pchip">awaiting confirmation</span></td>
+            <td>Average of quarters</td>
+          </tr>
+        </tbody>
+      </table>
+      <p class="sub">Row 1 is settled &mdash; text, not a field. Row 2 is a gap. Row 3 was filled
+        by the custodian yesterday: still an open box for them, marked amber everywhere it shows.</p>
+    </div>
+  </div>
+
+  <!-- ── C · the office's view ── -->
+  <div class="sec">
+    <h2><span class="n">C</span>The same rows as the office sees them &mdash; the confirm tick</h2>
+    <p class="why">The office reads the value in place, with a tick beside it. Confirming removes
+       the amber mark and the value becomes an ordinary settled one. Correcting the value
+       themselves confirms it too &mdash; an office edit is the stronger act. The count sits in
+       the pane band, where the queue is cleared.</p>
+    <div class="pane">
+      <p class="pband">Key measures <span class="countchip">2 awaiting confirmation</span></p>
+      <table>
+        <thead><tr><th>#</th><th>Key measure</th><th>Direction</th><th>Target</th><th>Compile</th></tr></thead>
+        <tbody>
+          <tr>
+            <td class="idx">1</td><td class="name">MB-KM1 &middot; Revenue growth</td>
+            <td>Higher is better</td><td class="num">EGP 4.2bn</td><td>Sum of quarters</td>
+          </tr>
+          <tr>
+            <td class="idx">2</td><td class="name">MB-KM2 &middot; Churn rate</td>
+            <td>Lower is better</td>
+            <td class="num"><span class="missing">Missing</span></td>
+            <td>Latest quarter</td>
+          </tr>
+          <tr>
+            <td class="idx">3</td><td class="name">MB-KM5 &middot; ARPU</td>
+            <td>Higher is better</td>
+            <td class="num">EGP 96<span class="pchip" title="Filled by Sara El Adawy, 26 Aug">pending &middot; Sara E.</span><button class="okbtn" title="Confirm this target — it becomes a settled value">Confirm &#10003;</button></td>
+            <td>Average of quarters</td>
+          </tr>
+        </tbody>
+      </table>
+      <p class="sub">The chip names who filled it; the hover carries the date. The change log
+        already records every write, so the trail is complete without adding anything here.</p>
+    </div>
+  </div>
+
+  <!-- ── D · performance waits on confirmation ── -->
+  <div class="sec">
+    <h2><span class="n">D</span>Performance &mdash; a pending target scores a dash, and says why</h2>
+    <p class="why">Reported figures land and are kept whatever the target&rsquo;s state. But a
+       score is a comparison, and a comparison against an unconfirmed target isn&rsquo;t ready:
+       it reads a dash, leaves the roll-up, and the card says so &mdash; only when there is
+       something to say.</p>
+    <div class="pane">
+      <table>
+        <thead><tr><th>#</th><th>Key measure</th><th>Target</th><th>Actual</th><th>Progress</th></tr></thead>
+        <tbody>
+          <tr>
+            <td class="idx">1</td><td class="name">MB-KM1 &middot; Revenue growth</td>
+            <td class="num">EGP 4.2bn</td><td class="num">EGP 3.9bn</td>
+            <td class="num score" style="color:var(--good)">93%</td>
+          </tr>
+          <tr>
+            <td class="idx">3</td><td class="name">MB-KM5 &middot; ARPU</td>
+            <td class="num">EGP 96<span class="pchip">pending</span></td>
+            <td class="num">EGP 88</td>
+            <td class="num dash" title="Awaiting target confirmation by the Strategy Office">&mdash;</td>
+          </tr>
+        </tbody>
+      </table>
+      <p class="sub">Weighted across <b>5</b> measures: <b>91%</b>
+        <span class="notcounted">&middot; 2 not counted yet &mdash; awaiting target confirmation</span></p>
+    </div>
+  </div>
+
+  <!-- ── E · submit waits, drafts don't ── -->
+  <div class="sec">
+    <h2><span class="n">E</span>Reporting &mdash; drafts flow, Submit waits</h2>
+    <p class="why">The refusal sits where the confirmation would be, names the rows, and says
+       whose move it is &mdash; the unit has nothing of its own to fix here, so the words must
+       send them to the right person, not back to their fields.</p>
+    <div class="pane">
+      <div class="rbar">
+        <button class="btn">Save draft</button>
+        <button class="btn primary" disabled>Submit</button>
+        <span class="refusal">2 targets are awaiting Strategy Office confirmation
+          (MB-KM2, MB-KM5). Reporting and drafts are unaffected &mdash; submitting opens when
+          the office confirms.</span>
+      </div>
+      <p class="sub">A pending <b>owner or date</b> never blocks Submit &mdash; only the fields a
+        score reads: target, direction, compile rule. The same line the dash draws, so the
+        product gives one answer, not two.</p>
+    </div>
+    <div class="note"><b>Not in this mode, by decision:</b> adding or removing rows, renaming
+      anything, reordering (its own grant, unchanged), and touching any confirmed value. On the
+      plan deck, a pending value prints as the value with a light &ldquo;(pending)&rdquo; &mdash;
+      answered, not settled &mdash; never as Missing.</div>
+  </div>
+
+  <!-- ── settled decisions ── -->
+  <div class="decisions">
+    <h2>Settled in this thread &mdash; what this mockup draws</h2>
+    <ul>
+      <li><b>Third state on the Strategy cell:</b> View / Fill gaps / Edit; nothing changes until the SMO lights it; a role only ever fills a unit or function it holds.</li>
+      <li><b>A gap is a place holding nothing</b> &mdash; the same list the deck already marks Missing; one definition shared by screen, server and deck.</li>
+      <li><b>No rows added or removed</b> in fill mode.</li>
+      <li><b>Filled &rarr; pending &rarr; confirmed:</b> a fill stays editable to fill-grant holders until the office confirms; confirming removes the mark; a confirmed value is the office&rsquo;s alone.</li>
+      <li><b>Reporting is never held up;</b> performance is computed only over confirmed targets, with the dash saying why.</li>
+      <li><b>Submit is refused while a score-bearing field is pending;</b> Save draft always works.</li>
+      <li><b>Server-authoritative throughout:</b> the screen offers, the authoriser decides &mdash; fill, amend-while-pending, and confirm are three server rules.</li>
+    </ul>
+  </div>
+</div>

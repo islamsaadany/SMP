@@ -89,6 +89,59 @@ with sync_playwright() as p:
     ck("the button carries the count",
        pg.evaluate("""()=>{const b=document.querySelector('.attnn');
           return !!b && parseInt(b.textContent,10) >= 6;}"""))
+    # ── ONE NAME, TWO PEOPLE (§130) ──────────────────────────────────
+    # Islam: "for the names you normally take the first 2 names but you allow
+    # me to amend the name in the edit. can you notify me as an issue to
+    # address if 2 people their 1st 2 names are the same so I can edit one of
+    # them." §81.1 already LENGTHENS the guess so the register can be read;
+    # this is the notice that somebody should now decide what each of the pair
+    # is actually called. A queue entry and never a mark: the Ahmeds are two
+    # real people, and §87 says a shared name is not evidence of one human.
+    print("── one name, two people (§130)")
+    sn = pg.evaluate("""()=>attentionQueue()
+        .filter(a=>a.why.some(w=>w.kind==='samename')).map(a=>a.key)""")
+    ck("both Ahmeds are queued for sharing a reading",
+       set(["ahmedmostafamo","ahmedmostafam2"]) <= set(sn), sn)
+    say = pg.evaluate("""()=>{const a=attentionQueue().filter(x=>x.key==='ahmedmostafamo')[0];
+        const w=a&&a.why.filter(w=>w.kind==='samename')[0]; return w?w.say:'';}""")
+    ck("...and the entry names the other person in full", "Abou El Einen" in say, say)
+    ck("...as an issue, never as a duplicate",
+       pg.evaluate("""()=>attentionQueue().filter(a=>
+          (a.key==='ahmedmostafamo'||a.key==='ahmedmostafam2') &&
+          a.why.some(w=>w.kind==='dupe')).length""")==0)
+    ck("the identical twins stay the duplicate flag's, said once not twice",
+       pg.evaluate("""()=>attentionQueue().filter(a=>(a.key==='twin1'||a.key==='twin2') &&
+          a.why.some(w=>w.kind==='samename')).length""")==0)
+    # THE REASON IS SAID WHERE THE FIX IS: the queue's dialog, above the very
+    # field that clears it — the same band every other kind already uses.
+    pg.evaluate("()=>document.querySelector('[data-attn]').click()")
+    pg.wait_for_timeout(500)
+    pg.evaluate("""()=>{ PDLG.at = PDLG.queue.findIndex(a=>a.key==='ahmedmostafamo');
+        PDLG.key = 'ahmedmostafamo'; personDialogPaint(); }""")
+    pg.wait_for_timeout(400)
+    band = pg.eval_on_selector("#modal-b .pdband", "e=>e.textContent")
+    ck("the dialog says it above the fields", "They read as" in band, band)
+    # AMENDING ONE CLEARS BOTH — typed through the dialog's own Name field, so
+    # the whole path is pressed, and the band re-asks rather than trusting the
+    # render that drew it (§48.2).
+    pg.evaluate("""()=>{ const f=document.querySelector('#modal-b [data-pknown]');
+        f.value='Ahmed El Gebely'; f.dispatchEvent(new Event('change',{bubbles:true})); }""")
+    pg.wait_for_timeout(600)
+    ck("amending one Name clears both",
+       pg.evaluate("""()=>attentionQueue().filter(a=>a.why.some(w=>w.kind==='samename') &&
+          (a.key==='ahmedmostafamo'||a.key==='ahmedmostafam2')).length""")==0)
+    # A TYPED NAME THAT STILL COLLIDES IS STILL FLAGGED — a typed value is
+    # never lengthened (§81.1), so without this the pair reads as one person
+    # for ever, with nothing left to notice it.
+    pg.evaluate("()=>{ setKnownName(personBy('ahmedmostafamo'),'Ahmed Mostafa'); paint(); }")
+    pg.wait_for_timeout(400)
+    ck("a typed Name that still collides keeps the pair queued",
+       pg.evaluate("""()=>attentionQueue().filter(a=>a.why.some(w=>w.kind==='samename') &&
+          (a.key==='ahmedmostafamo'||a.key==='ahmedmostafam2')).length""")==2)
+    pg.evaluate("()=>{ setKnownName(personBy('ahmedmostafamo'),''); paint(); }")
+    pg.keyboard.press("Escape")
+    pg.wait_for_timeout(400)
+
     # ── AND THE HEADER SAYS IT ONCE, NOT SIX TIMES (§116) ────────────
     # It carried a chip per KIND of collision — "1 employee number on more than
     # one row", "1 address…", "1 name…" — beside three more counts and five

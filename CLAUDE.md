@@ -2145,7 +2145,32 @@ prior sessions (on HR_ERP) accidentally reverted agreed-upon designs.
 
 ---
 
-*Last Updated: 2026-08-26 &mdash; **v3.47: building a plan on the platform
+*Last Updated: 2026-08-27 &mdash; **v3.48: the register notices two people
+whose name reads the same (&sect;130)**. Islam: *"for the names you normally
+take the first 2 names but you allow me to amend the name in the edit. can
+you notify me as an issue to address if 2 people their 1st 2 names are the
+same so I can edit one of them."* &sect;81.1 already LENGTHENS the clashing
+guess so the register stays readable, and never told anybody; the pair now
+also joins the **Attention queue** (&sect;116.2) until a Name is amended to
+read apart, which is the act that clears it. **A notice, never a mark**: a
+shared name is not evidence of one human (&sect;87), so the row wears no
+`.dupemark`, the kind sorts LAST in the queue, and anybody the row already
+flags as a possible duplicate is left to that flag &mdash; telling the SMO to
+RENAME a row that may need MERGING sends them to the wrong control.
+**The comparison is what was stored or guessed, never what is drawn**
+(`readName()`: the typed value or the flat two-name guess), because
+&sect;81.1's lengthening is a disambiguation painted OVER the collision
+&mdash; and a TYPED name that still collides is still flagged, since typed
+values are never lengthened and would read as one person for ever. The
+`read` groups ride `registerDupes()`'s existing walk, so nothing changed
+signature and nothing renders differently &mdash; the queue button, band and
+counter carry the new kind through &sect;116's machinery. Proved in
+`checks/duplicates.py` beside the Ahmeds it already injects, watched to fail
+4 ways on the pre-&sect;130 build first (&sect;94.5); the first run against
+the demo found a real pair &mdash; both placeholder company CEOs read as
+"Company CEO,".*
+
+*Earlier: 2026-08-26 &mdash; **v3.47: building a plan on the platform
 (&sect;129, spec 020)**. Islam: *"I want the team of the SMO to be able to
 build a plan on the platform directly … they identify a function or a unit
 and set which way are they going to plan pillars or projects and then they go

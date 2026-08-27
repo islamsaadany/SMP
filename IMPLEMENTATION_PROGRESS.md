@@ -6,9 +6,9 @@ version (rules A2 / A11, changed 2026-08-20) — those go only when asked for.
 
 **Where it runs:** Vercel, production tracks `main`. Static files plus two
 serverless functions (`/api/state`, `/api/auth`) against Neon Postgres.
-**Latest version:** v3.47 on `main`
-**Last updated:** 2026-08-26
-**Last updated:** 2026-08-26
+**Latest version:** v3.47 on `main`; v3.48 (§130, same-name notices) built and
+checked on `claude/duplicate-name-detection-cgv3vk`, waiting on the merge word.
+**Last updated:** 2026-08-27
 
 **Sign in as:** `SMO` / `1234` — a password change is forced at once (§43.1,
 reversing §19.4).
@@ -64,6 +64,22 @@ Nothing proceeds past this line without an answer.
   is a true signal — do not silence it.
 
 ## Built and verified
+
+### v3.48 — the register notices two people whose name reads the same (§130)
+
+- Islam: *"notify me as an issue to address if 2 people their 1st 2 names are
+  the same so I can edit one of them."* The pair now joins the **Attention
+  queue** on the People register — the button counts them, opening it walks to
+  each with the reason above the fields, naming the other person in full.
+- **A notice, never a duplicate mark** (§87: a shared name is not one human),
+  and it sorts last — collisions, declarations and missing identifiers stay
+  worse. Anybody already flagged as a possible duplicate is left to that flag.
+- **Amending one Name clears both**; a typed Name that still collides stays
+  flagged, because typed values are never auto-lengthened (§81.1).
+- Proved in `checks/duplicates.py` (watched to fail 4 ways on the pre-§130
+  build), with `identity-merge`, `people-dialog`, `table-standard` and the
+  full `qa.py` sweep green. Found on the way: the demo's two placeholder
+  company CEOs genuinely read the same ("Company CEO,") and now say so.
 
 ### v3.47 — building a plan on the platform (§129, spec 020)
 

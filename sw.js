@@ -124,7 +124,15 @@
    whose change this is, so a twelfth collision cannot happen by coincidence.
    Confirmed against origin/main serving "smp-shell-v3.46-plandeck"; confirm
    once more immediately before the push to main (§94.16). */
-const SHELL = "smp-shell-v3.47-planbuilder";
+/* v3.47-qmarks — §128.5: the missing quarters in the plan deck wear a red
+   question mark instead of a red tick. NOT a version bump — §91's trigger is
+   "the built file's bytes changed", which this is, and the platform filename,
+   the gate's link, vercel.json's rewrite and PLATFORM_FILE are all untouched.
+   The suffix carries the whole difference from the name beside it, which is
+   the §128 rule followed rather than a number nobody can tell apart.
+   Confirmed against origin/main serving "smp-shell-v3.47-planbuilder";
+   confirm once more immediately before the push to main (§94.16). */
+const SHELL = "smp-shell-v3.47-qmarks";
 const ASSETS = [
   "/",
   "/index.html",

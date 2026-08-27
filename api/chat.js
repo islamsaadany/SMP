@@ -176,9 +176,19 @@ async function assistantAnswer(client, me, question) {
       kb: kb, question: question, history: hist,
       who: roleWord(me), labels: labels
     });
-    if (!out || !out.ok) return null;
+    /* VISIBLE TO THE OPERATOR, INVISIBLE TO THE PERSON (§132, §123's rule).
+       The person's screen stays silent by design — §112.2 — but a failure
+       nobody can see anywhere is how "it is not working" went undiagnosable
+       twice. One line to the function log, which Vercel keeps and the chat
+       does not: stores nothing, shows nothing, answers "why" when somebody
+       finally looks. */
+    if (!out || !out.ok) {
+      console.error("assistant did not answer:", (out && out.why) || "no result");
+      return null;
+    }
     return out;
   } catch (e) {
+    console.error("assistant did not answer:", (e && e.message) || e);
     return null;
   }
 }

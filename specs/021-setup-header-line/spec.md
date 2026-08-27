@@ -51,9 +51,9 @@ offset was being applied inside it.
   carrying its own mark count.
 - **One table**: Measure · Target · Focus, banded by key objectives and then by
   pillar (a unit, or a pillars function) or by capability (a capability
-  function). The band is `tr.dxband` — the platform's own in-table band
-  (§99), because a band that has to be told apart from the zebra stripe cannot
-  be a lighter shade of it.
+  function). The band is `--line` with `--ink-2` — a band that has to be told
+  apart from the zebra stripe cannot be a lighter shade of it, and it must not
+  be the same navy as the `<thead>` above it either.
 - **Supporting functions can be marked**, and the group's Focus board shows
   them beside the units.
 
@@ -64,6 +64,14 @@ offset was being applied inside it.
 - **Two sections**: *Compose* and *Email settings*. `Setup › Email` leaves the
   rail. Each section keeps its own access key, so a `c_comms` holder without
   `c_send` still reaches the settings half.
+
+## 5a · The table head pins flush under the page header
+
+`--sethead-h` is published by a ResizeObserver from `.setuphead`'s measured
+height, re-pointed at the end of every `paint()`. A literal cannot be right:
+the header is 42px where the controls are small, 49px where a search box sits
+on the line, and taller again when it wraps. Any positive gap between the two
+pinned boxes is a slot that scrolling rows show through.
 
 ## 5b · The rail's own head
 

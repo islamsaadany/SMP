@@ -781,7 +781,27 @@
      difference from §99. There the first band OPENS the table, so a gap above
      it would be a gap under nothing. Here a real `<thead>` sits above it in the
      same navy, and without the break the two merge into one block. */
-  .ftable tr.fband th { border-top:14px solid var(--surface); }
+  /* ══ A BAND IS A DARKER GREY, NOT A NAVY ONE (§130.8, corrected) ═══
+     Islam: *"the key objectives title line and the pillar name line grey is
+     too close to the alternating grey — make it darker to be more
+     significant"*, and then, of the navy I reached for: *"the band should be
+     darker grey not navy."*
+
+     THE FIRST ANSWER WAS RIGHT ABOUT THE PROBLEM AND WRONG ABOUT THE FIX.
+     `--surface-2` is #EFF2F6 and `--zebra` is #F5F7FA — six points apart on one
+     channel, so a band that had to be told apart from a stripe was a lighter
+     shade of the stripe. Reaching for §99's `tr.dxband` kept one vocabulary for
+     "a band inside a table" (§53.5) and cost two things worth more: the band
+     then wore the SAME navy as the table's own `<thead>` directly above it, and
+     the 4px slot between the two pinned headers (§130.10) leaked a navy strip
+     that read as a second header.
+
+     `--line` IS THE STEP THAT EXISTS. It is the palette's own next neutral —
+     #D6DCE5 light, #333A45 dark — so it tracks the theme without a literal
+     (§25), and `--ink-2` on it measures 6.4:1 light and 7.0:1 dark. */
+  .ftable tr.fband th { background:var(--line); color:var(--ink-2); text-align:left;
+      font:700 11px/1.2 var(--sans); letter-spacing:.06em; text-transform:uppercase;
+      padding:7px 10px; }
   .ftable td.fmeas { color:var(--ink); font-weight:600; }
   .ftable td.ftar { font-family:var(--mono); font-size:12px; color:var(--ink-2); }
   .ftable tr.fon td { background:var(--attn-bg); }
@@ -832,7 +852,19 @@
      table — and applying a page offset there put the register's headings 293px
      down, measured. So they are excluded rather than overridden: two rules
      fighting over one thead is how a head ends up pinned to neither. */
-  .setuppane { --sethead-h: 46px; }
+  /* ── AND THE OFFSET IS MEASURED, NOT GUESSED (§130.10) ────────────
+     `--sethead-h` was the literal 46px, and §130 changed the header's height by
+     putting the page's controls in it: it is 42px where the controls are small
+     and 49px where a search box sits on the line. So the table's head pinned
+     4px BELOW the page header on some pages and 3px under it on others — and
+     that 4px slot is a hole between two pinned things, which scrolling rows
+     show through. Exactly what Islam saw, made obvious by a band that happened
+     to be navy.
+
+     Published by a ResizeObserver in the shell, the way `--chrome-h` already
+     is. NOT §28.3's loop: this feeds a sticky OFFSET and nothing else, and an
+     offset cannot change the height it was measured from. The literal survives
+     as the fallback for the frame before the observer first fires. */
   /* AND `.acgrid` IS THE THIRD, FOUND BY ISLAM RATHER THAN BY A CHECK (§130.2).
      *"in roles and access … check the table as the design is damaged."*
 
@@ -854,7 +886,7 @@
   .setuppane .cfg.acgrid table thead th { position:static; }
   .setuppane .cfg:not(.peoplebox):not(.srctable):not(.acgrid) table thead th {
       position:sticky; z-index:4;
-      top:calc(var(--chrome-h, 118px) + var(--rail-gap, 12px) + var(--sethead-h));
+      top:calc(var(--chrome-h, 118px) + var(--rail-gap, 12px) + var(--sethead-h, 46px));
       background:var(--panel); }
   /* A HAIRLINE BETWEEN HEADINGS (§121.4). They are uppercase, letter-spaced
      and 8px-padded, so at a narrow pane "Shown in the nav" and "Code" merged

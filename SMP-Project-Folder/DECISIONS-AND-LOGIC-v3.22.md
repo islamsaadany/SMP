@@ -17213,6 +17213,22 @@ difference from §99. There the first band OPENS the table, so a gap above it
 would be a gap under nothing; here a real `<thead>` sits above it in the same
 navy, and without the break the two merge into one block.
 
+### 130.8b The band is a darker grey, not a navy one (correcting 130.8)
+
+Islam, of the navy: *"the band should be darker grey not navy."*
+
+**§130.8 WAS RIGHT ABOUT THE PROBLEM AND WRONG ABOUT THE FIX.** Reaching for
+§99's `tr.dxband` kept one vocabulary for "a band inside a table" and cost two
+things worth more: the band then wore the SAME navy as the table's own
+`<thead>` directly above it, and — with §130.10's 4px slot open — it leaked a
+navy strip between the two pinned headers that read as a second header. A
+shared vocabulary is worth having and is not worth two confusions.
+
+**`--line` IS THE STEP THAT EXISTS**: #D6DCE5 light, #333A45 dark, so it
+tracks the theme without a literal (§25), and `--ink-2` on it measures 6.49:1
+light and 7.0:1 dark. Against a `--zebra` of #F5F7FA it is a real step rather
+than a shade of the same grey, which is what the original complaint was about.
+
 ### 130.9 The rail's head, pinned twice
 
 Islam, twice, with a screenshot of the navy *SETUP* bar and the search box:
@@ -17238,3 +17254,45 @@ the state this exists for.
 **AND IT IS ASSERTED NOW, WHICH IT NEVER WAS.** `checks/setup-rail.py` scrolls
 the list and reads both boxes back, and asserts they stack — the claim "already
 true" had only ever been something a throwaway probe could say.
+
+### 130.10 A four-pixel slot between two pinned headers
+
+Islam, with a screenshot: *"the scrolled up content is appearing behind the
+sticky headers — fix this."*
+
+**`--sethead-h` WAS A GUESSED CONSTANT, AND §130 MADE IT WRONG.** §121.4 pinned
+each Setup table's head at `--chrome-h + --rail-gap + --sethead-h`, and wrote
+that last one as the literal `46px`. §130 then changed the header's height by
+putting the page's own controls into it: **42px** where the controls are small,
+**49px** where a search box sits on the line. Measured, the table's head pinned
+**4px below** the page header on Focus measures and 3px under it on Business
+units.
+
+**FOUR PIXELS BETWEEN TWO THINGS THAT DO NOT MOVE IS A HOLE**, and scrolling
+rows show through it. Found by sweeping the scroll position in 4px steps: a 4px
+leak at y=152, and what leaks is a BAND — which is why it read as a second
+header rather than as a sliver. §122.5's fault exactly ("a cap made of a guessed
+constant goes stale silently"), reintroduced by the change that moved the
+controls.
+
+**A BETTER CONSTANT COULD NOT HAVE BEEN RIGHT**, which is why it is observed
+rather than corrected: the header WRAPS on a narrow window, so its height is a
+function of the window as well as of the page. A ResizeObserver publishes
+`--sethead-h` on the root, the way `--chrome-h` already is, re-pointed at the
+new header at the end of every `paint()`.
+
+**NOT §28.3's LOOP, and the difference is the whole reason it is safe**: the
+value feeds a sticky OFFSET and nothing else, and an offset cannot change the
+height it was measured from. v2.8's oscillation came from sizing a box against
+a number the box's own size decided; there is no such path here.
+
+**THE CHECK PASSED ON THE BROKEN BUILD TWICE BEFORE IT BIT.** First it swept
+scroll positions in 20px steps looking for a row showing through — and a 4px
+slot only shows something when a row happens to be passing it, so a sampled
+search for a symptom finds the fault when it is lucky. Then it measured the gap
+at a fixed scroll position and reported 50px on a page that was fine, because a
+short table's head is still in FLOW there and the distance to it is a layout
+gap rather than a slot. It now measures the gap **only while the head is
+actually pinned**, keeps one fine-grained sweep for the symptom, and asserts
+`--sethead-h` equals the header's measured height. With the observer removed it
+fails six ways, naming *"Key Objectives at y=180"*.

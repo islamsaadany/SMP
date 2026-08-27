@@ -364,12 +364,34 @@ console errors (in this cloud environment, run it via a wrapper that points Play
   the chip markup, its handler and `[data-tkcount]` are DELETED (§24).
 - **A BAND CANNOT BE A LIGHTER SHADE OF THE STRIPE (§130.8):** the marking
   table's band was `--surface-2` (#EFF2F6) against a `--zebra` of #F5F7FA — six
-  points on one channel, and Islam read them as the same grey. It takes
-  **`tr.dxband`**, which is what §99 already settled a band naming a group of
-  rows inside a table looks like (`--panel` on `--panel-ink`); a third grey
-  would be a second vocabulary for one idea (§53.5). **The 14px break is on
-  EVERY band here, including the first** — §99 excludes the first because there
-  it opens the table, and here a navy `<thead>` sits above it.
+  points on one channel, and Islam read them as the same grey. Reaching for
+  §99's `tr.dxband` kept one vocabulary for "a band inside a table" (§53.5) and
+  **Islam turned it down** — *"the band should be darker grey not navy"* — and
+  he was right twice over: it wore the SAME navy as the `<thead>` directly above
+  it, and it was what leaked through §130.10's slot and read as a second header.
+  **A shared vocabulary is worth having and is not worth two confusions.**
+  `--line` is the step that exists (#D6DCE5 / #333A45, so it tracks the theme
+  without a literal, §25) and `--ink-2` on it is 6.49:1 light, 7.0:1 dark.
+- **A GUESSED CONSTANT BETWEEN TWO PINNED THINGS IS A HOLE (§130.10):**
+  `--sethead-h` was the literal `46px`, and §130 changed the header's height by
+  putting the controls in it — 42px on some pages, 49px on others. So a table's
+  head pinned **4px below** the page header, and **four pixels between two
+  things that do not move is a slot scrolling rows show through**: measured, a
+  4px leak at y=152, and what leaks is a BAND, which is why it reads as a second
+  header. §122.5's fault, reintroduced by the change that moved the controls.
+  **A better constant could not have been right** — the header WRAPS, so its
+  height depends on the window too — so a ResizeObserver publishes it, the way
+  `--chrome-h` already is. **NOT §28.3's loop**: it feeds a sticky OFFSET and
+  nothing else, and an offset cannot change the height it was measured from.
+- **A SAMPLED SEARCH FOR A SYMPTOM FINDS THE FAULT WHEN IT IS LUCKY (§130.10):**
+  the check for the above swept scroll positions in 20px steps looking for a row
+  showing through, and **passed on the deliberately broken build** — a 4px slot
+  only shows something when a row happens to be crossing it. Measure the CAUSE
+  (the gap), and only **while the head is actually pinned**: the second attempt
+  measured at a fixed scroll and reported 50px on a page that was fine, because
+  a short table's head is still in flow there. And **put the state back first**
+  (§94.2) — an earlier section had left the focus page on a function with two
+  rows, and a page too short to scroll has a head that never pins at all.
 - **PINNED TWICE, AND ASSERTED ONCE (§130.9):** asked (twice) to make the rail's
   `SETUP` bar and search sticky, the honest first move was to MEASURE — eleven
   window sizes, four scroll positions, the list scrolled internally: 96px and

@@ -325,6 +325,89 @@ with sync_playwright() as p:
        any(lbl == "In Platform inbox" for _, lbl in pages)
        or not any(lbl == "Inbox" for _, lbl in pages), [lbl for _, lbl in pages])
 
+    # ── 7 · NO SLOT BETWEEN THE TWO PINNED HEADERS (§130.10) ─────────
+    print("\n7 · the table's head pins flush under the page's, at every width")
+    # THE SLOT IS MEASURED, NOT SAMPLED FOR. The first version of this section
+    # scrolled in 20px steps looking for a row showing through — and PASSED on
+    # a build with the fix deliberately removed, because the 4px slot only
+    # shows something when a row happens to be passing through it. A sampled
+    # search for a symptom is a check that finds the fault when it is lucky.
+    #
+    # Any positive gap between the two pinned boxes IS the fault: it is a hole
+    # between two things that do not move, so a row will show through it at
+    # some scroll position whether or not this run caught one. Negative is
+    # fine — the table's head simply tucks under the page's.
+    # THE STATE IS PUT BACK FIRST (§94.2). Section 5b left the focus page on a
+    # function with two rows, and a page too short to scroll has a head that
+    # never pins — so the first run of this measured the flow gap on a page
+    # that was perfectly fine and reported it as a slot.
+    pg.evaluate("()=>{ FSET.side='units'; FSET.unit=activeKeys()[0]; }")
+    for w in (1560, 1400, 1180):
+        pg.set_viewport_size({"width": w, "height": 700})
+        for k in ("focusset", "units", "caps"):
+            go(pg, k)
+            # MEASURED WHILE IT IS ACTUALLY PINNED, which is the only state the
+            # claim is about. At a fixed scroll position a short table's head is
+            # still in flow, and the distance to it is a layout gap rather than
+            # a slot — which is how the first version of this reported 50px on a
+            # page that was perfectly fine.
+            g = None
+            for y in (200, 400, 700, 1200):
+                pg.evaluate("(y)=>scrollTo(0,y)", y)
+                pg.wait_for_timeout(120)
+                v = pg.evaluate("""()=>{const h=document.querySelector('.setuphead');
+                  const th=document.querySelector('.setuppane table thead th');
+                  if(!h||!th) return null;
+                  const cs=getComputedStyle(th);
+                  const want=parseFloat(cs.top);
+                  const tb=th.getBoundingClientRect().top;
+                  return {stuck: cs.position==='sticky' && Math.abs(tb-want)<=1,
+                          gap: Math.round(tb - h.getBoundingClientRect().bottom)};}""")
+                if v and v["stuck"]:
+                    g = v["gap"]
+                    break
+            # NOT SKIPPED IN SILENCE (§54.5): a page whose head never pins is
+            # something to say, not something to pass over.
+            ck("%d %s: no slot between the two pinned heads (%s)" % (w, k, g),
+               g is not None and g <= 1, g if g is not None else "never pinned")
+    pg.set_viewport_size({"width": 1560, "height": 700})
+
+    # AND ONE FINE-GRAINED SWEEP, because "no gap" is the cause and "nothing is
+    # visible" is what Islam actually saw — one page, every 4px, so a build that
+    # closed the gap by some other means still has to show nothing.
+    go(pg, "focusset")
+    worst, where = 0, ""
+    for y in range(0, 700, 4):
+        pg.evaluate("(y)=>scrollTo(0,y)", y)
+        v = pg.evaluate("""()=>{const h=document.querySelector('.setuphead');
+          const th=document.querySelector('.setuppane table thead th');
+          const hb=h.getBoundingClientRect().bottom;
+          const tb=th.getBoundingClientRect().top;
+          let show=0, who='';
+          document.querySelectorAll('.setuppane table tbody tr').forEach(r=>{
+            const c=r.firstElementChild; if(!c) return;
+            const b=c.getBoundingClientRect();
+            const vis=Math.min(b.bottom,tb)-Math.max(b.top,hb);
+            if(vis>show){show=vis; who=(c.textContent||'').trim().slice(0,24);}});
+          return {show:Math.round(show), who:who};}""")
+        if v and v["show"] > worst:
+            worst, where = v["show"], "%s at y=%d" % (v["who"], y)
+    ck("and nothing is ever visible between them (%dpx)" % worst, worst <= 1, where)
+    pg.evaluate("()=>scrollTo(0,0)")
+    pg.set_viewport_size({"width": 1560, "height": 900})
+
+    # THE OFFSET IS PUBLISHED FROM THE REAL HEIGHT, asserted as the
+    # RELATIONSHIP (§53.5) so a header that legitimately changes height stays
+    # green and a literal creeping back does not.
+    for k in ("focusset", "units"):
+        go(pg, k)
+        m = pg.evaluate("""()=>{const h=document.querySelector('.setuphead');
+          return {h:Math.round(h.getBoundingClientRect().height),
+                  v:getComputedStyle(document.documentElement)
+                      .getPropertyValue('--sethead-h').trim()};}""")
+        ck("%s: --sethead-h is the header's own height (%s vs %dpx)" % (k, m["v"], m["h"]),
+           m["v"] == str(m["h"]) + "px", m)
+
     print("\n" + ("errors: " + str(errs[:4]) if errs else "no console errors"))
     if errs:
         bad += 1

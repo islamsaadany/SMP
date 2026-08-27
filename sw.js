@@ -142,7 +142,18 @@
    is the built file's BYTES, which this is.
    Confirmed against origin/main serving "smp-shell-v3.47-qmarks"; confirm
    once more immediately before the push to main (§94.16). */
-const SHELL = "smp-shell-v3.48-owners";
+/* v3.49-samename — §131: two people whose Name reads the same join the
+   register's Attention queue. First written as §130 / v3.48-samename against
+   a main serving v3.47-qmarks — and the owners session took §130 and v3.48
+   in the same window, §94.12's section-number face again, so both were
+   renumbered at the merge, which is the only moment a sequential name is
+   real. The suffix is why the CACHE name never collided: "samename" and
+   "owners" cannot be arrived at by coincidence. The platform filename, the
+   gate's link, vercel.json's rewrite and PLATFORM_FILE are all untouched —
+   §91's trigger is the built file's bytes, which this is.
+   Confirmed against origin/main serving "smp-shell-v3.48-owners"; confirm
+   once more immediately before the push to main (§94.16). */
+const SHELL = "smp-shell-v3.49-samename";
 const ASSETS = [
   "/",
   "/index.html",

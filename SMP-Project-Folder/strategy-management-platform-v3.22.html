@@ -9852,10 +9852,32 @@ function displayNames(){
    and `displayNames()` above tells them apart rather than complaining. Only a
    name that cannot be told apart even at eight words is reported.
 
+   §131 AMENDS THAT BY ONE NOTCH, WITHOUT MOVING THE LINE. Two people whose
+   NAME COLUMN reads the same — the first two names, or a typed value that
+   collides — are still not duplicates and never wear the mark; they are
+   QUEUED as something to address (Islam: "notify me as an issue to address if
+   2 people their 1st 2 names are the same so I can edit one of them"). The
+   `read` groups below feed attentionOf() and nothing else: personDupe()
+   deliberately does not read them, because sharing a spoken name is not
+   evidence of being one human, and a queue entry is a notice where a mark is
+   an accusation.
+
    RETIRED ROWS ARE EXCLUDED. They cannot sign in and no upload places them, so
    counting them would report a problem nobody has. */
+/* What the Name column SAYS for this row, before §81.1 lengthens anything:
+   the typed value, or the flat two-name guess. Kept apart from knownName(),
+   which answers with the lengthened display label — the collision worth
+   flagging is in what was stored or guessed, not in the disambiguation drawn
+   over it. And its key: one spelling for both halves of the comparison, or a
+   match reads as a difference (§116.9). */
+function readName(p){
+  return String((p && p.known) || "").trim() || knownGuess((p && p.name) || "");
+}
+function readKey(p){
+  return readName(p).toLowerCase().replace(/\s+/g, " ");
+}
 function registerDupes(){
-  var byId = {}, byAddr = {}, byName = {};
+  var byId = {}, byAddr = {}, byName = {}, byRead = {};
   PEOPLE.forEach(function(p){
     if (!personActive(p)) return;
     var id = String(p.empId == null ? "" : p.empId).trim();
@@ -9864,6 +9886,8 @@ function registerDupes(){
     if (a) (byAddr[a] = byAddr[a] || []).push(p);
     var n = String(p.name == null ? "" : p.name).trim().toLowerCase().replace(/\s+/g, " ");
     if (n) (byName[n] = byName[n] || []).push(p);
+    var r = readKey(p);
+    if (r) (byRead[r] = byRead[r] || []).push(p);
   });
   function only(m){
     var out = {};
@@ -9871,7 +9895,7 @@ function registerDupes(){
     return out;
   }
   return { empId: only(byId), email: only(byAddr), name: only(byName),
-           likely: likelyDupes() };
+           read: only(byRead), likely: likelyDupes() };
 }
 
 /* ── THE FOURTH KIND, AND IT IS THE ONE THAT BIT (§87.2) ───────────
@@ -11093,7 +11117,8 @@ function attentionOf(p, all){
   var why = [];
   /* A COLLISION FIRST: two rows that are one human is the fault that makes
      every other count wrong (§87). */
-  var dupes = personDupe(p, all || registerDupes());
+  var d = all || registerDupes();
+  var dupes = personDupe(p, d);
   if (dupes.length) why.push({ kind:"dupe", say: dupeSentence(dupes) });
   /* Then what they SAID about themselves, which is a question waiting on an
      answer rather than a gap (§56). */
@@ -11127,6 +11152,31 @@ function attentionOf(p, all){
   if (PWSTATES && !PWSTATES.__error && PWSTATES[p.key] === "none" &&
       personActive(p) && p.key !== viewer().key && mayIssuePasswordTo(p))
     why.push({ kind:"nopw", say:"They have never been issued a password." });
+  /* LAST, TWO PEOPLE WHOSE NAME READS THE SAME (§131). Islam: "you normally
+     take the first 2 names but you allow me to amend the name in the edit —
+     notify me as an issue to address if 2 people their 1st 2 names are the
+     same so I can edit one of them." §81.1 lengthens the GUESS so the
+     register itself stays readable; this is the other half — the pair still
+     reads as one name out loud, and a TYPED value that collides is never
+     lengthened at all — so each of them queues until a Name is amended to
+     read apart, which is exactly what clears it. NOT a duplicate and last in
+     the order: two people really can be "Ahmed Mostafa" (§87). Anybody this
+     row already flags as a possible duplicate is left to that flag — telling
+     the SMO to RENAME a row that may need MERGING sends them to the wrong
+     control, and the identical twins would otherwise be said twice. */
+  var reads = (d.read || {})[readKey(p)];
+  if (reads && reads.length > 1) {
+    var flagged = {};
+    dupes.forEach(function(x){ (x.rows || []).forEach(function(r){
+      if (r && r.key) flagged[r.key] = 1; }); });
+    var others = reads.filter(function(x){
+      return x.key !== p.key && !flagged[x.key]; });
+    if (others.length)
+      why.push({ kind:"samename", say:"They read as \u201c" + readName(p) +
+        "\u201d, and so " + (others.length === 1 ? "does " + others[0].name
+          : "do " + others.map(function(x){ return x.name; }).join(" and ")) +
+        ". Amend a Name so each reads apart." });
+  }
   return why.length ? { key:p.key, why:why } : null;
 }
 /* The sentence a duplicate makes, said once so the chip and the queue cannot
@@ -11144,7 +11194,7 @@ function dupeSentence(dupes){
            (others.length ? " (" + others.join(", ") + ")" : "") + ".";
   }).join(" ");
 }
-var ATTN_ORDER = ["dupe", "said", "noident", "noemail", "nopw"];
+var ATTN_ORDER = ["dupe", "said", "noident", "noemail", "nopw", "samename"];
 function attentionQueue(){
   var out = [];
   var all = registerDupes();          /* once for the whole queue, not per row */

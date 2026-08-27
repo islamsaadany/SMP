@@ -17375,9 +17375,85 @@ the hint had joined the search. The name is read from the row's first text node
 now, and the department test picks one nobody sits in.
 
 
+## 131 · The register notices two people whose name reads the same (v3.49)
+
+Islam: *"for the names you normally take the first 2 names but you allow me
+to amend the name in the edit. can you notify me as an issue to address if 2
+people their 1st 2 names are the same so I can edit one of them."*
+
+### 131.1 A notice, never a mark — and why §81.1 was not enough
+
+§81.1 already answers half of this: when two GUESSES collide, the register
+lengthens both until they differ, so the page itself stays readable. What it
+never did is tell anybody, and its own comment ("fixing it beats flagging
+it") was written before there was a queue to flag INTO — §116 built one. The
+two halves are now one answer: the display keeps the automatic lengthening,
+and the pair joins the **Attention queue** until somebody decides what each
+of them is actually called, which is exactly the act Islam described — open
+the person, amend the Name, done.
+
+**It is a queue entry and never a `.dupemark`.** §87 settled that a shared
+name is not evidence of one human — this tenant genuinely holds two people
+whose first four names are identical — so the row wears nothing and
+`personDupe()` deliberately does not read the new `read` groups. A mark is
+an accusation; this is a notice. For the same reason it is **last in
+`ATTN_ORDER`**: a collision, a declaration and a missing identifier are all
+worse than a name that reads ambiguously out loud.
+
+### 131.2 The comparison is what was STORED OR GUESSED, not what is drawn
+
+`readName()` is the typed `known` or the flat two-name guess — deliberately
+NOT `knownName()` with the display map, because §81.1's lengthening is a
+disambiguation drawn OVER the collision and comparing the drawn labels would
+report the problem as already solved. Two consequences worth keeping:
+
+- **A typed Name that still collides is still flagged.** §81.1 only ever
+  lengthens guess-vs-guess; a typed value is never lengthened, so a typed
+  "Ahmed Mostafa" beside somebody whose guess is "Ahmed Mostafa" reads as
+  one person for ever with nothing left to notice it. The group is keyed on
+  the effective value whatever its source.
+- **Amending one clears both.** The dialog's band re-asks `attentionOf()` on
+  every paint (§48.2), so the moment a Name reads apart the pair leaves the
+  queue — asserted through the dialog's own field, not by poking the data.
+
+**Anybody the row already flags as a possible duplicate is left to that
+flag.** The identical twins (a full-name collision) and §87.2's resemblance
+pairs would otherwise be said twice, and worse: telling the SMO to RENAME a
+row that may need MERGING sends them to the wrong control.
+
+### 131.3 What it rides on, and what it found
+
+The `read` groups are one more map in `registerDupes()`'s existing walk —
+computed once per paint beside the maps the queue already receives, so
+`attentionOf()` gets them without a signature change and without a second
+quadratic pass (§53.5: one walk, one caller-supplied result). Retired rows
+are excluded with the same reasoning as the other kinds. Nothing renders
+differently: the queue button, its count, the dialog band and the "N of M"
+counter all carry the new kind through the machinery §116 built.
+
+And the first run against the demo found a real pair: **the two placeholder
+company CEOs both read as "Company CEO,"** — true, visible in the queue, and
+left in the data as the worked example of exactly what this notices.
+
+### 131.4 What proves it
+
+A §131 section in `src/checks/duplicates.py`, beside the Ahmeds it already
+injects: both queued with the counterpart named in full, the entry carrying
+`samename` and never `dupe`, the twins left to the duplicate flag, the
+dialog's band saying it above the very field that clears it, the amendment
+typed through that field clearing BOTH, and a typed value that still
+collides keeping the pair queued. **Run against the pre-§131 build first
+(§94.5): 4 failures, all on the new assertions.** `identity-merge.py`,
+`people-dialog.py`, `table-standard.py` and the full `qa.py` sweep are
+green — the resemblance pair in identity-merge stays a resemblance and
+nothing double-reports it.
+*(Numbered §132–§134 at merge time: written as §131–§133 on the branch,
+and the same-name register work reached `main` first and took §131. Sixth
+renumber on this branch; the rule is unchanged — whoever lands first.)*
+
 ---
 
-## 131 · The key was right, the model was retired, and the heuristic apologised (v3.48)
+## 132 · The key was right, the model was retired, and the heuristic apologised (v3.49)
 
 > Islam's diagnostic, after re-issuing the key: **The API key — WRONG SHAPE —
 > 53 characters, starting AQ.A** … and beneath it, Google answering: *404: This
@@ -17388,7 +17464,7 @@ now, and the department test picks one nobody sits in.
 key that had been refused for two days is accepted — and Google's own message
 names the fix.
 
-### 131.1 Retired for new users, not for old ones
+### 132.1 Retired for new users, not for old ones
 
 `gemini-2.5-flash` still works in Strategy-Formulation, whose Google project
 predates the retirement, and is refused to SMP's fresh project. **The same
@@ -17398,7 +17474,7 @@ variable: *provider names are retired on somebody else's schedule.* The
 DEFAULT moves to `gemini-3.6-flash` (Google's own recommendation, verbatim);
 the override remains for the day this one retires in its turn.
 
-### 131.2 A heuristic never overrules the provider
+### 132.2 A heuristic never overrules the provider
 
 §126's shape test knew one shape — `AIza` + 35 — and the first real key it met
 was **Google's newer `AQ.`-prefixed form**, 53 characters, which the row
@@ -17414,7 +17490,7 @@ know. §124's rule caught from the other side: a word must not claim more than
 was measured, and *"wrong shape"* claimed knowledge of every shape Google will
 ever issue.
 
-### 131.3 What proves it
+### 132.3 What proves it
 
 `test-assistant.js`: the AQ. form recognised (watched to fail with the
 recognition removed — 1 failure, exactly that assertion), the classic form
@@ -17428,7 +17504,7 @@ trigger is a content change, and there is none).
 
 ---
 
-## 132 · The reply that never came back, and the budget that killed it (v3.48)
+## 133 · The reply that never came back, and the budget that killed it (v3.49)
 
 > Islam, with every row of the diagnostic green at last: *"everything is on but
 > I didn't get a reply from the bot."*
@@ -17439,7 +17515,7 @@ no history; a real message carries the conversation so far on top of the 13k
 token corpus, and the model reasons before it answers. Slow is where the two
 paths stop agreeing.
 
-### 132.1 The function died under its own timeout
+### 133.1 The function died under its own timeout
 
 `TIMEOUT_MS` was **12 seconds** — and Vercel's default function cap is **10**.
 So a slow answer never timed out politely: the whole function was killed under
@@ -17453,7 +17529,7 @@ inside 10s.
 20 — comfortably inside the function that hosts it, which is the invariant the
 two numbers must keep whatever they are set to.
 
-### 132.2 Thinking counts
+### 133.2 Thinking counts
 
 On Gemini 2.5+ the model reasons before it speaks and **the reasoning is
 billed against `maxOutputTokens`** — so the old cap of 700 could be consumed
@@ -17462,7 +17538,7 @@ failure and, by §112.2's design, writes nothing. 700 → **2048**: the schema
 still keeps the visible reply short; the headroom is for what the model spends
 before it starts speaking.
 
-### 132.3 Visible to the operator, invisible to the person — again
+### 133.3 Visible to the operator, invisible to the person — again
 
 §112.2's silence is right for the person and was still absolute for the
 operator: a say-path failure was recorded NOWHERE, which is how *"no reply"*
@@ -17474,7 +17550,7 @@ driving a real `say` against a quota-refusing stub: the person's send still
 succeeds, and the log holds `assistant did not answer: … (429: Resource has
 been exhausted)`.
 
-### 132.4 What §131 looked like from production
+### 133.4 What §132 looked like from production
 
 Deployed evidence, for the record: Islam set `GEMINI_MODEL=gemini-3.6-flash`
 himself (the override §104 built for exactly this), and the diagnostic then
@@ -17484,22 +17560,22 @@ remaining silence was this section's, not the key's and not the model's.
 
 ---
 
-## 133 · The thinking cap, and the knob that must not kill the assistant (v3.48)
+## 134 · The thinking cap, and the knob that must not kill the assistant (v3.49)
 
-> The §132 build's first diagnostic on a preview deployment: *"the assistant
+> The §133 build's first diagnostic on a preview deployment: *"the assistant
 > did not answer in time"* — the NEW 20-second budget, blown by the same model
 > that had answered the same question in under 12 the hour before.
 
-### 133.1 Latency was a lottery because reasoning was
+### 134.1 Latency was a lottery because reasoning was
 
 The model thinks before it answers, and how long it thinks varies run to run.
-§132 sized the timeout for the answer and could not size it for the mood.
+§133 sized the timeout for the answer and could not size it for the mood.
 **Answering from a corpus that is IN THE PROMPT is retrieval, not reasoning**,
 so `thinkingConfig: { thinkingBudget: 0 }` goes out with every request and the
 latency stops being weather. The 2048 output headroom stays — a dropped knob or
 a model that thinks regardless must not starve the visible answer.
 
-### 133.2 A config knob must never take the assistant down
+### 134.2 A config knob must never take the assistant down
 
 The knob's contract on a model Google ships tomorrow is unknowable from here —
 and §104's ordering means an unexpected 400 would land as silence. So **a 400
@@ -17512,14 +17588,14 @@ learns the field start being sent it without anybody doing anything.
 asserted, with the stub answering the way Google actually refuses an unknown
 `generationConfig` member.
 
-### 133.3 The preview URL's console error is Vercel's, not ours
+### 134.3 The preview URL's console error is Vercel's, not ours
 
 Recorded because it will be seen again: on a PROTECTED preview deployment,
 Vercel's SSO layer fetches the manifest through `vercel.com/sso-api`, which the
 platform's own CSP (`connect-src 'self'`) rightly blocks. Harmless, absent from
 production, and not a reason to widen the CSP.
 
-### 133.4 What proves it
+### 134.4 What proves it
 
 `test-assistant.js` §6: the cap goes out by default; a refused cap is dropped
 and the question re-asked exactly once; the refusal is remembered for the

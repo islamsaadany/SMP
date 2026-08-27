@@ -54,7 +54,7 @@ const stub = http.createServer(function (req, res) {
       return reply(200, { candidates: [{ content: { parts: [{ text: "not json at all" }] } }] });
     }
     if (MODE === "empty") return reply(200, { candidates: [] });
-    /* THE PROVIDER THAT NEVER HEARD OF THINKING (§133): a 400 naming the
+    /* THE PROVIDER THAT NEVER HEARD OF THINKING (§134): a 400 naming the
        field when it is present, an ordinary answer when it is not — which is
        how Google actually refuses an unknown generationConfig member. */
     if (MODE === "nothink" && LAST && LAST.generationConfig &&
@@ -213,7 +213,7 @@ const stub = http.createServer(function (req, res) {
   ck("and no more of it than that is ever handed out",
      shape && Object.keys(shape).sort().join() === "head,len,looksRight" &&
      !/0{5}/.test(JSON.stringify(shape)), shape);
-  /* GOOGLE'S NEWER FORM IS A KEY, NOT A STRANGER (§131.2). The first real
+  /* GOOGLE'S NEWER FORM IS A KEY, NOT A STRANGER (§132.2). The first real
      AQ.-prefixed key this row ever met was called "a different kind of
      credential" and then accepted by the provider one step later — the
      heuristic must recognise every shape Google issues, and stay humble about
@@ -238,7 +238,7 @@ const stub = http.createServer(function (req, res) {
 
   console.log("\n6 · the thinking cap, and the provider that refuses it");
   /* The cap is SENT by default — retrieval over an in-prompt corpus needs no
-     reasoning, and §132's timeout came straight back at 20s the day the model
+     reasoning, and §133's timeout came straight back at 20s the day the model
      felt like thinking long. */
   assistant._resetThinkCap && assistant._resetThinkCap();
   MODE = "answer"; CALLS = 0;

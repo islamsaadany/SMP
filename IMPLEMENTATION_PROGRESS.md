@@ -6,9 +6,10 @@ version (rules A2 / A11, changed 2026-08-20) — those go only when asked for.
 
 **Where it runs:** Vercel, production tracks `main`. Static files plus two
 serverless functions (`/api/state`, `/api/auth`) against Neon Postgres.
-**Latest version:** v3.47 on `main`
-**Last updated:** 2026-08-26
-**Last updated:** 2026-08-26
+**Latest version:** v3.49 on `main` — §132 (same-name notices) merged over
+§130 (owners, corners — another session's), which took v3.48 and the §130 number
+while this branch was being built.
+**Last updated:** 2026-08-27
 
 **Sign in as:** `SMO` / `1234` — a password change is forced at once (§43.1,
 reversing §19.4).
@@ -64,6 +65,22 @@ Nothing proceeds past this line without an answer.
   is a true signal — do not silence it.
 
 ## Built and verified
+
+### v3.49 — the register notices two people whose name reads the same (§131)
+
+- Islam: *"notify me as an issue to address if 2 people their 1st 2 names are
+  the same so I can edit one of them."* The pair now joins the **Attention
+  queue** on the People register — the button counts them, opening it walks to
+  each with the reason above the fields, naming the other person in full.
+- **A notice, never a duplicate mark** (§87: a shared name is not one human),
+  and it sorts last — collisions, declarations and missing identifiers stay
+  worse. Anybody already flagged as a possible duplicate is left to that flag.
+- **Amending one Name clears both**; a typed Name that still collides stays
+  flagged, because typed values are never auto-lengthened (§81.1).
+- Proved in `checks/duplicates.py` (watched to fail 4 ways on the pre-§131
+  build), with `identity-merge`, `people-dialog`, `table-standard` and the
+  full `qa.py` sweep green. Found on the way: the demo's two placeholder
+  company CEOs genuinely read the same ("Company CEO,") and now say so.
 
 ### v3.47 — building a plan on the platform (§129, spec 020)
 
@@ -124,9 +141,9 @@ test-assistant 33/0 · test-authorize 193/0. **One assertion was rewritten for
 being unfalsifiable** — it measured the row against the panel, and a row is
 inside its own panel by definition.
 
-### v3.48 — the thinking cap (§133)
+### v3.49 — the thinking cap (§134)
 
-§132's 20s budget blew on its first preview run — the same model, the same
+§133's 20s budget blew on its first preview run — the same model, the same
 question, under 12s the hour before. Reasoning time is a lottery, so the fix is
 not a bigger timeout: **thinking is capped at nought**, because answering from
 a corpus that is in the prompt is retrieval, not reasoning. And since the
@@ -136,9 +153,9 @@ be what takes the assistant down. Bad keys are never retried into.
 
 **Verified:** test-assistant 38/0 (retry watched to fail — 2), test-chat 52/0,
 built file byte-identical. The preview URL's CSP console error is Vercel's SSO
-layer fetching the manifest — harmless, absent from production (§133.3).
+layer fetching the manifest — harmless, absent from production (§134.3).
 
-### v3.48 — the reply that never came back (§132)
+### v3.49 — the reply that never came back (§133)
 
 Every diagnostic row green, and still no reply in the chat. The diagnostic and
 the conversation share one code path; what differs is time. Two budgets fixed:
@@ -158,7 +175,7 @@ the conversation share one code path; what differs is time. Two budgets fixed:
 observed in the log with the provider's reason while the send still succeeded ·
 built file byte-identical (server-only).
 
-### v3.48 — the key was right, the model was retired (§131)
+### v3.49 — the key was right, the model was retired (§132)
 
 The re-issued key WORKS — Google's 404 proved authentication passed — and the
 404's own text named the last problem: `gemini-2.5-flash` is retired for new

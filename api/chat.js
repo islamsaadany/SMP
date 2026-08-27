@@ -176,7 +176,7 @@ async function assistantAnswer(client, me, question) {
       kb: kb, question: question, history: hist,
       who: roleWord(me), labels: labels
     });
-    /* VISIBLE TO THE OPERATOR, INVISIBLE TO THE PERSON (§132, §123's rule).
+    /* VISIBLE TO THE OPERATOR, INVISIBLE TO THE PERSON (§133, §123's rule).
        The person's screen stays silent by design — §112.2 — but a failure
        nobody can see anywhere is how "it is not working" went undiagnosable
        twice. One line to the function log, which Vercel keeps and the chat
@@ -479,7 +479,7 @@ module.exports = async function handler(req, res) {
                     "this against the key in AI Studio: a deployment only has the " +
                     "variables that existed when it was BUILT, so a key changed " +
                     "since then needs a redeploy."
-                  /* NOT "wrong" — UNRECOGNISED (§131.2). This branch once
+                  /* NOT "wrong" — UNRECOGNISED (§132.2). This branch once
                      declared any non-AIza value a different kind of credential,
                      and the first real key it met was Google's newer AQ. form,
                      which the provider then accepted. A heuristic never

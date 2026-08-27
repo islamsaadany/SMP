@@ -2980,6 +2980,35 @@
         var k = b.dataset.edit; EDITING[k] = !EDITING[k]; paint();
       });
     });
+    /* ── THE KNOWLEDGE BASE'S PEN (§137) ─────────────────────────────
+       Bound per paint like every control above. The two text fields write on
+       `change` — blur, for a text control — so typing never repaints (§35),
+       and every write ends in paint(), whose §30.1 guard already holds a
+       repaint asked for mid-click until the click lands. An added question's
+       id is kbx<n>, minted outside the shipped ids' namespace, which is what
+       lets one handler serve both kinds of card. */
+    document.querySelectorAll("[data-kbpen]").forEach(function(b){
+      b.addEventListener("click", function(){ KBEDIT = !KBEDIT; paint(); });
+    });
+    document.querySelectorAll("[data-kbq], [data-kba]").forEach(function(f){
+      f.addEventListener("change", function(){
+        var card = f.closest(".kbed"); if (!card) return;
+        var id = f.dataset.kbq || f.dataset.kba;
+        var q = (card.querySelector("[data-kbq]") || {}).value;
+        var a = (card.querySelector("[data-kba]") || {}).value;
+        if (/^kbx\d+$/.test(id)) kbSetAdded(id, q, a); else kbSetOver(id, q, a);
+        paint();
+      });
+    });
+    document.querySelectorAll("[data-kbreset]").forEach(function(b){
+      b.addEventListener("click", function(){ kbResetOver(b.dataset.kbreset); paint(); });
+    });
+    document.querySelectorAll("[data-kbdel]").forEach(function(b){
+      b.addEventListener("click", function(){ kbDropAdded(b.dataset.kbdel); paint(); });
+    });
+    document.querySelectorAll("[data-kbadd]").forEach(function(b){
+      b.addEventListener("click", function(){ kbAddNew(b.dataset.kbadd); paint(); });
+    });
     document.querySelectorAll("input.blabel").forEach(function(inp){
       inp.addEventListener("change", function(){
         BANDS.bands[+inp.dataset.b].label = inp.value || "Unnamed"; paint();

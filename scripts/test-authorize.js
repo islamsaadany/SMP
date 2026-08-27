@@ -108,6 +108,21 @@ refuses(headKey, function (s) { s.group.comms = { fromName: "Raya Trade" }; },
   "a unit head cannot change the communication settings");
 allows("smo", function (s) { s.group.comms = { fromName: "Raya Trade" }; },
   "the SMO can");
+
+/* The knowledge base's overlay (§137) — the same shape as comms: named as
+   setup so the refusal points at the page with the pen, refused to anybody
+   the matrix does not give Setup to, and BOTH ENDS asked (§94.2). */
+refuses(headKey, function (s) { s.group.kb = { ov: { "report-a-figure": { q: "q", a: "mine" } } }; },
+  "a unit head cannot rewrite the knowledge base's answers");
+allows("smo", function (s) { s.group.kb = { ov: { "report-a-figure": { q: "q", a: "mine" } } }; },
+  "the SMO can rewrite an answer");
+(function () {
+  const inc = clone(SEED); inc.group.kb = { add: [{ id: "kbx1", g: "Reporting", q: "q", a: "a" }] };
+  const ch = A.collect(SEED, inc, R.worldOf(SEED))
+              .filter(function (c) { return c.what === "the knowledge base's answers"; })[0];
+  check("a knowledge base change is classified as setup, not as unknown",
+        !!ch && ch.kind === "setup", ch && ch.kind);
+})();
 (function () {
   /* A.collect, NOT A.classify — the lesson §54.5 left further down this file,
      applied forward rather than re-learned. */

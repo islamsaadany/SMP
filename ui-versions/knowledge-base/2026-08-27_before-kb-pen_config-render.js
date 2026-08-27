@@ -3005,62 +3005,9 @@ function recipeText(t){
     .replace(/\{pillar\}/g, L("pillar","bu"));
 }
 
-/* THE PEN'S STATE. File-scope like the other page modes; the page is the
-   office's (§125), so everyone who can open it may edit — the control still
-   asks inOffice() (§42: the gate is on the control) and the server classifies
-   a GROUP.kb change as setup, so both ends answer alike (§94.2). */
-var KBEDIT = false;
-
-function kbEdCard(id, q, a, mark){
-  return '<div class="kbed' + (mark === "edited" ? " on" : "") + '">' +
-    '<input class="kbed-q" data-kbq="' + esc(id) + '" value="' + esc(q) + '">' +
-    '<textarea class="kbed-a" data-kba="' + esc(id) + '">' + esc(a) + '</textarea>' +
-    '<div class="kbed-foot">' +
-      (mark === "edited"
-        ? '<span class="kbed-mark">Edited for this platform</span>' +
-          '<button type="button" class="kbed-reset" data-kbreset="' + esc(id) + '">' +
-            'Back to the standard wording</button>'
-        : "") +
-      (mark === "yours"
-        ? '<span class="kbed-mark quiet">Yours</span>' +
-          '<button type="button" class="kbed-x" data-kbdel="' + esc(id) + '">' +
-            'Remove this question</button>'
-        : "") +
-    '</div></div>';
-}
-
 function kbRecipes(){
   return RECIPES.map(function(g){
-    /* RAW IN EDIT MODE, THE RULE'S IN READ MODE. `kbAdds` drops an entry with
-       nothing in it — right for the corpus and the page, where an empty
-       question says nothing — but the card just minted by "+ Add" IS empty,
-       and filtering it out made the button write state and show nothing
-       (§45.2: a feature that renders nothing looks like one that was never
-       built — caught by driving it, minutes after writing it). */
-    var adds = KBEDIT
-      ? ((GROUP.kb && GROUP.kb.add) || []).filter(function(x){ return x && x.g === g.g; })
-      : SMPRules.kbAdds(GROUP.kb, g.g);
     var items = g.items.map(function(r){
-      /* THE TENANT'S WORDING WINS, by the one rule the assistant also reads
-         (§137, §103): what this page shows IS what the bot answers from. */
-      var o = SMPRules.kbLook(GROUP.kb, r.id);
-      if (KBEDIT) {
-        return kbEdCard(r.id, o ? o.q : r.q, o ? o.a : r.a, o ? "edited" : null);
-      }
-      /* AN OVERRIDE IS TYPED TEXT AND RENDERS AS TEXT. The shipped answers
-         carry deliberate <b> markup and render raw; a rewritten one must not
-         inherit that path — office-only or not, prose typed into a box that
-         comes back as live markup is §43's lesson waiting to repeat. */
-      if (o) {
-        var who0 = r.who || g.who;
-        return '<div class="kb-rec" id="kb-r-' + esc(r.id) + '">' +
-          '<h4 class="kb-q">' + esc(recipeText(o.q)) +
-            (who0 === "office" ? ' <span class="pill kind">Strategy Office</span>' : '') +
-          '</h4>' +
-          recipeText(o.a).split("|").map(function(para){
-            return '<p class="kb-p">' + esc(para) + '</p>';
-          }).join("") + '</div>';
-      }
       /* TWO TRUE ANSWERS TO ONE QUESTION are two entries sharing a `q`
          (spec 016 §5.2b). On the page BOTH are shown, because the knowledge
          base is readable by everyone and the office's answer is not a secret —
@@ -3081,20 +3028,6 @@ function kbRecipes(){
         }).join("") +
       '</div>';
     }).join("");
-    /* The office's own questions, at the foot of the group they were added
-       to — read like any other entry, editable like one of theirs. */
-    items += adds.map(function(x){
-      if (KBEDIT) return kbEdCard(x.id, x.q, x.a, "yours");
-      return '<div class="kb-rec" id="kb-r-' + esc(x.id) + '">' +
-        '<h4 class="kb-q">' + esc(recipeText(x.q)) + '</h4>' +
-        recipeText(x.a).split("|").map(function(para){
-          return '<p class="kb-p">' + esc(para) + '</p>';
-        }).join("") + '</div>';
-    }).join("");
-    if (KBEDIT) {
-      items += '<button type="button" class="kbadd" data-kbadd="' + esc(g.g) + '">' +
-               '+ Add a question to this group</button>';
-    }
     return { id: "how-" + g.g.toLowerCase().replace(/[^a-z]+/g, "-").replace(/^-|-$/g, ""),
              title: g.g, html: items };
   });
@@ -3368,21 +3301,7 @@ function renderKB(){
     }).join("") + '</div>';
 
 
-  /* THE PEN (§137): the office rewrites the answers on the page they are
-     read from. Not cfgHead's data-edit machinery — that drives the EDITING
-     registry and per-field pens; this page has one mode and its own writers —
-     but the same slot on the header line, so the door is where every other
-     page keeps it. */
-  var kbPen = inOffice()
-    ? '<button class="editbtn' + (KBEDIT ? " on" : "") + '" data-kbpen="1">' +
-        (KBEDIT ? "Done" : "\u270e Edit the answers") + '</button>'
-    : "";
-  return cfgHead("Knowledge base", [], null, false, null, null, kbPen) +
-    (KBEDIT
-      ? '<p class="kb-lede kbed-lede">What you write here is what this page shows ' +
-        '<b>and</b> what the assistant answers from \u2014 the two can never disagree. ' +
-        'A blank line is a paragraph break.</p>'
-      : "") +
+  return cfgHead("Knowledge base", [], null, false) +
     /* BOTH SIDES OF THE MERGE BELONG HERE. The lede names the how-tos, which
        exist now (§116); `tourBlock` is the other session's onboarding tour
        (§107), and it opens the page because somebody who has just arrived

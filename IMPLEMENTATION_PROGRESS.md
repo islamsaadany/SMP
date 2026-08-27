@@ -111,6 +111,19 @@ Nothing proceeds past this line without an answer.
   Postgres 16** (§113.7); contrast 52 failures, unchanged, none on the new
   surfaces.
 
+### v3.50 — the knowledge base gets a pen (§137)
+
+The office edits the assistant's scenarios on the page they are read from —
+approved from a mockup first. One precedence rule in `lib/rules.js` feeds the
+page AND the assistant's corpus, so the two can never disagree; overrides ride
+`org.extra`, delete on default, and the shipped wording is always one click
+back. Standard entries can be rewritten but never deleted; own questions can be
+added per group and removed. Typed text renders escaped.
+
+**Verified:** driven against a real Postgres including the reload round trip ·
+kb-pen.py ALL CLEAR, failing 2 ways with the rule broken · test-assistant 45/0
+· test-authorize 215/0 · extract-kb --check in step · qa.py clean.
+
 ### v3.50 — the send says what is happening (§136)
 
 The "glitch": with the assistant on, `say` holds its response for the model

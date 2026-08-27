@@ -18046,3 +18046,66 @@ stuck line); `checks/office-chat.py` §13 holds all of it permanently and fails
 3 ways against the pre-§136 build. One of its own assertions was rewritten on
 first contact: it asserted the product's failure sentence against the stub's
 own terse error, which is the server-sentence path working as designed.
+
+
+---
+
+## 137 · The knowledge base gets a pen (v3.50)
+
+> Islam: *"can you give me access in the setup page to the scenarios questions
+> and answers so I can refine the reply content."* Settled from a mockup of the
+> real page and approved before a line of src/ was touched.
+
+### 137.1 One corpus, so one precedence rule
+
+The scenarios feed **two things at once**: the Knowledge base page people read
+and the corpus the assistant answers from — §103's coupling, which is the whole
+reason editing them is safe. So the tenant's overrides apply to **both in the
+same breath**, and the precedence — which wording wins — is written **once, in
+`lib/rules.js`** (`kbLook` / `kbAdds`): the page renders through it and
+`assistant.withTenant()` merges through it. Two readers of the shape are fine;
+two definitions of who wins is how they start disagreeing.
+
+`GROUP.kb` rides `org.extra` like `GROUP.chat` — no migration —
+as `{ ov: { id: {q,a} }, add: [ {id,g,q,a} ] }`. **The writers delete on
+default** (§50.6): an answer typed back to the shipped wording deletes its key,
+and the last key leaving deletes `GROUP.kb`, so a tenant that touched the pen
+and thought better is byte-identical to one that never did. Added questions are
+minted `kbx<n>`, outside the shipped ids' namespace (§87, kept trivially).
+
+### 137.2 The pen is the page's, and a standard entry cannot be deleted
+
+The pen sits on the Knowledge base page's own header line — the office's page
+since §125, so everyone who can open it may edit; the control still asks
+`inOffice()` (§42) and the server classifies a `GROUP.kb` change as **setup**,
+named, beside `comms` (§94.2: both ends answer alike). A shipped entry can be
+**rewritten but never removed** — *Back to the standard wording* is always one
+click and the shipped text is never lost — while an added question carries
+*Yours* and can be removed. The one honest cost, stated when it was approved:
+**an overridden entry stops receiving improvements to the shipped wording**;
+the *Edited* chip is what keeps those findable.
+
+### 137.3 Typed text renders as text
+
+The shipped answers carry deliberate `<b>` markup and render raw; a rewritten
+answer is typed prose and **renders escaped**, or the pen becomes §43's lesson
+waiting to repeat. Asserted with a live `onerror` payload: the read view shows
+the literal text, no element, no execution.
+
+### 137.4 Found by driving, minutes after writing
+
+`kbAdds` drops an entry with nothing in it — right for the corpus and the read
+view — and the card just minted by *+ Add* **is** empty, so the button wrote
+state and showed nothing (§45.2 exactly). The edit view lists additions raw;
+the rule stays for everything that reads.
+
+### 137.5 What proves it
+
+Driven end to end against a **real Postgres**: override → chip → read view in
+the tenant's words → **reload** (the org.extra round trip) → reset + remove →
+`GROUP.kb` gone. `checks/kb-pen.py` holds the surface permanently — the pen,
+the cards, the data changing on every press (§96), the escape, §50.6, and the
+absences (no pen off-office) — and failed 2 ways with `kbLook` broken before
+its green was believed (§94.5). `test-assistant` §7 proves the corpus carries
+the tenant's words and not the old ones (6 assertions, malformed blob
+included); `test-authorize` asks both ends and the classification (3).

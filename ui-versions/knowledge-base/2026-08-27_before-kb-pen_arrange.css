@@ -1204,35 +1204,3 @@
      it reaches every table using the pattern and nothing else. */
   td:has(> .fld + .xbtn) > .fld { width: calc(100% - 30px); vertical-align: middle; }
   td:has(> .fld + .xbtn) > .xbtn { vertical-align: middle; margin-left: 5px; }
-
-/* ── THE KNOWLEDGE BASE'S PEN (§137) ──────────────────────────────────
-   In arrange.css, concatenated last, because config.css has eaten three
-   silently-duplicated rules already (§29.2, §51.5, §53.6) and one comment
-   (§93.11). The look is the approved mockup's: quiet cards, the platform's
-   own tokens throughout, nothing brandable. */
-.kbed { border:1px solid var(--line); border-radius:8px; padding:14px 16px;
-        margin:10px 0; background:var(--surface); }
-.kbed.on { border-color:var(--gold); box-shadow:0 0 0 1px var(--gold); }
-.kbed-q { width:100%; font:inherit; font-weight:650; border:1px solid var(--line);
-          border-radius:6px; padding:7px 10px; margin-bottom:8px;
-          background:var(--surface); color:var(--ink); }
-.kbed-a { width:100%; font:inherit; font-size:var(--fs-note); line-height:1.55;
-          border:1px solid var(--line); border-radius:6px; padding:8px 10px;
-          min-height:96px; resize:vertical; background:var(--surface); color:var(--ink); }
-.kbed-q:focus-visible, .kbed-a:focus-visible { outline:2px solid var(--focus); outline-offset:-1px; }
-.kbed-foot { display:flex; gap:12px; align-items:center; margin-top:8px; }
-.kbed-mark { font-size:var(--fs-micro); letter-spacing:.09em; text-transform:uppercase;
-             font-weight:700; color:var(--gold-deep); border:1px solid var(--gold);
-             border-radius:99px; padding:2px 9px; }
-.kbed-mark.quiet { color:var(--ink-3); border-color:var(--line); }
-.kbed-reset { font:inherit; font-size:var(--fs-small); background:none; border:none;
-              color:var(--ink-3); text-decoration:underline; cursor:pointer; padding:0; }
-.kbed-reset:hover { color:var(--ink); }
-.kbed-x { margin-left:auto; font:inherit; font-size:var(--fs-small); color:var(--bad);
-          background:none; border:none; text-decoration:underline; cursor:pointer; }
-.kbadd { display:block; width:100%; text-align:left; font:inherit; font-size:var(--fs-small);
-         font-weight:600; color:var(--gold-deep); background:none;
-         border:1px dashed var(--line); border-radius:8px; padding:11px 16px;
-         margin:6px 0 4px; cursor:pointer; }
-.kbadd:hover { border-color:var(--gold); }
-.kbed-lede b { color:var(--ink); }

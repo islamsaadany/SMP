@@ -574,6 +574,80 @@ function commsSet(key, value){
    ever. So a value set back to its default DELETES its key, and the last key
    leaving deletes `GROUP.chat` — a tenant that has never opened the menu, or
    has put everything back, writes nothing at all. */
+/* ── The knowledge base's pen (§137) ─────────────────────────────────
+   GROUP.kb rides org.extra like GROUP.chat above: { ov: { id: {q,a} },
+   add: [ {id,g,q,a} ] }. THE WRITERS DELETE ON DEFAULT (§50.6): an answer
+   put back to the shipped wording deletes its key, the last key leaving
+   deletes GROUP.kb, so a tenant that has never touched the pen and one that
+   touched it and thought better are byte-identical. What the overrides MEAN
+   is `SMPRules.kbLook` / `kbAdds` — one precedence rule for the page and
+   the assistant both (§103). */
+function kbShipped(id){
+  for (var i = 0; i < RECIPES.length; i++){
+    var g = RECIPES[i];
+    for (var j = 0; j < g.items.length; j++){
+      if (g.items[j].id === id) return g.items[j];
+    }
+  }
+  return null;
+}
+function kbWritable(){
+  if (!GROUP.kb || typeof GROUP.kb !== "object") GROUP.kb = {};
+  return GROUP.kb;
+}
+function kbPrune(){
+  var k = GROUP.kb;
+  if (!k) return;
+  if (k.ov && !Object.keys(k.ov).length) delete k.ov;
+  if (k.add && !k.add.length) delete k.add;
+  if (!Object.keys(k).length) delete GROUP.kb;
+}
+function kbSetOver(id, q, a){
+  var std = kbShipped(id);
+  if (!std) return;
+  q = String(q == null ? "" : q).trim();
+  a = String(a == null ? "" : a).trim();
+  /* Emptied or typed back to the shipped words, the override dies — an
+     override that stores the standard wording is a phantom change in every
+     save (§42, §50.6). */
+  var k = kbWritable();
+  if ((!q || q === std.q) && (!a || a === std.a)) {
+    if (k.ov) delete k.ov[id];
+  } else {
+    if (!k.ov) k.ov = {};
+    k.ov[id] = { q: q || std.q, a: a || std.a };
+  }
+  kbPrune();
+}
+function kbResetOver(id){
+  if (GROUP.kb && GROUP.kb.ov) delete GROUP.kb.ov[id];
+  kbPrune();
+}
+function kbAddNew(g){
+  var k = kbWritable();
+  if (!k.add) k.add = [];
+  /* Minted outside the shipped namespace: recipe ids are words, these are
+     kbx1… — §87's rule about names and identifiers, kept trivially. */
+  var n = 1;
+  while (k.add.some(function(x){ return x.id === "kbx" + n; })) n++;
+  k.add.push({ id: "kbx" + n, g: g, q: "", a: "" });
+  return "kbx" + n;
+}
+function kbSetAdded(id, q, a){
+  var k = GROUP.kb;
+  if (!k || !k.add) return;
+  var e = k.add.filter(function(x){ return x.id === id; })[0];
+  if (!e) return;
+  e.q = String(q == null ? "" : q).trim();
+  e.a = String(a == null ? "" : a).trim();
+}
+function kbDropAdded(id){
+  var k = GROUP.kb;
+  if (!k || !k.add) return;
+  k.add = k.add.filter(function(x){ return x.id !== id; });
+  kbPrune();
+}
+
 function chatCfg(){ return SMPRules.chatCfg(GROUP.chat); }
 function chatWritable(){
   if (!GROUP.chat || typeof GROUP.chat !== "object") GROUP.chat = {};

@@ -173,7 +173,9 @@ async function assistantAnswer(client, me, question) {
     const org = (await client.query("SELECT extra FROM org WHERE id = 1")).rows[0] || {};
     const labels = ((org.extra || {}).labels) || {};
     const out = await assistant.ask({
-      kb: kb, question: question, history: hist,
+      /* The tenant's rewritten and added answers, laid over the shipped
+         corpus by the same rule the page renders with (§137). */
+      kb: assistant.withTenant(kb, (org.extra || {}).kb), question: question, history: hist,
       who: roleWord(me), labels: labels
     });
     /* VISIBLE TO THE OPERATOR, INVISIBLE TO THE PERSON (§133, §123's rule).
@@ -496,12 +498,15 @@ module.exports = async function handler(req, res) {
                "built — if it was added since, redeploy.",
            !shape ? null : shape.looksRight ? "present" : "unrecognised");
 
-      /* THE CALL ITSELF, only once there is something to call with. */
+      /* THE CALL ITSELF, only once there is something to call with — against
+         the corpus AS THIS TENANT HAS IT (§137), or the diagnostic would test
+         a corpus nobody is answered from. */
       if (kb && assistant.configured()) {
+        const orgT = (await client.query("SELECT extra FROM org WHERE id = 1")).rows[0] || {};
         const q = "How is my unit's headline number worked out?";
         const out = await assistant.ask({
-          kb: kb, question: q, history: [],
-          who: "a member of the Strategy Office", labels: {}
+          kb: assistant.withTenant(kb, (orgT.extra || {}).kb), question: q, history: [],
+          who: "a member of the Strategy Office", labels: ((orgT.extra || {}).labels) || {}
         });
         if (out && out.badKey) {
           /* REPORTED AGAINST THE KEY, because that is what is wrong and that

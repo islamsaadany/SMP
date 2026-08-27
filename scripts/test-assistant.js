@@ -283,7 +283,32 @@ const stub = http.createServer(function (req, res) {
   assistant._resetThinkCap();
   MODE = "answer";
 
-  console.log("\n7 · what actually goes to the provider");
+  console.log("\n7 · the tenant's own words over the shipped ones (§137)");
+  {
+    const shipped = { recipes: [
+      { id: "r1", group: "G", q: "old question", a: "old answer", who: "everyone" },
+      { id: "r2", group: "G", q: "kept question", a: "kept answer", who: "everyone" }
+    ], sections: [], pages: [] };
+    const t = { ov: { r1: { q: "new question", a: "new answer" } },
+                add: [ { id: "kbx1", g: "G", q: "own question", a: "own answer" },
+                       { id: "kbx2", g: "G", q: "", a: "" } ] };
+    const m = assistant.withTenant(shipped, t);
+    ck("an override replaces the shipped wording",
+       m.recipes[0].q === "new question" && m.recipes[0].a === "new answer", m.recipes[0]);
+    ck("an untouched entry is untouched", m.recipes[1].a === "kept answer");
+    ck("an added question joins the corpus, and an empty one does not",
+       m.recipes.length === 3 && m.recipes[2].id === "kbx1", m.recipes.length);
+    const text = assistant.corpusText(m, {});
+    ck("the corpus the model reads carries the tenant's words and not the old ones",
+       text.indexOf("new answer") > -1 && text.indexOf("old answer") === -1 &&
+       text.indexOf("own answer") > -1, null);
+    ck("no tenant, no change — the same object back", assistant.withTenant(shipped, null) === shipped);
+    ck("a malformed tenant blob changes nothing",
+       JSON.stringify(assistant.withTenant(shipped, { ov: "junk", add: 7 }).recipes) ===
+       JSON.stringify(shipped.recipes));
+  }
+
+  console.log("\n8 · what actually goes to the provider");
   MODE = "answer";
   await assistant.ask({ kb: kb, question: "how do I report", history: [], who: "a strategy custodian", labels: { pillar: "direction", pillars: "directions" } });
   const sys = (LAST.systemInstruction.parts || []).map(function (p) { return p.text; }).join("\n");

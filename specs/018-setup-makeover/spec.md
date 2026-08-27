@@ -1,6 +1,6 @@
 # 018 · The Setup makeover
 
-**Version:** v3.30 · **Decisions:** §108 · **Status:** answered; built
+**Version:** v3.30 · **Decisions:** §108, §120, §121 · **Status:** answered; built
 **Constitution:** checked against v1.1.0.
 
 Islam: *"Rethink the whole settings page. The design, the grouping, the
@@ -141,7 +141,44 @@ at. Never a zero; never for somebody who cannot clear it (§69); and on a group
 heading only while that group is folded, because an open group's rows already
 speak for themselves.
 
-## 8 · Still open
+## 8 · Corrections after it shipped (§116)
+
+Assessed against the LIVE build once it reached a real client tenant. Everything
+in Option A was merged and deployed; four things came out of laying the built
+product beside the signed-off mockup:
+
+1. **A cycle with no dates printed its separators** — *"to · due · as of Q4"*.
+   Now one shared `cycleMeta()` both the Overview and the Reporting cycle read,
+   saying *"Dates not set"* rather than punctuating an absence. Not introduced
+   by the Overview: the same line predates it on the cycle page.
+2. **The rail's glyphs were drawn in the mockup and never built** — the only
+   one of the five HR_ERP practices that did not arrive. Adding them exposed
+   that `group-extra.css` had been styling this rail as a two-column grid all
+   along, and that one mark (`⌗`) renders as an empty box in the product's font.
+3. **People & access is back in the drawn order** — register, roles, BU list.
+4. **The strip's way through keeps its place** — 19px from the right edge at
+   every width from 1920 to 1024, and the strip never exceeds 145px.
+
+## 9 · The pages sit still (§121)
+
+Five notes on the built product, settled from a measured mockup. Two were not
+what they looked like: the rail's head and search **already** stick (they move
+33px and pin), so the ask was about the pane's title; and the title's problem
+was not its size but that it had no container.
+
+- **Named once, in the rail's word.** The shell draws the page's name from the
+  def's label, and a section heading repeating it is dropped — compared against
+  the name, never by position, so a real first section keeps its heading.
+  Fixes two duplicates and five pages that disagreed with the rail.
+- **The name and the table head stay on screen**, pinned at the rail's own
+  offset expression, with §53.7's ground filler over the strip above.
+  `.peoplebox` and `.srctable` keep their own in-box sticky heads.
+- **36px rows**, and the long label shortened to *Import & archives* rather
+  than clipped: in a navigation list the label is the destination.
+- **A hairline between table headings**, which at a narrow pane were merging
+  into one word.
+
+## 10 · Still open
 
 Nothing from this makeover. The two candidates deliberately NOT built:
 **data-search** (a typed person's name jumping to their register row) — a real

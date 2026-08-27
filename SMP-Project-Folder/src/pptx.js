@@ -56,9 +56,28 @@ function pptxColors(){
     bar:   strip(b.bar,    "#16325C"),      /* headers — the navigation's own */
     accent:strip(b.accent, "#C9A24D"),      /* the mark, sparingly (§41) */
     ink:   "1B2740", quiet:"5E6E88", ground:"FFFFFF", line:"DCE3ED",
-    zebra: "F2F5F9"
+    zebra: "F2F5F9",
+    /* The platform's own light --bad: what `.missing` wears on screen, worn
+       here on the slide's white ground (§119). */
+    bad:   "B04434"
   };
 }
+
+/* ── MISSING IS SAID, IN BOLD RED (§119) ─────────────────────────────
+   Islam: "identify the missing areas of the plan and type missing in bold red
+   so they know what they need to fill." The deck used to print an em-dash for
+   an empty plan fact, which reads as "nothing to say" when the truth is
+   "nobody has said it yet" — the same distinction §35 drew for the password
+   column. The product already marks an unset target `Missing` in red
+   (`.missing`, §104.10's family); the slides now speak the same word.
+
+   NOT every blank is a gap: collaborators are optional by design, and a
+   quarter column left unmarked is the mark. What gets the word is what the
+   PLAN OWES — a direction, a target, a compile rule, a tactic's owner, a
+   project's owner and dates, a capability's definition, the aspiration, and
+   an empty SWOT quadrant. */
+var PPTX_MISS = { miss: true };
+function orMiss(v){ return v ? v : PPTX_MISS; }
 
 /* ── The DrawingML fragments ────────────────────────────────────────── */
 function pptxRun(text, o){
@@ -92,10 +111,21 @@ function pptxText(id, box, paras, o){
    ink — §38.5: a surface with its own ground needs its own ink. */
 function pptxTable(id, box, widths, head, rows){
   var C = pptxColors();
-  function cell(text, hdr, ri){
+  function cell(c, hdr, ri){
+    /* A cell is a string, or an object: `{miss:true}` renders the bold red
+       Missing (§119); `{t, align}` carries a mark that wants centring. */
+    var o = (c !== null && typeof c === "object") ? c : { t: c };
+    /* Three weights: the header, a GAP (the word Missing), and an ordinary
+       value — plus `alarm`, which is an ordinary value wearing the gap's
+       colour, for a mark that says something is owed without being a word
+       (§128.1: the quarter ticks). */
+    var runOpts = hdr     ? { sz:1100, b:true, color:C.ground }
+                : o.miss  ? { sz:1100, b:true, color:C.bad }
+                : o.alarm ? { sz:1100, b:true, color:C.bad }
+                :           { sz:1100, color:C.ink };
     return '<a:tc><a:txBody><a:bodyPr/><a:lstStyle/>' +
-      pptxPara(pptxRun(text, hdr ? { sz:1100, b:true, color:C.ground }
-                                 : { sz:1100, color:C.ink })) +
+      pptxPara(pptxRun(o.miss ? "Missing" : (o.t == null ? "" : o.t), runOpts),
+               o.align ? { align: o.align } : undefined) +
       '</a:txBody><a:tcPr marL="72000" marR="72000" marT="36000" marB="36000">' +
       '<a:lnB w="6350"><a:solidFill><a:srgbClr val="' + C.line + '"/></a:solidFill></a:lnB>' +
       '<a:solidFill><a:srgbClr val="' +
@@ -164,10 +194,56 @@ function pptxTableSlides(kicker, title, widths, head, rows){
   return out;
 }
 
-function pptxQuarters(t){
-  var qs = ["q1","q2","q3","q4"].map(function(q, i){ return t[q] ? "Q" + (i + 1) : null; })
-    .filter(Boolean);
-  return qs.length ? qs.join(" · ") : "—";
+/* One cell per quarter, a mark where the tactic runs (§119 — Islam: "make
+   the tactics columns a column for each Q with a mark for the qs in action",
+   the shape the plan workbook's Q1–Q4 columns already have). */
+function pptxQCells(t){
+  /* AN UNTICKED QUARTER IS THE MARK; NO QUARTER AT ALL IS A GAP (§128.1,
+     corrected by Islam the same day).
+
+     §128 first answered this by merging one bold red `Missing` across the
+     four columns. Islam: "you changed the quarters columns format to type
+     missing that's wrong, the template should stay the same — revert the
+     columns of the quarters to separate columns and maybe make check marks in
+     bold red inside all as an indicator of missing."
+
+     THE COLUMN SHAPE IS THE TEMPLATE'S AND IS NOT MINE TO SPEND. The four Q
+     columns exist because the plan workbook has four, and a reader moves
+     between the two; a table that keeps its grid on every row can be scanned
+     down, and one whose cells merge when a row is incomplete cannot. Saying
+     the gap cost the shape that carries every other row — a bad trade, and
+     the mark can carry the alarm on its own.
+
+     SO THE MARK CHANGES COLOUR RATHER THAN THE TABLE CHANGING SHAPE: all four
+     quarters ticked in bold red says "this runs everywhere" in the one colour
+     the deck uses for nothing but a gap, beside a Missing owner in the same
+     red. §119.1 is untouched — a tactic that names SOME quarters is answering
+     the question, and its ticks stay the ordinary ink. */
+  var any = ["q1","q2","q3","q4"].some(function(q){ return t[q]; });
+  if (!any) return ["q1","q2","q3","q4"].map(function(){
+    return { t:"\u2713", align:"ctr", alarm:true };
+  });
+  return ["q1","q2","q3","q4"].map(function(q){
+    return { t: t[q] ? "\u2713" : "", align: "ctr" };
+  });
+}
+
+/* THE DECK CLOSES THE WAY THE REVIEW DECK CLOSES (§119.8). Islam: "add a
+   thank you page at the end of the ppt." `present.js` has ended on a
+   `d-thanks` cover slide since the deck existed — same words, same shape, the
+   subject's name under a rule — so this is the plan deck learning the manners
+   the projected one already has rather than a new idea (§53.5). */
+function pptxThanks(name, subLine){
+  var C = pptxColors();
+  return pptxSlideXml([
+    pptxText(2, { x:0, y:0, cx:PPTX_W, cy:PPTX_H }, [pptxPara(pptxRun(" ", { sz:100 }))], { fill:C.bar }),
+    pptxText(3, { x:PPTX_MX, y:2834640, cx:PPTX_CW, cy:1005840 },
+      [pptxPara(pptxRun("Thank you", { sz:4400, b:true, color:C.ground }))]),
+    pptxText(4, { x:PPTX_MX, y:3931920, cx:1828800, cy:45720 },
+      [pptxPara(pptxRun(" ", { sz:100 }))], { fill:C.accent }),
+    pptxText(5, { x:PPTX_MX, y:4114800, cx:PPTX_CW, cy:365760 },
+      [pptxPara(pptxRun(subLine, { sz:1400, color:C.ground }))])
+  ]);
 }
 
 function pptxCover(orgLine, name, subLine){
@@ -199,33 +275,40 @@ function pptxUnitSlides(u, kicker){
     found.push(pptxPara([pptxRun(c[0] + "  ", { sz:1200, b:true, color:C.quiet }),
                          pptxRun(c[1], { sz:1200 })], { before:600 }));
   });
+  /* The Foundation slide is ALWAYS in the deck since §119: a slide skipped
+     for being empty hides exactly the gap the Missing marks exist to show. */
   var fShapes = pptxHead(kicker, "Foundation");
-  if (u.aspiration) fShapes.push(pptxText(6,
+  fShapes.push(pptxText(6,
     { x:PPTX_MX, y:PPTX_TABLE_Y, cx:PPTX_CW, cy:1188720 },
     [pptxPara(pptxRun("ASPIRATION", { sz:1000, b:true, color:C.quiet })),
-     pptxPara(pptxRun(u.aspiration, { sz:1500, i:true, color:C.bar }), { before:600 })],
+     u.aspiration
+       ? pptxPara(pptxRun(u.aspiration, { sz:1500, i:true, color:C.bar }), { before:600 })
+       : pptxPara(pptxRun("Missing", { sz:1500, b:true, color:C.bad }), { before:600 })],
     { fill:C.zebra }));
   if (found.length) fShapes.push(pptxText(7,
     { x:PPTX_MX, y:2705100, cx:PPTX_CW, cy:2971800 }, found));
-  if (u.aspiration || found.length) slides.push(pptxSlideXml(fShapes));
+  slides.push(pptxSlideXml(fShapes));
 
   var kos = u.keyObjectives || [];
   if (kos.length) slides = slides.concat(pptxTableSlides(kicker, "Key objectives",
     [4754880, 914400, 2621280, 2621280],
     ["Objective", "Dir.", "This year's target", "3-year target"],
-    kos.map(function(k){ return [k.name, k.dir || "", k.target || "—", k.target3y || "—"]; })));
+    kos.map(function(k){ return [k.name, orMiss(k.dir), orMiss(k.target), orMiss(k.target3y)]; })));
 
   /* The SWOT, asked for by name (Islam, 2026-08-26). Four boxes, two rows —
      the shape the Analysis page draws. */
   var sw = u.swot || {};
-  if ((sw.s || []).length || (sw.w || []).length || (sw.o || []).length || (sw.t || []).length) {
+  (function(){
     var half = (PPTX_CW - 228600) / 2, boxH = 2103120, id = 6;
     var quad = function(x, y, title, items){
-      return pptxText(id++, { x:x, y:y, cx:half, cy:boxH },
-        [pptxPara(pptxRun(title.toUpperCase(), { sz:1050, b:true, color:C.bar }))].concat(
-          (items || []).map(function(t){
+      var body = (items || []).length
+        ? (items || []).map(function(t){
             return pptxPara(pptxRun("·  " + t, { sz:1000 }), { before:300 });
-          })), { fill:C.zebra });
+          })
+        : [pptxPara(pptxRun("Missing", { sz:1100, b:true, color:C.bad }), { before:300 })];
+      return pptxText(id++, { x:x, y:y, cx:half, cy:boxH },
+        [pptxPara(pptxRun(title.toUpperCase(), { sz:1050, b:true, color:C.bar }))].concat(body),
+        { fill:C.zebra });
     };
     slides.push(pptxSlideXml(pptxHead(kicker, "Analysis — SWOT").concat([
       quad(PPTX_MX, PPTX_TABLE_Y, "Strengths", sw.s),
@@ -233,7 +316,7 @@ function pptxUnitSlides(u, kicker){
       quad(PPTX_MX, PPTX_TABLE_Y + boxH + 182880, "Opportunities", sw.o),
       quad(PPTX_MX + half + 228600, PPTX_TABLE_Y + boxH + 182880, "Threats", sw.t)
     ])));
-  }
+  })();
 
   /* One pillar, two tables, two slides — measures then tactics, the order the
      Plan pane reads them in. */
@@ -244,16 +327,17 @@ function pptxUnitSlides(u, kicker){
       [5303520, 914400, 2346960, 2346960],
       ["Measure", "Dir.", "Target", "Compiles"],
       (p.measures || []).map(function(m){
-        return [m.name, m.dir || "", m.target || "—", m.compile || "—"];
+        return [m.name, orMiss(m.dir), orMiss(m.target), orMiss(m.compile)];
       })));
     slides = slides.concat(pptxTableSlides(pk, p.name + " — Tactics",
-      [5303520, 2103120, 2103120, 1402080],
-      ["Tactic", "Owner", "Collaborators", "Quarters"],
+      [4571760, 2103120, 1676400, 640140, 640140, 640140, 640140],
+      ["Tactic", "Owner", "Collaborators", "Q1", "Q2", "Q3", "Q4"],
       (p.tactics || []).map(function(t){
-        return [t.name, t.owner || "—",
-                (t.collaborators || []).join(", ") || "—", pptxQuarters(t)];
+        return [t.name, orMiss(t.owner),
+                (t.collaborators || []).join(", ") || "—"].concat(pptxQCells(t));
       })));
   });
+  slides.push(pptxThanks(u.name, (GROUP.org || "") + " \u00b7 Strategy plan"));
   return slides;
 }
 
@@ -269,29 +353,33 @@ function pptxFnSlides(fk){
     "Strategy plan — as agreed, no reported figures · " + today));
   capsOfFunction(fk).forEach(function(c){
     var shapes = pptxHead(f.name, c.name);
-    if (c.def) shapes.push(pptxText(6, { x:PPTX_MX, y:PPTX_TABLE_Y, cx:PPTX_CW, cy:960120 },
+    shapes.push(pptxText(6, { x:PPTX_MX, y:PPTX_TABLE_Y, cx:PPTX_CW, cy:960120 },
       [pptxPara(pptxRun("WHAT IT IS", { sz:1000, b:true, color:C.quiet })),
-       pptxPara(pptxRun(c.def, { sz:1300, i:true, color:C.bar }), { before:600 })],
+       c.def
+         ? pptxPara(pptxRun(c.def, { sz:1300, i:true, color:C.bar }), { before:600 })
+         : pptxPara(pptxRun("Missing", { sz:1300, b:true, color:C.bad }), { before:600 })],
       { fill:C.zebra }));
     var kos = c.keyObjectives || [];
     if (kos.length) shapes.push(pptxTable(7,
-      { x:PPTX_MX, y:c.def ? 2529840 : PPTX_TABLE_Y, cx:PPTX_CW },
+      { x:PPTX_MX, y:2529840, cx:PPTX_CW },
       [5760720, 914400, 2118360, 2118360],
       ["Key objective", "Dir.", "Target", "Weight"],
       kos.slice(0, 8).map(function(k){
-        return [k.name, k.dir || "", k.target || "—", k.weight != null ? k.weight + "%" : "—"];
+        return [k.name, orMiss(k.dir), orMiss(k.target),
+                k.weight != null ? k.weight + "%" : PPTX_MISS];
       })));
     slides.push(pptxSlideXml(shapes));
     slides = slides.concat(pptxTableSlides(f.name + " · " + c.name, "Projects",
       [3931920, 1737360, 1188720, 1188720, 2865120],
       ["Project", "Owner", "Start", "End", "Carries"],
       (c.projects || []).map(function(p){
-        return [p.name, p.owner || "—", p.start || "—", p.end || "—",
+        return [p.name, orMiss(p.owner), orMiss(p.start), orMiss(p.end),
           plural((p.deliverables || []).length, "deliverable") + " · " +
           plural((p.outcomes || []).length, "outcome") + " · " +
           plural((p.milestones || []).length, "milestone")];
       })));
   });
+  slides.push(pptxThanks(f.name, (GROUP.org || "") + " \u00b7 Strategy plan"));
   return slides;
 }
 

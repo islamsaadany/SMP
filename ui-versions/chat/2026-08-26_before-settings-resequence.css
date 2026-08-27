@@ -1,0 +1,370 @@
+/* ══ TALKING TO THE STRATEGY OFFICE (§97) ═══════════════════════════════════
+   The corner, the panel it opens, and the office's own inbox on Setup.
+
+   CONCATENATED LAST, like arrange.css, and for the same reason: everything in
+   here is new furniture that has to sit on top of the page it floats over, and
+   a rule that loses to `.cfg table` on source order is a rule that silently
+   does nothing (§93.11, §29.2, §51.5 — four times in this project already).
+
+   THE BUBBLE WEARS --panel, NOT THE ACCENT. It is chrome, not content: --panel
+   is the colour Setup › Branding sets for the navigation bar, so the corner
+   follows the tenant's brand the way the bar does and never has to be decided
+   again per client (§41.10). The only accent on it is the unread COUNT — one
+   small solid mark, which is what the accent budget is for (§41).
+   ────────────────────────────────────────────────────────────────────────── */
+
+.chatdock { position:fixed; right:18px; bottom:18px; z-index:45;
+            display:flex; flex-direction:column; align-items:flex-end; gap:10px; }
+.chatdock[hidden] { display:none; }
+/* OPEN, THE BUBBLE IS GONE (§100.4). It sat under the panel, pushing it 60px
+   up from the bottom of the window and offering to open what was already
+   open. With it gone the panel's bottom edge is the dock's, which is where
+   the bubble was — so the panel opens exactly where it was pressed. */
+.chatdock.chopen .chatbtn { display:none; }
+
+/* A DECK IS NOT A PLACE FOR A CHAT BUBBLE. Presentation puts the platform on a
+   projector in front of the board, and a floating control in the corner of a
+   slide is the wrong kind of surprise. Done in CSS off the class present.js
+   already sets, so there is no second piece of state to keep in step. */
+body.presenting .chatdock { display:none; }
+
+.chatbtn { width:50px; height:50px; border-radius:50%; border:none; cursor:pointer;
+           background:var(--panel); color:var(--panel-ink); position:relative;
+           box-shadow:0 3px 14px rgba(0,0,0,.22);
+           display:grid; place-items:center; padding:0; }
+.chatbtn:hover { background:var(--panel-hover); }
+.chatbtn:focus-visible { outline:2px solid var(--focus); outline-offset:3px; }
+.chatbtn svg { width:23px; height:23px; }
+/* ── A REPLY ANNOUNCES ITSELF (§99) ───────────────────────────────────
+   Islam: "when the admin replied the chat should show a notification on the
+   callout for the user to know he got an answer." The count was already
+   there; what was missing is that it ARRIVED silently, and up to three
+   minutes late. This is the arriving.
+
+   A ring that expands out of the bubble and fades, twice — not a bounce and
+   not a colour change: the corner sits over somebody's work and the job is to
+   be noticed, not to interrupt. `prefers-reduced-motion` gets the badge and
+   nothing else, which is the whole point of asking. */
+@keyframes chring {
+  0%   { box-shadow:0 0 0 0 var(--accent-glow, rgb(201 162 77/.5)); }
+  70%  { box-shadow:0 0 0 14px rgb(201 162 77/0); }
+  100% { box-shadow:0 0 0 0 rgb(201 162 77/0); }
+}
+.chatbtn.chring { animation:chring 1.3s ease-out 2; }
+@media (prefers-reduced-motion: reduce) {
+  .chatbtn.chring { animation:none; }
+}
+
+.chatbtn .chn { position:absolute; top:-3px; right:-3px; min-width:20px; height:20px;
+                border-radius:var(--r-pill); background:var(--gold); color:var(--on-accent,#1B1400);
+                font-size:var(--fs-micro); font-weight:800; display:grid; place-items:center;
+                padding:0 5px; border:2px solid var(--ground);
+                font-variant-numeric:tabular-nums; }
+
+/* ── THE PANEL ─────────────────────────────────────────────────────────── */
+.chatpanel { width:376px; max-width:calc(100vw - 32px);
+             background:var(--surface); border:1px solid var(--line); border-radius:12px;
+             overflow:hidden; box-shadow:0 6px 26px rgba(0,0,0,.18);
+             display:flex; flex-direction:column; }
+.chatpanel[hidden] { display:none; }
+
+.chathead { background:var(--panel); color:var(--panel-ink); padding:11px 13px;
+            display:flex; align-items:center; gap:10px; }
+.chathead .cht { font-size:var(--fs-body); font-weight:650; line-height:1.25; }
+.chathead .chs { font-size:var(--fs-micro); color:var(--panel-quiet); margin-top:2px;
+                 display:flex; align-items:center; gap:5px; }
+.chathead .chx { margin-left:auto; background:none; border:none; color:var(--panel-quiet);
+                 cursor:pointer; line-height:0; padding:4px; border-radius:5px;
+                 display:grid; place-items:center; }
+.chathead .chx svg { width:16px; height:16px; }
+.chathead .chx:hover { color:var(--panel-ink); background:rgb(255 255 255/.12); }
+.chathead .chx:focus-visible { outline:2px solid var(--panel-ink); outline-offset:1px; }
+.chatdot { width:6px; height:6px; border-radius:50%; background:var(--good); flex:none; }
+
+.chatbody { padding:14px 13px; display:flex; flex-direction:column; gap:14px;
+            background:var(--ground); height:340px; overflow-y:auto; }
+.chatday { text-align:center; font-size:var(--fs-micro); color:var(--ink-3);
+           letter-spacing:.09em; text-transform:uppercase; font-weight:700; }
+
+/* THE PRODUCT NARRATING, at the volume of the day divider above it (§119).
+   Deliberately not a message: no bubble, no name, no accent edge — the two
+   sides of this conversation are the person and the office, and a handoff is
+   neither. Wider than the divider because it is a sentence rather than a date,
+   and centred so it reads as a break in the conversation rather than a turn
+   in it. Nothing here is a new colour: --ink-3 and --line are the panel's own
+   quiet pair, so it needs nothing from a tenant's branding.
+
+   --fs-small AND NOT --fs-micro, which is what the day divider above it uses:
+   that token is for breadcrumbs and metric keys, and this is a SENTENCE
+   somebody has to read. One step under a message (--fs-note), so it is quieter
+   than the conversation without being smaller than the product's own floor for
+   running words (§94.9). Measured: 5.00 light, 6.61 dark. */
+.chsys { align-self:center; max-width:88%; text-align:center;
+         font-size:var(--fs-small); line-height:1.5; color:var(--ink-3);
+         padding:7px 12px; border:1px dashed var(--line); border-radius:9px; }
+
+.chmsg { max-width:84%; display:flex; flex-direction:column; gap:4px; }
+.chmsg .chwho { font-size:var(--fs-micro); color:var(--ink-3); font-weight:600;
+                display:flex; gap:6px; align-items:baseline; }
+.chmsg .chbod { font-size:var(--fs-note); line-height:1.55; padding:9px 11px;
+                border-radius:10px; white-space:pre-wrap; overflow-wrap:anywhere; }
+/* THE OFFICE'S SIDE CARRIES THE ACCENT EDGE, and it is the one thing that
+   distinguishes the two — never a filled bubble on either side, because a
+   colour block per line is a lot of colour for a page this quiet (§41). */
+.chmsg.chthem { align-self:flex-start; }
+.chmsg.chthem .chbod { background:var(--surface); border:1px solid var(--line);
+                       border-left:2px solid var(--gold); border-radius:4px 10px 10px 4px; }
+.chmsg.chme { align-self:flex-end; align-items:flex-end; }
+.chmsg.chme .chbod { background:var(--surface-2); border:1px solid var(--line-soft); }
+
+
+.chshot { display:inline-flex; align-items:center; gap:7px; margin-top:7px;
+          border:1px solid var(--line); border-radius:6px; padding:5px 8px;
+          font-size:var(--fs-micro); color:var(--ink-2); background:var(--ground);
+          cursor:pointer; }
+.chshot:hover { border-color:var(--gold-deep); }
+.chshot .chthumb { width:26px; height:18px; border-radius:2px; flex:none;
+                   background:linear-gradient(135deg,var(--line),var(--surface-2));
+                   border:1px solid var(--line); }
+.chshotfull { max-width:100%; border:1px solid var(--line); border-radius:6px;
+              margin-top:7px; display:block; }
+
+.chatfoot { border-top:1px solid var(--line); background:var(--surface); padding:9px 10px;
+            display:flex; flex-direction:column; gap:8px; }
+.chcomp { display:flex; align-items:flex-end; gap:8px; }
+.chcomp textarea { flex:1; border:1px solid var(--line); border-radius:8px;
+                   background:var(--ground); color:var(--ink); padding:8px 10px;
+                   font-family:inherit; font-size:var(--fs-note); line-height:1.45;
+                   min-height:38px; max-height:120px; resize:none; }
+.chcomp textarea:focus-visible { outline:2px solid var(--focus); outline-offset:-1px; }
+.chicon { border:1px solid var(--line); background:var(--surface); border-radius:8px;
+          width:34px; height:34px; display:grid; place-items:center; cursor:pointer;
+          color:var(--ink-2); flex:none; padding:0; }
+.chicon:hover { border-color:var(--gold-deep); color:var(--ink); }
+.chicon svg { width:15px; height:15px; }
+.chsend { background:var(--panel); color:var(--panel-ink); border:none; border-radius:8px;
+          height:34px; padding:0 13px; font-size:var(--fs-small); font-weight:650;
+          cursor:pointer; flex:none; }
+.chsend:hover { background:var(--panel-hover); }
+.chsend[disabled] { opacity:.5; cursor:default; }
+.chnote { font-size:var(--fs-micro); color:var(--ink-3); padding:0 2px 1px; }
+/* It is empty most of the time now that nothing is promised about the page
+   (§99), and an empty line still spends its height — so it takes no room
+   until it has something to say. */
+.chnote:empty { display:none; }
+.chnote.bad { color:var(--bad-tx); }
+
+.chempty { display:flex; flex-direction:column; gap:9px; align-items:center;
+           text-align:center; margin:auto; padding:10px 16px; }
+.chempty .chbig { font-size:var(--fs-body); font-weight:650; }
+.chempty p { margin:0; font-size:var(--fs-note); color:var(--ink-3); line-height:1.55;
+             max-width:30ch; }
+
+/* ── THE OFFICE'S INBOX (a Setup page) ─────────────────────────────────── */
+/* ── THE INBOX FITS THE SCREEN (§100.5) ────────────────────────────────
+   Islam: "the chat box requires a scroll up — this shouldn't happen. The chat
+   box stays fit to the screen to show the chat box and send, and what can be
+   scrolled is the left pane with the chats."
+
+   The thread body was already capped and scrolling; what was not was the BOX,
+   which stood at a fixed 593px however tall the window was — so on a 700px
+   screen the reply box and Send fell below the fold and the page had to be
+   scrolled to answer anybody. Measured before touching it: at 900px the page
+   scrolled 306px, at 700px it scrolled 506px and the composer was off-screen.
+
+   `--chin-top` is the box's own distance from the top of the DOCUMENT, set by
+   the one line of JS that can know it. §28.3's rule is about sizing against a
+   measured value THE SIZE ITSELF CAN CHANGE — the feedback loop that cost v2.8
+   an infinite oscillation. There is no loop here: what sits above this box does
+   not move when the box gets taller or shorter, so the measurement is stable
+   in a way a max-height fed by a height never was. */
+.chinbox { display:grid; grid-template-columns:272px 1fr;
+           height:calc(100dvh - var(--chin-top, 190px) - 20px);
+           /* Below this it stops shrinking and the page scrolls instead — a
+              thread squeezed into 150px is not a usable screen, and a window
+              that short is somebody's split view rather than their laptop. */
+           min-height:340px;
+           border:1px solid var(--line); border-radius:var(--r); overflow:hidden;
+           background:var(--surface); }
+.chq { border-right:1px solid var(--line); background:var(--ground);
+       display:flex; flex-direction:column; min-height:0; }
+.chqtop { padding:9px 10px; border-bottom:1px solid var(--line); display:flex; gap:7px; }
+.chqtop input { flex:1; border:1px solid var(--line); border-radius:6px;
+                background:var(--surface); color:var(--ink); padding:6px 9px;
+                font-family:inherit; font-size:var(--fs-small); min-width:0; }
+/* One segmented box divided by a hairline, not three capsules — §41.8's
+   control, and the same argument: these are three views of one list, and a
+   container that says so is what makes them read as one control. */
+.chqtabs { display:flex; margin:9px 10px 0; border:1px solid var(--line);
+           border-radius:6px; overflow:hidden; background:var(--surface); }
+.chqtab { flex:1; background:transparent; border:none; cursor:pointer;
+          font-family:inherit; font-size:var(--fs-micro); font-weight:700;
+          letter-spacing:.06em; text-transform:uppercase; color:var(--ink-3);
+          padding:6px 4px; white-space:nowrap; }
+.chqtab + .chqtab { box-shadow:inset 1px 0 0 var(--line); }
+.chqtab:hover { color:var(--ink); }
+.chqtab.on { background:var(--surface-2); color:var(--ink); }
+.chqtab span { font-variant-numeric:tabular-nums; opacity:.75; }
+.chqtab:focus-visible { outline:2px solid var(--focus); outline-offset:-2px; }
+
+.chqlist { overflow-y:auto; flex:1; }
+.chqsep { font-size:var(--fs-micro); letter-spacing:.1em; text-transform:uppercase;
+          font-weight:800; color:var(--ink-3); padding:10px 11px 5px; }
+
+/* ONE LINE PER CELL, CLIPPED (§88). A message is the one thing on this screen
+   that is arbitrarily long — if these rows wrapped, the height of the queue
+   would depend on how much somebody typed. */
+.chqrow { display:grid; grid-template-columns:1fr auto; gap:3px 8px; padding:9px 11px;
+          border-bottom:1px solid var(--line-soft); cursor:pointer; align-items:baseline;
+          width:100%; text-align:left; background:none; border-left:none;
+          border-right:none; border-top:none; font-family:inherit; color:inherit; }
+.chqrow:hover { background:var(--surface-2); }
+.chqrow.on { background:var(--surface); box-shadow:inset 2px 0 0 var(--gold); }
+.chqrow:focus-visible { outline:2px solid var(--focus); outline-offset:-2px; }
+.chqrow .chnm { font-size:var(--fs-note); font-weight:650; white-space:nowrap;
+                overflow:hidden; text-overflow:ellipsis; min-width:0; }
+.chqrow .chtm { font-size:var(--fs-micro); color:var(--ink-3);
+                font-variant-numeric:tabular-nums; white-space:nowrap; }
+.chqrow .chsn { grid-column:1; font-size:var(--fs-small); color:var(--ink-3);
+                white-space:nowrap; overflow:hidden; text-overflow:ellipsis; min-width:0; }
+.chqrow .chun { grid-column:2; font-size:var(--fs-micro); font-weight:800;
+                background:var(--gold); color:var(--on-accent,#1B1400);
+                border-radius:var(--r-pill); min-width:17px; height:17px;
+                display:grid; place-items:center; padding:0 4px; }
+.chqrow .chwh { grid-column:1/-1; font-size:var(--fs-micro); color:var(--ink-3);
+                white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+
+.chthread { display:flex; flex-direction:column; background:var(--surface);
+             min-width:0; min-height:0; }
+.chthead { padding:10px 14px; border-bottom:1px solid var(--line);
+           display:flex; align-items:center; gap:10px; flex-wrap:wrap; }
+.chthead .chnm { font-size:var(--fs-body); font-weight:650; }
+.chthead .chmeta { font-size:var(--fs-small); color:var(--ink-3); }
+.chthead .chacts { margin-left:auto; display:flex; gap:6px; flex-wrap:wrap; }
+.chmini { border:1px solid var(--line); background:var(--surface); color:var(--ink-2);
+          border-radius:6px; font-size:var(--fs-small); padding:4px 9px; cursor:pointer;
+          font-family:inherit; }
+.chmini:hover { border-color:var(--gold-deep); color:var(--ink); }
+.chmini.on { color:var(--attn-tx); border-color:var(--attn); background:var(--attn-bg); }
+/* NO max-height ANY MORE. It takes what the box has left after the header and
+   the composer, and scrolls inside that — which is what keeps Send on screen
+   at every window height rather than at one. `min-height:0` is what lets a
+   flex child shrink below its content at all. */
+.chtbody { padding:14px; display:flex; flex-direction:column; gap:14px;
+           background:var(--ground); flex:1; min-height:0; overflow-y:auto; }
+.chtfoot { border-top:1px solid var(--line); background:var(--surface); padding:10px 12px;
+           display:flex; flex-direction:column; gap:8px; }
+
+/* WHAT WILL HAPPEN WHEN SEND IS PRESSED, said before it is pressed (§97.5).
+   Semantic colours, not the accent: this is a state, not an emphasis. */
+.chpres { display:flex; align-items:center; gap:7px; font-size:var(--fs-small);
+          color:var(--ink-2); background:var(--good-bg); border:1px solid var(--good);
+          border-radius:6px; padding:6px 9px; }
+.chpres.away { background:var(--attn-bg); border-color:var(--attn); }
+.chpres.none { background:var(--surface-2); border-color:var(--line); }
+.chpres svg { width:13px; height:13px; flex:none; }
+
+/* ── THE SETTINGS MENU (§98) ───────────────────────────────────────────
+   It borrows `.hmenu` / `.hmenu-btn` / `.hmenu-panel` from the register's own
+   header dropdown (§90) — the same control, so it needs no second appearance —
+   and adds only the rows inside it. */
+.hmenu-panel.chset { width:392px; }
+.chset-h { font-size:var(--fs-micro); letter-spacing:.11em; text-transform:uppercase;
+           font-weight:800; color:var(--ink-3); background:var(--surface-2);
+           padding:8px 14px; border-bottom:1px solid var(--line); }
+.chset-row { padding:12px 14px; border-bottom:1px solid var(--line-soft);
+             display:flex; flex-direction:column; gap:7px; }
+.chset-row:last-child { border-bottom:none; }
+.chset-lab { font-size:var(--fs-note); font-weight:650; color:var(--ink);
+             display:flex; align-items:center; gap:8px; }
+.chset-ctl { margin-left:auto; flex:none; }
+.chset-hint { font-size:var(--fs-micro); color:var(--ink-3); line-height:1.5; }
+.chset-in { width:100%; border:1px solid var(--line); border-radius:6px;
+            background:var(--ground); color:var(--ink); padding:7px 9px;
+            font-family:inherit; font-size:var(--fs-note); }
+.chset-in:focus-visible { outline:2px solid var(--focus); outline-offset:-1px; }
+/* THE COST, WHERE THE CHOICE IS MADE. A semantic colour, not the accent: it
+   is a consequence being stated, not something being emphasised. */
+.chset-cost { font-size:var(--fs-micro); color:var(--attn-tx); background:var(--attn-bg);
+              border:1px solid var(--attn); border-radius:5px; padding:5px 8px;
+              line-height:1.45; }
+.chset-off { margin:0 0 14px; padding:12px 14px; border-radius:var(--r);
+             background:var(--attn-bg); border:1px solid var(--attn);
+             font-size:var(--fs-note); color:var(--ink-2); line-height:1.5; }
+.chset-off b { color:var(--ink); }
+.chset-off[hidden] { display:none; }
+
+/* The Off/On pair, §44's naming switch — two named sides, the live one lit. */
+.chsetwrap .seg { display:inline-flex; border:1px solid var(--line); border-radius:6px;
+                  overflow:hidden; flex:none; }
+.chsetwrap .seg button { background:var(--surface); border:none; cursor:pointer;
+                         font-family:inherit; font-size:var(--fs-micro); font-weight:700;
+                         letter-spacing:.06em; text-transform:uppercase; color:var(--ink-3);
+                         padding:5px 11px; }
+.chsetwrap .seg button + button { box-shadow:inset 1px 0 0 var(--line); }
+.chsetwrap .seg button[aria-pressed="true"] { background:var(--surface-2); color:var(--ink); }
+.chsetwrap .seg.lit button[aria-pressed="true"] { background:var(--gold);
+                                                  color:var(--on-accent,#1B1400); }
+.chsetwrap .seg button:focus-visible { outline:2px solid var(--focus); outline-offset:-2px; }
+
+/* A composer that is off is dimmed rather than removed, because the line above
+   it explains why — and a box that vanished would leave that line explaining
+   something no longer on screen. */
+.chcomp.shut { opacity:.55; }
+.chcomp.shut textarea, .chcomp.shut .chsend { cursor:default; }
+
+.chnothing { margin:auto; text-align:center; color:var(--ink-3);
+             font-size:var(--fs-note); padding:30px 20px; max-width:34ch; line-height:1.55; }
+/* The way back, inside the empty state that would otherwise be a dead end
+   (§105). A button rather than a link: it changes what this list shows, it
+   does not go anywhere. */
+.chnothing .chlink { display:inline; background:none; border:0; padding:0;
+                     font:inherit; color:var(--gold-deep); cursor:pointer;
+                     text-decoration:underline; text-underline-offset:2px; }
+.chnothing .chlink:hover { color:var(--gold); }
+.chnothing .chlink:focus-visible { outline:2px solid var(--gold); outline-offset:2px; }
+
+@media (max-width:820px) {
+  .chinbox { grid-template-columns:1fr; }
+  .chq { border-right:none; border-bottom:1px solid var(--line); max-height:280px; }
+}
+/* A 376px panel does not fit a phone beside its own margins, and a bubble that
+   opens something clipped is worse than one that opens nothing. */
+@media (max-width:460px) {
+  .chatdock { left:12px; right:12px; bottom:12px; align-items:stretch; }
+  .chatpanel { width:auto; }
+  .chatbtn { align-self:flex-end; }
+}
+
+/* ── IS THE BOT WORKING? (§116) ────────────────────────────────────────
+   The office's own diagnostic, in the dropdown they are already standing in.
+   Quiet until it has something to say: the chain that got that far is grey,
+   and the row where it stopped is the one that carries colour. */
+.chset-test { margin-top:10px; }
+.chtest { margin-top:10px; border:1px solid var(--line); border-radius:6px;
+          overflow:hidden; background:var(--surface); }
+.chtest-h { padding:8px 10px; font-size:var(--fs-note); font-weight:600;
+            border-bottom:1px solid var(--line); background:var(--ground); }
+.chtest.good .chtest-h { color:var(--good-tx); }
+.chtest.bad  .chtest-h { color:var(--bad-tx); }
+.chtest.off  .chtest-h { color:var(--ink-3); }
+.chtest-r { padding:7px 10px; border-top:1px solid var(--line-soft);
+            display:grid; grid-template-columns:auto 1fr auto; gap:6px 8px;
+            align-items:baseline; font-size:var(--fs-micro); }
+.chtest-r:first-of-type { border-top:0; }
+.chtest-n { color:var(--ink-2); }
+.chtest-s { color:var(--ink-3); text-transform:uppercase; letter-spacing:.06em;
+            font-size:10px; }
+/* The detail spans the row, because an error message is a sentence and a
+   sentence in a 90px column is a column of single words. */
+.chtest-d { grid-column:1 / -1; color:var(--ink-3); line-height:1.5;
+            word-break:break-word; }
+.tdot { width:7px; height:7px; border-radius:50%; display:inline-block;
+        background:var(--ink-3); position:relative; top:-1px; }
+.tdot.ok   { background:var(--good); }
+.tdot.warn { background:var(--warn); }
+.tdot.bad  { background:var(--bad); }
+.tdot.off  { background:var(--none); }   /* --line-firm does not exist; an undefined
+                                             var computes to transparent, which is
+                                             an invisible dot on the one row that
+                                             says the feature is off. */

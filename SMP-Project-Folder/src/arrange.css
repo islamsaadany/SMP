@@ -1068,7 +1068,11 @@
 
   /* ── One header for the configuration tables ─────────────────────── */
   .phead2{display:flex;align-items:center;gap:20px;flex-wrap:wrap;margin:0 0 14px}
-  .phead2 .secttl{font:400 24px/1.2 var(--serif);margin:0}
+  /* BOLD (§122.5). Islam, of the People register's: "the title needs to be
+     bold." ALL TWELVE Setup titles, not that one — `cfgHead()` is one function
+     and one page's title in a different weight from eleven others reads as a
+     mistake rather than as emphasis. */
+  .phead2 .secttl{font:700 24px/1.2 var(--serif);margin:0}
   /* IT WRAPS, or a chip added later pushes the buttons off the page (§93.4).
      `.phead2` has always wrapped; `.hright` did not, so it stayed one row and
      simply overflowed its pane — and the register's Register file button went
@@ -1181,3 +1185,14 @@
   .qs-edit .qtog.on { background:var(--gold-deep); color:var(--on-accent);
     border-color:var(--gold-deep); }
   .qs-edit .qtog:hover { border-color:var(--gold-deep); }
+
+  /* ── THE REMOVE BUTTON'S SEAT (§114.4, Islam's pick A) ────────────────
+     The × that removes a row rides in the name cell (a column of its own
+     would cost every row its width) — but .fld is width:100%, so it wrapped
+     and every editable row grew 56px → 76px for a 14px glyph. The field
+     yields the button's width instead, and the × sits BESIDE it, outside the
+     border, deliberately: an × drawn inside an input is the search box's
+     clear-the-text idiom, and this one removes the ROW. Keyed on the PAIR so
+     it reaches every table using the pattern and nothing else. */
+  td:has(> .fld + .xbtn) > .fld { width: calc(100% - 30px); vertical-align: middle; }
+  td:has(> .fld + .xbtn) > .xbtn { vertical-align: middle; margin-left: 5px; }

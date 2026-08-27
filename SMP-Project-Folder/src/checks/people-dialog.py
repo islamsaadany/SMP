@@ -156,11 +156,14 @@ with sync_playwright() as p:
     ck("Add someone is in the header", pg.evaluate("!!document.querySelector('[data-padd-open]')"))
     ck("...and the Add ROW is gone",
        pg.eval_on_selector_all(".peoplecfg tr.newrow", "e=>e.length") == 0)
-    # ONE COUNT, NOT TWO. Both said the same thing; the survivor is a line.
-    ck("one quiet count under the title",
-       pg.evaluate("!!document.querySelector('.pcount')") and
-       pg.eval_on_selector_all(".phead2 .chip", "e=>e.map(x=>x.textContent)")
-         .count(" active") == 0)
+    # NO COUNT AT ALL (122). 116 dropped the second copy of it and kept this
+    # one; Islam then asked for the survivor too -- "remove the 77 people
+    # active text" -- and the table under the row is the register's size.
+    # The badge went with it. Asserted here as well as in register-header.py
+    # because this file owns the header's inventory.
+    ck("no count line, and no badge",
+       pg.evaluate("!document.querySelector('.pcount')") and
+       pg.eval_on_selector_all(".phead2 .chip", "e=>e.length") == 0)
 
     # ── 2. THE TABLE WRITES NOTHING ──────────────────────────────────
     # Every collision this register has had was a control being clicked inside a

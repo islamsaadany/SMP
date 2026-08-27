@@ -167,7 +167,7 @@ with sync_playwright() as p:
     open_overview(pg)
     txt = " | ".join(r["t"] for r in rows(pg))
     ck("the page is the Overview",
-       pg.eval_on_selector("#panel .secttl", "e=>e.textContent.trim()") == "Overview")
+       pg.eval_on_selector("#panel .setupttl", "e=>e.textContent.trim()") == "Overview")
     ck("the inbox row is drawn", "conversation" in txt, txt)
     ck("the password row is drawn", "password" in txt, txt)
     ck("the declaration row is drawn", "said where they work" in txt, txt)

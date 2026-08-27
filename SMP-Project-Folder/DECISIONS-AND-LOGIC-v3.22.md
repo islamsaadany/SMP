@@ -15295,6 +15295,42 @@ along finally exists.
 editor wired to nothing looks identical), and asserts the closed end too —
 pen off, none of the three is drawn (§94.2).
 
+### 114.4 The remove button's seat
+
+Islam, with a screenshot of an open plan row: *"for the x that delete
+something can you think of a better placement for it rather than taking a
+full line?"*
+
+The × that removes a row rides in the name cell — a column of its own would
+cost every row its width — but `.fld` is `width:100%`, so the button wrapped
+under the field and **every editable row spent 20px of height (56 → 76px) on
+a 14px glyph**. Two placements were drawn **in the real platform** (§41.9,
+§101's method — the built file driven to a unit's open plan pane with each
+candidate injected live, both themes) and published as a mockup:
+**A**, the field yields 30px and the × sits beside it on the same line; **B**,
+the × drawn inside the field's right edge, the way a search box carries its
+clear button. A was recommended and **Islam picked A**.
+
+**B loses on semantics, not on pixels**: an × inside an input is the
+clear-the-text idiom — press it and you expect an empty field, not a missing
+row. The one glyph would have carried two meanings depending on which box it
+sat in, which is §87's twins drawn in chrome. So the × sits **outside the
+border**, where what it acts on is the row it shares a line with.
+
+**Keyed on the PAIR, never on the table**: `td:has(> .fld + .xbtn)` reaches
+every cell where a field and a remove button actually sit together — the plan
+pen, the project panes, wherever the pattern lands next — and touches nothing
+else, so a field without an × keeps its full width and a table added later is
+seated the day it is added (§94's gate-on-the-control, in CSS).
+
+`checks/plan-fields.py` asserts the problem, not the layout (§94.8): every
+field-and-× pair shares one line (centre difference under 8px, 9 cells on the
+demo plan), and **every × is hittable at its centre** —
+`document.elementFromPoint` must return the button, §93.4's press-the-point,
+because a button on the right line but under a neighbour is the same fault
+with a nicer face. Proved able to fail before it was trusted (§94.5): with
+the width rule removed, 1 FAILED; restored, all passed.
+
 ## 115 · A repeating project (v3.38)
 
 Islam: *"the CX mystery shopping happens on H1 and is repeated for H2 — same
@@ -15656,6 +15692,1120 @@ moving the page (220 → 93) — it fails identically on the pre-§117 build, so
 it is not this section's, and it is recorded here rather than quietly fixed.
 `checks/plan-arrange.py` learned `SMP_CHROME` and to stop counting the new
 download button as a pen (§51.11, on the day the control changed shape).
+
+## 118 · The CF tab, the add row, and a null that outlived its session (v3.41)
+
+> *"the CF tab is not showing anything while it was showing it a minute ago"*
+> — and, asked what it looks like: *"tab there it doesn't move it stays with
+> the previous opened tab."*
+
+### 118.1 The symptom was navigation and the fault was paint
+
+Clicking a destination runs `leaveModes()`, moves `current`, and calls
+`paint()`. A throw anywhere inside the panel's render abandons the redraw
+after the navigation row has already updated — so the screen KEEPS the
+previous page, the click reads as ignored, and the only witness is the
+hidden console:
+
+    Uncaught TypeError: Cannot read properties of null (reading 'name')
+        at Array.map · unitPlanBody · renderUnitPlan · renderFnProjects · paint
+
+`t.name` on a null sitting INSIDE a pillar's `tactics` array. Nothing was
+deleted and nothing was hidden; one row in one list was a shape the page
+cannot draw, and one bad row stops the whole page.
+
+### 118.2 The chain, each link proved on the exact bytes production serves
+
+The plan pane's **"+ Add a tactic" row is a `<tr>` inside the same sortable
+tbody**. Its own comment says why that felt safe: it has no grip, so it
+cannot be *dragged*. What it never said is that the row is still **counted**
+— `makeSortable`'s commit read `+el.dataset.oi` off every `tr`, the add row
+has none, and `+undefined` is `NaN`. `applyOrder` then did `arr[NaN]`, which
+is `undefined`, and pushed it: **one reorder of a measure or tactic with the
+pen on appended one phantom entry, every time, on units and functions
+alike.** Reproduced: `["Open branches", "Second tactic", <<undefined>>]`
+after a single ArrowDown on a grip.
+
+Why only a FUNCTION died a minute later: a unit's plan is stored row by row
+(`pillars`/`measures`/`tactics` tables) and an `undefined` in the list fails
+that save loudly. **A pillars function's plan rides in ONE JSON blob**
+(`functions.extra`, §59), and `JSON.stringify` writes an undefined array
+entry as `null` — the save succeeds, the poison is now durable, and every
+hydration hands it back. It was showing "a minute ago" because the minute is
+exactly the save-and-rehydrate cycle.
+
+### 118.3 What it was NOT, established before the cause was known
+
+The import was innocent: every hostile file tried — orphan rows, duplicate
+and empty pillar names, junk quarters, full-precision Excel numbers, unknown
+themes — was refused before Apply with the reason named. The pen's fields
+were innocent. The DB round trip was innocent (create → import → save →
+reload → click, green over a real Postgres). **And the person was innocent:
+there is no file and no field that is supposed to produce this. A control
+that silently does nothing is the product's fault by its own rules, and
+"what mistake did I make?" has the answer *none*.**
+
+### 118.4 Three fixes, one class each
+
+- **`makeSortable` counts data rows only** — `siblings()` keeps elements
+  carrying `data-oi`, which every real sortable item in the product already
+  has; the add row is furniture. (Also corrects the drop geometry beside the
+  add row, which used to allow a drop *after* it.)
+- **`applyOrder` refuses a commit that is not a permutation** — wrong
+  length, out of range, `NaN`, duplicated: the array is left untouched,
+  never half-applied, because with the commit fixed this backstop should
+  never fire, and if it ever does, an unchanged order is the only outcome
+  that loses nothing.
+- **`fnPruneNulls()` at the hydration door** (`hydrate()` in sync.js) —
+  remove-only, so §50.6 stands: a reader never creates what it looked for,
+  and here it only deletes what no writer may mint. A tenant that already
+  saved the poison heals on the next visit, and the next autosave persists
+  the clean lists. Units need none of this; a null cannot survive their
+  road.
+
+### 118.5 The tour is never offered to the office
+
+Islam, told the tour fires for the SMO: *"yes stop it to the SMO."* The
+bootstrap SMO also HEADS the SMO function, so `storyFor()`'s `fnhead` rung
+matched and the "owner" story opened for the one person it cannot be for —
+with the dock (`position:fixed; inset:0`) eating every click while its
+welcome card waited. The gate is in `storyFor()` itself, asked through
+`SMPRules.isOfficeRole()` — the one definition of the office (§89, §97),
+never a second copy — so `offer()`, the Knowledge base replay list and
+checks/tour.py all answer the same way.
+
+### 118.6 The check presses the control and was proved able to fail
+
+`checks/reorder-integrity.py`, four sections, both ends throughout (§94.2):
+keyboard AND pointer reorders must still REORDER and must mint nothing; the
+rail — which has no add row — must keep working, or the fix would be
+indistinguishable from reordering dying; `applyOrder` refuses all five
+non-permutations; a stub serves a tenant whose stored blob already holds a
+null (over HTTP, because file:// never hydrates — §94.11) and the poisoned
+function's tab must open AND its plan must draw; the office gets no story
+while a custodian still does. Against the v3.36 build it fails **16 ways**,
+ending in the production error verbatim (§94.5).
+
+### 118.7 Found and deliberately not fixed
+
+- **A paint that throws leaves the previous page on screen with no message
+  anywhere** — §32 one level deeper: the refusal-says-so rule has no
+  equivalent for a render that dies. Every fault of this family will look
+  like a dead click until that changes. A decision about what the failure
+  surface should say, not a patch.
+- **Below ~1100px the destination row wraps and its second line paints
+  under the page-tab row**, which then takes every click on the wrapped
+  tabs — `.units-in` keeps a fixed one-line `height:46px` (_shared.css)
+  while arrange.css says `flex-wrap:wrap`. Measured on the live bytes:
+  `elementFromPoint` at the wrapped tab's centre returns a `data-s` button.
+  Not this fault — Islam's row is one line — and a real one.
+- **checks/no-jump.py's "sorting a column" trial fails on main's own
+  build** (page scroll 220 → 93), before this section's changes. Pre-existing,
+  recorded here so the next green run is not trusted blind.
+
+## 119 · The deck names its gaps, the rail opens terse, the base is the office's (v3.42)
+
+Five follow-ups from Islam the day §117 shipped, from using it. One arrived
+empty (his item 3) and is not guessed at; one could not be reproduced and is
+recorded as a question rather than a fix (§119.5).
+
+### 119.1 Missing, in bold red
+
+*"identify the missing areas of the plan and type missing in bold red so they
+know what they need to fill."* The deck printed an em-dash for an empty plan
+fact, which reads as *nothing to say* when the truth is *nobody has said it
+yet* — §35's distinction, one artefact out. The product already marks an unset
+target `Missing` in red (`.missing`), so **the slides now say the same word in
+the same colour**: `B04434`, the platform's own light `--bad`, bold on the
+slide's white ground.
+
+**NOT EVERY BLANK IS A GAP.** Collaborators are optional by design and an
+unmarked quarter IS the mark, so neither is flagged. What gets the word is what
+the plan OWES: a direction, a target, a compile rule, a tactic's owner, a
+project's owner and dates, a capability's definition, the aspiration, and an
+empty SWOT quadrant. `orMiss()` and the `{miss:true}` cell are the one pair the
+tables and the text boxes both go through.
+
+**AND THE SLIDE IS DRAWN EVEN WHEN IT IS EMPTY.** Foundation, the SWOT and a
+capability's definition used to be skipped when they held nothing — which
+hides exactly the gap this section exists to show. A skipped slide is the
+strongest possible way of saying *nothing is missing here*.
+
+### 119.2 A column for each quarter
+
+*"make the tactics columns a column for each Q with a mark for the qs in
+action."* `pptxQCells()` returns four centred cells carrying `✓` or nothing —
+the shape the plan workbook's Q1–Q4 columns already have, so the deck and the
+template read the same way. `pptxQuarters()` (the `Q2 · Q3` string) is DELETED
+rather than left unused (§24).
+
+### 119.3 The pillar rail opens collapsed
+
+*"make the default view for the pillar rail to be the collapsed one."* Read
+the OTHER WAY ROUND from the four settings beside it (§104.7's rule): absent
+now means terse, so only an explicit `"0"` — somebody who pressed the control
+to bring the detail back — turns it off, and a `"1"` stored before today still
+reads as terse. Nobody's screen changes except by their own press.
+
+**AND THE ALARM SURVIVES THE COLLAPSE.** The rail's small line was carrying
+two different kinds of thing: the routine detail (counts, owner) and §106.2's
+count of rows wanting attention, which was put there so the project holding
+them can be found without opening each in turn (§93.4). A default that hid the
+second would have quietly undone that. `railSub(html, alarm)` tells them apart
+and terse drops only the first. **Found by `checks/project-tables.py` going red
+on the day the default flipped** — nothing had ever had to separate them
+before, and no amount of reading the rail would have suggested it.
+
+### 119.4 The knowledge base is the office's
+
+*"remove knowledge base from the view of all except the smo team and the super
+user."* **IT REVERSES §30 AND §37**, recorded as a reversal rather than
+overwritten (Principle II): §37 named "the knowledge base is readable by
+everyone, always" as one of three things too fundamental to be a matrix cell,
+and the argument was a good one — an explanation nobody can open is not an
+explanation. The client's is better: this knowledge base explains how the
+PLATFORM is run — cycles, access, imports, the reasoning behind every decision
+— which is the office's reading and nobody else's.
+
+**`when: inOffice()` ON THE PAGE DEF, NOT A MATRIX CELL** — the shape `c_send`
+and `c_chat` already use (§97): who may read the office's own working notes is
+not a tick somebody could set on a bad afternoon. `c_kb` keeps `area:"always"`,
+so the grant machinery is untouched and nothing else reads that key. The two
+places the product CLAIMED it was everyone's — the access page's own prose and
+`pageinfo.js` — are corrected in the same edit, or the platform would go on
+saying something it had stopped doing (§42, applied to prose).
+
+**AND IT LEAVES THE TOUR'S REPLAY BUTTON UNREACHABLE.** `storyFor()` fits a
+story to a custodian, an owner or a function head — the people who can no
+longer open the page — while the office, who can, has none. §61's trap from
+the other side: the door and the room are each correct and no longer meet. The
+FIRST-RUN tour is untouched (it starts on sign-in and never went through this
+page), so nothing is broken for a new person; what is lost is replaying it
+later. **Recorded, not asserted**: `checks/tour.py` now runs that section as
+the office and asserts the ABSENT half, and deliberately does NOT assert that
+the replay is unreachable — a check that did would freeze the mistake. Where
+that button should live is Islam's to answer.
+
+### 119.5 Asked about and not reproducible
+
+*"for the projects there is no arrange or download."* Measured on the live
+production file and on this build, a capability's Projects pane draws: for the
+office, the pen and the download (no arrange — §94.15 gives the office one
+control, not two); for the function's head, the arrange arrows and the
+download. All three are correctly absent for anybody who does not hold that
+function (§37: reaching is not holding), which is what the screenshot shows.
+So either the browser was holding a cached build from before §117 merged, or
+the viewer did not hold the function. **Not fixed, because there is nothing
+yet shown to be broken** — asked instead.
+
+### 119.6 What proves it
+
+`checks/strategy-split.py` §4: the check MAKES six gaps in the plan (§94.2 —
+the demo is complete, so a check that only downloaded it would never render a
+single mark), then asserts an EXACT count of six, all bold, all in `B04434`,
+**and that the filled facts are untouched** — a builder that marked everything
+would pass every assertion above it. The tactics table's last four columns are
+asserted to be `Q1 Q2 Q3 Q4`, with marks present and not on every cell. The
+rail is measured from a FRESH page (the preference is per-browser), both ends:
+collapsed on arrival, the detail back when the control is pressed. The KB gate
+is asked of the page def for five viewers. **Proved able to fail before it was
+believed** (§94.5): Missing back to an em-dash (2 failures), the rail default
+back to expanded (5), the KB open to everyone (5).
+
+## 120 · The four corrections after the makeover shipped (v3.30)
+
+Islam, looking at the Overview on a real client tenant: *"some of what we did
+was merged and some not."* Assessed against the LIVE build rather than from
+memory — everything agreed in Option A was merged and deployed — and the four
+things below came out of laying the built product beside the signed-off mockup.
+*Assessment is in `design-mockups/setup-makeover/2026-08-26_merge-assessment.html`.*
+
+### 120.1 A cycle with no dates said nothing, in punctuation
+
+His strip read **"to  ·  due  ·  as of Q4"** — three separators with nothing
+between them, because the line glued the words around three values and the
+punctuation survives when the values do not.
+
+**IT WAS NOT THE OVERVIEW'S FAULT, WHICH IS WHY THE FIX IS NOT THERE.** The
+identical line renders on the Reporting cycle page and predates the Overview
+entirely; the Overview only made it the first thing anybody sees. Two surfaces
+onto one sentence is exactly how the two come to say it differently (§53.5), so
+`cycleMeta()` builds it ONCE in `config-data.js` and both read it.
+
+**AN ABSENT DATE IS SAID, NOT PUNCTUATED** — *"Dates not set"*, the same
+argument as §93's dash for a password nobody was asked about. **BOTH ENDS OR
+NEITHER**: *"Jan 2026 to"* is worse than saying nothing, so one end alone is
+reported on its own terms (*"from Jan 2026"*). The quarter is a number rather
+than a date and is always known, so it is always said.
+
+### 120.2 The rail's glyphs, and the grid that was never this file's
+
+The mockup drew a glyph on every rail row and **none was built** — the only one
+of the five HR_ERP practices §108 took that did not arrive. The Overview's own
+rows had theirs, which is precisely why that page looked finished and the rail
+beside it looked plainer than the drawing.
+
+**AND ADDING THEM EXPOSED A COLLISION THAT HAD BEEN THERE ALL ALONG.**
+`group-extra.css` styles `.rail button.ritem` as a two-column grid for a UNIT's
+plan rail, and the Setup rail is a `.rail` too — so that selector (0,2,1) has
+been outranking `.setuprail .ritem` (0,2,0) since the rail was built. **The
+`display:flex` in this file never applied.** Nothing noticed, because the old
+two-child row (label, pill) lands correctly in a `1fr auto` grid by accident.
+The glyph made a THIRD child and the accident stopped working: the glyph took
+the `1fr` column and every label was pushed right by its own length, so shorter
+names sat further in — **measured at x = 62…166 down one rail.** §56.7 and
+§65.9 in CSS for the third time: two components, one class name, valid on both
+sides, silent when they meet.
+
+**SO IT DECLARES THE COLUMNS RATHER THAN THE BOX** — one property at a
+specificity that genuinely wins (`.rail.setuprail button.ritem`), leaving the
+padding, borders and type to the rule that has been drawing this row all along.
+
+**AND ONE GLYPH WAS MAPPED BUT NOT DRAWN.** `⌗` for the Official BU list
+rendered as an empty box: it looked right in the mockup, whose font had it, and
+has no outline in the product's. **§52's rule, in a new place** — a character is
+"supported" and simply has no glyph, and nothing complains. `checks/setup-rail.py`
+now measures every mark against a character guaranteed to be missing, so the
+next one cannot ship blank. `▦` replaces it; `◫` restores Companies, which had
+been mistyped as the much fainter `▫`.
+
+### 120.3 People & access, in the order the mockup drew
+
+Register · roles · BU list, which is what was signed off; the group had been
+renamed around the pre-existing order without it being brought back. Small, and
+the kind of drift only caught by laying the drawing beside the build.
+
+### 120.4 The way through keeps its place
+
+Below about 1280px the strip's *Open the cycle page* dropped to the LEFT of a
+second line, growing the strip from 72px to 126px — not broken, but it read as
+an accident rather than a decision.
+
+**THE FIRST ATTEMPT MADE IT WORSE, and the reason is the lesson**: giving the
+button `margin-left:auto` when `.ovcyc-n` already had one puts TWO auto margins
+in the row, and they split the free space between them — so the button was
+pushed out and wrapped at **1400px instead of 1280**. The second attempt
+(`flex:1 1 0` on the name, so it asks for nothing and then grows into what is
+left) kept the button on one line further down, and let the name be squeezed so
+hard the strip **ballooned to 328px** at 1150px.
+
+The answer is all three together: the name takes the slack with a **floor** so
+it cannot be crushed, and `justify-content:flex-end` right-aligns a wrapped
+line — which costs nothing on the first line, where the growing name leaves no
+free space to distribute. Measured 1920→1024: the button is **19px from the
+right edge at every width**, and the strip never exceeds 145px.
+
+### 120.5 A check that raced a poll, and was not a flake to shrug at
+
+`checks/office-chat.py` failed twice in five runs on this branch and passed four
+times out of four on `origin/main`, which is exactly the shape that gets called
+a flake and waved through. It measured `#chtbody` on a fixed 400ms timer after a
+viewport resize — racing the panel's own poll, which rewrites that body every
+few seconds. **Instrumented rather than re-run**: once settled the margin is
+1601px of content in a 437px box, so the assertion was never marginal; it was
+measuring before there was anything to measure. It waits for the thread now
+instead of for a clock, and the assertion itself is untouched. 4/4 after.
+
+**`no-jump` is left failing, deliberately** — it fails identically on
+`origin/main` (verified in a worktree) and belongs to whoever owns that page.
+
+## 121 · The Setup pages sit still (v3.30)
+
+Islam, five notes on the built product: *"make the title like overview with a
+better design … this page needs to be sticky for the title and the setup header
+and search bar … there is some duplication in the titles like business unit
+business unit … the rail options needs to be smaller in height and no title is
+double line … think of the overall design of the pages as well."*
+
+Settled from a measured mockup, and **two of the five were not what they looked
+like**. The rail's head and search bar ALREADY stick — measured, they move 33px
+and pin — so "make it sticky" was about the pane's title, which scrolled 600px
+away with everything else. And the title's design was not the problem: at 24px
+it is already the largest thing on the page. What it lacked was a CONTAINER, so
+it read as the page's first line rather than as its header.
+
+### 121.1 The page is named once, in the rail's own word
+
+Two pages printed their name twice (Business units, Companies) and **five called
+themselves something the rail did not** — Terminology opened *"Labels"*, Email
+opened *"Communication"*, Roles & access opened *"Who may see what"*, Import &
+archives opened *"Plan import"*, and Reporting cycle had no title at all. That
+is §108's rename reaching the navigation and stopping there: my own drift, and
+invisible on any single page, because a page looks wrong only when it is read
+beside the rail that points at it.
+
+**THE SHELL DRAWS THE NAME, FROM THE DEF'S LABEL** — the one list that already
+holds it, so the two can never disagree again. `PAGE_TITLE` is set before the
+page renders, and both `cfgHead()` and `section()` **drop a heading that repeats
+it** (§28's rule: a header saying nothing new still spends its line). Compared
+against the NAME, never by position — the Reporting cycle's first section is
+*"Who has reported"*, a real section, and it keeps its heading.
+
+**AND THE NAME IS TAKEN BEFORE `def` BECOMES A SECTION.** Twenty lines into
+`paint()` a page with sections reassigns `def` to whichever section is open, so
+reading the label after that gives the SECTION's: Figure sets titled itself
+*"Sets configuration"* and Import & archives *"Import a plan"* — the same fault
+the change was made to remove, reintroduced by reading the right field at the
+wrong moment.
+
+### 121.2 The header stays, and it needed §53.7's filler
+
+`.setuphead` pins at **the rail's own offset expression**, not a number of its
+own, so the two stay level as the chrome changes height (§29.4: one number, not
+two).
+
+**AND THE STRIP ABOVE IT HAD TO BE FILLED.** A sticky header pins BELOW the
+chrome by `--rail-gap`, and that gap is page rather than header — so table rows
+slid through it and a row was visible above the pinned title. §53.7's own
+pattern, already carried by the rail and the capability band: a `::before` that
+takes the ground up over the strip. Safe in the flow position here, which is
+what §53.7 warns about, because this header is the first thing in the pane.
+
+**THE CONTROLS ROW IS NOT PULLED INTO IT.** A `margin-top:-52px` did that first
+and the row is not sticky, so scrolling slid it out from under the pinned title
+and left a stray *"Clear plan"* floating above it. **A sticky box may only
+overlap something that pins with it.**
+
+### 121.3 Shorter rows, and a label shortened rather than clipped
+
+45px a row, and *"Plan import & archives"* wrapped to 66px — which is what made
+the list 961px and pushed the last entries below the fold. Rows are 36px now and
+the list is 816px.
+
+**THE LABEL WAS SHORTENED, NOT ELLIPSISED.** An ellipsis is right in a table
+cell (§88) and wrong in a navigation list, where the label IS the destination —
+half a name behind a hover is a door you cannot read. *Import & archives*, in
+the rail's own sentence case, which the other seventeen entries all use.
+`text-overflow` stays as a GUARD, so the next over-long label fails loudly in
+the check rather than quietly growing the rail again.
+
+### 121.4 The table head goes with it, and the headings are separated
+
+**NOT EVERY TABLE PINS TO THE PAGE.** `.cfg.peoplebox` and `.cfg.srctable` are
+their own scroll boxes with their own sticky heads at `top:0` INSIDE them, which
+is the right answer for a boxed table — applying a page offset there put the
+register's headings **293px down**, measured. They are excluded rather than
+overridden: two rules fighting over one thead is how a head ends up pinned to
+neither.
+
+The headings are uppercase, letter-spaced and 8px-padded with nothing between
+them, so at a narrow pane *"Shown in the nav"* and *"Code"* merged into one
+word — exactly what Islam's screenshot shows. A hairline between header cells
+costs no width and no height and is what makes a table read as columns.
+
+### 121.5 §51.11, in my own checks, twice in one change
+
+The rail row gained a glyph span, so `.ritem`'s `textContent` became
+*"People register2"*; then the page's name moved out of `.secttl` into
+`.setupttl`, and a heading that merely repeated the name stopped being drawn at
+all — so two checks reading `#panel .secttl` for the title **crashed on a
+missing element** rather than failing an assertion. Both were found by running
+the whole suite rather than the one file being worked on. *When a control
+changes shape, grep every check for the old selector — not the one that failed
+first.*
+
+---
+
+## 122 · One line above the table, and a dialog that fits the window (v3.44)
+
+Two asks, minutes apart, both from using the register on his own laptop.
+
+> "The top part can include the password, the SMO badge remove it and remove the
+> 77 people active text and the password can come to the same line and
+> accordingly the whole table should be just below the buttons line."
+
+> "That's a very wide design that even require a scroll — make it compact with
+> no need to scroll."
+
+Settled from a mockup carrying the measurements, agreed as drawn.
+
+### 122.1 Three removals and one arrival, and only the arrival had a constraint
+
+The badge said **who you are**, which the chrome says on every page. The count
+said **how big the register is**, and the table under it is that — §116 had
+already dropped the second copy of that count from the filter row for exactly
+this reason and kept this one, and *keeping one copy of something nobody asked
+for is still keeping it*.
+
+The fourth is not a removal, and it is the one that had to be measured rather
+than agreed. **Passwords was already in `.hright`; it was wrapping.** Take the
+badge away and the row still wanted **1107px**, so it would have kept wrapping
+on his own 1512px laptop at anything less than full width. Two labels are
+shorter — *Needs attention* → **Attention**, *+ Add someone* → **+ Add** — and
+the search flexes from 160px rather than 190px, because it is the only control
+on the row that can be narrower without losing a word.
+
+Measured, title and controls together: one line to **1512px** before, one line
+to **1280px** now. Below 1150 the title takes its own line, and the controls
+stay together to 1000. **The cost is recorded rather than glossed:** two labels
+are terser, bought for 140px.
+
+### 122.2 The mark that moved rather than went
+
+The count line also carried **"N units with no custodian"** — the one
+outstanding thing on this page that is not about a person, so it cannot join the
+Attention queue (§116.2: there would be nobody to open). Removing the line would
+have removed it in silence, which is how §93.4's finding gets lost.
+
+It is a **chip on the row**, wearing the warning ground rather than the page's
+quiet ink, because on a row of six controls a grey word is furniture. **Drawn
+only when there is one**: a chip that is usually absent is a mark, one that is
+always there is furniture again (§41's budget). One line, like everything else
+on that row (§88).
+
+### 122.3 The dialog was not dense, it was wasteful
+
+938px wide, two 434px columns, content **482px**, and a 720px-tall window cut it
+at 538px. What was spending that height was not content:
+
+- **Nine fields do not divide by two.** The Unit row left the cell beside it
+  empty — 56px of nothing, every time anybody opened anybody.
+- **Sign-in name carried a paragraph**, the tallest single thing in the dialog,
+  saying the same sentence on every person you open.
+
+Three columns divide nine exactly, so nothing is orphaned; the sentence is a
+`title` on a value that **looks** un-editable (`.pdro`, dashed and quiet) rather
+than one explaining that it is. Six content rows become four, **482px → 337px**,
+and it fits every window down to 640px tall with no scroll.
+
+**And it is narrower too — 860px, not 938.** Narrower and shorter are usually a
+trade and here they were not, precisely because what was spending the height was
+waste. The width is marked on the **overlay** (`.pdlg-on`), never loosened on
+`.modal`, which every dialog in the platform shares; it comes off in
+`closeModal()`, the one door all four ways out go through (§116.6). The steps
+down are **3 → 2 → 1**, never 3 → 1: a narrow laptop is not a phone, and
+dropping straight to one column would put the scroll back.
+
+**The cost, stated before it was agreed:** a 264px field is tighter than a 434px
+one, so a long address fills its box instead of sitting inside it.
+
+### 122.4 The check measured the wrong box and passed on the build it was meant to reject
+
+`checks/register-header.py` first asked whether **`.hright`** was one row — and
+that assertion was **green on the previous build at every width**. `.phead2`
+wraps too, so when the controls no longer fit beside the title the whole block
+drops them onto a line of their own, and the inner box then honestly reports one
+row while the header is two. *The thing Islam can see is the header's height,
+and that is what had to be asserted*; the inner row is asserted under it because
+it is the one that was carrying Passwords. With both, the previous build fails
+**12 times** — proved before the green run was believed (§94.5).
+
+Two more traps on the way. **One row is not one `top` value**: the controls have
+different heights, so their boxes start a pixel or two apart and a naive count
+reported three rows on a row that was plainly one — cluster by the middle.
+And **the whole thing is invisible over `file://`**: Passwords is `live`, so the
+first version measured a five-control row and called it a pass (§94.11).
+
+`.pcount` was read by two other checks, which are rewritten against the chip
+rather than deleted (§51.11, and loud rather than quiet this time only because
+the element is gone entirely). `var retired` is deleted with the line that read
+it — a variable nothing reads is one the next person reads as load-bearing
+(§24).
+
+### 122.5 A bold title, and a table that stopped 141px short
+
+> "1. the people register title needs to be bold. 2. the registery table should
+> extend down till the end of the page."
+
+**THE SECOND IS NOT A DESIGN DECISION, IT IS A STALE CONSTANT.**
+`.cfg.peoplebox` was capped at `calc(100vh - 300px)`, and that 300 was a guess
+at what sat above it: an alarm-chip row, a filter row and a count line. §116
+removed the first two and §118 removed the third, and nobody retuned the
+number — so the table ended **141px above the bottom of the window at every
+height measured**, with the rail beside it correctly ending 20px short.
+
+So it is not a constant any more. `.panefill` takes **the rail's own
+expression** — the two halves of this split start at the same y, so a second
+way of saying "as tall as the window allows" is exactly the drift §53.5 names —
+and the box FLEXES into what is left. That is what makes it right at narrow
+widths too: when the header takes a second line the box gets 48px shorter by
+itself, where any constant would have had to guess. Every link in the chain
+needs `min-height:0`, or a flex child refuses to shrink below its content and
+pushes the height back out by another road (§100.5, in a different tree).
+
+**Only this page's pane is capped**, and that is deliberate: every other Setup
+page is a form or a short list, and capping those would invent a scroll nobody
+asked for. The floor is the rail's floor, for the rail's reason.
+
+**THE TITLE IS BOLD ON ALL TWELVE**, not on this one. `cfgHead()` is one
+function, and one page's title in a different weight from eleven others reads
+as a mistake rather than as emphasis.
+
+**AND THE TWO ASKS INTERACT, WHICH IS WORTH THE PARAGRAPH.** At 700 the title
+measures **208px against 180px**, so the header's one-line reach went from
+1280px to **1300px**. Two attempts to buy those 20px back both made things
+worse and are recorded because each is a real trap:
+
+- **A flex container decides to WRAP from an item's hypothetical size**, and
+  only shrinks what is left on the line afterwards. So `.hright` was moved to a
+  second line before the search box was ever asked to give anything up, and
+  adding `min-width:0` to let it compress changed nothing at all.
+- **`flex-basis: min-content` on a WRAPPING flex container is its widest item,
+  not the sum of its items.** `.hright` promptly sized itself *below* its own
+  content and broke into two rows at 1150 and 1100, where it had been one — a
+  fix that made the exact fault it was aimed at appear 150px earlier.
+
+Both were reverted. Twenty pixels, on a window between 1280 and 1300, is not
+worth shaving a control for — the trade is recorded here and the check's
+threshold moved to match, rather than left asserting a number that is no longer
+true.
+
+**Still there and deliberately not changed:** `.wrap` carries
+`padding-bottom:80px`, so the page can still be scrolled about 60px past the
+table's foot. That is every railed page's behaviour, the rail does exactly the
+same thing, and it is not this section's to change.
+
+
+### 122.6 What §121 changed under this, and what that costs §122
+
+§121.2 gave every Setup pane its own **sticky page title**, arriving from
+another branch the same day. Three things in §122 met it, and following that
+decision rather than defending mine is the whole of this note.
+
+**THE BOLD MOVED.** `cfgHead()` now DROPS its `.secttl` where the pane's own
+name already says the same thing, so bolding `.phead2 .secttl` alone would have
+styled an element the register no longer renders — measured, the page draws
+exactly one title and it is `.setupttl`. Both carry 700 now, so a page whose
+section heading genuinely differs from its name does not read in two weights.
+
+**§122.1'S ONE-LINE HEADER IS SUPERSEDED, AND THAT IS THEIR CALL.** §121.2
+deliberately did NOT pull the controls into the sticky header — a non-sticky row
+slid out from under the pinned name when scrolled, which is a better reason than
+mine for wanting them together. The name and the controls are two rows now, on
+purpose. What survives of Islam's ask is the half that was ever about the
+controls: **they are one row, Passwords included, and the table follows them.**
+The check asserts that and no longer asserts the combined height — *a check that
+argues with a decision is a check that will be deleted by whoever made it.*
+
+**AND THE RAIL STOPPED BEING THE RIGHT THING TO COMPARE AGAINST.** §122.5
+asserted that the table ends where the rail ends, and that was true in five of
+six measurements: the rail is a max-height over a LIST, so on a tall window its
+content ends before its cap and the two legitimately differ. The pane is still
+capped by the rail's expression — that is the point of taking it — but what was
+asked for is that the table reaches the fold, so **the window is what is
+measured now**, at both ends: it must reach it and must never pass it.
+---
+
+*(Numbered §123–§127 at merge time. They were written as §116, §117, §119,
+§120 and §121 on their branch; another session's work reached `main` first and
+took every one of those, so all five move together — the rule is unchanged and
+is simply whoever lands first. Fifth renumber on this branch. Read them as one
+run: a diagnostic (§123), the diagnostic correcting itself twice (§124, §126),
+the handoff it made visible (§125), and the settings page it sat on (§127).)*
+
+## 123 · Is the bot working? (v3.46)
+
+> *"I tried it and enabled the assistant reply but nothing came back."* … *"But
+> I received the message at the inbox."* … *"I need to understand if the bot is
+> working."*
+
+### 123.1 The degradation was correct, and that is what made it invisible
+
+§112.2 built the assistant so that **every failure lands on the chat as it
+worked before it existed**: the message is stored, the conversation waits, a
+person answers. Islam's report is that behaviour working exactly as designed —
+which is why he could not tell it from the assistant simply never having been
+asked.
+
+**Four completely different situations look identical from the office's side:**
+no API key, a rejected model name, Google unreachable, and the assistant
+legitimately deciding it cannot answer. All four produce a message in the inbox
+and no explanation. Right for the person asking, who wants a human either way.
+Useless to the person who has just turned it on.
+
+*A failure mode designed to be invisible to the user must still be visible to
+the operator, and nothing in §112 said so.*
+
+### 123.2 It walks the chain and reports where it stops
+
+The diagnostic does not answer yes or no. **"It is not working" sends somebody
+to look at everything; "the API key" sends them to one page.** So each step is
+checked in the order the real call uses it, and the first failure ends the walk
+— reporting a model error underneath a missing key would be noise.
+
+| Step | What a failure there means |
+|---|---|
+| The switch | Everything is going to the inbox on purpose |
+| The knowledge base | `db/kb.json` did not reach the deployment |
+| The API key | No `GEMINI_API_KEY` — **and it names the Vercel trap**: a deployment only has the variables that existed when it was built |
+| The model | Reachable, refused, or the name retired — with the provider's own message |
+| A question it should know | It answered but declined a question the corpus covers, which is about the corpus rather than the connection |
+
+**It makes a real call.** Anything less tests the parts rather than the thing:
+a key can be present and refused, a model name valid and retired. It is the
+office's own button, so the cost is one question's worth of tokens when
+somebody presses it.
+
+**The last step is worth its place**: a model that is reachable and hands over a
+question with a right answer in the corpus is a different fault from a model
+that cannot be reached, and the two would otherwise both read as "not working".
+
+### 123.3 Nothing is stored
+
+The result is a question about **this moment**, so it lives where the answer is
+read and nowhere else. A stored last-attempt would go stale in a way nobody
+could see (§35: absent is not "none"), and on a serverless deployment there is
+no process to hold it in anyway.
+
+### 123.4 It rendered perfectly and did nothing
+
+The branch was written into the settings menu's **`change`** listener rather
+than its `click` listener — anchored on the representative `<select>`, which
+genuinely does belong there. **A `<button>` never fires `change`.**
+
+So the control was present, correctly styled, and `elementFromPoint` returned
+it: every assertion short of pressing it would have passed. It was found by
+pressing it, and then by instrumenting the click when the press did nothing —
+no request, no console error, the button's own label unchanged, which is what
+finally said *the handler is not running* rather than *the request failed*.
+
+§96's family exactly, and the fifth time this file records it: **a control
+wired to nothing is indistinguishable from a working one until somebody uses
+it.**
+
+### 123.5 What proves it
+
+`src/checks/office-chat.py` §10 asserts that the diagnostic **separates**
+outcomes rather than that it appears — a failing chain names the step that
+stopped it and marks exactly one row; a working chain says so and marks none.
+A check of the happy path alone would be the same silence with a button on it.
+
+And it presses the button, which is the only assertion that would have caught
+§123.4.
+
+**The check's own bug is worth a line**: the local holding the diagnostic's
+result was called `bad`, which is this file's module-level failure counter — so
+the summary crashed on a dict after every assertion had passed. Renamed to say
+what it holds.
+
+
+---
+
+## 124 · The diagnostic said the key was working while the provider refused it (v3.46)
+
+> Islam, having pressed §123's button: a screen reading **"It is not working —
+> the model (gemini-2.5-flash)"**, with *The API key · **WORKING** · Set on this
+> deployment* directly above *the assistant refused the request (400: API key
+> not valid. Please pass a valid API key.)*
+
+**Two rows on one screen contradicting each other, and the diagnostic wrote
+both.** §123 exists to send somebody to one page, and this sent them to the
+model page while the fault was the key.
+
+### 124.1 The row said "working" and had only checked presence
+
+`configured()` is `!!apiKey()` — a non-empty environment variable and nothing
+else. It cannot know whether Google accepts that value, and it never claimed
+to; **the word "working" claimed it on its behalf.**
+
+The state and the word had been the same fact: `TESTWORD` turned `ok` into
+*working*, `fail` into *stopped here*. That is right for every step whose check
+IS the thing — the switch is on, the corpus loaded, the model answered — and
+wrong for exactly one, because presence is all that step can see.
+
+So **a step chooses its own word** where the state's default would overclaim.
+The API key's is **PRESENT**, with the detail saying outright that whether the
+provider accepts it is the next step's answer.
+
+*A status word is a claim, and a claim wider than what was measured is a wrong
+answer wearing a green dot.* §35's rule with the sign reversed — that one is
+about absence being reported as "none"; this is presence being reported as
+proof.
+
+### 124.2 And the refusal belonged to the key, not to the model
+
+**Google answers a bad key with 400**, not 401 — so the generic branch caught
+it and reported it under *The model (…)*, which is the step that happened to be
+running rather than the thing that was wrong. `looksLikeBadKey(status, detail)`
+in `lib/assistant.js` reads 401 and 403 **and the provider's own words**,
+because the status alone cannot be trusted here; `ask()` returns
+`{ok:false, badKey:true}` and the diagnostic reports it as **The key itself**.
+
+**The three causes are named**, because all three produce a key that looks
+correct in the dashboard and is refused: a stray space or newline in the paste,
+a key restricted to a website or IP (a server key must not be), or a project
+where the Generative Language API was never switched on. None of them is
+visible from inside the deployment, so a diagnostic that stops at "rejected"
+leaves somebody staring at a value that looks right.
+
+### 124.3 Two of them are now impossible
+
+`apiKey()` **trims and strips surrounding quotes**. A key pasted into a
+dashboard field arrives with a trailing newline often enough to be the first
+thing to rule out, and some people paste it with its quotes. Both produce the
+provider's least helpful error against a character-for-character correct key,
+and neither is visible anywhere — the variable is set, it is non-empty, and it
+is wrong.
+
+Done in the reader rather than in an instruction to go and check: **a value
+that only works when it is clean should be cleaned by whatever reads it.**
+`model()` is trimmed with it, for the same reason and by the same road.
+
+### 124.4 The headline lowercased an acronym
+
+*"It is not working — the api key"*. The sentence lowercases the step's name so
+it reads as prose, and `toLowerCase()` reached the whole of it. `unCap()` moves
+**only the leading article**.
+
+Small, and worth the line: the headline is the one thing somebody reads before
+deciding whether to keep reading, and a product that cannot spell its own field
+names is read as a product that is guessing.
+
+### 124.5 What proves it
+
+Three assertions in `checks/office-chat.py` §10, and each was watched to fail
+before the green run was believed (§94.5 — 3 failures against the previous
+build):
+
+- a present key **never claims to be working**, and says only what it checked;
+- the refusal is reported **against the key, not the model**;
+- an acronym in a step's name **survives the headline**.
+
+The first is the one that matters, and it is a *these two must differ* check
+rather than a *these two must match* one — §113.8's blind spot does not apply,
+because the failure it guards against is precisely the two collapsing into one
+word.
+
+**Driven end to end against a stub standing in for Google**, in all five
+states — no key, a key it refuses, a retired model, exhausted quota, a real
+answer — because §123's own lesson is that the parts can each be right while
+the thing is not. Every one lands on the step it belongs to.
+
+
+---
+
+## 125 · A handoff was invisible to the person who asked (v3.46)
+
+> Islam, with the assistant on, a key the provider now accepts and the switch
+> showing ON: *"nothing happens at all."*
+
+### 125.1 Saying nothing is not a neutral outcome
+
+§104 wrote **nothing** on a handoff, and the reasoning was sound: a bot message
+saying *"the office will get back to you"* reads as an answer, and the
+conversation would drop out of the office's queue with nobody coming. So
+`answered` decides, and the model's words are shown only when it is true.
+
+What was never asked is **what that looks like from the other end.** The person
+sees no reply, no acknowledgement, nothing — which is byte-for-byte what they
+would see if the assistant had never been asked at all. Four states already
+looked alike to the office and §123 separated them; this is the same fault one
+layer in, on the side §123 did not touch.
+
+*A failure mode designed to be invisible must still be visible to somebody, and
+"the operator" was only half the answer.*
+
+### 125.2 It is narrated, not spoken
+
+One line, in the **product's** words and never the model's — which does not
+reverse §104, because that rule is about the model's sentence never being
+allowed to stand in for an answer, and `answered` still decides everything. The
+line is fixed text and the thread **stays waiting**, so the office's queue, the
+Waiting tab and the email chase are all exactly as they were.
+
+It wears **no name, no time and no bubble**. The two sides of this conversation
+are the person and the office, and a handoff is neither — it is the product
+saying what happened, so it reads as a break in the conversation rather than a
+turn in it. The office sees the same line in the thread, which is the point: it
+says the assistant looked before this reached them.
+
+**No way out on it.** That control (spec 016 §4.3) exists for a confident
+*wrong* answer, where the conversation has already left the queue and the
+person would otherwise be stranded. Here somebody is already coming, and a
+control asking for what is happening anyway is worse than no control (§62,
+§110).
+
+### 125.3 A handoff is a decision; a failure is not
+
+Only `answered: false` from a model that actually ran gets the line. Every one
+of §112.2's failures — no key, a refusal, a timeout, malformed JSON, the switch
+off — goes on writing **nothing at all**, exactly as the chat worked before the
+assistant existed.
+
+The difference matters: telling somebody the assistant considered their
+question when it never saw it is a lie the operator cannot see, and it would
+mask precisely the faults §123 was built to surface.
+
+`handoff` is a **column** (migration 026), for §104's own reason — the
+alternative is a reserved body string or a sentinel `source`, and both are a
+name doing an identifier's job (§87). And `HANDOFF_LINE` lives in
+`lib/assistant.js`, not beside the `INSERT` that writes it, because `api/chat.js`
+and `scripts/test-assistant.js` both need it and a string written twice drifts
+(§53.5).
+
+### 125.4 A test that reads a setting it does not control
+
+`test-chat.js` failed five assertions on the run after a dev-server restart and
+passed on the next, twice — which looks exactly like a race and is not one.
+**With the assistant on and a key present, her message comes back with a second
+row beside it and her conversation is no longer waiting**, so five assertions
+about the human path fail for a reason none of them is about. It passed on the
+second run because that file's own settings section clears the switch on its
+way past.
+
+It now forces the switch off at setup and puts the tenant's settings back in
+the `finally` — **including absent, which is not the same as `{}`** (§50.6).
+
+*An hour went into hunting a product race that did not exist. A test whose
+result depends on what somebody set on a screen an hour ago is not a test.*
+
+### 125.5 What proves it
+
+- **`scripts/test-assistant.js`** — a handoff writes exactly one row, marked as
+  a handoff and not as an answer, in the product's own words, and the thread is
+  still waiting; every failure still writes nothing at all. Both watched to
+  fail first (2 failures each way).
+- **`checks/office-chat.py` §11** — the line is on screen, narrated rather than
+  spoken, and carries no way out; **and a real answer looks different**, or a
+  build that drew the line for every bot message would pass every assertion
+  above it. Watched to fail: 3 failures with the rendering reverted.
+- **One assertion was thrown away for being unfalsifiable.** *"Never the
+  model's own words"* was written against the stored row — and `ask()` already
+  blanks the reply when `answered` is false, so it passed however the caller
+  behaved. It is asserted on `ask()` now, where it can fail. §94.5, found by
+  this file's own break test rather than by reading.
+- **Measured, not assumed**: the line is 5.00:1 light and 6.61:1 dark, at
+  `--fs-small` and not `--fs-micro` — that token is for breadcrumbs and metric
+  keys, and this is a sentence somebody has to read. **The chat panel has never
+  been in the contrast sweep at all** (§94.11: the whole feature is invisible
+  over `file://`), so this was measured by hand. Recorded as a gap rather than
+  quietly widened here.
+- Migration 026 applied to a **virgin database**, round trip PASS (§113.7).
+
+### 125.6 Found and not fixed
+
+`.chbot` and `.chout` have **no CSS anywhere in the product**. The way-out
+button under an assistant answer — *"This didn't answer it — send it to the
+office"* — renders as a bare browser button in a panel that is otherwise
+carefully styled, and a bot message is distinguished from the office's only by
+its label. Left alone deliberately: it is a visual decision on a surface this
+section was not asked to touch (rule 1c), and it is named here rather than
+silently corrected.
+
+
+---
+
+## 126 · Which key, without saying which key (v3.46)
+
+> Islam's diagnostic: **the switch WORKING, the knowledge base WORKING, the API
+> key PRESENT** — and the provider still refusing it.
+
+Everything the page could see was right, and the one fact that would explain it
+is the value itself, which must never be printed.
+
+**"Rejected" and "not the key you made" are two different errands.** The first
+sends somebody to Google's console to look at restrictions; the second sends
+them to Vercel, because **a deployment only carries the environment variables
+that existed when it was BUILT**, so a key changed since then is still the old
+one. Nothing on the screen could tell them apart.
+
+Its **length and its first four characters** are enough, and neither is a
+secret: an AI Studio key is `AIza` plus 35 characters, so a value of any other
+shape is a different **kind** of credential — an OAuth token, a service account,
+a Vertex key — and no amount of looking at Google will ever explain that one.
+Four characters of a 39-character string is not the string, and the row is
+behind the office's own door in any case.
+
+**Read after the trim** (§124), or that cleaning would make a good key report as
+malformed — asserted, because the ordering is invisible and would break
+silently. **Asserted in `test-assistant.js` and not in the browser check**,
+whose stub supplies the steps and would never run this at all (§94.2), with an
+explicit assertion that the shape carries nothing beyond a length and four
+characters.
+
+### 126.1 A real fault, found and set aside
+
+Chasing this turned up something else: **the autosave is debounced 800ms and
+nothing flushes it when the page goes away.** Measured with the chat settings
+wiped from the database — press ON, navigate 150ms later, **saves sent: none**,
+database unchanged, screen still reading ON. It is not the chat's: `sync.js` is
+the autosave for the **whole platform**, so branding, terminology and the access
+matrix all have the same hole.
+
+**It is NOT what Islam hit** — his diagnostic reads *The switch — WORKING*,
+which is the server's own answer — and it is recorded here rather than fixed,
+because a change to the save path for every page in the product on the way past
+another problem is exactly what rule 1b exists to stop.
+
+---
+
+## 127 · The settings, in the order somebody decides them (v3.46)
+
+> *"Refine the settings of chat — think of the logical sequence of the settings,
+> make the titles concise and any explanation can be a tooltip on hovering."*
+
+Settled from a mockup made of **this very panel** — the real build, with its
+rows reordered in the browser (§41.9) — before a line of `src/` was touched.
+**882px → 478px**, same seven controls, nothing removed.
+
+### 127.1 The order was not one
+
+The **master switch** — the one that decides whether any of this exists — sat
+**third**, underneath the assistant, which is a decision *about* the chat rather
+than one *above* it. And the two email settings sat **five rows apart** with
+three unrelated rows between them.
+
+It runs one way now, from *does this exist* down to *a tuning knob*, so a reader
+never has to go back up:
+
+| | |
+|---|---|
+| Chat · Promise · Screenshots | what it is, and what people get |
+| Assistant (+ Test) | who answers |
+| Handover email · Away email | how people are reached |
+| Reply checks | how it runs |
+
+**The titles are one or two words and the KEYS DO NOT MOVE** (§30.2, §65,
+§108.3): renaming a stored key would reset the setting for every tenant that had
+ever touched it, for the sake of a word nobody reads. The panel heading becomes
+**Chat settings**, Islam's own call, so it does not collide with a row now
+called Chat.
+
+### 127.2 A status is not an explanation
+
+Every line of prose became a tooltip. **"No one is set — handoffs wait in this
+inbox until somebody is chosen" did not**, because it is a fact about right now
+rather than a description of how a setting works: behind a hover, somebody turns
+Handover email on, nobody is chosen, and nothing ever says so (§35, §45.2).
+
+That is the one line drawn inside what was asked for, and it is the difference
+between prose and state.
+
+### 127.3 A tooltip that only answers a mouse
+
+Hover does not exist on a tablet, and since every explanation now lives behind
+one of these marks, a note that only answers a mouse is half this panel's
+readers unable to read it. **A tap opens it** — Islam's call when it was put to
+him — with `.on` sitting beside the `:hover` and `:focus` the platform already
+uses, so nothing about the mark changes for anybody else.
+
+**`.tip` is the platform's own**, declared once in `group-extra.css` and reused
+rather than drawn again (§53.5) — `display:none` and not `opacity:0`, for the
+reason §27.2 records at length. **Scoped to this panel deliberately**: `.tip` is
+used all over the product, and giving every one of them a tap would be a change
+to pages this was not asked to touch.
+
+**And the bubble had to stop hanging off the side.** The platform's default
+centres a 264px note on a 14px mark, which inside a 392px dropdown puts most of
+it outside the panel — and the seven marks sit at seven different x positions,
+so no single offset fixes them. Making the mark `position:static` hands the
+bubble to `.chset-row` instead, where it spans exactly the row: inside the
+panel **by construction rather than by arithmetic**.
+
+### 127.4 What proves it
+
+`checks/office-chat.py` §12 asserts **the problems, never the layout** (§94.8) —
+a check written against *"row 4 is Assistant"* has to be rewritten the day
+anything moves:
+
+- the switch that turns the whole thing off comes **first**;
+- the two email settings are **adjacent**;
+- Test is in the **assistant's own row**;
+- every setting explains itself behind a mark, and **pressing** one opens it;
+- **one at a time, and the bubble lands inside the panel**;
+- the prose is gone and **the live status is not**.
+
+Watched to fail first (§94.5): moving the master switch back down, 1 failure;
+reverting the tap, 1; reverting the anchoring, 1.
+
+**And one of those assertions could not fail when it was first written.** It
+measured the ROW against the panel — and a row is inside its own panel by
+definition, so it passed on the broken build. A `::after` is not an element and
+has no `getBoundingClientRect` (§53.7's blind spot), so the bubble's box is now
+computed from **whichever containing block `position` actually gives it**,
+following the CSS rather than assuming which rule is live. Only then did it
+report `box [899,1187] · panel [969,1361]`.
+
+
+## 128 · A tactic that names no quarter, a closing slide, and the overview's download (v3.46)
+
+Three more from using the plan download, on a tenant whose plan is still
+being filled in — which is exactly the state the Missing marks were built for
+and the state the demo never shows (§94.2).
+
+### 128.1 No quarter at all is a gap; a blank one is not
+
+Islam, on a tactics slide with a Missing owner and four empty quarter
+columns: *"in the tactics slide, Qs are missing as well."*
+
+**§119.1 DELIBERATELY LEFT A BLANK QUARTER ALONE, AND THAT IS STILL RIGHT.**
+A tactic marked Q2 and Q3 is *saying something* about Q1 and Q4 by leaving
+them empty — the absence is the answer, which is why an unticked quarter gets
+no mark. What that reasoning never covered is **all four empty**: nobody has
+said when this runs at all, and that is a fact the plan owes exactly like a
+missing owner. The rule is therefore not "flag an empty cell" but "flag a row
+that answered nothing".
+
+**THE FIRST ANSWER WAS WRONG AND IS RECORDED AS SUCH.** It merged one bold
+red `Missing` across the four columns — `gridSpan` on the first cell,
+`hMerge` on the other three. Islam: *"you changed the quarters columns format
+to type missing that's wrong, the template should stay the same — revert the
+columns of the quarters to separate columns and maybe make check marks in
+bold red inside all as an indicator of missing."*
+
+**THE COLUMN SHAPE IS THE TEMPLATE'S AND WAS NOT MINE TO SPEND.** The four Q
+columns exist because the plan workbook has four and a reader moves between
+the two; a table that keeps its grid on every row can be scanned down a
+column, and one whose cells merge whenever a row is incomplete cannot — so
+the merge cost the structure that carries every OTHER row in order to say
+one thing about this one. The same fault as putting a sentence where a mark
+belongs (§116.4): the alarm was allowed to reshape what it was annotating.
+
+**SO THE MARK CHANGES COLOUR AND THE TABLE DOES NOT CHANGE SHAPE**: all four
+quarters ticked in bold red, the one colour this deck uses for nothing but a
+gap, beside a Missing owner in that same red. It reads as "no answer here"
+without a word and without a merged cell. `gridSpan`, `hMerge` and the
+`merged` cell type are DELETED rather than left unused (§24).
+
+### 128.2 The deck closes on Thank you
+
+*"add a thank you page at the end of the ppt."* `present.js` has ended on a
+`d-thanks` cover slide since the projected deck existed — the words, the
+rule, the subject beneath — so this is the plan deck learning the manners the
+review deck already has rather than a new idea (§53.5, a unit and a function
+are the same product, applied to two decks of the same plan).
+
+### 128.3 The Function overview carries the download too
+
+*"the functional projects has no download button we need a download button."*
+Measured first, because the button IS on a capability's Projects pane and was
+confirmed there on live production (§119.5 asked about this and got no
+answer). What the measurement found is the half nobody had looked at: a
+capability function's strategy tab is **two sections** — Function overview
+and Projects — and only the second had a `.paneact` to hang the button on.
+One deck comes out either way, so from the overview there was simply no way
+to take the plan away. `DL_PAGES` names the two page keys and `editBar()`
+draws it beside Edit.
+
+**AND IT RENDERED INVISIBLE, WHICH IS §70 EXACTLY.** `.penbtn` is built for a
+card corner: absolutely positioned, `opacity:0` until its `.hoverpen` parent
+is hovered. Dropped into `.pageact` — a flex row of worded buttons — it
+appeared in the document, answered every DOM query, and could not be seen or
+pressed. It was caught only because the check CLICKS the control instead of
+asking whether it exists; Playwright refuses to click something invisible.
+`.pageact .penbtn` is `position:static` and always visible.
+
+**THE DOWNLOAD IS NOT AN AUTHORING CONTROL**, so `editBar()` asks for it
+before the pen's gate and draws the bar when either is answered — a person
+who may not author the overview may still take it away.
+
+### 128.4 What proves it
+
+`checks/strategy-split.py` §5 makes the state (a pillar whose tactics lose
+their quarters, with ONE tactic keeping a quarter so both halves are
+measured), asserts every row keeps its four columns and NOTHING is merged, reads the
+ticks' colour and weight rather than their text, asserts the last slide of both decks is the Thank you, and
+**presses** the overview's button with an `elementFromPoint` hit test before
+downloading through it. Proved able to fail three ways (3 / 3 / 1).
+
+**AND TWO OF THE FIRST RUN'S THREE FAILURES WERE THE CHECK.** `sorted()` over
+slide parts is LEXICOGRAPHIC — `slide10.xml` before `slide2.xml` — so the
+check read a pillar it had not touched and reported the product broken;
+`slidenames()` sorts numerically now and every reader in the file uses it.
+The other was `grab()` looking only inside `.pane`, which the overview's bar
+is not. *A measurement that is wrong in the direction of "broken" costs as
+much as one that is wrong in the direction of "clean" (§68.10), and the first
+instinct — to go and change the builder — would have damaged working code.*
 
 ## 129 · Building a plan on the platform (v3.47, spec 020)
 

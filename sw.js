@@ -107,7 +107,24 @@
    conflict only because a comment differed. Resolved to a name nobody has
    served, confirmed against origin/main at the merge and AGAIN immediately
    before the push (§94.16). */
-const SHELL = "smp-shell-v3.47";
+/* v3.46-plandeck — §128: the deck marks a tactic that names no quarter,
+   closes on Thank you, and the Function overview carries the download too.
+
+   §94.12 FOR THE TENTH TIME (and it did NOT collide this time), and the SEVENTH on this one piece of work:
+   v3.39, v3.40, v3.41, v3.43, v3.44 and v3.45 were each taken by main inside
+   the window between reading a name and pushing it. §99's answer is applied
+   properly this time — the bare next number is a rule two sessions follow
+   correctly and still collide on, so the SUFFIX says whose the change is and
+   cannot be arrived at by coincidence. Confirmed against origin/main serving
+   "smp-shell-v3.45"; confirm once more immediately before any push to main
+   (§94.16). */
+/* v3.47-planbuilder — §129: building a plan on the platform. The suffix rule
+   from the line above, followed: this session first wrote v3.41, found main
+   had taken v3.38–v3.46 while it worked, and renumbered — the name says
+   whose change this is, so a twelfth collision cannot happen by coincidence.
+   Confirmed against origin/main serving "smp-shell-v3.46-plandeck"; confirm
+   once more immediately before the push to main (§94.16). */
+const SHELL = "smp-shell-v3.47-planbuilder";
 const ASSETS = [
   "/",
   "/index.html",

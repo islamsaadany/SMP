@@ -227,10 +227,10 @@ var PAGE_INFO = {
        "to a role is a deliberate act made on the table, not a side effect of letting the same " +
        "people report."],
       ["Two things are rules, not settings, so they are not in the table",
-       "The <b>knowledge base</b> is readable by everyone, always &mdash; an explanation nobody " +
-       "can open is not an explanation. And <b>focus measures</b> &mdash; what carries reward " +
-       "&mdash; are marked by the group CEO and the SMO. Each of these used to be a cell in the " +
-       "matrix."],
+       "The <b>knowledge base</b> is the office's &mdash; the Super user and the SMO team &mdash; " +
+       "because it explains how the platform itself is run. And <b>focus measures</b> &mdash; " +
+       "what carries reward &mdash; are marked by the group CEO and the SMO. Each of these is a " +
+       "rule rather than a cell, so neither moves when the table does."],
       ["Page level only",
        "If a role can open a page, it sees everything on it. Restriction happens by removing the " +
        "page, never by trimming its contents &mdash; per-element permissions make a system nobody " +

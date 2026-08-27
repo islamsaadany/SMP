@@ -1,0 +1,266 @@
+<title>Setup Makeover Status</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Source+Serif+4:opsz,wght@8..60,600;8..60,700&display=swap">
+<style>
+  :root{
+    --ground:#F7F8FA; --surface:#FFFFFF; --surface-2:#EFF2F6;
+    --line:#D6DCE5; --line-soft:#E6EAF0;
+    --ink:#171B22; --ink-2:#414A58; --ink-3:#636C79;
+    --navy:#16325C; --navy-ink:#FFFFFF;
+    --gold:#C9A24D; --gold-deep:#8A6B22;
+    --good:#2E7D5B; --good-bg:#E4F0EA;
+    --attn:#B8860B; --attn-bg:#F7EFD6; --attn-tx:#7A5D1C;
+    --bad:#B04434; --bad-bg:#F7E3E0; --bad-tx:#8C3327;
+  }
+  @media (prefers-color-scheme: dark){ :root:not([data-theme="light"]){
+    --ground:#14161A; --surface:#1C2027; --surface-2:#242932;
+    --line:#333A45; --line-soft:#2A303A;
+    --ink:#E9ECF1; --ink-2:#B4BCC8; --ink-3:#949DAA;
+    --navy:#0F2242; --navy-ink:#E9ECF1;
+    --gold:#D9B665; --gold-deep:#C9A24D;
+    --good:#5FB68C; --good-bg:#122A20;
+    --attn:#D9B23C; --attn-bg:#2E2610; --attn-tx:#E8CA6A;
+    --bad:#D97066; --bad-bg:#2E1616; --bad-tx:#E79A93;
+  }}
+  :root[data-theme="dark"]{
+    --ground:#14161A; --surface:#1C2027; --surface-2:#242932;
+    --line:#333A45; --line-soft:#2A303A;
+    --ink:#E9ECF1; --ink-2:#B4BCC8; --ink-3:#949DAA;
+    --navy:#0F2242; --navy-ink:#E9ECF1;
+    --gold:#D9B665; --gold-deep:#C9A24D;
+    --good:#5FB68C; --good-bg:#122A20;
+    --attn:#D9B23C; --attn-bg:#2E2610; --attn-tx:#E8CA6A;
+    --bad:#D97066; --bad-bg:#2E1616; --bad-tx:#E79A93;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--ground);color:var(--ink);
+    font:14px/1.55 -apple-system,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif}
+  .wrap{max-width:1120px;margin:0 auto;padding:36px 28px 80px}
+  .eyebrow{font-size:10.5px;font-weight:800;letter-spacing:.09em;text-transform:uppercase;color:var(--gold-deep)}
+  h1{font-family:"Source Serif 4",Georgia,serif;font-size:31px;line-height:1.15;margin:6px 0 10px;text-wrap:balance}
+  .lede{color:var(--ink-2);max-width:66ch;margin:0}
+  h2{font-family:"Source Serif 4",Georgia,serif;font-size:20px;margin:0 0 4px}
+  .note{color:var(--ink-3);font-size:13px;margin:0 0 16px;max-width:74ch}
+  section{margin-top:42px}
+  .snum{display:inline-block;min-width:22px;padding:1px 7px;border-radius:99px;background:var(--navy);
+    color:var(--navy-ink);font-size:11px;font-weight:800;text-align:center;vertical-align:2px;margin-right:8px}
+
+  .verdict{background:var(--good-bg);border:1px solid var(--good);border-radius:12px;padding:16px 20px;margin-top:20px}
+  .verdict b{color:var(--ink);font-size:15px}
+  .verdict p{margin:6px 0 0;color:var(--ink-2);max-width:80ch}
+
+  .tblwrap{overflow-x:auto;border-radius:10px;border:1px solid var(--line)}
+  table{width:100%;border-collapse:collapse;background:var(--surface);font-size:13px}
+  th{background:var(--navy);color:var(--navy-ink);text-align:left;font-size:10.5px;letter-spacing:.07em;
+    text-transform:uppercase;padding:9px 12px;white-space:nowrap}
+  td{border-top:1px solid var(--line-soft);padding:9px 12px;vertical-align:top}
+  td.it{white-space:nowrap;font-weight:600}
+  .tag{display:inline-block;font-size:10px;font-weight:800;letter-spacing:.05em;text-transform:uppercase;
+    border-radius:99px;padding:2px 8px;white-space:nowrap}
+  .t-live{background:var(--good-bg);color:var(--good);border:1px solid var(--good)}
+  .t-gap{background:var(--attn-bg);color:var(--attn-tx);border:1px solid var(--attn)}
+  .t-bug{background:var(--bad-bg);color:var(--bad-tx);border:1px solid var(--bad)}
+
+  .items{display:grid;gap:11px}
+  .item{background:var(--surface);border:1px solid var(--line);border-left:3px solid var(--line);
+    border-radius:10px;padding:13px 17px}
+  .item.gap{border-left-color:var(--attn)}
+  .item.bug{border-left-color:var(--bad)}
+  .item.ok{border-left-color:var(--good)}
+  .item b{display:block;font-size:13.5px;margin-bottom:3px}
+  .item p{margin:0;color:var(--ink-2);font-size:13px;max-width:86ch}
+  .item p + p{margin-top:6px}
+  .ev{display:inline-block;margin-top:7px;font-family:ui-monospace,SFMono-Regular,Menlo,monospace;
+    font-size:11.5px;background:var(--surface-2);border:1px solid var(--line);border-radius:6px;
+    padding:3px 8px;color:var(--ink-2)}
+
+  .flow{display:grid;gap:8px;margin-top:6px}
+  .step{display:flex;gap:12px;align-items:flex-start;background:var(--surface);
+    border:1px solid var(--line);border-radius:10px;padding:11px 15px}
+  .step .n{flex:none;width:22px;height:22px;border-radius:99px;background:var(--gold);color:#171B22;
+    font-weight:800;font-size:12px;display:grid;place-items:center}
+  .step div{min-width:0}
+  .step b{display:block;font-size:13px}
+  .step span{color:var(--ink-2);font-size:12.5px}
+
+  .ask{background:var(--surface);border:1px solid var(--gold);border-radius:12px;padding:16px 20px;margin-top:14px}
+  .ask b{font-size:14px}
+  .ask ul{margin:8px 0 0;padding-left:20px;color:var(--ink-2);font-size:13px}
+  .ask li{margin:5px 0}
+  .foot{margin-top:46px;padding-top:14px;border-top:1px solid var(--line);color:var(--ink-3);font-size:12px}
+  code{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:12.5px;
+    background:var(--surface-2);padding:1px 5px;border-radius:4px}
+</style>
+
+<div class="wrap">
+  <div class="eyebrow">SMP · Setup makeover · 26 Aug 2026</div>
+  <h1>Where the makeover actually stands</h1>
+  <p class="lede">Measured against the live production build, not from memory. The short answer: everything
+  we agreed is merged and deployed. What you are seeing is <b>one real defect</b> and <b>two places where
+  the build drifted from the mockup you signed off</b> — plus a deployment problem that has now resolved itself.</p>
+
+  <div class="verdict">
+    <b>Production is in sync with main.</b>
+    <p>Live is serving <code>smp-shell-v3.36</code> at 2,402,175 bytes — byte-for-byte identical to
+    <code>origin/main</code>. The preview-only problem is gone. Every part of Option A is on the live
+    build: the Overview landing, the search box, the attention rows, the rail pills, the regrouping and
+    all the renames.</p>
+  </div>
+
+  <!-- 1 -->
+  <section>
+    <h2><span class="snum">1</span>Item by item, against what we agreed</h2>
+    <p class="note">Driven on the live production file as the SMO, not read from the source.</p>
+    <div class="tblwrap"><table>
+      <tr><th>What we agreed</th><th>Status</th><th>Evidence on the live build</th></tr>
+      <tr><td class="it">Gear lands on Overview</td><td><span class="tag t-live">Live</span></td>
+        <td>Lands on <b>Overview</b>, first in the rail.</td></tr>
+      <tr><td class="it">Cycle strip</td><td><span class="tag t-bug">Defect</span></td>
+        <td>Renders, but prints empty separators when a cycle has no dates — see §2.</td></tr>
+      <tr><td class="it">“Waiting on the office”</td><td><span class="tag t-live">Live</span></td>
+        <td>Heading present; your screenshot shows the declaration row working.</td></tr>
+      <tr><td class="it">Rail search</td><td><span class="tag t-live">Live</span></td>
+        <td>“Find a setting…” present; typing <code>logo</code> narrows to Business units + Branding.</td></tr>
+      <tr><td class="it">Attention pills</td><td><span class="tag t-live">Live</span></td>
+        <td>People register carries <b>1</b> in your screenshot, matching its Overview row.</td></tr>
+      <tr><td class="it">Group renames</td><td><span class="tag t-live">Live</span></td>
+        <td>Running the cycle · People &amp; access · The organisation · Measurement · Branding &amp; email.</td></tr>
+      <tr><td class="it">Page renames</td><td><span class="tag t-live">Live</span></td>
+        <td>Inbox · Email · Terminology · Plan import &amp; archives. Official BU list kept, as agreed.</td></tr>
+      <tr><td class="it">Rail row glyphs</td><td><span class="tag t-gap">Not built</span></td>
+        <td>Mockup drew one per row; the build has none — see §3.</td></tr>
+      <tr><td class="it">People &amp; access order</td><td><span class="tag t-gap">Drifted</span></td>
+        <td>Mockup: register · roles · BU list. Build: register · BU list · roles.</td></tr>
+      <tr><td class="it">Group heading badges</td><td><span class="tag t-gap">Changed</span></td>
+        <td>Mockup showed a waiting count; build shows entry count, plus a gold count only when folded.</td></tr>
+    </table></div>
+  </section>
+
+  <!-- 2 -->
+  <section>
+    <h2><span class="snum">2</span>The one real defect</h2>
+    <div class="items">
+      <div class="item bug">
+        <b>A cycle with no dates prints its separators anyway</b>
+        <p>Your strip reads <b>“to · due · as of Q4”</b>. I reproduced it exactly by clearing the cycle's
+        from/to/due on the live build. The line is built by joining the three values with the words
+        around them, so when a tenant has not set them the punctuation survives and the values do not.</p>
+        <p><b>It is not something the Overview introduced.</b> The identical line renders on the
+        Reporting cycle page, and has since long before this work — the Overview only made it the first
+        thing you see. That matters for the fix: it should be corrected in one place that both pages read,
+        not patched on the summary.</p>
+        <span class="ev">measured: '.ovcyc-meta' → "to  · due  · as of Q4"  ·  '.fstrip-meta' → identical</span>
+      </div>
+      <div class="item gap">
+        <b>The strip's button drops to its own line below 1280px</b>
+        <p>Swept at five widths: one line at 1920 / 1600 / 1400 / 1280, and at 1100px the strip grows from
+        72px to 126px with <i>Open the cycle page</i> on a row of its own. That is what your screenshot
+        shows. It is not broken, but it reads as unintended.</p>
+        <span class="ev">1920–1280px: 72px, one line  ·  1100px: 126px, button wrapped</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- 3 -->
+  <section>
+    <h2><span class="snum">3</span>Where the build drifted from the mockup</h2>
+    <p class="note">These are mine to own: the mockup you approved showed them and I did not build them,
+    or I changed them while building without bringing it back to you.</p>
+    <div class="items">
+      <div class="item gap">
+        <b>Every rail row was drawn with a glyph. None was built.</b>
+        <p>The signed-off mockup carried twenty of them — ⌂ Overview, ◔ Reporting cycle, ✉ Inbox, ☰ People
+        register, ◐ Branding and so on. It was one of the five HR_ERP practices I listed as worth taking,
+        and it is the only one that did not make it. The Overview's own rows <i>do</i> have them, which is
+        why the page looks finished and the rail looks plainer than what you approved.</p>
+        <span class="ev">live build: 0 occurrences of the rail glyph class</span>
+      </div>
+      <div class="item gap">
+        <b>People &amp; access is in a different order</b>
+        <p>Mockup: People register, Roles &amp; access, Official BU list. Build: People register, Official
+        BU list, Roles &amp; access — because I left the pre-existing source order alone when regrouping.
+        Small, but it is not what you signed off.</p>
+      </div>
+      <div class="item ok">
+        <b>Group badges: changed deliberately, and I should have said so</b>
+        <p>The mockup put a gold waiting-count on every group heading. I built it so the heading keeps its
+        quiet entry count and shows a gold count <b>only while the group is folded</b> — the reasoning being
+        that an open group's rows already carry their own pills, so a heading repeating their sum is the
+        same number twice. I still think that is right, but it is a change to an approved drawing that I
+        made while building rather than bringing to you.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- 4 -->
+  <section>
+    <h2><span class="snum">4</span>What the conflicts and blockers actually were</h2>
+    <p class="note">Useful mostly so the next merge is cheaper. None of this cost any of the work.</p>
+    <div class="items">
+      <div class="item">
+        <b>Main moved 65 commits while we built</b>
+        <p>Other sessions shipped §101–§107 and specs 016–017 (the office assistant, the onboarding tour,
+        reordering coming back, functions submitting). Our section numbering and spec number both collided,
+        so the makeover was renumbered <b>§101 → §108</b> and <b>spec 016 → 018</b>. Nothing was lost; main
+        is now at §110.</p>
+      </div>
+      <div class="item">
+        <b>One genuine code conflict, and it was worth the careful merge</b>
+        <p>§105 put supporting functions on the cycle board by adding a second loop to the totals I had just
+        extracted into a shared function. Taking either side whole would have been wrong. Merging them
+        properly also exposed a miscount nobody had noticed: “in progress” was divided by the unit count
+        while submissions already included functions, so every submitted function silently took one off the
+        figure. The board read 6 submitted / 3 in progress over fifteen rows; it now reads 6 / 10 of 17.</p>
+      </div>
+      <div class="item">
+        <b>The deployment went to preview, and that one was my error</b>
+        <p>Vercel de-duplicates by commit, so a commit sitting on both <code>main</code> and the branch can
+        be attributed to either. I pushed to main correctly, then — after waiting half an hour with no
+        build — tidied the branch onto the same commit, which handed the still-unbuilt deployment a second
+        candidate. It went to preview. Now resolved: production and main match exactly.</p>
+      </div>
+      <div class="item">
+        <b>Three of main's own checks were already failing</b>
+        <p>Unrelated to this work and confirmed by building main on its own: a function row on the cycle
+        board wraps to two lines, sorting a column moves the page, and one check still asserts “no way to
+        reorder at all” after §101 deliberately reversed that. Each needs a product decision, so I reported
+        them rather than guessing inside a merge.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- 5 -->
+  <section>
+    <h2><span class="snum">5</span>The refined merge I propose</h2>
+    <p class="note">Nothing here is started. Four items, smallest first — tell me which you want.</p>
+    <div class="flow">
+      <div class="step"><span class="n">1</span><div><b>Fix the empty-date line</b>
+        <span>One shared helper both the Overview and the Reporting cycle read, so a cycle with no dates
+        says something true — “Dates not set” — instead of stray punctuation. Fixes your screenshot.</span></div></div>
+      <div class="step"><span class="n">2</span><div><b>Add the rail glyphs</b>
+        <span>The twenty from the approved mockup. Restores the last of the five HR_ERP practices and makes
+        the rail match what you signed off.</span></div></div>
+      <div class="step"><span class="n">3</span><div><b>Put People &amp; access back in the drawn order</b>
+        <span>Roles &amp; access above Official BU list. One line.</span></div></div>
+      <div class="step"><span class="n">4</span><div><b>Stop the strip wrapping awkwardly below 1280px</b>
+        <span>Let the button hold its place, or move it deliberately rather than by accident.</span></div></div>
+    </div>
+
+    <div class="ask">
+      <b>What I need from you before I touch anything</b>
+      <ul>
+        <li><b>All four, or a subset?</b> My recommendation: 1 and 2 certainly; 3 and 4 are small and worth
+          doing in the same pass.</li>
+        <li><b>The empty-date wording</b> — “Dates not set” is my suggestion. Your call on the phrase, and
+          on whether the Reporting cycle page should say the same thing (I think yes: one line, one meaning).</li>
+        <li><b>Group badges</b> — keep my folded-only behaviour, or go back to the mockup's always-on
+          waiting count?</li>
+        <li><b>The three checks failing on main</b> — want me to take those on as their own piece of work,
+          or leave them for whoever owns those sections?</li>
+      </ul>
+    </div>
+  </section>
+
+  <div class="foot">All findings measured on the live production build (<code>smp-shell-v3.36</code>) driven in
+  a browser, and on <code>origin/main</code> built in an isolated worktree. Record:
+  <code>design-mockups/setup-makeover/2026-08-26_merge-assessment.html</code></div>
+</div>

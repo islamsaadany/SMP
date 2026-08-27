@@ -55,6 +55,15 @@ def be(pg, key, dest=None, tab=None, sec=None):
     pg.wait_for_timeout(400)
 
 
+def slidenames(z):
+    """Slide parts IN DECK ORDER. `sorted()` is lexicographic, so slide10 comes
+    before slide2 — which silently measures a different slide than the one the
+    check went looking for. Numeric, once, for every reader here."""
+    return sorted((n for n in z.namelist()
+                   if n.startswith("ppt/slides/slide") and n.endswith(".xml")),
+                  key=lambda n: int(n.split("slide")[-1].split(".")[0]))
+
+
 def read_pptx(path):
     """Unzip, parse EVERY xml part (a file PowerPoint refuses is one that
     parses nowhere), and return the concatenated slide text."""
@@ -63,8 +72,8 @@ def read_pptx(path):
     for n in z.namelist():
         if n.endswith(".xml") or n.endswith(".rels"):
             ET.fromstring(z.read(n))  # raises on anything malformed
-    slides = [n for n in z.namelist() if n.startswith("ppt/slides/slide") and n.endswith(".xml")]
-    for n in sorted(slides):
+    slides = slidenames(z)
+    for n in slides:
         root = ET.fromstring(z.read(n))
         for t in root.iter("{http://schemas.openxmlformats.org/drawingml/2006/main}t"):
             text.append(t.text or "")
@@ -190,8 +199,8 @@ with sync_playwright() as p:
     import tempfile, os
     tmp = tempfile.mkdtemp(prefix="smp-pptx-")
 
-    def grab(pg, name):
-        btn = pg.query_selector(".pane .paneact [data-dlpptx]")
+    def grab(pg, name, sel=".pane .paneact [data-dlpptx]"):
+        btn = pg.query_selector(sel)
         if btn is None:
             return None
         with pg.expect_download() as dl:
@@ -257,6 +266,211 @@ with sync_playwright() as p:
         ck("a capability and its project are inside",
            got["cap"] in d["text"] and got["proj"] in d["text"],
            got)
+
+    # ── 4 · §119'S FOUR FOLLOW-UPS ───────────────────────────────────
+    print("\n4 · the deck names its gaps, the rail opens terse, the KB is the office's")
+
+    # THE DECK MAKES ITS OWN GAPS (§94.2): the demo plan is complete, so a
+    # check that only downloads it would never once render a Missing mark.
+    be(pg, who["smo"], who["unit"], "strategy", "plan")
+    pg.evaluate("""(u) => {
+      const x = UNITS[u];
+      x.aspiration = ""; x.swot.t = [];
+      x.keyObjectives[0].target = "";
+      x.items[0].measures[0].dir = ""; x.items[0].measures[0].compile = "";
+      x.items[0].tactics[0].owner = "";
+      paint();
+    }""", who["unit"])
+    pg.wait_for_timeout(300)
+    gaps = grab(pg, "gaps.pptx")
+    ck("a plan with holes still downloads", gaps is not None)
+    if gaps:
+        z = zipfile.ZipFile(gaps)
+        A = "{http://schemas.openxmlformats.org/drawingml/2006/main}"
+        marks, plain = [], 0
+        for n in slidenames(z):
+            root = ET.fromstring(z.read(n))
+            for r in root.iter(A + "r"):
+                t = r.find(A + "t")
+                if t is None or (t.text or "") != "Missing":
+                    continue
+                pr = r.find(A + "rPr")
+                clr = pr.find(A + "solidFill/" + A + "srgbClr") if pr is not None else None
+                bold = pr is not None and pr.get("b") == "1"
+                val = clr.get("val") if clr is not None else None
+                marks.append((bold, val))
+                if not bold or val is None:
+                    plain += 1
+        # SIX GAPS WERE MADE AND SIX MUST BE NAMED — an exact count, because
+        # "at least one" passes a build that marks the aspiration and forgets
+        # every table cell.
+        ck("every gap made is named Missing (6)", len(marks) == 6, len(marks))
+        ck("...all of them bold", all(b for b, _ in marks), marks)
+        ck("...all of them in the platform's own red, not the page ink",
+           all(v == "B04434" for _, v in marks), marks)
+        # AND THE FILLED FACTS ARE NOT TOUCHED: a builder that marked
+        # everything would pass every assertion above.
+        txt = read_pptx(gaps)["text"]
+        ck("a filled target still reads its value", "32%" in txt)
+        ck("a filled owner still reads its name", "Mohamed Rizk" in txt)
+
+        # THE TACTICS TABLE IS FOUR QUARTER COLUMNS (§119, Islam: "a column for
+        # each Q with a mark for the qs in action").
+        heads, marked = None, 0
+        for n in slidenames(z):
+            root = ET.fromstring(z.read(n))
+            body = "".join(t.text or "" for t in root.iter(A + "t"))
+            if "Tactics" not in body:
+                continue
+            for tbl in root.iter(A + "tbl"):
+                rows = list(tbl.iter(A + "tr"))
+                cells = [ "".join(t.text or "" for t in c.iter(A + "t"))
+                          for c in rows[0].iter(A + "tc") ]
+                heads = heads or cells
+                for row in rows[1:]:
+                    vals = [ "".join(t.text or "" for t in c.iter(A + "t"))
+                             for c in row.iter(A + "tc") ]
+                    marked += sum(1 for v in vals[-4:] if v.strip())
+            break
+        ck("the tactics table ends in Q1 Q2 Q3 Q4",
+           heads is not None and heads[-4:] == ["Q1", "Q2", "Q3", "Q4"], heads)
+        ck("...and the quarters in action carry a mark", marked > 0, marked)
+        ck("...while the ones that are not stay empty",
+           heads is not None and marked < 4 * 12, marked)
+
+    # THE RAIL OPENS TERSE (§119). Asserted from a FRESH page, because the
+    # preference is per-browser and this one has been driven all run.
+    fresh = b.new_page(viewport={"width": 1600, "height": 1000})
+    fresh.goto(URL); fresh.wait_for_timeout(1400)
+    fresh.evaluate("""(k) => { VIEWER = k; leaveModes();
+      current = "mobile"; currentSub = "strategy"; CURSEC["strategy"] = "plan"; paint(); }""",
+      who["smo"])
+    fresh.wait_for_timeout(350)
+    r = fresh.evaluate("""() => ({
+      terse: RAIL_TERSE,
+      subs: document.querySelectorAll(".rail .rsub").length,
+      lit: !!document.querySelector(".railterse.on"),
+      names: document.querySelectorAll(".rail .ritem").length })""")
+    ck("a first visit opens the pillar rail collapsed", r["terse"] is True, r)
+    ck("...so no row carries its small line", r["subs"] == 0, r["subs"])
+    ck("...the control shows itself as on", r["lit"] is True)
+    ck("...and the names are all still there", r["names"] > 0, r["names"])
+    # BOTH ENDS: pressing it brings the detail back, or a build that had lost
+    # the sub-lines entirely would pass everything above (§94.2).
+    fresh.click(".railterse"); fresh.wait_for_timeout(350)
+    back = fresh.evaluate("() => document.querySelectorAll('.rail .rsub').length")
+    ck("pressing the control brings the detail back", back > 0, back)
+
+    # THE KNOWLEDGE BASE IS THE OFFICE'S (§119, reversing §30). Asked of the
+    # page def — the one thing the rail, the search and paint() all read.
+    kb = fresh.evaluate("""(w) => {
+      const d = setupDefs().filter(x => x.k === "kb")[0];
+      const asks = (k) => { VIEWER = k; return !d.when || d.when(); };
+      return { exists: !!d, smo: asks(w.smo), head: asks(w.head),
+               cust: asks(w.cust), fnhead: asks(w.fnhead),
+               floor: w.floor ? asks(w.floor) : null };
+    }""", who)
+    ck("the knowledge base page still exists", kb["exists"] is True)
+    ck("the office opens it", kb["smo"] is True)
+    for k, lab in [("head", "a unit owner"), ("cust", "a strategy custodian"),
+                   ("fnhead", "a function head"), ("floor", "somebody with no role")]:
+        if kb[k] is None:
+            continue
+        ck("%s does NOT" % lab, kb[k] is False, kb[k])
+    fresh.close()
+
+    # ── 5 · §119'S THREE FOLLOW-UPS ──────────────────────────────────
+    print("\n5 · quarters that say nothing, a closing slide, and the overview's download")
+
+    # A TACTIC WITH NO QUARTER AT ALL IS A GAP; ONE WITH SOME IS NOT (§119.7).
+    # Both halves, because a build that marked every quarter cell would pass a
+    # check that only looked for the word.
+    be(pg, who["smo"], who["unit"], "strategy", "plan")
+    pg.evaluate("""(u) => {
+      const p = UNITS[u].items[0];
+      p.tactics.forEach(t => { t.q1 = 0; t.q2 = 0; t.q3 = 0; t.q4 = 0; });
+      p.tactics[0].q2 = 1;              /* one tactic still says WHEN */
+      paint();
+    }""", who["unit"])
+    pg.wait_for_timeout(300)
+    MUTATED = pg.evaluate("(u) => UNITS[u].items[0].name", who["unit"])
+    noq = grab(pg, "noq.pptx")
+    ck("a plan whose tactics have no quarters still downloads", noq is not None)
+    if noq:
+        z = zipfile.ZipFile(noq)
+        A = "{http://schemas.openxmlformats.org/drawingml/2006/main}"
+        rows = []
+        for n in slidenames(z):
+            root = ET.fromstring(z.read(n))
+            body = "".join(t.text or "" for t in root.iter(A + "t"))
+            if "Tactics" not in body or MUTATED not in body:
+                continue   # the pillar the mutation touched, not merely the first
+            for tbl in root.iter(A + "tbl"):
+                for tr in list(tbl.iter(A + "tr"))[1:]:
+                    tcs = list(tr.iter(A + "tc"))
+                    qs = tcs[-4:]
+                    texts = ["".join(t.text or "" for t in c.iter(A + "t")) for c in qs]
+                    def red(c):
+                        clr = c.find(".//" + A + "rPr/" + A + "solidFill/" + A + "srgbClr")
+                        return clr is not None and clr.get("val") == "B04434"
+                    def bold(c):
+                        pr = c.find(".//" + A + "rPr")
+                        return pr is not None and pr.get("b") == "1"
+                    rows.append({
+                        "cells": len(qs),
+                        "texts": texts,
+                        "reds": sum(1 for c in qs if red(c)),
+                        "bolds": sum(1 for c in qs if bold(c)),
+                        "alarm": sum(1 for c in qs if red(c)) == 4,
+                        "span": qs[0].get("gridSpan"),
+                        "merged": [c.get("hMerge") for c in qs[1:]] })
+            break
+        ck("the tactics table was found", len(rows) > 0, len(rows))
+        # THE TEMPLATE'S SHAPE IS NOT SPENT ON SAYING THE GAP (§128.1, Islam's
+        # correction): four separate columns on EVERY row, no merged cell ever.
+        ck("every row keeps all four quarter columns",
+           all(r["cells"] == 4 for r in rows), [r["cells"] for r in rows])
+        ck("...and nothing is merged", all(not r["span"] and not any(r["merged"])
+                                           for r in rows), rows[:2])
+        gapped = [r for r in rows if r["alarm"]]
+        ck("a tactic with no quarter is ticked in all four",
+           all(r["texts"] == ["\u2713"] * 4 for r in gapped), gapped[:2])
+        ck("...in bold red, the colour the deck keeps for a gap",
+           all(r["reds"] == 4 and r["bolds"] == 4 for r in gapped), gapped[:2])
+        ck("...and that is every tactic but the one that names a quarter",
+           len(gapped) == len(rows) - 1, (len(gapped), len(rows)))
+        # THE OTHER HALF, or a build that painted every tick red would pass.
+        kept = [r for r in rows if not r["alarm"]]
+        ck("a tactic that names a quarter is not flagged", len(kept) == 1, kept)
+        ck("...its tick is the ordinary ink, and only the named quarter carries one",
+           all(r["reds"] == 0 and r["texts"].count("\u2713") < 4 for r in kept), kept)
+
+        # THE DECK CLOSES ON THANK YOU (§119.8).
+        last = slidenames(z)[-1]
+        txt = "".join(t.text or "" for t in ET.fromstring(z.read(last)).iter(A + "t"))
+        ck("the last slide is the Thank you", "Thank you" in txt, txt[:60])
+
+    # THE FUNCTION OVERVIEW CARRIES THE DOWNLOAD TOO (§119.9), and it is
+    # PRESSED — §70: this button rendered, sat in the document and could not be
+    # seen or clicked, because `.penbtn` is built for a card corner and this
+    # bar is a row. A query would have called it present.
+    be(pg, who["smo"], "fn:" + who["fn"], "fnstrat", "found")
+    btn = pg.query_selector("[data-dlpptx]")
+    ck("the Function overview draws the download", btn is not None)
+    if btn:
+        hit = pg.evaluate("""() => {
+          const b = document.querySelector("[data-dlpptx]");
+          const r = b.getBoundingClientRect();
+          if (!r.width || !r.height) return "no box";
+          const el = document.elementFromPoint(r.x + r.width / 2, r.y + r.height / 2);
+          return (el === b || b.contains(el)) ? "the button" : "something else";
+        }""")
+        ck("...and the press lands on it, not on a neighbour", hit == "the button", hit)
+        f = grab(pg, "fn-overview.pptx", "[data-dlpptx]")
+        ck("...and it produces the function's deck", f is not None)
+        if f:
+            d = read_pptx(f)
+            ck("...which closes on Thank you too", "Thank you" in d["text"])
 
     print("")
     ck("no page errors anywhere in the run", not errs, "; ".join(errs[:3]))

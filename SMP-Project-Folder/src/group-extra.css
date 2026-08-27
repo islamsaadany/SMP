@@ -761,6 +761,18 @@
      the corner itself. */
   .pane .paneact .penbtn.dlpen { right:36px; }
   .pane .paneact .penbtn.dlpen:only-child { right:0; }
+  .pageact .penbtn { position:static; visibility:visible; opacity:1;
+                     margin-right:8px; align-self:center; }
+  /* ── THE SAME BUTTON IN A WORDED BAR (§119.9) ─────────────────────
+     `.pageact` is a flex ROW of worded buttons — the Function overview's Edit
+     bar — and `.penbtn` is built for a card corner: absolutely positioned and
+     `opacity:0` until its `.hoverpen` parent is hovered. Dropped into the bar
+     unstyled it rendered, sat in the document, answered every DOM query and
+     COULD NOT BE SEEN OR PRESSED: §70's fault exactly, caught here only
+     because the check clicks the control rather than asking whether it
+     exists. In this context it is an ordinary inline control that is always
+     there, sized to sit beside the Edit button. */
+
   /* ── THE PEN ON A PLAN IS NOT HOVER-ONLY (§70) ────────────────────
      Islam: "in the project page I need to have the edit and add access, to
      edit current projects or add one. Same for the strategy plan page for the

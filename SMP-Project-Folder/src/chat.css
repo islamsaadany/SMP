@@ -86,6 +86,23 @@ body.presenting .chatdock { display:none; }
 .chatday { text-align:center; font-size:var(--fs-micro); color:var(--ink-3);
            letter-spacing:.09em; text-transform:uppercase; font-weight:700; }
 
+/* THE PRODUCT NARRATING, at the volume of the day divider above it (§125).
+   Deliberately not a message: no bubble, no name, no accent edge — the two
+   sides of this conversation are the person and the office, and a handoff is
+   neither. Wider than the divider because it is a sentence rather than a date,
+   and centred so it reads as a break in the conversation rather than a turn
+   in it. Nothing here is a new colour: --ink-3 and --line are the panel's own
+   quiet pair, so it needs nothing from a tenant's branding.
+
+   --fs-small AND NOT --fs-micro, which is what the day divider above it uses:
+   that token is for breadcrumbs and metric keys, and this is a SENTENCE
+   somebody has to read. One step under a message (--fs-note), so it is quieter
+   than the conversation without being smaller than the product's own floor for
+   running words (§94.9). Measured: 5.00 light, 6.61 dark. */
+.chsys { align-self:center; max-width:88%; text-align:center;
+         font-size:var(--fs-small); line-height:1.5; color:var(--ink-3);
+         padding:7px 12px; border:1px dashed var(--line); border-radius:9px; }
+
 .chmsg { max-width:84%; display:flex; flex-direction:column; gap:4px; }
 .chmsg .chwho { font-size:var(--fs-micro); color:var(--ink-3); font-weight:600;
                 display:flex; gap:6px; align-items:baseline; }
@@ -252,6 +269,34 @@ body.presenting .chatdock { display:none; }
    header dropdown (§90) — the same control, so it needs no second appearance —
    and adds only the rows inside it. */
 .hmenu-panel.chset { width:392px; }
+/* THE NOTE OPENS ON A TAP (§127). `.tip` and its bubble are the platform's,
+   declared once in group-extra.css and reused here rather than drawn again
+   (§53.5) — this adds the open state and nothing else, so a mark that was
+   opened by hover and by focus is now opened by a press as well.
+
+   BELOW the mark, not above it. The platform's default hangs the bubble over
+   the top, which inside a dropdown puts the first row's note off the top of
+   the panel; here every mark has the whole panel underneath it.
+
+   AND THE PANEL MUST NOT CLIP IT: `.chset` is a dropdown, and an absolutely
+   positioned bubble inside an overflow container is cut off at the edge
+   (§45.5, which is why the searchable select's popup is fixed). Measured
+   rather than assumed — checks/office-chat.py §12 asserts the whole bubble is
+   inside the window and reachable. */
+/* ANCHORED TO THE ROW, NOT TO THE MARK. The platform's default centres the
+   bubble on a 14px icon, which for a 264px note beside a left-hand label hangs
+   most of it off the side of a 392px dropdown — and the marks sit at seven
+   different x positions, so no single offset fixes all of them. Making the
+   mark `static` hands the bubble to `.chset-row` instead, and it then spans
+   exactly the row: inside the panel for every row, by construction rather than
+   by arithmetic. */
+.chset-row { position:relative; }
+.chset .tip { vertical-align:baseline; position:static; }
+.chset .tip::after { bottom:auto; top:calc(100% + 7px);
+  left:14px; right:14px; width:auto; transform:none; }
+.chset .tip.on::after { display:block; }
+.chset .tip.on { color:var(--gold-deep); border-color:var(--gold); }
+.chset .tip:focus-visible { outline:2px solid var(--focus); outline-offset:2px; }
 .chset-h { font-size:var(--fs-micro); letter-spacing:.11em; text-transform:uppercase;
            font-weight:800; color:var(--ink-3); background:var(--surface-2);
            padding:8px 14px; border-bottom:1px solid var(--line); }
@@ -318,3 +363,36 @@ body.presenting .chatdock { display:none; }
   .chatpanel { width:auto; }
   .chatbtn { align-self:flex-end; }
 }
+
+/* ── IS THE BOT WORKING? (§123) ────────────────────────────────────────
+   The office's own diagnostic, in the dropdown they are already standing in.
+   Quiet until it has something to say: the chain that got that far is grey,
+   and the row where it stopped is the one that carries colour. */
+.chset-test { margin-top:10px; }
+.chtest { margin-top:10px; border:1px solid var(--line); border-radius:6px;
+          overflow:hidden; background:var(--surface); }
+.chtest-h { padding:8px 10px; font-size:var(--fs-note); font-weight:600;
+            border-bottom:1px solid var(--line); background:var(--ground); }
+.chtest.good .chtest-h { color:var(--good-tx); }
+.chtest.bad  .chtest-h { color:var(--bad-tx); }
+.chtest.off  .chtest-h { color:var(--ink-3); }
+.chtest-r { padding:7px 10px; border-top:1px solid var(--line-soft);
+            display:grid; grid-template-columns:auto 1fr auto; gap:6px 8px;
+            align-items:baseline; font-size:var(--fs-micro); }
+.chtest-r:first-of-type { border-top:0; }
+.chtest-n { color:var(--ink-2); }
+.chtest-s { color:var(--ink-3); text-transform:uppercase; letter-spacing:.06em;
+            font-size:10px; }
+/* The detail spans the row, because an error message is a sentence and a
+   sentence in a 90px column is a column of single words. */
+.chtest-d { grid-column:1 / -1; color:var(--ink-3); line-height:1.5;
+            word-break:break-word; }
+.tdot { width:7px; height:7px; border-radius:50%; display:inline-block;
+        background:var(--ink-3); position:relative; top:-1px; }
+.tdot.ok   { background:var(--good); }
+.tdot.warn { background:var(--warn); }
+.tdot.bad  { background:var(--bad); }
+.tdot.off  { background:var(--none); }   /* --line-firm does not exist; an undefined
+                                             var computes to transparent, which is
+                                             an invisible dot on the one row that
+                                             says the feature is off. */

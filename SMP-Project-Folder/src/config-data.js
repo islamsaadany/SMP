@@ -4181,6 +4181,41 @@ function boardFunctionKeys(){
   });
 }
 
+/* ── WHAT A CYCLE SAYS ABOUT ITSELF (§120.1) ──────────────────────────
+   Islam, on a client tenant whose cycle has no dates: the strip read
+   **"to  ·  due  ·  as of Q4"** — three separators and nothing between them,
+   because the line was built by gluing the words around three values and the
+   punctuation survives when the values do not.
+
+   IT IS NOT THE OVERVIEW'S FAULT AND THAT IS WHY IT LIVES HERE. The identical
+   line renders on the Reporting cycle page and has since long before the
+   Overview existed; the Overview only made it the first thing anybody sees.
+   Two surfaces onto one sentence is exactly how the two come to say it
+   differently (§53.5), so the sentence is built ONCE and both read it.
+
+   AN ABSENT DATE IS SAID, NOT PUNCTUATED. A tenant that has not set its dates
+   has a real state, and "Dates not set" is what it is — the same argument as
+   §93's dash for a password nobody has been asked about, and §108.10's rule
+   that a page must be able to say NOTHING is here rather than draw an empty
+   shape. The quarter is always known (it is a number, not a date), so it is
+   always said. */
+function cycleMeta(){
+  var bits = [];
+  var from = String(REVIEW.from || "").trim();
+  var to   = String(REVIEW.to   || "").trim();
+  var due  = String(REVIEW.due  || "").trim();
+  /* BOTH ENDS OR NEITHER: "Jan 2026 to" is worse than saying nothing, and one
+     end alone is not a span. A single end is reported on its own terms. */
+  if (from && to) bits.push(from + " to " + to);
+  else if (from)  bits.push("from " + from);
+  else if (to)    bits.push("until " + to);
+  if (due) bits.push("due " + due);
+  if (!bits.length) bits.push("Dates not set");
+  if (REVIEW.endsQuarter != null && REVIEW.endsQuarter !== "")
+    bits.push("as of Q" + REVIEW.endsQuarter);
+  return bits.join(" \u00b7 ");
+}
+
 function cycleTotals(){
   var t = { done:0, total:0, sub:0, none:0, units:0 };
   function add(c, st){
@@ -4585,6 +4620,33 @@ function projCode(fk, p){
 function fnFormat(f){ return (f && f.format === "pillars") ? "pillars" : "projects"; }
 function fnPlansInPillars(f){ return fnFormat(f) === "pillars"; }
 function fnItems(f){ return (f && Array.isArray(f.items)) ? f.items : []; }
+
+/* A STORED LIST NEVER HOLDS A HOLE (§118). A pillars function's plan rides in
+   one JSON blob (functions.extra), and JSON writes an array hole or an
+   undefined entry as null — which is how one poisoned reorder commit left a
+   null inside a tactics list and the CF page threw on every visit from the
+   next hydration on, while the click looked like it did nothing. The commit
+   is fixed in arrange.js; this heals what a tenant already saved. It only
+   REMOVES — a reader must never create the field it was looking for (§50.6) —
+   and the next autosave persists the clean lists, so the poison does not
+   outlive one visit. Units need none of this: their plans are stored
+   row-by-row and a null cannot survive that road. */
+function fnPruneNulls(f){
+  if (!f) return f;
+  var live = function(x){ return x != null; };
+  if (Array.isArray(f.items)) {
+    f.items = f.items.filter(live);
+    f.items.forEach(function(p){
+      if (Array.isArray(p.measures)) p.measures = p.measures.filter(live);
+      if (Array.isArray(p.tactics))  p.tactics  = p.tactics.filter(live);
+    });
+  }
+  if (Array.isArray(f.keyObjectives)) f.keyObjectives = f.keyObjectives.filter(live);
+  if (f.swot) ["s","w","o","t"].forEach(function(k){
+    if (Array.isArray(f.swot[k])) f.swot[k] = f.swot[k].filter(live);
+  });
+  return f;
+}
 
 /* WHICH function carries this pillar, if any. Returns null unless the pointer
    names a function that exists, is active AND plans in pillars — a pointer at a

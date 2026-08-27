@@ -1658,13 +1658,19 @@ console errors (in this cloud environment, run it via a wrapper that points Play
   break silently — and asserted in `test-assistant.js`, never the browser
   check, whose stub supplies the steps and would never run it (§94.2).
 - **A DEBOUNCED SAVE WITH NO FLUSH LOSES THE LAST 800ms (§126.1, RECORDED NOT
-  FIXED):** press a switch, leave the page 150ms later — **saves sent: none**,
+  FIXED — CLOSED BY §138, v3.51, 2026-08-27):** press a switch, leave the page
+  150ms later — **saves sent: none**,
   database unchanged, screen still showing the new value. `sync.js` is the
   autosave for the WHOLE platform, so branding, terminology and the access
   matrix have the same hole. **It was NOT the fault being chased** (the
   diagnostic said the switch had saved), and it is written down rather than
   fixed on the way past: changing the save path for every page in the product
-  while looking at something else is what rule 1b exists to stop.
+  while looking at something else is what rule 1b exists to stop. **§138
+  closed it as its own aligned change**: `flushLeave()` on
+  visibilitychange/pagehide sends anything waiting (keepalive under 64KB,
+  plain fetch over — that limit stated, not glossed), touches no save
+  bookkeeping, skips while a save is in flight, and `checks/save-flush.py`
+  reproduces the loss end to end on the pre-§138 build.
 - **SAYING NOTHING IS NOT A NEUTRAL OUTCOME (§125):** with the assistant on
   and a working key, Islam got *"nothing happens at all"* — and that was §104
   working as designed. A handoff wrote NOTHING, on sound reasoning (a sentence

@@ -18066,3 +18066,47 @@ its own click point (§93.4), zero uncaught page errors, and a healthy page
 rendering normally afterwards. Against the pre-§137 build it fails 3 ways,
 ending in the production symptom verbatim: no card, the previous page left
 standing, the error uncaught.
+
+## 138 · The last 800ms survive leaving the page (v3.51, closing §126.1)
+
+**THE HOLE, AS §126.1 WROTE IT DOWN**: the autosave debounces 800ms with no
+flush when the page goes away, so a setting changed and left within that
+window was lost while the screen showed the new value — every page in the
+product, invisibly, and not the fault being chased the day it was found,
+which is why it was recorded rather than fixed on the way past (rule 1b).
+
+**THE FIX IS ONE FUNCTION IN ONE FILE**, because there is one autosave:
+`flushLeave()` in sync.js, fired on `visibilitychange`→hidden and on
+`pagehide`. Anything waiting is sent NOW, through a bare fetch with
+`keepalive` — which is what lets the request outlive the page, and which caps
+the body at 64KB, so over the cap it is a plain fetch instead: that completes
+whenever the tab is merely hidden (the common case — a switch-away, a
+minimise, and every close passes through hidden first) and is best-effort on
+a hard kill. Stated, not glossed.
+
+**DELIBERATELY NOT `save()`**: the flush touches none of the bookkeeping —
+`saving`, `lastSaved` and `refusedBody` stay as they are — because if the tab
+comes BACK, the ordinary path must still compare and decide for itself; a
+duplicate POST of an identical state diffs empty on the server and costs
+nothing (§42). And it interprets no answer, because on the way out there is
+nobody to show a refusal to; the ordinary path re-earns one on the next
+change.
+
+**SKIPPED WHILE A SAVE IS IN FLIGHT, on purpose**: two concurrent POSTs have
+no ordering, and an older body landing after a newer one would UNDO the newer
+— losing more than the keystroke this exists to keep. What stays open is an
+edit made during an in-flight save with the tab gone before it settles: the
+small corner of a small corner, owned by the 5s interval whenever the tab
+survives.
+
+**PROVED AT BOTH ENDS.** `checks/save-flush.py` serves the built file over
+HTTP with a stub `/api/state` that records every POST (§94.11 — over file://
+the save path does not exist), makes an edit through the real
+becoming-a-save path (a mutation, then paint(), which ends in afterPaint()),
+hides the tab 150ms later and navigates away inside the debounce window: on
+the pre-§138 build the stub records NOTHING — §126.1 reproduced end to end —
+and on this one the POST carries the edited value. The second trial asserts
+the flush is not a firehose: a clean state sends nothing on leave. And
+because sync.js is the whole product's save path, `test-roundtrip.js` was
+re-run against a throwaway Postgres 16 on a virgin database: clean slate,
+round trip deep-equal, fixed point and the archived-plan trip all PASS.

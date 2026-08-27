@@ -88,6 +88,13 @@ Nothing proceeds past this line without an answer.
   mockup: simple, friendly, one Reload button, the error folded behind a
   closed "Technical details". `checks/render-fail.py` fails 3 ways on the
   pre-§137 build — the production symptom verbatim.
+- **§138 — the last 800ms survive leaving the page (closes §126.1).** One
+  function in sync.js: on visibilitychange/pagehide anything waiting to save
+  is sent immediately (keepalive under 64KB, plain fetch over). Touches no
+  save bookkeeping, skips while a save is in flight (ordering), sends nothing
+  when clean. `checks/save-flush.py` reproduces §126.1 end to end on the old
+  build (0 posts, edit lost) and passes here; `test-roundtrip.js` re-run
+  against a throwaway Postgres 16 — all PASS.
 
 
 ### v3.50 — the Setup header line, the marking table, and a repaired matrix (§135)

@@ -132,7 +132,14 @@
    the §128 rule followed rather than a number nobody can tell apart.
    Confirmed against origin/main serving "smp-shell-v3.47-planbuilder";
    confirm once more immediately before the push to main (§94.16). */
-const SHELL = "smp-shell-v3.47-qmarks";
+/* v3.48-samename — §130: two people whose Name reads the same join the
+   register's Attention queue. NOT a version-number bump of the filename —
+   §91's trigger is "the built file's bytes changed", which this is; the
+   platform filename, the gate's link, vercel.json's rewrite and
+   PLATFORM_FILE are all untouched. Confirmed against origin/main serving
+   "smp-shell-v3.47-qmarks"; confirm once more immediately before the push
+   to main (§94.16). */
+const SHELL = "smp-shell-v3.48-samename";
 const ASSETS = [
   "/",
   "/index.html",

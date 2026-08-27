@@ -16980,3 +16980,122 @@ project-tables, tour, page-width, setup-overview) are green.
 authoring surface anywhere (the Overview says its foundation is the
 parent's), so the builder's pillars-function route carries Plan and Review
 only — giving them a surface is a decision, not a tidy-up.
+
+## 131 · A custodian per project (v3.49, spec 021)
+
+Islam: *"in a case of a function that has 2 projects each project has an
+owner so the custodian here is not on the whole capability there is a
+custodian per project. how can we make this work?"* Aligned before building:
+a project's owner becomes a **Contributor of the function**, reporting their
+project and nothing else; submitting stays the custodian's and the head's;
+the project's Owner field offers register people. He confirmed all three,
+adding that it must be governed **on the Roles & access table**.
+
+### 131.1 Derived, never granted — the unit's own rule, walked across the switch
+
+The machinery existed on the unit side since §55/spec 006 §7.2: somebody a
+plan names is a Contributor, own lines only, and the code explicitly said
+*"a supporting function has no contributors to exclude."* That sentence
+described the code truly and stopped being true here. `namedInFn()` is
+`namedInUnit()`'s function-side half, asked through the same `namedOn()`, so
+"named on a project" and "named on a tactic" are one concept; the floor arm
+in `personRoles()` gains the `p.fn` branch beside the `p.unit` one. **The
+LINE is the PROJECT**: being named its owner speaks for every deliverable,
+outcome and milestone it holds — that is what "a custodian per project"
+means — and for nothing beside it, the capability's own key objectives
+included, because those belong to no project.
+
+**THE WORLD HAD TO LEARN THE CAPABILITIES** (§102.4's two allow-lists, paid
+forward rather than re-learned): the projects live on `group.capabilities`,
+which `worldOf()` did not lift and `W()` did not keep — so the key was added
+in BOTH, in the same edit, and the test asserts the world actually carries
+them, or `namedInFn()` reads an empty list and the floor never derives,
+silently, in the safe-looking direction.
+
+### 131.2 The matrix cell was already there, and now it decides
+
+Islam: *"this needs to be in the access setup table if it's not."* It is —
+**Contributor × Own supporting function → Reporting** — and it had never
+decided anything, because no fn contributor could exist. It is the one gate
+now, read exactly as the unit's: shipped default **view** (spec 006 §7.2
+verbatim: *"contributors only view, and if we allow them they should be
+allowed to their lines only"*), opened to edit by the SMO, and **a rule with
+teeth** on both sides — `canReportFnProject()` on the screen,
+`capProjectOf()` + `namedOn()` against the STORED capabilities in
+`lib/authorize.js` (§42.2), so a tenant that opens the cell still hands
+nobody the project next door. `reportState`'s own-lines guard had a literal
+`!isFn` step-around; it now refuses submitting, the cycle note and the
+picture slides for an fn contributor too, and `canSpeakFor()` asks the same
+exclusion, so the dot never nags them for a submission they cannot make
+(§69.9). The access page's prose names the project case, and the
+Contributor's role note reads "a measure, a tactic or a project" now.
+
+### 131.3 The server had been refusing what the screen offered, since migration 024
+
+Found by proving the ground before building on it, with a fixture rather
+than by reading: **a function custodian reporting a DELIVERABLE was refused
+outright** — status, %, note, all three — as *"a plan is corrected by the
+SMO"*, and so was **the milestone % that §104.10 makes mandatory** (mark a
+milestone In progress, type the required %, whole save refused).
+`REPORT` in `lib/authorize.js` had no `deliverable` family at all and
+`milestone` never gained `pct`, so both fell through to the plan compare.
+Migration 024 reshaped the rows; this list was never told; the screen
+offered the boxes the whole time (§94.2's class — every capability check ran
+as the SMO, and `test-authorize.js` had no capReporting case). The families
+are complete now, deliverables have their own `splitRows`, and the custodian
+regression is asserted by name.
+
+### 131.4 The owner stays a NAME, and that was decided by a merge
+
+The aligned design's third point — the Owner field offers register people —
+was **built twice in one day**: this section first carried a keyed picker
+writing `owner` + `ownerKey` (a hard identity link, with the pointer
+discipline §87.4 implies — delete blocked, merge handing it over), and then
+`git fetch` found §130.1 already merged from another session, with Islam's
+own wider ask (*"for the owners in the plans, projects, tactics, milestones,
+let it be a searchable list from the registry"*) built as a register-picked
+**name** on five fields at once, `namedOn()` taught every register spelling
+(`nameRuns`), and the name-not-key decision RECORDED with its reasoning.
+
+Two owner models must not ship side by side, and a tactic's owner — which
+has carried unit reporting rights since §55 — matches by name; a project's
+owner matching by key would be the platform answering one question two ways
+(§53.5). So the `ownerKey` layer was **removed at the merge** and this
+feature rides §130.1's model whole: the pick is real because the spelling is
+the register's own. **The residual is §130.7's, recorded there and again
+here**: two people whose short names collide both answer to it, and a
+renamed person parts company with plans naming the old spelling. If project
+owners ever need a hard identity link, that is a reversal of §130.1's
+"stored is still the name" — a decision, not a tidy-up.
+
+### 131.5 Proof
+
+`scripts/test-authorize.js` §16: the derivation, the world, the custodian
+regressions, the owner's yes on all three row kinds, the five refusals (the
+other project, the capability's KOs, submit, the note, the plan), the
+shipped-default nothing, the unknown-name nothing and the retired-owner
+nothing — **every allows() also asserts the fixture changed something**,
+because this suite's own §94.5 scar is an assertion that set a value to what
+it already was. Proved able to fail both ways: the capReporting narrowing
+stubbed out, 2 failures; the floor derivation stubbed out, 6.
+`src/checks/project-custodian.py` presses the SCREEN as both viewers —
+entry controls on the own project (and pressing one CHANGES THE DATA, §96),
+nothing on the project beside it, no Submit and no dot for the owner, both
+for the custodian, both ends against the shared rule each time — and MAKES
+its state, because no demo person is attached to a function and named on a
+project (asserted by scanning the seed: **nobody's standing changes** on the
+shipped tenant). Proved able to fail: with `canReportFnProject()` flattened
+to the whole-function gate, 2 failures, including the exact assertion this
+feature exists for. The full `qa.py` sweep is green.
+
+### 131.6 Flagged, not built
+
+A **pillars** function still derives no contributors: its plan rows carry
+owners and collaborators like a unit's, but its figures classify through
+`collectUnit()` against an `fn:` target, where the own-lines narrowing has
+an explicit `isFn` skip — extending the floor there is its own decision, not
+a tidy-up. And the reporting bar still shows the **"View only"** pill to a
+contributor whose own rows are plainly editable below it — the unit's bar
+has said exactly this to unit contributors since spec 006, so the two sides
+agree (§53.5) and the wording is a decision for both at once, not a drive-by
+fix on one.

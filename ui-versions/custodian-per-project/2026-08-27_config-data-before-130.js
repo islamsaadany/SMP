@@ -1553,14 +1553,6 @@ function personNamedLines(key){
       if (SMPRules.namedOn({ owner:x.owner, collaborators:x.collaborators }, p)) n++;
     });
   });
-  /* §131: a project's owner name counts here too — since a project's owner
-     is a Contributor of its function now, the confirmation should say how
-     many of those namings survive the row as plain words. */
-  (GROUP.capabilities || []).forEach(function(c){
-    (c.projects || []).forEach(function(pr){
-      if (SMPRules.namedOn({ owner: pr.owner }, p)) n++;
-    });
-  });
   return n;
 }
 
@@ -3856,31 +3848,6 @@ function canReportRow(unitKey, x){
   return SMPRules.namedOn({ owner: x.owner, collaborators: x.collaborators }, viewer());
 }
 
-/* ── The function side of the same two questions (§131) ────────────
-   canReport/canReportRow for an fn: target. The whole-function gate is what
-   capReportBody always asked inline; it is a function now because the per-
-   project question has to sit on top of it and two spellings of the same
-   three gates is §53.5's drift. THE LINE IS THE PROJECT: a Contributor of a
-   function is somebody a project names as its owner, and they report every
-   row that project holds — deliverables, outcomes, milestones — and nothing
-   in the project beside it. Same two shared functions the server uses. */
-function canReportFn(fk){
-  if (REVIEW.state !== "open") return false;
-  if (CYCLE.locked && !inOffice()) return false;
-  return grantAt("k_report", "fn:" + fk) === "edit";
-}
-function canReportFnProject(fk, p){
-  if (!canReportFn(fk)) return false;
-  if (!SMPRules.onlyOwnLines(world(), viewer(), "fn", "fn:" + fk)) return true;
-  return SMPRules.namedOn(p, viewer());
-}
-/* A capability's own key objectives belong to no project, so for somebody who
-   speaks only for their own project they are read, never entered. */
-function canReportFnWhole(fk){
-  return canReportFn(fk) &&
-         !SMPRules.onlyOwnLines(world(), viewer(), "fn", "fn:" + fk);
-}
-
 /* ── Speaking for the whole unit (§50.5) ───────────────────────────
    Three acts are not about a row: SUBMITTING, the cycle NOTE, and the deck's
    PICTURE SLIDES. Each speaks for the unit in front of whoever is reading the
@@ -3892,16 +3859,14 @@ function canReportFnWhole(fk){
    A CONTRIBUTOR limited to their own lines does none of them. What they may
    say is about their own rows; a picture slide is the unit's.
 
-   A supporting function HAS contributors since §131 — a project's owner is
-   one, derived from the project's Owner row — so its half asks the same
-   own-lines exclusion the unit's always has. The sentence that stood here
-   ("a function has no contributors to exclude") described the code truly and
-   stopped being true the day the floor reached the projects. */
+   A supporting function has no contributors to exclude — its reporting is the
+   function's, whole — so its half is the two gates its reporting page already
+   applies, asked here rather than restated there. */
 function canSpeakFor(target){
   var t = String(target || "");
   if (t.indexOf("fn:") === 0) {
-    return canReportFn(t.slice(3)) &&
-           !SMPRules.onlyOwnLines(world(), viewer(), "fn", t);
+    return REVIEW.state === "open" && !(CYCLE.locked && !inOffice()) &&
+           grantAt("k_report", t) === "edit";
   }
   return canReport(t) && !SMPRules.onlyOwnLines(world(), viewer(), "unit", t);
 }

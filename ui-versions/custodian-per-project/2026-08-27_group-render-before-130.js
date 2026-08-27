@@ -3329,12 +3329,8 @@ function capReportBody(c){
      §89; a function's had not, so an SMO team member could report past a
      locked cycle on one side of the navigation switch and not the other
      (§53.5). The server was on `super` for both and refused either way. */
-  /* ONE gate per surface since §130: canReportFn() is the three gates that
-     were inline here; the capability's OWN rows ask the whole-function
-     question, because a project owner speaks for their project and a
-     capability's key objectives belong to no project. Each project asks for
-     ITSELF, below, through the same pair the server enforces. */
-  var may = canReportFnWhole(c.fn);
+  var may = REVIEW.state === "open" && !(CYCLE.locked && !inOffice()) &&
+            grant("k_report") === "edit";
   var kRows = c.keyObjectives.map(function(m, i){
     return '<tr><td class="idx">' + (i+1) + '</td><td>' + esc(m.name) + '</td>' +
       '<td class="cc">' + esc(m.dir) + '</td>' +
@@ -3358,8 +3354,7 @@ function capReportBody(c){
     null, 'Tally is entries given of asked',
     function(p){ return projCode(c.fn, p); });
   return koBlock +
-    splitOrPane(c.projects, sel, rail,
-      projReportBody(sel, canReportFnProject(c.fn, sel), c.fn));
+    splitOrPane(c.projects, sel, rail, projReportBody(sel, may, c.fn));
 }
 
 function renderFnReport(fnKey){

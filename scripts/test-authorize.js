@@ -1178,5 +1178,121 @@ console.log("\n15 · the strategy | reporting split (§117)");
         R.mayDownloadPlan(wClosed, personOf(closed, custKey), UNIT) === false);
 })();
 
+/* ── 16 · A CUSTODIAN PER PROJECT (§131) ──────────────────────────
+   A function's custodian covers the whole function; where each project has
+   its own owner, that owner is a Contributor of the function and reports
+   THEIR project — every row it holds — and nothing beside it. Derived from
+   the project's Owner row — a register-picked NAME since §130.1, matched by
+   the same namedOn() a tactic's owner is — never granted; governed by the
+   Contributor row's own-function Reporting cell.
+
+   EVERY allows() HERE ALSO ASSERTS THAT SOMETHING CHANGED (§94.5): the
+   no-op assertion is this suite's own recorded fault, and a fixture that
+   sets a status to the value the seed already holds would pass every
+   refusal vacuously. */
+console.log("\n16 · a custodian per project (§131)");
+(function () {
+  const FN = "it";
+  const T = "fn:" + FN;
+  const base = clone(SEED);
+  base.access.contrib = Object.assign({}, base.access.contrib, { a_fn_own: "edit" });
+  base.people.push({ key: "t130_own", name: "Project Owner 130", fn: FN, active: true });
+  const capOf = function (s) {
+    return s.group.capabilities.filter(function (c) { return c.fn === FN; })[0];
+  };
+  const cap = capOf(base);
+  cap.projects[0].owner = "Project Owner 130";
+  const wb = R.worldOf(base);
+  const me = personOf(base, "t130_own");
+
+  check("named owner of a project derives Contributor at the function",
+        JSON.stringify(R.personRoles(wb, me)) ===
+        JSON.stringify([{ role: "contrib", at: T }]),
+        JSON.stringify(R.personRoles(wb, me)));
+  check("...and speaks only for their own lines there",
+        R.onlyOwnLines(wb, me, "fn", T) === true);
+  check("the world carries the capabilities (§102.4's pair of allow-lists)",
+        (wb.capabilities || []).length === SEED.group.capabilities.length,
+        "world holds " + (wb.capabilities || []).length);
+
+  const run = function (stored, who, mutate) {
+    const inc = clone(stored); mutate(inc);
+    return { v: A.authorize(stored, inc, personOf(stored, who)),
+             moved: !same(stored, inc) };
+  };
+  const same = function (a, b) { return JSON.stringify(a) === JSON.stringify(b); };
+  const ok = function (name, r) {
+    check(name + " — the fixture actually changed something", r.moved);
+    check(name, r.v.ok, r.v.refusals.join(" / "));
+  };
+  const not = function (name, r) {
+    check(name + " — the fixture actually changed something", r.moved);
+    check(name, !r.v.ok, "was ALLOWED — " +
+      JSON.stringify(r.v.changes.map(function (c) { return c.kind + ":" + c.what; })));
+  };
+
+  /* The custodian first — §131 found that the server had been refusing a
+     custodian's DELIVERABLE outright and the milestone % that §104.10
+     REQUIRES, both classified as plan, since migration 024. The screen
+     offered both the whole time (§94.2's class). */
+  const fnCust = (SEED.functions[FN] || {}).custodian;
+  if (fnCust && personOf(SEED, fnCust)) {
+    ok("the custodian reports a deliverable (the §131 drift, fixed)",
+       run(SEED, fnCust, function (s) {
+         capOf(s).projects[0].deliverables[0].status = "todo"; }));
+    ok("the custodian gives an In-progress milestone its required %",
+       run(SEED, fnCust, function (s) {
+         const m = capOf(s).projects[0].milestones[2]; m.pct = 75; }));
+    ok("the custodian still submits the function",
+       run(SEED, fnCust, function (s) {
+         s.review.submitted = Object.assign({}, s.review.submitted); s.review.submitted[T] = true; }));
+  }
+
+  /* The project owner: their project, whole — and nothing beside it. */
+  ok("the owner reports their own project's deliverable",
+     run(base, "t130_own", function (s) {
+       capOf(s).projects[0].deliverables[0].status = "todo"; }));
+  ok("the owner reports their own project's milestone, % included",
+     run(base, "t130_own", function (s) {
+       const m = capOf(s).projects[0].milestones[2]; m.pct = 80; m.note = "on it"; }));
+  ok("the owner reports their own project's outcome, note included",
+     run(base, "t130_own", function (s) {
+       const o = capOf(s).projects[0].outcomes[0]; o.actual = "3"; o.note = "up"; }));
+  not("the owner may NOT report the project beside theirs",
+      run(base, "t130_own", function (s) {
+        capOf(s).projects[1].deliverables[0].status = "done"; }));
+  not("the owner may NOT enter the capability's own key objectives",
+      run(base, "t130_own", function (s) {
+        const k = capOf(s).keyObjectives[0]; if (k) k.actual = "99"; else s.group.capabilities[0].name = "x"; }));
+  not("the owner may NOT submit the function",
+      run(base, "t130_own", function (s) {
+        s.review.submitted = Object.assign({}, s.review.submitted); s.review.submitted[T] = true; }));
+  not("the owner may NOT write the function's cycle note",
+      run(base, "t130_own", function (s) {
+        s.review.note = Object.assign({}, s.review.note); s.review.note[T] = "our quarter"; }));
+  not("the owner may NOT edit the project's plan",
+      run(base, "t130_own", function (s) {
+        capOf(s).projects[0].name = "Renamed by its owner"; }));
+
+  /* The matrix governs it: with the shipped default (view) the same person
+     writes nothing at all — the cell Islam asked for, doing the deciding. */
+  const closed = clone(base);
+  delete closed.access.contrib;
+  not("with the Contributor default the owner reports nothing",
+      run(closed, "t130_own", function (s) {
+        capOf(s).projects[0].deliverables[0].status = "todo"; }));
+
+  /* A name that names nobody derives nothing — and a retired owner derives
+     nothing at all, because a retired person holds nothing (§110.4). */
+  const strangers = clone(base);
+  capOf(strangers).projects[0].owner = "Somebody The Register Never Met";
+  check("an owner name the register cannot answer for derives nothing",
+        R.personRoles(R.worldOf(strangers), personOf(strangers, "t130_own")).length === 0);
+  const retired = clone(base);
+  personOf(retired, "t130_own").active = false;
+  check("a retired owner derives nothing",
+        R.personRoles(R.worldOf(retired), personOf(retired, "t130_own")).length === 0);
+})();
+
 console.log("\n" + pass + " passed, " + fail + " failed");
 process.exit(fail ? 1 : 0);

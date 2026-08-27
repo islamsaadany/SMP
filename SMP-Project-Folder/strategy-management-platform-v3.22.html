@@ -6423,7 +6423,7 @@ THEME.apply();
     { key:"fnhead", name:"Function head", scope:"fn",
       note:"Runs a supporting function and the capabilities it owns." },
     { key:"contrib", name:"Contributor", scope:"unit",
-      note:"Named on a measure or a tactic. Reports against their own work and reads their unit." },
+      note:"Named on a measure, a tactic or a project. Reports against their own work and reads their unit or function." },
     /* EMPLOYEE WAS HERE, AND IT WAS NEVER A ROLE (§93, Islam 2026-08-24):
        "anyone with no role is employee … employee doesn't give the person
        anything and if so then let's remove this strange role."
@@ -6653,7 +6653,13 @@ THEME.apply();
          the default, which for a switch means "on". Found by driving the real
          page, not by reading (§44, twice now). */
       focusOff: !!o.focusOff,
-      naming: !!o.naming
+      naming: !!o.naming,
+      /* §131: a project's owner is a Contributor of its function, and the
+         projects live on the capabilities — so the world has to carry them or
+         namedInFn() reads an empty list and the floor never derives. §102.4's
+         trap exactly: added here AND in worldOf(), in the same edit as the
+         rule that reads it. */
+      capabilities: o.capabilities || []
     };
   }
   /* A world built straight off a state graph — the shape the server holds. */
@@ -6671,7 +6677,8 @@ THEME.apply();
                   sees undefined and answers the default. Add the key here in
                   the same edit as the rule that reads it. */
                focusOff: (state.group || {}).focusOff,
-               naming: (state.group || {}).naming });
+               naming: (state.group || {}).naming,
+               capabilities: (state.group || {}).capabilities });
   }
 
   function personActive(p) { return !!p && p.active !== false; }
@@ -6716,6 +6723,14 @@ THEME.apply();
        grantIn() rather than dressed up as a role they never got (§93). */
     if (!out.length && p.unit && namedInUnit(w, p, p.unit))
       out.push({ role:"contrib", at:p.unit });
+    /* §131: THE SAME FLOOR ON A FUNCTION'S PROJECTS. A function's custodian
+       covers the whole function; where each PROJECT has its own owner, that
+       owner is a Contributor of the function — derived from the project's
+       Owner row exactly as a unit's Contributor is derived from a tactic's,
+       and gone the day the project stops naming them. Capability projects
+       only: a pillars function's plan has no per-project owner to read. */
+    if (!out.length && p.fn && namedInFn(w, p, p.fn))
+      out.push({ role:"contrib", at:"fn:" + p.fn });
     return out;
   }
   function personRoleKeys(w, p) {
@@ -7353,6 +7368,41 @@ THEME.apply();
     return hit;
   }
 
+  /* §131: Is this person named on any of this function's projects? The
+     function-side half of namedInUnit(), asked through the same namedOn() so
+     "named on a project" means one thing in the platform. The unit of the
+     naming is the PROJECT — being its owner (or, should projects ever carry
+     them, a collaborator) speaks for every row the project holds, which is
+     what "a custodian per project" means. Capability projects only: a pillars
+     function's plan is classified with the units and has no per-project
+     owner; its floor is deliberately not derived here (flagged in §131.5). */
+  function capsOfFn(w, fnKey) {
+    return (w.capabilities || []).filter(function (c) { return c && c.fn === fnKey; });
+  }
+  function namedInFn(w, p, fnKey) {
+    if (!p || !fnKey) return false;
+    return capsOfFn(w, fnKey).some(function (c) {
+      return (c.projects || []).some(function (pr) { return namedOn(pr, p); });
+    });
+  }
+  /* Which project a reporting row belongs to, read from the world the caller
+     already holds — the server asks it of the STORED state (§42.2), the
+     screen of its own. A capability's key objectives belong to no project, so
+     an id found only there answers null: for somebody who speaks only for
+     their own project, no project means no. */
+  function capProjectOf(w, fnKey, id) {
+    var hit = null;
+    capsOfFn(w, fnKey).forEach(function (c) {
+      (c.projects || []).forEach(function (pr) {
+        if (hit) return;
+        var holds = (pr.deliverables || []).concat(pr.outcomes || [], pr.milestones || [])
+          .some(function (x) { return x && x.id === id; });
+        if (holds) hit = pr;
+      });
+    });
+    return hit;
+  }
+
   /* ── ROLES THAT SPEAK ONLY FOR THEMSELVES ─────────────────────────
      A Contributor reports the lines they are named on and nothing else (spec
      006 §7.2); an Employee is named on nothing, so the same rule leaves them
@@ -7416,6 +7466,7 @@ THEME.apply();
     focusOn: focusOn,
     mayAuthorPage: mayAuthorPage,
     namedOn: namedOn, namedInUnit: namedInUnit,
+    namedInFn: namedInFn, capProjectOf: capProjectOf,
     editingRoles: editingRoles, onlyVia: onlyVia, rolesOrFloor: rolesOrFloor,
     OWN_LINES_ONLY: OWN_LINES_ONLY, onlyOwnLines: onlyOwnLines,
     isOwnLinesRole: isOwnLinesRole,
@@ -10290,6 +10341,14 @@ function personNamedLines(key){
       if (SMPRules.namedOn({ owner:x.owner, collaborators:x.collaborators }, p)) n++;
     });
   });
+  /* §131: a project's owner name counts here too — since a project's owner
+     is a Contributor of its function now, the confirmation should say how
+     many of those namings survive the row as plain words. */
+  (GROUP.capabilities || []).forEach(function(c){
+    (c.projects || []).forEach(function(pr){
+      if (SMPRules.namedOn({ owner: pr.owner }, p)) n++;
+    });
+  });
   return n;
 }
 
@@ -12585,6 +12644,31 @@ function canReportRow(unitKey, x){
   return SMPRules.namedOn({ owner: x.owner, collaborators: x.collaborators }, viewer());
 }
 
+/* ── The function side of the same two questions (§131) ────────────
+   canReport/canReportRow for an fn: target. The whole-function gate is what
+   capReportBody always asked inline; it is a function now because the per-
+   project question has to sit on top of it and two spellings of the same
+   three gates is §53.5's drift. THE LINE IS THE PROJECT: a Contributor of a
+   function is somebody a project names as its owner, and they report every
+   row that project holds — deliverables, outcomes, milestones — and nothing
+   in the project beside it. Same two shared functions the server uses. */
+function canReportFn(fk){
+  if (REVIEW.state !== "open") return false;
+  if (CYCLE.locked && !inOffice()) return false;
+  return grantAt("k_report", "fn:" + fk) === "edit";
+}
+function canReportFnProject(fk, p){
+  if (!canReportFn(fk)) return false;
+  if (!SMPRules.onlyOwnLines(world(), viewer(), "fn", "fn:" + fk)) return true;
+  return SMPRules.namedOn(p, viewer());
+}
+/* A capability's own key objectives belong to no project, so for somebody who
+   speaks only for their own project they are read, never entered. */
+function canReportFnWhole(fk){
+  return canReportFn(fk) &&
+         !SMPRules.onlyOwnLines(world(), viewer(), "fn", "fn:" + fk);
+}
+
 /* ── Speaking for the whole unit (§50.5) ───────────────────────────
    Three acts are not about a row: SUBMITTING, the cycle NOTE, and the deck's
    PICTURE SLIDES. Each speaks for the unit in front of whoever is reading the
@@ -12596,14 +12680,16 @@ function canReportRow(unitKey, x){
    A CONTRIBUTOR limited to their own lines does none of them. What they may
    say is about their own rows; a picture slide is the unit's.
 
-   A supporting function has no contributors to exclude — its reporting is the
-   function's, whole — so its half is the two gates its reporting page already
-   applies, asked here rather than restated there. */
+   A supporting function HAS contributors since §131 — a project's owner is
+   one, derived from the project's Owner row — so its half asks the same
+   own-lines exclusion the unit's always has. The sentence that stood here
+   ("a function has no contributors to exclude") described the code truly and
+   stopped being true the day the floor reached the projects. */
 function canSpeakFor(target){
   var t = String(target || "");
   if (t.indexOf("fn:") === 0) {
-    return REVIEW.state === "open" && !(CYCLE.locked && !inOffice()) &&
-           grantAt("k_report", t) === "edit";
+    return canReportFn(t.slice(3)) &&
+           !SMPRules.onlyOwnLines(world(), viewer(), "fn", t);
   }
   return canReport(t) && !SMPRules.onlyOwnLines(world(), viewer(), "unit", t);
 }
@@ -15029,7 +15115,11 @@ var PAGE_INFO = {
        "If a role can open a page, it sees everything on it. Restriction happens by removing the " +
        "page, never by trimming its contents &mdash; per-element permissions make a system nobody " +
        "can reason about. The one exception is a rule with teeth rather than a setting: a " +
-       "contributor granted edit reaches <b>their own lines only</b>."],
+       "contributor granted edit reaches <b>their own lines only</b> &mdash; on a unit the " +
+       "measures and tactics that name them, and on a supporting function <b>the project they " +
+       "are named owner of</b>, whole, and nothing beside it. Neither is granted anywhere: being " +
+       "named is what derives the role, and the Contributor row&rsquo;s own-unit and own-function " +
+       "<b>Reporting</b> cells here are what open or close it."],
       ["Two states, not three",
        "View and edit, and edit includes view. <b>None is not a third thing you choose</b>, it is " +
        "the absence of the other two &mdash; which is why a cell is two toggles and nothing lit is " +
@@ -22149,8 +22239,12 @@ function capReportBody(c){
      §89; a function's had not, so an SMO team member could report past a
      locked cycle on one side of the navigation switch and not the other
      (§53.5). The server was on `super` for both and refused either way. */
-  var may = REVIEW.state === "open" && !(CYCLE.locked && !inOffice()) &&
-            grant("k_report") === "edit";
+  /* ONE gate per surface since §130: canReportFn() is the three gates that
+     were inline here; the capability's OWN rows ask the whole-function
+     question, because a project owner speaks for their project and a
+     capability's key objectives belong to no project. Each project asks for
+     ITSELF, below, through the same pair the server enforces. */
+  var may = canReportFnWhole(c.fn);
   var kRows = c.keyObjectives.map(function(m, i){
     return '<tr><td class="idx">' + (i+1) + '</td><td>' + esc(m.name) + '</td>' +
       '<td class="cc">' + esc(m.dir) + '</td>' +
@@ -22174,7 +22268,8 @@ function capReportBody(c){
     null, 'Tally is entries given of asked',
     function(p){ return projCode(c.fn, p); });
   return koBlock +
-    splitOrPane(c.projects, sel, rail, projReportBody(sel, may, c.fn));
+    splitOrPane(c.projects, sel, rail,
+      projReportBody(sel, canReportFnProject(c.fn, sel), c.fn));
 }
 
 function renderFnReport(fnKey){

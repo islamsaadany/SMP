@@ -40,15 +40,7 @@ const REPORT = {
   tactic:    ["status", "actual", "note"],
   capKO:     ["actual", "progress", "note"],
   outcome:   ["actual", "progress", "note"],
-  /* `pct` on both since §131 — it arrived with migration 024 (§104.10: an In
-     progress row REQUIRES a %) and this list was never told, so the very %
-     the pane demanded was classified as PLAN and the save refused. And a
-     DELIVERABLE had no family at all: its status/pct/note fell into the
-     project-body compare and came back "a plan is corrected by the SMO" for
-     every custodian who reported one. The screen had offered both since §104;
-     the server refused both; nothing compared the two (§94.2's class). */
-  deliverable: ["status", "pct", "note"],
-  milestone: ["status", "pct", "note"]
+  milestone: ["status", "note"]
 };
 
 /* §16.7 splits a unit's reporting in two. The FIGURE may belong to a source
@@ -543,12 +535,8 @@ function collectCapabilities(sList, iList, add) {
       const sp = byId(a.projects), ip = byId(b.projects);
       Object.keys(sp).forEach(function (pid) {
         const pa = sp[pid], pb = ip[pid];
-        if (!same(omit(pa, ["deliverables", "outcomes", "milestones"]),
-                  omit(pb, ["deliverables", "outcomes", "milestones"])))
+        if (!same(omit(pa, ["outcomes", "milestones"]), omit(pb, ["outcomes", "milestones"])))
           add("capPlan", target, "a project");
-        splitRows(pa.deliverables, pb.deliverables, REPORT.deliverable,
-          function (rows) { add("capReporting", target, "project deliverables", rows); },
-          function () { add("capPlan", target, "a project's deliverables"); });
         splitRows(pa.outcomes, pb.outcomes, REPORT.outcome,
           function (rows) { add("capReporting", target, "project outcome figures", rows); },
           function () { add("capPlan", target, "a project's outcomes"); });
@@ -710,15 +698,12 @@ function authorize(stored, incoming, person) {
           no("This cycle is locked. Ask the SMO to reopen it before entering figures.");
           return;
         }
-        /* Submitting, and the subject's own note on the cycle, speak for the
-           whole unit or function — so a contributor limited to their own lines
-           does neither (spec 006 §7.2; the fn: side since §131, because a
-           project's owner is a Contributor now and this guard used to step
-           around every fn: target). */
-        if (R.onlyOwnLines(w, person, isFn ? "fn" : "unit", t)) {
+        /* Submitting, and the unit's own note on the cycle, speak for the
+           whole unit — so a contributor limited to their own lines does
+           neither (spec 006 §7.2). */
+        if (!isFn && R.onlyOwnLines(w, person, "unit", t)) {
           if (ch.kind === "reportState") {
-            no("A contributor reports their own lines; " + ch.what + " is the " +
-               (isFn ? "function's." : "unit's."));
+            no("A contributor reports their own lines; " + ch.what + " is the unit's.");
             return;
           }
         }
@@ -882,37 +867,10 @@ function authorize(stored, incoming, person) {
           no("A plan is corrected by the SMO — " + ch.what + where + " cannot be changed here.");
         return;
 
-      case "capReporting": {
+      case "capReporting":
         if (!edits(w, person, "fn", ch.target)) { no("You cannot report for " + where.trim() + "."); return; }
-        if (locked && !office) {
-          no("This cycle is locked. Ask the SMO to reopen it before entering figures.");
-          return;
-        }
-        /* ── A CUSTODIAN PER PROJECT (§131) ──────────────────────────
-           A project's owner is a Contributor of its function, and a
-           Contributor reports their own lines only — here the line is the
-           PROJECT: every deliverable, outcome and milestone it holds, and
-           nothing in the project next to it. A capability's own key
-           objectives and its headline figures belong to no project, so for
-           somebody who speaks only for their own they are refused too.
-           Resolved against the STORED capabilities (§42.2), through the same
-           two functions the screen asks (capProjectOf, namedOn). */
-        if (!R.onlyOwnLines(w, person, "fn", ch.target)) return;
-        const fk = String(ch.target || "").replace(/^fn:/, "");
-        if (!ch.ids) {
-          no("A project owner reports their own project — " + ch.what + where +
-             " is the function's.");
-          return;
-        }
-        const notMine = ch.ids.filter(function (id) {
-          const proj = R.capProjectOf(w, fk, id);
-          return !proj || !namedOn(proj, person);
-        });
-        if (notMine.length)
-          no("A project owner reports only their own project — " + notMine.length +
-             (notMine.length === 1 ? " row" : " rows") + " in " + fk + " is not yours.");
+        if (locked && !office) no("This cycle is locked. Ask the SMO to reopen it before entering figures.");
         return;
-      }
 
       /* Fails CLOSED. A field the platform gained after this file was written
          is guarded on the day it is added, not on the day it is remembered. */

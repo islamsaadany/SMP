@@ -60,7 +60,7 @@
     { key:"fnhead", name:"Function head", scope:"fn",
       note:"Runs a supporting function and the capabilities it owns." },
     { key:"contrib", name:"Contributor", scope:"unit",
-      note:"Named on a measure, a tactic or a project. Reports against their own work and reads their unit or function." },
+      note:"Named on a measure or a tactic. Reports against their own work and reads their unit." },
     /* EMPLOYEE WAS HERE, AND IT WAS NEVER A ROLE (§93, Islam 2026-08-24):
        "anyone with no role is employee … employee doesn't give the person
        anything and if so then let's remove this strange role."
@@ -290,13 +290,7 @@
          the default, which for a switch means "on". Found by driving the real
          page, not by reading (§44, twice now). */
       focusOff: !!o.focusOff,
-      naming: !!o.naming,
-      /* §131: a project's owner is a Contributor of its function, and the
-         projects live on the capabilities — so the world has to carry them or
-         namedInFn() reads an empty list and the floor never derives. §102.4's
-         trap exactly: added here AND in worldOf(), in the same edit as the
-         rule that reads it. */
-      capabilities: o.capabilities || []
+      naming: !!o.naming
     };
   }
   /* A world built straight off a state graph — the shape the server holds. */
@@ -314,8 +308,7 @@
                   sees undefined and answers the default. Add the key here in
                   the same edit as the rule that reads it. */
                focusOff: (state.group || {}).focusOff,
-               naming: (state.group || {}).naming,
-               capabilities: (state.group || {}).capabilities });
+               naming: (state.group || {}).naming });
   }
 
   function personActive(p) { return !!p && p.active !== false; }
@@ -360,14 +353,6 @@
        grantIn() rather than dressed up as a role they never got (§93). */
     if (!out.length && p.unit && namedInUnit(w, p, p.unit))
       out.push({ role:"contrib", at:p.unit });
-    /* §131: THE SAME FLOOR ON A FUNCTION'S PROJECTS. A function's custodian
-       covers the whole function; where each PROJECT has its own owner, that
-       owner is a Contributor of the function — derived from the project's
-       Owner row exactly as a unit's Contributor is derived from a tactic's,
-       and gone the day the project stops naming them. Capability projects
-       only: a pillars function's plan has no per-project owner to read. */
-    if (!out.length && p.fn && namedInFn(w, p, p.fn))
-      out.push({ role:"contrib", at:"fn:" + p.fn });
     return out;
   }
   function personRoleKeys(w, p) {
@@ -1005,41 +990,6 @@
     return hit;
   }
 
-  /* §131: Is this person named on any of this function's projects? The
-     function-side half of namedInUnit(), asked through the same namedOn() so
-     "named on a project" means one thing in the platform. The unit of the
-     naming is the PROJECT — being its owner (or, should projects ever carry
-     them, a collaborator) speaks for every row the project holds, which is
-     what "a custodian per project" means. Capability projects only: a pillars
-     function's plan is classified with the units and has no per-project
-     owner; its floor is deliberately not derived here (flagged in §131.5). */
-  function capsOfFn(w, fnKey) {
-    return (w.capabilities || []).filter(function (c) { return c && c.fn === fnKey; });
-  }
-  function namedInFn(w, p, fnKey) {
-    if (!p || !fnKey) return false;
-    return capsOfFn(w, fnKey).some(function (c) {
-      return (c.projects || []).some(function (pr) { return namedOn(pr, p); });
-    });
-  }
-  /* Which project a reporting row belongs to, read from the world the caller
-     already holds — the server asks it of the STORED state (§42.2), the
-     screen of its own. A capability's key objectives belong to no project, so
-     an id found only there answers null: for somebody who speaks only for
-     their own project, no project means no. */
-  function capProjectOf(w, fnKey, id) {
-    var hit = null;
-    capsOfFn(w, fnKey).forEach(function (c) {
-      (c.projects || []).forEach(function (pr) {
-        if (hit) return;
-        var holds = (pr.deliverables || []).concat(pr.outcomes || [], pr.milestones || [])
-          .some(function (x) { return x && x.id === id; });
-        if (holds) hit = pr;
-      });
-    });
-    return hit;
-  }
-
   /* ── ROLES THAT SPEAK ONLY FOR THEMSELVES ─────────────────────────
      A Contributor reports the lines they are named on and nothing else (spec
      006 §7.2); an Employee is named on nothing, so the same rule leaves them
@@ -1103,7 +1053,6 @@
     focusOn: focusOn,
     mayAuthorPage: mayAuthorPage,
     namedOn: namedOn, namedInUnit: namedInUnit,
-    namedInFn: namedInFn, capProjectOf: capProjectOf,
     editingRoles: editingRoles, onlyVia: onlyVia, rolesOrFloor: rolesOrFloor,
     OWN_LINES_ONLY: OWN_LINES_ONLY, onlyOwnLines: onlyOwnLines,
     isOwnLinesRole: isOwnLinesRole,

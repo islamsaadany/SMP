@@ -235,11 +235,7 @@ var PAGE_INFO = {
        "If a role can open a page, it sees everything on it. Restriction happens by removing the " +
        "page, never by trimming its contents &mdash; per-element permissions make a system nobody " +
        "can reason about. The one exception is a rule with teeth rather than a setting: a " +
-       "contributor granted edit reaches <b>their own lines only</b> &mdash; on a unit the " +
-       "measures and tactics that name them, and on a supporting function <b>the project they " +
-       "are named owner of</b>, whole, and nothing beside it. Neither is granted anywhere: being " +
-       "named is what derives the role, and the Contributor row&rsquo;s own-unit and own-function " +
-       "<b>Reporting</b> cells here are what open or close it."],
+       "contributor granted edit reaches <b>their own lines only</b>."],
       ["Two states, not three",
        "View and edit, and edit includes view. <b>None is not a third thing you choose</b>, it is " +
        "the absence of the other two &mdash; which is why a cell is two toggles and nothing lit is " +

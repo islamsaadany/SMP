@@ -17723,7 +17723,7 @@ group headings §117 introduced are readable for the first time: *Own business
 unit* and *Own supporting function*, each splitting into Strategy and
 Reporting. They had been under the second row since the split shipped.
 
-### 135.3 Send an email, and the In Platform inbox
+### 135.3 Send an email, and the Platform Inbox
 
 *"Let's rename send a message to send an email"* and *"rename inbox to In
 Platform inbox."*
@@ -17734,6 +17734,10 @@ end: the composer sends **real email**, and calling it "a message" left it in
 the same word family as the in-platform conversation beside it. With it renamed,
 a bare *Inbox* reads as where those emails land, which is the one thing it is
 not.
+
+**"Platform Inbox", NOT "In Platform inbox"** — Islam shortened it the day after,
+and the shorter one is the better one: the qualifier does the work either way,
+and a rail entry is scanned rather than read.
 
 **THE KEYS DO NOT MOVE.** `send` and `chat` are what the endpoint, `GROUP.chat`
 and four checks name; a rename is a label (§65, §108.3).
@@ -17977,3 +17981,27 @@ gap rather than a slot. It now measures the gap **only while the head is
 actually pinned**, keeps one fine-grained sweep for the symptom, and asserts
 `--sethead-h` equals the header's measured height. With the observer removed it
 fails six ways, naming *"Key Objectives at y=180"*.
+
+### 135.11 Focus measures sits with Measurement
+
+Islam: *"move the focus measures to measurement."*
+
+**IT WAS IN *Running the cycle* FOR A REAL REASON AND IT IS NOT THE BETTER
+ONE.** The marks belong to the cycle — `CYCLE.focus`, cleared when a new one
+opens (§102) — so it genuinely is something you do while a cycle is open, and
+that is why it was grouped there.
+
+But the rail's groups answer *what did you come here to do* (§46), not *which
+table does this write*. Somebody opening this page came to say which measures
+matter, and *Measurement — what the numbers mean* is the heading for that. The
+cycle group is the things you do to RUN a cycle; this is a statement about the
+measures themselves that happens to be re-asked each cycle.
+
+**`grp` IS THE ONLY THING THAT CHANGES.** The key, the access key, the glyph,
+the search keywords and the page are untouched, and `SETUP_GROUPS` is the one
+place order is decided — so nothing outside the def needs to know it moved. It
+lands between Figure sets and Scoring bands.
+
+**And it is asserted of the RAIL, not of the def** (`checks/setup-header.py`): a
+def whose `grp` no longer matched a real group would render nowhere at all
+rather than in the wrong place, and the rail is what somebody scans.

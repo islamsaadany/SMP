@@ -360,24 +360,6 @@
                   { k:"fill", ac:"c_source", label:"Fill a figure set",
                     when: canPickSets,                                 render:renderSourceSetup }];
         } },
-      /* ── FOCUS MEASURES SITS WITH MEASUREMENT (§135.11) ──────────────
-         Islam: *"move the focus measures to measurement."*
-
-         IT WAS IN *Running the cycle* FOR A REAL REASON AND IT IS NOT THE
-         BETTER ONE. The marks belong to the cycle — `CYCLE.focus`, cleared
-         when a new one opens (§102), so it IS something you do while a cycle
-         is open. But the rail's groups answer *what did you come here to do*
-         (§46), and somebody opening this page came to say which measures
-         matter, which is what *Measurement — what the numbers mean* is for.
-         The cycle group is the things you do to RUN a cycle; this is a
-         statement about the measures themselves that happens to be re-asked
-         each cycle.
-
-         `grp` is the only thing that changes. The key, the access key, the
-         glyph, the keywords and the page are untouched — and the group is
-         the one place order is decided (SETUP_GROUPS), so nothing else needs
-         to know it moved. */
-      { k:"focusset", ac:"c_focus", grp:"meas", label:"Focus measures", glyph:"◎", find:"focus watch highlight measures",                render:renderFocusSetup },
       { k:"bands",  ac:"c_bands",  grp:"meas", label:"Scoring bands", glyph:"▥", find:"scoring bands green amber red threshold colours ranges",        render:function(){ return renderBands() + renderBandsExtra(); } },
       /* TERMINOLOGY, NOT "LABELS" (§108.3). The page holds what THIS tenant
          calls a pillar, a theme, an aspiration — its vocabulary, and the one
@@ -451,17 +433,13 @@
          Communications — the same way, by renaming until each name meant one
          thing. The KEY stays `chat`, which is what the page def, the endpoint,
          `GROUP.chat` and checks/office-chat.py all name. */
-      /* PLATFORM INBOX (§135.3, shortened by Islam). §108.3 named this "Inbox"
-         to break a three-way collision, and the rename has a second job now:
-         with the composer called "Send an email", a bare "Inbox" reads as where
+      /* IN PLATFORM INBOX (§135.3). §108.3 named this "Inbox" to break a
+         three-way collision, and the same rename now has a second job: with
+         the composer becoming "Send an email", a bare "Inbox" reads as where
          those emails land, which is the one thing it is not. This is the
-         conversation people have with the office inside the platform.
-
-         "Platform Inbox", not "In Platform inbox" — his word, and the shorter
-         one is the better one: the qualifier is doing the work either way, and
-         a rail entry is scanned rather than read. The KEY stays `chat`, which
-         the endpoint, `GROUP.chat` and the checks all name (§65, §108.3). */
-      { k:"chat",     ac:"c_chat",  grp:"cycle",  label:"Platform Inbox", glyph:"✉", find:"messages chat conversations questions replies feedback answer inbox",
+         conversation people have with the office INSIDE the platform. The KEY
+         stays `chat` — the endpoint, `GROUP.chat` and the checks all name it. */
+      { k:"chat",     ac:"c_chat",  grp:"cycle",  label:"In Platform inbox", glyph:"✉", find:"messages chat conversations questions replies feedback answer inbox",
         when: function(){ return inOffice() && CHAT.servable(); },
         render:function(){ return CHAT.renderInbox(); } },
       /* §74. A DOING page, so it sits with the cycle rather than beside the
@@ -489,6 +467,7 @@
           return [{ k:"compose", ac:"c_send",  label:"Compose",        render:renderSendMessage },
                   { k:"comms",   ac:"c_comms", label:"Email settings", render:renderComms }];
         } },
+      { k:"focusset", ac:"c_focus", grp:"cycle",  label:"Focus measures", glyph:"◎", find:"focus watch highlight measures",                render:renderFocusSetup },
       /* Only for somebody who has actually been named on a figure. Its reach
          is not a setting (§16.7), so `when` hides it outright rather than the
          matrix answering "none" — a menu entry that opens an empty page is

@@ -793,7 +793,7 @@ var CHAT = (function(){
        over file:// (§94.11). Saying the same word as the rail is what makes the
        heading drop; the settings dropdown rides up onto the pinned line with
        everything else (§135). */
-    return cfgHead("Platform Inbox", [], null, false, null, null,
+    return cfgHead("In Platform inbox", [], null, false, null, null,
         '<span class="chsetwrap">' + settingsHtml() + '</span>') +
       /* OFF IS SAID ON THE PAGE, because this is the one screen that still
          works when it is off and the one place it can be turned back on.

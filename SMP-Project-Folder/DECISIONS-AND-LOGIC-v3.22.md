@@ -17480,3 +17480,48 @@ Deployed evidence, for the record: Islam set `GEMINI_MODEL=gemini-3.6-flash`
 himself (the override §104 built for exactly this), and the diagnostic then
 read all green — the AQ.-shaped key PRESENT, the model answering in full. The
 remaining silence was this section's, not the key's and not the model's.
+
+
+---
+
+## 133 · The thinking cap, and the knob that must not kill the assistant (v3.48)
+
+> The §132 build's first diagnostic on a preview deployment: *"the assistant
+> did not answer in time"* — the NEW 20-second budget, blown by the same model
+> that had answered the same question in under 12 the hour before.
+
+### 133.1 Latency was a lottery because reasoning was
+
+The model thinks before it answers, and how long it thinks varies run to run.
+§132 sized the timeout for the answer and could not size it for the mood.
+**Answering from a corpus that is IN THE PROMPT is retrieval, not reasoning**,
+so `thinkingConfig: { thinkingBudget: 0 }` goes out with every request and the
+latency stops being weather. The 2048 output headroom stays — a dropped knob or
+a model that thinks regardless must not starve the visible answer.
+
+### 133.2 A config knob must never take the assistant down
+
+The knob's contract on a model Google ships tomorrow is unknowable from here —
+and §104's ordering means an unexpected 400 would land as silence. So **a 400
+that names thinking is read as the provider refusing the KNOB, not the
+question**: it is dropped, remembered for the process, and the same question
+asked once more. A fresh process asks again, which is what lets a provider that
+learns the field start being sent it without anybody doing anything.
+
+**Only after the bad-key check**, or a bad key's 400 would be retried into —
+asserted, with the stub answering the way Google actually refuses an unknown
+`generationConfig` member.
+
+### 133.3 The preview URL's console error is Vercel's, not ours
+
+Recorded because it will be seen again: on a PROTECTED preview deployment,
+Vercel's SSO layer fetches the manifest through `vercel.com/sso-api`, which the
+platform's own CSP (`connect-src 'self'`) rightly blocks. Harmless, absent from
+production, and not a reason to widen the CSP.
+
+### 133.4 What proves it
+
+`test-assistant.js` §6: the cap goes out by default; a refused cap is dropped
+and the question re-asked exactly once; the refusal is remembered for the
+process; a bad key is never retried into. Watched to fail with the retry
+removed — 2 failures. 38/0, test-chat 52/0, built file byte-identical.

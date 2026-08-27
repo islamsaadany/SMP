@@ -48,11 +48,21 @@ const stub = http.createServer(function (req, res) {
       res.writeHead(code, { "Content-Type": "application/json" }); res.end(b);
     };
     if (MODE === "refuse") return reply(429, { error: { message: "quota" } });
+    if (MODE === "badkey400") return reply(400, { error: { message: "API key not valid. Please pass a valid API key." } });
     if (MODE === "notfound") return reply(404, { error: { message: "model not found" } });
     if (MODE === "garbage") {
       return reply(200, { candidates: [{ content: { parts: [{ text: "not json at all" }] } }] });
     }
     if (MODE === "empty") return reply(200, { candidates: [] });
+    /* THE PROVIDER THAT NEVER HEARD OF THINKING (§133): a 400 naming the
+       field when it is present, an ordinary answer when it is not — which is
+       how Google actually refuses an unknown generationConfig member. */
+    if (MODE === "nothink" && LAST && LAST.generationConfig &&
+        LAST.generationConfig.thinkingConfig) {
+      return reply(400, { error: { message:
+        'Invalid JSON payload received. Unknown name "thinkingBudget" at ' +
+        "'generation_config.thinking_config'" } });
+    }
     if (MODE === "hang") return;                       /* never answers: the timeout path */
     /* THE MODEL'S WORDS ON A HANDOFF ARE A TRAP, and the stub sets it (§104).
        A provider that says something helpful-sounding while answering false is
@@ -226,7 +236,39 @@ const stub = http.createServer(function (req, res) {
   ck("no key, no shape", assistant.keyShape() === null);
   process.env.GEMINI_API_KEY = "test-key-not-a-real-one";
 
-  console.log("\n6 · what actually goes to the provider");
+  console.log("\n6 · the thinking cap, and the provider that refuses it");
+  /* The cap is SENT by default — retrieval over an in-prompt corpus needs no
+     reasoning, and §132's timeout came straight back at 20s the day the model
+     felt like thinking long. */
+  assistant._resetThinkCap && assistant._resetThinkCap();
+  MODE = "answer"; CALLS = 0;
+  let r6 = await assistant.ask({ kb: kb, question: "x", history: [], who: "w", labels: {} });
+  ck("the thinking cap goes out with the request",
+     r6.ok === true && LAST && LAST.generationConfig &&
+     LAST.generationConfig.thinkingConfig &&
+     LAST.generationConfig.thinkingConfig.thinkingBudget === 0, LAST && LAST.generationConfig);
+  /* AND A PROVIDER THAT REFUSES THE KNOB LOSES THE KNOB, NOT THE ANSWER. */
+  assistant._resetThinkCap();
+  MODE = "nothink"; CALLS = 0;
+  r6 = await assistant.ask({ kb: kb, question: "x", history: [], who: "w", labels: {} });
+  ck("a refused cap is dropped and the question asked again, once",
+     r6.ok === true && CALLS === 2 &&
+     !(LAST.generationConfig && LAST.generationConfig.thinkingConfig), { calls: CALLS });
+  CALLS = 0;
+  r6 = await assistant.ask({ kb: kb, question: "x", history: [], who: "w", labels: {} });
+  ck("and the refusal is remembered for the process",
+     r6.ok === true && CALLS === 1, { calls: CALLS });
+  /* NEVER INTO A BAD KEY: a 400 about the credential is not a 400 about the
+     knob, and retrying it would double every bad-key failure. */
+  assistant._resetThinkCap();
+  MODE = "badkey400"; CALLS = 0;
+  r6 = await assistant.ask({ kb: kb, question: "x", history: [], who: "w", labels: {} });
+  ck("a bad key is never retried into", r6.ok === false && r6.badKey === true && CALLS === 1,
+     { calls: CALLS, r: r6 });
+  assistant._resetThinkCap();
+  MODE = "answer";
+
+  console.log("\n7 · what actually goes to the provider");
   MODE = "answer";
   await assistant.ask({ kb: kb, question: "how do I report", history: [], who: "a strategy custodian", labels: { pillar: "direction", pillars: "directions" } });
   const sys = (LAST.systemInstruction.parts || []).map(function (p) { return p.text; }).join("\n");

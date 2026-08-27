@@ -124,6 +124,20 @@ test-assistant 33/0 · test-authorize 193/0. **One assertion was rewritten for
 being unfalsifiable** — it measured the row against the panel, and a row is
 inside its own panel by definition.
 
+### v3.48 — the thinking cap (§133)
+
+§132's 20s budget blew on its first preview run — the same model, the same
+question, under 12s the hour before. Reasoning time is a lottery, so the fix is
+not a bigger timeout: **thinking is capped at nought**, because answering from
+a corpus that is in the prompt is retrieval, not reasoning. And since the
+knob's contract on future models is unknowable, **a 400 naming thinking drops
+the knob and re-asks once**, remembered per process — a config knob must never
+be what takes the assistant down. Bad keys are never retried into.
+
+**Verified:** test-assistant 38/0 (retry watched to fail — 2), test-chat 52/0,
+built file byte-identical. The preview URL's CSP console error is Vercel's SSO
+layer fetching the manifest — harmless, absent from production (§133.3).
+
 ### v3.48 — the reply that never came back (§132)
 
 Every diagnostic row green, and still no reply in the chat. The diagnostic and

@@ -167,7 +167,7 @@ HTML = """<title>Dear Ahmed</title>
   <p>An on/off switch on the composer that opens every email with the receiver&rsquo;s
      own first name. Drawn in the real platform, not sketched &mdash; every picture
      below is the built product with the proposal injected into the live page.</p>
-  <div class="standing"><b>Waiting on your sign-off</b> <span>nothing in src/ has been touched</span></div>
+  <div class="standing"><b>Revision 2</b> <span>one line, no prose &middot; nothing in src/ touched</span></div>
 </header>
 
 <section class="item">
@@ -177,6 +177,16 @@ HTML = """<title>Dear Ahmed</title>
       to customize the email by the first name of the receiver like starting the email
       with Dear Ahmed and then the body comes after &mdash; it&rsquo;s a turn on and off option.
       <span>Islam &middot; 27 August 2026</span></div>
+
+    <div class="said">The design of the setting is poor. It should be one line, you
+      don&rsquo;t need 2 lines &mdash; and no explanations needed in the setting itself,
+      it&rsquo;s clear.
+      <span>Islam, on revision 1 &middot; 27 August 2026</span></div>
+
+    <p><strong>Right, and the row is rebuilt.</strong> The first version spent two lines
+      and a sentence saying what the label and the box already say. What it cost was not
+      only height: two lines under a message made the greeting look like a bigger decision
+      than the button row beneath it, which is one line. They read at the same weight now.</p>
 
     <h3>Why this is cheaper than it sounds</h3>
     <p><strong>Every recipient already receives their own separate email.</strong> The
@@ -216,6 +226,9 @@ HTML = """<title>Dear Ahmed</title>
 <section class="item">
   <div class="itemhead"><div class="num">The row</div><h2>One switch, and a word</h2></div>
   <div class="body">
+    <p><strong>One line, and nothing explaining itself.</strong> A label reading
+      <em>Open with a greeting</em> beside a box holding the word <em>Dear</em> has
+      already said everything a sentence under it would say.</p>
     <p>It sits under the message and above the button fields &mdash; the order the email
       itself reads in: the greeting is the top of the message, the button is the bottom.
       The switch is <strong>the platform&rsquo;s own Off/On control</strong>, the one the
@@ -225,10 +238,10 @@ HTML = """<title>Dear Ahmed</title>
     %(row_on)s
 
     <div class="cost">
-      <div class="kicker">Caught by drawing it</div>
-      <p>The word box first ran to half the width of the pane, because the row it sits
-        in is a two-column grid. A field that wide reads as one expecting a sentence.
-        It is sized for one word now, with the note beside it rather than under it.</p>
+      <div class="kicker">The switch does not move</div>
+      <p>The word box appears to the <em>left</em> of the switch, so the switch is the
+        last thing in the row whether the greeting is on or off. A control that shifts
+        under the press that produced it is a control people stop trusting.</p>
     </div>
   </div>
 </section>
@@ -239,10 +252,12 @@ HTML = """<title>Dear Ahmed</title>
     <p>The greeting is the first paragraph of the body, in the body&rsquo;s own type &mdash;
       not a heading, not a styled banner. The preview is built by the same builder that
       sends, so what is on screen is what lands in an inbox.</p>
-    <p><strong>The sample is named under the card, never inside it.</strong> The preview
-      shows the first person on your list, and the line beneath says so. It is deliberately
-      outside the email: a badge inside would be a line nobody receives, and the whole
-      point of that preview is that it is the real thing.</p>
+    <p><strong>Six words under the card, and nothing inside it.</strong> The preview
+      shows the first person on your list, so one short line says
+      <em>Everyone sees their own name here.</em> It is the one thing the screen cannot
+      say by showing, and it stays <em>outside</em> the email &mdash; a badge inside would
+      be a line nobody receives, and the whole point of that preview is that it is the
+      real thing.</p>
 
     %(prev)s
     %(prevc)s
@@ -333,22 +348,23 @@ page = HTML % {
     # The label is a display:block heading in this stylesheet, so the sentence
     # after it has to stand on its own rather than continue it.
     "row_off": fig("row-off.png",
-                   "<b>Off</b>How every message opens. The switch is the platform&rsquo;s "
-                   "own Off/On pair &mdash; the same control the naming setting uses."),
+                   "<b>Off</b>How every message opens. Label and switch, nothing else. "
+                   "The switch is the platform&rsquo;s own Off/On pair &mdash; the same "
+                   "control the naming setting uses."),
     "row_on": fig("row-on.png",
-                  "<b>On</b>The word box holds one word and is sized for one. The note "
-                  "beside it says what will happen, and what happens to a row with no "
-                  "usable name."),
+                  "<b>On</b>The word box appears beside the switch, sized for the one "
+                  "word it holds. Still one line, and still no prose."),
     "prev": fig("preview-greeted.png",
                 "The message as it arrives. &ldquo;Dear Ahmed,&rdquo; is the first "
-                "paragraph of the body, in the body&rsquo;s own type &mdash; and the line "
-                "under the card says whose name is being shown."),
+                "paragraph of the body, in the body&rsquo;s own type &mdash; with one "
+                "short line under the card saying the name is a sample."),
     "prevc": fig("preview-compound.png",
                  "The same message for the compound name on your register. One first "
                  "name, kept whole."),
     "whole": fig("composer-whole.png",
-                 "Send a message, whole, with the greeting on. The message, then the "
-                 "sample line, then the greeting row, then the button fields, then Send."),
+                 "Send a message, whole, with the greeting on. One line for the greeting, "
+                 "one for the button &mdash; the two rows under the message now read at "
+                 "the same weight."),
     "darkpair": fig("row-on-dark.png",
                     "The same row and the same message in dark. The email card itself "
                     "stays light in both, because an email is not the platform &mdash; "

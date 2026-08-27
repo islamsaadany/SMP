@@ -116,31 +116,29 @@ ROW = """(on) => {
   // The dashed rule and spacing `.ctarow` carries — the row belongs to the
   // composer, not to the page, so it is separated the way its neighbour is.
   d.setAttribute('style', 'border-top:1px dashed var(--line);margin-top:12px;padding-top:11px');
+  // ── ONE LINE, AND NOTHING EXPLAINING ITSELF ──────────────────────────
+  // Islam, of the two-line version: "the design of the setting is poor. It
+  // should be one line you dont need 2 lines .. and no explanations needed in
+  // the setting itself it's clear." §127's ruling on the chat settings, and he
+  // is right twice over — a label reading "Open with a greeting" beside a box
+  // holding the word "Dear" has already said everything the sentence said.
+  //
+  // `.imp-row` is a flex line and `.cfg-lab` is flex:1, so the label takes the
+  // free space and the field and switch sit together at the right. THE SWITCH
+  // DOES NOT MOVE when the field appears: it is last in the row either way,
+  // and a control that shifts under the press that produced it is §41.8's
+  // fault.
   d.innerHTML =
     '<div class="imp-row" style="margin:0">' +
       '<span class="cfg-lab">Open with a greeting</span>' +
+      // THE BOX HOLDS ONE WORD, so it is sized for one word.
+      (on ? '<input class="fld" value="Dear" placeholder="Dear" ' +
+              'aria-label="The greeting word" style="width:120px;flex:none">' : '') +
       '<span class="minisw">' +
         '<button aria-pressed="' + (!on) + '">Off</button>' +
         '<button aria-pressed="' + on + '">On</button>' +
       '</span>' +
-    '</div>' +
-    (on
-      // THE BOX HOLDS ONE WORD, so it is sized for one word. At `1fr` of the
-      // CTA grid it took half the pane, which reads as a field expecting a
-      // sentence.
-      ? '<div style="display:flex;align-items:center;gap:12px;margin-top:9px">' +
-          '<input class="fld" value="Dear" placeholder="Dear" ' +
-            'style="width:132px;flex:none">' +
-          // ONE LINE. The first draft ran to two and broke “Dear ,” across
-          // them, which is the one string this row exists to promise never
-          // appears. The rule it stated belongs in the spec, not in the row.
-          '<span class="why" style="margin:0">Each email opens ' +
-            '<b>Dear Ahmed,</b> \\u2014 the word is yours, the name is theirs. ' +
-            'A row with no usable name gets no greeting line.</span>' +
-        '</div>'
-      : '<span class="why" style="margin:9px 0 0;display:block">Every recipient ' +
-          'already gets their own email. With this on, each one opens with their ' +
-          'own first name.</span>');
+    '</div>';
   cta.parentNode.insertBefore(d, cta);
   return true;
 }"""
@@ -170,8 +168,11 @@ GREET_IN_PREVIEW = """(name) => {
   const n = document.createElement('span');
   n.className = 'why greetnote';
   n.setAttribute('style', 'display:block;margin:8px 0 0');
-  n.innerHTML = 'Shown with <b>' + name + '</b>, the first person on your list. ' +
-                'Every other recipient sees their own first name here.';
+  // The row explains nothing now, and this line is not the row — it is the one
+  // thing the screen cannot say by showing: that the name in the preview is a
+  // sample. Cut to six words rather than dropped, because without it a draft
+  // opened by somebody else reads as "everybody gets Dear Ahmed".
+  n.innerHTML = 'Everyone sees their own name here.';
   host2.parentNode.insertBefore(n, host2.nextSibling);
   return true;
 }"""

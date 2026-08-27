@@ -55,6 +55,18 @@ Nothing proceeds past this line without an answer.
 
 ---
 
+## Agreed, not built
+
+- **Spec 021 — the email greets its receiver** (`specs/021-email-greeting/`,
+  agreed 2026-08-27). Send a message gains a per-message switch (off by
+  default) that opens each email with an editable greeting word ("Dear") and
+  the receiver's first name — compound first names kept whole ("Dear Abd El
+  Moniem", never "Dear Abd"), substituted on the server per recipient, Send a
+  message only. **Next step: the composer/preview mockup, published as an
+  artifact for sign-off before `src/` is touched (rule 1c).**
+
+---
+
 ## Known red, on purpose
 
 - **`checks/no-jump.py` — "sorting a column" (1 JUMPED).** Real defect,

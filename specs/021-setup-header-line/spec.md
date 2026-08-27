@@ -51,7 +51,9 @@ offset was being applied inside it.
   carrying its own mark count.
 - **One table**: Measure · Target · Focus, banded by key objectives and then by
   pillar (a unit, or a pillars function) or by capability (a capability
-  function).
+  function). The band is `tr.dxband` — the platform's own in-table band
+  (§99), because a band that has to be told apart from the zebra stripe cannot
+  be a lighter shade of it.
 - **Supporting functions can be marked**, and the group's Focus board shows
   them beside the units.
 
@@ -62,6 +64,13 @@ offset was being applied inside it.
 - **Two sections**: *Compose* and *Email settings*. `Setup › Email` leaves the
   rail. Each section keeps its own access key, so a `c_comms` holder without
   `c_send` still reaches the settings half.
+
+## 5b · The rail's own head
+
+`.rhead` and `.railfind` are `position:sticky` inside `.setuprail`, on top of
+the rail already being sticky against the page. Redundant wherever the rail's
+`max-height` applies; load-bearing where it does not (no `100dvh` support;
+below 900px, where the split stacks and the rail is uncapped).
 
 ## 6 · The company on a person's row
 

@@ -362,6 +362,25 @@ console errors (in this cloud environment, run it via a wrapper that points Play
   and **nothing is hidden by it**: every row carries `data-tkrow` and every one
   is drawn, so the chip narrowed a view and never revealed rows. `TKFILTER`,
   the chip markup, its handler and `[data-tkcount]` are DELETED (§24).
+- **A BAND CANNOT BE A LIGHTER SHADE OF THE STRIPE (§130.8):** the marking
+  table's band was `--surface-2` (#EFF2F6) against a `--zebra` of #F5F7FA — six
+  points on one channel, and Islam read them as the same grey. It takes
+  **`tr.dxband`**, which is what §99 already settled a band naming a group of
+  rows inside a table looks like (`--panel` on `--panel-ink`); a third grey
+  would be a second vocabulary for one idea (§53.5). **The 14px break is on
+  EVERY band here, including the first** — §99 excludes the first because there
+  it opens the table, and here a navy `<thead>` sits above it.
+- **PINNED TWICE, AND ASSERTED ONCE (§130.9):** asked (twice) to make the rail's
+  `SETUP` bar and search sticky, the honest first move was to MEASURE — eleven
+  window sizes, four scroll positions, the list scrolled internally: 96px and
+  136px every time, on this build and main's. It was already true and had
+  **never been asserted**, which is why "already true" was only ever something a
+  throwaway probe could say. `.rhead` and `.railfind` are sticky inside the rail
+  now as belt and braces — a no-op wherever the cap applies, and the difference
+  between holding and not in the two states it does not reach (a browser without
+  `100dvh` drops the whole `max-height`; below 900px the rail stops being a
+  column). The search's offset is the head's **measured** height, or it pins
+  under the bar in exactly the state the fix exists for.
 - **`.acgrid` IS A SCROLL BOX, SO THE PAGE OFFSET WENT INSIDE IT (§130.2):**
   *"check the table as the design is damaged."* `overflow-x:auto` makes the BOX
   what a sticky head pins against, so §121.4's 141px page offset pushed the

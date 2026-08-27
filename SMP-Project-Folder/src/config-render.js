@@ -3469,7 +3469,9 @@ function renderFocusSetup(){
       '</td></tr>';
   };
   var body = bands.map(function(b){
-    return '<tr class="fband"><th colspan="3">' + esc(b.band) + '</th></tr>' +
+    /* `dxband` is the shared look (§130.8); `fband` is what this page's own
+       spacing rule and its check key off. */
+    return '<tr class="fband dxband"><th colspan="3">' + esc(b.band) + '</th></tr>' +
       (b.items.length
         ? b.items.map(row).join("")
         : '<tr><td colspan="3" class="fnone">Nothing to mark here.</td></tr>');

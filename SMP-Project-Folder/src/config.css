@@ -461,7 +461,28 @@
                   few rows is not navigation, and a window that short is
                   somebody's split view rather than their screen. */
                min-height:260px; }
-  .setuprail .rhead { flex:none; }
+  /* ── AND THEY PIN INSIDE THE RAIL AS WELL (§130.9) ────────────────
+     Islam, twice, pointing at the navy SETUP bar and the search box: *"this is
+     the part that needs to be sticky in the rail."*
+
+     WHAT WAS ALREADY TRUE, MEASURED BEFORE CHANGING ANYTHING: `.setuprail` is
+     `position:sticky` and `.raillist` is the only thing inside it that scrolls,
+     so the head and the search cannot move — asked at 1920×1080, 1600×900,
+     1440×900, 1440×820, 1366×768, 1280×720, 1280×600, 1100×700, 1024×760,
+     1000×650 and 880×800, scrolled to 300, 800, 900 and 1500px AND with the
+     list scrolled internally, they report 96px and 136px in every single one.
+
+     SO THIS IS BELT AND BRACES, AND IT IS CHEAP. It is a no-op wherever the
+     cap applies, and it is the difference between holding and not in the two
+     states the cap does not reach: a browser that does not understand `100dvh`
+     drops the whole `max-height` declaration, and below 900px the rail stops
+     being a column at all. In both the box grows past the window and only this
+     keeps the head and the search on screen.
+
+     `top:0`, not the chrome offset: these pin against the RAIL, which is
+     already pinned against the page — one number each, in its own frame
+     (§29.4). The ground is painted or the rows scroll through them (§53.7). */
+  .setuprail .rhead { flex:none; position:sticky; top:0; z-index:3; }
 
   /* ══ FINDING A SETTING (§108.13) ═══════════════════════════════════
      IN THE HEAD, ABOVE THE SCROLLING LIST, and `flex:none` for the same reason
@@ -469,7 +490,13 @@
      stay reachable while the list scrolls has to sit outside it. A search box
      that scrolls away from its own results is §90's control-below-the-fold by
      another road. */
-  .setuprail .railfind { flex:none; position:relative; padding:8px 10px 9px;
+  /* `top` is the head's own height, so the two stack rather than overlap. It
+     is measured into a variable rather than guessed — 40px, read off the
+     rendered head at four window sizes — because a wrong number here would put
+     the search under the bar in exactly the state this exists for. */
+  .setuprail { --rhead-h:40px; }
+  .setuprail .railfind { flex:none; position:sticky; top:var(--rhead-h); z-index:3;
+                         padding:8px 10px 9px; background:var(--surface);
                          border-bottom:1px solid var(--line); }
   .setuprail .railq { width:100%; box-sizing:border-box; font:400 12.5px/1.3 var(--sans);
                       color:var(--ink); background:var(--ground);
@@ -735,9 +762,26 @@
      because §121.4 pins every `thead th` on a Setup page and a band is not a
      heading of the table. */
   .ftable table { table-layout:fixed; width:100%; }
-  .ftable tr.fband th { background:var(--surface-2); color:var(--ink-2); text-align:left;
-      font:700 11px/1.2 var(--sans); letter-spacing:.06em; text-transform:uppercase;
-      padding:7px 10px; border-top:1px solid var(--line); position:static; }
+  /* ══ THE BAND IS THE PLATFORM'S OWN (§130.8) ═══════════════════════
+     Islam: *"the key objectives title line and the pillar name line grey is
+     too close to the alternating grey — make it darker to be more
+     significant."* He is right, and by a smaller margin than it looks:
+     `--surface-2` is #EFF2F6 and `--zebra` is #F5F7FA, six points apart on one
+     channel. A band that has to be told apart from a stripe cannot be a
+     lighter shade of the stripe.
+
+     SO IT TAKES `tr.dxband` RATHER THAN A THIRD GREY. §99 already settled what
+     a band naming a group of rows INSIDE a table looks like in this product —
+     `--panel` with `--panel-ink` — and inventing a darker neutral here would be
+     a second vocabulary for one idea (§53.5). It is also what this page wore
+     before §130.5 turned it into a table, so nothing about the look is new;
+     what changed is that the rows under it now have column headings.
+
+     THE BORDER IS ON EVERY BAND, INCLUDING THE FIRST, and that is the one
+     difference from §99. There the first band OPENS the table, so a gap above
+     it would be a gap under nothing. Here a real `<thead>` sits above it in the
+     same navy, and without the break the two merge into one block. */
+  .ftable tr.fband th { border-top:14px solid var(--surface); }
   .ftable td.fmeas { color:var(--ink); font-weight:600; }
   .ftable td.ftar { font-family:var(--mono); font-size:12px; color:var(--ink-2); }
   .ftable tr.fon td { background:var(--attn-bg); }

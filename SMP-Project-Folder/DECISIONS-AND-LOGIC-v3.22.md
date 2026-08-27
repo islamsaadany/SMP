@@ -17189,3 +17189,52 @@ they hold at 96px and 136px in every one. Two things that would feel like it
 are named for him — the rail list has its own scrollbar below about 900px of
 window height, and the group headings scroll away inside that list — and it is
 left open rather than guessed at.
+
+### 130.8 The band could not be told from the stripe
+
+Islam, on the new marking table: *"the key objectives title line and the pillar
+name line grey is too close to the alternating grey — make it darker to be more
+significant."*
+
+He is right, and by a smaller margin than it looks: the band was `--surface-2`
+(#EFF2F6) and the zebra stripe is `--zebra` (#F5F7FA), six points apart on one
+channel. **A band that has to be told apart from a stripe cannot be a lighter
+shade of the stripe.**
+
+**IT TAKES `tr.dxband` RATHER THAN A THIRD GREY.** §99 already settled what a
+band naming a group of rows INSIDE a table looks like in this product —
+`--panel` with `--panel-ink` — and inventing a darker neutral here would be a
+second vocabulary for one idea (§53.5). It is also what this page wore before
+§130.5 turned it into a table, so nothing about the look is new; what changed is
+that the rows under it now have column headings.
+
+**The border is on every band, including the first**, which is the one
+difference from §99. There the first band OPENS the table, so a gap above it
+would be a gap under nothing; here a real `<thead>` sits above it in the same
+navy, and without the break the two merge into one block.
+
+### 130.9 The rail's head, pinned twice
+
+Islam, twice, with a screenshot of the navy *SETUP* bar and the search box:
+*"this is the part that needs to be sticky in the rail — check how to do it."*
+
+**IT WAS ALREADY TRUE, AND SAYING SO A SECOND TIME WOULD HAVE BEEN THE WRONG
+ANSWER.** `.setuprail` is `position:sticky` and `.raillist` is the only thing
+inside it that scrolls, so the head and the search cannot move. Measured before
+changing anything, at eleven window sizes from 1920×1080 to 880×800, scrolled to
+300, 800, 900 and 1500px AND with the list scrolled internally: 96px and 136px
+in every single one, on this build and on `main`'s.
+
+**SO IT IS BELT AND BRACES, AND IT IS CHEAP.** `.rhead` and `.railfind` are
+`position:sticky` inside the rail now — a no-op wherever the cap applies, and
+the difference between holding and not in the two states the cap does not
+reach. A browser that does not understand `100dvh` drops the whole `max-height`
+declaration; below 900px the rail stops being a column at all. In both the box
+grows past the window and only this keeps them on screen. `top:0` on the head
+and the head's own measured height on the search, so the two stack rather than
+overlap — a wrong number there would put the search under the bar in exactly
+the state this exists for.
+
+**AND IT IS ASSERTED NOW, WHICH IT NEVER WAS.** `checks/setup-rail.py` scrolls
+the list and reads both boxes back, and asserts they stack — the claim "already
+true" had only ever been something a throwaway probe could say.

@@ -62,8 +62,10 @@ Nothing proceeds past this line without an answer.
   default) that opens each email with an editable greeting word ("Dear") and
   the receiver's first name — compound first names kept whole ("Dear Abd El
   Moniem", never "Dear Abd"), substituted on the server per recipient, Send a
-  message only. **Next step: the composer/preview mockup, published as an
-  artifact for sign-off before `src/` is touched (rule 1c).**
+  message only. **Mockup published 2026-08-27** — drawn in the real platform
+  (`design-mockups/email-greeting/`, made by `src/checks/greeting-mockup.py`
+  driving the built file with the send-message stub, both themes).
+  **Waiting on Islam's sign-off; nothing in `src/` touched.**
 
 ---
 

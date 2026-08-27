@@ -10,7 +10,7 @@ serverless functions (`/api/state`, `/api/auth`) against Neon Postgres.
 v3.49. Three sessions landed on the same numbers this week: this work was built
 as §130 / v3.48 and renumbered on the way in, because the owners-and-corners run
 took §130 and the same-name register run took §131–§134.
-**Last updated:** 2026-08-27
+**Last updated:** 2026-08-27 · v3.51 in flight on the audit branch
 
 **Sign in as:** `SMO` / `1234` — a password change is forced at once (§43.1,
 reversing §19.4).
@@ -66,6 +66,23 @@ Nothing proceeds past this line without an answer.
   is a true signal — do not silence it.
 
 ## Built and verified
+
+### v3.51 — Wave 1 of the UI/UX audit: the destination row scrolls (§136)
+
+- **From the platform-wide audit** (branch `claude/platform-ui-ux-audit-4pf8e5`;
+  plan and Wave 1 mockups under `design-mockups/`). Islam chose the scrolling
+  row over the wrap-and-grow chrome (“Decision 1: B”) from live screenshots of
+  the real build at 1024.
+- Below ~1280px the row wrapped inside a 46px box, so the second line painted
+  over the tab row and on some pages ate its clicks (§118.7, seen live at
+  1024). Now the destinations scroll in one line; the Group menu, the
+  Units | Functions switch and the gear are pinned outside the scroll region;
+  fades show each side only while that side has more; the lit destination is
+  scrolled into view on every paint.
+- `checks/nav-scroll.py` — fails 6 ways on the pre-§136 build, green here,
+  with page-width, setup-rail, setup-header and the full qa.py sweep re-run
+  beside it. **Not merged — on the branch awaiting Islam's word.**
+
 
 ### v3.50 — the Setup header line, the marking table, and a repaired matrix (§135)
 

@@ -64,29 +64,10 @@
   td.annual  { font-weight:700; }
   th.cc + th.cc { white-space:nowrap; }
 
-  /* ── ONE LINE THAT SCROLLS, ENDS PINNED (§136) ──────────────────────────
-     REVERSAL, quoted so it stays recorded: this block used to say "Wrapping
-     keeps every unit reachable; a horizontal scroll hides the last one behind
-     a gesture nobody is told about" — and the wrap it chose was fighting
-     `.units-in{height:46px}` in _shared.css, so below ~1280px the second line
-     painted OUTSIDE the 46px box, over the tab row, and on some pages ate its
-     clicks (§118.7, measured live at 1024). Islam chose the scroll (Decision
-     1: B, 2026-08-27), and the old objection is answered in kind: the fades
-     SAY there is more, each side only while it is true; the lit destination
-     is scrolled into view on every paint; and the controls — the Group menu,
-     the Units|Functions switch, the gear — sit OUTSIDE the scroll region,
-     pinned, so they can never leave the screen. */
-  .units-in { flex-wrap:nowrap; overflow:visible; }
-  .units-in > details, .units-in > .navswitch, .units-in > .sep { flex:0 0 auto; }
-  .navclip { position:relative; flex:1 1 auto; min-width:0; align-self:stretch; }
-  .navscroll { display:flex; gap:2px; align-items:stretch; height:100%;
-               overflow-x:auto; scrollbar-width:none; }
-  .navscroll::-webkit-scrollbar { display:none; }
-  .navscroll > * { flex:0 0 auto; }
-  .navfade { position:absolute; top:0; bottom:0; width:40px;
-             pointer-events:none; z-index:2; }
-  .navfade.l { left:0;  background:linear-gradient(to right, var(--panel), transparent); }
-  .navfade.r { right:0; background:linear-gradient(to left,  var(--panel), transparent); }
+  /* Ten units will not fit one line at every width. Wrapping keeps every unit
+     reachable; a horizontal scroll hides the last one behind a gesture nobody
+     is told about. */
+  .units-in { flex-wrap:wrap; overflow-x:visible; }
   .units button { padding:11px 14px; }
   .units .sep { margin:8px 8px; }
 

@@ -3973,10 +3973,29 @@
   td.annual  { font-weight:700; }
   th.cc + th.cc { white-space:nowrap; }
 
-  /* Ten units will not fit one line at every width. Wrapping keeps every unit
-     reachable; a horizontal scroll hides the last one behind a gesture nobody
-     is told about. */
-  .units-in { flex-wrap:wrap; overflow-x:visible; }
+  /* ── ONE LINE THAT SCROLLS, ENDS PINNED (§136) ──────────────────────────
+     REVERSAL, quoted so it stays recorded: this block used to say "Wrapping
+     keeps every unit reachable; a horizontal scroll hides the last one behind
+     a gesture nobody is told about" — and the wrap it chose was fighting
+     `.units-in{height:46px}` in _shared.css, so below ~1280px the second line
+     painted OUTSIDE the 46px box, over the tab row, and on some pages ate its
+     clicks (§118.7, measured live at 1024). Islam chose the scroll (Decision
+     1: B, 2026-08-27), and the old objection is answered in kind: the fades
+     SAY there is more, each side only while it is true; the lit destination
+     is scrolled into view on every paint; and the controls — the Group menu,
+     the Units|Functions switch, the gear — sit OUTSIDE the scroll region,
+     pinned, so they can never leave the screen. */
+  .units-in { flex-wrap:nowrap; overflow:visible; }
+  .units-in > details, .units-in > .navswitch, .units-in > .sep { flex:0 0 auto; }
+  .navclip { position:relative; flex:1 1 auto; min-width:0; align-self:stretch; }
+  .navscroll { display:flex; gap:2px; align-items:stretch; height:100%;
+               overflow-x:auto; scrollbar-width:none; }
+  .navscroll::-webkit-scrollbar { display:none; }
+  .navscroll > * { flex:0 0 auto; }
+  .navfade { position:absolute; top:0; bottom:0; width:40px;
+             pointer-events:none; z-index:2; }
+  .navfade.l { left:0;  background:linear-gradient(to right, var(--panel), transparent); }
+  .navfade.r { right:0; background:linear-gradient(to left,  var(--panel), transparent); }
   .units button { padding:11px 14px; }
   .units .sep { margin:8px 8px; }
 
@@ -35893,7 +35912,7 @@ var SYNC = (function () {
          it (Foundation), which is not the plan. */
       currentSub = current ? entrySub(current) : null;
     }
-    document.getElementById("units").innerHTML = tabs.map(function(t, i){
+    var parts = tabs.map(function(t, i){
       if (t.folds) {
         /* NO DISCLOSURE ARROW. A ▸/▾ twist promises "this opens and closes",
            which is what these were and are not any more — a switch has two
@@ -35943,7 +35962,25 @@ var SYNC = (function () {
       return ((i === 1 && !tabs[1].folds) ? '<span class="sep"></span>' : '') +
         '<button role="tab" aria-selected="' + (t.k === current) + '" data-u="' + t.k + '"' +
         '>' + t.label + '</button>';
-    }).join("") + menuHTML();
+    });
+    /* ── ONE LINE THAT SCROLLS, ENDS PINNED (§136, Islam: "Decision 1: B") ──
+       The destinations go into their own scroll region; everything that is a
+       CONTROL rather than a destination — the Group menu, the Units|Functions
+       switch, the gear — stays a direct child of the row, pinned, because a
+       control that can leave the screen is §90's fault arriving sideways
+       (the first draft of B showed exactly that: the switch slid off the
+       left edge). The fades are drawn here and told the truth by the wiring
+       below. */
+    var isDest = tabs.map(function(t){ return !!t.k; });
+    var d0 = isDest.indexOf(true), d1 = isDest.lastIndexOf(true);
+    document.getElementById("units").innerHTML = (d0 === -1
+      ? parts.join("")
+      : parts.slice(0, d0).join("") +
+        '<div class="navclip">' +
+          '<div class="navscroll" id="navscroll">' + parts.slice(d0, d1 + 1).join("") + '</div>' +
+          '<div class="navfade l" hidden></div><div class="navfade r" hidden></div>' +
+        '</div>' +
+        parts.slice(d1 + 1).join("")) + menuHTML();
     /* Only destinations. A fold button lives in the same row but goes nowhere \u2014
        binding it here set current to undefined and reset the page to Group, which
        made expanding a fold navigate. */
@@ -35988,6 +36025,44 @@ var SYNC = (function () {
       });
     });
     wireMenu();
+    /* ── AND THE SCROLLING HALF IS WIRED HERE (§136) — for the same reason
+       the fold is: this function just destroyed the last set of handlers.
+       Nothing below changes any SIZE, so §28.3's loop cannot form. */
+    var sc = document.getElementById("navscroll");
+    if (sc) {
+      var navclip = sc.parentNode;
+      var fadeL = navclip.querySelector(".navfade.l");
+      var fadeR = navclip.querySelector(".navfade.r");
+      /* A fade is a CLAIM that there is more that way; each side makes it
+         only while it is true, or the row promises names it does not have. */
+      var fades = function(){
+        fadeL.hidden = sc.scrollLeft <= 2;
+        fadeR.hidden = sc.scrollWidth - sc.clientWidth - sc.scrollLeft <= 2;
+      };
+      sc.addEventListener("scroll", fades, { passive: true });
+      /* Re-asked when the ROW resizes (a window drag repaints nothing), so
+         the fades cannot go stale. A fresh observer per paint on a fresh
+         element — the old one dies with the node it watched. */
+      new ResizeObserver(fades).observe(sc);
+      /* A vertical wheel over the row scrolls it SIDEWAYS — only while there
+         is somewhere to go, so everywhere else the wheel stays the page's. */
+      sc.addEventListener("wheel", function(e){
+        if (sc.scrollWidth <= sc.clientWidth) return;
+        if (Math.abs(e.deltaX) >= Math.abs(e.deltaY)) return;
+        sc.scrollLeft += e.deltaY;
+        e.preventDefault();
+      }, { passive: false });
+      /* The lit destination is brought into view by setting scrollLeft on
+         the ROW, never scrollIntoView — that call may also scroll the PAGE,
+         which is §110.7's jump arriving sideways. */
+      var lit = sc.querySelector('button[aria-selected="true"][data-u]');
+      if (lit) {
+        var L = lit.offsetLeft, R = L + lit.offsetWidth;
+        if (L < sc.scrollLeft + 24) sc.scrollLeft = Math.max(0, L - 24);
+        else if (R > sc.scrollLeft + sc.clientWidth - 24) sc.scrollLeft = R - sc.clientWidth + 24;
+      }
+      fades();
+    }
   }
 
   /* A gear. It replaced the word "Manage" in 3.3 - at 11px uppercase in a

@@ -17959,3 +17959,68 @@ gap rather than a slot. It now measures the gap **only while the head is
 actually pinned**, keeps one fine-grained sweep for the symptom, and asserts
 `--sethead-h` equals the header's measured height. With the observer removed it
 fails six ways, naming *"Key Objectives at y=180"*.
+
+## 136 · The destination row becomes one line that scrolls (v3.51)
+
+**THE FAULT, FIRST.** Below ~1280px the destination row WRAPPED while its box
+was held at 46px — `flex-wrap:wrap` in `arrange.css` against
+`.units-in{height:46px}` in `_shared.css` — so the second line painted OUTSIDE
+the box, over the tab row: overlapping text, and on some pages the hidden line
+took the clicks. §118.7 had recorded it below ~1100px; the audit's sweep HUNG
+on it at 1024 when a function's Strategy tab press was intercepted, and the
+new check found real buttons spilling at 1280 too. A container told to wrap
+and told to be 46px tall at the same time is not a layout, it is an argument.
+
+**THE DECISION IS ISLAM'S, FROM A MOCKUP OF THE REAL BUILD (§41.9's rule).**
+Two candidates were injected live into v3.50 at 1024 and screenshotted: A (the
+row wraps and the chrome grows to own it, `--chrome-h` already being measured)
+and B (one line that scrolls). I recommended A; **Islam chose B** — recorded,
+not re-argued. The old comment in `arrange.css` argued the other way
+("a horizontal scroll hides the last one behind a gesture nobody is told
+about") and is QUOTED in its replacement rather than overwritten, because the
+new build answers the objection rather than dismissing it.
+
+**THE ENDS ARE PINNED, AND THE FIRST DRAFT OF B IS WHY.** Injected naively,
+the Units | Functions switch slid off the LEFT edge at rest — a control the
+row exists for, gone. So the destinations go into their own scroll region
+(`.navclip > .navscroll`) and everything that is a CONTROL rather than a
+destination — the Group menu, the switch, the gear — stays a direct child of
+the row, pinned, `flex:0 0 auto` so the nowrap row cannot squeeze it (the
+second draft's fault: the switch rendered clipped mid-word). §90's rule
+arriving sideways: a control that can leave the screen does nothing.
+
+**THE OLD OBJECTION IS ANSWERED IN KIND, NOT WAVED AWAY.** Three things say
+the hidden names exist: a fade on each side of the clip, drawn ONLY while that
+side actually has more (`hidden` toggled from scroll position — a fade that
+always shows is a claim that is sometimes a lie); the lit destination brought
+into view on every paint; and a vertical wheel over the row scrolling it
+sideways, only while there is somewhere to go, so everywhere else the wheel
+stays the page's.
+
+**TWO SMALL RULES INSIDE THE WIRING, BOTH BOUGHT ELSEWHERE.** The lit button
+is brought into view by setting `scrollLeft` on the row, never
+`scrollIntoView` — that call may also scroll the PAGE, which is §110.7's jump
+arriving sideways. And the fades are re-asked by a ResizeObserver on the
+scroll region (a window drag repaints nothing), which is NOT §28.3's loop:
+nothing in it changes any size. The wiring lives in `paintUnits()` beside the
+fold's, for the reason written on the fold: this function just destroyed the
+last set of handlers.
+
+**THE CHECK ASSERTS THE PROBLEM (§94.8) AND WAS PROVED ABLE TO FAIL (§94.5).**
+`checks/nav-scroll.py`: no button spills past the row's own box; every tab,
+the switch and the gear receive their own click points (`elementFromPoint` —
+"in the document" passed every day this was broken); the LAST destination can
+be scrolled into view and navigates when pressed; the fades agree with what is
+actually left to see, and both are hidden at a width where everything fits; no
+sideways page scroll; and both sides of the navigation switch, ending on the
+exact press that hung the audit — a function's first tab at 1024. Against the
+pre-§136 build it fails 6 ways; on this one it is green, with `page-width`,
+`setup-rail`, `setup-header` and the full `qa.py` sweep re-run beside it.
+
+**AND THE CHECK'S OWN FIRST FAULT IS WORTH THE LINE**: its spill count read
+`#units button[data-u]` and flagged three buttons on every build at every
+width — the Group DROPDOWN's own menu items, which carry `data-u` and
+legitimately sit below the row. A dropdown's items are not the row. The
+exclusion was added and the check re-proved against the old build afterwards,
+because a filter added to silence a false positive is exactly the kind of edit
+that can silence the true one with it.

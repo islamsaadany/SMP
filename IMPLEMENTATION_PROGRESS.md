@@ -6,8 +6,9 @@ version (rules A2 / A11, changed 2026-08-20) — those go only when asked for.
 
 **Where it runs:** Vercel, production tracks `main`. Static files plus two
 serverless functions (`/api/state`, `/api/auth`) against Neon Postgres.
-**Latest version:** v3.47 on `main`; v3.48 (§130, same-name notices) built and
-checked on `claude/duplicate-name-detection-cgv3vk`, waiting on the merge word.
+**Latest version:** v3.49 on `main` — §131 (same-name notices) merged over
+§130 (owners, corners — another session's), which took v3.48 and the §130 number
+while this branch was being built.
 **Last updated:** 2026-08-27
 
 **Sign in as:** `SMO` / `1234` — a password change is forced at once (§43.1,
@@ -65,7 +66,7 @@ Nothing proceeds past this line without an answer.
 
 ## Built and verified
 
-### v3.48 — the register notices two people whose name reads the same (§130)
+### v3.49 — the register notices two people whose name reads the same (§131)
 
 - Islam: *"notify me as an issue to address if 2 people their 1st 2 names are
   the same so I can edit one of them."* The pair now joins the **Attention
@@ -76,7 +77,7 @@ Nothing proceeds past this line without an answer.
   worse. Anybody already flagged as a possible duplicate is left to that flag.
 - **Amending one Name clears both**; a typed Name that still collides stays
   flagged, because typed values are never auto-lengthened (§81.1).
-- Proved in `checks/duplicates.py` (watched to fail 4 ways on the pre-§130
+- Proved in `checks/duplicates.py` (watched to fail 4 ways on the pre-§131
   build), with `identity-merge`, `people-dialog`, `table-standard` and the
   full `qa.py` sweep green. Found on the way: the demo's two placeholder
   company CEOs genuinely read the same ("Company CEO,") and now say so.
@@ -139,6 +140,21 @@ the layout, each watched to fail first · qa.py ERRORS: none · test-chat 52/0 �
 test-assistant 33/0 · test-authorize 193/0. **One assertion was rewritten for
 being unfalsifiable** — it measured the row against the panel, and a row is
 inside its own panel by definition.
+
+### v3.48 — §126 resolved: the key was not the key (redeploy commit)
+
+The diagnosis held. Comparing against Strategy-Formulation's working Gemini
+setup showed the two projects byte-equivalent on the wire — same env name,
+same model, same endpoint, same header — so the only remaining difference was
+the stored VALUE in this project's Vercel environment. Islam's own AI Studio
+chart agreed: SMP_Key had accepted a real request, while the deployment's copy
+was refused, which means the deployment held a different string.
+
+Islam deleted and re-added `GEMINI_API_KEY` in Vercel. **This commit exists to
+trigger the build that bakes it in** — a deployment only carries the variables
+that existed when it was built, and editing one changes nothing until the next
+build. Proof on screen after deploy: Test the assistant → the key row's length
+and first four characters match SMP_Key, and the model row reads WORKING.
 
 ### v3.46 — which key, without saying which key (§126)
 

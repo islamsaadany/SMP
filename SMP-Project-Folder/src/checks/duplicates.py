@@ -89,7 +89,7 @@ with sync_playwright() as p:
     ck("the button carries the count",
        pg.evaluate("""()=>{const b=document.querySelector('.attnn');
           return !!b && parseInt(b.textContent,10) >= 6;}"""))
-    # ── ONE NAME, TWO PEOPLE (§130) ──────────────────────────────────
+    # ── ONE NAME, TWO PEOPLE (§131) ──────────────────────────────────
     # Islam: "for the names you normally take the first 2 names but you allow
     # me to amend the name in the edit. can you notify me as an issue to
     # address if 2 people their 1st 2 names are the same so I can edit one of
@@ -97,7 +97,7 @@ with sync_playwright() as p:
     # this is the notice that somebody should now decide what each of the pair
     # is actually called. A queue entry and never a mark: the Ahmeds are two
     # real people, and §87 says a shared name is not evidence of one human.
-    print("── one name, two people (§130)")
+    print("── one name, two people (§131)")
     sn = pg.evaluate("""()=>attentionQueue()
         .filter(a=>a.why.some(w=>w.kind==='samename')).map(a=>a.key)""")
     ck("both Ahmeds are queued for sharing a reading",

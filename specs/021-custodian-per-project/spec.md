@@ -1,6 +1,6 @@
 # 021 · A custodian per project
 
-**Version:** v3.49 · **Decisions:** §131 · **Status:** answered; built
+**Version:** v3.50 · **Decisions:** §132 · **Status:** answered; built
 
 Islam: *"in a case of a function that has 2 projects each project has an
 owner so the custodian here is not on the whole capability there is a
@@ -44,7 +44,7 @@ and this needs to be in the access setup table if it's not."*
   model whole; a keyed `ownerKey` variant was built first and removed at the
   merge, because a tactic's owner (already rights-bearing on units) matches
   by name and one question must not have two answers (§53.5). Residual
-  recorded in §130.7 and §131.4: colliding short names over-match, renames
+  recorded in §130.7 and §132.4: colliding short names over-match, renames
   part company with old plans.
 
 ## 3 · Repairs made on the way (found, not asked)
@@ -68,7 +68,7 @@ and this needs to be in the access setup table if it's not."*
   found. Proved able to fail (gate flattened: 2 failures).
 - Seed scanned: nobody's standing changes on the shipped tenant.
 
-## 5 · Flagged, not built (§131.6)
+## 5 · Flagged, not built (§132.6)
 
 - A **pillars** function derives no contributors (its rows go through the
   unit classifier, whose own-lines narrowing skips `fn:` targets).

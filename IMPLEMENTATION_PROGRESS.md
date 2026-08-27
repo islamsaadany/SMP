@@ -6,7 +6,7 @@ version (rules A2 / A11, changed 2026-08-20) — those go only when asked for.
 
 **Where it runs:** Vercel, production tracks `main`. Static files plus two
 serverless functions (`/api/state`, `/api/auth`) against Neon Postgres.
-**Latest version:** v3.48 on `main`; v3.49 on `claude/custodian-per-project-s8q93m`
+**Latest version:** v3.49 on `main`; v3.50 on `claude/custodian-per-project-s8q93m`
 **Last updated:** 2026-08-27
 
 **Sign in as:** `SMO` / `1234` — a password change is forced at once (§43.1,
@@ -64,7 +64,7 @@ Nothing proceeds past this line without an answer.
 
 ## Built and verified
 
-### v3.49 — a custodian per project (§131, spec 021)
+### v3.49 — a custodian per project (§132, spec 021)
 
 - **A project's owner is a Contributor of its function** — derived from the
   project's Owner row the way a unit's Contributor is derived from a tactic
@@ -75,7 +75,7 @@ Nothing proceeds past this line without an answer.
   Reporting cell (default view — the SMO opens it to edit), enforced on the
   screen and again on the server against the stored state.
 - **Rides §130.1's owner picker**: the stored owner stays a register-picked
-  NAME; a keyed variant was built first and removed at the merge (§131.4).
+  NAME; a keyed variant was built first and removed at the merge (§132.4).
 - **A drift since migration 024 fixed on the way**: a custodian's deliverable
   report, and the milestone % that §104.10 requires, were classified as plan
   and refused on save while the screen offered both.

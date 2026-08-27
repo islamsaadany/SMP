@@ -1541,7 +1541,7 @@ function personNamedLines(key){
       if (SMPRules.namedOn({ owner:x.owner, collaborators:x.collaborators }, p)) n++;
     });
   });
-  /* §131: a project's owner name counts here too — since a project's owner
+  /* §132: a project's owner name counts here too — since a project's owner
      is a Contributor of its function now, the confirmation should say how
      many of those namings survive the row as plain words. */
   (GROUP.capabilities || []).forEach(function(c){
@@ -3844,7 +3844,7 @@ function canReportRow(unitKey, x){
   return SMPRules.namedOn({ owner: x.owner, collaborators: x.collaborators }, viewer());
 }
 
-/* ── The function side of the same two questions (§131) ────────────
+/* ── The function side of the same two questions (§132) ────────────
    canReport/canReportRow for an fn: target. The whole-function gate is what
    capReportBody always asked inline; it is a function now because the per-
    project question has to sit on top of it and two spellings of the same
@@ -3880,7 +3880,7 @@ function canReportFnWhole(fk){
    A CONTRIBUTOR limited to their own lines does none of them. What they may
    say is about their own rows; a picture slide is the unit's.
 
-   A supporting function HAS contributors since §131 — a project's owner is
+   A supporting function HAS contributors since §132 — a project's owner is
    one, derived from the project's Owner row — so its half asks the same
    own-lines exclusion the unit's always has. The sentence that stood here
    ("a function has no contributors to exclude") described the code truly and

@@ -142,7 +142,7 @@
    is the built file's BYTES, which this is.
    Confirmed against origin/main serving "smp-shell-v3.47-qmarks"; confirm
    once more immediately before the push to main (§94.16). */
-const SHELL = "smp-shell-v3.49-projcust";
+const SHELL = "smp-shell-v3.50-projcust";
 const ASSETS = [
   "/",
   "/index.html",

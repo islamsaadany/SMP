@@ -348,7 +348,7 @@ from empty were fixed — the first "Who we are" line, the SWOT, the empty
 Plan page, a virgin pillars function's first row, and a capability's key
 objectives.
 
-Version **3.49** adds **a custodian per project** (§131, spec 021): a
+Version **3.50** adds **a custodian per project** (§132, spec 021): a
 supporting function's projects each name an owner, and that owner is now a
 **Contributor of the function** — derived from the project's Owner row the
 way a unit's Contributor has always been derived from being named on a line,

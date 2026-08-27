@@ -2199,7 +2199,7 @@ python3 checks/no-jump.py       # nothing moves the register under you — the a
 python3 checks/plan-builder.py  # building a plan ON the platform: the door, the chooser,
                                 # the band's map, every row form asked of the DATA, and the
                                 # empty-state fixes — proved able to fail twice (§129)
-python3 checks/project-custodian.py # a custodian per project (§131): the owner's project
+python3 checks/project-custodian.py # a custodian per project (§132): the owner's project
                                 # takes their figures and the one beside it takes nothing,
                                 # both ends as both viewers — proved able to fail
 python3 checks/office-chat.py   # the chat's client half — serves the built file over HTTP,
@@ -2253,7 +2253,7 @@ prior sessions (on HR_ERP) accidentally reverted agreed-upon designs.
 
 ---
 
-*Last Updated: 2026-08-27 &mdash; **v3.49: a custodian per project
+*Last Updated: 2026-08-27 &mdash; **v3.50: a custodian per project
 (&sect;131, spec 021)**. Islam: *"in a case of a function that has 2 projects
 each project has an owner so the custodian here is not on the whole capability
 there is a custodian per project."* Aligned first, three decisions confirmed.

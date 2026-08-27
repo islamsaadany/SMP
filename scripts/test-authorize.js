@@ -1178,7 +1178,7 @@ console.log("\n15 · the strategy | reporting split (§117)");
         R.mayDownloadPlan(wClosed, personOf(closed, custKey), UNIT) === false);
 })();
 
-/* ── 16 · A CUSTODIAN PER PROJECT (§131) ──────────────────────────
+/* ── 16 · A CUSTODIAN PER PROJECT (§132) ──────────────────────────
    A function's custodian covers the whole function; where each project has
    its own owner, that owner is a Contributor of the function and reports
    THEIR project — every row it holds — and nothing beside it. Derived from
@@ -1190,7 +1190,7 @@ console.log("\n15 · the strategy | reporting split (§117)");
    no-op assertion is this suite's own recorded fault, and a fixture that
    sets a status to the value the seed already holds would pass every
    refusal vacuously. */
-console.log("\n16 · a custodian per project (§131)");
+console.log("\n16 · a custodian per project (§132)");
 (function () {
   const FN = "it";
   const T = "fn:" + FN;
@@ -1231,13 +1231,13 @@ console.log("\n16 · a custodian per project (§131)");
       JSON.stringify(r.v.changes.map(function (c) { return c.kind + ":" + c.what; })));
   };
 
-  /* The custodian first — §131 found that the server had been refusing a
+  /* The custodian first — §132 found that the server had been refusing a
      custodian's DELIVERABLE outright and the milestone % that §104.10
      REQUIRES, both classified as plan, since migration 024. The screen
      offered both the whole time (§94.2's class). */
   const fnCust = (SEED.functions[FN] || {}).custodian;
   if (fnCust && personOf(SEED, fnCust)) {
-    ok("the custodian reports a deliverable (the §131 drift, fixed)",
+    ok("the custodian reports a deliverable (the §132 drift, fixed)",
        run(SEED, fnCust, function (s) {
          capOf(s).projects[0].deliverables[0].status = "todo"; }));
     ok("the custodian gives an In-progress milestone its required %",

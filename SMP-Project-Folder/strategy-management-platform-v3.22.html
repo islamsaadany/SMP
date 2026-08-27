@@ -1303,13 +1303,21 @@
      number of its own here would drift from the radius above the day somebody
      changes one (§29.4's rule, on a curve instead of a gap).
 
-     AND IT PAINTS WHEN THE BAND IS NOT PINNED TOO — §53.7 exactly, for the
-     same unavoidable reason: CSS cannot ask whether a sticky element is
-     pinned. At rest that covers about 1.4px of the pane's own corner border
-     arc. Measured against squaring the corners instead, which is the other
-     answer: 13px² disturbed at rest against 26px², and the square corner then
-     pokes 2px OUTSIDE the card it sits in. The fill is the cheaper of the two
-     and the only one that leaves a pinned header looking deliberate.
+     AND IT PAINTS ONLY WHILE THE BAND IS PINNED (§129.6). It did not at
+     first — §53.7's rule is that CSS cannot ask, so the strip above the band
+     paints in both positions and this was written the same way, at a cost
+     measured at 1.4px of the pane's own corner arc. Islam looked at it: *"the
+     corner still has this squared corner."* He is right, and the measurement
+     was right too — 13px² is small and it is exactly the card's rounded
+     corner, which is the one place on a card somebody's eye goes. So the ONE
+     thing CSS cannot ask is asked in JavaScript instead (`pinWatch()` in the
+     shell, an IntersectionObserver re-armed after every paint), and this
+     paints only when there is something to cover. At rest the corner is
+     byte-for-byte what it was before any of this.
+
+     STILL A FILL, NOT A SQUARE. Islam, given both: *"fill don't square the
+     corners"* — so the pinned band keeps its rounded corners and takes the
+     page's ground behind them, rather than becoming a flat bar.
 
      ON THE `::after`, NOT BEHIND THE BAND. A pseudo cannot be put behind its
      own parent's background once that parent makes a stacking context, and
@@ -1317,7 +1325,7 @@
      it paints ONLY the notches, which is the one place the band's own
      background is absent. `pointer-events:none`, or an 8px square in each
      corner would swallow clicks meant for the pen behind it. */
-  .pane > .pband::after {
+  .pane > .pband.pinned::after {
     content:""; position:absolute; left:0; right:0; top:0;
     height:var(--r); pointer-events:none;
     background:
@@ -7285,9 +7293,79 @@ THEME.apply();
      It lives HERE rather than in authorize.js because the screen has to make
      the same decision — a page that offers a pen the server then refuses is
      the drift this whole file exists to prevent. */
+  /* ══ WHAT SOMEBODY IS CALLED, SHORT (§129.7) ═══════════════════════════
+     Moved here from config-data.js, where it had always lived, because the
+     PLAN now stores what the register's Name column shows (§129.7) and
+     namedOn() below has to be able to recognise it. Two copies of a name rule
+     is the drift lib/rules.js exists to prevent (§42) — the browser keeps thin
+     wrappers that call these.
+
+     A PARTICLE IS NOT A NAME. "Abd El Moniem Mohamed" is two names, not four:
+     the list is the particles this register actually carries plus the European
+     ones a client could arrive with, and a word not on it is a name.
+     ══════════════════════════════════════════════════════════════════════ */
+  var NAME_PARTICLES = ["abd", "abdel", "abd-el", "el", "al", "abu", "abou",
+    "bin", "ben", "ibn", "bint", "van", "von", "de", "del", "della", "der",
+    "den", "di", "da", "dos", "du", "la", "le", "st", "st.", "mac", "mc"];
+  var KNOWN_NAME_WORDS = 2;
+
+  function nameWords(name, n) {
+    var parts = String(name == null ? "" : name).trim().split(/\s+/).filter(Boolean);
+    if (!parts.length) return "";
+    var out = [], names = 0, i = 0;
+    while (i < parts.length && names < n) {
+      /* Take the run of particles, then the word they belong to. A name ENDING
+         in a particle (a truncated row) still terminates, or this loops. */
+      var start = i;
+      while (i < parts.length &&
+             NAME_PARTICLES.indexOf(parts[i].toLowerCase().replace(/[^a-z.-]/g, "")) > -1) i++;
+      if (i < parts.length) i++;
+      else if (i === start) break;
+      names++;
+      out = parts.slice(0, i);
+    }
+    return out.join(" ");
+  }
+  function knownGuess(name) { return nameWords(name, KNOWN_NAME_WORDS); }
+
+  /* EVERY LEADING RUN OF SOMEBODY'S NAMES, from the register's own short form
+     up to the whole thing — which is exactly the set of labels the register
+     can show for them: the guess, each lengthening displayNames() applies to
+     separate a clashing pair (§81.1), and the full name itself.
+
+     IT NEVER YIELDS ONE NAME. KNOWN_NAME_WORDS is the floor, so "Karim" on a
+     plan still matches nobody — a bare first name would hand reporting rights
+     to whoever happens to share it, which is wider than the fault this fixes.
+
+     THE ONE OVER-MATCH IS RECORDED RATHER THAN CHASED: two people whose first
+     two names are identical both answer to the short form. The picker never
+     writes it (displayNames lengthens both), so it can only arrive from a plan
+     uploaded before this or typed by hand, where today it matches NOBODY. */
+  function nameRuns(name) {
+    var whole = String(name == null ? "" : name).trim();
+    if (!whole) return [];
+    var out = [], seen = {}, n = KNOWN_NAME_WORDS;
+    for (; n <= 12; n++) {
+      var run = nameWords(whole, n);
+      if (!run || seen[run.toLowerCase()]) continue;
+      seen[run.toLowerCase()] = 1;
+      out.push(run);
+      if (run.length >= whole.length) break;
+    }
+    return out;
+  }
+
   function namedOn(row, person) {
     if (!row || !person) return false;
-    var me = [String(person.key || ""), String(person.name || "")]
+    /* THE NAME THE REGISTER SHOWS COUNTS TOO (§129.7). The plan's owner and
+       collaborators are picked from the register's **Name** column now, not
+       from the full legal name — so matching only `person.name` would put the
+       platform back where §129.1 found it: 32 of 78 tactics owned by somebody
+       it could not recognise. `known` is the typed short name; nameRuns() is
+       every form the register can derive. */
+    var me = [String(person.key || ""), String(person.name || ""),
+              String(person.known || "")]
+      .concat(nameRuns(person.name))
       .map(function (s) { return s.trim().toLowerCase(); })
       .filter(function (s) { return !!s; });
     var hits = [row.owner].concat(Array.isArray(row.collaborators) ? row.collaborators : []);
@@ -7375,6 +7453,8 @@ THEME.apply();
     focusOn: focusOn,
     mayAuthorPage: mayAuthorPage,
     namedOn: namedOn, namedInUnit: namedInUnit,
+    NAME_PARTICLES: NAME_PARTICLES, KNOWN_NAME_WORDS: KNOWN_NAME_WORDS,
+    nameWords: nameWords, knownGuess: knownGuess, nameRuns: nameRuns,
     editingRoles: editingRoles, onlyVia: onlyVia, rolesOrFloor: rolesOrFloor,
     OWN_LINES_ONLY: OWN_LINES_ONLY, onlyOwnLines: onlyOwnLines,
     isOwnLinesRole: isOwnLinesRole,
@@ -9076,26 +9156,14 @@ var UNIT_ROLES = {
 
    The list is the particles this register actually contains, plus the European
    ones a client could arrive with. A word not on it is a name. */
-var NAME_PARTICLES = ["abd","abdel","abd-el","el","al","abu","abou","bin","ben",
-                      "ibn","bint","van","von","de","del","della","der","den",
-                      "di","da","dos","du","la","le","st","st.","mac","mc"];
-function nameWords(name, n){
-  var parts = String(name == null ? "" : name).trim().split(/\s+/).filter(Boolean);
-  if (!parts.length) return "";
-  var out = [], names = 0, i = 0;
-  while (i < parts.length && names < n) {
-    /* Take the run of particles, then the word they belong to. A name ENDING
-       in a particle (a truncated row) still terminates, or this loops. */
-    var start = i;
-    while (i < parts.length &&
-           NAME_PARTICLES.indexOf(parts[i].toLowerCase().replace(/[^a-z.-]/g, "")) > -1) i++;
-    if (i < parts.length) i++;
-    else if (i === start) break;
-    names++;
-    out = parts.slice(0, i);
-  }
-  return out.join(" ");
-}
+/* MOVED TO `lib/rules.js` (§129.7), and these are the browser's handles on it.
+   The plan stores what the register's Name column shows now, so the SERVER has
+   to be able to recognise it too — and a name rule written twice is the drift
+   that file exists to prevent (§42). Wrappers rather than renamed call sites:
+   five places here ask for a run of somebody's names, and none of them cares
+   where the answer is computed. */
+var NAME_PARTICLES = SMPRules.NAME_PARTICLES;
+function nameWords(name, n){ return SMPRules.nameWords(name, n); }
 
 var NAMED_ELSEWHERE_WORDS = 2;
 function personFullName(key){
@@ -9552,10 +9620,10 @@ function shortName(name){ return nameWords(name, SHORT_NAME_WORDS); }
    not the upload, not the merge, not the door. §87's ladder is Emp ID then
    email and stops, and this adds no rung. Two people really can be "Ahmed
    Mostafa", which is exactly how the twins were made. */
-var KNOWN_NAME_WORDS = 2;
+var KNOWN_NAME_WORDS = SMPRules.KNOWN_NAME_WORDS;
 /* The guess, used when nobody has said otherwise. Kept separate from the
    reader below so the seeded value and a typed one are never confused. */
-function knownGuess(name){ return nameWords(name, KNOWN_NAME_WORDS); }
+function knownGuess(name){ return SMPRules.knownGuess(name); }
 /* What the Name column shows: what was typed, or the guess. Never stores as a
    side effect of being read (§50.6's rule — a reader that creates the field it
    was looking for makes every save carry a phantom change). */
@@ -20652,12 +20720,32 @@ function ownerAdder(){
     seen[k] = 1; out.push(n);
   }, has: function(n){ return !!seen[String(n == null ? "" : n).trim().toLowerCase()]; } };
 }
-/* Sorted, because thirty-three names with no order is a list you search rather
-   than one you read — and the search box is what the list gets past five
-   entries anyway (searchsel.js). */
+/* ── THE REGISTER'S NAME, NOT THE FULL ONE (§129.7) ──────────────────
+   Islam, looking at the list on his own tenant: *"for the drop down of names
+   go for the list of names in the registry not the full name."* The register
+   carries two facts about what somebody is called (§93.8) — **Name**, what the
+   office says out loud, and **Full Name**, what the employee file holds, which
+   on his register runs to *Abd El Moniem Mohamed Abd El Moniem Mahmoud*. A
+   dropdown of fifty of those is a list nobody can scan.
+
+   IT COULD NOT BE SEEN IN THE DEMO. Every one of the 33 people here has a full
+   name of two or three words, and not one has a typed short name — so
+   `knownName()` returns exactly `p.name` for all of them and the first build
+   looked correct on the only data it was tested against. Measured, not
+   guessed: the fault lives on a tenant this file cannot open.
+
+   THROUGH `displayNames()`, ALWAYS. That map is what lengthens the guess for a
+   pair whose first two names match (§81.1), so the list can never show two
+   people as one entry — which for a picker is not cosmetic, since the second
+   of them would be silently dropped by the dedupe below.
+
+   AND WHAT IS SHOWN IS WHAT IS STORED, so the plan reads the same word the
+   register does (§53.5). `namedOn()` learned this name in the same edit — the
+   whole point of the picker is that the person it names may report the line,
+   and a label the rules cannot recognise would have put that back. */
 function ownerPeople(){
-  var a = ownerAdder();
-  PEOPLE.forEach(function(p){ if (personActive(p)) a.add(p.name); });
+  var a = ownerAdder(), dn = displayNames();
+  PEOPLE.forEach(function(p){ if (personActive(p)) a.add(knownName(p, dn)); });
   return a.list.sort(function(x, y){ return x.localeCompare(y); });
 }
 /* NOT sorted: the navigation's order is the order somebody learned these in,
@@ -34957,6 +35045,27 @@ var SYNC = (function () {
        around — so it re-resolves them and puts the shade and the card back.
        Like the inbox above, nothing in it ever calls paint(). */
     TOUR.onPaint();
+    /* ── AND THE PINNED TITLES SAY SO (§129.6) ───────────────────────
+       The one thing CSS cannot ask. `.pane > .pband` fills its two rounded
+       corners with the page's ground so nothing shows through them while it
+       is pinned (§129.3) — and painting that at REST cut the card's own
+       corner arc, which is what Islam saw next: *"the corner still has this
+       squared corner."*
+
+       AN OBSERVER, NOT A SCROLL LISTENER. v3.3 removed the condensing header
+       and wrote the rule down: never size anything against a measurement the
+       size itself can change. This changes no size at all — a class, and a
+       background inside a corner — so the loop that rule guards against
+       cannot form. What it does need is to be RE-ARMED after every paint,
+       like the three above it: the band it was watching has just been
+       replaced.
+
+       THE THRESHOLD IS THE ELEMENT'S OWN STICKY OFFSET, read off the computed
+       style rather than rebuilt from `--chrome-h` and `--rail-gap` — §29.4's
+       rule, which the rail learned the hard way: one number, not two that
+       happen to agree. Shrink the root by that offset plus a pixel and the
+       band stops being wholly inside it at exactly the moment it pins. */
+    pinWatch();
     clipTitles();
     /* PUT THE SCREEN BACK BEFORE THE BROWSER SHOWS IT (§75). Synchronous, in
        the same frame as the rebuild, so nothing is ever drawn at the top and
@@ -34998,6 +35107,29 @@ var SYNC = (function () {
      you are pointing at. And never over a title somebody else set — the
      register's name cell carries the full name and the sign-in key on its own
      hover (§81.1), which says more than this would. */
+  /* Held across paints so the previous one is disconnected rather than left
+     observing elements nothing can reach — an observer per paint, kept, is a
+     leak that grows for as long as the tab is open. */
+  var PINSEE = null;
+  function pinWatch(){
+    if (PINSEE) { PINSEE.disconnect(); PINSEE = null; }
+    var bands = document.querySelectorAll(".pane > .pband");
+    if (!bands.length || typeof IntersectionObserver !== "function") return;
+    /* Every band on a page shares one offset, so one observer serves them
+       all — a function's Projects page draws one per capability. */
+    var top = parseFloat(getComputedStyle(bands[0]).top);
+    if (!(top >= 0)) return;
+    PINSEE = new IntersectionObserver(function(rows){
+      rows.forEach(function(r){
+        /* Wholly inside the shrunk root means it is still in the flow;
+           anything less means it has reached its offset and pinned. It also
+           reads "pinned" once the band has scrolled off the BOTTOM, which is
+           true of nothing anybody can see and costs nothing. */
+        r.target.classList.toggle("pinned", r.intersectionRatio < 1);
+      });
+    }, { threshold: [1], rootMargin: "-" + (top + 1) + "px 0px 0px 0px" });
+    Array.prototype.forEach.call(bands, function(b){ PINSEE.observe(b); });
+  }
   function clipTitles(){
     document.querySelectorAll(".cfg table td").forEach(function(td){
       /* A CELL THAT ALREADY SAYS SOMETHING ON HOVER KEEPS SAYING IT. The

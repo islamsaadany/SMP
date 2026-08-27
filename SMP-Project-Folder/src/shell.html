@@ -1690,6 +1690,27 @@
        around — so it re-resolves them and puts the shade and the card back.
        Like the inbox above, nothing in it ever calls paint(). */
     TOUR.onPaint();
+    /* ── AND THE PINNED TITLES SAY SO (§129.6) ───────────────────────
+       The one thing CSS cannot ask. `.pane > .pband` fills its two rounded
+       corners with the page's ground so nothing shows through them while it
+       is pinned (§129.3) — and painting that at REST cut the card's own
+       corner arc, which is what Islam saw next: *"the corner still has this
+       squared corner."*
+
+       AN OBSERVER, NOT A SCROLL LISTENER. v3.3 removed the condensing header
+       and wrote the rule down: never size anything against a measurement the
+       size itself can change. This changes no size at all — a class, and a
+       background inside a corner — so the loop that rule guards against
+       cannot form. What it does need is to be RE-ARMED after every paint,
+       like the three above it: the band it was watching has just been
+       replaced.
+
+       THE THRESHOLD IS THE ELEMENT'S OWN STICKY OFFSET, read off the computed
+       style rather than rebuilt from `--chrome-h` and `--rail-gap` — §29.4's
+       rule, which the rail learned the hard way: one number, not two that
+       happen to agree. Shrink the root by that offset plus a pixel and the
+       band stops being wholly inside it at exactly the moment it pins. */
+    pinWatch();
     clipTitles();
     /* PUT THE SCREEN BACK BEFORE THE BROWSER SHOWS IT (§75). Synchronous, in
        the same frame as the rebuild, so nothing is ever drawn at the top and
@@ -1731,6 +1752,29 @@
      you are pointing at. And never over a title somebody else set — the
      register's name cell carries the full name and the sign-in key on its own
      hover (§81.1), which says more than this would. */
+  /* Held across paints so the previous one is disconnected rather than left
+     observing elements nothing can reach — an observer per paint, kept, is a
+     leak that grows for as long as the tab is open. */
+  var PINSEE = null;
+  function pinWatch(){
+    if (PINSEE) { PINSEE.disconnect(); PINSEE = null; }
+    var bands = document.querySelectorAll(".pane > .pband");
+    if (!bands.length || typeof IntersectionObserver !== "function") return;
+    /* Every band on a page shares one offset, so one observer serves them
+       all — a function's Projects page draws one per capability. */
+    var top = parseFloat(getComputedStyle(bands[0]).top);
+    if (!(top >= 0)) return;
+    PINSEE = new IntersectionObserver(function(rows){
+      rows.forEach(function(r){
+        /* Wholly inside the shrunk root means it is still in the flow;
+           anything less means it has reached its offset and pinned. It also
+           reads "pinned" once the band has scrolled off the BOTTOM, which is
+           true of nothing anybody can see and costs nothing. */
+        r.target.classList.toggle("pinned", r.intersectionRatio < 1);
+      });
+    }, { threshold: [1], rootMargin: "-" + (top + 1) + "px 0px 0px 0px" });
+    Array.prototype.forEach.call(bands, function(b){ PINSEE.observe(b); });
+  }
   function clipTitles(){
     document.querySelectorAll(".cfg table td").forEach(function(td){
       /* A CELL THAT ALREADY SAYS SOMETHING ON HOVER KEEPS SAYING IT. The

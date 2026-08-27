@@ -17037,3 +17037,102 @@ whatever else the block grows.
 * **A PROJECT'S STAKEHOLDERS ARE STILL TYPED.** They are the same shape as
   collaborators and would take the same control, and they were not what was
   asked for. Flagged, not widened (rule 1b).
+
+### 129.6 The corner, corrected by looking at it
+
+Islam, on the built fix: *"the corner still has this squared corner is there a
+way to remove it?"*
+
+**HE IS RIGHT, AND THE MEASUREMENT WAS RIGHT TOO.** §129.3 filled the two
+corner notches with the page's ground in BOTH positions, because §53.7's rule
+says CSS cannot ask whether a sticky element is pinned — and priced the rest
+position at about 1.4px of the pane's own corner border arc, 13px², *"visible
+at 10&times; and not at reading size."* What that arithmetic missed is WHERE
+those pixels are: they are the card's rounded corner, which is the one place on
+a card an eye goes. The corner read as squared off, which is a worse fault than
+the one it fixed.
+
+**SO THE ONE THING CSS CANNOT ASK IS ASKED IN JAVASCRIPT.** `pinWatch()` in the
+shell is an IntersectionObserver that toggles `.pinned` on every
+`.pane > .pband`, and the fill is gated on it. At rest the corner is
+byte-for-byte what it was before any of this; pinned, the notch is ground and
+nothing shows through.
+
+**AN OBSERVER, NOT A SCROLL LISTENER, AND THE DIFFERENCE IS v3.3's RULE.** That
+version removed the condensing header and wrote down: never size anything
+against a measurement the size itself can change. This changes no size at all —
+a class, and a background inside an 8px corner — so the loop that rule guards
+against cannot form. What it does need is to be RE-ARMED after every paint,
+beside `SEARCHSEL.wire()`, `CHAT.wireInbox()` and `TOUR.onPaint()`: the band it
+was watching has just been replaced. The previous observer is disconnected
+first, or one accumulates per paint for as long as the tab is open.
+
+**THE THRESHOLD IS THE ELEMENT'S OWN STICKY OFFSET**, read off the computed
+style rather than rebuilt from `--chrome-h` and `--rail-gap` — §29.4's rule,
+which the rail learned the hard way: one number, never two that happen to
+agree. Shrink the observer's root by that offset plus a pixel and the band
+stops being wholly inside it at exactly the moment it pins.
+
+**AND IT SHIPPED ONCE AS A THROW.** `pinWatch()` was declared inside `wire()`
+and called from `paint()`, so every paint ended in *"pinWatch is not defined"* —
+silently, with the page still on screen and everything after the call (the
+scroll restore among it) never running. §118 exactly, in the same file, one
+section later. `checks/band-corner.py` carries a page-error listener now for
+that reason.
+
+**THE CHECK HAD TO BE REWRITTEN, NOT EXTENDED.** It asserted *nothing behind
+the band shows through* in both positions, which the rejected build satisfied
+perfectly. At rest it now asserts the OPPOSITE and positively: the notch cannot
+be all ground, because the card's corner has to be drawn through it. Six
+failures against the build Islam rejected.
+
+### 129.7 The register's Name, not the full legal one
+
+Islam, on the picker: *"for the drop down of names go for the list of names in
+the registry not the full name."*
+
+**IT COULD NOT BE SEEN HERE, AND THAT IS THE FINDING.** Every one of the 33
+people in the demo has a full name of two or three words and not one has a
+typed short name, so `knownName()` returns exactly `p.name` for all of them —
+the first build listed the full name and looked correct on the only data this
+repository holds. On his tenant the register carries *Abd El Moniem Mohamed Abd
+El Moniem Mahmoud*, and a dropdown of fifty of those is a list nobody can scan.
+§93.8 split those two facts into **Name** and **Full Name** for exactly this
+reason; the picker was reading the wrong column.
+
+**THROUGH `displayNames()`, ALWAYS.** That map is what lengthens the guess for
+a pair whose first two names match (§81.1) — and in a PICKER that is not
+cosmetic: two people reading as one entry means the second is silently dropped
+by the list's own dedupe.
+
+**WHAT IS SHOWN IS WHAT IS STORED**, so the plan says the same word the
+register does (§53.5) rather than holding one name and displaying another.
+
+**WHICH MEANS `namedOn()` HAD TO LEARN IT, or §129.1 undoes itself.** The whole
+point of the picker is that the person it names may report that line; a label
+the rules cannot match would put the platform straight back to 32 tactics owned
+by somebody it cannot resolve. So the name rule MOVES into `lib/rules.js` —
+`NAME_PARTICLES`, `nameWords()`, `knownGuess()` — with the browser keeping thin
+wrappers, because a name rule written twice is precisely the drift that file
+exists to prevent (§42). `namedOn()` matches the key, the full name, a typed
+`known`, and **`nameRuns()`**: every leading run of somebody's names from the
+register's own short form up to the whole thing, which is exactly the set of
+labels the register can show for them.
+
+**IT NEVER YIELDS ONE NAME.** `KNOWN_NAME_WORDS` is the floor, so *"Karim"* on
+a plan still matches nobody — a bare first name would hand reporting rights to
+whoever happens to share it, which is wider than the fault being fixed.
+
+**THE ONE OVER-MATCH IS RECORDED RATHER THAN CHASED:** two people whose first
+two names are identical both answer to the short form. The picker never writes
+it — `displayNames()` lengthens both — so it can only arrive from a plan
+uploaded before this or typed by hand, where today it matches NOBODY.
+
+**AND A PLAN ALREADY HOLDING THE FULL NAME STILL NAMES ITS OWNER.** Nothing is
+migrated and nothing is rewritten on load; the ladder simply contains the full
+name as its last rung.
+
+`checks/owner-picker.py` §10 **makes a register whose two names differ** — one
+person given a five-name legal name and no short one, another given a typed
+Name — and asserts the list, what is stored, and the shared rule's answer for
+all four cases. Four failures against the build before it.

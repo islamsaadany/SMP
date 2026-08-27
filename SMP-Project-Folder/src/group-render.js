@@ -1906,12 +1906,32 @@ function ownerAdder(){
     seen[k] = 1; out.push(n);
   }, has: function(n){ return !!seen[String(n == null ? "" : n).trim().toLowerCase()]; } };
 }
-/* Sorted, because thirty-three names with no order is a list you search rather
-   than one you read — and the search box is what the list gets past five
-   entries anyway (searchsel.js). */
+/* ── THE REGISTER'S NAME, NOT THE FULL ONE (§129.7) ──────────────────
+   Islam, looking at the list on his own tenant: *"for the drop down of names
+   go for the list of names in the registry not the full name."* The register
+   carries two facts about what somebody is called (§93.8) — **Name**, what the
+   office says out loud, and **Full Name**, what the employee file holds, which
+   on his register runs to *Abd El Moniem Mohamed Abd El Moniem Mahmoud*. A
+   dropdown of fifty of those is a list nobody can scan.
+
+   IT COULD NOT BE SEEN IN THE DEMO. Every one of the 33 people here has a full
+   name of two or three words, and not one has a typed short name — so
+   `knownName()` returns exactly `p.name` for all of them and the first build
+   looked correct on the only data it was tested against. Measured, not
+   guessed: the fault lives on a tenant this file cannot open.
+
+   THROUGH `displayNames()`, ALWAYS. That map is what lengthens the guess for a
+   pair whose first two names match (§81.1), so the list can never show two
+   people as one entry — which for a picker is not cosmetic, since the second
+   of them would be silently dropped by the dedupe below.
+
+   AND WHAT IS SHOWN IS WHAT IS STORED, so the plan reads the same word the
+   register does (§53.5). `namedOn()` learned this name in the same edit — the
+   whole point of the picker is that the person it names may report the line,
+   and a label the rules cannot recognise would have put that back. */
 function ownerPeople(){
-  var a = ownerAdder();
-  PEOPLE.forEach(function(p){ if (personActive(p)) a.add(p.name); });
+  var a = ownerAdder(), dn = displayNames();
+  PEOPLE.forEach(function(p){ if (personActive(p)) a.add(knownName(p, dn)); });
   return a.list.sort(function(x, y){ return x.localeCompare(y); });
 }
 /* NOT sorted: the navigation's order is the order somebody learned these in,

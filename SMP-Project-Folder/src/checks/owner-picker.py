@@ -140,7 +140,8 @@ with sync_playwright() as p:
       const groups=[...s.querySelectorAll('optgroup')].map(g=>g.label);
       const people=[...s.querySelectorAll('optgroup[label="People"] option')].map(o=>o.text);
       const depts=[...s.querySelectorAll('optgroup[label="Departments"] option')].map(o=>o.text);
-      const reg=PEOPLE.filter(p=>personActive(p)).map(p=>p.name);
+      const dn=displayNames();
+      const reg=PEOPLE.filter(p=>personActive(p)).map(p=>knownName(p,dn));
       return {groups, blank:s.options[0].value==="" , people:people.length,
               regOnly:people.filter(x=>reg.indexOf(x)<0),
               missing:reg.filter(x=>people.indexOf(x)<0),
@@ -151,7 +152,11 @@ with sync_playwright() as p:
     ck("People and Departments, in that order",
        shape["groups"][:2] == ["People", "Departments"], shape["groups"])
     ck("a single owner can be cleared", shape["blank"])
-    ck("the People group is the register, exactly",
+    # THE REGISTER'S **Name** COLUMN, not the full legal name (§129.7). Every
+    # person in the demo has a short full name, so on this data the two are the
+    # same string and this assertion cannot tell them apart — section 10 below
+    # makes a register where they differ.
+    ck("the People group is the register's Name column, exactly",
        not shape["regOnly"] and not shape["missing"],
        {"not on the register": shape["regOnly"], "missing from the list": shape["missing"]})
     ck("the People group is sorted", shape["sorted"])
@@ -277,6 +282,60 @@ with sync_playwright() as p:
 
     except Missing:
         pass
+
+    # ── 10 · a register whose Name and Full Name differ ─────────────────
+    # MADE, because the demo cannot show this (§94.2): all 33 people have a
+    # full name of two or three words and nobody has typed a short one, so
+    # knownName() returns p.name for every row and a build listing the WRONG
+    # one of the two looks identical. This is the tenant Islam is on.
+    print("\n10 · a register with long names (made)")
+    pg.evaluate("""()=>{
+      const a=PEOPLE.filter(p=>personActive(p))[0], b=PEOPLE.filter(p=>personActive(p))[1];
+      window.__A=a.key; window.__B=b.key;
+      a.__was=a.name; b.__was=b.name; b.__wasKnown=b.known;
+      a.name="Abd El Moniem Mohamed Abd El Moniem Mahmoud"; delete a.known;
+      b.name="Testcase Longlegal Name Of Somebody"; b.known="Testcase Short";
+      paint();}""")
+    pg.wait_for_timeout(450)
+    open_plan(pg); pen(pg)
+    lst = pg.evaluate("""()=>{const s=document.querySelector('.pane select.ownersel');
+      return [...s.querySelectorAll('optgroup[label="People"] option')].map(o=>o.text);}""")
+    ck("a long full name is listed by its first two names",
+       "Abd El Moniem Mohamed" in lst and
+       "Abd El Moniem Mohamed Abd El Moniem Mahmoud" not in lst,
+       [x for x in lst if x.startswith("Abd")])
+    ck("a typed Name wins over the guess",
+       "Testcase Short" in lst and "Testcase Longlegal" not in lst,
+       [x for x in lst if "Testcase" in x])
+
+    # AND THE RULES MUST RECOGNISE WHAT THE PICKER WRITES — both ends (§94.2).
+    # A label the platform cannot match is exactly the fault §129.1 was built
+    # to fix: 32 of 78 tactics owned by somebody nobody could resolve.
+    try:
+        press(pg, btn_for(pg, ".pane table tbody tr:first-child select.ownersel"),
+              "the tactic owner picker")
+        pg.keyboard.type("Abd El Moniem"); pg.wait_for_timeout(250)
+        pg.click(".sspop .ssrow:not([hidden])"); pg.wait_for_timeout(350)
+        both = pg.evaluate("""()=>{const t=UNITS.mobile.items[0].tactics[0];
+          return {stored:t.owner,
+                  rule:SMPRules.namedOn(t, personBy(window.__A)),
+                  full:SMPRules.namedOn({owner:personBy(window.__A).name},
+                                        personBy(window.__A)),
+                  typed:SMPRules.namedOn({owner:"Testcase Short"}, personBy(window.__B)),
+                  first:SMPRules.namedOn({owner:"Abd"}, personBy(window.__A))};}""")
+        ck("the short name is what is stored", both["stored"] == "Abd El Moniem Mohamed", both)
+        ck("...and the shared rule says that names them", both["rule"], both)
+        ck("a plan that already holds the FULL name still names them", both["full"], both)
+        ck("a typed Name names them too", both["typed"], both)
+        ck("one name still names nobody", not both["first"], both)
+    except Missing:
+        pass
+    pg.evaluate("""()=>{const a=personBy(window.__A), b=personBy(window.__B);
+      a.name=a.__was; delete a.__was;
+      b.name=b.__was; delete b.__was;
+      if (b.__wasKnown) b.known=b.__wasKnown; else delete b.known;
+      delete b.__wasKnown; paint();}""")
+    pg.wait_for_timeout(300)
 
     ck("no console errors anywhere in this walk", not errs, errs[:4])
     pg.close()

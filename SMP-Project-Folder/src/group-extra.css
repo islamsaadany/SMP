@@ -729,13 +729,21 @@
      number of its own here would drift from the radius above the day somebody
      changes one (§29.4's rule, on a curve instead of a gap).
 
-     AND IT PAINTS WHEN THE BAND IS NOT PINNED TOO — §53.7 exactly, for the
-     same unavoidable reason: CSS cannot ask whether a sticky element is
-     pinned. At rest that covers about 1.4px of the pane's own corner border
-     arc. Measured against squaring the corners instead, which is the other
-     answer: 13px² disturbed at rest against 26px², and the square corner then
-     pokes 2px OUTSIDE the card it sits in. The fill is the cheaper of the two
-     and the only one that leaves a pinned header looking deliberate.
+     AND IT PAINTS ONLY WHILE THE BAND IS PINNED (§129.6). It did not at
+     first — §53.7's rule is that CSS cannot ask, so the strip above the band
+     paints in both positions and this was written the same way, at a cost
+     measured at 1.4px of the pane's own corner arc. Islam looked at it: *"the
+     corner still has this squared corner."* He is right, and the measurement
+     was right too — 13px² is small and it is exactly the card's rounded
+     corner, which is the one place on a card somebody's eye goes. So the ONE
+     thing CSS cannot ask is asked in JavaScript instead (`pinWatch()` in the
+     shell, an IntersectionObserver re-armed after every paint), and this
+     paints only when there is something to cover. At rest the corner is
+     byte-for-byte what it was before any of this.
+
+     STILL A FILL, NOT A SQUARE. Islam, given both: *"fill don't square the
+     corners"* — so the pinned band keeps its rounded corners and takes the
+     page's ground behind them, rather than becoming a flat bar.
 
      ON THE `::after`, NOT BEHIND THE BAND. A pseudo cannot be put behind its
      own parent's background once that parent makes a stacking context, and
@@ -743,7 +751,7 @@
      it paints ONLY the notches, which is the one place the band's own
      background is absent. `pointer-events:none`, or an 8px square in each
      corner would swallow clicks meant for the pen behind it. */
-  .pane > .pband::after {
+  .pane > .pband.pinned::after {
     content:""; position:absolute; left:0; right:0; top:0;
     height:var(--r); pointer-events:none;
     background:

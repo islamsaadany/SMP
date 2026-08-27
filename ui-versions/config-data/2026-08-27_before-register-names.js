@@ -380,14 +380,26 @@ var UNIT_ROLES = {
 
    The list is the particles this register actually contains, plus the European
    ones a client could arrive with. A word not on it is a name. */
-/* MOVED TO `lib/rules.js` (§129.7), and these are the browser's handles on it.
-   The plan stores what the register's Name column shows now, so the SERVER has
-   to be able to recognise it too — and a name rule written twice is the drift
-   that file exists to prevent (§42). Wrappers rather than renamed call sites:
-   five places here ask for a run of somebody's names, and none of them cares
-   where the answer is computed. */
-var NAME_PARTICLES = SMPRules.NAME_PARTICLES;
-function nameWords(name, n){ return SMPRules.nameWords(name, n); }
+var NAME_PARTICLES = ["abd","abdel","abd-el","el","al","abu","abou","bin","ben",
+                      "ibn","bint","van","von","de","del","della","der","den",
+                      "di","da","dos","du","la","le","st","st.","mac","mc"];
+function nameWords(name, n){
+  var parts = String(name == null ? "" : name).trim().split(/\s+/).filter(Boolean);
+  if (!parts.length) return "";
+  var out = [], names = 0, i = 0;
+  while (i < parts.length && names < n) {
+    /* Take the run of particles, then the word they belong to. A name ENDING
+       in a particle (a truncated row) still terminates, or this loops. */
+    var start = i;
+    while (i < parts.length &&
+           NAME_PARTICLES.indexOf(parts[i].toLowerCase().replace(/[^a-z.-]/g, "")) > -1) i++;
+    if (i < parts.length) i++;
+    else if (i === start) break;
+    names++;
+    out = parts.slice(0, i);
+  }
+  return out.join(" ");
+}
 
 var NAMED_ELSEWHERE_WORDS = 2;
 function personFullName(key){
@@ -844,10 +856,10 @@ function shortName(name){ return nameWords(name, SHORT_NAME_WORDS); }
    not the upload, not the merge, not the door. §87's ladder is Emp ID then
    email and stops, and this adds no rung. Two people really can be "Ahmed
    Mostafa", which is exactly how the twins were made. */
-var KNOWN_NAME_WORDS = SMPRules.KNOWN_NAME_WORDS;
+var KNOWN_NAME_WORDS = 2;
 /* The guess, used when nobody has said otherwise. Kept separate from the
    reader below so the seeded value and a typed one are never confused. */
-function knownGuess(name){ return SMPRules.knownGuess(name); }
+function knownGuess(name){ return nameWords(name, KNOWN_NAME_WORDS); }
 /* What the Name column shows: what was typed, or the guess. Never stores as a
    side effect of being read (§50.6's rule — a reader that creates the field it
    was looking for makes every save carry a phantom change). */

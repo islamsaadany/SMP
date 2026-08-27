@@ -515,19 +515,40 @@ console errors (in this cloud environment, run it via a wrapper that points Play
   **The pen already disagreed with the reading view** (§69.13 draws the rail
   from one project because Add lives in it). **Still false for an empty list**:
   nothing to list is not the same question as one thing to list (§61).
-- **THE PINNED TITLE'S CORNERS TAKE THE PAGE'S GROUND (§129.3):** §53.7 painted
-  the strip ABOVE the band and stopped at its top edge, where the two rounded
-  corner notches begin — 13px² of the white card per corner, with rows sliding
-  through it. **CSS cannot ask whether a sticky element is pinned**, so the
-  fill paints at rest too; measured against the alternative rather than
-  asserted (squaring the corners disturbs 26px² at rest and pokes 2px outside
-  the card). On the `::after`, because a pseudo cannot go behind its own
-  parent's background once that parent makes a stacking context —
-  `pointer-events:none`, or it swallows the pen's clicks. **Measured in
-  PIXELS**, and the first version of the check reported a CORRECT build broken:
-  in the dark palette `--surface` sits between `--ground` and `--surface-2`, so
-  an antialiased pixel lands on it by arithmetic (§68.10). One pixel of
-  clearance from the arc removes every blend.
+- **THE PINNED TITLE'S CORNERS TAKE THE PAGE'S GROUND — WHILE PINNED (§129.3,
+  corrected by §129.6):** §53.7 painted the strip ABOVE the band and stopped at
+  its top edge, where the two rounded corner notches begin — 13px² of the white
+  card per corner, with rows sliding through it. It first painted **in both
+  positions**, on §53.7's rule that CSS cannot ask whether a sticky element is
+  pinned, at a cost priced as 1.4px of the pane's own corner arc. Islam: *"the
+  corner still has this squared corner."* **The arithmetic was right and the
+  place was wrong** — those pixels ARE the card's rounded corner, which is where
+  an eye goes. So the one thing CSS cannot ask is asked in JavaScript:
+  **`pinWatch()`** is an IntersectionObserver toggling `.pinned`, re-armed after
+  every paint beside `SEARCHSEL.wire()`, with the previous one disconnected.
+  **NOT v3.3's loop** — it changes no size, so nothing can feed back — and the
+  threshold is the element's OWN sticky offset read off the computed style, not
+  rebuilt from `--chrome-h` (§29.4). **It shipped once as a throw**: declared
+  inside `wire()` and called from `paint()`, so every paint ended in *"pinWatch
+  is not defined"* with the page still on screen (§118, one section later) —
+  the check carries a page-error listener now. **Measured in PIXELS**, and the
+  first version of the check reported a CORRECT build broken: in the dark
+  palette `--surface` sits between `--ground` and `--surface-2`, so an
+  antialiased pixel lands on it by arithmetic (§68.10).
+- **THE PICKER LISTS THE REGISTER'S *Name*, NOT THE FULL LEGAL ONE (§129.7):**
+  invisible here — all 33 demo people have a two- or three-word full name and
+  none has a typed short one, so `knownName()` returns `p.name` and the wrong
+  column looked right. Read through **`displayNames()`**, which lengthens the
+  guess for a clashing pair (§81.1): in a PICKER two people reading as one entry
+  means the second is silently dropped by the dedupe. **What is shown is what is
+  STORED**, so the plan says the register's word (§53.5) — **which means
+  `namedOn()` had to learn it, or §129.1 undoes itself.** The name rule MOVES
+  into `lib/rules.js` (`NAME_PARTICLES`, `nameWords`, `knownGuess`), the browser
+  keeps wrappers, and `namedOn()` matches the key, the full name, a typed
+  `known`, and **`nameRuns()`** — every leading run from the short form up to
+  the whole name, which is exactly the set of labels the register can show.
+  **Never one name**: `KNOWN_NAME_WORDS` is the floor, so "Karim" still matches
+  nobody — a bare first name would hand reporting rights to whoever shares it.
 - **TERSE DROPS THE DETAIL, NEVER THE ALARM (§119.3):** the pillar rail opens
   COLLAPSED now (absent reads as terse, so only an explicit press turns it
   off), and that small line had been carrying two different kinds of thing —
@@ -2205,38 +2226,53 @@ prior sessions (on HR_ERP) accidentally reverted agreed-upon designs.
 ---
 
 *Last Updated: 2026-08-27 &mdash; **v3.47: an owner is picked, a single item
-keeps its rail, and the pinned title's corners (&sect;129)**. Three notes from
-using the product, and the first was not about tidiness. **A tactic's owner is
-matched against the register BY NAME** &mdash; `namedOn()` reads it beside the
-collaborators, and that is what makes somebody a Contributor who may enter that
-line's figure. Measured before a line was written: **38 owner names across the
-demo plan, 14 naming nobody, and 32 of the 78 tactics** owned by a short
-spelling that matches no one. Each is a person who owns a line and cannot report
-it, and no screen says so. Five fields become lists &mdash; project, milestone,
-tactic, **pillar** (read-only everywhere in the product's life until now), and
-collaborators as a **ticking** list of people or departments. **A stored name
-outside the register is KEPT in its own group** (&sect;96.2), so a plan uploaded
-before today reads exactly as it did. **A ticking list stays open and commits
-per tick**, which reverses the single-select rule on purpose and is safe only
-because the `data-fld` handler writes without repainting &mdash; written down,
-because the next person to wire a multiple select to a repainting handler will
-watch the popup die under the pointer. **And a 1px clipped element scrolling is
-never the page moving**: setting `selected` on a `<select multiple>` fires a
-real `scroll` from the hidden native select, which closed the popup on every
-tick near the fold &mdash; invisible for three versions, because the
-single-select path never sets `selected` on anything. **The rail comes back for
-one item, on units AND functions**: the gate counted a capability's PROJECTS, so
-Marketing drew two capabilities on one page at two different left edges, and the
-pen had already disagreed with the reading view since &sect;69.13. **And the
-pinned title's corners take the page's own ground** &mdash; &sect;53.7 painted
-the strip above the band and stopped at its top edge, where the notches begin;
-CSS cannot ask whether a sticky element is pinned, so the cost at rest was
-measured against squaring the corners rather than argued (13px&sup2; against
-26). Islam: *"fill don't square the corners."* Three new checks, each proved
-able to fail against the shipped build first &mdash; **20 / 14 / 8** &mdash;
-and the corner one **reported a correct build broken on its first run**, because
-in the dark palette `--surface` sits between `--ground` and `--surface-2` and an
-antialiased pixel lands on it by arithmetic (&sect;68.10).*
+keeps its rail, and the pinned title's corners (&sect;129)**, with two of the
+three corrected by Islam LOOKING at them (&sect;129.6, &sect;129.7). **A
+tactic's owner is matched against the register BY NAME** &mdash; `namedOn()`
+reads it beside the collaborators, and that is what makes somebody a
+Contributor who may enter that line's figure. Measured before a line was
+written: **38 owner names across the demo plan, 14 naming nobody, and 32 of the
+78 tactics** owned by a short spelling that matches no one. Five fields become
+lists &mdash; project, milestone, tactic, **pillar** (read-only everywhere in
+the product's life until now), and collaborators as a **ticking** list of
+people or departments. **A stored name outside the register is KEPT in its own
+group** (&sect;96.2), so a plan uploaded before today reads exactly as it did.
+**A ticking list stays open and commits per tick**, which reverses the
+single-select rule on purpose and is safe only because the `data-fld` handler
+writes without repainting. **And a 1px clipped element scrolling is never the
+page moving**: setting `selected` on a `<select multiple>` fires a real
+`scroll` from the hidden native select, which closed the popup on every tick
+near the fold &mdash; invisible for three versions, because the single-select
+path never sets `selected` on anything. **The rail comes back for one item, on
+units AND functions.**
+
+**THEN THE TWO CORRECTIONS, AND BOTH ARE THE SAME LESSON.** The corner fill
+painted in BOTH positions on &sect;53.7's rule that CSS cannot ask whether a
+sticky element is pinned, at a cost I measured at 13px&sup2; and called
+invisible &mdash; *"the corner still has this squared corner."* **The
+arithmetic was right and the place was wrong**: those pixels ARE the card's
+rounded corner, which is where an eye goes. So the one thing CSS cannot ask is
+asked in JavaScript (`pinWatch()`, an IntersectionObserver re-armed after every
+paint), and it **shipped once as a throw** &mdash; declared inside `wire()`,
+called from `paint()`, so every paint ended in *"pinWatch is not defined"* with
+the page still on screen (&sect;118, one section later). And the picker listed
+the **full legal name**: invisible here, because all 33 demo people have a two-
+or three-word name and none has a typed short one, so `knownName()` returns
+`p.name` and the wrong column looked right. It reads the register's **Name**
+now, through `displayNames()` so a clashing pair never reads as one entry
+&mdash; **which meant `namedOn()` had to learn that name**, or &sect;129.1
+undoes itself: the name rule moves into `lib/rules.js` and matches the key, the
+full name, a typed `known`, and every leading run down to the register's short
+form &mdash; **never one name**, or a bare *"Karim"* would hand reporting
+rights to whoever shares it. *Two builds that were correct on the only data
+this repository holds.*
+
+Three new checks, each proved able to fail against the build before it &mdash;
+**20 / 14 / 8**, and after the corrections **4 more** on the names and **6** on
+the corner. The corner check **reported a correct build broken on its first
+run**, because in the dark palette `--surface` sits between `--ground` and
+`--surface-2` and an antialiased pixel lands on it by arithmetic
+(&sect;68.10).*
 
 *Earlier: 2026-08-26 &mdash; **v3.44: one line above the table, and a
 

@@ -11,9 +11,18 @@ corner box at each top corner of the band, none of what is behind the band may
 show through. That stays true if the fill is one day replaced by squaring the
 corners, and it fails the moment either is removed.
 
-IN BOTH POSITIONS, because CSS cannot ask whether a sticky element is pinned
-and this therefore paints in both — pinned is where Islam saw it, at rest is
-where the cost was measured, and a fix that only worked in one is not one.
+BOTH POSITIONS, AND THEY WANT OPPOSITE THINGS (§129.6). Pinned, the notch must
+be the page's own ground and nothing behind it. AT REST it must be the card's
+rounded corner, border arc and all — the first build filled both, because CSS
+cannot ask whether a sticky element is pinned, and Islam looked at the result:
+*"the corner still has this squared corner."* So the rest assertion is written
+POSITIVELY, as the thing that has to be there, and it fails on that build.
+
+AND IT WATCHES FOR A THROW. The one thing CSS cannot ask is answered by an
+observer re-armed at the end of paint() — and the first version of that was
+declared inside wire(), so `paint()` threw on `pinWatch is not defined` every
+time, silently, with the page still on screen (§118). A page-error listener is
+part of this check for that reason.
 
 NO DEPENDENCY. Playwright hands back a PNG and the suite has never needed an
 image library; `zlib` and forty lines of unfiltering read an 18-pixel square
@@ -30,6 +39,7 @@ URL = "file://" + str(pathlib.Path(
     "strategy-management-platform.html").resolve())
 
 fails = []
+errs = []
 
 
 def ck(name, ok, extra=""):
@@ -125,6 +135,9 @@ with sync_playwright() as p:
     b = p.chromium.launch()
     for theme in ("light", "dark"):
         pg = b.new_page(viewport={"width": 1400, "height": 620}, device_scale_factor=2)
+        pg.on("pageerror", lambda e: errs.append("PAGEERROR: " + str(e)))
+        pg.on("console", lambda m: errs.append("CONSOLE: " + m.text)
+              if m.type == "error" else None)
         pg.goto(URL); pg.wait_for_timeout(900)
         if theme == "dark":
             pg.evaluate("document.documentElement.setAttribute('data-theme','dark')")
@@ -148,20 +161,42 @@ with sync_playwright() as p:
            not near(ground, surface), (ground, surface))
 
         for state, y in (("at rest", 0), ("pinned", 420)):
-            pg.evaluate("window.scrollTo(0,%d)" % y); pg.wait_for_timeout(350)
-            pinned = pg.evaluate("""()=>{const b=document.querySelector('.pane > .pband');
-              return b.getBoundingClientRect().top - b.parentElement.getBoundingClientRect().top > 2;}""")
-            if state == "pinned":
-                ck("[%s] the band is actually pinned before it is measured" % theme, pinned)
+            pg.evaluate("window.scrollTo(0,%d)" % y); pg.wait_for_timeout(400)
+            where = pg.evaluate("""()=>{const b=document.querySelector('.pane > .pband');
+              return {slid: b.getBoundingClientRect().top -
+                            b.parentElement.getBoundingClientRect().top > 2,
+                      says: b.classList.contains('pinned')};}""")
+            # THE BAND HAS TO AGREE WITH ITSELF: where it actually is, and what
+            # it says about where it is. An observer that quietly stopped firing
+            # leaves the second false while the first is true.
+            ck("[%s] %s: the band says where it is" % (theme, state),
+               where["says"] == where["slid"], where)
             for side in ("left", "right"):
                 px = notch_pixels(pg, 2, side)
                 ck("[%s] %s, %s corner: there is a notch to measure"
                    % (theme, state, side), len(px) >= 12, len(px))
-                wrong = [c for c in px if not near(c, ground)]
-                ck("[%s] %s, %s corner: the page's own ground, and nothing behind it"
-                   % (theme, state, side), not wrong,
-                   "%d of %d notch pixels are not the ground: %s"
-                   % (len(wrong), len(px), sorted(set(wrong))[:4]))
+                if state == "pinned":
+                    wrong = [c for c in px if not near(c, ground)]
+                    ck("[%s] pinned, %s corner: the page's own ground, and nothing behind it"
+                       % (theme, side), not wrong,
+                       "%d of %d notch pixels are not the ground: %s"
+                       % (len(wrong), len(px), sorted(set(wrong))[:4]))
+                else:
+                    # AT REST THE CARD KEEPS ITS CORNER. Written as what must be
+                    # PRESENT — the border arc drawn through the notch — because
+                    # the build this replaced covered it with ground and every
+                    # "nothing shows through" assertion passed on it.
+                    # NOT "near the border colour": in light, `--line` and
+                    # `--ground` are within 31 of each other, so a tolerance
+                    # loose enough to catch the antialiased arc also matches
+                    # the ground it is drawn on — the same trap the notch
+                    # sampling above already fell into once (§68.10). Asked as
+                    # the INVERSE: at rest the notch cannot be all ground.
+                    ink = [c for c in px if not near(c, ground, 10)]
+                    ck("[%s] at rest, %s corner: the card's own corner is still drawn"
+                       % (theme, side), len(ink) >= 3,
+                       "%d of %d notch pixels are something other than the page"
+                       % (len(ink), len(px)))
 
         # The fill must not become a lid over the control it sits beside: the
         # pen is in the same corner of the same pane (§93.4, §70). Measured AT
@@ -177,6 +212,7 @@ with sync_playwright() as p:
               return !at ? "nothing there" : (at===b||b.contains(at)||at.contains(b));}""")
             ck("[%s] the pen beside it is still what a click reaches" % theme,
                hit is True, hit)
+        ck("[%s] no console errors, and paint() did not throw" % theme, not errs, errs[:3])
         pg.close()
     b.close()
 

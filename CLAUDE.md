@@ -2184,12 +2184,26 @@ the plan download on a plan still being filled in. **A tactic with NO quarter
 at all is a gap** &mdash; &sect;119.1 was right to leave a single blank quarter
 alone (a tactic marked Q2 and Q3 is saying something by leaving Q1 and Q4
 empty), and that reasoning never covered a row that answered nothing; the four columns
-stay exactly as they are and **all four ticks go bold red** instead. The first
-answer merged one `Missing` across them and Islam turned it down &mdash;
-*"the template should stay the same"* &mdash; and he is right: the four columns
-are the workbook's shape, a table whose cells merge when a row is incomplete
-cannot be scanned down a column, and the alarm had been allowed to reshape the
-thing it was annotating (&sect;116.4's fault in a table).
+stay exactly as they are and **all four cells carry a bold red mark** instead.
+The first answer merged one `Missing` across them and Islam turned it down
+&mdash; *"the template should stay the same"* &mdash; and he is right: the four
+columns are the workbook's shape, a table whose cells merge when a row is
+incomplete cannot be scanned down a column, and the alarm had been allowed to
+reshape the thing it was annotating (&sect;116.4's fault in a table).
+**AND THE MARK IS A QUESTION MARK, NOT A TICK (&sect;128.5, reversing the
+glyph and nothing else):** *"rather than the red check mark for the missing qs
+make it red question marks."* A `&check;` in a Q column MEANS something on its
+own &mdash; *this runs in this quarter*, the column's whole point and the
+workbook's own shape &mdash; so painting it red asked the colour to REVERSE
+the mark, and the row read *"runs everywhere"* to anybody who did not also
+read the colour: close to the opposite of *"nobody said when this runs"*.
+&sect;128.1 chose its mark for the colour and not for what the mark says.
+A `?` says what the colour says, so the colour becomes emphasis rather than
+the whole message &mdash; which is what a bold red `Missing` already does,
+being a word that means missing before it is red. **Asserted at both ends**:
+the gapped rows carry `?` in all four AND never a tick (a red &check; put back
+satisfies "four bold red cells" and fails both), and an answered row never
+wears a question mark.
 **The deck closes on Thank you**, which is `present.js`'s own last slide
 (&sect;53.5: two decks of the same plan should have the same manners). **And
 the Function overview carries the download too** &mdash; a capability

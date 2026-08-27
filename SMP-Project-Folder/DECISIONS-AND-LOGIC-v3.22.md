@@ -16807,6 +16807,40 @@ is not. *A measurement that is wrong in the direction of "broken" costs as
 much as one that is wrong in the direction of "clean" (§68.10), and the first
 instinct — to go and change the builder — would have damaged working code.*
 
+### 128.5 A tick is an affirmation whatever colour it wears (reversing §128.1's mark)
+
+Islam, on the shipped red ticks: *"rather than the red check mark for the
+missing qs make it red question marks to indicate the missing."*
+
+**§128.1's ARGUMENT IS UNTOUCHED AND ONLY ITS GLYPH MOVES.** Everything that
+section settled still holds: the four Q columns stay four columns, nothing is
+ever merged, a tactic that names SOME quarters is answering the question and
+its ticks stay the ordinary ink, and the alarm is carried by the mark rather
+than by reshaping the table. What changes is the one character inside the
+four cells of a row that answered nothing.
+
+**AND THE REASON IS THAT A TICK MEANS SOMETHING BY ITSELF.** `✓` in a Q
+column says *this tactic runs in this quarter* — that is the whole meaning of
+the column, and it is the meaning the plan workbook's own Q1–Q4 columns carry.
+Painting it red asks the colour to do all the work of REVERSING it, so the
+row read *"runs in all four quarters"* to anybody who did not also read the
+colour, and *"runs everywhere"* is close to the opposite of *"nobody said
+when this runs"*. §128.1 chose the mark for its colour and not for what the
+mark says; the mark was arguing with the colour on top of it.
+
+**A `?` SAYS WHAT THE COLOUR SAYS.** Nobody answered this. The colour is then
+emphasis rather than the entire message, which is what every other gap in
+this deck already does — a bold red `Missing` is a word that means missing
+before it is red. Same shape as §116.4's rule read the other way: a mark must
+not be asked to mean the opposite of itself.
+
+**PROVED AT BOTH ENDS** (§94.2, §94.5). `checks/strategy-split.py` §5 asserts
+the gapped rows carry `?` in all four AND that a tick never appears on one —
+a build that put the red ✓ back satisfies "four bold red cells" and fails
+both of those — and, from the other side, that an answered row never wears a
+question mark. Run against the previous build: 2 failures.
+
+
 ## 129 · Building a plan on the platform (v3.47, spec 020)
 
 Islam: *"I want the team of the SMO to be able to build a plan on the platform

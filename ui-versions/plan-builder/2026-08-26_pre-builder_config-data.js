@@ -380,14 +380,26 @@ var UNIT_ROLES = {
 
    The list is the particles this register actually contains, plus the European
    ones a client could arrive with. A word not on it is a name. */
-/* MOVED TO `lib/rules.js` (§130.7), and these are the browser's handles on it.
-   The plan stores what the register's Name column shows now, so the SERVER has
-   to be able to recognise it too — and a name rule written twice is the drift
-   that file exists to prevent (§42). Wrappers rather than renamed call sites:
-   five places here ask for a run of somebody's names, and none of them cares
-   where the answer is computed. */
-var NAME_PARTICLES = SMPRules.NAME_PARTICLES;
-function nameWords(name, n){ return SMPRules.nameWords(name, n); }
+var NAME_PARTICLES = ["abd","abdel","abd-el","el","al","abu","abou","bin","ben",
+                      "ibn","bint","van","von","de","del","della","der","den",
+                      "di","da","dos","du","la","le","st","st.","mac","mc"];
+function nameWords(name, n){
+  var parts = String(name == null ? "" : name).trim().split(/\s+/).filter(Boolean);
+  if (!parts.length) return "";
+  var out = [], names = 0, i = 0;
+  while (i < parts.length && names < n) {
+    /* Take the run of particles, then the word they belong to. A name ENDING
+       in a particle (a truncated row) still terminates, or this loops. */
+    var start = i;
+    while (i < parts.length &&
+           NAME_PARTICLES.indexOf(parts[i].toLowerCase().replace(/[^a-z.-]/g, "")) > -1) i++;
+    if (i < parts.length) i++;
+    else if (i === start) break;
+    names++;
+    out = parts.slice(0, i);
+  }
+  return out.join(" ");
+}
 
 var NAMED_ELSEWHERE_WORDS = 2;
 function personFullName(key){
@@ -844,10 +856,10 @@ function shortName(name){ return nameWords(name, SHORT_NAME_WORDS); }
    not the upload, not the merge, not the door. §87's ladder is Emp ID then
    email and stops, and this adds no rung. Two people really can be "Ahmed
    Mostafa", which is exactly how the twins were made. */
-var KNOWN_NAME_WORDS = SMPRules.KNOWN_NAME_WORDS;
+var KNOWN_NAME_WORDS = 2;
 /* The guess, used when nobody has said otherwise. Kept separate from the
    reader below so the seeded value and a typed one are never confused. */
-function knownGuess(name){ return SMPRules.knownGuess(name); }
+function knownGuess(name){ return nameWords(name, KNOWN_NAME_WORDS); }
 /* What the Name column shows: what was typed, or the guess. Never stores as a
    side effect of being read (§50.6's rule — a reader that creates the field it
    was looking for makes every save carry a phantom change). */
@@ -4169,41 +4181,6 @@ function boardFunctionKeys(){
   });
 }
 
-/* ── WHAT A CYCLE SAYS ABOUT ITSELF (§120.1) ──────────────────────────
-   Islam, on a client tenant whose cycle has no dates: the strip read
-   **"to  ·  due  ·  as of Q4"** — three separators and nothing between them,
-   because the line was built by gluing the words around three values and the
-   punctuation survives when the values do not.
-
-   IT IS NOT THE OVERVIEW'S FAULT AND THAT IS WHY IT LIVES HERE. The identical
-   line renders on the Reporting cycle page and has since long before the
-   Overview existed; the Overview only made it the first thing anybody sees.
-   Two surfaces onto one sentence is exactly how the two come to say it
-   differently (§53.5), so the sentence is built ONCE and both read it.
-
-   AN ABSENT DATE IS SAID, NOT PUNCTUATED. A tenant that has not set its dates
-   has a real state, and "Dates not set" is what it is — the same argument as
-   §93's dash for a password nobody has been asked about, and §108.10's rule
-   that a page must be able to say NOTHING is here rather than draw an empty
-   shape. The quarter is always known (it is a number, not a date), so it is
-   always said. */
-function cycleMeta(){
-  var bits = [];
-  var from = String(REVIEW.from || "").trim();
-  var to   = String(REVIEW.to   || "").trim();
-  var due  = String(REVIEW.due  || "").trim();
-  /* BOTH ENDS OR NEITHER: "Jan 2026 to" is worse than saying nothing, and one
-     end alone is not a span. A single end is reported on its own terms. */
-  if (from && to) bits.push(from + " to " + to);
-  else if (from)  bits.push("from " + from);
-  else if (to)    bits.push("until " + to);
-  if (due) bits.push("due " + due);
-  if (!bits.length) bits.push("Dates not set");
-  if (REVIEW.endsQuarter != null && REVIEW.endsQuarter !== "")
-    bits.push("as of Q" + REVIEW.endsQuarter);
-  return bits.join(" \u00b7 ");
-}
-
 function cycleTotals(){
   var t = { done:0, total:0, sub:0, none:0, units:0 };
   function add(c, st){
@@ -4608,33 +4585,6 @@ function projCode(fk, p){
 function fnFormat(f){ return (f && f.format === "pillars") ? "pillars" : "projects"; }
 function fnPlansInPillars(f){ return fnFormat(f) === "pillars"; }
 function fnItems(f){ return (f && Array.isArray(f.items)) ? f.items : []; }
-
-/* A STORED LIST NEVER HOLDS A HOLE (§118). A pillars function's plan rides in
-   one JSON blob (functions.extra), and JSON writes an array hole or an
-   undefined entry as null — which is how one poisoned reorder commit left a
-   null inside a tactics list and the CF page threw on every visit from the
-   next hydration on, while the click looked like it did nothing. The commit
-   is fixed in arrange.js; this heals what a tenant already saved. It only
-   REMOVES — a reader must never create the field it was looking for (§50.6) —
-   and the next autosave persists the clean lists, so the poison does not
-   outlive one visit. Units need none of this: their plans are stored
-   row-by-row and a null cannot survive that road. */
-function fnPruneNulls(f){
-  if (!f) return f;
-  var live = function(x){ return x != null; };
-  if (Array.isArray(f.items)) {
-    f.items = f.items.filter(live);
-    f.items.forEach(function(p){
-      if (Array.isArray(p.measures)) p.measures = p.measures.filter(live);
-      if (Array.isArray(p.tactics))  p.tactics  = p.tactics.filter(live);
-    });
-  }
-  if (Array.isArray(f.keyObjectives)) f.keyObjectives = f.keyObjectives.filter(live);
-  if (f.swot) ["s","w","o","t"].forEach(function(k){
-    if (Array.isArray(f.swot[k])) f.swot[k] = f.swot[k].filter(live);
-  });
-  return f;
-}
 
 /* WHICH function carries this pillar, if any. Returns null unless the pointer
    names a function that exists, is active AND plans in pillars — a pointer at a
@@ -5395,43 +5345,19 @@ function pillarsUsingTheme(ab){
    click into it crashes on a missing array. It arrives inactive-in-content
    but active in the nav, weighted at zero until the SMO fills its factor row,
    and with the group's clause labels as a starting skeleton. */
-/* THE ONE MINTER FOR A UNIT (§129). It existed argless — "New unit 1", key
-   "newunit1" — and the builder gives it the three answers a real unit
-   arrives with: its name, its code prefix and its company. Three of its old
-   habits are corrected in the same breath, each a §-numbered fault:
-   · the key is minted from the NAME the way a function's and a person's are,
-     so the graph does not fill with "newunit3"s (§87's spirit);
-   · the weighting row's values are minted from the FACTOR LIST, never a
-     hardcoded rev/prof/imp/growth — a tenant that renamed a factor got a row
-     the composite could not read (§104.7's list-of-exceptions fault);
-   · `real` is TRUE: that flag marks DEMO content as illustrative (§21), and
-     a unit the SMO just created is the client's own. */
-function addBusinessUnit(name, prefix, company){
-  var nm = String(name || "").trim(), key;
-  if (nm) {
-    var base = nm.toLowerCase().replace(/[^a-z0-9]/g, "").slice(0, 18);
-    if (!base) base = "unit";
-    key = base;
-    var n2 = 2;
-    while (UNITS[key]) { key = base + n2; n2++; }
-  } else {
-    var n = 1;
-    do { key = "newunit" + n; nm = "New unit " + n; n++; } while (UNITS[key]);
-  }
+function addBusinessUnit(){
+  var n = 1, key, name;
+  do { key = "newunit" + n; name = "New unit " + n; n++; } while (UNITS[key]);
   UNITS[key] = {
-    name: nm,
-    codePrefix: (String(prefix || "").trim() || nm.replace(/[^A-Za-z0-9]/g, "").slice(0, 3) || "NU").toUpperCase(),
-    weight: 0, real: true, active: true, ukey: key,
-    company: company || null,
+    name: name, codePrefix: "NU", weight: 0, real: false, active: true, ukey: key,
     clauses: GROUP.clauses.map(function(c, i){ return [c[0], "", key + "-F" + (i + 1)]; }),
     aspiration: "", endInMind: "",
     keyObjectives: [], swot: { s: [], w: [], o: [], t: [] }, items: []
   };
   UNIT_KEYS.push(key);
   UNIT_ROLES[key] = { head: null, custodian: null };
-  var wrow = { key: key, unit: nm, why: "" };
-  (GROUP.weighting.factors || []).forEach(function(f){ wrow[f.key] = 0; });
-  GROUP.weighting.units.push(wrow);
+  GROUP.weighting.units.push({ key: key, unit: name, rev: 0, prof: 0, imp: 1, growth: 0,
+    why: "" });
   syncWeights();
   return key;
 }

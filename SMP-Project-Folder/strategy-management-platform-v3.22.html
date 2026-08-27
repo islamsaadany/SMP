@@ -1287,7 +1287,7 @@
   .pane > .pband::before {
     content:""; position:absolute; left:-1px; right:-1px; bottom:100%;
     height:calc(var(--rail-gap, 22px) + 2px); background:var(--ground); }
-  /* ── AND THE TWO CORNERS ARE THE SAME WINDOW (§129.3) ─────────────
+  /* ── AND THE TWO CORNERS ARE THE SAME WINDOW (§130.3) ─────────────
      Islam: "the title has round corners so the scrolled up appears in the
      right and left top corners." Measured before touching it: 13px² of the
      page's white card, per corner, with rows sliding through it — the band's
@@ -1303,7 +1303,7 @@
      number of its own here would drift from the radius above the day somebody
      changes one (§29.4's rule, on a curve instead of a gap).
 
-     AND IT PAINTS ONLY WHILE THE BAND IS PINNED (§129.6). It did not at
+     AND IT PAINTS ONLY WHILE THE BAND IS PINNED (§130.6). It did not at
      first — §53.7's rule is that CSS cannot ask, so the strip above the band
      paints in both positions and this was written the same way, at a cost
      measured at 1.4px of the pane's own corner arc. Islam looked at it: *"the
@@ -1325,7 +1325,7 @@
      it paints ONLY the notches, which is the one place the band's own
      background is absent. `pointer-events:none`, or an 8px square in each
      corner would swallow clicks meant for the pen behind it. */
-  /* PAST THE PANE'S BORDER, EXACTLY AS `::before` DOES (§129.8). The first
+  /* PAST THE PANE'S BORDER, EXACTLY AS `::before` DOES (§130.8). The first
      build filled the notch and stopped at the band's own edge — and the thing
      Islam was still looking at was not the notch at all: it was the pane's 1px
      SIDE BORDER, which `::before` covers everywhere above the band and which
@@ -1870,7 +1870,7 @@
   .ssrow.on { background:var(--over-bg); color:var(--gold-deep); font-weight:600; }
   .ssrow:focus-visible { outline:2px solid var(--gold); outline-offset:-2px; }
   .ssempty { font-size:12px; color:var(--none); padding:8px 4px; }
-  /* ── A GROUP IN THE LIST, AND A LIST YOU TICK (§129.1) ────────────────
+  /* ── A GROUP IN THE LIST, AND A LIST YOU TICK (§130.1) ────────────────
      The plan's owner list is fifty entries made of two different kinds of
      thing — people and departments — and a heading is what stops it reading as
      one run of names. The heading filters WITH its group (searchsel.js): a
@@ -1894,11 +1894,11 @@
   .ssmany .ssrow.on::after { content:""; position:absolute; left:12.5px; top:50%;
             margin-top:-5.5px; width:4px; height:8px; border:solid var(--on-accent);
             border-width:0 2px 2px 0; transform:rotate(45deg); }
-  /* A LIST YOU TICK STAYS OPEN, so it has to be able to hold more (§129.1):
+  /* A LIST YOU TICK STAYS OPEN, so it has to be able to hold more (§130.1):
      ticking six collaborators through a 230px window is six scrolls back to
      where you were. */
   .ssmany .sslist { max-height:300px; }
-  /* WHERE SOMEBODY WORKS, BESIDE THEIR NAME (§129.9). Quiet and second: the
+  /* WHERE SOMEBODY WORKS, BESIDE THEIR NAME (§130.9). Quiet and second: the
      name is the answer and this only tells two Ahmeds apart. It wraps rather
      than clips, because a place cut off mid-word tells nobody anything —
      the popup is 380px at most and the row is allowed to take a second line. */
@@ -4896,7 +4896,7 @@
   .pfval > .pill.kind:first-child { margin-left:0; }
   .pfval .pill.kind { margin-top:0; margin-bottom:0; }
   .pfront .fld, .pfront input, .pfront textarea { width:100%; max-width:none; }
-  /* ── ONE FACT WIDE (§129.1) ──────────────────────────────────────────
+  /* ── ONE FACT WIDE (§130.1) ──────────────────────────────────────────
      A pillar has an owner and nothing else that belongs in front matter, so
      the box keeps its ground, its hairline and its label track and loses the
      second column — the same component, not a second one that looks like it
@@ -5861,6 +5861,115 @@ body.presenting .tourdock { display:none; }
 
 .tourdock button:focus-visible { outline:2px solid var(--focus); outline-offset:2px; }
 
+/* ══ THE PLAN BUILDER (§129, spec 020) ══════════════════════════════
+   The band is CHROME — it sits under the tab rows, spans the window like
+   them, and carries the accent as an EDGE (§41's budget: one mark, not a
+   colour scheme). Everything wears tokens, so a tenant's branding and the
+   dark palette both carry it with no rule of their own (§38). */
+
+#buildband { border-bottom:1px solid var(--line); background:var(--surface); }
+.bband { display:flex; align-items:center; gap:14px; flex-wrap:wrap;
+  padding:8px 22px; border-left:3px solid var(--gold); }
+.bwho { font-size:10px; font-weight:800; letter-spacing:.08em; text-transform:uppercase;
+  color:var(--gold-deep); flex:none; }
+.bchips { display:flex; align-items:center; gap:4px; flex:none; }
+.bchip { display:flex; align-items:center; gap:5px; font-size:11.5px; color:var(--ink-2);
+  padding:3px 10px; border-radius:99px; border:1px solid var(--line);
+  background:var(--surface); cursor:pointer; font:inherit; }
+.bchip:hover { border-color:var(--gold); }
+.bchip:focus-visible { outline:2px solid var(--focus); outline-offset:1px; }
+.bchip.cur { background:var(--panel); color:var(--panel-ink); border-color:var(--panel);
+  font-weight:700; }
+.bst { font-weight:800; font-size:10px; }
+.bst.ok { color:var(--good); }
+.bst.part { color:var(--gold-deep); }
+.bst.empty { color:var(--ink-3); }
+/* On the lit chip the page's status inks vanish into the navy — the mark
+   takes the accent, the one colour that reads on the panel (§38.5). */
+.bchip.cur .bst { color:var(--gold); }
+.bhint { font-size:11.5px; color:var(--ink-2); flex:1; min-width:180px; }
+.bhint b { color:var(--ink); }
+.bacts { display:flex; gap:8px; align-items:center; flex:none; margin-left:auto; }
+
+/* The builder's three button voices, quietest to loudest (§94.8's order of
+   loudness): a link, an outlined act, the one solid primary. */
+.blink { border:none; background:none; color:var(--ink-3); font-size:11.5px;
+  text-decoration:underline; cursor:pointer; padding:4px 4px; font:inherit; }
+.blink:hover { color:var(--ink); }
+.bgo { border:1px solid var(--panel); color:var(--panel); background:var(--surface);
+  border-radius:7px; padding:4px 12px; font-size:11.5px; font-weight:700; cursor:pointer; font:inherit; }
+.bprim { border:1px solid var(--panel); background:var(--panel); color:var(--panel-ink);
+  border-radius:7px; padding:4px 12px; font-size:11.5px; font-weight:700; cursor:pointer; font:inherit; }
+.bgo:hover, .bprim:hover { border-color:var(--gold); }
+.bgo:focus-visible, .bprim:focus-visible, .blink:focus-visible,
+.bdanger:focus-visible { outline:2px solid var(--focus); outline-offset:1px; }
+.bprim:disabled, .bgo:disabled { opacity:.45; cursor:default; }
+.bdanger { border:1px solid var(--bad); color:var(--bad); background:var(--surface);
+  border-radius:7px; padding:3px 10px; font-size:11.5px; font-weight:700; cursor:pointer; font:inherit; }
+
+/* ── The chooser ──────────────────────────────────────────────────── */
+.bseg { display:inline-flex; border:1px solid var(--line); border-radius:8px;
+  overflow:hidden; margin:0 0 10px; }
+.bseg button { padding:5px 14px; font-size:12px; color:var(--ink-2); background:var(--surface);
+  border:none; border-right:1px solid var(--line); cursor:pointer; font:inherit; }
+.bseg button:last-child { border-right:none; }
+.bseg button[aria-pressed="true"] { background:var(--panel); color:var(--panel-ink); font-weight:700; }
+.blist { border:1px solid var(--line-soft); border-radius:9px; overflow:hidden; margin:0 0 10px; }
+.brow { display:flex; align-items:center; gap:10px; padding:8px 12px;
+  border-top:1px solid var(--line-soft); font-size:12.5px; flex-wrap:wrap; }
+.brow:first-child { border-top:none; }
+.brow > b { flex:1; }
+.bwhy { font-size:11px; color:var(--ink-3); }
+.bstat { font-size:10px; font-weight:800; letter-spacing:.05em; text-transform:uppercase;
+  border-radius:99px; padding:2px 8px; flex:none; }
+.bstat.empty { background:var(--surface-2); color:var(--ink-3); }
+.bstat.has { background:var(--over-bg); color:var(--gold-deep); }
+.bconfirm { font-size:11.5px; color:var(--ink-2); display:flex; gap:8px; align-items:center; flex-wrap:wrap; }
+.bnewrow { display:flex; gap:10px; align-items:center; }
+.bfoot { font-size:11px; color:var(--ink-3); margin:10px 0 0; max-width:60ch; }
+
+/* ── The row form: ordered boxes, §116's dialog shape ─────────────── */
+.bform { max-width:520px; }
+.bff { margin:0 0 10px; }
+.bfl { font-size:9.5px; font-weight:800; letter-spacing:.07em; text-transform:uppercase;
+  color:var(--ink-3); margin-bottom:3px; }
+.bfi { width:100%; border:1px solid var(--line); border-radius:7px; padding:7px 10px;
+  font-size:12.5px; background:var(--surface); color:var(--ink); font-family:inherit; box-sizing:border-box; }
+.bfi:focus-visible { outline:2px solid var(--focus); outline-offset:0; }
+.bfi.mono { font-family:var(--mono, ui-monospace, monospace); }
+textarea.bfi { resize:vertical; }
+.bfseg { display:inline-flex; border:1px solid var(--line); border-radius:7px; overflow:hidden; }
+.bfseg button { padding:6px 13px; font-size:12px; color:var(--ink-2); background:var(--surface);
+  border:none; border-right:1px solid var(--line); cursor:pointer; font:inherit; }
+.bfseg button:last-child { border-right:none; }
+.bfseg button[aria-pressed="true"] { background:var(--panel); color:var(--panel-ink); font-weight:700; }
+.bfseg button:focus-visible { outline:2px solid var(--focus); outline-offset:-2px; }
+.bfmiss { font-size:11.5px; color:var(--attn-tx); background:var(--attn-bg); border-radius:7px;
+  padding:6px 10px; margin:2px 0 10px; }
+.bfacts { display:flex; gap:8px; align-items:center; flex-wrap:wrap; }
+.bfnote { font-size:11.5px; color:var(--good); font-weight:700; }
+
+/* ── The review ───────────────────────────────────────────────────── */
+.brv { border:1px solid var(--line-soft); border-radius:9px; overflow:hidden; margin:0 0 6px; }
+.brvrow { display:flex; align-items:center; gap:10px; padding:8px 12px; width:100%;
+  border:none; border-top:1px solid var(--line-soft); font-size:12.5px; text-align:left;
+  background:var(--surface); color:var(--ink); cursor:pointer; font:inherit; }
+.brvrow:first-child { border-top:none; }
+.brvrow:hover { background:var(--surface-2); }
+.brvrow:focus-visible { outline:2px solid var(--focus); outline-offset:-2px; }
+.brvrow b { width:130px; flex:none; }
+.brvwhat { flex:1; color:var(--ink-2); }
+
+/* The door on Import & plans: the build door is the sibling of the upload,
+   quietly marked as the on-platform one. */
+.bdoor { display:flex; align-items:center; gap:12px; border:1px solid var(--gold);
+  border-radius:9px; background:var(--over-bg); padding:10px 14px; margin:0 0 14px; flex-wrap:wrap; }
+.bdoor b { font-size:12.5px; }
+.bdoor .bwhy { flex:1; min-width:200px; }
+
+/* On a projector nothing of the builder exists (§97's rule for the corner). */
+body.presenting #buildband { display:none; }
+
 </style>
 <script>
 /* THEME — light or dark, and which PALETTE (§38).
@@ -6328,6 +6437,12 @@ THEME.apply();
     <div class="modal-b" id="modal-b"></div>
   </div>
 </div>
+
+<!-- THE BUILDER BAND (§129). Chrome-shaped but NOT inside the sticky chrome:
+     a band added to the pinned rows would move --chrome-h and every sticky
+     offset under it (§101.5) — it scrolls with the page instead, sitting
+     first above the content it narrates. paint() fills and empties it. -->
+<div id="buildband" hidden></div>
 
 <!-- The page's own half of the skeleton. It lives INSIDE #panel, which
      paint() replaces wholesale — so nothing has to remove it and it cannot
@@ -7312,9 +7427,9 @@ THEME.apply();
      It lives HERE rather than in authorize.js because the screen has to make
      the same decision — a page that offers a pen the server then refuses is
      the drift this whole file exists to prevent. */
-  /* ══ WHAT SOMEBODY IS CALLED, SHORT (§129.7) ═══════════════════════════
+  /* ══ WHAT SOMEBODY IS CALLED, SHORT (§130.7) ═══════════════════════════
      Moved here from config-data.js, where it had always lived, because the
-     PLAN now stores what the register's Name column shows (§129.7) and
+     PLAN now stores what the register's Name column shows (§130.7) and
      namedOn() below has to be able to recognise it. Two copies of a name rule
      is the drift lib/rules.js exists to prevent (§42) — the browser keeps thin
      wrappers that call these.
@@ -7376,10 +7491,10 @@ THEME.apply();
 
   function namedOn(row, person) {
     if (!row || !person) return false;
-    /* THE NAME THE REGISTER SHOWS COUNTS TOO (§129.7). The plan's owner and
+    /* THE NAME THE REGISTER SHOWS COUNTS TOO (§130.7). The plan's owner and
        collaborators are picked from the register's **Name** column now, not
        from the full legal name — so matching only `person.name` would put the
-       platform back where §129.1 found it: 32 of 78 tactics owned by somebody
+       platform back where §130.1 found it: 32 of 78 tactics owned by somebody
        it could not recognise. `known` is the typed short name; nameRuns() is
        every form the register can derive. */
     var me = [String(person.key || ""), String(person.name || ""),
@@ -9175,7 +9290,7 @@ var UNIT_ROLES = {
 
    The list is the particles this register actually contains, plus the European
    ones a client could arrive with. A word not on it is a name. */
-/* MOVED TO `lib/rules.js` (§129.7), and these are the browser's handles on it.
+/* MOVED TO `lib/rules.js` (§130.7), and these are the browser's handles on it.
    The plan stores what the register's Name column shows now, so the SERVER has
    to be able to recognise it too — and a name rule written twice is the drift
    that file exists to prevent (§42). Wrappers rather than renamed call sites:
@@ -14190,19 +14305,43 @@ function pillarsUsingTheme(ab){
    click into it crashes on a missing array. It arrives inactive-in-content
    but active in the nav, weighted at zero until the SMO fills its factor row,
    and with the group's clause labels as a starting skeleton. */
-function addBusinessUnit(){
-  var n = 1, key, name;
-  do { key = "newunit" + n; name = "New unit " + n; n++; } while (UNITS[key]);
+/* THE ONE MINTER FOR A UNIT (§129). It existed argless — "New unit 1", key
+   "newunit1" — and the builder gives it the three answers a real unit
+   arrives with: its name, its code prefix and its company. Three of its old
+   habits are corrected in the same breath, each a §-numbered fault:
+   · the key is minted from the NAME the way a function's and a person's are,
+     so the graph does not fill with "newunit3"s (§87's spirit);
+   · the weighting row's values are minted from the FACTOR LIST, never a
+     hardcoded rev/prof/imp/growth — a tenant that renamed a factor got a row
+     the composite could not read (§104.7's list-of-exceptions fault);
+   · `real` is TRUE: that flag marks DEMO content as illustrative (§21), and
+     a unit the SMO just created is the client's own. */
+function addBusinessUnit(name, prefix, company){
+  var nm = String(name || "").trim(), key;
+  if (nm) {
+    var base = nm.toLowerCase().replace(/[^a-z0-9]/g, "").slice(0, 18);
+    if (!base) base = "unit";
+    key = base;
+    var n2 = 2;
+    while (UNITS[key]) { key = base + n2; n2++; }
+  } else {
+    var n = 1;
+    do { key = "newunit" + n; nm = "New unit " + n; n++; } while (UNITS[key]);
+  }
   UNITS[key] = {
-    name: name, codePrefix: "NU", weight: 0, real: false, active: true, ukey: key,
+    name: nm,
+    codePrefix: (String(prefix || "").trim() || nm.replace(/[^A-Za-z0-9]/g, "").slice(0, 3) || "NU").toUpperCase(),
+    weight: 0, real: true, active: true, ukey: key,
+    company: company || null,
     clauses: GROUP.clauses.map(function(c, i){ return [c[0], "", key + "-F" + (i + 1)]; }),
     aspiration: "", endInMind: "",
     keyObjectives: [], swot: { s: [], w: [], o: [], t: [] }, items: []
   };
   UNIT_KEYS.push(key);
   UNIT_ROLES[key] = { head: null, custodian: null };
-  GROUP.weighting.units.push({ key: key, unit: name, rev: 0, prof: 0, imp: 1, growth: 0,
-    why: "" });
+  var wrow = { key: key, unit: nm, why: "" };
+  (GROUP.weighting.factors || []).forEach(function(f){ wrow[f.key] = 0; });
+  GROUP.weighting.units.push(wrow);
   syncWeights();
   return key;
 }
@@ -18324,14 +18463,23 @@ function pptxQCells(t){
      the gap cost the shape that carries every other row — a bad trade, and
      the mark can carry the alarm on its own.
 
-     SO THE MARK CHANGES COLOUR RATHER THAN THE TABLE CHANGING SHAPE: all four
-     quarters ticked in bold red says "this runs everywhere" in the one colour
-     the deck uses for nothing but a gap, beside a Missing owner in the same
-     red. §119.1 is untouched — a tactic that names SOME quarters is answering
-     the question, and its ticks stay the ordinary ink. */
+     SO THE MARK CHANGES RATHER THAN THE TABLE CHANGING SHAPE: the four cells
+     carry a mark in the one colour the deck uses for nothing but a gap,
+     beside a Missing owner in the same red. §119.1 is untouched — a tactic
+     that names SOME quarters is answering the question, and its ticks stay
+     the ordinary ink.
+
+     AND THE MARK IS A QUESTION MARK, NOT A TICK (§128.2, Islam: "rather than
+     the red check mark for the missing qs make it red question marks to
+     indicate the missing"). §128.1 shipped a red ✓ in all four, and a tick
+     is an AFFIRMATION whatever colour it wears — it says the tactic runs in
+     that quarter, so the row read "runs everywhere" to anybody who did not
+     also read the colour, which is the opposite of what it is there to say.
+     A `?` says the same thing the colour says: nobody answered this. The
+     colour is now the emphasis rather than the whole message. */
   var any = ["q1","q2","q3","q4"].some(function(q){ return t[q]; });
   if (!any) return ["q1","q2","q3","q4"].map(function(){
-    return { t:"\u2713", align:"ctr", alarm:true };
+    return { t:"?", align:"ctr", alarm:true };
   });
   return ["q1","q2","q3","q4"].map(function(q){
     return { t: t[q] ? "\u2713" : "", align: "ctr" };
@@ -19491,7 +19639,7 @@ function kindPill(it){
    theme and no owner read "Direction · theme ·" - two separators pointing at
    nothing. With the kind hidden that would have become "theme ·". */
 /* `ownerBelow` is the plan pane with the pen on, where the owner has its own
-   row now (§129.1) — the meta line drops it rather than saying it twice three
+   row now (§130.1) — the meta line drops it rather than saying it twice three
    inches above the control that changes it (§41's budget, in one line). */
 function pillarMeta(it, ownerBelow){
   var parts = [];
@@ -20229,12 +20377,20 @@ function renderGroupFoundation(){
      the operand went and the `+` went with it, leaving the `return` stranded.
      Cost: a blank page for every viewer, and no edit route to the group's
      clauses, purpose, aspiration or values for anyone including the SMO. */
+  /* Same first-line fix as the unit's (§129's audit): the lead opens with
+     the pen, a line can be removed, and the first one can be written. */
   return '<div class="fgrid"><div class="card"><h2 class="sec first">Who we are</h2>' +
       '<dl style="margin:0">' +
-      GROUP.clauses.map(function(c){
-        return '<div class="clause"><dt>' + esc(c[0]) + '</dt><dd>' +
-          fieldOr(gpg, c[1], "", function(v){ c[1] = v; }) + '</dd></div>';
-      }).join("") + '</dl></div>' +
+      GROUP.clauses.map(function(c, ci){
+        return '<div class="clause"><dt>' +
+          (gpg ? inputOr(gpg, c[0], "", function(v){ c[0] = v; }) : esc(c[0])) + '</dt><dd>' +
+          fieldOr(gpg, c[1], "", function(v){ c[1] = v; }) +
+          (gpg ? '<button class="xbtn" data-clauserm="group|' + ci +
+            '" title="Remove this line" aria-label="Remove this line">&times;</button>' : '') +
+          '</dd></div>';
+      }).join("") + '</dl>' +
+      (gpg ? '<div class="addrow"><button class="editbtn" data-clauseadd="group">+ Add a line</button></div>' : '') +
+      '</div>' +
       '<div class="fcol">' +
         '<div class="card"><h2 class="sec first">' + L("purpose","group") + '</h2>' +
         '<p class="statement">' + fieldOr(gpg, GROUP.mission, "big-field",
@@ -20639,7 +20795,7 @@ function selectOr(page, value, opts, cls, setter){
     optionsHtml(opts, function(v){ return String(value) === v; }) + '</select>';
 }
 
-/* ── AN OPTION, A LABELLED OPTION, AND A GROUP OF THEM (§129.1) ───────
+/* ── AN OPTION, A LABELLED OPTION, AND A GROUP OF THEM (§130.1) ───────
    Three shapes, and the plain string is BYTE-FOR-BYTE what selectOr always
    emitted: no `value` attribute, the text escaped, `selected` when it matches.
    That matters because the direction and compile-rule pickers (§114) pass a
@@ -20656,7 +20812,7 @@ function selectOr(page, value, opts, cls, setter){
 function optionHtml(o, chosen){
   var pair = o && typeof o === "object";
   var v = String(pair ? o.v : o), t = String(pair ? o.label : o);
-  /* A HINT IS NOT PART OF THE ANSWER (§129.9). It rides on the option as data
+  /* A HINT IS NOT PART OF THE ANSWER (§130.9). It rides on the option as data
      and searchsel.js draws it quietly beside the name in the popup; the
      option's TEXT — which is what the closed control shows and what the field
      stores — is the name alone. */
@@ -20674,7 +20830,7 @@ function optionsHtml(opts, chosen){
   }).join("");
 }
 
-/* ── THE FOURTH WAY TO DRAW A BOUND FIELD: SEVERAL ANSWERS (§129.1) ───
+/* ── THE FOURTH WAY TO DRAW A BOUND FIELD: SEVERAL ANSWERS (§130.1) ───
    A `<select multiple>`, for a field that holds a LIST. It is its own builder
    for the same reason selectOr is (§96): a control the callers build by hand
    is a control that ends up bound to nothing.
@@ -20700,7 +20856,7 @@ function selectManyOr(page, values, opts, cls, setter){
       function(v){ return has[v] === 1; }) + '</select>';
 }
 
-/* ══ WHO OR WHAT OWNS A LINE (§129.1) ═══════════════════════════════════
+/* ══ WHO OR WHAT OWNS A LINE (§130.1) ═══════════════════════════════════
    Islam: "for the owners in the plans, projects, tactics, milestones, let it
    be a searchable list from the registry", and asked whether that list is
    people or departments: "people or department".
@@ -20744,7 +20900,7 @@ function ownerAdder(){
     seen[k] = 1; out.push(n);
   }, has: function(n){ return !!seen[String(n == null ? "" : n).trim().toLowerCase()]; } };
 }
-/* ── THE REGISTER'S NAME, NOT THE FULL ONE (§129.7) ──────────────────
+/* ── THE REGISTER'S NAME, NOT THE FULL ONE (§130.7) ──────────────────
    Islam, looking at the list on his own tenant: *"for the drop down of names
    go for the list of names in the registry not the full name."* The register
    carries two facts about what somebody is called (§93.8) — **Name**, what the
@@ -20767,7 +20923,7 @@ function ownerAdder(){
    register does (§53.5). `namedOn()` learned this name in the same edit — the
    whole point of the picker is that the person it names may report the line,
    and a label the rules cannot recognise would have put that back. */
-/* ── AND WHERE THEY WORK, BESIDE THE NAME (§129.9) ───────────────────
+/* ── AND WHERE THEY WORK, BESIDE THE NAME (§130.9) ───────────────────
    Islam: *"for the names in the lists, you can make it the name - the unit or
    function so people don't get confused."* Two people called Ahmed on a
    register of a hundred are told apart by their name here and by nothing else,
@@ -20777,7 +20933,7 @@ function ownerAdder(){
    nowhere else: the cell shows the name, the plan STORES the name, the
    workbook and the deck print the name, and `namedOn()` matches the name. A
    label of "Ramy Behairy — Mobile" written into a tactic would name nobody the
-   platform can resolve, which is the fault §129.1 exists to fix (§129.7 makes
+   platform can resolve, which is the fault §130.1 exists to fix (§130.7 makes
    the same argument about the short name from the other side).
 
    `personAt()` IS THE ONE PAIR THAT ANSWERS THIS (§54), and `placeLabel()` the
@@ -21074,12 +21230,23 @@ function koBand(objectives, page, acKey, owner, isGroup){
 
 function renderUnitFoundation(u){
   var upg = authoring("foundation", "u_found") ? "foundation" : null;
+  /* THE FIRST LINE CAN BE WRITTEN (§129's audit). The pen edited a clause's
+     TEXT and never its lead, and an empty list rendered nothing to edit and
+     no way to add — so a from-scratch unit could not say who it is at all
+     (§61's trap on the oldest surface in the product). The lead opens with
+     the pen because the leads are the unit's own words, not a fixed form. */
   return '<div class="fgrid"><div class="card"><h2 class="sec first">Who we are</h2>' +
       '<dl style="margin:0">' +
-      u.clauses.map(function(c){
-        return '<div class="clause"><dt>' + esc(c[0]) + '</dt><dd>' +
-          fieldOr(upg, c[1], "", function(v){ c[1] = v; }) + '</dd></div>';
-      }).join("") + '</dl></div>' +
+      u.clauses.map(function(c, ci){
+        return '<div class="clause"><dt>' +
+          (upg ? inputOr(upg, c[0], "", function(v){ c[0] = v; }) : esc(c[0])) + '</dt><dd>' +
+          fieldOr(upg, c[1], "", function(v){ c[1] = v; }) +
+          (upg ? '<button class="xbtn" data-clauserm="' + esc(u.ukey) + '|' + ci +
+            '" title="Remove this line" aria-label="Remove this line">&times;</button>' : '') +
+          '</dd></div>';
+      }).join("") + '</dl>' +
+      (upg ? '<div class="addrow"><button class="editbtn" data-clauseadd="' + esc(u.ukey) +
+        '">+ Add a line</button></div>' : '') + '</div>' +
       aspirationCard(L("aspiration","bu"), u.aspiration, u.endInMind, u.keyObjectives, "foundation",
         function(v){ u.aspiration = v; }, function(v){ u.endInMind = v; }, "u_found",
         false, u) +
@@ -21091,15 +21258,24 @@ function renderUnitFoundation(u){
    Static, like the foundation. Context, not a score — nothing here feeds a
    number. */
 function renderUnitAnalysis(u){
+  /* THE FIRST LINE CAN BE WRITTEN (§129's audit). The pen edited what a file
+     had put here and an empty quadrant offered nothing at all — so a SWOT
+     could only ever ARRIVE, never start. Add per quadrant, remove per line,
+     both re-asked on the click (§48.2). */
   var box = function(cls, key, title){
     var list = u.swot[key] || [];
+    var ed = authoring("analysis", "u_anal");
     return '<section class="' + cls + '"><h3>' + title + '</h3><ol class="swotlist">' +
       list.map(function(x, i){
         return '<li><span class="swot-n">' + (i + 1) + '</span>' +
-          (authoring("analysis", "u_anal")
-            ? fieldOr("analysis", x, "", function(v){ list[i] = v; })
+          (ed
+            ? fieldOr("analysis", x, "", function(v){ list[i] = v; }) +
+              '<button class="xbtn" data-swrm="' + esc(u.ukey) + '|' + key + '|' + i +
+              '" title="Remove this line" aria-label="Remove this line">&times;</button>'
             : '<span>' + esc(x) + '</span>') + '</li>';
-      }).join("") + '</ol></section>';
+      }).join("") + '</ol>' +
+      (ed ? '<div class="addrow"><button class="editbtn" data-swadd="' + esc(u.ukey) + '|' + key +
+        '">+ Add</button></div>' : '') + '</section>';
   };
   return '<div class="swot hoverpen">' + penBtn("analysis", "u_anal") +
     box("s","s","Strengths") + box("w","w","Weaknesses") +
@@ -21496,7 +21672,7 @@ function railPick(c){
   for (var i = 0; i < list.length; i++) if (list[i].id === want) return list[i];
   return list[0];
 }
-/* ── ONE ITEM STILL GETS THE RAIL (§129.2, reversing the line below) ────
+/* ── ONE ITEM STILL GETS THE RAIL (§130.2, reversing the line below) ────
    It used to read "below two items there are no siblings to move between, so
    the rail is a column of wasted width" — true about the width, and it made
    the platform lay the same page out two different ways. Islam, of a function
@@ -21947,10 +22123,17 @@ function projPerformanceBody(p, fk){
    is the one that gets left behind (§59). */
 function fnNothingBehind(fk){
   var f = FUNCTIONS[fk];
+  /* And the person who could give it one is offered the act, not only the
+     directions (\u00a7118's audit, \u00a761's rule): the button re-asks the shared
+     rule on the click, because this note has no pen to gate it. */
   return '<div class="note">' + esc(f ? f.name : "This function") +
     ' improves no capability yet, so there is nothing here to plan or report. ' +
-    'Allocate one on <b>Setup \u2192 Capabilities</b>, or set this function to plan ' +
-    'in ' + L("pillar", "bu").toLowerCase() + ' on <b>Setup \u2192 Functions</b>.</div>';
+    (mayAuthor("k_found", "fn:" + fk)
+      ? '<button class="linkbu" data-fncapadd="' + esc(fk) + '">Add its first capability</button> &mdash; ' +
+        'or allocate one on <b>Setup \u2192 Capabilities</b>, or set this function to plan in ' +
+        L("pillar", "bu").toLowerCase() + ' on <b>Setup \u2192 Functions</b>.'
+      : 'Allocate one on <b>Setup \u2192 Capabilities</b>, or set this function to plan ' +
+        'in ' + L("pillar", "bu").toLowerCase() + ' on <b>Setup \u2192 Functions</b>.') + '</div>';
 }
 
 function renderFnPerformance(fnKey){
@@ -22077,7 +22260,7 @@ function projFrontMatter(p, ed){
   }
   return '<div class="pfront">' +
     '<div class="pfcol">' +
-      /* THE OWNER IS A PICK, NOT A TYPED LINE (§129.1). Read mode is
+      /* THE OWNER IS A PICK, NOT A TYPED LINE (§130.1). Read mode is
          untouched — a name, or "Missing" where there is none. */
       row("l", "Owner", ed
         ? ownerSel("plan", p.owner, function(v){ p.owner = v; })
@@ -22635,7 +22818,7 @@ function unitPlanBody(it, u, railed){
          SAME pen that corrects the rest of the plan, and behind the same gate
          (§31): who is named on a tactic decides who may report it, so it is
          not a field the people being measured hold. */
-      /* TICKED FROM THE SAME LIST THE OWNER IS PICKED FROM (§129.1). Islam:
+      /* TICKED FROM THE SAME LIST THE OWNER IS PICKED FROM (§130.1). Islam:
          "the collaborators should be a searchable drop down with check marks
          for the list to select multiple people or departments." Emptied, the
          key is DELETED rather than left as an empty array (§50.6): a tactic
@@ -22656,7 +22839,7 @@ function unitPlanBody(it, u, railed){
         (mayEditPlan() ? penBtn("plan", "u_plan") : '') + '</div>'
     : pillarBand(code, it.name) + paneActs("plan", "u_plan");
   return head +
-    /* ── THE PILLAR'S OWNER, CORRECTABLE AT LAST (§129.1) ────────────────
+    /* ── THE PILLAR'S OWNER, CORRECTABLE AT LAST (§130.1) ────────────────
        Islam, asked whether the pillar's owner should join the other four:
        "the pillar as well yes". It has been READ-ONLY EVERYWHERE since the
        pillar model existed — shown in the rail's small line and in `.pmeta`,
@@ -22710,9 +22893,18 @@ function renderUnitPlan(u){
      on a supporting function's own page — and only ever appeared there,
      because before §61 a function with no plan was missing from the navigation
      and there was no way to reach the sentence. */
+  /* AN EMPTY PLAN IS WHERE THE FIRST PILLAR GOES (\u00a7118's audit, \u00a761's shape
+     from the capability side): the note used to point at Import and offer
+     nothing, and the pen had no pane to sit on \u2014 so the only way to start a
+     plan here was to upload one. The button asks mayEditPlan() itself
+     because there is no pen on an empty page to gate it (\u00a761's trap: the
+     control's anchor is the thing that does not exist yet). */
   if (!sel) return '<div class="note">' + esc(u.name) + ' has no ' +
     L("pillar", "bu").toLowerCase() + ' yet, so there is no plan to show. ' +
-    'A plan arrives as a file: <b>Setup \u2192 Import</b>, the pillars template.</div>';
+    (typeof mayEditPlan === "function" && mayEditPlan()
+      ? '<button class="linkbu" data-rowadd="pillar|' + esc(u.ukey) +
+        '">Add the first one</button> &mdash; or upload a plan on <b>Setup \u2192 Import &amp; plans</b>.'
+      : 'A plan arrives as a file: <b>Setup \u2192 Import</b>, the pillars template.') + '</div>';
   /* Key objectives are NOT repeated here. They are authored on Foundation and
      read on Performance \u2014 one place to author, one place to read. Showing them
      again above the rail was duplication, and a duplicated table is a table
@@ -22785,9 +22977,17 @@ function renderFnFoundation(fnKey){
       ' \u2014 the aspiration, the SWOT and the key objectives are set there, and ' +
       'what is planned here is the work under them. Open <b>Plan</b> to see it.</div>';
   }
+  var ed = authoring("capfoundation", "k_found");
   return editBar("capfoundation", "k_found") + caps.map(function(c){
     var f = functionOf(c.fn);
-    var koBlock = c.keyObjectives.length
+    /* A CAPABILITY'S OBJECTIVES CAN FINALLY BE AUTHORED HERE (§129's audit).
+       They could arrive in a projects file and be READ on this page, and no
+       surface in the product could write the first one — the same
+       import-only trap as the SWOT and the clauses. Behind the page's own
+       pen; a row minted empty carries the same shape the seed's rows have. */
+    var koBlock = ed
+      ? capKoEdit(c)
+      : c.keyObjectives.length
       ? '<div class="ohead"><span>Objective</span><span>This year</span><span>Weight</span></div>' +
         c.keyObjectives.map(function(m){
           return '<div class="orow"><span class="on">' + esc(m.name) + '</span>' +
@@ -22809,7 +23009,37 @@ function renderFnFoundation(fnKey){
         '<span class="pill horizon">Horizon &middot; ' + horizonLabel() + '</span></div>' +
         koBlock + '</div>' +
     '</div></div>';
-  }).join("");
+  }).join("") +
+  /* A second capability for the same function, added where the first is
+     described. addCapability() is the ONE minter (§51.11) — the Temple's
+     add and this one cannot drift. */
+  (ed ? '<div class="addrow"><button class="editbtn" data-fncapadd="' + esc(fk) +
+    '">+ Add a capability</button></div>' : '');
+}
+
+/* The capability objectives editor — koEdit's shape with the WEIGHT column a
+   capability's rows actually carry, addressed by capId + index the way the
+   Temple's tables are (no ids: the seed's rows never had them, and §96.4's
+   rule about mixed lists says do not mint some now). */
+function capKoEdit(c){
+  var pg = "capfoundation";
+  return '<div class="scroll"><table><thead><tr><th>Objective</th><th class="cc">Dir.</th>' +
+    '<th class="cc">This year</th><th class="cc">Compile</th><th class="cc">Weight %</th><th></th></tr></thead><tbody>' +
+    c.keyObjectives.map(function(m, i){
+      return '<tr><td>' + inputOr(pg, m.name, "", function(v){ m.name = v; }) + '</td>' +
+        '<td class="cc">' + selectOr(pg, m.dir || "≥", ["≥", "≤"], "",
+          function(v){ m.dir = v; }) + '</td>' +
+        '<td class="cc">' + inputOr(pg, m.target || "", "mono",
+          function(v){ m.target = v; }) + '</td>' +
+        '<td class="cc">' + selectOr(pg, m.compile || "Latest", ["Sum", "Latest", "Average"], "",
+          function(v){ m.compile = v; }) + '</td>' +
+        '<td class="cc">' + inputOr(pg, m.weight == null ? "" : String(m.weight), "mono",
+          function(v){ m.weight = (v === "" || !isFinite(+v)) ? null : +v; }) + '</td>' +
+        '<td class="cc"><button class="rmbtn" data-capkorm="' + esc(c.id) + '|' + i +
+          '">Remove</button></td></tr>';
+    }).join("") + '</tbody></table></div>' +
+    '<div class="addrow"><button class="editbtn" data-capkoadd="' + esc(c.id) +
+      '">+ Add an objective</button></div>';
 }
 
 
@@ -27093,6 +27323,13 @@ function renderImport(){
       '<span class="pill kind">' + (isPlan
         ? "One generic template &middot; one unit per file"
         : "One file per unit or capability") + '</span></div>' +
+    /* THE SECOND DOOR (§129, spec 020): a plan can be BUILT here as well as
+       uploaded — the two are siblings on the page where plans arrive, and
+       building over a standing plan archives it exactly as an upload does. */
+    '<div class="bdoor"><b>Build it here</b>' +
+      '<span class="bwhy">A guided flow through the plan’s own pages &mdash; pick a unit or a ' +
+      'function, or create one, and author the plan directly. No file needed.</span>' +
+      '<button class="bprim" data-buildplan="1">Build a plan</button></div>' +
     section("", (isPlan ? "Plan" : "Progress") + " import", null,
       '<div class="imp">' + step1 + step2 + step3 + '</div>');
 }
@@ -28941,6 +29178,617 @@ var TKFILTER = {};
 
 </script>
 <script>
+/* ══ THE PLAN BUILDER (§129, spec 020) ═══════════════════════════════
+
+   The SMO team builds a plan ON the platform: pick a unit or a function —
+   or create one — and author the whole plan through the plan's own pages.
+
+   THREE DECISIONS SHAPE EVERYTHING HERE, all Islam's:
+
+   · A MAP, NOT A MARCH. The band under the tab row is one chip per section
+     of the plan, each openable in any order. Nothing waits on a previous
+     step, and the left-to-right order is a suggestion, never a gate.
+
+   · A ROW IS ADDED WHOLE. Every "+ Add" in build mode opens a form asking
+     that row kind's fields in the order the outcome reads them (§116's
+     dialog shape, generalised). The name is what makes Add live; anything
+     else left empty is NAMED before the row lands and reads as missing
+     after — asked for, never forced, so "we have not set the target yet"
+     stays sayable.
+
+   · LIVE IMMEDIATELY, NOTHING STORED. The plan appears as it is built,
+     like pen edits today. Progress is DERIVED from the plan itself — the
+     chips read the data, so pausing costs nothing and there is no draft
+     flag for anybody to forget to clear. BUILDER is a screen mode, never
+     state-graph content (§25, §47.1 — and it is not even a preference, so
+     it is not stored at all: reopening the door reads the same truth off
+     the data).
+
+   WHAT THIS FILE IS AND IS NOT. It holds the builder's STATE, its HTML and
+   its data logic — everything that can live in the global scope the other
+   sources share. It never touches paint(), current, the modal or any other
+   shell-closure state: the shell owns navigation and dialogs, and wires the
+   data-b* attributes this file's HTML carries (the same contract every
+   config page already uses). Nothing in here writes a second copy of a
+   rule: rows are minted by the SAME add*()/koMint() the pen uses, cleared
+   plans go through the SAME clearUnitPlan()/clearFunction() the import and
+   Clear plan use (so starting fresh archives, §49.2), and the server
+   classifies every edit exactly as it classifies the pen's. */
+
+var BUILDER = null;       /* { target } while a build is underway */
+var BFORM = null;         /* { kind, ctx, draft, added } while a row form is open */
+var BCHOOSE = null;       /* { side, confirm } while the chooser is open */
+
+/* ── Which way a subject plans ────────────────────────────────────── */
+function builderRoute(target){
+  var t = String(target || "");
+  if (t.indexOf("fn:") !== 0) return UNITS[t] ? "unit" : null;
+  var f = FUNCTIONS[t.slice(3)];
+  if (!f) return null;
+  return fnPlansInPillars(f) ? "fnpillars" : "fnprojects";
+}
+function builderSubjectName(target){
+  /* Not unitLike(): that resolver answers only what the UNIT PAGES draw, and
+     a projects function is not drawn by them — asked through it, every
+     projects function built here was nameless (found by driving, §51.7). */
+  var t = String(target || "");
+  if (t.indexOf("fn:") === 0) { var f = FUNCTIONS[t.slice(3)]; return f ? f.name : ""; }
+  return UNITS[t] ? UNITS[t].name : "";
+}
+function builderHasPlan(target){
+  var r = builderRoute(target);
+  if (r === "unit" || r === "fnpillars")
+    return !planIsEmpty(unitSnapshotCounts(unitPlanSnapshot(unitLike(target))));
+  if (r === "fnprojects") return fnHasWork(String(target).slice(3));
+  return false;
+}
+
+/* ── The sections, per route ──────────────────────────────────────────
+   Each names the tab and section that show it, the EDIT_PAGE key whose pen
+   the chip opens, and how its chip reads. `state()` answers one of
+   "ok" | "part" | "empty" with a short mark for the chip; the hint is the
+   band's one sentence about the section. All of it reads the DATA — nothing
+   here is stored, so the chips cannot drift from the plan (§53.5). */
+function builderSections(target){
+  var route = builderRoute(target);
+  var u = function(){ return unitLike(target); };
+  var caps = function(){
+    return route === "fnprojects" ? capsOfFunction(String(target).slice(3)) : [];
+  };
+  var listChip = function(n){ return n ? { s:"part", mark:String(n) } : { s:"empty", mark:"○" }; };
+
+  if (route === "unit" || route === "fnpillars") {
+    var secs = [];
+    if (route === "unit") {
+      secs.push({ k:"found", label:"Foundation", tab:"strategy", sec:"found", pen:"foundation",
+        chip:function(){
+          var x = u(), filled = (x.aspiration ? 1 : 0) + (x.endInMind ? 1 : 0) +
+            ((x.clauses || []).some(function(c){ return c && c[1]; }) ? 1 : 0);
+          return filled === 3 ? { s:"ok", mark:"✓" } : filled ? { s:"part", mark:"…" } : { s:"empty", mark:"○" };
+        },
+        hint:function(){ return '<b>Foundation</b> — who this unit is: the “who we are” lines, the aspiration and the end in mind.'; } });
+      secs.push({ k:"obj", label:"Objectives", tab:"strategy", sec:"found", pen:"foundation", scrollTo:".koband",
+        chip:function(){ return listChip(u().keyObjectives.length); },
+        hint:function(){
+          var n = u().keyObjectives.length;
+          return '<b>' + esc(L("keyobj","bu")) + '</b> — what this unit is judged on. Name, direction, targets and compile; 3–5 is typical.' +
+            (n ? ' <b>' + n + ' added.</b>' : '');
+        } });
+      secs.push({ k:"swot", label:"SWOT", tab:"strategy", sec:"swot", pen:"analysis",
+        chip:function(){
+          var s = u().swot || {}, n = ["s","w","o","t"].reduce(function(a,q){ return a + ((s[q] || []).length); }, 0);
+          return listChip(n);
+        },
+        hint:function(){ return '<b>SWOT</b> — the analysis the ' + esc(L("pillar","bu").toLowerCase()) + ' are reasoned from. Empty is allowed; say what you know.'; } });
+    }
+    secs.push({ k:"plan", label:L("pillar", "bu"),
+      tab:route === "unit" ? "strategy" : "fnstrat",
+      sec:route === "unit" ? "plan" : "proj", pen:"plan",
+      chip:function(){ return listChip(u().items.length); },
+      hint:function(){
+        var x = u(), m = 0, t = 0;
+        x.items.forEach(function(p){ m += p.measures.length; t += p.tactics.length; });
+        return '<b>' + esc(L("pillar","bu")) + '</b> — the work the strategy commits to, each with its measures and tactics.' +
+          (x.items.length ? ' <b>' + x.items.length + ' · ' + m + ' measures · ' + t + ' tactics so far.</b>' : '');
+      } });
+    secs.push(builderReviewSection());
+    return secs;
+  }
+
+  if (route === "fnprojects") {
+    return [
+      { k:"def", label:"Definitions", tab:"fnstrat", sec:"found", pen:"capfoundation",
+        chip:function(){
+          var cs = caps(), have = cs.filter(function(c){ return c.def; }).length;
+          if (!cs.length) return { s:"empty", mark:"○" };
+          return have === cs.length ? { s:"ok", mark:"✓" } : have ? { s:"part", mark:"…" } : { s:"empty", mark:"○" };
+        },
+        hint:function(){ return '<b>Definitions</b> — what each capability is, in a sentence somebody outside the function would recognise.'; } },
+      { k:"obj", label:"Objectives", tab:"fnstrat", sec:"found", pen:"capfoundation",
+        chip:function(){
+          return listChip(caps().reduce(function(a,c){ return a + (c.keyObjectives || []).length; }, 0));
+        },
+        hint:function(){ return '<b>' + esc(L("keyobj","bu")) + '</b> — optional: a capability with none is judged by its projects.'; } },
+      { k:"proj", label:"Projects", tab:"fnstrat", sec:"proj", pen:"plan",
+        chip:function(){
+          return listChip(caps().reduce(function(a,c){ return a + (c.projects || []).length; }, 0));
+        },
+        hint:function(){
+          var d = 0, o = 0, ms = 0, n = 0;
+          caps().forEach(function(c){ (c.projects || []).forEach(function(p){
+            n++; d += p.deliverables.length; o += p.outcomes.length; ms += p.milestones.length; }); });
+          return '<b>Projects</b> — the enhancement work: front matter, deliverables, outcomes, milestones.' +
+            (n ? ' <b>' + n + ' · ' + d + ' deliverables · ' + o + ' outcomes · ' + ms + ' milestones.</b>' : '');
+        } }
+      , builderReviewSection()];
+  }
+  return [];
+}
+function builderReviewSection(){
+  return { k:"review", label:"Review", tab:null, sec:null, pen:null,
+    chip:function(){ return { s:"empty", mark:"○" }; },
+    hint:function(){ return '<b>Review</b> — the plan as it stands, gaps named.'; } };
+}
+function builderSectionByKey(target, k){
+  return builderSections(target).filter(function(s){ return s.k === k; })[0] || null;
+}
+
+/* Which chip the page on screen belongs to. Derived, never stored — the
+   band has to agree with the navigation even when the navigation moved by
+   its own tabs rather than by a chip. */
+function builderCurrentKey(target, tabKey, secOf){
+  var secs = builderSections(target), hit = null;
+  secs.forEach(function(s){
+    if (s.tab && s.tab === tabKey && s.sec === (secOf[s.tab] || null) && !hit) hit = s.k;
+  });
+  return hit;
+}
+
+/* ── The band ─────────────────────────────────────────────────────── */
+function builderBandHtml(tabKey, secOf){
+  if (!BUILDER) return "";
+  var target = BUILDER.target;
+  var cur = builderCurrentKey(target, tabKey, secOf);
+  var secs = builderSections(target);
+  var chips = secs.map(function(s){
+    var c = s.chip();
+    return '<button class="bchip' + (s.k === cur ? " cur" : "") + '" data-bnav="' + s.k + '"' +
+      ' title="Open ' + esc(s.label) + '">' +
+      '<span class="bst ' + c.s + '">' + c.mark + '</span>' + esc(s.label) + '</button>';
+  }).join("");
+  var curSec = secs.filter(function(s){ return s.k === cur; })[0];
+  return '<div class="bband"><span class="bwho">Building this plan — ' +
+      esc(builderSubjectName(target)) + '</span>' +
+    '<span class="bchips" role="tablist">' + chips + '</span>' +
+    '<span class="bhint">' + (curSec ? curSec.hint() :
+      'Open any section — the order is a suggestion, not a gate.') + '</span>' +
+    '<span class="bacts"><button class="blink" data-bpause="1" title="Leave the builder — everything built stays; come back from Setup → Import &amp; plans">Pause</button>' +
+    '<button class="bprim" data-bfinish="1">Finish building</button></span></div>';
+}
+
+/* ── The chooser ──────────────────────────────────────────────────── */
+function builderChooserHtml(){
+  var side = (BCHOOSE && BCHOOSE.side) || "units";
+  var seg = '<div class="bseg">' +
+    '<button data-bside="units" aria-pressed="' + (side === "units") + '">Business units</button>' +
+    '<button data-bside="fns" aria-pressed="' + (side === "fns") + '">Supporting functions</button></div>';
+
+  var rows = (side === "units"
+    ? activeKeys().map(function(k){ return { t:k, name:UNITS[k].name }; })
+    : activeFunctionKeys().map(function(k){
+        return { t:"fn:" + k, name:FUNCTIONS[k].name,
+                 fmt:fnPlansInPillars(FUNCTIONS[k]) ? L("pillar","bu").toLowerCase() : "projects" };
+      })
+  ).map(function(r){
+    var has = builderHasPlan(r.t);
+    var confirming = BCHOOSE && BCHOOSE.confirm === r.t;
+    return '<div class="brow">' +
+      '<b>' + esc(r.name) + '</b>' +
+      (r.fmt ? '<span class="bwhy">plans in ' + esc(r.fmt) + '</span>' : '') +
+      '<span class="bstat ' + (has ? "has" : "empty") + '">' + (has ? "Has a plan" : "Empty") + '</span>' +
+      (confirming
+        ? '<span class="bconfirm">Archive today’s plan and start fresh? ' +
+            '<button class="bdanger" data-bfresh="' + esc(r.t) + '">Yes, archive it</button>' +
+            '<button class="blink" data-bnofresh="1">Cancel</button></span>'
+        /* A subject with content gets TWO ways in: Continue picks up a
+           paused build exactly where the data stands (§129: progress is the
+           plan itself, so nothing was ever "saved" to resume), and Start
+           fresh archives first. One button that always cleared would make
+           pausing cost the whole plan. */
+        : has
+        ? '<button class="bgo" data-bcont="' + esc(r.t) + '">Continue</button>' +
+          '<button class="blink" data-bpick="' + esc(r.t) + '">Start fresh</button>'
+        : '<button class="bgo" data-bpick="' + esc(r.t) + '">Build</button>') +
+      '</div>';
+  }).join("");
+
+  return seg + '<div class="blist">' + (rows ||
+      '<div class="brow"><span class="bwhy">Nothing here yet — create one below.</span></div>') + '</div>' +
+    '<div class="bnewrow">' +
+      '<button class="blink" data-bnew="unit">+ New business unit</button>' +
+      '<button class="blink" data-bnew="fn">+ New supporting function</button></div>' +
+    '<p class="bfoot">Starting fresh archives the standing plan first — restorable from ' +
+      '<b>Archived plans</b>. Nothing the builder does is a deletion.</p>';
+}
+
+/* Starting fresh IS the import's replace and the row's Clear plan — the same
+   functions, so the same archive (§49.2). A pillars function goes through the
+   writable view and writes back, exactly as an uploaded replacement does. */
+function builderStartFresh(target){
+  var route = builderRoute(target);
+  var why = "replaced by a plan built on the platform";
+  if (route === "unit") clearUnitPlan(UNITS[target], why);
+  else if (route === "fnpillars") {
+    var fk = String(target).slice(3), w = unitLikeWritable(target);
+    clearUnitPlan(w, why);
+    fnWriteBack(fk, w);
+  }
+  else if (route === "fnprojects") clearFunction(String(target).slice(3), "plan", why);
+}
+
+/* Entering a projects function that has no capability yet mints its first,
+   named after the function — a projects plan has to hang off something, and
+   the Temple's addCapability() is the one place that mints one (§51.11). */
+function builderEnsureCapability(target){
+  if (builderRoute(target) !== "fnprojects") return;
+  var fk = String(target).slice(3);
+  if (capsOfFunction(fk).length) return;
+  var c = addCapability(fk);
+  c.name = FUNCTIONS[fk].name;
+}
+
+/* ── The row forms ────────────────────────────────────────────────────
+   One definition per row kind: the fields IN THE ORDER THE OUTCOME READS
+   THEM, which is the whole point (Islam: "the template should protect the
+   structure of the outcome"). `req` is the one field that makes Add live;
+   everything else is asked, named while empty, and never forced. The
+   vocabulary is the pen's own selectOr lists — never a second copy (§53.5). */
+function bformDef(kind, ctx){
+  var dirSeg = { k:"dir", label:"Direction", type:"seg", def:"≥",
+                 opts:[["≥","≥ at least"],["≤","≤ at most"]] };
+  var compileSeg = { k:"compile", label:"Compile rule — how the year’s figure is read",
+                     type:"seg", def:"Latest",
+                     opts:[["Latest","Latest"],["Sum","Sum"],["Average","Average"]] };
+  var defs = {
+    pillar: { title:"Add a " + L("pillar","bu").toLowerCase().replace(/s$/, ""),
+      fields:[
+        { k:"name", label:"Name", req:true, ph:"What this " + L("pillar","bu").toLowerCase().replace(/s$/, "") + " is called" },
+        { k:"sub", label:"One line under the name", ph:"e.g. the end-state it reaches for" },
+        { k:"theme", label:"Theme", type:"select",
+          opts:[["","— cross-cutting, no theme —"]].concat(
+            GROUP.themes.map(function(t){ return [t.ab, t.ab + " · " + t.name]; })) },
+        { k:"owner", label:"Owner", ph:"Who answers for it" }
+      ] },
+    measure: { title:"Add a measure",
+      fields:[
+        { k:"name", label:"Measure", req:true, ph:"What is measured" },
+        dirSeg,
+        { k:"target", label:"Target this year", mono:true, ph:"e.g. 90%" },
+        { k:"target3y", label:horizonSet() ? "Target by " + esc(String(GROUP.horizon)) : "3-year target", mono:true, ph:"optional" },
+        compileSeg
+      ] },
+    tactic: { title:"Add a tactic",
+      fields:[
+        { k:"name", label:"Tactic", req:true, ph:"The work itself, as a sentence" },
+        { k:"owner", label:"Owner", ph:"Who runs it" },
+        { k:"q", label:"Quarters it is due in", type:"quarters" }
+      ] },
+    objective: { title:"Add a key objective",
+      fields:[
+        { k:"name", label:"Objective", req:true, ph:"What the unit is judged on" },
+        dirSeg,
+        { k:"target", label:"Target this year", mono:true },
+        { k:"target3y", label:horizonSet() ? "Target by " + esc(String(GROUP.horizon)) : "3-year target", mono:true, ph:"optional" },
+        compileSeg
+      ] },
+    capko: { title:"Add a key objective",
+      fields:[
+        { k:"name", label:"Objective", req:true, ph:"What this capability is judged on" },
+        dirSeg,
+        { k:"target", label:"Target this year", mono:true },
+        compileSeg,
+        { k:"weight", label:"Weight %", mono:true, ph:"its share of the capability’s score" }
+      ] },
+    cap: { title:"Add a capability",
+      fields:[
+        { k:"name", label:"Capability", req:true, ph:"What the function builds or runs" },
+        { k:"def", label:"Definition", type:"long", ph:"What it is, in a sentence" }
+      ] },
+    project: { title:"Add a project",
+      fields:[
+        { k:"name", label:"Project", req:true, ph:"What the project is called" },
+        { k:"owner", label:"Owner", ph:"Who answers for it" },
+        { k:"start", label:"Start", mono:true, ph:"e.g. Q1 2026" },
+        { k:"end", label:"End", mono:true, ph:"e.g. Q4 2026" },
+        { k:"brief", label:"Brief", type:"long", ph:"Why this project exists, in two sentences" }
+      ] },
+    deliverable: { title:"Add a deliverable",
+      fields:[
+        { k:"name", label:"Deliverable", req:true, ph:"What the project hands over" },
+        { k:"kind", label:"Measured as", type:"seg", def:"binary",
+          opts:[["binary","Done or not"],["pct","% of progress"]] },
+        { k:"due", label:"Due date", mono:true, ph:"e.g. Sep 2026" }
+      ] },
+    outcome: { title:"Add an outcome",
+      fields:[
+        { k:"name", label:"Outcome", req:true, ph:"What the project is meant to change" },
+        dirSeg,
+        { k:"target", label:"Target", mono:true },
+        { k:"measureAt", label:"Measure date", mono:true, ph:"when it is read, e.g. Q4 2026" }
+      ] },
+    milestone: { title:"Add a milestone",
+      fields:[
+        { k:"name", label:"Milestone", req:true, ph:"Short name" },
+        { k:"covers", label:"Description", type:"long", ph:"What done looks like" },
+        { k:"owner", label:"Owner" },
+        { k:"finish", label:"Due date", mono:true, ph:"e.g. March 2026" }
+      ] },
+    clause: { title:"Add a line to “Who we are”",
+      fields:[
+        { k:"label", label:"The lead — the words down the left", req:true, ph:"e.g. We serve" },
+        { k:"text", label:"The line itself", type:"long" }
+      ] },
+    swot: { title:"Add " + ({ s:"a strength", w:"a weakness", o:"an opportunity", t:"a threat" }[ctx && ctx.q] || "a line"),
+      fields:[
+        { k:"text", label:{ s:"Strength", w:"Weakness", o:"Opportunity", t:"Threat" }[ctx && ctx.q] || "Line",
+          req:true, type:"long" }
+      ] },
+    newunit: { title:"New business unit", noAnother:true, verb:"Create",
+      fields:[
+        { k:"name", label:"Name", req:true },
+        { k:"prefix", label:"Code prefix", mono:true, ph:"e.g. LE — minted from the name if left empty" },
+        { k:"company", label:"Company", type:"select",
+          opts:COMPANY_KEYS.filter(function(ck){ return companyActive(ck); })
+            .map(function(ck){ return [ck, COMPANIES[ck].name]; })
+            .concat([["","— its own company —"]]) }
+      ] },
+    newfn: { title:"New supporting function", noAnother:true, verb:"Create",
+      fields:[
+        { k:"name", label:"Name", req:true },
+        { k:"format", label:"Plans in", type:"seg", def:"projects",
+          opts:[["projects","Projects"],["pillars",L("pillar","bu")]] }
+      ] }
+  };
+  return defs[kind] || null;
+}
+
+/* What the form would leave empty, by label — said BEFORE the row is added,
+   in the amber line, so finishing with a gap is a decision (§87's "named,
+   not guessed" applied to a form). */
+function bformMissing(def, draft){
+  return def.fields.filter(function(f){
+    if (f.req || f.type === "quarters") return false;
+    var v = draft[f.k];
+    if (f.type === "seg") return false;              /* a seg always has a value */
+    if (f.type === "select") return false;           /* an empty select is a real answer */
+    return !(v && String(v).trim());
+  }).map(function(f){ return f.label.replace(/ —.*$/, ""); });
+}
+
+function bformFieldHtml(f, draft){
+  var v = draft[f.k] != null ? draft[f.k] : (f.def != null ? f.def : "");
+  var lab = '<div class="bfl">' + f.label + '</div>';
+  if (f.type === "seg") {
+    return '<div class="bff">' + lab + '<div class="bfseg" data-bfseg="' + f.k + '">' +
+      f.opts.map(function(o){
+        return '<button type="button" data-bfv="' + esc(o[0]) + '" aria-pressed="' + (v === o[0]) + '">' +
+          o[1] + '</button>';
+      }).join("") + '</div></div>';
+  }
+  if (f.type === "select") {
+    return '<div class="bff">' + lab + '<select class="bfi" data-bf="' + f.k + '">' +
+      f.opts.map(function(o){
+        return '<option value="' + esc(o[0]) + '"' + (v === o[0] ? " selected" : "") + '>' + esc(o[1]) + '</option>';
+      }).join("") + '</select></div>';
+  }
+  if (f.type === "quarters") {
+    return '<div class="bff">' + lab + '<div class="bfseg bfq" data-bfq="1">' +
+      [1,2,3,4].map(function(q){
+        return '<button type="button" data-bfqn="' + q + '" aria-pressed="' + !!draft["q" + q] + '">Q' + q + '</button>';
+      }).join("") + '</div></div>';
+  }
+  if (f.type === "long") {
+    return '<div class="bff">' + lab + '<textarea class="bfi" rows="2" data-bf="' + f.k + '"' +
+      (f.ph ? ' placeholder="' + esc(f.ph) + '"' : '') + '>' + esc(String(v)) + '</textarea></div>';
+  }
+  return '<div class="bff">' + lab + '<input class="bfi' + (f.mono ? " mono" : "") + '" data-bf="' + f.k +
+    '" value="' + esc(String(v)) + '"' + (f.ph ? ' placeholder="' + esc(f.ph) + '"' : '') + '></div>';
+}
+
+function bformHtml(){
+  if (!BFORM) return "";
+  var def = bformDef(BFORM.kind, BFORM.ctx), d = BFORM.draft;
+  var miss = bformMissing(def, d);
+  var reqk = (def.fields.filter(function(f){ return f.req; })[0] || {}).k;
+  var live = !reqk || !!(d[reqk] && String(d[reqk]).trim());
+  var verb = def.verb || "Add";
+  return '<div class="bform">' +
+    def.fields.map(function(f){ return bformFieldHtml(f, d); }).join("") +
+    '<div class="bfmiss"' + (miss.length ? '' : ' hidden') + '>Still empty: <b>' +
+      miss.join(", ") + '</b> — the row is added anyway and reads as missing ' +
+      (miss.length === 1 ? 'it' : 'these') + '.</div>' +
+    '<div class="bfacts">' +
+      (def.noAnother ? '' :
+        '<button class="bprim" data-bfadd="more"' + (live ? '' : ' disabled') + '>' + verb + ' &amp; add another</button>') +
+      '<button class="' + (def.noAnother ? 'bprim' : 'bgo') + '" data-bfadd="one"' + (live ? '' : ' disabled') + '>' + verb + '</button>' +
+      '<button class="blink" data-bfcancel="1">' + (BFORM.added ? "Done" : "Cancel") + '</button>' +
+      (BFORM.added ? '<span class="bfnote">' + BFORM.added + ' added</span>' : '') +
+    '</div></div>';
+}
+
+/* ── Applying a form: the SAME minters the pen uses ─────────────────── */
+function bPillarById(target, pid){
+  var u = unitLikeWritable(target);
+  return u ? (u.items.filter(function(it){ return it.id === pid; })[0] || null) : null;
+}
+function bApply(kind, ctx, d){
+  var v = function(k){ return (d[k] != null ? String(d[k]) : "").trim(); };
+  if (kind === "pillar") {
+    var u = unitLikeWritable(ctx.target); if (!u) return false;
+    var it = addPillar(u); if (!it) return false;
+    it.name = v("name"); it.sub = v("sub"); it.theme = v("theme"); it.owner = v("owner");
+    return true;
+  }
+  if (kind === "measure" || kind === "tactic") {
+    var p = bPillarById(ctx.target, ctx.pid); if (!p) return false;
+    if (kind === "measure") {
+      var m = addMeasure(p);
+      m.name = v("name"); m.dir = d.dir || "≥"; m.target = v("target");
+      if (v("target3y")) m.target3y = v("target3y");
+      m.compile = d.compile || "Latest";
+    } else {
+      var t = addTactic(p);
+      t.name = v("name"); t.owner = v("owner");
+      [1,2,3,4].forEach(function(q){ t["q" + q] = d["q" + q] ? 1 : 0; });
+    }
+    return true;
+  }
+  if (kind === "objective") {
+    var w = unitLikeWritable(ctx.target); if (!w) return false;
+    var ko = koMint(w.keyObjectives, w.ukey);
+    ko.name = v("name"); ko.dir = d.dir || "≥"; ko.target = v("target");
+    if (v("target3y")) ko.target3y = v("target3y");
+    ko.compile = d.compile || "Latest";
+    w.keyObjectives.push(ko);
+    renumberUnit(w);
+    return true;
+  }
+  if (kind === "capko") {
+    var c = capById(ctx.capId); if (!c) return false;
+    c.keyObjectives.push({ name:v("name"), dir:d.dir || "≥", target:v("target"),
+      compile:d.compile || "Latest",
+      weight:v("weight") !== "" && isFinite(+v("weight")) ? +v("weight") : null,
+      actual:"", progress:null });
+    return true;
+  }
+  if (kind === "cap") {
+    var made = addCapability(ctx.fnKey); if (!made) return false;
+    made.name = v("name") || made.name; made.def = v("def");
+    return true;
+  }
+  if (kind === "project") {
+    var cc = capById(ctx.capId); if (!cc) return false;
+    var pr = addProject(cc); if (!pr) return false;
+    pr.name = v("name"); pr.owner = v("owner"); pr.start = v("start"); pr.end = v("end"); pr.brief = v("brief");
+    if (typeof RAIL !== "undefined" && typeof railKeyFor === "function") RAIL[railKeyFor(cc)] = pr.id;
+    return true;
+  }
+  if (kind === "deliverable" || kind === "outcome" || kind === "milestone") {
+    var pj = projById(ctx.projId); if (!pj) return false;
+    if (kind === "deliverable") {
+      var dl = addDeliverable(pj);
+      dl.name = v("name"); dl.kind = d.kind === "pct" ? "pct" : "binary"; dl.due = v("due");
+    } else if (kind === "outcome") {
+      var oc = addOutcome(pj);
+      oc.name = v("name"); oc.dir = d.dir || "≥"; oc.target = v("target"); oc.measureAt = v("measureAt");
+    } else {
+      var ml = addMilestone(pj);
+      ml.name = v("name"); ml.covers = v("covers"); ml.owner = v("owner"); ml.finish = v("finish");
+    }
+    return true;
+  }
+  if (kind === "clause") {
+    var cu = ctx.target === "group" ? GROUP : unitLikeWritable(ctx.target);
+    if (!cu || !Array.isArray(cu.clauses)) return false;
+    cu.clauses.push([v("label"), v("text")]);
+    if (cu.ukey) renumberUnit(cu);
+    return true;
+  }
+  if (kind === "swot") {
+    var su = unitLikeWritable(ctx.target); if (!su || !su.swot) return false;
+    if (!Array.isArray(su.swot[ctx.q])) return false;
+    su.swot[ctx.q].push(v("text"));
+    return true;
+  }
+  return false;
+}
+
+/* ── Creating a subject ───────────────────────────────────────────────
+   A UNIT is minted by addBusinessUnit() in config-data.js — the one minter
+   the Setup page has always called, now taking the name, prefix and company
+   the builder's form asks for (§53.5: a second unit-shape here is how twins
+   get made). A FUNCTION gets the same treatment: one minter, shared by the
+   Setup page's add button and the builder's chooser, keyed from the name. */
+function addFunction(name, format){
+  var nm = String(name || "").trim();
+  if (!nm) return null;
+  var base = nm.toLowerCase().replace(/[^a-z0-9]/g, "").slice(0, 14) || ("fn" + FUNCTION_KEYS.length);
+  var key = base, n = 2;
+  while (FUNCTIONS[key]) { key = base + n; n++; }
+  FUNCTIONS[key] = { name:nm, navName:null, codePrefix:nm.slice(0, 3).toUpperCase(),
+    head:null, custodian:null, active:true,
+    format:format === "pillars" ? "pillars" : "projects" };
+  FUNCTION_KEYS.push(key);
+  return key;
+}
+
+/* ── The review ───────────────────────────────────────────────────────
+   Not a gate — an honest reading (§129). Rows restate the SAME counts the
+   chips read; gaps are counted from the data in the same pass. Empty is
+   allowed, and finishing with a gap is a decision the review makes visible. */
+function builderGaps(target){
+  var route = builderRoute(target), gaps = [];
+  var say = function(k, n, one, many){
+    if (n) gaps.push({ k:k, text:plural(n, one, many) });
+  };
+  if (route === "unit" || route === "fnpillars") {
+    var u = unitLike(target);
+    say("obj", u.keyObjectives.filter(function(m){ return !m.target; }).length,
+      "objective has no target this year", "objectives have no target this year");
+    var mNoTarget = 0, bareP = 0, idleT = 0;
+    u.items.forEach(function(p){
+      if (!p.measures.length && !p.tactics.length) bareP++;
+      p.measures.forEach(function(m){ if (!m.target) mNoTarget++; });
+      p.tactics.forEach(function(t){ if (!t.q1 && !t.q2 && !t.q3 && !t.q4) idleT++; });
+    });
+    var pw = L("pillar","bu").toLowerCase().replace(/s$/, "");
+    say("plan", bareP, pw + " holds no measures and no tactics yet", pw + "s hold no measures and no tactics yet");
+    say("plan", mNoTarget, "measure has no target — it will read as missing it",
+      "measures have no target — they will read as missing it");
+    say("plan", idleT, "tactic is due in no quarter, so no cycle will ask for it",
+      "tactics are due in no quarter, so no cycle will ask for them");
+  }
+  if (route === "fnprojects") {
+    var noDef = 0, emptyP = 0, oNoT = 0, msNoDue = 0;
+    capsOfFunction(String(target).slice(3)).forEach(function(c){
+      if (!c.def) noDef++;
+      (c.projects || []).forEach(function(p){
+        if (!p.deliverables.length && !p.outcomes.length) emptyP++;
+        p.outcomes.forEach(function(o){ if (!o.target) oNoT++; });
+        p.milestones.forEach(function(m){ if (!m.finish) msNoDue++; });
+      });
+    });
+    say("def", noDef, "capability has no definition", "capabilities have no definition");
+    say("proj", emptyP, "project holds neither deliverables nor outcomes",
+      "projects hold neither deliverables nor outcomes");
+    say("proj", oNoT, "outcome has no target", "outcomes have no target");
+    say("proj", msNoDue, "milestone has no due date", "milestones have no due date");
+  }
+  return gaps;
+}
+function builderReviewHtml(target){
+  var secs = builderSections(target).filter(function(s){ return s.k !== "review"; });
+  var gaps = builderGaps(target);
+  var rows = secs.map(function(s){
+    var c = s.chip();
+    var own = gaps.filter(function(g){ return g.k === s.k; });
+    return '<button class="brvrow" data-bnav="' + s.k + '">' +
+      '<span class="bst ' + c.s + '">' + (c.s === "ok" ? "✓" : c.s === "part" ? c.mark : "○") + '</span>' +
+      '<b>' + esc(s.label) + '</b><span class="brvwhat">' +
+      (c.s === "empty" ? "Empty" : c.s === "ok" ? "Filled"
+        : c.mark === "…" ? "Partly filled" : c.mark + " so far") +
+      (own.length ? ' · ' + own.map(function(g){ return g.text; }).join(" · ") : '') +
+      '</span></button>';
+  }).join("");
+  return '<div class="brv">' + rows + '</div>' +
+    '<p class="bfoot">Finishing closes the band and nothing else — the plan has been live all along. ' +
+      'Gaps stay findable on the pages' + (gaps.length ? '' : ' — and there are none') + '.</p>' +
+    '<div class="bfacts"><button class="bprim" data-bdone="1">Finish building</button>' +
+    '<button class="blink" data-brvback="1">Keep building</button></div>';
+}
+
+</script>
+<script>
 /* ── Presentation mode ────────────────────────────────────────────────────
    A unit's review, built from whatever the platform holds at the moment it is
    opened. There is no exported copy and no version to go stale: a figure
@@ -30522,7 +31370,7 @@ var SEARCHSEL = (function(){
     sel.dispatchEvent(new Event("change", { bubbles: true }));
   }
 
-  /* ── TICKING IS NOT ANSWERING (§129.1) ──────────────────────────────
+  /* ── TICKING IS NOT ANSWERING (§130.1) ──────────────────────────────
      The single-select path above closes the popup BEFORE it fires `change`,
      because picking one option answers the question and because `change`
      repaints the panel the popup is standing in (§30.1). Neither is true of a
@@ -30591,7 +31439,7 @@ var SEARCHSEL = (function(){
       r.type = "button";
       r.className = "ssrow" + (on ? " on" : "");
       r.textContent = op.text || "—";
-      /* WHERE THIS ONE IS FROM, QUIETLY (§129.9). A hint on the option rides
+      /* WHERE THIS ONE IS FROM, QUIETLY (§130.9). A hint on the option rides
          into the row and nowhere else — the button's label and the value the
          field stores are the option's TEXT, which is the name on its own. It
          joins what is SEARCHED, so typing a unit's name finds the people in
@@ -30687,7 +31535,7 @@ var SEARCHSEL = (function(){
        rule was never size against a measured value; this only moves). It
        still closes when the button it belongs to has left the screen, because
        a popup pointing at nothing is worse than a closed one. */
-    /* AND A 1px CLIPPED ELEMENT SCROLLING IS NEVER THE PAGE MOVING (§129.1).
+    /* AND A 1px CLIPPED ELEMENT SCROLLING IS NEVER THE PAGE MOVING (§130.1).
        Setting `selected` on a `<select multiple>` makes the browser scroll the
        native list box to the option — and it fires a real `scroll` event doing
        it, from an element that is 1px square, clipped and invisible (see
@@ -30747,7 +31595,7 @@ var SEARCHSEL = (function(){
   function enhance(sel){
     if (sel.disabled) return;
     if (sel.dataset.nosearch === "1") return;
-    /* A MULTIPLE SELECT IS ALWAYS ENHANCED, whatever it holds (§129.1). The
+    /* A MULTIPLE SELECT IS ALWAYS ENHANCED, whatever it holds (§130.1). The
        five-option floor is about whether a short list is worth a search box;
        the native multiple select is a scrolling list box that ctrl-clicks, and
        it is not a control this product uses anywhere. Below the floor there is
@@ -34918,6 +35766,7 @@ var SYNC = (function () {
       " &middot; " + where;
 
     if (!current) {
+      paintBuildBand();
       document.getElementById("subtabs").innerHTML = "";
       document.getElementById("panel").innerHTML =
         '<div class="note bad-note" style="margin-top:30px"><b>No pages granted.</b> The roles this person holds reach nothing. ' +
@@ -34939,6 +35788,7 @@ var SYNC = (function () {
        that had just been ruled out for having nothing to render. Nothing to
        render is a real answer, and the branch above already says it in words. */
     if (!defs.length) {
+      paintBuildBand();
       document.getElementById("panel").innerHTML =
         '<div class="note">There is nothing here for you to open. ' +
         'That is the table working as configured, not an error &mdash; open ' +
@@ -35090,6 +35940,8 @@ var SYNC = (function () {
           }).join("")
         : "";
     }
+    /* The builder's band, once the navigation above has settled (§129). */
+    paintBuildBand();
     wire();
     /* LAST, and after wire(). Every <select> the paint just produced gets a
        searchable button in front of it once its list passes five options
@@ -35107,10 +35959,10 @@ var SYNC = (function () {
        around — so it re-resolves them and puts the shade and the card back.
        Like the inbox above, nothing in it ever calls paint(). */
     TOUR.onPaint();
-    /* ── AND THE PINNED TITLES SAY SO (§129.6) ───────────────────────
+    /* ── AND THE PINNED TITLES SAY SO (§130.6) ───────────────────────
        The one thing CSS cannot ask. `.pane > .pband` fills its two rounded
        corners with the page's ground so nothing shows through them while it
-       is pinned (§129.3) — and painting that at REST cut the card's own
+       is pinned (§130.3) — and painting that at REST cut the card's own
        corner arc, which is what Islam saw next: *"the corner still has this
        squared corner."*
 
@@ -35313,6 +36165,9 @@ var SYNC = (function () {
     m.style.left = Math.max(8, Math.min(r.right - w, window.innerWidth - w - 8)) + "px";
   }
 
+  function fieldSaved(){
+    if (typeof SYNC !== "undefined" && SYNC.afterPaint) SYNC.afterPaint();
+  }
   function wire(){
     document.querySelectorAll("#subtabs button").forEach(function(b){
       b.addEventListener("click", function(){
@@ -35742,15 +36597,15 @@ var SYNC = (function () {
         paint();
       });
     });
+    /* One minter for a function's shape, shared with the builder's chooser
+       (§53.5): a second copy here is how the register's twins get made. A
+       taken key is suffixed rather than refused, the same answer addUnit
+       gives — two functions may genuinely share a name's letters. */
     var addFn = document.getElementById("addfn");
     if (addFn) addFn.addEventListener("click", function(){
       var name = prompt("Name of the supporting function");
       if (!name || !name.trim()) return;
-      var key = name.trim().toLowerCase().replace(/[^a-z0-9]/g, "").slice(0, 14) || ("fn" + FUNCTION_KEYS.length);
-      if (FUNCTIONS[key]) { alert("A function with that key already exists."); return; }
-      FUNCTIONS[key] = { name:name.trim(), navName:null,
-        codePrefix:name.trim().slice(0, 3).toUpperCase(), head:null, custodian:null, active:true };
-      FUNCTION_KEYS.push(key);
+      addFunction(name);
       paint();
     });
     document.querySelectorAll("[data-capfn]").forEach(function(el){
@@ -36068,8 +36923,11 @@ var SYNC = (function () {
     });
     /* Both role <select>s are gone — Business units and Supporting functions
        share one picker now, wired in wirePicker() below (§35). */
+    /* A unit is asked for by name now, in the builder's form — pressing this
+       used to mint "New unit 1" with prefix NU and leave the SMO renaming it
+       across three cells (§129). Same minter underneath, one question first. */
     var au = document.getElementById("addunit");
-    if (au) au.addEventListener("click", function(){ addBusinessUnit(); paint(); });
+    if (au) au.addEventListener("click", function(){ openBuilderForm("newunit", { stay:true }); });
     /* Capabilities: add, name, remove — the SMO's, behind the same key the
        rest of the page is behind (§51.11). */
     var ac = document.getElementById("addcap");
@@ -36213,6 +37071,13 @@ var SYNC = (function () {
       b.addEventListener("click", function(){
         var e = KOLISTS[+b.dataset.koadd];
         if (!e) return;
+        /* Build mode: the objective arrives whole, through the form (§129).
+           Only for the subject being built — the Temple's group list keeps
+           its inline add. */
+        if (BUILDER && e.owner && e.owner.ukey === BUILDER.target) {
+          openBuilderForm("objective", { target: BUILDER.target });
+          return;
+        }
         /* SETTLED BEFORE THE NEW ROW IS MINTED, or the group's six id-less
            objectives are filled in as KO1..KO6 a moment after the new row has
            already taken KO1 (§96.4). Once before, so the maximum is true; once
@@ -36235,7 +37100,7 @@ var SYNC = (function () {
            cursor left a cell, on the one screen somebody fills in left to
            right. */
         var fn = FIELDS[+el.dataset.fld];
-        /* SEVERAL ANSWERS COME AS AN ARRAY (§129.1). On a `<select multiple>`
+        /* SEVERAL ANSWERS COME AS AN ARRAY (§130.1). On a `<select multiple>`
            `el.value` is only the FIRST selected option, so a collaborators cell
            wired through the plain path would have saved one name and dropped
            the rest — silently, which is the shape §96 exists to stop. Asked of
@@ -36700,10 +37565,12 @@ var SYNC = (function () {
        SAVED, THOUGH. `SYNC.afterPaint()` is what schedules the write, and it
        was only ever reached THROUGH paint() — so removing the repaint without
        this would have made every edit stay on screen and never reach the
-       database until something else happened to repaint. */
-    function fieldSaved(){
-      if (typeof SYNC !== "undefined" && SYNC.afterPaint) SYNC.afterPaint();
-    }
+       database until something else happened to repaint.
+
+       Hoisted OUT of wire() in §129: the builder's dialogs write rows from
+       outside wire()'s closure, and a second copy of "how an edit reaches
+       the database" is the drift §53.5 exists to stop — so the one function
+       moved up a scope, and every old caller still resolves it. */
     /* ── SCOPED, SO THE DIALOG CAN BE WIRED WITHOUT THE PAGE (§116) ──
        `root` defaults to the document, which is every existing caller. The
        person dialog passes its own body: its fields are built after paint() has
@@ -38256,10 +39123,18 @@ var SYNC = (function () {
     document.querySelectorAll("[data-rowadd]").forEach(function(b){
       b.addEventListener("click", function(){
         if (!mayEditPlan()) return;
+        /* IN BUILD MODE A ROW IS ADDED WHOLE (§129): the same control opens
+           the structured form instead of minting an empty row — the form
+           applies through the same minters, so the two paths cannot drift. */
+        if (BUILDER && BUILDER.target === current && builderFormFromRowadd(this.dataset.rowadd)) return;
         var a = this.dataset.rowadd.split("|"), what = a[0];
-        if (what === "pillar")  { addPillar(unitLike(a[1])); }
+        if (what === "pillar")  { addPillar(unitLikeWritable(a[1])); }
         else if (what === "measure" || what === "tactic") {
-          var u = unitLike(a[1]), it = u && u.items[+a[2]];
+          /* unitLikeWritable, not unitLike (§129's audit): the reading view
+             hands a VIRGIN pillars function frozen empties, so the first add
+             pushed into an array the function never held — accepted on
+             screen, written nowhere (§50.6's fault through a fresh door). */
+          var u = unitLikeWritable(a[1]), it = u && u.items[+a[2]];
           if (!it) return;
           if (what === "measure") addMeasure(it); else addTactic(it);
         }
@@ -38304,6 +39179,113 @@ var SYNC = (function () {
         removeRowById(listById(list, id), id);
         paint();
       });
+    });
+    /* ── FIRST ROWS FOR THE SURFACES THAT NEVER HAD ONE (§129's audit) ──
+       The SWOT, the “Who we are” lines and a capability's objectives could
+       be EDITED and never STARTED — the editors were built for correcting an
+       imported plan, so an empty list rendered nothing to edit and no way to
+       write the first row (§61's trap, three more times). Every add re-asks
+       the shared rule rather than trusting the render that drew it (§48.2),
+       and in build mode routes through the structured form. */
+    document.querySelectorAll("[data-swadd]").forEach(function(b){
+      b.addEventListener("click", function(){
+        var a = b.dataset.swadd.split("|"), t = a[0], q = a[1];
+        if (!mayAuthor("u_anal", t)) return;
+        if (BUILDER && BUILDER.target === t) { openBuilderForm("swot", { target:t, q:q }); return; }
+        var u = unitLikeWritable(t);
+        if (!u || !u.swot || !Array.isArray(u.swot[q])) return;
+        u.swot[q].push("");
+        fieldSaved(); paint();
+      });
+    });
+    document.querySelectorAll("[data-swrm]").forEach(function(b){
+      b.addEventListener("click", function(){
+        var a = b.dataset.swrm.split("|"), t = a[0], q = a[1], i = +a[2];
+        if (!mayAuthor("u_anal", t)) return;
+        var u = unitLikeWritable(t);
+        if (!u || !u.swot || !Array.isArray(u.swot[q]) || u.swot[q][i] == null) return;
+        if (String(u.swot[q][i]).trim() &&
+            !confirm("Remove this line? This cannot be undone here.")) return;
+        u.swot[q].splice(i, 1);
+        fieldSaved(); paint();
+      });
+    });
+    document.querySelectorAll("[data-clauseadd]").forEach(function(b){
+      b.addEventListener("click", function(){
+        var t = b.dataset.clauseadd;
+        if (!mayAuthor(t === "group" ? "g_found" : "u_found", t === "group" ? null : t)) return;
+        if (BUILDER && BUILDER.target === t) { openBuilderForm("clause", { target:t }); return; }
+        var o = t === "group" ? GROUP : unitLikeWritable(t);
+        if (!o || !Array.isArray(o.clauses)) return;
+        o.clauses.push(["", ""]);
+        if (o.ukey) renumberUnit(o);
+        fieldSaved(); paint();
+      });
+    });
+    document.querySelectorAll("[data-clauserm]").forEach(function(b){
+      b.addEventListener("click", function(){
+        var a = b.dataset.clauserm.split("|"), t = a[0], i = +a[1];
+        if (!mayAuthor(t === "group" ? "g_found" : "u_found", t === "group" ? null : t)) return;
+        var o = t === "group" ? GROUP : unitLikeWritable(t);
+        if (!o || !Array.isArray(o.clauses) || !o.clauses[i]) return;
+        if ((String(o.clauses[i][0] || "").trim() || String(o.clauses[i][1] || "").trim()) &&
+            !confirm("Remove this line? This cannot be undone here.")) return;
+        o.clauses.splice(i, 1);
+        if (o.ukey) renumberUnit(o);
+        fieldSaved(); paint();
+      });
+    });
+    document.querySelectorAll("[data-capkoadd]").forEach(function(b){
+      b.addEventListener("click", function(){
+        var c = capById(b.dataset.capkoadd);
+        if (!c) return;
+        var t = c.fn ? "fn:" + c.fn : null;
+        if (!mayAuthor("k_found", t)) return;
+        if (BUILDER && BUILDER.target === t) { openBuilderForm("capko", { capId:c.id }); return; }
+        c.keyObjectives.push({ name:"", dir:"≥", target:"", compile:"Latest",
+          weight:null, actual:"", progress:null });
+        fieldSaved(); paint();
+      });
+    });
+    document.querySelectorAll("[data-capkorm]").forEach(function(b){
+      b.addEventListener("click", function(){
+        var a = b.dataset.capkorm.split("|"), c = capById(a[0]), i = +a[1];
+        if (!c || !c.keyObjectives[i]) return;
+        if (!mayAuthor("k_found", c.fn ? "fn:" + c.fn : null)) return;
+        if (c.keyObjectives[i].name &&
+            !confirm("Remove " + c.keyObjectives[i].name + "? This cannot be undone here.")) return;
+        c.keyObjectives.splice(i, 1);
+        fieldSaved(); paint();
+      });
+    });
+    document.querySelectorAll("[data-fncapadd]").forEach(function(b){
+      b.addEventListener("click", function(){
+        var fk = b.dataset.fncapadd;
+        if (!mayAuthor("k_found", "fn:" + fk)) return;
+        if (BUILDER && BUILDER.target === "fn:" + fk) { openBuilderForm("cap", { fnKey:fk }); return; }
+        addCapability(fk);
+        fieldSaved(); paint();
+      });
+    });
+    /* ── THE BUILDER'S DOORS AND BAND (§129) ───────────────────────── */
+    document.querySelectorAll("[data-buildplan]").forEach(function(b){
+      b.addEventListener("click", function(){ openBuilderChooser(); });
+    });
+    /* Scoped to the band: the review dialog carries data-bnav rows of its
+       own, wired by its own painter — a page-wide query here would bind
+       them twice the moment a paint runs under the open dialog (§24). */
+    document.querySelectorAll("#buildband [data-bnav]").forEach(function(b){
+      b.addEventListener("click", function(){ builderGo(b.dataset.bnav); });
+    });
+    document.querySelectorAll("#buildband [data-bpause]").forEach(function(b){
+      b.addEventListener("click", function(){
+        BUILDER = null;
+        leaveModes();
+        paint();
+      });
+    });
+    document.querySelectorAll("#buildband [data-bfinish]").forEach(function(b){
+      b.addEventListener("click", function(){ builderDialogOpen("review"); });
     });
 
     document.querySelectorAll(".sortable").forEach(function(c){
@@ -39083,7 +40065,264 @@ var SYNC = (function () {
      screen. Both go through the one door now, and it treats them as KEEPING
      what was typed: every field has already written itself (§71.2), so throwing
      it away on the × would discard edits the register has already shown. */
+  /* ══ THE PLAN BUILDER'S DIALOGS AND NAVIGATION (§129, spec 020) ══════
+     The shell's half: everything that needs paint(), the modal, or the
+     navigation state the closure holds. The HTML and the data logic live in
+     builder.js; this half never mints a row and never counts one — it opens
+     doors, moves the navigation, and wires what builder.js rendered
+     (whoever rewrites the DOM re-wires it, §24, §30.1). */
+  var BDLG = null;   /* "choose" | "form" | "review" while a builder dialog is open */
+  function builderDialogOpen(kind){
+    BDLG = kind;
+    openModalHtml("", "", "");
+    builderDialogPaint();
+  }
+  /* The dialog's own painter (§116's shape): it rewrites the DIALOG's body
+     and re-wires it rather than calling paint(), which would rebuild the
+     page behind an inert overlay mid-interaction. */
+  function builderDialogPaint(){
+    if (!BDLG) return;
+    var t = document.getElementById("modal-t"), s = document.getElementById("modal-s"),
+        b = document.getElementById("modal-b");
+    if (!t) return;
+    if (BDLG === "choose") {
+      t.textContent = "Build a plan"; s.textContent = "Whose plan is this?";
+      b.innerHTML = builderChooserHtml();
+      wireBuilderChooser(b);
+    } else if (BDLG === "form") {
+      var def = bformDef(BFORM.kind, BFORM.ctx);
+      t.textContent = def.title;
+      s.textContent = BUILDER ? builderSubjectName(BUILDER.target) : "";
+      b.innerHTML = bformHtml();
+      wireBuilderForm(b);
+      focusNoScroll(b.querySelector("input.bfi, textarea.bfi"));
+    } else if (BDLG === "review") {
+      t.textContent = "The plan as it stands";
+      s.textContent = builderSubjectName(BUILDER.target);
+      b.innerHTML = builderReviewHtml(BUILDER.target);
+      wireBuilderReview(b);
+    }
+  }
+  /* One door out, whatever the way (§116.6): the ×, Escape, Cancel and every
+     finished act all land here, so a dialog can never leave BDLG believing
+     it is still open. Nothing needs rescuing — a form writes nothing until
+     Add, so dismissal IS cancel. */
+  function builderDialogClose(){
+    BDLG = null; BFORM = null; BCHOOSE = null;
+    closeModal();
+  }
+  function openBuilderChooser(){
+    BCHOOSE = { side:"units", confirm:null };
+    builderDialogOpen("choose");
+  }
+  function openBuilderForm(kind, ctx){
+    BFORM = { kind:kind, ctx:ctx || {}, draft:{}, added:0 };
+    bformSeedDefaults();
+    builderDialogOpen("form");
+  }
+  function bformSeedDefaults(){
+    (bformDef(BFORM.kind, BFORM.ctx).fields || []).forEach(function(f){
+      if (f.type === "seg" && f.def != null) BFORM.draft[f.k] = f.def;
+    });
+  }
+  /* Entering: the subject becomes the destination, the first section opens
+     with its pen on. leaveModes() first — it clears EDIT_PAGE, so the pen is
+     switched on AFTER it, never before. */
+  function builderStart(target){
+    builderEnsureCapability(target);
+    BUILDER = { target: target };
+    builderDialogClose();
+    var first = builderSections(target)[0];
+    current = target;
+    builderGo(first ? first.k : "review");
+  }
+  function builderGo(k){
+    if (!BUILDER) return;
+    var sec = builderSectionByKey(BUILDER.target, k);
+    if (!sec) return;
+    if (k === "review") { builderDialogOpen("review"); return; }
+    if (currentSub !== sec.tab) leaveModes();
+    currentSub = sec.tab;
+    CURSEC[sec.tab] = sec.sec;
+    if (sec.pen) EDIT_PAGE[sec.pen] = true;
+    paint();
+    window.scrollTo(0, 0);
+    if (sec.scrollTo) {
+      var el = document.querySelector(sec.scrollTo);
+      if (el) el.scrollIntoView({ block:"center" });
+    }
+  }
+  function wireBuilderChooser(body){
+    body.querySelectorAll("[data-bside]").forEach(function(b){
+      b.addEventListener("click", function(){
+        BCHOOSE.side = b.dataset.bside; BCHOOSE.confirm = null;
+        builderDialogPaint();
+      });
+    });
+    body.querySelectorAll("[data-bcont]").forEach(function(b){
+      b.addEventListener("click", function(){ builderStart(b.dataset.bcont); });
+    });
+    body.querySelectorAll("[data-bpick]").forEach(function(b){
+      b.addEventListener("click", function(){
+        var t = b.dataset.bpick;
+        /* A standing plan is never overwritten on one press: the row turns
+           into the question, and the answer archives first (§49.2). */
+        if (builderHasPlan(t)) { BCHOOSE.confirm = t; builderDialogPaint(); }
+        else builderStart(t);
+      });
+    });
+    body.querySelectorAll("[data-bfresh]").forEach(function(b){
+      b.addEventListener("click", function(){
+        builderStartFresh(b.dataset.bfresh);
+        fieldSaved();
+        builderStart(b.dataset.bfresh);
+      });
+    });
+    body.querySelectorAll("[data-bnofresh]").forEach(function(b){
+      b.addEventListener("click", function(){ BCHOOSE.confirm = null; builderDialogPaint(); });
+    });
+    body.querySelectorAll("[data-bnew]").forEach(function(b){
+      b.addEventListener("click", function(){
+        openBuilderForm(b.dataset.bnew === "unit" ? "newunit" : "newfn", {});
+      });
+    });
+  }
+  function wireBuilderForm(body){
+    var refresh = function(){
+      if (!BFORM) return;
+      var def = bformDef(BFORM.kind, BFORM.ctx);
+      var miss = bformMissing(def, BFORM.draft);
+      var line = body.querySelector(".bfmiss");
+      if (line) {
+        line.hidden = !miss.length;
+        line.innerHTML = 'Still empty: <b>' + esc(miss.join(", ")) +
+          '</b> — the row is added anyway and reads as missing ' +
+          (miss.length === 1 ? 'it' : 'these') + '.';
+      }
+      var reqk = (def.fields.filter(function(f){ return f.req; })[0] || {}).k;
+      var live = !reqk || !!(BFORM.draft[reqk] && String(BFORM.draft[reqk]).trim());
+      body.querySelectorAll("[data-bfadd]").forEach(function(x){ x.disabled = !live; });
+    };
+    body.querySelectorAll("[data-bf]").forEach(function(el){
+      /* Guarded: closing the dialog empties its body, which BLURS the field
+         being typed, which fires `change` into a form that no longer exists
+         — Escape threw on exactly that (§30.1's family, from the far side). */
+      var write = function(){ if (!BFORM) return; BFORM.draft[el.dataset.bf] = el.value; refresh(); };
+      el.addEventListener("input", write);
+      el.addEventListener("change", write);
+    });
+    body.querySelectorAll("[data-bfseg]").forEach(function(seg){
+      seg.querySelectorAll("[data-bfv]").forEach(function(b){
+        b.addEventListener("click", function(){
+          BFORM.draft[seg.dataset.bfseg] = b.dataset.bfv;
+          seg.querySelectorAll("[data-bfv]").forEach(function(x){
+            x.setAttribute("aria-pressed", String(x === b));
+          });
+          refresh();
+        });
+      });
+    });
+    body.querySelectorAll("[data-bfqn]").forEach(function(b){
+      b.addEventListener("click", function(){
+        var k = "q" + b.dataset.bfqn;
+        BFORM.draft[k] = !BFORM.draft[k];
+        b.setAttribute("aria-pressed", String(!!BFORM.draft[k]));
+      });
+    });
+    body.querySelectorAll("[data-bfadd]").forEach(function(b){
+      b.addEventListener("click", function(){ builderFormAdd(b.dataset.bfadd); });
+    });
+    var c = body.querySelector("[data-bfcancel]");
+    if (c) c.addEventListener("click", function(){ builderDialogClose(); paint(); });
+  }
+  function builderFormAdd(mode){
+    var kind = BFORM.kind, d = BFORM.draft;
+    if (kind === "newunit" || kind === "newfn") {
+      var stay = !!BFORM.ctx.stay;
+      var made = kind === "newunit"
+        ? addBusinessUnit(d.name, d.prefix, d.company)
+        : addFunction(d.name, d.format);
+      if (!made) return;
+      fieldSaved();
+      if (stay) { builderDialogClose(); paint(); }
+      else builderStart(kind === "newunit" ? made : "fn:" + made);
+      return;
+    }
+    if (!bApply(kind, BFORM.ctx, d)) { builderDialogClose(); paint(); return; }
+    fieldSaved();
+    if (mode === "more") {
+      BFORM.added++;
+      BFORM.draft = {};
+      bformSeedDefaults();
+      /* The page behind updates so the table shows the row that just landed —
+         inert while the dialog is open, and Islam has already ruled the
+         covered register acceptable in exactly this shape (§116). */
+      paint();
+      builderDialogPaint();
+    } else {
+      builderDialogClose();
+      paint();
+    }
+  }
+  function wireBuilderReview(body){
+    body.querySelectorAll("[data-bnav]").forEach(function(b){
+      b.addEventListener("click", function(){
+        var k = b.dataset.bnav;
+        builderDialogClose();
+        builderGo(k);
+      });
+    });
+    var done = body.querySelector("[data-bdone]");
+    if (done) done.addEventListener("click", function(){
+      /* Finishing closes the band and nothing else — the plan has been live
+         all along (§129). leaveModes() closes the pens with it. */
+      BUILDER = null;
+      builderDialogClose();
+      leaveModes();
+      paint();
+    });
+    var back = body.querySelector("[data-brvback]");
+    if (back) back.addEventListener("click", function(){ builderDialogClose(); paint(); });
+  }
+  /* The pen's add controls, routed into the form in build mode. The pillar
+     INDEX is resolved to its ID here, at open — the id survives a repaint,
+     the index is the thing that goes stale (§48.2). */
+  function builderFormFromRowadd(spec){
+    var a = String(spec).split("|"), what = a[0];
+    if (what === "pillar") { openBuilderForm("pillar", { target:a[1] }); return true; }
+    if (what === "measure" || what === "tactic") {
+      var u = unitLikeWritable(a[1]), it = u && u.items[+a[2]];
+      if (!it) return false;
+      openBuilderForm(what, { target:a[1], pid:it.id });
+      return true;
+    }
+    if (what === "project") { openBuilderForm("project", { capId:a[1] }); return true; }
+    if (what === "deliverable" || what === "outcome" || what === "milestone") {
+      openBuilderForm(what, { projId:a[1] });
+      return true;
+    }
+    return false;
+  }
+  /* The band's own paint, called from paint() once the navigation has
+     settled — the chips read currentSub/CURSEC, so earlier would read the
+     paint before this one. */
+  function paintBuildBand(){
+    var bb = document.getElementById("buildband");
+    if (!bb) return;
+    var show = !!(typeof BUILDER !== "undefined" && BUILDER && current === BUILDER.target);
+    /* The viewer switcher can change who this is between paints (§94): the
+       band asks the shared rule again, and hides — with the mode kept, so
+       switching back finds the build where it stood. */
+    if (show) {
+      var ac = builderRoute(BUILDER.target) === "fnprojects" ? "k_proj" : "u_plan";
+      if (!mayAuthor(ac, BUILDER.target)) show = false;
+    }
+    bb.hidden = !show;
+    bb.innerHTML = show ? builderBandHtml(currentSub, CURSEC) : "";
+  }
+
   function modalDismiss(){
+    if (BDLG) { builderDialogClose(); paint(); return; }
     if (PDLG) { closePersonDialog(false); return; }
     closeModal();
   }

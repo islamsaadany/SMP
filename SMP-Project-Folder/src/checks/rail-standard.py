@@ -1,4 +1,4 @@
-"""One item still gets the rail, on both sides of the switch (§129.2).
+"""One item still gets the rail, on both sides of the switch (§130.2).
 
 Islam, of a function whose capability holds a single project: "keep the rail
 there to keep the standard view even with 1 capability either in the strategy

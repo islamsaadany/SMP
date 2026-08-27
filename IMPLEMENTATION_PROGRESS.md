@@ -6,7 +6,7 @@ version (rules A2 / A11, changed 2026-08-20) — those go only when asked for.
 
 **Where it runs:** Vercel, production tracks `main`. Static files plus two
 serverless functions (`/api/state`, `/api/auth`) against Neon Postgres.
-**Latest version:** v3.46 on `main`
+**Latest version:** v3.47 on `main`
 **Last updated:** 2026-08-26
 **Last updated:** 2026-08-26
 
@@ -64,6 +64,31 @@ Nothing proceeds past this line without an answer.
   is a true signal — do not silence it.
 
 ## Built and verified
+
+### v3.47 — building a plan on the platform (§129, spec 020)
+
+- **A second door beside Import**: *Build a plan* opens a chooser of every
+  unit and function — with an honest Empty / Has-a-plan status, **Continue**
+  on a part-built subject, and **Start fresh** behind a confirm that archives
+  first through the import's own path. A new unit or function is created in
+  the same place; a new function is asked *pillars or projects* at birth.
+- **The builder band** under the tab row is a MAP: one chip per plan section,
+  openable in any order, each chip reading the data (✓ / count / ○). Nothing
+  is stored; pausing costs nothing. Finish opens a review that names every
+  gap and jumps to it.
+- **Every "+ Add" in build mode opens a form** asking the row kind's fields
+  in the outcome's order (§116's dialog shape); the name makes Add live,
+  gaps are named in amber and never forced; *Add & add another* for tables.
+- **Five empty-state fixes** outside the builder too: the first "Who we are"
+  line (unit and group), SWOT add/remove, the empty Plan page offering its
+  first pillar, a virgin pillars function's first row actually writing, and
+  a capability's key objectives gaining their first authoring surface.
+- **"+ Add a business unit" asks a form now** — name, prefix, company — with
+  the key minted from the name, `real:true`, and the weighting row minted
+  from the factor list.
+- Proved by `checks/plan-builder.py` (every control pressed, the DATA asked,
+  able to fail twice — the second proof caught the check itself), plus the
+  full `qa.py` sweep and the affected checks on the merged bytes.
 
 ### v3.46 — the deck's last gaps, and the overview's download (§128)
 

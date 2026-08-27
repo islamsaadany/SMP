@@ -1,4 +1,4 @@
-"""The pinned title's corners show the page, not the page behind it (§129.3).
+"""The pinned title's corners show the page, not the page behind it (§130.3).
 
 MEASURED IN PIXELS, AND THAT IS NOT A PREFERENCE. §53.7 wrote the rule down
 when the strip ABOVE this band was fixed: `elementFromPoint` returns an
@@ -11,7 +11,7 @@ corner box at each top corner of the band, none of what is behind the band may
 show through. That stays true if the fill is one day replaced by squaring the
 corners, and it fails the moment either is removed.
 
-BOTH POSITIONS, AND THEY WANT OPPOSITE THINGS (§129.6). Pinned, the notch must
+BOTH POSITIONS, AND THEY WANT OPPOSITE THINGS (§130.6). Pinned, the notch must
 be the page's own ground and nothing behind it. AT REST it must be the card's
 rounded corner, border arc and all — the first build filled both, because CSS
 cannot ask whether a sticky element is pinned, and Islam looked at the result:
@@ -116,7 +116,7 @@ def notch_pixels(pg, scale, side):
       const r=b.getBoundingClientRect();
       const rad=parseFloat(getComputedStyle(b).borderTopLeftRadius)||8;
       return {top:r.top,left:r.left,width:r.width,rad:rad};}""")
-    # ONE PIXEL PAST THE BAND ON THE OUTSIDE (§129.8). The box used to start at
+    # ONE PIXEL PAST THE BAND ON THE OUTSIDE (§130.8). The box used to start at
     # the band's own edge, and the thing Islam was still looking at lived
     # OUTSIDE it: the pane's 1px side border, covered by `::before` everywhere
     # above the band and therefore standing, pinned, as a square-ended stub

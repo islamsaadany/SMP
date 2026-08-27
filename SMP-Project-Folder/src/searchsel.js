@@ -96,7 +96,7 @@ var SEARCHSEL = (function(){
     sel.dispatchEvent(new Event("change", { bubbles: true }));
   }
 
-  /* ── TICKING IS NOT ANSWERING (§129.1) ──────────────────────────────
+  /* ── TICKING IS NOT ANSWERING (§130.1) ──────────────────────────────
      The single-select path above closes the popup BEFORE it fires `change`,
      because picking one option answers the question and because `change`
      repaints the panel the popup is standing in (§30.1). Neither is true of a
@@ -165,7 +165,7 @@ var SEARCHSEL = (function(){
       r.type = "button";
       r.className = "ssrow" + (on ? " on" : "");
       r.textContent = op.text || "—";
-      /* WHERE THIS ONE IS FROM, QUIETLY (§129.9). A hint on the option rides
+      /* WHERE THIS ONE IS FROM, QUIETLY (§130.9). A hint on the option rides
          into the row and nowhere else — the button's label and the value the
          field stores are the option's TEXT, which is the name on its own. It
          joins what is SEARCHED, so typing a unit's name finds the people in
@@ -261,7 +261,7 @@ var SEARCHSEL = (function(){
        rule was never size against a measured value; this only moves). It
        still closes when the button it belongs to has left the screen, because
        a popup pointing at nothing is worse than a closed one. */
-    /* AND A 1px CLIPPED ELEMENT SCROLLING IS NEVER THE PAGE MOVING (§129.1).
+    /* AND A 1px CLIPPED ELEMENT SCROLLING IS NEVER THE PAGE MOVING (§130.1).
        Setting `selected` on a `<select multiple>` makes the browser scroll the
        native list box to the option — and it fires a real `scroll` event doing
        it, from an element that is 1px square, clipped and invisible (see
@@ -321,7 +321,7 @@ var SEARCHSEL = (function(){
   function enhance(sel){
     if (sel.disabled) return;
     if (sel.dataset.nosearch === "1") return;
-    /* A MULTIPLE SELECT IS ALWAYS ENHANCED, whatever it holds (§129.1). The
+    /* A MULTIPLE SELECT IS ALWAYS ENHANCED, whatever it holds (§130.1). The
        five-option floor is about whether a short list is worth a search box;
        the native multiple select is a scrolling list box that ctrl-clicks, and
        it is not a control this product uses anywhere. Below the floor there is

@@ -16807,14 +16807,187 @@ is not. *A measurement that is wrong in the direction of "broken" costs as
 much as one that is wrong in the direction of "clean" (§68.10), and the first
 instinct — to go and change the builder — would have damaged working code.*
 
+### 128.5 A tick is an affirmation whatever colour it wears (reversing §128.1's mark)
+
+Islam, on the shipped red ticks: *"rather than the red check mark for the
+missing qs make it red question marks to indicate the missing."*
+
+**§128.1's ARGUMENT IS UNTOUCHED AND ONLY ITS GLYPH MOVES.** Everything that
+section settled still holds: the four Q columns stay four columns, nothing is
+ever merged, a tactic that names SOME quarters is answering the question and
+its ticks stay the ordinary ink, and the alarm is carried by the mark rather
+than by reshaping the table. What changes is the one character inside the
+four cells of a row that answered nothing.
+
+**AND THE REASON IS THAT A TICK MEANS SOMETHING BY ITSELF.** `✓` in a Q
+column says *this tactic runs in this quarter* — that is the whole meaning of
+the column, and it is the meaning the plan workbook's own Q1–Q4 columns carry.
+Painting it red asks the colour to do all the work of REVERSING it, so the
+row read *"runs in all four quarters"* to anybody who did not also read the
+colour, and *"runs everywhere"* is close to the opposite of *"nobody said
+when this runs"*. §128.1 chose the mark for its colour and not for what the
+mark says; the mark was arguing with the colour on top of it.
+
+**A `?` SAYS WHAT THE COLOUR SAYS.** Nobody answered this. The colour is then
+emphasis rather than the entire message, which is what every other gap in
+this deck already does — a bold red `Missing` is a word that means missing
+before it is red. Same shape as §116.4's rule read the other way: a mark must
+not be asked to mean the opposite of itself.
+
+**PROVED AT BOTH ENDS** (§94.2, §94.5). `checks/strategy-split.py` §5 asserts
+the gapped rows carry `?` in all four AND that a tick never appears on one —
+a build that put the red ✓ back satisfies "four bold red cells" and fails
+both of those — and, from the other side, that an answered row never wears a
+question mark. Run against the previous build: 2 failures.
+
+
+## 129 · Building a plan on the platform (v3.47, spec 020)
+
+Islam: *"I want the team of the SMO to be able to build a plan on the platform
+directly. so they identify a function or a unit and set which way are they
+going to plan pillars or projects and then they go in a flow of building the
+plans on the platform."* Settled over two mockup revisions
+(`design-mockups/plan-builder/`), and both of his corrections to revision 1
+are the decisions that shape the module.
+
+### 129.1 The decisions
+
+**FUNCTIONS CHOOSE, UNITS DO NOT.** A unit always plans in pillars — the
+scoring model, the import template and every unit page assume it. Only a
+function with nothing behind it is asked *pillars or projects*, and the
+question writes the `format` field spec 010 already stores, asked at a better
+moment: the function's birth.
+
+**A MAP, NOT A MARCH** (his first correction: *"the SMO might not build in
+that sequence — he might jump to a certain area"*). The band under the tab
+row is one chip per section of the plan — unit: Foundation · Objectives ·
+SWOT · Pillars · Review; projects function: Definitions · Objectives ·
+Projects · Review; pillars function: Pillars · Review — and every chip opens
+its section directly with the pen on. Nothing waits on a previous step. The
+chips read the DATA (✓ filled, a count so far, ○ empty), so they cannot
+drift from the plan; the same derivation is why **pausing costs nothing and
+nothing is stored** — no draft flag, no progress record, no state anybody
+can forget to clear. BUILDER is a screen mode and not even a preference.
+
+**A ROW IS ADDED WHOLE** (his second: *"the build up should be in boxes that
+respect the outcome structure … the template should protect the structure of
+the outcome"*). Every "+ Add" in build mode opens a form — §116's dialog
+shape, generalised — asking that row kind's fields in the order the outcome
+reads them. The name is the one field that makes Add live; everything else is
+asked, NAMED in an amber line while empty, and never forced, because a hard
+requirement makes somebody invent a number to get past a box ("we have not
+set the target yet" stays sayable, §47's rule about honest states). *Add &
+add another* keeps the form open for building a table in one sitting. The
+rows are applied through the pen's own minters (`addPillar`, `addMeasure`,
+`koMint`, …) and the option lists are the pen's own `selectOr` vocabulary —
+never a second copy of either (§53.5).
+
+**LIVE IMMEDIATELY.** The plan appears as it is built, exactly like pen
+edits; missing things read honestly as missing through the marks the pages
+already carry.
+
+**THE DOOR IS BESIDE IMPORT** — the page where plans arrive grows a second
+door, *Build it here*, and the chooser it opens lists every subject with an
+honest status. **A subject with content gets Continue AND Start fresh** —
+the first check run found the flaw: one button that always cleared would
+have made pausing cost the whole plan. Starting fresh goes through
+`clearUnitPlan()` / `clearFunction()`, the import's own path, so **it
+archives first and nothing the builder does is a deletion** (§49.2; a
+pillars function through the writable view + write-back, the same way an
+uploaded replacement goes). Creating a subject happens in the same place: a
+new function asks its format; a new projects function gets its first
+capability minted, named after it, because a projects plan has to hang off
+something and `addCapability()` is the one minter (§51.11).
+
+### 129.2 The empty-state audit — part one of the build, and five findings
+
+The editors were built for CORRECTING an imported plan, so from a truly
+empty subject several surfaces could be read and never started — §61's trap,
+found five more times in one walk:
+
+1. **"Who we are" had no first line.** The pen edited a clause's text and
+   never its lead, and an empty list rendered nothing and offered nothing.
+   Add, remove and an editable lead now, on the unit's foundation AND the
+   group's (the same table, the same fault).
+2. **The SWOT could only ever arrive.** No add, no remove, in any quadrant.
+3. **An empty unit's Plan page was a dead end** — "A plan arrives as a file:
+   Setup → Import" and nothing else, with no pane for the pen to sit on. It
+   offers the first pillar now to whoever `mayEditPlan()`, with the button
+   asking the rule itself because there is no pen to gate it.
+4. **A VIRGIN pillars function swallowed its first row silently**: the
+   rowadd handler resolved subjects through `unitLike()`, whose reading view
+   hands a function frozen empties (§50.6) — so the first add pushed into an
+   array the function never held, accepted on screen and written nowhere.
+   `unitLikeWritable()` now, which mints the containers.
+5. **A capability's key objectives were import-only**: readable on the
+   function's Overview, writable nowhere in the product. `capKoEdit()` —
+   koEdit's shape with the weight column a capability's rows carry — behind
+   the page's own pen, plus "+ Add a capability" on the Overview and on the
+   empty-function note.
+
+**And the Business units page's "+ Add a business unit" was found half-built
+on the way**: wired since some earlier version to an argless
+`addBusinessUnit()` that minted "New unit 1", key `newunit1`, prefix NU,
+`real:false` — stamping a unit the SMO just created as ILLUSTRATIVE (§21's
+flag) — with the weighting row's values hardcoded as rev/prof/imp/growth
+(§104.7's list-of-exceptions fault: a tenant that renamed a factor got a row
+the composite could not read). One minter still, now taking name, prefix and
+company from the builder's form; the key minted from the name; `real:true`;
+the weighting row minted from the factor list.
+
+### 129.3 The shape of the code
+
+`src/builder.js` holds state, HTML and data logic — everything that lives in
+the shared global scope. The SHELL owns what its closure owns: navigation,
+the modal, the wiring of every `data-b*` attribute (whoever rewrites the DOM
+re-wires it, §24/§30.1). The band (`#buildband`) sits OUTSIDE the sticky
+chrome — a band added to the pinned rows would move `--chrome-h` and every
+sticky offset under it (§101.5) — and is repainted by paint() after the
+navigation settles, because the chips read `currentSub`/`CURSEC`.
+`fieldSaved()` was hoisted out of wire()'s closure — the builder's dialogs
+write rows from outside it, and a second copy of "how an edit reaches the
+database" is §53.5's drift. **The server needed nothing**: every edit the
+builder makes is a plan/setup change `lib/authorize.js` already classifies,
+and an added unit or function is the office's by §42's unclassified rule.
+
+Three faults found by driving rather than reading: `builderSubjectName()`
+first asked `unitLike()` and every projects function was NAMELESS (that
+resolver answers only what the unit pages draw); closing the form's dialog
+EMPTIES its body, which blurs the field being typed, which fires `change`
+into a form that no longer exists (Escape threw on exactly that — §30.1's
+family from the far side; guarded); and the viewer switcher moves `current`
+to the new viewer's entry (§94.6), so "the band comes back when the SMO
+returns" is true through the chooser's Continue, not by standing still.
+
+### 129.4 What proves it
+
+`src/checks/plan-builder.py` — ten sections, every assertion asking the DATA
+after pressing the CONTROL (§96's question), making every state it measures
+(§94.2: an empty unit, a virgin function, a subject mid-build). Both ends
+each time: the chooser's statuses asserted to AGREE with `builderHasPlan()`,
+and the band asserted to HIDE for a viewer `SMPRules.mayAuthorPage()`
+refuses — found by asking the rule for a refused person rather than guessing
+one. **Proved able to fail twice before its green was believed (§94.5), and
+the second proof caught THE CHECK**: with the plan chip forced to lie, the
+first "agreement" assertion passed, because it looked for the count as a
+substring of the review row and the gap sentence beside the lying chip also
+contained a "1". It compares the chip's own mark against the data now, and
+the same break fails it. The full `qa.py` sweep and the affected checks
+(foundation-objectives, strategy-office, plan-fields, strategy-split,
+project-tables, tour, page-width, setup-overview) are green.
+
+**Flagged, not built**: a pillars function's key objectives still have no
+authoring surface anywhere (the Overview says its foundation is the
+parent's), so the builder's pillars-function route carries Plan and Review
+only — giving them a surface is a decision, not a tidy-up.
 ---
 
-## 129 · Owners come from the register, one item keeps its rail, and the pinned title's corners (v3.47)
+## 130 · Owners come from the register, one item keeps its rail, and the pinned title's corners (v3.48)
 
 Three notes from using the product, and the first of them turned out not to be
 about tidiness at all.
 
-### 129.1 An owner is picked, not typed — and 32 tactics proved why
+### 130.1 An owner is picked, not typed — and 32 tactics proved why
 
 Islam: *"for the owners in the plans, projects, tactics, milestones, let it be
 a searchable list from the registry"*, and, asked whether that list is people
@@ -16919,7 +17092,7 @@ bare `""` in their list to mean *not answered*, and it still renders as an
 empty option. A value/label pair would have quietly turned two dropdowns
 nobody asked about into em-dashes.
 
-### 129.2 One item still gets the rail
+### 130.2 One item still gets the rail
 
 Islam, of a function whose capability holds one project: *"in case of the
 function has 1 capability keep the rail there to keep the standard view even
@@ -16951,7 +17124,7 @@ thing to list, and an empty subject must still say what would fill it (§61).
 **THE COST IS STATED, NOT GLOSSED:** about 212px of width goes to a list with
 nothing to move between. Standing still beats saving the width.
 
-### 129.3 The pinned title's corners
+### 130.3 The pinned title's corners
 
 Islam: *"a very small visual glitch that on scrolling up in the pillars or
 project with the sticky title. the title has round corners so the scrolled up
@@ -16982,7 +17155,7 @@ one does. It does not need to be: it paints ONLY the notches, which is the one
 place the band's own background is absent. `pointer-events:none`, or an 8px
 square in each corner would swallow clicks meant for the pen behind it.
 
-### 129.4 What proves it
+### 130.4 What proves it
 
 Three new checks, each **proved able to fail against the shipped build before
 its green run was believed** (§94.5): `checks/owner-picker.py` **20**,
@@ -17024,7 +17197,7 @@ since §115, so the honest total is six and a total was never the point: it
 asks per ROW now, which is the thing that has to be true and stays true
 whatever else the block grows.
 
-### 129.5 Found and not fixed
+### 130.5 Found and not fixed
 
 * **A COLLABORATOR WHOSE NAME HOLDS A COMMA DOES NOT SURVIVE THE WORKBOOK.**
   `xlsx.js` writes collaborators joined with `", "` and reads them back split
@@ -17038,12 +17211,12 @@ whatever else the block grows.
   collaborators and would take the same control, and they were not what was
   asked for. Flagged, not widened (rule 1b).
 
-### 129.6 The corner, corrected by looking at it
+### 130.6 The corner, corrected by looking at it
 
 Islam, on the built fix: *"the corner still has this squared corner is there a
 way to remove it?"*
 
-**HE IS RIGHT, AND THE MEASUREMENT WAS RIGHT TOO.** §129.3 filled the two
+**HE IS RIGHT, AND THE MEASUREMENT WAS RIGHT TOO.** §130.3 filled the two
 corner notches with the page's ground in BOTH positions, because §53.7's rule
 says CSS cannot ask whether a sticky element is pinned — and priced the rest
 position at about 1.4px of the pane's own corner border arc, 13px², *"visible
@@ -17086,7 +17259,7 @@ perfectly. At rest it now asserts the OPPOSITE and positively: the notch cannot
 be all ground, because the card's corner has to be drawn through it. Six
 failures against the build Islam rejected.
 
-### 129.7 The register's Name, not the full legal one
+### 130.7 The register's Name, not the full legal one
 
 Islam, on the picker: *"for the drop down of names go for the list of names in
 the registry not the full name."*
@@ -17108,7 +17281,7 @@ by the list's own dedupe.
 **WHAT IS SHOWN IS WHAT IS STORED**, so the plan says the same word the
 register does (§53.5) rather than holding one name and displaying another.
 
-**WHICH MEANS `namedOn()` HAD TO LEARN IT, or §129.1 undoes itself.** The whole
+**WHICH MEANS `namedOn()` HAD TO LEARN IT, or §130.1 undoes itself.** The whole
 point of the picker is that the person it names may report that line; a label
 the rules cannot match would put the platform straight back to 32 tactics owned
 by somebody it cannot resolve. So the name rule MOVES into `lib/rules.js` —
@@ -17137,13 +17310,13 @@ person given a five-name legal name and no short one, another given a typed
 Name — and asserts the list, what is stored, and the shared rule's answer for
 all four cases. Four failures against the build before it.
 
-### 129.8 The squared corner was the card's border, not the band's
+### 130.8 The squared corner was the card's border, not the band's
 
 Islam, on the corrected build: *"the issue still persists"*, with a picture.
 
 **AND THE PICTURE HAD CHANGED SHAPE, which is the whole of the diagnosis.** The
-band's corner in it is ROUNDED and the page behind it is ground — §129.3 and
-§129.6 both working. What is square in that picture is the thin line beside it:
+band's corner in it is ROUNDED and the page behind it is ground — §130.3 and
+§130.6 both working. What is square in that picture is the thin line beside it:
 **the pane's own 1px side border**, which `::before` covers everywhere ABOVE
 the band (§53.7, so nothing scrolls through the strip) and which therefore
 begins, pinned, as a square-ended stub standing next to a rounded corner. A
@@ -17163,14 +17336,14 @@ check that samples only inside the corner it is named after cannot see the
 thing next to it. It samples a pixel past the band on the outside now, and
 fails four ways on the build Islam was looking at, naming the colour: `--line`.
 
-**THREE ROUNDS ON ONE CORNER, AND EACH FOUND A DIFFERENT ELEMENT.** §129.3 the
-pane's white ground, §129.6 the corner arc it covered at rest, §129.8 the
+**THREE ROUNDS ON ONE CORNER, AND EACH FOUND A DIFFERENT ELEMENT.** §130.3 the
+pane's white ground, §130.6 the corner arc it covered at rest, §130.8 the
 border beside it. Every round was measured, and every measurement was of the
 thing named in the round before. *Reproducing the picture is not the same as
 reproducing the complaint;* the first two rounds fixed what I had measured, and
 what he was pointing at moved each time.
 
-### 129.9 The place beside the name
+### 130.9 The place beside the name
 
 Islam: *"for the names in the lists, you can make it the name - the unit or
 function so people don't get confused."*
@@ -17179,8 +17352,8 @@ function so people don't get confused."*
 and nowhere else: the closed control shows the name, the plan STORES the name,
 the workbook and the deck print the name, and `namedOn()` matches the name.
 "Ramy Behairy — Mobile" written into a tactic would name nobody the platform
-can resolve, which is the fault §129.1 exists to fix and the same argument
-§129.7 makes about the short name from the other side. It rides on the option
+can resolve, which is the fault §130.1 exists to fix and the same argument
+§130.7 makes about the short name from the other side. It rides on the option
 as `data-hint` and `searchsel.js` draws it as a quiet span; `textOf()` reads
 the option's TEXT, which is the name alone, so the button and the field are
 untouched by it.

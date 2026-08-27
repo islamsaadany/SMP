@@ -1,4 +1,4 @@
-"""Owners and collaborators are picked from the register (§129.1).
+"""Owners and collaborators are picked from the register (§130.1).
 
 WHAT THIS ASSERTS IS THAT PRESSING THE CONTROL CHANGES THE DATA, which is the
 only question that separates a bound field from a decorative one (§96): the
@@ -152,7 +152,7 @@ with sync_playwright() as p:
     ck("People and Departments, in that order",
        shape["groups"][:2] == ["People", "Departments"], shape["groups"])
     ck("a single owner can be cleared", shape["blank"])
-    # THE REGISTER'S **Name** COLUMN, not the full legal name (§129.7). Every
+    # THE REGISTER'S **Name** COLUMN, not the full legal name (§130.7). Every
     # person in the demo has a short full name, so on this data the two are the
     # same string and this assertion cannot tell them apart — section 10 below
     # makes a register where they differ.
@@ -162,7 +162,7 @@ with sync_playwright() as p:
     ck("the People group is sorted", shape["sorted"])
     ck("the Departments group speaks the navigation's words",
        "Mobile" in shape["depts"] and "IT Dist." in shape["depts"], shape["depts"][:6])
-    # ── 3b · where somebody works, beside their name (§129.9) ──────────
+    # ── 3b · where somebody works, beside their name (§130.9) ──────────
     hint = pg.evaluate("""()=>{
       const s=document.querySelector('.pane select.ownersel');
       const os=[...s.querySelectorAll('optgroup[label="People"] option')];
@@ -202,12 +202,12 @@ with sync_playwright() as p:
         after = pg.evaluate("()=>UNITS.mobile.items[0].tactics[0].owner")
         ck("picking an owner writes it to the plan", after == "Hazem Roushdy" and after != before,
            {"was": before, "now": after})
-        # THE HINT IS A HINT (§129.9): what lands in the plan is the name
-        # alone, or namedOn() could not resolve it and §129.1 undoes itself.
+        # THE HINT IS A HINT (§130.9): what lands in the plan is the name
+        # alone, or namedOn() could not resolve it and §130.1 undoes itself.
         ck("the place beside it is not written into the plan",
            after == after.strip() and "Logistics" not in after, after)
         ck("a single pick closes the list", pg.query_selector(".sspop") is None)
-        # A HINT YOU CAN SEE AND CANNOT SEARCH FOR IS HALF A CONTROL (§129.9).
+        # A HINT YOU CAN SEE AND CANNOT SEARCH FOR IS HALF A CONTROL (§130.9).
         press(pg, btn_for(pg, sel), "the tactic owner picker")
         pg.keyboard.type("Nigeria"); pg.wait_for_timeout(250)
         found = pg.eval_on_selector_all(".sspop .ssrow:not([hidden])",
@@ -229,7 +229,7 @@ with sync_playwright() as p:
             ".sspop.ssmany .ssrow", "e=>e.filter(r=>r.textContent.trim()==='—').length") == 0)
         names = pg.evaluate("""()=>{const rs=[...document.querySelectorAll('.sspop .ssrow')];
           /* THE ROW'S NAME IS ITS FIRST TEXT NODE. The place beside it is a
-             span inside the same button (§129.9), so textContent would read
+             span inside the same button (§130.9), so textContent would read
              "Amaka EzeNigeria" and this would compare it against a stored
              value that is correctly the name alone. */
           const nm=r=>r.childNodes[0].textContent;
@@ -258,7 +258,7 @@ with sync_playwright() as p:
         was = pg.evaluate("()=>UNITS.mobile.items[0].owner")
         press(pg, btn_for(pg, psel), "the pillar owner picker")
     # A DEPARTMENT NOBODY SITS IN, deliberately: the place now joins what
-        # is searched (§129.9), so "Nigeria" would match the people who work
+        # is searched (§130.9), so "Nigeria" would match the people who work
         # there as well as the unit and this would pick whichever came first.
         pg.keyboard.type("Risk"); pg.wait_for_timeout(250)
         pg.click(".sspop .ssrow:not([hidden])"); pg.wait_for_timeout(350)
@@ -345,7 +345,7 @@ with sync_playwright() as p:
        [x for x in lst if "Testcase" in x])
 
     # AND THE RULES MUST RECOGNISE WHAT THE PICKER WRITES — both ends (§94.2).
-    # A label the platform cannot match is exactly the fault §129.1 was built
+    # A label the platform cannot match is exactly the fault §130.1 was built
     # to fix: 32 of 78 tactics owned by somebody nobody could resolve.
     try:
         press(pg, btn_for(pg, ".pane table tbody tr:first-child select.ownersel"),

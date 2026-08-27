@@ -107,13 +107,6 @@
    conflict only because a comment differed. Resolved to a name nobody has
    served, confirmed against origin/main at the merge and AGAIN immediately
    before the push (§94.16). */
-/* v3.44 — §122: one line above the table, a dialog that fits the window,
-   a bold title and a table that reaches the fold. §94.12 FOR THE EIGHTH
-   TIME, and the FIFTH on this one piece of work: v3.39, v3.40, v3.41 and
-   v3.43 were each taken by main inside the window between reading a name
-   and pushing it, and main is now serving "smp-shell-v3.43-setup".
-   Confirmed against origin/main, and to be confirmed once more
-   immediately before any push to main (§94.16). */
 /* v3.46-plandeck — §128: the deck marks a tactic that names no quarter,
    closes on Thank you, and the Function overview carries the download too.
 
@@ -125,7 +118,31 @@
    cannot be arrived at by coincidence. Confirmed against origin/main serving
    "smp-shell-v3.45"; confirm once more immediately before any push to main
    (§94.16). */
-const SHELL = "smp-shell-v3.46-plandeck";
+/* v3.47-planbuilder — §129: building a plan on the platform. The suffix rule
+   from the line above, followed: this session first wrote v3.41, found main
+   had taken v3.38–v3.46 while it worked, and renumbered — the name says
+   whose change this is, so a twelfth collision cannot happen by coincidence.
+   Confirmed against origin/main serving "smp-shell-v3.46-plandeck"; confirm
+   once more immediately before the push to main (§94.16). */
+/* v3.47-qmarks — §128.5: the missing quarters in the plan deck wear a red
+   question mark instead of a red tick. NOT a version bump — §91's trigger is
+   "the built file's bytes changed", which this is, and the platform filename,
+   the gate's link, vercel.json's rewrite and PLATFORM_FILE are all untouched.
+   The suffix carries the whole difference from the name beside it, which is
+   the §128 rule followed rather than a number nobody can tell apart.
+   Confirmed against origin/main serving "smp-shell-v3.47-planbuilder";
+   confirm once more immediately before the push to main (§94.16). */
+/* v3.48-owners — §130: owners and collaborators picked from the register, the
+   rail kept for a single item, and the pinned title's corners. A version bump
+   as well as a content change: main had taken §129 and v3.47 for the plan
+   builder while this session worked, so both were renumbered on the way in
+   (the fifth time this repository has had to, and the suffix rule is why the
+   collision is visible rather than silent). The platform filename, the gate's
+   link, vercel.json's rewrite and PLATFORM_FILE are untouched — §91's trigger
+   is the built file's BYTES, which this is.
+   Confirmed against origin/main serving "smp-shell-v3.47-qmarks"; confirm
+   once more immediately before the push to main (§94.16). */
+const SHELL = "smp-shell-v3.48-owners";
 const ASSETS = [
   "/",
   "/index.html",

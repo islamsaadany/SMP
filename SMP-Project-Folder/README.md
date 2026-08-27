@@ -90,6 +90,7 @@ of it was rejected — which is the point of keeping it.
 | `../../design-mockups/send-a-message/2026-08-25_send-a-message-rework.html` | The composer stays one screen: the audience becomes a bounded summary, the send bar is pinned and carries the count, drafts and sent move into the header, and a copy can be sent to yourself first. Today beside the proposal. **Built in 3.25** (&sect;95) |
 | `../../design-mockups/foundation-edit/2026-08-25_objectives-table-width.html` | The Foundation's objectives table leaves the aspiration card for a full-width band while the pen is open. Real screenshots at 1600px, today beside the proposal, both themes, with the width measured (696px &rarr; 1493px) and the cost stated in its own panel. **Built in 3.25** (&sect;96.6) |
 | `../../design-mockups/access-strategy-reporting-split/2026-08-26_matrix-split-and-plan-download.html` | The own access columns split into Strategy &#124; Reporting halves, and a download-the-plan-as-slides (.pptx) button beside the pen. Screenshots of the REAL platform with the proposal injected into the live table and pane. **Built in 3.40** (&sect;117, spec 019); its five follow-ups built in 3.42 (&sect;119) |
+| `../../design-mockups/plan-builder/2026-08-26_build-a-plan-flow.html` | Building a plan on the platform: the door beside Import, the subject chooser, the builder band as a MAP of section chips, the structured row forms, and the review. Revision 2 &mdash; Islam's two corrections (any order; rows added whole) are drawn in. **Built in 3.47** (&sect;129, spec 020) |
 | `../../design-mockups/office-chat/2026-08-25_talking-to-the-office.html` | The corner, the conversation it opens, and the Setup page the office answers from. Both themes, with the five decisions and their costs stated under each screen. **Built in 3.26** (&sect;97, spec 015) |
 | `../../design-mockups/office-chat/2026-08-25_chat-settings.html` | The chat's on/off switch and its four settings, in a dropdown on the Messages page header, and what "off" actually does. Both themes. **Built in 3.27** (&sect;98) |
 | `../../design-mockups/office-chat/2026-08-25_what-was-built.html` | Not a proposal &mdash; the outcome report for &sect;97, with screenshots of the running product, the decisions and their costs, and what the three suites assert. |
@@ -334,6 +335,18 @@ The **Demo data** button is now a menu with two entries (§67): **Filled
 project**, the full worked example, and **Clear project**, the same organisation
 with nothing filled in &mdash; what a new deployment looks like on day one, for
 explaining the reporting cycle from the beginning. Neither can be saved.
+
+Version **3.47** lets the office **build a plan on the platform** (§129,
+spec 020, mockups in `../../design-mockups/plan-builder/`): a second door
+beside Import opens a chooser of every unit and function — or creates one,
+a new function asked *pillars or projects* at birth — and a band of section
+chips maps the plan, each openable in any order, each reading the data.
+Every "+ Add" in build mode opens a form asking the row's fields in the
+outcome's order, and starting fresh over a standing plan archives it first.
+On the way, five authoring surfaces that could be read but never STARTED
+from empty were fixed — the first "Who we are" line, the SWOT, the empty
+Plan page, a virgin pillars function's first row, and a capability's key
+objectives.
 
 **Next:** the rebuild on the HR_ERP stack (§20) — sign-in and the shell, then
 the read-only screens, then editing and reporting per action. Then

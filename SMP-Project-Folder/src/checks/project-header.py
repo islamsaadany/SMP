@@ -123,7 +123,7 @@ with sync_playwright() as pw:
     ck("the plan pen is there", bool(pen))
     if pen:
         pen.click(); pg.wait_for_timeout(500)
-        # THE OWNER IS A LIST NOW (§129.1), and the count that used to answer
+        # THE OWNER IS A LIST NOW (§130.1), and the count that used to answer
         # this stopped being able to (§51.11: a check keyed on markup that has
         # changed shape). It was `input, textarea` == 5, which silently left
         # out the Repeats select that has been in this block since §115 — so
@@ -159,7 +159,7 @@ with sync_playwright() as pw:
               const el = row && row.querySelector('input, textarea, select');
               if (!el) return;
               /* A select can only be set to something it holds — which is the
-                 point of the control (§129.1) — so the value is added if the
+                 point of the control (§130.1) — so the value is added if the
                  register does not carry it, exactly as a stored name outside
                  the list is (§96.2). */
               if (el.tagName === "SELECT" &&

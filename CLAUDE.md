@@ -474,7 +474,7 @@ console errors (in this cloud environment, run it via a wrapper that points Play
   with a real choice still asks. The × on the chip is what makes committing on
   one press safe.
 - **AN OWNER IS PICKED FROM THE REGISTER, AND IT DECIDES WHO MAY REPORT
-  (§129.1):** `SMPRules.namedOn()` matches a tactic's `owner` against the
+  (§130.1):** `SMPRules.namedOn()` matches a tactic's `owner` against the
   register BY NAME, so a short spelling names nobody — **32 of the 78 tactics
   in the demo**, each one a person who owns a line and cannot enter its figure.
   Five fields become lists (project · milestone · tactic · **pillar**, plus
@@ -488,7 +488,7 @@ console errors (in this cloud environment, run it via a wrapper that points Play
   the deck and the archive. **The pillar's row is edit-mode only** — read mode
   already says it twice — and the meta line drops it while the pen is on.
 - **A TICKING LIST STAYS OPEN, AND THAT REVERSES `choose()` ON PURPOSE
-  (§129.1):** a single pick answers the question, so it closes before firing
+  (§130.1):** a single pick answers the question, so it closes before firing
   `change` (§30.1); a list you are ticking is not answered until you stop.
   **Committed per tick, never on close** — `close()` is the first thing
   `wire()` does at the end of `paint()`, by which time `FIELDS` is rebuilt and
@@ -500,13 +500,13 @@ console errors (in this cloud environment, run it via a wrapper that points Play
   FIRST option and would have dropped the rest in silence. Emptied, the key is
   DELETED (§50.6). The tick is DRAWN, not written: U+2713 is outside the latin
   subsets and would ship as a blank box (§52, §120.2).
-- **A 1px CLIPPED ELEMENT SCROLLING IS NEVER THE PAGE MOVING (§129.1):**
+- **A 1px CLIPPED ELEMENT SCROLLING IS NEVER THE PAGE MOVING (§130.1):**
   setting `selected` on a `<select multiple>` fires a real `scroll` event from
   the hidden `.ss-native`, which reached `onGone` with capture on — so every
   tick re-placed the popup and a tick near the fold CLOSED it. Three versions
   of `searchsel.js` never saw it, because the single-select path never sets
   `selected` on anything. **Found by ticking, not by reading.**
-- **ONE ITEM STILL GETS THE RAIL, ON BOTH SIDES OF THE SWITCH (§129.2,
+- **ONE ITEM STILL GETS THE RAIL, ON BOTH SIDES OF THE SWITCH (§130.2,
   reversing `railWorthIt`'s threshold):** it was never about capabilities — the
   gate counted a capability's PROJECTS, so Marketing drew two capabilities on
   one page at two different left edges. `railWorthIt()` is the ONE answer,
@@ -515,8 +515,8 @@ console errors (in this cloud environment, run it via a wrapper that points Play
   **The pen already disagreed with the reading view** (§69.13 draws the rail
   from one project because Add lives in it). **Still false for an empty list**:
   nothing to list is not the same question as one thing to list (§61).
-- **THE PINNED TITLE'S CORNERS TAKE THE PAGE'S GROUND — WHILE PINNED (§129.3,
-  corrected by §129.6):** §53.7 painted the strip ABOVE the band and stopped at
+- **THE PINNED TITLE'S CORNERS TAKE THE PAGE'S GROUND — WHILE PINNED (§130.3,
+  corrected by §130.6):** §53.7 painted the strip ABOVE the band and stopped at
   its top edge, where the two rounded corner notches begin — 13px² of the white
   card per corner, with rows sliding through it. It first painted **in both
   positions**, on §53.7's rule that CSS cannot ask whether a sticky element is
@@ -535,10 +535,10 @@ console errors (in this cloud environment, run it via a wrapper that points Play
   first version of the check reported a CORRECT build broken: in the dark
   palette `--surface` sits between `--ground` and `--surface-2`, so an
   antialiased pixel lands on it by arithmetic (§68.10).
-- **THE SQUARED CORNER WAS THE CARD'S BORDER, NOT THE BAND'S (§129.8):** the
-  third round on one corner, and each round found a different element — §129.3
-  the pane's white ground, §129.6 the corner arc the fill covered at rest,
-  §129.8 the **1px side border**, which `::before` covers everywhere ABOVE the
+- **THE SQUARED CORNER WAS THE CARD'S BORDER, NOT THE BAND'S (§130.8):** the
+  third round on one corner, and each round found a different element — §130.3
+  the pane's white ground, §130.6 the corner arc the fill covered at rest,
+  §130.8 the **1px side border**, which `::before` covers everywhere ABOVE the
   band and which therefore begins, pinned, as a square-ended stub beside a
   rounded corner. A card whose side starts in a butt end READS as a squared
   corner. The fill goes `left:-1px`/`right:-1px` now and each gradient tile is
@@ -548,23 +548,23 @@ console errors (in this cloud environment, run it via a wrapper that points Play
   is the one immediately outside. *Reproducing the picture is not the same as
   reproducing the complaint* — the first two rounds fixed what I had measured,
   and what he was pointing at moved each time.
-- **THE PLACE BESIDE THE NAME IS A HINT, NEVER PART OF THE ANSWER (§129.9):**
+- **THE PLACE BESIDE THE NAME IS A HINT, NEVER PART OF THE ANSWER (§130.9):**
   `data-hint` on the option, drawn as a quiet span by `searchsel.js`; the closed
   control, the stored value, the workbook, the deck and `namedOn()` all see the
-  NAME alone — "Ramy Behairy — Mobile" in a tactic would name nobody (§129.1's
-  fault, §129.7's argument from the other side). **It joins what is searched**,
+  NAME alone — "Ramy Behairy — Mobile" in a tactic would name nobody (§130.1's
+  fault, §130.7's argument from the other side). **It joins what is searched**,
   or it is half a control. `personAt()` + `placeLabel()`, and somebody the
   register has not placed gets NO hint rather than a guess (§15.1). And it broke
   three assertions by being a span: a row's `textContent` became
   "Amaka EzeNigeria" — read the row's FIRST TEXT NODE.
-- **THE PICKER LISTS THE REGISTER'S *Name*, NOT THE FULL LEGAL ONE (§129.7):**
+- **THE PICKER LISTS THE REGISTER'S *Name*, NOT THE FULL LEGAL ONE (§130.7):**
   invisible here — all 33 demo people have a two- or three-word full name and
   none has a typed short one, so `knownName()` returns `p.name` and the wrong
   column looked right. Read through **`displayNames()`**, which lengthens the
   guess for a clashing pair (§81.1): in a PICKER two people reading as one entry
   means the second is silently dropped by the dedupe. **What is shown is what is
   STORED**, so the plan says the register's word (§53.5) — **which means
-  `namedOn()` had to learn it, or §129.1 undoes itself.** The name rule MOVES
+  `namedOn()` had to learn it, or §130.1 undoes itself.** The name rule MOVES
   into `lib/rules.js` (`NAME_PARTICLES`, `nameWords`, `knownGuess`), the browser
   keeps wrappers, and `namedOn()` matches the key, the full name, a typed
   `known`, and **`nameRuns()`** — every leading run from the short form up to
@@ -2189,13 +2189,16 @@ python3 checks/strategy-split.py # the Strategy | Reporting halves: the cell pre
                                 # download unzipped and read — figures proved absent (§117)
 python3 checks/owner-picker.py  # an owner is picked from the register, not typed: all five
                                 # fields PRESSED through the real popup and the state
-                                # graph read back, both ends each time (§129.1)
+                                # graph read back, both ends each time (§130.1)
 python3 checks/rail-standard.py # one item still gets the rail, on a unit AND a function —
-                                # it MAKES the one-pillar unit, the demo has none (§129.2)
+                                # it MAKES the one-pillar unit, the demo has none (§130.2)
 python3 checks/band-corner.py   # the pinned title's corners, measured in PIXELS because a
-                                # DOM probe calls the broken build clean (§129.3, §53.7)
+                                # DOM probe calls the broken build clean (§130.3, §53.7)
 python3 checks/no-jump.py       # nothing moves the register under you — the act of
                                 # OPENING a row included, since §110.7
+python3 checks/plan-builder.py  # building a plan ON the platform: the door, the chooser,
+                                # the band's map, every row form asked of the DATA, and the
+                                # empty-state fixes — proved able to fail twice (§129)
 python3 checks/office-chat.py   # the chat's client half — serves the built file over HTTP,
                                 # because the whole feature is invisible over file:// (§97.9)
 python3 checks/setup-rail.py    # the Setup rail fits the window, every entry is reachable
@@ -2247,9 +2250,9 @@ prior sessions (on HR_ERP) accidentally reverted agreed-upon designs.
 
 ---
 
-*Last Updated: 2026-08-27 &mdash; **v3.47: an owner is picked, a single item
-keeps its rail, and the pinned title's corners (&sect;129)**, with two of the
-three corrected by Islam LOOKING at them (&sect;129.6, &sect;129.7). **A
+*Last Updated: 2026-08-27 &mdash; **v3.48: an owner is picked, a single item
+keeps its rail, and the pinned title's corners (&sect;130)**, with two of the
+three corrected by Islam LOOKING at them (&sect;130.6, &sect;130.7). **A
 tactic's owner is matched against the register BY NAME** &mdash; `namedOn()`
 reads it beside the collaborators, and that is what makes somebody a
 Contributor who may enter that line's figure. Measured before a line was
@@ -2282,7 +2285,7 @@ the **full legal name**: invisible here, because all 33 demo people have a two-
 or three-word name and none has a typed short one, so `knownName()` returns
 `p.name` and the wrong column looked right. It reads the register's **Name**
 now, through `displayNames()` so a clashing pair never reads as one entry
-&mdash; **which meant `namedOn()` had to learn that name**, or &sect;129.1
+&mdash; **which meant `namedOn()` had to learn that name**, or &sect;130.1
 undoes itself: the name rule moves into `lib/rules.js` and matches the key, the
 full name, a typed `known`, and every leading run down to the register's short
 form &mdash; **never one name**, or a bare *"Karim"* would hand reporting
@@ -2295,6 +2298,79 @@ the corner. The corner check **reported a correct build broken on its first
 run**, because in the dark palette `--surface` sits between `--ground` and
 `--surface-2` and an antialiased pixel lands on it by arithmetic
 (&sect;68.10).*
+
+*Earlier: 2026-08-26 &mdash; **v3.47: building a plan on the platform
+(&sect;129, spec 020)**. Islam: *"I want the team of the SMO to be able to
+build a plan on the platform directly … they identify a function or a unit
+and set which way are they going to plan pillars or projects and then they go
+in a flow."* Settled over two mockup revisions, and both of his corrections
+ARE the design: **a map, not a march** (the band under the tab row is one
+chip per section, openable in any order, each chip reading the DATA — ✓ /
+count / ○ — so nothing is stored and pausing costs nothing), and **a row is
+added whole** (every "+ Add" in build mode opens &sect;116's dialog shape
+asking that row kind's fields in the outcome's order; the name makes Add
+live, everything else is NAMED while empty and never forced). Only a
+function is asked *pillars or projects* — a unit always plans in pillars —
+and the door is beside Import: two doors on the page where plans arrive,
+with **Continue AND Start fresh** on a subject with content (one button that
+always cleared would make pausing cost the whole plan) and Start fresh going
+through the import's own archive path (&sect;49.2). **PART ONE WAS AN AUDIT,
+AND IT FOUND FIVE SURFACES THAT COULD BE READ AND NEVER STARTED** (&sect;61's
+trap, five more times): no first "Who we are" line (unit AND group), no SWOT
+add, an empty Plan page that was a dead end pointing at Import, a VIRGIN
+pillars function whose first row was accepted on screen and written nowhere
+(`unitLike()`'s frozen empties — `unitLikeWritable()` now), and a
+capability's key objectives readable on the Overview and writable nowhere.
+Plus one found half-built: "+ Add a business unit" minted "New unit 1" with
+`real:false` — stamping the SMO's own unit as ILLUSTRATIVE — and hardcoded
+factor keys; it asks the form now, and the weighting row is minted from the
+factor list (&sect;104.7). **The server needed nothing**: every builder edit
+is a change the authoriser already classifies. `checks/plan-builder.py` asks
+the DATA after pressing every control, and was **proved able to fail twice —
+the second proof caught the check itself** (a substring "agreement" that a
+lying chip satisfied; it compares the chip's mark now). Flagged, not built:
+a pillars function's key objectives still have no authoring surface
+anywhere.*
+
+*Earlier: 2026-08-26 &mdash; **v3.46: a tactic that names no quarter, a
+closing slide, and the overview's download (&sect;128)**. Three more from using
+the plan download on a plan still being filled in. **A tactic with NO quarter
+at all is a gap** &mdash; &sect;119.1 was right to leave a single blank quarter
+alone (a tactic marked Q2 and Q3 is saying something by leaving Q1 and Q4
+empty), and that reasoning never covered a row that answered nothing; the four columns
+stay exactly as they are and **all four cells carry a bold red mark** instead.
+The first answer merged one `Missing` across them and Islam turned it down
+&mdash; *"the template should stay the same"* &mdash; and he is right: the four
+columns are the workbook's shape, a table whose cells merge when a row is
+incomplete cannot be scanned down a column, and the alarm had been allowed to
+reshape the thing it was annotating (&sect;116.4's fault in a table).
+**AND THE MARK IS A QUESTION MARK, NOT A TICK (&sect;128.5, reversing the
+glyph and nothing else):** *"rather than the red check mark for the missing qs
+make it red question marks."* A `&check;` in a Q column MEANS something on its
+own &mdash; *this runs in this quarter*, the column's whole point and the
+workbook's own shape &mdash; so painting it red asked the colour to REVERSE
+the mark, and the row read *"runs everywhere"* to anybody who did not also
+read the colour: close to the opposite of *"nobody said when this runs"*.
+&sect;128.1 chose its mark for the colour and not for what the mark says.
+A `?` says what the colour says, so the colour becomes emphasis rather than
+the whole message &mdash; which is what a bold red `Missing` already does,
+being a word that means missing before it is red. **Asserted at both ends**:
+the gapped rows carry `?` in all four AND never a tick (a red &check; put back
+satisfies "four bold red cells" and fails both), and an answered row never
+wears a question mark.
+**The deck closes on Thank you**, which is `present.js`'s own last slide
+(&sect;53.5: two decks of the same plan should have the same manners). **And
+the Function overview carries the download too** &mdash; a capability
+function's strategy tab is TWO sections and only Projects had a `.paneact` to
+hang the button on, so from the other half there was no way to take the plan
+away. **IT RENDERED INVISIBLE FIRST, WHICH IS &sect;70 EXACTLY**: `.penbtn` is
+built for a card corner (absolute, `opacity:0` until hovered) and a worded bar
+is not one, so it sat in the document answering every DOM query and could not
+be pressed &mdash; caught only because the check CLICKS. **And two of the first
+run's three failures were the check, not the product**: `sorted()` over slide
+parts is lexicographic, so `slide10` came before `slide2` and it measured a
+pillar it had never touched. A measurement wrong in the direction of "broken"
+costs as much as one wrong in the direction of "clean".*
 
 *Earlier: 2026-08-26 &mdash; **v3.44: one line above the table, and a
 

@@ -214,14 +214,23 @@ function pptxQCells(t){
      the gap cost the shape that carries every other row — a bad trade, and
      the mark can carry the alarm on its own.
 
-     SO THE MARK CHANGES COLOUR RATHER THAN THE TABLE CHANGING SHAPE: all four
-     quarters ticked in bold red says "this runs everywhere" in the one colour
-     the deck uses for nothing but a gap, beside a Missing owner in the same
-     red. §119.1 is untouched — a tactic that names SOME quarters is answering
-     the question, and its ticks stay the ordinary ink. */
+     SO THE MARK CHANGES RATHER THAN THE TABLE CHANGING SHAPE: the four cells
+     carry a mark in the one colour the deck uses for nothing but a gap,
+     beside a Missing owner in the same red. §119.1 is untouched — a tactic
+     that names SOME quarters is answering the question, and its ticks stay
+     the ordinary ink.
+
+     AND THE MARK IS A QUESTION MARK, NOT A TICK (§128.2, Islam: "rather than
+     the red check mark for the missing qs make it red question marks to
+     indicate the missing"). §128.1 shipped a red ✓ in all four, and a tick
+     is an AFFIRMATION whatever colour it wears — it says the tactic runs in
+     that quarter, so the row read "runs everywhere" to anybody who did not
+     also read the colour, which is the opposite of what it is there to say.
+     A `?` says the same thing the colour says: nobody answered this. The
+     colour is now the emphasis rather than the whole message. */
   var any = ["q1","q2","q3","q4"].some(function(q){ return t[q]; });
   if (!any) return ["q1","q2","q3","q4"].map(function(){
-    return { t:"\u2713", align:"ctr", alarm:true };
+    return { t:"?", align:"ctr", alarm:true };
   });
   return ["q1","q2","q3","q4"].map(function(q){
     return { t: t[q] ? "\u2713" : "", align: "ctr" };

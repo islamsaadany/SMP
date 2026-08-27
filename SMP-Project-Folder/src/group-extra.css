@@ -713,7 +713,7 @@
   .pane > .pband::before {
     content:""; position:absolute; left:-1px; right:-1px; bottom:100%;
     height:calc(var(--rail-gap, 22px) + 2px); background:var(--ground); }
-  /* ── AND THE TWO CORNERS ARE THE SAME WINDOW (§129.3) ─────────────
+  /* ── AND THE TWO CORNERS ARE THE SAME WINDOW (§130.3) ─────────────
      Islam: "the title has round corners so the scrolled up appears in the
      right and left top corners." Measured before touching it: 13px² of the
      page's white card, per corner, with rows sliding through it — the band's
@@ -729,7 +729,7 @@
      number of its own here would drift from the radius above the day somebody
      changes one (§29.4's rule, on a curve instead of a gap).
 
-     AND IT PAINTS ONLY WHILE THE BAND IS PINNED (§129.6). It did not at
+     AND IT PAINTS ONLY WHILE THE BAND IS PINNED (§130.6). It did not at
      first — §53.7's rule is that CSS cannot ask, so the strip above the band
      paints in both positions and this was written the same way, at a cost
      measured at 1.4px of the pane's own corner arc. Islam looked at it: *"the
@@ -751,7 +751,7 @@
      it paints ONLY the notches, which is the one place the band's own
      background is absent. `pointer-events:none`, or an 8px square in each
      corner would swallow clicks meant for the pen behind it. */
-  /* PAST THE PANE'S BORDER, EXACTLY AS `::before` DOES (§129.8). The first
+  /* PAST THE PANE'S BORDER, EXACTLY AS `::before` DOES (§130.8). The first
      build filled the notch and stopped at the band's own edge — and the thing
      Islam was still looking at was not the notch at all: it was the pane's 1px
      SIDE BORDER, which `::before` covers everywhere above the band and which

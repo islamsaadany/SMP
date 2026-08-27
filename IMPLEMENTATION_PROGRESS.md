@@ -6,9 +6,10 @@ version (rules A2 / A11, changed 2026-08-20) — those go only when asked for.
 
 **Where it runs:** Vercel, production tracks `main`. Static files plus two
 serverless functions (`/api/state`, `/api/auth`) against Neon Postgres.
-**Latest version:** v3.49 on `main` — §132 (same-name notices) merged over
-§130 (owners, corners — another session's), which took v3.48 and the §130 number
-while this branch was being built.
+**Latest version:** v3.50 on `main` — §135 (the Setup header line) merged over
+v3.49. Three sessions landed on the same numbers this week: this work was built
+as §130 / v3.48 and renumbered on the way in, because the owners-and-corners run
+took §130 and the same-name register run took §131–§134.
 **Last updated:** 2026-08-27
 
 **Sign in as:** `SMO` / `1234` — a password change is forced at once (§43.1,
@@ -65,6 +66,50 @@ Nothing proceeds past this line without an answer.
   is a true signal — do not silence it.
 
 ## Built and verified
+
+### v3.50 — the Setup header line, the marking table, and a repaired matrix (§135)
+
+- Eleven asks from using the Setup pages. **Seven of them are one standard
+  applied to sixteen pages**: the page's own search and buttons share the
+  pinned line with its name, the `SMO` pill and every count chip go, the quick
+  filters and the row count go the way the register's did, and the grey
+  briefing paragraph goes everywhere.
+- **§121.2 had left those controls on a row of their own for a good reason,
+  and that reason forbade the FAKE move rather than the move** — a negative
+  margin pulled a non-sticky row up under a pinned title and scrolling slid it
+  out. Inside the header they pin with it.
+- **Roles & access is repaired, and it had one cause** (§135.2): `.acgrid` is
+  `overflow-x:auto`, so the BOX — not the page — is what its head pins against,
+  and §121.4's 141px page offset pushed the header 141px down inside the table,
+  onto rows three and four. The exact fault §121.4 wrote down about the
+  register, on the one table its exclusion forgot. Repairing it made §117's
+  *Own business unit* and *Own supporting function* headings readable for the
+  first time since the split shipped.
+- **Focus measures reaches supporting functions** in both of their shapes, with
+  a segmented On|Off switch on the header line, a navigation-style destination
+  row carrying each place's mark count, and one table headed like the register.
+  The group's Focus board grows the same half, or the marks are stored where
+  nobody can see them (§61).
+- **Send a message → Send an email**, with the Email settings folded in as its
+  second section (a status table, four fields, a live rendered preview and a
+  test send: not a dropdown). **Inbox → In Platform inbox.**
+- **A person's company is sometimes derived and sometimes stored** (§135.6):
+  read-only wherever the unit has already answered it, written only where
+  nothing else has, so two fields cannot contradict one stored fact.
+- **A four-pixel slot was closed** (§135.10): `--sethead-h` was a guessed 46px
+  and the header is 42–49px depending on the page, so scrolling rows showed
+  through the gap between the two pinned headers. Published by a
+  ResizeObserver now.
+- `checks/setup-header.py` was proved able to fail first — **33 failures
+  against the previous build** — and **two of its own assertions could not
+  fail when written** (§113.8's blind spot, and `tr.getBoundingClientRect()`
+  reporting the un-stuck layout).
+- Verified after the merge: `qa.py`, setup-header, setup-rail, setup-pages,
+  setup-search, register-header, focus-switch, role-picker, table-standard-all,
+  no-wrap, and main's own band-corner, owner-picker and rail-standard all
+  green; `test-authorize` 212/0; **round trip and clean parity on a virgin
+  Postgres 16** (§113.7); contrast 52 failures, unchanged, none on the new
+  surfaces.
 
 ### v3.49 — the register notices two people whose name reads the same (§131)
 

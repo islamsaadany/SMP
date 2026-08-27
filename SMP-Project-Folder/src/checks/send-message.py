@@ -187,10 +187,6 @@ READ = """() => {
                    return e ? Math.round(e.getBoundingClientRect().height) : null; })(),
     moreLabel: (() => { const e = document.querySelector("[data-audnames]");
                         return e ? e.textContent.trim() : null; })(),
-    /* THE HEADER'S COUNT, asked by its own hook rather than by position —
-       and asserted, because that is exactly what stopped matching (§95.7). */
-    headCount: (() => { const e = document.querySelector("[data-audcount]");
-                        return e ? e.textContent.trim() : null; })(),
     draftBtn: (() => { const e = document.querySelector("[data-draftmenu]");
                        return e ? e.textContent.replace(/\\s+/g, " ").trim() : null; })(),
     sentBtn: (() => { const e = document.querySelector("[data-sentmenu]");
@@ -294,9 +290,13 @@ def go():
         # control a full repaint would have fixed and this never touches (§95).
         # Asked here, before anything else on this page repaints, or the
         # measurement is of the repaint rather than of the answer.
-        ck("and the header says so too",
-           pg.evaluate(READ)["headCount"] == "76 recipients",
-           pg.evaluate(READ)["headCount"])
+        # THE HEADER CHIP IS GONE (§135.1). Islam: "remove the tag SMO and
+        # nobody chosen." The count was being said twice, and §95 had already
+        # settled which of the two matters — the control that ACTS. So what is
+        # asserted is that it is gone AND that the Send button still carries the
+        # number: a build that dropped both would otherwise pass the removal.
+        ck("the header no longer says it a second time",
+           not pg.evaluate("()=>!!document.querySelector('[data-audcount]')"))
         ck("and the Send button already carries the count",
            pg.evaluate(READ)["sendLabel"] == "Send to 76 people",
            pg.evaluate(READ)["sendLabel"])
@@ -439,7 +439,7 @@ def go():
                 pg.wait_for_timeout(250)
                 surfaces = [("the audience summary", "#audout"),
                             ("the send bar", ".sendbar"),
-                            ("the header counts", ".phead2 .hright")]
+                            ("the header counts", ".setuphead .hright")]
                 for name, sel in surfaces:
                     # THE SWEEP'S FUNCTION TAKES A SELECTOR, not an element —
                     # it scans `root + ' *'` so a modal can pass its own root

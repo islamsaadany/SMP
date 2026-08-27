@@ -153,7 +153,20 @@
    §91's trigger is the built file's bytes, which this is.
    Confirmed against origin/main serving "smp-shell-v3.48-owners"; confirm
    once more immediately before the push to main (§94.16). */
-const SHELL = "smp-shell-v3.49-samename";
+/* v3.50-setuphead — §135: every Setup page's controls share its pinned header
+   line, the Roles & access head is repaired, Focus measures becomes a table
+   that reaches supporting functions, Send a message becomes Send an email with
+   the Email settings folded in, and a person's company is a field of its own.
+   The built file's bytes changed, so the name changes (§91).
+
+   NAME CHECKED TWICE, WHICH IS THE RULE AND NOT A HABIT (§94.12, §94.16): main
+   was read at the start of this merge and again immediately before the push,
+   and the full history of served names was listed rather than remembered. Two
+   sessions independently wrote "v3.25b" once; a worker caches by NAME, so a
+   collision means a browser holding somebody else's bytes never fetches these.
+   `-setuphead` rather than a bare version, because THREE sessions have taken a
+   version number out from under this one in a week. */
+const SHELL = "smp-shell-v3.50-setuphead";
 const ASSETS = [
   "/",
   "/index.html",

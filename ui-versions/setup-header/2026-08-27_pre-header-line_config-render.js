@@ -228,7 +228,10 @@ function renderAccess(){
   }).join("");
 
   return section("", "Roles & access",
-      null,
+      "Eight roles and the floor beneath them, against the kinds of page each may " +
+      "reach. Edit includes view. The own columns answer in two halves — " +
+      "Strategy is the words as agreed, Reporting is the figures entered against them. " +
+      "Change any cell and the navigation above re-renders immediately for whoever is being viewed as.",
       '<div class="cfg acgrid"><table><thead>' + head + '</thead><tbody>' + body + '</tbody></table></div>' +
       '<div class="chart-legend" style="margin-top:12px">' +
         '<span><i class="st st-view">' + ICON_EYE + '</i> may read</span>' +
@@ -340,7 +343,7 @@ function renderBands(){
   for (var i = 1; i < b.length; i++) if (b[i].floor >= b[i-1].floor) ok = false;
 
   return section("", "Scoring bands",
-      null,
+      "The lowest band has no floor to set &mdash; it catches everything beneath the band above it.",
       '<div class="cfg-bar plain"><span class="cfg-lab">' + b.length + ' bands</span>' +
         (grant("c_bands") === "edit"
           ? '<button class="editbtn" data-edit="bands">' + (EDITING.bands ? "Done" : "Edit") + '</button>'
@@ -414,54 +417,15 @@ var CLEARMENU = null;
    because it also carries the page's controls. */
 var PAGE_TITLE = null;
 
-/* ── ONE LINE, AND THE PAGE'S CONTROLS ARE ON IT (§135) ────────────────
-   Islam, of six Setup pages at once: *"bring all the buttons and search bar to
-   the sticky header line."*
-
-   §121.2 pinned the page's NAME and deliberately left the controls on a row
-   of their own beneath it — for a good reason, recorded there: the row is not
-   sticky, so pulling it up with a negative margin slid it out from under the
-   pinned title and left a stray "Clear plan" floating. **A sticky box may only
-   overlap something that pins with it.** That reason does not forbid the move;
-   it forbids the FAKE move. So the controls go INSIDE the header, where they
-   pin with the name rather than under it.
-
-   THE SHELL DRAWS THE HEADER, so the controls have to reach it, and they are
-   produced deep inside a page's own render. `PAGE_TITLE` already solves exactly
-   this problem in exactly this direction (§121.1) — these are its two
-   siblings, reset by the shell before the page renders and read after. Two
-   slots and not one, because the search box and the buttons are different
-   things and the search sits left of them on every page that has both.
-
-   A CALLER OUTSIDE A SETUP PAGE STILL GETS ITS ROW. `PAGE_TITLE == null` is
-   what says "the shell is not drawing a header here" — there is no such
-   caller today, and a silent loss of every control on the day one appears is
-   not a trade worth making. */
-var PAGE_TOOLS = "";
-var PAGE_ACTS  = "";
-function pageLineReset(){ PAGE_TOOLS = ""; PAGE_ACTS = ""; }
-function pageLineHTML(){
-  if (!PAGE_TOOLS && !PAGE_ACTS) return "";
-  return (PAGE_TOOLS ? '<div class="headtools">' + PAGE_TOOLS + '</div>' : '') +
-         (PAGE_ACTS ? '<div class="hright">' + PAGE_ACTS + '</div>' : '');
-}
-
-/* THE COUNT CHIPS AND THE `SMO` PILL ARE GONE (§135.1). Islam: *"remove the
-   smo pill and 10 names and 10 mapped."* The chrome says who you are on every
-   page, and the table under the header is how big the list is — §122 removed
-   the badge and one copy of the count from the register on those two arguments
-   and left the other copy standing, which is how a rule half-applied looks.
-
-   `alerts` IS WHAT SURVIVES, and it is not the same thing wearing a shorter
-   name: "10 names" is the list, and "3 names on people and not on this list" is
-   something outstanding. A page keeps the second and loses the first. */
-function cfgHead(title, alerts, editKey, mayEdit, clearScope, labels, extra){
+function cfgHead(title, chips, editKey, mayEdit, clearScope, labels, extra){
   var editing = EDITING[editKey];
   var open = CLEARMENU === editKey;
   var dup = PAGE_TITLE != null &&
             String(title).trim().toLowerCase() === String(PAGE_TITLE).trim().toLowerCase();
-  var acts =
-      (alerts || []).map(function(x){ return '<span class="chip">' + x + '</span>'; }).join("") +
+  return '<div class="phead2' + (dup ? ' named' : '') + '">' +
+    (dup ? '' : '<h2 class="secttl">' + title + '</h2>') +
+    '<div class="hright">' +
+      chips.map(function(x){ return '<span class="chip">' + x + '</span>'; }).join("") +
       (extra || "") +
       (mayEdit
         ? '<span class="iconwrap">' +
@@ -504,11 +468,8 @@ function cfgHead(title, alerts, editKey, mayEdit, clearScope, labels, extra){
                 '</div>'
               : '')) +
           '</span>'
-        : '');
-  if (PAGE_TITLE != null) { PAGE_ACTS += acts; return ""; }
-  return '<div class="phead2' + (dup ? ' named' : '') + '">' +
-    (dup ? '' : '<h2 class="secttl">' + title + '</h2>') +
-    '<div class="hright">' + acts + '</div></div>';
+        : '') +
+    '</div></div>';
 }
 
 /* ── Assigning a person to a thing (§35) ────────────────────────────
@@ -681,7 +642,12 @@ function renderUnits(){
       '</td></tr>';
   }).join("");
 
-  return cfgHead("Business units", [], "units", grant("c_units") === "edit", "all",
+  return cfgHead("Business units",
+      ['<span class="pill kind">SMO</span>',
+       UNIT_KEYS.length + ' units',
+       live + ' active'].concat(
+         live < UNIT_KEYS.length ? [(UNIT_KEYS.length - live) + ' retired'] : []),
+      "units", grant("c_units") === "edit", "all",
       ["Clear all progress", "Clear all plans"]) +
 
     /* §84. SEARCH BUT NO SORT (spec §6.2). This table's row order is the order
@@ -690,7 +656,8 @@ function renderUnits(){
        the moment a row is dragged, and no label fixes that. Ten rows: search
        narrows it better than sorting would anyway. */
     section("", "Business units", null,
-      tkBar("units", { placeholder:"Search the units\u2026" }) +
+      tkBar("units", { placeholder:"Search the units\u2026",
+          filters:[{ k:"retired", label:"Retired" }] }) +
       '<div class="cfg"><table class="unitcfg" data-tktable="units"><thead><tr>' +
         '<th class="idx" style="width:38px">#</th><th style="width:18%">Unit</th>' +
         '<th style="width:14%">Shown in the nav</th>' +
@@ -765,6 +732,7 @@ function renderUnitMarks(editable){
    Everything measurable in the unit is offered: its Key Objectives first, then
    each pillar's key measures, each with its target so the choice is made
    against the number rather than the name alone. */
+var FSET = { unit:"mobile" };
 
 /* `renderFocusSetup` was defined TWICE, and the first one — 56 lines that
    returned the Business units screen rather than the focus one — was dead:
@@ -898,10 +866,14 @@ function renderBranding(){
       }).join("") + '</tbody></table></div>'
     : '';
 
-  return cfgHead("Branding", [], "brand", mayEdit, null) +
+  return cfgHead("Branding",
+      ['<span class="pill kind">SMO</span>',
+       set ? 'set for this tenant' : 'using the shipped palette'],
+      "brand", mayEdit, null) +
 
     section("", "The tenant’s colours",
-      null,
+      "Two colours, and the platform works out the rest. They apply to everyone here — " +
+      "unlike the switches in the top bar, which are your own screen and nobody else’s.",
       '<div class="cfg"><table><thead><tr><th style="width:34%">What it colours</th>' +
       '<th class="cc">Colour</th></tr></thead><tbody>' + rows + '</tbody></table></div>' +
       (mayEdit && set ? '<div style="margin-top:12px"><button class="linkbu" data-brandreset="1">' +
@@ -910,7 +882,8 @@ function renderBranding(){
     (derived ? section("", "What follows from them", null, derived) : "") +
 
     (checkRows ? section("", "Is it readable?",
-      null,
+      "Run on every derived pair, every time you change one. A brand colour that cannot be read " +
+      "is worth knowing about here rather than in a screenshot three weeks from now.",
       checkRows) : "") +
 
     section("", "Typeface", null,
@@ -1058,14 +1031,6 @@ var PEOPLE_COLS = [
      the default and reappear for everybody who ever touched the chooser
      (§30.2) — the label is what people read, the key is what code holds. */
   { k:"bu",       label:"Unit" },
-  /* ── THE COMPANY, OFF BY DEFAULT (§135.6) ─────────────────────────
-     Islam asked for the company beside the unit on the person's own form; the
-     register gets the column too, because a value that can be set and never
-     read back is half a feature. OFF by default: for most of the register it
-     repeats what the Unit column already implies (Mobile is Distribution's),
-     and it earns its place only when somebody is looking for the people who
-     belong to a company and no unit. */
-  { k:"company",  label:"Company", off:true },
   /* TWO COLUMNS, NOT ONE (Islam, 2026-08-24: "the contact in the People
      register table needs to split the email from the contact number").
      §54 put them together as "one answer to one question" — how you reach
@@ -1408,13 +1373,7 @@ function renderPeople(){
         'changed.">' + esc(p.key) + '</span>');
     F("Group", "where", false);
     F("Job title", '<input class="fld" value="' + esc(p.title || "") + '" data-ptitle="' + p.key +
-        '" placeholder="Job title">', true);
-    /* WIDE, SO THE THREE PLACES SIT TOGETHER (§135.6). Adding Company left the
-       second block at four fields in a three-column grid — a row of three and
-       a row of one, which is the empty cell §122 spent a redesign removing.
-       Job title is a free-text field and reads fine across the width; Official
-       BU, Unit or function and Company are the three answers to one question
-       and now sit side by side, which is where somebody compares them. */
+        '" placeholder="Job title">');
     /* THE CLIENT'S OWN WORD, and a name not on the list is KEPT rather than
        refused — a fresh tenant could never read its first file otherwise
        (§22's locked-dropdown trap, §54). */
@@ -1427,9 +1386,7 @@ function renderPeople(){
       (p.mainbu && !mainbuBy(p.mainbu)
         ? '<span class="vwhy">not on the Official BU list</span>' : ''));
     var drift = mainbuDrift(p);
-    /* "Unit or function", because that is what it holds now — the companies
-       moved to the field below it (§135.6). */
-    F("Unit or function", '<select class="fld" data-pat="' + esc(p.key) + '">' +
+    F("Unit", '<select class="fld" data-pat="' + esc(p.key) + '">' +
         '<option value="">&mdash; nowhere yet &mdash;</option>' +
         personAtChoices().map(function(o){
           return '<option value="' + esc(o.v) + '"' +
@@ -1438,22 +1395,6 @@ function renderPeople(){
       (drift && drift !== belongsKey(p)
         ? '<span class="vwhy">the Official BU list says ' + esc(whereLabel(drift)) + '</span>' : '') +
       saidWhereNote(p, true));
-    /* ── AND THE COMPANY, WHICH IS SOMETIMES THE UNIT'S ANSWER (§135.6) ──
-       Read-only wherever the unit above has already answered it, writable
-       where nothing else has — so a person in Mobile reads "Distribution" and
-       cannot be moved to another company behind their unit's back, and the CEO
-       who belongs to a company and no unit is written here. */
-    var derived = personCompanyDerived(p), co = personCompany(p);
-    F("Company", '<select class="fld" data-pco="' + esc(p.key) + '"' +
-        (derived ? ' disabled' : '') + '>' +
-        '<option value="">&mdash; none &mdash;</option>' +
-        companyChoices().map(function(o){
-          return '<option value="' + esc(o.v) + '"' +
-            (o.v === co ? " selected" : "") + '>' + esc(o.label) + '</option>';
-        }).join("") + '</select>' +
-      (derived
-        ? '<span class="vwhy">from the unit above</span>'
-        : ''));
     if (!add) F("Roles", '<span class="rolebox rolebox-wide">' + roleCell(p, true) + '</span>', true);
     return out;
   }
@@ -1864,12 +1805,6 @@ function renderPeople(){
             ? '<span class="val">' + esc(home) + marks + '</span>'
             : '<span class="why" style="margin:0">&mdash;' + marks + '</span>';
         })() + '</td>' : '') +
-      (showCol("company") ? '<td>' + (function(){
-          var ck = personCompany(p);
-          return ck
-            ? '<span class="val">' + esc(COMPANIES[ck].name) + '</span>'
-            : '<span class="why" style="margin:0">&mdash;</span>';
-        })() + '</td>' : '') +
       (showCol("email") ? '<td class="wrapany">' + copyable(p.email, "val") + '</td>' : '') +
       (showCol("phone") ? '<td>' + copyable(p.phone, "mono") + '</td>' : '') +
       (showCol("roles")
@@ -2253,7 +2188,7 @@ function renderPeople(){
       attnBtn + noCustChip + addBtn + fileMenu + colMenu + pwMenu) +
 
     section("", "",
-      null,
+      "",
       /* NO COLUMN WIDTHS, and no table-layout:fixed (see .peoplecfg in
          config.css). Islam: "the first column of the name needs to wrap
          around the name length" — the column fits the name, rather than the
@@ -2291,7 +2226,6 @@ function renderPeople(){
            select is capped to sit inside it. */
         (showCol("mainbu")   ? th("Official BU", "wcol") : '') +
         (showCol("bu")       ? th("Unit", "wcol")        : '') +
-        (showCol("company")  ? th("Company")             : '') +
         (showCol("email")    ? th("Email", "wrapany")      : '') +
         (showCol("phone")    ? th("Mobile")     : '') +
         /* Roles is a stack of chips and Password is a pill: sorting either
@@ -2845,7 +2779,10 @@ function renderMainbus(){
      zero. */
   var mbth = tkHead("mainbu");
   var table = list.length || mayEdit
-    ? tkBar("mainbu", { placeholder:"Search the list\u2026" }) +
+    ? tkBar("mainbu", { placeholder:"Search the list\u2026",
+          filters:[{ k:"unmapped", label:"Unmapped",
+                     title:"Names that point at nothing here yet" },
+                   { k:"mapped", label:"Mapped" }] }) +
       '<div class="cfg"><table class="unitcfg" data-tktable="mainbu"><thead><tr>' +
         mbth("#", "idx", false) +
         mbth("Official BU") +
@@ -2857,17 +2794,20 @@ function renderMainbus(){
       'file is uploaded on <b>People</b> — every BU it mentions is added here, pointing at ' +
       'nothing, for you to map. Or type them in with Edit.</div>';
 
-  /* THE ONLY CHIP LEFT HERE IS AN ALARM (§135.1). "10 names" and "0 mapped"
-     went with the SMO pill; a name sitting on somebody's row and not on this
-     list is something outstanding, and it is the one thing this page can say
-     that the table under it cannot. */
   return cfgHead("Official BU list",
-      strays.length ? ['<span class="pill warn">' + plural(strays.length, "name") +
-                       ' on people and not on this list</span>'] : [],
+      ['<span class="pill kind">SMO</span>',
+       plural(list.length, "name"),
+       mapped + ' mapped'].concat(
+        strays.length ? ['<span class="pill warn">' + plural(strays.length, "name") +
+                         ' on people and not on this list</span>'] : []),
       "people", mayEdit) +
 
     section("", "Your names, and what they point at",
-      null,
+      "Your organisation's own official names for parts of the business, and which units " +
+      "and supporting functions each one holds here. An official BU carries no strategy and " +
+      "no score of its own — it is vocabulary, and what it points at is what is measured. " +
+      "Set once: every employee file then reads itself, and everyone signs in to a short " +
+      "list instead of the whole organisation.",
       table +
       (strays.length
         ? '<div class="note bad-note"><b>' + esc(strays.join(", ")) +
@@ -2897,14 +2837,20 @@ function renderCompanies(){
      own `editable` is whether that row is open. */
   var mayEdit = grant("c_units") === "edit";
   var live = activeCompanyKeys().length;
-  return cfgHead("Companies", [], "units", grant("c_units") === "edit") +
+  return cfgHead("Companies",
+      ['<span class="pill kind">SMO</span>',
+       COMPANY_KEYS.length + ' ' + (COMPANY_KEYS.length === 1 ? 'company' : 'companies'),
+       plural(soloUnits().length, "unit") + ' standing alone'].concat(
+         live < COMPANY_KEYS.length ? [(COMPANY_KEYS.length - live) + ' retired'] : []),
+      "units", grant("c_units") === "edit") +
     section("", "Companies", null,
       /* §84. NO SEARCH BAR: two rows, and a search box above two rows hides
          nothing and costs a header — the threshold is in the spec (§2.2) and
          this is the table it was written for. It still sorts and still carries
          the retired filter, because both are one attribute each and a client
          with fifteen companies gets them for free. */
-      tkBar("companies", { placeholder:"Search the companies\u2026" }) +
+      tkBar("companies", { placeholder:"Search the companies\u2026",
+          filters:[{ k:"retired", label:"Retired" }] }) +
       '<div class="cfg"><table class="unitcfg" data-tktable="companies"><thead><tr>' +
         (function(){ var h = tkHead("companies");
           return h("#", "idx", false) + h("Company") + h("Units", "cc") +
@@ -3301,7 +3247,10 @@ function renderKB(){
     }).join("") + '</div>';
 
 
-  return cfgHead("Knowledge base", [], null, false) +
+  return cfgHead("Knowledge base",
+      ['<span class="pill kind">Everyone</span>',
+       secs.length + ' sections', recipeCount() + ' how-tos'],
+      null, false) +
     /* BOTH SIDES OF THE MERGE BELONG HERE. The lede names the how-tos, which
        exist now (§116); `tourBlock` is the other session's onboarding tour
        (§107), and it opens the page because somebody who has just arrived
@@ -3350,7 +3299,7 @@ function renderBandsExtra(){
    Everything measurable in the unit is offered: its Key Objectives first, then
    each pillar's key measures, each with its target so the choice is made
    against the number rather than the name alone. */
-var FSET = { unit:"mobile", side:"units" };   /* which destination is being marked, and which side of the fold */
+var FSET = { unit:"mobile" };
 
 /* THE SWITCH LIVES ON THE PAGE IT GOVERNS (§102), which is §90's shape and
    §98's row: five chat settings went into a dropdown on the Messages page
@@ -3363,126 +3312,76 @@ var FSET = { unit:"mobile", side:"units" };   /* which destination is being mark
    and while off it says what is being kept. */
 function focusSwitch(){
   var on = focusOn();
+  var marks = Object.keys(CYCLE.focus || {}).length;
   if (!inOffice()) {
-    /* Not a control for them, and the fact still has to be said: a page that
-       simply looks empty is a page that looks broken (§45.2). */
     return on ? '' : '<div class="note">Focus measures are switched off for this ' +
       'platform. The Strategy Office can turn them back on.</div>';
   }
-  /* ── ON AND OFF, ON THE PINNED LINE (§135.5) ──────────────────────
-     Islam: *"turn the big button to only On and Off switch and bring it to the
-     sticky header line."*
-
-     A SEGMENTED PAIR, which is what the navigation's own Units | Functions
-     control already is — you press the state you want rather than pressing a
-     button that says the state you are in and means the opposite. The old
-     control was a 240px worded button reading "Focus measures are on", which
-     is a sentence where a switch belongs, and it sat above a grey paragraph
-     saying the same thing again.
-
-     ITS OWN CLASS, NOT `.navswitch`. That one is scoped to `.units` and its
-     colours are white-on-navy — reaching for it here is §65.9 exactly, a class
-     name being one namespace and a control wearing somebody else's clothes.
-
-     AND THE GREY NOTE GOES WITH IT. It carried the kept-marks count, which
-     also carried a bug nobody had reported: `marks + plural(marks,"mark")`
-     printed "0 0 marks", because plural() already puts the number in. */
-  PAGE_ACTS +=
-    '<span class="segsw" role="group" aria-label="Focus measures on or off">' +
-      '<button type="button" class="seg' + (on ? ' on' : '') + '" data-focusswitch="1" ' +
-        'aria-pressed="' + on + '">On</button>' +
-      '<button type="button" class="seg' + (on ? '' : ' on') + '" data-focusswitch="0" ' +
-        'aria-pressed="' + (!on) + '">Off</button>' +
-    '</span>';
-  return '';
-}
-
-/* ── WHERE THE MARKING IS BEING DONE (§135.5) ────────────────────────
-   Islam: *"rather than a drop down for the units make it like the navigation
-   at the top."* A dropdown answers "which one" and hides where the work was
-   left; a row of destinations carrying their own counts says both at once —
-   §16.7a settled the identical question on the source-of-figures page, and
-   this is that answer applied to the page it was borrowed from.
-
-   THE FOLD IS THE NAVIGATION'S, because Units and Functions are the same two
-   sides here as up there, and a second word for them is a second thing to
-   learn. `FSET.side` is screen state and is corrected rather than trusted: a
-   side with nothing reachable behind it must not leave the page blank. */
-function focusNav(){
-  var subs = focusSubjects();
-  var side = FSET.side === "fns" ? "fns" : "units";
-  if (!subs[side].length) side = side === "fns" ? "units" : "fns";
-  var list = subs[side];
-  var both = subs.units.length && subs.fns.length;
-  return '<div class="fnav">' +
-    (both
-      ? '<span class="segsw" role="group" aria-label="Units or supporting functions">' +
-          '<button type="button" class="seg' + (side === "units" ? ' on' : '') +
-            '" data-fsetside="units">Units</button>' +
-          '<button type="button" class="seg' + (side === "fns" ? ' on' : '') +
-            '" data-fsetside="fns">Functions</button></span>'
-      : '') +
-    '<div class="fnav-dests" role="tablist">' +
-      list.map(function(x){
-        var n = focusIn(x.key).length;
-        return '<button type="button" role="tab" data-fsetgo="' + esc(x.key) + '" ' +
-          'aria-selected="' + (x.key === FSET.unit) + '">' + esc(x.name) +
-          (n ? '<i class="fnav-n">' + n + '</i>' : '') + '</button>';
-      }).join("") +
-    '</div></div>';
+  return '<div class="phead2"><div class="hright">' +
+    '<button class="editbtn' + (on ? ' on' : '') + '" data-focusswitch="' + (on ? "0" : "1") + '">' +
+      (on ? "Focus measures are on" : "Focus measures are off") + '</button>' +
+    '</div></div>' +
+    (on ? '' : '<div class="note">Nothing is shown anywhere in the platform, and ' +
+      '<b>' + marks + ' ' + plural(marks, "mark") + '</b> ' +
+      (marks === 1 ? "is" : "are") + ' being kept. Turning it back on restores ' +
+      (marks === 1 ? "it" : "them") + '.</div>');
 }
 
 function renderFocusSetup(){
   /* Marking is the CEO's and the SMO's — a rule now, not a cell (§37).
      mayMarkFocus() carries the lock too, so there is one gate, not two. */
   var editable = mayMarkFocus();
-  var bands = focusBands(FSET.unit);
-  /* A destination that has gone (a unit retired, a function switched off)
-     leaves the page pointing at nothing — corrected here rather than left to
-     render an empty table under a name nobody can select. */
-  if (!bands.length) {
-    var subs = focusSubjects(), first = (subs.units[0] || subs.fns[0]);
-    if (first && first.key !== FSET.unit) { FSET.unit = first.key; bands = focusBands(FSET.unit); }
-  }
+  var u = UNITS[FSET.unit];
 
-  /* ── ONE TABLE, HEADED THE WAY THE REGISTER IS (§135.5) ────────────
-     Islam: *"make the table headers design better like the other tables like
-     registry as an example."* It was never a table — it was `.pick` rows in
-     divs under navy `.grouphead` bars, so it had no column headings at all and
-     the target and the mark were floated numbers rather than columns.
-
-     THE MARK IS THE LAST COLUMN, because that is the one somebody runs their
-     eye down (§104.9's rule, on a different table). The band rows are the
-     table's own, so the grouping survives sorting nothing and scrolling. */
-  var row = function(m){
+  var pick = function(m, src){
     var on = focusMarked(m.id);   /* the RAW map, never isFocus (§102) */
-    return '<tr' + (on ? ' class="fon"' : '') + '>' +
-      '<td class="fmeas">' + esc(m.name) + '</td>' +
-      '<td class="cc ftar">' +
-        (m.target ? esc(m.target) : '<span class="missing">Missing</span>') + '</td>' +
-      '<td class="cc">' +
-        (editable
-          ? '<button class="fmark-btn' + (on ? ' on' : '') + '" data-focus="' + esc(m.id) + '" ' +
-            'aria-pressed="' + on + '" aria-label="' + (on ? "Unmark " : "Mark ") + esc(m.name) + '"></button>'
-          : '<span class="fmark-btn' + (on ? ' on' : '') + '" style="cursor:default"></span>') +
-        '<span class="fmark-w">' + (on ? "Marked" : (editable ? "Mark" : "")) + '</span>' +
-      '</td></tr>';
+    return '<div class="pick ' + (on ? "on" : "off") + '">' +
+      (editable
+        ? '<button class="fmark-btn' + (on ? ' on' : '') + '" data-focus="' + m.id + '" ' +
+          'aria-pressed="' + on + '" aria-label="' + (on ? "Unmark " : "Mark ") + esc(m.name) + '"></button>'
+        : '<span class="fmark-btn' + (on ? ' on' : '') + '" style="cursor:default"></span>') +
+      '<span>' + esc(m.name) + ' <span class="src">' + esc(src) + '</span></span>' +
+      '<span class="num why" style="margin:0">target ' +
+        (m.target ? esc(m.target) : '<span class="missing">Missing</span>') + '</span>' +
+      '<span class="why" style="margin:0;min-width:74px;text-align:right">' +
+        (on ? "marked" : (editable ? "click to mark" : "")) + '</span>' +
+    '</div>';
   };
-  var body = bands.map(function(b){
-    /* `dxband` is the shared look (§135.8); `fband` is what this page's own
-       spacing rule and its check key off. */
-    return '<tr class="fband dxband"><th colspan="3">' + esc(b.band) + '</th></tr>' +
-      (b.items.length
-        ? b.items.map(row).join("")
-        : '<tr><td colspan="3" class="fnone">Nothing to mark here.</td></tr>');
-  }).join("");
 
-  return focusSwitch() + focusNav() +
-    '<div class="cfg ftable"><table><thead><tr>' +
-      '<th style="width:56%">Measure</th>' +
-      '<th class="cc" style="width:22%">Target</th>' +
-      '<th class="cc" style="width:22%">Focus</th>' +
-    '</tr></thead><tbody>' + body + '</tbody></table></div>';
+  var blocks =
+    '<div class="grouphead">' + L("keyobj","bu") + '</div>' +
+    (u.keyObjectives.length
+      ? u.keyObjectives.map(function(m){ return pick(m, "objective"); }).join("")
+      : '<div class="fstrip-empty">None set for this unit.</div>') +
+    u.items.map(function(p, pi){
+      return '<div class="grouphead">' + pillarCode(u, pi) + ' ' + esc(p.name) +
+             ' &middot; ' + esc(p.kind).toLowerCase() + '</div>' +
+        (p.measures.length
+          ? p.measures.map(function(m){ return pick(m, ""); }).join("")
+          : '<div class="fstrip-empty">No key measures.</div>');
+    }).join("");
+
+  var n = unitFocus(u).length;
+  var unitPick = '<select class="fld" id="fset-unit" aria-label="Which unit to mark">' +
+    activeKeys().map(function(k){
+      var c = unitFocus(UNITS[k]).length;
+      return '<option value="' + k + '"' + (k === FSET.unit ? " selected" : "") + '>' +
+        esc(UNITS[k].name) + (c ? "  \u2014 " + c + " marked" : "") + '</option>';
+    }).join("") + '</select>';
+
+  return focusSwitch() +
+    '<div class="kv"><span class="pill kind">CEO &amp; SMO</span>' +
+      '<span class="pill ' + (CYCLE.locked ? "none" : "good") + '">' +
+        (CYCLE.locked ? "Locked for the cycle" : "Open for marking") + '</span>' +
+      '<span class="pill kind">reward begins at ' + CYCLE.rewardAt + '%</span></div>' +
+    section("", "Focus measures", null,
+      '<div class="imp-row" style="margin:0 0 16px">' + unitPick +
+        '<span class="cfg-lab">' + n + ' marked in ' + esc(u.name) + '</span></div>' +
+      '<div class="cfg" style="padding:0">' + blocks + '</div>' +
+      '<div class="note">Marks are stored against the cycle, not the measure \u2014 <b>every cycle ' +
+        'starts unmarked</b>, so last year\'s emphasis cannot quietly become this year\'s. ' +
+        'There is no cap: three is the usual choice and it stays a choice. ' +
+        '<b>Focus changes no score</b>; it is a lens and an incentive, not a second weighting.</div>');
 }
 
 /* ── Source of figures (§16.7) ───────────────────────────────────────
@@ -3607,7 +3506,10 @@ function renderSetsSetup(){
 
   var claimed = SMPRules.sourceRows(world()).length;
 
-  return cfgHead("Figure sets", [], "sets", mayEdit, null, null) +
+  return cfgHead("Figure sets",
+      [sets.length + (sets.length === 1 ? " set" : " sets"),
+       claimed + " figure" + (claimed === 1 ? "" : "s") + " claimed"],
+      "sets", mayEdit, null, null) +
     /* §84. NO SEARCH, NO SORT, and both are the spec (§2.2, §6.2) rather than
        an omission. One set today: a search box above one row is furniture. And
        the order of the sets is the order somebody put them in — the same
@@ -4298,11 +4200,10 @@ function renderImport(){
       '</div></div>';
   }
 
-  return cfgHead("Import & archives",
-      ['<span class="pill kind">' + (isPlan
+  return '<div class="kv"><span class="pill kind">SMO only</span>' +
+      '<span class="pill kind">' + (isPlan
         ? "One generic template &middot; one unit per file"
-        : "One file per unit or capability") + '</span>'],
-      null, false) +
+        : "One file per unit or capability") + '</span></div>' +
     /* THE SECOND DOOR (§129, spec 020): a plan can be BUILT here as well as
        uploaded — the two are siblings on the page where plans arrive, and
        building over a standing plan archives it exactly as an upload does. */
@@ -4324,7 +4225,8 @@ function renderArchives(){
   var can = grant("c_import") === "edit";
   if (!ARCHIVES.length)
     return section("", "Archived plans",
-      null,
+      "A plan is archived here whenever an upload replaces one or a clear empties one, and a " +
+      "cycle's figures whenever a new cycle clears them. Nothing has been replaced yet.",
       '<div class="note">Empty. Upload a plan on <b>Import</b>, clear one on <b>Business units</b>, ' +
       'or open a new reporting cycle, and what it displaces will appear here with a way to put ' +
       'it back.</div>');
@@ -4364,7 +4266,9 @@ function renderArchives(){
   }).join("");
 
   return section("", "Archived plans",
-    null,
+    "Every plan an upload replaced or a clear emptied, and every cycle's figures a new cycle " +
+    "cleared \u2014 newest first. Restoring puts one back and archives whatever is there now: " +
+    "the same act in reverse, with the same warning.",
     '<div class="cfg"><table><thead><tr>' +
       '<th style="width:22%">Plan</th><th class="cc" style="width:12%">Archived</th>' +
       '<th style="width:20%">Replaced by</th><th>What it held</th>' +
@@ -4704,11 +4608,10 @@ function renderCycle(){
         : '') + '</td></tr>';
   }).join("");
 
-  return cfgHead("Reporting cycle",
-      ['<span class="pill kind">' + esc(REVIEW.cadence) + '</span>'].concat(
-        claims.length ? ['<span class="pill attn">' + claims.length + ' claim request' +
-          (claims.length === 1 ? "" : "s") + '</span>'] : []),
-      null, false) + head +
+  return '<div class="kv"><span class="pill kind">SMO</span>' +
+      '<span class="pill kind">' + esc(REVIEW.cadence) + '</span>' +
+      (claims.length ? '<span class="pill attn">' + claims.length + ' claim request' +
+        (claims.length === 1 ? "" : "s") + '</span>' : '') + '</div>' + head +
     (claims.length
       ? section("", "Claim requests", null,
           '<div class="cfg"><table><thead><tr><th style="width:34%">Figure</th>' +
@@ -5042,12 +4945,16 @@ function renderFunctions(){
         : '') +
     '</span>';
 
-  return cfgHead("Functions", [], "fns", grant("c_fns") === "edit", "fnall",
+  return cfgHead("Functions",
+      ['<span class="pill kind">SMO</span>', activeFunctionKeys().length + ' active',
+       GROUP.capabilities.length + ' capabilities'],
+      "fns", grant("c_fns") === "edit", "fnall",
       ["Clear all progress", "Clear all plans"], fnColMenu) +
     section("", "", null,
       /* §84. Eight rows and nine columns — over the search threshold, and its
          order is a plain list rather than something arranged, so it sorts. */
-      tkBar("fns", { placeholder:"Search the functions\u2026" }) +
+      tkBar("fns", { placeholder:"Search the functions\u2026",
+          filters:[{ k:"retired", label:"Retired" }] }) +
       /* SHORTENED, BECAUSE THEY NO LONGER FIT. Measured rather than judged:
          at 920px "Shown in the nav" wanted 119px in a 94px cell, "Strategy
          custodian" 129 in 119 and "Capabilities" 86 in 68 — three headers
@@ -5129,13 +5036,9 @@ function renderCaps(){
   }).join("");
 
   var orphan = GROUP.capabilities.filter(function(c){ return !c.fn; }).length;
-  /* THE `SMO` PILL GOES AND THE ALARM STAYS (§135.1). "all assigned" goes with
-     it — a green chip saying nothing is wrong is the state this page is in
-     almost always, and §41's budget says a mark that is always lit is not a
-     mark. What is left is drawn only when there IS an orphan. */
-  return cfgHead("Capabilities",
-      orphan ? ['<span class="pill none">' + orphan + ' unassigned</span>'] : [],
-      null, false) +
+  return '<div class="kv"><span class="pill kind">SMO</span>' +
+      '<span class="pill ' + (orphan ? "none" : "good") + '">' +
+        (orphan ? orphan + " unassigned" : "all assigned") + '</span></div>' +
     section("", "Capabilities", null,
       /* Widths set so a long head name \u2014 "Strategy Management Office" \u2014 does not
          wrap and leave one row taller than the rest, which reads as broken
@@ -5143,7 +5046,9 @@ function renderCaps(){
       /* §84. Eight rows and it grows with the practice; *Unassigned* is the
          filter because an unassigned capability is the one thing this page
          exists to fix, and the header has counted them since §15. */
-      tkBar("caps", { placeholder:"Search the capabilities\u2026" }) +
+      tkBar("caps", { placeholder:"Search the capabilities\u2026",
+          filters:[{ k:"unassigned", label:"Unassigned",
+                     title:"Capabilities with no function carrying them" }] }) +
       '<div class="cfg"><table data-tktable="caps"><thead><tr>' +
         (function(){ var h = tkHead("caps");
           return h("#", "idx", false) + h("Capability") + h("Owned by") + h("Head") +
@@ -5354,24 +5259,32 @@ function renderComms(){
       '</span>' +
     '</span></td></tr></tbody></table></div>';
 
-  return cfgHead("Email settings", [], "comms", mayEdit, null) +
+  return cfgHead("Email",
+      ['<span class="pill kind">SMO</span>',
+       set ? 'set for this tenant' : 'using the defaults'],
+      "comms", mayEdit, null) +
 
     section("", "Can this deployment send?",
-      null,
+      "The key and the address live in the deployment’s environment variables, not here — " +
+      "they are tied to the domain verified with Resend, so changing one is a deployment decision " +
+      "rather than a screen one. This is the server’s own answer, asked once when you first " +
+      "opened this page — reload after changing a variable.",
       '<div class="cfg"><table><thead><tr><th>What was checked</th>' +
       '<th class="cc" style="width:18%">Verdict</th></tr></thead><tbody>' +
       commsStatusRows() + '</tbody></table></div>') +
 
     section("", "What it arrives as",
-      null,
+      "Four things about the message that are the tenant’s to set. Everything else about how it " +
+      "looks comes from Branding, so an email looks like the platform it came from.",
       sender) +
 
     section("", "What it looks like",
-      null,
+      "The real thing, drawn by the same code that builds what is sent — not a picture of it.",
       '<div class="mailprev" id="mailprev"></div>') +
 
     section("", "Prove it",
-      null,
+      "One message, to one address, with every part of the template filled in. Nothing else is sent " +
+      "and nobody else is told.",
       test);
 }
 
@@ -5649,7 +5562,8 @@ function renderSendMessage(){
     '</div>';
 
   var who = section("", "Who gets it",
-    null,
+    "Tick as many as you like — they add up rather than narrow each other. " +
+    "Somebody who matches twice still gets one message.",
     '<div class="cfg audpick">' + everyone + ddbar +
       (picked ? '<div class="audrow">' + picked + '</div>' : '') +
       '<div class="audout" id="audout">' + sendmsgAudienceHtml() + '</div>' +
@@ -5685,7 +5599,8 @@ function renderSendMessage(){
     '</div>';
 
   var look = section("", "Write it",
-    null,
+    "Type straight into the message. The heading is also the subject line people see " +
+    "in their inbox before they open it. Nothing here scrolls \u2014 it grows as you write.",
     '<div class="mailprev grows" id="msgprev"></div>' + ctarow);
 
   /* ── THE BAR DOES NOT MOVE (§95) ────────────────────────────────
@@ -5746,7 +5661,20 @@ function renderSendMessage(){
   var draftMenu = renderDraftMenu();
   var sentMenu  = renderSentMenu();
 
-  return cfgHead("Send an email", [], null, false, null, null, draftMenu + sentMenu) +
+  return cfgHead("Send a message",
+      ['<span class="pill kind">SMO</span>',
+       /* ── THE COUNT CARRIES ITS OWN HOOK (§95.7) ─────────────────
+          `paintAudience()` used to find this by `.chip:last-of-type`, and
+          `:last-of-type` counts TAGS rather than classes — so the moment §95.5
+          put two `<span>` dropdowns after the chips in this same header, the
+          selector matched nothing and the header sat on "nobody chosen" while
+          the page had resolved seventy-six. §51.11's fault in the PRODUCT
+          rather than in a check, which is how §93 hit it too: silent, and in
+          the safe-looking direction. */
+       '<span data-audcount>' + (sendmsgHasAny() && st.aud && st.aud.to
+         ? plural(st.aud.to.length, "recipient", "recipients") : 'nobody chosen') +
+       '</span>'],
+      null, false, null, null, draftMenu + sentMenu) +
     who + look + said + bar + renderSentOne();
 }
 
@@ -5784,7 +5712,8 @@ function renderDraftList(){
                   '">Delete</button></td></tr>';
           }).join("") + '</tbody></table></div>';
   return section("", "Drafts",
-    null, body);
+    "A message you have started. Saved on the server, so it is there on any machine you sign " +
+    "in from — and it stops being a draft the moment it is sent.", body);
 }
 
 /* ── THE SAME LIST, IN THE HEADER (§95) ───────────────────────────────
@@ -5929,7 +5858,8 @@ function renderSentList(){
               '<td>' + esc(m.by_name || "") + '</td></tr>';
           }).join("") + '</tbody></table></div>';
   return section("", "What has been sent",
-    null, body) + renderSentOne();
+    "The record lives outside the saved data, so a save cannot erase it. " +
+    "Open one to see what happened to each person.", body) + renderSentOne();
 }
 
 /* ── THE PREVIEW IS THE EDITOR (§76.3) ────────────────────────────────────
@@ -6054,28 +5984,21 @@ function tkSearchOnly(id, placeholder){
     'placeholder="' + esc(placeholder) + '" autocomplete="off" ' +
     'value="' + esc(TKQ[id] || "") + '">';
 }
-/* ── THE SEARCH GOES UP, THE FILTERS AND THE COUNT GO (§135.1) ─────
-   Islam, asked whether the quick filters and the row count move up with the
-   search or go: *"drop like the way register quick filters were dropped."*
-   §116 dropped that pair from the register for a reason that is true of all
-   six tables — the filters narrowed to a state the table already prints in a
-   column of its own, and the count said how big a list you are looking at.
-
-   NOTHING IS HIDDEN BY IT, and that was checked rather than assumed: every row
-   carries `data-tkrow="active|retired"` and every one is drawn — the chip
-   narrowed the view, it never revealed rows the table was holding back. So a
-   retired unit is still on the page after this, where a "show retired" toggle
-   would have taken it away.
-
-   The bar is the page's TOOLS slot now, so it renders on the pinned line
-   beside the title rather than above the table (§135). */
 function tkBar(id, opts){
   opts = opts || {};
-  if (typeof opts.rows === "number" && opts.rows < TK_SEARCH_FROM) return "";
-  var bar = '<div class="tk-bar" data-tkbar="' + esc(id) + '">' +
-    tkSearchOnly(id, opts.placeholder || "Search…") + '</div>';
-  if (PAGE_TITLE != null) { PAGE_TOOLS += bar; return ""; }
-  return bar;
+  if (typeof opts.rows === "number" && opts.rows < TK_SEARCH_FROM &&
+      !(opts.filters || []).length) return "";
+  var f = TKFILTER[id] || "";
+  var chips = (opts.filters || []).map(function(x){
+    return '<button class="tk-chip' + (f === x.k ? ' on' : '') + '" data-tkfilter="' +
+      esc(id + "|" + x.k) + '"' + (x.title ? ' title="' + esc(x.title) + '"' : '') +
+      '>' + esc(x.label) + '</button>';
+  }).join("");
+  return '<div class="tk-bar" data-tkbar="' + esc(id) + '">' +
+    tkSearchOnly(id, opts.placeholder || "Search…") +
+    (chips ? '<div class="tk-chips">' + chips + '</div>' : '') +
+    '<span class="tk-count" data-tkcount="' + esc(id) + '"></span>' +
+  '</div>';
 }
 /* ── THE ACTIONS CELL, FOR ANY TABLE (§85) ───────────────────────────
    Open, it is Save and Cancel; closed, it is a pen and whatever else the row
@@ -6132,3 +6055,4 @@ function tkHead(id){
    (§75), and a search that emptied itself when you added somebody would be a
    filter you have to retype every time you use the page. */
 var TKQ = {};
+var TKFILTER = {};

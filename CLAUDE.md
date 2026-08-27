@@ -473,6 +473,61 @@ console errors (in this cloud environment, run it via a wrapper that points Play
   door behind a door. A role with one place is granted on the role pick; a role
   with a real choice still asks. The × on the chip is what makes committing on
   one press safe.
+- **AN OWNER IS PICKED FROM THE REGISTER, AND IT DECIDES WHO MAY REPORT
+  (§129.1):** `SMPRules.namedOn()` matches a tactic's `owner` against the
+  register BY NAME, so a short spelling names nobody — **32 of the 78 tactics
+  in the demo**, each one a person who owns a line and cannot enter its figure.
+  Five fields become lists (project · milestone · tactic · **pillar**, plus
+  collaborators as a **ticking** list), built from `ownerChoices()`: the active
+  register under *People*, `placeLabel()`'s places under *Departments* — the
+  navigation's own word, never a second vocabulary (§53.5) — plus an Official
+  BU that points at nothing (§54: Risk carries no strategy and employs people).
+  **A stored value outside the list is KEPT in its own group** (§96.2), so a
+  plan uploaded before today reads exactly as it did. **The NAME is still what
+  is stored**: a key would be a migration through `namedOn()`, the workbook,
+  the deck and the archive. **The pillar's row is edit-mode only** — read mode
+  already says it twice — and the meta line drops it while the pen is on.
+- **A TICKING LIST STAYS OPEN, AND THAT REVERSES `choose()` ON PURPOSE
+  (§129.1):** a single pick answers the question, so it closes before firing
+  `change` (§30.1); a list you are ticking is not answered until you stop.
+  **Committed per tick, never on close** — `close()` is the first thing
+  `wire()` does at the end of `paint()`, by which time `FIELDS` is rebuilt and
+  that element's `data-fld` points at somebody else's setter. Safe only because
+  the `data-fld` handler writes without repainting (§71.2): **wire a multiple
+  select to a handler that calls `paint()` and the popup dies under the
+  pointer.** The setter is handed an ARRAY, asked of `el.multiple` in the one
+  place every bound field goes through — `el.value` on a multiple select is the
+  FIRST option and would have dropped the rest in silence. Emptied, the key is
+  DELETED (§50.6). The tick is DRAWN, not written: U+2713 is outside the latin
+  subsets and would ship as a blank box (§52, §120.2).
+- **A 1px CLIPPED ELEMENT SCROLLING IS NEVER THE PAGE MOVING (§129.1):**
+  setting `selected` on a `<select multiple>` fires a real `scroll` event from
+  the hidden `.ss-native`, which reached `onGone` with capture on — so every
+  tick re-placed the popup and a tick near the fold CLOSED it. Three versions
+  of `searchsel.js` never saw it, because the single-select path never sets
+  `selected` on anything. **Found by ticking, not by reading.**
+- **ONE ITEM STILL GETS THE RAIL, ON BOTH SIDES OF THE SWITCH (§129.2,
+  reversing `railWorthIt`'s threshold):** it was never about capabilities — the
+  gate counted a capability's PROJECTS, so Marketing drew two capabilities on
+  one page at two different left edges. `railWorthIt()` is the ONE answer,
+  asked in four places; three of them spelled `u.items.length >= 2` inline,
+  which is how a unit and a function come to be fine DIFFERENTLY (§53.5).
+  **The pen already disagreed with the reading view** (§69.13 draws the rail
+  from one project because Add lives in it). **Still false for an empty list**:
+  nothing to list is not the same question as one thing to list (§61).
+- **THE PINNED TITLE'S CORNERS TAKE THE PAGE'S GROUND (§129.3):** §53.7 painted
+  the strip ABOVE the band and stopped at its top edge, where the two rounded
+  corner notches begin — 13px² of the white card per corner, with rows sliding
+  through it. **CSS cannot ask whether a sticky element is pinned**, so the
+  fill paints at rest too; measured against the alternative rather than
+  asserted (squaring the corners disturbs 26px² at rest and pokes 2px outside
+  the card). On the `::after`, because a pseudo cannot go behind its own
+  parent's background once that parent makes a stacking context —
+  `pointer-events:none`, or it swallows the pen's clicks. **Measured in
+  PIXELS**, and the first version of the check reported a CORRECT build broken:
+  in the dark palette `--surface` sits between `--ground` and `--surface-2`, so
+  an antialiased pixel lands on it by arithmetic (§68.10). One pixel of
+  clearance from the arc removes every blend.
 - **TERSE DROPS THE DETAIL, NEVER THE ALARM (§119.3):** the pillar rail opens
   COLLAPSED now (absent reads as terse, so only an explicit press turns it
   off), and that small line had been carrying two different kinds of thing —
@@ -2089,6 +2144,13 @@ python3 checks/role-picker.py   # giving somebody a role: every control PRESSED,
 python3 checks/strategy-split.py # the Strategy | Reporting halves: the cell pressed
                                 # open AND closed, both ends each time, and the .pptx
                                 # download unzipped and read — figures proved absent (§117)
+python3 checks/owner-picker.py  # an owner is picked from the register, not typed: all five
+                                # fields PRESSED through the real popup and the state
+                                # graph read back, both ends each time (§129.1)
+python3 checks/rail-standard.py # one item still gets the rail, on a unit AND a function —
+                                # it MAKES the one-pillar unit, the demo has none (§129.2)
+python3 checks/band-corner.py   # the pinned title's corners, measured in PIXELS because a
+                                # DOM probe calls the broken build clean (§129.3, §53.7)
 python3 checks/no-jump.py       # nothing moves the register under you — the act of
                                 # OPENING a row included, since §110.7
 python3 checks/office-chat.py   # the chat's client half — serves the built file over HTTP,
@@ -2142,31 +2204,39 @@ prior sessions (on HR_ERP) accidentally reverted agreed-upon designs.
 
 ---
 
-*Last Updated: 2026-08-26 &mdash; **v3.46: a tactic that names no quarter, a
-closing slide, and the overview's download (&sect;128)**. Three more from using
-the plan download on a plan still being filled in. **A tactic with NO quarter
-at all is a gap** &mdash; &sect;119.1 was right to leave a single blank quarter
-alone (a tactic marked Q2 and Q3 is saying something by leaving Q1 and Q4
-empty), and that reasoning never covered a row that answered nothing; the four columns
-stay exactly as they are and **all four ticks go bold red** instead. The first
-answer merged one `Missing` across them and Islam turned it down &mdash;
-*"the template should stay the same"* &mdash; and he is right: the four columns
-are the workbook's shape, a table whose cells merge when a row is incomplete
-cannot be scanned down a column, and the alarm had been allowed to reshape the
-thing it was annotating (&sect;116.4's fault in a table).
-**The deck closes on Thank you**, which is `present.js`'s own last slide
-(&sect;53.5: two decks of the same plan should have the same manners). **And
-the Function overview carries the download too** &mdash; a capability
-function's strategy tab is TWO sections and only Projects had a `.paneact` to
-hang the button on, so from the other half there was no way to take the plan
-away. **IT RENDERED INVISIBLE FIRST, WHICH IS &sect;70 EXACTLY**: `.penbtn` is
-built for a card corner (absolute, `opacity:0` until hovered) and a worded bar
-is not one, so it sat in the document answering every DOM query and could not
-be pressed &mdash; caught only because the check CLICKS. **And two of the first
-run's three failures were the check, not the product**: `sorted()` over slide
-parts is lexicographic, so `slide10` came before `slide2` and it measured a
-pillar it had never touched. A measurement wrong in the direction of "broken"
-costs as much as one wrong in the direction of "clean".*
+*Last Updated: 2026-08-27 &mdash; **v3.47: an owner is picked, a single item
+keeps its rail, and the pinned title's corners (&sect;129)**. Three notes from
+using the product, and the first was not about tidiness. **A tactic's owner is
+matched against the register BY NAME** &mdash; `namedOn()` reads it beside the
+collaborators, and that is what makes somebody a Contributor who may enter that
+line's figure. Measured before a line was written: **38 owner names across the
+demo plan, 14 naming nobody, and 32 of the 78 tactics** owned by a short
+spelling that matches no one. Each is a person who owns a line and cannot report
+it, and no screen says so. Five fields become lists &mdash; project, milestone,
+tactic, **pillar** (read-only everywhere in the product's life until now), and
+collaborators as a **ticking** list of people or departments. **A stored name
+outside the register is KEPT in its own group** (&sect;96.2), so a plan uploaded
+before today reads exactly as it did. **A ticking list stays open and commits
+per tick**, which reverses the single-select rule on purpose and is safe only
+because the `data-fld` handler writes without repainting &mdash; written down,
+because the next person to wire a multiple select to a repainting handler will
+watch the popup die under the pointer. **And a 1px clipped element scrolling is
+never the page moving**: setting `selected` on a `<select multiple>` fires a
+real `scroll` from the hidden native select, which closed the popup on every
+tick near the fold &mdash; invisible for three versions, because the
+single-select path never sets `selected` on anything. **The rail comes back for
+one item, on units AND functions**: the gate counted a capability's PROJECTS, so
+Marketing drew two capabilities on one page at two different left edges, and the
+pen had already disagreed with the reading view since &sect;69.13. **And the
+pinned title's corners take the page's own ground** &mdash; &sect;53.7 painted
+the strip above the band and stopped at its top edge, where the notches begin;
+CSS cannot ask whether a sticky element is pinned, so the cost at rest was
+measured against squaring the corners rather than argued (13px&sup2; against
+26). Islam: *"fill don't square the corners."* Three new checks, each proved
+able to fail against the shipped build first &mdash; **20 / 14 / 8** &mdash;
+and the corner one **reported a correct build broken on its first run**, because
+in the dark palette `--surface` sits between `--ground` and `--surface-2` and an
+antialiased pixel lands on it by arithmetic (&sect;68.10).*
 
 *Earlier: 2026-08-26 &mdash; **v3.44: one line above the table, and a
 

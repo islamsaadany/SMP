@@ -1169,14 +1169,6 @@
   .pfval > .pill.kind:first-child { margin-left:0; }
   .pfval .pill.kind { margin-top:0; margin-bottom:0; }
   .pfront .fld, .pfront input, .pfront textarea { width:100%; max-width:none; }
-  /* ── ONE FACT WIDE (§129.1) ──────────────────────────────────────────
-     A pillar has an owner and nothing else that belongs in front matter, so
-     the box keeps its ground, its hairline and its label track and loses the
-     second column — the same component, not a second one that looks like it
-     (§53.5). The `.ssbtn` the owner list becomes is a button rather than a
-     field, so it needs the same full width by name. */
-  .pfront.one { grid-template-columns:minmax(0,1fr); }
-  .pfront .ssbtn { width:100%; }
   @media (max-width: 1180px) {
     .pfront { grid-template-columns:1fr; }
     .pfright { border-left:0; border-top:1px solid var(--line); }

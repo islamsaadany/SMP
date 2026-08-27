@@ -713,44 +713,6 @@
   .pane > .pband::before {
     content:""; position:absolute; left:-1px; right:-1px; bottom:100%;
     height:calc(var(--rail-gap, 22px) + 2px); background:var(--ground); }
-  /* ── AND THE TWO CORNERS ARE THE SAME WINDOW (§129.3) ─────────────
-     Islam: "the title has round corners so the scrolled up appears in the
-     right and left top corners." Measured before touching it: 13px² of the
-     page's white card, per corner, with rows sliding through it — the band's
-     grey does not reach into a rounded corner, so what is behind it does.
-
-     THE STRIP ABOVE WAS ALREADY PAINTED AND THE CORNERS WERE NOT. That is the
-     whole fault: `::before` covers the gap over the band and stops dead at its
-     top edge, where the two notches begin.
-
-     SO THEY TAKE THE SAME GROUND, from the same token — one surface, one
-     colour, whether you are looking at the strip or at the corner beside it.
-     `--r` twice, because the arc being filled around IS the band's radius: a
-     number of its own here would drift from the radius above the day somebody
-     changes one (§29.4's rule, on a curve instead of a gap).
-
-     AND IT PAINTS WHEN THE BAND IS NOT PINNED TOO — §53.7 exactly, for the
-     same unavoidable reason: CSS cannot ask whether a sticky element is
-     pinned. At rest that covers about 1.4px of the pane's own corner border
-     arc. Measured against squaring the corners instead, which is the other
-     answer: 13px² disturbed at rest against 26px², and the square corner then
-     pokes 2px OUTSIDE the card it sits in. The fill is the cheaper of the two
-     and the only one that leaves a pinned header looking deliberate.
-
-     ON THE `::after`, NOT BEHIND THE BAND. A pseudo cannot be put behind its
-     own parent's background once that parent makes a stacking context, and
-     this one does (`position:sticky` with a z-index). It does not need to be:
-     it paints ONLY the notches, which is the one place the band's own
-     background is absent. `pointer-events:none`, or an 8px square in each
-     corner would swallow clicks meant for the pen behind it. */
-  .pane > .pband::after {
-    content:""; position:absolute; left:0; right:0; top:0;
-    height:var(--r); pointer-events:none;
-    background:
-      radial-gradient(circle at 100% 100%, transparent calc(var(--r) - .5px),
-        var(--ground) var(--r)) left top / var(--r) var(--r) no-repeat,
-      radial-gradient(circle at 0 100%, transparent calc(var(--r) - .5px),
-        var(--ground) var(--r)) right top / var(--r) var(--r) no-repeat; }
   /* AND THE RAIL'S COLUMN IS THE SAME WINDOW (§53.7). The strip above the
      pinned band was filled across the PANE only, so beside it — over the rail's
      own column — content kept sliding through: the capability band cut off in

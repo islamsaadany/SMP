@@ -2774,19 +2774,7 @@
            cursor left a cell, on the one screen somebody fills in left to
            right. */
         var fn = FIELDS[+el.dataset.fld];
-        /* SEVERAL ANSWERS COME AS AN ARRAY (§129.1). On a `<select multiple>`
-           `el.value` is only the FIRST selected option, so a collaborators cell
-           wired through the plain path would have saved one name and dropped
-           the rest — silently, which is the shape §96 exists to stop. Asked of
-           the element rather than of the setter: `multiple` is undefined on an
-           input and on a textarea, so every other field is untouched. */
-        if (fn) {
-          fn(el.multiple
-            ? Array.prototype.filter.call(el.options, function(o){ return o.selected; })
-                .map(function(o){ return o.value; })
-            : el.value);
-          fieldSaved();
-        }
+        if (fn) { fn(el.value); fieldSaved(); }
       });
       /* THE BOX GROWS WITH WHAT IS TYPED IN IT (§51.1, Islam: "the foundation
          end in mind is not editable in terms of space or empty lines").

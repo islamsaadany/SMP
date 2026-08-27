@@ -116,11 +116,17 @@ def notch_pixels(pg, scale, side):
       const r=b.getBoundingClientRect();
       const rad=parseFloat(getComputedStyle(b).borderTopLeftRadius)||8;
       return {top:r.top,left:r.left,width:r.width,rad:rad};}""")
+    # ONE PIXEL PAST THE BAND ON THE OUTSIDE (§129.8). The box used to start at
+    # the band's own edge, and the thing Islam was still looking at lived
+    # OUTSIDE it: the pane's 1px side border, covered by `::before` everywhere
+    # above the band and therefore standing, pinned, as a square-ended stub
+    # beside a rounded corner. A check that samples only inside the corner it
+    # is named after cannot see the pixel next to it.
     rad = d["rad"]
-    x = d["left"] if side == "left" else d["left"] + d["width"] - rad
-    shot = pg.screenshot(clip={"x": x, "y": d["top"], "width": rad, "height": rad})
+    x = (d["left"] - 1) if side == "left" else d["left"] + d["width"] - rad
+    shot = pg.screenshot(clip={"x": x, "y": d["top"], "width": rad + 1, "height": rad})
     w, h, px = png_pixels(shot)
-    cx = rad * scale if side == "left" else 0.0
+    cx = (rad + 1) * scale if side == "left" else 0.0
     cy = rad * scale
     keep, lim = [], (rad + 1) * scale
     for row in range(h):

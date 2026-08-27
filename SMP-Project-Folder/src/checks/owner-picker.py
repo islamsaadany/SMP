@@ -162,6 +162,22 @@ with sync_playwright() as p:
     ck("the People group is sorted", shape["sorted"])
     ck("the Departments group speaks the navigation's words",
        "Mobile" in shape["depts"] and "IT Dist." in shape["depts"], shape["depts"][:6])
+    # ── 3b · where somebody works, beside their name (§129.9) ──────────
+    hint = pg.evaluate("""()=>{
+      const s=document.querySelector('.pane select.ownersel');
+      const os=[...s.querySelectorAll('optgroup[label="People"] option')];
+      const dn=displayNames();
+      const want={}; PEOPLE.filter(p=>personActive(p)).forEach(p=>{
+        const at=personAt(p);
+        want[knownName(p,dn)] = (at && at!=="group") ? placeLabel(at) : "";});
+      return {wrong: os.filter(o=>(o.dataset.hint||"")!==want[o.text]).map(o=>o.text),
+              withPlace: os.filter(o=>o.dataset.hint).length,
+              inText: os.filter(o=>/\u2014|\u2013| - /.test(o.text)).length};}""")
+    ck("every name carries where that person works, and none carries a wrong one",
+       not hint["wrong"], hint["wrong"][:4])
+    ck("...and it is actually filled in", hint["withPlace"] > 0, hint)
+    ck("the place is NOT part of the name that gets stored",
+       hint["inText"] == 0, hint)
     ck("a unit and a function sharing a name stay apart",
        "Care" in shape["depts"] and "Care (function)" in shape["depts"], shape["depts"])
 
@@ -186,7 +202,19 @@ with sync_playwright() as p:
         after = pg.evaluate("()=>UNITS.mobile.items[0].tactics[0].owner")
         ck("picking an owner writes it to the plan", after == "Hazem Roushdy" and after != before,
            {"was": before, "now": after})
+        # THE HINT IS A HINT (§129.9): what lands in the plan is the name
+        # alone, or namedOn() could not resolve it and §129.1 undoes itself.
+        ck("the place beside it is not written into the plan",
+           after == after.strip() and "Logistics" not in after, after)
         ck("a single pick closes the list", pg.query_selector(".sspop") is None)
+        # A HINT YOU CAN SEE AND CANNOT SEARCH FOR IS HALF A CONTROL (§129.9).
+        press(pg, btn_for(pg, sel), "the tactic owner picker")
+        pg.keyboard.type("Nigeria"); pg.wait_for_timeout(250)
+        found = pg.eval_on_selector_all(".sspop .ssrow:not([hidden])",
+                                        "e=>e.map(x=>x.childNodes[0].textContent)")
+        ck("typing a place finds the people who work there",
+           any(t != "Nigeria" for t in found), found[:6])
+        pg.keyboard.press("Escape"); pg.wait_for_timeout(200)
 
     except Missing:
         pass
@@ -200,7 +228,12 @@ with sync_playwright() as p:
         ck("no em-dash to tick", pg.eval_on_selector_all(
             ".sspop.ssmany .ssrow", "e=>e.filter(r=>r.textContent.trim()==='—').length") == 0)
         names = pg.evaluate("""()=>{const rs=[...document.querySelectorAll('.sspop .ssrow')];
-          rs[0].click(); rs[2].click(); return [rs[0].textContent, rs[2].textContent];}""")
+          /* THE ROW'S NAME IS ITS FIRST TEXT NODE. The place beside it is a
+             span inside the same button (§129.9), so textContent would read
+             "Amaka EzeNigeria" and this would compare it against a stored
+             value that is correctly the name alone. */
+          const nm=r=>r.childNodes[0].textContent;
+          rs[0].click(); rs[2].click(); return [nm(rs[0]), nm(rs[2])];}""")
         pg.wait_for_timeout(300)
         got = pg.evaluate("()=>UNITS.mobile.items[0].tactics[0].collaborators")
         ck("two ticks write two collaborators", got == names, {"ticked": names, "stored": got})
@@ -224,12 +257,15 @@ with sync_playwright() as p:
         psel = ".pane .pfront.one select.ownersel"
         was = pg.evaluate("()=>UNITS.mobile.items[0].owner")
         press(pg, btn_for(pg, psel), "the pillar owner picker")
-        pg.keyboard.type("Nigeria"); pg.wait_for_timeout(250)
+    # A DEPARTMENT NOBODY SITS IN, deliberately: the place now joins what
+        # is searched (§129.9), so "Nigeria" would match the people who work
+        # there as well as the unit and this would pick whichever came first.
+        pg.keyboard.type("Risk"); pg.wait_for_timeout(250)
         pg.click(".sspop .ssrow:not([hidden])"); pg.wait_for_timeout(350)
         now = pg.evaluate("()=>UNITS.mobile.items[0].owner")
-        ck("a pillar's owner can be a department", now == "Nigeria" and now != was, {"was": was, "now": now})
+        ck("a pillar's owner can be a department", now == "Risk" and now != was, {"was": was, "now": now})
         ck("the meta line above does not repeat it while it is being edited",
-           pg.eval_on_selector_all(".pane .ptitle .pmeta", "e=>e.map(x=>x.textContent).join('')").find("Nigeria") < 0)
+           pg.eval_on_selector_all(".pane .ptitle .pmeta", "e=>e.map(x=>x.textContent).join('')").find("Risk") < 0)
 
     except Missing:
         pass

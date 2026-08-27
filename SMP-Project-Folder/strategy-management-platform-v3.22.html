@@ -1325,14 +1325,27 @@
      it paints ONLY the notches, which is the one place the band's own
      background is absent. `pointer-events:none`, or an 8px square in each
      corner would swallow clicks meant for the pen behind it. */
+  /* PAST THE PANE'S BORDER, EXACTLY AS `::before` DOES (§129.8). The first
+     build filled the notch and stopped at the band's own edge — and the thing
+     Islam was still looking at was not the notch at all: it was the pane's 1px
+     SIDE BORDER, which `::before` covers everywhere above the band and which
+     therefore begins, pinned, as a square-ended stub standing beside a rounded
+     corner. That reads as a squared corner because it is one; the round part
+     is just the thing next to it.
+
+     `left:-1px`/`right:-1px` takes the fill over that border too, and the
+     ARITHMETIC IS WHAT MAKES IT MEET: each tile is `--r + 1` wide so its
+     circle still sits on the BAND's corner centre rather than a pixel out, and
+     the band's arc touches the border's own line exactly where the fill ends —
+     so the card reads as starting, rounded, at the pinned title. */
   .pane > .pband.pinned::after {
-    content:""; position:absolute; left:0; right:0; top:0;
+    content:""; position:absolute; left:-1px; right:-1px; top:0;
     height:var(--r); pointer-events:none;
     background:
       radial-gradient(circle at 100% 100%, transparent calc(var(--r) - .5px),
-        var(--ground) var(--r)) left top / var(--r) var(--r) no-repeat,
+        var(--ground) var(--r)) left top / calc(var(--r) + 1px) var(--r) no-repeat,
       radial-gradient(circle at 0 100%, transparent calc(var(--r) - .5px),
-        var(--ground) var(--r)) right top / var(--r) var(--r) no-repeat; }
+        var(--ground) var(--r)) right top / calc(var(--r) + 1px) var(--r) no-repeat; }
   /* AND THE RAIL'S COLUMN IS THE SAME WINDOW (§53.7). The strip above the
      pinned band was filled across the PANE only, so beside it — over the rail's
      own column — content kept sliding through: the capability band cut off in
@@ -1885,6 +1898,12 @@
      ticking six collaborators through a 230px window is six scrolls back to
      where you were. */
   .ssmany .sslist { max-height:300px; }
+  /* WHERE SOMEBODY WORKS, BESIDE THEIR NAME (§129.9). Quiet and second: the
+     name is the answer and this only tells two Ahmeds apart. It wraps rather
+     than clips, because a place cut off mid-word tells nobody anything —
+     the popup is 380px at most and the row is allowed to take a second line. */
+  .ssrow .sshint { color:var(--ink-3); font-size:11.5px; margin-left:8px; }
+  .ssrow.on .sshint { color:var(--gold-deep); }
   /* The viewer switcher keeps the cap its select had, and for the same reason:
      "Strategy Management Office — all units" would otherwise set the width of
      the chrome's first line and wrap the two buttons beside it onto a second.
@@ -20637,7 +20656,12 @@ function selectOr(page, value, opts, cls, setter){
 function optionHtml(o, chosen){
   var pair = o && typeof o === "object";
   var v = String(pair ? o.v : o), t = String(pair ? o.label : o);
-  return '<option' + (v === t ? '' : ' value="' + esc(v) + '"') +
+  /* A HINT IS NOT PART OF THE ANSWER (§129.9). It rides on the option as data
+     and searchsel.js draws it quietly beside the name in the popup; the
+     option's TEXT — which is what the closed control shows and what the field
+     stores — is the name alone. */
+  var hint = pair && o.hint ? ' data-hint="' + esc(String(o.hint)) + '"' : '';
+  return '<option' + (v === t ? '' : ' value="' + esc(v) + '"') + hint +
     (chosen(v) ? " selected" : "") + '>' + esc(t) + '</option>';
 }
 function optionsHtml(opts, chosen){
@@ -20743,10 +20767,34 @@ function ownerAdder(){
    register does (§53.5). `namedOn()` learned this name in the same edit — the
    whole point of the picker is that the person it names may report the line,
    and a label the rules cannot recognise would have put that back. */
+/* ── AND WHERE THEY WORK, BESIDE THE NAME (§129.9) ───────────────────
+   Islam: *"for the names in the lists, you can make it the name - the unit or
+   function so people don't get confused."* Two people called Ahmed on a
+   register of a hundred are told apart by their name here and by nothing else,
+   and the register already knows the answer.
+
+   THE PLACE IS A HINT, NEVER PART OF THE ANSWER. It is drawn in the popup and
+   nowhere else: the cell shows the name, the plan STORES the name, the
+   workbook and the deck print the name, and `namedOn()` matches the name. A
+   label of "Ramy Behairy — Mobile" written into a tactic would name nobody the
+   platform can resolve, which is the fault §129.1 exists to fix (§129.7 makes
+   the same argument about the short name from the other side).
+
+   `personAt()` IS THE ONE PAIR THAT ANSWERS THIS (§54), and `placeLabel()` the
+   one vocabulary (§53.5). Somebody the register has not placed gets no hint
+   rather than a guess or the word "group" — an absence is honest and a wrong
+   place is worse than none (§15.1). */
 function ownerPeople(){
-  var a = ownerAdder(), dn = displayNames();
-  PEOPLE.forEach(function(p){ if (personActive(p)) a.add(knownName(p, dn)); });
-  return a.list.sort(function(x, y){ return x.localeCompare(y); });
+  var a = ownerAdder(), dn = displayNames(), out = [];
+  PEOPLE.forEach(function(p){
+    if (!personActive(p)) return;
+    var n = knownName(p, dn);
+    if (a.has(n)) return;
+    a.add(n);
+    var at = personAt(p);
+    out.push({ name: n, where: at && at !== "group" ? placeLabel(at) : "" });
+  });
+  return out.sort(function(x, y){ return x.name.localeCompare(y.name); });
 }
 /* NOT sorted: the navigation's order is the order somebody learned these in,
    and it is short enough to read. Retired ones are left out — a retired place
@@ -20765,14 +20813,16 @@ function ownerDepts(){
 function ownerChoices(current, blank){
   var people = ownerPeople(), depts = ownerDepts();
   var known = ownerAdder();
-  people.forEach(known.add); depts.forEach(known.add);
+  people.forEach(function(x){ known.add(x.name); });
+  depts.forEach(known.add);
   var kept = ownerAdder();
   (Array.isArray(current) ? current : [current]).forEach(function(v){
     if (!known.has(v)) kept.add(v);
   });
   var out = blank ? [{ v:"", label:"\u2014" }] : [];
   if (kept.list.length) out.push({ group:"Already on this plan", items:kept.list });
-  if (people.length)    out.push({ group:"People", items:people });
+  if (people.length) out.push({ group:"People", items: people.map(function(x){
+    return { v:x.name, label:x.name, hint:x.where }; }) });
   if (depts.length)     out.push({ group:"Departments", items:depts });
   return out;
 }
@@ -30541,9 +30591,21 @@ var SEARCHSEL = (function(){
       r.type = "button";
       r.className = "ssrow" + (on ? " on" : "");
       r.textContent = op.text || "—";
+      /* WHERE THIS ONE IS FROM, QUIETLY (§129.9). A hint on the option rides
+         into the row and nowhere else — the button's label and the value the
+         field stores are the option's TEXT, which is the name on its own. It
+         joins what is SEARCHED, so typing a unit's name finds the people in
+         it; a hint you can see and cannot search for is half a control. */
+      var hint = op.dataset && op.dataset.hint;
+      if (hint) {
+        var h = document.createElement("span");
+        h.className = "sshint";
+        h.textContent = hint;
+        r.appendChild(h);
+      }
       r.setAttribute("role", "option");
       r.setAttribute("aria-selected", on ? "true" : "false");
-      r._q = (op.text || "").toLowerCase();
+      r._q = ((op.text || "") + " " + (hint || "")).toLowerCase();
       r.addEventListener("click", function(){
         if (many) toggle(sel, btn, op, r); else choose(sel, btn, op.value);
       });

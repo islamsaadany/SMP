@@ -1823,7 +1823,12 @@ function selectOr(page, value, opts, cls, setter){
 function optionHtml(o, chosen){
   var pair = o && typeof o === "object";
   var v = String(pair ? o.v : o), t = String(pair ? o.label : o);
-  return '<option' + (v === t ? '' : ' value="' + esc(v) + '"') +
+  /* A HINT IS NOT PART OF THE ANSWER (§129.9). It rides on the option as data
+     and searchsel.js draws it quietly beside the name in the popup; the
+     option's TEXT — which is what the closed control shows and what the field
+     stores — is the name alone. */
+  var hint = pair && o.hint ? ' data-hint="' + esc(String(o.hint)) + '"' : '';
+  return '<option' + (v === t ? '' : ' value="' + esc(v) + '"') + hint +
     (chosen(v) ? " selected" : "") + '>' + esc(t) + '</option>';
 }
 function optionsHtml(opts, chosen){
@@ -1929,10 +1934,34 @@ function ownerAdder(){
    register does (§53.5). `namedOn()` learned this name in the same edit — the
    whole point of the picker is that the person it names may report the line,
    and a label the rules cannot recognise would have put that back. */
+/* ── AND WHERE THEY WORK, BESIDE THE NAME (§129.9) ───────────────────
+   Islam: *"for the names in the lists, you can make it the name - the unit or
+   function so people don't get confused."* Two people called Ahmed on a
+   register of a hundred are told apart by their name here and by nothing else,
+   and the register already knows the answer.
+
+   THE PLACE IS A HINT, NEVER PART OF THE ANSWER. It is drawn in the popup and
+   nowhere else: the cell shows the name, the plan STORES the name, the
+   workbook and the deck print the name, and `namedOn()` matches the name. A
+   label of "Ramy Behairy — Mobile" written into a tactic would name nobody the
+   platform can resolve, which is the fault §129.1 exists to fix (§129.7 makes
+   the same argument about the short name from the other side).
+
+   `personAt()` IS THE ONE PAIR THAT ANSWERS THIS (§54), and `placeLabel()` the
+   one vocabulary (§53.5). Somebody the register has not placed gets no hint
+   rather than a guess or the word "group" — an absence is honest and a wrong
+   place is worse than none (§15.1). */
 function ownerPeople(){
-  var a = ownerAdder(), dn = displayNames();
-  PEOPLE.forEach(function(p){ if (personActive(p)) a.add(knownName(p, dn)); });
-  return a.list.sort(function(x, y){ return x.localeCompare(y); });
+  var a = ownerAdder(), dn = displayNames(), out = [];
+  PEOPLE.forEach(function(p){
+    if (!personActive(p)) return;
+    var n = knownName(p, dn);
+    if (a.has(n)) return;
+    a.add(n);
+    var at = personAt(p);
+    out.push({ name: n, where: at && at !== "group" ? placeLabel(at) : "" });
+  });
+  return out.sort(function(x, y){ return x.name.localeCompare(y.name); });
 }
 /* NOT sorted: the navigation's order is the order somebody learned these in,
    and it is short enough to read. Retired ones are left out — a retired place
@@ -1951,14 +1980,16 @@ function ownerDepts(){
 function ownerChoices(current, blank){
   var people = ownerPeople(), depts = ownerDepts();
   var known = ownerAdder();
-  people.forEach(known.add); depts.forEach(known.add);
+  people.forEach(function(x){ known.add(x.name); });
+  depts.forEach(known.add);
   var kept = ownerAdder();
   (Array.isArray(current) ? current : [current]).forEach(function(v){
     if (!known.has(v)) kept.add(v);
   });
   var out = blank ? [{ v:"", label:"\u2014" }] : [];
   if (kept.list.length) out.push({ group:"Already on this plan", items:kept.list });
-  if (people.length)    out.push({ group:"People", items:people });
+  if (people.length) out.push({ group:"People", items: people.map(function(x){
+    return { v:x.name, label:x.name, hint:x.where }; }) });
   if (depts.length)     out.push({ group:"Departments", items:depts });
   return out;
 }

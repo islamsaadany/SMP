@@ -165,9 +165,21 @@ var SEARCHSEL = (function(){
       r.type = "button";
       r.className = "ssrow" + (on ? " on" : "");
       r.textContent = op.text || "—";
+      /* WHERE THIS ONE IS FROM, QUIETLY (§129.9). A hint on the option rides
+         into the row and nowhere else — the button's label and the value the
+         field stores are the option's TEXT, which is the name on its own. It
+         joins what is SEARCHED, so typing a unit's name finds the people in
+         it; a hint you can see and cannot search for is half a control. */
+      var hint = op.dataset && op.dataset.hint;
+      if (hint) {
+        var h = document.createElement("span");
+        h.className = "sshint";
+        h.textContent = hint;
+        r.appendChild(h);
+      }
       r.setAttribute("role", "option");
       r.setAttribute("aria-selected", on ? "true" : "false");
-      r._q = (op.text || "").toLowerCase();
+      r._q = ((op.text || "") + " " + (hint || "")).toLowerCase();
       r.addEventListener("click", function(){
         if (many) toggle(sel, btn, op, r); else choose(sel, btn, op.value);
       });

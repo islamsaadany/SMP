@@ -535,6 +535,28 @@ console errors (in this cloud environment, run it via a wrapper that points Play
   first version of the check reported a CORRECT build broken: in the dark
   palette `--surface` sits between `--ground` and `--surface-2`, so an
   antialiased pixel lands on it by arithmetic (§68.10).
+- **THE SQUARED CORNER WAS THE CARD'S BORDER, NOT THE BAND'S (§129.8):** the
+  third round on one corner, and each round found a different element — §129.3
+  the pane's white ground, §129.6 the corner arc the fill covered at rest,
+  §129.8 the **1px side border**, which `::before` covers everywhere ABOVE the
+  band and which therefore begins, pinned, as a square-ended stub beside a
+  rounded corner. A card whose side starts in a butt end READS as a squared
+  corner. The fill goes `left:-1px`/`right:-1px` now and each gradient tile is
+  `--r + 1` wide so its circle stays on the BAND's corner centre — the arc then
+  meets the border's line exactly where the fill ends. **The check could not
+  have seen it**: it sampled the band's own corner box and the offending pixel
+  is the one immediately outside. *Reproducing the picture is not the same as
+  reproducing the complaint* — the first two rounds fixed what I had measured,
+  and what he was pointing at moved each time.
+- **THE PLACE BESIDE THE NAME IS A HINT, NEVER PART OF THE ANSWER (§129.9):**
+  `data-hint` on the option, drawn as a quiet span by `searchsel.js`; the closed
+  control, the stored value, the workbook, the deck and `namedOn()` all see the
+  NAME alone — "Ramy Behairy — Mobile" in a tactic would name nobody (§129.1's
+  fault, §129.7's argument from the other side). **It joins what is searched**,
+  or it is half a control. `personAt()` + `placeLabel()`, and somebody the
+  register has not placed gets NO hint rather than a guess (§15.1). And it broke
+  three assertions by being a span: a row's `textContent` became
+  "Amaka EzeNigeria" — read the row's FIRST TEXT NODE.
 - **THE PICKER LISTS THE REGISTER'S *Name*, NOT THE FULL LEGAL ONE (§129.7):**
   invisible here — all 33 demo people have a two- or three-word full name and
   none has a typed short one, so `knownName()` returns `p.name` and the wrong

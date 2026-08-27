@@ -17136,3 +17136,67 @@ name as its last rung.
 person given a five-name legal name and no short one, another given a typed
 Name — and asserts the list, what is stored, and the shared rule's answer for
 all four cases. Four failures against the build before it.
+
+### 129.8 The squared corner was the card's border, not the band's
+
+Islam, on the corrected build: *"the issue still persists"*, with a picture.
+
+**AND THE PICTURE HAD CHANGED SHAPE, which is the whole of the diagnosis.** The
+band's corner in it is ROUNDED and the page behind it is ground — §129.3 and
+§129.6 both working. What is square in that picture is the thin line beside it:
+**the pane's own 1px side border**, which `::before` covers everywhere ABOVE
+the band (§53.7, so nothing scrolls through the strip) and which therefore
+begins, pinned, as a square-ended stub standing next to a rounded corner. A
+card whose side starts in a butt end reads as a squared corner, because it is
+one — the round part is just the thing next to it.
+
+**SO THE FILL GOES PAST THE BORDER, EXACTLY AS `::before` ALREADY DOES.**
+`left:-1px` / `right:-1px`, and the arithmetic is what makes it meet: each
+gradient tile is `--r + 1` wide so its circle still sits on the BAND's corner
+centre rather than a pixel out of it, and the band's arc touches the border's
+own line precisely where the fill ends. The card now reads as starting,
+rounded, at the pinned title.
+
+**THE CHECK COULD NOT HAVE SEEN IT.** `notch_pixels()` sampled the band's own
+8px corner box, and the offending pixel is the one immediately OUTSIDE it — a
+check that samples only inside the corner it is named after cannot see the
+thing next to it. It samples a pixel past the band on the outside now, and
+fails four ways on the build Islam was looking at, naming the colour: `--line`.
+
+**THREE ROUNDS ON ONE CORNER, AND EACH FOUND A DIFFERENT ELEMENT.** §129.3 the
+pane's white ground, §129.6 the corner arc it covered at rest, §129.8 the
+border beside it. Every round was measured, and every measurement was of the
+thing named in the round before. *Reproducing the picture is not the same as
+reproducing the complaint;* the first two rounds fixed what I had measured, and
+what he was pointing at moved each time.
+
+### 129.9 The place beside the name
+
+Islam: *"for the names in the lists, you can make it the name - the unit or
+function so people don't get confused."*
+
+**IT IS A HINT, NEVER PART OF THE ANSWER.** The place is drawn in the popup row
+and nowhere else: the closed control shows the name, the plan STORES the name,
+the workbook and the deck print the name, and `namedOn()` matches the name.
+"Ramy Behairy — Mobile" written into a tactic would name nobody the platform
+can resolve, which is the fault §129.1 exists to fix and the same argument
+§129.7 makes about the short name from the other side. It rides on the option
+as `data-hint` and `searchsel.js` draws it as a quiet span; `textOf()` reads
+the option's TEXT, which is the name alone, so the button and the field are
+untouched by it.
+
+**IT JOINS WHAT IS SEARCHED.** Typing a unit's name finds the people who work
+in it — a hint you can see and cannot search for is half a control.
+
+**`personAt()` IS THE ONE PAIR THAT ANSWERS THIS** (§54) and `placeLabel()` the
+one vocabulary (§53.5). Somebody the register has not placed gets **no hint**
+rather than a guess or the word "group": an absence is honest and a wrong place
+is worse than none (§15.1). Three of the demo's 33 sit at the group and
+correctly carry nothing.
+
+**AND IT BROKE THREE ASSERTIONS BY BEING A SPAN.** A row's `textContent` became
+"Amaka EzeNigeria", so two checks compared it against a stored value that is
+correctly the name alone, and a third — which typed "Nigeria" and clicked the
+first match — started picking a PERSON in Nigeria rather than the unit, because
+the hint had joined the search. The name is read from the row's first text node
+now, and the department test picks one nobody sits in.

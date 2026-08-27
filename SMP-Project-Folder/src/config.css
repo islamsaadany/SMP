@@ -428,6 +428,12 @@
      ticking six collaborators through a 230px window is six scrolls back to
      where you were. */
   .ssmany .sslist { max-height:300px; }
+  /* WHERE SOMEBODY WORKS, BESIDE THEIR NAME (§129.9). Quiet and second: the
+     name is the answer and this only tells two Ahmeds apart. It wraps rather
+     than clips, because a place cut off mid-word tells nobody anything —
+     the popup is 380px at most and the row is allowed to take a second line. */
+  .ssrow .sshint { color:var(--ink-3); font-size:11.5px; margin-left:8px; }
+  .ssrow.on .sshint { color:var(--gold-deep); }
   /* The viewer switcher keeps the cap its select had, and for the same reason:
      "Strategy Management Office — all units" would otherwise set the width of
      the chrome's first line and wrap the two buttons beside it onto a second.

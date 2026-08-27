@@ -751,14 +751,27 @@
      it paints ONLY the notches, which is the one place the band's own
      background is absent. `pointer-events:none`, or an 8px square in each
      corner would swallow clicks meant for the pen behind it. */
+  /* PAST THE PANE'S BORDER, EXACTLY AS `::before` DOES (§129.8). The first
+     build filled the notch and stopped at the band's own edge — and the thing
+     Islam was still looking at was not the notch at all: it was the pane's 1px
+     SIDE BORDER, which `::before` covers everywhere above the band and which
+     therefore begins, pinned, as a square-ended stub standing beside a rounded
+     corner. That reads as a squared corner because it is one; the round part
+     is just the thing next to it.
+
+     `left:-1px`/`right:-1px` takes the fill over that border too, and the
+     ARITHMETIC IS WHAT MAKES IT MEET: each tile is `--r + 1` wide so its
+     circle still sits on the BAND's corner centre rather than a pixel out, and
+     the band's arc touches the border's own line exactly where the fill ends —
+     so the card reads as starting, rounded, at the pinned title. */
   .pane > .pband.pinned::after {
-    content:""; position:absolute; left:0; right:0; top:0;
+    content:""; position:absolute; left:-1px; right:-1px; top:0;
     height:var(--r); pointer-events:none;
     background:
       radial-gradient(circle at 100% 100%, transparent calc(var(--r) - .5px),
-        var(--ground) var(--r)) left top / var(--r) var(--r) no-repeat,
+        var(--ground) var(--r)) left top / calc(var(--r) + 1px) var(--r) no-repeat,
       radial-gradient(circle at 0 100%, transparent calc(var(--r) - .5px),
-        var(--ground) var(--r)) right top / var(--r) var(--r) no-repeat; }
+        var(--ground) var(--r)) right top / calc(var(--r) + 1px) var(--r) no-repeat; }
   /* AND THE RAIL'S COLUMN IS THE SAME WINDOW (§53.7). The strip above the
      pinned band was filled across the PANE only, so beside it — over the rail's
      own column — content kept sliding through: the capability band cut off in

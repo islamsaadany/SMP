@@ -124,6 +124,26 @@ test-assistant 33/0 · test-authorize 193/0. **One assertion was rewritten for
 being unfalsifiable** — it measured the row against the panel, and a row is
 inside its own panel by definition.
 
+### v3.48 — the reply that never came back (§132)
+
+Every diagnostic row green, and still no reply in the chat. The diagnostic and
+the conversation share one code path; what differs is time. Two budgets fixed:
+
+- **The function outlives the model now** — the model timeout was 12s inside
+  Vercel's default 10s function cap, so a slow answer had the whole function
+  killed under it after the message was stored and before any reply or handoff
+  could be written. `api/*.js` gets 30s; the model gets 20.
+- **Thinking counts** — Gemini 2.5+ bills its reasoning against
+  `maxOutputTokens`, so the 700 cap could be eaten whole by thought and the
+  truncated JSON read as a failure, which by design writes nothing. Now 2048.
+- **Failures reach the operator** — one `console.error` with the provider's own
+  reason, into the Vercel function log. The person's silence (§112.2) is
+  untouched; proved by driving a real `say` against a quota-refusing stub.
+
+**Verified:** test-assistant 34/0 · test-chat 52/0 · the say-path failure
+observed in the log with the provider's reason while the send still succeeded ·
+built file byte-identical (server-only).
+
 ### v3.48 — the key was right, the model was retired (§131)
 
 The re-issued key WORKS — Google's 404 proved authentication passed — and the

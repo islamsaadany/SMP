@@ -17424,3 +17424,59 @@ the model row now says `gemini-3.6-flash`; an unrecognised value reads
 UNRECOGNISED and the provider's refusal still lands on *The key itself*.
 **Server-only** — the built file is byte-identical, so no SHELL bump (§91's
 trigger is a content change, and there is none).
+
+
+---
+
+## 132 · The reply that never came back, and the budget that killed it (v3.48)
+
+> Islam, with every row of the diagnostic green at last: *"everything is on but
+> I didn't get a reply from the bot."*
+
+The diagnostic and the conversation make the SAME call through the SAME code —
+what differs is how long it takes. The diagnostic asks one short question with
+no history; a real message carries the conversation so far on top of the 13k
+token corpus, and the model reasons before it answers. Slow is where the two
+paths stop agreeing.
+
+### 132.1 The function died under its own timeout
+
+`TIMEOUT_MS` was **12 seconds** — and Vercel's default function cap is **10**.
+So a slow answer never timed out politely: the whole function was killed under
+it, after the person's message was stored (it is inserted before the model is
+asked, §104's ordering) and before any reply or handoff line could be written.
+From the office: a message in the inbox and nothing back. From the person:
+nothing at all. From the diagnostic: green, because its shorter call finishes
+inside 10s.
+
+`vercel.json` grants `api/*.js` **30 seconds** now, and the model timeout is
+20 — comfortably inside the function that hosts it, which is the invariant the
+two numbers must keep whatever they are set to.
+
+### 132.2 Thinking counts
+
+On Gemini 2.5+ the model reasons before it speaks and **the reasoning is
+billed against `maxOutputTokens`** — so the old cap of 700 could be consumed
+entirely by thought, leaving a truncated or empty JSON that parses as a
+failure and, by §112.2's design, writes nothing. 700 → **2048**: the schema
+still keeps the visible reply short; the headroom is for what the model spends
+before it starts speaking.
+
+### 132.3 Visible to the operator, invisible to the person — again
+
+§112.2's silence is right for the person and was still absolute for the
+operator: a say-path failure was recorded NOWHERE, which is how *"no reply"*
+went undiagnosable twice in one week (§123 fixed it for configuration; this is
+the per-message half). One `console.error` with the provider's own reason —
+into the function log, which Vercel keeps and the chat does not. Stores
+nothing, shows nothing, answers *why* when somebody finally looks. Proved by
+driving a real `say` against a quota-refusing stub: the person's send still
+succeeds, and the log holds `assistant did not answer: … (429: Resource has
+been exhausted)`.
+
+### 132.4 What §131 looked like from production
+
+Deployed evidence, for the record: Islam set `GEMINI_MODEL=gemini-3.6-flash`
+himself (the override §104 built for exactly this), and the diagnostic then
+read all green — the AQ.-shaped key PRESENT, the model answering in full. The
+remaining silence was this section's, not the key's and not the model's.

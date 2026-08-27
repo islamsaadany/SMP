@@ -6,9 +6,11 @@ version (rules A2 / A11, changed 2026-08-20) — those go only when asked for.
 
 **Where it runs:** Vercel, production tracks `main`. Static files plus two
 serverless functions (`/api/state`, `/api/auth`) against Neon Postgres.
-**Latest version:** v3.47 on `main`
-**Last updated:** 2026-08-26
-**Last updated:** 2026-08-26
+**Latest version:** v3.50 on `main` — §135 (the Setup header line) merged over
+v3.49. Three sessions landed on the same numbers this week: this work was built
+as §130 / v3.48 and renumbered on the way in, because the owners-and-corners run
+took §130 and the same-name register run took §131–§134.
+**Last updated:** 2026-08-27
 
 **Sign in as:** `SMO` / `1234` — a password change is forced at once (§43.1,
 reversing §19.4).
@@ -64,6 +66,66 @@ Nothing proceeds past this line without an answer.
   is a true signal — do not silence it.
 
 ## Built and verified
+
+### v3.50 — the Setup header line, the marking table, and a repaired matrix (§135)
+
+- Eleven asks from using the Setup pages. **Seven of them are one standard
+  applied to sixteen pages**: the page's own search and buttons share the
+  pinned line with its name, the `SMO` pill and every count chip go, the quick
+  filters and the row count go the way the register's did, and the grey
+  briefing paragraph goes everywhere.
+- **§121.2 had left those controls on a row of their own for a good reason,
+  and that reason forbade the FAKE move rather than the move** — a negative
+  margin pulled a non-sticky row up under a pinned title and scrolling slid it
+  out. Inside the header they pin with it.
+- **Roles & access is repaired, and it had one cause** (§135.2): `.acgrid` is
+  `overflow-x:auto`, so the BOX — not the page — is what its head pins against,
+  and §121.4's 141px page offset pushed the header 141px down inside the table,
+  onto rows three and four. The exact fault §121.4 wrote down about the
+  register, on the one table its exclusion forgot. Repairing it made §117's
+  *Own business unit* and *Own supporting function* headings readable for the
+  first time since the split shipped.
+- **Focus measures reaches supporting functions** in both of their shapes, with
+  a segmented On|Off switch on the header line, a navigation-style destination
+  row carrying each place's mark count, and one table headed like the register.
+  The group's Focus board grows the same half, or the marks are stored where
+  nobody can see them (§61).
+- **Send a message → Send an email**, with the Email settings folded in as its
+  second section (a status table, four fields, a live rendered preview and a
+  test send: not a dropdown). **Inbox → In Platform inbox.**
+- **A person's company is sometimes derived and sometimes stored** (§135.6):
+  read-only wherever the unit has already answered it, written only where
+  nothing else has, so two fields cannot contradict one stored fact.
+- **A four-pixel slot was closed** (§135.10): `--sethead-h` was a guessed 46px
+  and the header is 42–49px depending on the page, so scrolling rows showed
+  through the gap between the two pinned headers. Published by a
+  ResizeObserver now.
+- `checks/setup-header.py` was proved able to fail first — **33 failures
+  against the previous build** — and **two of its own assertions could not
+  fail when written** (§113.8's blind spot, and `tr.getBoundingClientRect()`
+  reporting the un-stuck layout).
+- Verified after the merge: `qa.py`, setup-header, setup-rail, setup-pages,
+  setup-search, register-header, focus-switch, role-picker, table-standard-all,
+  no-wrap, and main's own band-corner, owner-picker and rail-standard all
+  green; `test-authorize` 212/0; **round trip and clean parity on a virgin
+  Postgres 16** (§113.7); contrast 52 failures, unchanged, none on the new
+  surfaces.
+
+### v3.49 — the register notices two people whose name reads the same (§131)
+
+- Islam: *"notify me as an issue to address if 2 people their 1st 2 names are
+  the same so I can edit one of them."* The pair now joins the **Attention
+  queue** on the People register — the button counts them, opening it walks to
+  each with the reason above the fields, naming the other person in full.
+- **A notice, never a duplicate mark** (§87: a shared name is not one human),
+  and it sorts last — collisions, declarations and missing identifiers stay
+  worse. Anybody already flagged as a possible duplicate is left to that flag.
+- **Amending one Name clears both**; a typed Name that still collides stays
+  flagged, because typed values are never auto-lengthened (§81.1).
+- Proved in `checks/duplicates.py` (watched to fail 4 ways on the pre-§131
+  build), with `identity-merge`, `people-dialog`, `table-standard` and the
+  full `qa.py` sweep green. Found on the way: the demo's two placeholder
+  company CEOs genuinely read the same ("Company CEO,") and now say so.
 
 ### v3.47 — building a plan on the platform (§129, spec 020)
 
@@ -123,6 +185,72 @@ the layout, each watched to fail first · qa.py ERRORS: none · test-chat 52/0 �
 test-assistant 33/0 · test-authorize 193/0. **One assertion was rewritten for
 being unfalsifiable** — it measured the row against the panel, and a row is
 inside its own panel by definition.
+
+### v3.49 — the thinking cap (§134)
+
+§133's 20s budget blew on its first preview run — the same model, the same
+question, under 12s the hour before. Reasoning time is a lottery, so the fix is
+not a bigger timeout: **thinking is capped at nought**, because answering from
+a corpus that is in the prompt is retrieval, not reasoning. And since the
+knob's contract on future models is unknowable, **a 400 naming thinking drops
+the knob and re-asks once**, remembered per process — a config knob must never
+be what takes the assistant down. Bad keys are never retried into.
+
+**Verified:** test-assistant 38/0 (retry watched to fail — 2), test-chat 52/0,
+built file byte-identical. The preview URL's CSP console error is Vercel's SSO
+layer fetching the manifest — harmless, absent from production (§134.3).
+
+### v3.49 — the reply that never came back (§133)
+
+Every diagnostic row green, and still no reply in the chat. The diagnostic and
+the conversation share one code path; what differs is time. Two budgets fixed:
+
+- **The function outlives the model now** — the model timeout was 12s inside
+  Vercel's default 10s function cap, so a slow answer had the whole function
+  killed under it after the message was stored and before any reply or handoff
+  could be written. `api/*.js` gets 30s; the model gets 20.
+- **Thinking counts** — Gemini 2.5+ bills its reasoning against
+  `maxOutputTokens`, so the 700 cap could be eaten whole by thought and the
+  truncated JSON read as a failure, which by design writes nothing. Now 2048.
+- **Failures reach the operator** — one `console.error` with the provider's own
+  reason, into the Vercel function log. The person's silence (§112.2) is
+  untouched; proved by driving a real `say` against a quota-refusing stub.
+
+**Verified:** test-assistant 34/0 · test-chat 52/0 · the say-path failure
+observed in the log with the provider's reason while the send still succeeded ·
+built file byte-identical (server-only).
+
+### v3.49 — the key was right, the model was retired (§132)
+
+The re-issued key WORKS — Google's 404 proved authentication passed — and the
+404's own text named the last problem: `gemini-2.5-flash` is retired for new
+users. SF keeps using it on its old project; SMP's fresh project cannot. The
+default moves to `gemini-3.6-flash` (Google's recommendation, verbatim);
+`GEMINI_MODEL` still overrides.
+
+And §126's shape row called the newer `AQ.`-prefixed key "a different kind of
+credential" while the provider accepted it one step later. Both Google shapes
+are recognised now; an unmatched one reads UNRECOGNISED, never wrong — a
+heuristic never overrules the provider.
+
+**Verified:** test-assistant 34/0, the new assertion watched to fail · both
+cases driven end to end through the diagnostic · built file byte-identical
+(server-only, no SHELL bump).
+
+### v3.48 — §126 resolved: the key was not the key (redeploy commit)
+
+The diagnosis held. Comparing against Strategy-Formulation's working Gemini
+setup showed the two projects byte-equivalent on the wire — same env name,
+same model, same endpoint, same header — so the only remaining difference was
+the stored VALUE in this project's Vercel environment. Islam's own AI Studio
+chart agreed: SMP_Key had accepted a real request, while the deployment's copy
+was refused, which means the deployment held a different string.
+
+Islam deleted and re-added `GEMINI_API_KEY` in Vercel. **This commit exists to
+trigger the build that bakes it in** — a deployment only carries the variables
+that existed when it was built, and editing one changes nothing until the next
+build. Proof on screen after deploy: Test the assistant → the key row's length
+and first four characters match SMP_Key, and the model row reads WORKING.
 
 ### v3.46 — which key, without saying which key (§126)
 

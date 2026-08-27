@@ -88,13 +88,13 @@ with sync_playwright() as p:
            abs(m["headTop"] - m["railTop"]) <= 1, m)
         # Below the floor the rail stops shrinking on purpose, so "scrolls" is
         # only required where the list is genuinely taller than the box — and
-        # WHETHER it is depends on how many pages Setup has. §130.4 removed one
+        # WHETHER it is depends on how many pages Setup has. §135.4 removed one
         # (Email became a section of Send an email) and at 1000px the remaining
         # seventeen fit, so the literal "it scrolls" became a check reporting a
         # deliberate change as a fault. The CLAIM is that the scroll, when there
         # is one, belongs to the LIST and not to the rail or the page — which is
         # what licenses the cap at all (§101.5). That is what is asserted now.
-        # ── AND THE HEAD AND THE SEARCH HOLD WHILE IT DOES (§130.9) ──
+        # ── AND THE HEAD AND THE SEARCH HOLD WHILE IT DOES (§135.9) ──
         # Islam asked for this twice, and it was already true — but it had
         # never been ASSERTED, which is why "already true" was something I
         # could only say from a throwaway probe. Both scrolls, because they

@@ -80,7 +80,7 @@ with sync_playwright() as p:
     for word, want in [("logo", "brand"), ("password", "people"), ("upload", "import"),
                        ("threshold", "bands"), ("permissions", "access"),
                        ("vocabulary", "labels"),
-                       # §130.4: the Email page became Send an email's second
+                       # §135.4: the Email page became Send an email's second
                        # section, so its keywords moved onto that def. The
                        # errand is unchanged — "where do I set the reply-to" —
                        # and it still lands somewhere that answers it.
@@ -118,7 +118,7 @@ with sync_playwright() as p:
     type_q(pg, "")
     ck("the folded group is folded again, not left open",
        "brand" not in shown(pg), shown(pg))
-    # THE NUMBER IS COUNTED, NOT WRITTEN DOWN (§130.4 removed a row from this
+    # THE NUMBER IS COUNTED, NOT WRITTEN DOWN (§135.4 removed a row from this
     # very group). A literal here fails the day somebody adds or moves a page,
     # which is a check reporting a change as a fault.
     folded = pg.eval_on_selector_all('[data-railitems="look"] .ritem', "e=>e.length")

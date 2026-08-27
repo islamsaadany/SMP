@@ -124,7 +124,49 @@
    whose change this is, so a twelfth collision cannot happen by coincidence.
    Confirmed against origin/main serving "smp-shell-v3.46-plandeck"; confirm
    once more immediately before the push to main (§94.16). */
-const SHELL = "smp-shell-v3.47-planbuilder";
+/* v3.47-qmarks — §128.5: the missing quarters in the plan deck wear a red
+   question mark instead of a red tick. NOT a version bump — §91's trigger is
+   "the built file's bytes changed", which this is, and the platform filename,
+   the gate's link, vercel.json's rewrite and PLATFORM_FILE are all untouched.
+   The suffix carries the whole difference from the name beside it, which is
+   the §128 rule followed rather than a number nobody can tell apart.
+   Confirmed against origin/main serving "smp-shell-v3.47-planbuilder";
+   confirm once more immediately before the push to main (§94.16). */
+/* v3.48-owners — §130: owners and collaborators picked from the register, the
+   rail kept for a single item, and the pinned title's corners. A version bump
+   as well as a content change: main had taken §129 and v3.47 for the plan
+   builder while this session worked, so both were renumbered on the way in
+   (the fifth time this repository has had to, and the suffix rule is why the
+   collision is visible rather than silent). The platform filename, the gate's
+   link, vercel.json's rewrite and PLATFORM_FILE are untouched — §91's trigger
+   is the built file's BYTES, which this is.
+   Confirmed against origin/main serving "smp-shell-v3.47-qmarks"; confirm
+   once more immediately before the push to main (§94.16). */
+/* v3.49-samename — §131: two people whose Name reads the same join the
+   register's Attention queue. First written as §130 / v3.48-samename against
+   a main serving v3.47-qmarks — and the owners session took §130 and v3.48
+   in the same window, §94.12's section-number face again, so both were
+   renumbered at the merge, which is the only moment a sequential name is
+   real. The suffix is why the CACHE name never collided: "samename" and
+   "owners" cannot be arrived at by coincidence. The platform filename, the
+   gate's link, vercel.json's rewrite and PLATFORM_FILE are all untouched —
+   §91's trigger is the built file's bytes, which this is.
+   Confirmed against origin/main serving "smp-shell-v3.48-owners"; confirm
+   once more immediately before the push to main (§94.16). */
+/* v3.50-setuphead — §135: every Setup page's controls share its pinned header
+   line, the Roles & access head is repaired, Focus measures becomes a table
+   that reaches supporting functions, Send a message becomes Send an email with
+   the Email settings folded in, and a person's company is a field of its own.
+   The built file's bytes changed, so the name changes (§91).
+
+   NAME CHECKED TWICE, WHICH IS THE RULE AND NOT A HABIT (§94.12, §94.16): main
+   was read at the start of this merge and again immediately before the push,
+   and the full history of served names was listed rather than remembered. Two
+   sessions independently wrote "v3.25b" once; a worker caches by NAME, so a
+   collision means a browser holding somebody else's bytes never fetches these.
+   `-setuphead` rather than a bare version, because THREE sessions have taken a
+   version number out from under this one in a week. */
+const SHELL = "smp-shell-v3.50-setuphead";
 const ASSETS = [
   "/",
   "/index.html",

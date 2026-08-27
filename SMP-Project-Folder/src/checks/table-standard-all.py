@@ -11,7 +11,7 @@ PAGES = [("people","People register"), ("mainbu","Official BU list"),
          ("fns","Functions"), ("caps","Capabilities"), ("sets","Figure sets")]
 # Their row order IS the setting somebody arranged, so a sort would be
 # indistinguishable from a rearrangement (spec §6.2).
-# THE FIVE THAT CARRIED QUICK FILTERS BEFORE §130.1. Named, because the claim
+# THE FIVE THAT CARRIED QUICK FILTERS BEFORE §135.1. Named, because the claim
 # being tested is that dropping the chips hid nothing — and a table that never
 # had one has nothing to prove. Figure sets is the case that caught this: its
 # rows carry no `data-tkrow` at all, so "every row is flagged" was false and
@@ -67,8 +67,8 @@ with sync_playwright() as p:
         else:
             ck("sortable headers", st["sortables"] > 0, st)
 
-        # ── AND EVERY TABLE'S SEARCH LEFT THE BAR (§116, then §130.1) ──
-        # §116 took the register's quick filters and row count away; §130.1 took
+        # ── AND EVERY TABLE'S SEARCH LEFT THE BAR (§116, then §135.1) ──
+        # §116 took the register's quick filters and row count away; §135.1 took
         # the same pair from the other five, and moved every search box onto the
         # page's pinned header line. The STANDARD is unchanged and is what is
         # asserted: a table of nine rows or more is searchable. Where the box
@@ -76,7 +76,7 @@ with sync_playwright() as p:
         # search EXISTS and never where it is drawn (§94.8).
         if st["rows"] >= 9:
             ck("is searchable (%d rows)" % st["rows"], st["bar"] or st["search"], st)
-        ck("no quick filters left on it (§130.1)",
+        ck("no quick filters left on it (§135.1)",
            pg.evaluate("""(k)=>document.querySelectorAll('[data-tkfilter^="'+k+'|"]').length""",
                        key) == 0)
 

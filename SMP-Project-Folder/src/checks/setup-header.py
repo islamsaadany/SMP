@@ -1,5 +1,5 @@
-"""THE SETUP HEADER LINE (§130), THE MARKING TABLE (§130.5) AND A REPAIRED
-MATRIX (§130.2).
+"""THE SETUP HEADER LINE (§135), THE MARKING TABLE (§135.5) AND A REPAIRED
+MATRIX (§135.2).
 
 Islam, of six Setup pages at once: *"bring all the buttons and search bar to the
 sticky header line"*, *"remove the smo pill and 10 names and 10 mapped"*,
@@ -178,7 +178,7 @@ with sync_playwright() as p:
            not pg.evaluate("()=>document.documentElement.scrollWidth>innerWidth+1"))
     pg.set_viewport_size({"width": 1560, "height": 900})
 
-    # ── 4 · THE MATRIX'S HEADER IS BACK WHERE IT BELONGS (§130.2) ────
+    # ── 4 · THE MATRIX'S HEADER IS BACK WHERE IT BELONGS (§135.2) ────
     print("\n4 · Roles & access: two header levels, in order, clear of the rows")
     # ── THE STATE HAS TO BE MADE (§94.2) ─────────────────────────────
     # The damage only appears once the page has SCROLLED, and on a 900px window
@@ -233,7 +233,7 @@ with sync_playwright() as p:
        and any("own supporting function" in h for h in heads), heads)
     pg.set_viewport_size({"width": 1560, "height": 900})
 
-    # ── 5 · FOCUS MEASURES (§130.5) ──────────────────────────────────
+    # ── 5 · FOCUS MEASURES (§135.5) ──────────────────────────────────
     print("\n5 · focus: a switch on the line, destinations in a row, one table")
     go(pg, "focusset")
     st = pg.evaluate("""()=>({
@@ -298,7 +298,7 @@ with sync_playwright() as p:
     ck("a function appears on the Focus board beside the units",
        any(n in ("Finance", "Merchandising") for n in names) and len(names) > 1, names)
 
-    # ── 6 · SEND AN EMAIL (§130.3, §130.4) ───────────────────────────
+    # ── 6 · SEND AN EMAIL (§135.3, §135.4) ───────────────────────────
     print("\n6 · one page, two halves, and the settings still work")
     pg.evaluate("()=>{current='setup';currentSub='send';paint();}")
     pg.wait_for_timeout(450)
@@ -325,7 +325,7 @@ with sync_playwright() as p:
        any(lbl == "In Platform inbox" for _, lbl in pages)
        or not any(lbl == "Inbox" for _, lbl in pages), [lbl for _, lbl in pages])
 
-    # ── 7 · NO SLOT BETWEEN THE TWO PINNED HEADERS (§130.10) ─────────
+    # ── 7 · NO SLOT BETWEEN THE TWO PINNED HEADERS (§135.10) ─────────
     print("\n7 · the table's head pins flush under the page's, at every width")
     # THE SLOT IS MEASURED, NOT SAMPLED FOR. The first version of this section
     # scrolled in 20px steps looking for a row showing through — and PASSED on

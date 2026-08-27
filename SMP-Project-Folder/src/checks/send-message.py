@@ -290,7 +290,7 @@ def go():
         # control a full repaint would have fixed and this never touches (§95).
         # Asked here, before anything else on this page repaints, or the
         # measurement is of the repaint rather than of the answer.
-        # THE HEADER CHIP IS GONE (§130.1). Islam: "remove the tag SMO and
+        # THE HEADER CHIP IS GONE (§135.1). Islam: "remove the tag SMO and
         # nobody chosen." The count was being said twice, and §95 had already
         # settled which of the two matters — the control that ACTS. So what is
         # asserted is that it is gone AND that the Send button still carries the

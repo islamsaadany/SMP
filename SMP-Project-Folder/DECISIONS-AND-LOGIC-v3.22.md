@@ -16807,6 +16807,40 @@ is not. *A measurement that is wrong in the direction of "broken" costs as
 much as one that is wrong in the direction of "clean" (§68.10), and the first
 instinct — to go and change the builder — would have damaged working code.*
 
+### 128.5 A tick is an affirmation whatever colour it wears (reversing §128.1's mark)
+
+Islam, on the shipped red ticks: *"rather than the red check mark for the
+missing qs make it red question marks to indicate the missing."*
+
+**§128.1's ARGUMENT IS UNTOUCHED AND ONLY ITS GLYPH MOVES.** Everything that
+section settled still holds: the four Q columns stay four columns, nothing is
+ever merged, a tactic that names SOME quarters is answering the question and
+its ticks stay the ordinary ink, and the alarm is carried by the mark rather
+than by reshaping the table. What changes is the one character inside the
+four cells of a row that answered nothing.
+
+**AND THE REASON IS THAT A TICK MEANS SOMETHING BY ITSELF.** `✓` in a Q
+column says *this tactic runs in this quarter* — that is the whole meaning of
+the column, and it is the meaning the plan workbook's own Q1–Q4 columns carry.
+Painting it red asks the colour to do all the work of REVERSING it, so the
+row read *"runs in all four quarters"* to anybody who did not also read the
+colour, and *"runs everywhere"* is close to the opposite of *"nobody said
+when this runs"*. §128.1 chose the mark for its colour and not for what the
+mark says; the mark was arguing with the colour on top of it.
+
+**A `?` SAYS WHAT THE COLOUR SAYS.** Nobody answered this. The colour is then
+emphasis rather than the entire message, which is what every other gap in
+this deck already does — a bold red `Missing` is a word that means missing
+before it is red. Same shape as §116.4's rule read the other way: a mark must
+not be asked to mean the opposite of itself.
+
+**PROVED AT BOTH ENDS** (§94.2, §94.5). `checks/strategy-split.py` §5 asserts
+the gapped rows carry `?` in all four AND that a tick never appears on one —
+a build that put the red ✓ back satisfies "four bold red cells" and fails
+both of those — and, from the other side, that an answered row never wears a
+question mark. Run against the previous build: 2 failures.
+
+
 ## 129 · Building a plan on the platform (v3.47, spec 020)
 
 Islam: *"I want the team of the SMO to be able to build a plan on the platform
@@ -16946,10 +16980,639 @@ project-tables, tour, page-width, setup-overview) are green.
 authoring surface anywhere (the Overview says its foundation is the
 parent's), so the builder's pillars-function route carries Plan and Review
 only — giving them a surface is a decision, not a tidy-up.
+---
+
+## 130 · Owners come from the register, one item keeps its rail, and the pinned title's corners (v3.48)
+
+Three notes from using the product, and the first of them turned out not to be
+about tidiness at all.
+
+### 130.1 An owner is picked, not typed — and 32 tactics proved why
+
+Islam: *"for the owners in the plans, projects, tactics, milestones, let it be
+a searchable list from the registry"*, and, asked whether that list is people
+or departments: *"people or department"*, *"the pillar as well yes"*, and
+*"the collaborators should be a searchable drop down with check marks for the
+list to select multiple people or departments."*
+
+**IT DECIDES WHO MAY REPORT A LINE, AND THAT IS THE FINDING.** A tactic's owner
+is matched against the register BY NAME — `SMPRules.namedOn()` reads
+`row.owner` beside the collaborators, and that is what makes somebody a
+Contributor of the unit who may enter that line's figure (§55, §42). Measured
+on the demo before a line was written: **38 different owner names across the
+plan, 14 of them naming nobody the platform can recognise, and 32 of the 78
+tactics** owned by a short spelling — *"Karim"*, *"Hossam"*, *"Nour"* — that
+matches no one. Every one of those is a person who owns a line and cannot
+report it, and nothing on any screen says so. A typed box cannot tell a real
+name from a nickname; a list cannot produce one.
+
+**FIVE FIELDS, ONE LIST.** A project's owner, a milestone's owner, a tactic's
+owner, a tactic's collaborators, and — for the first time in the product's
+life — **a pillar's owner**, which has been shown in the rail and in the meta
+line since the pillar model existed and was editable on no screen at all. An
+owner who moved meant re-uploading the unit's whole plan to correct a name.
+
+**THE VOCABULARY IS `placeLabel()`'s, NEVER A SECOND ONE (§53.5).** It is the
+register's own word for a place — the navigation's name, with *(function)*
+kept only where a unit and a function share one (§93.12), which in this tenant
+is Care. A department the platform has no page for is a real answer too, so an
+**Official BU that points at nothing** is offered under its own name (§54:
+Risk employs people and carries no strategy); a mapped one is not, because the
+place it points at is already there under the navigation's word for it.
+
+**WHAT IS STORED IS STILL THE NAME, not a person key.** `namedOn()` matches on
+the name, the plan workbook carries the name, the deck prints the name and the
+archive holds the name — a key would be a migration through all four for a
+field nobody reads as an identifier. §87 is about not TRUSTING a name to say
+who somebody is; this is a label that now happens to match one.
+
+**A VALUE ALREADY ON THE PLAN IS KEPT, in a group that says what it is**
+(§96.2). *Already on this plan* sits above *People* and *Departments*, so a
+plan uploaded before today opens reading exactly what it read yesterday and
+only what somebody deliberately changes moves. Nothing is migrated and nothing
+is rewritten on load — a reader that corrected what it read would put a
+phantom change into every save (§42, §50.6).
+
+**THE MULTIPLE SELECT IS THE SAME CONTROL, NOT A SECOND ONE.** `searchsel.js`
+already owns the popup, the filter, the placement and the flip-above; a
+ticking list is that control with three differences, and each is a decision:
+
+* **Ticking is not answering.** The single-select path closes the popup before
+  it fires `change`, because picking one option answers the question and
+  because `change` repaints the panel the popup stands in (§30.1). A list you
+  are ticking is not answered until you stop, so the popup **stays open** and
+  every tick commits on its own. What makes that safe is the handler: every
+  field this control is used on goes through the shell's one `data-fld`
+  listener, which writes and saves and **does not repaint** (§71.2) — written
+  down in the file, because the next person to wire a multiple select to a
+  repainting handler will not know.
+* **Committed per tick rather than on close.** Holding the change until the
+  popup shuts would mean firing it from `close()`, and `close()` is the first
+  thing `wire()` does at the end of every `paint()` — by which time `FIELDS`
+  has been rebuilt and that element's `data-fld` index points at somebody
+  else's setter (§96's registry, read one paint too late).
+* **The tick is drawn, not written.** A check mark is U+2713 and the
+  platform's faces are latin subsets — a glyph that is MAPPED and not DRAWN
+  ships as a blank box (§52, §120.2). Two pseudo-elements and a rotated border
+  owe nothing to a font.
+
+**AND A 1px CLIPPED ELEMENT SCROLLING IS NEVER THE PAGE MOVING.** Found by
+ticking, not by reading: setting `selected` on a `<select multiple>` makes the
+browser scroll the native list box to the option, and it **fires a real
+`scroll` event** doing it — from an element that is 1px square, clipped and
+invisible. With capture on, that reached the popup's own reposition handler as
+though somebody had scrolled the window, so every tick re-placed the popup and
+a tick on a control near the fold CLOSED it. The single-select path has never
+set `selected` on anything, so nothing had ever fired it in three versions of
+this component.
+
+**THE SETTER IS HANDED AN ARRAY.** On a multiple select `el.value` is only the
+FIRST selected option, so a collaborators cell wired through the plain path
+would have saved one name and dropped the rest, silently — which is the shape
+§96 exists to stop. The question is asked of the ELEMENT (`el.multiple`), in
+the one place every bound field already goes through.
+
+**EMPTIED, THE KEY IS DELETED** rather than left as an empty array (§50.6): a
+tactic nobody supports and one never asked must be byte-identical, or every
+save carries a change nobody made.
+
+**THE PILLAR'S ROW IS EDIT MODE ONLY**, and that is a decision rather than a
+shortcut. In read mode the owner is already on the page twice — the rail row
+says it and the meta line says it — and a third telling spends the page's
+budget to repeat itself (§41). What was missing was never a place to READ it.
+It reuses the project's own front matter one column wide (§109), because a
+project's Owner row and a pillar's are the same fact in the same place on the
+same kind of pane, and drawing them two ways is how a unit and a function come
+to be fine differently (§53.5). **The meta line drops the owner while the pen
+is on**, or the product says it three inches above the control that changes it.
+
+**`optionHtml`'s PLAIN STRING IS BYTE-FOR-BYTE WHAT `selectOr` ALWAYS
+EMITTED.** That matters: the direction and compile-rule pickers (§114) pass a
+bare `""` in their list to mean *not answered*, and it still renders as an
+empty option. A value/label pair would have quietly turned two dropdowns
+nobody asked about into em-dashes.
+
+### 130.2 One item still gets the rail
+
+Islam, of a function whose capability holds one project: *"in case of the
+function has 1 capability keep the rail there to keep the standard view even
+with 1 capability either in the strategy or the performance or reporting"*,
+and, asked whether that was functions only: *"units and functions."*
+
+**IT WAS NEVER ABOUT CAPABILITIES.** `railWorthIt()` read *below two items
+there are no siblings to move between, so the rail is a column of wasted
+width* — true about the width, and it made the platform lay the same page out
+two different ways. Marketing shows both on one screen: **Brand Positioning**
+has two projects and got a rail, **Product Mindset** has one and did not, so
+two capabilities stacked on the same page started at two different left edges
+and the second read as a different kind of thing.
+
+**THE PEN ALREADY DISAGREED WITH THE READING VIEW.** `renderFnProjects()` has
+drawn the rail from one project since §69.13, because *Add a project* lives in
+it — so the editing view was already the standard view and only the reading
+view was not.
+
+**THE ONE ANSWER, ASKED IN FOUR PLACES.** A capability's projects, and a
+unit's pillars on Plan, Performance and Reporting: three of those spelled it
+`u.items.length >= 2` inline, which is exactly how a unit and a function come
+to be fine DIFFERENTLY (§53.5).
+
+**STILL FALSE FOR AN EMPTY LIST**, which is what keeps the pane-only branch at
+each call site meaningful: nothing to list is not the same question as one
+thing to list, and an empty subject must still say what would fill it (§61).
+
+**THE COST IS STATED, NOT GLOSSED:** about 212px of width goes to a list with
+nothing to move between. Standing still beats saving the width.
+
+### 130.3 The pinned title's corners
+
+Islam: *"a very small visual glitch that on scrolling up in the pillars or
+project with the sticky title. the title has round corners so the scrolled up
+appears in the right and left top corners."*
+
+The diagnosis is his and it is right. §53.7 painted the strip ABOVE the pinned
+band with the page's ground and **stopped dead at its top edge**, where the
+two corner notches begin — so the band's grey does not reach into a rounded
+corner and what shows there is the white card and whatever row is sliding
+past. Measured: **13px² of the card's own surface, per corner.**
+
+**IT CANNOT BE "SQUARE IT WHILE PINNED".** CSS cannot ask whether a sticky
+element is pinned — §53.7's own rule, and the reason the strip above paints in
+both positions. So the corners take **the same ground from the same token**,
+and they paint at rest too.
+
+**THE COST IS MEASURED AGAINST THE ALTERNATIVE, not asserted.** Squaring the
+band's top corners also fixes it: 26px² disturbed at rest against 13px², and
+the square corner then pokes about 2px OUTSIDE the card it sits in. The fill
+is the cheaper of the two and the only one that leaves a pinned header looking
+deliberate. At rest it covers about 1.4px of the pane's own corner border arc,
+which is visible at 10× and is not at reading size. Islam: *"fill don't square
+the corners."*
+
+**ON THE `::after`, NOT BEHIND THE BAND.** A pseudo cannot be put behind its
+own parent's background once that parent makes a stacking context, and this
+one does. It does not need to be: it paints ONLY the notches, which is the one
+place the band's own background is absent. `pointer-events:none`, or an 8px
+square in each corner would swallow clicks meant for the pen behind it.
+
+### 130.4 What proves it
+
+Three new checks, each **proved able to fail against the shipped build before
+its green run was believed** (§94.5): `checks/owner-picker.py` **20**,
+`checks/rail-standard.py` **14**, `checks/band-corner.py` **8**.
+
+* **owner-picker** opens each of the five fields through its REAL search
+  popup, picks or ticks, and reads the **state graph** back — the only
+  question that separates a bound field from a decorative one (§96). Both ends
+  every time (§94.2): the pen is closed again and the absence of every select
+  asserted. `elementFromPoint` at each button's own centre must return that
+  button (§93.4, §110). And it **refuses rather than crashes** when a control
+  is absent, so a build without it fails with the reason instead of throwing
+  halfway through and leaving every later assertion unrun.
+* **rail-standard** asserts the AGREEMENT, never the number (§53.5, §94.14):
+  two capabilities on one page lay out the same way, and a unit's pillars
+  behave like a capability's projects. It **makes the state** (§94.2) — no
+  unit in the demo has one pillar, so a check that walked only what is there
+  would never have exercised the side Islam did not report.
+* **band-corner** measures in **PIXELS**, because §53.7 already recorded that
+  `elementFromPoint` returns an element and a `::before` is not one, so a DOM
+  probe calls the broken build clean. No image library is added: `zlib` and
+  forty lines of unfiltering read an 8-pixel square, which is cheaper than
+  asking every laptop that runs these checks to install one.
+
+**AND THE FIRST VERSION OF band-corner REPORTED A CORRECT BUILD BROKEN.** It
+sampled the whole corner box and asked whether any pixel matched the card's
+surface: green in light and two failures in dark — because in the dark palette
+`--surface` sits BETWEEN `--ground` and `--surface-2`, so an antialiased pixel
+where the fill meets the band's grey lands on it **by arithmetic**. Sampling a
+pixel and reading it against a colour it can be blended into is not a
+measurement (§68.10). One pixel of clearance from the arc removes every blend.
+
+**AND §51.11 BIT IN AN EXISTING CHECK, LOUDLY THIS TIME.**
+`checks/project-header.py` counted `.pfront input, .pfront textarea` and
+expected five; the Owner is a `<select>` now, so it went red rather than
+quietly green — the good outcome. Correcting it exposed that the old count had
+been **silently leaving out the Repeats select** that has been in that block
+since §115, so the honest total is six and a total was never the point: it
+asks per ROW now, which is the thing that has to be true and stays true
+whatever else the block grows.
+
+### 130.5 Found and not fixed
+
+* **A COLLABORATOR WHOSE NAME HOLDS A COMMA DOES NOT SURVIVE THE WORKBOOK.**
+  `xlsx.js` writes collaborators joined with `", "` and reads them back split
+  on `,` or `|`, so *Company CEO, B2C* — a real row on this register —
+  round-trips as two collaborators. It is pre-existing and it is not made
+  worse by anything here (both names were typable before), but the picker
+  makes it easy to choose. The fix is one character on the WRITE side (`|`,
+  which the reader already accepts) and it changes what the client's template
+  looks like, so it is asked rather than done.
+* **A PROJECT'S STAKEHOLDERS ARE STILL TYPED.** They are the same shape as
+  collaborators and would take the same control, and they were not what was
+  asked for. Flagged, not widened (rule 1b).
+
+### 130.6 The corner, corrected by looking at it
+
+Islam, on the built fix: *"the corner still has this squared corner is there a
+way to remove it?"*
+
+**HE IS RIGHT, AND THE MEASUREMENT WAS RIGHT TOO.** §130.3 filled the two
+corner notches with the page's ground in BOTH positions, because §53.7's rule
+says CSS cannot ask whether a sticky element is pinned — and priced the rest
+position at about 1.4px of the pane's own corner border arc, 13px², *"visible
+at 10&times; and not at reading size."* What that arithmetic missed is WHERE
+those pixels are: they are the card's rounded corner, which is the one place on
+a card an eye goes. The corner read as squared off, which is a worse fault than
+the one it fixed.
+
+**SO THE ONE THING CSS CANNOT ASK IS ASKED IN JAVASCRIPT.** `pinWatch()` in the
+shell is an IntersectionObserver that toggles `.pinned` on every
+`.pane > .pband`, and the fill is gated on it. At rest the corner is
+byte-for-byte what it was before any of this; pinned, the notch is ground and
+nothing shows through.
+
+**AN OBSERVER, NOT A SCROLL LISTENER, AND THE DIFFERENCE IS v3.3's RULE.** That
+version removed the condensing header and wrote down: never size anything
+against a measurement the size itself can change. This changes no size at all —
+a class, and a background inside an 8px corner — so the loop that rule guards
+against cannot form. What it does need is to be RE-ARMED after every paint,
+beside `SEARCHSEL.wire()`, `CHAT.wireInbox()` and `TOUR.onPaint()`: the band it
+was watching has just been replaced. The previous observer is disconnected
+first, or one accumulates per paint for as long as the tab is open.
+
+**THE THRESHOLD IS THE ELEMENT'S OWN STICKY OFFSET**, read off the computed
+style rather than rebuilt from `--chrome-h` and `--rail-gap` — §29.4's rule,
+which the rail learned the hard way: one number, never two that happen to
+agree. Shrink the observer's root by that offset plus a pixel and the band
+stops being wholly inside it at exactly the moment it pins.
+
+**AND IT SHIPPED ONCE AS A THROW.** `pinWatch()` was declared inside `wire()`
+and called from `paint()`, so every paint ended in *"pinWatch is not defined"* —
+silently, with the page still on screen and everything after the call (the
+scroll restore among it) never running. §118 exactly, in the same file, one
+section later. `checks/band-corner.py` carries a page-error listener now for
+that reason.
+
+**THE CHECK HAD TO BE REWRITTEN, NOT EXTENDED.** It asserted *nothing behind
+the band shows through* in both positions, which the rejected build satisfied
+perfectly. At rest it now asserts the OPPOSITE and positively: the notch cannot
+be all ground, because the card's corner has to be drawn through it. Six
+failures against the build Islam rejected.
+
+### 130.7 The register's Name, not the full legal one
+
+Islam, on the picker: *"for the drop down of names go for the list of names in
+the registry not the full name."*
+
+**IT COULD NOT BE SEEN HERE, AND THAT IS THE FINDING.** Every one of the 33
+people in the demo has a full name of two or three words and not one has a
+typed short name, so `knownName()` returns exactly `p.name` for all of them —
+the first build listed the full name and looked correct on the only data this
+repository holds. On his tenant the register carries *Abd El Moniem Mohamed Abd
+El Moniem Mahmoud*, and a dropdown of fifty of those is a list nobody can scan.
+§93.8 split those two facts into **Name** and **Full Name** for exactly this
+reason; the picker was reading the wrong column.
+
+**THROUGH `displayNames()`, ALWAYS.** That map is what lengthens the guess for
+a pair whose first two names match (§81.1) — and in a PICKER that is not
+cosmetic: two people reading as one entry means the second is silently dropped
+by the list's own dedupe.
+
+**WHAT IS SHOWN IS WHAT IS STORED**, so the plan says the same word the
+register does (§53.5) rather than holding one name and displaying another.
+
+**WHICH MEANS `namedOn()` HAD TO LEARN IT, or §130.1 undoes itself.** The whole
+point of the picker is that the person it names may report that line; a label
+the rules cannot match would put the platform straight back to 32 tactics owned
+by somebody it cannot resolve. So the name rule MOVES into `lib/rules.js` —
+`NAME_PARTICLES`, `nameWords()`, `knownGuess()` — with the browser keeping thin
+wrappers, because a name rule written twice is precisely the drift that file
+exists to prevent (§42). `namedOn()` matches the key, the full name, a typed
+`known`, and **`nameRuns()`**: every leading run of somebody's names from the
+register's own short form up to the whole thing, which is exactly the set of
+labels the register can show for them.
+
+**IT NEVER YIELDS ONE NAME.** `KNOWN_NAME_WORDS` is the floor, so *"Karim"* on
+a plan still matches nobody — a bare first name would hand reporting rights to
+whoever happens to share it, which is wider than the fault being fixed.
+
+**THE ONE OVER-MATCH IS RECORDED RATHER THAN CHASED:** two people whose first
+two names are identical both answer to the short form. The picker never writes
+it — `displayNames()` lengthens both — so it can only arrive from a plan
+uploaded before this or typed by hand, where today it matches NOBODY.
+
+**AND A PLAN ALREADY HOLDING THE FULL NAME STILL NAMES ITS OWNER.** Nothing is
+migrated and nothing is rewritten on load; the ladder simply contains the full
+name as its last rung.
+
+`checks/owner-picker.py` §10 **makes a register whose two names differ** — one
+person given a five-name legal name and no short one, another given a typed
+Name — and asserts the list, what is stored, and the shared rule's answer for
+all four cases. Four failures against the build before it.
+
+### 130.8 The squared corner was the card's border, not the band's
+
+Islam, on the corrected build: *"the issue still persists"*, with a picture.
+
+**AND THE PICTURE HAD CHANGED SHAPE, which is the whole of the diagnosis.** The
+band's corner in it is ROUNDED and the page behind it is ground — §130.3 and
+§130.6 both working. What is square in that picture is the thin line beside it:
+**the pane's own 1px side border**, which `::before` covers everywhere ABOVE
+the band (§53.7, so nothing scrolls through the strip) and which therefore
+begins, pinned, as a square-ended stub standing next to a rounded corner. A
+card whose side starts in a butt end reads as a squared corner, because it is
+one — the round part is just the thing next to it.
+
+**SO THE FILL GOES PAST THE BORDER, EXACTLY AS `::before` ALREADY DOES.**
+`left:-1px` / `right:-1px`, and the arithmetic is what makes it meet: each
+gradient tile is `--r + 1` wide so its circle still sits on the BAND's corner
+centre rather than a pixel out of it, and the band's arc touches the border's
+own line precisely where the fill ends. The card now reads as starting,
+rounded, at the pinned title.
+
+**THE CHECK COULD NOT HAVE SEEN IT.** `notch_pixels()` sampled the band's own
+8px corner box, and the offending pixel is the one immediately OUTSIDE it — a
+check that samples only inside the corner it is named after cannot see the
+thing next to it. It samples a pixel past the band on the outside now, and
+fails four ways on the build Islam was looking at, naming the colour: `--line`.
+
+**THREE ROUNDS ON ONE CORNER, AND EACH FOUND A DIFFERENT ELEMENT.** §130.3 the
+pane's white ground, §130.6 the corner arc it covered at rest, §130.8 the
+border beside it. Every round was measured, and every measurement was of the
+thing named in the round before. *Reproducing the picture is not the same as
+reproducing the complaint;* the first two rounds fixed what I had measured, and
+what he was pointing at moved each time.
+
+### 130.9 The place beside the name
+
+Islam: *"for the names in the lists, you can make it the name - the unit or
+function so people don't get confused."*
+
+**IT IS A HINT, NEVER PART OF THE ANSWER.** The place is drawn in the popup row
+and nowhere else: the closed control shows the name, the plan STORES the name,
+the workbook and the deck print the name, and `namedOn()` matches the name.
+"Ramy Behairy — Mobile" written into a tactic would name nobody the platform
+can resolve, which is the fault §130.1 exists to fix and the same argument
+§130.7 makes about the short name from the other side. It rides on the option
+as `data-hint` and `searchsel.js` draws it as a quiet span; `textOf()` reads
+the option's TEXT, which is the name alone, so the button and the field are
+untouched by it.
+
+**IT JOINS WHAT IS SEARCHED.** Typing a unit's name finds the people who work
+in it — a hint you can see and cannot search for is half a control.
+
+**`personAt()` IS THE ONE PAIR THAT ANSWERS THIS** (§54) and `placeLabel()` the
+one vocabulary (§53.5). Somebody the register has not placed gets **no hint**
+rather than a guess or the word "group": an absence is honest and a wrong place
+is worse than none (§15.1). Three of the demo's 33 sit at the group and
+correctly carry nothing.
+
+**AND IT BROKE THREE ASSERTIONS BY BEING A SPAN.** A row's `textContent` became
+"Amaka EzeNigeria", so two checks compared it against a stored value that is
+correctly the name alone, and a third — which typed "Nigeria" and clicked the
+first match — started picking a PERSON in Nigeria rather than the unit, because
+the hint had joined the search. The name is read from the row's first text node
+now, and the department test picks one nobody sits in.
+
+
+## 131 · The register notices two people whose name reads the same (v3.49)
+
+Islam: *"for the names you normally take the first 2 names but you allow me
+to amend the name in the edit. can you notify me as an issue to address if 2
+people their 1st 2 names are the same so I can edit one of them."*
+
+### 131.1 A notice, never a mark — and why §81.1 was not enough
+
+§81.1 already answers half of this: when two GUESSES collide, the register
+lengthens both until they differ, so the page itself stays readable. What it
+never did is tell anybody, and its own comment ("fixing it beats flagging
+it") was written before there was a queue to flag INTO — §116 built one. The
+two halves are now one answer: the display keeps the automatic lengthening,
+and the pair joins the **Attention queue** until somebody decides what each
+of them is actually called, which is exactly the act Islam described — open
+the person, amend the Name, done.
+
+**It is a queue entry and never a `.dupemark`.** §87 settled that a shared
+name is not evidence of one human — this tenant genuinely holds two people
+whose first four names are identical — so the row wears nothing and
+`personDupe()` deliberately does not read the new `read` groups. A mark is
+an accusation; this is a notice. For the same reason it is **last in
+`ATTN_ORDER`**: a collision, a declaration and a missing identifier are all
+worse than a name that reads ambiguously out loud.
+
+### 131.2 The comparison is what was STORED OR GUESSED, not what is drawn
+
+`readName()` is the typed `known` or the flat two-name guess — deliberately
+NOT `knownName()` with the display map, because §81.1's lengthening is a
+disambiguation drawn OVER the collision and comparing the drawn labels would
+report the problem as already solved. Two consequences worth keeping:
+
+- **A typed Name that still collides is still flagged.** §81.1 only ever
+  lengthens guess-vs-guess; a typed value is never lengthened, so a typed
+  "Ahmed Mostafa" beside somebody whose guess is "Ahmed Mostafa" reads as
+  one person for ever with nothing left to notice it. The group is keyed on
+  the effective value whatever its source.
+- **Amending one clears both.** The dialog's band re-asks `attentionOf()` on
+  every paint (§48.2), so the moment a Name reads apart the pair leaves the
+  queue — asserted through the dialog's own field, not by poking the data.
+
+**Anybody the row already flags as a possible duplicate is left to that
+flag.** The identical twins (a full-name collision) and §87.2's resemblance
+pairs would otherwise be said twice, and worse: telling the SMO to RENAME a
+row that may need MERGING sends them to the wrong control.
+
+### 131.3 What it rides on, and what it found
+
+The `read` groups are one more map in `registerDupes()`'s existing walk —
+computed once per paint beside the maps the queue already receives, so
+`attentionOf()` gets them without a signature change and without a second
+quadratic pass (§53.5: one walk, one caller-supplied result). Retired rows
+are excluded with the same reasoning as the other kinds. Nothing renders
+differently: the queue button, its count, the dialog band and the "N of M"
+counter all carry the new kind through the machinery §116 built.
+
+And the first run against the demo found a real pair: **the two placeholder
+company CEOs both read as "Company CEO,"** — true, visible in the queue, and
+left in the data as the worked example of exactly what this notices.
+
+### 131.4 What proves it
+
+A §131 section in `src/checks/duplicates.py`, beside the Ahmeds it already
+injects: both queued with the counterpart named in full, the entry carrying
+`samename` and never `dupe`, the twins left to the duplicate flag, the
+dialog's band saying it above the very field that clears it, the amendment
+typed through that field clearing BOTH, and a typed value that still
+collides keeping the pair queued. **Run against the pre-§131 build first
+(§94.5): 4 failures, all on the new assertions.** `identity-merge.py`,
+`people-dialog.py`, `table-standard.py` and the full `qa.py` sweep are
+green — the resemblance pair in identity-merge stays a resemblance and
+nothing double-reports it.
+*(Numbered §132–§134 at merge time: written as §131–§133 on the branch,
+and the same-name register work reached `main` first and took §131. Sixth
+renumber on this branch; the rule is unchanged — whoever lands first.)*
 
 ---
 
-## 130 · The Setup header line, the marking table, and a repaired matrix (v3.48)
+## 132 · The key was right, the model was retired, and the heuristic apologised (v3.49)
+
+> Islam's diagnostic, after re-issuing the key: **The API key — WRONG SHAPE —
+> 53 characters, starting AQ.A** … and beneath it, Google answering: *404: This
+> model models/gemini-2.5-flash is no longer available to new users. Please
+> update your code to use models/gemini-3.6-flash.*
+
+**The 404 is the good news, twice over.** It means authentication PASSED — the
+key that had been refused for two days is accepted — and Google's own message
+names the fix.
+
+### 132.1 Retired for new users, not for old ones
+
+`gemini-2.5-flash` still works in Strategy-Formulation, whose Google project
+predates the retirement, and is refused to SMP's fresh project. **The same
+default was right there and wrong here, and no code review could see it** —
+which is what §104 predicted when it made `GEMINI_MODEL` an environment
+variable: *provider names are retired on somebody else's schedule.* The
+DEFAULT moves to `gemini-3.6-flash` (Google's own recommendation, verbatim);
+the override remains for the day this one retires in its turn.
+
+### 132.2 A heuristic never overrules the provider
+
+§126's shape test knew one shape — `AIza` + 35 — and the first real key it met
+was **Google's newer `AQ.`-prefixed form**, 53 characters, which the row
+declared *"a different kind of credential"* while the provider accepted it on
+the very next step. The next step is the one proof that outranks the heuristic,
+and the row was flatly wrong in the direction that sends somebody to remake a
+working key.
+
+Both of Google's shapes are recognised now, and an unmatched shape reads
+**UNRECOGNISED, never wrong** — with the detail saying outright that the next
+step still decides, because the provider may accept a shape this page does not
+know. §124's rule caught from the other side: a word must not claim more than
+was measured, and *"wrong shape"* claimed knowledge of every shape Google will
+ever issue.
+
+### 132.3 What proves it
+
+`test-assistant.js`: the AQ. form recognised (watched to fail with the
+recognition removed — 1 failure, exactly that assertion), the classic form
+unchanged, an OAuth-shaped value still reported as unrecognised, and the shape
+still read after §124's trim. Driven end to end: an AQ. key reads PRESENT and
+the model row now says `gemini-3.6-flash`; an unrecognised value reads
+UNRECOGNISED and the provider's refusal still lands on *The key itself*.
+**Server-only** — the built file is byte-identical, so no SHELL bump (§91's
+trigger is a content change, and there is none).
+
+
+---
+
+## 133 · The reply that never came back, and the budget that killed it (v3.49)
+
+> Islam, with every row of the diagnostic green at last: *"everything is on but
+> I didn't get a reply from the bot."*
+
+The diagnostic and the conversation make the SAME call through the SAME code —
+what differs is how long it takes. The diagnostic asks one short question with
+no history; a real message carries the conversation so far on top of the 13k
+token corpus, and the model reasons before it answers. Slow is where the two
+paths stop agreeing.
+
+### 133.1 The function died under its own timeout
+
+`TIMEOUT_MS` was **12 seconds** — and Vercel's default function cap is **10**.
+So a slow answer never timed out politely: the whole function was killed under
+it, after the person's message was stored (it is inserted before the model is
+asked, §104's ordering) and before any reply or handoff line could be written.
+From the office: a message in the inbox and nothing back. From the person:
+nothing at all. From the diagnostic: green, because its shorter call finishes
+inside 10s.
+
+`vercel.json` grants `api/*.js` **30 seconds** now, and the model timeout is
+20 — comfortably inside the function that hosts it, which is the invariant the
+two numbers must keep whatever they are set to.
+
+### 133.2 Thinking counts
+
+On Gemini 2.5+ the model reasons before it speaks and **the reasoning is
+billed against `maxOutputTokens`** — so the old cap of 700 could be consumed
+entirely by thought, leaving a truncated or empty JSON that parses as a
+failure and, by §112.2's design, writes nothing. 700 → **2048**: the schema
+still keeps the visible reply short; the headroom is for what the model spends
+before it starts speaking.
+
+### 133.3 Visible to the operator, invisible to the person — again
+
+§112.2's silence is right for the person and was still absolute for the
+operator: a say-path failure was recorded NOWHERE, which is how *"no reply"*
+went undiagnosable twice in one week (§123 fixed it for configuration; this is
+the per-message half). One `console.error` with the provider's own reason —
+into the function log, which Vercel keeps and the chat does not. Stores
+nothing, shows nothing, answers *why* when somebody finally looks. Proved by
+driving a real `say` against a quota-refusing stub: the person's send still
+succeeds, and the log holds `assistant did not answer: … (429: Resource has
+been exhausted)`.
+
+### 133.4 What §132 looked like from production
+
+Deployed evidence, for the record: Islam set `GEMINI_MODEL=gemini-3.6-flash`
+himself (the override §104 built for exactly this), and the diagnostic then
+read all green — the AQ.-shaped key PRESENT, the model answering in full. The
+remaining silence was this section's, not the key's and not the model's.
+
+
+---
+
+## 134 · The thinking cap, and the knob that must not kill the assistant (v3.49)
+
+> The §133 build's first diagnostic on a preview deployment: *"the assistant
+> did not answer in time"* — the NEW 20-second budget, blown by the same model
+> that had answered the same question in under 12 the hour before.
+
+### 134.1 Latency was a lottery because reasoning was
+
+The model thinks before it answers, and how long it thinks varies run to run.
+§133 sized the timeout for the answer and could not size it for the mood.
+**Answering from a corpus that is IN THE PROMPT is retrieval, not reasoning**,
+so `thinkingConfig: { thinkingBudget: 0 }` goes out with every request and the
+latency stops being weather. The 2048 output headroom stays — a dropped knob or
+a model that thinks regardless must not starve the visible answer.
+
+### 134.2 A config knob must never take the assistant down
+
+The knob's contract on a model Google ships tomorrow is unknowable from here —
+and §104's ordering means an unexpected 400 would land as silence. So **a 400
+that names thinking is read as the provider refusing the KNOB, not the
+question**: it is dropped, remembered for the process, and the same question
+asked once more. A fresh process asks again, which is what lets a provider that
+learns the field start being sent it without anybody doing anything.
+
+**Only after the bad-key check**, or a bad key's 400 would be retried into —
+asserted, with the stub answering the way Google actually refuses an unknown
+`generationConfig` member.
+
+### 134.3 The preview URL's console error is Vercel's, not ours
+
+Recorded because it will be seen again: on a PROTECTED preview deployment,
+Vercel's SSO layer fetches the manifest through `vercel.com/sso-api`, which the
+platform's own CSP (`connect-src 'self'`) rightly blocks. Harmless, absent from
+production, and not a reason to widen the CSP.
+
+### 134.4 What proves it
+
+`test-assistant.js` §6: the cap goes out by default; a refused cap is dropped
+and the question re-asked exactly once; the refusal is remembered for the
+process; a bad key is never retried into. Watched to fail with the retry
+removed — 2 failures. 38/0, test-chat 52/0, built file byte-identical.
+
+---
+
+## 135 · The Setup header line, the marking table, and a repaired matrix (v3.50)
+
+> **Renumbered.** This work was built as §130 / v3.48 and merged after two other
+> sessions had taken §130–§134 and v3.48–v3.49 — the owners-from-the-register
+> run and the same-name register run. The number moved; nothing in the reasoning
+> did. Recorded here rather than silently rewritten, because §130 in this
+> document means somebody else's decision and the commits behind this one say
+> §130 on their face.
+
 
 Eleven things Islam asked for after using the Setup pages on his own laptop.
 Settled from two mockups made of the real built platform
@@ -16957,7 +17620,7 @@ Settled from two mockups made of the real built platform
 was touched. Seven of the eleven turn out to be **one standard applied to
 sixteen pages**, and the rest are three separate decisions and one repair.
 
-### 130.1 One line, and the page's controls are on it
+### 135.1 One line, and the page's controls are on it
 
 *"For the people register bring all the buttons and search bar to the sticky
 header line"*, *"remove the smo pill and 10 names and 10 mapped"*, *"remove
@@ -17014,7 +17677,7 @@ the gap BETWEEN sections, and with the control row gone the first one was
 spending it on nothing — 42px of air between a pinned header and the table
 under it. Only the first: the gap between two sections is still that.
 
-### 130.2 Roles & access — the damage, and its cause
+### 135.2 Roles & access — the damage, and its cause
 
 *"In roles and access remove the briefing grey paragraph and check the table as
 the design is damaged."* He was right, and it has one cause.
@@ -17042,7 +17705,7 @@ group headings §117 introduced are readable for the first time: *Own business
 unit* and *Own supporting function*, each splitting into Strategy and
 Reporting. They had been under the second row since the split shipped.
 
-### 130.3 Send an email, and the In Platform inbox
+### 135.3 Send an email, and the In Platform inbox
 
 *"Let's rename send a message to send an email"* and *"rename inbox to In
 Platform inbox."*
@@ -17062,7 +17725,7 @@ the rail did not — the duplication §121.1 removed from five pages, invisible 
 that sweep because the whole feature needs a server and every screen check opens
 the built file over `file://` (§94.11).
 
-### 130.4 The email settings are a sub-panel, not a dropdown
+### 135.4 The email settings are a sub-panel, not a dropdown
 
 Islam asked which: *"would it be better as a drop down or a sub panel for
 settings?"*
@@ -17080,7 +17743,7 @@ the entry for somebody holding neither.
 *Branding & email* no longer has an email in it, and a rail naming something it
 does not hold is §121.1's fault pointing the other way.
 
-### 130.5 Focus measures — a switch, a destination row, and a real table
+### 135.5 Focus measures — a switch, a destination row, and a real table
 
 *"In the focus measures remove the part in the screenshot, turn the big button
 to only On and Off switch and bring it to the sticky header line, and rather
@@ -17117,7 +17780,7 @@ column is *Where* rather than *Business unit*. A function's cell says
 weight in the group's score and never has, and inventing one to keep the column
 tidy would be a number that means nothing.
 
-### 130.6 The company is sometimes derived and sometimes stored
+### 135.6 The company is sometimes derived and sometimes stored
 
 *"In the registry, for the fields of the users we need to add the company as
 some users belong only to a company not a unit"* — and, asked about the
@@ -17154,7 +17817,7 @@ side, which is where somebody compares them. The dialog is 614px where it was
 field, stated: §122.5's rule, that a check left asserting a number which is no
 longer true is worse than the pixels.
 
-### 130.7 What was measured, and what is still open
+### 135.7 What was measured, and what is still open
 
 `checks/setup-header.py` walks every Setup page and was **proved able to fail
 before its green run was believed — 33 failures against the previous build**
@@ -17190,7 +17853,7 @@ are named for him — the rail list has its own scrollbar below about 900px of
 window height, and the group headings scroll away inside that list — and it is
 left open rather than guessed at.
 
-### 130.8 The band could not be told from the stripe
+### 135.8 The band could not be told from the stripe
 
 Islam, on the new marking table: *"the key objectives title line and the pillar
 name line grey is too close to the alternating grey — make it darker to be more
@@ -17205,7 +17868,7 @@ shade of the stripe.**
 band naming a group of rows INSIDE a table looks like in this product —
 `--panel` with `--panel-ink` — and inventing a darker neutral here would be a
 second vocabulary for one idea (§53.5). It is also what this page wore before
-§130.5 turned it into a table, so nothing about the look is new; what changed is
+§135.5 turned it into a table, so nothing about the look is new; what changed is
 that the rows under it now have column headings.
 
 **The border is on every band, including the first**, which is the one
@@ -17213,14 +17876,14 @@ difference from §99. There the first band OPENS the table, so a gap above it
 would be a gap under nothing; here a real `<thead>` sits above it in the same
 navy, and without the break the two merge into one block.
 
-### 130.8b The band is a darker grey, not a navy one (correcting 130.8)
+### 135.8b The band is a darker grey, not a navy one (correcting 135.8)
 
 Islam, of the navy: *"the band should be darker grey not navy."*
 
-**§130.8 WAS RIGHT ABOUT THE PROBLEM AND WRONG ABOUT THE FIX.** Reaching for
+**§135.8 WAS RIGHT ABOUT THE PROBLEM AND WRONG ABOUT THE FIX.** Reaching for
 §99's `tr.dxband` kept one vocabulary for "a band inside a table" and cost two
 things worth more: the band then wore the SAME navy as the table's own
-`<thead>` directly above it, and — with §130.10's 4px slot open — it leaked a
+`<thead>` directly above it, and — with §135.10's 4px slot open — it leaked a
 navy strip between the two pinned headers that read as a second header. A
 shared vocabulary is worth having and is not worth two confusions.
 
@@ -17229,7 +17892,7 @@ tracks the theme without a literal (§25), and `--ink-2` on it measures 6.49:1
 light and 7.0:1 dark. Against a `--zebra` of #F5F7FA it is a real step rather
 than a shade of the same grey, which is what the original complaint was about.
 
-### 130.9 The rail's head, pinned twice
+### 135.9 The rail's head, pinned twice
 
 Islam, twice, with a screenshot of the navy *SETUP* bar and the search box:
 *"this is the part that needs to be sticky in the rail — check how to do it."*
@@ -17255,14 +17918,14 @@ the state this exists for.
 the list and reads both boxes back, and asserts they stack — the claim "already
 true" had only ever been something a throwaway probe could say.
 
-### 130.10 A four-pixel slot between two pinned headers
+### 135.10 A four-pixel slot between two pinned headers
 
 Islam, with a screenshot: *"the scrolled up content is appearing behind the
 sticky headers — fix this."*
 
-**`--sethead-h` WAS A GUESSED CONSTANT, AND §130 MADE IT WRONG.** §121.4 pinned
+**`--sethead-h` WAS A GUESSED CONSTANT, AND §135 MADE IT WRONG.** §121.4 pinned
 each Setup table's head at `--chrome-h + --rail-gap + --sethead-h`, and wrote
-that last one as the literal `46px`. §130 then changed the header's height by
+that last one as the literal `46px`. §135 then changed the header's height by
 putting the page's own controls into it: **42px** where the controls are small,
 **49px** where a search box sits on the line. Measured, the table's head pinned
 **4px below** the page header on Focus measures and 3px under it on Business

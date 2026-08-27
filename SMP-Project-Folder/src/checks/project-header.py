@@ -123,8 +123,31 @@ with sync_playwright() as pw:
     ck("the plan pen is there", bool(pen))
     if pen:
         pen.click(); pg.wait_for_timeout(500)
-        n = pg.eval_on_selector_all(".pfront input, .pfront textarea", "e=>e.length")
-        ck("five fields behind it", n == 5, n)
+        # THE OWNER IS A LIST NOW (§130.1), and the count that used to answer
+        # this stopped being able to (§51.11: a check keyed on markup that has
+        # changed shape). It was `input, textarea` == 5, which silently left
+        # out the Repeats select that has been in this block since §115 — so
+        # adding selects to the query makes the honest total SIX, and a total
+        # was never what this was about.
+        #
+        # IT ASKS PER ROW INSTEAD: every one of the five rows this section
+        # then drives must carry a field, which is the thing that has to be
+        # true and stays true whatever else the block grows.
+        got = pg.evaluate("""()=>{const out={};
+          [...document.querySelectorAll('.pfront .pfrow')].forEach(r=>{
+            const el=r.querySelector('input, textarea, select');
+            /* By CLASS MEMBERSHIP, never by the last word of className:
+               searchsel.js appends `ss-native` to the select it enhances, so
+               the last class is the enhancement rather than the field. */
+            out[r.querySelector('em').textContent.trim()] = !el ? null
+              : el.tagName.toLowerCase() +
+                (el.classList.contains('ownersel') ? '.ownersel' : '');});
+          return out;}""")
+        want = ["Owner", "Start", "End", "Brief", "Stakeholders"]
+        ck("a field behind every one of the five",
+           all(got.get(k) for k in want), got)
+        ck("and the owner among them is a list from the register",
+           got.get("Owner") == "select.ownersel", got)
         for label, typed, field in (("Owner", "Someone Else", "owner"),
                                     ("Start", "3 Feb 2026", "start"),
                                     ("End", "31 Dec 2026", "end"),
@@ -133,8 +156,17 @@ with sync_playwright() as pw:
             pg.evaluate("""([label, typed]) => {
               const row = [...document.querySelectorAll('.pfront .pfrow')]
                 .find(r => r.querySelector('em').textContent.trim() === label);
-              const el = row && row.querySelector('input, textarea');
+              const el = row && row.querySelector('input, textarea, select');
               if (!el) return;
+              /* A select can only be set to something it holds — which is the
+                 point of the control (§130.1) — so the value is added if the
+                 register does not carry it, exactly as a stored name outside
+                 the list is (§96.2). */
+              if (el.tagName === "SELECT" &&
+                  ![...el.options].some(o => o.value === typed)) {
+                const o = document.createElement("option");
+                o.textContent = typed; el.appendChild(o);
+              }
               el.value = typed;
               el.dispatchEvent(new Event('change', { bubbles: true }));
             }""", [label, typed])

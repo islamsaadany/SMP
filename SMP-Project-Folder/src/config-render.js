@@ -414,7 +414,7 @@ var CLEARMENU = null;
    because it also carries the page's controls. */
 var PAGE_TITLE = null;
 
-/* ── ONE LINE, AND THE PAGE'S CONTROLS ARE ON IT (§130) ────────────────
+/* ── ONE LINE, AND THE PAGE'S CONTROLS ARE ON IT (§135) ────────────────
    Islam, of six Setup pages at once: *"bring all the buttons and search bar to
    the sticky header line."*
 
@@ -446,7 +446,7 @@ function pageLineHTML(){
          (PAGE_ACTS ? '<div class="hright">' + PAGE_ACTS + '</div>' : '');
 }
 
-/* THE COUNT CHIPS AND THE `SMO` PILL ARE GONE (§130.1). Islam: *"remove the
+/* THE COUNT CHIPS AND THE `SMO` PILL ARE GONE (§135.1). Islam: *"remove the
    smo pill and 10 names and 10 mapped."* The chrome says who you are on every
    page, and the table under the header is how big the list is — §122 removed
    the badge and one copy of the count from the register on those two arguments
@@ -1058,7 +1058,7 @@ var PEOPLE_COLS = [
      the default and reappear for everybody who ever touched the chooser
      (§30.2) — the label is what people read, the key is what code holds. */
   { k:"bu",       label:"Unit" },
-  /* ── THE COMPANY, OFF BY DEFAULT (§130.6) ─────────────────────────
+  /* ── THE COMPANY, OFF BY DEFAULT (§135.6) ─────────────────────────
      Islam asked for the company beside the unit on the person's own form; the
      register gets the column too, because a value that can be set and never
      read back is half a feature. OFF by default: for most of the register it
@@ -1409,7 +1409,7 @@ function renderPeople(){
     F("Group", "where", false);
     F("Job title", '<input class="fld" value="' + esc(p.title || "") + '" data-ptitle="' + p.key +
         '" placeholder="Job title">', true);
-    /* WIDE, SO THE THREE PLACES SIT TOGETHER (§130.6). Adding Company left the
+    /* WIDE, SO THE THREE PLACES SIT TOGETHER (§135.6). Adding Company left the
        second block at four fields in a three-column grid — a row of three and
        a row of one, which is the empty cell §122 spent a redesign removing.
        Job title is a free-text field and reads fine across the width; Official
@@ -1428,7 +1428,7 @@ function renderPeople(){
         ? '<span class="vwhy">not on the Official BU list</span>' : ''));
     var drift = mainbuDrift(p);
     /* "Unit or function", because that is what it holds now — the companies
-       moved to the field below it (§130.6). */
+       moved to the field below it (§135.6). */
     F("Unit or function", '<select class="fld" data-pat="' + esc(p.key) + '">' +
         '<option value="">&mdash; nowhere yet &mdash;</option>' +
         personAtChoices().map(function(o){
@@ -1438,7 +1438,7 @@ function renderPeople(){
       (drift && drift !== belongsKey(p)
         ? '<span class="vwhy">the Official BU list says ' + esc(whereLabel(drift)) + '</span>' : '') +
       saidWhereNote(p, true));
-    /* ── AND THE COMPANY, WHICH IS SOMETIMES THE UNIT'S ANSWER (§130.6) ──
+    /* ── AND THE COMPANY, WHICH IS SOMETIMES THE UNIT'S ANSWER (§135.6) ──
        Read-only wherever the unit above has already answered it, writable
        where nothing else has — so a person in Mobile reads "Distribution" and
        cannot be moved to another company behind their unit's back, and the CEO
@@ -2857,7 +2857,7 @@ function renderMainbus(){
       'file is uploaded on <b>People</b> — every BU it mentions is added here, pointing at ' +
       'nothing, for you to map. Or type them in with Edit.</div>';
 
-  /* THE ONLY CHIP LEFT HERE IS AN ALARM (§130.1). "10 names" and "0 mapped"
+  /* THE ONLY CHIP LEFT HERE IS AN ALARM (§135.1). "10 names" and "0 mapped"
      went with the SMO pill; a name sitting on somebody's row and not on this
      list is something outstanding, and it is the one thing this page can say
      that the table under it cannot. */
@@ -3369,7 +3369,7 @@ function focusSwitch(){
     return on ? '' : '<div class="note">Focus measures are switched off for this ' +
       'platform. The Strategy Office can turn them back on.</div>';
   }
-  /* ── ON AND OFF, ON THE PINNED LINE (§130.5) ──────────────────────
+  /* ── ON AND OFF, ON THE PINNED LINE (§135.5) ──────────────────────
      Islam: *"turn the big button to only On and Off switch and bring it to the
      sticky header line."*
 
@@ -3397,7 +3397,7 @@ function focusSwitch(){
   return '';
 }
 
-/* ── WHERE THE MARKING IS BEING DONE (§130.5) ────────────────────────
+/* ── WHERE THE MARKING IS BEING DONE (§135.5) ────────────────────────
    Islam: *"rather than a drop down for the units make it like the navigation
    at the top."* A dropdown answers "which one" and hides where the work was
    left; a row of destinations carrying their own counts says both at once —
@@ -3445,7 +3445,7 @@ function renderFocusSetup(){
     if (first && first.key !== FSET.unit) { FSET.unit = first.key; bands = focusBands(FSET.unit); }
   }
 
-  /* ── ONE TABLE, HEADED THE WAY THE REGISTER IS (§130.5) ────────────
+  /* ── ONE TABLE, HEADED THE WAY THE REGISTER IS (§135.5) ────────────
      Islam: *"make the table headers design better like the other tables like
      registry as an example."* It was never a table — it was `.pick` rows in
      divs under navy `.grouphead` bars, so it had no column headings at all and
@@ -3469,7 +3469,7 @@ function renderFocusSetup(){
       '</td></tr>';
   };
   var body = bands.map(function(b){
-    /* `dxband` is the shared look (§130.8); `fband` is what this page's own
+    /* `dxband` is the shared look (§135.8); `fband` is what this page's own
        spacing rule and its check key off. */
     return '<tr class="fband dxband"><th colspan="3">' + esc(b.band) + '</th></tr>' +
       (b.items.length
@@ -5129,7 +5129,7 @@ function renderCaps(){
   }).join("");
 
   var orphan = GROUP.capabilities.filter(function(c){ return !c.fn; }).length;
-  /* THE `SMO` PILL GOES AND THE ALARM STAYS (§130.1). "all assigned" goes with
+  /* THE `SMO` PILL GOES AND THE ALARM STAYS (§135.1). "all assigned" goes with
      it — a green chip saying nothing is wrong is the state this page is in
      almost always, and §41's budget says a mark that is always lit is not a
      mark. What is left is drawn only when there IS an orphan. */
@@ -6054,7 +6054,7 @@ function tkSearchOnly(id, placeholder){
     'placeholder="' + esc(placeholder) + '" autocomplete="off" ' +
     'value="' + esc(TKQ[id] || "") + '">';
 }
-/* ── THE SEARCH GOES UP, THE FILTERS AND THE COUNT GO (§130.1) ─────
+/* ── THE SEARCH GOES UP, THE FILTERS AND THE COUNT GO (§135.1) ─────
    Islam, asked whether the quick filters and the row count move up with the
    search or go: *"drop like the way register quick filters were dropped."*
    §116 dropped that pair from the register for a reason that is true of all
@@ -6068,7 +6068,7 @@ function tkSearchOnly(id, placeholder){
    would have taken it away.
 
    The bar is the page's TOOLS slot now, so it renders on the pinned line
-   beside the title rather than above the table (§130). */
+   beside the title rather than above the table (§135). */
 function tkBar(id, opts){
   opts = opts || {};
   if (typeof opts.rows === "number" && opts.rows < TK_SEARCH_FROM) return "";

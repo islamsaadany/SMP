@@ -400,6 +400,40 @@
   .ssrow.on { background:var(--over-bg); color:var(--gold-deep); font-weight:600; }
   .ssrow:focus-visible { outline:2px solid var(--gold); outline-offset:-2px; }
   .ssempty { font-size:12px; color:var(--none); padding:8px 4px; }
+  /* ── A GROUP IN THE LIST, AND A LIST YOU TICK (§130.1) ────────────────
+     The plan's owner list is fifty entries made of two different kinds of
+     thing — people and departments — and a heading is what stops it reading as
+     one run of names. The heading filters WITH its group (searchsel.js): a
+     search for one name must not leave two empty headings standing over the
+     one row that matched.
+
+     THE TICK IS DRAWN, NOT WRITTEN. A check mark is U+2713 and the platform's
+     faces are latin subsets — a glyph that is MAPPED and not DRAWN ships as a
+     blank box (§52, §120.2). Two pseudo-elements and a rotated border owe
+     nothing to a font. */
+  .ssgrph { font:700 9.5px/1.6 var(--sans); letter-spacing:.1em; text-transform:uppercase;
+            color:var(--ink-3); padding:8px 8px 3px; }
+  .ssgrp + .ssgrp .ssgrph { border-top:1px solid var(--line-soft); margin-top:4px; }
+  .ssmany .ssrow { position:relative; padding-left:31px; }
+  .ssmany .ssrow::before { content:""; position:absolute; left:8px; top:50%;
+            margin-top:-7px; width:14px; height:14px; border:1.5px solid var(--line);
+            border-radius:4px; background:var(--surface); box-sizing:border-box; }
+  .ssmany .ssrow.on::before { background:var(--gold); border-color:var(--gold); }
+  /* --on-accent, because white on the house gold is 2.4:1 and this mark is the
+     only thing saying the row is ticked (§38.4). */
+  .ssmany .ssrow.on::after { content:""; position:absolute; left:12.5px; top:50%;
+            margin-top:-5.5px; width:4px; height:8px; border:solid var(--on-accent);
+            border-width:0 2px 2px 0; transform:rotate(45deg); }
+  /* A LIST YOU TICK STAYS OPEN, so it has to be able to hold more (§130.1):
+     ticking six collaborators through a 230px window is six scrolls back to
+     where you were. */
+  .ssmany .sslist { max-height:300px; }
+  /* WHERE SOMEBODY WORKS, BESIDE THEIR NAME (§130.9). Quiet and second: the
+     name is the answer and this only tells two Ahmeds apart. It wraps rather
+     than clips, because a place cut off mid-word tells nobody anything —
+     the popup is 380px at most and the row is allowed to take a second line. */
+  .ssrow .sshint { color:var(--ink-3); font-size:11.5px; margin-left:8px; }
+  .ssrow.on .sshint { color:var(--gold-deep); }
   /* The viewer switcher keeps the cap its select had, and for the same reason:
      "Strategy Management Office — all units" would otherwise set the width of
      the chrome's first line and wrap the two buttons beside it onto a second.
@@ -461,7 +495,7 @@
                   few rows is not navigation, and a window that short is
                   somebody's split view rather than their screen. */
                min-height:260px; }
-  /* ── AND THEY PIN INSIDE THE RAIL AS WELL (§130.9) ────────────────
+  /* ── AND THEY PIN INSIDE THE RAIL AS WELL (§135.9) ────────────────
      Islam, twice, pointing at the navy SETUP bar and the search box: *"this is
      the part that needs to be sticky in the rail."*
 
@@ -697,7 +731,7 @@
   .setupttl { margin:0; font:700 24px/1.2 var(--serif); color:var(--ink);
               letter-spacing:-.01em; }
 
-  /* ══ THE PAGE'S CONTROLS SHARE THE PINNED LINE (§130) ═════════════
+  /* ══ THE PAGE'S CONTROLS SHARE THE PINNED LINE (§135) ═════════════
      Islam, of six Setup pages: *"bring all the buttons and search bar to the
      sticky header line."*
 
@@ -717,7 +751,7 @@
   .setuphead .headtools .tk-bar input { width:100%; }
   .setuphead .hright { margin:0; display:flex; align-items:center; gap:8px; flex:none; }
 
-  /* ══ A SEGMENTED SWITCH, IN THE PANE'S OWN COLOURS (§130.5) ════════
+  /* ══ A SEGMENTED SWITCH, IN THE PANE'S OWN COLOURS (§135.5) ════════
      The navigation's Units | Functions control is the shape; its CSS is not,
      because `.units .navswitch` paints white-on-navy and this sits on the page
      (§65.9 — a class name is one namespace, and a control wearing another
@@ -732,7 +766,7 @@
   .segsw .seg:not(.on):hover { color:var(--ink-2); }
   .segsw .seg:focus-visible { outline:2px solid var(--gold); outline-offset:-2px; }
 
-  /* ══ WHERE THE MARKING IS BEING DONE (§130.5) ══════════════════════
+  /* ══ WHERE THE MARKING IS BEING DONE (§135.5) ══════════════════════
      The destinations read as the page's own tabs — the same underline the
      Setup pane's section row already uses, so a row of places and a row of
      sections do not need two visual languages. The count is drawn only where
@@ -756,13 +790,13 @@
             background:var(--surface); border:1px solid var(--line);
             border-radius:9px; padding:2px 6px; }
 
-  /* ══ THE MARKING TABLE (§130.5) ════════════════════════════════════
+  /* ══ THE MARKING TABLE (§135.5) ════════════════════════════════════
      A real table at last, headed like the register. The band row is a `<th>`
      inside the body so the grouping travels with the rows; `position:static`
      because §121.4 pins every `thead th` on a Setup page and a band is not a
      heading of the table. */
   .ftable table { table-layout:fixed; width:100%; }
-  /* ══ THE BAND IS THE PLATFORM'S OWN (§130.8) ═══════════════════════
+  /* ══ THE BAND IS THE PLATFORM'S OWN (§135.8) ═══════════════════════
      Islam: *"the key objectives title line and the pillar name line grey is
      too close to the alternating grey — make it darker to be more
      significant."* He is right, and by a smaller margin than it looks:
@@ -774,14 +808,14 @@
      a band naming a group of rows INSIDE a table looks like in this product —
      `--panel` with `--panel-ink` — and inventing a darker neutral here would be
      a second vocabulary for one idea (§53.5). It is also what this page wore
-     before §130.5 turned it into a table, so nothing about the look is new;
+     before §135.5 turned it into a table, so nothing about the look is new;
      what changed is that the rows under it now have column headings.
 
      THE BORDER IS ON EVERY BAND, INCLUDING THE FIRST, and that is the one
      difference from §99. There the first band OPENS the table, so a gap above
      it would be a gap under nothing. Here a real `<thead>` sits above it in the
      same navy, and without the break the two merge into one block. */
-  /* ══ A BAND IS A DARKER GREY, NOT A NAVY ONE (§130.8, corrected) ═══
+  /* ══ A BAND IS A DARKER GREY, NOT A NAVY ONE (§135.8, corrected) ═══
      Islam: *"the key objectives title line and the pillar name line grey is
      too close to the alternating grey — make it darker to be more
      significant"*, and then, of the navy I reached for: *"the band should be
@@ -793,7 +827,7 @@
      shade of the stripe. Reaching for §99's `tr.dxband` kept one vocabulary for
      "a band inside a table" (§53.5) and cost two things worth more: the band
      then wore the SAME navy as the table's own `<thead>` directly above it, and
-     the 4px slot between the two pinned headers (§130.10) leaked a navy strip
+     the 4px slot between the two pinned headers (§135.10) leaked a navy strip
      that read as a second header.
 
      `--line` IS THE STEP THAT EXISTS. It is the palette's own next neutral —
@@ -828,7 +862,7 @@
   .setuppane .phead2.named .hright { margin-left:0; }
   .setuppane .phead2.named:empty { display:none; }
 
-  /* THE FIRST SECTION FOLLOWS THE HEADER (§130). `.section`'s 26px top margin
+  /* THE FIRST SECTION FOLLOWS THE HEADER (§135). `.section`'s 26px top margin
      is the gap BETWEEN sections, and with the controls row gone the first one
      was spending it on nothing — 42px of air between a pinned header and the
      table under it. Only the first: the gap between two sections is still the
@@ -852,8 +886,8 @@
      table — and applying a page offset there put the register's headings 293px
      down, measured. So they are excluded rather than overridden: two rules
      fighting over one thead is how a head ends up pinned to neither. */
-  /* ── AND THE OFFSET IS MEASURED, NOT GUESSED (§130.10) ────────────
-     `--sethead-h` was the literal 46px, and §130 changed the header's height by
+  /* ── AND THE OFFSET IS MEASURED, NOT GUESSED (§135.10) ────────────
+     `--sethead-h` was the literal 46px, and §135 changed the header's height by
      putting the page's controls in it: it is 42px where the controls are small
      and 49px where a search box sits on the line. So the table's head pinned
      4px BELOW the page header on some pages and 3px under it on others — and
@@ -865,7 +899,7 @@
      is. NOT §28.3's loop: this feeds a sticky OFFSET and nothing else, and an
      offset cannot change the height it was measured from. The literal survives
      as the fallback for the frame before the observer first fires. */
-  /* AND `.acgrid` IS THE THIRD, FOUND BY ISLAM RATHER THAN BY A CHECK (§130.2).
+  /* AND `.acgrid` IS THE THIRD, FOUND BY ISLAM RATHER THAN BY A CHECK (§135.2).
      *"in roles and access … check the table as the design is damaged."*
 
      It is `overflow-x:auto`, which makes the BOX — not the page — what its head

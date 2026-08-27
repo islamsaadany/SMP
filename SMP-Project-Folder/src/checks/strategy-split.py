@@ -433,17 +433,24 @@ with sync_playwright() as p:
         ck("...and nothing is merged", all(not r["span"] and not any(r["merged"])
                                            for r in rows), rows[:2])
         gapped = [r for r in rows if r["alarm"]]
-        ck("a tactic with no quarter is ticked in all four",
-           all(r["texts"] == ["\u2713"] * 4 for r in gapped), gapped[:2])
+        # A QUESTION MARK, NEVER A TICK (§128.2). Asserted as BOTH halves —
+        # the mark is `?` AND no tick appears on a gapped row — because a
+        # build that put a red ✓ back would satisfy "four red bold cells".
+        ck("a tactic with no quarter carries a question mark in all four",
+           all(r["texts"] == ["?"] * 4 for r in gapped), gapped[:2])
+        ck("...and never a tick, which would read as an affirmation",
+           all("\u2713" not in r["texts"] for r in gapped), gapped[:2])
         ck("...in bold red, the colour the deck keeps for a gap",
            all(r["reds"] == 4 and r["bolds"] == 4 for r in gapped), gapped[:2])
         ck("...and that is every tactic but the one that names a quarter",
            len(gapped) == len(rows) - 1, (len(gapped), len(rows)))
-        # THE OTHER HALF, or a build that painted every tick red would pass.
+        # THE OTHER HALF, or a build that marked every row would pass.
         kept = [r for r in rows if not r["alarm"]]
         ck("a tactic that names a quarter is not flagged", len(kept) == 1, kept)
         ck("...its tick is the ordinary ink, and only the named quarter carries one",
            all(r["reds"] == 0 and r["texts"].count("\u2713") < 4 for r in kept), kept)
+        ck("...and an answered row never wears a question mark",
+           all("?" not in r["texts"] for r in kept), kept)
 
         # THE DECK CLOSES ON THANK YOU (§119.8).
         last = slidenames(z)[-1]

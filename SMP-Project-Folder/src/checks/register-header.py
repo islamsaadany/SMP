@@ -177,13 +177,13 @@ with sync_playwright() as p:
     for w in (1920, 1600, 1400, 1320):
         pg.set_viewport_size({"width": w, "height": 900})
         land(pg)
-        # AND §130 PUTS THEM BACK TOGETHER, WHICH IS WHAT §122 ASKED FOR AND
+        # AND §135 PUTS THEM BACK TOGETHER, WHICH IS WHAT §122 ASKED FOR AND
         # §121.2 COULD NOT SAFELY GIVE. That section left the controls on a row
         # of their own because pulling a NON-STICKY row up under a pinned title
         # slid it out on scroll — a real fault, and an argument against the fake
         # move rather than against the move. They are inside the sticky header
         # now, so they pin WITH the name and Islam's original ask holds again.
-        ck("%d: the name and the controls pin together (§130)" % w,
+        ck("%d: the name and the controls pin together (§135)" % w,
            pg.evaluate("""()=>{const h=document.querySelector('.setuphead');
               return !!h && getComputedStyle(h).position==='sticky' &&
                      !!h.querySelector('.hright');}"""))
@@ -245,7 +245,7 @@ with sync_playwright() as p:
 
     # ── 4. THE DIALOG FITS THE WINDOW ────────────────────────────────
     print("\n4. the dialog is compact, and nothing is orphaned")
-    # 700 RATHER THAN 640, AND THE 56px IS RECORDED (§130.6, §122.5's rule).
+    # 700 RATHER THAN 640, AND THE 56px IS RECORDED (§135.6, §122.5's rule).
     # The Company field costs the second block a row — four fields do not fit a
     # three-column grid in one — so the dialog is 614px where it was 558, and a
     # 640px-tall window now scrolls it by 50px. That is the price of the field

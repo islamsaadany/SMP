@@ -1,6 +1,6 @@
 # 021 · The Setup header line
 
-**Status:** built (v3.48, §130)
+**Status:** built (v3.48, §135)
 **Asked for by:** Islam, 2026-08-27, from using the Setup pages on his own laptop
 **Mockups:** `design-mockups/setup-refinements/2026-08-27_setup-header-line.html`,
 `design-mockups/setup-refinements/2026-08-27_marking-and-the-matrix.html`

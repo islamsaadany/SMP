@@ -380,14 +380,26 @@ var UNIT_ROLES = {
 
    The list is the particles this register actually contains, plus the European
    ones a client could arrive with. A word not on it is a name. */
-/* MOVED TO `lib/rules.js` (§130.7), and these are the browser's handles on it.
-   The plan stores what the register's Name column shows now, so the SERVER has
-   to be able to recognise it too — and a name rule written twice is the drift
-   that file exists to prevent (§42). Wrappers rather than renamed call sites:
-   five places here ask for a run of somebody's names, and none of them cares
-   where the answer is computed. */
-var NAME_PARTICLES = SMPRules.NAME_PARTICLES;
-function nameWords(name, n){ return SMPRules.nameWords(name, n); }
+var NAME_PARTICLES = ["abd","abdel","abd-el","el","al","abu","abou","bin","ben",
+                      "ibn","bint","van","von","de","del","della","der","den",
+                      "di","da","dos","du","la","le","st","st.","mac","mc"];
+function nameWords(name, n){
+  var parts = String(name == null ? "" : name).trim().split(/\s+/).filter(Boolean);
+  if (!parts.length) return "";
+  var out = [], names = 0, i = 0;
+  while (i < parts.length && names < n) {
+    /* Take the run of particles, then the word they belong to. A name ENDING
+       in a particle (a truncated row) still terminates, or this loops. */
+    var start = i;
+    while (i < parts.length &&
+           NAME_PARTICLES.indexOf(parts[i].toLowerCase().replace(/[^a-z.-]/g, "")) > -1) i++;
+    if (i < parts.length) i++;
+    else if (i === start) break;
+    names++;
+    out = parts.slice(0, i);
+  }
+  return out.join(" ");
+}
 
 var NAMED_ELSEWHERE_WORDS = 2;
 function personFullName(key){
@@ -844,10 +856,10 @@ function shortName(name){ return nameWords(name, SHORT_NAME_WORDS); }
    not the upload, not the merge, not the door. §87's ladder is Emp ID then
    email and stops, and this adds no rung. Two people really can be "Ahmed
    Mostafa", which is exactly how the twins were made. */
-var KNOWN_NAME_WORDS = SMPRules.KNOWN_NAME_WORDS;
+var KNOWN_NAME_WORDS = 2;
 /* The guess, used when nobody has said otherwise. Kept separate from the
    reader below so the seeded value and a typed one are never confused. */
-function knownGuess(name){ return SMPRules.knownGuess(name); }
+function knownGuess(name){ return nameWords(name, KNOWN_NAME_WORDS); }
 /* What the Name column shows: what was typed, or the guess. Never stores as a
    side effect of being read (§50.6's rule — a reader that creates the field it
    was looking for makes every save carry a phantom change). */
@@ -942,32 +954,10 @@ function displayNames(){
    and `displayNames()` above tells them apart rather than complaining. Only a
    name that cannot be told apart even at eight words is reported.
 
-   §131 AMENDS THAT BY ONE NOTCH, WITHOUT MOVING THE LINE. Two people whose
-   NAME COLUMN reads the same — the first two names, or a typed value that
-   collides — are still not duplicates and never wear the mark; they are
-   QUEUED as something to address (Islam: "notify me as an issue to address if
-   2 people their 1st 2 names are the same so I can edit one of them"). The
-   `read` groups below feed attentionOf() and nothing else: personDupe()
-   deliberately does not read them, because sharing a spoken name is not
-   evidence of being one human, and a queue entry is a notice where a mark is
-   an accusation.
-
    RETIRED ROWS ARE EXCLUDED. They cannot sign in and no upload places them, so
    counting them would report a problem nobody has. */
-/* What the Name column SAYS for this row, before §81.1 lengthens anything:
-   the typed value, or the flat two-name guess. Kept apart from knownName(),
-   which answers with the lengthened display label — the collision worth
-   flagging is in what was stored or guessed, not in the disambiguation drawn
-   over it. And its key: one spelling for both halves of the comparison, or a
-   match reads as a difference (§116.9). */
-function readName(p){
-  return String((p && p.known) || "").trim() || knownGuess((p && p.name) || "");
-}
-function readKey(p){
-  return readName(p).toLowerCase().replace(/\s+/g, " ");
-}
 function registerDupes(){
-  var byId = {}, byAddr = {}, byName = {}, byRead = {};
+  var byId = {}, byAddr = {}, byName = {};
   PEOPLE.forEach(function(p){
     if (!personActive(p)) return;
     var id = String(p.empId == null ? "" : p.empId).trim();
@@ -976,8 +966,6 @@ function registerDupes(){
     if (a) (byAddr[a] = byAddr[a] || []).push(p);
     var n = String(p.name == null ? "" : p.name).trim().toLowerCase().replace(/\s+/g, " ");
     if (n) (byName[n] = byName[n] || []).push(p);
-    var r = readKey(p);
-    if (r) (byRead[r] = byRead[r] || []).push(p);
   });
   function only(m){
     var out = {};
@@ -985,7 +973,7 @@ function registerDupes(){
     return out;
   }
   return { empId: only(byId), email: only(byAddr), name: only(byName),
-           read: only(byRead), likely: likelyDupes() };
+           likely: likelyDupes() };
 }
 
 /* ── THE FOURTH KIND, AND IT IS THE ONE THAT BIT (§87.2) ───────────
@@ -1833,48 +1821,6 @@ function mainbuNamesFor(p){
    are left out: a retired one is not somewhere to be seated (§49.3), and an
    existing attachment to one is left alone because the select keeps whatever
    the row already says (below). */
-/* ── WHERE A PERSON'S COMPANY COMES FROM (§135.6) ─────────────────────
-   Islam: *"some users belong only to a company not a unit, like how the CEO
-   belongs to the group only."*
-
-   A PERSON SITS IN EXACTLY ONE PLACE, and that is built in rather than
-   habitual: `attachPersonAt()` clears unit, function and company before
-   setting one, and `personAt()` gives one answer. Sign-in, the Official BU
-   list, roles and the Overview all rest on it. So a second dropdown that could
-   disagree with the first is the pair §110 removed from this very dialog.
-
-   THE ANSWER IS THAT A COMPANY IS SOMETIMES DERIVED AND SOMETIMES STORED, and
-   which one it is depends on the unit beside it. Somebody in Mobile is in
-   Distribution — the platform already knows, because `units.company` says so
-   (§23) — so the field shows it and is read-only. Somebody with no unit is the
-   case Islam is describing, and there the field is the answer and is written.
-   One stored fact, two fields, and they cannot contradict each other because
-   only one of them is ever writable.
-
-   `null` for the group and for a function: neither belongs to a company, and
-   answering "—" is the truth rather than a gap. */
-function personCompany(p){
-  if (!p) return null;
-  if (p.company) return COMPANIES[p.company] ? p.company : null;
-  if (p.unit && p.unit !== "group") {
-    var u = UNITS[p.unit];
-    return u && u.company && COMPANIES[u.company] ? u.company : null;
-  }
-  return null;
-}
-/* True where the unit beside it has already answered, so the control is shown
-   and disabled rather than hidden — a field that appears and disappears as its
-   neighbour changes is harder to read than one that greys (§59's rule: shown
-   disabled with the reason, never hidden). */
-function personCompanyDerived(p){
-  return !!(p && p.unit && p.unit !== "group" && UNITS[p.unit] && UNITS[p.unit].company);
-}
-function companyChoices(){
-  return activeCompanyKeys().map(function(c){
-    return { v:c, label:COMPANIES[c].name };
-  });
-}
-
 function personAtChoices(){
   var out = [{ v:"group", label:roleWhereLabel("group") }];
   UNIT_KEYS.forEach(function(k){
@@ -1884,9 +1830,9 @@ function personAtChoices(){
     if (FUNCTIONS[k].active !== false)
       out.push({ v:"fn:" + k, label:FUNCTIONS[k].name + " (function)" });
   });
-  /* THE COMPANIES LEFT THIS LIST (§135.6). They are their own field now, so
-     offering them here as well would be one answer in two controls — which is
-     the fault this whole change exists to avoid, arriving by the back door. */
+  activeCompanyKeys().forEach(function(c){
+    out.push({ v:"co:" + c, label:COMPANIES[c].name + " (company)" });
+  });
   return out;
 }
 
@@ -2249,8 +2195,7 @@ function attentionOf(p, all){
   var why = [];
   /* A COLLISION FIRST: two rows that are one human is the fault that makes
      every other count wrong (§87). */
-  var d = all || registerDupes();
-  var dupes = personDupe(p, d);
+  var dupes = personDupe(p, all || registerDupes());
   if (dupes.length) why.push({ kind:"dupe", say: dupeSentence(dupes) });
   /* Then what they SAID about themselves, which is a question waiting on an
      answer rather than a gap (§56). */
@@ -2284,31 +2229,6 @@ function attentionOf(p, all){
   if (PWSTATES && !PWSTATES.__error && PWSTATES[p.key] === "none" &&
       personActive(p) && p.key !== viewer().key && mayIssuePasswordTo(p))
     why.push({ kind:"nopw", say:"They have never been issued a password." });
-  /* LAST, TWO PEOPLE WHOSE NAME READS THE SAME (§131). Islam: "you normally
-     take the first 2 names but you allow me to amend the name in the edit —
-     notify me as an issue to address if 2 people their 1st 2 names are the
-     same so I can edit one of them." §81.1 lengthens the GUESS so the
-     register itself stays readable; this is the other half — the pair still
-     reads as one name out loud, and a TYPED value that collides is never
-     lengthened at all — so each of them queues until a Name is amended to
-     read apart, which is exactly what clears it. NOT a duplicate and last in
-     the order: two people really can be "Ahmed Mostafa" (§87). Anybody this
-     row already flags as a possible duplicate is left to that flag — telling
-     the SMO to RENAME a row that may need MERGING sends them to the wrong
-     control, and the identical twins would otherwise be said twice. */
-  var reads = (d.read || {})[readKey(p)];
-  if (reads && reads.length > 1) {
-    var flagged = {};
-    dupes.forEach(function(x){ (x.rows || []).forEach(function(r){
-      if (r && r.key) flagged[r.key] = 1; }); });
-    var others = reads.filter(function(x){
-      return x.key !== p.key && !flagged[x.key]; });
-    if (others.length)
-      why.push({ kind:"samename", say:"They read as \u201c" + readName(p) +
-        "\u201d, and so " + (others.length === 1 ? "does " + others[0].name
-          : "do " + others.map(function(x){ return x.name; }).join(" and ")) +
-        ". Amend a Name so each reads apart." });
-  }
   return why.length ? { key:p.key, why:why } : null;
 }
 /* The sentence a duplicate makes, said once so the chip and the queue cannot
@@ -2326,7 +2246,7 @@ function dupeSentence(dupes){
            (others.length ? " (" + others.join(", ") + ")" : "") + ".";
   }).join(" ");
 }
-var ATTN_ORDER = ["dupe", "said", "noident", "noemail", "nopw", "samename"];
+var ATTN_ORDER = ["dupe", "said", "noident", "noemail", "nopw"];
 function attentionQueue(){
   var out = [];
   var all = registerDupes();          /* once for the whole queue, not per row */
@@ -2990,88 +2910,23 @@ function focusStanding(progress){
   return { key:"short", label:"Short" };
 }
 
-/* ── WHAT CAN BE MARKED, BANDED, FOR A UNIT OR A FUNCTION (§135.5) ────
-   Islam: *"make it like the navigation rail for units and supporting
-   functions."*
-
-   ONE BUILDER, asked with a destination key, because the marking page, the
-   unit's own strip and the group's Focus board are three surfaces onto one
-   answer and three walks of the data is how they drift (§53.5). It returns the
-   BANDS rather than a flat list: every one of the three groups what it shows,
-   and a band that is empty is still a band the marking table draws.
-
-   A FUNCTION ANSWERS IN ITS OWN SHAPE, and the two shapes are not a special
-   case bolted on — they are what a function IS. Merchandising plans in pillars
-   (§59), so `fnAsUnit()` hands over the unit shape and the unit's own bands
-   answer unchanged. The other seven plan in capabilities, and their measurable
-   rows sit one level down: a capability's key objectives, banded by capability
-   exactly as a unit's are banded by pillar. Islam, asked which: *"agreed."*
-
-   THE IDS WERE ALREADY THERE, which is what makes this cheap rather than a
-   migration — `renumberCapability()` has minted `cap1-KO1` for every one of
-   them since the capability model existed, and a focus mark is nothing but
-   that id in `CYCLE.focus`. §96.4's ID-less objectives were the group's, not
-   these. */
-function unitBands(u){
-  if (!u) return [];
-  return [{ band:L("keyobj","bu"), src:L("keyobj","bu").toLowerCase(),
-            items:u.keyObjectives || [] }]
-    .concat((u.items || []).map(function(p, pi){
-      return { band:pillarCode(u, pi) + " " + p.name, src:pillarCode(u, pi),
-               items:p.measures || [] };
-    }));
-}
-function focusBands(key){
-  if (!key) return [];
-  /* The prefix test rather than `isFn()`, which is the shell's own local
-     helper and not in scope here. */
-  if (String(key).indexOf("fn:") === 0) {
-    var fk = String(key).slice(3), f = FUNCTIONS[fk];
-    if (!f) return [];
-    if (f.format === "pillars") return unitBands(fnAsUnit(fk));
-    /* THE BAND IS THE CAPABILITY'S NAME, and no code is invented for it. A
-       pillar has one because the unit owns a prefix and somebody says "MB01"
-       out loud (§51.3); a capability has never had one on any screen, and
-       minting one here would be new vocabulary arriving through a marking
-       table. */
-    return capsOfFunction(fk).map(function(c){
-      return { band:c.name, src:c.name, items:c.keyObjectives || [] };
-    });
-  }
-  return unitBands(UNITS[key]);
-}
-/* Every place a mark could be made, in the navigation's own order. */
-function focusSubjects(){
-  return { units: activeKeys().map(function(k){
-             return { key:k, name:UNITS[k].name }; }),
-           fns: activeFunctionKeys().filter(function(k){ return fnShows(k); })
-                  .map(function(k){
-             return { key:"fn:" + k, name:FUNCTIONS[k].name }; }) };
-}
-/* Every MARKED item behind a destination. */
-function focusIn(key){
-  var out = [];
-  focusBands(key).forEach(function(b){
-    (b.items || []).forEach(function(m){
-      if (isFocus(m.id)) out.push({ m:m, src:b.src });
-    });
-  });
-  return out;
-}
-/* Kept for the unit-shaped callers that hold an object rather than a key. */
+/* Every marked item in a unit, objectives and pillar measures alike. */
 function unitFocus(u){
   var out = [];
-  unitBands(u).forEach(function(b){
-    (b.items || []).forEach(function(m){
-      if (isFocus(m.id)) out.push({ m:m, src:b.src });
+  u.keyObjectives.forEach(function(m){
+    if (isFocus(m.id)) out.push({ m:m, src:L("keyobj","bu").toLowerCase() });
+  });
+  u.items.forEach(function(p, pi){
+    p.measures.forEach(function(m){
+      if (isFocus(m.id)) out.push({ m:m, src:pillarCode(u, pi) });
     });
   });
   return out;
 }
-function focusTallyOf(items){
+function focusTally(u){
   var t = { over:0, met:0, short:0, none:0, total:0, mean:null };
   var vals = [];
-  items.forEach(function(x){
+  unitFocus(u).forEach(function(x){
     t.total++;
     t[focusStanding(x.m.progress).key]++;
     if (x.m.progress != null) vals.push(x.m.progress);
@@ -3079,7 +2934,6 @@ function focusTallyOf(items){
   t.mean = avg(vals);
   return t;
 }
-function focusTally(u){ return focusTallyOf(unitFocus(u)); }
 
 /* ── Supporting functions ─────────────────────────────────────────────────
    A capability is cross-cutting: the whole group depends on it, and a supporting
@@ -5553,43 +5407,19 @@ function pillarsUsingTheme(ab){
    click into it crashes on a missing array. It arrives inactive-in-content
    but active in the nav, weighted at zero until the SMO fills its factor row,
    and with the group's clause labels as a starting skeleton. */
-/* THE ONE MINTER FOR A UNIT (§129). It existed argless — "New unit 1", key
-   "newunit1" — and the builder gives it the three answers a real unit
-   arrives with: its name, its code prefix and its company. Three of its old
-   habits are corrected in the same breath, each a §-numbered fault:
-   · the key is minted from the NAME the way a function's and a person's are,
-     so the graph does not fill with "newunit3"s (§87's spirit);
-   · the weighting row's values are minted from the FACTOR LIST, never a
-     hardcoded rev/prof/imp/growth — a tenant that renamed a factor got a row
-     the composite could not read (§104.7's list-of-exceptions fault);
-   · `real` is TRUE: that flag marks DEMO content as illustrative (§21), and
-     a unit the SMO just created is the client's own. */
-function addBusinessUnit(name, prefix, company){
-  var nm = String(name || "").trim(), key;
-  if (nm) {
-    var base = nm.toLowerCase().replace(/[^a-z0-9]/g, "").slice(0, 18);
-    if (!base) base = "unit";
-    key = base;
-    var n2 = 2;
-    while (UNITS[key]) { key = base + n2; n2++; }
-  } else {
-    var n = 1;
-    do { key = "newunit" + n; nm = "New unit " + n; n++; } while (UNITS[key]);
-  }
+function addBusinessUnit(){
+  var n = 1, key, name;
+  do { key = "newunit" + n; name = "New unit " + n; n++; } while (UNITS[key]);
   UNITS[key] = {
-    name: nm,
-    codePrefix: (String(prefix || "").trim() || nm.replace(/[^A-Za-z0-9]/g, "").slice(0, 3) || "NU").toUpperCase(),
-    weight: 0, real: true, active: true, ukey: key,
-    company: company || null,
+    name: name, codePrefix: "NU", weight: 0, real: false, active: true, ukey: key,
     clauses: GROUP.clauses.map(function(c, i){ return [c[0], "", key + "-F" + (i + 1)]; }),
     aspiration: "", endInMind: "",
     keyObjectives: [], swot: { s: [], w: [], o: [], t: [] }, items: []
   };
   UNIT_KEYS.push(key);
   UNIT_ROLES[key] = { head: null, custodian: null };
-  var wrow = { key: key, unit: nm, why: "" };
-  (GROUP.weighting.factors || []).forEach(function(f){ wrow[f.key] = 0; });
-  GROUP.weighting.units.push(wrow);
+  GROUP.weighting.units.push({ key: key, unit: name, rev: 0, prof: 0, imp: 1, growth: 0,
+    why: "" });
   syncWeights();
   return key;
 }

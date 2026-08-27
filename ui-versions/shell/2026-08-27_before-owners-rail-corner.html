@@ -166,12 +166,6 @@
   </div>
 </div>
 
-<!-- THE BUILDER BAND (§129). Chrome-shaped but NOT inside the sticky chrome:
-     a band added to the pinned rows would move --chrome-h and every sticky
-     offset under it (§101.5) — it scrolls with the page instead, sitting
-     first above the content it narrates. paint() fills and empties it. -->
-<div id="buildband" hidden></div>
-
 <!-- The page's own half of the skeleton. It lives INSIDE #panel, which
      paint() replaces wholesale — so nothing has to remove it and it cannot
      outlive the first real paint. -->
@@ -202,7 +196,6 @@
 <script src="MAIL"></script>
 <script src="RENDER"></script>
 <script src="CONFIGRENDER"></script>
-<script src="BUILDER"></script>
 <script src="PRESENT"></script>
 <script src="SLIDES"></script>
 <script src="SEARCHSEL"></script>
@@ -370,21 +363,18 @@
 
       /* Last in Setup: it changes how everything else LOOKS, which is a thing
          you do once the things themselves exist (§39). */
-      /* ── AND EMAIL LEFT THIS GROUP (§135.4) ────────────────────────
-         §108.3's rename settled a three-way collision — Messages, Send a
-         message, Communication — by naming each page after the one thing it
-         did, and put Email here on a sound argument: what a message wears
-         leaving the platform is the same subject Branding answers, one step
-         further out. Islam's ask goes further and dissolves the question:
-         *"bring the email as a settings in the Send an email part."*
-
-         WHAT A MESSAGE WEARS AND WHERE A MESSAGE IS WRITTEN ARE ONE ERRAND, and
-         the group "Branding & email" no longer has an email in it. The heading
-         is corrected in SETUP_GROUPS rather than left describing a page that
-         moved (§24) — a rail that names something it no longer holds is the
-         same fault as a page naming itself something the rail does not
-         (§121.1). */
-      { k:"brand",  ac:"c_brand",  grp:"look", label:"Branding", glyph:"◐", find:"branding logo colour color mark palette theme look accent email sender footer kicker",             render:renderBranding }
+      { k:"brand",  ac:"c_brand",  grp:"look", label:"Branding", glyph:"◐", find:"branding logo colour color mark palette theme look accent",             render:renderBranding },
+      /* §72. In *How it looks* rather than a group of its own, and that is the
+         argument rather than the leftover: an email leaves wearing the tenant's
+         accent, the tenant's name and the tenant's footer, so what it looks
+         like is the same subject Branding answers — one step further out, where
+         the reader is not in the platform at all. */
+      /* EMAIL, NOT "COMMUNICATION" (§108.3). The third of the colliding three,
+         and the easiest to settle because the page is narrower than its name:
+         it sets the display name, the reply-to, the kicker and the footer of
+         what LEAVES the platform — an email, and nothing else. Naming it Email
+         is what lets "Send a message" and "Inbox" each mean one thing too. */
+      { k:"comms",  ac:"c_comms",  grp:"look", label:"Email", glyph:"✉", find:"email sender reply-to footer kicker display name outgoing from address",                 render:renderComms }
     ],
     /* ONE DESTINATION, NOT TWO (§47.7). Manage and Setup were split in §46.1
        because a flat menu of sixteen was doing two jobs — and that argument
@@ -433,40 +423,15 @@
          Communications — the same way, by renaming until each name meant one
          thing. The KEY stays `chat`, which is what the page def, the endpoint,
          `GROUP.chat` and checks/office-chat.py all name. */
-      /* IN PLATFORM INBOX (§135.3). §108.3 named this "Inbox" to break a
-         three-way collision, and the same rename now has a second job: with
-         the composer becoming "Send an email", a bare "Inbox" reads as where
-         those emails land, which is the one thing it is not. This is the
-         conversation people have with the office INSIDE the platform. The KEY
-         stays `chat` — the endpoint, `GROUP.chat` and the checks all name it. */
-      { k:"chat",     ac:"c_chat",  grp:"cycle",  label:"In Platform inbox", glyph:"✉", find:"messages chat conversations questions replies feedback answer inbox",
+      { k:"chat",     ac:"c_chat",  grp:"cycle",  label:"Inbox", glyph:"✉", find:"messages chat conversations questions replies feedback answer",
         when: function(){ return inOffice() && CHAT.servable(); },
         render:function(){ return CHAT.renderInbox(); } },
       /* §74. A DOING page, so it sits with the cycle rather than beside the
          Email SETTINGS — and gated at edit for Import's reason (§48.2): there
          is nothing to read on a composer, so a view grant would open a page
          whose every control the server then refuses. */
-      /* ── SEND AN EMAIL, AND WHAT IT ARRIVES AS (§135.3, §135.4) ─────
-         Renamed at Islam's word, and it settles what §108.3 could not: this
-         page sends REAL EMAIL, and calling it "a message" left it in the same
-         word family as the in-platform conversation beside it.
-
-         AND THE EMAIL SETTINGS ARE ITS SECOND HALF, asked as a question —
-         *"would it be better as a drop down or a sub panel?"* A dropdown is
-         right for the inbox's seven switches (§98). This is a status table,
-         four fields, a LIVE RENDERED PREVIEW of the message and a test send:
-         a rendered email inside a dropdown is not a dropdown. It is the shape
-         Figure sets (§46.2) and Import & archives (§108.4) already use — one
-         rail entry, two sections — and, exactly as there, EACH SECTION KEEPS
-         ITS OWN GATE, so somebody holding `c_comms` and not `c_send` still
-         reaches the settings half, and paint() drops the whole entry for
-         somebody holding neither. */
-      { k:"send",     ac:"c_send", grp:"cycle",   label:"Send an email", glyph:"➤", find:"broadcast announce notify everyone email the team sender reply-to footer kicker display name outgoing from address",
-        when: function(){ return inOffice(); },
-        sections: function(){
-          return [{ k:"compose", ac:"c_send",  label:"Compose",        render:renderSendMessage },
-                  { k:"comms",   ac:"c_comms", label:"Email settings", render:renderComms }];
-        } },
+      { k:"send",     ac:"c_send", grp:"cycle",   label:"Send a message", glyph:"➤", find:"broadcast announce notify everyone email the team",
+        when: function(){ return inOffice(); },                          render:renderSendMessage },
       { k:"focusset", ac:"c_focus", grp:"cycle",  label:"Focus measures", glyph:"◎", find:"focus watch highlight measures",                render:renderFocusSetup },
       /* Only for somebody who has actually been named on a figure. Its reach
          is not a setting (§16.7), so `when` hides it outright rather than the
@@ -603,11 +568,9 @@
     if (el) el.innerHTML = sendmsgAudienceHtml();
     var st = sendmsg();
     var n = (sendmsgHasAny() && st.aud && st.aud.to) ? st.aud.to.length : 0;
-    /* THE HEADER CHIP IS GONE (§135.1) and this is where its reader went with
-       it (§24). Islam: *"remove the tag SMO and nobody chosen."* The count was
-       being said twice — here and on the Send button below — and §95 had
-       already decided which of the two is the one that matters: the count
-       belongs on the control that ACTS. */
+    var chip = document.querySelector("[data-audcount]");
+    if (chip) chip.textContent = n ? plural(n, "recipient", "recipients")
+                                   : "nobody chosen";
     var send = document.getElementById("msgsend");
     if (send && !st.busy)
       send.textContent = n ? "Send to " + plural(n, "person", "people") : "Send";
@@ -847,7 +810,7 @@
     { k:"who",  label:"People & access",   note:"Who exists, and what may they touch" },
     { k:"run",  label:"The organisation",  note:"The things being planned" },
     { k:"meas", label:"Measurement",       note:"What the numbers mean" },
-    { k:"look", label:"Branding",         note:"What the tenant wears, in here and on the way out" }
+    { k:"look", label:"Branding & email",  note:"What the tenant wears, in here and on the way out" }
   ];
 
   /* ══ THE RAIL COLLAPSES (§47.3) ═══════════════════════════════════
@@ -1538,7 +1501,6 @@
       " &middot; " + where;
 
     if (!current) {
-      paintBuildBand();
       document.getElementById("subtabs").innerHTML = "";
       document.getElementById("panel").innerHTML =
         '<div class="note bad-note" style="margin-top:30px"><b>No pages granted.</b> The roles this person holds reach nothing. ' +
@@ -1560,7 +1522,6 @@
        that had just been ruled out for having nothing to render. Nothing to
        render is a real answer, and the branch above already says it in words. */
     if (!defs.length) {
-      paintBuildBand();
       document.getElementById("panel").innerHTML =
         '<div class="note">There is nothing here for you to open. ' +
         'That is the table working as configured, not an error &mdash; open ' +
@@ -1646,10 +1607,6 @@
        section called "Performance" would go unnamed on a page the rail is not
        even drawing. */
     PAGE_TITLE = railed ? (pageName || null) : null;
-    /* AND THE TWO SLOTS THE PAGE'S CONTROLS ARRIVE IN (§135). Cleared before
-       the render that fills them, read after it — the same trip PAGE_TITLE
-       already makes, in the other direction. */
-    pageLineReset();
 
     var body = (current === "group" || current === "setup" || current === "manage")
       ? def.render()
@@ -1680,12 +1637,7 @@
              the page instead. Both halves of this line came from different
              branches on the same day and both are load-bearing. */
           (currentSub === "people" ? " panefill" : "") + '">' +
-          /* ── AND THE PAGE'S CONTROLS ARE ON IT (§135) ────────────────
-             `pageLineHTML()` is read AFTER `body`, because the page's own
-             render is what fills the slots. The search sits left of the
-             buttons, and a page with neither gets neither. */
-          '<div class="setuphead' + (PAGE_TOOLS || PAGE_ACTS ? ' withacts' : '') + '">' +
-            '<h1 class="setupttl">' + esc(pageName) + '</h1>' + pageLineHTML() + '</div>' +
+          '<div class="setuphead"><h1 class="setupttl">' + esc(pageName) + '</h1></div>' +
           secrowHTML + body + '</div></div>'
       : body;
 
@@ -1721,8 +1673,6 @@
           }).join("")
         : "";
     }
-    /* The builder's band, once the navigation above has settled (§129). */
-    paintBuildBand();
     wire();
     /* LAST, and after wire(). Every <select> the paint just produced gets a
        searchable button in front of it once its list passes five options
@@ -1740,31 +1690,7 @@
        around — so it re-resolves them and puts the shade and the card back.
        Like the inbox above, nothing in it ever calls paint(). */
     TOUR.onPaint();
-    /* ── AND THE PINNED TITLES SAY SO (§130.6) ───────────────────────
-       The one thing CSS cannot ask. `.pane > .pband` fills its two rounded
-       corners with the page's ground so nothing shows through them while it
-       is pinned (§130.3) — and painting that at REST cut the card's own
-       corner arc, which is what Islam saw next: *"the corner still has this
-       squared corner."*
-
-       AN OBSERVER, NOT A SCROLL LISTENER. v3.3 removed the condensing header
-       and wrote the rule down: never size anything against a measurement the
-       size itself can change. This changes no size at all — a class, and a
-       background inside a corner — so the loop that rule guards against
-       cannot form. What it does need is to be RE-ARMED after every paint,
-       like the three above it: the band it was watching has just been
-       replaced.
-
-       THE THRESHOLD IS THE ELEMENT'S OWN STICKY OFFSET, read off the computed
-       style rather than rebuilt from `--chrome-h` and `--rail-gap` — §29.4's
-       rule, which the rail learned the hard way: one number, not two that
-       happen to agree. Shrink the root by that offset plus a pixel and the
-       band stops being wholly inside it at exactly the moment it pins. */
-    pinWatch();
     clipTitles();
-    /* The header this paint just drew is a different element from the last
-       one's, so the observer is re-pointed at it (§135.10). */
-    watchSetupHead();
     /* PUT THE SCREEN BACK BEFORE THE BROWSER SHOWS IT (§75). Synchronous, in
        the same frame as the rebuild, so nothing is ever drawn at the top and
        then moved — that flash is the jump, only quicker. */
@@ -1805,29 +1731,6 @@
      you are pointing at. And never over a title somebody else set — the
      register's name cell carries the full name and the sign-in key on its own
      hover (§81.1), which says more than this would. */
-  /* Held across paints so the previous one is disconnected rather than left
-     observing elements nothing can reach — an observer per paint, kept, is a
-     leak that grows for as long as the tab is open. */
-  var PINSEE = null;
-  function pinWatch(){
-    if (PINSEE) { PINSEE.disconnect(); PINSEE = null; }
-    var bands = document.querySelectorAll(".pane > .pband");
-    if (!bands.length || typeof IntersectionObserver !== "function") return;
-    /* Every band on a page shares one offset, so one observer serves them
-       all — a function's Projects page draws one per capability. */
-    var top = parseFloat(getComputedStyle(bands[0]).top);
-    if (!(top >= 0)) return;
-    PINSEE = new IntersectionObserver(function(rows){
-      rows.forEach(function(r){
-        /* Wholly inside the shrunk root means it is still in the flow;
-           anything less means it has reached its offset and pinned. It also
-           reads "pinned" once the band has scrolled off the BOTTOM, which is
-           true of nothing anybody can see and costs nothing. */
-        r.target.classList.toggle("pinned", r.intersectionRatio < 1);
-      });
-    }, { threshold: [1], rootMargin: "-" + (top + 1) + "px 0px 0px 0px" });
-    Array.prototype.forEach.call(bands, function(b){ PINSEE.observe(b); });
-  }
   function clipTitles(){
     document.querySelectorAll(".cfg table td").forEach(function(td){
       /* A CELL THAT ALREADY SAYS SOMETHING ON HOVER KEEPS SAYING IT. The
@@ -1949,9 +1852,6 @@
     m.style.left = Math.max(8, Math.min(r.right - w, window.innerWidth - w - 8)) + "px";
   }
 
-  function fieldSaved(){
-    if (typeof SYNC !== "undefined" && SYNC.afterPaint) SYNC.afterPaint();
-  }
   function wire(){
     document.querySelectorAll("#subtabs button").forEach(function(b){
       b.addEventListener("click", function(){
@@ -2381,15 +2281,15 @@
         paint();
       });
     });
-    /* One minter for a function's shape, shared with the builder's chooser
-       (§53.5): a second copy here is how the register's twins get made. A
-       taken key is suffixed rather than refused, the same answer addUnit
-       gives — two functions may genuinely share a name's letters. */
     var addFn = document.getElementById("addfn");
     if (addFn) addFn.addEventListener("click", function(){
       var name = prompt("Name of the supporting function");
       if (!name || !name.trim()) return;
-      addFunction(name);
+      var key = name.trim().toLowerCase().replace(/[^a-z0-9]/g, "").slice(0, 14) || ("fn" + FUNCTION_KEYS.length);
+      if (FUNCTIONS[key]) { alert("A function with that key already exists."); return; }
+      FUNCTIONS[key] = { name:name.trim(), navName:null,
+        codePrefix:name.trim().slice(0, 3).toUpperCase(), head:null, custodian:null, active:true };
+      FUNCTION_KEYS.push(key);
       paint();
     });
     document.querySelectorAll("[data-capfn]").forEach(function(el){
@@ -2398,24 +2298,8 @@
         paint();
       });
     });
-    /* ── THE DESTINATION ROW REPLACED THE DROPDOWN (§135.5) ─────────
-       A press, not typing, so a repaint is right here: which one is lit and
-       every count on the row are both drawn by the render. */
-    document.querySelectorAll("[data-fsetgo]").forEach(function(b){
-      b.addEventListener("click", function(){ FSET.unit = b.dataset.fsetgo; paint(); });
-    });
-    document.querySelectorAll("[data-fsetside]").forEach(function(b){
-      b.addEventListener("click", function(){
-        FSET.side = b.dataset.fsetside;
-        /* THE SIDE MOVES AND SO DOES THE SUBJECT, or pressing Functions leaves
-           a unit's rows on screen under a row that says Functions (§50.6's
-           fault: a label naming a page it is not showing). */
-        var subs = focusSubjects(), list = subs[FSET.side] || [];
-        if (list.length && !list.some(function(x){ return x.key === FSET.unit; }))
-          FSET.unit = list[0].key;
-        paint();
-      });
-    });
+    var fu = document.getElementById("fset-unit");
+    if (fu) fu.addEventListener("change", function(){ FSET.unit = fu.value; paint(); });
     var cc = document.querySelector("[data-closecycle]");
     if (cc) cc.addEventListener("click", function(){
       var gaps = 0;
@@ -2723,11 +2607,8 @@
     });
     /* Both role <select>s are gone — Business units and Supporting functions
        share one picker now, wired in wirePicker() below (§35). */
-    /* A unit is asked for by name now, in the builder's form — pressing this
-       used to mint "New unit 1" with prefix NU and leave the SMO renaming it
-       across three cells (§129). Same minter underneath, one question first. */
     var au = document.getElementById("addunit");
-    if (au) au.addEventListener("click", function(){ openBuilderForm("newunit", { stay:true }); });
+    if (au) au.addEventListener("click", function(){ addBusinessUnit(); paint(); });
     /* Capabilities: add, name, remove — the SMO's, behind the same key the
        rest of the page is behind (§51.11). */
     var ac = document.getElementById("addcap");
@@ -2871,13 +2752,6 @@
       b.addEventListener("click", function(){
         var e = KOLISTS[+b.dataset.koadd];
         if (!e) return;
-        /* Build mode: the objective arrives whole, through the form (§129).
-           Only for the subject being built — the Temple's group list keeps
-           its inline add. */
-        if (BUILDER && e.owner && e.owner.ukey === BUILDER.target) {
-          openBuilderForm("objective", { target: BUILDER.target });
-          return;
-        }
         /* SETTLED BEFORE THE NEW ROW IS MINTED, or the group's six id-less
            objectives are filled in as KO1..KO6 a moment after the new row has
            already taken KO1 (§96.4). Once before, so the maximum is true; once
@@ -2900,19 +2774,7 @@
            cursor left a cell, on the one screen somebody fills in left to
            right. */
         var fn = FIELDS[+el.dataset.fld];
-        /* SEVERAL ANSWERS COME AS AN ARRAY (§130.1). On a `<select multiple>`
-           `el.value` is only the FIRST selected option, so a collaborators cell
-           wired through the plain path would have saved one name and dropped
-           the rest — silently, which is the shape §96 exists to stop. Asked of
-           the element rather than of the setter: `multiple` is undefined on an
-           input and on a textarea, so every other field is untouched. */
-        if (fn) {
-          fn(el.multiple
-            ? Array.prototype.filter.call(el.options, function(o){ return o.selected; })
-                .map(function(o){ return o.value; })
-            : el.value);
-          fieldSaved();
-        }
+        if (fn) { fn(el.value); fieldSaved(); }
       });
       /* THE BOX GROWS WITH WHAT IS TYPED IN IT (§51.1, Islam: "the foundation
          end in mind is not editable in terms of space or empty lines").
@@ -3365,12 +3227,10 @@
        SAVED, THOUGH. `SYNC.afterPaint()` is what schedules the write, and it
        was only ever reached THROUGH paint() — so removing the repaint without
        this would have made every edit stay on screen and never reach the
-       database until something else happened to repaint.
-
-       Hoisted OUT of wire() in §129: the builder's dialogs write rows from
-       outside wire()'s closure, and a second copy of "how an edit reaches
-       the database" is the drift §53.5 exists to stop — so the one function
-       moved up a scope, and every old caller still resolves it. */
+       database until something else happened to repaint. */
+    function fieldSaved(){
+      if (typeof SYNC !== "undefined" && SYNC.afterPaint) SYNC.afterPaint();
+    }
     /* ── SCOPED, SO THE DIALOG CAN BE WIRED WITHOUT THE PAGE (§116) ──
        `root` defaults to the document, which is every existing caller. The
        person dialog passes its own body: its fields are built after paint() has
@@ -3614,19 +3474,9 @@
              different KIND of Unit. The old pair could say neither — it
              committed on the second answer, so both looked like nothing
              happening. */
-          /* AND IT NAMES THE FIELD THAT CAN ANSWER IT (§135.6). Companies
-             left the Unit dropdown when they became a field of their own, so a
-             refusal telling somebody to change the Unit for a Company CEO sends
-             them to a control that no longer offers the answer — §16.7's dead
-             end, reintroduced by a field split. `roleWheres()` is still the one
-             definition of what may be held where; this only reads which of the
-             two fields it points at. */
-          var atCo = wheres.every(function(w){
-            return String(w.v).indexOf("co:") === 0; });
-          var fld = atCo ? "Company" : "Unit";
           ROLESTOP = { key:key, why: at
-            ? roleName(role) + " is held at " + roleAtWord(role) + ". Change the " + fld + "."
-            : "Set the " + fld + " first \u2014 " + roleName(role) + " is held at " +
+            ? roleName(role) + " is held at " + roleAtWord(role) + ". Change the Unit."
+            : "Set the Unit first \u2014 " + roleName(role) + " is held at " +
               roleAtWord(role) + "." };
           paint();
           return;
@@ -3669,29 +3519,6 @@
         else {
           p.mainbu = v;
           if (!mainbuBy(v)) mainbuList().push({ name: v, at: null });
-        }
-        paint();
-      });
-    });
-    /* ── THE COMPANY FIELD WRITES THE SAME ONE FACT (§135.6) ────────
-       Through `attachPersonAt()`, which clears the other two pointers — so
-       choosing a company MOVES somebody out of a unit rather than adding a
-       second place they sit. It is only reachable when the unit above says
-       nothing, so that move is never a surprise. */
-    R.querySelectorAll("[data-pco]").forEach(function(sel){
-      sel.addEventListener("change", function(){
-        if (grant("c_people") !== "edit") return;
-        var p = personBy(sel.dataset.pco);
-        if (!p || personCompanyDerived(p)) return;
-        attachPersonAt(p, sel.value ? "co:" + sel.value : null);
-        /* EITHER HALF FINISHES IT (§110, §135.6). A Company CEO is refused
-           until the person sits at a company, and the Company field is now the
-           only control that can put them there — so answering it while a
-           refusal is standing is the answer that refusal was waiting for. */
-        if (ROLESTOP && ROLESTOP.key === p.key && ADDROLE === p.key &&
-            roleIsGrantable(ADDROLE_KIND)) {
-          tryGrantRole(p.key, ADDROLE_KIND);
-          return;
         }
         paint();
       });
@@ -3838,15 +3665,35 @@
       var table = document.querySelector('[data-tktable="' + id + '"]');
       if (!table) return;
       var q = String(TKQ[id] || "").trim().toLowerCase();
+      var f = TKFILTER[id] || "";
+      var shown = 0, total = 0;
       [].forEach.call(table.tBodies[0] ? table.tBodies[0].rows : [], function(tr){
         if (tr.classList.contains("newrow")) return;   /* the Add row is not a row */
-        tr.hidden = !!q && tkRowText(tr).indexOf(q) === -1;
+        total++;
+        var okF = !f || (" " + (tr.dataset.tkrow || "") + " ").indexOf(" " + f + " ") > -1;
+        var okQ = !q || tkRowText(tr).indexOf(q) > -1;
+        tr.hidden = !(okF && okQ);
+        if (!tr.hidden) shown++;
       });
+      var out = document.querySelector('[data-tkcount="' + id + '"]');
+      if (out) out.textContent = (q || f)
+        ? shown + " of " + total
+        : (total ? total + " rows" : "");
     }
     document.querySelectorAll("[data-tksearch]").forEach(function(inp){
       inp.addEventListener("input", function(){
         TKQ[inp.dataset.tksearch] = inp.value;
         tkApply(inp.dataset.tksearch);
+      });
+    });
+    /* A CHIP REPAINTS, because which one is lit is drawn by the render — and it
+       is a press, not typing, so nothing is mid-word. Pressing the lit one
+       clears it: a filter you cannot turn off is a filter that traps you. */
+    document.querySelectorAll("[data-tkfilter]").forEach(function(b){
+      b.addEventListener("click", function(){
+        var bits = b.dataset.tkfilter.split("|");
+        TKFILTER[bits[0]] = (TKFILTER[bits[0]] === bits[1]) ? "" : bits[1];
+        paint();
       });
     });
     document.querySelectorAll("[data-tktable]").forEach(function(t){ tkApply(t.dataset.tktable); });
@@ -4936,18 +4783,10 @@
     document.querySelectorAll("[data-rowadd]").forEach(function(b){
       b.addEventListener("click", function(){
         if (!mayEditPlan()) return;
-        /* IN BUILD MODE A ROW IS ADDED WHOLE (§129): the same control opens
-           the structured form instead of minting an empty row — the form
-           applies through the same minters, so the two paths cannot drift. */
-        if (BUILDER && BUILDER.target === current && builderFormFromRowadd(this.dataset.rowadd)) return;
         var a = this.dataset.rowadd.split("|"), what = a[0];
-        if (what === "pillar")  { addPillar(unitLikeWritable(a[1])); }
+        if (what === "pillar")  { addPillar(unitLike(a[1])); }
         else if (what === "measure" || what === "tactic") {
-          /* unitLikeWritable, not unitLike (§129's audit): the reading view
-             hands a VIRGIN pillars function frozen empties, so the first add
-             pushed into an array the function never held — accepted on
-             screen, written nowhere (§50.6's fault through a fresh door). */
-          var u = unitLikeWritable(a[1]), it = u && u.items[+a[2]];
+          var u = unitLike(a[1]), it = u && u.items[+a[2]];
           if (!it) return;
           if (what === "measure") addMeasure(it); else addTactic(it);
         }
@@ -4992,113 +4831,6 @@
         removeRowById(listById(list, id), id);
         paint();
       });
-    });
-    /* ── FIRST ROWS FOR THE SURFACES THAT NEVER HAD ONE (§129's audit) ──
-       The SWOT, the “Who we are” lines and a capability's objectives could
-       be EDITED and never STARTED — the editors were built for correcting an
-       imported plan, so an empty list rendered nothing to edit and no way to
-       write the first row (§61's trap, three more times). Every add re-asks
-       the shared rule rather than trusting the render that drew it (§48.2),
-       and in build mode routes through the structured form. */
-    document.querySelectorAll("[data-swadd]").forEach(function(b){
-      b.addEventListener("click", function(){
-        var a = b.dataset.swadd.split("|"), t = a[0], q = a[1];
-        if (!mayAuthor("u_anal", t)) return;
-        if (BUILDER && BUILDER.target === t) { openBuilderForm("swot", { target:t, q:q }); return; }
-        var u = unitLikeWritable(t);
-        if (!u || !u.swot || !Array.isArray(u.swot[q])) return;
-        u.swot[q].push("");
-        fieldSaved(); paint();
-      });
-    });
-    document.querySelectorAll("[data-swrm]").forEach(function(b){
-      b.addEventListener("click", function(){
-        var a = b.dataset.swrm.split("|"), t = a[0], q = a[1], i = +a[2];
-        if (!mayAuthor("u_anal", t)) return;
-        var u = unitLikeWritable(t);
-        if (!u || !u.swot || !Array.isArray(u.swot[q]) || u.swot[q][i] == null) return;
-        if (String(u.swot[q][i]).trim() &&
-            !confirm("Remove this line? This cannot be undone here.")) return;
-        u.swot[q].splice(i, 1);
-        fieldSaved(); paint();
-      });
-    });
-    document.querySelectorAll("[data-clauseadd]").forEach(function(b){
-      b.addEventListener("click", function(){
-        var t = b.dataset.clauseadd;
-        if (!mayAuthor(t === "group" ? "g_found" : "u_found", t === "group" ? null : t)) return;
-        if (BUILDER && BUILDER.target === t) { openBuilderForm("clause", { target:t }); return; }
-        var o = t === "group" ? GROUP : unitLikeWritable(t);
-        if (!o || !Array.isArray(o.clauses)) return;
-        o.clauses.push(["", ""]);
-        if (o.ukey) renumberUnit(o);
-        fieldSaved(); paint();
-      });
-    });
-    document.querySelectorAll("[data-clauserm]").forEach(function(b){
-      b.addEventListener("click", function(){
-        var a = b.dataset.clauserm.split("|"), t = a[0], i = +a[1];
-        if (!mayAuthor(t === "group" ? "g_found" : "u_found", t === "group" ? null : t)) return;
-        var o = t === "group" ? GROUP : unitLikeWritable(t);
-        if (!o || !Array.isArray(o.clauses) || !o.clauses[i]) return;
-        if ((String(o.clauses[i][0] || "").trim() || String(o.clauses[i][1] || "").trim()) &&
-            !confirm("Remove this line? This cannot be undone here.")) return;
-        o.clauses.splice(i, 1);
-        if (o.ukey) renumberUnit(o);
-        fieldSaved(); paint();
-      });
-    });
-    document.querySelectorAll("[data-capkoadd]").forEach(function(b){
-      b.addEventListener("click", function(){
-        var c = capById(b.dataset.capkoadd);
-        if (!c) return;
-        var t = c.fn ? "fn:" + c.fn : null;
-        if (!mayAuthor("k_found", t)) return;
-        if (BUILDER && BUILDER.target === t) { openBuilderForm("capko", { capId:c.id }); return; }
-        c.keyObjectives.push({ name:"", dir:"≥", target:"", compile:"Latest",
-          weight:null, actual:"", progress:null });
-        fieldSaved(); paint();
-      });
-    });
-    document.querySelectorAll("[data-capkorm]").forEach(function(b){
-      b.addEventListener("click", function(){
-        var a = b.dataset.capkorm.split("|"), c = capById(a[0]), i = +a[1];
-        if (!c || !c.keyObjectives[i]) return;
-        if (!mayAuthor("k_found", c.fn ? "fn:" + c.fn : null)) return;
-        if (c.keyObjectives[i].name &&
-            !confirm("Remove " + c.keyObjectives[i].name + "? This cannot be undone here.")) return;
-        c.keyObjectives.splice(i, 1);
-        fieldSaved(); paint();
-      });
-    });
-    document.querySelectorAll("[data-fncapadd]").forEach(function(b){
-      b.addEventListener("click", function(){
-        var fk = b.dataset.fncapadd;
-        if (!mayAuthor("k_found", "fn:" + fk)) return;
-        if (BUILDER && BUILDER.target === "fn:" + fk) { openBuilderForm("cap", { fnKey:fk }); return; }
-        addCapability(fk);
-        fieldSaved(); paint();
-      });
-    });
-    /* ── THE BUILDER'S DOORS AND BAND (§129) ───────────────────────── */
-    document.querySelectorAll("[data-buildplan]").forEach(function(b){
-      b.addEventListener("click", function(){ openBuilderChooser(); });
-    });
-    /* Scoped to the band: the review dialog carries data-bnav rows of its
-       own, wired by its own painter — a page-wide query here would bind
-       them twice the moment a paint runs under the open dialog (§24). */
-    document.querySelectorAll("#buildband [data-bnav]").forEach(function(b){
-      b.addEventListener("click", function(){ builderGo(b.dataset.bnav); });
-    });
-    document.querySelectorAll("#buildband [data-bpause]").forEach(function(b){
-      b.addEventListener("click", function(){
-        BUILDER = null;
-        leaveModes();
-        paint();
-      });
-    });
-    document.querySelectorAll("#buildband [data-bfinish]").forEach(function(b){
-      b.addEventListener("click", function(){ builderDialogOpen("review"); });
     });
 
     document.querySelectorAll(".sortable").forEach(function(c){
@@ -5878,264 +5610,7 @@
      screen. Both go through the one door now, and it treats them as KEEPING
      what was typed: every field has already written itself (§71.2), so throwing
      it away on the × would discard edits the register has already shown. */
-  /* ══ THE PLAN BUILDER'S DIALOGS AND NAVIGATION (§129, spec 020) ══════
-     The shell's half: everything that needs paint(), the modal, or the
-     navigation state the closure holds. The HTML and the data logic live in
-     builder.js; this half never mints a row and never counts one — it opens
-     doors, moves the navigation, and wires what builder.js rendered
-     (whoever rewrites the DOM re-wires it, §24, §30.1). */
-  var BDLG = null;   /* "choose" | "form" | "review" while a builder dialog is open */
-  function builderDialogOpen(kind){
-    BDLG = kind;
-    openModalHtml("", "", "");
-    builderDialogPaint();
-  }
-  /* The dialog's own painter (§116's shape): it rewrites the DIALOG's body
-     and re-wires it rather than calling paint(), which would rebuild the
-     page behind an inert overlay mid-interaction. */
-  function builderDialogPaint(){
-    if (!BDLG) return;
-    var t = document.getElementById("modal-t"), s = document.getElementById("modal-s"),
-        b = document.getElementById("modal-b");
-    if (!t) return;
-    if (BDLG === "choose") {
-      t.textContent = "Build a plan"; s.textContent = "Whose plan is this?";
-      b.innerHTML = builderChooserHtml();
-      wireBuilderChooser(b);
-    } else if (BDLG === "form") {
-      var def = bformDef(BFORM.kind, BFORM.ctx);
-      t.textContent = def.title;
-      s.textContent = BUILDER ? builderSubjectName(BUILDER.target) : "";
-      b.innerHTML = bformHtml();
-      wireBuilderForm(b);
-      focusNoScroll(b.querySelector("input.bfi, textarea.bfi"));
-    } else if (BDLG === "review") {
-      t.textContent = "The plan as it stands";
-      s.textContent = builderSubjectName(BUILDER.target);
-      b.innerHTML = builderReviewHtml(BUILDER.target);
-      wireBuilderReview(b);
-    }
-  }
-  /* One door out, whatever the way (§116.6): the ×, Escape, Cancel and every
-     finished act all land here, so a dialog can never leave BDLG believing
-     it is still open. Nothing needs rescuing — a form writes nothing until
-     Add, so dismissal IS cancel. */
-  function builderDialogClose(){
-    BDLG = null; BFORM = null; BCHOOSE = null;
-    closeModal();
-  }
-  function openBuilderChooser(){
-    BCHOOSE = { side:"units", confirm:null };
-    builderDialogOpen("choose");
-  }
-  function openBuilderForm(kind, ctx){
-    BFORM = { kind:kind, ctx:ctx || {}, draft:{}, added:0 };
-    bformSeedDefaults();
-    builderDialogOpen("form");
-  }
-  function bformSeedDefaults(){
-    (bformDef(BFORM.kind, BFORM.ctx).fields || []).forEach(function(f){
-      if (f.type === "seg" && f.def != null) BFORM.draft[f.k] = f.def;
-    });
-  }
-  /* Entering: the subject becomes the destination, the first section opens
-     with its pen on. leaveModes() first — it clears EDIT_PAGE, so the pen is
-     switched on AFTER it, never before. */
-  function builderStart(target){
-    builderEnsureCapability(target);
-    BUILDER = { target: target };
-    builderDialogClose();
-    var first = builderSections(target)[0];
-    current = target;
-    builderGo(first ? first.k : "review");
-  }
-  function builderGo(k){
-    if (!BUILDER) return;
-    var sec = builderSectionByKey(BUILDER.target, k);
-    if (!sec) return;
-    if (k === "review") { builderDialogOpen("review"); return; }
-    if (currentSub !== sec.tab) leaveModes();
-    currentSub = sec.tab;
-    CURSEC[sec.tab] = sec.sec;
-    if (sec.pen) EDIT_PAGE[sec.pen] = true;
-    paint();
-    window.scrollTo(0, 0);
-    if (sec.scrollTo) {
-      var el = document.querySelector(sec.scrollTo);
-      if (el) el.scrollIntoView({ block:"center" });
-    }
-  }
-  function wireBuilderChooser(body){
-    body.querySelectorAll("[data-bside]").forEach(function(b){
-      b.addEventListener("click", function(){
-        BCHOOSE.side = b.dataset.bside; BCHOOSE.confirm = null;
-        builderDialogPaint();
-      });
-    });
-    body.querySelectorAll("[data-bcont]").forEach(function(b){
-      b.addEventListener("click", function(){ builderStart(b.dataset.bcont); });
-    });
-    body.querySelectorAll("[data-bpick]").forEach(function(b){
-      b.addEventListener("click", function(){
-        var t = b.dataset.bpick;
-        /* A standing plan is never overwritten on one press: the row turns
-           into the question, and the answer archives first (§49.2). */
-        if (builderHasPlan(t)) { BCHOOSE.confirm = t; builderDialogPaint(); }
-        else builderStart(t);
-      });
-    });
-    body.querySelectorAll("[data-bfresh]").forEach(function(b){
-      b.addEventListener("click", function(){
-        builderStartFresh(b.dataset.bfresh);
-        fieldSaved();
-        builderStart(b.dataset.bfresh);
-      });
-    });
-    body.querySelectorAll("[data-bnofresh]").forEach(function(b){
-      b.addEventListener("click", function(){ BCHOOSE.confirm = null; builderDialogPaint(); });
-    });
-    body.querySelectorAll("[data-bnew]").forEach(function(b){
-      b.addEventListener("click", function(){
-        openBuilderForm(b.dataset.bnew === "unit" ? "newunit" : "newfn", {});
-      });
-    });
-  }
-  function wireBuilderForm(body){
-    var refresh = function(){
-      if (!BFORM) return;
-      var def = bformDef(BFORM.kind, BFORM.ctx);
-      var miss = bformMissing(def, BFORM.draft);
-      var line = body.querySelector(".bfmiss");
-      if (line) {
-        line.hidden = !miss.length;
-        line.innerHTML = 'Still empty: <b>' + esc(miss.join(", ")) +
-          '</b> — the row is added anyway and reads as missing ' +
-          (miss.length === 1 ? 'it' : 'these') + '.';
-      }
-      var reqk = (def.fields.filter(function(f){ return f.req; })[0] || {}).k;
-      var live = !reqk || !!(BFORM.draft[reqk] && String(BFORM.draft[reqk]).trim());
-      body.querySelectorAll("[data-bfadd]").forEach(function(x){ x.disabled = !live; });
-    };
-    body.querySelectorAll("[data-bf]").forEach(function(el){
-      /* Guarded: closing the dialog empties its body, which BLURS the field
-         being typed, which fires `change` into a form that no longer exists
-         — Escape threw on exactly that (§30.1's family, from the far side). */
-      var write = function(){ if (!BFORM) return; BFORM.draft[el.dataset.bf] = el.value; refresh(); };
-      el.addEventListener("input", write);
-      el.addEventListener("change", write);
-    });
-    body.querySelectorAll("[data-bfseg]").forEach(function(seg){
-      seg.querySelectorAll("[data-bfv]").forEach(function(b){
-        b.addEventListener("click", function(){
-          BFORM.draft[seg.dataset.bfseg] = b.dataset.bfv;
-          seg.querySelectorAll("[data-bfv]").forEach(function(x){
-            x.setAttribute("aria-pressed", String(x === b));
-          });
-          refresh();
-        });
-      });
-    });
-    body.querySelectorAll("[data-bfqn]").forEach(function(b){
-      b.addEventListener("click", function(){
-        var k = "q" + b.dataset.bfqn;
-        BFORM.draft[k] = !BFORM.draft[k];
-        b.setAttribute("aria-pressed", String(!!BFORM.draft[k]));
-      });
-    });
-    body.querySelectorAll("[data-bfadd]").forEach(function(b){
-      b.addEventListener("click", function(){ builderFormAdd(b.dataset.bfadd); });
-    });
-    var c = body.querySelector("[data-bfcancel]");
-    if (c) c.addEventListener("click", function(){ builderDialogClose(); paint(); });
-  }
-  function builderFormAdd(mode){
-    var kind = BFORM.kind, d = BFORM.draft;
-    if (kind === "newunit" || kind === "newfn") {
-      var stay = !!BFORM.ctx.stay;
-      var made = kind === "newunit"
-        ? addBusinessUnit(d.name, d.prefix, d.company)
-        : addFunction(d.name, d.format);
-      if (!made) return;
-      fieldSaved();
-      if (stay) { builderDialogClose(); paint(); }
-      else builderStart(kind === "newunit" ? made : "fn:" + made);
-      return;
-    }
-    if (!bApply(kind, BFORM.ctx, d)) { builderDialogClose(); paint(); return; }
-    fieldSaved();
-    if (mode === "more") {
-      BFORM.added++;
-      BFORM.draft = {};
-      bformSeedDefaults();
-      /* The page behind updates so the table shows the row that just landed —
-         inert while the dialog is open, and Islam has already ruled the
-         covered register acceptable in exactly this shape (§116). */
-      paint();
-      builderDialogPaint();
-    } else {
-      builderDialogClose();
-      paint();
-    }
-  }
-  function wireBuilderReview(body){
-    body.querySelectorAll("[data-bnav]").forEach(function(b){
-      b.addEventListener("click", function(){
-        var k = b.dataset.bnav;
-        builderDialogClose();
-        builderGo(k);
-      });
-    });
-    var done = body.querySelector("[data-bdone]");
-    if (done) done.addEventListener("click", function(){
-      /* Finishing closes the band and nothing else — the plan has been live
-         all along (§129). leaveModes() closes the pens with it. */
-      BUILDER = null;
-      builderDialogClose();
-      leaveModes();
-      paint();
-    });
-    var back = body.querySelector("[data-brvback]");
-    if (back) back.addEventListener("click", function(){ builderDialogClose(); paint(); });
-  }
-  /* The pen's add controls, routed into the form in build mode. The pillar
-     INDEX is resolved to its ID here, at open — the id survives a repaint,
-     the index is the thing that goes stale (§48.2). */
-  function builderFormFromRowadd(spec){
-    var a = String(spec).split("|"), what = a[0];
-    if (what === "pillar") { openBuilderForm("pillar", { target:a[1] }); return true; }
-    if (what === "measure" || what === "tactic") {
-      var u = unitLikeWritable(a[1]), it = u && u.items[+a[2]];
-      if (!it) return false;
-      openBuilderForm(what, { target:a[1], pid:it.id });
-      return true;
-    }
-    if (what === "project") { openBuilderForm("project", { capId:a[1] }); return true; }
-    if (what === "deliverable" || what === "outcome" || what === "milestone") {
-      openBuilderForm(what, { projId:a[1] });
-      return true;
-    }
-    return false;
-  }
-  /* The band's own paint, called from paint() once the navigation has
-     settled — the chips read currentSub/CURSEC, so earlier would read the
-     paint before this one. */
-  function paintBuildBand(){
-    var bb = document.getElementById("buildband");
-    if (!bb) return;
-    var show = !!(typeof BUILDER !== "undefined" && BUILDER && current === BUILDER.target);
-    /* The viewer switcher can change who this is between paints (§94): the
-       band asks the shared rule again, and hides — with the mode kept, so
-       switching back finds the build where it stood. */
-    if (show) {
-      var ac = builderRoute(BUILDER.target) === "fnprojects" ? "k_proj" : "u_plan";
-      if (!mayAuthor(ac, BUILDER.target)) show = false;
-    }
-    bb.hidden = !show;
-    bb.innerHTML = show ? builderBandHtml(currentSub, CURSEC) : "";
-  }
-
   function modalDismiss(){
-    if (BDLG) { builderDialogClose(); paint(); return; }
     if (PDLG) { closePersonDialog(false); return; }
     closeModal();
   }
@@ -6228,48 +5703,6 @@
   new ResizeObserver(function(){
     document.documentElement.style.setProperty("--chrome-h", chromeEl.offsetHeight + "px");
   }).observe(chromeEl);
-
-  /* ── AND A SETUP TABLE'S HEAD PINS UNDER THE PAGE'S (§135.10) ──────
-     Same pattern, one component in. `--sethead-h` was a literal 46px, and §135
-     changed the header's height by putting the page's own controls into it —
-     42px where they are small, 49px where a search box sits on the line. A
-     table head pinned 4px BELOW the page header leaves a slot between two
-     pinned things, and scrolling rows show through it: measured, a 4px leak on
-     Focus measures, and the thing Islam photographed.
-
-     A CONSTANT COULD NOT HAVE BEEN RIGHT, which is why this is observed rather
-     than corrected to a better number: the header WRAPS on a narrow window, so
-     its height is a function of the window as well as of the page.
-
-     NOT §28.3's LOOP, and the difference is the whole reason this is safe: the
-     value feeds a sticky OFFSET and nothing else. An offset cannot change the
-     height it was measured from, so there is no path from the output back to
-     the input — unlike v2.8's max-height, which sized a box against a number
-     the box's own size decided.
-
-     Published on the ROOT rather than on the pane, because the pane is replaced
-     on every paint and an inline value would go with it. */
-  var SETHEAD_RO = new ResizeObserver(function(rs){
-    var el = rs[0] && rs[0].target;
-    if (!el) return;
-    document.documentElement.style.setProperty(
-      "--sethead-h", Math.round(el.getBoundingClientRect().height) + "px");
-  });
-  function watchSetupHead(){
-    /* GUARDED, BECAUSE paint() CAN RUN FIRST. `SETHEAD_RO` is a `var` assigned
-       here at the foot of the file, and the function declaration above it
-       hoists while the value does not — the same shape as §113.8's `undefined`
-       unshift. A boot that painted before this line would throw, and a throw
-       mid-paint keeps the previous page on screen with the only witness in a
-       console nobody has open (§118). */
-    if (!SETHEAD_RO) return;
-    SETHEAD_RO.disconnect();
-    var el = document.querySelector(".setuphead");
-    if (el) SETHEAD_RO.observe(el);
-    /* Removed rather than left holding the last Setup page's number: every
-       other page reads the fallback, and a stale value is worse than none. */
-    else document.documentElement.style.removeProperty("--sethead-h");
-  }
 
   /* NO CONDENSE-ON-SCROLL. The chrome is one height, always.
 

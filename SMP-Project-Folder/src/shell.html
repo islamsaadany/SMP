@@ -166,7 +166,7 @@
   </div>
 </div>
 
-<!-- THE BUILDER BAND (§118). Chrome-shaped but NOT inside the sticky chrome:
+<!-- THE BUILDER BAND (§129). Chrome-shaped but NOT inside the sticky chrome:
      a band added to the pinned rows would move --chrome-h and every sticky
      offset under it (§101.5) — it scrolls with the page instead, sitting
      first above the content it narrates. paint() fills and empties it. -->
@@ -1619,7 +1619,7 @@
           }).join("")
         : "";
     }
-    /* The builder's band, once the navigation above has settled (§118). */
+    /* The builder's band, once the navigation above has settled (§129). */
     paintBuildBand();
     wire();
     /* LAST, and after wire(). Every <select> the paint just produced gets a
@@ -2560,7 +2560,7 @@
        share one picker now, wired in wirePicker() below (§35). */
     /* A unit is asked for by name now, in the builder's form — pressing this
        used to mint "New unit 1" with prefix NU and leave the SMO renaming it
-       across three cells (§118). Same minter underneath, one question first. */
+       across three cells (§129). Same minter underneath, one question first. */
     var au = document.getElementById("addunit");
     if (au) au.addEventListener("click", function(){ openBuilderForm("newunit", { stay:true }); });
     /* Capabilities: add, name, remove — the SMO's, behind the same key the
@@ -2706,7 +2706,7 @@
       b.addEventListener("click", function(){
         var e = KOLISTS[+b.dataset.koadd];
         if (!e) return;
-        /* Build mode: the objective arrives whole, through the form (§118).
+        /* Build mode: the objective arrives whole, through the form (§129).
            Only for the subject being built — the Temple's group list keeps
            its inline add. */
         if (BUILDER && e.owner && e.owner.ukey === BUILDER.target) {
@@ -3190,7 +3190,7 @@
        this would have made every edit stay on screen and never reach the
        database until something else happened to repaint.
 
-       Hoisted OUT of wire() in §118: the builder's dialogs write rows from
+       Hoisted OUT of wire() in §129: the builder's dialogs write rows from
        outside wire()'s closure, and a second copy of "how an edit reaches
        the database" is the drift §53.5 exists to stop — so the one function
        moved up a scope, and every old caller still resolves it. */
@@ -4746,14 +4746,14 @@
     document.querySelectorAll("[data-rowadd]").forEach(function(b){
       b.addEventListener("click", function(){
         if (!mayEditPlan()) return;
-        /* IN BUILD MODE A ROW IS ADDED WHOLE (§118): the same control opens
+        /* IN BUILD MODE A ROW IS ADDED WHOLE (§129): the same control opens
            the structured form instead of minting an empty row — the form
            applies through the same minters, so the two paths cannot drift. */
         if (BUILDER && BUILDER.target === current && builderFormFromRowadd(this.dataset.rowadd)) return;
         var a = this.dataset.rowadd.split("|"), what = a[0];
         if (what === "pillar")  { addPillar(unitLikeWritable(a[1])); }
         else if (what === "measure" || what === "tactic") {
-          /* unitLikeWritable, not unitLike (§118's audit): the reading view
+          /* unitLikeWritable, not unitLike (§129's audit): the reading view
              hands a VIRGIN pillars function frozen empties, so the first add
              pushed into an array the function never held — accepted on
              screen, written nowhere (§50.6's fault through a fresh door). */
@@ -4803,7 +4803,7 @@
         paint();
       });
     });
-    /* ── FIRST ROWS FOR THE SURFACES THAT NEVER HAD ONE (§118's audit) ──
+    /* ── FIRST ROWS FOR THE SURFACES THAT NEVER HAD ONE (§129's audit) ──
        The SWOT, the “Who we are” lines and a capability's objectives could
        be EDITED and never STARTED — the editors were built for correcting an
        imported plan, so an empty list rendered nothing to edit and no way to
@@ -4890,7 +4890,7 @@
         fieldSaved(); paint();
       });
     });
-    /* ── THE BUILDER'S DOORS AND BAND (§118) ───────────────────────── */
+    /* ── THE BUILDER'S DOORS AND BAND (§129) ───────────────────────── */
     document.querySelectorAll("[data-buildplan]").forEach(function(b){
       b.addEventListener("click", function(){ openBuilderChooser(); });
     });
@@ -5680,7 +5680,7 @@
      screen. Both go through the one door now, and it treats them as KEEPING
      what was typed: every field has already written itself (§71.2), so throwing
      it away on the × would discard edits the register has already shown. */
-  /* ══ THE PLAN BUILDER'S DIALOGS AND NAVIGATION (§118, spec 020) ══════
+  /* ══ THE PLAN BUILDER'S DIALOGS AND NAVIGATION (§129, spec 020) ══════
      The shell's half: everything that needs paint(), the modal, or the
      navigation state the closure holds. The HTML and the data logic live in
      builder.js; this half never mints a row and never counts one — it opens
@@ -5890,7 +5890,7 @@
     var done = body.querySelector("[data-bdone]");
     if (done) done.addEventListener("click", function(){
       /* Finishing closes the band and nothing else — the plan has been live
-         all along (§118). leaveModes() closes the pens with it. */
+         all along (§129). leaveModes() closes the pens with it. */
       BUILDER = null;
       builderDialogClose();
       leaveModes();

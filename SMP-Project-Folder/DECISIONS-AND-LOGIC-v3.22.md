@@ -15657,7 +15657,7 @@ it is not this section's, and it is recorded here rather than quietly fixed.
 `checks/plan-arrange.py` learned `SMP_CHROME` and to stop counting the new
 download button as a pen (§51.11, on the day the control changed shape).
 
-## 118 · Building a plan on the platform (v3.41, spec 020)
+## 129 · Building a plan on the platform (v3.47, spec 020)
 
 Islam: *"I want the team of the SMO to be able to build a plan on the platform
 directly. so they identify a function or a unit and set which way are they
@@ -15666,7 +15666,7 @@ plans on the platform."* Settled over two mockup revisions
 (`design-mockups/plan-builder/`), and both of his corrections to revision 1
 are the decisions that shape the module.
 
-### 118.1 The decisions
+### 129.1 The decisions
 
 **FUNCTIONS CHOOSE, UNITS DO NOT.** A unit always plans in pillars — the
 scoring model, the import template and every unit page assume it. Only a
@@ -15715,7 +15715,7 @@ new function asks its format; a new projects function gets its first
 capability minted, named after it, because a projects plan has to hang off
 something and `addCapability()` is the one minter (§51.11).
 
-### 118.2 The empty-state audit — part one of the build, and five findings
+### 129.2 The empty-state audit — part one of the build, and five findings
 
 The editors were built for CORRECTING an imported plan, so from a truly
 empty subject several surfaces could be read and never started — §61's trap,
@@ -15751,7 +15751,7 @@ the composite could not read). One minter still, now taking name, prefix and
 company from the builder's form; the key minted from the name; `real:true`;
 the weighting row minted from the factor list.
 
-### 118.3 The shape of the code
+### 129.3 The shape of the code
 
 `src/builder.js` holds state, HTML and data logic — everything that lives in
 the shared global scope. The SHELL owns what its closure owns: navigation,
@@ -15775,7 +15775,7 @@ family from the far side; guarded); and the viewer switcher moves `current`
 to the new viewer's entry (§94.6), so "the band comes back when the SMO
 returns" is true through the chooser's Continue, not by standing still.
 
-### 118.4 What proves it
+### 129.4 What proves it
 
 `src/checks/plan-builder.py` — ten sections, every assertion asking the DATA
 after pressing the CONTROL (§96's question), making every state it measures

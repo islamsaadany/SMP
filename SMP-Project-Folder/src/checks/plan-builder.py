@@ -1,4 +1,4 @@
-"""The plan builder (§118, spec 020): a plan can be BUILT, whole, on the platform.
+"""The plan builder (§129, spec 020): a plan can be BUILT, whole, on the platform.
 
 WHAT THIS PROVES, AND HOW IT HAS TO PROVE IT. Every assertion below asks the
 DATA after pressing the CONTROL (§96's question — "does pressing this change
@@ -109,7 +109,7 @@ with sync_playwright() as p:
     ck("Pillars opens directly with the foundation still empty",
        pg.evaluate("currentSub === 'strategy' && !UNITS['%s'].aspiration" % T))
     pa = pg.query_selector('[data-rowadd^="pillar"]')
-    ck("an empty plan offers the first pillar (§118's audit)", bool(pa))
+    ck("an empty plan offers the first pillar (§129's audit)", bool(pa))
     pa.click(); pg.wait_for_timeout(200)
     pg.fill('[data-bf="name"]', "Route to market")
     pg.query_selector('[data-bfadd="one"]').click(); pg.wait_for_timeout(500)
@@ -150,7 +150,7 @@ with sync_playwright() as p:
     pg.hover('#panel .hoverpen'); pg.wait_for_timeout(100)
     pg.query_selector('#panel [data-page="plan"]').click(); pg.wait_for_timeout(300)
 
-    print("\n── 6 · the surfaces that could never start (§118's audit) ──")
+    print("\n── 6 · the surfaces that could never start (§129's audit) ──")
     pg.query_selector('#buildband [data-bnav="found"]').click(); pg.wait_for_timeout(400)
     ca = pg.query_selector("[data-clauseadd='%s']" % T)
     ck("the first 'Who we are' line can be written", bool(ca))
@@ -187,7 +187,7 @@ with sync_playwright() as p:
        pg.evaluate("capsOfFunction('%s').length === 1 && capsOfFunction('%s')[0].name === 'Quality Assurance'" % (FK, FK)))
     chips = pg.evaluate("Array.from(document.querySelectorAll('#buildband [data-bnav]')).map(b=>b.dataset.bnav)")
     ck("the projects route's chips", chips == ["def", "obj", "proj", "review"], chips)
-    ck("a capability's first objective can be written (import-only until §118)",
+    ck("a capability's first objective can be written (import-only until §129)",
        bool(pg.query_selector("[data-capkoadd]")))
     pg.query_selector("[data-capkoadd]").click(); pg.wait_for_timeout(200)
     pg.fill('[data-bf="name"]', "Defect escape rate")

@@ -1,6 +1,6 @@
 # 020 · Building a plan on the platform
 
-**Version:** v3.41 · **Decisions:** §118 · **Status:** answered; built
+**Version:** v3.47 · **Decisions:** §129 · **Status:** answered; built
 
 Islam: *"I want the team of the SMO to be able to build a plan on the platform
 directly. so they identify a function or a unit and set which way are they

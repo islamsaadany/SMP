@@ -1,4 +1,4 @@
-/* ══ THE PLAN BUILDER (§118, spec 020) ═══════════════════════════════
+/* ══ THE PLAN BUILDER (§129, spec 020) ═══════════════════════════════
 
    The SMO team builds a plan ON the platform: pick a unit or a function —
    or create one — and author the whole plan through the plan's own pages.
@@ -211,7 +211,7 @@ function builderChooserHtml(){
             '<button class="bdanger" data-bfresh="' + esc(r.t) + '">Yes, archive it</button>' +
             '<button class="blink" data-bnofresh="1">Cancel</button></span>'
         /* A subject with content gets TWO ways in: Continue picks up a
-           paused build exactly where the data stands (§118: progress is the
+           paused build exactly where the data stands (§129: progress is the
            plan itself, so nothing was ever "saved" to resume), and Start
            fresh archives first. One button that always cleared would make
            pausing cost the whole plan. */
@@ -543,7 +543,7 @@ function addFunction(name, format){
 }
 
 /* ── The review ───────────────────────────────────────────────────────
-   Not a gate — an honest reading (§118). Rows restate the SAME counts the
+   Not a gate — an honest reading (§129). Rows restate the SAME counts the
    chips read; gaps are counted from the data in the same pass. Empty is
    allowed, and finishing with a gap is a decision the review makes visible. */
 function builderGaps(target){

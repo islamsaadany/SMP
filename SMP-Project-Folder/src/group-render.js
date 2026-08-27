@@ -1385,7 +1385,7 @@ function renderGroupFoundation(){
      the operand went and the `+` went with it, leaving the `return` stranded.
      Cost: a blank page for every viewer, and no edit route to the group's
      clauses, purpose, aspiration or values for anyone including the SMO. */
-  /* Same first-line fix as the unit's (§118's audit): the lead opens with
+  /* Same first-line fix as the unit's (§129's audit): the lead opens with
      the pen, a line can be removed, and the first one can be written. */
   return '<div class="fgrid"><div class="card"><h2 class="sec first">Who we are</h2>' +
       '<dl style="margin:0">' +
@@ -2030,7 +2030,7 @@ function koBand(objectives, page, acKey, owner, isGroup){
 
 function renderUnitFoundation(u){
   var upg = authoring("foundation", "u_found") ? "foundation" : null;
-  /* THE FIRST LINE CAN BE WRITTEN (§118's audit). The pen edited a clause's
+  /* THE FIRST LINE CAN BE WRITTEN (§129's audit). The pen edited a clause's
      TEXT and never its lead, and an empty list rendered nothing to edit and
      no way to add — so a from-scratch unit could not say who it is at all
      (§61's trap on the oldest surface in the product). The lead opens with
@@ -2058,7 +2058,7 @@ function renderUnitFoundation(u){
    Static, like the foundation. Context, not a score — nothing here feeds a
    number. */
 function renderUnitAnalysis(u){
-  /* THE FIRST LINE CAN BE WRITTEN (§118's audit). The pen edited what a file
+  /* THE FIRST LINE CAN BE WRITTEN (§129's audit). The pen edited what a file
      had put here and an empty quadrant offered nothing at all — so a SWOT
      could only ever ARRIVE, never start. Add per quadrant, remove per line,
      both re-asked on the click (§48.2). */
@@ -3693,7 +3693,7 @@ function renderFnFoundation(fnKey){
   var ed = authoring("capfoundation", "k_found");
   return editBar("capfoundation", "k_found") + caps.map(function(c){
     var f = functionOf(c.fn);
-    /* A CAPABILITY'S OBJECTIVES CAN FINALLY BE AUTHORED HERE (§118's audit).
+    /* A CAPABILITY'S OBJECTIVES CAN FINALLY BE AUTHORED HERE (§129's audit).
        They could arrive in a projects file and be READ on this page, and no
        surface in the product could write the first one — the same
        import-only trap as the SWOT and the clauses. Behind the page's own

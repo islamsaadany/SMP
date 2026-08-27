@@ -4157,7 +4157,7 @@ function renderImport(){
       '<span class="pill kind">' + (isPlan
         ? "One generic template &middot; one unit per file"
         : "One file per unit or capability") + '</span></div>' +
-    /* THE SECOND DOOR (§118, spec 020): a plan can be BUILT here as well as
+    /* THE SECOND DOOR (§129, spec 020): a plan can be BUILT here as well as
        uploaded — the two are siblings on the page where plans arrive, and
        building over a standing plan archives it exactly as an upload does. */
     '<div class="bdoor"><b>Build it here</b>' +

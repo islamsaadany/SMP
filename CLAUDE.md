@@ -1870,7 +1870,7 @@ python3 checks/no-jump.py       # nothing moves the register under you — the a
                                 # OPENING a row included, since §110.7
 python3 checks/plan-builder.py  # building a plan ON the platform: the door, the chooser,
                                 # the band's map, every row form asked of the DATA, and the
-                                # empty-state fixes — proved able to fail twice (§118)
+                                # empty-state fixes — proved able to fail twice (§129)
 python3 checks/office-chat.py   # the chat's client half — serves the built file over HTTP,
                                 # because the whole feature is invisible over file:// (§97.9)
 python3 checks/setup-rail.py    # the Setup rail fits the window, every entry is reachable
@@ -1917,8 +1917,8 @@ prior sessions (on HR_ERP) accidentally reverted agreed-upon designs.
 
 ---
 
-*Last Updated: 2026-08-26 &mdash; **v3.41: building a plan on the platform
-(&sect;118, spec 020)**. Islam: *"I want the team of the SMO to be able to
+*Last Updated: 2026-08-26 &mdash; **v3.47: building a plan on the platform
+(&sect;129, spec 020)**. Islam: *"I want the team of the SMO to be able to
 build a plan on the platform directly … they identify a function or a unit
 and set which way are they going to plan pillars or projects and then they go
 in a flow."* Settled over two mockup revisions, and both of his corrections

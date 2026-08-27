@@ -5345,7 +5345,7 @@ function pillarsUsingTheme(ab){
    click into it crashes on a missing array. It arrives inactive-in-content
    but active in the nav, weighted at zero until the SMO fills its factor row,
    and with the group's clause labels as a starting skeleton. */
-/* THE ONE MINTER FOR A UNIT (§118). It existed argless — "New unit 1", key
+/* THE ONE MINTER FOR A UNIT (§129). It existed argless — "New unit 1", key
    "newunit1" — and the builder gives it the three answers a real unit
    arrives with: its name, its code prefix and its company. Three of its old
    habits are corrected in the same breath, each a §-numbered fault:

@@ -62,10 +62,15 @@ Nothing proceeds past this line without an answer.
   default) that opens each email with an editable greeting word ("Dear") and
   the receiver's first name — compound first names kept whole ("Dear Abd El
   Moniem", never "Dear Abd"), substituted on the server per recipient, Send a
-  message only. **Mockup published 2026-08-27** — drawn in the real platform
-  (`design-mockups/email-greeting/`, made by `src/checks/greeting-mockup.py`
-  driving the built file with the send-message stub, both themes).
-  **Waiting on Islam's sign-off; nothing in `src/` touched.**
+  message only. **Mockup published 2026-08-27, now at revision 2** — drawn in
+  the real platform (`design-mockups/email-greeting/`, made by
+  `src/checks/greeting-mockup.py` driving the built file with the send-message
+  stub, both themes). Islam on revision 1: *"the design of the setting is poor.
+  It should be one line you dont need 2 lines .. and no explanations needed in
+  the setting itself it's clear."* The row is ONE `.imp-row` line — label, word
+  box, switch — with no prose, so the greeting and the button row under the
+  message now read at the same weight.
+  **Waiting on sign-off; nothing in `src/` touched.**
 
 ---
 

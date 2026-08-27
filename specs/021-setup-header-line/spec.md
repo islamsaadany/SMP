@@ -59,7 +59,7 @@ offset was being applied inside it.
 
 ## 5 · Send an email
 
-- *Send a message* → **Send an email**; *Inbox* → **In Platform inbox**. Keys
+- *Send a message* → **Send an email**; *Inbox* → **Platform Inbox**. Keys
   unchanged (`send`, `chat`).
 - **Two sections**: *Compose* and *Email settings*. `Setup › Email` leaves the
   rail. Each section keeps its own access key, so a `c_comms` holder without
@@ -79,6 +79,12 @@ pinned boxes is a slot that scrolling rows show through.
 the rail already being sticky against the page. Redundant wherever the rail's
 `max-height` applies; load-bearing where it does not (no `100dvh` support;
 below 900px, where the split stacks and the rail is uncapped).
+
+## 5c · Focus measures sits with Measurement
+
+`grp:"meas"` rather than `grp:"cycle"`. The marks belong to the cycle, but the
+rail's groups answer what somebody came to do, and they came to say which
+measures matter. Nothing else about the page changes.
 
 ## 6 · The company on a person's row
 

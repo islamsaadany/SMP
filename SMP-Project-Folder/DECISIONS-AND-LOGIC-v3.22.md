@@ -17595,6 +17595,24 @@ Vercel's SSO layer fetches the manifest through `vercel.com/sso-api`, which the
 platform's own CSP (`connect-src 'self'`) rightly blocks. Harmless, absent from
 production, and not a reason to widen the CSP.
 
+### 134.5 The provider's refusal was vaguer than the stub's (corrected from production the same day)
+
+The guard shipped keyed on the WORDING — retry only when the 400 names
+thinking — because the stub imitated Google's verbose *"Unknown name"*
+refusal from the documentation. Production answered `gemini-3.6-flash`'s
+refusal with the terse generic *"Request contains an invalid argument."*
+and nothing else; the guard never fired, and the knob took the assistant
+down — the precise fault §134.2 exists to prevent, on its first day.
+
+**§100.3 cuts deeper than it read: a stub models the PROVIDER, and I had
+modelled the documentation.** The signal is the SITUATION now, never the
+wording: any 400 on a request that carried the knob, once per process, after
+the bad-key check. Worst case is one extra request for a genuinely malformed
+ask, once per warm process. The stub speaks production's words verbatim; the
+narrowed guard was put back and watched to fail 2 ways before the widened
+one was believed — and the new assertion's own first version reset the cap in
+the line above measuring that it was off, a test bug its calls-count exposed.
+
 ### 134.4 What proves it
 
 `test-assistant.js` §6: the cap goes out by default; a refused cap is dropped
@@ -17705,7 +17723,7 @@ group headings §117 introduced are readable for the first time: *Own business
 unit* and *Own supporting function*, each splitting into Strategy and
 Reporting. They had been under the second row since the split shipped.
 
-### 135.3 Send an email, and the In Platform inbox
+### 135.3 Send an email, and the Platform Inbox
 
 *"Let's rename send a message to send an email"* and *"rename inbox to In
 Platform inbox."*
@@ -17716,6 +17734,10 @@ end: the composer sends **real email**, and calling it "a message" left it in
 the same word family as the in-platform conversation beside it. With it renamed,
 a bare *Inbox* reads as where those emails land, which is the one thing it is
 not.
+
+**"Platform Inbox", NOT "In Platform inbox"** — Islam shortened it the day after,
+and the shorter one is the better one: the qualifier does the work either way,
+and a rail entry is scanned rather than read.
 
 **THE KEYS DO NOT MOVE.** `send` and `chat` are what the endpoint, `GROUP.chat`
 and four checks name; a rename is a label (§65, §108.3).
@@ -17959,6 +17981,30 @@ gap rather than a slot. It now measures the gap **only while the head is
 actually pinned**, keeps one fine-grained sweep for the symptom, and asserts
 `--sethead-h` equals the header's measured height. With the observer removed it
 fails six ways, naming *"Key Objectives at y=180"*.
+
+### 135.11 Focus measures sits with Measurement
+
+Islam: *"move the focus measures to measurement."*
+
+**IT WAS IN *Running the cycle* FOR A REAL REASON AND IT IS NOT THE BETTER
+ONE.** The marks belong to the cycle — `CYCLE.focus`, cleared when a new one
+opens (§102) — so it genuinely is something you do while a cycle is open, and
+that is why it was grouped there.
+
+But the rail's groups answer *what did you come here to do* (§46), not *which
+table does this write*. Somebody opening this page came to say which measures
+matter, and *Measurement — what the numbers mean* is the heading for that. The
+cycle group is the things you do to RUN a cycle; this is a statement about the
+measures themselves that happens to be re-asked each cycle.
+
+**`grp` IS THE ONLY THING THAT CHANGES.** The key, the access key, the glyph,
+the search keywords and the page are untouched, and `SETUP_GROUPS` is the one
+place order is decided — so nothing outside the def needs to know it moved. It
+lands between Figure sets and Scoring bands.
+
+**And it is asserted of the RAIL, not of the def** (`checks/setup-header.py`): a
+def whose `grp` no longer matched a real group would render nowhere at all
+rather than in the wrong place, and the rail is what somebody scans.
 
 ## 136 · The destination row becomes one line that scrolls (v3.51)
 

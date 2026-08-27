@@ -360,24 +360,6 @@
                   { k:"fill", ac:"c_source", label:"Fill a figure set",
                     when: canPickSets,                                 render:renderSourceSetup }];
         } },
-      /* ── FOCUS MEASURES SITS WITH MEASUREMENT (§135.11) ──────────────
-         Islam: *"move the focus measures to measurement."*
-
-         IT WAS IN *Running the cycle* FOR A REAL REASON AND IT IS NOT THE
-         BETTER ONE. The marks belong to the cycle — `CYCLE.focus`, cleared
-         when a new one opens (§102), so it IS something you do while a cycle
-         is open. But the rail's groups answer *what did you come here to do*
-         (§46), and somebody opening this page came to say which measures
-         matter, which is what *Measurement — what the numbers mean* is for.
-         The cycle group is the things you do to RUN a cycle; this is a
-         statement about the measures themselves that happens to be re-asked
-         each cycle.
-
-         `grp` is the only thing that changes. The key, the access key, the
-         glyph, the keywords and the page are untouched — and the group is
-         the one place order is decided (SETUP_GROUPS), so nothing else needs
-         to know it moved. */
-      { k:"focusset", ac:"c_focus", grp:"meas", label:"Focus measures", glyph:"◎", find:"focus watch highlight measures",                render:renderFocusSetup },
       { k:"bands",  ac:"c_bands",  grp:"meas", label:"Scoring bands", glyph:"▥", find:"scoring bands green amber red threshold colours ranges",        render:function(){ return renderBands() + renderBandsExtra(); } },
       /* TERMINOLOGY, NOT "LABELS" (§108.3). The page holds what THIS tenant
          calls a pillar, a theme, an aspiration — its vocabulary, and the one
@@ -451,17 +433,13 @@
          Communications — the same way, by renaming until each name meant one
          thing. The KEY stays `chat`, which is what the page def, the endpoint,
          `GROUP.chat` and checks/office-chat.py all name. */
-      /* PLATFORM INBOX (§135.3, shortened by Islam). §108.3 named this "Inbox"
-         to break a three-way collision, and the rename has a second job now:
-         with the composer called "Send an email", a bare "Inbox" reads as where
+      /* IN PLATFORM INBOX (§135.3). §108.3 named this "Inbox" to break a
+         three-way collision, and the same rename now has a second job: with
+         the composer becoming "Send an email", a bare "Inbox" reads as where
          those emails land, which is the one thing it is not. This is the
-         conversation people have with the office inside the platform.
-
-         "Platform Inbox", not "In Platform inbox" — his word, and the shorter
-         one is the better one: the qualifier is doing the work either way, and
-         a rail entry is scanned rather than read. The KEY stays `chat`, which
-         the endpoint, `GROUP.chat` and the checks all name (§65, §108.3). */
-      { k:"chat",     ac:"c_chat",  grp:"cycle",  label:"Platform Inbox", glyph:"✉", find:"messages chat conversations questions replies feedback answer inbox",
+         conversation people have with the office INSIDE the platform. The KEY
+         stays `chat` — the endpoint, `GROUP.chat` and the checks all name it. */
+      { k:"chat",     ac:"c_chat",  grp:"cycle",  label:"In Platform inbox", glyph:"✉", find:"messages chat conversations questions replies feedback answer inbox",
         when: function(){ return inOffice() && CHAT.servable(); },
         render:function(){ return CHAT.renderInbox(); } },
       /* §74. A DOING page, so it sits with the cycle rather than beside the
@@ -489,6 +467,7 @@
           return [{ k:"compose", ac:"c_send",  label:"Compose",        render:renderSendMessage },
                   { k:"comms",   ac:"c_comms", label:"Email settings", render:renderComms }];
         } },
+      { k:"focusset", ac:"c_focus", grp:"cycle",  label:"Focus measures", glyph:"◎", find:"focus watch highlight measures",                render:renderFocusSetup },
       /* Only for somebody who has actually been named on a figure. Its reach
          is not a setting (§16.7), so `when` hides it outright rather than the
          matrix answering "none" — a menu entry that opens an empty page is
@@ -1218,7 +1197,7 @@
          it (Foundation), which is not the plan. */
       currentSub = current ? entrySub(current) : null;
     }
-    var parts = tabs.map(function(t, i){
+    document.getElementById("units").innerHTML = tabs.map(function(t, i){
       if (t.folds) {
         /* NO DISCLOSURE ARROW. A ▸/▾ twist promises "this opens and closes",
            which is what these were and are not any more — a switch has two
@@ -1268,25 +1247,7 @@
       return ((i === 1 && !tabs[1].folds) ? '<span class="sep"></span>' : '') +
         '<button role="tab" aria-selected="' + (t.k === current) + '" data-u="' + t.k + '"' +
         '>' + t.label + '</button>';
-    });
-    /* ── ONE LINE THAT SCROLLS, ENDS PINNED (§136, Islam: "Decision 1: B") ──
-       The destinations go into their own scroll region; everything that is a
-       CONTROL rather than a destination — the Group menu, the Units|Functions
-       switch, the gear — stays a direct child of the row, pinned, because a
-       control that can leave the screen is §90's fault arriving sideways
-       (the first draft of B showed exactly that: the switch slid off the
-       left edge). The fades are drawn here and told the truth by the wiring
-       below. */
-    var isDest = tabs.map(function(t){ return !!t.k; });
-    var d0 = isDest.indexOf(true), d1 = isDest.lastIndexOf(true);
-    document.getElementById("units").innerHTML = (d0 === -1
-      ? parts.join("")
-      : parts.slice(0, d0).join("") +
-        '<div class="navclip">' +
-          '<div class="navscroll" id="navscroll">' + parts.slice(d0, d1 + 1).join("") + '</div>' +
-          '<div class="navfade l" hidden></div><div class="navfade r" hidden></div>' +
-        '</div>' +
-        parts.slice(d1 + 1).join("")) + menuHTML();
+    }).join("") + menuHTML();
     /* Only destinations. A fold button lives in the same row but goes nowhere \u2014
        binding it here set current to undefined and reset the page to Group, which
        made expanding a fold navigate. */
@@ -1331,44 +1292,6 @@
       });
     });
     wireMenu();
-    /* ── AND THE SCROLLING HALF IS WIRED HERE (§136) — for the same reason
-       the fold is: this function just destroyed the last set of handlers.
-       Nothing below changes any SIZE, so §28.3's loop cannot form. */
-    var sc = document.getElementById("navscroll");
-    if (sc) {
-      var navclip = sc.parentNode;
-      var fadeL = navclip.querySelector(".navfade.l");
-      var fadeR = navclip.querySelector(".navfade.r");
-      /* A fade is a CLAIM that there is more that way; each side makes it
-         only while it is true, or the row promises names it does not have. */
-      var fades = function(){
-        fadeL.hidden = sc.scrollLeft <= 2;
-        fadeR.hidden = sc.scrollWidth - sc.clientWidth - sc.scrollLeft <= 2;
-      };
-      sc.addEventListener("scroll", fades, { passive: true });
-      /* Re-asked when the ROW resizes (a window drag repaints nothing), so
-         the fades cannot go stale. A fresh observer per paint on a fresh
-         element — the old one dies with the node it watched. */
-      new ResizeObserver(fades).observe(sc);
-      /* A vertical wheel over the row scrolls it SIDEWAYS — only while there
-         is somewhere to go, so everywhere else the wheel stays the page's. */
-      sc.addEventListener("wheel", function(e){
-        if (sc.scrollWidth <= sc.clientWidth) return;
-        if (Math.abs(e.deltaX) >= Math.abs(e.deltaY)) return;
-        sc.scrollLeft += e.deltaY;
-        e.preventDefault();
-      }, { passive: false });
-      /* The lit destination is brought into view by setting scrollLeft on
-         the ROW, never scrollIntoView — that call may also scroll the PAGE,
-         which is §110.7's jump arriving sideways. */
-      var lit = sc.querySelector('button[aria-selected="true"][data-u]');
-      if (lit) {
-        var L = lit.offsetLeft, R = L + lit.offsetWidth;
-        if (L < sc.scrollLeft + 24) sc.scrollLeft = Math.max(0, L - 24);
-        else if (R > sc.scrollLeft + sc.clientWidth - 24) sc.scrollLeft = R - sc.clientWidth + 24;
-      }
-      fades();
-    }
   }
 
   /* A gear. It replaced the word "Manage" in 3.3 - at 11px uppercase in a
@@ -1555,21 +1478,6 @@
     if (f.start != null) { try { el.setSelectionRange(f.start, f.end); } catch (e) {} }
   }
 
-  /* The card a page that could not be drawn leaves in its place (§137). One
-     action, deliberately: an earlier draft carried "Open another page" beside
-     Reload, and it went — the navigation is right above, and a control that
-     does nothing concrete is worse than no control. The technical line is
-     inside a <details> that starts CLOSED. */
-  function failCard(name, msg){
-    return '<div class="failcard">' +
-      '<div class="fc-t">Something went wrong opening this page.</div>' +
-      '<div class="fc-b">Your data is safe. Please reload, or open another page from the menu above.</div>' +
-      '<button type="button" class="editbtn" data-failreload>Reload</button>' +
-      '<details><summary>Technical details</summary>' +
-        '<div class="fc-e">' + esc((name ? name + " · " : "") + String(msg)) + '</div>' +
-      '</details></div>';
-  }
-
   function paint(){
     if (CLICKING) { PAINT_HELD = true; return; }
     var _panel = document.getElementById("panel");
@@ -1743,35 +1651,13 @@
        already makes, in the other direction. */
     pageLineReset();
 
-    /* ── A FAILED RENDER SAYS SO (§137). A throw inside a page's render used
-       to abort paint() and leave the PREVIOUS page standing, with the only
-       witness in the hidden console — so a data fault read as a dead click,
-       and the person reported the wrong symptom (§118.7, and §118's CF tab is
-       exactly how that looked from production). §32's rule one level deeper:
-       after a failure there is exactly one honest thing to show, and it is
-       the failure. The guard sits on the PAGE's render alone — the chrome,
-       the navigation and the tabs above have already painted, which is what
-       makes "open another page from the menu above" a true sentence. The
-       words are Islam's ask ("simple with a more user friendly message",
-       2026-08-27); the error itself is kept, folded behind a closed
-       disclosure, so the office can still read it without it shouting at
-       anybody else. */
-    var body;
-    try {
-      body = (current === "group" || current === "setup" || current === "manage")
-        ? def.render()
-        /* A company is passed its key, the way a function is: there is no
-           UNITS[...] to hand it and inventing a unit-shaped object for something
-           that carries no plan would be a lie about what it is (§68). */
-        : isCo(current) ? def.render(current)
-        : isFn(current) ? def.render(current) : def.render(UNITS[current]);
-    } catch (renderErr) {
-      /* Still said to the console, verbatim — the card is FOR the person, the
-         console line is for whoever is diagnosing with the lid off. */
-      console.error("SMP: this page could not be drawn", renderErr);
-      body = failCard(pageName || (def && def.label) || "",
-                      renderErr && renderErr.message || renderErr);
-    }
+    var body = (current === "group" || current === "setup" || current === "manage")
+      ? def.render()
+      /* A company is passed its key, the way a function is: there is no
+         UNITS[...] to hand it and inventing a unit-shaped object for something
+         that carries no plan would be a lie about what it is (§68). */
+      : isCo(current) ? def.render(current)
+      : isFn(current) ? def.render(current) : def.render(UNITS[current]);
     /* The rail and the page it chose, side by side. `defs` rather than
        SUBS.setup, so a page the viewer may not open is not offered — the rail
        is navigation, and navigation that leads somewhere refused is worse than
@@ -1802,12 +1688,6 @@
             '<h1 class="setupttl">' + esc(pageName) + '</h1>' + pageLineHTML() + '</div>' +
           secrowHTML + body + '</div></div>'
       : body;
-    /* The failure card's one control (§137). Wired here because the card was
-       written into innerHTML two lines up — no inline handlers anywhere
-       (§43.6), and wire() below owes this card nothing: it must work exactly
-       when a page's own wiring cannot be trusted. */
-    var failBtn = _panel.querySelector("[data-failreload]");
-    if (failBtn) failBtn.addEventListener("click", function(){ location.reload(); });
 
     /* Group Performance is four sections; they become a third nav row rather
        than one long scroll. The row exists only where there are sections. */

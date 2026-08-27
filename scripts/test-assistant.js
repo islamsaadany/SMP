@@ -49,19 +49,21 @@ const stub = http.createServer(function (req, res) {
     };
     if (MODE === "refuse") return reply(429, { error: { message: "quota" } });
     if (MODE === "badkey400") return reply(400, { error: { message: "API key not valid. Please pass a valid API key." } });
+    if (MODE === "bad400") return reply(400, { error: { message: "Request contains an invalid argument." } });
     if (MODE === "notfound") return reply(404, { error: { message: "model not found" } });
     if (MODE === "garbage") {
       return reply(200, { candidates: [{ content: { parts: [{ text: "not json at all" }] } }] });
     }
     if (MODE === "empty") return reply(200, { candidates: [] });
-    /* THE PROVIDER THAT NEVER HEARD OF THINKING (§134): a 400 naming the
-       field when it is present, an ordinary answer when it is not — which is
-       how Google actually refuses an unknown generationConfig member. */
+    /* THE PROVIDER THAT REFUSES THE THINKING KNOB (§134.5) — with the words
+       Google ACTUALLY uses, taken verbatim off production: the terse generic,
+       not the verbose "Unknown name" refusal the docs show for a misspelled
+       field. The first stub imitated the documentation, the guard keyed on
+       its wording, and the real refusal sailed past it (§100.3: a stub models
+       the provider, and the provider is what production said). */
     if (MODE === "nothink" && LAST && LAST.generationConfig &&
         LAST.generationConfig.thinkingConfig) {
-      return reply(400, { error: { message:
-        'Invalid JSON payload received. Unknown name "thinkingBudget" at ' +
-        "'generation_config.thinking_config'" } });
+      return reply(400, { error: { message: "Request contains an invalid argument." } });
     }
     if (MODE === "hang") return;                       /* never answers: the timeout path */
     /* THE MODEL'S WORDS ON A HANDOFF ARE A TRAP, and the stub sets it (§104).
@@ -265,6 +267,19 @@ const stub = http.createServer(function (req, res) {
   r6 = await assistant.ask({ kb: kb, question: "x", history: [], who: "w", labels: {} });
   ck("a bad key is never retried into", r6.ok === false && r6.badKey === true && CALLS === 1,
      { calls: CALLS, r: r6 });
+  /* AND A GENERIC 400 WITHOUT THE KNOB IS NOT RETRIED — the retry is about
+     the knob, and once the knob is off a 400 is the question's own problem.
+     The cap is dropped FIRST through a real refusal, then the provider 400s
+     everything: exactly one call, and the error surfaces. (The first version
+     of this assertion reset the cap in the line above measuring it was off —
+     a test bug its own calls-count exposed.) */
+  assistant._resetThinkCap();
+  MODE = "nothink";
+  await assistant.ask({ kb: kb, question: "x", history: [], who: "w", labels: {} });
+  MODE = "bad400"; CALLS = 0;
+  r6 = await assistant.ask({ kb: kb, question: "x", history: [], who: "w", labels: {} });
+  ck("a 400 with no knob in the request is surfaced, not retried",
+     r6.ok === false && CALLS === 1, { calls: CALLS, r: r6.ok });
   assistant._resetThinkCap();
   MODE = "answer";
 

@@ -122,7 +122,7 @@ Nothing proceeds past this line without an answer.
   nobody can see them (§61).
 - **Send a message → Send an email**, with the Email settings folded in as its
   second section (a status table, four fields, a live rendered preview and a
-  test send: not a dropdown). **Inbox → In Platform inbox.**
+  test send: not a dropdown). **Inbox → Platform Inbox**, and Focus measures moves to *Measurement*.
 - **A person's company is sometimes derived and sometimes stored** (§135.6):
   read-only wherever the unit has already answered it, written only where
   nothing else has, so two fields cannot contradict one stored fact.
@@ -215,6 +215,17 @@ the layout, each watched to fail first · qa.py ERRORS: none · test-chat 52/0 �
 test-assistant 33/0 · test-authorize 193/0. **One assertion was rewritten for
 being unfalsifiable** — it measured the row against the panel, and a row is
 inside its own panel by definition.
+
+### v3.50 — the knob's guard keyed on words the provider never says (§134.5)
+
+§134 shipped and went straight down in production: gemini-3.6-flash refuses
+the thinking cap with the GENERIC "400: Request contains an invalid argument."
+— and the self-healing retry only fired when the 400 named thinking, because
+the stub imitated the documentation's verbose refusal instead of the
+provider's real one. The guard now keys on the situation (a 400 on a request
+that carried the knob), never the wording. Stub corrected to production's
+verbatim words; the shipped guard reproduces the production failure 2 ways in
+the suite; 39/0 after.
 
 ### v3.49 — the thinking cap (§134)
 

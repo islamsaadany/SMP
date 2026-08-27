@@ -166,7 +166,16 @@
    collision means a browser holding somebody else's bytes never fetches these.
    `-setuphead` rather than a bare version, because THREE sessions have taken a
    version number out from under this one in a week. */
-const SHELL = "smp-shell-v3.50-setuphead";
+/* v3.50-inbox — §135.3 and §135.11: the rail entry becomes "Platform Inbox" and
+   Focus measures moves into the Measurement group. Two labels and a `grp`, and
+   the built file's bytes changed by 1,295 — which is the whole trigger (§91).
+   The temptation on a change this small is to leave the name alone; a worker
+   caches by NAME, so leaving it is how a returning browser goes on serving
+   itself yesterday's rail out of its own disk.
+
+   Checked against main and against all 29 names this repo has ever served,
+   immediately before the push (§94.12, §94.16). */
+const SHELL = "smp-shell-v3.51-navscroll";
 const ASSETS = [
   "/",
   "/index.html",

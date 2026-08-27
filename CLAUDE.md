@@ -2273,7 +2273,7 @@ the server had classified a custodian's DELIVERABLE report &mdash; and the
 milestone % that &sect;104.10 REQUIRES &mdash; as PLAN and refused them, while
 the screen offered both (`REPORT` had no deliverable family and `milestone`
 never gained `pct`; no capReporting test existed to notice). Fixed and
-asserted by name. **THE OWNER STAYS A NAME, DECIDED BY A MERGE** (&sect;131.4):
+asserted by name. **THE OWNER STAYS A NAME, DECIDED BY A MERGE** (&sect;132.4):
 a keyed `owner`+`ownerKey` picker was built first, and `git fetch` before
 pushing found &sect;130.1 already on `main` from another session &mdash; Islam's
 own wider ask, register-picked owner NAMES on five plan fields, the
@@ -2283,10 +2283,35 @@ owner is already rights-bearing by name and one question must not have two
 answers (&sect;53.5). Proved able to fail three ways before green was believed
 (&sect;94.5): narrowing stubbed &rarr; 2 failures, derivation stubbed &rarr; 6,
 screen gate flattened &rarr; 2. Seed scanned: nobody's standing changes.
-**Flagged, not built** (&sect;131.6): a pillars function still derives no
+**Flagged, not built** (&sect;132.6): a pillars function still derives no
 contributors, and the bar's "View only" pill to a contributor with editable
 rows is the unit side's own long-standing wording &mdash; changing it is a
 decision for both sides at once.*
+
+*Earlier: 2026-08-27 &mdash; **v3.49: the register notices two people
+whose name reads the same (&sect;131)**. Islam: *"for the names you normally
+take the first 2 names but you allow me to amend the name in the edit. can
+you notify me as an issue to address if 2 people their 1st 2 names are the
+same so I can edit one of them."* &sect;81.1 already LENGTHENS the clashing
+guess so the register stays readable, and never told anybody; the pair now
+also joins the **Attention queue** (&sect;116.2) until a Name is amended to
+read apart, which is the act that clears it. **A notice, never a mark**: a
+shared name is not evidence of one human (&sect;87), so the row wears no
+`.dupemark`, the kind sorts LAST in the queue, and anybody the row already
+flags as a possible duplicate is left to that flag &mdash; telling the SMO to
+RENAME a row that may need MERGING sends them to the wrong control.
+**The comparison is what was stored or guessed, never what is drawn**
+(`readName()`: the typed value or the flat two-name guess), because
+&sect;81.1's lengthening is a disambiguation painted OVER the collision
+&mdash; and a TYPED name that still collides is still flagged, since typed
+values are never lengthened and would read as one person for ever. The
+`read` groups ride `registerDupes()`'s existing walk, so nothing changed
+signature and nothing renders differently &mdash; the queue button, band and
+counter carry the new kind through &sect;116's machinery. Proved in
+`checks/duplicates.py` beside the Ahmeds it already injects, watched to fail
+4 ways on the pre-&sect;131 build first (&sect;94.5); the first run against
+the demo found a real pair &mdash; both placeholder company CEOs read as
+"Company CEO,".*
 
 *Earlier: 2026-08-27 &mdash; **v3.48: an owner is picked, a single item
 keeps its rail, and the pinned title's corners (&sect;130)**, with two of the

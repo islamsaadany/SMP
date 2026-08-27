@@ -380,14 +380,26 @@ var UNIT_ROLES = {
 
    The list is the particles this register actually contains, plus the European
    ones a client could arrive with. A word not on it is a name. */
-/* MOVED TO `lib/rules.js` (§130.7), and these are the browser's handles on it.
-   The plan stores what the register's Name column shows now, so the SERVER has
-   to be able to recognise it too — and a name rule written twice is the drift
-   that file exists to prevent (§42). Wrappers rather than renamed call sites:
-   five places here ask for a run of somebody's names, and none of them cares
-   where the answer is computed. */
-var NAME_PARTICLES = SMPRules.NAME_PARTICLES;
-function nameWords(name, n){ return SMPRules.nameWords(name, n); }
+var NAME_PARTICLES = ["abd","abdel","abd-el","el","al","abu","abou","bin","ben",
+                      "ibn","bint","van","von","de","del","della","der","den",
+                      "di","da","dos","du","la","le","st","st.","mac","mc"];
+function nameWords(name, n){
+  var parts = String(name == null ? "" : name).trim().split(/\s+/).filter(Boolean);
+  if (!parts.length) return "";
+  var out = [], names = 0, i = 0;
+  while (i < parts.length && names < n) {
+    /* Take the run of particles, then the word they belong to. A name ENDING
+       in a particle (a truncated row) still terminates, or this loops. */
+    var start = i;
+    while (i < parts.length &&
+           NAME_PARTICLES.indexOf(parts[i].toLowerCase().replace(/[^a-z.-]/g, "")) > -1) i++;
+    if (i < parts.length) i++;
+    else if (i === start) break;
+    names++;
+    out = parts.slice(0, i);
+  }
+  return out.join(" ");
+}
 
 var NAMED_ELSEWHERE_WORDS = 2;
 function personFullName(key){
@@ -844,10 +856,10 @@ function shortName(name){ return nameWords(name, SHORT_NAME_WORDS); }
    not the upload, not the merge, not the door. §87's ladder is Emp ID then
    email and stops, and this adds no rung. Two people really can be "Ahmed
    Mostafa", which is exactly how the twins were made. */
-var KNOWN_NAME_WORDS = SMPRules.KNOWN_NAME_WORDS;
+var KNOWN_NAME_WORDS = 2;
 /* The guess, used when nobody has said otherwise. Kept separate from the
    reader below so the seeded value and a typed one are never confused. */
-function knownGuess(name){ return SMPRules.knownGuess(name); }
+function knownGuess(name){ return nameWords(name, KNOWN_NAME_WORDS); }
 /* What the Name column shows: what was typed, or the guess. Never stores as a
    side effect of being read (§50.6's rule — a reader that creates the field it
    was looking for makes every save carry a phantom change). */
@@ -942,32 +954,10 @@ function displayNames(){
    and `displayNames()` above tells them apart rather than complaining. Only a
    name that cannot be told apart even at eight words is reported.
 
-   §131 AMENDS THAT BY ONE NOTCH, WITHOUT MOVING THE LINE. Two people whose
-   NAME COLUMN reads the same — the first two names, or a typed value that
-   collides — are still not duplicates and never wear the mark; they are
-   QUEUED as something to address (Islam: "notify me as an issue to address if
-   2 people their 1st 2 names are the same so I can edit one of them"). The
-   `read` groups below feed attentionOf() and nothing else: personDupe()
-   deliberately does not read them, because sharing a spoken name is not
-   evidence of being one human, and a queue entry is a notice where a mark is
-   an accusation.
-
    RETIRED ROWS ARE EXCLUDED. They cannot sign in and no upload places them, so
    counting them would report a problem nobody has. */
-/* What the Name column SAYS for this row, before §81.1 lengthens anything:
-   the typed value, or the flat two-name guess. Kept apart from knownName(),
-   which answers with the lengthened display label — the collision worth
-   flagging is in what was stored or guessed, not in the disambiguation drawn
-   over it. And its key: one spelling for both halves of the comparison, or a
-   match reads as a difference (§116.9). */
-function readName(p){
-  return String((p && p.known) || "").trim() || knownGuess((p && p.name) || "");
-}
-function readKey(p){
-  return readName(p).toLowerCase().replace(/\s+/g, " ");
-}
 function registerDupes(){
-  var byId = {}, byAddr = {}, byName = {}, byRead = {};
+  var byId = {}, byAddr = {}, byName = {};
   PEOPLE.forEach(function(p){
     if (!personActive(p)) return;
     var id = String(p.empId == null ? "" : p.empId).trim();
@@ -976,8 +966,6 @@ function registerDupes(){
     if (a) (byAddr[a] = byAddr[a] || []).push(p);
     var n = String(p.name == null ? "" : p.name).trim().toLowerCase().replace(/\s+/g, " ");
     if (n) (byName[n] = byName[n] || []).push(p);
-    var r = readKey(p);
-    if (r) (byRead[r] = byRead[r] || []).push(p);
   });
   function only(m){
     var out = {};
@@ -985,7 +973,7 @@ function registerDupes(){
     return out;
   }
   return { empId: only(byId), email: only(byAddr), name: only(byName),
-           read: only(byRead), likely: likelyDupes() };
+           likely: likelyDupes() };
 }
 
 /* ── THE FOURTH KIND, AND IT IS THE ONE THAT BIT (§87.2) ───────────
@@ -1563,14 +1551,6 @@ function personNamedLines(key){
     if (!u) return;
     reportItems(u).forEach(function(x){
       if (SMPRules.namedOn({ owner:x.owner, collaborators:x.collaborators }, p)) n++;
-    });
-  });
-  /* §132: a project's owner name counts here too — since a project's owner
-     is a Contributor of its function now, the confirmation should say how
-     many of those namings survive the row as plain words. */
-  (GROUP.capabilities || []).forEach(function(c){
-    (c.projects || []).forEach(function(pr){
-      if (SMPRules.namedOn({ owner: pr.owner }, p)) n++;
     });
   });
   return n;
@@ -2215,8 +2195,7 @@ function attentionOf(p, all){
   var why = [];
   /* A COLLISION FIRST: two rows that are one human is the fault that makes
      every other count wrong (§87). */
-  var d = all || registerDupes();
-  var dupes = personDupe(p, d);
+  var dupes = personDupe(p, all || registerDupes());
   if (dupes.length) why.push({ kind:"dupe", say: dupeSentence(dupes) });
   /* Then what they SAID about themselves, which is a question waiting on an
      answer rather than a gap (§56). */
@@ -2250,31 +2229,6 @@ function attentionOf(p, all){
   if (PWSTATES && !PWSTATES.__error && PWSTATES[p.key] === "none" &&
       personActive(p) && p.key !== viewer().key && mayIssuePasswordTo(p))
     why.push({ kind:"nopw", say:"They have never been issued a password." });
-  /* LAST, TWO PEOPLE WHOSE NAME READS THE SAME (§131). Islam: "you normally
-     take the first 2 names but you allow me to amend the name in the edit —
-     notify me as an issue to address if 2 people their 1st 2 names are the
-     same so I can edit one of them." §81.1 lengthens the GUESS so the
-     register itself stays readable; this is the other half — the pair still
-     reads as one name out loud, and a TYPED value that collides is never
-     lengthened at all — so each of them queues until a Name is amended to
-     read apart, which is exactly what clears it. NOT a duplicate and last in
-     the order: two people really can be "Ahmed Mostafa" (§87). Anybody this
-     row already flags as a possible duplicate is left to that flag — telling
-     the SMO to RENAME a row that may need MERGING sends them to the wrong
-     control, and the identical twins would otherwise be said twice. */
-  var reads = (d.read || {})[readKey(p)];
-  if (reads && reads.length > 1) {
-    var flagged = {};
-    dupes.forEach(function(x){ (x.rows || []).forEach(function(r){
-      if (r && r.key) flagged[r.key] = 1; }); });
-    var others = reads.filter(function(x){
-      return x.key !== p.key && !flagged[x.key]; });
-    if (others.length)
-      why.push({ kind:"samename", say:"They read as \u201c" + readName(p) +
-        "\u201d, and so " + (others.length === 1 ? "does " + others[0].name
-          : "do " + others.map(function(x){ return x.name; }).join(" and ")) +
-        ". Amend a Name so each reads apart." });
-  }
   return why.length ? { key:p.key, why:why } : null;
 }
 /* The sentence a duplicate makes, said once so the chip and the queue cannot
@@ -2292,7 +2246,7 @@ function dupeSentence(dupes){
            (others.length ? " (" + others.join(", ") + ")" : "") + ".";
   }).join(" ");
 }
-var ATTN_ORDER = ["dupe", "said", "noident", "noemail", "nopw", "samename"];
+var ATTN_ORDER = ["dupe", "said", "noident", "noemail", "nopw"];
 function attentionQueue(){
   var out = [];
   var all = registerDupes();          /* once for the whole queue, not per row */
@@ -3894,31 +3848,6 @@ function canReportRow(unitKey, x){
   return SMPRules.namedOn({ owner: x.owner, collaborators: x.collaborators }, viewer());
 }
 
-/* ── The function side of the same two questions (§132) ────────────
-   canReport/canReportRow for an fn: target. The whole-function gate is what
-   capReportBody always asked inline; it is a function now because the per-
-   project question has to sit on top of it and two spellings of the same
-   three gates is §53.5's drift. THE LINE IS THE PROJECT: a Contributor of a
-   function is somebody a project names as its owner, and they report every
-   row that project holds — deliverables, outcomes, milestones — and nothing
-   in the project beside it. Same two shared functions the server uses. */
-function canReportFn(fk){
-  if (REVIEW.state !== "open") return false;
-  if (CYCLE.locked && !inOffice()) return false;
-  return grantAt("k_report", "fn:" + fk) === "edit";
-}
-function canReportFnProject(fk, p){
-  if (!canReportFn(fk)) return false;
-  if (!SMPRules.onlyOwnLines(world(), viewer(), "fn", "fn:" + fk)) return true;
-  return SMPRules.namedOn(p, viewer());
-}
-/* A capability's own key objectives belong to no project, so for somebody who
-   speaks only for their own project they are read, never entered. */
-function canReportFnWhole(fk){
-  return canReportFn(fk) &&
-         !SMPRules.onlyOwnLines(world(), viewer(), "fn", "fn:" + fk);
-}
-
 /* ── Speaking for the whole unit (§50.5) ───────────────────────────
    Three acts are not about a row: SUBMITTING, the cycle NOTE, and the deck's
    PICTURE SLIDES. Each speaks for the unit in front of whoever is reading the
@@ -3930,16 +3859,14 @@ function canReportFnWhole(fk){
    A CONTRIBUTOR limited to their own lines does none of them. What they may
    say is about their own rows; a picture slide is the unit's.
 
-   A supporting function HAS contributors since §132 — a project's owner is
-   one, derived from the project's Owner row — so its half asks the same
-   own-lines exclusion the unit's always has. The sentence that stood here
-   ("a function has no contributors to exclude") described the code truly and
-   stopped being true the day the floor reached the projects. */
+   A supporting function has no contributors to exclude — its reporting is the
+   function's, whole — so its half is the two gates its reporting page already
+   applies, asked here rather than restated there. */
 function canSpeakFor(target){
   var t = String(target || "");
   if (t.indexOf("fn:") === 0) {
-    return canReportFn(t.slice(3)) &&
-           !SMPRules.onlyOwnLines(world(), viewer(), "fn", t);
+    return REVIEW.state === "open" && !(CYCLE.locked && !inOffice()) &&
+           grantAt("k_report", t) === "edit";
   }
   return canReport(t) && !SMPRules.onlyOwnLines(world(), viewer(), "unit", t);
 }

@@ -79,7 +79,12 @@ with sync_playwright() as p:
     # The whole reason keywords exist: these words appear on no label.
     for word, want in [("logo", "brand"), ("password", "people"), ("upload", "import"),
                        ("threshold", "bands"), ("permissions", "access"),
-                       ("vocabulary", "labels"), ("reply-to", "comms")]:
+                       ("vocabulary", "labels"),
+                       # §130.4: the Email page became Send an email's second
+                       # section, so its keywords moved onto that def. The
+                       # errand is unchanged — "where do I set the reply-to" —
+                       # and it still lands somewhere that answers it.
+                       ("reply-to", "send")]:
         type_q(pg, word)
         got = shown(pg)
         ck("'%s' finds %s" % (word, want), want in got, got)
@@ -113,7 +118,11 @@ with sync_playwright() as p:
     type_q(pg, "")
     ck("the folded group is folded again, not left open",
        "brand" not in shown(pg), shown(pg))
-    ck("everything else is back", len(shown(pg)) == len(everything) - 2,
+    # THE NUMBER IS COUNTED, NOT WRITTEN DOWN (§130.4 removed a row from this
+    # very group). A literal here fails the day somebody adds or moves a page,
+    # which is a check reporting a change as a fault.
+    folded = pg.eval_on_selector_all('[data-railitems="look"] .ritem', "e=>e.length")
+    ck("everything else is back", len(shown(pg)) == len(everything) - folded,
        (len(shown(pg)), len(everything)))
     # Put it back for the blocks below.
     pg.evaluate("""()=>{const h=document.querySelector('.rgroup[data-railgrp=\\"look\\"]');

@@ -16946,3 +16946,246 @@ project-tables, tour, page-width, setup-overview) are green.
 authoring surface anywhere (the Overview says its foundation is the
 parent's), so the builder's pillars-function route carries Plan and Review
 only — giving them a surface is a decision, not a tidy-up.
+
+---
+
+## 130 · The Setup header line, the marking table, and a repaired matrix (v3.48)
+
+Eleven things Islam asked for after using the Setup pages on his own laptop.
+Settled from two mockups made of the real built platform
+(`design-mockups/setup-refinements/`), both signed off before a line of `src/`
+was touched. Seven of the eleven turn out to be **one standard applied to
+sixteen pages**, and the rest are three separate decisions and one repair.
+
+### 130.1 One line, and the page's controls are on it
+
+*"For the people register bring all the buttons and search bar to the sticky
+header line"*, *"remove the smo pill and 10 names and 10 mapped"*, *"remove
+the briefing grey paragraph"*, and the same for the Official BU list, Business
+units, Companies, Functions, Capabilities and Figure sets.
+
+**§121.2 LEFT THE CONTROLS ON A ROW OF THEIR OWN FOR A GOOD REASON, AND THAT
+REASON FORBADE THE FAKE MOVE RATHER THAN THE MOVE.** That section pinned the
+page's NAME and recorded why it stopped there: a negative margin pulled the
+control row up under the pinned title, and because that row was not itself
+sticky, scrolling slid it out and left a stray *Clear plan* floating above the
+header. **A sticky box may only overlap something that pins with it.** The
+answer is not to pull the row up — it is to put the controls INSIDE the header,
+where they pin with the name.
+
+**THE CONTROLS ARRIVE THE WAY THE NAME ALREADY DOES.** The shell draws the
+header and the controls are produced deep inside each page's own render, which
+is exactly the problem `PAGE_TITLE` solves in the other direction (§121.1). So
+`PAGE_TOOLS` and `PAGE_ACTS` are its two siblings: reset by the shell before
+the page renders, read after it. Two slots and not one, because the search box
+and the buttons are different things and the search sits left of them on every
+page that has both. A caller outside a Setup page still gets its old row —
+there is no such caller today, and a silent loss of every control on the day
+one appears is not a trade worth making.
+
+**THE COUNT CHIPS AND THE `SMO` PILL GO EVERYWHERE, INCLUDING THE TWO PAGES HE
+DID NOT NAME.** The chrome says who you are on every page, and the table under
+the header is how big the list is — §122 removed the badge and one copy of the
+count from the register on exactly those two arguments and left the other copy
+standing, which is what a rule half-applied looks like. Reporting cycle and
+Import & archives were not on his list and are done too, because an identity
+pill surviving on two pages after leaving eight reads as a mistake rather than
+as a decision.
+
+**`alerts` IS WHAT SURVIVES, AND IT IS NOT THE SAME THING WITH A SHORTER NAME.**
+*"10 names"* is the list; *"3 names on people and not on this list"* is
+something outstanding. A page keeps the second and loses the first — the
+Official BU list's stray warning, the cycle's claim requests, Capabilities'
+unassigned count. *"All assigned"* went with the pill: a green chip saying
+nothing is wrong is lit almost always, and §41's budget says a mark that is
+always lit is not a mark.
+
+**THE QUICK FILTERS AND THE ROW COUNT GO, THE WAY THE REGISTER'S DID** (his
+call, asked directly: *"drop like the way register quick filters were
+dropped"*). **Nothing is hidden by it, and that was checked rather than
+assumed**: every row carries `data-tkrow="active|retired"` and every one is
+drawn, so the chip narrowed a view and never revealed rows the table was
+holding back. A retired unit is still a row on the page. `TKFILTER`, the chip
+markup, its handler and `[data-tkcount]` are deleted rather than left unused
+(§24).
+
+**AND THE FIRST SECTION FOLLOWS THE HEADER.** `.section`'s 26px top margin is
+the gap BETWEEN sections, and with the control row gone the first one was
+spending it on nothing — 42px of air between a pinned header and the table
+under it. Only the first: the gap between two sections is still that.
+
+### 130.2 Roles & access — the damage, and its cause
+
+*"In roles and access remove the briefing grey paragraph and check the table as
+the design is damaged."* He was right, and it has one cause.
+
+**`.acgrid` IS `overflow-x:auto`, WHICH MAKES THE BOX — NOT THE PAGE — WHAT ITS
+HEADER PINS AGAINST.** §121.4 gives every Setup table's `thead th` the page's
+own offset (`--chrome-h + --rail-gap + --sethead-h`, 141px here), so inside a
+scroll container that offset was applied to the container: the header was
+pushed **141px down inside the table**, landing on rows three and four.
+Measured, all twelve header cells reported one position.
+
+**IT IS THE FAULT §121.4 ALREADY WROTE DOWN, ON THE ONE TABLE IT FORGOT.** That
+rule excludes `.peoplebox` and `.srctable` for this exact reason — its own note
+says applying a page offset there "put the register's headings 293px down,
+measured". `.acgrid` was missed.
+
+**STATIC RATHER THAN `top:0`, AND THAT IS THE DECISION.** This matrix is nine
+rows and scrolls the page by about 60px on an ordinary window, so a sticky head
+buys nothing — and its head is TWO ROWS deep with cells spanning both, a shape
+no sticky offset handles well in every engine. A head that cannot pin correctly
+is better not pinned.
+
+**AND THE DAMAGE WAS HIDING SOMETHING.** With the header repaired, the two
+group headings §117 introduced are readable for the first time: *Own business
+unit* and *Own supporting function*, each splitting into Strategy and
+Reporting. They had been under the second row since the split shipped.
+
+### 130.3 Send an email, and the In Platform inbox
+
+*"Let's rename send a message to send an email"* and *"rename inbox to In
+Platform inbox."*
+
+§108.3 broke a three-way collision — Messages, Send a message, Communication —
+by naming each page after the one thing it did. This finishes it from the other
+end: the composer sends **real email**, and calling it "a message" left it in
+the same word family as the in-platform conversation beside it. With it renamed,
+a bare *Inbox* reads as where those emails land, which is the one thing it is
+not.
+
+**THE KEYS DO NOT MOVE.** `send` and `chat` are what the endpoint, `GROUP.chat`
+and four checks name; a rename is a label (§65, §108.3).
+
+**AND THE INBOX STOPPED SAYING "MESSAGES".** Its own `cfgHead` printed a heading
+the rail did not — the duplication §121.1 removed from five pages, invisible to
+that sweep because the whole feature needs a server and every screen check opens
+the built file over `file://` (§94.11).
+
+### 130.4 The email settings are a sub-panel, not a dropdown
+
+Islam asked which: *"would it be better as a drop down or a sub panel for
+settings?"*
+
+**A SUB-PANEL, AND SPECIFICALLY A SECOND SECTION ON THE PAGE.** A dropdown is
+right for the inbox's seven switches (§98). This is a status table, four
+fields, a **live rendered preview of the message** and a test send: a rendered
+email inside a dropdown is not a dropdown. It is the shape Figure sets (§46.2)
+and Import & archives (§108.4) already use — one rail entry, two sections —
+and, exactly as there, **each section keeps its own gate**, so somebody holding
+`c_comms` and not `c_send` still reaches the settings half and `paint()` drops
+the entry for somebody holding neither.
+
+**`Setup › Email` LEAVES THE RAIL**, and the group it was in is renamed with it:
+*Branding & email* no longer has an email in it, and a rail naming something it
+does not hold is §121.1's fault pointing the other way.
+
+### 130.5 Focus measures — a switch, a destination row, and a real table
+
+*"In the focus measures remove the part in the screenshot, turn the big button
+to only On and Off switch and bring it to the sticky header line, and rather
+than a dropdown for the units make it like the navigation at the top, and make
+the table headers design better like the other tables like registry."*
+
+**THE SWITCH IS A SEGMENTED PAIR** — press the state you want, rather than a
+240px worded button reading "Focus measures are on" which is a sentence where a
+switch belongs. Its own class and not `.navswitch`: that one is scoped to
+`.units` and paints white-on-navy, and reaching for it here is §65.9 exactly.
+
+**THE GREY NOTE WENT WITH IT, AND IT WAS CARRYING A BUG NOBODY HAD REPORTED**:
+`marks + " " + plural(marks, "mark")` printed *"0 0 marks"*, because `plural()`
+already puts the number in. What the note was EVIDENCE FOR — that switching off
+keeps every mark (§102) — is asserted of the data now instead of of a sentence.
+
+**THE DESTINATIONS CARRY THEIR OWN COUNTS.** A dropdown answers "which one" and
+hides where the work was left; a row says both at once. §16.7a settled the
+identical question on the source-of-figures page, and this is that answer
+applied to the page it was borrowed from.
+
+**AND THE FUNCTIONS ARE ON IT, IN BOTH OF THEIR SHAPES.** `focusBands(key)` is
+one builder asked with a destination: a unit's key objectives and pillars; a
+**pillars function**'s, through `fnAsUnit()`, identically; and a **capability
+function**'s capabilities, each banding its own key objectives. Islam, asked
+which rows a capability function offers: *"agreed."* **The ids were already
+there** — `renumberCapability()` has minted `cap1-KO1` since the capability
+model existed — which is what makes this cheap rather than a migration.
+
+**THE GROUP'S FOCUS BOARD GROWS THE SAME HALF, OR THE MARKS ARE STORED WHERE
+NOBODY CAN SEE THEM** (§61). It walks `focusSubjects()` now, and its first
+column is *Where* rather than *Business unit*. A function's cell says
+"supporting function" where a unit's says its weight: a function carries no
+weight in the group's score and never has, and inventing one to keep the column
+tidy would be a number that means nothing.
+
+### 130.6 The company is sometimes derived and sometimes stored
+
+*"In the registry, for the fields of the users we need to add the company as
+some users belong only to a company not a unit"* — and, asked about the
+collision, *"company field beside the unit, some people belong to a company but
+not a unit like how the CEO belongs to the group only."*
+
+**A PERSON SITS IN EXACTLY ONE PLACE, AND THAT IS BUILT IN RATHER THAN
+HABITUAL**: `attachPersonAt()` clears unit, function and company before setting
+one, and `personAt()` gives one answer. Sign-in, the Official BU list, roles and
+the Overview all rest on it. So a second dropdown that could disagree with the
+first is the pair §110 removed from this very dialog.
+
+**THE RESOLUTION IS THAT THE FIELD IS READ-ONLY WHEREVER THE UNIT HAS ALREADY
+ANSWERED IT.** Somebody in Mobile is in Distribution — `units.company` says so
+(§23) — so the field shows it, greyed, with *"from the unit above"* beside it.
+Somebody with no unit is the case Islam is describing, and there the field is
+the answer and is written, through `attachPersonAt()` like everything else. One
+stored fact, two fields, and they cannot contradict each other because only one
+of them is ever writable.
+
+**COMPANIES LEFT THE UNIT DROPDOWN**, or the same answer would be in two
+controls by the back door — and **that broke granting a Company CEO**, found by
+`checks/role-picker.py` rather than by reading. Two things follow: the refusal
+names the field that can answer it (*"Set the Company first"* — a refusal
+pointing at a control that no longer offers the answer is §16.7's dead end), and
+**either half finishes it** (§110), so answering the Company while a refusal is
+standing completes the grant.
+
+**AND THE DIALOG GAINED A ROW, WHICH IS RECORDED RATHER THAN GLOSSED.** Four
+fields do not fit a three-column grid in one row, so *Job title* is full width
+and the three places — Official BU, Unit or function, Company — sit side by
+side, which is where somebody compares them. The dialog is 614px where it was
+558, so a 640px-tall window now scrolls it by 50px. That is the price of the
+field, stated: §122.5's rule, that a check left asserting a number which is no
+longer true is worse than the pixels.
+
+### 130.7 What was measured, and what is still open
+
+`checks/setup-header.py` walks every Setup page and was **proved able to fail
+before its green run was believed — 33 failures against the previous build**
+(§94.5). Three things it does the hard way: the box somebody can SEE as well as
+the inner one (§122.4), every control PRESSED rather than counted (§70, §93.4),
+and marking asked of `CYCLE.focus` rather than of a lit tick (§96).
+
+**TWO OF ITS OWN ASSERTIONS COULD NOT FAIL WHEN FIRST WRITTEN**, and both are
+worth keeping. The chip check was scoped to `.setuphead`, so it passed on a
+build where the chips were alive one row lower — §113.8's blind spot, an
+assertion satisfied by both sides vanishing. And the matrix section measured
+`tr.getBoundingClientRect()`: **a table row has no box of its own once its cells
+are positioned**, so it went on reporting the un-stuck layout while every `th`
+had been shoved 141px down, and it called the broken build clean at three scroll
+positions. It measures the CELLS now. A third: the page had to be given
+something to scroll — at 1560×900 this matrix scrolls by 60px, so the check
+measured an unscrolled page three times (§94.2).
+
+**FLAGGED, NOT FIXED.** The Email settings section's note explaining that the
+API key and the from-address live in the deployment's environment variables went
+with the other briefing paragraphs. It is the one of the sixteen that stated a
+fact rather than describing how a setting works (§127's distinction), and
+without it somebody will look for a field to paste a key into and find none.
+Putting it back as a hover on the section heading is a decision, not a
+tidy-up — and `.tip` opens on hover and focus but not on tap outside the chat
+panel (§127), so it would be unreachable on a tablet.
+
+**STILL NOT REPRODUCED**: the left rail's *"SETUP"* header and search bar,
+which Islam reports as not sticky. Measured at nine window sizes from
+1920×1080 to 1000×650, scrolled to 300/800/1500px, on this build and on main's:
+they hold at 96px and 136px in every one. Two things that would feel like it
+are named for him — the rail list has its own scrollbar below about 900px of
+window height, and the group headings scroll away inside that list — and it is
+left open rather than guessed at.

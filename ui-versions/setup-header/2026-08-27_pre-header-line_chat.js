@@ -785,15 +785,7 @@ var CHAT = (function(){
 
   function renderInbox(){
     var c = chatCfg();
-    /* NAMED WHAT THE RAIL NAMES IT (§121.1, §130.3). Islam: *"in the page of
-       inbox … remove the word messages."* It was printing "Messages" under a
-       rail entry that said "Inbox", which is the duplication §121.1 removed
-       from five pages — and this page was invisible to that sweep, because the
-       whole feature needs a server and every screen check opens the built file
-       over file:// (§94.11). Saying the same word as the rail is what makes the
-       heading drop; the settings dropdown rides up onto the pinned line with
-       everything else (§130). */
-    return cfgHead("In Platform inbox", [], null, false, null, null,
+    return cfgHead("Messages", [], null, false, null, null,
         '<span class="chsetwrap">' + settingsHtml() + '</span>') +
       /* OFF IS SAID ON THE PAGE, because this is the one screen that still
          works when it is off and the one place it can be turned back on.

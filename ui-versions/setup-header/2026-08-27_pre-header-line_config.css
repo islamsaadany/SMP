@@ -669,85 +669,6 @@
      name does not read in two weights. */
   .setupttl { margin:0; font:700 24px/1.2 var(--serif); color:var(--ink);
               letter-spacing:-.01em; }
-
-  /* ══ THE PAGE'S CONTROLS SHARE THE PINNED LINE (§130) ═════════════
-     Islam, of six Setup pages: *"bring all the buttons and search bar to the
-     sticky header line."*
-
-     `nowrap`, and the title is what gives way. The controls are a fixed set of
-     real buttons — a search box, a dropdown, a pen — and there is no honest
-     way to make them narrower; a long page name is a string that can ellipsise
-     without anybody losing a control (§122.4's own fault, which was a header
-     silently becoming two rows while its inner box reported one).
-
-     The search FLEXES and the buttons do not, for the same reason. */
-  .setuphead.withacts { gap:12px; flex-wrap:nowrap; padding-bottom:10px; }
-  .setuphead.withacts .setupttl { flex:0 1 auto; margin-right:auto; min-width:0;
-                                  overflow:hidden; text-overflow:ellipsis;
-                                  white-space:nowrap; }
-  .setuphead .headtools { flex:0 1 280px; min-width:110px; display:flex; }
-  .setuphead .headtools .tk-bar { display:flex; margin:0; padding:0; border:0; width:100%; }
-  .setuphead .headtools .tk-bar input { width:100%; }
-  .setuphead .hright { margin:0; display:flex; align-items:center; gap:8px; flex:none; }
-
-  /* ══ A SEGMENTED SWITCH, IN THE PANE'S OWN COLOURS (§130.5) ════════
-     The navigation's Units | Functions control is the shape; its CSS is not,
-     because `.units .navswitch` paints white-on-navy and this sits on the page
-     (§65.9 — a class name is one namespace, and a control wearing another
-     component's clothes is how the access matrix's eye ended up 11px low). */
-  .segsw { display:inline-flex; align-items:center; background:var(--surface-2);
-           border:1px solid var(--line); border-radius:7px; overflow:hidden; }
-  .segsw .seg { background:none; border:0; cursor:pointer; padding:6px 13px;
-                font:700 12.5px/1 var(--sans); color:var(--ink-3);
-                transition:background .12s, color .12s; }
-  .segsw .seg + .seg { box-shadow:inset 1px 0 0 var(--line); }
-  .segsw .seg.on { background:var(--surface); color:var(--ink); }
-  .segsw .seg:not(.on):hover { color:var(--ink-2); }
-  .segsw .seg:focus-visible { outline:2px solid var(--gold); outline-offset:-2px; }
-
-  /* ══ WHERE THE MARKING IS BEING DONE (§130.5) ══════════════════════
-     The destinations read as the page's own tabs — the same underline the
-     Setup pane's section row already uses, so a row of places and a row of
-     sections do not need two visual languages. The count is drawn only where
-     there is one (§108.10's rule: a pill that can say zero says nothing). */
-  .fnav { display:flex; align-items:center; gap:12px; margin:0 0 14px;
-          border-bottom:1px solid var(--line); flex-wrap:wrap; }
-  .fnav .segsw { flex:none; margin-bottom:6px; }
-  .fnav-dests { display:flex; gap:2px; flex-wrap:wrap; }
-  .fnav-dests button { background:none; border:0; border-bottom:2px solid transparent;
-      font:600 13.5px/1 var(--sans); color:var(--ink-3); padding:9px 11px; cursor:pointer;
-      margin-bottom:-1px; display:flex; align-items:center; gap:6px; }
-  .fnav-dests button:hover { color:var(--ink-2); }
-  .fnav-dests button[aria-selected="true"] { color:var(--ink); font-weight:700;
-      border-bottom-color:var(--gold); }
-  .fnav-dests button:focus-visible { outline:2px solid var(--gold); outline-offset:2px; }
-  /* THE GROUND MOVES, NOT THE MARK (§38.5, and this file records it by number
-     because it keeps happening): `--gold-deep` on `--surface-2` measures
-     4.45:1 and wants 4.5. Walked into it anyway, and caught by the sweep at
-     4.45 — on `--surface` the same mark clears with room to spare. */
-  .fnav-n { font:700 10px/1 var(--mono); font-style:normal; color:var(--gold-deep);
-            background:var(--surface); border:1px solid var(--line);
-            border-radius:9px; padding:2px 6px; }
-
-  /* ══ THE MARKING TABLE (§130.5) ════════════════════════════════════
-     A real table at last, headed like the register. The band row is a `<th>`
-     inside the body so the grouping travels with the rows; `position:static`
-     because §121.4 pins every `thead th` on a Setup page and a band is not a
-     heading of the table. */
-  .ftable table { table-layout:fixed; width:100%; }
-  .ftable tr.fband th { background:var(--surface-2); color:var(--ink-2); text-align:left;
-      font:700 11px/1.2 var(--sans); letter-spacing:.06em; text-transform:uppercase;
-      padding:7px 10px; border-top:1px solid var(--line); position:static; }
-  .ftable td.fmeas { color:var(--ink); font-weight:600; }
-  .ftable td.ftar { font-family:var(--mono); font-size:12px; color:var(--ink-2); }
-  .ftable tr.fon td { background:var(--attn-bg); }
-  .ftable .fmark-w { font:600 11px/1 var(--sans); color:var(--ink-3); margin-left:8px;
-      display:inline-block; min-width:46px; text-align:left; }
-  /* AND ON THE MARKED ROW'S OWN GROUND IT IS THE `-tx` TWIN (§38.4): the
-     accent that works as a FILL is 4.34:1 as TYPE over `--attn-bg`, which is
-     the whole reason every scoring colour has a word-coloured sibling. */
-  .ftable tr.fon .fmark-w { color:var(--attn-tx); }
-  .ftable td.fnone { color:var(--ink-3); font-style:italic; }
   /* The page's own controls sit beside the name and stay reachable with it —
      Islam, asked whether the header carries anything besides the title: "ok".
      `.phead2` is the row each page already builds for them; where its heading
@@ -763,14 +684,6 @@
                              min-height:0; justify-content:flex-end; }
   .setuppane .phead2.named .hright { margin-left:0; }
   .setuppane .phead2.named:empty { display:none; }
-
-  /* THE FIRST SECTION FOLLOWS THE HEADER (§130). `.section`'s 26px top margin
-     is the gap BETWEEN sections, and with the controls row gone the first one
-     was spending it on nothing — 42px of air between a pinned header and the
-     table under it. Only the first: the gap between two sections is still the
-     gap between two sections. */
-  .setuppane .setuphead + .section,
-  .setuppane .setuphead + .secrow { margin-top:0; }
 
   /* ── AND THE TABLE'S HEAD GOES WITH IT (§121.4) ───────────────────
      On the register at 33 rows the headings are gone by the time you are
@@ -789,26 +702,7 @@
      down, measured. So they are excluded rather than overridden: two rules
      fighting over one thead is how a head ends up pinned to neither. */
   .setuppane { --sethead-h: 46px; }
-  /* AND `.acgrid` IS THE THIRD, FOUND BY ISLAM RATHER THAN BY A CHECK (§130.2).
-     *"in roles and access … check the table as the design is damaged."*
-
-     It is `overflow-x:auto`, which makes the BOX — not the page — what its head
-     pins against, so the page offset below was applied inside it and pushed the
-     head 141px DOWN, onto rows three and four. Measured: all twelve header
-     cells reported one position. That is the exact fault the note above records
-     about the register ("293px down"), on the one table the exclusion missed.
-
-     STATIC RATHER THAN `top:0`, and that is the decision. This matrix is nine
-     rows and scrolls the page by 60px on an ordinary window, so a sticky head
-     buys nothing here — and its head is TWO ROWS deep with cells spanning both,
-     which is a shape no sticky offset handles well in every engine. A head that
-     cannot pin correctly is better not pinned.
-
-     REPAIRING IT REVEALED WHAT IT WAS COVERING: the "Own business unit" and
-     "Own supporting function" group headings, which had been under the second
-     row since §117 split them. */
-  .setuppane .cfg.acgrid table thead th { position:static; }
-  .setuppane .cfg:not(.peoplebox):not(.srctable):not(.acgrid) table thead th {
+  .setuppane .cfg:not(.peoplebox):not(.srctable) table thead th {
       position:sticky; z-index:4;
       top:calc(var(--chrome-h, 118px) + var(--rail-gap, 12px) + var(--sethead-h));
       background:var(--panel); }

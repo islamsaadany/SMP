@@ -2114,31 +2114,17 @@ function renderUnitAnalysis(u){
    across the groups the row-spanning cell creates and make the unit boundaries
    harder to see, which is the thing that actually needs to be visible here. */
 function renderFocusBoard(){
-  /* ── AND THE FUNCTIONS ARE ON IT (§130.5) ─────────────────────────
-     Marking reaches supporting functions now, and a mark the board cannot show
-     is a mark stored where nobody can see it — §61's trap, which is exactly
-     what "built and unreachable" looks like from the other end. So the board
-     walks the same `focusSubjects()` the marking page does, and a row's
-     subject is a DESTINATION rather than a unit.
-
-     THE WEIGHT LINE IS A UNIT'S ONLY. A function carries no weight in the
-     group's score and never has (§59), so the cell says the name alone rather
-     than inventing a number to keep the column tidy. */
-  var subs = focusSubjects();
-  var all = subs.units.concat(subs.fns);
-  var live = all.filter(function(x){ return focusIn(x.key).length; });
+  var live = activeKeys().filter(function(k){ return unitFocus(UNITS[k]).length; });
   var totals = { over:0, met:0, short:0, none:0, total:0 };
 
-  var body = live.map(function(sub, ui){
-    var u = UNITS[sub.key], items = focusIn(sub.key);
+  var body = live.map(function(k, ui){
+    var u = UNITS[k], items = unitFocus(u);
     return items.map(function(x, i){
       var st = focusStanding(x.m.progress);
       totals[st.key]++; totals.total++;
       return '<tr class="' + (ui % 2 ? "alt " : "") + (i === 0 ? "unitstart" : "") + '">' +
-        (i === 0 ? '<td class="unitcell" rowspan="' + items.length + '"><b>' + esc(sub.name) + '</b>' +
-                   (u ? '<span class="why" style="margin:3px 0 0">weight ' + u.weight + '%</span>'
-                      : '<span class="why" style="margin:3px 0 0">supporting function</span>') +
-                   '</td>' : '') +
+        (i === 0 ? '<td class="unitcell" rowspan="' + items.length + '"><b>' + esc(u.name) + '</b>' +
+                   '<span class="why" style="margin:3px 0 0">weight ' + u.weight + '%</span></td>' : '') +
         '<td>' + esc(x.m.name) + '</td>' +
         '<td class="cc"><span class="why" style="margin:0">' + esc(x.src) + '</span></td>' +
         '<td class="num">' + (x.m.target ? esc(x.m.target) : '<span class="missing">Missing</span>') + '</td>' +
@@ -2148,8 +2134,8 @@ function renderFocusBoard(){
     }).join("");
   }).join("");
 
-  var unmarked = all.filter(function(x){ return !focusIn(x.key).length; })
-                    .map(function(x){ return x.name; });
+  var unmarked = activeKeys().filter(function(k){ return !unitFocus(UNITS[k]).length; })
+                             .map(function(k){ return UNITS[k].name; });
 
   var chips = [["over","earning"],["met","met, not earning"],["short","short"],["none","not reported"]]
     .filter(function(x){ return totals[x[0]]; })
@@ -2165,13 +2151,13 @@ function renderFocusBoard(){
     '<div class="fstrip-body">' +
       '<div class="fcount"><b>' + totals.over + '</b><span> of ' + totals.total + '</span><em>earning</em></div>' +
       '<div class="fchips">' + chips + '</div>' +
-      '<div class="fmean">' + live.length + ' of ' + all.length + ' marked</div>' +
+      '<div class="fmean">' + live.length + ' of ' + activeKeys().length + ' units marked</div>' +
     '</div></div>' +
 
     section("", "Focus measures", null,
       (totals.total
         ? '<div class="cfg"><table class="board"><thead><tr>' +
-            '<th style="width:16%">Where</th><th>Focus measure</th>' +
+            '<th style="width:16%">Business unit</th><th>Focus measure</th>' +
             '<th class="cc">Source</th><th class="cc">Target</th><th class="cc">Actual</th>' +
             '<th class="cc">Progress</th><th class="cc">Standing</th>' +
           '</tr></thead><tbody>' + body + '</tbody></table></div>'
@@ -2189,8 +2175,8 @@ function renderFocusBoard(){
         : '<div class="note">Nothing marked in this cycle. Marks are made on ' +
           '<b>Setup &rsaquo; Focus measures</b>.</div>') +
       (unmarked.length
-        ? '<div class="note"><b>' + plural(unmarked.length, "place") +
-          (unmarked.length > 1 ? ' have' : ' has') + ' nothing marked.</b> ' + unmarked.map(esc).join(", ") +
+        ? '<div class="note"><b>' + unmarked.length + ' unit' + (unmarked.length > 1 ? 's have' : ' has') +
+          ' nothing marked.</b> ' + unmarked.map(esc).join(", ") +
           '. Marked on <b>Setup &rsaquo; Focus measures</b>.</div>'
         : ''));
 }

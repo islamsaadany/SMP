@@ -73,10 +73,20 @@ def close_row(pg):
 
 
 def set_unit(pg, key, at):
-    pg.evaluate(
-        """(a)=>{const s=document.querySelector('[data-pat="'+a[0]+'"]');
-           s.value=a[1]; s.dispatchEvent(new Event('change',{bubbles:true}));}""",
-        [key, at])
+    """WHICHEVER FIELD HOLDS THAT KIND OF PLACE (§130.6). Companies left the
+    Unit dropdown when they became a field of their own, so putting somebody in
+    a company is now the Company select — and driving the Unit select with a
+    `co:` value would be testing a path the product no longer has."""
+    if str(at).startswith("co:"):
+        pg.evaluate(
+            """(a)=>{const s=document.querySelector('[data-pco="'+a[0]+'"]');
+               s.value=a[1]; s.dispatchEvent(new Event('change',{bubbles:true}));}""",
+            [key, at[3:]])
+    else:
+        pg.evaluate(
+            """(a)=>{const s=document.querySelector('[data-pat="'+a[0]+'"]');
+               s.value=a[1]; s.dispatchEvent(new Event('change',{bubbles:true}));}""",
+            [key, at])
     pg.wait_for_timeout(400)
 
 
@@ -203,6 +213,11 @@ with sync_playwright() as p:
     ck("wrong kind: nothing granted",
        not any(r["role"] == "cceo" for r in roles_of(pg, "cfo")), roles_of(pg, "cfo"))
     ck("wrong kind: the row names the kind it needs", "company" in said.lower(), said)
+    # AND IT NAMES THE FIELD THAT CAN ANSWER IT (§130.6). Before the company
+    # field existed, "change the Unit" was the way out; it is not any more, and
+    # a refusal pointing at a control that cannot answer is §16.7's dead end.
+    ck("wrong kind: ...and the field that answers it",
+       "company" in said.lower() and "unit" not in said.lower(), said)
 
     # ── 4b. AND EITHER HALF CAN BE THE ONE THAT FINISHES IT ─────────
     # A refused pick leaves the picker open with that role still SHOWING, so

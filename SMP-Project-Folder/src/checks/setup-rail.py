@@ -87,8 +87,18 @@ with sync_playwright() as p:
         ck("head sits at the top of the rail @%dpx" % h,
            abs(m["headTop"] - m["railTop"]) <= 1, m)
         # Below the floor the rail stops shrinking on purpose, so "scrolls" is
-        # only required where the list is genuinely taller than the box.
-        ck("the LIST is what scrolls @%dpx" % h, m["scrolls"], m["scrolls"])
+        # only required where the list is genuinely taller than the box — and
+        # WHETHER it is depends on how many pages Setup has. §130.4 removed one
+        # (Email became a section of Send an email) and at 1000px the remaining
+        # seventeen fit, so the literal "it scrolls" became a check reporting a
+        # deliberate change as a fault. The CLAIM is that the scroll, when there
+        # is one, belongs to the LIST and not to the rail or the page — which is
+        # what licenses the cap at all (§101.5). That is what is asserted now.
+        ck("nothing but the list ever scrolls @%dpx" % h,
+           not pg.evaluate("""()=>{const r=document.querySelector('.setuprail');
+              return r.scrollHeight>r.clientHeight+1;}"""), m)
+        if m["scrolls"]:
+            print("      (the list is taller than its box here, and it is the box that scrolls)")
 
     print("\n── 2 · every entry is reachable by scrolling the LIST ──")
     pg.set_viewport_size({"width": 1600, "height": 800})

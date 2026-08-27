@@ -106,12 +106,29 @@ with sync_playwright() as p:
             const e=document.elementFromPoint(r.left+r.width/2, r.top+r.height/2);
             return e ? (e.closest('[data-focusswitch]') ? 'switch' : e.tagName) : 'nothing'; })(),
         ticks: document.querySelectorAll('.fmark-btn.on').length,
-        saysWhatIsKept: /being kept/.test(document.body.innerText) })""")
+        /* THE SWITCH IS A SEGMENTED PAIR NOW (§130.5), so "which state is it
+           in" is which segment is lit rather than what a sentence says. */
+        lit: (()=>{ const b=document.querySelector('[data-focusswitch].on');
+            return b ? b.textContent.trim() : null; })() })""")
     ck("the switch is on the page", s["switch"], s)
     ck("and PRESSABLE, not merely present (§70, §93.4)", s["pressable"] == "switch", s)
     # The page reads the RAW map, or turning it off would look like losing it.
     ck("the marks are still ticked on it (%s)" % s["ticks"], s["ticks"] > 0, s)
-    ck("and it says what is being kept", s["saysWhatIsKept"], s)
+    # THE SENTENCE WENT AND THE CLAIM DID NOT (§130.5). The grey note under the
+    # old button said how many marks were being kept — Islam removed it, and it
+    # was carrying a bug of its own ("0 0 marks", because plural() already puts
+    # the number in). What it was EVIDENCE FOR is asserted directly instead, of
+    # the data rather than of prose: the marks are still there and the switch
+    # says the state it is actually in. §94.8 — assert the problem, not the
+    # wording, or a check has to be rewritten every time somebody edits a line.
+    # READ OFF THE SEGMENT'S OWN WORD, not off `data-focusswitch` — that
+    # attribute is the ACT ("press me to turn it on"), so the lit segment while
+    # the feature is off carries "0", and an assertion written against it reads
+    # backwards to anybody maintaining this.
+    ck("the switch shows OFF while it is off", s["lit"] == "Off", s)
+    ck("and every mark is still stored behind it",
+       pg.evaluate("()=>Object.keys(CYCLE.focus).length") == on["stored"],
+       pg.evaluate("()=>Object.keys(CYCLE.focus).length"))
     pg.evaluate("()=>{ setFocusOn(true); paint(); }")
 
     ck("no console errors", not errs, errs[:3])

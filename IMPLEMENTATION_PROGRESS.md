@@ -141,6 +141,17 @@ test-assistant 33/0 · test-authorize 193/0. **One assertion was rewritten for
 being unfalsifiable** — it measured the row against the panel, and a row is
 inside its own panel by definition.
 
+### v3.50 — the knob's guard keyed on words the provider never says (§134.5)
+
+§134 shipped and went straight down in production: gemini-3.6-flash refuses
+the thinking cap with the GENERIC "400: Request contains an invalid argument."
+— and the self-healing retry only fired when the 400 named thinking, because
+the stub imitated the documentation's verbose refusal instead of the
+provider's real one. The guard now keys on the situation (a 400 on a request
+that carried the knob), never the wording. Stub corrected to production's
+verbatim words; the shipped guard reproduces the production failure 2 ways in
+the suite; 39/0 after.
+
 ### v3.49 — the thinking cap (§134)
 
 §133's 20s budget blew on its first preview run — the same model, the same

@@ -17595,6 +17595,24 @@ Vercel's SSO layer fetches the manifest through `vercel.com/sso-api`, which the
 platform's own CSP (`connect-src 'self'`) rightly blocks. Harmless, absent from
 production, and not a reason to widen the CSP.
 
+### 134.5 The provider's refusal was vaguer than the stub's (corrected from production the same day)
+
+The guard shipped keyed on the WORDING — retry only when the 400 names
+thinking — because the stub imitated Google's verbose *"Unknown name"*
+refusal from the documentation. Production answered `gemini-3.6-flash`'s
+refusal with the terse generic *"Request contains an invalid argument."*
+and nothing else; the guard never fired, and the knob took the assistant
+down — the precise fault §134.2 exists to prevent, on its first day.
+
+**§100.3 cuts deeper than it read: a stub models the PROVIDER, and I had
+modelled the documentation.** The signal is the SITUATION now, never the
+wording: any 400 on a request that carried the knob, once per process, after
+the bad-key check. Worst case is one extra request for a genuinely malformed
+ask, once per warm process. The stub speaks production's words verbatim; the
+narrowed guard was put back and watched to fail 2 ways before the widened
+one was believed — and the new assertion's own first version reset the cap in
+the line above measuring that it was off, a test bug its calls-count exposed.
+
 ### 134.4 What proves it
 
 `test-assistant.js` §6: the cap goes out by default; a refused cap is dropped

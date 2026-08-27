@@ -496,6 +496,23 @@ console errors (in this cloud environment, run it via a wrapper that points Play
   a gap: collaborators and an unmarked quarter are left alone. The check MAKES
   the gaps (§94.2) and asserts an EXACT count plus **that the filled facts are
   untouched**, or a builder that marked everything would pass.
+- **FILL THE GAPS (§132, spec 021):** the Strategy cells carry a THIRD state —
+  View / **Fill gaps** / Edit — letting a custodian or owner write only where
+  the plan holds NOTHING. `GAP_FIELDS`/`GAP_SCORE_FIELDS`/`mayFillPage()`/
+  `pendOf()`/`pendingScore()` live in `lib/rules.js` (one definition for
+  screen, server and deck); a fill is `row.pend[field] = {by, at}`, stored as
+  an absence, riding `extra` JSONB with no migration; the authoriser's gap
+  pass (`gapFill`/`gapConfirm`) judges fill/amend/unfill/confirm against a
+  CLONE and everything else falls through office-only. Reporting and drafts
+  flow against a pending target; the SCORE reads a dash and leaves every
+  average until the office confirms; Submit is refused naming the rows.
+  `gapCell()` is the ONE builder for a fillable cell; no rows are ever
+  added/removed/renamed/reordered in fill mode; an office write settles (the
+  setters lift the mark — correcting is confirming). **Marks are compared
+  canonically, never by stringify — Postgres jsonb reorders `{by, at}` to
+  `{at, by}` and an order-sensitive compare refuses innocent saves.**
+  §117's .pptx download button is hidden for everyone (§132.9) — machinery
+  kept, `dlPlanBtn()` is one line to give back.
 - **THE OWN COLUMNS ARE TWO QUESTIONS, AND §94'S LOCK IS A DEFAULT NOW (§117,
   partially reversing §94 at Islam's direction):** each own column on Roles &
   access splits into **Strategy** (the words as agreed — `a_unit_own_strat` /
@@ -2087,8 +2104,13 @@ python3 checks/register-header.py # one line above the table and a dialog that f
 python3 checks/role-picker.py   # giving somebody a role: every control PRESSED,
                                 # both ends asked, and the absences asserted (§110)
 python3 checks/strategy-split.py # the Strategy | Reporting halves: the cell pressed
-                                # open AND closed, both ends each time, and the .pptx
-                                # download unzipped and read — figures proved absent (§117)
+                                # open AND closed, both ends each time — and since §132.9
+                                # the .pptx download asserted HIDDEN on every surface while
+                                # the dormant builder is still proved by a direct call
+python3 checks/gap-fill.py      # fill the gaps (§132): the third toggle where it belongs
+                                # and nowhere else, fill mode's fields AND absences, every
+                                # press read back from the DATA, the pending chip and the
+                                # office's tick, the dash, and the Submit refusal
 python3 checks/no-jump.py       # nothing moves the register under you — the act of
                                 # OPENING a row included, since §110.7
 python3 checks/plan-builder.py  # building a plan ON the platform: the door, the chooser,
@@ -2145,7 +2167,45 @@ prior sessions (on HR_ERP) accidentally reverted agreed-upon designs.
 
 ---
 
-*Last Updated: 2026-08-26 &mdash; **v3.47: building a plan on the platform
+*Last Updated: 2026-08-27 &mdash; **v3.50: fill the gaps (&sect;132, spec
+021)**. Islam: *"a special type of editing which is just filling the missing
+areas — the missing targets, maybe the missing timeline, the missing
+owners."* A third state on the two STRATEGY cells of Roles &amp; access —
+View / **Fill gaps** / Edit — granted per role by the SMO, reaching only a
+unit or function the person holds. **A gap is a place holding nothing**
+(`GAP_FIELDS` in `lib/rules.js`, the same list the deck marks Missing — one
+definition for screen, server and deck); writing the first value is filling,
+touching anything already written is authoring, and no rows are ever added,
+removed, renamed or reordered in this mode. **A fill is PENDING until the
+office confirms it** (Islam's own design): live and counted nowhere, amber
+everywhere it shows, still the filler's to correct — `row.pend[field] =
+{by, at}`, stored as an absence (&sect;50.6), riding each row's `extra`
+JSONB with **no migration** (proved on a real Postgres 16, clean slate
+included). Confirming is REMOVING the mark — a tick beside the chip, or the
+office simply correcting the value, which settles it in passing. **The
+server judges transitions, not intentions**: a gap pass ahead of the diff
+classifies fill / amend / unfill / confirm against a clone and lets
+everything else fall through office-only (`gapFill` passes on authorship OR
+the fill grant; `gapConfirm` on authorship alone). **Reporting flows,
+performance waits**: figures and drafts land against a pending target, but
+a row whose score-bearing field (dir &middot; target &middot; compile
+&middot; weight &middot; quarters) is pending scores a dash, leaves every
+average, and **blocks Submit** — the refusal names the rows and sends the
+unit to the office, the only desk that can clear it. Two lessons paid for:
+**Postgres jsonb reorders object keys**, so marks are compared canonically
+or an untouched pending field reads as a phantom amend that refuses an
+innocent save (&sect;42's `branding()` shape, one layer down); and a fill
+holder is the first person to hold &sect;101's arrows BESIDE a pen — both
+sat at `right:0` and the arrows ate the pen's clicks (&sect;70's family,
+caught by the check PRESSING it). The matrix wears the mockup-approved
+restyle (&sect;132.7: chip toggles, tinted lit states, hairline rows), and
+**&sect;117's .pptx download button is HIDDEN for everyone at Islam's
+direction (&sect;132.9)** — machinery kept, one line to give back. Proved
+by `test-authorize.js` &sect;16 (6 red on the pre-build) and
+`checks/gap-fill.py` (fails from its first section on the pre-build), plus
+the round trip on a virgin database.*
+
+*Earlier: 2026-08-26 &mdash; **v3.47: building a plan on the platform
 (&sect;129, spec 020)**. Islam: *"I want the team of the SMO to be able to
 build a plan on the platform directly … they identify a function or a unit
 and set which way are they going to plan pillars or projects and then they go

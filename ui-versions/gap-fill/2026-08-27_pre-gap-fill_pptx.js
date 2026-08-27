@@ -78,13 +78,6 @@ function pptxColors(){
    an empty SWOT quadrant. */
 var PPTX_MISS = { miss: true };
 function orMiss(v){ return v ? v : PPTX_MISS; }
-/* §132: a value filled but not yet confirmed is ANSWERED, not missing — it
-   prints as the value plus "(pending)", never as the bold red gap mark. */
-function orPend(row, f){
-  var v = row && row[f];
-  if (v && row.pend && row.pend[f]) return String(v) + " (pending)";
-  return orMiss(v);
-}
 
 /* ── The DrawingML fragments ────────────────────────────────────────── */
 function pptxRun(text, o){
@@ -298,9 +291,7 @@ function pptxUnitSlides(u, kicker){
     { x:PPTX_MX, y:PPTX_TABLE_Y, cx:PPTX_CW, cy:1188720 },
     [pptxPara(pptxRun("ASPIRATION", { sz:1000, b:true, color:C.quiet })),
      u.aspiration
-       ? pptxPara(pptxRun(u.aspiration +
-           (u.pend && u.pend.aspiration ? " (pending)" : ""),
-           { sz:1500, i:true, color:C.bar }), { before:600 })
+       ? pptxPara(pptxRun(u.aspiration, { sz:1500, i:true, color:C.bar }), { before:600 })
        : pptxPara(pptxRun("Missing", { sz:1500, b:true, color:C.bad }), { before:600 })],
     { fill:C.zebra }));
   if (found.length) fShapes.push(pptxText(7,
@@ -311,7 +302,7 @@ function pptxUnitSlides(u, kicker){
   if (kos.length) slides = slides.concat(pptxTableSlides(kicker, "Key objectives",
     [4754880, 914400, 2621280, 2621280],
     ["Objective", "Dir.", "This year's target", "3-year target"],
-    kos.map(function(k){ return [k.name, orPend(k, "dir"), orPend(k, "target"), orPend(k, "target3y")]; })));
+    kos.map(function(k){ return [k.name, orMiss(k.dir), orMiss(k.target), orMiss(k.target3y)]; })));
 
   /* The SWOT, asked for by name (Islam, 2026-08-26). Four boxes, two rows —
      the shape the Analysis page draws. */
@@ -345,13 +336,13 @@ function pptxUnitSlides(u, kicker){
       [5303520, 914400, 2346960, 2346960],
       ["Measure", "Dir.", "Target", "Compiles"],
       (p.measures || []).map(function(m){
-        return [m.name, orPend(m, "dir"), orPend(m, "target"), orPend(m, "compile")];
+        return [m.name, orMiss(m.dir), orMiss(m.target), orMiss(m.compile)];
       })));
     slides = slides.concat(pptxTableSlides(pk, p.name + " — Tactics",
       [4571760, 2103120, 1676400, 640140, 640140, 640140, 640140],
       ["Tactic", "Owner", "Collaborators", "Q1", "Q2", "Q3", "Q4"],
       (p.tactics || []).map(function(t){
-        return [t.name, orPend(t, "owner"),
+        return [t.name, orMiss(t.owner),
                 (t.collaborators || []).join(", ") || "—"].concat(pptxQCells(t));
       })));
   });
@@ -383,17 +374,15 @@ function pptxFnSlides(fk){
       [5760720, 914400, 2118360, 2118360],
       ["Key objective", "Dir.", "Target", "Weight"],
       kos.slice(0, 8).map(function(k){
-        return [k.name, orPend(k, "dir"), orPend(k, "target"),
-                k.weight != null
-                  ? k.weight + "%" + (k.pend && k.pend.weight ? " (pending)" : "")
-                  : PPTX_MISS];
+        return [k.name, orMiss(k.dir), orMiss(k.target),
+                k.weight != null ? k.weight + "%" : PPTX_MISS];
       })));
     slides.push(pptxSlideXml(shapes));
     slides = slides.concat(pptxTableSlides(f.name + " · " + c.name, "Projects",
       [3931920, 1737360, 1188720, 1188720, 2865120],
       ["Project", "Owner", "Start", "End", "Carries"],
       (c.projects || []).map(function(p){
-        return [p.name, orPend(p, "owner"), orPend(p, "start"), orPend(p, "end"),
+        return [p.name, orMiss(p.owner), orMiss(p.start), orMiss(p.end),
           plural((p.deliverables || []).length, "deliverable") + " · " +
           plural((p.outcomes || []).length, "outcome") + " · " +
           plural((p.milestones || []).length, "milestone")];

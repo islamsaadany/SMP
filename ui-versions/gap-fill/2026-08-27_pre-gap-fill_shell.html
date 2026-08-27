@@ -1467,8 +1467,6 @@
        its Add and Remove act on, and an index from the last paint would act on
        the paint before it. */
     if (typeof KOLISTS !== "undefined") KOLISTS.length = 0;
-    /* §132: the confirm ticks register the row they act on the same way. */
-    if (typeof PENDS !== "undefined") PENDS.length = 0;
     fillViewers();
     paintUnits();
     /* ── TARGET IS DERIVED FROM `current`, SO IT IS SET AFTER IT SETTLES ──
@@ -4856,37 +4854,6 @@
         var t = (list || []).filter(function(x){ return x && x.id === id; })[0];
         if (!t) return;
         t["q" + q] = !t["q" + q];
-        /* §132: an office write settles — a pending quarters fill loses its
-           mark the moment the office touches the row. Correcting confirms. */
-        gapLift(t, "quarters");
-        paint();
-      });
-    });
-    /* ── FILL THE GAPS (§132) ──────────────────────────────────────────
-       The fill grant's quarter buttons: only a tactic with NO quarter at
-       all is a gap (§128, §119.1), so these are only drawn there and while
-       that fill is pending — the four move together under one mark, and
-       clearing the last quarter is the filler's own undo. */
-    document.querySelectorAll("[data-qfill]").forEach(function(b){
-      b.addEventListener("click", function(){
-        if (!mayFill("u_plan")) return;
-        var a = this.dataset.qfill.split("|"), id = a[0], q = +a[1];
-        var list = listById("tactics", id);
-        var t = (list || []).filter(function(x){ return x && x.id === id; })[0];
-        if (!t) return;
-        t["q" + q] = !t["q" + q];
-        if (SMPRules.quartersBlank(t)) gapLift(t, "quarters");
-        else gapStamp(t, "quarters");
-        paint();
-      });
-    });
-    /* Confirming a pending fill — the office's act, re-asked at the click.
-       The registry is this paint's, exactly as FIELDS is (§48.2's shape). */
-    document.querySelectorAll("[data-pconf]").forEach(function(b){
-      b.addEventListener("click", function(){
-        var e = PENDS[+b.dataset.pconf];
-        if (!e || !mayAuthor(e.acKey)) return;
-        gapLift(e.row, e.field);
         paint();
       });
     });

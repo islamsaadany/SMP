@@ -199,20 +199,21 @@ with sync_playwright() as p:
     import tempfile, os
     tmp = tempfile.mkdtemp(prefix="smp-pptx-")
 
-    def grab(pg, name, sel=".pane .paneact [data-dlpptx]"):
-        btn = pg.query_selector(sel)
-        if btn is None:
-            return None
+    # §132.9 (Islam, 2026-08-27): the download BUTTON is hidden for everyone —
+    # the builder and its rule stand, kept for the feature's return, so the
+    # deck's content is still proved through a direct call to sendPlanPptx()
+    # while every surface is asserted to draw NO button.
+    def grab(pg, name, target):
         with pg.expect_download() as dl:
-            btn.click()
+            pg.evaluate("(t) => sendPlanPptx(t)", target)
         path = os.path.join(tmp, name)
         dl.value.save_as(path)
         return path
 
     be(pg, who["smo"], who["unit"], "strategy", "plan")
-    ck("the SMO sees the download beside the pen",
-       pg.query_selector(".pane .paneact [data-dlpptx]") is not None)
-    f = grab(pg, "smo-unit.pptx")
+    ck("§132.9: the download button is drawn for nobody — the SMO included",
+       pg.query_selector("[data-dlpptx]") is None)
+    f = grab(pg, "smo-unit.pptx", who["unit"])
     ck("...and pressing it saves a file", f is not None)
     if f:
         d = read_pptx(f)
@@ -231,13 +232,16 @@ with sync_playwright() as p:
             ck("no reported figure leaks in (" + figure + ")", figure not in d["text"])
 
     be(pg, who["cust"], who["unit"], "strategy", "plan")
-    ck("the custodian sees it", pg.query_selector(".pane .paneact [data-dlpptx]") is not None)
-    ck("...beside the arrows, not instead of them",
+    ck("the custodian sees no download either (§132.9)",
+       pg.query_selector("[data-dlpptx]") is None)
+    ck("...and hiding it did not take the arrows with it",
        pg.query_selector(".pane .paneact [data-arrange]") is not None)
-    ck("...and their press is allowed at press time", grab(pg, "cust-unit.pptx") is not None)
+    ck("...while the dormant rule still answers for them (kept for its return)",
+       grab(pg, "cust-unit.pptx", who["unit"]) is not None)
 
     be(pg, who["head"], who["unit"], "strategy", "plan")
-    ck("the unit owner sees it", pg.query_selector(".pane .paneact [data-dlpptx]") is not None)
+    ck("the unit owner sees no download (§132.9)",
+       pg.query_selector("[data-dlpptx]") is None)
 
     # The fixture itself is asserted (§54.5): a demo with nobody to say no
     # about would pass the negative case by never running it.
@@ -246,16 +250,16 @@ with sync_playwright() as p:
     if who["floor"]:
         be(pg, who["floor"], who["floorUnit"], "strategy", "plan")
         ck("somebody who does not hold the unit does NOT see it",
-           pg.query_selector(".pane .paneact [data-dlpptx]") is None)
+           pg.query_selector("[data-dlpptx]") is None)
         rule = pg.evaluate("""(w) =>
           SMPRules.mayDownloadPlan(world(), personBy(w.floor), w.floorUnit)""", who)
-        ck("...and the rule says the same", rule is False)
+        ck("...and the dormant rule still refuses them", rule is False)
 
     # A function's head, on the projects their plan lives behind.
     be(pg, who["fnhead"], "fn:" + who["fn"], "fnstrat", "proj")
-    fbtn = pg.query_selector(".pane .paneact [data-dlpptx]")
-    ck("a function head sees it on their Projects pane", fbtn is not None)
-    ff = grab(pg, "fn-caps.pptx")
+    ck("a function head sees no download on their Projects pane (§132.9)",
+       pg.query_selector("[data-dlpptx]") is None)
+    ff = grab(pg, "fn-caps.pptx", "fn:" + who["fn"])
     ck("...and it downloads", ff is not None)
     if ff:
         d = read_pptx(ff)
@@ -282,7 +286,7 @@ with sync_playwright() as p:
       paint();
     }""", who["unit"])
     pg.wait_for_timeout(300)
-    gaps = grab(pg, "gaps.pptx")
+    gaps = grab(pg, "gaps.pptx", who["unit"])
     ck("a plan with holes still downloads", gaps is not None)
     if gaps:
         z = zipfile.ZipFile(gaps)
@@ -394,7 +398,7 @@ with sync_playwright() as p:
     }""", who["unit"])
     pg.wait_for_timeout(300)
     MUTATED = pg.evaluate("(u) => UNITS[u].items[0].name", who["unit"])
-    noq = grab(pg, "noq.pptx")
+    noq = grab(pg, "noq.pptx", who["unit"])
     ck("a plan whose tactics have no quarters still downloads", noq is not None)
     if noq:
         z = zipfile.ZipFile(noq)
@@ -457,27 +461,17 @@ with sync_playwright() as p:
         txt = "".join(t.text or "" for t in ET.fromstring(z.read(last)).iter(A + "t"))
         ck("the last slide is the Thank you", "Thank you" in txt, txt[:60])
 
-    # THE FUNCTION OVERVIEW CARRIES THE DOWNLOAD TOO (§119.9), and it is
-    # PRESSED — §70: this button rendered, sat in the document and could not be
-    # seen or clicked, because `.penbtn` is built for a card corner and this
-    # bar is a row. A query would have called it present.
+    # THE FUNCTION OVERVIEW carried the download too (§119.9) and §132.9 hides
+    # it there like everywhere else — asserted, because a hide that missed one
+    # of the two surfaces would be exactly §119.9's fault inverted.
     be(pg, who["smo"], "fn:" + who["fn"], "fnstrat", "found")
-    btn = pg.query_selector("[data-dlpptx]")
-    ck("the Function overview draws the download", btn is not None)
-    if btn:
-        hit = pg.evaluate("""() => {
-          const b = document.querySelector("[data-dlpptx]");
-          const r = b.getBoundingClientRect();
-          if (!r.width || !r.height) return "no box";
-          const el = document.elementFromPoint(r.x + r.width / 2, r.y + r.height / 2);
-          return (el === b || b.contains(el)) ? "the button" : "something else";
-        }""")
-        ck("...and the press lands on it, not on a neighbour", hit == "the button", hit)
-        f = grab(pg, "fn-overview.pptx", "[data-dlpptx]")
-        ck("...and it produces the function's deck", f is not None)
-        if f:
-            d = read_pptx(f)
-            ck("...which closes on Thank you too", "Thank you" in d["text"])
+    ck("the Function overview draws no download either (§132.9)",
+       pg.query_selector("[data-dlpptx]") is None)
+    f = grab(pg, "fn-overview.pptx", "fn:" + who["fn"])
+    ck("...while the builder still answers a direct ask", f is not None)
+    if f:
+        d = read_pptx(f)
+        ck("...and its deck closes on Thank you", "Thank you" in d["text"])
 
     print("")
     ck("no page errors anywhere in the run", not errs, "; ".join(errs[:3]))

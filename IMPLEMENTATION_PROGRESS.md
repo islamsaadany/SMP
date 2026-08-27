@@ -6,9 +6,9 @@ version (rules A2 / A11, changed 2026-08-20) — those go only when asked for.
 
 **Where it runs:** Vercel, production tracks `main`. Static files plus two
 serverless functions (`/api/state`, `/api/auth`) against Neon Postgres.
-**Latest version:** v3.47 on `main`
-**Last updated:** 2026-08-26
-**Last updated:** 2026-08-26
+**Latest version:** v3.50 on `claude/strategy-partial-edit-config-egxkf0`
+(v3.49 on `main`; this branch carries §132 and awaits the merge word)
+**Last updated:** 2026-08-27
 
 **Sign in as:** `SMO` / `1234` — a password change is forced at once (§43.1,
 reversing §19.4).
@@ -64,6 +64,31 @@ Nothing proceeds past this line without an answer.
   is a true signal — do not silence it.
 
 ## Built and verified
+
+### v3.50 — fill the gaps (§132, spec 021) — on this branch, not yet merged
+
+- **A third Strategy-cell state, Fill gaps**: the custodian or owner writes
+  only where the plan holds nothing — targets, directions, compile rules,
+  owners, project dates, a tactic naming no quarter, the aspiration. Granted
+  per role by the SMO on Roles & access; reaches only what the person holds;
+  no rows added, removed, renamed or reordered in this mode.
+- **A fill is pending until the office confirms** (Islam's design): live,
+  amber, still the filler's to correct; the office confirms with a tick or
+  by simply correcting the value. Stored as `pend` marks in each row's
+  `extra` JSONB — no migration, proved on a real Postgres 16.
+- **Reporting flows, performance waits**: figures and drafts land against a
+  pending target; the score reads a dash and leaves every average until the
+  office confirms; **Submit is refused**, naming the rows and pointing at
+  the office. Save draft is never blocked.
+- **Server-authoritative**: the authoriser classifies fill / amend / unfill /
+  confirm ahead of the ordinary diff; anything else falls through
+  office-only. `test-authorize.js` §16 — 231 pass, 6 red on the pre-build.
+- **The access matrix restyle Islam approved from the mockup** (chip
+  toggles, tinted lit states, hairline rows) rides along.
+- **§117's .pptx plan download button is hidden for everyone** (§132.9,
+  asked mid-build) — machinery kept, one line to give back.
+- Proved by `checks/gap-fill.py` (fails on the pre-build from its first
+  section), the full `qa.py` walk, and the virgin-database round trip.
 
 ### v3.47 — building a plan on the platform (§129, spec 020)
 

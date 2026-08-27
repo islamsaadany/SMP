@@ -1196,39 +1196,3 @@
      it reaches every table using the pattern and nothing else. */
   td:has(> .fld + .xbtn) > .fld { width: calc(100% - 30px); vertical-align: middle; }
   td:has(> .fld + .xbtn) > .xbtn { vertical-align: middle; margin-left: 5px; }
-
-  /* ── FILL THE GAPS (§132, spec 021) ──────────────────────────────────
-     Three states, one colour family: a GAP is the product's own red (the
-     word Missing already owns it), a PENDING fill is amber everywhere it
-     shows — the field, the chip, the count, the quarters — and a settled
-     value wears nothing. The amber pair is the platform's attn family, so
-     the contrast is the pill family's own, already measured. */
-  .fld.gapfld { border:1px dashed var(--bad); }
-  .fld.gapfld::placeholder { color:var(--bad); font-weight:600; opacity:.75; }
-  .fld.pendfld { border-color:var(--attn); background:var(--attn-bg); }
-  .pchip { display:inline-block; background:var(--attn-bg); color:var(--attn-tx);
-    border:1px solid var(--attn); border-radius:20px; font-size:10px;
-    font-weight:600; line-height:1.5; padding:0 7px; margin-left:6px;
-    vertical-align:1px; text-transform:uppercase; letter-spacing:.04em; }
-  /* The office's tick, beside the chip it clears. */
-  .gapok { width:22px; height:20px; padding:0; margin-left:4px; cursor:pointer;
-    border:1px solid var(--good); background:var(--good-bg); color:var(--good-tx);
-    border-radius:5px; font-size:11px; font-weight:700; line-height:1;
-    vertical-align:1px; }
-  .gapok:hover { border-color:var(--good-tx); }
-  .gapok:focus-visible { outline:2px solid var(--good); outline-offset:1px; }
-  /* The subject-wide count on the pane band (§93.4: one press from where
-     the gap is closed). */
-  .pendcount { display:inline-block; background:var(--attn-bg); color:var(--attn-tx);
-    border:1px solid var(--attn); border-radius:20px; font-size:10.5px;
-    font-weight:600; padding:1px 9px; letter-spacing:0; text-transform:none; }
-  /* The contract, said where the person is working (§32's rule). */
-  .fillbar { background:var(--surface-2); border:1px solid var(--line);
-    border-radius:8px; padding:8px 12px; margin:10px 0 0; font-size:12.5px;
-    color:var(--ink-2); }
-  .fillbar b { color:var(--ink); }
-  .pendwait { color:var(--attn-tx); }
-  /* The fill grant's quarter buttons: lit is amber, because their fill is
-     pending by construction — gold-deep is the author's lit state. */
-  .qs-fill .qtog.on { background:var(--attn-bg); color:var(--attn-tx);
-    border-color:var(--attn); }

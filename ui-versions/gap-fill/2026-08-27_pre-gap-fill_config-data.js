@@ -3164,8 +3164,7 @@ function capById(id){
    project's real story rather than a defect. */
 
 function capKOScore(c){
-  /* Pending confirmation leaves the average (§132), as everywhere. */
-  var list = (c.keyObjectives || []).filter(function(m){ return m.progress != null && !SMPRules.pendingScore(m); });
+  var list = (c.keyObjectives || []).filter(function(m){ return m.progress != null; });
   if (!list.length) return null;
   var tw = 0, sum = 0;
   list.forEach(function(m){ var w = m.weight == null ? 1 : m.weight; tw += w; sum += m.progress * w; });
@@ -4138,13 +4137,7 @@ function submitBlockers(target){
   var t = String(target || ""), fn = t.indexOf("fn:") === 0;
   var rows = fn ? fnAskedItems(t.slice(3)) : askedItems(UNITS[t] || { keyObjectives:[], items:[] });
   return { notes: rows.filter(needsNote),
-           pending: rows.filter(function(x){ return statusPending(x.obj); }),
-           /* §132: a value the office has not yet confirmed, where a score
-              reads it. Reporting and drafts flow; submitting says
-              "performance can be read", and against an unconfirmed number
-              it cannot (Islam, 2026-08-27). Only the office can clear this
-              one, so the refusal must send the person to them. */
-           confirms: gapScoreWait(t) };
+           pending: rows.filter(function(x){ return statusPending(x.obj); }) };
 }
 /* The refusal in words, or "" when nothing is in the way. Said in ONE place so
    the two Submits cannot explain themselves differently. */
@@ -4155,15 +4148,6 @@ function submitRefusal(target){
   if (b.notes.length) say.push(plural(b.notes.length, "figure") +
     " " + (b.notes.length === 1 ? "is" : "are") +
     " at risk or off track with no note. Add a line to each.");
-  if (b.confirms.length) {
-    var named = b.confirms.slice(0, 4).map(function(x){
-      return x.obj.name || x.obj.id || "a row"; });
-    say.push(plural(b.confirms.length, "value") +
-      (b.confirms.length === 1 ? " is" : " are") +
-      " awaiting Strategy Office confirmation (" + named.join(", ") +
-      (b.confirms.length > 4 ? ", …" : "") + "). Reporting and drafts are " +
-      "unaffected — submitting opens when the office confirms.");
-  }
   return say.join("\n\n");
 }
 function unitState(u){ return reportState(reportedCount(u), u.ukey); }
@@ -4370,14 +4354,6 @@ function mayAuthor(acKey, target){
     target === undefined ? TARGET : target);
 }
 function mayEditPlan(){ return mayAuthor("u_plan"); }
-/* MAY THIS PERSON FILL THIS PAGE'S GAPS (§132)? A wrapper, never a second
-   copy — lib/rules.js answers, for the person being viewed as, so the
-   fill field the screen draws and the save the server accepts cannot
-   disagree (§42). */
-function mayFill(acKey, target){
-  return SMPRules.mayFillPage(world(), viewer(), acKey,
-    target === undefined ? TARGET : target);
-}
 /* MAY THIS PERSON REORDER WHAT THEY ARE LOOKING AT (§101)? A wrapper, never a
    second copy — the answer is lib/rules.js's, asked for the person being viewed
    as, so the handle the screen draws and the save the server accepts cannot
@@ -4432,16 +4408,14 @@ function mayMarkFocus(){
 var KO_WEIGHTS = { mobile: [40, 25, 20, 15] };
 
 function koScore(list, weights){
-  /* `pendingScore` (§132): an objective with a pending target/direction/
-     compile leaves the average until the office confirms it. */
-  var vals = list.filter(function(m){ return !m.milestone && m.progress != null && !SMPRules.pendingScore(m); });
+  var vals = list.filter(function(m){ return !m.milestone && m.progress != null; });
   if (!vals.length) return null;
   if (!weights) {
     return Math.round(vals.reduce(function(a, m){ return a + m.progress; }, 0) / vals.length);
   }
   var tot = 0, acc = 0;
   list.forEach(function(m, i){
-    if (m.milestone || m.progress == null || SMPRules.pendingScore(m)) return;
+    if (m.milestone || m.progress == null) return;
     var w = weights[i] == null ? 0 : weights[i];
     acc += m.progress * w; tot += w;
   });
@@ -4533,11 +4507,6 @@ function quartersOf(t){
   return [t.q1, t.q2, t.q3, t.q4].map(function(x){ return x ? 1 : 0; });
 }
 function tacticPlanned(t){
-  /* Quarters filled but not yet confirmed (§132): the tactic's timeline is
-     not settled, so it reads as not-yet-due — null, never zero — and every
-     downstream reader (due, ratio, the execution averages) already handles
-     that shape. */
-  if (SMPRules.pendOf(t).quarters) return null;
   var q = quartersOf(t), total = 0, elapsed = 0;
   for (var i = 0; i < 4; i++) {
     if (!q[i]) continue;
@@ -4550,59 +4519,6 @@ function tacticPlanned(t){
 /* A tactic whose quarters have not begun is not behind — it is not yet due,
    and averaging a zero into execution would say otherwise. */
 function tacticDue(t){ return tacticPlanned(t) > 0; }
-
-/* ── WHAT IS STILL AWAITING THE OFFICE'S CONFIRMATION (§132) ────────────
-   Every pending-fill mark on a subject, one entry per marked field. The
-   COUNT the pane band shows, the rows the Submit refusal names and the
-   scores' exclusions are all read off this one list — a count that cannot
-   take you to what it counts is a count that makes work (§116.2). */
-function gapPendRows(target){
-  var out = [], t = String(target || "");
-  var push = function(row){
-    var p = SMPRules.pendOf(row);
-    Object.keys(p).forEach(function(f){
-      out.push({ obj: row, field: f, mark: p[f] });
-    });
-  };
-  if (t.indexOf("fn:") === 0) {
-    var fk = t.slice(3), fo = functionOf(fk);
-    if (fo && String(fo.format) === "pillars") {
-      var fu = unitLike(t);
-      if (fu) {
-        push(fu);
-        (fu.keyObjectives || []).forEach(push);
-        (fu.items || []).forEach(function(p){
-          (p.measures || []).forEach(push);
-          (p.tactics || []).forEach(push);
-        });
-      }
-    }
-    (GROUP.capabilities || []).forEach(function(c){
-      if (c.fn !== fk) return;
-      (c.keyObjectives || []).forEach(push);
-      (c.projects || []).forEach(push);
-    });
-  } else {
-    var u = UNITS[t];
-    if (u) {
-      push(u);
-      (u.keyObjectives || []).forEach(push);
-      (u.items || []).forEach(function(p){
-        (p.measures || []).forEach(push);
-        (p.tactics || []).forEach(push);
-      });
-    }
-  }
-  return out;
-}
-function gapPendCount(target){ return gapPendRows(target).length; }
-/* Only the fields a score reads block a submission — a pending owner or
-   date changes no figure's meaning (§132, Islam's boundary). */
-function gapScoreWait(target){
-  return gapPendRows(target).filter(function(x){
-    return SMPRules.GAP_SCORE_FIELDS.indexOf(x.field) > -1;
-  });
-}
 function tacticRatio(t){
   var p = tacticPlanned(t);
   return p && t.actual != null ? Math.round(t.actual / p * 100) : null;
@@ -4832,11 +4748,7 @@ function viaCarrier(p, own, roll){
   try { return roll(f); } finally { PILLAR_DEPTH--; }
 }
 
-/* A measure whose target, direction or compile rule is still awaiting the
-   office's confirmation is not scored (§132): the comparison is not ready,
-   so it leaves the average the way an unmeasured outcome already does
-   (§104.10) — the reported actual is kept and shown, only the score waits. */
-function scorableMeasures(p){ return (p.measures || []).filter(function(m){ return m.target && m.progress != null && !SMPRules.pendingScore(m); }); }
+function scorableMeasures(p){ return (p.measures || []).filter(function(m){ return m.target && m.progress != null; }); }
 function pillarPerf(p){
   return viaCarrier(p,
     function(){ return avg(scorableMeasures(p).map(function(m){ return m.progress; })); },

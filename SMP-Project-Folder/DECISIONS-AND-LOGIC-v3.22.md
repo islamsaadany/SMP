@@ -16980,3 +16980,163 @@ project-tables, tour, page-width, setup-overview) are green.
 authoring surface anywhere (the Overview says its foundation is the
 parent's), so the builder's pillars-function route carries Plan and Review
 only — giving them a surface is a decision, not a tidy-up.
+
+## 132 · Fill the gaps (v3.50, spec 021)
+
+Islam: *"a configuration to allow the Strategy custodian and the owner to
+fill in the missing areas in the plan … the missing targets maybe the
+missing timeline the missing owners so it's a special type of editing which
+is just filling the missing areas."* Aligned over four rounds in one
+session — the pending/confirm lifecycle is his (*"the SMO can have a
+verification before the number is locked so the custodian can fill the
+number, it becomes still editable for them until the SMO comes in and
+confirms"*), the reporting boundary is his (*"the reporting can happen …
+the performance is depending on the confirmation of the number"*, then,
+overruling my no-blocker recommendation: *"if the targets are still
+pending, they can report and see it draft, but they cannot submit"*) —
+and the whole shape was signed off on a mockup artifact before a line of
+source moved (design-mockups/gap-fill/, rule 1c).
+
+### 132.1 A third state on the Strategy halves
+
+`STATE_RANK` is `none < view < fill < edit`, and the seat is the whole
+argument: everywhere the platform asks `=== "edit"` nothing widens, and
+everywhere it asks `!== "none"` a fill grant shows the page. The state is
+OFFERED only on the two Strategy cells (`a_unit_own_strat`,
+`a_fn_own_strat`) — on any other area it would grant nothing, and a toggle
+that does nothing is decoration (§42). `mayFillPage()` in `lib/rules.js`
+is the one question both sides ask: a strategy page, a target the person
+HOLDS (§94's ownsIt walk, unchanged), and the grant exactly `fill` — the
+office never fills, because an office write settles and never wears the
+mark.
+
+### 132.2 One definition of a gap, and the line it draws
+
+*A gap is a place holding nothing; writing the first value into it is
+filling; touching anything already there is authoring.* `GAP_FIELDS` in
+`lib/rules.js` names the fillable fields once — the same list §119's deck
+marks Missing — per row kind: a KO's dir/target/target3y/compile, a
+measure's dir/target/compile, a tactic's owner and its QUARTERS AS ONE
+(§119.1: a tactic marked Q2–Q3 is saying something by its blanks, so only
+a no-quarter tactic is a gap, §128 — and while that fill is pending the
+four move together under one mark), a capability KO's four plus weight, a
+project's owner/start/end, and the unit's aspiration. Empty is null or
+whitespace, never a typed 0 (§104.10). **Deliberately not in v1**, flagged
+rather than silently absent: SWOT quadrants (filling one means adding rows
+and "adding or removing rows is not possible in this mode" is Islam's own
+boundary — where the two rules collide, the quadrant stays the office's),
+deliverable/outcome/milestone fields, and End in mind (optional by design,
+§45.2 — not a gap). Never in this mode: names, add, remove, reorder
+(§101's own grant, untouched), collaborators (§50.2 — they decide who may
+report).
+
+### 132.3 Pending is a mark, and confirming is removing it
+
+`row.pend = { field: {by, at} }`, stored as an ABSENCE (§50.6): the office
+confirming deletes the key, the last key leaving deletes `pend`, and a
+tenant that never filled is byte-identical to one confirmed clean. No
+migration — rows persist unknown keys through their `extra` JSONB, proved
+against a real Postgres 16 (write, read, clean slate). The value is LIVE
+the moment it is filled — held aside it would leave Missing on a screen
+with a number waiting behind it, §104.8's screen-arguing-with-its-own-score
+— and wears amber everywhere it shows: the field, the chip, the band's
+count, the matrix state. The chip names who filled it and when on hover;
+the office sees a tick beside it; **an office edit confirms in passing**,
+because correcting is the stronger act — `gapCell`'s edit-mode setter and
+the quarter toggle both lift the mark on write.
+
+### 132.4 The server judges transitions, not intentions
+
+A gap pass runs BEFORE the existing diff (`lib/authorize.js`): per row by
+id, per gap field, it classifies fill (blank → value + mark), amend (mark
+on both sides, anything moved), unfill (the filler's own undo, back to the
+exact stored gap) and confirm (mark removed, value standing), applies the
+accepted ones to a CLONE of the stored side, and lets everything else fall
+through to the old classification — office-only, the fail-closed direction.
+`gapFill` passes on authorship OR the fill grant; `gapConfirm` on
+authorship alone. Filling without the mark, marking a settled value, and
+touching a settled value all fall through by construction. **Two lessons
+paid for on the way:** `same()` is stringify-based and KEY ORDER IS NOT
+CONTENT — the pass rebuilds pend maps field by field, and Postgres jsonb
+itself stores `{by, at}` back as `{at, by}` (measured), so marks are
+compared canonically or an untouched pending field reads as a phantom
+amend and refuses an innocent save (§42's `branding()` shape, caught by
+test-authorize §16 case 10 and then again by the round trip).
+
+### 132.5 The score waits on confirmation; the report never does
+
+Reporting rides the Reporting half untouched: figures, notes and Save
+draft land against a pending target the day it is filled. What waits is
+the COMPARISON: a row with a pending score-bearing field
+(`GAP_SCORE_FIELDS` — dir, target, compile, weight, quarters; not
+target3y, owner or a date, which change no figure's meaning this cycle)
+scores null and leaves every average — `scorableMeasures`, `koScore`,
+`capKOScore`, and `tacticPlanned` reads not-yet-due. The screen says why
+where the dash is (§106): the row's dash carries the reason on hover and
+the table carries *"N not counted yet — awaiting Strategy Office
+confirmation"*, only when there is one. **Submit is refused** while any
+such field is pending — a third entry in `submitBlockers`/`submitRefusal`
+(§105's one function for both sides), naming the rows and saying whose
+move it is, because only the office can clear this blocker and words that
+send the unit back to its own fields would be pointing at the wrong desk.
+
+### 132.6 The screen: one builder, and the pen says which mode it opens
+
+`gapCell()` draws every fillable value in all three states — red dashed
+field on a gap, amber field while pending (fill mode), text plus chip plus
+tick in read — and is the ONLY way one is drawn (§96: a second way to draw
+these cells is how unbound ones get built). Fill mode is `filling()`,
+`authoring()`'s shape one grant down; every `ed ?` site in the renderers
+stays false, which is what keeps Add, ×, handles and name fields out of
+fill mode without a second gate. The pen itself is one slot and one
+control: for a fill holder it says "Fill the gaps", and §101's arrows —
+which a fill holder, unlike anyone before, holds BESIDE a pen — yield to
+the second slot, because both sat at `right:0` and the arrows ate the
+pen's clicks: §70's family, caught by the check PRESSING the pen rather
+than querying it.
+
+### 132.7 The matrix restyle rides along, approved from the mockup
+
+Islam, on the mockup's access table: *"I really like that design for the
+access table … we can enhance it in this build as well."* Same bones, three
+refinements: each toggle its own rounded chip with a gap (not a fused
+strip), a LIT toggle a tint with a coloured border rather than a solid
+fill (§41's budget on a page drawing up to 27 of them), hairline row
+separators with roomier padding. The third toggle's mark is a pen over a
+dashed line, amber when lit — the grant wears the colour its consequence
+wears. The three-toggle cells outgrew the 940px scroll floor and clipped
+the third with nothing to read it by (caught by `no-wrap.py`); the floor is
+1010px now, and the grid scrolls inside its own box as it always has
+(§54.6).
+
+### 132.8 What proves it
+
+`scripts/test-authorize.js` §16: fill, amend, unfill accepted for the fill
+grant; the same fill refused at the shipped default; a settled value
+refused even wearing the mark; the mark's removal refused to its own
+filler and accepted for the office, tick and correcting-confirm both; the
+quarters group; the capability side; the four ends of `mayFillPage()`.
+**Run against the pre-§132 build it fails 6 ways and then crashes on the
+missing rule (§94.5).** `src/checks/gap-fill.py`: the third toggle where
+it belongs and nowhere else; fill mode's fields counted and its absences
+asserted (§94.2); every press read back from the DATA (§96); the chip, the
+count, the custodian's missing tick and the office's present one; the
+dash, the not-counted line, the Submit refusal with Save draft alive; the
+KO band through the same builder. It MAKES its gaps — the demo plan is
+complete — and fails on the pre-build from the first section. The DB half:
+round trip PASS on a virgin Postgres 16, and pend proved to survive write,
+read and the clean slate.
+
+### 132.9 The plan download is hidden (reversing §117's button, not its machinery)
+
+Islam, mid-build: *"hide the download button of the plans and the
+capabilities in the ppt format that we created earlier so we can have it
+in one fix here."* `dlPlanBtn()` returns nothing for EVERYONE, office
+included — hidden, not deleted: `pptx.js`, `mayDownloadPlan()` and
+`sendPlanPptx()` all stand, so giving it back is one line, and the deck
+stays honest for that day (§130-era Missing marks, and now a pending value
+prints as the value plus "(pending)", never Missing — answered, not
+settled). `checks/strategy-split.py` asserts the button absent on BOTH
+surfaces (§119.9's fault inverted would be hiding one) for every viewer,
+while the dormant builder is still proved through a direct call — a check
+written against the problem survives the button's return (§94.8).

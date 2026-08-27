@@ -75,13 +75,6 @@ var ICON_EYE = '<svg viewBox="0 0 20 20" aria-hidden="true">' +
 var ICON_PEN = '<svg viewBox="0 0 20 20" aria-hidden="true">' +
   '<path d="M13.4 3.6l3 3L7.9 15.1l-3.9.9.9-3.9z" fill="none" ' +
     'stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/></svg>';
-/* §132: the fill-the-gaps mark — a pen over a dashed line, writing into the
-   blank. The same pen, lifted, with the line it writes on. */
-var ICON_FILL = '<svg viewBox="0 0 20 20" aria-hidden="true">' +
-  '<path d="M12.6 3.4l3 3-7 7-3.6.6.6-3.6z" fill="none" ' +
-    'stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/>' +
-  '<path d="M3 17.4h14" fill="none" stroke="currentColor" stroke-width="1.6" ' +
-    'stroke-linecap="round" stroke-dasharray="2 3"/></svg>';
 
 /* ── Roles & access ─────────────────────────────────────────────────── */
 function stateCell(roleKey, areaKey, editable, disabled){
@@ -108,17 +101,7 @@ function stateCell(roleKey, areaKey, editable, disabled){
      is a TOGGLE: pressing the lit one turns it off and the cell falls back to
      none. The state each press produces is worked out here rather than in the
      handler, so the click still says only "set this cell to this". */
-  /* §132: THE TWO STRATEGY HALVES CARRY A THIRD STATE — Fill gaps — between
-     view and edit. Only those two cells: everywhere else the state would
-     grant nothing (`mayFillPage` answers only for the strategy pages), and
-     a toggle that does nothing is decoration (§42). */
-  var states = (areaKey === "a_unit_own_strat" || areaKey === "a_fn_own_strat")
-    ? ["view", "fill", "edit"] : ["view", "edit"];
-  var WORD = { view: "May read",
-               fill: "May fill what’s empty — Missing values only, pending until the office confirms",
-               edit: "May read and change" };
-  var ICON = { view: ICON_EYE, fill: ICON_FILL, edit: ICON_PEN };
-  var opts = states.map(function(o){
+  var opts = ["view","edit"].map(function(o){
     var on = o === v;
     /* `st-view`, NOT `view` (§65). A class name is one global namespace, and
        `.view` is the PAGE REGION — `.view { padding-top: var(--rail-gap) }` —
@@ -129,9 +112,9 @@ function stateCell(roleKey, areaKey, editable, disabled){
        component, and the collision is silent because both rules are valid. */
     return '<button type="button" class="stbtn' + (on ? " on st-" + o : "") + '" data-ac="' +
       roleKey + '|' + areaKey + '|' + (on ? "none" : o) + '" title="' +
-      (on ? "Turn off — leaves no access" : WORD[o]) +
+      (on ? "Turn off — leaves no access" : o === "view" ? "May read" : "May read and change") +
       '" aria-label="' + (on ? "turn off " + o : o) + '" aria-pressed="' + on + '">' +
-      ICON[o] + '</button>';
+      (o === "view" ? ICON_EYE : ICON_PEN) + '</button>';
   }).join("");
   /* Nothing lit IS the answer, so the cell says so rather than looking
      unanswered — a blank cell in a permissions table reads as "not filled in",
@@ -252,7 +235,6 @@ function renderAccess(){
       '<div class="cfg acgrid"><table><thead>' + head + '</thead><tbody>' + body + '</tbody></table></div>' +
       '<div class="chart-legend" style="margin-top:12px">' +
         '<span><i class="st st-view">' + ICON_EYE + '</i> may read</span>' +
-        '<span><i class="st st-fill">' + ICON_FILL + '</i> may fill what&rsquo;s empty (Strategy halves only)</span>' +
         '<span><i class="st st-edit">' + ICON_PEN + '</i> may read and change</span>' +
         '<span><i class="st st-none">neither</i> no access, page hidden</span>' +
         '<span><i class="st" style="background:none;color:var(--none);border:1px dashed var(--none)">&mdash;</i> cannot come up for this role</span>' +

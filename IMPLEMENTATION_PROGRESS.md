@@ -82,6 +82,12 @@ Nothing proceeds past this line without an answer.
 - `checks/nav-scroll.py` — fails 6 ways on the pre-§136 build, green here,
   with page-width, setup-rail, setup-header and the full qa.py sweep re-run
   beside it. **Not merged — on the branch awaiting Islam's word.**
+- **§137 — a failed render says so on the page.** The guard sits on the page's
+  render alone, so the chrome and navigation stay alive and the card's "open
+  another page from the menu above" is true. Islam's words after revising the
+  mockup: simple, friendly, one Reload button, the error folded behind a
+  closed "Technical details". `checks/render-fail.py` fails 3 ways on the
+  pre-§137 build — the production symptom verbatim.
 
 
 ### v3.50 — the Setup header line, the marking table, and a repaired matrix (§135)

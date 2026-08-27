@@ -5133,6 +5133,22 @@
   td:has(> .fld + .xbtn) > .fld { width: calc(100% - 30px); vertical-align: middle; }
   td:has(> .fld + .xbtn) > .xbtn { vertical-align: middle; margin-left: 5px; }
 
+  /* ── A FAILED RENDER SAYS SO (§137) ────────────────────────────────────
+     The card paint() leaves where a page that threw would have been. Quiet on
+     purpose: no red kicker, no shouting — the first sentence answers the fear
+     and the error sits folded behind "Technical details". Drawn from tokens
+     only, so it holds in both themes. */
+  .failcard { max-width:560px; margin:64px auto; background:var(--surface);
+    border:1px solid var(--line); border-radius:10px; padding:30px 34px;
+    text-align:center; }
+  .failcard .fc-t { font-size:17px; font-weight:700; margin-bottom:10px; }
+  .failcard .fc-b { font-size:14px; color:var(--ink-2); margin-bottom:18px; }
+  .failcard details { margin-top:18px; text-align:left; }
+  .failcard summary { font-size:12px; color:var(--ink-3); cursor:pointer; }
+  .failcard summary:focus-visible { outline:2px solid var(--gold); outline-offset:2px; }
+  .failcard .fc-e { font-family:var(--mono); font-size:12px; color:var(--ink-3);
+    background:var(--surface-2); border-radius:6px; padding:8px 12px; margin-top:8px; }
+
   /* ── Presentation mode ────────────────────────────────────────────
      A mode, not a page: it takes the whole window, the app chrome disappears,
      and Exit returns to exactly where the presenter was standing.
@@ -36249,6 +36265,21 @@ var SYNC = (function () {
     if (f.start != null) { try { el.setSelectionRange(f.start, f.end); } catch (e) {} }
   }
 
+  /* The card a page that could not be drawn leaves in its place (§137). One
+     action, deliberately: an earlier draft carried "Open another page" beside
+     Reload, and it went — the navigation is right above, and a control that
+     does nothing concrete is worse than no control. The technical line is
+     inside a <details> that starts CLOSED. */
+  function failCard(name, msg){
+    return '<div class="failcard">' +
+      '<div class="fc-t">Something went wrong opening this page.</div>' +
+      '<div class="fc-b">Your data is safe. Please reload, or open another page from the menu above.</div>' +
+      '<button type="button" class="editbtn" data-failreload>Reload</button>' +
+      '<details><summary>Technical details</summary>' +
+        '<div class="fc-e">' + esc((name ? name + " · " : "") + String(msg)) + '</div>' +
+      '</details></div>';
+  }
+
   function paint(){
     if (CLICKING) { PAINT_HELD = true; return; }
     var _panel = document.getElementById("panel");
@@ -36422,13 +36453,35 @@ var SYNC = (function () {
        already makes, in the other direction. */
     pageLineReset();
 
-    var body = (current === "group" || current === "setup" || current === "manage")
-      ? def.render()
-      /* A company is passed its key, the way a function is: there is no
-         UNITS[...] to hand it and inventing a unit-shaped object for something
-         that carries no plan would be a lie about what it is (§68). */
-      : isCo(current) ? def.render(current)
-      : isFn(current) ? def.render(current) : def.render(UNITS[current]);
+    /* ── A FAILED RENDER SAYS SO (§137). A throw inside a page's render used
+       to abort paint() and leave the PREVIOUS page standing, with the only
+       witness in the hidden console — so a data fault read as a dead click,
+       and the person reported the wrong symptom (§118.7, and §118's CF tab is
+       exactly how that looked from production). §32's rule one level deeper:
+       after a failure there is exactly one honest thing to show, and it is
+       the failure. The guard sits on the PAGE's render alone — the chrome,
+       the navigation and the tabs above have already painted, which is what
+       makes "open another page from the menu above" a true sentence. The
+       words are Islam's ask ("simple with a more user friendly message",
+       2026-08-27); the error itself is kept, folded behind a closed
+       disclosure, so the office can still read it without it shouting at
+       anybody else. */
+    var body;
+    try {
+      body = (current === "group" || current === "setup" || current === "manage")
+        ? def.render()
+        /* A company is passed its key, the way a function is: there is no
+           UNITS[...] to hand it and inventing a unit-shaped object for something
+           that carries no plan would be a lie about what it is (§68). */
+        : isCo(current) ? def.render(current)
+        : isFn(current) ? def.render(current) : def.render(UNITS[current]);
+    } catch (renderErr) {
+      /* Still said to the console, verbatim — the card is FOR the person, the
+         console line is for whoever is diagnosing with the lid off. */
+      console.error("SMP: this page could not be drawn", renderErr);
+      body = failCard(pageName || (def && def.label) || "",
+                      renderErr && renderErr.message || renderErr);
+    }
     /* The rail and the page it chose, side by side. `defs` rather than
        SUBS.setup, so a page the viewer may not open is not offered — the rail
        is navigation, and navigation that leads somewhere refused is worse than
@@ -36459,6 +36512,12 @@ var SYNC = (function () {
             '<h1 class="setupttl">' + esc(pageName) + '</h1>' + pageLineHTML() + '</div>' +
           secrowHTML + body + '</div></div>'
       : body;
+    /* The failure card's one control (§137). Wired here because the card was
+       written into innerHTML two lines up — no inline handlers anywhere
+       (§43.6), and wire() below owes this card nothing: it must work exactly
+       when a page's own wiring cannot be trusted. */
+    var failBtn = _panel.querySelector("[data-failreload]");
+    if (failBtn) failBtn.addEventListener("click", function(){ location.reload(); });
 
     /* Group Performance is four sections; they become a third nav row rather
        than one long scroll. The row exists only where there are sections. */

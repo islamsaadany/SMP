@@ -18024,3 +18024,45 @@ legitimately sit below the row. A dropdown's items are not the row. The
 exclusion was added and the check re-proved against the old build afterwards,
 because a filter added to silence a false positive is exactly the kind of edit
 that can silence the true one with it.
+
+## 137 · A failed render says so on the page (v3.51)
+
+**THE FAULT**: a throw inside a page's render aborted `paint()` and left the
+PREVIOUS page standing, with the only witness in the hidden console — §118.7
+recorded it, and §118's CF tab is exactly how it looked from production: a
+data fault wearing a dead click's face, so the person reports the wrong
+symptom and diagnosis starts a page away from the fault.
+
+**THE GUARD SITS ON THE PAGE'S RENDER ALONE.** By the time `def.render()` runs,
+the chrome, the navigation and the tabs have already painted — which is what
+makes the card's second sentence ("open another page from the menu above") a
+true sentence rather than a hope. A guard around the whole of paint() would
+have had to promise less.
+
+**THE WORDS ARE ISLAM'S ASK** (*"the message needs to be simple with a more
+userfriendly message"*, 2026-08-27, revising the first mockup): "Something
+went wrong opening this page. Your data is safe. Please reload, or open
+another page from the menu above." — then one Reload button. **The first
+draft's red kicker and second button both went**: "Open another page" was a
+control that did nothing concrete with the navigation right above it, and the
+technical line moved behind a `<details>` that starts CLOSED — kept, because
+the operator still needs the real message (§123's lesson: a failure invisible
+to the user must stay visible to the operator), and folded, because it is for
+them alone. The throw is also still said to the console verbatim.
+
+**"Kept for the Strategy Office" was NOT written on the card**: that clause is
+only honest if the error is also stored somewhere the office looks, which is
+storage and stays an open decision — the card claims exactly what is true.
+
+**The Reload control is wired beside the innerHTML that draws it** — no inline
+handlers (§43.6), and deliberately not in wire(): the card must work exactly
+when a page's own wiring cannot be trusted.
+
+**Proved able to fail first (§94.5)**: `checks/render-fail.py` poisons a real
+def in `SUBS` — the table paint() actually reads, never a copy — walks to the
+page through the real controls, and asserts both ends: the card with the
+agreed words, the folded details carrying the injected error, Reload receiving
+its own click point (§93.4), zero uncaught page errors, and a healthy page
+rendering normally afterwards. Against the pre-§137 build it fails 3 ways,
+ending in the production symptom verbatim: no card, the previous page left
+standing, the error uncaught.

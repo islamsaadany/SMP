@@ -521,15 +521,23 @@ var SYNC = (function () {
         function (err, j) { done(err, err ? null : j); });
     },
     mailSend: function (o, done) {
+      /* `greet` is the WORD, and it is here for the RECORD rather than for the
+         send: the personalisation rides in the html's marked region, so a
+         build that dropped this would mail perfectly and write a record saying
+         no message ever greeted anybody (spec 021). Which is what happened —
+         this function names every field it forwards, so the new one was
+         silently absent until the check asked what was posted. */
       mailPost({ action: "send", draftId: o.draftId,
                  criteria: o.criteria, subject: o.subject, body: o.body,
                  ctaLabel: o.ctaLabel, ctaHref: o.ctaHref, html: o.html,
+                 greet: o.greet,
                  fromName: o.fromName, replyTo: o.replyTo },
         function (err, j) { done(err, err ? null : j); });
     },
     mailDraftSave: function (o, done) {
       mailPost({ action: "draftSave", id: o.id, subject: o.subject, body: o.body,
-                 ctaLabel: o.ctaLabel, ctaHref: o.ctaHref, criteria: o.criteria },
+                 ctaLabel: o.ctaLabel, ctaHref: o.ctaHref, greet: o.greet,
+                 criteria: o.criteria },
         function (err, j) { done(err, err ? null : j); });
     },
     mailDraftList: function (done) {

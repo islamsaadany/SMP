@@ -222,16 +222,38 @@ module.exports = async function handler(req, res) {
       const html = String(body.html || "");
       if (!html) return send(res, 400, { ok: false, error: "Nothing to send." });
 
+      /* ── THE GREETING IS FILLED IN HERE, ONCE PER RECIPIENT (spec 021) ──
+         The page builds ONE email and leaves a marked region where the name
+         goes; this is the side that knows who the recipients are (§74.2), so
+         this is the side that names them. Read off the STORED register, from
+         the same rows the audience resolved from — never from anything the
+         browser posted.
+
+         A NAME THAT COMES OUT EMPTY DROPS THE GREETING LINE, never "Dear ,":
+         `greetFill` removes the whole region. The send is not refused and the
+         recipient is not marked — a greeting is a courtesy, not a condition of
+         delivery.
+
+         WITH THE GREETING OFF there is no region, so `greetFill` returns the
+         html unchanged and every recipient gets the identical email they would
+         have got before this existed. */
+      const byKey = new Map((stored.people || []).map(function (p) { return [p.key, p]; }));
+      const greetWord = String(body.greet == null ? "" : body.greet).trim() || null;
+      const htmlFor = function (r) {
+        return Rules.greetFill(html, Rules.firstName(byKey.get(r.key) || { name: r.name }));
+      };
+
       /* THE ROW IS WRITTEN BEFORE THE SEND, not after. A send that half
          succeeds and then loses the function is the case a record exists for,
          and a record written afterwards is exactly the one that would be
          missing. */
       const msg = (await client.query(
-        "INSERT INTO messages (by_key, by_name, subject, body, cta_label, cta_href, audience, total) " +
-        "VALUES ($1,$2,$3,$4,$5,$6,$7,$8) RETURNING id",
+        "INSERT INTO messages (by_key, by_name, subject, body, cta_label, cta_href, greet, audience, total) " +
+        "VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9) RETURNING id",
         [me.key, me.name || null, subject, bodyText,
          String(body.ctaLabel || "").trim() || null,
          String(body.ctaHref || "").trim() || null,
+         greetWord,
          JSON.stringify(body.criteria || {}), aud.to.length])).rows[0];
 
       let ok = 0, failed = 0;
@@ -240,7 +262,7 @@ module.exports = async function handler(req, res) {
         let ids = [], err = null;
         try {
           ids = await resendBatch(key, chunk.map(function (r) {
-            return { from: from, to: [r.email], subject: subject, html: html,
+            return { from: from, to: [r.email], subject: subject, html: htmlFor(r),
                      reply_to: replyTo };
           }));
         } catch (e) {
@@ -276,21 +298,28 @@ module.exports = async function handler(req, res) {
        composer is holding is what says which. */
     if (action === "draftSave") {
       const id = parseInt(body.id, 10) || null;
+      /* `greet` LAST, so adding it did not renumber the five placeholders
+         already here — the UPDATE and the INSERT share this array and a
+         column inserted in the middle silently shifts one of them. NULL is
+         off, and an empty word is off rather than a greeting with no word
+         (spec 021). */
       const vals = [String(body.subject || ""), String(body.body || ""),
                     String(body.ctaLabel || "").trim() || null,
                     String(body.ctaHref || "").trim() || null,
-                    JSON.stringify(body.criteria || {})];
+                    JSON.stringify(body.criteria || {}),
+                    String(body.greet == null ? "" : body.greet).trim() || null];
       if (id) {
         const r = await client.query(
           "UPDATE message_drafts SET subject=$2, body=$3, cta_label=$4, cta_href=$5, " +
-          "audience=$6, updated_at=now() WHERE id=$1 RETURNING id", [id].concat(vals));
+          "audience=$6, greet=$7, updated_at=now() WHERE id=$1 RETURNING id",
+          [id].concat(vals));
         if (r.rowCount) return send(res, 200, { ok: true, id: String(id) });
         /* The draft was deleted from another tab. Saving into nothing would
            lose the message; it becomes a new draft instead. */
       }
       const r2 = await client.query(
-        "INSERT INTO message_drafts (by_key, by_name, subject, body, cta_label, cta_href, audience) " +
-        "VALUES ($1,$2,$3,$4,$5,$6,$7) RETURNING id",
+        "INSERT INTO message_drafts (by_key, by_name, subject, body, cta_label, cta_href, audience, greet) " +
+        "VALUES ($1,$2,$3,$4,$5,$6,$7,$8) RETURNING id",
         [me.key, me.name || null].concat(vals));
       return send(res, 200, { ok: true, id: String(r2.rows[0].id) });
     }

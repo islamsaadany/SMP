@@ -17601,3 +17601,159 @@ production, and not a reason to widen the CSP.
 and the question re-asked exactly once; the refusal is remembered for the
 process; a bad key is never retried into. Watched to fail with the retry
 removed — 2 failures. 38/0, test-chat 52/0, built file byte-identical.
+
+---
+
+## 135 · The email greets its receiver (v3.50, spec 021)
+
+Islam: *"For the emails sent can we make an option while sending the email to
+customize the email by the first name of the reciever like starting the email
+with Dear Ahmed and then the body comes after — it's a turn on and off
+option."*
+
+Settled by question-and-answer before anything was drawn, then from a mockup
+made of the real composer, then corrected once by looking at it.
+
+### 135.1 Every recipient already gets their own email, and that is the whole reason this is cheap
+
+Worth stating first because it decided the shape: `/api/mail`'s send loop has
+posted **one message per person** since §74.3 — never a shared To, never a BCC
+— so that the record could say who received what. Nothing about how many
+emails go out, or who can see whom, changes here.
+
+What changes is one sentence in §72.3's rule. The page builds ONE html and the
+server sends that identical html to everybody; a greeting that names the
+receiver means the emails are no longer identical. So **the builder leaves a
+marked region and the server fills it once per recipient**, because who the
+recipients are is the server's answer and never the browser's (§74.2) —
+resolved again off the STORED register, from the same rows the audience came
+from.
+
+`SMPRules.GREET_OPEN` / `GREET_CLOSE` / `GREET_NAME` and `greetFill()` live in
+`lib/rules.js` because **both sides need the same three strings** and a second
+copy of a contract drifts in silence (§42). `src/mail.js` writes them,
+`api/mail.js` reads them.
+
+**THE REGION IS DELIMITED, NOT MERELY TOKENISED**, and it buys two things. A
+sender who types the token into their own message can never have it
+substituted, because nothing outside the region is touched — asserted. And an
+empty name removes **the whole paragraph** rather than leaving `Dear ,`, which
+is the one string this feature must never produce.
+
+### 135.2 The first name, kept whole — the one question worth asking twice
+
+Islam's answer was *"just the very first name"*, and that reads two ways on his
+own register: **Abd El Moniem Mohamed Abd El Moniem Mahmoud** is a real row.
+Asked again, and the answer was the whole first name. So it is
+`nameWords(…, 1)` — **the same reader the register's short-name guess already
+uses** (§93.8), so the particle list keeps a compound name together and "Abd"
+alone can never come out. A typed `known` wins over the guess, because that is
+the SMO's correction.
+
+**It may return nothing, and that is not an error**: the caller drops the
+greeting line.
+
+### 135.3 One line, and no prose — the correction, kept rather than overwritten
+
+The row shipped to the mockup with a label, a switch, a word box and a
+sentence, over two lines. Islam: *"the design of the setting is poor. It should
+be one line you dont need 2 lines .. and no explanations needed in the setting
+itself it's clear."*
+
+**Right twice.** A label reading *Open with a greeting* beside a box holding
+the word *Dear* has already said everything the sentence said — §127's ruling
+on the chat settings, reached again from the other direction. And the height
+was not the only cost: **two lines under the message made the greeting read as
+a bigger decision than the button row beneath it**, which is one line. They
+carry the same weight now.
+
+It is `.imp-row` + `.cfg-lab` + `.minisw`, the platform's own switch row (§44).
+**The word box sits BEFORE the switch**, so the switch is last in the row
+whether the greeting is on or off — a control that moves under the press that
+produced it is §41.8's fault. Measured: the switch's x is identical in both
+states.
+
+**SIX WORDS SURVIVE, and not in the setting.** Under the preview card:
+*Everyone sees their own name here.* It is the one thing the screen cannot say
+by showing — without it a draft opened by somebody else reads as everybody
+getting "Dear Ahmed" — and it stays OUTSIDE the email, because a badge inside
+would be a line nobody receives and the preview's whole value is that it is the
+real output (§72.3).
+
+### 135.4 One column, holding the word
+
+`greet TEXT` on `messages` and on `message_drafts` (migration 027). **Not a
+boolean beside a word**: a switch that is on with no word is a state nothing in
+the product allows, and two columns that must agree are two columns that drift
+(§104.7 — take the type from the one value there is). NULL is off, so every
+existing row is already correct and nothing is backfilled; turning it off
+writes NULL again, so an untouched message and one switched on and off are
+byte-identical (§50.6).
+
+On `messages` because **the record is the record**: it is written before the
+send (§74), and a fact the send used that the record does not hold is a fact
+nobody can check afterwards.
+
+### 135.5 The bug the check found, and it was in the plumbing
+
+`SYNC.mailSend()` **names every field it forwards**, so `greet` was silently
+absent from the posted body. The emails would have been personalised perfectly
+— the fill rides in the html's region — and `messages.greet` would have been
+NULL on every row: **the record would have said no message ever greeted
+anybody**, which is the exact failure §135.4's own comment describes. Found by
+asking what the page POSTS, not by reading it.
+
+### 135.6 An absent name and an empty one are different answers
+
+Found by reading my own diff rather than by a failing test, and it is the only
+`Dear ,` this feature can make.
+
+`greetPara()` first asked whether it had a usable name and, failing that, wrote
+the region for the server. But **`Send me a copy` fills the name in the
+browser** — there is one recipient and the page knows who they are — so a
+signed-in sender whose own row has no usable name handed over an EMPTY name,
+fell through to the region, and the copy arrived carrying markers no server
+would ever fill. An HTML comment renders as nothing, so the reader would have
+seen exactly the string this whole design exists to prevent.
+
+**Absent means "the server will fill it"; present-and-empty means "I looked and
+there is none".** The second writes no greeting at all. Asserted in §6 of the
+test, on the builder directly, because the path it breaks is the one no server
+ever touches.
+
+### 135.7 What proves it, and the endpoint that had to become configurable
+
+Two halves, because the claim has two halves.
+
+**`scripts/test-email-greeting.js`** stands in front of the provider and reads
+what each recipient was actually sent. `SMP_RESEND_ENDPOINT` is a new
+environment variable defaulting to the real Resend — §100.3's rule, that a
+check must MODEL the provider rather than branch around it, because a test
+double behind an `if` in `lib/mailer.js` would be a second code path shipping
+to production. It spawns its own dev-server, since the variable has to be in
+the child's environment before `lib/mailer.js` loads.
+
+Four shapes of name, each of which had to survive: an ordinary one, the
+compound one, a typed short name, and a row whose name yields nothing. **The
+assertion that separates this from a build greeting everybody with the first
+recipient's name is that each message carries NOBODY ELSE'S** — which a single
+shared html would fail. 33 passed.
+
+**`src/checks/email-greeting.py`** measures the screen and the seam: one line
+with no prose in both states, the switch not moving, the controls PRESSED
+(§93.4), and that what the page posts carries the region **and names nobody**.
+Over HTTP, because this page is the empty state over `file://` (§94.11). 38
+passed.
+
+**Both were watched to fail first** (§94.5). The server test: the fill removed
+→ 8 failures; the empty-name rule removed → 2; the compound rule cut to one
+word → 2. The browser check: the browser resolving the name into the posted
+html → 2; the prose put back → 3.
+
+**Two of the browser check's own first-run failures were the CHECK.** It
+clustered the row's controls by their `top`, and three controls of three
+heights on one line have three different tops — §122.4, already written down
+once. It asks whether their **middles** agree now, with the tolerance taken
+from the tallest control rather than from a number somebody picked. And it
+asserted the row's pixel height was unchanged when the word box appears, which
+is false and was never the point: a text input is taller than a chip.

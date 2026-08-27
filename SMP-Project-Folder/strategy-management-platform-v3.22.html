@@ -3172,6 +3172,24 @@
             border-top:1px dashed var(--line); margin-top:12px; padding-top:11px; }
   .ctarow .why { grid-column:1 / -1; }
 
+  /* ── THE GREETING ROW (spec 021) ────────────────────────────────────
+     ONE LINE, and no prose in it — Islam, of the two-line first draft: "it
+     should be one line you dont need 2 lines .. and no explanations needed in
+     the setting itself it's clear." It borrows `.ctarow`'s dashed rule and
+     spacing, because it is the composer's other settings row and the two
+     belong to the message rather than to the page.
+
+     THE BOX IS SIZED FOR THE ONE WORD IT HOLDS. `.fld` is `width:100%`, which
+     in `.ctarow`'s two-column grid made it half the pane — a field that wide
+     reads as one expecting a sentence. `flex:none` as well as a width, or the
+     flex row would shrink it under `.cfg-lab`'s `flex:1` (§110.8's family:
+     a width alone is not enough inside a flex or table layout). */
+  .ctarow.greetrow { grid-template-columns:1fr; }
+  .greetword { width:120px; max-width:120px; flex:none; }
+  /* The one thing the screen cannot say by showing: that the name above is a
+     sample. Sits under the preview, above the row it explains. */
+  .greetsay { display:block; margin:8px 0 0; }
+
   /* THE BAR DOES NOT MOVE. Pinned to the foot of the window rather than
      sitting at the end of the scroll, so the count and the button stay
      together whether the audience is three people or seventy-six.
@@ -7489,6 +7507,69 @@ THEME.apply();
     return out;
   }
 
+  /* ── THE FIRST NAME, AND IT IS ONE NAME KEPT WHOLE (spec 021) ──────
+     What an email greets somebody by. `nameWords(…, 1)` is the SAME reader
+     the register's short-name guess uses, so a compound first name arrives
+     whole — "Abd El Moniem", never "Abd", which is the case Islam asked about
+     twice and the one this would otherwise get wrong on his own register.
+
+     A TYPED SHORT NAME WINS. `known` is the SMO's correction to the guess
+     (§93.8); somebody who has been written down as "Mo" is greeted "Mo".
+
+     IT MAY RETURN "". A row whose name cannot produce one is not an error
+     here — the caller drops the greeting line rather than writing "Dear ,". */
+  function firstName(person) {
+    if (!person) return "";
+    var typed = String(person.known == null ? "" : person.known).trim();
+    return nameWords(typed || person.name, 1);
+  }
+
+  /* ── THE GREETING IS FILLED IN ON THE SERVER (spec 021) ────────────
+     ONE BUILDER STILL BUILDS THE EMAIL (§72.3): the page builds the HTML and
+     posts it, and the server sends it. But a greeting names the RECEIVER, so
+     the emails stop being identical — and who the receivers are is the
+     server's answer, never the browser's (§74.2). So the builder leaves a
+     marked region and the server fills it once per recipient.
+
+     THE REGION IS DELIMITED, NOT JUST TOKENISED, for two reasons. A sender
+     who happens to type the token in their own message can never have it
+     substituted, because nothing outside the region is touched. And an empty
+     name removes the WHOLE greeting paragraph rather than leaving "Dear ,",
+     which is the one string this feature must never produce.
+
+     HTML COMMENTS, so a region that somehow survives unfilled renders as
+     nothing rather than as markup somebody reads.
+
+     Declared here because BOTH SIDES need the same three strings and a second
+     copy of a contract drifts in silence. mail.js writes them, api/mail.js
+     reads them. */
+  var GREET_OPEN = "<!--smp-greet-->";
+  var GREET_CLOSE = "<!--/smp-greet-->";
+  var GREET_NAME = "<!--smp-name-->";
+
+  function greetEsc(s) {
+    return String(s == null ? "" : s)
+      .replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;")
+      .replace(/"/g, "&quot;");
+  }
+
+  /* html → html, for ONE recipient. An empty or missing name drops the region
+     entirely. Only the FIRST region is touched: the greeting is the first
+     thing in the message, and a message with no region comes back unchanged,
+     which is what makes "the switch is off" cost nothing. */
+  function greetFill(html, name) {
+    var s = String(html == null ? "" : html);
+    var a = s.indexOf(GREET_OPEN);
+    if (a < 0) return s;
+    var b = s.indexOf(GREET_CLOSE, a);
+    if (b < 0) return s;
+    var end = b + GREET_CLOSE.length;
+    var who = String(name == null ? "" : name).trim();
+    if (!who) return s.slice(0, a) + s.slice(end);
+    var region = s.slice(a + GREET_OPEN.length, b).split(GREET_NAME).join(greetEsc(who));
+    return s.slice(0, a) + region + s.slice(end);
+  }
+
   function namedOn(row, person) {
     if (!row || !person) return false;
     /* THE NAME THE REGISTER SHOWS COUNTS TOO (§130.7). The plan's owner and
@@ -7589,6 +7670,9 @@ THEME.apply();
     namedOn: namedOn, namedInUnit: namedInUnit,
     NAME_PARTICLES: NAME_PARTICLES, KNOWN_NAME_WORDS: KNOWN_NAME_WORDS,
     nameWords: nameWords, knownGuess: knownGuess, nameRuns: nameRuns,
+    firstName: firstName,
+    GREET_OPEN: GREET_OPEN, GREET_CLOSE: GREET_CLOSE, GREET_NAME: GREET_NAME,
+    greetFill: greetFill,
     editingRoles: editingRoles, onlyVia: onlyVia, rolesOrFloor: rolesOrFloor,
     OWN_LINES_ONLY: OWN_LINES_ONLY, onlyOwnLines: onlyOwnLines,
     isOwnLinesRole: isOwnLinesRole,
@@ -18932,7 +19016,48 @@ var MAIL = (function(){
     return hexOf([0,1,2].map(function(i){ return A[i]*(1-t) + B[i]*t; }));
   }
 
-  /* o: { org, title, body, footer, accent, panel, cta:{label,href} } */
+  /* ── THE GREETING (spec 021) ────────────────────────────────────────
+     Islam: "customize the email by the first name of the receiver like
+     starting the email with Dear Ahmed and then the body comes after."
+
+     IT IS THE FIRST PARAGRAPH OF THE BODY, in the body's own type — not a
+     heading and not a styled banner. A greeting that wears a different size
+     from the sentence after it reads as a label on the message rather than as
+     the opening of it.
+
+     TWO MODES, ONE FUNCTION. Given a `name` it writes it (the composer's
+     preview, and the copy the sender takes for themselves); given none it
+     writes the MARKED REGION `SMPRules.greetFill()` fills once per recipient
+     on the server, because who the recipients are is the server's answer
+     (§74.2). Either way this is the only place the greeting's markup exists.
+
+     `SMPRules` is a global here: build.py inlines lib/rules.js FIRST, and
+     scripts/test-mail-contrast.js hands it in for the same reason. */
+  function greetPara(g, colour){
+    if (!g) return "";
+    var word = String(g.word == null ? "" : g.word).trim() || "Dear";
+    var p = function(inner){
+      return '<p style="margin:0 0 16px;font:400 15px/1.6 Helvetica,Arial,sans-serif;' +
+        'color:' + colour + '">' + inner + '</p>';
+    };
+    /* AN ABSENT `name` AND AN EMPTY ONE ARE DIFFERENT ANSWERS, and reading
+       them as one produced the only "Dear ," this feature can make. Absent
+       means "the server will fill it"; PRESENT AND EMPTY means the caller
+       looked and there is no name — which is exactly what `Send me a copy`
+       hands over when the signed-in sender's own row has none. Falling back to
+       the region there would emit markers nobody fills, and an HTML comment
+       renders as nothing: the reader would get "Dear ,". */
+    if (g.name !== undefined) {
+      var who = String(g.name == null ? "" : g.name).trim();
+      return who ? p(e(word) + " " + e(who) + ",") : "";
+    }
+    var R = (typeof SMPRules !== "undefined") ? SMPRules : null;
+    if (!R) return "";
+    return R.GREET_OPEN + p(e(word) + " " + R.GREET_NAME + ",") + R.GREET_CLOSE;
+  }
+
+  /* o: { org, title, body, footer, accent, panel, cta:{label,href},
+          greeting:{word,name} } */
   function html(o){
     o = o || {};
     var accent = accentOf(o), panel = panelOf(o);
@@ -18993,7 +19118,11 @@ var MAIL = (function(){
                 'color:' + ink + '">' + e(o.title) + '</h1>'
               : '<h1 data-mail-title style="margin:0 0 14px;font:700 22px/1.3 Helvetica,Arial,sans-serif;' +
                 'color:' + ink + '"></h1>') +
-            '<div data-mail-body>' + paras(o.body, ink) + '</div>' + cta +
+            /* The greeting sits INSIDE `data-mail-body` and before the typed
+               paragraphs, so the composer's editor hook still wraps the whole
+               message and the greeting reads as its first line. */
+            '<div data-mail-body>' + greetPara(o.greeting, ink) +
+              paras(o.body, ink) + '</div>' + cta +
           '</td></tr>' +
 
           '<tr><td style="padding:0 28px"><div style="border-top:1px solid ' + line + '"></div></td></tr>' +
@@ -28500,12 +28629,33 @@ function paintMailPreview(){
 var DDOPEN = null;
 var SENDMSG = null;
 function sendmsg(){
+  /* `greet` is the greeting WORD or null, and null is off (spec 021). One
+     value, not a flag beside a word: a switch that is on with no word is a
+     state nothing above allows, and two fields that must agree are two fields
+     that drift (§104.7's shape). OFF BY DEFAULT — Islam's answer — so a
+     message sends exactly as it did before this existed unless somebody asks
+     for the greeting on that message. */
   if (!SENDMSG) SENDMSG = { criteria: { everyone:false, roles:[], targets:[], keys:[] },
                             subject:"", body:"", ctaLabel:"", ctaHref:"",
+                            greet:null,
                             draftId:null,
                             aud:null, asking:false, busy:false, result:null };
   return SENDMSG;
 }
+/* ── WHOSE NAME THE PREVIEW SHOWS (spec 021) ────────────────────────────
+   The FIRST resolved recipient, looked up on the register so a typed short
+   name counts (§93.8) — the audience row carries only key, name and address.
+   Falls back to the audience row's own name, and then to nothing at all: a
+   preview with no audience yet still has to draw the greeting, and "Dear
+   Ahmed" invented out of nowhere would be a name nobody is going to receive.
+   The word alone is what it shows then. */
+function greetSample(){
+  var st = sendmsg(), to = (st.aud && st.aud.to) || [];
+  if (!to.length) return "";
+  var r = to[0], p = (typeof personBy === "function") ? personBy(r.key) : null;
+  return SMPRules.firstName(p || { name: r.name });
+}
+
 /* Toggling one entry of a criteria list. The lists are small and the order
    does not matter, so membership is the whole of it. */
 function sendmsgToggle(list, value, on){
@@ -28767,10 +28917,51 @@ function renderSendMessage(){
         '" placeholder="' + esc(sh.href || "https://\u2026") + '">' +
     '</div>';
 
+  /* ── THE GREETING ROW (spec 021) ────────────────────────────────
+     ONE LINE, AND NOTHING EXPLAINING ITSELF. Islam, of a two-line first
+     draft: "the design of the setting is poor. It should be one line you dont
+     need 2 lines .. and no explanations needed in the setting itself it's
+     clear." A label reading "Open with a greeting" beside a box holding the
+     word "Dear" has already said what the sentence under it said — §127's
+     ruling on the chat settings, reached again from the other direction. And
+     the height was not the only cost: two lines under the message made the
+     greeting read as a bigger decision than the button row beneath it, which
+     is one line.
+
+     `.imp-row` + `.cfg-lab` + `.minisw` is the platform's OWN switch row, the
+     one the naming setting wears (§44) — never a control invented for this.
+
+     THE WORD BOX SITS BEFORE THE SWITCH, so the switch is last in the row
+     whether the greeting is on or off: a control that moves under the press
+     that produced it is §41.8's fault. */
+  var greetrow =
+    '<div class="ctarow greetrow">' +
+      '<div class="imp-row" style="margin:0;grid-column:1 / -1">' +
+        '<span class="cfg-lab">Open with a greeting</span>' +
+        (st.greet != null
+          ? '<input class="fld greetword" id="msggreet" value="' + esc(st.greet) +
+              '" placeholder="Dear" aria-label="The greeting word" maxlength="24">'
+          : '') +
+        '<span class="minisw">' +
+          '<button data-greet="0" aria-pressed="' + (st.greet == null) + '">Off</button>' +
+          '<button data-greet="1" aria-pressed="' + (st.greet != null) + '">On</button>' +
+        '</span>' +
+      '</div>' +
+    '</div>';
+
   var look = section("", "Write it",
     "Type straight into the message. The heading is also the subject line people see " +
     "in their inbox before they open it. Nothing here scrolls \u2014 it grows as you write.",
-    '<div class="mailprev grows" id="msgprev"></div>' + ctarow);
+    /* The sample line sits between the preview and the greeting row, because
+       it is about the message above it. Drawn only while the greeting is on
+       (§41's budget), and it is the ONE thing the screen cannot say by
+       showing: without it a draft opened by somebody else reads as everybody
+       getting "Dear Ahmed". Six words. */
+    '<div class="mailprev grows" id="msgprev"></div>' +
+    (st.greet != null
+      ? '<span class="why greetsay">Everyone sees their own name here.</span>'
+      : '') +
+    greetrow + ctarow);
 
   /* ── THE BAR DOES NOT MOVE (§95) ────────────────────────────────
      Pinned to the foot of the pane rather than sitting at the end of the
@@ -29071,6 +29262,9 @@ function paintMsgPreview(){
     title: st.subject,
     preheader: st.subject,
     body: st.body,
+    /* A NAME, so the preview shows the real thing rather than the region the
+       server fills — the line under the card is what says it is a sample. */
+    greeting: st.greet == null ? null : { word: st.greet, name: greetSample() },
     cta: (st.ctaLabel && st.ctaHref) ? { label: st.ctaLabel, href: st.ctaHref } : null
   });
   var t = root.querySelector("[data-mail-title]"),
@@ -34368,15 +34562,23 @@ var SYNC = (function () {
         function (err, j) { done(err, err ? null : j); });
     },
     mailSend: function (o, done) {
+      /* `greet` is the WORD, and it is here for the RECORD rather than for the
+         send: the personalisation rides in the html's marked region, so a
+         build that dropped this would mail perfectly and write a record saying
+         no message ever greeted anybody (spec 021). Which is what happened —
+         this function names every field it forwards, so the new one was
+         silently absent until the check asked what was posted. */
       mailPost({ action: "send", draftId: o.draftId,
                  criteria: o.criteria, subject: o.subject, body: o.body,
                  ctaLabel: o.ctaLabel, ctaHref: o.ctaHref, html: o.html,
+                 greet: o.greet,
                  fromName: o.fromName, replyTo: o.replyTo },
         function (err, j) { done(err, err ? null : j); });
     },
     mailDraftSave: function (o, done) {
       mailPost({ action: "draftSave", id: o.id, subject: o.subject, body: o.body,
-                 ctaLabel: o.ctaLabel, ctaHref: o.ctaHref, criteria: o.criteria },
+                 ctaLabel: o.ctaLabel, ctaHref: o.ctaHref, greet: o.greet,
+                 criteria: o.criteria },
         function (err, j) { done(err, err ? null : j); });
     },
     mailDraftList: function (done) {
@@ -38515,6 +38717,29 @@ var SYNC = (function () {
         paintMsgPreview();
       });
     });
+
+    /* ── THE GREETING (spec 021) ────────────────────────────────────
+       THE SWITCH REPAINTS; TYPING THE WORD DOES NOT. Turning it on draws a
+       box and a line that were not there, which is a repaint; typing into
+       that box must only redraw the PREVIEW, or the field being typed into is
+       replaced mid-word (§35, §71.2) — the same rule the two button fields
+       above obey.
+
+       `greet` is the word or null. Turning it off DELETES the value rather
+       than remembering it, so off is the absence and a draft saved off
+       carries nothing (§50.6). */
+    document.querySelectorAll("[data-greet]").forEach(function(b){
+      b.addEventListener("click", function(){
+        sendmsg().greet = b.dataset.greet === "1" ? "Dear" : null;
+        paint();
+      });
+    });
+    var mg = document.getElementById("msggreet");
+    if (mg) mg.addEventListener("input", function(){
+      sendmsg().greet = mg.value;
+      paintMsgPreview();
+    });
+
     paintMsgPreview();
 
     /* ── The recipient dropdowns (§76.2) ────────────────────────────
@@ -38571,6 +38796,7 @@ var SYNC = (function () {
       if (out) out.textContent = "Saving\u2026";
       SYNC.mailDraftSave({ id: st.draftId, subject: st.subject, body: st.body,
                            ctaLabel: st.ctaLabel, ctaHref: st.ctaHref,
+                           greet: st.greet,
                            criteria: st.criteria }, function(err, j){
         msgdraft.disabled = false;
         if (err) { if (out) out.textContent = err; return; }
@@ -38587,6 +38813,9 @@ var SYNC = (function () {
           st.draftId = String(d.id);
           st.subject = d.subject || ""; st.body = d.body || "";
           st.ctaLabel = d.cta_label || ""; st.ctaHref = d.cta_href || "";
+          /* NULL IS OFF, and it has to stay null rather than becoming "" —
+             `greet == null` is the switch everywhere else (spec 021). */
+          st.greet = (d.greet == null) ? null : String(d.greet);
           st.criteria = d.audience || { everyone:false, roles:[], targets:[], keys:[] };
           /* Whatever was resolved for the message you were writing before is
              not this message's audience. Cleared, then asked again. */
@@ -38758,11 +38987,16 @@ var SYNC = (function () {
         draftId: st.draftId,
         criteria: st.criteria, subject: st.subject.trim(), body: st.body.trim(),
         ctaLabel: st.ctaLabel.trim(), ctaHref: st.ctaHref.trim(),
+        greet: st.greet,
         fromName: sh.fromName, replyTo: sh.replyTo,
         html: MAIL.html({
           org: sh.org, accent: sh.accent, panel: sh.panel, footer: sh.footer,
           eyebrow: sh.eyebrow, title: st.subject.trim(), preheader: st.subject.trim(),
           body: st.body.trim(),
+          /* NO NAME HERE, deliberately — the builder leaves the region and the
+             server fills it once per recipient, because who they are is the
+             server's answer (spec 021, §74.2). */
+          greeting: st.greet == null ? null : { word: st.greet },
           cta: (st.ctaLabel.trim() && st.ctaHref.trim())
                  ? { label: st.ctaLabel.trim(), href: st.ctaHref.trim() } : null
         })
@@ -38830,6 +39064,12 @@ var SYNC = (function () {
           org: sh.org, accent: sh.accent, panel: sh.panel, footer: sh.footer,
           eyebrow: sh.eyebrow, title: st.subject.trim(), preheader: st.subject.trim(),
           body: st.body.trim(),
+          /* YOUR COPY GREETS YOU, by the name on the row of whoever is SIGNED
+             IN — `row` is found from SYNC.person(), never viewer(), which is
+             the simulation (§95). Filled here rather than left as a region:
+             there is one recipient and the browser knows who they are. */
+          greeting: st.greet == null ? null
+                      : { word: st.greet, name: SMPRules.firstName(row) },
           cta: (st.ctaLabel.trim() && st.ctaHref.trim())
                  ? { label: st.ctaLabel.trim(), href: st.ctaHref.trim() } : null
         }),

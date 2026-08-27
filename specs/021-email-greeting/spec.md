@@ -1,7 +1,7 @@
 # 021 · The email greets its receiver
 
-**Version:** not built · **Decisions:** to be numbered at build · **Status:** agreed; not built
-**Constitution:** to be checked at build.
+**Version:** v3.50 (built) · **Decisions:** §135 · **Status:** answered; built
+**Constitution:** checked against v1.1.0.
 
 Islam: *"For the emails sent can we make an option while sending the email to
 customize the email by the first name of the receiver like starting the email
@@ -75,18 +75,30 @@ on always greets, and the way to send a plain message is to turn it off, not
 to hollow the greeting out. The greeting renders as the first paragraph of the
 body, in the body's own style: *Dear Ahmed,* then the message.
 
-**The builder emits the greeting with a token where the name goes.**
-`MAIL.html` gains an optional `greeting` field and renders the greeting
-paragraph with a placeholder token instead of a name — still ONE builder
-(§72.3), on every surface. Then each side fills the token with the name it is
-authoritative for:
+**The builder emits the greeting inside a MARKED REGION.** `MAIL.html` gains an
+optional `greeting` field — still ONE builder (§72.3), on every surface — and
+writes the greeting paragraph between `GREET_OPEN` and `GREET_CLOSE` with
+`GREET_NAME` where the name goes. All three live in `lib/rules.js`, because
+both sides need the same three strings and a second copy of a contract drifts
+in silence.
 
-- **The server**, on send: for each recipient, replace the **first occurrence**
-  of the token with that person's first name, HTML-escaped, read from the
-  stored register (the same rows the audience was resolved from). First
-  occurrence only, because the greeting is the first thing in the message —
-  so a sender who types the token's literal text in their body cannot make
-  the substitution land twice.
+**Delimited, not merely tokenised**, and it buys two things: nothing outside
+the region is ever touched, so a sender who types the token into their own
+message cannot have it substituted; and an empty name removes **the whole
+paragraph** rather than leaving "Dear ,".
+
+**An absent name and an empty one are different answers** (§135.6). Absent
+means *the server will fill this*; present-and-empty means *the caller looked
+and there is none*, and writes no greeting at all — which is what *Send me a
+copy* hands over when the signed-in sender's own row has no usable name, on
+the one path no server ever touches.
+
+Then each side fills it with the name it is authoritative for:
+
+- **The server**, on send: for each recipient, `Rules.greetFill()` with that
+  person's first name, HTML-escaped, read from the stored register (the same
+  rows the audience was resolved from) — never from anything the browser
+  posted.
 - **The browser**, for the preview and for *Send me a copy*: the preview shows
   the greeting with a sample name — the first resolved recipient's — under
   **six words**: *Everyone sees their own name here.* That line survives the
@@ -134,20 +146,48 @@ its receivers.
 
 ---
 
+## 4b · What building it found
+
+**`SYNC.mailSend()` names every field it forwards**, so `greet` was silently
+absent from the posted body. The emails would have been personalised perfectly
+— the fill rides in the html's region — and `messages.greet` would have been
+NULL on every row: **the record would have said no message ever greeted
+anybody.** Found by asking what the page POSTS, not by reading it (§135.5).
+
+**`lib/mailer.js`'s Resend address became `SMP_RESEND_ENDPOINT`**, defaulting
+to the real one — §100.3's rule, so a check can MODEL the provider rather than
+branch around it. Without it there is no way to know what each recipient was
+actually sent, which is the whole of what this spec claims.
+
 ## 5 · What must be proved before this is called built
 
-- **The check makes the state and asks both ends** (§94.2): with the switch on,
-  the stub's captured Resend payloads show each recipient's OWN first name and
-  nobody else's; with it off, every payload is byte-identical to every other
-  and holds no token. The compound-name case (*Abd El Moniem…*) and the
-  blank-name case (greeting line absent, not "Dear ,") are both injected,
-  because the demo register may not hold either forever.
-- **The preview still is the builder's output** (§72.3) — asserted through the
-  real `MAIL.html`, not a copy.
-- **A draft round-trips the switch and the word**, including OFF over a draft
-  saved ON (the column back to NULL, §50.6).
-- **`checks/send-message.py` is grepped for selectors the new row moves**
-  before its next green run is trusted (§51.11).
+All of it, and it is proved. Two halves, because the claim has two halves.
+
+**`scripts/test-email-greeting.js` — 37 passed.** Stands in front of the
+provider (`SMP_RESEND_ENDPOINT`) and reads what each recipient was actually
+sent, against a real Postgres. Four shapes of name are injected because the
+demo register may not hold them forever: ordinary, compound, a typed short
+name, and a row whose name yields nothing. The assertion that separates this
+from a build greeting everybody with the first recipient's name is that **each
+message carries nobody else's**. Off: every payload identical, `greet` NULL. A
+token typed into the body is left alone. A draft round-trips, including OFF
+over a draft saved ON (back to NULL, §50.6).
+
+**`src/checks/email-greeting.py` — 38 passed.** The screen and the seam, over
+HTTP (§94.11): one line with no prose in both states, the switch not moving,
+every control PRESSED (§93.4), and what the page posts carrying the region
+**and naming nobody**.
+
+**Both were watched to fail first** (§94.5) — 8 / 2 / 2 on the server, 2 / 3 on
+the browser. **Two of the browser check's own first-run failures were the
+check**: it clustered the row's controls by their `top`, and three controls of
+three heights on one line have three different tops (§122.4, already written
+down once); and it asserted the row's pixel height was unchanged when the word
+box appears, which is false and was never the point.
+
+**Regression:** `qa.py` green, no console errors; `send-message.py` all green;
+`test-authorize.js` 212/0; `test-mail-contrast.js` 16/0; round trip and clean
+parity PASS **on virgin databases** (§113.7), with migration 027 applied.
 
 ## 6 · The mockup, and the one correction it drew
 

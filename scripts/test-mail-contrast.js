@@ -11,7 +11,12 @@
    for reasons that have nothing to do with the product (§50.6). */
 const fs=require("fs");
 const src=fs.readFileSync(__dirname+"/../SMP-Project-Folder/src/mail.js","utf8");
-const MAIL=(new Function(src+";return MAIL;"))();
+/* SMPRules IS HANDED IN, not stubbed. The builder reads the greeting's region
+   markers from the shared module (spec 021), and build.py supplies them the
+   same way — by inlining lib/rules.js before mail.js. Feeding the real module
+   is what makes this the real builder's output rather than a near miss
+   (§103.4: a stub is what you reach for when you cannot supply the thing). */
+const MAIL=(new Function("SMPRules", src+";return MAIL;"))(require("../lib/rules.js"));
 
 function rgb(h){h=String(h).replace('#','');if(h.length===3)h=h.split('').map(c=>c+c).join('');
   return [0,2,4].map(i=>parseInt(h.slice(i,i+2),16));}

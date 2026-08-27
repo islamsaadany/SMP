@@ -5331,33 +5331,12 @@ function paintMailPreview(){
 var DDOPEN = null;
 var SENDMSG = null;
 function sendmsg(){
-  /* `greet` is the greeting WORD or null, and null is off (spec 021). One
-     value, not a flag beside a word: a switch that is on with no word is a
-     state nothing above allows, and two fields that must agree are two fields
-     that drift (§104.7's shape). OFF BY DEFAULT — Islam's answer — so a
-     message sends exactly as it did before this existed unless somebody asks
-     for the greeting on that message. */
   if (!SENDMSG) SENDMSG = { criteria: { everyone:false, roles:[], targets:[], keys:[] },
                             subject:"", body:"", ctaLabel:"", ctaHref:"",
-                            greet:null,
                             draftId:null,
                             aud:null, asking:false, busy:false, result:null };
   return SENDMSG;
 }
-/* ── WHOSE NAME THE PREVIEW SHOWS (spec 021) ────────────────────────────
-   The FIRST resolved recipient, looked up on the register so a typed short
-   name counts (§93.8) — the audience row carries only key, name and address.
-   Falls back to the audience row's own name, and then to nothing at all: a
-   preview with no audience yet still has to draw the greeting, and "Dear
-   Ahmed" invented out of nowhere would be a name nobody is going to receive.
-   The word alone is what it shows then. */
-function greetSample(){
-  var st = sendmsg(), to = (st.aud && st.aud.to) || [];
-  if (!to.length) return "";
-  var r = to[0], p = (typeof personBy === "function") ? personBy(r.key) : null;
-  return SMPRules.firstName(p || { name: r.name });
-}
-
 /* Toggling one entry of a criteria list. The lists are small and the order
    does not matter, so membership is the whole of it. */
 function sendmsgToggle(list, value, on){
@@ -5619,51 +5598,10 @@ function renderSendMessage(){
         '" placeholder="' + esc(sh.href || "https://\u2026") + '">' +
     '</div>';
 
-  /* ── THE GREETING ROW (spec 021) ────────────────────────────────
-     ONE LINE, AND NOTHING EXPLAINING ITSELF. Islam, of a two-line first
-     draft: "the design of the setting is poor. It should be one line you dont
-     need 2 lines .. and no explanations needed in the setting itself it's
-     clear." A label reading "Open with a greeting" beside a box holding the
-     word "Dear" has already said what the sentence under it said — §127's
-     ruling on the chat settings, reached again from the other direction. And
-     the height was not the only cost: two lines under the message made the
-     greeting read as a bigger decision than the button row beneath it, which
-     is one line.
-
-     `.imp-row` + `.cfg-lab` + `.minisw` is the platform's OWN switch row, the
-     one the naming setting wears (§44) — never a control invented for this.
-
-     THE WORD BOX SITS BEFORE THE SWITCH, so the switch is last in the row
-     whether the greeting is on or off: a control that moves under the press
-     that produced it is §41.8's fault. */
-  var greetrow =
-    '<div class="ctarow greetrow">' +
-      '<div class="imp-row" style="margin:0;grid-column:1 / -1">' +
-        '<span class="cfg-lab">Open with a greeting</span>' +
-        (st.greet != null
-          ? '<input class="fld greetword" id="msggreet" value="' + esc(st.greet) +
-              '" placeholder="Dear" aria-label="The greeting word" maxlength="24">'
-          : '') +
-        '<span class="minisw">' +
-          '<button data-greet="0" aria-pressed="' + (st.greet == null) + '">Off</button>' +
-          '<button data-greet="1" aria-pressed="' + (st.greet != null) + '">On</button>' +
-        '</span>' +
-      '</div>' +
-    '</div>';
-
   var look = section("", "Write it",
     "Type straight into the message. The heading is also the subject line people see " +
     "in their inbox before they open it. Nothing here scrolls \u2014 it grows as you write.",
-    /* The sample line sits between the preview and the greeting row, because
-       it is about the message above it. Drawn only while the greeting is on
-       (§41's budget), and it is the ONE thing the screen cannot say by
-       showing: without it a draft opened by somebody else reads as everybody
-       getting "Dear Ahmed". Six words. */
-    '<div class="mailprev grows" id="msgprev"></div>' +
-    (st.greet != null
-      ? '<span class="why greetsay">Everyone sees their own name here.</span>'
-      : '') +
-    greetrow + ctarow);
+    '<div class="mailprev grows" id="msgprev"></div>' + ctarow);
 
   /* ── THE BAR DOES NOT MOVE (§95) ────────────────────────────────
      Pinned to the foot of the pane rather than sitting at the end of the
@@ -5964,9 +5902,6 @@ function paintMsgPreview(){
     title: st.subject,
     preheader: st.subject,
     body: st.body,
-    /* A NAME, so the preview shows the real thing rather than the region the
-       server fills — the line under the card is what says it is a sample. */
-    greeting: st.greet == null ? null : { word: st.greet, name: greetSample() },
     cta: (st.ctaLabel && st.ctaHref) ? { label: st.ctaLabel, href: st.ctaHref } : null
   });
   var t = root.querySelector("[data-mail-title]"),

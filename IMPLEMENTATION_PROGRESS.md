@@ -55,25 +55,6 @@ Nothing proceeds past this line without an answer.
 
 ---
 
-## Agreed, not built
-
-- **Spec 021 — the email greets its receiver** (`specs/021-email-greeting/`,
-  agreed 2026-08-27). Send a message gains a per-message switch (off by
-  default) that opens each email with an editable greeting word ("Dear") and
-  the receiver's first name — compound first names kept whole ("Dear Abd El
-  Moniem", never "Dear Abd"), substituted on the server per recipient, Send a
-  message only. **Mockup published 2026-08-27, now at revision 2** — drawn in
-  the real platform (`design-mockups/email-greeting/`, made by
-  `src/checks/greeting-mockup.py` driving the built file with the send-message
-  stub, both themes). Islam on revision 1: *"the design of the setting is poor.
-  It should be one line you dont need 2 lines .. and no explanations needed in
-  the setting itself it's clear."* The row is ONE `.imp-row` line — label, word
-  box, switch — with no prose, so the greeting and the button row under the
-  message now read at the same weight.
-  **Waiting on sign-off; nothing in `src/` touched.**
-
----
-
 ## Known red, on purpose
 
 - **`checks/no-jump.py` — "sorting a column" (1 JUMPED).** Real defect,
@@ -84,6 +65,44 @@ Nothing proceeds past this line without an answer.
   is a true signal — do not silence it.
 
 ## Built and verified
+
+### v3.50 — the email greets its receiver (§135, spec 021)
+
+Islam: *"can we make an option while sending the email to customize the email
+by the first name of the reciever like starting the email with Dear Ahmed ...
+it's a turn on and off option."* Settled by question-and-answer, then from a
+mockup of the real composer, then **corrected once by looking at it**.
+
+- **A per-message switch on Send a message**, off by default, with the greeting
+  word editable per message (starting at "Dear"). Send a message only —
+  including *Send me a copy*, which greets whoever is **signed in**.
+- **Every recipient already got their own email** (§74.3), so nothing about how
+  many go out changes; what changes is that they stop being identical. The
+  builder leaves a **marked region** and the server fills it once per recipient
+  off the stored register.
+- **The first name kept whole** — "Dear Abd El Moniem", never "Dear Abd" —
+  using the register's own name reader, so there is no second definition.
+- **Never "Dear ,":** a row whose name yields nothing loses the greeting LINE,
+  and still receives the message.
+- **One line, no prose** (Islam's correction to a two-line first draft), with
+  the word box before the switch so the switch never moves.
+- **Migration 027**: one nullable `greet` column on `messages` and
+  `message_drafts`. NULL is off; nothing backfilled.
+
+**The bug it found:** `SYNC.mailSend()` names every field it forwards, so
+`greet` was silently dropped — the emails would have been personalised
+perfectly and **the record would have said no message ever greeted anybody**.
+
+**Proved:** `test-email-greeting.js` 37/0 (a real Postgres, standing in front
+of the provider via the new `SMP_RESEND_ENDPOINT`, reading what each recipient
+was actually sent); `checks/email-greeting.py` 38/0 (the screen and the seam,
+over HTTP). Both watched to fail first — 8/2/2 and 2/3. `qa.py` green, no
+console errors; `send-message.py`, `setup-pages`, `setup-rail`, `setup-search`,
+`office-chat` green; `test-authorize.js` 212/0; `test-mail-contrast.js` 16/0;
+round trip and clean parity PASS **on virgin databases**.
+
+**On the branch only — not merged to main.**
+
 
 ### v3.49 — the register notices two people whose name reads the same (§131)
 

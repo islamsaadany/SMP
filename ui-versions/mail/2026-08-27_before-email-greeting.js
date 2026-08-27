@@ -96,48 +96,7 @@ var MAIL = (function(){
     return hexOf([0,1,2].map(function(i){ return A[i]*(1-t) + B[i]*t; }));
   }
 
-  /* ── THE GREETING (spec 021) ────────────────────────────────────────
-     Islam: "customize the email by the first name of the receiver like
-     starting the email with Dear Ahmed and then the body comes after."
-
-     IT IS THE FIRST PARAGRAPH OF THE BODY, in the body's own type — not a
-     heading and not a styled banner. A greeting that wears a different size
-     from the sentence after it reads as a label on the message rather than as
-     the opening of it.
-
-     TWO MODES, ONE FUNCTION. Given a `name` it writes it (the composer's
-     preview, and the copy the sender takes for themselves); given none it
-     writes the MARKED REGION `SMPRules.greetFill()` fills once per recipient
-     on the server, because who the recipients are is the server's answer
-     (§74.2). Either way this is the only place the greeting's markup exists.
-
-     `SMPRules` is a global here: build.py inlines lib/rules.js FIRST, and
-     scripts/test-mail-contrast.js hands it in for the same reason. */
-  function greetPara(g, colour){
-    if (!g) return "";
-    var word = String(g.word == null ? "" : g.word).trim() || "Dear";
-    var p = function(inner){
-      return '<p style="margin:0 0 16px;font:400 15px/1.6 Helvetica,Arial,sans-serif;' +
-        'color:' + colour + '">' + inner + '</p>';
-    };
-    /* AN ABSENT `name` AND AN EMPTY ONE ARE DIFFERENT ANSWERS, and reading
-       them as one produced the only "Dear ," this feature can make. Absent
-       means "the server will fill it"; PRESENT AND EMPTY means the caller
-       looked and there is no name — which is exactly what `Send me a copy`
-       hands over when the signed-in sender's own row has none. Falling back to
-       the region there would emit markers nobody fills, and an HTML comment
-       renders as nothing: the reader would get "Dear ,". */
-    if (g.name !== undefined) {
-      var who = String(g.name == null ? "" : g.name).trim();
-      return who ? p(e(word) + " " + e(who) + ",") : "";
-    }
-    var R = (typeof SMPRules !== "undefined") ? SMPRules : null;
-    if (!R) return "";
-    return R.GREET_OPEN + p(e(word) + " " + R.GREET_NAME + ",") + R.GREET_CLOSE;
-  }
-
-  /* o: { org, title, body, footer, accent, panel, cta:{label,href},
-          greeting:{word,name} } */
+  /* o: { org, title, body, footer, accent, panel, cta:{label,href} } */
   function html(o){
     o = o || {};
     var accent = accentOf(o), panel = panelOf(o);
@@ -198,11 +157,7 @@ var MAIL = (function(){
                 'color:' + ink + '">' + e(o.title) + '</h1>'
               : '<h1 data-mail-title style="margin:0 0 14px;font:700 22px/1.3 Helvetica,Arial,sans-serif;' +
                 'color:' + ink + '"></h1>') +
-            /* The greeting sits INSIDE `data-mail-body` and before the typed
-               paragraphs, so the composer's editor hook still wraps the whole
-               message and the greeting reads as its first line. */
-            '<div data-mail-body>' + greetPara(o.greeting, ink) +
-              paras(o.body, ink) + '</div>' + cta +
+            '<div data-mail-body>' + paras(o.body, ink) + '</div>' + cta +
           '</td></tr>' +
 
           '<tr><td style="padding:0 28px"><div style="border-top:1px solid ' + line + '"></div></td></tr>' +

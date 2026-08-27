@@ -4207,29 +4207,6 @@
         paintMsgPreview();
       });
     });
-
-    /* ── THE GREETING (spec 021) ────────────────────────────────────
-       THE SWITCH REPAINTS; TYPING THE WORD DOES NOT. Turning it on draws a
-       box and a line that were not there, which is a repaint; typing into
-       that box must only redraw the PREVIEW, or the field being typed into is
-       replaced mid-word (§35, §71.2) — the same rule the two button fields
-       above obey.
-
-       `greet` is the word or null. Turning it off DELETES the value rather
-       than remembering it, so off is the absence and a draft saved off
-       carries nothing (§50.6). */
-    document.querySelectorAll("[data-greet]").forEach(function(b){
-      b.addEventListener("click", function(){
-        sendmsg().greet = b.dataset.greet === "1" ? "Dear" : null;
-        paint();
-      });
-    });
-    var mg = document.getElementById("msggreet");
-    if (mg) mg.addEventListener("input", function(){
-      sendmsg().greet = mg.value;
-      paintMsgPreview();
-    });
-
     paintMsgPreview();
 
     /* ── The recipient dropdowns (§76.2) ────────────────────────────
@@ -4286,7 +4263,6 @@
       if (out) out.textContent = "Saving\u2026";
       SYNC.mailDraftSave({ id: st.draftId, subject: st.subject, body: st.body,
                            ctaLabel: st.ctaLabel, ctaHref: st.ctaHref,
-                           greet: st.greet,
                            criteria: st.criteria }, function(err, j){
         msgdraft.disabled = false;
         if (err) { if (out) out.textContent = err; return; }
@@ -4303,9 +4279,6 @@
           st.draftId = String(d.id);
           st.subject = d.subject || ""; st.body = d.body || "";
           st.ctaLabel = d.cta_label || ""; st.ctaHref = d.cta_href || "";
-          /* NULL IS OFF, and it has to stay null rather than becoming "" —
-             `greet == null` is the switch everywhere else (spec 021). */
-          st.greet = (d.greet == null) ? null : String(d.greet);
           st.criteria = d.audience || { everyone:false, roles:[], targets:[], keys:[] };
           /* Whatever was resolved for the message you were writing before is
              not this message's audience. Cleared, then asked again. */
@@ -4477,16 +4450,11 @@
         draftId: st.draftId,
         criteria: st.criteria, subject: st.subject.trim(), body: st.body.trim(),
         ctaLabel: st.ctaLabel.trim(), ctaHref: st.ctaHref.trim(),
-        greet: st.greet,
         fromName: sh.fromName, replyTo: sh.replyTo,
         html: MAIL.html({
           org: sh.org, accent: sh.accent, panel: sh.panel, footer: sh.footer,
           eyebrow: sh.eyebrow, title: st.subject.trim(), preheader: st.subject.trim(),
           body: st.body.trim(),
-          /* NO NAME HERE, deliberately — the builder leaves the region and the
-             server fills it once per recipient, because who they are is the
-             server's answer (spec 021, §74.2). */
-          greeting: st.greet == null ? null : { word: st.greet },
           cta: (st.ctaLabel.trim() && st.ctaHref.trim())
                  ? { label: st.ctaLabel.trim(), href: st.ctaHref.trim() } : null
         })
@@ -4554,12 +4522,6 @@
           org: sh.org, accent: sh.accent, panel: sh.panel, footer: sh.footer,
           eyebrow: sh.eyebrow, title: st.subject.trim(), preheader: st.subject.trim(),
           body: st.body.trim(),
-          /* YOUR COPY GREETS YOU, by the name on the row of whoever is SIGNED
-             IN — `row` is found from SYNC.person(), never viewer(), which is
-             the simulation (§95). Filled here rather than left as a region:
-             there is one recipient and the browser knows who they are. */
-          greeting: st.greet == null ? null
-                      : { word: st.greet, name: SMPRules.firstName(row) },
           cta: (st.ctaLabel.trim() && st.ctaHref.trim())
                  ? { label: st.ctaLabel.trim(), href: st.ctaHref.trim() } : null
         }),

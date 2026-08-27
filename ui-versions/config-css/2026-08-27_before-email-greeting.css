@@ -1702,24 +1702,6 @@
             border-top:1px dashed var(--line); margin-top:12px; padding-top:11px; }
   .ctarow .why { grid-column:1 / -1; }
 
-  /* ── THE GREETING ROW (spec 021) ────────────────────────────────────
-     ONE LINE, and no prose in it — Islam, of the two-line first draft: "it
-     should be one line you dont need 2 lines .. and no explanations needed in
-     the setting itself it's clear." It borrows `.ctarow`'s dashed rule and
-     spacing, because it is the composer's other settings row and the two
-     belong to the message rather than to the page.
-
-     THE BOX IS SIZED FOR THE ONE WORD IT HOLDS. `.fld` is `width:100%`, which
-     in `.ctarow`'s two-column grid made it half the pane — a field that wide
-     reads as one expecting a sentence. `flex:none` as well as a width, or the
-     flex row would shrink it under `.cfg-lab`'s `flex:1` (§110.8's family:
-     a width alone is not enough inside a flex or table layout). */
-  .ctarow.greetrow { grid-template-columns:1fr; }
-  .greetword { width:120px; max-width:120px; flex:none; }
-  /* The one thing the screen cannot say by showing: that the name above is a
-     sample. Sits under the preview, above the row it explains. */
-  .greetsay { display:block; margin:8px 0 0; }
-
   /* THE BAR DOES NOT MOVE. Pinned to the foot of the window rather than
      sitting at the end of the scroll, so the count and the button stay
      together whether the audience is three people or seventy-six.

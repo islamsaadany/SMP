@@ -2044,6 +2044,37 @@ console errors (in this cloud environment, run it via a wrapper that points Play
   touching `mail.js`. "Present" ≠ "accepted" ≠ "verified": the page reports only
   what was actually asked, and matches a bad key on Resend's MESSAGE because
   Resend answers an invalid key with **400**, not 401.
+- **THE EMAIL GREETS ITS RECEIVER (since v3.50, §135; spec 021):** a per-message
+  switch on Send a message opens each email *Dear Ahmed,* — off by default, the
+  word editable per message, **Send a message only**. **EVERY RECIPIENT ALREADY
+  GOT THEIR OWN EMAIL** (§74.3's one-message-per-person loop), so nothing about
+  how many go out changes; what changes is that they stop being IDENTICAL, so
+  the builder leaves a **marked region** and the server fills it once per
+  recipient off the STORED register (§74.2). `GREET_OPEN`/`GREET_CLOSE`/
+  `GREET_NAME` and `greetFill()` live in `lib/rules.js` because **both sides
+  need the same three strings**; `src/mail.js` writes them, `api/mail.js` reads
+  them. **THE REGION IS DELIMITED, NOT MERELY TOKENISED**: a token typed into
+  the body can never be substituted, and an empty name removes the WHOLE
+  paragraph — never `Dear ,`. The name is `firstName()` = `nameWords(…, 1)`,
+  **the register's own reader** (§93.8), so a compound first name is kept whole
+  ("Abd El Moniem", never "Abd") and a typed `known` wins. **ONE LINE, NO
+  PROSE** (Islam, correcting a two-line first draft): `.imp-row` + `.cfg-lab` +
+  `.minisw`, the platform's own switch row, with the word box BEFORE the switch
+  so the switch never moves (§41.8) — two lines had also made the greeting read
+  as a bigger decision than the button row under it, which is one. Six words
+  survive under the preview (*Everyone sees their own name here.*), **outside**
+  the email, because a badge inside would be a line nobody receives. `greet
+  TEXT` on `messages` and `message_drafts` (027), **one column holding the
+  word** and never a boolean beside it (§104.7); NULL is off, so nothing is
+  backfilled. **AND `SYNC.mailSend()` NAMES EVERY FIELD IT FORWARDS**, so
+  `greet` was silently dropped and the RECORD would have said no message ever
+  greeted anybody — found by asking what the page POSTS, not by reading it.
+- **A CHECK MUST BE ABLE TO STAND IN FRONT OF THE PROVIDER (§135.6, §100.3
+  again):** `SMP_RESEND_ENDPOINT` joins `GEMINI_ENDPOINT` as an environment
+  variable defaulting to the real service, because **a test double behind an
+  `if` in `lib/mailer.js` would be a second code path shipping to production**.
+  What each recipient was actually sent is the whole of what spec 021 claims,
+  and the only way to know it is to catch the messages on the wire.
 - **PWA (since v3.1, §26):** `manifest.webmanifest`, `sw.js` and `icons/` at the
   repo root; `vercel.json` sets the content types, and `scripts/dev-server.js`
   carries the same list so it can be tested locally. The worker caches the shell
@@ -2214,9 +2245,14 @@ python3 checks/setup-search.py  # the rail's search: typing NEVER repaints, a re
                                 # setup-rail.py also measures every rail GLYPH against a
                                 # character guaranteed missing: a mark that is MAPPED and
                                 # not DRAWN ships as a blank box (§52, §120.2)
+python3 checks/email-greeting.py # the greeting row is ONE line with no prose, the switch does
+                                # not move, and what the page POSTS names NOBODY — the server
+                                # fills it per recipient (§135, over HTTP)
 python3 checks/setup-pages.py   # every Setup page is named ONCE and in the rail's own word,
                                 # and the name and the table head stay on screen (§121)
 ```
+The mail half needs a database and a password (it spawns its own dev-server):
+`DATABASE_URL=… node scripts/test-email-greeting.js <smo-password>` (§135.6).
 In this cloud image, run any sweep through the wrapper so Playwright finds the
 Chromium that is already here:
 `SMP_CHROME=/opt/pw-browsers/chromium-1194/chrome-linux/chrome python3 qa-run.py <file>`.
@@ -2250,7 +2286,43 @@ prior sessions (on HR_ERP) accidentally reverted agreed-upon designs.
 
 ---
 
-*Last Updated: 2026-08-27 &mdash; **v3.49: the register notices two people
+*Last Updated: 2026-08-27 &mdash; **v3.50: the email greets its receiver
+(&sect;135, spec 021)**. Islam: *"can we make an option while sending the email
+to customize the email by the first name of the reciever like starting the
+email with Dear Ahmed and then the body comes after &mdash; it's a turn on and
+off option."* **Every recipient already received their own email**
+(&sect;74.3's one-message-per-person loop), so nothing about how many go out
+changes &mdash; what changes is that they stop being IDENTICAL, which is why
+the builder leaves a **marked region** and the SERVER fills it once per
+recipient off the stored register (&sect;74.2). The region is **delimited, not
+merely tokenised**: a token typed into the body can never be substituted, and
+an empty name removes the WHOLE paragraph rather than leaving `Dear ,`. The
+name is the register's own reader (&sect;93.8), so a compound first name is
+kept whole &mdash; **"Dear Abd El Moniem", never "Dear Abd"**, which is a real
+row on this register and the reason that question was asked twice.
+**ONE LINE, NO PROSE**, and that is Islam correcting a two-line first draft:
+*"the design of the setting is poor. It should be one line you dont need 2
+lines .. and no explanations needed in the setting itself it's clear."* Right
+twice &mdash; a label reading *Open with a greeting* beside a box holding the
+word *Dear* had already said what the sentence said (&sect;127 from the other
+direction), and the height was not the only cost: **two lines under the message
+made the greeting read as a bigger decision than the button row beneath it**,
+which is one line. **AND THE BUG WAS IN THE PLUMBING**: `SYNC.mailSend()` names
+every field it forwards, so `greet` was silently absent from the posted body
+&mdash; the emails would have been personalised perfectly and
+`messages.greet` would have been NULL on every row, so **the record would have
+said no message ever greeted anybody**. Found by asking what the page POSTS,
+not by reading it. Proved by two halves, each watched to fail first
+(&sect;94.5): `test-email-greeting.js` **stands in front of the provider** via
+the new `SMP_RESEND_ENDPOINT` (&sect;100.3 &mdash; a test double behind an `if`
+in `lib/mailer.js` would be a second code path shipping to production) and
+reads what each recipient was actually sent, asserting each carries **nobody
+else's name**; `checks/email-greeting.py` measures the screen and the seam.
+**Two of that check's own first-run failures were the CHECK**, clustering a
+row's controls by their `top` when three controls of three heights on one line
+have three different tops &mdash; &sect;122.4, already written down once.*
+
+*Earlier: 2026-08-27 &mdash; **v3.49: the register notices two people
 whose name reads the same (&sect;131)**. Islam: *"for the names you normally
 take the first 2 names but you allow me to amend the name in the edit. can
 you notify me as an issue to address if 2 people their 1st 2 names are the

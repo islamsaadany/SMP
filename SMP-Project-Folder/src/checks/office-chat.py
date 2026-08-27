@@ -327,10 +327,19 @@ with sync_playwright() as p:
     print("\n5 · the office's page")
     pg.click('[data-md="setup"]')
     pg.wait_for_timeout(900)
-    ck("Messages is in Running the cycle",
+    ck("the Platform Inbox is in the rail",
        pg.is_visible('[data-setupgo="chat"]'))
+    # THE NAME IS ASSERTED HERE AND NOWHERE ELSE (§135.3, shortened). The chat
+    # needs a server, so this is the only check that can see the entry at all —
+    # `checks/setup-header.py` can assert the old names are gone and no more.
+    ck("...and it is called the Platform Inbox, in the rail and on the page",
+       pg.eval_on_selector('[data-setupgo="chat"] .rilab',
+                           "e=>e.textContent.trim()") == "Platform Inbox")
     pg.click('[data-setupgo="chat"]')
     pg.wait_for_selector("#chinbox", timeout=8000)
+    ck("...and the page says the same word the rail does (§121.1)",
+       pg.eval_on_selector(".setupttl", "e=>e.textContent.trim()") == "Platform Inbox"
+       and "Messages" not in pg.eval_on_selector("#panel", "e=>e.textContent"))
     ck("the inbox drew its two halves",
        pg.is_visible("#chqlist") and pg.is_visible("#chthread"))
     # AND IT OPENS ON SOMEBODY. The office comes here because a conversation is

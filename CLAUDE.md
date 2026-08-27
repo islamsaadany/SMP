@@ -2390,7 +2390,9 @@ wherever the unit has already answered it, written only where nothing else has,
 so two fields cannot contradict one stored fact. **Send a message becomes Send
 an email with the Email settings as its second section** (a status table, four
 fields, a live rendered preview and a test send: not a dropdown), and Inbox
-becomes **In Platform inbox**. `checks/setup-header.py` was proved able to fail
+becomes **Platform Inbox**, and Focus measures moves to *Measurement* — the
+rail's groups answer what you came to do, and somebody opening that page came to
+say which measures matter (&sect;135.11). `checks/setup-header.py` was proved able to fail
 first &mdash; **33 failures against the previous build** &mdash; and **two of
 its own assertions could not fail when written**: one scoped to where the chips
 had moved TO (&sect;113.8), and one measuring `tr.getBoundingClientRect()`,

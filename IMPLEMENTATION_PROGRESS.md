@@ -92,7 +92,7 @@ Nothing proceeds past this line without an answer.
   nobody can see them (§61).
 - **Send a message → Send an email**, with the Email settings folded in as its
   second section (a status table, four fields, a live rendered preview and a
-  test send: not a dropdown). **Inbox → In Platform inbox.**
+  test send: not a dropdown). **Inbox → Platform Inbox**, and Focus measures moves to *Measurement*.
 - **A person's company is sometimes derived and sometimes stored** (§135.6):
   read-only wherever the unit has already answered it, written only where
   nothing else has, so two fields cannot contradict one stored fact.

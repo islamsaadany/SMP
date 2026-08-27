@@ -321,9 +321,23 @@ with sync_playwright() as p:
                    " !!document.querySelector('#mailprev')"))
     ck("...and Email is no longer a rail row of its own",
        "comms" not in [k for k, _ in pages], [k for k, _ in pages])
-    ck("...while the rail still names the inbox in full",
-       any(lbl == "In Platform inbox" for _, lbl in pages)
-       or not any(lbl == "Inbox" for _, lbl in pages), [lbl for _, lbl in pages])
+    # THE OLD NAME IS GONE, AND THAT IS ALL THIS FILE CAN HONESTLY SAY. The
+    # chat needs a server, so over `file://` the entry is not in the rail at
+    # all (§94.11) — the POSITIVE assertion lives in checks/office-chat.py,
+    # which serves the built file over HTTP. Asserting presence here would
+    # either fail forever or be softened into something that passes on a build
+    # with the page deleted.
+    ck("...and no rail entry is called just 'Inbox' any more",
+       not any(lbl in ("Inbox", "In Platform inbox") for _, lbl in pages),
+       [lbl for _, lbl in pages])
+    # AND IT SITS WITH MEASUREMENT (§135.11). Asserted of the GROUP the rail
+    # actually draws it under, not of the def — the rail is what somebody
+    # scans, and a def whose `grp` no longer matches a real group would render
+    # nowhere at all rather than in the wrong place.
+    ck("Focus measures is in the Measurement group",
+       pg.evaluate("""()=>{const b=[...document.querySelectorAll('.setuprail .ritem')]
+             .filter(x=>x.dataset.setupgo==='focusset')[0];
+           return !!b && b.closest('[data-railitems]').dataset.railitems;}""") == "meas")
 
     # ── 7 · NO SLOT BETWEEN THE TWO PINNED HEADERS (§135.10) ─────────
     print("\n7 · the table's head pins flush under the page's, at every width")

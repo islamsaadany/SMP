@@ -126,6 +126,17 @@ READ = """() => {
     const b = h.shadowRoot.querySelector("[data-mail-body]");
     return b ? b.textContent.replace(/\\s+/g, " ").trim() : null;
   })();
+  /* THE GREETING IS THE `<p>` BEFORE `data-mail-body`, not inside it — it has
+     to be outside the editable region or typing absorbs it. So it is read as
+     the div's previous sibling, and the body's own first paragraph is read
+     separately: two facts, two selectors. */
+  const greetLine = (() => {
+    const h = document.getElementById("msgprev");
+    if (!h || !h.shadowRoot) return null;
+    const b = h.shadowRoot.querySelector("[data-mail-body]");
+    const p = b && b.previousElementSibling;
+    return (p && p.tagName === "P") ? p.textContent.trim() : null;
+  })();
   const firstPara = (() => {
     const h = document.getElementById("msgprev");
     if (!h || !h.shadowRoot) return null;
@@ -160,6 +171,7 @@ READ = """() => {
     pressed: Array.from(sw).map(b => b.getAttribute("aria-pressed")),
     say: (() => { const e = document.querySelector(".greetsay");
                   return e ? e.textContent.trim() : null; })(),
+    greetLine: greetLine,
     firstPara: firstPara,
     bodyText: body,
     /* The row belongs with the button row, under the message. */
@@ -229,7 +241,9 @@ def go():
         ck("no sample line while it is off", r["say"] is None, r["say"])
         ck("no prose in the setting", r["rowWhy"] == 0, r["rowWhy"])
         ck("every control shares one line", one_line(r), r["rowMids"])
-        ck("the message opens with the body, not a greeting",
+        ck("no greeting line at all in the message",
+           r["greetLine"] is None, r["greetLine"])
+        ck("and the message still opens with the body",
            (r["firstPara"] or "").startswith("The cycle opens"), r["firstPara"])
         offX, offH = r["swX"], r["rowH"]
 
@@ -256,7 +270,7 @@ def go():
 
         # ══ 3 · WHAT THE MESSAGE NOW SAYS ═══════════════════════════
         print("\n3 · the preview")
-        ck("the message opens “Dear Ahmed,”", r["firstPara"] == "Dear Ahmed,", r["firstPara"])
+        ck("the message opens “Dear Ahmed,”", r["greetLine"] == "Dear Ahmed,", r["greetLine"])
         ck("the body is still there",
            "The cycle opens on Monday" in (r["bodyText"] or ""), r["bodyText"])
         ck("and one short line says the name is a sample",
@@ -267,13 +281,36 @@ def go():
         pg.fill("#msggreet", "Hi")
         pg.wait_for_timeout(400)
         r = pg.evaluate(READ)
-        ck("typing the word changes the message", r["firstPara"] == "Hi Ahmed,", r["firstPara"])
+        ck("typing the word changes the message", r["greetLine"] == "Hi Ahmed,", r["greetLine"])
         # §35 — a repaint would replace the box being typed into.
         ck("and the box being typed into survives it",
            pg.evaluate("() => document.activeElement && document.activeElement.id") == "msggreet",
            pg.evaluate("() => document.activeElement && document.activeElement.id"))
         pg.fill("#msggreet", "Dear")
         pg.wait_for_timeout(300)
+
+        # ── THE GREETING IS NOT PART OF THE MESSAGE ──────────────────
+        # The message is typed straight INTO the preview and read back with
+        # `innerText` (§76.3). The greeting was first emitted inside that same
+        # editable div, so one keystroke in the message absorbed "Dear Ahmed,"
+        # into the body — after which the email carries it twice and the stored
+        # message holds a name nobody typed. Asked of the DATA, because on
+        # screen it looks correct either way.
+        pg.evaluate("""() => { const h = document.getElementById('msgprev');
+          const b = h.shadowRoot.querySelector('[data-mail-body]'); b.focus(); }""")
+        pg.keyboard.type(" Please report.")
+        pg.wait_for_timeout(400)
+        after = pg.evaluate("() => sendmsg().body")
+        ck("typing in the message never absorbs the greeting",
+           "Dear" not in (after or ""), repr(after)[:120])
+        ck("and what was already typed survives it",
+           "The cycle opens on Monday" in (after or ""), repr(after)[:120])
+        ck("the greeting line is not editable",
+           pg.evaluate("""() => { const h = document.getElementById('msgprev');
+             const b = h.shadowRoot.querySelector('[data-mail-body]');
+             const p = b && b.previousElementSibling;
+             return !!p && p.tagName === 'P' &&
+                    p.getAttribute('contenteditable') === null; }"""))
 
         # ══ 4 · WHAT THE PAGE POSTS ═════════════════════════════════
         # The seam: the browser must NOT name anybody, because who the
@@ -305,8 +342,7 @@ def go():
         r = pg.evaluate(READ)
         ck("the word box goes", not r["wordShown"])
         ck("the sample line goes with it", r["say"] is None, r["say"])
-        ck("the greeting leaves the message",
-           (r["firstPara"] or "").startswith("The cycle opens"), r["firstPara"])
+        ck("the greeting line leaves the message", r["greetLine"] is None, r["greetLine"])
         del POSTED[:]
         pg.click("#msgsend")
         pg.wait_for_timeout(400)

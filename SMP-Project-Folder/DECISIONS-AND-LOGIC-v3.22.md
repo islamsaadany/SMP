@@ -17757,3 +17757,123 @@ once. It asks whether their **middles** agree now, with the tolerance taken
 from the tallest control rather than from a number somebody picked. And it
 asserted the row's pixel height was unchanged when the word box appears, which
 is false and was never the point: a text input is taller than a chip.
+
+### 135.8 The greeting was inside the box people type into
+
+Found by reading the diff while building §136, not by a failing test, and it is
+the worst thing in spec 021.
+
+The message is typed **straight into the preview** (§76.3) and read back with
+`b.innerText` on the `data-mail-body` div. The greeting was emitted INSIDE that
+div — deliberately, with a comment saying it belonged there "so the composer's
+editor hook still wraps the whole message". Exactly wrong: the hook must not
+wrap the greeting, because the greeting is not typed.
+
+**Measured, not reasoned.** With the greeting on, one keystroke in the message
+turned `body` into `"…Dear Ahmed,\n\nThe cycle opens…"` — after which the
+email carries the greeting **twice**, and the stored message holds a name
+nobody typed and the wrong person's name for every other recipient.
+
+The greeting moves out, immediately before the div. Visually identical (both
+are block children of the same cell), and it is what makes the greeting line
+un-editable — which is right: it is the one part of the message that differs in
+every inbox.
+
+**Every existing assertion passed while this was broken**, because none of them
+typed into the body with the greeting on and then asked the DATA. Three now do,
+and moving the element broke three OLD assertions that read the greeting as
+`[data-mail-body] p` — §51.11, and the reason to grep the checks whenever a
+thing changes shape.
+
+---
+
+## 136 · The bar reports, and moves on (v3.50)
+
+Islam, using the product: *"When I send I don't get any verification that the
+message was sent and the page stays the same view."*
+
+**Both halves were true, and they are two separate faults.** Established by
+driving the built platform and sending a real message through its own controls
+before changing anything — the send itself works, and saying so first is most
+of the diagnosis.
+
+### 136.1 Success was written in the failure-neutral voice
+
+The words *76 messages sent.* were on that bar. In `.why` — **12px, in the same
+quiet grey as an empty space** — fourth in a row behind three loud buttons.
+
+And the grey was not a styling oversight, it was a dropped stitch:
+`reallySend()` works out `ok: !j.failed`, stores it, and **nothing ever read
+it.** The error path goes through `say()` and turns red; the success path
+repaints and the repaint drew that span plain. *So the two outcomes that most
+need telling apart were drawn in one voice, and it was the voice for "nothing
+happened".*
+
+Fixed by reading the flag that was already there. `--good-tx` / `--bad-tx`, the
+type-safe twins (§38.4 for the sixth time), measured on this bar: **6.82 and
+7.55 in light, 10.45 and 8.14 in dark.** At `--fs-note`, and the first build
+reached for `--fs-small`, which is 12px — the size it already was. **The check
+caught it because it asks for a size worth READING rather than for a token
+name** (§94.8).
+
+### 136.2 The loudest control on the bar still said "not sent"
+
+This is the half about the page not changing, and it is the one that mattered.
+After a successful send the orange button **still read *Send to 76 people* and
+was still live**, with the subject, the message and the audience all loaded.
+Every loud signal said not-sent-yet, which is what the eye reads and what the
+small grey sentence was arguing against.
+
+**A second press would have sent the whole thing again**, to all seventy-six,
+with nothing on screen to warn anybody. §95 put a confirmation in FRONT of the
+send *because it cannot be recalled* — and then left the button loaded.
+
+So the CTA becomes **Write another**. Deliberately not a disabled Send left
+lying there: a dead control in the loudest slot is furniture, and the word
+*Sent* on it beside *Sent* in the outcome is the same word twice (§87's twins).
+
+### 136.3 `sent` is its own flag, and `result.ok` could not have carried it
+
+A refused request and a partial delivery both read `ok:false`, and **only one
+of them must lock the button**: a partial send has already reached most of the
+list, so re-sending in one press would give those people it twice. `sent` is
+set only when the SERVER answered — a network failure leaves Send exactly where
+it was, because nothing went.
+
+### 136.4 Both buttons are drawn, and one is hidden
+
+**Because the way back must not repaint.** Without a way back the composer is a
+dead end (§61): the only control on offer CLEARS, so somebody fixing a typo to
+re-send the corrected version would have to throw the correction away to get a
+Send button.
+
+But the heading and the body are typed **into the preview** (§76.3), so a
+`paint()` on the first keystroke after a send rebuilds the contenteditable and
+**the caret dies mid-word** (§35, §71.2, §30.1). With both buttons present and
+bound at paint time, `sendmsgTouched()` is two `hidden` flags and nothing to
+rewire (§24, §47.2) — and it is called from every surface that changes the
+message *or who it goes to*, because changing the audience makes it a different
+send. **The stale outcome goes with it**: a sentence that is merely stale is
+worse than none (§100).
+
+*Write another* clears the MESSAGE and **keeps the audience** — the recipients
+are usually the same list, re-picking seventy-six people is real work, and the
+audience is stated at the top of the page so nothing is hidden. It does not
+confirm: what it clears has already been sent and is in the record.
+
+### 136.5 What proves it
+
+`src/checks/send-said.py`, over HTTP (§94.11). The assertions that matter are
+**that the send cannot be repeated by one press** — asked at both ends, by
+pressing where Send was and counting the requests (§94.2) — and that the way
+back exists, with **the caret still in the message** afterwards.
+
+Watched to fail first (§94.5): the pre-§136 bar restored → **5 failures**,
+naming the grey voice, the 12px, and Send still on offer; `sendmsgTouched()`
+removed from the body editor → **2**, the dead end exactly.
+
+**One of its own first-run failures was the check**: `focus()` puts the caret
+at the START of a contenteditable, so the typed character lands first and the
+assertion had used `endswith`. It asks whether the character reached the state
+and whether what was already there survived — neither of which assumes a
+position.

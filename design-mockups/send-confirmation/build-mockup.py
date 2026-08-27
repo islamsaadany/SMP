@@ -39,7 +39,7 @@ HTML = """<title>Did It Send</title>
   <h1>Did it send?</h1>
   <p>It did &mdash; and the screen barely says so. What follows is measured on the
      built platform, with a message actually sent through its own controls.</p>
-  <div class="standing"><b>Waiting on your sign-off</b> <span>nothing in src/ has been touched</span></div>
+  <div class="standing"><b>Built</b> <span>on the branch &middot; not merged to main</span></div>
 </header>
 
 <section class="item">
@@ -119,6 +119,8 @@ HTML = """<title>Did It Send</title>
         where your eye is &mdash; you just pressed a button on it. The report belongs
         where the act happened.</p>
     </div>
+    %(built)s
+
     <div class="rec">
       <div class="kicker">Measured, not assumed</div>
       <p>The green reads <strong>6.82:1</strong> on the bar in light and
@@ -152,6 +154,10 @@ page = HTML % {
                  "are there &mdash; and the orange button beside them still says "
                  "<em>Send to 76 people</em>.",
                  dark="today-dark.png"),
+    "built": fig("built.png",
+                 "<b>As built</b>The shipped bar, captured the same way &mdash; a real "
+                 "send through the product&rsquo;s own controls, on the branch build.",
+                 dark="built-dark.png"),
     "proposed": fig("proposed.png",
                     "<b>Proposed</b>The same bar, same build. The outcome reads at a "
                     "size worth reading, and the loud control has become the next thing "

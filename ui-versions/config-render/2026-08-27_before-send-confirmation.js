@@ -5341,13 +5341,6 @@ function sendmsg(){
                             subject:"", body:"", ctaLabel:"", ctaHref:"",
                             greet:null,
                             draftId:null,
-                            /* `sent` is set only when the SERVER answered a send —
-                               never on a network failure, where nothing went and
-                               Send must stay available. `result.ok` cannot carry
-                               this: a refused request and a partial delivery both
-                               read false, and only one of them must lock the
-                               button (§136). */
-                            sent:false,
                             aud:null, asking:false, busy:false, result:null };
   return SENDMSG;
 }
@@ -5363,35 +5356,6 @@ function greetSample(){
   if (!to.length) return "";
   var r = to[0], p = (typeof personBy === "function") ? personBy(r.key) : null;
   return SMPRules.firstName(p || { name: r.name });
-}
-
-/* ── THE MESSAGE ON SCREEN IS NO LONGER THE ONE THAT WENT (§136) ────────
-   Called the moment anything about the message changes after it has been sent.
-   Without it the composer is a dead end (§61): the only control offered is
-   *Write another*, which CLEARS — so somebody fixing a typo to re-send the
-   corrected version would have to throw away the correction to get a Send
-   button back.
-
-   IT DOES NOT REPAINT, and that is the whole reason it exists rather than a
-   `paint()` in the editors. The heading and the body are typed into the
-   preview itself, so a repaint on the first keystroke rebuilds the
-   contenteditable and the caret dies mid-word (§35, §71.2, §30.1). Both
-   buttons are drawn and bound at paint time, so this is two `hidden` flags and
-   nothing to rewire.
-
-   THE OUTCOME GOES WITH IT: "76 messages sent." describes a message that is no
-   longer what is on screen, and a sentence that is merely stale is worse than
-   no sentence (§100). */
-function sendmsgTouched(){
-  var st = sendmsg();
-  if (!st.sent && !st.result) return;
-  st.sent = false; st.result = null;
-  var send = document.getElementById("msgsend"),
-      again = document.getElementById("msgagain"),
-      said = document.getElementById("msgsaid");
-  if (send) send.hidden = false;
-  if (again) again.hidden = true;
-  if (said) { said.textContent = ""; said.className = "why msgsaid"; }
 }
 
 /* Toggling one entry of a criteria list. The lists are small and the order
@@ -5716,39 +5680,10 @@ function renderSendMessage(){
   var r = st.result;
   var n = (st.aud && st.aud.to) ? st.aud.to.length : 0;
   var ready = live && sendmsgHasAny() && st.subject.trim() && st.body.trim() && n;
-  /* ── AFTER A SEND, THE BAR REPORTS AND MOVES ON (§136) ──────────
-     Islam: "When I send I don't get any verification that the message was sent
-     and the page stays the same view."
-
-     Both halves of that were true. The outcome was drawn in `.why` — the same
-     12px quiet grey as an empty space — and `result.ok` was worked out and
-     never read, so a FAILED send turned red and a successful one got no colour
-     at all. And the orange button still read *Send to 76 people* and was still
-     live, with the subject, the message and the audience all still loaded: every
-     loud signal on the bar said not-sent-yet, which is what the eye reads.
-
-     THE SECOND PRESS IS THE REAL FAULT. §95 put a confirmation in FRONT of the
-     send because it cannot be recalled, and then left the button loaded — one
-     press from sending the whole thing again, with nothing on screen to say it
-     had already gone.
-
-     So the CTA becomes the next thing you would actually do. It is not a
-     disabled Send left lying there: a dead control in the loudest slot is
-     furniture, and the word "Sent" on it beside "Sent" in the outcome is the
-     same word twice (§87's twins). */
-  /* BOTH ARE DRAWN, AND ONE IS HIDDEN — never one or the other, because the
-     way back has to happen WITHOUT A REPAINT. The heading and the body are
-     typed straight into the preview, so a `paint()` on the first keystroke
-     after a send would rebuild the contenteditable and eject the caret
-     mid-word (§35, §71.2). With both present and bound at paint time,
-     `sendmsgTouched()` is two `hidden` flags and no rewiring (§24, §47.2). */
   var bar =
     '<div class="sendbar">' +
-      '<button class="editbtn cta" id="msgsend"' + (live ? '' : ' disabled') +
-        (st.sent ? ' hidden' : '') + '>' +
+      '<button class="editbtn cta" id="msgsend"' + (live ? '' : ' disabled') + '>' +
         (n ? 'Send to ' + plural(n, "person", "people") : 'Send') + '</button>' +
-      '<button class="editbtn cta" id="msgagain"' + (st.sent ? '' : ' hidden') + '>' +
-        'Write another</button>' +
       '<button class="editbtn" id="msgdraft"' + (live ? '' : ' disabled') + '>' +
         (st.draftId ? 'Save the draft' : 'Save as a draft') + '</button>' +
       /* ── SEND ME A COPY FIRST (§95) ────────────────────────────
@@ -5761,18 +5696,8 @@ function renderSendMessage(){
         (live && st.subject.trim() && st.body.trim() ? '' : ' disabled') +
         ' title="One copy, to you, before it goes to anybody else">' +
         'Send me a copy</button>' +
-      /* SAID IN THE VOICE OF WHAT HAPPENED. `--good-tx` / `--bad-tx` are the
-         type-safe twins (§38.4), measured on this bar: 6.82 and 7.55 in light,
-         10.45 and 8.14 in dark. At `--fs-note`, because this is a sentence
-         somebody has to read and `.why` alone is the size of a legend. */
-      '<span class="why msgsaid' + (r ? (r.ok ? ' good' : ' bad') : '') +
-        '" id="msgsaid" style="margin:0">' +
-        (r ? '<b>' + esc(r.msg) + '</b>' +
-             (r.ok && r.skipped
-               ? ' <span class="quiet">' + plural(r.skipped, "person", "people") +
-                 ' skipped \u2014 no address on their row.</span>'
-               : '')
-           : (live ? '' : 'There is no server here to send from.')) + '</span>' +
+      '<span class="why" id="msgsaid" style="margin:0">' +
+        (r ? esc(r.msg) : (live ? '' : 'There is no server here to send from.')) + '</span>' +
     '</div>';
 
   /* WHAT HAPPENED, after a send. It belongs with the record rather than the
@@ -6068,12 +5993,10 @@ function wireMsgEditor(root){
       b = root.querySelector("[data-mail-body]");
   if (t) t.addEventListener("input", function(){
     st.subject = t.innerText.replace(/\s+$/, "");
-    sendmsgTouched();
   });
   if (b) b.addEventListener("input", function(){
     st.body = b.innerText.replace(/\s+$/, "");
     b.classList.toggle("blank", !st.body);
-    sendmsgTouched();
   });
   /* PLAIN TEXT ONLY on paste. A message pasted out of a browser arrives
      carrying its own fonts, colours and links, and none of that survives being

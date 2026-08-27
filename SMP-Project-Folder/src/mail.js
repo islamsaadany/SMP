@@ -198,11 +198,22 @@ var MAIL = (function(){
                 'color:' + ink + '">' + e(o.title) + '</h1>'
               : '<h1 data-mail-title style="margin:0 0 14px;font:700 22px/1.3 Helvetica,Arial,sans-serif;' +
                 'color:' + ink + '"></h1>') +
-            /* The greeting sits INSIDE `data-mail-body` and before the typed
-               paragraphs, so the composer's editor hook still wraps the whole
-               message and the greeting reads as its first line. */
-            '<div data-mail-body>' + greetPara(o.greeting, ink) +
-              paras(o.body, ink) + '</div>' + cta +
+            /* ── THE GREETING SITS OUTSIDE `data-mail-body`, AND THAT IS
+               NOT COSMETIC. That div is the composer's EDITABLE region: the
+               message is typed straight into the preview (§76.3) and read
+               back with `b.innerText`. Put the greeting inside it and the
+               first keystroke in the message absorbs "Dear Ahmed," into the
+               body text — after which the email carries the greeting twice
+               and the stored message holds a name that was never typed.
+               Measured, not reasoned: `body` came back as
+               "…Dear Ahmed,\n\nThe cycle opens…" after one character.
+
+               Visually identical — both are block children of the same cell —
+               and it is what makes the greeting line un-editable, which is
+               right: it is the one part of the message that differs in every
+               inbox. */
+            greetPara(o.greeting, ink) +
+            '<div data-mail-body>' + paras(o.body, ink) + '</div>' + cta +
           '</td></tr>' +
 
           '<tr><td style="padding:0 28px"><div style="border-top:1px solid ' + line + '"></div></td></tr>' +

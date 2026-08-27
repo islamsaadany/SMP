@@ -66,6 +66,47 @@ Nothing proceeds past this line without an answer.
 
 ## Built and verified
 
+### v3.50 — the bar reports, and moves on (§136)
+
+Islam, using the product: *"When I send I don't get any verification that the
+message was sent and the page stays the same view."*
+
+**The send was working.** Established first, by driving the built platform and
+sending a real message through its own controls. Two faults after that moment,
+both pre-existing §95 code:
+
+- **Success was written in the failure-neutral voice.** The words were there —
+  in 12px, the page's quietest grey. `reallySend()` works out `ok: !j.failed`,
+  stores it, and nothing ever read it: a *failed* send turned red, a successful
+  one got no colour at all.
+- **The loudest control still said not-sent.** The orange button read *Send to
+  76 people* and was live — one press from sending the whole thing again, with
+  nothing on screen to say it had already gone.
+
+Now: the outcome reads in `--good-tx` / `--bad-tx` at `--fs-note`, and the CTA
+becomes **Write another** (clears the message, keeps the audience). `sent` is
+its own flag, because a refused request and a partial delivery both read
+`ok:false` and only one must lock the button. Both buttons are drawn with one
+hidden, so the way back needs no repaint — the message is typed *into* the
+preview and a repaint would kill the caret mid-word.
+
+**Found while building it (§135.8):** the greeting was being emitted *inside*
+`data-mail-body`, the editable region — so one keystroke in the message
+absorbed *"Dear Ahmed,"* into the body text, and the email would have carried
+the greeting twice with the wrong person's name for every other recipient.
+Moved outside; three assertions added.
+
+**Proved:** `checks/send-said.py` — the assertions that matter are that the
+send cannot be repeated by one press (asked by pressing where Send was and
+counting requests) and that the way back exists with the caret intact. Watched
+to fail first: the pre-§136 bar → 5 failures; `sendmsgTouched()` removed → 2.
+`qa.py` green; `send-message.py` and `email-greeting.py` green;
+`test-email-greeting.js` 37/0; `test-authorize.js` 212/0;
+`test-mail-contrast.js` 16/0.
+
+**On the branch only — not merged to main.**
+
+
 ### v3.50 — the email greets its receiver (§135, spec 021)
 
 Islam: *"can we make an option while sending the email to customize the email

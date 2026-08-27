@@ -1702,6 +1702,24 @@
             border-top:1px dashed var(--line); margin-top:12px; padding-top:11px; }
   .ctarow .why { grid-column:1 / -1; }
 
+  /* ── THE SEND OUTCOME SPEAKS (§136) ─────────────────────────────────
+     It was `.why` — the legend size, in the page's quietest grey — so a
+     successful send read exactly like an empty space, and `result.ok` was
+     computed and never used. A sentence somebody has to read after an act
+     that cannot be undone is not a legend.
+
+     THE TYPE-SAFE TWINS, never `--good` / `--bad` (§38.4, six times now):
+     measured on this bar at 6.82 and 7.55 in light, 10.45 and 8.14 in dark.
+
+     `--fs-note`, NOT `--fs-small`: small is 12px — the size `.why` already
+     was — and note is 13px, the one the product uses for cells and notes. The
+     first build reached for the wrong constant and the check caught it,
+     because it asks for a size worth READING rather than for a token name. */
+  .msgsaid { font-size:var(--fs-note); }
+  .msgsaid.good b { color:var(--good-tx); }
+  .msgsaid.bad  b { color:var(--bad-tx); }
+  .msgsaid .quiet { color:var(--ink-3); font-weight:400; }
+
   /* ── THE GREETING ROW (spec 021) ────────────────────────────────────
      ONE LINE, and no prose in it — Islam, of the two-line first draft: "it
      should be one line you dont need 2 lines .. and no explanations needed in

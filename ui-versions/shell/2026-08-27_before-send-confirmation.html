@@ -4178,9 +4178,6 @@
       inp.addEventListener("change", function(){
         if (inp.dataset.aud === "everyone") sendmsg().criteria.everyone = inp.checked;
         else sendmsgToggle(inp.dataset.aud, inp.value, inp.checked);
-        /* CHANGING WHO IT GOES TO MAKES IT A DIFFERENT SEND, so Send comes back
-           for the same reason editing the words does (§136). */
-        sendmsgTouched();
         sendmsgAsk();
         paint();
       });
@@ -4188,14 +4185,14 @@
     document.querySelectorAll("[data-audkey]").forEach(function(b){
       b.addEventListener("click", function(){
         sendmsgToggle("keys", b.dataset.audkey, false);
-        sendmsgTouched(); sendmsgAsk(); paint();
+        sendmsgAsk(); paint();
       });
     });
     var audpick = document.getElementById("audpick");
     if (audpick) audpick.addEventListener("change", function(){
       if (!this.value) return;
       sendmsgToggle("keys", this.value, true);
-      sendmsgTouched(); sendmsgAsk(); paint();
+      sendmsgAsk(); paint();
     });
 
     /* THE BUTTON'S TWO FIELDS ARE THE ONLY BOXES LEFT (§76.3) — the heading
@@ -4207,7 +4204,6 @@
       if (!el) return;
       el.addEventListener("input", function(){
         sendmsg()[pair[1]] = el.value;
-        sendmsgTouched();
         paintMsgPreview();
       });
     });
@@ -4225,14 +4221,12 @@
     document.querySelectorAll("[data-greet]").forEach(function(b){
       b.addEventListener("click", function(){
         sendmsg().greet = b.dataset.greet === "1" ? "Dear" : null;
-        sendmsgTouched();
         paint();
       });
     });
     var mg = document.getElementById("msggreet");
     if (mg) mg.addEventListener("input", function(){
       sendmsg().greet = mg.value;
-      sendmsgTouched();
       paintMsgPreview();
     });
 
@@ -4499,16 +4493,9 @@
       }, function(err, j){
         msgsend.disabled = false; st.busy = false;
         if (err) { say(err, false); return; }
-        /* THE SERVER ANSWERED, SO THE MESSAGE HAS GONE — even if some of it
-           failed. `sent` locks the send (§136); `ok` is about how well it
-           went, and the two are different questions: a partial delivery must
-           still not be re-sendable in one press, because the people it DID
-           reach would get it twice. */
-        st.sent = true;
         st.result = { ok: !j.failed,
           msg: plural(j.sent, "message", "messages") + " sent" +
                (j.failed ? ", " + j.failed + " failed" : "") + ".",
-          skipped: (st.aud && st.aud.skipped) ? st.aud.skipped.length : 0,
           rows: null };
         /* The list is asked again rather than guessed at: what the server
            recorded is the record, and a row this page invented would be a
@@ -4519,25 +4506,6 @@
       });
       });
     }
-
-    /* ── WRITE ANOTHER (§136) ───────────────────────────────────────
-       Where Send stood once the message has gone. It clears the MESSAGE —
-       heading, body, the button's two fields, the greeting — and deliberately
-       KEEPS who it goes to: the recipients are usually the same list and
-       re-picking seventy-six people is real work, while the audience is stated
-       at the top of the page so nothing is hidden.
-
-       It does not confirm. There is nothing to lose: the message it clears has
-       already been sent and is in the record. */
-    var msgagain = document.getElementById("msgagain");
-    if (msgagain) msgagain.addEventListener("click", function(){
-      var st = sendmsg();
-      st.subject = ""; st.body = "";
-      st.ctaLabel = ""; st.ctaHref = "";
-      st.greet = null;
-      st.sent = false; st.result = null; st.draftId = null;
-      paint();
-    });
 
     /* ── SEND ME A COPY (§95) ───────────────────────────────────────
        The cheapest safeguard there is, and it was missing: a message to

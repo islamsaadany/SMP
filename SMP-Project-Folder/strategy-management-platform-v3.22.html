@@ -3172,6 +3172,24 @@
             border-top:1px dashed var(--line); margin-top:12px; padding-top:11px; }
   .ctarow .why { grid-column:1 / -1; }
 
+  /* ── THE SEND OUTCOME SPEAKS (§136) ─────────────────────────────────
+     It was `.why` — the legend size, in the page's quietest grey — so a
+     successful send read exactly like an empty space, and `result.ok` was
+     computed and never used. A sentence somebody has to read after an act
+     that cannot be undone is not a legend.
+
+     THE TYPE-SAFE TWINS, never `--good` / `--bad` (§38.4, six times now):
+     measured on this bar at 6.82 and 7.55 in light, 10.45 and 8.14 in dark.
+
+     `--fs-note`, NOT `--fs-small`: small is 12px — the size `.why` already
+     was — and note is 13px, the one the product uses for cells and notes. The
+     first build reached for the wrong constant and the check caught it,
+     because it asks for a size worth READING rather than for a token name. */
+  .msgsaid { font-size:var(--fs-note); }
+  .msgsaid.good b { color:var(--good-tx); }
+  .msgsaid.bad  b { color:var(--bad-tx); }
+  .msgsaid .quiet { color:var(--ink-3); font-weight:400; }
+
   /* ── THE GREETING ROW (spec 021) ────────────────────────────────────
      ONE LINE, and no prose in it — Islam, of the two-line first draft: "it
      should be one line you dont need 2 lines .. and no explanations needed in
@@ -19118,11 +19136,22 @@ var MAIL = (function(){
                 'color:' + ink + '">' + e(o.title) + '</h1>'
               : '<h1 data-mail-title style="margin:0 0 14px;font:700 22px/1.3 Helvetica,Arial,sans-serif;' +
                 'color:' + ink + '"></h1>') +
-            /* The greeting sits INSIDE `data-mail-body` and before the typed
-               paragraphs, so the composer's editor hook still wraps the whole
-               message and the greeting reads as its first line. */
-            '<div data-mail-body>' + greetPara(o.greeting, ink) +
-              paras(o.body, ink) + '</div>' + cta +
+            /* ── THE GREETING SITS OUTSIDE `data-mail-body`, AND THAT IS
+               NOT COSMETIC. That div is the composer's EDITABLE region: the
+               message is typed straight into the preview (§76.3) and read
+               back with `b.innerText`. Put the greeting inside it and the
+               first keystroke in the message absorbs "Dear Ahmed," into the
+               body text — after which the email carries the greeting twice
+               and the stored message holds a name that was never typed.
+               Measured, not reasoned: `body` came back as
+               "…Dear Ahmed,\n\nThe cycle opens…" after one character.
+
+               Visually identical — both are block children of the same cell —
+               and it is what makes the greeting line un-editable, which is
+               right: it is the one part of the message that differs in every
+               inbox. */
+            greetPara(o.greeting, ink) +
+            '<div data-mail-body>' + paras(o.body, ink) + '</div>' + cta +
           '</td></tr>' +
 
           '<tr><td style="padding:0 28px"><div style="border-top:1px solid ' + line + '"></div></td></tr>' +
@@ -28639,6 +28668,13 @@ function sendmsg(){
                             subject:"", body:"", ctaLabel:"", ctaHref:"",
                             greet:null,
                             draftId:null,
+                            /* `sent` is set only when the SERVER answered a send —
+                               never on a network failure, where nothing went and
+                               Send must stay available. `result.ok` cannot carry
+                               this: a refused request and a partial delivery both
+                               read false, and only one of them must lock the
+                               button (§136). */
+                            sent:false,
                             aud:null, asking:false, busy:false, result:null };
   return SENDMSG;
 }
@@ -28654,6 +28690,35 @@ function greetSample(){
   if (!to.length) return "";
   var r = to[0], p = (typeof personBy === "function") ? personBy(r.key) : null;
   return SMPRules.firstName(p || { name: r.name });
+}
+
+/* ── THE MESSAGE ON SCREEN IS NO LONGER THE ONE THAT WENT (§136) ────────
+   Called the moment anything about the message changes after it has been sent.
+   Without it the composer is a dead end (§61): the only control offered is
+   *Write another*, which CLEARS — so somebody fixing a typo to re-send the
+   corrected version would have to throw away the correction to get a Send
+   button back.
+
+   IT DOES NOT REPAINT, and that is the whole reason it exists rather than a
+   `paint()` in the editors. The heading and the body are typed into the
+   preview itself, so a repaint on the first keystroke rebuilds the
+   contenteditable and the caret dies mid-word (§35, §71.2, §30.1). Both
+   buttons are drawn and bound at paint time, so this is two `hidden` flags and
+   nothing to rewire.
+
+   THE OUTCOME GOES WITH IT: "76 messages sent." describes a message that is no
+   longer what is on screen, and a sentence that is merely stale is worse than
+   no sentence (§100). */
+function sendmsgTouched(){
+  var st = sendmsg();
+  if (!st.sent && !st.result) return;
+  st.sent = false; st.result = null;
+  var send = document.getElementById("msgsend"),
+      again = document.getElementById("msgagain"),
+      said = document.getElementById("msgsaid");
+  if (send) send.hidden = false;
+  if (again) again.hidden = true;
+  if (said) { said.textContent = ""; said.className = "why msgsaid"; }
 }
 
 /* Toggling one entry of a criteria list. The lists are small and the order
@@ -28978,10 +29043,39 @@ function renderSendMessage(){
   var r = st.result;
   var n = (st.aud && st.aud.to) ? st.aud.to.length : 0;
   var ready = live && sendmsgHasAny() && st.subject.trim() && st.body.trim() && n;
+  /* ── AFTER A SEND, THE BAR REPORTS AND MOVES ON (§136) ──────────
+     Islam: "When I send I don't get any verification that the message was sent
+     and the page stays the same view."
+
+     Both halves of that were true. The outcome was drawn in `.why` — the same
+     12px quiet grey as an empty space — and `result.ok` was worked out and
+     never read, so a FAILED send turned red and a successful one got no colour
+     at all. And the orange button still read *Send to 76 people* and was still
+     live, with the subject, the message and the audience all still loaded: every
+     loud signal on the bar said not-sent-yet, which is what the eye reads.
+
+     THE SECOND PRESS IS THE REAL FAULT. §95 put a confirmation in FRONT of the
+     send because it cannot be recalled, and then left the button loaded — one
+     press from sending the whole thing again, with nothing on screen to say it
+     had already gone.
+
+     So the CTA becomes the next thing you would actually do. It is not a
+     disabled Send left lying there: a dead control in the loudest slot is
+     furniture, and the word "Sent" on it beside "Sent" in the outcome is the
+     same word twice (§87's twins). */
+  /* BOTH ARE DRAWN, AND ONE IS HIDDEN — never one or the other, because the
+     way back has to happen WITHOUT A REPAINT. The heading and the body are
+     typed straight into the preview, so a `paint()` on the first keystroke
+     after a send would rebuild the contenteditable and eject the caret
+     mid-word (§35, §71.2). With both present and bound at paint time,
+     `sendmsgTouched()` is two `hidden` flags and no rewiring (§24, §47.2). */
   var bar =
     '<div class="sendbar">' +
-      '<button class="editbtn cta" id="msgsend"' + (live ? '' : ' disabled') + '>' +
+      '<button class="editbtn cta" id="msgsend"' + (live ? '' : ' disabled') +
+        (st.sent ? ' hidden' : '') + '>' +
         (n ? 'Send to ' + plural(n, "person", "people") : 'Send') + '</button>' +
+      '<button class="editbtn cta" id="msgagain"' + (st.sent ? '' : ' hidden') + '>' +
+        'Write another</button>' +
       '<button class="editbtn" id="msgdraft"' + (live ? '' : ' disabled') + '>' +
         (st.draftId ? 'Save the draft' : 'Save as a draft') + '</button>' +
       /* ── SEND ME A COPY FIRST (§95) ────────────────────────────
@@ -28994,8 +29088,18 @@ function renderSendMessage(){
         (live && st.subject.trim() && st.body.trim() ? '' : ' disabled') +
         ' title="One copy, to you, before it goes to anybody else">' +
         'Send me a copy</button>' +
-      '<span class="why" id="msgsaid" style="margin:0">' +
-        (r ? esc(r.msg) : (live ? '' : 'There is no server here to send from.')) + '</span>' +
+      /* SAID IN THE VOICE OF WHAT HAPPENED. `--good-tx` / `--bad-tx` are the
+         type-safe twins (§38.4), measured on this bar: 6.82 and 7.55 in light,
+         10.45 and 8.14 in dark. At `--fs-note`, because this is a sentence
+         somebody has to read and `.why` alone is the size of a legend. */
+      '<span class="why msgsaid' + (r ? (r.ok ? ' good' : ' bad') : '') +
+        '" id="msgsaid" style="margin:0">' +
+        (r ? '<b>' + esc(r.msg) + '</b>' +
+             (r.ok && r.skipped
+               ? ' <span class="quiet">' + plural(r.skipped, "person", "people") +
+                 ' skipped \u2014 no address on their row.</span>'
+               : '')
+           : (live ? '' : 'There is no server here to send from.')) + '</span>' +
     '</div>';
 
   /* WHAT HAPPENED, after a send. It belongs with the record rather than the
@@ -29291,10 +29395,12 @@ function wireMsgEditor(root){
       b = root.querySelector("[data-mail-body]");
   if (t) t.addEventListener("input", function(){
     st.subject = t.innerText.replace(/\s+$/, "");
+    sendmsgTouched();
   });
   if (b) b.addEventListener("input", function(){
     st.body = b.innerText.replace(/\s+$/, "");
     b.classList.toggle("blank", !st.body);
+    sendmsgTouched();
   });
   /* PLAIN TEXT ONLY on paste. A message pasted out of a browser arrives
      carrying its own fonts, colours and links, and none of that survives being
@@ -38688,6 +38794,9 @@ var SYNC = (function () {
       inp.addEventListener("change", function(){
         if (inp.dataset.aud === "everyone") sendmsg().criteria.everyone = inp.checked;
         else sendmsgToggle(inp.dataset.aud, inp.value, inp.checked);
+        /* CHANGING WHO IT GOES TO MAKES IT A DIFFERENT SEND, so Send comes back
+           for the same reason editing the words does (§136). */
+        sendmsgTouched();
         sendmsgAsk();
         paint();
       });
@@ -38695,14 +38804,14 @@ var SYNC = (function () {
     document.querySelectorAll("[data-audkey]").forEach(function(b){
       b.addEventListener("click", function(){
         sendmsgToggle("keys", b.dataset.audkey, false);
-        sendmsgAsk(); paint();
+        sendmsgTouched(); sendmsgAsk(); paint();
       });
     });
     var audpick = document.getElementById("audpick");
     if (audpick) audpick.addEventListener("change", function(){
       if (!this.value) return;
       sendmsgToggle("keys", this.value, true);
-      sendmsgAsk(); paint();
+      sendmsgTouched(); sendmsgAsk(); paint();
     });
 
     /* THE BUTTON'S TWO FIELDS ARE THE ONLY BOXES LEFT (§76.3) — the heading
@@ -38714,6 +38823,7 @@ var SYNC = (function () {
       if (!el) return;
       el.addEventListener("input", function(){
         sendmsg()[pair[1]] = el.value;
+        sendmsgTouched();
         paintMsgPreview();
       });
     });
@@ -38731,12 +38841,14 @@ var SYNC = (function () {
     document.querySelectorAll("[data-greet]").forEach(function(b){
       b.addEventListener("click", function(){
         sendmsg().greet = b.dataset.greet === "1" ? "Dear" : null;
+        sendmsgTouched();
         paint();
       });
     });
     var mg = document.getElementById("msggreet");
     if (mg) mg.addEventListener("input", function(){
       sendmsg().greet = mg.value;
+      sendmsgTouched();
       paintMsgPreview();
     });
 
@@ -39003,9 +39115,16 @@ var SYNC = (function () {
       }, function(err, j){
         msgsend.disabled = false; st.busy = false;
         if (err) { say(err, false); return; }
+        /* THE SERVER ANSWERED, SO THE MESSAGE HAS GONE — even if some of it
+           failed. `sent` locks the send (§136); `ok` is about how well it
+           went, and the two are different questions: a partial delivery must
+           still not be re-sendable in one press, because the people it DID
+           reach would get it twice. */
+        st.sent = true;
         st.result = { ok: !j.failed,
           msg: plural(j.sent, "message", "messages") + " sent" +
                (j.failed ? ", " + j.failed + " failed" : "") + ".",
+          skipped: (st.aud && st.aud.skipped) ? st.aud.skipped.length : 0,
           rows: null };
         /* The list is asked again rather than guessed at: what the server
            recorded is the record, and a row this page invented would be a
@@ -39016,6 +39135,25 @@ var SYNC = (function () {
       });
       });
     }
+
+    /* ── WRITE ANOTHER (§136) ───────────────────────────────────────
+       Where Send stood once the message has gone. It clears the MESSAGE —
+       heading, body, the button's two fields, the greeting — and deliberately
+       KEEPS who it goes to: the recipients are usually the same list and
+       re-picking seventy-six people is real work, while the audience is stated
+       at the top of the page so nothing is hidden.
+
+       It does not confirm. There is nothing to lose: the message it clears has
+       already been sent and is in the record. */
+    var msgagain = document.getElementById("msgagain");
+    if (msgagain) msgagain.addEventListener("click", function(){
+      var st = sendmsg();
+      st.subject = ""; st.body = "";
+      st.ctaLabel = ""; st.ctaHref = "";
+      st.greet = null;
+      st.sent = false; st.result = null; st.draftId = null;
+      paint();
+    });
 
     /* ── SEND ME A COPY (§95) ───────────────────────────────────────
        The cheapest safeguard there is, and it was missing: a message to

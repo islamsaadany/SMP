@@ -2069,6 +2069,41 @@ console errors (in this cloud environment, run it via a wrapper that points Play
   backfilled. **AND `SYNC.mailSend()` NAMES EVERY FIELD IT FORWARDS**, so
   `greet` was silently dropped and the RECORD would have said no message ever
   greeted anybody — found by asking what the page POSTS, not by reading it.
+  **AND THE GREETING MUST SIT OUTSIDE `data-mail-body`** (§135.8): the message
+  is typed INTO the preview and read back with `innerText`, so a greeting
+  emitted inside that div is absorbed into the body by the first keystroke —
+  the email then carries it twice and the stored message holds a name nobody
+  typed. Measured, not reasoned; every existing assertion passed while it was
+  broken, because none typed into the body with the greeting on and then asked
+  the DATA.
+- **THE BAR REPORTS, AND MOVES ON (since v3.50, §136):** Islam, using the
+  product: *"When I send I don't get any verification that the message was sent
+  and the page stays the same view."* Both halves true, and two faults. **The
+  outcome was drawn in the failure-neutral voice** — `.why`, 12px, the page's
+  quietest grey — because `reallySend()` works out `ok: !j.failed`, stores it,
+  and **nothing ever read it**: the error path goes through `say()` and turns
+  red, the success path repaints and the repaint drew that span plain. It reads
+  the flag now, in `--good-tx`/`--bad-tx` at `--fs-note` (the first build
+  reached for `--fs-small`, which is the 12px it already was — the check caught
+  it by asking for a size worth READING rather than for a token name).
+  **AND THE LOUD CONTROL STILL SAID NOT-SENT**: the orange button read *Send to
+  76 people* and was live, one press from sending the whole thing again — §95
+  put a confirmation in FRONT of the send *because it cannot be recalled* and
+  then left the button loaded. It becomes **Write another**, never a disabled
+  Send left lying there (a dead control in the loudest slot is furniture, and
+  *Sent* on it beside *Sent* in the outcome is §87's twins). **`sent` IS ITS
+  OWN FLAG**: a refused request and a partial delivery both read `ok:false` and
+  only one must lock the button — a partial send has already reached most of
+  the list, so one press would give those people it twice. **BOTH BUTTONS ARE
+  DRAWN AND ONE IS HIDDEN**, because the way back must not repaint: the message
+  is typed INTO the preview, so a `paint()` on the first keystroke rebuilds the
+  contenteditable and the caret dies mid-word (§35, §71.2) — `sendmsgTouched()`
+  is two `hidden` flags and nothing to rewire (§24, §47.2), called from every
+  surface that changes the message **or who it goes to**. Without it the
+  composer is a dead end (§61): the only control on offer CLEARS, so somebody
+  fixing a typo to re-send would have to throw the fix away to get Send back.
+  **Write another keeps the AUDIENCE** — the recipients are usually the same
+  list and re-picking seventy-six people is real work.
 - **A CHECK MUST BE ABLE TO STAND IN FRONT OF THE PROVIDER (§135.6, §100.3
   again):** `SMP_RESEND_ENDPOINT` joins `GEMINI_ENDPOINT` as an environment
   variable defaulting to the real service, because **a test double behind an
@@ -2245,6 +2280,9 @@ python3 checks/setup-search.py  # the rail's search: typing NEVER repaints, a re
                                 # setup-rail.py also measures every rail GLYPH against a
                                 # character guaranteed missing: a mark that is MAPPED and
                                 # not DRAWN ships as a blank box (§52, §120.2)
+python3 checks/send-said.py     # after a send the bar SAYS so and stops offering the same
+                                # send again — asked by pressing where Send was and counting
+                                # the requests, with the way back proved too (§136)
 python3 checks/email-greeting.py # the greeting row is ONE line with no prose, the switch does
                                 # not move, and what the page POSTS names NOBODY — the server
                                 # fills it per recipient (§135, over HTTP)
@@ -2286,7 +2324,35 @@ prior sessions (on HR_ERP) accidentally reverted agreed-upon designs.
 
 ---
 
-*Last Updated: 2026-08-27 &mdash; **v3.50: the email greets its receiver
+*Last Updated: 2026-08-27 &mdash; **v3.50: the bar reports, and moves on
+(&sect;136)**. Islam, using the product: *"When I send I don't get any
+verification that the message was sent and the page stays the same view."*
+Both halves were true, and they are TWO faults. **Success was written in the
+failure-neutral voice**: the words were there, in `.why` &mdash; 12px, the same
+quiet grey as an empty space &mdash; because `reallySend()` works out
+`ok: !j.failed`, stores it, and **nothing ever read it**, so a FAILED send
+turned red and a successful one got no colour at all. **And the loudest control
+on the bar still said not-sent**: the orange button read *Send to 76 people* and
+was live, with the message and the audience still loaded &mdash; **one press
+from sending the whole thing again**, which is &sect;95 putting a confirmation
+in FRONT of the send *because it cannot be recalled* and then leaving the button
+loaded. It becomes **Write another**, and `sent` is its own flag because a
+refused request and a partial delivery both read `ok:false` and only one of them
+must lock the button. **BOTH BUTTONS ARE DRAWN AND ONE IS HIDDEN**, because the
+way back must not repaint &mdash; the message is typed INTO the preview, so a
+`paint()` on the first keystroke after a send rebuilds the contenteditable and
+the caret dies mid-word; without a way back the composer is a dead end
+(&sect;61), since the only control on offer CLEARS and somebody fixing a typo
+would have to throw the fix away to get Send back. **The first build reached for
+`--fs-small`**, which is the 12px it already was, and the check caught it
+because it asks for a size worth READING rather than for a token name. Proved by
+`checks/send-said.py`, watched to fail first: the pre-&sect;136 bar restored
+&rarr; **5 failures**; `sendmsgTouched()` removed &rarr; **2**, the dead end
+exactly. **One of its own first-run failures was the check** &mdash; `focus()`
+puts the caret at the START of a contenteditable, so the typed character lands
+first and the assertion had used `endswith`.*
+
+*Earlier the same day: **v3.50: the email greets its receiver
 (&sect;135, spec 021)**. Islam: *"can we make an option while sending the email
 to customize the email by the first name of the reciever like starting the
 email with Dear Ahmed and then the body comes after &mdash; it's a turn on and

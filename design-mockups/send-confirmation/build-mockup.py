@@ -55,8 +55,30 @@ HTML = """<title>Did It Send</title>
       written. Nothing has been lost and nothing needs re-sending.</p>
     <p>What is wrong is everything after that moment &mdash; and it is <strong>two
       separate faults</strong>, not one.</p>
+  </div>
+</section>
 
-    %(today)s
+<section class="item">
+  <div class="itemhead"><div class="num">Before and after</div><h2>The whole page, ringed</h2></div>
+  <div class="body">
+    <p>Both are <strong>real builds</strong>, not one screen with something painted
+      on: the first is the platform exactly as it was before this change, taken
+      out of git; the second is what is on the branch now. Each was walked to
+      Send a message, given the same message and the same seventy-six people, and
+      <strong>actually sent</strong> through its own confirmation. The ring marks
+      the only thing that differs.</p>
+
+    %(fullbefore)s
+    %(fullafter)s
+
+    <div class="cost">
+      <div class="kicker">What to look at</div>
+      <p>The bottom bar in each. <strong>Before:</strong> a lit orange
+        <em>Send to 76 people</em> with a small grey <em>76 messages sent.</em>
+        beside it. <strong>After:</strong> the orange button has become
+        <em>Write another</em>, and the outcome reads in green at a size worth
+        reading.</p>
+    </div>
   </div>
 </section>
 
@@ -111,7 +133,7 @@ HTML = """<title>Did It Send</title>
         message.</li>
     </ul>
 
-    %(proposed)s
+    %(built)s
 
     <div class="rec">
       <div class="kicker">Why not a pop-up</div>
@@ -119,8 +141,6 @@ HTML = """<title>Did It Send</title>
         where your eye is &mdash; you just pressed a button on it. The report belongs
         where the act happened.</p>
     </div>
-    %(built)s
-
     <div class="rec">
       <div class="kicker">Measured, not assumed</div>
       <p>The green reads <strong>6.82:1</strong> on the bar in light and
@@ -149,14 +169,24 @@ HTML = """<title>Did It Send</title>
 
 page = HTML % {
     "css": CSS,
+    "fullbefore": fig("full-before.png",
+                      "<b>Before</b>The send has already happened. Every loud signal "
+                      "on the page still says it has not: the orange button is lit and "
+                      "live, and the confirmation is the quietest thing on the bar.",
+                      dark="full-before-dark.png"),
+    "fullafter": fig("full-after.png",
+                     "<b>After</b>Same page, same send. The outcome reads in green, and "
+                     "the loud control has become the next thing to do rather than the "
+                     "same thing again.",
+                     dark="full-after-dark.png"),
     "today": fig("today.png",
                  "<b>Today</b>The send bar straight after a successful send. The words "
                  "are there &mdash; and the orange button beside them still says "
                  "<em>Send to 76 people</em>.",
                  dark="today-dark.png"),
     "built": fig("built.png",
-                 "<b>As built</b>The shipped bar, captured the same way &mdash; a real "
-                 "send through the product&rsquo;s own controls, on the branch build.",
+                 "<b>Close up</b>The bar as built, at full size &mdash; a real send "
+                 "through the product&rsquo;s own controls.",
                  dark="built-dark.png"),
     "proposed": fig("proposed.png",
                     "<b>Proposed</b>The same bar, same build. The outcome reads at a "

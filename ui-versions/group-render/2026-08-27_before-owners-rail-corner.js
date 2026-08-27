@@ -657,14 +657,11 @@ function kindPill(it){
    concatenate kind, theme and owner with fixed separators, so a pillar with no
    theme and no owner read "Direction · theme ·" - two separators pointing at
    nothing. With the kind hidden that would have become "theme ·". */
-/* `ownerBelow` is the plan pane with the pen on, where the owner has its own
-   row now (§130.1) — the meta line drops it rather than saying it twice three
-   inches above the control that changes it (§41's budget, in one line). */
-function pillarMeta(it, ownerBelow){
+function pillarMeta(it){
   var parts = [];
   if (SHOW_KIND && it.kind) parts.push(esc(it.kind));
   if (it.theme) parts.push("theme " + esc(it.theme));
-  if (it.owner && !ownerBelow) parts.push(esc(it.owner));
+  if (it.owner) parts.push(esc(it.owner));
   return parts.join(" &middot; ");
 }
 
@@ -1396,20 +1393,12 @@ function renderGroupFoundation(){
      the operand went and the `+` went with it, leaving the `return` stranded.
      Cost: a blank page for every viewer, and no edit route to the group's
      clauses, purpose, aspiration or values for anyone including the SMO. */
-  /* Same first-line fix as the unit's (§129's audit): the lead opens with
-     the pen, a line can be removed, and the first one can be written. */
   return '<div class="fgrid"><div class="card"><h2 class="sec first">Who we are</h2>' +
       '<dl style="margin:0">' +
-      GROUP.clauses.map(function(c, ci){
-        return '<div class="clause"><dt>' +
-          (gpg ? inputOr(gpg, c[0], "", function(v){ c[0] = v; }) : esc(c[0])) + '</dt><dd>' +
-          fieldOr(gpg, c[1], "", function(v){ c[1] = v; }) +
-          (gpg ? '<button class="xbtn" data-clauserm="group|' + ci +
-            '" title="Remove this line" aria-label="Remove this line">&times;</button>' : '') +
-          '</dd></div>';
-      }).join("") + '</dl>' +
-      (gpg ? '<div class="addrow"><button class="editbtn" data-clauseadd="group">+ Add a line</button></div>' : '') +
-      '</div>' +
+      GROUP.clauses.map(function(c){
+        return '<div class="clause"><dt>' + esc(c[0]) + '</dt><dd>' +
+          fieldOr(gpg, c[1], "", function(v){ c[1] = v; }) + '</dd></div>';
+      }).join("") + '</dl></div>' +
       '<div class="fcol">' +
         '<div class="card"><h2 class="sec first">' + L("purpose","group") + '</h2>' +
         '<p class="statement">' + fieldOr(gpg, GROUP.mission, "big-field",
@@ -1811,204 +1800,10 @@ function selectOr(page, value, opts, cls, setter){
     return '<span class="' + (cls || '') + '">' + esc(value) + '</span>';
   var i = FIELDS.push(setter) - 1;
   return '<select class="fld ' + (cls || '') + '" data-fld="' + i + '">' +
-    optionsHtml(opts, function(v){ return String(value) === v; }) + '</select>';
-}
-
-/* ── AN OPTION, A LABELLED OPTION, AND A GROUP OF THEM (§130.1) ───────
-   Three shapes, and the plain string is BYTE-FOR-BYTE what selectOr always
-   emitted: no `value` attribute, the text escaped, `selected` when it matches.
-   That matters because the direction and compile-rule pickers (§114) pass a
-   bare `""` in their list to mean "not answered", and it renders as an empty
-   option exactly as it did before this — a `value`/label pair here would have
-   quietly turned two dropdowns nobody asked about into em-dashes.
-
-     "Ramy Behairy"            an option whose value is its text
-     { v:"", label:"\u2014" }   a value and a label that differ
-     { group:"People", items:[…] }   an <optgroup>
-
-   `chosen` is asked of the VALUE, never of the label, or the pair above can
-   never be selected. */
-function optionHtml(o, chosen){
-  var pair = o && typeof o === "object";
-  var v = String(pair ? o.v : o), t = String(pair ? o.label : o);
-  /* A HINT IS NOT PART OF THE ANSWER (§130.9). It rides on the option as data
-     and searchsel.js draws it quietly beside the name in the popup; the
-     option's TEXT — which is what the closed control shows and what the field
-     stores — is the name alone. */
-  var hint = pair && o.hint ? ' data-hint="' + esc(String(o.hint)) + '"' : '';
-  return '<option' + (v === t ? '' : ' value="' + esc(v) + '"') + hint +
-    (chosen(v) ? " selected" : "") + '>' + esc(t) + '</option>';
-}
-function optionsHtml(opts, chosen){
-  return (opts || []).map(function(o){
-    if (o && typeof o === "object" && o.group)
-      return '<optgroup label="' + esc(o.group) + '">' +
-        (o.items || []).map(function(x){ return optionHtml(x, chosen); }).join("") +
-        '</optgroup>';
-    return optionHtml(o, chosen);
-  }).join("");
-}
-
-/* ── THE FOURTH WAY TO DRAW A BOUND FIELD: SEVERAL ANSWERS (§130.1) ───
-   A `<select multiple>`, for a field that holds a LIST. It is its own builder
-   for the same reason selectOr is (§96): a control the callers build by hand
-   is a control that ends up bound to nothing.
-
-   THE SETTER IS HANDED AN ARRAY, not a string. The shell's one `data-fld`
-   handler reads `el.value` for every other field, and on a multiple select
-   `value` is only the FIRST selected option — so it asks `el.multiple` and
-   passes every selected value instead. One question, in the one place every
-   bound field already goes through.
-
-   NO BLANK OPTION. On a single select the blank is how you say "nobody"; on a
-   multiple one you say it by ticking nothing, and an em-dash sitting in the
-   list as a thing you could tick is a second way to say it. */
-function selectManyOr(page, values, opts, cls, setter){
-  var list = (values || []).map(function(v){ return String(v); });
-  if (!EDIT_PAGE[page] || !setter)
-    return '<span class="' + (cls || '') + '">' + esc(list.join(", ")) + '</span>';
-  var i = FIELDS.push(setter) - 1;
-  var has = {};
-  list.forEach(function(v){ has[v] = 1; });
-  return '<select class="fld ' + (cls || '') + '" multiple data-fld="' + i + '">' +
-    optionsHtml((opts || []).filter(function(o){ return o !== ""; }),
-      function(v){ return has[v] === 1; }) + '</select>';
-}
-
-/* ══ WHO OR WHAT OWNS A LINE (§130.1) ═══════════════════════════════════
-   Islam: "for the owners in the plans, projects, tactics, milestones, let it
-   be a searchable list from the registry", and asked whether that list is
-   people or departments: "people or department".
-
-   IT IS NOT ONLY TIDINESS, AND THIS IS THE PART WORTH KEEPING. A tactic's
-   owner is matched against the register BY NAME — `SMPRules.namedOn()` reads
-   `row.owner` beside the collaborators and that is what makes somebody a
-   Contributor who may report that line (§55, §42). Measured on the demo before
-   any of this was built: 38 different owner names across the plan, 14 of them
-   naming nobody the platform can recognise, and **32 of the 78 tactics** owned
-   by a short spelling — "Karim", "Hossam" — that matches no one. Every one of
-   those is a person who owns a line and cannot enter its figure. A typed box
-   could not have told them apart from a real name; a list cannot produce one.
-
-   THE VOCABULARY IS `placeLabel()`'s, NEVER A SECOND ONE (§53.5). It is the
-   register's own word for a place — the navigation's name, with "(function)"
-   kept only where a unit and a function share one (§93.12). A department that
-   the platform has no page for is a real answer too, so an **Official BU that
-   points at nothing** is offered under its own name (§54: Risk employs people
-   and carries no strategy); a mapped one is not, because the place it points
-   at is already in the list under the navigation's word for it.
-
-   WHAT IS STORED IS STILL THE NAME, not a person key. `namedOn()` matches on
-   the name, the plan workbook carries the name, the deck prints the name and
-   the archive holds the name — a key would be a migration through all four for
-   a field nobody reads as an identifier (§87 is about not TRUSTING a name to
-   say who somebody is; this is a label that now happens to match one).
-
-   A VALUE ALREADY ON THE PLAN IS KEPT, in a group that says what it is (§96.2:
-   a stored value outside the list is shown as it is, never silently displayed
-   as something else). So a plan uploaded before today opens reading exactly
-   what it read yesterday, and only what somebody deliberately changes moves.
-   ═══════════════════════════════════════════════════════════════════════ */
-function ownerAdder(){
-  var seen = {}, out = [];
-  return { list: out, add: function(n){
-    n = String(n == null ? "" : n).trim();
-    if (!n) return;
-    var k = n.toLowerCase();
-    if (seen[k]) return;
-    seen[k] = 1; out.push(n);
-  }, has: function(n){ return !!seen[String(n == null ? "" : n).trim().toLowerCase()]; } };
-}
-/* ── THE REGISTER'S NAME, NOT THE FULL ONE (§130.7) ──────────────────
-   Islam, looking at the list on his own tenant: *"for the drop down of names
-   go for the list of names in the registry not the full name."* The register
-   carries two facts about what somebody is called (§93.8) — **Name**, what the
-   office says out loud, and **Full Name**, what the employee file holds, which
-   on his register runs to *Abd El Moniem Mohamed Abd El Moniem Mahmoud*. A
-   dropdown of fifty of those is a list nobody can scan.
-
-   IT COULD NOT BE SEEN IN THE DEMO. Every one of the 33 people here has a full
-   name of two or three words, and not one has a typed short name — so
-   `knownName()` returns exactly `p.name` for all of them and the first build
-   looked correct on the only data it was tested against. Measured, not
-   guessed: the fault lives on a tenant this file cannot open.
-
-   THROUGH `displayNames()`, ALWAYS. That map is what lengthens the guess for a
-   pair whose first two names match (§81.1), so the list can never show two
-   people as one entry — which for a picker is not cosmetic, since the second
-   of them would be silently dropped by the dedupe below.
-
-   AND WHAT IS SHOWN IS WHAT IS STORED, so the plan reads the same word the
-   register does (§53.5). `namedOn()` learned this name in the same edit — the
-   whole point of the picker is that the person it names may report the line,
-   and a label the rules cannot recognise would have put that back. */
-/* ── AND WHERE THEY WORK, BESIDE THE NAME (§130.9) ───────────────────
-   Islam: *"for the names in the lists, you can make it the name - the unit or
-   function so people don't get confused."* Two people called Ahmed on a
-   register of a hundred are told apart by their name here and by nothing else,
-   and the register already knows the answer.
-
-   THE PLACE IS A HINT, NEVER PART OF THE ANSWER. It is drawn in the popup and
-   nowhere else: the cell shows the name, the plan STORES the name, the
-   workbook and the deck print the name, and `namedOn()` matches the name. A
-   label of "Ramy Behairy — Mobile" written into a tactic would name nobody the
-   platform can resolve, which is the fault §130.1 exists to fix (§130.7 makes
-   the same argument about the short name from the other side).
-
-   `personAt()` IS THE ONE PAIR THAT ANSWERS THIS (§54), and `placeLabel()` the
-   one vocabulary (§53.5). Somebody the register has not placed gets no hint
-   rather than a guess or the word "group" — an absence is honest and a wrong
-   place is worse than none (§15.1). */
-function ownerPeople(){
-  var a = ownerAdder(), dn = displayNames(), out = [];
-  PEOPLE.forEach(function(p){
-    if (!personActive(p)) return;
-    var n = knownName(p, dn);
-    if (a.has(n)) return;
-    a.add(n);
-    var at = personAt(p);
-    out.push({ name: n, where: at && at !== "group" ? placeLabel(at) : "" });
-  });
-  return out.sort(function(x, y){ return x.name.localeCompare(y.name); });
-}
-/* NOT sorted: the navigation's order is the order somebody learned these in,
-   and it is short enough to read. Retired ones are left out — a retired place
-   is not somewhere work can be given to (§49.3) — and one already written on a
-   plan is kept by the caller below, so nothing is lost by leaving it out here. */
-function ownerDepts(){
-  var a = ownerAdder();
-  activeKeys().forEach(function(k){ a.add(placeLabel(k)); });
-  activeFunctionKeys().forEach(function(k){ a.add(placeLabel("fn:" + k)); });
-  activeCompanyKeys().forEach(function(k){ a.add(placeLabel("co:" + k)); });
-  mainbus().forEach(function(b){ if (!mainbuAts(b).length) a.add(b.name); });
-  return a.list;
-}
-/* `current` is a string or a list of them — whatever the field already holds,
-   so the caller never has to reason about which of its values are known. */
-function ownerChoices(current, blank){
-  var people = ownerPeople(), depts = ownerDepts();
-  var known = ownerAdder();
-  people.forEach(function(x){ known.add(x.name); });
-  depts.forEach(known.add);
-  var kept = ownerAdder();
-  (Array.isArray(current) ? current : [current]).forEach(function(v){
-    if (!known.has(v)) kept.add(v);
-  });
-  var out = blank ? [{ v:"", label:"\u2014" }] : [];
-  if (kept.list.length) out.push({ group:"Already on this plan", items:kept.list });
-  if (people.length) out.push({ group:"People", items: people.map(function(x){
-    return { v:x.name, label:x.name, hint:x.where }; }) });
-  if (depts.length)     out.push({ group:"Departments", items:depts });
-  return out;
-}
-/* The two controls every owner and every collaborator list in the plan is
-   drawn by. One place, so the five fields cannot be given five lists. */
-function ownerSel(page, value, setter){
-  return selectOr(page, value == null ? "" : value,
-    ownerChoices(value, true), "ownersel", setter);
-}
-function collabSel(page, list, setter){
-  return selectManyOr(page, list, ownerChoices(list, false), "collabsel", setter);
+    opts.map(function(o){
+      return '<option' + (String(value) === String(o) ? " selected" : "") + '>' +
+        esc(o) + '</option>';
+    }).join("") + '</select>';
 }
 
 /* Two readings of the same targets. Columns compares them down a line; chips
@@ -2249,23 +2044,12 @@ function koBand(objectives, page, acKey, owner, isGroup){
 
 function renderUnitFoundation(u){
   var upg = authoring("foundation", "u_found") ? "foundation" : null;
-  /* THE FIRST LINE CAN BE WRITTEN (§129's audit). The pen edited a clause's
-     TEXT and never its lead, and an empty list rendered nothing to edit and
-     no way to add — so a from-scratch unit could not say who it is at all
-     (§61's trap on the oldest surface in the product). The lead opens with
-     the pen because the leads are the unit's own words, not a fixed form. */
   return '<div class="fgrid"><div class="card"><h2 class="sec first">Who we are</h2>' +
       '<dl style="margin:0">' +
-      u.clauses.map(function(c, ci){
-        return '<div class="clause"><dt>' +
-          (upg ? inputOr(upg, c[0], "", function(v){ c[0] = v; }) : esc(c[0])) + '</dt><dd>' +
-          fieldOr(upg, c[1], "", function(v){ c[1] = v; }) +
-          (upg ? '<button class="xbtn" data-clauserm="' + esc(u.ukey) + '|' + ci +
-            '" title="Remove this line" aria-label="Remove this line">&times;</button>' : '') +
-          '</dd></div>';
-      }).join("") + '</dl>' +
-      (upg ? '<div class="addrow"><button class="editbtn" data-clauseadd="' + esc(u.ukey) +
-        '">+ Add a line</button></div>' : '') + '</div>' +
+      u.clauses.map(function(c){
+        return '<div class="clause"><dt>' + esc(c[0]) + '</dt><dd>' +
+          fieldOr(upg, c[1], "", function(v){ c[1] = v; }) + '</dd></div>';
+      }).join("") + '</dl></div>' +
       aspirationCard(L("aspiration","bu"), u.aspiration, u.endInMind, u.keyObjectives, "foundation",
         function(v){ u.aspiration = v; }, function(v){ u.endInMind = v; }, "u_found",
         false, u) +
@@ -2277,24 +2061,15 @@ function renderUnitFoundation(u){
    Static, like the foundation. Context, not a score — nothing here feeds a
    number. */
 function renderUnitAnalysis(u){
-  /* THE FIRST LINE CAN BE WRITTEN (§129's audit). The pen edited what a file
-     had put here and an empty quadrant offered nothing at all — so a SWOT
-     could only ever ARRIVE, never start. Add per quadrant, remove per line,
-     both re-asked on the click (§48.2). */
   var box = function(cls, key, title){
     var list = u.swot[key] || [];
-    var ed = authoring("analysis", "u_anal");
     return '<section class="' + cls + '"><h3>' + title + '</h3><ol class="swotlist">' +
       list.map(function(x, i){
         return '<li><span class="swot-n">' + (i + 1) + '</span>' +
-          (ed
-            ? fieldOr("analysis", x, "", function(v){ list[i] = v; }) +
-              '<button class="xbtn" data-swrm="' + esc(u.ukey) + '|' + key + '|' + i +
-              '" title="Remove this line" aria-label="Remove this line">&times;</button>'
+          (authoring("analysis", "u_anal")
+            ? fieldOr("analysis", x, "", function(v){ list[i] = v; })
             : '<span>' + esc(x) + '</span>') + '</li>';
-      }).join("") + '</ol>' +
-      (ed ? '<div class="addrow"><button class="editbtn" data-swadd="' + esc(u.ukey) + '|' + key +
-        '">+ Add</button></div>' : '') + '</section>';
+      }).join("") + '</ol></section>';
   };
   return '<div class="swot hoverpen">' + penBtn("analysis", "u_anal") +
     box("s","s","Strengths") + box("w","w","Weaknesses") +
@@ -2562,7 +2337,7 @@ function renderReport(u){
     var rail = '<div class="rail">' + railHead(L("pillar","bu"), u.items.length) + railRows +
       '<div class="rfoot">Tally is entries given of asked</div></div>';
     var pane = reportPillarPane(sel, u.items.indexOf(sel));
-    pillars = railWorthIt(u.items)
+    pillars = u.items.length >= 2
       ? '<div class="split">' + rail + '<div class="pane">' + pane + '</div></div>'
       : '<div class="pane">' + pane + '</div>';
   }
@@ -2691,34 +2466,9 @@ function railPick(c){
   for (var i = 0; i < list.length; i++) if (list[i].id === want) return list[i];
   return list[0];
 }
-/* ── ONE ITEM STILL GETS THE RAIL (§130.2, reversing the line below) ────
-   It used to read "below two items there are no siblings to move between, so
-   the rail is a column of wasted width" — true about the width, and it made
-   the platform lay the same page out two different ways. Islam, of a function
-   whose capability holds one project: "keep the rail there to keep the
-   standard view even with 1 capability either in the strategy or the
-   performance or reporting."
-
-   MARKETING SHOWED BOTH ON ONE SCREEN. Brand Positioning has two projects and
-   got a rail; Product Mindset has one and did not — so two capabilities
-   stacked on the same page started at two different left edges, and the second
-   one read as a different kind of thing.
-
-   THE PEN ALREADY DISAGREED WITH THE READING VIEW. renderFnProjects() has
-   drawn the rail from one project since §69.13, because *Add a project* lives
-   in it — so the editing view was already the "standard view" and only the
-   reading view was not.
-
-   THE ONE ANSWER, ASKED IN FOUR PLACES. A capability's projects, and a unit's
-   pillars on Plan, Performance and Reporting: three of those spelled it
-   `u.items.length >= 2` inline, which is exactly how a unit and a function
-   come to be fine DIFFERENTLY (§53.5). Islam, asked whether this was functions
-   only: "units and functions."
-
-   STILL FALSE FOR AN EMPTY LIST, which is what keeps the `.pane`-only branch
-   at each call site meaningful: nothing to list is not the same question as
-   one thing to list. */
-function railWorthIt(list){ return (list || []).length >= 1; }
+/* Below two items there are no siblings to move between, so the rail is a
+   column of wasted width. The pane simply fills it. */
+function railWorthIt(list){ return (list || []).length >= 2; }
 
 /* `codeOf` is optional and last, so every existing caller is untouched. The
    unit rail has shown `MB01 Digital & Data-Driven Operations` since §46.3; a
@@ -3142,17 +2892,10 @@ function projPerformanceBody(p, fk){
    is the one that gets left behind (§59). */
 function fnNothingBehind(fk){
   var f = FUNCTIONS[fk];
-  /* And the person who could give it one is offered the act, not only the
-     directions (\u00a7118's audit, \u00a761's rule): the button re-asks the shared
-     rule on the click, because this note has no pen to gate it. */
   return '<div class="note">' + esc(f ? f.name : "This function") +
     ' improves no capability yet, so there is nothing here to plan or report. ' +
-    (mayAuthor("k_found", "fn:" + fk)
-      ? '<button class="linkbu" data-fncapadd="' + esc(fk) + '">Add its first capability</button> &mdash; ' +
-        'or allocate one on <b>Setup \u2192 Capabilities</b>, or set this function to plan in ' +
-        L("pillar", "bu").toLowerCase() + ' on <b>Setup \u2192 Functions</b>.'
-      : 'Allocate one on <b>Setup \u2192 Capabilities</b>, or set this function to plan ' +
-        'in ' + L("pillar", "bu").toLowerCase() + ' on <b>Setup \u2192 Functions</b>.') + '</div>';
+    'Allocate one on <b>Setup \u2192 Capabilities</b>, or set this function to plan ' +
+    'in ' + L("pillar", "bu").toLowerCase() + ' on <b>Setup \u2192 Functions</b>.</div>';
 }
 
 function renderFnPerformance(fnKey){
@@ -3279,11 +3022,7 @@ function projFrontMatter(p, ed){
   }
   return '<div class="pfront">' +
     '<div class="pfcol">' +
-      /* THE OWNER IS A PICK, NOT A TYPED LINE (§130.1). Read mode is
-         untouched — a name, or "Missing" where there is none. */
-      row("l", "Owner", ed
-        ? ownerSel("plan", p.owner, function(v){ p.owner = v; })
-        : (p.owner ? esc(p.owner) : '<span class="missing">Missing</span>')) +
+      row("l", "Owner", f(p.owner, function(v){ p.owner = v; })) +
       row("l", "Start", f(p.start, function(v){ p.start = v; })) +
       row("l", "End",   f(p.end,   function(v){ p.end   = v; })) +
       repRow +
@@ -3347,7 +3086,7 @@ function projPlanBody(p, fk){
         xb("milestones", m.id) + '</td>' +
       '<td>' + (ed ? inputOr("plan", m.covers || "", "", function(v){ m.covers = v; })
                    : esc(m.covers || "")) + '</td>' +
-      '<td class="cc">' + (ed ? ownerSel("plan", m.owner, function(v){ m.owner = v; })
+      '<td class="cc">' + (ed ? inputOr("plan", m.owner || "", "", function(v){ m.owner = v; })
                               : esc(m.owner || "\u2014")) + '</td>' +
       '<td class="cc">' + f(m.finish, function(v){ m.finish = v; }) + '</td></tr>';
   }).join("") +
@@ -3555,12 +3294,8 @@ function capReportBody(c){
      §89; a function's had not, so an SMO team member could report past a
      locked cycle on one side of the navigation switch and not the other
      (§53.5). The server was on `super` for both and refused either way. */
-  /* ONE gate per surface since §130: canReportFn() is the three gates that
-     were inline here; the capability's OWN rows ask the whole-function
-     question, because a project owner speaks for their project and a
-     capability's key objectives belong to no project. Each project asks for
-     ITSELF, below, through the same pair the server enforces. */
-  var may = canReportFnWhole(c.fn);
+  var may = REVIEW.state === "open" && !(CYCLE.locked && !inOffice()) &&
+            grant("k_report") === "edit";
   var kRows = c.keyObjectives.map(function(m, i){
     return '<tr><td class="idx">' + (i+1) + '</td><td>' + esc(m.name) + '</td>' +
       '<td class="cc">' + esc(m.dir) + '</td>' +
@@ -3584,8 +3319,7 @@ function capReportBody(c){
     null, 'Tally is entries given of asked',
     function(p){ return projCode(c.fn, p); });
   return koBlock +
-    splitOrPane(c.projects, sel, rail,
-      projReportBody(sel, canReportFnProject(c.fn, sel), c.fn));
+    splitOrPane(c.projects, sel, rail, projReportBody(sel, may, c.fn));
 }
 
 function renderFnReport(fnKey){
@@ -3835,26 +3569,19 @@ function unitPlanBody(it, u, railed){
       '<span class="idx-n">' + (i+1) + '</span></td>' +
       '<td>' + (ed ? inputOr("plan", t.name, "", function(v){ t.name = v; }) : esc(t.name)) +
         xb("tactics", t.id) + '</td>' +
-      '<td>' + (ed ? ownerSel("plan", t.owner, function(v){ t.owner = v; }) : esc(t.owner)) + '</td>' +
+      '<td>' + (ed ? inputOr("plan", t.owner || "", "", function(v){ t.owner = v; }) : esc(t.owner)) + '</td>' +
       /* THE ONE PLACE COLLABORATORS CAN BE TYPED (§50.2). Before this they
          could only arrive with the upload, so a name that changed after the
          plan landed meant re-uploading the unit to fix it. It sits under the
          SAME pen that corrects the rest of the plan, and behind the same gate
          (§31): who is named on a tactic decides who may report it, so it is
          not a field the people being measured hold. */
-      /* TICKED FROM THE SAME LIST THE OWNER IS PICKED FROM (§130.1). Islam:
-         "the collaborators should be a searchable drop down with check marks
-         for the list to select multiple people or departments." Emptied, the
-         key is DELETED rather than left as an empty array (§50.6): a tactic
-         nobody supports and one never asked must be byte-identical, or every
-         save carries a change nobody made. */
       '<td class="collabs">' + (ed
-        ? collabSel("plan", collabNames(t), function(list){
-            if (list.length) t.collaborators = list; else delete t.collaborators; })
+        ? inputOr("plan", collabText(t), "", function(v){ t.collaborators = collabParse(v); })
         : collabCell(t)) + '</td>' +
       '<td>' + (ed ? qsEdit(t) : qs(t)) + '</td></tr>';
   }).join("");
-  var meta = pillarMeta(it, ed);
+  var meta = pillarMeta(it);
   var head = showHead
     ? '<div class="ptitle hoverpen"><div><h3>' + code + '&nbsp; ' +
         (ed ? inputOr("plan", it.name, "", function(v){ it.name = v; }) : esc(it.name)) + '</h3>' +
@@ -3863,29 +3590,6 @@ function unitPlanBody(it, u, railed){
         (mayEditPlan() ? penBtn("plan", "u_plan") : '') + '</div>'
     : pillarBand(code, it.name) + paneActs("plan", "u_plan");
   return head +
-    /* ── THE PILLAR'S OWNER, CORRECTABLE AT LAST (§130.1) ────────────────
-       Islam, asked whether the pillar's owner should join the other four:
-       "the pillar as well yes". It has been READ-ONLY EVERYWHERE since the
-       pillar model existed — shown in the rail's small line and in `.pmeta`,
-       and editable on no screen at all, so an owner who moved meant
-       re-uploading the unit's whole plan to fix a name (§53.3's complaint,
-       one field further along).
-
-       EDIT MODE ONLY, and that is deliberate rather than lazy. In read mode
-       the name is already on the page twice — the rail row says it and the
-       meta line says it — and a third telling is spending the page's budget
-       to repeat itself (§41). What was missing was never a place to READ it.
-
-       THE PROJECT'S OWN FRONT MATTER, one column wide (§109). Not a new
-       component: a project's Owner row and a pillar's are the same fact in
-       the same place on the same kind of pane, and drawing them two ways is
-       how a unit and a function come to be fine differently (§53.5). */
-    (ed
-      ? '<div class="pfront one"><div class="pfcol"><div class="pfrow"><em>Owner</em>' +
-          '<div class="pfval">' +
-          ownerSel("plan", it.owner, function(v){ it.owner = v; }) +
-        '</div></div></div></div>'
-      : '') +
     /* NO NOTE UNDER THE PILLAR (Islam, 2026-08-22: "there is a statement under
        the title of the direction in the mobile, generally standardize the view
        there is no notes under the pillars"). Mobile's first pillar carried
@@ -3917,18 +3621,9 @@ function renderUnitPlan(u){
      on a supporting function's own page — and only ever appeared there,
      because before §61 a function with no plan was missing from the navigation
      and there was no way to reach the sentence. */
-  /* AN EMPTY PLAN IS WHERE THE FIRST PILLAR GOES (\u00a7118's audit, \u00a761's shape
-     from the capability side): the note used to point at Import and offer
-     nothing, and the pen had no pane to sit on \u2014 so the only way to start a
-     plan here was to upload one. The button asks mayEditPlan() itself
-     because there is no pen on an empty page to gate it (\u00a761's trap: the
-     control's anchor is the thing that does not exist yet). */
   if (!sel) return '<div class="note">' + esc(u.name) + ' has no ' +
     L("pillar", "bu").toLowerCase() + ' yet, so there is no plan to show. ' +
-    (typeof mayEditPlan === "function" && mayEditPlan()
-      ? '<button class="linkbu" data-rowadd="pillar|' + esc(u.ukey) +
-        '">Add the first one</button> &mdash; or upload a plan on <b>Setup \u2192 Import &amp; plans</b>.'
-      : 'A plan arrives as a file: <b>Setup \u2192 Import</b>, the pillars template.') + '</div>';
+    'A plan arrives as a file: <b>Setup \u2192 Import</b>, the pillars template.</div>';
   /* Key objectives are NOT repeated here. They are authored on Foundation and
      read on Performance \u2014 one place to author, one place to read. Showing them
      again above the rail was duplication, and a duplicated table is a table
@@ -3973,7 +3668,7 @@ function renderUnitPlan(u){
       ? '<p class="sec-hint">' + u.items.length + ' ' + L("pillar","bu").toLowerCase() +
         ' &middot; drag by the handle to reorder, here and inside each ' +
         L("pillar","bu").toLowerCase().replace(/s$/, "") + '</p>' : '') +
-    (railWorthIt(u.items)
+    (u.items.length >= 2
       ? '<div class="split">' + unitRailFor(u, sel) + '<div class="pane">' + unitPlanBody(sel, u, true) + '</div></div>'
       : '<div class="pane">' + unitPlanBody(sel, u, false) + '</div>');
 }
@@ -4001,17 +3696,9 @@ function renderFnFoundation(fnKey){
       ' \u2014 the aspiration, the SWOT and the key objectives are set there, and ' +
       'what is planned here is the work under them. Open <b>Plan</b> to see it.</div>';
   }
-  var ed = authoring("capfoundation", "k_found");
   return editBar("capfoundation", "k_found") + caps.map(function(c){
     var f = functionOf(c.fn);
-    /* A CAPABILITY'S OBJECTIVES CAN FINALLY BE AUTHORED HERE (§129's audit).
-       They could arrive in a projects file and be READ on this page, and no
-       surface in the product could write the first one — the same
-       import-only trap as the SWOT and the clauses. Behind the page's own
-       pen; a row minted empty carries the same shape the seed's rows have. */
-    var koBlock = ed
-      ? capKoEdit(c)
-      : c.keyObjectives.length
+    var koBlock = c.keyObjectives.length
       ? '<div class="ohead"><span>Objective</span><span>This year</span><span>Weight</span></div>' +
         c.keyObjectives.map(function(m){
           return '<div class="orow"><span class="on">' + esc(m.name) + '</span>' +
@@ -4033,37 +3720,7 @@ function renderFnFoundation(fnKey){
         '<span class="pill horizon">Horizon &middot; ' + horizonLabel() + '</span></div>' +
         koBlock + '</div>' +
     '</div></div>';
-  }).join("") +
-  /* A second capability for the same function, added where the first is
-     described. addCapability() is the ONE minter (§51.11) — the Temple's
-     add and this one cannot drift. */
-  (ed ? '<div class="addrow"><button class="editbtn" data-fncapadd="' + esc(fk) +
-    '">+ Add a capability</button></div>' : '');
-}
-
-/* The capability objectives editor — koEdit's shape with the WEIGHT column a
-   capability's rows actually carry, addressed by capId + index the way the
-   Temple's tables are (no ids: the seed's rows never had them, and §96.4's
-   rule about mixed lists says do not mint some now). */
-function capKoEdit(c){
-  var pg = "capfoundation";
-  return '<div class="scroll"><table><thead><tr><th>Objective</th><th class="cc">Dir.</th>' +
-    '<th class="cc">This year</th><th class="cc">Compile</th><th class="cc">Weight %</th><th></th></tr></thead><tbody>' +
-    c.keyObjectives.map(function(m, i){
-      return '<tr><td>' + inputOr(pg, m.name, "", function(v){ m.name = v; }) + '</td>' +
-        '<td class="cc">' + selectOr(pg, m.dir || "≥", ["≥", "≤"], "",
-          function(v){ m.dir = v; }) + '</td>' +
-        '<td class="cc">' + inputOr(pg, m.target || "", "mono",
-          function(v){ m.target = v; }) + '</td>' +
-        '<td class="cc">' + selectOr(pg, m.compile || "Latest", ["Sum", "Latest", "Average"], "",
-          function(v){ m.compile = v; }) + '</td>' +
-        '<td class="cc">' + inputOr(pg, m.weight == null ? "" : String(m.weight), "mono",
-          function(v){ m.weight = (v === "" || !isFinite(+v)) ? null : +v; }) + '</td>' +
-        '<td class="cc"><button class="rmbtn" data-capkorm="' + esc(c.id) + '|' + i +
-          '">Remove</button></td></tr>';
-    }).join("") + '</tbody></table></div>' +
-    '<div class="addrow"><button class="editbtn" data-capkoadd="' + esc(c.id) +
-      '">+ Add an objective</button></div>';
+  }).join("");
 }
 
 
@@ -4103,7 +3760,7 @@ function unitPerfRail(u){
     '<div class="sortable" data-item=".ritem" data-kind="pillars" data-u="' + u.ukey + '">' + rows + '</div>' +
     '<div class="rfoot">' + pct(unitPillars(u)) + ' across ' + u.items.length + ' &middot; execution ' +
       pct(unitRatio(u)) + '</div></div>';
-  return railWorthIt(u.items)
+  return u.items.length >= 2
     ? '<div class="split">' + rail + '<div class="pane">' + unitPerfPane(sel, u, true) + '</div></div>'
     : '<div class="pane">' + unitPerfPane(sel, u, false) + '</div>';
 }

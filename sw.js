@@ -132,7 +132,17 @@
    the §128 rule followed rather than a number nobody can tell apart.
    Confirmed against origin/main serving "smp-shell-v3.47-planbuilder";
    confirm once more immediately before the push to main (§94.16). */
-const SHELL = "smp-shell-v3.47-qmarks";
+/* v3.48-owners — §130: owners and collaborators picked from the register, the
+   rail kept for a single item, and the pinned title's corners. A version bump
+   as well as a content change: main had taken §129 and v3.47 for the plan
+   builder while this session worked, so both were renumbered on the way in
+   (the fifth time this repository has had to, and the suffix rule is why the
+   collision is visible rather than silent). The platform filename, the gate's
+   link, vercel.json's rewrite and PLATFORM_FILE are untouched — §91's trigger
+   is the built file's BYTES, which this is.
+   Confirmed against origin/main serving "smp-shell-v3.47-qmarks"; confirm
+   once more immediately before the push to main (§94.16). */
+const SHELL = "smp-shell-v3.49-projcust";
 const ASSETS = [
   "/",
   "/index.html",

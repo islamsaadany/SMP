@@ -16980,6 +16980,399 @@ project-tables, tour, page-width, setup-overview) are green.
 authoring surface anywhere (the Overview says its foundation is the
 parent's), so the builder's pillars-function route carries Plan and Review
 only — giving them a surface is a decision, not a tidy-up.
+---
+
+## 130 · Owners come from the register, one item keeps its rail, and the pinned title's corners (v3.48)
+
+Three notes from using the product, and the first of them turned out not to be
+about tidiness at all.
+
+### 130.1 An owner is picked, not typed — and 32 tactics proved why
+
+Islam: *"for the owners in the plans, projects, tactics, milestones, let it be
+a searchable list from the registry"*, and, asked whether that list is people
+or departments: *"people or department"*, *"the pillar as well yes"*, and
+*"the collaborators should be a searchable drop down with check marks for the
+list to select multiple people or departments."*
+
+**IT DECIDES WHO MAY REPORT A LINE, AND THAT IS THE FINDING.** A tactic's owner
+is matched against the register BY NAME — `SMPRules.namedOn()` reads
+`row.owner` beside the collaborators, and that is what makes somebody a
+Contributor of the unit who may enter that line's figure (§55, §42). Measured
+on the demo before a line was written: **38 different owner names across the
+plan, 14 of them naming nobody the platform can recognise, and 32 of the 78
+tactics** owned by a short spelling — *"Karim"*, *"Hossam"*, *"Nour"* — that
+matches no one. Every one of those is a person who owns a line and cannot
+report it, and nothing on any screen says so. A typed box cannot tell a real
+name from a nickname; a list cannot produce one.
+
+**FIVE FIELDS, ONE LIST.** A project's owner, a milestone's owner, a tactic's
+owner, a tactic's collaborators, and — for the first time in the product's
+life — **a pillar's owner**, which has been shown in the rail and in the meta
+line since the pillar model existed and was editable on no screen at all. An
+owner who moved meant re-uploading the unit's whole plan to correct a name.
+
+**THE VOCABULARY IS `placeLabel()`'s, NEVER A SECOND ONE (§53.5).** It is the
+register's own word for a place — the navigation's name, with *(function)*
+kept only where a unit and a function share one (§93.12), which in this tenant
+is Care. A department the platform has no page for is a real answer too, so an
+**Official BU that points at nothing** is offered under its own name (§54:
+Risk employs people and carries no strategy); a mapped one is not, because the
+place it points at is already there under the navigation's word for it.
+
+**WHAT IS STORED IS STILL THE NAME, not a person key.** `namedOn()` matches on
+the name, the plan workbook carries the name, the deck prints the name and the
+archive holds the name — a key would be a migration through all four for a
+field nobody reads as an identifier. §87 is about not TRUSTING a name to say
+who somebody is; this is a label that now happens to match one.
+
+**A VALUE ALREADY ON THE PLAN IS KEPT, in a group that says what it is**
+(§96.2). *Already on this plan* sits above *People* and *Departments*, so a
+plan uploaded before today opens reading exactly what it read yesterday and
+only what somebody deliberately changes moves. Nothing is migrated and nothing
+is rewritten on load — a reader that corrected what it read would put a
+phantom change into every save (§42, §50.6).
+
+**THE MULTIPLE SELECT IS THE SAME CONTROL, NOT A SECOND ONE.** `searchsel.js`
+already owns the popup, the filter, the placement and the flip-above; a
+ticking list is that control with three differences, and each is a decision:
+
+* **Ticking is not answering.** The single-select path closes the popup before
+  it fires `change`, because picking one option answers the question and
+  because `change` repaints the panel the popup stands in (§30.1). A list you
+  are ticking is not answered until you stop, so the popup **stays open** and
+  every tick commits on its own. What makes that safe is the handler: every
+  field this control is used on goes through the shell's one `data-fld`
+  listener, which writes and saves and **does not repaint** (§71.2) — written
+  down in the file, because the next person to wire a multiple select to a
+  repainting handler will not know.
+* **Committed per tick rather than on close.** Holding the change until the
+  popup shuts would mean firing it from `close()`, and `close()` is the first
+  thing `wire()` does at the end of every `paint()` — by which time `FIELDS`
+  has been rebuilt and that element's `data-fld` index points at somebody
+  else's setter (§96's registry, read one paint too late).
+* **The tick is drawn, not written.** A check mark is U+2713 and the
+  platform's faces are latin subsets — a glyph that is MAPPED and not DRAWN
+  ships as a blank box (§52, §120.2). Two pseudo-elements and a rotated border
+  owe nothing to a font.
+
+**AND A 1px CLIPPED ELEMENT SCROLLING IS NEVER THE PAGE MOVING.** Found by
+ticking, not by reading: setting `selected` on a `<select multiple>` makes the
+browser scroll the native list box to the option, and it **fires a real
+`scroll` event** doing it — from an element that is 1px square, clipped and
+invisible. With capture on, that reached the popup's own reposition handler as
+though somebody had scrolled the window, so every tick re-placed the popup and
+a tick on a control near the fold CLOSED it. The single-select path has never
+set `selected` on anything, so nothing had ever fired it in three versions of
+this component.
+
+**THE SETTER IS HANDED AN ARRAY.** On a multiple select `el.value` is only the
+FIRST selected option, so a collaborators cell wired through the plain path
+would have saved one name and dropped the rest, silently — which is the shape
+§96 exists to stop. The question is asked of the ELEMENT (`el.multiple`), in
+the one place every bound field already goes through.
+
+**EMPTIED, THE KEY IS DELETED** rather than left as an empty array (§50.6): a
+tactic nobody supports and one never asked must be byte-identical, or every
+save carries a change nobody made.
+
+**THE PILLAR'S ROW IS EDIT MODE ONLY**, and that is a decision rather than a
+shortcut. In read mode the owner is already on the page twice — the rail row
+says it and the meta line says it — and a third telling spends the page's
+budget to repeat itself (§41). What was missing was never a place to READ it.
+It reuses the project's own front matter one column wide (§109), because a
+project's Owner row and a pillar's are the same fact in the same place on the
+same kind of pane, and drawing them two ways is how a unit and a function come
+to be fine differently (§53.5). **The meta line drops the owner while the pen
+is on**, or the product says it three inches above the control that changes it.
+
+**`optionHtml`'s PLAIN STRING IS BYTE-FOR-BYTE WHAT `selectOr` ALWAYS
+EMITTED.** That matters: the direction and compile-rule pickers (§114) pass a
+bare `""` in their list to mean *not answered*, and it still renders as an
+empty option. A value/label pair would have quietly turned two dropdowns
+nobody asked about into em-dashes.
+
+### 130.2 One item still gets the rail
+
+Islam, of a function whose capability holds one project: *"in case of the
+function has 1 capability keep the rail there to keep the standard view even
+with 1 capability either in the strategy or the performance or reporting"*,
+and, asked whether that was functions only: *"units and functions."*
+
+**IT WAS NEVER ABOUT CAPABILITIES.** `railWorthIt()` read *below two items
+there are no siblings to move between, so the rail is a column of wasted
+width* — true about the width, and it made the platform lay the same page out
+two different ways. Marketing shows both on one screen: **Brand Positioning**
+has two projects and got a rail, **Product Mindset** has one and did not, so
+two capabilities stacked on the same page started at two different left edges
+and the second read as a different kind of thing.
+
+**THE PEN ALREADY DISAGREED WITH THE READING VIEW.** `renderFnProjects()` has
+drawn the rail from one project since §69.13, because *Add a project* lives in
+it — so the editing view was already the standard view and only the reading
+view was not.
+
+**THE ONE ANSWER, ASKED IN FOUR PLACES.** A capability's projects, and a
+unit's pillars on Plan, Performance and Reporting: three of those spelled it
+`u.items.length >= 2` inline, which is exactly how a unit and a function come
+to be fine DIFFERENTLY (§53.5).
+
+**STILL FALSE FOR AN EMPTY LIST**, which is what keeps the pane-only branch at
+each call site meaningful: nothing to list is not the same question as one
+thing to list, and an empty subject must still say what would fill it (§61).
+
+**THE COST IS STATED, NOT GLOSSED:** about 212px of width goes to a list with
+nothing to move between. Standing still beats saving the width.
+
+### 130.3 The pinned title's corners
+
+Islam: *"a very small visual glitch that on scrolling up in the pillars or
+project with the sticky title. the title has round corners so the scrolled up
+appears in the right and left top corners."*
+
+The diagnosis is his and it is right. §53.7 painted the strip ABOVE the pinned
+band with the page's ground and **stopped dead at its top edge**, where the
+two corner notches begin — so the band's grey does not reach into a rounded
+corner and what shows there is the white card and whatever row is sliding
+past. Measured: **13px² of the card's own surface, per corner.**
+
+**IT CANNOT BE "SQUARE IT WHILE PINNED".** CSS cannot ask whether a sticky
+element is pinned — §53.7's own rule, and the reason the strip above paints in
+both positions. So the corners take **the same ground from the same token**,
+and they paint at rest too.
+
+**THE COST IS MEASURED AGAINST THE ALTERNATIVE, not asserted.** Squaring the
+band's top corners also fixes it: 26px² disturbed at rest against 13px², and
+the square corner then pokes about 2px OUTSIDE the card it sits in. The fill
+is the cheaper of the two and the only one that leaves a pinned header looking
+deliberate. At rest it covers about 1.4px of the pane's own corner border arc,
+which is visible at 10× and is not at reading size. Islam: *"fill don't square
+the corners."*
+
+**ON THE `::after`, NOT BEHIND THE BAND.** A pseudo cannot be put behind its
+own parent's background once that parent makes a stacking context, and this
+one does. It does not need to be: it paints ONLY the notches, which is the one
+place the band's own background is absent. `pointer-events:none`, or an 8px
+square in each corner would swallow clicks meant for the pen behind it.
+
+### 130.4 What proves it
+
+Three new checks, each **proved able to fail against the shipped build before
+its green run was believed** (§94.5): `checks/owner-picker.py` **20**,
+`checks/rail-standard.py` **14**, `checks/band-corner.py` **8**.
+
+* **owner-picker** opens each of the five fields through its REAL search
+  popup, picks or ticks, and reads the **state graph** back — the only
+  question that separates a bound field from a decorative one (§96). Both ends
+  every time (§94.2): the pen is closed again and the absence of every select
+  asserted. `elementFromPoint` at each button's own centre must return that
+  button (§93.4, §110). And it **refuses rather than crashes** when a control
+  is absent, so a build without it fails with the reason instead of throwing
+  halfway through and leaving every later assertion unrun.
+* **rail-standard** asserts the AGREEMENT, never the number (§53.5, §94.14):
+  two capabilities on one page lay out the same way, and a unit's pillars
+  behave like a capability's projects. It **makes the state** (§94.2) — no
+  unit in the demo has one pillar, so a check that walked only what is there
+  would never have exercised the side Islam did not report.
+* **band-corner** measures in **PIXELS**, because §53.7 already recorded that
+  `elementFromPoint` returns an element and a `::before` is not one, so a DOM
+  probe calls the broken build clean. No image library is added: `zlib` and
+  forty lines of unfiltering read an 8-pixel square, which is cheaper than
+  asking every laptop that runs these checks to install one.
+
+**AND THE FIRST VERSION OF band-corner REPORTED A CORRECT BUILD BROKEN.** It
+sampled the whole corner box and asked whether any pixel matched the card's
+surface: green in light and two failures in dark — because in the dark palette
+`--surface` sits BETWEEN `--ground` and `--surface-2`, so an antialiased pixel
+where the fill meets the band's grey lands on it **by arithmetic**. Sampling a
+pixel and reading it against a colour it can be blended into is not a
+measurement (§68.10). One pixel of clearance from the arc removes every blend.
+
+**AND §51.11 BIT IN AN EXISTING CHECK, LOUDLY THIS TIME.**
+`checks/project-header.py` counted `.pfront input, .pfront textarea` and
+expected five; the Owner is a `<select>` now, so it went red rather than
+quietly green — the good outcome. Correcting it exposed that the old count had
+been **silently leaving out the Repeats select** that has been in that block
+since §115, so the honest total is six and a total was never the point: it
+asks per ROW now, which is the thing that has to be true and stays true
+whatever else the block grows.
+
+### 130.5 Found and not fixed
+
+* **A COLLABORATOR WHOSE NAME HOLDS A COMMA DOES NOT SURVIVE THE WORKBOOK.**
+  `xlsx.js` writes collaborators joined with `", "` and reads them back split
+  on `,` or `|`, so *Company CEO, B2C* — a real row on this register —
+  round-trips as two collaborators. It is pre-existing and it is not made
+  worse by anything here (both names were typable before), but the picker
+  makes it easy to choose. The fix is one character on the WRITE side (`|`,
+  which the reader already accepts) and it changes what the client's template
+  looks like, so it is asked rather than done.
+* **A PROJECT'S STAKEHOLDERS ARE STILL TYPED.** They are the same shape as
+  collaborators and would take the same control, and they were not what was
+  asked for. Flagged, not widened (rule 1b).
+
+### 130.6 The corner, corrected by looking at it
+
+Islam, on the built fix: *"the corner still has this squared corner is there a
+way to remove it?"*
+
+**HE IS RIGHT, AND THE MEASUREMENT WAS RIGHT TOO.** §130.3 filled the two
+corner notches with the page's ground in BOTH positions, because §53.7's rule
+says CSS cannot ask whether a sticky element is pinned — and priced the rest
+position at about 1.4px of the pane's own corner border arc, 13px², *"visible
+at 10&times; and not at reading size."* What that arithmetic missed is WHERE
+those pixels are: they are the card's rounded corner, which is the one place on
+a card an eye goes. The corner read as squared off, which is a worse fault than
+the one it fixed.
+
+**SO THE ONE THING CSS CANNOT ASK IS ASKED IN JAVASCRIPT.** `pinWatch()` in the
+shell is an IntersectionObserver that toggles `.pinned` on every
+`.pane > .pband`, and the fill is gated on it. At rest the corner is
+byte-for-byte what it was before any of this; pinned, the notch is ground and
+nothing shows through.
+
+**AN OBSERVER, NOT A SCROLL LISTENER, AND THE DIFFERENCE IS v3.3's RULE.** That
+version removed the condensing header and wrote down: never size anything
+against a measurement the size itself can change. This changes no size at all —
+a class, and a background inside an 8px corner — so the loop that rule guards
+against cannot form. What it does need is to be RE-ARMED after every paint,
+beside `SEARCHSEL.wire()`, `CHAT.wireInbox()` and `TOUR.onPaint()`: the band it
+was watching has just been replaced. The previous observer is disconnected
+first, or one accumulates per paint for as long as the tab is open.
+
+**THE THRESHOLD IS THE ELEMENT'S OWN STICKY OFFSET**, read off the computed
+style rather than rebuilt from `--chrome-h` and `--rail-gap` — §29.4's rule,
+which the rail learned the hard way: one number, never two that happen to
+agree. Shrink the observer's root by that offset plus a pixel and the band
+stops being wholly inside it at exactly the moment it pins.
+
+**AND IT SHIPPED ONCE AS A THROW.** `pinWatch()` was declared inside `wire()`
+and called from `paint()`, so every paint ended in *"pinWatch is not defined"* —
+silently, with the page still on screen and everything after the call (the
+scroll restore among it) never running. §118 exactly, in the same file, one
+section later. `checks/band-corner.py` carries a page-error listener now for
+that reason.
+
+**THE CHECK HAD TO BE REWRITTEN, NOT EXTENDED.** It asserted *nothing behind
+the band shows through* in both positions, which the rejected build satisfied
+perfectly. At rest it now asserts the OPPOSITE and positively: the notch cannot
+be all ground, because the card's corner has to be drawn through it. Six
+failures against the build Islam rejected.
+
+### 130.7 The register's Name, not the full legal one
+
+Islam, on the picker: *"for the drop down of names go for the list of names in
+the registry not the full name."*
+
+**IT COULD NOT BE SEEN HERE, AND THAT IS THE FINDING.** Every one of the 33
+people in the demo has a full name of two or three words and not one has a
+typed short name, so `knownName()` returns exactly `p.name` for all of them —
+the first build listed the full name and looked correct on the only data this
+repository holds. On his tenant the register carries *Abd El Moniem Mohamed Abd
+El Moniem Mahmoud*, and a dropdown of fifty of those is a list nobody can scan.
+§93.8 split those two facts into **Name** and **Full Name** for exactly this
+reason; the picker was reading the wrong column.
+
+**THROUGH `displayNames()`, ALWAYS.** That map is what lengthens the guess for
+a pair whose first two names match (§81.1) — and in a PICKER that is not
+cosmetic: two people reading as one entry means the second is silently dropped
+by the list's own dedupe.
+
+**WHAT IS SHOWN IS WHAT IS STORED**, so the plan says the same word the
+register does (§53.5) rather than holding one name and displaying another.
+
+**WHICH MEANS `namedOn()` HAD TO LEARN IT, or §130.1 undoes itself.** The whole
+point of the picker is that the person it names may report that line; a label
+the rules cannot match would put the platform straight back to 32 tactics owned
+by somebody it cannot resolve. So the name rule MOVES into `lib/rules.js` —
+`NAME_PARTICLES`, `nameWords()`, `knownGuess()` — with the browser keeping thin
+wrappers, because a name rule written twice is precisely the drift that file
+exists to prevent (§42). `namedOn()` matches the key, the full name, a typed
+`known`, and **`nameRuns()`**: every leading run of somebody's names from the
+register's own short form up to the whole thing, which is exactly the set of
+labels the register can show for them.
+
+**IT NEVER YIELDS ONE NAME.** `KNOWN_NAME_WORDS` is the floor, so *"Karim"* on
+a plan still matches nobody — a bare first name would hand reporting rights to
+whoever happens to share it, which is wider than the fault being fixed.
+
+**THE ONE OVER-MATCH IS RECORDED RATHER THAN CHASED:** two people whose first
+two names are identical both answer to the short form. The picker never writes
+it — `displayNames()` lengthens both — so it can only arrive from a plan
+uploaded before this or typed by hand, where today it matches NOBODY.
+
+**AND A PLAN ALREADY HOLDING THE FULL NAME STILL NAMES ITS OWNER.** Nothing is
+migrated and nothing is rewritten on load; the ladder simply contains the full
+name as its last rung.
+
+`checks/owner-picker.py` §10 **makes a register whose two names differ** — one
+person given a five-name legal name and no short one, another given a typed
+Name — and asserts the list, what is stored, and the shared rule's answer for
+all four cases. Four failures against the build before it.
+
+### 130.8 The squared corner was the card's border, not the band's
+
+Islam, on the corrected build: *"the issue still persists"*, with a picture.
+
+**AND THE PICTURE HAD CHANGED SHAPE, which is the whole of the diagnosis.** The
+band's corner in it is ROUNDED and the page behind it is ground — §130.3 and
+§130.6 both working. What is square in that picture is the thin line beside it:
+**the pane's own 1px side border**, which `::before` covers everywhere ABOVE
+the band (§53.7, so nothing scrolls through the strip) and which therefore
+begins, pinned, as a square-ended stub standing next to a rounded corner. A
+card whose side starts in a butt end reads as a squared corner, because it is
+one — the round part is just the thing next to it.
+
+**SO THE FILL GOES PAST THE BORDER, EXACTLY AS `::before` ALREADY DOES.**
+`left:-1px` / `right:-1px`, and the arithmetic is what makes it meet: each
+gradient tile is `--r + 1` wide so its circle still sits on the BAND's corner
+centre rather than a pixel out of it, and the band's arc touches the border's
+own line precisely where the fill ends. The card now reads as starting,
+rounded, at the pinned title.
+
+**THE CHECK COULD NOT HAVE SEEN IT.** `notch_pixels()` sampled the band's own
+8px corner box, and the offending pixel is the one immediately OUTSIDE it — a
+check that samples only inside the corner it is named after cannot see the
+thing next to it. It samples a pixel past the band on the outside now, and
+fails four ways on the build Islam was looking at, naming the colour: `--line`.
+
+**THREE ROUNDS ON ONE CORNER, AND EACH FOUND A DIFFERENT ELEMENT.** §130.3 the
+pane's white ground, §130.6 the corner arc it covered at rest, §130.8 the
+border beside it. Every round was measured, and every measurement was of the
+thing named in the round before. *Reproducing the picture is not the same as
+reproducing the complaint;* the first two rounds fixed what I had measured, and
+what he was pointing at moved each time.
+
+### 130.9 The place beside the name
+
+Islam: *"for the names in the lists, you can make it the name - the unit or
+function so people don't get confused."*
+
+**IT IS A HINT, NEVER PART OF THE ANSWER.** The place is drawn in the popup row
+and nowhere else: the closed control shows the name, the plan STORES the name,
+the workbook and the deck print the name, and `namedOn()` matches the name.
+"Ramy Behairy — Mobile" written into a tactic would name nobody the platform
+can resolve, which is the fault §130.1 exists to fix and the same argument
+§130.7 makes about the short name from the other side. It rides on the option
+as `data-hint` and `searchsel.js` draws it as a quiet span; `textOf()` reads
+the option's TEXT, which is the name alone, so the button and the field are
+untouched by it.
+
+**IT JOINS WHAT IS SEARCHED.** Typing a unit's name finds the people who work
+in it — a hint you can see and cannot search for is half a control.
+
+**`personAt()` IS THE ONE PAIR THAT ANSWERS THIS** (§54) and `placeLabel()` the
+one vocabulary (§53.5). Somebody the register has not placed gets **no hint**
+rather than a guess or the word "group": an absence is honest and a wrong place
+is worse than none (§15.1). Three of the demo's 33 sit at the group and
+correctly carry nothing.
+
+**AND IT BROKE THREE ASSERTIONS BY BEING A SPAN.** A row's `textContent` became
+"Amaka EzeNigeria", so two checks compared it against a stored value that is
+correctly the name alone, and a third — which typed "Nigeria" and clicked the
+first match — started picking a PERSON in Nigeria rather than the unit, because
+the hint had joined the search. The name is read from the row's first text node
+now, and the department test picks one nobody sits in.
 
 ## 131 · A custodian per project (v3.49, spec 021)
 

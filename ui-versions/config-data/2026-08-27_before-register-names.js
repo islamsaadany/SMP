@@ -380,14 +380,26 @@ var UNIT_ROLES = {
 
    The list is the particles this register actually contains, plus the European
    ones a client could arrive with. A word not on it is a name. */
-/* MOVED TO `lib/rules.js` (§130.7), and these are the browser's handles on it.
-   The plan stores what the register's Name column shows now, so the SERVER has
-   to be able to recognise it too — and a name rule written twice is the drift
-   that file exists to prevent (§42). Wrappers rather than renamed call sites:
-   five places here ask for a run of somebody's names, and none of them cares
-   where the answer is computed. */
-var NAME_PARTICLES = SMPRules.NAME_PARTICLES;
-function nameWords(name, n){ return SMPRules.nameWords(name, n); }
+var NAME_PARTICLES = ["abd","abdel","abd-el","el","al","abu","abou","bin","ben",
+                      "ibn","bint","van","von","de","del","della","der","den",
+                      "di","da","dos","du","la","le","st","st.","mac","mc"];
+function nameWords(name, n){
+  var parts = String(name == null ? "" : name).trim().split(/\s+/).filter(Boolean);
+  if (!parts.length) return "";
+  var out = [], names = 0, i = 0;
+  while (i < parts.length && names < n) {
+    /* Take the run of particles, then the word they belong to. A name ENDING
+       in a particle (a truncated row) still terminates, or this loops. */
+    var start = i;
+    while (i < parts.length &&
+           NAME_PARTICLES.indexOf(parts[i].toLowerCase().replace(/[^a-z.-]/g, "")) > -1) i++;
+    if (i < parts.length) i++;
+    else if (i === start) break;
+    names++;
+    out = parts.slice(0, i);
+  }
+  return out.join(" ");
+}
 
 var NAMED_ELSEWHERE_WORDS = 2;
 function personFullName(key){
@@ -844,10 +856,10 @@ function shortName(name){ return nameWords(name, SHORT_NAME_WORDS); }
    not the upload, not the merge, not the door. §87's ladder is Emp ID then
    email and stops, and this adds no rung. Two people really can be "Ahmed
    Mostafa", which is exactly how the twins were made. */
-var KNOWN_NAME_WORDS = SMPRules.KNOWN_NAME_WORDS;
+var KNOWN_NAME_WORDS = 2;
 /* The guess, used when nobody has said otherwise. Kept separate from the
    reader below so the seeded value and a typed one are never confused. */
-function knownGuess(name){ return SMPRules.knownGuess(name); }
+function knownGuess(name){ return nameWords(name, KNOWN_NAME_WORDS); }
 /* What the Name column shows: what was typed, or the guess. Never stores as a
    side effect of being read (§50.6's rule — a reader that creates the field it
    was looking for makes every save carry a phantom change). */
@@ -1539,14 +1551,6 @@ function personNamedLines(key){
     if (!u) return;
     reportItems(u).forEach(function(x){
       if (SMPRules.namedOn({ owner:x.owner, collaborators:x.collaborators }, p)) n++;
-    });
-  });
-  /* §131: a project's owner name counts here too — since a project's owner
-     is a Contributor of its function now, the confirmation should say how
-     many of those namings survive the row as plain words. */
-  (GROUP.capabilities || []).forEach(function(c){
-    (c.projects || []).forEach(function(pr){
-      if (SMPRules.namedOn({ owner: pr.owner }, p)) n++;
     });
   });
   return n;
@@ -3844,31 +3848,6 @@ function canReportRow(unitKey, x){
   return SMPRules.namedOn({ owner: x.owner, collaborators: x.collaborators }, viewer());
 }
 
-/* ── The function side of the same two questions (§131) ────────────
-   canReport/canReportRow for an fn: target. The whole-function gate is what
-   capReportBody always asked inline; it is a function now because the per-
-   project question has to sit on top of it and two spellings of the same
-   three gates is §53.5's drift. THE LINE IS THE PROJECT: a Contributor of a
-   function is somebody a project names as its owner, and they report every
-   row that project holds — deliverables, outcomes, milestones — and nothing
-   in the project beside it. Same two shared functions the server uses. */
-function canReportFn(fk){
-  if (REVIEW.state !== "open") return false;
-  if (CYCLE.locked && !inOffice()) return false;
-  return grantAt("k_report", "fn:" + fk) === "edit";
-}
-function canReportFnProject(fk, p){
-  if (!canReportFn(fk)) return false;
-  if (!SMPRules.onlyOwnLines(world(), viewer(), "fn", "fn:" + fk)) return true;
-  return SMPRules.namedOn(p, viewer());
-}
-/* A capability's own key objectives belong to no project, so for somebody who
-   speaks only for their own project they are read, never entered. */
-function canReportFnWhole(fk){
-  return canReportFn(fk) &&
-         !SMPRules.onlyOwnLines(world(), viewer(), "fn", "fn:" + fk);
-}
-
 /* ── Speaking for the whole unit (§50.5) ───────────────────────────
    Three acts are not about a row: SUBMITTING, the cycle NOTE, and the deck's
    PICTURE SLIDES. Each speaks for the unit in front of whoever is reading the
@@ -3880,16 +3859,14 @@ function canReportFnWhole(fk){
    A CONTRIBUTOR limited to their own lines does none of them. What they may
    say is about their own rows; a picture slide is the unit's.
 
-   A supporting function HAS contributors since §131 — a project's owner is
-   one, derived from the project's Owner row — so its half asks the same
-   own-lines exclusion the unit's always has. The sentence that stood here
-   ("a function has no contributors to exclude") described the code truly and
-   stopped being true the day the floor reached the projects. */
+   A supporting function has no contributors to exclude — its reporting is the
+   function's, whole — so its half is the two gates its reporting page already
+   applies, asked here rather than restated there. */
 function canSpeakFor(target){
   var t = String(target || "");
   if (t.indexOf("fn:") === 0) {
-    return canReportFn(t.slice(3)) &&
-           !SMPRules.onlyOwnLines(world(), viewer(), "fn", t);
+    return REVIEW.state === "open" && !(CYCLE.locked && !inOffice()) &&
+           grantAt("k_report", t) === "edit";
   }
   return canReport(t) && !SMPRules.onlyOwnLines(world(), viewer(), "unit", t);
 }
@@ -5430,43 +5407,19 @@ function pillarsUsingTheme(ab){
    click into it crashes on a missing array. It arrives inactive-in-content
    but active in the nav, weighted at zero until the SMO fills its factor row,
    and with the group's clause labels as a starting skeleton. */
-/* THE ONE MINTER FOR A UNIT (§129). It existed argless — "New unit 1", key
-   "newunit1" — and the builder gives it the three answers a real unit
-   arrives with: its name, its code prefix and its company. Three of its old
-   habits are corrected in the same breath, each a §-numbered fault:
-   · the key is minted from the NAME the way a function's and a person's are,
-     so the graph does not fill with "newunit3"s (§87's spirit);
-   · the weighting row's values are minted from the FACTOR LIST, never a
-     hardcoded rev/prof/imp/growth — a tenant that renamed a factor got a row
-     the composite could not read (§104.7's list-of-exceptions fault);
-   · `real` is TRUE: that flag marks DEMO content as illustrative (§21), and
-     a unit the SMO just created is the client's own. */
-function addBusinessUnit(name, prefix, company){
-  var nm = String(name || "").trim(), key;
-  if (nm) {
-    var base = nm.toLowerCase().replace(/[^a-z0-9]/g, "").slice(0, 18);
-    if (!base) base = "unit";
-    key = base;
-    var n2 = 2;
-    while (UNITS[key]) { key = base + n2; n2++; }
-  } else {
-    var n = 1;
-    do { key = "newunit" + n; nm = "New unit " + n; n++; } while (UNITS[key]);
-  }
+function addBusinessUnit(){
+  var n = 1, key, name;
+  do { key = "newunit" + n; name = "New unit " + n; n++; } while (UNITS[key]);
   UNITS[key] = {
-    name: nm,
-    codePrefix: (String(prefix || "").trim() || nm.replace(/[^A-Za-z0-9]/g, "").slice(0, 3) || "NU").toUpperCase(),
-    weight: 0, real: true, active: true, ukey: key,
-    company: company || null,
+    name: name, codePrefix: "NU", weight: 0, real: false, active: true, ukey: key,
     clauses: GROUP.clauses.map(function(c, i){ return [c[0], "", key + "-F" + (i + 1)]; }),
     aspiration: "", endInMind: "",
     keyObjectives: [], swot: { s: [], w: [], o: [], t: [] }, items: []
   };
   UNIT_KEYS.push(key);
   UNIT_ROLES[key] = { head: null, custodian: null };
-  var wrow = { key: key, unit: nm, why: "" };
-  (GROUP.weighting.factors || []).forEach(function(f){ wrow[f.key] = 0; });
-  GROUP.weighting.units.push(wrow);
+  GROUP.weighting.units.push({ key: key, unit: name, rev: 0, prof: 0, imp: 1, growth: 0,
+    why: "" });
   syncWeights();
   return key;
 }

@@ -6,9 +6,8 @@ version (rules A2 / A11, changed 2026-08-20) — those go only when asked for.
 
 **Where it runs:** Vercel, production tracks `main`. Static files plus two
 serverless functions (`/api/state`, `/api/auth`) against Neon Postgres.
-**Latest version:** v3.47 on `main`
-**Last updated:** 2026-08-26
-**Last updated:** 2026-08-26
+**Latest version:** v3.48 on `main`; v3.49 on `claude/custodian-per-project-s8q93m`
+**Last updated:** 2026-08-27
 
 **Sign in as:** `SMO` / `1234` — a password change is forced at once (§43.1,
 reversing §19.4).
@@ -64,6 +63,26 @@ Nothing proceeds past this line without an answer.
   is a true signal — do not silence it.
 
 ## Built and verified
+
+### v3.49 — a custodian per project (§131, spec 021)
+
+- **A project's owner is a Contributor of its function** — derived from the
+  project's Owner row the way a unit's Contributor is derived from a tactic
+  (§55); they report their own project whole (deliverables, outcomes,
+  milestones) and nothing beside it. Submitting, the cycle note and the
+  picture slides stay the custodian's and the head's.
+- **Governed on Roles & access**: the Contributor row's own-function
+  Reporting cell (default view — the SMO opens it to edit), enforced on the
+  screen and again on the server against the stored state.
+- **Rides §130.1's owner picker**: the stored owner stays a register-picked
+  NAME; a keyed variant was built first and removed at the merge (§131.4).
+- **A drift since migration 024 fixed on the way**: a custodian's deliverable
+  report, and the milestone % that §104.10 requires, were classified as plan
+  and refused on save while the screen offered both.
+- Proof: `test-authorize.js` §16 (proved able to fail two ways),
+  `checks/project-custodian.py` (both viewers, both ends, proved able to
+  fail), the full `qa.py` sweep; the seed scanned — nobody's standing
+  changes until somebody is actually named.
 
 ### v3.47 — building a plan on the platform (§129, spec 020)
 
@@ -123,6 +142,21 @@ the layout, each watched to fail first · qa.py ERRORS: none · test-chat 52/0 �
 test-assistant 33/0 · test-authorize 193/0. **One assertion was rewritten for
 being unfalsifiable** — it measured the row against the panel, and a row is
 inside its own panel by definition.
+
+### v3.48 — §126 resolved: the key was not the key (redeploy commit)
+
+The diagnosis held. Comparing against Strategy-Formulation's working Gemini
+setup showed the two projects byte-equivalent on the wire — same env name,
+same model, same endpoint, same header — so the only remaining difference was
+the stored VALUE in this project's Vercel environment. Islam's own AI Studio
+chart agreed: SMP_Key had accepted a real request, while the deployment's copy
+was refused, which means the deployment held a different string.
+
+Islam deleted and re-added `GEMINI_API_KEY` in Vercel. **This commit exists to
+trigger the build that bakes it in** — a deployment only carries the variables
+that existed when it was built, and editing one changes nothing until the next
+build. Proof on screen after deploy: Test the assistant → the key row's length
+and first four characters match SMP_Key, and the model row reads WORKING.
 
 ### v3.46 — which key, without saying which key (§126)
 

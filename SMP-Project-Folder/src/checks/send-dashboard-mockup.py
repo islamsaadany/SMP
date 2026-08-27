@@ -104,11 +104,12 @@ DASH = """(o) => {
     .replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;");
   const when = (s) => String(s || "").slice(0,16).replace("T"," ");
 
-  const head =
-    '<div class="phead2"><h1 class="ptitle">Send a message</h1>' +
-      '<div class="hright">' +
-        '<button class="editbtn cta" id="mockwrite">Write a message</button>' +
-      '</div>' +
+  const tabs =
+    '<div class="secrow">' +
+      '<button type="button" role="tab" aria-selected="' + (o.tab === "list") + '">' +
+        'Messages</button>' +
+      '<button type="button" role="tab" aria-selected="' + (o.tab === "new") + '">' +
+        'Write a message</button>' +
     '</div>';
 
   /* THE OUTCOME LANDS HERE, not on the composer you have just left. */
@@ -119,8 +120,7 @@ DASH = """(o) => {
     : '';
 
   const drafts = o.drafts.length
-    ? section("", "Not sent yet",
-        "Pick one up where you left it, or throw it away.",
+    ? section("", "Not sent yet", null,
         '<div class="cfg"><table><thead><tr>' +
           '<th style="width:56%">Heading</th>' +
           '<th style="width:26%">Last saved</th>' +
@@ -132,9 +132,7 @@ DASH = """(o) => {
         '</tbody></table></div>')
     : '';
 
-  const sent = section("", "What has been sent",
-    "The record lives outside the saved data, so a save cannot erase it. " +
-    "Open one to see what happened to each person.",
+  const sent = section("", "What has been sent", null,
     '<div class="cfg"><table><thead><tr>' +
       '<th style="width:34%">Heading</th>' +
       '<th style="width:16%">Sent</th>' +
@@ -164,25 +162,36 @@ DASH = """(o) => {
      being a picture of this product. */
   const pane = document.querySelector(".setuppane");
   if (!pane) return false;
-  pane.innerHTML = head + said + drafts + sent;
+  const ttl = pane.querySelector(".setuphead");
+  pane.innerHTML = (ttl ? ttl.outerHTML : "") + tabs + said + drafts + sent;
   return true;
 }"""
 
 # ── THE COMPOSER, WITH A WAY BACK ────────────────────────────────────
-BACK = """() => {
-  /* The pane's sticky title is `.setupttl` inside `.setuphead` (§121.2) — NOT
-     `.ptitle`, which is the register's own header. The first build aimed at
-     the wrong one and the way back simply did not appear. */
-  const t = document.querySelector(".setuphead .setupttl");
-  if (!t) return false;
-  t.innerHTML = '<button class="linkbu backbu">\u2039 Messages</button>' +
-                '<span style="display:block">Write a message</span>';
-  const st = document.createElement("style");
-  st.textContent = '.backbu{display:block;font-size:var(--fs-small);' +
-    'color:var(--gold-deep);margin-bottom:1px;font-weight:600;letter-spacing:.02em}';
-  document.head.appendChild(st);
-  /* Drafts and Sent were header dropdowns; the dashboard is where they live
-     now, so nothing here duplicates it. */
+# ── THE COMPOSER, AS THE SECOND SUBTAB ───────────────────────────────
+# The two halves are TABS of one page now, not a page and a button that
+# navigates — so the composer wears the same `.secrow` with its own tab lit,
+# and the header carries nothing else.
+COMPOSE = """() => {
+  const pane = document.querySelector(".setuppane");
+  const head = pane && pane.querySelector(".setuphead");
+  if (!pane || !head) return false;
+
+  const tabs = document.createElement("div");
+  tabs.className = "secrow";
+  tabs.innerHTML =
+    '<button type="button" role="tab" aria-selected="false">Messages</button>' +
+    '<button type="button" role="tab" aria-selected="true">Write a message</button>';
+  head.insertAdjacentElement("afterend", tabs);
+
+  /* THE GREY DESCRIPTIONS GO HERE TOO. Islam: "in dashboard remove the grey
+     descriptions and stop adding descriptions to pages." The two halves are
+     one page now, so one tab clean and the other carrying three paragraphs
+     would read as unfinished rather than as a rule. */
+  pane.querySelectorAll(".sec-note").forEach(e => e.remove());
+
+  /* Drafts and Sent were header dropdowns; the Messages tab is where they
+     live now, so nothing here duplicates it. */
   document.querySelectorAll("[data-draftmenu],[data-sentmenu]").forEach(e => {
     const w = e.closest("details") || e; w.remove(); });
   return true;
@@ -219,7 +228,8 @@ def run(theme):
         shot(pg, "today%s.png" % sfx)
 
         # 2 · THE DASHBOARD, as it would open.
-        pg.evaluate(DASH, {"sent": SENT, "drafts": DRAFTS, "said": None})
+        pg.evaluate(DASH, {"sent": SENT, "drafts": DRAFTS, "said": None,
+                           "tab": "list"})
         pg.wait_for_timeout(300)
         shot(pg, "dashboard%s.png" % sfx)
 
@@ -233,12 +243,12 @@ def run(theme):
                   + "12 September.";
           sendmsgAsk(); paint(); }""")
         pg.wait_for_timeout(1000)
-        pg.evaluate(BACK)
+        pg.evaluate(COMPOSE)
         pg.wait_for_timeout(250)
         shot(pg, "compose%s.png" % sfx)
 
         # 4 · BACK ON THE DASHBOARD, with the message that just went.
-        pg.evaluate(DASH, {"sent": SENT, "drafts": DRAFTS,
+        pg.evaluate(DASH, {"sent": SENT, "drafts": DRAFTS, "tab": "list",
                            "said": "Sent to 76 people.",
                            "saidQuiet": "3 skipped — no address on their row."})
         pg.wait_for_timeout(300)

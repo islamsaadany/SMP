@@ -37,8 +37,8 @@ HTML = """<title>Messages, Then The Message</title>
 <header class="mast">
   <div class="kicker">Send a message &middot; proposed</div>
   <h1>Messages, then the message</h1>
-  <p>Send a message opens on a record of what has gone out. Writing one is a
-     step you take from there, and finishing it brings you back.</p>
+  <p>One page, two tabs: what has gone out, and writing the next one. Sending
+     lands you back on the record. No grey prose on either.</p>
   <div class="standing"><b>Waiting on your sign-off</b> <span>nothing in src/ has been touched</span></div>
 </header>
 
@@ -83,8 +83,11 @@ HTML = """<title>Messages, Then The Message</title>
       can be answered.</p>
     <p><strong>Drafts sit above it</strong>, under <em>Not sent yet</em>. They were
       behind their own dropdown; unfinished work you cannot see is unfinished work
-      you forget. Both dropdowns go &mdash; that is most of the &ldquo;cleaner
-      configuration&rdquo;.</p>
+      you forget. Both dropdowns go.</p>
+    <p><strong>And no grey descriptions.</strong> The headings say what the two
+      lists are; a paragraph under each saying it again in grey is the rest of the
+      &ldquo;cleaner configuration&rdquo;. They go on the writing tab too &mdash;
+      one page, one rule.</p>
     %(dashboard)s
     <div class="cost">
       <div class="kicker">Deliberately not there</div>
@@ -98,10 +101,9 @@ HTML = """<title>Messages, Then The Message</title>
 <section class="item">
   <div class="itemhead"><div class="num">2</div><h2>Writing one is a step you take</h2></div>
   <div class="body">
-    <p><strong>Write a message</strong> opens the composer &mdash; unchanged, every
-      part of it, including the greeting row and Send me a copy. The only
-      difference is the way back at the top, so the composer is somewhere you went
-      rather than where you always are.</p>
+    <p>The second tab is the composer &mdash; unchanged, every control of it,
+      including the greeting row and Send me a copy. What went is the grey prose
+      under its three headings, which bought back most of a screen.</p>
     %(compose)s
   </div>
 </section>
@@ -133,12 +135,23 @@ HTML = """<title>Messages, Then The Message</title>
 </section>
 
 <footer>
-  <h2>What I need from you</h2>
+  <h2>One thing to decide, and one to know</h2>
+  <p style="max-width:var(--measure);color:var(--ink-2);margin:0 0 14px">
+    <strong>One sentence was doing real work</strong> and I have removed it with the
+    rest: <em>&ldquo;Tick as many as you like &mdash; they add up rather than narrow
+    each other.&rdquo;</em> That behaviour is genuinely not obvious, and nothing else
+    on the page says it. Say the word and it comes back as a hover on the heading
+    rather than as a paragraph.</p>
+  <p style="max-width:var(--measure);color:var(--ink-2);margin:0 0 22px">
+    <strong>And the rule is wider than this page.</strong> Every other Setup page
+    still carries its grey description. I have not touched them &mdash; you asked
+    about this one. Say so and I will strip them across Setup in one pass.</p>
+  <h2 style="margin-top:34px">What I need from you</h2>
   <ol>
     <li><strong>Sign off the dashboard</strong> &mdash; the two lists, and the five
       columns on the sent one.</li>
-    <li><strong>Sign off the flow</strong> &mdash; Write a message, back at the top
-      of the composer, and the return with the green line.</li>
+    <li><strong>Sign off the flow</strong> &mdash; two subtabs, and the return to
+      the record with the green line after a send.</li>
     <li>Say <em>build it</em> and I will, with a check that walks the whole
       round trip and proves the message you just sent is on the list when you
       land.</li>
@@ -159,12 +172,12 @@ page = HTML % {
                  "has been sent is behind the <em>Sent</em> dropdown at the top right.",
                  dark="today-dark.png"),
     "dashboard": fig("dashboard.png",
-                     "<b>Proposed &mdash; the opening page</b>Drafts above, what was sent "
-                     "below, and one loud control: <em>Write a message</em>.",
+                     "<b>Proposed &mdash; the first tab</b>Drafts above, what was sent "
+                     "below, and nothing explaining either of them.",
                      dark="dashboard-dark.png"),
     "compose": fig("compose.png",
-                   "<b>Proposed &mdash; writing one</b>The composer exactly as it is "
-                   "today, with a way back to the list at the top.",
+                   "<b>Proposed &mdash; the second tab</b>Every control exactly as it "
+                   "is today. Only the grey descriptions have gone.",
                    dark="compose-dark.png"),
     "aftersend": fig("after-send.png",
                      "<b>Proposed &mdash; after Send</b>Back on the list, with the "

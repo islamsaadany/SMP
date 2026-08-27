@@ -39,6 +39,22 @@ A drift between specs and code is a documentation bug — report it before silen
 - **Stick to exactly what was requested — no extra "improvements" or visual changes.**
 - **If a fix requires touching something the user didn't mention, flag it and ask first.**
 
+### 1b-ii. NO GREY DESCRIPTIONS UNDER PAGE AND SECTION HEADINGS (2026-08-27)
+- **Islam: *"remove the grey descriptions and stop adding descriptions to
+  pages."*** A heading names the thing; a paragraph under it in grey saying the
+  same thing again is furniture, and it pushes the content people came for
+  further down the page.
+- **Do not pass a `note` to `section()` for new work**, and do not add
+  explanatory prose under a page title.
+- **Where a sentence carries a fact the screen does not otherwise state**, it is
+  not a description — it is information, and it belongs on a **hover** (`tip()`)
+  or in the knowledge base, never as a paragraph. Flag it rather than deleting
+  it silently: §127 made every line of chat-settings prose a tooltip for exactly
+  this reason, and kept *"No one is set"* on the page because a status is not a
+  description.
+- Existing pages keep theirs until Islam asks for a sweep; this rule governs
+  what is BUILT from now on.
+
 ### 1c. CRITICAL: UI Changes Require Explicit Approval
 - **NEVER change any UI design, layout, styling, or visual element without explicit user approval.**
 - **This includes: colors, borders, spacing, card designs, labels, icons, section order, font sizes — EVERYTHING visual.**

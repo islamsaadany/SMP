@@ -110,6 +110,12 @@ class H(http.server.BaseHTTPRequestHandler):
             self._send(CHAT["status"], b'{"ok":false,"error":"no"}', "application/json")
             return
         if body.get("action") == "say":
+            # §136's echo exists FOR the slow say — with the assistant on the
+            # server holds the response for the whole model round-trip, and the
+            # check must model that or the in-flight state lasts one frame and
+            # nothing here ever measures it.
+            if CHAT.get("slow"):
+                time.sleep(CHAT["slow"])
             CHAT["said"].append(body)
             # THE STUB HAS TO MODEL THE SERVER, not merely answer. A real `say`
             # comes back with the conversation WAITING, and that is what puts
@@ -773,6 +779,64 @@ with sync_playwright() as p:
     pg.wait_for_timeout(250)
     ck("and pressing anything else puts it away",
        pg.eval_on_selector_all(".chset .tip.on", "n=>n.length") == 0)
+
+    # ── 13 · THE SEND SAYS WHAT IS HAPPENING (§136) ──────────────────────
+    # With the assistant on, `say` holds its response for the model round-trip
+    # and the typed message used to sit in the box the whole time — "looked as
+    # a glitch at the start" (Islam). The echo puts it in the thread at once;
+    # what is asserted is the IN-FLIGHT state, the reconciliation, and that a
+    # failure gives the words back.
+    print("\n13 · a send in flight says so, and a failed one gives the words back")
+    CHAT["cfg"]["assistant"] = True
+    CHAT["messages"] = []
+    CHAT["thread"] = None
+    pg.evaluate("()=>{const p=document.getElementById('chatpanel');"
+                " if(p && p.hidden) document.getElementById('chatbtn').click();}")
+    pg.wait_for_timeout(800)
+    CHAT["slow"] = 1.6
+    pg.fill("#chatsay", "An echo, please")
+    pg.evaluate("()=>{document.getElementById('chatsend').click();}")
+    pg.wait_for_timeout(400)
+    mid = pg.evaluate("""()=>({
+        box: document.getElementById('chatsay').value,
+        echoed: [...document.querySelectorAll('#chatbody .chmsg')]
+                  .some(m=>m.innerText.includes('An echo, please')),
+        wait: (x=>x?x.innerText:null)(document.querySelector('.chsys.chwait')) })""")
+    ck("the message is in the thread the moment Send is pressed", mid["echoed"], mid)
+    ck("and the box is already empty", mid["box"] == "", mid)
+    ck("and the screen says the assistant is being asked",
+       bool(mid["wait"]) and "assistant" in mid["wait"].lower(), mid)
+    pg.wait_for_timeout(2200)
+    CHAT["slow"] = 0
+    fin = pg.evaluate("""()=>({
+        wait: !!document.querySelector('.chsys.chwait'),
+        echoed: [...document.querySelectorAll('#chatbody .chmsg')]
+                  .some(m=>m.innerText.includes('An echo, please')) })""")
+    ck("the server's answer replaces the echo and the line goes", fin["echoed"] and not fin["wait"], fin)
+
+    # A FAILED SEND GIVES THE WORDS BACK — the one thing nobody can get back
+    # is what they typed, and restoring beats merely not-clearing (§136).
+    CHAT["status"] = 500
+    pg.fill("#chatsay", "Words that must come back")
+    pg.evaluate("()=>{document.getElementById('chatsend').click();}")
+    pg.wait_for_timeout(900)
+    CHAT["status"] = 200
+    rb = pg.evaluate("""()=>({
+        box: document.getElementById('chatsay').value,
+        ghost: [...document.querySelectorAll('#chatbody .chmsg')]
+                 .some(m=>m.innerText.includes('Words that must come back')),
+        note: (x=>x?x.innerText:null)(document.getElementById('chatnote')),
+        wait: !!document.querySelector('.chsys.chwait') })""")
+    ck("the words are back in the box", rb["box"] == "Words that must come back", rb)
+    ck("the echo is gone from the thread", not rb["ghost"], rb)
+    # The note carries the SERVER'S OWN sentence when there is one (here the
+    # stub's terse "no") and the product's "That did not send" only for a
+    # network failure — which the abort drive proved and a stub cannot model.
+    # What must hold either way: something is said, and the wait line is gone.
+    ck("and the failure says so, with the wait line gone",
+       bool(rb["note"]) and not rb["wait"], rb)
+    CHAT["cfg"]["assistant"] = False
+    CHAT["messages"] = []
 
     # ── 7 · AND A SESSION THE SERVER REFUSES, LAST ON PURPOSE ────────────
     # A refused session takes the corner away rather than leaving a control

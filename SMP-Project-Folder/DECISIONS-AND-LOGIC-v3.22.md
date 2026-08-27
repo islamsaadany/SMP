@@ -18005,3 +18005,44 @@ lands between Figure sets and Scoring bands.
 **And it is asserted of the RAIL, not of the def** (`checks/setup-header.py`): a
 def whose `grp` no longer matched a real group would render nowhere at all
 rather than in the wrong place, and the rail is what somebody scans.
+
+
+---
+
+## 136 · The send says what is happening (v3.50)
+
+> Islam, first real conversation with the assistant: *"the message took time to
+> be sent to the chat and stayed in the box for some time … looked as a glitch
+> at the start."*
+
+Nothing was broken. With the assistant on, `say` holds its response open for
+the whole model round-trip — the message is stored, the model is asked, and
+only then does the browser hear back — so the typed words sat in the composer
+for seconds, looking exactly like a send that had not worked.
+
+**The message moves into the thread the moment Send is pressed**, the box
+empties, and a quiet narrated line — the §125 register, one shade quieter —
+says *Asking the assistant…* while the server works. The server's answer then
+replaces the echo wholesale, so the screen can never drift from what was
+actually stored.
+
+**The echo is never trusted past the round-trip.** On any failure it is rolled
+back and the words go **back into the box** — the one thing nobody can get
+back is what they typed, and restoring beats the old rule's merely
+not-clearing. **And the poll must not erase it**: a `mine` racing the `say`
+can answer without the just-sent message (the insert is inside the very
+request still running), so the poll skips a beat while a send is in flight.
+
+**A network failure speaks the product's language**: `post()` mapped a fetch
+rejection to its raw browser message, and *"Failed to fetch"* reached the
+screen verbatim through the new rollback note. It is the sentinel `"failed"`
+now, which every caller already reads as *That did not send. Try again.* —
+while a sentence the server actually said still passes through untouched.
+
+Proved by driving a **4-second-slow model** (echo on screen at 350ms, box
+empty, wait line up, a poll beat passing without erasing it, the reply
+replacing it) and an **aborted send** (words back in the box, echo gone, no
+stuck line); `checks/office-chat.py` §13 holds all of it permanently and fails
+3 ways against the pre-§136 build. One of its own assertions was rewritten on
+first contact: it asserted the product's failure sentence against the stub's
+own terse error, which is the server-sentence path working as designed.

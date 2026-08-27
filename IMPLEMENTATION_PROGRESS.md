@@ -111,6 +111,19 @@ Nothing proceeds past this line without an answer.
   Postgres 16** (§113.7); contrast 52 failures, unchanged, none on the new
   surfaces.
 
+### v3.50 — the send says what is happening (§136)
+
+The "glitch": with the assistant on, `say` holds its response for the model
+round-trip, so the typed message sat in the box for seconds. Now it moves into
+the thread the moment Send is pressed, the box empties, and a quiet *Asking
+the assistant…* line shows until the reply replaces the echo. A failed send
+puts the words back in the box; the poll skips a beat while a send is in
+flight so it cannot erase the echo; a network failure says "That did not
+send" instead of the browser's "Failed to fetch".
+
+**Verified:** driven against a 4s-slow model and an aborted send ·
+office-chat.py §13 permanent, failing 3 ways on the pre-§136 build.
+
 ### v3.49 — the register notices two people whose name reads the same (§131)
 
 - Islam: *"notify me as an issue to address if 2 people their 1st 2 names are

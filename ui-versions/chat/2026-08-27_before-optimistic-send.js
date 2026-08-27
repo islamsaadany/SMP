@@ -91,11 +91,7 @@ var CHAT = (function(){
                          body: JSON.stringify(body) })
       .then(function(r){ return r.json().then(function(j){ j.__status = r.status; return j; }); })
       .then(function(j){ done(j && j.ok ? null : ((j && j.error) || "failed"), j); })
-      /* A NETWORK FAILURE SPEAKS THE PRODUCT'S LANGUAGE, not the browser's
-         (§136): "Failed to fetch" is what fetch() says, and it reached the
-         screen verbatim through the send path's rollback note. Every caller
-         already handles the sentinel "failed" as "say it did not send". */
-      .catch(function(){ done("failed", null); });
+      .catch(function(e){ done(String((e && e.message) || e), null); });
   }
 
   /* WHERE SOMEBODY WAS USED TO BE CAPTURED AND SENT WITH EVERY MESSAGE — the
@@ -280,13 +276,7 @@ var CHAT = (function(){
         "<p>A number that looks wrong, a page you cannot reach, a deadline you need " +
         "moved. One of us will come back to you.</p></div>";
     } else {
-      body.innerHTML = threadHtml(state.messages, false, false) +
-        /* WHILE THE SERVER WORKS, THE SCREEN SAYS SO (§136) — the same quiet
-           narrated register as the handoff line (§125): not a message, the
-           product saying what is happening. Only with the assistant on;
-           without it a send is near-instant and the line would only flash. */
-        (sending && chatCfg().assistant
-          ? '<div class="chsys chwait">Asking the assistant\u2026</div>' : "");
+      body.innerHTML = threadHtml(state.messages, false, false);
     }
     if (atEnd) body.scrollTop = body.scrollHeight;
 
@@ -326,13 +316,6 @@ var CHAT = (function(){
 
   function poll(){
     if (!servable()) return;
-    /* NEVER OVER A SEND IN FLIGHT (§136). The echo is on screen and the
-       server's answer to `say` is what replaces it; a poll racing that
-       round-trip can come back WITHOUT the just-sent message (the insert is
-       inside the very request still running) and would erase the echo — a
-       message vanishing off the screen mid-send, which is worse than the
-       glitch this fixes. One beat later the poll runs as normal. */
-    if (sending) return;
     post({ action:"mine" }, function(err, j){
       if (!err && j) {
         /* ASKED BEFORE ANYTHING IS OVERWRITTEN, and the first version of this
@@ -437,49 +420,27 @@ var CHAT = (function(){
     drawPanel();
   }
 
-  /* THE SCREEN SAYS WHAT IS HAPPENING WHILE THE SERVER WORKS (§136). With
-     the assistant on, `say` holds the response open for the whole model
-     round-trip — a few seconds — and the typed message used to sit in the box
-     the entire time, looking exactly like a send that had not worked (Islam:
-     "looked as a glitch at the start"). So the message moves into the thread
-     THE MOMENT Send is pressed, the box empties, and a quiet line says the
-     assistant is being asked; when the server answers, its truth replaces the
-     echo wholesale, so nothing here can drift from what was actually stored.
-
-     THE ECHO IS NEVER TRUSTED PAST THE ROUND-TRIP: on ANY failure the echo is
-     rolled back and the words go BACK INTO THE BOX — the one thing nobody can
-     get back is what they typed, and a chat that eats it because the network
-     blinked is a chat nobody uses twice (that rule survives from the version
-     this replaces; it now restores rather than merely not-clearing). */
   function send(){
     var t = el("chatsay"); if (!t || sending) return;
     var text = t.value.trim();
     if (!text && !shot) return;
     sending = true; lastErr = "";
     var btn = el("chatsend"); if (btn) btn.disabled = true;
-    var hadShot = shot;
-    var wasMsgs = state.messages;
-    state.messages = state.messages.concat([{
-      id: "echo", at: new Date().toISOString(), from_office: false,
-      by_key: "", by_name: "", body: text, flag: null,
-      has_shot: !!shot, echo: true
-    }]);
-    t.value = ""; t.style.height = "";
-    shot = null;
-    var f0 = el("chatfile"); if (f0) f0.value = "";
-    drawPanel();
-    var body0 = el("chatbody"); if (body0) body0.scrollTop = body0.scrollHeight;
-    post({ action:"say", body:text, shot:hadShot }, function(err, j){
+    post({ action:"say", body:text, shot:shot }, function(err, j){
       sending = false;
       if (btn) btn.disabled = false;
       if (err) {
-        state.messages = wasMsgs;
-        t.value = text; shot = hadShot;
+        /* THE TYPED MESSAGE IS NOT THROWN AWAY ON A FAILURE. It is the one
+           thing here nobody can get back, and a chat that eats what you wrote
+           because the network blinked is a chat nobody uses twice. */
         lastErr = err === "failed" ? "That did not send. Try again." : err;
         drawPanel();
         return;
       }
-      state.messages = (j && j.messages) || wasMsgs;
+      t.value = ""; t.style.height = "";
+      shot = null;
+      var f = el("chatfile"); if (f) f.value = "";
+      state.messages = (j && j.messages) || state.messages;
       state.thread = (j && j.thread) || state.thread;
       state.unread = 0;
       drawPanel();

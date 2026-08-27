@@ -103,6 +103,11 @@ body.presenting .chatdock { display:none; }
          font-size:var(--fs-small); line-height:1.5; color:var(--ink-3);
          padding:7px 12px; border:1px dashed var(--line); border-radius:9px; }
 
+/* The send-in-flight line (§136): the handoff's register, one shade quieter
+   still — no border, because it is gone in a few seconds and a box that blinks
+   in and out draws the eye it exists to calm. */
+.chsys.chwait { border:none; padding:2px 12px; }
+
 .chmsg { max-width:84%; display:flex; flex-direction:column; gap:4px; }
 .chmsg .chwho { font-size:var(--fs-micro); color:var(--ink-3); font-weight:600;
                 display:flex; gap:6px; align-items:baseline; }

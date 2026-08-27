@@ -512,7 +512,19 @@ console errors (in this cloud environment, run it via a wrapper that points Play
   canonically, never by stringify — Postgres jsonb reorders `{by, at}` to
   `{at, by}` and an order-sensitive compare refuses innocent saves.**
   §117's .pptx download button is hidden for everyone (§132.9) — machinery
-  kept, `dlPlanBtn()` is one line to give back.
+  kept, `dlPlanBtn()` is one line to give back. **The second build
+  (§132.10–13):** collaborators are fillable (empty list only) and **a
+  pending name confers no reporting right** — `namedOn()` skips marked
+  fields, owner included; the objectives' **This year column shows by
+  default** (§66's toggle and saved choices untouched); and **the plan says
+  where it is owed** — `gapMap()`/`gapMissing()` are ONE list feeding the
+  Strategy tab's count, the rail's per-row counts, the fill-mode **gap
+  band** (§129's chip shape; a chip is a door that keeps fill mode on) and
+  the **Next gap** walker; counts rewrite IN PLACE via `gapBandRefresh()`
+  (§71.2 — never a repaint under a typing hand). `FILL_PAGES` keeps the
+  fill pen off u_anal (a pen that opens nothing, §61). **qa.py reads tab
+  NAMES with `.tbadge/.vh/.tabdot` stripped** — the badge made textContent
+  lie to two probes on a healthy build (§51.11).
 - **THE OWN COLUMNS ARE TWO QUESTIONS, AND §94'S LOCK IS A DEFAULT NOW (§117,
   partially reversing §94 at Islam's direction):** each own column on Roles &
   access splits into **Strategy** (the words as agreed — `a_unit_own_strat` /
@@ -836,7 +848,9 @@ console errors (in this cloud environment, run it via a wrapper that points Play
   now; the name-match is the fallback.
 - **The 1-year view on a unit's key objectives is a TOGGLE (§66):** §51.16's
   hard-coded `false` said "for now" in the code; this is the control it was
-  waiting for, and **it still starts hidden**. A screen preference
+  waiting for. **§132.11 reversed the DEFAULT to shown** (a missing near
+  target must be a visible red word); the toggle and every saved choice
+  survive. A screen preference
   (`smp.ko.year` in `localStorage`), never the state graph — one person seeing
   both horizons must not decide it for the tenant (§25, §47.1). **The unit's
   only**: the group's objectives have always shown both, so the control is

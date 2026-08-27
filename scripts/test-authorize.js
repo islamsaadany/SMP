@@ -1208,6 +1208,7 @@ console.log("\n16 · fill the gaps (§132, spec 021)");
     u.aspiration = "";
     u.items[0].measures[0].compile = "";
     u.items[0].tactics[0].owner = "";
+    u.items[0].tactics[0].collaborators = [];
     u.items[0].tactics[0].q1 = 0; u.items[0].tactics[0].q2 = 0;
     u.items[0].tactics[0].q3 = 0; u.items[0].tactics[0].q4 = 0;
     return s;
@@ -1327,6 +1328,46 @@ console.log("\n16 · fill the gaps (§132, spec 021)");
     });
     check("FILL: the same grant never renames a project", !v.ok, "was ALLOWED");
   }
+
+  /* 13 · collaborators join the fillable list (§132.10) — an empty list is
+     a gap, an existing one never opens, and A PENDING NAME CONFERS NO
+     REPORTING RIGHT until the office confirms: being named is what lets a
+     Contributor report the line (§50.2), so this is the half that makes
+     the reversal safe. */
+  s = gappy();
+  v = fromStored(s, custKey, function (i) {
+    const t = i.units[UNIT].items[0].tactics[0];
+    t.collaborators = ["Somebody Supporting"]; t.pend = { collaborators: MARK };
+  });
+  check("FILL: an empty collaborators list is fillable", v.ok, v.refusals.join(" / "));
+  s = gappy();
+  v = fromStored(s, custKey, function (i) {
+    const t = i.units[UNIT].items[0].tactics.filter(function (x) {
+      return (x.collaborators || []).length; })[0];
+    if (!t) { i.__skip = true; return; }
+    t.collaborators = t.collaborators.concat("Somebody Extra");
+    t.pend = Object.assign({}, t.pend, { collaborators: MARK });
+  });
+  check("FILL: adding to an EXISTING collaborators list refuses, mark or not",
+        !v.ok, "was ALLOWED");
+  (function () {
+    const t = { owner: "", collaborators: ["Test Person"],
+                pend: { collaborators: MARK } };
+    const who = { key: "tp", name: "Test Person" };
+    check("RIGHTS: a pending collaborator is not namedOn the line",
+          R.namedOn(t, who) === false);
+    delete t.pend;
+    check("RIGHTS: the same name counts the moment the mark lifts",
+          R.namedOn(t, who) === true);
+    const t2 = { owner: "Test Person", pend: { owner: MARK } };
+    check("RIGHTS: a pending owner is not namedOn either",
+          R.namedOn(t2, who) === false);
+  })();
+
+  /* 14 · u_anal never fills: a strategy page with no fillable field must
+     not draw the fill pen — a pen that opens nothing is §61's trap. */
+  check("mayFillPage: never the SWOT page",
+        R.mayFillPage(R.worldOf(gappy()), personOf(gappy(), custKey), "u_anal", UNIT) === false);
 
   /* 12 · the rule's own ends. */
   const wf = R.worldOf(gappy());

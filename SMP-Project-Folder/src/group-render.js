@@ -1929,6 +1929,66 @@ function pendBadge(acKey){
   if (!n || (!mayAuthor(acKey) && !mayFill(acKey))) return '';
   return '<span class="pendcount">' + n + ' awaiting confirmation</span>';
 }
+/* ── THE GAP BAND (§132.12): a map, not a march — §129's chip shape ────
+   One chip per place holding gaps, each reading the DATA (gapMap), press
+   to go; Next gap walks the fields. Drawn while the pen is open, for the
+   fill grant and the office — the people the counts are FOR (§69). */
+function gapChipInner(e){
+  return esc(e.label) + (e.count
+    ? '<span class="c">' + e.count + '</span>'
+    : '<span class="c ok">&#10003;</span>');
+}
+function gapTail(total){
+  if (total) return '<button type="button" class="nextgap" data-nextgap="1">' +
+    'Next gap &rarr;&nbsp;<span class="ngleft">' + total + ' left</span></button>';
+  var p = gapPendCount(TARGET);
+  return '<span class="gapdone">Nothing missing' +
+    (p ? ' &middot; ' + p + ' awaiting confirmation' : '') + '</span>';
+}
+function gapBand(page, acKey){
+  if (!EDIT_PAGE[page]) return '';
+  if (!mayFill(acKey) && !mayAuthor(acKey)) return '';
+  var map = gapMap(TARGET);
+  var chips = map.map(function(e){
+    return '<button type="button" class="gchip' + (e.count ? '' : ' clear') + '"' +
+      ' data-gkey="' + esc(e.key) + '"' +
+      ' data-gpage="' + esc(e.go.page) + '" data-gsec="' + esc(e.go.sec) + '"' +
+      (e.go.rail ? ' data-grail="' + esc(e.go.rail) + '" data-gcode="' +
+        esc(String(e.go.code == null ? "" : e.go.code)) + '"' : '') +
+      ' title="' + (e.count ? plural(e.count, "gap") + " to fill — press to go"
+                            : "Nothing missing here") + '">' +
+      gapChipInner(e) + '</button>';
+  }).join("");
+  return '<div class="gapband" data-gapband="1"><span class="lead">To fill</span>' +
+    chips + '<span class="gaptail">' + gapTail(gapTotal(TARGET)) + '</span></div>';
+}
+/* The counts rewritten IN PLACE after a fill — §63's write-into-the-node,
+   because a repaint here would destroy the field being typed into (§71.2).
+   The chips themselves are kept (their handler rides the band), only their
+   numbers move; the tab badge and the rail counts follow the same list. */
+function gapBandRefresh(){
+  var map = gapMap(TARGET), total = gapTotal(TARGET);
+  var band = document.querySelector('[data-gapband]');
+  if (band){
+    map.forEach(function(e){
+      var chip = band.querySelector('[data-gkey="' + CSS.escape(e.key) + '"]');
+      if (!chip) return;
+      chip.classList.toggle("clear", !e.count);
+      chip.innerHTML = gapChipInner(e);
+    });
+    var tail = band.querySelector(".gaptail");
+    if (tail) tail.innerHTML = gapTail(total);
+  }
+  var tb = document.querySelector('[data-gaptab]');
+  if (tb) { if (total) tb.textContent = total; else tb.remove(); }
+  document.querySelectorAll('[data-rgap]').forEach(function(el){
+    var e = map.filter(function(x){ return x.key === el.dataset.rgap; })[0];
+    if (!e) return;
+    el.classList.toggle("ok", !e.count);
+    el.innerHTML = e.count ? String(e.count) : "&#10003;";
+  });
+}
+
 /* The sentence over a page in fill mode — the contract, where the person
    is working, not in the knowledge base (§32's rule, one surface in). */
 function fillBar(page, acKey){
@@ -1939,7 +1999,10 @@ function fillBar(page, acKey){
 }
 function gapCell(page, acKey, row, field, opts){
   opts = opts || {};
-  var val = row[field];
+  /* `text` renders a stored shape as the string the field holds (a
+     collaborators ARRAY reads and types as "A, B"); `parse` is its way
+     back. §132.10's cell is why they exist — one pair, beside `num`. */
+  var val = opts.text ? opts.text(row) : row[field];
   var blank = SMPRules.gapBlank(val);
   var mark = SMPRules.pendOf(row)[field];
   var ed = authoring(page, acKey);
@@ -1969,16 +2032,25 @@ function gapCell(page, acKey, row, field, opts){
   /* `num` writes a number or null (§104.7's rule the other way round: the
      type comes from the field, and a numeric field must never store the
      string that would turn `tw += w` into concatenation). */
-  var put = function(v){ return opts.num ? ((v === "" || !isFinite(+v)) ? null : +v) : v; };
+  var put = function(v){
+    if (opts.parse) return opts.parse(v);
+    return opts.num ? ((v === "" || !isFinite(+v)) ? null : +v) : v;
+  };
+  var empty = function(){
+    return opts.parse ? opts.parse("") : (opts.num ? null : "");
+  };
   if (ed) {
     /* The office's ordinary field — writing it settles the value, which is
        why the setter lifts the mark: correcting is confirming. */
-    return draw(function(v){ row[field] = put(v); gapLift(row, field); });
+    return draw(function(v){
+      row[field] = put(v); gapLift(row, field); gapBandRefresh();
+    });
   }
   if (fl && (blank || mark)) {
     return draw(function(v){
-      if (SMPRules.gapBlank(v)) { row[field] = opts.num ? null : ""; gapLift(row, field); }
+      if (SMPRules.gapBlank(v)) { row[field] = empty(); gapLift(row, field); }
       else { row[field] = put(v); gapStamp(row, field); }
+      gapBandRefresh();
     }, mark ? "pendfld" : "gapfld");
   }
   /* Read — and fill mode on a settled value reads too. */
@@ -2253,7 +2325,8 @@ function renderUnitFoundation(u){
      no way to add — so a from-scratch unit could not say who it is at all
      (§61's trap on the oldest surface in the product). The lead opens with
      the pen because the leads are the unit's own words, not a fixed form. */
-  return '<div class="fgrid"><div class="card"><h2 class="sec first">Who we are</h2>' +
+  return gapBand("foundation", "u_found") +
+    '<div class="fgrid"><div class="card"><h2 class="sec first">Who we are</h2>' +
       '<dl style="margin:0">' +
       u.clauses.map(function(c, ci){
         return '<div class="clause"><dt>' +
@@ -2781,6 +2854,13 @@ function railFor(list, sel, numOf, subOf, groupOf, footNote, codeOf, opts){
         '" data-oi="' + i + '">' +
         (opts.arranging ? handle("Reorder " + it.name) : '') +
         railName(code, it.name) +
+        /* §132.12: the row's own count of gaps to fill, for whoever can act
+           on them — drawn only while it is not zero, rewritten in place as
+           fills land. Optional and last, so the other callers are untouched. */
+        (opts.gapOf && opts.gapOf(it)
+          ? '<span class="rgap" data-rgap="pr:' + esc(it.id) + '" title="' +
+            plural(opts.gapOf(it), "gap") + ' to fill">' + opts.gapOf(it) + '</span>'
+          : '') +
         /* NO NUMBER MEANS NO ELEMENT. An empty `.rnum` still takes its column in
          the row's grid, so a rail with nothing to show on the right laid its
          names out as though something were there — the unit's Plan rail, which
@@ -3375,7 +3455,7 @@ function renderFnProjects(fnKey){
      a unit and a function are the same product, and a button removed from one
      side of the navigation switch and left on the other is exactly the drift
      that rule exists to stop. */
-  return caps.map(function(c){
+  return gapBand("plan", "k_proj") + caps.map(function(c){
     var sel = railPick(c);
     /* AN EMPTY CAPABILITY IS WHERE THE FIRST PROJECT GOES (§61's lesson, the
        same shape): the note said "No projects yet" and offered nothing, so the
@@ -3407,7 +3487,10 @@ function renderFnProjects(fnKey){
            in the grid (the note on railFor says so). */
         alarmOf: function(p){
           var n = planAttention(p);
-          return n ? '<span class="missing">' + plural(n, "row") + ' to check</span>' : ''; } });
+          return n ? '<span class="missing">' + plural(n, "row") + ' to check</span>' : ''; },
+        gapOf: (typeof seesGaps === "function" && seesGaps())
+          ? function(p){ return SMPRules.gapMissing("project", p).length; }
+          : null });
     /* splitOrPane() drops the rail below railWorthIt()'s threshold, which is
        right for reading and wrong while a plan is being authored: with one
        project there would be nowhere to press Add. */
@@ -3640,10 +3723,20 @@ function unitRailFor(u, sel){
        `data-urail` is the rail's selection key and unitRailPick() matches on
        `it.code`. Change that and the rail stops being able to find the pillar
        it just selected. */
+    /* §132.12: which pillar owes what, for the people who can act on it —
+       drawn only while it owes something (§41's budget), and rewritten in
+       place as fills land (gapBandRefresh finds it by data-rgap). */
+    var gaps = 0;
+    if (typeof seesGaps === "function" && seesGaps()) {
+      (it.measures || []).forEach(function(m){ gaps += SMPRules.gapMissing("measure", m).length; });
+      (it.tactics  || []).forEach(function(x){ gaps += SMPRules.gapMissing("tactic", x).length; });
+    }
     return '<button class="ritem' + (it.code === sel.code ? " on" : "") + '" data-urail="' +
         esc(u.ukey) + '|' + esc(it.code) + '" data-oi="' + i + '">' +
         (on ? handle("Reorder " + it.name) : '') +
         railName(pillarCode(u, i), it.name) +
+        (gaps ? '<span class="rgap" data-rgap="p:' + esc(it.code || String(i)) +
+          '" title="' + plural(gaps, "gap") + ' to fill">' + gaps + '</span>' : '') +
         /* Both counts, both labelled, on one line. It used to put the tactics
            count in the small line and the MEASURES count as a bare number on
            the right - two numbers, one of them unlabelled, and nothing saying
@@ -3810,9 +3903,14 @@ function unitPlanBody(it, u, railed){
          SAME pen that corrects the rest of the plan, and behind the same gate
          (§31): who is named on a tactic decides who may report it, so it is
          not a field the people being measured hold. */
-      '<td class="collabs">' + (ed
-        ? inputOr("plan", collabText(t), "", function(v){ t.collaborators = collabParse(v); })
-        : collabCell(t)) + '</td>' +
+      /* §132.10: collaborators join the fillable fields (Islam: "it's
+         optional anyway") — an EMPTY list is a gap, an existing one never
+         opens to the filler, and a pending name confers no reporting right
+         until the office confirms (namedOn skips marked fields). Read mode
+         keeps §15.1's em-dash: nobody supporting is an ordinary answer. */
+      '<td class="collabs">' + gapCell("plan", "u_plan", t, "collaborators",
+        { text: collabText, parse: collabParse,
+          readEmpty: '<span class="nobody">&mdash;</span>' }) + '</td>' +
       /* Quarters (§132): only a tactic naming NO quarter is a gap, and while
          its fill is pending the four stay the filler's — read mode carries
          the same chip and tick every other pending value wears. */
@@ -3914,7 +4012,8 @@ function renderUnitPlan(u){
      renderGroupFoundation(), which rendered the literal word "undefined" for
      versions; the note is here so the next deletion of a leading term does not
      re-earn it. */
-  return (arranging("unit", u.ukey)
+  return gapBand("plan", "u_plan") +
+    (arranging("unit", u.ukey)
       ? '<p class="sec-hint">' + u.items.length + ' ' + L("pillar","bu").toLowerCase() +
         ' &middot; drag by the handle to reorder, here and inside each ' +
         L("pillar","bu").toLowerCase().replace(/s$/, "") + '</p>' : '') +
@@ -3950,7 +4049,8 @@ function renderFnFoundation(fnKey){
   /* §132: the fill grant opens the same editor, whose gap cells then draw
      only the blanks — Add and Remove stay the author's. */
   var fl = filling("capfoundation", "k_found");
-  return editBar("capfoundation", "k_found") + fillBar("capfoundation", "k_found") +
+  return editBar("capfoundation", "k_found") + gapBand("capfoundation", "k_found") +
+    fillBar("capfoundation", "k_found") +
     caps.map(function(c){
     var f = functionOf(c.fn);
     /* A CAPABILITY'S OBJECTIVES CAN FINALLY BE AUTHORED HERE (§129's audit).

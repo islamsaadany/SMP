@@ -55,11 +55,20 @@ with sync_playwright() as p:
 
     who = pg.evaluate("""() => {
       const u = "mobile";
+      const world_ = world();
+      const bystander = PEOPLE.filter(p => {
+        if (!personActive(p) || !p.unit) return false;
+        const rs = SMPRules.personRoles(world_, p);
+        return rs.every(r => ["owner","custodian","fnhead","super","smoteam"]
+          .indexOf(r.role) < 0);
+      })[0];
       return { unit: u,
                smo: PEOPLE.filter(p => p.role === "super")[0].key,
-               cust: (UNIT_ROLES[u] || {}).custodian };
+               cust: (UNIT_ROLES[u] || {}).custodian,
+               floor: bystander ? bystander.key : null,
+               floorUnit: bystander ? bystander.unit : null };
     }""")
-    print("unit %(unit)s · smo %(smo)s · custodian %(cust)s" % who)
+    print("unit %(unit)s · smo %(smo)s · custodian %(cust)s · floor %(floor)s" % who)
 
     # ── 1 · THE MATRIX OFFERS THE THIRD STATE, ON THE RIGHT CELLS ONLY ──
     print("\n1 · the third toggle, where it belongs and nowhere else")
@@ -90,9 +99,15 @@ with sync_playwright() as p:
     pg.evaluate("""(u) => {
       const x = UNITS[u];
       x.items[0].measures[0].compile = "";
-      x.items[0].tactics[0].owner = "";
       const t = x.items[0].tactics[0];
+      t.owner = ""; t.collaborators = [];
       t.q1 = 0; t.q2 = 0; t.q3 = 0; t.q4 = 0;
+      /* Every OTHER tactic on this pillar gets a collaborator, so the
+         fixture holds exactly one collaborators gap and the counts below
+         are deterministic (§132.10 made empty lists gaps). */
+      x.items[0].tactics.slice(1).forEach(tt => {
+        if (!(tt.collaborators || []).length) tt.collaborators = ["Somebody"];
+      });
       x.keyObjectives[0].target = "";
       paint();
     }""", who["unit"])
@@ -114,7 +129,8 @@ with sync_playwright() as p:
       handles: document.querySelectorAll('.pane .handle, .pane [draggable]').length,
       fields:  document.querySelectorAll('.pane .fld').length,
       bar:     !!document.querySelector('.pane .fillbar, .fillbar') })""")
-    ck("the two blank cells draw fill fields", shape["gaps"] == 2, shape)
+    ck("the three blank cells draw fill fields (compile, owner, collaborators)",
+       shape["gaps"] == 3, shape)
     ck("the no-quarter tactic draws the four fill buttons", shape["qfill"] == 4, shape)
     ck("no add row in fill mode", shape["adds"] == 0, shape)
     ck("no remove × in fill mode", shape["offs"] == 0, shape)
@@ -265,6 +281,128 @@ with sync_playwright() as p:
        not r.get("none") and r["target"] == "EGP 9.9bn" and r["pend"], r)
     ck("no Add and no Remove in the KO band's fill mode",
        not r.get("none") and r["adds"] == 0 and r["rms"] == 0, r)
+
+    # ── 8 · COLLABORATORS FILL, AND THE RIGHT WAITS (§132.10) ───────────
+    print("\n8 · collaborators fill, and the reporting right waits")
+    be(pg, who["cust"], who["unit"], "strategy", "plan")
+    pg.click('.pane .paneact .penbtn[data-page="plan"]'); pg.wait_for_timeout(400)
+    r = pg.evaluate("""(w) => {
+      const inp = document.querySelector('td.collabs .fld.gapfld');
+      if (!inp) return { none: true };
+      inp.value = "New Helper, Second Helper";
+      inp.dispatchEvent(new Event('change', { bubbles: true }));
+      const t = UNITS[w.unit].items[0].tactics[0];
+      return { list: t.collaborators, pend: !!(t.pend && t.pend.collaborators),
+               named: SMPRules.namedOn(t, { key: "nh", name: "New Helper" }) };
+    }""", who)
+    ck("a typed list parses into the array and wears the mark",
+       not r.get("none") and r["list"] == ["New Helper", "Second Helper"] and r["pend"], r)
+    ck("...and the pending name confers NO reporting right (§50.2 held)",
+       r.get("named") is False, r)
+    r = pg.evaluate("""(w) => {
+      const t = UNITS[w.unit].items[0].tactics[0];
+      delete t.pend.collaborators;
+      if (!Object.keys(t.pend).length) delete t.pend;
+      return SMPRules.namedOn(t, { key: "nh", name: "New Helper" });
+    }""", who)
+    ck("...and counts the moment the mark lifts", r is True)
+    pg.click('.pane .paneact .penbtn[data-page="plan"]'); pg.wait_for_timeout(300)
+
+    # ── 9 · THE COUNTS THAT FIND YOU (§132.12) ──────────────────────────
+    print("\n9 · the tab badge, the rail counts, the band and the walker")
+    be(pg, who["cust"], who["unit"], "strategy", "plan")
+    r = pg.evaluate("""() => ({
+      badge: (document.querySelector('[data-gaptab]') || {}).textContent || null,
+      total: gapTotal(TARGET),
+      rail: document.querySelectorAll('[data-rgap]').length,
+      band: !!document.querySelector('[data-gapband]') })""")
+    ck("the Strategy tab wears the count, in read mode",
+       r["badge"] is not None and r["badge"] == str(r["total"]) and r["total"] > 0, r)
+    ck("the rail says which pillar owes", r["rail"] >= 1, r)
+    ck("the band waits for the pen (fill mode only)", r["band"] is False, r)
+    if who["floor"]:
+        be(pg, who["floor"], who["floorUnit"], "strategy", "plan")
+        ck("somebody with no control to clear it sees no badge (§69)",
+           pg.query_selector('[data-gaptab]') is None)
+    be(pg, who["cust"], who["unit"], "strategy", "plan")
+    pg.click('.pane .paneact .penbtn[data-page="plan"]'); pg.wait_for_timeout(400)
+    r = pg.evaluate("""() => {
+      const band = document.querySelector('[data-gapband]');
+      const chips = [...band.querySelectorAll('[data-gkey]')];
+      const map = gapMap(TARGET);
+      const agree = map.every(e => {
+        const c = band.querySelector('[data-gkey="' + CSS.escape(e.key) + '"]');
+        if (!c) return false;
+        const n = c.querySelector('.c').textContent.trim();
+        return e.count ? n === String(e.count) : n === "\\u2713";
+      });
+      return { chips: chips.length, places: map.length, agree,
+               next: !!band.querySelector('[data-nextgap]') };
+    }""")
+    ck("the band draws one chip per place", r["chips"] == r["places"] and r["chips"] > 0, r)
+    ck("...and every chip agrees with the data it counts", r["agree"] is True, r)
+    ck("...with the walker beside them", r["next"] is True, r)
+
+    pg.evaluate("() => document.querySelector('[data-nextgap]').click()")
+    pg.wait_for_timeout(200)
+    lit = pg.evaluate("() => document.querySelectorAll('.gaplit').length")
+    ck("Next gap lands the ring on a fillable field", lit == 1, lit)
+
+    # a fill moves the counts IN PLACE — no repaint, the typed field survives
+    r = pg.evaluate("""(w) => {
+      const t = UNITS[w.unit].items[0].tactics[0];
+      const chip = document.querySelector('[data-gapband] [data-gkey^="p:"]');
+      const before = chip.querySelector('.c').textContent.trim();
+      const inp = document.querySelector('.pane .fld.gapfld');
+      inp.value = "Somebody Named";
+      inp.dispatchEvent(new Event('change', { bubbles: true }));
+      const after = chip.querySelector('.c').textContent.trim();
+      const badge = (document.querySelector('[data-gaptab]') || {}).textContent;
+      return { before, after, badge, total: gapTotal(TARGET) };
+    }""", who)
+    want = pg.evaluate(
+        "(w) => gapMap(TARGET).filter(e => e.key.indexOf('p:') === 0)[0].count", who)
+    ck("a fill ticks the chip down in place, no repaint",
+       r["before"] != r["after"] and
+       r["after"] == (str(want) if want else "✓"), (r, want))
+    ck("...and the tab badge follows", r["badge"] == str(r["total"]), r)
+
+    # a chip is a door: it navigates AND keeps fill mode on where it lands
+    pg.evaluate("""() => {
+      document.querySelector('[data-gapband] [data-gkey="found"]').click();
+    }""")
+    pg.wait_for_timeout(400)
+    r = pg.evaluate("""() => ({
+      sec: CURSEC[currentSub], pen: EDIT_PAGE.foundation,
+      band: !!document.querySelector('[data-gapband]') })""")
+    ck("a chip walks to Foundation with the mode kept on",
+       r["sec"] == "found" and r["pen"] is True and r["band"] is True, r)
+
+    # the SWOT page never fills: a pen that opens nothing is not drawn
+    be(pg, who["cust"], who["unit"], "strategy", "anal")
+    ck("no fill pen on the Analysis page (u_anal has no fillable field)",
+       pg.query_selector('[data-page="analysis"]') is None)
+
+    # ── 10 · THIS YEAR SHOWS BY DEFAULT (§132.11) ───────────────────────
+    print("\n10 · the This-year column defaults to shown, saved choices win")
+    pg2 = b.new_page()
+    pg2.goto(URL); pg2.wait_for_timeout(1200)
+    r = pg2.evaluate("""(w) => {
+      try { localStorage.removeItem("smp.ko.year"); } catch (e) {}
+      VIEWER = w.smo; leaveModes(); current = w.unit;
+      currentSub = "strategy"; CURSEC.strategy = "found";
+      KO_VIEW = "cols"; paint();
+      const oh = document.querySelector(".ohead");
+      return { on: SHOW_KO_THIS_YEAR,
+               cols: oh ? oh.querySelectorAll("span").length : null };
+    }""", who)
+    ck("a fresh browser shows both horizons", r["on"] is True and r["cols"] == 3, r)
+    r = pg2.evaluate("""() => {
+      setKoThisYear(false);
+      return localStorage.getItem("smp.ko.year");
+    }""")
+    ck("...and a person's explicit choice is stored to win next time", r == "0", r)
+    pg2.close()
 
     print("")
     ck("no page errors anywhere in the run", not errs, "; ".join(errs[:3]))

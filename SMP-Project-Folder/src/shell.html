@@ -1567,12 +1567,22 @@
        and one class carrying both is how the dot came to mean nothing. It
        paints to the RIGHT (Islam), which is also where it belongs — a mark
        AFTER the word annotates it; a mark before it is a bullet. */
+    /* \u00a7132.12: THE COUNT FINDS YOU. The strategy tab wears the number of
+       gaps this viewer could act on \u2014 the fill grant and the office only
+       (\u00a769: never a nag with no control to clear it), and only while it
+       is not zero (\u00a741's budget). One list behind it: gapMap(). */
+    var gapsHere = (typeof seesGaps === "function" && seesGaps()) ? gapTotal(TARGET) : 0;
     document.getElementById("subtabs").innerHTML = railed ? "" : defs.map(function(d){
       var cls = (d.primary ? "primary" : "") +
         (d.dot && reportPending(TARGET) ? " dot" : "");
       return '<button role="tab" data-s="' + d.k + '"' +
         (cls.trim() ? ' class="' + cls.trim() + '"' : '') +
         ' aria-selected="' + (d.k === currentSub) + '">' + d.label +
+        ((d.k === "strategy" || d.k === "fnstrat") && gapsHere
+          ? '<span class="tbadge" data-gaptab="1" title="' +
+            plural(gapsHere, "gap") + ' to fill in this plan">' + gapsHere + '</span>' +
+            '<span class="vh"> \u2014 ' + gapsHere + ' to fill</span>'
+          : '') +
         (d.dot && reportPending(TARGET)
           ? '<i class="tabdot" aria-hidden="true"></i>' +
             '<span class="vh"> \u2014 not submitted yet</span>'
@@ -1867,6 +1877,29 @@
 
   function fieldSaved(){
     if (typeof SYNC !== "undefined" && SYNC.afterPaint) SYNC.afterPaint();
+  }
+  /* ── NEXT GAP (§132.12): walk the fillable blanks on this page ─────────
+     Field to field in document order, wrapping; the ring says which one the
+     press landed on. When the page holds none, the walk goes to the first
+     PLACE still owing — through the band's own chip, so the two ways of
+     moving cannot disagree about where a place is. */
+  function gapWalk(){
+    var els = [].slice.call(document.querySelectorAll(".fld.gapfld, .qs-fill"));
+    if (!els.length){
+      var chip = document.querySelector("[data-gapband] .gchip:not(.clear)");
+      if (chip) chip.click();
+      return;
+    }
+    var cur = document.activeElement, at = -1;
+    for (var i = 0; i < els.length; i++)
+      if (cur && (els[i] === cur || els[i].contains(cur))) { at = i; break; }
+    var next = els[(at + 1) % els.length];
+    els.forEach(function(e){ e.classList.remove("gaplit"); });
+    next.classList.add("gaplit");
+    next.scrollIntoView({ block: "center" });
+    var f = next.matches("input,select,textarea")
+      ? next : next.querySelector("button,input,select,textarea");
+    if (f) f.focus({ preventScroll: true });
   }
   function wire(){
     document.querySelectorAll("#subtabs button").forEach(function(b){
@@ -4889,6 +4922,26 @@
         gapLift(e.row, e.field);
         paint();
       });
+    });
+    /* ── THE GAP BAND'S CHIPS AND WALKER (§132.12) ─────────────────────
+       ONE handler on the band, by delegation: gapBandRefresh() rewrites the
+       chips' contents in place between paints (a repaint would destroy the
+       field being typed into, §71.2), so the handler must not live on the
+       nodes being rewritten. A chip is a door: it keeps fill mode on for the
+       page it lands on, because the band exists only while somebody is
+       filling and a door that closed the mode behind it would strand them. */
+    var gband = document.querySelector("[data-gapband]");
+    if (gband) gband.addEventListener("click", function(ev){
+      var chip = ev.target.closest("[data-gkey]");
+      if (chip){
+        if (chip.dataset.gpage) EDIT_PAGE[chip.dataset.gpage] = true;
+        if (chip.dataset.gsec) CURSEC[currentSub] = chip.dataset.gsec;
+        if (chip.dataset.grail) RAIL[chip.dataset.grail] = chip.dataset.gcode;
+        paint();
+        if (typeof toPaneTop === "function") toPaneTop();
+        return;
+      }
+      if (ev.target.closest("[data-nextgap]")) gapWalk();
     });
 
     document.querySelectorAll("[data-rowoff]").forEach(function(b){

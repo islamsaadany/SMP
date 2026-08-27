@@ -4596,6 +4596,66 @@ function gapPendRows(target){
   return out;
 }
 function gapPendCount(target){ return gapPendRows(target).length; }
+
+/* ── WHERE THE MISSING THINGS ARE (§132.12) ─────────────────────────────
+   One map of every place holding gaps, counted through the shared
+   `gapMissing()` — the tab badge, the rail counts and the band's chips all
+   read THIS list, so a count can never disagree with the fields it points
+   at (§116.2: the count and the queue are one list). Each entry names how
+   to GET there, in the navigation's own words. */
+function gapMap(target){
+  var t = String(target || ""), out = [];
+  var G = SMPRules.gapMissing;
+  var entry = function(key, label, count, go){
+    out.push({ key: key, label: label, count: count, go: go });
+  };
+  var unitHalf = function(u){
+    if (!u) return;
+    var found = G("unit", u).length;
+    entry("found", "Foundation", found, { sec: "found", page: "foundation" });
+    var ko = 0;
+    (u.keyObjectives || []).forEach(function(m){ ko += G("ko", m).length; });
+    entry("ko", "Objectives", ko, { sec: "found", page: "foundation" });
+    (u.items || []).forEach(function(p, i){
+      var n = 0;
+      (p.measures || []).forEach(function(m){ n += G("measure", m).length; });
+      (p.tactics  || []).forEach(function(x){ n += G("tactic", x).length; });
+      entry("p:" + (p.code || i), pillarCode(u, i), n,
+            { sec: "plan", page: "plan", rail: unitRailKey(u), code: p.code });
+    });
+  };
+  if (t.indexOf("fn:") === 0) {
+    var fk = t.slice(3), fo = functionOf(fk);
+    if (fo && String(fo.format) === "pillars") { unitHalf(unitLike(t)); return out; }
+    var caps = capsOfFunction(fk), ov = 0;
+    caps.forEach(function(c){
+      (c.keyObjectives || []).forEach(function(m){ ov += G("capko", m).length; });
+    });
+    entry("ov", "Overview", ov, { sec: "found", page: "capfoundation" });
+    caps.forEach(function(c){
+      (c.projects || []).forEach(function(p){
+        /* The projects rail is per CAPABILITY (railKeyFor), and it selects
+           by project id — the same pair the rail's own rows write. */
+        entry("pr:" + p.id, projCode(fk, p), G("project", p).length,
+              { sec: "proj", page: "plan", rail: "cap:" + c.id, code: p.id });
+      });
+    });
+  } else {
+    unitHalf(UNITS[t]);
+  }
+  return out;
+}
+function gapTotal(target){
+  return gapMap(target).reduce(function(a, e){ return a + e.count; }, 0);
+}
+/* Who the counts are FOR: somebody who can act on them — the fill grant or
+   the office. A plain reader never sees a nag they cannot clear (§69). */
+function seesGaps(target){
+  var t = target === undefined ? TARGET : target;
+  return SMPRules.FILL_PAGES.some(function(pg){
+    return mayFill(pg, t) || mayAuthor(pg, t);
+  });
+}
 /* Only the fields a score reads block a submission — a pending owner or
    date changes no figure's meaning (§132, Islam's boundary). */
 function gapScoreWait(target){
@@ -4649,8 +4709,17 @@ function avg(a){
    rail's terse switch. One person deciding to see both horizons must not
    decide it for the whole tenant, and a toggle that autosaved would. */
 var KO_YEAR_KEY = "smp.ko.year";
+/* §132.11 REVERSES §66's DEFAULT (Islam: "let the this year objective
+   clicked by default so it can be filled as missing as well"): absent now
+   reads as SHOWN, so a missing near target is a visible red word instead
+   of a hidden column. The toggle stays, and a person's SAVED choice still
+   wins in both directions — the stored value is an explicit "1"/"0", so
+   nobody who ever pressed the button moves (§30.2's shape). */
 var SHOW_KO_THIS_YEAR = (function(){
-  try { return localStorage.getItem(KO_YEAR_KEY) === "1"; } catch (e) { return false; }
+  try {
+    var v = localStorage.getItem(KO_YEAR_KEY);
+    return v === null ? true : v === "1";
+  } catch (e) { return true; }
 })();
 function setKoThisYear(on){
   SHOW_KO_THIS_YEAR = !!on;

@@ -48,7 +48,7 @@ null/undefined/whitespace — a typed `0` is a value (§104.10).
 | unit / function (page `u_found`) | `aspiration` |
 | key objective (`u_found`) | `dir`, `target`, `target3y`, `compile` |
 | key measure (`u_plan`) | `dir`, `target`, `compile` |
-| tactic (`u_plan`) | `owner`; **quarters as a group** — fillable only when none of q1–q4 is marked (§119.1: a single blank quarter is saying something; four blanks say nothing) |
+| tactic (`u_plan`) | `owner`; `collaborators` (§132.10 — an empty list only, and a pending name confers no reporting right until confirmed, since §50.2 makes naming a rights grant); **quarters as a group** — fillable only when none of q1–q4 is marked (§119.1: a single blank quarter is saying something; four blanks say nothing) |
 | capability key objective (`k_found`) | `dir`, `target`, `compile`, `weight` |
 | project front matter (`k_proj`) | `owner`, `start`, `end` |
 
@@ -59,8 +59,22 @@ quadrant stays the office's); deliverable/outcome/milestone fields; End in
 mind (optional by design, §45.2 — not a gap).
 
 **Never in fill mode:** adding or removing rows, renaming anything,
-reordering (its own grant, §101, untouched), collaborators (§50.2: they
-decide who may report), anything on the group's own pages.
+reordering (its own grant, §101, untouched), anything on the group's own
+pages, and the SWOT page entirely (`FILL_PAGES` — a strategy page with no
+fillable field must not draw the pen, §132.13).
+
+## 10 · Finding the gaps (§132.11–12, second build)
+
+- The unit objectives' **This year column shows by default** (reversing
+  §66's default, keeping its toggle and every saved choice).
+- **One list** (`gapMap()` over the shared `gapMissing()`) feeds three
+  layers: a count on the Strategy tab and per-row rail counts (read mode
+  too, fill grant and office only, only while non-zero); the **gap band**
+  in fill mode — §129's chip map, one chip per place, ✓ when clear, a chip
+  is a door that keeps fill mode on where it lands; and **Next gap**, which
+  walks the fillable blanks with a landing ring and crosses places through
+  the band's own chips. Counts are rewritten in place on every fill —
+  never a repaint (§71.2).
 
 ## 4 · The pending mark
 

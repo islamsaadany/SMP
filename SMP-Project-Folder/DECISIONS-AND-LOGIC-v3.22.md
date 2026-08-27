@@ -17140,3 +17140,79 @@ settled). `checks/strategy-split.py` asserts the button absent on BOTH
 surfaces (§119.9's fault inverted would be hiding one) for every viewer,
 while the dormant builder is still proved through a direct call — a check
 written against the problem survives the button's return (§94.8).
+
+### 132.10 Collaborators join the fillable list, and the right waits (reversing §132.2's exclusion)
+
+Islam: *"make the collaborators as well can be added — it's optional
+anyway."* The exclusion was mine and the reversal is his; what makes it safe
+to build is the half he approved from the mockup's amber note: **being named
+on a tactic is what lets a Contributor report that line (§50.2), so a
+pending name confers NO reporting right until the office confirms it.**
+`namedOn()` skips any field still wearing the mark — field by field, because
+an owner confirmed long ago must not lose their line over a collaborator
+still pending beside them — and the same rule covers a pending OWNER, which
+had the identical hole. An empty list is a gap; an existing list never opens
+to the filler; `gapCell` grew the `text`/`parse` pair (collabText /
+collabParse) so an array reads and types as the sentence it always was.
+
+### 132.11 This year shows by default (reversing §66's default, not its toggle)
+
+Islam: *"let the this year objective clicked by default so it can be filled
+as missing as well."* §66's control survives untouched — what flips is what
+ABSENT means: a browser that never chose now shows both horizons, so a
+missing near target is a visible red word instead of a hidden column. The
+stored value is an explicit "1"/"0", so everybody who ever pressed the
+toggle keeps exactly what they chose, in both directions (§30.2's shape).
+
+### 132.12 The plan says where it is owed (the finding experience)
+
+Islam: *"we need some sort of identification for the user where missing
+things are so he can fill and fill all."* Three layers, each a shape the
+product already owns, all counting through ONE list (`gapMap()` reading the
+shared `gapMissing()` — §116.2: the count and the queue are one list, or
+the counts disagree with the fields they point at):
+
+- **The count finds you.** The Strategy tab wears the number of gaps and
+  each rail row wears its own — in read mode too, drawn only for the fill
+  grant and the office (§69: never a nag with no control to clear it) and
+  only while not zero (§41's budget).
+- **The gap band** appears with the pen: §129's builder-band chip map
+  re-used — one chip per place, counts read live, ✓ when clear, press to
+  go. **A chip is a door that keeps fill mode on where it lands**, because
+  the band exists only while somebody is filling and a door that closed the
+  mode behind it would strand them mid-walk.
+- **Next gap** walks the fillable blanks in document order with a landing
+  ring (`prefers-reduced-motion` respected); when the page holds none it
+  goes to the first place still owing — through the band's own chip, so
+  the two ways of moving cannot disagree about where a place is.
+
+**THE COUNTS MOVE WITHOUT A REPAINT.** A repaint on field-change would
+destroy the box being typed into (§71.2), so `gapBandRefresh()` rewrites
+the chips, the tab badge and the rail counts IN PLACE (§63's
+write-into-the-node), and the band's controls ride a delegated handler on
+the band itself so the rewrite cannot orphan them. **The check caught the
+design being better than its own assertion**: the pillar chip's last fill
+turned it into the ✓, and the assertion expecting a digit went red on a
+correct build — §68.10's class, fixed in the check.
+
+**AND THE TAB GREW TEXT A CHECK WAS READING** (§51.11, §93.7's drill): the
+badge and its screen-reader line made `textContent` read "Strategy22 — 22
+to fill", and qa.py's PARITY and LANDING probes went red on a healthy
+build. The two readers now strip `.tbadge/.vh/.tabdot` before comparing —
+the name, not its annotations.
+
+### 132.13 A pen that opens nothing is not drawn
+
+Found by writing §132.12's map, fixing a §132 gap: `mayFillPage()` answered
+true for u_anal — a strategy page with NO fillable field (the SWOT is rows,
+and rows are never fill mode's) — so a fill holder was offered a pen that
+opened nothing: §61's trap wearing §132's clothes. `FILL_PAGES` names the
+four pages `GAP_FIELDS` actually reaches, and the check asserts the absence.
+
+Proof, §132.10–13 together: `test-authorize.js` grows to 237 (collaborator
+fill, existing-list refusal, the three rights assertions, the u_anal
+refusal); `checks/gap-fill.py` grows sections 8–10 (the parse-and-mark, the
+right waiting and lifting, the badge/rail/band agreeing with `gapMap`, the
+walker's ring, the in-place tick-down, the chip-as-door, the floor viewer's
+absent badge, the fresh-browser default and the stored choice winning); the
+full qa walk and eleven suites green.

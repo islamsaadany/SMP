@@ -4887,6 +4887,51 @@
   .qs-fill .qtog.on { background:var(--attn-bg); color:var(--attn-tx);
     border-color:var(--attn); }
 
+  /* ── FINDING THE GAPS (§132.12) ──────────────────────────────────────
+     The counts that find you, and the band that walks them. Every count
+     wears the attn pill pair — the measured amber the pending marks wear —
+     because a count of gaps and a pending value are one story. */
+  .tabs .tbadge { display:inline-block; margin-left:6px; background:var(--attn-bg);
+    color:var(--attn-tx); border:1px solid var(--attn); border-radius:16px;
+    font-size:10px; font-weight:700; line-height:1.5; padding:0 6px;
+    vertical-align:1px; }
+  .ritem .rgap { display:inline-block; margin-left:7px; background:var(--attn-bg);
+    color:var(--attn-tx); border:1px solid var(--attn); border-radius:16px;
+    font-size:9.5px; font-weight:700; line-height:1.5; padding:0 6px;
+    vertical-align:1px; }
+  .ritem .rgap.ok { background:none; border-color:transparent; color:var(--good);
+    font-size:12px; }
+  .gapband { display:flex; gap:7px; align-items:center; flex-wrap:wrap;
+    background:var(--surface); border:1px solid var(--line); border-radius:9px;
+    padding:7px 10px; margin:0 0 12px; }
+  .gapband .lead { font-size:10.5px; font-weight:700; letter-spacing:.07em;
+    text-transform:uppercase; color:var(--ink-3); margin-right:2px; }
+  .gchip { border:1px solid var(--line); background:var(--surface);
+    color:var(--ink-2); border-radius:18px; font-size:12px; padding:3px 11px;
+    cursor:pointer; font-weight:600; font-family:inherit; }
+  .gchip:hover { border-color:var(--gold-deep); }
+  .gchip:focus-visible, .nextgap:focus-visible { outline:2px solid var(--gold-deep);
+    outline-offset:1px; }
+  .gchip .c { display:inline-block; background:var(--attn-bg); color:var(--attn-tx);
+    border:1px solid var(--attn); font-size:10px; font-weight:700; min-width:16px;
+    border-radius:9px; text-align:center; line-height:1.5; margin-left:6px;
+    padding:0 4px; vertical-align:1px; }
+  .gchip.clear { color:var(--ink-3); }
+  .gchip.clear .c, .gchip .c.ok { background:none; border-color:transparent;
+    color:var(--good); font-size:12px; min-width:0; }
+  .nextgap { margin-left:auto; border:1px solid var(--attn); background:var(--attn-bg);
+    color:var(--attn-tx); border-radius:8px; font-size:12.5px; font-weight:700;
+    padding:5px 13px; cursor:pointer; font-family:inherit; }
+  .nextgap:hover { border-color:var(--attn-tx); }
+  .gapdone { margin-left:auto; color:var(--good-tx); font-size:12.5px;
+    font-weight:600; }
+  /* The walker's landing ring. */
+  .gaplit { outline:2px solid var(--attn); outline-offset:2px;
+    animation:gapring 1s ease-out; }
+  @keyframes gapring { 0% { outline-offset:6px; outline-width:3px; }
+                       100% { outline-offset:2px; outline-width:2px; } }
+  @media (prefers-reduced-motion: reduce){ .gaplit { animation:none; } }
+
   /* ── Presentation mode ────────────────────────────────────────────
      A mode, not a page: it takes the whole window, the app chrome disappears,
      and Exit returns to exactly where the presenter was standing.
@@ -7029,8 +7074,15 @@ THEME.apply();
     /* `quarters` is VIRTUAL and covers q1–q4 as one mark: a tactic set to
        Q2 and Q3 is saying something by leaving Q1 and Q4 empty (§119.1),
        so only a tactic with NO quarter at all is a gap (§128) — and while
-       that fill is pending the four move together. */
-    tactic:  ["owner", "quarters"],
+       that fill is pending the four move together.
+
+       `collaborators` joined at Islam's direction (§132.10, reversing
+       this section's own first exclusion): an EMPTY list is a gap, an
+       existing list is never the filler's — and because being named is
+       what lets a Contributor report the line (§50.2), a pending name
+       CONFERS NOTHING until the office confirms: namedOn() below skips
+       any field still wearing the mark. */
+    tactic:  ["owner", "collaborators", "quarters"],
     capko:   ["dir", "target", "compile", "weight"],
     project: ["owner", "start", "end"]
   };
@@ -7053,6 +7105,17 @@ THEME.apply();
      read through one frozen empty, never created by reading. */
   var FROZEN_PEND = Object.freeze({});
   function pendOf(row) { return (row && row.pend) || FROZEN_PEND; }
+  /* The fields on this row still holding NOTHING — blank and unmarked. A
+     pending fill is answered, not missing, so it is not in this list; the
+     gap band, the tab badge and the rail counts all count through here
+     (§132.12: one definition, or the counts disagree with the fields). */
+  function gapMissing(kind, row) {
+    return (GAP_FIELDS[kind] || []).filter(function (f) {
+      if (pendOf(row)[f]) return false;
+      if (f === "quarters") return quartersBlank(row);
+      return gapBlank(row[f]);
+    });
+  }
   function pendingScore(row) {
     var p = pendOf(row);
     for (var i = 0; i < GAP_SCORE_FIELDS.length; i++)
@@ -7066,8 +7129,13 @@ THEME.apply();
      author (their writes settle, no pending mark), at view they read.
      The OFFICE never fills for the same reason — mayAuthorPage already
      answers for them, and an office write is a settled write. */
+  /* u_anal is a strategy page with NO fillable field (the SWOT is rows,
+     and rows are never fill mode's — §132.2), so the fill grant must not
+     draw its pen: a pen that opens nothing is §61's trap wearing §132's
+     clothes. The list is the pages GAP_FIELDS actually reaches. */
+  var FILL_PAGES = ["u_found", "u_plan", "k_found", "k_proj"];
   function mayFillPage(w, person, pageKey, target) {
-    if (!isStrategyPage(pageKey)) return false;
+    if (FILL_PAGES.indexOf(pageKey) < 0) return false;
     if (isOffice(w, person)) return false;
     var ownsIt = rolesOrFloor(w, person).some(function (r) {
       return roleOwns(w, r, target);
@@ -7456,7 +7524,15 @@ THEME.apply();
     var me = [String(person.key || ""), String(person.name || "")]
       .map(function (s) { return s.trim().toLowerCase(); })
       .filter(function (s) { return !!s; });
-    var hits = [row.owner].concat(Array.isArray(row.collaborators) ? row.collaborators : []);
+    /* §132.10: A PENDING NAME CONFERS NOTHING. Being named here is what
+       lets a Contributor report the line, so a name the custodian filled
+       but the office has not confirmed is visible on the page and silent
+       in this rule — the same shape as the score waiting on the target.
+       Field by field, because an owner confirmed long ago must not lose
+       their line over a collaborator still pending beside them. */
+    var pd = pendOf(row);
+    var hits = (pd.owner ? [] : [row.owner]).concat(
+      !pd.collaborators && Array.isArray(row.collaborators) ? row.collaborators : []);
     return hits.some(function (h) {
       return h != null && me.indexOf(String(h).trim().toLowerCase()) > -1;
     });
@@ -7543,6 +7619,7 @@ THEME.apply();
     GAP_FIELDS: GAP_FIELDS, GAP_SCORE_FIELDS: GAP_SCORE_FIELDS,
     gapBlank: gapBlank, quartersBlank: quartersBlank,
     pendOf: pendOf, pendingScore: pendingScore, mayFillPage: mayFillPage,
+    FILL_PAGES: FILL_PAGES, gapMissing: gapMissing,
     namedOn: namedOn, namedInUnit: namedInUnit,
     editingRoles: editingRoles, onlyVia: onlyVia, rolesOrFloor: rolesOrFloor,
     OWN_LINES_ONLY: OWN_LINES_ONLY, onlyOwnLines: onlyOwnLines,
@@ -13461,6 +13538,66 @@ function gapPendRows(target){
   return out;
 }
 function gapPendCount(target){ return gapPendRows(target).length; }
+
+/* ── WHERE THE MISSING THINGS ARE (§132.12) ─────────────────────────────
+   One map of every place holding gaps, counted through the shared
+   `gapMissing()` — the tab badge, the rail counts and the band's chips all
+   read THIS list, so a count can never disagree with the fields it points
+   at (§116.2: the count and the queue are one list). Each entry names how
+   to GET there, in the navigation's own words. */
+function gapMap(target){
+  var t = String(target || ""), out = [];
+  var G = SMPRules.gapMissing;
+  var entry = function(key, label, count, go){
+    out.push({ key: key, label: label, count: count, go: go });
+  };
+  var unitHalf = function(u){
+    if (!u) return;
+    var found = G("unit", u).length;
+    entry("found", "Foundation", found, { sec: "found", page: "foundation" });
+    var ko = 0;
+    (u.keyObjectives || []).forEach(function(m){ ko += G("ko", m).length; });
+    entry("ko", "Objectives", ko, { sec: "found", page: "foundation" });
+    (u.items || []).forEach(function(p, i){
+      var n = 0;
+      (p.measures || []).forEach(function(m){ n += G("measure", m).length; });
+      (p.tactics  || []).forEach(function(x){ n += G("tactic", x).length; });
+      entry("p:" + (p.code || i), pillarCode(u, i), n,
+            { sec: "plan", page: "plan", rail: unitRailKey(u), code: p.code });
+    });
+  };
+  if (t.indexOf("fn:") === 0) {
+    var fk = t.slice(3), fo = functionOf(fk);
+    if (fo && String(fo.format) === "pillars") { unitHalf(unitLike(t)); return out; }
+    var caps = capsOfFunction(fk), ov = 0;
+    caps.forEach(function(c){
+      (c.keyObjectives || []).forEach(function(m){ ov += G("capko", m).length; });
+    });
+    entry("ov", "Overview", ov, { sec: "found", page: "capfoundation" });
+    caps.forEach(function(c){
+      (c.projects || []).forEach(function(p){
+        /* The projects rail is per CAPABILITY (railKeyFor), and it selects
+           by project id — the same pair the rail's own rows write. */
+        entry("pr:" + p.id, projCode(fk, p), G("project", p).length,
+              { sec: "proj", page: "plan", rail: "cap:" + c.id, code: p.id });
+      });
+    });
+  } else {
+    unitHalf(UNITS[t]);
+  }
+  return out;
+}
+function gapTotal(target){
+  return gapMap(target).reduce(function(a, e){ return a + e.count; }, 0);
+}
+/* Who the counts are FOR: somebody who can act on them — the fill grant or
+   the office. A plain reader never sees a nag they cannot clear (§69). */
+function seesGaps(target){
+  var t = target === undefined ? TARGET : target;
+  return SMPRules.FILL_PAGES.some(function(pg){
+    return mayFill(pg, t) || mayAuthor(pg, t);
+  });
+}
 /* Only the fields a score reads block a submission — a pending owner or
    date changes no figure's meaning (§132, Islam's boundary). */
 function gapScoreWait(target){
@@ -13514,8 +13651,17 @@ function avg(a){
    rail's terse switch. One person deciding to see both horizons must not
    decide it for the whole tenant, and a toggle that autosaved would. */
 var KO_YEAR_KEY = "smp.ko.year";
+/* §132.11 REVERSES §66's DEFAULT (Islam: "let the this year objective
+   clicked by default so it can be filled as missing as well"): absent now
+   reads as SHOWN, so a missing near target is a visible red word instead
+   of a hidden column. The toggle stays, and a person's SAVED choice still
+   wins in both directions — the stored value is an explicit "1"/"0", so
+   nobody who ever pressed the button moves (§30.2's shape). */
 var SHOW_KO_THIS_YEAR = (function(){
-  try { return localStorage.getItem(KO_YEAR_KEY) === "1"; } catch (e) { return false; }
+  try {
+    var v = localStorage.getItem(KO_YEAR_KEY);
+    return v === null ? true : v === "1";
+  } catch (e) { return true; }
 })();
 function setKoThisYear(on){
   SHOW_KO_THIS_YEAR = !!on;
@@ -20976,6 +21122,66 @@ function pendBadge(acKey){
   if (!n || (!mayAuthor(acKey) && !mayFill(acKey))) return '';
   return '<span class="pendcount">' + n + ' awaiting confirmation</span>';
 }
+/* ── THE GAP BAND (§132.12): a map, not a march — §129's chip shape ────
+   One chip per place holding gaps, each reading the DATA (gapMap), press
+   to go; Next gap walks the fields. Drawn while the pen is open, for the
+   fill grant and the office — the people the counts are FOR (§69). */
+function gapChipInner(e){
+  return esc(e.label) + (e.count
+    ? '<span class="c">' + e.count + '</span>'
+    : '<span class="c ok">&#10003;</span>');
+}
+function gapTail(total){
+  if (total) return '<button type="button" class="nextgap" data-nextgap="1">' +
+    'Next gap &rarr;&nbsp;<span class="ngleft">' + total + ' left</span></button>';
+  var p = gapPendCount(TARGET);
+  return '<span class="gapdone">Nothing missing' +
+    (p ? ' &middot; ' + p + ' awaiting confirmation' : '') + '</span>';
+}
+function gapBand(page, acKey){
+  if (!EDIT_PAGE[page]) return '';
+  if (!mayFill(acKey) && !mayAuthor(acKey)) return '';
+  var map = gapMap(TARGET);
+  var chips = map.map(function(e){
+    return '<button type="button" class="gchip' + (e.count ? '' : ' clear') + '"' +
+      ' data-gkey="' + esc(e.key) + '"' +
+      ' data-gpage="' + esc(e.go.page) + '" data-gsec="' + esc(e.go.sec) + '"' +
+      (e.go.rail ? ' data-grail="' + esc(e.go.rail) + '" data-gcode="' +
+        esc(String(e.go.code == null ? "" : e.go.code)) + '"' : '') +
+      ' title="' + (e.count ? plural(e.count, "gap") + " to fill — press to go"
+                            : "Nothing missing here") + '">' +
+      gapChipInner(e) + '</button>';
+  }).join("");
+  return '<div class="gapband" data-gapband="1"><span class="lead">To fill</span>' +
+    chips + '<span class="gaptail">' + gapTail(gapTotal(TARGET)) + '</span></div>';
+}
+/* The counts rewritten IN PLACE after a fill — §63's write-into-the-node,
+   because a repaint here would destroy the field being typed into (§71.2).
+   The chips themselves are kept (their handler rides the band), only their
+   numbers move; the tab badge and the rail counts follow the same list. */
+function gapBandRefresh(){
+  var map = gapMap(TARGET), total = gapTotal(TARGET);
+  var band = document.querySelector('[data-gapband]');
+  if (band){
+    map.forEach(function(e){
+      var chip = band.querySelector('[data-gkey="' + CSS.escape(e.key) + '"]');
+      if (!chip) return;
+      chip.classList.toggle("clear", !e.count);
+      chip.innerHTML = gapChipInner(e);
+    });
+    var tail = band.querySelector(".gaptail");
+    if (tail) tail.innerHTML = gapTail(total);
+  }
+  var tb = document.querySelector('[data-gaptab]');
+  if (tb) { if (total) tb.textContent = total; else tb.remove(); }
+  document.querySelectorAll('[data-rgap]').forEach(function(el){
+    var e = map.filter(function(x){ return x.key === el.dataset.rgap; })[0];
+    if (!e) return;
+    el.classList.toggle("ok", !e.count);
+    el.innerHTML = e.count ? String(e.count) : "&#10003;";
+  });
+}
+
 /* The sentence over a page in fill mode — the contract, where the person
    is working, not in the knowledge base (§32's rule, one surface in). */
 function fillBar(page, acKey){
@@ -20986,7 +21192,10 @@ function fillBar(page, acKey){
 }
 function gapCell(page, acKey, row, field, opts){
   opts = opts || {};
-  var val = row[field];
+  /* `text` renders a stored shape as the string the field holds (a
+     collaborators ARRAY reads and types as "A, B"); `parse` is its way
+     back. §132.10's cell is why they exist — one pair, beside `num`. */
+  var val = opts.text ? opts.text(row) : row[field];
   var blank = SMPRules.gapBlank(val);
   var mark = SMPRules.pendOf(row)[field];
   var ed = authoring(page, acKey);
@@ -21016,16 +21225,25 @@ function gapCell(page, acKey, row, field, opts){
   /* `num` writes a number or null (§104.7's rule the other way round: the
      type comes from the field, and a numeric field must never store the
      string that would turn `tw += w` into concatenation). */
-  var put = function(v){ return opts.num ? ((v === "" || !isFinite(+v)) ? null : +v) : v; };
+  var put = function(v){
+    if (opts.parse) return opts.parse(v);
+    return opts.num ? ((v === "" || !isFinite(+v)) ? null : +v) : v;
+  };
+  var empty = function(){
+    return opts.parse ? opts.parse("") : (opts.num ? null : "");
+  };
   if (ed) {
     /* The office's ordinary field — writing it settles the value, which is
        why the setter lifts the mark: correcting is confirming. */
-    return draw(function(v){ row[field] = put(v); gapLift(row, field); });
+    return draw(function(v){
+      row[field] = put(v); gapLift(row, field); gapBandRefresh();
+    });
   }
   if (fl && (blank || mark)) {
     return draw(function(v){
-      if (SMPRules.gapBlank(v)) { row[field] = opts.num ? null : ""; gapLift(row, field); }
+      if (SMPRules.gapBlank(v)) { row[field] = empty(); gapLift(row, field); }
       else { row[field] = put(v); gapStamp(row, field); }
+      gapBandRefresh();
     }, mark ? "pendfld" : "gapfld");
   }
   /* Read — and fill mode on a settled value reads too. */
@@ -21300,7 +21518,8 @@ function renderUnitFoundation(u){
      no way to add — so a from-scratch unit could not say who it is at all
      (§61's trap on the oldest surface in the product). The lead opens with
      the pen because the leads are the unit's own words, not a fixed form. */
-  return '<div class="fgrid"><div class="card"><h2 class="sec first">Who we are</h2>' +
+  return gapBand("foundation", "u_found") +
+    '<div class="fgrid"><div class="card"><h2 class="sec first">Who we are</h2>' +
       '<dl style="margin:0">' +
       u.clauses.map(function(c, ci){
         return '<div class="clause"><dt>' +
@@ -21828,6 +22047,13 @@ function railFor(list, sel, numOf, subOf, groupOf, footNote, codeOf, opts){
         '" data-oi="' + i + '">' +
         (opts.arranging ? handle("Reorder " + it.name) : '') +
         railName(code, it.name) +
+        /* §132.12: the row's own count of gaps to fill, for whoever can act
+           on them — drawn only while it is not zero, rewritten in place as
+           fills land. Optional and last, so the other callers are untouched. */
+        (opts.gapOf && opts.gapOf(it)
+          ? '<span class="rgap" data-rgap="pr:' + esc(it.id) + '" title="' +
+            plural(opts.gapOf(it), "gap") + ' to fill">' + opts.gapOf(it) + '</span>'
+          : '') +
         /* NO NUMBER MEANS NO ELEMENT. An empty `.rnum` still takes its column in
          the row's grid, so a rail with nothing to show on the right laid its
          names out as though something were there — the unit's Plan rail, which
@@ -22422,7 +22648,7 @@ function renderFnProjects(fnKey){
      a unit and a function are the same product, and a button removed from one
      side of the navigation switch and left on the other is exactly the drift
      that rule exists to stop. */
-  return caps.map(function(c){
+  return gapBand("plan", "k_proj") + caps.map(function(c){
     var sel = railPick(c);
     /* AN EMPTY CAPABILITY IS WHERE THE FIRST PROJECT GOES (§61's lesson, the
        same shape): the note said "No projects yet" and offered nothing, so the
@@ -22454,7 +22680,10 @@ function renderFnProjects(fnKey){
            in the grid (the note on railFor says so). */
         alarmOf: function(p){
           var n = planAttention(p);
-          return n ? '<span class="missing">' + plural(n, "row") + ' to check</span>' : ''; } });
+          return n ? '<span class="missing">' + plural(n, "row") + ' to check</span>' : ''; },
+        gapOf: (typeof seesGaps === "function" && seesGaps())
+          ? function(p){ return SMPRules.gapMissing("project", p).length; }
+          : null });
     /* splitOrPane() drops the rail below railWorthIt()'s threshold, which is
        right for reading and wrong while a plan is being authored: with one
        project there would be nowhere to press Add. */
@@ -22687,10 +22916,20 @@ function unitRailFor(u, sel){
        `data-urail` is the rail's selection key and unitRailPick() matches on
        `it.code`. Change that and the rail stops being able to find the pillar
        it just selected. */
+    /* §132.12: which pillar owes what, for the people who can act on it —
+       drawn only while it owes something (§41's budget), and rewritten in
+       place as fills land (gapBandRefresh finds it by data-rgap). */
+    var gaps = 0;
+    if (typeof seesGaps === "function" && seesGaps()) {
+      (it.measures || []).forEach(function(m){ gaps += SMPRules.gapMissing("measure", m).length; });
+      (it.tactics  || []).forEach(function(x){ gaps += SMPRules.gapMissing("tactic", x).length; });
+    }
     return '<button class="ritem' + (it.code === sel.code ? " on" : "") + '" data-urail="' +
         esc(u.ukey) + '|' + esc(it.code) + '" data-oi="' + i + '">' +
         (on ? handle("Reorder " + it.name) : '') +
         railName(pillarCode(u, i), it.name) +
+        (gaps ? '<span class="rgap" data-rgap="p:' + esc(it.code || String(i)) +
+          '" title="' + plural(gaps, "gap") + ' to fill">' + gaps + '</span>' : '') +
         /* Both counts, both labelled, on one line. It used to put the tactics
            count in the small line and the MEASURES count as a bare number on
            the right - two numbers, one of them unlabelled, and nothing saying
@@ -22857,9 +23096,14 @@ function unitPlanBody(it, u, railed){
          SAME pen that corrects the rest of the plan, and behind the same gate
          (§31): who is named on a tactic decides who may report it, so it is
          not a field the people being measured hold. */
-      '<td class="collabs">' + (ed
-        ? inputOr("plan", collabText(t), "", function(v){ t.collaborators = collabParse(v); })
-        : collabCell(t)) + '</td>' +
+      /* §132.10: collaborators join the fillable fields (Islam: "it's
+         optional anyway") — an EMPTY list is a gap, an existing one never
+         opens to the filler, and a pending name confers no reporting right
+         until the office confirms (namedOn skips marked fields). Read mode
+         keeps §15.1's em-dash: nobody supporting is an ordinary answer. */
+      '<td class="collabs">' + gapCell("plan", "u_plan", t, "collaborators",
+        { text: collabText, parse: collabParse,
+          readEmpty: '<span class="nobody">&mdash;</span>' }) + '</td>' +
       /* Quarters (§132): only a tactic naming NO quarter is a gap, and while
          its fill is pending the four stay the filler's — read mode carries
          the same chip and tick every other pending value wears. */
@@ -22961,7 +23205,8 @@ function renderUnitPlan(u){
      renderGroupFoundation(), which rendered the literal word "undefined" for
      versions; the note is here so the next deletion of a leading term does not
      re-earn it. */
-  return (arranging("unit", u.ukey)
+  return gapBand("plan", "u_plan") +
+    (arranging("unit", u.ukey)
       ? '<p class="sec-hint">' + u.items.length + ' ' + L("pillar","bu").toLowerCase() +
         ' &middot; drag by the handle to reorder, here and inside each ' +
         L("pillar","bu").toLowerCase().replace(/s$/, "") + '</p>' : '') +
@@ -22997,7 +23242,8 @@ function renderFnFoundation(fnKey){
   /* §132: the fill grant opens the same editor, whose gap cells then draw
      only the blanks — Add and Remove stay the author's. */
   var fl = filling("capfoundation", "k_found");
-  return editBar("capfoundation", "k_found") + fillBar("capfoundation", "k_found") +
+  return editBar("capfoundation", "k_found") + gapBand("capfoundation", "k_found") +
+    fillBar("capfoundation", "k_found") +
     caps.map(function(c){
     var f = functionOf(c.fn);
     /* A CAPABILITY'S OBJECTIVES CAN FINALLY BE AUTHORED HERE (§129's audit).
@@ -35768,12 +36014,22 @@ var SYNC = (function () {
        and one class carrying both is how the dot came to mean nothing. It
        paints to the RIGHT (Islam), which is also where it belongs — a mark
        AFTER the word annotates it; a mark before it is a bullet. */
+    /* \u00a7132.12: THE COUNT FINDS YOU. The strategy tab wears the number of
+       gaps this viewer could act on \u2014 the fill grant and the office only
+       (\u00a769: never a nag with no control to clear it), and only while it
+       is not zero (\u00a741's budget). One list behind it: gapMap(). */
+    var gapsHere = (typeof seesGaps === "function" && seesGaps()) ? gapTotal(TARGET) : 0;
     document.getElementById("subtabs").innerHTML = railed ? "" : defs.map(function(d){
       var cls = (d.primary ? "primary" : "") +
         (d.dot && reportPending(TARGET) ? " dot" : "");
       return '<button role="tab" data-s="' + d.k + '"' +
         (cls.trim() ? ' class="' + cls.trim() + '"' : '') +
         ' aria-selected="' + (d.k === currentSub) + '">' + d.label +
+        ((d.k === "strategy" || d.k === "fnstrat") && gapsHere
+          ? '<span class="tbadge" data-gaptab="1" title="' +
+            plural(gapsHere, "gap") + ' to fill in this plan">' + gapsHere + '</span>' +
+            '<span class="vh"> \u2014 ' + gapsHere + ' to fill</span>'
+          : '') +
         (d.dot && reportPending(TARGET)
           ? '<i class="tabdot" aria-hidden="true"></i>' +
             '<span class="vh"> \u2014 not submitted yet</span>'
@@ -36068,6 +36324,29 @@ var SYNC = (function () {
 
   function fieldSaved(){
     if (typeof SYNC !== "undefined" && SYNC.afterPaint) SYNC.afterPaint();
+  }
+  /* ── NEXT GAP (§132.12): walk the fillable blanks on this page ─────────
+     Field to field in document order, wrapping; the ring says which one the
+     press landed on. When the page holds none, the walk goes to the first
+     PLACE still owing — through the band's own chip, so the two ways of
+     moving cannot disagree about where a place is. */
+  function gapWalk(){
+    var els = [].slice.call(document.querySelectorAll(".fld.gapfld, .qs-fill"));
+    if (!els.length){
+      var chip = document.querySelector("[data-gapband] .gchip:not(.clear)");
+      if (chip) chip.click();
+      return;
+    }
+    var cur = document.activeElement, at = -1;
+    for (var i = 0; i < els.length; i++)
+      if (cur && (els[i] === cur || els[i].contains(cur))) { at = i; break; }
+    var next = els[(at + 1) % els.length];
+    els.forEach(function(e){ e.classList.remove("gaplit"); });
+    next.classList.add("gaplit");
+    next.scrollIntoView({ block: "center" });
+    var f = next.matches("input,select,textarea")
+      ? next : next.querySelector("button,input,select,textarea");
+    if (f) f.focus({ preventScroll: true });
   }
   function wire(){
     document.querySelectorAll("#subtabs button").forEach(function(b){
@@ -39090,6 +39369,26 @@ var SYNC = (function () {
         gapLift(e.row, e.field);
         paint();
       });
+    });
+    /* ── THE GAP BAND'S CHIPS AND WALKER (§132.12) ─────────────────────
+       ONE handler on the band, by delegation: gapBandRefresh() rewrites the
+       chips' contents in place between paints (a repaint would destroy the
+       field being typed into, §71.2), so the handler must not live on the
+       nodes being rewritten. A chip is a door: it keeps fill mode on for the
+       page it lands on, because the band exists only while somebody is
+       filling and a door that closed the mode behind it would strand them. */
+    var gband = document.querySelector("[data-gapband]");
+    if (gband) gband.addEventListener("click", function(ev){
+      var chip = ev.target.closest("[data-gkey]");
+      if (chip){
+        if (chip.dataset.gpage) EDIT_PAGE[chip.dataset.gpage] = true;
+        if (chip.dataset.gsec) CURSEC[currentSub] = chip.dataset.gsec;
+        if (chip.dataset.grail) RAIL[chip.dataset.grail] = chip.dataset.gcode;
+        paint();
+        if (typeof toPaneTop === "function") toPaneTop();
+        return;
+      }
+      if (ev.target.closest("[data-nextgap]")) gapWalk();
     });
 
     document.querySelectorAll("[data-rowoff]").forEach(function(b){

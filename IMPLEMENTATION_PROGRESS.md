@@ -89,6 +89,15 @@ Nothing proceeds past this line without an answer.
   asked mid-build) — machinery kept, one line to give back.
 - Proved by `checks/gap-fill.py` (fails on the pre-build from its first
   section), the full `qa.py` walk, and the virgin-database round trip.
+- **Second build (§132.10–13), same branch:** collaborators fillable — an
+  empty list only, and a pending name confers no reporting right until the
+  office confirms (`namedOn` skips marked fields, owner included); the
+  objectives' This-year column shows by default (§66's toggle and saved
+  choices kept); and the plan says where it is owed — a count on the
+  Strategy tab, per-row rail counts, a fill-mode gap band of place chips
+  (each a door that keeps fill mode on), and a Next-gap walker, all fed by
+  one list and rewritten in place as fills land. 237 server tests, the
+  extended browser check, qa and eleven suites green.
 
 ### v3.47 — building a plan on the platform (§129, spec 020)
 

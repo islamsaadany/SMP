@@ -437,26 +437,8 @@
          Email SETTINGS — and gated at edit for Import's reason (§48.2): there
          is nothing to read on a composer, so a view grant would open a page
          whose every control the server then refuses. */
-      /* ── TWO SUBTABS (§137) ───────────────────────────────────────────
-         Islam: "the opening page of Send a message should be a dashboard of
-         what was sent ... and when I say create a message it takes me to
-         another tab ... and when I finish and send it it should take me back
-         to the dashboard and show me that the message was sent there."
-
-         The page's OWN section row, the one Import & archives and Figure sets
-         already use (§46.2) — never a button that navigates, because switching
-         back to the record must not mean abandoning what you were writing.
-
-         OVERVIEW IS ISLAM'S WORD, and the Setup rail already has a page called
-         Overview one group above. Recorded rather than quietly changed: they
-         sit at different levels (a page vs a tab inside one), and the rail
-         entry above it says "Send a message". */
-      { k:"send",     ac:"c_send", grp:"cycle",   label:"Send a message", glyph:"➤", find:"broadcast announce notify everyone email the team sent record history drafts",
-        when: function(){ return inOffice(); },
-        sections: function(){
-          return [{ k:"over",  ac:"c_send", label:"Overview",        render:renderMsgOverview },
-                  { k:"write", ac:"c_send", label:"Write a message", render:renderSendMessage }];
-        } },
+      { k:"send",     ac:"c_send", grp:"cycle",   label:"Send a message", glyph:"➤", find:"broadcast announce notify everyone email the team",
+        when: function(){ return inOffice(); },                          render:renderSendMessage },
       { k:"focusset", ac:"c_focus", grp:"cycle",  label:"Focus measures", glyph:"◎", find:"focus watch highlight measures",                render:renderFocusSetup },
       /* Only for somebody who has actually been named on a figure. Its reach
          is not a setting (§16.7), so `when` hides it outright rather than the
@@ -4350,9 +4332,7 @@
         });
       });
     });
-    /* ON THE OVERVIEW, not on the composer (§137). Both lists are drawn there
-       now, and the old gate — the Send button — is on the other tab. */
-    if (DRAFTLIST === null && document.getElementById("msgover") &&
+    if (DRAFTLIST === null && document.getElementById("msgsend") &&
         typeof SYNC !== "undefined" && SYNC.isLive()) {
       DRAFTLIST = { drafts: [] };
       SYNC.mailDraftList(function(err, j){
@@ -4484,19 +4464,11 @@
        yes, unchanged. */
     function reallySend(){
       var st = sendmsg(), out = document.getElementById("msgsaid");
-      /* WRITTEN INTO THE ELEMENT, because a repaint would replace the button
-         that was just pressed (§63). THE CLASS, not an inline colour — the
-         render says the same thing with `.msgsaid.bad`, and two ways of
-         colouring one span is how the two come to disagree (§53.5). A null
-         `ok` is "in progress" and wears neither.
-
-         THIS ONLY EVER REPORTS A FAILURE NOW (§137): a send the server
-         answered leaves this tab, and its outcome is drawn on the Overview. */
       function say(msg, ok){
         st.result = { msg: msg, ok: ok, rows: (st.result && st.result.rows) || null };
         if (!out) return;
         out.textContent = msg;
-        out.className = "why msgsaid" + (ok === false ? " bad" : "");
+        out.style.color = ok === null ? "" : ("var(--" + (ok ? "good" : "bad") + "-tx)");
       }
       var n = (st.aud && st.aud.to) ? st.aud.to.length : 0;
       var msgsend = document.getElementById("msgsend");
@@ -4527,35 +4499,45 @@
       }, function(err, j){
         msgsend.disabled = false; st.busy = false;
         if (err) { say(err, false); return; }
-        /* ── THE SERVER ANSWERED, SO GO BACK TO THE RECORD (§137) ─────
-           Islam: "when I finish the email and send it it should take me back
-           to the dashboard and show me that the message was sent there."
-
-           `landed` is what says the outcome belongs on the Overview rather
-           than in the composer's bar — set for a partial failure too, because
-           the message DID go to most people and the record is where the
-           failures are named. Only a send that never happened stays here.
-
-           THE COMPOSER IS EMPTIED. What was in it has been sent and is in the
-           record now; leaving it loaded behind a tab is a message that looks
-           unsent and is one press from going twice. */
-        st.result = { ok: !j.failed, landed: true,
+        /* THE SERVER ANSWERED, SO THE MESSAGE HAS GONE — even if some of it
+           failed. `sent` locks the send (§136); `ok` is about how well it
+           went, and the two are different questions: a partial delivery must
+           still not be re-sendable in one press, because the people it DID
+           reach would get it twice. */
+        st.sent = true;
+        st.result = { ok: !j.failed,
           msg: plural(j.sent, "message", "messages") + " sent" +
                (j.failed ? ", " + j.failed + " failed" : "") + ".",
           skipped: (st.aud && st.aud.skipped) ? st.aud.skipped.length : 0,
           rows: null };
-        st.subject = ""; st.body = "";
-        st.ctaLabel = ""; st.ctaHref = ""; st.greet = null;
-        /* The lists are asked again rather than guessed at: what the server
+        /* The list is asked again rather than guessed at: what the server
            recorded is the record, and a row this page invented would be a
-           second copy of it (§95). */
+           second copy of it. */
         SENTLIST = null;
         st.draftId = null; DRAFTLIST = null;
-        CURSEC["send"] = "over";
         paint();
       });
       });
     }
+
+    /* ── WRITE ANOTHER (§136) ───────────────────────────────────────
+       Where Send stood once the message has gone. It clears the MESSAGE —
+       heading, body, the button's two fields, the greeting — and deliberately
+       KEEPS who it goes to: the recipients are usually the same list and
+       re-picking seventy-six people is real work, while the audience is stated
+       at the top of the page so nothing is hidden.
+
+       It does not confirm. There is nothing to lose: the message it clears has
+       already been sent and is in the record. */
+    var msgagain = document.getElementById("msgagain");
+    if (msgagain) msgagain.addEventListener("click", function(){
+      var st = sendmsg();
+      st.subject = ""; st.body = "";
+      st.ctaLabel = ""; st.ctaHref = "";
+      st.greet = null;
+      st.sent = false; st.result = null; st.draftId = null;
+      paint();
+    });
 
     /* ── SEND ME A COPY (§95) ───────────────────────────────────────
        The cheapest safeguard there is, and it was missing: a message to
@@ -4622,7 +4604,7 @@
       });
     });
 
-    if (SENTLIST === null && document.getElementById("msgover") &&
+    if (SENTLIST === null && document.getElementById("msgsend") &&
         typeof SYNC !== "undefined" && SYNC.isLive()) {
       SENTLIST = { messages: [] };
       SYNC.mailHistory(function(err, j){

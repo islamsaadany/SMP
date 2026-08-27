@@ -345,7 +345,11 @@ module.exports = async function handler(req, res) {
        "did they get it" can be answered. */
     if (action === "history") {
       const rows = (await client.query(
-        "SELECT id, sent_at, by_name, subject, total, sent, failed FROM messages " +
+        /* `audience` too (§137): the Overview says WHO each message went to, and
+           the criteria as they were chosen is the only honest answer — the
+           resolved list is what `message_recipients` holds, and re-resolving it
+           today would describe who it would reach NOW, not who it reached. */
+        "SELECT id, sent_at, by_name, subject, total, sent, failed, audience FROM messages " +
         "ORDER BY sent_at DESC LIMIT 50")).rows;
       return send(res, 200, { ok: true, messages: rows });
     }

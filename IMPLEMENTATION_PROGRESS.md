@@ -66,6 +66,44 @@ Nothing proceeds past this line without an answer.
 
 ## Built and verified
 
+### v3.51 — Send a message opens on what went (§137)
+
+Islam: *"The opening page ... should be a dashboard of what was sent, to whom,
+how many people ... and when I say create a message it takes me to another tab
+... and when I finish and send it it should take me back to the dashboard and
+show me that the message was sent there."* And: *"change messages to
+Overview."*
+
+- **Two subtabs** — **Overview** and **Write a message** — in the platform's
+  own section row, not a page with a button that navigates.
+- **Overview is the record**: drafts under *Not sent yet*, then what was sent
+  with heading, when, **who it went to** (in the platform's own words for roles
+  and places), how many it reached, and by whom. A row still opens what
+  happened to each person.
+- **Sending lands back on the Overview** with a green outcome band and the
+  composer emptied. A partial failure lands there too; only a send that never
+  happened stays put, in red, with the message still loaded.
+- **No grey descriptions** on either tab, and the two header dropdowns are
+  gone. The one sentence carrying a real fact — that the audience criteria add
+  up rather than narrow — moved to the heading's hover.
+- **§136 is superseded**: *Write another* and the bar's outcome line go, and
+  `checks/send-said.py` is deleted rather than left red. Its surviving rule —
+  a send cannot be repeated by one press — now holds by construction.
+
+**The bug it cost:** both list fetches were gated on `#msgsend`, the Send
+button, which now lives on the other tab — so on the Overview neither list was
+ever asked and both said *Asking…* for ever. Found by driving the built page,
+not by reading the diff. Three other checks held the same stale selector and
+were fixed (§51.11).
+
+**Proved:** `checks/send-overview.py`, watched to fail first — the fetches
+re-gated on `#msgsend` → 3 failures; the return-to-record removed → 8. `qa.py`
+green with no console errors; `send-message.py` and `email-greeting.py` green
+after being taught about the tabs.
+
+**On the branch only — not merged to main.**
+
+
 ### v3.50 — the bar reports, and moves on (§136)
 
 Islam, using the product: *"When I send I don't get any verification that the

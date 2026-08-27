@@ -5341,6 +5341,13 @@ function sendmsg(){
                             subject:"", body:"", ctaLabel:"", ctaHref:"",
                             greet:null,
                             draftId:null,
+                            /* `sent` is set only when the SERVER answered a send —
+                               never on a network failure, where nothing went and
+                               Send must stay available. `result.ok` cannot carry
+                               this: a refused request and a partial delivery both
+                               read false, and only one of them must lock the
+                               button (§136). */
+                            sent:false,
                             aud:null, asking:false, busy:false, result:null };
   return SENDMSG;
 }
@@ -5377,9 +5384,13 @@ function greetSample(){
    no sentence (§100). */
 function sendmsgTouched(){
   var st = sendmsg();
-  if (!st.result) return;
-  st.result = null;
-  var said = document.getElementById("msgsaid");
+  if (!st.sent && !st.result) return;
+  st.sent = false; st.result = null;
+  var send = document.getElementById("msgsend"),
+      again = document.getElementById("msgagain"),
+      said = document.getElementById("msgsaid");
+  if (send) send.hidden = false;
+  if (again) again.hidden = true;
   if (said) { said.textContent = ""; said.className = "why msgsaid"; }
 }
 
@@ -5607,18 +5618,13 @@ function renderSendMessage(){
        (c.keys || []).length) +
     '</div>';
 
-  /* NO NOTE (CLAUDE.md 1b-ii). The sentence here was carrying a FACT the screen
-     does not otherwise state — that the criteria ADD UP rather than narrow each
-     other — so it moves to the heading's HOVER rather than being deleted: that
-     is information, not a description (§127's ruling, that prose explaining a
-     control belongs behind a mark). `section()`'s fifth argument is the tip. */
-  var who = section("", "Who gets it", null,
+  var who = section("", "Who gets it",
+    "Tick as many as you like — they add up rather than narrow each other. " +
+    "Somebody who matches twice still gets one message.",
     '<div class="cfg audpick">' + everyone + ddbar +
       (picked ? '<div class="audrow">' + picked + '</div>' : '') +
       '<div class="audout" id="audout">' + sendmsgAudienceHtml() + '</div>' +
-    '</div>',
-    "Tick as many as you like \u2014 they add up rather than narrow each other. " +
-    "Somebody who matches twice still gets one message.");
+    '</div>');
 
   /* ── ONE PLACE TO WRITE IT (§76.3) ──────────────────────────────
      Islam: "should I edit in separate boxes or can you let me edit inside the
@@ -5681,9 +5687,9 @@ function renderSendMessage(){
       '</div>' +
     '</div>';
 
-  /* The heading being the subject line is worth saying and is not a
-     description of the page, so it rides the hover too (CLAUDE.md 1b-ii). */
-  var look = section("", "Write it", null,
+  var look = section("", "Write it",
+    "Type straight into the message. The heading is also the subject line people see " +
+    "in their inbox before they open it. Nothing here scrolls \u2014 it grows as you write.",
     /* The sample line sits between the preview and the greeting row, because
        it is about the message above it. Drawn only while the greeting is on
        (§41's budget), and it is the ONE thing the screen cannot say by
@@ -5693,9 +5699,7 @@ function renderSendMessage(){
     (st.greet != null
       ? '<span class="why greetsay">Everyone sees their own name here.</span>'
       : '') +
-    greetrow + ctarow,
-    "Type straight into the message. The heading is also the subject line people " +
-    "see in their inbox before they open it.");
+    greetrow + ctarow);
 
   /* ── THE BAR DOES NOT MOVE (§95) ────────────────────────────────
      Pinned to the foot of the pane rather than sitting at the end of the
@@ -5732,20 +5736,19 @@ function renderSendMessage(){
      disabled Send left lying there: a dead control in the loudest slot is
      furniture, and the word "Sent" on it beside "Sent" in the outcome is the
      same word twice (§87's twins). */
-  /* ── §136 IS SUPERSEDED BY §137, AND ONLY ITS ANSWER IS ──────────
-     That section put the outcome in this bar and turned Send into *Write
-     another*, because the page stayed put after a send. The page does not stay
-     put now: it goes back to the Overview, which is where the record is and
-     therefore where the proof belongs. So the bar keeps the send and nothing
-     else — no outcome line to go stale, and no second control.
-
-     WHAT SURVIVES IS THE RULE UNDERNEATH: a send cannot be repeated by one
-     press. It cannot here either, and by construction rather than by a flag —
-     you are on the other tab, and the composer it left behind is empty. */
+  /* BOTH ARE DRAWN, AND ONE IS HIDDEN — never one or the other, because the
+     way back has to happen WITHOUT A REPAINT. The heading and the body are
+     typed straight into the preview, so a `paint()` on the first keystroke
+     after a send would rebuild the contenteditable and eject the caret
+     mid-word (§35, §71.2). With both present and bound at paint time,
+     `sendmsgTouched()` is two `hidden` flags and no rewiring (§24, §47.2). */
   var bar =
     '<div class="sendbar">' +
-      '<button class="editbtn cta" id="msgsend"' + (live ? '' : ' disabled') + '>' +
+      '<button class="editbtn cta" id="msgsend"' + (live ? '' : ' disabled') +
+        (st.sent ? ' hidden' : '') + '>' +
         (n ? 'Send to ' + plural(n, "person", "people") : 'Send') + '</button>' +
+      '<button class="editbtn cta" id="msgagain"' + (st.sent ? '' : ' hidden') + '>' +
+        'Write another</button>' +
       '<button class="editbtn" id="msgdraft"' + (live ? '' : ' disabled') + '>' +
         (st.draftId ? 'Save the draft' : 'Save as a draft') + '</button>' +
       /* ── SEND ME A COPY FIRST (§95) ────────────────────────────
@@ -5758,15 +5761,17 @@ function renderSendMessage(){
         (live && st.subject.trim() && st.body.trim() ? '' : ' disabled') +
         ' title="One copy, to you, before it goes to anybody else">' +
         'Send me a copy</button>' +
-      /* THIS SAYS ONLY WHAT DID NOT HAPPEN NOW (§137). A send the server
-         answered leaves this tab, so its outcome is drawn on the Overview; what
-         is left here is the case where nothing went — no server, a refusal, a
-         network failure — and you stay put with the message still loaded.
-         `--bad-tx` is the type-safe twin (§38.4), 7.55 in light, 8.14 in dark,
-         at `--fs-note` because it is a sentence somebody has to read. */
-      '<span class="why msgsaid' + (r && !r.landed ? ' bad' : '') +
+      /* SAID IN THE VOICE OF WHAT HAPPENED. `--good-tx` / `--bad-tx` are the
+         type-safe twins (§38.4), measured on this bar: 6.82 and 7.55 in light,
+         10.45 and 8.14 in dark. At `--fs-note`, because this is a sentence
+         somebody has to read and `.why` alone is the size of a legend. */
+      '<span class="why msgsaid' + (r ? (r.ok ? ' good' : ' bad') : '') +
         '" id="msgsaid" style="margin:0">' +
-        (r && !r.landed ? '<b>' + esc(r.msg) + '</b>'
+        (r ? '<b>' + esc(r.msg) + '</b>' +
+             (r.ok && r.skipped
+               ? ' <span class="quiet">' + plural(r.skipped, "person", "people") +
+                 ' skipped \u2014 no address on their row.</span>'
+               : '')
            : (live ? '' : 'There is no server here to send from.')) + '</span>' +
     '</div>';
 
@@ -5806,45 +5811,8 @@ function renderSendMessage(){
        '<span data-audcount>' + (sendmsgHasAny() && st.aud && st.aud.to
          ? plural(st.aud.to.length, "recipient", "recipients") : 'nobody chosen') +
        '</span>'],
-      /* THE HEADER CARRIES NOTHING BUT WHO YOU ARE AND THE COUNT (§137).
-         Drafts and Sent were dropdowns here; the Overview tab is where both
-         lists live now, and a dropdown beside the tab that holds them is the
-         same list in two places (§90's argument, from the other side). */
-      null, false, null, null, null) +
-    who + look + bar;
-}
-
-/* ══ THE OVERVIEW (§137) ═══════════════════════════════════════════════════
-   Islam: "the opening page ... should be a dashboard of what was sent, to whom,
-   how many people ... and when I finish and send it it should take me back to
-   the dashboard and show me that the message was sent there."
-
-   NOTHING NEW IS COMPUTED. Every send already writes a row — subject, when,
-   the criteria it was aimed at, how many were reached, how many failed, by whom
-   — plus a row per recipient. This is that record, moved to the front from the
-   header dropdown it was hiding in, and it calls the SAME `renderDraftList()`
-   and `renderSentList()` the dropdowns called, so the list cannot say two
-   different things depending on where it is drawn.
-
-   THE OUTCOME OF A SEND LANDS HERE, not on the composer you have just left —
-   which is the whole of what was asked (§137.2). */
-function renderMsgOverview(){
-  var st = sendmsg();
-  var r = st.result;
-  var said = (r && r.landed)
-    ? '<div class="sentsaid' + (r.ok ? '' : ' bad') + '"><b>' + esc(r.msg) + '</b>' +
-      (r.ok && r.skipped
-        ? ' <span class="quiet">' + plural(r.skipped, "person", "people") +
-          ' skipped \u2014 no address on their row.</span>'
-        : '') + '</div>'
-    : '';
-  /* `#msgover` IS THE HOOK THE TWO FETCHES ARE GATED ON. They were gated on
-     `#msgsend` — the Send button — which now lives on the other tab, so on this
-     one neither list was ever asked and both said "Asking…" for ever: §93's
-     fault exactly, a gate keyed on markup that moved, failing silently and in
-     the safe-looking direction. Gated on the thing that DRAWS the lists. */
-  return '<div id="msgover">' + said + renderDraftList() + renderSentList() +
-         renderSentOne() + '</div>';
+      null, false, null, null, draftMenu + sentMenu) +
+    who + look + said + bar + renderSentOne();
 }
 
 /* WHAT IS HALF-WRITTEN. Listed above what was sent, because a draft is
@@ -5880,35 +5848,9 @@ function renderDraftList(){
                 '<button class="linkbu danger" data-draftdel="' + esc(String(d.id)) +
                   '">Delete</button></td></tr>';
           }).join("") + '</tbody></table></div>';
-  /* NO NOTE. Islam: "remove the grey descriptions and stop adding descriptions
-     to pages." The heading names the list; a paragraph under it in grey says it
-     again and pushes what people came for down the page (CLAUDE.md 1b-ii). */
-  return section("", "Not sent yet", null, body);
-}
-
-/* ── WHO A MESSAGE WENT TO, IN WORDS (§137) ───────────────────────────
-   From the criteria as they were CHOSEN — `messages.audience`, which is what
-   somebody ticked — never from re-resolving them today, which would describe
-   who it would reach NOW rather than who it reached.
-
-   NAMED THROUGH THE PLATFORM'S OWN VOCABULARY (§53.5): `roleName()` and
-   `placeLabel()` are what the composer's own dropdowns say, so the record reads
-   in the same words the choosing did. A key that no longer names anything —
-   a unit renamed or retired since — is shown AS THE KEY rather than dropped,
-   because a record that quietly loses a recipient group is worse than one with
-   an unfamiliar word in it (§96.2's rule, in the record). */
-function audienceWords(a){
-  if (!a) return "\u2014";
-  if (typeof a === "string") { try { a = JSON.parse(a); } catch (e) { return "\u2014"; } }
-  if (a.everyone) return "Everyone on the register";
-  var out = [];
-  (a.roles || []).forEach(function(r){
-    out.push(typeof roleName === "function" ? (roleName(r) || r) : r); });
-  (a.targets || []).forEach(function(k){
-    out.push(typeof placeLabel === "function" ? (placeLabel(k) || k) : k); });
-  var n = (a.keys || []).length;
-  if (n) out.push(plural(n, "person", "people") + " by name");
-  return out.length ? out.join(" \u00b7 ") : "\u2014";
+  return section("", "Drafts",
+    "A message you have started. Saved on the server, so it is there on any machine you sign " +
+    "in from — and it stops being a draft the moment it is sent.", body);
 }
 
 /* ── THE SAME LIST, IN THE HEADER (§95) ───────────────────────────────
@@ -6034,11 +5976,11 @@ function renderSentList(){
            only thing telling one draft from another, was clipped to
            "Half-wri…" in a 600px panel. Percentages, because the panel's width
            is a `min()` of the window. */
-        : '<div class="cfg"><table><thead><tr><th style="width:32%">Heading</th>' +
-          '<th style="width:16%">Sent</th>' +
-          '<th style="width:23%">Who it went to</th>' +
-          '<th class="cc" style="width:15%">Reached</th>' +
-          '<th style="width:14%">By</th></tr></thead><tbody>' +
+        : '<div class="cfg"><table><thead><tr><th style="width:36%">Subject</th>' +
+          '<th style="width:24%">Sent</th>' +
+          '<th class="cc" style="width:11%">To</th>' +
+          '<th class="cc" style="width:12%">Failed</th>' +
+          '<th style="width:17%">By</th></tr></thead><tbody>' +
           rows.map(function(m){
             /* THE ROW OPENS (§93.15). The subject is the control, because it is
                the thing somebody is already looking for when they come here to
@@ -6047,13 +5989,14 @@ function renderSentList(){
               '<td><button class="linkbu" data-sentone="' + esc(String(m.id)) + '"><b>' +
                 esc(m.subject) + '</b></button></td>' +
               '<td>' + esc(String(m.sent_at || "").slice(0, 16).replace("T", " ")) + '</td>' +
-              '<td>' + esc(audienceWords(m.audience)) + '</td>' +
-              '<td class="cc">' + (m.sent || 0) + ' of ' + (m.total || 0) +
-                (m.failed ? ' <span class="pill bad">' + m.failed + ' failed</span>' : '') +
-                '</td>' +
+              '<td class="cc">' + (m.sent || 0) + ' of ' + (m.total || 0) + '</td>' +
+              '<td class="cc">' + (m.failed
+                  ? '<span class="pill bad">' + m.failed + '</span>' : '\u2014') + '</td>' +
               '<td>' + esc(m.by_name || "") + '</td></tr>';
           }).join("") + '</tbody></table></div>';
-  return section("", "What has been sent", null, body);
+  return section("", "What has been sent",
+    "The record lives outside the saved data, so a save cannot erase it. " +
+    "Open one to see what happened to each person.", body) + renderSentOne();
 }
 
 /* ── THE PREVIEW IS THE EDITOR (§76.3) ────────────────────────────────────

@@ -2092,7 +2092,31 @@ console errors (in this cloud environment, run it via a wrapper that points Play
   typed. Measured, not reasoned; every existing assertion passed while it was
   broken, because none typed into the body with the greeting on and then asked
   the DATA.
-- **THE BAR REPORTS, AND MOVES ON (since v3.50, §136):** Islam, using the
+- **SEND A MESSAGE OPENS ON WHAT WENT (since v3.51, §137):** Islam: *"the
+  opening page ... should be a dashboard of what was sent, to whom, how many
+  people ... and when I say create a message it takes me to another tab ... and
+  when I finish and send it it should take me back to the dashboard and show me
+  that the message was sent there."* **TWO SUBTABS** — *Overview* (his word;
+  the Setup rail has a page of the same name one group above, recorded rather
+  than quietly changed, because they sit at different levels) and *Write a
+  message* — in the platform's OWN `.secrow`, the one Import & archives and
+  Figure sets already use (§46.2): never a button that navigates, because
+  going back to the record must not mean abandoning what you were writing.
+  **NOTHING NEW IS COMPUTED**: every send already wrote the row, and this is
+  §95's own `renderDraftList()` / `renderSentList()` moved out of the header
+  dropdowns they were hiding in — one renderer, so the list cannot say two
+  things depending on where it is drawn. **A SEND LANDS ON THE RECORD** and the
+  composer is EMPTIED, which is also how §136's rule survives: the send cannot
+  be repeated by one press, by construction rather than by a flag. **A partial
+  failure lands there too** (the message went to most people and the record is
+  where the failures are named); **only a send that never happened stays put**,
+  with the message still loaded and the bar red. **AND THE TWO FETCHES WERE
+  GATED ON `#msgsend`** — the Send button, now on the other tab — so on the
+  Overview neither list was ever asked and both said *Asking…* for ever: §93
+  and §51.11 exactly, a gate keyed on markup that moved, failing silently and
+  in the safe-looking direction. Gated on `#msgover`, the thing that draws
+  them. **Found by driving it, not by reading it.**
+- **THE BAR REPORTS, AND MOVES ON (v3.50, §136 — SUPERSEDED BY §137):** Islam, using the
   product: *"When I send I don't get any verification that the message was sent
   and the page stays the same view."* Both halves true, and two faults. **The
   outcome was drawn in the failure-neutral voice** — `.why`, 12px, the page's
@@ -2296,9 +2320,10 @@ python3 checks/setup-search.py  # the rail's search: typing NEVER repaints, a re
                                 # setup-rail.py also measures every rail GLYPH against a
                                 # character guaranteed missing: a mark that is MAPPED and
                                 # not DRAWN ships as a blank box (§52, §120.2)
-python3 checks/send-said.py     # after a send the bar SAYS so and stops offering the same
-                                # send again — asked by pressing where Send was and counting
-                                # the requests, with the way back proved too (§136)
+python3 checks/send-overview.py # Send a message opens on the record, writing is the second
+                                # subtab, and a send LANDS back on the record with the
+                                # composer emptied — the send that never happened is the
+                                # one case that stays put (§137)
 python3 checks/email-greeting.py # the greeting row is ONE line with no prose, the switch does
                                 # not move, and what the page POSTS names NOBODY — the server
                                 # fills it per recipient (§135, over HTTP)
@@ -2362,7 +2387,8 @@ the caret dies mid-word; without a way back the composer is a dead end
 would have to throw the fix away to get Send back. **The first build reached for
 `--fs-small`**, which is the 12px it already was, and the check caught it
 because it asks for a size worth READING rather than for a token name. Proved by
-`checks/send-said.py`, watched to fail first: the pre-&sect;136 bar restored
+`checks/send-said.py` (retired by &sect;137, whose own check carries the one
+rule that survived), watched to fail first: the pre-&sect;136 bar restored
 &rarr; **5 failures**; `sendmsgTouched()` removed &rarr; **2**, the dead end
 exactly. **One of its own first-run failures was the check** &mdash; `focus()`
 puts the caret at the START of a contenteditable, so the typed character lands

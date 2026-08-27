@@ -17877,3 +17877,107 @@ at the START of a contenteditable, so the typed character lands first and the
 assertion had used `endswith`. It asks whether the character reached the state
 and whether what was already there survived — neither of which assumes a
 position.
+
+---
+
+## 137 · Send a message opens on what went (v3.51)
+
+Islam: *"The opening page of the send the email should be a dashboard of what
+was sent, that was sent to whom, how many people ... and when I say create a
+message it takes me to another tab ... and when I finish the email and send it
+it should take me back to the dashboard and show me that the message was sent
+there. It should be a cleaner configuration."* And, of the mockup: *"change
+messages to Overview."*
+
+### 137.1 It is mostly a rearrangement, and that is the point
+
+Every send has written a row since §74 — subject, when, the criteria it was
+aimed at, how many were reached, how many failed, by whom — plus a row per
+recipient saying whether it arrived. That record was behind a **Sent** dropdown
+in the corner while the page opened on a blank composer. So whatever you came
+to do — check last week's message went out, see who missed it, pick up a draft
+— the page opened ready to compose and the answer was two dropdowns away.
+
+**`renderDraftList()` and `renderSentList()` are unchanged and are what the
+Overview draws.** One renderer, so the list cannot say two different things
+depending on where it is shown (§95's own rule, kept while its dropdowns go).
+
+### 137.2 Two SUBTABS, never a page and a button
+
+The platform's own `.secrow`, the one Import & archives and Figure sets already
+use (§46.2). A button that navigates would mean going back to the record
+costs whatever you were writing; a tab does not.
+
+**Overview is Islam's word**, and the Setup rail has a page called Overview one
+group above. Recorded rather than quietly changed: they sit at different levels
+— a page in the rail against a tab inside one — and the rail entry above this
+one says *Send a message*. §87's twins rule is about two things at the same
+level competing for one name; these do not.
+
+### 137.3 A send lands on the record, and the composer is emptied
+
+`landed` on the result is what says the outcome belongs on the Overview rather
+than in the composer's bar. Set for a **partial failure** too — the message did
+go to most people, and the record is where the failures are named — so there is
+one behaviour and not two. **Only a send that never happened stays put**: no
+server, a refusal, a network failure, where nothing went and the message has to
+still be there to try again.
+
+**Emptying the composer is not tidiness.** It is how §136's rule survives the
+supersession: the send cannot be repeated by one press, now by construction —
+you are on the other tab and what it left behind is blank — rather than by a
+flag on a button.
+
+### 137.4 §136 is superseded, and only its answer is
+
+That section put the outcome in the send bar and turned Send into *Write
+another*, because the page stayed put. The page does not stay put now. So the
+bar keeps the send and nothing else: no outcome line to go stale, no second
+control, and `sendmsgTouched()` shrinks to clearing a failure message. **What
+survives is the rule underneath**, and `checks/send-said.py` is DELETED rather
+than left red — a check asserting a decision that was reversed is worse than no
+check (§24), and its one surviving assertion is in the new one.
+
+### 137.5 No grey descriptions
+
+Islam: *"in dashboard remove the grey descriptions and stop adding descriptions
+to pages."* Both tabs, because they are one page and one clean tab beside one
+carrying three paragraphs reads as unfinished rather than as a rule. Recorded
+as **CLAUDE.md 1b-ii**, governing what is built from here.
+
+**One sentence was carrying a FACT the screen does not otherwise state** — that
+the audience criteria ADD UP rather than narrow each other (§75) — so it moves
+to the heading's hover rather than being deleted. That is information, not a
+description: §127's ruling, that prose explaining a control belongs behind a
+mark, and that a status is not an explanation.
+
+### 137.6 The bug this cost, and it was invisible in a screenshot
+
+**Both list fetches were gated on `#msgsend`** — the Send button — which now
+lives on the other tab. So on the Overview neither list was ever asked and both
+said *Asking…* for ever. §93 and §51.11 exactly: a gate keyed on markup that
+moved, failing **silently and in the safe-looking direction**. Gated on
+`#msgover`, the element that draws the lists.
+
+**Found by driving the built page and looking at it**, not by reading the diff
+— the page rendered, the tabs worked, and every assertion short of "do the
+lists resolve" would have passed.
+
+**And three checks held the old selector.** `send-message.py` and
+`email-greeting.py` both open the page and reach straight for `#msgsend`, and
+`send-message.py` asserted §95's dropdowns, which a supersession makes false —
+rewritten to assert what that block was really protecting (both lists
+reachable, nothing clipped without a hover, a row that opens the per-person
+record) rather than where they live. §51.11's instruction, followed rather than
+re-learned: grep every check when a control changes shape.
+
+### 137.7 What proves it
+
+`src/checks/send-overview.py`, over HTTP (§94.11). It asserts the two things a
+screenshot cannot: **that the lists resolve**, and **that a send lands on the
+record with the composer emptied** — plus the two cases that must differ, a
+partial failure (lands) and a send that never happened (stays, in red).
+
+Watched to fail first (§94.5): the fetches re-gated on `#msgsend` → **3
+failures**, naming the *Asking…* directly; `CURSEC["send"] = "over"` removed →
+**8**.

@@ -39,7 +39,7 @@ HTML = """<title>Messages, Then The Message</title>
   <h1>Messages, then the message</h1>
   <p>One page, two tabs: what has gone out, and writing the next one. Sending
      lands you back on the record. No grey prose on either.</p>
-  <div class="standing"><b>Waiting on your sign-off</b> <span>nothing in src/ has been touched</span></div>
+  <div class="standing"><b>Built</b> <span>on the branch &middot; not merged to main</span></div>
 </header>
 
 <section class="item">
@@ -135,7 +135,14 @@ HTML = """<title>Messages, Then The Message</title>
 </section>
 
 <footer>
-  <h2>One thing to decide, and one to know</h2>
+  <h2>Built, and two things to know</h2>
+  <p style="max-width:var(--measure);color:var(--ink-2);margin:0 0 14px">
+    <strong>One bug this cost, and it was invisible in a screenshot.</strong> Both
+    lists are fetched by the page, and both fetches were keyed on the Send button
+    &mdash; which now lives on the other tab. So on the Overview neither list was
+    ever asked and both said <em>Asking&hellip;</em> for ever. The page rendered,
+    the tabs worked, and everything short of &ldquo;do the lists actually fill
+    in&rdquo; passed. Found by driving the built page and looking at it.</p>
   <p style="max-width:var(--measure);color:var(--ink-2);margin:0 0 14px">
     <strong>One sentence was doing real work</strong> and I have removed it with the
     rest: <em>&ldquo;Tick as many as you like &mdash; they add up rather than narrow
@@ -146,19 +153,19 @@ HTML = """<title>Messages, Then The Message</title>
     <strong>And the rule is wider than this page.</strong> Every other Setup page
     still carries its grey description. I have not touched them &mdash; you asked
     about this one. Say so and I will strip them across Setup in one pass.</p>
-  <h2 style="margin-top:34px">What I need from you</h2>
+  <h2 style="margin-top:34px">What to go and check</h2>
   <ol>
-    <li><strong>Sign off the dashboard</strong> &mdash; the two lists, and the five
-      columns on the sent one.</li>
-    <li><strong>Sign off the flow</strong> &mdash; two subtabs, and the return to
-      the record with the green line after a send.</li>
-    <li>Say <em>build it</em> and I will, with a check that walks the whole
-      round trip and proves the message you just sent is on the list when you
-      land.</li>
+    <li><strong>Setup &rsaquo; Send a message.</strong> It opens on Overview:
+      drafts, then what has been sent, with who each one went to.</li>
+    <li><strong>Write a message</strong>, pick an audience, and send it. You land
+      back on Overview with a green line and the message at the top of the
+      list.</li>
+    <li><strong>A row in either list</strong> still opens &mdash; a draft to carry
+      on with, a sent message to see who received it.</li>
   </ol>
   <div class="sig">
     Drawn in the real platform &middot; light and dark &middot; the page&rsquo;s own section() and tables<br>
-    nothing in src/ touched &middot; nothing merged to main
+built on the branch &middot; qa sweep green &middot; nothing merged to main
   </div>
 </footer>
 
@@ -168,19 +175,19 @@ HTML = """<title>Messages, Then The Message</title>
 page = HTML % {
     "css": CSS,
     "today": fig("today.png",
-                 "<b>Today</b>Send a message opens on the composer. The record of what "
+                 "<b>Before</b>Send a message opened on the composer. The record of what "
                  "has been sent is behind the <em>Sent</em> dropdown at the top right.",
                  dark="today-dark.png"),
     "dashboard": fig("dashboard.png",
-                     "<b>Proposed &mdash; the first tab</b>Drafts above, what was sent "
+                     "<b>The first tab</b>Drafts above, what was sent "
                      "below, and nothing explaining either of them.",
                      dark="dashboard-dark.png"),
     "compose": fig("compose.png",
-                   "<b>Proposed &mdash; the second tab</b>Every control exactly as it "
+                   "<b>The second tab</b>Every control exactly as it "
                    "is today. Only the grey descriptions have gone.",
                    dark="compose-dark.png"),
     "aftersend": fig("after-send.png",
-                     "<b>Proposed &mdash; after Send</b>Back on the list, with the "
+                     "<b>After Send</b>Back on the list, with the "
                      "outcome stated and the message that just went at the top of it.",
                      dark="after-send-dark.png"),
 }

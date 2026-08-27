@@ -213,6 +213,12 @@ def go():
             pg.wait_for_timeout(70)
         pg.click('.setuprail [data-setupgo="send"]')
         pg.wait_for_timeout(800)
+        # SEND A MESSAGE IS TWO SUBTABS NOW (§137): it opens on the Overview,
+        # and the composer — which is all this file measures — is the second.
+        # §51.11: when a control changes shape, every check holding the old
+        # selector has to be found, not only the one that failed first.
+        pg.click('.secrow [role=tab]:nth-of-type(2)')
+        pg.wait_for_timeout(900)
         if not pg.query_selector("#msgsend"):
             ck("the page opens", False, "no send button")
             return
@@ -335,8 +341,21 @@ def go():
                "Dear Ahmed," not in (s.get("html") or ""),
                (s.get("html") or "")[:0])
 
+        # A SEND LANDS ON THE OVERVIEW NOW (§137) and empties the composer, so
+        # anything measured after one has to walk back and set the message up
+        # again. Written as a helper because three sections need it.
+        def back_to_write():
+            pg.click('.secrow [role=tab]:nth-of-type(2)')
+            pg.wait_for_timeout(700)
+            pg.evaluate("""() => { const st = sendmsg();
+              st.criteria.everyone = true;
+              st.subject = "The Q3 reporting cycle opens on Monday";
+              st.body = "The cycle opens on Monday 1 September."; sendmsgAsk(); paint(); }""")
+            pg.wait_for_timeout(800)
+
         # ══ 5 · OFF POSTS WHAT IT ALWAYS POSTED ═════════════════════
         print("\n5 · off is byte-identical to before this existed")
+        back_to_write()
         pg.click('[data-greet="0"]')
         pg.wait_for_timeout(500)
         r = pg.evaluate(READ)
@@ -358,6 +377,7 @@ def go():
 
         # ══ 6 · A DRAFT CARRIES IT ══════════════════════════════════
         print("\n6 · a draft carries the switch")
+        back_to_write()
         pg.click('[data-greet="1"]')
         pg.wait_for_timeout(400)
         pg.fill("#msggreet", "Dear")

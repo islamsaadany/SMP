@@ -1716,9 +1716,19 @@
      first build reached for the wrong constant and the check caught it,
      because it asks for a size worth READING rather than for a token name. */
   .msgsaid { font-size:var(--fs-note); }
-  .msgsaid.good b { color:var(--good-tx); }
   .msgsaid.bad  b { color:var(--bad-tx); }
-  .msgsaid .quiet { color:var(--ink-3); font-weight:400; }
+
+  /* ── THE OUTCOME, ON THE RECORD (§137) ──────────────────────────────
+     A send that the server answered leaves the composer, so what it did is
+     said on the Overview — above the two lists, with the message it describes
+     sitting in the one below. A band rather than a line: it is the answer to
+     the act you just took, and it goes the next time the page is drawn fresh. */
+  .sentsaid { margin:0 0 18px; padding:11px 16px; border-radius:8px;
+              background:var(--good-bg); border:1px solid var(--good);
+              font-size:var(--fs-note); color:var(--good-tx); }
+  .sentsaid.bad { background:var(--bad-bg); border-color:var(--bad);
+                  color:var(--bad-tx); }
+  .sentsaid .quiet { color:var(--ink-2); font-weight:400; }
 
   /* ── THE GREETING ROW (spec 021) ────────────────────────────────────
      ONE LINE, and no prose in it — Islam, of the two-line first draft: "it

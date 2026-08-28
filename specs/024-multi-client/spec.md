@@ -251,7 +251,9 @@ inventing a second way to do the same job — a temporary password issued by the
 platform's Super user, forced change on first use, the *not asked / temporary /
 set* status column, retire rather than delete, and rate limiting on the door.
 
-Islam is the platform's Super user. Day one: Islam, Omar, Essam.
+Islam is the platform's Admin. Day one, three accounts (Islam, 2026-08-28):
+`islam.saadany@forefront.consulting`, `mohamed.essam@forefront.consulting`,
+`omar.alaa@forefront.consulting`.
 
 ### 7.2 Clients — the configuration page
 
@@ -343,9 +345,9 @@ with the rollback written down first.
 1. `CREATE SCHEMA raya_trade;` then `ALTER TABLE public.<t> SET SCHEMA
    raya_trade;` for every table — no data is copied, so nothing can be
    half-copied.
-2. Create `platform`; seed the three Forefront accounts (Islam, Omar, Essam —
-   their addresses read off Raya's register and shown to Islam before they are
-   used), and Raya's configuration with its SMO team. Then build `accounts`
+2. Create `platform`; seed the three Forefront accounts named in §7.1 — each
+   with a temporary password that must be changed on first use, never a known
+   one — and Raya's configuration with its SMO team. Then build `accounts`
    from the existing `credentials` joined to each person's email on the
    register. A person with a password
    and no email gets **no account** and is named in the report, not dropped

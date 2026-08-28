@@ -18311,3 +18311,61 @@ stays as the promise that nothing is deliberately accepted. The check named
 the fixes itself, run by run — *"fixed since the baseline was written — remove
 from BASELINE"* — which is what makes deleting an entry the assertion that
 holds a repair.
+
+## 145 · Four visual refinements (v3.54)
+
+Wave 3 of the audit. Islam approved four of five; the fifth he redirected
+(§146). None of these repairs a fault — each makes a screen read better.
+
+**THE GROUP LANDING ANSWERS "WHERE DO I LOOK NEXT".** The first screen of
+every session said how the group was doing in three cards and then stopped,
+with 330px of empty page and the units one click away on another section. It
+answered *how are we doing* and never the question a chief executive opens
+this page with. `whereNext()` draws one entry per business unit, **worst
+first**, each with its own score in its band's TEXT twin (§144).
+
+**NOTHING NEW IS COMPUTED** — `unitObjectives(u)` is the same figure the
+Business units section draws in its gauges, so the summary cannot disagree
+with the detail it summarises (§53.5), and the check asserts exactly that
+entry by entry rather than asserting a number.
+
+**THE CAPTION'S NOUN SHOUTS AND ITS EXPLANATION SPEAKS.** "KEY MEASURES — AS
+PLANNED: THIS YEAR'S TARGET, AND HOW IT COMPILES" set a whole clause in italic
+capitals with letter-spacing: three emphases at once on the hardest form to
+read at length. The label keeps all three, because labels are scanned; the
+clause becomes ordinary text, because sentences are read.
+
+**BRANDING STOPS SHOWING A COLOUR THE PRODUCT NEVER PAINTS.** The pickers
+opened on `#4F46E5`, an indigo that exists nowhere in SMP, so an unbranded
+tenant met two indigo swatches on the one page that defines colour.
+`brandNow()` reads the LIVE token rather than repeating a literal (§25), so it
+cannot go stale the day a palette moves.
+
+**AND THE REGISTER STOPS SAYING THE NAME TWICE.** §93.8's two columns are both
+right and both stay; what changes is the DEFAULT. Until somebody types a short
+name the two are identical — 33 rows of 33 today — which spends the frozen
+column, the one a wide table never scrolls away, on saying the same thing
+twice. One tick in Columns brings it back and a saved choice still wins
+(§30.2), so nobody who has ever opened the chooser is affected.
+
+### 145.1 A control is not navigable because it looks it
+
+The strip's entries first carried `data-u` — the attribute the destination row
+uses — and **went nowhere when pressed**: that loop is
+`document.querySelectorAll("#units [data-u]")`, scoped to the chrome. The
+platform already had the right attribute: `[data-go]` is wired document-wide
+and lands on the unit's Performance page, which is where somebody following a
+low score is going anyway. **§140.1 twice in one session**, and found the same
+way — by pressing the thing, not by reading it.
+
+### 145.2 An assertion can force a design to be wrong
+
+The check first asserted the caption's explainer "reads quieter" by comparing
+COLOUR — and the noun is already the page's quietest ink, so satisfying it
+would have meant an explanation fainter than anything else on the page
+(§38.5's trap from the other side). The two differ in FORM, not in colour:
+one is a label (upper, bold, spaced), the other a sentence. The assertion was
+corrected rather than the design bent to fit it.
+
+Proved able to fail: 12 failures against the pre-§145 build. Full sweep: 33
+viewers, no errors.

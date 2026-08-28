@@ -1307,6 +1307,46 @@ function renderGroupPerformance(){
       '</div></div></div>';
   }).join("");
 
+/* ── WHERE TO LOOK NEXT (§145) ─────────────────────────────────────────────
+   The group's first section — the first screen of every session — said how the
+   group was doing in three cards and then stopped, with 330px of empty page
+   under it and the units one click away on another section. It answered "how
+   are we doing" and never "where do I look next", which is the question a
+   chief executive opens this page with.
+
+   NOTHING NEW IS COMPUTED. `unitObjectives(u)` is the same figure the Business
+   units section draws in its gauges, so the strip cannot disagree with the
+   detail it summarises (§53.5) — and `checks/wave3.py` asserts exactly that,
+   entry by entry, rather than asserting a number.
+
+   WORST FIRST, because a list sorted by anything else makes the reader do the
+   sorting. Each entry is a real destination carrying `data-u`, so it is wired
+   by the same loop as every other one in the product (§24) — a chip that
+   looked like a link and went nowhere would be worse than no chip.
+
+   The score wears its band's TEXT twin, never the fill (§144). */
+function whereNext(keys){
+  var rows = keys.map(function(k){
+    var u = UNITS[k];
+    return u ? { k: k, name: navName(u), v: unitObjectives(u) } : null;
+  }).filter(function(r){ return r && r.v != null; });
+  if (rows.length < 2) return "";
+  rows.sort(function(a, b){ return a.v - b.v; });
+  return '<div class="ustrip-h">Where to look next</div><div class="ustrip">' +
+    rows.map(function(r){
+      /* `data-go`, NOT `data-u` (§145.1). The row of destinations at the top
+         wires `#units [data-u]` — scoped to the chrome — so a button carrying
+         that attribute anywhere else looks navigable and does nothing. The
+         platform already has the attribute for exactly this: `[data-go]` is
+         wired document-wide and lands on the unit's Performance page, which
+         is where somebody following a low score is going anyway. Found by
+         pressing it (§96, §140.1 — twice in one session). */
+      return '<button type="button" data-go="' + esc(r.k) + '">' +
+        '<span class="un">' + esc(r.name) + '</span>' +
+        '<span class="uv" style="color:' + bandInk(r.v) + '">' + r.v + '%</span></button>';
+    }).join("") + '</div>';
+}
+
   var SECS = [];
   SECS.push({ t: "Overall performance", h: section("", "Overall performance", null,
       '<div class="scores">' +
@@ -1328,7 +1368,7 @@ function renderGroupPerformance(){
                  "%</b> planned &mdash; variance <b>" + varCell(groupExec(), groupPlan()) + "</b>.",
           drill: execDrill, modalTitle: "Business units \u2014 execution", modalSub: "Weighted compile of tactic delivery, as a share of plan"
         }) +
-      '</div>') });
+      '</div>' + whereNext(UNIT_KEYS)) });
 
   var arrangeBar = function(label, n){
     return canArrange("group") && ARRANGE

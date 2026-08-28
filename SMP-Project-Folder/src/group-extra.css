@@ -61,6 +61,15 @@
   .item-body { padding:4px 16px 18px; border-top:1px solid var(--line-soft); }
   h4.mini { font-size:11px; letter-spacing:.12em; text-transform:uppercase; color:var(--ink-3);
             font-weight:700; margin:22px 0 9px; }
+  /* ── THE NOUN SHOUTS, THE EXPLANATION SPEAKS (§145) ────────────────────
+     A caption like "KEY MEASURES — AS PLANNED: THIS YEAR'S TARGET, AND HOW IT
+     COMPILES" set a whole clause in italic capitals with letter-spacing:
+     three emphases at once, on the hardest form to read at length. The noun
+     keeps every one of them — it is a label and labels are scanned — and the
+     clause after the dash becomes ordinary quiet text, because it is a
+     sentence and sentences are read. Same words, one emphasis each. */
+  h4.mini em { font-style:normal; text-transform:none; letter-spacing:0;
+               font-weight:400; font-size:12px; color:var(--ink-3); }
   @media (max-width:900px) {
     details.item summary { grid-template-columns:30px 1fr 70px 70px; }
     .i-owner, .i-var { display:none; }

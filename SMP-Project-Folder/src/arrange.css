@@ -1337,3 +1337,19 @@
   /* The seam, so the frozen pair reads as a held edge rather than as text
      sliding under text. */
   .tblscroll td.idx + td, .tblscroll th.idx + th { box-shadow:1px 0 0 var(--line-soft); }
+
+  /* ── WHERE TO LOOK NEXT (§145) ──────────────────────────────────────────
+     One entry per unit under the group's three cards, worst first. A quiet
+     row on purpose: the cards above are the reading, this is the index to it,
+     and an index that competes with what it indexes has stopped being one. */
+  .ustrip-h { font-size:11px; letter-spacing:.12em; text-transform:uppercase;
+    color:var(--ink-3); font-weight:700; margin:24px 0 8px; }
+  .ustrip { display:flex; flex-wrap:wrap; gap:8px; margin:0 0 8px; }
+  .ustrip button { display:flex; align-items:center; gap:9px; font:inherit;
+    border:1px solid var(--line); border-radius:8px; padding:7px 12px;
+    background:var(--surface); cursor:pointer; }
+  .ustrip button:hover { border-color:var(--gold); }
+  .ustrip button:focus-visible { outline:2px solid var(--gold); outline-offset:2px; }
+  .ustrip .un { font-size:13px; color:var(--ink); }
+  .ustrip .uv { font-family:var(--mono); font-size:13px; font-weight:700;
+    font-variant-numeric:tabular-nums; }

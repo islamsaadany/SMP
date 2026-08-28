@@ -635,6 +635,15 @@
   .item-body { padding:4px 16px 18px; border-top:1px solid var(--line-soft); }
   h4.mini { font-size:11px; letter-spacing:.12em; text-transform:uppercase; color:var(--ink-3);
             font-weight:700; margin:22px 0 9px; }
+  /* ── THE NOUN SHOUTS, THE EXPLANATION SPEAKS (§145) ────────────────────
+     A caption like "KEY MEASURES — AS PLANNED: THIS YEAR'S TARGET, AND HOW IT
+     COMPILES" set a whole clause in italic capitals with letter-spacing:
+     three emphases at once, on the hardest form to read at length. The noun
+     keeps every one of them — it is a label and labels are scanned — and the
+     clause after the dash becomes ordinary quiet text, because it is a
+     sentence and sentences are read. Same words, one emphasis each. */
+  h4.mini em { font-style:normal; text-transform:none; letter-spacing:0;
+               font-weight:400; font-size:12px; color:var(--ink-3); }
   @media (max-width:900px) {
     details.item summary { grid-template-columns:30px 1fr 70px 70px; }
     .i-owner, .i-var { display:none; }
@@ -5263,6 +5272,22 @@
   /* The seam, so the frozen pair reads as a held edge rather than as text
      sliding under text. */
   .tblscroll td.idx + td, .tblscroll th.idx + th { box-shadow:1px 0 0 var(--line-soft); }
+
+  /* ── WHERE TO LOOK NEXT (§145) ──────────────────────────────────────────
+     One entry per unit under the group's three cards, worst first. A quiet
+     row on purpose: the cards above are the reading, this is the index to it,
+     and an index that competes with what it indexes has stopped being one. */
+  .ustrip-h { font-size:11px; letter-spacing:.12em; text-transform:uppercase;
+    color:var(--ink-3); font-weight:700; margin:24px 0 8px; }
+  .ustrip { display:flex; flex-wrap:wrap; gap:8px; margin:0 0 8px; }
+  .ustrip button { display:flex; align-items:center; gap:9px; font:inherit;
+    border:1px solid var(--line); border-radius:8px; padding:7px 12px;
+    background:var(--surface); cursor:pointer; }
+  .ustrip button:hover { border-color:var(--gold); }
+  .ustrip button:focus-visible { outline:2px solid var(--gold); outline-offset:2px; }
+  .ustrip .un { font-size:13px; color:var(--ink); }
+  .ustrip .uv { font-family:var(--mono); font-size:13px; font-weight:700;
+    font-variant-numeric:tabular-nums; }
 
   /* ── Presentation mode ────────────────────────────────────────────
      A mode, not a page: it takes the whole window, the app chrome disappears,
@@ -20778,6 +20803,46 @@ function renderGroupPerformance(){
       '</div></div></div>';
   }).join("");
 
+/* ── WHERE TO LOOK NEXT (§145) ─────────────────────────────────────────────
+   The group's first section — the first screen of every session — said how the
+   group was doing in three cards and then stopped, with 330px of empty page
+   under it and the units one click away on another section. It answered "how
+   are we doing" and never "where do I look next", which is the question a
+   chief executive opens this page with.
+
+   NOTHING NEW IS COMPUTED. `unitObjectives(u)` is the same figure the Business
+   units section draws in its gauges, so the strip cannot disagree with the
+   detail it summarises (§53.5) — and `checks/wave3.py` asserts exactly that,
+   entry by entry, rather than asserting a number.
+
+   WORST FIRST, because a list sorted by anything else makes the reader do the
+   sorting. Each entry is a real destination carrying `data-u`, so it is wired
+   by the same loop as every other one in the product (§24) — a chip that
+   looked like a link and went nowhere would be worse than no chip.
+
+   The score wears its band's TEXT twin, never the fill (§144). */
+function whereNext(keys){
+  var rows = keys.map(function(k){
+    var u = UNITS[k];
+    return u ? { k: k, name: navName(u), v: unitObjectives(u) } : null;
+  }).filter(function(r){ return r && r.v != null; });
+  if (rows.length < 2) return "";
+  rows.sort(function(a, b){ return a.v - b.v; });
+  return '<div class="ustrip-h">Where to look next</div><div class="ustrip">' +
+    rows.map(function(r){
+      /* `data-go`, NOT `data-u` (§145.1). The row of destinations at the top
+         wires `#units [data-u]` — scoped to the chrome — so a button carrying
+         that attribute anywhere else looks navigable and does nothing. The
+         platform already has the attribute for exactly this: `[data-go]` is
+         wired document-wide and lands on the unit's Performance page, which
+         is where somebody following a low score is going anyway. Found by
+         pressing it (§96, §140.1 — twice in one session). */
+      return '<button type="button" data-go="' + esc(r.k) + '">' +
+        '<span class="un">' + esc(r.name) + '</span>' +
+        '<span class="uv" style="color:' + bandInk(r.v) + '">' + r.v + '%</span></button>';
+    }).join("") + '</div>';
+}
+
   var SECS = [];
   SECS.push({ t: "Overall performance", h: section("", "Overall performance", null,
       '<div class="scores">' +
@@ -20799,7 +20864,7 @@ function renderGroupPerformance(){
                  "%</b> planned &mdash; variance <b>" + varCell(groupExec(), groupPlan()) + "</b>.",
           drill: execDrill, modalTitle: "Business units \u2014 execution", modalSub: "Weighted compile of tactic delivery, as a share of plan"
         }) +
-      '</div>') });
+      '</div>' + whereNext(UNIT_KEYS)) });
 
   var arrangeBar = function(label, n){
     return canArrange("group") && ARRANGE
@@ -24561,6 +24626,21 @@ var PPLF = { read:"", plan:null, done:null };
    derived pair reported as you type, because a brand colour that cannot be
    read is a thing to be told about at the moment you enter it, not discovered
    in a screenshot three weeks later. */
+/* The colour the running page is actually painting for a branding slot, as a
+   hex a <input type="color"> will accept. Read from the computed style, never
+   from a table of literals — the palette is themed and tenant-branded, and a
+   second copy of its values is a second thing to keep in step (§25, §53.5). */
+function brandNow(key){
+  var token = { accent: "--gold", bar: "--panel" }[key];
+  if (!token) return "#000000";
+  var v = getComputedStyle(document.documentElement).getPropertyValue(token).trim();
+  if (v.charAt(0) === "#") return v.length === 4
+    ? "#" + v[1] + v[1] + v[2] + v[2] + v[3] + v[3] : v;
+  var m = v.match(/\d+/g);
+  return m ? "#" + m.slice(0,3).map(function(x){
+    return ("0" + (+x).toString(16)).slice(-2); }).join("") : "#000000";
+}
+
 function renderBranding(){
   var mayEdit = grant("c_brand") === "edit";
   var b = branding(), checks = brandChecks(), t = brandTokens();
@@ -24571,8 +24651,14 @@ function renderBranding(){
     return '<tr><td><b>' + esc(label) + '</b><span class="why">' + esc(note) + '</span></td>' +
       '<td class="cc">' + (mayEdit
         ? '<span class="brandpick">' +
+            /* AN UNSET PICKER OPENS ON WHAT THE PLATFORM IS PAINTING (§145).
+               It opened on #4F46E5 — an indigo that exists nowhere in SMP — so
+               an unbranded tenant met two indigo swatches on the one page that
+               defines colour, while the product around them was navy and gold.
+               `brandNow()` reads the live token rather than repeating a
+               literal, so this cannot go stale the day a palette moves (§25). */
             '<input type="color" class="brandcolor" data-brand="' + key + '" value="' +
-              esc(shown || "#4F46E5") + '" aria-label="' + esc(label) + '">' +
+              esc(shown || brandNow(key)) + '" aria-label="' + esc(label) + '">' +
             '<input type="text" class="fld mono brandhex" data-brandhex="' + key +
               '" value="' + esc(shown) + '" placeholder="not set" spellcheck="false" size="9">' +
             (shown ? '<button class="linkbu" data-brandclear="' + key + '">Clear</button>' : '') +
@@ -24759,7 +24845,15 @@ var PEOPLE_COLS = [
      It sits immediately after the name rather than with the identifiers: it is
      the same fact at a different length, and putting it beside Emp ID would
      imply it identifies somebody, which is exactly what it must not do. */
-  { k:"fullname", label:"Full Name" },
+  /* OFF BY DEFAULT (§145). Everything above stays true — it is the value the
+     employee file is written in, and on a reconciliation day it is the column
+     you want. But until somebody types a short name it is IDENTICAL to the
+     frozen Name beside it, which today is 33 rows of 33: the register's most
+     valuable column, the one a wide table never scrolls away, spent saying
+     the same thing twice. One tick in Columns brings it back, and a saved
+     choice still wins (§30.2), so nobody who has ever opened the chooser is
+     affected. */
+  { k:"fullname", label:"Full Name", off:true },
   { k:"empid",    label:"Emp. ID", off:true },
   /* THE SIGN-IN NAME, OFF BY DEFAULT (§69.11). §35 took it out from under the
      name and it was right to: it cost 31 rows a line each to say what the

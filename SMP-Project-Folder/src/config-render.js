@@ -845,6 +845,21 @@ var PPLF = { read:"", plan:null, done:null };
    derived pair reported as you type, because a brand colour that cannot be
    read is a thing to be told about at the moment you enter it, not discovered
    in a screenshot three weeks later. */
+/* The colour the running page is actually painting for a branding slot, as a
+   hex a <input type="color"> will accept. Read from the computed style, never
+   from a table of literals — the palette is themed and tenant-branded, and a
+   second copy of its values is a second thing to keep in step (§25, §53.5). */
+function brandNow(key){
+  var token = { accent: "--gold", bar: "--panel" }[key];
+  if (!token) return "#000000";
+  var v = getComputedStyle(document.documentElement).getPropertyValue(token).trim();
+  if (v.charAt(0) === "#") return v.length === 4
+    ? "#" + v[1] + v[1] + v[2] + v[2] + v[3] + v[3] : v;
+  var m = v.match(/\d+/g);
+  return m ? "#" + m.slice(0,3).map(function(x){
+    return ("0" + (+x).toString(16)).slice(-2); }).join("") : "#000000";
+}
+
 function renderBranding(){
   var mayEdit = grant("c_brand") === "edit";
   var b = branding(), checks = brandChecks(), t = brandTokens();
@@ -855,8 +870,14 @@ function renderBranding(){
     return '<tr><td><b>' + esc(label) + '</b><span class="why">' + esc(note) + '</span></td>' +
       '<td class="cc">' + (mayEdit
         ? '<span class="brandpick">' +
+            /* AN UNSET PICKER OPENS ON WHAT THE PLATFORM IS PAINTING (§145).
+               It opened on #4F46E5 — an indigo that exists nowhere in SMP — so
+               an unbranded tenant met two indigo swatches on the one page that
+               defines colour, while the product around them was navy and gold.
+               `brandNow()` reads the live token rather than repeating a
+               literal, so this cannot go stale the day a palette moves (§25). */
             '<input type="color" class="brandcolor" data-brand="' + key + '" value="' +
-              esc(shown || "#4F46E5") + '" aria-label="' + esc(label) + '">' +
+              esc(shown || brandNow(key)) + '" aria-label="' + esc(label) + '">' +
             '<input type="text" class="fld mono brandhex" data-brandhex="' + key +
               '" value="' + esc(shown) + '" placeholder="not set" spellcheck="false" size="9">' +
             (shown ? '<button class="linkbu" data-brandclear="' + key + '">Clear</button>' : '') +
@@ -1043,7 +1064,15 @@ var PEOPLE_COLS = [
      It sits immediately after the name rather than with the identifiers: it is
      the same fact at a different length, and putting it beside Emp ID would
      imply it identifies somebody, which is exactly what it must not do. */
-  { k:"fullname", label:"Full Name" },
+  /* OFF BY DEFAULT (§145). Everything above stays true — it is the value the
+     employee file is written in, and on a reconciliation day it is the column
+     you want. But until somebody types a short name it is IDENTICAL to the
+     frozen Name beside it, which today is 33 rows of 33: the register's most
+     valuable column, the one a wide table never scrolls away, spent saying
+     the same thing twice. One tick in Columns brings it back, and a saved
+     choice still wins (§30.2), so nobody who has ever opened the chooser is
+     affected. */
+  { k:"fullname", label:"Full Name", off:true },
   { k:"empid",    label:"Emp. ID", off:true },
   /* THE SIGN-IN NAME, OFF BY DEFAULT (§69.11). §35 took it out from under the
      name and it was right to: it cost 31 rows a line each to say what the

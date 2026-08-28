@@ -67,6 +67,26 @@ Nothing proceeds past this line without an answer.
 
 ## Built and verified
 
+### v3.54 — Wave 3: four visual refinements (§145)
+
+- **The group landing answers "where do I look next"** — one entry per unit,
+  worst first, each linking to it; the same figures the Business units section
+  already shows, asserted equal entry by entry.
+- **Caption explainers stop shouting**; **Branding's pickers open on the colour
+  the platform actually paints** (read live, never a literal); **Full Name
+  leaves the register's default columns** and stays one tick away.
+- **§145.1**: the strip's entries first carried `data-u` and went nowhere —
+  that wiring is scoped to the chrome. `data-go` is the platform's own
+  document-wide attribute. Found by pressing, §140.1 twice in one session.
+- **§145.2**: an assertion nearly forced a wrong design — "quieter" measured
+  as colour would have made the explanation fainter than the quietest ink.
+  Corrected the check, not the design.
+- `checks/wave3.py` — 12 failures on the pre-§145 build. Full sweep: 33
+  viewers, no errors. **Not merged — awaiting Islam.**
+- **Still with Islam**: the three card sentences (§146 mockup) and whether the
+  chip refinement goes in with them.
+
+
 ### v3.53 — the three contrast repairs (§144)
 
 - Islam approved §143's three findings for repair. All three were **one fault**:

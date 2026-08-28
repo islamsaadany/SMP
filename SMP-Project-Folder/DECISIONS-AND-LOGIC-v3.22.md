@@ -18110,3 +18110,159 @@ the flush is not a firehose: a clean state sends nothing on leave. And
 because sync.js is the whole product's save path, `test-roundtrip.js` was
 re-run against a throwaway Postgres 16 on a virgin database: clean slate,
 round trip deep-equal, fixed point and the archived-plan trip all PASS.
+
+## 139 · The glyph and the rule say what they mean (v3.52)
+
+The audit's item 06: `DIR.` showed a bare ≥ / ≤ and `COMPILED` read "Latest"
+on nearly every row — a column with one value is furniture wearing a heading.
+Islam **kept the glyphs** and rejected the first draft's words: *"for the
+direction I was thinking if we can make the hover note to say something better
+than at least and at most, some descriptive like Less is better or more is
+better"*, and then the same for the other column — *"take last measure,
+accumulative across the time, average across the time"*.
+
+**THE WORDS ARE A DIRECTION OF TRAVEL, NOT A RESTATEMENT.** "At least the
+target" says what the glyph already says, in more words; "More is better" says
+which way the number should move, which is the thing a reader actually wants
+and the one thing the glyph cannot spell. That is the whole difference between
+the draft and the shipped version, and it is Islam's.
+
+**ONE PAIR OF MAPS, READ BY EVERY SURFACE.** Nine read-mode cells print
+`m.dir` and three print `m.compile`, across the unit, group, company and
+capability tables — so `DIR_WORDS` / `COMPILE_WORDS` and the `dirCell()` /
+`compileCell()` pair live in one place (§53.5, or the plan page and the deck
+end up explaining the same glyph differently). **A stored value outside the
+list keeps its spelling and gets NO note** (§96.2): an imported plan may carry
+a rule this product never offered, and inventing an explanation for it would
+be the platform speaking for the client's own words.
+
+**A SENTENCE IS NOT A COLUMN.** The rail's meta line reads "≥ · latest" as
+prose and is left plain — §99.8's rule (a column heading is a noun, a pill is
+a sentence), applied to a hover.
+
+**AND THE QUIET DEFAULT WEARS NO DOTS** — seen only by building it. The dotted
+underline that says "there is more here" was drawn under every "Latest", which
+made the column *busier* than before the notes existed: the mark was shouting
+on the one value nobody needs to read. The note stays on hover; the standing
+mark goes. The check asserts the two directions say DIFFERENT things (§113.8:
+an agreement assertion passes when both sides vanish — here the fault would be
+one note on both) and that the note never restates the glyph. Six failures
+against the pre-§139 build.
+
+## 140 · The reporting controls ride the tab row (v3.52)
+
+The audit proposed pinning the reporting bar; **Islam proposed the better
+thing**: *"if we take the floating bar to be in a box beside the performance
+icon would that look better?"* It does, and it is also the sounder build — the
+tab row is ALREADY pinned chrome, so the box is on screen for the whole report
+with **no new sticky element and none of the arithmetic one needs** (§122.5's
+entire class of fault, avoided by placement rather than by getting a number
+right). On a 41-figure report the tally, Submit and Save draft used to leave
+the screen on the first scroll.
+
+**ONE BUILDER FOR BOTH SIDES** (`repChrome()`): a unit's report and a
+supporting function's built that bar twice, line for line (§53.5). **The
+cycle line moves to the hover** — it is the one fact here nobody acts on —
+while the count stays written, because it says whether the report is finished.
+
+**THE COLOURS ARE ISLAM'S**: Submit wears the Report orange (`--cta`, the fill
+and ink §94.8 declared as a pair) and Save draft *"the same colour but without
+box and lighter font weight"* — one family in two volumes, the act that ends
+the report against the act that parks it. Inside §41's accent budget: drawn
+only while a cycle is open, for somebody who may report.
+
+**IT TRAVELS LIKE `PAGE_TOOLS`**, because the tab row is written BEFORE the
+page renders: the report publishes `REPORT_CHROME` and the shell hangs it on
+the row afterwards, reset in `pageLineReset()` with the other two or a
+report's box would survive onto the next page.
+
+### 140.1 A control is not a tab because of where it sits
+
+**Putting the controls in the row made them subject to the row's wiring.**
+`wire()` bound every `#subtabs button` as a tab, so pressing **Save draft** set
+`currentSub = undefined`, dropped the modes and repainted — from the outside,
+the report closing itself. The row had never held anything but tabs, so the
+selector had never been wrong before. It is `#subtabs button[data-s]` now: a
+tab is the thing carrying the key, not the thing standing in the row. **Found
+by pressing the button** — every assertion short of clicking it passed (§96's
+family, and the reason `report-chrome.py` presses Save draft and Cancel rather
+than looking for them).
+
+## 141 · A wide table scrolls inside its own box (v3.52)
+
+Islam, using the product on his own laptop: *"I'm stuck with the unit tables
+cut and I can't scroll horizontally."* The page never scrolls sideways by
+design (§27.2 — it drags every sticky element with it), so a plan wider than
+its pane was simply **CUT**, with nothing to reach the rest. The audit's item
+08 in the flesh, and the navigation fault (§136) had been hiding it.
+
+**THE BOX SCROLLS, THE PAGE NEVER DOES.** `min-width:0` on the grid child and
+the pane is what lets the box be narrower than the table inside it — a grid
+item's automatic minimum size is its content, so without it the pane grows and
+the cut comes straight back. **Wrapped unconditionally**, whatever the width:
+`overflow-x:auto` changes nothing while the table fits, and the demo's plan
+fits at 1100px where the client's does not — which is exactly how this reached
+production unnoticed. **Done in one place** after the panel is written, not at
+the dozen render sites that build a table, because the day one of them forgot
+would be the day a client's plan is cut again.
+
+**THE NAME COLUMN STAYS PUT** (Islam's pick, the register's own pattern,
+§69.19): scrolling numbers away from the row they belong to is how a scoring
+table becomes unreadable mid-scroll. `background:inherit` with the ROW
+carrying the ground, exactly as the register learned it (§73.2).
+
+### 141.1 A guessed constant between two frozen columns is a slip
+
+It shipped as `left:38px` — the `#` column's declared width — and **the name
+slid 2.5px on every scroll**, because the rendered border box is that width
+plus its borders. §122.5's rule and the register's own note that the second
+frozen column must equal the first one's rendered border box, met a third
+time. The offset is measured after wrapping and published as `--frozen-1` on
+the box, because every row's cell needs the same number and one of them
+deciding it is how two frozen columns come to disagree. Caught by the check
+asserting the name does **not** move — 9 failures against the previous build.
+
+## 142 · The viewer switcher says the name and the place (v3.52)
+
+Islam: *"this needs to be only the name not the full name + the unit name and
+that's all which will make it much smaller"*, and then *"if we make it all
+visible it will be ok"*. It read "Mohamed Essam — Head of the Strategy
+Management Office" against a 150px cap, so the control cut at the em dash and
+**the half that says what you are looking at was the half never shown**.
+
+The register's own two answers, never a third vocabulary (§53.5):
+`knownName()` with `displayNames()` behind it, so a pair whose short names
+collide is lengthened just enough to read apart and nobody is silently dropped
+from a picker by the dedupe (§130.7, §81.1); and `placeLabel(personAt(p))`,
+the navigation's own word for where somebody sits (§93.12). **The job title
+moves to the hover** — the thing you might want, never the thing you scan by
+— and the cap rises to a ceiling that only catches a genuinely long tenant
+name rather than the ordinary case.
+
+## 143 · Hover and focus are measured too (v3.52, closing §16.17)
+
+`scripts/contrast-sweep.py` walks pages and measures controls **at rest**, so
+every `:hover`, `:focus` and `:disabled` colour in the product had never been
+measured — a palette is only as good as its worst reachable state, and the
+moment a hand is on a control is when its label matters most.
+`checks/state-contrast.py` runs **the sweep's own JS, read out of its source**
+(§67 — two copies of a measuring rule drift, and the copy is the one that goes
+stale) against one representative per kind of control while that control is
+genuinely hovered or focused.
+
+**THE FIRST RUN FOUND THREE, ALL IN LIGHT MODE**, and they are recorded rather
+than quietly repainted, because a palette is the client's decision (rule 1c):
+`.dlcar` at **4.34** hovered (§95's `.editbtn:hover` family, found by accident
+then and by measurement now), a `<b>` at **4.45** (§38.5 for the seventh time:
+`--gold-deep` on `--surface-2`, which clears on white and fails on the quiet
+ground), and `.rnum` at **3.26** — the worst, and it is a NUMBER on a page
+about numbers. The BASELINE is named in the file: the suite stays green on
+what is known and goes red the moment a FOURTH appears or one gets worse, and
+**deleting an entry is how a fix is asserted**. §16.15's pattern, which
+recorded 31 failures rather than pretending they were absent.
+
+**AND `qa.py` WENT RED FOR THE RIGHT REASON** (§140): its reporting assertion
+asked for `.rep-bar`, which had moved to the tab row — §51.11's fault caught
+doing its job for once, going red rather than quietly passing. It asks for the
+controls and for the box being in the pinned row now, which is what the move
+was for.

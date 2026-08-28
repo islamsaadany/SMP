@@ -1239,3 +1239,96 @@
   .failcard summary:focus-visible { outline:2px solid var(--gold); outline-offset:2px; }
   .failcard .fc-e { font-family:var(--mono); font-size:12px; color:var(--ink-3);
     background:var(--surface-2); border-radius:6px; padding:8px 12px; margin-top:8px; }
+
+  /* ── THE GLYPH AND THE RULE CARRY THEIR MEANING ON THE HOVER (§139) ─────
+     A dotted underline is the one mark that says "there is more here" without
+     spending colour — the accent budget (§41) is already committed, and a
+     coloured glyph in a scoring table would read as a score. `help` rather
+     than `pointer`: nothing happens on a click. */
+  td .hasnote { border-bottom:1px dotted var(--ink-3); cursor:help; }
+  /* The value almost every row repeats, quiet so the exceptions carry the
+     column. Never hidden — it is still read straight down. */
+  td .cdefault { color:var(--ink-3); }
+  /* AND THE QUIET ONE WEARS NO DOTS (§139). Seen built: a dotted underline
+     under every "Latest" made the column busier than it was before the note
+     existed — the mark meant to say "there is more here" was shouting on the
+     one value that never needs reading. The note is still there on hover
+     (`cursor:help` says so once the pointer arrives); what goes is the
+     standing mark on the repeated default. */
+  td .cdefault.hasnote { border-bottom:0; }
+
+  /* ── THE REPORTING CONTROLS RIDE THE TAB ROW (§140) ─────────────────────
+     Islam's own placement, chosen over a pinned bar: the tab row is already
+     pinned chrome, so the controls stay on screen for the whole report with
+     no new sticky element and none of the arithmetic one needs (§122.5).
+     `margin-left:auto` puts the box at the far end of a row whose tabs read
+     from the left. */
+  .repchrome { display:flex; align-items:center; gap:12px; margin-left:auto;
+    align-self:center; background:var(--surface); border:1px solid var(--line);
+    border-radius:8px; padding:5px 12px; }
+  .repchrome .rc-n { font-weight:700; font-size:15px; }
+  .repchrome .rc-of { font-size:11.5px; color:var(--ink-3); }
+  .repchrome .rc-bar { width:110px; height:6px; background:var(--surface-2);
+    border-radius:20px; overflow:hidden; }
+  .repchrome .rc-bar i { display:block; height:100%; background:var(--good); }
+  .repchrome .rc-bar.part i { background:var(--attn); }
+  /* SUBMIT WEARS THE REPORT ORANGE (Islam: "the same button with orange
+     colour of reporting to be clear as well"). `--cta` is the pair §94.8
+     declared together — the fill and the ink that survives on it — so the
+     one solid fill in the room stays inside the accent budget: it is drawn
+     only while a cycle is open, for somebody who may report. */
+  .repchrome .rc-submit { background:var(--cta); color:var(--cta-ink);
+    border:1px solid var(--cta); border-radius:6px; padding:6px 14px;
+    font:inherit; font-size:12px; font-weight:700; letter-spacing:.06em;
+    text-transform:uppercase; cursor:pointer; }
+  .repchrome .rc-submit:hover { background:var(--cta-hover); border-color:var(--cta-hover); }
+  .repchrome .rc-submit:focus-visible { outline:2px solid var(--gold); outline-offset:2px; }
+  /* SAVE DRAFT IS THE SAME COLOUR AND NOTHING ELSE (Islam: "the same colour
+     but without box and lighter font weight") — the pair below reads as one
+     family in two volumes: the act that ends the report shouts, the act that
+     parks it speaks. `--cta` as TYPE, never the fill's own colour: §38.4 cuts
+     both ways, and `--cta` is the deep half of the pair for exactly this. */
+  .repchrome .rc-draft { background:none; border:0; color:var(--cta);
+    font:inherit; font-size:12px; font-weight:500; letter-spacing:.04em;
+    text-transform:uppercase; cursor:pointer; padding:6px 4px; }
+  .repchrome .rc-draft:hover { text-decoration:underline; }
+  .repchrome .rc-draft:focus-visible { outline:2px solid var(--gold); outline-offset:2px; }
+
+  /* ── A WIDE TABLE SCROLLS INSIDE ITS OWN BOX (§141) ─────────────────────
+     Islam, from his own laptop on Mazaya: *"I'm stuck with the unit tables cut
+     and I can't scroll horizontally."* The page deliberately never scrolls
+     sideways — §27.2, because a sideways page drags every sticky element with
+     it — so a plan wider than its pane was simply CUT, with no way to reach
+     the columns past the edge. The audit's item 08 in the flesh.
+
+     The box scrolls, the page never does. `min-width:0` on the grid child and
+     the pane is what lets the box be narrower than the table inside it: a
+     grid item's automatic minimum size is its content, so without this the
+     pane grows instead and the cut comes straight back (§100.5's rule, a
+     different tree). */
+  .split, .pane { min-width:0; }
+  .tblscroll { overflow-x:auto; }
+  /* THE NAME COLUMN STAYS PUT (Islam: the register's own pattern, §69.19).
+     Scrolling numbers away from the row they belong to is how a scoring table
+     becomes unreadable mid-scroll — so the `#` and the name freeze and the
+     figures move beside them.
+
+     `background:inherit` with the ROW carrying the ground, exactly as the
+     register learned it (§73.2): a hard-coded white here would leave the two
+     frozen cells unstriped beside a striped row, which is the seam freezing
+     was meant to remove. */
+  .tblscroll table tr { background:var(--surface); }
+  .tblscroll table tbody tr:nth-child(even) { background:var(--zebra); }
+  .tblscroll td.idx, .tblscroll th.idx { position:sticky; left:0; z-index:2;
+    background:inherit; }
+  .tblscroll thead th.idx { z-index:4; background:var(--panel); }
+  /* The name is the SECOND cell of these tables and has no class of its own,
+     so it is named by position — the one place that is safe, because every
+     table this wraps is built by the same row renderers (#, name, then
+     figures). It parks against the `#` column's own width. */
+  .tblscroll td.idx + td, .tblscroll th.idx + th { position:sticky;
+    left:var(--frozen-1, 38px); z-index:2; background:inherit; }
+  .tblscroll thead th.idx + th { z-index:4; background:var(--panel); }
+  /* The seam, so the frozen pair reads as a held edge rather than as text
+     sliding under text. */
+  .tblscroll td.idx + td, .tblscroll th.idx + th { box-shadow:1px 0 0 var(--line-soft); }

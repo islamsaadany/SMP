@@ -67,6 +67,33 @@ Nothing proceeds past this line without an answer.
 
 ## Built and verified
 
+### v3.52 — Wave 2 of the UI/UX audit (§139–§143)
+
+- **§141 the tables Islam was stuck on**: a plan wider than its pane was cut
+  with no way to scroll (the page never scrolls sideways, §27.2). It scrolls
+  inside its own box now, with the `#` and name column frozen — and the second
+  frozen column parks against the first one's MEASURED width, because
+  `left:38px` slid the name 2.5px on every scroll (§141.1).
+- **§140 the reporting controls ride the tab row** — Islam's placement, better
+  than the audit's pinned bar: the row is already pinned chrome, so no new
+  sticky element and none of its arithmetic. Submit wears the Report orange,
+  Save draft the same orange as type with no box. **§140.1**: putting them in
+  the row made them subject to the row's wiring — every `#subtabs button` was
+  bound as a tab, so Save draft closed the report. Found by pressing it.
+- **§139 the glyphs keep their place and gain their meaning**: "More is
+  better / Less is better", and the compile rules described; the repeated
+  "Latest" quiet, with no standing dotted mark.
+- **§142 the viewer switcher** reads name + place, job title on the hover.
+- **§143 hover and focus are measured at last** (closes §16.17), reusing the
+  sweep's own rule. Three light-mode failures recorded as a named baseline —
+  `.dlcar` 4.34, `<b>` 4.45, `.rnum` 3.26 — **awaiting Islam's colour
+  decision**, since a palette is his (rule 1c).
+- Checks: `plan-columns.py` (6 failures on the old build), `report-chrome.py`
+  (12), `table-scroll.py` (9), `state-contrast.py` (new), plus qa.py's own
+  reporting assertion updated — it went red for the right reason. Full sweep:
+  33 viewers, no errors. **Not merged — on the branch awaiting Islam's word.**
+
+
 ### v3.51 — Wave 1 of the UI/UX audit: the destination row scrolls (§136)
 
 - **From the platform-wide audit** (branch `claude/platform-ui-ux-audit-4pf8e5`;

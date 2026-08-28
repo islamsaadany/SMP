@@ -439,7 +439,13 @@ var PAGE_TITLE = null;
    not a trade worth making. */
 var PAGE_TOOLS = "";
 var PAGE_ACTS  = "";
-function pageLineReset(){ PAGE_TOOLS = ""; PAGE_ACTS = ""; }
+/* THE REPORTING BOX TRAVELS THE SAME WAY (§140). The tab row is written
+   BEFORE the page renders, so a report cannot put its controls there
+   directly — it publishes them here and the shell hangs them on the row
+   afterwards, which is exactly the trip the two slots above already make.
+   Reset with them, or a report's box would survive onto the next page. */
+var REPORT_CHROME = "";
+function pageLineReset(){ PAGE_TOOLS = ""; PAGE_ACTS = ""; REPORT_CHROME = ""; }
 function pageLineHTML(){
   if (!PAGE_TOOLS && !PAGE_ACTS) return "";
   return (PAGE_TOOLS ? '<div class="headtools">' + PAGE_TOOLS + '</div>' : '') +

@@ -244,6 +244,58 @@ function qsEdit(t){
   return '<span class="qs qs-edit">' + out + '</span>';
 }
 
+/* ── WHAT A GLYPH AND A ONE-WORD RULE ACTUALLY MEAN (§139) ───────────────
+   Islam, on the audit's two "columns that say nothing": keep the glyphs, and
+   say something better than "at least / at most" — *"some descriptive like
+   Less is better or more is better"* — and give COMPILED the same treatment,
+   *"take last measure, accumulative across the time, average across the
+   time"*.
+
+   THE WORDS ARE A DIRECTION OF TRAVEL, NOT A RESTATEMENT. "At least the
+   target" says what the glyph already says in longer form; "More is better"
+   says which way the number should move, which is the thing somebody reading
+   a scorecard actually wants and the one thing the glyph cannot spell.
+
+   ONE PAIR OF MAPS, READ BY EVERY SURFACE. Eight read-mode cells across the
+   unit, group, company and capability tables print `m.dir`, and four print
+   `m.compile` — so the words live here and nowhere else, or the plan page and
+   the deck end up explaining the same glyph differently (§53.5).
+
+   A STORED VALUE OUTSIDE THE LIST KEEPS ITS OWN SPELLING AND GETS NO NOTE
+   (§96.2, §130.1): an imported plan may carry a direction or a rule this
+   product never offered, and inventing an explanation for it would be the
+   platform speaking for the client's own words. */
+var DIR_WORDS = { "≥": "More is better", "≤": "Less is better" };
+var COMPILE_WORDS = {
+  Latest:  "Takes the last measure reported",
+  Sum:     "Adds up across the period",
+  Average: "Averages across the period"
+};
+/* The mark is drawn as it always was; the note rides on it. `title` alone —
+   the platform's own hover, so nothing new has to be positioned, and
+   `clipTitles()` only fills an EMPTY title so this is never overwritten
+   (§93.6). */
+function noteSpan(text, note){
+  return note
+    ? '<span class="hasnote" title="' + esc(note) + '">' + esc(text) + '</span>'
+    : esc(text);
+}
+function dirCell(d){ return d ? noteSpan(d, DIR_WORDS[d] || "") : ""; }
+/* THE REPEATED DEFAULT DROPS TO THE QUIET INK (§139). "Latest" is what almost
+   every row says, so at full strength it is a column of noise that hides the
+   two rows saying something else. Quiet, never hidden: the value is still
+   there for anybody reading down the column. */
+function compileCell(c){
+  if (!c) return "";
+  var note = COMPILE_WORDS[c] || "";
+  var cls = [];
+  if (c === "Latest") cls.push("cdefault");
+  if (note) cls.push("hasnote");
+  if (!cls.length) return esc(c);
+  return '<span class="' + cls.join(" ") + '"' +
+    (note ? ' title="' + esc(note) + '"' : '') + '>' + esc(c) + '</span>';
+}
+
 /* Measure name reads left; every figure centres under its column. Progress
    carries the band colour, since it is the row's conclusion. */
 function measureRows(ms, opts){
@@ -255,8 +307,8 @@ function measureRows(ms, opts){
                (on ? handle("Reorder " + m.name) : '') +
                '<span class="idx-n">' + (i+1) + '</span></td><td>' + esc(m.name) + fmark(m.id) +
                (m.horizon ? '<span class="why">measured at ' + esc(m.horizon) + '</span>' : '') +
-               '</td><td class="num">' + esc(m.dir) + '</td><td class="num">' + esc(m.target) +
-               '</td><td class="cc">' + esc(m.compile) + '</td>';
+               '</td><td class="num">' + dirCell(m.dir) + '</td><td class="num">' + esc(m.target) +
+               '</td><td class="cc">' + compileCell(m.compile) + '</td>';
     if (opts.unscored) return head + '</tr>';
     return head + '<td class="num">' + esc(m.actual) + '</td>' +
            (scored
@@ -540,6 +592,48 @@ function draftBtns(){
     '<button class="linkbu" data-repcancel="1">Cancel</button>' +
     '<span class="savesay" data-savesay="1" role="status" aria-live="polite"></span>' +
     '</span>';
+}
+
+/* ── THE REPORTING CONTROLS RIDE THE TAB ROW (§140) ──────────────────────
+   Islam, asked whether the audit's pinned bar should instead be a box beside
+   the Performance tab: *"if we take the floating bar to be in a box beside
+   the performance icon would that look better?"* — and it does, twice over.
+   A 41-figure report used to scroll its tally, Submit and Save draft off the
+   screen on the first flick; the tab row is ALREADY pinned chrome, so the box
+   is on screen for the whole report with no new sticky element and none of
+   the arithmetic one needs (§122.5's whole class of fault, avoided by
+   placement rather than by getting the numbers right).
+
+   ONE BUILDER FOR BOTH SIDES (§53.5). A unit's report and a supporting
+   function's built this bar twice, line for line; two boxes explaining the
+   same state differently is exactly the drift that rule exists to stop.
+
+   THE CYCLE LINE MOVES TO THE HOVER, because the row is shared with the tabs
+   and a date is the one fact here nobody acts on — while the COUNT stays
+   written, since it is what says whether the report is finished.
+
+   THE COLOURS ARE ISLAM'S: Submit wears the Report orange (`--cta`, the fill
+   and ink §94.8 declared as a pair) and Save draft the same orange as TYPE
+   with no box and a lighter weight — one family in two volumes, the act that
+   ends the report against the act that parks it. Inside §41's accent budget:
+   drawn only while a cycle is open, for somebody who may report. */
+function repChrome(target, done, total, pct, mayAll, subd){
+  return '<div class="repchrome">' +
+    '<span title="' + esc(REVIEW.name + " · due " + REVIEW.due) + '">' +
+      '<span class="rc-n">' + done + '</span> ' +
+      '<span class="rc-of">of ' + total + '</span></span>' +
+    '<span class="rc-bar' + (pct < 100 ? " part" : "") + '">' +
+      '<i style="width:' + pct + '%"></i></span>' +
+    (mayAll
+      ? (subd
+          ? '<span class="badge b-done">Submitted</span>' +
+            '<button class="linkbu" data-unsubmit="' + esc(target) + '">Reopen my report</button>'
+          : '<button class="rc-submit" data-submit="' + esc(target) + '">Submit to the SMO</button>' +
+            '<button class="rc-draft" data-repsave="1">Save draft</button>')
+      : '<span class="pill none">View only</span>') +
+    '<button class="linkbu" data-repcancel="1">Cancel</button>' +
+    '<span class="savesay" data-savesay="1" role="status" aria-live="polite"></span>' +
+    '</div>';
 }
 
 /* One button with two entries, the same <details> the template download uses
@@ -919,7 +1013,7 @@ function unitCards(keys){
     var u = UNITS[k];
     var pd = miniTable(["Key objective","Direction","Target","H1 actual","Progress"],
       u.keyObjectives.map(function(m){
-        return '<tr><td>' + esc(m.name) + '</td><td class="num">' + esc(m.dir) + '</td>' +
+        return '<tr><td>' + esc(m.name) + '</td><td class="num">' + dirCell(m.dir) + '</td>' +
           '<td class="num">' + esc(m.target) + '</td><td class="num">' + esc(m.actual) +
           '</td><td class="num">' + m.progress + '%</td></tr>';
       }).join("")) +
@@ -1061,8 +1155,8 @@ function renderGroupPerformance(){
   var koDrill = miniTable(["Objective","Direction","Target","Compile","H1 actual","Progress"],
     GROUP.keyObjectives.map(function(m){
       return '<tr><td>' + (m.group ? esc(m.group) + " &mdash; " : "") + esc(m.name) + '</td>' +
-        '<td class="num">' + esc(m.dir) + '</td><td class="num">' + esc(m.target) + '</td>' +
-        '<td>' + esc(m.compile) + '</td><td class="num">' + esc(m.actual) + '</td>' +
+        '<td class="num">' + dirCell(m.dir) + '</td><td class="num">' + esc(m.target) + '</td>' +
+        '<td>' + compileCell(m.compile) + '</td><td class="num">' + esc(m.actual) + '</td>' +
         '<td class="num">' + m.progress + '%</td></tr>';
     }).join("")) +
     '<p class="sub">Mean of the ' + GROUP.keyObjectives.length + ': <b>' +
@@ -1141,7 +1235,7 @@ function renderGroupPerformance(){
         : miniTable(["#","Key objective","Direction","Target","Actual","Progress"],
             c.keyObjectives.map(function(m, i){
               return '<tr><td class="idx">' + (i+1) + '</td><td>' + esc(m.name) + '</td>' +
-                '<td class="num">' + esc(m.dir) + '</td>' +
+                '<td class="num">' + dirCell(m.dir) + '</td>' +
                 '<td class="num">' + (m.target ? esc(m.target) : '<span class="missing">Missing</span>') + '</td>' +
                 '<td class="num">' + esc(m.actual) + '</td>' +
                 '<td class="num final" style="color:var(--' + band(m.progress) + ')">' + pct(m.progress) + '</td></tr>';
@@ -1354,6 +1448,10 @@ function renderTemple(){
   var cell = function(m){
     return '<div class="ns-item"><span class="ns-label">' + esc(m.name) + '</span>' +
            '<span class="ns-target">' + (m.target ? esc(m.target) : '<span class="missing">Missing</span>') + '</span>' +
+           /* A SENTENCE, NOT A COLUMN (§139, §99.8's rule). The hover words
+              belong on the table cells somebody runs an eye down; this line
+              already reads "≥ · latest" as prose, and half of it wearing a
+              note would be the drift the helpers exist to prevent. */
            '<span class="ns-dir">' + esc(m.dir) + ' &middot; ' + esc(m.compile).toLowerCase() + '</span></div>';
   };
   var ns = '<span class="ko-head">' + L("keyobj","group") + horizonBy() + '</span>' +
@@ -1505,7 +1603,7 @@ function renderUnitPerformance(u){
         var w = ws ? (ws[i] == null ? 0 : ws[i]) : null;
         return '<tr' + (isFocus(m.id) ? ' class="focusrow"' : '') + '><td class="idx">' + (i+1) + '</td>' +
           '<td>' + esc(m.name) + fmark(m.id) + '</td>' +
-          '<td class="num">' + esc(m.dir) + '</td><td class="num">' + esc(m.target) + '</td>' +
+          '<td class="num">' + dirCell(m.dir) + '</td><td class="num">' + esc(m.target) + '</td>' +
           '<td class="num">' + esc(m.actual) + '</td>' +
           '<td class="num final" style="color:var(--' + band(m.progress) + ')">' + pct(m.progress) + '</td>' +
           (ws ? '<td class="num">' + w + '%</td><td class="num">' +
@@ -2581,19 +2679,11 @@ function renderReport(u){
       : '<div class="pane">' + pane + '</div>';
   }
 
-  var bar =
-    '<div class="rep-bar">' +
-      '<div class="kpi"><b>' + c.done + '</b><span>of ' + c.total + ' reported</span></div>' +
-      '<div class="repbar' + (pctDone < 100 ? " part" : "") + '"><i style="width:' + pctDone + '%"></i></div>' +
-      '<span class="why" style="margin:0">' + esc(REVIEW.name) + ' &middot; due ' + esc(REVIEW.due) + '</span>' +
-      (mayAll
-        ? (subd
-            ? '<span class="badge b-done">Submitted</span>' +
-              '<button class="linkbu" data-unsubmit="' + u.ukey + '">Reopen my report</button>'
-            : '<button class="editbtn" data-submit="' + u.ukey + '">Submit to the SMO</button>')
-        : '<span class="pill none">View only</span>') +
-      draftBtns() +
-    '</div>';
+  /* Published to the chrome rather than drawn here (§140): the shell reads
+     REPORT_CHROME after this render and hangs it on the tab row, the same
+     trip PAGE_TOOLS already makes. */
+  REPORT_CHROME = repChrome(u.ukey, c.done, c.total, pctDone, mayAll, subd);
+  var bar = "";
 
   var summary =
     '<h4 class="mini">The owner\'s note on this cycle</h4>' +
@@ -3086,7 +3176,7 @@ function capKOTable(c){
         return '<tr><td class="idx">' + (i+1) + '</td><td>' + esc(m.name) +
           (m.note ? '<span class="why">' + esc(m.note) + '</span>' : '') + '</td>' +
           '<td class="cc">' + (m.weight == null ? "&mdash;" : m.weight + "%") + '</td>' +
-          '<td class="cc">' + esc(m.dir) + '</td>' +
+          '<td class="cc">' + dirCell(m.dir) + '</td>' +
           '<td class="num">' + (m.target ? esc(m.target) : '<span class="missing">Missing</span>') + '</td>' +
           '<td class="num">' + (m.actual == null || m.actual === "" ? "&mdash;" : esc(m.actual)) + '</td>' +
           '<td class="num final" style="color:var(--' + band(m.progress) + ')">' + pct(m.progress) + '</td></tr>';
@@ -3573,7 +3663,7 @@ function capReportBody(c){
             grant("k_report") === "edit";
   var kRows = c.keyObjectives.map(function(m, i){
     return '<tr><td class="idx">' + (i+1) + '</td><td>' + esc(m.name) + '</td>' +
-      '<td class="cc">' + esc(m.dir) + '</td>' +
+      '<td class="cc">' + dirCell(m.dir) + '</td>' +
       '<td class="num">' + (m.target ? esc(m.target) : '<span class="missing">Missing</span>') + '</td>' +
       '<td class="cc">' + capEntryBox(m, splitTarget(String(m.target)).unit, may, m.name) + '</td>' +
       '<td class="notecol">' + capNoteBox(m, may) + '</td></tr>';
@@ -3623,18 +3713,10 @@ function renderFnReport(fnKey){
      second answer everywhere. */
   var fnKeyTarget = "fn:" + fk;
   var mayAll = canSpeakFor(fnKeyTarget), subd = !!(REVIEW.submitted || {})[fnKeyTarget];
-  var bar = '<div class="rep-bar">' +
-      '<div class="kpi"><b>' + done + '</b><span>of ' + total + ' reported</span></div>' +
-      '<div class="repbar' + (pctDone < 100 ? " part" : "") + '"><i style="width:' + pctDone + '%"></i></div>' +
-      '<span class="why" style="margin:0">' + esc(REVIEW.name) + ' &middot; due ' + esc(REVIEW.due) + '</span>' +
-      (mayAll
-        ? (subd
-            ? '<span class="badge b-done">Submitted</span>' +
-              '<button class="linkbu" data-unsubmit="' + esc(fnKeyTarget) + '">Reopen my report</button>'
-            : '<button class="editbtn" data-submit="' + esc(fnKeyTarget) + '">Submit to the SMO</button>')
-        : '<span class="pill none">View only</span>') +
-      draftBtns() +
-    '</div>';
+  /* The same box the unit's report publishes (§140, §53.5) — one builder, so
+     the two sides cannot explain the same state differently. */
+  REPORT_CHROME = repChrome(fnKeyTarget, done, total, pctDone, mayAll, subd);
+  var bar = "";
   return bar + caps.map(function(c){
     return capBand(c) + '<div class="capbody">' + capReportBody(c) + '</div>';
   }).join("");
@@ -3822,7 +3904,7 @@ function unitPlanBody(it, u, railed){
             (m.dir && ["\u2265","\u2264"].indexOf(m.dir) < 0 ? [m.dir] : [])
               .concat(m.dir ? [] : [""]).concat(["\u2265","\u2264"]), "mono",
             function(v){ m.dir = v; })
-        : esc(m.dir)) + '</td>' +
+        : dirCell(m.dir)) + '</td>' +
       '<td class="num">' + cell(m.target, function(v){ m.target = v; }, "mono") + '</td>' +
       /* NO 3-YEAR COLUMN. Islam, 2026-08-22: "in the direction plans the key
          measures are for 1 year only". A pillar's key measures carry one
@@ -3836,7 +3918,7 @@ function unitPlanBody(it, u, railed){
             (m.compile && ["Sum","Latest","Average"].indexOf(m.compile) < 0 ? [m.compile] : [])
               .concat(m.compile ? [] : [""]).concat(["Sum","Latest","Average"]), "",
             function(v){ m.compile = v; })
-        : esc(m.compile || "\u2014")) + '</td></tr>';
+        : (m.compile ? compileCell(m.compile) : "\u2014")) + '</td></tr>';
   }).join("");
   var tRows = it.tactics.map(function(t, i){
     return '<tr data-oi="' + i + '"><td class="idx">' +

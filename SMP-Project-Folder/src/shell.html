@@ -1788,6 +1788,62 @@
     var failBtn = _panel.querySelector("[data-failreload]");
     if (failBtn) failBtn.addEventListener("click", function(){ location.reload(); });
 
+    /* ── AND THE REPORTING CONTROLS GO ON THE TAB ROW (§140) ─────────────
+       Read AFTER the page's render, because the render is what fills the
+       slot — the same direction of travel `pageLineHTML()` makes for a Setup
+       page's controls, and the reason the tab row could not simply build
+       them itself: it is written further up, before this page exists.
+
+       The row is pinned chrome, so the box stays on screen for the whole
+       report — which is the entire feature. Appended rather than written
+       into the row's innerHTML, because that string is the tabs' and a
+       report is not a tab.
+
+       Its controls are bound by wire() below, which queries the DOCUMENT for
+       [data-submit] / [data-repsave] / [data-repcancel] — so the box works
+       from outside #panel without a second wiring path (§24). */
+    var tabrow = document.getElementById("subtabs");
+    if (REPORT_CHROME && tabrow && !railed) tabrow.insertAdjacentHTML("beforeend", REPORT_CHROME);
+
+    /* ── AND A TABLE TOO WIDE FOR ITS PANE SCROLLS INSIDE ITSELF (§141) ──
+       Done here, once, rather than at the dozen render sites that build a
+       table: every one of them would have had to remember, and the day one
+       forgot would be the day a client's plan is cut again with no way to
+       reach the rest of it (Islam, on Mazaya).
+
+       WRAPPED WHATEVER THE WIDTH, and that is deliberate: `overflow-x:auto`
+       shows no scrollbar and changes nothing while the table fits, so
+       wrapping unconditionally means the behaviour cannot depend on which
+       tenant's data happens to be loaded — the demo's plan fits at 1100px
+       and the client's does not, which is exactly how this reached
+       production unnoticed.
+
+       Tables already inside a scroller are left alone: the register brings
+       its own (§122.5), and a box inside a box scrolls neither well. */
+    _panel.querySelectorAll("table").forEach(function(t){
+      if (t.closest(".tblscroll") || t.closest(".acgrid")) return;
+      var w = document.createElement("div");
+      w.className = "tblscroll";
+      t.parentNode.insertBefore(w, t);
+      w.appendChild(t);
+    });
+    /* THE SECOND FROZEN COLUMN PARKS AGAINST THE FIRST ONE'S MEASURED WIDTH,
+       NEVER AGAINST A CONSTANT (§141.1). It shipped as `left:38px` — the `#`
+       column's declared width — and the name slid 2.5px on every scroll,
+       because the RENDERED border box is the declared width plus its borders.
+       §122.5's rule ("a cap made of a guessed constant goes stale silently")
+       and the register's own note that the second frozen column must equal
+       the first one's rendered border box (§73.2), met again here.
+
+       Measured after the wrapping above, so the layout it reads is the one
+       that will be on screen; published as a variable on the box, because
+       every row's cell needs the same number and one of them deciding it is
+       how two frozen columns come to disagree. */
+    _panel.querySelectorAll(".tblscroll").forEach(function(w){
+      var first = w.querySelector("thead th.idx, tbody td.idx");
+      if (first) w.style.setProperty("--frozen-1", first.getBoundingClientRect().width + "px");
+    });
+
     /* Group Performance is four sections; they become a third nav row rather
        than one long scroll. The row exists only where there are sections. */
     var secrow = document.getElementById("secrow");
@@ -2052,7 +2108,15 @@
     if (typeof SYNC !== "undefined" && SYNC.afterPaint) SYNC.afterPaint();
   }
   function wire(){
-    document.querySelectorAll("#subtabs button").forEach(function(b){
+    /* `[data-s]`, NOT every button in the row (§140.1). The row gained a
+       second kind of child when the reporting controls moved onto it, and
+       this selector said "a button here is a tab" — so pressing Save draft
+       set `currentSub = undefined`, dropped the modes and repainted, which
+       from the outside looked exactly like the report closing itself. A
+       control is not a tab because of where it sits; a tab is the thing
+       carrying the key. Found by pressing the button, not by reading — every
+       assertion short of clicking it passed (§96's family). */
+    document.querySelectorAll("#subtabs button[data-s]").forEach(function(b){
       b.addEventListener("click", function(){
         /* A TAB IS SOMEWHERE ELSE TOO. Only the destination change dropped the
            modes, so pressing Strategy while reporting and coming back landed
@@ -6293,8 +6357,27 @@
     var sig = PEOPLE.map(function(p){ return p.key; }).join(",");
     if (sig !== viewerSig) {
       viewerSig = sig;
+      /* \u2500\u2500 THE NAME AND THE PLACE, AND NOTHING ELSE (\u00a7142) \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500
+         Islam: *"this needs to be only the name not the full name + the unit
+         name and that's all which will make it much smaller."* It read
+         "Mohamed Essam \u2014 Head of the Strategy Management Office" and the
+         control's cap cut it at the em dash, so the half that says WHAT YOU
+         ARE LOOKING AT was the half never shown.
+
+         The register's own two answers, never a third vocabulary (\u00a753.5):
+         `knownName()` is the short name the People page shows \u2014 with
+         `displayNames()` behind it, so a pair whose short names collide is
+         lengthened just enough to read apart and nobody is silently dropped
+         from a picker by the dedupe (\u00a7130.7, \u00a781.1) \u2014 and `placeLabel()` is
+         the navigation's own word for where they sit (\u00a793.12).
+
+         The job title goes from the option and stays on the `title`: it is
+         the thing you might want and never the thing you scan by. */
+      var dn = displayNames();
       sel.innerHTML = PEOPLE.map(function(p){
-        return '<option value="' + p.key + '">' + p.name + " \u2014 " + p.title + '</option>';
+        var where = placeLabel(personAt(p));
+        return '<option value="' + p.key + '" title="' + esc(p.name + " \u2014 " + p.title) + '">' +
+          esc(knownName(p, dn)) + " \u2014 " + esc(where) + '</option>';
       }).join("");
     }
     viewer();               /* corrects VIEWER if the person selected has gone */

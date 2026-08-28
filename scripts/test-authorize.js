@@ -1397,49 +1397,58 @@ console.log("\n16 · fill the gaps (§145, spec 023)");
         R.mayFillPage(R.worldOf(sOther), personOf(sOther, custKey), "u_plan", OTHER) === false);
 })();
 
-/* ── 17 · A CUSTODIAN PER PROJECT (§147) ──────────────────────────
-   A function's custodian covers the whole function; where each project has
-   its own owner, that owner is a Contributor of the function and reports
-   THEIR project — every row it holds — and nothing beside it. Derived from
-   the project's Owner row — a register-picked NAME since §130.1, matched by
-   the same namedOn() a tactic's owner is — never granted; governed by the
-   Contributor row's own-function Reporting cell.
+/* ── 17 · A CUSTODIAN PER PROJECT — TWO ROLES, NOT ONE (§147.7) ────
+   Islam: "a project owner is a role", "we need to add another role which is
+   pillar owner ... same pattern", and "contributor is someone whose name is
+   on the project anywhere but that doesn't mean that he is a project owner".
 
-   EVERY allows() HERE ALSO ASSERTS THAT SOMETHING CHANGED (§94.5): the
-   no-op assertion is this suite's own recorded fault, and a fixture that
-   sets a status to the value the seed already holds would pass every
-   refusal vacuously. */
-console.log("\n17 · a custodian per project (§147)");
+   TWO CONDITIONS before anybody reports (his words): the role's Reporting
+   cell opened to edit on Roles & access, AND being named the Owner on the
+   thing. Contributors — a milestone's owner, a stakeholder — report NOTHING
+   until the Contributor row is opened, and then only the rows that name
+   them. None of the three ever submits.
+
+   EVERY allows() ALSO ASSERTS THE FIXTURE CHANGED SOMETHING (§94.5): the
+   no-op assertion is this suite's own recorded fault. */
+console.log("\n17 · a custodian per project — two roles (§147.7)");
 (function () {
   const FN = "it";
   const T = "fn:" + FN;
-  const base = clone(SEED);
-  base.access.contrib = Object.assign({}, base.access.contrib, { a_fn_own: "edit" });
-  base.people.push({ key: "t130_own", name: "Project Owner 130", fn: FN, active: true });
   const capOf = function (s) {
     return s.group.capabilities.filter(function (c) { return c.fn === FN; })[0];
   };
+  /* The base: three people the plan names — an owner of project 1, the owner
+     of one of project 1's milestones, and a stakeholder on project 1 — and
+     the two owner rows opened, Islam's condition 1. DELIBERATELY UNATTACHED
+     (no p.unit, no p.fn): his two conditions do not include the register
+     attachment, and this is the exact shape of the Ahmed test that started
+     §147.7. The contributor row is left at its default. */
+  const base = clone(SEED);
+  base.access.powner = Object.assign({}, base.access.powner, { a_fn_own: "edit" });
+  base.people.push({ key: "t147_own",   name: "Project Owner 147",   active: true });
+  base.people.push({ key: "t147_mile",  name: "Milestone Owner 147", active: true });
+  base.people.push({ key: "t147_stake", name: "Stakeholder 147",     active: true });
   const cap = capOf(base);
-  cap.projects[0].owner = "Project Owner 130";
+  cap.projects[0].owner = "Project Owner 147";
+  cap.projects[0].milestones[0].owner = "Milestone Owner 147";
+  cap.projects[0].stakeholders = (cap.projects[0].stakeholders || []).concat("Stakeholder 147");
   const wb = R.worldOf(base);
-  const me = personOf(base, "t130_own");
 
-  check("named owner of a project derives Contributor at the function",
-        JSON.stringify(R.personRoles(wb, me)) ===
-        JSON.stringify([{ role: "contrib", at: T }]),
-        JSON.stringify(R.personRoles(wb, me)));
-  check("...and speaks only for their own lines there",
-        R.onlyOwnLines(wb, me, "fn", T) === true);
-  check("the world carries the capabilities (§102.4's pair of allow-lists)",
-        (wb.capabilities || []).length === SEED.group.capabilities.length,
-        "world holds " + (wb.capabilities || []).length);
+  check("named Owner of a project derives PROJECT OWNER, unattached included",
+        JSON.stringify(R.personRoles(wb, personOf(base, "t147_own"))) ===
+        JSON.stringify([{ role: "powner", at: T }]),
+        JSON.stringify(R.personRoles(wb, personOf(base, "t147_own"))));
+  check("a project owner is bounded — never the whole function",
+        R.onlyOwnLines(wb, personOf(base, "t147_own"), "fn", T) === true);
+  check("the two owner roles are never grantable by hand",
+        R.isOwnLinesRole("powner") && R.isOwnLinesRole("plowner"));
 
+  const same = function (a, b) { return JSON.stringify(a) === JSON.stringify(b); };
   const run = function (stored, who, mutate) {
     const inc = clone(stored); mutate(inc);
     return { v: A.authorize(stored, inc, personOf(stored, who)),
              moved: !same(stored, inc) };
   };
-  const same = function (a, b) { return JSON.stringify(a) === JSON.stringify(b); };
   const ok = function (name, r) {
     check(name + " — the fixture actually changed something", r.moved);
     check(name, r.v.ok, r.v.refusals.join(" / "));
@@ -1450,13 +1459,10 @@ console.log("\n17 · a custodian per project (§147)");
       JSON.stringify(r.v.changes.map(function (c) { return c.kind + ":" + c.what; })));
   };
 
-  /* The custodian first — §147 found that the server had been refusing a
-     custodian's DELIVERABLE outright and the milestone % that §104.10
-     REQUIRES, both classified as plan, since migration 024. The screen
-     offered both the whole time (§94.2's class). */
+  /* The custodian regressions §147.3 fixed stay fixed. */
   const fnCust = (SEED.functions[FN] || {}).custodian;
   if (fnCust && personOf(SEED, fnCust)) {
-    ok("the custodian reports a deliverable (the §147 drift, fixed)",
+    ok("the custodian reports a deliverable (the §147.3 drift, fixed)",
        run(SEED, fnCust, function (s) {
          capOf(s).projects[0].deliverables[0].status = "todo"; }));
     ok("the custodian gives an In-progress milestone its required %",
@@ -1467,50 +1473,137 @@ console.log("\n17 · a custodian per project (§147)");
          s.review.submitted = Object.assign({}, s.review.submitted); s.review.submitted[T] = true; }));
   }
 
-  /* The project owner: their project, whole — and nothing beside it. */
-  ok("the owner reports their own project's deliverable",
-     run(base, "t130_own", function (s) {
+  /* THE PROJECT OWNER: their project, whole — and nothing beside it. */
+  ok("the project owner reports their own project's deliverable",
+     run(base, "t147_own", function (s) {
        capOf(s).projects[0].deliverables[0].status = "todo"; }));
-  ok("the owner reports their own project's milestone, % included",
-     run(base, "t130_own", function (s) {
+  ok("the project owner reports their own project's milestone, % included",
+     run(base, "t147_own", function (s) {
        const m = capOf(s).projects[0].milestones[2]; m.pct = 80; m.note = "on it"; }));
-  ok("the owner reports their own project's outcome, note included",
-     run(base, "t130_own", function (s) {
+  ok("the project owner reports their own project's outcome, note included",
+     run(base, "t147_own", function (s) {
        const o = capOf(s).projects[0].outcomes[0]; o.actual = "3"; o.note = "up"; }));
-  not("the owner may NOT report the project beside theirs",
-      run(base, "t130_own", function (s) {
+  not("the project owner may NOT report the project beside theirs",
+      run(base, "t147_own", function (s) {
         capOf(s).projects[1].deliverables[0].status = "done"; }));
-  not("the owner may NOT enter the capability's own key objectives",
-      run(base, "t130_own", function (s) {
+  not("the project owner may NOT enter the capability's own key objectives",
+      run(base, "t147_own", function (s) {
         const k = capOf(s).keyObjectives[0]; if (k) k.actual = "99"; else s.group.capabilities[0].name = "x"; }));
-  not("the owner may NOT submit the function",
-      run(base, "t130_own", function (s) {
+  not("the project owner may NOT submit the function",
+      run(base, "t147_own", function (s) {
         s.review.submitted = Object.assign({}, s.review.submitted); s.review.submitted[T] = true; }));
-  not("the owner may NOT write the function's cycle note",
-      run(base, "t130_own", function (s) {
+  not("the project owner may NOT write the function's cycle note",
+      run(base, "t147_own", function (s) {
         s.review.note = Object.assign({}, s.review.note); s.review.note[T] = "our quarter"; }));
-  not("the owner may NOT edit the project's plan",
-      run(base, "t130_own", function (s) {
+  not("the project owner may NOT edit the project's plan",
+      run(base, "t147_own", function (s) {
         capOf(s).projects[0].name = "Renamed by its owner"; }));
 
-  /* The matrix governs it: with the shipped default (view) the same person
-     writes nothing at all — the cell Islam asked for, doing the deciding. */
-  const closed = clone(base);
-  delete closed.access.contrib;
-  not("with the Contributor default the owner reports nothing",
-      run(closed, "t130_own", function (s) {
+  /* CONDITION 1 WITHOUT CONDITION 2, AND THE REVERSE. */
+  const unopened = clone(base);
+  delete unopened.access.powner;
+  not("named, but the Project owner row still at its default: nothing",
+      run(unopened, "t147_own", function (s) {
+        capOf(s).projects[0].deliverables[0].status = "todo"; }));
+  const unnamed = clone(base);
+  capOf(unnamed).projects[0].owner = "Somebody Else Entirely";
+  not("the row opened, but not named on any project: nothing",
+      run(unnamed, "t147_own", function (s) {
         capOf(s).projects[0].deliverables[0].status = "todo"; }));
 
-  /* A name that names nobody derives nothing — and a retired owner derives
-     nothing at all, because a retired person holds nothing (§110.4). */
-  const strangers = clone(base);
-  capOf(strangers).projects[0].owner = "Somebody The Register Never Met";
-  check("an owner name the register cannot answer for derives nothing",
-        R.personRoles(R.worldOf(strangers), personOf(strangers, "t130_own")).length === 0);
+  /* CONTRIBUTORS REPORT NOTHING FOR NOW (Islam) — the row ships at view. */
+  check("a milestone's owner derives Contributor, not Project owner",
+        R.personRoleKeys(wb, personOf(base, "t147_mile")).join() === "contrib",
+        R.personRoleKeys(wb, personOf(base, "t147_mile")).join());
+  check("a stakeholder derives Contributor too",
+        R.personRoleKeys(wb, personOf(base, "t147_stake")).join() === "contrib",
+        R.personRoleKeys(wb, personOf(base, "t147_stake")).join());
+  not("with the shipped default a milestone owner reports nothing",
+      run(base, "t147_mile", function (s) {
+        const m = capOf(s).projects[0].milestones[0]; m.status = "todo"; }));
+
+  /* ...AND THE FUTURE ISLAM ASKED TO BE READY: contributor edit opened. */
+  const cOpen = clone(base);
+  cOpen.access.contrib = Object.assign({}, cOpen.access.contrib, { a_fn_own: "edit" });
+  ok("contrib opened: the milestone owner reports THEIR milestone",
+     run(cOpen, "t147_mile", function (s) {
+       const m = capOf(s).projects[0].milestones[0]; m.status = "wip"; m.pct = 10; }));
+  not("...and still not the deliverable beside it",
+      run(cOpen, "t147_mile", function (s) {
+        capOf(s).projects[0].deliverables[0].status = "todo"; }));
+  ok("contrib opened: the stakeholder reaches their project's rows",
+     run(cOpen, "t147_stake", function (s) {
+       capOf(s).projects[0].deliverables[0].status = "todo"; }));
+  not("...and not the project beside it",
+      run(cOpen, "t147_stake", function (s) {
+        capOf(s).projects[1].deliverables[0].status = "done"; }));
+
+  /* THE PILLAR OWNER — same pattern, on a unit's pillar. */
+  const pb = clone(SEED);
+  pb.access.plowner = Object.assign({}, pb.access.plowner, { a_unit_own: "edit" });
+  pb.people.push({ key: "t147_pill", name: "Pillar Owner 147", active: true });
+  pb.units[UNIT].items[0].owner = "Pillar Owner 147";
+  const wpb = R.worldOf(pb);
+  check("named Owner of a unit's pillar derives PILLAR OWNER",
+        JSON.stringify(R.personRoles(wpb, personOf(pb, "t147_pill"))) ===
+        JSON.stringify([{ role: "plowner", at: UNIT }]),
+        JSON.stringify(R.personRoles(wpb, personOf(pb, "t147_pill"))));
+  ok("the pillar owner reports a measure of their pillar",
+     run(pb, "t147_pill", function (s) {
+       const m = s.units[UNIT].items[0].measures[0]; m.actual = "7"; m.note = "up"; }));
+  ok("the pillar owner reports a tactic of their pillar",
+     run(pb, "t147_pill", function (s) {
+       const x = s.units[UNIT].items[0].tactics[0]; if (x) { x.status = "Done"; } else { s.units[UNIT].items[0].measures[0].note = "n2"; } }));
+  not("the pillar owner may NOT report the pillar beside theirs",
+      run(pb, "t147_pill", function (s) {
+        const q = s.units[UNIT].items[1];
+        const m = (q.measures || [])[0] || (q.tactics || [])[0];
+        if (m.actual !== undefined) m.actual = "9"; else m.status = "Done"; }));
+  not("the pillar owner may NOT submit the unit",
+      run(pb, "t147_pill", function (s) {
+        s.review.submitted = Object.assign({}, s.review.submitted); s.review.submitted[UNIT] = true; }));
+  not("named, but the Pillar owner row still at its default: nothing",
+      run((function () { const s2 = clone(pb); delete s2.access.plowner; return s2; })(),
+          "t147_pill", function (s) {
+            s.units[UNIT].items[0].measures[0].actual = "7"; }));
+
+  /* ...AND ON A PILLARS FUNCTION, where the old code skipped every fn:
+     target. Merchandising plans in pillars (spec 010). */
+  const MR = "merchandising";
+  if ((SEED.functions[MR] || {}).format === "pillars" &&
+      (SEED.functions[MR].items || []).length) {
+    const fb = clone(SEED);
+    fb.access.plowner = Object.assign({}, fb.access.plowner, { a_fn_own: "edit" });
+    fb.people.push({ key: "t147_fnp", name: "Fn Pillar Owner 147", active: true });
+    fb.functions[MR].items[0].owner = "Fn Pillar Owner 147";
+    check("named Owner of a pillars function's pillar derives PILLAR OWNER there",
+          JSON.stringify(R.personRoles(R.worldOf(fb), personOf(fb, "t147_fnp"))) ===
+          JSON.stringify([{ role: "plowner", at: "fn:" + MR }]),
+          JSON.stringify(R.personRoles(R.worldOf(fb), personOf(fb, "t147_fnp"))));
+    ok("...and reports a measure of that pillar",
+       run(fb, "t147_fnp", function (s) {
+         const m = s.functions[MR].items[0].measures[0]; m.actual = "5"; m.note = "up"; }));
+    if ((fb.functions[MR].items || []).length > 1) {
+      not("...and not the pillar beside it",
+          run(fb, "t147_fnp", function (s) {
+            const q = s.functions[MR].items[1];
+            const m = (q.measures || [])[0] || (q.tactics || [])[0];
+            if (m.actual !== undefined) m.actual = "9"; else m.status = "Done"; }));
+    }
+    not("...and never submits the function",
+        run(fb, "t147_fnp", function (s) {
+          s.review.submitted = Object.assign({}, s.review.submitted);
+          s.review.submitted["fn:" + MR] = true; }));
+  } else {
+    check("the pillars function fixture exists in the seed", false,
+          "merchandising is not a pillars function with items");
+  }
+
+  /* A retired owner derives nothing (§110.4). */
   const retired = clone(base);
-  personOf(retired, "t130_own").active = false;
-  check("a retired owner derives nothing",
-        R.personRoles(R.worldOf(retired), personOf(retired, "t130_own")).length === 0);
+  personOf(retired, "t147_own").active = false;
+  check("a retired project owner derives nothing",
+        R.personRoles(R.worldOf(retired), personOf(retired, "t147_own")).length === 0);
 })();
 
 console.log("\n" + pass + " passed, " + fail + " failed");

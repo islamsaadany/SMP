@@ -19302,3 +19302,93 @@ contributor whose own rows are plainly editable below it — the unit's bar
 has said exactly this to unit contributors since spec 006, so the two sides
 agree (§53.5) and the wording is a decision for both at once, not a drive-by
 fix on one.
+
+### 147.7 Two roles, not one (Islam, reversing 147.1's naming and half of 147.2)
+
+Islam, on the first build: *"contributor is not the right naming. contributor
+is someone whose name is on the project anywhere but that doesn't mean that
+he is a project owner. these are 2 roles."* And then the full shape: *"a
+project owner is a role and this role is on a function of course. but for the
+assigning to work there are 2 things need to happen (1- is to be granted edit
+access in the roles & access setup, 2- that is assigned as an owner on a
+project)"*; *"stakeholders are contributors"*; *"we need to add another role
+which is pillar owner which needs to be in the roles and follows the same
+pattern and conditions of the project owners but on the level of a pillar"*;
+and *"contributors don't report anything for now … build this for the future
+where if I enable their edit mode they can report on only their numbers or
+rows."*
+
+So the model is three bounded roles where the first build had one:
+
+- **Project owner** (`powner`) — derived from a project's Owner row, on the
+  function that carries it. Reaches the project, whole.
+- **Pillar owner** (`plowner`) — derived from a pillar's Owner row, on the
+  unit or the pillars function that carries it. Reaches the pillar, whole.
+- **Contributor** (`contrib`) — everyone else the plan names anywhere: a
+  collaborator, a milestone's owner, a project's stakeholder. Reaches the
+  rows that name them — and reports NOTHING until the tenant opens the row.
+
+**TWO CONDITIONS, HIS WORDS, AND NOTHING ELSE**: the role's Reporting cell
+opened to edit, and being named the Owner. The register attachment the first
+build required is DROPPED for all three derivations — his list of conditions
+did not include it, and it was the silent third condition that made the very
+first live test ("I added ahmed abdelzim to a project … he is not able to
+report") fail with nothing on any screen saying why. The naming is picked
+from the register in the office's own pen (§94, §130.1), so it is already a
+deliberate act about a known person; anchoring it a second time bought
+safety nobody asked for at the price of a silent nothing.
+
+**BOTH OWNER ROWS SHIP AT VIEW, DELIBERATELY** — condition 1 is that the
+grant is MADE on the table, so shipping edit would erase it. All three roles
+are in `OWN_LINES_ONLY`: never grantable by hand (the picker, the workbook,
+the merge and the delete-blockers all key off `isOwnLinesRole`, §55's list
+doing exactly what it was recorded for), never submitting, never the note or
+the slides, and every reporting save narrowed to their reach.
+
+### 147.8 One reach rule, asked per row
+
+`boundedReach()` / `mayReportRow()` in `lib/rules.js` are the ONE answer to
+"may this person report this row", asked by the unit pane, the function pane
+and the authoriser (§42). The reach: an owner role covers everything inside
+the thing whose Owner row names them; a contributor covers what names THEM —
+the row's own owner or collaborators, or the project through its stakeholder
+and collaborator lists. The function pane gates PER ROW now (two bounded
+roles meet on one project: its owner takes every box, a milestone's owner
+takes their milestone), and `ctxOfUnit()` / `ctxOfFn()` hand the server the
+same row-with-context the screen reads. A measure still leans on its
+pillar's owner for the contributor case — §55's rule, kept so nothing a unit
+contributor could reach before the pillar-owner role existed moves on
+upgrade.
+
+### 147.9 What the build surfaced
+
+**THE PILLARS FUNCTION'S REPORT PAGE ASKED THE WRONG CELL.** `canReport()`
+asked `u_report` for every target, and u_report's area is "unit" — so for an
+`fn:` target the screen read the own-UNIT cell while the server judged the
+same save against the own-FUNCTION one (`edits(…, "fn", t)`), a drift
+invisible only because custodian and head ship with both cells at edit. The
+pillar owner is the first role that would have hit it; the screen asks
+`k_report` for `fn:` targets now. **The old `isFn` skip in the server's
+own-lines narrowing is gone with it** — it existed because no bounded role
+could reach an fn: target, and a pillars function's pillar owner can.
+
+**THE SEED GAINS CHIPS AND NOBODY GAINS GRANTS**: 24 of the demo's 33 people
+are named as owners of pillars or projects in the worked example, so their
+register rows now also read Pillar owner or Project owner — true statements
+of the model. Nobody's ACCESS moves: both new rows ship at view, and all 24
+already hold wider roles or held the same view through the floor. A derived
+chip carries no × (an × that silently does nothing is §96's family); its
+hover says the role comes from the plan and moves by changing the Owner
+there.
+
+Proof: `test-authorize.js` §17 rewritten to the three-role model — 297
+passed, with the §94.5 discipline catching its own fixture once (a milestone
+set to the status it already held) — and proved able to fail: the owner
+match dropped from `boundedReach()` fails the server suite and
+`checks/project-custodian.py` together (1 + 2 failures, including "the
+project beside theirs offers NOTHING", the assertion the feature exists
+for). The check gained the contributor act: nothing at the default, their
+milestone and only it once the row is opened. role-picker, gap-fill,
+strategy-split, setup-header, project-tables, repeat-project,
+project-header, people-dialog and the full qa.py sweep all green on the
+final build.

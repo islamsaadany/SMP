@@ -353,18 +353,20 @@ from empty were fixed — the first "Who we are" line, the SWOT, the empty
 Plan page, a virgin pillars function's first row, and a capability's key
 objectives.
 
-Version **3.57** adds **a custodian per project** (§147, spec 024): a
-supporting function's projects each name an owner, and that owner is now a
-**Contributor of the function** — derived from the project's Owner row the
-way a unit's Contributor has always been derived from being named on a line,
-reporting their own project whole and nothing beside it. Submitting stays the
-custodian's and the head's; the Contributor row's own-function Reporting cell
-on Roles & access is what opens or closes it (default view); and the Owner
-picker §130.1 gave every plan field is what makes the naming reliable — the
-stored name is the register's own spelling. On the way, a server drift
-standing since migration 024 was fixed: a custodian's deliverable report —
-and the milestone % that §104.10 requires — had been classified as plan and
-refused, while the screen offered both.
+Version **3.57** adds **a custodian per project — as two new roles** (§147,
+spec 024). A **Project owner** is named on a project's Owner row and reports
+that project whole; a **Pillar owner** is named on a pillar's Owner row — on
+a unit or a pillars function — and reports that pillar whole; a
+**Contributor** is everyone else the plan names (collaborators,
+stakeholders, milestone owners) and reports nothing until the SMO opens the
+Contributor row, then only the rows that name them. All three are derived
+from the plan's own Owner rows, never granted by hand; each has its own row
+on Roles & access shipping at view, and an owner reports only when that row
+says edit AND the plan names them — Islam's two conditions, exactly. None of
+the three submits. On the way, two server drifts were fixed: a custodian's
+deliverable report (and the §104.10 milestone %) refused as plan since
+migration 024, and a pillars function's Report page reading the own-unit
+cell where the server judged the own-function one.
 
 **Next:** the rebuild on the HR_ERP stack (§20) — sign-in and the shell, then
 the read-only screens, then editing and reporting per action. Then

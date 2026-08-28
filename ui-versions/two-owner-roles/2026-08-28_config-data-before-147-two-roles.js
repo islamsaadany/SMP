@@ -4063,60 +4063,39 @@ function canReport(unitKey){
   /* A locked cycle takes no more figures, from anyone but the SMO — the
      server refuses them, so the screen must not offer them (spec 006 §7.1). */
   if (CYCLE.locked && !inOffice()) return false;
-  /* A PILLARS FUNCTION'S REPORT PAGE ASKS THE FUNCTION'S OWN GRANT (§147.9).
-     This asked `u_report` for every target, and u_report's area is "unit" —
-     so for an fn: target the screen read the own-UNIT cell while the server
-     has always judged the same save against the own-FUNCTION one (`edits(…,
-     "fn", t)`). Invisible for as long as custodian and head shipped with
-     both cells at edit; visible the day one is tightened, and the exact
-     screen-says-yes / server-says-no drift §42 exists to prevent. */
-  var page = String(unitKey).indexOf("fn:") === 0 ? "k_report" : "u_report";
-  return grantAt(page, unitKey) === "edit";
+  return grantAt("u_report", unitKey) === "edit";
 }
 
-/* ONE ROW, for the roles that are limited to their own. Everybody else whose
-   grant reaches the unit reports all of it; a contributor reports the rows
-   that name them, and a PILLAR OWNER reports the pillar whose Owner row
-   names them, whole (§147.7). The same reach rule the server uses (§42) —
-   offering a field the server will refuse is the fault this is here to
-   avoid. `x` is a reportItems() entry; `x.owner` is §55's rule (a measure
-   leans on its pillar's owner), `x.pown` is the pillar's own Owner. */
+/* ONE ROW, for the one role that is limited to its own. Everybody else whose
+   grant reaches the unit reports all of it; a contributor reports the lines
+   they are named on. The same two functions the server uses (spec 006 §7.2) —
+   offering a field the server will refuse is the fault this is here to avoid. */
 function canReportRow(unitKey, x){
   if (!canReport(unitKey)) return false;
-  var area = String(unitKey).indexOf("fn:") === 0 ? "fn" : "unit";
-  return SMPRules.mayReportRow(world(), viewer(), area, unitKey,
-    { row: { owner: x.owner, collaborators: x.collaborators },
-      pillarOwner: x.pown });
+  if (!SMPRules.onlyOwnLines(world(), viewer(), "unit", unitKey)) return true;
+  return SMPRules.namedOn({ owner: x.owner, collaborators: x.collaborators }, viewer());
 }
 
 /* ── The function side of the same two questions (§147) ────────────
    canReport/canReportRow for an fn: target. The whole-function gate is what
-   capReportBody always asked inline; it is a function now because the
-   bounded questions have to sit on top of it and two spellings of the same
-   three gates is §53.5's drift. Since §147.7 the reach is PER ROW, through
-   the same mayReportRow() the server asks: a PROJECT OWNER reaches every
-   row of their project; a CONTRIBUTOR (a milestone's owner, a stakeholder)
-   reaches the rows that name them; the custodian and the head reach it
-   all. */
+   capReportBody always asked inline; it is a function now because the per-
+   project question has to sit on top of it and two spellings of the same
+   three gates is §53.5's drift. THE LINE IS THE PROJECT: a Contributor of a
+   function is somebody a project names as its owner, and they report every
+   row that project holds — deliverables, outcomes, milestones — and nothing
+   in the project beside it. Same two shared functions the server uses. */
 function canReportFn(fk){
   if (REVIEW.state !== "open") return false;
   if (CYCLE.locked && !inOffice()) return false;
   return grantAt("k_report", "fn:" + fk) === "edit";
 }
-function canReportFnRow(fk, project, rowObj){
-  if (!canReportFn(fk)) return false;
-  return SMPRules.mayReportRow(world(), viewer(), "fn", "fn:" + fk,
-                               { row: rowObj, project: project });
-}
-/* The project as a whole — what the rail and the checks ask. True for
-   anybody unbounded, and for a bounded role whose reach is the project
-   itself (its owner; its stakeholders once the Contributor row is opened). */
 function canReportFnProject(fk, p){
   if (!canReportFn(fk)) return false;
-  return SMPRules.mayReportRow(world(), viewer(), "fn", "fn:" + fk, { project: p });
+  if (!SMPRules.onlyOwnLines(world(), viewer(), "fn", "fn:" + fk)) return true;
+  return SMPRules.namedOn(p, viewer());
 }
-/* A capability's own key objectives belong to no project, so for anybody
-   bounded they are read, never entered. */
+/* A capability's own key objectives belong to no project, so for somebody who
+   speaks only for their own project they are read, never entered. */
 function canReportFnWhole(fk){
   return canReportFn(fk) &&
          !SMPRules.onlyOwnLines(world(), viewer(), "fn", "fn:" + fk);
@@ -4313,17 +4292,13 @@ function reportItems(u){
        walking back up to the pillar. A MEASURE names nobody of its own, so it
        carries its pillar's owner — the nearest thing the data supports until
        a measure has an owner of its own. */
-    /* `pown` is the pillar's own Owner, for the pillar-owner role's reach
-       (§147.7) — carried beside §55's `owner` lean rather than replacing it,
-       so nothing a contributor could reach before the role existed moves. */
     p.measures.forEach(function(m){
-      out.push({ id:m.id, obj:m, kind:"measure", group:head, sub:"",
-                 owner:p.owner, pown:p.owner });
+      out.push({ id:m.id, obj:m, kind:"measure", group:head, sub:"", owner:p.owner });
     });
     p.tactics.forEach(function(t){
       out.push({ id:t.id, obj:t, kind:"tactic", group:head,
                  sub:spanLabel(t), asked:tacticDue(t),
-                 owner:t.owner, collaborators:t.collaborators, pown:p.owner });
+                 owner:t.owner, collaborators:t.collaborators });
     });
   });
   return out;

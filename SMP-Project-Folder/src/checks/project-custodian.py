@@ -1,14 +1,19 @@
-"""A CUSTODIAN PER PROJECT (S147).
+"""A CUSTODIAN PER PROJECT — TWO ROLES (S147.7).
 
 Islam: "in a case of a function that has 2 projects each project has an owner
 so the custodian here is not on the whole capability there is a custodian per
-project."
+project" — and then: "a project owner is a role ... for the assigning to work
+there are 2 things need to happen (1- is to be granted edit access in the
+roles & access setup, 2- that is assigned as an owner on a project)".
 
-A project's owner is a Contributor of its function — derived from the
-project's Owner row, never granted — and reports THEIR project, whole, and
-nothing beside it. The function's custodian keeps the whole function. This
-asks the SCREEN, because the server half lives in test-authorize.js §16 and a
-check that only asks one end is how the two drift (§94.2, §42):
+A project's owner is a PROJECT OWNER — its own role, derived from the
+project's Owner row, never granted by hand, no register attachment asked —
+and reports THEIR project, whole, and nothing beside it. Everyone else the
+project names (a milestone's owner, a stakeholder) is a CONTRIBUTOR, who
+reports nothing until that row is opened, and then only the rows that name
+them. This asks the SCREEN, because the server half lives in
+test-authorize.js §17 and a check that only asks one end is how the two
+drift (§94.2, §42):
 
   · the owner's own project offers every entry control, and PRESSING one
     CHANGES THE DATA (§96 — a drawn control proves nothing);
@@ -89,19 +94,27 @@ with sync_playwright() as pw:
     pg.goto(URL); pg.wait_for_timeout(1300)
     pg.select_option("#asWho", "smo"); pg.wait_for_timeout(250)
 
+    # THE AHMED SHAPE (§147.7): named as a project's Owner, the Project
+    # owner row opened — and deliberately NOT attached to the function on
+    # the register, because Islam's two conditions do not include it.
     ids = pg.evaluate("""() => {
-      ACCESS.contrib = Object.assign({}, ACCESS.contrib, { a_fn_own: "edit" });
+      ACCESS.powner = Object.assign({}, ACCESS.powner, { a_fn_own: "edit" });
       PEOPLE.push({ key:"t130", name:"Project Owner 130", title:"Project owner",
-                    fn:"%s", active:true });
+                    active:true });
+      PEOPLE.push({ key:"t130m", name:"Milestone Owner 130", title:"Engineer",
+                    active:true });
       var cap = capsOfFunction("%s")[0];
       cap.projects[0].owner = "Project Owner 130";
+      cap.projects[0].milestones[0].owner = "Milestone Owner 130";
       paint();
       return { own: cap.projects[0].id, other: cap.projects[1].id,
+               m0: cap.projects[0].milestones[0].id,
+               d0: cap.projects[0].deliverables[0].id,
                cust: FUNCTIONS["%s"].custodian,
                shape: cap.projects[0].deliverables.length + "d " +
                       cap.projects[0].outcomes.length + "o " +
                       cap.projects[0].milestones.length + "m" };
-    }""" % (FN, FN, FN))
+    }""" % (FN, FN))
     print("  fixture: own %(own)s (%(shape)s) · other %(other)s · custodian %(cust)s" % ids)
 
     print("-- the project owner")
@@ -117,7 +130,9 @@ with sync_playwright() as pw:
     ck("the capability's own key objectives take nothing from them", d["koBoxes"] == 0, d)
     ck("Submit is not drawn for them", not d["submit"])
     ck("no dot nags them for a submission they cannot make", d["pending"] == False)
-    ck("both ends: the shared rule says own-lines here", d["ownLines"] == True)
+    ck("both ends: the shared rule reads them as bounded", d["ownLines"] == True)
+    roles = pg.evaluate("() => personRoleKeys(viewer()).join()")
+    ck("they hold PROJECT OWNER — a role, not a contributor", roles == "powner", roles)
     ck("both ends: canReportFnProject says yes to theirs, no to the other",
        d["mayOwn"] == True and d["mayOther"] == False, (d["mayOwn"], d["mayOther"]))
 
@@ -156,6 +171,25 @@ with sync_playwright() as pw:
         ck("both ends: the rule does not read them as own-lines", d["ownLines"] == False)
     else:
         ck("the function has a custodian to compare against", False)
+
+    print("-- the contributor, built for the future")
+    pg.select_option("#asWho", "t130m"); pg.wait_for_timeout(400)
+    ck("landed on the reporting mode", goto_reporting(pg))
+    pg.evaluate("""(id)=>{const r=document.querySelector('.capbody .ritem[data-rail="'+id+'"]');
+        if(r)r.click()}""", ids["own"]); pg.wait_for_timeout(350)
+    croles = pg.evaluate("() => personRoleKeys(viewer()).join()")
+    ck("a milestone's owner derives CONTRIBUTOR", croles == "contrib", croles)
+    n = pg.evaluate("""() => document.querySelectorAll(
+        '.capbody [data-cpick], .capbody [data-crep], .capbody [data-cpct], .capbody [data-cnote]').length""")
+    ck("with the shipped default they report NOTHING", n == 0, n)
+    opened = pg.evaluate("""([m0, d0]) => {
+      ACCESS.contrib = Object.assign({}, ACCESS.contrib, { a_fn_own: "edit" });
+      paint();
+      return { mine: !!document.querySelector('.capbody [data-cpick="' + m0 + '"]'),
+               theirs: !!document.querySelector('.capbody [data-cpick="' + d0 + '"]') };
+    }""", [ids["m0"], ids["d0"]])
+    ck("contrib opened: THEIR milestone takes a status", opened["mine"], opened)
+    ck("contrib opened: the deliverable beside it still does not", not opened["theirs"], opened)
 
     ck("no console errors", not errs, errs[:2])
     pg.close(); b.close()

@@ -6960,8 +6960,30 @@ THEME.apply();
       note:"Carries the strategy work for a unit or a supporting function, alongside its head." },
     { key:"fnhead", name:"Function head", scope:"fn",
       note:"Runs a supporting function and the capabilities it owns." },
+    /* ── TWO NAMED ROLES, READ OFF THE PLAN (§147.7, Islam 2026-08-28) ──
+       "a project owner is a role", and "we need to add another role which is
+       pillar owner which ... follows the same pattern and conditions of the
+       project owners but on the level of a pillar."
+
+       Both are derived the way every responsibility role is (§33): being
+       named the Owner of a project or a pillar IS the role — nothing is
+       granted by hand, and the naming is already the office's own act,
+       because the plan pen is the office's (§94). TWO CONDITIONS before
+       anybody reports (Islam's words): this row's Reporting cell opened to
+       edit on Roles & access, AND being named the Owner on the thing. The
+       role without the grant reads; the grant without the naming reaches
+       nothing. */
+    { key:"powner", name:"Project owner", scope:"fn",
+      note:"Named as a project's Owner on a supporting function. With Reporting opened on this row, they report that project — whole, and only it." },
+    { key:"plowner", name:"Pillar owner", scope:"unitfn",
+      note:"Named as a pillar's Owner, on a unit or a pillars function. With Reporting opened on this row, they report that pillar — whole, and only it." },
+    /* CONTRIBUTOR IS EVERYONE ELSE THE PLAN NAMES (§147.8, Islam): "contributor
+       is someone whose name is on the project anywhere but that doesn't mean
+       that he is a project owner", and "stakeholders are contributors". They
+       report NOTHING until the tenant opens this row's edit — and then only
+       the rows that name them. */
     { key:"contrib", name:"Contributor", scope:"unit",
-      note:"Named on a measure, a tactic or a project. Reports against their own work and reads their unit or function." },
+      note:"Named anywhere on a plan or a project — a collaborator, a stakeholder, a milestone's owner. Reads; reports their own rows only where this row is opened to edit." },
     /* EMPLOYEE WAS HERE, AND IT WAS NEVER A ROLE (§93, Islam 2026-08-24):
        "anyone with no role is employee … employee doesn't give the person
        anything and if so then let's remove this strange role."
@@ -7085,6 +7107,16 @@ THEME.apply();
                  a_fn_own:"edit", a_fn_own_strat:"view", a_fn_other:"none", a_cycle:"none", a_setup:"none" },
     fnhead:    { a_group:"view", a_unit_own:"none", a_unit_own_strat:"none", a_unit_other:"none",
                  a_fn_own:"edit", a_fn_own_strat:"view", a_fn_other:"none", a_cycle:"none", a_setup:"none" },
+    /* VIEW ON THE REPORTING CELLS, DELIBERATELY (§147.7): Islam's first
+       condition is that the grant is MADE on this table — "1- is to be
+       granted edit access in the roles & access setup" — so shipping edit
+       would make the second condition the only one. The SMO opens the
+       own-function cell for project owners, the own-unit (and, for a pillars
+       function, own-function) cell for pillar owners. */
+    powner:    { a_group:"view", a_unit_own:"none", a_unit_own_strat:"none", a_unit_other:"none",
+                 a_fn_own:"view", a_fn_own_strat:"view", a_fn_other:"none", a_cycle:"none", a_setup:"none" },
+    plowner:   { a_group:"view", a_unit_own:"view", a_unit_own_strat:"view", a_unit_other:"none",
+                 a_fn_own:"view", a_fn_own_strat:"view", a_fn_other:"none", a_cycle:"none", a_setup:"none" },
     /* VIEW, at Islam's direction (spec 006 §7.2): "contributors only view, and
        if we allow them they should be allowed to their lines only". The second
        half of that sentence is CONTRIB_OWN_LINES below — a rule with teeth,
@@ -7251,6 +7283,34 @@ THEME.apply();
       if (f.custodian === p.key) out.push({ role:"custodian", at:"fn:" + k });
     });
 
+    /* ── PROJECT OWNER AND PILLAR OWNER (§147.7) ──────────────────────
+       Read off the plan's own Owner rows, exactly as a unit's head is read
+       off the unit — and UNCONDITIONAL, unlike the floor below: a custodian
+       somewhere else who also owns a project here holds both. Attachment is
+       deliberately NOT required (Islam named two conditions and this was not
+       one): the Owner is picked from the register in the office's own pen, so
+       the naming is already a deliberate act about a known person. One entry
+       per place, however many projects or pillars there name them. */
+    var seen = {};
+    var once = function (role, at) {
+      if (seen[role + "|" + at]) return;
+      seen[role + "|" + at] = 1;
+      out.push({ role: role, at: at });
+    };
+    var owns = function (row) { return namedOn({ owner: row && row.owner }, p); };
+    (w.capabilities || []).forEach(function (c) {
+      if (!c || !c.fn) return;
+      if ((c.projects || []).some(owns)) once("powner", "fn:" + c.fn);
+    });
+    w.unitKeys.forEach(function (k) {
+      if ((((w.units || {})[k] || {}).items || []).some(owns)) once("plowner", k);
+    });
+    w.functionKeys.forEach(function (k) {
+      var f = w.functions[k] || {};
+      if (String(f.format) === "pillars" && (f.items || []).some(owns))
+        once("plowner", "fn:" + k);
+    });
+
     /* THE FLOOR, AND WHICH OF THE TWO IT IS. Somebody attached to a unit and
        holding nothing else is a Contributor if a plan names them and an
        Employee if it does not. Read, never stored — the same argument that
@@ -7265,14 +7325,17 @@ THEME.apply();
        grantIn() rather than dressed up as a role they never got (§93). */
     if (!out.length && p.unit && namedInUnit(w, p, p.unit))
       out.push({ role:"contrib", at:p.unit });
-    /* §147: THE SAME FLOOR ON A FUNCTION'S PROJECTS. A function's custodian
-       covers the whole function; where each PROJECT has its own owner, that
-       owner is a Contributor of the function — derived from the project's
-       Owner row exactly as a unit's Contributor is derived from a tactic's,
-       and gone the day the project stops naming them. Capability projects
-       only: a pillars function's plan has no per-project owner to read. */
-    if (!out.length && p.fn && namedInFn(w, p, p.fn))
-      out.push({ role:"contrib", at:"fn:" + p.fn });
+    /* §147.8: THE SAME FLOOR ON A FUNCTION'S PROJECTS — for everyone the
+       projects name who is not an OWNER of one: a milestone's owner, a
+       stakeholder, a collaborator. Islam: "contributor is someone whose name
+       is on the project anywhere but that doesn't mean that he is a project
+       owner." Being NAMED is the whole trigger, like the owner roles above —
+       attachment is not asked, because the names are picked from the register
+       in the office's own pen. They report nothing until the Contributor row
+       is opened, and then only the rows that name them (boundedReach). */
+    if (!out.length) w.functionKeys.forEach(function (k) {
+      if (namedInFn(w, p, k)) out.push({ role:"contrib", at:"fn:" + k });
+    });
     return out;
   }
   function personRoleKeys(w, p) {
@@ -8177,8 +8240,18 @@ THEME.apply();
   }
   function namedInFn(w, p, fnKey) {
     if (!p || !fnKey) return false;
+    /* Named ANYWHERE in the function's projects (§147.8): the project's own
+       rows (owner, collaborators), its stakeholder list, or a milestone's
+       Owner. A project's owner also matches here and it does not matter —
+       they derive powner above, so the floor is never reached for them. */
     return capsOfFn(w, fnKey).some(function (c) {
-      return (c.projects || []).some(function (pr) { return namedOn(pr, p); });
+      return (c.projects || []).some(function (pr) {
+        return namedOn(pr, p) ||
+               namedOn({ collaborators: pr.stakeholders }, p) ||
+               (pr.milestones || []).some(function (m) {
+                 return namedOn({ owner: m.owner }, p);
+               });
+      });
     });
   }
   /* Which project a reporting row belongs to, read from the world the caller
@@ -8218,7 +8291,13 @@ THEME.apply();
      tenant that sets *Everyone else* to edit gives every unroled person on the
      register the run of their unit's whole plan. Wider than a Contributor,
      which is the opposite of a floor. */
-  var OWN_LINES_ONLY = ["contrib", NO_ROLE];
+  /* §147.7 ADDS THE TWO NAMED OWNERS. Each speaks for a bounded piece — a
+     project, a pillar, the rows that name them — and never for the whole
+     subject: no Submit, no cycle note, no picture slides, and every reporting
+     save is narrowed to their reach by mayReportRow() below. Adding a key
+     here is what wires all of that at once, which is exactly the property
+     §55 recorded this list for. */
+  var OWN_LINES_ONLY = ["contrib", NO_ROLE, "powner", "plowner"];
 
   /* Which of a person's roles is what lets them edit here. The floor rule
      applies when the floor is ALL they have. */
@@ -8238,6 +8317,45 @@ THEME.apply();
   function onlyOwnLines(w, person, area, target) {
     var via = editingRoles(w, person, area, target);
     return via.length > 0 && via.every(function (r) { return OWN_LINES_ONLY.indexOf(r) > -1; });
+  }
+
+  /* ── WHICH ROWS A BOUNDED ROLE REACHES (§147.7) ───────────────────
+     One rule for both sides and every bounded role, because three copies of
+     "is this row theirs" is how the screen and the server come to disagree
+     (§42). `ctx` carries the row and what it sits inside — whichever of
+     these the calling side has:
+
+       row          the row itself; namedOn() reads owner + collaborators
+       pillarOwner  the Owner of the pillar the row sits under (unit side —
+                    also what §55's measure rule has always leaned on)
+       project      the project the row sits inside (function side)
+
+     · a PROJECT OWNER reaches every row of a project whose Owner names them;
+     · a PILLAR OWNER reaches every row of a pillar whose Owner names them;
+     · a CONTRIBUTOR (and the floor) reaches the rows that NAME them — the
+       row's own owner or collaborators, or the project's stakeholder and
+       collaborator lists (§147.8: "stakeholders are contributors"). */
+  function boundedReach(person, roleKey, ctx) {
+    ctx = ctx || {};
+    if (roleKey === "powner")
+      return !!ctx.project && namedOn({ owner: ctx.project.owner }, person);
+    if (roleKey === "plowner")
+      return ctx.pillarOwner != null && ctx.pillarOwner !== "" &&
+             namedOn({ owner: ctx.pillarOwner }, person);
+    if (ctx.row && namedOn(ctx.row, person)) return true;
+    return !!ctx.project &&
+           (namedOn({ collaborators: ctx.project.stakeholders }, person) ||
+            namedOn({ collaborators: ctx.project.collaborators }, person));
+  }
+  /* May this person report THIS row? True outright when any unbounded role
+     grants edit here; a person editing only through bounded roles reaches the
+     union of what those roles reach. The one question the unit's pane, the
+     function's pane and the authoriser all ask (§42). */
+  function mayReportRow(w, person, area, target, ctx) {
+    var via = editingRoles(w, person, area, target);
+    if (!via.length) return false;
+    if (via.some(function (r) { return OWN_LINES_ONLY.indexOf(r) === -1; })) return true;
+    return via.some(function (r) { return boundedReach(person, r, ctx); });
   }
   /* Is this role one of the two that speak only for themselves? Asked by the
      employee file and the People page, which must never GRANT either. */
@@ -8275,6 +8393,7 @@ THEME.apply();
     editingRoles: editingRoles, onlyVia: onlyVia, rolesOrFloor: rolesOrFloor,
     OWN_LINES_ONLY: OWN_LINES_ONLY, onlyOwnLines: onlyOwnLines,
     isOwnLinesRole: isOwnLinesRole,
+    boundedReach: boundedReach, mayReportRow: mayReportRow,
     isSourced: isSourced, sourceRows: sourceRows, sourcesFor: sourcesFor,
     ownsSources: ownsSources, rowsOfSet: rowsOfSet, rowById: rowById,
     setsOf: setsOf, setById: setById, mayPickInto: mayPickInto,
@@ -13657,39 +13776,60 @@ function canReport(unitKey){
   /* A locked cycle takes no more figures, from anyone but the SMO — the
      server refuses them, so the screen must not offer them (spec 006 §7.1). */
   if (CYCLE.locked && !inOffice()) return false;
-  return grantAt("u_report", unitKey) === "edit";
+  /* A PILLARS FUNCTION'S REPORT PAGE ASKS THE FUNCTION'S OWN GRANT (§147.9).
+     This asked `u_report` for every target, and u_report's area is "unit" —
+     so for an fn: target the screen read the own-UNIT cell while the server
+     has always judged the same save against the own-FUNCTION one (`edits(…,
+     "fn", t)`). Invisible for as long as custodian and head shipped with
+     both cells at edit; visible the day one is tightened, and the exact
+     screen-says-yes / server-says-no drift §42 exists to prevent. */
+  var page = String(unitKey).indexOf("fn:") === 0 ? "k_report" : "u_report";
+  return grantAt(page, unitKey) === "edit";
 }
 
-/* ONE ROW, for the one role that is limited to its own. Everybody else whose
-   grant reaches the unit reports all of it; a contributor reports the lines
-   they are named on. The same two functions the server uses (spec 006 §7.2) —
-   offering a field the server will refuse is the fault this is here to avoid. */
+/* ONE ROW, for the roles that are limited to their own. Everybody else whose
+   grant reaches the unit reports all of it; a contributor reports the rows
+   that name them, and a PILLAR OWNER reports the pillar whose Owner row
+   names them, whole (§147.7). The same reach rule the server uses (§42) —
+   offering a field the server will refuse is the fault this is here to
+   avoid. `x` is a reportItems() entry; `x.owner` is §55's rule (a measure
+   leans on its pillar's owner), `x.pown` is the pillar's own Owner. */
 function canReportRow(unitKey, x){
   if (!canReport(unitKey)) return false;
-  if (!SMPRules.onlyOwnLines(world(), viewer(), "unit", unitKey)) return true;
-  return SMPRules.namedOn({ owner: x.owner, collaborators: x.collaborators }, viewer());
+  var area = String(unitKey).indexOf("fn:") === 0 ? "fn" : "unit";
+  return SMPRules.mayReportRow(world(), viewer(), area, unitKey,
+    { row: { owner: x.owner, collaborators: x.collaborators },
+      pillarOwner: x.pown });
 }
 
 /* ── The function side of the same two questions (§147) ────────────
    canReport/canReportRow for an fn: target. The whole-function gate is what
-   capReportBody always asked inline; it is a function now because the per-
-   project question has to sit on top of it and two spellings of the same
-   three gates is §53.5's drift. THE LINE IS THE PROJECT: a Contributor of a
-   function is somebody a project names as its owner, and they report every
-   row that project holds — deliverables, outcomes, milestones — and nothing
-   in the project beside it. Same two shared functions the server uses. */
+   capReportBody always asked inline; it is a function now because the
+   bounded questions have to sit on top of it and two spellings of the same
+   three gates is §53.5's drift. Since §147.7 the reach is PER ROW, through
+   the same mayReportRow() the server asks: a PROJECT OWNER reaches every
+   row of their project; a CONTRIBUTOR (a milestone's owner, a stakeholder)
+   reaches the rows that name them; the custodian and the head reach it
+   all. */
 function canReportFn(fk){
   if (REVIEW.state !== "open") return false;
   if (CYCLE.locked && !inOffice()) return false;
   return grantAt("k_report", "fn:" + fk) === "edit";
 }
+function canReportFnRow(fk, project, rowObj){
+  if (!canReportFn(fk)) return false;
+  return SMPRules.mayReportRow(world(), viewer(), "fn", "fn:" + fk,
+                               { row: rowObj, project: project });
+}
+/* The project as a whole — what the rail and the checks ask. True for
+   anybody unbounded, and for a bounded role whose reach is the project
+   itself (its owner; its stakeholders once the Contributor row is opened). */
 function canReportFnProject(fk, p){
   if (!canReportFn(fk)) return false;
-  if (!SMPRules.onlyOwnLines(world(), viewer(), "fn", "fn:" + fk)) return true;
-  return SMPRules.namedOn(p, viewer());
+  return SMPRules.mayReportRow(world(), viewer(), "fn", "fn:" + fk, { project: p });
 }
-/* A capability's own key objectives belong to no project, so for somebody who
-   speaks only for their own project they are read, never entered. */
+/* A capability's own key objectives belong to no project, so for anybody
+   bounded they are read, never entered. */
 function canReportFnWhole(fk){
   return canReportFn(fk) &&
          !SMPRules.onlyOwnLines(world(), viewer(), "fn", "fn:" + fk);
@@ -13886,13 +14026,17 @@ function reportItems(u){
        walking back up to the pillar. A MEASURE names nobody of its own, so it
        carries its pillar's owner — the nearest thing the data supports until
        a measure has an owner of its own. */
+    /* `pown` is the pillar's own Owner, for the pillar-owner role's reach
+       (§147.7) — carried beside §55's `owner` lean rather than replacing it,
+       so nothing a contributor could reach before the role existed moves. */
     p.measures.forEach(function(m){
-      out.push({ id:m.id, obj:m, kind:"measure", group:head, sub:"", owner:p.owner });
+      out.push({ id:m.id, obj:m, kind:"measure", group:head, sub:"",
+                 owner:p.owner, pown:p.owner });
     });
     p.tactics.forEach(function(t){
       out.push({ id:t.id, obj:t, kind:"tactic", group:head,
                  sub:spanLabel(t), asked:tacticDue(t),
-                 owner:t.owner, collaborators:t.collaborators });
+                 owner:t.owner, collaborators:t.collaborators, pown:p.owner });
     });
   });
   return out;
@@ -16296,12 +16440,16 @@ var PAGE_INFO = {
       ["Page level only",
        "If a role can open a page, it sees everything on it. Restriction happens by removing the " +
        "page, never by trimming its contents &mdash; per-element permissions make a system nobody " +
-       "can reason about. The one exception is a rule with teeth rather than a setting: a " +
-       "contributor granted edit reaches <b>their own lines only</b> &mdash; on a unit the " +
-       "measures and tactics that name them, and on a supporting function <b>the project they " +
-       "are named owner of</b>, whole, and nothing beside it. Neither is granted anywhere: being " +
-       "named is what derives the role, and the Contributor row&rsquo;s own-unit and own-function " +
-       "<b>Reporting</b> cells here are what open or close it."],
+       "can reason about. The one exception is a rule with teeth rather than a setting: three " +
+       "rows here are <b>bounded</b>, and opening their Reporting cell reaches only what names " +
+       "the person. A <b>Project owner</b> reaches the project whose Owner row names them, " +
+       "whole; a <b>Pillar owner</b> the pillar whose Owner row names them, whole; a " +
+       "<b>Contributor</b> &mdash; anyone the plan names anywhere: a collaborator, a " +
+       "stakeholder, a milestone&rsquo;s owner &mdash; only the rows that name them. None of the " +
+       "three is granted anywhere: <b>being named is what derives the role</b>, in the plan pen, " +
+       "and the row&rsquo;s Reporting cell here is the other half &mdash; both have to say yes " +
+       "before anything is entered, and none of the three ever submits, writes the cycle note " +
+       "or adds a picture slide."],
       ["Two states, not three",
        "View and edit, and edit includes view. <b>None is not a third thing you choose</b>, it is " +
        "the absence of the other two &mdash; which is why a cell is two toggles and nothing lit is " +
@@ -24025,8 +24173,14 @@ function capPickBox(x, may, opts, val){
     }).join("") + '</select>';
 }
 
-function projReportBody(p, may, fk){
+/* PER ROW SINCE §147.7, because two bounded roles meet on one project: its
+   OWNER reaches every row, while a milestone's owner (a Contributor, once
+   that row is opened) reaches their milestone and nothing beside it — so one
+   `may` for the pane would either over-offer or under-offer. Each control
+   asks canReportFnRow(), which is the server's own reach rule (§42). */
+function projReportBody(p, fk){
   var r = projReported(p);
+  var mayRow = function(o){ return canReportFnRow(fk, p, o); };
   /* THE PANE SOMEBODY FILLS IN UNDER TIME PRESSURE, and the widest table in
      the product at eight columns -- the honest cost of one row shape carrying
      Type, Due date, Target, Status, % and Note (§104).
@@ -24047,14 +24201,15 @@ function projReportBody(p, may, fk){
     var o = row.obj, d = dxIsDeliv(row), when = dxWhen(row);
     var notDue = d ? !dueThisCycle(when) : !outcomeDue(o);
     var has = reportedAny(o, d), quiet = notDue && !has;
+    var mayR = mayRow(o);
     var ent, pcell;
     if (d) {
-      ent = capPickBox(o, may, DX_WORDS, o.status);
-      pcell = o.status === "wip" ? capPctBox(o, may, o.name) + (statusPending(o) ? needsPct() : "")
+      ent = capPickBox(o, mayR, DX_WORDS, o.status);
+      pcell = o.status === "wip" ? capPctBox(o, mayR, o.name) + (statusPending(o) ? needsPct() : "")
         : (has ? '<b>' + statusReads(o) + '%</b>'
                : (notDue ? notDueCell() : '<b>&mdash;</b>'));
     } else {
-      ent = capEntryBox(o, splitTarget(String(o.target)).unit, may, o.name);
+      ent = capEntryBox(o, splitTarget(String(o.target)).unit, mayR, o.name);
       pcell = has ? '<span class="fixedval">' + (o.progress == null ? "&mdash;" : o.progress + "%") + '</span>'
                   : (notDue ? notDueCell() : '<span class="fixedval">&mdash;</span>');
     }
@@ -24065,19 +24220,20 @@ function projReportBody(p, may, fk){
       '<td class="num">' + dxTarget(row) + '</td>' +
       '<td class="cc">' + ent + '</td>' +
       '<td class="cc">' + pcell + '</td>' +
-      '<td class="notecol">' + capNoteBox(o, may) + '</td></tr>';
+      '<td class="notecol">' + capNoteBox(o, mayR) + '</td></tr>';
   }).join("");
   var mRows = p.milestones.map(function(m, i){
     var notDue = !dueThisCycle(m.finish), quiet = notDue && !m.status;
+    var mayM = mayRow(m);
     return '<tr' + (quiet ? ' class="notdue"' : '') + '><td class="idx">' + (i+1) + '</td>' +
       '<td>' + esc(m.name) + '</td>' +
       '<td class="cc">' + dxDate(m.finish, m.status === "done") + '</td>' +
-      '<td class="cc">' + capPickBox(m, may, MS_WORDS, m.status) + '</td>' +
+      '<td class="cc">' + capPickBox(m, mayM, MS_WORDS, m.status) + '</td>' +
       '<td class="cc">' + (m.status === "wip"
-        ? capPctBox(m, may, m.name) + (statusPending(m) ? needsPct() : "")
+        ? capPctBox(m, mayM, m.name) + (statusPending(m) ? needsPct() : "")
         : (m.status ? '<b>' + msReads(m) + '%</b>'
                     : (notDue ? notDueCell() : '<b>&mdash;</b>'))) + '</td>' +
-      '<td class="notecol">' + capNoteBox(m, may) + '</td></tr>';
+      '<td class="notecol">' + capNoteBox(m, mayM) + '</td></tr>';
   }).join("");
   return pillarBand(projCode(fk, p), p.name,
       '<span class="pill ' + (r.done >= r.total ? "good" : "attn") + '">' + r.done + ' / ' + r.total + '</span>') +
@@ -24124,8 +24280,7 @@ function capReportBody(c){
     null, 'Tally is entries given of asked',
     function(p){ return projCode(c.fn, p); });
   return koBlock +
-    splitOrPane(c.projects, sel, rail,
-      projReportBody(sel, canReportFnProject(c.fn, sel), c.fn));
+    splitOrPane(c.projects, sel, rail, projReportBody(sel, c.fn));
 }
 
 function renderFnReport(fnKey){
@@ -26027,10 +26182,18 @@ function renderPeople(){
              unrepeated. */
           var at = whereLabel(r.at);
           var elsewhere = !home || r.at !== home;
-          return '<span class="rolechip" title="' + esc(roleName(r.role)) + ' \u00b7 ' + esc(at) + '">' +
+          /* A DERIVED ROLE HAS NO \u00d7 (\u00a7147.7): a Project owner or Pillar owner
+             is read off the plan's own Owner rows and a Contributor off being
+             named \u2014 there is nothing here to revoke, and an \u00d7 that silently
+             does nothing is \u00a796's family. The chip says where the role comes
+             from instead, so the way to take it off is findable. */
+          var derived = SMPRules.isOwnLinesRole(r.role);
+          var tip = roleName(r.role) + " \u00b7 " + at +
+            (derived ? " \u2014 comes from being named on the plan; change the Owner there to move it" : "");
+          return '<span class="rolechip" title="' + esc(tip) + '">' +
             '<b>' + esc(roleName(r.role)) + '</b>' +
             (elsewhere ? '<span class="rolewhere">' + esc(at) + '</span>' : '') +
-            (editable
+            (editable && !derived
               ? '<button class="xbtn" data-prole-off="' + p.key + '|' + r.role + '|' + r.at +
                 '" title="Remove this role" aria-label="Remove this role">&times;</button>'
               : '') + '</span>';

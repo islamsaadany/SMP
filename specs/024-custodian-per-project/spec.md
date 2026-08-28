@@ -6,7 +6,11 @@ Islam: *"in a case of a function that has 2 projects each project has an
 owner so the custodian here is not on the whole capability there is a
 custodian per project. how can we make this work?"* Aligned in chat
 2026-08-27; three decisions confirmed, the first with an addition: *"agreed,
-and this needs to be in the access setup table if it's not."*
+and this needs to be in the access setup table if it's not."* Then corrected
+2026-08-28 (§147.7): *"contributor is not the right naming … these are 2
+roles"* — the owner became a role of its own, **Pillar owner** joined it,
+stakeholders became contributors, and contributors report nothing until
+their row is opened.
 
 ---
 
@@ -21,22 +25,25 @@ and this needs to be in the access setup table if it's not."*
 4. The project's Owner field offers **register people**, so the link is a
    real identity rather than a spelling (confirmed: point 3).
 
-## 2 · The design
+## 2 · The design (as corrected by §147.7)
 
-- **A project's owner is a Contributor of its function** — derived, never
-  granted, exactly as a unit's Contributor is derived from being named on a
-  plan line (§55, spec 006 §7.2). `namedInFn()` beside `namedInUnit()`, both
-  through `namedOn()`; the floor arm of `personRoles()` reads `p.fn` beside
-  `p.unit`.
-- **The line is the project.** An owner reports every deliverable, outcome
-  and milestone their project holds, and nothing beside it — not the project
-  next door, not the capability's own key objectives, not the submission,
-  the cycle note or the picture slides.
-- **Governed by the existing cell** Contributor × *Own supporting function —
-  Reporting* (`a_fn_own`), shipped default **view**; the SMO opens it to
-  edit. Enforced on both sides: `canReportFnProject()` on the screen,
-  `capProjectOf()` + `namedOn()` against the stored state in
-  `lib/authorize.js`.
+- **Three bounded roles, all derived from being named, none grantable by
+  hand.** A **Project owner** (`powner`) is named on a project's Owner row;
+  a **Pillar owner** (`plowner`) on a pillar's, on a unit or a pillars
+  function; a **Contributor** is anyone else the plan names — a
+  collaborator, a stakeholder, a milestone's owner. Two conditions before an
+  owner reports (Islam's words): the role's Reporting cell at edit, and the
+  naming. No register attachment is asked.
+- **The line is the thing named.** A project owner reports every
+  deliverable, outcome and milestone their project holds; a pillar owner
+  their pillar's measures and tactics; a contributor, once their row is
+  opened, only the rows that name them. None of the three submits, writes
+  the cycle note or adds picture slides.
+- **Each role has its own row on Roles & access**, shipped at **view** —
+  condition 1 is that the grant is made on the table. Enforced on both
+  sides through one reach rule, `mayReportRow()`/`boundedReach()` in
+  `lib/rules.js`, asked per row by the panes and by `lib/authorize.js`
+  against the stored state.
 - **The Owner field offers register people** — this landed twice in one
   day: §130.1 (another session, Islam's own wider ask) built register-picked
   owner NAMES on five plan fields with `namedOn()` taught every register

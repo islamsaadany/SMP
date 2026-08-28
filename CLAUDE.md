@@ -2533,9 +2533,11 @@ python3 checks/no-jump.py       # nothing moves the register under you — the a
 python3 checks/plan-builder.py  # building a plan ON the platform: the door, the chooser,
                                 # the band's map, every row form asked of the DATA, and the
                                 # empty-state fixes — proved able to fail twice (§129)
-python3 checks/project-custodian.py # a custodian per project (§147): the owner's project
-                                # takes their figures and the one beside it takes nothing,
-                                # both ends as both viewers — proved able to fail
+python3 checks/project-custodian.py # a custodian per project (§147): the Project owner's
+                                # project takes their figures, the one beside it takes
+                                # nothing, and a milestone owner is a Contributor who
+                                # reports nothing until the row is opened — both ends,
+                                # three viewers, proved able to fail
 python3 checks/office-chat.py   # the chat's client half — serves the built file over HTTP,
                                 # because the whole feature is invisible over file:// (§97.9)
 python3 checks/setup-rail.py    # the Setup rail fits the window, every entry is reachable
@@ -2603,21 +2605,38 @@ prior sessions (on HR_ERP) accidentally reverted agreed-upon designs.
 
 ---
 
-*Last Updated: 2026-08-27 &mdash; **v3.57: a custodian per project
-(&sect;131, spec 024)**. Islam: *"in a case of a function that has 2 projects
+*Last Updated: 2026-08-28 &mdash; **v3.57: a custodian per project
+(&sect;147, spec 024)**. Islam: *"in a case of a function that has 2 projects
 each project has an owner so the custodian here is not on the whole capability
-there is a custodian per project."* Aligned first, three decisions confirmed.
-**A project's owner is a Contributor of its function** &mdash; derived from the
-project's Owner row exactly as a unit's Contributor is derived from a tactic
-(&sect;55), never granted, and **the line is the PROJECT**: every deliverable,
-outcome and milestone it holds, nothing beside it &mdash; not the next project,
-not the capability's own key objectives, not Submit, the note or the slides
-(`reportState`'s own-lines guard had a literal `!isFn` step-around, now gone).
-**Governed by the cell that was already on Roles &amp; access** &mdash;
-Contributor &times; Own supporting function &rarr; Reporting, default view,
-the SMO opens it &mdash; enforced both ends through `canReportFnProject()` /
-`capProjectOf()` + `namedOn()` against the STORED state. **The world had to
-learn the capabilities** (&sect;102.4's two allow-lists, both edited, asserted).
+there is a custodian per project"* &mdash; and then, correcting the first
+build (&sect;147.7): *"contributor is not the right naming &hellip; these are
+2 roles."* **THREE BOUNDED ROLES, ALL DERIVED FROM BEING NAMED, NONE GRANTABLE
+BY HAND**: a **Project owner** (`powner`) from a project's Owner row; a
+**Pillar owner** (`plowner`) from a pillar's, on a unit or a pillars function;
+a **Contributor** is everyone else the plan names &mdash; a collaborator, a
+stakeholder, a milestone's owner &mdash; who **reports NOTHING until the
+tenant opens the Contributor row**, and then only the rows that name them.
+**TWO CONDITIONS before an owner reports, his words and nothing else**: the
+role's own Reporting cell at edit (both owner rows SHIP AT VIEW &mdash;
+condition 1 is that the grant is made on the table) and being named the Owner
+&mdash; the register attachment the first build required is DROPPED, because
+it was the silent third condition behind "I added ahmed abdelzim to a project
+and he is not able to report". The line is the thing named, whole; none of the
+three ever submits, writes the note or adds slides (`OWN_LINES_ONLY` carries
+all three, so the picker, the workbook, the merge and the delete-blockers
+already answer right). **ONE REACH RULE, PER ROW** &mdash;
+`boundedReach()`/`mayReportRow()` in `lib/rules.js`, asked by the unit pane,
+the function pane (per row now: a project's owner and a milestone's owner
+meet on one table) and the authoriser; `ctxOfUnit()`/`ctxOfFn()` hand the
+server the same row-with-context. **AND THE BUILD SURFACED A DRIFT**: a
+pillars function's Report page asked the own-UNIT cell while the server
+judged the own-FUNCTION one &mdash; invisible while custodian and head ship
+with both at edit; `canReport()` asks `k_report` for `fn:` targets now, and
+the server's own-lines narrowing reaches pillars functions (the `isFn` skip
+is gone). **The seed gains chips and nobody gains grants** (24 of 33 demo
+people are named owners in the worked example; both new rows ship at view).
+**The world had to learn the capabilities**
+(&sect;102.4's two allow-lists, both edited, asserted).
 **AND THE GROUND IT STANDS ON WAS BROKEN**: since migration 024
 the server had classified a custodian's DELIVERABLE report &mdash; and the
 milestone % that &sect;104.10 REQUIRES &mdash; as PLAN and refused them, while

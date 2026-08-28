@@ -65,25 +65,28 @@ Nothing proceeds past this line without an answer.
 
 ## Built and verified
 
-### v3.57 — a custodian per project (§147, spec 024)
+### v3.57 — a custodian per project: two roles, not one (§147, spec 024)
 
-- **A project's owner is a Contributor of its function** — derived from the
-  project's Owner row the way a unit's Contributor is derived from a tactic
-  (§55); they report their own project whole (deliverables, outcomes,
-  milestones) and nothing beside it. Submitting, the cycle note and the
-  picture slides stay the custodian's and the head's.
-- **Governed on Roles & access**: the Contributor row's own-function
-  Reporting cell (default view — the SMO opens it to edit), enforced on the
-  screen and again on the server against the stored state.
-- **Rides §130.1's owner picker**: the stored owner stays a register-picked
-  NAME; a keyed variant was built first and removed at the merge (§147.4).
-- **A drift since migration 024 fixed on the way**: a custodian's deliverable
-  report, and the milestone % that §104.10 requires, were classified as plan
-  and refused on save while the screen offered both.
-- Proof: `test-authorize.js` §16 (proved able to fail two ways),
-  `checks/project-custodian.py` (both viewers, both ends, proved able to
-  fail), the full `qa.py` sweep; the seed scanned — nobody's standing
-  changes until somebody is actually named.
+- **Three bounded roles, all derived from being named** (§147.7, Islam's
+  correction of the first build): **Project owner** from a project's Owner
+  row; **Pillar owner** from a pillar's, on a unit or a pillars function;
+  **Contributor** for everyone else the plan names — collaborators,
+  stakeholders, milestone owners — who report nothing until their row is
+  opened, and then only the rows that name them.
+- **Two conditions before an owner reports**: their role's Reporting cell at
+  edit on Roles & access (both owner rows ship at view), and being named the
+  Owner. No register attachment — the silent third condition that broke the
+  first live test is gone.
+- **One reach rule per row** (`mayReportRow` in `lib/rules.js`), asked by
+  both panes and the authoriser; none of the three roles ever submits.
+- **Two drifts fixed on the way**: a custodian's deliverable report and the
+  §104.10 milestone % were refused as plan since migration 024; and a
+  pillars function's Report page read the own-unit cell while the server
+  judged the own-function one.
+- Proof: `test-authorize.js` §17 (297 passed; proved able to fail),
+  `checks/project-custodian.py` (three viewers, both ends, proved able to
+  fail), the matrix and project checks, the full `qa.py` sweep; the seed
+  scanned — 24 people gain a true chip, nobody's grants move.
 
 ### v3.56 — a test copy is a send, and it says so (§146)
 

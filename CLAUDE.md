@@ -176,6 +176,15 @@ A drift between specs and code is a documentation bug — report it before silen
   merge commit, so the moment two sessions have touched the same thing you are
   told rather than shown a silent auto-merge. On a refusal: fetch, merge main
   into the branch, resolve there, re-run the checks, then fast-forward.
+- **`node --check sw.js` AFTER EVERY MERGE (§146.2).** Merging main spliced the
+  two SHELL name blocks together: the branch's `const SHELL` landed INSIDE
+  main's comment, the comment lost its opener, and the file ended with **two
+  `const SHELL` declarations** and loose prose between them. **It did not
+  conflict.** A worker that will not parse does not install, so every returning
+  browser would have gone on serving itself the old shell — §91's own failure,
+  by a route §91 does not name. `sw.js` is **not generated**, so no build step
+  would have caught it; rebuild it from main's copy and re-apply the one line
+  the branch changes, exactly as §91 prescribes for the built file.
 - **AFTER A MERGE THAT BRINGS IN SOMEBODY ELSE'S SOURCES, REBUILD — never trust
   git's merge of the built file.** `strategy-management-platform-vX.Y.html` is
   generated; git will happily splice two versions of it into something that
@@ -718,6 +727,64 @@ console errors (in this cloud environment, run it via a wrapper that points Play
   a gap: collaborators and an unmarked quarter are left alone. The check MAKES
   the gaps (§94.2) and asserts an EXACT count plus **that the filled facts are
   untouched**, or a builder that marked everything would pass.
+- **FILL THE GAPS (§145, spec 023):** the Strategy cells carry a THIRD state —
+  View / **Fill gaps** / Edit — letting a custodian or owner write only where
+  the plan holds NOTHING. `GAP_FIELDS`/`GAP_SCORE_FIELDS`/`mayFillPage()`/
+  `pendOf()`/`pendingScore()` live in `lib/rules.js` (one definition for
+  screen, server and deck); a fill is `row.pend[field] = {by, at}`, stored as
+  an absence, riding `extra` JSONB with no migration; the authoriser's gap
+  pass (`gapFill`/`gapConfirm`) judges fill/amend/unfill/confirm against a
+  CLONE and everything else falls through office-only. Reporting and drafts
+  flow against a pending target; the SCORE reads a dash and leaves every
+  average until the office confirms; Submit is refused naming the rows.
+  `gapCell()` is the ONE builder for a fillable cell; no rows are ever
+  added/removed/renamed/reordered in fill mode; an office write settles (the
+  setters lift the mark — correcting is confirming). **Marks are compared
+  canonically, never by stringify — Postgres jsonb reorders `{by, at}` to
+  `{at, by}` and an order-sensitive compare refuses innocent saves.**
+  §117's .pptx download button is hidden for everyone (§145.9) — machinery
+  kept, `dlPlanBtn()` is one line to give back. **The second build
+  (§145.10–13):** collaborators are fillable (empty list only) and **a
+  pending name confers no reporting right** — `namedOn()` skips marked
+  fields, owner included; the objectives' **This year column shows by
+  default** (§66's toggle and saved choices untouched); and **the plan says
+  where it is owed** — `gapMap()`/`gapMissing()` are ONE list feeding the
+  Strategy tab's count, the rail's per-row counts, the fill-mode **gap
+  band** (§129's chip shape; a chip is a door that keeps fill mode on) and
+  the **Next gap** walker; counts rewrite IN PLACE via `gapBandRefresh()`
+  (§71.2 — never a repaint under a typing hand). `FILL_PAGES` keeps the
+  fill pen off u_anal (a pen that opens nothing, §61). **qa.py reads tab
+  NAMES with `.tbadge/.vh/.tabdot` stripped** — the badge made textContent
+  lie to two probes on a healthy build (§51.11). **The third build
+  (§145.14, reshaping §145.12 from Islam's screens): red means missing,
+  amber means pending — never mixed.** The WHOLE missing bar — the total
+  as **"N Missing"**, one red chip per owing place, the solid red **Fill
+  in missing elements** button — lives IN the section row beside
+  Foundation · SWOT · Plan, read mode included, NOTHING in the page body,
+  vanishing at zero; the Strategy tab's number is GONE. The corner button
+  beside §101's arrows is the same press (red → **Done filling** while
+  open → quiet amber **Review pending · N** when only marks remain); rail
+  rows read red italic *"N Missing"* → green ✓; one press opens fill mode
+  and walks to the first blank, and a page owing nothing says so and
+  points away (`fillBarOr()` — the empty hand reads as broken, §45.2).
+  **A REAL PRESS IS NOT A PROGRAMMATIC ONE**: §30.1's `CLICKING` guard
+  HOLDS the paint until the click lands, so `enterFillMode()`'s walk read
+  the read-mode page, found nothing and marched off through another
+  place's chip — invisible to every evaluate-driven probe; the walk now
+  queues behind the release timer (`setTimeout(gapWalk, 0)`). And
+  **reassigning `window.fn` intercepts nothing called from inside the same
+  script** — instrument the SOURCE, not a wrapper. Red WORDS wear
+  `--bad-tx` (§38.5, sixth time — `--bad` as type measured 4.49 dark);
+  the button keeps `--bad` as FILL with `--surface` ink. **AND THE BAR
+  SHIPPED UNDRESSED WITH EVERY ASSERTION GREEN**: inside `nav.tabs`,
+  `.tabs button` (0,1,1) outranks `.mchip`/`.fillcta` (0,1,0), so the
+  chips lost their borders and the red button rendered as plain words
+  while the corner copy wore the design — the contrast probe had printed
+  both computed grounds one line apart and I read them as two valid
+  states. One declaration, two selectors per list (`.missbar button.X`
+  outranks the tab rule, §53.5); the check asserts the PAINT — same
+  computed ground as the corner's AND a real colour, or both vanishing
+  passes (§113.8).
 - **THE OWN COLUMNS ARE TWO QUESTIONS, AND §94'S LOCK IS A DEFAULT NOW (§117,
   partially reversing §94 at Islam's direction):** each own column on Roles &
   access splits into **Strategy** (the words as agreed — `a_unit_own_strat` /
@@ -1041,7 +1108,9 @@ console errors (in this cloud environment, run it via a wrapper that points Play
   now; the name-match is the fallback.
 - **The 1-year view on a unit's key objectives is a TOGGLE (§66):** §51.16's
   hard-coded `false` said "for now" in the code; this is the control it was
-  waiting for, and **it still starts hidden**. A screen preference
+  waiting for. **§145.11 reversed the DEFAULT to shown** (a missing near
+  target must be a visible red word); the toggle and every saved choice
+  survive. A screen preference
   (`smp.ko.year` in `localStorage`), never the state graph — one person seeing
   both horizons must not decide it for the tenant (§25, §47.1). **The unit's
   only**: the group's objectives have always shown both, so the control is
@@ -2174,7 +2243,7 @@ console errors (in this cloud environment, run it via a wrapper that points Play
   touching `mail.js`. "Present" ≠ "accepted" ≠ "verified": the page reports only
   what was actually asked, and matches a bad key on Resend's MESSAGE because
   Resend answers an invalid key with **400**, not 401.
-- **A TEST COPY IS A SEND, AND IT SAYS SO (since v3.55, §145):** two kinds of
+- **A TEST COPY IS A SEND, AND IT SAYS SO (since v3.56, §146):** two kinds of
   email leave this platform and only one was recorded — `send` wrote a row and a
   row per recipient, while `test` (*Send me a copy*, and the test send on Email
   settings) sent a **real email through the same builder** and wrote nothing at
@@ -2185,7 +2254,7 @@ console errors (in this cloud environment, run it via a wrapper that points Play
   (a half-succeeded send is the case a record exists for) and **a failed test
   keeps its row**, saying 0 of 1. **`kind` is ONE column holding the word**
   (§104.7, §142) and **NULL is a real send**, so nothing is backfilled — proved
-  against a tenant rolled back to its pre-§145 shape. **The mark goes in the
+  against a tenant rolled back to its pre-§146 shape. **The mark goes in the
   audience column**: beside the heading it pushed the frozen first column onto a
   second line (§88, §116.4), and a test copy has no audience for that column to
   print. **Delete reaches test copies and nothing else** (Islam's B, chosen from
@@ -2445,8 +2514,13 @@ python3 checks/register-header.py # one line above the table and a dialog that f
 python3 checks/role-picker.py   # giving somebody a role: every control PRESSED,
                                 # both ends asked, and the absences asserted (§110)
 python3 checks/strategy-split.py # the Strategy | Reporting halves: the cell pressed
-                                # open AND closed, both ends each time, and the .pptx
-                                # download unzipped and read — figures proved absent (§117)
+                                # open AND closed, both ends each time — and since §145.9
+                                # the .pptx download asserted HIDDEN on every surface while
+                                # the dormant builder is still proved by a direct call
+python3 checks/gap-fill.py      # fill the gaps (§145): the third toggle where it belongs
+                                # and nowhere else, fill mode's fields AND absences, every
+                                # press read back from the DATA, the pending chip and the
+                                # office's tick, the dash, and the Submit refusal
 python3 checks/owner-picker.py  # an owner is picked from the register, not typed: all five
                                 # fields PRESSED through the real popup and the state
                                 # graph read back, both ends each time (§130.1)
@@ -2483,7 +2557,7 @@ python3 checks/send-overview.py # Send an email opens on the record, writing is 
                                 # one case that stays put (§144). §6 covers the test copy:
                                 # marked in the AUDIENCE column, every heading still ONE
                                 # line, and Delete drawn for the Super user and on test
-                                # copies only (§145)
+                                # copies only (§146)
 python3 checks/email-greeting.py # the greeting row is ONE line with no prose, the switch does
                                 # not move, and what the page POSTS names NOBODY — the server
                                 # fills it per recipient (§135, over HTTP)
@@ -2492,7 +2566,7 @@ python3 checks/setup-pages.py   # every Setup page is named ONCE and in the rail
 ```
 The mail half needs a database and a password (it spawns its own dev-server):
 `DATABASE_URL=… node scripts/test-email-greeting.js <smo-password>` (§142.6), and
-`DATABASE_URL=… node scripts/test-test-copies.js <smo-password>` (§145).
+`DATABASE_URL=… node scripts/test-test-copies.js <smo-password>` (§146).
 In this cloud image, run any sweep through the wrapper so Playwright finds the
 Chromium that is already here:
 `SMP_CHROME=/opt/pw-browsers/chromium-1194/chrome-linux/chrome python3 qa-run.py <file>`.
@@ -2526,8 +2600,8 @@ prior sessions (on HR_ERP) accidentally reverted agreed-upon designs.
 
 ---
 
-*Last Updated: 2026-08-28 &mdash; **v3.55: a test copy is a send, and it says
-so (&sect;145)**. Islam, using the product: *"there have been multiple sent
+*Last Updated: 2026-08-28 &mdash; **v3.56: a test copy is a send, and it says
+so (&sect;146)**. Islam, using the product: *"there have been multiple sent
 emails earlier. weren't they saved? I can't see them in the overview."*
 **NOTHING WAS LOST, AND ESTABLISHING THAT FIRST WAS MOST OF THE WORK** &mdash;
 `messages` sits outside the state graph with no foreign key, so the
@@ -2554,6 +2628,59 @@ its own text node sitting happily on one line &mdash; the deliberate break
 reproduced the exact fault while that assertion stayed green, and four others
 caught it. Counted across the whole cell it reads `[1,1,1,1,2]`. Both halves
 watched to fail first: **5 / 1 / 2** on the client, **3 / 11** on the server.*
+
+*Earlier, from another session: 2026-08-28 &mdash; **v3.55: fill the gaps (&sect;145, spec
+023)**. Islam: *"a special type of editing which is just filling the missing
+areas — the missing targets, maybe the missing timeline, the missing
+owners."* A third state on the two STRATEGY cells of Roles &amp; access —
+View / **Fill gaps** / Edit — granted per role by the SMO, reaching only a
+unit or function the person holds. **A gap is a place holding nothing**
+(`GAP_FIELDS` in `lib/rules.js`, the same list the deck marks Missing — one
+definition for screen, server and deck); writing the first value is filling,
+touching anything already written is authoring, and no rows are ever added,
+removed, renamed or reordered in this mode. **A fill is PENDING until the
+office confirms it** (Islam's own design): live and counted nowhere, amber
+everywhere it shows, still the filler's to correct — `row.pend[field] =
+{by, at}`, stored as an absence (&sect;50.6), riding each row's `extra`
+JSONB with **no migration** (proved on a real Postgres 16, clean slate
+included). Confirming is REMOVING the mark — a tick beside the chip, or the
+office simply correcting the value, which settles it in passing. **The
+server judges transitions, not intentions**: a gap pass ahead of the diff
+classifies fill / amend / unfill / confirm against a clone and lets
+everything else fall through office-only (`gapFill` passes on authorship OR
+the fill grant; `gapConfirm` on authorship alone). **Reporting flows,
+performance waits**: figures and drafts land against a pending target, but
+a row whose score-bearing field (dir &middot; target &middot; compile
+&middot; weight &middot; quarters) is pending scores a dash, leaves every
+average, and **blocks Submit** — the refusal names the rows and sends the
+unit to the office, the only desk that can clear it. Two lessons paid for:
+**Postgres jsonb reorders object keys**, so marks are compared canonically
+or an untouched pending field reads as a phantom amend that refuses an
+innocent save (&sect;42's `branding()` shape, one layer down); and a fill
+holder is the first person to hold &sect;101's arrows BESIDE a pen — both
+sat at `right:0` and the arrows ate the pen's clicks (&sect;70's family,
+caught by the check PRESSING it). The matrix wears the mockup-approved
+restyle (&sect;145.7: chip toggles, tinted lit states, hairline rows), and
+**&sect;117's .pptx download button is HIDDEN for everyone at Islam's
+direction (&sect;145.9)** — machinery kept, one line to give back.
+**AND THE FINDING SYSTEM WENT RED AND WORDED (&sect;145.14)**, reshaped
+from Islam's own screens: the whole missing bar &mdash; *"N Missing"*, one
+red chip per owing place, the solid red **Fill in missing elements**
+button &mdash; moved INTO the section row beside the tabs (*"not to waste
+lines in the page"*), read mode included, nothing left in the page body
+and the Strategy tab's number gone; a page owing nothing says so and
+points away, because *"I couldn't enter anything"* was &sect;45.2's empty
+hand wearing fill mode's clothes. The bug worth reading: **a real press is
+not a programmatic one** &mdash; &sect;30.1's `CLICKING` guard HOLDS the
+paint until the click lands, so the one-press walk read the read-mode page,
+found no fields and marched off through another place's chip, while every
+evaluate-driven probe passed; the walk now queues behind the release timer,
+and the probe that found it had to live in the SOURCE, because reassigning
+`window.fn` intercepts nothing called from inside the same script. Proved
+by `test-authorize.js` &sect;16 (6 red on the pre-build) and
+`checks/gap-fill.py` (fails from its first section on the pre-build; 58
+assertions on the &sect;145.14 shape), plus the round trip on a virgin
+database.*
 
 *Earlier: 2026-08-28 &mdash; **v3.54: Send an email opens on what went
 (&sect;144)**. Islam: *"the opening page ... should be a dashboard of what was

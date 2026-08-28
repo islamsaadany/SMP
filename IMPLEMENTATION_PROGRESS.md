@@ -6,11 +6,11 @@ version (rules A2 / A11, changed 2026-08-20) — those go only when asked for.
 
 **Where it runs:** Vercel, production tracks `main`. Static files plus two
 serverless functions (`/api/state`, `/api/auth`) against Neon Postgres.
-**Latest version:** v3.50 on `main` — §135 (the Setup header line) merged over
-v3.49. Three sessions landed on the same numbers this week: this work was built
-as §130 / v3.48 and renumbered on the way in, because the owners-and-corners run
-took §130 and the same-name register run took §131–§134.
-**Last updated:** 2026-08-27 · v3.51 in flight on the audit branch
+**Latest version:** v3.55 — §145 (fill the gaps) merged over v3.54. Built as
+§132 / v3.50 / spec 021 and renumbered on the way in: four sessions took
+§132–§144, v3.50–v3.54 and specs 021–022 while this one worked, and the
+merge is the only moment a sequential number is real.
+**Last updated:** 2026-08-28
 
 **Sign in as:** `SMO` / `1234` — a password change is forced at once (§43.1,
 reversing §19.4).
@@ -67,7 +67,7 @@ Nothing proceeds past this line without an answer.
 
 ## Built and verified
 
-### v3.55 — a test copy is a send, and it says so (§145)
+### v3.56 — a test copy is a send, and it says so (§146)
 
 - **Islam:** *"there have been multiple sent emails earlier. weren't they saved?
   I can't see them in the overview."*
@@ -92,7 +92,53 @@ Nothing proceeds past this line without an answer.
 - **Proved:** `checks/send-overview.py` §6 (5 / 1 / 2 failures against three
   deliberate breaks) and `scripts/test-test-copies.js`, 19/0 against a real
   Postgres (3 / 11 against two breaks). Round trip PASS on a virgin database and
-  on a tenant rolled back to its pre-§145 shape.
+  on a tenant rolled back to its pre-§146 shape.
+### v3.55 — fill the gaps (§145, spec 023)
+
+- **A third Strategy-cell state, Fill gaps**: the custodian or owner writes
+  only where the plan holds nothing — targets, directions, compile rules,
+  owners, project dates, a tactic naming no quarter, the aspiration. Granted
+  per role by the SMO on Roles & access; reaches only what the person holds;
+  no rows added, removed, renamed or reordered in this mode.
+- **A fill is pending until the office confirms** (Islam's design): live,
+  amber, still the filler's to correct; the office confirms with a tick or
+  by simply correcting the value. Stored as `pend` marks in each row's
+  `extra` JSONB — no migration, proved on a real Postgres 16.
+- **Reporting flows, performance waits**: figures and drafts land against a
+  pending target; the score reads a dash and leaves every average until the
+  office confirms; **Submit is refused**, naming the rows and pointing at
+  the office. Save draft is never blocked.
+- **Server-authoritative**: the authoriser classifies fill / amend / unfill /
+  confirm ahead of the ordinary diff; anything else falls through
+  office-only. `test-authorize.js` §16 — 231 pass, 6 red on the pre-build.
+- **The access matrix restyle Islam approved from the mockup** (chip
+  toggles, tinted lit states, hairline rows) rides along.
+- **§117's .pptx plan download button is hidden for everyone** (§145.9,
+  asked mid-build) — machinery kept, one line to give back.
+- Proved by `checks/gap-fill.py` (fails on the pre-build from its first
+  section), the full `qa.py` walk, and the virgin-database round trip.
+- **Second build (§145.10–13), same branch:** collaborators fillable — an
+  empty list only, and a pending name confers no reporting right until the
+  office confirms (`namedOn` skips marked fields, owner included); the
+  objectives' This-year column shows by default (§66's toggle and saved
+  choices kept); and the plan says where it is owed — a count on the
+  Strategy tab, per-row rail counts, a fill-mode gap band of place chips
+  (each a door that keeps fill mode on), and a Next-gap walker, all fed by
+  one list and rewritten in place as fills land. 237 server tests, the
+  extended browser check, qa and eleven suites green.
+- **Third build (§145.14), same branch — the finding system red and worded,
+  from Islam's screens:** the whole missing bar ("N Missing" + one red chip
+  per owing place + the solid red *Fill in missing elements* button) moves
+  INTO the section row beside the section tabs, read mode included, nothing
+  in the page body; the Strategy tab's number is gone. The corner button
+  beside the arrange arrows is the same press (red → *Done filling* →
+  quiet amber *Review pending · N*); rail rows read red italic "N Missing"
+  → green ✓; a page owing nothing says so and points away. One press opens
+  fill mode and walks to the first blank — fixed to wait for the paint
+  §30.1 holds mid-click, the bug that made a real press behave differently
+  from every programmatic probe. Red words on `--bad-tx` (§38.5).
+  `checks/gap-fill.py` §9 rewritten (58 assertions); qa and the suite
+  battery re-run green.
 
 ### v3.54 — Send an email opens on what went (§144)
 

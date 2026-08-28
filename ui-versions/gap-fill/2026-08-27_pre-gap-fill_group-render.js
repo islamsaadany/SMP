@@ -243,18 +243,6 @@ function qsEdit(t){
   }
   return '<span class="qs qs-edit">' + out + '</span>';
 }
-/* The fill grant's quarters (§145): the same four marks, wired to the fill
-   handler that stamps the pending mark — drawn only where the tactic names
-   NO quarter at all (§128's gap) or while that fill is still pending. */
-function qsFill(t){
-  var q = quartersOf(t), out = "";
-  for (var i = 0; i < 4; i++) {
-    out += '<button class="qtog' + (q[i] ? " on" : "") + '" data-qfill="' +
-      esc(t.id) + '|' + (i + 1) + '" title="Quarter ' + (i + 1) +
-      (q[i] ? " — filled; press to clear" : " — press to fill") + '">' + (i + 1) + '</button>';
-  }
-  return '<span class="qs qs-edit qs-fill">' + out + '</span>';
-}
 
 /* Measure name reads left; every figure centres under its column. Progress
    carries the band colour, since it is the row's conclusion. */
@@ -262,12 +250,7 @@ function measureRows(ms, opts){
   opts = opts || {};
   var on = arranging("unit", opts.unit);
   return ms.map(function(m, i){
-    /* §145: a measure whose target, direction or compile is awaiting the
-       office's confirmation is not scored — the actual is shown (it is
-       real), the score reads a dash with the reason on hover, and the
-       averages already left it out (`scorableMeasures`). */
-    var pend = SMPRules.pendingScore(m);
-    var scored = m.target && m.progress != null && !pend;
+    var scored = m.target && m.progress != null;
     var head = '<tr data-oi="' + i + '"' + (isFocus(m.id) ? ' class="focusrow"' : '') + '><td class="idx">' +
                (on ? handle("Reorder " + m.name) : '') +
                '<span class="idx-n">' + (i+1) + '</span></td><td>' + esc(m.name) + fmark(m.id) +
@@ -278,21 +261,8 @@ function measureRows(ms, opts){
     return head + '<td class="num">' + esc(m.actual) + '</td>' +
            (scored
              ? '<td class="num final" style="color:var(--' + band(m.progress) + ')">' + m.progress + '%</td>'
-             : pend
-             ? '<td class="cc"><span class="pill none" title="Awaiting Strategy Office ' +
-               'confirmation — this row is not counted yet">&mdash;</span></td>'
              : '<td class="cc"><span class="pill none">Not scored</span></td>') + '</tr>';
   }).join("");
-}
-/* The sentence under a table with rows the score is not counting (§106's
-   shape: a score that moves — or refuses to move — for a reason nothing on
-   the page states is a score nobody can defend). Drawn only when there is
-   something to say. */
-function pendCountLine(list){
-  var n = (list || []).filter(function(m){ return SMPRules.pendingScore(m); }).length;
-  if (!n) return "";
-  return '<p class="sub pendwait">' + plural(n, "row") +
-    ' not counted yet &mdash; awaiting Strategy Office confirmation.</p>';
 }
 function measureHead(unscored){
   return '<thead><tr><th class="idx">#</th><th>Measure</th><th class="cc">Dir.</th><th class="cc">Target</th>' +
@@ -448,7 +418,6 @@ function pillarBody(it, u){
     '<div class="scroll"><table>' + measureHead() +
       '<tbody class="sortable" data-item="tr" data-kind="measures" data-u="' + uk + '">' +
       measureRows(it.measures, { unit: uk }) + '</tbody></table></div>' +
-    pendCountLine(it.measures) +
     '<h5 class="mini">' + L("tactic","bu") + '</h5>' +
     '<div class="scroll"><table>' + tacticHead() +
       '<tbody class="sortable" data-item="tr" data-kind="tactics" data-u="' + uk + '">' +
@@ -688,14 +657,11 @@ function kindPill(it){
    concatenate kind, theme and owner with fixed separators, so a pillar with no
    theme and no owner read "Direction · theme ·" - two separators pointing at
    nothing. With the kind hidden that would have become "theme ·". */
-/* `ownerBelow` is the plan pane with the pen on, where the owner has its own
-   row now (§130.1) — the meta line drops it rather than saying it twice three
-   inches above the control that changes it (§41's budget, in one line). */
-function pillarMeta(it, ownerBelow){
+function pillarMeta(it){
   var parts = [];
   if (SHOW_KIND && it.kind) parts.push(esc(it.kind));
   if (it.theme) parts.push("theme " + esc(it.theme));
-  if (it.owner && !ownerBelow) parts.push(esc(it.owner));
+  if (it.owner) parts.push(esc(it.owner));
   return parts.join(" &middot; ");
 }
 
@@ -1702,15 +1668,6 @@ function renderUnitPerformance(u){
    name, because the group's Foundation and a unit's share one page key and
    only one of them is a strategy page. */
 function authoring(page, acKey){ return !!EDIT_PAGE[page] && mayAuthor(acKey); }
-/* IS THIS PAGE OPEN FOR FILLING THE GAPS (§145)? The same shape, one grant
-   down: the pen is on, the person may NOT author (an author's write settles
-   and never wears the mark), and the fill grant answers for this page and
-   target. Only `gapCell`, the quarters and the mode bar read this — every
-   other `ed ?` site stays false, which is what keeps Add, ×, the drag
-   handles and every name field out of fill mode without a second gate. */
-function filling(page, acKey){
-  return !!EDIT_PAGE[page] && !mayAuthor(acKey) && mayFill(acKey);
-}
 
 /* mayAuthor(), NOT the raw grant (§94). Every "Edit" bar and every pen in
    the platform asks this one question, so a strategy page cannot acquire a
@@ -1721,24 +1678,7 @@ function editBar(page, acKey){
      BEFORE the pen's gate and the bar is drawn when either is answered — a
      custodian who may not author the overview may still take it away. */
   var dl = dlPlanBtn(page);
-  /* §145.14: the worded bar takes the corner button's three states — red
-     while something is missing, quiet amber while only pending remains,
-     nothing after; Done while the mode is open. */
-  if (!mayAuthor(acKey || "u_found")) {
-    if (mayFill(acKey || "u_found")) {
-      var inner;
-      if (EDIT_PAGE[page])
-        inner = '<button class="editbtn fdone" data-page="' + page + '">Done filling</button>';
-      else if (gapTotal(TARGET))
-        inner = '<button class="fillcta" data-fillcta="' + page + '">Fill in missing elements</button>';
-      else if (gapPendCount(TARGET))
-        inner = '<button class="pendcta" data-page="' + page + '">Review pending &middot; ' +
-          gapPendCount(TARGET) + '</button>';
-      else inner = '';
-      return (dl || inner) ? '<div class="pageact">' + dl + inner + '</div>' : '';
-    }
-    return dl ? '<div class="pageact">' + dl + '</div>' : '';
-  }
+  if (!mayAuthor(acKey || "u_found")) return dl ? '<div class="pageact">' + dl + '</div>' : '';
   return '<div class="pageact">' + dl + '<button class="editbtn" data-page="' + page + '">' +
     (EDIT_PAGE[page] ? "Done" : "Edit") + '</button></div>';
 }
@@ -1797,14 +1737,6 @@ function paneActs(page, acKey){
    cards and has no pane (§30's rule about which control suits which shape). */
 var DL_PAGES = { plan:1, capfoundation:1 };
 function dlPlanBtn(page){
-  /* ── HIDDEN AT ISLAM'S DIRECTION (2026-08-27, §145.9) ────────────────
-     "hide the download button of the plans and the capabilities in the ppt
-     format that we created earlier." HIDDEN, not deleted: pptx.js,
-     mayDownloadPlan and sendPlanPptx all stand, so giving it back is one
-     line here — and §119.1's Missing marks (now §145's "(pending)" too)
-     keep the deck honest for that day. The early return is above the gate
-     on purpose: the feature is off for EVERYONE, office included. */
-  return '';
   if (!DL_PAGES[page]) return '';
   if (!SMPRules.mayDownloadPlan(world(), viewer(), TARGET)) return '';
   return '<button class="penbtn dlpen" data-dlpptx="' + esc(TARGET) + '"' +
@@ -1828,32 +1760,10 @@ function arrangePaneBtn(target){
 }
 
 function penBtn(page, acKey){
-  var author = mayAuthor(acKey || "u_found");
-  /* §145.14: THE FILL GRANT'S CONTROL IS A WORDED RED BUTTON, not a pen
-     glyph (Islam: "a clear red button with the wording fill in missing
-     elements") — drawn only while something is missing; once everything is
-     filled a quiet amber "Review pending · N" remains until the office has
-     confirmed the lot, and then nothing. The office keeps its pen: their
-     write settles, and their control did not change. */
-  if (!author) {
-    if (!mayFill(acKey || "u_found")) return '';
-    if (EDIT_PAGE[page])
-      return '<button class="editbtn cornerbtn fdone" data-page="' + page +
-        '">Done filling</button>';
-    var miss = gapTotal(TARGET);
-    if (miss) return '<button class="fillcta cornerbtn" data-fillcta="' + page +
-      '" title="' + plural(miss, "missing element") + ' in this plan">' +
-      'Fill in missing elements</button>';
-    var pend = gapPendCount(TARGET);
-    if (pend) return '<button class="pendcta cornerbtn" data-page="' + page +
-      '" title="Filled values awaiting Strategy Office confirmation — still yours to correct">' +
-      'Review pending &middot; ' + pend + '</button>';
-    return '';
-  }
+  if (!mayAuthor(acKey || "u_found")) return '';
   var on = EDIT_PAGE[page];
-  var word = on ? "Done editing" : "Edit";
   return '<button class="penbtn' + (on ? " on" : "") + '" data-page="' + page + '"' +
-    ' title="' + word + '" aria-label="' + word + '">' +
+    ' title="' + (on ? "Done editing" : "Edit") + '" aria-label="' + (on ? "Done editing" : "Edit") + '">' +
     (on ? '<svg viewBox="0 0 20 20" aria-hidden="true"><path d="M4.5 10.5l3.5 3.5 7.5-8" fill="none" ' +
             'stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>'
         : '<svg viewBox="0 0 20 20" aria-hidden="true"><path d="M13.4 3.6l3 3L7.9 15.1l-3.9.9.9-3.9z" ' +
@@ -1898,435 +1808,10 @@ function selectOr(page, value, opts, cls, setter){
     return '<span class="' + (cls || '') + '">' + esc(value) + '</span>';
   var i = FIELDS.push(setter) - 1;
   return '<select class="fld ' + (cls || '') + '" data-fld="' + i + '">' +
-    optionsHtml(opts, function(v){ return String(value) === v; }) + '</select>';
-}
-
-/* ── AN OPTION, A LABELLED OPTION, AND A GROUP OF THEM (§130.1) ───────
-   Three shapes, and the plain string is BYTE-FOR-BYTE what selectOr always
-   emitted: no `value` attribute, the text escaped, `selected` when it matches.
-   That matters because the direction and compile-rule pickers (§114) pass a
-   bare `""` in their list to mean "not answered", and it renders as an empty
-   option exactly as it did before this — a `value`/label pair here would have
-   quietly turned two dropdowns nobody asked about into em-dashes.
-
-     "Ramy Behairy"            an option whose value is its text
-     { v:"", label:"\u2014" }   a value and a label that differ
-     { group:"People", items:[…] }   an <optgroup>
-
-   `chosen` is asked of the VALUE, never of the label, or the pair above can
-   never be selected. */
-function optionHtml(o, chosen){
-  var pair = o && typeof o === "object";
-  var v = String(pair ? o.v : o), t = String(pair ? o.label : o);
-  /* A HINT IS NOT PART OF THE ANSWER (§130.9). It rides on the option as data
-     and searchsel.js draws it quietly beside the name in the popup; the
-     option's TEXT — which is what the closed control shows and what the field
-     stores — is the name alone. */
-  var hint = pair && o.hint ? ' data-hint="' + esc(String(o.hint)) + '"' : '';
-  return '<option' + (v === t ? '' : ' value="' + esc(v) + '"') + hint +
-    (chosen(v) ? " selected" : "") + '>' + esc(t) + '</option>';
-}
-function optionsHtml(opts, chosen){
-  return (opts || []).map(function(o){
-    if (o && typeof o === "object" && o.group)
-      return '<optgroup label="' + esc(o.group) + '">' +
-        (o.items || []).map(function(x){ return optionHtml(x, chosen); }).join("") +
-        '</optgroup>';
-    return optionHtml(o, chosen);
-  }).join("");
-}
-
-/* ── THE FOURTH WAY TO DRAW A BOUND FIELD: SEVERAL ANSWERS (§130.1) ───
-   A `<select multiple>`, for a field that holds a LIST. It is its own builder
-   for the same reason selectOr is (§96): a control the callers build by hand
-   is a control that ends up bound to nothing.
-
-   THE SETTER IS HANDED AN ARRAY, not a string. The shell's one `data-fld`
-   handler reads `el.value` for every other field, and on a multiple select
-   `value` is only the FIRST selected option — so it asks `el.multiple` and
-   passes every selected value instead. One question, in the one place every
-   bound field already goes through.
-
-   NO BLANK OPTION. On a single select the blank is how you say "nobody"; on a
-   multiple one you say it by ticking nothing, and an em-dash sitting in the
-   list as a thing you could tick is a second way to say it. */
-function selectManyOr(page, values, opts, cls, setter){
-  var list = (values || []).map(function(v){ return String(v); });
-  if (!EDIT_PAGE[page] || !setter)
-    return '<span class="' + (cls || '') + '">' + esc(list.join(", ")) + '</span>';
-  var i = FIELDS.push(setter) - 1;
-  var has = {};
-  list.forEach(function(v){ has[v] = 1; });
-  return '<select class="fld ' + (cls || '') + '" multiple data-fld="' + i + '">' +
-    optionsHtml((opts || []).filter(function(o){ return o !== ""; }),
-      function(v){ return has[v] === 1; }) + '</select>';
-}
-
-/* ══ WHO OR WHAT OWNS A LINE (§130.1) ═══════════════════════════════════
-   Islam: "for the owners in the plans, projects, tactics, milestones, let it
-   be a searchable list from the registry", and asked whether that list is
-   people or departments: "people or department".
-
-   IT IS NOT ONLY TIDINESS, AND THIS IS THE PART WORTH KEEPING. A tactic's
-   owner is matched against the register BY NAME — `SMPRules.namedOn()` reads
-   `row.owner` beside the collaborators and that is what makes somebody a
-   Contributor who may report that line (§55, §42). Measured on the demo before
-   any of this was built: 38 different owner names across the plan, 14 of them
-   naming nobody the platform can recognise, and **32 of the 78 tactics** owned
-   by a short spelling — "Karim", "Hossam" — that matches no one. Every one of
-   those is a person who owns a line and cannot enter its figure. A typed box
-   could not have told them apart from a real name; a list cannot produce one.
-
-   THE VOCABULARY IS `placeLabel()`'s, NEVER A SECOND ONE (§53.5). It is the
-   register's own word for a place — the navigation's name, with "(function)"
-   kept only where a unit and a function share one (§93.12). A department that
-   the platform has no page for is a real answer too, so an **Official BU that
-   points at nothing** is offered under its own name (§54: Risk employs people
-   and carries no strategy); a mapped one is not, because the place it points
-   at is already in the list under the navigation's word for it.
-
-   WHAT IS STORED IS STILL THE NAME, not a person key. `namedOn()` matches on
-   the name, the plan workbook carries the name, the deck prints the name and
-   the archive holds the name — a key would be a migration through all four for
-   a field nobody reads as an identifier (§87 is about not TRUSTING a name to
-   say who somebody is; this is a label that now happens to match one).
-
-   A VALUE ALREADY ON THE PLAN IS KEPT, in a group that says what it is (§96.2:
-   a stored value outside the list is shown as it is, never silently displayed
-   as something else). So a plan uploaded before today opens reading exactly
-   what it read yesterday, and only what somebody deliberately changes moves.
-   ═══════════════════════════════════════════════════════════════════════ */
-function ownerAdder(){
-  var seen = {}, out = [];
-  return { list: out, add: function(n){
-    n = String(n == null ? "" : n).trim();
-    if (!n) return;
-    var k = n.toLowerCase();
-    if (seen[k]) return;
-    seen[k] = 1; out.push(n);
-  }, has: function(n){ return !!seen[String(n == null ? "" : n).trim().toLowerCase()]; } };
-}
-/* ── THE REGISTER'S NAME, NOT THE FULL ONE (§130.7) ──────────────────
-   Islam, looking at the list on his own tenant: *"for the drop down of names
-   go for the list of names in the registry not the full name."* The register
-   carries two facts about what somebody is called (§93.8) — **Name**, what the
-   office says out loud, and **Full Name**, what the employee file holds, which
-   on his register runs to *Abd El Moniem Mohamed Abd El Moniem Mahmoud*. A
-   dropdown of fifty of those is a list nobody can scan.
-
-   IT COULD NOT BE SEEN IN THE DEMO. Every one of the 33 people here has a full
-   name of two or three words, and not one has a typed short name — so
-   `knownName()` returns exactly `p.name` for all of them and the first build
-   looked correct on the only data it was tested against. Measured, not
-   guessed: the fault lives on a tenant this file cannot open.
-
-   THROUGH `displayNames()`, ALWAYS. That map is what lengthens the guess for a
-   pair whose first two names match (§81.1), so the list can never show two
-   people as one entry — which for a picker is not cosmetic, since the second
-   of them would be silently dropped by the dedupe below.
-
-   AND WHAT IS SHOWN IS WHAT IS STORED, so the plan reads the same word the
-   register does (§53.5). `namedOn()` learned this name in the same edit — the
-   whole point of the picker is that the person it names may report the line,
-   and a label the rules cannot recognise would have put that back. */
-/* ── AND WHERE THEY WORK, BESIDE THE NAME (§130.9) ───────────────────
-   Islam: *"for the names in the lists, you can make it the name - the unit or
-   function so people don't get confused."* Two people called Ahmed on a
-   register of a hundred are told apart by their name here and by nothing else,
-   and the register already knows the answer.
-
-   THE PLACE IS A HINT, NEVER PART OF THE ANSWER. It is drawn in the popup and
-   nowhere else: the cell shows the name, the plan STORES the name, the
-   workbook and the deck print the name, and `namedOn()` matches the name. A
-   label of "Ramy Behairy — Mobile" written into a tactic would name nobody the
-   platform can resolve, which is the fault §130.1 exists to fix (§130.7 makes
-   the same argument about the short name from the other side).
-
-   `personAt()` IS THE ONE PAIR THAT ANSWERS THIS (§54), and `placeLabel()` the
-   one vocabulary (§53.5). Somebody the register has not placed gets no hint
-   rather than a guess or the word "group" — an absence is honest and a wrong
-   place is worse than none (§15.1). */
-function ownerPeople(){
-  var a = ownerAdder(), dn = displayNames(), out = [];
-  PEOPLE.forEach(function(p){
-    if (!personActive(p)) return;
-    var n = knownName(p, dn);
-    if (a.has(n)) return;
-    a.add(n);
-    var at = personAt(p);
-    out.push({ name: n, where: at && at !== "group" ? placeLabel(at) : "" });
-  });
-  return out.sort(function(x, y){ return x.name.localeCompare(y.name); });
-}
-/* NOT sorted: the navigation's order is the order somebody learned these in,
-   and it is short enough to read. Retired ones are left out — a retired place
-   is not somewhere work can be given to (§49.3) — and one already written on a
-   plan is kept by the caller below, so nothing is lost by leaving it out here. */
-function ownerDepts(){
-  var a = ownerAdder();
-  activeKeys().forEach(function(k){ a.add(placeLabel(k)); });
-  activeFunctionKeys().forEach(function(k){ a.add(placeLabel("fn:" + k)); });
-  activeCompanyKeys().forEach(function(k){ a.add(placeLabel("co:" + k)); });
-  mainbus().forEach(function(b){ if (!mainbuAts(b).length) a.add(b.name); });
-  return a.list;
-}
-/* `current` is a string or a list of them — whatever the field already holds,
-   so the caller never has to reason about which of its values are known. */
-function ownerChoices(current, blank){
-  var people = ownerPeople(), depts = ownerDepts();
-  var known = ownerAdder();
-  people.forEach(function(x){ known.add(x.name); });
-  depts.forEach(known.add);
-  var kept = ownerAdder();
-  (Array.isArray(current) ? current : [current]).forEach(function(v){
-    if (!known.has(v)) kept.add(v);
-  });
-  var out = blank ? [{ v:"", label:"\u2014" }] : [];
-  if (kept.list.length) out.push({ group:"Already on this plan", items:kept.list });
-  if (people.length) out.push({ group:"People", items: people.map(function(x){
-    return { v:x.name, label:x.name, hint:x.where }; }) });
-  if (depts.length)     out.push({ group:"Departments", items:depts });
-  return out;
-}
-/* The two controls every owner and every collaborator list in the plan is
-   drawn by. One place, so the five fields cannot be given five lists. */
-function ownerSel(page, value, setter){
-  return selectOr(page, value == null ? "" : value,
-    ownerChoices(value, true), "ownersel", setter);
-}
-function collabSel(page, list, setter){
-  return selectManyOr(page, list, ownerChoices(list, false), "collabsel", setter);
-}
-
-/* ── FILL THE GAPS: ONE BUILDER FOR A FILLABLE CELL (§145, spec 023) ──────
-   Every gap-fillable value in the product is drawn through gapCell, in all
-   three of its states — a gap (fill mode draws the field), pending (amber,
-   still the filler's, the office sees a confirm tick), settled (ordinary
-   text, the office's alone). One builder, because §96 is what happens when
-   there is a second way to draw one of these cells.
-
-   THE SETTERS CARRY THE LIFECYCLE. A fill writes the value AND stamps the
-   mark; clearing the box takes both away (the filler's own undo); an
-   office write through the ordinary pen DELETES the mark on that field —
-   correcting is confirming. The server judges the same transitions from
-   the diff (lib/authorize.js's gap pass), so nothing here is trusted. */
-var PENDS = [];
-function gapStamp(row, field){
-  row.pend = row.pend || {};
-  row.pend[field] = { by: (viewer() || {}).key || null,
-                      at: new Date().toISOString().slice(0, 10) };
-}
-function gapLift(row, field){
-  if (!row.pend) return;
-  delete row.pend[field];
-  /* The last mark leaving deletes the key (§50.6). */
-  if (!Object.keys(row.pend).length) delete row.pend;
-}
-/* The tenant-facing word for each fillable field — the chip's hover names
-   WHICH value is pending, because two chips reading "pending" on one row
-   otherwise cannot be told apart. */
-var GAP_WORDS = { dir:"Direction", target:"Target", target3y:"3-year target",
-                  compile:"Compile rule", owner:"Owner", quarters:"Quarters",
-                  start:"Start", end:"End", aspiration:"Aspiration",
-                  weight:"Weight" };
-function pendChip(acKey, row, field){
-  var p = SMPRules.pendOf(row)[field];
-  if (!p) return '';
-  var per = p.by ? personBy(p.by) : null;
-  var who = (per && per.name) || p.by || "";
-  var say = (GAP_WORDS[field] || field) + " filled" + (who ? " by " + who : "") +
-            (p.at ? ", " + p.at : "") + " — awaiting Strategy Office confirmation";
-  var tick = "";
-  if (mayAuthor(acKey)) {
-    var i = PENDS.push({ row: row, field: field, acKey: acKey }) - 1;
-    tick = '<button class="gapok" data-pconf="' + i + '" title="Confirm — ' +
-      'this value becomes settled" aria-label="Confirm this value">&#10003;</button>';
-  }
-  return '<span class="pchip" title="' + esc(say) + '">pending</span>' + tick;
-}
-/* The subject-wide count, drawn only when there is one (§41's budget) and
-   only for somebody who can act on it — the office confirms, the filler
-   corrects (§93.4: a count sits one press from where the gap is closed). */
-function pendBadge(acKey){
-  var n = gapPendCount(TARGET);
-  if (!n || (!mayAuthor(acKey) && !mayFill(acKey))) return '';
-  return '<span class="pendcount">' + n + ' awaiting confirmation</span>';
-}
-/* ── THE MISSING BAR (§145.14, reshaping §145.12 from Islam's r2 mockup) ──
-   The WHOLE signal lives in the section row beside Foundation · SWOT · Plan
-   — read mode included, no line of the page spent: red "N Missing", one
-   red chip per place that OWES (a clear place draws no chip), and the red
-   "Fill in missing elements" button. Drawn only for the fill grant and the
-   office (§69) and only while something is missing; it vanishes at zero.
-   RED ALWAYS MEANS MISSING, AMBER ALWAYS MEANS PENDING CONFIRMATION — two
-   colours, two meanings, never mixed. */
-function missChipInner(e){
-  return e.count ? esc(e.label) + ' <b>' + e.count + '</b>'
-                 : '&#10003; ' + esc(e.label);
-}
-/* Which page a section's fill pen is (the bar's button opens it). */
-function fillPageForSec(sec){
-  var t = String(TARGET || "");
-  if (sec === "found")
-    return t.indexOf("fn:") === 0 && !fnPlansInPillars(FUNCTIONS[t.slice(3)])
-      ? "capfoundation" : "foundation";
-  if (sec === "plan" || sec === "proj") return "plan";
-  return "";
-}
-function missBarCta(total){
-  var inFill = EDIT_PAGE.plan || EDIT_PAGE.foundation || EDIT_PAGE.capfoundation;
-  if (inFill) return '<button type="button" class="fillcta" data-nextgap="1">' +
-    'Next gap &rarr;&nbsp;<span class="ngleft">' + total + ' left</span></button>';
-  var sec = (typeof CURSEC !== "undefined" && CURSEC[currentSub]) || "";
-  return '<button type="button" class="fillcta" data-fillcta="' +
-    esc(fillPageForSec(sec)) + '">Fill in missing elements</button>';
-}
-function missBar(){
-  if (typeof seesGaps !== "function" || !seesGaps()) return '';
-  var map = gapMap(TARGET), total = gapTotal(TARGET);
-  if (!total) return '';
-  var chips = map.filter(function(e){ return e.count > 0; }).map(function(e){
-    return '<button type="button" class="mchip"' +
-      ' data-gkey="' + esc(e.key) + '"' +
-      ' data-gpage="' + esc(e.go.page) + '" data-gsec="' + esc(e.go.sec) + '"' +
-      (e.go.rail ? ' data-grail="' + esc(e.go.rail) + '" data-gcode="' +
-        esc(String(e.go.code == null ? "" : e.go.code)) + '"' : '') +
-      ' title="' + plural(e.count, "missing element") + ' — press to go">' +
-      missChipInner(e) + '</button>';
-  }).join("");
-  return '<div class="missbar" data-gapband="1">' +
-    '<span class="secmiss">' + total + ' Missing</span>' + chips +
-    '<span class="gaptail">' + missBarCta(total) + '</span></div>';
-}
-/* The counts rewritten IN PLACE after a fill — §63's write-into-the-node,
-   because a repaint here would destroy the field being typed into (§71.2).
-   The chips are kept (their handler rides the band by delegation), only
-   their words move: a place reaching zero flips its chip to the green tick
-   until the next paint drops it. The rail rows follow the same list. */
-function gapBandRefresh(){
-  var map = gapMap(TARGET), total = gapTotal(TARGET);
-  var band = document.querySelector('[data-gapband]');
-  if (band){
-    var tot = band.querySelector(".secmiss");
-    if (tot) tot.textContent = total + " Missing";
-    map.forEach(function(e){
-      var chip = band.querySelector('[data-gkey="' + CSS.escape(e.key) + '"]');
-      if (!chip) return;
-      chip.classList.toggle("done", !e.count);
-      chip.innerHTML = missChipInner(e);
-    });
-    var tail = band.querySelector(".gaptail");
-    if (tail) tail.innerHTML = total
-      ? missBarCta(total)
-      : '<span class="gapdone">&#10003; Nothing missing</span>';
-  }
-  document.querySelectorAll('[data-rgap]').forEach(function(el){
-    var e = map.filter(function(x){ return x.key === el.dataset.rgap; })[0];
-    if (!e) return;
-    el.classList.toggle("ok", !e.count);
-    el.innerHTML = e.count ? e.count + " Missing" : "&#10003;";
-  });
-}
-
-/* The sentence over a page in fill mode — the contract, where the person
-   is working, not in the knowledge base (§32's rule, one surface in). */
-function fillBar(page, acKey){
-  if (!filling(page, acKey)) return '';
-  return '<div class="fillbar"><b>Filling the gaps.</b> You can write only where the ' +
-    'plan holds nothing. A value you fill stays yours to correct until the ' +
-    'Strategy Office confirms it — after that, changes are the office’s.</div>';
-}
-/* §145.14: A PAGE WITH NOTHING MISSING SAYS SO AND POINTS AWAY — Islam's
-   Mazaya moment: fill mode opened an empty hand and said nothing, which
-   read as broken. When the surface being looked at owes nothing but the
-   plan still does, the contract line gives way to the answer and a door. */
-function fillBarOr(page, acKey, ownCount, place){
-  if (!filling(page, acKey)) return '';
-  var total = gapTotal(TARGET);
-  if (!ownCount && total)
-    return '<div class="emptynote"><b>&#10003; Nothing missing in ' + esc(place) +
-      '.</b> ' + plural(total, "missing element") + ' elsewhere in this plan. ' +
-      '<button class="linkbu" data-nextgap="1">Go to the next place &rarr;</button></div>';
-  return fillBar(page, acKey);
-}
-function gapCell(page, acKey, row, field, opts){
-  opts = opts || {};
-  /* `text` renders a stored shape as the string the field holds (a
-     collaborators ARRAY reads and types as "A, B"); `parse` is its way
-     back. §145.10's cell is why they exist — one pair, beside `num`. */
-  var val = opts.text ? opts.text(row) : row[field];
-  var blank = SMPRules.gapBlank(val);
-  var mark = SMPRules.pendOf(row)[field];
-  var ed = authoring(page, acKey);
-  var fl = filling(page, acKey);
-  var draw = function(setter, pendCls){
-    /* §130.1 MET §145 AT THE MERGE: an owner or a collaborator is PICKED
-       from the register, never typed — so those call sites hand in the
-       CONTROL and this builder keeps the LIFECYCLE. The hook receives the
-       wrapped setter (stamp on fill, lift on office write) and the pending
-       class, and renders through selectOr/selectManyOr, which register the
-       setter in FIELDS themselves. */
-    if (opts.control) return opts.control(setter, pendCls);
-    var i = FIELDS.push(setter) - 1;
-    var cls = "fld " + (pendCls || "") + " " + (opts.cls || "");
-    if (opts.kind === "select") {
-      var list = (opts.opts || []).slice();
-      /* A stored value outside the list is prepended rather than displayed
-         wrong (§96.2); a blank leads with the blank so nothing is chosen by
-         accident (§69's picker rule). */
-      if (!blank && list.indexOf(val) < 0) list.unshift(val);
-      if (blank) list.unshift("");
-      return '<select class="' + cls + '" data-fld="' + i + '">' +
-        list.map(function(o){
-          return '<option' + (String(val == null ? "" : val) === String(o) ? " selected" : "") + '>' +
-            esc(o) + '</option>';
-        }).join("") + '</select>';
-    }
-    if (opts.kind === "area")
-      return '<textarea class="' + cls + '" data-fld="' + i + '" rows="2"' +
-        (blank ? ' placeholder="Missing"' : '') + '>' + esc(blank ? "" : val) + '</textarea>';
-    return '<input class="' + cls + '" data-fld="' + i + '" value="' + esc(blank ? "" : val) +
-      '"' + (blank ? ' placeholder="Missing"' : '') + '>';
-  };
-  /* `num` writes a number or null (§104.7's rule the other way round: the
-     type comes from the field, and a numeric field must never store the
-     string that would turn `tw += w` into concatenation). */
-  var put = function(v){
-    if (opts.parse) return opts.parse(v);
-    return opts.num ? ((v === "" || !isFinite(+v)) ? null : +v) : v;
-  };
-  var empty = function(){
-    return opts.parse ? opts.parse("") : (opts.num ? null : "");
-  };
-  if (ed) {
-    /* The office's ordinary field — writing it settles the value, which is
-       why the setter lifts the mark: correcting is confirming. `del` is
-       §50.6's rule carried from §130.1's collaborators: an emptied list
-       DELETES its key, or a tactic nobody supports and one never asked
-       stop being byte-identical and every save carries a phantom change. */
-    return draw(function(v){
-      var nv = put(v);
-      if (opts.del && SMPRules.gapBlank(nv)) delete row[field];
-      else row[field] = nv;
-      gapLift(row, field); gapBandRefresh();
-    });
-  }
-  if (fl && (blank || mark)) {
-    return draw(function(v){
-      var nv = put(v);
-      if (SMPRules.gapBlank(nv)) {
-        if (opts.del) delete row[field]; else row[field] = empty();
-        gapLift(row, field);
-      }
-      else { row[field] = nv; gapStamp(row, field); }
-      gapBandRefresh();
-    }, mark ? "pendfld" : "gapfld");
-  }
-  /* Read — and fill mode on a settled value reads too. */
-  var text = blank
-    ? (opts.readEmpty !== undefined ? opts.readEmpty : '<span class="missing">Missing</span>')
-    : (opts.flow ? '<span class="flow ' + (opts.cls || "") + '">' + esc(val) + '</span>' : esc(val));
-  return text + pendChip(acKey, row, field);
+    opts.map(function(o){
+      return '<option' + (String(value) === String(o) ? " selected" : "") + '>' +
+        esc(o) + '</option>';
+    }).join("") + '</select>';
 }
 
 /* Two readings of the same targets. Columns compares them down a line; chips
@@ -2352,31 +1837,23 @@ function koToggle(){
    same value, and the 3-year loses its "3-year" prefix there — with only one
    number left, a label saying which one it is has nothing to distinguish it
    from. */
-function koView(list, isGroup, acKey){
+function koView(list, isGroup){
   var near = isGroup || SHOW_KO_THIS_YEAR;
   var miss = '<span class="missing">Missing</span>';
-  /* §145: every pending mark on the row, chips beside the values it shows —
-     including a pending direction or compile, which have no column here, or
-     the office would have nothing to confirm them from in read mode. */
-  var chips = function(m){
-    return pendChip(acKey, m, "dir") + pendChip(acKey, m, "target3y") +
-           pendChip(acKey, m, "target") + pendChip(acKey, m, "compile");
-  };
   if (KO_VIEW === "chips") {
     return '<div class="ochips">' + list.map(function(m){
       var far = m.target3y ? esc(m.target3y) : miss;
       return '<div class="ochip"><b>' + esc(m.name) + '</b>' +
         (near ? '<div class="v">' + (m.target ? esc(m.target) : miss) + '</div>' +
                 '<div class="h">3-year ' + far + '</div>'
-              : '<div class="v">' + far + '</div>') + chips(m) + '</div>';
+              : '<div class="v">' + far + '</div>') + '</div>';
     }).join("") + '</div>';
   }
   return '<div class="ohead' + (near ? '' : ' one') + '"><span>Objective</span>' +
       '<span>' + horizonColLabel() + '</span>' +
       (near ? '<span>This year</span>' : '') + '</div>' +
     list.map(function(m){
-      return '<div class="orow' + (near ? '' : ' one') + '"><span class="on">' + esc(m.name) +
-        chips(m) + '</span>' +
+      return '<div class="orow' + (near ? '' : ' one') + '"><span class="on">' + esc(m.name) + '</span>' +
         '<span class="ot h">' + (m.target3y ? esc(m.target3y) : miss) + '</span>' +
         (near ? '<span class="ot">' + (m.target ? esc(m.target) : miss) + '</span>' : '') + '</div>';
     }).join("");
@@ -2419,20 +1896,15 @@ function koEdit(list, page, acKey, owner){
   return '<div class="scroll"><table><thead><tr><th>Objective</th><th class="cc">Dir.</th>' +
     '<th class="cc">3-year</th><th class="cc">This year</th><th class="cc">Compile</th><th></th></tr></thead><tbody>' +
     list.map(function(m, i){
-      /* \u00a7130: the four gap-fillable columns go through gapCell \u2014 in the
-         office's edit they are the same bound fields as before (with the
-         setter lifting a pending mark, since correcting confirms); in fill
-         mode only a blank or still-pending one opens. The NAME never does:
-         a row that exists is named, and renaming is authoring. */
       return '<tr><td>' + inputOr(pg, m.name, "", function(v){ m.name = v; }) + '</td>' +
-        '<td class="cc">' + gapCell(page, acKey, m, "dir",
-          { kind:"select", opts:["\u2265", "\u2264"] }) + '</td>' +
-        '<td class="cc">' + gapCell(page, acKey, m, "target3y",
-          { kind:"input", cls:"mono" }) + '</td>' +
-        '<td class="cc">' + gapCell(page, acKey, m, "target",
-          { kind:"input", cls:"mono" }) + '</td>' +
-        '<td class="cc">' + gapCell(page, acKey, m, "compile",
-          { kind:"select", opts:["Sum", "Latest", "Average"] }) + '</td>' +
+        '<td class="cc">' + selectOr(pg, m.dir, ["\u2265", "\u2264"], "",
+          function(v){ m.dir = v; }) + '</td>' +
+        '<td class="cc">' + inputOr(pg, m.target3y || "", "mono",
+          function(v){ m.target3y = v; }) + '</td>' +
+        '<td class="cc">' + inputOr(pg, m.target || "", "mono",
+          function(v){ m.target = v; }) + '</td>' +
+        '<td class="cc">' + selectOr(pg, m.compile, ["Sum", "Latest", "Average"], "",
+          function(v){ m.compile = v; }) + '</td>' +
         '<td class="cc">' + (editing
           ? '<button class="rmbtn" data-korm="' + li + '|' + i + '">Remove</button>' : '') +
         '</td></tr>';
@@ -2523,14 +1995,7 @@ function aspirationCard(label, statement, endInMind, objectives, page, setAsp, s
           inputOr(pg, GROUP.horizon, "mono yr", function(v){ GROUP.horizon = v; }) + '</label>'
         : '<span class="pill horizon">Horizon &middot; ' + horizonLabel() + '</span>') +
     '</div>' +
-    /* §145: a unit's (or function's) aspiration is a gap the fill grant can
-       close — through gapCell, whose edit-mode setter also lifts a pending
-       mark (correcting confirms). The GROUP's stays exactly as it was: the
-       group's own pages are never fillable (§94's list). */
-    '<p class="statement">' + (isGroup
-      ? fieldOr(pg, statement, "big-field", setAsp)
-      : gapCell(page, acKey, owner, "aspiration",
-          { kind:"area", cls:"big-field", flow:true, readEmpty:"" })) + '</p>' +
+    '<p class="statement">' + fieldOr(pg, statement, "big-field", setAsp) + '</p>' +
     /* End in mind is optional. Where a unit does not have one, nothing appears
        \u2014 an empty labelled block asserts that something is missing when the
        plan simply does not work that way. In edit the field is always there,
@@ -2571,7 +2036,7 @@ function koBlock(objectives, page, acKey, owner, isGroup, editing){
          same reason the layout switch is: authoring shows every field there is,
          so a control that hides one would be lying about what is stored. */
       (editing ? '' : (isGroup ? '' : koYearToggle()) + koToggle()) + '</div>' +
-    (editing ? koEdit(objectives, page, acKey, owner) : koView(objectives, isGroup, acKey));
+    (editing ? koEdit(objectives, page, acKey, owner) : koView(objectives, isGroup));
 }
 
 /* THE BAND ASKS THE SAME QUESTION THE CARD ASKS (§94). `authoring()` and not a
@@ -2580,10 +2045,8 @@ function koBlock(objectives, page, acKey, owner, isGroup, editing){
    is no longer open to whoever is now looking at it. Nothing is drawn at all
    when it is not — the band exists only while the pen is on. */
 function koBand(objectives, page, acKey, owner, isGroup){
-  /* §145: the band also opens for the fill grant — koEdit's gap cells then
-     draw only the blanks, and Add/Remove stay gated on authoring alone. */
-  if (!authoring(page, acKey) && !filling(page, acKey)) return '';
-  return '<div class="card koband">' + fillBar(page, acKey) +
+  if (!authoring(page, acKey)) return '';
+  return '<div class="card koband">' +
     koBlock(objectives, page, acKey, owner, isGroup, true) + '</div>';
 }
 
@@ -2594,12 +2057,7 @@ function renderUnitFoundation(u){
      no way to add — so a from-scratch unit could not say who it is at all
      (§61's trap on the oldest surface in the product). The lead opens with
      the pen because the leads are the unit's own words, not a fixed form. */
-  return fillBarOr("foundation", "u_found",
-      SMPRules.gapMissing("unit", u).length +
-      (u.keyObjectives || []).reduce(function(a, m){
-        return a + SMPRules.gapMissing("ko", m).length; }, 0),
-      "the Foundation") +
-    '<div class="fgrid"><div class="card"><h2 class="sec first">Who we are</h2>' +
+  return '<div class="fgrid"><div class="card"><h2 class="sec first">Who we are</h2>' +
       '<dl style="margin:0">' +
       u.clauses.map(function(c, ci){
         return '<div class="clause"><dt>' +
@@ -2656,31 +2114,17 @@ function renderUnitAnalysis(u){
    across the groups the row-spanning cell creates and make the unit boundaries
    harder to see, which is the thing that actually needs to be visible here. */
 function renderFocusBoard(){
-  /* ── AND THE FUNCTIONS ARE ON IT (§135.5) ─────────────────────────
-     Marking reaches supporting functions now, and a mark the board cannot show
-     is a mark stored where nobody can see it — §61's trap, which is exactly
-     what "built and unreachable" looks like from the other end. So the board
-     walks the same `focusSubjects()` the marking page does, and a row's
-     subject is a DESTINATION rather than a unit.
-
-     THE WEIGHT LINE IS A UNIT'S ONLY. A function carries no weight in the
-     group's score and never has (§59), so the cell says the name alone rather
-     than inventing a number to keep the column tidy. */
-  var subs = focusSubjects();
-  var all = subs.units.concat(subs.fns);
-  var live = all.filter(function(x){ return focusIn(x.key).length; });
+  var live = activeKeys().filter(function(k){ return unitFocus(UNITS[k]).length; });
   var totals = { over:0, met:0, short:0, none:0, total:0 };
 
-  var body = live.map(function(sub, ui){
-    var u = UNITS[sub.key], items = focusIn(sub.key);
+  var body = live.map(function(k, ui){
+    var u = UNITS[k], items = unitFocus(u);
     return items.map(function(x, i){
       var st = focusStanding(x.m.progress);
       totals[st.key]++; totals.total++;
       return '<tr class="' + (ui % 2 ? "alt " : "") + (i === 0 ? "unitstart" : "") + '">' +
-        (i === 0 ? '<td class="unitcell" rowspan="' + items.length + '"><b>' + esc(sub.name) + '</b>' +
-                   (u ? '<span class="why" style="margin:3px 0 0">weight ' + u.weight + '%</span>'
-                      : '<span class="why" style="margin:3px 0 0">supporting function</span>') +
-                   '</td>' : '') +
+        (i === 0 ? '<td class="unitcell" rowspan="' + items.length + '"><b>' + esc(u.name) + '</b>' +
+                   '<span class="why" style="margin:3px 0 0">weight ' + u.weight + '%</span></td>' : '') +
         '<td>' + esc(x.m.name) + '</td>' +
         '<td class="cc"><span class="why" style="margin:0">' + esc(x.src) + '</span></td>' +
         '<td class="num">' + (x.m.target ? esc(x.m.target) : '<span class="missing">Missing</span>') + '</td>' +
@@ -2690,8 +2134,8 @@ function renderFocusBoard(){
     }).join("");
   }).join("");
 
-  var unmarked = all.filter(function(x){ return !focusIn(x.key).length; })
-                    .map(function(x){ return x.name; });
+  var unmarked = activeKeys().filter(function(k){ return !unitFocus(UNITS[k]).length; })
+                             .map(function(k){ return UNITS[k].name; });
 
   var chips = [["over","earning"],["met","met, not earning"],["short","short"],["none","not reported"]]
     .filter(function(x){ return totals[x[0]]; })
@@ -2707,13 +2151,13 @@ function renderFocusBoard(){
     '<div class="fstrip-body">' +
       '<div class="fcount"><b>' + totals.over + '</b><span> of ' + totals.total + '</span><em>earning</em></div>' +
       '<div class="fchips">' + chips + '</div>' +
-      '<div class="fmean">' + live.length + ' of ' + all.length + ' marked</div>' +
+      '<div class="fmean">' + live.length + ' of ' + activeKeys().length + ' units marked</div>' +
     '</div></div>' +
 
     section("", "Focus measures", null,
       (totals.total
         ? '<div class="cfg"><table class="board"><thead><tr>' +
-            '<th style="width:16%">Where</th><th>Focus measure</th>' +
+            '<th style="width:16%">Business unit</th><th>Focus measure</th>' +
             '<th class="cc">Source</th><th class="cc">Target</th><th class="cc">Actual</th>' +
             '<th class="cc">Progress</th><th class="cc">Standing</th>' +
           '</tr></thead><tbody>' + body + '</tbody></table></div>'
@@ -2731,8 +2175,8 @@ function renderFocusBoard(){
         : '<div class="note">Nothing marked in this cycle. Marks are made on ' +
           '<b>Setup &rsaquo; Focus measures</b>.</div>') +
       (unmarked.length
-        ? '<div class="note"><b>' + plural(unmarked.length, "place") +
-          (unmarked.length > 1 ? ' have' : ' has') + ' nothing marked.</b> ' + unmarked.map(esc).join(", ") +
+        ? '<div class="note"><b>' + unmarked.length + ' unit' + (unmarked.length > 1 ? 's have' : ' has') +
+          ' nothing marked.</b> ' + unmarked.map(esc).join(", ") +
           '. Marked on <b>Setup &rsaquo; Focus measures</b>.</div>'
         : ''));
 }
@@ -2921,7 +2365,7 @@ function renderReport(u){
     var rail = '<div class="rail">' + railHead(L("pillar","bu"), u.items.length) + railRows +
       '<div class="rfoot">Tally is entries given of asked</div></div>';
     var pane = reportPillarPane(sel, u.items.indexOf(sel));
-    pillars = railWorthIt(u.items)
+    pillars = u.items.length >= 2
       ? '<div class="split">' + rail + '<div class="pane">' + pane + '</div></div>'
       : '<div class="pane">' + pane + '</div>';
   }
@@ -3050,34 +2494,9 @@ function railPick(c){
   for (var i = 0; i < list.length; i++) if (list[i].id === want) return list[i];
   return list[0];
 }
-/* ── ONE ITEM STILL GETS THE RAIL (§130.2, reversing the line below) ────
-   It used to read "below two items there are no siblings to move between, so
-   the rail is a column of wasted width" — true about the width, and it made
-   the platform lay the same page out two different ways. Islam, of a function
-   whose capability holds one project: "keep the rail there to keep the
-   standard view even with 1 capability either in the strategy or the
-   performance or reporting."
-
-   MARKETING SHOWED BOTH ON ONE SCREEN. Brand Positioning has two projects and
-   got a rail; Product Mindset has one and did not — so two capabilities
-   stacked on the same page started at two different left edges, and the second
-   one read as a different kind of thing.
-
-   THE PEN ALREADY DISAGREED WITH THE READING VIEW. renderFnProjects() has
-   drawn the rail from one project since §69.13, because *Add a project* lives
-   in it — so the editing view was already the "standard view" and only the
-   reading view was not.
-
-   THE ONE ANSWER, ASKED IN FOUR PLACES. A capability's projects, and a unit's
-   pillars on Plan, Performance and Reporting: three of those spelled it
-   `u.items.length >= 2` inline, which is exactly how a unit and a function
-   come to be fine DIFFERENTLY (§53.5). Islam, asked whether this was functions
-   only: "units and functions."
-
-   STILL FALSE FOR AN EMPTY LIST, which is what keeps the `.pane`-only branch
-   at each call site meaningful: nothing to list is not the same question as
-   one thing to list. */
-function railWorthIt(list){ return (list || []).length >= 1; }
+/* Below two items there are no siblings to move between, so the rail is a
+   column of wasted width. The pane simply fills it. */
+function railWorthIt(list){ return (list || []).length >= 2; }
 
 /* `codeOf` is optional and last, so every existing caller is untouched. The
    unit rail has shown `MB01 Digital & Data-Driven Operations` since §46.3; a
@@ -3166,14 +2585,6 @@ function railFor(list, sel, numOf, subOf, groupOf, footNote, codeOf, opts){
         '" data-oi="' + i + '">' +
         (opts.arranging ? handle("Reorder " + it.name) : '') +
         railName(code, it.name) +
-        /* §145.12: the row's own count of gaps to fill, for whoever can act
-           on them — drawn only while it is not zero, rewritten in place as
-           fills land. Optional and last, so the other callers are untouched. */
-        (opts.gapOf && opts.gapOf(it)
-          ? '<span class="rgap" data-rgap="pr:' + esc(it.id) + '" title="' +
-            plural(opts.gapOf(it), "missing element") + ' — the fill grant can close them">' +
-            opts.gapOf(it) + ' Missing</span>'
-          : '') +
         /* NO NUMBER MEANS NO ELEMENT. An empty `.rnum` still takes its column in
          the row's grid, so a rail with nothing to show on the right laid its
          names out as though something were there — the unit's Plan rail, which
@@ -3646,19 +3057,9 @@ function projFrontMatter(p, ed){
   }
   return '<div class="pfront">' +
     '<div class="pfcol">' +
-      /* §145 MERGED WITH §130.1: the three gap-fillable facts go through
-         gapCell — the fill grant closes a Missing owner or date, the
-         office's write settles, read mode carries the chip and the tick —
-         and the OWNER IS A PICK, NOT A TYPED LINE, in the office's pen and
-         in fill mode alike: the control hook renders §130.1's register-fed
-         list while gapCell keeps the pending lifecycle. */
-      row("l", "Owner", gapCell("plan", "k_proj", p, "owner", {
-        control: function(set, pendCls){
-          return selectOr("plan", p.owner == null ? "" : p.owner,
-            ownerChoices(p.owner, true), "ownersel " + (pendCls || ""), set);
-        } })) +
-      row("l", "Start", gapCell("plan", "k_proj", p, "start", {})) +
-      row("l", "End",   gapCell("plan", "k_proj", p, "end",   {})) +
+      row("l", "Owner", f(p.owner, function(v){ p.owner = v; })) +
+      row("l", "Start", f(p.start, function(v){ p.start = v; })) +
+      row("l", "End",   f(p.end,   function(v){ p.end   = v; })) +
       repRow +
     '</div>' +
     '<div class="pfcol pfright">' +
@@ -3720,7 +3121,7 @@ function projPlanBody(p, fk){
         xb("milestones", m.id) + '</td>' +
       '<td>' + (ed ? inputOr("plan", m.covers || "", "", function(v){ m.covers = v; })
                    : esc(m.covers || "")) + '</td>' +
-      '<td class="cc">' + (ed ? ownerSel("plan", m.owner, function(v){ m.owner = v; })
+      '<td class="cc">' + (ed ? inputOr("plan", m.owner || "", "", function(v){ m.owner = v; })
                               : esc(m.owner || "\u2014")) + '</td>' +
       '<td class="cc">' + f(m.finish, function(v){ m.finish = v; }) + '</td></tr>';
   }).join("") +
@@ -3749,9 +3150,8 @@ function projPlanBody(p, fk){
     ? '<div class="pband"><span class="pband-code">' + esc(projCode(fk, p)) + '</span>' +
         '<span class="pband-name">' +
           inputOr("plan", p.name, "", function(v){ p.name = v; }) + '</span></div>'
-    : pillarBand(projCode(fk, p), p.name, pendBadge("u_plan"));
-  return band + paneActs("plan", "u_plan") +
-    projFrontMatter(p, ed) +
+    : pillarBand(projCode(fk, p), p.name, "");
+  return band + paneActs("plan", "u_plan") + projFrontMatter(p, ed) +
     '<h4 class="mini">' + DX_HEADING +
       ' <em>\u2014 what the project hands over, and what it is meant to change</em></h4>' +
     miniTable(["#","Deliverables &amp; outcomes","Type","Direction","Target"], dxr) +
@@ -3775,11 +3175,7 @@ function renderFnProjects(fnKey){
      a unit and a function are the same product, and a button removed from one
      side of the navigation switch and left on the other is exactly the drift
      that rule exists to stop. */
-  return fillBarOr("plan", "k_proj",
-      caps.reduce(function(a, c){
-        return a + (c.projects || []).reduce(function(b, p){
-          return b + SMPRules.gapMissing("project", p).length; }, 0); }, 0),
-      "the projects") + caps.map(function(c){
+  return caps.map(function(c){
     var sel = railPick(c);
     /* AN EMPTY CAPABILITY IS WHERE THE FIRST PROJECT GOES (§61's lesson, the
        same shape): the note said "No projects yet" and offered nothing, so the
@@ -3811,10 +3207,7 @@ function renderFnProjects(fnKey){
            in the grid (the note on railFor says so). */
         alarmOf: function(p){
           var n = planAttention(p);
-          return n ? '<span class="missing">' + plural(n, "row") + ' to check</span>' : ''; },
-        gapOf: (typeof seesGaps === "function" && seesGaps())
-          ? function(p){ return SMPRules.gapMissing("project", p).length; }
-          : null });
+          return n ? '<span class="missing">' + plural(n, "row") + ' to check</span>' : ''; } });
     /* splitOrPane() drops the rail below railWorthIt()'s threshold, which is
        right for reading and wrong while a plan is being authored: with one
        project there would be nowhere to press Add. */
@@ -4047,21 +3440,10 @@ function unitRailFor(u, sel){
        `data-urail` is the rail's selection key and unitRailPick() matches on
        `it.code`. Change that and the rail stops being able to find the pillar
        it just selected. */
-    /* §145.12: which pillar owes what, for the people who can act on it —
-       drawn only while it owes something (§41's budget), and rewritten in
-       place as fills land (gapBandRefresh finds it by data-rgap). */
-    var gaps = 0;
-    if (typeof seesGaps === "function" && seesGaps()) {
-      (it.measures || []).forEach(function(m){ gaps += SMPRules.gapMissing("measure", m).length; });
-      (it.tactics  || []).forEach(function(x){ gaps += SMPRules.gapMissing("tactic", x).length; });
-    }
     return '<button class="ritem' + (it.code === sel.code ? " on" : "") + '" data-urail="' +
         esc(u.ukey) + '|' + esc(it.code) + '" data-oi="' + i + '">' +
         (on ? handle("Reorder " + it.name) : '') +
         railName(pillarCode(u, i), it.name) +
-        (gaps ? '<span class="rgap" data-rgap="p:' + esc(it.code || String(i)) +
-          '" title="' + plural(gaps, "missing element") + ' — the fill grant can close them">' +
-          gaps + ' Missing</span>' : '') +
         /* Both counts, both labelled, on one line. It used to put the tactics
            count in the small line and the MEASURES count as a bare number on
            the right - two numbers, one of them unlabelled, and nothing saying
@@ -4195,15 +3577,13 @@ function unitPlanBody(it, u, railed){
          already stored that is NOT in the list is prepended rather than
          silently displayed wrong (§96.2: the display must not disagree with
          the data). */
-      /* \u00a7130: the three gap-fillable cells go through gapCell in EVERY mode \u2014
-         the office's setter lifts the pending mark (correcting confirms), the
-         fill grant reaches only a blank or a still-pending value, and read
-         mode carries the chip and the office's tick. \u00a7114's prepend rule for
-         an out-of-list stored value lives inside gapCell now. */
-      '<td class="cc">' + gapCell("plan", "u_plan", m, "dir",
-        { kind:"select", opts:["\u2265","\u2264"], cls:"mono" }) + '</td>' +
-      '<td class="num">' + gapCell("plan", "u_plan", m, "target",
-        { kind:"input", cls:"mono" }) + '</td>' +
+      '<td class="cc">' + (ed
+        ? selectOr("plan", m.dir || "",
+            (m.dir && ["\u2265","\u2264"].indexOf(m.dir) < 0 ? [m.dir] : [])
+              .concat(m.dir ? [] : [""]).concat(["\u2265","\u2264"]), "mono",
+            function(v){ m.dir = v; })
+        : esc(m.dir)) + '</td>' +
+      '<td class="num">' + cell(m.target, function(v){ m.target = v; }, "mono") + '</td>' +
       /* NO 3-YEAR COLUMN. Islam, 2026-08-22: "in the direction plans the key
          measures are for 1 year only". A pillar's key measures carry one
          target and it is this year's; the three-year horizon belongs to the
@@ -4211,9 +3591,12 @@ function unitPlanBody(it, u, railed){
          and keep theirs. `target3y` is still stored and still travels through
          import, export and the archive — this removes a column, not a field,
          so nothing a plan already carries is lost. */
-      '<td class="cc">' + gapCell("plan", "u_plan", m, "compile",
-        { kind:"select", opts:["Sum","Latest","Average"],
-          readEmpty:"\u2014" }) + '</td></tr>';
+      '<td class="cc">' + (ed
+        ? selectOr("plan", m.compile || "",
+            (m.compile && ["Sum","Latest","Average"].indexOf(m.compile) < 0 ? [m.compile] : [])
+              .concat(m.compile ? [] : [""]).concat(["Sum","Latest","Average"]), "",
+            function(v){ m.compile = v; })
+        : esc(m.compile || "\u2014")) + '</td></tr>';
   }).join("");
   var tRows = it.tactics.map(function(t, i){
     return '<tr data-oi="' + i + '"><td class="idx">' +
@@ -4221,87 +3604,27 @@ function unitPlanBody(it, u, railed){
       '<span class="idx-n">' + (i+1) + '</span></td>' +
       '<td>' + (ed ? inputOr("plan", t.name, "", function(v){ t.name = v; }) : esc(t.name)) +
         xb("tactics", t.id) + '</td>' +
-      /* §145 MERGED WITH §130.1: gapCell keeps the pending lifecycle and
-         the read-mode Missing word; the control hook renders the register-
-         fed picker — an owner is PICKED, not typed, in the pen and in fill
-         mode alike. */
-      '<td>' + gapCell("plan", "u_plan", t, "owner", {
-        readEmpty:'<span class="missing">Missing</span>',
-        control: function(set, pendCls){
-          return selectOr("plan", t.owner == null ? "" : t.owner,
-            ownerChoices(t.owner, true), "ownersel " + (pendCls || ""), set);
-        } }) + '</td>' +
+      '<td>' + (ed ? inputOr("plan", t.owner || "", "", function(v){ t.owner = v; }) : esc(t.owner)) + '</td>' +
       /* THE ONE PLACE COLLABORATORS CAN BE TYPED (§50.2). Before this they
          could only arrive with the upload, so a name that changed after the
          plan landed meant re-uploading the unit to fix it. It sits under the
          SAME pen that corrects the rest of the plan, and behind the same gate
          (§31): who is named on a tactic decides who may report it, so it is
          not a field the people being measured hold. */
-      /* §145.10 MERGED WITH §130.1: collaborators are FILLABLE (Islam:
-         "it's optional anyway") — an EMPTY list is a gap, an existing one
-         never opens to the filler, and a pending name confers no reporting
-         right until the office confirms (namedOn skips marked fields) —
-         AND they are TICKED FROM THE SAME LIST THE OWNER IS PICKED FROM,
-         never typed: the control hook renders §130.1's multi-select in the
-         pen and in fill mode alike, while gapCell keeps the lifecycle.
-         Emptied, the key is DELETED rather than left as an empty array
-         (`del`, §50.6): a tactic nobody supports and one never asked must
-         be byte-identical, or every save carries a change nobody made.
-         Read mode keeps §15.1's em-dash: nobody supporting is an ordinary
-         answer. */
-      '<td class="collabs">' + gapCell("plan", "u_plan", t, "collaborators",
-        { text: collabText,
-          parse: function(v){ return Array.isArray(v)
-            ? v.map(function(x){ return String(x).trim(); }).filter(Boolean)
-            : collabParse(v); },
-          del: true,
-          readEmpty: '<span class="nobody">&mdash;</span>',
-          control: function(set, pendCls){
-            return selectManyOr("plan", collabNames(t),
-              ownerChoices(collabNames(t), false),
-              "collabsel " + (pendCls || ""), set);
-          } }) + '</td>' +
-      /* Quarters (§145): only a tactic naming NO quarter is a gap, and while
-         its fill is pending the four stay the filler's — read mode carries
-         the same chip and tick every other pending value wears. */
-      '<td>' + (ed ? qsEdit(t)
-        : (filling("plan", "u_plan") &&
-           (SMPRules.quartersBlank(t) || SMPRules.pendOf(t).quarters))
-          ? qsFill(t)
-          : qs(t) + pendChip("u_plan", t, "quarters")) + '</td></tr>';
+      '<td class="collabs">' + (ed
+        ? inputOr("plan", collabText(t), "", function(v){ t.collaborators = collabParse(v); })
+        : collabCell(t)) + '</td>' +
+      '<td>' + (ed ? qsEdit(t) : qs(t)) + '</td></tr>';
   }).join("");
-  var meta = pillarMeta(it, ed);
+  var meta = pillarMeta(it);
   var head = showHead
     ? '<div class="ptitle hoverpen"><div><h3>' + code + '&nbsp; ' +
         (ed ? inputOr("plan", it.name, "", function(v){ it.name = v; }) : esc(it.name)) + '</h3>' +
         (meta ? '<div class="pmeta">' + meta + '</div>' : '') + '</div>' +
         kindPill(it) +
         (mayEditPlan() ? penBtn("plan", "u_plan") : '') + '</div>'
-    : pillarBand(code, it.name, pendBadge("u_plan")) + paneActs("plan", "u_plan");
+    : pillarBand(code, it.name) + paneActs("plan", "u_plan");
   return head +
-    /* ── THE PILLAR'S OWNER, CORRECTABLE AT LAST (§130.1) ────────────────
-       Islam, asked whether the pillar's owner should join the other four:
-       "the pillar as well yes". It has been READ-ONLY EVERYWHERE since the
-       pillar model existed — shown in the rail's small line and in `.pmeta`,
-       and editable on no screen at all, so an owner who moved meant
-       re-uploading the unit's whole plan to fix a name (§53.3's complaint,
-       one field further along).
-
-       EDIT MODE ONLY, and that is deliberate rather than lazy. In read mode
-       the name is already on the page twice — the rail row says it and the
-       meta line says it — and a third telling is spending the page's budget
-       to repeat itself (§41). What was missing was never a place to READ it.
-
-       THE PROJECT'S OWN FRONT MATTER, one column wide (§109). Not a new
-       component: a project's Owner row and a pillar's are the same fact in
-       the same place on the same kind of pane, and drawing them two ways is
-       how a unit and a function come to be fine differently (§53.5). */
-    (ed
-      ? '<div class="pfront one"><div class="pfcol"><div class="pfrow"><em>Owner</em>' +
-          '<div class="pfval">' +
-          ownerSel("plan", it.owner, function(v){ it.owner = v; }) +
-        '</div></div></div></div>'
-      : '') +
     /* NO NOTE UNDER THE PILLAR (Islam, 2026-08-22: "there is a statement under
        the title of the direction in the mobile, generally standardize the view
        there is no notes under the pillars"). Mobile's first pillar carried
@@ -4385,17 +3708,11 @@ function renderUnitPlan(u){
      renderGroupFoundation(), which rendered the literal word "undefined" for
      versions; the note is here so the next deletion of a leading term does not
      re-earn it. */
-  return fillBarOr("plan", "u_plan",
-      (sel.measures || []).reduce(function(a, m){
-        return a + SMPRules.gapMissing("measure", m).length; }, 0) +
-      (sel.tactics || []).reduce(function(a, t){
-        return a + SMPRules.gapMissing("tactic", t).length; }, 0),
-      "this " + L("pillar","bu").toLowerCase().replace(/s$/, "")) +
-    (arranging("unit", u.ukey)
+  return (arranging("unit", u.ukey)
       ? '<p class="sec-hint">' + u.items.length + ' ' + L("pillar","bu").toLowerCase() +
         ' &middot; drag by the handle to reorder, here and inside each ' +
         L("pillar","bu").toLowerCase().replace(/s$/, "") + '</p>' : '') +
-    (railWorthIt(u.items)
+    (u.items.length >= 2
       ? '<div class="split">' + unitRailFor(u, sel) + '<div class="pane">' + unitPlanBody(sel, u, true) + '</div></div>'
       : '<div class="pane">' + unitPlanBody(sel, u, false) + '</div>');
 }
@@ -4424,35 +3741,21 @@ function renderFnFoundation(fnKey){
       'what is planned here is the work under them. Open <b>Plan</b> to see it.</div>';
   }
   var ed = authoring("capfoundation", "k_found");
-  /* §145: the fill grant opens the same editor, whose gap cells then draw
-     only the blanks — Add and Remove stay the author's. */
-  var fl = filling("capfoundation", "k_found");
-  return editBar("capfoundation", "k_found") +
-    fillBarOr("capfoundation", "k_found",
-      caps.reduce(function(a, c){
-        return a + (c.keyObjectives || []).reduce(function(b, m){
-          return b + SMPRules.gapMissing("capko", m).length; }, 0); }, 0),
-      "the overview") +
-    caps.map(function(c){
+  return editBar("capfoundation", "k_found") + caps.map(function(c){
     var f = functionOf(c.fn);
     /* A CAPABILITY'S OBJECTIVES CAN FINALLY BE AUTHORED HERE (§129's audit).
        They could arrive in a projects file and be READ on this page, and no
        surface in the product could write the first one — the same
        import-only trap as the SWOT and the clauses. Behind the page's own
        pen; a row minted empty carries the same shape the seed's rows have. */
-    var koBlock = (ed || fl)
+    var koBlock = ed
       ? capKoEdit(c)
       : c.keyObjectives.length
       ? '<div class="ohead"><span>Objective</span><span>This year</span><span>Weight</span></div>' +
         c.keyObjectives.map(function(m){
-          /* §145: the pending chips, including a direction or compile that
-             has no column here — read mode is where the office's tick is. */
-          return '<div class="orow"><span class="on">' + esc(m.name) +
-              pendChip("k_found", m, "dir") + pendChip("k_found", m, "compile") + '</span>' +
-            '<span class="ot">' + (m.target ? esc(m.target) : '<span class="missing">Missing</span>') +
-              pendChip("k_found", m, "target") + '</span>' +
-            '<span class="ot h">' + (m.weight == null ? "&mdash;" : m.weight + "%") +
-              pendChip("k_found", m, "weight") + '</span></div>';
+          return '<div class="orow"><span class="on">' + esc(m.name) + '</span>' +
+            '<span class="ot">' + (m.target ? esc(m.target) : '<span class="missing">Missing</span>') + '</span>' +
+            '<span class="ot h">' + (m.weight == null ? "&mdash;" : m.weight + "%") + '</span></div>';
         }).join("")
       : '<p class="sub" style="margin:0">None. This capability is judged by its projects.</p>';
     return capBand(c) + '<div class="capbody"><div class="fgrid">' +
@@ -4483,27 +3786,23 @@ function renderFnFoundation(fnKey){
    rule about mixed lists says do not mint some now). */
 function capKoEdit(c){
   var pg = "capfoundation";
-  /* §145: the four gap-fillable columns through gapCell; the NAME, Remove
-     and Add stay the author's — a fill-mode render draws them read-only or
-     not at all. */
-  var ed = authoring(pg, "k_found");
   return '<div class="scroll"><table><thead><tr><th>Objective</th><th class="cc">Dir.</th>' +
     '<th class="cc">This year</th><th class="cc">Compile</th><th class="cc">Weight %</th><th></th></tr></thead><tbody>' +
     c.keyObjectives.map(function(m, i){
-      return '<tr><td>' + inputOr(ed ? pg : null, m.name, "", function(v){ m.name = v; }) + '</td>' +
-        '<td class="cc">' + gapCell(pg, "k_found", m, "dir",
-          { kind:"select", opts:["≥", "≤"] }) + '</td>' +
-        '<td class="cc">' + gapCell(pg, "k_found", m, "target",
-          { kind:"input", cls:"mono" }) + '</td>' +
-        '<td class="cc">' + gapCell(pg, "k_found", m, "compile",
-          { kind:"select", opts:["Sum", "Latest", "Average"] }) + '</td>' +
-        '<td class="cc">' + gapCell(pg, "k_found", m, "weight",
-          { kind:"input", cls:"mono", num:true }) + '</td>' +
-        '<td class="cc">' + (ed ? '<button class="rmbtn" data-capkorm="' + esc(c.id) + '|' + i +
-          '">Remove</button>' : '') + '</td></tr>';
+      return '<tr><td>' + inputOr(pg, m.name, "", function(v){ m.name = v; }) + '</td>' +
+        '<td class="cc">' + selectOr(pg, m.dir || "≥", ["≥", "≤"], "",
+          function(v){ m.dir = v; }) + '</td>' +
+        '<td class="cc">' + inputOr(pg, m.target || "", "mono",
+          function(v){ m.target = v; }) + '</td>' +
+        '<td class="cc">' + selectOr(pg, m.compile || "Latest", ["Sum", "Latest", "Average"], "",
+          function(v){ m.compile = v; }) + '</td>' +
+        '<td class="cc">' + inputOr(pg, m.weight == null ? "" : String(m.weight), "mono",
+          function(v){ m.weight = (v === "" || !isFinite(+v)) ? null : +v; }) + '</td>' +
+        '<td class="cc"><button class="rmbtn" data-capkorm="' + esc(c.id) + '|' + i +
+          '">Remove</button></td></tr>';
     }).join("") + '</tbody></table></div>' +
-    (ed ? '<div class="addrow"><button class="editbtn" data-capkoadd="' + esc(c.id) +
-      '">+ Add an objective</button></div>' : '');
+    '<div class="addrow"><button class="editbtn" data-capkoadd="' + esc(c.id) +
+      '">+ Add an objective</button></div>';
 }
 
 
@@ -4543,7 +3842,7 @@ function unitPerfRail(u){
     '<div class="sortable" data-item=".ritem" data-kind="pillars" data-u="' + u.ukey + '">' + rows + '</div>' +
     '<div class="rfoot">' + pct(unitPillars(u)) + ' across ' + u.items.length + ' &middot; execution ' +
       pct(unitRatio(u)) + '</div></div>';
-  return railWorthIt(u.items)
+  return u.items.length >= 2
     ? '<div class="split">' + rail + '<div class="pane">' + unitPerfPane(sel, u, true) + '</div></div>'
     : '<div class="pane">' + unitPerfPane(sel, u, false) + '</div>';
 }
@@ -4573,7 +3872,6 @@ function unitPerfPane(it, u, railed){
     '<div class="scroll"><table>' + measureHead() +
       '<tbody class="sortable" data-item="tr" data-kind="measures" data-u="' + uk + '">' +
       measureRows(it.measures, { unit: uk }) + '</tbody></table></div>' +
-    pendCountLine(it.measures) +
     '<h5 class="mini">' + L("tactic","bu") + '</h5>' +
     '<div class="scroll"><table>' + tacticHead() +
       '<tbody class="sortable" data-item="tr" data-kind="tactics" data-u="' + uk + '">' +

@@ -18730,9 +18730,351 @@ Watched to fail first (§94.5): the fetches re-gated on `#msgsend` → **3
 failures**, naming the *Asking…* directly; `CURSEC["send"] = "over"` removed →
 **8**.
 
+## 145 · Fill the gaps (v3.55, spec 023)
+
+Islam: *"a configuration to allow the Strategy custodian and the owner to
+fill in the missing areas in the plan … the missing targets maybe the
+missing timeline the missing owners so it's a special type of editing which
+is just filling the missing areas."* Aligned over four rounds in one
+session — the pending/confirm lifecycle is his (*"the SMO can have a
+verification before the number is locked so the custodian can fill the
+number, it becomes still editable for them until the SMO comes in and
+confirms"*), the reporting boundary is his (*"the reporting can happen …
+the performance is depending on the confirmation of the number"*, then,
+overruling my no-blocker recommendation: *"if the targets are still
+pending, they can report and see it draft, but they cannot submit"*) —
+and the whole shape was signed off on a mockup artifact before a line of
+source moved (design-mockups/gap-fill/, rule 1c).
+
+### 145.1 A third state on the Strategy halves
+
+`STATE_RANK` is `none < view < fill < edit`, and the seat is the whole
+argument: everywhere the platform asks `=== "edit"` nothing widens, and
+everywhere it asks `!== "none"` a fill grant shows the page. The state is
+OFFERED only on the two Strategy cells (`a_unit_own_strat`,
+`a_fn_own_strat`) — on any other area it would grant nothing, and a toggle
+that does nothing is decoration (§42). `mayFillPage()` in `lib/rules.js`
+is the one question both sides ask: a strategy page, a target the person
+HOLDS (§94's ownsIt walk, unchanged), and the grant exactly `fill` — the
+office never fills, because an office write settles and never wears the
+mark.
+
+### 145.2 One definition of a gap, and the line it draws
+
+*A gap is a place holding nothing; writing the first value into it is
+filling; touching anything already there is authoring.* `GAP_FIELDS` in
+`lib/rules.js` names the fillable fields once — the same list §119's deck
+marks Missing — per row kind: a KO's dir/target/target3y/compile, a
+measure's dir/target/compile, a tactic's owner and its QUARTERS AS ONE
+(§119.1: a tactic marked Q2–Q3 is saying something by its blanks, so only
+a no-quarter tactic is a gap, §128 — and while that fill is pending the
+four move together under one mark), a capability KO's four plus weight, a
+project's owner/start/end, and the unit's aspiration. Empty is null or
+whitespace, never a typed 0 (§104.10). **Deliberately not in v1**, flagged
+rather than silently absent: SWOT quadrants (filling one means adding rows
+and "adding or removing rows is not possible in this mode" is Islam's own
+boundary — where the two rules collide, the quadrant stays the office's),
+deliverable/outcome/milestone fields, and End in mind (optional by design,
+§45.2 — not a gap). Never in this mode: names, add, remove, reorder
+(§101's own grant, untouched), collaborators (§50.2 — they decide who may
+report).
+
+### 145.3 Pending is a mark, and confirming is removing it
+
+`row.pend = { field: {by, at} }`, stored as an ABSENCE (§50.6): the office
+confirming deletes the key, the last key leaving deletes `pend`, and a
+tenant that never filled is byte-identical to one confirmed clean. No
+migration — rows persist unknown keys through their `extra` JSONB, proved
+against a real Postgres 16 (write, read, clean slate). The value is LIVE
+the moment it is filled — held aside it would leave Missing on a screen
+with a number waiting behind it, §104.8's screen-arguing-with-its-own-score
+— and wears amber everywhere it shows: the field, the chip, the band's
+count, the matrix state. The chip names who filled it and when on hover;
+the office sees a tick beside it; **an office edit confirms in passing**,
+because correcting is the stronger act — `gapCell`'s edit-mode setter and
+the quarter toggle both lift the mark on write.
+
+### 145.4 The server judges transitions, not intentions
+
+A gap pass runs BEFORE the existing diff (`lib/authorize.js`): per row by
+id, per gap field, it classifies fill (blank → value + mark), amend (mark
+on both sides, anything moved), unfill (the filler's own undo, back to the
+exact stored gap) and confirm (mark removed, value standing), applies the
+accepted ones to a CLONE of the stored side, and lets everything else fall
+through to the old classification — office-only, the fail-closed direction.
+`gapFill` passes on authorship OR the fill grant; `gapConfirm` on
+authorship alone. Filling without the mark, marking a settled value, and
+touching a settled value all fall through by construction. **Two lessons
+paid for on the way:** `same()` is stringify-based and KEY ORDER IS NOT
+CONTENT — the pass rebuilds pend maps field by field, and Postgres jsonb
+itself stores `{by, at}` back as `{at, by}` (measured), so marks are
+compared canonically or an untouched pending field reads as a phantom
+amend and refuses an innocent save (§42's `branding()` shape, caught by
+test-authorize §16 case 10 and then again by the round trip).
+
+### 145.5 The score waits on confirmation; the report never does
+
+Reporting rides the Reporting half untouched: figures, notes and Save
+draft land against a pending target the day it is filled. What waits is
+the COMPARISON: a row with a pending score-bearing field
+(`GAP_SCORE_FIELDS` — dir, target, compile, weight, quarters; not
+target3y, owner or a date, which change no figure's meaning this cycle)
+scores null and leaves every average — `scorableMeasures`, `koScore`,
+`capKOScore`, and `tacticPlanned` reads not-yet-due. The screen says why
+where the dash is (§106): the row's dash carries the reason on hover and
+the table carries *"N not counted yet — awaiting Strategy Office
+confirmation"*, only when there is one. **Submit is refused** while any
+such field is pending — a third entry in `submitBlockers`/`submitRefusal`
+(§105's one function for both sides), naming the rows and saying whose
+move it is, because only the office can clear this blocker and words that
+send the unit back to its own fields would be pointing at the wrong desk.
+
+### 145.6 The screen: one builder, and the pen says which mode it opens
+
+`gapCell()` draws every fillable value in all three states — red dashed
+field on a gap, amber field while pending (fill mode), text plus chip plus
+tick in read — and is the ONLY way one is drawn (§96: a second way to draw
+these cells is how unbound ones get built). Fill mode is `filling()`,
+`authoring()`'s shape one grant down; every `ed ?` site in the renderers
+stays false, which is what keeps Add, ×, handles and name fields out of
+fill mode without a second gate. The pen itself is one slot and one
+control: for a fill holder it says "Fill the gaps", and §101's arrows —
+which a fill holder, unlike anyone before, holds BESIDE a pen — yield to
+the second slot, because both sat at `right:0` and the arrows ate the
+pen's clicks: §70's family, caught by the check PRESSING the pen rather
+than querying it.
+
+### 145.7 The matrix restyle rides along, approved from the mockup
+
+Islam, on the mockup's access table: *"I really like that design for the
+access table … we can enhance it in this build as well."* Same bones, three
+refinements: each toggle its own rounded chip with a gap (not a fused
+strip), a LIT toggle a tint with a coloured border rather than a solid
+fill (§41's budget on a page drawing up to 27 of them), hairline row
+separators with roomier padding. The third toggle's mark is a pen over a
+dashed line, amber when lit — the grant wears the colour its consequence
+wears. The three-toggle cells outgrew the 940px scroll floor and clipped
+the third with nothing to read it by (caught by `no-wrap.py`); the floor is
+1010px now, and the grid scrolls inside its own box as it always has
+(§54.6).
+
+### 145.8 What proves it
+
+`scripts/test-authorize.js` §16: fill, amend, unfill accepted for the fill
+grant; the same fill refused at the shipped default; a settled value
+refused even wearing the mark; the mark's removal refused to its own
+filler and accepted for the office, tick and correcting-confirm both; the
+quarters group; the capability side; the four ends of `mayFillPage()`.
+**Run against the pre-§145 build it fails 6 ways and then crashes on the
+missing rule (§94.5).** `src/checks/gap-fill.py`: the third toggle where
+it belongs and nowhere else; fill mode's fields counted and its absences
+asserted (§94.2); every press read back from the DATA (§96); the chip, the
+count, the custodian's missing tick and the office's present one; the
+dash, the not-counted line, the Submit refusal with Save draft alive; the
+KO band through the same builder. It MAKES its gaps — the demo plan is
+complete — and fails on the pre-build from the first section. The DB half:
+round trip PASS on a virgin Postgres 16, and pend proved to survive write,
+read and the clean slate.
+
+### 145.9 The plan download is hidden (reversing §117's button, not its machinery)
+
+Islam, mid-build: *"hide the download button of the plans and the
+capabilities in the ppt format that we created earlier so we can have it
+in one fix here."* `dlPlanBtn()` returns nothing for EVERYONE, office
+included — hidden, not deleted: `pptx.js`, `mayDownloadPlan()` and
+`sendPlanPptx()` all stand, so giving it back is one line, and the deck
+stays honest for that day (§130-era Missing marks, and now a pending value
+prints as the value plus "(pending)", never Missing — answered, not
+settled). `checks/strategy-split.py` asserts the button absent on BOTH
+surfaces (§119.9's fault inverted would be hiding one) for every viewer,
+while the dormant builder is still proved through a direct call — a check
+written against the problem survives the button's return (§94.8).
+
+### 145.10 Collaborators join the fillable list, and the right waits (reversing §145.2's exclusion)
+
+Islam: *"make the collaborators as well can be added — it's optional
+anyway."* The exclusion was mine and the reversal is his; what makes it safe
+to build is the half he approved from the mockup's amber note: **being named
+on a tactic is what lets a Contributor report that line (§50.2), so a
+pending name confers NO reporting right until the office confirms it.**
+`namedOn()` skips any field still wearing the mark — field by field, because
+an owner confirmed long ago must not lose their line over a collaborator
+still pending beside them — and the same rule covers a pending OWNER, which
+had the identical hole. An empty list is a gap; an existing list never opens
+to the filler; `gapCell` grew the `text`/`parse` pair (collabText /
+collabParse) so an array reads and types as the sentence it always was.
+
+### 145.11 This year shows by default (reversing §66's default, not its toggle)
+
+Islam: *"let the this year objective clicked by default so it can be filled
+as missing as well."* §66's control survives untouched — what flips is what
+ABSENT means: a browser that never chose now shows both horizons, so a
+missing near target is a visible red word instead of a hidden column. The
+stored value is an explicit "1"/"0", so everybody who ever pressed the
+toggle keeps exactly what they chose, in both directions (§30.2's shape).
+
+### 145.12 The plan says where it is owed (the finding experience)
+
+Islam: *"we need some sort of identification for the user where missing
+things are so he can fill and fill all."* Three layers, each a shape the
+product already owns, all counting through ONE list (`gapMap()` reading the
+shared `gapMissing()` — §116.2: the count and the queue are one list, or
+the counts disagree with the fields they point at):
+
+- **The count finds you.** The Strategy tab wears the number of gaps and
+  each rail row wears its own — in read mode too, drawn only for the fill
+  grant and the office (§69: never a nag with no control to clear it) and
+  only while not zero (§41's budget).
+- **The gap band** appears with the pen: §129's builder-band chip map
+  re-used — one chip per place, counts read live, ✓ when clear, press to
+  go. **A chip is a door that keeps fill mode on where it lands**, because
+  the band exists only while somebody is filling and a door that closed the
+  mode behind it would strand them mid-walk.
+- **Next gap** walks the fillable blanks in document order with a landing
+  ring (`prefers-reduced-motion` respected); when the page holds none it
+  goes to the first place still owing — through the band's own chip, so
+  the two ways of moving cannot disagree about where a place is.
+
+**THE COUNTS MOVE WITHOUT A REPAINT.** A repaint on field-change would
+destroy the box being typed into (§71.2), so `gapBandRefresh()` rewrites
+the chips, the tab badge and the rail counts IN PLACE (§63's
+write-into-the-node), and the band's controls ride a delegated handler on
+the band itself so the rewrite cannot orphan them. **The check caught the
+design being better than its own assertion**: the pillar chip's last fill
+turned it into the ✓, and the assertion expecting a digit went red on a
+correct build — §68.10's class, fixed in the check.
+
+**AND THE TAB GREW TEXT A CHECK WAS READING** (§51.11, §93.7's drill): the
+badge and its screen-reader line made `textContent` read "Strategy22 — 22
+to fill", and qa.py's PARITY and LANDING probes went red on a healthy
+build. The two readers now strip `.tbadge/.vh/.tabdot` before comparing —
+the name, not its annotations.
+
+### 145.13 A pen that opens nothing is not drawn
+
+Found by writing §145.12's map, fixing a §145 gap: `mayFillPage()` answered
+true for u_anal — a strategy page with NO fillable field (the SWOT is rows,
+and rows are never fill mode's) — so a fill holder was offered a pen that
+opened nothing: §61's trap wearing §145's clothes. `FILL_PAGES` names the
+four pages `GAP_FIELDS` actually reaches, and the check asserts the absence.
+
+Proof, §145.10–13 together: `test-authorize.js` grows to 237 (collaborator
+fill, existing-list refusal, the three rights assertions, the u_anal
+refusal); `checks/gap-fill.py` grows sections 8–10 (the parse-and-mark, the
+right waiting and lifting, the badge/rail/band agreeing with `gapMap`, the
+walker's ring, the in-place tick-down, the chip-as-door, the floor viewer's
+absent badge, the fresh-browser default and the stored choice winning); the
+full qa walk and eleven suites green.
+
+### 145.14 The finding system goes red and worded, and the whole bar moves
+### into the section row (reshaping §145.12, from Islam's screens)
+
+Islam, using §145.12 on Mazaya as its custodian, in order: *"I'd prefer
+that the missing items to be beside the arrange button actually on it's
+left side with a clear red button with the wording fill in missing
+elements"*; *"when I went to the objectives I couldn't enter anything"*;
+*"bring the line to fill beside the plan in to top line as a temp box and
+it needs to be significant so use red"*; *"remove the number 47 from the
+strategy word in the top keep the numbers in the directions but go for
+redish and make it 10 Missing."* Then, of the drawn mockup's top box:
+*"I meant that bar with that button is what goes up beside the plan not to
+waste lines in the page and remove it from the inpage."* Settled from
+mockup r2 plus four answered questions, and the shape that came out:
+
+- **RED MEANS MISSING, AMBER MEANS PENDING — two colours, two meanings,
+  never mixed.** Every count in the system now reads **"N Missing"**, red,
+  one wording on the bar, the chips and the rail. The Strategy tab's
+  number is GONE (reversing §145.12's badge): the tab names a place, and
+  the bar an inch below it now carries the number with somewhere to press.
+- **The whole bar lives in the section row** — total, one red chip per
+  owing place, and the solid red **Fill in missing elements** button — on
+  the same line as Foundation · SWOT · Plan, read mode included, and
+  NOTHING of it in the page body. It exists while `seesGaps()` and the
+  total is not zero, and vanishes at zero (§41's budget; §69: never shown
+  to somebody with no control that clears it). In fill mode the button
+  becomes **Next gap → N left**.
+- **The corner button beside §101's arrows** is the same press with the
+  same words, red while anything is missing, **Done filling** while the
+  mode is open, and the quiet amber **Review pending · N** only when
+  nothing is missing and marks still await the office — a state that asks
+  nothing of the filler, so it must not shout.
+- **One press opens fill mode and walks to the first blank** (the ring,
+  §145.12's walker unchanged). **A page with nothing missing says so and
+  points away** — `fillBarOr()` swaps the contract line for *"Nothing
+  missing in this pillar. N missing elements elsewhere in this plan —
+  Go to the next place →"* — because Islam's *"I couldn't enter
+  anything"* was the empty hand §45.2 warns about: a mode entered and
+  nothing to do reads as a mode that is broken.
+- **The rail rows carry the words too** — red italic *"N Missing"*, the
+  green ✓ the moment a fill clears the place — rewritten in place by
+  `gapBandRefresh()` with the chips and the total (§71.2, never a repaint
+  under a typing hand).
+
+**THE BUG WORTH THE SECTION: A REAL PRESS IS NOT A PROGRAMMATIC ONE.**
+The press's `enterFillMode()` painted and then walked — and on a real
+click the paint is HELD: §30.1's `CLICKING` guard defers any repaint
+requested between mousedown and the click's end, released by a timer
+scheduled on mouseup. So the walk ran against the READ-MODE page, found
+zero fillable fields, and its fallback marched off through another
+place's chip — the press landed the custodian on Foundation while the
+Plan page they pressed it on was full of gaps. **Every evaluate-driven
+probe passed** (no mouse, no hold, paint synchronous), which is why the
+fault survived until the real click was watched. Two lessons paid for on
+the way: **reassigning `window.fn` intercepts nothing called from inside
+the same script** (internal callers bind the declaration, so a wrapper
+"instrumenting" `filling()` observed silence and proved only itself), so
+the probe had to go into the SOURCE; and the fix is one line —
+`setTimeout(gapWalk, 0)` queues behind the mouseup's release timer, so
+the walk always reads the repainted page, from a programmatic click too,
+where it merely runs a beat later.
+
+**AND THE RED WORDS WEAR THE `-tx` TWINS** (§38.5, sixth time): `--bad`
+as TYPE measured 4.49:1 in dark — the fill colour doing a word's job —
+while `--bad-tx` reads 6.56 dark / 7.14 light. The solid button keeps
+`--bad` as its FILL with `--surface` ink (5.64 / 5.03), which is the
+token pair doing exactly the two jobs §38 split them for. Measured by
+hand in both themes and both modes, because the sweep never signs in as
+a fill holder (§94.11's class).
+
+Proof: `checks/gap-fill.py` §9 rewritten against the new shape — the tab
+badge asserted ABSENT, the bar in the section row in read mode with
+nothing in `#panel`, the floor viewer seeing neither bar nor button, the
+press opening the mode with the ring on the first blank, every chip
+agreeing with the data it counts and none for a clear place, the
+in-place tick-down, and the chip-as-door with the mode kept on. 58
+assertions green; the full qa walk and the eleven-suite battery re-run
+green after the fix.
+
+**AND THE BAR SHIPPED UNDRESSED, WITH EVERY ASSERTION GREEN** (Islam:
+*"the view is not like the design I approved"*). Moving the bar INTO the
+section row put its controls inside `nav.tabs`, whose `.tabs button`
+rule — `border:0`, no ground, the quiet ink, written for a tab — outranks
+a bare class (`0,1,1` over `0,1,0`), so the chips lost their borders and
+the solid red button rendered as plain words, while the corner copy
+outside the row wore the design correctly. **The contrast probe had
+already recorded it** — the bar's button at 7.97 in the page's own ink,
+the corner's at 5.64 white-on-red, printed one line apart — and I read
+the two as two valid states, which is §68.10's fault in the reader
+rather than the tool. The fix is ONE declaration serving both homes: a
+selector list where the second selector (`.missbar button.fillcta`)
+merely outranks `.tabs button` inside the bar, so the two copies cannot
+drift (§53.5); the hovers restate ground and ink because
+`.tabs button:hover` paints its own. **And the check now asserts the
+PAINT, not the words** — the bar's button must wear the SAME computed
+ground as the corner's AND that ground must be a real colour (the
+relationship alone passes when both vanish, §113.8), and the chip must
+keep a real border inside the tab row. Proved able to fail against the
+undressed build: both assertions red (`barBg: rgba(0,0,0,0)` against the
+corner's solid), then green after the one block.
+
+
+*(Numbered §146 at merge time: written as §145 on the branch, and the
+fill-the-gaps session's §145 reached `main` first. The work is unchanged;
+only the number moved.)*
+
 ---
 
-## 145 · A test copy is a send, and it says so (v3.55)
+## 146 · A test copy is a send, and it says so (v3.56)
 
 Islam, using the product: *"there have been multiple sent emails earlier.
 weren't they saved? I can't see them in the overview."*
@@ -18764,7 +19106,7 @@ own failures is not a record.
 it. **NULL IS A REAL SEND**, so nothing is backfilled and nothing needs to be:
 every row that exists today was written by the `send` path, which is exactly
 what NULL now means (§50.6 — an absent value is the answer, not a gap). Proved
-against a tenant rolled back to its pre-§145 shape: the column arrives, and the
+against a tenant rolled back to its pre-§146 shape: the column arrives, and the
 row the old product wrote is still a real send.
 
 **THE MARK GOES IN THE COLUMN THAT ALREADY ANSWERS "WHO GOT IT", AND THE MOCKUP
@@ -18814,7 +19156,7 @@ scope of Delete, the confirmation, the refusal reaching the page, and the whole
 column absent for somebody who may not destroy — failing **5 / 1 / 2** against
 three deliberate breaks. `scripts/test-test-copies.js` covers the half no
 browser can see, 19 assertions against a real Postgres, failing **3** with the
-kind check dropped and **11** against the pre-§145 product.
+kind check dropped and **11** against the pre-§146 product.
 
 **AND ONE ASSERTION COULD NOT FAIL FOR THE REASON IT EXISTED.** The line count
 was taken per text node, and the mark that wraps is its OWN text node sitting
@@ -18822,4 +19164,23 @@ happily on one line of its own — so the first deliberate break reproduced the
 exact fault and that assertion stayed green while four others caught it. Counted
 across the whole cell it reports `[1,1,1,1,2]`. §113.8's family: the break is
 what found it, not the reading.
+
+**AND `sw.js` MERGED ITSELF INTO A SYNTAX ERROR, SILENTLY (§146.2).** Merging
+main in for the second time spliced the two name blocks together: this branch's
+`const SHELL` line landed **inside** main's comment, that comment lost its
+opener, and the file ended with **two `const SHELL` declarations** and loose
+prose between them. **It did not conflict.** git merged it happily, and the
+first `sed` aimed at "the SHELL line" hit the one that was now inside a comment.
+
+A worker that will not parse does not install, so **every returning browser
+would have gone on serving itself the old shell out of its own disk** — the
+exact failure §91 exists to prevent, arriving by the one route §91 does not
+name: not a stale name, a file that cannot run. §56.7 said *a clean merge is not
+a working one* about the built platform; this is the same lesson about a file
+**nothing rebuilds**, so no build step would ever have caught it.
+
+Fixed by rebuilding `sw.js` from main's copy and re-applying the one line this
+branch changes, which is what §91 already prescribes for the built file.
+**`node --check sw.js` is the two seconds that catches it**, and it belongs
+beside the name check in every merge from here.
 

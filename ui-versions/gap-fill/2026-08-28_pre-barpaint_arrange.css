@@ -64,29 +64,10 @@
   td.annual  { font-weight:700; }
   th.cc + th.cc { white-space:nowrap; }
 
-  /* ── ONE LINE THAT SCROLLS, ENDS PINNED (§136) ──────────────────────────
-     REVERSAL, quoted so it stays recorded: this block used to say "Wrapping
-     keeps every unit reachable; a horizontal scroll hides the last one behind
-     a gesture nobody is told about" — and the wrap it chose was fighting
-     `.units-in{height:46px}` in _shared.css, so below ~1280px the second line
-     painted OUTSIDE the 46px box, over the tab row, and on some pages ate its
-     clicks (§118.7, measured live at 1024). Islam chose the scroll (Decision
-     1: B, 2026-08-27), and the old objection is answered in kind: the fades
-     SAY there is more, each side only while it is true; the lit destination
-     is scrolled into view on every paint; and the controls — the Group menu,
-     the Units|Functions switch, the gear — sit OUTSIDE the scroll region,
-     pinned, so they can never leave the screen. */
-  .units-in { flex-wrap:nowrap; overflow:visible; }
-  .units-in > details, .units-in > .navswitch, .units-in > .sep { flex:0 0 auto; }
-  .navclip { position:relative; flex:1 1 auto; min-width:0; align-self:stretch; }
-  .navscroll { display:flex; gap:2px; align-items:stretch; height:100%;
-               overflow-x:auto; scrollbar-width:none; }
-  .navscroll::-webkit-scrollbar { display:none; }
-  .navscroll > * { flex:0 0 auto; }
-  .navfade { position:absolute; top:0; bottom:0; width:40px;
-             pointer-events:none; z-index:2; }
-  .navfade.l { left:0;  background:linear-gradient(to right, var(--panel), transparent); }
-  .navfade.r { right:0; background:linear-gradient(to left,  var(--panel), transparent); }
+  /* Ten units will not fit one line at every width. Wrapping keeps every unit
+     reachable; a horizontal scroll hides the last one behind a gesture nobody
+     is told about. */
+  .units-in { flex-wrap:wrap; overflow-x:visible; }
   .units button { padding:11px 14px; }
   .units .sep { margin:8px 8px; }
 
@@ -1188,14 +1169,6 @@
   .pfval > .pill.kind:first-child { margin-left:0; }
   .pfval .pill.kind { margin-top:0; margin-bottom:0; }
   .pfront .fld, .pfront input, .pfront textarea { width:100%; max-width:none; }
-  /* ── ONE FACT WIDE (§130.1) ──────────────────────────────────────────
-     A pillar has an owner and nothing else that belongs in front matter, so
-     the box keeps its ground, its hairline and its label track and loses the
-     second column — the same component, not a second one that looks like it
-     (§53.5). The `.ssbtn` the owner list becomes is a button rather than a
-     field, so it needs the same full width by name. */
-  .pfront.one { grid-template-columns:minmax(0,1fr); }
-  .pfront .ssbtn { width:100%; }
   @media (max-width: 1180px) {
     .pfront { grid-template-columns:1fr; }
     .pfright { border-left:0; border-top:1px solid var(--line); }
@@ -1224,7 +1197,7 @@
   td:has(> .fld + .xbtn) > .fld { width: calc(100% - 30px); vertical-align: middle; }
   td:has(> .fld + .xbtn) > .xbtn { vertical-align: middle; margin-left: 5px; }
 
-  /* ── FILL THE GAPS (§145, spec 023) ──────────────────────────────────
+  /* ── FILL THE GAPS (§132, spec 021) ──────────────────────────────────
      Three states, one colour family: a GAP is the product's own red (the
      word Missing already owns it), a PENDING fill is amber everywhere it
      shows — the field, the chip, the count, the quarters — and a settled
@@ -1260,7 +1233,7 @@
   .qs-fill .qtog.on { background:var(--attn-bg); color:var(--attn-tx);
     border-color:var(--attn); }
 
-  /* ── FINDING THE GAPS (§145.14, reshaping §145.12 from Islam's mockup) ──
+  /* ── FINDING THE GAPS (§132.14, reshaping §132.12 from Islam's mockup) ──
      RED MEANS MISSING, AMBER MEANS PENDING CONFIRMATION — two colours, two
      meanings, never mixed. The whole signal lives in the section row beside
      the section tabs: the total, one red chip per owing place, the red
@@ -1270,32 +1243,20 @@
     flex-wrap:wrap; }
   .missbar .secmiss { color:var(--bad-tx); font-weight:800; font-size:12.5px;
     white-space:nowrap; padding-left:12px; }
-  /* THE BAR LIVES INSIDE THE TAB ROW, SO ITS CONTROLS MUST OUTRANK THE TAB
-     ROW'S OWN DRESS. `.tabs button` (border:0, no ground, the quiet ink)
-     covers every button in the row — right for a tab, and it stripped the
-     chips and the red button down to plain words while the corner copy,
-     outside the row, wore the design. ONE declaration serves both homes:
-     the second selector in each list only outranks `.tabs button` inside
-     the bar, so the two copies cannot drift (§53.5). The hovers restate the
-     ground and ink because `.tabs button:hover` paints its own. */
-  .mchip, .missbar button.mchip { border:1px solid var(--bad); background:var(--surface);
+  .mchip { border:1px solid var(--bad); background:var(--surface);
     color:var(--bad-tx); border-radius:18px; font-size:11.5px; padding:2px 10px;
     cursor:pointer; font-weight:600; font-family:inherit; white-space:nowrap; }
   .mchip b { color:var(--bad-tx); font-weight:800; }
-  .mchip:hover, .missbar button.mchip:hover {
-    background:var(--bad-bg); color:var(--bad-tx); }
-  .mchip.done, .missbar button.mchip.done {
-    border-color:var(--good); color:var(--good-tx); }
-  .mchip:focus-visible, .fillcta:focus-visible, .pendcta:focus-visible,
-  .missbar button.mchip:focus-visible, .missbar button.fillcta:focus-visible {
+  .mchip:hover { background:var(--bad-bg); }
+  .mchip.done { border-color:var(--good); color:var(--good-tx); }
+  .mchip:focus-visible, .fillcta:focus-visible, .pendcta:focus-visible {
     outline:2px solid var(--bad); outline-offset:2px; }
   /* The action: a solid red worded button. The ink is --surface — white in
      light, the dark ground in dark — so it reads on --bad in both themes. */
-  .fillcta, .missbar button.fillcta { border:1px solid var(--bad); background:var(--bad);
+  .fillcta { border:1px solid var(--bad); background:var(--bad);
     color:var(--surface); border-radius:8px; font-size:12px; font-weight:700;
     padding:4px 13px; cursor:pointer; font-family:inherit; white-space:nowrap; }
-  .fillcta:hover, .missbar button.fillcta:hover { filter:brightness(1.08);
-    background:var(--bad); color:var(--surface); }
+  .fillcta:hover { filter:brightness(1.08); }
   /* Quiet amber: only pending remains — the office's move, still correctable. */
   .pendcta { border:1px solid var(--attn); background:var(--attn-bg);
     color:var(--attn-tx); border-radius:8px; font-size:12px; font-weight:600;
@@ -1311,7 +1272,7 @@
   .ritem .rgap { display:inline-block; margin-left:7px; color:var(--bad-tx);
     font-size:11px; font-weight:700; font-style:italic; white-space:nowrap; }
   .ritem .rgap.ok { color:var(--good-tx); font-style:normal; }
-  /* A page with nothing missing says so and points away (§145.14). */
+  /* A page with nothing missing says so and points away (§132.14). */
   .emptynote { background:var(--surface-2); border:1px solid var(--line);
     border-radius:8px; padding:10px 14px; margin:0 0 12px; font-size:13px;
     color:var(--ink-2); }
@@ -1322,65 +1283,3 @@
   @keyframes gapring { 0% { outline-offset:6px; outline-width:3px; }
                        100% { outline-offset:2px; outline-width:2px; } }
   @media (prefers-reduced-motion: reduce){ .gaplit { animation:none; } }
-  /* ── A FAILED RENDER SAYS SO (§137) ────────────────────────────────────
-     The card paint() leaves where a page that threw would have been. Quiet on
-     purpose: no red kicker, no shouting — the first sentence answers the fear
-     and the error sits folded behind "Technical details". Drawn from tokens
-     only, so it holds in both themes. */
-  .failcard { max-width:560px; margin:64px auto; background:var(--surface);
-    border:1px solid var(--line); border-radius:10px; padding:30px 34px;
-    text-align:center; }
-  .failcard .fc-t { font-size:17px; font-weight:700; margin-bottom:10px; }
-  .failcard .fc-b { font-size:14px; color:var(--ink-2); margin-bottom:18px; }
-  .failcard details { margin-top:18px; text-align:left; }
-  .failcard summary { font-size:12px; color:var(--ink-3); cursor:pointer; }
-  .failcard summary:focus-visible { outline:2px solid var(--gold); outline-offset:2px; }
-  .failcard .fc-e { font-family:var(--mono); font-size:12px; color:var(--ink-3);
-    background:var(--surface-2); border-radius:6px; padding:8px 12px; margin-top:8px; }
-
-/* ── THE KNOWLEDGE BASE'S PEN (§140) ──────────────────────────────────
-   In arrange.css, concatenated last, because config.css has eaten three
-   silently-duplicated rules already (§29.2, §51.5, §53.6) and one comment
-   (§93.11). The look is the approved mockup's: quiet cards, the platform's
-   own tokens throughout, nothing brandable. */
-.kbed { border:1px solid var(--line); border-radius:8px; padding:14px 16px;
-        margin:10px 0; background:var(--surface); }
-.kbed.on { border-color:var(--gold); box-shadow:0 0 0 1px var(--gold); }
-.kbed-q { width:100%; font:inherit; font-weight:650; border:1px solid var(--line);
-          border-radius:6px; padding:7px 10px; margin-bottom:8px;
-          background:var(--surface); color:var(--ink); }
-.kbed-a { width:100%; font:inherit; font-size:var(--fs-note); line-height:1.55;
-          border:1px solid var(--line); border-radius:6px; padding:8px 10px;
-          min-height:96px; resize:vertical; background:var(--surface); color:var(--ink); }
-.kbed-q:focus-visible, .kbed-a:focus-visible { outline:2px solid var(--focus); outline-offset:-1px; }
-.kbed-foot { display:flex; gap:12px; align-items:center; margin-top:8px; }
-.kbed-mark { font-size:var(--fs-micro); letter-spacing:.09em; text-transform:uppercase;
-             font-weight:700; color:var(--gold-deep); border:1px solid var(--gold);
-             border-radius:99px; padding:2px 9px; }
-.kbed-mark.quiet { color:var(--ink-3); border-color:var(--line); }
-.kbed-reset { font:inherit; font-size:var(--fs-small); background:none; border:none;
-              color:var(--ink-3); text-decoration:underline; cursor:pointer; padding:0; }
-.kbed-reset:hover { color:var(--ink); }
-.kbed-x { margin-left:auto; font:inherit; font-size:var(--fs-small); color:var(--bad);
-          background:none; border:none; text-decoration:underline; cursor:pointer; }
-.kbadd { display:block; width:100%; text-align:left; font:inherit; font-size:var(--fs-small);
-         font-weight:600; color:var(--gold-deep); background:none;
-         border:1px dashed var(--line); border-radius:8px; padding:11px 16px;
-         margin:6px 0 4px; cursor:pointer; }
-.kbadd:hover { border-color:var(--gold); }
-.kbed-lede b { color:var(--ink); }
-
-/* ── THE KNOWLEDGE BASE'S TWO TABS (§141) ─────────────────────────────
-   The approved mockup's segmented pair: the active half wears the tenant's
-   panel colour, the way the navigation's own segments do — nothing here is a
-   new colour. */
-.kbtabs { display:flex; margin:2px 0 18px; border:1px solid var(--line);
-          border-radius:9px; overflow:hidden; width:max-content;
-          background:var(--surface); }
-.kbtabs button { font:inherit; font-size:var(--fs-small); font-weight:600;
-                 padding:8px 18px; border:0; background:none; color:var(--ink-2);
-                 cursor:pointer; }
-.kbtabs button + button { box-shadow:inset 1px 0 0 var(--line); }
-.kbtabs button.on { background:var(--panel); color:var(--panel-ink); }
-.kbtabs button:focus-visible { outline:2px solid var(--focus); outline-offset:-2px; }
-.kbcount { font-size:var(--fs-micro); font-weight:700; opacity:.75; margin-left:6px; }

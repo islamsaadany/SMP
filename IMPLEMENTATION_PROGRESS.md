@@ -141,6 +141,16 @@ Nothing proceeds past this line without an answer.
   Postgres 16** (§113.7); contrast 52 failures, unchanged, none on the new
   surfaces.
 
+### v3.52 — the Knowledge base in two tabs (§141)
+
+How it works 9 | Questions & answers 43 — counts on the tabs, contents pills
+per tab, the pen on the questions tab alone, the tour's replay with the
+explanations, and the last-used tab remembered per browser. Server untouched.
+
+**Verified:** kb-pen.py §0 (failed 4 ways with the default flipped) ·
+knowledge-base.py re-taught to gather from both tabs after going loudly red ·
+tour.py clean · qa.py ERRORS: none.
+
 ### v3.52 — the knowledge base gets a pen (§140)
 
 The office edits the assistant's scenarios on the page they are read from —

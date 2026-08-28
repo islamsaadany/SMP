@@ -18264,3 +18264,38 @@ absences (no pen off-office) — and failed 2 ways with `kbLook` broken before
 its green was believed (§94.5). `test-assistant` §7 proves the corpus carries
 the tenant's words and not the old ones (6 assertions, malformed blob
 included); `test-authorize` asks both ends and the classification (3).
+
+
+---
+
+## 141 · The Knowledge base in two tabs (v3.52)
+
+> Islam: *"the knowledge base needs to be 2 tabs one for the written
+> explanations and another for the questions to edit and adjust."* Settled from
+> a mockup of the live page; approved with one word.
+
+**How it works 9 | Questions & answers 43** — the counts on the tabs, so the
+split explains itself; the sections on one side and the QUESTIONS (not the
+groups) on the other, because 43 is what somebody is choosing to search.
+
+**Each tab keeps to its own.** The contents pills derive from the ACTIVE tab's
+list — a pill that jumps to a section on the hidden tab is a link that does
+nothing, §110's fault arriving as navigation. **The pen lives on the questions
+tab alone**: nothing on the explanations tab is editable, and a pen over a page
+it cannot mark is furniture. Switching tabs leaves edit mode, or the mode's
+only way out disappears with its tab (§61). The tour's replay stays with the
+explanations, where orientation lives.
+
+**The tab is a screen preference** (`smp.kb.tab`, §25, §47.1) — one person
+reading the reference must not decide the tenant's landing tab — with a
+throwing store reading as the default. *How it works* opens first: reading is
+the common case, editing is the office's errand.
+
+**`checks/knowledge-base.py` went red the day the tabs landed** — its recipe
+counts came from whichever tab was open, and the recipes had moved. That is
+§51.11's loud failure working as intended; it gathers from BOTH tabs now, and
+the relationship it guards (page count == corpus count) is unchanged.
+`checks/kb-pen.py` §0 holds the split — the default tab, the pen's absence on
+the explanations, no dead pills, the remembered choice — and failed 4 ways with
+the default flipped (§94.5). Server untouched: the tabs are entirely the
+screen's.

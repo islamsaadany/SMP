@@ -3089,6 +3089,14 @@
     document.querySelectorAll("[data-kbpen]").forEach(function(b){
       b.addEventListener("click", function(){ KBEDIT = !KBEDIT; paint(); });
     });
+    /* The two tabs (§141). Switching leaves edit mode: the pen lives on the
+       questions tab, and a mode whose control is no longer on screen is §61's
+       trap — a state with no way back out of it. */
+    document.querySelectorAll("[data-kbtab]").forEach(function(b){
+      b.addEventListener("click", function(){
+        kbTabSet(b.dataset.kbtab); KBEDIT = false; paint();
+      });
+    });
     document.querySelectorAll("[data-kbq], [data-kba]").forEach(function(f){
       f.addEventListener("change", function(){
         var card = f.closest(".kbed"); if (!card) return;

@@ -3011,18 +3011,6 @@ function recipeText(t){
    a GROUP.kb change as setup, so both ends answer alike (§94.2). */
 var KBEDIT = false;
 
-/* WHICH TAB (§141): "how" or "qa". A SCREEN PREFERENCE (§25, §47.1) — one
-   person reading the reference must not decide the tenant's landing tab —
-   remembered per browser, with a throwing store reading as the default
-   (§107's rule: a page nobody can open is worse than a lost preference). */
-function kbTab(){
-  try { return localStorage.getItem("smp.kb.tab") === "qa" ? "qa" : "how"; }
-  catch (e) { return "how"; }
-}
-function kbTabSet(t){
-  try { localStorage.setItem("smp.kb.tab", t === "qa" ? "qa" : "how"); } catch (e) {}
-}
-
 function kbEdCard(id, q, a, mark){
   return '<div class="kbed' + (mark === "edited" ? " on" : "") + '">' +
     '<input class="kbed-q" data-kbq="' + esc(id) + '" value="' + esc(q) + '">' +
@@ -3329,12 +3317,9 @@ function renderKB(){
      serves neither — somebody reading the Access section wants the argument,
      somebody asking "where do I press" wants four lines. */
   var recs = kbRecipes();
-  /* THEIR OWN LIST SINCE §141: the page is two tabs — the written
-     explanations, and the questions with the pen — and a recipe block pushed
-     into `secs` would render on the wrong one. */
-  var hows = recs.map(function(r){
-    return '<div class="kb-sec kb-how" id="kb-' + r.id + '"><h3>' + esc(r.title) +
-           '</h3>' + r.html + '</div>';
+  recs.forEach(function(r){
+    secs.push('<div class="kb-sec kb-how" id="kb-' + r.id + '"><h3>' + esc(r.title) +
+              '</h3>' + r.html + '</div>');
   });
 
   /* DERIVED, NEVER LISTED. This was a hand-written array beside the sections
@@ -3374,32 +3359,13 @@ function renderKB(){
      tour silently left the page. */
   if (tourBlock) secs.unshift(tourBlock);
 
-  /* EACH TAB'S CONTENTS ARE ITS OWN (§141): a pill that jumps to a section
-     on the hidden tab is a link that does nothing — the fault §110 records
-     for a control, arriving as navigation. Derived per tab, same rule. */
-  var tab = kbTab();
-  var shown = tab === "qa" ? hows : secs;
   var toc = '<div class="kb-toc">' +
-    shown.map(function(html){
+    secs.map(function(html){
       var id = (html.match(/id="kb-([a-z-]+)"/) || [])[1];
       var title = (html.match(/<h3>([^<]*)/) || [])[1] || "";
       title = title.split(" \u2014 ")[0];
       return id ? '<a href="#kb-' + id + '">' + title + '</a>' : '';
     }).join("") + '</div>';
-
-  /* THE COUNTS SIT ON THE TABS, so the split explains itself (approved
-     mockup): sections on one side, questions on the other — the QUESTIONS,
-     not the groups, because 43 is what somebody is choosing to search. */
-  var nQ = RECIPES.reduce(function(n, g){ return n + g.items.length; }, 0) +
-           SMPRules.kbAllAdds(GROUP.kb).length;
-  var tabs = '<div class="kbtabs" role="tablist">' +
-    '<button type="button" role="tab" data-kbtab="how" aria-selected="' + (tab === "how") + '"' +
-      (tab === "how" ? ' class="on"' : '') + '>How it works' +
-      '<span class="kbcount">' + secs.length + '</span></button>' +
-    '<button type="button" role="tab" data-kbtab="qa" aria-selected="' + (tab === "qa") + '"' +
-      (tab === "qa" ? ' class="on"' : '') + '>Questions &amp; answers' +
-      '<span class="kbcount">' + nQ + '</span></button>' +
-  '</div>';
 
 
   /* THE PEN (§140): the office rewrites the answers on the page they are
@@ -3407,14 +3373,12 @@ function renderKB(){
      registry and per-field pens; this page has one mode and its own writers —
      but the same slot on the header line, so the door is where every other
      page keeps it. */
-  /* ON THE QUESTIONS TAB ALONE (§141): nothing on the explanations tab is
-     editable, and a pen over a page it cannot mark is furniture. */
-  var kbPen = inOffice() && tab === "qa"
+  var kbPen = inOffice()
     ? '<button class="editbtn' + (KBEDIT ? " on" : "") + '" data-kbpen="1">' +
         (KBEDIT ? "Done" : "\u270e Edit the answers") + '</button>'
     : "";
   return cfgHead("Knowledge base", [], null, false, null, null, kbPen) +
-    (KBEDIT && tab === "qa"
+    (KBEDIT
       ? '<p class="kb-lede kbed-lede">What you write here is what this page shows ' +
         '<b>and</b> what the assistant answers from \u2014 the two can never disagree. ' +
         'A blank line is a paragraph break.</p>'
@@ -3426,7 +3390,7 @@ function renderKB(){
     '<p class="kb-lede">How the platform works, and how to do things in it \u2014 in one ' +
       'place. This grows: anything we settle that a reader would need to know belongs here ' +
       'rather than in a note under the screen it happens to affect.</p>' +
-    tabs + toc + '<div class="kb">' + shown.join("") + '</div>';
+    toc + '<div class="kb">' + secs.join("") + '</div>';
 }
 
 

@@ -56,12 +56,62 @@ def open_kb(pg):
     pg.wait_for_timeout(600)
     pg.evaluate("()=>{const b=document.querySelector('[data-setupgo=\"kb\"]'); if(b) b.click();}")
     pg.wait_for_timeout(900)
+    # §141: the page opens on How it works, and the pen lives on the
+    # questions tab — every section below edits, so it starts by switching.
+    pg.evaluate("()=>{const b=document.querySelector('[data-kbtab=\"qa\"]'); if(b) b.click();}")
+    pg.wait_for_timeout(700)
 
 with sync_playwright() as pw:
     b = pw.chromium.launch(executable_path=EXE, args=["--no-sandbox"])
     pg = b.new_page(viewport={"width": 1400, "height": 1000})
     pg.on("pageerror", lambda e: errs.append(str(e)[:150]))
     open_kb(pg)
+
+    print("0 · two tabs, and each keeps to its own (§141)")
+    # measured BEFORE the switch above ran? No — open a fresh look at the
+    # default state in its own page, or this asserts the tab we just chose.
+    pgA = b.new_page(viewport={"width": 1400, "height": 1000})
+    pgA.on("pageerror", lambda e: errs.append(str(e)[:150]))
+    pgA.goto(BASE + "/raya-trade", wait_until="networkidle")
+    pgA.evaluate("()=>{ try{ ['custodian','owner','smo','fnhead']"
+                 ".forEach(k=>localStorage.setItem('smp.tour.'+k,'never')); }catch(e){} }")
+    pgA.reload(wait_until="networkidle"); pgA.wait_for_timeout(2000)
+    pgA.evaluate("()=>{const b=document.querySelector('[data-md=\"setup\"]'); if(b) b.click();}")
+    pgA.wait_for_timeout(600)
+    pgA.evaluate("()=>{const b=document.querySelector('[data-setupgo=\"kb\"]'); if(b) b.click();}")
+    pgA.wait_for_timeout(900)
+    d0 = pgA.evaluate("""()=>({
+        on: (x=>x?x.dataset.kbtab:null)(document.querySelector('.kbtabs button.on')),
+        pen: !!document.querySelector('[data-kbpen]'),
+        prose: document.querySelectorAll('.kb-sec:not(.kb-how)').length,
+        qa: document.querySelectorAll('.kb-sec.kb-how').length,
+        toc: [...document.querySelectorAll('.kb-toc a')].length })""")
+    ck("the page opens on How it works", d0["on"] == "how", d0)
+    ck("with the explanations shown and the questions not", d0["prose"] > 5 and d0["qa"] == 0, d0)
+    ck("and NO pen — nothing on this tab is editable (§94.2)", not d0["pen"], d0)
+    pgA.evaluate("()=>{document.querySelector('[data-kbtab=\"qa\"]').click();}")
+    pgA.wait_for_timeout(700)
+    d1 = pgA.evaluate("""()=>({
+        on: (x=>x?x.dataset.kbtab:null)(document.querySelector('.kbtabs button.on')),
+        pen: !!document.querySelector('[data-kbpen]'),
+        prose: document.querySelectorAll('.kb-sec:not(.kb-how)').length,
+        qa: document.querySelectorAll('.kb-sec.kb-how').length,
+        dead: [...document.querySelectorAll('.kb-toc a')]
+                .filter(a=>!document.querySelector(a.getAttribute('href'))).length })""")
+    ck("the questions tab shows the questions, the pen, and not the prose",
+       d1["on"] == "qa" and d1["pen"] and d1["qa"] >= 6 and d1["prose"] == 0, d1)
+    # A PILL THAT JUMPS TO A HIDDEN TAB IS A LINK THAT DOES NOTHING — the
+    # contents must never point at a section the active tab is not showing.
+    ck("no contents pill points at a section this tab is not showing",
+       d0["toc"] > 0 and d1["dead"] == 0, d1)
+    pgA.reload(wait_until="networkidle"); pgA.wait_for_timeout(2000)
+    pgA.evaluate("()=>{const b=document.querySelector('[data-md=\"setup\"]'); if(b) b.click();}")
+    pgA.wait_for_timeout(600)
+    pgA.evaluate("()=>{const b=document.querySelector('[data-setupgo=\"kb\"]'); if(b) b.click();}")
+    pgA.wait_for_timeout(900)
+    ck("the tab you last used is remembered in this browser (§25)",
+       pgA.evaluate("()=>(x=>x?x.dataset.kbtab:null)(document.querySelector('.kbtabs button.on'))") == "qa")
+    pgA.close()
 
     print("1 · the pen, and what pressing it opens")
     ck("the office is offered the pen", pg.evaluate("()=>!!document.querySelector('[data-kbpen]')"))

@@ -14,17 +14,8 @@
    A recipe that REFUSES something keeps one clause of WHY. A bare "not
    yourself" reads as the software being obstructive; "not yourself — a plan
    you're measured against isn't yours to rewrite" reads as a decision somebody
-   made on purpose. A good few of these refuse something, and those are the
+   made on purpose. Twelve of these refuse something, and those twelve are the
    ones people will be annoyed by.
-
-   A REFUSAL THAT HAS STOPPED BEING ABSOLUTE MUST SAY SO. This file sat
-   unchanged from §103 to §148 while the platform learned to open a plan's
-   Strategy half to a role (§117) and to let somebody fill only what is empty
-   (§145) — so five answers went on saying a flat "the office" about something
-   the office can now hand over. A recipe is a promise about behaviour, and a
-   promise nobody revisits is the one a client reads out in a meeting: when a
-   rule gains an exception, the recipe that states the rule is part of the
-   change.
 
    `who` IS RELEVANCE, NEVER PERMISSION. "office" means the answer is only
    useful to somebody who can do it — every word here is readable by everyone,
@@ -73,16 +64,6 @@ var RECIPES = [
        "you submit." +
        "|If you cannot report, you never see it — the platform does not nag somebody who has " +
        "no control that would clear it." },
-  { id: "needs-a-pct", q: "A row says <i>Needs a %</i> — what does it want?",
-    a: "It was set to <b>In progress</b> and never said how far. In progress with no number is " +
-       "not nought, so the platform leaves the row out of the average rather than inventing a " +
-       "figure on your behalf." +
-       "|Type the per-cent beside it. Submitting waits on these, and the refusal names them." },
-  { id: "function-submit", q: "How does a supporting function submit its report?",
-    a: "The same way a unit does — from its <b>Reporting</b> page, one submission covering " +
-       "every capability the function owns." +
-       "|The same two things stop it: a figure at risk or off track with no note, and a row " +
-       "that said In progress without saying how far." },
   { id: "who-reports", q: "Who reports my unit's figures?",
     a: "Your unit's <b>strategy custodian</b> or its <b>head</b>. Submitting speaks for the " +
        "whole unit, so it stays with the people who hold it." +
@@ -92,130 +73,34 @@ var RECIPES = [
 
 { g: "My plan", items: [
   { id: "plan-mistake", q: "There is a mistake in my plan — how do I fix it?",
-    a: "Usually not yourself. Plans are corrected by the Strategy Office — a plan you are " +
-       "measured against is not yours to rewrite." +
+    a: "Not yourself. Plans are corrected by the Strategy Office — a plan you are measured " +
+       "against is not yours to rewrite." +
        "|Tell them here what is wrong. That covers the aspiration and the SWOT too, not only " +
-       "the measures." +
-       "|Two exceptions, and both are set by the office on <b>Roles &amp; access</b>: your role " +
-       "can be opened to edit the Strategy pages outright, or to <b>Fill gaps</b>, which lets " +
-       "you write only where the plan holds nothing." },
+       "the measures." },
   { id: "add-a-row", q: "How do I add a {pillar}, a measure or a tactic?",
     a: "The office adds them, on your unit's <b>Plan</b> page. Ask here and say where it " +
        "belongs and what it should be called." },
   { id: "reorder", q: "How do I reorder my {pillars}?",
     a: "Press the arrange control in the top-right of the Plan pane, drag the rows by the " +
        "handles that appear, and press it again when you are done." +
-       "|The order is yours to decide — a unit's owner or its strategy custodian, and a " +
-       "function's head on its projects — while the words stay the office's. Reordering is " +
-       "not rewriting." +
        "|The order carries through to Performance and Reporting on its own." },
   { id: "who-edits-plan", q: "Who can edit my unit's plan, and why not me?",
-    a: "The Strategy Office by default. A plan is the agreement you are measured against, so " +
-       "it stays with the people who keep the agreement rather than with either side of it." +
-       "|The office can open it, on the <b>Strategy</b> half of your access — at edit, or at " +
-       "<b>Fill gaps</b>. That is a deliberate act on that table, never something being able " +
-       "to report brings with it." +
-       "|Everything else — reading it, reporting against it, explaining a figure — is yours " +
-       "either way." },
+    a: "The Strategy Office. A plan is the agreement you are measured against, so it stays " +
+       "with the people who keep the agreement rather than with either side of it." +
+       "|Everything else — reading it, reporting against it, explaining a figure — is yours." },
   { id: "plan-arrives", q: "How does a plan arrive in the first place?",
-    a: "It is authored once by the office — uploaded from the template, or built on the " +
-       "platform through the plan's own pages — and everything after that is reporting " +
-       "against it." +
+    a: "It is authored once, by the office, and everything after that is reporting against it." +
        "|If yours is missing or wrong, ask here." },
   { id: "old-plan", q: "What happens to my old plan when a new one is uploaded?",
     a: "It is archived, not deleted, and it can be restored. Nothing an import does is a deletion." },
   { id: "collaborator", q: "What is a collaborator on a tactic?",
-    a: "Somebody who supports the tactic alongside the person accountable for it. They are " +
-       "<b>picked from the register</b> rather than typed, because a name spelt a little " +
-       "differently names nobody." +
-       "|Being named does not by itself let them report the line: the office has to open " +
-       "<b>Reporting</b> for Contributor first, and even then it reaches only the rows that " +
-       "name them." +
-       "|The office sets the list." },
+    a: "Somebody who supports the tactic alongside the person accountable for it. It records " +
+       "who is involved — it does not by itself let them report the line." +
+       "|The office sets them." },
   { id: "change-targets", q: "Can I change my targets during the year?",
     a: "Not yourself, and the office will usually say no mid-cycle — a target that moves while " +
        "it is being measured stops being a target." +
        "|If something genuinely changed, say what and why here." }
-]},
-
-{ g: "Filling in what's missing", items: [
-  { id: "fill-what", q: "What does <i>Fill in missing elements</i> do?",
-    a: "It opens a third kind of editing, between reading a plan and authoring one: you may " +
-       "write where the plan holds <b>nothing</b> — a target nobody set, an owner nobody " +
-       "named, a tactic with no quarters — and nowhere else." +
-       "|It appears on your unit's or function's Strategy pages when the office has opened " +
-       "<b>Fill gaps</b> for your role. What you write stays <b>pending</b> until they " +
-       "confirm it." },
-  { id: "fill-what-not", q: "What can I not change while I am filling gaps?",
-    a: "Anything already written, and the shape of the plan — no rows are added, removed, " +
-       "renamed or reordered. The only thing on offer is an empty value." +
-       "|Something written that is wrong is a correction rather than a gap. Tell the office " +
-       "here." },
-  { id: "fill-find", q: "How do I find what is missing?",
-    a: "The red bar on the section row says how many, with one chip per place that owes " +
-       "something — press a chip and it takes you there." +
-       "|Once you are filling, that button becomes <b>Next gap</b> and walks you through them " +
-       "one at a time. Each row in the list on the left counts its own, and a page that owes " +
-       "nothing says so." },
-  { id: "fill-pending", q: "Why does the value I filled say <i>pending</i>?",
-    a: "Because a gap filled by anyone but the office is an offer rather than a decision. It " +
-       "is amber, it is still yours to correct or clear, and where a score reads it the score " +
-       "waits." +
-       "|Hover it and it names who filled it and when. The office confirms it with the tick " +
-       "beside it — or simply by correcting the value, which settles it in passing." },
-  { id: "fill-dash", q: "I filled the target — why is the score still a dash?",
-    a: "Because the target is still pending. A figure judged against a number nobody has " +
-       "confirmed cannot be read yet, so the row scores a dash and leaves every average alone " +
-       "rather than producing one that may move." +
-       "|Entering figures and saving drafts are unaffected. The score appears when the office " +
-       "confirms." },
-  { id: "fill-submit", q: "Why won't it let me submit — something is <i>awaiting confirmation</i>?",
-    a: "One of the values a score reads — a direction, a target, a compile rule, a weight, a " +
-       "tactic's quarters — was filled and has not been confirmed. Submitting says <i>this " +
-       "performance can be read</i>, and against an unconfirmed number it cannot." +
-       "|The refusal names the rows. Only the office can clear it, so ask them here; reporting " +
-       "and drafts carry on meanwhile." },
-  { id: "fill-confirm", q: "How do I confirm what somebody filled in?", who: "office",
-    a: "Press the tick beside the amber <i>pending</i> mark — or simply correct the value with " +
-       "the pen, because correcting is confirming." +
-       "|The count beside the page says how many are waiting. Until you answer them those " +
-       "values stay the filler's to change, and any score reading one waits." }
-]},
-
-{ g: "Owners, and who may report what", items: [
-  { id: "project-owner", q: "What is a project owner?",
-    a: "Whoever is named as a project's <b>Owner</b>. That naming is the role — nobody grants " +
-       "it by hand." +
-       "|Two things must both be true before they can report it: they are named the Owner, and " +
-       "the office has opened <b>Reporting</b> for Project owner on Roles &amp; access. Then " +
-       "they report that project whole, and nothing else." },
-  { id: "pillar-owner", q: "What is a {pillar} owner?",
-    a: "The same idea one level up: whoever is named as a {pillar}'s <b>Owner</b>, on a " +
-       "business unit or on a function that plans in {pillars}. They report that {pillar} " +
-       "whole — its measures and its tactics — and nothing else." +
-       "|Named, <i>and</i> Reporting opened for Pillar owner. Neither half works alone." },
-  { id: "contributor-role", q: "What is a contributor?",
-    a: "Everybody else a plan names — a collaborator on a tactic, a stakeholder on a project, " +
-       "the owner of a single milestone. Being named is what makes somebody one." +
-       "|A contributor reports <b>nothing</b> until the office opens Reporting for " +
-       "Contributor, and then only the rows that name them. None of these three ever submits: " +
-       "submitting speaks for the whole subject." },
-  { id: "owner-cant-report", q: "I own a project and still cannot report it — why?",
-    a: "One of the two conditions is missing. Either the Owner row does not name you the way " +
-       "the register spells your name, or Reporting has not been opened for Project owner on " +
-       "Roles &amp; access." +
-       "|Both are the office's to fix. Say which project here." },
-  { id: "some-rows-only", q: "Why can I enter some rows on this page and not others?",
-    a: "Because your role reaches lines rather than the whole subject. A project owner reaches " +
-       "their project's rows, a {pillar} owner their {pillar}'s, a contributor the rows that " +
-       "name them." +
-       "|The rest of the page is readable and is somebody else's to enter. If a row should be " +
-       "yours, say which one here." },
-  { id: "owner-from-register", q: "Why is Owner a list of people rather than a box to type in?",
-    a: "Because being named is what a reporting right is read from, and a name spelt a little " +
-       "differently names nobody. The list is the people register, plus your own departments." +
-       "|A name already on the plan that is not on the register is kept in a group of its own " +
-       "at the top, so a plan uploaded before this reads exactly as it did." }
 ]},
 
 { g: "Understanding the numbers", items: [
@@ -263,11 +148,6 @@ var RECIPES = [
   { id: "project-performance", q: "How is a project's performance worked out?",
     a: "Half from its deliverables and half from its outcomes. Where a project has only one of " +
        "the two, that side carries the whole score." },
-  { id: "repeating-project", q: "What does <i>Repeats: Each cycle</i> mean on a project?",
-    a: "That the project runs again rather than being finished once. When the office opens a " +
-       "cycle its figures are archived and cleared and its dates move on by the length of the " +
-       "cycle that closed, so you are asked afresh instead of inheriting last cycle's answers." +
-       "|A project without the mark keeps its figures — delivered is delivered." },
   { id: "no-outcomes", q: "Why has my project no outcomes section?",
     a: "Because it has none yet. An empty half is not drawn — a project with no outcomes is a " +
        "plan that committed to no measurable change, not a broken screen." +
@@ -289,12 +169,6 @@ var RECIPES = [
        "gives you that unit, not all of them. Hold several roles and you get the most generous " +
        "answer of them, each about its own thing." +
        "|The <b>Access</b> section above has the full picture." },
-  { id: "strategy-vs-reporting", q: "My access says Strategy and Reporting separately — what is the difference?",
-    a: "<b>Strategy</b> is the words as agreed: the foundation, the SWOT, the plan itself. " +
-       "<b>Reporting</b> is the figures entered against them, the drafts and the submission." +
-       "|They are granted separately, so your unit can be yours to report without being yours " +
-       "to rewrite. Strategy has a third setting between reading and editing — <b>Fill gaps</b> " +
-       "— which opens only the places the plan has left empty." },
   { id: "get-access", q: "How do I get access to something I cannot open?",
     a: "Ask here, and say which page and why. Access is the office's to grant." }
 ]},
@@ -335,27 +209,6 @@ var RECIPES = [
     a: "Yes to both. It is a single page and it keeps itself, so it opens offline, and your " +
        "browser will offer to install it with its own icon and window." +
        "|What it cannot do offline is save — anything typed goes up when you are back." },
-  { id: "ask-the-office", q: "How do I ask the Strategy Office something?",
-    a: "The bubble in the bottom-right corner of every page. It is <b>one running " +
-       "conversation</b> — everything you have asked and everything they have answered, in one " +
-       "place — so there is nothing to file, number or reopen." +
-       "|You can attach a screenshot. Minimising it keeps whatever you had half-typed." },
-  { id: "assistant-answer", q: "Something answered me straight away — was that a person?",
-    a: "No. Where the office has switched the assistant on, it answers first from this " +
-       "knowledge base, and the message says so rather than wearing a colleague's name." +
-       "|If it did not answer what you meant, press <b>This didn’t answer it — send it to the " +
-       "office</b> underneath and a person picks it up. A question it cannot answer goes to " +
-       "them by itself." },
-  { id: "welcome-screen", q: "What is the screen I get when I sign in?",
-    a: "A short list of what is waiting on you — a report to submit, missing plan elements to " +
-       "fill, a reply from the office — each with a button that takes you straight there." +
-       "|<b>Continue</b> steps past it into the platform. It appears once per sign-in, and " +
-       "when nothing is outstanding it says so." },
-  { id: "take-the-tour", q: "Can I see the introduction again?",
-    a: "It runs by itself the first time you sign in, and the welcome screen offers it as " +
-       "<b>Take an intro round</b>." +
-       "|It walks the worked example rather than your own figures — labelled the whole time, " +
-       "and nothing in it can be saved." },
   { id: "where-data", q: "Where does my data live?",
     a: "In a database belonging to this deployment. Figures, plans and people are stored there; " +
        "what you have chosen on screen — light or dark, which columns you show — stays in your " +

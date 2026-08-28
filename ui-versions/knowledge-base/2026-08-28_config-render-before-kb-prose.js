@@ -3174,40 +3174,19 @@ function renderKB(){
            'than delete, and they set passwords for the client\u2019s people but never for ' +
            'a Super user or for each other. The register carries the seat, so moving one ' +
            'there is treated as changing the matrix — not as editing a row.' },
-      { h: "Nine roles, nine kinds of page",
+      { h: "Seven roles, seven kinds of page",
         p: 'The table on <b>Roles &amp; access</b> is roles down the side and kinds of page ' +
            'across the top. Not individual pages — a unit\u2019s five pages answer together, ' +
-           'because &ldquo;may they open this unit&rdquo; is one question, not five. The last ' +
-           'row, <i>Everyone else</i>, is not a role anybody holds: it is the floor somebody ' +
-           'with no role at all stands on.' },
-      { h: "Three of the roles are read off the plan",
-        p: '<b>Project owner</b>, <b>' + L1 + ' owner</b> and <b>Contributor</b> are never ' +
-           'granted by hand — being named on the plan is the role. Whoever is named a ' +
-           'project\u2019s Owner is its project owner; whoever is named a ' + L1.toLowerCase() +
-           '\u2019s is its ' + L1.toLowerCase() + ' owner; everybody else a plan names — a ' +
-           'collaborator, a stakeholder, a milestone\u2019s owner — is a contributor. Each ' +
-           'still needs its <b>Reporting</b> cell opened before it reports anything, and then ' +
-           'it reaches only its own lines: the project, the ' + L1.toLowerCase() + ', or the ' +
-           'rows that name the person. None of the three ever submits, because submitting ' +
-           'speaks for the whole subject.' },
+           'because &ldquo;may they open this unit&rdquo; is one question, not five.' },
       { h: "Own is not a setting",
         p: '<b>Own business unit</b> means the units they hold a role in. The head and the ' +
            'custodian of Mobile own Mobile; a company CEO owns every unit in their company; ' +
            'the SMO and the group CEO own all of it. Nobody types that in — it is read from ' +
            'who is attached to what, so this table and the unit pages cannot disagree.' },
-      { h: "Three states, and one cell with a fourth",
+      { h: "Three states, never more",
         p: 'Each cell is <b>none</b>, <b>view</b> or <b>edit</b>. Edit includes view. Two ' +
            'would not be enough: a unit head reads the weighting table but does not manage ' +
            'it, and that is not expressible in two.' },
-      { h: "Fill gaps sits between reading and editing",
-        p: 'The two <b>Strategy</b> cells carry a fourth setting, <b>Fill gaps</b>: the role ' +
-           'may write where the plan holds nothing — an unset target, an unnamed owner, a ' +
-           'tactic with no quarters — and nowhere else, and never adds, removes, renames or ' +
-           'reorders a row. What they write stays <b>pending</b>: amber, theirs to correct, ' +
-           'counted nowhere, and not scored where a score would read it, until the office ' +
-           'confirms it — with a tick, or simply by correcting the value. Reporting and drafts ' +
-           'flow against a pending value; <b>submitting waits</b> on one, because submitting ' +
-           'says the performance can be read.' },
       { h: "Someone holding several roles",
         p: 'They get the <b>most generous</b> answer of them — but each role answers only ' +
            'about what it is attached to. Owning Mobile and sitting on Finance gives the ' +
@@ -3232,13 +3211,10 @@ function renderKB(){
            'flags, whether its CEO sees the group and the other companies, can only ever ' +
            '<b>narrow</b> what the table allows. Supporting functions belong to no company: ' +
            'they serve all of them.' },
-      { h: "The server decides, not the screen",
-        p: 'Signing in is checked on the server against a stored password, and so is every ' +
-           'save: the change is classified against what is <b>stored</b> — a plan edit, a ' +
-           'figure, a setting, a gap being filled or confirmed — and refused where the ' +
-           'person\u2019s roles do not allow it. A screen that offers something the server ' +
-           'would refuse is a fault, not a shortcut. The same comparison writes the ' +
-           '<b>change log</b>, so who moved a target is answerable.' }
+      { h: "The gate is real, the rest is Phase 2",
+        p: 'Signing in is checked on the server against a stored password. Per-action ' +
+           'authorisation and the change log are not built yet: today the enforcement is ' +
+           'at the door, not at each button.' }
     ]),
     /* ── THE REGISTER'S THREE NOTES, MOVED HERE (§90) ────────────────
        Islam: "remove the notes below the registry table and take them to the

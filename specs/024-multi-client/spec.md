@@ -50,6 +50,10 @@ a component or a rule.
 | The first office account | `islam.saadany@forefront.consulting`, temporary password, must change on first use. The `SMO` / `1234` seat goes. |
 | Where it is built | **The live platform** (gate + built HTML + `/api/*`). `smp-app/` is untouched. |
 | The main address | **No client's name on it.** The door is the root; each client is that name after the slash. An address of a client's own (`raya-trade.smp…`) is not in v1. |
+| Where the office's seats are set | **In the client's configuration on the outer platform**, not in the client's register. One list — the SMO team — with one of them marked that client's Super user. |
+| Who may open a client | **Everyone at Forefront sees and opens every client.** The team is what carries edit rights inside it. |
+| A client's own Super user | **Possible, and granted from outside** — usually Islam for now, a client's own person when he decides. |
+| How the seat move lands | **Two steps**: read-only in the register first, out of Roles & access once proven. |
 | A Demo client | **Yes**, on the cards, Forefront only. Seeded with the Raya worked example, **renamed to invented names**, and editable from then on. |
 | The Demo data button | **Goes.** One place for demo material, and it is the one that can be added to. |
 | The first-run tour | **Not offered until the client has a plan**, then it walks their own. |
@@ -112,6 +116,10 @@ client is chosen.
 - **Sign-in takes an email and nothing else.** The person-key path is
   removed, including `SMO`. A deployment is entered by the office account
   that created it, so no client ever needs a bootstrap seat of its own.
+- **Who manages whom.** Forefront accounts are managed on the outer platform's
+  Consultants page (§7.1); a client's own people are managed inside their
+  client, on the register they already have. One door, two desks, and neither
+  can issue the other's passwords (§89's rule, unchanged).
 - **Rate limiting stays where guessing happens** — `platform.login_attempts`,
   by email and by address, on the same thresholds, checked before the
   password is verified (§43.2).
@@ -145,17 +153,45 @@ After sign-in:
   to the cards. **No dropdown** — a list of every client on every page of a
   client's platform is one mis-gate away from being read by that client.
 
-## 6 · Inside a client
+## 6 · Inside a client — and where the office's seats are decided
 
-- A Forefront person **appears on that client's register**, marked as the
-  office, from the first time they open it. Every rule that already reads the
-  register — roles, chat, email audiences, the change log, `namedOn()` —
-  keeps working with nothing added beside it (§53.5).
-- Their default seat is **SMO team** (`smoteam`): run cycles, correct plans,
-  read the inbox. The **Super user's** three acts — the access matrix,
-  destruction, issuing passwords to the office (§89) — only where that
-  client's Super user granted them.
+**The office's seats are granted outside the client, not inside it** (Islam,
+2026-08-28). Each client's configuration on the outer platform names its
+**SMO team** — one list — and marks one of them as that client's **Super
+user**. That is the only place those two seats are decided.
+
+- A Forefront person on a client's team **appears on that client's register**,
+  marked as the office, so every rule that already reads the register — roles,
+  chat, email audiences, the change log, `namedOn()` — keeps working with
+  nothing added beside it (§53.5). The row is **written from the
+  configuration and read-only inside the client**, and says where it is set.
+- The **Super user** may be a Forefront person or, when Islam decides, a
+  person on that client's own register. Either way they are named in the
+  client's configuration, and they hold everything §89 gives a Super user
+  inside that client: the access matrix, destruction, issuing passwords.
+- **Everyone at Forefront can see and open every client** (Islam's answer).
+  Opening one you are not on the team of gives you the client **read-only**,
+  and it is in the change log like anything else. *This last sentence is my
+  reading of "see all, open all" beside "the responsible team who will have
+  the edit access", and it is the one line in this section to confirm at
+  mockup sign-off rather than assume.*
 - Everything else a client's people see is the platform as it stands today.
+  A client's own roles — unit owner, strategy custodian, function head,
+  contributor — are theirs, granted inside their client, and nothing here
+  touches them.
+
+### 6.0.1 How the seat move lands — two steps (Islam's answer)
+
+1. **Step one, in this build.** The configuration decides the office seats;
+   the client's register shows them, marked, and refuses to edit them. Two
+   surfaces, one source (§53.5).
+2. **Step two, once step one is proven on a live client.** The office seats
+   come out of the client's own Roles & access page entirely. Only then is
+   `people.role` no longer where `super` and `smoteam` are decided.
+
+Doing it in one step would move the client's role model on the same day the
+door, the schemas and the accounts move. Two steps is Islam's call and the
+safer order.
 
 ## 6.1 · The Demo data button goes — and what that reverses
 
@@ -200,18 +236,43 @@ name is the one thing a demo must not be.
 The invented names are content, not code: I draft them and Islam approves the
 list before it is seeded. Nothing is shown to anyone until he has.
 
-## 7 · Creating a client (office-only page)
+## 7 · The outer platform — what it holds
 
-Name, slug, mark, colours. On save: create the schema, apply `db/schema.sql`
-and every migration, write the org name, and stop. **No seed, no demo data,
-no invented content** (§21) — which is precisely what migration 004's clean
-slate produces today, so "real but empty" is a shape the product already has
-and has been checked. Defaults absent from an empty client (labels, bands,
-the access matrix) are already answered by `lib/rules.js` when the stored map
-does not hold them (§30.2).
+Three things, and nothing else. It is the office's platform, not a second copy
+of the product.
 
-Retiring a client is **not in v1** and is flagged, not silently omitted: a
-schema that holds a client's whole strategy is not deleted from a button.
+### 7.1 Consultants (people and passwords)
+
+The Forefront team: name, email, whether they are active, and their password
+state. It **borrows the register's own mechanics** (§35, §43) rather than
+inventing a second way to do the same job — a temporary password issued by the
+platform's Super user, forced change on first use, the *not asked / temporary /
+set* status column, retire rather than delete, and rate limiting on the door.
+
+Islam is the platform's Super user. Day one: Islam, Omar, Essam.
+
+### 7.2 Clients — the configuration page
+
+Per client: **name** (what the cards and the client's own chrome say),
+**address name** (the name after the slash, derived from the name and editable
+once, since a link that has been sent should keep working), **industry**,
+**notes**, the client's **mark and colours**, and the **SMO team** — the list,
+with one person marked as that client's Super user.
+
+**Creating one** does exactly what §36.4 describes and no more: create the
+schema, apply `db/schema.sql` and every migration, write the org name, and
+stop. **No seed, no invented content** — which is what migration 004's clean
+slate already produces, so "real but empty" is a shape the product has and has
+been checked. Defaults an empty client does not hold (labels, bands, the
+access matrix) are already answered by `lib/rules.js` when the stored map does
+not carry them (§30.2).
+
+**Retiring a client is not in v1**, flagged rather than silently omitted: a
+schema holding a client's whole strategy is not deleted from a button.
+
+### 7.3 The cards
+
+The way in. Covered in §5.
 
 ## 8 · Files this touches
 
@@ -222,7 +283,9 @@ schema that holds a client's whole strategy is not deleted from a button.
 new `db/platform-schema.sql` + migrations · `vercel.json` (a rewrite per
 client) · `sw.js` (it precaches `/raya-trade` by name — §91: bump `SHELL`) ·
 `scripts/dev-server.js` (one path per client) · the shell's chrome (client
-name) · `lib/rules.js` (`isForefront`, `tourReady`) · the platform's shell and
+name) · the outer platform's three pages — Consultants, Clients, the cards ·
+`lib/rules.js` (`isForefront`, `tourReady`, the office seat read from the
+configuration) · the platform's shell and
 `src/sync.js` (the Demo data button, demo mode and §67's Filled/Clear pair
 come out) · `src/tour.js` — and the checks.
 
@@ -238,8 +301,11 @@ with the rollback written down first.
 1. `CREATE SCHEMA raya_trade;` then `ALTER TABLE public.<t> SET SCHEMA
    raya_trade;` for every table — no data is copied, so nothing can be
    half-copied.
-2. Create `platform`, and build `accounts` from the existing `credentials`
-   joined to each person's email on the register. A person with a password
+2. Create `platform`; seed the three Forefront accounts (Islam, Omar, Essam —
+   their addresses read off Raya's register and shown to Islam before they are
+   used), and Raya's configuration with its SMO team. Then build `accounts`
+   from the existing `credentials` joined to each person's email on the
+   register. A person with a password
    and no email gets **no account** and is named in the report, not dropped
    silently.
 3. Create `rhi` and `el_abd`, empty.
@@ -265,6 +331,11 @@ with the rollback written down first.
   viewer (asserted as an absence at both ends, §94.2), the offline file opened
   from disk still shows the full example, and the Demo *client* opens with a
   complete plan and saves.
+- **The seats agree:** the office people the client's register shows are
+  exactly the client's configured SMO team, the seat cannot be edited from
+  inside the client, and a consultant who is not on the team enters read-only —
+  asserted on the screen **and** against the server, since a screen that
+  refuses an edit the server would accept is §94's drift.
 - **The tour:** not offered on a client with no plan, offered and walked
   through on one that has, and still never offered to the office (§118).
 - Each check is watched to fail against the pre-split build before its green

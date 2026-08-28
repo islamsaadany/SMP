@@ -18,8 +18,15 @@
 -- in. The hash below is scrypt with its own salt — the password itself is not
 -- stored anywhere.
 
+-- GUARDED ON THE TENANT IT WAS WRITTEN FOR (spec 024, 2026-08-28).
+-- Since the platform holds a schema per client, this file runs on every client
+-- created from now on — and unguarded it would put a known password on the
+-- door of a database that has no people in it at all. The WHERE EXISTS makes
+-- it apply to a tenant that already has an `smo` person and to nothing else.
+-- The existing tenant recorded this migration long ago, so nothing there moves.
 INSERT INTO credentials (person_key, password_hash, must_change)
-VALUES ('smo', 's1:0cfbcab26f3ef15b45f5ed3694570ca9:aecd9a53399f62739636f1be57b724ec1ea1823074a03f6247eddcad21030266', false)
+SELECT 'smo', 's1:0cfbcab26f3ef15b45f5ed3694570ca9:aecd9a53399f62739636f1be57b724ec1ea1823074a03f6247eddcad21030266', false
+WHERE EXISTS (SELECT 1 FROM people WHERE key = 'smo')
 ON CONFLICT (person_key) DO UPDATE
   SET password_hash = EXCLUDED.password_hash,
       must_change   = false,

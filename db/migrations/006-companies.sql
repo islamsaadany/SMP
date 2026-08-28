@@ -27,9 +27,18 @@ CREATE TABLE IF NOT EXISTS companies (
 -- explicit "its own company", which Setup names in words.
 ALTER TABLE units ADD COLUMN IF NOT EXISTS company text;
 
-INSERT INTO companies (key, idx, name, ceo, see_others, see_group) VALUES
-  ('distribution', 0, 'Distribution', NULL, false, true),
-  ('b2c',          1, 'B2C',          NULL, false, true)
+-- GUARDED ON THE TENANT IT WAS WRITTEN FOR (spec 024, 2026-08-28).
+-- Distribution and B2C are RAYA's companies. With a schema per client this
+-- file runs for every client created from now on, and unguarded it would put
+-- one client's companies into another's database (§21: no invented content in
+-- a client's database). It applies where Raya's units are and nowhere else;
+-- the existing tenant recorded this migration long ago and does not move.
+INSERT INTO companies (key, idx, name, ceo, see_others, see_group)
+SELECT * FROM (VALUES
+  ('distribution', 0, 'Distribution', NULL::text, false, true),
+  ('b2c',          1, 'B2C',          NULL::text, false, true)
+) AS v(key, idx, name, ceo, see_others, see_group)
+WHERE EXISTS (SELECT 1 FROM units WHERE key = 'mobile')
 ON CONFLICT (key) DO NOTHING;
 
 UPDATE units SET company = 'distribution' WHERE key IN ('mobile','consumerelectronics','it');

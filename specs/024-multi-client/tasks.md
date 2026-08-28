@@ -29,11 +29,11 @@ serverless functions `api/`; SQL `db/`; checks `SMP-Project-Folder/src/checks/`;
 
 ## Phase 2 · Foundational (blocks every story)
 
-- [ ] T006 Add `lib/platform-io.js` — `getPlatformPool()`, `clientByKey()` (returns a frozen empty when absent, Principle XII), `clientsFor(email)`, `teamOf(clientKey)`, `accountByEmail()`, `withClient(clientKey, fn)` which sets `search_path` on the checked-out connection and **resets it on release**
-- [ ] T007 Change `ensureReady` in `lib/state-io.js` from one module-level `READY` promise to a **map keyed by schema**, and take the advisory lock per schema (`hashtext(schema)`) — research.md §3; keep the §98 memoisation win
-- [ ] T008 Teach `lib/state-io.js`'s `getPool` to hand back a connection with `search_path` set for a named schema, and never to set it on the pool
-- [ ] T009 Add `ensurePlatformReady()` to `lib/platform-io.js` — applies `db/platform-schema.sql` + `db/platform-migrations/*` under an advisory lock, memoised per process
-- [ ] T010 [P] Write `scripts/test-platform.js` skeleton against a real Postgres: create two client schemas, assert `ensureReady` migrates the **second** one opened first in a fresh process (the trap), and assert `search_path` is reset when a connection returns to the pool
+- [x] T006 Add `lib/platform-io.js` — `getPlatformPool()`, `clientByKey()` (returns a frozen empty when absent, Principle XII), `clientsFor(email)`, `teamOf(clientKey)`, `accountByEmail()`, `withClient(clientKey, fn)` which sets `search_path` on the checked-out connection and **resets it on release**
+- [x] T007 Change `ensureReady` in `lib/state-io.js` from one module-level `READY` promise to a **map keyed by schema**, and take the advisory lock per schema (`hashtext(schema)`) — research.md §3; keep the §98 memoisation win
+- [x] T008 Teach `lib/state-io.js`'s `getPool` to hand back a connection with `search_path` set for a named schema, and never to set it on the pool
+- [x] T009 Add `ensurePlatformReady()` to `lib/platform-io.js` — applies `db/platform-schema.sql` + `db/platform-migrations/*` under an advisory lock, memoised per process
+- [x] T010 [P] Write `scripts/test-platform.js` skeleton against a real Postgres: create two client schemas, assert `ensureReady` migrates the **second** one opened first in a fresh process (the trap), and assert `search_path` is reset when a connection returns to the pool
 
 ---
 

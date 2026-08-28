@@ -574,7 +574,7 @@ function commsSet(key, value){
    ever. So a value set back to its default DELETES its key, and the last key
    leaving deletes `GROUP.chat` — a tenant that has never opened the menu, or
    has put everything back, writes nothing at all. */
-/* ── The knowledge base's pen (§137) ─────────────────────────────────
+/* ── The knowledge base's pen (§140) ─────────────────────────────────
    GROUP.kb rides org.extra like GROUP.chat above: { ov: { id: {q,a} },
    add: [ {id,g,q,a} ] }. THE WRITERS DELETE ON DEFAULT (§50.6): an answer
    put back to the shipped wording deletes its key, the last key leaving

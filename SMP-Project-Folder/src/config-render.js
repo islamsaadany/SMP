@@ -3042,7 +3042,7 @@ function kbRecipes(){
       : SMPRules.kbAdds(GROUP.kb, g.g);
     var items = g.items.map(function(r){
       /* THE TENANT'S WORDING WINS, by the one rule the assistant also reads
-         (§137, §103): what this page shows IS what the bot answers from. */
+         (§140, §103): what this page shows IS what the bot answers from. */
       var o = SMPRules.kbLook(GROUP.kb, r.id);
       if (KBEDIT) {
         return kbEdCard(r.id, o ? o.q : r.q, o ? o.a : r.a, o ? "edited" : null);
@@ -3368,7 +3368,7 @@ function renderKB(){
     }).join("") + '</div>';
 
 
-  /* THE PEN (§137): the office rewrites the answers on the page they are
+  /* THE PEN (§140): the office rewrites the answers on the page they are
      read from. Not cfgHead's data-edit machinery — that drives the EDITING
      registry and per-field pens; this page has one mode and its own writers —
      but the same slot on the header line, so the door is where every other

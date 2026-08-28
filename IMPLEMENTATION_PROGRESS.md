@@ -10,7 +10,7 @@ serverless functions (`/api/state`, `/api/auth`) against Neon Postgres.
 v3.49. Three sessions landed on the same numbers this week: this work was built
 as §130 / v3.48 and renumbered on the way in, because the owners-and-corners run
 took §130 and the same-name register run took §131–§134.
-**Last updated:** 2026-08-27
+**Last updated:** 2026-08-27 · v3.51 in flight on the audit branch
 
 **Sign in as:** `SMO` / `1234` — a password change is forced at once (§43.1,
 reversing §19.4).
@@ -67,6 +67,36 @@ Nothing proceeds past this line without an answer.
 
 ## Built and verified
 
+### v3.51 — Wave 1 of the UI/UX audit: the destination row scrolls (§136)
+
+- **From the platform-wide audit** (branch `claude/platform-ui-ux-audit-4pf8e5`;
+  plan and Wave 1 mockups under `design-mockups/`). Islam chose the scrolling
+  row over the wrap-and-grow chrome (“Decision 1: B”) from live screenshots of
+  the real build at 1024.
+- Below ~1280px the row wrapped inside a 46px box, so the second line painted
+  over the tab row and on some pages ate its clicks (§118.7, seen live at
+  1024). Now the destinations scroll in one line; the Group menu, the
+  Units | Functions switch and the gear are pinned outside the scroll region;
+  fades show each side only while that side has more; the lit destination is
+  scrolled into view on every paint.
+- `checks/nav-scroll.py` — fails 6 ways on the pre-§136 build, green here,
+  with page-width, setup-rail, setup-header and the full qa.py sweep re-run
+  beside it. **Not merged — on the branch awaiting Islam's word.**
+- **§137 — a failed render says so on the page.** The guard sits on the page's
+  render alone, so the chrome and navigation stay alive and the card's "open
+  another page from the menu above" is true. Islam's words after revising the
+  mockup: simple, friendly, one Reload button, the error folded behind a
+  closed "Technical details". `checks/render-fail.py` fails 3 ways on the
+  pre-§137 build — the production symptom verbatim.
+- **§138 — the last 800ms survive leaving the page (closes §126.1).** One
+  function in sync.js: on visibilitychange/pagehide anything waiting to save
+  is sent immediately (keepalive under 64KB, plain fetch over). Touches no
+  save bookkeeping, skips while a save is in flight (ordering), sends nothing
+  when clean. `checks/save-flush.py` reproduces §126.1 end to end on the old
+  build (0 posts, edit lost) and passes here; `test-roundtrip.js` re-run
+  against a throwaway Postgres 16 — all PASS.
+
+
 ### v3.50 — the Setup header line, the marking table, and a repaired matrix (§135)
 
 - Eleven asks from using the Setup pages. **Seven of them are one standard
@@ -111,7 +141,7 @@ Nothing proceeds past this line without an answer.
   Postgres 16** (§113.7); contrast 52 failures, unchanged, none on the new
   surfaces.
 
-### v3.50 — the knowledge base gets a pen (§137)
+### v3.52 — the knowledge base gets a pen (§140)
 
 The office edits the assistant's scenarios on the page they are read from —
 approved from a mockup first. One precedence rule in `lib/rules.js` feeds the
@@ -124,7 +154,7 @@ added per group and removed. Typed text renders escaped.
 kb-pen.py ALL CLEAR, failing 2 ways with the rule broken · test-assistant 45/0
 · test-authorize 215/0 · extract-kb --check in step · qa.py clean.
 
-### v3.50 — the send says what is happening (§136)
+### v3.52 — the send says what is happening (§139)
 
 The "glitch": with the assistant on, `say` holds its response for the model
 round-trip, so the typed message sat in the box for seconds. Now it moves into
@@ -135,7 +165,7 @@ flight so it cannot erase the echo; a network failure says "That did not
 send" instead of the browser's "Failed to fetch".
 
 **Verified:** driven against a 4s-slow model and an aborted send ·
-office-chat.py §13 permanent, failing 3 ways on the pre-§136 build.
+office-chat.py §13 permanent, failing 3 ways on the pre-§139 build.
 
 ### v3.49 — the register notices two people whose name reads the same (§131)
 

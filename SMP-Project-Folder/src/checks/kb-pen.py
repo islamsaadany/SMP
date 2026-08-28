@@ -1,4 +1,4 @@
-"""THE KNOWLEDGE BASE'S PEN (§137).
+"""THE KNOWLEDGE BASE'S PEN (§140).
 
 Over HTTP with a stub, because the pen only matters where a server will keep
 what it writes — and half of what is asserted is DATA (§96's lesson: an editor

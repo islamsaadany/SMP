@@ -110,7 +110,7 @@ class H(http.server.BaseHTTPRequestHandler):
             self._send(CHAT["status"], b'{"ok":false,"error":"no"}', "application/json")
             return
         if body.get("action") == "say":
-            # §136's echo exists FOR the slow say — with the assistant on the
+            # §139's echo exists FOR the slow say — with the assistant on the
             # server holds the response for the whole model round-trip, and the
             # check must model that or the in-flight state lasts one frame and
             # nothing here ever measures it.
@@ -780,7 +780,7 @@ with sync_playwright() as p:
     ck("and pressing anything else puts it away",
        pg.eval_on_selector_all(".chset .tip.on", "n=>n.length") == 0)
 
-    # ── 13 · THE SEND SAYS WHAT IS HAPPENING (§136) ──────────────────────
+    # ── 13 · THE SEND SAYS WHAT IS HAPPENING (§139) ──────────────────────
     # With the assistant on, `say` holds its response for the model round-trip
     # and the typed message used to sit in the box the whole time — "looked as
     # a glitch at the start" (Islam). The echo puts it in the thread at once;
@@ -815,7 +815,7 @@ with sync_playwright() as p:
     ck("the server's answer replaces the echo and the line goes", fin["echoed"] and not fin["wait"], fin)
 
     # A FAILED SEND GIVES THE WORDS BACK — the one thing nobody can get back
-    # is what they typed, and restoring beats merely not-clearing (§136).
+    # is what they typed, and restoring beats merely not-clearing (§139).
     CHAT["status"] = 500
     pg.fill("#chatsay", "Words that must come back")
     pg.evaluate("()=>{document.getElementById('chatsend').click();}")

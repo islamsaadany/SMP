@@ -92,7 +92,7 @@ var CHAT = (function(){
       .then(function(r){ return r.json().then(function(j){ j.__status = r.status; return j; }); })
       .then(function(j){ done(j && j.ok ? null : ((j && j.error) || "failed"), j); })
       /* A NETWORK FAILURE SPEAKS THE PRODUCT'S LANGUAGE, not the browser's
-         (§136): "Failed to fetch" is what fetch() says, and it reached the
+         (§139): "Failed to fetch" is what fetch() says, and it reached the
          screen verbatim through the send path's rollback note. Every caller
          already handles the sentinel "failed" as "say it did not send". */
       .catch(function(){ done("failed", null); });
@@ -281,7 +281,7 @@ var CHAT = (function(){
         "moved. One of us will come back to you.</p></div>";
     } else {
       body.innerHTML = threadHtml(state.messages, false, false) +
-        /* WHILE THE SERVER WORKS, THE SCREEN SAYS SO (§136) — the same quiet
+        /* WHILE THE SERVER WORKS, THE SCREEN SAYS SO (§139) — the same quiet
            narrated register as the handoff line (§125): not a message, the
            product saying what is happening. Only with the assistant on;
            without it a send is near-instant and the line would only flash. */
@@ -326,7 +326,7 @@ var CHAT = (function(){
 
   function poll(){
     if (!servable()) return;
-    /* NEVER OVER A SEND IN FLIGHT (§136). The echo is on screen and the
+    /* NEVER OVER A SEND IN FLIGHT (§139). The echo is on screen and the
        server's answer to `say` is what replaces it; a poll racing that
        round-trip can come back WITHOUT the just-sent message (the insert is
        inside the very request still running) and would erase the echo — a
@@ -437,7 +437,7 @@ var CHAT = (function(){
     drawPanel();
   }
 
-  /* THE SCREEN SAYS WHAT IS HAPPENING WHILE THE SERVER WORKS (§136). With
+  /* THE SCREEN SAYS WHAT IS HAPPENING WHILE THE SERVER WORKS (§139). With
      the assistant on, `say` holds the response open for the whole model
      round-trip — a few seconds — and the typed message used to sit in the box
      the entire time, looking exactly like a send that had not worked (Islam:

@@ -175,7 +175,7 @@
 
    Checked against main and against all 29 names this repo has ever served,
    immediately before the push (§94.12, §94.16). */
-const SHELL = "smp-shell-v3.50-inbox";
+const SHELL = "smp-shell-v3.52-kbpen";
 const ASSETS = [
   "/",
   "/index.html",

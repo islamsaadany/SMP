@@ -3973,10 +3973,29 @@
   td.annual  { font-weight:700; }
   th.cc + th.cc { white-space:nowrap; }
 
-  /* Ten units will not fit one line at every width. Wrapping keeps every unit
-     reachable; a horizontal scroll hides the last one behind a gesture nobody
-     is told about. */
-  .units-in { flex-wrap:wrap; overflow-x:visible; }
+  /* ── ONE LINE THAT SCROLLS, ENDS PINNED (§136) ──────────────────────────
+     REVERSAL, quoted so it stays recorded: this block used to say "Wrapping
+     keeps every unit reachable; a horizontal scroll hides the last one behind
+     a gesture nobody is told about" — and the wrap it chose was fighting
+     `.units-in{height:46px}` in _shared.css, so below ~1280px the second line
+     painted OUTSIDE the 46px box, over the tab row, and on some pages ate its
+     clicks (§118.7, measured live at 1024). Islam chose the scroll (Decision
+     1: B, 2026-08-27), and the old objection is answered in kind: the fades
+     SAY there is more, each side only while it is true; the lit destination
+     is scrolled into view on every paint; and the controls — the Group menu,
+     the Units|Functions switch, the gear — sit OUTSIDE the scroll region,
+     pinned, so they can never leave the screen. */
+  .units-in { flex-wrap:nowrap; overflow:visible; }
+  .units-in > details, .units-in > .navswitch, .units-in > .sep { flex:0 0 auto; }
+  .navclip { position:relative; flex:1 1 auto; min-width:0; align-self:stretch; }
+  .navscroll { display:flex; gap:2px; align-items:stretch; height:100%;
+               overflow-x:auto; scrollbar-width:none; }
+  .navscroll::-webkit-scrollbar { display:none; }
+  .navscroll > * { flex:0 0 auto; }
+  .navfade { position:absolute; top:0; bottom:0; width:40px;
+             pointer-events:none; z-index:2; }
+  .navfade.l { left:0;  background:linear-gradient(to right, var(--panel), transparent); }
+  .navfade.r { right:0; background:linear-gradient(to left,  var(--panel), transparent); }
   .units button { padding:11px 14px; }
   .units .sep { margin:8px 8px; }
 
@@ -5114,7 +5133,23 @@
   td:has(> .fld + .xbtn) > .fld { width: calc(100% - 30px); vertical-align: middle; }
   td:has(> .fld + .xbtn) > .xbtn { vertical-align: middle; margin-left: 5px; }
 
-/* ── THE KNOWLEDGE BASE'S PEN (§137) ──────────────────────────────────
+  /* ── A FAILED RENDER SAYS SO (§137) ────────────────────────────────────
+     The card paint() leaves where a page that threw would have been. Quiet on
+     purpose: no red kicker, no shouting — the first sentence answers the fear
+     and the error sits folded behind "Technical details". Drawn from tokens
+     only, so it holds in both themes. */
+  .failcard { max-width:560px; margin:64px auto; background:var(--surface);
+    border:1px solid var(--line); border-radius:10px; padding:30px 34px;
+    text-align:center; }
+  .failcard .fc-t { font-size:17px; font-weight:700; margin-bottom:10px; }
+  .failcard .fc-b { font-size:14px; color:var(--ink-2); margin-bottom:18px; }
+  .failcard details { margin-top:18px; text-align:left; }
+  .failcard summary { font-size:12px; color:var(--ink-3); cursor:pointer; }
+  .failcard summary:focus-visible { outline:2px solid var(--gold); outline-offset:2px; }
+  .failcard .fc-e { font-family:var(--mono); font-size:12px; color:var(--ink-3);
+    background:var(--surface-2); border-radius:6px; padding:8px 12px; margin-top:8px; }
+
+/* ── THE KNOWLEDGE BASE'S PEN (§140) ──────────────────────────────────
    In arrange.css, concatenated last, because config.css has eaten three
    silently-duplicated rules already (§29.2, §51.5, §53.6) and one comment
    (§93.11). The look is the approved mockup's: quiet cards, the platform's
@@ -5677,7 +5712,7 @@ body.presenting .chatdock { display:none; }
          font-size:var(--fs-small); line-height:1.5; color:var(--ink-3);
          padding:7px 12px; border:1px dashed var(--line); border-radius:9px; }
 
-/* The send-in-flight line (§136): the handoff's register, one shade quieter
+/* The send-in-flight line (§139): the handoff's register, one shade quieter
    still — no border, because it is gone in a few seconds and a box that blinks
    in and out draws the eye it exists to calm. */
 .chsys.chwait { border:none; padding:2px 12px; }
@@ -7611,7 +7646,7 @@ THEME.apply();
      and so the check can assert the pair. */
   function chatBeat(raw) { return chatCfg(raw).fast ? 4000 : 15000; }
 
-  /* ── The knowledge base's tenant overlay (§137) ────────────────────
+  /* ── The knowledge base's tenant overlay (§140) ────────────────────
      The office can rewrite a shipped answer and add its own (GROUP.kb →
      org.extra: { ov: { id: {q,a} }, add: [ {id,g,q,a} ] }). THE PRECEDENCE
      LIVES HERE AND ONLY HERE, because the page a person reads and the corpus
@@ -9729,7 +9764,7 @@ function commsSet(key, value){
    ever. So a value set back to its default DELETES its key, and the last key
    leaving deletes `GROUP.chat` — a tenant that has never opened the menu, or
    has put everything back, writes nothing at all. */
-/* ── The knowledge base's pen (§137) ─────────────────────────────────
+/* ── The knowledge base's pen (§140) ─────────────────────────────────
    GROUP.kb rides org.extra like GROUP.chat above: { ov: { id: {q,a} },
    add: [ {id,g,q,a} ] }. THE WRITERS DELETE ON DEFAULT (§50.6): an answer
    put back to the shipped wording deletes its key, the last key leaving
@@ -26652,7 +26687,7 @@ function kbRecipes(){
       : SMPRules.kbAdds(GROUP.kb, g.g);
     var items = g.items.map(function(r){
       /* THE TENANT'S WORDING WINS, by the one rule the assistant also reads
-         (§137, §103): what this page shows IS what the bot answers from. */
+         (§140, §103): what this page shows IS what the bot answers from. */
       var o = SMPRules.kbLook(GROUP.kb, r.id);
       if (KBEDIT) {
         return kbEdCard(r.id, o ? o.q : r.q, o ? o.a : r.a, o ? "edited" : null);
@@ -26978,7 +27013,7 @@ function renderKB(){
     }).join("") + '</div>';
 
 
-  /* THE PEN (§137): the office rewrites the answers on the page they are
+  /* THE PEN (§140): the office rewrites the answers on the page they are
      read from. Not cfgHead's data-edit machinery — that drives the EDITING
      registry and per-field pens; this page has one mode and its own writers —
      but the same slot on the header line, so the door is where every other
@@ -32428,7 +32463,7 @@ var CHAT = (function(){
       .then(function(r){ return r.json().then(function(j){ j.__status = r.status; return j; }); })
       .then(function(j){ done(j && j.ok ? null : ((j && j.error) || "failed"), j); })
       /* A NETWORK FAILURE SPEAKS THE PRODUCT'S LANGUAGE, not the browser's
-         (§136): "Failed to fetch" is what fetch() says, and it reached the
+         (§139): "Failed to fetch" is what fetch() says, and it reached the
          screen verbatim through the send path's rollback note. Every caller
          already handles the sentinel "failed" as "say it did not send". */
       .catch(function(){ done("failed", null); });
@@ -32617,7 +32652,7 @@ var CHAT = (function(){
         "moved. One of us will come back to you.</p></div>";
     } else {
       body.innerHTML = threadHtml(state.messages, false, false) +
-        /* WHILE THE SERVER WORKS, THE SCREEN SAYS SO (§136) — the same quiet
+        /* WHILE THE SERVER WORKS, THE SCREEN SAYS SO (§139) — the same quiet
            narrated register as the handoff line (§125): not a message, the
            product saying what is happening. Only with the assistant on;
            without it a send is near-instant and the line would only flash. */
@@ -32662,7 +32697,7 @@ var CHAT = (function(){
 
   function poll(){
     if (!servable()) return;
-    /* NEVER OVER A SEND IN FLIGHT (§136). The echo is on screen and the
+    /* NEVER OVER A SEND IN FLIGHT (§139). The echo is on screen and the
        server's answer to `say` is what replaces it; a poll racing that
        round-trip can come back WITHOUT the just-sent message (the insert is
        inside the very request still running) and would erase the echo — a
@@ -32773,7 +32808,7 @@ var CHAT = (function(){
     drawPanel();
   }
 
-  /* THE SCREEN SAYS WHAT IS HAPPENING WHILE THE SERVER WORKS (§136). With
+  /* THE SCREEN SAYS WHAT IS HAPPENING WHILE THE SERVER WORKS (§139). With
      the assistant on, `say` holds the response open for the whole model
      round-trip — a few seconds — and the typed message used to sit in the box
      the entire time, looking exactly like a send that had not worked (Islam:
@@ -34950,6 +34985,53 @@ var SYNC = (function () {
       .catch(function (e) { done(String(e.message || e), null); });
   }
 
+  /* ── THE LAST 800ms SURVIVE LEAVING THE PAGE (§138, closing §126.1) ─────
+     The debounce above means an edit made and the tab closed or hidden inside
+     that window was never sent: the screen showed the new value, the database
+     never received it — every page in the product, invisibly. So when the tab
+     goes away, anything waiting is sent NOW.
+
+     Deliberately not save(): this path touches none of the bookkeeping
+     (`saving`, `lastSaved`, `refusedBody` stay as they are), because if the
+     tab comes BACK the ordinary path must still compare and decide for
+     itself — and a duplicate POST of an identical state diffs empty on the
+     server and costs nothing (§42). It also interprets no answer: on the way
+     out there is nobody to show a refusal to; the ordinary path re-earns one
+     on the next change.
+
+     `keepalive` is what lets the request outlive the page, and it caps the
+     body at 64KB — over the cap this becomes a plain fetch, which completes
+     whenever the tab is merely hidden (the common case: a switch-away, a
+     minimise, and every close passes through hidden first) and is
+     best-effort on a hard kill. Stated rather than glossed: a state graph
+     over 64KB closed in under 800ms can still lose the race.
+
+     SKIPPED WHILE A SAVE IS IN FLIGHT, on purpose: two concurrent POSTs have
+     no ordering, and an older body landing after a newer one would UNDO the
+     newer — losing more than the keystroke this exists to keep. The window
+     left open (an edit made during an in-flight save, the tab gone before it
+     settles) is the small corner of a small corner, and the 5s interval owns
+     it whenever the tab survives. */
+  function flushLeave() {
+    if (!live || isDemoMode() || saving) return;
+    if (timer) { clearTimeout(timer); timer = null; }
+    var now = serialize();
+    if (now === lastSaved || now === refusedBody) return;
+    var body = '{"state":' + now + "}";
+    try {
+      fetch("/api/state", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: body,
+        keepalive: body.length < 60000
+      });
+    } catch (e) { /* leaving anyway — the console has nothing useful to add */ }
+  }
+  document.addEventListener("visibilitychange", function () {
+    if (document.hidden) flushLeave();
+  });
+  window.addEventListener("pagehide", flushLeave);
+
   return {
     isLive: function () { return live; },
     /* Flush now rather than on the next 800ms tick, and say what happened.
@@ -36171,7 +36253,7 @@ var SYNC = (function () {
          it (Foundation), which is not the plan. */
       currentSub = current ? entrySub(current) : null;
     }
-    document.getElementById("units").innerHTML = tabs.map(function(t, i){
+    var parts = tabs.map(function(t, i){
       if (t.folds) {
         /* NO DISCLOSURE ARROW. A ▸/▾ twist promises "this opens and closes",
            which is what these were and are not any more — a switch has two
@@ -36221,7 +36303,25 @@ var SYNC = (function () {
       return ((i === 1 && !tabs[1].folds) ? '<span class="sep"></span>' : '') +
         '<button role="tab" aria-selected="' + (t.k === current) + '" data-u="' + t.k + '"' +
         '>' + t.label + '</button>';
-    }).join("") + menuHTML();
+    });
+    /* ── ONE LINE THAT SCROLLS, ENDS PINNED (§136, Islam: "Decision 1: B") ──
+       The destinations go into their own scroll region; everything that is a
+       CONTROL rather than a destination — the Group menu, the Units|Functions
+       switch, the gear — stays a direct child of the row, pinned, because a
+       control that can leave the screen is §90's fault arriving sideways
+       (the first draft of B showed exactly that: the switch slid off the
+       left edge). The fades are drawn here and told the truth by the wiring
+       below. */
+    var isDest = tabs.map(function(t){ return !!t.k; });
+    var d0 = isDest.indexOf(true), d1 = isDest.lastIndexOf(true);
+    document.getElementById("units").innerHTML = (d0 === -1
+      ? parts.join("")
+      : parts.slice(0, d0).join("") +
+        '<div class="navclip">' +
+          '<div class="navscroll" id="navscroll">' + parts.slice(d0, d1 + 1).join("") + '</div>' +
+          '<div class="navfade l" hidden></div><div class="navfade r" hidden></div>' +
+        '</div>' +
+        parts.slice(d1 + 1).join("")) + menuHTML();
     /* Only destinations. A fold button lives in the same row but goes nowhere \u2014
        binding it here set current to undefined and reset the page to Group, which
        made expanding a fold navigate. */
@@ -36266,6 +36366,44 @@ var SYNC = (function () {
       });
     });
     wireMenu();
+    /* ── AND THE SCROLLING HALF IS WIRED HERE (§136) — for the same reason
+       the fold is: this function just destroyed the last set of handlers.
+       Nothing below changes any SIZE, so §28.3's loop cannot form. */
+    var sc = document.getElementById("navscroll");
+    if (sc) {
+      var navclip = sc.parentNode;
+      var fadeL = navclip.querySelector(".navfade.l");
+      var fadeR = navclip.querySelector(".navfade.r");
+      /* A fade is a CLAIM that there is more that way; each side makes it
+         only while it is true, or the row promises names it does not have. */
+      var fades = function(){
+        fadeL.hidden = sc.scrollLeft <= 2;
+        fadeR.hidden = sc.scrollWidth - sc.clientWidth - sc.scrollLeft <= 2;
+      };
+      sc.addEventListener("scroll", fades, { passive: true });
+      /* Re-asked when the ROW resizes (a window drag repaints nothing), so
+         the fades cannot go stale. A fresh observer per paint on a fresh
+         element — the old one dies with the node it watched. */
+      new ResizeObserver(fades).observe(sc);
+      /* A vertical wheel over the row scrolls it SIDEWAYS — only while there
+         is somewhere to go, so everywhere else the wheel stays the page's. */
+      sc.addEventListener("wheel", function(e){
+        if (sc.scrollWidth <= sc.clientWidth) return;
+        if (Math.abs(e.deltaX) >= Math.abs(e.deltaY)) return;
+        sc.scrollLeft += e.deltaY;
+        e.preventDefault();
+      }, { passive: false });
+      /* The lit destination is brought into view by setting scrollLeft on
+         the ROW, never scrollIntoView — that call may also scroll the PAGE,
+         which is §110.7's jump arriving sideways. */
+      var lit = sc.querySelector('button[aria-selected="true"][data-u]');
+      if (lit) {
+        var L = lit.offsetLeft, R = L + lit.offsetWidth;
+        if (L < sc.scrollLeft + 24) sc.scrollLeft = Math.max(0, L - 24);
+        else if (R > sc.scrollLeft + sc.clientWidth - 24) sc.scrollLeft = R - sc.clientWidth + 24;
+      }
+      fades();
+    }
   }
 
   /* A gear. It replaced the word "Manage" in 3.3 - at 11px uppercase in a
@@ -36452,6 +36590,21 @@ var SYNC = (function () {
     if (f.start != null) { try { el.setSelectionRange(f.start, f.end); } catch (e) {} }
   }
 
+  /* The card a page that could not be drawn leaves in its place (§137). One
+     action, deliberately: an earlier draft carried "Open another page" beside
+     Reload, and it went — the navigation is right above, and a control that
+     does nothing concrete is worse than no control. The technical line is
+     inside a <details> that starts CLOSED. */
+  function failCard(name, msg){
+    return '<div class="failcard">' +
+      '<div class="fc-t">Something went wrong opening this page.</div>' +
+      '<div class="fc-b">Your data is safe. Please reload, or open another page from the menu above.</div>' +
+      '<button type="button" class="editbtn" data-failreload>Reload</button>' +
+      '<details><summary>Technical details</summary>' +
+        '<div class="fc-e">' + esc((name ? name + " · " : "") + String(msg)) + '</div>' +
+      '</details></div>';
+  }
+
   function paint(){
     if (CLICKING) { PAINT_HELD = true; return; }
     var _panel = document.getElementById("panel");
@@ -36625,13 +36778,35 @@ var SYNC = (function () {
        already makes, in the other direction. */
     pageLineReset();
 
-    var body = (current === "group" || current === "setup" || current === "manage")
-      ? def.render()
-      /* A company is passed its key, the way a function is: there is no
-         UNITS[...] to hand it and inventing a unit-shaped object for something
-         that carries no plan would be a lie about what it is (§68). */
-      : isCo(current) ? def.render(current)
-      : isFn(current) ? def.render(current) : def.render(UNITS[current]);
+    /* ── A FAILED RENDER SAYS SO (§137). A throw inside a page's render used
+       to abort paint() and leave the PREVIOUS page standing, with the only
+       witness in the hidden console — so a data fault read as a dead click,
+       and the person reported the wrong symptom (§118.7, and §118's CF tab is
+       exactly how that looked from production). §32's rule one level deeper:
+       after a failure there is exactly one honest thing to show, and it is
+       the failure. The guard sits on the PAGE's render alone — the chrome,
+       the navigation and the tabs above have already painted, which is what
+       makes "open another page from the menu above" a true sentence. The
+       words are Islam's ask ("simple with a more user friendly message",
+       2026-08-27); the error itself is kept, folded behind a closed
+       disclosure, so the office can still read it without it shouting at
+       anybody else. */
+    var body;
+    try {
+      body = (current === "group" || current === "setup" || current === "manage")
+        ? def.render()
+        /* A company is passed its key, the way a function is: there is no
+           UNITS[...] to hand it and inventing a unit-shaped object for something
+           that carries no plan would be a lie about what it is (§68). */
+        : isCo(current) ? def.render(current)
+        : isFn(current) ? def.render(current) : def.render(UNITS[current]);
+    } catch (renderErr) {
+      /* Still said to the console, verbatim — the card is FOR the person, the
+         console line is for whoever is diagnosing with the lid off. */
+      console.error("SMP: this page could not be drawn", renderErr);
+      body = failCard(pageName || (def && def.label) || "",
+                      renderErr && renderErr.message || renderErr);
+    }
     /* The rail and the page it chose, side by side. `defs` rather than
        SUBS.setup, so a page the viewer may not open is not offered — the rail
        is navigation, and navigation that leads somewhere refused is worse than
@@ -36662,6 +36837,12 @@ var SYNC = (function () {
             '<h1 class="setupttl">' + esc(pageName) + '</h1>' + pageLineHTML() + '</div>' +
           secrowHTML + body + '</div></div>'
       : body;
+    /* The failure card's one control (§137). Wired here because the card was
+       written into innerHTML two lines up — no inline handlers anywhere
+       (§43.6), and wire() below owes this card nothing: it must work exactly
+       when a page's own wiring cannot be trusted. */
+    var failBtn = _panel.querySelector("[data-failreload]");
+    if (failBtn) failBtn.addEventListener("click", function(){ location.reload(); });
 
     /* Group Performance is four sections; they become a third nav row rather
        than one long scroll. The row exists only where there are sections. */
@@ -37933,7 +38114,7 @@ var SYNC = (function () {
         var k = b.dataset.edit; EDITING[k] = !EDITING[k]; paint();
       });
     });
-    /* ── THE KNOWLEDGE BASE'S PEN (§137) ─────────────────────────────
+    /* ── THE KNOWLEDGE BASE'S PEN (§140) ─────────────────────────────
        Bound per paint like every control above. The two text fields write on
        `change` — blur, for a text control — so typing never repaints (§35),
        and every write ends in paint(), whose §30.1 guard already holds a

@@ -109,7 +109,7 @@ refuses(headKey, function (s) { s.group.comms = { fromName: "Raya Trade" }; },
 allows("smo", function (s) { s.group.comms = { fromName: "Raya Trade" }; },
   "the SMO can");
 
-/* The knowledge base's overlay (§137) — the same shape as comms: named as
+/* The knowledge base's overlay (§140) — the same shape as comms: named as
    setup so the refusal points at the page with the pen, refused to anybody
    the matrix does not give Setup to, and BOTH ENDS asked (§94.2). */
 refuses(headKey, function (s) { s.group.kb = { ov: { "report-a-figure": { q: "q", a: "mine" } } }; },

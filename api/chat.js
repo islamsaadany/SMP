@@ -174,7 +174,7 @@ async function assistantAnswer(client, me, question) {
     const labels = ((org.extra || {}).labels) || {};
     const out = await assistant.ask({
       /* The tenant's rewritten and added answers, laid over the shipped
-         corpus by the same rule the page renders with (§137). */
+         corpus by the same rule the page renders with (§140). */
       kb: assistant.withTenant(kb, (org.extra || {}).kb), question: question, history: hist,
       who: roleWord(me), labels: labels
     });
@@ -499,7 +499,7 @@ module.exports = async function handler(req, res) {
            !shape ? null : shape.looksRight ? "present" : "unrecognised");
 
       /* THE CALL ITSELF, only once there is something to call with — against
-         the corpus AS THIS TENANT HAS IT (§137), or the diagnostic would test
+         the corpus AS THIS TENANT HAS IT (§140), or the diagnostic would test
          a corpus nobody is answered from. */
       if (kb && assistant.configured()) {
         const orgT = (await client.query("SELECT extra FROM org WHERE id = 1")).rows[0] || {};

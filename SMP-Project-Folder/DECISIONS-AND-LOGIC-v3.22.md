@@ -18006,10 +18006,165 @@ lands between Figure sets and Scoring bands.
 def whose `grp` no longer matched a real group would render nowhere at all
 rather than in the wrong place, and the rail is what somebody scans.
 
+## 136 · The destination row becomes one line that scrolls (v3.51)
+
+**THE FAULT, FIRST.** Below ~1280px the destination row WRAPPED while its box
+was held at 46px — `flex-wrap:wrap` in `arrange.css` against
+`.units-in{height:46px}` in `_shared.css` — so the second line painted OUTSIDE
+the box, over the tab row: overlapping text, and on some pages the hidden line
+took the clicks. §118.7 had recorded it below ~1100px; the audit's sweep HUNG
+on it at 1024 when a function's Strategy tab press was intercepted, and the
+new check found real buttons spilling at 1280 too. A container told to wrap
+and told to be 46px tall at the same time is not a layout, it is an argument.
+
+**THE DECISION IS ISLAM'S, FROM A MOCKUP OF THE REAL BUILD (§41.9's rule).**
+Two candidates were injected live into v3.50 at 1024 and screenshotted: A (the
+row wraps and the chrome grows to own it, `--chrome-h` already being measured)
+and B (one line that scrolls). I recommended A; **Islam chose B** — recorded,
+not re-argued. The old comment in `arrange.css` argued the other way
+("a horizontal scroll hides the last one behind a gesture nobody is told
+about") and is QUOTED in its replacement rather than overwritten, because the
+new build answers the objection rather than dismissing it.
+
+**THE ENDS ARE PINNED, AND THE FIRST DRAFT OF B IS WHY.** Injected naively,
+the Units | Functions switch slid off the LEFT edge at rest — a control the
+row exists for, gone. So the destinations go into their own scroll region
+(`.navclip > .navscroll`) and everything that is a CONTROL rather than a
+destination — the Group menu, the switch, the gear — stays a direct child of
+the row, pinned, `flex:0 0 auto` so the nowrap row cannot squeeze it (the
+second draft's fault: the switch rendered clipped mid-word). §90's rule
+arriving sideways: a control that can leave the screen does nothing.
+
+**THE OLD OBJECTION IS ANSWERED IN KIND, NOT WAVED AWAY.** Three things say
+the hidden names exist: a fade on each side of the clip, drawn ONLY while that
+side actually has more (`hidden` toggled from scroll position — a fade that
+always shows is a claim that is sometimes a lie); the lit destination brought
+into view on every paint; and a vertical wheel over the row scrolling it
+sideways, only while there is somewhere to go, so everywhere else the wheel
+stays the page's.
+
+**TWO SMALL RULES INSIDE THE WIRING, BOTH BOUGHT ELSEWHERE.** The lit button
+is brought into view by setting `scrollLeft` on the row, never
+`scrollIntoView` — that call may also scroll the PAGE, which is §110.7's jump
+arriving sideways. And the fades are re-asked by a ResizeObserver on the
+scroll region (a window drag repaints nothing), which is NOT §28.3's loop:
+nothing in it changes any size. The wiring lives in `paintUnits()` beside the
+fold's, for the reason written on the fold: this function just destroyed the
+last set of handlers.
+
+**THE CHECK ASSERTS THE PROBLEM (§94.8) AND WAS PROVED ABLE TO FAIL (§94.5).**
+`checks/nav-scroll.py`: no button spills past the row's own box; every tab,
+the switch and the gear receive their own click points (`elementFromPoint` —
+"in the document" passed every day this was broken); the LAST destination can
+be scrolled into view and navigates when pressed; the fades agree with what is
+actually left to see, and both are hidden at a width where everything fits; no
+sideways page scroll; and both sides of the navigation switch, ending on the
+exact press that hung the audit — a function's first tab at 1024. Against the
+pre-§136 build it fails 6 ways; on this one it is green, with `page-width`,
+`setup-rail`, `setup-header` and the full `qa.py` sweep re-run beside it.
+
+**AND THE CHECK'S OWN FIRST FAULT IS WORTH THE LINE**: its spill count read
+`#units button[data-u]` and flagged three buttons on every build at every
+width — the Group DROPDOWN's own menu items, which carry `data-u` and
+legitimately sit below the row. A dropdown's items are not the row. The
+exclusion was added and the check re-proved against the old build afterwards,
+because a filter added to silence a false positive is exactly the kind of edit
+that can silence the true one with it.
+
+## 137 · A failed render says so on the page (v3.51)
+
+**THE FAULT**: a throw inside a page's render aborted `paint()` and left the
+PREVIOUS page standing, with the only witness in the hidden console — §118.7
+recorded it, and §118's CF tab is exactly how it looked from production: a
+data fault wearing a dead click's face, so the person reports the wrong
+symptom and diagnosis starts a page away from the fault.
+
+**THE GUARD SITS ON THE PAGE'S RENDER ALONE.** By the time `def.render()` runs,
+the chrome, the navigation and the tabs have already painted — which is what
+makes the card's second sentence ("open another page from the menu above") a
+true sentence rather than a hope. A guard around the whole of paint() would
+have had to promise less.
+
+**THE WORDS ARE ISLAM'S ASK** (*"the message needs to be simple with a more
+userfriendly message"*, 2026-08-27, revising the first mockup): "Something
+went wrong opening this page. Your data is safe. Please reload, or open
+another page from the menu above." — then one Reload button. **The first
+draft's red kicker and second button both went**: "Open another page" was a
+control that did nothing concrete with the navigation right above it, and the
+technical line moved behind a `<details>` that starts CLOSED — kept, because
+the operator still needs the real message (§123's lesson: a failure invisible
+to the user must stay visible to the operator), and folded, because it is for
+them alone. The throw is also still said to the console verbatim.
+
+**"Kept for the Strategy Office" was NOT written on the card**: that clause is
+only honest if the error is also stored somewhere the office looks, which is
+storage and stays an open decision — the card claims exactly what is true.
+
+**The Reload control is wired beside the innerHTML that draws it** — no inline
+handlers (§43.6), and deliberately not in wire(): the card must work exactly
+when a page's own wiring cannot be trusted.
+
+**Proved able to fail first (§94.5)**: `checks/render-fail.py` poisons a real
+def in `SUBS` — the table paint() actually reads, never a copy — walks to the
+page through the real controls, and asserts both ends: the card with the
+agreed words, the folded details carrying the injected error, Reload receiving
+its own click point (§93.4), zero uncaught page errors, and a healthy page
+rendering normally afterwards. Against the pre-§137 build it fails 3 ways,
+ending in the production symptom verbatim: no card, the previous page left
+standing, the error uncaught.
+
+## 138 · The last 800ms survive leaving the page (v3.51, closing §126.1)
+
+**THE HOLE, AS §126.1 WROTE IT DOWN**: the autosave debounces 800ms with no
+flush when the page goes away, so a setting changed and left within that
+window was lost while the screen showed the new value — every page in the
+product, invisibly, and not the fault being chased the day it was found,
+which is why it was recorded rather than fixed on the way past (rule 1b).
+
+**THE FIX IS ONE FUNCTION IN ONE FILE**, because there is one autosave:
+`flushLeave()` in sync.js, fired on `visibilitychange`→hidden and on
+`pagehide`. Anything waiting is sent NOW, through a bare fetch with
+`keepalive` — which is what lets the request outlive the page, and which caps
+the body at 64KB, so over the cap it is a plain fetch instead: that completes
+whenever the tab is merely hidden (the common case — a switch-away, a
+minimise, and every close passes through hidden first) and is best-effort on
+a hard kill. Stated, not glossed.
+
+**DELIBERATELY NOT `save()`**: the flush touches none of the bookkeeping —
+`saving`, `lastSaved` and `refusedBody` stay as they are — because if the tab
+comes BACK, the ordinary path must still compare and decide for itself; a
+duplicate POST of an identical state diffs empty on the server and costs
+nothing (§42). And it interprets no answer, because on the way out there is
+nobody to show a refusal to; the ordinary path re-earns one on the next
+change.
+
+**SKIPPED WHILE A SAVE IS IN FLIGHT, on purpose**: two concurrent POSTs have
+no ordering, and an older body landing after a newer one would UNDO the newer
+— losing more than the keystroke this exists to keep. What stays open is an
+edit made during an in-flight save with the tab gone before it settles: the
+small corner of a small corner, owned by the 5s interval whenever the tab
+survives.
+
+**PROVED AT BOTH ENDS.** `checks/save-flush.py` serves the built file over
+HTTP with a stub `/api/state` that records every POST (§94.11 — over file://
+the save path does not exist), makes an edit through the real
+becoming-a-save path (a mutation, then paint(), which ends in afterPaint()),
+hides the tab 150ms later and navigates away inside the debounce window: on
+the pre-§138 build the stub records NOTHING — §126.1 reproduced end to end —
+and on this one the POST carries the edited value. The second trial asserts
+the flush is not a firehose: a clean state sends nothing on leave. And
+because sync.js is the whole product's save path, `test-roundtrip.js` was
+re-run against a throwaway Postgres 16 on a virgin database: clean slate,
+round trip deep-equal, fixed point and the archived-plan trip all PASS.
+*(Numbered §139–§140 at merge time: written as §136–§137 on the branch, and
+the Wave 1 session's §136–§138 reached `main` first — among them §138, which
+closes §126.1's debounced-save hole this file recorded and deliberately left.
+Seventh renumber on this branch; the rule is unchanged.)*
+
 
 ---
 
-## 136 · The send says what is happening (v3.50)
+## 139 · The send says what is happening (v3.52)
 
 > Islam, first real conversation with the assistant: *"the message took time to
 > be sent to the chat and stayed in the box for some time … looked as a glitch
@@ -18043,20 +18198,20 @@ Proved by driving a **4-second-slow model** (echo on screen at 350ms, box
 empty, wait line up, a poll beat passing without erasing it, the reply
 replacing it) and an **aborted send** (words back in the box, echo gone, no
 stuck line); `checks/office-chat.py` §13 holds all of it permanently and fails
-3 ways against the pre-§136 build. One of its own assertions was rewritten on
+3 ways against the pre-§139 build. One of its own assertions was rewritten on
 first contact: it asserted the product's failure sentence against the stub's
 own terse error, which is the server-sentence path working as designed.
 
 
 ---
 
-## 137 · The knowledge base gets a pen (v3.50)
+## 140 · The knowledge base gets a pen (v3.52)
 
 > Islam: *"can you give me access in the setup page to the scenarios questions
 > and answers so I can refine the reply content."* Settled from a mockup of the
 > real page and approved before a line of src/ was touched.
 
-### 137.1 One corpus, so one precedence rule
+### 140.1 One corpus, so one precedence rule
 
 The scenarios feed **two things at once**: the Knowledge base page people read
 and the corpus the assistant answers from — §103's coupling, which is the whole
@@ -18073,7 +18228,7 @@ and the last key leaving deletes `GROUP.kb`, so a tenant that touched the pen
 and thought better is byte-identical to one that never did. Added questions are
 minted `kbx<n>`, outside the shipped ids' namespace (§87, kept trivially).
 
-### 137.2 The pen is the page's, and a standard entry cannot be deleted
+### 140.2 The pen is the page's, and a standard entry cannot be deleted
 
 The pen sits on the Knowledge base page's own header line — the office's page
 since §125, so everyone who can open it may edit; the control still asks
@@ -18085,21 +18240,21 @@ click and the shipped text is never lost — while an added question carries
 **an overridden entry stops receiving improvements to the shipped wording**;
 the *Edited* chip is what keeps those findable.
 
-### 137.3 Typed text renders as text
+### 140.3 Typed text renders as text
 
 The shipped answers carry deliberate `<b>` markup and render raw; a rewritten
 answer is typed prose and **renders escaped**, or the pen becomes §43's lesson
 waiting to repeat. Asserted with a live `onerror` payload: the read view shows
 the literal text, no element, no execution.
 
-### 137.4 Found by driving, minutes after writing
+### 140.4 Found by driving, minutes after writing
 
 `kbAdds` drops an entry with nothing in it — right for the corpus and the read
 view — and the card just minted by *+ Add* **is** empty, so the button wrote
 state and showed nothing (§45.2 exactly). The edit view lists additions raw;
 the rule stays for everything that reads.
 
-### 137.5 What proves it
+### 140.5 What proves it
 
 Driven end to end against a **real Postgres**: override → chip → read view in
 the tenant's words → **reload** (the org.extra round trip) → reset + remove →

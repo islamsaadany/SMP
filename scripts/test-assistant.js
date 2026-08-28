@@ -283,7 +283,7 @@ const stub = http.createServer(function (req, res) {
   assistant._resetThinkCap();
   MODE = "answer";
 
-  console.log("\n7 · the tenant's own words over the shipped ones (§137)");
+  console.log("\n7 · the tenant's own words over the shipped ones (§140)");
   {
     const shipped = { recipes: [
       { id: "r1", group: "G", q: "old question", a: "old answer", who: "everyone" },

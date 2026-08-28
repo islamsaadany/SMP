@@ -37,7 +37,7 @@ ICON = (
 # that, and would put a request to a third party on every load of a file
 # holding a client's strategy.
 #
-# ONE EMBEDDED FACE, NOT FOUR (§147). Four rode in every build from §38.7 so
+# ONE EMBEDDED FACE, NOT FOUR (§156). Four rode in every build from §38.7 so
 # they could be compared in the real product — "B is how you decide, A is how
 # you ship" — and Islam has now decided: the system stack and Source Sans 3,
 # nothing else. Inter, Manrope and IBM Plex Sans leave the file with their

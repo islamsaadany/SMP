@@ -1,4 +1,4 @@
-"""TWO FACES, AND ONLY TWO (§147).
+"""TWO FACES, AND ONLY TWO (§156).
 
 Islam, closing §38.7's open comparison: *"let's make the 2 fonts available are
 the system font and the source san3."* Four faces had ridden in every build so

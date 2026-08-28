@@ -78,7 +78,7 @@
      degrades to the system font rather than to a default serif. Absence of the
      attribute is the system stack, which is why there is no [data-font="system"]
      block: nothing to set. */
-  /* ONE BLOCK, because there is one embedded face (§147). The other three
+  /* ONE BLOCK, because there is one embedded face (§156). The other three
      went with their .woff2 files rather than being left here unreachable — a
      rule for a face the product no longer carries is exactly what §24 is
      about, and the next reader would have no way to tell it was dead. */

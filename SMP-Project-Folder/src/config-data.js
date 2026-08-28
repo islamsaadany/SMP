@@ -221,7 +221,6 @@ var PCOLMENU = false, PWMENU = false, PFILEMENU = false;
 var FNCOLMENU = false;   /* the Functions table's own (§93.14) */
 /* Send a message's two header dropdowns (§95). One at a time, like every
    other header menu: two open panels on one row cover each other. */
-var DRAFTMENU = false, SENTMENU = false;
 var PICKING = null, PICKQ = "";
 
 /* ── ACCESS, by ROLE and by AREA ────────────────────────────────────
@@ -574,6 +573,80 @@ function commsSet(key, value){
    ever. So a value set back to its default DELETES its key, and the last key
    leaving deletes `GROUP.chat` — a tenant that has never opened the menu, or
    has put everything back, writes nothing at all. */
+/* ── The knowledge base's pen (§140) ─────────────────────────────────
+   GROUP.kb rides org.extra like GROUP.chat above: { ov: { id: {q,a} },
+   add: [ {id,g,q,a} ] }. THE WRITERS DELETE ON DEFAULT (§50.6): an answer
+   put back to the shipped wording deletes its key, the last key leaving
+   deletes GROUP.kb, so a tenant that has never touched the pen and one that
+   touched it and thought better are byte-identical. What the overrides MEAN
+   is `SMPRules.kbLook` / `kbAdds` — one precedence rule for the page and
+   the assistant both (§103). */
+function kbShipped(id){
+  for (var i = 0; i < RECIPES.length; i++){
+    var g = RECIPES[i];
+    for (var j = 0; j < g.items.length; j++){
+      if (g.items[j].id === id) return g.items[j];
+    }
+  }
+  return null;
+}
+function kbWritable(){
+  if (!GROUP.kb || typeof GROUP.kb !== "object") GROUP.kb = {};
+  return GROUP.kb;
+}
+function kbPrune(){
+  var k = GROUP.kb;
+  if (!k) return;
+  if (k.ov && !Object.keys(k.ov).length) delete k.ov;
+  if (k.add && !k.add.length) delete k.add;
+  if (!Object.keys(k).length) delete GROUP.kb;
+}
+function kbSetOver(id, q, a){
+  var std = kbShipped(id);
+  if (!std) return;
+  q = String(q == null ? "" : q).trim();
+  a = String(a == null ? "" : a).trim();
+  /* Emptied or typed back to the shipped words, the override dies — an
+     override that stores the standard wording is a phantom change in every
+     save (§42, §50.6). */
+  var k = kbWritable();
+  if ((!q || q === std.q) && (!a || a === std.a)) {
+    if (k.ov) delete k.ov[id];
+  } else {
+    if (!k.ov) k.ov = {};
+    k.ov[id] = { q: q || std.q, a: a || std.a };
+  }
+  kbPrune();
+}
+function kbResetOver(id){
+  if (GROUP.kb && GROUP.kb.ov) delete GROUP.kb.ov[id];
+  kbPrune();
+}
+function kbAddNew(g){
+  var k = kbWritable();
+  if (!k.add) k.add = [];
+  /* Minted outside the shipped namespace: recipe ids are words, these are
+     kbx1… — §87's rule about names and identifiers, kept trivially. */
+  var n = 1;
+  while (k.add.some(function(x){ return x.id === "kbx" + n; })) n++;
+  k.add.push({ id: "kbx" + n, g: g, q: "", a: "" });
+  return "kbx" + n;
+}
+function kbSetAdded(id, q, a){
+  var k = GROUP.kb;
+  if (!k || !k.add) return;
+  var e = k.add.filter(function(x){ return x.id === id; })[0];
+  if (!e) return;
+  e.q = String(q == null ? "" : q).trim();
+  e.a = String(a == null ? "" : a).trim();
+}
+function kbDropAdded(id){
+  var k = GROUP.kb;
+  if (!k || !k.add) return;
+  k.add = k.add.filter(function(x){ return x.id !== id; });
+  kbPrune();
+}
+
 function chatCfg(){ return SMPRules.chatCfg(GROUP.chat); }
 function chatWritable(){
   if (!GROUP.chat || typeof GROUP.chat !== "object") GROUP.chat = {};
@@ -1563,6 +1636,14 @@ function personNamedLines(key){
     if (!u) return;
     reportItems(u).forEach(function(x){
       if (SMPRules.namedOn({ owner:x.owner, collaborators:x.collaborators }, p)) n++;
+    });
+  });
+  /* §147: a project's owner name counts here too — since a project's owner
+     is a Contributor of its function now, the confirmation should say how
+     many of those namings survive the row as plain words. */
+  (GROUP.capabilities || []).forEach(function(c){
+    (c.projects || []).forEach(function(pr){
+      if (SMPRules.namedOn({ owner: pr.owner }, p)) n++;
     });
   });
   return n;
@@ -3310,7 +3391,8 @@ function capById(id){
    project's real story rather than a defect. */
 
 function capKOScore(c){
-  var list = (c.keyObjectives || []).filter(function(m){ return m.progress != null; });
+  /* Pending confirmation leaves the average (§145), as everywhere. */
+  var list = (c.keyObjectives || []).filter(function(m){ return m.progress != null && !SMPRules.pendingScore(m); });
   if (!list.length) return null;
   var tw = 0, sum = 0;
   list.forEach(function(m){ var w = m.weight == null ? 1 : m.weight; tw += w; sum += m.progress * w; });
@@ -3981,17 +4063,63 @@ function canReport(unitKey){
   /* A locked cycle takes no more figures, from anyone but the SMO — the
      server refuses them, so the screen must not offer them (spec 006 §7.1). */
   if (CYCLE.locked && !inOffice()) return false;
-  return grantAt("u_report", unitKey) === "edit";
+  /* A PILLARS FUNCTION'S REPORT PAGE ASKS THE FUNCTION'S OWN GRANT (§147.9).
+     This asked `u_report` for every target, and u_report's area is "unit" —
+     so for an fn: target the screen read the own-UNIT cell while the server
+     has always judged the same save against the own-FUNCTION one (`edits(…,
+     "fn", t)`). Invisible for as long as custodian and head shipped with
+     both cells at edit; visible the day one is tightened, and the exact
+     screen-says-yes / server-says-no drift §42 exists to prevent. */
+  var page = String(unitKey).indexOf("fn:") === 0 ? "k_report" : "u_report";
+  return grantAt(page, unitKey) === "edit";
 }
 
-/* ONE ROW, for the one role that is limited to its own. Everybody else whose
-   grant reaches the unit reports all of it; a contributor reports the lines
-   they are named on. The same two functions the server uses (spec 006 §7.2) —
-   offering a field the server will refuse is the fault this is here to avoid. */
+/* ONE ROW, for the roles that are limited to their own. Everybody else whose
+   grant reaches the unit reports all of it; a contributor reports the rows
+   that name them, and a PILLAR OWNER reports the pillar whose Owner row
+   names them, whole (§147.7). The same reach rule the server uses (§42) —
+   offering a field the server will refuse is the fault this is here to
+   avoid. `x` is a reportItems() entry; `x.owner` is §55's rule (a measure
+   leans on its pillar's owner), `x.pown` is the pillar's own Owner. */
 function canReportRow(unitKey, x){
   if (!canReport(unitKey)) return false;
-  if (!SMPRules.onlyOwnLines(world(), viewer(), "unit", unitKey)) return true;
-  return SMPRules.namedOn({ owner: x.owner, collaborators: x.collaborators }, viewer());
+  var area = String(unitKey).indexOf("fn:") === 0 ? "fn" : "unit";
+  return SMPRules.mayReportRow(world(), viewer(), area, unitKey,
+    { row: { owner: x.owner, collaborators: x.collaborators },
+      pillarOwner: x.pown });
+}
+
+/* ── The function side of the same two questions (§147) ────────────
+   canReport/canReportRow for an fn: target. The whole-function gate is what
+   capReportBody always asked inline; it is a function now because the
+   bounded questions have to sit on top of it and two spellings of the same
+   three gates is §53.5's drift. Since §147.7 the reach is PER ROW, through
+   the same mayReportRow() the server asks: a PROJECT OWNER reaches every
+   row of their project; a CONTRIBUTOR (a milestone's owner, a stakeholder)
+   reaches the rows that name them; the custodian and the head reach it
+   all. */
+function canReportFn(fk){
+  if (REVIEW.state !== "open") return false;
+  if (CYCLE.locked && !inOffice()) return false;
+  return grantAt("k_report", "fn:" + fk) === "edit";
+}
+function canReportFnRow(fk, project, rowObj){
+  if (!canReportFn(fk)) return false;
+  return SMPRules.mayReportRow(world(), viewer(), "fn", "fn:" + fk,
+                               { row: rowObj, project: project });
+}
+/* The project as a whole — what the rail and the checks ask. True for
+   anybody unbounded, and for a bounded role whose reach is the project
+   itself (its owner; its stakeholders once the Contributor row is opened). */
+function canReportFnProject(fk, p){
+  if (!canReportFn(fk)) return false;
+  return SMPRules.mayReportRow(world(), viewer(), "fn", "fn:" + fk, { project: p });
+}
+/* A capability's own key objectives belong to no project, so for anybody
+   bounded they are read, never entered. */
+function canReportFnWhole(fk){
+  return canReportFn(fk) &&
+         !SMPRules.onlyOwnLines(world(), viewer(), "fn", "fn:" + fk);
 }
 
 /* ── Speaking for the whole unit (§50.5) ───────────────────────────
@@ -4005,14 +4133,16 @@ function canReportRow(unitKey, x){
    A CONTRIBUTOR limited to their own lines does none of them. What they may
    say is about their own rows; a picture slide is the unit's.
 
-   A supporting function has no contributors to exclude — its reporting is the
-   function's, whole — so its half is the two gates its reporting page already
-   applies, asked here rather than restated there. */
+   A supporting function HAS contributors since §147 — a project's owner is
+   one, derived from the project's Owner row — so its half asks the same
+   own-lines exclusion the unit's always has. The sentence that stood here
+   ("a function has no contributors to exclude") described the code truly and
+   stopped being true the day the floor reached the projects. */
 function canSpeakFor(target){
   var t = String(target || "");
   if (t.indexOf("fn:") === 0) {
-    return REVIEW.state === "open" && !(CYCLE.locked && !inOffice()) &&
-           grantAt("k_report", t) === "edit";
+    return canReportFn(t.slice(3)) &&
+           !SMPRules.onlyOwnLines(world(), viewer(), "fn", t);
   }
   return canReport(t) && !SMPRules.onlyOwnLines(world(), viewer(), "unit", t);
 }
@@ -4183,13 +4313,17 @@ function reportItems(u){
        walking back up to the pillar. A MEASURE names nobody of its own, so it
        carries its pillar's owner — the nearest thing the data supports until
        a measure has an owner of its own. */
+    /* `pown` is the pillar's own Owner, for the pillar-owner role's reach
+       (§147.7) — carried beside §55's `owner` lean rather than replacing it,
+       so nothing a contributor could reach before the role existed moves. */
     p.measures.forEach(function(m){
-      out.push({ id:m.id, obj:m, kind:"measure", group:head, sub:"", owner:p.owner });
+      out.push({ id:m.id, obj:m, kind:"measure", group:head, sub:"",
+                 owner:p.owner, pown:p.owner });
     });
     p.tactics.forEach(function(t){
       out.push({ id:t.id, obj:t, kind:"tactic", group:head,
                  sub:spanLabel(t), asked:tacticDue(t),
-                 owner:t.owner, collaborators:t.collaborators });
+                 owner:t.owner, collaborators:t.collaborators, pown:p.owner });
     });
   });
   return out;
@@ -4283,7 +4417,13 @@ function submitBlockers(target){
   var t = String(target || ""), fn = t.indexOf("fn:") === 0;
   var rows = fn ? fnAskedItems(t.slice(3)) : askedItems(UNITS[t] || { keyObjectives:[], items:[] });
   return { notes: rows.filter(needsNote),
-           pending: rows.filter(function(x){ return statusPending(x.obj); }) };
+           pending: rows.filter(function(x){ return statusPending(x.obj); }),
+           /* §145: a value the office has not yet confirmed, where a score
+              reads it. Reporting and drafts flow; submitting says
+              "performance can be read", and against an unconfirmed number
+              it cannot (Islam, 2026-08-27). Only the office can clear this
+              one, so the refusal must send the person to them. */
+           confirms: gapScoreWait(t) };
 }
 /* The refusal in words, or "" when nothing is in the way. Said in ONE place so
    the two Submits cannot explain themselves differently. */
@@ -4294,6 +4434,15 @@ function submitRefusal(target){
   if (b.notes.length) say.push(plural(b.notes.length, "figure") +
     " " + (b.notes.length === 1 ? "is" : "are") +
     " at risk or off track with no note. Add a line to each.");
+  if (b.confirms.length) {
+    var named = b.confirms.slice(0, 4).map(function(x){
+      return x.obj.name || x.obj.id || "a row"; });
+    say.push(plural(b.confirms.length, "value") +
+      (b.confirms.length === 1 ? " is" : " are") +
+      " awaiting Strategy Office confirmation (" + named.join(", ") +
+      (b.confirms.length > 4 ? ", …" : "") + "). Reporting and drafts are " +
+      "unaffected — submitting opens when the office confirms.");
+  }
   return say.join("\n\n");
 }
 function unitState(u){ return reportState(reportedCount(u), u.ukey); }
@@ -4500,6 +4649,14 @@ function mayAuthor(acKey, target){
     target === undefined ? TARGET : target);
 }
 function mayEditPlan(){ return mayAuthor("u_plan"); }
+/* MAY THIS PERSON FILL THIS PAGE'S GAPS (§145)? A wrapper, never a second
+   copy — lib/rules.js answers, for the person being viewed as, so the
+   fill field the screen draws and the save the server accepts cannot
+   disagree (§42). */
+function mayFill(acKey, target){
+  return SMPRules.mayFillPage(world(), viewer(), acKey,
+    target === undefined ? TARGET : target);
+}
 /* MAY THIS PERSON REORDER WHAT THEY ARE LOOKING AT (§101)? A wrapper, never a
    second copy — the answer is lib/rules.js's, asked for the person being viewed
    as, so the handle the screen draws and the save the server accepts cannot
@@ -4554,14 +4711,16 @@ function mayMarkFocus(){
 var KO_WEIGHTS = { mobile: [40, 25, 20, 15] };
 
 function koScore(list, weights){
-  var vals = list.filter(function(m){ return !m.milestone && m.progress != null; });
+  /* `pendingScore` (§145): an objective with a pending target/direction/
+     compile leaves the average until the office confirms it. */
+  var vals = list.filter(function(m){ return !m.milestone && m.progress != null && !SMPRules.pendingScore(m); });
   if (!vals.length) return null;
   if (!weights) {
     return Math.round(vals.reduce(function(a, m){ return a + m.progress; }, 0) / vals.length);
   }
   var tot = 0, acc = 0;
   list.forEach(function(m, i){
-    if (m.milestone || m.progress == null) return;
+    if (m.milestone || m.progress == null || SMPRules.pendingScore(m)) return;
     var w = weights[i] == null ? 0 : weights[i];
     acc += m.progress * w; tot += w;
   });
@@ -4653,6 +4812,11 @@ function quartersOf(t){
   return [t.q1, t.q2, t.q3, t.q4].map(function(x){ return x ? 1 : 0; });
 }
 function tacticPlanned(t){
+  /* Quarters filled but not yet confirmed (§145): the tactic's timeline is
+     not settled, so it reads as not-yet-due — null, never zero — and every
+     downstream reader (due, ratio, the execution averages) already handles
+     that shape. */
+  if (SMPRules.pendOf(t).quarters) return null;
   var q = quartersOf(t), total = 0, elapsed = 0;
   for (var i = 0; i < 4; i++) {
     if (!q[i]) continue;
@@ -4665,6 +4829,119 @@ function tacticPlanned(t){
 /* A tactic whose quarters have not begun is not behind — it is not yet due,
    and averaging a zero into execution would say otherwise. */
 function tacticDue(t){ return tacticPlanned(t) > 0; }
+
+/* ── WHAT IS STILL AWAITING THE OFFICE'S CONFIRMATION (§145) ────────────
+   Every pending-fill mark on a subject, one entry per marked field. The
+   COUNT the pane band shows, the rows the Submit refusal names and the
+   scores' exclusions are all read off this one list — a count that cannot
+   take you to what it counts is a count that makes work (§116.2). */
+function gapPendRows(target){
+  var out = [], t = String(target || "");
+  var push = function(row){
+    var p = SMPRules.pendOf(row);
+    Object.keys(p).forEach(function(f){
+      out.push({ obj: row, field: f, mark: p[f] });
+    });
+  };
+  if (t.indexOf("fn:") === 0) {
+    var fk = t.slice(3), fo = functionOf(fk);
+    if (fo && String(fo.format) === "pillars") {
+      var fu = unitLike(t);
+      if (fu) {
+        push(fu);
+        (fu.keyObjectives || []).forEach(push);
+        (fu.items || []).forEach(function(p){
+          (p.measures || []).forEach(push);
+          (p.tactics || []).forEach(push);
+        });
+      }
+    }
+    (GROUP.capabilities || []).forEach(function(c){
+      if (c.fn !== fk) return;
+      (c.keyObjectives || []).forEach(push);
+      (c.projects || []).forEach(push);
+    });
+  } else {
+    var u = UNITS[t];
+    if (u) {
+      push(u);
+      (u.keyObjectives || []).forEach(push);
+      (u.items || []).forEach(function(p){
+        (p.measures || []).forEach(push);
+        (p.tactics || []).forEach(push);
+      });
+    }
+  }
+  return out;
+}
+function gapPendCount(target){ return gapPendRows(target).length; }
+
+/* ── WHERE THE MISSING THINGS ARE (§145.12) ─────────────────────────────
+   One map of every place holding gaps, counted through the shared
+   `gapMissing()` — the tab badge, the rail counts and the band's chips all
+   read THIS list, so a count can never disagree with the fields it points
+   at (§116.2: the count and the queue are one list). Each entry names how
+   to GET there, in the navigation's own words. */
+function gapMap(target){
+  var t = String(target || ""), out = [];
+  var G = SMPRules.gapMissing;
+  var entry = function(key, label, count, go){
+    out.push({ key: key, label: label, count: count, go: go });
+  };
+  var unitHalf = function(u){
+    if (!u) return;
+    var found = G("unit", u).length;
+    entry("found", "Foundation", found, { sec: "found", page: "foundation" });
+    var ko = 0;
+    (u.keyObjectives || []).forEach(function(m){ ko += G("ko", m).length; });
+    entry("ko", "Objectives", ko, { sec: "found", page: "foundation" });
+    (u.items || []).forEach(function(p, i){
+      var n = 0;
+      (p.measures || []).forEach(function(m){ n += G("measure", m).length; });
+      (p.tactics  || []).forEach(function(x){ n += G("tactic", x).length; });
+      entry("p:" + (p.code || i), pillarCode(u, i), n,
+            { sec: "plan", page: "plan", rail: unitRailKey(u), code: p.code });
+    });
+  };
+  if (t.indexOf("fn:") === 0) {
+    var fk = t.slice(3), fo = functionOf(fk);
+    if (fo && String(fo.format) === "pillars") { unitHalf(unitLike(t)); return out; }
+    var caps = capsOfFunction(fk), ov = 0;
+    caps.forEach(function(c){
+      (c.keyObjectives || []).forEach(function(m){ ov += G("capko", m).length; });
+    });
+    entry("ov", "Overview", ov, { sec: "found", page: "capfoundation" });
+    caps.forEach(function(c){
+      (c.projects || []).forEach(function(p){
+        /* The projects rail is per CAPABILITY (railKeyFor), and it selects
+           by project id — the same pair the rail's own rows write. */
+        entry("pr:" + p.id, projCode(fk, p), G("project", p).length,
+              { sec: "proj", page: "plan", rail: "cap:" + c.id, code: p.id });
+      });
+    });
+  } else {
+    unitHalf(UNITS[t]);
+  }
+  return out;
+}
+function gapTotal(target){
+  return gapMap(target).reduce(function(a, e){ return a + e.count; }, 0);
+}
+/* Who the counts are FOR: somebody who can act on them — the fill grant or
+   the office. A plain reader never sees a nag they cannot clear (§69). */
+function seesGaps(target){
+  var t = target === undefined ? TARGET : target;
+  return SMPRules.FILL_PAGES.some(function(pg){
+    return mayFill(pg, t) || mayAuthor(pg, t);
+  });
+}
+/* Only the fields a score reads block a submission — a pending owner or
+   date changes no figure's meaning (§145, Islam's boundary). */
+function gapScoreWait(target){
+  return gapPendRows(target).filter(function(x){
+    return SMPRules.GAP_SCORE_FIELDS.indexOf(x.field) > -1;
+  });
+}
 function tacticRatio(t){
   var p = tacticPlanned(t);
   return p && t.actual != null ? Math.round(t.actual / p * 100) : null;
@@ -4711,8 +4988,17 @@ function avg(a){
    rail's terse switch. One person deciding to see both horizons must not
    decide it for the whole tenant, and a toggle that autosaved would. */
 var KO_YEAR_KEY = "smp.ko.year";
+/* §145.11 REVERSES §66's DEFAULT (Islam: "let the this year objective
+   clicked by default so it can be filled as missing as well"): absent now
+   reads as SHOWN, so a missing near target is a visible red word instead
+   of a hidden column. The toggle stays, and a person's SAVED choice still
+   wins in both directions — the stored value is an explicit "1"/"0", so
+   nobody who ever pressed the button moves (§30.2's shape). */
 var SHOW_KO_THIS_YEAR = (function(){
-  try { return localStorage.getItem(KO_YEAR_KEY) === "1"; } catch (e) { return false; }
+  try {
+    var v = localStorage.getItem(KO_YEAR_KEY);
+    return v === null ? true : v === "1";
+  } catch (e) { return true; }
 })();
 function setKoThisYear(on){
   SHOW_KO_THIS_YEAR = !!on;
@@ -4894,7 +5180,11 @@ function viaCarrier(p, own, roll){
   try { return roll(f); } finally { PILLAR_DEPTH--; }
 }
 
-function scorableMeasures(p){ return (p.measures || []).filter(function(m){ return m.target && m.progress != null; }); }
+/* A measure whose target, direction or compile rule is still awaiting the
+   office's confirmation is not scored (§145): the comparison is not ready,
+   so it leaves the average the way an unmeasured outcome already does
+   (§104.10) — the reported actual is kept and shown, only the score waits. */
+function scorableMeasures(p){ return (p.measures || []).filter(function(m){ return m.target && m.progress != null && !SMPRules.pendingScore(m); }); }
 function pillarPerf(p){
   return viaCarrier(p,
     function(){ return avg(scorableMeasures(p).map(function(m){ return m.progress; })); },

@@ -299,19 +299,30 @@ with sync_playwright() as p:
        any(n in ("Finance", "Merchandising") for n in names) and len(names) > 1, names)
 
     # ── 6 · SEND AN EMAIL (§135.3, §135.4) ───────────────────────────
-    print("\n6 · one page, two halves, and the settings still work")
+    print("\n6 · one page, three halves, and the settings still work")
     pg.evaluate("()=>{current='setup';currentSub='send';paint();}")
     pg.wait_for_timeout(450)
     secs = pg.eval_on_selector_all(".setuppane .secrow button",
                                    "e=>e.map(x=>x.textContent.trim())")
-    ck("it has two sections", secs == ["Compose", "Email settings"], secs)
+    # §144 PUT THE RECORD IN FRONT OF THE COMPOSER, so the two halves §135.3
+    # built are three now: what you arrive at, what you do, and what you set
+    # once. The assertion is the WHOLE row rather than the two it knew about,
+    # or a fourth tab appearing later would go unnoticed.
+    ck("it has three sections",
+       secs == ["Overview", "Compose", "Email settings"], secs)
     ck("the page is called Send an email",
        pg.eval_on_selector(".setupttl", "e=>e.textContent.trim()") == "Send an email")
     ck("and the two chips are gone",
        not pg.evaluate("()=>!!document.querySelector('[data-audcount]')")
        and not any("SMO" == c for c in
                    pg.eval_on_selector_all(".setuphead .chip", "e=>e.map(x=>x.textContent.trim())")))
-    second = pg.query_selector('.setuppane .secrow button:nth-child(2)')
+    # THE SETTINGS ARE THE LAST TAB, NAMED RATHER THAN COUNTED: keying on
+    # nth-child is how this check would silently start opening the composer the
+    # next time a tab is inserted (§51.11).
+    second = None
+    for tab in pg.query_selector_all('.setuppane .secrow button'):
+        if tab.text_content().strip() == "Email settings":
+            second = tab
     ck("the settings half can be opened", bool(second))
     if second:
         second.click()
@@ -321,9 +332,23 @@ with sync_playwright() as p:
                    " !!document.querySelector('#mailprev')"))
     ck("...and Email is no longer a rail row of its own",
        "comms" not in [k for k, _ in pages], [k for k, _ in pages])
-    ck("...while the rail still names the inbox in full",
-       any(lbl == "In Platform inbox" for _, lbl in pages)
-       or not any(lbl == "Inbox" for _, lbl in pages), [lbl for _, lbl in pages])
+    # THE OLD NAME IS GONE, AND THAT IS ALL THIS FILE CAN HONESTLY SAY. The
+    # chat needs a server, so over `file://` the entry is not in the rail at
+    # all (§94.11) — the POSITIVE assertion lives in checks/office-chat.py,
+    # which serves the built file over HTTP. Asserting presence here would
+    # either fail forever or be softened into something that passes on a build
+    # with the page deleted.
+    ck("...and no rail entry is called just 'Inbox' any more",
+       not any(lbl in ("Inbox", "In Platform inbox") for _, lbl in pages),
+       [lbl for _, lbl in pages])
+    # AND IT SITS WITH MEASUREMENT (§135.11). Asserted of the GROUP the rail
+    # actually draws it under, not of the def — the rail is what somebody
+    # scans, and a def whose `grp` no longer matches a real group would render
+    # nowhere at all rather than in the wrong place.
+    ck("Focus measures is in the Measurement group",
+       pg.evaluate("""()=>{const b=[...document.querySelectorAll('.setuprail .ritem')]
+             .filter(x=>x.dataset.setupgo==='focusset')[0];
+           return !!b && b.closest('[data-railitems]').dataset.railitems;}""") == "meas")
 
     # ── 7 · NO SLOT BETWEEN THE TWO PINNED HEADERS (§135.10) ─────────
     print("\n7 · the table's head pins flush under the page's, at every width")

@@ -360,7 +360,7 @@ with sync_playwright() as p:
             errs.append("PERFORMANCE (%s): Arrange is still here — it belongs to the plan"
                         % label)
         pg.click("[data-report]"); pg.wait_for_timeout(300)
-        # THE BAR MOVED, IT DID NOT GO (§140). The reporting controls now ride
+        # THE BAR MOVED, IT DID NOT GO (§149). The reporting controls now ride
         # the tab row rather than sitting in the page, so this asked for
         # `.rep-bar` and correctly found nothing — §51.11's fault caught doing
         # its job for once: a check keyed on markup that changed, going red
@@ -516,9 +516,16 @@ with sync_playwright() as p:
         # THE LABEL MUST SAY WHICH PAGE WAS ACTUALLY SCANNED (50.6). A probe
         # that clicks and does not check reports the page behind under the
         # name of the one it meant to open.
-        got = pg.evaluate("""()=>{const a=document.querySelector('#subtabs [aria-selected="true"]'),
-            b=document.querySelector('#secrow [aria-selected="true"]');
-            return (a?a.textContent.trim():'?') + ' / ' + (b?b.textContent.trim():'?')}""")
+        # THE NAME, NOT ITS ANNOTATIONS (132.12, 51.11's drill): the tab
+        # carries a gap-count badge and screen-reader text now, so a bare
+        # textContent read "Strategy22 - 22 to fill" and two checks went red
+        # on a healthy build. Read the label with the marks removed.
+        got = pg.evaluate("""()=>{const label=(el)=>{if(!el)return '?';
+            const c=el.cloneNode(true);
+            c.querySelectorAll('.tbadge,.vh,.tabdot').forEach(x=>x.remove());
+            return c.textContent.trim()};
+            return label(document.querySelector('#subtabs [aria-selected="true"]')) + ' / ' +
+                   label(document.querySelector('#secrow [aria-selected="true"]'))}""")
         return got
 
     pg.select_option("#asWho", people[0]); pg.wait_for_timeout(200)
@@ -590,9 +597,16 @@ with sync_playwright() as p:
             pg.click("#units .navswitch"); pg.wait_for_timeout(150)
         go_top(pg, "group")
         pg.click('#units button[data-u="%s"]' % key); pg.wait_for_timeout(350)
-        got = pg.evaluate("""()=>{const a=document.querySelector('#subtabs [aria-selected="true"]'),
-            b=document.querySelector('#secrow [aria-selected="true"]');
-            return (a?a.textContent.trim():'?') + ' / ' + (b?b.textContent.trim():'?')}""")
+        # THE NAME, NOT ITS ANNOTATIONS (132.12, 51.11's drill): the tab
+        # carries a gap-count badge and screen-reader text now, so a bare
+        # textContent read "Strategy22 - 22 to fill" and two checks went red
+        # on a healthy build. Read the label with the marks removed.
+        got = pg.evaluate("""()=>{const label=(el)=>{if(!el)return '?';
+            const c=el.cloneNode(true);
+            c.querySelectorAll('.tbadge,.vh,.tabdot').forEach(x=>x.remove());
+            return c.textContent.trim()};
+            return label(document.querySelector('#subtabs [aria-selected="true"]')) + ' / ' +
+                   label(document.querySelector('#secrow [aria-selected="true"]'))}""")
         if got != want:
             errs.append("LANDING: %s opens on %r, not %r" % (key, got, want))
         print("%s opens on %s" % (key, got))

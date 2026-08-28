@@ -166,7 +166,46 @@
    collision means a browser holding somebody else's bytes never fetches these.
    `-setuphead` rather than a bare version, because THREE sessions have taken a
    version number out from under this one in a week. */
-const SHELL = "smp-shell-v3.50-setuphead";
+/* v3.50-inbox — §135.3 and §135.11: the rail entry becomes "Platform Inbox" and
+   Focus measures moves into the Measurement group. Two labels and a `grp`, and
+   the built file's bytes changed by 1,295 — which is the whole trigger (§91).
+   The temptation on a change this small is to leave the name alone; a worker
+   caches by NAME, so leaving it is how a returning browser goes on serving
+   itself yesterday's rail out of its own disk.
+
+   Checked against main and against all 29 names this repo has ever served,
+   immediately before the push (§94.12, §94.16). */
+/* v3.55-gapfill — §145 (spec 023): fill the gaps. A fill grant on the two
+   Strategy halves, pending marks the office confirms, the missing bar in the
+   section row, and the .pptx plan download hidden. Written as §132 / v3.50
+   against a main serving v3.47-planbuilder — four sessions took §132–§144 and
+   v3.50–v3.54 in the same window, so the section, the version AND the spec
+   number (021 → 023) were renumbered at the merge. The suffix is why the
+   cache name never collided (§94.12): "gapfill" and "setuphead" cannot be
+   arrived at by coincidence. The platform filename, the gate's link,
+   vercel.json's rewrite and PLATFORM_FILE are all untouched — §91's trigger
+   is the built file's bytes, which this is.
+   Confirmed against origin/main serving "smp-shell-v3.54-sendrecord";
+   confirm once more immediately before the push to main (§94.16). */
+/* v3.56-testcopy — §146: a test copy is written into the record and only a
+   test copy can be removed. `kind` on `messages` (migration 028), the mark in
+   the audience column, a Delete behind mayDestroy() and refused again on the
+   server, and one clause added to the Send-me-a-copy hover. The built file's
+   bytes changed, which is the whole trigger (§91).
+
+   AND THIS FILE IS WHY §91 SAYS REBUILD RATHER THAN MERGE. Merging main in
+   spliced the two name blocks together: my `const SHELL` line landed inside
+   main's comment, the comment lost its opener, and the file ended with TWO
+   `const SHELL` declarations and loose prose between them — a SyntaxError, so
+   the worker would not have installed at all and every returning browser would
+   have gone on serving itself the old shell. It did not conflict; git merged
+   it happily. `node --check sw.js` is the two seconds that catches it, and
+   this file is not generated, so nothing else would have.
+
+   Name read off origin/main at the start of this merge and again immediately
+   before the push (§94.12, §94.16); "-testcopy" cannot be arrived at by
+   coincidence. */
+const SHELL = "smp-shell-v3.57-projcust";
 const ASSETS = [
   "/",
   "/index.html",

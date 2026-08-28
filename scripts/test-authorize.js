@@ -108,6 +108,21 @@ refuses(headKey, function (s) { s.group.comms = { fromName: "Raya Trade" }; },
   "a unit head cannot change the communication settings");
 allows("smo", function (s) { s.group.comms = { fromName: "Raya Trade" }; },
   "the SMO can");
+
+/* The knowledge base's overlay (§140) — the same shape as comms: named as
+   setup so the refusal points at the page with the pen, refused to anybody
+   the matrix does not give Setup to, and BOTH ENDS asked (§94.2). */
+refuses(headKey, function (s) { s.group.kb = { ov: { "report-a-figure": { q: "q", a: "mine" } } }; },
+  "a unit head cannot rewrite the knowledge base's answers");
+allows("smo", function (s) { s.group.kb = { ov: { "report-a-figure": { q: "q", a: "mine" } } }; },
+  "the SMO can rewrite an answer");
+(function () {
+  const inc = clone(SEED); inc.group.kb = { add: [{ id: "kbx1", g: "Reporting", q: "q", a: "a" }] };
+  const ch = A.collect(SEED, inc, R.worldOf(SEED))
+              .filter(function (c) { return c.what === "the knowledge base's answers"; })[0];
+  check("a knowledge base change is classified as setup, not as unknown",
+        !!ch && ch.kind === "setup", ch && ch.kind);
+})();
 (function () {
   /* A.collect, NOT A.classify — the lesson §54.5 left further down this file,
      applied forward rather than re-learned. */
@@ -1176,6 +1191,448 @@ console.log("\n15 · the strategy | reporting split (§117)");
         R.mayDownloadPlan(wSeed, nobody, UNIT) === false);
   check("download: strategy at none takes it away",
         R.mayDownloadPlan(wClosed, personOf(closed, custKey), UNIT) === false);
+})();
+
+console.log("\n16 · fill the gaps (§145, spec 023)");
+/* The third grant state: a fill-holder writes only where the plan holds
+   nothing, the write carries a pending mark, and the office confirms.
+
+   PROVED ABLE TO FAIL (§94.5): every ALLOWED case below refuses on the
+   pre-§145 build — the stored "fill" grant ranks as nothing there, so the
+   classifier lands the change on unitPlan and the verdict says office-only.
+   The refused cases are each one rule-flip from passing: drop the pend mark
+   requirement and case 3 goes green, drop the blank(stored) requirement and
+   case 4 does. */
+(function () {
+  function withAccess(role, patch) {
+    const s = clone(SEED);
+    s.access = Object.assign({}, s.access,
+      { [role]: Object.assign({}, (s.access || {})[role], patch) });
+    return s;
+  }
+  function fromStored(stored, who, mutate) {
+    const inc = clone(stored); mutate(inc);
+    return A.authorize(stored, inc, personOf(stored, who));
+  }
+  const MARK = { by: "somebody", at: "2026-08-27" };
+
+  /* A stored world whose plan has real gaps, under the fill grant. */
+  function gappy() {
+    const s = withAccess("custodian", { a_unit_own_strat: "fill" });
+    const u = s.units[UNIT];
+    u.aspiration = "";
+    u.items[0].measures[0].compile = "";
+    u.items[0].tactics[0].owner = "";
+    u.items[0].tactics[0].collaborators = [];
+    u.items[0].tactics[0].q1 = 0; u.items[0].tactics[0].q2 = 0;
+    u.items[0].tactics[0].q3 = 0; u.items[0].tactics[0].q4 = 0;
+    return s;
+  }
+
+  /* 1 · a fill: blank → value + mark, on the fill grant. */
+  let s = gappy();
+  let v = fromStored(s, custKey, function (i) {
+    const m = i.units[UNIT].items[0].measures[0];
+    m.compile = "Latest"; m.pend = { compile: MARK };
+  });
+  check("FILL: a blank compile filled with the mark is the custodian's", v.ok, v.refusals.join(" / "));
+
+  /* 2 · the same save with the grant at its shipped default refuses. */
+  s = gappy(); s.access = clone(SEED.access || {});
+  v = fromStored(s, custKey, function (i) {
+    const m = i.units[UNIT].items[0].measures[0];
+    m.compile = "Latest"; m.pend = { compile: MARK };
+  });
+  check("FILL: the same save without the fill grant refuses", !v.ok, "was ALLOWED");
+
+  /* 3 · a fill WITHOUT the mark is an ordinary plan write — office-only. */
+  s = gappy();
+  v = fromStored(s, custKey, function (i) {
+    i.units[UNIT].items[0].measures[0].compile = "Latest";
+  });
+  check("FILL: writing the value without the pending mark refuses", !v.ok, "was ALLOWED");
+
+  /* 4 · a settled value is never the fill grant's, mark or no mark. */
+  s = gappy();
+  v = fromStored(s, custKey, function (i) {
+    const m = i.units[UNIT].items[0].measures[0];
+    m.target = "999"; m.pend = { target: MARK };
+  });
+  check("FILL: overwriting a settled target refuses, even wearing the mark", !v.ok, "was ALLOWED");
+
+  /* 5 · amending while pending stays the fill grant's; 6 · so does the undo. */
+  function pending() {
+    const s2 = gappy();
+    const m = s2.units[UNIT].items[0].measures[0];
+    m.compile = "Latest"; m.pend = { compile: MARK };
+    return s2;
+  }
+  s = pending();
+  v = fromStored(s, custKey, function (i) {
+    i.units[UNIT].items[0].measures[0].compile = "Average";
+  });
+  check("AMEND: a pending value corrected by the filler is allowed", v.ok, v.refusals.join(" / "));
+  s = pending();
+  v = fromStored(s, custKey, function (i) {
+    const m = i.units[UNIT].items[0].measures[0];
+    m.compile = ""; delete m.pend;
+  });
+  check("UNFILL: the filler's own undo is allowed", v.ok, v.refusals.join(" / "));
+
+  /* 7 · confirming is the office's alone; 8 · and the office may. */
+  s = pending();
+  v = fromStored(s, custKey, function (i) {
+    delete i.units[UNIT].items[0].measures[0].pend;
+  });
+  check("CONFIRM: the fill-holder may not lift their own mark", !v.ok, "was ALLOWED");
+  s = pending();
+  v = fromStored(s, "smo", function (i) {
+    delete i.units[UNIT].items[0].measures[0].pend;
+  });
+  check("CONFIRM: the office lifts the mark", v.ok, v.refusals.join(" / "));
+  s = pending();
+  v = fromStored(s, "smo", function (i) {
+    const m = i.units[UNIT].items[0].measures[0];
+    m.compile = "Sum"; delete m.pend;
+  });
+  check("CONFIRM: the office correcting the value confirms in the same act", v.ok, v.refusals.join(" / "));
+
+  /* 9 · the aspiration is a unit-level gap. */
+  s = gappy();
+  v = fromStored(s, custKey, function (i) {
+    i.units[UNIT].aspiration = "Filled by the custodian";
+    i.units[UNIT].pend = { aspiration: MARK };
+  });
+  check("FILL: an empty aspiration is fillable", v.ok, v.refusals.join(" / "));
+
+  /* 10 · quarters move as ONE mark, and only from nothing. */
+  s = gappy();
+  v = fromStored(s, custKey, function (i) {
+    const t = i.units[UNIT].items[0].tactics[0];
+    t.q2 = 1; t.pend = { quarters: MARK, owner: MARK };
+    t.owner = "Somebody Named";
+  });
+  check("FILL: a no-quarter tactic takes its quarters and owner", v.ok, v.refusals.join(" / "));
+  s = withAccess("custodian", { a_unit_own_strat: "fill" });
+  v = fromStored(s, custKey, function (i) {
+    const t = i.units[UNIT].items[0].tactics.filter(function (x) {
+      return x.q1 || x.q2 || x.q3 || x.q4; })[0];
+    t.q4 = t.q4 ? 0 : 1; t.pend = { quarters: MARK };
+  });
+  check("FILL: a tactic that already names a quarter refuses more, mark or not",
+        !v.ok, "was ALLOWED");
+
+  /* 11 · the capability side, through the fn half. */
+  const FN2 = SEED.functionKeys.filter(function (k) {
+    return (SEED.functions[k] || {}).custodian && !(SEED.functions[k] || {}).format;
+  })[0];
+  const fnCust2 = FN2 && (SEED.functions[FN2] || {}).custodian;
+  check("the seed still holds a capability-function custodian for §16", !!fnCust2);
+  if (fnCust2) {
+    const sf = withAccess("custodian", { a_fn_own_strat: "fill" });
+    const cap = sf.group.capabilities.filter(function (c) { return c.fn === FN2; })[0];
+    cap.projects[0].start = "";
+    v = fromStored(sf, fnCust2, function (i) {
+      const p = i.group.capabilities.filter(function (c) { return c.fn === FN2; })[0].projects[0];
+      p.start = "Jan 2026"; p.pend = { start: MARK };
+    });
+    check("FILL: a project's missing start date, on the function half", v.ok, v.refusals.join(" / "));
+    v = fromStored(sf, fnCust2, function (i) {
+      const p = i.group.capabilities.filter(function (c) { return c.fn === FN2; })[0].projects[0];
+      p.name = "Renamed by a fill grant"; p.pend = { start: MARK };
+    });
+    check("FILL: the same grant never renames a project", !v.ok, "was ALLOWED");
+  }
+
+  /* 13 · collaborators join the fillable list (§145.10) — an empty list is
+     a gap, an existing one never opens, and A PENDING NAME CONFERS NO
+     REPORTING RIGHT until the office confirms: being named is what lets a
+     Contributor report the line (§50.2), so this is the half that makes
+     the reversal safe. */
+  s = gappy();
+  v = fromStored(s, custKey, function (i) {
+    const t = i.units[UNIT].items[0].tactics[0];
+    t.collaborators = ["Somebody Supporting"]; t.pend = { collaborators: MARK };
+  });
+  check("FILL: an empty collaborators list is fillable", v.ok, v.refusals.join(" / "));
+  s = gappy();
+  v = fromStored(s, custKey, function (i) {
+    const t = i.units[UNIT].items[0].tactics.filter(function (x) {
+      return (x.collaborators || []).length; })[0];
+    if (!t) { i.__skip = true; return; }
+    t.collaborators = t.collaborators.concat("Somebody Extra");
+    t.pend = Object.assign({}, t.pend, { collaborators: MARK });
+  });
+  check("FILL: adding to an EXISTING collaborators list refuses, mark or not",
+        !v.ok, "was ALLOWED");
+  (function () {
+    const t = { owner: "", collaborators: ["Test Person"],
+                pend: { collaborators: MARK } };
+    const who = { key: "tp", name: "Test Person" };
+    check("RIGHTS: a pending collaborator is not namedOn the line",
+          R.namedOn(t, who) === false);
+    delete t.pend;
+    check("RIGHTS: the same name counts the moment the mark lifts",
+          R.namedOn(t, who) === true);
+    const t2 = { owner: "Test Person", pend: { owner: MARK } };
+    check("RIGHTS: a pending owner is not namedOn either",
+          R.namedOn(t2, who) === false);
+  })();
+
+  /* 14 · u_anal never fills: a strategy page with no fillable field must
+     not draw the fill pen — a pen that opens nothing is §61's trap. */
+  check("mayFillPage: never the SWOT page",
+        R.mayFillPage(R.worldOf(gappy()), personOf(gappy(), custKey), "u_anal", UNIT) === false);
+
+  /* 12 · the rule's own ends. */
+  const wf = R.worldOf(gappy());
+  check("mayFillPage: the fill grant answers for the holder",
+        R.mayFillPage(wf, personOf(gappy(), custKey), "u_plan", UNIT) === true);
+  check("mayFillPage: never for the office (their writes settle)",
+        R.mayFillPage(wf, personOf(gappy(), "smo"), "u_plan", UNIT) === false);
+  check("mayFillPage: never off a strategy page",
+        R.mayFillPage(wf, personOf(gappy(), custKey), "u_report", UNIT) === false);
+  const sOther = withAccess("custodian", { a_unit_own_strat: "fill" });
+  check("mayFillPage: never a unit this sign-in does not hold",
+        R.mayFillPage(R.worldOf(sOther), personOf(sOther, custKey), "u_plan", OTHER) === false);
+})();
+
+/* ── 17 · A CUSTODIAN PER PROJECT — TWO ROLES, NOT ONE (§147.7) ────
+   Islam: "a project owner is a role", "we need to add another role which is
+   pillar owner ... same pattern", and "contributor is someone whose name is
+   on the project anywhere but that doesn't mean that he is a project owner".
+
+   TWO CONDITIONS before anybody reports (his words): the role's Reporting
+   cell opened to edit on Roles & access, AND being named the Owner on the
+   thing. Contributors — a milestone's owner, a stakeholder — report NOTHING
+   until the Contributor row is opened, and then only the rows that name
+   them. None of the three ever submits.
+
+   EVERY allows() ALSO ASSERTS THE FIXTURE CHANGED SOMETHING (§94.5): the
+   no-op assertion is this suite's own recorded fault. */
+console.log("\n17 · a custodian per project — two roles (§147.7)");
+(function () {
+  const FN = "it";
+  const T = "fn:" + FN;
+  const capOf = function (s) {
+    return s.group.capabilities.filter(function (c) { return c.fn === FN; })[0];
+  };
+  /* The base: three people the plan names — an owner of project 1, the owner
+     of one of project 1's milestones, and a stakeholder on project 1 — and
+     the two owner rows opened, Islam's condition 1. DELIBERATELY UNATTACHED
+     (no p.unit, no p.fn): his two conditions do not include the register
+     attachment, and this is the exact shape of the Ahmed test that started
+     §147.7. The contributor row is left at its default. */
+  const base = clone(SEED);
+  base.access.powner = Object.assign({}, base.access.powner, { a_fn_own: "edit" });
+  base.people.push({ key: "t147_own",   name: "Project Owner 147",   active: true });
+  base.people.push({ key: "t147_mile",  name: "Milestone Owner 147", active: true });
+  base.people.push({ key: "t147_stake", name: "Stakeholder 147",     active: true });
+  const cap = capOf(base);
+  cap.projects[0].owner = "Project Owner 147";
+  cap.projects[0].milestones[0].owner = "Milestone Owner 147";
+  cap.projects[0].stakeholders = (cap.projects[0].stakeholders || []).concat("Stakeholder 147");
+  const wb = R.worldOf(base);
+
+  check("named Owner of a project derives PROJECT OWNER, unattached included",
+        JSON.stringify(R.personRoles(wb, personOf(base, "t147_own"))) ===
+        JSON.stringify([{ role: "powner", at: T }]),
+        JSON.stringify(R.personRoles(wb, personOf(base, "t147_own"))));
+  check("a project owner is bounded — never the whole function",
+        R.onlyOwnLines(wb, personOf(base, "t147_own"), "fn", T) === true);
+  check("the two owner roles are never grantable by hand",
+        R.isOwnLinesRole("powner") && R.isOwnLinesRole("plowner"));
+
+  const same = function (a, b) { return JSON.stringify(a) === JSON.stringify(b); };
+  const run = function (stored, who, mutate) {
+    const inc = clone(stored); mutate(inc);
+    return { v: A.authorize(stored, inc, personOf(stored, who)),
+             moved: !same(stored, inc) };
+  };
+  const ok = function (name, r) {
+    check(name + " — the fixture actually changed something", r.moved);
+    check(name, r.v.ok, r.v.refusals.join(" / "));
+  };
+  const not = function (name, r) {
+    check(name + " — the fixture actually changed something", r.moved);
+    check(name, !r.v.ok, "was ALLOWED — " +
+      JSON.stringify(r.v.changes.map(function (c) { return c.kind + ":" + c.what; })));
+  };
+
+  /* The custodian regressions §147.3 fixed stay fixed. */
+  const fnCust = (SEED.functions[FN] || {}).custodian;
+  if (fnCust && personOf(SEED, fnCust)) {
+    ok("the custodian reports a deliverable (the §147.3 drift, fixed)",
+       run(SEED, fnCust, function (s) {
+         capOf(s).projects[0].deliverables[0].status = "todo"; }));
+    ok("the custodian gives an In-progress milestone its required %",
+       run(SEED, fnCust, function (s) {
+         const m = capOf(s).projects[0].milestones[2]; m.pct = 75; }));
+    ok("the custodian still submits the function",
+       run(SEED, fnCust, function (s) {
+         s.review.submitted = Object.assign({}, s.review.submitted); s.review.submitted[T] = true; }));
+  }
+
+  /* THE PROJECT OWNER: their project, whole — and nothing beside it. */
+  ok("the project owner reports their own project's deliverable",
+     run(base, "t147_own", function (s) {
+       capOf(s).projects[0].deliverables[0].status = "todo"; }));
+  ok("the project owner reports their own project's milestone, % included",
+     run(base, "t147_own", function (s) {
+       const m = capOf(s).projects[0].milestones[2]; m.pct = 80; m.note = "on it"; }));
+  ok("the project owner reports their own project's outcome, note included",
+     run(base, "t147_own", function (s) {
+       const o = capOf(s).projects[0].outcomes[0]; o.actual = "3"; o.note = "up"; }));
+  not("the project owner may NOT report the project beside theirs",
+      run(base, "t147_own", function (s) {
+        capOf(s).projects[1].deliverables[0].status = "done"; }));
+  not("the project owner may NOT enter the capability's own key objectives",
+      run(base, "t147_own", function (s) {
+        const k = capOf(s).keyObjectives[0]; if (k) k.actual = "99"; else s.group.capabilities[0].name = "x"; }));
+  not("the project owner may NOT submit the function",
+      run(base, "t147_own", function (s) {
+        s.review.submitted = Object.assign({}, s.review.submitted); s.review.submitted[T] = true; }));
+  not("the project owner may NOT write the function's cycle note",
+      run(base, "t147_own", function (s) {
+        s.review.note = Object.assign({}, s.review.note); s.review.note[T] = "our quarter"; }));
+  not("the project owner may NOT edit the project's plan",
+      run(base, "t147_own", function (s) {
+        capOf(s).projects[0].name = "Renamed by its owner"; }));
+
+  /* CONDITION 1 WITHOUT CONDITION 2, AND THE REVERSE. */
+  const unopened = clone(base);
+  delete unopened.access.powner;
+  not("named, but the Project owner row still at its default: nothing",
+      run(unopened, "t147_own", function (s) {
+        capOf(s).projects[0].deliverables[0].status = "todo"; }));
+  const unnamed = clone(base);
+  capOf(unnamed).projects[0].owner = "Somebody Else Entirely";
+  not("the row opened, but not named on any project: nothing",
+      run(unnamed, "t147_own", function (s) {
+        capOf(s).projects[0].deliverables[0].status = "todo"; }));
+
+  /* CONTRIBUTORS REPORT NOTHING FOR NOW (Islam) — the row ships at view. */
+  check("a milestone's owner derives Contributor, not Project owner",
+        R.personRoleKeys(wb, personOf(base, "t147_mile")).join() === "contrib",
+        R.personRoleKeys(wb, personOf(base, "t147_mile")).join());
+  check("a stakeholder derives Contributor too",
+        R.personRoleKeys(wb, personOf(base, "t147_stake")).join() === "contrib",
+        R.personRoleKeys(wb, personOf(base, "t147_stake")).join());
+  not("with the shipped default a milestone owner reports nothing",
+      run(base, "t147_mile", function (s) {
+        const m = capOf(s).projects[0].milestones[0]; m.status = "todo"; }));
+
+  /* ...AND THE FUTURE ISLAM ASKED TO BE READY: contributor edit opened. */
+  const cOpen = clone(base);
+  cOpen.access.contrib = Object.assign({}, cOpen.access.contrib, { a_fn_own: "edit" });
+  ok("contrib opened: the milestone owner reports THEIR milestone",
+     run(cOpen, "t147_mile", function (s) {
+       const m = capOf(s).projects[0].milestones[0]; m.status = "wip"; m.pct = 10; }));
+  not("...and still not the deliverable beside it",
+      run(cOpen, "t147_mile", function (s) {
+        capOf(s).projects[0].deliverables[0].status = "todo"; }));
+  ok("contrib opened: the stakeholder reaches their project's rows",
+     run(cOpen, "t147_stake", function (s) {
+       capOf(s).projects[0].deliverables[0].status = "todo"; }));
+  not("...and not the project beside it",
+      run(cOpen, "t147_stake", function (s) {
+        capOf(s).projects[1].deliverables[0].status = "done"; }));
+
+  /* THE PILLAR OWNER — same pattern, on a unit's pillar. */
+  const pb = clone(SEED);
+  pb.access.plowner = Object.assign({}, pb.access.plowner, { a_unit_own: "edit" });
+  pb.people.push({ key: "t147_pill", name: "Pillar Owner 147", active: true });
+  pb.units[UNIT].items[0].owner = "Pillar Owner 147";
+  const wpb = R.worldOf(pb);
+  check("named Owner of a unit's pillar derives PILLAR OWNER",
+        JSON.stringify(R.personRoles(wpb, personOf(pb, "t147_pill"))) ===
+        JSON.stringify([{ role: "plowner", at: UNIT }]),
+        JSON.stringify(R.personRoles(wpb, personOf(pb, "t147_pill"))));
+  ok("the pillar owner reports a measure of their pillar",
+     run(pb, "t147_pill", function (s) {
+       const m = s.units[UNIT].items[0].measures[0]; m.actual = "7"; m.note = "up"; }));
+  ok("the pillar owner reports a tactic of their pillar",
+     run(pb, "t147_pill", function (s) {
+       const x = s.units[UNIT].items[0].tactics[0]; if (x) { x.status = "Done"; } else { s.units[UNIT].items[0].measures[0].note = "n2"; } }));
+  not("the pillar owner may NOT report the pillar beside theirs",
+      run(pb, "t147_pill", function (s) {
+        const q = s.units[UNIT].items[1];
+        const m = (q.measures || [])[0] || (q.tactics || [])[0];
+        if (m.actual !== undefined) m.actual = "9"; else m.status = "Done"; }));
+  not("the pillar owner may NOT submit the unit",
+      run(pb, "t147_pill", function (s) {
+        s.review.submitted = Object.assign({}, s.review.submitted); s.review.submitted[UNIT] = true; }));
+  not("named, but the Pillar owner row still at its default: nothing",
+      run((function () { const s2 = clone(pb); delete s2.access.plowner; return s2; })(),
+          "t147_pill", function (s) {
+            s.units[UNIT].items[0].measures[0].actual = "7"; }));
+
+  /* ...AND ON A PILLARS FUNCTION, where the old code skipped every fn:
+     target. Merchandising plans in pillars (spec 010). */
+  const MR = "merchandising";
+  if ((SEED.functions[MR] || {}).format === "pillars" &&
+      (SEED.functions[MR].items || []).length) {
+    const fb = clone(SEED);
+    fb.access.plowner = Object.assign({}, fb.access.plowner, { a_fn_own: "edit" });
+    fb.people.push({ key: "t147_fnp", name: "Fn Pillar Owner 147", active: true });
+    fb.functions[MR].items[0].owner = "Fn Pillar Owner 147";
+    check("named Owner of a pillars function's pillar derives PILLAR OWNER there",
+          JSON.stringify(R.personRoles(R.worldOf(fb), personOf(fb, "t147_fnp"))) ===
+          JSON.stringify([{ role: "plowner", at: "fn:" + MR }]),
+          JSON.stringify(R.personRoles(R.worldOf(fb), personOf(fb, "t147_fnp"))));
+    ok("...and reports a measure of that pillar",
+       run(fb, "t147_fnp", function (s) {
+         const m = s.functions[MR].items[0].measures[0]; m.actual = "5"; m.note = "up"; }));
+    if ((fb.functions[MR].items || []).length > 1) {
+      not("...and not the pillar beside it",
+          run(fb, "t147_fnp", function (s) {
+            const q = s.functions[MR].items[1];
+            const m = (q.measures || [])[0] || (q.tactics || [])[0];
+            if (m.actual !== undefined) m.actual = "9"; else m.status = "Done"; }));
+    }
+    not("...and never submits the function",
+        run(fb, "t147_fnp", function (s) {
+          s.review.submitted = Object.assign({}, s.review.submitted);
+          s.review.submitted["fn:" + MR] = true; }));
+  } else {
+    check("the pillars function fixture exists in the seed", false,
+          "merchandising is not a pillars function with items");
+  }
+
+  /* THE CUSTODIAN WHO ALSO OWNS A PROJECT LOSES NOTHING (§147.7, asked by
+     Islam): the most generous role wins (§33), so the powner chip beside the
+     custodian's narrows nothing — whole function, Submit and all. And the
+     roles stay separable: with the CUSTODIAN row closed and the Project
+     owner row open, the same person keeps their own project and loses the
+     rest — bounded reach engaging only when the bounded role is the only way
+     in. Guarded here so no later edit can turn the union into a narrowing. */
+  const both = clone(SEED);
+  const custKey2 = SEED.functions[FN].custodian;
+  const custName2 = SEED.people.filter(function (x) { return x.key === custKey2; })[0].name;
+  capOf(both).projects[0].owner = custName2;
+  check("custodian + project owner: not read as bounded",
+        R.onlyOwnLines(R.worldOf(both), personOf(both, custKey2), "fn", T) === false);
+  ok("custodian + project owner: still reports the OTHER project",
+     run(both, custKey2, function (s) {
+       capOf(s).projects[1].deliverables[0].status = "done"; }));
+  ok("custodian + project owner: still submits the function",
+     run(both, custKey2, function (s) {
+       s.review.submitted = Object.assign({}, s.review.submitted); s.review.submitted[T] = true; }));
+  const narrowed = clone(both);
+  narrowed.access.custodian = Object.assign({}, narrowed.access.custodian, { a_fn_own: "view" });
+  narrowed.access.powner = Object.assign({}, narrowed.access.powner, { a_fn_own: "edit" });
+  ok("custodian row closed, owner row open: their project still reports",
+     run(narrowed, custKey2, function (s) {
+       capOf(s).projects[0].deliverables[0].status = "todo"; }));
+  not("...and the rest of the function no longer does",
+      run(narrowed, custKey2, function (s) {
+        capOf(s).projects[1].deliverables[0].status = "done"; }));
+
+  /* A retired owner derives nothing (§110.4). */
+  const retired = clone(base);
+  personOf(retired, "t147_own").active = false;
+  check("a retired project owner derives nothing",
+        R.personRoles(R.worldOf(retired), personOf(retired, "t147_own")).length === 0);
 })();
 
 console.log("\n" + pass + " passed, " + fail + " failed");

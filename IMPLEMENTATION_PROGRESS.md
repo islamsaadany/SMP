@@ -6,11 +6,9 @@ version (rules A2 / A11, changed 2026-08-20) — those go only when asked for.
 
 **Where it runs:** Vercel, production tracks `main`. Static files plus two
 serverless functions (`/api/state`, `/api/auth`) against Neon Postgres.
-**Latest version:** v3.50 on `main` — §135 (the Setup header line) merged over
-v3.49. Three sessions landed on the same numbers this week: this work was built
-as §130 / v3.48 and renumbered on the way in, because the owners-and-corners run
-took §130 and the same-name register run took §131–§134.
-**Last updated:** 2026-08-27 · v3.51 in flight on the audit branch
+**Latest version:** v3.56 on `main`; **v3.57 (§147, a custodian per project,
+spec 024) on `claude/custodian-per-project-s8q93m`**, awaiting the word to
+merge — renumbered twice on the way as parallel sessions took §130–§146.
 
 **Sign in as:** `SMO` / `1234` — a password change is forced at once (§43.1,
 reversing §19.4).
@@ -67,7 +65,11 @@ Nothing proceeds past this line without an answer.
 
 ## Built and verified
 
-### v3.56 — two faces (§147)
+*The five v3.58 entries below are the UI/UX audit's waves 2 and 3, built and
+checked as separate rounds on one branch and shipping as one version — main
+took v3.52–v3.57 from four other sessions while they were being built.*
+
+### v3.58 — two faces (§156)
 
 - Islam: *"let's make the 2 fonts available are the sytem font and the source
   san3."* §38.7 carried four faces so they could be judged in the real product
@@ -89,11 +91,11 @@ Nothing proceeds past this line without an answer.
 - **And one assertion could not fail when written** (§94.5): it derived the
   attribute key from the family name, and `"IBM Plex Sans".split()[0]` is
   `ibm` where the selector has always been `plex`.
-- `checks/typeface.py` — 11 failures on the pre-§147 build. Wave 1–3 suite,
+- `checks/typeface.py` — 11 failures on the pre-§156 build. Wave 1–3 suite,
   `save-flush`, `state-contrast` and the 33-viewer sweep green.
   **Not merged — awaiting Islam.**
 
-### v3.55 — the card sentences and the delta (§146)
+### v3.58 — the card sentences and the delta (§155)
 
 - Islam's redirect of Wave 3's item 2: the three group cards each carried a
   different kind of sentence and none said what its number meant — a data
@@ -105,11 +107,11 @@ Nothing proceeds past this line without an answer.
   rather than asserting the wording.
 - The ▲ delta moves from the title into the number (where a unit's own cards
   have always put it); "primary" drops from gold to the page's neutrals.
-- 4 failures on the pre-§146 build; whole suite and 33-viewer sweep green.
+- 4 failures on the pre-§155 build; whole suite and 33-viewer sweep green.
   **Not merged — awaiting Islam.**
 
 
-### v3.54 — Wave 3: four visual refinements (§145)
+### v3.58 — Wave 3: four visual refinements (§154)
 
 - **The group landing answers "where do I look next"** — one entry per unit,
   worst first, each linking to it; the same figures the Business units section
@@ -117,51 +119,51 @@ Nothing proceeds past this line without an answer.
 - **Caption explainers stop shouting**; **Branding's pickers open on the colour
   the platform actually paints** (read live, never a literal); **Full Name
   leaves the register's default columns** and stays one tick away.
-- **§145.1**: the strip's entries first carried `data-u` and went nowhere —
+- **§154.1**: the strip's entries first carried `data-u` and went nowhere —
   that wiring is scoped to the chrome. `data-go` is the platform's own
-  document-wide attribute. Found by pressing, §140.1 twice in one session.
-- **§145.2**: an assertion nearly forced a wrong design — "quieter" measured
+  document-wide attribute. Found by pressing, §149.1 twice in one session.
+- **§154.2**: an assertion nearly forced a wrong design — "quieter" measured
   as colour would have made the explanation fainter than the quietest ink.
   Corrected the check, not the design.
-- `checks/wave3.py` — 12 failures on the pre-§145 build. Full sweep: 33
+- `checks/wave3.py` — 12 failures on the pre-§154 build. Full sweep: 33
   viewers, no errors. **Not merged — awaiting Islam.**
-- **Still with Islam**: the three card sentences (§146 mockup) and whether the
+- **Still with Islam**: the three card sentences (§155 mockup) and whether the
   chip refinement goes in with them.
 
 
-### v3.53 — the three contrast repairs (§144)
+### v3.58 — the three contrast repairs (§153)
 
-- Islam approved §143's three findings for repair. All three were **one fault**:
+- Islam approved §152's three findings for repair. All three were **one fault**:
   a scoring colour used as TYPE rather than as a mark — the rail's figure
   (3.26 → 4.93), the focus strip's count (4.45 → 6.45), the hovered button and
   its caret (4.34 → 5.36).
 - `bandInk()` beside `band()`, applied at 30 call sites, with a fallback for a
   tenant band that has no text twin. Two more fixed by hand, same move.
-- **§144.1**: the caret's first fix made it worse (4.34 → 1.43) — a blanket
+- **§153.1**: the caret's first fix made it worse (4.34 → 1.43) — a blanket
   rule hit a caret sitting on the navy chrome. Reverted; fixed at the control
   that failed.
 - `state-contrast.py`'s baseline is now **empty** — anything failing from here
   is new. Full sweep: 33 viewers, no errors. **Not merged — awaiting Islam.**
 
 
-### v3.52 — Wave 2 of the UI/UX audit (§139–§143)
+### v3.58 — Wave 2 of the UI/UX audit (§148–§152)
 
-- **§141 the tables Islam was stuck on**: a plan wider than its pane was cut
+- **§150 the tables Islam was stuck on**: a plan wider than its pane was cut
   with no way to scroll (the page never scrolls sideways, §27.2). It scrolls
   inside its own box now, with the `#` and name column frozen — and the second
   frozen column parks against the first one's MEASURED width, because
-  `left:38px` slid the name 2.5px on every scroll (§141.1).
-- **§140 the reporting controls ride the tab row** — Islam's placement, better
+  `left:38px` slid the name 2.5px on every scroll (§150.1).
+- **§149 the reporting controls ride the tab row** — Islam's placement, better
   than the audit's pinned bar: the row is already pinned chrome, so no new
   sticky element and none of its arithmetic. Submit wears the Report orange,
-  Save draft the same orange as type with no box. **§140.1**: putting them in
+  Save draft the same orange as type with no box. **§149.1**: putting them in
   the row made them subject to the row's wiring — every `#subtabs button` was
   bound as a tab, so Save draft closed the report. Found by pressing it.
-- **§139 the glyphs keep their place and gain their meaning**: "More is
+- **§148 the glyphs keep their place and gain their meaning**: "More is
   better / Less is better", and the compile rules described; the repeated
   "Latest" quiet, with no standing dotted mark.
-- **§142 the viewer switcher** reads name + place, job title on the hover.
-- **§143 hover and focus are measured at last** (closes §16.17), reusing the
+- **§151 the viewer switcher** reads name + place, job title on the hover.
+- **§152 hover and focus are measured at last** (closes §16.17), reusing the
   sweep's own rule. Three light-mode failures recorded as a named baseline —
   `.dlcar` 4.34, `<b>` 4.45, `.rnum` 3.26 — **awaiting Islam's colour
   decision**, since a palette is his (rule 1c).
@@ -170,6 +172,223 @@ Nothing proceeds past this line without an answer.
   reporting assertion updated — it went red for the right reason. Full sweep:
   33 viewers, no errors. **Not merged — on the branch awaiting Islam's word.**
 
+
+### v3.57 — a custodian per project: two roles, not one (§147, spec 024)
+
+- **Three bounded roles, all derived from being named** (§147.7, Islam's
+  correction of the first build): **Project owner** from a project's Owner
+  row; **Pillar owner** from a pillar's, on a unit or a pillars function;
+  **Contributor** for everyone else the plan names — collaborators,
+  stakeholders, milestone owners — who report nothing until their row is
+  opened, and then only the rows that name them.
+- **Two conditions before an owner reports**: their role's Reporting cell at
+  edit on Roles & access (both owner rows ship at view), and being named the
+  Owner. No register attachment — the silent third condition that broke the
+  first live test is gone.
+- **One reach rule per row** (`mayReportRow` in `lib/rules.js`), asked by
+  both panes and the authoriser; none of the three roles ever submits.
+- **Two drifts fixed on the way**: a custodian's deliverable report and the
+  §104.10 milestone % were refused as plan since migration 024; and a
+  pillars function's Report page read the own-unit cell while the server
+  judged the own-function one.
+- Proof: `test-authorize.js` §17 (297 passed; proved able to fail),
+  `checks/project-custodian.py` (three viewers, both ends, proved able to
+  fail), the matrix and project checks, the full `qa.py` sweep; the seed
+  scanned — 24 people gain a true chip, nobody's grants move.
+
+### v3.56 — a test copy is a send, and it says so (§146)
+
+- **Islam:** *"there have been multiple sent emails earlier. weren't they saved?
+  I can't see them in the overview."*
+- **Nothing was lost, and proving that came first.** `messages` sits outside the
+  state graph with no foreign key, so the `TRUNCATE … CASCADE` on every save
+  cannot reach it, and no `DELETE FROM messages` exists in the product. Driven
+  end to end against a real Postgres with a stub in front of Resend: a send
+  writes its row *before* the emails go out and appears on the Overview at once.
+- **The cause:** two kinds of email leave this platform and only one was
+  recorded. `test` — *Send me a copy*, and the test send on Email settings —
+  sends a real email through the same builder and wrote nothing at all.
+- **Built:** the test copy is recorded (`kind`, migration 028; NULL is a real
+  send, nothing backfilled), marked in the **audience** column — beside the
+  heading it wrapped the frozen first column, §88 and §116.4 — and **Delete
+  reaches test copies only** (Islam's B), drawn behind `mayDestroy()` and
+  refused again on the server.
+- **The note by *Send me a copy* shrank** to one clause on the hover it already
+  had: with the row in the record beneath, the list is the answer (CLAUDE.md
+  1b-ii, §127).
+- **Found on the way:** `SYNC.mailTest()` did not forward the body — §142's
+  fault, found by looking this time rather than by being bitten.
+- **Proved:** `checks/send-overview.py` §6 (5 / 1 / 2 failures against three
+  deliberate breaks) and `scripts/test-test-copies.js`, 19/0 against a real
+  Postgres (3 / 11 against two breaks). Round trip PASS on a virgin database and
+  on a tenant rolled back to its pre-§146 shape.
+### v3.55 — fill the gaps (§145, spec 023)
+
+- **A third Strategy-cell state, Fill gaps**: the custodian or owner writes
+  only where the plan holds nothing — targets, directions, compile rules,
+  owners, project dates, a tactic naming no quarter, the aspiration. Granted
+  per role by the SMO on Roles & access; reaches only what the person holds;
+  no rows added, removed, renamed or reordered in this mode.
+- **A fill is pending until the office confirms** (Islam's design): live,
+  amber, still the filler's to correct; the office confirms with a tick or
+  by simply correcting the value. Stored as `pend` marks in each row's
+  `extra` JSONB — no migration, proved on a real Postgres 16.
+- **Reporting flows, performance waits**: figures and drafts land against a
+  pending target; the score reads a dash and leaves every average until the
+  office confirms; **Submit is refused**, naming the rows and pointing at
+  the office. Save draft is never blocked.
+- **Server-authoritative**: the authoriser classifies fill / amend / unfill /
+  confirm ahead of the ordinary diff; anything else falls through
+  office-only. `test-authorize.js` §16 — 231 pass, 6 red on the pre-build.
+- **The access matrix restyle Islam approved from the mockup** (chip
+  toggles, tinted lit states, hairline rows) rides along.
+- **§117's .pptx plan download button is hidden for everyone** (§145.9,
+  asked mid-build) — machinery kept, one line to give back.
+- Proved by `checks/gap-fill.py` (fails on the pre-build from its first
+  section), the full `qa.py` walk, and the virgin-database round trip.
+- **Second build (§145.10–13), same branch:** collaborators fillable — an
+  empty list only, and a pending name confers no reporting right until the
+  office confirms (`namedOn` skips marked fields, owner included); the
+  objectives' This-year column shows by default (§66's toggle and saved
+  choices kept); and the plan says where it is owed — a count on the
+  Strategy tab, per-row rail counts, a fill-mode gap band of place chips
+  (each a door that keeps fill mode on), and a Next-gap walker, all fed by
+  one list and rewritten in place as fills land. 237 server tests, the
+  extended browser check, qa and eleven suites green.
+- **Third build (§145.14), same branch — the finding system red and worded,
+  from Islam's screens:** the whole missing bar ("N Missing" + one red chip
+  per owing place + the solid red *Fill in missing elements* button) moves
+  INTO the section row beside the section tabs, read mode included, nothing
+  in the page body; the Strategy tab's number is gone. The corner button
+  beside the arrange arrows is the same press (red → *Done filling* →
+  quiet amber *Review pending · N*); rail rows read red italic "N Missing"
+  → green ✓; a page owing nothing says so and points away. One press opens
+  fill mode and walks to the first blank — fixed to wait for the paint
+  §30.1 holds mid-click, the bug that made a real press behave differently
+  from every programmatic probe. Red words on `--bad-tx` (§38.5).
+  `checks/gap-fill.py` §9 rewritten (58 assertions); qa and the suite
+  battery re-run green.
+
+### v3.54 — Send an email opens on what went (§144)
+
+Islam: *"The opening page ... should be a dashboard of what was sent, to whom,
+how many people ... and when I say create a message it takes me to another tab
+... and when I finish and send it it should take me back to the dashboard and
+show me that the message was sent there."* And: *"change messages to
+Overview."*
+
+- **Two subtabs** — **Overview** and **Write a message** — in the platform's
+  own section row, not a page with a button that navigates.
+- **Overview is the record**: drafts under *Not sent yet*, then what was sent
+  with heading, when, **who it went to** (in the platform's own words for roles
+  and places), how many it reached, and by whom. A row still opens what
+  happened to each person.
+- **Sending lands back on the Overview** with a green outcome band and the
+  composer emptied. A partial failure lands there too; only a send that never
+  happened stays put, in red, with the message still loaded.
+- **No grey descriptions** on either tab, and the two header dropdowns are
+  gone. The one sentence carrying a real fact — that the audience criteria add
+  up rather than narrow — moved to the heading's hover.
+- **§143 is superseded**: *Write another* and the bar's outcome line go, and
+  `checks/send-said.py` is deleted rather than left red. Its surviving rule —
+  a send cannot be repeated by one press — now holds by construction.
+- **A loud control for the action** (§144.8): **Send an email**, above the
+  lists. Both the placement and the word are Islam's, picked from three drawn
+  in the real page, and both costs were stated before he chose — the button
+  scrolls away on a long record, and the platform now has three nouns for one
+  thing. Drawn only on the Overview, asserted at both ends.
+
+**The bug it cost:** both list fetches were gated on `#msgsend`, the Send
+button, which now lives on the other tab — so on the Overview neither list was
+ever asked and both said *Asking…* for ever. Found by driving the built page,
+not by reading the diff. Three other checks held the same stale selector and
+were fixed (§51.11).
+
+**Proved:** `checks/send-overview.py`, watched to fail first — the fetches
+re-gated on `#msgsend` → 3 failures; the return-to-record removed → 8. `qa.py`
+green with no console errors; `send-message.py` and `email-greeting.py` green
+after being taught about the tabs.
+
+**On the branch only — not merged to main.**
+
+
+### v3.54 — the bar reports, and moves on (§143)
+
+Islam, using the product: *"When I send I don't get any verification that the
+message was sent and the page stays the same view."*
+
+**The send was working.** Established first, by driving the built platform and
+sending a real message through its own controls. Two faults after that moment,
+both pre-existing §95 code:
+
+- **Success was written in the failure-neutral voice.** The words were there —
+  in 12px, the page's quietest grey. `reallySend()` works out `ok: !j.failed`,
+  stores it, and nothing ever read it: a *failed* send turned red, a successful
+  one got no colour at all.
+- **The loudest control still said not-sent.** The orange button read *Send to
+  76 people* and was live — one press from sending the whole thing again, with
+  nothing on screen to say it had already gone.
+
+Now: the outcome reads in `--good-tx` / `--bad-tx` at `--fs-note`, and the CTA
+becomes **Write another** (clears the message, keeps the audience). `sent` is
+its own flag, because a refused request and a partial delivery both read
+`ok:false` and only one must lock the button. Both buttons are drawn with one
+hidden, so the way back needs no repaint — the message is typed *into* the
+preview and a repaint would kill the caret mid-word.
+
+**Found while building it (§142.8):** the greeting was being emitted *inside*
+`data-mail-body`, the editable region — so one keystroke in the message
+absorbed *"Dear Ahmed,"* into the body text, and the email would have carried
+the greeting twice with the wrong person's name for every other recipient.
+Moved outside; three assertions added.
+
+**Proved:** `checks/send-said.py` — the assertions that matter are that the
+send cannot be repeated by one press (asked by pressing where Send was and
+counting requests) and that the way back exists with the caret intact. Watched
+to fail first: the pre-§143 bar → 5 failures; `sendmsgTouched()` removed → 2.
+`qa.py` green; `send-message.py` and `email-greeting.py` green;
+`test-email-greeting.js` 37/0; `test-authorize.js` 212/0;
+`test-mail-contrast.js` 16/0.
+
+**On the branch only — not merged to main.**
+
+
+### v3.54 — the email greets its receiver (§142, spec 022)
+
+Islam: *"can we make an option while sending the email to customize the email
+by the first name of the reciever like starting the email with Dear Ahmed ...
+it's a turn on and off option."* Settled by question-and-answer, then from a
+mockup of the real composer, then **corrected once by looking at it**.
+
+- **A per-message switch on Send a message**, off by default, with the greeting
+  word editable per message (starting at "Dear"). Send a message only —
+  including *Send me a copy*, which greets whoever is **signed in**.
+- **Every recipient already got their own email** (§74.3), so nothing about how
+  many go out changes; what changes is that they stop being identical. The
+  builder leaves a **marked region** and the server fills it once per recipient
+  off the stored register.
+- **The first name kept whole** — "Dear Abd El Moniem", never "Dear Abd" —
+  using the register's own name reader, so there is no second definition.
+- **Never "Dear ,":** a row whose name yields nothing loses the greeting LINE,
+  and still receives the message.
+- **One line, no prose** (Islam's correction to a two-line first draft), with
+  the word box before the switch so the switch never moves.
+- **Migration 027**: one nullable `greet` column on `messages` and
+  `message_drafts`. NULL is off; nothing backfilled.
+
+**The bug it found:** `SYNC.mailSend()` names every field it forwards, so
+`greet` was silently dropped — the emails would have been personalised
+perfectly and **the record would have said no message ever greeted anybody**.
+
+**Proved:** `test-email-greeting.js` 37/0 (a real Postgres, standing in front
+of the provider via the new `SMP_RESEND_ENDPOINT`, reading what each recipient
+was actually sent); `checks/email-greeting.py` 38/0 (the screen and the seam,
+over HTTP). Both watched to fail first — 8/2/2 and 2/3. `qa.py` green, no
+console errors; `send-message.py`, `setup-pages`, `setup-rail`, `setup-search`,
+`office-chat` green; `test-authorize.js` 212/0; `test-mail-contrast.js` 16/0;
+round trip and clean parity PASS **on virgin databases**.
+
+**On the branch only — not merged to main.**
 
 ### v3.51 — Wave 1 of the UI/UX audit: the destination row scrolls (§136)
 
@@ -226,7 +445,7 @@ Nothing proceeds past this line without an answer.
   nobody can see them (§61).
 - **Send a message → Send an email**, with the Email settings folded in as its
   second section (a status table, four fields, a live rendered preview and a
-  test send: not a dropdown). **Inbox → In Platform inbox.**
+  test send: not a dropdown). **Inbox → Platform Inbox**, and Focus measures moves to *Measurement*.
 - **A person's company is sometimes derived and sometimes stored** (§135.6):
   read-only wherever the unit has already answered it, written only where
   nothing else has, so two fields cannot contradict one stored fact.
@@ -244,6 +463,42 @@ Nothing proceeds past this line without an answer.
   green; `test-authorize` 212/0; **round trip and clean parity on a virgin
   Postgres 16** (§113.7); contrast 52 failures, unchanged, none on the new
   surfaces.
+
+### v3.52 — the Knowledge base in two tabs (§141)
+
+How it works 9 | Questions & answers 43 — counts on the tabs, contents pills
+per tab, the pen on the questions tab alone, the tour's replay with the
+explanations, and the last-used tab remembered per browser. Server untouched.
+
+**Verified:** kb-pen.py §0 (failed 4 ways with the default flipped) ·
+knowledge-base.py re-taught to gather from both tabs after going loudly red ·
+tour.py clean · qa.py ERRORS: none.
+
+### v3.52 — the knowledge base gets a pen (§140)
+
+The office edits the assistant's scenarios on the page they are read from —
+approved from a mockup first. One precedence rule in `lib/rules.js` feeds the
+page AND the assistant's corpus, so the two can never disagree; overrides ride
+`org.extra`, delete on default, and the shipped wording is always one click
+back. Standard entries can be rewritten but never deleted; own questions can be
+added per group and removed. Typed text renders escaped.
+
+**Verified:** driven against a real Postgres including the reload round trip ·
+kb-pen.py ALL CLEAR, failing 2 ways with the rule broken · test-assistant 45/0
+· test-authorize 215/0 · extract-kb --check in step · qa.py clean.
+
+### v3.52 — the send says what is happening (§139)
+
+The "glitch": with the assistant on, `say` holds its response for the model
+round-trip, so the typed message sat in the box for seconds. Now it moves into
+the thread the moment Send is pressed, the box empties, and a quiet *Asking
+the assistant…* line shows until the reply replaces the echo. A failed send
+puts the words back in the box; the poll skips a beat while a send is in
+flight so it cannot erase the echo; a network failure says "That did not
+send" instead of the browser's "Failed to fetch".
+
+**Verified:** driven against a 4s-slow model and an aborted send ·
+office-chat.py §13 permanent, failing 3 ways on the pre-§139 build.
 
 ### v3.49 — the register notices two people whose name reads the same (§131)
 
@@ -319,6 +574,17 @@ the layout, each watched to fail first · qa.py ERRORS: none · test-chat 52/0 �
 test-assistant 33/0 · test-authorize 193/0. **One assertion was rewritten for
 being unfalsifiable** — it measured the row against the panel, and a row is
 inside its own panel by definition.
+
+### v3.50 — the knob's guard keyed on words the provider never says (§134.5)
+
+§134 shipped and went straight down in production: gemini-3.6-flash refuses
+the thinking cap with the GENERIC "400: Request contains an invalid argument."
+— and the self-healing retry only fired when the 400 named thinking, because
+the stub imitated the documentation's verbose refusal instead of the
+provider's real one. The guard now keys on the situation (a 400 on a request
+that carried the knob), never the wording. Stub corrected to production's
+verbatim words; the shipped guard reproduces the production failure 2 ways in
+the suite; 39/0 after.
 
 ### v3.49 — the thinking cap (§134)
 

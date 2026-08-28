@@ -49,19 +49,21 @@ const stub = http.createServer(function (req, res) {
     };
     if (MODE === "refuse") return reply(429, { error: { message: "quota" } });
     if (MODE === "badkey400") return reply(400, { error: { message: "API key not valid. Please pass a valid API key." } });
+    if (MODE === "bad400") return reply(400, { error: { message: "Request contains an invalid argument." } });
     if (MODE === "notfound") return reply(404, { error: { message: "model not found" } });
     if (MODE === "garbage") {
       return reply(200, { candidates: [{ content: { parts: [{ text: "not json at all" }] } }] });
     }
     if (MODE === "empty") return reply(200, { candidates: [] });
-    /* THE PROVIDER THAT NEVER HEARD OF THINKING (§134): a 400 naming the
-       field when it is present, an ordinary answer when it is not — which is
-       how Google actually refuses an unknown generationConfig member. */
+    /* THE PROVIDER THAT REFUSES THE THINKING KNOB (§134.5) — with the words
+       Google ACTUALLY uses, taken verbatim off production: the terse generic,
+       not the verbose "Unknown name" refusal the docs show for a misspelled
+       field. The first stub imitated the documentation, the guard keyed on
+       its wording, and the real refusal sailed past it (§100.3: a stub models
+       the provider, and the provider is what production said). */
     if (MODE === "nothink" && LAST && LAST.generationConfig &&
         LAST.generationConfig.thinkingConfig) {
-      return reply(400, { error: { message:
-        'Invalid JSON payload received. Unknown name "thinkingBudget" at ' +
-        "'generation_config.thinking_config'" } });
+      return reply(400, { error: { message: "Request contains an invalid argument." } });
     }
     if (MODE === "hang") return;                       /* never answers: the timeout path */
     /* THE MODEL'S WORDS ON A HANDOFF ARE A TRAP, and the stub sets it (§104).
@@ -265,10 +267,48 @@ const stub = http.createServer(function (req, res) {
   r6 = await assistant.ask({ kb: kb, question: "x", history: [], who: "w", labels: {} });
   ck("a bad key is never retried into", r6.ok === false && r6.badKey === true && CALLS === 1,
      { calls: CALLS, r: r6 });
+  /* AND A GENERIC 400 WITHOUT THE KNOB IS NOT RETRIED — the retry is about
+     the knob, and once the knob is off a 400 is the question's own problem.
+     The cap is dropped FIRST through a real refusal, then the provider 400s
+     everything: exactly one call, and the error surfaces. (The first version
+     of this assertion reset the cap in the line above measuring it was off —
+     a test bug its own calls-count exposed.) */
+  assistant._resetThinkCap();
+  MODE = "nothink";
+  await assistant.ask({ kb: kb, question: "x", history: [], who: "w", labels: {} });
+  MODE = "bad400"; CALLS = 0;
+  r6 = await assistant.ask({ kb: kb, question: "x", history: [], who: "w", labels: {} });
+  ck("a 400 with no knob in the request is surfaced, not retried",
+     r6.ok === false && CALLS === 1, { calls: CALLS, r: r6.ok });
   assistant._resetThinkCap();
   MODE = "answer";
 
-  console.log("\n7 · what actually goes to the provider");
+  console.log("\n7 · the tenant's own words over the shipped ones (§140)");
+  {
+    const shipped = { recipes: [
+      { id: "r1", group: "G", q: "old question", a: "old answer", who: "everyone" },
+      { id: "r2", group: "G", q: "kept question", a: "kept answer", who: "everyone" }
+    ], sections: [], pages: [] };
+    const t = { ov: { r1: { q: "new question", a: "new answer" } },
+                add: [ { id: "kbx1", g: "G", q: "own question", a: "own answer" },
+                       { id: "kbx2", g: "G", q: "", a: "" } ] };
+    const m = assistant.withTenant(shipped, t);
+    ck("an override replaces the shipped wording",
+       m.recipes[0].q === "new question" && m.recipes[0].a === "new answer", m.recipes[0]);
+    ck("an untouched entry is untouched", m.recipes[1].a === "kept answer");
+    ck("an added question joins the corpus, and an empty one does not",
+       m.recipes.length === 3 && m.recipes[2].id === "kbx1", m.recipes.length);
+    const text = assistant.corpusText(m, {});
+    ck("the corpus the model reads carries the tenant's words and not the old ones",
+       text.indexOf("new answer") > -1 && text.indexOf("old answer") === -1 &&
+       text.indexOf("own answer") > -1, null);
+    ck("no tenant, no change — the same object back", assistant.withTenant(shipped, null) === shipped);
+    ck("a malformed tenant blob changes nothing",
+       JSON.stringify(assistant.withTenant(shipped, { ov: "junk", add: 7 }).recipes) ===
+       JSON.stringify(shipped.recipes));
+  }
+
+  console.log("\n8 · what actually goes to the provider");
   MODE = "answer";
   await assistant.ask({ kb: kb, question: "how do I report", history: [], who: "a strategy custodian", labels: { pillar: "direction", pillars: "directions" } });
   const sys = (LAST.systemInstruction.parts || []).map(function (p) { return p.text; }).join("\n");

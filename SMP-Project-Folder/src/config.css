@@ -63,13 +63,18 @@
      26px control, so the padding was most of the row. Seven roles × 7px saved
      twice over is what lets the table fit without scrolling now the header
      notes have gone to hover. */
-  .acgrid th, .acgrid td { padding-top:5px; padding-bottom:5px; }
+  /* §145's approved restyle: roomier rows over hairline separators. */
+  .acgrid th, .acgrid td { padding-top:7px; padding-bottom:7px; }
+  .acgrid tbody td { border-bottom:1px solid var(--line-soft); }
   .acgrid thead th { padding-top:9px; padding-bottom:9px; }
   /* Below the width where seven columns of controls fit, the table scrolls
      inside its own box rather than pushing the page sideways — a horizontal
      page scroll breaks every position:sticky above it (§27.2). */
   .acgrid { overflow-x:auto; }
-  .acgrid table { min-width:940px; }
+  /* 1010, not 940 (§145): the two Strategy cells hold THREE toggles now, and
+     at 940 a 9.4% column clipped the third with nothing to read it by — the
+     grid scrolls inside its own box (§54.6), so the floor is the honest fix. */
+  .acgrid table { min-width:1010px; }
   .acgrid tr.grouprow td { background:var(--panel); color:var(--panel-ink);
                            font-size:10.5px; letter-spacing:.13em; text-transform:uppercase;
                            font-weight:700; padding:7px 13px; }
@@ -77,6 +82,9 @@
         font-weight:700; padding:3px 9px; border-radius:99px; font-style:normal; }
   .st-none { color:var(--none); border:1px dashed var(--none); }
   .st-view { color:var(--stone); background:var(--surface-2); border:1px solid var(--line); }
+  /* §145: the fill-the-gaps state wears the amber the pending marks wear —
+     the grant and its consequence read as one family. */
+  .st-fill { color:var(--attn-tx); background:var(--attn-bg); border:1px solid var(--attn); }
   /* The ACCENT tint, not the warning tint. "May edit" is not a warning, and
      gold-deep on the amber ground was 4.34:1 as well as saying the wrong
      thing. */
@@ -90,19 +98,25 @@
      used to be text — one text glyph and one colour emoji — so the box was
      sized in ems and the emoji hung out of the bottom of it. inline-flex
      centres whatever is inside, and the SVGs are sized here (§ICON_EYE). */
-  .stbtn { width:26px; height:24px; border:1px solid var(--line); background:var(--surface);
+  .stbtn { width:24px; height:24px; border:1px solid var(--line); background:var(--surface);
            color:var(--ink-3); cursor:pointer; font-size:11px; padding:0; border-radius:2px;
            font-family:var(--sans); line-height:1;
            display:inline-flex; align-items:center; justify-content:center; }
   .stbtn svg { width:14px; height:14px; display:block; }
   .st svg { width:12px; height:12px; display:inline-block; vertical-align:-2px; }
-  .stbtn:first-child { border-radius:2px 0 0 2px; }
-  .stbtn:last-child { border-radius:0 2px 2px 0; }
+  /* §145's approved restyle (Islam, from the gap-fill mockup: "I really like
+     that design for the access table"): each toggle its own rounded chip
+     with a small gap — not a fused strip — and a LIT toggle is a tint with
+     a coloured border rather than a solid fill, §41's budget on a page that
+     draws up to 27 of them. The icon carries the accent: gold-deep on
+     over-bg is the .st-edit chip's own measured pair. */
+  .stbtn { border-radius:6px; margin:0 1px; }
   .stbtn:hover { background:var(--surface-2); }
   .stbtn:focus-visible { outline:2px solid var(--gold); outline-offset:1px; }
   .stbtn.on.st-none { background:var(--none); border-color:var(--none); color:var(--surface); }
-  .stbtn.on.st-view { background:var(--stone); border-color:var(--stone); color:var(--on-fill); }
-  .stbtn.on.st-edit { background:var(--gold-deep); border-color:var(--gold-deep); color:var(--on-fill); }
+  .stbtn.on.st-view { background:var(--over-bg); border-color:var(--gold-deep); color:var(--gold-deep); }
+  .stbtn.on.st-edit { background:var(--over-bg); border-color:var(--gold-deep); color:var(--gold-deep); }
+  .stbtn.on.st-fill { background:var(--attn-bg); border-color:var(--attn); color:var(--attn-tx); }
 
   .chart-legend i.st { margin-right:2px; }
 
@@ -438,11 +452,11 @@
      "Strategy Management Office — all units" would otherwise set the width of
      the chrome's first line and wrap the two buttons beside it onto a second.
      The name truncates; the popup shows it in full. */
-  /* ── THE WHOLE ANSWER, NOT THE FIRST 150 PIXELS OF IT (§142) ───────────
+  /* ── THE WHOLE ANSWER, NOT THE FIRST 150 PIXELS OF IT (§151) ───────────
      The cap cut "Mohamed Essam — Head of the Strategy Management Office" at
      the em dash, so the control showed the name and hid the part that says
      what is being looked at. With the option now reading name + place
-     (§142's own change), the label is short enough to show whole — Islam:
+     (§151's own change), the label is short enough to show whole — Islam:
      *"if we make it all visible it will be ok"* — so the cap rises to a
      ceiling that only ever catches a genuinely long tenant name rather than
      the ordinary case. The row has the room: it holds the label, this
@@ -1892,6 +1906,56 @@
   .ctarow { display:grid; grid-template-columns:1fr 1fr; gap:8px 10px;
             border-top:1px dashed var(--line); margin-top:12px; padding-top:11px; }
   .ctarow .why { grid-column:1 / -1; }
+
+  /* ── THE SEND OUTCOME SPEAKS (§143) ─────────────────────────────────
+     It was `.why` — the legend size, in the page's quietest grey — so a
+     successful send read exactly like an empty space, and `result.ok` was
+     computed and never used. A sentence somebody has to read after an act
+     that cannot be undone is not a legend.
+
+     THE TYPE-SAFE TWINS, never `--good` / `--bad` (§38.4, six times now):
+     measured on this bar at 6.82 and 7.55 in light, 10.45 and 8.14 in dark.
+
+     `--fs-note`, NOT `--fs-small`: small is 12px — the size `.why` already
+     was — and note is 13px, the one the product uses for cells and notes. The
+     first build reached for the wrong constant and the check caught it,
+     because it asks for a size worth READING rather than for a token name. */
+  .msgsaid { font-size:var(--fs-note); }
+  .msgsaid.bad  b { color:var(--bad-tx); }
+
+  /* The Overview's one loud control (§144.8), above the lists it leads away
+     from. Its own row, so the heading under it keeps its spacing. */
+  .msgnew { margin:0 0 20px; }
+
+  /* ── THE OUTCOME, ON THE RECORD (§144) ──────────────────────────────
+     A send that the server answered leaves the composer, so what it did is
+     said on the Overview — above the two lists, with the message it describes
+     sitting in the one below. A band rather than a line: it is the answer to
+     the act you just took, and it goes the next time the page is drawn fresh. */
+  .sentsaid { margin:0 0 18px; padding:11px 16px; border-radius:8px;
+              background:var(--good-bg); border:1px solid var(--good);
+              font-size:var(--fs-note); color:var(--good-tx); }
+  .sentsaid.bad { background:var(--bad-bg); border-color:var(--bad);
+                  color:var(--bad-tx); }
+  .sentsaid .quiet { color:var(--ink-2); font-weight:400; }
+
+  /* ── THE GREETING ROW (spec 022) ────────────────────────────────────
+     ONE LINE, and no prose in it — Islam, of the two-line first draft: "it
+     should be one line you dont need 2 lines .. and no explanations needed in
+     the setting itself it's clear." It borrows `.ctarow`'s dashed rule and
+     spacing, because it is the composer's other settings row and the two
+     belong to the message rather than to the page.
+
+     THE BOX IS SIZED FOR THE ONE WORD IT HOLDS. `.fld` is `width:100%`, which
+     in `.ctarow`'s two-column grid made it half the pane — a field that wide
+     reads as one expecting a sentence. `flex:none` as well as a width, or the
+     flex row would shrink it under `.cfg-lab`'s `flex:1` (§110.8's family:
+     a width alone is not enough inside a flex or table layout). */
+  .ctarow.greetrow { grid-template-columns:1fr; }
+  .greetword { width:120px; max-width:120px; flex:none; }
+  /* The one thing the screen cannot say by showing: that the name above is a
+     sample. Sits under the preview, above the row it explains. */
+  .greetsay { display:block; margin:8px 0 0; }
 
   /* THE BAR DOES NOT MOVE. Pinned to the foot of the window rather than
      sitting at the end of the scroll, so the count and the button stay

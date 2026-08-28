@@ -568,15 +568,23 @@ var SYNC = (function () {
         function (err, j) { done(err, err ? null : j); });
     },
     mailSend: function (o, done) {
+      /* `greet` is the WORD, and it is here for the RECORD rather than for the
+         send: the personalisation rides in the html's marked region, so a
+         build that dropped this would mail perfectly and write a record saying
+         no message ever greeted anybody (spec 022). Which is what happened —
+         this function names every field it forwards, so the new one was
+         silently absent until the check asked what was posted. */
       mailPost({ action: "send", draftId: o.draftId,
                  criteria: o.criteria, subject: o.subject, body: o.body,
                  ctaLabel: o.ctaLabel, ctaHref: o.ctaHref, html: o.html,
+                 greet: o.greet,
                  fromName: o.fromName, replyTo: o.replyTo },
         function (err, j) { done(err, err ? null : j); });
     },
     mailDraftSave: function (o, done) {
       mailPost({ action: "draftSave", id: o.id, subject: o.subject, body: o.body,
-                 ctaLabel: o.ctaLabel, ctaHref: o.ctaHref, criteria: o.criteria },
+                 ctaLabel: o.ctaLabel, ctaHref: o.ctaHref, greet: o.greet,
+                 criteria: o.criteria },
         function (err, j) { done(err, err ? null : j); });
     },
     mailDraftList: function (done) {
@@ -597,9 +605,22 @@ var SYNC = (function () {
     mailHistoryOne: function (id, done) {
       mailPost({ action: "historyOne", id: id }, function (err, j) { done(err, err ? null : j); });
     },
+    /* ── REMOVING A TEST COPY (§145) ────────────────────────────────
+       The server decides whether it may go, and whether the row is a test at
+       all — this only carries the id. */
+    mailHistoryDelete: function (id, done) {
+      mailPost({ action: "historyDelete", id: id }, function (err, j) { done(err, err ? null : j); });
+    },
     mailTest: function (o, done) {
+      /* `body` IS FORWARDED, and it was not. This function names every field it
+         sends, so a field absent here is a field the server never sees however
+         correctly the caller filled it — the fault §142 hit with `greet`, where
+         the emails were personalised perfectly and the record held nothing. It
+         cost nothing while a test copy was recorded nowhere; now that the row
+         is written (§145), leaving it out would store every test copy with an
+         empty body. */
       mailPost({ action: "test", to: o.to, subject: o.subject, html: o.html,
-                 fromName: o.fromName, replyTo: o.replyTo },
+                 body: o.body, fromName: o.fromName, replyTo: o.replyTo },
         function (err, j) { done(err, err ? null : j); });
     },
     boot: function (paint) {

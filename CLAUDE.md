@@ -39,6 +39,22 @@ A drift between specs and code is a documentation bug — report it before silen
 - **Stick to exactly what was requested — no extra "improvements" or visual changes.**
 - **If a fix requires touching something the user didn't mention, flag it and ask first.**
 
+### 1b-ii. NO GREY DESCRIPTIONS UNDER PAGE AND SECTION HEADINGS (2026-08-27)
+- **Islam: *"remove the grey descriptions and stop adding descriptions to
+  pages."*** A heading names the thing; a paragraph under it in grey saying the
+  same thing again is furniture, and it pushes the content people came for
+  further down the page.
+- **Do not pass a `note` to `section()` for new work**, and do not add
+  explanatory prose under a page title.
+- **Where a sentence carries a fact the screen does not otherwise state**, it is
+  not a description — it is information, and it belongs on a **hover** (`tip()`)
+  or in the knowledge base, never as a paragraph. Flag it rather than deleting
+  it silently: §127 made every line of chat-settings prose a tooltip for exactly
+  this reason, and kept *"No one is set"* on the page because a status is not a
+  description.
+- Existing pages keep theirs until Islam asks for a sweep; this rule governs
+  what is BUILT from now on.
+
 ### 1c. CRITICAL: UI Changes Require Explicit Approval
 - **NEVER change any UI design, layout, styling, or visual element without explicit user approval.**
 - **This includes: colors, borders, spacing, card designs, labels, icons, section order, font sizes — EVERYTHING visual.**
@@ -160,6 +176,15 @@ A drift between specs and code is a documentation bug — report it before silen
   merge commit, so the moment two sessions have touched the same thing you are
   told rather than shown a silent auto-merge. On a refusal: fetch, merge main
   into the branch, resolve there, re-run the checks, then fast-forward.
+- **`node --check sw.js` AFTER EVERY MERGE (§146.2).** Merging main spliced the
+  two SHELL name blocks together: the branch's `const SHELL` landed INSIDE
+  main's comment, the comment lost its opener, and the file ended with **two
+  `const SHELL` declarations** and loose prose between them. **It did not
+  conflict.** A worker that will not parse does not install, so every returning
+  browser would have gone on serving itself the old shell — §91's own failure,
+  by a route §91 does not name. `sw.js` is **not generated**, so no build step
+  would have caught it; rebuild it from main's copy and re-apply the one line
+  the branch changes, exactly as §91 prescribes for the built file.
 - **AFTER A MERGE THAT BRINGS IN SOMEBODY ELSE'S SOURCES, REBUILD — never trust
   git's merge of the built file.** `strategy-management-platform-vX.Y.html` is
   generated; git will happily splice two versions of it into something that
@@ -702,6 +727,64 @@ console errors (in this cloud environment, run it via a wrapper that points Play
   a gap: collaborators and an unmarked quarter are left alone. The check MAKES
   the gaps (§94.2) and asserts an EXACT count plus **that the filled facts are
   untouched**, or a builder that marked everything would pass.
+- **FILL THE GAPS (§145, spec 023):** the Strategy cells carry a THIRD state —
+  View / **Fill gaps** / Edit — letting a custodian or owner write only where
+  the plan holds NOTHING. `GAP_FIELDS`/`GAP_SCORE_FIELDS`/`mayFillPage()`/
+  `pendOf()`/`pendingScore()` live in `lib/rules.js` (one definition for
+  screen, server and deck); a fill is `row.pend[field] = {by, at}`, stored as
+  an absence, riding `extra` JSONB with no migration; the authoriser's gap
+  pass (`gapFill`/`gapConfirm`) judges fill/amend/unfill/confirm against a
+  CLONE and everything else falls through office-only. Reporting and drafts
+  flow against a pending target; the SCORE reads a dash and leaves every
+  average until the office confirms; Submit is refused naming the rows.
+  `gapCell()` is the ONE builder for a fillable cell; no rows are ever
+  added/removed/renamed/reordered in fill mode; an office write settles (the
+  setters lift the mark — correcting is confirming). **Marks are compared
+  canonically, never by stringify — Postgres jsonb reorders `{by, at}` to
+  `{at, by}` and an order-sensitive compare refuses innocent saves.**
+  §117's .pptx download button is hidden for everyone (§145.9) — machinery
+  kept, `dlPlanBtn()` is one line to give back. **The second build
+  (§145.10–13):** collaborators are fillable (empty list only) and **a
+  pending name confers no reporting right** — `namedOn()` skips marked
+  fields, owner included; the objectives' **This year column shows by
+  default** (§66's toggle and saved choices untouched); and **the plan says
+  where it is owed** — `gapMap()`/`gapMissing()` are ONE list feeding the
+  Strategy tab's count, the rail's per-row counts, the fill-mode **gap
+  band** (§129's chip shape; a chip is a door that keeps fill mode on) and
+  the **Next gap** walker; counts rewrite IN PLACE via `gapBandRefresh()`
+  (§71.2 — never a repaint under a typing hand). `FILL_PAGES` keeps the
+  fill pen off u_anal (a pen that opens nothing, §61). **qa.py reads tab
+  NAMES with `.tbadge/.vh/.tabdot` stripped** — the badge made textContent
+  lie to two probes on a healthy build (§51.11). **The third build
+  (§145.14, reshaping §145.12 from Islam's screens): red means missing,
+  amber means pending — never mixed.** The WHOLE missing bar — the total
+  as **"N Missing"**, one red chip per owing place, the solid red **Fill
+  in missing elements** button — lives IN the section row beside
+  Foundation · SWOT · Plan, read mode included, NOTHING in the page body,
+  vanishing at zero; the Strategy tab's number is GONE. The corner button
+  beside §101's arrows is the same press (red → **Done filling** while
+  open → quiet amber **Review pending · N** when only marks remain); rail
+  rows read red italic *"N Missing"* → green ✓; one press opens fill mode
+  and walks to the first blank, and a page owing nothing says so and
+  points away (`fillBarOr()` — the empty hand reads as broken, §45.2).
+  **A REAL PRESS IS NOT A PROGRAMMATIC ONE**: §30.1's `CLICKING` guard
+  HOLDS the paint until the click lands, so `enterFillMode()`'s walk read
+  the read-mode page, found nothing and marched off through another
+  place's chip — invisible to every evaluate-driven probe; the walk now
+  queues behind the release timer (`setTimeout(gapWalk, 0)`). And
+  **reassigning `window.fn` intercepts nothing called from inside the same
+  script** — instrument the SOURCE, not a wrapper. Red WORDS wear
+  `--bad-tx` (§38.5, sixth time — `--bad` as type measured 4.49 dark);
+  the button keeps `--bad` as FILL with `--surface` ink. **AND THE BAR
+  SHIPPED UNDRESSED WITH EVERY ASSERTION GREEN**: inside `nav.tabs`,
+  `.tabs button` (0,1,1) outranks `.mchip`/`.fillcta` (0,1,0), so the
+  chips lost their borders and the red button rendered as plain words
+  while the corner copy wore the design — the contrast probe had printed
+  both computed grounds one line apart and I read them as two valid
+  states. One declaration, two selectors per list (`.missbar button.X`
+  outranks the tab rule, §53.5); the check asserts the PAINT — same
+  computed ground as the corner's AND a real colour, or both vanishing
+  passes (§113.8).
 - **THE OWN COLUMNS ARE TWO QUESTIONS, AND §94'S LOCK IS A DEFAULT NOW (§117,
   partially reversing §94 at Islam's direction):** each own column on Roles &
   access splits into **Strategy** (the words as agreed — `a_unit_own_strat` /
@@ -1025,7 +1108,9 @@ console errors (in this cloud environment, run it via a wrapper that points Play
   now; the name-match is the fallback.
 - **The 1-year view on a unit's key objectives is a TOGGLE (§66):** §51.16's
   hard-coded `false` said "for now" in the code; this is the control it was
-  waiting for, and **it still starts hidden**. A screen preference
+  waiting for. **§145.11 reversed the DEFAULT to shown** (a missing near
+  target must be a visible red word); the toggle and every saved choice
+  survive. A screen preference
   (`smp.ko.year` in `localStorage`), never the state graph — one person seeing
   both horizons must not decide it for the tenant (§25, §47.1). **The unit's
   only**: the group's objectives have always shown both, so the control is
@@ -2158,6 +2243,136 @@ console errors (in this cloud environment, run it via a wrapper that points Play
   touching `mail.js`. "Present" ≠ "accepted" ≠ "verified": the page reports only
   what was actually asked, and matches a bad key on Resend's MESSAGE because
   Resend answers an invalid key with **400**, not 401.
+- **A TEST COPY IS A SEND, AND IT SAYS SO (since v3.56, §146):** two kinds of
+  email leave this platform and only one was recorded — `send` wrote a row and a
+  row per recipient, while `test` (*Send me a copy*, and the test send on Email
+  settings) sent a **real email through the same builder** and wrote nothing at
+  all, so from the record those emails had never happened. **Nothing was ever
+  lost**: `messages` sits outside the state graph with no foreign key, so the
+  `TRUNCATE … CASCADE` on every save cannot reach it, and no `DELETE FROM
+  messages` exists in the product. The test row is written **before** the send
+  (a half-succeeded send is the case a record exists for) and **a failed test
+  keeps its row**, saying 0 of 1. **`kind` is ONE column holding the word**
+  (§104.7, §142) and **NULL is a real send**, so nothing is backfilled — proved
+  against a tenant rolled back to its pre-§146 shape. **The mark goes in the
+  audience column**: beside the heading it pushed the frozen first column onto a
+  second line (§88, §116.4), and a test copy has no audience for that column to
+  print. **Delete reaches test copies and nothing else** (Islam's B, chosen from
+  two drawn scopes with the cost of each stated): the record of what the
+  business was sent stays whole, and a real send carries no control rather than
+  a disabled one. **The guard is asked twice on purpose** — `mayDestroy()` draws
+  it, the server asks `isSuperRole` again — because the endpoint's own gate
+  means *"Communication is the SMO's"* and this one means *"destruction is the
+  Super user's"*: two questions with the same answer today, and §94's drift the
+  day the first is widened. The kind is read off the **stored** row. **And
+  `SYNC.mailTest()` did not forward the body** (§142's fault, found by looking
+  this time): every test copy would have stored an empty one.
+- **THE EMAIL GREETS ITS RECEIVER (since v3.50, §135; spec 021):** a per-message
+  switch on Send a message opens each email *Dear Ahmed,* — off by default, the
+  word editable per message, **Send a message only**. **EVERY RECIPIENT ALREADY
+  GOT THEIR OWN EMAIL** (§74.3's one-message-per-person loop), so nothing about
+  how many go out changes; what changes is that they stop being IDENTICAL, so
+  the builder leaves a **marked region** and the server fills it once per
+  recipient off the STORED register (§74.2). `GREET_OPEN`/`GREET_CLOSE`/
+  `GREET_NAME` and `greetFill()` live in `lib/rules.js` because **both sides
+  need the same three strings**; `src/mail.js` writes them, `api/mail.js` reads
+  them. **THE REGION IS DELIMITED, NOT MERELY TOKENISED**: a token typed into
+  the body can never be substituted, and an empty name removes the WHOLE
+  paragraph — never `Dear ,`. The name is `firstName()` = `nameWords(…, 1)`,
+  **the register's own reader** (§93.8), so a compound first name is kept whole
+  ("Abd El Moniem", never "Abd") and a typed `known` wins. **ONE LINE, NO
+  PROSE** (Islam, correcting a two-line first draft): `.imp-row` + `.cfg-lab` +
+  `.minisw`, the platform's own switch row, with the word box BEFORE the switch
+  so the switch never moves (§41.8) — two lines had also made the greeting read
+  as a bigger decision than the button row under it, which is one. Six words
+  survive under the preview (*Everyone sees their own name here.*), **outside**
+  the email, because a badge inside would be a line nobody receives. `greet
+  TEXT` on `messages` and `message_drafts` (027), **one column holding the
+  word** and never a boolean beside it (§104.7); NULL is off, so nothing is
+  backfilled. **AND `SYNC.mailSend()` NAMES EVERY FIELD IT FORWARDS**, so
+  `greet` was silently dropped and the RECORD would have said no message ever
+  greeted anybody — found by asking what the page POSTS, not by reading it.
+  **AND THE GREETING MUST SIT OUTSIDE `data-mail-body`** (§142.8): the message
+  is typed INTO the preview and read back with `innerText`, so a greeting
+  emitted inside that div is absorbed into the body by the first keystroke —
+  the email then carries it twice and the stored message holds a name nobody
+  typed. Measured, not reasoned; every existing assertion passed while it was
+  broken, because none typed into the body with the greeting on and then asked
+  the DATA.
+- **SEND A MESSAGE OPENS ON WHAT WENT (since v3.51, §137):** Islam: *"the
+  opening page ... should be a dashboard of what was sent, to whom, how many
+  people ... and when I say create a message it takes me to another tab ... and
+  when I finish and send it it should take me back to the dashboard and show me
+  that the message was sent there."* **TWO SUBTABS** — *Overview* (his word;
+  the Setup rail has a page of the same name one group above, recorded rather
+  than quietly changed, because they sit at different levels) and *Write a
+  message* — in the platform's OWN `.secrow`, the one Import & archives and
+  Figure sets already use (§46.2): never a button that navigates, because
+  going back to the record must not mean abandoning what you were writing.
+  **NOTHING NEW IS COMPUTED**: every send already wrote the row, and this is
+  §95's own `renderDraftList()` / `renderSentList()` moved out of the header
+  dropdowns they were hiding in — one renderer, so the list cannot say two
+  things depending on where it is drawn. **A SEND LANDS ON THE RECORD** and the
+  composer is EMPTIED, which is also how §136's rule survives: the send cannot
+  be repeated by one press, by construction rather than by a flag. **A partial
+  failure lands there too** (the message went to most people and the record is
+  where the failures are named); **only a send that never happened stays put**,
+  with the message still loaded and the bar red. **AND THE TWO FETCHES WERE
+  GATED ON `#msgsend`** — the Send button, now on the other tab — so on the
+  Overview neither list was ever asked and both said *Asking…* for ever: §93
+  and §51.11 exactly, a gate keyed on markup that moved, failing silently and
+  in the safe-looking direction. Gated on `#msgover`, the thing that draws
+  them. **Found by driving it, not by reading it.**
+- **THE ACTION IS MADE OBVIOUS, AND BOTH CHOICES ARE ISLAM'S (§144.8):** a tab
+  reads as *where you are*, not as *something to do*, so the page's own purpose
+  had no loud control. Three placements were drawn in the real page; he picked
+  **above the lists** over the header, and **"Send an email"** over *Write a
+  message*. **Both costs were stated before he chose and are recorded rather
+  than re-argued**: the button SCROLLS AWAY on a long record (§95's own fault),
+  and the platform now has three nouns for one thing — page *Send a message*,
+  tab *Write a message*, button *Send an email* (§87's twins, in vocabulary).
+  **DRAWN ONLY ON THE OVERVIEW** — a button offering to take you where you
+  already are is a duplicate, not a choice (§94.15) — which holds by
+  construction because it lives inside `#msgover`, and is asserted at BOTH ENDS.
+  **AND THE CAPTURE LIED TWICE BEFORE THE COMPARISON WAS FAIR**: an element
+  screenshot DISPLACES the sticky rows inside it (shooting `.setuppane` dropped
+  the tab row from every option), so the viewport is shot and cropped to the
+  pane's measured box; and the tab row styles its own buttons, so option B's
+  fill had to be forced — which is itself a cost of B, named rather than hidden.
+- **THE BAR REPORTS, AND MOVES ON (v3.50, §136 — SUPERSEDED BY §137):** Islam, using the
+  product: *"When I send I don't get any verification that the message was sent
+  and the page stays the same view."* Both halves true, and two faults. **The
+  outcome was drawn in the failure-neutral voice** — `.why`, 12px, the page's
+  quietest grey — because `reallySend()` works out `ok: !j.failed`, stores it,
+  and **nothing ever read it**: the error path goes through `say()` and turns
+  red, the success path repaints and the repaint drew that span plain. It reads
+  the flag now, in `--good-tx`/`--bad-tx` at `--fs-note` (the first build
+  reached for `--fs-small`, which is the 12px it already was — the check caught
+  it by asking for a size worth READING rather than for a token name).
+  **AND THE LOUD CONTROL STILL SAID NOT-SENT**: the orange button read *Send to
+  76 people* and was live, one press from sending the whole thing again — §95
+  put a confirmation in FRONT of the send *because it cannot be recalled* and
+  then left the button loaded. It becomes **Write another**, never a disabled
+  Send left lying there (a dead control in the loudest slot is furniture, and
+  *Sent* on it beside *Sent* in the outcome is §87's twins). **`sent` IS ITS
+  OWN FLAG**: a refused request and a partial delivery both read `ok:false` and
+  only one must lock the button — a partial send has already reached most of
+  the list, so one press would give those people it twice. **BOTH BUTTONS ARE
+  DRAWN AND ONE IS HIDDEN**, because the way back must not repaint: the message
+  is typed INTO the preview, so a `paint()` on the first keystroke rebuilds the
+  contenteditable and the caret dies mid-word (§35, §71.2) — `sendmsgTouched()`
+  is two `hidden` flags and nothing to rewire (§24, §47.2), called from every
+  surface that changes the message **or who it goes to**. Without it the
+  composer is a dead end (§61): the only control on offer CLEARS, so somebody
+  fixing a typo to re-send would have to throw the fix away to get Send back.
+  **Write another keeps the AUDIENCE** — the recipients are usually the same
+  list and re-picking seventy-six people is real work.
+- **A CHECK MUST BE ABLE TO STAND IN FRONT OF THE PROVIDER (§142.6, §100.3
+  again):** `SMP_RESEND_ENDPOINT` joins `GEMINI_ENDPOINT` as an environment
+  variable defaulting to the real service, because **a test double behind an
+  `if` in `lib/mailer.js` would be a second code path shipping to production**.
+  What each recipient was actually sent is the whole of what spec 021 claims,
+  and the only way to know it is to catch the messages on the wire.
 - **PWA (since v3.1, §26):** `manifest.webmanifest`, `sw.js` and `icons/` at the
   repo root; `vercel.json` sets the content types, and `scripts/dev-server.js`
   carries the same list so it can be tested locally. The worker caches the shell
@@ -2299,8 +2514,13 @@ python3 checks/register-header.py # one line above the table and a dialog that f
 python3 checks/role-picker.py   # giving somebody a role: every control PRESSED,
                                 # both ends asked, and the absences asserted (§110)
 python3 checks/strategy-split.py # the Strategy | Reporting halves: the cell pressed
-                                # open AND closed, both ends each time, and the .pptx
-                                # download unzipped and read — figures proved absent (§117)
+                                # open AND closed, both ends each time — and since §145.9
+                                # the .pptx download asserted HIDDEN on every surface while
+                                # the dormant builder is still proved by a direct call
+python3 checks/gap-fill.py      # fill the gaps (§145): the third toggle where it belongs
+                                # and nowhere else, fill mode's fields AND absences, every
+                                # press read back from the DATA, the pending chip and the
+                                # office's tick, the dash, and the Submit refusal
 python3 checks/owner-picker.py  # an owner is picked from the register, not typed: all five
                                 # fields PRESSED through the real popup and the state
                                 # graph read back, both ends each time (§130.1)
@@ -2313,6 +2533,11 @@ python3 checks/no-jump.py       # nothing moves the register under you — the a
 python3 checks/plan-builder.py  # building a plan ON the platform: the door, the chooser,
                                 # the band's map, every row form asked of the DATA, and the
                                 # empty-state fixes — proved able to fail twice (§129)
+python3 checks/project-custodian.py # a custodian per project (§147): the Project owner's
+                                # project takes their figures, the one beside it takes
+                                # nothing, and a milestone owner is a Contributor who
+                                # reports nothing until the row is opened — both ends,
+                                # three viewers, proved able to fail
 python3 checks/office-chat.py   # the chat's client half — serves the built file over HTTP,
                                 # because the whole feature is invisible over file:// (§97.9)
 python3 checks/setup-rail.py    # the Setup rail fits the window, every entry is reachable
@@ -2331,9 +2556,22 @@ python3 checks/setup-search.py  # the rail's search: typing NEVER repaints, a re
 python3 checks/setup-header.py  # the page's controls share its pinned line, the counts and
                                 # the SMO pill are gone, the matrix's two header levels stack,
                                 # and a function's focus mark is written and shown (§130)
+python3 checks/send-overview.py # Send an email opens on the record, writing is the second
+                                # subtab, and a send LANDS back on the record with the
+                                # composer emptied — the send that never happened is the
+                                # one case that stays put (§144). §6 covers the test copy:
+                                # marked in the AUDIENCE column, every heading still ONE
+                                # line, and Delete drawn for the Super user and on test
+                                # copies only (§146)
+python3 checks/email-greeting.py # the greeting row is ONE line with no prose, the switch does
+                                # not move, and what the page POSTS names NOBODY — the server
+                                # fills it per recipient (§135, over HTTP)
 python3 checks/setup-pages.py   # every Setup page is named ONCE and in the rail's own word,
                                 # and the name and the table head stay on screen (§121)
 ```
+The mail half needs a database and a password (it spawns its own dev-server):
+`DATABASE_URL=… node scripts/test-email-greeting.js <smo-password>` (§142.6), and
+`DATABASE_URL=… node scripts/test-test-copies.js <smo-password>` (§146).
 In this cloud image, run any sweep through the wrapper so Playwright finds the
 Chromium that is already here:
 `SMP_CHROME=/opt/pw-browsers/chromium-1194/chrome-linux/chrome python3 qa-run.py <file>`.
@@ -2367,7 +2605,240 @@ prior sessions (on HR_ERP) accidentally reverted agreed-upon designs.
 
 ---
 
-*Last Updated: 2026-08-27 &mdash; **v3.50: the Setup header line, the marking
+*Last Updated: 2026-08-28 &mdash; **v3.57: a custodian per project
+(&sect;147, spec 024)**. Islam: *"in a case of a function that has 2 projects
+each project has an owner so the custodian here is not on the whole capability
+there is a custodian per project"* &mdash; and then, correcting the first
+build (&sect;147.7): *"contributor is not the right naming &hellip; these are
+2 roles."* **THREE BOUNDED ROLES, ALL DERIVED FROM BEING NAMED, NONE GRANTABLE
+BY HAND**: a **Project owner** (`powner`) from a project's Owner row; a
+**Pillar owner** (`plowner`) from a pillar's, on a unit or a pillars function;
+a **Contributor** is everyone else the plan names &mdash; a collaborator, a
+stakeholder, a milestone's owner &mdash; who **reports NOTHING until the
+tenant opens the Contributor row**, and then only the rows that name them.
+**TWO CONDITIONS before an owner reports, his words and nothing else**: the
+role's own Reporting cell at edit (both owner rows SHIP AT VIEW &mdash;
+condition 1 is that the grant is made on the table) and being named the Owner
+&mdash; the register attachment the first build required is DROPPED, because
+it was the silent third condition behind "I added ahmed abdelzim to a project
+and he is not able to report". The line is the thing named, whole; none of the
+three ever submits, writes the note or adds slides (`OWN_LINES_ONLY` carries
+all three, so the picker, the workbook, the merge and the delete-blockers
+already answer right). **ONE REACH RULE, PER ROW** &mdash;
+`boundedReach()`/`mayReportRow()` in `lib/rules.js`, asked by the unit pane,
+the function pane (per row now: a project's owner and a milestone's owner
+meet on one table) and the authoriser; `ctxOfUnit()`/`ctxOfFn()` hand the
+server the same row-with-context. **AND THE BUILD SURFACED A DRIFT**: a
+pillars function's Report page asked the own-UNIT cell while the server
+judged the own-FUNCTION one &mdash; invisible while custodian and head ship
+with both at edit; `canReport()` asks `k_report` for `fn:` targets now, and
+the server's own-lines narrowing reaches pillars functions (the `isFn` skip
+is gone). **The seed gains chips and nobody gains grants** (24 of 33 demo
+people are named owners in the worked example; both new rows ship at view).
+**The world had to learn the capabilities**
+(&sect;102.4's two allow-lists, both edited, asserted).
+**AND THE GROUND IT STANDS ON WAS BROKEN**: since migration 024
+the server had classified a custodian's DELIVERABLE report &mdash; and the
+milestone % that &sect;104.10 REQUIRES &mdash; as PLAN and refused them, while
+the screen offered both (`REPORT` had no deliverable family and `milestone`
+never gained `pct`; no capReporting test existed to notice). Fixed and
+asserted by name. **THE OWNER STAYS A NAME, DECIDED BY A MERGE** (&sect;147.4):
+a keyed `owner`+`ownerKey` picker was built first, and `git fetch` before
+pushing found &sect;130.1 already on `main` from another session &mdash; Islam's
+own wider ask, register-picked owner NAMES on five plan fields, the
+name-not-key decision recorded with its reasoning &mdash; so the `ownerKey`
+layer was removed and this feature rides that model whole, because a tactic's
+owner is already rights-bearing by name and one question must not have two
+answers (&sect;53.5). Proved able to fail three ways before green was believed
+(&sect;94.5): narrowing stubbed &rarr; 2 failures, derivation stubbed &rarr; 6,
+screen gate flattened &rarr; 2. Seed scanned: nobody's standing changes.
+**Flagged, not built** (&sect;147.6): a pillars function still derives no
+contributors, and the bar's "View only" pill to a contributor with editable
+rows is the unit side's own long-standing wording &mdash; changing it is a
+decision for both sides at once.*
+
+*Earlier: 2026-08-28 &mdash; **v3.56: a test copy is a send, and it says
+so (&sect;146)**. Islam, using the product: *"there have been multiple sent
+emails earlier. weren't they saved? I can't see them in the overview."*
+**NOTHING WAS LOST, AND ESTABLISHING THAT FIRST WAS MOST OF THE WORK** &mdash;
+`messages` sits outside the state graph with no foreign key, so the
+`TRUNCATE &hellip; CASCADE` on every save cannot reach it, and there is no
+`DELETE FROM messages` anywhere in the product; driven end to end against a real
+Postgres, a send writes its row BEFORE the emails go out and appears on the
+Overview at once. **The fault is that TWO KINDS OF EMAIL LEAVE THIS PLATFORM
+AND ONLY ONE WAS RECORDED**: `test` &mdash; *Send me a copy*, and the test send
+on Email settings &mdash; sends a REAL email through the same builder and wrote
+nothing at all, so from the record those emails had never happened. From the
+screen they are one act. **THE MOCKUP CAUGHT THE FIRST DRAWING**: a mark beside
+the heading pushed the frozen first column onto a second line, which is the one
+thing a setup table may never do (&sect;88) and &sect;116.4's fault exactly
+&mdash; it lives in the column that already answers *who got it*, where it costs
+no height and is the honest answer for a row that has no audience. **DELETE
+REACHES TEST COPIES AND NOTHING ELSE**, Islam's B from two scopes drawn with the
+cost of each stated: the record of what the business was sent stays whole.
+**The guard is asked twice on purpose** &mdash; the endpoint's own gate means
+*"Communication is the SMO's"* and this one means *"destruction is the Super
+user's"*, two questions with the same answer this week and &sect;94's drift the
+day the first is widened. **AND ONE ASSERTION COULD NOT FAIL FOR THE REASON IT
+EXISTED**: the line count was taken per text node, and the mark that wraps is
+its own text node sitting happily on one line &mdash; the deliberate break
+reproduced the exact fault while that assertion stayed green, and four others
+caught it. Counted across the whole cell it reads `[1,1,1,1,2]`. Both halves
+watched to fail first: **5 / 1 / 2** on the client, **3 / 11** on the server.*
+
+*Earlier, from another session: 2026-08-28 &mdash; **v3.55: fill the gaps (&sect;145, spec
+023)**. Islam: *"a special type of editing which is just filling the missing
+areas — the missing targets, maybe the missing timeline, the missing
+owners."* A third state on the two STRATEGY cells of Roles &amp; access —
+View / **Fill gaps** / Edit — granted per role by the SMO, reaching only a
+unit or function the person holds. **A gap is a place holding nothing**
+(`GAP_FIELDS` in `lib/rules.js`, the same list the deck marks Missing — one
+definition for screen, server and deck); writing the first value is filling,
+touching anything already written is authoring, and no rows are ever added,
+removed, renamed or reordered in this mode. **A fill is PENDING until the
+office confirms it** (Islam's own design): live and counted nowhere, amber
+everywhere it shows, still the filler's to correct — `row.pend[field] =
+{by, at}`, stored as an absence (&sect;50.6), riding each row's `extra`
+JSONB with **no migration** (proved on a real Postgres 16, clean slate
+included). Confirming is REMOVING the mark — a tick beside the chip, or the
+office simply correcting the value, which settles it in passing. **The
+server judges transitions, not intentions**: a gap pass ahead of the diff
+classifies fill / amend / unfill / confirm against a clone and lets
+everything else fall through office-only (`gapFill` passes on authorship OR
+the fill grant; `gapConfirm` on authorship alone). **Reporting flows,
+performance waits**: figures and drafts land against a pending target, but
+a row whose score-bearing field (dir &middot; target &middot; compile
+&middot; weight &middot; quarters) is pending scores a dash, leaves every
+average, and **blocks Submit** — the refusal names the rows and sends the
+unit to the office, the only desk that can clear it. Two lessons paid for:
+**Postgres jsonb reorders object keys**, so marks are compared canonically
+or an untouched pending field reads as a phantom amend that refuses an
+innocent save (&sect;42's `branding()` shape, one layer down); and a fill
+holder is the first person to hold &sect;101's arrows BESIDE a pen — both
+sat at `right:0` and the arrows ate the pen's clicks (&sect;70's family,
+caught by the check PRESSING it). The matrix wears the mockup-approved
+restyle (&sect;145.7: chip toggles, tinted lit states, hairline rows), and
+**&sect;117's .pptx download button is HIDDEN for everyone at Islam's
+direction (&sect;145.9)** — machinery kept, one line to give back.
+**AND THE FINDING SYSTEM WENT RED AND WORDED (&sect;145.14)**, reshaped
+from Islam's own screens: the whole missing bar &mdash; *"N Missing"*, one
+red chip per owing place, the solid red **Fill in missing elements**
+button &mdash; moved INTO the section row beside the tabs (*"not to waste
+lines in the page"*), read mode included, nothing left in the page body
+and the Strategy tab's number gone; a page owing nothing says so and
+points away, because *"I couldn't enter anything"* was &sect;45.2's empty
+hand wearing fill mode's clothes. The bug worth reading: **a real press is
+not a programmatic one** &mdash; &sect;30.1's `CLICKING` guard HOLDS the
+paint until the click lands, so the one-press walk read the read-mode page,
+found no fields and marched off through another place's chip, while every
+evaluate-driven probe passed; the walk now queues behind the release timer,
+and the probe that found it had to live in the SOURCE, because reassigning
+`window.fn` intercepts nothing called from inside the same script. Proved
+by `test-authorize.js` &sect;16 (6 red on the pre-build) and
+`checks/gap-fill.py` (fails from its first section on the pre-build; 58
+assertions on the &sect;145.14 shape), plus the round trip on a virgin
+database.*
+
+*Earlier: 2026-08-28 &mdash; **v3.54: Send an email opens on what went
+(&sect;144)**. Islam: *"the opening page ... should be a dashboard of what was
+sent, to whom, how many people ... and when I say create a message it takes me
+to another tab ... and when I finish and send it it should take me back to the
+dashboard and show me that the message was sent there."* **NOTHING NEW IS
+COMPUTED** &mdash; every send already wrote its row, and this is &sect;95's own
+`renderDraftList()` / `renderSentList()` moved out of the header dropdowns they
+were hiding in, so the list cannot say two things depending on where it is
+drawn. **A SEND LANDS ON THE RECORD AND THE COMPOSER IS EMPTIED**, which is
+also how &sect;143's rule survives: the send cannot be repeated by one press,
+by construction rather than by a flag. A partial failure lands there too (the
+message went to most people and the record is where the failures are named);
+**only a send that never happened stays put**. **AND THE TWO FETCHES WERE GATED
+ON `#msgsend`** &mdash; the Send button, now on another tab &mdash; so on the
+Overview neither list was ever asked and both said *Asking&hellip;* for ever:
+&sect;93 and &sect;51.11 exactly, a gate keyed on markup that moved, failing
+silently and in the safe-looking direction. **Found by driving it, not by
+reading it.** **AND THE ACTION IS MADE OBVIOUS** (&sect;144.8): a tab reads as
+*where you are*, not as something to do, so the page's own purpose had no loud
+control &mdash; three placements were drawn in the real page and Islam picked
+**above the lists**, and named the button himself. Both costs were stated
+before he chose and are recorded rather than re-argued: it SCROLLS AWAY on a
+long record, and the platform now carries more than one noun for the one act
+(&sect;87's twins, in vocabulary). **MERGED WITH &sect;135&ndash;&sect;141 FROM
+FOUR OTHER SESSIONS**, which had renamed this very page to *Send an email* and
+given it a second subtab of its own (&sect;135.3): the two section rows are ONE
+row now &mdash; **Overview &middot; Compose &middot; Email settings**, what you
+arrive at, what you do, and what you set once &mdash; and my
+&sect;135&ndash;&sect;137 became &sect;142&ndash;&sect;144 because main had
+taken those numbers first. **The header dropdowns are DELETED, not left
+unused** (&sect;24): with the Overview holding both lists, `renderDraftMenu()`
+and `renderSentMenu()` had no caller, and a builder nobody calls is one the
+next reader takes for load-bearing.*
+
+*Earlier: 2026-08-27 &mdash; **v3.54: the bar reports, and moves on
+(&sect;136)**. Islam, using the product: *"When I send I don't get any
+verification that the message was sent and the page stays the same view."*
+Both halves were true, and they are TWO faults. **Success was written in the
+failure-neutral voice**: the words were there, in `.why` &mdash; 12px, the same
+quiet grey as an empty space &mdash; because `reallySend()` works out
+`ok: !j.failed`, stores it, and **nothing ever read it**, so a FAILED send
+turned red and a successful one got no colour at all. **And the loudest control
+on the bar still said not-sent**: the orange button read *Send to 76 people* and
+was live, with the message and the audience still loaded &mdash; **one press
+from sending the whole thing again**, which is &sect;95 putting a confirmation
+in FRONT of the send *because it cannot be recalled* and then leaving the button
+loaded. It becomes **Write another**, and `sent` is its own flag because a
+refused request and a partial delivery both read `ok:false` and only one of them
+must lock the button. **BOTH BUTTONS ARE DRAWN AND ONE IS HIDDEN**, because the
+way back must not repaint &mdash; the message is typed INTO the preview, so a
+`paint()` on the first keystroke after a send rebuilds the contenteditable and
+the caret dies mid-word; without a way back the composer is a dead end
+(&sect;61), since the only control on offer CLEARS and somebody fixing a typo
+would have to throw the fix away to get Send back. **The first build reached for
+`--fs-small`**, which is the 12px it already was, and the check caught it
+because it asks for a size worth READING rather than for a token name. Proved by
+`checks/send-said.py` (retired by &sect;137, whose own check carries the one
+rule that survived), watched to fail first: the pre-&sect;136 bar restored
+&rarr; **5 failures**; `sendmsgTouched()` removed &rarr; **2**, the dead end
+exactly. **One of its own first-run failures was the check** &mdash; `focus()`
+puts the caret at the START of a contenteditable, so the typed character lands
+first and the assertion had used `endswith`.*
+
+*Earlier the same day: **v3.54: the email greets its receiver
+(&sect;135, spec 021)**. Islam: *"can we make an option while sending the email
+to customize the email by the first name of the reciever like starting the
+email with Dear Ahmed and then the body comes after &mdash; it's a turn on and
+off option."* **Every recipient already received their own email**
+(&sect;74.3's one-message-per-person loop), so nothing about how many go out
+changes &mdash; what changes is that they stop being IDENTICAL, which is why
+the builder leaves a **marked region** and the SERVER fills it once per
+recipient off the stored register (&sect;74.2). The region is **delimited, not
+merely tokenised**: a token typed into the body can never be substituted, and
+an empty name removes the WHOLE paragraph rather than leaving `Dear ,`. The
+name is the register's own reader (&sect;93.8), so a compound first name is
+kept whole &mdash; **"Dear Abd El Moniem", never "Dear Abd"**, which is a real
+row on this register and the reason that question was asked twice.
+**ONE LINE, NO PROSE**, and that is Islam correcting a two-line first draft:
+*"the design of the setting is poor. It should be one line you dont need 2
+lines .. and no explanations needed in the setting itself it's clear."* Right
+twice &mdash; a label reading *Open with a greeting* beside a box holding the
+word *Dear* had already said what the sentence said (&sect;127 from the other
+direction), and the height was not the only cost: **two lines under the message
+made the greeting read as a bigger decision than the button row beneath it**,
+which is one line. **AND THE BUG WAS IN THE PLUMBING**: `SYNC.mailSend()` names
+every field it forwards, so `greet` was silently absent from the posted body
+&mdash; the emails would have been personalised perfectly and
+`messages.greet` would have been NULL on every row, so **the record would have
+said no message ever greeted anybody**. Found by asking what the page POSTS,
+not by reading it. Proved by two halves, each watched to fail first
+(&sect;94.5): `test-email-greeting.js` **stands in front of the provider** via
+the new `SMP_RESEND_ENDPOINT` (&sect;100.3 &mdash; a test double behind an `if`
+in `lib/mailer.js` would be a second code path shipping to production) and
+reads what each recipient was actually sent, asserting each carries **nobody
+else's name**; `checks/email-greeting.py` measures the screen and the seam.
+**Two of that check's own first-run failures were the CHECK**, clustering a
+row's controls by their `top` when three controls of three heights on one line
+have three different tops &mdash; &sect;122.4, already written down once.*
+
+*Earlier, from four other sessions: 2026-08-27 &mdash; **v3.50: the Setup header line, the marking
 table, and a repaired matrix (&sect;135)**. Eleven asks from using the Setup
 pages, of which seven turn out to be **one standard applied to sixteen pages**:
 the page's own search, filters and buttons share the pinned line with its name,
@@ -2396,7 +2867,9 @@ wherever the unit has already answered it, written only where nothing else has,
 so two fields cannot contradict one stored fact. **Send a message becomes Send
 an email with the Email settings as its second section** (a status table, four
 fields, a live rendered preview and a test send: not a dropdown), and Inbox
-becomes **In Platform inbox**. `checks/setup-header.py` was proved able to fail
+becomes **Platform Inbox**, and Focus measures moves to *Measurement* — the
+rail's groups answer what you came to do, and somebody opening that page came to
+say which measures matter (&sect;135.11). `checks/setup-header.py` was proved able to fail
 first &mdash; **33 failures against the previous build** &mdash; and **two of
 its own assertions could not fail when written**: one scoped to where the chips
 had moved TO (&sect;113.8), and one measuring `tr.getBoundingClientRect()`,

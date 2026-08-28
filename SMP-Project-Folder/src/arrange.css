@@ -770,10 +770,10 @@
   details.fstrip[open] > summary::after{transform:rotate(90deg)}
   .fstrip-sum{font-family:var(--mono);font-size:13px;color:var(--ink-2)}
   /* The count is TYPE, so it takes the good family's text twin rather than
-     its fill (§38.4, §144): on `--surface-2` the fill measures 4.45 and the
+     its fill (§38.4, §153): on `--surface-2` the fill measures 4.45 and the
      twin 6.45. The strip's own ground is what makes the difference — the same
      colour clears comfortably on white, which is why this survived until the
-     state sweep measured it (§143). */
+     state sweep measured it (§152). */
   .fstrip-sum b{color:var(--good-tx);font-size:15px}
   .fstrip-meta{margin-left:auto}
   .fstrip .fstrip-body{padding:12px 18px 10px}
@@ -810,7 +810,7 @@
     vertical-align:middle;letter-spacing:.02em}
   .delta.up{color:var(--good-tx)} .delta.down{color:var(--bad-tx)}
   .headline .delta{align-self:center}
-  /* Inside the group card's big figure (§146): the number is 34px and the
+  /* Inside the group card's big figure (§155): the number is 34px and the
      delta rides its baseline rather than the line box's top. */
   .big .delta{vertical-align:0.35em;font-size:12.5px}
 
@@ -1232,6 +1232,104 @@
   td:has(> .fld + .xbtn) > .fld { width: calc(100% - 30px); vertical-align: middle; }
   td:has(> .fld + .xbtn) > .xbtn { vertical-align: middle; margin-left: 5px; }
 
+  /* ── FILL THE GAPS (§145, spec 023) ──────────────────────────────────
+     Three states, one colour family: a GAP is the product's own red (the
+     word Missing already owns it), a PENDING fill is amber everywhere it
+     shows — the field, the chip, the count, the quarters — and a settled
+     value wears nothing. The amber pair is the platform's attn family, so
+     the contrast is the pill family's own, already measured. */
+  .fld.gapfld { border:1px dashed var(--bad); }
+  .fld.gapfld::placeholder { color:var(--bad); font-weight:600; opacity:.75; }
+  .fld.pendfld { border-color:var(--attn); background:var(--attn-bg); }
+  .pchip { display:inline-block; background:var(--attn-bg); color:var(--attn-tx);
+    border:1px solid var(--attn); border-radius:20px; font-size:10px;
+    font-weight:600; line-height:1.5; padding:0 7px; margin-left:6px;
+    vertical-align:1px; text-transform:uppercase; letter-spacing:.04em; }
+  /* The office's tick, beside the chip it clears. */
+  .gapok { width:22px; height:20px; padding:0; margin-left:4px; cursor:pointer;
+    border:1px solid var(--good); background:var(--good-bg); color:var(--good-tx);
+    border-radius:5px; font-size:11px; font-weight:700; line-height:1;
+    vertical-align:1px; }
+  .gapok:hover { border-color:var(--good-tx); }
+  .gapok:focus-visible { outline:2px solid var(--good); outline-offset:1px; }
+  /* The subject-wide count on the pane band (§93.4: one press from where
+     the gap is closed). */
+  .pendcount { display:inline-block; background:var(--attn-bg); color:var(--attn-tx);
+    border:1px solid var(--attn); border-radius:20px; font-size:10.5px;
+    font-weight:600; padding:1px 9px; letter-spacing:0; text-transform:none; }
+  /* The contract, said where the person is working (§32's rule). */
+  .fillbar { background:var(--surface-2); border:1px solid var(--line);
+    border-radius:8px; padding:8px 12px; margin:10px 0 0; font-size:12.5px;
+    color:var(--ink-2); }
+  .fillbar b { color:var(--ink); }
+  .pendwait { color:var(--attn-tx); }
+  /* The fill grant's quarter buttons: lit is amber, because their fill is
+     pending by construction — gold-deep is the author's lit state. */
+  .qs-fill .qtog.on { background:var(--attn-bg); color:var(--attn-tx);
+    border-color:var(--attn); }
+
+  /* ── FINDING THE GAPS (§145.14, reshaping §145.12 from Islam's mockup) ──
+     RED MEANS MISSING, AMBER MEANS PENDING CONFIRMATION — two colours, two
+     meanings, never mixed. The whole signal lives in the section row beside
+     the section tabs: the total, one red chip per owing place, the red
+     button. Nothing in the page body, no number on the Strategy tab. */
+  .sectionrow .tabs-in { flex-wrap:wrap; align-items:center; }
+  .missbar { margin-left:auto; display:flex; gap:6px; align-items:center;
+    flex-wrap:wrap; }
+  .missbar .secmiss { color:var(--bad-tx); font-weight:800; font-size:12.5px;
+    white-space:nowrap; padding-left:12px; }
+  /* THE BAR LIVES INSIDE THE TAB ROW, SO ITS CONTROLS MUST OUTRANK THE TAB
+     ROW'S OWN DRESS. `.tabs button` (border:0, no ground, the quiet ink)
+     covers every button in the row — right for a tab, and it stripped the
+     chips and the red button down to plain words while the corner copy,
+     outside the row, wore the design. ONE declaration serves both homes:
+     the second selector in each list only outranks `.tabs button` inside
+     the bar, so the two copies cannot drift (§53.5). The hovers restate the
+     ground and ink because `.tabs button:hover` paints its own. */
+  .mchip, .missbar button.mchip { border:1px solid var(--bad); background:var(--surface);
+    color:var(--bad-tx); border-radius:18px; font-size:11.5px; padding:2px 10px;
+    cursor:pointer; font-weight:600; font-family:inherit; white-space:nowrap; }
+  .mchip b { color:var(--bad-tx); font-weight:800; }
+  .mchip:hover, .missbar button.mchip:hover {
+    background:var(--bad-bg); color:var(--bad-tx); }
+  .mchip.done, .missbar button.mchip.done {
+    border-color:var(--good); color:var(--good-tx); }
+  .mchip:focus-visible, .fillcta:focus-visible, .pendcta:focus-visible,
+  .missbar button.mchip:focus-visible, .missbar button.fillcta:focus-visible {
+    outline:2px solid var(--bad); outline-offset:2px; }
+  /* The action: a solid red worded button. The ink is --surface — white in
+     light, the dark ground in dark — so it reads on --bad in both themes. */
+  .fillcta, .missbar button.fillcta { border:1px solid var(--bad); background:var(--bad);
+    color:var(--surface); border-radius:8px; font-size:12px; font-weight:700;
+    padding:4px 13px; cursor:pointer; font-family:inherit; white-space:nowrap; }
+  .fillcta:hover, .missbar button.fillcta:hover { filter:brightness(1.08);
+    background:var(--bad); color:var(--surface); }
+  /* Quiet amber: only pending remains — the office's move, still correctable. */
+  .pendcta { border:1px solid var(--attn); background:var(--attn-bg);
+    color:var(--attn-tx); border-radius:8px; font-size:12px; font-weight:600;
+    padding:4px 12px; cursor:pointer; font-family:inherit; white-space:nowrap; }
+  .gapdone { color:var(--good-tx); font-size:12px; font-weight:600; }
+  /* The corner pair: the worded button takes the second slot beside §101's
+     arrows (right:0 when it stands alone). */
+  .pane .paneact .cornerbtn { position:absolute; top:0; right:36px;
+    white-space:nowrap; }
+  .pane .paneact .cornerbtn:last-child { right:0; }
+  .editbtn.fdone { white-space:nowrap; }
+  /* The rail's own word, red italic — green tick once its place is clear. */
+  .ritem .rgap { display:inline-block; margin-left:7px; color:var(--bad-tx);
+    font-size:11px; font-weight:700; font-style:italic; white-space:nowrap; }
+  .ritem .rgap.ok { color:var(--good-tx); font-style:normal; }
+  /* A page with nothing missing says so and points away (§145.14). */
+  .emptynote { background:var(--surface-2); border:1px solid var(--line);
+    border-radius:8px; padding:10px 14px; margin:0 0 12px; font-size:13px;
+    color:var(--ink-2); }
+  .emptynote b { color:var(--good-tx); }
+  /* The walker's landing ring. */
+  .gaplit { outline:2px solid var(--bad); outline-offset:2px;
+    animation:gapring 1s ease-out; }
+  @keyframes gapring { 0% { outline-offset:6px; outline-width:3px; }
+                       100% { outline-offset:2px; outline-width:2px; } }
+  @media (prefers-reduced-motion: reduce){ .gaplit { animation:none; } }
   /* ── A FAILED RENDER SAYS SO (§137) ────────────────────────────────────
      The card paint() leaves where a page that threw would have been. Quiet on
      purpose: no red kicker, no shouting — the first sentence answers the fear
@@ -1248,7 +1346,7 @@
   .failcard .fc-e { font-family:var(--mono); font-size:12px; color:var(--ink-3);
     background:var(--surface-2); border-radius:6px; padding:8px 12px; margin-top:8px; }
 
-  /* ── THE GLYPH AND THE RULE CARRY THEIR MEANING ON THE HOVER (§139) ─────
+  /* ── THE GLYPH AND THE RULE CARRY THEIR MEANING ON THE HOVER (§148) ─────
      A dotted underline is the one mark that says "there is more here" without
      spending colour — the accent budget (§41) is already committed, and a
      coloured glyph in a scoring table would read as a score. `help` rather
@@ -1257,7 +1355,7 @@
   /* The value almost every row repeats, quiet so the exceptions carry the
      column. Never hidden — it is still read straight down. */
   td .cdefault { color:var(--ink-3); }
-  /* AND THE QUIET ONE WEARS NO DOTS (§139). Seen built: a dotted underline
+  /* AND THE QUIET ONE WEARS NO DOTS (§148). Seen built: a dotted underline
      under every "Latest" made the column busier than it was before the note
      existed — the mark meant to say "there is more here" was shouting on the
      one value that never needs reading. The note is still there on hover
@@ -1265,7 +1363,7 @@
      standing mark on the repeated default. */
   td .cdefault.hasnote { border-bottom:0; }
 
-  /* ── THE REPORTING CONTROLS RIDE THE TAB ROW (§140) ─────────────────────
+  /* ── THE REPORTING CONTROLS RIDE THE TAB ROW (§149) ─────────────────────
      Islam's own placement, chosen over a pinned bar: the tab row is already
      pinned chrome, so the controls stay on screen for the whole report with
      no new sticky element and none of the arithmetic one needs (§122.5).
@@ -1302,7 +1400,7 @@
   .repchrome .rc-draft:hover { text-decoration:underline; }
   .repchrome .rc-draft:focus-visible { outline:2px solid var(--gold); outline-offset:2px; }
 
-  /* ── A WIDE TABLE SCROLLS INSIDE ITS OWN BOX (§141) ─────────────────────
+  /* ── A WIDE TABLE SCROLLS INSIDE ITS OWN BOX (§150) ─────────────────────
      Islam, from his own laptop on Mazaya: *"I'm stuck with the unit tables cut
      and I can't scroll horizontally."* The page deliberately never scrolls
      sideways — §27.2, because a sideways page drags every sticky element with
@@ -1341,7 +1439,7 @@
      sliding under text. */
   .tblscroll td.idx + td, .tblscroll th.idx + th { box-shadow:1px 0 0 var(--line-soft); }
 
-  /* ── WHERE TO LOOK NEXT (§145) ──────────────────────────────────────────
+  /* ── WHERE TO LOOK NEXT (§154) ──────────────────────────────────────────
      One entry per unit under the group's three cards, worst first. A quiet
      row on purpose: the cards above are the reading, this is the index to it,
      and an index that competes with what it indexes has stopped being one. */
@@ -1356,3 +1454,49 @@
   .ustrip .un { font-size:13px; color:var(--ink); }
   .ustrip .uv { font-family:var(--mono); font-size:13px; font-weight:700;
     font-variant-numeric:tabular-nums; }
+/* ── THE KNOWLEDGE BASE'S PEN (§140) ──────────────────────────────────
+   In arrange.css, concatenated last, because config.css has eaten three
+   silently-duplicated rules already (§29.2, §51.5, §53.6) and one comment
+   (§93.11). The look is the approved mockup's: quiet cards, the platform's
+   own tokens throughout, nothing brandable. */
+.kbed { border:1px solid var(--line); border-radius:8px; padding:14px 16px;
+        margin:10px 0; background:var(--surface); }
+.kbed.on { border-color:var(--gold); box-shadow:0 0 0 1px var(--gold); }
+.kbed-q { width:100%; font:inherit; font-weight:650; border:1px solid var(--line);
+          border-radius:6px; padding:7px 10px; margin-bottom:8px;
+          background:var(--surface); color:var(--ink); }
+.kbed-a { width:100%; font:inherit; font-size:var(--fs-note); line-height:1.55;
+          border:1px solid var(--line); border-radius:6px; padding:8px 10px;
+          min-height:96px; resize:vertical; background:var(--surface); color:var(--ink); }
+.kbed-q:focus-visible, .kbed-a:focus-visible { outline:2px solid var(--focus); outline-offset:-1px; }
+.kbed-foot { display:flex; gap:12px; align-items:center; margin-top:8px; }
+.kbed-mark { font-size:var(--fs-micro); letter-spacing:.09em; text-transform:uppercase;
+             font-weight:700; color:var(--gold-deep); border:1px solid var(--gold);
+             border-radius:99px; padding:2px 9px; }
+.kbed-mark.quiet { color:var(--ink-3); border-color:var(--line); }
+.kbed-reset { font:inherit; font-size:var(--fs-small); background:none; border:none;
+              color:var(--ink-3); text-decoration:underline; cursor:pointer; padding:0; }
+.kbed-reset:hover { color:var(--ink); }
+.kbed-x { margin-left:auto; font:inherit; font-size:var(--fs-small); color:var(--bad);
+          background:none; border:none; text-decoration:underline; cursor:pointer; }
+.kbadd { display:block; width:100%; text-align:left; font:inherit; font-size:var(--fs-small);
+         font-weight:600; color:var(--gold-deep); background:none;
+         border:1px dashed var(--line); border-radius:8px; padding:11px 16px;
+         margin:6px 0 4px; cursor:pointer; }
+.kbadd:hover { border-color:var(--gold); }
+.kbed-lede b { color:var(--ink); }
+
+/* ── THE KNOWLEDGE BASE'S TWO TABS (§141) ─────────────────────────────
+   The approved mockup's segmented pair: the active half wears the tenant's
+   panel colour, the way the navigation's own segments do — nothing here is a
+   new colour. */
+.kbtabs { display:flex; margin:2px 0 18px; border:1px solid var(--line);
+          border-radius:9px; overflow:hidden; width:max-content;
+          background:var(--surface); }
+.kbtabs button { font:inherit; font-size:var(--fs-small); font-weight:600;
+                 padding:8px 18px; border:0; background:none; color:var(--ink-2);
+                 cursor:pointer; }
+.kbtabs button + button { box-shadow:inset 1px 0 0 var(--line); }
+.kbtabs button.on { background:var(--panel); color:var(--panel-ink); }
+.kbtabs button:focus-visible { outline:2px solid var(--focus); outline-offset:-2px; }
+.kbcount { font-size:var(--fs-micro); font-weight:700; opacity:.75; margin-left:6px; }

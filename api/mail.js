@@ -152,16 +152,49 @@ module.exports = async function handler(req, res) {
       const name = String(body.fromName || "").trim();
       const html = String(body.html || "");
       if (!html) return send(res, 400, { ok: false, error: "Nothing to send." });
+      const subj = String(body.subject || "Test from the Strategy Management Platform");
+
+      /* ── A TEST COPY IS WRITTEN DOWN TOO (§145) ────────────────────
+         It was not, and that is the whole of what Islam hit: this path sends a
+         REAL email through the same builder as `send` and recorded nothing, so
+         three test copies looked from the Overview exactly like three emails
+         that had never happened.
+
+         THE ROW GOES IN BEFORE THE SEND, for `send`'s own reason: a send that
+         half succeeds and then loses the function is the case a record exists
+         for, and a record written afterwards is the one that would be missing.
+
+         `kind` SAYS WHAT IT IS. NULL is a real send, so nothing existing needs
+         backfilling and the two paths differ by one value rather than by two
+         code paths writing two shapes. */
+      const trow = (await client.query(
+        "INSERT INTO messages (by_key, by_name, subject, body, kind, total) " +
+        "VALUES ($1,$2,$3,$4,'test',1) RETURNING id",
+        [me.key, me.name || null, subj, String(body.body || "")])).rows[0];
       try {
         const out = await resendSend(key, {
           from: name ? name + " <" + addr + ">" : addr,
           to: [to],
-          subject: String(body.subject || "Test from the Strategy Management Platform"),
+          subject: subj,
           html: html,
           reply_to: String(body.replyTo || "").trim() || undefined
         });
+        await client.query("UPDATE messages SET sent = 1 WHERE id = $1", [trow.id]);
+        await client.query(
+          "INSERT INTO message_recipients (message_id, person_key, person_name, address, ok, provider_id) " +
+          "VALUES ($1,$2,$3,$4,TRUE,$5)",
+          [trow.id, me.key, me.name || null, to, (out && out.id) || null]);
         return send(res, 200, { ok: true, id: out && out.id, to: to });
       } catch (e) {
+        /* A TEST THAT FAILED IS STILL A TEST THAT WAS ATTEMPTED. The row stays
+           and says 0 of 1, the same way a failed send does — a record that
+           quietly removes its own failures is not a record. */
+        await client.query("UPDATE messages SET failed = 1 WHERE id = $1", [trow.id]);
+        await client.query(
+          "INSERT INTO message_recipients (message_id, person_key, person_name, address, ok, error) " +
+          "VALUES ($1,$2,$3,$4,FALSE,$5)",
+          [trow.id, me.key, me.name || null, to,
+           e.resend ? String(e.message).slice(0, 400) : "Could not reach Resend"]);
         /* RESEND'S OWN SENTENCE, OR OURS — never undici's. A refusal from
            Resend names the real cause ("Domain is not verified", "API key is
            invalid") far better than anything generic here could. A network
@@ -222,16 +255,38 @@ module.exports = async function handler(req, res) {
       const html = String(body.html || "");
       if (!html) return send(res, 400, { ok: false, error: "Nothing to send." });
 
+      /* ── THE GREETING IS FILLED IN HERE, ONCE PER RECIPIENT (spec 022) ──
+         The page builds ONE email and leaves a marked region where the name
+         goes; this is the side that knows who the recipients are (§74.2), so
+         this is the side that names them. Read off the STORED register, from
+         the same rows the audience resolved from — never from anything the
+         browser posted.
+
+         A NAME THAT COMES OUT EMPTY DROPS THE GREETING LINE, never "Dear ,":
+         `greetFill` removes the whole region. The send is not refused and the
+         recipient is not marked — a greeting is a courtesy, not a condition of
+         delivery.
+
+         WITH THE GREETING OFF there is no region, so `greetFill` returns the
+         html unchanged and every recipient gets the identical email they would
+         have got before this existed. */
+      const byKey = new Map((stored.people || []).map(function (p) { return [p.key, p]; }));
+      const greetWord = String(body.greet == null ? "" : body.greet).trim() || null;
+      const htmlFor = function (r) {
+        return Rules.greetFill(html, Rules.firstName(byKey.get(r.key) || { name: r.name }));
+      };
+
       /* THE ROW IS WRITTEN BEFORE THE SEND, not after. A send that half
          succeeds and then loses the function is the case a record exists for,
          and a record written afterwards is exactly the one that would be
          missing. */
       const msg = (await client.query(
-        "INSERT INTO messages (by_key, by_name, subject, body, cta_label, cta_href, audience, total) " +
-        "VALUES ($1,$2,$3,$4,$5,$6,$7,$8) RETURNING id",
+        "INSERT INTO messages (by_key, by_name, subject, body, cta_label, cta_href, greet, audience, total) " +
+        "VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9) RETURNING id",
         [me.key, me.name || null, subject, bodyText,
          String(body.ctaLabel || "").trim() || null,
          String(body.ctaHref || "").trim() || null,
+         greetWord,
          JSON.stringify(body.criteria || {}), aud.to.length])).rows[0];
 
       let ok = 0, failed = 0;
@@ -240,7 +295,7 @@ module.exports = async function handler(req, res) {
         let ids = [], err = null;
         try {
           ids = await resendBatch(key, chunk.map(function (r) {
-            return { from: from, to: [r.email], subject: subject, html: html,
+            return { from: from, to: [r.email], subject: subject, html: htmlFor(r),
                      reply_to: replyTo };
           }));
         } catch (e) {
@@ -276,21 +331,28 @@ module.exports = async function handler(req, res) {
        composer is holding is what says which. */
     if (action === "draftSave") {
       const id = parseInt(body.id, 10) || null;
+      /* `greet` LAST, so adding it did not renumber the five placeholders
+         already here — the UPDATE and the INSERT share this array and a
+         column inserted in the middle silently shifts one of them. NULL is
+         off, and an empty word is off rather than a greeting with no word
+         (spec 022). */
       const vals = [String(body.subject || ""), String(body.body || ""),
                     String(body.ctaLabel || "").trim() || null,
                     String(body.ctaHref || "").trim() || null,
-                    JSON.stringify(body.criteria || {})];
+                    JSON.stringify(body.criteria || {}),
+                    String(body.greet == null ? "" : body.greet).trim() || null];
       if (id) {
         const r = await client.query(
           "UPDATE message_drafts SET subject=$2, body=$3, cta_label=$4, cta_href=$5, " +
-          "audience=$6, updated_at=now() WHERE id=$1 RETURNING id", [id].concat(vals));
+          "audience=$6, greet=$7, updated_at=now() WHERE id=$1 RETURNING id",
+          [id].concat(vals));
         if (r.rowCount) return send(res, 200, { ok: true, id: String(id) });
         /* The draft was deleted from another tab. Saving into nothing would
            lose the message; it becomes a new draft instead. */
       }
       const r2 = await client.query(
-        "INSERT INTO message_drafts (by_key, by_name, subject, body, cta_label, cta_href, audience) " +
-        "VALUES ($1,$2,$3,$4,$5,$6,$7) RETURNING id",
+        "INSERT INTO message_drafts (by_key, by_name, subject, body, cta_label, cta_href, audience, greet) " +
+        "VALUES ($1,$2,$3,$4,$5,$6,$7,$8) RETURNING id",
         [me.key, me.name || null].concat(vals));
       return send(res, 200, { ok: true, id: String(r2.rows[0].id) });
     }
@@ -316,10 +378,49 @@ module.exports = async function handler(req, res) {
        "did they get it" can be answered. */
     if (action === "history") {
       const rows = (await client.query(
-        "SELECT id, sent_at, by_name, subject, total, sent, failed FROM messages " +
+        /* `audience` too (§144): the Overview says WHO each message went to, and
+           the criteria as they were chosen is the only honest answer — the
+           resolved list is what `message_recipients` holds, and re-resolving it
+           today would describe who it would reach NOW, not who it reached. */
+        "SELECT id, sent_at, by_name, subject, total, sent, failed, audience, kind FROM messages " +
         "ORDER BY sent_at DESC LIMIT 50")).rows;
       return send(res, 200, { ok: true, messages: rows });
     }
+    /* ── REMOVING A TEST COPY, AND ONLY A TEST COPY (§145) ──────────
+       Islam, asked whether Delete should reach every record or the test copies
+       alone: "B". The clutter goes and the record of what the business was
+       actually sent stays whole — nobody can quietly remove the evidence that
+       a message went to seventy-six people.
+
+       THE GUARD IS ASKED AGAIN HERE ON PURPOSE, though nobody but a Super user
+       reaches this endpoint at all. That gate says "Communication is the SMO's"
+       and this one says "destruction is the Super user's" (§89's mayDestroy):
+       two different questions that happen to have the same answer today. Widen
+       the endpoint to the SMO team, as §89 would have it, and the delete must
+       not widen with it — §94's drift exactly, a gate relied on for something
+       it does not mean.
+
+       THE KIND IS CHECKED ON THE STORED ROW, never taken from the request: a
+       screen that decides what may be deleted has decided nothing, because it
+       still had to ask. `message_recipients` goes with it by ON DELETE
+       CASCADE. */
+    if (action === "historyDelete") {
+      if (!Rules.isSuperRole(me.role)) {
+        return send(res, 403, { ok: false, error: "Removing a record is the Super user's." });
+      }
+      const id = parseInt(body.id, 10);
+      if (!id) return send(res, 400, { ok: false, error: "which message?" });
+      const row = (await client.query(
+        "SELECT kind FROM messages WHERE id = $1", [id])).rows[0];
+      if (!row) return send(res, 404, { ok: false, error: "no such message" });
+      if (row.kind !== "test") {
+        return send(res, 403, { ok: false,
+          error: "That is a message that went to the business. Only test copies can be removed." });
+      }
+      await client.query("DELETE FROM messages WHERE id = $1", [id]);
+      return send(res, 200, { ok: true });
+    }
+
     if (action === "historyOne") {
       const id = parseInt(body.id, 10);
       if (!id) return send(res, 400, { ok: false, error: "which message?" });

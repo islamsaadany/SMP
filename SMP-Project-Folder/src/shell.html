@@ -360,6 +360,24 @@
                   { k:"fill", ac:"c_source", label:"Fill a figure set",
                     when: canPickSets,                                 render:renderSourceSetup }];
         } },
+      /* ── FOCUS MEASURES SITS WITH MEASUREMENT (§135.11) ──────────────
+         Islam: *"move the focus measures to measurement."*
+
+         IT WAS IN *Running the cycle* FOR A REAL REASON AND IT IS NOT THE
+         BETTER ONE. The marks belong to the cycle — `CYCLE.focus`, cleared
+         when a new one opens (§102), so it IS something you do while a cycle
+         is open. But the rail's groups answer *what did you come here to do*
+         (§46), and somebody opening this page came to say which measures
+         matter, which is what *Measurement — what the numbers mean* is for.
+         The cycle group is the things you do to RUN a cycle; this is a
+         statement about the measures themselves that happens to be re-asked
+         each cycle.
+
+         `grp` is the only thing that changes. The key, the access key, the
+         glyph, the keywords and the page are untouched — and the group is
+         the one place order is decided (SETUP_GROUPS), so nothing else needs
+         to know it moved. */
+      { k:"focusset", ac:"c_focus", grp:"meas", label:"Focus measures", glyph:"◎", find:"focus watch highlight measures",                render:renderFocusSetup },
       { k:"bands",  ac:"c_bands",  grp:"meas", label:"Scoring bands", glyph:"▥", find:"scoring bands green amber red threshold colours ranges",        render:function(){ return renderBands() + renderBandsExtra(); } },
       /* TERMINOLOGY, NOT "LABELS" (§108.3). The page holds what THIS tenant
          calls a pillar, a theme, an aspiration — its vocabulary, and the one
@@ -433,41 +451,55 @@
          Communications — the same way, by renaming until each name meant one
          thing. The KEY stays `chat`, which is what the page def, the endpoint,
          `GROUP.chat` and checks/office-chat.py all name. */
-      /* IN PLATFORM INBOX (§135.3). §108.3 named this "Inbox" to break a
-         three-way collision, and the same rename now has a second job: with
-         the composer becoming "Send an email", a bare "Inbox" reads as where
+      /* PLATFORM INBOX (§135.3, shortened by Islam). §108.3 named this "Inbox"
+         to break a three-way collision, and the rename has a second job now:
+         with the composer called "Send an email", a bare "Inbox" reads as where
          those emails land, which is the one thing it is not. This is the
-         conversation people have with the office INSIDE the platform. The KEY
-         stays `chat` — the endpoint, `GROUP.chat` and the checks all name it. */
-      { k:"chat",     ac:"c_chat",  grp:"cycle",  label:"In Platform inbox", glyph:"✉", find:"messages chat conversations questions replies feedback answer inbox",
+         conversation people have with the office inside the platform.
+
+         "Platform Inbox", not "In Platform inbox" — his word, and the shorter
+         one is the better one: the qualifier is doing the work either way, and
+         a rail entry is scanned rather than read. The KEY stays `chat`, which
+         the endpoint, `GROUP.chat` and the checks all name (§65, §108.3). */
+      { k:"chat",     ac:"c_chat",  grp:"cycle",  label:"Platform Inbox", glyph:"✉", find:"messages chat conversations questions replies feedback answer inbox",
         when: function(){ return inOffice() && CHAT.servable(); },
         render:function(){ return CHAT.renderInbox(); } },
       /* §74. A DOING page, so it sits with the cycle rather than beside the
          Email SETTINGS — and gated at edit for Import's reason (§48.2): there
          is nothing to read on a composer, so a view grant would open a page
          whose every control the server then refuses. */
-      /* ── SEND AN EMAIL, AND WHAT IT ARRIVES AS (§135.3, §135.4) ─────
-         Renamed at Islam's word, and it settles what §108.3 could not: this
-         page sends REAL EMAIL, and calling it "a message" left it in the same
-         word family as the in-platform conversation beside it.
+      /* ── THREE SUBTABS: THE RECORD, THE COMPOSER, THE SETTINGS ────────
+         Two sessions gave this page a section row on the same day and they
+         agree about the shape — one rail entry, tabs inside it, the shape
+         Figure sets (§46.2) and Import & archives (§108.4) already use.
 
-         AND THE EMAIL SETTINGS ARE ITS SECOND HALF, asked as a question —
-         *"would it be better as a drop down or a sub panel?"* A dropdown is
-         right for the inbox's seven switches (§98). This is a status table,
-         four fields, a LIVE RENDERED PREVIEW of the message and a test send:
-         a rendered email inside a dropdown is not a dropdown. It is the shape
-         Figure sets (§46.2) and Import & archives (§108.4) already use — one
-         rail entry, two sections — and, exactly as there, EACH SECTION KEEPS
-         ITS OWN GATE, so somebody holding `c_comms` and not `c_send` still
-         reaches the settings half, and paint() drops the whole entry for
-         somebody holding neither. */
-      { k:"send",     ac:"c_send", grp:"cycle",   label:"Send an email", glyph:"➤", find:"broadcast announce notify everyone email the team sender reply-to footer kicker display name outgoing from address",
+         §142.3 renamed the page at Islam's word (this page sends REAL EMAIL,
+         and "a message" left it in the same word family as the in-platform
+         conversation beside it) and made the email SETTINGS its second half,
+         because a status table with a live rendered preview is not a dropdown.
+
+         §144 put the RECORD in front of the composer, also at his word: "the
+         opening page ... should be a dashboard of what was sent, to whom, how
+         many people ... and when I finish and send it it should take me back to
+         the dashboard and show me that the message was sent there."
+
+         So the order is what you ARRIVE at, what you DO, and what you SET
+         ONCE — and Overview is first because that is what he asked to open on.
+
+         OVERVIEW IS HIS WORD, and the Setup rail already has a page called
+         Overview one group above. Recorded rather than quietly changed: they
+         sit at different levels (a page vs a tab inside one).
+
+         EACH SECTION KEEPS ITS OWN GATE (§108.4), so somebody holding
+         `c_comms` and not `c_send` still reaches the settings half, and
+         paint() drops the whole entry for somebody holding neither. */
+      { k:"send",     ac:"c_send", grp:"cycle",   label:"Send an email", glyph:"➤", find:"broadcast announce notify everyone email the team sent record history drafts sender reply-to footer kicker display name outgoing from address",
         when: function(){ return inOffice(); },
         sections: function(){
-          return [{ k:"compose", ac:"c_send",  label:"Compose",        render:renderSendMessage },
+          return [{ k:"over",    ac:"c_send",  label:"Overview",       render:renderMsgOverview },
+                  { k:"compose", ac:"c_send",  label:"Compose",        render:renderSendMessage },
                   { k:"comms",   ac:"c_comms", label:"Email settings", render:renderComms }];
         } },
-      { k:"focusset", ac:"c_focus", grp:"cycle",  label:"Focus measures", glyph:"◎", find:"focus watch highlight measures",                render:renderFocusSetup },
       /* Only for somebody who has actually been named on a figure. Its reach
          is not a setting (§16.7), so `when` hides it outright rather than the
          matrix answering "none" — a menu entry that opens an empty page is
@@ -1568,6 +1600,8 @@
        its Add and Remove act on, and an index from the last paint would act on
        the paint before it. */
     if (typeof KOLISTS !== "undefined") KOLISTS.length = 0;
+    /* §145: the confirm ticks register the row they act on the same way. */
+    if (typeof PENDS !== "undefined") PENDS.length = 0;
     fillViewers();
     paintUnits();
     /* ── TARGET IS DERIVED FROM `current`, SO IT IS SET AFTER IT SETTLES ──
@@ -1666,6 +1700,9 @@
        and one class carrying both is how the dot came to mean nothing. It
        paints to the RIGHT (Islam), which is also where it belongs — a mark
        AFTER the word annotates it; a mark before it is a bullet. */
+    /* \u00a7132.14: the Strategy tab wears NO number (Islam: "remove the number
+       from the strategy word") \u2014 the missing bar in the section row below
+       carries the total, the places and the action, through missBar(). */
     document.getElementById("subtabs").innerHTML = railed ? "" : defs.map(function(d){
       var cls = (d.primary ? "primary" : "") +
         (d.dot && reportPending(TARGET) ? " dot" : "");
@@ -1788,7 +1825,7 @@
     var failBtn = _panel.querySelector("[data-failreload]");
     if (failBtn) failBtn.addEventListener("click", function(){ location.reload(); });
 
-    /* ── AND THE REPORTING CONTROLS GO ON THE TAB ROW (§140) ─────────────
+    /* ── AND THE REPORTING CONTROLS GO ON THE TAB ROW (§149) ─────────────
        Read AFTER the page's render, because the render is what fills the
        slot — the same direction of travel `pageLineHTML()` makes for a Setup
        page's controls, and the reason the tab row could not simply build
@@ -1805,7 +1842,7 @@
     var tabrow = document.getElementById("subtabs");
     if (REPORT_CHROME && tabrow && !railed) tabrow.insertAdjacentHTML("beforeend", REPORT_CHROME);
 
-    /* ── AND A TABLE TOO WIDE FOR ITS PANE SCROLLS INSIDE ITSELF (§141) ──
+    /* ── AND A TABLE TOO WIDE FOR ITS PANE SCROLLS INSIDE ITSELF (§150) ──
        Done here, once, rather than at the dozen render sites that build a
        table: every one of them would have had to remember, and the day one
        forgot would be the day a client's plan is cut again with no way to
@@ -1828,7 +1865,7 @@
       w.appendChild(t);
     });
     /* THE SECOND FROZEN COLUMN PARKS AGAINST THE FIRST ONE'S MEASURED WIDTH,
-       NEVER AGAINST A CONSTANT (§141.1). It shipped as `left:38px` — the `#`
+       NEVER AGAINST A CONSTANT (§150.1). It shipped as `left:38px` — the `#`
        column's declared width — and the name slid 2.5px on every scroll,
        because the RENDERED border box is the declared width plus its borders.
        §122.5's rule ("a cap made of a guessed constant goes stale silently")
@@ -1857,7 +1894,13 @@
       document.getElementById("secrow-in").innerHTML = secs.map(function(s){
         return '<button role="tab" data-sub2="' + s.k + '"' + (s.cls ? ' class="' + s.cls + '"' : '') +
           ' aria-selected="' + (s.k === def.k) + '">' + s.label + '</button>';
-      }).join("");
+      }).join("") +
+        /* §145.14: THE MISSING BAR LIVES IN THIS ROW'S FREE SPACE (Islam:
+           "that bar with that button is what goes up beside the plan, not
+           to waste lines") — the total, one red chip per place that owes,
+           and the red button, on the strategy tabs only, read mode too. */
+        ((currentSub === "strategy" || currentSub === "fnstrat") &&
+         typeof missBar === "function" ? missBar() : "");
     } else {
       secrow.hidden = !onSecPage;
       /* HIDDEN IS NOT EMPTY, AND IT HAS TO BE BOTH (§63.6). The row kept the
@@ -2107,8 +2150,58 @@
   function fieldSaved(){
     if (typeof SYNC !== "undefined" && SYNC.afterPaint) SYNC.afterPaint();
   }
+  /* §145.14: pressing "Fill in missing elements" opens fill mode for the
+     page it names and walks straight to the first blank — one press, one
+     field under the cursor. With no page (a section that cannot fill, like
+     the SWOT), the walk itself finds the first place that owes. */
+  function enterFillMode(page){
+    if (page) EDIT_PAGE[page] = true;
+    paint();
+    /* THE WALK WAITS FOR THE PAINT IT NEEDS. On a real press, paint() is HELD
+       until the click has landed (§30.1's CLICKING guard, released by a timer
+       scheduled on mouseup) — so walking synchronously here reads the
+       read-mode page, finds zero fillable fields, and the fallback marches
+       off to another place's chip while THIS page is full of gaps. A
+       zero-delay timer queues behind the mouseup's release timer, so the walk
+       always sees the repainted page; on a programmatic click paint ran
+       synchronously and the timer merely walks a beat later. */
+    setTimeout(gapWalk, 0);
+  }
+  /* ── NEXT GAP (§145.12): walk the fillable blanks on this page ─────────
+     Field to field in document order, wrapping; the ring says which one the
+     press landed on. When the page holds none, the walk goes to the first
+     PLACE still owing — through the band's own chip, so the two ways of
+     moving cannot disagree about where a place is. */
+  function gapWalk(){
+    var els = [].slice.call(document.querySelectorAll(".fld.gapfld, .qs-fill"));
+    if (!els.length){
+      var chip = document.querySelector("[data-gapband] .mchip:not(.done)");
+      if (chip) chip.click();
+      return;
+    }
+    var cur = document.activeElement, at = -1;
+    for (var i = 0; i < els.length; i++)
+      if (cur && (els[i] === cur || els[i].contains(cur))) { at = i; break; }
+    var next = els[(at + 1) % els.length];
+    /* §130.1's pickers are searchsel-enhanced: the native select is HIDDEN
+       in place with a button in front of it, so ringing or focusing the
+       select itself lights nothing anybody can see (§34: whoever hides a
+       field hides its furniture — and whoever walks to one walks to its
+       furniture). */
+    var lit = next;
+    if (lit.previousElementSibling && lit.previousElementSibling.classList &&
+        lit.previousElementSibling.classList.contains("ssbtn"))
+      lit = lit.previousElementSibling;
+    els.forEach(function(e){ e.classList.remove("gaplit"); });
+    document.querySelectorAll(".ssbtn.gaplit").forEach(function(e){ e.classList.remove("gaplit"); });
+    lit.classList.add("gaplit");
+    lit.scrollIntoView({ block: "center" });
+    var f = lit.matches("input,select,textarea,button")
+      ? lit : lit.querySelector("button,input,select,textarea");
+    if (f) f.focus({ preventScroll: true });
+  }
   function wire(){
-    /* `[data-s]`, NOT every button in the row (§140.1). The row gained a
+    /* `[data-s]`, NOT every button in the row (§149.1). The row gained a
        second kind of child when the reporting controls moved onto it, and
        this selector said "a button here is a tab" — so pressing Save draft
        set `currentSub = undefined`, dropped the modes and repainted, which
@@ -3121,6 +3214,43 @@
       b.addEventListener("click", function(){
         var k = b.dataset.edit; EDITING[k] = !EDITING[k]; paint();
       });
+    });
+    /* ── THE KNOWLEDGE BASE'S PEN (§140) ─────────────────────────────
+       Bound per paint like every control above. The two text fields write on
+       `change` — blur, for a text control — so typing never repaints (§35),
+       and every write ends in paint(), whose §30.1 guard already holds a
+       repaint asked for mid-click until the click lands. An added question's
+       id is kbx<n>, minted outside the shipped ids' namespace, which is what
+       lets one handler serve both kinds of card. */
+    document.querySelectorAll("[data-kbpen]").forEach(function(b){
+      b.addEventListener("click", function(){ KBEDIT = !KBEDIT; paint(); });
+    });
+    /* The two tabs (§141). Switching leaves edit mode: the pen lives on the
+       questions tab, and a mode whose control is no longer on screen is §61's
+       trap — a state with no way back out of it. */
+    document.querySelectorAll("[data-kbtab]").forEach(function(b){
+      b.addEventListener("click", function(){
+        kbTabSet(b.dataset.kbtab); KBEDIT = false; paint();
+      });
+    });
+    document.querySelectorAll("[data-kbq], [data-kba]").forEach(function(f){
+      f.addEventListener("change", function(){
+        var card = f.closest(".kbed"); if (!card) return;
+        var id = f.dataset.kbq || f.dataset.kba;
+        var q = (card.querySelector("[data-kbq]") || {}).value;
+        var a = (card.querySelector("[data-kba]") || {}).value;
+        if (/^kbx\d+$/.test(id)) kbSetAdded(id, q, a); else kbSetOver(id, q, a);
+        paint();
+      });
+    });
+    document.querySelectorAll("[data-kbreset]").forEach(function(b){
+      b.addEventListener("click", function(){ kbResetOver(b.dataset.kbreset); paint(); });
+    });
+    document.querySelectorAll("[data-kbdel]").forEach(function(b){
+      b.addEventListener("click", function(){ kbDropAdded(b.dataset.kbdel); paint(); });
+    });
+    document.querySelectorAll("[data-kbadd]").forEach(function(b){
+      b.addEventListener("click", function(){ kbAddNew(b.dataset.kbadd); paint(); });
     });
     document.querySelectorAll("input.blabel").forEach(function(inp){
       inp.addEventListener("change", function(){
@@ -4392,6 +4522,7 @@
           to: addr,
           subject: "Test from " + (sh.org || "the Strategy Management Platform"),
           html: MAIL.sampleFor(sh),
+          body: "",
           fromName: sh.fromName,
           replyTo: sh.replyTo
         }, function(err){
@@ -4412,6 +4543,9 @@
       inp.addEventListener("change", function(){
         if (inp.dataset.aud === "everyone") sendmsg().criteria.everyone = inp.checked;
         else sendmsgToggle(inp.dataset.aud, inp.value, inp.checked);
+        /* CHANGING WHO IT GOES TO MAKES IT A DIFFERENT SEND, so Send comes back
+           for the same reason editing the words does (§143). */
+        sendmsgTouched();
         sendmsgAsk();
         paint();
       });
@@ -4419,14 +4553,14 @@
     document.querySelectorAll("[data-audkey]").forEach(function(b){
       b.addEventListener("click", function(){
         sendmsgToggle("keys", b.dataset.audkey, false);
-        sendmsgAsk(); paint();
+        sendmsgTouched(); sendmsgAsk(); paint();
       });
     });
     var audpick = document.getElementById("audpick");
     if (audpick) audpick.addEventListener("change", function(){
       if (!this.value) return;
       sendmsgToggle("keys", this.value, true);
-      sendmsgAsk(); paint();
+      sendmsgTouched(); sendmsgAsk(); paint();
     });
 
     /* THE BUTTON'S TWO FIELDS ARE THE ONLY BOXES LEFT (§76.3) — the heading
@@ -4438,9 +4572,44 @@
       if (!el) return;
       el.addEventListener("input", function(){
         sendmsg()[pair[1]] = el.value;
+        sendmsgTouched();
         paintMsgPreview();
       });
     });
+
+    /* THE OVERVIEW'S ONE LOUD CONTROL (§144.8). It moves to the other tab
+       rather than doing anything itself — the composer is where the act
+       happens, and this is the way in that a tab was not being. */
+    var msgwrite = document.querySelector("[data-msgwrite]");
+    if (msgwrite) msgwrite.addEventListener("click", function(){
+      CURSEC["send"] = "compose";
+      paint();
+    });
+
+    /* ── THE GREETING (spec 022) ────────────────────────────────────
+       THE SWITCH REPAINTS; TYPING THE WORD DOES NOT. Turning it on draws a
+       box and a line that were not there, which is a repaint; typing into
+       that box must only redraw the PREVIEW, or the field being typed into is
+       replaced mid-word (§35, §71.2) — the same rule the two button fields
+       above obey.
+
+       `greet` is the word or null. Turning it off DELETES the value rather
+       than remembering it, so off is the absence and a draft saved off
+       carries nothing (§50.6). */
+    document.querySelectorAll("[data-greet]").forEach(function(b){
+      b.addEventListener("click", function(){
+        sendmsg().greet = b.dataset.greet === "1" ? "Dear" : null;
+        sendmsgTouched();
+        paint();
+      });
+    });
+    var mg = document.getElementById("msggreet");
+    if (mg) mg.addEventListener("input", function(){
+      sendmsg().greet = mg.value;
+      sendmsgTouched();
+      paintMsgPreview();
+    });
+
     paintMsgPreview();
 
     /* ── The recipient dropdowns (§76.2) ────────────────────────────
@@ -4497,6 +4666,7 @@
       if (out) out.textContent = "Saving\u2026";
       SYNC.mailDraftSave({ id: st.draftId, subject: st.subject, body: st.body,
                            ctaLabel: st.ctaLabel, ctaHref: st.ctaHref,
+                           greet: st.greet,
                            criteria: st.criteria }, function(err, j){
         msgdraft.disabled = false;
         if (err) { if (out) out.textContent = err; return; }
@@ -4513,6 +4683,9 @@
           st.draftId = String(d.id);
           st.subject = d.subject || ""; st.body = d.body || "";
           st.ctaLabel = d.cta_label || ""; st.ctaHref = d.cta_href || "";
+          /* NULL IS OFF, and it has to stay null rather than becoming "" —
+             `greet == null` is the switch everywhere else (spec 022). */
+          st.greet = (d.greet == null) ? null : String(d.greet);
           st.criteria = d.audience || { everyone:false, roles:[], targets:[], keys:[] };
           /* Whatever was resolved for the message you were writing before is
              not this message's audience. Cleared, then asked again. */
@@ -4533,7 +4706,66 @@
         });
       });
     });
-    if (DRAFTLIST === null && document.getElementById("msgsend") &&
+    /* ── REMOVING A TEST COPY (§145) ────────────────────────────────
+       The Super user's alone, and only ever a test copy — Islam's B: the
+       clutter goes and the record of what the business was actually sent stays
+       whole. `mayDestroy()` decides whether the control is drawn and the SERVER
+       decides whether it may act, because a control that is only hidden is
+       decoration (§42, §44).
+
+       THE PLATFORM'S OWN MODAL, never `confirm()` (§95): a browser dialog can
+       be silenced permanently on some other site, and this cannot be undone.
+       It names the subject and when it went, so the row being removed is the
+       row you meant.
+
+       IT IS THE ROW'S OWN ID, read at press time from the element, and the
+       refusal the server may give is SHOWN rather than swallowed — a delete
+       that silently does nothing is the fault this whole section is about. */
+    document.querySelectorAll("[data-sentdel]").forEach(function(b){
+      b.addEventListener("click", function(){
+        var id = this.dataset.sentdel;
+        var row = ((SENTLIST && SENTLIST.messages) || []).filter(function(m){
+          return String(m.id) === String(id); })[0] || {};
+        openModalHtml("Remove this test copy?", "",
+          '<div class="sendconfirm">' +
+            '<div class="kv"><span class="k">Subject</span><span>' +
+              esc(String(row.subject || "")) + '</span></div>' +
+            '<div class="kv"><span class="k">Sent</span><span>' +
+              esc(String(row.sent_at || "").slice(0, 16).replace("T", " ")) +
+              ' \u2014 to you only</span></div>' +
+            '<div class="kv"><span class="k">No undo</span><span>The record of ' +
+              'this test copy goes for good. Messages that went to the business ' +
+              'are never removed.</span></div>' +
+            '<div class="cbtns"><button data-delno="1">Cancel</button>' +
+            '<button class="danger" data-delyes="1">Yes, remove it</button></div>' +
+          '</div>');
+        var box = document.getElementById("modal-b");
+        if (!box) return;
+        var no = box.querySelector("[data-delno]");
+        if (no) no.addEventListener("click", function(){ closeModal(); });
+        var yes = box.querySelector("[data-delyes]");
+        if (yes) yes.addEventListener("click", function(){
+          closeModal();
+          SYNC.mailHistoryDelete(id, function(err){
+            if (err) {
+              /* THE REFUSAL IS SAID ON THE PAGE (§32, one surface in), in the
+                 outcome line the Overview already has, rather than warning a
+                 console nobody has open. */
+              var st = sendmsg();
+              st.result = { ok: false, landed: true, msg: err, skipped: 0, rows: null };
+              paint(); return;
+            }
+            if (SENTONE && String(SENTONE.id) === String(id)) SENTONE = null;
+            SENTLIST = null;
+            paint();
+          });
+        });
+      });
+    });
+
+    /* ON THE OVERVIEW, not on the composer (§144). Both lists are drawn there
+       now, and the old gate — the Send button — is on the other tab. */
+    if (DRAFTLIST === null && document.getElementById("msgover") &&
         typeof SYNC !== "undefined" && SYNC.isLive()) {
       DRAFTLIST = { drafts: [] };
       SYNC.mailDraftList(function(err, j){
@@ -4573,20 +4805,6 @@
     var sentClose = document.querySelector("[data-sentclose]");
     if (sentClose) sentClose.addEventListener("click", function(){ SENTONE = null; paint(); });
 
-    /* ── SEND A MESSAGE'S HEADER MENUS AND DISCLOSURE (§95) ──────────
-       The same shape as the register's, and one open at a time. */
-    document.querySelectorAll("[data-draftmenu]").forEach(function(b){
-      b.addEventListener("click", function(e){
-        e.stopPropagation();
-        DRAFTMENU = !DRAFTMENU; SENTMENU = false; paint();
-      });
-    });
-    document.querySelectorAll("[data-sentmenu]").forEach(function(b){
-      b.addEventListener("click", function(e){
-        e.stopPropagation();
-        SENTMENU = !SENTMENU; DRAFTMENU = false; paint();
-      });
-    });
     /* THE NAMES ARE A DISCLOSURE, not a repaint of the composer — but the
        audience block is its own element and paint() is what redraws it, so
        this is one of the few things on this page that may repaint (§35: what
@@ -4665,11 +4883,19 @@
        yes, unchanged. */
     function reallySend(){
       var st = sendmsg(), out = document.getElementById("msgsaid");
+      /* WRITTEN INTO THE ELEMENT, because a repaint would replace the button
+         that was just pressed (§63). THE CLASS, not an inline colour — the
+         render says the same thing with `.msgsaid.bad`, and two ways of
+         colouring one span is how the two come to disagree (§53.5). A null
+         `ok` is "in progress" and wears neither.
+
+         THIS ONLY EVER REPORTS A FAILURE NOW (§144): a send the server
+         answered leaves this tab, and its outcome is drawn on the Overview. */
       function say(msg, ok){
         st.result = { msg: msg, ok: ok, rows: (st.result && st.result.rows) || null };
         if (!out) return;
         out.textContent = msg;
-        out.style.color = ok === null ? "" : ("var(--" + (ok ? "good" : "bad") + "-tx)");
+        out.className = "why msgsaid" + (ok === false ? " bad" : "");
       }
       var n = (st.aud && st.aud.to) ? st.aud.to.length : 0;
       var msgsend = document.getElementById("msgsend");
@@ -4684,26 +4910,47 @@
         draftId: st.draftId,
         criteria: st.criteria, subject: st.subject.trim(), body: st.body.trim(),
         ctaLabel: st.ctaLabel.trim(), ctaHref: st.ctaHref.trim(),
+        greet: st.greet,
         fromName: sh.fromName, replyTo: sh.replyTo,
         html: MAIL.html({
           org: sh.org, accent: sh.accent, panel: sh.panel, footer: sh.footer,
           eyebrow: sh.eyebrow, title: st.subject.trim(), preheader: st.subject.trim(),
           body: st.body.trim(),
+          /* NO NAME HERE, deliberately — the builder leaves the region and the
+             server fills it once per recipient, because who they are is the
+             server's answer (spec 022, §74.2). */
+          greeting: st.greet == null ? null : { word: st.greet },
           cta: (st.ctaLabel.trim() && st.ctaHref.trim())
                  ? { label: st.ctaLabel.trim(), href: st.ctaHref.trim() } : null
         })
       }, function(err, j){
         msgsend.disabled = false; st.busy = false;
         if (err) { say(err, false); return; }
-        st.result = { ok: !j.failed,
+        /* ── THE SERVER ANSWERED, SO GO BACK TO THE RECORD (§144) ─────
+           Islam: "when I finish the email and send it it should take me back
+           to the dashboard and show me that the message was sent there."
+
+           `landed` is what says the outcome belongs on the Overview rather
+           than in the composer's bar — set for a partial failure too, because
+           the message DID go to most people and the record is where the
+           failures are named. Only a send that never happened stays here.
+
+           THE COMPOSER IS EMPTIED. What was in it has been sent and is in the
+           record now; leaving it loaded behind a tab is a message that looks
+           unsent and is one press from going twice. */
+        st.result = { ok: !j.failed, landed: true,
           msg: plural(j.sent, "message", "messages") + " sent" +
                (j.failed ? ", " + j.failed + " failed" : "") + ".",
+          skipped: (st.aud && st.aud.skipped) ? st.aud.skipped.length : 0,
           rows: null };
-        /* The list is asked again rather than guessed at: what the server
+        st.subject = ""; st.body = "";
+        st.ctaLabel = ""; st.ctaHref = ""; st.greet = null;
+        /* The lists are asked again rather than guessed at: what the server
            recorded is the record, and a row this page invented would be a
-           second copy of it. */
+           second copy of it (§95). */
         SENTLIST = null;
         st.draftId = null; DRAFTLIST = null;
+        CURSEC["send"] = "over";
         paint();
       });
       });
@@ -4756,9 +5003,16 @@
           org: sh.org, accent: sh.accent, panel: sh.panel, footer: sh.footer,
           eyebrow: sh.eyebrow, title: st.subject.trim(), preheader: st.subject.trim(),
           body: st.body.trim(),
+          /* YOUR COPY GREETS YOU, by the name on the row of whoever is SIGNED
+             IN — `row` is found from SYNC.person(), never viewer(), which is
+             the simulation (§95). Filled here rather than left as a region:
+             there is one recipient and the browser knows who they are. */
+          greeting: st.greet == null ? null
+                      : { word: st.greet, name: SMPRules.firstName(row) },
           cta: (st.ctaLabel.trim() && st.ctaHref.trim())
                  ? { label: st.ctaLabel.trim(), href: st.ctaHref.trim() } : null
         }),
+        body: st.body.trim(),
         fromName: sh.fromName,
         replyTo: sh.replyTo
       }, function(err){
@@ -4768,7 +5022,7 @@
       });
     });
 
-    if (SENTLIST === null && document.getElementById("msgsend") &&
+    if (SENTLIST === null && document.getElementById("msgover") &&
         typeof SYNC !== "undefined" && SYNC.isLive()) {
       SENTLIST = { messages: [] };
       SYNC.mailHistory(function(err, j){
@@ -5144,8 +5398,74 @@
         var t = (list || []).filter(function(x){ return x && x.id === id; })[0];
         if (!t) return;
         t["q" + q] = !t["q" + q];
+        /* §145: an office write settles — a pending quarters fill loses its
+           mark the moment the office touches the row. Correcting confirms. */
+        gapLift(t, "quarters");
         paint();
       });
+    });
+    /* ── FILL THE GAPS (§145) ──────────────────────────────────────────
+       The fill grant's quarter buttons: only a tactic with NO quarter at
+       all is a gap (§128, §119.1), so these are only drawn there and while
+       that fill is pending — the four move together under one mark, and
+       clearing the last quarter is the filler's own undo. */
+    document.querySelectorAll("[data-qfill]").forEach(function(b){
+      b.addEventListener("click", function(){
+        if (!mayFill("u_plan")) return;
+        var a = this.dataset.qfill.split("|"), id = a[0], q = +a[1];
+        var list = listById("tactics", id);
+        var t = (list || []).filter(function(x){ return x && x.id === id; })[0];
+        if (!t) return;
+        t["q" + q] = !t["q" + q];
+        if (SMPRules.quartersBlank(t)) gapLift(t, "quarters");
+        else gapStamp(t, "quarters");
+        paint();
+      });
+    });
+    /* Confirming a pending fill — the office's act, re-asked at the click.
+       The registry is this paint's, exactly as FIELDS is (§48.2's shape). */
+    document.querySelectorAll("[data-pconf]").forEach(function(b){
+      b.addEventListener("click", function(){
+        var e = PENDS[+b.dataset.pconf];
+        if (!e || !mayAuthor(e.acKey)) return;
+        gapLift(e.row, e.field);
+        paint();
+      });
+    });
+    /* ── THE GAP BAND'S CHIPS AND WALKER (§145.12) ─────────────────────
+       ONE handler on the band, by delegation: gapBandRefresh() rewrites the
+       chips' contents in place between paints (a repaint would destroy the
+       field being typed into, §71.2), so the handler must not live on the
+       nodes being rewritten. A chip is a door: it keeps fill mode on for the
+       page it lands on, because the band exists only while somebody is
+       filling and a door that closed the mode behind it would strand them. */
+    var gband = document.querySelector("[data-gapband]");
+    if (gband) gband.addEventListener("click", function(ev){
+      var chip = ev.target.closest("[data-gkey]");
+      if (chip){
+        if (chip.dataset.gpage) EDIT_PAGE[chip.dataset.gpage] = true;
+        if (chip.dataset.gsec) CURSEC[currentSub] = chip.dataset.gsec;
+        if (chip.dataset.grail) RAIL[chip.dataset.grail] = chip.dataset.gcode;
+        paint();
+        if (typeof toPaneTop === "function") toPaneTop();
+        return;
+      }
+      if (ev.target.closest("[data-fillcta]")) {
+        enterFillMode(ev.target.closest("[data-fillcta]").dataset.fillcta);
+        return;
+      }
+      if (ev.target.closest("[data-nextgap]")) gapWalk();
+    });
+    /* §145.14: the same two controls OUTSIDE the bar — the corner button and
+       the empty-page pointer — wired directly (they are repainted, never
+       rewritten in place), and never double-bound onto the bar's own. */
+    document.querySelectorAll("[data-fillcta]").forEach(function(b){
+      if (b.closest("[data-gapband]")) return;
+      b.addEventListener("click", function(){ enterFillMode(b.dataset.fillcta); });
+    });
+    document.querySelectorAll("[data-nextgap]").forEach(function(b){
+      if (b.closest("[data-gapband]")) return;
+      b.addEventListener("click", gapWalk);
     });
 
     document.querySelectorAll("[data-rowoff]").forEach(function(b){
@@ -6328,10 +6648,10 @@
     /* The header menus close the same way, and on a click anywhere that is not
        inside them. `.hmenu` covers both the button and its panel. */
     if (typeof PCOLMENU !== "undefined" &&
-        (PCOLMENU || PWMENU || FNCOLMENU || DRAFTMENU || SENTMENU) &&
+        (PCOLMENU || PWMENU || FNCOLMENU) &&
         !(e.target.closest && e.target.closest(".hmenu"))) {
       PCOLMENU = false; PWMENU = false; PFILEMENU = false; FNCOLMENU = false;
-      DRAFTMENU = false; SENTMENU = false; paint();
+      paint();
     }
   });
   document.addEventListener("keydown", function(e){
@@ -6339,9 +6659,9 @@
     if (typeof PMENU !== "undefined" && PMENU !== null) { PMENU = null; paint(); }
     if (typeof FNMENU !== "undefined" && FNMENU !== null) { FNMENU = null; paint(); }
     if (typeof PCOLMENU !== "undefined" &&
-        (PCOLMENU || PWMENU || FNCOLMENU || DRAFTMENU || SENTMENU)) {
+        (PCOLMENU || PWMENU || FNCOLMENU)) {
       PCOLMENU = false; PWMENU = false; PFILEMENU = false; FNCOLMENU = false;
-      DRAFTMENU = false; SENTMENU = false; paint();
+      paint();
     }
   });
 

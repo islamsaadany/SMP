@@ -75,6 +75,13 @@ var ICON_EYE = '<svg viewBox="0 0 20 20" aria-hidden="true">' +
 var ICON_PEN = '<svg viewBox="0 0 20 20" aria-hidden="true">' +
   '<path d="M13.4 3.6l3 3L7.9 15.1l-3.9.9.9-3.9z" fill="none" ' +
     'stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/></svg>';
+/* §145: the fill-the-gaps mark — a pen over a dashed line, writing into the
+   blank. The same pen, lifted, with the line it writes on. */
+var ICON_FILL = '<svg viewBox="0 0 20 20" aria-hidden="true">' +
+  '<path d="M12.6 3.4l3 3-7 7-3.6.6.6-3.6z" fill="none" ' +
+    'stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/>' +
+  '<path d="M3 17.4h14" fill="none" stroke="currentColor" stroke-width="1.6" ' +
+    'stroke-linecap="round" stroke-dasharray="2 3"/></svg>';
 
 /* ── Roles & access ─────────────────────────────────────────────────── */
 function stateCell(roleKey, areaKey, editable, disabled){
@@ -101,7 +108,17 @@ function stateCell(roleKey, areaKey, editable, disabled){
      is a TOGGLE: pressing the lit one turns it off and the cell falls back to
      none. The state each press produces is worked out here rather than in the
      handler, so the click still says only "set this cell to this". */
-  var opts = ["view","edit"].map(function(o){
+  /* §145: THE TWO STRATEGY HALVES CARRY A THIRD STATE — Fill gaps — between
+     view and edit. Only those two cells: everywhere else the state would
+     grant nothing (`mayFillPage` answers only for the strategy pages), and
+     a toggle that does nothing is decoration (§42). */
+  var states = (areaKey === "a_unit_own_strat" || areaKey === "a_fn_own_strat")
+    ? ["view", "fill", "edit"] : ["view", "edit"];
+  var WORD = { view: "May read",
+               fill: "May fill what’s empty — Missing values only, pending until the office confirms",
+               edit: "May read and change" };
+  var ICON = { view: ICON_EYE, fill: ICON_FILL, edit: ICON_PEN };
+  var opts = states.map(function(o){
     var on = o === v;
     /* `st-view`, NOT `view` (§65). A class name is one global namespace, and
        `.view` is the PAGE REGION — `.view { padding-top: var(--rail-gap) }` —
@@ -112,9 +129,9 @@ function stateCell(roleKey, areaKey, editable, disabled){
        component, and the collision is silent because both rules are valid. */
     return '<button type="button" class="stbtn' + (on ? " on st-" + o : "") + '" data-ac="' +
       roleKey + '|' + areaKey + '|' + (on ? "none" : o) + '" title="' +
-      (on ? "Turn off — leaves no access" : o === "view" ? "May read" : "May read and change") +
+      (on ? "Turn off — leaves no access" : WORD[o]) +
       '" aria-label="' + (on ? "turn off " + o : o) + '" aria-pressed="' + on + '">' +
-      (o === "view" ? ICON_EYE : ICON_PEN) + '</button>';
+      ICON[o] + '</button>';
   }).join("");
   /* Nothing lit IS the answer, so the cell says so rather than looking
      unanswered — a blank cell in a permissions table reads as "not filled in",
@@ -232,6 +249,7 @@ function renderAccess(){
       '<div class="cfg acgrid"><table><thead>' + head + '</thead><tbody>' + body + '</tbody></table></div>' +
       '<div class="chart-legend" style="margin-top:12px">' +
         '<span><i class="st st-view">' + ICON_EYE + '</i> may read</span>' +
+        '<span><i class="st st-fill">' + ICON_FILL + '</i> may fill what&rsquo;s empty (Strategy halves only)</span>' +
         '<span><i class="st st-edit">' + ICON_PEN + '</i> may read and change</span>' +
         '<span><i class="st st-none">neither</i> no access, page hidden</span>' +
         '<span><i class="st" style="background:none;color:var(--none);border:1px dashed var(--none)">&mdash;</i> cannot come up for this role</span>' +
@@ -439,7 +457,7 @@ var PAGE_TITLE = null;
    not a trade worth making. */
 var PAGE_TOOLS = "";
 var PAGE_ACTS  = "";
-/* THE REPORTING BOX TRAVELS THE SAME WAY (§140). The tab row is written
+/* THE REPORTING BOX TRAVELS THE SAME WAY (§149). The tab row is written
    BEFORE the page renders, so a report cannot put its controls there
    directly — it publishes them here and the shell hangs them on the row
    afterwards, which is exactly the trip the two slots above already make.
@@ -870,7 +888,7 @@ function renderBranding(){
     return '<tr><td><b>' + esc(label) + '</b><span class="why">' + esc(note) + '</span></td>' +
       '<td class="cc">' + (mayEdit
         ? '<span class="brandpick">' +
-            /* AN UNSET PICKER OPENS ON WHAT THE PLATFORM IS PAINTING (§145).
+            /* AN UNSET PICKER OPENS ON WHAT THE PLATFORM IS PAINTING (§154).
                It opened on #4F46E5 — an indigo that exists nowhere in SMP — so
                an unbranded tenant met two indigo swatches on the one page that
                defines colour, while the product around them was navy and gold.
@@ -1064,7 +1082,7 @@ var PEOPLE_COLS = [
      It sits immediately after the name rather than with the identifiers: it is
      the same fact at a different length, and putting it beside Emp ID would
      imply it identifies somebody, which is exactly what it must not do. */
-  /* OFF BY DEFAULT (§145). Everything above stays true — it is the value the
+  /* OFF BY DEFAULT (§154). Everything above stays true — it is the value the
      employee file is written in, and on a reconciliation day it is the column
      you want. But until somebody types a short name it is IDENTICAL to the
      frozen Name beside it, which today is 33 rows of 33: the register's most
@@ -1296,10 +1314,18 @@ function renderPeople(){
              unrepeated. */
           var at = whereLabel(r.at);
           var elsewhere = !home || r.at !== home;
-          return '<span class="rolechip" title="' + esc(roleName(r.role)) + ' \u00b7 ' + esc(at) + '">' +
+          /* A DERIVED ROLE HAS NO \u00d7 (\u00a7147.7): a Project owner or Pillar owner
+             is read off the plan's own Owner rows and a Contributor off being
+             named \u2014 there is nothing here to revoke, and an \u00d7 that silently
+             does nothing is \u00a796's family. The chip says where the role comes
+             from instead, so the way to take it off is findable. */
+          var derived = SMPRules.isOwnLinesRole(r.role);
+          var tip = roleName(r.role) + " \u00b7 " + at +
+            (derived ? " \u2014 comes from being named on the plan; change the Owner there to move it" : "");
+          return '<span class="rolechip" title="' + esc(tip) + '">' +
             '<b>' + esc(roleName(r.role)) + '</b>' +
             (elsewhere ? '<span class="rolewhere">' + esc(at) + '</span>' : '') +
-            (editable
+            (editable && !derived
               ? '<button class="xbtn" data-prole-off="' + p.key + '|' + r.role + '|' + r.at +
                 '" title="Remove this role" aria-label="Remove this role">&times;</button>'
               : '') + '</span>';
@@ -3040,9 +3066,74 @@ function recipeText(t){
     .replace(/\{pillar\}/g, L("pillar","bu"));
 }
 
+/* THE PEN'S STATE. File-scope like the other page modes; the page is the
+   office's (§125), so everyone who can open it may edit — the control still
+   asks inOffice() (§42: the gate is on the control) and the server classifies
+   a GROUP.kb change as setup, so both ends answer alike (§94.2). */
+var KBEDIT = false;
+
+/* WHICH TAB (§141): "how" or "qa". A SCREEN PREFERENCE (§25, §47.1) — one
+   person reading the reference must not decide the tenant's landing tab —
+   remembered per browser, with a throwing store reading as the default
+   (§107's rule: a page nobody can open is worse than a lost preference). */
+function kbTab(){
+  try { return localStorage.getItem("smp.kb.tab") === "qa" ? "qa" : "how"; }
+  catch (e) { return "how"; }
+}
+function kbTabSet(t){
+  try { localStorage.setItem("smp.kb.tab", t === "qa" ? "qa" : "how"); } catch (e) {}
+}
+
+function kbEdCard(id, q, a, mark){
+  return '<div class="kbed' + (mark === "edited" ? " on" : "") + '">' +
+    '<input class="kbed-q" data-kbq="' + esc(id) + '" value="' + esc(q) + '">' +
+    '<textarea class="kbed-a" data-kba="' + esc(id) + '">' + esc(a) + '</textarea>' +
+    '<div class="kbed-foot">' +
+      (mark === "edited"
+        ? '<span class="kbed-mark">Edited for this platform</span>' +
+          '<button type="button" class="kbed-reset" data-kbreset="' + esc(id) + '">' +
+            'Back to the standard wording</button>'
+        : "") +
+      (mark === "yours"
+        ? '<span class="kbed-mark quiet">Yours</span>' +
+          '<button type="button" class="kbed-x" data-kbdel="' + esc(id) + '">' +
+            'Remove this question</button>'
+        : "") +
+    '</div></div>';
+}
+
 function kbRecipes(){
   return RECIPES.map(function(g){
+    /* RAW IN EDIT MODE, THE RULE'S IN READ MODE. `kbAdds` drops an entry with
+       nothing in it — right for the corpus and the page, where an empty
+       question says nothing — but the card just minted by "+ Add" IS empty,
+       and filtering it out made the button write state and show nothing
+       (§45.2: a feature that renders nothing looks like one that was never
+       built — caught by driving it, minutes after writing it). */
+    var adds = KBEDIT
+      ? ((GROUP.kb && GROUP.kb.add) || []).filter(function(x){ return x && x.g === g.g; })
+      : SMPRules.kbAdds(GROUP.kb, g.g);
     var items = g.items.map(function(r){
+      /* THE TENANT'S WORDING WINS, by the one rule the assistant also reads
+         (§140, §103): what this page shows IS what the bot answers from. */
+      var o = SMPRules.kbLook(GROUP.kb, r.id);
+      if (KBEDIT) {
+        return kbEdCard(r.id, o ? o.q : r.q, o ? o.a : r.a, o ? "edited" : null);
+      }
+      /* AN OVERRIDE IS TYPED TEXT AND RENDERS AS TEXT. The shipped answers
+         carry deliberate <b> markup and render raw; a rewritten one must not
+         inherit that path — office-only or not, prose typed into a box that
+         comes back as live markup is §43's lesson waiting to repeat. */
+      if (o) {
+        var who0 = r.who || g.who;
+        return '<div class="kb-rec" id="kb-r-' + esc(r.id) + '">' +
+          '<h4 class="kb-q">' + esc(recipeText(o.q)) +
+            (who0 === "office" ? ' <span class="pill kind">Strategy Office</span>' : '') +
+          '</h4>' +
+          recipeText(o.a).split("|").map(function(para){
+            return '<p class="kb-p">' + esc(para) + '</p>';
+          }).join("") + '</div>';
+      }
       /* TWO TRUE ANSWERS TO ONE QUESTION are two entries sharing a `q`
          (spec 016 §5.2b). On the page BOTH are shown, because the knowledge
          base is readable by everyone and the office's answer is not a secret —
@@ -3063,6 +3154,20 @@ function kbRecipes(){
         }).join("") +
       '</div>';
     }).join("");
+    /* The office's own questions, at the foot of the group they were added
+       to — read like any other entry, editable like one of theirs. */
+    items += adds.map(function(x){
+      if (KBEDIT) return kbEdCard(x.id, x.q, x.a, "yours");
+      return '<div class="kb-rec" id="kb-r-' + esc(x.id) + '">' +
+        '<h4 class="kb-q">' + esc(recipeText(x.q)) + '</h4>' +
+        recipeText(x.a).split("|").map(function(para){
+          return '<p class="kb-p">' + esc(para) + '</p>';
+        }).join("") + '</div>';
+    }).join("");
+    if (KBEDIT) {
+      items += '<button type="button" class="kbadd" data-kbadd="' + esc(g.g) + '">' +
+               '+ Add a question to this group</button>';
+    }
     return { id: "how-" + g.g.toLowerCase().replace(/[^a-z]+/g, "-").replace(/^-|-$/g, ""),
              title: g.g, html: items };
   });
@@ -3285,9 +3390,12 @@ function renderKB(){
      serves neither — somebody reading the Access section wants the argument,
      somebody asking "where do I press" wants four lines. */
   var recs = kbRecipes();
-  recs.forEach(function(r){
-    secs.push('<div class="kb-sec kb-how" id="kb-' + r.id + '"><h3>' + esc(r.title) +
-              '</h3>' + r.html + '</div>');
+  /* THEIR OWN LIST SINCE §141: the page is two tabs — the written
+     explanations, and the questions with the pen — and a recipe block pushed
+     into `secs` would render on the wrong one. */
+  var hows = recs.map(function(r){
+    return '<div class="kb-sec kb-how" id="kb-' + r.id + '"><h3>' + esc(r.title) +
+           '</h3>' + r.html + '</div>';
   });
 
   /* DERIVED, NEVER LISTED. This was a hand-written array beside the sections
@@ -3327,16 +3435,51 @@ function renderKB(){
      tour silently left the page. */
   if (tourBlock) secs.unshift(tourBlock);
 
+  /* EACH TAB'S CONTENTS ARE ITS OWN (§141): a pill that jumps to a section
+     on the hidden tab is a link that does nothing — the fault §110 records
+     for a control, arriving as navigation. Derived per tab, same rule. */
+  var tab = kbTab();
+  var shown = tab === "qa" ? hows : secs;
   var toc = '<div class="kb-toc">' +
-    secs.map(function(html){
+    shown.map(function(html){
       var id = (html.match(/id="kb-([a-z-]+)"/) || [])[1];
       var title = (html.match(/<h3>([^<]*)/) || [])[1] || "";
       title = title.split(" \u2014 ")[0];
       return id ? '<a href="#kb-' + id + '">' + title + '</a>' : '';
     }).join("") + '</div>';
 
+  /* THE COUNTS SIT ON THE TABS, so the split explains itself (approved
+     mockup): sections on one side, questions on the other — the QUESTIONS,
+     not the groups, because 43 is what somebody is choosing to search. */
+  var nQ = RECIPES.reduce(function(n, g){ return n + g.items.length; }, 0) +
+           SMPRules.kbAllAdds(GROUP.kb).length;
+  var tabs = '<div class="kbtabs" role="tablist">' +
+    '<button type="button" role="tab" data-kbtab="how" aria-selected="' + (tab === "how") + '"' +
+      (tab === "how" ? ' class="on"' : '') + '>How it works' +
+      '<span class="kbcount">' + secs.length + '</span></button>' +
+    '<button type="button" role="tab" data-kbtab="qa" aria-selected="' + (tab === "qa") + '"' +
+      (tab === "qa" ? ' class="on"' : '') + '>Questions &amp; answers' +
+      '<span class="kbcount">' + nQ + '</span></button>' +
+  '</div>';
 
-  return cfgHead("Knowledge base", [], null, false) +
+
+  /* THE PEN (§140): the office rewrites the answers on the page they are
+     read from. Not cfgHead's data-edit machinery — that drives the EDITING
+     registry and per-field pens; this page has one mode and its own writers —
+     but the same slot on the header line, so the door is where every other
+     page keeps it. */
+  /* ON THE QUESTIONS TAB ALONE (§141): nothing on the explanations tab is
+     editable, and a pen over a page it cannot mark is furniture. */
+  var kbPen = inOffice() && tab === "qa"
+    ? '<button class="editbtn' + (KBEDIT ? " on" : "") + '" data-kbpen="1">' +
+        (KBEDIT ? "Done" : "\u270e Edit the answers") + '</button>'
+    : "";
+  return cfgHead("Knowledge base", [], null, false, null, null, kbPen) +
+    (KBEDIT && tab === "qa"
+      ? '<p class="kb-lede kbed-lede">What you write here is what this page shows ' +
+        '<b>and</b> what the assistant answers from \u2014 the two can never disagree. ' +
+        'A blank line is a paragraph break.</p>'
+      : "") +
     /* BOTH SIDES OF THE MERGE BELONG HERE. The lede names the how-tos, which
        exist now (§116); `tourBlock` is the other session's onboarding tour
        (§107), and it opens the page because somebody who has just arrived
@@ -3344,7 +3487,7 @@ function renderKB(){
     '<p class="kb-lede">How the platform works, and how to do things in it \u2014 in one ' +
       'place. This grows: anything we settle that a reader would need to know belongs here ' +
       'rather than in a note under the screen it happens to affect.</p>' +
-    toc + '<div class="kb">' + secs.join("") + '</div>';
+    tabs + toc + '<div class="kb">' + shown.join("") + '</div>';
 }
 
 
@@ -5453,12 +5596,58 @@ function paintMailPreview(){
 var DDOPEN = null;
 var SENDMSG = null;
 function sendmsg(){
+  /* `greet` is the greeting WORD or null, and null is off (spec 022). One
+     value, not a flag beside a word: a switch that is on with no word is a
+     state nothing above allows, and two fields that must agree are two fields
+     that drift (§104.7's shape). OFF BY DEFAULT — Islam's answer — so a
+     message sends exactly as it did before this existed unless somebody asks
+     for the greeting on that message. */
   if (!SENDMSG) SENDMSG = { criteria: { everyone:false, roles:[], targets:[], keys:[] },
                             subject:"", body:"", ctaLabel:"", ctaHref:"",
+                            greet:null,
                             draftId:null,
                             aud:null, asking:false, busy:false, result:null };
   return SENDMSG;
 }
+/* ── WHOSE NAME THE PREVIEW SHOWS (spec 022) ────────────────────────────
+   The FIRST resolved recipient, looked up on the register so a typed short
+   name counts (§93.8) — the audience row carries only key, name and address.
+   Falls back to the audience row's own name, and then to nothing at all: a
+   preview with no audience yet still has to draw the greeting, and "Dear
+   Ahmed" invented out of nowhere would be a name nobody is going to receive.
+   The word alone is what it shows then. */
+function greetSample(){
+  var st = sendmsg(), to = (st.aud && st.aud.to) || [];
+  if (!to.length) return "";
+  var r = to[0], p = (typeof personBy === "function") ? personBy(r.key) : null;
+  return SMPRules.firstName(p || { name: r.name });
+}
+
+/* ── THE MESSAGE ON SCREEN IS NO LONGER THE ONE THAT WENT (§143) ────────
+   Called the moment anything about the message changes after it has been sent.
+   Without it the composer is a dead end (§61): the only control offered is
+   *Write another*, which CLEARS — so somebody fixing a typo to re-send the
+   corrected version would have to throw away the correction to get a Send
+   button back.
+
+   IT DOES NOT REPAINT, and that is the whole reason it exists rather than a
+   `paint()` in the editors. The heading and the body are typed into the
+   preview itself, so a repaint on the first keystroke rebuilds the
+   contenteditable and the caret dies mid-word (§35, §71.2, §30.1). Both
+   buttons are drawn and bound at paint time, so this is two `hidden` flags and
+   nothing to rewire.
+
+   THE OUTCOME GOES WITH IT: "76 messages sent." describes a message that is no
+   longer what is on screen, and a sentence that is merely stale is worse than
+   no sentence (§100). */
+function sendmsgTouched(){
+  var st = sendmsg();
+  if (!st.result) return;
+  st.result = null;
+  var said = document.getElementById("msgsaid");
+  if (said) { said.textContent = ""; said.className = "why msgsaid"; }
+}
+
 /* Toggling one entry of a criteria list. The lists are small and the order
    does not matter, so membership is the whole of it. */
 function sendmsgToggle(list, value, on){
@@ -5683,12 +5872,18 @@ function renderSendMessage(){
        (c.keys || []).length) +
     '</div>';
 
-  var who = section("", "Who gets it",
-    null,
+  /* NO NOTE (CLAUDE.md 1b-ii). The sentence here was carrying a FACT the screen
+     does not otherwise state — that the criteria ADD UP rather than narrow each
+     other — so it moves to the heading's HOVER rather than being deleted: that
+     is information, not a description (§127's ruling, that prose explaining a
+     control belongs behind a mark). `section()`'s fifth argument is the tip. */
+  var who = section("", "Who gets it", null,
     '<div class="cfg audpick">' + everyone + ddbar +
       (picked ? '<div class="audrow">' + picked + '</div>' : '') +
       '<div class="audout" id="audout">' + sendmsgAudienceHtml() + '</div>' +
-    '</div>');
+    '</div>',
+    "Tick as many as you like \u2014 they add up rather than narrow each other. " +
+    "Somebody who matches twice still gets one message.");
 
   /* ── ONE PLACE TO WRITE IT (§76.3) ──────────────────────────────
      Islam: "should I edit in separate boxes or can you let me edit inside the
@@ -5719,9 +5914,53 @@ function renderSendMessage(){
         '" placeholder="' + esc(sh.href || "https://\u2026") + '">' +
     '</div>';
 
-  var look = section("", "Write it",
-    null,
-    '<div class="mailprev grows" id="msgprev"></div>' + ctarow);
+  /* ── THE GREETING ROW (spec 022) ────────────────────────────────
+     ONE LINE, AND NOTHING EXPLAINING ITSELF. Islam, of a two-line first
+     draft: "the design of the setting is poor. It should be one line you dont
+     need 2 lines .. and no explanations needed in the setting itself it's
+     clear." A label reading "Open with a greeting" beside a box holding the
+     word "Dear" has already said what the sentence under it said — §127's
+     ruling on the chat settings, reached again from the other direction. And
+     the height was not the only cost: two lines under the message made the
+     greeting read as a bigger decision than the button row beneath it, which
+     is one line.
+
+     `.imp-row` + `.cfg-lab` + `.minisw` is the platform's OWN switch row, the
+     one the naming setting wears (§44) — never a control invented for this.
+
+     THE WORD BOX SITS BEFORE THE SWITCH, so the switch is last in the row
+     whether the greeting is on or off: a control that moves under the press
+     that produced it is §41.8's fault. */
+  var greetrow =
+    '<div class="ctarow greetrow">' +
+      '<div class="imp-row" style="margin:0;grid-column:1 / -1">' +
+        '<span class="cfg-lab">Open with a greeting</span>' +
+        (st.greet != null
+          ? '<input class="fld greetword" id="msggreet" value="' + esc(st.greet) +
+              '" placeholder="Dear" aria-label="The greeting word" maxlength="24">'
+          : '') +
+        '<span class="minisw">' +
+          '<button data-greet="0" aria-pressed="' + (st.greet == null) + '">Off</button>' +
+          '<button data-greet="1" aria-pressed="' + (st.greet != null) + '">On</button>' +
+        '</span>' +
+      '</div>' +
+    '</div>';
+
+  /* The heading being the subject line is worth saying and is not a
+     description of the page, so it rides the hover too (CLAUDE.md 1b-ii). */
+  var look = section("", "Write it", null,
+    /* The sample line sits between the preview and the greeting row, because
+       it is about the message above it. Drawn only while the greeting is on
+       (§41's budget), and it is the ONE thing the screen cannot say by
+       showing: without it a draft opened by somebody else reads as everybody
+       getting "Dear Ahmed". Six words. */
+    '<div class="mailprev grows" id="msgprev"></div>' +
+    (st.greet != null
+      ? '<span class="why greetsay">Everyone sees their own name here.</span>'
+      : '') +
+    greetrow + ctarow,
+    "Type straight into the message. The heading is also the subject line people " +
+    "see in their inbox before they open it.");
 
   /* ── THE BAR DOES NOT MOVE (§95) ────────────────────────────────
      Pinned to the foot of the pane rather than sitting at the end of the
@@ -5738,6 +5977,36 @@ function renderSendMessage(){
   var r = st.result;
   var n = (st.aud && st.aud.to) ? st.aud.to.length : 0;
   var ready = live && sendmsgHasAny() && st.subject.trim() && st.body.trim() && n;
+  /* ── AFTER A SEND, THE BAR REPORTS AND MOVES ON (§143) ──────────
+     Islam: "When I send I don't get any verification that the message was sent
+     and the page stays the same view."
+
+     Both halves of that were true. The outcome was drawn in `.why` — the same
+     12px quiet grey as an empty space — and `result.ok` was worked out and
+     never read, so a FAILED send turned red and a successful one got no colour
+     at all. And the orange button still read *Send to 76 people* and was still
+     live, with the subject, the message and the audience all still loaded: every
+     loud signal on the bar said not-sent-yet, which is what the eye reads.
+
+     THE SECOND PRESS IS THE REAL FAULT. §95 put a confirmation in FRONT of the
+     send because it cannot be recalled, and then left the button loaded — one
+     press from sending the whole thing again, with nothing on screen to say it
+     had already gone.
+
+     So the CTA becomes the next thing you would actually do. It is not a
+     disabled Send left lying there: a dead control in the loudest slot is
+     furniture, and the word "Sent" on it beside "Sent" in the outcome is the
+     same word twice (§87's twins). */
+  /* ── §143 IS SUPERSEDED BY §144, AND ONLY ITS ANSWER IS ──────────
+     That section put the outcome in this bar and turned Send into *Write
+     another*, because the page stayed put after a send. The page does not stay
+     put now: it goes back to the Overview, which is where the record is and
+     therefore where the proof belongs. So the bar keeps the send and nothing
+     else — no outcome line to go stale, and no second control.
+
+     WHAT SURVIVES IS THE RULE UNDERNEATH: a send cannot be repeated by one
+     press. It cannot here either, and by construction rather than by a flag —
+     you are on the other tab, and the composer it left behind is empty. */
   var bar =
     '<div class="sendbar">' +
       '<button class="editbtn cta" id="msgsend"' + (live ? '' : ' disabled') + '>' +
@@ -5752,10 +6021,24 @@ function renderSendMessage(){
          — so what they read is what everybody else will read. */
       '<button class="editbtn" id="msgtestme"' +
         (live && st.subject.trim() && st.body.trim() ? '' : ' disabled') +
-        ' title="One copy, to you, before it goes to anybody else">' +
+        /* THE HOVER SAYS WHERE IT GOES (§145). It is one clause on the title
+           the button already had, never a new line under it: with the test copy
+           now in the record beneath, the row itself is the answer, and a
+           sentence explaining a control is what §127 spent a whole panel
+           removing (CLAUDE.md 1b-ii). */
+        ' title="One copy, to you, before it goes to anybody else \u2014 ' +
+        'kept in the record below as a test copy.">' +
         'Send me a copy</button>' +
-      '<span class="why" id="msgsaid" style="margin:0">' +
-        (r ? esc(r.msg) : (live ? '' : 'There is no server here to send from.')) + '</span>' +
+      /* THIS SAYS ONLY WHAT DID NOT HAPPEN NOW (§144). A send the server
+         answered leaves this tab, so its outcome is drawn on the Overview; what
+         is left here is the case where nothing went — no server, a refusal, a
+         network failure — and you stay put with the message still loaded.
+         `--bad-tx` is the type-safe twin (§38.4), 7.55 in light, 8.14 in dark,
+         at `--fs-note` because it is a sentence somebody has to read. */
+      '<span class="why msgsaid' + (r && !r.landed ? ' bad' : '') +
+        '" id="msgsaid" style="margin:0">' +
+        (r && !r.landed ? '<b>' + esc(r.msg) + '</b>'
+           : (live ? '' : 'There is no server here to send from.')) + '</span>' +
     '</div>';
 
   /* WHAT HAPPENED, after a send. It belongs with the record rather than the
@@ -5769,20 +6052,72 @@ function renderSendMessage(){
         '</div></div>')
     : "";
 
-  /* ── DRAFTS AND SENT LEAVE THE SCROLL (§95) ─────────────────────
-     §90's move, on the page that needed it next: a thing done occasionally
-     belongs in the header, and the page is for the thing you came to do. Both
-     sat BELOW the Send button, each loading lazily — so somebody arriving to
-     pick up a draft scrolled past the whole composer to find it, and somebody
-     arriving to check what was sent did the same.
 
-     They are dropdowns now, and they carry their counts, so "is there a draft
-     waiting" is answered without opening anything. */
-  var draftMenu = renderDraftMenu();
-  var sentMenu  = renderSentMenu();
+  /* THE HEADER CARRIES THE PAGE'S NAME AND NOTHING ELSE (§130 from main,
+     §144 from here, and they agree). §130's header line dropped the badge and
+     the count; §144 dropped Drafts and Sent, because the Overview tab is where
+     both lists live now and a dropdown beside the tab that holds them is the
+     same list in two places (§90's argument, from the other side). */
+  return cfgHead("Send an email", [], null, false, null, null, null) +
+    who + look + said + bar;
+}
 
-  return cfgHead("Send an email", [], null, false, null, null, draftMenu + sentMenu) +
-    who + look + said + bar + renderSentOne();
+/* ══ THE OVERVIEW (§144) ═══════════════════════════════════════════════════
+   Islam: "the opening page ... should be a dashboard of what was sent, to whom,
+   how many people ... and when I finish and send it it should take me back to
+   the dashboard and show me that the message was sent there."
+
+   NOTHING NEW IS COMPUTED. Every send already writes a row — subject, when,
+   the criteria it was aimed at, how many were reached, how many failed, by whom
+   — plus a row per recipient. This is that record, moved to the front from the
+   header dropdown it was hiding in, and it calls the SAME `renderDraftList()`
+   and `renderSentList()` the dropdowns called, so the list cannot say two
+   different things depending on where it is drawn.
+
+   THE OUTCOME OF A SEND LANDS HERE, not on the composer you have just left —
+   which is the whole of what was asked (§144.2). */
+function renderMsgOverview(){
+  var st = sendmsg();
+  var r = st.result;
+  var said = (r && r.landed)
+    ? '<div class="sentsaid' + (r.ok ? '' : ' bad') + '"><b>' + esc(r.msg) + '</b>' +
+      (r.ok && r.skipped
+        ? ' <span class="quiet">' + plural(r.skipped, "person", "people") +
+          ' skipped \u2014 no address on their row.</span>'
+        : '') + '</div>'
+    : '';
+  /* `#msgover` IS THE HOOK THE TWO FETCHES ARE GATED ON. They were gated on
+     `#msgsend` — the Send button — which now lives on the other tab, so on this
+     one neither list was ever asked and both said "Asking…" for ever: §93's
+     fault exactly, a gate keyed on markup that moved, failing silently and in
+     the safe-looking direction. Gated on the thing that DRAWS the lists. */
+  /* ── THE ACTION, MADE OBVIOUS (§144.8) ──────────────────────────
+     Islam: "in the overview I'd like to add a button, send an email, somewhere
+     for the action to be obvious." He is right that it was missing: *Write a
+     message* is a TAB, and a tab reads as where you are rather than as
+     something to do, so the page's whole purpose had no loud control on it.
+
+     ABOVE THE LISTS — his pick from three drawn in the real page. The cost was
+     stated before he chose and is recorded rather than re-argued: it SCROLLS
+     AWAY, so on a long record the one action on the page is off the top of the
+     screen. The header (option A) would have stayed put; he wanted it in the
+     tab's own content, where it unambiguously belongs to this tab and nothing
+     else.
+
+     "SEND AN EMAIL" IS HIS WORD TOO, chosen over *Write a message*, which is
+     what the tab it opens is called. The cost is that the platform now has a
+     third noun for one thing — page: *Send a message*, tab: *Write a message*,
+     button: *Send an email* (§87's twins, in vocabulary rather than in rows).
+     Recorded, not re-argued.
+
+     DRAWN ONLY HERE, never on the composer: a button offering to take you
+     where you already are is a duplicate, not a choice (§94.15). It is inside
+     `#msgover`, which only the Overview renders, so that holds by
+     construction. */
+  var write = '<div class="msgnew">' +
+    '<button class="editbtn cta" data-msgwrite="1">Send an email</button></div>';
+  return '<div id="msgover">' + said + write + renderDraftList() +
+         renderSentList() + renderSentOne() + '</div>';
 }
 
 /* WHAT IS HALF-WRITTEN. Listed above what was sent, because a draft is
@@ -5818,38 +6153,43 @@ function renderDraftList(){
                 '<button class="linkbu danger" data-draftdel="' + esc(String(d.id)) +
                   '">Delete</button></td></tr>';
           }).join("") + '</tbody></table></div>';
-  return section("", "Drafts",
-    null, body);
+  /* NO NOTE. Islam: "remove the grey descriptions and stop adding descriptions
+     to pages." The heading names the list; a paragraph under it in grey says it
+     again and pushes what people came for down the page (CLAUDE.md 1b-ii). */
+  return section("", "Not sent yet", null, body);
 }
 
-/* ── THE SAME LIST, IN THE HEADER (§95) ───────────────────────────────
-   `renderDraftList()` above is unchanged and is what the panel shows: one
-   renderer, so the list cannot say two different things depending on where it
-   is drawn. This wraps it in the header dropdown and puts the count on the
-   button, which is the part that answers "is there anything waiting" without
-   opening anything. */
-function renderDraftMenu(){
-  var rows = (DRAFTLIST && DRAFTLIST.drafts) || [];
-  var n = rows.length;
-  return '<span class="hmenu' + (DRAFTMENU ? " open" : "") + '">' +
-    '<button class="hmenu-btn" data-draftmenu="1" aria-haspopup="true" ' +
-      'aria-expanded="' + DRAFTMENU + '">Drafts' +
-      (n ? ' <span class="hcount">' + n + '</span>' : '') +
-      ' <span class="hcar">&#9662;</span></button>' +
-    (DRAFTMENU ? '<div class="hmenu-panel wide">' + renderDraftList() + '</div>' : '') +
-    '</span>';
+/* ── WHO A MESSAGE WENT TO, IN WORDS (§144) ───────────────────────────
+   From the criteria as they were CHOSEN — `messages.audience`, which is what
+   somebody ticked — never from re-resolving them today, which would describe
+   who it would reach NOW rather than who it reached.
+
+   NAMED THROUGH THE PLATFORM'S OWN VOCABULARY (§53.5): `roleName()` and
+   `placeLabel()` are what the composer's own dropdowns say, so the record reads
+   in the same words the choosing did. A key that no longer names anything —
+   a unit renamed or retired since — is shown AS THE KEY rather than dropped,
+   because a record that quietly loses a recipient group is worse than one with
+   an unfamiliar word in it (§96.2's rule, in the record). */
+function audienceWords(a){
+  if (!a) return "\u2014";
+  if (typeof a === "string") { try { a = JSON.parse(a); } catch (e) { return "\u2014"; } }
+  if (a.everyone) return "Everyone on the register";
+  var out = [];
+  (a.roles || []).forEach(function(r){
+    out.push(typeof roleName === "function" ? (roleName(r) || r) : r); });
+  (a.targets || []).forEach(function(k){
+    out.push(typeof placeLabel === "function" ? (placeLabel(k) || k) : k); });
+  var n = (a.keys || []).length;
+  if (n) out.push(plural(n, "person", "people") + " by name");
+  return out.length ? out.join(" \u00b7 ") : "\u2014";
 }
 
-function renderSentMenu(){
-  var rows = (SENTLIST && SENTLIST.messages) || [];
-  return '<span class="hmenu' + (SENTMENU ? " open" : "") + '">' +
-    '<button class="hmenu-btn" data-sentmenu="1" aria-haspopup="true" ' +
-      'aria-expanded="' + SENTMENU + '">Sent' +
-      (rows.length ? ' <span class="hcount">' + rows.length + '</span>' : '') +
-      ' <span class="hcar">&#9662;</span></button>' +
-    (SENTMENU ? '<div class="hmenu-panel wide">' + renderSentList() + '</div>' : '') +
-    '</span>';
-}
+/* THE HEADER DROPDOWNS ARE GONE (§144, finishing §95). `renderDraftMenu()`
+   and `renderSentMenu()` wrapped the two lists in header menus so a thing done
+   occasionally would not sit below the composer. The Overview tab is that
+   answer now, and it calls `renderDraftList()` / `renderSentList()` directly —
+   so the wrappers had no caller left, and a builder nobody calls is one the
+   next reader takes for load-bearing (§24). */
 
 /* WHAT WAS SENT. Its own section rather than its own page: the thing you want
    after pressing Send is to see it in the list, and a second destination puts
@@ -5945,12 +6285,36 @@ function renderSentList(){
            only thing telling one draft from another, was clipped to
            "Half-wri…" in a 600px panel. Percentages, because the panel's width
            is a `min()` of the window. */
-        : '<div class="cfg"><table><thead><tr><th style="width:36%">Subject</th>' +
-          '<th style="width:24%">Sent</th>' +
-          '<th class="cc" style="width:11%">To</th>' +
-          '<th class="cc" style="width:12%">Failed</th>' +
-          '<th style="width:17%">By</th></tr></thead><tbody>' +
+        /* ── THE DELETE COLUMN IS DRAWN FOR WHOEVER MAY USE IT (§145) ──
+           `mayDestroy()` is §89's rule — the Super user's alone — asked here
+           rather than restated, and asked AGAIN on the server, because a
+           control that is only hidden is decoration (§42, §44). A column
+           nobody in this seat can act in is furniture, so it is not drawn at
+           all rather than drawn empty. */
+        : (function(){
+            var del = mayDestroy();
+            /* The widths add to 100 (§95.5): under `table-layout:fixed` a column
+               left to itself does not get the leftover — Chrome hands the excess
+               to the columns that asked — so adding one means re-apportioning
+               rather than appending. Heading gives up the 9 the actions take. */
+            return '<div class="cfg"><table><thead><tr><th style="width:' +
+              (del ? '25' : '32') + '%">Heading</th>' +
+              '<th style="width:16%">Sent</th>' +
+              '<th style="width:23%">Who it went to</th>' +
+              '<th class="cc" style="width:15%">Reached</th>' +
+              '<th style="width:14%">By</th>' +
+              (del ? '<th class="cc" style="width:7%"></th>' : '') +
+              '</tr></thead><tbody>' +
           rows.map(function(m){
+            /* A TEST COPY SAYS SO IN THE COLUMN THAT ALREADY ANSWERS "WHO GOT
+               IT" (§145). Beside the heading it pushed the first column onto a
+               second line, which is the one thing a setup table may never do
+               (§88) — §116.4's fault exactly, a mark placed BESIDE a value
+               rather than inside the block it marks. Here it costs no height.
+
+               `audience` IS NULL ON A TEST, which `audienceWords()` renders as
+               a dash; the mark is the honest answer to that column instead. */
+            var test = m.kind === "test";
             /* THE ROW OPENS (§93.15). The subject is the control, because it is
                the thing somebody is already looking for when they come here to
                ask what happened to a particular message. */
@@ -5958,13 +6322,24 @@ function renderSentList(){
               '<td><button class="linkbu" data-sentone="' + esc(String(m.id)) + '"><b>' +
                 esc(m.subject) + '</b></button></td>' +
               '<td>' + esc(String(m.sent_at || "").slice(0, 16).replace("T", " ")) + '</td>' +
-              '<td class="cc">' + (m.sent || 0) + ' of ' + (m.total || 0) + '</td>' +
-              '<td class="cc">' + (m.failed
-                  ? '<span class="pill bad">' + m.failed + '</span>' : '\u2014') + '</td>' +
-              '<td>' + esc(m.by_name || "") + '</td></tr>';
+              '<td>' + (test ? '<span class="pill">Test copy</span>'
+                             : esc(audienceWords(m.audience))) + '</td>' +
+              '<td class="cc">' + (m.sent || 0) + ' of ' + (m.total || 0) +
+                (m.failed ? ' <span class="pill bad">' + m.failed + ' failed</span>' : '') +
+                '</td>' +
+              '<td>' + esc(m.by_name || "") + '</td>' +
+              /* ONLY A TEST COPY CARRIES IT (Islam's B). A real send has no
+                 control here rather than a disabled one: a dead control in a
+                 row is furniture, and the refusal it would explain is one the
+                 server gives anyway. */
+              (del ? '<td class="cc">' +
+                 (test ? '<button class="linkbu danger" data-sentdel="' +
+                           esc(String(m.id)) + '">Delete</button>' : '') +
+                 '</td>' : '') +
+              '</tr>';
           }).join("") + '</tbody></table></div>';
-  return section("", "What has been sent",
-    null, body) + renderSentOne();
+          })();
+  return section("", "What has been sent", null, body);
 }
 
 /* ── THE PREVIEW IS THE EDITOR (§76.3) ────────────────────────────────────
@@ -6007,6 +6382,9 @@ function paintMsgPreview(){
     title: st.subject,
     preheader: st.subject,
     body: st.body,
+    /* A NAME, so the preview shows the real thing rather than the region the
+       server fills — the line under the card is what says it is a sample. */
+    greeting: st.greet == null ? null : { word: st.greet, name: greetSample() },
     cta: (st.ctaLabel && st.ctaHref) ? { label: st.ctaLabel, href: st.ctaHref } : null
   });
   var t = root.querySelector("[data-mail-title]"),
@@ -6033,10 +6411,12 @@ function wireMsgEditor(root){
       b = root.querySelector("[data-mail-body]");
   if (t) t.addEventListener("input", function(){
     st.subject = t.innerText.replace(/\s+$/, "");
+    sendmsgTouched();
   });
   if (b) b.addEventListener("input", function(){
     st.body = b.innerText.replace(/\s+$/, "");
     b.classList.toggle("blank", !st.body);
+    sendmsgTouched();
   });
   /* PLAIN TEXT ONLY on paste. A message pasted out of a browser arrives
      carrying its own fonts, colours and links, and none of that survives being

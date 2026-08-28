@@ -61,7 +61,7 @@
   .item-body { padding:4px 16px 18px; border-top:1px solid var(--line-soft); }
   h4.mini { font-size:11px; letter-spacing:.12em; text-transform:uppercase; color:var(--ink-3);
             font-weight:700; margin:22px 0 9px; }
-  /* ── THE NOUN SHOUTS, THE EXPLANATION SPEAKS (§145) ────────────────────
+  /* ── THE NOUN SHOUTS, THE EXPLANATION SPEAKS (§154) ────────────────────
      A caption like "KEY MEASURES — AS PLANNED: THIS YEAR'S TARGET, AND HOW IT
      COMPILES" set a whole clause in italic capitals with letter-spacing:
      three emphases at once, on the hardest form to read at length. The noun
@@ -77,7 +77,7 @@
 
   /* Performance is the primary reading; execution sits beside it */
   .card.primary-card { border-color:var(--stone-soft); border-top:3px solid var(--stone-soft); }
-  /* A QUIET OUTLINE, NOT A SECOND GOLD CHIP (§146). "primary" says which of
+  /* A QUIET OUTLINE, NOT A SECOND GOLD CHIP (§155). "primary" says which of
      two readings leads; it is a footnote to the title, and in the accent it
      competed with the status pill on the same line and with the accent budget
      itself (§41). The border and the ink drop to the page's own neutrals; the
@@ -498,9 +498,9 @@
   .editbtn { font:inherit; font-size:12px; letter-spacing:.08em; text-transform:uppercase;
              font-weight:700; color:var(--gold-deep); background:none;
              border:1px solid var(--gold); border-radius:99px; padding:6px 15px; cursor:pointer; }
-  /* ── THE INK MOVES WITH THE GROUND (§144) ────────────────────────────
+  /* ── THE INK MOVES WITH THE GROUND (§153) ────────────────────────────
      Measured at 4.34 hovered (§16.17, recorded in §95 and found again by
-     §143's state sweep): the wash arrives on hover and the ink stays where it
+     §152's state sweep): the wash arrives on hover and the ink stays where it
      was, so the label is at its least readable exactly when a hand is on it.
      `--gold-deep` is right on white (4.99) and one step too light on
      `--attn-bg`; the wash's OWN text twin is 5.36 — the same pairing this
@@ -843,6 +843,12 @@
      the corner itself. */
   .pane .paneact .penbtn.dlpen { right:36px; }
   .pane .paneact .penbtn.dlpen:only-child { right:0; }
+  /* §145: a fill-grant holder has BOTH the fill pen and §101's arrows —
+     before that grant the two never coexisted (pen ⟺ office, arrows ⟺
+     holder), so both sat at right:0 and the arrows ate the pen's clicks:
+     §70's family, caught by gap-fill.py PRESSING the pen, not querying it.
+     The arrows yield to the second slot when a pen stands beside them. */
+  .pane .paneact .penbtn:not(.arrpen) ~ .arrpen { right:36px; }
   .pageact .penbtn { position:static; visibility:visible; opacity:1;
                      margin-right:8px; align-self:center; }
   /* ── THE SAME BUTTON IN A WORDED BAR (§119.9) ─────────────────────

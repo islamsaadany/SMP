@@ -90,6 +90,9 @@ of it was rejected — which is the point of keeping it.
 | `../../design-mockups/send-a-message/2026-08-25_send-a-message-rework.html` | The composer stays one screen: the audience becomes a bounded summary, the send bar is pinned and carries the count, drafts and sent move into the header, and a copy can be sent to yourself first. Today beside the proposal. **Built in 3.25** (&sect;95) |
 | `../../design-mockups/foundation-edit/2026-08-25_objectives-table-width.html` | The Foundation's objectives table leaves the aspiration card for a full-width band while the pen is open. Real screenshots at 1600px, today beside the proposal, both themes, with the width measured (696px &rarr; 1493px) and the cost stated in its own panel. **Built in 3.25** (&sect;96.6) |
 | `../../design-mockups/access-strategy-reporting-split/2026-08-26_matrix-split-and-plan-download.html` | The own access columns split into Strategy &#124; Reporting halves, and a download-the-plan-as-slides (.pptx) button beside the pen. Screenshots of the REAL platform with the proposal injected into the live table and pane. **Built in 3.40** (&sect;117, spec 019); its five follow-ups built in 3.42 (&sect;119) |
+| `../../design-mockups/gap-fill/2026-08-27_gap-fill-states.html` | Fill the gaps: the Roles &amp; access Strategy cell's third state, fill mode's three gap states (Missing / pending with the office's confirm tick / confirmed), the dash with its “not counted yet” line, and the Submit refusal. Published as an artifact and approved whole. **Built in 3.55** (&sect;145, spec 023) |
+| `../../design-mockups/gap-fill/2026-08-27_gap-visibility.html` | Finding the gaps, first drawing: counts on the tab and the rail, the fill-mode chip band, the Next-gap walker. **Superseded the same day** &mdash; Islam asked for red wording, a red worded button by the arrange arrows, and no number on the tab (r2 below). Built shape is r2's. |
+| `../../design-mockups/gap-fill/2026-08-27_gap-visibility-r2.html` | Finding the gaps, revision 2 as corrected: the WHOLE missing bar &mdash; "N Missing", one red chip per owing place, the solid red *Fill in missing elements* button &mdash; in the section row beside the tabs, nothing in the page body, red italic rail words, the empty-hand note that points away. **Built in 3.55** (&sect;145.14) |
 | `../../design-mockups/plan-builder/2026-08-26_build-a-plan-flow.html` | Building a plan on the platform: the door beside Import, the subject chooser, the builder band as a MAP of section chips, the structured row forms, and the review. Revision 2 &mdash; Islam's two corrections (any order; rows added whole) are drawn in. **Built in 3.47** (&sect;129, spec 020) |
 | `../../design-mockups/setup-refinements/2026-08-27_setup-header-line.html` | Every Setup page's search, filters and buttons share the pinned line with its name; the `SMO` pill, the count chips and the briefing paragraph go; Send a message becomes Send an email with the Email settings folded in. Not a drawing &mdash; the real platform driven in a browser with the proposal injected into the live page, plus two options for the company field. **Built in 3.48** (&sect;135) |
 | `../../design-mockups/setup-refinements/2026-08-27_marking-and-the-matrix.html` | Focus measures as a switch on the header line, a navigation-style destination row and one table headed like the register; and the diagnosed repair for the Roles &amp; access header, which was pinning 141px down inside its own scroll box. Before and after on the same build. **Built in 3.48** (&sect;135.2, &sect;135.5) |
@@ -349,6 +352,21 @@ On the way, five authoring surfaces that could be read but never STARTED
 from empty were fixed — the first "Who we are" line, the SWOT, the empty
 Plan page, a virgin pillars function's first row, and a capability's key
 objectives.
+
+Version **3.57** adds **a custodian per project — as two new roles** (§147,
+spec 024). A **Project owner** is named on a project's Owner row and reports
+that project whole; a **Pillar owner** is named on a pillar's Owner row — on
+a unit or a pillars function — and reports that pillar whole; a
+**Contributor** is everyone else the plan names (collaborators,
+stakeholders, milestone owners) and reports nothing until the SMO opens the
+Contributor row, then only the rows that name them. All three are derived
+from the plan's own Owner rows, never granted by hand; each has its own row
+on Roles & access shipping at view, and an owner reports only when that row
+says edit AND the plan names them — Islam's two conditions, exactly. None of
+the three submits. On the way, two server drifts were fixed: a custodian's
+deliverable report (and the §104.10 milestone %) refused as plan since
+migration 024, and a pillars function's Report page reading the own-unit
+cell where the server judged the own-function one.
 
 **Next:** the rebuild on the HR_ERP stack (§20) — sign-in and the shell, then
 the read-only screens, then editing and reporting per action. Then

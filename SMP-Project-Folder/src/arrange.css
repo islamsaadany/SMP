@@ -770,10 +770,10 @@
   details.fstrip[open] > summary::after{transform:rotate(90deg)}
   .fstrip-sum{font-family:var(--mono);font-size:13px;color:var(--ink-2)}
   /* The count is TYPE, so it takes the good family's text twin rather than
-     its fill (§38.4, §153): on `--surface-2` the fill measures 4.45 and the
+     its fill (§38.4, §154): on `--surface-2` the fill measures 4.45 and the
      twin 6.45. The strip's own ground is what makes the difference — the same
      colour clears comfortably on white, which is why this survived until the
-     state sweep measured it (§152). */
+     state sweep measured it (§153). */
   .fstrip-sum b{color:var(--good-tx);font-size:15px}
   .fstrip-meta{margin-left:auto}
   .fstrip .fstrip-body{padding:12px 18px 10px}
@@ -810,7 +810,7 @@
     vertical-align:middle;letter-spacing:.02em}
   .delta.up{color:var(--good-tx)} .delta.down{color:var(--bad-tx)}
   .headline .delta{align-self:center}
-  /* Inside the group card's big figure (§155): the number is 34px and the
+  /* Inside the group card's big figure (§156): the number is 34px and the
      delta rides its baseline rather than the line box's top. */
   .big .delta{vertical-align:0.35em;font-size:12.5px}
 
@@ -1346,7 +1346,7 @@
   .failcard .fc-e { font-family:var(--mono); font-size:12px; color:var(--ink-3);
     background:var(--surface-2); border-radius:6px; padding:8px 12px; margin-top:8px; }
 
-  /* ── THE GLYPH AND THE RULE CARRY THEIR MEANING ON THE HOVER (§148) ─────
+  /* ── THE GLYPH AND THE RULE CARRY THEIR MEANING ON THE HOVER (§149) ─────
      A dotted underline is the one mark that says "there is more here" without
      spending colour — the accent budget (§41) is already committed, and a
      coloured glyph in a scoring table would read as a score. `help` rather
@@ -1355,7 +1355,7 @@
   /* The value almost every row repeats, quiet so the exceptions carry the
      column. Never hidden — it is still read straight down. */
   td .cdefault { color:var(--ink-3); }
-  /* AND THE QUIET ONE WEARS NO DOTS (§148). Seen built: a dotted underline
+  /* AND THE QUIET ONE WEARS NO DOTS (§149). Seen built: a dotted underline
      under every "Latest" made the column busier than it was before the note
      existed — the mark meant to say "there is more here" was shouting on the
      one value that never needs reading. The note is still there on hover
@@ -1363,7 +1363,7 @@
      standing mark on the repeated default. */
   td .cdefault.hasnote { border-bottom:0; }
 
-  /* ── THE REPORTING CONTROLS RIDE THE TAB ROW (§149) ─────────────────────
+  /* ── THE REPORTING CONTROLS RIDE THE TAB ROW (§150) ─────────────────────
      Islam's own placement, chosen over a pinned bar: the tab row is already
      pinned chrome, so the controls stay on screen for the whole report with
      no new sticky element and none of the arithmetic one needs (§122.5).
@@ -1400,7 +1400,7 @@
   .repchrome .rc-draft:hover { text-decoration:underline; }
   .repchrome .rc-draft:focus-visible { outline:2px solid var(--gold); outline-offset:2px; }
 
-  /* ── A WIDE TABLE SCROLLS INSIDE ITS OWN BOX (§150) ─────────────────────
+  /* ── A WIDE TABLE SCROLLS INSIDE ITS OWN BOX (§151) ─────────────────────
      Islam, from his own laptop on Mazaya: *"I'm stuck with the unit tables cut
      and I can't scroll horizontally."* The page deliberately never scrolls
      sideways — §27.2, because a sideways page drags every sticky element with
@@ -1439,7 +1439,7 @@
      sliding under text. */
   .tblscroll td.idx + td, .tblscroll th.idx + th { box-shadow:1px 0 0 var(--line-soft); }
 
-  /* ── WHERE TO LOOK NEXT (§154) ──────────────────────────────────────────
+  /* ── WHERE TO LOOK NEXT (§155) ──────────────────────────────────────────
      One entry per unit under the group's three cards, worst first. A quiet
      row on purpose: the cards above are the reading, this is the index to it,
      and an index that competes with what it indexes has stopped being one. */

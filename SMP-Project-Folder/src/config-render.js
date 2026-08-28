@@ -457,7 +457,7 @@ var PAGE_TITLE = null;
    not a trade worth making. */
 var PAGE_TOOLS = "";
 var PAGE_ACTS  = "";
-/* THE REPORTING BOX TRAVELS THE SAME WAY (§149). The tab row is written
+/* THE REPORTING BOX TRAVELS THE SAME WAY (§150). The tab row is written
    BEFORE the page renders, so a report cannot put its controls there
    directly — it publishes them here and the shell hangs them on the row
    afterwards, which is exactly the trip the two slots above already make.
@@ -888,7 +888,7 @@ function renderBranding(){
     return '<tr><td><b>' + esc(label) + '</b><span class="why">' + esc(note) + '</span></td>' +
       '<td class="cc">' + (mayEdit
         ? '<span class="brandpick">' +
-            /* AN UNSET PICKER OPENS ON WHAT THE PLATFORM IS PAINTING (§154).
+            /* AN UNSET PICKER OPENS ON WHAT THE PLATFORM IS PAINTING (§155).
                It opened on #4F46E5 — an indigo that exists nowhere in SMP — so
                an unbranded tenant met two indigo swatches on the one page that
                defines colour, while the product around them was navy and gold.
@@ -1082,7 +1082,7 @@ var PEOPLE_COLS = [
      It sits immediately after the name rather than with the identifiers: it is
      the same fact at a different length, and putting it beside Emp ID would
      imply it identifies somebody, which is exactly what it must not do. */
-  /* OFF BY DEFAULT (§154). Everything above stays true — it is the value the
+  /* OFF BY DEFAULT (§155). Everything above stays true — it is the value the
      employee file is written in, and on a reconciliation day it is the column
      you want. But until somebody types a short name it is IDENTICAL to the
      frozen Name beside it, which today is 33 rows of 33: the register's most

@@ -121,6 +121,27 @@ A drift between specs and code is a documentation bug — report it before silen
   the client for enforcement. (SMP's current access gate is a client-side placeholder and is
   explicitly NOT real security — it must move server-side before SMP holds anything sensitive.)
 
+#### A FLOOR CANNOT YIELD, AND THAT IS THE WHOLE FAULT (§158)
+- `table { min-width:620px }` stops a data table squashing and is the right
+  default. It is also a FLOOR: a pane that narrows past it does not shrink the
+  table, it **cuts** it — 585px of pane against 620px of table at a 900px
+  window, so the last column is sliced and the heading reads *COMPILE*.
+  **§109 recorded the same global rule from the other side** (a small table
+  overflowing its grid track by 300px): a good default in both directions
+  still has two edges.
+- **Anything that does not move the floor moves nothing.** Tightening cell
+  padding narrowed the columns and left `scrollWidth` at 620 to the pixel,
+  because the flexible column absorbs every pixel saved. Padding is what moves
+  an **intrinsic** minimum, which is the different fault underneath — and both
+  were present, one per side of the switch (§53.5).
+- **An affordance is not a fix when the box only scrolls because of a bug.**
+  §108.5's scroll shadow and visible track answer *this box scrolls and does
+  not say so*; here the answer was for it not to scroll. It could not even be
+  demonstrated: headless paints no scrollbar, and on an iPad the native one is
+  an overlay that vanishes.
+- **`.pane` INCLUDES SETUP** — `<div class="pane setuppane">` — so scope any
+  pane rule with `:not(.setuppane)` or it reaches the register.
+
 #### A pinned header's ground filler paints when it is NOT pinned too (§53.7)
 - `.pane > .pband::before` and `.split .rail::before` fill the gap between the
   chrome and the pinned pair with `--ground`. **CSS cannot ask whether a sticky
@@ -2538,8 +2559,14 @@ python3 checks/project-custodian.py # a custodian per project (§147): the Proje
                                 # nothing, and a milestone owner is a Contributor who
                                 # reports nothing until the row is opened — both ends,
                                 # three viewers, proved able to fail
+python3 checks/table-fit.py     # the plan tables FIT the pane at every width — never
+                                # "and it scrolls" — on a unit AND a function, with the
+                                # 620 floor still in force on a wide window (§158)
 python3 checks/office-chat.py   # the chat's client half — serves the built file over HTTP,
                                 # because the whole feature is invisible over file:// (§97.9)
+python3 checks/welcome.py       # the welcome screen (§148): three viewers over HTTP, every
+                                # row asserted against the function its destination page
+                                # calls, every door pressed and read back, and the absences
 python3 checks/setup-rail.py    # the Setup rail fits the window, every entry is reachable
                                 # by scrolling the LIST, and the cap does not move --chrome-h
                                 # (§101.5 — that last one is what licenses the cap at all)
@@ -2605,7 +2632,72 @@ prior sessions (on HR_ERP) accidentally reverted agreed-upon designs.
 
 ---
 
-*Last Updated: 2026-08-28 &mdash; **v3.57: a custodian per project
+*Last Updated: 2026-08-28 &mdash; **v3.59: the UI/UX audit, waves 2&ndash;4
+(&sect;149&ndash;&sect;158)**. Islam: *"I need a refinement plan for the whole
+platform."* Twenty items audited, and what shipped is smaller than the audit
+predicted because measuring kept dissolving items. **The last of them
+(&sect;158) is the one worth reading**: the plan tables were cut off down the
+right on a smaller window, and the cause was that
+`table { min-width:620px }` is a FLOOR &mdash; the pane narrows past it and the
+table does not shrink, it gets sliced (585px of pane against 620px of table at
+900px). **Two wrong fixes were drawn first**: tightening cell padding narrowed
+the columns and left `scrollWidth` at 620 to the pixel, because the flexible
+column absorbs every pixel saved; and &sect;108.5's scroll shadow was an
+affordance over a fault, undemonstrable anyway (headless paints no scrollbar,
+and an iPad's is an overlay that vanishes). **&sect;53.5 paid within a minute**
+&mdash; with the floor gone a unit's Plan fitted and a supporting FUNCTION's
+Projects pane still ran 41px over, a different fault (five columns, intrinsic
+minimum) needing the padding after all. **`:not(.setuppane)` was found by the
+check**: Setup's pane is also `.pane`, so the obvious selector would have
+squashed the register to fix the plan. **And the obvious both-ends assertion
+could not fail** &mdash; `.cfg table`'s 760px floor is dead code, re-declared
+as 0 later in the same file (the fifth duplicated rule this project has
+recorded), so the reach is asserted on the SELECTOR the browser holds.
+Also in the wave: the destination row scrolls instead of breaking below 1100px,
+a failed render says so on the page, the last 800ms survive leaving the page,
+the reporting controls ride the tab row, hover and focus are measured at last
+(three contrast repairs), two typefaces instead of five, and the group cards'
+sentences agree with their numbers. **Nothing else broke between 1440 and
+768** &mdash; five pages, seven widths, both themes &mdash; and my own probe
+cried wolf twice before that could be said, measuring the CENTRE of a control
+half-scrolled under a clip.*
+
+*Earlier: 2026-08-28 &mdash; **v3.58: the welcome screen (&sect;148,
+spec 025)**. Islam: *"let's work on a Welcome screen for the user with what
+needs to be done with good design and name of company and smo and overview of
+his list of actions and info to work on or take an intro round."* Settled over
+THREE mockup rounds before a source was touched, and two of the three
+decisions are his corrections of the first drawing: **the greeting leads on
+the left** (band B, the tenant a compact signature whose every line starts at
+the separator hairline), and **no number ever stands without its noun**
+(variation C &mdash; the bare 3/4/1 badges were *"confusing"*, so every count
+lives inside its own sentence). **NOTHING NEW IS COMPUTED**: the submission
+row is `reportPending()` + `reportedCount()` + `submitBlockers()`, the gaps
+row is `seesGaps()`/`gapTotal()`/`gapMap()` (&sect;145) so a plain reader
+never sees a nag they cannot clear (&sect;69), the reply row is
+`CHAT.unread()`, and **the office's list IS the Setup Overview's own
+`attentionRows()`** (&sect;108.10) with the inbox's count asked through
+`CHAT.officeQueue` and written into the list when it answers &mdash; a count
+with no answer draws no row, and an empty list says **"Nothing is waiting on
+you"** (&sect;45.2). **EVERY DOOR PRESSES THE PLATFORM'S OWN CONTROLS**
+behind `setTimeout(&hellip;,0)`, because the handler fires on a real click and
+&sect;30.1's CLICKING guard holds any paint until the click lands
+(&sect;145.14's fault avoided); Continue only steps aside, since the platform
+under the overlay is already on the page &sect;94.6 chose. **ONCE PER BROWSER
+SESSION** (sessionStorage; a throwing store reads as seen, &sect;107's rule);
+never over `file://`, never on a projector. **THE TOUR IS NOT LOST**: while
+the welcome is up its auto-offer is skipped (two docks fight for every click,
+&sect;118) and the **intro-round card is the tour's offer made visible** and
+its reachable home again (&sect;119.4) &mdash; `TOUR.storyFor()` gates it, so
+never the office, and starting it hands the screen to `TOUR.start()`. Proof:
+`checks/welcome.py` over HTTP with a stub (&sect;94.11), the state MADE
+(&sect;94.2), agreement asserted rather than constants (&sect;94.8 &mdash;
+the first run asserted the made gaps as exactly 3 and the demo plan already
+owes 22 of its own), doors read back through `current`/`REPORTING`
+(&sect;70), and **proved able to fail** against the shipped pre-&sect;148
+file, where no overlay ever draws (&sect;94.5). Full `qa.py` green.*
+
+*Earlier: 2026-08-28 &mdash; **v3.57: a custodian per project
 (&sect;147, spec 024)**. Islam: *"in a case of a function that has 2 projects
 each project has an owner so the custodian here is not on the whole capability
 there is a custodian per project"* &mdash; and then, correcting the first

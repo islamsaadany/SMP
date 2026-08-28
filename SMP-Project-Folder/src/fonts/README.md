@@ -17,7 +17,7 @@ would.
 Fetched from Google Fonts' `css2` API with a modern user-agent — that is what
 selects woff2 and the variable axis — taking only the `/* latin */` block.
 
-**The comparison is over (§156).** §38.7 carried four faces here so they could
+**The comparison is over (§157).** §38.7 carried four faces here so they could
 be judged in the real product rather than on a specimen sheet; Islam picked the
 two the product offers — the system stack and this one — and Inter, Manrope and
 IBM Plex Sans came out, with 116 KB of every handover. Adding a face back means

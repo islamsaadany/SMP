@@ -1,0 +1,283 @@
+<title>SMP Welcome Screen</title>
+<style>
+  /* ══════════════════════════════════════════════════════════════════
+     MOCKUP — Welcome screen, round 2: the greeting moves LEFT.
+     Two variations of the navy band; everything below it is unchanged
+     from the approved round. Forefront palette, light, product language.
+     ══════════════════════════════════════════════════════════════════ */
+  :root {
+    --sans:ui-sans-serif,system-ui,-apple-system,'Segoe UI',Roboto,'Helvetica Neue',Arial,'Noto Sans',sans-serif;
+    --mono:ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,'Liberation Mono',monospace;
+    --fs-micro:10px; --fs-label:11px; --fs-small:12px; --fs-note:13px;
+    --fs-body:14px; --fs-lead:17px; --fs-title:20px;
+    --track:.12em;
+    --r-sm:6px; --r:8px; --r-md:12px; --r-pill:999px;
+
+    /* Forefront · light (verbatim from _shared.css) */
+    --cta:#A4512C; --cta-ink:#FFFFFF; --cta-hover:#8F4423;
+    --bad-tx:#8C3327;
+    --panel-accent:#E6C65C; --panel-quiet:#B7C4D8;
+    --stone:#16325C;
+    --gold:#C9A24D; --gold-deep:#8A6B22;
+    --ground:#F7F8FA; --surface:#FFFFFF; --surface-2:#EFF2F6;
+    --line:#D6DCE5; --line-soft:#E6EAF0;
+    --ink:#171B22; --ink-2:#414A58; --ink-3:#636C79;
+    --bad-bg:#F7E3E0;
+    --panel:#16325C; --panel-ink:#FFFFFF;
+    --over-bg:#FBF6E9; --over-line:#E8D9AE;
+  }
+  * { box-sizing:border-box; }
+  body { margin:0; background:var(--ground); color:var(--ink);
+         font-family:var(--sans); font-size:var(--fs-body); line-height:1.55;
+         -webkit-font-smoothing:antialiased; }
+
+  .wrap { max-width:1140px; margin:0 auto; padding:34px 24px 60px; }
+
+  .mockband { font-size:var(--fs-small); color:var(--ink-3); letter-spacing:.06em;
+              text-transform:uppercase; margin:0 0 14px; }
+  .mockband b { color:var(--ink-2); }
+  .varlab { font-size:var(--fs-note); font-weight:800; letter-spacing:.08em;
+            text-transform:uppercase; color:var(--stone); margin:52px 0 12px;
+            padding-top:26px; border-top:2px solid var(--line); }
+  .varlab:first-of-type { margin-top:6px; border-top:0; padding-top:0; }
+  .varlab small { font-weight:500; letter-spacing:.02em; text-transform:none;
+                  color:var(--ink-3); margin-left:10px; }
+
+  /* ── The navy band — shared bones ───────────────────────────────── */
+  .hero { background:var(--panel); color:var(--panel-ink); border-radius:var(--r-md);
+          padding:30px 34px 28px; display:flex; justify-content:space-between;
+          gap:30px; flex-wrap:wrap; }
+  .kicker { font-size:var(--fs-micro); letter-spacing:.18em; text-transform:uppercase;
+            color:var(--panel-accent); font-weight:700; margin:0 0 10px; }
+  .chip { display:inline-flex; align-items:center; gap:6px; font-size:var(--fs-label);
+          font-weight:600; letter-spacing:.04em; padding:4px 11px; border-radius:var(--r-pill);
+          border:1px solid rgba(255,255,255,.28); color:var(--panel-ink); }
+  .chip.cycle { border-color:var(--panel-accent); color:var(--panel-accent); }
+  .chip.cycle i { width:7px; height:7px; border-radius:99px; background:var(--panel-accent); }
+  .mark { border-radius:var(--r-sm); background:var(--surface); color:var(--stone);
+          font-weight:800; text-align:center; letter-spacing:.02em; flex:none; }
+
+  /* ── VARIATION A — the mirror: two blocks trade places ──────────── */
+  .heroA { align-items:flex-end; }
+  .heroA .greet h2 { margin:0 0 10px; font-size:26px; font-weight:800; letter-spacing:-.02em; }
+  .heroA .who { display:flex; gap:8px; flex-wrap:wrap; }
+  .heroA .tenant { text-align:right; }
+  .heroA .tenant .row { display:flex; align-items:center; gap:12px; justify-content:flex-end; }
+  .heroA .mark { width:40px; height:40px; font-size:14px; line-height:40px; }
+  .heroA .tenant h1 { margin:0; font-size:22px; font-weight:800; letter-spacing:-.02em; line-height:1.1; }
+  .heroA .office { font-size:var(--fs-small); color:var(--panel-quiet); margin-top:4px; }
+
+  /* ── VARIATION B — the greeting is the headline, the tenant signs ─ */
+  .heroB { align-items:center; }
+  .heroB .greet h2 { margin:0 0 12px; font-size:30px; font-weight:800; letter-spacing:-.02em; }
+  .heroB .who { display:flex; gap:8px; flex-wrap:wrap; }
+  .heroB .tenant { display:flex; flex-direction:column; align-items:flex-end; gap:8px;
+                   border-left:1px solid rgba(255,255,255,.18); padding-left:28px;
+                   align-self:stretch; justify-content:center; }
+  .heroB .mark { width:36px; height:36px; font-size:13px; line-height:36px; }
+  .heroB .tenant h1 { margin:0; font-size:var(--fs-lead); font-weight:800; letter-spacing:-.01em;
+                      text-align:right; }
+  .heroB .office { font-size:var(--fs-label); letter-spacing:.06em; text-transform:uppercase;
+                   color:var(--panel-quiet); text-align:right; }
+
+  /* ── Body — unchanged from the approved round ───────────────────── */
+  .cols { display:grid; grid-template-columns:1fr 336px; gap:22px; margin-top:22px; }
+  @media (max-width:960px){ .cols { grid-template-columns:1fr; } }
+  .seclab { font-size:var(--fs-label); font-weight:900; letter-spacing:var(--track);
+            text-transform:uppercase; color:var(--ink-2); margin:0 0 10px; }
+  .seclab .n { font-family:var(--mono); color:var(--gold-deep); margin-left:6px; }
+  .acts { display:flex; flex-direction:column; gap:10px; }
+  .act { background:var(--surface); border:1px solid var(--line); border-radius:var(--r);
+         padding:16px 18px; display:flex; align-items:center; gap:16px; }
+  .act .cnt { flex:none; min-width:40px; height:40px; border-radius:var(--r-sm);
+              display:flex; align-items:center; justify-content:center;
+              font:800 16px/1 var(--mono); background:var(--surface-2); color:var(--ink-2);
+              border:1px solid var(--line-soft); padding:0 8px; }
+  .act.miss .cnt { background:var(--bad-bg); color:var(--bad-tx); border-color:var(--bad-bg); }
+  .act .what { flex:1; min-width:0; }
+  .act .what b { display:block; font-size:15px; letter-spacing:-.01em; }
+  .act .what > span { display:block; font-size:var(--fs-note); color:var(--ink-2); margin-top:2px; }
+  .act .what .alert { color:var(--bad-tx); font-weight:600; }
+  button { font:inherit; cursor:pointer; }
+  .btn { flex:none; font-size:var(--fs-small); font-weight:700; letter-spacing:.03em;
+         padding:8px 16px; border-radius:var(--r-sm); border:1px solid var(--line);
+         background:var(--surface); color:var(--ink-2); }
+  .btn:hover { border-color:var(--gold-deep); color:var(--ink); }
+  .btn.cta { background:var(--cta); border-color:var(--cta); color:var(--cta-ink); }
+  .btn.cta:hover { background:var(--cta-hover); border-color:var(--cta-hover); }
+  .continue { margin-top:14px; text-align:right; }
+  .continue a { font-size:var(--fs-note); font-weight:600; color:var(--stone); text-decoration:none; }
+  .continue a:hover { color:var(--gold-deep); }
+  .side { display:flex; flex-direction:column; gap:22px; }
+  .card { background:var(--surface); border:1px solid var(--line); border-radius:var(--r);
+          padding:16px 18px; }
+  .pages { display:flex; flex-direction:column; }
+  .pages a { display:flex; align-items:center; gap:8px; padding:9px 2px;
+             font-size:var(--fs-note); font-weight:600; color:var(--ink);
+             text-decoration:none; border-bottom:1px solid var(--line-soft); }
+  .pages a:last-child { border-bottom:0; }
+  .pages a small { flex:1; font-weight:500; color:var(--ink-3); font-size:var(--fs-small);
+                   text-align:right; }
+  .pages a .go { color:var(--gold-deep); font-family:var(--mono); margin-left:auto; }
+  .pages a:hover { color:var(--gold-deep); }
+  .tourcard { background:var(--over-bg); border:1px solid var(--over-line);
+              border-radius:var(--r); padding:18px; }
+  .tourcard h3 { margin:0 0 6px; font-size:var(--fs-lead); font-weight:700; letter-spacing:-.01em; }
+  .tourcard p { margin:0 0 14px; font-size:var(--fs-note); color:var(--ink-2); }
+  .tourbtns { display:flex; gap:10px; align-items:center; }
+  .tbtn { font-size:var(--fs-small); font-weight:700; letter-spacing:.03em; padding:8px 16px;
+          border-radius:var(--r-pill); border:1px solid var(--gold); background:none;
+          color:var(--gold-deep); }
+  .tbtn:hover { border-color:var(--gold-deep); }
+  .tghost { font-size:var(--fs-small); font-weight:600; border:0; background:none;
+            color:var(--ink-3); padding:8px 6px; }
+  .tghost:hover { color:var(--ink); }
+</style>
+
+<div class="wrap">
+  <p class="mockband">Mockup · <b>Welcome screen — round 2</b> · the greeting leads on the left · body unchanged · 2026-08-28</p>
+
+  <!-- ═══════════ VARIATION A ═══════════ -->
+  <p class="varlab">Variation A<small>the two blocks trade places — the tenant keeps its full name and mark, right-aligned</small></p>
+
+  <div class="hero heroA">
+    <div class="greet">
+      <p class="kicker">Strategy Management Platform</p>
+      <h2>Welcome, Mennah</h2>
+      <div class="who">
+        <span class="chip">Strategy custodian · Mobile</span>
+        <span class="chip cycle"><i></i>Q2 2026 cycle is open</span>
+      </div>
+    </div>
+    <div class="tenant">
+      <div class="row">
+        <div class="mark">RT</div>
+        <div>
+          <h1>Raya Trade</h1>
+        </div>
+      </div>
+      <div class="office">Strategy Management Office</div>
+    </div>
+  </div>
+
+  <div class="cols">
+    <div>
+      <p class="seclab">Waiting on you<span class="n">3</span></p>
+      <div class="acts">
+        <div class="act">
+          <div class="cnt">3</div>
+          <div class="what">
+            <b>Submit Mobile's Q2 report</b>
+            <span>3 figures still open · <span class="alert">1 needs a note</span></span>
+          </div>
+          <button class="btn cta">Open reporting</button>
+        </div>
+        <div class="act miss">
+          <div class="cnt">4</div>
+          <div class="what">
+            <b>Fill Mobile's missing plan elements</b>
+            <span>2 targets · 1 owner · 1 due date</span>
+          </div>
+          <button class="btn">Fill the gaps</button>
+        </div>
+        <div class="act">
+          <div class="cnt">1</div>
+          <div class="what">
+            <b>The Strategy Office replied to you</b>
+            <span>Yesterday, in your conversation</span>
+          </div>
+          <button class="btn">Open the conversation</button>
+        </div>
+      </div>
+      <p class="continue"><a href="#">Continue to Mobile ›</a></p>
+    </div>
+    <div class="side">
+      <div>
+        <p class="seclab">Your pages</p>
+        <div class="card pages">
+          <a href="#">Mobile — Strategy <small>Plan · Foundation · SWOT</small><span class="go">›</span></a>
+          <a href="#">Mobile — Performance<span class="go">›</span></a>
+          <a href="#">Mobile — Reporting<span class="go">›</span></a>
+        </div>
+      </div>
+      <div class="tourcard">
+        <h3>Take an intro round</h3>
+        <p>Eight stops on the worked example — about two minutes.</p>
+        <div class="tourbtns">
+          <button class="tbtn">Start the round</button>
+          <button class="tghost">Not now</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══════════ VARIATION B ═══════════ -->
+  <p class="varlab">Variation B<small>the greeting is the headline — the tenant becomes a compact signature behind a hairline</small></p>
+
+  <div class="hero heroB">
+    <div class="greet">
+      <p class="kicker">Strategy Management Platform</p>
+      <h2>Welcome, Mennah</h2>
+      <div class="who">
+        <span class="chip">Strategy custodian · Mobile</span>
+        <span class="chip cycle"><i></i>Q2 2026 cycle is open</span>
+      </div>
+    </div>
+    <div class="tenant">
+      <div class="mark">RT</div>
+      <h1>Raya Trade</h1>
+      <div class="office">Strategy Management Office</div>
+    </div>
+  </div>
+
+  <div class="cols">
+    <div>
+      <p class="seclab">Waiting on you<span class="n">3</span></p>
+      <div class="acts">
+        <div class="act">
+          <div class="cnt">3</div>
+          <div class="what">
+            <b>Submit Mobile's Q2 report</b>
+            <span>3 figures still open · <span class="alert">1 needs a note</span></span>
+          </div>
+          <button class="btn cta">Open reporting</button>
+        </div>
+        <div class="act miss">
+          <div class="cnt">4</div>
+          <div class="what">
+            <b>Fill Mobile's missing plan elements</b>
+            <span>2 targets · 1 owner · 1 due date</span>
+          </div>
+          <button class="btn">Fill the gaps</button>
+        </div>
+        <div class="act">
+          <div class="cnt">1</div>
+          <div class="what">
+            <b>The Strategy Office replied to you</b>
+            <span>Yesterday, in your conversation</span>
+          </div>
+          <button class="btn">Open the conversation</button>
+        </div>
+      </div>
+      <p class="continue"><a href="#">Continue to Mobile ›</a></p>
+    </div>
+    <div class="side">
+      <div>
+        <p class="seclab">Your pages</p>
+        <div class="card pages">
+          <a href="#">Mobile — Strategy <small>Plan · Foundation · SWOT</small><span class="go">›</span></a>
+          <a href="#">Mobile — Performance<span class="go">›</span></a>
+          <a href="#">Mobile — Reporting<span class="go">›</span></a>
+        </div>
+      </div>
+      <div class="tourcard">
+        <h3>Take an intro round</h3>
+        <p>Eight stops on the worked example — about two minutes.</p>
+        <div class="tourbtns">
+          <button class="tbtn">Start the round</button>
+          <button class="tghost">Not now</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

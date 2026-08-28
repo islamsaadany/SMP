@@ -19393,8 +19393,104 @@ strategy-split, setup-header, project-tables, repeat-project,
 project-header, people-dialog and the full qa.py sweep all green on the
 final build.
 
+---
 
-## 148 · The glyph and the rule say what they mean (v3.58)
+## §148 · The welcome screen (v3.58, spec 025)
+
+Islam: *"let's work on a Welcome screen for the user with what needs to be
+done with good design and name of company and smo and overview of his list of
+actions and info to work on or take an intro round."* Settled over THREE
+mockup rounds before a source was touched (design-mockups/welcome-screen/),
+and two of the three decisions are his corrections of the first drawing:
+
+- **§148.1 — THE GREETING LEADS.** Round 1 put the tenant on the left and the
+  greeting on the right; Islam: *"the welcome mennah and the data below should
+  be on the left to be the first thing they read."* Two band variations were
+  drawn and he chose **B**: "Welcome, <first name>" is the 30px headline with
+  the person's role chips and the cycle state under it, and the tenant is a
+  compact signature on the right — mark, name, "Strategy Management Office" —
+  **every line starting AT the separator hairline**, his round-3 correction,
+  so the rule and the text draw one vertical edge. The first name is
+  `SMPRules.firstName()`, the register's own reader (§93.8, §135): a typed
+  short name wins and a compound first name arrives whole.
+
+- **§148.2 — NO NUMBER STANDS WITHOUT ITS NOUN.** Round 2's action rows led
+  with bare count badges — 3, 4, 1 in boxes — and Islam: *"the 3, 4, 1
+  numbers are confusing."* Two list variations were drawn (the count in the
+  sentence; the count in a worded chip) and he chose **C**: no badges at all,
+  every number inside its own sentence — "3 figures still open · 1 needs a
+  note", "25 missing elements — MB01 · MB02…". §116.2's cousin in the other
+  direction: a count that cannot say what it counts makes work.
+
+- **§148.3 — NOTHING NEW IS COMPUTED.** Every row's facts are the same
+  functions its destination page already calls: the submission row is
+  `reportPending()` + `reportedCount()`/`fnReportedCount()` +
+  `submitBlockers()`; the gaps row is `seesGaps()` + `gapTotal()` +
+  `gapMap()` (§145), so it appears only for somebody holding the fill state
+  or authorship — a plain reader never sees a nag they cannot clear (§69);
+  the reply row is `CHAT.unread()`. **The office's list IS the Setup
+  Overview's own `attentionRows()`** (§108.10), destination and sentence
+  included, with the inbox's waiting count asked the way the Overview asks it
+  (`CHAT.officeQueue`, one reader of one endpoint) and written into the list
+  when it answers. A count with no answer draws no row; an empty list says
+  **"Nothing is waiting on you"** (§45.2) and the async answers remove that
+  line if they land.
+
+- **§148.4 — EVERY DOOR PRESSES THE PLATFORM'S OWN CONTROLS** — `[data-u]`,
+  `[data-s]`, `[data-md]`, `[data-setupgo]`, `[data-report]` — §107's rule
+  for §107's reason: a second copy of the navigation drifts. And every walk
+  runs behind `setTimeout(…, 0)`, because the handler fires on a REAL click
+  and §30.1's CLICKING guard holds any paint until the click lands — a walk
+  inside the handler reads the page from before its own press, which is
+  §145.14's fault avoided rather than repeated. "Open reporting" lands on
+  the subject's Performance and presses the Report button, so the person
+  arrives IN reporting mode; "Fill the gaps" lands on Strategy, where
+  §145.14's missing bar already stands; **Continue only steps aside**,
+  because the platform under the overlay is already on the page §94.6 chose
+  — the door names it ("Continue to Mobile ›") rather than repeating the
+  navigation's work.
+
+- **§148.5 — ONCE PER BROWSER SESSION**, in sessionStorage like the tour's
+  "skip for now": a reload mid-morning is not greeted twice, a new session
+  is. A throwing store reads as already seen (§107's rule — a screen that
+  cannot remember being dismissed is met on every reload for ever). Never
+  over file:// (nobody is signed in), never on a projector.
+
+- **§148.6 — THE WELCOME TAKES THE BOOT SLOT AND THE TOUR IS NOT LOST.** It
+  offers itself from `land()` beside `TOUR.offer` — the one door every boot
+  path passes (§94.10) — and while it is up the tour's auto-offer is skipped:
+  two docks over one page fight for every click (§118's fault by another
+  door). **The intro-round card IS the tour's offer**, made visibly instead
+  of automatically, gated on `TOUR.storyFor()` (so never the office, §118),
+  and starting it is a handoff — the welcome puts itself away and
+  `TOUR.start()` takes the screen. This also gives the tour a reachable home
+  again: §119.4 recorded that its replay lived on a page most people can no
+  longer open. `TOUR.offer`'s own memory is untouched, so a build without
+  the welcome offers the tour exactly as before. **The cost is recorded**:
+  a genuine first-timer who dismisses the welcome without pressing the card
+  is not auto-toured that session; the card returns with the next session.
+
+- **§148.7 — ONE SOLID BUTTON** (§41's budget): Report's own `--cta` pair on
+  "Open reporting", worn only while a cycle is open. The missing count wears
+  `--bad-tx` as WORDS (§38.5); its button stays quiet. Everything is tokens,
+  so the tenant's branding and both themes carry the screen with no rule of
+  its own — and nothing here ever calls `paint()` (§71.2): the two late
+  answers write into the row they are about.
+
+Proof: `checks/welcome.py` — over HTTP with a stub, because the whole feature
+is invisible over `file://` (§94.11). Three viewers, the state MADE (§94.2:
+the demo grants nobody the fill state and every unit has a custodian, so the
+seed is edited before serving); every row asserted as AGREEMENT with the same
+function its destination calls, never a constant (§94.8 — the first run
+asserted the made gaps as exactly 3 and the demo plan already owes 22 of its
+own); every door PRESSED with `current`/`currentSub`/`REPORTING` read back
+(§70); the absences asserted (file://, the projector, the office's tour, a
+reload's second greeting); and **proved able to fail** by running against the
+shipped pre-§148 file, where it fails from the first wait — no overlay ever
+draws (§94.5). Full `qa.py` sweep green on the final build.
+
+
+## 149 · The glyph and the rule say what they mean (v3.59)
 
 The audit's item 06: `DIR.` showed a bare ≥ / ≤ and `COMPILED` read "Latest"
 on nearly every row — a column with one value is furniture wearing a heading.
@@ -19430,9 +19526,9 @@ on the one value nobody needs to read. The note stays on hover; the standing
 mark goes. The check asserts the two directions say DIFFERENT things (§113.8:
 an agreement assertion passes when both sides vanish — here the fault would be
 one note on both) and that the note never restates the glyph. Six failures
-against the pre-§148 build.
+against the pre-§149 build.
 
-## 149 · The reporting controls ride the tab row (v3.58)
+## 150 · The reporting controls ride the tab row (v3.59)
 
 The audit proposed pinning the reporting bar; **Islam proposed the better
 thing**: *"if we take the floating bar to be in a box beside the performance
@@ -19471,7 +19567,7 @@ by pressing the button** — every assertion short of clicking it passed (§96's
 family, and the reason `report-chrome.py` presses Save draft and Cancel rather
 than looking for them).
 
-## 150 · A wide table scrolls inside its own box (v3.58)
+## 151 · A wide table scrolls inside its own box (v3.59)
 
 Islam, using the product on his own laptop: *"I'm stuck with the unit tables
 cut and I can't scroll horizontally."* The page never scrolls sideways by
@@ -19505,7 +19601,7 @@ the box, because every row's cell needs the same number and one of them
 deciding it is how two frozen columns come to disagree. Caught by the check
 asserting the name does **not** move — 9 failures against the previous build.
 
-## 151 · The viewer switcher says the name and the place (v3.58)
+## 152 · The viewer switcher says the name and the place (v3.59)
 
 Islam: *"this needs to be only the name not the full name + the unit name and
 that's all which will make it much smaller"*, and then *"if we make it all
@@ -19522,7 +19618,7 @@ moves to the hover** — the thing you might want, never the thing you scan by
 — and the cap rises to a ceiling that only catches a genuinely long tenant
 name rather than the ordinary case.
 
-## 152 · Hover and focus are measured too (v3.58, closing §16.17)
+## 153 · Hover and focus are measured too (v3.59, closing §16.17)
 
 `scripts/contrast-sweep.py` walks pages and measures controls **at rest**, so
 every `:hover`, `:focus` and `:disabled` colour in the product had never been
@@ -19544,15 +19640,15 @@ what is known and goes red the moment a FOURTH appears or one gets worse, and
 **deleting an entry is how a fix is asserted**. §16.15's pattern, which
 recorded 31 failures rather than pretending they were absent.
 
-**AND `qa.py` WENT RED FOR THE RIGHT REASON** (§149): its reporting assertion
+**AND `qa.py` WENT RED FOR THE RIGHT REASON** (§150): its reporting assertion
 asked for `.rep-bar`, which had moved to the tab row — §51.11's fault caught
 doing its job for once, going red rather than quietly passing. It asks for the
 controls and for the box being in the pinned row now, which is what the move
 was for.
 
-## 153 · A band's colour as type, not as a mark (v3.58)
+## 154 · A band's colour as type, not as a mark (v3.59)
 
-§152 measured hover and focus for the first time and found three failures, all
+§153 measured hover and focus for the first time and found three failures, all
 in light mode. Islam approved the repair, and the three turned out to be **one
 fault wearing three faces**: a scoring colour used as TYPE. §38.4 wrote the
 rule — *"a colour that works as a FILL usually fails as TYPE"* — and gave
@@ -19588,24 +19684,24 @@ it used a wash from the wrong palette block — the shipped one is `#F7EFD6`,
 not `#FFFBEB`. Reading the tokens off the running page is what produced 4.34
 and then 5.36.
 
-**AND THE BASELINE IS EMPTY NOW.** §152 recorded the three so the suite could
+**AND THE BASELINE IS EMPTY NOW.** §153 recorded the three so the suite could
 stay green on what was known; the entries are gone and `BASELINE = set()`
 stays as the promise that nothing is deliberately accepted. The check named
 the fixes itself, run by run — *"fixed since the baseline was written — remove
 from BASELINE"* — which is what makes deleting an entry the assertion that
 holds a repair.
 
-## 154 · Four visual refinements (v3.58)
+## 155 · Four visual refinements (v3.59)
 
 Wave 3 of the audit. Islam approved four of five; the fifth he redirected
-(§155). None of these repairs a fault — each makes a screen read better.
+(§156). None of these repairs a fault — each makes a screen read better.
 
 **THE GROUP LANDING ANSWERS "WHERE DO I LOOK NEXT".** The first screen of
 every session said how the group was doing in three cards and then stopped,
 with 330px of empty page and the units one click away on another section. It
 answered *how are we doing* and never the question a chief executive opens
 this page with. `whereNext()` draws one entry per business unit, **worst
-first**, each with its own score in its band's TEXT twin (§153).
+first**, each with its own score in its band's TEXT twin (§154).
 
 **NOTHING NEW IS COMPUTED** — `unitObjectives(u)` is the same figure the
 Business units section draws in its gauges, so the summary cannot disagree
@@ -19638,7 +19734,7 @@ uses — and **went nowhere when pressed**: that loop is
 `document.querySelectorAll("#units [data-u]")`, scoped to the chrome. The
 platform already had the right attribute: `[data-go]` is wired document-wide
 and lands on the unit's Performance page, which is where somebody following a
-low score is going anyway. **§149.1 twice in one session**, and found the same
+low score is going anyway. **§150.1 twice in one session**, and found the same
 way — by pressing the thing, not by reading it.
 
 ### 145.2 An assertion can force a design to be wrong
@@ -19650,10 +19746,10 @@ would have meant an explanation fainter than anything else on the page
 one is a label (upper, bold, spaced), the other a sentence. The assertion was
 corrected rather than the design bent to fit it.
 
-Proved able to fail: 12 failures against the pre-§154 build. Full sweep: 33
+Proved able to fail: 12 failures against the pre-§155 build. Full sweep: 33
 viewers, no errors.
 
-## 155 · The line under a number says what the number is (v3.58)
+## 156 · The line under a number says what the number is (v3.59)
 
 Islam, shown Wave 3's chip proposal, looked past it at the real fault:
 *"the description under the business units performance is confusing either we
@@ -19698,12 +19794,12 @@ beside a status pill on the same line — two chips competing on one row, and a
 spend against §41's budget for a word that ranks two readings. The page's own
 neutrals; the word unchanged.
 
-Proved able to fail: 4 failures against the pre-§155 build. Wave 1–3 suite and
+Proved able to fail: 4 failures against the pre-§156 build. Wave 1–3 suite and
 the full sweep (33 viewers) green.
 
 ---
 
-## 156 · Two faces, and the comparison closes (v3.58)
+## 157 · Two faces, and the comparison closes (v3.59)
 
 Islam: *"let's make the 2 fonts available are the sytem font and the source
 san3."*
@@ -19752,12 +19848,12 @@ is `ibm` while the selector has always been `[data-font="plex"]` — so it looke
 for a string the product never held and passed on the very build it was written
 to reject. The pair is written out.
 
-Proved able to fail: **11 failures** against the pre-§156 build. Wave 1–3
+Proved able to fail: **11 failures** against the pre-§157 build. Wave 1–3
 suite, `save-flush`, `state-contrast` and the full sweep green.
 
 ---
 
-## 157 · The plan tables fit the pane they are in (v3.58)
+## 158 · The plan tables fit the pane they are in (v3.59)
 
 Islam, from the audit's wave 4: the plan tables were being cut off down the
 right-hand side on a smaller window — the last column sliced vertically, the
@@ -19827,10 +19923,10 @@ recorded below rather than fixed in passing (rule 1b).
 (§94.8): in the band, **nothing overflows** — never *and it has a scrollbar* —
 no heading takes a second line, on **both sides of the switch**, with the
 620 floor and the 13px padding still in force on a wide window (§94.2). Proved
-able to fail: **7 failures** against the pre-§157 build, on both sides at all
+able to fail: **7 failures** against the pre-§158 build, on both sides at all
 three band widths.
 
-### Recorded, not fixed (§157.1)
+### Recorded, not fixed (§158.1)
 
 - **`.cfg table`'s 760px floor is dead code.** `group-extra.css:296` sets it;
   line 528 sets `min-width:0` on the same selector, unscoped and later. One of

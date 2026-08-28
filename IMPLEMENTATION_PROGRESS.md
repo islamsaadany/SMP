@@ -6,9 +6,8 @@ version (rules A2 / A11, changed 2026-08-20) — those go only when asked for.
 
 **Where it runs:** Vercel, production tracks `main`. Static files plus two
 serverless functions (`/api/state`, `/api/auth`) against Neon Postgres.
-**Latest version:** v3.56 on `main`; **v3.57 (§147, a custodian per project,
-spec 024) on `claude/custodian-per-project-s8q93m`**, awaiting the word to
-merge — renumbered twice on the way as parallel sessions took §130–§146.
+**Latest version:** v3.58 on `main` (§148, the welcome screen, spec 025 —
+merged 2026-08-28 on Islam's word).
 
 **Sign in as:** `SMO` / `1234` — a password change is forced at once (§43.1,
 reversing §19.4).
@@ -65,11 +64,11 @@ Nothing proceeds past this line without an answer.
 
 ## Built and verified
 
-*The five v3.58 entries below are the UI/UX audit's waves 2 and 3, built and
+*The five v3.59 entries below are the UI/UX audit's waves 2 and 3, built and
 checked as separate rounds on one branch and shipping as one version — main
 took v3.52–v3.57 from four other sessions while they were being built.*
 
-### v3.58 — the plan tables fit the pane (§157)
+### v3.59 — the plan tables fit the pane (§158)
 
 - Islam, wave 4: on a smaller window the plan tables were cut off down the
   right — the last column sliced, the heading reading *COMPILE*.
@@ -91,10 +90,10 @@ took v3.52–v3.57 from four other sessions while they were being built.*
 - **And the obvious both-ends assertion could not fail**: `.cfg table`'s 760px
   floor is dead code, re-declared as 0 later in the same file (the fifth
   duplicate this project has recorded). Asserted on the selector instead.
-- `checks/table-fit.py` — 7 failures on the pre-§157 build. Whole suite and
+- `checks/table-fit.py` — 7 failures on the pre-§158 build. Whole suite and
   the 33-viewer sweep green. **Not merged — awaiting Islam.**
 
-### v3.58 — two faces (§156)
+### v3.59 — two faces (§157)
 
 - Islam: *"let's make the 2 fonts available are the sytem font and the source
   san3."* §38.7 carried four faces so they could be judged in the real product
@@ -116,11 +115,11 @@ took v3.52–v3.57 from four other sessions while they were being built.*
 - **And one assertion could not fail when written** (§94.5): it derived the
   attribute key from the family name, and `"IBM Plex Sans".split()[0]` is
   `ibm` where the selector has always been `plex`.
-- `checks/typeface.py` — 11 failures on the pre-§156 build. Wave 1–3 suite,
+- `checks/typeface.py` — 11 failures on the pre-§157 build. Wave 1–3 suite,
   `save-flush`, `state-contrast` and the 33-viewer sweep green.
   **Not merged — awaiting Islam.**
 
-### v3.58 — the card sentences and the delta (§155)
+### v3.59 — the card sentences and the delta (§156)
 
 - Islam's redirect of Wave 3's item 2: the three group cards each carried a
   different kind of sentence and none said what its number meant — a data
@@ -132,11 +131,11 @@ took v3.52–v3.57 from four other sessions while they were being built.*
   rather than asserting the wording.
 - The ▲ delta moves from the title into the number (where a unit's own cards
   have always put it); "primary" drops from gold to the page's neutrals.
-- 4 failures on the pre-§155 build; whole suite and 33-viewer sweep green.
+- 4 failures on the pre-§156 build; whole suite and 33-viewer sweep green.
   **Not merged — awaiting Islam.**
 
 
-### v3.58 — Wave 3: four visual refinements (§154)
+### v3.59 — Wave 3: four visual refinements (§155)
 
 - **The group landing answers "where do I look next"** — one entry per unit,
   worst first, each linking to it; the same figures the Business units section
@@ -144,51 +143,51 @@ took v3.52–v3.57 from four other sessions while they were being built.*
 - **Caption explainers stop shouting**; **Branding's pickers open on the colour
   the platform actually paints** (read live, never a literal); **Full Name
   leaves the register's default columns** and stays one tick away.
-- **§154.1**: the strip's entries first carried `data-u` and went nowhere —
+- **§155.1**: the strip's entries first carried `data-u` and went nowhere —
   that wiring is scoped to the chrome. `data-go` is the platform's own
-  document-wide attribute. Found by pressing, §149.1 twice in one session.
-- **§154.2**: an assertion nearly forced a wrong design — "quieter" measured
+  document-wide attribute. Found by pressing, §150.1 twice in one session.
+- **§155.2**: an assertion nearly forced a wrong design — "quieter" measured
   as colour would have made the explanation fainter than the quietest ink.
   Corrected the check, not the design.
-- `checks/wave3.py` — 12 failures on the pre-§154 build. Full sweep: 33
+- `checks/wave3.py` — 12 failures on the pre-§155 build. Full sweep: 33
   viewers, no errors. **Not merged — awaiting Islam.**
-- **Still with Islam**: the three card sentences (§155 mockup) and whether the
+- **Still with Islam**: the three card sentences (§156 mockup) and whether the
   chip refinement goes in with them.
 
 
-### v3.58 — the three contrast repairs (§153)
+### v3.59 — the three contrast repairs (§154)
 
-- Islam approved §152's three findings for repair. All three were **one fault**:
+- Islam approved §153's three findings for repair. All three were **one fault**:
   a scoring colour used as TYPE rather than as a mark — the rail's figure
   (3.26 → 4.93), the focus strip's count (4.45 → 6.45), the hovered button and
   its caret (4.34 → 5.36).
 - `bandInk()` beside `band()`, applied at 30 call sites, with a fallback for a
   tenant band that has no text twin. Two more fixed by hand, same move.
-- **§153.1**: the caret's first fix made it worse (4.34 → 1.43) — a blanket
+- **§154.1**: the caret's first fix made it worse (4.34 → 1.43) — a blanket
   rule hit a caret sitting on the navy chrome. Reverted; fixed at the control
   that failed.
 - `state-contrast.py`'s baseline is now **empty** — anything failing from here
   is new. Full sweep: 33 viewers, no errors. **Not merged — awaiting Islam.**
 
 
-### v3.58 — Wave 2 of the UI/UX audit (§148–§152)
+### v3.59 — Wave 2 of the UI/UX audit (§149–§153)
 
-- **§150 the tables Islam was stuck on**: a plan wider than its pane was cut
+- **§151 the tables Islam was stuck on**: a plan wider than its pane was cut
   with no way to scroll (the page never scrolls sideways, §27.2). It scrolls
   inside its own box now, with the `#` and name column frozen — and the second
   frozen column parks against the first one's MEASURED width, because
-  `left:38px` slid the name 2.5px on every scroll (§150.1).
-- **§149 the reporting controls ride the tab row** — Islam's placement, better
+  `left:38px` slid the name 2.5px on every scroll (§151.1).
+- **§150 the reporting controls ride the tab row** — Islam's placement, better
   than the audit's pinned bar: the row is already pinned chrome, so no new
   sticky element and none of its arithmetic. Submit wears the Report orange,
-  Save draft the same orange as type with no box. **§149.1**: putting them in
+  Save draft the same orange as type with no box. **§150.1**: putting them in
   the row made them subject to the row's wiring — every `#subtabs button` was
   bound as a tab, so Save draft closed the report. Found by pressing it.
-- **§148 the glyphs keep their place and gain their meaning**: "More is
+- **§149 the glyphs keep their place and gain their meaning**: "More is
   better / Less is better", and the compile rules described; the repeated
   "Latest" quiet, with no standing dotted mark.
-- **§151 the viewer switcher** reads name + place, job title on the hover.
-- **§152 hover and focus are measured at last** (closes §16.17), reusing the
+- **§152 the viewer switcher** reads name + place, job title on the hover.
+- **§153 hover and focus are measured at last** (closes §16.17), reusing the
   sweep's own rule. Three light-mode failures recorded as a named baseline —
   `.dlcar` 4.34, `<b>` 4.45, `.rnum` 3.26 — **awaiting Islam's colour
   decision**, since a palette is his (rule 1c).
@@ -197,6 +196,24 @@ took v3.52–v3.57 from four other sessions while they were being built.*
   reporting assertion updated — it went red for the right reason. Full sweep:
   33 viewers, no errors. **Not merged — on the branch awaiting Islam's word.**
 
+
+### v3.58 — the welcome screen (§148, spec 025)
+
+- **One screen after sign-in, before the platform**: "Welcome, <first name>"
+  leads with the person's role chips and the cycle state; Raya Trade and the
+  Strategy Management Office sign the band on the separator's edge. Settled
+  over three mockup rounds — the greeting moved left and the bare count
+  badges became sentences at Islam's direction.
+- **"Waiting on you" computes nothing new**: the submission row, the plan's
+  missing elements (§145) and the office's unread reply are the same
+  functions their destination pages call; the SMO's list is the Setup
+  Overview's own rows. An empty list says so. Every door presses the
+  platform's own navigation — "Open reporting" arrives IN reporting mode.
+- **The intro round card is the tour's visible offer** and its reachable
+  home again (§119.4); starting it hands the screen to the real tour. Once
+  per browser session; never the office's tour, never over file://.
+- Proof: `checks/welcome.py` (three viewers, made state, doors pressed and
+  read back, absences, proved to fail on the pre-§148 build) + full `qa.py`.
 
 ### v3.57 — a custodian per project: two roles, not one (§147, spec 024)
 

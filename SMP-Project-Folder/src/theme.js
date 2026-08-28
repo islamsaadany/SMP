@@ -57,7 +57,7 @@ var THEME = (function () {
      "system" first, because it is what the platform shipped with and a
      comparison needs its own starting point in it. */
   var FKEY = "smp.font";
-  /* TWO, NOT FIVE (§156, Islam: "let's make the 2 fonts available are the
+  /* TWO, NOT FIVE (§157, Islam: "let's make the 2 fonts available are the
      system font and the source san3"). §38.7 carried four embedded faces so
      they could be compared in the real product; the comparison is over.
 

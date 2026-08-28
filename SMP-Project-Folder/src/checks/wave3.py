@@ -1,4 +1,4 @@
-"""FIVE VISUAL REFINEMENTS (§154): the landing strip, the captions, the
+"""FIVE VISUAL REFINEMENTS (§155): the landing strip, the captions, the
 branding swatches, and one name column.
 
 Each is a reading improvement rather than a repair, so each assertion is about
@@ -130,7 +130,7 @@ with sync_playwright() as p:
     else:
         ck("there is an entry to press", False)
 
-    print("— 2 · the sentences under the numbers (§155) —")
+    print("— 2 · the sentences under the numbers (§156) —")
     go_group(pg)
     cards = pg.evaluate("""() => [...document.querySelectorAll('#panel .scores .card')].map(function(c){
       var big=c.querySelector('.big'), sub=c.querySelector('p.sub');

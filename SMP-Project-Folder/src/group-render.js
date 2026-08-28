@@ -11,11 +11,11 @@ function esc(s){ return String(s).replace(/&/g,"&amp;").replace(/</g,"&lt;"); }
    the strategy layer and the functional layer never disagree about a colour;
    85 is the added top edge that splits on-track from needs-attention. */
 function band(v){ return bandOf(v).key; }
-/* ── A BAND'S COLOUR AS *TYPE*, NOT AS A MARK (§153) ────────────────────
+/* ── A BAND'S COLOUR AS *TYPE*, NOT AS A MARK (§154) ────────────────────
    §38.4's rule, applied where it had never been: "a colour that works as a
    FILL usually fails as TYPE", which is why every scoring colour was given a
    `-tx` twin. Thirty-one places then went on painting TEXT with the fill —
-   invisible until §152 measured a hovered control and found the rail's figure
+   invisible until §153 measured a hovered control and found the rail's figure
    at 3.26 and a scored per-cent at 4.45 on the quiet ground.
 
    THE FALLBACK IS LOAD-BEARING: the bands are the tenant's (Setup › Scoring
@@ -138,7 +138,7 @@ function plus(id, label){
 }
 
 /* A headline figure whose derivation opens in a modal. */
-/* ── WHAT A DELIVERY RATIO MEANS, IN WORDS (§155) ─────────────────────────
+/* ── WHAT A DELIVERY RATIO MEANS, IN WORDS (§156) ─────────────────────────
    Islam, on a card reading 104%: *"it's 104% while the description is saying
    something else."* The line said "Delivered 50% against 48% planned —
    variance +2", which is arithmetically the same fact and asks the reader to
@@ -172,7 +172,7 @@ function drillCard(title, val, opts){
   var id = modalFor(opts.modalTitle || title.replace(/<[^>]*>/g, ""), opts.modalSub, opts.drill);
   var vs = opts.planned != null ? ' <span class="vs">vs ' + opts.planned + '% planned</span>' : '';
   var mark = opts.planned != null ? '<div class="marker" style="left:' + opts.planned + '%"></div>' : '';
-  /* A DELTA BELONGS TO ITS NUMBER (§155). It used to be appended to the
+  /* A DELTA BELONGS TO ITS NUMBER (§156). It used to be appended to the
      TITLE by the caller, so "▲ 3" sat among the labels — pushing the heading
      onto two lines and standing four words away from the figure it qualifies.
      The unit's own cards have always drawn it inside `.headline`, beside the
@@ -297,7 +297,7 @@ function qsFill(t){
   return '<span class="qs qs-edit qs-fill">' + out + '</span>';
 }
 
-/* ── WHAT A GLYPH AND A ONE-WORD RULE ACTUALLY MEAN (§148) ───────────────
+/* ── WHAT A GLYPH AND A ONE-WORD RULE ACTUALLY MEAN (§149) ───────────────
    Islam, on the audit's two "columns that say nothing": keep the glyphs, and
    say something better than "at least / at most" — *"some descriptive like
    Less is better or more is better"* — and give COMPILED the same treatment,
@@ -334,7 +334,7 @@ function noteSpan(text, note){
     : esc(text);
 }
 function dirCell(d){ return d ? noteSpan(d, DIR_WORDS[d] || "") : ""; }
-/* THE REPEATED DEFAULT DROPS TO THE QUIET INK (§148). "Latest" is what almost
+/* THE REPEATED DEFAULT DROPS TO THE QUIET INK (§149). "Latest" is what almost
    every row says, so at full strength it is a column of noise that hides the
    two rows saying something else. Quiet, never hidden: the value is still
    there for anybody reading down the column. */
@@ -666,7 +666,7 @@ function draftBtns(){
     '</span>';
 }
 
-/* ── THE REPORTING CONTROLS RIDE THE TAB ROW (§149) ──────────────────────
+/* ── THE REPORTING CONTROLS RIDE THE TAB ROW (§150) ──────────────────────
    Islam, asked whether the audit's pinned bar should instead be a box beside
    the Performance tab: *"if we take the floating bar to be in a box beside
    the performance icon would that look better?"* — and it does, twice over.
@@ -1365,7 +1365,7 @@ function renderGroupPerformance(){
       '</div></div></div>';
   }).join("");
 
-/* ── WHERE TO LOOK NEXT (§154) ─────────────────────────────────────────────
+/* ── WHERE TO LOOK NEXT (§155) ─────────────────────────────────────────────
    The group's first section — the first screen of every session — said how the
    group was doing in three cards and then stopped, with 330px of empty page
    under it and the units one click away on another section. It answered "how
@@ -1382,7 +1382,7 @@ function renderGroupPerformance(){
    by the same loop as every other one in the product (§24) — a chip that
    looked like a link and went nowhere would be worse than no chip.
 
-   The score wears its band's TEXT twin, never the fill (§153). */
+   The score wears its band's TEXT twin, never the fill (§154). */
 function whereNext(keys){
   var rows = keys.map(function(k){
     var u = UNITS[k];
@@ -1392,13 +1392,13 @@ function whereNext(keys){
   rows.sort(function(a, b){ return a.v - b.v; });
   return '<div class="ustrip-h">Where to look next</div><div class="ustrip">' +
     rows.map(function(r){
-      /* `data-go`, NOT `data-u` (§154.1). The row of destinations at the top
+      /* `data-go`, NOT `data-u` (§155.1). The row of destinations at the top
          wires `#units [data-u]` — scoped to the chrome — so a button carrying
          that attribute anywhere else looks navigable and does nothing. The
          platform already has the attribute for exactly this: `[data-go]` is
          wired document-wide and lands on the unit's Performance page, which
          is where somebody following a low score is going anyway. Found by
-         pressing it (§96, §149.1 — twice in one session). */
+         pressing it (§96, §150.1 — twice in one session). */
       return '<button type="button" data-go="' + esc(r.k) + '">' +
         '<span class="un">' + esc(r.name) + '</span>' +
         '<span class="uv" style="color:' + bandInk(r.v) + '">' + r.v + '%</span></button>';
@@ -1411,7 +1411,7 @@ function whereNext(keys){
         drillCard("Group Key Objectives" + tip("The objectives the group set itself \u2014 each actual against its target, averaged. Authored by the group, never summed from the business units."), groupKeyObjectives(), {
           /* Was "The group's own scorecard. All 6 objectives have a target
              set." — a data-quality note where the reader wanted to know what
-             the number IS (§155). The count stays, because it is the size of
+             the number IS (§156). The count stays, because it is the size of
              the thing being scored. */
           primary: true, sub: "The group\u2019s own <b>" + GROUP.keyObjectives.length +
             "</b> objectives, each scored against its target.",
@@ -1419,7 +1419,7 @@ function whereNext(keys){
         }) +
         drillCard("Business units &mdash; performance" + tip(TIP_PERF), groupUnitsObjectives(), {
           delta: deltaTag("group"),
-          /* THE LINE SAYS WHAT THE NUMBER IS, NOT HOW IT WAS MADE (§155).
+          /* THE LINE SAYS WHAT THE NUMBER IS, NOT HOW IT WAS MADE (§156).
              It used to print all ten unit weights — "21 / 14 / 10 / 15 / 8 /
              6 / 6 / 7 / 8 / 5" — which is a derivation nobody can use at a
              glance and which grows with the business. "How this is
@@ -1566,7 +1566,7 @@ function renderTemple(){
   var cell = function(m){
     return '<div class="ns-item"><span class="ns-label">' + esc(m.name) + '</span>' +
            '<span class="ns-target">' + (m.target ? esc(m.target) : '<span class="missing">Missing</span>') + '</span>' +
-           /* A SENTENCE, NOT A COLUMN (§148, §99.8's rule). The hover words
+           /* A SENTENCE, NOT A COLUMN (§149, §99.8's rule). The hover words
               belong on the table cells somebody runs an eye down; this line
               already reads "≥ · latest" as prose, and half of it wearing a
               note would be the drift the helpers exist to prevent. */
@@ -2508,8 +2508,8 @@ function gapCell(page, acKey, row, field, opts){
     }, mark ? "pendfld" : "gapfld");
   }
   /* Read — and fill mode on a settled value reads too.
-     `read` IS WHY §148 SURVIVED THE MERGE. A direction and a compile rule are
-     stored as `\u2265` and `Latest`, and §148 gave each a dotted hover saying
+     `read` IS WHY §149 SURVIVED THE MERGE. A direction and a compile rule are
+     stored as `\u2265` and `Latest`, and §149 gave each a dotted hover saying
      what it MEANS ("More is better", "Takes the last measure"). gapCell's read
      path is `esc(val)`, so routing those two cells through it would have
      silently dropped the words while every check went on passing — the value
@@ -3120,7 +3120,7 @@ function renderReport(u){
       : '<div class="pane">' + pane + '</div>';
   }
 
-  /* Published to the chrome rather than drawn here (§149): the shell reads
+  /* Published to the chrome rather than drawn here (§150): the shell reads
      REPORT_CHROME after this render and hangs it on the tab row, the same
      trip PAGE_TOOLS already makes. */
   REPORT_CHROME = repChrome(u.ukey, c.done, c.total, pctDone, mayAll, subd);
@@ -4188,7 +4188,7 @@ function renderFnReport(fnKey){
      second answer everywhere. */
   var fnKeyTarget = "fn:" + fk;
   var mayAll = canSpeakFor(fnKeyTarget), subd = !!(REVIEW.submitted || {})[fnKeyTarget];
-  /* The same box the unit's report publishes (§149, §53.5) — one builder, so
+  /* The same box the unit's report publishes (§150, §53.5) — one builder, so
      the two sides cannot explain the same state differently. */
   REPORT_CHROME = repChrome(fnKeyTarget, done, total, pctDone, mayAll, subd);
   var bar = "";

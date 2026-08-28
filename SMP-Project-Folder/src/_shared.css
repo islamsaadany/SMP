@@ -78,7 +78,7 @@
      degrades to the system font rather than to a default serif. Absence of the
      attribute is the system stack, which is why there is no [data-font="system"]
      block: nothing to set. */
-  /* ONE BLOCK, because there is one embedded face (§156). The other three
+  /* ONE BLOCK, because there is one embedded face (§157). The other three
      went with their .woff2 files rather than being left here unreachable — a
      rule for a face the product no longer carries is exactly what §24 is
      about, and the next reader would have no way to tell it was dead. */
@@ -498,7 +498,7 @@
      product from the reference. */
   .scroll { overflow-x:auto; border:1px solid var(--line); border-radius:var(--r-lg); background:var(--surface); }
   table { width:100%; border-collapse:collapse; font-size:var(--fs-note); min-width:620px; }
-  /* ── THE FLOOR IS RIGHT NEARLY EVERYWHERE, AND IT CUT THE PLAN (§157) ──
+  /* ── THE FLOOR IS RIGHT NEARLY EVERYWHERE, AND IT CUT THE PLAN (§158) ──
      That 620px stops a data table squashing into unreadable columns, and it is
      the right default. It is also a FLOOR, and a floor cannot yield: a unit's
      plan pane narrows with the window, and once the pane is under 620 the
@@ -540,7 +540,7 @@
      by asking `document.styleSheets`, per §93.11, not by reading the cascade).
      That value reads the same with or without the `:not()`, which is §113.8's
      blind spot, so the reach is asserted on the SELECTOR the browser holds
-     instead. The dead 760 is recorded in §157.1, not fixed here.
+     instead. The dead 760 is recorded in §158.1, not fixed here.
 
      Below 820 the split stacks and the pane is full-width again, so the window
      where this applies is exactly the window where the two-column layout is

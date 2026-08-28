@@ -360,7 +360,7 @@ with sync_playwright() as p:
             errs.append("PERFORMANCE (%s): Arrange is still here — it belongs to the plan"
                         % label)
         pg.click("[data-report]"); pg.wait_for_timeout(300)
-        # THE BAR MOVED, IT DID NOT GO (§149). The reporting controls now ride
+        # THE BAR MOVED, IT DID NOT GO (§150). The reporting controls now ride
         # the tab row rather than sitting in the page, so this asked for
         # `.rep-bar` and correctly found nothing — §51.11's fault caught doing
         # its job for once: a check keyed on markup that changed, going red

@@ -1,7 +1,7 @@
-"""A WIDE TABLE SCROLLS IN ITS OWN BOX, AND THE NAME STAYS PUT (§150),
-AND THE VIEWER SWITCHER SAYS THE NAME AND THE PLACE (§151).
+"""A WIDE TABLE SCROLLS IN ITS OWN BOX, AND THE NAME STAYS PUT (§151),
+AND THE VIEWER SWITCHER SAYS THE NAME AND THE PLACE (§152).
 
-§150 came from Islam using the product on his own laptop: *"I'm stuck with the
+§151 came from Islam using the product on his own laptop: *"I'm stuck with the
 unit tables cut and I can't scroll horizontally."* The page never scrolls
 sideways by design (§27.2 — it drags every sticky element with it), so a plan
 wider than its pane was simply CUT with nothing to reach the rest.
@@ -20,7 +20,7 @@ WHAT IS ASSERTED — the problem, not the pixels (§94.8):
   3. The frozen cells are opaque: what scrolls under them does not show
      through (measured with elementFromPoint, not by reading the CSS).
   4. Nothing changes where the table already fits: no scrollbar, no shift.
-  5. §151: every switcher option reads "name — place", the job title is on
+  5. §152: every switcher option reads "name — place", the job title is on
      the hover rather than in the line, and the closed control shows its whole
      label with nothing clipped.
 
@@ -103,7 +103,7 @@ with sync_playwright() as p:
     ck("the frozen name is opaque — nothing shows through it",
        moved.get("nameOnTop"), moved)
 
-    print("— the viewer switcher (§151) —")
+    print("— the viewer switcher (§152) —")
     pg.evaluate("var s=document.getElementById('widen'); if(s) s.remove();")
     pg.wait_for_timeout(200)
     opts = pg.evaluate("""() => [...document.querySelectorAll('#asWho option')].map(function(o){

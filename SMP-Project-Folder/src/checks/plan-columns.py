@@ -1,4 +1,4 @@
-"""THE GLYPH AND THE RULE SAY WHAT THEY MEAN (§148).
+"""THE GLYPH AND THE RULE SAY WHAT THEY MEAN (§149).
 
 Islam kept the ≥ / ≤ glyphs and asked for better words behind them than the
 audit's first draft ("at least / at most", which only restates the glyph):

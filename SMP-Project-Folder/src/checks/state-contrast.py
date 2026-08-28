@@ -1,4 +1,4 @@
-"""HOVER AND FOCUS ARE MEASURED TOO (§152, closing §16.17).
+"""HOVER AND FOCUS ARE MEASURED TOO (§153, closing §16.17).
 
 THE GAP: `scripts/contrast-sweep.py` walks pages and measures controls AT
 REST. Every `:hover`, `:focus` and `:disabled` colour in the product has
@@ -42,12 +42,12 @@ JS = _m.group(1)
 bad = 0
 failures = []
 
-# ── THE BASELINE IS EMPTY, AND THAT IS THE POINT (§153) ───────────────────
+# ── THE BASELINE IS EMPTY, AND THAT IS THE POINT (§154) ───────────────────
 # The first run of this check found three failures, all in light mode, and all
 # three were the SAME fault wearing three faces: a scoring colour used as TYPE
 # rather than as a mark — §38.4's rule, which is why every scoring colour has
 # a `-tx` twin. They were recorded here as a baseline for exactly one
-# conversation, Islam approved the repair, and §153 fixed them:
+# conversation, Islam approved the repair, and §154 fixed them:
 #
 #   .rnum   3.26 → 4.93   the rail's figure (via bandInk(), 30 call sites)
 #   <b>     4.45 → 6.45   the focus strip's count (--good → --good-tx)

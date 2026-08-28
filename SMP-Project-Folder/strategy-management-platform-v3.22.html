@@ -90,7 +90,7 @@
      degrades to the system font rather than to a default serif. Absence of the
      attribute is the system stack, which is why there is no [data-font="system"]
      block: nothing to set. */
-  /* ONE BLOCK, because there is one embedded face (§156). The other three
+  /* ONE BLOCK, because there is one embedded face (§157). The other three
      went with their .woff2 files rather than being left here unreachable — a
      rule for a face the product no longer carries is exactly what §24 is
      about, and the next reader would have no way to tell it was dead. */
@@ -510,7 +510,7 @@
      product from the reference. */
   .scroll { overflow-x:auto; border:1px solid var(--line); border-radius:var(--r-lg); background:var(--surface); }
   table { width:100%; border-collapse:collapse; font-size:var(--fs-note); min-width:620px; }
-  /* ── THE FLOOR IS RIGHT NEARLY EVERYWHERE, AND IT CUT THE PLAN (§157) ──
+  /* ── THE FLOOR IS RIGHT NEARLY EVERYWHERE, AND IT CUT THE PLAN (§158) ──
      That 620px stops a data table squashing into unreadable columns, and it is
      the right default. It is also a FLOOR, and a floor cannot yield: a unit's
      plan pane narrows with the window, and once the pane is under 620 the
@@ -552,7 +552,7 @@
      by asking `document.styleSheets`, per §93.11, not by reading the cascade).
      That value reads the same with or without the `:not()`, which is §113.8's
      blind spot, so the reach is asserted on the SELECTOR the browser holds
-     instead. The dead 760 is recorded in §157.1, not fixed here.
+     instead. The dead 760 is recorded in §158.1, not fixed here.
 
      Below 820 the split stacks and the pane is full-width again, so the window
      where this applies is exactly the window where the two-column layout is
@@ -696,7 +696,7 @@
   .item-body { padding:4px 16px 18px; border-top:1px solid var(--line-soft); }
   h4.mini { font-size:11px; letter-spacing:.12em; text-transform:uppercase; color:var(--ink-3);
             font-weight:700; margin:22px 0 9px; }
-  /* ── THE NOUN SHOUTS, THE EXPLANATION SPEAKS (§154) ────────────────────
+  /* ── THE NOUN SHOUTS, THE EXPLANATION SPEAKS (§155) ────────────────────
      A caption like "KEY MEASURES — AS PLANNED: THIS YEAR'S TARGET, AND HOW IT
      COMPILES" set a whole clause in italic capitals with letter-spacing:
      three emphases at once, on the hardest form to read at length. The noun
@@ -712,7 +712,7 @@
 
   /* Performance is the primary reading; execution sits beside it */
   .card.primary-card { border-color:var(--stone-soft); border-top:3px solid var(--stone-soft); }
-  /* A QUIET OUTLINE, NOT A SECOND GOLD CHIP (§155). "primary" says which of
+  /* A QUIET OUTLINE, NOT A SECOND GOLD CHIP (§156). "primary" says which of
      two readings leads; it is a footnote to the title, and in the accent it
      competed with the status pill on the same line and with the accent budget
      itself (§41). The border and the ink drop to the page's own neutrals; the
@@ -1133,9 +1133,9 @@
   .editbtn { font:inherit; font-size:12px; letter-spacing:.08em; text-transform:uppercase;
              font-weight:700; color:var(--gold-deep); background:none;
              border:1px solid var(--gold); border-radius:99px; padding:6px 15px; cursor:pointer; }
-  /* ── THE INK MOVES WITH THE GROUND (§153) ────────────────────────────
+  /* ── THE INK MOVES WITH THE GROUND (§154) ────────────────────────────
      Measured at 4.34 hovered (§16.17, recorded in §95 and found again by
-     §152's state sweep): the wash arrives on hover and the ink stays where it
+     §153's state sweep): the wash arrives on hover and the ink stays where it
      was, so the label is at its least readable exactly when a hand is on it.
      `--gold-deep` is right on white (4.99) and one step too light on
      `--attn-bg`; the wash's OWN text twin is 5.36 — the same pairing this
@@ -2012,11 +2012,11 @@
      "Strategy Management Office — all units" would otherwise set the width of
      the chrome's first line and wrap the two buttons beside it onto a second.
      The name truncates; the popup shows it in full. */
-  /* ── THE WHOLE ANSWER, NOT THE FIRST 150 PIXELS OF IT (§151) ───────────
+  /* ── THE WHOLE ANSWER, NOT THE FIRST 150 PIXELS OF IT (§152) ───────────
      The cap cut "Mohamed Essam — Head of the Strategy Management Office" at
      the em dash, so the control showed the name and hid the part that says
      what is being looked at. With the option now reading name + place
-     (§151's own change), the label is short enough to show whole — Islam:
+     (§152's own change), the label is short enough to show whole — Islam:
      *"if we make it all visible it will be ok"* — so the cap rises to a
      ceiling that only ever catches a genuinely long tenant name rather than
      the ordinary case. The row has the room: it holds the label, this
@@ -4842,10 +4842,10 @@
   details.fstrip[open] > summary::after{transform:rotate(90deg)}
   .fstrip-sum{font-family:var(--mono);font-size:13px;color:var(--ink-2)}
   /* The count is TYPE, so it takes the good family's text twin rather than
-     its fill (§38.4, §153): on `--surface-2` the fill measures 4.45 and the
+     its fill (§38.4, §154): on `--surface-2` the fill measures 4.45 and the
      twin 6.45. The strip's own ground is what makes the difference — the same
      colour clears comfortably on white, which is why this survived until the
-     state sweep measured it (§152). */
+     state sweep measured it (§153). */
   .fstrip-sum b{color:var(--good-tx);font-size:15px}
   .fstrip-meta{margin-left:auto}
   .fstrip .fstrip-body{padding:12px 18px 10px}
@@ -4882,7 +4882,7 @@
     vertical-align:middle;letter-spacing:.02em}
   .delta.up{color:var(--good-tx)} .delta.down{color:var(--bad-tx)}
   .headline .delta{align-self:center}
-  /* Inside the group card's big figure (§155): the number is 34px and the
+  /* Inside the group card's big figure (§156): the number is 34px and the
      delta rides its baseline rather than the line box's top. */
   .big .delta{vertical-align:0.35em;font-size:12.5px}
 
@@ -5418,7 +5418,7 @@
   .failcard .fc-e { font-family:var(--mono); font-size:12px; color:var(--ink-3);
     background:var(--surface-2); border-radius:6px; padding:8px 12px; margin-top:8px; }
 
-  /* ── THE GLYPH AND THE RULE CARRY THEIR MEANING ON THE HOVER (§148) ─────
+  /* ── THE GLYPH AND THE RULE CARRY THEIR MEANING ON THE HOVER (§149) ─────
      A dotted underline is the one mark that says "there is more here" without
      spending colour — the accent budget (§41) is already committed, and a
      coloured glyph in a scoring table would read as a score. `help` rather
@@ -5427,7 +5427,7 @@
   /* The value almost every row repeats, quiet so the exceptions carry the
      column. Never hidden — it is still read straight down. */
   td .cdefault { color:var(--ink-3); }
-  /* AND THE QUIET ONE WEARS NO DOTS (§148). Seen built: a dotted underline
+  /* AND THE QUIET ONE WEARS NO DOTS (§149). Seen built: a dotted underline
      under every "Latest" made the column busier than it was before the note
      existed — the mark meant to say "there is more here" was shouting on the
      one value that never needs reading. The note is still there on hover
@@ -5435,7 +5435,7 @@
      standing mark on the repeated default. */
   td .cdefault.hasnote { border-bottom:0; }
 
-  /* ── THE REPORTING CONTROLS RIDE THE TAB ROW (§149) ─────────────────────
+  /* ── THE REPORTING CONTROLS RIDE THE TAB ROW (§150) ─────────────────────
      Islam's own placement, chosen over a pinned bar: the tab row is already
      pinned chrome, so the controls stay on screen for the whole report with
      no new sticky element and none of the arithmetic one needs (§122.5).
@@ -5472,7 +5472,7 @@
   .repchrome .rc-draft:hover { text-decoration:underline; }
   .repchrome .rc-draft:focus-visible { outline:2px solid var(--gold); outline-offset:2px; }
 
-  /* ── A WIDE TABLE SCROLLS INSIDE ITS OWN BOX (§150) ─────────────────────
+  /* ── A WIDE TABLE SCROLLS INSIDE ITS OWN BOX (§151) ─────────────────────
      Islam, from his own laptop on Mazaya: *"I'm stuck with the unit tables cut
      and I can't scroll horizontally."* The page deliberately never scrolls
      sideways — §27.2, because a sideways page drags every sticky element with
@@ -5511,7 +5511,7 @@
      sliding under text. */
   .tblscroll td.idx + td, .tblscroll th.idx + th { box-shadow:1px 0 0 var(--line-soft); }
 
-  /* ── WHERE TO LOOK NEXT (§154) ──────────────────────────────────────────
+  /* ── WHERE TO LOOK NEXT (§155) ──────────────────────────────────────────
      One entry per unit under the group's three cards, worst first. A quiet
      row on purpose: the cards above are the reading, this is the index to it,
      and an index that competes with what it indexes has stopped being one. */
@@ -6507,6 +6507,111 @@ body.presenting .tourdock { display:none; }
 
 .tourdock button:focus-visible { outline:2px solid var(--focus); outline-offset:2px; }
 
+/* ═══ THE WELCOME SCREEN (§148) ═══════════════════════════════════════════
+   Styles for welcome.js, concatenated late beside chat.css and tour.css and
+   for the same reason: furniture floating over the page must not lose to
+   `.cfg table` on source order (§93.11). Every colour is a token, so the
+   tenant's branding and both themes carry it with no rule of its own —
+   the mockup's literals were these tokens' light values.
+
+   LAYERING: above the chat dock (45) — its row on this screen IS the door —
+   and below the tour (70), which the intro-round card hands the screen to. */
+.welcomeover { position:fixed; inset:0; z-index:60; overflow:auto;
+               background:var(--ground); color:var(--ink);
+               -webkit-font-smoothing:antialiased; }
+.welcomeover .wwrap { max-width:1140px; margin:0 auto; padding:34px 24px 60px; }
+
+/* ── The navy band: greeting leads, tenant signs on the separator ───────── */
+.welcomeover .whero { background:var(--panel); color:var(--panel-ink);
+  border-radius:var(--r-md); padding:30px 34px 28px; display:flex;
+  justify-content:space-between; align-items:center; gap:30px; flex-wrap:wrap; }
+.welcomeover .wkick { font-size:var(--fs-micro); letter-spacing:.18em;
+  text-transform:uppercase; color:var(--panel-accent); font-weight:700; margin:0 0 10px; }
+.welcomeover .wgreet h2 { margin:0 0 12px; font-size:30px; font-weight:800;
+  letter-spacing:-.02em; }
+.welcomeover .wwho { display:flex; gap:8px; flex-wrap:wrap; }
+.welcomeover .wchip { display:inline-flex; align-items:center; gap:6px;
+  font-size:var(--fs-label); font-weight:600; letter-spacing:.04em;
+  padding:4px 11px; border-radius:var(--r-pill);
+  border:1px solid rgba(255,255,255,.28); color:var(--panel-ink); }
+.welcomeover .wchip.wcycle { border-color:var(--panel-accent); color:var(--panel-accent); }
+.welcomeover .wchip.wcycle i { width:7px; height:7px; border-radius:99px;
+  background:var(--panel-accent); }
+/* ONE SHARED EDGE (round 3): every line of the tenant block starts AT the
+   separator, so the hairline and the text draw a single vertical. */
+.welcomeover .wtenant { display:flex; flex-direction:column; align-items:flex-start;
+  gap:8px; border-left:1px solid rgba(255,255,255,.18); padding-left:28px;
+  align-self:stretch; justify-content:center; }
+.welcomeover .wmark { width:36px; height:36px; border-radius:var(--r-sm);
+  background:var(--surface); color:var(--stone); font:800 13px/36px var(--sans);
+  text-align:center; letter-spacing:.02em; flex:none; }
+.welcomeover .wtenant h1 { margin:0; font-size:var(--fs-lead); font-weight:800;
+  letter-spacing:-.01em; }
+.welcomeover .woffice { font-size:var(--fs-label); letter-spacing:.06em;
+  text-transform:uppercase; color:var(--panel-quiet); }
+
+/* ── The list: every number lives inside its own sentence ──────────────── */
+.welcomeover .wcols { display:grid; grid-template-columns:1fr 336px; gap:22px;
+  margin-top:22px; }
+@media (max-width:960px){ .welcomeover .wcols { grid-template-columns:1fr; } }
+.welcomeover .wseclab { font-size:var(--fs-label); font-weight:900;
+  letter-spacing:var(--track); text-transform:uppercase; color:var(--ink-2);
+  margin:0 0 10px; }
+.welcomeover .wacts { display:flex; flex-direction:column; gap:10px; }
+.welcomeover .wact { background:var(--surface); border:1px solid var(--line);
+  border-radius:var(--r); padding:16px 18px; display:flex; align-items:center; gap:16px; }
+.welcomeover .wwhat { flex:1; min-width:0; }
+.welcomeover .wwhat b { display:block; font-size:15px; letter-spacing:-.01em; }
+.welcomeover .wwhat > span { display:block; font-size:var(--fs-note);
+  color:var(--ink-2); margin-top:2px; }
+.welcomeover .wwhat i { font-style:normal; font-weight:700; }
+/* Red is WORDS here, so it wears --bad-tx (§38.5) — the count with its noun,
+   never a bare number in a box (round 3, Islam). */
+.welcomeover .wwhat em.walert { font-style:normal; color:var(--bad-tx); font-weight:600; }
+.welcomeover .wempty .wwhat b { font-weight:600; color:var(--ink-2); }
+.welcomeover .wbtn { flex:none; font:inherit; cursor:pointer;
+  font-size:var(--fs-small); font-weight:700; letter-spacing:.03em;
+  padding:8px 16px; border-radius:var(--r-sm); border:1px solid var(--line);
+  background:var(--surface); color:var(--ink-2); }
+.welcomeover .wbtn:hover { border-color:var(--gold-deep); color:var(--ink); }
+/* §41's budget: the one solid fill on this screen is Report's own CTA pair,
+   worn only while a cycle is open. */
+.welcomeover .wbtn.wcta { background:var(--cta); border-color:var(--cta);
+  color:var(--cta-ink); }
+.welcomeover .wbtn.wcta:hover { background:var(--cta-hover); border-color:var(--cta-hover); }
+.welcomeover .wcontinue { margin-top:14px; text-align:right; }
+.welcomeover .wcontinue a { font-size:var(--fs-note); font-weight:600;
+  color:var(--stone); text-decoration:none; }
+.welcomeover .wcontinue a:hover { color:var(--gold-deep); }
+
+/* ── The side column ────────────────────────────────────────────────────── */
+.welcomeover .wside { display:flex; flex-direction:column; gap:22px; }
+.welcomeover .wcard { background:var(--surface); border:1px solid var(--line);
+  border-radius:var(--r); padding:16px 18px; }
+.welcomeover .wpages { display:flex; flex-direction:column; }
+.welcomeover .wpages a { display:flex; align-items:center; gap:8px; padding:9px 2px;
+  font-size:var(--fs-note); font-weight:600; color:var(--ink); text-decoration:none;
+  border-bottom:1px solid var(--line-soft); }
+.welcomeover .wpages a:last-child { border-bottom:0; }
+.welcomeover .wpages a small { flex:1; font-weight:500; color:var(--ink-3);
+  font-size:var(--fs-small); text-align:right; }
+.welcomeover .wpages a .wgo { color:var(--gold-deep); font-family:var(--mono);
+  margin-left:auto; }
+.welcomeover .wpages a:hover { color:var(--gold-deep); }
+.welcomeover .wtour { background:var(--over-bg); border:1px solid var(--over-line);
+  border-radius:var(--r); padding:18px; }
+.welcomeover .wtour h3 { margin:0 0 6px; font-size:var(--fs-lead); font-weight:700;
+  letter-spacing:-.01em; }
+.welcomeover .wtour p { margin:0 0 14px; font-size:var(--fs-note); color:var(--ink-2); }
+.welcomeover .wtourbtns { display:flex; gap:10px; align-items:center; }
+.welcomeover .wtbtn { font:inherit; cursor:pointer; font-size:var(--fs-small);
+  font-weight:700; letter-spacing:.03em; padding:8px 16px; border-radius:var(--r-pill);
+  border:1px solid var(--gold); background:none; color:var(--gold-deep); }
+.welcomeover .wtbtn:hover { border-color:var(--gold-deep); }
+.welcomeover .wtghost { font:inherit; cursor:pointer; font-size:var(--fs-small);
+  font-weight:600; border:0; background:none; color:var(--ink-3); padding:8px 6px; }
+.welcomeover .wtghost:hover { color:var(--ink); }
+
 /* ══ THE PLAN BUILDER (§129, spec 020) ══════════════════════════════
    The band is CHROME — it sits under the tab rows, spans the window like
    them, and carries the accent as an EDGE (§41's budget: one mark, not a
@@ -6677,7 +6782,7 @@ var THEME = (function () {
      "system" first, because it is what the platform shipped with and a
      comparison needs its own starting point in it. */
   var FKEY = "smp.font";
-  /* TWO, NOT FIVE (§156, Islam: "let's make the 2 fonts available are the
+  /* TWO, NOT FIVE (§157, Islam: "let's make the 2 fonts available are the
      system font and the source san3"). §38.7 carried four embedded faces so
      they could be compared in the real product; the comparison is over.
 
@@ -20534,11 +20639,11 @@ function esc(s){ return String(s).replace(/&/g,"&amp;").replace(/</g,"&lt;"); }
    the strategy layer and the functional layer never disagree about a colour;
    85 is the added top edge that splits on-track from needs-attention. */
 function band(v){ return bandOf(v).key; }
-/* ── A BAND'S COLOUR AS *TYPE*, NOT AS A MARK (§153) ────────────────────
+/* ── A BAND'S COLOUR AS *TYPE*, NOT AS A MARK (§154) ────────────────────
    §38.4's rule, applied where it had never been: "a colour that works as a
    FILL usually fails as TYPE", which is why every scoring colour was given a
    `-tx` twin. Thirty-one places then went on painting TEXT with the fill —
-   invisible until §152 measured a hovered control and found the rail's figure
+   invisible until §153 measured a hovered control and found the rail's figure
    at 3.26 and a scored per-cent at 4.45 on the quiet ground.
 
    THE FALLBACK IS LOAD-BEARING: the bands are the tenant's (Setup › Scoring
@@ -20661,7 +20766,7 @@ function plus(id, label){
 }
 
 /* A headline figure whose derivation opens in a modal. */
-/* ── WHAT A DELIVERY RATIO MEANS, IN WORDS (§155) ─────────────────────────
+/* ── WHAT A DELIVERY RATIO MEANS, IN WORDS (§156) ─────────────────────────
    Islam, on a card reading 104%: *"it's 104% while the description is saying
    something else."* The line said "Delivered 50% against 48% planned —
    variance +2", which is arithmetically the same fact and asks the reader to
@@ -20695,7 +20800,7 @@ function drillCard(title, val, opts){
   var id = modalFor(opts.modalTitle || title.replace(/<[^>]*>/g, ""), opts.modalSub, opts.drill);
   var vs = opts.planned != null ? ' <span class="vs">vs ' + opts.planned + '% planned</span>' : '';
   var mark = opts.planned != null ? '<div class="marker" style="left:' + opts.planned + '%"></div>' : '';
-  /* A DELTA BELONGS TO ITS NUMBER (§155). It used to be appended to the
+  /* A DELTA BELONGS TO ITS NUMBER (§156). It used to be appended to the
      TITLE by the caller, so "▲ 3" sat among the labels — pushing the heading
      onto two lines and standing four words away from the figure it qualifies.
      The unit's own cards have always drawn it inside `.headline`, beside the
@@ -20820,7 +20925,7 @@ function qsFill(t){
   return '<span class="qs qs-edit qs-fill">' + out + '</span>';
 }
 
-/* ── WHAT A GLYPH AND A ONE-WORD RULE ACTUALLY MEAN (§148) ───────────────
+/* ── WHAT A GLYPH AND A ONE-WORD RULE ACTUALLY MEAN (§149) ───────────────
    Islam, on the audit's two "columns that say nothing": keep the glyphs, and
    say something better than "at least / at most" — *"some descriptive like
    Less is better or more is better"* — and give COMPILED the same treatment,
@@ -20857,7 +20962,7 @@ function noteSpan(text, note){
     : esc(text);
 }
 function dirCell(d){ return d ? noteSpan(d, DIR_WORDS[d] || "") : ""; }
-/* THE REPEATED DEFAULT DROPS TO THE QUIET INK (§148). "Latest" is what almost
+/* THE REPEATED DEFAULT DROPS TO THE QUIET INK (§149). "Latest" is what almost
    every row says, so at full strength it is a column of noise that hides the
    two rows saying something else. Quiet, never hidden: the value is still
    there for anybody reading down the column. */
@@ -21189,7 +21294,7 @@ function draftBtns(){
     '</span>';
 }
 
-/* ── THE REPORTING CONTROLS RIDE THE TAB ROW (§149) ──────────────────────
+/* ── THE REPORTING CONTROLS RIDE THE TAB ROW (§150) ──────────────────────
    Islam, asked whether the audit's pinned bar should instead be a box beside
    the Performance tab: *"if we take the floating bar to be in a box beside
    the performance icon would that look better?"* — and it does, twice over.
@@ -21888,7 +21993,7 @@ function renderGroupPerformance(){
       '</div></div></div>';
   }).join("");
 
-/* ── WHERE TO LOOK NEXT (§154) ─────────────────────────────────────────────
+/* ── WHERE TO LOOK NEXT (§155) ─────────────────────────────────────────────
    The group's first section — the first screen of every session — said how the
    group was doing in three cards and then stopped, with 330px of empty page
    under it and the units one click away on another section. It answered "how
@@ -21905,7 +22010,7 @@ function renderGroupPerformance(){
    by the same loop as every other one in the product (§24) — a chip that
    looked like a link and went nowhere would be worse than no chip.
 
-   The score wears its band's TEXT twin, never the fill (§153). */
+   The score wears its band's TEXT twin, never the fill (§154). */
 function whereNext(keys){
   var rows = keys.map(function(k){
     var u = UNITS[k];
@@ -21915,13 +22020,13 @@ function whereNext(keys){
   rows.sort(function(a, b){ return a.v - b.v; });
   return '<div class="ustrip-h">Where to look next</div><div class="ustrip">' +
     rows.map(function(r){
-      /* `data-go`, NOT `data-u` (§154.1). The row of destinations at the top
+      /* `data-go`, NOT `data-u` (§155.1). The row of destinations at the top
          wires `#units [data-u]` — scoped to the chrome — so a button carrying
          that attribute anywhere else looks navigable and does nothing. The
          platform already has the attribute for exactly this: `[data-go]` is
          wired document-wide and lands on the unit's Performance page, which
          is where somebody following a low score is going anyway. Found by
-         pressing it (§96, §149.1 — twice in one session). */
+         pressing it (§96, §150.1 — twice in one session). */
       return '<button type="button" data-go="' + esc(r.k) + '">' +
         '<span class="un">' + esc(r.name) + '</span>' +
         '<span class="uv" style="color:' + bandInk(r.v) + '">' + r.v + '%</span></button>';
@@ -21934,7 +22039,7 @@ function whereNext(keys){
         drillCard("Group Key Objectives" + tip("The objectives the group set itself \u2014 each actual against its target, averaged. Authored by the group, never summed from the business units."), groupKeyObjectives(), {
           /* Was "The group's own scorecard. All 6 objectives have a target
              set." — a data-quality note where the reader wanted to know what
-             the number IS (§155). The count stays, because it is the size of
+             the number IS (§156). The count stays, because it is the size of
              the thing being scored. */
           primary: true, sub: "The group\u2019s own <b>" + GROUP.keyObjectives.length +
             "</b> objectives, each scored against its target.",
@@ -21942,7 +22047,7 @@ function whereNext(keys){
         }) +
         drillCard("Business units &mdash; performance" + tip(TIP_PERF), groupUnitsObjectives(), {
           delta: deltaTag("group"),
-          /* THE LINE SAYS WHAT THE NUMBER IS, NOT HOW IT WAS MADE (§155).
+          /* THE LINE SAYS WHAT THE NUMBER IS, NOT HOW IT WAS MADE (§156).
              It used to print all ten unit weights — "21 / 14 / 10 / 15 / 8 /
              6 / 6 / 7 / 8 / 5" — which is a derivation nobody can use at a
              glance and which grows with the business. "How this is
@@ -22089,7 +22194,7 @@ function renderTemple(){
   var cell = function(m){
     return '<div class="ns-item"><span class="ns-label">' + esc(m.name) + '</span>' +
            '<span class="ns-target">' + (m.target ? esc(m.target) : '<span class="missing">Missing</span>') + '</span>' +
-           /* A SENTENCE, NOT A COLUMN (§148, §99.8's rule). The hover words
+           /* A SENTENCE, NOT A COLUMN (§149, §99.8's rule). The hover words
               belong on the table cells somebody runs an eye down; this line
               already reads "≥ · latest" as prose, and half of it wearing a
               note would be the drift the helpers exist to prevent. */
@@ -23031,8 +23136,8 @@ function gapCell(page, acKey, row, field, opts){
     }, mark ? "pendfld" : "gapfld");
   }
   /* Read — and fill mode on a settled value reads too.
-     `read` IS WHY §148 SURVIVED THE MERGE. A direction and a compile rule are
-     stored as `\u2265` and `Latest`, and §148 gave each a dotted hover saying
+     `read` IS WHY §149 SURVIVED THE MERGE. A direction and a compile rule are
+     stored as `\u2265` and `Latest`, and §149 gave each a dotted hover saying
      what it MEANS ("More is better", "Takes the last measure"). gapCell's read
      path is `esc(val)`, so routing those two cells through it would have
      silently dropped the words while every check went on passing — the value
@@ -23643,7 +23748,7 @@ function renderReport(u){
       : '<div class="pane">' + pane + '</div>';
   }
 
-  /* Published to the chrome rather than drawn here (§149): the shell reads
+  /* Published to the chrome rather than drawn here (§150): the shell reads
      REPORT_CHROME after this render and hangs it on the tab row, the same
      trip PAGE_TOOLS already makes. */
   REPORT_CHROME = repChrome(u.ukey, c.done, c.total, pctDone, mayAll, subd);
@@ -24711,7 +24816,7 @@ function renderFnReport(fnKey){
      second answer everywhere. */
   var fnKeyTarget = "fn:" + fk;
   var mayAll = canSpeakFor(fnKeyTarget), subd = !!(REVIEW.submitted || {})[fnKeyTarget];
-  /* The same box the unit's report publishes (§149, §53.5) — one builder, so
+  /* The same box the unit's report publishes (§150, §53.5) — one builder, so
      the two sides cannot explain the same state differently. */
   REPORT_CHROME = repChrome(fnKeyTarget, done, total, pctDone, mayAll, subd);
   var bar = "";
@@ -25755,7 +25860,7 @@ var PAGE_TITLE = null;
    not a trade worth making. */
 var PAGE_TOOLS = "";
 var PAGE_ACTS  = "";
-/* THE REPORTING BOX TRAVELS THE SAME WAY (§149). The tab row is written
+/* THE REPORTING BOX TRAVELS THE SAME WAY (§150). The tab row is written
    BEFORE the page renders, so a report cannot put its controls there
    directly — it publishes them here and the shell hangs them on the row
    afterwards, which is exactly the trip the two slots above already make.
@@ -26186,7 +26291,7 @@ function renderBranding(){
     return '<tr><td><b>' + esc(label) + '</b><span class="why">' + esc(note) + '</span></td>' +
       '<td class="cc">' + (mayEdit
         ? '<span class="brandpick">' +
-            /* AN UNSET PICKER OPENS ON WHAT THE PLATFORM IS PAINTING (§154).
+            /* AN UNSET PICKER OPENS ON WHAT THE PLATFORM IS PAINTING (§155).
                It opened on #4F46E5 — an indigo that exists nowhere in SMP — so
                an unbranded tenant met two indigo swatches on the one page that
                defines colour, while the product around them was navy and gold.
@@ -26380,7 +26485,7 @@ var PEOPLE_COLS = [
      It sits immediately after the name rather than with the identifiers: it is
      the same fact at a different length, and putting it beside Emp ID would
      imply it identifies somebody, which is exactly what it must not do. */
-  /* OFF BY DEFAULT (§154). Everything above stays true — it is the value the
+  /* OFF BY DEFAULT (§155). Everything above stays true — it is the value the
      employee file is written in, and on a reconciliation day it is the column
      you want. But until somebody types a short name it is IDENTICAL to the
      frozen Name beside it, which today is 33 rows of 33: the register's most
@@ -36512,6 +36617,465 @@ var TOUR = (function(){
 
 </script>
 <script>
+/* ═══ THE WELCOME SCREEN (§148, spec 025) ════════════════════════════════
+   One screen after sign-in, before the platform: who you are, whose platform
+   this is, what is waiting on you, and the doors to each. Settled from three
+   mockup rounds (design-mockups/welcome-screen/) — the greeting leads on the
+   left, the tenant is a compact signature on the separator's edge, and no
+   number ever stands without its noun (Islam: "the 3, 4, 1 numbers are
+   confusing").
+
+   THE RULES IT IS BUILT AROUND, all of them paid for elsewhere:
+
+   - NOTHING NEW IS COMPUTED. Every row's facts are the same functions its
+     destination page already calls — reportPending()/submitBlockers() for
+     the cycle, gapTotal()/gapMap() for the plan's gaps (§145),
+     CHAT.unread() for the corner, and the office's list IS the Setup
+     Overview's own attentionRows() (§108.10). A welcome that counted for
+     itself would disagree with the page it points at, on the one screen
+     whose whole job is agreement (§53.5).
+
+   - EVERY DOOR PRESSES THE PLATFORM'S OWN CONTROLS — [data-u], [data-s],
+     [data-md], [data-setupgo], [data-report] — never a second copy of the
+     navigation (§107's rule, for the tour's reason). And every door runs
+     BEHIND setTimeout(…, 0): the handler fires on a real click, §30.1's
+     CLICKING guard holds any paint until the click lands, and a walk that
+     runs inside the handler reads the page from before its own press —
+     §145.14's fault, avoided rather than repeated.
+
+   - NOTHING HERE EVER CALLS paint(). The screen is built once from the data
+     at offer time; the two answers that arrive late (the corner's unread,
+     the office inbox's waiting count) are written into the row they are
+     about (§71.2).
+
+   - ONCE PER BROWSER SESSION, remembered in sessionStorage like the tour's
+     "skip for now" — a reload mid-morning does not greet you twice, a new
+     session does. A THROWING STORE READS AS ALREADY SEEN (§107's rule): a
+     screen that cannot remember being dismissed is a screen somebody meets
+     on every reload for ever.
+
+   - IT DEFERS TO NOTHING AND IS DEFERRED TO BY ONE THING: while it is up,
+     land() does not auto-offer the tour — the intro-round card IS the offer
+     (recorded in §148; TOUR.offer's own memory is untouched, so a build
+     without the welcome offers the tour exactly as before).
+
+   Offered from land() in sync.js beside TOUR.offer — the one door every
+   boot path passes (§94.10) — so it exists only over http(s) with a signed
+   in person, which also means the whole feature is invisible over file://
+   and lives in checks/welcome.py, not qa.py (§94.11). */
+var WELCOME = (function(){
+  var box = null;
+
+  function wesc(s){ return String(s).replace(/&/g,"&amp;").replace(/</g,"&lt;"); }
+
+  function seenThisSession(){
+    try { return sessionStorage.getItem("smp.welcome.done") === "1"; }
+    catch(e){ return true; }
+  }
+  function markDone(){ try { sessionStorage.setItem("smp.welcome.done", "1"); } catch(e){} }
+
+  /* The register's row for the signed-in person — the API's person carries a
+     key and a name, and everything else (attachment, roles, a typed short
+     name) lives on the register (§93.8). */
+  function rowFor(person){
+    try { return (typeof personBy === "function" && personBy(person.key)) || person; }
+    catch(e){ return person; }
+  }
+  function rolesOf(row){
+    try { return (typeof personRoles === "function" && personRoles(row)) || []; }
+    catch(e){ return []; }
+  }
+  function inOffice(rs){
+    return rs.some(function(r){
+      return (typeof SMPRules !== "undefined" && SMPRules.isOfficeRole)
+        ? SMPRules.isOfficeRole(r.role)
+        : (r.role === "super" || r.role === "smoteam");
+    });
+  }
+
+  /* The real subjects this person answers for: where their roles are held
+     plus where the register sits them — units and functions only, because
+     the group and a company neither submit nor hold a plan (§59, §68). */
+  function ownTargets(row, rs){
+    var out = [];
+    function add(t){
+      if (!t || t === "group" || String(t).indexOf("co:") === 0) return;
+      var real = String(t).indexOf("fn:") === 0
+        ? !!(typeof FUNCTIONS !== "undefined" && FUNCTIONS[String(t).slice(3)])
+        : !!(typeof UNITS !== "undefined" && UNITS[t]);
+      if (real && out.indexOf(t) < 0) out.push(t);
+    }
+    rs.forEach(function(r){ add(r.at); });
+    try { add(personAt(row)); } catch(e){}
+    return out;
+  }
+
+  function subjectName(t){
+    try { return placeLabel(t); } catch(e){ return String(t); }
+  }
+
+  /* ── THE DOORS ──────────────────────────────────────────────────────────
+     Dismiss first, then walk on a fresh task (§30.1/§145.14, above). Every
+     press is a null-checked click on a control the platform draws — a door
+     whose control is missing does nothing louder than staying put, and the
+     platform under the overlay is already on this person's own page
+     (§94.6), so "nothing" is never a blank screen. */
+  function press(sel){
+    var b = document.querySelector(sel);
+    if (b) b.click();
+    return !!b;
+  }
+  function goPlace(t, tab, report){
+    dismiss();
+    setTimeout(function(){
+      press('#units [data-u="' + t + '"]');
+      var fn = String(t).indexOf("fn:") === 0;
+      if (tab === "strategy") press('#subtabs [data-s="' + (fn ? "fnstrat" : "strategy") + '"]');
+      if (tab === "performance") press('#subtabs [data-s="' + (fn ? "fnperf" : "performance") + '"]');
+      if (report) press('[data-report="' + t + '"]');
+      window.scrollTo(0, 0);
+    }, 0);
+  }
+  function goSetup(page){
+    dismiss();
+    setTimeout(function(){
+      press('#units [data-md="setup"]');
+      /* The rail is painted by the press above; its rows are the one
+         [data-setupgo] wiring (§108), pressed on the next task for the same
+         reason the whole walk is deferred. */
+      setTimeout(function(){ press('[data-setupgo="' + page + '"]'); window.scrollTo(0, 0); }, 0);
+    }, 0);
+  }
+  function goGroup(){
+    dismiss();
+    setTimeout(function(){ press('#units [data-go="group"]'); window.scrollTo(0, 0); }, 0);
+  }
+
+  /* ── THE ROWS ─────────────────────────────────────────────────────────── */
+  function actRow(title, subHtml, btnLabel, cta, onGo){
+    var d = document.createElement("div");
+    d.className = "wact";
+    d.innerHTML = '<div class="wwhat"><b>' + wesc(title) + "</b>" +
+      (subHtml ? "<span>" + subHtml + "</span>" : "") + "</div>" +
+      '<button type="button" class="wbtn' + (cta ? " wcta" : "") + '">' +
+      wesc(btnLabel) + "</button>";
+    d.querySelector("button").addEventListener("click", onGo);
+    return d;
+  }
+
+  function submitRows(targets){
+    var rows = [];
+    targets.forEach(function(t){
+      var pending;
+      try { pending = reportPending(t); } catch(e){ pending = false; }
+      if (!pending) return;
+      var parts = [], c, b;
+      try {
+        c = String(t).indexOf("fn:") === 0
+          ? fnReportedCount(String(t).slice(3)) : reportedCount(UNITS[t]);
+        var open = Math.max(0, (c.total | 0) - (c.done | 0));
+        if (open) parts.push("<i>" + wesc(plural(open, "figure")) + "</i> still open");
+        else parts.push("Every figure is entered");
+      } catch(e){}
+      try {
+        b = submitBlockers(t);
+        if (b.notes.length) parts.push('<em class="walert">' + b.notes.length +
+          (b.notes.length === 1 ? " needs a note" : " need a note") + "</em>");
+        if (b.pending.length) parts.push('<em class="walert">' + b.pending.length +
+          " said In progress with no %</em>");
+      } catch(e){}
+      rows.push(actRow(
+        "Submit " + subjectName(t) + "’s " + ((typeof REVIEW !== "undefined" && REVIEW.name) || "") + " report",
+        parts.join(" · "), "Open reporting", true,
+        function(){ goPlace(t, "performance", true); }));
+    });
+    return rows;
+  }
+
+  function gapRows(targets){
+    var rows = [];
+    targets.forEach(function(t){
+      var n = 0, owed = [];
+      try {
+        if (!seesGaps(t)) return;
+        n = gapTotal(t);
+        if (n > 0) owed = gapMap(t).filter(function(e){ return e.count > 0; })
+                             .map(function(e){ return e.label; });
+      } catch(e){ return; }
+      if (n <= 0) return;
+      var names = owed.slice(0, 4).join(" · ") + (owed.length > 4 ? " · …" : "");
+      rows.push(actRow(
+        "Fill " + subjectName(t) + "’s missing plan elements",
+        '<em class="walert">' + wesc(plural(n, "missing element", "missing elements")) + "</em>" +
+          (names ? " — " + wesc(names) : ""),
+        "Fill the gaps", false,
+        function(){ goPlace(t, "strategy"); }));
+    });
+    return rows;
+  }
+
+  function replyRow(n){
+    return actRow("The Strategy Office replied to you",
+      wesc(n === 1 ? "1 unread reply" : n + " unread replies"),
+      "Open the conversation", false,
+      function(){
+        dismiss();
+        setTimeout(function(){
+          try { if (typeof CHAT !== "undefined" && CHAT.open) CHAT.open(); } catch(e){}
+        }, 0);
+      });
+  }
+
+  /* THE OFFICE'S LIST IS THE OVERVIEW'S OWN (§108.10): attentionRows() gives
+     the same rows the gear's landing page draws, destination included, and a
+     count it has no answer for draws nothing rather than a zero. The chat
+     row's count is server-side, so it is asked the way the Overview asks —
+     CHAT.officeQueue, one reader of one endpoint — and written into the list
+     when it answers. */
+  function officeActs(list){
+    var rows = [];
+    try {
+      attentionRows().forEach(function(r){
+        if (r.k === "chat") return;   /* asked async below, same as the Overview */
+        rows.push(actRow(r.text, "", "Open " + setupWord(r.dest), false,
+          function(){ goSetup(r.dest); }));
+      });
+    } catch(e){}
+    try {
+      if (typeof CHAT !== "undefined" && CHAT.officeQueue) {
+        CHAT.officeQueue(function(err, q){
+          if (err || !q || !(q.waiting > 0) || !box) return;
+          var row = actRow(plural(q.waiting, "conversation") + " waiting for an answer",
+            "", "Open the inbox", false, function(){ goSetup("chat"); });
+          unEmpty(list);
+          list.insertBefore(row, list.firstChild);
+        });
+      }
+    } catch(e){}
+    return rows;
+  }
+  /* The rail's own word for a destination, off the defs the rail draws from —
+     rename a page there and this follows (§108.3). */
+  function setupWord(k){
+    try {
+      var d = setupDefs().filter(function(x){ return x.k === k; })[0];
+      if (d) return d.label;
+    } catch(e){}
+    return "Setup";
+  }
+
+  /* ── LATE ANSWERS LAND IN PLACE (§71.2) ──────────────────────────────── */
+  function unEmpty(list){
+    var e = list.querySelector(".wempty");
+    if (e) e.remove();
+  }
+  function watchReplies(list){
+    /* The corner's first poll is in flight while this screen is built, so
+       the unread count is asked again shortly rather than trusted at t=0 —
+       and only ever ADDS a row: an answer of nothing changes nothing. */
+    var asked = 0;
+    function ask(){
+      if (!box) return;
+      var n = 0;
+      try { n = (typeof CHAT !== "undefined" && CHAT.unread) ? CHAT.unread() : 0; } catch(e){}
+      if (n > 0) {
+        if (!list.querySelector(".wact-reply")) {
+          var row = replyRow(n);
+          row.classList.add("wact-reply");
+          unEmpty(list);
+          list.appendChild(row);
+        }
+        return;
+      }
+      if (++asked < 3) setTimeout(ask, 2500);
+    }
+    ask();
+  }
+
+  /* ── THE SCREEN ──────────────────────────────────────────────────────── */
+  function build(person){
+    var row = rowFor(person), rs = rolesOf(row), office = inOffice(rs);
+    var targets = ownTargets(row, rs);
+
+    var name = "";
+    try { name = SMPRules.firstName(row); } catch(e){}
+    if (!name) name = String(row.name || person.name || "").split(/\s+/)[0] || "";
+
+    var chips = rs.slice(0, 3).map(function(r){
+      var where = "";
+      try { where = roleWhereLabel(r.at); } catch(e){ where = String(r.at || ""); }
+      return '<span class="wchip">' + wesc(roleName(r.role)) +
+             (where ? " · " + wesc(where) : "") + "</span>";
+    });
+    if (!chips.length) {
+      var at = null;
+      try { at = personAt(row); } catch(e){}
+      if (at) chips.push('<span class="wchip">' + wesc(subjectName(at)) + "</span>");
+    }
+    var open = typeof REVIEW !== "undefined" && REVIEW && REVIEW.state === "open";
+    if (open) chips.push('<span class="wchip wcycle"><i></i>' +
+      wesc((REVIEW.name || "The") + " cycle is open") + "</span>");
+
+    var org = "";
+    try { org = GROUP.org || ""; } catch(e){}
+    var initials = org.split(/\s+/).map(function(w){ return w.charAt(0); })
+                      .join("").slice(0, 2).toUpperCase();
+
+    box = document.createElement("div");
+    box.className = "welcomeover";
+    box.setAttribute("role", "dialog");
+    box.setAttribute("aria-label", "Welcome");
+    box.innerHTML =
+      '<div class="wwrap">' +
+        '<div class="whero">' +
+          '<div class="wgreet">' +
+            '<p class="wkick">Strategy Management Platform</p>' +
+            "<h2>Welcome" + (name ? ", " + wesc(name) : "") + "</h2>" +
+            '<div class="wwho">' + chips.join("") + "</div>" +
+          "</div>" +
+          '<div class="wtenant">' +
+            (initials ? '<div class="wmark">' + wesc(initials) + "</div>" : "") +
+            "<h1>" + wesc(org || "") + "</h1>" +
+            '<div class="woffice">Strategy Management Office</div>' +
+          "</div>" +
+        "</div>" +
+        '<div class="wcols">' +
+          '<div class="wmain">' +
+            '<p class="wseclab">Waiting on you</p>' +
+            '<div class="wacts"></div>' +
+            '<p class="wcontinue"><a href="#" data-wcontinue>Continue</a></p>' +
+          "</div>" +
+          '<div class="wside">' +
+            '<div class="wpagesbox"><p class="wseclab">Your pages</p>' +
+              '<div class="wcard wpages"></div></div>' +
+            '<div class="wtour" hidden>' +
+              "<h3>Take an intro round</h3>" +
+              "<p>A short walk of the platform on the worked example — about two minutes.</p>" +
+              '<div class="wtourbtns">' +
+                '<button type="button" class="wtbtn" data-wtour>Start the round</button>' +
+                '<button type="button" class="wtghost" data-wnotnow>Not now</button>' +
+              "</div>" +
+            "</div>" +
+          "</div>" +
+        "</div>" +
+      "</div>";
+
+    var list = box.querySelector(".wacts");
+    var acts = office ? officeActs(list)
+                      : submitRows(targets).concat(gapRows(targets));
+    if (!office) {
+      var un = 0;
+      try { un = (typeof CHAT !== "undefined" && CHAT.unread) ? CHAT.unread() : 0; } catch(e){}
+      if (un > 0) { var rr = replyRow(un); rr.classList.add("wact-reply"); acts.push(rr); }
+    }
+    if (!acts.length) {
+      /* An empty list says so (§45.2) — and says only what it knows: nothing
+         of what THIS list asks is waiting. The async answers above may still
+         add a row, and they remove this line when they do. */
+      var empty = document.createElement("div");
+      empty.className = "wact wempty";
+      empty.innerHTML = '<div class="wwhat"><b>Nothing is waiting on you</b></div>';
+      list.appendChild(empty);
+    }
+    acts.forEach(function(a){ list.appendChild(a); });
+    if (!office) watchReplies(list);
+
+    /* ── Your pages ─────────────────────────────────────────────────── */
+    var pages = box.querySelector(".wpages");
+    function pageLink(label, small, onGo){
+      var a = document.createElement("a");
+      a.href = "#";
+      a.innerHTML = wesc(label) + (small ? " <small>" + wesc(small) + "</small>" : "") +
+        '<span class="wgo">›</span>';
+      a.addEventListener("click", function(ev){ ev.preventDefault(); onGo(); });
+      pages.appendChild(a);
+    }
+    if (office) {
+      pageLink("Setup — Overview", "", function(){ goSetup("overview"); });
+      pageLink("The group — Performance", "", function(){ goGroup(); });
+    } else {
+      var home = targets[0] || null;
+      if (home) {
+        var nm = subjectName(home);
+        var isFn = String(home).indexOf("fn:") === 0;
+        pageLink(nm + " — Strategy", isFn ? "" : "Plan · Foundation · SWOT",
+          function(){ goPlace(home, "strategy"); });
+        pageLink(nm + " — Performance", "", function(){ goPlace(home, "performance"); });
+        var canRep = false;
+        try { canRep = open && canSpeakFor(home); } catch(e){}
+        if (canRep) pageLink(nm + " — Reporting", "",
+          function(){ goPlace(home, "performance", true); });
+      } else {
+        box.querySelector(".wpagesbox").hidden = true;
+      }
+    }
+
+    /* ── The intro round ────────────────────────────────────────────────
+       Offered to whoever the tour has a story for — TOUR.storyFor is the
+       one answer to that (never the office, §118) — and starting it is a
+       handoff: the welcome puts itself away and the tour takes the screen.
+       This card is also the tour's reachable home again: its replay had
+       lived on a page most people can no longer open (§119.4). */
+    var storyKey = null;
+    try { storyKey = (typeof TOUR !== "undefined" && TOUR.storyFor) ? TOUR.storyFor(row) : null; }
+    catch(e){}
+    var tourCard = box.querySelector(".wtour");
+    if (storyKey) {
+      tourCard.hidden = false;
+      tourCard.querySelector("[data-wtour]").addEventListener("click", function(){
+        var k = storyKey;
+        dismiss();
+        setTimeout(function(){ try { TOUR.start(k); } catch(e){} }, 0);
+      });
+      tourCard.querySelector("[data-wnotnow]").addEventListener("click", function(){
+        tourCard.hidden = true;
+      });
+    }
+
+    /* ── Continue ───────────────────────────────────────────────────────
+       The platform under this screen is already on the page §94.6 chose, so
+       Continue only steps aside — and names where that is. */
+    var here = null;
+    try { here = typeof current !== "undefined" ? current : null; } catch(e){}
+    var word = "Continue";
+    if (here && here !== "setup" && here !== "manage") {
+      try { word = "Continue to " + subjectName(here); } catch(e){}
+    }
+    var cont = box.querySelector("[data-wcontinue]");
+    cont.textContent = word + " ›";
+    cont.addEventListener("click", function(ev){ ev.preventDefault(); dismiss(); });
+
+    document.body.appendChild(box);
+  }
+
+  function dismiss(){
+    markDone();
+    if (box) { box.remove(); box = null; }
+  }
+
+  /* ── THE OFFER ──────────────────────────────────────────────────────────
+     Called from land() beside TOUR.offer, with the same silences: no
+     session, a projector, already seen this session. Returns whether it
+     took the screen, because land() offers the tour only when it did not —
+     two docks drawn over one page would fight for every click (§118). */
+  function offer(person){
+    if (!person) return false;
+    if (location.protocol === "file:") return false;
+    if (document.body && document.body.classList.contains("presenting")) return false;
+    if (seenThisSession()) return false;
+    try { build(person); } catch(e){ box = null; return false; }
+    return true;
+  }
+
+  return {
+    offer: offer,
+    showing: function(){ return !!box; },
+    dismiss: dismiss
+  };
+})();
+
+</script>
+<script>
 /* ── Persistence ──────────────────────────────────────────────────────────
    Served over http(s), the platform loads its state from /api/state and
    writes every change back, so edits survive reloads and every viewer shares
@@ -37201,13 +37765,22 @@ var SYNC = (function () {
           land(function () {
             if (person) chromeFor(paint); else paint();
             /* ── AND ONLY NOW IS THERE ANYTHING TO SHOW SOMEBODY ──────
-               The onboarding tour offers itself here and nowhere else: this
-               is after the one paint that puts a true page on screen, so a
-               first-time viewer is never handed a spotlight on the grey
-               skeleton (§94.10). It declines in silence — no session, no
-               story for their roles, already answered, a projector — which
-               is the common case and must stay cheap. */
-            TOUR.offer(person);
+               The welcome screen and the onboarding tour offer themselves
+               here and nowhere else: this is after the one paint that puts
+               a true page on screen, so nobody is ever handed a greeting or
+               a spotlight over the grey skeleton (§94.10). Both decline in
+               silence — no session, already seen, a projector — which is
+               the common case and must stay cheap.
+
+               THE WELCOME TAKES PRECEDENCE AND THE TOUR IS NOT LOST (§148):
+               two docks over one page would fight for every click (§118's
+               fault by another door), and the welcome's intro-round card is
+               the tour's own offer, made visibly instead of automatically.
+               TOUR.offer's memory is untouched, so with the welcome already
+               seen this session the tour offers itself exactly as before. */
+            var greeted = false;
+            try { greeted = WELCOME.offer(person); } catch (e) {}
+            if (!greeted) TOUR.offer(person);
           });
           lastSaved = serialize();
           setInterval(save, 5000);
@@ -38868,7 +39441,7 @@ var SYNC = (function () {
     var failBtn = _panel.querySelector("[data-failreload]");
     if (failBtn) failBtn.addEventListener("click", function(){ location.reload(); });
 
-    /* ── AND THE REPORTING CONTROLS GO ON THE TAB ROW (§149) ─────────────
+    /* ── AND THE REPORTING CONTROLS GO ON THE TAB ROW (§150) ─────────────
        Read AFTER the page's render, because the render is what fills the
        slot — the same direction of travel `pageLineHTML()` makes for a Setup
        page's controls, and the reason the tab row could not simply build
@@ -38885,7 +39458,7 @@ var SYNC = (function () {
     var tabrow = document.getElementById("subtabs");
     if (REPORT_CHROME && tabrow && !railed) tabrow.insertAdjacentHTML("beforeend", REPORT_CHROME);
 
-    /* ── AND A TABLE TOO WIDE FOR ITS PANE SCROLLS INSIDE ITSELF (§150) ──
+    /* ── AND A TABLE TOO WIDE FOR ITS PANE SCROLLS INSIDE ITSELF (§151) ──
        Done here, once, rather than at the dozen render sites that build a
        table: every one of them would have had to remember, and the day one
        forgot would be the day a client's plan is cut again with no way to
@@ -38908,7 +39481,7 @@ var SYNC = (function () {
       w.appendChild(t);
     });
     /* THE SECOND FROZEN COLUMN PARKS AGAINST THE FIRST ONE'S MEASURED WIDTH,
-       NEVER AGAINST A CONSTANT (§150.1). It shipped as `left:38px` — the `#`
+       NEVER AGAINST A CONSTANT (§151.1). It shipped as `left:38px` — the `#`
        column's declared width — and the name slid 2.5px on every scroll,
        because the RENDERED border box is the declared width plus its borders.
        §122.5's rule ("a cap made of a guessed constant goes stale silently")
@@ -39244,7 +39817,7 @@ var SYNC = (function () {
     if (f) f.focus({ preventScroll: true });
   }
   function wire(){
-    /* `[data-s]`, NOT every button in the row (§149.1). The row gained a
+    /* `[data-s]`, NOT every button in the row (§150.1). The row gained a
        second kind of child when the reporting controls moved onto it, and
        this selector said "a button here is a tab" — so pressing Save draft
        set `currentSub = undefined`, dropped the modes and repainted, which

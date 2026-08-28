@@ -1,4 +1,4 @@
-"""THE PLAN TABLES FIT THE PANE THEY ARE IN (§157).
+"""THE PLAN TABLES FIT THE PANE THEY ARE IN (§158).
 
 THE FAULT: `table { min-width:620px }` is a floor, and a floor cannot yield.
 A unit's plan pane narrows with the window; once it is under 620px the table

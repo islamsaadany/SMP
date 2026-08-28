@@ -5,8 +5,7 @@
 css = (open('_shared.css').read() + "\n" + open('group-extra.css').read()
        + "\n" + open('config.css').read() + "\n" + open('arrange.css').read()
        + "\n" + open('present.css').read() + "\n" + open('chat.css').read()
-       + "\n" + open('tour.css').read() + "\n" + open('welcome.css').read()
-       + "\n" + open('builder.css').read())
+       + "\n" + open('tour.css').read() + "\n" + open('builder.css').read())
 shell = open('shell.html').read()
 
 # lib/rules.js is the SHARED one — the same file api/state.js requires. It is
@@ -19,7 +18,7 @@ for tag, f in [("RULES","../../lib/rules.js"), ("AUDIENCE","../../lib/audience.j
                ("PPTX","pptx.js"),
                ("MAIL","mail.js"),
                ("RENDER","group-render.js"), ("CONFIGRENDER","config-render.js"), ("BUILDER","builder.js"), ("PRESENT","present.js"), ("SLIDES","slides.js"),
-               ("SEARCHSEL","searchsel.js"), ("CHAT","chat.js"), ("TOUR","tour.js"), ("WELCOME","welcome.js"), ("SYNC","sync.js")]:
+               ("SEARCHSEL","searchsel.js"), ("CHAT","chat.js"), ("TOUR","tour.js"), ("SYNC","sync.js")]:
     shell = shell.replace('<script src="%s"></script>' % tag, '<script>\n' + open(f).read() + '\n</script>')
 # The icon travels INSIDE the built file, as a data URI, because the file has
 # to carry everything it needs — opened from a memory stick it still shows its
@@ -38,20 +37,16 @@ ICON = (
 # that, and would put a request to a third party on every load of a file
 # holding a client's strategy.
 #
-# ONE EMBEDDED FACE, NOT FOUR (§157). Four rode in every build from §38.7 so
-# they could be compared in the real product — "B is how you decide, A is how
-# you ship" — and Islam has now decided: the system stack and Source Sans 3,
-# nothing else. Inter, Manrope and IBM Plex Sans leave the file with their
-# .woff2 files, which is 116 KB off every handover and three faces that can no
-# longer drift out of step with the switch that offers them.
-#
-# A Latin subset of a variable face, so the whole family costs 28 KB rather
-# than the several hundred a static family per weight would. font-display:swap
-# so text is readable while it decodes rather than invisible — the data URI
-# decodes almost instantly, but swap is what makes the failure mode "the system
-# font" instead of "nothing", which is also the other option on the switch.
+# Latin subsets of variable faces, so four families cost 148 KB rather than the
+# several hundred a static family per weight would. font-display:swap so text
+# is readable while a face decodes rather than invisible — the data URI decodes
+# almost instantly, but swap is what makes the failure mode "the system font"
+# instead of "nothing".
 import base64, glob, os
-FACES = [("Source Sans 3", "fonts/Source_Sans_3.woff2")]
+FACES = [("Inter", "fonts/Inter.woff2"),
+         ("Source Sans 3", "fonts/Source_Sans_3.woff2"),
+         ("Manrope", "fonts/Manrope.woff2"),
+         ("IBM Plex Sans", "fonts/IBM_Plex_Sans.woff2")]
 faces_css = []
 for family, path in FACES:
     if not os.path.exists(path):

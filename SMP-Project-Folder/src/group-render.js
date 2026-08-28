@@ -243,7 +243,7 @@ function qsEdit(t){
   }
   return '<span class="qs qs-edit">' + out + '</span>';
 }
-/* The fill grant's quarters (§132): the same four marks, wired to the fill
+/* The fill grant's quarters (§145): the same four marks, wired to the fill
    handler that stamps the pending mark — drawn only where the tactic names
    NO quarter at all (§128's gap) or while that fill is still pending. */
 function qsFill(t){
@@ -262,7 +262,7 @@ function measureRows(ms, opts){
   opts = opts || {};
   var on = arranging("unit", opts.unit);
   return ms.map(function(m, i){
-    /* §132: a measure whose target, direction or compile is awaiting the
+    /* §145: a measure whose target, direction or compile is awaiting the
        office's confirmation is not scored — the actual is shown (it is
        real), the score reads a dash with the reason on hover, and the
        averages already left it out (`scorableMeasures`). */
@@ -1699,7 +1699,7 @@ function renderUnitPerformance(u){
    name, because the group's Foundation and a unit's share one page key and
    only one of them is a strategy page. */
 function authoring(page, acKey){ return !!EDIT_PAGE[page] && mayAuthor(acKey); }
-/* IS THIS PAGE OPEN FOR FILLING THE GAPS (§132)? The same shape, one grant
+/* IS THIS PAGE OPEN FOR FILLING THE GAPS (§145)? The same shape, one grant
    down: the pen is on, the person may NOT author (an author's write settles
    and never wears the mark), and the fill grant answers for this page and
    target. Only `gapCell`, the quarters and the mode bar read this — every
@@ -1718,7 +1718,7 @@ function editBar(page, acKey){
      BEFORE the pen's gate and the bar is drawn when either is answered — a
      custodian who may not author the overview may still take it away. */
   var dl = dlPlanBtn(page);
-  /* §132.14: the worded bar takes the corner button's three states — red
+  /* §145.14: the worded bar takes the corner button's three states — red
      while something is missing, quiet amber while only pending remains,
      nothing after; Done while the mode is open. */
   if (!mayAuthor(acKey || "u_found")) {
@@ -1794,11 +1794,11 @@ function paneActs(page, acKey){
    cards and has no pane (§30's rule about which control suits which shape). */
 var DL_PAGES = { plan:1, capfoundation:1 };
 function dlPlanBtn(page){
-  /* ── HIDDEN AT ISLAM'S DIRECTION (2026-08-27, §132.9) ────────────────
+  /* ── HIDDEN AT ISLAM'S DIRECTION (2026-08-27, §145.9) ────────────────
      "hide the download button of the plans and the capabilities in the ppt
      format that we created earlier." HIDDEN, not deleted: pptx.js,
      mayDownloadPlan and sendPlanPptx all stand, so giving it back is one
-     line here — and §119.1's Missing marks (now §132's "(pending)" too)
+     line here — and §119.1's Missing marks (now §145's "(pending)" too)
      keep the deck honest for that day. The early return is above the gate
      on purpose: the feature is off for EVERYONE, office included. */
   return '';
@@ -1826,7 +1826,7 @@ function arrangePaneBtn(target){
 
 function penBtn(page, acKey){
   var author = mayAuthor(acKey || "u_found");
-  /* §132.14: THE FILL GRANT'S CONTROL IS A WORDED RED BUTTON, not a pen
+  /* §145.14: THE FILL GRANT'S CONTROL IS A WORDED RED BUTTON, not a pen
      glyph (Islam: "a clear red button with the wording fill in missing
      elements") — drawn only while something is missing; once everything is
      filled a quiet amber "Review pending · N" remains until the office has
@@ -1901,7 +1901,7 @@ function selectOr(page, value, opts, cls, setter){
     }).join("") + '</select>';
 }
 
-/* ── FILL THE GAPS: ONE BUILDER FOR A FILLABLE CELL (§132, spec 021) ──────
+/* ── FILL THE GAPS: ONE BUILDER FOR A FILLABLE CELL (§145, spec 023) ──────
    Every gap-fillable value in the product is drawn through gapCell, in all
    three of its states — a gap (fill mode draws the field), pending (amber,
    still the filler's, the office sees a confirm tick), settled (ordinary
@@ -1955,7 +1955,7 @@ function pendBadge(acKey){
   if (!n || (!mayAuthor(acKey) && !mayFill(acKey))) return '';
   return '<span class="pendcount">' + n + ' awaiting confirmation</span>';
 }
-/* ── THE MISSING BAR (§132.14, reshaping §132.12 from Islam's r2 mockup) ──
+/* ── THE MISSING BAR (§145.14, reshaping §145.12 from Islam's r2 mockup) ──
    The WHOLE signal lives in the section row beside Foundation · SWOT · Plan
    — read mode included, no line of the page spent: red "N Missing", one
    red chip per place that OWES (a clear place draws no chip), and the red
@@ -2039,7 +2039,7 @@ function fillBar(page, acKey){
     'plan holds nothing. A value you fill stays yours to correct until the ' +
     'Strategy Office confirms it — after that, changes are the office’s.</div>';
 }
-/* §132.14: A PAGE WITH NOTHING MISSING SAYS SO AND POINTS AWAY — Islam's
+/* §145.14: A PAGE WITH NOTHING MISSING SAYS SO AND POINTS AWAY — Islam's
    Mazaya moment: fill mode opened an empty hand and said nothing, which
    read as broken. When the surface being looked at owes nothing but the
    plan still does, the contract line gives way to the answer and a door. */
@@ -2056,7 +2056,7 @@ function gapCell(page, acKey, row, field, opts){
   opts = opts || {};
   /* `text` renders a stored shape as the string the field holds (a
      collaborators ARRAY reads and types as "A, B"); `parse` is its way
-     back. §132.10's cell is why they exist — one pair, beside `num`. */
+     back. §145.10's cell is why they exist — one pair, beside `num`. */
   var val = opts.text ? opts.text(row) : row[field];
   var blank = SMPRules.gapBlank(val);
   var mark = SMPRules.pendOf(row)[field];
@@ -2141,7 +2141,7 @@ function koToggle(){
 function koView(list, isGroup, acKey){
   var near = isGroup || SHOW_KO_THIS_YEAR;
   var miss = '<span class="missing">Missing</span>';
-  /* §132: every pending mark on the row, chips beside the values it shows —
+  /* §145: every pending mark on the row, chips beside the values it shows —
      including a pending direction or compile, which have no column here, or
      the office would have nothing to confirm them from in read mode. */
   var chips = function(m){
@@ -2309,7 +2309,7 @@ function aspirationCard(label, statement, endInMind, objectives, page, setAsp, s
           inputOr(pg, GROUP.horizon, "mono yr", function(v){ GROUP.horizon = v; }) + '</label>'
         : '<span class="pill horizon">Horizon &middot; ' + horizonLabel() + '</span>') +
     '</div>' +
-    /* §132: a unit's (or function's) aspiration is a gap the fill grant can
+    /* §145: a unit's (or function's) aspiration is a gap the fill grant can
        close — through gapCell, whose edit-mode setter also lifts a pending
        mark (correcting confirms). The GROUP's stays exactly as it was: the
        group's own pages are never fillable (§94's list). */
@@ -2366,7 +2366,7 @@ function koBlock(objectives, page, acKey, owner, isGroup, editing){
    is no longer open to whoever is now looking at it. Nothing is drawn at all
    when it is not — the band exists only while the pen is on. */
 function koBand(objectives, page, acKey, owner, isGroup){
-  /* §132: the band also opens for the fill grant — koEdit's gap cells then
+  /* §145: the band also opens for the fill grant — koEdit's gap cells then
      draw only the blanks, and Add/Remove stay gated on authoring alone. */
   if (!authoring(page, acKey) && !filling(page, acKey)) return '';
   return '<div class="card koband">' + fillBar(page, acKey) +
@@ -2913,7 +2913,7 @@ function railFor(list, sel, numOf, subOf, groupOf, footNote, codeOf, opts){
         '" data-oi="' + i + '">' +
         (opts.arranging ? handle("Reorder " + it.name) : '') +
         railName(code, it.name) +
-        /* §132.12: the row's own count of gaps to fill, for whoever can act
+        /* §145.12: the row's own count of gaps to fill, for whoever can act
            on them — drawn only while it is not zero, rewritten in place as
            fills land. Optional and last, so the other callers are untouched. */
         (opts.gapOf && opts.gapOf(it)
@@ -3393,7 +3393,7 @@ function projFrontMatter(p, ed){
   }
   return '<div class="pfront">' +
     '<div class="pfcol">' +
-      /* §132: the three gap-fillable facts go through gapCell — the fill
+      /* §145: the three gap-fillable facts go through gapCell — the fill
          grant closes a Missing owner or date, the office's write settles,
          and read mode carries the chip and the tick. */
       row("l", "Owner", gapCell("plan", "k_proj", p, "owner", {})) +
@@ -3787,7 +3787,7 @@ function unitRailFor(u, sel){
        `data-urail` is the rail's selection key and unitRailPick() matches on
        `it.code`. Change that and the rail stops being able to find the pillar
        it just selected. */
-    /* §132.12: which pillar owes what, for the people who can act on it —
+    /* §145.12: which pillar owes what, for the people who can act on it —
        drawn only while it owes something (§41's budget), and rewritten in
        place as fills land (gapBandRefresh finds it by data-rgap). */
     var gaps = 0;
@@ -3968,7 +3968,7 @@ function unitPlanBody(it, u, railed){
          SAME pen that corrects the rest of the plan, and behind the same gate
          (§31): who is named on a tactic decides who may report it, so it is
          not a field the people being measured hold. */
-      /* §132.10: collaborators join the fillable fields (Islam: "it's
+      /* §145.10: collaborators join the fillable fields (Islam: "it's
          optional anyway") — an EMPTY list is a gap, an existing one never
          opens to the filler, and a pending name confers no reporting right
          until the office confirms (namedOn skips marked fields). Read mode
@@ -3976,7 +3976,7 @@ function unitPlanBody(it, u, railed){
       '<td class="collabs">' + gapCell("plan", "u_plan", t, "collaborators",
         { text: collabText, parse: collabParse,
           readEmpty: '<span class="nobody">&mdash;</span>' }) + '</td>' +
-      /* Quarters (§132): only a tactic naming NO quarter is a gap, and while
+      /* Quarters (§145): only a tactic naming NO quarter is a gap, and while
          its fill is pending the four stay the filler's — read mode carries
          the same chip and tick every other pending value wears. */
       '<td>' + (ed ? qsEdit(t)
@@ -4116,7 +4116,7 @@ function renderFnFoundation(fnKey){
       'what is planned here is the work under them. Open <b>Plan</b> to see it.</div>';
   }
   var ed = authoring("capfoundation", "k_found");
-  /* §132: the fill grant opens the same editor, whose gap cells then draw
+  /* §145: the fill grant opens the same editor, whose gap cells then draw
      only the blanks — Add and Remove stay the author's. */
   var fl = filling("capfoundation", "k_found");
   return editBar("capfoundation", "k_found") +
@@ -4137,7 +4137,7 @@ function renderFnFoundation(fnKey){
       : c.keyObjectives.length
       ? '<div class="ohead"><span>Objective</span><span>This year</span><span>Weight</span></div>' +
         c.keyObjectives.map(function(m){
-          /* §132: the pending chips, including a direction or compile that
+          /* §145: the pending chips, including a direction or compile that
              has no column here — read mode is where the office's tick is. */
           return '<div class="orow"><span class="on">' + esc(m.name) +
               pendChip("k_found", m, "dir") + pendChip("k_found", m, "compile") + '</span>' +
@@ -4175,7 +4175,7 @@ function renderFnFoundation(fnKey){
    rule about mixed lists says do not mint some now). */
 function capKoEdit(c){
   var pg = "capfoundation";
-  /* §132: the four gap-fillable columns through gapCell; the NAME, Remove
+  /* §145: the four gap-fillable columns through gapCell; the NAME, Remove
      and Add stay the author's — a fill-mode render draws them read-only or
      not at all. */
   var ed = authoring(pg, "k_found");

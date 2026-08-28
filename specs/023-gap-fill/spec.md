@@ -48,7 +48,7 @@ null/undefined/whitespace — a typed `0` is a value (§104.10).
 | unit / function (page `u_found`) | `aspiration` |
 | key objective (`u_found`) | `dir`, `target`, `target3y`, `compile` |
 | key measure (`u_plan`) | `dir`, `target`, `compile` |
-| tactic (`u_plan`) | `owner`; `collaborators` (§132.10 — an empty list only, and a pending name confers no reporting right until confirmed, since §50.2 makes naming a rights grant); **quarters as a group** — fillable only when none of q1–q4 is marked (§119.1: a single blank quarter is saying something; four blanks say nothing) |
+| tactic (`u_plan`) | `owner`; `collaborators` (§145.10 — an empty list only, and a pending name confers no reporting right until confirmed, since §50.2 makes naming a rights grant); **quarters as a group** — fillable only when none of q1–q4 is marked (§119.1: a single blank quarter is saying something; four blanks say nothing) |
 | capability key objective (`k_found`) | `dir`, `target`, `compile`, `weight` |
 | project front matter (`k_proj`) | `owner`, `start`, `end` |
 
@@ -61,9 +61,9 @@ mind (optional by design, §45.2 — not a gap).
 **Never in fill mode:** adding or removing rows, renaming anything,
 reordering (its own grant, §101, untouched), anything on the group's own
 pages, and the SWOT page entirely (`FILL_PAGES` — a strategy page with no
-fillable field must not draw the pen, §132.13).
+fillable field must not draw the pen, §145.13).
 
-## 10 · Finding the gaps (§132.11–12, second build; reshaped by §132.14)
+## 10 · Finding the gaps (§145.11–12, second build; reshaped by §145.14)
 
 - The unit objectives' **This year column shows by default** (reversing
   §66's default, keeping its toggle and every saved choice).
@@ -72,13 +72,13 @@ fillable field must not draw the pen, §132.13).
   (§71.2). **Next gap** walks the fillable blanks with a landing ring and
   crosses places through the bar's own chips; a chip is a door that keeps
   fill mode on where it lands.
-- **§132.14 (third build, Islam's screens): red means missing, amber means
+- **§145.14 (third build, Islam's screens): red means missing, amber means
   pending — never mixed.** The whole missing bar — the total as
   **"N Missing"**, one red chip per owing place, the solid red **Fill in
   missing elements** button (→ **Next gap → N left** in fill mode) — lives
   IN the section row beside the section tabs, read mode included, nothing
   in the page body; drawn only for `seesGaps()` and only while non-zero.
-  The Strategy tab carries **no number** (reversing §132.12's badge). The
+  The Strategy tab carries **no number** (reversing §145.12's badge). The
   corner button beside §101's arrows is the same press: red while anything
   is missing, **Done filling** while the mode is open, quiet amber
   **Review pending · N** when only pending marks remain. Rail rows read

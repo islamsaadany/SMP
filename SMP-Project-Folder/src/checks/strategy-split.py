@@ -199,7 +199,7 @@ with sync_playwright() as p:
     import tempfile, os
     tmp = tempfile.mkdtemp(prefix="smp-pptx-")
 
-    # §132.9 (Islam, 2026-08-27): the download BUTTON is hidden for everyone —
+    # §145.9 (Islam, 2026-08-27): the download BUTTON is hidden for everyone —
     # the builder and its rule stand, kept for the feature's return, so the
     # deck's content is still proved through a direct call to sendPlanPptx()
     # while every surface is asserted to draw NO button.
@@ -211,7 +211,7 @@ with sync_playwright() as p:
         return path
 
     be(pg, who["smo"], who["unit"], "strategy", "plan")
-    ck("§132.9: the download button is drawn for nobody — the SMO included",
+    ck("§145.9: the download button is drawn for nobody — the SMO included",
        pg.query_selector("[data-dlpptx]") is None)
     f = grab(pg, "smo-unit.pptx", who["unit"])
     ck("...and pressing it saves a file", f is not None)
@@ -232,7 +232,7 @@ with sync_playwright() as p:
             ck("no reported figure leaks in (" + figure + ")", figure not in d["text"])
 
     be(pg, who["cust"], who["unit"], "strategy", "plan")
-    ck("the custodian sees no download either (§132.9)",
+    ck("the custodian sees no download either (§145.9)",
        pg.query_selector("[data-dlpptx]") is None)
     ck("...and hiding it did not take the arrows with it",
        pg.query_selector(".pane .paneact [data-arrange]") is not None)
@@ -240,7 +240,7 @@ with sync_playwright() as p:
        grab(pg, "cust-unit.pptx", who["unit"]) is not None)
 
     be(pg, who["head"], who["unit"], "strategy", "plan")
-    ck("the unit owner sees no download (§132.9)",
+    ck("the unit owner sees no download (§145.9)",
        pg.query_selector("[data-dlpptx]") is None)
 
     # The fixture itself is asserted (§54.5): a demo with nobody to say no
@@ -257,7 +257,7 @@ with sync_playwright() as p:
 
     # A function's head, on the projects their plan lives behind.
     be(pg, who["fnhead"], "fn:" + who["fn"], "fnstrat", "proj")
-    ck("a function head sees no download on their Projects pane (§132.9)",
+    ck("a function head sees no download on their Projects pane (§145.9)",
        pg.query_selector("[data-dlpptx]") is None)
     ff = grab(pg, "fn-caps.pptx", "fn:" + who["fn"])
     ck("...and it downloads", ff is not None)
@@ -461,11 +461,11 @@ with sync_playwright() as p:
         txt = "".join(t.text or "" for t in ET.fromstring(z.read(last)).iter(A + "t"))
         ck("the last slide is the Thank you", "Thank you" in txt, txt[:60])
 
-    # THE FUNCTION OVERVIEW carried the download too (§119.9) and §132.9 hides
+    # THE FUNCTION OVERVIEW carried the download too (§119.9) and §145.9 hides
     # it there like everywhere else — asserted, because a hide that missed one
     # of the two surfaces would be exactly §119.9's fault inverted.
     be(pg, who["smo"], "fn:" + who["fn"], "fnstrat", "found")
-    ck("the Function overview draws no download either (§132.9)",
+    ck("the Function overview draws no download either (§145.9)",
        pg.query_selector("[data-dlpptx]") is None)
     f = grab(pg, "fn-overview.pptx", "fn:" + who["fn"])
     ck("...while the builder still answers a direct ask", f is not None)

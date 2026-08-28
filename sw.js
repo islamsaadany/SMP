@@ -132,7 +132,7 @@
    the §128 rule followed rather than a number nobody can tell apart.
    Confirmed against origin/main serving "smp-shell-v3.47-planbuilder";
    confirm once more immediately before the push to main (§94.16). */
-const SHELL = "smp-shell-v3.50-gapfill";
+const SHELL = "smp-shell-v3.55-gapfill";
 const ASSETS = [
   "/",
   "/index.html",

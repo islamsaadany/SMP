@@ -63,7 +63,7 @@
      26px control, so the padding was most of the row. Seven roles × 7px saved
      twice over is what lets the table fit without scrolling now the header
      notes have gone to hover. */
-  /* §132's approved restyle: roomier rows over hairline separators. */
+  /* §145's approved restyle: roomier rows over hairline separators. */
   .acgrid th, .acgrid td { padding-top:7px; padding-bottom:7px; }
   .acgrid tbody td { border-bottom:1px solid var(--line-soft); }
   .acgrid thead th { padding-top:9px; padding-bottom:9px; }
@@ -71,7 +71,7 @@
      inside its own box rather than pushing the page sideways — a horizontal
      page scroll breaks every position:sticky above it (§27.2). */
   .acgrid { overflow-x:auto; }
-  /* 1010, not 940 (§132): the two Strategy cells hold THREE toggles now, and
+  /* 1010, not 940 (§145): the two Strategy cells hold THREE toggles now, and
      at 940 a 9.4% column clipped the third with nothing to read it by — the
      grid scrolls inside its own box (§54.6), so the floor is the honest fix. */
   .acgrid table { min-width:1010px; }
@@ -82,7 +82,7 @@
         font-weight:700; padding:3px 9px; border-radius:99px; font-style:normal; }
   .st-none { color:var(--none); border:1px dashed var(--none); }
   .st-view { color:var(--stone); background:var(--surface-2); border:1px solid var(--line); }
-  /* §132: the fill-the-gaps state wears the amber the pending marks wear —
+  /* §145: the fill-the-gaps state wears the amber the pending marks wear —
      the grant and its consequence read as one family. */
   .st-fill { color:var(--attn-tx); background:var(--attn-bg); border:1px solid var(--attn); }
   /* The ACCENT tint, not the warning tint. "May edit" is not a warning, and
@@ -104,7 +104,7 @@
            display:inline-flex; align-items:center; justify-content:center; }
   .stbtn svg { width:14px; height:14px; display:block; }
   .st svg { width:12px; height:12px; display:inline-block; vertical-align:-2px; }
-  /* §132's approved restyle (Islam, from the gap-fill mockup: "I really like
+  /* §145's approved restyle (Islam, from the gap-fill mockup: "I really like
      that design for the access table"): each toggle its own rounded chip
      with a small gap — not a fused strip — and a LIT toggle is a tint with
      a coloured border rather than a solid fill, §41's budget on a page that

@@ -1178,12 +1178,12 @@ console.log("\n15 · the strategy | reporting split (§117)");
         R.mayDownloadPlan(wClosed, personOf(closed, custKey), UNIT) === false);
 })();
 
-console.log("\n16 · fill the gaps (§132, spec 021)");
+console.log("\n16 · fill the gaps (§145, spec 023)");
 /* The third grant state: a fill-holder writes only where the plan holds
    nothing, the write carries a pending mark, and the office confirms.
 
    PROVED ABLE TO FAIL (§94.5): every ALLOWED case below refuses on the
-   pre-§132 build — the stored "fill" grant ranks as nothing there, so the
+   pre-§145 build — the stored "fill" grant ranks as nothing there, so the
    classifier lands the change on unitPlan and the verdict says office-only.
    The refused cases are each one rule-flip from passing: drop the pend mark
    requirement and case 3 goes green, drop the blank(stored) requirement and
@@ -1329,7 +1329,7 @@ console.log("\n16 · fill the gaps (§132, spec 021)");
     check("FILL: the same grant never renames a project", !v.ok, "was ALLOWED");
   }
 
-  /* 13 · collaborators join the fillable list (§132.10) — an empty list is
+  /* 13 · collaborators join the fillable list (§145.10) — an empty list is
      a gap, an existing one never opens, and A PENDING NAME CONFERS NO
      REPORTING RIGHT until the office confirms: being named is what lets a
      Contributor report the line (§50.2), so this is the half that makes

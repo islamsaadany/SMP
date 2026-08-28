@@ -761,7 +761,7 @@
      the corner itself. */
   .pane .paneact .penbtn.dlpen { right:36px; }
   .pane .paneact .penbtn.dlpen:only-child { right:0; }
-  /* §132: a fill-grant holder has BOTH the fill pen and §101's arrows —
+  /* §145: a fill-grant holder has BOTH the fill pen and §101's arrows —
      before that grant the two never coexisted (pen ⟺ office, arrows ⟺
      holder), so both sat at right:0 and the arrows ate the pen's clicks:
      §70's family, caught by gap-fill.py PRESSING the pen, not querying it.

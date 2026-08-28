@@ -6,8 +6,8 @@ version (rules A2 / A11, changed 2026-08-20) — those go only when asked for.
 
 **Where it runs:** Vercel, production tracks `main`. Static files plus two
 serverless functions (`/api/state`, `/api/auth`) against Neon Postgres.
-**Latest version:** v3.50 on `claude/strategy-partial-edit-config-egxkf0`
-(v3.49 on `main`; this branch carries §132 and awaits the merge word)
+**Latest version:** v3.55 on `claude/strategy-partial-edit-config-egxkf0`
+(v3.49 on `main`; this branch carries §145 and awaits the merge word)
 **Last updated:** 2026-08-27
 
 **Sign in as:** `SMO` / `1234` — a password change is forced at once (§43.1,
@@ -65,7 +65,7 @@ Nothing proceeds past this line without an answer.
 
 ## Built and verified
 
-### v3.50 — fill the gaps (§132, spec 021) — on this branch, not yet merged
+### v3.55 — fill the gaps (§145, spec 023) — on this branch, not yet merged
 
 - **A third Strategy-cell state, Fill gaps**: the custodian or owner writes
   only where the plan holds nothing — targets, directions, compile rules,
@@ -85,11 +85,11 @@ Nothing proceeds past this line without an answer.
   office-only. `test-authorize.js` §16 — 231 pass, 6 red on the pre-build.
 - **The access matrix restyle Islam approved from the mockup** (chip
   toggles, tinted lit states, hairline rows) rides along.
-- **§117's .pptx plan download button is hidden for everyone** (§132.9,
+- **§117's .pptx plan download button is hidden for everyone** (§145.9,
   asked mid-build) — machinery kept, one line to give back.
 - Proved by `checks/gap-fill.py` (fails on the pre-build from its first
   section), the full `qa.py` walk, and the virgin-database round trip.
-- **Second build (§132.10–13), same branch:** collaborators fillable — an
+- **Second build (§145.10–13), same branch:** collaborators fillable — an
   empty list only, and a pending name confers no reporting right until the
   office confirms (`namedOn` skips marked fields, owner included); the
   objectives' This-year column shows by default (§66's toggle and saved
@@ -98,7 +98,7 @@ Nothing proceeds past this line without an answer.
   (each a door that keeps fill mode on), and a Next-gap walker, all fed by
   one list and rewritten in place as fills land. 237 server tests, the
   extended browser check, qa and eleven suites green.
-- **Third build (§132.14), same branch — the finding system red and worded,
+- **Third build (§145.14), same branch — the finding system red and worded,
   from Islam's screens:** the whole missing bar ("N Missing" + one red chip
   per owing place + the solid red *Fill in missing elements* button) moves
   INTO the section row beside the section tabs, read mode included, nothing

@@ -1,4 +1,4 @@
-"""FILL THE GAPS (§132, spec 021) — the screen half, both ends of every door.
+"""FILL THE GAPS (§145, spec 023) — the screen half, both ends of every door.
 
 · The matrix's Strategy cells carry the third toggle, no other cell does, and
   pressing it stores the grant the rule then answers from.
@@ -16,7 +16,7 @@
 THE CHECK MAKES ITS GAPS (§94.2): the demo plan is complete, so a check that
 only opened it would never draw a single fill field.
 
-PROVED ABLE TO FAIL (§94.5): run against the pre-§132 build it fails from the
+PROVED ABLE TO FAIL (§94.5): run against the pre-§145 build it fails from the
 first section — the third toggle does not exist there, and the pen never
 opens for the custodian.
 """
@@ -104,7 +104,7 @@ with sync_playwright() as p:
       t.q1 = 0; t.q2 = 0; t.q3 = 0; t.q4 = 0;
       /* Every OTHER tactic on this pillar gets a collaborator, so the
          fixture holds exactly one collaborators gap and the counts below
-         are deterministic (§132.10 made empty lists gaps). */
+         are deterministic (§145.10 made empty lists gaps). */
       x.items[0].tactics.slice(1).forEach(tt => {
         if (!(tt.collaborators || []).length) tt.collaborators = ["Somebody"];
       });
@@ -114,7 +114,7 @@ with sync_playwright() as p:
     pg.wait_for_timeout(300)
 
     be(pg, who["cust"], who["unit"], "strategy", "plan")
-    # §132.14: the fill control is a WORDED RED BUTTON beside the arrows,
+    # §145.14: the fill control is a WORDED RED BUTTON beside the arrows,
     # not a pen glyph — drawn only while something is missing.
     pen = pg.query_selector('.pane .paneact .fillcta[data-fillcta="plan"]')
     ck("the custodian's red button appears beside the arrows", pen is not None)
@@ -284,7 +284,7 @@ with sync_playwright() as p:
     ck("no Add and no Remove in the KO band's fill mode",
        not r.get("none") and r["adds"] == 0 and r["rms"] == 0, r)
 
-    # ── 8 · COLLABORATORS FILL, AND THE RIGHT WAITS (§132.10) ───────────
+    # ── 8 · COLLABORATORS FILL, AND THE RIGHT WAITS (§145.10) ───────────
     print("\n8 · collaborators fill, and the reporting right waits")
     be(pg, who["cust"], who["unit"], "strategy", "plan")
     pg.click('.pane .paneact .fillcta[data-fillcta="plan"]'); pg.wait_for_timeout(400)
@@ -310,7 +310,7 @@ with sync_playwright() as p:
     ck("...and counts the moment the mark lifts", r is True)
     pg.click('.pane .paneact .fdone[data-page="plan"]'); pg.wait_for_timeout(300)
 
-    # ── 9 · THE COUNTS THAT FIND YOU (§132.14) ──────────────────────────
+    # ── 9 · THE COUNTS THAT FIND YOU (§145.14) ──────────────────────────
     print("\n9 · the missing bar beside the sections, the rail words, the walker")
     be(pg, who["cust"], who["unit"], "strategy", "plan")
     r = pg.evaluate("""() => {
@@ -324,12 +324,12 @@ with sync_playwright() as p:
         rail: [...document.querySelectorAll('[data-rgap]')].map(e => e.textContent),
         inPage: !!document.querySelector('#panel [data-gapband]') };
     }""")
-    ck("the Strategy tab wears NO number (§132.14)", r["badge"] is False, r)
+    ck("the Strategy tab wears NO number (§145.14)", r["badge"] is False, r)
     ck("the missing bar lives in the section row, read mode included",
        r["bar"] is True and r["totalWord"] == str(r["total"]) + " Missing" and r["total"] > 0, r)
     ck("...with the red worded button on it", r["cta"] is True, r)
     # THE BAR SITS INSIDE THE TAB ROW, WHERE `.tabs button` UNDRESSES ANY
-    # BUTTON IT OUTRANKS (§132.14's second round — Islam: "the view is not
+    # BUTTON IT OUTRANKS (§145.14's second round — Islam: "the view is not
     # like the design I approved"). Text assertions passed on that build, so
     # the PAINT is asserted: the bar's button wears the same ground as the
     # corner's (the relationship, §53.5), and that ground is a real colour —
@@ -424,7 +424,7 @@ with sync_playwright() as p:
     ck("no fill pen on the Analysis page (u_anal has no fillable field)",
        pg.query_selector('[data-page="analysis"]') is None)
 
-    # ── 10 · THIS YEAR SHOWS BY DEFAULT (§132.11) ───────────────────────
+    # ── 10 · THIS YEAR SHOWS BY DEFAULT (§145.11) ───────────────────────
     print("\n10 · the This-year column defaults to shown, saved choices win")
     pg2 = b.new_page()
     pg2.goto(URL); pg2.wait_for_timeout(1200)

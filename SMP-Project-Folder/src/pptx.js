@@ -78,7 +78,7 @@ function pptxColors(){
    an empty SWOT quadrant. */
 var PPTX_MISS = { miss: true };
 function orMiss(v){ return v ? v : PPTX_MISS; }
-/* §132: a value filled but not yet confirmed is ANSWERED, not missing — it
+/* §145: a value filled but not yet confirmed is ANSWERED, not missing — it
    prints as the value plus "(pending)", never as the bold red gap mark. */
 function orPend(row, f){
   var v = row && row[f];

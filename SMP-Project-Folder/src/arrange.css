@@ -1197,7 +1197,7 @@
   td:has(> .fld + .xbtn) > .fld { width: calc(100% - 30px); vertical-align: middle; }
   td:has(> .fld + .xbtn) > .xbtn { vertical-align: middle; margin-left: 5px; }
 
-  /* ── FILL THE GAPS (§132, spec 021) ──────────────────────────────────
+  /* ── FILL THE GAPS (§145, spec 023) ──────────────────────────────────
      Three states, one colour family: a GAP is the product's own red (the
      word Missing already owns it), a PENDING fill is amber everywhere it
      shows — the field, the chip, the count, the quarters — and a settled
@@ -1233,7 +1233,7 @@
   .qs-fill .qtog.on { background:var(--attn-bg); color:var(--attn-tx);
     border-color:var(--attn); }
 
-  /* ── FINDING THE GAPS (§132.14, reshaping §132.12 from Islam's mockup) ──
+  /* ── FINDING THE GAPS (§145.14, reshaping §145.12 from Islam's mockup) ──
      RED MEANS MISSING, AMBER MEANS PENDING CONFIRMATION — two colours, two
      meanings, never mixed. The whole signal lives in the section row beside
      the section tabs: the total, one red chip per owing place, the red
@@ -1284,7 +1284,7 @@
   .ritem .rgap { display:inline-block; margin-left:7px; color:var(--bad-tx);
     font-size:11px; font-weight:700; font-style:italic; white-space:nowrap; }
   .ritem .rgap.ok { color:var(--good-tx); font-style:normal; }
-  /* A page with nothing missing says so and points away (§132.14). */
+  /* A page with nothing missing says so and points away (§145.14). */
   .emptynote { background:var(--surface-2); border:1px solid var(--line);
     border-radius:8px; padding:10px 14px; margin:0 0 12px; font-size:13px;
     color:var(--ink-2); }

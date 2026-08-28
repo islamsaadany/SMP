@@ -75,7 +75,7 @@ var ICON_EYE = '<svg viewBox="0 0 20 20" aria-hidden="true">' +
 var ICON_PEN = '<svg viewBox="0 0 20 20" aria-hidden="true">' +
   '<path d="M13.4 3.6l3 3L7.9 15.1l-3.9.9.9-3.9z" fill="none" ' +
     'stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/></svg>';
-/* §132: the fill-the-gaps mark — a pen over a dashed line, writing into the
+/* §145: the fill-the-gaps mark — a pen over a dashed line, writing into the
    blank. The same pen, lifted, with the line it writes on. */
 var ICON_FILL = '<svg viewBox="0 0 20 20" aria-hidden="true">' +
   '<path d="M12.6 3.4l3 3-7 7-3.6.6.6-3.6z" fill="none" ' +
@@ -108,7 +108,7 @@ function stateCell(roleKey, areaKey, editable, disabled){
      is a TOGGLE: pressing the lit one turns it off and the cell falls back to
      none. The state each press produces is worked out here rather than in the
      handler, so the click still says only "set this cell to this". */
-  /* §132: THE TWO STRATEGY HALVES CARRY A THIRD STATE — Fill gaps — between
+  /* §145: THE TWO STRATEGY HALVES CARRY A THIRD STATE — Fill gaps — between
      view and edit. Only those two cells: everywhere else the state would
      grant nothing (`mayFillPage` answers only for the strategy pages), and
      a toggle that does nothing is decoration (§42). */

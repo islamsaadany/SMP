@@ -3164,7 +3164,7 @@ function capById(id){
    project's real story rather than a defect. */
 
 function capKOScore(c){
-  /* Pending confirmation leaves the average (§132), as everywhere. */
+  /* Pending confirmation leaves the average (§145), as everywhere. */
   var list = (c.keyObjectives || []).filter(function(m){ return m.progress != null && !SMPRules.pendingScore(m); });
   if (!list.length) return null;
   var tw = 0, sum = 0;
@@ -4139,7 +4139,7 @@ function submitBlockers(target){
   var rows = fn ? fnAskedItems(t.slice(3)) : askedItems(UNITS[t] || { keyObjectives:[], items:[] });
   return { notes: rows.filter(needsNote),
            pending: rows.filter(function(x){ return statusPending(x.obj); }),
-           /* §132: a value the office has not yet confirmed, where a score
+           /* §145: a value the office has not yet confirmed, where a score
               reads it. Reporting and drafts flow; submitting says
               "performance can be read", and against an unconfirmed number
               it cannot (Islam, 2026-08-27). Only the office can clear this
@@ -4370,7 +4370,7 @@ function mayAuthor(acKey, target){
     target === undefined ? TARGET : target);
 }
 function mayEditPlan(){ return mayAuthor("u_plan"); }
-/* MAY THIS PERSON FILL THIS PAGE'S GAPS (§132)? A wrapper, never a second
+/* MAY THIS PERSON FILL THIS PAGE'S GAPS (§145)? A wrapper, never a second
    copy — lib/rules.js answers, for the person being viewed as, so the
    fill field the screen draws and the save the server accepts cannot
    disagree (§42). */
@@ -4432,7 +4432,7 @@ function mayMarkFocus(){
 var KO_WEIGHTS = { mobile: [40, 25, 20, 15] };
 
 function koScore(list, weights){
-  /* `pendingScore` (§132): an objective with a pending target/direction/
+  /* `pendingScore` (§145): an objective with a pending target/direction/
      compile leaves the average until the office confirms it. */
   var vals = list.filter(function(m){ return !m.milestone && m.progress != null && !SMPRules.pendingScore(m); });
   if (!vals.length) return null;
@@ -4533,7 +4533,7 @@ function quartersOf(t){
   return [t.q1, t.q2, t.q3, t.q4].map(function(x){ return x ? 1 : 0; });
 }
 function tacticPlanned(t){
-  /* Quarters filled but not yet confirmed (§132): the tactic's timeline is
+  /* Quarters filled but not yet confirmed (§145): the tactic's timeline is
      not settled, so it reads as not-yet-due — null, never zero — and every
      downstream reader (due, ratio, the execution averages) already handles
      that shape. */
@@ -4551,7 +4551,7 @@ function tacticPlanned(t){
    and averaging a zero into execution would say otherwise. */
 function tacticDue(t){ return tacticPlanned(t) > 0; }
 
-/* ── WHAT IS STILL AWAITING THE OFFICE'S CONFIRMATION (§132) ────────────
+/* ── WHAT IS STILL AWAITING THE OFFICE'S CONFIRMATION (§145) ────────────
    Every pending-fill mark on a subject, one entry per marked field. The
    COUNT the pane band shows, the rows the Submit refusal names and the
    scores' exclusions are all read off this one list — a count that cannot
@@ -4597,7 +4597,7 @@ function gapPendRows(target){
 }
 function gapPendCount(target){ return gapPendRows(target).length; }
 
-/* ── WHERE THE MISSING THINGS ARE (§132.12) ─────────────────────────────
+/* ── WHERE THE MISSING THINGS ARE (§145.12) ─────────────────────────────
    One map of every place holding gaps, counted through the shared
    `gapMissing()` — the tab badge, the rail counts and the band's chips all
    read THIS list, so a count can never disagree with the fields it points
@@ -4657,7 +4657,7 @@ function seesGaps(target){
   });
 }
 /* Only the fields a score reads block a submission — a pending owner or
-   date changes no figure's meaning (§132, Islam's boundary). */
+   date changes no figure's meaning (§145, Islam's boundary). */
 function gapScoreWait(target){
   return gapPendRows(target).filter(function(x){
     return SMPRules.GAP_SCORE_FIELDS.indexOf(x.field) > -1;
@@ -4709,7 +4709,7 @@ function avg(a){
    rail's terse switch. One person deciding to see both horizons must not
    decide it for the whole tenant, and a toggle that autosaved would. */
 var KO_YEAR_KEY = "smp.ko.year";
-/* §132.11 REVERSES §66's DEFAULT (Islam: "let the this year objective
+/* §145.11 REVERSES §66's DEFAULT (Islam: "let the this year objective
    clicked by default so it can be filled as missing as well"): absent now
    reads as SHOWN, so a missing near target is a visible red word instead
    of a hidden column. The toggle stays, and a person's SAVED choice still
@@ -4902,7 +4902,7 @@ function viaCarrier(p, own, roll){
 }
 
 /* A measure whose target, direction or compile rule is still awaiting the
-   office's confirmation is not scored (§132): the comparison is not ready,
+   office's confirmation is not scored (§145): the comparison is not ready,
    so it leaves the average the way an unmeasured outcome already does
    (§104.10) — the reported actual is kept and shown, only the score waits. */
 function scorableMeasures(p){ return (p.measures || []).filter(function(m){ return m.target && m.progress != null && !SMPRules.pendingScore(m); }); }

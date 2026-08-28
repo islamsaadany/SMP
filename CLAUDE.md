@@ -496,7 +496,7 @@ console errors (in this cloud environment, run it via a wrapper that points Play
   a gap: collaborators and an unmarked quarter are left alone. The check MAKES
   the gaps (§94.2) and asserts an EXACT count plus **that the filled facts are
   untouched**, or a builder that marked everything would pass.
-- **FILL THE GAPS (§132, spec 021):** the Strategy cells carry a THIRD state —
+- **FILL THE GAPS (§145, spec 023):** the Strategy cells carry a THIRD state —
   View / **Fill gaps** / Edit — letting a custodian or owner write only where
   the plan holds NOTHING. `GAP_FIELDS`/`GAP_SCORE_FIELDS`/`mayFillPage()`/
   `pendOf()`/`pendingScore()` live in `lib/rules.js` (one definition for
@@ -511,9 +511,9 @@ console errors (in this cloud environment, run it via a wrapper that points Play
   setters lift the mark — correcting is confirming). **Marks are compared
   canonically, never by stringify — Postgres jsonb reorders `{by, at}` to
   `{at, by}` and an order-sensitive compare refuses innocent saves.**
-  §117's .pptx download button is hidden for everyone (§132.9) — machinery
+  §117's .pptx download button is hidden for everyone (§145.9) — machinery
   kept, `dlPlanBtn()` is one line to give back. **The second build
-  (§132.10–13):** collaborators are fillable (empty list only) and **a
+  (§145.10–13):** collaborators are fillable (empty list only) and **a
   pending name confers no reporting right** — `namedOn()` skips marked
   fields, owner included; the objectives' **This year column shows by
   default** (§66's toggle and saved choices untouched); and **the plan says
@@ -525,7 +525,7 @@ console errors (in this cloud environment, run it via a wrapper that points Play
   fill pen off u_anal (a pen that opens nothing, §61). **qa.py reads tab
   NAMES with `.tbadge/.vh/.tabdot` stripped** — the badge made textContent
   lie to two probes on a healthy build (§51.11). **The third build
-  (§132.14, reshaping §132.12 from Islam's screens): red means missing,
+  (§145.14, reshaping §145.12 from Islam's screens): red means missing,
   amber means pending — never mixed.** The WHOLE missing bar — the total
   as **"N Missing"**, one red chip per owing place, the solid red **Fill
   in missing elements** button — lives IN the section row beside
@@ -877,7 +877,7 @@ console errors (in this cloud environment, run it via a wrapper that points Play
   now; the name-match is the fallback.
 - **The 1-year view on a unit's key objectives is a TOGGLE (§66):** §51.16's
   hard-coded `false` said "for now" in the code; this is the control it was
-  waiting for. **§132.11 reversed the DEFAULT to shown** (a missing near
+  waiting for. **§145.11 reversed the DEFAULT to shown** (a missing near
   target must be a visible red word); the toggle and every saved choice
   survive. A screen preference
   (`smp.ko.year` in `localStorage`), never the state graph — one person seeing
@@ -2147,10 +2147,10 @@ python3 checks/register-header.py # one line above the table and a dialog that f
 python3 checks/role-picker.py   # giving somebody a role: every control PRESSED,
                                 # both ends asked, and the absences asserted (§110)
 python3 checks/strategy-split.py # the Strategy | Reporting halves: the cell pressed
-                                # open AND closed, both ends each time — and since §132.9
+                                # open AND closed, both ends each time — and since §145.9
                                 # the .pptx download asserted HIDDEN on every surface while
                                 # the dormant builder is still proved by a direct call
-python3 checks/gap-fill.py      # fill the gaps (§132): the third toggle where it belongs
+python3 checks/gap-fill.py      # fill the gaps (§145): the third toggle where it belongs
                                 # and nowhere else, fill mode's fields AND absences, every
                                 # press read back from the DATA, the pending chip and the
                                 # office's tick, the dash, and the Submit refusal
@@ -2210,7 +2210,7 @@ prior sessions (on HR_ERP) accidentally reverted agreed-upon designs.
 
 ---
 
-*Last Updated: 2026-08-28 &mdash; **v3.50: fill the gaps (&sect;132, spec
+*Last Updated: 2026-08-28 &mdash; **v3.55: fill the gaps (&sect;145, spec
 021)**. Islam: *"a special type of editing which is just filling the missing
 areas — the missing targets, maybe the missing timeline, the missing
 owners."* A third state on the two STRATEGY cells of Roles &amp; access —
@@ -2241,10 +2241,10 @@ innocent save (&sect;42's `branding()` shape, one layer down); and a fill
 holder is the first person to hold &sect;101's arrows BESIDE a pen — both
 sat at `right:0` and the arrows ate the pen's clicks (&sect;70's family,
 caught by the check PRESSING it). The matrix wears the mockup-approved
-restyle (&sect;132.7: chip toggles, tinted lit states, hairline rows), and
+restyle (&sect;145.7: chip toggles, tinted lit states, hairline rows), and
 **&sect;117's .pptx download button is HIDDEN for everyone at Islam's
-direction (&sect;132.9)** — machinery kept, one line to give back.
-**AND THE FINDING SYSTEM WENT RED AND WORDED (&sect;132.14)**, reshaped
+direction (&sect;145.9)** — machinery kept, one line to give back.
+**AND THE FINDING SYSTEM WENT RED AND WORDED (&sect;145.14)**, reshaped
 from Islam's own screens: the whole missing bar &mdash; *"N Missing"*, one
 red chip per owing place, the solid red **Fill in missing elements**
 button &mdash; moved INTO the section row beside the tabs (*"not to waste
@@ -2260,7 +2260,7 @@ and the probe that found it had to live in the SOURCE, because reassigning
 `window.fn` intercepts nothing called from inside the same script. Proved
 by `test-authorize.js` &sect;16 (6 red on the pre-build) and
 `checks/gap-fill.py` (fails from its first section on the pre-build; 58
-assertions on the &sect;132.14 shape), plus the round trip on a virgin
+assertions on the &sect;145.14 shape), plus the round trip on a virgin
 database.*
 
 *Earlier: 2026-08-26 &mdash; **v3.47: building a plan on the platform

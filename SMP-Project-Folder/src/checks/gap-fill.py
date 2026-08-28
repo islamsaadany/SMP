@@ -328,6 +328,29 @@ with sync_playwright() as p:
     ck("the missing bar lives in the section row, read mode included",
        r["bar"] is True and r["totalWord"] == str(r["total"]) + " Missing" and r["total"] > 0, r)
     ck("...with the red worded button on it", r["cta"] is True, r)
+    # THE BAR SITS INSIDE THE TAB ROW, WHERE `.tabs button` UNDRESSES ANY
+    # BUTTON IT OUTRANKS (§132.14's second round — Islam: "the view is not
+    # like the design I approved"). Text assertions passed on that build, so
+    # the PAINT is asserted: the bar's button wears the same ground as the
+    # corner's (the relationship, §53.5), and that ground is a real colour —
+    # both vanishing together must still fail. The chip keeps a real border.
+    pr = pg.evaluate("""() => {
+      const barBtn = document.querySelector('#secrow-in .missbar .fillcta');
+      const corner = document.querySelector('.pane .paneact .fillcta');
+      const chip = document.querySelector('#secrow-in .missbar .mchip');
+      const bs = barBtn ? getComputedStyle(barBtn) : null;
+      const cs = corner ? getComputedStyle(corner) : null;
+      const ch = chip ? getComputedStyle(chip) : null;
+      return { barBg: bs && bs.backgroundColor, cornerBg: cs && cs.backgroundColor,
+               barInk: bs && bs.color, cornerInk: cs && cs.color,
+               chipBorder: ch && parseFloat(ch.borderTopWidth) > 0 &&
+                           ch.borderTopColor !== ch.color };
+    }""")
+    ck("...and the bar's button is PAINTED like the corner's — solid, not a tab",
+       pr["barBg"] is not None and pr["barBg"] == pr["cornerBg"] and
+       "rgba(0, 0, 0, 0)" not in (pr["barBg"] or "rgba(0, 0, 0, 0)") and
+       pr["barInk"] == pr["cornerInk"], pr)
+    ck("...and the chip keeps its border inside the tab row", pr["chipBorder"] is True, pr)
     ck("...and nothing of it in the page body", r["inPage"] is False, r)
     ck("the rail speaks the same words — 'N Missing'",
        len(r["rail"]) >= 1 and all(t.endswith(" Missing") for t in r["rail"]), r)

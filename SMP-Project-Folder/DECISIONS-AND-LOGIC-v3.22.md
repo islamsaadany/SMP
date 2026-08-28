@@ -17295,3 +17295,25 @@ agreeing with the data it counts and none for a clear place, the
 in-place tick-down, and the chip-as-door with the mode kept on. 58
 assertions green; the full qa walk and the eleven-suite battery re-run
 green after the fix.
+
+**AND THE BAR SHIPPED UNDRESSED, WITH EVERY ASSERTION GREEN** (Islam:
+*"the view is not like the design I approved"*). Moving the bar INTO the
+section row put its controls inside `nav.tabs`, whose `.tabs button`
+rule — `border:0`, no ground, the quiet ink, written for a tab — outranks
+a bare class (`0,1,1` over `0,1,0`), so the chips lost their borders and
+the solid red button rendered as plain words, while the corner copy
+outside the row wore the design correctly. **The contrast probe had
+already recorded it** — the bar's button at 7.97 in the page's own ink,
+the corner's at 5.64 white-on-red, printed one line apart — and I read
+the two as two valid states, which is §68.10's fault in the reader
+rather than the tool. The fix is ONE declaration serving both homes: a
+selector list where the second selector (`.missbar button.fillcta`)
+merely outranks `.tabs button` inside the bar, so the two copies cannot
+drift (§53.5); the hovers restate ground and ink because
+`.tabs button:hover` paints its own. **And the check now asserts the
+PAINT, not the words** — the bar's button must wear the SAME computed
+ground as the corner's AND that ground must be a real colour (the
+relationship alone passes when both vanish, §113.8), and the chip must
+keep a real border inside the tab row. Proved able to fail against the
+undressed build: both assertions red (`barBg: rgba(0,0,0,0)` against the
+corner's solid), then green after the one block.

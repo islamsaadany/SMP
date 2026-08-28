@@ -544,7 +544,16 @@ console errors (in this cloud environment, run it via a wrapper that points Play
   **reassigning `window.fn` intercepts nothing called from inside the same
   script** — instrument the SOURCE, not a wrapper. Red WORDS wear
   `--bad-tx` (§38.5, sixth time — `--bad` as type measured 4.49 dark);
-  the button keeps `--bad` as FILL with `--surface` ink.
+  the button keeps `--bad` as FILL with `--surface` ink. **AND THE BAR
+  SHIPPED UNDRESSED WITH EVERY ASSERTION GREEN**: inside `nav.tabs`,
+  `.tabs button` (0,1,1) outranks `.mchip`/`.fillcta` (0,1,0), so the
+  chips lost their borders and the red button rendered as plain words
+  while the corner copy wore the design — the contrast probe had printed
+  both computed grounds one line apart and I read them as two valid
+  states. One declaration, two selectors per list (`.missbar button.X`
+  outranks the tab rule, §53.5); the check asserts the PAINT — same
+  computed ground as the corner's AND a real colour, or both vanishing
+  passes (§113.8).
 - **THE OWN COLUMNS ARE TWO QUESTIONS, AND §94'S LOCK IS A DEFAULT NOW (§117,
   partially reversing §94 at Islam's direction):** each own column on Roles &
   access splits into **Strategy** (the words as agreed — `a_unit_own_strat` /

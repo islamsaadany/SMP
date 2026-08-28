@@ -1,7 +1,10 @@
 # Spec 024 — One door, many clients
 
 **Status:** decisions agreed 2026-08-28 (Islam, in session, question by
-question). **Nothing built.** The cards page, the client name in the chrome
+question) and the **mockup signed off the same day** —
+`design-mockups/multi-client/2026-08-28_outer-platform.html`, published as an
+artifact: *"clints cards are ok … demo is ok … proceed"*, with RHI's industry
+corrected to **Industrial**. **Nothing built.** The cards page, the client name in the chrome
 and the "add a client" page are visual work and are mockup-first (CLAUDE.md
 §1c): no source is touched until the mockup is published and signed off.
 
@@ -318,6 +321,27 @@ while seeing no client at all.
 
 The way in. Covered in §5.
 
+## 7.5 · Two palettes, and the line between them
+
+**The outer platform wears Forefront's own colours** (Islam, 2026-08-28):
+`#0F2C69` and `#F5A623`. **Inside a client, the colours are the client's** —
+Setup › Branding, §39, untouched. The line is the same one §36 drew: a tenant's
+branding supplies a palette, never a language.
+
+Measured before use, because §38.4 has cost this product five sections:
+
+| | measured | so |
+|---|---|---|
+| `#0F2C69` with white on it | **13.25:1** | the bar, the wall, a lit cell |
+| `#F5A623` as a fill, `#231500` on it | **9.04:1** | buttons, the lit *edit* cell |
+| `#F5A623` **as type on white** | **2.03:1** | never — this is the trap |
+| `#9C5D08` as type on white / `--surface-2` | **5.27 / 4.62:1** | every amber **word** on a light ground |
+| `#F5A623` as type on the dark surface | **8.15:1** | the dark palette's amber word |
+
+So the amber is **two tokens declared together** — `--ff-amber` (fill) and
+`--ff-amber-tx` (type) — the shape §94.8 settled for `--cta` / `--cta-ink`.
+The client platform's `--gold` family is untouched and unrelated.
+
 ## 8 · Files this touches
 
 `index.html` (the door; Raya's mark stops being hardcoded) · a new cards page
@@ -352,7 +376,8 @@ with the rollback written down first.
    register. A person with a password
    and no email gets **no account** and is named in the report, not dropped
    silently.
-3. Create `rhi` and `el_abd`, empty.
+3. Create `rhi` (Industrial) and `el_abd` (Food & beverage), empty, and
+   `demo` from the renamed worked example.
 4. Verify by reading, not by reasoning: the three schemas' table counts, one
    known figure out of `raya_trade`, an empty `rhi`, and a sign-in as the
    seeded office account.

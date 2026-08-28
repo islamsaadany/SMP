@@ -14,6 +14,12 @@
     --warn:#8A6410; --warn-bg:#FBF2DC;
     --shadow:0 1px 2px rgba(20,28,43,.06), 0 8px 28px rgba(20,28,43,.06);
     --measure:44rem;
+    /* Forefront's own colours — the OUTER platform wears these.
+       #F5A623 is a FILL: as type on white it measures 2.03:1, so words take
+       --ff-amber-tx (#9C5D08, 5.27:1 on white, 4.62 on --surface-2). §38.4. */
+    --ff-navy:#0F2C69; --ff-navy-ink:#FFFFFF; --ff-navy-quiet:#A9BAD8;
+    --ff-amber:#F5A623; --ff-amber-ink:#231500; --ff-amber-tx:#9C5D08;
+    --ff-wash:#FEF4E2;
   }
   @media (prefers-color-scheme: dark){
     :root:not([data-theme="light"]){
@@ -26,6 +32,9 @@
       --good:#63BE96; --good-tx:#7FCFAB; --good-bg:#1B2C26;
       --warn:#D7B04A; --warn-bg:#2A2515;
       --shadow:0 1px 2px rgba(0,0,0,.4), 0 10px 30px rgba(0,0,0,.35);
+      --ff-navy:#0D2350; --ff-navy-ink:#F0F4FB; --ff-navy-quiet:#95A9CC;
+      --ff-amber:#F5A623; --ff-amber-ink:#231500; --ff-amber-tx:#F5A623;
+      --ff-wash:#2B2210;
     }
   }
   :root[data-theme="dark"]{
@@ -38,6 +47,9 @@
     --good:#63BE96; --good-tx:#7FCFAB; --good-bg:#1B2C26;
     --warn:#D7B04A; --warn-bg:#2A2515;
     --shadow:0 1px 2px rgba(0,0,0,.4), 0 10px 30px rgba(0,0,0,.35);
+    --ff-navy:#0D2350; --ff-navy-ink:#F0F4FB; --ff-navy-quiet:#95A9CC;
+    --ff-amber:#F5A623; --ff-amber-ink:#231500; --ff-amber-tx:#F5A623;
+    --ff-wash:#2B2210;
   }
   *{box-sizing:border-box}
   body{
@@ -71,6 +83,17 @@
   /* ── the fake product screens ─────────────────────────────── */
   .screen{background:var(--surface); border:1px solid var(--line); border-radius:12px;
     box-shadow:var(--shadow); overflow:hidden}
+  .ff .chrome, .ff .wall{background:var(--ff-navy); color:var(--ff-navy-ink)}
+  .ff .chrome .mark, .ff .wall .kick{color:var(--ff-amber)}
+  .ff .chrome .sep, .ff .chrome .who, .ff .wall p{color:var(--ff-navy-quiet)}
+  .ff .btn.gold{background:var(--ff-amber); border-color:var(--ff-amber); color:var(--ff-amber-ink)}
+  .ff .cmark{background:var(--ff-navy); color:var(--ff-amber)}
+  .ff thead th{background:var(--ff-navy); color:var(--ff-navy-ink)}
+  .ff .cellwrap span.on{background:var(--ff-navy); color:var(--ff-navy-ink)}
+  .ff .cellwrap span.on.edit{background:var(--ff-amber); color:var(--ff-amber-ink)}
+  .ff .btn.solid{background:var(--ff-navy); border-color:var(--ff-navy); color:var(--ff-navy-ink)}
+  .ff .ccard.demo{background:var(--ff-wash); border-color:var(--ff-amber)}
+  .ff .tag.demo{color:var(--ff-amber-tx); border-color:var(--ff-amber); background:var(--surface)}
   .chrome{background:var(--navy); color:var(--navy-ink); display:flex; align-items:center;
     gap:14px; padding:11px 16px; font-size:13.5px}
   .chrome .mark{font:700 12px/1 "IBM Plex Mono", ui-monospace, monospace; letter-spacing:.18em;
@@ -200,7 +223,7 @@
   card the platform exactly as it is today — named after that client and holding
   only that client's data. Six screens, drawn from the decisions taken on
   28 August. Nothing here is built.</p>
-  <div class="standing"><b>Proposed</b> <span>Nothing in the product has changed</span></div>
+  <div class="standing"><b>Signed off 28 Aug</b> <span>Cards, Demo names and the shape approved · nothing built yet</span></div>
 </header>
 
 <!-- 1 · THE DOOR ------------------------------------------------- -->
@@ -211,7 +234,7 @@
   with it, goes.</p>
 
   <p class="caption">smp.forefront.consulting</p>
-  <div class="screen">
+  <div class="screen ff">
     <div class="door">
       <div class="wall">
         <div class="kick">Forefront Consulting</div>
@@ -259,7 +282,7 @@
   allows. Nobody is shown a client they cannot open.</p>
 
   <p class="caption">Signed in as Islam — Admin, so every client and the way to add one</p>
-  <div class="screen">
+  <div class="screen ff">
     <div class="chrome">
       <span class="mark">FOREFRONT</span>
       <span class="sep">·</span><span>Clients</span>
@@ -285,7 +308,7 @@
         <div class="ccard">
           <div class="cmark">RH</div>
           <h4>RHI</h4>
-          <p class="ind">Healthcare</p>
+          <p class="ind">Industrial</p>
           <div class="foot"><span class="tag empty">No plan yet</span><span class="tag mine">Mine</span></div>
         </div>
         <div class="ccard">
@@ -326,7 +349,7 @@
   the clients whose SMO team I am on — read from the client's own configuration,
   never a second list.</p>
 
-  <div class="screen">
+  <div class="screen ff">
     <div class="chrome">
       <span class="mark">FOREFRONT</span>
       <span class="sep">·</span><span>Who sees what</span>
@@ -404,7 +427,7 @@
   <p class="lede">Everything about the client that is not their strategy — and
   the one list that decides who from Forefront works on them.</p>
 
-  <div class="screen">
+  <div class="screen ff">
     <div class="chrome">
       <span class="mark">FOREFRONT</span>
       <span class="sep">·</span><span>Clients</span>
@@ -499,7 +522,7 @@
   a temporary password issued from the platform, forced change on first use,
   retire rather than delete. Not a second way of doing the same job.</p>
 
-  <div class="screen">
+  <div class="screen ff">
     <div class="chrome">
       <span class="mark">FOREFRONT</span>
       <span class="sep">·</span><span>Consultants</span>
@@ -599,7 +622,7 @@
   names. Real numbers against a real client's name is the one thing a demo must
   not be. Change any of these and I will use yours.</p>
 
-  <div class="screen"><div class="body">
+  <div class="screen ff"><div class="body">
     <div class="tscroll">
       <table>
         <thead><tr><th>Today, in the example</th><th>In the Demo client</th></tr></thead>
@@ -634,17 +657,19 @@
 <!-- 8 · WHAT I STILL NEED ---------------------------------------- -->
 <section class="step">
   <div class="stephead"><div class="stepno">08</div><h2>What I need from you</h2></div>
-  <div class="flag ask">
-    <p><b>Sign off, or mark up.</b> Anything on these six screens can move —
-    layout, wording, what a card says, what the table's columns are. Nothing in
-    the real product is touched until you have.</p>
+  <div class="flag">
+    <p><b>Signed off, 28 August.</b> Islam approved the cards, the Demo names
+    and the shape; RHI is <b>Industrial</b>; and the outer platform now wears
+    Forefront's own colours — <span class="mono">#0F2C69</span> and
+    <span class="mono">#F5A623</span>. <b>Inside a client the colours are the
+    client's</b>, which is why screen 06 stays navy and gold: the outer
+    platform is Forefront's, each client's platform is theirs.</p>
   </div>
   <ul class="notes">
     <li><b>The client cards:</b> is <i>Industry · cycle · mine · units</i> the
     right four things, or would you rather see something else at a glance?</li>
     <li><b>The Demo names</b> above — approve, or send me yours.</li>
-    <li><b>RHI and El Abd</b> — are those the names as they should read, and are
-    Healthcare and Food &amp; beverage right?</li>
+
   </ul>
 </section>
 

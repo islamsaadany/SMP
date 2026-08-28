@@ -71,6 +71,12 @@ Nothing proceeds past this line without an answer.
   mode and §67's Filled/Clear pair**, and reverses §21's "no invented content in
   the database" for that one client, deliberately. The first-run tour then runs
   on the client's own plan and is not offered until there is one.
+  **The outer platform has its own access matrix** — §37's table one level up:
+  Admin · Lead · Consultant · Observer down, My clients · Other clients ·
+  Client configuration · Consultants · Creating a client · Demo across, each
+  cell view / edit / nothing, and nothing at all until a role is granted.
+  **The office's seats inside a client are set in that client's configuration**,
+  not in its register, landing in two steps.
   Built on the live platform; `smp-app/` untouched. **Nothing implemented** — the cards page, the client name in the chrome and the
   create-a-client page are mockup-first (§1c).
 

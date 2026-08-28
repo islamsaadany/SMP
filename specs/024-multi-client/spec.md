@@ -51,7 +51,7 @@ a component or a rule.
 | Where it is built | **The live platform** (gate + built HTML + `/api/*`). `smp-app/` is untouched. |
 | The main address | **No client's name on it.** The door is the root; each client is that name after the slash. An address of a client's own (`raya-trade.smp…`) is not in v1. |
 | Where the office's seats are set | **In the client's configuration on the outer platform**, not in the client's register. One list — the SMO team — with one of them marked that client's Super user. |
-| Who may open a client | **Everyone at Forefront sees and opens every client.** The team is what carries edit rights inside it. |
+| Who may open a client | **A matrix decides** (Islam, 2026-08-28, revising "everyone sees and opens every client" the same day): four office roles × six columns, view / edit / nothing. |
 | A client's own Super user | **Possible, and granted from outside** — usually Islam for now, a client's own person when he decides. |
 | How the seat move lands | **Two steps**: read-only in the register first, out of Roles & access once proven. |
 | A Demo client | **Yes**, on the cards, Forefront only. Seeded with the Raya worked example, **renamed to invented names**, and editable from then on. |
@@ -146,6 +146,9 @@ After sign-in:
 - **More than one → the cards.** All clients, each carrying the client's name
   and its own mark. What else a card says (last opened, whether a cycle is
   open, who leads it) is a design question for the mockup, not decided here.
+- **What is on the cards is what your row allows** (§7.4) — your clients
+  always, other clients only if your role reaches them. Nobody is shown a card
+  they cannot open.
 - **Demo sits among them**, marked as the demo so nobody mistakes it for a
   client, and drawn for Forefront only — it is on the cards, and the cards are
   the office's.
@@ -169,12 +172,11 @@ user**. That is the only place those two seats are decided.
   person on that client's own register. Either way they are named in the
   client's configuration, and they hold everything §89 gives a Super user
   inside that client: the access matrix, destruction, issuing passwords.
-- **Everyone at Forefront can see and open every client** (Islam's answer).
-  Opening one you are not on the team of gives you the client **read-only**,
-  and it is in the change log like anything else. *This last sentence is my
-  reading of "see all, open all" beside "the responsible team who will have
-  the edit access", and it is the one line in this section to confirm at
-  mockup sign-off rather than assume.*
+- **What a Forefront person may reach is the matrix's answer** (§7.4), not
+  the team list's alone: the team says which clients are *yours*, and the
+  matrix says what *yours* and *others* are worth. This replaces the earlier
+  "everyone sees and opens every client", and it settles the one line the
+  first draft of this section had to guess at.
 - Everything else a client's people see is the platform as it stands today.
   A client's own roles — unit owner, strategy custodian, function head,
   contributor — are theirs, granted inside their client, and nothing here
@@ -238,8 +240,8 @@ list before it is seeded. Nothing is shown to anyone until he has.
 
 ## 7 · The outer platform — what it holds
 
-Three things, and nothing else. It is the office's platform, not a second copy
-of the product.
+Four things, and nothing else. It is the office's platform, not a second copy
+of the product: consultants, clients, who may do what, and the cards.
 
 ### 7.1 Consultants (people and passwords)
 
@@ -270,7 +272,47 @@ not carry them (§30.2).
 **Retiring a client is not in v1**, flagged rather than silently omitted: a
 schema holding a client's whole strategy is not deleted from a button.
 
-### 7.3 The cards
+### 7.3 Who may see and do what — the platform's own access matrix
+
+Islam: *"someone who is early in the company will not see all the clients,
+might be only seeing his own clients, not even editing… we need an
+accessibility table."* It is **§37's table one level up**: roles down, areas
+across, each cell **view · edit · nothing**, and the same reason §37 has *own
+business unit* apart from *other business units* — the interesting question is
+almost always whether the thing is yours.
+
+**Four roles:** Admin · Lead · Consultant · Observer.
+**Six columns:** My clients · Other clients · Client configuration ·
+Consultants and passwords · Creating a client · Demo client.
+
+- **"My clients" are the clients whose SMO team I am on** (§7.2). One
+  definition, read from the configuration — never a second list.
+- **The configuration column is exercised over the clients that role can
+  reach.** A Lead who may edit configuration edits it for their own clients;
+  it does not hand them a client their row cannot open.
+- **Creating a client** is an act, not a page: nothing or edit.
+- **Nothing until granted** (Islam's answer): a Forefront person with no role
+  signs in and sees an empty platform. That is deliberately *not* §93's floor
+  row — there is nothing to configure about somebody who holds nothing.
+- **The Admin's row is not editable**, for §89's reason: editing the matrix is
+  editing who may edit the matrix, so the platform must always have somebody
+  who can. Creating clients and managing consultants stay the Admin's whatever
+  the table says.
+
+Proposed shipped defaults — Islam's to change from the page, and the point of
+writing them down is that a default nobody chose is still a decision:
+
+| | My clients | Other clients | Client config | Consultants | Create a client | Demo |
+|---|---|---|---|---|---|---|
+| **Admin** | edit | edit | edit | edit | edit | edit |
+| **Lead** | edit | view | edit | view | — | edit |
+| **Consultant** | edit | — | view | — | — | view |
+| **Observer** | view | — | — | — | — | view |
+
+The Demo column is why a new joiner can be given somewhere real to practise
+while seeing no client at all.
+
+### 7.4 The cards
 
 The way in. Covered in §5.
 
@@ -331,6 +373,11 @@ with the rollback written down first.
   viewer (asserted as an absence at both ends, §94.2), the offline file opened
   from disk still shows the full example, and the Demo *client* opens with a
   complete plan and saves.
+- **The matrix has teeth:** each of the four roles is signed in and asked for
+  a client its row does not reach — refused on the screen **and** by the
+  server, and refused identically to a client that does not exist (§3.1). The
+  Observer's edit is refused everywhere, and the Admin's row cannot be edited
+  into locking the Admin out (§89).
 - **The seats agree:** the office people the client's register shows are
   exactly the client's configured SMO team, the seat cannot be edited from
   inside the client, and a consultant who is not on the team enters read-only —

@@ -288,24 +288,33 @@ with sync_playwright() as p:
     print("\n8 · collaborators fill, and the reporting right waits")
     be(pg, who["cust"], who["unit"], "strategy", "plan")
     pg.click('.pane .paneact .fillcta[data-fillcta="plan"]'); pg.wait_for_timeout(400)
+    # §130.1 MET §145 AT THE MERGE: collaborators are TICKED from the
+    # register-fed list, never typed — so the fill control is the same
+    # multi-select the office's pen uses, and the check picks two REAL
+    # options off it rather than inventing names a list cannot produce.
     r = pg.evaluate("""(w) => {
-      const inp = document.querySelector('td.collabs .fld.gapfld');
-      if (!inp) return { none: true };
-      inp.value = "New Helper, Second Helper";
-      inp.dispatchEvent(new Event('change', { bubbles: true }));
+      const sel = document.querySelector('td.collabs select.fld.gapfld');
+      if (!sel) return { none: true };
+      const opts = [...sel.options].filter(o => o.value).slice(0, 2);
+      if (opts.length < 2) return { few: sel.options.length };
+      opts.forEach(o => { o.selected = true; });
+      sel.dispatchEvent(new Event('change', { bubbles: true }));
       const t = UNITS[w.unit].items[0].tactics[0];
-      return { list: t.collaborators, pend: !!(t.pend && t.pend.collaborators),
-               named: SMPRules.namedOn(t, { key: "nh", name: "New Helper" }) };
+      return { picked: opts.map(o => o.value), list: t.collaborators,
+               pend: !!(t.pend && t.pend.collaborators),
+               named: SMPRules.namedOn(t, { key: "nh", name: opts[0].value }) };
     }""", who)
-    ck("a typed list parses into the array and wears the mark",
-       not r.get("none") and r["list"] == ["New Helper", "Second Helper"] and r["pend"], r)
+    ck("two register names picked land in the array and wear the mark",
+       not r.get("none") and not r.get("few") and
+       r["list"] == r["picked"] and r["pend"], r)
     ck("...and the pending name confers NO reporting right (§50.2 held)",
        r.get("named") is False, r)
     r = pg.evaluate("""(w) => {
       const t = UNITS[w.unit].items[0].tactics[0];
+      const name = t.collaborators[0];
       delete t.pend.collaborators;
       if (!Object.keys(t.pend).length) delete t.pend;
-      return SMPRules.namedOn(t, { key: "nh", name: "New Helper" });
+      return SMPRules.namedOn(t, { key: "nh", name: name });
     }""", who)
     ck("...and counts the moment the mark lifts", r is True)
     pg.click('.pane .paneact .fdone[data-page="plan"]'); pg.wait_for_timeout(300)
@@ -391,7 +400,13 @@ with sync_playwright() as p:
       const key = chip.dataset.gkey;
       const before = chip.textContent.trim();
       const inp = document.querySelector('.pane .fld.gapfld');
-      inp.value = "Somebody Named";
+      /* §130.1: an owner or a collaborator field is a PICKER now, so the
+         trial answers whatever control it lands on — first real option on
+         a select, a typed value everywhere else. */
+      if (inp.tagName === "SELECT") {
+        const o = [...inp.options].filter(o => o.value)[0];
+        if (inp.multiple) o.selected = true; else inp.value = o.value;
+      } else inp.value = "Somebody Named";
       inp.dispatchEvent(new Event('change', { bubbles: true }));
       const after = chip.textContent.trim();
       const totalWord = document.querySelector('[data-gapband] .secmiss').textContent;

@@ -39,6 +39,22 @@ A drift between specs and code is a documentation bug — report it before silen
 - **Stick to exactly what was requested — no extra "improvements" or visual changes.**
 - **If a fix requires touching something the user didn't mention, flag it and ask first.**
 
+### 1b-ii. NO GREY DESCRIPTIONS UNDER PAGE AND SECTION HEADINGS (2026-08-27)
+- **Islam: *"remove the grey descriptions and stop adding descriptions to
+  pages."*** A heading names the thing; a paragraph under it in grey saying the
+  same thing again is furniture, and it pushes the content people came for
+  further down the page.
+- **Do not pass a `note` to `section()` for new work**, and do not add
+  explanatory prose under a page title.
+- **Where a sentence carries a fact the screen does not otherwise state**, it is
+  not a description — it is information, and it belongs on a **hover** (`tip()`)
+  or in the knowledge base, never as a paragraph. Flag it rather than deleting
+  it silently: §127 made every line of chat-settings prose a tooltip for exactly
+  this reason, and kept *"No one is set"* on the page because a status is not a
+  description.
+- Existing pages keep theirs until Islam asks for a sweep; this rule governs
+  what is BUILT from now on.
+
 ### 1c. CRITICAL: UI Changes Require Explicit Approval
 - **NEVER change any UI design, layout, styling, or visual element without explicit user approval.**
 - **This includes: colors, borders, spacing, card designs, labels, icons, section order, font sizes — EVERYTHING visual.**
@@ -345,6 +361,114 @@ console errors (in this cloud environment, run it via a wrapper that points Play
   that rule watches for CHECKS holding a removed selector; this was the PRODUCT
   holding one, and it fails the same way — silently, in the safe-looking
   direction.
+- **ONE LINE, AND THE PAGE'S CONTROLS ARE ON IT (§130):** §121.2 pinned the
+  page's NAME and deliberately left the controls beneath it — because a
+  negative margin pulled that NON-sticky row up and scrolling slid it out
+  (**a sticky box may only overlap something that pins with it**). That
+  forbids the FAKE move, not the move: the controls go INSIDE `.setuphead`
+  now. **`PAGE_TOOLS` and `PAGE_ACTS` are `PAGE_TITLE`'s two siblings** —
+  reset by the shell before the page renders, read after it — because the
+  shell draws the header and the controls are produced deep inside each page's
+  render. **The `SMO` pill and the count chips go from every page**, including
+  the two Islam did not name: the chrome says who you are and the table IS the
+  count, and a pill surviving on two pages after leaving eight reads as a
+  mistake. **`alerts` is what survives and is not the same thing renamed** —
+  "10 names" is the list, "3 names on people and not on this list" is
+  something outstanding. **The quick filters and the row count go** (his call),
+  and **nothing is hidden by it**: every row carries `data-tkrow` and every one
+  is drawn, so the chip narrowed a view and never revealed rows. `TKFILTER`,
+  the chip markup, its handler and `[data-tkcount]` are DELETED (§24).
+- **A BAND CANNOT BE A LIGHTER SHADE OF THE STRIPE (§130.8):** the marking
+  table's band was `--surface-2` (#EFF2F6) against a `--zebra` of #F5F7FA — six
+  points on one channel, and Islam read them as the same grey. Reaching for
+  §99's `tr.dxband` kept one vocabulary for "a band inside a table" (§53.5) and
+  **Islam turned it down** — *"the band should be darker grey not navy"* — and
+  he was right twice over: it wore the SAME navy as the `<thead>` directly above
+  it, and it was what leaked through §130.10's slot and read as a second header.
+  **A shared vocabulary is worth having and is not worth two confusions.**
+  `--line` is the step that exists (#D6DCE5 / #333A45, so it tracks the theme
+  without a literal, §25) and `--ink-2` on it is 6.49:1 light, 7.0:1 dark.
+- **A GUESSED CONSTANT BETWEEN TWO PINNED THINGS IS A HOLE (§130.10):**
+  `--sethead-h` was the literal `46px`, and §130 changed the header's height by
+  putting the controls in it — 42px on some pages, 49px on others. So a table's
+  head pinned **4px below** the page header, and **four pixels between two
+  things that do not move is a slot scrolling rows show through**: measured, a
+  4px leak at y=152, and what leaks is a BAND, which is why it reads as a second
+  header. §122.5's fault, reintroduced by the change that moved the controls.
+  **A better constant could not have been right** — the header WRAPS, so its
+  height depends on the window too — so a ResizeObserver publishes it, the way
+  `--chrome-h` already is. **NOT §28.3's loop**: it feeds a sticky OFFSET and
+  nothing else, and an offset cannot change the height it was measured from.
+- **A SAMPLED SEARCH FOR A SYMPTOM FINDS THE FAULT WHEN IT IS LUCKY (§130.10):**
+  the check for the above swept scroll positions in 20px steps looking for a row
+  showing through, and **passed on the deliberately broken build** — a 4px slot
+  only shows something when a row happens to be crossing it. Measure the CAUSE
+  (the gap), and only **while the head is actually pinned**: the second attempt
+  measured at a fixed scroll and reported 50px on a page that was fine, because
+  a short table's head is still in flow there. And **put the state back first**
+  (§94.2) — an earlier section had left the focus page on a function with two
+  rows, and a page too short to scroll has a head that never pins at all.
+- **PINNED TWICE, AND ASSERTED ONCE (§130.9):** asked (twice) to make the rail's
+  `SETUP` bar and search sticky, the honest first move was to MEASURE — eleven
+  window sizes, four scroll positions, the list scrolled internally: 96px and
+  136px every time, on this build and main's. It was already true and had
+  **never been asserted**, which is why "already true" was only ever something a
+  throwaway probe could say. `.rhead` and `.railfind` are sticky inside the rail
+  now as belt and braces — a no-op wherever the cap applies, and the difference
+  between holding and not in the two states it does not reach (a browser without
+  `100dvh` drops the whole `max-height`; below 900px the rail stops being a
+  column). The search's offset is the head's **measured** height, or it pins
+  under the bar in exactly the state the fix exists for.
+- **`.acgrid` IS A SCROLL BOX, SO THE PAGE OFFSET WENT INSIDE IT (§130.2):**
+  *"check the table as the design is damaged."* `overflow-x:auto` makes the BOX
+  what a sticky head pins against, so §121.4's 141px page offset pushed the
+  Roles & access header **141px DOWN inside the table**, onto rows three and
+  four — all twelve cells at one position, measured. **The exact fault §121.4
+  wrote down about the register, on the one table its exclusion forgot.**
+  `position:static`, not `top:0`: nine rows scrolling the page by 60px buy
+  nothing from a sticky head, and this head is TWO ROWS with cells spanning
+  both. **The damage was hiding §117's group headings** — *Own business unit*
+  and *Own supporting function* — unreadable since the split shipped.
+- **A TABLE ROW HAS NO BOX ONCE ITS CELLS ARE POSITIONED (§130.7):** the check
+  for the above measured `tr.getBoundingClientRect()` and **called the broken
+  build clean at three scroll positions**, because the row went on reporting
+  the un-stuck layout while every `th` had moved. Measure the CELLS. Two more
+  in the same file: a chip assertion scoped to where the chips had MOVED TO
+  passed on a build where they were alive one row lower (§113.8's blind spot),
+  and the page had to be given something to SCROLL — at 1560×900 that matrix
+  scrolls 60px, so three measurements were of an unscrolled page (§94.2).
+  **33 failures against the previous build** before the green was believed.
+- **FOCUS REACHES SUPPORTING FUNCTIONS, IN BOTH SHAPES (§130.5):**
+  `focusBands(key)` is ONE builder — a unit's key objectives and pillars; a
+  **pillars** function's through `fnAsUnit()`, identically; a **capability**
+  function's capabilities each banding their own key objectives (Islam:
+  *"agreed"*). **The ids were already there** (`renumberCapability()` mints
+  `cap1-KO1`), which is what made it cheap rather than a migration. **The
+  group's Focus board grows the same half or the marks are stored where nobody
+  looks** (§61) — its first column is *Where*, and a function's cell says
+  "supporting function" where a unit's says its weight, because a function
+  carries no weight and inventing one is a number that means nothing. The
+  switch is a segmented On|Off pair in its **own class, never `.navswitch`**
+  (§65.9: that one is scoped to `.units` and paints white-on-navy). **The grey
+  note went and was carrying a bug** — `marks + plural(marks,"mark")` printed
+  *"0 0 marks"* — and what it was evidence for is asserted of the DATA now.
+- **THE COMPANY IS SOMETIMES DERIVED AND SOMETIMES STORED (§130.6):** a person
+  sits in exactly ONE place by construction (`attachPersonAt()` clears all
+  three pointers; `personAt()` gives one answer), so a second dropdown that
+  could disagree is §110's pair. The field is **read-only wherever the unit has
+  already answered it** — Mobile's company IS Distribution (§23) — and written
+  only where nothing else has. **Companies left the Unit dropdown, and that
+  broke granting a Company CEO**, found by `checks/role-picker.py`: the refusal
+  names the field that can answer it, and **either half finishes it** (§110).
+  The dialog gains a row (614px from 558), so a 640px window now scrolls it —
+  recorded, not glossed (§122.5).
+- **EMAIL SETTINGS ARE A SECTION, NOT A DROPDOWN (§130.4):** asked as a
+  question and answered by what the page holds — a status table, four fields,
+  a **live rendered preview** and a test send. A rendered email inside a
+  dropdown is not a dropdown. Figure sets' and Import & archives' shape (§46.2,
+  §108.4): one rail entry, two sections, **each keeping its own gate**, so a
+  `c_comms` holder without `c_send` still reaches it. *Setup › Email* leaves
+  the rail and its GROUP is renamed with it (§24).
 - **THE RAILED PAGES GET THE WHOLE WINDOW (§93.9):** *"the page is wide,
   however the rail and the tables are stuck in a confined space."* 1180px is a
   READING measure, right for prose and wrong for a rail and a table — every
@@ -473,6 +597,104 @@ console errors (in this cloud environment, run it via a wrapper that points Play
   door behind a door. A role with one place is granted on the role pick; a role
   with a real choice still asks. The × on the chip is what makes committing on
   one press safe.
+- **AN OWNER IS PICKED FROM THE REGISTER, AND IT DECIDES WHO MAY REPORT
+  (§130.1):** `SMPRules.namedOn()` matches a tactic's `owner` against the
+  register BY NAME, so a short spelling names nobody — **32 of the 78 tactics
+  in the demo**, each one a person who owns a line and cannot enter its figure.
+  Five fields become lists (project · milestone · tactic · **pillar**, plus
+  collaborators as a **ticking** list), built from `ownerChoices()`: the active
+  register under *People*, `placeLabel()`'s places under *Departments* — the
+  navigation's own word, never a second vocabulary (§53.5) — plus an Official
+  BU that points at nothing (§54: Risk carries no strategy and employs people).
+  **A stored value outside the list is KEPT in its own group** (§96.2), so a
+  plan uploaded before today reads exactly as it did. **The NAME is still what
+  is stored**: a key would be a migration through `namedOn()`, the workbook,
+  the deck and the archive. **The pillar's row is edit-mode only** — read mode
+  already says it twice — and the meta line drops it while the pen is on.
+- **A TICKING LIST STAYS OPEN, AND THAT REVERSES `choose()` ON PURPOSE
+  (§130.1):** a single pick answers the question, so it closes before firing
+  `change` (§30.1); a list you are ticking is not answered until you stop.
+  **Committed per tick, never on close** — `close()` is the first thing
+  `wire()` does at the end of `paint()`, by which time `FIELDS` is rebuilt and
+  that element's `data-fld` points at somebody else's setter. Safe only because
+  the `data-fld` handler writes without repainting (§71.2): **wire a multiple
+  select to a handler that calls `paint()` and the popup dies under the
+  pointer.** The setter is handed an ARRAY, asked of `el.multiple` in the one
+  place every bound field goes through — `el.value` on a multiple select is the
+  FIRST option and would have dropped the rest in silence. Emptied, the key is
+  DELETED (§50.6). The tick is DRAWN, not written: U+2713 is outside the latin
+  subsets and would ship as a blank box (§52, §120.2).
+- **A 1px CLIPPED ELEMENT SCROLLING IS NEVER THE PAGE MOVING (§130.1):**
+  setting `selected` on a `<select multiple>` fires a real `scroll` event from
+  the hidden `.ss-native`, which reached `onGone` with capture on — so every
+  tick re-placed the popup and a tick near the fold CLOSED it. Three versions
+  of `searchsel.js` never saw it, because the single-select path never sets
+  `selected` on anything. **Found by ticking, not by reading.**
+- **ONE ITEM STILL GETS THE RAIL, ON BOTH SIDES OF THE SWITCH (§130.2,
+  reversing `railWorthIt`'s threshold):** it was never about capabilities — the
+  gate counted a capability's PROJECTS, so Marketing drew two capabilities on
+  one page at two different left edges. `railWorthIt()` is the ONE answer,
+  asked in four places; three of them spelled `u.items.length >= 2` inline,
+  which is how a unit and a function come to be fine DIFFERENTLY (§53.5).
+  **The pen already disagreed with the reading view** (§69.13 draws the rail
+  from one project because Add lives in it). **Still false for an empty list**:
+  nothing to list is not the same question as one thing to list (§61).
+- **THE PINNED TITLE'S CORNERS TAKE THE PAGE'S GROUND — WHILE PINNED (§130.3,
+  corrected by §130.6):** §53.7 painted the strip ABOVE the band and stopped at
+  its top edge, where the two rounded corner notches begin — 13px² of the white
+  card per corner, with rows sliding through it. It first painted **in both
+  positions**, on §53.7's rule that CSS cannot ask whether a sticky element is
+  pinned, at a cost priced as 1.4px of the pane's own corner arc. Islam: *"the
+  corner still has this squared corner."* **The arithmetic was right and the
+  place was wrong** — those pixels ARE the card's rounded corner, which is where
+  an eye goes. So the one thing CSS cannot ask is asked in JavaScript:
+  **`pinWatch()`** is an IntersectionObserver toggling `.pinned`, re-armed after
+  every paint beside `SEARCHSEL.wire()`, with the previous one disconnected.
+  **NOT v3.3's loop** — it changes no size, so nothing can feed back — and the
+  threshold is the element's OWN sticky offset read off the computed style, not
+  rebuilt from `--chrome-h` (§29.4). **It shipped once as a throw**: declared
+  inside `wire()` and called from `paint()`, so every paint ended in *"pinWatch
+  is not defined"* with the page still on screen (§118, one section later) —
+  the check carries a page-error listener now. **Measured in PIXELS**, and the
+  first version of the check reported a CORRECT build broken: in the dark
+  palette `--surface` sits between `--ground` and `--surface-2`, so an
+  antialiased pixel lands on it by arithmetic (§68.10).
+- **THE SQUARED CORNER WAS THE CARD'S BORDER, NOT THE BAND'S (§130.8):** the
+  third round on one corner, and each round found a different element — §130.3
+  the pane's white ground, §130.6 the corner arc the fill covered at rest,
+  §130.8 the **1px side border**, which `::before` covers everywhere ABOVE the
+  band and which therefore begins, pinned, as a square-ended stub beside a
+  rounded corner. A card whose side starts in a butt end READS as a squared
+  corner. The fill goes `left:-1px`/`right:-1px` now and each gradient tile is
+  `--r + 1` wide so its circle stays on the BAND's corner centre — the arc then
+  meets the border's line exactly where the fill ends. **The check could not
+  have seen it**: it sampled the band's own corner box and the offending pixel
+  is the one immediately outside. *Reproducing the picture is not the same as
+  reproducing the complaint* — the first two rounds fixed what I had measured,
+  and what he was pointing at moved each time.
+- **THE PLACE BESIDE THE NAME IS A HINT, NEVER PART OF THE ANSWER (§130.9):**
+  `data-hint` on the option, drawn as a quiet span by `searchsel.js`; the closed
+  control, the stored value, the workbook, the deck and `namedOn()` all see the
+  NAME alone — "Ramy Behairy — Mobile" in a tactic would name nobody (§130.1's
+  fault, §130.7's argument from the other side). **It joins what is searched**,
+  or it is half a control. `personAt()` + `placeLabel()`, and somebody the
+  register has not placed gets NO hint rather than a guess (§15.1). And it broke
+  three assertions by being a span: a row's `textContent` became
+  "Amaka EzeNigeria" — read the row's FIRST TEXT NODE.
+- **THE PICKER LISTS THE REGISTER'S *Name*, NOT THE FULL LEGAL ONE (§130.7):**
+  invisible here — all 33 demo people have a two- or three-word full name and
+  none has a typed short one, so `knownName()` returns `p.name` and the wrong
+  column looked right. Read through **`displayNames()`**, which lengthens the
+  guess for a clashing pair (§81.1): in a PICKER two people reading as one entry
+  means the second is silently dropped by the dedupe. **What is shown is what is
+  STORED**, so the plan says the register's word (§53.5) — **which means
+  `namedOn()` had to learn it, or §130.1 undoes itself.** The name rule MOVES
+  into `lib/rules.js` (`NAME_PARTICLES`, `nameWords`, `knownGuess`), the browser
+  keeps wrappers, and `namedOn()` matches the key, the full name, a typed
+  `known`, and **`nameRuns()`** — every leading run from the short form up to
+  the whole name, which is exactly the set of labels the register can show.
+  **Never one name**: `KNOWN_NAME_WORDS` is the floor, so "Karim" still matches
+  nobody — a bare first name would hand reporting rights to whoever shares it.
 - **TERSE DROPS THE DETAIL, NEVER THE ALARM (§119.3):** the pillar rail opens
   COLLAPSED now (absent reads as terse, so only an explicit press turns it
   off), and that small line had been carrying two different kinds of thing —
@@ -1512,13 +1734,19 @@ console errors (in this cloud environment, run it via a wrapper that points Play
   break silently — and asserted in `test-assistant.js`, never the browser
   check, whose stub supplies the steps and would never run it (§94.2).
 - **A DEBOUNCED SAVE WITH NO FLUSH LOSES THE LAST 800ms (§126.1, RECORDED NOT
-  FIXED):** press a switch, leave the page 150ms later — **saves sent: none**,
+  FIXED — CLOSED BY §138, v3.51, 2026-08-27):** press a switch, leave the page
+  150ms later — **saves sent: none**,
   database unchanged, screen still showing the new value. `sync.js` is the
   autosave for the WHOLE platform, so branding, terminology and the access
   matrix have the same hole. **It was NOT the fault being chased** (the
   diagnostic said the switch had saved), and it is written down rather than
   fixed on the way past: changing the save path for every page in the product
-  while looking at something else is what rule 1b exists to stop.
+  while looking at something else is what rule 1b exists to stop. **§138
+  closed it as its own aligned change**: `flushLeave()` on
+  visibilitychange/pagehide sends anything waiting (keepalive under 64KB,
+  plain fetch over — that limit stated, not glossed), touches no save
+  bookkeeping, skips while a save is in flight, and `checks/save-flush.py`
+  reproduces the loss end to end on the pre-§138 build.
 - **SAYING NOTHING IS NOT A NEUTRAL OUTCOME (§125):** with the assistant on
   and a working key, Islam got *"nothing happens at all"* — and that was §104
   working as designed. A handoff wrote NOTHING, on sound reasoning (a sentence
@@ -2006,6 +2234,112 @@ console errors (in this cloud environment, run it via a wrapper that points Play
   touching `mail.js`. "Present" ≠ "accepted" ≠ "verified": the page reports only
   what was actually asked, and matches a bad key on Resend's MESSAGE because
   Resend answers an invalid key with **400**, not 401.
+- **THE EMAIL GREETS ITS RECEIVER (since v3.50, §135; spec 021):** a per-message
+  switch on Send a message opens each email *Dear Ahmed,* — off by default, the
+  word editable per message, **Send a message only**. **EVERY RECIPIENT ALREADY
+  GOT THEIR OWN EMAIL** (§74.3's one-message-per-person loop), so nothing about
+  how many go out changes; what changes is that they stop being IDENTICAL, so
+  the builder leaves a **marked region** and the server fills it once per
+  recipient off the STORED register (§74.2). `GREET_OPEN`/`GREET_CLOSE`/
+  `GREET_NAME` and `greetFill()` live in `lib/rules.js` because **both sides
+  need the same three strings**; `src/mail.js` writes them, `api/mail.js` reads
+  them. **THE REGION IS DELIMITED, NOT MERELY TOKENISED**: a token typed into
+  the body can never be substituted, and an empty name removes the WHOLE
+  paragraph — never `Dear ,`. The name is `firstName()` = `nameWords(…, 1)`,
+  **the register's own reader** (§93.8), so a compound first name is kept whole
+  ("Abd El Moniem", never "Abd") and a typed `known` wins. **ONE LINE, NO
+  PROSE** (Islam, correcting a two-line first draft): `.imp-row` + `.cfg-lab` +
+  `.minisw`, the platform's own switch row, with the word box BEFORE the switch
+  so the switch never moves (§41.8) — two lines had also made the greeting read
+  as a bigger decision than the button row under it, which is one. Six words
+  survive under the preview (*Everyone sees their own name here.*), **outside**
+  the email, because a badge inside would be a line nobody receives. `greet
+  TEXT` on `messages` and `message_drafts` (027), **one column holding the
+  word** and never a boolean beside it (§104.7); NULL is off, so nothing is
+  backfilled. **AND `SYNC.mailSend()` NAMES EVERY FIELD IT FORWARDS**, so
+  `greet` was silently dropped and the RECORD would have said no message ever
+  greeted anybody — found by asking what the page POSTS, not by reading it.
+  **AND THE GREETING MUST SIT OUTSIDE `data-mail-body`** (§142.8): the message
+  is typed INTO the preview and read back with `innerText`, so a greeting
+  emitted inside that div is absorbed into the body by the first keystroke —
+  the email then carries it twice and the stored message holds a name nobody
+  typed. Measured, not reasoned; every existing assertion passed while it was
+  broken, because none typed into the body with the greeting on and then asked
+  the DATA.
+- **SEND A MESSAGE OPENS ON WHAT WENT (since v3.51, §137):** Islam: *"the
+  opening page ... should be a dashboard of what was sent, to whom, how many
+  people ... and when I say create a message it takes me to another tab ... and
+  when I finish and send it it should take me back to the dashboard and show me
+  that the message was sent there."* **TWO SUBTABS** — *Overview* (his word;
+  the Setup rail has a page of the same name one group above, recorded rather
+  than quietly changed, because they sit at different levels) and *Write a
+  message* — in the platform's OWN `.secrow`, the one Import & archives and
+  Figure sets already use (§46.2): never a button that navigates, because
+  going back to the record must not mean abandoning what you were writing.
+  **NOTHING NEW IS COMPUTED**: every send already wrote the row, and this is
+  §95's own `renderDraftList()` / `renderSentList()` moved out of the header
+  dropdowns they were hiding in — one renderer, so the list cannot say two
+  things depending on where it is drawn. **A SEND LANDS ON THE RECORD** and the
+  composer is EMPTIED, which is also how §136's rule survives: the send cannot
+  be repeated by one press, by construction rather than by a flag. **A partial
+  failure lands there too** (the message went to most people and the record is
+  where the failures are named); **only a send that never happened stays put**,
+  with the message still loaded and the bar red. **AND THE TWO FETCHES WERE
+  GATED ON `#msgsend`** — the Send button, now on the other tab — so on the
+  Overview neither list was ever asked and both said *Asking…* for ever: §93
+  and §51.11 exactly, a gate keyed on markup that moved, failing silently and
+  in the safe-looking direction. Gated on `#msgover`, the thing that draws
+  them. **Found by driving it, not by reading it.**
+- **THE ACTION IS MADE OBVIOUS, AND BOTH CHOICES ARE ISLAM'S (§144.8):** a tab
+  reads as *where you are*, not as *something to do*, so the page's own purpose
+  had no loud control. Three placements were drawn in the real page; he picked
+  **above the lists** over the header, and **"Send an email"** over *Write a
+  message*. **Both costs were stated before he chose and are recorded rather
+  than re-argued**: the button SCROLLS AWAY on a long record (§95's own fault),
+  and the platform now has three nouns for one thing — page *Send a message*,
+  tab *Write a message*, button *Send an email* (§87's twins, in vocabulary).
+  **DRAWN ONLY ON THE OVERVIEW** — a button offering to take you where you
+  already are is a duplicate, not a choice (§94.15) — which holds by
+  construction because it lives inside `#msgover`, and is asserted at BOTH ENDS.
+  **AND THE CAPTURE LIED TWICE BEFORE THE COMPARISON WAS FAIR**: an element
+  screenshot DISPLACES the sticky rows inside it (shooting `.setuppane` dropped
+  the tab row from every option), so the viewport is shot and cropped to the
+  pane's measured box; and the tab row styles its own buttons, so option B's
+  fill had to be forced — which is itself a cost of B, named rather than hidden.
+- **THE BAR REPORTS, AND MOVES ON (v3.50, §136 — SUPERSEDED BY §137):** Islam, using the
+  product: *"When I send I don't get any verification that the message was sent
+  and the page stays the same view."* Both halves true, and two faults. **The
+  outcome was drawn in the failure-neutral voice** — `.why`, 12px, the page's
+  quietest grey — because `reallySend()` works out `ok: !j.failed`, stores it,
+  and **nothing ever read it**: the error path goes through `say()` and turns
+  red, the success path repaints and the repaint drew that span plain. It reads
+  the flag now, in `--good-tx`/`--bad-tx` at `--fs-note` (the first build
+  reached for `--fs-small`, which is the 12px it already was — the check caught
+  it by asking for a size worth READING rather than for a token name).
+  **AND THE LOUD CONTROL STILL SAID NOT-SENT**: the orange button read *Send to
+  76 people* and was live, one press from sending the whole thing again — §95
+  put a confirmation in FRONT of the send *because it cannot be recalled* and
+  then left the button loaded. It becomes **Write another**, never a disabled
+  Send left lying there (a dead control in the loudest slot is furniture, and
+  *Sent* on it beside *Sent* in the outcome is §87's twins). **`sent` IS ITS
+  OWN FLAG**: a refused request and a partial delivery both read `ok:false` and
+  only one must lock the button — a partial send has already reached most of
+  the list, so one press would give those people it twice. **BOTH BUTTONS ARE
+  DRAWN AND ONE IS HIDDEN**, because the way back must not repaint: the message
+  is typed INTO the preview, so a `paint()` on the first keystroke rebuilds the
+  contenteditable and the caret dies mid-word (§35, §71.2) — `sendmsgTouched()`
+  is two `hidden` flags and nothing to rewire (§24, §47.2), called from every
+  surface that changes the message **or who it goes to**. Without it the
+  composer is a dead end (§61): the only control on offer CLEARS, so somebody
+  fixing a typo to re-send would have to throw the fix away to get Send back.
+  **Write another keeps the AUDIENCE** — the recipients are usually the same
+  list and re-picking seventy-six people is real work.
+- **A CHECK MUST BE ABLE TO STAND IN FRONT OF THE PROVIDER (§142.6, §100.3
+  again):** `SMP_RESEND_ENDPOINT` joins `GEMINI_ENDPOINT` as an environment
+  variable defaulting to the real service, because **a test double behind an
+  `if` in `lib/mailer.js` would be a second code path shipping to production**.
+  What each recipient was actually sent is the whole of what spec 021 claims,
+  and the only way to know it is to catch the messages on the wire.
 - **PWA (since v3.1, §26):** `manifest.webmanifest`, `sw.js` and `icons/` at the
   repo root; `vercel.json` sets the content types, and `scripts/dev-server.js`
   carries the same list so it can be tested locally. The worker caches the shell
@@ -2154,6 +2488,13 @@ python3 checks/gap-fill.py      # fill the gaps (§145): the third toggle where 
                                 # and nowhere else, fill mode's fields AND absences, every
                                 # press read back from the DATA, the pending chip and the
                                 # office's tick, the dash, and the Submit refusal
+python3 checks/owner-picker.py  # an owner is picked from the register, not typed: all five
+                                # fields PRESSED through the real popup and the state
+                                # graph read back, both ends each time (§130.1)
+python3 checks/rail-standard.py # one item still gets the rail, on a unit AND a function —
+                                # it MAKES the one-pillar unit, the demo has none (§130.2)
+python3 checks/band-corner.py   # the pinned title's corners, measured in PIXELS because a
+                                # DOM probe calls the broken build clean (§130.3, §53.7)
 python3 checks/no-jump.py       # nothing moves the register under you — the act of
                                 # OPENING a row included, since §110.7
 python3 checks/plan-builder.py  # building a plan ON the platform: the door, the chooser,
@@ -2174,9 +2515,21 @@ python3 checks/setup-search.py  # the rail's search: typing NEVER repaints, a re
                                 # setup-rail.py also measures every rail GLYPH against a
                                 # character guaranteed missing: a mark that is MAPPED and
                                 # not DRAWN ships as a blank box (§52, §120.2)
+python3 checks/setup-header.py  # the page's controls share its pinned line, the counts and
+                                # the SMO pill are gone, the matrix's two header levels stack,
+                                # and a function's focus mark is written and shown (§130)
+python3 checks/send-overview.py # Send a message opens on the record, writing is the second
+                                # subtab, and a send LANDS back on the record with the
+                                # composer emptied — the send that never happened is the
+                                # one case that stays put (§137)
+python3 checks/email-greeting.py # the greeting row is ONE line with no prose, the switch does
+                                # not move, and what the page POSTS names NOBODY — the server
+                                # fills it per recipient (§135, over HTTP)
 python3 checks/setup-pages.py   # every Setup page is named ONCE and in the rail's own word,
                                 # and the name and the table head stay on screen (§121)
 ```
+The mail half needs a database and a password (it spawns its own dev-server):
+`DATABASE_URL=… node scripts/test-email-greeting.js <smo-password>` (§142.6).
 In this cloud image, run any sweep through the wrapper so Playwright finds the
 Chromium that is already here:
 `SMP_CHROME=/opt/pw-browsers/chromium-1194/chrome-linux/chrome python3 qa-run.py <file>`.
@@ -2211,7 +2564,7 @@ prior sessions (on HR_ERP) accidentally reverted agreed-upon designs.
 ---
 
 *Last Updated: 2026-08-28 &mdash; **v3.55: fill the gaps (&sect;145, spec
-021)**. Islam: *"a special type of editing which is just filling the missing
+023)**. Islam: *"a special type of editing which is just filling the missing
 areas — the missing targets, maybe the missing timeline, the missing
 owners."* A third state on the two STRATEGY cells of Roles &amp; access —
 View / **Fill gaps** / Edit — granted per role by the SMO, reaching only a
@@ -2262,6 +2615,219 @@ by `test-authorize.js` &sect;16 (6 red on the pre-build) and
 `checks/gap-fill.py` (fails from its first section on the pre-build; 58
 assertions on the &sect;145.14 shape), plus the round trip on a virgin
 database.*
+
+*Earlier: 2026-08-28 &mdash; **v3.54: Send an email opens on what went
+(&sect;144)**. Islam: *"the opening page ... should be a dashboard of what was
+sent, to whom, how many people ... and when I say create a message it takes me
+to another tab ... and when I finish and send it it should take me back to the
+dashboard and show me that the message was sent there."* **NOTHING NEW IS
+COMPUTED** &mdash; every send already wrote its row, and this is &sect;95's own
+`renderDraftList()` / `renderSentList()` moved out of the header dropdowns they
+were hiding in, so the list cannot say two things depending on where it is
+drawn. **A SEND LANDS ON THE RECORD AND THE COMPOSER IS EMPTIED**, which is
+also how &sect;143's rule survives: the send cannot be repeated by one press,
+by construction rather than by a flag. A partial failure lands there too (the
+message went to most people and the record is where the failures are named);
+**only a send that never happened stays put**. **AND THE TWO FETCHES WERE GATED
+ON `#msgsend`** &mdash; the Send button, now on another tab &mdash; so on the
+Overview neither list was ever asked and both said *Asking&hellip;* for ever:
+&sect;93 and &sect;51.11 exactly, a gate keyed on markup that moved, failing
+silently and in the safe-looking direction. **Found by driving it, not by
+reading it.** **AND THE ACTION IS MADE OBVIOUS** (&sect;144.8): a tab reads as
+*where you are*, not as something to do, so the page's own purpose had no loud
+control &mdash; three placements were drawn in the real page and Islam picked
+**above the lists**, and named the button himself. Both costs were stated
+before he chose and are recorded rather than re-argued: it SCROLLS AWAY on a
+long record, and the platform now carries more than one noun for the one act
+(&sect;87's twins, in vocabulary). **MERGED WITH &sect;135&ndash;&sect;141 FROM
+FOUR OTHER SESSIONS**, which had renamed this very page to *Send an email* and
+given it a second subtab of its own (&sect;135.3): the two section rows are ONE
+row now &mdash; **Overview &middot; Compose &middot; Email settings**, what you
+arrive at, what you do, and what you set once &mdash; and my
+&sect;135&ndash;&sect;137 became &sect;142&ndash;&sect;144 because main had
+taken those numbers first. **The header dropdowns are DELETED, not left
+unused** (&sect;24): with the Overview holding both lists, `renderDraftMenu()`
+and `renderSentMenu()` had no caller, and a builder nobody calls is one the
+next reader takes for load-bearing.*
+
+*Earlier: 2026-08-27 &mdash; **v3.54: the bar reports, and moves on
+(&sect;136)**. Islam, using the product: *"When I send I don't get any
+verification that the message was sent and the page stays the same view."*
+Both halves were true, and they are TWO faults. **Success was written in the
+failure-neutral voice**: the words were there, in `.why` &mdash; 12px, the same
+quiet grey as an empty space &mdash; because `reallySend()` works out
+`ok: !j.failed`, stores it, and **nothing ever read it**, so a FAILED send
+turned red and a successful one got no colour at all. **And the loudest control
+on the bar still said not-sent**: the orange button read *Send to 76 people* and
+was live, with the message and the audience still loaded &mdash; **one press
+from sending the whole thing again**, which is &sect;95 putting a confirmation
+in FRONT of the send *because it cannot be recalled* and then leaving the button
+loaded. It becomes **Write another**, and `sent` is its own flag because a
+refused request and a partial delivery both read `ok:false` and only one of them
+must lock the button. **BOTH BUTTONS ARE DRAWN AND ONE IS HIDDEN**, because the
+way back must not repaint &mdash; the message is typed INTO the preview, so a
+`paint()` on the first keystroke after a send rebuilds the contenteditable and
+the caret dies mid-word; without a way back the composer is a dead end
+(&sect;61), since the only control on offer CLEARS and somebody fixing a typo
+would have to throw the fix away to get Send back. **The first build reached for
+`--fs-small`**, which is the 12px it already was, and the check caught it
+because it asks for a size worth READING rather than for a token name. Proved by
+`checks/send-said.py` (retired by &sect;137, whose own check carries the one
+rule that survived), watched to fail first: the pre-&sect;136 bar restored
+&rarr; **5 failures**; `sendmsgTouched()` removed &rarr; **2**, the dead end
+exactly. **One of its own first-run failures was the check** &mdash; `focus()`
+puts the caret at the START of a contenteditable, so the typed character lands
+first and the assertion had used `endswith`.*
+
+*Earlier the same day: **v3.54: the email greets its receiver
+(&sect;135, spec 021)**. Islam: *"can we make an option while sending the email
+to customize the email by the first name of the reciever like starting the
+email with Dear Ahmed and then the body comes after &mdash; it's a turn on and
+off option."* **Every recipient already received their own email**
+(&sect;74.3's one-message-per-person loop), so nothing about how many go out
+changes &mdash; what changes is that they stop being IDENTICAL, which is why
+the builder leaves a **marked region** and the SERVER fills it once per
+recipient off the stored register (&sect;74.2). The region is **delimited, not
+merely tokenised**: a token typed into the body can never be substituted, and
+an empty name removes the WHOLE paragraph rather than leaving `Dear ,`. The
+name is the register's own reader (&sect;93.8), so a compound first name is
+kept whole &mdash; **"Dear Abd El Moniem", never "Dear Abd"**, which is a real
+row on this register and the reason that question was asked twice.
+**ONE LINE, NO PROSE**, and that is Islam correcting a two-line first draft:
+*"the design of the setting is poor. It should be one line you dont need 2
+lines .. and no explanations needed in the setting itself it's clear."* Right
+twice &mdash; a label reading *Open with a greeting* beside a box holding the
+word *Dear* had already said what the sentence said (&sect;127 from the other
+direction), and the height was not the only cost: **two lines under the message
+made the greeting read as a bigger decision than the button row beneath it**,
+which is one line. **AND THE BUG WAS IN THE PLUMBING**: `SYNC.mailSend()` names
+every field it forwards, so `greet` was silently absent from the posted body
+&mdash; the emails would have been personalised perfectly and
+`messages.greet` would have been NULL on every row, so **the record would have
+said no message ever greeted anybody**. Found by asking what the page POSTS,
+not by reading it. Proved by two halves, each watched to fail first
+(&sect;94.5): `test-email-greeting.js` **stands in front of the provider** via
+the new `SMP_RESEND_ENDPOINT` (&sect;100.3 &mdash; a test double behind an `if`
+in `lib/mailer.js` would be a second code path shipping to production) and
+reads what each recipient was actually sent, asserting each carries **nobody
+else's name**; `checks/email-greeting.py` measures the screen and the seam.
+**Two of that check's own first-run failures were the CHECK**, clustering a
+row's controls by their `top` when three controls of three heights on one line
+have three different tops &mdash; &sect;122.4, already written down once.*
+
+*Earlier, from four other sessions: 2026-08-27 &mdash; **v3.50: the Setup header line, the marking
+table, and a repaired matrix (&sect;135)**. Eleven asks from using the Setup
+pages, of which seven turn out to be **one standard applied to sixteen pages**:
+the page's own search, filters and buttons share the pinned line with its name,
+the `SMO` pill and every count chip go, and the grey briefing paragraph goes
+everywhere. **&sect;121.2 had left those controls on a row of their own for a
+good reason, and that reason forbade the FAKE move rather than the move** &mdash;
+a negative margin pulled a NON-sticky row up under a pinned title and scrolling
+slid it out; putting them INSIDE the header makes them pin with it. **The
+quick filters and the row count go the way the register's did**, and nothing is
+hidden by it: every row carries `data-tkrow` and every one is drawn, so the chip
+narrowed a view and never revealed rows a table was holding back.
+**AND THE DAMAGED MATRIX HAD ONE CAUSE** (&sect;135.2): `.acgrid` is
+`overflow-x:auto`, which makes the BOX &mdash; not the page &mdash; what its
+header pins against, so &sect;121.4's 141px page offset pushed the Roles &amp;
+access header **141px down inside the table**, onto rows three and four. All
+twelve cells at one position, measured. It is the exact fault &sect;121.4 wrote
+down about the register, on the one table its exclusion forgot &mdash; and
+repairing it made &sect;117's *Own business unit* and *Own supporting function*
+headings readable for the first time since the split shipped.
+**FOCUS REACHES SUPPORTING FUNCTIONS** (&sect;135.5), in both of their shapes,
+with the group's board growing the same half or the marks are stored where
+nobody can see them; the switch is a segmented On|Off pair on the header line,
+and the grey note it replaced was printing *"0 0 marks"*. **THE COMPANY IS
+SOMETIMES DERIVED AND SOMETIMES STORED** (&sect;135.6) &mdash; read-only
+wherever the unit has already answered it, written only where nothing else has,
+so two fields cannot contradict one stored fact. **Send a message becomes Send
+an email with the Email settings as its second section** (a status table, four
+fields, a live rendered preview and a test send: not a dropdown), and Inbox
+becomes **Platform Inbox**, and Focus measures moves to *Measurement* — the
+rail's groups answer what you came to do, and somebody opening that page came to
+say which measures matter (&sect;135.11). `checks/setup-header.py` was proved able to fail
+first &mdash; **33 failures against the previous build** &mdash; and **two of
+its own assertions could not fail when written**: one scoped to where the chips
+had moved TO (&sect;113.8), and one measuring `tr.getBoundingClientRect()`,
+which goes on reporting the un-stuck layout because **a table row has no box of
+its own once its cells are positioned**. **Still not reproduced**: the left
+rail's own header and search, measured holding at nine window sizes and three
+scroll positions on this build and on main's.*
+
+*Earlier: 2026-08-27 &mdash; **v3.49: the register notices two people
+whose name reads the same (&sect;131)**. Islam: *"for the names you normally
+take the first 2 names but you allow me to amend the name in the edit. can
+you notify me as an issue to address if 2 people their 1st 2 names are the
+same so I can edit one of them."* &sect;81.1 already LENGTHENS the clashing
+guess so the register stays readable, and never told anybody; the pair now
+also joins the **Attention queue** (&sect;116.2) until a Name is amended to
+read apart, which is the act that clears it. **A notice, never a mark**: a
+shared name is not evidence of one human (&sect;87), so the row wears no
+`.dupemark`, the kind sorts LAST in the queue, and anybody the row already
+flags as a possible duplicate is left to that flag &mdash; telling the SMO to
+RENAME a row that may need MERGING sends them to the wrong control.
+**The comparison is what was stored or guessed, never what is drawn**
+(`readName()`: the typed value or the flat two-name guess), because
+&sect;81.1's lengthening is a disambiguation painted OVER the collision
+&mdash; and a TYPED name that still collides is still flagged, since typed
+values are never lengthened and would read as one person for ever. The
+`read` groups ride `registerDupes()`'s existing walk, so nothing changed
+signature and nothing renders differently &mdash; the queue button, band and
+counter carry the new kind through &sect;116's machinery. Proved in
+`checks/duplicates.py` beside the Ahmeds it already injects, watched to fail
+4 ways on the pre-&sect;131 build first (&sect;94.5); the first run against
+the demo found a real pair &mdash; both placeholder company CEOs read as
+"Company CEO,".*
+
+*Earlier: 2026-08-27 &mdash; **v3.48: an owner is picked, a single item
+keeps its rail, and the pinned title's corners (&sect;130)**, with two of the
+three corrected by Islam LOOKING at them (&sect;130.6, &sect;130.7). **A
+tactic's owner is matched against the register BY NAME** &mdash; `namedOn()`
+reads it beside the collaborators, and that is what makes somebody a
+Contributor who may enter that line's figure. Measured before a line was
+written: **38 owner names across the demo plan, 14 naming nobody, and 32 of the
+78 tactics** owned by a short spelling that matches no one. Five fields become
+lists &mdash; project, milestone, tactic, **pillar** (read-only everywhere in
+the product's life until now), and collaborators as a **ticking** list of
+people or departments. **A stored name outside the register is KEPT in its own
+group** (&sect;96.2), so a plan uploaded before today reads exactly as it did.
+**A ticking list stays open and commits per tick**, which reverses the
+single-select rule on purpose and is safe only because the `data-fld` handler
+writes without repainting. **And a 1px clipped element scrolling is never the
+page moving**: setting `selected` on a `<select multiple>` fires a real
+`scroll` from the hidden native select, which closed the popup on every tick
+near the fold &mdash; invisible for three versions, because the single-select
+path never sets `selected` on anything. **The rail comes back for one item, on
+units AND functions.**
+
+**THEN THE TWO CORRECTIONS, AND BOTH ARE THE SAME LESSON.** The corner fill
+painted in BOTH positions on &sect;53.7's rule that CSS cannot ask whether a
+sticky element is pinned, at a cost I measured at 13px&sup2; and called
+invisible &mdash; *"the corner still has this squared corner."* **The
+arithmetic was right and the place was wrong**: those pixels ARE the card's
+rounded corner, which is where an eye goes. So the one thing CSS cannot ask is
+asked in JavaScript (`pinWatch()`, an IntersectionObserver re-armed after every
+paint), and it **shipped once as a throw** &mdash; declared inside `wire()`,
+called from `paint()`, so every paint ended in *"pinWatch is not defined"* with
+the page still on screen (&sect;118, one section later). And the picker listed
+the **full legal name**: invisible here, because all 33 demo people have a two-
+or three-word name and none has a typed short one, so `knownName()` returns
+`p.name` and the wrong column looked right. It reads the register's **Name**
+now, through `displayNames()` so a clashing pair never reads as one entry
+&mdash; **which meant `namedOn()` had to learn that name**, or &sect;130.1
+undoes itself: the name rule moves into `lib/rules.js` and matches the key, the
+full name, a typed `known`, and every leading run down to the register's short
+form &mdash; **never one name**, or a bare *"Karim"* would hand reporting
+rights to whoever shares it. *Two builds that were correct on the only data
+this repository holds.*
+
+Three new checks, each proved able to fail against the build before it &mdash;
+**20 / 14 / 8**, and after the corrections **4 more** on the names and **6** on
+the corner. The corner check **reported a correct build broken on its first
+run**, because in the dark palette `--surface` sits between `--ground` and
+`--surface-2` and an antialiased pixel lands on it by arithmetic
+(&sect;68.10).*
 
 *Earlier: 2026-08-26 &mdash; **v3.47: building a plan on the platform
 (&sect;129, spec 020)**. Islam: *"I want the team of the SMO to be able to

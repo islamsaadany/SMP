@@ -713,6 +713,65 @@
   .pane > .pband::before {
     content:""; position:absolute; left:-1px; right:-1px; bottom:100%;
     height:calc(var(--rail-gap, 22px) + 2px); background:var(--ground); }
+  /* ── AND THE TWO CORNERS ARE THE SAME WINDOW (§130.3) ─────────────
+     Islam: "the title has round corners so the scrolled up appears in the
+     right and left top corners." Measured before touching it: 13px² of the
+     page's white card, per corner, with rows sliding through it — the band's
+     grey does not reach into a rounded corner, so what is behind it does.
+
+     THE STRIP ABOVE WAS ALREADY PAINTED AND THE CORNERS WERE NOT. That is the
+     whole fault: `::before` covers the gap over the band and stops dead at its
+     top edge, where the two notches begin.
+
+     SO THEY TAKE THE SAME GROUND, from the same token — one surface, one
+     colour, whether you are looking at the strip or at the corner beside it.
+     `--r` twice, because the arc being filled around IS the band's radius: a
+     number of its own here would drift from the radius above the day somebody
+     changes one (§29.4's rule, on a curve instead of a gap).
+
+     AND IT PAINTS ONLY WHILE THE BAND IS PINNED (§130.6). It did not at
+     first — §53.7's rule is that CSS cannot ask, so the strip above the band
+     paints in both positions and this was written the same way, at a cost
+     measured at 1.4px of the pane's own corner arc. Islam looked at it: *"the
+     corner still has this squared corner."* He is right, and the measurement
+     was right too — 13px² is small and it is exactly the card's rounded
+     corner, which is the one place on a card somebody's eye goes. So the ONE
+     thing CSS cannot ask is asked in JavaScript instead (`pinWatch()` in the
+     shell, an IntersectionObserver re-armed after every paint), and this
+     paints only when there is something to cover. At rest the corner is
+     byte-for-byte what it was before any of this.
+
+     STILL A FILL, NOT A SQUARE. Islam, given both: *"fill don't square the
+     corners"* — so the pinned band keeps its rounded corners and takes the
+     page's ground behind them, rather than becoming a flat bar.
+
+     ON THE `::after`, NOT BEHIND THE BAND. A pseudo cannot be put behind its
+     own parent's background once that parent makes a stacking context, and
+     this one does (`position:sticky` with a z-index). It does not need to be:
+     it paints ONLY the notches, which is the one place the band's own
+     background is absent. `pointer-events:none`, or an 8px square in each
+     corner would swallow clicks meant for the pen behind it. */
+  /* PAST THE PANE'S BORDER, EXACTLY AS `::before` DOES (§130.8). The first
+     build filled the notch and stopped at the band's own edge — and the thing
+     Islam was still looking at was not the notch at all: it was the pane's 1px
+     SIDE BORDER, which `::before` covers everywhere above the band and which
+     therefore begins, pinned, as a square-ended stub standing beside a rounded
+     corner. That reads as a squared corner because it is one; the round part
+     is just the thing next to it.
+
+     `left:-1px`/`right:-1px` takes the fill over that border too, and the
+     ARITHMETIC IS WHAT MAKES IT MEET: each tile is `--r + 1` wide so its
+     circle still sits on the BAND's corner centre rather than a pixel out, and
+     the band's arc touches the border's own line exactly where the fill ends —
+     so the card reads as starting, rounded, at the pinned title. */
+  .pane > .pband.pinned::after {
+    content:""; position:absolute; left:-1px; right:-1px; top:0;
+    height:var(--r); pointer-events:none;
+    background:
+      radial-gradient(circle at 100% 100%, transparent calc(var(--r) - .5px),
+        var(--ground) var(--r)) left top / calc(var(--r) + 1px) var(--r) no-repeat,
+      radial-gradient(circle at 0 100%, transparent calc(var(--r) - .5px),
+        var(--ground) var(--r)) right top / calc(var(--r) + 1px) var(--r) no-repeat; }
   /* AND THE RAIL'S COLUMN IS THE SAME WINDOW (§53.7). The strip above the
      pinned band was filled across the PANE only, so beside it — over the rail's
      own column — content kept sliding through: the capability band cut off in

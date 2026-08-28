@@ -1,7 +1,8 @@
 {
   "functions": {
     "api/*.js": {
-      "includeFiles": "db/**"
+      "includeFiles": "db/**",
+      "maxDuration": 30
     }
   },
   "headers": [

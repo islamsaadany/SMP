@@ -6,9 +6,11 @@ version (rules A2 / A11, changed 2026-08-20) — those go only when asked for.
 
 **Where it runs:** Vercel, production tracks `main`. Static files plus two
 serverless functions (`/api/state`, `/api/auth`) against Neon Postgres.
-**Latest version:** v3.55 on `claude/strategy-partial-edit-config-egxkf0`
-(v3.49 on `main`; this branch carries §145 and awaits the merge word)
-**Last updated:** 2026-08-27
+**Latest version:** v3.55 — §145 (fill the gaps) merged over v3.54. Built as
+§132 / v3.50 / spec 021 and renumbered on the way in: four sessions took
+§132–§144, v3.50–v3.54 and specs 021–022 while this one worked, and the
+merge is the only moment a sequential number is real.
+**Last updated:** 2026-08-28
 
 **Sign in as:** `SMO` / `1234` — a password change is forced at once (§43.1,
 reversing §19.4).
@@ -65,7 +67,7 @@ Nothing proceeds past this line without an answer.
 
 ## Built and verified
 
-### v3.55 — fill the gaps (§145, spec 023) — on this branch, not yet merged
+### v3.55 — fill the gaps (§145, spec 023)
 
 - **A third Strategy-cell state, Fill gaps**: the custodian or owner writes
   only where the plan holds nothing — targets, directions, compile rules,
@@ -111,6 +113,253 @@ Nothing proceeds past this line without an answer.
   from every programmatic probe. Red words on `--bad-tx` (§38.5).
   `checks/gap-fill.py` §9 rewritten (58 assertions); qa and the suite
   battery re-run green.
+
+### v3.54 — Send an email opens on what went (§144)
+
+Islam: *"The opening page ... should be a dashboard of what was sent, to whom,
+how many people ... and when I say create a message it takes me to another tab
+... and when I finish and send it it should take me back to the dashboard and
+show me that the message was sent there."* And: *"change messages to
+Overview."*
+
+- **Two subtabs** — **Overview** and **Write a message** — in the platform's
+  own section row, not a page with a button that navigates.
+- **Overview is the record**: drafts under *Not sent yet*, then what was sent
+  with heading, when, **who it went to** (in the platform's own words for roles
+  and places), how many it reached, and by whom. A row still opens what
+  happened to each person.
+- **Sending lands back on the Overview** with a green outcome band and the
+  composer emptied. A partial failure lands there too; only a send that never
+  happened stays put, in red, with the message still loaded.
+- **No grey descriptions** on either tab, and the two header dropdowns are
+  gone. The one sentence carrying a real fact — that the audience criteria add
+  up rather than narrow — moved to the heading's hover.
+- **§143 is superseded**: *Write another* and the bar's outcome line go, and
+  `checks/send-said.py` is deleted rather than left red. Its surviving rule —
+  a send cannot be repeated by one press — now holds by construction.
+- **A loud control for the action** (§144.8): **Send an email**, above the
+  lists. Both the placement and the word are Islam's, picked from three drawn
+  in the real page, and both costs were stated before he chose — the button
+  scrolls away on a long record, and the platform now has three nouns for one
+  thing. Drawn only on the Overview, asserted at both ends.
+
+**The bug it cost:** both list fetches were gated on `#msgsend`, the Send
+button, which now lives on the other tab — so on the Overview neither list was
+ever asked and both said *Asking…* for ever. Found by driving the built page,
+not by reading the diff. Three other checks held the same stale selector and
+were fixed (§51.11).
+
+**Proved:** `checks/send-overview.py`, watched to fail first — the fetches
+re-gated on `#msgsend` → 3 failures; the return-to-record removed → 8. `qa.py`
+green with no console errors; `send-message.py` and `email-greeting.py` green
+after being taught about the tabs.
+
+**On the branch only — not merged to main.**
+
+
+### v3.54 — the bar reports, and moves on (§143)
+
+Islam, using the product: *"When I send I don't get any verification that the
+message was sent and the page stays the same view."*
+
+**The send was working.** Established first, by driving the built platform and
+sending a real message through its own controls. Two faults after that moment,
+both pre-existing §95 code:
+
+- **Success was written in the failure-neutral voice.** The words were there —
+  in 12px, the page's quietest grey. `reallySend()` works out `ok: !j.failed`,
+  stores it, and nothing ever read it: a *failed* send turned red, a successful
+  one got no colour at all.
+- **The loudest control still said not-sent.** The orange button read *Send to
+  76 people* and was live — one press from sending the whole thing again, with
+  nothing on screen to say it had already gone.
+
+Now: the outcome reads in `--good-tx` / `--bad-tx` at `--fs-note`, and the CTA
+becomes **Write another** (clears the message, keeps the audience). `sent` is
+its own flag, because a refused request and a partial delivery both read
+`ok:false` and only one must lock the button. Both buttons are drawn with one
+hidden, so the way back needs no repaint — the message is typed *into* the
+preview and a repaint would kill the caret mid-word.
+
+**Found while building it (§142.8):** the greeting was being emitted *inside*
+`data-mail-body`, the editable region — so one keystroke in the message
+absorbed *"Dear Ahmed,"* into the body text, and the email would have carried
+the greeting twice with the wrong person's name for every other recipient.
+Moved outside; three assertions added.
+
+**Proved:** `checks/send-said.py` — the assertions that matter are that the
+send cannot be repeated by one press (asked by pressing where Send was and
+counting requests) and that the way back exists with the caret intact. Watched
+to fail first: the pre-§143 bar → 5 failures; `sendmsgTouched()` removed → 2.
+`qa.py` green; `send-message.py` and `email-greeting.py` green;
+`test-email-greeting.js` 37/0; `test-authorize.js` 212/0;
+`test-mail-contrast.js` 16/0.
+
+**On the branch only — not merged to main.**
+
+
+### v3.54 — the email greets its receiver (§142, spec 022)
+
+Islam: *"can we make an option while sending the email to customize the email
+by the first name of the reciever like starting the email with Dear Ahmed ...
+it's a turn on and off option."* Settled by question-and-answer, then from a
+mockup of the real composer, then **corrected once by looking at it**.
+
+- **A per-message switch on Send a message**, off by default, with the greeting
+  word editable per message (starting at "Dear"). Send a message only —
+  including *Send me a copy*, which greets whoever is **signed in**.
+- **Every recipient already got their own email** (§74.3), so nothing about how
+  many go out changes; what changes is that they stop being identical. The
+  builder leaves a **marked region** and the server fills it once per recipient
+  off the stored register.
+- **The first name kept whole** — "Dear Abd El Moniem", never "Dear Abd" —
+  using the register's own name reader, so there is no second definition.
+- **Never "Dear ,":** a row whose name yields nothing loses the greeting LINE,
+  and still receives the message.
+- **One line, no prose** (Islam's correction to a two-line first draft), with
+  the word box before the switch so the switch never moves.
+- **Migration 027**: one nullable `greet` column on `messages` and
+  `message_drafts`. NULL is off; nothing backfilled.
+
+**The bug it found:** `SYNC.mailSend()` names every field it forwards, so
+`greet` was silently dropped — the emails would have been personalised
+perfectly and **the record would have said no message ever greeted anybody**.
+
+**Proved:** `test-email-greeting.js` 37/0 (a real Postgres, standing in front
+of the provider via the new `SMP_RESEND_ENDPOINT`, reading what each recipient
+was actually sent); `checks/email-greeting.py` 38/0 (the screen and the seam,
+over HTTP). Both watched to fail first — 8/2/2 and 2/3. `qa.py` green, no
+console errors; `send-message.py`, `setup-pages`, `setup-rail`, `setup-search`,
+`office-chat` green; `test-authorize.js` 212/0; `test-mail-contrast.js` 16/0;
+round trip and clean parity PASS **on virgin databases**.
+
+**On the branch only — not merged to main.**
+
+### v3.51 — Wave 1 of the UI/UX audit: the destination row scrolls (§136)
+
+- **From the platform-wide audit** (branch `claude/platform-ui-ux-audit-4pf8e5`;
+  plan and Wave 1 mockups under `design-mockups/`). Islam chose the scrolling
+  row over the wrap-and-grow chrome (“Decision 1: B”) from live screenshots of
+  the real build at 1024.
+- Below ~1280px the row wrapped inside a 46px box, so the second line painted
+  over the tab row and on some pages ate its clicks (§118.7, seen live at
+  1024). Now the destinations scroll in one line; the Group menu, the
+  Units | Functions switch and the gear are pinned outside the scroll region;
+  fades show each side only while that side has more; the lit destination is
+  scrolled into view on every paint.
+- `checks/nav-scroll.py` — fails 6 ways on the pre-§136 build, green here,
+  with page-width, setup-rail, setup-header and the full qa.py sweep re-run
+  beside it. **Not merged — on the branch awaiting Islam's word.**
+- **§137 — a failed render says so on the page.** The guard sits on the page's
+  render alone, so the chrome and navigation stay alive and the card's "open
+  another page from the menu above" is true. Islam's words after revising the
+  mockup: simple, friendly, one Reload button, the error folded behind a
+  closed "Technical details". `checks/render-fail.py` fails 3 ways on the
+  pre-§137 build — the production symptom verbatim.
+- **§138 — the last 800ms survive leaving the page (closes §126.1).** One
+  function in sync.js: on visibilitychange/pagehide anything waiting to save
+  is sent immediately (keepalive under 64KB, plain fetch over). Touches no
+  save bookkeeping, skips while a save is in flight (ordering), sends nothing
+  when clean. `checks/save-flush.py` reproduces §126.1 end to end on the old
+  build (0 posts, edit lost) and passes here; `test-roundtrip.js` re-run
+  against a throwaway Postgres 16 — all PASS.
+
+
+### v3.50 — the Setup header line, the marking table, and a repaired matrix (§135)
+
+- Eleven asks from using the Setup pages. **Seven of them are one standard
+  applied to sixteen pages**: the page's own search and buttons share the
+  pinned line with its name, the `SMO` pill and every count chip go, the quick
+  filters and the row count go the way the register's did, and the grey
+  briefing paragraph goes everywhere.
+- **§121.2 had left those controls on a row of their own for a good reason,
+  and that reason forbade the FAKE move rather than the move** — a negative
+  margin pulled a non-sticky row up under a pinned title and scrolling slid it
+  out. Inside the header they pin with it.
+- **Roles & access is repaired, and it had one cause** (§135.2): `.acgrid` is
+  `overflow-x:auto`, so the BOX — not the page — is what its head pins against,
+  and §121.4's 141px page offset pushed the header 141px down inside the table,
+  onto rows three and four. The exact fault §121.4 wrote down about the
+  register, on the one table its exclusion forgot. Repairing it made §117's
+  *Own business unit* and *Own supporting function* headings readable for the
+  first time since the split shipped.
+- **Focus measures reaches supporting functions** in both of their shapes, with
+  a segmented On|Off switch on the header line, a navigation-style destination
+  row carrying each place's mark count, and one table headed like the register.
+  The group's Focus board grows the same half, or the marks are stored where
+  nobody can see them (§61).
+- **Send a message → Send an email**, with the Email settings folded in as its
+  second section (a status table, four fields, a live rendered preview and a
+  test send: not a dropdown). **Inbox → Platform Inbox**, and Focus measures moves to *Measurement*.
+- **A person's company is sometimes derived and sometimes stored** (§135.6):
+  read-only wherever the unit has already answered it, written only where
+  nothing else has, so two fields cannot contradict one stored fact.
+- **A four-pixel slot was closed** (§135.10): `--sethead-h` was a guessed 46px
+  and the header is 42–49px depending on the page, so scrolling rows showed
+  through the gap between the two pinned headers. Published by a
+  ResizeObserver now.
+- `checks/setup-header.py` was proved able to fail first — **33 failures
+  against the previous build** — and **two of its own assertions could not
+  fail when written** (§113.8's blind spot, and `tr.getBoundingClientRect()`
+  reporting the un-stuck layout).
+- Verified after the merge: `qa.py`, setup-header, setup-rail, setup-pages,
+  setup-search, register-header, focus-switch, role-picker, table-standard-all,
+  no-wrap, and main's own band-corner, owner-picker and rail-standard all
+  green; `test-authorize` 212/0; **round trip and clean parity on a virgin
+  Postgres 16** (§113.7); contrast 52 failures, unchanged, none on the new
+  surfaces.
+
+### v3.52 — the Knowledge base in two tabs (§141)
+
+How it works 9 | Questions & answers 43 — counts on the tabs, contents pills
+per tab, the pen on the questions tab alone, the tour's replay with the
+explanations, and the last-used tab remembered per browser. Server untouched.
+
+**Verified:** kb-pen.py §0 (failed 4 ways with the default flipped) ·
+knowledge-base.py re-taught to gather from both tabs after going loudly red ·
+tour.py clean · qa.py ERRORS: none.
+
+### v3.52 — the knowledge base gets a pen (§140)
+
+The office edits the assistant's scenarios on the page they are read from —
+approved from a mockup first. One precedence rule in `lib/rules.js` feeds the
+page AND the assistant's corpus, so the two can never disagree; overrides ride
+`org.extra`, delete on default, and the shipped wording is always one click
+back. Standard entries can be rewritten but never deleted; own questions can be
+added per group and removed. Typed text renders escaped.
+
+**Verified:** driven against a real Postgres including the reload round trip ·
+kb-pen.py ALL CLEAR, failing 2 ways with the rule broken · test-assistant 45/0
+· test-authorize 215/0 · extract-kb --check in step · qa.py clean.
+
+### v3.52 — the send says what is happening (§139)
+
+The "glitch": with the assistant on, `say` holds its response for the model
+round-trip, so the typed message sat in the box for seconds. Now it moves into
+the thread the moment Send is pressed, the box empties, and a quiet *Asking
+the assistant…* line shows until the reply replaces the echo. A failed send
+puts the words back in the box; the poll skips a beat while a send is in
+flight so it cannot erase the echo; a network failure says "That did not
+send" instead of the browser's "Failed to fetch".
+
+**Verified:** driven against a 4s-slow model and an aborted send ·
+office-chat.py §13 permanent, failing 3 ways on the pre-§139 build.
+
+### v3.49 — the register notices two people whose name reads the same (§131)
+
+- Islam: *"notify me as an issue to address if 2 people their 1st 2 names are
+  the same so I can edit one of them."* The pair now joins the **Attention
+  queue** on the People register — the button counts them, opening it walks to
+  each with the reason above the fields, naming the other person in full.
+- **A notice, never a duplicate mark** (§87: a shared name is not one human),
+  and it sorts last — collisions, declarations and missing identifiers stay
+  worse. Anybody already flagged as a possible duplicate is left to that flag.
+- **Amending one Name clears both**; a typed Name that still collides stays
+  flagged, because typed values are never auto-lengthened (§81.1).
+- Proved in `checks/duplicates.py` (watched to fail 4 ways on the pre-§131
+  build), with `identity-merge`, `people-dialog`, `table-standard` and the
+  full `qa.py` sweep green. Found on the way: the demo's two placeholder
+  company CEOs genuinely read the same ("Company CEO,") and now say so.
 
 ### v3.47 — building a plan on the platform (§129, spec 020)
 
@@ -170,6 +419,83 @@ the layout, each watched to fail first · qa.py ERRORS: none · test-chat 52/0 �
 test-assistant 33/0 · test-authorize 193/0. **One assertion was rewritten for
 being unfalsifiable** — it measured the row against the panel, and a row is
 inside its own panel by definition.
+
+### v3.50 — the knob's guard keyed on words the provider never says (§134.5)
+
+§134 shipped and went straight down in production: gemini-3.6-flash refuses
+the thinking cap with the GENERIC "400: Request contains an invalid argument."
+— and the self-healing retry only fired when the 400 named thinking, because
+the stub imitated the documentation's verbose refusal instead of the
+provider's real one. The guard now keys on the situation (a 400 on a request
+that carried the knob), never the wording. Stub corrected to production's
+verbatim words; the shipped guard reproduces the production failure 2 ways in
+the suite; 39/0 after.
+
+### v3.49 — the thinking cap (§134)
+
+§133's 20s budget blew on its first preview run — the same model, the same
+question, under 12s the hour before. Reasoning time is a lottery, so the fix is
+not a bigger timeout: **thinking is capped at nought**, because answering from
+a corpus that is in the prompt is retrieval, not reasoning. And since the
+knob's contract on future models is unknowable, **a 400 naming thinking drops
+the knob and re-asks once**, remembered per process — a config knob must never
+be what takes the assistant down. Bad keys are never retried into.
+
+**Verified:** test-assistant 38/0 (retry watched to fail — 2), test-chat 52/0,
+built file byte-identical. The preview URL's CSP console error is Vercel's SSO
+layer fetching the manifest — harmless, absent from production (§134.3).
+
+### v3.49 — the reply that never came back (§133)
+
+Every diagnostic row green, and still no reply in the chat. The diagnostic and
+the conversation share one code path; what differs is time. Two budgets fixed:
+
+- **The function outlives the model now** — the model timeout was 12s inside
+  Vercel's default 10s function cap, so a slow answer had the whole function
+  killed under it after the message was stored and before any reply or handoff
+  could be written. `api/*.js` gets 30s; the model gets 20.
+- **Thinking counts** — Gemini 2.5+ bills its reasoning against
+  `maxOutputTokens`, so the 700 cap could be eaten whole by thought and the
+  truncated JSON read as a failure, which by design writes nothing. Now 2048.
+- **Failures reach the operator** — one `console.error` with the provider's own
+  reason, into the Vercel function log. The person's silence (§112.2) is
+  untouched; proved by driving a real `say` against a quota-refusing stub.
+
+**Verified:** test-assistant 34/0 · test-chat 52/0 · the say-path failure
+observed in the log with the provider's reason while the send still succeeded ·
+built file byte-identical (server-only).
+
+### v3.49 — the key was right, the model was retired (§132)
+
+The re-issued key WORKS — Google's 404 proved authentication passed — and the
+404's own text named the last problem: `gemini-2.5-flash` is retired for new
+users. SF keeps using it on its old project; SMP's fresh project cannot. The
+default moves to `gemini-3.6-flash` (Google's recommendation, verbatim);
+`GEMINI_MODEL` still overrides.
+
+And §126's shape row called the newer `AQ.`-prefixed key "a different kind of
+credential" while the provider accepted it one step later. Both Google shapes
+are recognised now; an unmatched one reads UNRECOGNISED, never wrong — a
+heuristic never overrules the provider.
+
+**Verified:** test-assistant 34/0, the new assertion watched to fail · both
+cases driven end to end through the diagnostic · built file byte-identical
+(server-only, no SHELL bump).
+
+### v3.48 — §126 resolved: the key was not the key (redeploy commit)
+
+The diagnosis held. Comparing against Strategy-Formulation's working Gemini
+setup showed the two projects byte-equivalent on the wire — same env name,
+same model, same endpoint, same header — so the only remaining difference was
+the stored VALUE in this project's Vercel environment. Islam's own AI Studio
+chart agreed: SMP_Key had accepted a real request, while the deployment's copy
+was refused, which means the deployment held a different string.
+
+Islam deleted and re-added `GEMINI_API_KEY` in Vercel. **This commit exists to
+trigger the build that bakes it in** — a deployment only carries the variables
+that existed when it was built, and editing one changes nothing until the next
+build. Proof on screen after deploy: Test the assistant → the key row's length
+and first four characters match SMP_Key, and the model row reads WORKING.
 
 ### v3.46 — which key, without saying which key (§126)
 

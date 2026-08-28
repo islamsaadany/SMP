@@ -145,9 +145,26 @@ with sync_playwright() as p:
     pg.query_selector('#panel [data-page="plan"]').click(); pg.wait_for_timeout(300)
     ck("the target left empty reads as missing ON THE PAGE",
        pg.evaluate("document.querySelector('#panel').textContent.includes('Missing')"))
-    # a CLOSED pen appears on hover (§30) — hover its container, then press,
-    # with no forcing (§70: what Playwright cannot click, a finger cannot)
-    pg.hover('#panel .hoverpen'); pg.wait_for_timeout(100)
+    # THE PEN A ONE-PILLAR UNIT CARRIES CHANGED SHAPE (§130.2). This hovered
+    # `#panel .hoverpen` unconditionally, which is the pen on a pillar TITLE —
+    # and a unit with one pillar is railed now, so the title is a band and the
+    # pen is the pane's own corner one, which needs no hover at all (§70: that
+    # is the pen §70 made always visible, because a hover never happens on a
+    # touch screen). Keyed on the old markup this timed out for thirty seconds
+    # on a build that is correct — §51.11, and the reason the rule says to grep
+    # every check when a control changes shape.
+    #
+    # SO IT ASSERTS WHAT MATTERS instead: a pen is on the page and a click at
+    # its own centre reaches it, whichever of the two it is.
+    hp = pg.query_selector('#panel .hoverpen')
+    if hp:
+        hp.hover(); pg.wait_for_timeout(100)
+    ck("the closed pen is reachable where it sits", pg.evaluate("""()=>{
+      const p=document.querySelector('#panel [data-page="plan"]');
+      if (!p) return false;
+      const r=p.getBoundingClientRect();
+      const at=document.elementFromPoint(r.left+r.width/2, r.top+r.height/2);
+      return !!at && (at===p||p.contains(at)||at.contains(p));}"""))
     pg.query_selector('#panel [data-page="plan"]').click(); pg.wait_for_timeout(300)
 
     print("\n── 6 · the surfaces that could never start (§129's audit) ──")

@@ -54,6 +54,11 @@ with sync_playwright() as p:
     pg.wait_for_timeout(900)
 
     print("\n1 · the page")
+    # §141 split the page into two tabs — the explanations open first, the
+    # recipes live behind Questions & answers — so the counts this file guards
+    # are gathered from BOTH tabs, not from whichever happens to be open.
+    # (§51.11: this check went red the day the tabs landed, which is the loud
+    # failure that rule asks for; this is the fix, not a silencing.)
     m = pg.evaluate("""()=>({
         sections: document.querySelectorAll('.kb-sec').length,
         howGroups: document.querySelectorAll('.kb-how').length,
@@ -68,6 +73,23 @@ with sync_playwright() as p:
                         .map(r=>r.id),
         unsubstituted: /\\{pillar/.test(document.body.innerText),
         officeMarks: document.querySelectorAll('.kb-rec .pill').length })""")
+    pg.evaluate("()=>{const b=document.querySelector('[data-kbtab=qa]'); if(b) b.click();}")
+    pg.wait_for_timeout(700)
+    m2 = pg.evaluate("""()=>({
+        howGroups: document.querySelectorAll('.kb-how').length,
+        recipes: document.querySelectorAll('.kb-rec').length,
+        tocBroken: [...document.querySelectorAll('.kb-toc a')]
+                     .filter(a=>!document.querySelector(a.getAttribute('href')))
+                     .map(a=>a.textContent),
+        emptyAnswers: [...document.querySelectorAll('.kb-rec')]
+                        .filter(r=>!r.querySelector('.kb-p') ||
+                                   !r.querySelector('.kb-p').textContent.trim())
+                        .map(r=>r.id),
+        officeMarks: document.querySelectorAll('.kb-rec .pill').length })""")
+    m["howGroups"] = m2["howGroups"]; m["recipes"] = m2["recipes"]
+    m["tocBroken"] = m["tocBroken"] + m2["tocBroken"]
+    m["emptyAnswers"] = m["emptyAnswers"] + m2["emptyAnswers"]
+    m["officeMarks"] = m2["officeMarks"]
     ck("a unit head can open it at all", m["sections"] > 0, m)
     ck("every how-to group is drawn (%d)" % m["howGroups"], m["howGroups"] > 0, m)
     ck("every recipe has an answer", not m["emptyAnswers"], m["emptyAnswers"])

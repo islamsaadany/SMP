@@ -96,7 +96,48 @@ var MAIL = (function(){
     return hexOf([0,1,2].map(function(i){ return A[i]*(1-t) + B[i]*t; }));
   }
 
-  /* o: { org, title, body, footer, accent, panel, cta:{label,href} } */
+  /* ── THE GREETING (spec 022) ────────────────────────────────────────
+     Islam: "customize the email by the first name of the receiver like
+     starting the email with Dear Ahmed and then the body comes after."
+
+     IT IS THE FIRST PARAGRAPH OF THE BODY, in the body's own type — not a
+     heading and not a styled banner. A greeting that wears a different size
+     from the sentence after it reads as a label on the message rather than as
+     the opening of it.
+
+     TWO MODES, ONE FUNCTION. Given a `name` it writes it (the composer's
+     preview, and the copy the sender takes for themselves); given none it
+     writes the MARKED REGION `SMPRules.greetFill()` fills once per recipient
+     on the server, because who the recipients are is the server's answer
+     (§74.2). Either way this is the only place the greeting's markup exists.
+
+     `SMPRules` is a global here: build.py inlines lib/rules.js FIRST, and
+     scripts/test-mail-contrast.js hands it in for the same reason. */
+  function greetPara(g, colour){
+    if (!g) return "";
+    var word = String(g.word == null ? "" : g.word).trim() || "Dear";
+    var p = function(inner){
+      return '<p style="margin:0 0 16px;font:400 15px/1.6 Helvetica,Arial,sans-serif;' +
+        'color:' + colour + '">' + inner + '</p>';
+    };
+    /* AN ABSENT `name` AND AN EMPTY ONE ARE DIFFERENT ANSWERS, and reading
+       them as one produced the only "Dear ," this feature can make. Absent
+       means "the server will fill it"; PRESENT AND EMPTY means the caller
+       looked and there is no name — which is exactly what `Send me a copy`
+       hands over when the signed-in sender's own row has none. Falling back to
+       the region there would emit markers nobody fills, and an HTML comment
+       renders as nothing: the reader would get "Dear ,". */
+    if (g.name !== undefined) {
+      var who = String(g.name == null ? "" : g.name).trim();
+      return who ? p(e(word) + " " + e(who) + ",") : "";
+    }
+    var R = (typeof SMPRules !== "undefined") ? SMPRules : null;
+    if (!R) return "";
+    return R.GREET_OPEN + p(e(word) + " " + R.GREET_NAME + ",") + R.GREET_CLOSE;
+  }
+
+  /* o: { org, title, body, footer, accent, panel, cta:{label,href},
+          greeting:{word,name} } */
   function html(o){
     o = o || {};
     var accent = accentOf(o), panel = panelOf(o);
@@ -157,6 +198,21 @@ var MAIL = (function(){
                 'color:' + ink + '">' + e(o.title) + '</h1>'
               : '<h1 data-mail-title style="margin:0 0 14px;font:700 22px/1.3 Helvetica,Arial,sans-serif;' +
                 'color:' + ink + '"></h1>') +
+            /* ── THE GREETING SITS OUTSIDE `data-mail-body`, AND THAT IS
+               NOT COSMETIC. That div is the composer's EDITABLE region: the
+               message is typed straight into the preview (§76.3) and read
+               back with `b.innerText`. Put the greeting inside it and the
+               first keystroke in the message absorbs "Dear Ahmed," into the
+               body text — after which the email carries the greeting twice
+               and the stored message holds a name that was never typed.
+               Measured, not reasoned: `body` came back as
+               "…Dear Ahmed,\n\nThe cycle opens…" after one character.
+
+               Visually identical — both are block children of the same cell —
+               and it is what makes the greeting line un-editable, which is
+               right: it is the one part of the message that differs in every
+               inbox. */
+            greetPara(o.greeting, ink) +
             '<div data-mail-body>' + paras(o.body, ink) + '</div>' + cta +
           '</td></tr>' +
 

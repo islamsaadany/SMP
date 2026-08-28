@@ -187,10 +187,6 @@ READ = """() => {
                    return e ? Math.round(e.getBoundingClientRect().height) : null; })(),
     moreLabel: (() => { const e = document.querySelector("[data-audnames]");
                         return e ? e.textContent.trim() : null; })(),
-    /* THE HEADER'S COUNT, asked by its own hook rather than by position —
-       and asserted, because that is exactly what stopped matching (§95.7). */
-    headCount: (() => { const e = document.querySelector("[data-audcount]");
-                        return e ? e.textContent.trim() : null; })(),
     draftBtn: (() => { const e = document.querySelector("[data-draftmenu]");
                        return e ? e.textContent.replace(/\\s+/g, " ").trim() : null; })(),
     sentBtn: (() => { const e = document.querySelector("[data-sentmenu]");
@@ -252,6 +248,12 @@ def go():
             pg.wait_for_timeout(70)
         pg.click('.setuprail [data-setupgo="send"]')
         pg.wait_for_timeout(900)
+        # SEND A MESSAGE IS TWO SUBTABS NOW (§144): it opens on the Overview,
+        # and the composer — which is all this file measures — is the second.
+        # §51.11: when a control changes shape, every check holding the old
+        # selector has to be found, not only the one that failed first.
+        pg.click('.secrow [role=tab]:nth-of-type(2)')
+        pg.wait_for_timeout(900)
         if not pg.query_selector("#msgsend"):
             ck("the page opens", False, "no send button")
             return
@@ -294,9 +296,13 @@ def go():
         # control a full repaint would have fixed and this never touches (§95).
         # Asked here, before anything else on this page repaints, or the
         # measurement is of the repaint rather than of the answer.
-        ck("and the header says so too",
-           pg.evaluate(READ)["headCount"] == "76 recipients",
-           pg.evaluate(READ)["headCount"])
+        # THE HEADER CHIP IS GONE (§135.1). Islam: "remove the tag SMO and
+        # nobody chosen." The count was being said twice, and §95 had already
+        # settled which of the two matters — the control that ACTS. So what is
+        # asserted is that it is gone AND that the Send button still carries the
+        # number: a build that dropped both would otherwise pass the removal.
+        ck("the header no longer says it a second time",
+           not pg.evaluate("()=>!!document.querySelector('[data-audcount]')"))
         ck("and the Send button already carries the count",
            pg.evaluate(READ)["sendLabel"] == "Send to 76 people",
            pg.evaluate(READ)["sendLabel"])
@@ -330,58 +336,42 @@ def go():
             ck("the Send button is pressable " + where, h["sendHits"] == "itself",
                h["sendHits"])
 
-        # ── DRAFTS AND SENT LEFT THE SCROLL ─────────────────────────
+        # ── THE LISTS MOVED AGAIN, TO THE OVERVIEW TAB (§144) ───────
+        # §95 put Drafts and Sent in header dropdowns to get them out of the
+        # scroll; §144 gave the page an Overview tab and they live there now.
+        # This block asserted WHERE they were, which a supersession makes
+        # false — so it asserts what it was really protecting instead: that
+        # both lists are reachable, that nothing in them is cut off without a
+        # hover, and that a sent row opens what happened to each person.
         r = pg.evaluate(READ)
-        ck("Drafts is a header button carrying its count",
-           r["draftBtn"] and r["draftBtn"].startswith("Drafts") and "2" in r["draftBtn"],
-           r["draftBtn"])
-        ck("Sent is too", r["sentBtn"] and r["sentBtn"].startswith("Sent") and
-           "1" in r["sentBtn"], r["sentBtn"])
-        # MEASURED AT THE TOP. The page was scrolled to the end a moment ago,
-        # and elementFromPoint answers about the VIEWPORT — a header button
-        # off-screen reports as unreachable, which is the check being wrong
-        # rather than the product (§68.10's fault, in miniature).
-        pg.evaluate("window.scrollTo(0,0)")
-        pg.wait_for_timeout(200)
-        ck("and it is pressable", pg.evaluate(READ)["draftHits"] == "itself",
-           pg.evaluate(READ)["draftHits"])
-        # BOTH ENDS (§90): gone from the page, present in the header.
-        ck("neither is a section in the page any more",
+        ck("neither list is a header dropdown any more",
+           not r["draftBtn"] and not r["sentBtn"],
+           "%s / %s" % (r["draftBtn"], r["sentBtn"]))
+        ck("nor a section of the composer",
            "Drafts" not in r["bodySecs"] and "Sent" not in r["bodySecs"], r["bodySecs"])
         ck("the button is a row under the composer, not a section of its own",
            r["ctaRow"] and "A button" not in " ".join(r["bodySecs"]), r["bodySecs"])
 
-        # NOTHING IN EITHER PANEL IS CUT OFF WITHOUT A HOVER. §88's 150px cell
-        # cap is deliberately off inside a panel (§95.5) — these tables are
-        # fixed-layout with an explicit share per column, so a cell cannot hold
-        # one open — and a heading clipped to "Half-wri…" is a draft nobody can
-        # tell from the next one.
-        clipped = """() => { const t = document.querySelector(".hmenu-panel.wide table");
-          if (!t) return null;
-          return [...t.querySelectorAll("td,th")]
-                 .filter((c) => c.scrollWidth > c.clientWidth + 1 && !c.title)
-                 .map((c) => c.textContent.trim().slice(0, 24)); }"""
-        pg.click("[data-draftmenu]")
-        pg.wait_for_timeout(300)
-        ck("the drafts open in the header",
-           pg.evaluate("() => !!document.querySelector('.hmenu-panel.wide [data-draftopen]')"))
-        cl = pg.evaluate(clipped)
-        ck("and nothing in them is cut off without a hover", cl == [], cl)
-        pg.keyboard.press("Escape")
-        pg.wait_for_timeout(250)
-        ck("and Escape closes them",
-           pg.evaluate("() => !document.querySelector('.hmenu-panel.wide')"))
-        pg.click("[data-sentmenu]")
-        pg.wait_for_timeout(300)
-        cl = pg.evaluate(clipped)
-        ck("nor in the sent list", cl == [], cl)
-        # The row is the way in to who got it (§93.15) — a record nothing opens
-        # is the fault that section exists to fix.
-        ck("and its row opens what happened to each person",
-           pg.evaluate("() => !!document.querySelector('.hmenu-panel.wide [data-sentone]')"))
-        pg.keyboard.press("Escape")
-        pg.wait_for_timeout(250)
+        pg.evaluate("window.scrollTo(0,0)")
+        pg.click('.secrow [role=tab]:nth-of-type(1)')
+        pg.wait_for_timeout(900)
+        ck("both lists are on the Overview",
+           pg.eval_on_selector_all("#msgover .section h2", "e=>e.map(x=>x.textContent.trim())")
+             == ["Not sent yet", "What has been sent"],
+           pg.eval_on_selector_all("#msgover .section h2", "e=>e.map(x=>x.textContent.trim())"))
+        ck("the drafts are openable there",
+           pg.evaluate("() => !!document.querySelector('#msgover [data-draftopen]')"))
+        ck("and a sent row opens what happened to each person",
+           pg.evaluate("() => !!document.querySelector('#msgover [data-sentone]')"))
+        # §88's 150px cell cap is off inside these tables (§95.5) — a heading
+        # clipped to "Half-wri…" is a draft nobody can tell from the next one.
+        cl = pg.evaluate("""() => [...document.querySelectorAll("#msgover td,#msgover th")]
+              .filter((c) => c.scrollWidth > c.clientWidth + 1 && !c.title)
+              .map((c) => c.textContent.trim().slice(0, 24))""")
+        ck("and nothing in either is cut off without a hover", cl == [], cl)
 
+        pg.click('.secrow [role=tab]:nth-of-type(2)')
+        pg.wait_for_timeout(900)
         # ── THE CONFIRMATION IS THE PLATFORM'S OWN ──────────────────
         pg.evaluate("window.scrollTo(0,0)")
         pg.click("#msgsend")
@@ -439,19 +429,27 @@ def go():
                 pg.wait_for_timeout(250)
                 surfaces = [("the audience summary", "#audout"),
                             ("the send bar", ".sendbar"),
-                            ("the header counts", ".phead2 .hright")]
+                            # §130 EMPTIED `.hright` ON THIS PAGE (the SMO pill
+                            # and every count chip went with the header line) and
+                            # §144 took the two dropdowns to the Overview — so the
+                            # selector this measured is genuinely absent now, and
+                            # the surface worth measuring is the header that is
+                            # left: the page's own name. Repointed rather than
+                            # deleted, or the line nobody looks at goes unmeasured
+                            # (§94.2 — an assertion removed is coverage removed).
+                            ("the page header", ".setuphead")]
                 for name, sel in surfaces:
                     # THE SWEEP'S FUNCTION TAKES A SELECTOR, not an element —
                     # it scans `root + ' *'` so a modal can pass its own root
                     # and not be counted with the page behind it (§50.6).
                     f = pg.evaluate(CONTRAST_JS, sel) if pg.query_selector(sel) else "absent"
                     ck(name + " reads, in " + theme, f == [], f)
-                pg.click("[data-sentmenu]")
-                pg.wait_for_timeout(300)
-                f = pg.evaluate(CONTRAST_JS, ".hmenu-panel.wide")
+                pg.click('.secrow [role=tab]:nth-of-type(1)')
+                pg.wait_for_timeout(800)
+                f = pg.evaluate(CONTRAST_JS, "#msgover")
                 ck("the sent panel reads, in " + theme, f == [], f)
-                pg.keyboard.press("Escape")
-                pg.wait_for_timeout(200)
+                pg.click('.secrow [role=tab]:nth-of-type(2)')
+                pg.wait_for_timeout(800)
                 pg.click("#msgsend")
                 pg.wait_for_timeout(350)
                 f = pg.evaluate(CONTRAST_JS, ".sendconfirm")

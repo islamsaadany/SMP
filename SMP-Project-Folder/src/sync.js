@@ -458,6 +458,53 @@ var SYNC = (function () {
       .catch(function (e) { done(String(e.message || e), null); });
   }
 
+  /* ── THE LAST 800ms SURVIVE LEAVING THE PAGE (§138, closing §126.1) ─────
+     The debounce above means an edit made and the tab closed or hidden inside
+     that window was never sent: the screen showed the new value, the database
+     never received it — every page in the product, invisibly. So when the tab
+     goes away, anything waiting is sent NOW.
+
+     Deliberately not save(): this path touches none of the bookkeeping
+     (`saving`, `lastSaved`, `refusedBody` stay as they are), because if the
+     tab comes BACK the ordinary path must still compare and decide for
+     itself — and a duplicate POST of an identical state diffs empty on the
+     server and costs nothing (§42). It also interprets no answer: on the way
+     out there is nobody to show a refusal to; the ordinary path re-earns one
+     on the next change.
+
+     `keepalive` is what lets the request outlive the page, and it caps the
+     body at 64KB — over the cap this becomes a plain fetch, which completes
+     whenever the tab is merely hidden (the common case: a switch-away, a
+     minimise, and every close passes through hidden first) and is
+     best-effort on a hard kill. Stated rather than glossed: a state graph
+     over 64KB closed in under 800ms can still lose the race.
+
+     SKIPPED WHILE A SAVE IS IN FLIGHT, on purpose: two concurrent POSTs have
+     no ordering, and an older body landing after a newer one would UNDO the
+     newer — losing more than the keystroke this exists to keep. The window
+     left open (an edit made during an in-flight save, the tab gone before it
+     settles) is the small corner of a small corner, and the 5s interval owns
+     it whenever the tab survives. */
+  function flushLeave() {
+    if (!live || isDemoMode() || saving) return;
+    if (timer) { clearTimeout(timer); timer = null; }
+    var now = serialize();
+    if (now === lastSaved || now === refusedBody) return;
+    var body = '{"state":' + now + "}";
+    try {
+      fetch("/api/state", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: body,
+        keepalive: body.length < 60000
+      });
+    } catch (e) { /* leaving anyway — the console has nothing useful to add */ }
+  }
+  document.addEventListener("visibilitychange", function () {
+    if (document.hidden) flushLeave();
+  });
+  window.addEventListener("pagehide", flushLeave);
+
   return {
     isLive: function () { return live; },
     /* Flush now rather than on the next 800ms tick, and say what happened.
@@ -521,15 +568,23 @@ var SYNC = (function () {
         function (err, j) { done(err, err ? null : j); });
     },
     mailSend: function (o, done) {
+      /* `greet` is the WORD, and it is here for the RECORD rather than for the
+         send: the personalisation rides in the html's marked region, so a
+         build that dropped this would mail perfectly and write a record saying
+         no message ever greeted anybody (spec 022). Which is what happened —
+         this function names every field it forwards, so the new one was
+         silently absent until the check asked what was posted. */
       mailPost({ action: "send", draftId: o.draftId,
                  criteria: o.criteria, subject: o.subject, body: o.body,
                  ctaLabel: o.ctaLabel, ctaHref: o.ctaHref, html: o.html,
+                 greet: o.greet,
                  fromName: o.fromName, replyTo: o.replyTo },
         function (err, j) { done(err, err ? null : j); });
     },
     mailDraftSave: function (o, done) {
       mailPost({ action: "draftSave", id: o.id, subject: o.subject, body: o.body,
-                 ctaLabel: o.ctaLabel, ctaHref: o.ctaHref, criteria: o.criteria },
+                 ctaLabel: o.ctaLabel, ctaHref: o.ctaHref, greet: o.greet,
+                 criteria: o.criteria },
         function (err, j) { done(err, err ? null : j); });
     },
     mailDraftList: function (done) {

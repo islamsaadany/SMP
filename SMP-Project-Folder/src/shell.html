@@ -360,6 +360,24 @@
                   { k:"fill", ac:"c_source", label:"Fill a figure set",
                     when: canPickSets,                                 render:renderSourceSetup }];
         } },
+      /* ── FOCUS MEASURES SITS WITH MEASUREMENT (§135.11) ──────────────
+         Islam: *"move the focus measures to measurement."*
+
+         IT WAS IN *Running the cycle* FOR A REAL REASON AND IT IS NOT THE
+         BETTER ONE. The marks belong to the cycle — `CYCLE.focus`, cleared
+         when a new one opens (§102), so it IS something you do while a cycle
+         is open. But the rail's groups answer *what did you come here to do*
+         (§46), and somebody opening this page came to say which measures
+         matter, which is what *Measurement — what the numbers mean* is for.
+         The cycle group is the things you do to RUN a cycle; this is a
+         statement about the measures themselves that happens to be re-asked
+         each cycle.
+
+         `grp` is the only thing that changes. The key, the access key, the
+         glyph, the keywords and the page are untouched — and the group is
+         the one place order is decided (SETUP_GROUPS), so nothing else needs
+         to know it moved. */
+      { k:"focusset", ac:"c_focus", grp:"meas", label:"Focus measures", glyph:"◎", find:"focus watch highlight measures",                render:renderFocusSetup },
       { k:"bands",  ac:"c_bands",  grp:"meas", label:"Scoring bands", glyph:"▥", find:"scoring bands green amber red threshold colours ranges",        render:function(){ return renderBands() + renderBandsExtra(); } },
       /* TERMINOLOGY, NOT "LABELS" (§108.3). The page holds what THIS tenant
          calls a pillar, a theme, an aspiration — its vocabulary, and the one
@@ -370,18 +388,21 @@
 
       /* Last in Setup: it changes how everything else LOOKS, which is a thing
          you do once the things themselves exist (§39). */
-      { k:"brand",  ac:"c_brand",  grp:"look", label:"Branding", glyph:"◐", find:"branding logo colour color mark palette theme look accent",             render:renderBranding },
-      /* §72. In *How it looks* rather than a group of its own, and that is the
-         argument rather than the leftover: an email leaves wearing the tenant's
-         accent, the tenant's name and the tenant's footer, so what it looks
-         like is the same subject Branding answers — one step further out, where
-         the reader is not in the platform at all. */
-      /* EMAIL, NOT "COMMUNICATION" (§108.3). The third of the colliding three,
-         and the easiest to settle because the page is narrower than its name:
-         it sets the display name, the reply-to, the kicker and the footer of
-         what LEAVES the platform — an email, and nothing else. Naming it Email
-         is what lets "Send a message" and "Inbox" each mean one thing too. */
-      { k:"comms",  ac:"c_comms",  grp:"look", label:"Email", glyph:"✉", find:"email sender reply-to footer kicker display name outgoing from address",                 render:renderComms }
+      /* ── AND EMAIL LEFT THIS GROUP (§135.4) ────────────────────────
+         §108.3's rename settled a three-way collision — Messages, Send a
+         message, Communication — by naming each page after the one thing it
+         did, and put Email here on a sound argument: what a message wears
+         leaving the platform is the same subject Branding answers, one step
+         further out. Islam's ask goes further and dissolves the question:
+         *"bring the email as a settings in the Send an email part."*
+
+         WHAT A MESSAGE WEARS AND WHERE A MESSAGE IS WRITTEN ARE ONE ERRAND, and
+         the group "Branding & email" no longer has an email in it. The heading
+         is corrected in SETUP_GROUPS rather than left describing a page that
+         moved (§24) — a rail that names something it no longer holds is the
+         same fault as a page naming itself something the rail does not
+         (§121.1). */
+      { k:"brand",  ac:"c_brand",  grp:"look", label:"Branding", glyph:"◐", find:"branding logo colour color mark palette theme look accent email sender footer kicker",             render:renderBranding }
     ],
     /* ONE DESTINATION, NOT TWO (§47.7). Manage and Setup were split in §46.1
        because a flat menu of sixteen was doing two jobs — and that argument
@@ -430,16 +451,55 @@
          Communications — the same way, by renaming until each name meant one
          thing. The KEY stays `chat`, which is what the page def, the endpoint,
          `GROUP.chat` and checks/office-chat.py all name. */
-      { k:"chat",     ac:"c_chat",  grp:"cycle",  label:"Inbox", glyph:"✉", find:"messages chat conversations questions replies feedback answer",
+      /* PLATFORM INBOX (§135.3, shortened by Islam). §108.3 named this "Inbox"
+         to break a three-way collision, and the rename has a second job now:
+         with the composer called "Send an email", a bare "Inbox" reads as where
+         those emails land, which is the one thing it is not. This is the
+         conversation people have with the office inside the platform.
+
+         "Platform Inbox", not "In Platform inbox" — his word, and the shorter
+         one is the better one: the qualifier is doing the work either way, and
+         a rail entry is scanned rather than read. The KEY stays `chat`, which
+         the endpoint, `GROUP.chat` and the checks all name (§65, §108.3). */
+      { k:"chat",     ac:"c_chat",  grp:"cycle",  label:"Platform Inbox", glyph:"✉", find:"messages chat conversations questions replies feedback answer inbox",
         when: function(){ return inOffice() && CHAT.servable(); },
         render:function(){ return CHAT.renderInbox(); } },
       /* §74. A DOING page, so it sits with the cycle rather than beside the
          Email SETTINGS — and gated at edit for Import's reason (§48.2): there
          is nothing to read on a composer, so a view grant would open a page
          whose every control the server then refuses. */
-      { k:"send",     ac:"c_send", grp:"cycle",   label:"Send a message", glyph:"➤", find:"broadcast announce notify everyone email the team",
-        when: function(){ return inOffice(); },                          render:renderSendMessage },
-      { k:"focusset", ac:"c_focus", grp:"cycle",  label:"Focus measures", glyph:"◎", find:"focus watch highlight measures",                render:renderFocusSetup },
+      /* ── THREE SUBTABS: THE RECORD, THE COMPOSER, THE SETTINGS ────────
+         Two sessions gave this page a section row on the same day and they
+         agree about the shape — one rail entry, tabs inside it, the shape
+         Figure sets (§46.2) and Import & archives (§108.4) already use.
+
+         §142.3 renamed the page at Islam's word (this page sends REAL EMAIL,
+         and "a message" left it in the same word family as the in-platform
+         conversation beside it) and made the email SETTINGS its second half,
+         because a status table with a live rendered preview is not a dropdown.
+
+         §144 put the RECORD in front of the composer, also at his word: "the
+         opening page ... should be a dashboard of what was sent, to whom, how
+         many people ... and when I finish and send it it should take me back to
+         the dashboard and show me that the message was sent there."
+
+         So the order is what you ARRIVE at, what you DO, and what you SET
+         ONCE — and Overview is first because that is what he asked to open on.
+
+         OVERVIEW IS HIS WORD, and the Setup rail already has a page called
+         Overview one group above. Recorded rather than quietly changed: they
+         sit at different levels (a page vs a tab inside one).
+
+         EACH SECTION KEEPS ITS OWN GATE (§108.4), so somebody holding
+         `c_comms` and not `c_send` still reaches the settings half, and
+         paint() drops the whole entry for somebody holding neither. */
+      { k:"send",     ac:"c_send", grp:"cycle",   label:"Send an email", glyph:"➤", find:"broadcast announce notify everyone email the team sent record history drafts sender reply-to footer kicker display name outgoing from address",
+        when: function(){ return inOffice(); },
+        sections: function(){
+          return [{ k:"over",    ac:"c_send",  label:"Overview",       render:renderMsgOverview },
+                  { k:"compose", ac:"c_send",  label:"Compose",        render:renderSendMessage },
+                  { k:"comms",   ac:"c_comms", label:"Email settings", render:renderComms }];
+        } },
       /* Only for somebody who has actually been named on a figure. Its reach
          is not a setting (§16.7), so `when` hides it outright rather than the
          matrix answering "none" — a menu entry that opens an empty page is
@@ -575,9 +635,11 @@
     if (el) el.innerHTML = sendmsgAudienceHtml();
     var st = sendmsg();
     var n = (sendmsgHasAny() && st.aud && st.aud.to) ? st.aud.to.length : 0;
-    var chip = document.querySelector("[data-audcount]");
-    if (chip) chip.textContent = n ? plural(n, "recipient", "recipients")
-                                   : "nobody chosen";
+    /* THE HEADER CHIP IS GONE (§135.1) and this is where its reader went with
+       it (§24). Islam: *"remove the tag SMO and nobody chosen."* The count was
+       being said twice — here and on the Send button below — and §95 had
+       already decided which of the two is the one that matters: the count
+       belongs on the control that ACTS. */
     var send = document.getElementById("msgsend");
     if (send && !st.busy)
       send.textContent = n ? "Send to " + plural(n, "person", "people") : "Send";
@@ -817,7 +879,7 @@
     { k:"who",  label:"People & access",   note:"Who exists, and what may they touch" },
     { k:"run",  label:"The organisation",  note:"The things being planned" },
     { k:"meas", label:"Measurement",       note:"What the numbers mean" },
-    { k:"look", label:"Branding & email",  note:"What the tenant wears, in here and on the way out" }
+    { k:"look", label:"Branding",         note:"What the tenant wears, in here and on the way out" }
   ];
 
   /* ══ THE RAIL COLLAPSES (§47.3) ═══════════════════════════════════
@@ -1167,7 +1229,7 @@
          it (Foundation), which is not the plan. */
       currentSub = current ? entrySub(current) : null;
     }
-    document.getElementById("units").innerHTML = tabs.map(function(t, i){
+    var parts = tabs.map(function(t, i){
       if (t.folds) {
         /* NO DISCLOSURE ARROW. A ▸/▾ twist promises "this opens and closes",
            which is what these were and are not any more — a switch has two
@@ -1217,7 +1279,25 @@
       return ((i === 1 && !tabs[1].folds) ? '<span class="sep"></span>' : '') +
         '<button role="tab" aria-selected="' + (t.k === current) + '" data-u="' + t.k + '"' +
         '>' + t.label + '</button>';
-    }).join("") + menuHTML();
+    });
+    /* ── ONE LINE THAT SCROLLS, ENDS PINNED (§136, Islam: "Decision 1: B") ──
+       The destinations go into their own scroll region; everything that is a
+       CONTROL rather than a destination — the Group menu, the Units|Functions
+       switch, the gear — stays a direct child of the row, pinned, because a
+       control that can leave the screen is §90's fault arriving sideways
+       (the first draft of B showed exactly that: the switch slid off the
+       left edge). The fades are drawn here and told the truth by the wiring
+       below. */
+    var isDest = tabs.map(function(t){ return !!t.k; });
+    var d0 = isDest.indexOf(true), d1 = isDest.lastIndexOf(true);
+    document.getElementById("units").innerHTML = (d0 === -1
+      ? parts.join("")
+      : parts.slice(0, d0).join("") +
+        '<div class="navclip">' +
+          '<div class="navscroll" id="navscroll">' + parts.slice(d0, d1 + 1).join("") + '</div>' +
+          '<div class="navfade l" hidden></div><div class="navfade r" hidden></div>' +
+        '</div>' +
+        parts.slice(d1 + 1).join("")) + menuHTML();
     /* Only destinations. A fold button lives in the same row but goes nowhere \u2014
        binding it here set current to undefined and reset the page to Group, which
        made expanding a fold navigate. */
@@ -1262,6 +1342,44 @@
       });
     });
     wireMenu();
+    /* ── AND THE SCROLLING HALF IS WIRED HERE (§136) — for the same reason
+       the fold is: this function just destroyed the last set of handlers.
+       Nothing below changes any SIZE, so §28.3's loop cannot form. */
+    var sc = document.getElementById("navscroll");
+    if (sc) {
+      var navclip = sc.parentNode;
+      var fadeL = navclip.querySelector(".navfade.l");
+      var fadeR = navclip.querySelector(".navfade.r");
+      /* A fade is a CLAIM that there is more that way; each side makes it
+         only while it is true, or the row promises names it does not have. */
+      var fades = function(){
+        fadeL.hidden = sc.scrollLeft <= 2;
+        fadeR.hidden = sc.scrollWidth - sc.clientWidth - sc.scrollLeft <= 2;
+      };
+      sc.addEventListener("scroll", fades, { passive: true });
+      /* Re-asked when the ROW resizes (a window drag repaints nothing), so
+         the fades cannot go stale. A fresh observer per paint on a fresh
+         element — the old one dies with the node it watched. */
+      new ResizeObserver(fades).observe(sc);
+      /* A vertical wheel over the row scrolls it SIDEWAYS — only while there
+         is somewhere to go, so everywhere else the wheel stays the page's. */
+      sc.addEventListener("wheel", function(e){
+        if (sc.scrollWidth <= sc.clientWidth) return;
+        if (Math.abs(e.deltaX) >= Math.abs(e.deltaY)) return;
+        sc.scrollLeft += e.deltaY;
+        e.preventDefault();
+      }, { passive: false });
+      /* The lit destination is brought into view by setting scrollLeft on
+         the ROW, never scrollIntoView — that call may also scroll the PAGE,
+         which is §110.7's jump arriving sideways. */
+      var lit = sc.querySelector('button[aria-selected="true"][data-u]');
+      if (lit) {
+        var L = lit.offsetLeft, R = L + lit.offsetWidth;
+        if (L < sc.scrollLeft + 24) sc.scrollLeft = Math.max(0, L - 24);
+        else if (R > sc.scrollLeft + sc.clientWidth - 24) sc.scrollLeft = R - sc.clientWidth + 24;
+      }
+      fades();
+    }
   }
 
   /* A gear. It replaced the word "Manage" in 3.3 - at 11px uppercase in a
@@ -1448,6 +1566,21 @@
     if (f.start != null) { try { el.setSelectionRange(f.start, f.end); } catch (e) {} }
   }
 
+  /* The card a page that could not be drawn leaves in its place (§137). One
+     action, deliberately: an earlier draft carried "Open another page" beside
+     Reload, and it went — the navigation is right above, and a control that
+     does nothing concrete is worse than no control. The technical line is
+     inside a <details> that starts CLOSED. */
+  function failCard(name, msg){
+    return '<div class="failcard">' +
+      '<div class="fc-t">Something went wrong opening this page.</div>' +
+      '<div class="fc-b">Your data is safe. Please reload, or open another page from the menu above.</div>' +
+      '<button type="button" class="editbtn" data-failreload>Reload</button>' +
+      '<details><summary>Technical details</summary>' +
+        '<div class="fc-e">' + esc((name ? name + " · " : "") + String(msg)) + '</div>' +
+      '</details></div>';
+  }
+
   function paint(){
     if (CLICKING) { PAINT_HELD = true; return; }
     var _panel = document.getElementById("panel");
@@ -1621,14 +1754,40 @@
        section called "Performance" would go unnamed on a page the rail is not
        even drawing. */
     PAGE_TITLE = railed ? (pageName || null) : null;
+    /* AND THE TWO SLOTS THE PAGE'S CONTROLS ARRIVE IN (§135). Cleared before
+       the render that fills them, read after it — the same trip PAGE_TITLE
+       already makes, in the other direction. */
+    pageLineReset();
 
-    var body = (current === "group" || current === "setup" || current === "manage")
-      ? def.render()
-      /* A company is passed its key, the way a function is: there is no
-         UNITS[...] to hand it and inventing a unit-shaped object for something
-         that carries no plan would be a lie about what it is (§68). */
-      : isCo(current) ? def.render(current)
-      : isFn(current) ? def.render(current) : def.render(UNITS[current]);
+    /* ── A FAILED RENDER SAYS SO (§137). A throw inside a page's render used
+       to abort paint() and leave the PREVIOUS page standing, with the only
+       witness in the hidden console — so a data fault read as a dead click,
+       and the person reported the wrong symptom (§118.7, and §118's CF tab is
+       exactly how that looked from production). §32's rule one level deeper:
+       after a failure there is exactly one honest thing to show, and it is
+       the failure. The guard sits on the PAGE's render alone — the chrome,
+       the navigation and the tabs above have already painted, which is what
+       makes "open another page from the menu above" a true sentence. The
+       words are Islam's ask ("simple with a more user friendly message",
+       2026-08-27); the error itself is kept, folded behind a closed
+       disclosure, so the office can still read it without it shouting at
+       anybody else. */
+    var body;
+    try {
+      body = (current === "group" || current === "setup" || current === "manage")
+        ? def.render()
+        /* A company is passed its key, the way a function is: there is no
+           UNITS[...] to hand it and inventing a unit-shaped object for something
+           that carries no plan would be a lie about what it is (§68). */
+        : isCo(current) ? def.render(current)
+        : isFn(current) ? def.render(current) : def.render(UNITS[current]);
+    } catch (renderErr) {
+      /* Still said to the console, verbatim — the card is FOR the person, the
+         console line is for whoever is diagnosing with the lid off. */
+      console.error("SMP: this page could not be drawn", renderErr);
+      body = failCard(pageName || (def && def.label) || "",
+                      renderErr && renderErr.message || renderErr);
+    }
     /* The rail and the page it chose, side by side. `defs` rather than
        SUBS.setup, so a page the viewer may not open is not offered — the rail
        is navigation, and navigation that leads somewhere refused is worse than
@@ -1651,9 +1810,20 @@
              the page instead. Both halves of this line came from different
              branches on the same day and both are load-bearing. */
           (currentSub === "people" ? " panefill" : "") + '">' +
-          '<div class="setuphead"><h1 class="setupttl">' + esc(pageName) + '</h1></div>' +
+          /* ── AND THE PAGE'S CONTROLS ARE ON IT (§135) ────────────────
+             `pageLineHTML()` is read AFTER `body`, because the page's own
+             render is what fills the slots. The search sits left of the
+             buttons, and a page with neither gets neither. */
+          '<div class="setuphead' + (PAGE_TOOLS || PAGE_ACTS ? ' withacts' : '') + '">' +
+            '<h1 class="setupttl">' + esc(pageName) + '</h1>' + pageLineHTML() + '</div>' +
           secrowHTML + body + '</div></div>'
       : body;
+    /* The failure card's one control (§137). Wired here because the card was
+       written into innerHTML two lines up — no inline handlers anywhere
+       (§43.6), and wire() below owes this card nothing: it must work exactly
+       when a page's own wiring cannot be trusted. */
+    var failBtn = _panel.querySelector("[data-failreload]");
+    if (failBtn) failBtn.addEventListener("click", function(){ location.reload(); });
 
     /* Group Performance is four sections; they become a third nav row rather
        than one long scroll. The row exists only where there are sections. */
@@ -1712,7 +1882,31 @@
        around — so it re-resolves them and puts the shade and the card back.
        Like the inbox above, nothing in it ever calls paint(). */
     TOUR.onPaint();
+    /* ── AND THE PINNED TITLES SAY SO (§130.6) ───────────────────────
+       The one thing CSS cannot ask. `.pane > .pband` fills its two rounded
+       corners with the page's ground so nothing shows through them while it
+       is pinned (§130.3) — and painting that at REST cut the card's own
+       corner arc, which is what Islam saw next: *"the corner still has this
+       squared corner."*
+
+       AN OBSERVER, NOT A SCROLL LISTENER. v3.3 removed the condensing header
+       and wrote the rule down: never size anything against a measurement the
+       size itself can change. This changes no size at all — a class, and a
+       background inside a corner — so the loop that rule guards against
+       cannot form. What it does need is to be RE-ARMED after every paint,
+       like the three above it: the band it was watching has just been
+       replaced.
+
+       THE THRESHOLD IS THE ELEMENT'S OWN STICKY OFFSET, read off the computed
+       style rather than rebuilt from `--chrome-h` and `--rail-gap` — §29.4's
+       rule, which the rail learned the hard way: one number, not two that
+       happen to agree. Shrink the root by that offset plus a pixel and the
+       band stops being wholly inside it at exactly the moment it pins. */
+    pinWatch();
     clipTitles();
+    /* The header this paint just drew is a different element from the last
+       one's, so the observer is re-pointed at it (§135.10). */
+    watchSetupHead();
     /* PUT THE SCREEN BACK BEFORE THE BROWSER SHOWS IT (§75). Synchronous, in
        the same frame as the rebuild, so nothing is ever drawn at the top and
        then moved — that flash is the jump, only quicker. */
@@ -1753,6 +1947,29 @@
      you are pointing at. And never over a title somebody else set — the
      register's name cell carries the full name and the sign-in key on its own
      hover (§81.1), which says more than this would. */
+  /* Held across paints so the previous one is disconnected rather than left
+     observing elements nothing can reach — an observer per paint, kept, is a
+     leak that grows for as long as the tab is open. */
+  var PINSEE = null;
+  function pinWatch(){
+    if (PINSEE) { PINSEE.disconnect(); PINSEE = null; }
+    var bands = document.querySelectorAll(".pane > .pband");
+    if (!bands.length || typeof IntersectionObserver !== "function") return;
+    /* Every band on a page shares one offset, so one observer serves them
+       all — a function's Projects page draws one per capability. */
+    var top = parseFloat(getComputedStyle(bands[0]).top);
+    if (!(top >= 0)) return;
+    PINSEE = new IntersectionObserver(function(rows){
+      rows.forEach(function(r){
+        /* Wholly inside the shrunk root means it is still in the flow;
+           anything less means it has reached its offset and pinned. It also
+           reads "pinned" once the band has scrolled off the BOTTOM, which is
+           true of nothing anybody can see and costs nothing. */
+        r.target.classList.toggle("pinned", r.intersectionRatio < 1);
+      });
+    }, { threshold: [1], rootMargin: "-" + (top + 1) + "px 0px 0px 0px" });
+    Array.prototype.forEach.call(bands, function(b){ PINSEE.observe(b); });
+  }
   function clipTitles(){
     document.querySelectorAll(".cfg table td").forEach(function(td){
       /* A CELL THAT ALREADY SAYS SOMETHING ON HOVER KEEPS SAYING IT. The
@@ -1910,11 +2127,21 @@
     for (var i = 0; i < els.length; i++)
       if (cur && (els[i] === cur || els[i].contains(cur))) { at = i; break; }
     var next = els[(at + 1) % els.length];
+    /* §130.1's pickers are searchsel-enhanced: the native select is HIDDEN
+       in place with a button in front of it, so ringing or focusing the
+       select itself lights nothing anybody can see (§34: whoever hides a
+       field hides its furniture — and whoever walks to one walks to its
+       furniture). */
+    var lit = next;
+    if (lit.previousElementSibling && lit.previousElementSibling.classList &&
+        lit.previousElementSibling.classList.contains("ssbtn"))
+      lit = lit.previousElementSibling;
     els.forEach(function(e){ e.classList.remove("gaplit"); });
-    next.classList.add("gaplit");
-    next.scrollIntoView({ block: "center" });
-    var f = next.matches("input,select,textarea")
-      ? next : next.querySelector("button,input,select,textarea");
+    document.querySelectorAll(".ssbtn.gaplit").forEach(function(e){ e.classList.remove("gaplit"); });
+    lit.classList.add("gaplit");
+    lit.scrollIntoView({ block: "center" });
+    var f = lit.matches("input,select,textarea,button")
+      ? lit : lit.querySelector("button,input,select,textarea");
     if (f) f.focus({ preventScroll: true });
   }
   function wire(){
@@ -2363,8 +2590,24 @@
         paint();
       });
     });
-    var fu = document.getElementById("fset-unit");
-    if (fu) fu.addEventListener("change", function(){ FSET.unit = fu.value; paint(); });
+    /* ── THE DESTINATION ROW REPLACED THE DROPDOWN (§135.5) ─────────
+       A press, not typing, so a repaint is right here: which one is lit and
+       every count on the row are both drawn by the render. */
+    document.querySelectorAll("[data-fsetgo]").forEach(function(b){
+      b.addEventListener("click", function(){ FSET.unit = b.dataset.fsetgo; paint(); });
+    });
+    document.querySelectorAll("[data-fsetside]").forEach(function(b){
+      b.addEventListener("click", function(){
+        FSET.side = b.dataset.fsetside;
+        /* THE SIDE MOVES AND SO DOES THE SUBJECT, or pressing Functions leaves
+           a unit's rows on screen under a row that says Functions (§50.6's
+           fault: a label naming a page it is not showing). */
+        var subs = focusSubjects(), list = subs[FSET.side] || [];
+        if (list.length && !list.some(function(x){ return x.key === FSET.unit; }))
+          FSET.unit = list[0].key;
+        paint();
+      });
+    });
     var cc = document.querySelector("[data-closecycle]");
     if (cc) cc.addEventListener("click", function(){
       var gaps = 0;
@@ -2849,7 +3092,19 @@
            cursor left a cell, on the one screen somebody fills in left to
            right. */
         var fn = FIELDS[+el.dataset.fld];
-        if (fn) { fn(el.value); fieldSaved(); }
+        /* SEVERAL ANSWERS COME AS AN ARRAY (§130.1). On a `<select multiple>`
+           `el.value` is only the FIRST selected option, so a collaborators cell
+           wired through the plain path would have saved one name and dropped
+           the rest — silently, which is the shape §96 exists to stop. Asked of
+           the element rather than of the setter: `multiple` is undefined on an
+           input and on a textarea, so every other field is untouched. */
+        if (fn) {
+          fn(el.multiple
+            ? Array.prototype.filter.call(el.options, function(o){ return o.selected; })
+                .map(function(o){ return o.value; })
+            : el.value);
+          fieldSaved();
+        }
       });
       /* THE BOX GROWS WITH WHAT IS TYPED IN IT (§51.1, Islam: "the foundation
          end in mind is not editable in terms of space or empty lines").
@@ -2895,6 +3150,43 @@
       b.addEventListener("click", function(){
         var k = b.dataset.edit; EDITING[k] = !EDITING[k]; paint();
       });
+    });
+    /* ── THE KNOWLEDGE BASE'S PEN (§140) ─────────────────────────────
+       Bound per paint like every control above. The two text fields write on
+       `change` — blur, for a text control — so typing never repaints (§35),
+       and every write ends in paint(), whose §30.1 guard already holds a
+       repaint asked for mid-click until the click lands. An added question's
+       id is kbx<n>, minted outside the shipped ids' namespace, which is what
+       lets one handler serve both kinds of card. */
+    document.querySelectorAll("[data-kbpen]").forEach(function(b){
+      b.addEventListener("click", function(){ KBEDIT = !KBEDIT; paint(); });
+    });
+    /* The two tabs (§141). Switching leaves edit mode: the pen lives on the
+       questions tab, and a mode whose control is no longer on screen is §61's
+       trap — a state with no way back out of it. */
+    document.querySelectorAll("[data-kbtab]").forEach(function(b){
+      b.addEventListener("click", function(){
+        kbTabSet(b.dataset.kbtab); KBEDIT = false; paint();
+      });
+    });
+    document.querySelectorAll("[data-kbq], [data-kba]").forEach(function(f){
+      f.addEventListener("change", function(){
+        var card = f.closest(".kbed"); if (!card) return;
+        var id = f.dataset.kbq || f.dataset.kba;
+        var q = (card.querySelector("[data-kbq]") || {}).value;
+        var a = (card.querySelector("[data-kba]") || {}).value;
+        if (/^kbx\d+$/.test(id)) kbSetAdded(id, q, a); else kbSetOver(id, q, a);
+        paint();
+      });
+    });
+    document.querySelectorAll("[data-kbreset]").forEach(function(b){
+      b.addEventListener("click", function(){ kbResetOver(b.dataset.kbreset); paint(); });
+    });
+    document.querySelectorAll("[data-kbdel]").forEach(function(b){
+      b.addEventListener("click", function(){ kbDropAdded(b.dataset.kbdel); paint(); });
+    });
+    document.querySelectorAll("[data-kbadd]").forEach(function(b){
+      b.addEventListener("click", function(){ kbAddNew(b.dataset.kbadd); paint(); });
     });
     document.querySelectorAll("input.blabel").forEach(function(inp){
       inp.addEventListener("change", function(){
@@ -3551,9 +3843,19 @@
              different KIND of Unit. The old pair could say neither — it
              committed on the second answer, so both looked like nothing
              happening. */
+          /* AND IT NAMES THE FIELD THAT CAN ANSWER IT (§135.6). Companies
+             left the Unit dropdown when they became a field of their own, so a
+             refusal telling somebody to change the Unit for a Company CEO sends
+             them to a control that no longer offers the answer — §16.7's dead
+             end, reintroduced by a field split. `roleWheres()` is still the one
+             definition of what may be held where; this only reads which of the
+             two fields it points at. */
+          var atCo = wheres.every(function(w){
+            return String(w.v).indexOf("co:") === 0; });
+          var fld = atCo ? "Company" : "Unit";
           ROLESTOP = { key:key, why: at
-            ? roleName(role) + " is held at " + roleAtWord(role) + ". Change the Unit."
-            : "Set the Unit first \u2014 " + roleName(role) + " is held at " +
+            ? roleName(role) + " is held at " + roleAtWord(role) + ". Change the " + fld + "."
+            : "Set the " + fld + " first \u2014 " + roleName(role) + " is held at " +
               roleAtWord(role) + "." };
           paint();
           return;
@@ -3596,6 +3898,29 @@
         else {
           p.mainbu = v;
           if (!mainbuBy(v)) mainbuList().push({ name: v, at: null });
+        }
+        paint();
+      });
+    });
+    /* ── THE COMPANY FIELD WRITES THE SAME ONE FACT (§135.6) ────────
+       Through `attachPersonAt()`, which clears the other two pointers — so
+       choosing a company MOVES somebody out of a unit rather than adding a
+       second place they sit. It is only reachable when the unit above says
+       nothing, so that move is never a surprise. */
+    R.querySelectorAll("[data-pco]").forEach(function(sel){
+      sel.addEventListener("change", function(){
+        if (grant("c_people") !== "edit") return;
+        var p = personBy(sel.dataset.pco);
+        if (!p || personCompanyDerived(p)) return;
+        attachPersonAt(p, sel.value ? "co:" + sel.value : null);
+        /* EITHER HALF FINISHES IT (§110, §135.6). A Company CEO is refused
+           until the person sits at a company, and the Company field is now the
+           only control that can put them there — so answering it while a
+           refusal is standing is the answer that refusal was waiting for. */
+        if (ROLESTOP && ROLESTOP.key === p.key && ADDROLE === p.key &&
+            roleIsGrantable(ADDROLE_KIND)) {
+          tryGrantRole(p.key, ADDROLE_KIND);
+          return;
         }
         paint();
       });
@@ -3742,35 +4067,15 @@
       var table = document.querySelector('[data-tktable="' + id + '"]');
       if (!table) return;
       var q = String(TKQ[id] || "").trim().toLowerCase();
-      var f = TKFILTER[id] || "";
-      var shown = 0, total = 0;
       [].forEach.call(table.tBodies[0] ? table.tBodies[0].rows : [], function(tr){
         if (tr.classList.contains("newrow")) return;   /* the Add row is not a row */
-        total++;
-        var okF = !f || (" " + (tr.dataset.tkrow || "") + " ").indexOf(" " + f + " ") > -1;
-        var okQ = !q || tkRowText(tr).indexOf(q) > -1;
-        tr.hidden = !(okF && okQ);
-        if (!tr.hidden) shown++;
+        tr.hidden = !!q && tkRowText(tr).indexOf(q) === -1;
       });
-      var out = document.querySelector('[data-tkcount="' + id + '"]');
-      if (out) out.textContent = (q || f)
-        ? shown + " of " + total
-        : (total ? total + " rows" : "");
     }
     document.querySelectorAll("[data-tksearch]").forEach(function(inp){
       inp.addEventListener("input", function(){
         TKQ[inp.dataset.tksearch] = inp.value;
         tkApply(inp.dataset.tksearch);
-      });
-    });
-    /* A CHIP REPAINTS, because which one is lit is drawn by the render — and it
-       is a press, not typing, so nothing is mid-word. Pressing the lit one
-       clears it: a filter you cannot turn off is a filter that traps you. */
-    document.querySelectorAll("[data-tkfilter]").forEach(function(b){
-      b.addEventListener("click", function(){
-        var bits = b.dataset.tkfilter.split("|");
-        TKFILTER[bits[0]] = (TKFILTER[bits[0]] === bits[1]) ? "" : bits[1];
-        paint();
       });
     });
     document.querySelectorAll("[data-tktable]").forEach(function(t){ tkApply(t.dataset.tktable); });
@@ -4173,6 +4478,9 @@
       inp.addEventListener("change", function(){
         if (inp.dataset.aud === "everyone") sendmsg().criteria.everyone = inp.checked;
         else sendmsgToggle(inp.dataset.aud, inp.value, inp.checked);
+        /* CHANGING WHO IT GOES TO MAKES IT A DIFFERENT SEND, so Send comes back
+           for the same reason editing the words does (§143). */
+        sendmsgTouched();
         sendmsgAsk();
         paint();
       });
@@ -4180,14 +4488,14 @@
     document.querySelectorAll("[data-audkey]").forEach(function(b){
       b.addEventListener("click", function(){
         sendmsgToggle("keys", b.dataset.audkey, false);
-        sendmsgAsk(); paint();
+        sendmsgTouched(); sendmsgAsk(); paint();
       });
     });
     var audpick = document.getElementById("audpick");
     if (audpick) audpick.addEventListener("change", function(){
       if (!this.value) return;
       sendmsgToggle("keys", this.value, true);
-      sendmsgAsk(); paint();
+      sendmsgTouched(); sendmsgAsk(); paint();
     });
 
     /* THE BUTTON'S TWO FIELDS ARE THE ONLY BOXES LEFT (§76.3) — the heading
@@ -4199,9 +4507,44 @@
       if (!el) return;
       el.addEventListener("input", function(){
         sendmsg()[pair[1]] = el.value;
+        sendmsgTouched();
         paintMsgPreview();
       });
     });
+
+    /* THE OVERVIEW'S ONE LOUD CONTROL (§144.8). It moves to the other tab
+       rather than doing anything itself — the composer is where the act
+       happens, and this is the way in that a tab was not being. */
+    var msgwrite = document.querySelector("[data-msgwrite]");
+    if (msgwrite) msgwrite.addEventListener("click", function(){
+      CURSEC["send"] = "compose";
+      paint();
+    });
+
+    /* ── THE GREETING (spec 022) ────────────────────────────────────
+       THE SWITCH REPAINTS; TYPING THE WORD DOES NOT. Turning it on draws a
+       box and a line that were not there, which is a repaint; typing into
+       that box must only redraw the PREVIEW, or the field being typed into is
+       replaced mid-word (§35, §71.2) — the same rule the two button fields
+       above obey.
+
+       `greet` is the word or null. Turning it off DELETES the value rather
+       than remembering it, so off is the absence and a draft saved off
+       carries nothing (§50.6). */
+    document.querySelectorAll("[data-greet]").forEach(function(b){
+      b.addEventListener("click", function(){
+        sendmsg().greet = b.dataset.greet === "1" ? "Dear" : null;
+        sendmsgTouched();
+        paint();
+      });
+    });
+    var mg = document.getElementById("msggreet");
+    if (mg) mg.addEventListener("input", function(){
+      sendmsg().greet = mg.value;
+      sendmsgTouched();
+      paintMsgPreview();
+    });
+
     paintMsgPreview();
 
     /* ── The recipient dropdowns (§76.2) ────────────────────────────
@@ -4258,6 +4601,7 @@
       if (out) out.textContent = "Saving\u2026";
       SYNC.mailDraftSave({ id: st.draftId, subject: st.subject, body: st.body,
                            ctaLabel: st.ctaLabel, ctaHref: st.ctaHref,
+                           greet: st.greet,
                            criteria: st.criteria }, function(err, j){
         msgdraft.disabled = false;
         if (err) { if (out) out.textContent = err; return; }
@@ -4274,6 +4618,9 @@
           st.draftId = String(d.id);
           st.subject = d.subject || ""; st.body = d.body || "";
           st.ctaLabel = d.cta_label || ""; st.ctaHref = d.cta_href || "";
+          /* NULL IS OFF, and it has to stay null rather than becoming "" —
+             `greet == null` is the switch everywhere else (spec 022). */
+          st.greet = (d.greet == null) ? null : String(d.greet);
           st.criteria = d.audience || { everyone:false, roles:[], targets:[], keys:[] };
           /* Whatever was resolved for the message you were writing before is
              not this message's audience. Cleared, then asked again. */
@@ -4294,7 +4641,9 @@
         });
       });
     });
-    if (DRAFTLIST === null && document.getElementById("msgsend") &&
+    /* ON THE OVERVIEW, not on the composer (§144). Both lists are drawn there
+       now, and the old gate — the Send button — is on the other tab. */
+    if (DRAFTLIST === null && document.getElementById("msgover") &&
         typeof SYNC !== "undefined" && SYNC.isLive()) {
       DRAFTLIST = { drafts: [] };
       SYNC.mailDraftList(function(err, j){
@@ -4334,20 +4683,6 @@
     var sentClose = document.querySelector("[data-sentclose]");
     if (sentClose) sentClose.addEventListener("click", function(){ SENTONE = null; paint(); });
 
-    /* ── SEND A MESSAGE'S HEADER MENUS AND DISCLOSURE (§95) ──────────
-       The same shape as the register's, and one open at a time. */
-    document.querySelectorAll("[data-draftmenu]").forEach(function(b){
-      b.addEventListener("click", function(e){
-        e.stopPropagation();
-        DRAFTMENU = !DRAFTMENU; SENTMENU = false; paint();
-      });
-    });
-    document.querySelectorAll("[data-sentmenu]").forEach(function(b){
-      b.addEventListener("click", function(e){
-        e.stopPropagation();
-        SENTMENU = !SENTMENU; DRAFTMENU = false; paint();
-      });
-    });
     /* THE NAMES ARE A DISCLOSURE, not a repaint of the composer — but the
        audience block is its own element and paint() is what redraws it, so
        this is one of the few things on this page that may repaint (§35: what
@@ -4426,11 +4761,19 @@
        yes, unchanged. */
     function reallySend(){
       var st = sendmsg(), out = document.getElementById("msgsaid");
+      /* WRITTEN INTO THE ELEMENT, because a repaint would replace the button
+         that was just pressed (§63). THE CLASS, not an inline colour — the
+         render says the same thing with `.msgsaid.bad`, and two ways of
+         colouring one span is how the two come to disagree (§53.5). A null
+         `ok` is "in progress" and wears neither.
+
+         THIS ONLY EVER REPORTS A FAILURE NOW (§144): a send the server
+         answered leaves this tab, and its outcome is drawn on the Overview. */
       function say(msg, ok){
         st.result = { msg: msg, ok: ok, rows: (st.result && st.result.rows) || null };
         if (!out) return;
         out.textContent = msg;
-        out.style.color = ok === null ? "" : ("var(--" + (ok ? "good" : "bad") + "-tx)");
+        out.className = "why msgsaid" + (ok === false ? " bad" : "");
       }
       var n = (st.aud && st.aud.to) ? st.aud.to.length : 0;
       var msgsend = document.getElementById("msgsend");
@@ -4445,26 +4788,47 @@
         draftId: st.draftId,
         criteria: st.criteria, subject: st.subject.trim(), body: st.body.trim(),
         ctaLabel: st.ctaLabel.trim(), ctaHref: st.ctaHref.trim(),
+        greet: st.greet,
         fromName: sh.fromName, replyTo: sh.replyTo,
         html: MAIL.html({
           org: sh.org, accent: sh.accent, panel: sh.panel, footer: sh.footer,
           eyebrow: sh.eyebrow, title: st.subject.trim(), preheader: st.subject.trim(),
           body: st.body.trim(),
+          /* NO NAME HERE, deliberately — the builder leaves the region and the
+             server fills it once per recipient, because who they are is the
+             server's answer (spec 022, §74.2). */
+          greeting: st.greet == null ? null : { word: st.greet },
           cta: (st.ctaLabel.trim() && st.ctaHref.trim())
                  ? { label: st.ctaLabel.trim(), href: st.ctaHref.trim() } : null
         })
       }, function(err, j){
         msgsend.disabled = false; st.busy = false;
         if (err) { say(err, false); return; }
-        st.result = { ok: !j.failed,
+        /* ── THE SERVER ANSWERED, SO GO BACK TO THE RECORD (§144) ─────
+           Islam: "when I finish the email and send it it should take me back
+           to the dashboard and show me that the message was sent there."
+
+           `landed` is what says the outcome belongs on the Overview rather
+           than in the composer's bar — set for a partial failure too, because
+           the message DID go to most people and the record is where the
+           failures are named. Only a send that never happened stays here.
+
+           THE COMPOSER IS EMPTIED. What was in it has been sent and is in the
+           record now; leaving it loaded behind a tab is a message that looks
+           unsent and is one press from going twice. */
+        st.result = { ok: !j.failed, landed: true,
           msg: plural(j.sent, "message", "messages") + " sent" +
                (j.failed ? ", " + j.failed + " failed" : "") + ".",
+          skipped: (st.aud && st.aud.skipped) ? st.aud.skipped.length : 0,
           rows: null };
-        /* The list is asked again rather than guessed at: what the server
+        st.subject = ""; st.body = "";
+        st.ctaLabel = ""; st.ctaHref = ""; st.greet = null;
+        /* The lists are asked again rather than guessed at: what the server
            recorded is the record, and a row this page invented would be a
-           second copy of it. */
+           second copy of it (§95). */
         SENTLIST = null;
         st.draftId = null; DRAFTLIST = null;
+        CURSEC["send"] = "over";
         paint();
       });
       });
@@ -4517,6 +4881,12 @@
           org: sh.org, accent: sh.accent, panel: sh.panel, footer: sh.footer,
           eyebrow: sh.eyebrow, title: st.subject.trim(), preheader: st.subject.trim(),
           body: st.body.trim(),
+          /* YOUR COPY GREETS YOU, by the name on the row of whoever is SIGNED
+             IN — `row` is found from SYNC.person(), never viewer(), which is
+             the simulation (§95). Filled here rather than left as a region:
+             there is one recipient and the browser knows who they are. */
+          greeting: st.greet == null ? null
+                      : { word: st.greet, name: SMPRules.firstName(row) },
           cta: (st.ctaLabel.trim() && st.ctaHref.trim())
                  ? { label: st.ctaLabel.trim(), href: st.ctaHref.trim() } : null
         }),
@@ -4529,7 +4899,7 @@
       });
     });
 
-    if (SENTLIST === null && document.getElementById("msgsend") &&
+    if (SENTLIST === null && document.getElementById("msgover") &&
         typeof SYNC !== "undefined" && SYNC.isLive()) {
       SENTLIST = { messages: [] };
       SYNC.mailHistory(function(err, j){
@@ -6155,10 +6525,10 @@
     /* The header menus close the same way, and on a click anywhere that is not
        inside them. `.hmenu` covers both the button and its panel. */
     if (typeof PCOLMENU !== "undefined" &&
-        (PCOLMENU || PWMENU || FNCOLMENU || DRAFTMENU || SENTMENU) &&
+        (PCOLMENU || PWMENU || FNCOLMENU) &&
         !(e.target.closest && e.target.closest(".hmenu"))) {
       PCOLMENU = false; PWMENU = false; PFILEMENU = false; FNCOLMENU = false;
-      DRAFTMENU = false; SENTMENU = false; paint();
+      paint();
     }
   });
   document.addEventListener("keydown", function(e){
@@ -6166,9 +6536,9 @@
     if (typeof PMENU !== "undefined" && PMENU !== null) { PMENU = null; paint(); }
     if (typeof FNMENU !== "undefined" && FNMENU !== null) { FNMENU = null; paint(); }
     if (typeof PCOLMENU !== "undefined" &&
-        (PCOLMENU || PWMENU || FNCOLMENU || DRAFTMENU || SENTMENU)) {
+        (PCOLMENU || PWMENU || FNCOLMENU)) {
       PCOLMENU = false; PWMENU = false; PFILEMENU = false; FNCOLMENU = false;
-      DRAFTMENU = false; SENTMENU = false; paint();
+      paint();
     }
   });
 
@@ -6218,6 +6588,48 @@
   new ResizeObserver(function(){
     document.documentElement.style.setProperty("--chrome-h", chromeEl.offsetHeight + "px");
   }).observe(chromeEl);
+
+  /* ── AND A SETUP TABLE'S HEAD PINS UNDER THE PAGE'S (§135.10) ──────
+     Same pattern, one component in. `--sethead-h` was a literal 46px, and §135
+     changed the header's height by putting the page's own controls into it —
+     42px where they are small, 49px where a search box sits on the line. A
+     table head pinned 4px BELOW the page header leaves a slot between two
+     pinned things, and scrolling rows show through it: measured, a 4px leak on
+     Focus measures, and the thing Islam photographed.
+
+     A CONSTANT COULD NOT HAVE BEEN RIGHT, which is why this is observed rather
+     than corrected to a better number: the header WRAPS on a narrow window, so
+     its height is a function of the window as well as of the page.
+
+     NOT §28.3's LOOP, and the difference is the whole reason this is safe: the
+     value feeds a sticky OFFSET and nothing else. An offset cannot change the
+     height it was measured from, so there is no path from the output back to
+     the input — unlike v2.8's max-height, which sized a box against a number
+     the box's own size decided.
+
+     Published on the ROOT rather than on the pane, because the pane is replaced
+     on every paint and an inline value would go with it. */
+  var SETHEAD_RO = new ResizeObserver(function(rs){
+    var el = rs[0] && rs[0].target;
+    if (!el) return;
+    document.documentElement.style.setProperty(
+      "--sethead-h", Math.round(el.getBoundingClientRect().height) + "px");
+  });
+  function watchSetupHead(){
+    /* GUARDED, BECAUSE paint() CAN RUN FIRST. `SETHEAD_RO` is a `var` assigned
+       here at the foot of the file, and the function declaration above it
+       hoists while the value does not — the same shape as §113.8's `undefined`
+       unshift. A boot that painted before this line would throw, and a throw
+       mid-paint keeps the previous page on screen with the only witness in a
+       console nobody has open (§118). */
+    if (!SETHEAD_RO) return;
+    SETHEAD_RO.disconnect();
+    var el = document.querySelector(".setuphead");
+    if (el) SETHEAD_RO.observe(el);
+    /* Removed rather than left holding the last Setup page's number: every
+       other page reads the fallback, and a stale value is worse than none. */
+    else document.documentElement.style.removeProperty("--sethead-h");
+  }
 
   /* NO CONDENSE-ON-SCROLL. The chrome is one height, always.
 

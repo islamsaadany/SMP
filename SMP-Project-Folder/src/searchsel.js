@@ -46,8 +46,19 @@ var SEARCHSEL = (function(){
   var open = null;
 
   function textOf(sel){
+    if (sel.multiple) return chosenTexts(sel).join(", ");
     var o = sel.options[sel.selectedIndex];
     return o ? o.text : "";
+  }
+  /* In the select's OWN order, never the order they were ticked: the cell has
+     to read the same after a repaint as it did before one, and the ticking
+     order is not something the data keeps. */
+  function chosenTexts(sel){
+    var out = [];
+    Array.prototype.forEach.call(sel.options, function(op){
+      if (op.selected) out.push(op.text);
+    });
+    return out;
   }
 
   function close(){
@@ -85,16 +96,47 @@ var SEARCHSEL = (function(){
     sel.dispatchEvent(new Event("change", { bubbles: true }));
   }
 
+  /* ── TICKING IS NOT ANSWERING (§130.1) ──────────────────────────────
+     The single-select path above closes the popup BEFORE it fires `change`,
+     because picking one option answers the question and because `change`
+     repaints the panel the popup is standing in (§30.1). Neither is true of a
+     list you are ticking: the question is not answered until you stop, so the
+     popup STAYS OPEN and every tick commits on its own.
+
+     WHAT MAKES THAT SAFE IS THE HANDLER, and it is worth writing down because
+     the next person to add one will not know: every field this control is used
+     on goes through the shell's one `data-fld` listener, which writes the value
+     and saves and DOES NOT REPAINT (§71.2). Wire a multiple select to a handler
+     that calls paint() and the popup will vanish under the pointer on the first
+     tick — the same fault §30.1 records, arriving by the other road.
+
+     COMMITTED PER TICK RATHER THAN ON CLOSE, deliberately. Holding the change
+     until the popup shuts would mean firing it from close(), and close() is the
+     first thing wire() does at the end of every paint() — by which time FIELDS
+     has been rebuilt and this element's `data-fld` index points at somebody
+     else's setter (§96's registry, read one paint too late). */
+  function toggle(sel, btn, op, row){
+    op.selected = !op.selected;
+    row.classList.toggle("on", op.selected);
+    row.setAttribute("aria-selected", op.selected ? "true" : "false");
+    setLabel(sel, btn);
+    sel.dispatchEvent(new Event("change", { bubbles: true }));
+  }
+
   function setLabel(sel, btn){
+    /* An em-dash for nothing chosen, which is the word the plan's own cells
+       already use for nobody (§15.1: absent, never zero). */
     btn.querySelector(".sslabel").textContent = textOf(sel) || "—";
     btn.title = textOf(sel) || "";
   }
 
   function openFor(sel, btn){
     close();
+    var many = !!sel.multiple;
     var pop = document.createElement("div");
-    pop.className = "sspop";
+    pop.className = "sspop" + (many ? " ssmany" : "");
     pop.setAttribute("role", "listbox");
+    if (many) pop.setAttribute("aria-multiselectable", "true");
 
     var q = document.createElement("input");
     q.type = "text";
@@ -110,18 +152,54 @@ var SEARCHSEL = (function(){
     none.textContent = "Nothing matches.";
     none.hidden = true;
 
-    var rows = [];
-    Array.prototype.forEach.call(sel.options, function(op){
+    /* An <optgroup> is a heading over the options inside it, so the rows are
+       walked through the groups rather than off `sel.options` — otherwise the
+       People and Departments a plan picks from arrive as one undifferentiated
+       list of fifty. The heading is not a row: it filters with the group and
+       disappears when nothing under it matches, or a search for one name
+       leaves two empty headings standing over it. */
+    var rows = [], groups = [];
+    var addRow = function(op, into){
+      var on = many ? op.selected : (op.value === sel.value);
       var r = document.createElement("button");
       r.type = "button";
-      r.className = "ssrow" + (op.value === sel.value ? " on" : "");
+      r.className = "ssrow" + (on ? " on" : "");
       r.textContent = op.text || "—";
+      /* WHERE THIS ONE IS FROM, QUIETLY (§130.9). A hint on the option rides
+         into the row and nowhere else — the button's label and the value the
+         field stores are the option's TEXT, which is the name on its own. It
+         joins what is SEARCHED, so typing a unit's name finds the people in
+         it; a hint you can see and cannot search for is half a control. */
+      var hint = op.dataset && op.dataset.hint;
+      if (hint) {
+        var h = document.createElement("span");
+        h.className = "sshint";
+        h.textContent = hint;
+        r.appendChild(h);
+      }
       r.setAttribute("role", "option");
-      r.setAttribute("aria-selected", op.value === sel.value);
-      r._q = (op.text || "").toLowerCase();
-      r.addEventListener("click", function(){ choose(sel, btn, op.value); });
+      r.setAttribute("aria-selected", on ? "true" : "false");
+      r._q = ((op.text || "") + " " + (hint || "")).toLowerCase();
+      r.addEventListener("click", function(){
+        if (many) toggle(sel, btn, op, r); else choose(sel, btn, op.value);
+      });
       rows.push(r);
-      list.appendChild(r);
+      into.appendChild(r);
+    };
+    Array.prototype.forEach.call(sel.children, function(node){
+      if (node.tagName === "OPTGROUP") {
+        var box = document.createElement("div");
+        box.className = "ssgrp";
+        var h = document.createElement("div");
+        h.className = "ssgrph";
+        h.textContent = node.label || "";
+        box.appendChild(h);
+        Array.prototype.forEach.call(node.children, function(op){ addRow(op, box); });
+        groups.push(box);
+        list.appendChild(box);
+      } else if (node.tagName === "OPTION") {
+        addRow(node, list);
+      }
     });
 
     /* Hides rows in place. Never re-renders the list, never touches the input
@@ -132,6 +210,10 @@ var SEARCHSEL = (function(){
         var hit = !s || r._q.indexOf(s) > -1;
         r.hidden = !hit;
         if (hit) n++;
+      });
+      groups.forEach(function(g){
+        g.hidden = !Array.prototype.some.call(g.querySelectorAll(".ssrow"),
+          function(r){ return !r.hidden; });
       });
       none.hidden = n > 0;
     });
@@ -151,7 +233,14 @@ var SEARCHSEL = (function(){
       /* Enter takes the first row still showing — the whole point of typing
          three letters is not having to reach for the mouse afterwards. */
       var first = rows.filter(function(r){ return !r.hidden; })[0];
-      if (first && document.activeElement === q) { e.preventDefault(); first.click(); }
+      if (first && document.activeElement === q) {
+        e.preventDefault();
+        first.click();
+        /* On a list you are TICKING, Enter has to leave the search box alone:
+           the whole point of typing three letters is to tick and type three
+           more. The single-select path has already closed by now. */
+        if (many) { q.select(); }
+      }
     };
     /* IT FOLLOWS THE BUTTON NOW, RATHER THAN CLOSING (§51.6, Islam: "the
        where it goes list needs to be scrollable as on scrolling it closes").
@@ -172,8 +261,19 @@ var SEARCHSEL = (function(){
        rule was never size against a measured value; this only moves). It
        still closes when the button it belongs to has left the screen, because
        a popup pointing at nothing is worse than a closed one. */
+    /* AND A 1px CLIPPED ELEMENT SCROLLING IS NEVER THE PAGE MOVING (§130.1).
+       Setting `selected` on a `<select multiple>` makes the browser scroll the
+       native list box to the option — and it fires a real `scroll` event doing
+       it, from an element that is 1px square, clipped and invisible (see
+       `.ss-native`). With capture on, that reached here as though somebody had
+       scrolled the window: every tick re-placed the popup, and a tick on a
+       control near the fold CLOSED it, because the button honestly is off
+       screen down there. Found by ticking, not by reading — the single-select
+       path never sets `selected` on anything, so nothing has ever fired it. */
     var onGone = function(e){
-      if (e && e.target && e.target.nodeType === 1 && pop.contains(e.target)) return;
+      if (e && e.target && e.target.nodeType === 1 &&
+          (pop.contains(e.target) ||
+           (e.target.classList && e.target.classList.contains("ss-native")))) return;
       var r = btn.getBoundingClientRect();
       if (r.bottom < 0 || r.top > innerHeight || r.right < 0 || r.left > innerWidth) { close(); return; }
       place(btn, pop);
@@ -219,9 +319,14 @@ var SEARCHSEL = (function(){
   }
 
   function enhance(sel){
-    if (sel.multiple || sel.disabled) return;
+    if (sel.disabled) return;
     if (sel.dataset.nosearch === "1") return;
-    if (sel.options.length < MIN) return;
+    /* A MULTIPLE SELECT IS ALWAYS ENHANCED, whatever it holds (§130.1). The
+       five-option floor is about whether a short list is worth a search box;
+       the native multiple select is a scrolling list box that ctrl-clicks, and
+       it is not a control this product uses anywhere. Below the floor there is
+       still nothing to search — the box is there and matches nothing away. */
+    if (!sel.multiple && sel.options.length < MIN) return;
     if (sel.dataset.ss === "1") {           /* already wrapped this paint */
       var prev = buttonFor(sel);
       if (prev) {

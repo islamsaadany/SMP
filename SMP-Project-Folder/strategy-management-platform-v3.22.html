@@ -510,6 +510,69 @@
      product from the reference. */
   .scroll { overflow-x:auto; border:1px solid var(--line); border-radius:var(--r-lg); background:var(--surface); }
   table { width:100%; border-collapse:collapse; font-size:var(--fs-note); min-width:620px; }
+  /* ── THE FLOOR IS RIGHT NEARLY EVERYWHERE, AND IT CUT THE PLAN (§157) ──
+     That 620px stops a data table squashing into unreadable columns, and it is
+     the right default. It is also a FLOOR, and a floor cannot yield: a unit's
+     plan pane narrows with the window, and once the pane is under 620 the
+     table holds its minimum while the pane keeps shrinking — so the last
+     column is sliced by the pane's edge. Measured on the demo tenant: the
+     pane is 585px at a 900px window and the table stays at exactly 620,
+     overflowing 35px, then 75 at 860 and 105 at 830.
+
+     IT IS THE FLOOR AND NOTHING ELSE, which is why the first fix drawn was
+     the wrong one. The obvious reading is "the columns need less room", so
+     the first attempt tightened the cell padding — 13px to 7px — and the
+     columns DID narrow while `scrollWidth` stayed at 620 to the pixel,
+     because the flexible Measure column simply absorbed every pixel saved.
+     Anything that does not move the floor moves nothing. The second attempt
+     was §108.5's pair, a scroll shadow and a visible track, which is the
+     right answer to "this box scrolls and does not say so" and the wrong
+     answer here: the box only scrolls BECAUSE of the floor, and a table that
+     fits needs no sign that it continues.
+
+     §109 wrote this same global rule down from the other side — it made a
+     small front-matter table overflow its own grid track by 300px. A rule
+     that is a good default in both directions is still a rule with two edges.
+
+     `:not(.setuppane)` IS LOAD-BEARING AND WAS FOUND BY THE CHECK, NOT BY
+     READING. Setup's pane is `<div class="pane setuppane">`, so the obvious
+     `.pane table` silently took the floor off every Setup table too — and
+     Setup's `.cfg table` floor is 760px on paper: §88 clips every cell to one
+     line and needs the room, and §122.5 caps that pane and lets it scroll ON
+     PURPOSE. Widening this to Setup would have traded a sliced plan for a
+     squashed register, which is the worse of the two.
+
+     THE CHECK CANNOT PROVE THAT BY MEASURING, AND SAYS SO RATHER THAN
+     PRETENDING. The natural assertion — "Setup's table keeps its 760px floor"
+     — was written, went red, and the fault was the assertion:
+     `group-extra.css:296` declares that floor and line 528 re-declares
+     `.cfg table { min-width:0 }` unscoped and later, so every Setup table has
+     computed 0 for a long time and the 760 is dead code (the fifth duplicated
+     rule this project has recorded — §29.2, §51.5, §53.6, §88, §93.11; found
+     by asking `document.styleSheets`, per §93.11, not by reading the cascade).
+     That value reads the same with or without the `:not()`, which is §113.8's
+     blind spot, so the reach is asserted on the SELECTOR the browser holds
+     instead. The dead 760 is recorded in §157.1, not fixed here.
+
+     Below 820 the split stacks and the pane is full-width again, so the window
+     where this applies is exactly the window where the two-column layout is
+     tighter than the floor. */
+  @media (max-width:1000px){
+    .pane:not(.setuppane) table { min-width:0; }
+    /* AND THE FLOOR WAS NOT THE WHOLE OF IT ON THE FUNCTION'S SIDE (§53.5,
+       earning its keep the moment the check asked both). With the floor gone a
+       unit's Plan fits at every width in the band; a supporting function's
+       Projects pane still ran 11px over at 860 and 41px at 830, because its
+       deliverables table carries five columns to the unit's, and what is left
+       once min-width yields is the columns' own intrinsic minimum. Padding
+       could not touch the floor (that is the note above) and is exactly what
+       moves an intrinsic minimum: 13px to 8px a side closes it to zero at
+       every width, with no column heading pushed onto a second line — which
+       is the failure mode to watch, and is asserted rather than assumed.
+       Islam signed off "the columns simply sit a little closer together";
+       this is that, and it is off again above 1000px. */
+    .pane:not(.setuppane) th, .pane:not(.setuppane) td { padding-left:8px; padding-right:8px; }
+  }
   th,td { text-align:left; padding:10px 13px; border-bottom:1px solid var(--line-soft); vertical-align:top; }
   th+th, td+td { border-left:1px solid var(--line-soft); }
   thead th { font-size:10.5px; letter-spacing:.09em; text-transform:uppercase; color:var(--ink-2);

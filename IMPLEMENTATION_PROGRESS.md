@@ -69,6 +69,31 @@ Nothing proceeds past this line without an answer.
 checked as separate rounds on one branch and shipping as one version — main
 took v3.52–v3.57 from four other sessions while they were being built.*
 
+### v3.58 — the plan tables fit the pane (§157)
+
+- Islam, wave 4: on a smaller window the plan tables were cut off down the
+  right — the last column sliced, the heading reading *COMPILE*.
+- **A floor cannot yield.** `table { min-width:620px }` is the right default
+  and the pane narrows past it: at a 900px window the pane is 585 and the
+  table stays at exactly 620. Only between ~820 and 960 — above it fits,
+  below 820 the split stacks — which is why 1440 and 768 both look clean.
+- **Two wrong fixes were drawn first.** Tightening cell padding narrowed the
+  columns and left `scrollWidth` at 620 to the pixel (the flexible column
+  absorbs it); §108.5's scroll shadow and track was an affordance over a
+  fault, and could not even be demonstrated — headless paints no scrollbar,
+  and on an iPad the native one is an overlay that vanishes.
+- **§53.5 paid within a minute**: with the floor gone the unit fits and a
+  supporting function still ran 11px over at 860 and 41px at 830 (five columns,
+  intrinsic minimum). 13px → 8px of cell padding closes it with no heading
+  taking a second line.
+- **`:not(.setuppane)` was found by the check** — Setup's pane is also `.pane`,
+  so the obvious selector stripped the register's floor too.
+- **And the obvious both-ends assertion could not fail**: `.cfg table`'s 760px
+  floor is dead code, re-declared as 0 later in the same file (the fifth
+  duplicate this project has recorded). Asserted on the selector instead.
+- `checks/table-fit.py` — 7 failures on the pre-§157 build. Whole suite and
+  the 33-viewer sweep green. **Not merged — awaiting Islam.**
+
 ### v3.58 — two faces (§156)
 
 - Islam: *"let's make the 2 fonts available are the sytem font and the source

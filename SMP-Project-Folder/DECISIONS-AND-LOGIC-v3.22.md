@@ -19754,3 +19754,89 @@ to reject. The pair is written out.
 
 Proved able to fail: **11 failures** against the pre-§156 build. Wave 1–3
 suite, `save-flush`, `state-contrast` and the full sweep green.
+
+---
+
+## 157 · The plan tables fit the pane they are in (v3.58)
+
+Islam, from the audit's wave 4: the plan tables were being cut off down the
+right-hand side on a smaller window — the last column sliced vertically, the
+heading reading *COMPILE* and the values *Lates*.
+
+**IT IS A FLOOR, AND A FLOOR CANNOT YIELD.** `table { min-width:620px }` stops a
+data table squashing into unreadable columns and is the right default. But a
+unit's plan pane narrows with the window, and once the pane is under 620 the
+table holds its minimum while the pane keeps shrinking, so the last column is
+cut by the pane's edge. Measured on the demo tenant: the pane is **585px at a
+900px window** and the table stays at **exactly 620**, overflowing 35px, then
+75 at 860 and 105 at 830. **§109 wrote this same global rule down from the
+other side** — it made a small front-matter table overflow its own grid track
+by 300px. A rule that is a good default in both directions still has two edges.
+
+**BAND, NOT SLOPE.** It only happens between about **820 and 960px**: above
+that the table fits beside the rail, and below 820 the split stacks and the
+pane is full-width again. That is why walking the product at 1440 and at 768
+finds nothing, and why it survived every sweep the suite has.
+
+**TWO WRONG FIXES WERE DRAWN FIRST, AND EACH TAUGHT SOMETHING.** The obvious
+reading is *the columns need less room*, so the first attempt tightened the
+cell padding — 13px to 7px — and the columns **did** narrow while
+`scrollWidth` stayed at 620 to the pixel, because the flexible Measure column
+absorbed every pixel saved. *Anything that does not move the floor moves
+nothing.* The second attempt was **§108.5's pair** — a scroll shadow and a
+visible track — which is the right answer to *this box scrolls and does not
+say so* and the wrong answer here: the box only scrolls BECAUSE of the floor,
+and a table that fits needs no sign that it continues. It also could not be
+demonstrated: headless Chromium paints no scrollbar (`offsetHeight -
+clientHeight` is 0 either way), and on an iPad — the audience this is for —
+the native track is an overlay that vanishes. **The affordance would have been
+furniture over a fault.**
+
+**§53.5 EARNED ITS KEEP WITHIN A MINUTE.** With the floor gone a unit's Plan
+fits at every width in the band and a supporting **function's** Projects pane
+still ran **11px over at 860 and 41px at 830** — its deliverables table carries
+five columns to the unit's, so what is left once `min-width` yields is the
+columns' own **intrinsic** minimum. Padding could not touch the floor and is
+exactly what moves an intrinsic minimum: **13px → 8px a side** closes it to
+zero at every width **with no column heading pushed onto a second line**, which
+is the failure mode to watch and is asserted rather than assumed. Islam signed
+off *"the columns simply sit a little closer together"*; this is that, and it
+is off again above 1000px.
+
+**`:not(.setuppane)` IS LOAD-BEARING AND WAS FOUND BY THE CHECK, NOT BY
+READING.** Setup's pane is `<div class="pane setuppane">`, so the obvious
+`.pane table` silently took the floor off every Setup table too — and Setup's
+tables are governed by §88's one-line clip and §122.5's capped, deliberately
+scrolling pane. Widening this to Setup would have traded a sliced plan for a
+squashed register, which is the worse of the two.
+
+**AND THE OBVIOUS "BOTH ENDS" ASSERTION COULD NOT FAIL.** It was written —
+*Setup's table keeps its 760px floor* — it went red, and **the fix was the
+check**: `group-extra.css:296` declares `.cfg table { min-width:760px }` and
+**line 528 re-declares `.cfg table { min-width:0 }` unscoped and later**, so
+every Setup table has computed 0 for a long time and the 760 is dead code.
+The **fifth** duplicated rule this project has recorded (§29.2, §51.5, §53.6,
+§88, §93.11) — and, as §93.11 prescribes, found by asking
+`document.styleSheets` what the browser actually holds rather than reading the
+cascade. Measuring that value passes whether or not the exclusion is present,
+which is §113.8's blind spot exactly, so the reach is asserted where it can
+still be falsified: **on the selector the browser holds**. The dead 760 is
+recorded below rather than fixed in passing (rule 1b).
+
+`src/checks/table-fit.py` asserts the promise and not the implementation
+(§94.8): in the band, **nothing overflows** — never *and it has a scrollbar* —
+no heading takes a second line, on **both sides of the switch**, with the
+620 floor and the 13px padding still in force on a wide window (§94.2). Proved
+able to fail: **7 failures** against the pre-§157 build, on both sides at all
+three band widths.
+
+### Recorded, not fixed (§157.1)
+
+- **`.cfg table`'s 760px floor is dead code.** `group-extra.css:296` sets it;
+  line 528 sets `min-width:0` on the same selector, unscoped and later. One of
+  the two is wrong and which one is a decision about how Setup's tables should
+  behave, not a tidy-up to make while looking at the plan pane.
+- **`checks/no-wrap.py` reports 5 failures**, identically on this build and the
+  one before it — the register's table 544px past a box that does not scroll,
+  and the access matrix clipped with no hover. Pre-existing; a true signal, and
+  its own item.

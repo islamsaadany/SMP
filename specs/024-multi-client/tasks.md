@@ -21,11 +21,11 @@ serverless functions `api/`; SQL `db/`; checks `SMP-Project-Folder/src/checks/`;
 
 ## Phase 1 · Setup
 
-- [ ] T001 Create `db/platform-schema.sql` with `clients`, `accounts`, `account_clients`, `platform_access`, `sessions`, `login_attempts`, `client_log` per specs/024-multi-client/data-model.md, idempotent (`CREATE TABLE IF NOT EXISTS`) and with the partial unique index for one super user per client
-- [ ] T002 [P] Create `db/platform-migrations/` with its own `_sql_migrations` registry, mirroring the convention in `lib/state-io.js` (numbered files, `-- @phase:` honoured)
-- [ ] T003 [P] Create `lib/platform-rules.js` — `OFFICE_ROLES` (admin·lead·consultant·observer), `AREAS` (my_clients·other_clients·client_config·consultants·create_client·demo), `ACCESS_DEFAULTS` from spec §7.3, `grantIn()` merging stored over defaults (§30.2), and `mayOpenClient` / `mayEditClient` / `mayConfigureClient` / `mayManageConsultants` / `mayCreateClient` / `mayEditAccess` — pure functions, no I/O
-- [ ] T004 Add `lib/platform-rules.js` to `build.py`'s inline list beside `lib/rules.js` so the browser and the API share one copy (Principle IX)
-- [ ] T005 [P] Write `scripts/test-platform-rules.js` — the four roles against the six areas, defaults merged, an unknown area answering `none`, and the admin row unwritable
+- [x] T001 Create `db/platform-schema.sql` with `clients`, `accounts`, `account_clients`, `platform_access`, `sessions`, `login_attempts`, `client_log` per specs/024-multi-client/data-model.md, idempotent (`CREATE TABLE IF NOT EXISTS`) and with the partial unique index for one super user per client
+- [x] T002 [P] Create `db/platform-migrations/` with its own `_sql_migrations` registry, mirroring the convention in `lib/state-io.js` (numbered files, `-- @phase:` honoured)
+- [x] T003 [P] Create `lib/platform-rules.js` — `OFFICE_ROLES` (admin·lead·consultant·observer), `AREAS` (my_clients·other_clients·client_config·consultants·create_client·demo), `ACCESS_DEFAULTS` from spec §7.3, `grantIn()` merging stored over defaults (§30.2), and `mayOpenClient` / `mayEditClient` / `mayConfigureClient` / `mayManageConsultants` / `mayCreateClient` / `mayEditAccess` — pure functions, no I/O
+- [ ] T004 (deferred to US2, when `ff-shell.html` exists — an inline nothing reads is dead code, §24) Add `lib/platform-rules.js` to `build.py`'s inline list beside `lib/rules.js` so the browser and the API share one copy (Principle IX)
+- [x] T005 [P] Write `scripts/test-platform-rules.js` — the four roles against the six areas, defaults merged, an unknown area answering `none`, and the admin row unwritable
 
 ## Phase 2 · Foundational (blocks every story)
 

@@ -56,6 +56,18 @@ Nothing proceeds past this line without an answer.
 
 ---
 
+## Agreed and specified, not built
+
+- **Multi-client — one door, many clients (`specs/024-multi-client/spec.md`,
+  2026-08-28).** Every decision settled with Islam in session: one door, cards
+  for Forefront only, **one Postgres schema per client** (§36.2), RHI and
+  El Abd real and empty, an office-only page that creates a client, **email-only
+  sign-in** (no person-key, `SMO` / `1234` goes), the office landing as SMO team
+  and appearing on the client's register marked as Forefront, Demo data
+  office-only. Built on the live platform; `smp-app/` untouched. **Nothing
+  implemented** — the cards page, the client name in the chrome and the
+  create-a-client page are mockup-first (§1c).
+
 ## Known red, on purpose
 
 - **`checks/no-jump.py` — "sorting a column" (1 JUMPED).** Real defect,

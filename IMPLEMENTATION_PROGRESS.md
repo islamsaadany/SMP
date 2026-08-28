@@ -67,6 +67,32 @@ Nothing proceeds past this line without an answer.
 
 ## Built and verified
 
+### v3.56 — two faces (§147)
+
+- Islam: *"let's make the 2 fonts available are the sytem font and the source
+  san3."* §38.7 carried four faces so they could be judged in the real product
+  rather than on a specimen sheet; the judging is done. Inter, Manrope and IBM
+  Plex Sans leave — files, `@font-face` blocks and `[data-font]` rules together
+  (§24) — and the switch offers **System** and **Source Sans**.
+- The built file goes **2,690,171 → 2,531,861 bytes** (2.69 → 2.46 MB), which
+  is 116 KB of face in every handover of the single file.
+- A face lives in three places that must agree — `fonts/`, `FACES` in
+  `build.py`, `FONTS` in `theme.js` — and `FONTS` is also the sanitiser, which
+  is what makes a browser remembering `manrope` fall back to the system stack
+  with the switch still working rather than being stranded.
+- **The check reported a correct build broken first.** A `data:` URI removes
+  the network and not the asynchrony: the face is `unloaded` until asked for,
+  so a width measured in the same frame as the attribute is the system stack's
+  width under the right family name (279.95 = 279.95). `await
+  document.fonts.load()` first (227.91 vs 279.95), with the decode asserted as
+  its own fact.
+- **And one assertion could not fail when written** (§94.5): it derived the
+  attribute key from the family name, and `"IBM Plex Sans".split()[0]` is
+  `ibm` where the selector has always been `plex`.
+- `checks/typeface.py` — 11 failures on the pre-§147 build. Wave 1–3 suite,
+  `save-flush`, `state-contrast` and the 33-viewer sweep green.
+  **Not merged — awaiting Islam.**
+
 ### v3.55 — the card sentences and the delta (§146)
 
 - Islam's redirect of Wave 3's item 2: the three group cards each carried a

@@ -18417,3 +18417,57 @@ neutrals; the word unchanged.
 
 Proved able to fail: 4 failures against the pre-§146 build. Wave 1–3 suite and
 the full sweep (33 viewers) green.
+
+---
+
+## §147 — Two faces, and the comparison closes
+
+Islam: *"let's make the 2 fonts available are the sytem font and the source
+san3."*
+
+**§38.7 WAS AN OPEN COMPARISON AND IT IS NOW ANSWERED.** That section embedded
+four faces so they could be judged *in the real product* rather than on a
+specimen sheet — its own note said the axis "collapses into the palette once
+each has a face" — and the judging is done. Inter, Manrope and IBM Plex Sans
+leave: their woff2 files are deleted, their `@font-face` blocks and their
+`:root[data-font=…]` rules go with them (§24 — a rule for a face the product no
+longer carries is worse than no rule, because nothing tells the next reader it
+is dead), and the switch offers **System** and **Source Sans**.
+
+**THE SAVING IS REAL AND IT IS THE SECOND REASON, NOT THE FIRST.** The built
+file goes **2,690,171 → 2,531,861 bytes** (2.69 MB → 2.46 MB): 116 KB of face
+plus its base64 overhead, carried in every handover, every email of the single
+file, every memory stick. The first reason is that a choice with three options
+nobody picked is a choice that costs a reader time.
+
+**THE THREE PLACES MUST AGREE, AND THE LIST IS ALSO THE SANITISER.** A face
+lives in `fonts/`, in `FACES` in `build.py` (which inlines it as a `data:` URI)
+and in `FONTS` in `theme.js` — and `chosenFont()` validates a remembered value
+against that same array, so **removing a face from the list is what makes a
+browser holding `manrope` fall back cleanly** rather than being stranded with
+an attribute no stylesheet answers (§30.2's shape, from the other side). That
+is asserted: a stored `manrope` lands on the system stack with the switch
+still working.
+
+**AN EMBEDDED FACE IS STILL LOADED LAZILY, AND THE CHECK REPORTED A CORRECT
+BUILD BROKEN.** A `data:` URI removes the network and **not the asynchrony**:
+the face sits `unloaded` until something asks for it, `font-display:swap`
+paints the fallback meanwhile, and a width measured in the same frame as the
+attribute is set is therefore the SYSTEM stack's width *under the right family
+name* — 279.95 and 279.95, `font-family` correctly resolved to `"Source Sans
+3", …`, and a working product called broken. `await document.fonts.load()`
+first (227.91 against 279.95), and the decode is asserted as **its own fact**,
+or a face that genuinely never decodes would leave two equal widths and no
+explanation of which of the two things went wrong. §68.10's class, on a
+different instrument: *a correct build reported broken is the same fault as a
+broken build reported clean, and the first instinct — to go and change the
+build's font handling — would have damaged a working embed.*
+
+**AND ONE ASSERTION COULD NOT FAIL WHEN IT WAS WRITTEN** (§94.5): the loop
+derived the attribute key from the family name, and `"IBM Plex Sans".split()[0]`
+is `ibm` while the selector has always been `[data-font="plex"]` — so it looked
+for a string the product never held and passed on the very build it was written
+to reject. The pair is written out.
+
+Proved able to fail: **11 failures** against the pre-§147 build. Wave 1–3
+suite, `save-flush`, `state-contrast` and the full sweep green.

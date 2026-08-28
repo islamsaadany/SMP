@@ -78,11 +78,10 @@
      degrades to the system font rather than to a default serif. Absence of the
      attribute is the system stack, which is why there is no [data-font="system"]
      block: nothing to set. */
-  /* ONE BLOCK, because there is one embedded face (§147). The other three
-     went with their .woff2 files rather than being left here unreachable — a
-     rule for a face the product no longer carries is exactly what §24 is
-     about, and the next reader would have no way to tell it was dead. */
+  :root[data-font="inter"]   { --sans:'Inter',var(--sys-sans); }
   :root[data-font="source"]  { --sans:'Source Sans 3',var(--sys-sans); }
+  :root[data-font="manrope"] { --sans:'Manrope',var(--sys-sans); }
+  :root[data-font="plex"]    { --sans:'IBM Plex Sans',var(--sys-sans); }
 
   /* ── LAYER 2 · THE PALETTES ──────────────────────────────────────
      A colour that is legible as a FILL is usually not legible as TYPE. Every

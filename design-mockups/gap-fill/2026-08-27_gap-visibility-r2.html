@@ -60,8 +60,9 @@
   .secrow span.stab{padding:4px 10px;border-radius:6px}
   .secrow span.stab.on{background:var(--surface);font-weight:600;color:var(--gold-deep)}
   .secmiss{margin-left:auto;color:var(--bad);font-weight:800;font-size:12.5px;
-           white-space:nowrap}
-  .secrow .fillcta{margin-left:10px;padding:4px 13px;font-size:12px}
+           white-space:nowrap;padding-left:14px}
+  .secrow .mchip{padding:2px 9px;font-size:11.5px}
+  .secrow .fillcta{margin-left:4px;padding:4px 13px;font-size:12px}
   .stage{background:var(--ground);border:1px solid var(--line);border-top:0;
          border-radius:0 0 10px 10px;padding:12px 16px 18px}
 
@@ -174,12 +175,12 @@
 
   <!-- A · read mode -->
   <div class="sec">
-    <h2><span class="n">A</span>Read mode — the count lives in the bar beside Plan, no extra row</h2>
-    <p class="why">Your space-saving move: the section bar already has the room, so in read
-       mode it carries the whole signal — red <b>47 Missing</b> and the red button, at the
-       bar's right edge, costing zero height. The full chip strip appears only while you
-       are actually filling, when a working row earns its space — and vanishes with the
-       last gap.</p>
+    <h2><span class="n">A</span>The whole bar lives beside Plan — nothing in the page</h2>
+    <p class="why">Your correction, drawn: red <b>47 Missing</b>, the place chips and the
+       red button all sit in the section bar's free space, read mode included — the page
+       body carries nothing. A chip jumps to its place; the button opens fill mode and
+       becomes <b>Next gap</b>. On a plan with many pillars the bar wraps to a second
+       line — the honest cost, paid only when the chips genuinely do not fit.</p>
     <div class="chrome">
       <span class="tab on">Strategy</span>
       <span class="tab">Performance</span>
@@ -187,19 +188,15 @@
     <div class="secrow">
       <span class="stab">Foundation</span><span class="stab">SWOT</span><span class="stab on">Plan</span>
       <span class="secmiss" id="secmiss">47 Missing</span>
+      <button class="mchip" data-m="found">Foundation <b>2</b></button>
+      <button class="mchip" data-m="ko">Objectives <b>3</b></button>
+      <button class="mchip here" data-m="be01">BE01 <b>12</b></button>
+      <button class="mchip" data-m="be02">BE02 <b>9</b></button>
+      <button class="mchip" data-m="be03">BE03 <b>14</b></button>
+      <button class="mchip" data-m="be04">BE04 <b>7</b></button>
       <button class="fillcta" id="cta">Fill in missing elements</button>
     </div>
     <div class="stage">
-      <div class="misstrip" id="strip" hidden>
-        <span class="tot">47 Missing</span>
-        <button class="mchip" data-m="found">Foundation <b>2</b></button>
-        <button class="mchip" data-m="ko">Objectives <b>3</b></button>
-        <button class="mchip here" data-m="be01">BE01 <b>12</b></button>
-        <button class="mchip" data-m="be02">BE02 <b>9</b></button>
-        <button class="mchip" data-m="be03">BE03 <b>14</b></button>
-        <button class="mchip" data-m="be04">BE04 <b>7</b></button>
-        <button class="fillcta" id="next" hidden>Next gap →</button>
-      </div>
 
       <div class="split">
         <div class="rail">
@@ -249,8 +246,8 @@
       </div>
     </div>
     <p class="try">↑ Press <b>Fill in missing elements</b> (in the bar or the corner) — the
-      chip strip appears for the work, the Missing words become fields, the button becomes
-      <b>Next gap</b>, and filling ticks every red count down live.</p>
+      Missing words become fields, the button becomes <b>Next gap</b>, and filling ticks
+      every red count down live, right there in the bar.</p>
   </div>
 
   <!-- B · objectives with nothing missing -->
@@ -294,10 +291,10 @@
     <h2>What this revision proposes (§132.14)</h2>
     <ul>
       <li><b>The Strategy tab loses its number.</b> The red strip carries the total instead.</li>
-      <li><b>The count lives in the section bar beside Plan</b> (your space-saving
-        correction to r2's own strip): read mode carries red "47 Missing" + the button at
-        the bar's right edge, zero extra height. <b>The chip strip appears only in fill
-        mode</b>, where a working row earns its space, and vanishes at zero.</li>
+      <li><b>The whole bar lives beside Plan</b> (your correction): "47 Missing", the
+        place chips and the red button all in the section bar's free space, read mode
+        included — nothing in the page body, no extra row. Wraps only when a plan has
+        more chips than the line can hold. Vanishes at zero.</li>
       <li><b>"Fill in missing elements"</b> is a clear red worded button, left of the
         arrange arrows, drawn only while something is missing; after that a quiet amber
         <i>Review pending · N</i> remains until the office has confirmed everything.</li>
@@ -319,12 +316,10 @@
     var cta = document.getElementById('cta'), corner = document.getElementById('corner');
     var r1 = document.getElementById('r1');
     var be01 = document.querySelector('[data-m="be01"] b');
-    var tot = document.querySelector('.tot');
     var secmiss = document.getElementById('secmiss');
     var slots = { t2: null, o1: null };
     function enterFill(){
       if (filling) return; filling = true;
-      document.getElementById('strip').hidden = false;
       cta.textContent = 'Next gap → 47 left';
       corner.textContent = 'Next gap →';
       ['t2','o1'].forEach(function(k){
@@ -336,7 +331,7 @@
           this.classList.remove('gap'); this.classList.add('pend');
           this.insertAdjacentHTML('afterend', '<span class="pchip">pending</span>');
           total--; var p = Math.max(0, (+be01.textContent) - 1);
-          be01.textContent = p; tot.textContent = total + ' Missing';
+          be01.textContent = p;
           secmiss.textContent = total + ' Missing';
           r1.innerHTML = p ? p + ' Missing' : '✓';
           r1.classList.toggle('ok', !p);

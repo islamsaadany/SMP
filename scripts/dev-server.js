@@ -14,9 +14,12 @@ const mailHandler = require("../api/mail.js");
 
 const ROOT = path.join(__dirname, "..");
 const PORT = parseInt(process.argv[2], 10) || 3999;
-/* Mirrors vercel.json's rewrite: one tenant today, its own name in the URL,
-   and the versioned filename behind it (§35.6). */
-const TENANT = "raya-trade";
+/* Mirrors vercel.json's rewrites: a client's own name in the URL, and the
+   versioned filename behind every one of them (§35.6, spec 024). The list is
+   READ FROM vercel.json rather than typed again — the same rule the security
+   headers below follow, and the one §35.6 asks for: three files carry this
+   mapping and they must stay in step. */
+const CLIENT_PATHS = null;   /* filled below, from vercel.json's rewrites */
 const PLATFORM_FILE = "SMP-Project-Folder/strategy-management-platform-v3.22.html";
 const TYPES = { ".html": "text/html; charset=utf-8", ".js": "text/javascript",
                 ".css": "text/css", ".json": "application/json", ".ico": "image/x-icon",
@@ -34,6 +37,10 @@ const TYPES = { ".html": "text/html; charset=utf-8", ".js": "text/javascript",
    production: sending it from http://localhost would pin the browser to https
    for localhost, which breaks every other local server on the machine. */
 const VERCEL = JSON.parse(fs.readFileSync(path.join(ROOT, "vercel.json"), "utf8"));
+/* Every rewrite whose destination is the platform file is a client's path. */
+const CLIENTS = (VERCEL.rewrites || [])
+  .filter(function (r) { return r.destination && /strategy-management-platform/.test(r.destination); })
+  .map(function (r) { return r.source; });
 const SECURITY = ((VERCEL.headers || []).filter(function (h) { return h.source === "/(.*)"; })[0] || {})
   .headers.filter(function (h) { return h.key !== "Strict-Transport-Security"; });
 
@@ -52,10 +59,13 @@ http.createServer(function (req, res) {
      ships. Without it the gate's /raya-trade link 404s locally and the
      pretty URL is only ever exercised in production — which is the one
      place a broken link costs something. Keep the two in step. */
-  if (url.pathname === "/" + TENANT) p = path.join(ROOT, PLATFORM_FILE);
+  if (CLIENTS.indexOf(url.pathname) > -1) p = path.join(ROOT, PLATFORM_FILE);
   fs.readFile(p, function (err, data) {
     if (err) { res.statusCode = 404; return res.end("not found"); }
     res.setHeader("Content-Type", TYPES[path.extname(p)] || "application/octet-stream");
     res.end(data);
   });
-}).listen(PORT, function () { console.log("dev server on http://localhost:" + PORT); });
+}).listen(PORT, function () {
+  console.log("dev server on http://localhost:" + PORT);
+  console.log("clients: " + (CLIENTS.join(", ") || "(none in vercel.json)"));
+});

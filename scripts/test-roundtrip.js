@@ -51,14 +51,31 @@ function firstDiff(a, b, at) {
   return null;
 }
 
+/* `--client <schema>` runs the whole round trip inside ONE CLIENT's schema
+   (spec 024). Worth having as a flag rather than a separate script: §113.7 is
+   a migration that read a column schema.sql no longer creates — perfect on
+   every database that already existed and broken on every fresh one — and the
+   only way to see that class of fault is to run this against a client created
+   today. */
+const CLIENT_ARG = (function () {
+  const i = process.argv.indexOf("--client");
+  return i > -1 ? process.argv[i + 1] : "";
+})();
+
 (async function () {
   io.tuneTypes(pg);
   const pool = new pg.Pool({ connectionString: process.env.DATABASE_URL, max: 2 });
   const client = await pool.connect();
+  if (CLIENT_ARG) {
+    if (!/^[a-z][a-z0-9_]{0,48}$/.test(CLIENT_ARG)) throw new Error("not a schema name: " + CLIENT_ARG);
+    await client.query("CREATE SCHEMA IF NOT EXISTS " + CLIENT_ARG);
+    await client.query("SET search_path TO " + CLIENT_ARG);
+    console.log("running inside client schema: " + CLIENT_ARG);
+  }
 
-  const r1 = await io.ensureReady(client);
+  const r1 = await io.ensureReady(client, CLIENT_ARG || undefined);
   console.log("first ensureReady seeded:", r1.seeded);
-  const r2 = await io.ensureReady(client);
+  const r2 = await io.ensureReady(client, CLIENT_ARG || undefined);
   console.log("second ensureReady seeded:", r2.seeded, "(must be false)");
 
   /* What a first deployment actually gets: seeded, then cleared. */

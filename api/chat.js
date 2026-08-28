@@ -60,6 +60,7 @@ function escHtml(t) {
   });
 }
 const { ensureReady } = io;
+const P = require("../lib/platform-io.js");
 function getPool() { return io.getPool(pg); }
 
 /* §71's caps, unchanged: the client already shrinks a picture to 1600px and
@@ -251,9 +252,14 @@ async function tellTheOffice(client, me, text, cfg) {
 module.exports = async function handler(req, res) {
   let client;
   try {
-    client = await getPool().connect();
-    await ensureReady(client);
+    /* WHICH CLIENT IS THIS FOR (spec 024). The browser sends the slug it was
+       served at; the schema comes from the registry row, never from the
+       request (§36.4). An unknown client and one this account may not open are
+       the same refusal, so trying slugs tells nobody anything. */
     const body = req.method === "POST" ? await readBody(req) : {};
+    client = await P.connectFor(pg, P.clientSlugFrom(req, body));
+    await ensureReady(client, client._smpClient.schema_name);
+
     const action = body.action || (req.method === "GET" ? "mine" : "");
     const me = await auth.getSession(client, req);
     if (!me) return send(res, 401, { ok: false, error: "sign in first" });
@@ -720,9 +726,9 @@ module.exports = async function handler(req, res) {
 
     return send(res, 400, { ok: false, error: "unknown action" });
   } catch (e) {
-    return send(res, e.code === "NO_DB" ? 503 : 500,
+    return send(res, e.code === "NO_DB" ? 503 : e.code === "NO_CLIENT" ? 404 : 500,
                 { ok: false, error: e.message === "too large" ? "Too large." : "Something went wrong." });
   } finally {
-    if (client) client.release();
+    if (client) await P.releaseClient(client);
   }
 };

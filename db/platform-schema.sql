@@ -56,6 +56,12 @@ CREATE TABLE IF NOT EXISTS clients (
 CREATE TABLE IF NOT EXISTS accounts (
   email         text PRIMARY KEY,            -- lower-cased by whoever writes it
   name          text NOT NULL DEFAULT '',
+  -- WHOSE PERSON IS THIS? An `office` account is Forefront's and is governed
+  -- by the table below; a `client` account is one of a client's own people and
+  -- is governed by nothing here — they hold exactly the one client on their
+  -- row, and the office's roles say nothing about them. Without this the two
+  -- would share a matrix that was only ever written about consultants.
+  kind          text NOT NULL DEFAULT 'office',
   -- NOTHING UNTIL GRANTED (Islam's answer): a person with no role signs in and
   -- sees an empty platform. That is deliberately not a floor role — there is
   -- nothing to configure about somebody who holds nothing (§93 from the other
@@ -66,6 +72,7 @@ CREATE TABLE IF NOT EXISTS accounts (
   status        text NOT NULL DEFAULT 'active',
   created_at    timestamptz NOT NULL DEFAULT now(),
   updated_at    timestamptz NOT NULL DEFAULT now(),
+  CONSTRAINT accounts_kind CHECK (kind IN ('office','client')),
   CONSTRAINT accounts_role CHECK (role IS NULL OR role IN ('admin','lead','consultant','observer')),
   CONSTRAINT accounts_status CHECK (status IN ('active','retired'))
 );

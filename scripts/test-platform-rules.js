@@ -126,7 +126,28 @@ check("every card shown is openable",
 eq("a consultant sees only their own and Demo",
   F.visibleClients(wCons, consultant, CLIENTS).map(c => c.key).join(","), "raya-trade,demo");
 
-console.log("── 12 · the seat an office account holds inside a client ─");
+console.log("── 12 · a client's own person is not one of us ───────────");
+/* Raya's CEO signs in at the same door and lands in their client. The office's
+   roles say nothing about them: they hold their one client, always, and no
+   page of the outer platform ever. */
+const rayaCEO = { email:"ceo@rayatrade.com", name:"Group CEO", role:null,
+                  kind:"client", status:"active" };
+const wCEO = world([on("raya-trade")]);
+check("their own client, always", F.mayOpenClient(wCEO, rayaCEO, RAYA) && F.mayEditClient(wCEO, rayaCEO, RAYA));
+check("nobody else's client, ever", !F.mayOpenClient(wCEO, rayaCEO, RHI));
+check("…not even Demo", !F.mayOpenClient(wCEO, rayaCEO, DEMO));
+check("no configuration page", !F.mayReadConfig(wCEO, rayaCEO, RAYA));
+check("no consultants page", !F.mayReadConsultants(wCEO, rayaCEO));
+check("no adding clients", !F.mayCreateClient(wCEO, rayaCEO));
+check("no access table", !F.mayEditAccess(wCEO, rayaCEO));
+/* AND AN OFFICE ROLE ON A CLIENT ACCOUNT CHANGES NOTHING — the kind is asked
+   first, so a stray `role` value cannot promote somebody who is not one of us. */
+const strayed = Object.assign({}, rayaCEO, { role:"admin" });
+check("a stray office role on a client account grants nothing",
+  !F.mayOpenClient(wCEO, strayed, RHI) && !F.mayCreateClient(wCEO, strayed) &&
+  !F.mayEditAccess(wCEO, strayed));
+
+console.log("── 13 · the seat an office account holds inside a client ─");
 eq("their super user", F.seatIn(wLead, "rhi"), "super");
 eq("everyone else on the team", F.seatIn(wLead, "raya-trade"), "smoteam");
 

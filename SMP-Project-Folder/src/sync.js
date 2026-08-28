@@ -196,7 +196,7 @@ var SYNC = (function () {
     fetch("/api/state", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: '{"state":' + now + "}"
+      body: '{"client":' + JSON.stringify(clientSlug()) + ',"state":' + now + "}"
     }).then(function (r) {
       saving = false;
       /* REFUSED, not failed (spec 006). The server has decided this person may
@@ -440,10 +440,36 @@ var SYNC = (function () {
   /* One shape for every /api/auth call this object makes: post JSON, hand
      back (error, body). Three callers with the same six lines is where a typo
      lives in exactly one of them. */
+  /* ── WHICH CLIENT THIS PAGE IS (spec 024) ────────────────────────
+     Read from the path it was SERVED at — /raya-trade, /rhi, /demo — and
+     never stored, so two tabs on two clients cannot cross: each one sends
+     the client it is. The server takes this as a name to look up and never
+     as a schema (§36.4), and answers a client it does not know exactly as it
+     answers one this person may not open.
+
+     Empty from file://, where there is no server to ask. */
+  function clientSlug() {
+    if (location.protocol === "file:") return "";
+    var m = String(location.pathname || "").match(/^\/([a-z0-9][a-z0-9-]{0,47})/);
+    return m ? m[1] : "";
+  }
+  function withClient(url) {
+    var c = clientSlug();
+    if (!c) return url;
+    return url + (url.indexOf("?") > -1 ? "&" : "?") + "client=" + encodeURIComponent(c);
+  }
+  /* Posted bodies carry it as a field rather than a query, because that is
+     what the endpoints read first and because a body survives a redirect. */
+  function withClientBody(obj) {
+    var c = clientSlug();
+    if (c) obj.client = c;
+    return obj;
+  }
+
   function authPost(body, done) {
     fetch("/api/auth", { method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(body)
+      body: JSON.stringify(withClientBody(body))
     }).then(function (r) { return r.json(); })
       .then(function (j) { done(j.ok ? null : (j.error || "failed"), j); })
       .catch(function (e) { done(String(e.message || e), null); });
@@ -452,7 +478,7 @@ var SYNC = (function () {
   function mailPost(body, done) {
     fetch("/api/mail", { method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(body)
+      body: JSON.stringify(withClientBody(body))
     }).then(function (r) { return r.json(); })
       .then(function (j) { done(j.ok ? null : (j.error || "failed"), j); })
       .catch(function (e) { done(String(e.message || e), null); });
@@ -490,7 +516,7 @@ var SYNC = (function () {
     if (timer) { clearTimeout(timer); timer = null; }
     var now = serialize();
     if (now === lastSaved || now === refusedBody) return;
-    var body = '{"state":' + now + "}";
+    var body = '{"client":' + JSON.stringify(clientSlug()) + ',"state":' + now + "}";
     try {
       fetch("/api/state", {
         method: "POST",
@@ -664,7 +690,7 @@ var SYNC = (function () {
                      (BOOT_GIVEUP / 1000) + "s — showing the baked-in data");
         land();
       }, BOOT_GIVEUP);
-      fetch("/api/state", { cache: "no-store" })
+      fetch(withClient("/api/state"), { cache: "no-store" })
         .then(function (r) {
           /* Deployed and not signed in: the gate is the way in. A TEMPORARY
              password now gets the same answer — the server refuses the state

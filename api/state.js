@@ -16,6 +16,7 @@ const io = require("../lib/state-io.js");
 const { writeState, readState, ensureReady } = io;
 const auth = require("../lib/auth.js");
 const { authorize } = require("../lib/authorize.js");
+const P = require("../lib/platform-io.js");
 
 /* The six env-var spellings Neon and Vercel use between them live in ONE
    place now (lib/state-io.js): this was copied here and into api/auth.js
@@ -42,7 +43,7 @@ function readBody(req) {
    the schema to anyone probing, and meaningless to the person who hit it. The
    real one goes to the function's log. */
 function safeError(e) {
-  if (e && e.code === "NO_DB") return String(e.message);
+  if (e && (e.code === "NO_DB" || e.code === "NO_CLIENT")) return String(e.message);
   console.error("api/state:", e && (e.stack || e.message || e));
   return "Something went wrong saving. Nothing was changed — try again, and tell the SMO if it keeps happening.";
 }
@@ -82,8 +83,13 @@ async function logChanges(client, person, changes) {
 module.exports = async function handler(req, res) {
   let client;
   try {
-    client = await getPool().connect();
-    const ready = await ensureReady(client);
+    /* WHICH CLIENT IS THIS FOR (spec 024). Read BEFORE the connection,
+       because the connection is what gets pointed at the client's schema —
+       which is also why a POST's body is read here rather than in its own
+       branch below. */
+    const body = req.method === "POST" ? await readBody(req) : null;
+    client = await P.connectFor(pg, P.clientSlugFrom(req, body));
+    const ready = await ensureReady(client, client._smpClient.schema_name);
 
     /* Since v2.1 the state is for signed-in people only (§19). Phase 1
        enforces WHO at the door; per-action WHAT enforcement is Phase 2 and
@@ -105,7 +111,6 @@ module.exports = async function handler(req, res) {
       return send(res, 200, { ok: true, seeded: ready.seeded, person: person, state: state });
     }
     if (req.method === "POST") {
-      const body = await readBody(req);
       const state = body && body.state;
       /* A minimal shape check — a malformed save must fail loudly rather than
          wipe the tenant with nothing to write back. */
@@ -142,8 +147,8 @@ module.exports = async function handler(req, res) {
     res.setHeader("Allow", "GET, POST");
     return send(res, 405, { ok: false, error: "method not allowed" });
   } catch (e) {
-    return send(res, e.code === "NO_DB" ? 503 : 500, { ok: false, error: safeError(e) });
+    return send(res, e.code === "NO_DB" ? 503 : e.code === "NO_CLIENT" ? 404 : 500, { ok: false, error: safeError(e) });
   } finally {
-    if (client) client.release();
+    if (client) await P.releaseClient(client);
   }
 };

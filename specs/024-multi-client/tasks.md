@@ -42,17 +42,17 @@ serverless functions `api/`; SQL `db/`; checks `SMP-Project-Folder/src/checks/`;
 **Goal**: one client's data is reachable only through that client, with the product unchanged.
 **Independently testable**: the existing suite passes untouched against `raya-trade`, and a request for a client the account may not open is refused identically to one that does not exist.
 
-- [ ] T011 [US1] Resolve the client in `api/state.js`: read `client` from the body/query, look up the schema through `clientByKey()`, authorise it against the session's account, then run today's code inside `withClient()`
-- [ ] T012 [P] [US1] Same resolution in `api/chat.js`
-- [ ] T013 [P] [US1] Same resolution in `api/mail.js`
-- [ ] T014 [US1] Make the refusal for an unknown client and an unreachable client **byte-identical**, and never name a role the person does not hold (contracts/platform-api.md)
-- [ ] T015 [US1] Send the client with every request from the browser in `SMP-Project-Folder/src/sync.js` — read from the path, never stored, so two tabs on two clients cannot cross
-- [ ] T016 [US1] Add the client to `SMP-Project-Folder/src/chat.js`'s `post()` in the one place every chat request already goes through (§97)
-- [ ] T017 [US1] Write `scripts/migrate-to-multi-client.js`: `CREATE SCHEMA raya_trade`, `ALTER TABLE public.<t> SET SCHEMA raya_trade` for every table (no data copied, so nothing can be half-copied), create `platform`, seed the three office accounts with temporary passwords, seed Raya's configuration and team, then create `rhi` and `el_abd` empty — with a `--dry-run` that prints the plan and changes nothing
-- [ ] T018 [US1] Verification step inside the migration: table counts per schema, one known figure read out of `raya_trade`, an empty `rhi`, and a report naming any account it could not create
-- [ ] T019 [US1] Teach `scripts/dev-server.js` the client paths (`/raya-trade`, `/rhi`, `/el-abd`, `/demo`) and keep `PLATFORM_FILE` serving the same built file for each
-- [ ] T020 [US1] Extend `scripts/test-platform.js`: an account not on a client is refused; the two refusals match; a request naming a **schema** rather than a slug is refused; an Observer's save is refused by the server
-- [ ] T021 [US1] Run `DATABASE_URL=… node scripts/test-roundtrip.js` inside `raya_trade` **and** against a virgin `rhi` (§113.7 — a migration reading a column `schema.sql` no longer creates is invisible on an existing database)
+- [x] T011 [US1] Resolve the client in `api/state.js`: read `client` from the body/query, look up the schema through `clientByKey()`, authorise it against the session's account, then run today's code inside `withClient()`
+- [x] T012 [P] [US1] Same resolution in `api/chat.js`
+- [x] T013 [P] [US1] Same resolution in `api/mail.js`
+- [x] T014 [US1] Make the refusal for an unknown client and an unreachable client **byte-identical**, and never name a role the person does not hold (contracts/platform-api.md)
+- [x] T015 [US1] Send the client with every request from the browser in `SMP-Project-Folder/src/sync.js` — read from the path, never stored, so two tabs on two clients cannot cross
+- [x] T016 [US1] Add the client to `SMP-Project-Folder/src/chat.js`'s `post()` in the one place every chat request already goes through (§97)
+- [x] T017 [US1] Write `scripts/migrate-to-multi-client.js`: `CREATE SCHEMA raya_trade`, `ALTER TABLE public.<t> SET SCHEMA raya_trade` for every table (no data copied, so nothing can be half-copied), create `platform`, seed the three office accounts with temporary passwords, seed Raya's configuration and team, then create `rhi` and `el_abd` empty — with a `--dry-run` that prints the plan and changes nothing
+- [x] T018 [US1] Verification step inside the migration: table counts per schema, one known figure read out of `raya_trade`, an empty `rhi`, and a report naming any account it could not create
+- [x] T019 [US1] Teach `scripts/dev-server.js` the client paths (`/raya-trade`, `/rhi`, `/el-abd`, `/demo`) and keep `PLATFORM_FILE` serving the same built file for each
+- [x] T020 [US1] Extend `scripts/test-platform.js`: an account not on a client is refused; the two refusals match; a request naming a **schema** rather than a slug is refused; an Observer's save is refused by the server
+- [x] T021 [US1] Run `DATABASE_URL=… node scripts/test-roundtrip.js` inside `raya_trade` **and** against a virgin `rhi` (§113.7 — a migration reading a column `schema.sql` no longer creates is invisible on an existing database)
 - [ ] T022 [US1] Run the whole existing suite unchanged against `raya-trade` (`qa.py`, every `src/checks/*.py`, `test-authorize.js`, `test-chat.js`) and record the numbers in the commit
 
 **Checkpoint**: the product is identical, and the boundary exists.

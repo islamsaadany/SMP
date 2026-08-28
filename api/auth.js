@@ -12,6 +12,7 @@
 const pg = require("pg");
 const io = require("../lib/state-io.js");
 const { ensureReady } = io;
+const P = require("../lib/platform-io.js");
 const auth = require("../lib/auth.js");
 const Rules = require("../lib/rules.js");
 
@@ -46,7 +47,7 @@ function readBody(req) {
    it means nothing to the person who hit it. The real error goes to the
    function's own log, where it is visible to us and to nobody else. */
 function safeError(e) {
-  if (e && e.code === "NO_DB") return String(e.message);
+  if (e && (e.code === "NO_DB" || e.code === "NO_CLIENT")) return String(e.message);
   console.error("api/auth:", e && (e.stack || e.message || e));
   return "Something went wrong. Try again, and tell the SMO if it keeps happening.";
 }
@@ -70,9 +71,14 @@ function send(res, code, obj) {
 module.exports = async function handler(req, res) {
   let client;
   try {
-    client = await getPool().connect();
-    await ensureReady(client);
+    /* WHICH CLIENT IS THIS FOR (spec 024). The browser sends the slug it was
+       served at; the schema comes from the registry row, never from the
+       request (§36.4). An unknown client and one this account may not open are
+       the same refusal, so trying slugs tells nobody anything. */
     const body = req.method === "POST" ? await readBody(req) : {};
+    client = await P.connectFor(pg, P.clientSlugFrom(req, body));
+    await ensureReady(client, client._smpClient.schema_name);
+
     const action = body.action || (req.method === "GET" ? "me" : "");
 
     if (action === "me") {
@@ -528,8 +534,8 @@ module.exports = async function handler(req, res) {
 
     return send(res, 400, { ok: false, error: "unknown action" });
   } catch (e) {
-    return send(res, e.code === "NO_DB" ? 503 : 500, { ok: false, error: safeError(e) });
+    return send(res, e.code === "NO_DB" ? 503 : e.code === "NO_CLIENT" ? 404 : 500, { ok: false, error: safeError(e) });
   } finally {
-    if (client) client.release();
+    if (client) await P.releaseClient(client);
   }
 };

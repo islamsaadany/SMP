@@ -7,8 +7,26 @@
    None of them throws; all of them render. */
 
 const pg = require("pg");
+const path = require("path");
+const { spawn } = require("child_process");
 const io = require("../lib/state-io.js");
 const P = require("../lib/platform-io.js");
+const auth = require("../lib/auth.js");
+
+const PORT = 3991;
+const BASE = "http://127.0.0.1:" + PORT;
+
+function waitFor(url, tries) {
+  return new Promise(function (resolve, reject) {
+    (function go(n) {
+      fetch(url).then(function () { resolve(); })
+        .catch(function () {
+          if (n <= 0) return reject(new Error("dev-server never came up"));
+          setTimeout(function () { go(n - 1); }, 300);
+        });
+    })(tries);
+  });
+}
 
 let pass = 0, fail = 0;
 function check(name, cond, extra) {
@@ -143,6 +161,69 @@ async function main() {
     eq("an unknown client is an empty answer, not a built one", Object.keys(missing).length, 0);
     check("…and it is frozen (constitution XII)", Object.isFrozen(missing));
   });
+
+  /* ── 8 · over HTTP, which is the only place the refusal is real ──
+     Everything above proves the plumbing; this proves what a browser gets.
+     The endpoints resolve the client themselves, and a refusal that is only
+     ever asserted in-process is a refusal nobody has seen. */
+  await P.createClientSchema(pg, "t_http", "HTTP Client");
+  await P.withPlatform(pg, async function (pc) {
+    await pc.query("INSERT INTO clients (key, name, schema_name) VALUES ('t-http','HTTP Client','t_http') " +
+                   "ON CONFLICT (key) DO NOTHING");
+  });
+  /* Somebody to sign in as, inside the client — in this slice credentials
+     still live per client, which is what US2 changes. */
+  await P.withSchema(pg, "t_http", async function (c) {
+    await c.query("INSERT INTO people (key, idx, name) VALUES ('smo', 1, 'Test SMO') " +
+                  "ON CONFLICT (key) DO NOTHING");
+    await c.query("INSERT INTO credentials (person_key, password_hash, must_change) VALUES ('smo',$1,false) " +
+                  "ON CONFLICT (person_key) DO UPDATE SET password_hash = $1, must_change = false",
+                  [auth.hashPassword("testpw123")]);
+    await c.query("UPDATE org SET org_name = 'HTTP Client' WHERE id = 1");
+  });
+
+  const dev = spawn(process.execPath, [path.join(__dirname, "dev-server.js"), String(PORT)], {
+    env: Object.assign({}, process.env, { SMP_DEFAULT_CLIENT: "t-http" }), stdio: "ignore" });
+  try {
+    await waitFor(BASE + "/api/state", 25);
+    const post = (body) => fetch(BASE + "/api/auth", { method:"POST",
+      headers:{ "Content-Type":"application/json" }, body: JSON.stringify(body) });
+
+    const login = await post({ action:"login", user:"smo", password:"testpw123", client:"t-http" });
+    const cookie = (login.headers.get("set-cookie") || "").split(";")[0];
+    check("a person signs in against the client named in the request", (await login.json()).ok === true);
+
+    const get = (q) => fetch(BASE + "/api/state" + q, { headers: cookie ? { cookie: cookie } : {} });
+
+    const mine = await (await get("?client=t-http")).json();
+    eq("…and reads that client's own state", mine.state && mine.state.group.org, "HTTP Client");
+
+    /* THE TWO REFUSALS MUST BE INDISTINGUISHABLE. Told apart, trying slugs
+       tells an outsider which clients Forefront has. */
+    const unknown = await get("?client=nobody-here");
+    const asSchema = await get("?client=t_http");     /* a schema name, not a slug */
+    const uBody = await unknown.json(), sBody = await asSchema.json();
+    eq("an unknown client is refused", unknown.status, 404);
+    eq("a SCHEMA name is refused too — the address bar cannot name a schema", asSchema.status, 404);
+    eq("…and the two refusals are word for word the same", uBody.error, sBody.error);
+    /* AND BOTH ARE THE PLATFORM'S ONE REFUSAL. Asserting only that they match
+       each other passes when an endpoint invents its own message and both
+       paths happen to use it — §113.8's blind spot, found by breaking this
+       very assertion and watching it stay green. Asked against the shared
+       constant, so a hand-written refusal anywhere fails here. */
+    eq("…and both are the platform's single refusal", uBody.error, P.noSuchClient().message);
+    check("…which mentions neither a schema nor what was tried",
+      !/schema/i.test(uBody.error || "") && !/nobody-here|t_http/.test(uBody.error || ""), uBody.error);
+
+    /* A browser holding the PREVIOUS platform file (§91: a service worker
+       serves the shell from its own disk) posts no client at all. It must
+       land on the named default rather than be refused, or deploy day takes
+       the live client down. */
+    const noSlug = await (await get("")).json();
+    eq("a request naming no client lands on the default", noSlug.state && noSlug.state.group.org, "HTTP Client");
+  } finally {
+    dev.kill();
+  }
 
   console.log("\n" + pass + " passed, " + fail + " failed");
   await pool.end();

@@ -1567,15 +1567,22 @@
        and one class carrying both is how the dot came to mean nothing. It
        paints to the RIGHT (Islam), which is also where it belongs — a mark
        AFTER the word annotates it; a mark before it is a bullet. */
-    /* \u00a7132.14: the Strategy tab wears NO number (Islam: "remove the number
-       from the strategy word") \u2014 the missing bar in the section row below
-       carries the total, the places and the action, through missBar(). */
+    /* \u00a7132.12: THE COUNT FINDS YOU. The strategy tab wears the number of
+       gaps this viewer could act on \u2014 the fill grant and the office only
+       (\u00a769: never a nag with no control to clear it), and only while it
+       is not zero (\u00a741's budget). One list behind it: gapMap(). */
+    var gapsHere = (typeof seesGaps === "function" && seesGaps()) ? gapTotal(TARGET) : 0;
     document.getElementById("subtabs").innerHTML = railed ? "" : defs.map(function(d){
       var cls = (d.primary ? "primary" : "") +
         (d.dot && reportPending(TARGET) ? " dot" : "");
       return '<button role="tab" data-s="' + d.k + '"' +
         (cls.trim() ? ' class="' + cls.trim() + '"' : '') +
         ' aria-selected="' + (d.k === currentSub) + '">' + d.label +
+        ((d.k === "strategy" || d.k === "fnstrat") && gapsHere
+          ? '<span class="tbadge" data-gaptab="1" title="' +
+            plural(gapsHere, "gap") + ' to fill in this plan">' + gapsHere + '</span>' +
+            '<span class="vh"> \u2014 ' + gapsHere + ' to fill</span>'
+          : '') +
         (d.dot && reportPending(TARGET)
           ? '<i class="tabdot" aria-hidden="true"></i>' +
             '<span class="vh"> \u2014 not submitted yet</span>'
@@ -1668,13 +1675,7 @@
       document.getElementById("secrow-in").innerHTML = secs.map(function(s){
         return '<button role="tab" data-sub2="' + s.k + '"' + (s.cls ? ' class="' + s.cls + '"' : '') +
           ' aria-selected="' + (s.k === def.k) + '">' + s.label + '</button>';
-      }).join("") +
-        /* §132.14: THE MISSING BAR LIVES IN THIS ROW'S FREE SPACE (Islam:
-           "that bar with that button is what goes up beside the plan, not
-           to waste lines") — the total, one red chip per place that owes,
-           and the red button, on the strategy tabs only, read mode too. */
-        ((currentSub === "strategy" || currentSub === "fnstrat") &&
-         typeof missBar === "function" ? missBar() : "");
+      }).join("");
     } else {
       secrow.hidden = !onSecPage;
       /* HIDDEN IS NOT EMPTY, AND IT HAS TO BE BOTH (§63.6). The row kept the
@@ -1877,23 +1878,6 @@
   function fieldSaved(){
     if (typeof SYNC !== "undefined" && SYNC.afterPaint) SYNC.afterPaint();
   }
-  /* §132.14: pressing "Fill in missing elements" opens fill mode for the
-     page it names and walks straight to the first blank — one press, one
-     field under the cursor. With no page (a section that cannot fill, like
-     the SWOT), the walk itself finds the first place that owes. */
-  function enterFillMode(page){
-    if (page) EDIT_PAGE[page] = true;
-    paint();
-    /* THE WALK WAITS FOR THE PAINT IT NEEDS. On a real press, paint() is HELD
-       until the click has landed (§30.1's CLICKING guard, released by a timer
-       scheduled on mouseup) — so walking synchronously here reads the
-       read-mode page, finds zero fillable fields, and the fallback marches
-       off to another place's chip while THIS page is full of gaps. A
-       zero-delay timer queues behind the mouseup's release timer, so the walk
-       always sees the repainted page; on a programmatic click paint ran
-       synchronously and the timer merely walks a beat later. */
-    setTimeout(gapWalk, 0);
-  }
   /* ── NEXT GAP (§132.12): walk the fillable blanks on this page ─────────
      Field to field in document order, wrapping; the ring says which one the
      press landed on. When the page holds none, the walk goes to the first
@@ -1902,7 +1886,7 @@
   function gapWalk(){
     var els = [].slice.call(document.querySelectorAll(".fld.gapfld, .qs-fill"));
     if (!els.length){
-      var chip = document.querySelector("[data-gapband] .mchip:not(.done)");
+      var chip = document.querySelector("[data-gapband] .gchip:not(.clear)");
       if (chip) chip.click();
       return;
     }
@@ -4957,22 +4941,7 @@
         if (typeof toPaneTop === "function") toPaneTop();
         return;
       }
-      if (ev.target.closest("[data-fillcta]")) {
-        enterFillMode(ev.target.closest("[data-fillcta]").dataset.fillcta);
-        return;
-      }
       if (ev.target.closest("[data-nextgap]")) gapWalk();
-    });
-    /* §132.14: the same two controls OUTSIDE the bar — the corner button and
-       the empty-page pointer — wired directly (they are repainted, never
-       rewritten in place), and never double-bound onto the bar's own. */
-    document.querySelectorAll("[data-fillcta]").forEach(function(b){
-      if (b.closest("[data-gapband]")) return;
-      b.addEventListener("click", function(){ enterFillMode(b.dataset.fillcta); });
-    });
-    document.querySelectorAll("[data-nextgap]").forEach(function(b){
-      if (b.closest("[data-gapband]")) return;
-      b.addEventListener("click", gapWalk);
     });
 
     document.querySelectorAll("[data-rowoff]").forEach(function(b){

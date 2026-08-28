@@ -1233,52 +1233,46 @@
   .qs-fill .qtog.on { background:var(--attn-bg); color:var(--attn-tx);
     border-color:var(--attn); }
 
-  /* ── FINDING THE GAPS (§132.14, reshaping §132.12 from Islam's mockup) ──
-     RED MEANS MISSING, AMBER MEANS PENDING CONFIRMATION — two colours, two
-     meanings, never mixed. The whole signal lives in the section row beside
-     the section tabs: the total, one red chip per owing place, the red
-     button. Nothing in the page body, no number on the Strategy tab. */
-  .sectionrow .tabs-in { flex-wrap:wrap; align-items:center; }
-  .missbar { margin-left:auto; display:flex; gap:6px; align-items:center;
-    flex-wrap:wrap; }
-  .missbar .secmiss { color:var(--bad-tx); font-weight:800; font-size:12.5px;
-    white-space:nowrap; padding-left:12px; }
-  .mchip { border:1px solid var(--bad); background:var(--surface);
-    color:var(--bad-tx); border-radius:18px; font-size:11.5px; padding:2px 10px;
-    cursor:pointer; font-weight:600; font-family:inherit; white-space:nowrap; }
-  .mchip b { color:var(--bad-tx); font-weight:800; }
-  .mchip:hover { background:var(--bad-bg); }
-  .mchip.done { border-color:var(--good); color:var(--good-tx); }
-  .mchip:focus-visible, .fillcta:focus-visible, .pendcta:focus-visible {
-    outline:2px solid var(--bad); outline-offset:2px; }
-  /* The action: a solid red worded button. The ink is --surface — white in
-     light, the dark ground in dark — so it reads on --bad in both themes. */
-  .fillcta { border:1px solid var(--bad); background:var(--bad);
-    color:var(--surface); border-radius:8px; font-size:12px; font-weight:700;
-    padding:4px 13px; cursor:pointer; font-family:inherit; white-space:nowrap; }
-  .fillcta:hover { filter:brightness(1.08); }
-  /* Quiet amber: only pending remains — the office's move, still correctable. */
-  .pendcta { border:1px solid var(--attn); background:var(--attn-bg);
-    color:var(--attn-tx); border-radius:8px; font-size:12px; font-weight:600;
-    padding:4px 12px; cursor:pointer; font-family:inherit; white-space:nowrap; }
-  .gapdone { color:var(--good-tx); font-size:12px; font-weight:600; }
-  /* The corner pair: the worded button takes the second slot beside §101's
-     arrows (right:0 when it stands alone). */
-  .pane .paneact .cornerbtn { position:absolute; top:0; right:36px;
-    white-space:nowrap; }
-  .pane .paneact .cornerbtn:last-child { right:0; }
-  .editbtn.fdone { white-space:nowrap; }
-  /* The rail's own word, red italic — green tick once its place is clear. */
-  .ritem .rgap { display:inline-block; margin-left:7px; color:var(--bad-tx);
-    font-size:11px; font-weight:700; font-style:italic; white-space:nowrap; }
-  .ritem .rgap.ok { color:var(--good-tx); font-style:normal; }
-  /* A page with nothing missing says so and points away (§132.14). */
-  .emptynote { background:var(--surface-2); border:1px solid var(--line);
-    border-radius:8px; padding:10px 14px; margin:0 0 12px; font-size:13px;
-    color:var(--ink-2); }
-  .emptynote b { color:var(--good-tx); }
+  /* ── FINDING THE GAPS (§132.12) ──────────────────────────────────────
+     The counts that find you, and the band that walks them. Every count
+     wears the attn pill pair — the measured amber the pending marks wear —
+     because a count of gaps and a pending value are one story. */
+  .tabs .tbadge { display:inline-block; margin-left:6px; background:var(--attn-bg);
+    color:var(--attn-tx); border:1px solid var(--attn); border-radius:16px;
+    font-size:10px; font-weight:700; line-height:1.5; padding:0 6px;
+    vertical-align:1px; }
+  .ritem .rgap { display:inline-block; margin-left:7px; background:var(--attn-bg);
+    color:var(--attn-tx); border:1px solid var(--attn); border-radius:16px;
+    font-size:9.5px; font-weight:700; line-height:1.5; padding:0 6px;
+    vertical-align:1px; }
+  .ritem .rgap.ok { background:none; border-color:transparent; color:var(--good);
+    font-size:12px; }
+  .gapband { display:flex; gap:7px; align-items:center; flex-wrap:wrap;
+    background:var(--surface); border:1px solid var(--line); border-radius:9px;
+    padding:7px 10px; margin:0 0 12px; }
+  .gapband .lead { font-size:10.5px; font-weight:700; letter-spacing:.07em;
+    text-transform:uppercase; color:var(--ink-3); margin-right:2px; }
+  .gchip { border:1px solid var(--line); background:var(--surface);
+    color:var(--ink-2); border-radius:18px; font-size:12px; padding:3px 11px;
+    cursor:pointer; font-weight:600; font-family:inherit; }
+  .gchip:hover { border-color:var(--gold-deep); }
+  .gchip:focus-visible, .nextgap:focus-visible { outline:2px solid var(--gold-deep);
+    outline-offset:1px; }
+  .gchip .c { display:inline-block; background:var(--attn-bg); color:var(--attn-tx);
+    border:1px solid var(--attn); font-size:10px; font-weight:700; min-width:16px;
+    border-radius:9px; text-align:center; line-height:1.5; margin-left:6px;
+    padding:0 4px; vertical-align:1px; }
+  .gchip.clear { color:var(--ink-3); }
+  .gchip.clear .c, .gchip .c.ok { background:none; border-color:transparent;
+    color:var(--good); font-size:12px; min-width:0; }
+  .nextgap { margin-left:auto; border:1px solid var(--attn); background:var(--attn-bg);
+    color:var(--attn-tx); border-radius:8px; font-size:12.5px; font-weight:700;
+    padding:5px 13px; cursor:pointer; font-family:inherit; }
+  .nextgap:hover { border-color:var(--attn-tx); }
+  .gapdone { margin-left:auto; color:var(--good-tx); font-size:12.5px;
+    font-weight:600; }
   /* The walker's landing ring. */
-  .gaplit { outline:2px solid var(--bad); outline-offset:2px;
+  .gaplit { outline:2px solid var(--attn); outline-offset:2px;
     animation:gapring 1s ease-out; }
   @keyframes gapring { 0% { outline-offset:6px; outline-width:3px; }
                        100% { outline-offset:2px; outline-width:2px; } }

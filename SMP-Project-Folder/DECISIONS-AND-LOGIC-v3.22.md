@@ -17216,3 +17216,82 @@ right waiting and lifting, the badge/rail/band agreeing with `gapMap`, the
 walker's ring, the in-place tick-down, the chip-as-door, the floor viewer's
 absent badge, the fresh-browser default and the stored choice winning); the
 full qa walk and eleven suites green.
+
+### 132.14 The finding system goes red and worded, and the whole bar moves
+### into the section row (reshaping §132.12, from Islam's screens)
+
+Islam, using §132.12 on Mazaya as its custodian, in order: *"I'd prefer
+that the missing items to be beside the arrange button actually on it's
+left side with a clear red button with the wording fill in missing
+elements"*; *"when I went to the objectives I couldn't enter anything"*;
+*"bring the line to fill beside the plan in to top line as a temp box and
+it needs to be significant so use red"*; *"remove the number 47 from the
+strategy word in the top keep the numbers in the directions but go for
+redish and make it 10 Missing."* Then, of the drawn mockup's top box:
+*"I meant that bar with that button is what goes up beside the plan not to
+waste lines in the page and remove it from the inpage."* Settled from
+mockup r2 plus four answered questions, and the shape that came out:
+
+- **RED MEANS MISSING, AMBER MEANS PENDING — two colours, two meanings,
+  never mixed.** Every count in the system now reads **"N Missing"**, red,
+  one wording on the bar, the chips and the rail. The Strategy tab's
+  number is GONE (reversing §132.12's badge): the tab names a place, and
+  the bar an inch below it now carries the number with somewhere to press.
+- **The whole bar lives in the section row** — total, one red chip per
+  owing place, and the solid red **Fill in missing elements** button — on
+  the same line as Foundation · SWOT · Plan, read mode included, and
+  NOTHING of it in the page body. It exists while `seesGaps()` and the
+  total is not zero, and vanishes at zero (§41's budget; §69: never shown
+  to somebody with no control that clears it). In fill mode the button
+  becomes **Next gap → N left**.
+- **The corner button beside §101's arrows** is the same press with the
+  same words, red while anything is missing, **Done filling** while the
+  mode is open, and the quiet amber **Review pending · N** only when
+  nothing is missing and marks still await the office — a state that asks
+  nothing of the filler, so it must not shout.
+- **One press opens fill mode and walks to the first blank** (the ring,
+  §132.12's walker unchanged). **A page with nothing missing says so and
+  points away** — `fillBarOr()` swaps the contract line for *"Nothing
+  missing in this pillar. N missing elements elsewhere in this plan —
+  Go to the next place →"* — because Islam's *"I couldn't enter
+  anything"* was the empty hand §45.2 warns about: a mode entered and
+  nothing to do reads as a mode that is broken.
+- **The rail rows carry the words too** — red italic *"N Missing"*, the
+  green ✓ the moment a fill clears the place — rewritten in place by
+  `gapBandRefresh()` with the chips and the total (§71.2, never a repaint
+  under a typing hand).
+
+**THE BUG WORTH THE SECTION: A REAL PRESS IS NOT A PROGRAMMATIC ONE.**
+The press's `enterFillMode()` painted and then walked — and on a real
+click the paint is HELD: §30.1's `CLICKING` guard defers any repaint
+requested between mousedown and the click's end, released by a timer
+scheduled on mouseup. So the walk ran against the READ-MODE page, found
+zero fillable fields, and its fallback marched off through another
+place's chip — the press landed the custodian on Foundation while the
+Plan page they pressed it on was full of gaps. **Every evaluate-driven
+probe passed** (no mouse, no hold, paint synchronous), which is why the
+fault survived until the real click was watched. Two lessons paid for on
+the way: **reassigning `window.fn` intercepts nothing called from inside
+the same script** (internal callers bind the declaration, so a wrapper
+"instrumenting" `filling()` observed silence and proved only itself), so
+the probe had to go into the SOURCE; and the fix is one line —
+`setTimeout(gapWalk, 0)` queues behind the mouseup's release timer, so
+the walk always reads the repainted page, from a programmatic click too,
+where it merely runs a beat later.
+
+**AND THE RED WORDS WEAR THE `-tx` TWINS** (§38.5, sixth time): `--bad`
+as TYPE measured 4.49:1 in dark — the fill colour doing a word's job —
+while `--bad-tx` reads 6.56 dark / 7.14 light. The solid button keeps
+`--bad` as its FILL with `--surface` ink (5.64 / 5.03), which is the
+token pair doing exactly the two jobs §38 split them for. Measured by
+hand in both themes and both modes, because the sweep never signs in as
+a fill holder (§94.11's class).
+
+Proof: `checks/gap-fill.py` §9 rewritten against the new shape — the tab
+badge asserted ABSENT, the bar in the section row in read mode with
+nothing in `#panel`, the floor viewer seeing neither bar nor button, the
+press opening the mode with the ring on the first blank, every chip
+agreeing with the data it counts and none for a clear place, the
+in-place tick-down, and the chip-as-door with the mode kept on. 58
+assertions green; the full qa walk and the eleven-suite battery re-run
+green after the fix.

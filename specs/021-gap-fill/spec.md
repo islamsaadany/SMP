@@ -63,18 +63,32 @@ reordering (its own grant, §101, untouched), anything on the group's own
 pages, and the SWOT page entirely (`FILL_PAGES` — a strategy page with no
 fillable field must not draw the pen, §132.13).
 
-## 10 · Finding the gaps (§132.11–12, second build)
+## 10 · Finding the gaps (§132.11–12, second build; reshaped by §132.14)
 
 - The unit objectives' **This year column shows by default** (reversing
   §66's default, keeping its toggle and every saved choice).
-- **One list** (`gapMap()` over the shared `gapMissing()`) feeds three
-  layers: a count on the Strategy tab and per-row rail counts (read mode
-  too, fill grant and office only, only while non-zero); the **gap band**
-  in fill mode — §129's chip map, one chip per place, ✓ when clear, a chip
-  is a door that keeps fill mode on where it lands; and **Next gap**, which
-  walks the fillable blanks with a landing ring and crosses places through
-  the band's own chips. Counts are rewritten in place on every fill —
-  never a repaint (§71.2).
+- **One list** (`gapMap()` over the shared `gapMissing()`) feeds every
+  surface; counts are rewritten in place on every fill — never a repaint
+  (§71.2). **Next gap** walks the fillable blanks with a landing ring and
+  crosses places through the bar's own chips; a chip is a door that keeps
+  fill mode on where it lands.
+- **§132.14 (third build, Islam's screens): red means missing, amber means
+  pending — never mixed.** The whole missing bar — the total as
+  **"N Missing"**, one red chip per owing place, the solid red **Fill in
+  missing elements** button (→ **Next gap → N left** in fill mode) — lives
+  IN the section row beside the section tabs, read mode included, nothing
+  in the page body; drawn only for `seesGaps()` and only while non-zero.
+  The Strategy tab carries **no number** (reversing §132.12's badge). The
+  corner button beside §101's arrows is the same press: red while anything
+  is missing, **Done filling** while the mode is open, quiet amber
+  **Review pending · N** when only pending marks remain. Rail rows read
+  red italic *"N Missing"*, green ✓ once clear. A page owing nothing says
+  so and points away (*"Nothing missing here … Go to the next place →"*),
+  because a fill mode with an empty hand reads as broken (§45.2). Red
+  WORDS wear `--bad-tx`; the button's FILL is `--bad` on `--surface` ink
+  (§38.5). One press = enter mode + walk to the first blank — and the walk
+  waits for the paint it needs, because §30.1 holds a repaint requested
+  mid-click (`setTimeout` behind the release timer).
 
 ## 4 · The pending mark
 

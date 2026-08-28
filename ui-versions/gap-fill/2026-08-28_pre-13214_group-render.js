@@ -1718,22 +1718,12 @@ function editBar(page, acKey){
      BEFORE the pen's gate and the bar is drawn when either is answered — a
      custodian who may not author the overview may still take it away. */
   var dl = dlPlanBtn(page);
-  /* §132.14: the worded bar takes the corner button's three states — red
-     while something is missing, quiet amber while only pending remains,
-     nothing after; Done while the mode is open. */
+  /* §132: the fill grant gets the same bar with its own word — the mode it
+     opens draws only the gaps, which `filling()` and `gapCell` decide. */
   if (!mayAuthor(acKey || "u_found")) {
-    if (mayFill(acKey || "u_found")) {
-      var inner;
-      if (EDIT_PAGE[page])
-        inner = '<button class="editbtn fdone" data-page="' + page + '">Done filling</button>';
-      else if (gapTotal(TARGET))
-        inner = '<button class="fillcta" data-fillcta="' + page + '">Fill in missing elements</button>';
-      else if (gapPendCount(TARGET))
-        inner = '<button class="pendcta" data-page="' + page + '">Review pending &middot; ' +
-          gapPendCount(TARGET) + '</button>';
-      else inner = '';
-      return (dl || inner) ? '<div class="pageact">' + dl + inner + '</div>' : '';
-    }
+    if (mayFill(acKey || "u_found"))
+      return '<div class="pageact">' + dl + '<button class="editbtn" data-page="' + page + '">' +
+        (EDIT_PAGE[page] ? "Done" : "Fill gaps") + '</button></div>';
     return dl ? '<div class="pageact">' + dl + '</div>' : '';
   }
   return '<div class="pageact">' + dl + '<button class="editbtn" data-page="' + page + '">' +
@@ -1826,29 +1816,13 @@ function arrangePaneBtn(target){
 
 function penBtn(page, acKey){
   var author = mayAuthor(acKey || "u_found");
-  /* §132.14: THE FILL GRANT'S CONTROL IS A WORDED RED BUTTON, not a pen
-     glyph (Islam: "a clear red button with the wording fill in missing
-     elements") — drawn only while something is missing; once everything is
-     filled a quiet amber "Review pending · N" remains until the office has
-     confirmed the lot, and then nothing. The office keeps its pen: their
-     write settles, and their control did not change. */
-  if (!author) {
-    if (!mayFill(acKey || "u_found")) return '';
-    if (EDIT_PAGE[page])
-      return '<button class="editbtn cornerbtn fdone" data-page="' + page +
-        '">Done filling</button>';
-    var miss = gapTotal(TARGET);
-    if (miss) return '<button class="fillcta cornerbtn" data-fillcta="' + page +
-      '" title="' + plural(miss, "missing element") + ' in this plan">' +
-      'Fill in missing elements</button>';
-    var pend = gapPendCount(TARGET);
-    if (pend) return '<button class="pendcta cornerbtn" data-page="' + page +
-      '" title="Filled values awaiting Strategy Office confirmation — still yours to correct">' +
-      'Review pending &middot; ' + pend + '</button>';
-    return '';
-  }
+  /* §132: the fill grant carries the same pen — one slot, one control —
+     with the word saying which mode it opens. The fields themselves ask
+     again (`gapCell`), so a pen reached by the wrong person draws nothing. */
+  if (!author && !mayFill(acKey || "u_found")) return '';
   var on = EDIT_PAGE[page];
-  var word = on ? "Done editing" : "Edit";
+  var word = on ? (author ? "Done editing" : "Done filling")
+                : (author ? "Edit" : "Fill the gaps");
   return '<button class="penbtn' + (on ? " on" : "") + '" data-page="' + page + '"' +
     ' title="' + word + '" aria-label="' + word + '">' +
     (on ? '<svg viewBox="0 0 20 20" aria-hidden="true"><path d="M4.5 10.5l3.5 3.5 7.5-8" fill="none" ' +
@@ -1955,79 +1929,63 @@ function pendBadge(acKey){
   if (!n || (!mayAuthor(acKey) && !mayFill(acKey))) return '';
   return '<span class="pendcount">' + n + ' awaiting confirmation</span>';
 }
-/* ── THE MISSING BAR (§132.14, reshaping §132.12 from Islam's r2 mockup) ──
-   The WHOLE signal lives in the section row beside Foundation · SWOT · Plan
-   — read mode included, no line of the page spent: red "N Missing", one
-   red chip per place that OWES (a clear place draws no chip), and the red
-   "Fill in missing elements" button. Drawn only for the fill grant and the
-   office (§69) and only while something is missing; it vanishes at zero.
-   RED ALWAYS MEANS MISSING, AMBER ALWAYS MEANS PENDING CONFIRMATION — two
-   colours, two meanings, never mixed. */
-function missChipInner(e){
-  return e.count ? esc(e.label) + ' <b>' + e.count + '</b>'
-                 : '&#10003; ' + esc(e.label);
+/* ── THE GAP BAND (§132.12): a map, not a march — §129's chip shape ────
+   One chip per place holding gaps, each reading the DATA (gapMap), press
+   to go; Next gap walks the fields. Drawn while the pen is open, for the
+   fill grant and the office — the people the counts are FOR (§69). */
+function gapChipInner(e){
+  return esc(e.label) + (e.count
+    ? '<span class="c">' + e.count + '</span>'
+    : '<span class="c ok">&#10003;</span>');
 }
-/* Which page a section's fill pen is (the bar's button opens it). */
-function fillPageForSec(sec){
-  var t = String(TARGET || "");
-  if (sec === "found")
-    return t.indexOf("fn:") === 0 && !fnPlansInPillars(FUNCTIONS[t.slice(3)])
-      ? "capfoundation" : "foundation";
-  if (sec === "plan" || sec === "proj") return "plan";
-  return "";
-}
-function missBarCta(total){
-  var inFill = EDIT_PAGE.plan || EDIT_PAGE.foundation || EDIT_PAGE.capfoundation;
-  if (inFill) return '<button type="button" class="fillcta" data-nextgap="1">' +
+function gapTail(total){
+  if (total) return '<button type="button" class="nextgap" data-nextgap="1">' +
     'Next gap &rarr;&nbsp;<span class="ngleft">' + total + ' left</span></button>';
-  var sec = (typeof CURSEC !== "undefined" && CURSEC[currentSub]) || "";
-  return '<button type="button" class="fillcta" data-fillcta="' +
-    esc(fillPageForSec(sec)) + '">Fill in missing elements</button>';
+  var p = gapPendCount(TARGET);
+  return '<span class="gapdone">Nothing missing' +
+    (p ? ' &middot; ' + p + ' awaiting confirmation' : '') + '</span>';
 }
-function missBar(){
-  if (typeof seesGaps !== "function" || !seesGaps()) return '';
-  var map = gapMap(TARGET), total = gapTotal(TARGET);
-  if (!total) return '';
-  var chips = map.filter(function(e){ return e.count > 0; }).map(function(e){
-    return '<button type="button" class="mchip"' +
+function gapBand(page, acKey){
+  if (!EDIT_PAGE[page]) return '';
+  if (!mayFill(acKey) && !mayAuthor(acKey)) return '';
+  var map = gapMap(TARGET);
+  var chips = map.map(function(e){
+    return '<button type="button" class="gchip' + (e.count ? '' : ' clear') + '"' +
       ' data-gkey="' + esc(e.key) + '"' +
       ' data-gpage="' + esc(e.go.page) + '" data-gsec="' + esc(e.go.sec) + '"' +
       (e.go.rail ? ' data-grail="' + esc(e.go.rail) + '" data-gcode="' +
         esc(String(e.go.code == null ? "" : e.go.code)) + '"' : '') +
-      ' title="' + plural(e.count, "missing element") + ' — press to go">' +
-      missChipInner(e) + '</button>';
+      ' title="' + (e.count ? plural(e.count, "gap") + " to fill — press to go"
+                            : "Nothing missing here") + '">' +
+      gapChipInner(e) + '</button>';
   }).join("");
-  return '<div class="missbar" data-gapband="1">' +
-    '<span class="secmiss">' + total + ' Missing</span>' + chips +
-    '<span class="gaptail">' + missBarCta(total) + '</span></div>';
+  return '<div class="gapband" data-gapband="1"><span class="lead">To fill</span>' +
+    chips + '<span class="gaptail">' + gapTail(gapTotal(TARGET)) + '</span></div>';
 }
 /* The counts rewritten IN PLACE after a fill — §63's write-into-the-node,
    because a repaint here would destroy the field being typed into (§71.2).
-   The chips are kept (their handler rides the band by delegation), only
-   their words move: a place reaching zero flips its chip to the green tick
-   until the next paint drops it. The rail rows follow the same list. */
+   The chips themselves are kept (their handler rides the band), only their
+   numbers move; the tab badge and the rail counts follow the same list. */
 function gapBandRefresh(){
   var map = gapMap(TARGET), total = gapTotal(TARGET);
   var band = document.querySelector('[data-gapband]');
   if (band){
-    var tot = band.querySelector(".secmiss");
-    if (tot) tot.textContent = total + " Missing";
     map.forEach(function(e){
       var chip = band.querySelector('[data-gkey="' + CSS.escape(e.key) + '"]');
       if (!chip) return;
-      chip.classList.toggle("done", !e.count);
-      chip.innerHTML = missChipInner(e);
+      chip.classList.toggle("clear", !e.count);
+      chip.innerHTML = gapChipInner(e);
     });
     var tail = band.querySelector(".gaptail");
-    if (tail) tail.innerHTML = total
-      ? missBarCta(total)
-      : '<span class="gapdone">&#10003; Nothing missing</span>';
+    if (tail) tail.innerHTML = gapTail(total);
   }
+  var tb = document.querySelector('[data-gaptab]');
+  if (tb) { if (total) tb.textContent = total; else tb.remove(); }
   document.querySelectorAll('[data-rgap]').forEach(function(el){
     var e = map.filter(function(x){ return x.key === el.dataset.rgap; })[0];
     if (!e) return;
     el.classList.toggle("ok", !e.count);
-    el.innerHTML = e.count ? e.count + " Missing" : "&#10003;";
+    el.innerHTML = e.count ? String(e.count) : "&#10003;";
   });
 }
 
@@ -2038,19 +1996,6 @@ function fillBar(page, acKey){
   return '<div class="fillbar"><b>Filling the gaps.</b> You can write only where the ' +
     'plan holds nothing. A value you fill stays yours to correct until the ' +
     'Strategy Office confirms it — after that, changes are the office’s.</div>';
-}
-/* §132.14: A PAGE WITH NOTHING MISSING SAYS SO AND POINTS AWAY — Islam's
-   Mazaya moment: fill mode opened an empty hand and said nothing, which
-   read as broken. When the surface being looked at owes nothing but the
-   plan still does, the contract line gives way to the answer and a door. */
-function fillBarOr(page, acKey, ownCount, place){
-  if (!filling(page, acKey)) return '';
-  var total = gapTotal(TARGET);
-  if (!ownCount && total)
-    return '<div class="emptynote"><b>&#10003; Nothing missing in ' + esc(place) +
-      '.</b> ' + plural(total, "missing element") + ' elsewhere in this plan. ' +
-      '<button class="linkbu" data-nextgap="1">Go to the next place &rarr;</button></div>';
-  return fillBar(page, acKey);
 }
 function gapCell(page, acKey, row, field, opts){
   opts = opts || {};
@@ -2380,11 +2325,7 @@ function renderUnitFoundation(u){
      no way to add — so a from-scratch unit could not say who it is at all
      (§61's trap on the oldest surface in the product). The lead opens with
      the pen because the leads are the unit's own words, not a fixed form. */
-  return fillBarOr("foundation", "u_found",
-      SMPRules.gapMissing("unit", u).length +
-      (u.keyObjectives || []).reduce(function(a, m){
-        return a + SMPRules.gapMissing("ko", m).length; }, 0),
-      "the Foundation") +
+  return gapBand("foundation", "u_found") +
     '<div class="fgrid"><div class="card"><h2 class="sec first">Who we are</h2>' +
       '<dl style="margin:0">' +
       u.clauses.map(function(c, ci){
@@ -2918,8 +2859,7 @@ function railFor(list, sel, numOf, subOf, groupOf, footNote, codeOf, opts){
            fills land. Optional and last, so the other callers are untouched. */
         (opts.gapOf && opts.gapOf(it)
           ? '<span class="rgap" data-rgap="pr:' + esc(it.id) + '" title="' +
-            plural(opts.gapOf(it), "missing element") + ' — the fill grant can close them">' +
-            opts.gapOf(it) + ' Missing</span>'
+            plural(opts.gapOf(it), "gap") + ' to fill">' + opts.gapOf(it) + '</span>'
           : '') +
         /* NO NUMBER MEANS NO ELEMENT. An empty `.rnum` still takes its column in
          the row's grid, so a rail with nothing to show on the right laid its
@@ -3490,7 +3430,7 @@ function projPlanBody(p, fk){
         '<span class="pband-name">' +
           inputOr("plan", p.name, "", function(v){ p.name = v; }) + '</span></div>'
     : pillarBand(projCode(fk, p), p.name, pendBadge("u_plan"));
-  return band + paneActs("plan", "u_plan") +
+  return band + paneActs("plan", "u_plan") + fillBar("plan", "u_plan") +
     projFrontMatter(p, ed) +
     '<h4 class="mini">' + DX_HEADING +
       ' <em>\u2014 what the project hands over, and what it is meant to change</em></h4>' +
@@ -3515,11 +3455,7 @@ function renderFnProjects(fnKey){
      a unit and a function are the same product, and a button removed from one
      side of the navigation switch and left on the other is exactly the drift
      that rule exists to stop. */
-  return fillBarOr("plan", "k_proj",
-      caps.reduce(function(a, c){
-        return a + (c.projects || []).reduce(function(b, p){
-          return b + SMPRules.gapMissing("project", p).length; }, 0); }, 0),
-      "the projects") + caps.map(function(c){
+  return gapBand("plan", "k_proj") + caps.map(function(c){
     var sel = railPick(c);
     /* AN EMPTY CAPABILITY IS WHERE THE FIRST PROJECT GOES (§61's lesson, the
        same shape): the note said "No projects yet" and offered nothing, so the
@@ -3800,8 +3736,7 @@ function unitRailFor(u, sel){
         (on ? handle("Reorder " + it.name) : '') +
         railName(pillarCode(u, i), it.name) +
         (gaps ? '<span class="rgap" data-rgap="p:' + esc(it.code || String(i)) +
-          '" title="' + plural(gaps, "missing element") + ' — the fill grant can close them">' +
-          gaps + ' Missing</span>' : '') +
+          '" title="' + plural(gaps, "gap") + ' to fill">' + gaps + '</span>' : '') +
         /* Both counts, both labelled, on one line. It used to put the tactics
            count in the small line and the MEASURES count as a bare number on
            the right - two numbers, one of them unlabelled, and nothing saying
@@ -3993,7 +3928,7 @@ function unitPlanBody(it, u, railed){
         kindPill(it) +
         (mayEditPlan() ? penBtn("plan", "u_plan") : '') + '</div>'
     : pillarBand(code, it.name, pendBadge("u_plan")) + paneActs("plan", "u_plan");
-  return head +
+  return head + fillBar("plan", "u_plan") +
     /* NO NOTE UNDER THE PILLAR (Islam, 2026-08-22: "there is a statement under
        the title of the direction in the mobile, generally standardize the view
        there is no notes under the pillars"). Mobile's first pillar carried
@@ -4077,12 +4012,7 @@ function renderUnitPlan(u){
      renderGroupFoundation(), which rendered the literal word "undefined" for
      versions; the note is here so the next deletion of a leading term does not
      re-earn it. */
-  return fillBarOr("plan", "u_plan",
-      (sel.measures || []).reduce(function(a, m){
-        return a + SMPRules.gapMissing("measure", m).length; }, 0) +
-      (sel.tactics || []).reduce(function(a, t){
-        return a + SMPRules.gapMissing("tactic", t).length; }, 0),
-      "this " + L("pillar","bu").toLowerCase().replace(/s$/, "")) +
+  return gapBand("plan", "u_plan") +
     (arranging("unit", u.ukey)
       ? '<p class="sec-hint">' + u.items.length + ' ' + L("pillar","bu").toLowerCase() +
         ' &middot; drag by the handle to reorder, here and inside each ' +
@@ -4119,12 +4049,8 @@ function renderFnFoundation(fnKey){
   /* §132: the fill grant opens the same editor, whose gap cells then draw
      only the blanks — Add and Remove stay the author's. */
   var fl = filling("capfoundation", "k_found");
-  return editBar("capfoundation", "k_found") +
-    fillBarOr("capfoundation", "k_found",
-      caps.reduce(function(a, c){
-        return a + (c.keyObjectives || []).reduce(function(b, m){
-          return b + SMPRules.gapMissing("capko", m).length; }, 0); }, 0),
-      "the overview") +
+  return editBar("capfoundation", "k_found") + gapBand("capfoundation", "k_found") +
+    fillBar("capfoundation", "k_found") +
     caps.map(function(c){
     var f = functionOf(c.fn);
     /* A CAPABILITY'S OBJECTIVES CAN FINALLY BE AUTHORED HERE (§129's audit).

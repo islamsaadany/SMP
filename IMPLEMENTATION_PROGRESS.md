@@ -98,6 +98,19 @@ Nothing proceeds past this line without an answer.
   (each a door that keeps fill mode on), and a Next-gap walker, all fed by
   one list and rewritten in place as fills land. 237 server tests, the
   extended browser check, qa and eleven suites green.
+- **Third build (§132.14), same branch — the finding system red and worded,
+  from Islam's screens:** the whole missing bar ("N Missing" + one red chip
+  per owing place + the solid red *Fill in missing elements* button) moves
+  INTO the section row beside the section tabs, read mode included, nothing
+  in the page body; the Strategy tab's number is gone. The corner button
+  beside the arrange arrows is the same press (red → *Done filling* →
+  quiet amber *Review pending · N*); rail rows read red italic "N Missing"
+  → green ✓; a page owing nothing says so and points away. One press opens
+  fill mode and walks to the first blank — fixed to wait for the paint
+  §30.1 holds mid-click, the bug that made a real press behave differently
+  from every programmatic probe. Red words on `--bad-tx` (§38.5).
+  `checks/gap-fill.py` §9 rewritten (58 assertions); qa and the suite
+  battery re-run green.
 
 ### v3.47 — building a plan on the platform (§129, spec 020)
 

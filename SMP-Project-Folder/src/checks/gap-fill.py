@@ -114,11 +114,13 @@ with sync_playwright() as p:
     pg.wait_for_timeout(300)
 
     be(pg, who["cust"], who["unit"], "strategy", "plan")
-    pen = pg.query_selector('.pane .paneact .penbtn[data-page="plan"]')
-    ck("the custodian's pen appears", pen is not None)
-    ck("...and it says what it opens",
-       pen is not None and pen.get_attribute("title") == "Fill the gaps",
-       pen and pen.get_attribute("title"))
+    # §132.14: the fill control is a WORDED RED BUTTON beside the arrows,
+    # not a pen glyph — drawn only while something is missing.
+    pen = pg.query_selector('.pane .paneact .fillcta[data-fillcta="plan"]')
+    ck("the custodian's red button appears beside the arrows", pen is not None)
+    ck("...and it says what it does",
+       pen is not None and pen.text_content().strip() == "Fill in missing elements",
+       pen and pen.text_content())
     if pen:
         pen.click(); pg.wait_for_timeout(400)
     shape = pg.evaluate("""() => ({
@@ -181,7 +183,7 @@ with sync_playwright() as p:
 
     # ── 4 · READ MODE: THE CHIP, THE COUNT, AND NO TICK FOR THE FILLER ──
     print("\n4 · pending reads as pending, and the tick is the office's")
-    pg.click('.pane .paneact .penbtn[data-page="plan"]'); pg.wait_for_timeout(400)
+    pg.click('.pane .paneact .fdone[data-page="plan"]'); pg.wait_for_timeout(400)
     r = pg.evaluate("""() => ({
       chips: document.querySelectorAll('.pane .pchip').length,
       ticks: document.querySelectorAll('.pane .gapok').length,
@@ -263,8 +265,8 @@ with sync_playwright() as p:
     # ── 7 · THE FOUNDATION'S GAPS FILL THE SAME WAY ─────────────────────
     print("\n7 · the key objectives table, through the same one builder")
     be(pg, who["cust"], who["unit"], "strategy", "found")
-    fpen = pg.query_selector('[data-page="foundation"]')
-    ck("the foundation pen appears for the custodian", fpen is not None)
+    fpen = pg.query_selector('.fillcta[data-fillcta="foundation"]')
+    ck("the foundation card carries the red button for the custodian", fpen is not None)
     if fpen:
         fpen.click(); pg.wait_for_timeout(400)
     r = pg.evaluate("""(w) => {
@@ -285,7 +287,7 @@ with sync_playwright() as p:
     # ── 8 · COLLABORATORS FILL, AND THE RIGHT WAITS (§132.10) ───────────
     print("\n8 · collaborators fill, and the reporting right waits")
     be(pg, who["cust"], who["unit"], "strategy", "plan")
-    pg.click('.pane .paneact .penbtn[data-page="plan"]'); pg.wait_for_timeout(400)
+    pg.click('.pane .paneact .fillcta[data-fillcta="plan"]'); pg.wait_for_timeout(400)
     r = pg.evaluate("""(w) => {
       const inp = document.querySelector('td.collabs .fld.gapfld');
       if (!inp) return { none: true };
@@ -306,77 +308,93 @@ with sync_playwright() as p:
       return SMPRules.namedOn(t, { key: "nh", name: "New Helper" });
     }""", who)
     ck("...and counts the moment the mark lifts", r is True)
-    pg.click('.pane .paneact .penbtn[data-page="plan"]'); pg.wait_for_timeout(300)
+    pg.click('.pane .paneact .fdone[data-page="plan"]'); pg.wait_for_timeout(300)
 
-    # ── 9 · THE COUNTS THAT FIND YOU (§132.12) ──────────────────────────
-    print("\n9 · the tab badge, the rail counts, the band and the walker")
+    # ── 9 · THE COUNTS THAT FIND YOU (§132.14) ──────────────────────────
+    print("\n9 · the missing bar beside the sections, the rail words, the walker")
     be(pg, who["cust"], who["unit"], "strategy", "plan")
-    r = pg.evaluate("""() => ({
-      badge: (document.querySelector('[data-gaptab]') || {}).textContent || null,
-      total: gapTotal(TARGET),
-      rail: document.querySelectorAll('[data-rgap]').length,
-      band: !!document.querySelector('[data-gapband]') })""")
-    ck("the Strategy tab wears the count, in read mode",
-       r["badge"] is not None and r["badge"] == str(r["total"]) and r["total"] > 0, r)
-    ck("the rail says which pillar owes", r["rail"] >= 1, r)
-    ck("the band waits for the pen (fill mode only)", r["band"] is False, r)
+    r = pg.evaluate("""() => {
+      const bar = document.querySelector('#secrow-in [data-gapband]');
+      return {
+        badge: document.querySelector('[data-gaptab]') !== null,
+        bar: !!bar,
+        totalWord: bar ? bar.querySelector('.secmiss').textContent : null,
+        total: gapTotal(TARGET),
+        cta: bar ? !!bar.querySelector('[data-fillcta]') : false,
+        rail: [...document.querySelectorAll('[data-rgap]')].map(e => e.textContent),
+        inPage: !!document.querySelector('#panel [data-gapband]') };
+    }""")
+    ck("the Strategy tab wears NO number (§132.14)", r["badge"] is False, r)
+    ck("the missing bar lives in the section row, read mode included",
+       r["bar"] is True and r["totalWord"] == str(r["total"]) + " Missing" and r["total"] > 0, r)
+    ck("...with the red worded button on it", r["cta"] is True, r)
+    ck("...and nothing of it in the page body", r["inPage"] is False, r)
+    ck("the rail speaks the same words — 'N Missing'",
+       len(r["rail"]) >= 1 and all(t.endswith(" Missing") for t in r["rail"]), r)
     if who["floor"]:
         be(pg, who["floor"], who["floorUnit"], "strategy", "plan")
-        ck("somebody with no control to clear it sees no badge (§69)",
-           pg.query_selector('[data-gaptab]') is None)
+        ck("somebody with no control to clear it sees no bar and no button (§69)",
+           pg.query_selector('[data-gapband]') is None and
+           pg.query_selector('[data-fillcta]') is None)
     be(pg, who["cust"], who["unit"], "strategy", "plan")
-    pg.click('.pane .paneact .penbtn[data-page="plan"]'); pg.wait_for_timeout(400)
+    # the bar's own button opens fill mode AND walks to the first blank
+    pg.click('#secrow-in [data-fillcta]'); pg.wait_for_timeout(400)
     r = pg.evaluate("""() => {
-      const band = document.querySelector('[data-gapband]');
-      const chips = [...band.querySelectorAll('[data-gkey]')];
+      const bar = document.querySelector('#secrow-in [data-gapband]');
       const map = gapMap(TARGET);
-      const agree = map.every(e => {
-        const c = band.querySelector('[data-gkey="' + CSS.escape(e.key) + '"]');
-        if (!c) return false;
-        const n = c.querySelector('.c').textContent.trim();
-        return e.count ? n === String(e.count) : n === "\\u2713";
+      const owing = map.filter(e => e.count > 0);
+      const agree = owing.every(e => {
+        const c = bar.querySelector('[data-gkey="' + CSS.escape(e.key) + '"]');
+        return c && c.querySelector('b') &&
+               c.querySelector('b').textContent.trim() === String(e.count);
       });
-      return { chips: chips.length, places: map.length, agree,
-               next: !!band.querySelector('[data-nextgap]') };
+      const clearDrawn = map.filter(e => !e.count).some(e =>
+        bar.querySelector('[data-gkey="' + CSS.escape(e.key) + '"]'));
+      return { mode: EDIT_PAGE.plan, chips: bar.querySelectorAll('.mchip').length,
+               owing: owing.length, agree, clearDrawn,
+               lit: document.querySelectorAll('.gaplit').length,
+               next: !!bar.querySelector('[data-nextgap]') };
     }""")
-    ck("the band draws one chip per place", r["chips"] == r["places"] and r["chips"] > 0, r)
-    ck("...and every chip agrees with the data it counts", r["agree"] is True, r)
-    ck("...with the walker beside them", r["next"] is True, r)
-
-    pg.evaluate("() => document.querySelector('[data-nextgap]').click()")
-    pg.wait_for_timeout(200)
-    lit = pg.evaluate("() => document.querySelectorAll('.gaplit').length")
-    ck("Next gap lands the ring on a fillable field", lit == 1, lit)
+    ck("one press opens fill mode and lands the ring on the first blank",
+       r["mode"] is True and r["lit"] == 1, r)
+    ck("one red chip per OWING place, none for a clear one",
+       r["chips"] == r["owing"] and r["chips"] > 0 and r["clearDrawn"] is False, r)
+    ck("...every chip agreeing with the data it counts", r["agree"] is True, r)
+    ck("...and the button now walks — Next gap", r["next"] is True, r)
 
     # a fill moves the counts IN PLACE — no repaint, the typed field survives
     r = pg.evaluate("""(w) => {
-      const t = UNITS[w.unit].items[0].tactics[0];
       const chip = document.querySelector('[data-gapband] [data-gkey^="p:"]');
-      const before = chip.querySelector('.c').textContent.trim();
+      const key = chip.dataset.gkey;
+      const before = chip.textContent.trim();
       const inp = document.querySelector('.pane .fld.gapfld');
       inp.value = "Somebody Named";
       inp.dispatchEvent(new Event('change', { bubbles: true }));
-      const after = chip.querySelector('.c').textContent.trim();
-      const badge = (document.querySelector('[data-gaptab]') || {}).textContent;
-      return { before, after, badge, total: gapTotal(TARGET) };
+      const after = chip.textContent.trim();
+      const totalWord = document.querySelector('[data-gapband] .secmiss').textContent;
+      const want = gapMap(TARGET).filter(e => e.key === key)[0].count;
+      return { before, after, totalWord, want, total: gapTotal(TARGET) };
     }""", who)
-    want = pg.evaluate(
-        "(w) => gapMap(TARGET).filter(e => e.key.indexOf('p:') === 0)[0].count", who)
-    ck("a fill ticks the chip down in place, no repaint",
+    ck("a fill ticks its chip down in place, no repaint",
        r["before"] != r["after"] and
-       r["after"] == (str(want) if want else "✓"), (r, want))
-    ck("...and the tab badge follows", r["badge"] == str(r["total"]), r)
+       (str(r["want"]) in r["after"] if r["want"] else "✓" in r["after"]), r)
+    ck("...and the bar's total follows", r["totalWord"] == str(r["total"]) + " Missing", r)
 
-    # a chip is a door: it navigates AND keeps fill mode on where it lands
+    # a chip is a door: it navigates AND keeps fill mode on where it lands.
+    # The Foundation owes nothing at this point, so its chip is rightly
+    # absent — a gap is made first, and the repaint draws the chip (§94.2).
+    pg.evaluate("""(w) => { UNITS[w.unit].aspiration = ""; paint(); }""", who)
+    pg.wait_for_timeout(300)
     pg.evaluate("""() => {
       document.querySelector('[data-gapband] [data-gkey="found"]').click();
     }""")
     pg.wait_for_timeout(400)
     r = pg.evaluate("""() => ({
       sec: CURSEC[currentSub], pen: EDIT_PAGE.foundation,
-      band: !!document.querySelector('[data-gapband]') })""")
-    ck("a chip walks to Foundation with the mode kept on",
-       r["sec"] == "found" and r["pen"] is True and r["band"] is True, r)
+      band: !!document.querySelector('#secrow-in [data-gapband]'),
+      fld: document.querySelectorAll('#panel .fld.gapfld').length })""")
+    ck("a chip walks to Foundation with the mode kept on, fields open",
+       r["sec"] == "found" and r["pen"] is True and r["band"] is True and r["fld"] >= 1, r)
 
     # the SWOT page never fills: a pen that opens nothing is not drawn
     be(pg, who["cust"], who["unit"], "strategy", "anal")

@@ -1,0 +1,307 @@
+"""THE WELCOME SCREEN (§148, spec 025).
+
+NOT PART OF qa.py, for §94.11's reason: the screen exists only over http(s)
+with a signed-in person — over file:// WELCOME.offer declines before drawing
+anything, so a build that had lost the whole feature would go green in every
+file:// sweep. Served here with a stub /api/state and /api/chat, three
+viewers, and the STATE MADE rather than waited for (§94.2): the demo tenant
+grants nobody the fill state and every register row has a custodian, so the
+gaps row and the office's no-custodian row are exercised on a seed this file
+edits before serving.
+
+WHAT IS ASSERTED IS AGREEMENT AND PRESSES, NEVER COPY ALONE (§94.8, §70):
+each row's number is compared against the same function its destination page
+calls, evaluated in the page itself — and every door is CLICKED, with the
+platform's own state (current / currentSub / REPORTING) read back afterwards,
+because a control that renders and does nothing has shipped five times.
+
+PROVE IT CAN FAIL (§94.5): run with SMP_WELCOME_HTML pointing at the shipped
+pre-§148 file and every section fails from the first assertion — no overlay
+is ever drawn there.
+
+Run:  SMP_CHROME=/opt/pw-browsers/chromium python3 qa-run.py checks/welcome.py
+"""
+import copy, json, os, pathlib, threading, http.server, socketserver
+from playwright.sync_api import sync_playwright
+
+ROOT = pathlib.Path(__file__).resolve().parents[3]
+HTML_PATH = pathlib.Path(os.environ.get("SMP_WELCOME_HTML") or
+                         (ROOT / "SMP-Project-Folder/src/strategy-management-platform.html"))
+HTML = HTML_PATH.read_bytes()
+BASE = json.loads((ROOT / "db/seed-state.json").read_text())
+
+# Mutable per-section: who is signed in, what state is served, what the chat
+# stub answers. A new browser context per section keeps sessionStorage clean.
+PERSON = {"key": "own_mob", "name": "Mennah Farouk"}
+STATE = BASE
+CHATANS = {"unread": 0, "queue": None}
+
+errs, bad = [], 0
+
+
+def ck(w, ok, x=""):
+    global bad
+    if not ok:
+        bad += 1
+    print(("  ok      " if ok else "  FAIL    ") + w + (("  — " + str(x)) if not ok and x else ""))
+
+
+GATE = b"<!doctype html><title>Sign in</title><h1 id='gate'>Sign in</h1>"
+
+
+class H(http.server.BaseHTTPRequestHandler):
+    def log_message(self, *a):
+        pass
+
+    def _send(self, code, body, ctype):
+        self.send_response(code)
+        self.send_header("Content-Type", ctype)
+        self.send_header("Content-Length", str(len(body)))
+        self.end_headers()
+        self.wfile.write(body)
+
+    def do_GET(self):
+        if self.path.startswith("/api/state"):
+            self._send(200, json.dumps({"ok": True, "state": STATE, "person": PERSON}).encode(),
+                       "application/json")
+            return
+        if self.path.startswith("/raya-trade"):
+            self._send(200, HTML, "text/html; charset=utf-8")
+            return
+        self._send(200, GATE, "text/html; charset=utf-8")
+
+    def do_POST(self):
+        n = int(self.headers.get("Content-Length") or 0)
+        raw = self.rfile.read(n)
+        if not self.path.startswith("/api/chat"):
+            self._send(200, b'{"ok":true}', "application/json")
+            return
+        body = json.loads(raw or b"{}")
+        if body.get("action") == "mine":
+            self._send(200, json.dumps({
+                "ok": True, "messages": [], "unread": CHATANS["unread"],
+                "thread": ({"waiting": False} if CHATANS["unread"] else None),
+                "office": PERSON["key"] == "smo",
+                "chat": {"on": True}}).encode(), "application/json")
+            return
+        if body.get("action") == "queue":
+            q = CHATANS["queue"] or {"waiting": 0, "flagged": 0}
+            self._send(200, json.dumps({
+                "ok": True, "office": True, "threads": [], "chat": {"on": True},
+                "waiting": q["waiting"], "flagged": q["flagged"],
+                "hereMinutes": 5, "mail": False}).encode(), "application/json")
+            return
+        self._send(200, b'{"ok":true}', "application/json")
+
+
+def _no_tour(pg):
+    # The tour's auto-offer is suppressed as a returning viewer would have it
+    # (its own session flag) — the welcome's card and TOUR.start are gated on
+    # neither, so §5's handoff still exercises the real thing.
+    pg.add_init_script("try{sessionStorage.setItem('smp.tour.later','1');}catch(e){}")
+
+
+def fresh(browser, port):
+    ctx = browser.new_context(viewport={"width": 1440, "height": 950})
+    pg = ctx.new_page()
+    _no_tour(pg)
+    pg.goto("http://127.0.0.1:%d/raya-trade" % port)
+    pg.wait_for_selector(".welcomeover", timeout=15000)
+    return ctx, pg
+
+
+def gapped_seed():
+    """Mobile owes exactly three elements, and its custodian holds the fill
+    state — the two edits that make §145's row reachable on this seed."""
+    s = copy.deepcopy(BASE)
+    m = s["units"]["mobile"]
+    m["items"][0]["measures"][0]["target"] = ""
+    m["items"][0]["measures"][1]["target"] = ""
+    m["items"][0]["tactics"][0]["owner"] = ""
+    s["access"].setdefault("custodian", {})["a_unit_own_strat"] = "fill"
+    return s
+
+
+def main():
+    global PERSON, STATE, CHATANS
+    socketserver.TCPServer.allow_reuse_address = True
+    srv = socketserver.TCPServer(("127.0.0.1", 0), H)
+    port = srv.server_address[1]
+    threading.Thread(target=srv.serve_forever, daemon=True).start()
+
+    with sync_playwright() as p:
+        browser = p.chromium.launch()
+
+        # ── 1 · THE CUSTODIAN'S SCREEN AGREES WITH THE DATA ────────────────
+        print("§1 the custodian's screen, against the same functions its rows read")
+        PERSON = {"key": "own_mob", "name": "Mennah Farouk"}
+        STATE = gapped_seed()
+        CHATANS = {"unread": 2, "queue": None}
+        ctx, pg = fresh(browser, port)
+        ck("greeting leads with the register's first name",
+           "Welcome, Mennah" in pg.inner_text(".wgreet h2"))
+        org = pg.evaluate("GROUP.org")
+        ck("the tenant signs the band with its own name",
+           pg.inner_text(".wtenant h1") == org, pg.inner_text(".wtenant h1"))
+        ck("the Strategy Management Office is named under it",
+           "STRATEGY MANAGEMENT OFFICE" in pg.inner_text(".woffice").upper())
+        chips = pg.inner_text(".wwho")
+        ck("the person's role chip says custodian", "custodian" in chips.lower(), chips)
+        rev = pg.evaluate("REVIEW.name")
+        ck("the cycle chip carries the cycle's own name", rev in chips, chips)
+
+        acts = pg.inner_text(".wacts")
+        # The submission row, against reportedCount + submitBlockers.
+        ck("the submit row names the subject and the cycle",
+           ("Submit Mobile" in acts) and (rev in acts), acts[:200])
+        # The relationship, never the constant (§94.8): the demo's mobile has
+        # every figure entered today, and the row must say whichever is true.
+        open_n = pg.evaluate(
+            "(function(){var c=reportedCount(UNITS.mobile);return c.total-c.done;})()")
+        want_open = ("Every figure is entered" if open_n == 0 else
+                     ("1 figure still open" if open_n == 1 else
+                      "%d figures still open" % open_n))
+        ck("figures-still-open agrees with reportedCount", want_open in acts, acts[:300])
+        notes_n = pg.evaluate("submitBlockers('mobile').notes.length")
+        if notes_n:
+            want = ("1 needs a note" if notes_n == 1 else "%d need a note" % notes_n)
+            ck("the note debt agrees with submitBlockers", want in acts, acts[:300])
+        # The gaps row, against gapTotal — the demo plan owes gaps of its own
+        # (§119.1's Missing marks), so the made three only guarantee nonzero;
+        # what is asserted is that the row and the function AGREE (§94.8).
+        gaps_n = pg.evaluate("gapTotal('mobile')")
+        ck("the made state owes gaps at all", gaps_n >= 3, gaps_n)
+        ck("the gaps row carries the same number with its noun",
+           ("%d missing elements" % gaps_n) in acts, acts[:300])
+        # No bare number: every digit on the list sits inside a sentence chip-free.
+        ck("no count badge boxes exist (round 3, variation C)",
+           pg.locator(".wacts .cnt, .wacts .stchip").count() == 0)
+        # The one solid button (§41's budget).
+        ck("exactly one solid CTA on the screen",
+           pg.locator(".welcomeover .wcta").count() == 1)
+        # The reply row arrives when the corner's poll answers.
+        try:
+            pg.wait_for_selector(".wact-reply", timeout=9000)
+            ck("the office's reply announces itself", True)
+        except Exception:
+            ck("the office's reply announces itself", False, "no .wact-reply within 9s")
+        ck("the reply row counts with its noun",
+           "2 unread replies" in pg.inner_text(".wacts"))
+        # The side column.
+        ck("your pages lists Strategy, Performance and Reporting",
+           pg.locator(".wpages a").count() == 3, pg.inner_text(".wpages"))
+        ck("the intro round is offered to somebody the tour has a story for",
+           pg.locator(".wtour").is_visible())
+        ctx.close()
+
+        # ── 2 · THE DOORS ARE REAL, AND THE SCREEN IS ONCE PER SESSION ─────
+        print("§2 the doors are pressed and the platform is read back")
+        ctx, pg = fresh(browser, port)
+        pg.click(".welcomeover .wcta")
+        pg.wait_for_selector(".welcomeover", state="detached", timeout=5000)
+        pg.wait_for_timeout(400)
+        ck("Open reporting lands on the unit", pg.evaluate("current") == "mobile",
+           pg.evaluate("current"))
+        ck("…on Performance", pg.evaluate("currentSub") == "performance",
+           pg.evaluate("currentSub"))
+        ck("…with reporting mode entered",
+           pg.evaluate("typeof REPORTING!=='undefined' && REPORTING==='mobile'"))
+        pg.reload()
+        pg.wait_for_timeout(2500)
+        ck("a reload in the same session is not greeted twice",
+           pg.locator(".welcomeover").count() == 0)
+        ctx.close()
+
+        print("§3 Continue names where the platform already is, and steps aside")
+        ctx, pg = fresh(browser, port)
+        word = pg.inner_text("[data-wcontinue]")
+        ck("Continue names the landing place", "Mobile" in word, word)
+        pg.click("[data-wcontinue]")
+        pg.wait_for_selector(".welcomeover", state="detached", timeout=5000)
+        ck("…and the platform under it is on that place",
+           pg.evaluate("current") == "mobile", pg.evaluate("current"))
+        ctx.close()
+
+        print("§4 the intro round is a handoff to the real tour")
+        ctx, pg = fresh(browser, port)
+        pg.click("[data-wtour]")
+        pg.wait_for_selector(".welcomeover", state="detached", timeout=5000)
+        pg.wait_for_timeout(600)
+        st = pg.evaluate("TOUR.state()")
+        ck("the tour is running once the welcome steps aside",
+           bool(st and st.get("running")), st)
+        ctx.close()
+
+        # ── 5 · THE OFFICE'S LIST IS THE OVERVIEW'S ────────────────────────
+        print("§5 the office sees its own rows, and never the tour")
+        PERSON = {"key": "smo", "name": "Mohamed Essam"}
+        s = copy.deepcopy(BASE)
+        s["unitRoles"]["mobile"]["custodian"] = None
+        STATE = s
+        CHATANS = {"unread": 0, "queue": {"waiting": 2, "flagged": 0}}
+        ctx, pg = fresh(browser, port)
+        ck("the office is never offered the intro round (§118)",
+           pg.locator(".wtour").count() == 0 or not pg.locator(".wtour").is_visible())
+        n_nocust = pg.evaluate("unitsWithoutCustodian().length")
+        ck("the made state has a custodian-less unit", n_nocust >= 1, n_nocust)
+        acts = pg.inner_text(".wacts")
+        ck("the no-custodian row is the Overview's own sentence",
+           ("%d unit" % n_nocust) in acts and "no custodian" in acts, acts[:300])
+        try:
+            pg.wait_for_selector(".wacts >> text=conversation", timeout=9000)
+            ck("the inbox's waiting count arrives and is drawn", True)
+        except Exception:
+            ck("the inbox's waiting count arrives and is drawn", False, "no row in 9s")
+        ck("…with its noun", "2 conversations waiting" in pg.inner_text(".wacts"),
+           pg.inner_text(".wacts")[:300])
+        ck("the office's pages open Setup",
+           "Overview" in pg.inner_text(".wpages"), pg.inner_text(".wpages"))
+        # A door into Setup: the no-custodian row goes to the People register.
+        pg.locator(".wacts .wact", has_text="no custodian").locator("button").click()
+        pg.wait_for_selector(".welcomeover", state="detached", timeout=5000)
+        pg.wait_for_timeout(600)
+        ck("its door lands on the People register",
+           pg.evaluate("currentSub") == "people", pg.evaluate("currentSub"))
+        ctx.close()
+
+        # ── 6 · NOTHING WAITING SAYS SO ────────────────────────────────────
+        print("§6 an empty list says so (§45.2)")
+        PERSON = {"key": "own_ret", "name": "Retail Custodian"}
+        STATE = BASE          # retailstores is submitted in the seed; no fill grant
+        CHATANS = {"unread": 0, "queue": None}
+        ctx, pg = fresh(browser, port)
+        ck("the empty list says nothing is waiting",
+           "Nothing is waiting on you" in pg.inner_text(".wacts"),
+           pg.inner_text(".wacts")[:200])
+        ck("…and offers no solid CTA", pg.locator(".welcomeover .wcta").count() == 0)
+        ctx.close()
+
+        # ── 7 · THE ABSENCES (§94.2) ───────────────────────────────────────
+        print("§7 where the screen must NOT be")
+        pg2 = browser.new_page()
+        pg2.goto("file://" + str(HTML_PATH))
+        pg2.wait_for_timeout(2000)
+        ck("over file:// no welcome is ever drawn", pg2.locator(".welcomeover").count() == 0)
+        ck("…and offer() itself declines there",
+           pg2.evaluate("WELCOME.offer({key:'own_mob',name:'x'})") is False)
+        pg2.close()
+        PERSON = {"key": "own_mob", "name": "Mennah Farouk"}
+        STATE = BASE
+        ctx, pg = fresh(browser, port)
+        pg.click("[data-wcontinue]")
+        pg.wait_for_selector(".welcomeover", state="detached", timeout=5000)
+        ck("a projector is never greeted",
+           pg.evaluate("(function(){try{sessionStorage.removeItem('smp.welcome.done');}catch(e){}"
+                       "document.body.classList.add('presenting');"
+                       "return WELCOME.offer({key:'own_mob',name:'x'});})()") is False)
+        ctx.close()
+
+        browser.close()
+    srv.shutdown()
+
+    print("")
+    print("welcome: %s" % ("OK" if bad == 0 else "%d FAILURES" % bad))
+    raise SystemExit(0 if bad == 0 else 1)
+
+
+main()

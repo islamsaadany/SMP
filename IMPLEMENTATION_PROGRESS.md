@@ -6,9 +6,10 @@ version (rules A2 / A11, changed 2026-08-20) — those go only when asked for.
 
 **Where it runs:** Vercel, production tracks `main`. Static files plus two
 serverless functions (`/api/state`, `/api/auth`) against Neon Postgres.
-**Latest version:** v3.56 on `main`; **v3.57 (§147, a custodian per project,
-spec 024) on `claude/custodian-per-project-s8q93m`**, awaiting the word to
-merge — renumbered twice on the way as parallel sessions took §130–§146.
+**Latest version:** v3.57 on `main` (§147 merged 2026-08-28); **v3.58 (§148,
+the welcome screen, spec 025) on `claude/welcome-screen-design-d4mlfq`**,
+awaiting the word to merge. *(Corrected in passing: this line still said
+v3.57 was awaiting merge after its merge commit had landed on `main`.)*
 
 **Sign in as:** `SMO` / `1234` — a password change is forced at once (§43.1,
 reversing §19.4).
@@ -64,6 +65,24 @@ Nothing proceeds past this line without an answer.
   is a true signal — do not silence it.
 
 ## Built and verified
+
+### v3.58 — the welcome screen (§148, spec 025)
+
+- **One screen after sign-in, before the platform**: "Welcome, <first name>"
+  leads with the person's role chips and the cycle state; Raya Trade and the
+  Strategy Management Office sign the band on the separator's edge. Settled
+  over three mockup rounds — the greeting moved left and the bare count
+  badges became sentences at Islam's direction.
+- **"Waiting on you" computes nothing new**: the submission row, the plan's
+  missing elements (§145) and the office's unread reply are the same
+  functions their destination pages call; the SMO's list is the Setup
+  Overview's own rows. An empty list says so. Every door presses the
+  platform's own navigation — "Open reporting" arrives IN reporting mode.
+- **The intro round card is the tour's visible offer** and its reachable
+  home again (§119.4); starting it hands the screen to the real tour. Once
+  per browser session; never the office's tour, never over file://.
+- Proof: `checks/welcome.py` (three viewers, made state, doors pressed and
+  read back, absences, proved to fail on the pre-§148 build) + full `qa.py`.
 
 ### v3.57 — a custodian per project: two roles, not one (§147, spec 024)
 

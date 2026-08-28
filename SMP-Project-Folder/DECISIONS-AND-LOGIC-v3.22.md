@@ -19392,3 +19392,99 @@ milestone and only it once the row is opened. role-picker, gap-fill,
 strategy-split, setup-header, project-tables, repeat-project,
 project-header, people-dialog and the full qa.py sweep all green on the
 final build.
+
+---
+
+## §148 · The welcome screen (v3.58, spec 025)
+
+Islam: *"let's work on a Welcome screen for the user with what needs to be
+done with good design and name of company and smo and overview of his list of
+actions and info to work on or take an intro round."* Settled over THREE
+mockup rounds before a source was touched (design-mockups/welcome-screen/),
+and two of the three decisions are his corrections of the first drawing:
+
+- **§148.1 — THE GREETING LEADS.** Round 1 put the tenant on the left and the
+  greeting on the right; Islam: *"the welcome mennah and the data below should
+  be on the left to be the first thing they read."* Two band variations were
+  drawn and he chose **B**: "Welcome, <first name>" is the 30px headline with
+  the person's role chips and the cycle state under it, and the tenant is a
+  compact signature on the right — mark, name, "Strategy Management Office" —
+  **every line starting AT the separator hairline**, his round-3 correction,
+  so the rule and the text draw one vertical edge. The first name is
+  `SMPRules.firstName()`, the register's own reader (§93.8, §135): a typed
+  short name wins and a compound first name arrives whole.
+
+- **§148.2 — NO NUMBER STANDS WITHOUT ITS NOUN.** Round 2's action rows led
+  with bare count badges — 3, 4, 1 in boxes — and Islam: *"the 3, 4, 1
+  numbers are confusing."* Two list variations were drawn (the count in the
+  sentence; the count in a worded chip) and he chose **C**: no badges at all,
+  every number inside its own sentence — "3 figures still open · 1 needs a
+  note", "25 missing elements — MB01 · MB02…". §116.2's cousin in the other
+  direction: a count that cannot say what it counts makes work.
+
+- **§148.3 — NOTHING NEW IS COMPUTED.** Every row's facts are the same
+  functions its destination page already calls: the submission row is
+  `reportPending()` + `reportedCount()`/`fnReportedCount()` +
+  `submitBlockers()`; the gaps row is `seesGaps()` + `gapTotal()` +
+  `gapMap()` (§145), so it appears only for somebody holding the fill state
+  or authorship — a plain reader never sees a nag they cannot clear (§69);
+  the reply row is `CHAT.unread()`. **The office's list IS the Setup
+  Overview's own `attentionRows()`** (§108.10), destination and sentence
+  included, with the inbox's waiting count asked the way the Overview asks it
+  (`CHAT.officeQueue`, one reader of one endpoint) and written into the list
+  when it answers. A count with no answer draws no row; an empty list says
+  **"Nothing is waiting on you"** (§45.2) and the async answers remove that
+  line if they land.
+
+- **§148.4 — EVERY DOOR PRESSES THE PLATFORM'S OWN CONTROLS** — `[data-u]`,
+  `[data-s]`, `[data-md]`, `[data-setupgo]`, `[data-report]` — §107's rule
+  for §107's reason: a second copy of the navigation drifts. And every walk
+  runs behind `setTimeout(…, 0)`, because the handler fires on a REAL click
+  and §30.1's CLICKING guard holds any paint until the click lands — a walk
+  inside the handler reads the page from before its own press, which is
+  §145.14's fault avoided rather than repeated. "Open reporting" lands on
+  the subject's Performance and presses the Report button, so the person
+  arrives IN reporting mode; "Fill the gaps" lands on Strategy, where
+  §145.14's missing bar already stands; **Continue only steps aside**,
+  because the platform under the overlay is already on the page §94.6 chose
+  — the door names it ("Continue to Mobile ›") rather than repeating the
+  navigation's work.
+
+- **§148.5 — ONCE PER BROWSER SESSION**, in sessionStorage like the tour's
+  "skip for now": a reload mid-morning is not greeted twice, a new session
+  is. A throwing store reads as already seen (§107's rule — a screen that
+  cannot remember being dismissed is met on every reload for ever). Never
+  over file:// (nobody is signed in), never on a projector.
+
+- **§148.6 — THE WELCOME TAKES THE BOOT SLOT AND THE TOUR IS NOT LOST.** It
+  offers itself from `land()` beside `TOUR.offer` — the one door every boot
+  path passes (§94.10) — and while it is up the tour's auto-offer is skipped:
+  two docks over one page fight for every click (§118's fault by another
+  door). **The intro-round card IS the tour's offer**, made visibly instead
+  of automatically, gated on `TOUR.storyFor()` (so never the office, §118),
+  and starting it is a handoff — the welcome puts itself away and
+  `TOUR.start()` takes the screen. This also gives the tour a reachable home
+  again: §119.4 recorded that its replay lived on a page most people can no
+  longer open. `TOUR.offer`'s own memory is untouched, so a build without
+  the welcome offers the tour exactly as before. **The cost is recorded**:
+  a genuine first-timer who dismisses the welcome without pressing the card
+  is not auto-toured that session; the card returns with the next session.
+
+- **§148.7 — ONE SOLID BUTTON** (§41's budget): Report's own `--cta` pair on
+  "Open reporting", worn only while a cycle is open. The missing count wears
+  `--bad-tx` as WORDS (§38.5); its button stays quiet. Everything is tokens,
+  so the tenant's branding and both themes carry the screen with no rule of
+  its own — and nothing here ever calls `paint()` (§71.2): the two late
+  answers write into the row they are about.
+
+Proof: `checks/welcome.py` — over HTTP with a stub, because the whole feature
+is invisible over `file://` (§94.11). Three viewers, the state MADE (§94.2:
+the demo grants nobody the fill state and every unit has a custodian, so the
+seed is edited before serving); every row asserted as AGREEMENT with the same
+function its destination calls, never a constant (§94.8 — the first run
+asserted the made gaps as exactly 3 and the demo plan already owes 22 of its
+own); every door PRESSED with `current`/`currentSub`/`REPORTING` read back
+(§70); the absences asserted (file://, the projector, the office's tour, a
+reload's second greeting); and **proved able to fail** by running against the
+shipped pre-§148 file, where it fails from the first wait — no overlay ever
+draws (§94.5). Full `qa.py` sweep green on the final build.

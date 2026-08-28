@@ -2540,6 +2540,9 @@ python3 checks/project-custodian.py # a custodian per project (§147): the Proje
                                 # three viewers, proved able to fail
 python3 checks/office-chat.py   # the chat's client half — serves the built file over HTTP,
                                 # because the whole feature is invisible over file:// (§97.9)
+python3 checks/welcome.py       # the welcome screen (§148): three viewers over HTTP, every
+                                # row asserted against the function its destination page
+                                # calls, every door pressed and read back, and the absences
 python3 checks/setup-rail.py    # the Setup rail fits the window, every entry is reachable
                                 # by scrolling the LIST, and the cap does not move --chrome-h
                                 # (§101.5 — that last one is what licenses the cap at all)
@@ -2605,7 +2608,42 @@ prior sessions (on HR_ERP) accidentally reverted agreed-upon designs.
 
 ---
 
-*Last Updated: 2026-08-28 &mdash; **v3.57: a custodian per project
+*Last Updated: 2026-08-28 &mdash; **v3.58: the welcome screen (&sect;148,
+spec 025)**. Islam: *"let's work on a Welcome screen for the user with what
+needs to be done with good design and name of company and smo and overview of
+his list of actions and info to work on or take an intro round."* Settled over
+THREE mockup rounds before a source was touched, and two of the three
+decisions are his corrections of the first drawing: **the greeting leads on
+the left** (band B, the tenant a compact signature whose every line starts at
+the separator hairline), and **no number ever stands without its noun**
+(variation C &mdash; the bare 3/4/1 badges were *"confusing"*, so every count
+lives inside its own sentence). **NOTHING NEW IS COMPUTED**: the submission
+row is `reportPending()` + `reportedCount()` + `submitBlockers()`, the gaps
+row is `seesGaps()`/`gapTotal()`/`gapMap()` (&sect;145) so a plain reader
+never sees a nag they cannot clear (&sect;69), the reply row is
+`CHAT.unread()`, and **the office's list IS the Setup Overview's own
+`attentionRows()`** (&sect;108.10) with the inbox's count asked through
+`CHAT.officeQueue` and written into the list when it answers &mdash; a count
+with no answer draws no row, and an empty list says **"Nothing is waiting on
+you"** (&sect;45.2). **EVERY DOOR PRESSES THE PLATFORM'S OWN CONTROLS**
+behind `setTimeout(&hellip;,0)`, because the handler fires on a real click and
+&sect;30.1's CLICKING guard holds any paint until the click lands
+(&sect;145.14's fault avoided); Continue only steps aside, since the platform
+under the overlay is already on the page &sect;94.6 chose. **ONCE PER BROWSER
+SESSION** (sessionStorage; a throwing store reads as seen, &sect;107's rule);
+never over `file://`, never on a projector. **THE TOUR IS NOT LOST**: while
+the welcome is up its auto-offer is skipped (two docks fight for every click,
+&sect;118) and the **intro-round card is the tour's offer made visible** and
+its reachable home again (&sect;119.4) &mdash; `TOUR.storyFor()` gates it, so
+never the office, and starting it hands the screen to `TOUR.start()`. Proof:
+`checks/welcome.py` over HTTP with a stub (&sect;94.11), the state MADE
+(&sect;94.2), agreement asserted rather than constants (&sect;94.8 &mdash;
+the first run asserted the made gaps as exactly 3 and the demo plan already
+owes 22 of its own), doors read back through `current`/`REPORTING`
+(&sect;70), and **proved able to fail** against the shipped pre-&sect;148
+file, where no overlay ever draws (&sect;94.5). Full `qa.py` green.*
+
+*Earlier: 2026-08-28 &mdash; **v3.57: a custodian per project
 (&sect;147, spec 024)**. Islam: *"in a case of a function that has 2 projects
 each project has an owner so the custodian here is not on the whole capability
 there is a custodian per project"* &mdash; and then, correcting the first

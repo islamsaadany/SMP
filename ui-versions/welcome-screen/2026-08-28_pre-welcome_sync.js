@@ -687,22 +687,13 @@ var SYNC = (function () {
           land(function () {
             if (person) chromeFor(paint); else paint();
             /* ── AND ONLY NOW IS THERE ANYTHING TO SHOW SOMEBODY ──────
-               The welcome screen and the onboarding tour offer themselves
-               here and nowhere else: this is after the one paint that puts
-               a true page on screen, so nobody is ever handed a greeting or
-               a spotlight over the grey skeleton (§94.10). Both decline in
-               silence — no session, already seen, a projector — which is
-               the common case and must stay cheap.
-
-               THE WELCOME TAKES PRECEDENCE AND THE TOUR IS NOT LOST (§148):
-               two docks over one page would fight for every click (§118's
-               fault by another door), and the welcome's intro-round card is
-               the tour's own offer, made visibly instead of automatically.
-               TOUR.offer's memory is untouched, so with the welcome already
-               seen this session the tour offers itself exactly as before. */
-            var greeted = false;
-            try { greeted = WELCOME.offer(person); } catch (e) {}
-            if (!greeted) TOUR.offer(person);
+               The onboarding tour offers itself here and nowhere else: this
+               is after the one paint that puts a true page on screen, so a
+               first-time viewer is never handed a spotlight on the grey
+               skeleton (§94.10). It declines in silence — no session, no
+               story for their roles, already answered, a projector — which
+               is the common case and must stay cheap. */
+            TOUR.offer(person);
           });
           lastSaved = serialize();
           setInterval(save, 5000);

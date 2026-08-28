@@ -1,0 +1,503 @@
+<title>SMP Design Directions</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,500;0,6..72,600;1,6..72,400&family=Archivo:wght@500;600;700;800&family=Manrope:wght@400;500;600;700;800&family=IBM+Plex+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@500&display=swap">
+<style>
+/* ════════════════════════════════════════════════════════════════════
+   THE FRAME — the document around the plates. Deliberately quiet so the
+   three concepts do the talking. IBM Plex Sans, near-neutral ground.
+   ════════════════════════════════════════════════════════════════════ */
+:root{
+  --f-ground:#F5F6F8; --f-surface:#FFFFFF; --f-line:#E1E4EA;
+  --f-ink:#191D26; --f-ink2:#464D5A; --f-ink3:#6C7482;
+  --f-mark:#8A6B22; --f-markbg:#F6EFDD;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --f-ground:#121418; --f-surface:#1A1D23; --f-line:#2C313A;
+    --f-ink:#E8EAEF; --f-ink2:#B7BdC9; --f-ink3:#8B93A1;
+    --f-mark:#D9B665; --f-markbg:#2A2416;
+  }
+}
+:root[data-theme="dark"]{
+  --f-ground:#121418; --f-surface:#1A1D23; --f-line:#2C313A;
+  --f-ink:#E8EAEF; --f-ink2:#B7BDC9; --f-ink3:#8B93A1;
+  --f-mark:#D9B665; --f-markbg:#2A2416;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--f-ground);color:var(--f-ink);
+  font-family:"IBM Plex Sans",-apple-system,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+  font-size:15px;line-height:1.6;-webkit-font-smoothing:antialiased}
+.wrap{max-width:1180px;margin:0 auto;padding:0 24px 100px}
+.doc-eyebrow{font-size:11px;font-weight:700;letter-spacing:.16em;text-transform:uppercase;color:var(--f-mark);margin:44px 0 10px}
+h1{font-size:34px;line-height:1.15;margin:0 0 12px;font-weight:700;letter-spacing:-.015em;text-wrap:balance}
+.lede{color:var(--f-ink2);max-width:76ch;margin:0}
+.lede b{color:var(--f-ink)}
+h2{font-size:21px;margin:0 0 4px;font-weight:700;letter-spacing:-.01em;display:flex;align-items:baseline;gap:12px}
+h2 .letter{display:inline-grid;place-items:center;min-width:28px;height:28px;border-radius:8px;
+  background:var(--f-ink);color:var(--f-ground);font-size:14px;font-weight:700;transform:translateY(3px)}
+.thesis{color:var(--f-ink2);font-size:15px;max-width:80ch;margin:6px 0 0}
+.thesis b{color:var(--f-ink)}
+section.concept{margin-top:72px}
+.notes{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:10px 22px;margin:18px 0 20px;padding:0;list-style:none}
+.notes li{font-size:13px;color:var(--f-ink2);padding-left:18px;position:relative}
+.notes li::before{content:"";position:absolute;left:0;top:.55em;width:8px;height:2px;background:var(--f-mark)}
+.notes li b{color:var(--f-ink)}
+.cost{display:inline-block;font-size:11.5px;font-weight:600;color:var(--f-mark);background:var(--f-markbg);
+  border-radius:999px;padding:2px 10px;margin-top:2px}
+
+/* the sticky brand bar */
+.brandbar{position:sticky;top:0;z-index:50;background:var(--f-surface);border-bottom:1px solid var(--f-line);
+  margin:36px -24px 0;padding:10px 24px;display:flex;align-items:center;gap:14px;flex-wrap:wrap}
+.brandbar .bb-lab{font-size:11px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--f-ink3)}
+.bswitch{display:flex;gap:8px;flex-wrap:wrap}
+.bbtn{display:inline-flex;align-items:center;gap:8px;border:1px solid var(--f-line);background:var(--f-surface);
+  color:var(--f-ink2);border-radius:999px;padding:5px 14px 5px 6px;font:600 13px "IBM Plex Sans",sans-serif;cursor:pointer}
+.bbtn .sw{display:inline-flex;border-radius:999px;overflow:hidden;width:30px;height:18px}
+.bbtn .sw i{flex:1}
+.bbtn[aria-pressed="true"]{border-color:var(--f-ink);color:var(--f-ink);box-shadow:inset 0 0 0 1px var(--f-ink)}
+.bb-note{font-size:12px;color:var(--f-ink3);margin-left:auto}
+@media (max-width:760px){.bb-note{display:none}}
+
+/* the plate: a browser-ish frame each concept renders inside */
+.plate{border:1px solid var(--f-line);border-radius:14px;overflow:hidden;background:var(--f-surface);
+  box-shadow:0 1px 2px rgb(10 15 25/.05),0 12px 32px -18px rgb(10 15 25/.18)}
+.platehead{display:flex;align-items:center;gap:8px;padding:9px 14px;border-bottom:1px solid var(--f-line);background:var(--f-surface)}
+.platehead i{width:10px;height:10px;border-radius:999px;background:var(--f-line)}
+.platehead span{font-size:12px;color:var(--f-ink3);margin-left:8px}
+.screen{overflow-x:auto}
+.screen-in{min-width:860px}
+
+/* the closing decision block */
+.decision{margin-top:64px;border-left:3px solid var(--f-mark);background:var(--f-markbg);
+  padding:18px 22px;border-radius:0 12px 12px 0;max-width:900px}
+.decision h3{margin:0 0 8px;font-size:17px}
+.decision ol{margin:8px 0 0;padding-left:20px}
+.decision li{margin:7px 0;font-size:14px;color:var(--f-ink2)}
+.decision li b{color:var(--f-ink)}
+footer{margin-top:56px;border-top:1px solid var(--f-line);padding-top:16px;font-size:12.5px;color:var(--f-ink3)}
+
+/* the contract strip */
+.contract{display:flex;align-items:center;gap:14px;flex-wrap:wrap;margin:26px 0 0;
+  border:1px solid var(--f-line);background:var(--f-surface);border-radius:12px;padding:14px 18px}
+.contract .cin,.contract .cout{display:flex;gap:6px;flex-wrap:wrap}
+.contract .tk{font:500 11.5px "IBM Plex Mono",monospace;border:1px solid var(--f-line);border-radius:6px;
+  padding:3px 8px;color:var(--f-ink2);background:var(--f-ground)}
+.contract .tk.in{border-style:dashed;font-weight:700;color:var(--f-ink)}
+.contract .arrow{font-size:18px;color:var(--f-ink3)}
+.contract .who{font-size:11px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--f-ink3);width:100%;margin-bottom:-6px}
+
+/* ════════════════════════════════════════════════════════════════════
+   BRAND SCOPES — what a tenant's two colours become. Each class is one
+   client; dark blocks re-derive the accent the way the product's dark
+   palettes do (accent lightens to stay legible as text).
+   ════════════════════════════════════════════════════════════════════ */
+.brandscope{ --b-panel:#16325C; --b-panel-ink:#FFFFFF; --b-quiet:#B7C4D8; --b-hover:#24487A;
+  --b-accent:#C9A24D; --b-deep:#8A6B22; --b-on:#16325C; --b-glow:rgb(201 162 77/.26); }
+.brandscope.brand-meridian{ --b-panel:#0C3B2E; --b-panel-ink:#EAF6EF; --b-quiet:#8FB5A5; --b-hover:#14503F;
+  --b-accent:#2E9E6B; --b-deep:#1D7A4F; --b-on:#06251A; --b-glow:rgb(46 158 107/.22); }
+.brandscope.brand-aurelia{ --b-panel:#4E1B2B; --b-panel-ink:#F8EDEF; --b-quiet:#C39CA8; --b-hover:#66293C;
+  --b-accent:#B34A5E; --b-deep:#8E3348; --b-on:#FFFFFF; --b-glow:rgb(179 74 94/.22); }
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]) .brandscope{ --b-deep:#D9B665; }
+  :root:not([data-theme="light"]) .brandscope.brand-meridian{ --b-deep:#5FC08F; }
+  :root:not([data-theme="light"]) .brandscope.brand-aurelia{ --b-deep:#DE8A99; }
+}
+:root[data-theme="dark"] .brandscope{ --b-deep:#D9B665; }
+:root[data-theme="dark"] .brandscope.brand-meridian{ --b-deep:#5FC08F; }
+:root[data-theme="dark"] .brandscope.brand-aurelia{ --b-deep:#DE8A99; }
+
+/* ════════════════════════════════════════════════════════════════════
+   SHARED SCREEN ANATOMY — one markup, four skins. The concept classes
+   below restyle these pieces; nothing here decides a look.
+   ════════════════════════════════════════════════════════════════════ */
+.chrome{background:var(--b-panel);color:var(--b-panel-ink);padding:0 22px}
+.chrome .row1{display:flex;align-items:center;gap:14px;padding:10px 0 8px}
+.orgname{font-weight:700;font-size:14px;letter-spacing:.01em}
+.chrome .who{margin-left:auto;font-size:11.5px;color:var(--b-quiet)}
+.navrow{display:flex;gap:2px;padding-bottom:0}
+.navrow button{appearance:none;border:0;background:transparent;color:var(--b-quiet);
+  font:500 12.5px var(--c-sans);padding:7px 11px 9px;cursor:pointer;border-radius:6px 6px 0 0;position:relative}
+.navrow button:hover{color:var(--b-panel-ink);background:var(--b-hover)}
+.navrow button.on{color:var(--b-panel-ink);font-weight:600}
+.navrow button.on::after{content:"";position:absolute;left:10px;right:10px;bottom:0;height:2px;background:var(--b-accent)}
+.tabs{display:flex;gap:4px;padding:10px 22px 0;border-bottom:1px solid var(--c-line);background:var(--c-surface)}
+.tabs button{appearance:none;border:0;background:transparent;color:var(--c-ink3);
+  font:500 13px var(--c-sans);padding:8px 12px 10px;cursor:pointer;position:relative}
+.tabs button.on{color:var(--c-ink);font-weight:600}
+.tabs button.on::after{content:"";position:absolute;left:10px;right:10px;bottom:-1px;height:2px;background:var(--b-accent)}
+.pagebody{background:var(--c-ground);padding:22px}
+.titlerow{display:flex;align-items:center;gap:14px;margin-bottom:18px}
+.ptitle{font:600 20px/1.2 var(--c-display);letter-spacing:-.01em;color:var(--c-ink)}
+.ptitle small{display:block;font:600 10.5px var(--c-sans);letter-spacing:.14em;text-transform:uppercase;color:var(--c-ink3);margin-bottom:4px}
+.reportbtn{margin-left:auto;appearance:none;border:0;cursor:pointer;border-radius:var(--c-rbtn);
+  background:var(--b-accent);color:var(--b-on);font:700 13px var(--c-sans);padding:9px 18px}
+.reportbtn:hover{filter:brightness(1.06)}
+.cards{display:grid;grid-template-columns:repeat(3,1fr);gap:var(--c-gap)}
+.kpi{background:var(--c-surface);border:1px solid var(--c-line);border-radius:var(--c-rcard);padding:16px 18px;box-shadow:var(--c-shadow)}
+.kpi .klab{font:700 10.5px var(--c-sans);letter-spacing:.13em;text-transform:uppercase;color:var(--c-ink3)}
+.kpi .kfig{font:var(--c-figweight) 32px/1.1 var(--c-figfont);color:var(--c-ink);margin-top:8px;font-variant-numeric:tabular-nums}
+.kpi .kfig small{font-size:16px;color:var(--c-ink3);font-weight:500}
+.kpi .ksub{font-size:12px;color:var(--c-ink3);margin-top:6px}
+.kpi .ksub b{font-weight:600}
+.tablecard{margin-top:var(--c-gap);background:var(--c-surface);border:1px solid var(--c-line);
+  border-radius:var(--c-rcard);overflow:hidden;box-shadow:var(--c-shadow)}
+.tablecard .thead{display:flex;align-items:center;gap:10px;padding:12px 18px;border-bottom:1px solid var(--c-line)}
+.tablecard .tname{font:600 14px var(--c-display);color:var(--c-ink)}
+.tablecard .tcount{font-size:11.5px;color:var(--c-ink3);margin-left:auto}
+table.kt{width:100%;border-collapse:collapse;font-size:13px}
+table.kt th{font:700 10.5px var(--c-sans);letter-spacing:.11em;text-transform:uppercase;
+  text-align:left;padding:9px 18px;color:var(--c-think);background:var(--c-thbg);border-bottom:1px solid var(--c-line)}
+table.kt td{padding:10px 18px;border-bottom:1px solid var(--c-linesoft);color:var(--c-ink2);vertical-align:middle}
+table.kt tr:last-child td{border-bottom:0}
+table.kt td.code{font:500 12px "IBM Plex Mono",monospace;color:var(--c-ink3);width:52px}
+table.kt td.name{color:var(--c-ink);font-weight:500}
+table.kt td.num{font-variant-numeric:tabular-nums;text-align:right;width:86px}
+table.kt td.score{width:150px}
+.plate .foot{display:flex;gap:10px;align-items:center;padding:10px 22px;background:var(--c-surface);
+  border-top:1px solid var(--c-line);font-size:11px;color:var(--c-ink3)}
+
+/* ════════════════════════════════════════════════════════════════════
+   PLATE 0 — TODAY. The shipped Forefront palette, faithfully.
+   ════════════════════════════════════════════════════════════════════ */
+.c0{--c-sans:-apple-system,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+  --c-display:var(--c-sans); --c-figfont:var(--c-sans); --c-figweight:700;
+  --c-ground:#F7F8FA; --c-surface:#FFFFFF; --c-line:#D6DCE5; --c-linesoft:#E6EAF0;
+  --c-ink:#171B22; --c-ink2:#414A58; --c-ink3:#636C79;
+  --c-thbg:#16325C; --c-think:#FFFFFF;
+  --c-rcard:8px; --c-rbtn:8px; --c-gap:14px; --c-shadow:none;
+  --sc-good:#2E7D5B; --sc-attn:#B8860B; --sc-warn:#CC6B3D; --sc-bad:#B04434;
+  --sc-goodx:#1F6248; --sc-attnx:#7A5D1C; --sc-warnx:#A4512C; --sc-badx:#8C3327;}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]) .c0{
+    --c-ground:#14161A; --c-surface:#1C2027; --c-line:#333A45; --c-linesoft:#2A303A;
+    --c-ink:#E9ECF1; --c-ink2:#B4BCC8; --c-ink3:#949DAA;
+    --c-thbg:#10233F; --c-think:#E9ECF1;
+    --sc-good:#5FB68C; --sc-attn:#D9B23C; --sc-warn:#E1935F; --sc-bad:#D97066;
+    --sc-goodx:#8FD3B0; --sc-attnx:#E8CA6A; --sc-warnx:#EDAF83; --sc-badx:#E79A93;}}
+:root[data-theme="dark"] .c0{
+  --c-ground:#14161A; --c-surface:#1C2027; --c-line:#333A45; --c-linesoft:#2A303A;
+  --c-ink:#E9ECF1; --c-ink2:#B4BCC8; --c-ink3:#949DAA;
+  --c-thbg:#10233F; --c-think:#E9ECF1;
+  --sc-good:#5FB68C; --sc-attn:#D9B23C; --sc-warn:#E1935F; --sc-bad:#D97066;
+  --sc-goodx:#8FD3B0; --sc-attnx:#E8CA6A; --sc-warnx:#EDAF83; --sc-badx:#E79A93;}
+/* today's score chip: the quiet dot + word the product uses */
+.c0 .sc{display:inline-flex;align-items:center;gap:7px;font-size:12px;font-weight:600}
+.c0 .sc i{width:8px;height:8px;border-radius:999px}
+.c0 .sc .pct{font-variant-numeric:tabular-nums;color:var(--c-ink)}
+
+/* ════════════════════════════════════════════════════════════════════
+   CONCEPT A — CONSULTING PAPER. Warm neutrals, a serif voice for what
+   the practice says, hairline rules instead of boxes. The product as a
+   beautifully set advisory document.
+   ════════════════════════════════════════════════════════════════════ */
+.cA{--c-sans:"IBM Plex Sans",-apple-system,sans-serif;
+  --c-display:"Newsreader",Georgia,serif; --c-figfont:"Newsreader",Georgia,serif; --c-figweight:500;
+  --c-ground:#F6F4EE; --c-surface:#FDFCF8; --c-line:#E2DDCF; --c-linesoft:#EDE9DD;
+  --c-ink:#23252A; --c-ink2:#50524F; --c-ink3:#77746A;
+  --c-thbg:#F1EEE4; --c-think:#77746A;
+  --c-rcard:10px; --c-rbtn:8px; --c-gap:16px; --c-shadow:none;
+  --sc-good:#2E7D5B; --sc-attn:#A8821E; --sc-warn:#B4562F; --sc-bad:#A63A2E;
+  --sc-goodx:#1F6248; --sc-attnx:#7A5D1C; --sc-warnx:#96431F; --sc-badx:#8C2F24;}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]) .cA{
+    --c-ground:#191712; --c-surface:#201E18; --c-line:#39352A; --c-linesoft:#2C2921;
+    --c-ink:#ECE8DD; --c-ink2:#C3BEAF; --c-ink3:#948E7D;
+    --c-thbg:#26231B; --c-think:#948E7D;
+    --sc-good:#6FBE95; --sc-attn:#D9B23C; --sc-warn:#E09A6C; --sc-bad:#DB8071;
+    --sc-goodx:#98D6B6; --sc-attnx:#E8CA6A; --sc-warnx:#EDB48C; --sc-badx:#EBA396;}}
+:root[data-theme="dark"] .cA{
+  --c-ground:#191712; --c-surface:#201E18; --c-line:#39352A; --c-linesoft:#2C2921;
+  --c-ink:#ECE8DD; --c-ink2:#C3BEAF; --c-ink3:#948E7D;
+  --c-thbg:#26231B; --c-think:#948E7D;
+  --sc-good:#6FBE95; --sc-attn:#D9B23C; --sc-warn:#E09A6C; --sc-bad:#DB8071;
+  --sc-goodx:#98D6B6; --sc-attnx:#E8CA6A; --sc-warnx:#EDB48C; --sc-badx:#EBA396;}
+.cA .ptitle{font-size:24px;font-weight:500}
+.cA .ptitle small{font-family:var(--c-sans)}
+.cA .kpi{border:0;border-top:2px solid var(--c-ink);border-radius:0;background:transparent;padding:14px 2px 0}
+.cA .kpi .kfig{font-size:40px;letter-spacing:-.01em}
+.cA .tablecard{border:0;border-top:2px solid var(--c-ink);border-radius:0;background:transparent}
+.cA table.kt th{background:transparent;border-bottom:1px solid var(--c-line)}
+.cA table.kt td{padding:11px 14px}
+.cA table.kt th{padding:9px 14px}
+.cA table.kt td.name{font-weight:500}
+/* score: the number carries it; a hairline underline states the band */
+.cA .sc{display:inline-flex;flex-direction:column;gap:4px;min-width:96px}
+.cA .sc .pct{font:500 15px var(--c-figfont);color:var(--c-ink);font-variant-numeric:tabular-nums}
+.cA .sc .pct em{font-style:normal;font:600 10.5px var(--c-sans);letter-spacing:.1em;text-transform:uppercase;margin-left:7px}
+.cA .sc i{display:block;height:2px;width:100%;background:var(--c-linesoft);position:relative}
+.cA .sc i::after{content:"";position:absolute;inset:0;right:calc(100% - var(--p));background:currentColor}
+.cA .reportbtn{background:var(--b-accent);color:var(--b-on)}
+.cA .chrome .row1{padding-top:12px}
+.cA .orgname{font:600 16px var(--c-display);letter-spacing:0}
+
+/* ════════════════════════════════════════════════════════════════════
+   CONCEPT B — COMMAND LEDGER. Cool graphite, condensed authority, the
+   craft spent on the data itself: tabular numerals, inline meters, a
+   4px radius, nothing decorative. A trading desk for strategy.
+   ════════════════════════════════════════════════════════════════════ */
+.cB{--c-sans:"Archivo","IBM Plex Sans",sans-serif;
+  --c-display:"Archivo",sans-serif; --c-figfont:"Archivo",sans-serif; --c-figweight:800;
+  --c-ground:#F1F3F6; --c-surface:#FFFFFF; --c-line:#D2D8E1; --c-linesoft:#E7EBF0;
+  --c-ink:#101520; --c-ink2:#3C4453; --c-ink3:#66707F;
+  --c-thbg:#EAEDF2; --c-think:#4A5361;
+  --c-rcard:6px; --c-rbtn:4px; --c-gap:10px; --c-shadow:0 1px 2px rgb(10 16 28/.05);
+  --sc-good:#0F8A5F; --sc-attn:#C08A0A; --sc-warn:#D26320; --sc-bad:#CC3B2E;
+  --sc-goodx:#0A6B49; --sc-attnx:#8A6207; --sc-warnx:#A84C15; --sc-badx:#A82C21;}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]) .cB{
+    --c-ground:#0E1116; --c-surface:#161A21; --c-line:#2B323D; --c-linesoft:#222831;
+    --c-ink:#EAEDF2; --c-ink2:#B6BeCA; --c-ink3:#8A94A3;
+    --c-thbg:#1B2029; --c-think:#9AA4B2;
+    --sc-good:#3FC08D; --sc-attn:#E0B23C; --sc-warn:#EB8A50; --sc-bad:#E86E5F;
+    --sc-goodx:#7BD9B3; --sc-attnx:#EDCC72; --sc-warnx:#F2AC80; --sc-badx:#F09A8D;}}
+:root[data-theme="dark"] .cB{
+  --c-ground:#0E1116; --c-surface:#161A21; --c-line:#2B323D; --c-linesoft:#222831;
+  --c-ink:#EAEDF2; --c-ink2:#B6BECA; --c-ink3:#8A94A3;
+  --c-thbg:#1B2029; --c-think:#9AA4B2;
+  --sc-good:#3FC08D; --sc-attn:#E0B23C; --sc-warn:#EB8A50; --sc-bad:#E86E5F;
+  --sc-goodx:#7BD9B3; --sc-attnx:#EDCC72; --sc-warnx:#F2AC80; --sc-badx:#F09A8D;}
+.cB .ptitle{font-weight:700;text-transform:uppercase;font-size:16px;letter-spacing:.04em}
+.cB .kpi{padding:14px 16px;position:relative}
+.cB .kpi::before{content:"";position:absolute;left:0;top:10px;bottom:10px;width:3px;border-radius:2px;background:var(--b-accent)}
+.cB .kpi .kfig{font-size:30px;letter-spacing:-.02em}
+.cB table.kt{font-size:12.5px}
+.cB table.kt td{padding:8px 16px}
+.cB table.kt th{padding:8px 16px}
+.cB table.kt td.num{font-family:"IBM Plex Mono",monospace;font-size:12px}
+.cB table.kt td.code{color:var(--b-deep);font-weight:500}
+/* score: number + inline meter, one glance down the column */
+.cB .sc{display:flex;align-items:center;gap:10px}
+.cB .sc .pct{font:700 12.5px "IBM Plex Mono",monospace;min-width:36px;text-align:right;color:var(--c-ink)}
+.cB .sc i{flex:1;height:6px;border-radius:3px;background:var(--c-linesoft);position:relative;overflow:hidden}
+.cB .sc i::after{content:"";position:absolute;inset:0;right:calc(100% - var(--p));background:currentColor;border-radius:3px}
+.cB .reportbtn{text-transform:uppercase;letter-spacing:.06em;font-size:12px}
+.cB .tabs button{text-transform:uppercase;font-size:11.5px;letter-spacing:.06em;font-weight:600}
+
+/* ════════════════════════════════════════════════════════════════════
+   CONCEPT C — SOFT ATLAS. Air and light: brand-tinted washes mixed live
+   from the client's own accent, 14px radius, layered shadows, a floating
+   feel. A contemporary product, still boardroom-legible.
+   ════════════════════════════════════════════════════════════════════ */
+.cC{--c-sans:"Manrope",-apple-system,sans-serif;
+  --c-display:"Manrope",sans-serif; --c-figfont:"Manrope",sans-serif; --c-figweight:800;
+  --c-ground:#F6F7FA; --c-surface:#FFFFFF; --c-line:#E5E8EF; --c-linesoft:#EEF0F5;
+  --c-ink:#171B26; --c-ink2:#454C5C; --c-ink3:#707888;
+  --c-thbg:color-mix(in srgb, var(--b-accent) 7%, #FFFFFF); --c-think:#5A6273;
+  --c-rcard:16px; --c-rbtn:999px; --c-gap:16px;
+  --c-shadow:0 1px 2px rgb(15 20 35/.04), 0 10px 28px -14px rgb(15 20 35/.14);
+  --sc-good:#149467; --sc-attn:#C08A0A; --sc-warn:#D26320; --sc-bad:#CC3B2E;
+  --sc-goodx:#0C6E4C; --sc-attnx:#8A6207; --sc-warnx:#A84C15; --sc-badx:#A82C21;
+  --sc-goodbg:#E5F5EE; --sc-attnbg:#FAF1D8; --sc-warnbg:#FBEADF; --sc-badbg:#FAE5E2;}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]) .cC{
+    --c-ground:#13151A; --c-surface:#1B1E25; --c-line:#2C313C; --c-linesoft:#232833;
+    --c-ink:#EAECF2; --c-ink2:#B8BECA; --c-ink3:#8B93A2;
+    --c-thbg:color-mix(in srgb, var(--b-accent) 12%, #1B1E25); --c-think:#A6ADBB;
+    --c-shadow:0 1px 2px rgb(0 0 0/.3), 0 10px 28px -14px rgb(0 0 0/.5);
+    --sc-good:#41C795; --sc-attn:#E0B23C; --sc-warn:#EB8A50; --sc-bad:#E86E5F;
+    --sc-goodx:#7BD9B3; --sc-attnx:#EDCC72; --sc-warnx:#F2AC80; --sc-badx:#F09A8D;
+    --sc-goodbg:#1B3129; --sc-attnbg:#332C16; --sc-warnbg:#33241A; --sc-badbg:#33201E;}}
+:root[data-theme="dark"] .cC{
+  --c-ground:#13151A; --c-surface:#1B1E25; --c-line:#2C313C; --c-linesoft:#232833;
+  --c-ink:#EAECF2; --c-ink2:#B8BECA; --c-ink3:#8B93A2;
+  --c-thbg:color-mix(in srgb, var(--b-accent) 12%, #1B1E25); --c-think:#A6ADBB;
+  --c-shadow:0 1px 2px rgb(0 0 0/.3), 0 10px 28px -14px rgb(0 0 0/.5);
+  --sc-good:#41C795; --sc-attn:#E0B23C; --sc-warn:#EB8A50; --sc-bad:#E86E5F;
+  --sc-goodx:#7BD9B3; --sc-attnx:#EDCC72; --sc-warnx:#F2AC80; --sc-badx:#F09A8D;
+  --sc-goodbg:#1B3129; --sc-attnbg:#332C16; --sc-warnbg:#33241A; --sc-badbg:#33201E;}
+.cC .pagebody{background:
+  radial-gradient(900px 300px at 15% -80px, color-mix(in srgb, var(--b-accent) 9%, transparent), transparent 70%),
+  var(--c-ground)}
+.cC .kpi .kfig{font-size:34px;letter-spacing:-.03em}
+.cC .kpi{transition:transform .18s ease, box-shadow .18s ease}
+.cC .kpi:hover{transform:translateY(-2px);box-shadow:0 2px 4px rgb(15 20 35/.05),0 16px 36px -14px rgb(15 20 35/.2)}
+.cC .navrow button.on::after{height:3px;border-radius:2px}
+.cC .tabs{gap:8px;padding-bottom:10px;border-bottom:0}
+.cC .tabs button{border-radius:999px;padding:7px 16px}
+.cC .tabs button.on{background:color-mix(in srgb, var(--b-accent) 14%, var(--c-surface));color:var(--b-deep);font-weight:700}
+.cC .tabs button.on::after{display:none}
+.cC table.kt th{background:var(--c-thbg)}
+/* score: soft pill, tinted wash */
+.cC .sc{display:inline-flex;align-items:center;gap:7px;border-radius:999px;padding:4px 12px;font:700 12px var(--c-sans);
+  background:var(--w);color:var(--x);white-space:nowrap}
+.cC .sc i{width:7px;height:7px;border-radius:999px;background:currentColor}
+.cC .sc .pct{font-variant-numeric:tabular-nums}
+.cC .reportbtn{box-shadow:0 6px 16px -6px var(--b-glow)}
+@media (prefers-reduced-motion: reduce){ .cC .kpi{transition:none} .cC .kpi:hover{transform:none} }
+
+/* band words share one mechanism across concepts */
+.sc .pct em{font-style:normal;font-weight:700;font-size:10px;letter-spacing:.08em;text-transform:uppercase;margin-left:6px;opacity:.9}
+.cB .sc .pct em{display:none}
+.sc.good{color:var(--sc-goodx)} .sc.attn{color:var(--sc-attnx)}
+.sc.warn{color:var(--sc-warnx)} .sc.bad{color:var(--sc-badx)}
+.c0 .sc i.good,.cB .sc i{background:var(--c-linesoft)}
+.c0 .sc.good i{background:var(--sc-good)} .c0 .sc.attn i{background:var(--sc-attn)}
+.c0 .sc.warn i{background:var(--sc-warn)} .c0 .sc.bad i{background:var(--sc-bad)}
+.cC .sc.good{--w:var(--sc-goodbg);--x:var(--sc-goodx)} .cC .sc.attn{--w:var(--sc-attnbg);--x:var(--sc-attnx)}
+.cC .sc.warn{--w:var(--sc-warnbg);--x:var(--sc-warnx)} .cC .sc.bad{--w:var(--sc-badbg);--x:var(--sc-badx)}
+</style>
+
+<div class="wrap">
+  <p class="doc-eyebrow">SMP · design language</p>
+  <h1>Three directions that survive a client's colours</h1>
+  <p class="lede">A client hands SMP <b>two colours</b> — a bar and an accent — and <code>brandTokens()</code> derives seven
+  tokens from them. Everything else on screen — the neutrals, the typefaces, the shapes, the depth, the density — is ours,
+  and today it carries no point of view. Each direction below owns exactly that unbrandable half. The same screen
+  (Mobile&rsquo;s Performance page) is drawn four times; use the switcher to re-brand every plate with a different
+  client&rsquo;s two colours and watch each design keep its character. The plates also follow your light/dark theme.</p>
+
+  <div class="contract">
+    <span class="who">The whole branding contract — what the client controls vs. what we own</span>
+    <div class="cin"><span class="tk in">bar colour</span><span class="tk in">accent colour</span></div>
+    <span class="arrow">→</span>
+    <div class="cout">
+      <span class="tk">--panel</span><span class="tk">--panel-ink</span><span class="tk">--panel-quiet</span><span class="tk">--panel-hover</span>
+      <span class="tk">--gold</span><span class="tk">--gold-deep</span><span class="tk">--on-accent</span>
+    </div>
+    <span class="arrow">·</span>
+    <div class="cout">
+      <span class="tk" style="border-style:double">neutrals · type · shape · depth · motion — never branded, ours to design</span>
+    </div>
+  </div>
+
+  <div class="brandbar">
+    <span class="bb-lab">Try a client</span>
+    <div class="bswitch" id="bswitch">
+      <button class="bbtn" data-brand="raya" data-org="Raya Trade" aria-pressed="true">
+        <span class="sw"><i style="background:#16325C"></i><i style="background:#C9A24D"></i></span>Raya Trade</button>
+      <button class="bbtn" data-brand="meridian" data-org="Meridian Bank" aria-pressed="false">
+        <span class="sw"><i style="background:#0C3B2E"></i><i style="background:#2E9E6B"></i></span>Meridian Bank</button>
+      <button class="bbtn" data-brand="aurelia" data-org="Aurelia Holdings" aria-pressed="false">
+        <span class="sw"><i style="background:#4E1B2B"></i><i style="background:#B34A5E"></i></span>Aurelia Holdings</button>
+    </div>
+    <span class="bb-note">Two colours in — every plate re-brands, no design breaks.</span>
+  </div>
+
+  <div class="brandscope" id="scope">
+
+  <section class="concept">
+    <h2><span class="letter">0</span> Today</h2>
+    <p class="thesis">The shipped Forefront look, faithfully: system font, cool functional greys, radius doing the work of
+    elevation. Nothing is wrong — and nothing is <b>chosen</b>. The neutrals are Tailwind&rsquo;s, the type is whatever the
+    OS ships, and the only personality on screen is the client&rsquo;s two colours.</p>
+    <div class="plate c0"><div class="platehead"><i></i><i></i><i></i><span>smp — today</span></div>
+      <div class="screen"><div class="screen-in" data-plate></div></div>
+      <div class="foot">System font stack · Tailwind slate neutrals · identity = the tenant's two colours only</div>
+    </div>
+  </section>
+
+  <section class="concept">
+    <h2><span class="letter">A</span> Consulting Paper</h2>
+    <p class="thesis"><b>The product as an advisory document.</b> Warm paper neutrals, a serif voice (Newsreader) for what
+    the practice says — titles and the headline figures — and hairline rules instead of boxes: cards become ruled sections,
+    scores become set numerals with a fine underline meter. The client&rsquo;s colours sit on it like a foil stamp on good
+    paper.</p>
+    <ul class="notes">
+      <li><b>Identity carrier:</b> the serif + the warm paper. Both live entirely in the unbrandable half.</li>
+      <li><b>Closest relative:</b> HR_ERP&rsquo;s refined-consulting feel — cousin, not copy: rules-not-cards is its own stance.</li>
+      <li><b>Cost:</b> <span class="cost">~90&nbsp;KB embedded serif subsets</span> in the offline file, and the warm neutrals touch every palette block.</li>
+    </ul>
+    <div class="plate cA"><div class="platehead"><i></i><i></i><i></i><span>concept a — consulting paper</span></div>
+      <div class="screen"><div class="screen-in" data-plate></div></div>
+      <div class="foot">Newsreader (display &amp; figures) + IBM Plex Sans (UI) · warm paper neutrals · hairline architecture</div>
+    </div>
+  </section>
+
+  <section class="concept">
+    <h2><span class="letter">B</span> Command Ledger</h2>
+    <p class="thesis"><b>The craft spent on the data itself.</b> Cool graphite neutrals a step deeper than today, Archivo at
+    heavy weight for titles and figures, mono numerals in the columns, and every score read off an inline meter — one glance
+    down the column tells the story. Sharp 4–6px radius, a 3px accent spine on each card. The most authoritative room, and
+    the cheapest migration: today&rsquo;s bones, tuned.</p>
+    <ul class="notes">
+      <li><b>Identity carrier:</b> typographic weight + numeric discipline. Uppercase titles, tabular mono figures, meters.</li>
+      <li><b>Best for:</b> a product whose every page is a table — which SMP mostly is.</li>
+      <li><b>Cost:</b> <span class="cost">~55&nbsp;KB Archivo subsets</span>; the smallest token migration of the three.</li>
+    </ul>
+    <div class="plate cB"><div class="platehead"><i></i><i></i><i></i><span>concept b — command ledger</span></div>
+      <div class="screen"><div class="screen-in" data-plate></div></div>
+      <div class="foot">Archivo (display) + IBM Plex Mono (figures) · graphite neutrals · inline meters, accent spine</div>
+    </div>
+  </section>
+
+  <section class="concept">
+    <h2><span class="letter">C</span> Soft Atlas</h2>
+    <p class="thesis"><b>Air, light, and the client&rsquo;s colour in the atmosphere.</b> Manrope throughout at generous
+    weights, 16px radius, layered soft shadows — and the washes (tab fills, table heads, the glow behind the page title) are
+    mixed <b>live from the client&rsquo;s own accent</b> with <code>color-mix()</code>, so the atmosphere itself re-brands.
+    Pills for tabs and scores, a gentle lift on hover. The most modern room of the three.</p>
+    <ul class="notes">
+      <li><b>Identity carrier:</b> shape and depth — radius, layered shadow, tinted air. All unbrandable, yet the tint tracks the brand.</li>
+      <li><b>Best for:</b> the dashboard and card pages; presentation mode would look superb in it.</li>
+      <li><b>Cost:</b> <span class="cost">~45&nbsp;KB Manrope subsets</span>; shadow/radius retune across every component; needs <code>color-mix()</code> (fine in every browser the product supports).</li>
+    </ul>
+    <div class="plate cC"><div class="platehead"><i></i><i></i><i></i><span>concept c — soft atlas</span></div>
+      <div class="screen"><div class="screen-in" data-plate></div></div>
+      <div class="foot">Manrope (one family, many weights) · brand-tinted washes via color-mix() · 16px radius, layered depth</div>
+    </div>
+  </section>
+
+  <div class="decision">
+    <h3>What happens next, and what I need from you</h3>
+    <ol>
+      <li><b>Pick a direction</b> — A, B or C, or a blend (e.g. B&rsquo;s tables inside A&rsquo;s paper, which is a real option: the carriers don&rsquo;t conflict).</li>
+      <li><b>Confirm the font budget.</b> The offline single file grows by the noted KB; today it embeds four trial faces we&rsquo;d replace, so the net cost is small.</li>
+      <li><b>Dark mode stays first-class</b> in all three — flip your theme on this page to check each one. Tell me if any dark rendering reads wrong to you.</li>
+      <li><b>A real second brand.</b> Meridian and Aurelia are invented stress-tests. If you have an actual client&rsquo;s bar + accent, give me the two hexes and I&rsquo;ll add them to the switcher.</li>
+    </ol>
+    <p style="font-size:13px;margin:12px 0 0;color:var(--f-ink2)">Once you choose, I write the <b>reference file</b> — the affirmative
+    design-language statement (neutrals, faces, scale, shape, depth, motion) plus the token sheet — into the repo the way HR_ERP
+    carries its own, and every future screen and mockup is built against it. Applying it to the live platform is a separate,
+    later decision, page by page, with your sign-off each time.</p>
+  </div>
+
+  </div><!-- /brandscope -->
+
+  <footer>design-mockups/design-language/2026-08-28_design-directions.html · the same screen, four languages · brands are simulated through the exact token set <code>brandTokens()</code> derives</footer>
+</div>
+
+<script>
+/* One screen, rendered into all four plates — the concepts differ only in CSS. */
+var ROWS = [
+  ["KO1","Revenue growth (EGP bn)","12.4","11.1",89,"good","On track"],
+  ["KO2","Net subscriber adds (k)","850","610",72,"attn","Attention"],
+  ["KO3","Customer NPS","45","38",84,"good","On track"],
+  ["KO4","Churn (%)","≤ 2.1","2.6",62,"warn","At risk"],
+  ["KO5","Digital revenue mix (%)","40","22",55,"bad","Off track"]
+];
+function screenHTML(org){
+  var rows = ROWS.map(function(r){
+    return '<tr><td class="code">'+r[0]+'</td><td class="name">'+r[1]+'</td>'+
+      '<td class="num">'+r[2]+'</td><td class="num">'+r[3]+'</td>'+
+      '<td class="score"><span class="sc '+r[5]+'" style="--p:'+r[4]+'%">'+
+      '<i></i><span class="pct">'+r[4]+'%<em>'+r[6]+'</em></span></span></td></tr>';
+  }).join('');
+  return '<div class="chrome"><div class="row1"><span class="orgname">'+org+'</span>'+
+    '<span class="who">Q3 2026 cycle · signed in as Unit custodian</span></div>'+
+    '<div class="navrow"><button>Group ▾</button><button class="on">Mobile</button><button>B2B Ecomm</button>'+
+    '<button>Retail Stores</button><button>IT Dist.</button><button>Care</button></div></div>'+
+    '<div class="tabs"><button>Strategy</button><button>Reporting</button><button class="on">Performance</button></div>'+
+    '<div class="pagebody"><div class="titlerow"><div class="ptitle"><small>Performance</small>Mobile</div>'+
+    '<button class="reportbtn">Report</button></div>'+
+    '<div class="cards">'+
+    '<div class="kpi"><div class="klab">Key objectives</div><div class="kfig">68<small>%</small></div><div class="ksub">5 objectives · <b>2 need attention</b></div></div>'+
+    '<div class="kpi"><div class="klab">Pillars</div><div class="kfig">72<small>%</small></div><div class="ksub">5 pillars · 23 measures</div></div>'+
+    '<div class="kpi"><div class="klab">Execution</div><div class="kfig">61<small>%</small></div><div class="ksub">34 tactics · 8 due this quarter</div></div>'+
+    '</div>'+
+    '<div class="tablecard"><div class="thead"><span class="tname">Key objectives</span><span class="tcount">5 of 5 reported</span></div>'+
+    '<table class="kt"><thead><tr><th></th><th>Objective</th><th style="text-align:right">Target</th><th style="text-align:right">Actual</th><th>Score</th></tr></thead>'+
+    '<tbody>'+rows+'</tbody></table></div></div>';
+}
+function paintPlates(org){
+  document.querySelectorAll('[data-plate]').forEach(function(p){ p.innerHTML = screenHTML(org); });
+}
+var scope = document.getElementById('scope');
+document.getElementById('bswitch').addEventListener('click', function(e){
+  var b = e.target.closest('.bbtn'); if(!b) return;
+  scope.className = 'brandscope' + (b.dataset.brand==='raya' ? '' : ' brand-'+b.dataset.brand);
+  document.querySelectorAll('#bswitch .bbtn').forEach(function(x){ x.setAttribute('aria-pressed', x===b ? 'true':'false'); });
+  paintPlates(b.dataset.org);
+});
+paintPlates('Raya Trade');
+</script>

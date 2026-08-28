@@ -17,6 +17,15 @@ A client's own people (Raya's CEO, a unit head) sign in at the same door and
 land straight in their client. They never see a card, and never learn that
 another client exists.
 
+**The main address carries no client's name.** The door is the platform's own
+address; each client hangs off it under its own name — `/raya-trade`, `/rhi`,
+`/el-abd`, `/demo`. Today the deployment answers only at `/raya-trade`, which
+is one client's name on the front of the product (Islam, 2026-08-28).
+
+**Demo is a client like any other.** It sits on the cards for Forefront only,
+holds invented content, and — unlike everything demo has been until now — it
+**saves**, so it can be added to between pitches.
+
 **Where this sits beside the rebuild (D1 / §20).** The direction of travel is
 still a rebuild on the HR_ERP stack; this is built on the live platform
 because that is what Islam uses today, and the boundary is drawn so a rebuild
@@ -40,6 +49,11 @@ a component or a rule.
 | A register row with no email | **Stays, and cannot sign in.** |
 | The first office account | `islam.saadany@forefront.consulting`, temporary password, must change on first use. The `SMO` / `1234` seat goes. |
 | Where it is built | **The live platform** (gate + built HTML + `/api/*`). `smp-app/` is untouched. |
+| The main address | **No client's name on it.** The door is the root; each client is that name after the slash. An address of a client's own (`raya-trade.smp…`) is not in v1. |
+| A Demo client | **Yes**, on the cards, Forefront only. Seeded with the Raya worked example, **renamed to invented names**, and editable from then on. |
+| The Demo data button | **Goes.** One place for demo material, and it is the one that can be added to. |
+| The first-run tour | **Not offered until the client has a plan**, then it walks their own. |
+| One demo or several | **One now, split into industry demos later.** |
 
 ## 3 · The shape
 
@@ -124,6 +138,9 @@ After sign-in:
 - **More than one → the cards.** All clients, each carrying the client's name
   and its own mark. What else a card says (last opened, whether a cycle is
   open, who leads it) is a design question for the mockup, not decided here.
+- **Demo sits among them**, marked as the demo so nobody mistakes it for a
+  client, and drawn for Forefront only — it is on the cards, and the cards are
+  the office's.
 - Inside a client, the chrome carries the client's name; pressing it returns
   to the cards. **No dropdown** — a list of every client on every page of a
   client's platform is one mis-gate away from being read by that client.
@@ -138,9 +155,50 @@ After sign-in:
   read the inbox. The **Super user's** three acts — the access matrix,
   destruction, issuing passwords to the office (§89) — only where that
   client's Super user granted them.
-- **Demo data is office-only.** `isForefront(person)` gates the button;
-  everything else about the demo dataset (§21, §67) is unchanged.
 - Everything else a client's people see is the platform as it stands today.
+
+## 6.1 · The Demo data button goes — and what that reverses
+
+§21 gave every client a **Demo data** button holding the invented Raya example,
+baked into the platform file and refusing to save (§21.1's guard). With a Demo
+*client* on the cards, that button is a second, weaker home for the same
+material: it cannot be added to, which is the whole reason Islam asked for the
+Demo client.
+
+- **The button, demo mode, and §67's Filled/Clear project pair leave the
+  product.** The controls, the switch and the banner go; nothing that reads
+  live data changes.
+- **The baked dataset itself stays.** Opened as a file with no server, the
+  platform *is* the example — that is where the offline handover file gets its
+  content — so the bake is data of last resort, not a mode anyone switches into.
+- **This reverses §21's "never put invented content in the database", for one
+  client and deliberately.** The Demo client is invented content, in a database,
+  saved on purpose. What replaces §21's guard is the boundary this spec builds:
+  Demo is its own schema, on the cards only, and no client can reach it.
+
+## 6.2 · The first-run tour
+
+The tour (§107) switched to demo data to walk a new person through a filled-in
+plan. With the switch gone, **the tour runs on the person's own plan, and is
+not offered until there is one** (Islam's answer, and it is the honest one — a
+tour of an empty screen teaches nothing).
+
+- `tourReady(target)` — the place the story would be told on holds at least one
+  pillar or capability and one key objective. Absent that, the tour is not
+  offered, and the replay button on the Knowledge base says why rather than
+  starting something that lights nothing (§61: a control that opens nothing).
+- Nothing else about §107 changes: the same two stories, the same steps, the
+  same rule that it never appears for the office (§118).
+
+## 6.3 · The Demo client's content
+
+Created like any other client, then seeded from `db/seed-state.json` — the Raya
+worked example the product already carries — **with the company, the units and
+the people renamed to invented ones**. Real numbers against a real client's
+name is the one thing a demo must not be.
+
+The invented names are content, not code: I draft them and Islam approves the
+list before it is seeded. Nothing is shown to anyone until he has.
 
 ## 7 · Creating a client (office-only page)
 
@@ -164,7 +222,9 @@ schema that holds a client's whole strategy is not deleted from a button.
 new `db/platform-schema.sql` + migrations · `vercel.json` (a rewrite per
 client) · `sw.js` (it precaches `/raya-trade` by name — §91: bump `SHELL`) ·
 `scripts/dev-server.js` (one path per client) · the shell's chrome (client
-name) · `lib/rules.js` (`isForefront`, the Demo gate) — and the checks.
+name) · `lib/rules.js` (`isForefront`, `tourReady`) · the platform's shell and
+`src/sync.js` (the Demo data button, demo mode and §67's Filled/Clear pair
+come out) · `src/tour.js` — and the checks.
 
 **`lib/authorize.js` and the rest of `lib/rules.js` are untouched.** If this
 work starts editing the authoriser, the boundary has been drawn in the wrong
@@ -201,12 +261,22 @@ with the rollback written down first.
   error and no invented content (`qa.py` against a blank client).
 - **The round trip** (`scripts/test-roundtrip.js`) runs unchanged inside a
   schema, plus once against a virgin client schema (§113.7).
+- **The demo material:** the Demo button is gone from every page and every
+  viewer (asserted as an absence at both ends, §94.2), the offline file opened
+  from disk still shows the full example, and the Demo *client* opens with a
+  complete plan and saves.
+- **The tour:** not offered on a client with no plan, offered and walked
+  through on one that has, and still never offered to the office (§118).
 - Each check is watched to fail against the pre-split build before its green
   run is believed (§94.5).
 
 ## 11 · Deliberately not in v1
 
-Cross-client reporting for Forefront; a subdomain per client; a client person
+An address of a client's own (`raya-trade.smp…`) — decided, not forgotten:
+paths first, and the work is arranged so a client address can be added later
+without redoing it. A demo client per industry (one now, split when the
+industries are known). A guest login into Demo for a prospect. Cross-client
+reporting for Forefront; a client person
 who holds two clients; retiring or exporting a client; per-client backup and
 retention; assigning office people to a subset of clients (all see all, §2);
 and the Neon compute question — every open tab polls (§98), and three clients

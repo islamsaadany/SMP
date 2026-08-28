@@ -64,8 +64,14 @@ Nothing proceeds past this line without an answer.
   El Abd real and empty, an office-only page that creates a client, **email-only
   sign-in** (no person-key, `SMO` / `1234` goes), the office landing as SMO team
   and appearing on the client's register marked as Forefront, Demo data
-  office-only. Built on the live platform; `smp-app/` untouched. **Nothing
-  implemented** — the cards page, the client name in the chrome and the
+  office-only. **The main address carries no client's name**; each client hangs
+  off it under its own (`/raya-trade`, `/rhi`, `/demo`). **A Demo client** joins
+  the cards, Forefront only, seeded from the Raya worked example under invented
+  names and editable from then on — which **retires the Demo data button, demo
+  mode and §67's Filled/Clear pair**, and reverses §21's "no invented content in
+  the database" for that one client, deliberately. The first-run tour then runs
+  on the client's own plan and is not offered until there is one.
+  Built on the live platform; `smp-app/` untouched. **Nothing implemented** — the cards page, the client name in the chrome and the
   create-a-client page are mockup-first (§1c).
 
 ## Known red, on purpose

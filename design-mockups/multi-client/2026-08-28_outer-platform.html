@@ -1,0 +1,656 @@
+<title>The Forefront Platform</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Newsreader:opsz,wght@6..72,400;6..72,600&family=Public+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;600&display=swap">
+<style>
+  :root{
+    --ground:#F5F6F9; --surface:#FFFFFF; --surface-2:#EDF0F5;
+    --line:#D8DEE8; --line-soft:#E6EAF1;
+    --ink:#141C2B; --ink-2:#465268; --ink-3:#6E7A90;
+    --navy:#173156; --navy-ink:#F2F5FA; --navy-quiet:#9FB1CA;
+    --gold:#C29B2A; --gold-deep:#7E6410; --gold-wash:#FAF3DF;
+    --bad:#B23025; --bad-tx:#96271E; --bad-bg:#FBEDEB;
+    --good:#1B6E4E; --good-tx:#15583E; --good-bg:#E9F4EF;
+    --warn:#8A6410; --warn-bg:#FBF2DC;
+    --shadow:0 1px 2px rgba(20,28,43,.06), 0 8px 28px rgba(20,28,43,.06);
+    --measure:44rem;
+  }
+  @media (prefers-color-scheme: dark){
+    :root:not([data-theme="light"]){
+      --ground:#12151C; --surface:#1A1F29; --surface-2:#222834;
+      --line:#333B4A; --line-soft:#2A313E;
+      --ink:#E7EBF2; --ink-2:#AAB4C6; --ink-3:#8590A3;
+      --navy:#132845; --navy-ink:#E7EBF2; --navy-quiet:#8DA0BC;
+      --gold:#D7B04A; --gold-deep:#E3C266; --gold-wash:#2A2515;
+      --bad:#E8776B; --bad-tx:#F0958B; --bad-bg:#33211F;
+      --good:#63BE96; --good-tx:#7FCFAB; --good-bg:#1B2C26;
+      --warn:#D7B04A; --warn-bg:#2A2515;
+      --shadow:0 1px 2px rgba(0,0,0,.4), 0 10px 30px rgba(0,0,0,.35);
+    }
+  }
+  :root[data-theme="dark"]{
+    --ground:#12151C; --surface:#1A1F29; --surface-2:#222834;
+    --line:#333B4A; --line-soft:#2A313E;
+    --ink:#E7EBF2; --ink-2:#AAB4C6; --ink-3:#8590A3;
+    --navy:#132845; --navy-ink:#E7EBF2; --navy-quiet:#8DA0BC;
+    --gold:#D7B04A; --gold-deep:#E3C266; --gold-wash:#2A2515;
+    --bad:#E8776B; --bad-tx:#F0958B; --bad-bg:#33211F;
+    --good:#63BE96; --good-tx:#7FCFAB; --good-bg:#1B2C26;
+    --warn:#D7B04A; --warn-bg:#2A2515;
+    --shadow:0 1px 2px rgba(0,0,0,.4), 0 10px 30px rgba(0,0,0,.35);
+  }
+  *{box-sizing:border-box}
+  body{
+    background:var(--ground); color:var(--ink);
+    font:400 16.5px/1.62 "Public Sans", ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
+    margin:0; padding:0 20px 96px; -webkit-font-smoothing:antialiased;
+  }
+  .wrap{max-width:70rem; margin:0 auto}
+  h1,h2,h3{font-family:"Newsreader", Georgia, "Times New Roman", serif; font-weight:600;
+    text-wrap:balance; letter-spacing:-.005em; margin:0}
+  .kicker{font:600 11px/1 "IBM Plex Mono", ui-monospace, SFMono-Regular, Menlo, monospace;
+    letter-spacing:.16em; text-transform:uppercase; color:var(--gold-deep)}
+
+  header.mast{padding:60px 0 30px; border-bottom:1px solid var(--line)}
+  header.mast h1{font-size:clamp(32px,5vw,50px); line-height:1.08; margin:14px 0 16px}
+  header.mast p{max-width:var(--measure); color:var(--ink-2); font-size:18px; margin:0}
+  .standing{display:flex; flex-wrap:wrap; align-items:center; gap:10px; margin-top:24px;
+    font:600 12px/1 "IBM Plex Mono", ui-monospace, monospace; letter-spacing:.08em;
+    text-transform:uppercase; color:var(--ink-3)}
+  .standing b{display:inline-block; padding:5px 10px; border-radius:999px;
+    background:var(--gold); color:#1B1400; letter-spacing:.08em}
+
+  section.step{padding:52px 0 8px; border-bottom:1px solid var(--line-soft)}
+  section.step:last-of-type{border-bottom:0}
+  .stephead{display:flex; gap:16px; align-items:baseline; margin-bottom:6px}
+  .stepno{font:600 12px/1 "IBM Plex Mono", ui-monospace, monospace; color:var(--gold-deep);
+    letter-spacing:.1em; padding-top:6px}
+  section.step h2{font-size:clamp(23px,3vw,30px); line-height:1.2}
+  .lede{color:var(--ink-2); max-width:var(--measure); margin:10px 0 26px}
+
+  /* ── the fake product screens ─────────────────────────────── */
+  .screen{background:var(--surface); border:1px solid var(--line); border-radius:12px;
+    box-shadow:var(--shadow); overflow:hidden}
+  .chrome{background:var(--navy); color:var(--navy-ink); display:flex; align-items:center;
+    gap:14px; padding:11px 16px; font-size:13.5px}
+  .chrome .mark{font:700 12px/1 "IBM Plex Mono", ui-monospace, monospace; letter-spacing:.18em;
+    color:var(--gold)}
+  .chrome .sep{color:var(--navy-quiet)}
+  .chrome .who{margin-left:auto; color:var(--navy-quiet); font-size:12.5px}
+  .chrome .clientbtn{background:rgba(255,255,255,.10); border:1px solid rgba(255,255,255,.20);
+    color:var(--navy-ink); border-radius:7px; padding:4px 10px; font:600 13px/1.4 inherit;
+    display:inline-flex; gap:8px; align-items:center}
+  .chrome .clientbtn i{font-style:normal; color:var(--navy-quiet); font-weight:400}
+  .body{padding:22px}
+  .body.tight{padding:16px 18px}
+
+  .ptitle{display:flex; align-items:center; gap:12px; flex-wrap:wrap;
+    padding-bottom:12px; border-bottom:1px solid var(--line); margin-bottom:16px}
+  .ptitle h3{font-size:19px}
+  .ptitle .right{margin-left:auto; display:flex; gap:8px; align-items:center}
+
+  .btn{border:1px solid var(--line); background:var(--surface); color:var(--ink);
+    border-radius:8px; padding:6px 12px; font:600 13px/1.5 inherit}
+  .btn.solid{background:var(--navy); border-color:var(--navy); color:var(--navy-ink)}
+  .btn.gold{background:var(--gold); border-color:var(--gold); color:#1B1400}
+  .field{display:block; width:100%; border:1px solid var(--line); background:var(--surface);
+    color:var(--ink); border-radius:8px; padding:8px 11px; font:400 14px/1.5 inherit}
+  .lab{font:600 11px/1 "IBM Plex Mono", ui-monospace, monospace; letter-spacing:.12em;
+    text-transform:uppercase; color:var(--ink-3); display:block; margin-bottom:6px}
+
+  /* door */
+  .door{display:grid; grid-template-columns:1.15fr .85fr; min-height:340px}
+  .door .wall{background:var(--navy); color:var(--navy-ink); padding:34px 32px;
+    display:flex; flex-direction:column; justify-content:center; gap:14px}
+  .door .wall .kick{font:600 11px/1 "IBM Plex Mono", ui-monospace, monospace;
+    letter-spacing:.2em; text-transform:uppercase; color:var(--gold)}
+  .door .wall h3{font-size:27px; color:var(--navy-ink); line-height:1.2}
+  .door .wall p{color:var(--navy-quiet); font-size:14.5px; margin:0; max-width:26rem}
+  .door .card{padding:34px 30px; display:flex; flex-direction:column; justify-content:center; gap:14px}
+  .door .card h4{margin:0 0 2px; font:600 17px/1.3 "Newsreader", Georgia, serif}
+  .door .card .why{color:var(--ink-3); font-size:13px; margin:0}
+  .addr{font:600 12px/1 "IBM Plex Mono", ui-monospace, monospace; color:var(--ink-3);
+    background:var(--surface-2); border:1px solid var(--line-soft); border-radius:6px;
+    padding:5px 9px; display:inline-block}
+
+  /* cards */
+  .cards{display:grid; grid-template-columns:repeat(auto-fill,minmax(230px,1fr)); gap:14px}
+  .ccard{border:1px solid var(--line); border-radius:11px; background:var(--surface);
+    padding:16px; display:flex; flex-direction:column; gap:9px; min-height:158px}
+  .ccard .cmark{width:38px; height:38px; border-radius:9px; background:var(--navy);
+    color:var(--gold); font:700 13px/38px "IBM Plex Mono", ui-monospace, monospace;
+    text-align:center; letter-spacing:.06em}
+  .ccard h4{margin:0; font:600 17px/1.25 "Newsreader", Georgia, serif}
+  .ccard .ind{color:var(--ink-3); font-size:12.5px; margin:-4px 0 0}
+  .ccard .foot{margin-top:auto; display:flex; gap:8px; align-items:center; flex-wrap:wrap;
+    font-size:12px; color:var(--ink-3)}
+  .ccard.add{border-style:dashed; align-items:center; justify-content:center; color:var(--ink-3);
+    font-weight:600; font-size:14px}
+  .ccard.demo{background:var(--gold-wash); border-color:var(--gold)}
+  .tag{font:600 10.5px/1 "IBM Plex Mono", ui-monospace, monospace; letter-spacing:.1em;
+    text-transform:uppercase; padding:4px 7px; border-radius:5px; border:1px solid var(--line);
+    color:var(--ink-2); background:var(--surface-2)}
+  .tag.live{color:var(--good-tx); background:var(--good-bg); border-color:var(--good)}
+  .tag.empty{color:var(--warn); background:var(--warn-bg); border-color:var(--warn)}
+  .tag.demo{color:var(--gold-deep); background:var(--surface); border-color:var(--gold)}
+  .tag.mine{color:var(--ink-2); background:var(--surface-2); border-color:var(--line)}
+
+  /* tables */
+  table{border-collapse:collapse; width:100%; font-size:14px}
+  th,td{text-align:left; padding:8px 10px; border-bottom:1px solid var(--line-soft);
+    white-space:nowrap}
+  thead th{background:var(--navy); color:var(--navy-ink);
+    font:600 11px/1.4 "IBM Plex Mono", ui-monospace, monospace; letter-spacing:.1em;
+    text-transform:uppercase; border-bottom:0}
+  thead th:first-child{border-top-left-radius:8px}
+  thead th:last-child{border-top-right-radius:8px}
+  tbody tr:nth-child(even) td{background:var(--surface-2)}
+  .tscroll{overflow-x:auto}
+  .mono{font:400 13px/1.5 "IBM Plex Mono", ui-monospace, monospace; color:var(--ink-2)}
+  .muted{color:var(--ink-3)}
+
+  /* matrix cells */
+  .cellwrap{display:inline-flex; border:1px solid var(--line); border-radius:7px; overflow:hidden}
+  .cellwrap span{padding:4px 9px; font:600 11px/1.4 "IBM Plex Mono", ui-monospace, monospace;
+    letter-spacing:.06em; text-transform:uppercase; color:var(--ink-3); background:var(--surface);
+    border-right:1px solid var(--line)}
+  .cellwrap span:last-child{border-right:0}
+  .cellwrap span.on{background:var(--navy); color:var(--navy-ink)}
+  .cellwrap span.on.edit{background:var(--gold); color:#1B1400}
+  .cellwrap.locked{opacity:.75}
+
+  /* config page */
+  .cfg{display:grid; grid-template-columns:1.1fr .9fr; gap:26px}
+  .cfg .rowset{display:grid; gap:13px}
+  .teamrow{display:flex; align-items:center; gap:10px; padding:8px 0;
+    border-bottom:1px solid var(--line-soft)}
+  .teamrow .nm{font-weight:600; font-size:14px}
+  .teamrow .em{color:var(--ink-3); font-size:12.5px}
+  .teamrow .sp{margin-left:auto; display:flex; gap:6px; align-items:center}
+
+  /* notes under each screen */
+  .notes{margin:20px 0 0; padding:0; list-style:none; display:grid; gap:10px}
+  .notes li{padding-left:18px; position:relative; color:var(--ink-2); font-size:15px;
+    max-width:var(--measure)}
+  .notes li::before{content:"—"; position:absolute; left:0; color:var(--gold-deep)}
+  .notes li b{color:var(--ink)}
+  .flag{border-left:3px solid var(--gold); background:var(--gold-wash); padding:14px 16px;
+    border-radius:0 9px 9px 0; margin-top:20px; max-width:var(--measure)}
+  .flag p{margin:0; font-size:15px; color:var(--ink-2)}
+  .flag p b{color:var(--ink)}
+  .ask{border-left:3px solid var(--bad); background:var(--bad-bg)}
+  .ask p b{color:var(--bad-tx)}
+
+  .caption{font:600 11px/1 "IBM Plex Mono", ui-monospace, monospace; letter-spacing:.12em;
+    text-transform:uppercase; color:var(--ink-3); margin:0 0 10px}
+  footer{padding:44px 0 0; border-top:1px solid var(--line); margin-top:40px; color:var(--ink-3);
+    font-size:14px}
+  @media (max-width:820px){
+    .door{grid-template-columns:1fr}
+    .cfg{grid-template-columns:1fr}
+  }
+</style>
+
+<div class="wrap">
+
+<header class="mast">
+  <div class="kicker">Spec 024 · mockup for sign-off</div>
+  <h1>The Forefront platform</h1>
+  <p>One door for Forefront's consultants, a card for every client, and inside a
+  card the platform exactly as it is today — named after that client and holding
+  only that client's data. Six screens, drawn from the decisions taken on
+  28 August. Nothing here is built.</p>
+  <div class="standing"><b>Proposed</b> <span>Nothing in the product has changed</span></div>
+</header>
+
+<!-- 1 · THE DOOR ------------------------------------------------- -->
+<section class="step">
+  <div class="stephead"><div class="stepno">01</div><h2>The door</h2></div>
+  <p class="lede">The main address carries no client's name. Sign-in is by email
+  and nothing else — the person-key path, and <span class="mono">SMO / 1234</span>
+  with it, goes.</p>
+
+  <p class="caption">smp.forefront.consulting</p>
+  <div class="screen">
+    <div class="door">
+      <div class="wall">
+        <div class="kick">Forefront Consulting</div>
+        <h3>Strategy Management Platform</h3>
+        <p>Group and business-unit plans, reporting cycles, and the evidence
+        behind every figure — run for each client in their own platform.</p>
+      </div>
+      <div class="card">
+        <div>
+          <h4>Sign in</h4>
+          <p class="why">Use the email address your platform is registered against.</p>
+        </div>
+        <div>
+          <span class="lab">Email</span>
+          <input class="field" value="islam.saadany@forefront.consulting" readonly>
+        </div>
+        <div>
+          <span class="lab">Password</span>
+          <input class="field" type="password" value="............" readonly>
+        </div>
+        <button class="btn solid">Sign in</button>
+        <p class="why">You stay signed in on this device for 30 days.</p>
+      </div>
+    </div>
+  </div>
+
+  <ul class="notes">
+    <li><b>No client name on the front door.</b> Today the deployment answers
+    only at <span class="mono">/raya-trade</span>, which puts one client's name
+    on the product. Clients hang off the door: <span class="mono">/raya-trade</span>,
+    <span class="mono">/rhi</span>, <span class="mono">/el-abd</span>,
+    <span class="mono">/demo</span>.</li>
+    <li><b>A client's own person sees no card.</b> They sign in here and land
+    straight in their client, and never learn another exists.</li>
+    <li><b>Someone with no email cannot sign in.</b> Their row stays on the
+    register and still owns plan lines; the Attention queue names them beside
+    the people with no password.</li>
+  </ul>
+</section>
+
+<!-- 2 · THE CARDS ------------------------------------------------ -->
+<section class="step">
+  <div class="stephead"><div class="stepno">02</div><h2>The clients</h2></div>
+  <p class="lede">What is on the cards is what your row in the access table
+  allows. Nobody is shown a client they cannot open.</p>
+
+  <p class="caption">Signed in as Islam — Admin, so every client and the way to add one</p>
+  <div class="screen">
+    <div class="chrome">
+      <span class="mark">FOREFRONT</span>
+      <span class="sep">·</span><span>Clients</span>
+      <span class="who">Islam Saadany · Admin</span>
+    </div>
+    <div class="body">
+      <div class="ptitle">
+        <h3>Clients</h3>
+        <div class="right">
+          <input class="field" style="width:190px" value="Search clients" readonly>
+          <button class="btn">Consultants</button>
+          <button class="btn">Who sees what</button>
+          <button class="btn gold">Add a client</button>
+        </div>
+      </div>
+      <div class="cards">
+        <div class="ccard">
+          <div class="cmark">RT</div>
+          <h4>Raya Trade</h4>
+          <p class="ind">Distribution &amp; retail</p>
+          <div class="foot"><span class="tag live">Cycle open</span><span class="tag mine">Mine</span><span>10 units</span></div>
+        </div>
+        <div class="ccard">
+          <div class="cmark">RH</div>
+          <h4>RHI</h4>
+          <p class="ind">Healthcare</p>
+          <div class="foot"><span class="tag empty">No plan yet</span><span class="tag mine">Mine</span></div>
+        </div>
+        <div class="ccard">
+          <div class="cmark">EA</div>
+          <h4>El Abd</h4>
+          <p class="ind">Food &amp; beverage</p>
+          <div class="foot"><span class="tag empty">No plan yet</span></div>
+        </div>
+        <div class="ccard demo">
+          <div class="cmark">DM</div>
+          <h4>Demo</h4>
+          <p class="ind">Meridian Group — a worked example</p>
+          <div class="foot"><span class="tag demo">Demo</span><span>Yours to edit</span></div>
+        </div>
+        <div class="ccard add">+ Add a client</div>
+      </div>
+    </div>
+  </div>
+
+  <ul class="notes">
+    <li><b>Demo is a client, not a button.</b> It sits here, holds a renamed
+    copy of the worked example, and — unlike every demo the product has had —
+    it <b>saves</b>, so it can be added to between pitches. The
+    <i>Demo data</i> button inside the platform goes.</li>
+    <li><b>The card says what you would ask.</b> Industry, whether a cycle is
+    open or there is no plan yet, whether the client is yours, how many units.
+    Nothing that needs a second look to understand.</li>
+    <li><b>The first-run tour then runs on the client's own plan</b>, and is not
+    offered until there is one — a tour of an empty screen teaches nothing.</li>
+  </ul>
+</section>
+
+<!-- 3 · WHO SEES WHAT -------------------------------------------- -->
+<section class="step">
+  <div class="stephead"><div class="stepno">03</div><h2>Who sees what</h2></div>
+  <p class="lede">Your table, one level up from the one the product already has:
+  roles down, areas across, each cell view · edit · nothing. <b>My clients</b> are
+  the clients whose SMO team I am on — read from the client's own configuration,
+  never a second list.</p>
+
+  <div class="screen">
+    <div class="chrome">
+      <span class="mark">FOREFRONT</span>
+      <span class="sep">·</span><span>Who sees what</span>
+      <span class="who">Islam Saadany · Admin</span>
+    </div>
+    <div class="body">
+      <div class="ptitle"><h3>Who sees what</h3></div>
+      <div class="tscroll">
+        <table>
+          <thead><tr>
+            <th>Role</th><th>My clients</th><th>Other clients</th>
+            <th>Client configuration</th><th>Consultants</th><th>Add a client</th><th>Demo</th>
+          </tr></thead>
+          <tbody>
+            <tr>
+              <td><b>Admin</b><div class="muted" style="font-size:12px">Islam</div></td>
+              <td><span class="cellwrap locked"><span>View</span><span class="on edit">Edit</span></span></td>
+              <td><span class="cellwrap locked"><span>View</span><span class="on edit">Edit</span></span></td>
+              <td><span class="cellwrap locked"><span>View</span><span class="on edit">Edit</span></span></td>
+              <td><span class="cellwrap locked"><span>View</span><span class="on edit">Edit</span></span></td>
+              <td><span class="cellwrap locked"><span class="on edit">Yes</span></span></td>
+              <td><span class="cellwrap locked"><span>View</span><span class="on edit">Edit</span></span></td>
+            </tr>
+            <tr>
+              <td><b>Lead</b><div class="muted" style="font-size:12px">Runs the clients they are on</div></td>
+              <td><span class="cellwrap"><span>View</span><span class="on edit">Edit</span></span></td>
+              <td><span class="cellwrap"><span class="on">View</span><span>Edit</span></span></td>
+              <td><span class="cellwrap"><span>View</span><span class="on edit">Edit</span></span></td>
+              <td><span class="cellwrap"><span class="on">View</span><span>Edit</span></span></td>
+              <td><span class="cellwrap"><span>Yes</span></span></td>
+              <td><span class="cellwrap"><span>View</span><span class="on edit">Edit</span></span></td>
+            </tr>
+            <tr>
+              <td><b>Consultant</b><div class="muted" style="font-size:12px">Works inside their clients</div></td>
+              <td><span class="cellwrap"><span>View</span><span class="on edit">Edit</span></span></td>
+              <td><span class="cellwrap"><span>View</span><span>Edit</span></span></td>
+              <td><span class="cellwrap"><span class="on">View</span><span>Edit</span></span></td>
+              <td><span class="cellwrap"><span>View</span><span>Edit</span></span></td>
+              <td><span class="cellwrap"><span>Yes</span></span></td>
+              <td><span class="cellwrap"><span class="on">View</span><span>Edit</span></span></td>
+            </tr>
+            <tr>
+              <td><b>Observer</b><div class="muted" style="font-size:12px">New joiners, and anyone who only reads</div></td>
+              <td><span class="cellwrap"><span class="on">View</span><span>Edit</span></span></td>
+              <td><span class="cellwrap"><span>View</span><span>Edit</span></span></td>
+              <td><span class="cellwrap"><span>View</span><span>Edit</span></span></td>
+              <td><span class="cellwrap"><span>View</span><span>Edit</span></span></td>
+              <td><span class="cellwrap"><span>Yes</span></span></td>
+              <td><span class="cellwrap"><span class="on">View</span><span>Edit</span></span></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+      <p class="muted" style="font-size:13px; margin:14px 0 0">Nothing lit means
+      nothing at all. Somebody with no role sees an empty platform until you set
+      their row.</p>
+    </div>
+  </div>
+
+  <ul class="notes">
+    <li><b>The Admin's row cannot be edited</b> — editing this table is editing
+    who may edit this table, so the platform always has somebody who can.
+    Adding clients and managing consultants stay yours whatever it says.</li>
+    <li><b>Configuration is exercised over the clients that role can reach.</b>
+    A Lead who may edit configuration edits it for their own clients; it does not
+    hand them a client their row cannot open.</li>
+    <li><b>The Demo column is what lets a new joiner practise</b> somewhere real
+    while seeing no client at all.</li>
+  </ul>
+</section>
+
+<!-- 4 · A CLIENT'S CONFIGURATION --------------------------------- -->
+<section class="step">
+  <div class="stephead"><div class="stepno">04</div><h2>A client's configuration</h2></div>
+  <p class="lede">Everything about the client that is not their strategy — and
+  the one list that decides who from Forefront works on them.</p>
+
+  <div class="screen">
+    <div class="chrome">
+      <span class="mark">FOREFRONT</span>
+      <span class="sep">·</span><span>Clients</span>
+      <span class="sep">›</span><span>Raya Trade</span>
+      <span class="who">Islam Saadany · Admin</span>
+    </div>
+    <div class="body">
+      <div class="ptitle">
+        <h3>Raya Trade</h3>
+        <div class="right">
+          <span class="tag live">Cycle open</span>
+          <button class="btn">Open the platform</button>
+          <button class="btn solid">Save</button>
+        </div>
+      </div>
+
+      <div class="cfg">
+        <div class="rowset">
+          <div>
+            <span class="lab">Client name</span>
+            <input class="field" value="Raya Trade" readonly>
+          </div>
+          <div>
+            <span class="lab">Address</span>
+            <input class="field" value="smp.forefront.consulting/raya-trade" readonly>
+            <p class="muted" style="font-size:12.5px; margin:6px 0 0">Set once from
+            the name. A link that has been sent should keep working.</p>
+          </div>
+          <div>
+            <span class="lab">Industry</span>
+            <input class="field" value="Distribution &amp; retail" readonly>
+          </div>
+          <div>
+            <span class="lab">Notes</span>
+            <textarea class="field" rows="3" readonly>Group of ten business units under two companies. Cycle 1 opened July 2026; Mobile is the only unit with a fully authored plan.</textarea>
+          </div>
+          <div>
+            <span class="lab">Mark and colours</span>
+            <div style="display:flex; gap:10px; align-items:center">
+              <span class="cmark" style="width:38px;height:38px;border-radius:9px;background:var(--navy);color:var(--gold);font:700 13px/38px 'IBM Plex Mono',monospace;text-align:center">RT</span>
+              <button class="btn">Replace</button>
+              <span class="addr">#173156 · #C29B2A</span>
+            </div>
+          </div>
+        </div>
+
+        <div>
+          <span class="lab">Strategy office for this client</span>
+          <div class="teamrow">
+            <div><div class="nm">Islam Saadany</div><div class="em">islam.saadany@forefront.consulting</div></div>
+            <div class="sp"><span class="tag demo">Super user</span><button class="btn">Remove</button></div>
+          </div>
+          <div class="teamrow">
+            <div><div class="nm">Mohamed Essam</div><div class="em">mohamed.essam@forefront.consulting</div></div>
+            <div class="sp"><button class="btn">Make super user</button><button class="btn">Remove</button></div>
+          </div>
+          <div class="teamrow">
+            <div><div class="nm">Omar Alaa</div><div class="em">omar.alaa@forefront.consulting</div></div>
+            <div class="sp"><button class="btn">Make super user</button><button class="btn">Remove</button></div>
+          </div>
+          <div style="display:flex; gap:8px; margin-top:14px">
+            <input class="field" style="flex:1" value="Add somebody from Forefront" readonly>
+            <button class="btn">Add</button>
+          </div>
+          <p class="muted" style="font-size:13px; margin:16px 0 0">
+          Everyone on this list holds <b>SMO team</b> inside Raya Trade. The
+          super user also holds the access matrix, retiring people, and issuing
+          passwords — and may be a person on the client's own register instead,
+          when you decide.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <ul class="notes">
+    <li><b>This is the only place the office's seats are set.</b> Inside the
+    client, the register shows them, marked, and refuses to edit them — two
+    surfaces, one source.</li>
+    <li><b>Creating a client does exactly this and no more:</b> the client's own
+    empty platform, its name written in, and nothing else. No invented content,
+    no starter units — the same shape a cleared client already has.</li>
+    <li><b>Retiring a client is not in this build</b>, and is named rather than
+    quietly left out: something holding a client's whole strategy is not deleted
+    from a button.</li>
+  </ul>
+</section>
+
+<!-- 5 · CONSULTANTS ---------------------------------------------- -->
+<section class="step">
+  <div class="stephead"><div class="stepno">05</div><h2>Forefront's own people</h2></div>
+  <p class="lede">The same machinery as the people register you already use —
+  a temporary password issued from the platform, forced change on first use,
+  retire rather than delete. Not a second way of doing the same job.</p>
+
+  <div class="screen">
+    <div class="chrome">
+      <span class="mark">FOREFRONT</span>
+      <span class="sep">·</span><span>Consultants</span>
+      <span class="who">Islam Saadany · Admin</span>
+    </div>
+    <div class="body">
+      <div class="ptitle">
+        <h3>Consultants</h3>
+        <div class="right">
+          <input class="field" style="width:170px" value="Search" readonly>
+          <button class="btn">Passwords</button>
+          <button class="btn gold">Add a consultant</button>
+        </div>
+      </div>
+      <div class="tscroll">
+        <table>
+          <thead><tr><th>Name</th><th>Email</th><th>Role</th><th>Clients</th><th>Password</th><th>Status</th></tr></thead>
+          <tbody>
+            <tr><td><b>Islam Saadany</b></td><td class="mono">islam.saadany@forefront.consulting</td>
+              <td>Admin</td><td>All</td><td><span class="tag live">Set</span></td><td>Active</td></tr>
+            <tr><td><b>Mohamed Essam</b></td><td class="mono">mohamed.essam@forefront.consulting</td>
+              <td>Lead</td><td>Raya Trade · RHI</td><td><span class="tag empty">Temporary</span></td><td>Active</td></tr>
+            <tr><td><b>Omar Alaa</b></td><td class="mono">omar.alaa@forefront.consulting</td>
+              <td>Consultant</td><td>Raya Trade</td><td><span class="tag empty">Temporary</span></td><td>Active</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <ul class="notes">
+    <li><b>Three accounts on day one</b> — you, Mohamed and Omar — each with a
+    temporary password that must be changed on first use. Never a known one:
+    that is why <span class="mono">SMO / 1234</span> goes.</li>
+    <li><b>The Clients column is read, not set here.</b> It is the clients whose
+    team you are on, and it is set on each client's configuration.</li>
+  </ul>
+</section>
+
+<!-- 6 · INSIDE A CLIENT ------------------------------------------ -->
+<section class="step">
+  <div class="stephead"><div class="stepno">06</div><h2>Inside a client, one thing changes</h2></div>
+  <p class="lede">The platform is what it is today. The client's name sits in the
+  bar and takes you back to the cards, and the office's seats read as set from
+  outside.</p>
+
+  <div class="screen">
+    <div class="chrome">
+      <button class="clientbtn">Raya Trade <i>change</i></button>
+      <span class="sep">·</span><span>Setup › People register</span>
+      <span class="who">Islam Saadany · Super user</span>
+    </div>
+    <div class="body tight">
+      <div class="tscroll">
+        <table>
+          <thead><tr><th>Name</th><th>Email</th><th>Unit</th><th>Roles</th><th>Password</th></tr></thead>
+          <tbody>
+            <tr><td><b>Islam Saadany</b> <span class="tag demo">Forefront</span></td>
+              <td class="mono">islam.saadany@forefront.consulting</td><td>The group</td>
+              <td><span class="tag">Super user</span> <span class="muted" style="font-size:12px">set in the configuration</span></td>
+              <td>Set</td></tr>
+            <tr><td><b>Mohamed Essam</b> <span class="tag demo">Forefront</span></td>
+              <td class="mono">mohamed.essam@forefront.consulting</td><td>The group</td>
+              <td><span class="tag">SMO team</span> <span class="muted" style="font-size:12px">set in the configuration</span></td>
+              <td>Set</td></tr>
+            <tr><td><b>Ashraf Laithy</b></td><td class="mono">ashraf.laithy@rayatrade.com</td>
+              <td>Mobile</td><td><span class="tag">Business unit owner</span></td><td>Set</td></tr>
+            <tr><td><b>Hazem Roushdy</b></td><td class="mono">hazem.roushdy@rayatrade.com</td>
+              <td>Logistics</td><td><span class="tag">Business unit owner</span></td><td>Temporary</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <ul class="notes">
+    <li><b>The client's own roles are untouched</b> — unit owner, strategy
+    custodian, function head, contributor are theirs, granted inside their
+    client, exactly as now.</li>
+    <li><b>It lands in two steps.</b> First the seats are read-only here, set
+    from the configuration. Then, once that is proven on a live client, the
+    office seats come out of Roles &amp; access entirely.</li>
+  </ul>
+
+  <div class="flag">
+    <p><b>Visible to Raya on day one.</b> Their Super user seat is a row on their
+    own register today. After step one it reads as set from outside and can no
+    longer be changed there. Nobody loses anything — but it should be you who
+    tells them, not them finding it.</p>
+  </div>
+</section>
+
+<!-- 7 · THE DEMO NAMES ------------------------------------------- -->
+<section class="step">
+  <div class="stephead"><div class="stepno">07</div><h2>The Demo client's names — for approval</h2></div>
+  <p class="lede">Demo is seeded with a copy of the worked example under invented
+  names. Real numbers against a real client's name is the one thing a demo must
+  not be. Change any of these and I will use yours.</p>
+
+  <div class="screen"><div class="body">
+    <div class="tscroll">
+      <table>
+        <thead><tr><th>Today, in the example</th><th>In the Demo client</th></tr></thead>
+        <tbody>
+          <tr><td>Raya Trade</td><td><b>Meridian Group</b></td></tr>
+          <tr><td>Distribution (company)</td><td>Distribution</td></tr>
+          <tr><td>B2C (company)</td><td>Consumer</td></tr>
+          <tr><td>Mobile</td><td>Devices</td></tr>
+          <tr><td>Logistics</td><td>Logistics</td></tr>
+          <tr><td>Retail Stores</td><td>Retail Stores</td></tr>
+          <tr><td>B2B Ecomm</td><td>B2B Online</td></tr>
+          <tr><td>Consumer Electronics</td><td>Home Electronics</td></tr>
+          <tr><td>Office Solutions</td><td>Office Solutions</td></tr>
+          <tr><td>Contact Center</td><td>Contact Centre</td></tr>
+          <tr><td>Care</td><td>Customer Care</td></tr>
+          <tr><td>IT Dist.</td><td>IT Distribution</td></tr>
+          <tr><td>Trade</td><td>Trade</td></tr>
+          <tr><td>Every person's name</td><td class="muted">Replaced with invented ones, and every email address at <span class="mono">meridian.example</span></td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div></div>
+
+  <ul class="notes">
+    <li><b>The plan content itself is kept</b> — the pillars, measures, targets,
+    figures and the closed cycle. That is what makes it worth showing.</li>
+    <li><b>One Demo now</b>, split into industry demos once you know which
+    industries you are pitching.</li>
+  </ul>
+</section>
+
+<!-- 8 · WHAT I STILL NEED ---------------------------------------- -->
+<section class="step">
+  <div class="stephead"><div class="stepno">08</div><h2>What I need from you</h2></div>
+  <div class="flag ask">
+    <p><b>Sign off, or mark up.</b> Anything on these six screens can move —
+    layout, wording, what a card says, what the table's columns are. Nothing in
+    the real product is touched until you have.</p>
+  </div>
+  <ul class="notes">
+    <li><b>The client cards:</b> is <i>Industry · cycle · mine · units</i> the
+    right four things, or would you rather see something else at a glance?</li>
+    <li><b>The Demo names</b> above — approve, or send me yours.</li>
+    <li><b>RHI and El Abd</b> — are those the names as they should read, and are
+    Healthcare and Food &amp; beverage right?</li>
+  </ul>
+</section>
+
+<footer>
+  Mockup for spec 024 · drawn 28 August 2026 · nothing built ·
+  <span class="mono">design-mockups/multi-client/2026-08-28_outer-platform.html</span>
+</footer>
+
+</div>

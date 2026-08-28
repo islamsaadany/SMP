@@ -1,6 +1,6 @@
 # 022 · The email greets its receiver
 
-**Version:** v3.50 (built) · **Decisions:** §142 · **Status:** answered; built
+**Version:** v3.54 (built) · **Decisions:** §142 · **Status:** answered; built
 **Constitution:** checked against v1.1.0.
 
 Islam: *"For the emails sent can we make an option while sending the email to

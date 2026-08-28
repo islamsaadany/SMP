@@ -67,6 +67,33 @@ Nothing proceeds past this line without an answer.
 
 ## Built and verified
 
+### v3.55 — a test copy is a send, and it says so (§145)
+
+- **Islam:** *"there have been multiple sent emails earlier. weren't they saved?
+  I can't see them in the overview."*
+- **Nothing was lost, and proving that came first.** `messages` sits outside the
+  state graph with no foreign key, so the `TRUNCATE … CASCADE` on every save
+  cannot reach it, and no `DELETE FROM messages` exists in the product. Driven
+  end to end against a real Postgres with a stub in front of Resend: a send
+  writes its row *before* the emails go out and appears on the Overview at once.
+- **The cause:** two kinds of email leave this platform and only one was
+  recorded. `test` — *Send me a copy*, and the test send on Email settings —
+  sends a real email through the same builder and wrote nothing at all.
+- **Built:** the test copy is recorded (`kind`, migration 028; NULL is a real
+  send, nothing backfilled), marked in the **audience** column — beside the
+  heading it wrapped the frozen first column, §88 and §116.4 — and **Delete
+  reaches test copies only** (Islam's B), drawn behind `mayDestroy()` and
+  refused again on the server.
+- **The note by *Send me a copy* shrank** to one clause on the hover it already
+  had: with the row in the record beneath, the list is the answer (CLAUDE.md
+  1b-ii, §127).
+- **Found on the way:** `SYNC.mailTest()` did not forward the body — §142's
+  fault, found by looking this time rather than by being bitten.
+- **Proved:** `checks/send-overview.py` §6 (5 / 1 / 2 failures against three
+  deliberate breaks) and `scripts/test-test-copies.js`, 19/0 against a real
+  Postgres (3 / 11 against two breaks). Round trip PASS on a virgin database and
+  on a tenant rolled back to its pre-§145 shape.
+
 ### v3.54 — Send an email opens on what went (§144)
 
 Islam: *"The opening page ... should be a dashboard of what was sent, to whom,

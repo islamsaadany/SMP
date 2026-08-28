@@ -1,0 +1,21 @@
+-- @phase: pre
+-- ══ A TEST COPY IS A SEND, AND IT SAYS SO (§145) ═══════════════════════
+-- Islam: "there have been multiple sent emails earlier. weren't they saved?
+-- I can't see them in the overview."
+--
+-- They were never written down. TWO KINDS OF EMAIL LEAVE THIS PLATFORM and
+-- only one was recorded: `send` wrote a row and a row per recipient, while
+-- `test` — Send me a copy, and the test send on Email settings — sent a real
+-- email through the same builder and wrote nothing at all. Both look like the
+-- same act from the screen, so the record read as though those emails had
+-- never happened.
+--
+-- ONE COLUMN HOLDING THE WORD, never a boolean beside it (§104.7, §135): a
+-- kind can gain a third value without a second column, and a list of
+-- exceptions is a list somebody forgets to add to.
+--
+-- NULL IS A REAL SEND, so nothing is backfilled and nothing needs to be:
+-- every row that exists today was written by the `send` path, which is
+-- exactly what NULL now means. An absent value is the answer, not a gap
+-- (§50.6).
+ALTER TABLE messages ADD COLUMN IF NOT EXISTS kind TEXT;

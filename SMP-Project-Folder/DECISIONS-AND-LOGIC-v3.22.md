@@ -18729,3 +18729,97 @@ partial failure (lands) and a send that never happened (stays, in red).
 Watched to fail first (§94.5): the fetches re-gated on `#msgsend` → **3
 failures**, naming the *Asking…* directly; `CURSEC["send"] = "over"` removed →
 **8**.
+
+---
+
+## 145 · A test copy is a send, and it says so (v3.55)
+
+Islam, using the product: *"there have been multiple sent emails earlier.
+weren't they saved? I can't see them in the overview."*
+
+**NOTHING WAS LOST, AND ESTABLISHING THAT FIRST WAS MOST OF THE WORK.** The
+record cannot be erased by design: `messages` sits outside the state graph with
+**no foreign key to people**, so the `TRUNCATE … CASCADE` that runs on every
+save cannot reach it (migration 020 says so in its own comment), and there is
+no `DELETE FROM messages` anywhere in the product. Driven end to end against a
+real Postgres with a stub in front of Resend: a send writes its row **before**
+the emails go out, writes a row per recipient, and appears on the Overview at
+once, beside older ones. The product was working.
+
+**TWO KINDS OF EMAIL LEAVE THIS PLATFORM AND ONLY ONE WAS RECORDED.** `send`
+writes the row and the recipients. `test` — *Send me a copy*, and the test send
+on Email settings — sends a **real email through the same builder** and wrote
+nothing at all. From the screen they are the same act; from the record, one of
+them never happened. That is the whole fault, and it is not in the record: it
+is in there being two paths where the person sees one.
+
+**THE TEST COPY IS WRITTEN DOWN NOW**, same table, same chronology, so *"I
+tested it twice and then sent it"* reads straight down the page. The row goes in
+**before** the send for `send`'s own reason — a send that half succeeds and then
+loses the function is the case a record exists for — and **a test that FAILED
+still leaves its row**, saying 0 of 1, because a record that quietly drops its
+own failures is not a record.
+
+**`kind` IS ONE COLUMN HOLDING THE WORD** (§104.7, §142), never a boolean beside
+it. **NULL IS A REAL SEND**, so nothing is backfilled and nothing needs to be:
+every row that exists today was written by the `send` path, which is exactly
+what NULL now means (§50.6 — an absent value is the answer, not a gap). Proved
+against a tenant rolled back to its pre-§145 shape: the column arrives, and the
+row the old product wrote is still a real send.
+
+**THE MARK GOES IN THE COLUMN THAT ALREADY ANSWERS "WHO GOT IT", AND THE MOCKUP
+IS WHY.** Drawn first beside the heading, it pushed the frozen first column onto
+a **second line** — the one thing a setup table may never do (§88), and
+§116.4's fault exactly: a mark placed BESIDE a value rather than inside the
+block it marks, three times in one section there and once more here. In the
+audience column it costs no height, and it is the honest answer to a column that
+would otherwise print a dash, since a test copy has no audience.
+
+**DELETE REACHES TEST COPIES AND NOTHING ELSE.** Both scopes were drawn and put
+to Islam with the cost of each stated; he chose **B**. The clutter goes and the
+record of what the business was actually sent stays whole — nobody can quietly
+remove the evidence that a message went to seventy-six people. A real send
+carries **no control at all** rather than a disabled one: a dead control in a
+row is furniture, and the refusal it would explain is one the server gives
+anyway.
+
+**THE GUARD IS ASKED TWICE ON PURPOSE.** `mayDestroy()` — §89's rule, the Super
+user's alone — decides whether the control is drawn, and the server asks
+`isSuperRole` again, because a control that is only hidden is decoration (§42,
+§44). Nobody but a Super user reaches `/api/mail` at all today, so the second
+guard is redundant **now**: that gate says *"Communication is the SMO's"* and
+this one says *"destruction is the Super user's"*, two different questions with
+the same answer this week. Widen the endpoint to the SMO team, as §89 would have
+it, and the delete must not widen with it — §94's drift exactly, a gate relied on
+for something it does not mean. **The kind is read off the STORED row**, never
+taken from the request.
+
+**THE NOTE SHRANK RATHER THAN DOUBLING.** Islam said yes to a line by *Send me a
+copy* as well; with the test copy now in the record beneath it, the surprise is
+gone and the list is the answer. So it is **one clause on the hover the button
+already had**, not a new sentence under it — a sentence explaining a control is
+what §127 spent a whole panel removing (CLAUDE.md 1b-ii). Said in the mockup and
+recorded here rather than quietly dropped.
+
+**AND `SYNC.mailTest()` DID NOT FORWARD THE BODY** — §142's fault, found by
+looking for it this time rather than by being bitten. That function names every
+field it sends, so a field absent there is a field the server never sees however
+correctly the caller filled it. It cost nothing while a test copy was recorded
+nowhere; the moment the row is written, every test copy would have stored an
+empty body. Both call sites now pass one.
+
+**PROVED, AND EACH HALF WATCHED TO FAIL FIRST (§94.5).**
+`checks/send-overview.py` §6 covers the client — the mark, the line count, the
+scope of Delete, the confirmation, the refusal reaching the page, and the whole
+column absent for somebody who may not destroy — failing **5 / 1 / 2** against
+three deliberate breaks. `scripts/test-test-copies.js` covers the half no
+browser can see, 19 assertions against a real Postgres, failing **3** with the
+kind check dropped and **11** against the pre-§145 product.
+
+**AND ONE ASSERTION COULD NOT FAIL FOR THE REASON IT EXISTED.** The line count
+was taken per text node, and the mark that wraps is its OWN text node sitting
+happily on one line of its own — so the first deliberate break reproduced the
+exact fault and that assertion stayed green while four others caught it. Counted
+across the whole cell it reports `[1,1,1,1,2]`. §113.8's family: the break is
+what found it, not the reading.
+

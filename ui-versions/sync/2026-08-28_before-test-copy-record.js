@@ -605,22 +605,9 @@ var SYNC = (function () {
     mailHistoryOne: function (id, done) {
       mailPost({ action: "historyOne", id: id }, function (err, j) { done(err, err ? null : j); });
     },
-    /* ── REMOVING A TEST COPY (§145) ────────────────────────────────
-       The server decides whether it may go, and whether the row is a test at
-       all — this only carries the id. */
-    mailHistoryDelete: function (id, done) {
-      mailPost({ action: "historyDelete", id: id }, function (err, j) { done(err, err ? null : j); });
-    },
     mailTest: function (o, done) {
-      /* `body` IS FORWARDED, and it was not. This function names every field it
-         sends, so a field absent here is a field the server never sees however
-         correctly the caller filled it — the fault §142 hit with `greet`, where
-         the emails were personalised perfectly and the record held nothing. It
-         cost nothing while a test copy was recorded nowhere; now that the row
-         is written (§145), leaving it out would store every test copy with an
-         empty body. */
       mailPost({ action: "test", to: o.to, subject: o.subject, html: o.html,
-                 body: o.body, fromName: o.fromName, replyTo: o.replyTo },
+                 fromName: o.fromName, replyTo: o.replyTo },
         function (err, j) { done(err, err ? null : j); });
     },
     boot: function (paint) {

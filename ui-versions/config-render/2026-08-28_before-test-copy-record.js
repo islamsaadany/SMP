@@ -5960,13 +5960,7 @@ function renderSendMessage(){
          — so what they read is what everybody else will read. */
       '<button class="editbtn" id="msgtestme"' +
         (live && st.subject.trim() && st.body.trim() ? '' : ' disabled') +
-        /* THE HOVER SAYS WHERE IT GOES (§145). It is one clause on the title
-           the button already had, never a new line under it: with the test copy
-           now in the record beneath, the row itself is the answer, and a
-           sentence explaining a control is what §127 spent a whole panel
-           removing (CLAUDE.md 1b-ii). */
-        ' title="One copy, to you, before it goes to anybody else \u2014 ' +
-        'kept in the record below as a test copy.">' +
+        ' title="One copy, to you, before it goes to anybody else">' +
         'Send me a copy</button>' +
       /* THIS SAYS ONLY WHAT DID NOT HAPPEN NOW (§144). A send the server
          answered leaves this tab, so its outcome is drawn on the Overview; what
@@ -6224,36 +6218,12 @@ function renderSentList(){
            only thing telling one draft from another, was clipped to
            "Half-wri…" in a 600px panel. Percentages, because the panel's width
            is a `min()` of the window. */
-        /* ── THE DELETE COLUMN IS DRAWN FOR WHOEVER MAY USE IT (§145) ──
-           `mayDestroy()` is §89's rule — the Super user's alone — asked here
-           rather than restated, and asked AGAIN on the server, because a
-           control that is only hidden is decoration (§42, §44). A column
-           nobody in this seat can act in is furniture, so it is not drawn at
-           all rather than drawn empty. */
-        : (function(){
-            var del = mayDestroy();
-            /* The widths add to 100 (§95.5): under `table-layout:fixed` a column
-               left to itself does not get the leftover — Chrome hands the excess
-               to the columns that asked — so adding one means re-apportioning
-               rather than appending. Heading gives up the 9 the actions take. */
-            return '<div class="cfg"><table><thead><tr><th style="width:' +
-              (del ? '25' : '32') + '%">Heading</th>' +
-              '<th style="width:16%">Sent</th>' +
-              '<th style="width:23%">Who it went to</th>' +
-              '<th class="cc" style="width:15%">Reached</th>' +
-              '<th style="width:14%">By</th>' +
-              (del ? '<th class="cc" style="width:7%"></th>' : '') +
-              '</tr></thead><tbody>' +
+        : '<div class="cfg"><table><thead><tr><th style="width:32%">Heading</th>' +
+          '<th style="width:16%">Sent</th>' +
+          '<th style="width:23%">Who it went to</th>' +
+          '<th class="cc" style="width:15%">Reached</th>' +
+          '<th style="width:14%">By</th></tr></thead><tbody>' +
           rows.map(function(m){
-            /* A TEST COPY SAYS SO IN THE COLUMN THAT ALREADY ANSWERS "WHO GOT
-               IT" (§145). Beside the heading it pushed the first column onto a
-               second line, which is the one thing a setup table may never do
-               (§88) — §116.4's fault exactly, a mark placed BESIDE a value
-               rather than inside the block it marks. Here it costs no height.
-
-               `audience` IS NULL ON A TEST, which `audienceWords()` renders as
-               a dash; the mark is the honest answer to that column instead. */
-            var test = m.kind === "test";
             /* THE ROW OPENS (§93.15). The subject is the control, because it is
                the thing somebody is already looking for when they come here to
                ask what happened to a particular message. */
@@ -6261,23 +6231,12 @@ function renderSentList(){
               '<td><button class="linkbu" data-sentone="' + esc(String(m.id)) + '"><b>' +
                 esc(m.subject) + '</b></button></td>' +
               '<td>' + esc(String(m.sent_at || "").slice(0, 16).replace("T", " ")) + '</td>' +
-              '<td>' + (test ? '<span class="pill">Test copy</span>'
-                             : esc(audienceWords(m.audience))) + '</td>' +
+              '<td>' + esc(audienceWords(m.audience)) + '</td>' +
               '<td class="cc">' + (m.sent || 0) + ' of ' + (m.total || 0) +
                 (m.failed ? ' <span class="pill bad">' + m.failed + ' failed</span>' : '') +
                 '</td>' +
-              '<td>' + esc(m.by_name || "") + '</td>' +
-              /* ONLY A TEST COPY CARRIES IT (Islam's B). A real send has no
-                 control here rather than a disabled one: a dead control in a
-                 row is furniture, and the refusal it would explain is one the
-                 server gives anyway. */
-              (del ? '<td class="cc">' +
-                 (test ? '<button class="linkbu danger" data-sentdel="' +
-                           esc(String(m.id)) + '">Delete</button>' : '') +
-                 '</td>' : '') +
-              '</tr>';
+              '<td>' + esc(m.by_name || "") + '</td></tr>';
           }).join("") + '</tbody></table></div>';
-          })();
   return section("", "What has been sent", null, body);
 }
 

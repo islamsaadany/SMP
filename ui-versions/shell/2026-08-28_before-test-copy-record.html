@@ -4397,7 +4397,6 @@
           to: addr,
           subject: "Test from " + (sh.org || "the Strategy Management Platform"),
           html: MAIL.sampleFor(sh),
-          body: "",
           fromName: sh.fromName,
           replyTo: sh.replyTo
         }, function(err){
@@ -4581,63 +4580,6 @@
         });
       });
     });
-    /* ── REMOVING A TEST COPY (§145) ────────────────────────────────
-       The Super user's alone, and only ever a test copy — Islam's B: the
-       clutter goes and the record of what the business was actually sent stays
-       whole. `mayDestroy()` decides whether the control is drawn and the SERVER
-       decides whether it may act, because a control that is only hidden is
-       decoration (§42, §44).
-
-       THE PLATFORM'S OWN MODAL, never `confirm()` (§95): a browser dialog can
-       be silenced permanently on some other site, and this cannot be undone.
-       It names the subject and when it went, so the row being removed is the
-       row you meant.
-
-       IT IS THE ROW'S OWN ID, read at press time from the element, and the
-       refusal the server may give is SHOWN rather than swallowed — a delete
-       that silently does nothing is the fault this whole section is about. */
-    document.querySelectorAll("[data-sentdel]").forEach(function(b){
-      b.addEventListener("click", function(){
-        var id = this.dataset.sentdel;
-        var row = ((SENTLIST && SENTLIST.messages) || []).filter(function(m){
-          return String(m.id) === String(id); })[0] || {};
-        openModalHtml("Remove this test copy?", "",
-          '<div class="sendconfirm">' +
-            '<div class="kv"><span class="k">Subject</span><span>' +
-              esc(String(row.subject || "")) + '</span></div>' +
-            '<div class="kv"><span class="k">Sent</span><span>' +
-              esc(String(row.sent_at || "").slice(0, 16).replace("T", " ")) +
-              ' \u2014 to you only</span></div>' +
-            '<div class="kv"><span class="k">No undo</span><span>The record of ' +
-              'this test copy goes for good. Messages that went to the business ' +
-              'are never removed.</span></div>' +
-            '<div class="cbtns"><button data-delno="1">Cancel</button>' +
-            '<button class="danger" data-delyes="1">Yes, remove it</button></div>' +
-          '</div>');
-        var box = document.getElementById("modal-b");
-        if (!box) return;
-        var no = box.querySelector("[data-delno]");
-        if (no) no.addEventListener("click", function(){ closeModal(); });
-        var yes = box.querySelector("[data-delyes]");
-        if (yes) yes.addEventListener("click", function(){
-          closeModal();
-          SYNC.mailHistoryDelete(id, function(err){
-            if (err) {
-              /* THE REFUSAL IS SAID ON THE PAGE (§32, one surface in), in the
-                 outcome line the Overview already has, rather than warning a
-                 console nobody has open. */
-              var st = sendmsg();
-              st.result = { ok: false, landed: true, msg: err, skipped: 0, rows: null };
-              paint(); return;
-            }
-            if (SENTONE && String(SENTONE.id) === String(id)) SENTONE = null;
-            SENTLIST = null;
-            paint();
-          });
-        });
-      });
-    });
-
     /* ON THE OVERVIEW, not on the composer (§144). Both lists are drawn there
        now, and the old gate — the Send button — is on the other tab. */
     if (DRAFTLIST === null && document.getElementById("msgover") &&
@@ -4887,7 +4829,6 @@
           cta: (st.ctaLabel.trim() && st.ctaHref.trim())
                  ? { label: st.ctaLabel.trim(), href: st.ctaHref.trim() } : null
         }),
-        body: st.body.trim(),
         fromName: sh.fromName,
         replyTo: sh.replyTo
       }, function(err){

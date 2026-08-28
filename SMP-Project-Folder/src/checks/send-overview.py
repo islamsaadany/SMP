@@ -54,6 +54,11 @@ SENT = [
   {"id": 1, "subject": "Welcome to the platform",
    "sent_at": "2026-08-01T10:05", "by_name": "Mohamed Essam",
    "audience": {"everyone": True}, "total": 79, "sent": 71, "failed": 8},
+  # A TEST COPY (§145). `audience` is null on one, which is why the mark has to
+  # be what that column says rather than a dash.
+  {"id": 7, "subject": "The Q3 reporting cycle opens on Monday",
+   "sent_at": "2026-08-27T09:06", "by_name": "Mohamed Essam",
+   "audience": None, "total": 1, "sent": 1, "failed": 0, "kind": "test"},
 ]
 DRAFTS = [
   {"id": 9, "subject": "Q4 planning \u2014 what we need from each unit",
@@ -91,6 +96,13 @@ class H(http.server.BaseHTTPRequestHandler):
                                    "active": len(TO) + len(SKIPPED), "withAddress": len(TO)})
             if a == "draftList": return self._json({"ok": True, "drafts": DRAFTS})
             if a == "history":  return self._json({"ok": True, "messages": SENT})
+            if a == "historyDelete":
+                if DELREFUSE:
+                    return self._send(403, b'{"ok":false,"error":"That is a message that '
+                                           b'went to the business. Only test copies can be removed."}',
+                                      "application/json")
+                DELETED.append(body.get("id"))
+                return self._json({"ok": True})
             if a in ("send", "test"):
                 if DOWN:
                     return self._send(500, b'{"ok":false,"error":"Could not reach Resend."}',
@@ -108,6 +120,8 @@ URL = "http://127.0.0.1:%d/raya-trade" % PORT
 POSTED = []      # every body the page sent to /api/mail
 FAILN = 0        # how many the stub reports as failed
 DOWN = False     # the send never reaches the server
+DELETED = []     # ids the page asked the server to remove
+DELREFUSE = False  # the server refuses the delete
 bad, errs = 0, []
 
 
@@ -314,7 +328,135 @@ def go():
         left = [e for e in errs if "500" not in e]
         ck("no console errors anywhere in that", not left, left[:3])
 
+        # ── 6 · THE TEST COPY, AND WHAT MAY BE REMOVED (§145) ────────────
+        print("\n6 · a test copy is in the record, and only it can be removed")
+        br, pg = open_page(pw)
+        pg.wait_for_timeout(1400)
+
+        rows = pg.evaluate("""() => {
+          const t = [...document.querySelectorAll('#msgover table')].pop();
+          if (!t) return null;
+          return [...t.querySelectorAll('tbody tr')].map(tr => ({
+            subject: (tr.children[0].innerText || '').trim(),
+            who: (tr.children[2].innerText || '').trim(),
+            del: !!tr.querySelector('[data-sentdel]'),
+            /* THE FAULT THE MOCKUP CAUGHT: a mark beside the heading pushed the
+               frozen first column onto a SECOND LINE (§88, §116.4). A table cell
+               returns ONE client rect however many lines it holds (§105.2), so
+               the lines are counted off a Range over its contents — the distinct
+               tops among rects that have width. Never the row's HEIGHT: §88's
+               own check deliberately does not assert equal heights, because the
+               way to pass that is to delete real content. */
+            lines: (() => {
+              /* OVER THE TEXT NODE, never the cell: a Range over an element's
+                 contents spans the boxes inside it too, so the button and its
+                 own text reported two tops and every row — marked or not —
+                 came back as two lines. `no-wrap.py` had this right already
+                 and this is its shape, not a second one. */
+              const walk = document.createTreeWalker(tr.children[0], NodeFilter.SHOW_TEXT);
+              const tops = new Set();
+              let n;
+              while ((n = walk.nextNode())) {
+                if (!n.textContent.trim()) continue;
+                const rg = document.createRange();
+                rg.selectNodeContents(n);
+                [...rg.getClientRects()].filter(x => x.width > 0)
+                  .forEach(x => tops.add(Math.round(x.top)));
+              }
+              /* TOPS ACROSS THE WHOLE CELL, not the worst single text node: the
+                 fault this exists for puts the MARK on the second line, and the
+                 mark is its own text node sitting happily on one line of its
+                 own. Counted per node this assertion could not fail for the one
+                 reason it was written (§113.8), and the deliberate break proved
+                 exactly that before this was corrected. */
+              return tops.size;
+            })()
+          }));
+        }""")
+        ck("the record is drawn", bool(rows), rows)
+        if rows:
+            tests = [r for r in rows if "Test copy" in r["who"]]
+            real = [r for r in rows if "Test copy" not in r["who"]]
+            ck("the test copy is marked", len(tests) == 1, [r["who"] for r in rows])
+            ck("and a real send is not", all("Test copy" not in r["who"] for r in real))
+            ck("a real send still says who it went to",
+               all(r["who"] and r["who"] != "\u2014" for r in real), [r["who"] for r in real])
+            # §88: EVERY HEADING IS ONE LINE. The first drawing failed here, and
+            # a 1px difference between rows is not that fault — asserting equal
+            # heights called a correct build broken.
+            ck("no heading is pushed onto a second line",
+               all(r["lines"] == 1 for r in rows), [r["lines"] for r in rows])
+            ck("Delete is on the test copy", tests and tests[0]["del"])
+            ck("and on no message that went to the business",
+               not any(r["del"] for r in real), [r["subject"] for r in real if r["del"]])
+
+        print("\n6b · removing one")
+        pg.click("[data-sentdel]")
+        pg.wait_for_timeout(400)
+        ck("it asks first, in the platform's own dialog",
+           pg.evaluate("()=>!!document.querySelector('#modal-b .sendconfirm')"))
+        ck("and names the row being removed",
+           "Q3 reporting cycle" in (pg.inner_text("#modal-b") if
+                                    pg.query_selector("#modal-b") else ""))
+        ck("and says there is no undo",
+           "no undo" in (pg.inner_text("#modal-b").lower() if
+                         pg.query_selector("#modal-b") else ""))
+        n0 = len(DELETED)
+        pg.click("[data-delno]"); pg.wait_for_timeout(300)
+        ck("Cancel removes nothing", len(DELETED) == n0, DELETED)
+        pg.click("[data-sentdel]"); pg.wait_for_timeout(300)
+        pg.click("[data-delyes]"); pg.wait_for_timeout(900)
+        ck("Yes asks the server", len(DELETED) == n0 + 1, DELETED)
+        ck("and the list is asked again rather than guessed at",
+           pg.evaluate("()=>SENTLIST !== null"))
+        br.close()
+
+        # ── 6c · A REFUSAL IS SAID ON THE PAGE (§32) ─────────────────────
+        print("\n6c · a refusal from the server is said, not swallowed")
+        global DELREFUSE
+        DELREFUSE = True
+        br, pg = open_page(pw)
+        pg.wait_for_timeout(1400)
+        pg.click("[data-sentdel]"); pg.wait_for_timeout(350)
+        pg.click("[data-delyes]"); pg.wait_for_timeout(900)
+        said = pg.inner_text("#msgover") if pg.query_selector("#msgover") else ""
+        ck("the refusal reaches the page", "test copies" in said.lower(), said[:160])
+        ck("in the bad voice", pg.evaluate("""() => {
+            const e = document.querySelector('#msgover .sentsaid');
+            return !!e && e.className.indexOf('bad') > -1; }"""))
+        DELREFUSE = False
+        br.close()
+
+        # ── 6d · IT IS THE SUPER USER'S (§89) ────────────────────────────
+        print("\n6d · somebody who may not destroy is offered nothing")
+        # THE SEAT IS ON THE REGISTER ROW (§89): `isSMO` reads `people[].role`,
+        # so changing the session's own field proves nothing — the first version
+        # of this did exactly that and passed while the control was still drawn.
+        for _p in STATE.get("people", []):
+            if _p.get("key") == "smo":
+                _p["role"] = "smoteam"
+        PERSON["role"] = "smoteam"
+        br, pg = open_page(pw)
+        pg.wait_for_timeout(1400)
+        ck("no Delete anywhere in the record",
+           not pg.evaluate("()=>!!document.querySelector('#msgover [data-sentdel]')"))
+        ck("and no empty column left behind", pg.evaluate("""() => {
+            const t = [...document.querySelectorAll('#msgover table')].pop();
+            if (!t) return false;
+            const th = t.querySelectorAll('thead th').length;
+            const td = t.querySelectorAll('tbody tr').length
+                       ? t.querySelector('tbody tr').children.length : 0;
+            return th === 5 && td === 5; }"""))
+        ck("but the record still reads",
+           "Q3 reporting" in (pg.inner_text("#msgover") if pg.query_selector("#msgover") else ""))
+        for _p in STATE.get("people", []):
+            if _p.get("key") == "smo":
+                _p["role"] = "super"
+        PERSON["role"] = "super"
+        br.close()
+
 
 go()
+
 print("\n%s" % ("ALL GOOD" if not bad else "%d FAILED" % bad))
 raise SystemExit(1 if bad else 0)

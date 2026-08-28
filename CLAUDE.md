@@ -2174,6 +2174,30 @@ console errors (in this cloud environment, run it via a wrapper that points Play
   touching `mail.js`. "Present" ≠ "accepted" ≠ "verified": the page reports only
   what was actually asked, and matches a bad key on Resend's MESSAGE because
   Resend answers an invalid key with **400**, not 401.
+- **A TEST COPY IS A SEND, AND IT SAYS SO (since v3.55, §145):** two kinds of
+  email leave this platform and only one was recorded — `send` wrote a row and a
+  row per recipient, while `test` (*Send me a copy*, and the test send on Email
+  settings) sent a **real email through the same builder** and wrote nothing at
+  all, so from the record those emails had never happened. **Nothing was ever
+  lost**: `messages` sits outside the state graph with no foreign key, so the
+  `TRUNCATE … CASCADE` on every save cannot reach it, and no `DELETE FROM
+  messages` exists in the product. The test row is written **before** the send
+  (a half-succeeded send is the case a record exists for) and **a failed test
+  keeps its row**, saying 0 of 1. **`kind` is ONE column holding the word**
+  (§104.7, §142) and **NULL is a real send**, so nothing is backfilled — proved
+  against a tenant rolled back to its pre-§145 shape. **The mark goes in the
+  audience column**: beside the heading it pushed the frozen first column onto a
+  second line (§88, §116.4), and a test copy has no audience for that column to
+  print. **Delete reaches test copies and nothing else** (Islam's B, chosen from
+  two drawn scopes with the cost of each stated): the record of what the
+  business was sent stays whole, and a real send carries no control rather than
+  a disabled one. **The guard is asked twice on purpose** — `mayDestroy()` draws
+  it, the server asks `isSuperRole` again — because the endpoint's own gate
+  means *"Communication is the SMO's"* and this one means *"destruction is the
+  Super user's"*: two questions with the same answer today, and §94's drift the
+  day the first is widened. The kind is read off the **stored** row. **And
+  `SYNC.mailTest()` did not forward the body** (§142's fault, found by looking
+  this time): every test copy would have stored an empty one.
 - **THE EMAIL GREETS ITS RECEIVER (since v3.50, §135; spec 021):** a per-message
   switch on Send a message opens each email *Dear Ahmed,* — off by default, the
   word editable per message, **Send a message only**. **EVERY RECIPIENT ALREADY
@@ -2453,10 +2477,13 @@ python3 checks/setup-search.py  # the rail's search: typing NEVER repaints, a re
 python3 checks/setup-header.py  # the page's controls share its pinned line, the counts and
                                 # the SMO pill are gone, the matrix's two header levels stack,
                                 # and a function's focus mark is written and shown (§130)
-python3 checks/send-overview.py # Send a message opens on the record, writing is the second
+python3 checks/send-overview.py # Send an email opens on the record, writing is the second
                                 # subtab, and a send LANDS back on the record with the
                                 # composer emptied — the send that never happened is the
-                                # one case that stays put (§137)
+                                # one case that stays put (§144). §6 covers the test copy:
+                                # marked in the AUDIENCE column, every heading still ONE
+                                # line, and Delete drawn for the Super user and on test
+                                # copies only (§145)
 python3 checks/email-greeting.py # the greeting row is ONE line with no prose, the switch does
                                 # not move, and what the page POSTS names NOBODY — the server
                                 # fills it per recipient (§135, over HTTP)
@@ -2464,7 +2491,8 @@ python3 checks/setup-pages.py   # every Setup page is named ONCE and in the rail
                                 # and the name and the table head stay on screen (§121)
 ```
 The mail half needs a database and a password (it spawns its own dev-server):
-`DATABASE_URL=… node scripts/test-email-greeting.js <smo-password>` (§142.6).
+`DATABASE_URL=… node scripts/test-email-greeting.js <smo-password>` (§142.6), and
+`DATABASE_URL=… node scripts/test-test-copies.js <smo-password>` (§145).
 In this cloud image, run any sweep through the wrapper so Playwright finds the
 Chromium that is already here:
 `SMP_CHROME=/opt/pw-browsers/chromium-1194/chrome-linux/chrome python3 qa-run.py <file>`.
@@ -2498,7 +2526,36 @@ prior sessions (on HR_ERP) accidentally reverted agreed-upon designs.
 
 ---
 
-*Last Updated: 2026-08-28 &mdash; **v3.54: Send an email opens on what went
+*Last Updated: 2026-08-28 &mdash; **v3.55: a test copy is a send, and it says
+so (&sect;145)**. Islam, using the product: *"there have been multiple sent
+emails earlier. weren't they saved? I can't see them in the overview."*
+**NOTHING WAS LOST, AND ESTABLISHING THAT FIRST WAS MOST OF THE WORK** &mdash;
+`messages` sits outside the state graph with no foreign key, so the
+`TRUNCATE &hellip; CASCADE` on every save cannot reach it, and there is no
+`DELETE FROM messages` anywhere in the product; driven end to end against a real
+Postgres, a send writes its row BEFORE the emails go out and appears on the
+Overview at once. **The fault is that TWO KINDS OF EMAIL LEAVE THIS PLATFORM
+AND ONLY ONE WAS RECORDED**: `test` &mdash; *Send me a copy*, and the test send
+on Email settings &mdash; sends a REAL email through the same builder and wrote
+nothing at all, so from the record those emails had never happened. From the
+screen they are one act. **THE MOCKUP CAUGHT THE FIRST DRAWING**: a mark beside
+the heading pushed the frozen first column onto a second line, which is the one
+thing a setup table may never do (&sect;88) and &sect;116.4's fault exactly
+&mdash; it lives in the column that already answers *who got it*, where it costs
+no height and is the honest answer for a row that has no audience. **DELETE
+REACHES TEST COPIES AND NOTHING ELSE**, Islam's B from two scopes drawn with the
+cost of each stated: the record of what the business was sent stays whole.
+**The guard is asked twice on purpose** &mdash; the endpoint's own gate means
+*"Communication is the SMO's"* and this one means *"destruction is the Super
+user's"*, two questions with the same answer this week and &sect;94's drift the
+day the first is widened. **AND ONE ASSERTION COULD NOT FAIL FOR THE REASON IT
+EXISTED**: the line count was taken per text node, and the mark that wraps is
+its own text node sitting happily on one line &mdash; the deliberate break
+reproduced the exact fault while that assertion stayed green, and four others
+caught it. Counted across the whole cell it reads `[1,1,1,1,2]`. Both halves
+watched to fail first: **5 / 1 / 2** on the client, **3 / 11** on the server.*
+
+*Earlier: 2026-08-28 &mdash; **v3.54: Send an email opens on what went
 (&sect;144)**. Islam: *"the opening page ... should be a dashboard of what was
 sent, to whom, how many people ... and when I say create a message it takes me
 to another tab ... and when I finish and send it it should take me back to the

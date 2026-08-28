@@ -152,16 +152,49 @@ module.exports = async function handler(req, res) {
       const name = String(body.fromName || "").trim();
       const html = String(body.html || "");
       if (!html) return send(res, 400, { ok: false, error: "Nothing to send." });
+      const subj = String(body.subject || "Test from the Strategy Management Platform");
+
+      /* ── A TEST COPY IS WRITTEN DOWN TOO (§145) ────────────────────
+         It was not, and that is the whole of what Islam hit: this path sends a
+         REAL email through the same builder as `send` and recorded nothing, so
+         three test copies looked from the Overview exactly like three emails
+         that had never happened.
+
+         THE ROW GOES IN BEFORE THE SEND, for `send`'s own reason: a send that
+         half succeeds and then loses the function is the case a record exists
+         for, and a record written afterwards is the one that would be missing.
+
+         `kind` SAYS WHAT IT IS. NULL is a real send, so nothing existing needs
+         backfilling and the two paths differ by one value rather than by two
+         code paths writing two shapes. */
+      const trow = (await client.query(
+        "INSERT INTO messages (by_key, by_name, subject, body, kind, total) " +
+        "VALUES ($1,$2,$3,$4,'test',1) RETURNING id",
+        [me.key, me.name || null, subj, String(body.body || "")])).rows[0];
       try {
         const out = await resendSend(key, {
           from: name ? name + " <" + addr + ">" : addr,
           to: [to],
-          subject: String(body.subject || "Test from the Strategy Management Platform"),
+          subject: subj,
           html: html,
           reply_to: String(body.replyTo || "").trim() || undefined
         });
+        await client.query("UPDATE messages SET sent = 1 WHERE id = $1", [trow.id]);
+        await client.query(
+          "INSERT INTO message_recipients (message_id, person_key, person_name, address, ok, provider_id) " +
+          "VALUES ($1,$2,$3,$4,TRUE,$5)",
+          [trow.id, me.key, me.name || null, to, (out && out.id) || null]);
         return send(res, 200, { ok: true, id: out && out.id, to: to });
       } catch (e) {
+        /* A TEST THAT FAILED IS STILL A TEST THAT WAS ATTEMPTED. The row stays
+           and says 0 of 1, the same way a failed send does — a record that
+           quietly removes its own failures is not a record. */
+        await client.query("UPDATE messages SET failed = 1 WHERE id = $1", [trow.id]);
+        await client.query(
+          "INSERT INTO message_recipients (message_id, person_key, person_name, address, ok, error) " +
+          "VALUES ($1,$2,$3,$4,FALSE,$5)",
+          [trow.id, me.key, me.name || null, to,
+           e.resend ? String(e.message).slice(0, 400) : "Could not reach Resend"]);
         /* RESEND'S OWN SENTENCE, OR OURS — never undici's. A refusal from
            Resend names the real cause ("Domain is not verified", "API key is
            invalid") far better than anything generic here could. A network
@@ -349,10 +382,45 @@ module.exports = async function handler(req, res) {
            the criteria as they were chosen is the only honest answer — the
            resolved list is what `message_recipients` holds, and re-resolving it
            today would describe who it would reach NOW, not who it reached. */
-        "SELECT id, sent_at, by_name, subject, total, sent, failed, audience FROM messages " +
+        "SELECT id, sent_at, by_name, subject, total, sent, failed, audience, kind FROM messages " +
         "ORDER BY sent_at DESC LIMIT 50")).rows;
       return send(res, 200, { ok: true, messages: rows });
     }
+    /* ── REMOVING A TEST COPY, AND ONLY A TEST COPY (§145) ──────────
+       Islam, asked whether Delete should reach every record or the test copies
+       alone: "B". The clutter goes and the record of what the business was
+       actually sent stays whole — nobody can quietly remove the evidence that
+       a message went to seventy-six people.
+
+       THE GUARD IS ASKED AGAIN HERE ON PURPOSE, though nobody but a Super user
+       reaches this endpoint at all. That gate says "Communication is the SMO's"
+       and this one says "destruction is the Super user's" (§89's mayDestroy):
+       two different questions that happen to have the same answer today. Widen
+       the endpoint to the SMO team, as §89 would have it, and the delete must
+       not widen with it — §94's drift exactly, a gate relied on for something
+       it does not mean.
+
+       THE KIND IS CHECKED ON THE STORED ROW, never taken from the request: a
+       screen that decides what may be deleted has decided nothing, because it
+       still had to ask. `message_recipients` goes with it by ON DELETE
+       CASCADE. */
+    if (action === "historyDelete") {
+      if (!Rules.isSuperRole(me.role)) {
+        return send(res, 403, { ok: false, error: "Removing a record is the Super user's." });
+      }
+      const id = parseInt(body.id, 10);
+      if (!id) return send(res, 400, { ok: false, error: "which message?" });
+      const row = (await client.query(
+        "SELECT kind FROM messages WHERE id = $1", [id])).rows[0];
+      if (!row) return send(res, 404, { ok: false, error: "no such message" });
+      if (row.kind !== "test") {
+        return send(res, 403, { ok: false,
+          error: "That is a message that went to the business. Only test copies can be removed." });
+      }
+      await client.query("DELETE FROM messages WHERE id = $1", [id]);
+      return send(res, 200, { ok: true });
+    }
+
     if (action === "historyOne") {
       const id = parseInt(body.id, 10);
       if (!id) return send(res, 400, { ok: false, error: "which message?" });

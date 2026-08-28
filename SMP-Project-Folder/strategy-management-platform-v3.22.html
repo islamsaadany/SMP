@@ -3188,6 +3188,10 @@
   .msgsaid { font-size:var(--fs-note); }
   .msgsaid.bad  b { color:var(--bad-tx); }
 
+  /* The Overview's one loud control (§137.8), above the lists it leads away
+     from. Its own row, so the heading under it keeps its spacing. */
+  .msgnew { margin:0 0 20px; }
+
   /* ── THE OUTCOME, ON THE RECORD (§137) ──────────────────────────────
      A send that the server answered leaves the composer, so what it did is
      said on the Overview — above the two lists, with the message it describes
@@ -29180,8 +29184,33 @@ function renderMsgOverview(){
      one neither list was ever asked and both said "Asking…" for ever: §93's
      fault exactly, a gate keyed on markup that moved, failing silently and in
      the safe-looking direction. Gated on the thing that DRAWS the lists. */
-  return '<div id="msgover">' + said + renderDraftList() + renderSentList() +
-         renderSentOne() + '</div>';
+  /* ── THE ACTION, MADE OBVIOUS (§137.8) ──────────────────────────
+     Islam: "in the overview I'd like to add a button, send an email, somewhere
+     for the action to be obvious." He is right that it was missing: *Write a
+     message* is a TAB, and a tab reads as where you are rather than as
+     something to do, so the page's whole purpose had no loud control on it.
+
+     ABOVE THE LISTS — his pick from three drawn in the real page. The cost was
+     stated before he chose and is recorded rather than re-argued: it SCROLLS
+     AWAY, so on a long record the one action on the page is off the top of the
+     screen. The header (option A) would have stayed put; he wanted it in the
+     tab's own content, where it unambiguously belongs to this tab and nothing
+     else.
+
+     "SEND AN EMAIL" IS HIS WORD TOO, chosen over *Write a message*, which is
+     what the tab it opens is called. The cost is that the platform now has a
+     third noun for one thing — page: *Send a message*, tab: *Write a message*,
+     button: *Send an email* (§87's twins, in vocabulary rather than in rows).
+     Recorded, not re-argued.
+
+     DRAWN ONLY HERE, never on the composer: a button offering to take you
+     where you already are is a duplicate, not a choice (§94.15). It is inside
+     `#msgover`, which only the Overview renders, so that holds by
+     construction. */
+  var write = '<div class="msgnew">' +
+    '<button class="editbtn cta" data-msgwrite="1">Send an email</button></div>';
+  return '<div id="msgover">' + said + write + renderDraftList() +
+         renderSentList() + renderSentOne() + '</div>';
 }
 
 /* WHAT IS HALF-WRITTEN. Listed above what was sent, because a draft is
@@ -38911,6 +38940,15 @@ var SYNC = (function () {
         sendmsgTouched();
         paintMsgPreview();
       });
+    });
+
+    /* THE OVERVIEW'S ONE LOUD CONTROL (§137.8). It moves to the other tab
+       rather than doing anything itself — the composer is where the act
+       happens, and this is the way in that a tab was not being. */
+    var msgwrite = document.querySelector("[data-msgwrite]");
+    if (msgwrite) msgwrite.addEventListener("click", function(){
+      CURSEC["send"] = "write";
+      paint();
     });
 
     /* ── THE GREETING (spec 021) ────────────────────────────────────

@@ -147,6 +147,27 @@ READ = """() => {
        Overview is what says the send cannot be repeated by one press. */
     sendShown: (() => { const e = document.getElementById("msgsend");
                         return !!e && e.getClientRects().length > 0; })(),
+    /* THE OVERVIEW'S OWN LOUD CONTROL (§137.8) — and `elementFromPoint` at its
+       centre, never "it is in the document": §90, §93.4 and §110 are all
+       controls that were present, styled and enabled while hitting something
+       else, and none would have failed a query. */
+    writeBtn: (() => { const e = document.querySelector("[data-msgwrite]");
+                       return e ? e.textContent.trim() : null; })(),
+    writeHits: (() => {
+      const e = document.querySelector("[data-msgwrite]"); if (!e) return null;
+      const r = e.getBoundingClientRect();
+      if (!r.width || !r.height) return "no box";
+      const at = document.elementFromPoint(r.left + r.width / 2, r.top + r.height / 2);
+      return at ? (at === e || e.contains(at) || at.contains(e) ? "itself" : at.tagName) : "nothing";
+    })(),
+    /* ABOVE THE LISTS, which is the placement Islam picked (C, not the header).
+       Measured against the first heading rather than by position in the markup. */
+    writeAboveLists: (() => {
+      const b = document.querySelector("[data-msgwrite]");
+      const h = document.querySelector("#msgover .section h2");
+      if (!b || !h) return null;
+      return b.getBoundingClientRect().bottom <= h.getBoundingClientRect().top + 2;
+    })(),
     subject: (typeof sendmsg === "function") ? sendmsg().subject : null,
     body: (typeof sendmsg === "function") ? sendmsg().body : null
   };
@@ -204,6 +225,13 @@ def go():
         # THE FAULT THIS CHECK EXISTS FOR: gated on a control that moved tabs.
         ck("the lists actually resolve", not r["asking"], "still Asking...")
         ck("no grey descriptions", r["notes"] == 0, r["notes"])
+
+        # ── THE ACTION IS OBVIOUS (§137.8) ──────────────────────────
+        ck("there is a loud control for the action",
+           r["writeBtn"] == "Send an email", r["writeBtn"])
+        ck("it can actually be pressed", r["writeHits"] == "itself", r["writeHits"])
+        ck("and it sits above the lists, where Islam put it",
+           r["writeAboveLists"] is True, r["writeAboveLists"])
         ck("and no header dropdowns duplicating the lists", r["menus"] == 0, r["menus"])
 
         # WHO IT WENT TO, in the platform's own words rather than keys or JSON.
@@ -216,6 +244,16 @@ def go():
 
         # ══ 2 · WRITING IS THE OTHER TAB ═══════════════════════════
         print("\n2 · writing one")
+        # PRESSED, not navigated around: the button is the way in this section
+        # exists for, so the check goes the way a person would.
+        pg.click("[data-msgwrite]")
+        pg.wait_for_timeout(900)
+        r = pg.evaluate(READ)
+        ck("the button opens the composer", r["on"] == "Write a message", r["on"])
+        # A control offering to take you where you are is a duplicate (§94.15).
+        ck("and it is not drawn there", r["writeBtn"] is None, r["writeBtn"])
+        pg.click('.secrow [role=tab]:nth-of-type(1)')
+        pg.wait_for_timeout(800)
         to_write(pg)
         r = pg.evaluate(READ)
         ck("the composer is the second tab", r["on"] == "Write a message", r["on"])

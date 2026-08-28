@@ -36,9 +36,10 @@ HTML = """<title>Where The Send Button Goes</title>
 <header class="mast">
   <div class="kicker">Send a message &middot; Overview</div>
   <h1>Where the send button goes</h1>
-  <p>Three places it could sit, each drawn in the real page. My recommendation
-     is the first, and the reason is where it is <em>not</em> shown.</p>
-  <div class="standing"><b>Your pick</b> <span>nothing built yet</span></div>
+  <p>Three places it could sit, each drawn in the real page. Islam picked
+     <strong>C</strong>, above the lists, labelled <strong>Send an email</strong>.
+     Built; the other two are kept here as the record of what was weighed.</p>
+  <div class="standing"><b>Built &mdash; C</b> <span>&ldquo;Send an email&rdquo;, above the lists</span></div>
 </header>
 
 <section class="item">
@@ -63,7 +64,7 @@ HTML = """<title>Where The Send Button Goes</title>
       scroll</strong> &mdash; so on a long record the button is still there.</p>
     %(head)s
     <div class="pick">
-      <div class="kicker">My recommendation</div>
+      <div class="kicker">My recommendation &mdash; not taken</div>
       <p><b>And the reason is what it does on the other tab: nothing.</b> Drawn
         only on Overview, so while you are writing there is no button offering to
         take you where you already are &mdash; a control with no audience of its
@@ -111,19 +112,25 @@ HTML = """<title>Where The Send Button Goes</title>
 </section>
 
 <footer>
-  <h2>Two small things to settle with it</h2>
+  <h2>What was decided</h2>
+  <p style="max-width:var(--measure);color:var(--ink-2);margin:0 0 18px">
+    <strong>C, and &ldquo;Send an email&rdquo;.</strong> Both costs were on the
+    table before the choice and are recorded rather than re-argued: the button
+    scrolls away on a long record, and the platform now has three nouns for one
+    thing &mdash; the page is <em>Send a message</em>, the tab is <em>Write a
+    message</em>, the button says <em>Send an email</em>.</p>
+  <h2 style="margin-top:34px">Settled with it</h2>
   <ol>
-    <li><strong>The word.</strong> The picture says <em>Write a message</em>,
-      matching the tab it opens. You said &ldquo;send an email&rdquo; &mdash; but
-      the page is called <em>Send a message</em> and the platform says
-      <em>message</em> everywhere, so <em>Send an email</em> would be a third word
-      for one thing. Say which you want.</li>
-    <li><strong>Does the tab stay?</strong> I would keep it: the button is the
-      loud way in, the tab is how you get <em>back</em> to a half-written message
-      without losing it.</li>
+    <li><strong>The word is <em>Send an email</em></strong>, Islam&rsquo;s
+      choice.</li>
+    <li><strong>The tab stays.</strong> The button is the loud way in; the tab is
+      how you get <em>back</em> to a half-written message without losing it.</li>
+    <li><strong>It is drawn only on the Overview.</strong> On the writing tab a
+      button offering to take you where you already are would be a duplicate,
+      not a choice.</li>
   </ol>
   <div class="sig">
-    Drawn in the real platform &middot; light and dark &middot; nothing built yet
+    Drawn in the real platform &middot; light and dark &middot; C built on the branch
   </div>
 </footer>
 
@@ -143,8 +150,10 @@ page = HTML % {
     "body": fig("body.png",
                 "<b>C &mdash; above the lists</b>Inside the tab&rsquo;s own content, "
                 "before the first table."),
-    "headdark": fig("head-dark.png",
-                    "<b>A, in dark</b>Same build, same placement."),
+    "headdark": fig("built.png",
+                    "<b>As built &mdash; C, in both themes</b>The shipped Overview: "
+                    "<em>Send an email</em> above the lists, drawn on this tab only.",
+                    dark="built-dark.png"),
 }
 OUT.write_text(page)
 print("wrote %s (%.1f MB)" % (OUT, OUT.stat().st_size / 1e6))

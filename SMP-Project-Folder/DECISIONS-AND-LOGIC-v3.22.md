@@ -17971,6 +17971,53 @@ reachable, nothing clipped without a hover, a row that opens the per-person
 record) rather than where they live. §51.11's instruction, followed rather than
 re-learned: grep every check when a control changes shape.
 
+### 137.8 The action, made obvious — and it is his placement and his word
+
+Islam: *"In the overview I'd like to add a button, send an email, somewhere for
+the action to be obvious. Where should we place it? What are my options?"*
+
+**He is right that it was missing.** *Write a message* is a TAB, and a tab reads
+as **where you are** rather than as **something to do** — so the page's whole
+purpose had no loud control anywhere on it.
+
+Three placements were drawn in the real page and put to him:
+
+| | Where | What it costs |
+|---|---|---|
+| **A** | Beside the page's name | — (recommended: the header stays put when you scroll) |
+| **B** | At the end of the tab row | Reads as a third tab; the tab row styles its own buttons, so a solid fill is a rule fighting a rule |
+| **C** | Above the lists | **Scrolls away** |
+
+**Islam picked C, and the cost was stated before he chose it**, so it is
+recorded rather than re-argued: on a long record the one action on the page
+goes off the top of the screen — the fault that made the send bar sticky in the
+first place (§95). What C buys is that the button unambiguously belongs to this
+tab and nothing else.
+
+**And the word is his too.** *Send an email*, over *Write a message*, which is
+what the tab it opens is called. The cost, also stated first: the platform now
+has **three nouns for one thing** — the page is *Send a message*, the tab is
+*Write a message*, the button says *Send an email* (§87's twins, in vocabulary
+rather than in rows).
+
+**DRAWN ONLY ON THE OVERVIEW**, which is not a preference: a button offering to
+take you where you already are is a duplicate rather than a choice (§94.15). It
+sits inside `#msgover`, which only this tab renders, so that holds by
+construction — and the check asserts BOTH ENDS, that it is here and that it is
+not there (§94.2).
+
+**Two faults the CAPTURE taught**, both recorded in
+`checks/send-button-mockup.py` because both would have produced a lying
+picture. An **element screenshot displaces the sticky rows inside it** —
+shooting `.setuppane` dropped the tab row out of every option, so the viewport
+is shot and cropped to the pane's measured box instead. And the **tab row
+styles its own buttons**, so option B's fill had to be forced inline; needing
+that is itself a cost of B, and it is named rather than hidden.
+
+Proved in `checks/send-overview.py` §1–2, watched to fail first: the button
+removed → **3 failures**; drawn on the composer too → **1**, the duplicate
+exactly.
+
 ### 137.7 What proves it
 
 `src/checks/send-overview.py`, over HTTP (§94.11). It asserts the two things a

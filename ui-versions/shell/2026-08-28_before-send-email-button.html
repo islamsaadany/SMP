@@ -4230,15 +4230,6 @@
       });
     });
 
-    /* THE OVERVIEW'S ONE LOUD CONTROL (§137.8). It moves to the other tab
-       rather than doing anything itself — the composer is where the act
-       happens, and this is the way in that a tab was not being. */
-    var msgwrite = document.querySelector("[data-msgwrite]");
-    if (msgwrite) msgwrite.addEventListener("click", function(){
-      CURSEC["send"] = "write";
-      paint();
-    });
-
     /* ── THE GREETING (spec 021) ────────────────────────────────────
        THE SWITCH REPAINTS; TYPING THE WORD DOES NOT. Turning it on draws a
        box and a line that were not there, which is a repaint; typing into

@@ -1718,6 +1718,10 @@
   .msgsaid { font-size:var(--fs-note); }
   .msgsaid.bad  b { color:var(--bad-tx); }
 
+  /* The Overview's one loud control (§137.8), above the lists it leads away
+     from. Its own row, so the heading under it keeps its spacing. */
+  .msgnew { margin:0 0 20px; }
+
   /* ── THE OUTCOME, ON THE RECORD (§137) ──────────────────────────────
      A send that the server answered leaves the composer, so what it did is
      said on the Overview — above the two lists, with the message it describes

@@ -2116,6 +2116,22 @@ console errors (in this cloud environment, run it via a wrapper that points Play
   and §51.11 exactly, a gate keyed on markup that moved, failing silently and
   in the safe-looking direction. Gated on `#msgover`, the thing that draws
   them. **Found by driving it, not by reading it.**
+- **THE ACTION IS MADE OBVIOUS, AND BOTH CHOICES ARE ISLAM'S (§137.8):** a tab
+  reads as *where you are*, not as *something to do*, so the page's own purpose
+  had no loud control. Three placements were drawn in the real page; he picked
+  **above the lists** over the header, and **"Send an email"** over *Write a
+  message*. **Both costs were stated before he chose and are recorded rather
+  than re-argued**: the button SCROLLS AWAY on a long record (§95's own fault),
+  and the platform now has three nouns for one thing — page *Send a message*,
+  tab *Write a message*, button *Send an email* (§87's twins, in vocabulary).
+  **DRAWN ONLY ON THE OVERVIEW** — a button offering to take you where you
+  already are is a duplicate, not a choice (§94.15) — which holds by
+  construction because it lives inside `#msgover`, and is asserted at BOTH ENDS.
+  **AND THE CAPTURE LIED TWICE BEFORE THE COMPARISON WAS FAIR**: an element
+  screenshot DISPLACES the sticky rows inside it (shooting `.setuppane` dropped
+  the tab row from every option), so the viewport is shot and cropped to the
+  pane's measured box; and the tab row styles its own buttons, so option B's
+  fill had to be forced — which is itself a cost of B, named rather than hidden.
 - **THE BAR REPORTS, AND MOVES ON (v3.50, §136 — SUPERSEDED BY §137):** Islam, using the
   product: *"When I send I don't get any verification that the message was sent
   and the page stays the same view."* Both halves true, and two faults. **The

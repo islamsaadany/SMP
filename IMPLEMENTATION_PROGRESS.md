@@ -89,6 +89,11 @@ Overview."*
 - **§136 is superseded**: *Write another* and the bar's outcome line go, and
   `checks/send-said.py` is deleted rather than left red. Its surviving rule —
   a send cannot be repeated by one press — now holds by construction.
+- **A loud control for the action** (§137.8): **Send an email**, above the
+  lists. Both the placement and the word are Islam's, picked from three drawn
+  in the real page, and both costs were stated before he chose — the button
+  scrolls away on a long record, and the platform now has three nouns for one
+  thing. Drawn only on the Overview, asserted at both ends.
 
 **The bug it cost:** both list fetches were gated on `#msgsend`, the Send
 button, which now lives on the other tab — so on the Overview neither list was

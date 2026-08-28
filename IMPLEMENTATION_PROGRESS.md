@@ -6,10 +6,8 @@ version (rules A2 / A11, changed 2026-08-20) — those go only when asked for.
 
 **Where it runs:** Vercel, production tracks `main`. Static files plus two
 serverless functions (`/api/state`, `/api/auth`) against Neon Postgres.
-**Latest version:** v3.57 on `main` (§147 merged 2026-08-28); **v3.58 (§148,
-the welcome screen, spec 025) on `claude/welcome-screen-design-d4mlfq`**,
-awaiting the word to merge. *(Corrected in passing: this line still said
-v3.57 was awaiting merge after its merge commit had landed on `main`.)*
+**Latest version:** v3.58 on `main` (§148, the welcome screen, spec 025 —
+merged 2026-08-28 on Islam's word).
 
 **Sign in as:** `SMO` / `1234` — a password change is forced at once (§43.1,
 reversing §19.4).

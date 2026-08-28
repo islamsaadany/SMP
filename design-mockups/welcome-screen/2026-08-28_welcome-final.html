@@ -1,0 +1,209 @@
+<title>SMP Welcome Screen</title>
+<style>
+  /* ══════════════════════════════════════════════════════════════════
+     MOCKUP — Welcome screen, FINAL for sign-off.
+     Settled across three rounds: the greeting leads on the left (round 2,
+     band B); the tenant is a compact signature whose every line starts at
+     the separator (round 3); no number stands alone — each lives in its
+     own sentence (round 3, variation C). Forefront palette, light,
+     product language. Viewer shown: Mennah Farouk, custodian of Mobile.
+     ══════════════════════════════════════════════════════════════════ */
+  :root {
+    --sans:ui-sans-serif,system-ui,-apple-system,'Segoe UI',Roboto,'Helvetica Neue',Arial,'Noto Sans',sans-serif;
+    --mono:ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,'Liberation Mono',monospace;
+    --fs-micro:10px; --fs-label:11px; --fs-small:12px; --fs-note:13px;
+    --fs-body:14px; --fs-lead:17px;
+    --track:.12em;
+    --r-sm:6px; --r:8px; --r-md:12px; --r-pill:999px;
+
+    /* Forefront · light (verbatim from _shared.css) */
+    --cta:#A4512C; --cta-ink:#FFFFFF; --cta-hover:#8F4423;
+    --bad-tx:#8C3327;
+    --panel-accent:#E6C65C; --panel-quiet:#B7C4D8;
+    --stone:#16325C;
+    --gold:#C9A24D; --gold-deep:#8A6B22;
+    --ground:#F7F8FA; --surface:#FFFFFF; --surface-2:#EFF2F6;
+    --line:#D6DCE5; --line-soft:#E6EAF0;
+    --ink:#171B22; --ink-2:#414A58; --ink-3:#636C79;
+    --panel:#16325C; --panel-ink:#FFFFFF;
+    --over-bg:#FBF6E9; --over-line:#E8D9AE;
+  }
+  * { box-sizing:border-box; }
+  body { margin:0; background:var(--ground); color:var(--ink);
+         font-family:var(--sans); font-size:var(--fs-body); line-height:1.55;
+         -webkit-font-smoothing:antialiased; }
+
+  .wrap { max-width:1140px; margin:0 auto; padding:34px 24px 60px; }
+
+  .mockband { font-size:var(--fs-small); color:var(--ink-3); letter-spacing:.06em;
+              text-transform:uppercase; margin:0 0 14px; }
+  .mockband b { color:var(--ink-2); }
+
+  /* ══════════ THE SCREEN ══════════ */
+
+  /* ── The navy band: greeting leads, tenant signs on the separator ── */
+  .hero { background:var(--panel); color:var(--panel-ink); border-radius:var(--r-md);
+          padding:30px 34px 28px; display:flex; justify-content:space-between;
+          align-items:center; gap:30px; flex-wrap:wrap; }
+  .kicker { font-size:var(--fs-micro); letter-spacing:.18em; text-transform:uppercase;
+            color:var(--panel-accent); font-weight:700; margin:0 0 10px; }
+  .greet h2 { margin:0 0 12px; font-size:30px; font-weight:800; letter-spacing:-.02em; }
+  .who { display:flex; gap:8px; flex-wrap:wrap; }
+  .chip { display:inline-flex; align-items:center; gap:6px; font-size:var(--fs-label);
+          font-weight:600; letter-spacing:.04em; padding:4px 11px; border-radius:var(--r-pill);
+          border:1px solid rgba(255,255,255,.28); color:var(--panel-ink); }
+  .chip.cycle { border-color:var(--panel-accent); color:var(--panel-accent); }
+  .chip.cycle i { width:7px; height:7px; border-radius:99px; background:var(--panel-accent); }
+  /* One shared edge: every line of the tenant block starts AT the separator,
+     so the hairline and the text draw a single vertical. */
+  .tenant { display:flex; flex-direction:column; align-items:flex-start; gap:8px;
+            border-left:1px solid rgba(255,255,255,.18); padding-left:28px;
+            align-self:stretch; justify-content:center; }
+  .mark { width:36px; height:36px; border-radius:var(--r-sm); background:var(--surface);
+          color:var(--stone); font:800 13px/36px var(--sans); text-align:center;
+          letter-spacing:.02em; flex:none; }
+  .tenant h1 { margin:0; font-size:var(--fs-lead); font-weight:800; letter-spacing:-.01em; }
+  .office { font-size:var(--fs-label); letter-spacing:.06em; text-transform:uppercase;
+            color:var(--panel-quiet); }
+
+  /* ── The list: every number lives inside its own sentence ────────── */
+  .cols { display:grid; grid-template-columns:1fr 336px; gap:22px; margin-top:22px; }
+  @media (max-width:960px){ .cols { grid-template-columns:1fr; } }
+  .seclab { font-size:var(--fs-label); font-weight:900; letter-spacing:var(--track);
+            text-transform:uppercase; color:var(--ink-2); margin:0 0 10px; }
+  .acts { display:flex; flex-direction:column; gap:10px; }
+  .act { background:var(--surface); border:1px solid var(--line); border-radius:var(--r);
+         padding:16px 18px; display:flex; align-items:center; gap:16px; }
+  .act .what { flex:1; min-width:0; }
+  .act .what b { display:block; font-size:15px; letter-spacing:-.01em; }
+  .act .what > span { display:block; font-size:var(--fs-note); color:var(--ink-2); margin-top:2px; }
+  .act .what .lead { font-weight:700; }
+  .act .what .alert { color:var(--bad-tx); font-weight:600; }
+  button { font:inherit; cursor:pointer; }
+  .btn { flex:none; font-size:var(--fs-small); font-weight:700; letter-spacing:.03em;
+         padding:8px 16px; border-radius:var(--r-sm); border:1px solid var(--line);
+         background:var(--surface); color:var(--ink-2); }
+  .btn:hover { border-color:var(--gold-deep); color:var(--ink); }
+  .btn.cta { background:var(--cta); border-color:var(--cta); color:var(--cta-ink); }
+  .btn.cta:hover { background:var(--cta-hover); border-color:var(--cta-hover); }
+  .continue { margin-top:14px; text-align:right; }
+  .continue a { font-size:var(--fs-note); font-weight:600; color:var(--stone); text-decoration:none; }
+  .continue a:hover { color:var(--gold-deep); }
+
+  /* ── Side column ─────────────────────────────────────────────────── */
+  .side { display:flex; flex-direction:column; gap:22px; }
+  .card { background:var(--surface); border:1px solid var(--line); border-radius:var(--r);
+          padding:16px 18px; }
+  .pages { display:flex; flex-direction:column; }
+  .pages a { display:flex; align-items:center; gap:8px; padding:9px 2px;
+             font-size:var(--fs-note); font-weight:600; color:var(--ink);
+             text-decoration:none; border-bottom:1px solid var(--line-soft); }
+  .pages a:last-child { border-bottom:0; }
+  .pages a small { flex:1; font-weight:500; color:var(--ink-3); font-size:var(--fs-small);
+                   text-align:right; }
+  .pages a .go { color:var(--gold-deep); font-family:var(--mono); margin-left:auto; }
+  .pages a:hover { color:var(--gold-deep); }
+  .tourcard { background:var(--over-bg); border:1px solid var(--over-line);
+              border-radius:var(--r); padding:18px; }
+  .tourcard h3 { margin:0 0 6px; font-size:var(--fs-lead); font-weight:700; letter-spacing:-.01em; }
+  .tourcard p { margin:0 0 14px; font-size:var(--fs-note); color:var(--ink-2); }
+  .tourbtns { display:flex; gap:10px; align-items:center; }
+  .tbtn { font-size:var(--fs-small); font-weight:700; letter-spacing:.03em; padding:8px 16px;
+          border-radius:var(--r-pill); border:1px solid var(--gold); background:none;
+          color:var(--gold-deep); }
+  .tbtn:hover { border-color:var(--gold-deep); }
+  .tghost { font-size:var(--fs-small); font-weight:600; border:0; background:none;
+            color:var(--ink-3); padding:8px 6px; }
+  .tghost:hover { color:var(--ink); }
+
+  /* ══════════ NOTES FOR THE RECORD — not part of the screen ══════════ */
+  .notes { margin-top:44px; border-top:1px solid var(--line); padding-top:22px; }
+  .notes h4 { font-size:var(--fs-label); font-weight:900; letter-spacing:var(--track);
+              text-transform:uppercase; color:var(--ink-3); margin:0 0 12px; }
+  .notes ol { margin:0; padding-left:20px; display:flex; flex-direction:column; gap:8px;
+              font-size:var(--fs-note); color:var(--ink-2); max-width:78ch; }
+  .notes b { color:var(--ink); }
+</style>
+
+<div class="wrap">
+  <p class="mockband">Mockup · <b>Welcome screen — final for sign-off</b> · band B + variation C · shown as Mennah Farouk, custodian of Mobile · 2026-08-28</p>
+
+  <!-- ═══════════ THE SCREEN ═══════════ -->
+  <div class="hero">
+    <div class="greet">
+      <p class="kicker">Strategy Management Platform</p>
+      <h2>Welcome, Mennah</h2>
+      <div class="who">
+        <span class="chip">Strategy custodian · Mobile</span>
+        <span class="chip cycle"><i></i>Q2 2026 cycle is open</span>
+      </div>
+    </div>
+    <div class="tenant">
+      <div class="mark">RT</div>
+      <h1>Raya Trade</h1>
+      <div class="office">Strategy Management Office</div>
+    </div>
+  </div>
+
+  <div class="cols">
+    <div>
+      <p class="seclab">Waiting on you</p>
+      <div class="acts">
+        <div class="act">
+          <div class="what">
+            <b>Submit Mobile's Q2 report</b>
+            <span><span class="lead">3 figures</span> still open · <span class="alert">1 needs a note</span></span>
+          </div>
+          <button class="btn cta">Open reporting</button>
+        </div>
+        <div class="act">
+          <div class="what">
+            <b>Fill Mobile's missing plan elements</b>
+            <span><span class="alert">4 missing</span> — 2 targets, 1 owner and 1 due date</span>
+          </div>
+          <button class="btn">Fill the gaps</button>
+        </div>
+        <div class="act">
+          <div class="what">
+            <b>The Strategy Office replied to you</b>
+            <span>Yesterday, in your conversation</span>
+          </div>
+          <button class="btn">Open the conversation</button>
+        </div>
+      </div>
+      <p class="continue"><a href="#">Continue to Mobile ›</a></p>
+    </div>
+
+    <div class="side">
+      <div>
+        <p class="seclab">Your pages</p>
+        <div class="card pages">
+          <a href="#">Mobile — Strategy <small>Plan · Foundation · SWOT</small><span class="go">›</span></a>
+          <a href="#">Mobile — Performance<span class="go">›</span></a>
+          <a href="#">Mobile — Reporting<span class="go">›</span></a>
+        </div>
+      </div>
+      <div class="tourcard">
+        <h3>Take an intro round</h3>
+        <p>Eight stops on the worked example — about two minutes.</p>
+        <div class="tourbtns">
+          <button class="tbtn">Start the round</button>
+          <button class="tghost">Not now</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══════════ FOR THE RECORD — mockup furniture only ═══════════ -->
+  <div class="notes">
+    <h4>Settled across the three rounds — not part of the screen</h4>
+    <ol>
+      <li><b>The greeting leads</b> (round 2, band B): "Welcome, Mennah" is the headline on the left with the person's place and the cycle state under it; the tenant is a compact signature on the right, every line starting at the separator so the hairline and the text share one edge (round 3).</li>
+      <li><b>No number stands alone</b> (round 3, variation C): every count lives inside its own sentence — the badges are gone.</li>
+      <li><b>Where it appears:</b> after sign-in, before the platform. <b>Continue to Mobile</b> is the no-action path and goes where the person works today (§94.6 still decides that).</li>
+      <li><b>Nothing new is computed:</b> each row's facts are the same functions its destination page already calls — the cycle's pending state, the plan's gap list (§145), the chat's unread.</li>
+      <li><b>The list is the viewer's:</b> the SMO and team see their own rows (inbox waiting, passwords to issue, units without a custodian) and are never offered the intro round (§118). Nothing waiting reads <b>Nothing is waiting on you</b>, with Continue as the loud control.</li>
+      <li><b>One solid button</b> (§41's budget): Report wears the CTA orange while a cycle is open; "4 missing" wears red as words, its button stays quiet.</li>
+    </ol>
+  </div>
+</div>

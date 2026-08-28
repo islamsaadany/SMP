@@ -2533,6 +2533,11 @@ python3 checks/no-jump.py       # nothing moves the register under you — the a
 python3 checks/plan-builder.py  # building a plan ON the platform: the door, the chooser,
                                 # the band's map, every row form asked of the DATA, and the
                                 # empty-state fixes — proved able to fail twice (§129)
+python3 checks/project-custodian.py # a custodian per project (§147): the Project owner's
+                                # project takes their figures, the one beside it takes
+                                # nothing, and a milestone owner is a Contributor who
+                                # reports nothing until the row is opened — both ends,
+                                # three viewers, proved able to fail
 python3 checks/office-chat.py   # the chat's client half — serves the built file over HTTP,
                                 # because the whole feature is invisible over file:// (§97.9)
 python3 checks/setup-rail.py    # the Setup rail fits the window, every entry is reachable
@@ -2600,7 +2605,59 @@ prior sessions (on HR_ERP) accidentally reverted agreed-upon designs.
 
 ---
 
-*Last Updated: 2026-08-28 &mdash; **v3.56: a test copy is a send, and it says
+*Last Updated: 2026-08-28 &mdash; **v3.57: a custodian per project
+(&sect;147, spec 024)**. Islam: *"in a case of a function that has 2 projects
+each project has an owner so the custodian here is not on the whole capability
+there is a custodian per project"* &mdash; and then, correcting the first
+build (&sect;147.7): *"contributor is not the right naming &hellip; these are
+2 roles."* **THREE BOUNDED ROLES, ALL DERIVED FROM BEING NAMED, NONE GRANTABLE
+BY HAND**: a **Project owner** (`powner`) from a project's Owner row; a
+**Pillar owner** (`plowner`) from a pillar's, on a unit or a pillars function;
+a **Contributor** is everyone else the plan names &mdash; a collaborator, a
+stakeholder, a milestone's owner &mdash; who **reports NOTHING until the
+tenant opens the Contributor row**, and then only the rows that name them.
+**TWO CONDITIONS before an owner reports, his words and nothing else**: the
+role's own Reporting cell at edit (both owner rows SHIP AT VIEW &mdash;
+condition 1 is that the grant is made on the table) and being named the Owner
+&mdash; the register attachment the first build required is DROPPED, because
+it was the silent third condition behind "I added ahmed abdelzim to a project
+and he is not able to report". The line is the thing named, whole; none of the
+three ever submits, writes the note or adds slides (`OWN_LINES_ONLY` carries
+all three, so the picker, the workbook, the merge and the delete-blockers
+already answer right). **ONE REACH RULE, PER ROW** &mdash;
+`boundedReach()`/`mayReportRow()` in `lib/rules.js`, asked by the unit pane,
+the function pane (per row now: a project's owner and a milestone's owner
+meet on one table) and the authoriser; `ctxOfUnit()`/`ctxOfFn()` hand the
+server the same row-with-context. **AND THE BUILD SURFACED A DRIFT**: a
+pillars function's Report page asked the own-UNIT cell while the server
+judged the own-FUNCTION one &mdash; invisible while custodian and head ship
+with both at edit; `canReport()` asks `k_report` for `fn:` targets now, and
+the server's own-lines narrowing reaches pillars functions (the `isFn` skip
+is gone). **The seed gains chips and nobody gains grants** (24 of 33 demo
+people are named owners in the worked example; both new rows ship at view).
+**The world had to learn the capabilities**
+(&sect;102.4's two allow-lists, both edited, asserted).
+**AND THE GROUND IT STANDS ON WAS BROKEN**: since migration 024
+the server had classified a custodian's DELIVERABLE report &mdash; and the
+milestone % that &sect;104.10 REQUIRES &mdash; as PLAN and refused them, while
+the screen offered both (`REPORT` had no deliverable family and `milestone`
+never gained `pct`; no capReporting test existed to notice). Fixed and
+asserted by name. **THE OWNER STAYS A NAME, DECIDED BY A MERGE** (&sect;147.4):
+a keyed `owner`+`ownerKey` picker was built first, and `git fetch` before
+pushing found &sect;130.1 already on `main` from another session &mdash; Islam's
+own wider ask, register-picked owner NAMES on five plan fields, the
+name-not-key decision recorded with its reasoning &mdash; so the `ownerKey`
+layer was removed and this feature rides that model whole, because a tactic's
+owner is already rights-bearing by name and one question must not have two
+answers (&sect;53.5). Proved able to fail three ways before green was believed
+(&sect;94.5): narrowing stubbed &rarr; 2 failures, derivation stubbed &rarr; 6,
+screen gate flattened &rarr; 2. Seed scanned: nobody's standing changes.
+**Flagged, not built** (&sect;147.6): a pillars function still derives no
+contributors, and the bar's "View only" pill to a contributor with editable
+rows is the unit side's own long-standing wording &mdash; changing it is a
+decision for both sides at once.*
+
+*Earlier: 2026-08-28 &mdash; **v3.56: a test copy is a send, and it says
 so (&sect;146)**. Islam, using the product: *"there have been multiple sent
 emails earlier. weren't they saved? I can't see them in the overview."*
 **NOTHING WAS LOST, AND ESTABLISHING THAT FIRST WAS MOST OF THE WORK** &mdash;

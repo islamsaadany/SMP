@@ -699,36 +699,13 @@ function edits(w, person, area, target) {
    the drift the shared file exists to prevent. */
 const namedOn = R.namedOn;
 
-/* Every row in a unit that carries an id, with the context mayReportRow()
-   reads (§147.7): the row itself and the Owner of the pillar it sits under.
-   A measure's `row` still leans on its pillar's owner — §55's rule, kept so
-   nothing a unit contributor could reach before the pillar-owner role
-   existed is taken away by its arrival. */
-function ctxOfUnit(u) {
+/* Every row in a unit that carries an id, so a changed id can be found. */
+function rowsOfUnit(u) {
   const out = {};
-  (u && u.keyObjectives || []).forEach(function (x) { out[x.id] = { row: x }; });
+  (u && u.keyObjectives || []).forEach(function (x) { out[x.id] = x; });
   (u && u.items || []).forEach(function (p) {
-    (p.measures || []).forEach(function (m) {
-      out[m.id] = { row: { owner: p.owner, collaborators: m.collaborators },
-                    pillarOwner: p.owner };
-    });
-    (p.tactics || []).forEach(function (t) {
-      out[t.id] = { row: t, pillarOwner: p.owner };
-    });
-  });
-  return out;
-}
-/* The same map for a function's capabilities: each reporting row with the
-   project it sits inside. */
-function ctxOfFn(w, fnKey) {
-  const out = {};
-  (w.capabilities || []).forEach(function (c) {
-    if (!c || c.fn !== fnKey) return;
-    (c.keyObjectives || []).forEach(function (x) { out[x.id] = { row: x }; });
-    (c.projects || []).forEach(function (pr) {
-      (pr.deliverables || []).concat(pr.outcomes || [], pr.milestones || [])
-        .forEach(function (x) { if (x && x.id !== undefined) out[x.id] = { row: x, project: pr }; });
-    });
+    (p.measures || []).forEach(function (m) { out[m.id] = { owner: p.owner, of: m }; });
+    (p.tactics || []).forEach(function (t) { out[t.id] = t; });
   });
   return out;
 }
@@ -879,36 +856,31 @@ function authorize(stored, incoming, person) {
           return;
         }
         /* Submitting, and the subject's own note on the cycle, speak for the
-           whole unit or function — so somebody who edits only through a
-           bounded role (a contributor, a project owner, a pillar owner) does
-           neither (spec 006 §7.2; the two owner roles since §147.7). */
+           whole unit or function — so a contributor limited to their own lines
+           does neither (spec 006 §7.2; the fn: side since §147, because a
+           project's owner is a Contributor now and this guard used to step
+           around every fn: target). */
         if (R.onlyOwnLines(w, person, isFn ? "fn" : "unit", t)) {
           if (ch.kind === "reportState") {
-            no("Your role reports its own rows; " + ch.what + " is the " +
+            no("A contributor reports their own lines; " + ch.what + " is the " +
                (isFn ? "function's." : "unit's."));
             return;
           }
         }
-        if (ch.kind !== "unitReporting" || !ch.ids) return;
-        /* "They should be allowed to their lines only" — a rule with teeth,
-           so a tenant that opened a bounded row cannot touch anybody else's
-           rows. mayReportRow() is the one reach rule the screen also asks
-           (§42), and since §147.7 it runs for a pillars FUNCTION's plan too:
-           the old `isFn` skip existed because no bounded role could reach an
-           fn: target, and a pillar owner can. */
-        if (!R.onlyOwnLines(w, person, isFn ? "fn" : "unit", t)) return;
-        const uStored = isFn
-          ? asUnit((stored.functions || {})[t.slice(3)] || {}, t)
-          : (stored.units || {})[t];
-        const ctxs = ctxOfUnit(uStored);
+        if (ch.kind !== "unitReporting" || !ch.ids || isFn) return;
+        /* "Contributors only view, and if we allow them they should be allowed
+           to their lines only" — a rule with teeth, so a tenant that still has
+           edit stored for contrib cannot touch anybody else's rows. */
+        if (!R.onlyOwnLines(w, person, "unit", t)) return;
+        const rows = rowsOfUnit((stored.units || {})[t]);
         const notMine = ch.ids.filter(function (id) {
-          const ctx = ctxs[id];
-          return !ctx || !R.mayReportRow(w, person, isFn ? "fn" : "unit", t, ctx);
+          const row = rows[id];
+          if (!row) return true;
+          return !namedOn(row.of ? { owner: row.owner } : row, person);
         });
         if (notMine.length)
-          no("Your role reports only its own rows — " + notMine.length +
-             (notMine.length === 1 ? " figure" : " figures") + " in " +
-             t.replace(/^fn:/, "") + " is not yours.");
+          no("A contributor reports only their own lines — " + notMine.length +
+             (notMine.length === 1 ? " figure" : " figures") + " in " + t + " is not yours.");
         return;
       }
 
@@ -1062,27 +1034,27 @@ function authorize(stored, incoming, person) {
           return;
         }
         /* ── A CUSTODIAN PER PROJECT (§147) ──────────────────────────
-           A PROJECT OWNER reaches every row of their project and nothing in
-           the project next to it; a CONTRIBUTOR (a milestone's owner, a
-           stakeholder) reaches the rows that name them; the capability's own
-           key objectives and its headline figures belong to no project, so
-           for anybody bounded they are refused. Resolved against the STORED
-           capabilities (§42.2), through the same reach rule the screen asks
-           (mayReportRow, §147.7). */
+           A project's owner is a Contributor of its function, and a
+           Contributor reports their own lines only — here the line is the
+           PROJECT: every deliverable, outcome and milestone it holds, and
+           nothing in the project next to it. A capability's own key
+           objectives and its headline figures belong to no project, so for
+           somebody who speaks only for their own they are refused too.
+           Resolved against the STORED capabilities (§42.2), through the same
+           two functions the screen asks (capProjectOf, namedOn). */
         if (!R.onlyOwnLines(w, person, "fn", ch.target)) return;
         const fk = String(ch.target || "").replace(/^fn:/, "");
         if (!ch.ids) {
-          no("Your role reports its own rows — " + ch.what + where +
+          no("A project owner reports their own project — " + ch.what + where +
              " is the function's.");
           return;
         }
-        const ctxs = ctxOfFn(w, fk);
         const notMine = ch.ids.filter(function (id) {
-          const ctx = ctxs[id];
-          return !ctx || !R.mayReportRow(w, person, "fn", ch.target, ctx);
+          const proj = R.capProjectOf(w, fk, id);
+          return !proj || !namedOn(proj, person);
         });
         if (notMine.length)
-          no("Your role reports only its own rows — " + notMine.length +
+          no("A project owner reports only their own project — " + notMine.length +
              (notMine.length === 1 ? " row" : " rows") + " in " + fk + " is not yours.");
         return;
       }

@@ -221,6 +221,7 @@ var PCOLMENU = false, PWMENU = false, PFILEMENU = false;
 var FNCOLMENU = false;   /* the Functions table's own (§93.14) */
 /* Send a message's two header dropdowns (§95). One at a time, like every
    other header menu: two open panels on one row cover each other. */
+var DRAFTMENU = false, SENTMENU = false;
 var PICKING = null, PICKQ = "";
 
 /* ── ACCESS, by ROLE and by AREA ────────────────────────────────────
@@ -379,14 +380,26 @@ var UNIT_ROLES = {
 
    The list is the particles this register actually contains, plus the European
    ones a client could arrive with. A word not on it is a name. */
-/* MOVED TO `lib/rules.js` (§130.7), and these are the browser's handles on it.
-   The plan stores what the register's Name column shows now, so the SERVER has
-   to be able to recognise it too — and a name rule written twice is the drift
-   that file exists to prevent (§42). Wrappers rather than renamed call sites:
-   five places here ask for a run of somebody's names, and none of them cares
-   where the answer is computed. */
-var NAME_PARTICLES = SMPRules.NAME_PARTICLES;
-function nameWords(name, n){ return SMPRules.nameWords(name, n); }
+var NAME_PARTICLES = ["abd","abdel","abd-el","el","al","abu","abou","bin","ben",
+                      "ibn","bint","van","von","de","del","della","der","den",
+                      "di","da","dos","du","la","le","st","st.","mac","mc"];
+function nameWords(name, n){
+  var parts = String(name == null ? "" : name).trim().split(/\s+/).filter(Boolean);
+  if (!parts.length) return "";
+  var out = [], names = 0, i = 0;
+  while (i < parts.length && names < n) {
+    /* Take the run of particles, then the word they belong to. A name ENDING
+       in a particle (a truncated row) still terminates, or this loops. */
+    var start = i;
+    while (i < parts.length &&
+           NAME_PARTICLES.indexOf(parts[i].toLowerCase().replace(/[^a-z.-]/g, "")) > -1) i++;
+    if (i < parts.length) i++;
+    else if (i === start) break;
+    names++;
+    out = parts.slice(0, i);
+  }
+  return out.join(" ");
+}
 
 var NAMED_ELSEWHERE_WORDS = 2;
 function personFullName(key){
@@ -573,80 +586,6 @@ function commsSet(key, value){
    ever. So a value set back to its default DELETES its key, and the last key
    leaving deletes `GROUP.chat` — a tenant that has never opened the menu, or
    has put everything back, writes nothing at all. */
-/* ── The knowledge base's pen (§140) ─────────────────────────────────
-   GROUP.kb rides org.extra like GROUP.chat above: { ov: { id: {q,a} },
-   add: [ {id,g,q,a} ] }. THE WRITERS DELETE ON DEFAULT (§50.6): an answer
-   put back to the shipped wording deletes its key, the last key leaving
-   deletes GROUP.kb, so a tenant that has never touched the pen and one that
-   touched it and thought better are byte-identical. What the overrides MEAN
-   is `SMPRules.kbLook` / `kbAdds` — one precedence rule for the page and
-   the assistant both (§103). */
-function kbShipped(id){
-  for (var i = 0; i < RECIPES.length; i++){
-    var g = RECIPES[i];
-    for (var j = 0; j < g.items.length; j++){
-      if (g.items[j].id === id) return g.items[j];
-    }
-  }
-  return null;
-}
-function kbWritable(){
-  if (!GROUP.kb || typeof GROUP.kb !== "object") GROUP.kb = {};
-  return GROUP.kb;
-}
-function kbPrune(){
-  var k = GROUP.kb;
-  if (!k) return;
-  if (k.ov && !Object.keys(k.ov).length) delete k.ov;
-  if (k.add && !k.add.length) delete k.add;
-  if (!Object.keys(k).length) delete GROUP.kb;
-}
-function kbSetOver(id, q, a){
-  var std = kbShipped(id);
-  if (!std) return;
-  q = String(q == null ? "" : q).trim();
-  a = String(a == null ? "" : a).trim();
-  /* Emptied or typed back to the shipped words, the override dies — an
-     override that stores the standard wording is a phantom change in every
-     save (§42, §50.6). */
-  var k = kbWritable();
-  if ((!q || q === std.q) && (!a || a === std.a)) {
-    if (k.ov) delete k.ov[id];
-  } else {
-    if (!k.ov) k.ov = {};
-    k.ov[id] = { q: q || std.q, a: a || std.a };
-  }
-  kbPrune();
-}
-function kbResetOver(id){
-  if (GROUP.kb && GROUP.kb.ov) delete GROUP.kb.ov[id];
-  kbPrune();
-}
-function kbAddNew(g){
-  var k = kbWritable();
-  if (!k.add) k.add = [];
-  /* Minted outside the shipped namespace: recipe ids are words, these are
-     kbx1… — §87's rule about names and identifiers, kept trivially. */
-  var n = 1;
-  while (k.add.some(function(x){ return x.id === "kbx" + n; })) n++;
-  k.add.push({ id: "kbx" + n, g: g, q: "", a: "" });
-  return "kbx" + n;
-}
-function kbSetAdded(id, q, a){
-  var k = GROUP.kb;
-  if (!k || !k.add) return;
-  var e = k.add.filter(function(x){ return x.id === id; })[0];
-  if (!e) return;
-  e.q = String(q == null ? "" : q).trim();
-  e.a = String(a == null ? "" : a).trim();
-}
-function kbDropAdded(id){
-  var k = GROUP.kb;
-  if (!k || !k.add) return;
-  k.add = k.add.filter(function(x){ return x.id !== id; });
-  kbPrune();
-}
-
 function chatCfg(){ return SMPRules.chatCfg(GROUP.chat); }
 function chatWritable(){
   if (!GROUP.chat || typeof GROUP.chat !== "object") GROUP.chat = {};
@@ -917,10 +856,10 @@ function shortName(name){ return nameWords(name, SHORT_NAME_WORDS); }
    not the upload, not the merge, not the door. §87's ladder is Emp ID then
    email and stops, and this adds no rung. Two people really can be "Ahmed
    Mostafa", which is exactly how the twins were made. */
-var KNOWN_NAME_WORDS = SMPRules.KNOWN_NAME_WORDS;
+var KNOWN_NAME_WORDS = 2;
 /* The guess, used when nobody has said otherwise. Kept separate from the
    reader below so the seeded value and a typed one are never confused. */
-function knownGuess(name){ return SMPRules.knownGuess(name); }
+function knownGuess(name){ return nameWords(name, KNOWN_NAME_WORDS); }
 /* What the Name column shows: what was typed, or the guess. Never stores as a
    side effect of being read (§50.6's rule — a reader that creates the field it
    was looking for makes every save carry a phantom change). */
@@ -1015,32 +954,10 @@ function displayNames(){
    and `displayNames()` above tells them apart rather than complaining. Only a
    name that cannot be told apart even at eight words is reported.
 
-   §131 AMENDS THAT BY ONE NOTCH, WITHOUT MOVING THE LINE. Two people whose
-   NAME COLUMN reads the same — the first two names, or a typed value that
-   collides — are still not duplicates and never wear the mark; they are
-   QUEUED as something to address (Islam: "notify me as an issue to address if
-   2 people their 1st 2 names are the same so I can edit one of them"). The
-   `read` groups below feed attentionOf() and nothing else: personDupe()
-   deliberately does not read them, because sharing a spoken name is not
-   evidence of being one human, and a queue entry is a notice where a mark is
-   an accusation.
-
    RETIRED ROWS ARE EXCLUDED. They cannot sign in and no upload places them, so
    counting them would report a problem nobody has. */
-/* What the Name column SAYS for this row, before §81.1 lengthens anything:
-   the typed value, or the flat two-name guess. Kept apart from knownName(),
-   which answers with the lengthened display label — the collision worth
-   flagging is in what was stored or guessed, not in the disambiguation drawn
-   over it. And its key: one spelling for both halves of the comparison, or a
-   match reads as a difference (§116.9). */
-function readName(p){
-  return String((p && p.known) || "").trim() || knownGuess((p && p.name) || "");
-}
-function readKey(p){
-  return readName(p).toLowerCase().replace(/\s+/g, " ");
-}
 function registerDupes(){
-  var byId = {}, byAddr = {}, byName = {}, byRead = {};
+  var byId = {}, byAddr = {}, byName = {};
   PEOPLE.forEach(function(p){
     if (!personActive(p)) return;
     var id = String(p.empId == null ? "" : p.empId).trim();
@@ -1049,8 +966,6 @@ function registerDupes(){
     if (a) (byAddr[a] = byAddr[a] || []).push(p);
     var n = String(p.name == null ? "" : p.name).trim().toLowerCase().replace(/\s+/g, " ");
     if (n) (byName[n] = byName[n] || []).push(p);
-    var r = readKey(p);
-    if (r) (byRead[r] = byRead[r] || []).push(p);
   });
   function only(m){
     var out = {};
@@ -1058,7 +973,7 @@ function registerDupes(){
     return out;
   }
   return { empId: only(byId), email: only(byAddr), name: only(byName),
-           read: only(byRead), likely: likelyDupes() };
+           likely: likelyDupes() };
 }
 
 /* ── THE FOURTH KIND, AND IT IS THE ONE THAT BIT (§87.2) ───────────
@@ -1638,14 +1553,6 @@ function personNamedLines(key){
       if (SMPRules.namedOn({ owner:x.owner, collaborators:x.collaborators }, p)) n++;
     });
   });
-  /* §147: a project's owner name counts here too — since a project's owner
-     is a Contributor of its function now, the confirmation should say how
-     many of those namings survive the row as plain words. */
-  (GROUP.capabilities || []).forEach(function(c){
-    (c.projects || []).forEach(function(pr){
-      if (SMPRules.namedOn({ owner: pr.owner }, p)) n++;
-    });
-  });
   return n;
 }
 
@@ -1914,48 +1821,6 @@ function mainbuNamesFor(p){
    are left out: a retired one is not somewhere to be seated (§49.3), and an
    existing attachment to one is left alone because the select keeps whatever
    the row already says (below). */
-/* ── WHERE A PERSON'S COMPANY COMES FROM (§135.6) ─────────────────────
-   Islam: *"some users belong only to a company not a unit, like how the CEO
-   belongs to the group only."*
-
-   A PERSON SITS IN EXACTLY ONE PLACE, and that is built in rather than
-   habitual: `attachPersonAt()` clears unit, function and company before
-   setting one, and `personAt()` gives one answer. Sign-in, the Official BU
-   list, roles and the Overview all rest on it. So a second dropdown that could
-   disagree with the first is the pair §110 removed from this very dialog.
-
-   THE ANSWER IS THAT A COMPANY IS SOMETIMES DERIVED AND SOMETIMES STORED, and
-   which one it is depends on the unit beside it. Somebody in Mobile is in
-   Distribution — the platform already knows, because `units.company` says so
-   (§23) — so the field shows it and is read-only. Somebody with no unit is the
-   case Islam is describing, and there the field is the answer and is written.
-   One stored fact, two fields, and they cannot contradict each other because
-   only one of them is ever writable.
-
-   `null` for the group and for a function: neither belongs to a company, and
-   answering "—" is the truth rather than a gap. */
-function personCompany(p){
-  if (!p) return null;
-  if (p.company) return COMPANIES[p.company] ? p.company : null;
-  if (p.unit && p.unit !== "group") {
-    var u = UNITS[p.unit];
-    return u && u.company && COMPANIES[u.company] ? u.company : null;
-  }
-  return null;
-}
-/* True where the unit beside it has already answered, so the control is shown
-   and disabled rather than hidden — a field that appears and disappears as its
-   neighbour changes is harder to read than one that greys (§59's rule: shown
-   disabled with the reason, never hidden). */
-function personCompanyDerived(p){
-  return !!(p && p.unit && p.unit !== "group" && UNITS[p.unit] && UNITS[p.unit].company);
-}
-function companyChoices(){
-  return activeCompanyKeys().map(function(c){
-    return { v:c, label:COMPANIES[c].name };
-  });
-}
-
 function personAtChoices(){
   var out = [{ v:"group", label:roleWhereLabel("group") }];
   UNIT_KEYS.forEach(function(k){
@@ -1965,9 +1830,9 @@ function personAtChoices(){
     if (FUNCTIONS[k].active !== false)
       out.push({ v:"fn:" + k, label:FUNCTIONS[k].name + " (function)" });
   });
-  /* THE COMPANIES LEFT THIS LIST (§135.6). They are their own field now, so
-     offering them here as well would be one answer in two controls — which is
-     the fault this whole change exists to avoid, arriving by the back door. */
+  activeCompanyKeys().forEach(function(c){
+    out.push({ v:"co:" + c, label:COMPANIES[c].name + " (company)" });
+  });
   return out;
 }
 
@@ -2330,8 +2195,7 @@ function attentionOf(p, all){
   var why = [];
   /* A COLLISION FIRST: two rows that are one human is the fault that makes
      every other count wrong (§87). */
-  var d = all || registerDupes();
-  var dupes = personDupe(p, d);
+  var dupes = personDupe(p, all || registerDupes());
   if (dupes.length) why.push({ kind:"dupe", say: dupeSentence(dupes) });
   /* Then what they SAID about themselves, which is a question waiting on an
      answer rather than a gap (§56). */
@@ -2365,31 +2229,6 @@ function attentionOf(p, all){
   if (PWSTATES && !PWSTATES.__error && PWSTATES[p.key] === "none" &&
       personActive(p) && p.key !== viewer().key && mayIssuePasswordTo(p))
     why.push({ kind:"nopw", say:"They have never been issued a password." });
-  /* LAST, TWO PEOPLE WHOSE NAME READS THE SAME (§131). Islam: "you normally
-     take the first 2 names but you allow me to amend the name in the edit —
-     notify me as an issue to address if 2 people their 1st 2 names are the
-     same so I can edit one of them." §81.1 lengthens the GUESS so the
-     register itself stays readable; this is the other half — the pair still
-     reads as one name out loud, and a TYPED value that collides is never
-     lengthened at all — so each of them queues until a Name is amended to
-     read apart, which is exactly what clears it. NOT a duplicate and last in
-     the order: two people really can be "Ahmed Mostafa" (§87). Anybody this
-     row already flags as a possible duplicate is left to that flag — telling
-     the SMO to RENAME a row that may need MERGING sends them to the wrong
-     control, and the identical twins would otherwise be said twice. */
-  var reads = (d.read || {})[readKey(p)];
-  if (reads && reads.length > 1) {
-    var flagged = {};
-    dupes.forEach(function(x){ (x.rows || []).forEach(function(r){
-      if (r && r.key) flagged[r.key] = 1; }); });
-    var others = reads.filter(function(x){
-      return x.key !== p.key && !flagged[x.key]; });
-    if (others.length)
-      why.push({ kind:"samename", say:"They read as \u201c" + readName(p) +
-        "\u201d, and so " + (others.length === 1 ? "does " + others[0].name
-          : "do " + others.map(function(x){ return x.name; }).join(" and ")) +
-        ". Amend a Name so each reads apart." });
-  }
   return why.length ? { key:p.key, why:why } : null;
 }
 /* The sentence a duplicate makes, said once so the chip and the queue cannot
@@ -2407,7 +2246,7 @@ function dupeSentence(dupes){
            (others.length ? " (" + others.join(", ") + ")" : "") + ".";
   }).join(" ");
 }
-var ATTN_ORDER = ["dupe", "said", "noident", "noemail", "nopw", "samename"];
+var ATTN_ORDER = ["dupe", "said", "noident", "noemail", "nopw"];
 function attentionQueue(){
   var out = [];
   var all = registerDupes();          /* once for the whole queue, not per row */
@@ -3071,88 +2910,23 @@ function focusStanding(progress){
   return { key:"short", label:"Short" };
 }
 
-/* ── WHAT CAN BE MARKED, BANDED, FOR A UNIT OR A FUNCTION (§135.5) ────
-   Islam: *"make it like the navigation rail for units and supporting
-   functions."*
-
-   ONE BUILDER, asked with a destination key, because the marking page, the
-   unit's own strip and the group's Focus board are three surfaces onto one
-   answer and three walks of the data is how they drift (§53.5). It returns the
-   BANDS rather than a flat list: every one of the three groups what it shows,
-   and a band that is empty is still a band the marking table draws.
-
-   A FUNCTION ANSWERS IN ITS OWN SHAPE, and the two shapes are not a special
-   case bolted on — they are what a function IS. Merchandising plans in pillars
-   (§59), so `fnAsUnit()` hands over the unit shape and the unit's own bands
-   answer unchanged. The other seven plan in capabilities, and their measurable
-   rows sit one level down: a capability's key objectives, banded by capability
-   exactly as a unit's are banded by pillar. Islam, asked which: *"agreed."*
-
-   THE IDS WERE ALREADY THERE, which is what makes this cheap rather than a
-   migration — `renumberCapability()` has minted `cap1-KO1` for every one of
-   them since the capability model existed, and a focus mark is nothing but
-   that id in `CYCLE.focus`. §96.4's ID-less objectives were the group's, not
-   these. */
-function unitBands(u){
-  if (!u) return [];
-  return [{ band:L("keyobj","bu"), src:L("keyobj","bu").toLowerCase(),
-            items:u.keyObjectives || [] }]
-    .concat((u.items || []).map(function(p, pi){
-      return { band:pillarCode(u, pi) + " " + p.name, src:pillarCode(u, pi),
-               items:p.measures || [] };
-    }));
-}
-function focusBands(key){
-  if (!key) return [];
-  /* The prefix test rather than `isFn()`, which is the shell's own local
-     helper and not in scope here. */
-  if (String(key).indexOf("fn:") === 0) {
-    var fk = String(key).slice(3), f = FUNCTIONS[fk];
-    if (!f) return [];
-    if (f.format === "pillars") return unitBands(fnAsUnit(fk));
-    /* THE BAND IS THE CAPABILITY'S NAME, and no code is invented for it. A
-       pillar has one because the unit owns a prefix and somebody says "MB01"
-       out loud (§51.3); a capability has never had one on any screen, and
-       minting one here would be new vocabulary arriving through a marking
-       table. */
-    return capsOfFunction(fk).map(function(c){
-      return { band:c.name, src:c.name, items:c.keyObjectives || [] };
-    });
-  }
-  return unitBands(UNITS[key]);
-}
-/* Every place a mark could be made, in the navigation's own order. */
-function focusSubjects(){
-  return { units: activeKeys().map(function(k){
-             return { key:k, name:UNITS[k].name }; }),
-           fns: activeFunctionKeys().filter(function(k){ return fnShows(k); })
-                  .map(function(k){
-             return { key:"fn:" + k, name:FUNCTIONS[k].name }; }) };
-}
-/* Every MARKED item behind a destination. */
-function focusIn(key){
-  var out = [];
-  focusBands(key).forEach(function(b){
-    (b.items || []).forEach(function(m){
-      if (isFocus(m.id)) out.push({ m:m, src:b.src });
-    });
-  });
-  return out;
-}
-/* Kept for the unit-shaped callers that hold an object rather than a key. */
+/* Every marked item in a unit, objectives and pillar measures alike. */
 function unitFocus(u){
   var out = [];
-  unitBands(u).forEach(function(b){
-    (b.items || []).forEach(function(m){
-      if (isFocus(m.id)) out.push({ m:m, src:b.src });
+  u.keyObjectives.forEach(function(m){
+    if (isFocus(m.id)) out.push({ m:m, src:L("keyobj","bu").toLowerCase() });
+  });
+  u.items.forEach(function(p, pi){
+    p.measures.forEach(function(m){
+      if (isFocus(m.id)) out.push({ m:m, src:pillarCode(u, pi) });
     });
   });
   return out;
 }
-function focusTallyOf(items){
+function focusTally(u){
   var t = { over:0, met:0, short:0, none:0, total:0, mean:null };
   var vals = [];
-  items.forEach(function(x){
+  unitFocus(u).forEach(function(x){
     t.total++;
     t[focusStanding(x.m.progress).key]++;
     if (x.m.progress != null) vals.push(x.m.progress);
@@ -3160,7 +2934,6 @@ function focusTallyOf(items){
   t.mean = avg(vals);
   return t;
 }
-function focusTally(u){ return focusTallyOf(unitFocus(u)); }
 
 /* ── Supporting functions ─────────────────────────────────────────────────
    A capability is cross-cutting: the whole group depends on it, and a supporting
@@ -3391,8 +3164,7 @@ function capById(id){
    project's real story rather than a defect. */
 
 function capKOScore(c){
-  /* Pending confirmation leaves the average (§145), as everywhere. */
-  var list = (c.keyObjectives || []).filter(function(m){ return m.progress != null && !SMPRules.pendingScore(m); });
+  var list = (c.keyObjectives || []).filter(function(m){ return m.progress != null; });
   if (!list.length) return null;
   var tw = 0, sum = 0;
   list.forEach(function(m){ var w = m.weight == null ? 1 : m.weight; tw += w; sum += m.progress * w; });
@@ -4063,63 +3835,17 @@ function canReport(unitKey){
   /* A locked cycle takes no more figures, from anyone but the SMO — the
      server refuses them, so the screen must not offer them (spec 006 §7.1). */
   if (CYCLE.locked && !inOffice()) return false;
-  /* A PILLARS FUNCTION'S REPORT PAGE ASKS THE FUNCTION'S OWN GRANT (§147.9).
-     This asked `u_report` for every target, and u_report's area is "unit" —
-     so for an fn: target the screen read the own-UNIT cell while the server
-     has always judged the same save against the own-FUNCTION one (`edits(…,
-     "fn", t)`). Invisible for as long as custodian and head shipped with
-     both cells at edit; visible the day one is tightened, and the exact
-     screen-says-yes / server-says-no drift §42 exists to prevent. */
-  var page = String(unitKey).indexOf("fn:") === 0 ? "k_report" : "u_report";
-  return grantAt(page, unitKey) === "edit";
+  return grantAt("u_report", unitKey) === "edit";
 }
 
-/* ONE ROW, for the roles that are limited to their own. Everybody else whose
-   grant reaches the unit reports all of it; a contributor reports the rows
-   that name them, and a PILLAR OWNER reports the pillar whose Owner row
-   names them, whole (§147.7). The same reach rule the server uses (§42) —
-   offering a field the server will refuse is the fault this is here to
-   avoid. `x` is a reportItems() entry; `x.owner` is §55's rule (a measure
-   leans on its pillar's owner), `x.pown` is the pillar's own Owner. */
+/* ONE ROW, for the one role that is limited to its own. Everybody else whose
+   grant reaches the unit reports all of it; a contributor reports the lines
+   they are named on. The same two functions the server uses (spec 006 §7.2) —
+   offering a field the server will refuse is the fault this is here to avoid. */
 function canReportRow(unitKey, x){
   if (!canReport(unitKey)) return false;
-  var area = String(unitKey).indexOf("fn:") === 0 ? "fn" : "unit";
-  return SMPRules.mayReportRow(world(), viewer(), area, unitKey,
-    { row: { owner: x.owner, collaborators: x.collaborators },
-      pillarOwner: x.pown });
-}
-
-/* ── The function side of the same two questions (§147) ────────────
-   canReport/canReportRow for an fn: target. The whole-function gate is what
-   capReportBody always asked inline; it is a function now because the
-   bounded questions have to sit on top of it and two spellings of the same
-   three gates is §53.5's drift. Since §147.7 the reach is PER ROW, through
-   the same mayReportRow() the server asks: a PROJECT OWNER reaches every
-   row of their project; a CONTRIBUTOR (a milestone's owner, a stakeholder)
-   reaches the rows that name them; the custodian and the head reach it
-   all. */
-function canReportFn(fk){
-  if (REVIEW.state !== "open") return false;
-  if (CYCLE.locked && !inOffice()) return false;
-  return grantAt("k_report", "fn:" + fk) === "edit";
-}
-function canReportFnRow(fk, project, rowObj){
-  if (!canReportFn(fk)) return false;
-  return SMPRules.mayReportRow(world(), viewer(), "fn", "fn:" + fk,
-                               { row: rowObj, project: project });
-}
-/* The project as a whole — what the rail and the checks ask. True for
-   anybody unbounded, and for a bounded role whose reach is the project
-   itself (its owner; its stakeholders once the Contributor row is opened). */
-function canReportFnProject(fk, p){
-  if (!canReportFn(fk)) return false;
-  return SMPRules.mayReportRow(world(), viewer(), "fn", "fn:" + fk, { project: p });
-}
-/* A capability's own key objectives belong to no project, so for anybody
-   bounded they are read, never entered. */
-function canReportFnWhole(fk){
-  return canReportFn(fk) &&
-         !SMPRules.onlyOwnLines(world(), viewer(), "fn", "fn:" + fk);
+  if (!SMPRules.onlyOwnLines(world(), viewer(), "unit", unitKey)) return true;
+  return SMPRules.namedOn({ owner: x.owner, collaborators: x.collaborators }, viewer());
 }
 
 /* ── Speaking for the whole unit (§50.5) ───────────────────────────
@@ -4133,16 +3859,14 @@ function canReportFnWhole(fk){
    A CONTRIBUTOR limited to their own lines does none of them. What they may
    say is about their own rows; a picture slide is the unit's.
 
-   A supporting function HAS contributors since §147 — a project's owner is
-   one, derived from the project's Owner row — so its half asks the same
-   own-lines exclusion the unit's always has. The sentence that stood here
-   ("a function has no contributors to exclude") described the code truly and
-   stopped being true the day the floor reached the projects. */
+   A supporting function has no contributors to exclude — its reporting is the
+   function's, whole — so its half is the two gates its reporting page already
+   applies, asked here rather than restated there. */
 function canSpeakFor(target){
   var t = String(target || "");
   if (t.indexOf("fn:") === 0) {
-    return canReportFn(t.slice(3)) &&
-           !SMPRules.onlyOwnLines(world(), viewer(), "fn", t);
+    return REVIEW.state === "open" && !(CYCLE.locked && !inOffice()) &&
+           grantAt("k_report", t) === "edit";
   }
   return canReport(t) && !SMPRules.onlyOwnLines(world(), viewer(), "unit", t);
 }
@@ -4313,17 +4037,13 @@ function reportItems(u){
        walking back up to the pillar. A MEASURE names nobody of its own, so it
        carries its pillar's owner — the nearest thing the data supports until
        a measure has an owner of its own. */
-    /* `pown` is the pillar's own Owner, for the pillar-owner role's reach
-       (§147.7) — carried beside §55's `owner` lean rather than replacing it,
-       so nothing a contributor could reach before the role existed moves. */
     p.measures.forEach(function(m){
-      out.push({ id:m.id, obj:m, kind:"measure", group:head, sub:"",
-                 owner:p.owner, pown:p.owner });
+      out.push({ id:m.id, obj:m, kind:"measure", group:head, sub:"", owner:p.owner });
     });
     p.tactics.forEach(function(t){
       out.push({ id:t.id, obj:t, kind:"tactic", group:head,
                  sub:spanLabel(t), asked:tacticDue(t),
-                 owner:t.owner, collaborators:t.collaborators, pown:p.owner });
+                 owner:t.owner, collaborators:t.collaborators });
     });
   });
   return out;
@@ -4417,13 +4137,7 @@ function submitBlockers(target){
   var t = String(target || ""), fn = t.indexOf("fn:") === 0;
   var rows = fn ? fnAskedItems(t.slice(3)) : askedItems(UNITS[t] || { keyObjectives:[], items:[] });
   return { notes: rows.filter(needsNote),
-           pending: rows.filter(function(x){ return statusPending(x.obj); }),
-           /* §145: a value the office has not yet confirmed, where a score
-              reads it. Reporting and drafts flow; submitting says
-              "performance can be read", and against an unconfirmed number
-              it cannot (Islam, 2026-08-27). Only the office can clear this
-              one, so the refusal must send the person to them. */
-           confirms: gapScoreWait(t) };
+           pending: rows.filter(function(x){ return statusPending(x.obj); }) };
 }
 /* The refusal in words, or "" when nothing is in the way. Said in ONE place so
    the two Submits cannot explain themselves differently. */
@@ -4434,15 +4148,6 @@ function submitRefusal(target){
   if (b.notes.length) say.push(plural(b.notes.length, "figure") +
     " " + (b.notes.length === 1 ? "is" : "are") +
     " at risk or off track with no note. Add a line to each.");
-  if (b.confirms.length) {
-    var named = b.confirms.slice(0, 4).map(function(x){
-      return x.obj.name || x.obj.id || "a row"; });
-    say.push(plural(b.confirms.length, "value") +
-      (b.confirms.length === 1 ? " is" : " are") +
-      " awaiting Strategy Office confirmation (" + named.join(", ") +
-      (b.confirms.length > 4 ? ", …" : "") + "). Reporting and drafts are " +
-      "unaffected — submitting opens when the office confirms.");
-  }
   return say.join("\n\n");
 }
 function unitState(u){ return reportState(reportedCount(u), u.ukey); }
@@ -4649,14 +4354,6 @@ function mayAuthor(acKey, target){
     target === undefined ? TARGET : target);
 }
 function mayEditPlan(){ return mayAuthor("u_plan"); }
-/* MAY THIS PERSON FILL THIS PAGE'S GAPS (§145)? A wrapper, never a second
-   copy — lib/rules.js answers, for the person being viewed as, so the
-   fill field the screen draws and the save the server accepts cannot
-   disagree (§42). */
-function mayFill(acKey, target){
-  return SMPRules.mayFillPage(world(), viewer(), acKey,
-    target === undefined ? TARGET : target);
-}
 /* MAY THIS PERSON REORDER WHAT THEY ARE LOOKING AT (§101)? A wrapper, never a
    second copy — the answer is lib/rules.js's, asked for the person being viewed
    as, so the handle the screen draws and the save the server accepts cannot
@@ -4711,16 +4408,14 @@ function mayMarkFocus(){
 var KO_WEIGHTS = { mobile: [40, 25, 20, 15] };
 
 function koScore(list, weights){
-  /* `pendingScore` (§145): an objective with a pending target/direction/
-     compile leaves the average until the office confirms it. */
-  var vals = list.filter(function(m){ return !m.milestone && m.progress != null && !SMPRules.pendingScore(m); });
+  var vals = list.filter(function(m){ return !m.milestone && m.progress != null; });
   if (!vals.length) return null;
   if (!weights) {
     return Math.round(vals.reduce(function(a, m){ return a + m.progress; }, 0) / vals.length);
   }
   var tot = 0, acc = 0;
   list.forEach(function(m, i){
-    if (m.milestone || m.progress == null || SMPRules.pendingScore(m)) return;
+    if (m.milestone || m.progress == null) return;
     var w = weights[i] == null ? 0 : weights[i];
     acc += m.progress * w; tot += w;
   });
@@ -4812,11 +4507,6 @@ function quartersOf(t){
   return [t.q1, t.q2, t.q3, t.q4].map(function(x){ return x ? 1 : 0; });
 }
 function tacticPlanned(t){
-  /* Quarters filled but not yet confirmed (§145): the tactic's timeline is
-     not settled, so it reads as not-yet-due — null, never zero — and every
-     downstream reader (due, ratio, the execution averages) already handles
-     that shape. */
-  if (SMPRules.pendOf(t).quarters) return null;
   var q = quartersOf(t), total = 0, elapsed = 0;
   for (var i = 0; i < 4; i++) {
     if (!q[i]) continue;
@@ -4829,119 +4519,6 @@ function tacticPlanned(t){
 /* A tactic whose quarters have not begun is not behind — it is not yet due,
    and averaging a zero into execution would say otherwise. */
 function tacticDue(t){ return tacticPlanned(t) > 0; }
-
-/* ── WHAT IS STILL AWAITING THE OFFICE'S CONFIRMATION (§145) ────────────
-   Every pending-fill mark on a subject, one entry per marked field. The
-   COUNT the pane band shows, the rows the Submit refusal names and the
-   scores' exclusions are all read off this one list — a count that cannot
-   take you to what it counts is a count that makes work (§116.2). */
-function gapPendRows(target){
-  var out = [], t = String(target || "");
-  var push = function(row){
-    var p = SMPRules.pendOf(row);
-    Object.keys(p).forEach(function(f){
-      out.push({ obj: row, field: f, mark: p[f] });
-    });
-  };
-  if (t.indexOf("fn:") === 0) {
-    var fk = t.slice(3), fo = functionOf(fk);
-    if (fo && String(fo.format) === "pillars") {
-      var fu = unitLike(t);
-      if (fu) {
-        push(fu);
-        (fu.keyObjectives || []).forEach(push);
-        (fu.items || []).forEach(function(p){
-          (p.measures || []).forEach(push);
-          (p.tactics || []).forEach(push);
-        });
-      }
-    }
-    (GROUP.capabilities || []).forEach(function(c){
-      if (c.fn !== fk) return;
-      (c.keyObjectives || []).forEach(push);
-      (c.projects || []).forEach(push);
-    });
-  } else {
-    var u = UNITS[t];
-    if (u) {
-      push(u);
-      (u.keyObjectives || []).forEach(push);
-      (u.items || []).forEach(function(p){
-        (p.measures || []).forEach(push);
-        (p.tactics || []).forEach(push);
-      });
-    }
-  }
-  return out;
-}
-function gapPendCount(target){ return gapPendRows(target).length; }
-
-/* ── WHERE THE MISSING THINGS ARE (§145.12) ─────────────────────────────
-   One map of every place holding gaps, counted through the shared
-   `gapMissing()` — the tab badge, the rail counts and the band's chips all
-   read THIS list, so a count can never disagree with the fields it points
-   at (§116.2: the count and the queue are one list). Each entry names how
-   to GET there, in the navigation's own words. */
-function gapMap(target){
-  var t = String(target || ""), out = [];
-  var G = SMPRules.gapMissing;
-  var entry = function(key, label, count, go){
-    out.push({ key: key, label: label, count: count, go: go });
-  };
-  var unitHalf = function(u){
-    if (!u) return;
-    var found = G("unit", u).length;
-    entry("found", "Foundation", found, { sec: "found", page: "foundation" });
-    var ko = 0;
-    (u.keyObjectives || []).forEach(function(m){ ko += G("ko", m).length; });
-    entry("ko", "Objectives", ko, { sec: "found", page: "foundation" });
-    (u.items || []).forEach(function(p, i){
-      var n = 0;
-      (p.measures || []).forEach(function(m){ n += G("measure", m).length; });
-      (p.tactics  || []).forEach(function(x){ n += G("tactic", x).length; });
-      entry("p:" + (p.code || i), pillarCode(u, i), n,
-            { sec: "plan", page: "plan", rail: unitRailKey(u), code: p.code });
-    });
-  };
-  if (t.indexOf("fn:") === 0) {
-    var fk = t.slice(3), fo = functionOf(fk);
-    if (fo && String(fo.format) === "pillars") { unitHalf(unitLike(t)); return out; }
-    var caps = capsOfFunction(fk), ov = 0;
-    caps.forEach(function(c){
-      (c.keyObjectives || []).forEach(function(m){ ov += G("capko", m).length; });
-    });
-    entry("ov", "Overview", ov, { sec: "found", page: "capfoundation" });
-    caps.forEach(function(c){
-      (c.projects || []).forEach(function(p){
-        /* The projects rail is per CAPABILITY (railKeyFor), and it selects
-           by project id — the same pair the rail's own rows write. */
-        entry("pr:" + p.id, projCode(fk, p), G("project", p).length,
-              { sec: "proj", page: "plan", rail: "cap:" + c.id, code: p.id });
-      });
-    });
-  } else {
-    unitHalf(UNITS[t]);
-  }
-  return out;
-}
-function gapTotal(target){
-  return gapMap(target).reduce(function(a, e){ return a + e.count; }, 0);
-}
-/* Who the counts are FOR: somebody who can act on them — the fill grant or
-   the office. A plain reader never sees a nag they cannot clear (§69). */
-function seesGaps(target){
-  var t = target === undefined ? TARGET : target;
-  return SMPRules.FILL_PAGES.some(function(pg){
-    return mayFill(pg, t) || mayAuthor(pg, t);
-  });
-}
-/* Only the fields a score reads block a submission — a pending owner or
-   date changes no figure's meaning (§145, Islam's boundary). */
-function gapScoreWait(target){
-  return gapPendRows(target).filter(function(x){
-    return SMPRules.GAP_SCORE_FIELDS.indexOf(x.field) > -1;
-  });
-}
 function tacticRatio(t){
   var p = tacticPlanned(t);
   return p && t.actual != null ? Math.round(t.actual / p * 100) : null;
@@ -4988,17 +4565,8 @@ function avg(a){
    rail's terse switch. One person deciding to see both horizons must not
    decide it for the whole tenant, and a toggle that autosaved would. */
 var KO_YEAR_KEY = "smp.ko.year";
-/* §145.11 REVERSES §66's DEFAULT (Islam: "let the this year objective
-   clicked by default so it can be filled as missing as well"): absent now
-   reads as SHOWN, so a missing near target is a visible red word instead
-   of a hidden column. The toggle stays, and a person's SAVED choice still
-   wins in both directions — the stored value is an explicit "1"/"0", so
-   nobody who ever pressed the button moves (§30.2's shape). */
 var SHOW_KO_THIS_YEAR = (function(){
-  try {
-    var v = localStorage.getItem(KO_YEAR_KEY);
-    return v === null ? true : v === "1";
-  } catch (e) { return true; }
+  try { return localStorage.getItem(KO_YEAR_KEY) === "1"; } catch (e) { return false; }
 })();
 function setKoThisYear(on){
   SHOW_KO_THIS_YEAR = !!on;
@@ -5180,11 +4748,7 @@ function viaCarrier(p, own, roll){
   try { return roll(f); } finally { PILLAR_DEPTH--; }
 }
 
-/* A measure whose target, direction or compile rule is still awaiting the
-   office's confirmation is not scored (§145): the comparison is not ready,
-   so it leaves the average the way an unmeasured outcome already does
-   (§104.10) — the reported actual is kept and shown, only the score waits. */
-function scorableMeasures(p){ return (p.measures || []).filter(function(m){ return m.target && m.progress != null && !SMPRules.pendingScore(m); }); }
+function scorableMeasures(p){ return (p.measures || []).filter(function(m){ return m.target && m.progress != null; }); }
 function pillarPerf(p){
   return viaCarrier(p,
     function(){ return avg(scorableMeasures(p).map(function(m){ return m.progress; })); },

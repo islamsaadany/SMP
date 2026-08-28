@@ -3866,14 +3866,8 @@ function capPickBox(x, may, opts, val){
     }).join("") + '</select>';
 }
 
-/* PER ROW SINCE §147.7, because two bounded roles meet on one project: its
-   OWNER reaches every row, while a milestone's owner (a Contributor, once
-   that row is opened) reaches their milestone and nothing beside it — so one
-   `may` for the pane would either over-offer or under-offer. Each control
-   asks canReportFnRow(), which is the server's own reach rule (§42). */
-function projReportBody(p, fk){
+function projReportBody(p, may, fk){
   var r = projReported(p);
-  var mayRow = function(o){ return canReportFnRow(fk, p, o); };
   /* THE PANE SOMEBODY FILLS IN UNDER TIME PRESSURE, and the widest table in
      the product at eight columns -- the honest cost of one row shape carrying
      Type, Due date, Target, Status, % and Note (§104).
@@ -3894,15 +3888,14 @@ function projReportBody(p, fk){
     var o = row.obj, d = dxIsDeliv(row), when = dxWhen(row);
     var notDue = d ? !dueThisCycle(when) : !outcomeDue(o);
     var has = reportedAny(o, d), quiet = notDue && !has;
-    var mayR = mayRow(o);
     var ent, pcell;
     if (d) {
-      ent = capPickBox(o, mayR, DX_WORDS, o.status);
-      pcell = o.status === "wip" ? capPctBox(o, mayR, o.name) + (statusPending(o) ? needsPct() : "")
+      ent = capPickBox(o, may, DX_WORDS, o.status);
+      pcell = o.status === "wip" ? capPctBox(o, may, o.name) + (statusPending(o) ? needsPct() : "")
         : (has ? '<b>' + statusReads(o) + '%</b>'
                : (notDue ? notDueCell() : '<b>&mdash;</b>'));
     } else {
-      ent = capEntryBox(o, splitTarget(String(o.target)).unit, mayR, o.name);
+      ent = capEntryBox(o, splitTarget(String(o.target)).unit, may, o.name);
       pcell = has ? '<span class="fixedval">' + (o.progress == null ? "&mdash;" : o.progress + "%") + '</span>'
                   : (notDue ? notDueCell() : '<span class="fixedval">&mdash;</span>');
     }
@@ -3913,20 +3906,19 @@ function projReportBody(p, fk){
       '<td class="num">' + dxTarget(row) + '</td>' +
       '<td class="cc">' + ent + '</td>' +
       '<td class="cc">' + pcell + '</td>' +
-      '<td class="notecol">' + capNoteBox(o, mayR) + '</td></tr>';
+      '<td class="notecol">' + capNoteBox(o, may) + '</td></tr>';
   }).join("");
   var mRows = p.milestones.map(function(m, i){
     var notDue = !dueThisCycle(m.finish), quiet = notDue && !m.status;
-    var mayM = mayRow(m);
     return '<tr' + (quiet ? ' class="notdue"' : '') + '><td class="idx">' + (i+1) + '</td>' +
       '<td>' + esc(m.name) + '</td>' +
       '<td class="cc">' + dxDate(m.finish, m.status === "done") + '</td>' +
-      '<td class="cc">' + capPickBox(m, mayM, MS_WORDS, m.status) + '</td>' +
+      '<td class="cc">' + capPickBox(m, may, MS_WORDS, m.status) + '</td>' +
       '<td class="cc">' + (m.status === "wip"
-        ? capPctBox(m, mayM, m.name) + (statusPending(m) ? needsPct() : "")
+        ? capPctBox(m, may, m.name) + (statusPending(m) ? needsPct() : "")
         : (m.status ? '<b>' + msReads(m) + '%</b>'
                     : (notDue ? notDueCell() : '<b>&mdash;</b>'))) + '</td>' +
-      '<td class="notecol">' + capNoteBox(m, mayM) + '</td></tr>';
+      '<td class="notecol">' + capNoteBox(m, may) + '</td></tr>';
   }).join("");
   return pillarBand(projCode(fk, p), p.name,
       '<span class="pill ' + (r.done >= r.total ? "good" : "attn") + '">' + r.done + ' / ' + r.total + '</span>') +
@@ -3973,7 +3965,8 @@ function capReportBody(c){
     null, 'Tally is entries given of asked',
     function(p){ return projCode(c.fn, p); });
   return koBlock +
-    splitOrPane(c.projects, sel, rail, projReportBody(sel, c.fn));
+    splitOrPane(c.projects, sel, rail,
+      projReportBody(sel, canReportFnProject(c.fn, sel), c.fn));
 }
 
 function renderFnReport(fnKey){

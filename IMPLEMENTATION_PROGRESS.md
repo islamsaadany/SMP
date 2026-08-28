@@ -6,11 +6,9 @@ version (rules A2 / A11, changed 2026-08-20) — those go only when asked for.
 
 **Where it runs:** Vercel, production tracks `main`. Static files plus two
 serverless functions (`/api/state`, `/api/auth`) against Neon Postgres.
-**Latest version:** v3.55 — §145 (fill the gaps) merged over v3.54. Built as
-§132 / v3.50 / spec 021 and renumbered on the way in: four sessions took
-§132–§144, v3.50–v3.54 and specs 021–022 while this one worked, and the
-merge is the only moment a sequential number is real.
-**Last updated:** 2026-08-28
+**Latest version:** v3.56 on `main`; **v3.57 (§147, a custodian per project,
+spec 024) on `claude/custodian-per-project-s8q93m`**, awaiting the word to
+merge — renumbered twice on the way as parallel sessions took §130–§146.
 
 **Sign in as:** `SMO` / `1234` — a password change is forced at once (§43.1,
 reversing §19.4).
@@ -66,6 +64,29 @@ Nothing proceeds past this line without an answer.
   is a true signal — do not silence it.
 
 ## Built and verified
+
+### v3.57 — a custodian per project: two roles, not one (§147, spec 024)
+
+- **Three bounded roles, all derived from being named** (§147.7, Islam's
+  correction of the first build): **Project owner** from a project's Owner
+  row; **Pillar owner** from a pillar's, on a unit or a pillars function;
+  **Contributor** for everyone else the plan names — collaborators,
+  stakeholders, milestone owners — who report nothing until their row is
+  opened, and then only the rows that name them.
+- **Two conditions before an owner reports**: their role's Reporting cell at
+  edit on Roles & access (both owner rows ship at view), and being named the
+  Owner. No register attachment — the silent third condition that broke the
+  first live test is gone.
+- **One reach rule per row** (`mayReportRow` in `lib/rules.js`), asked by
+  both panes and the authoriser; none of the three roles ever submits.
+- **Two drifts fixed on the way**: a custodian's deliverable report and the
+  §104.10 milestone % were refused as plan since migration 024; and a
+  pillars function's Report page read the own-unit cell while the server
+  judged the own-function one.
+- Proof: `test-authorize.js` §17 (297 passed; proved able to fail),
+  `checks/project-custodian.py` (three viewers, both ends, proved able to
+  fail), the matrix and project checks, the full `qa.py` sweep; the seed
+  scanned — 24 people gain a true chip, nobody's grants move.
 
 ### v3.56 — a test copy is a send, and it says so (§146)
 

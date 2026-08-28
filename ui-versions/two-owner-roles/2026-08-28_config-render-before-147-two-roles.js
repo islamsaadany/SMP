@@ -1279,18 +1279,10 @@ function renderPeople(){
              unrepeated. */
           var at = whereLabel(r.at);
           var elsewhere = !home || r.at !== home;
-          /* A DERIVED ROLE HAS NO \u00d7 (\u00a7147.7): a Project owner or Pillar owner
-             is read off the plan's own Owner rows and a Contributor off being
-             named \u2014 there is nothing here to revoke, and an \u00d7 that silently
-             does nothing is \u00a796's family. The chip says where the role comes
-             from instead, so the way to take it off is findable. */
-          var derived = SMPRules.isOwnLinesRole(r.role);
-          var tip = roleName(r.role) + " \u00b7 " + at +
-            (derived ? " \u2014 comes from being named on the plan; change the Owner there to move it" : "");
-          return '<span class="rolechip" title="' + esc(tip) + '">' +
+          return '<span class="rolechip" title="' + esc(roleName(r.role)) + ' \u00b7 ' + esc(at) + '">' +
             '<b>' + esc(roleName(r.role)) + '</b>' +
             (elsewhere ? '<span class="rolewhere">' + esc(at) + '</span>' : '') +
-            (editable && !derived
+            (editable
               ? '<button class="xbtn" data-prole-off="' + p.key + '|' + r.role + '|' + r.at +
                 '" title="Remove this role" aria-label="Remove this role">&times;</button>'
               : '') + '</span>';

@@ -221,7 +221,6 @@ var PCOLMENU = false, PWMENU = false, PFILEMENU = false;
 var FNCOLMENU = false;   /* the Functions table's own (§93.14) */
 /* Send a message's two header dropdowns (§95). One at a time, like every
    other header menu: two open panels on one row cover each other. */
-var DRAFTMENU = false, SENTMENU = false;
 var PICKING = null, PICKQ = "";
 
 /* ── ACCESS, by ROLE and by AREA ────────────────────────────────────
@@ -574,6 +573,80 @@ function commsSet(key, value){
    ever. So a value set back to its default DELETES its key, and the last key
    leaving deletes `GROUP.chat` — a tenant that has never opened the menu, or
    has put everything back, writes nothing at all. */
+/* ── The knowledge base's pen (§140) ─────────────────────────────────
+   GROUP.kb rides org.extra like GROUP.chat above: { ov: { id: {q,a} },
+   add: [ {id,g,q,a} ] }. THE WRITERS DELETE ON DEFAULT (§50.6): an answer
+   put back to the shipped wording deletes its key, the last key leaving
+   deletes GROUP.kb, so a tenant that has never touched the pen and one that
+   touched it and thought better are byte-identical. What the overrides MEAN
+   is `SMPRules.kbLook` / `kbAdds` — one precedence rule for the page and
+   the assistant both (§103). */
+function kbShipped(id){
+  for (var i = 0; i < RECIPES.length; i++){
+    var g = RECIPES[i];
+    for (var j = 0; j < g.items.length; j++){
+      if (g.items[j].id === id) return g.items[j];
+    }
+  }
+  return null;
+}
+function kbWritable(){
+  if (!GROUP.kb || typeof GROUP.kb !== "object") GROUP.kb = {};
+  return GROUP.kb;
+}
+function kbPrune(){
+  var k = GROUP.kb;
+  if (!k) return;
+  if (k.ov && !Object.keys(k.ov).length) delete k.ov;
+  if (k.add && !k.add.length) delete k.add;
+  if (!Object.keys(k).length) delete GROUP.kb;
+}
+function kbSetOver(id, q, a){
+  var std = kbShipped(id);
+  if (!std) return;
+  q = String(q == null ? "" : q).trim();
+  a = String(a == null ? "" : a).trim();
+  /* Emptied or typed back to the shipped words, the override dies — an
+     override that stores the standard wording is a phantom change in every
+     save (§42, §50.6). */
+  var k = kbWritable();
+  if ((!q || q === std.q) && (!a || a === std.a)) {
+    if (k.ov) delete k.ov[id];
+  } else {
+    if (!k.ov) k.ov = {};
+    k.ov[id] = { q: q || std.q, a: a || std.a };
+  }
+  kbPrune();
+}
+function kbResetOver(id){
+  if (GROUP.kb && GROUP.kb.ov) delete GROUP.kb.ov[id];
+  kbPrune();
+}
+function kbAddNew(g){
+  var k = kbWritable();
+  if (!k.add) k.add = [];
+  /* Minted outside the shipped namespace: recipe ids are words, these are
+     kbx1… — §87's rule about names and identifiers, kept trivially. */
+  var n = 1;
+  while (k.add.some(function(x){ return x.id === "kbx" + n; })) n++;
+  k.add.push({ id: "kbx" + n, g: g, q: "", a: "" });
+  return "kbx" + n;
+}
+function kbSetAdded(id, q, a){
+  var k = GROUP.kb;
+  if (!k || !k.add) return;
+  var e = k.add.filter(function(x){ return x.id === id; })[0];
+  if (!e) return;
+  e.q = String(q == null ? "" : q).trim();
+  e.a = String(a == null ? "" : a).trim();
+}
+function kbDropAdded(id){
+  var k = GROUP.kb;
+  if (!k || !k.add) return;
+  k.add = k.add.filter(function(x){ return x.id !== id; });
+  kbPrune();
+}
+
 function chatCfg(){ return SMPRules.chatCfg(GROUP.chat); }
 function chatWritable(){
   if (!GROUP.chat || typeof GROUP.chat !== "object") GROUP.chat = {};
@@ -1833,6 +1906,48 @@ function mainbuNamesFor(p){
    are left out: a retired one is not somewhere to be seated (§49.3), and an
    existing attachment to one is left alone because the select keeps whatever
    the row already says (below). */
+/* ── WHERE A PERSON'S COMPANY COMES FROM (§135.6) ─────────────────────
+   Islam: *"some users belong only to a company not a unit, like how the CEO
+   belongs to the group only."*
+
+   A PERSON SITS IN EXACTLY ONE PLACE, and that is built in rather than
+   habitual: `attachPersonAt()` clears unit, function and company before
+   setting one, and `personAt()` gives one answer. Sign-in, the Official BU
+   list, roles and the Overview all rest on it. So a second dropdown that could
+   disagree with the first is the pair §110 removed from this very dialog.
+
+   THE ANSWER IS THAT A COMPANY IS SOMETIMES DERIVED AND SOMETIMES STORED, and
+   which one it is depends on the unit beside it. Somebody in Mobile is in
+   Distribution — the platform already knows, because `units.company` says so
+   (§23) — so the field shows it and is read-only. Somebody with no unit is the
+   case Islam is describing, and there the field is the answer and is written.
+   One stored fact, two fields, and they cannot contradict each other because
+   only one of them is ever writable.
+
+   `null` for the group and for a function: neither belongs to a company, and
+   answering "—" is the truth rather than a gap. */
+function personCompany(p){
+  if (!p) return null;
+  if (p.company) return COMPANIES[p.company] ? p.company : null;
+  if (p.unit && p.unit !== "group") {
+    var u = UNITS[p.unit];
+    return u && u.company && COMPANIES[u.company] ? u.company : null;
+  }
+  return null;
+}
+/* True where the unit beside it has already answered, so the control is shown
+   and disabled rather than hidden — a field that appears and disappears as its
+   neighbour changes is harder to read than one that greys (§59's rule: shown
+   disabled with the reason, never hidden). */
+function personCompanyDerived(p){
+  return !!(p && p.unit && p.unit !== "group" && UNITS[p.unit] && UNITS[p.unit].company);
+}
+function companyChoices(){
+  return activeCompanyKeys().map(function(c){
+    return { v:c, label:COMPANIES[c].name };
+  });
+}
+
 function personAtChoices(){
   var out = [{ v:"group", label:roleWhereLabel("group") }];
   UNIT_KEYS.forEach(function(k){
@@ -1842,9 +1957,9 @@ function personAtChoices(){
     if (FUNCTIONS[k].active !== false)
       out.push({ v:"fn:" + k, label:FUNCTIONS[k].name + " (function)" });
   });
-  activeCompanyKeys().forEach(function(c){
-    out.push({ v:"co:" + c, label:COMPANIES[c].name + " (company)" });
-  });
+  /* THE COMPANIES LEFT THIS LIST (§135.6). They are their own field now, so
+     offering them here as well would be one answer in two controls — which is
+     the fault this whole change exists to avoid, arriving by the back door. */
   return out;
 }
 
@@ -2948,23 +3063,88 @@ function focusStanding(progress){
   return { key:"short", label:"Short" };
 }
 
-/* Every marked item in a unit, objectives and pillar measures alike. */
-function unitFocus(u){
+/* ── WHAT CAN BE MARKED, BANDED, FOR A UNIT OR A FUNCTION (§135.5) ────
+   Islam: *"make it like the navigation rail for units and supporting
+   functions."*
+
+   ONE BUILDER, asked with a destination key, because the marking page, the
+   unit's own strip and the group's Focus board are three surfaces onto one
+   answer and three walks of the data is how they drift (§53.5). It returns the
+   BANDS rather than a flat list: every one of the three groups what it shows,
+   and a band that is empty is still a band the marking table draws.
+
+   A FUNCTION ANSWERS IN ITS OWN SHAPE, and the two shapes are not a special
+   case bolted on — they are what a function IS. Merchandising plans in pillars
+   (§59), so `fnAsUnit()` hands over the unit shape and the unit's own bands
+   answer unchanged. The other seven plan in capabilities, and their measurable
+   rows sit one level down: a capability's key objectives, banded by capability
+   exactly as a unit's are banded by pillar. Islam, asked which: *"agreed."*
+
+   THE IDS WERE ALREADY THERE, which is what makes this cheap rather than a
+   migration — `renumberCapability()` has minted `cap1-KO1` for every one of
+   them since the capability model existed, and a focus mark is nothing but
+   that id in `CYCLE.focus`. §96.4's ID-less objectives were the group's, not
+   these. */
+function unitBands(u){
+  if (!u) return [];
+  return [{ band:L("keyobj","bu"), src:L("keyobj","bu").toLowerCase(),
+            items:u.keyObjectives || [] }]
+    .concat((u.items || []).map(function(p, pi){
+      return { band:pillarCode(u, pi) + " " + p.name, src:pillarCode(u, pi),
+               items:p.measures || [] };
+    }));
+}
+function focusBands(key){
+  if (!key) return [];
+  /* The prefix test rather than `isFn()`, which is the shell's own local
+     helper and not in scope here. */
+  if (String(key).indexOf("fn:") === 0) {
+    var fk = String(key).slice(3), f = FUNCTIONS[fk];
+    if (!f) return [];
+    if (f.format === "pillars") return unitBands(fnAsUnit(fk));
+    /* THE BAND IS THE CAPABILITY'S NAME, and no code is invented for it. A
+       pillar has one because the unit owns a prefix and somebody says "MB01"
+       out loud (§51.3); a capability has never had one on any screen, and
+       minting one here would be new vocabulary arriving through a marking
+       table. */
+    return capsOfFunction(fk).map(function(c){
+      return { band:c.name, src:c.name, items:c.keyObjectives || [] };
+    });
+  }
+  return unitBands(UNITS[key]);
+}
+/* Every place a mark could be made, in the navigation's own order. */
+function focusSubjects(){
+  return { units: activeKeys().map(function(k){
+             return { key:k, name:UNITS[k].name }; }),
+           fns: activeFunctionKeys().filter(function(k){ return fnShows(k); })
+                  .map(function(k){
+             return { key:"fn:" + k, name:FUNCTIONS[k].name }; }) };
+}
+/* Every MARKED item behind a destination. */
+function focusIn(key){
   var out = [];
-  u.keyObjectives.forEach(function(m){
-    if (isFocus(m.id)) out.push({ m:m, src:L("keyobj","bu").toLowerCase() });
-  });
-  u.items.forEach(function(p, pi){
-    p.measures.forEach(function(m){
-      if (isFocus(m.id)) out.push({ m:m, src:pillarCode(u, pi) });
+  focusBands(key).forEach(function(b){
+    (b.items || []).forEach(function(m){
+      if (isFocus(m.id)) out.push({ m:m, src:b.src });
     });
   });
   return out;
 }
-function focusTally(u){
+/* Kept for the unit-shaped callers that hold an object rather than a key. */
+function unitFocus(u){
+  var out = [];
+  unitBands(u).forEach(function(b){
+    (b.items || []).forEach(function(m){
+      if (isFocus(m.id)) out.push({ m:m, src:b.src });
+    });
+  });
+  return out;
+}
+function focusTallyOf(items){
   var t = { over:0, met:0, short:0, none:0, total:0, mean:null };
   var vals = [];
-  unitFocus(u).forEach(function(x){
+  items.forEach(function(x){
     t.total++;
     t[focusStanding(x.m.progress).key]++;
     if (x.m.progress != null) vals.push(x.m.progress);
@@ -2972,6 +3152,7 @@ function focusTally(u){
   t.mean = avg(vals);
   return t;
 }
+function focusTally(u){ return focusTallyOf(unitFocus(u)); }
 
 /* ── Supporting functions ─────────────────────────────────────────────────
    A capability is cross-cutting: the whole group depends on it, and a supporting

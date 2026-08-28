@@ -222,7 +222,7 @@ module.exports = async function handler(req, res) {
       const html = String(body.html || "");
       if (!html) return send(res, 400, { ok: false, error: "Nothing to send." });
 
-      /* ── THE GREETING IS FILLED IN HERE, ONCE PER RECIPIENT (spec 021) ──
+      /* ── THE GREETING IS FILLED IN HERE, ONCE PER RECIPIENT (spec 022) ──
          The page builds ONE email and leaves a marked region where the name
          goes; this is the side that knows who the recipients are (§74.2), so
          this is the side that names them. Read off the STORED register, from
@@ -302,7 +302,7 @@ module.exports = async function handler(req, res) {
          already here — the UPDATE and the INSERT share this array and a
          column inserted in the middle silently shifts one of them. NULL is
          off, and an empty word is off rather than a greeting with no word
-         (spec 021). */
+         (spec 022). */
       const vals = [String(body.subject || ""), String(body.body || ""),
                     String(body.ctaLabel || "").trim() || null,
                     String(body.ctaHref || "").trim() || null,
@@ -345,7 +345,7 @@ module.exports = async function handler(req, res) {
        "did they get it" can be answered. */
     if (action === "history") {
       const rows = (await client.query(
-        /* `audience` too (§137): the Overview says WHO each message went to, and
+        /* `audience` too (§144): the Overview says WHO each message went to, and
            the criteria as they were chosen is the only honest answer — the
            resolved list is what `message_recipients` holds, and re-resolving it
            today would describe who it would reach NOW, not who it reached. */

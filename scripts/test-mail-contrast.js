@@ -12,7 +12,7 @@
 const fs=require("fs");
 const src=fs.readFileSync(__dirname+"/../SMP-Project-Folder/src/mail.js","utf8");
 /* SMPRules IS HANDED IN, not stubbed. The builder reads the greeting's region
-   markers from the shared module (spec 021), and build.py supplies them the
+   markers from the shared module (spec 022), and build.py supplies them the
    same way — by inlining lib/rules.js before mail.js. Feeding the real module
    is what makes this the real builder's output rather than a near miss
    (§103.4: a stub is what you reach for when you cannot supply the thing). */

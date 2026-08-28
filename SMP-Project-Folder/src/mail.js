@@ -96,7 +96,7 @@ var MAIL = (function(){
     return hexOf([0,1,2].map(function(i){ return A[i]*(1-t) + B[i]*t; }));
   }
 
-  /* ── THE GREETING (spec 021) ────────────────────────────────────────
+  /* ── THE GREETING (spec 022) ────────────────────────────────────────
      Islam: "customize the email by the first name of the receiver like
      starting the email with Dear Ahmed and then the body comes after."
 

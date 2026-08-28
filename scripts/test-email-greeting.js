@@ -1,4 +1,4 @@
-/* THE EMAIL GREETS ITS RECEIVER — THE SERVER HALF (spec 021).
+/* THE EMAIL GREETS ITS RECEIVER — THE SERVER HALF (spec 022).
    ═══════════════════════════════════════════════════════════════════════
 
    Islam: "customize the email by the first name of the reciever like starting

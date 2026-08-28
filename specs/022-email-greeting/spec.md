@@ -1,6 +1,6 @@
-# 021 · The email greets its receiver
+# 022 · The email greets its receiver
 
-**Version:** v3.50 (built) · **Decisions:** §135 · **Status:** answered; built
+**Version:** v3.50 (built) · **Decisions:** §142 · **Status:** answered; built
 **Constitution:** checked against v1.1.0.
 
 Islam: *"For the emails sent can we make an option while sending the email to
@@ -87,7 +87,7 @@ the region is ever touched, so a sender who types the token into their own
 message cannot have it substituted; and an empty name removes **the whole
 paragraph** rather than leaving "Dear ,".
 
-**An absent name and an empty one are different answers** (§135.6). Absent
+**An absent name and an empty one are different answers** (§142.6). Absent
 means *the server will fill this*; present-and-empty means *the caller looked
 and there is none*, and writes no greeting at all — which is what *Send me a
 copy* hands over when the signed-in sender's own row has no usable name, on
@@ -152,7 +152,7 @@ its receivers.
 absent from the posted body. The emails would have been personalised perfectly
 — the fill rides in the html's region — and `messages.greet` would have been
 NULL on every row: **the record would have said no message ever greeted
-anybody.** Found by asking what the page POSTS, not by reading it (§135.5).
+anybody.** Found by asking what the page POSTS, not by reading it (§142.5).
 
 **`lib/mailer.js`'s Resend address became `SMP_RESEND_ENDPOINT`**, defaulting
 to the real one — §100.3's rule, so a check can MODEL the provider rather than

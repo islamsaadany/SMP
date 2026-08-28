@@ -1,4 +1,4 @@
-"""SEND A MESSAGE OPENS ON WHAT WENT (§137).
+"""SEND A MESSAGE OPENS ON WHAT WENT (§144).
 
 Islam: "The opening page of Send a message should be a dashboard of what was
 sent, to whom, how many people ... and when I say create a message it takes me
@@ -16,7 +16,7 @@ a page that renders:
     direction). Found by driving it, not by reading it.
 
   · A SEND MUST LAND ON THE RECORD, with the composer emptied behind it — which
-    is also what keeps §136's rule alive: the send cannot be repeated by one
+    is also what keeps §143's rule alive: the send cannot be repeated by one
     press, by construction now rather than by a flag.
 
 OVER HTTP, because this whole page is the empty state over `file://` (§94.11).
@@ -147,7 +147,7 @@ READ = """() => {
        Overview is what says the send cannot be repeated by one press. */
     sendShown: (() => { const e = document.getElementById("msgsend");
                         return !!e && e.getClientRects().length > 0; })(),
-    /* THE OVERVIEW'S OWN LOUD CONTROL (§137.8) — and `elementFromPoint` at its
+    /* THE OVERVIEW'S OWN LOUD CONTROL (§144.8) — and `elementFromPoint` at its
        centre, never "it is in the document": §90, §93.4 and §110 are all
        controls that were present, styled and enabled while hitting something
        else, and none would have failed a query. */
@@ -218,7 +218,7 @@ def go():
         br, pg = open_page(pw)
         r = pg.evaluate(READ)
         ck("there are two tabs",
-           [t["label"] for t in r["tabs"]] == ["Overview", "Write a message"], r["tabs"])
+           [t["label"] for t in r["tabs"]] == ["Overview", "Compose", "Email settings"], r["tabs"])
         ck("and it opens on Overview", r["on"] == "Overview", r["on"])
         ck("which draws both lists",
            r["headings"] == ["Not sent yet", "What has been sent"], r["headings"])
@@ -226,7 +226,7 @@ def go():
         ck("the lists actually resolve", not r["asking"], "still Asking...")
         ck("no grey descriptions", r["notes"] == 0, r["notes"])
 
-        # ── THE ACTION IS OBVIOUS (§137.8) ──────────────────────────
+        # ── THE ACTION IS OBVIOUS (§144.8) ──────────────────────────
         ck("there is a loud control for the action",
            r["writeBtn"] == "Send an email", r["writeBtn"])
         ck("it can actually be pressed", r["writeHits"] == "itself", r["writeHits"])
@@ -249,14 +249,14 @@ def go():
         pg.click("[data-msgwrite]")
         pg.wait_for_timeout(900)
         r = pg.evaluate(READ)
-        ck("the button opens the composer", r["on"] == "Write a message", r["on"])
+        ck("the button opens the composer", r["on"] == "Compose", r["on"])
         # A control offering to take you where you are is a duplicate (§94.15).
         ck("and it is not drawn there", r["writeBtn"] is None, r["writeBtn"])
         pg.click('.secrow [role=tab]:nth-of-type(1)')
         pg.wait_for_timeout(800)
         to_write(pg)
         r = pg.evaluate(READ)
-        ck("the composer is the second tab", r["on"] == "Write a message", r["on"])
+        ck("the composer is the second tab", r["on"] == "Compose", r["on"])
         ck("Send is there", r["sendShown"])
         ck("still no grey descriptions", r["notes"] == 0, r["notes"])
 
@@ -272,7 +272,7 @@ def go():
         ck("and it names who was skipped",
            "3 people skipped" in (r["said"] or ""), r["said"])
         ck("in the good voice", not r["saidBad"])
-        # §136's rule, kept by construction: there is no Send to press.
+        # §143's rule, kept by construction: there is no Send to press.
         ck("the send cannot be repeated by one press", not r["sendShown"])
         ck("and the composer it left behind is empty",
            not r["subject"] and not r["body"], "%r / %r" % (r["subject"], r["body"]))
@@ -301,7 +301,7 @@ def go():
         to_write(pg)
         send(pg)
         r = pg.evaluate(READ)
-        ck("it stays on the composer", r["on"] == "Write a message", r["on"])
+        ck("it stays on the composer", r["on"] == "Compose", r["on"])
         ck("the message is still loaded", bool(r["subject"]) and bool(r["body"]))
         ck("Send is still there to try again", r["sendShown"])
         ck("and the bar says what went wrong", bool(r["barSaid"]), r["barSaid"])

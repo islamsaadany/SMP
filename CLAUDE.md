@@ -361,6 +361,114 @@ console errors (in this cloud environment, run it via a wrapper that points Play
   that rule watches for CHECKS holding a removed selector; this was the PRODUCT
   holding one, and it fails the same way — silently, in the safe-looking
   direction.
+- **ONE LINE, AND THE PAGE'S CONTROLS ARE ON IT (§130):** §121.2 pinned the
+  page's NAME and deliberately left the controls beneath it — because a
+  negative margin pulled that NON-sticky row up and scrolling slid it out
+  (**a sticky box may only overlap something that pins with it**). That
+  forbids the FAKE move, not the move: the controls go INSIDE `.setuphead`
+  now. **`PAGE_TOOLS` and `PAGE_ACTS` are `PAGE_TITLE`'s two siblings** —
+  reset by the shell before the page renders, read after it — because the
+  shell draws the header and the controls are produced deep inside each page's
+  render. **The `SMO` pill and the count chips go from every page**, including
+  the two Islam did not name: the chrome says who you are and the table IS the
+  count, and a pill surviving on two pages after leaving eight reads as a
+  mistake. **`alerts` is what survives and is not the same thing renamed** —
+  "10 names" is the list, "3 names on people and not on this list" is
+  something outstanding. **The quick filters and the row count go** (his call),
+  and **nothing is hidden by it**: every row carries `data-tkrow` and every one
+  is drawn, so the chip narrowed a view and never revealed rows. `TKFILTER`,
+  the chip markup, its handler and `[data-tkcount]` are DELETED (§24).
+- **A BAND CANNOT BE A LIGHTER SHADE OF THE STRIPE (§130.8):** the marking
+  table's band was `--surface-2` (#EFF2F6) against a `--zebra` of #F5F7FA — six
+  points on one channel, and Islam read them as the same grey. Reaching for
+  §99's `tr.dxband` kept one vocabulary for "a band inside a table" (§53.5) and
+  **Islam turned it down** — *"the band should be darker grey not navy"* — and
+  he was right twice over: it wore the SAME navy as the `<thead>` directly above
+  it, and it was what leaked through §130.10's slot and read as a second header.
+  **A shared vocabulary is worth having and is not worth two confusions.**
+  `--line` is the step that exists (#D6DCE5 / #333A45, so it tracks the theme
+  without a literal, §25) and `--ink-2` on it is 6.49:1 light, 7.0:1 dark.
+- **A GUESSED CONSTANT BETWEEN TWO PINNED THINGS IS A HOLE (§130.10):**
+  `--sethead-h` was the literal `46px`, and §130 changed the header's height by
+  putting the controls in it — 42px on some pages, 49px on others. So a table's
+  head pinned **4px below** the page header, and **four pixels between two
+  things that do not move is a slot scrolling rows show through**: measured, a
+  4px leak at y=152, and what leaks is a BAND, which is why it reads as a second
+  header. §122.5's fault, reintroduced by the change that moved the controls.
+  **A better constant could not have been right** — the header WRAPS, so its
+  height depends on the window too — so a ResizeObserver publishes it, the way
+  `--chrome-h` already is. **NOT §28.3's loop**: it feeds a sticky OFFSET and
+  nothing else, and an offset cannot change the height it was measured from.
+- **A SAMPLED SEARCH FOR A SYMPTOM FINDS THE FAULT WHEN IT IS LUCKY (§130.10):**
+  the check for the above swept scroll positions in 20px steps looking for a row
+  showing through, and **passed on the deliberately broken build** — a 4px slot
+  only shows something when a row happens to be crossing it. Measure the CAUSE
+  (the gap), and only **while the head is actually pinned**: the second attempt
+  measured at a fixed scroll and reported 50px on a page that was fine, because
+  a short table's head is still in flow there. And **put the state back first**
+  (§94.2) — an earlier section had left the focus page on a function with two
+  rows, and a page too short to scroll has a head that never pins at all.
+- **PINNED TWICE, AND ASSERTED ONCE (§130.9):** asked (twice) to make the rail's
+  `SETUP` bar and search sticky, the honest first move was to MEASURE — eleven
+  window sizes, four scroll positions, the list scrolled internally: 96px and
+  136px every time, on this build and main's. It was already true and had
+  **never been asserted**, which is why "already true" was only ever something a
+  throwaway probe could say. `.rhead` and `.railfind` are sticky inside the rail
+  now as belt and braces — a no-op wherever the cap applies, and the difference
+  between holding and not in the two states it does not reach (a browser without
+  `100dvh` drops the whole `max-height`; below 900px the rail stops being a
+  column). The search's offset is the head's **measured** height, or it pins
+  under the bar in exactly the state the fix exists for.
+- **`.acgrid` IS A SCROLL BOX, SO THE PAGE OFFSET WENT INSIDE IT (§130.2):**
+  *"check the table as the design is damaged."* `overflow-x:auto` makes the BOX
+  what a sticky head pins against, so §121.4's 141px page offset pushed the
+  Roles & access header **141px DOWN inside the table**, onto rows three and
+  four — all twelve cells at one position, measured. **The exact fault §121.4
+  wrote down about the register, on the one table its exclusion forgot.**
+  `position:static`, not `top:0`: nine rows scrolling the page by 60px buy
+  nothing from a sticky head, and this head is TWO ROWS with cells spanning
+  both. **The damage was hiding §117's group headings** — *Own business unit*
+  and *Own supporting function* — unreadable since the split shipped.
+- **A TABLE ROW HAS NO BOX ONCE ITS CELLS ARE POSITIONED (§130.7):** the check
+  for the above measured `tr.getBoundingClientRect()` and **called the broken
+  build clean at three scroll positions**, because the row went on reporting
+  the un-stuck layout while every `th` had moved. Measure the CELLS. Two more
+  in the same file: a chip assertion scoped to where the chips had MOVED TO
+  passed on a build where they were alive one row lower (§113.8's blind spot),
+  and the page had to be given something to SCROLL — at 1560×900 that matrix
+  scrolls 60px, so three measurements were of an unscrolled page (§94.2).
+  **33 failures against the previous build** before the green was believed.
+- **FOCUS REACHES SUPPORTING FUNCTIONS, IN BOTH SHAPES (§130.5):**
+  `focusBands(key)` is ONE builder — a unit's key objectives and pillars; a
+  **pillars** function's through `fnAsUnit()`, identically; a **capability**
+  function's capabilities each banding their own key objectives (Islam:
+  *"agreed"*). **The ids were already there** (`renumberCapability()` mints
+  `cap1-KO1`), which is what made it cheap rather than a migration. **The
+  group's Focus board grows the same half or the marks are stored where nobody
+  looks** (§61) — its first column is *Where*, and a function's cell says
+  "supporting function" where a unit's says its weight, because a function
+  carries no weight and inventing one is a number that means nothing. The
+  switch is a segmented On|Off pair in its **own class, never `.navswitch`**
+  (§65.9: that one is scoped to `.units` and paints white-on-navy). **The grey
+  note went and was carrying a bug** — `marks + plural(marks,"mark")` printed
+  *"0 0 marks"* — and what it was evidence for is asserted of the DATA now.
+- **THE COMPANY IS SOMETIMES DERIVED AND SOMETIMES STORED (§130.6):** a person
+  sits in exactly ONE place by construction (`attachPersonAt()` clears all
+  three pointers; `personAt()` gives one answer), so a second dropdown that
+  could disagree is §110's pair. The field is **read-only wherever the unit has
+  already answered it** — Mobile's company IS Distribution (§23) — and written
+  only where nothing else has. **Companies left the Unit dropdown, and that
+  broke granting a Company CEO**, found by `checks/role-picker.py`: the refusal
+  names the field that can answer it, and **either half finishes it** (§110).
+  The dialog gains a row (614px from 558), so a 640px window now scrolls it —
+  recorded, not glossed (§122.5).
+- **EMAIL SETTINGS ARE A SECTION, NOT A DROPDOWN (§130.4):** asked as a
+  question and answered by what the page holds — a status table, four fields,
+  a **live rendered preview** and a test send. A rendered email inside a
+  dropdown is not a dropdown. Figure sets' and Import & archives' shape (§46.2,
+  §108.4): one rail entry, two sections, **each keeping its own gate**, so a
+  `c_comms` holder without `c_send` still reaches it. *Setup › Email* leaves
+  the rail and its GROUP is renamed with it (§24).
 - **THE RAILED PAGES GET THE WHOLE WINDOW (§93.9):** *"the page is wide,
   however the rail and the tables are stuck in a confined space."* 1180px is a
   READING measure, right for prose and wrong for a rail and a table — every
@@ -1566,13 +1674,19 @@ console errors (in this cloud environment, run it via a wrapper that points Play
   break silently — and asserted in `test-assistant.js`, never the browser
   check, whose stub supplies the steps and would never run it (§94.2).
 - **A DEBOUNCED SAVE WITH NO FLUSH LOSES THE LAST 800ms (§126.1, RECORDED NOT
-  FIXED):** press a switch, leave the page 150ms later — **saves sent: none**,
+  FIXED — CLOSED BY §138, v3.51, 2026-08-27):** press a switch, leave the page
+  150ms later — **saves sent: none**,
   database unchanged, screen still showing the new value. `sync.js` is the
   autosave for the WHOLE platform, so branding, terminology and the access
   matrix have the same hole. **It was NOT the fault being chased** (the
   diagnostic said the switch had saved), and it is written down rather than
   fixed on the way past: changing the save path for every page in the product
-  while looking at something else is what rule 1b exists to stop.
+  while looking at something else is what rule 1b exists to stop. **§138
+  closed it as its own aligned change**: `flushLeave()` on
+  visibilitychange/pagehide sends anything waiting (keepalive under 64KB,
+  plain fetch over — that limit stated, not glossed), touches no save
+  bookkeeping, skips while a save is in flight, and `checks/save-flush.py`
+  reproduces the loss end to end on the pre-§138 build.
 - **SAYING NOTHING IS NOT A NEUTRAL OUTCOME (§125):** with the assistant on
   and a working key, Islam got *"nothing happens at all"* — and that was §104
   working as designed. A handoff wrote NOTHING, on sound reasoning (a sentence
@@ -2085,7 +2199,7 @@ console errors (in this cloud environment, run it via a wrapper that points Play
   backfilled. **AND `SYNC.mailSend()` NAMES EVERY FIELD IT FORWARDS**, so
   `greet` was silently dropped and the RECORD would have said no message ever
   greeted anybody — found by asking what the page POSTS, not by reading it.
-  **AND THE GREETING MUST SIT OUTSIDE `data-mail-body`** (§135.8): the message
+  **AND THE GREETING MUST SIT OUTSIDE `data-mail-body`** (§142.8): the message
   is typed INTO the preview and read back with `innerText`, so a greeting
   emitted inside that div is absorbed into the body by the first keystroke —
   the email then carries it twice and the stored message holds a name nobody
@@ -2116,7 +2230,7 @@ console errors (in this cloud environment, run it via a wrapper that points Play
   and §51.11 exactly, a gate keyed on markup that moved, failing silently and
   in the safe-looking direction. Gated on `#msgover`, the thing that draws
   them. **Found by driving it, not by reading it.**
-- **THE ACTION IS MADE OBVIOUS, AND BOTH CHOICES ARE ISLAM'S (§137.8):** a tab
+- **THE ACTION IS MADE OBVIOUS, AND BOTH CHOICES ARE ISLAM'S (§144.8):** a tab
   reads as *where you are*, not as *something to do*, so the page's own purpose
   had no loud control. Three placements were drawn in the real page; he picked
   **above the lists** over the header, and **"Send an email"** over *Write a
@@ -2160,7 +2274,7 @@ console errors (in this cloud environment, run it via a wrapper that points Play
   fixing a typo to re-send would have to throw the fix away to get Send back.
   **Write another keeps the AUDIENCE** — the recipients are usually the same
   list and re-picking seventy-six people is real work.
-- **A CHECK MUST BE ABLE TO STAND IN FRONT OF THE PROVIDER (§135.6, §100.3
+- **A CHECK MUST BE ABLE TO STAND IN FRONT OF THE PROVIDER (§142.6, §100.3
   again):** `SMP_RESEND_ENDPOINT` joins `GEMINI_ENDPOINT` as an environment
   variable defaulting to the real service, because **a test double behind an
   `if` in `lib/mailer.js` would be a second code path shipping to production**.
@@ -2336,6 +2450,9 @@ python3 checks/setup-search.py  # the rail's search: typing NEVER repaints, a re
                                 # setup-rail.py also measures every rail GLYPH against a
                                 # character guaranteed missing: a mark that is MAPPED and
                                 # not DRAWN ships as a blank box (§52, §120.2)
+python3 checks/setup-header.py  # the page's controls share its pinned line, the counts and
+                                # the SMO pill are gone, the matrix's two header levels stack,
+                                # and a function's focus mark is written and shown (§130)
 python3 checks/send-overview.py # Send a message opens on the record, writing is the second
                                 # subtab, and a send LANDS back on the record with the
                                 # composer emptied — the send that never happened is the
@@ -2347,7 +2464,7 @@ python3 checks/setup-pages.py   # every Setup page is named ONCE and in the rail
                                 # and the name and the table head stay on screen (§121)
 ```
 The mail half needs a database and a password (it spawns its own dev-server):
-`DATABASE_URL=… node scripts/test-email-greeting.js <smo-password>` (§135.6).
+`DATABASE_URL=… node scripts/test-email-greeting.js <smo-password>` (§142.6).
 In this cloud image, run any sweep through the wrapper so Playwright finds the
 Chromium that is already here:
 `SMP_CHROME=/opt/pw-browsers/chromium-1194/chrome-linux/chrome python3 qa-run.py <file>`.
@@ -2381,7 +2498,41 @@ prior sessions (on HR_ERP) accidentally reverted agreed-upon designs.
 
 ---
 
-*Last Updated: 2026-08-27 &mdash; **v3.50: the bar reports, and moves on
+*Last Updated: 2026-08-28 &mdash; **v3.54: Send an email opens on what went
+(&sect;144)**. Islam: *"the opening page ... should be a dashboard of what was
+sent, to whom, how many people ... and when I say create a message it takes me
+to another tab ... and when I finish and send it it should take me back to the
+dashboard and show me that the message was sent there."* **NOTHING NEW IS
+COMPUTED** &mdash; every send already wrote its row, and this is &sect;95's own
+`renderDraftList()` / `renderSentList()` moved out of the header dropdowns they
+were hiding in, so the list cannot say two things depending on where it is
+drawn. **A SEND LANDS ON THE RECORD AND THE COMPOSER IS EMPTIED**, which is
+also how &sect;143's rule survives: the send cannot be repeated by one press,
+by construction rather than by a flag. A partial failure lands there too (the
+message went to most people and the record is where the failures are named);
+**only a send that never happened stays put**. **AND THE TWO FETCHES WERE GATED
+ON `#msgsend`** &mdash; the Send button, now on another tab &mdash; so on the
+Overview neither list was ever asked and both said *Asking&hellip;* for ever:
+&sect;93 and &sect;51.11 exactly, a gate keyed on markup that moved, failing
+silently and in the safe-looking direction. **Found by driving it, not by
+reading it.** **AND THE ACTION IS MADE OBVIOUS** (&sect;144.8): a tab reads as
+*where you are*, not as something to do, so the page's own purpose had no loud
+control &mdash; three placements were drawn in the real page and Islam picked
+**above the lists**, and named the button himself. Both costs were stated
+before he chose and are recorded rather than re-argued: it SCROLLS AWAY on a
+long record, and the platform now carries more than one noun for the one act
+(&sect;87's twins, in vocabulary). **MERGED WITH &sect;135&ndash;&sect;141 FROM
+FOUR OTHER SESSIONS**, which had renamed this very page to *Send an email* and
+given it a second subtab of its own (&sect;135.3): the two section rows are ONE
+row now &mdash; **Overview &middot; Compose &middot; Email settings**, what you
+arrive at, what you do, and what you set once &mdash; and my
+&sect;135&ndash;&sect;137 became &sect;142&ndash;&sect;144 because main had
+taken those numbers first. **The header dropdowns are DELETED, not left
+unused** (&sect;24): with the Overview holding both lists, `renderDraftMenu()`
+and `renderSentMenu()` had no caller, and a builder nobody calls is one the
+next reader takes for load-bearing.*
+
+*Earlier: 2026-08-27 &mdash; **v3.54: the bar reports, and moves on
 (&sect;136)**. Islam, using the product: *"When I send I don't get any
 verification that the message was sent and the page stays the same view."*
 Both halves were true, and they are TWO faults. **Success was written in the
@@ -2410,7 +2561,7 @@ exactly. **One of its own first-run failures was the check** &mdash; `focus()`
 puts the caret at the START of a contenteditable, so the typed character lands
 first and the assertion had used `endswith`.*
 
-*Earlier the same day: **v3.50: the email greets its receiver
+*Earlier the same day: **v3.54: the email greets its receiver
 (&sect;135, spec 021)**. Islam: *"can we make an option while sending the email
 to customize the email by the first name of the reciever like starting the
 email with Dear Ahmed and then the body comes after &mdash; it's a turn on and
@@ -2445,6 +2596,46 @@ else's name**; `checks/email-greeting.py` measures the screen and the seam.
 **Two of that check's own first-run failures were the CHECK**, clustering a
 row's controls by their `top` when three controls of three heights on one line
 have three different tops &mdash; &sect;122.4, already written down once.*
+
+*Earlier, from four other sessions: 2026-08-27 &mdash; **v3.50: the Setup header line, the marking
+table, and a repaired matrix (&sect;135)**. Eleven asks from using the Setup
+pages, of which seven turn out to be **one standard applied to sixteen pages**:
+the page's own search, filters and buttons share the pinned line with its name,
+the `SMO` pill and every count chip go, and the grey briefing paragraph goes
+everywhere. **&sect;121.2 had left those controls on a row of their own for a
+good reason, and that reason forbade the FAKE move rather than the move** &mdash;
+a negative margin pulled a NON-sticky row up under a pinned title and scrolling
+slid it out; putting them INSIDE the header makes them pin with it. **The
+quick filters and the row count go the way the register's did**, and nothing is
+hidden by it: every row carries `data-tkrow` and every one is drawn, so the chip
+narrowed a view and never revealed rows a table was holding back.
+**AND THE DAMAGED MATRIX HAD ONE CAUSE** (&sect;135.2): `.acgrid` is
+`overflow-x:auto`, which makes the BOX &mdash; not the page &mdash; what its
+header pins against, so &sect;121.4's 141px page offset pushed the Roles &amp;
+access header **141px down inside the table**, onto rows three and four. All
+twelve cells at one position, measured. It is the exact fault &sect;121.4 wrote
+down about the register, on the one table its exclusion forgot &mdash; and
+repairing it made &sect;117's *Own business unit* and *Own supporting function*
+headings readable for the first time since the split shipped.
+**FOCUS REACHES SUPPORTING FUNCTIONS** (&sect;135.5), in both of their shapes,
+with the group's board growing the same half or the marks are stored where
+nobody can see them; the switch is a segmented On|Off pair on the header line,
+and the grey note it replaced was printing *"0 0 marks"*. **THE COMPANY IS
+SOMETIMES DERIVED AND SOMETIMES STORED** (&sect;135.6) &mdash; read-only
+wherever the unit has already answered it, written only where nothing else has,
+so two fields cannot contradict one stored fact. **Send a message becomes Send
+an email with the Email settings as its second section** (a status table, four
+fields, a live rendered preview and a test send: not a dropdown), and Inbox
+becomes **Platform Inbox**, and Focus measures moves to *Measurement* — the
+rail's groups answer what you came to do, and somebody opening that page came to
+say which measures matter (&sect;135.11). `checks/setup-header.py` was proved able to fail
+first &mdash; **33 failures against the previous build** &mdash; and **two of
+its own assertions could not fail when written**: one scoped to where the chips
+had moved TO (&sect;113.8), and one measuring `tr.getBoundingClientRect()`,
+which goes on reporting the un-stuck layout because **a table row has no box of
+its own once its cells are positioned**. **Still not reproduced**: the left
+rail's own header and search, measured holding at nine window sizes and three
+scroll positions on this build and on main's.*
 
 *Earlier: 2026-08-27 &mdash; **v3.49: the register notices two people
 whose name reads the same (&sect;131)**. Islam: *"for the names you normally

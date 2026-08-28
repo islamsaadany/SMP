@@ -206,7 +206,7 @@ with sync_playwright() as p:
         # line to go; it moved onto the controls row rather than going with it,
         # and it still names the units.
         return [x for x in pg.eval_on_selector_all(
-            ".phead2 .pnocust", "e=>e.map(x=>[x.textContent, x.title])")
+            ".setuphead .pnocust", "e=>e.map(x=>[x.textContent, x.title])")
             if "custodian" in x[0]]
     ck("nothing is said while every unit has one",
        pg.evaluate("()=>unitsWithoutCustodian().length") == 0 and not custPill(),
@@ -372,7 +372,7 @@ with sync_playwright() as p:
     # EVERY header menu, not just this one: the next chip would have taken
     # Columns and Passwords the same way.
     unreachable = pg.evaluate("""() =>
-      Array.from(document.querySelectorAll('.setuppane .phead2 .hmenu-btn'))
+      Array.from(document.querySelectorAll('.setuppane .setuphead .hmenu-btn'))
         .filter(function(b){ const r = b.getBoundingClientRect();
           return document.elementFromPoint(r.left + r.width/2, r.top + r.height/2) !== b; })
         .map(function(b){ return b.textContent.trim(); })""")

@@ -146,8 +146,8 @@ with sync_playwright() as p:
     pg.set_viewport_size({"width": 1512, "height": 900})
     land(pg)
     ck("the SMO badge is gone",
-       pg.evaluate("()=>document.querySelectorAll('.phead2 .chip').length") == 0,
-       pg.evaluate("()=>[...document.querySelectorAll('.phead2 .chip')].map(x=>x.textContent)"))
+       pg.evaluate("()=>document.querySelectorAll('.setuphead .chip').length") == 0,
+       pg.evaluate("()=>[...document.querySelectorAll('.setuphead .chip')].map(x=>x.textContent)"))
     ck("the count line is gone",
        not pg.evaluate("()=>!!document.querySelector('.pcount')"))
     ck("...and no 'people active' text survives anywhere on the page",
@@ -155,19 +155,19 @@ with sync_playwright() as p:
     # THE ARRIVAL IS THE HALF THAT IS NOT A REMOVAL, and it is the half that
     # only exists over HTTP.
     ck("Passwords is drawn at all (it is `live`, so this needs a server)",
-       pg.evaluate("""()=>[...document.querySelectorAll('.phead2 .hright *')]
+       pg.evaluate("""()=>[...document.querySelectorAll('.setuphead .hright *')]
           .some(x=>/password/i.test(x.textContent||''))"""))
     ck("...and it is inside the controls row, not below it",
-       pg.evaluate("""()=>{const r=document.querySelector('.phead2 .hright');
+       pg.evaluate("""()=>{const r=document.querySelector('.setuphead .hright');
           return [...r.children].some(x=>/password/i.test(x.textContent||''));}"""))
 
     # ── 2. IT IS ONE ROW ─────────────────────────────────────────────
     print("\n2. one row, and the table under it")
-    # THE ASK WAS ABOUT THE HEADER, NOT ABOUT `.hright` (§122). `.phead2` wraps
-    # too, so when the controls no longer fit beside the title the whole block
-    # drops them to a line of their own — and `.hright` then reports ONE row
-    # while the header is two. Measuring the inner box alone passed on the
-    # build this section replaced, at every width. The height of the WHOLE
+    # THE ASK WAS ABOUT THE HEADER, NOT ABOUT `.hright` (§122). The header
+    # wraps too, so when the controls no longer fit beside the title the whole
+    # block drops them to a line of their own — and `.hright` then reports ONE
+    # row while the header is two. Measuring the inner box alone passed on the
+    # build that section replaced, at every width. The height of the WHOLE
     # header is the thing Islam can see, so that is what is asserted, with the
     # inner row asserted under it because it is the one that carried Passwords.
     # 1320 RATHER THAN 1280, AND THE 20px IS RECORDED (§122.5): the bold title
@@ -177,31 +177,31 @@ with sync_playwright() as p:
     for w in (1920, 1600, 1400, 1320):
         pg.set_viewport_size({"width": w, "height": 900})
         land(pg)
-        # §122'S ONE-LINE HEADER IS SUPERSEDED BY §121.2, AND THAT IS THEIR
-        # CALL, NOT A REGRESSION. That section gave the pane its own sticky
-        # title and deliberately did NOT pull the controls up into it — a
-        # non-sticky row slid out from under the pinned name when scrolled —
-        # so the name and the controls are two rows now, on purpose and with
-        # a stated reason. What survives of Islam's ask is the half that was
-        # ever about the controls: they are ONE row, Passwords included, and
-        # the table follows them. Asserting the old combined height here would
-        # be a check arguing with a decision.
-        ck("%d: the name is its own sticky row (§121.2)" % w,
-           pg.evaluate("()=>{const h=document.querySelector('.setuphead');"
-                       " return !!h && getComputedStyle(h).position==='sticky';}"))
-        n = pg.evaluate(ROWS, ".phead2 .hright")
+        # AND §135 PUTS THEM BACK TOGETHER, WHICH IS WHAT §122 ASKED FOR AND
+        # §121.2 COULD NOT SAFELY GIVE. That section left the controls on a row
+        # of their own because pulling a NON-STICKY row up under a pinned title
+        # slid it out on scroll — a real fault, and an argument against the fake
+        # move rather than against the move. They are inside the sticky header
+        # now, so they pin WITH the name and Islam's original ask holds again.
+        ck("%d: the name and the controls pin together (§135)" % w,
+           pg.evaluate("""()=>{const h=document.querySelector('.setuphead');
+              return !!h && getComputedStyle(h).position==='sticky' &&
+                     !!h.querySelector('.hright');}"""))
+        nh = pg.evaluate(ROWS, ".setuphead")
+        ck("%d: the header is one row (%d)" % (w, nh), nh == 1, nh)
+        n = pg.evaluate(ROWS, ".setuphead .hright")
         ck("%d: the controls are one row (%d)" % (w, n), n == 1, n)
         ck("%d: nothing scrolls sideways" % w,
            not pg.evaluate("()=>document.documentElement.scrollWidth>innerWidth+1"))
         # THE TABLE FOLLOWS THE ROW. Not a number — the header's own margin is
         # the gap, and the assertion is that nothing else is between them.
-        gap = pg.evaluate("""()=>{const h=document.querySelector('.phead2'),
+        gap = pg.evaluate("""()=>{const h=document.querySelector('.setuphead'),
              t=document.querySelector('.peoplebox');
            return t? Math.round(t.getBoundingClientRect().top -
                                 h.getBoundingClientRect().bottom) : -1;}""")
         ck("%d: the table starts directly under it (%dpx)" % (w, gap),
            0 <= gap <= 40, gap)
-        hits = pg.evaluate(HITS, ".phead2 .hright > *")
+        hits = pg.evaluate(HITS, ".setuphead .hright > *")
         ck("%d: every control on the row can be pressed (%d)" % (w, len(hits)),
            len(hits) >= 5 and all(h["ok"] for h in hits),
            [h for h in hits if not h["ok"]])
@@ -212,7 +212,7 @@ with sync_playwright() as p:
     for w in (1240, 1150, 1100):
         pg.set_viewport_size({"width": w, "height": 900})
         land(pg)
-        n = pg.evaluate(ROWS, ".phead2 .hright")
+        n = pg.evaluate(ROWS, ".setuphead .hright")
         ck("%d: the controls are still one row (%d)" % (w, n), n == 1, n)
         ck("%d: nothing scrolls sideways" % w,
            not pg.evaluate("()=>document.documentElement.scrollWidth>innerWidth+1"))
@@ -225,19 +225,19 @@ with sync_playwright() as p:
     # unexercised and the chip could be broken for as long as every unit has a
     # custodian (§94.2).
     ck("with every unit covered, no chip is drawn",
-       not pg.evaluate("()=>!!document.querySelector('.phead2 .pnocust')"))
+       not pg.evaluate("()=>!!document.querySelector('.setuphead .pnocust')"))
     pg.evaluate("""()=>{ const k=Object.keys(UNIT_ROLES)[0];
         UNIT_ROLES[k].custodian = null; paint(); }""")
     pg.wait_for_timeout(500)
     ck("take a custodian away and it appears, on the row",
-       pg.evaluate("""()=>{const c=document.querySelector('.phead2 .pnocust');
+       pg.evaluate("""()=>{const c=document.querySelector('.setuphead .pnocust');
           return !!c && !!c.closest('.hright');}"""))
     ck("...saying which unit, on the hover",
-       len(pg.eval_on_selector(".phead2 .pnocust", "e=>e.title") or "") > 20)
+       len(pg.eval_on_selector(".setuphead .pnocust", "e=>e.title") or "") > 20)
     ck("...and it is still one row with it there",
-       pg.evaluate(ROWS, ".phead2 .hright") == 1)
+       pg.evaluate(ROWS, ".setuphead .hright") == 1)
     ck("...and one LINE, like everything else on the row (§88)",
-       pg.eval_on_selector(".phead2 .pnocust", """e=>{
+       pg.eval_on_selector(".setuphead .pnocust", """e=>{
          const r=document.createRange(); r.selectNodeContents(e);
          const t=new Set([...r.getClientRects()].filter(x=>x.width>0)
                    .map(x=>Math.round(x.top)));
@@ -245,7 +245,13 @@ with sync_playwright() as p:
 
     # ── 4. THE DIALOG FITS THE WINDOW ────────────────────────────────
     print("\n4. the dialog is compact, and nothing is orphaned")
-    for w, h in ((1920, 1080), (1512, 860), (1440, 780), (1280, 720), (1280, 640)):
+    # 700 RATHER THAN 640, AND THE 56px IS RECORDED (§135.6, §122.5's rule).
+    # The Company field costs the second block a row — four fields do not fit a
+    # three-column grid in one — so the dialog is 614px where it was 558, and a
+    # 640px-tall window now scrolls it by 50px. That is the price of the field
+    # Islam asked for, stated rather than hidden; a check left asserting a
+    # number that is no longer true is worse than the fifty pixels.
+    for w, h in ((1920, 1080), (1512, 860), (1440, 780), (1280, 720), (1280, 700)):
         pg.set_viewport_size({"width": w, "height": h})
         land(pg)
         pg.evaluate("()=>document.querySelector('[data-pmenu=\"smo\"]').click()")
@@ -320,7 +326,7 @@ with sync_playwright() as p:
           return {box:Math.round(b.bottom), rail:Math.round(r.bottom),
                   vh:innerHeight, scrolls:bx.scrollHeight>bx.clientHeight+2,
                   weight:getComputedStyle(document.querySelector(
-                    '.setuppane .setupttl, .setuppane .phead2 .secttl')).fontWeight};}""")
+                    '.setuppane .setupttl, .setuppane .setuphead .setupttl')).fontWeight};}""")
         # THE WINDOW IS THE THING TO ASSERT, NOT THE RAIL. Both were compared
         # at first and it was wrong in one case out of six: the rail is a
         # max-height over a LIST, so on a tall window its content ends before
@@ -347,7 +353,7 @@ with sync_playwright() as p:
     pg.evaluate("()=>document.querySelector('[data-setupgo=\"units\"]').click()")
     pg.wait_for_timeout(900)
     ck("...and every Setup title is bold, not only this one",
-       int(pg.eval_on_selector(".setuppane .setupttl, .setuppane .phead2 .secttl",
+       int(pg.eval_on_selector(".setuppane .setupttl, .setuppane .setuphead .setupttl",
                                "e=>getComputedStyle(e).fontWeight")) >= 600)
     # AND ONLY THE REGISTER'S PANE IS CAPPED: every other Setup page is a form
     # or a short list, and capping those would invent a scroll nobody asked for.

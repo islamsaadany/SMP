@@ -64,10 +64,29 @@
   td.annual  { font-weight:700; }
   th.cc + th.cc { white-space:nowrap; }
 
-  /* Ten units will not fit one line at every width. Wrapping keeps every unit
-     reachable; a horizontal scroll hides the last one behind a gesture nobody
-     is told about. */
-  .units-in { flex-wrap:wrap; overflow-x:visible; }
+  /* ── ONE LINE THAT SCROLLS, ENDS PINNED (§136) ──────────────────────────
+     REVERSAL, quoted so it stays recorded: this block used to say "Wrapping
+     keeps every unit reachable; a horizontal scroll hides the last one behind
+     a gesture nobody is told about" — and the wrap it chose was fighting
+     `.units-in{height:46px}` in _shared.css, so below ~1280px the second line
+     painted OUTSIDE the 46px box, over the tab row, and on some pages ate its
+     clicks (§118.7, measured live at 1024). Islam chose the scroll (Decision
+     1: B, 2026-08-27), and the old objection is answered in kind: the fades
+     SAY there is more, each side only while it is true; the lit destination
+     is scrolled into view on every paint; and the controls — the Group menu,
+     the Units|Functions switch, the gear — sit OUTSIDE the scroll region,
+     pinned, so they can never leave the screen. */
+  .units-in { flex-wrap:nowrap; overflow:visible; }
+  .units-in > details, .units-in > .navswitch, .units-in > .sep { flex:0 0 auto; }
+  .navclip { position:relative; flex:1 1 auto; min-width:0; align-self:stretch; }
+  .navscroll { display:flex; gap:2px; align-items:stretch; height:100%;
+               overflow-x:auto; scrollbar-width:none; }
+  .navscroll::-webkit-scrollbar { display:none; }
+  .navscroll > * { flex:0 0 auto; }
+  .navfade { position:absolute; top:0; bottom:0; width:40px;
+             pointer-events:none; z-index:2; }
+  .navfade.l { left:0;  background:linear-gradient(to right, var(--panel), transparent); }
+  .navfade.r { right:0; background:linear-gradient(to left,  var(--panel), transparent); }
   .units button { padding:11px 14px; }
   .units .sep { margin:8px 8px; }
 
@@ -1204,3 +1223,66 @@
      it reaches every table using the pattern and nothing else. */
   td:has(> .fld + .xbtn) > .fld { width: calc(100% - 30px); vertical-align: middle; }
   td:has(> .fld + .xbtn) > .xbtn { vertical-align: middle; margin-left: 5px; }
+
+  /* ── A FAILED RENDER SAYS SO (§137) ────────────────────────────────────
+     The card paint() leaves where a page that threw would have been. Quiet on
+     purpose: no red kicker, no shouting — the first sentence answers the fear
+     and the error sits folded behind "Technical details". Drawn from tokens
+     only, so it holds in both themes. */
+  .failcard { max-width:560px; margin:64px auto; background:var(--surface);
+    border:1px solid var(--line); border-radius:10px; padding:30px 34px;
+    text-align:center; }
+  .failcard .fc-t { font-size:17px; font-weight:700; margin-bottom:10px; }
+  .failcard .fc-b { font-size:14px; color:var(--ink-2); margin-bottom:18px; }
+  .failcard details { margin-top:18px; text-align:left; }
+  .failcard summary { font-size:12px; color:var(--ink-3); cursor:pointer; }
+  .failcard summary:focus-visible { outline:2px solid var(--gold); outline-offset:2px; }
+  .failcard .fc-e { font-family:var(--mono); font-size:12px; color:var(--ink-3);
+    background:var(--surface-2); border-radius:6px; padding:8px 12px; margin-top:8px; }
+
+/* ── THE KNOWLEDGE BASE'S PEN (§140) ──────────────────────────────────
+   In arrange.css, concatenated last, because config.css has eaten three
+   silently-duplicated rules already (§29.2, §51.5, §53.6) and one comment
+   (§93.11). The look is the approved mockup's: quiet cards, the platform's
+   own tokens throughout, nothing brandable. */
+.kbed { border:1px solid var(--line); border-radius:8px; padding:14px 16px;
+        margin:10px 0; background:var(--surface); }
+.kbed.on { border-color:var(--gold); box-shadow:0 0 0 1px var(--gold); }
+.kbed-q { width:100%; font:inherit; font-weight:650; border:1px solid var(--line);
+          border-radius:6px; padding:7px 10px; margin-bottom:8px;
+          background:var(--surface); color:var(--ink); }
+.kbed-a { width:100%; font:inherit; font-size:var(--fs-note); line-height:1.55;
+          border:1px solid var(--line); border-radius:6px; padding:8px 10px;
+          min-height:96px; resize:vertical; background:var(--surface); color:var(--ink); }
+.kbed-q:focus-visible, .kbed-a:focus-visible { outline:2px solid var(--focus); outline-offset:-1px; }
+.kbed-foot { display:flex; gap:12px; align-items:center; margin-top:8px; }
+.kbed-mark { font-size:var(--fs-micro); letter-spacing:.09em; text-transform:uppercase;
+             font-weight:700; color:var(--gold-deep); border:1px solid var(--gold);
+             border-radius:99px; padding:2px 9px; }
+.kbed-mark.quiet { color:var(--ink-3); border-color:var(--line); }
+.kbed-reset { font:inherit; font-size:var(--fs-small); background:none; border:none;
+              color:var(--ink-3); text-decoration:underline; cursor:pointer; padding:0; }
+.kbed-reset:hover { color:var(--ink); }
+.kbed-x { margin-left:auto; font:inherit; font-size:var(--fs-small); color:var(--bad);
+          background:none; border:none; text-decoration:underline; cursor:pointer; }
+.kbadd { display:block; width:100%; text-align:left; font:inherit; font-size:var(--fs-small);
+         font-weight:600; color:var(--gold-deep); background:none;
+         border:1px dashed var(--line); border-radius:8px; padding:11px 16px;
+         margin:6px 0 4px; cursor:pointer; }
+.kbadd:hover { border-color:var(--gold); }
+.kbed-lede b { color:var(--ink); }
+
+/* ── THE KNOWLEDGE BASE'S TWO TABS (§141) ─────────────────────────────
+   The approved mockup's segmented pair: the active half wears the tenant's
+   panel colour, the way the navigation's own segments do — nothing here is a
+   new colour. */
+.kbtabs { display:flex; margin:2px 0 18px; border:1px solid var(--line);
+          border-radius:9px; overflow:hidden; width:max-content;
+          background:var(--surface); }
+.kbtabs button { font:inherit; font-size:var(--fs-small); font-weight:600;
+                 padding:8px 18px; border:0; background:none; color:var(--ink-2);
+                 cursor:pointer; }
+.kbtabs button + button { box-shadow:inset 1px 0 0 var(--line); }
+.kbtabs button.on { background:var(--panel); color:var(--panel-ink); }
+.kbtabs button:focus-visible { outline:2px solid var(--focus); outline-offset:-2px; }
+.kbcount { font-size:var(--fs-micro); font-weight:700; opacity:.75; margin-left:6px; }

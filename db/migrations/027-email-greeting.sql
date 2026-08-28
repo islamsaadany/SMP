@@ -1,5 +1,5 @@
 -- @phase: pre
--- ══ THE EMAIL GREETS ITS RECEIVER (spec 021) ═══════════════════════════
+-- ══ THE EMAIL GREETS ITS RECEIVER (spec 022) ═══════════════════════════
 -- Islam: "can we make an option while sending the email to customize the
 -- email by the first name of the reciever like starting the email with Dear
 -- Ahmed ... it's a turn on and off option."

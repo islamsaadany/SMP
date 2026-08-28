@@ -17595,6 +17595,24 @@ Vercel's SSO layer fetches the manifest through `vercel.com/sso-api`, which the
 platform's own CSP (`connect-src 'self'`) rightly blocks. Harmless, absent from
 production, and not a reason to widen the CSP.
 
+### 134.5 The provider's refusal was vaguer than the stub's (corrected from production the same day)
+
+The guard shipped keyed on the WORDING — retry only when the 400 names
+thinking — because the stub imitated Google's verbose *"Unknown name"*
+refusal from the documentation. Production answered `gemini-3.6-flash`'s
+refusal with the terse generic *"Request contains an invalid argument."*
+and nothing else; the guard never fired, and the knob took the assistant
+down — the precise fault §134.2 exists to prevent, on its first day.
+
+**§100.3 cuts deeper than it read: a stub models the PROVIDER, and I had
+modelled the documentation.** The signal is the SITUATION now, never the
+wording: any 400 on a request that carried the knob, once per process, after
+the bad-key check. Worst case is one extra request for a genuinely malformed
+ask, once per warm process. The stub speaks production's words verbatim; the
+narrowed guard was put back and watched to fail 2 ways before the widened
+one was believed — and the new assertion's own first version reset the cap in
+the line above measuring that it was off, a test bug its calls-count exposed.
+
 ### 134.4 What proves it
 
 `test-assistant.js` §6: the cap goes out by default; a refused cap is dropped
@@ -17604,7 +17622,690 @@ removed — 2 failures. 38/0, test-chat 52/0, built file byte-identical.
 
 ---
 
-## 135 · The email greets its receiver (v3.50, spec 021)
+## 135 · The Setup header line, the marking table, and a repaired matrix (v3.50)
+
+> **Renumbered.** This work was built as §130 / v3.48 and merged after two other
+> sessions had taken §130–§134 and v3.48–v3.49 — the owners-from-the-register
+> run and the same-name register run. The number moved; nothing in the reasoning
+> did. Recorded here rather than silently rewritten, because §130 in this
+> document means somebody else's decision and the commits behind this one say
+> §130 on their face.
+
+
+Eleven things Islam asked for after using the Setup pages on his own laptop.
+Settled from two mockups made of the real built platform
+(`design-mockups/setup-refinements/`), both signed off before a line of `src/`
+was touched. Seven of the eleven turn out to be **one standard applied to
+sixteen pages**, and the rest are three separate decisions and one repair.
+
+### 135.1 One line, and the page's controls are on it
+
+*"For the people register bring all the buttons and search bar to the sticky
+header line"*, *"remove the smo pill and 10 names and 10 mapped"*, *"remove
+the briefing grey paragraph"*, and the same for the Official BU list, Business
+units, Companies, Functions, Capabilities and Figure sets.
+
+**§121.2 LEFT THE CONTROLS ON A ROW OF THEIR OWN FOR A GOOD REASON, AND THAT
+REASON FORBADE THE FAKE MOVE RATHER THAN THE MOVE.** That section pinned the
+page's NAME and recorded why it stopped there: a negative margin pulled the
+control row up under the pinned title, and because that row was not itself
+sticky, scrolling slid it out and left a stray *Clear plan* floating above the
+header. **A sticky box may only overlap something that pins with it.** The
+answer is not to pull the row up — it is to put the controls INSIDE the header,
+where they pin with the name.
+
+**THE CONTROLS ARRIVE THE WAY THE NAME ALREADY DOES.** The shell draws the
+header and the controls are produced deep inside each page's own render, which
+is exactly the problem `PAGE_TITLE` solves in the other direction (§121.1). So
+`PAGE_TOOLS` and `PAGE_ACTS` are its two siblings: reset by the shell before
+the page renders, read after it. Two slots and not one, because the search box
+and the buttons are different things and the search sits left of them on every
+page that has both. A caller outside a Setup page still gets its old row —
+there is no such caller today, and a silent loss of every control on the day
+one appears is not a trade worth making.
+
+**THE COUNT CHIPS AND THE `SMO` PILL GO EVERYWHERE, INCLUDING THE TWO PAGES HE
+DID NOT NAME.** The chrome says who you are on every page, and the table under
+the header is how big the list is — §122 removed the badge and one copy of the
+count from the register on exactly those two arguments and left the other copy
+standing, which is what a rule half-applied looks like. Reporting cycle and
+Import & archives were not on his list and are done too, because an identity
+pill surviving on two pages after leaving eight reads as a mistake rather than
+as a decision.
+
+**`alerts` IS WHAT SURVIVES, AND IT IS NOT THE SAME THING WITH A SHORTER NAME.**
+*"10 names"* is the list; *"3 names on people and not on this list"* is
+something outstanding. A page keeps the second and loses the first — the
+Official BU list's stray warning, the cycle's claim requests, Capabilities'
+unassigned count. *"All assigned"* went with the pill: a green chip saying
+nothing is wrong is lit almost always, and §41's budget says a mark that is
+always lit is not a mark.
+
+**THE QUICK FILTERS AND THE ROW COUNT GO, THE WAY THE REGISTER'S DID** (his
+call, asked directly: *"drop like the way register quick filters were
+dropped"*). **Nothing is hidden by it, and that was checked rather than
+assumed**: every row carries `data-tkrow="active|retired"` and every one is
+drawn, so the chip narrowed a view and never revealed rows the table was
+holding back. A retired unit is still a row on the page. `TKFILTER`, the chip
+markup, its handler and `[data-tkcount]` are deleted rather than left unused
+(§24).
+
+**AND THE FIRST SECTION FOLLOWS THE HEADER.** `.section`'s 26px top margin is
+the gap BETWEEN sections, and with the control row gone the first one was
+spending it on nothing — 42px of air between a pinned header and the table
+under it. Only the first: the gap between two sections is still that.
+
+### 135.2 Roles & access — the damage, and its cause
+
+*"In roles and access remove the briefing grey paragraph and check the table as
+the design is damaged."* He was right, and it has one cause.
+
+**`.acgrid` IS `overflow-x:auto`, WHICH MAKES THE BOX — NOT THE PAGE — WHAT ITS
+HEADER PINS AGAINST.** §121.4 gives every Setup table's `thead th` the page's
+own offset (`--chrome-h + --rail-gap + --sethead-h`, 141px here), so inside a
+scroll container that offset was applied to the container: the header was
+pushed **141px down inside the table**, landing on rows three and four.
+Measured, all twelve header cells reported one position.
+
+**IT IS THE FAULT §121.4 ALREADY WROTE DOWN, ON THE ONE TABLE IT FORGOT.** That
+rule excludes `.peoplebox` and `.srctable` for this exact reason — its own note
+says applying a page offset there "put the register's headings 293px down,
+measured". `.acgrid` was missed.
+
+**STATIC RATHER THAN `top:0`, AND THAT IS THE DECISION.** This matrix is nine
+rows and scrolls the page by about 60px on an ordinary window, so a sticky head
+buys nothing — and its head is TWO ROWS deep with cells spanning both, a shape
+no sticky offset handles well in every engine. A head that cannot pin correctly
+is better not pinned.
+
+**AND THE DAMAGE WAS HIDING SOMETHING.** With the header repaired, the two
+group headings §117 introduced are readable for the first time: *Own business
+unit* and *Own supporting function*, each splitting into Strategy and
+Reporting. They had been under the second row since the split shipped.
+
+### 135.3 Send an email, and the Platform Inbox
+
+*"Let's rename send a message to send an email"* and *"rename inbox to In
+Platform inbox."*
+
+§108.3 broke a three-way collision — Messages, Send a message, Communication —
+by naming each page after the one thing it did. This finishes it from the other
+end: the composer sends **real email**, and calling it "a message" left it in
+the same word family as the in-platform conversation beside it. With it renamed,
+a bare *Inbox* reads as where those emails land, which is the one thing it is
+not.
+
+**"Platform Inbox", NOT "In Platform inbox"** — Islam shortened it the day after,
+and the shorter one is the better one: the qualifier does the work either way,
+and a rail entry is scanned rather than read.
+
+**THE KEYS DO NOT MOVE.** `send` and `chat` are what the endpoint, `GROUP.chat`
+and four checks name; a rename is a label (§65, §108.3).
+
+**AND THE INBOX STOPPED SAYING "MESSAGES".** Its own `cfgHead` printed a heading
+the rail did not — the duplication §121.1 removed from five pages, invisible to
+that sweep because the whole feature needs a server and every screen check opens
+the built file over `file://` (§94.11).
+
+### 135.4 The email settings are a sub-panel, not a dropdown
+
+Islam asked which: *"would it be better as a drop down or a sub panel for
+settings?"*
+
+**A SUB-PANEL, AND SPECIFICALLY A SECOND SECTION ON THE PAGE.** A dropdown is
+right for the inbox's seven switches (§98). This is a status table, four
+fields, a **live rendered preview of the message** and a test send: a rendered
+email inside a dropdown is not a dropdown. It is the shape Figure sets (§46.2)
+and Import & archives (§108.4) already use — one rail entry, two sections —
+and, exactly as there, **each section keeps its own gate**, so somebody holding
+`c_comms` and not `c_send` still reaches the settings half and `paint()` drops
+the entry for somebody holding neither.
+
+**`Setup › Email` LEAVES THE RAIL**, and the group it was in is renamed with it:
+*Branding & email* no longer has an email in it, and a rail naming something it
+does not hold is §121.1's fault pointing the other way.
+
+### 135.5 Focus measures — a switch, a destination row, and a real table
+
+*"In the focus measures remove the part in the screenshot, turn the big button
+to only On and Off switch and bring it to the sticky header line, and rather
+than a dropdown for the units make it like the navigation at the top, and make
+the table headers design better like the other tables like registry."*
+
+**THE SWITCH IS A SEGMENTED PAIR** — press the state you want, rather than a
+240px worded button reading "Focus measures are on" which is a sentence where a
+switch belongs. Its own class and not `.navswitch`: that one is scoped to
+`.units` and paints white-on-navy, and reaching for it here is §65.9 exactly.
+
+**THE GREY NOTE WENT WITH IT, AND IT WAS CARRYING A BUG NOBODY HAD REPORTED**:
+`marks + " " + plural(marks, "mark")` printed *"0 0 marks"*, because `plural()`
+already puts the number in. What the note was EVIDENCE FOR — that switching off
+keeps every mark (§102) — is asserted of the data now instead of of a sentence.
+
+**THE DESTINATIONS CARRY THEIR OWN COUNTS.** A dropdown answers "which one" and
+hides where the work was left; a row says both at once. §16.7a settled the
+identical question on the source-of-figures page, and this is that answer
+applied to the page it was borrowed from.
+
+**AND THE FUNCTIONS ARE ON IT, IN BOTH OF THEIR SHAPES.** `focusBands(key)` is
+one builder asked with a destination: a unit's key objectives and pillars; a
+**pillars function**'s, through `fnAsUnit()`, identically; and a **capability
+function**'s capabilities, each banding its own key objectives. Islam, asked
+which rows a capability function offers: *"agreed."* **The ids were already
+there** — `renumberCapability()` has minted `cap1-KO1` since the capability
+model existed — which is what makes this cheap rather than a migration.
+
+**THE GROUP'S FOCUS BOARD GROWS THE SAME HALF, OR THE MARKS ARE STORED WHERE
+NOBODY CAN SEE THEM** (§61). It walks `focusSubjects()` now, and its first
+column is *Where* rather than *Business unit*. A function's cell says
+"supporting function" where a unit's says its weight: a function carries no
+weight in the group's score and never has, and inventing one to keep the column
+tidy would be a number that means nothing.
+
+### 135.6 The company is sometimes derived and sometimes stored
+
+*"In the registry, for the fields of the users we need to add the company as
+some users belong only to a company not a unit"* — and, asked about the
+collision, *"company field beside the unit, some people belong to a company but
+not a unit like how the CEO belongs to the group only."*
+
+**A PERSON SITS IN EXACTLY ONE PLACE, AND THAT IS BUILT IN RATHER THAN
+HABITUAL**: `attachPersonAt()` clears unit, function and company before setting
+one, and `personAt()` gives one answer. Sign-in, the Official BU list, roles and
+the Overview all rest on it. So a second dropdown that could disagree with the
+first is the pair §110 removed from this very dialog.
+
+**THE RESOLUTION IS THAT THE FIELD IS READ-ONLY WHEREVER THE UNIT HAS ALREADY
+ANSWERED IT.** Somebody in Mobile is in Distribution — `units.company` says so
+(§23) — so the field shows it, greyed, with *"from the unit above"* beside it.
+Somebody with no unit is the case Islam is describing, and there the field is
+the answer and is written, through `attachPersonAt()` like everything else. One
+stored fact, two fields, and they cannot contradict each other because only one
+of them is ever writable.
+
+**COMPANIES LEFT THE UNIT DROPDOWN**, or the same answer would be in two
+controls by the back door — and **that broke granting a Company CEO**, found by
+`checks/role-picker.py` rather than by reading. Two things follow: the refusal
+names the field that can answer it (*"Set the Company first"* — a refusal
+pointing at a control that no longer offers the answer is §16.7's dead end), and
+**either half finishes it** (§110), so answering the Company while a refusal is
+standing completes the grant.
+
+**AND THE DIALOG GAINED A ROW, WHICH IS RECORDED RATHER THAN GLOSSED.** Four
+fields do not fit a three-column grid in one row, so *Job title* is full width
+and the three places — Official BU, Unit or function, Company — sit side by
+side, which is where somebody compares them. The dialog is 614px where it was
+558, so a 640px-tall window now scrolls it by 50px. That is the price of the
+field, stated: §122.5's rule, that a check left asserting a number which is no
+longer true is worse than the pixels.
+
+### 135.7 What was measured, and what is still open
+
+`checks/setup-header.py` walks every Setup page and was **proved able to fail
+before its green run was believed — 33 failures against the previous build**
+(§94.5). Three things it does the hard way: the box somebody can SEE as well as
+the inner one (§122.4), every control PRESSED rather than counted (§70, §93.4),
+and marking asked of `CYCLE.focus` rather than of a lit tick (§96).
+
+**TWO OF ITS OWN ASSERTIONS COULD NOT FAIL WHEN FIRST WRITTEN**, and both are
+worth keeping. The chip check was scoped to `.setuphead`, so it passed on a
+build where the chips were alive one row lower — §113.8's blind spot, an
+assertion satisfied by both sides vanishing. And the matrix section measured
+`tr.getBoundingClientRect()`: **a table row has no box of its own once its cells
+are positioned**, so it went on reporting the un-stuck layout while every `th`
+had been shoved 141px down, and it called the broken build clean at three scroll
+positions. It measures the CELLS now. A third: the page had to be given
+something to scroll — at 1560×900 this matrix scrolls by 60px, so the check
+measured an unscrolled page three times (§94.2).
+
+**FLAGGED, NOT FIXED.** The Email settings section's note explaining that the
+API key and the from-address live in the deployment's environment variables went
+with the other briefing paragraphs. It is the one of the sixteen that stated a
+fact rather than describing how a setting works (§127's distinction), and
+without it somebody will look for a field to paste a key into and find none.
+Putting it back as a hover on the section heading is a decision, not a
+tidy-up — and `.tip` opens on hover and focus but not on tap outside the chat
+panel (§127), so it would be unreachable on a tablet.
+
+**STILL NOT REPRODUCED**: the left rail's *"SETUP"* header and search bar,
+which Islam reports as not sticky. Measured at nine window sizes from
+1920×1080 to 1000×650, scrolled to 300/800/1500px, on this build and on main's:
+they hold at 96px and 136px in every one. Two things that would feel like it
+are named for him — the rail list has its own scrollbar below about 900px of
+window height, and the group headings scroll away inside that list — and it is
+left open rather than guessed at.
+
+### 135.8 The band could not be told from the stripe
+
+Islam, on the new marking table: *"the key objectives title line and the pillar
+name line grey is too close to the alternating grey — make it darker to be more
+significant."*
+
+He is right, and by a smaller margin than it looks: the band was `--surface-2`
+(#EFF2F6) and the zebra stripe is `--zebra` (#F5F7FA), six points apart on one
+channel. **A band that has to be told apart from a stripe cannot be a lighter
+shade of the stripe.**
+
+**IT TAKES `tr.dxband` RATHER THAN A THIRD GREY.** §99 already settled what a
+band naming a group of rows INSIDE a table looks like in this product —
+`--panel` with `--panel-ink` — and inventing a darker neutral here would be a
+second vocabulary for one idea (§53.5). It is also what this page wore before
+§135.5 turned it into a table, so nothing about the look is new; what changed is
+that the rows under it now have column headings.
+
+**The border is on every band, including the first**, which is the one
+difference from §99. There the first band OPENS the table, so a gap above it
+would be a gap under nothing; here a real `<thead>` sits above it in the same
+navy, and without the break the two merge into one block.
+
+### 135.8b The band is a darker grey, not a navy one (correcting 135.8)
+
+Islam, of the navy: *"the band should be darker grey not navy."*
+
+**§135.8 WAS RIGHT ABOUT THE PROBLEM AND WRONG ABOUT THE FIX.** Reaching for
+§99's `tr.dxband` kept one vocabulary for "a band inside a table" and cost two
+things worth more: the band then wore the SAME navy as the table's own
+`<thead>` directly above it, and — with §135.10's 4px slot open — it leaked a
+navy strip between the two pinned headers that read as a second header. A
+shared vocabulary is worth having and is not worth two confusions.
+
+**`--line` IS THE STEP THAT EXISTS**: #D6DCE5 light, #333A45 dark, so it
+tracks the theme without a literal (§25), and `--ink-2` on it measures 6.49:1
+light and 7.0:1 dark. Against a `--zebra` of #F5F7FA it is a real step rather
+than a shade of the same grey, which is what the original complaint was about.
+
+### 135.9 The rail's head, pinned twice
+
+Islam, twice, with a screenshot of the navy *SETUP* bar and the search box:
+*"this is the part that needs to be sticky in the rail — check how to do it."*
+
+**IT WAS ALREADY TRUE, AND SAYING SO A SECOND TIME WOULD HAVE BEEN THE WRONG
+ANSWER.** `.setuprail` is `position:sticky` and `.raillist` is the only thing
+inside it that scrolls, so the head and the search cannot move. Measured before
+changing anything, at eleven window sizes from 1920×1080 to 880×800, scrolled to
+300, 800, 900 and 1500px AND with the list scrolled internally: 96px and 136px
+in every single one, on this build and on `main`'s.
+
+**SO IT IS BELT AND BRACES, AND IT IS CHEAP.** `.rhead` and `.railfind` are
+`position:sticky` inside the rail now — a no-op wherever the cap applies, and
+the difference between holding and not in the two states the cap does not
+reach. A browser that does not understand `100dvh` drops the whole `max-height`
+declaration; below 900px the rail stops being a column at all. In both the box
+grows past the window and only this keeps them on screen. `top:0` on the head
+and the head's own measured height on the search, so the two stack rather than
+overlap — a wrong number there would put the search under the bar in exactly
+the state this exists for.
+
+**AND IT IS ASSERTED NOW, WHICH IT NEVER WAS.** `checks/setup-rail.py` scrolls
+the list and reads both boxes back, and asserts they stack — the claim "already
+true" had only ever been something a throwaway probe could say.
+
+### 135.10 A four-pixel slot between two pinned headers
+
+Islam, with a screenshot: *"the scrolled up content is appearing behind the
+sticky headers — fix this."*
+
+**`--sethead-h` WAS A GUESSED CONSTANT, AND §135 MADE IT WRONG.** §121.4 pinned
+each Setup table's head at `--chrome-h + --rail-gap + --sethead-h`, and wrote
+that last one as the literal `46px`. §135 then changed the header's height by
+putting the page's own controls into it: **42px** where the controls are small,
+**49px** where a search box sits on the line. Measured, the table's head pinned
+**4px below** the page header on Focus measures and 3px under it on Business
+units.
+
+**FOUR PIXELS BETWEEN TWO THINGS THAT DO NOT MOVE IS A HOLE**, and scrolling
+rows show through it. Found by sweeping the scroll position in 4px steps: a 4px
+leak at y=152, and what leaks is a BAND — which is why it read as a second
+header rather than as a sliver. §122.5's fault exactly ("a cap made of a guessed
+constant goes stale silently"), reintroduced by the change that moved the
+controls.
+
+**A BETTER CONSTANT COULD NOT HAVE BEEN RIGHT**, which is why it is observed
+rather than corrected: the header WRAPS on a narrow window, so its height is a
+function of the window as well as of the page. A ResizeObserver publishes
+`--sethead-h` on the root, the way `--chrome-h` already is, re-pointed at the
+new header at the end of every `paint()`.
+
+**NOT §28.3's LOOP, and the difference is the whole reason it is safe**: the
+value feeds a sticky OFFSET and nothing else, and an offset cannot change the
+height it was measured from. v2.8's oscillation came from sizing a box against
+a number the box's own size decided; there is no such path here.
+
+**THE CHECK PASSED ON THE BROKEN BUILD TWICE BEFORE IT BIT.** First it swept
+scroll positions in 20px steps looking for a row showing through — and a 4px
+slot only shows something when a row happens to be passing it, so a sampled
+search for a symptom finds the fault when it is lucky. Then it measured the gap
+at a fixed scroll position and reported 50px on a page that was fine, because a
+short table's head is still in FLOW there and the distance to it is a layout
+gap rather than a slot. It now measures the gap **only while the head is
+actually pinned**, keeps one fine-grained sweep for the symptom, and asserts
+`--sethead-h` equals the header's measured height. With the observer removed it
+fails six ways, naming *"Key Objectives at y=180"*.
+
+### 135.11 Focus measures sits with Measurement
+
+Islam: *"move the focus measures to measurement."*
+
+**IT WAS IN *Running the cycle* FOR A REAL REASON AND IT IS NOT THE BETTER
+ONE.** The marks belong to the cycle — `CYCLE.focus`, cleared when a new one
+opens (§102) — so it genuinely is something you do while a cycle is open, and
+that is why it was grouped there.
+
+But the rail's groups answer *what did you come here to do* (§46), not *which
+table does this write*. Somebody opening this page came to say which measures
+matter, and *Measurement — what the numbers mean* is the heading for that. The
+cycle group is the things you do to RUN a cycle; this is a statement about the
+measures themselves that happens to be re-asked each cycle.
+
+**`grp` IS THE ONLY THING THAT CHANGES.** The key, the access key, the glyph,
+the search keywords and the page are untouched, and `SETUP_GROUPS` is the one
+place order is decided — so nothing outside the def needs to know it moved. It
+lands between Figure sets and Scoring bands.
+
+**And it is asserted of the RAIL, not of the def** (`checks/setup-header.py`): a
+def whose `grp` no longer matched a real group would render nowhere at all
+rather than in the wrong place, and the rail is what somebody scans.
+
+## 136 · The destination row becomes one line that scrolls (v3.51)
+
+**THE FAULT, FIRST.** Below ~1280px the destination row WRAPPED while its box
+was held at 46px — `flex-wrap:wrap` in `arrange.css` against
+`.units-in{height:46px}` in `_shared.css` — so the second line painted OUTSIDE
+the box, over the tab row: overlapping text, and on some pages the hidden line
+took the clicks. §118.7 had recorded it below ~1100px; the audit's sweep HUNG
+on it at 1024 when a function's Strategy tab press was intercepted, and the
+new check found real buttons spilling at 1280 too. A container told to wrap
+and told to be 46px tall at the same time is not a layout, it is an argument.
+
+**THE DECISION IS ISLAM'S, FROM A MOCKUP OF THE REAL BUILD (§41.9's rule).**
+Two candidates were injected live into v3.50 at 1024 and screenshotted: A (the
+row wraps and the chrome grows to own it, `--chrome-h` already being measured)
+and B (one line that scrolls). I recommended A; **Islam chose B** — recorded,
+not re-argued. The old comment in `arrange.css` argued the other way
+("a horizontal scroll hides the last one behind a gesture nobody is told
+about") and is QUOTED in its replacement rather than overwritten, because the
+new build answers the objection rather than dismissing it.
+
+**THE ENDS ARE PINNED, AND THE FIRST DRAFT OF B IS WHY.** Injected naively,
+the Units | Functions switch slid off the LEFT edge at rest — a control the
+row exists for, gone. So the destinations go into their own scroll region
+(`.navclip > .navscroll`) and everything that is a CONTROL rather than a
+destination — the Group menu, the switch, the gear — stays a direct child of
+the row, pinned, `flex:0 0 auto` so the nowrap row cannot squeeze it (the
+second draft's fault: the switch rendered clipped mid-word). §90's rule
+arriving sideways: a control that can leave the screen does nothing.
+
+**THE OLD OBJECTION IS ANSWERED IN KIND, NOT WAVED AWAY.** Three things say
+the hidden names exist: a fade on each side of the clip, drawn ONLY while that
+side actually has more (`hidden` toggled from scroll position — a fade that
+always shows is a claim that is sometimes a lie); the lit destination brought
+into view on every paint; and a vertical wheel over the row scrolling it
+sideways, only while there is somewhere to go, so everywhere else the wheel
+stays the page's.
+
+**TWO SMALL RULES INSIDE THE WIRING, BOTH BOUGHT ELSEWHERE.** The lit button
+is brought into view by setting `scrollLeft` on the row, never
+`scrollIntoView` — that call may also scroll the PAGE, which is §110.7's jump
+arriving sideways. And the fades are re-asked by a ResizeObserver on the
+scroll region (a window drag repaints nothing), which is NOT §28.3's loop:
+nothing in it changes any size. The wiring lives in `paintUnits()` beside the
+fold's, for the reason written on the fold: this function just destroyed the
+last set of handlers.
+
+**THE CHECK ASSERTS THE PROBLEM (§94.8) AND WAS PROVED ABLE TO FAIL (§94.5).**
+`checks/nav-scroll.py`: no button spills past the row's own box; every tab,
+the switch and the gear receive their own click points (`elementFromPoint` —
+"in the document" passed every day this was broken); the LAST destination can
+be scrolled into view and navigates when pressed; the fades agree with what is
+actually left to see, and both are hidden at a width where everything fits; no
+sideways page scroll; and both sides of the navigation switch, ending on the
+exact press that hung the audit — a function's first tab at 1024. Against the
+pre-§136 build it fails 6 ways; on this one it is green, with `page-width`,
+`setup-rail`, `setup-header` and the full `qa.py` sweep re-run beside it.
+
+**AND THE CHECK'S OWN FIRST FAULT IS WORTH THE LINE**: its spill count read
+`#units button[data-u]` and flagged three buttons on every build at every
+width — the Group DROPDOWN's own menu items, which carry `data-u` and
+legitimately sit below the row. A dropdown's items are not the row. The
+exclusion was added and the check re-proved against the old build afterwards,
+because a filter added to silence a false positive is exactly the kind of edit
+that can silence the true one with it.
+
+## 137 · A failed render says so on the page (v3.51)
+
+**THE FAULT**: a throw inside a page's render aborted `paint()` and left the
+PREVIOUS page standing, with the only witness in the hidden console — §118.7
+recorded it, and §118's CF tab is exactly how it looked from production: a
+data fault wearing a dead click's face, so the person reports the wrong
+symptom and diagnosis starts a page away from the fault.
+
+**THE GUARD SITS ON THE PAGE'S RENDER ALONE.** By the time `def.render()` runs,
+the chrome, the navigation and the tabs have already painted — which is what
+makes the card's second sentence ("open another page from the menu above") a
+true sentence rather than a hope. A guard around the whole of paint() would
+have had to promise less.
+
+**THE WORDS ARE ISLAM'S ASK** (*"the message needs to be simple with a more
+userfriendly message"*, 2026-08-27, revising the first mockup): "Something
+went wrong opening this page. Your data is safe. Please reload, or open
+another page from the menu above." — then one Reload button. **The first
+draft's red kicker and second button both went**: "Open another page" was a
+control that did nothing concrete with the navigation right above it, and the
+technical line moved behind a `<details>` that starts CLOSED — kept, because
+the operator still needs the real message (§123's lesson: a failure invisible
+to the user must stay visible to the operator), and folded, because it is for
+them alone. The throw is also still said to the console verbatim.
+
+**"Kept for the Strategy Office" was NOT written on the card**: that clause is
+only honest if the error is also stored somewhere the office looks, which is
+storage and stays an open decision — the card claims exactly what is true.
+
+**The Reload control is wired beside the innerHTML that draws it** — no inline
+handlers (§43.6), and deliberately not in wire(): the card must work exactly
+when a page's own wiring cannot be trusted.
+
+**Proved able to fail first (§94.5)**: `checks/render-fail.py` poisons a real
+def in `SUBS` — the table paint() actually reads, never a copy — walks to the
+page through the real controls, and asserts both ends: the card with the
+agreed words, the folded details carrying the injected error, Reload receiving
+its own click point (§93.4), zero uncaught page errors, and a healthy page
+rendering normally afterwards. Against the pre-§137 build it fails 3 ways,
+ending in the production symptom verbatim: no card, the previous page left
+standing, the error uncaught.
+
+## 138 · The last 800ms survive leaving the page (v3.51, closing §126.1)
+
+**THE HOLE, AS §126.1 WROTE IT DOWN**: the autosave debounces 800ms with no
+flush when the page goes away, so a setting changed and left within that
+window was lost while the screen showed the new value — every page in the
+product, invisibly, and not the fault being chased the day it was found,
+which is why it was recorded rather than fixed on the way past (rule 1b).
+
+**THE FIX IS ONE FUNCTION IN ONE FILE**, because there is one autosave:
+`flushLeave()` in sync.js, fired on `visibilitychange`→hidden and on
+`pagehide`. Anything waiting is sent NOW, through a bare fetch with
+`keepalive` — which is what lets the request outlive the page, and which caps
+the body at 64KB, so over the cap it is a plain fetch instead: that completes
+whenever the tab is merely hidden (the common case — a switch-away, a
+minimise, and every close passes through hidden first) and is best-effort on
+a hard kill. Stated, not glossed.
+
+**DELIBERATELY NOT `save()`**: the flush touches none of the bookkeeping —
+`saving`, `lastSaved` and `refusedBody` stay as they are — because if the tab
+comes BACK, the ordinary path must still compare and decide for itself; a
+duplicate POST of an identical state diffs empty on the server and costs
+nothing (§42). And it interprets no answer, because on the way out there is
+nobody to show a refusal to; the ordinary path re-earns one on the next
+change.
+
+**SKIPPED WHILE A SAVE IS IN FLIGHT, on purpose**: two concurrent POSTs have
+no ordering, and an older body landing after a newer one would UNDO the newer
+— losing more than the keystroke this exists to keep. What stays open is an
+edit made during an in-flight save with the tab gone before it settles: the
+small corner of a small corner, owned by the 5s interval whenever the tab
+survives.
+
+**PROVED AT BOTH ENDS.** `checks/save-flush.py` serves the built file over
+HTTP with a stub `/api/state` that records every POST (§94.11 — over file://
+the save path does not exist), makes an edit through the real
+becoming-a-save path (a mutation, then paint(), which ends in afterPaint()),
+hides the tab 150ms later and navigates away inside the debounce window: on
+the pre-§138 build the stub records NOTHING — §126.1 reproduced end to end —
+and on this one the POST carries the edited value. The second trial asserts
+the flush is not a firehose: a clean state sends nothing on leave. And
+because sync.js is the whole product's save path, `test-roundtrip.js` was
+re-run against a throwaway Postgres 16 on a virgin database: clean slate,
+round trip deep-equal, fixed point and the archived-plan trip all PASS.
+*(Numbered §139–§140 at merge time: written as §136–§137 on the branch, and
+the Wave 1 session's §136–§138 reached `main` first — among them §138, which
+closes §126.1's debounced-save hole this file recorded and deliberately left.
+Seventh renumber on this branch; the rule is unchanged.)*
+
+
+---
+
+## 139 · The send says what is happening (v3.52)
+
+> Islam, first real conversation with the assistant: *"the message took time to
+> be sent to the chat and stayed in the box for some time … looked as a glitch
+> at the start."*
+
+Nothing was broken. With the assistant on, `say` holds its response open for
+the whole model round-trip — the message is stored, the model is asked, and
+only then does the browser hear back — so the typed words sat in the composer
+for seconds, looking exactly like a send that had not worked.
+
+**The message moves into the thread the moment Send is pressed**, the box
+empties, and a quiet narrated line — the §125 register, one shade quieter —
+says *Asking the assistant…* while the server works. The server's answer then
+replaces the echo wholesale, so the screen can never drift from what was
+actually stored.
+
+**The echo is never trusted past the round-trip.** On any failure it is rolled
+back and the words go **back into the box** — the one thing nobody can get
+back is what they typed, and restoring beats the old rule's merely
+not-clearing. **And the poll must not erase it**: a `mine` racing the `say`
+can answer without the just-sent message (the insert is inside the very
+request still running), so the poll skips a beat while a send is in flight.
+
+**A network failure speaks the product's language**: `post()` mapped a fetch
+rejection to its raw browser message, and *"Failed to fetch"* reached the
+screen verbatim through the new rollback note. It is the sentinel `"failed"`
+now, which every caller already reads as *That did not send. Try again.* —
+while a sentence the server actually said still passes through untouched.
+
+Proved by driving a **4-second-slow model** (echo on screen at 350ms, box
+empty, wait line up, a poll beat passing without erasing it, the reply
+replacing it) and an **aborted send** (words back in the box, echo gone, no
+stuck line); `checks/office-chat.py` §13 holds all of it permanently and fails
+3 ways against the pre-§139 build. One of its own assertions was rewritten on
+first contact: it asserted the product's failure sentence against the stub's
+own terse error, which is the server-sentence path working as designed.
+
+
+---
+
+## 140 · The knowledge base gets a pen (v3.52)
+
+> Islam: *"can you give me access in the setup page to the scenarios questions
+> and answers so I can refine the reply content."* Settled from a mockup of the
+> real page and approved before a line of src/ was touched.
+
+### 140.1 One corpus, so one precedence rule
+
+The scenarios feed **two things at once**: the Knowledge base page people read
+and the corpus the assistant answers from — §103's coupling, which is the whole
+reason editing them is safe. So the tenant's overrides apply to **both in the
+same breath**, and the precedence — which wording wins — is written **once, in
+`lib/rules.js`** (`kbLook` / `kbAdds`): the page renders through it and
+`assistant.withTenant()` merges through it. Two readers of the shape are fine;
+two definitions of who wins is how they start disagreeing.
+
+`GROUP.kb` rides `org.extra` like `GROUP.chat` — no migration —
+as `{ ov: { id: {q,a} }, add: [ {id,g,q,a} ] }`. **The writers delete on
+default** (§50.6): an answer typed back to the shipped wording deletes its key,
+and the last key leaving deletes `GROUP.kb`, so a tenant that touched the pen
+and thought better is byte-identical to one that never did. Added questions are
+minted `kbx<n>`, outside the shipped ids' namespace (§87, kept trivially).
+
+### 140.2 The pen is the page's, and a standard entry cannot be deleted
+
+The pen sits on the Knowledge base page's own header line — the office's page
+since §125, so everyone who can open it may edit; the control still asks
+`inOffice()` (§42) and the server classifies a `GROUP.kb` change as **setup**,
+named, beside `comms` (§94.2: both ends answer alike). A shipped entry can be
+**rewritten but never removed** — *Back to the standard wording* is always one
+click and the shipped text is never lost — while an added question carries
+*Yours* and can be removed. The one honest cost, stated when it was approved:
+**an overridden entry stops receiving improvements to the shipped wording**;
+the *Edited* chip is what keeps those findable.
+
+### 140.3 Typed text renders as text
+
+The shipped answers carry deliberate `<b>` markup and render raw; a rewritten
+answer is typed prose and **renders escaped**, or the pen becomes §43's lesson
+waiting to repeat. Asserted with a live `onerror` payload: the read view shows
+the literal text, no element, no execution.
+
+### 140.4 Found by driving, minutes after writing
+
+`kbAdds` drops an entry with nothing in it — right for the corpus and the read
+view — and the card just minted by *+ Add* **is** empty, so the button wrote
+state and showed nothing (§45.2 exactly). The edit view lists additions raw;
+the rule stays for everything that reads.
+
+### 140.5 What proves it
+
+Driven end to end against a **real Postgres**: override → chip → read view in
+the tenant's words → **reload** (the org.extra round trip) → reset + remove →
+`GROUP.kb` gone. `checks/kb-pen.py` holds the surface permanently — the pen,
+the cards, the data changing on every press (§96), the escape, §50.6, and the
+absences (no pen off-office) — and failed 2 ways with `kbLook` broken before
+its green was believed (§94.5). `test-assistant` §7 proves the corpus carries
+the tenant's words and not the old ones (6 assertions, malformed blob
+included); `test-authorize` asks both ends and the classification (3).
+
+
+---
+
+## 141 · The Knowledge base in two tabs (v3.52)
+
+> Islam: *"the knowledge base needs to be 2 tabs one for the written
+> explanations and another for the questions to edit and adjust."* Settled from
+> a mockup of the live page; approved with one word.
+
+**How it works 9 | Questions & answers 43** — the counts on the tabs, so the
+split explains itself; the sections on one side and the QUESTIONS (not the
+groups) on the other, because 43 is what somebody is choosing to search.
+
+**Each tab keeps to its own.** The contents pills derive from the ACTIVE tab's
+list — a pill that jumps to a section on the hidden tab is a link that does
+nothing, §110's fault arriving as navigation. **The pen lives on the questions
+tab alone**: nothing on the explanations tab is editable, and a pen over a page
+it cannot mark is furniture. Switching tabs leaves edit mode, or the mode's
+only way out disappears with its tab (§61). The tour's replay stays with the
+explanations, where orientation lives.
+
+**The tab is a screen preference** (`smp.kb.tab`, §25, §47.1) — one person
+reading the reference must not decide the tenant's landing tab — with a
+throwing store reading as the default. *How it works* opens first: reading is
+the common case, editing is the office's errand.
+
+**`checks/knowledge-base.py` went red the day the tabs landed** — its recipe
+counts came from whichever tab was open, and the recipes had moved. That is
+§51.11's loud failure working as intended; it gathers from BOTH tabs now, and
+the relationship it guards (page count == corpus count) is unchanged.
+`checks/kb-pen.py` §0 holds the split — the default tab, the pen's absence on
+the explanations, no dead pills, the remembered choice — and failed 4 ways with
+the default flipped (§94.5). Server untouched: the tabs are entirely the
+screen's.
+
+*(Numbered §142–§144 at merge time: written as §135–§137 on the branch,
+and four other sessions' §135–§141 reached `main` first. The work is
+unchanged; only the numbers moved, and they moved here rather than on
+`main` because a number already published is one somebody has quoted.)*
+
+## 142 · The email greets its receiver (v3.54, spec 022)
 
 Islam: *"For the emails sent can we make an option while sending the email to
 customize the email by the first name of the reciever like starting the email
@@ -17700,7 +18401,7 @@ nobody can check afterwards.
 absent from the posted body. The emails would have been personalised perfectly
 — the fill rides in the html's region — and `messages.greet` would have been
 NULL on every row: **the record would have said no message ever greeted
-anybody**, which is the exact failure §135.4's own comment describes. Found by
+anybody**, which is the exact failure §142.4's own comment describes. Found by
 asking what the page POSTS, not by reading it.
 
 ### 135.6 An absent name and an empty one are different answers
@@ -17760,7 +18461,7 @@ is false and was never the point: a text input is taller than a chip.
 
 ### 135.8 The greeting was inside the box people type into
 
-Found by reading the diff while building §136, not by a failing test, and it is
+Found by reading the diff while building §143, not by a failing test, and it is
 the worst thing in spec 021.
 
 The message is typed **straight into the preview** (§76.3) and read back with
@@ -17787,7 +18488,7 @@ thing changes shape.
 
 ---
 
-## 136 · The bar reports, and moves on (v3.50)
+## 143 · The bar reports, and moves on (v3.54)
 
 Islam, using the product: *"When I send I don't get any verification that the
 message was sent and the page stays the same view."*
@@ -17868,7 +18569,7 @@ confirm: what it clears has already been sent and is in the record.
 pressing where Send was and counting the requests (§94.2) — and that the way
 back exists, with **the caret still in the message** afterwards.
 
-Watched to fail first (§94.5): the pre-§136 bar restored → **5 failures**,
+Watched to fail first (§94.5): the pre-§143 bar restored → **5 failures**,
 naming the grey voice, the 12px, and Send still on offer; `sendmsgTouched()`
 removed from the body editor → **2**, the dead end exactly.
 
@@ -17880,7 +18581,7 @@ position.
 
 ---
 
-## 137 · Send a message opens on what went (v3.51)
+## 144 · Send an email opens on what went (v3.54)
 
 Islam: *"The opening page of the send the email should be a dashboard of what
 was sent, that was sent to whom, how many people ... and when I say create a
@@ -17923,12 +18624,12 @@ one behaviour and not two. **Only a send that never happened stays put**: no
 server, a refusal, a network failure, where nothing went and the message has to
 still be there to try again.
 
-**Emptying the composer is not tidiness.** It is how §136's rule survives the
+**Emptying the composer is not tidiness.** It is how §143's rule survives the
 supersession: the send cannot be repeated by one press, now by construction —
 you are on the other tab and what it left behind is blank — rather than by a
 flag on a button.
 
-### 137.4 §136 is superseded, and only its answer is
+### 137.4 §143 is superseded, and only its answer is
 
 That section put the outcome in the send bar and turned Send into *Write
 another*, because the page stayed put. The page does not stay put now. So the

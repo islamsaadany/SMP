@@ -1,4 +1,4 @@
-"""THE EMAIL GREETS ITS RECEIVER — THE CLIENT HALF (spec 021).
+"""THE EMAIL GREETS ITS RECEIVER — THE CLIENT HALF (spec 022).
 
 Islam: "customize the email by the first name of the reciever like starting the
 email with Dear Ahmed ... it's a turn on and off option." And of the first
@@ -213,7 +213,7 @@ def go():
             pg.wait_for_timeout(70)
         pg.click('.setuprail [data-setupgo="send"]')
         pg.wait_for_timeout(800)
-        # SEND A MESSAGE IS TWO SUBTABS NOW (§137): it opens on the Overview,
+        # SEND A MESSAGE IS TWO SUBTABS NOW (§144): it opens on the Overview,
         # and the composer — which is all this file measures — is the second.
         # §51.11: when a control changes shape, every check holding the old
         # selector has to be found, not only the one that failed first.
@@ -341,7 +341,7 @@ def go():
                "Dear Ahmed," not in (s.get("html") or ""),
                (s.get("html") or "")[:0])
 
-        # A SEND LANDS ON THE OVERVIEW NOW (§137) and empties the composer, so
+        # A SEND LANDS ON THE OVERVIEW NOW (§144) and empties the composer, so
         # anything measured after one has to walk back and set the message up
         # again. Written as a helper because three sections need it.
         def back_to_write():

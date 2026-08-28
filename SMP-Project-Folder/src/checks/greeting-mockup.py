@@ -1,4 +1,4 @@
-"""THE MOCKUP IS MADE OF THE REAL COMPOSER (§41.9, spec 021).
+"""THE MOCKUP IS MADE OF THE REAL COMPOSER (§41.9, spec 022).
 
 Not drawn from the stylesheet — driven. This serves the BUILT platform with the
 same stub `checks/send-message.py` uses (the whole page is the empty state over

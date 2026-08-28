@@ -1,0 +1,225 @@
+<title>SMP Welcome Screen</title>
+<style>
+  /* ══════════════════════════════════════════════════════════════════
+     MOCKUP — Welcome screen (entry after sign-in)
+     Drawn in the product's own language (§38): Forefront palette, light,
+     system stack, the fs scale, hairline borders, one solid CTA (§41).
+     Viewer shown: Mennah Farouk, strategy custodian of Mobile (demo data).
+     ══════════════════════════════════════════════════════════════════ */
+  :root {
+    --sans:ui-sans-serif,system-ui,-apple-system,'Segoe UI',Roboto,'Helvetica Neue',Arial,'Noto Sans',sans-serif;
+    --mono:ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,'Liberation Mono',monospace;
+    --fs-micro:10px; --fs-label:11px; --fs-small:12px; --fs-note:13px;
+    --fs-body:14px; --fs-lead:17px; --fs-title:20px; --fs-big:34px;
+    --track:.12em;
+    --r-sm:6px; --r:8px; --r-md:12px; --r-pill:999px;
+
+    /* Forefront · light (verbatim from _shared.css) */
+    --cta:#A4512C; --cta-ink:#FFFFFF; --cta-hover:#8F4423;
+    --good-tx:#1F6248; --attn-tx:#7A5D1C; --bad-tx:#8C3327;
+    --on-accent:#16325C; --panel-accent:#E6C65C;
+    --panel-quiet:#B7C4D8; --panel-hover:#24487A;
+    --stone:#16325C; --stone-soft:#24487A;
+    --gold:#C9A24D; --gold-deep:#8A6B22;
+    --ground:#F7F8FA; --surface:#FFFFFF; --surface-2:#EFF2F6;
+    --line:#D6DCE5; --line-soft:#E6EAF0;
+    --ink:#171B22; --ink-2:#414A58; --ink-3:#636C79;
+    --good:#2E7D5B; --bad:#B04434;
+    --good-bg:#E4F0EA; --bad-bg:#F7E3E0;
+    --panel:#16325C; --panel-ink:#FFFFFF;
+    --over-bg:#FBF6E9; --over-line:#E8D9AE;
+  }
+  * { box-sizing:border-box; }
+  body { margin:0; background:var(--ground); color:var(--ink);
+         font-family:var(--sans); font-size:var(--fs-body); line-height:1.55;
+         -webkit-font-smoothing:antialiased; }
+
+  .wrap { max-width:1140px; margin:0 auto; padding:34px 24px 60px; }
+
+  /* ── The mockup's own banner — review furniture, not the screen ── */
+  .mockband { font-size:var(--fs-small); color:var(--ink-3); letter-spacing:.06em;
+              text-transform:uppercase; margin:0 0 14px; }
+  .mockband b { color:var(--ink-2); }
+
+  /* ══════════ THE SCREEN ══════════ */
+
+  /* ── Hero: the tenant's navy band ───────────────────────────────── */
+  .hero { background:var(--panel); color:var(--panel-ink); border-radius:var(--r-md);
+          padding:30px 34px 28px; display:flex; justify-content:space-between;
+          align-items:flex-end; gap:30px; flex-wrap:wrap; }
+  .kicker { font-size:var(--fs-micro); letter-spacing:.18em; text-transform:uppercase;
+            color:var(--panel-accent); font-weight:700; margin:0 0 10px; }
+  .tenant { display:flex; align-items:center; gap:14px; }
+  .mark { width:44px; height:44px; border-radius:var(--r-sm); background:var(--surface);
+          color:var(--stone); font:800 15px/44px var(--sans); text-align:center;
+          letter-spacing:.02em; flex:none; }
+  .tenant h1 { margin:0; font-size:28px; font-weight:800; letter-spacing:-.02em; line-height:1.1; }
+  .tenant .office { font-size:var(--fs-small); color:var(--panel-quiet); margin-top:3px; }
+  .greet { text-align:right; }
+  .greet h2 { margin:0 0 8px; font-size:var(--fs-title); font-weight:700; letter-spacing:-.01em; }
+  .greet .who { display:flex; gap:8px; justify-content:flex-end; flex-wrap:wrap; }
+  .chip { display:inline-flex; align-items:center; gap:6px; font-size:var(--fs-label);
+          font-weight:600; letter-spacing:.04em; padding:4px 11px; border-radius:var(--r-pill);
+          border:1px solid rgba(255,255,255,.28); color:var(--panel-ink); }
+  .chip.cycle { border-color:var(--panel-accent); color:var(--panel-accent); }
+  .chip.cycle i { width:7px; height:7px; border-radius:99px; background:var(--panel-accent); }
+
+  /* ── Body: the list and the side column ─────────────────────────── */
+  .cols { display:grid; grid-template-columns:1fr 336px; gap:22px; margin-top:22px; }
+  @media (max-width:960px){ .cols { grid-template-columns:1fr; } }
+
+  .seclab { font-size:var(--fs-label); font-weight:900; letter-spacing:var(--track);
+            text-transform:uppercase; color:var(--ink-2); margin:0 0 10px; }
+  .seclab .n { font-family:var(--mono); color:var(--gold-deep); margin-left:6px; }
+
+  .acts { display:flex; flex-direction:column; gap:10px; }
+  .act { background:var(--surface); border:1px solid var(--line); border-radius:var(--r);
+         padding:16px 18px; display:flex; align-items:center; gap:16px; }
+  .act .cnt { flex:none; min-width:40px; height:40px; border-radius:var(--r-sm);
+              display:flex; align-items:center; justify-content:center;
+              font:800 16px/1 var(--mono); background:var(--surface-2); color:var(--ink-2);
+              border:1px solid var(--line-soft); padding:0 8px; }
+  .act.miss .cnt { background:var(--bad-bg); color:var(--bad-tx); border-color:var(--bad-bg); }
+  .act .what { flex:1; min-width:0; }
+  .act .what b { display:block; font-size:15px; letter-spacing:-.01em; }
+  .act .what > span { display:block; font-size:var(--fs-note); color:var(--ink-2); margin-top:2px; }
+  .act .what .alert { color:var(--bad-tx); font-weight:600; }
+
+  button { font:inherit; cursor:pointer; }
+  .btn { flex:none; font-size:var(--fs-small); font-weight:700; letter-spacing:.03em;
+         padding:8px 16px; border-radius:var(--r-sm); border:1px solid var(--line);
+         background:var(--surface); color:var(--ink-2); }
+  .btn:hover { border-color:var(--gold-deep); color:var(--ink); }
+  .btn.cta { background:var(--cta); border-color:var(--cta); color:var(--cta-ink); }
+  .btn.cta:hover { background:var(--cta-hover); border-color:var(--cta-hover); }
+
+  .continue { margin-top:14px; text-align:right; }
+  .continue a { font-size:var(--fs-note); font-weight:600; color:var(--stone);
+                text-decoration:none; }
+  .continue a:hover { color:var(--gold-deep); }
+
+  /* ── Side column ────────────────────────────────────────────────── */
+  .side { display:flex; flex-direction:column; gap:22px; }
+  .card { background:var(--surface); border:1px solid var(--line); border-radius:var(--r);
+          padding:16px 18px; }
+  .pages { display:flex; flex-direction:column; }
+  .pages a { display:flex; align-items:center; gap:8px;
+             padding:9px 2px; font-size:var(--fs-note); font-weight:600; color:var(--ink);
+             text-decoration:none; border-bottom:1px solid var(--line-soft); }
+  .pages a:last-child { border-bottom:0; }
+  .pages a small { flex:1; font-weight:500; color:var(--ink-3); font-size:var(--fs-small);
+                   text-align:right; }
+  .pages a .go { color:var(--gold-deep); font-family:var(--mono); margin-left:auto; }
+  .pages a:hover { color:var(--gold-deep); }
+
+  .tourcard { background:var(--over-bg); border:1px solid var(--over-line);
+              border-radius:var(--r); padding:18px; }
+  .tourcard h3 { margin:0 0 6px; font-size:var(--fs-lead); font-weight:700; letter-spacing:-.01em; }
+  .tourcard p { margin:0 0 14px; font-size:var(--fs-note); color:var(--ink-2); }
+  .tourbtns { display:flex; gap:10px; align-items:center; }
+  .tbtn { font-size:var(--fs-small); font-weight:700; letter-spacing:.03em; padding:8px 16px;
+          border-radius:var(--r-pill); border:1px solid var(--gold); background:none;
+          color:var(--gold-deep); }
+  .tbtn:hover { border-color:var(--gold-deep); }
+  .tghost { font-size:var(--fs-small); font-weight:600; border:0; background:none;
+            color:var(--ink-3); padding:8px 6px; }
+  .tghost:hover { color:var(--ink); }
+
+  /* ══════════ NOTES FOR REVIEW — not part of the screen ══════════ */
+  .notes { margin-top:44px; border-top:1px solid var(--line); padding-top:22px; }
+  .notes h4 { font-size:var(--fs-label); font-weight:900; letter-spacing:var(--track);
+              text-transform:uppercase; color:var(--ink-3); margin:0 0 12px; }
+  .notes ol { margin:0; padding-left:20px; display:flex; flex-direction:column; gap:8px;
+              font-size:var(--fs-note); color:var(--ink-2); max-width:78ch; }
+  .notes b { color:var(--ink); }
+</style>
+
+<div class="wrap">
+  <p class="mockband">Mockup · <b>Welcome screen</b> · shown as Mennah Farouk, strategy custodian of Mobile · 2026-08-28</p>
+
+  <!-- ═══════════ THE SCREEN ═══════════ -->
+  <div class="hero">
+    <div>
+      <p class="kicker">Strategy Management Platform</p>
+      <div class="tenant">
+        <div class="mark">RT</div>
+        <div>
+          <h1>Raya Trade</h1>
+          <div class="office">Strategy Management Office</div>
+        </div>
+      </div>
+    </div>
+    <div class="greet">
+      <h2>Welcome, Mennah</h2>
+      <div class="who">
+        <span class="chip">Strategy custodian · Mobile</span>
+        <span class="chip cycle"><i></i>Q2 2026 cycle is open</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="cols">
+    <div>
+      <p class="seclab">Waiting on you<span class="n">3</span></p>
+      <div class="acts">
+        <div class="act">
+          <div class="cnt">3</div>
+          <div class="what">
+            <b>Submit Mobile's Q2 report</b>
+            <span>3 figures still open · <span class="alert">1 needs a note</span></span>
+          </div>
+          <button class="btn cta">Open reporting</button>
+        </div>
+        <div class="act miss">
+          <div class="cnt">4</div>
+          <div class="what">
+            <b>Fill Mobile's missing plan elements</b>
+            <span>2 targets · 1 owner · 1 due date</span>
+          </div>
+          <button class="btn">Fill the gaps</button>
+        </div>
+        <div class="act">
+          <div class="cnt">1</div>
+          <div class="what">
+            <b>The Strategy Office replied to you</b>
+            <span>Yesterday, in your conversation</span>
+          </div>
+          <button class="btn">Open the conversation</button>
+        </div>
+      </div>
+      <p class="continue"><a href="#">Continue to Mobile ›</a></p>
+    </div>
+
+    <div class="side">
+      <div>
+        <p class="seclab">Your pages</p>
+        <div class="card pages">
+          <a href="#">Mobile — Strategy <small>Plan · Foundation · SWOT</small><span class="go">›</span></a>
+          <a href="#">Mobile — Performance<span class="go">›</span></a>
+          <a href="#">Mobile — Reporting<span class="go">›</span></a>
+        </div>
+      </div>
+      <div class="tourcard">
+        <h3>Take an intro round</h3>
+        <p>Eight stops on the worked example — about two minutes.</p>
+        <div class="tourbtns">
+          <button class="tbtn">Start the round</button>
+          <button class="tghost">Not now</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══════════ REVIEW NOTES — mockup furniture only ═══════════ -->
+  <div class="notes">
+    <h4>For review — not part of the screen</h4>
+    <ol>
+      <li><b>Where it appears:</b> after sign-in, before the platform — one screen, and every control on it is a door. <b>Continue to Mobile</b> is the no-action path and goes where the person works today (§94.6 still decides that).</li>
+      <li><b>Nothing new is computed.</b> The submission row is the cycle's own pending state, the missing count is the plan's gap list (§145), the message row is the chat's unread — each number is the same function its destination page already calls, so the screen and the page cannot disagree.</li>
+      <li><b>The list is the viewer's.</b> The SMO and team see their own rows instead — inbox waiting, passwords to issue, units without a custodian (the Setup Overview's counts) — and are never offered the intro round (§118).</li>
+      <li><b>Nothing waiting:</b> the list says <b>Nothing is waiting on you</b> and Continue becomes the loud control — an empty list must say so, never sit blank.</li>
+      <li><b>One solid button</b> (§41's budget): Report keeps the product's CTA orange because the cycle is open; the missing count wears red, its button stays quiet.</li>
+      <li><b>The intro round card</b> gives the tour a home a signed-in person can reach — today its replay lives on a page most people can no longer open (§119.4).</li>
+    </ol>
+  </div>
+</div>

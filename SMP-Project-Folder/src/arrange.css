@@ -810,6 +810,9 @@
     vertical-align:middle;letter-spacing:.02em}
   .delta.up{color:var(--good-tx)} .delta.down{color:var(--bad-tx)}
   .headline .delta{align-self:center}
+  /* Inside the group card's big figure (§146): the number is 34px and the
+     delta rides its baseline rather than the line box's top. */
+  .big .delta{vertical-align:0.35em;font-size:12.5px}
 
   /* Reporting reuses the pillar accordion so the two pages read as one product,
      but its row carries how much is done rather than a score \u2014 that is what

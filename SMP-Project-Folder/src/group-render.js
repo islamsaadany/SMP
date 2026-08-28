@@ -138,6 +138,29 @@ function plus(id, label){
 }
 
 /* A headline figure whose derivation opens in a modal. */
+/* ── WHAT A DELIVERY RATIO MEANS, IN WORDS (§146) ─────────────────────────
+   Islam, on a card reading 104%: *"it's 104% while the description is saying
+   something else."* The line said "Delivered 50% against 48% planned —
+   variance +2", which is arithmetically the same fact and asks the reader to
+   divide one number by the other to see that it is. The headline is a RATIO;
+   what it needs underneath is the plain-English reading of it, and "variance
+   +2" is a third number rather than a reading.
+
+   ONE FUNCTION, because the group's card and a company's carried the same
+   sentence twice (§53.5) and would otherwise explain the same ratio
+   differently. The empty case keeps its own words: reading "0% delivered
+   against 0% planned" under "Not yet measurable" is three false precisions in
+   a row. */
+function deliveryLine(ex, pl, whose){
+  if (ex == null || pl == null || !pl)
+    return "No tactic " + (whose || "anywhere in the group") +
+           " has a plan against it yet, so there is nothing to deliver against.";
+  var r = Math.round(ex / pl * 100);
+  var verdict = r > 100 ? "ahead of plan" : r < 100 ? "behind plan" : "exactly on plan";
+  return "<b>" + ex + "%</b> of the work delivered against <b>" + pl +
+         "%</b> planned \u2014 <b>" + verdict + "</b>.";
+}
+
 function drillCard(title, val, opts){
   opts = opts || {};
   /* A NUMBER THAT IS NOT A SCORE MUST NOT WEAR A SCORING COLOUR (§68). The
@@ -149,9 +172,16 @@ function drillCard(title, val, opts){
   var id = modalFor(opts.modalTitle || title.replace(/<[^>]*>/g, ""), opts.modalSub, opts.drill);
   var vs = opts.planned != null ? ' <span class="vs">vs ' + opts.planned + '% planned</span>' : '';
   var mark = opts.planned != null ? '<div class="marker" style="left:' + opts.planned + '%"></div>' : '';
+  /* A DELTA BELONGS TO ITS NUMBER (§146). It used to be appended to the
+     TITLE by the caller, so "▲ 3" sat among the labels — pushing the heading
+     onto two lines and standing four words away from the figure it qualifies.
+     The unit's own cards have always drawn it inside `.headline`, beside the
+     number; this is the group's card catching up rather than a new idea
+     (§53.5). */
+  var delta = opts.delta || "";
   var body = val == null
     ? '<div class="big nodata">' + (opts.empty || "Not yet measurable") + '</div><div class="track empty"></div>'
-    : '<div class="big">' + val + '<small>%</small>' + vs + '</div>' +
+    : '<div class="big">' + val + '<small>%</small>' + vs + delta + '</div>' +
       '<div class="track"><div class="fill" style="width:' + val + '%;background:var(--' + b + ')"></div>' + mark + '</div>';
   return '<div class="card' + (opts.primary ? ' primary-card' : '') + '">' +
     '<div class="score-h"><h3>' + title + (opts.primary ? ' <span class="rank">primary</span>' : '') + '</h3>' +
@@ -1132,10 +1162,7 @@ function renderCompanyPerformance(coKey){
       modalSub: "Weighted across the units in this company"
     }) +
     drillCard("Business units &mdash; execution" + tip(TIP_EXEC), r, {
-      sub: r == null
-        ? "No tactic in these units has a plan against it yet, so there is nothing to deliver against."
-        : "Delivered <b>" + pct(ex) + "</b> against <b>" + pct(pl) +
-          "</b> planned &mdash; variance <b>" + varCell(ex, pl) + "</b>.",
+      sub: deliveryLine(ex, pl, "in these units"),
       drill: execDrill, modalTitle: esc(co.name) + " \u2014 execution",
       modalSub: "Weighted compile of tactic delivery, as a share of plan"
     }) +
@@ -1351,21 +1378,30 @@ function whereNext(keys){
   SECS.push({ t: "Overall performance", h: section("", "Overall performance", null,
       '<div class="scores">' +
         drillCard("Group Key Objectives" + tip("The objectives the group set itself \u2014 each actual against its target, averaged. Authored by the group, never summed from the business units."), groupKeyObjectives(), {
-          primary: true, sub: "The group\'s own scorecard. All <b>" + GROUP.keyObjectives.length + "</b> objectives have a target set.",
+          /* Was "The group's own scorecard. All 6 objectives have a target
+             set." — a data-quality note where the reader wanted to know what
+             the number IS (§146). The count stays, because it is the size of
+             the thing being scored. */
+          primary: true, sub: "The group\u2019s own <b>" + GROUP.keyObjectives.length +
+            "</b> objectives, each scored against its target.",
           drill: koDrill, modalTitle: "Group Key Objectives", modalSub: "The group\'s own scorecard, authored not compiled"
         }) +
-        drillCard("Business units &mdash; performance" + tip(TIP_PERF) + deltaTag("group"), groupUnitsObjectives(), {
-          primary: true, sub: "Each unit\'s own " + L("keyobj","bu") + ", weighted " + UNIT_KEYS.map(function(k){ return UNITS[k].weight; }).join(" / ") + " \u2014 composed on the Weighting tab.",
+        drillCard("Business units &mdash; performance" + tip(TIP_PERF), groupUnitsObjectives(), {
+          delta: deltaTag("group"),
+          /* THE LINE SAYS WHAT THE NUMBER IS, NOT HOW IT WAS MADE (§146).
+             It used to print all ten unit weights — "21 / 14 / 10 / 15 / 8 /
+             6 / 6 / 7 / 8 / 5" — which is a derivation nobody can use at a
+             glance and which grows with the business. "How this is
+             calculated →" is two lines below and opens exactly that. */
+          primary: true, sub: "All <b>" + UNIT_KEYS.length + "</b> business units\u2019 own " +
+            L("keyobj","bu").toLowerCase() + ", weighted by size.",
           drill: perfDrill, modalTitle: "Business units \u2014 performance", modalSub: "Weighted compile across the three units"
         }) +
         drillCard("Business units &mdash; execution" + tip(TIP_EXEC), groupRatio(), {
           /* The sentence has to survive the empty tenant too. Reading
              "Delivered 0% against 0% planned - variance +0" under a card that
              says "Not yet measurable" is three false precisions in a row. */
-          sub: groupRatio() == null
-               ? "No tactic anywhere in the group has a plan against it yet, so there is nothing to deliver against."
-               : "Delivered <b>" + groupExec() + "%</b> against <b>" + groupPlan() +
-                 "%</b> planned &mdash; variance <b>" + varCell(groupExec(), groupPlan()) + "</b>.",
+          sub: deliveryLine(groupExec(), groupPlan()),
           drill: execDrill, modalTitle: "Business units \u2014 execution", modalSub: "Weighted compile of tactic delivery, as a share of plan"
         }) +
       '</div>' + whereNext(UNIT_KEYS)) });

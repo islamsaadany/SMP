@@ -130,6 +130,45 @@ with sync_playwright() as p:
     else:
         ck("there is an entry to press", False)
 
+    print("— 2 · the sentences under the numbers (§146) —")
+    go_group(pg)
+    cards = pg.evaluate("""() => [...document.querySelectorAll('#panel .scores .card')].map(function(c){
+      var big=c.querySelector('.big'), sub=c.querySelector('p.sub');
+      return {head:((c.querySelector('.score-h')||{}).textContent||'').trim(),
+              val: big ? parseInt((big.textContent||'').replace(/[^0-9-].*$/,''),10) : null,
+              sub: sub ? (sub.textContent||'').trim() : '',
+              deltaInBig: !!(big && big.querySelector('.delta')),
+              deltaInHead: !!(c.querySelector('.score-h .delta')),
+              lines: sub ? sub.getClientRects().length : 0};
+    })""")
+    ck("the three cards are there", len(cards) >= 3, len(cards))
+    ck("no sentence lists the unit weights",
+       not any("/" in c["sub"] and c["sub"].count("/") > 3 for c in cards),
+       [c["sub"][:60] for c in cards if c["sub"].count("/") > 3])
+    ck("no sentence says 'variance'",
+       not any("variance" in c["sub"].lower() for c in cards),
+       [c["sub"][:60] for c in cards if "variance" in c["sub"].lower()])
+    # THE ONE THAT MATTERS: the words under a ratio must agree with the ratio.
+    ratio = [c for c in cards if "execution" in c["head"].lower()]
+    ck("the execution card is found", bool(ratio), [c["head"][:40] for c in cards])
+    if ratio:
+        c = ratio[0]
+        v, sub = c["val"], c["sub"].lower()
+        want = ("ahead of plan" if v > 100 else "behind plan" if v < 100 else "exactly on plan")
+        ck("its verdict agrees with its own number", want in sub, (v, c["sub"]))
+    ck("the delta sits with its number, not in the heading",
+       any(c["deltaInBig"] for c in cards) and not any(c["deltaInHead"] for c in cards),
+       [(c["deltaInBig"], c["deltaInHead"]) for c in cards])
+    rank = pg.evaluate("""() => {
+      var r=document.querySelector('.score-h .rank'), p=document.querySelector('.score-h .pill');
+      if(!r||!p) return {none:true};
+      var rc=getComputedStyle(r), pc=getComputedStyle(p);
+      return {rankInk:rc.color, rankBorder:rc.borderTopColor,
+              pillInk:pc.color, gold:getComputedStyle(document.documentElement).getPropertyValue('--gold').trim()};
+    }""")
+    ck("the primary chip is quieter than the status pill beside it",
+       rank.get("none") or rank.get("rankInk") != rank.get("pillInk"), rank)
+
     print("— 3 · the caption explainer —")
     pg.query_selector('#units [data-u="mobile"]').click()
     pg.wait_for_timeout(500)

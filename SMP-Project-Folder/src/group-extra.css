@@ -77,8 +77,14 @@
 
   /* Performance is the primary reading; execution sits beside it */
   .card.primary-card { border-color:var(--stone-soft); border-top:3px solid var(--stone-soft); }
-  .score-h .rank { font-size:9.5px; letter-spacing:.1em; color:var(--gold-deep);
-                   border:1px solid var(--gold); border-radius:99px; padding:1px 6px; margin-left:6px; }
+  /* A QUIET OUTLINE, NOT A SECOND GOLD CHIP (§146). "primary" says which of
+     two readings leads; it is a footnote to the title, and in the accent it
+     competed with the status pill on the same line and with the accent budget
+     itself (§41). The border and the ink drop to the page's own neutrals; the
+     word is unchanged. */
+  .score-h .rank { font-size:9.5px; letter-spacing:.1em; color:var(--ink-3);
+                   border:1px solid var(--line); border-radius:99px; padding:1px 6px;
+                   margin-left:6px; font-weight:600; }
   .i-sc.primary b { color:var(--stone); }
 
   /* ── Visual performance rows ─────────────────────────── */

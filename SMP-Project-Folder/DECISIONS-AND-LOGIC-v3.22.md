@@ -18369,3 +18369,51 @@ corrected rather than the design bent to fit it.
 
 Proved able to fail: 12 failures against the pre-§145 build. Full sweep: 33
 viewers, no errors.
+
+## 146 · The line under a number says what the number is (v3.55)
+
+Islam, shown Wave 3's chip proposal, looked past it at the real fault:
+*"the description under the business units performance is confusing either we
+simplify it or remove it and same for the execution it's 104% while the
+description is saying something else and same for the group key objectives
+description."*
+
+**THREE CARDS, THREE DIFFERENT KINDS OF SENTENCE, AND NONE OF THEM SAID WHAT
+ITS NUMBER MEANT.** One was a data-quality note ("All 6 objectives have a
+target set"), one was a derivation that grows with the business (ten unit
+weights, "21 / 14 / 10 / 15 / 8 / 6 / 6 / 7 / 8 / 5"), and one was the same
+fact restated as three more numbers — "Delivered 50% against 48% planned —
+variance +2" under a headline of **104%**, which asks the reader to divide one
+by the other to discover the two agree.
+
+**THE RULE THAT SETTLES ALL THREE**: every card already carries *"How this is
+calculated →"*, which opens the full derivation. So the line under the number
+says **what the number is**, and the arithmetic stays one click away where it
+belongs. The three cards also end up the same height, which they never were.
+
+**THE RATIO IS READ OUT IN WORDS** — `deliveryLine()` prints *ahead of plan* /
+*behind plan* / *exactly on plan*, which is what 104% MEANS. **One function,
+because the group's card and a company's carried the sentence twice** (§53.5)
+and would otherwise explain the same ratio differently; the empty case keeps
+its own words, since "0% delivered against 0% planned" under *Not yet
+measurable* is three false precisions in a row.
+
+**AND THE CHECK ASSERTS THE AGREEMENT, NEVER THE WORDING** (§94.8): the verdict
+must match the card's own figure, whatever that figure is on the day — so a
+tenant whose delivery falls below plan cannot end up reading "ahead of plan",
+and rewording the sentence later keeps the check green.
+
+**THE DELTA BELONGS TO ITS NUMBER.** "▲ 3" was glued to the TITLE by the
+caller, so it sat among the labels, four words from the figure it qualifies,
+and pushed the heading onto two lines. `drillCard` takes it as an option and
+renders it inside `.big` — **which is what the unit's own cards have always
+done** (§53.5 again: the group's card catching up, not a new idea). Its hover
+says what it is measured against.
+
+**AND "primary" STOPS WEARING THE ACCENT**: a footnote to a title, in gold,
+beside a status pill on the same line — two chips competing on one row, and a
+spend against §41's budget for a word that ranks two readings. The page's own
+neutrals; the word unchanged.
+
+Proved able to fail: 4 failures against the pre-§146 build. Wave 1–3 suite and
+the full sweep (33 viewers) green.

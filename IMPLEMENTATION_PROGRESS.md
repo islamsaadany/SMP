@@ -67,6 +67,22 @@ Nothing proceeds past this line without an answer.
 
 ## Built and verified
 
+### v3.55 — the card sentences and the delta (§146)
+
+- Islam's redirect of Wave 3's item 2: the three group cards each carried a
+  different kind of sentence and none said what its number meant — a data
+  note, ten unit weights, and "variance +2" under a headline of 104%.
+- Each now says what the number IS, with the arithmetic left to "How this is
+  calculated →". `deliveryLine()` reads the ratio out in words — **ahead of
+  plan / behind plan / exactly on plan** — one function for the group's card
+  and a company's, and the check asserts the verdict AGREES with the figure
+  rather than asserting the wording.
+- The ▲ delta moves from the title into the number (where a unit's own cards
+  have always put it); "primary" drops from gold to the page's neutrals.
+- 4 failures on the pre-§146 build; whole suite and 33-viewer sweep green.
+  **Not merged — awaiting Islam.**
+
+
 ### v3.54 — Wave 3: four visual refinements (§145)
 
 - **The group landing answers "where do I look next"** — one entry per unit,

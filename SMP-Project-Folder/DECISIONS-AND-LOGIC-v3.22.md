@@ -17447,7 +17447,7 @@ collides keeping the pair queued. **Run against the pre-§131 build first
 `people-dialog.py`, `table-standard.py` and the full `qa.py` sweep are
 green — the resemblance pair in identity-merge stays a resemblance and
 nothing double-reports it.
-## 132 · A custodian per project (v3.50, spec 021)
+## 147 · A custodian per project (v3.57, spec 024)
 
 Islam: *"in a case of a function that has 2 projects each project has an
 owner so the custodian here is not on the whole capability there is a
@@ -17457,7 +17457,7 @@ project and nothing else; submitting stays the custodian's and the head's;
 the project's Owner field offers register people. He confirmed all three,
 adding that it must be governed **on the Roles & access table**.
 
-### 132.1 Derived, never granted — the unit's own rule, walked across the switch
+### 147.1 Derived, never granted — the unit's own rule, walked across the switch
 
 The machinery existed on the unit side since §55/spec 006 §7.2: somebody a
 plan names is a Contributor, own lines only, and the code explicitly said
@@ -17478,7 +17478,7 @@ in BOTH, in the same edit, and the test asserts the world actually carries
 them, or `namedInFn()` reads an empty list and the floor never derives,
 silently, in the safe-looking direction.
 
-### 132.2 The matrix cell was already there, and now it decides
+### 147.2 The matrix cell was already there, and now it decides
 
 Islam: *"this needs to be in the access setup table if it's not."* It is —
 **Contributor × Own supporting function → Reporting** — and it had never
@@ -17496,7 +17496,7 @@ exclusion, so the dot never nags them for a submission they cannot make
 (§69.9). The access page's prose names the project case, and the
 Contributor's role note reads "a measure, a tactic or a project" now.
 
-### 132.3 The server had been refusing what the screen offered, since migration 024
+### 147.3 The server had been refusing what the screen offered, since migration 024
 
 Found by proving the ground before building on it, with a fixture rather
 than by reading: **a function custodian reporting a DELIVERABLE was refused
@@ -17511,7 +17511,7 @@ as the SMO, and `test-authorize.js` had no capReporting case). The families
 are complete now, deliverables have their own `splitRows`, and the custodian
 regression is asserted by name.
 
-### 132.4 The owner stays a NAME, and that was decided by a merge
+### 147.4 The owner stays a NAME, and that was decided by a merge
 
 The aligned design's third point — the Owner field offers register people —
 was **built twice in one day**: this section first carried a keyed picker
@@ -17534,7 +17534,7 @@ renamed person parts company with plans naming the old spelling. If project
 owners ever need a hard identity link, that is a reversal of §130.1's
 "stored is still the name" — a decision, not a tidy-up.
 
-### 132.5 Proof
+### 147.5 Proof
 
 `scripts/test-authorize.js` §16: the derivation, the world, the custodian
 regressions, the owner's yes on all three row kinds, the five refusals (the
@@ -17554,7 +17554,7 @@ shipped tenant). Proved able to fail: with `canReportFnProject()` flattened
 to the whole-function gate, 2 failures, including the exact assertion this
 feature exists for. The full `qa.py` sweep is green.
 
-### 132.6 Flagged, not built
+### 147.6 Flagged, not built
 
 A **pillars** function still derives no contributors: its plan rows carry
 owners and collaborators like a unit's, but its figures classify through

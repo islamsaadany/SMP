@@ -7,7 +7,7 @@ version (rules A2 / A11, changed 2026-08-20) — those go only when asked for.
 **Where it runs:** Vercel, production tracks `main`. Static files plus two
 serverless functions (`/api/state`, `/api/auth`) against Neon Postgres.
 **Latest version:** v3.49 on `main` — §131 (same-name notices) over §130
-(owners, corners); **v3.50 (§132, a custodian per project) on
+(owners, corners); **v3.50 (§147, a custodian per project) on
 `claude/custodian-per-project-s8q93m`**, awaiting the word to merge.
 **Last updated:** 2026-08-27
 
@@ -66,7 +66,7 @@ Nothing proceeds past this line without an answer.
 
 ## Built and verified
 
-### v3.50 — a custodian per project (§132, spec 021)
+### v3.57 — a custodian per project (§147, spec 024)
 
 - **A project's owner is a Contributor of its function** — derived from the
   project's Owner row the way a unit's Contributor is derived from a tactic
@@ -77,7 +77,7 @@ Nothing proceeds past this line without an answer.
   Reporting cell (default view — the SMO opens it to edit), enforced on the
   screen and again on the server against the stored state.
 - **Rides §130.1's owner picker**: the stored owner stays a register-picked
-  NAME; a keyed variant was built first and removed at the merge (§132.4).
+  NAME; a keyed variant was built first and removed at the merge (§147.4).
 - **A drift since migration 024 fixed on the way**: a custodian's deliverable
   report, and the milestone % that §104.10 requires, were classified as plan
   and refused on save while the screen offered both.

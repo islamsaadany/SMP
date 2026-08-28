@@ -2199,7 +2199,7 @@ python3 checks/no-jump.py       # nothing moves the register under you — the a
 python3 checks/plan-builder.py  # building a plan ON the platform: the door, the chooser,
                                 # the band's map, every row form asked of the DATA, and the
                                 # empty-state fixes — proved able to fail twice (§129)
-python3 checks/project-custodian.py # a custodian per project (§132): the owner's project
+python3 checks/project-custodian.py # a custodian per project (§147): the owner's project
                                 # takes their figures and the one beside it takes nothing,
                                 # both ends as both viewers — proved able to fail
 python3 checks/office-chat.py   # the chat's client half — serves the built file over HTTP,
@@ -2253,8 +2253,8 @@ prior sessions (on HR_ERP) accidentally reverted agreed-upon designs.
 
 ---
 
-*Last Updated: 2026-08-27 &mdash; **v3.50: a custodian per project
-(&sect;131, spec 021)**. Islam: *"in a case of a function that has 2 projects
+*Last Updated: 2026-08-27 &mdash; **v3.57: a custodian per project
+(&sect;131, spec 024)**. Islam: *"in a case of a function that has 2 projects
 each project has an owner so the custodian here is not on the whole capability
 there is a custodian per project."* Aligned first, three decisions confirmed.
 **A project's owner is a Contributor of its function** &mdash; derived from the
@@ -2273,7 +2273,7 @@ the server had classified a custodian's DELIVERABLE report &mdash; and the
 milestone % that &sect;104.10 REQUIRES &mdash; as PLAN and refused them, while
 the screen offered both (`REPORT` had no deliverable family and `milestone`
 never gained `pct`; no capReporting test existed to notice). Fixed and
-asserted by name. **THE OWNER STAYS A NAME, DECIDED BY A MERGE** (&sect;132.4):
+asserted by name. **THE OWNER STAYS A NAME, DECIDED BY A MERGE** (&sect;147.4):
 a keyed `owner`+`ownerKey` picker was built first, and `git fetch` before
 pushing found &sect;130.1 already on `main` from another session &mdash; Islam's
 own wider ask, register-picked owner NAMES on five plan fields, the
@@ -2283,7 +2283,7 @@ owner is already rights-bearing by name and one question must not have two
 answers (&sect;53.5). Proved able to fail three ways before green was believed
 (&sect;94.5): narrowing stubbed &rarr; 2 failures, derivation stubbed &rarr; 6,
 screen gate flattened &rarr; 2. Seed scanned: nobody's standing changes.
-**Flagged, not built** (&sect;132.6): a pillars function still derives no
+**Flagged, not built** (&sect;147.6): a pillars function still derives no
 contributors, and the bar's "View only" pill to a contributor with editable
 rows is the unit side's own long-standing wording &mdash; changing it is a
 decision for both sides at once.*

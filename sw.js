@@ -153,7 +153,7 @@
    §91's trigger is the built file's bytes, which this is.
    Confirmed against origin/main serving "smp-shell-v3.48-owners"; confirm
    once more immediately before the push to main (§94.16). */
-const SHELL = "smp-shell-v3.50-projcust";
+const SHELL = "smp-shell-v3.57-projcust";
 const ASSETS = [
   "/",
   "/index.html",

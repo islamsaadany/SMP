@@ -68,6 +68,22 @@ section.concept{margin-top:72px}
 .screen{overflow-x:auto}
 .screen-in{min-width:860px}
 
+/* the comparison stage — Today beside B */
+.compare{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-top:18px}
+.compare>div{min-width:0}
+@media (max-width:920px){.compare{grid-template-columns:1fr}}
+.compare .plab{font-size:11px;font-weight:700;letter-spacing:.13em;text-transform:uppercase;color:var(--f-ink3);margin:0 0 8px}
+.compare .plab b{color:var(--f-ink)}
+.scalewrap{overflow:hidden}
+.scalewrap .screen{overflow:visible}
+.scalewrap .screen-in{transform-origin:top left}
+.fliprow{display:flex;align-items:center;gap:12px;margin:26px 0 10px}
+.fliprow .plab{margin:0}
+.flipbtns{display:inline-flex;border:1px solid var(--f-line);border-radius:999px;overflow:hidden}
+.flipbtns button{appearance:none;border:0;background:var(--f-surface);color:var(--f-ink3);
+  font:600 12.5px "IBM Plex Sans",sans-serif;padding:6px 16px;cursor:pointer}
+.flipbtns button[aria-pressed="true"]{background:var(--f-ink);color:var(--f-ground)}
+
 /* the closing decision block */
 .decision{margin-top:64px;border-left:3px solid var(--f-mark);background:var(--f-markbg);
   padding:18px 22px;border-radius:0 12px 12px 0;max-width:900px}
@@ -377,6 +393,33 @@ table.kt td.score{width:150px}
   <div class="brandscope" id="scope">
 
   <section class="concept">
+    <h2><span class="letter">⇄</span> Today beside B</h2>
+    <p class="thesis">The comparison stage. Left is the shipped look, right is <b>Command Ledger</b>, drawn at equal scale
+    from the identical markup — same rows, same numbers, same controls. What to watch: the graphite ground a step deeper,
+    the uppercase Archivo titles, the 3px accent spine on each card, mono tabular figures, and the score column becoming a
+    meter you read in one pass instead of five dot-and-word pairs. The brand switcher above re-colours both sides together.</p>
+    <div class="compare">
+      <div><p class="plab">Today — shipped</p>
+        <div class="plate c0"><div class="scalewrap"><div class="screen"><div class="screen-in" data-plate></div></div></div></div>
+      </div>
+      <div><p class="plab"><b>B — Command Ledger</b></p>
+        <div class="plate cB"><div class="scalewrap"><div class="screen"><div class="screen-in" data-plate></div></div></div></div>
+      </div>
+    </div>
+    <div class="fliprow">
+      <p class="plab">Full size, in place:</p>
+      <div class="flipbtns" id="flipbtns">
+        <button data-skin="c0" aria-pressed="true">Today</button>
+        <button data-skin="cB" aria-pressed="false">Concept B</button>
+      </div>
+      <span style="font-size:12px;color:var(--f-ink3)">— the screen re-skins where it stands, so every difference is a movement you can see.</span>
+    </div>
+    <div class="plate c0" id="flipplate"><div class="platehead"><i></i><i></i><i></i><span id="fliplab">today — full size</span></div>
+      <div class="screen"><div class="screen-in" data-plate></div></div>
+    </div>
+  </section>
+
+  <section class="concept">
     <h2><span class="letter">0</span> Today</h2>
     <p class="thesis">The shipped Forefront look, faithfully: system font, cool functional greys, radius doing the work of
     elevation. Nothing is wrong — and nothing is <b>chosen</b>. The neutrals are Tailwind&rsquo;s, the type is whatever the
@@ -491,7 +534,24 @@ function screenHTML(org){
 }
 function paintPlates(org){
   document.querySelectorAll('[data-plate]').forEach(function(p){ p.innerHTML = screenHTML(org); });
+  requestAnimationFrame(fitScaled);
 }
+/* the side-by-side pair renders the full 860px screen scaled into half a page */
+function fitScaled(){
+  document.querySelectorAll('.scalewrap').forEach(function(w){
+    var inner = w.querySelector('.screen-in'); if(!inner) return;
+    var s = Math.min(1, w.clientWidth / 860);
+    inner.style.transform = 'scale(' + s + ')';
+    w.style.height = (inner.offsetHeight * s) + 'px';
+  });
+}
+window.addEventListener('resize', fitScaled);
+document.getElementById('flipbtns').addEventListener('click', function(e){
+  var b = e.target.closest('button'); if(!b) return;
+  document.getElementById('flipplate').className = 'plate ' + b.dataset.skin;
+  document.getElementById('fliplab').textContent = (b.dataset.skin==='c0' ? 'today' : 'concept b — command ledger') + ' — full size';
+  document.querySelectorAll('#flipbtns button').forEach(function(x){ x.setAttribute('aria-pressed', x===b ? 'true':'false'); });
+});
 var scope = document.getElementById('scope');
 document.getElementById('bswitch').addEventListener('click', function(e){
   var b = e.target.closest('.bbtn'); if(!b) return;

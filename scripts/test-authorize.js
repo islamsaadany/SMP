@@ -1599,6 +1599,35 @@ console.log("\n17 · a custodian per project — two roles (§147.7)");
           "merchandising is not a pillars function with items");
   }
 
+  /* THE CUSTODIAN WHO ALSO OWNS A PROJECT LOSES NOTHING (§147.7, asked by
+     Islam): the most generous role wins (§33), so the powner chip beside the
+     custodian's narrows nothing — whole function, Submit and all. And the
+     roles stay separable: with the CUSTODIAN row closed and the Project
+     owner row open, the same person keeps their own project and loses the
+     rest — bounded reach engaging only when the bounded role is the only way
+     in. Guarded here so no later edit can turn the union into a narrowing. */
+  const both = clone(SEED);
+  const custKey2 = SEED.functions[FN].custodian;
+  const custName2 = SEED.people.filter(function (x) { return x.key === custKey2; })[0].name;
+  capOf(both).projects[0].owner = custName2;
+  check("custodian + project owner: not read as bounded",
+        R.onlyOwnLines(R.worldOf(both), personOf(both, custKey2), "fn", T) === false);
+  ok("custodian + project owner: still reports the OTHER project",
+     run(both, custKey2, function (s) {
+       capOf(s).projects[1].deliverables[0].status = "done"; }));
+  ok("custodian + project owner: still submits the function",
+     run(both, custKey2, function (s) {
+       s.review.submitted = Object.assign({}, s.review.submitted); s.review.submitted[T] = true; }));
+  const narrowed = clone(both);
+  narrowed.access.custodian = Object.assign({}, narrowed.access.custodian, { a_fn_own: "view" });
+  narrowed.access.powner = Object.assign({}, narrowed.access.powner, { a_fn_own: "edit" });
+  ok("custodian row closed, owner row open: their project still reports",
+     run(narrowed, custKey2, function (s) {
+       capOf(s).projects[0].deliverables[0].status = "todo"; }));
+  not("...and the rest of the function no longer does",
+      run(narrowed, custKey2, function (s) {
+        capOf(s).projects[1].deliverables[0].status = "done"; }));
+
   /* A retired owner derives nothing (§110.4). */
   const retired = clone(base);
   personOf(retired, "t147_own").active = false;

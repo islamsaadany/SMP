@@ -11,6 +11,17 @@ function esc(s){ return String(s).replace(/&/g,"&amp;").replace(/</g,"&lt;"); }
    the strategy layer and the functional layer never disagree about a colour;
    85 is the added top edge that splits on-track from needs-attention. */
 function band(v){ return bandOf(v).key; }
+/* ── A BAND'S COLOUR AS *TYPE*, NOT AS A MARK (§144) ────────────────────
+   §38.4's rule, applied where it had never been: "a colour that works as a
+   FILL usually fails as TYPE", which is why every scoring colour was given a
+   `-tx` twin. Thirty-one places then went on painting TEXT with the fill —
+   invisible until §143 measured a hovered control and found the rail's figure
+   at 3.26 and a scored per-cent at 4.45 on the quiet ground.
+
+   THE FALLBACK IS LOAD-BEARING: the bands are the tenant's (Setup › Scoring
+   bands), so a key without a twin is possible; `var(--x-tx, var(--x))` then
+   paints exactly what it paints today rather than nothing. */
+function bandInk(v){ var k = band(v); return 'var(--' + k + '-tx, var(--' + k + '))'; }
 function bandWord(v){ return bandOf(v).label; }
 /* A score with nothing behind it renders as a dash, never as the number zero
    and never as the word null. This is the brief's rule made a single function
@@ -312,7 +323,7 @@ function measureRows(ms, opts){
     if (opts.unscored) return head + '</tr>';
     return head + '<td class="num">' + esc(m.actual) + '</td>' +
            (scored
-             ? '<td class="num final" style="color:var(--' + band(m.progress) + ')">' + m.progress + '%</td>'
+             ? '<td class="num final" style="color:' + bandInk(m.progress) + '">' + m.progress + '%</td>'
              : '<td class="cc"><span class="pill none">Not scored</span></td>') + '</tr>';
   }).join("");
 }
@@ -377,7 +388,7 @@ function tacticRows(ts, unitKey){
         '<span class="why" style="margin:2px 0 0">due at ' + pl + '%</span></td>'
       : '<td class="num"><span class="pair"><b>' + t.actual + '</b> / ' + pl + '</span></td>' +
         '<td class="num">' + varCell(t.actual, pl) + '</td>' +
-        '<td class="num final" style="color:var(--' + band(r) + ')">' + pct(r) + '</td>';
+        '<td class="num final" style="color:' + bandInk(r) + '">' + pct(r) + '</td>';
     return '<tr data-oi="' + i + '"' + (due && t.actual != null ? '' : ' class="notdue"') + '><td class="idx">' +
       (on ? handle("Reorder " + t.name) : '') +
       '<span class="idx-n">' + (i+1) + '</span></td><td>' + esc(t.name) +
@@ -424,8 +435,8 @@ function pillarRow(it, i, u){
     '<span>' + kindPill(it) + '</span>' +
     '<span><span class="pill theme">' + esc(it.theme) + '</span></span>' +
     '<span class="powner">' + esc(it.owner) + '</span>' +
-    '<span class="num lead" style="color:var(--' + band(perf) + ')">' + pct(perf) + '</span>' +
-    '<span class="num" style="color:var(--' + band(r) + ')">' + pct(r) + '</span>' +
+    '<span class="num lead" style="color:' + bandInk(perf) + '">' + pct(perf) + '</span>' +
+    '<span class="num" style="color:' + bandInk(r) + '">' + pct(r) + '</span>' +
     '<span class="num">' + varCell(pillarExec(it), pillarPlan(it)) + '</span>' +
     '<span class="chev">&#9654;</span></button>' + pillarBody(it, u) + '</div>';
 }
@@ -438,16 +449,16 @@ function scorePair(perf, ex, pl, nMeasures, nScored, hi, lo){
   return '<div class="scores">' +
     '<div class="card tight primary"><div class="score-h"><h4>' + L("measure","bu") + ' performance</h4>' +
       '<span class="pill ' + band(perf) + '">' + bandWord(perf) + '</span></div>' +
-      '<div class="headline"><span class="big" style="color:var(--' + band(perf) + ')">' + pctBig(perf) + '</span></div>' +
+      '<div class="headline"><span class="big" style="color:' + bandInk(perf) + '">' + pctBig(perf) + '</span></div>' +
       '<div class="minirow"><div><em>Measures</em><b>' + nMeasures + '</b>' +
           (nScored < nMeasures ? '<em class="sub-n">' + nScored + ' scored</em>' : '') + '</div>' +
-        '<div><em>Highest</em><b style="color:var(--' + band(hi) + ')">' +
+        '<div><em>Highest</em><b style="color:' + bandInk(hi) + '">' +
           pct(hi) + '</b></div>' +
-        '<div><em>Lowest</em><b style="color:var(--' + band(lo) + ')">' +
+        '<div><em>Lowest</em><b style="color:' + bandInk(lo) + '">' +
           pct(lo) + '</b></div></div></div>' +
     '<div class="card tight"><div class="score-h"><h4>Execution performance</h4>' +
       '<span class="pill ' + band(r) + '">' + bandWord(r) + '</span></div>' +
-      '<div class="headline"><span class="big" style="color:var(--' + band(r) + ')">' + pctBig(r) + '</span>' +
+      '<div class="headline"><span class="big" style="color:' + bandInk(r) + '">' + pctBig(r) + '</span>' +
         (r == null ? '' : '<span class="ofplan">of plan</span>') + '</div>' +
       '<div class="minirow"><div><em>Delivered</em><b>' + pct(ex) + '</b></div>' +
         '<div><em>Planned</em><b>' + pct(pl) + '</b></div>' +
@@ -690,7 +701,7 @@ function unitsTable(keys){
       '<td class="num">' + u.items.length + '</td>' +
       '<td class="num">' + pct(r) + '</td>' +
       '<td class="num">' + varCell(unitExec(u), unitPlan(u)) + '</td>' +
-      '<td class="num final" style="color:var(--' + band(ko) + ')">' + pct(ko) + '</td></tr>';
+      '<td class="num final" style="color:' + bandInk(ko) + '">' + pct(ko) + '</td></tr>';
   }).join("");
   return '<div class="cfg"><table><thead><tr>' +
     '<th style="width:30%">Business unit</th><th class="num">Weight</th>' +
@@ -718,7 +729,7 @@ function capsTable(){
         '<b style="color:var(--good-tx)">' + ce.done + '</b> / ' +
         '<b style="color:var(--attn)">' + ce.wip + '</b> / ' +
         '<span style="color:var(--none)">' + ce.todo + '</span></span></td>' +
-      '<td class="num final" style="color:var(--' + band(perf) + ')">' + pct(perf) + '</td></tr>';
+      '<td class="num final" style="color:' + bandInk(perf) + '">' + pct(perf) + '</td></tr>';
   }).join("");
   return '<div class="cfg"><table><thead><tr>' +
     '<th style="width:44%">Capability</th><th class="num">Projects</th>' +
@@ -1199,7 +1210,7 @@ function renderGroupPerformance(){
     var pd = miniTable(["Business unit", L("pillar","bu"), "Performance"],
       st.list.map(function(x){
         return '<tr><td>' + esc(x.unit) + '</td><td>' + x.code + ' ' + esc(x.it.name) + '</td>' +
-          '<td class="num final" style="color:var(--' + band(pillarPerf(x.it)) + ')">' + pillarPerf(x.it) + '%</td></tr>';
+          '<td class="num final" style="color:' + bandInk(pillarPerf(x.it)) + '">' + pillarPerf(x.it) + '%</td></tr>';
       }).join("")) +
       '<p class="sub">Mean across <b>' + st.list.length + '</b> ' + L("pillar","bu").toLowerCase() +
       ' carrying this theme, in <b>' + st.units.length + '</b> business units: <b>' + st.perf + '%</b>.</p>';
@@ -1238,7 +1249,7 @@ function renderGroupPerformance(){
                 '<td class="num">' + dirCell(m.dir) + '</td>' +
                 '<td class="num">' + (m.target ? esc(m.target) : '<span class="missing">Missing</span>') + '</td>' +
                 '<td class="num">' + esc(m.actual) + '</td>' +
-                '<td class="num final" style="color:var(--' + band(m.progress) + ')">' + pct(m.progress) + '</td></tr>';
+                '<td class="num final" style="color:' + bandInk(m.progress) + '">' + pct(m.progress) + '</td></tr>';
             }).join("")) +
           '<p class="sub">Weighted across <b>' + c.keyObjectives.length + '</b> objectives: <b>' + pct(ko) + '</b>.</p>') +
       miniTable(["#","Project","Deliverables","Outcomes","Performance"],
@@ -1246,7 +1257,7 @@ function renderGroupPerformance(){
           return '<tr><td class="idx">' + (i+1) + '</td><td>' + esc(p.name) + '</td>' +
             '<td class="num">' + pct(projDeliverySide(p)) + '</td>' +
             '<td class="num">' + pct(projOutcomeSide(p)) + '</td>' +
-            '<td class="num final" style="color:var(--' + band(projPerf(p)) + ')">' + pct(projPerf(p)) + '</td></tr>';
+            '<td class="num final" style="color:' + bandInk(projPerf(p)) + '">' + pct(projPerf(p)) + '</td></tr>';
         }).join("")) +
       '<p class="sub">Half from the deliverables side, half from the outcomes side, per side rather than per row.</p>';
     var ed = miniTable(["#","Project","Completed","In progress","Not started"],
@@ -1605,7 +1616,7 @@ function renderUnitPerformance(u){
           '<td>' + esc(m.name) + fmark(m.id) + '</td>' +
           '<td class="num">' + dirCell(m.dir) + '</td><td class="num">' + esc(m.target) + '</td>' +
           '<td class="num">' + esc(m.actual) + '</td>' +
-          '<td class="num final" style="color:var(--' + band(m.progress) + ')">' + pct(m.progress) + '</td>' +
+          '<td class="num final" style="color:' + bandInk(m.progress) + '">' + pct(m.progress) + '</td>' +
           (ws ? '<td class="num">' + w + '%</td><td class="num">' +
                 (Math.round(m.progress * w) / 100).toFixed(1) + '</td>' : '') + '</tr>';
       }).join("")) +
@@ -1654,7 +1665,7 @@ function renderUnitPerformance(u){
         return '<tr><td class="idx">' + (i+1) + '</td>' +
           '<td>' + pillarCode(u, i) + ' ' + esc(it.name) + '</td>' +
           '<td class="num">' + ms + '</td><td class="num">' + sc + '</td>' +
-          '<td class="num final" style="color:var(--' + band(pp) + ')">' + pct(pp) + '</td></tr>';
+          '<td class="num final" style="color:' + bandInk(pp) + '">' + pct(pp) + '</td></tr>';
       }).join("")) +
     '<p class="sub">Mean across <b>' + pps.length + '</b> of <b>' + u.items.length + '</b> ' +
     plWord.toLowerCase() + ' with something scored: <b>' + pct(pl) + '</b>. ' +
@@ -1668,7 +1679,7 @@ function renderUnitPerformance(u){
         var pr = pillarRatio(it);
         return '<tr><td class="idx">' + (i+1) + '</td><td>' + pillarCode(u, i) + ' ' + esc(it.name) + '</td>' +
           '<td class="num">' + pillarExec(it) + '%</td><td class="num">' + pillarPlan(it) + '%</td>' +
-          '<td class="num final" style="color:var(--' + band(pr) + ')">' + pr + '%</td>' +
+          '<td class="num final" style="color:' + bandInk(pr) + '">' + pr + '%</td>' +
           '<td class="num">' + varCell(pillarExec(it), pillarPlan(it)) + '</td></tr>';
       }).join("")) +
     '<p class="sub">Delivered <b>' + unitExec(u) + '%</b> against <b>' + unitPlan(u) +
@@ -1704,30 +1715,30 @@ function renderUnitPerformance(u){
     '<div class="scores">' +
       '<div class="card tight primary"><div class="score-h"><h4>' + L("keyobj","bu") + ' performance</h4>' +
         '<span class="pill ' + band(ko) + '">' + bandWord(ko) + '</span></div>' +
-        '<div class="headline"><span class="big" style="color:var(--' + band(ko) + ')">' + pctBig(ko) + '</span>' +
+        '<div class="headline"><span class="big" style="color:' + bandInk(ko) + '">' + pctBig(ko) + '</span>' +
           deltaTag(u.ukey) +
           '<button class="drill" data-modal="' + koId + '">See the ' + L("keyobj","bu").toLowerCase() + ' &rarr;</button></div>' +
         '<div class="minirow"><div><em>Objectives</em><b>' + u.keyObjectives.length + '</b></div>' +
-          '<div><em>Highest</em><b style="color:var(--' + band(koHi) + ')">' +
+          '<div><em>Highest</em><b style="color:' + bandInk(koHi) + '">' +
             pct(koHi) + '</b></div>' +
-          '<div><em>Lowest</em><b style="color:var(--' + band(koLo) + ')">' +
+          '<div><em>Lowest</em><b style="color:' + bandInk(koLo) + '">' +
             pct(koLo) + '</b></div></div></div>' +
       /* IN THE MIDDLE, as asked: the objectives are what the unit is judged
          on, the pillars are how it means to get there, and execution is
          whether the work happened. Read left to right that is the argument. */
       '<div class="card tight"><div class="score-h"><h4>' + plWord + ' performance</h4>' +
         '<span class="pill ' + band(pl) + '">' + bandWord(pl) + '</span></div>' +
-        '<div class="headline"><span class="big" style="color:var(--' + band(pl) + ')">' + pctBig(pl) + '</span>' +
+        '<div class="headline"><span class="big" style="color:' + bandInk(pl) + '">' + pctBig(pl) + '</span>' +
           '<button class="drill" data-modal="' + plId + '">See the ' +
             plWord.toLowerCase() + ' &rarr;</button></div>' +
         '<div class="minirow"><div><em>' + plWord + '</em><b>' + u.items.length + '</b></div>' +
-          '<div><em>Highest</em><b style="color:var(--' + band(plHi) + ')">' +
+          '<div><em>Highest</em><b style="color:' + bandInk(plHi) + '">' +
             pct(plHi) + '</b></div>' +
-          '<div><em>Lowest</em><b style="color:var(--' + band(plLo) + ')">' +
+          '<div><em>Lowest</em><b style="color:' + bandInk(plLo) + '">' +
             pct(plLo) + '</b></div></div></div>' +
       '<div class="card tight"><div class="score-h"><h4>Execution performance</h4>' +
         '<span class="pill ' + band(r) + '">' + bandWord(r) + '</span></div>' +
-        '<div class="headline"><span class="big" style="color:var(--' + band(r) + ')">' + pctBig(r) + '</span>' +
+        '<div class="headline"><span class="big" style="color:' + bandInk(r) + '">' + pctBig(r) + '</span>' +
           (r == null ? '' : '<span class="ofplan">of plan</span>') +
           '<button class="drill" data-modal="' + exId + '">See the breakdown &rarr;</button></div>' +
         '<div class="minirow"><div><em>Delivered</em><b>' + pct(unitExec(u)) + '</b></div>' +
@@ -3135,7 +3146,7 @@ function capScoreCards(c){
     cards.push('<div class="card tight primary-card">' +
       '<div class="score-h"><h4>Key objectives <span class="rank">primary</span></h4>' +
         '<span class="pill ' + band(ko) + '">' + bandWord(ko) + '</span></div>' +
-      '<div class="headline"><span class="big" style="color:var(--' + band(ko) + ')">' + pctBig(ko) + '</span></div>' +
+      '<div class="headline"><span class="big" style="color:' + bandInk(ko) + '">' + pctBig(ko) + '</span></div>' +
       '<div class="minirow"><div><em>Objectives</em><b>' + c.keyObjectives.length + '</b></div>' +
         '<div><em>Weighted</em><b>' + c.keyObjectives.map(function(m){ return m.weight == null ? "\u2014" : m.weight; }).join(" / ") + '</b></div>' +
         '<div><em>Reported</em><b>' + c.keyObjectives.filter(function(m){ return m.actual != null && m.actual !== ""; }).length +
@@ -3144,7 +3155,7 @@ function capScoreCards(c){
   cards.push('<div class="card tight' + (ko == null ? " primary-card" : "") + '">' +
     '<div class="score-h"><h4>Project performance' + (ko == null ? ' <span class="rank">primary</span>' : '') + '</h4>' +
       '<span class="pill ' + band(perf) + '">' + bandWord(perf) + '</span></div>' +
-    '<div class="headline"><span class="big" style="color:var(--' + band(perf) + ')">' + pctBig(perf) + '</span></div>' +
+    '<div class="headline"><span class="big" style="color:' + bandInk(perf) + '">' + pctBig(perf) + '</span></div>' +
     '<div class="minirow"><div><em>Deliverables</em><b>' + pct(capDeliverySide(c)) + '</b></div>' +
       '<div><em>Outcomes</em><b>' + pct(capOutcomeSide(c)) + '</b></div>' +
       '<div><em>Projects</em><b>' + c.projects.length + '</b></div></div></div>');
@@ -3158,7 +3169,7 @@ function capScoreCards(c){
   cards.push('<div class="card tight">' +
     '<div class="score-h"><h4>Execution</h4>' +
       '<span class="pill ' + band(ce.pct) + '">' + bandWord(ce.pct) + '</span></div>' +
-    '<div class="headline"><span class="big" style="color:var(--' + band(ce.pct) + ')">' + pctBig(ce.pct) + '</span>' +
+    '<div class="headline"><span class="big" style="color:' + bandInk(ce.pct) + '">' + pctBig(ce.pct) + '</span>' +
       '<span class="ofplan">' + ce.done + ' of ' + ce.total + ' milestones' +
         (ce.pending ? ' &middot; <span class="missing">' + ce.pending +
           ' not counted yet</span>' : '') + '</span></div>' +
@@ -3179,7 +3190,7 @@ function capKOTable(c){
           '<td class="cc">' + dirCell(m.dir) + '</td>' +
           '<td class="num">' + (m.target ? esc(m.target) : '<span class="missing">Missing</span>') + '</td>' +
           '<td class="num">' + (m.actual == null || m.actual === "" ? "&mdash;" : esc(m.actual)) + '</td>' +
-          '<td class="num final" style="color:var(--' + band(m.progress) + ')">' + pct(m.progress) + '</td></tr>';
+          '<td class="num final" style="color:' + bandInk(m.progress) + '">' + pct(m.progress) + '</td></tr>';
       }).join(""));
 }
 
@@ -3205,7 +3216,7 @@ function projPerformanceBody(p, fk){
       '<td class="num">' + dxTarget(row) + '</td>' +
       '<td class="cc">' + got + '</td>' +
       '<td class="num final"' + (reads == null ? '' :
-        ' style="color:var(--' + band(reads) + ')"') + '>' +
+        ' style="color:' + bandInk(reads) + '"') + '>' +
         (statusPending(o) ? needsPct()
           : has ? pct(reads) : (notDue ? notDueCell() : "&mdash;")) + '</td></tr>';
   }).join("");
@@ -3284,7 +3295,7 @@ function renderFnPerformance(fnKey){
     var rail = railFor(c.projects, sel,
       function(p){ var v = projPerf(p);
         return v == null ? '&mdash;'
-          : '<b style="color:var(--' + band(v) + ')">' + v + '%</b>'; },
+          : '<b style="color:' + bandInk(v) + '">' + v + '%</b>'; },
       function(p){ var m = projMilestones(p);
         return 'execution ' + m.done + ' of ' + m.total +
           (p.owner ? ' &middot; ' + esc(p.owner) : ''); },
@@ -4177,7 +4188,7 @@ function unitPerfRail(u){
       esc(u.ukey) + '|' + esc(it.code) + '" data-oi="' + i + '">' +
       (on ? handle("Reorder " + it.name) : '') +
       railName(pillarCode(u, i), it.name) +
-      '<span class="rnum" style="color:var(--' + band(perf) + ');font-weight:700">' + pct(perf) + '</span>' +
+      '<span class="rnum" style="color:' + bandInk(perf) + ';font-weight:700">' + pct(perf) + '</span>' +
       railSub((SHOW_KIND ? esc(it.kind) + ' &middot; ' : '') +
         'execution ' + pct(r) + (it.owner ? ' &middot; ' + esc(it.owner) : '')) +
       '</button>';

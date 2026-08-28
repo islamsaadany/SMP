@@ -42,25 +42,22 @@ JS = _m.group(1)
 bad = 0
 failures = []
 
-# ── WHAT THIS FIRST RUN FOUND, RECORDED RATHER THAN QUIETLY FIXED ─────────
-# Three classes fail while hovered or focused, all in LIGHT mode, and all
-# three are palette decisions — which are the client's, not a check's (rule
-# 1c). They are named here so the suite stays green on what is already known
-# and goes RED the moment a FOURTH appears or one of these gets worse: the
-# §16.15 pattern, which recorded 31 failures rather than pretending they were
-# not there.
+# ── THE BASELINE IS EMPTY, AND THAT IS THE POINT (§144) ───────────────────
+# The first run of this check found three failures, all in light mode, and all
+# three were the SAME fault wearing three faces: a scoring colour used as TYPE
+# rather than as a mark — §38.4's rule, which is why every scoring colour has
+# a `-tx` twin. They were recorded here as a baseline for exactly one
+# conversation, Islam approved the repair, and §144 fixed them:
 #
-#   .dlcar  4.34  the dropdown caret, hovered — §95's `.editbtn:hover`
-#                 family, found by accident then and by measurement now
-#   b       4.45  §38.5 for the seventh time: --gold-deep on --surface-2,
-#                 which clears on white and fails on the quiet ground
-#   .rnum   3.26  the rail's figure in --ink-3 on the hover ground — the
-#                 worst of the three, and it is a NUMBER on a page about
-#                 numbers
+#   .rnum   3.26 → 4.93   the rail's figure (via bandInk(), 30 call sites)
+#   <b>     4.45 → 6.45   the focus strip's count (--good → --good-tx)
+#   .dlcar  4.34 → 5.36   the hovered button's label and its caret
 #
-# Removing a line from this list is how the fix is asserted: fix the colour,
-# delete the entry, and the check holds it fixed for ever.
-BASELINE = {("light", "dlcar"), ("light", "b"), ("light", "rnum")}
+# It stays as an empty set rather than being deleted, because the machinery
+# below is what holds the fix: any state that fails from now on is NEW, and
+# the check goes red naming it. Adding an entry here is how a failure gets
+# deliberately accepted; the empty set is the promise that none is.
+BASELINE = set()
 
 
 def ck(w, ok, x=""):
@@ -155,8 +152,6 @@ with sync_playwright() as p:
                 pages.append("unit/performance")
                 break
 
-        for label in pages[-1:]:
-            pass
         # Measure on the two pages just visited, in both interactive states.
         for label in ("unit/performance",):
             for state in ("hover", "focus"):
@@ -184,9 +179,13 @@ with sync_playwright() as p:
     gone = sorted(BASELINE - seen)
     if gone:
         print("  note    fixed since the baseline was written — remove from BASELINE: %s" % (gone,))
-    ck("the recorded failures are still being measured (the check can still see them)",
-       bool(seen & BASELINE) or not BASELINE,
-       "baseline entries no longer reached — has the page or the selector changed? (§51.11)")
+    # Only meaningful while something is deliberately accepted; with an empty
+    # baseline the assertion above ("nothing beyond the baseline") is the whole
+    # promise, and this one would assert nothing at all (§94.5).
+    if BASELINE:
+        ck("the recorded failures are still being measured (the check can still see them)",
+           bool(seen & BASELINE),
+           "baseline entries no longer reached — has the page or the selector changed? (§51.11)")
     ck("no page errors while driving", not errs, errs[:2])
     b.close()
 

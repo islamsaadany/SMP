@@ -18266,3 +18266,48 @@ asked for `.rep-bar`, which had moved to the tab row — §51.11's fault caught
 doing its job for once, going red rather than quietly passing. It asks for the
 controls and for the box being in the pinned row now, which is what the move
 was for.
+
+## 144 · A band's colour as type, not as a mark (v3.53)
+
+§143 measured hover and focus for the first time and found three failures, all
+in light mode. Islam approved the repair, and the three turned out to be **one
+fault wearing three faces**: a scoring colour used as TYPE. §38.4 wrote the
+rule — *"a colour that works as a FILL usually fails as TYPE"* — and gave
+every scoring colour a `-tx` twin for exactly this. **Thirty-one places then
+went on painting text with the fill.**
+
+**`bandInk()` IS THE ONE ANSWER**, beside `band()` where anybody reaching for
+one will see the other: it returns `var(--<key>-tx, var(--<key>))`, and **the
+fallback is load-bearing** — the bands are the tenant's (Setup › Scoring
+bands), so a key with no twin is possible and then paints exactly what it
+paints today rather than nothing. Applied at 30 call sites; the one remaining
+`var(--` + band + `)` is a gauge's FILL and correctly left alone.
+
+**THE OTHER TWO WERE THE SAME MOVE BY HAND**: `.fstrip-sum b` took `--good` as
+text on `--surface-2` (4.45 → 6.45 with the twin), and `.editbtn:hover` put
+`--gold-deep` on the `--attn-bg` wash (4.34 → 5.36 with that wash's own text
+twin). **The ink moves with the ground**, which is the general form of all
+three.
+
+### 144.1 A blanket colour rule is a class name in disguise
+
+The caret fix shipped first as `summary:hover .dlcar { color:var(--ink-2) }`
+and **made it worse — 4.34 → 1.43** — because there are three carets on three
+grounds: one on white, one on the `--attn-bg` wash, and **one on the navy
+chrome**, where a dark ink is nearly invisible. §65.9's rule ("a class name is
+one global namespace") in colour form: the selector was right about the mark
+and wrong about the room it was in. Reverted, and fixed at the control that
+actually failed — where the label and the caret now move together, because
+the caret was only ever inheriting the button's problem.
+
+**MEASURED, NOT REASONED**: the first arithmetic said 4.81 and passed, because
+it used a wash from the wrong palette block — the shipped one is `#F7EFD6`,
+not `#FFFBEB`. Reading the tokens off the running page is what produced 4.34
+and then 5.36.
+
+**AND THE BASELINE IS EMPTY NOW.** §143 recorded the three so the suite could
+stay green on what was known; the entries are gone and `BASELINE = set()`
+stays as the promise that nothing is deliberately accepted. The check named
+the fixes itself, run by run — *"fixed since the baseline was written — remove
+from BASELINE"* — which is what makes deleting an entry the assertion that
+holds a repair.

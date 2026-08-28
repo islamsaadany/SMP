@@ -67,6 +67,21 @@ Nothing proceeds past this line without an answer.
 
 ## Built and verified
 
+### v3.53 — the three contrast repairs (§144)
+
+- Islam approved §143's three findings for repair. All three were **one fault**:
+  a scoring colour used as TYPE rather than as a mark — the rail's figure
+  (3.26 → 4.93), the focus strip's count (4.45 → 6.45), the hovered button and
+  its caret (4.34 → 5.36).
+- `bandInk()` beside `band()`, applied at 30 call sites, with a fallback for a
+  tenant band that has no text twin. Two more fixed by hand, same move.
+- **§144.1**: the caret's first fix made it worse (4.34 → 1.43) — a blanket
+  rule hit a caret sitting on the navy chrome. Reverted; fixed at the control
+  that failed.
+- `state-contrast.py`'s baseline is now **empty** — anything failing from here
+  is new. Full sweep: 33 viewers, no errors. **Not merged — awaiting Islam.**
+
+
 ### v3.52 — Wave 2 of the UI/UX audit (§139–§143)
 
 - **§141 the tables Islam was stuck on**: a plan wider than its pane was cut

@@ -483,7 +483,15 @@
   .editbtn { font:inherit; font-size:12px; letter-spacing:.08em; text-transform:uppercase;
              font-weight:700; color:var(--gold-deep); background:none;
              border:1px solid var(--gold); border-radius:99px; padding:6px 15px; cursor:pointer; }
-  .editbtn:hover { background:var(--attn-bg); }
+  /* ── THE INK MOVES WITH THE GROUND (§144) ────────────────────────────
+     Measured at 4.34 hovered (§16.17, recorded in §95 and found again by
+     §143's state sweep): the wash arrives on hover and the ink stays where it
+     was, so the label is at its least readable exactly when a hand is on it.
+     `--gold-deep` is right on white (4.99) and one step too light on
+     `--attn-bg`; the wash's OWN text twin is 5.36 — the same pairing this
+     version applies everywhere else a band colour was used as type, rather
+     than a colour invented for one control. */
+  .editbtn:hover { background:var(--attn-bg); color:var(--attn-tx); }
   /* THE ONE SOLID BUTTON (§94). Its ink comes from the same pair as its fill,
      so neither theme can end up with white on white — see the note beside the
      tokens in _shared.css. The hover moves the FILL rather than adding one,

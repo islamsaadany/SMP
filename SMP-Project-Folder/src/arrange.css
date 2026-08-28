@@ -769,7 +769,12 @@
   details.fstrip[open] > summary .fstrip-head::after,
   details.fstrip[open] > summary::after{transform:rotate(90deg)}
   .fstrip-sum{font-family:var(--mono);font-size:13px;color:var(--ink-2)}
-  .fstrip-sum b{color:var(--good);font-size:15px}
+  /* The count is TYPE, so it takes the good family's text twin rather than
+     its fill (§38.4, §144): on `--surface-2` the fill measures 4.45 and the
+     twin 6.45. The strip's own ground is what makes the difference — the same
+     colour clears comfortably on white, which is why this survived until the
+     state sweep measured it (§143). */
+  .fstrip-sum b{color:var(--good-tx);font-size:15px}
   .fstrip-meta{margin-left:auto}
   .fstrip .fstrip-body{padding:12px 18px 10px}
   .fstrip .fmean{margin:0;font-size:12px}

@@ -149,7 +149,7 @@ with sync_playwright() as p:
     # one button, and it is the one that opens them.
     print("── header")
     ck("no alarm chips are left in the header",
-       pg.eval_on_selector_all('.phead2 .chip', "e=>e.map(x=>x.textContent)")
+       pg.eval_on_selector_all('.setuphead .chip', "e=>e.map(x=>x.textContent)")
          .count("more than one row") == 0)
     ck("the count is on the button that opens them",
        pg.evaluate("!!document.querySelector('[data-attn] .attnn')"))

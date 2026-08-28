@@ -173,12 +173,24 @@ async function assistantAnswer(client, me, question) {
     const org = (await client.query("SELECT extra FROM org WHERE id = 1")).rows[0] || {};
     const labels = ((org.extra || {}).labels) || {};
     const out = await assistant.ask({
-      kb: kb, question: question, history: hist,
+      /* The tenant's rewritten and added answers, laid over the shipped
+         corpus by the same rule the page renders with (§140). */
+      kb: assistant.withTenant(kb, (org.extra || {}).kb), question: question, history: hist,
       who: roleWord(me), labels: labels
     });
-    if (!out || !out.ok) return null;
+    /* VISIBLE TO THE OPERATOR, INVISIBLE TO THE PERSON (§133, §123's rule).
+       The person's screen stays silent by design — §112.2 — but a failure
+       nobody can see anywhere is how "it is not working" went undiagnosable
+       twice. One line to the function log, which Vercel keeps and the chat
+       does not: stores nothing, shows nothing, answers "why" when somebody
+       finally looks. */
+    if (!out || !out.ok) {
+      console.error("assistant did not answer:", (out && out.why) || "no result");
+      return null;
+    }
     return out;
   } catch (e) {
+    console.error("assistant did not answer:", (e && e.message) || e);
     return null;
   }
 }
@@ -469,22 +481,32 @@ module.exports = async function handler(req, res) {
                     "this against the key in AI Studio: a deployment only has the " +
                     "variables that existed when it was BUILT, so a key changed " +
                     "since then needs a redeploy."
-                  : "AN AI STUDIO KEY IS " + assistant.KEY_LEN + " CHARACTERS " +
-                    "STARTING " + assistant.KEY_HEAD + ", so this is a different " +
-                    "kind of credential — an OAuth token, a service account or a " +
-                    "Vertex key will be refused however the project is set up. " +
-                    "Make one at aistudio.google.com/apikey."))
+                  /* NOT "wrong" — UNRECOGNISED (§132.2). This branch once
+                     declared any non-AIza value a different kind of credential,
+                     and the first real key it met was Google's newer AQ. form,
+                     which the provider then accepted. A heuristic never
+                     overrules the provider, so the next step still runs and
+                     the word here claims only what was measured. */
+                  : "An AI Studio key is " + assistant.KEY_LEN + " characters " +
+                    "starting " + assistant.KEY_HEAD + ", or Google's newer form " +
+                    "starting " + assistant.KEY_HEAD2 + " — this matches neither, " +
+                    "so compare it against aistudio.google.com/apikey. The next " +
+                    "step is still what decides: the provider may accept a shape " +
+                    "this page does not know."))
              : "No " + assistant.KEY_NAME + " here. Note that Vercel only " +
                "gives a deployment the variables that existed when it was " +
                "built — if it was added since, redeploy.",
-           !shape ? null : shape.looksRight ? "present" : "wrong shape");
+           !shape ? null : shape.looksRight ? "present" : "unrecognised");
 
-      /* THE CALL ITSELF, only once there is something to call with. */
+      /* THE CALL ITSELF, only once there is something to call with — against
+         the corpus AS THIS TENANT HAS IT (§140), or the diagnostic would test
+         a corpus nobody is answered from. */
       if (kb && assistant.configured()) {
+        const orgT = (await client.query("SELECT extra FROM org WHERE id = 1")).rows[0] || {};
         const q = "How is my unit's headline number worked out?";
         const out = await assistant.ask({
-          kb: kb, question: q, history: [],
-          who: "a member of the Strategy Office", labels: {}
+          kb: assistant.withTenant(kb, (orgT.extra || {}).kb), question: q, history: [],
+          who: "a member of the Strategy Office", labels: ((orgT.extra || {}).labels) || {}
         });
         if (out && out.badKey) {
           /* REPORTED AGAINST THE KEY, because that is what is wrong and that

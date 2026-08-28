@@ -63,13 +63,18 @@
      26px control, so the padding was most of the row. Seven roles × 7px saved
      twice over is what lets the table fit without scrolling now the header
      notes have gone to hover. */
-  .acgrid th, .acgrid td { padding-top:5px; padding-bottom:5px; }
+  /* §145's approved restyle: roomier rows over hairline separators. */
+  .acgrid th, .acgrid td { padding-top:7px; padding-bottom:7px; }
+  .acgrid tbody td { border-bottom:1px solid var(--line-soft); }
   .acgrid thead th { padding-top:9px; padding-bottom:9px; }
   /* Below the width where seven columns of controls fit, the table scrolls
      inside its own box rather than pushing the page sideways — a horizontal
      page scroll breaks every position:sticky above it (§27.2). */
   .acgrid { overflow-x:auto; }
-  .acgrid table { min-width:940px; }
+  /* 1010, not 940 (§145): the two Strategy cells hold THREE toggles now, and
+     at 940 a 9.4% column clipped the third with nothing to read it by — the
+     grid scrolls inside its own box (§54.6), so the floor is the honest fix. */
+  .acgrid table { min-width:1010px; }
   .acgrid tr.grouprow td { background:var(--panel); color:var(--panel-ink);
                            font-size:10.5px; letter-spacing:.13em; text-transform:uppercase;
                            font-weight:700; padding:7px 13px; }
@@ -77,6 +82,9 @@
         font-weight:700; padding:3px 9px; border-radius:99px; font-style:normal; }
   .st-none { color:var(--none); border:1px dashed var(--none); }
   .st-view { color:var(--stone); background:var(--surface-2); border:1px solid var(--line); }
+  /* §145: the fill-the-gaps state wears the amber the pending marks wear —
+     the grant and its consequence read as one family. */
+  .st-fill { color:var(--attn-tx); background:var(--attn-bg); border:1px solid var(--attn); }
   /* The ACCENT tint, not the warning tint. "May edit" is not a warning, and
      gold-deep on the amber ground was 4.34:1 as well as saying the wrong
      thing. */
@@ -90,19 +98,25 @@
      used to be text — one text glyph and one colour emoji — so the box was
      sized in ems and the emoji hung out of the bottom of it. inline-flex
      centres whatever is inside, and the SVGs are sized here (§ICON_EYE). */
-  .stbtn { width:26px; height:24px; border:1px solid var(--line); background:var(--surface);
+  .stbtn { width:24px; height:24px; border:1px solid var(--line); background:var(--surface);
            color:var(--ink-3); cursor:pointer; font-size:11px; padding:0; border-radius:2px;
            font-family:var(--sans); line-height:1;
            display:inline-flex; align-items:center; justify-content:center; }
   .stbtn svg { width:14px; height:14px; display:block; }
   .st svg { width:12px; height:12px; display:inline-block; vertical-align:-2px; }
-  .stbtn:first-child { border-radius:2px 0 0 2px; }
-  .stbtn:last-child { border-radius:0 2px 2px 0; }
+  /* §145's approved restyle (Islam, from the gap-fill mockup: "I really like
+     that design for the access table"): each toggle its own rounded chip
+     with a small gap — not a fused strip — and a LIT toggle is a tint with
+     a coloured border rather than a solid fill, §41's budget on a page that
+     draws up to 27 of them. The icon carries the accent: gold-deep on
+     over-bg is the .st-edit chip's own measured pair. */
+  .stbtn { border-radius:6px; margin:0 1px; }
   .stbtn:hover { background:var(--surface-2); }
   .stbtn:focus-visible { outline:2px solid var(--gold); outline-offset:1px; }
   .stbtn.on.st-none { background:var(--none); border-color:var(--none); color:var(--surface); }
-  .stbtn.on.st-view { background:var(--stone); border-color:var(--stone); color:var(--on-fill); }
-  .stbtn.on.st-edit { background:var(--gold-deep); border-color:var(--gold-deep); color:var(--on-fill); }
+  .stbtn.on.st-view { background:var(--over-bg); border-color:var(--gold-deep); color:var(--gold-deep); }
+  .stbtn.on.st-edit { background:var(--over-bg); border-color:var(--gold-deep); color:var(--gold-deep); }
+  .stbtn.on.st-fill { background:var(--attn-bg); border-color:var(--attn); color:var(--attn-tx); }
 
   .chart-legend i.st { margin-right:2px; }
 
@@ -495,7 +509,28 @@
                   few rows is not navigation, and a window that short is
                   somebody's split view rather than their screen. */
                min-height:260px; }
-  .setuprail .rhead { flex:none; }
+  /* ── AND THEY PIN INSIDE THE RAIL AS WELL (§135.9) ────────────────
+     Islam, twice, pointing at the navy SETUP bar and the search box: *"this is
+     the part that needs to be sticky in the rail."*
+
+     WHAT WAS ALREADY TRUE, MEASURED BEFORE CHANGING ANYTHING: `.setuprail` is
+     `position:sticky` and `.raillist` is the only thing inside it that scrolls,
+     so the head and the search cannot move — asked at 1920×1080, 1600×900,
+     1440×900, 1440×820, 1366×768, 1280×720, 1280×600, 1100×700, 1024×760,
+     1000×650 and 880×800, scrolled to 300, 800, 900 and 1500px AND with the
+     list scrolled internally, they report 96px and 136px in every single one.
+
+     SO THIS IS BELT AND BRACES, AND IT IS CHEAP. It is a no-op wherever the
+     cap applies, and it is the difference between holding and not in the two
+     states the cap does not reach: a browser that does not understand `100dvh`
+     drops the whole `max-height` declaration, and below 900px the rail stops
+     being a column at all. In both the box grows past the window and only this
+     keeps the head and the search on screen.
+
+     `top:0`, not the chrome offset: these pin against the RAIL, which is
+     already pinned against the page — one number each, in its own frame
+     (§29.4). The ground is painted or the rows scroll through them (§53.7). */
+  .setuprail .rhead { flex:none; position:sticky; top:0; z-index:3; }
 
   /* ══ FINDING A SETTING (§108.13) ═══════════════════════════════════
      IN THE HEAD, ABOVE THE SCROLLING LIST, and `flex:none` for the same reason
@@ -503,7 +538,13 @@
      stay reachable while the list scrolls has to sit outside it. A search box
      that scrolls away from its own results is §90's control-below-the-fold by
      another road. */
-  .setuprail .railfind { flex:none; position:relative; padding:8px 10px 9px;
+  /* `top` is the head's own height, so the two stack rather than overlap. It
+     is measured into a variable rather than guessed — 40px, read off the
+     rendered head at four window sizes — because a wrong number here would put
+     the search under the bar in exactly the state this exists for. */
+  .setuprail { --rhead-h:40px; }
+  .setuprail .railfind { flex:none; position:sticky; top:var(--rhead-h); z-index:3;
+                         padding:8px 10px 9px; background:var(--surface);
                          border-bottom:1px solid var(--line); }
   .setuprail .railq { width:100%; box-sizing:border-box; font:400 12.5px/1.3 var(--sans);
                       color:var(--ink); background:var(--ground);
@@ -703,6 +744,122 @@
      name does not read in two weights. */
   .setupttl { margin:0; font:700 24px/1.2 var(--serif); color:var(--ink);
               letter-spacing:-.01em; }
+
+  /* ══ THE PAGE'S CONTROLS SHARE THE PINNED LINE (§135) ═════════════
+     Islam, of six Setup pages: *"bring all the buttons and search bar to the
+     sticky header line."*
+
+     `nowrap`, and the title is what gives way. The controls are a fixed set of
+     real buttons — a search box, a dropdown, a pen — and there is no honest
+     way to make them narrower; a long page name is a string that can ellipsise
+     without anybody losing a control (§122.4's own fault, which was a header
+     silently becoming two rows while its inner box reported one).
+
+     The search FLEXES and the buttons do not, for the same reason. */
+  .setuphead.withacts { gap:12px; flex-wrap:nowrap; padding-bottom:10px; }
+  .setuphead.withacts .setupttl { flex:0 1 auto; margin-right:auto; min-width:0;
+                                  overflow:hidden; text-overflow:ellipsis;
+                                  white-space:nowrap; }
+  .setuphead .headtools { flex:0 1 280px; min-width:110px; display:flex; }
+  .setuphead .headtools .tk-bar { display:flex; margin:0; padding:0; border:0; width:100%; }
+  .setuphead .headtools .tk-bar input { width:100%; }
+  .setuphead .hright { margin:0; display:flex; align-items:center; gap:8px; flex:none; }
+
+  /* ══ A SEGMENTED SWITCH, IN THE PANE'S OWN COLOURS (§135.5) ════════
+     The navigation's Units | Functions control is the shape; its CSS is not,
+     because `.units .navswitch` paints white-on-navy and this sits on the page
+     (§65.9 — a class name is one namespace, and a control wearing another
+     component's clothes is how the access matrix's eye ended up 11px low). */
+  .segsw { display:inline-flex; align-items:center; background:var(--surface-2);
+           border:1px solid var(--line); border-radius:7px; overflow:hidden; }
+  .segsw .seg { background:none; border:0; cursor:pointer; padding:6px 13px;
+                font:700 12.5px/1 var(--sans); color:var(--ink-3);
+                transition:background .12s, color .12s; }
+  .segsw .seg + .seg { box-shadow:inset 1px 0 0 var(--line); }
+  .segsw .seg.on { background:var(--surface); color:var(--ink); }
+  .segsw .seg:not(.on):hover { color:var(--ink-2); }
+  .segsw .seg:focus-visible { outline:2px solid var(--gold); outline-offset:-2px; }
+
+  /* ══ WHERE THE MARKING IS BEING DONE (§135.5) ══════════════════════
+     The destinations read as the page's own tabs — the same underline the
+     Setup pane's section row already uses, so a row of places and a row of
+     sections do not need two visual languages. The count is drawn only where
+     there is one (§108.10's rule: a pill that can say zero says nothing). */
+  .fnav { display:flex; align-items:center; gap:12px; margin:0 0 14px;
+          border-bottom:1px solid var(--line); flex-wrap:wrap; }
+  .fnav .segsw { flex:none; margin-bottom:6px; }
+  .fnav-dests { display:flex; gap:2px; flex-wrap:wrap; }
+  .fnav-dests button { background:none; border:0; border-bottom:2px solid transparent;
+      font:600 13.5px/1 var(--sans); color:var(--ink-3); padding:9px 11px; cursor:pointer;
+      margin-bottom:-1px; display:flex; align-items:center; gap:6px; }
+  .fnav-dests button:hover { color:var(--ink-2); }
+  .fnav-dests button[aria-selected="true"] { color:var(--ink); font-weight:700;
+      border-bottom-color:var(--gold); }
+  .fnav-dests button:focus-visible { outline:2px solid var(--gold); outline-offset:2px; }
+  /* THE GROUND MOVES, NOT THE MARK (§38.5, and this file records it by number
+     because it keeps happening): `--gold-deep` on `--surface-2` measures
+     4.45:1 and wants 4.5. Walked into it anyway, and caught by the sweep at
+     4.45 — on `--surface` the same mark clears with room to spare. */
+  .fnav-n { font:700 10px/1 var(--mono); font-style:normal; color:var(--gold-deep);
+            background:var(--surface); border:1px solid var(--line);
+            border-radius:9px; padding:2px 6px; }
+
+  /* ══ THE MARKING TABLE (§135.5) ════════════════════════════════════
+     A real table at last, headed like the register. The band row is a `<th>`
+     inside the body so the grouping travels with the rows; `position:static`
+     because §121.4 pins every `thead th` on a Setup page and a band is not a
+     heading of the table. */
+  .ftable table { table-layout:fixed; width:100%; }
+  /* ══ THE BAND IS THE PLATFORM'S OWN (§135.8) ═══════════════════════
+     Islam: *"the key objectives title line and the pillar name line grey is
+     too close to the alternating grey — make it darker to be more
+     significant."* He is right, and by a smaller margin than it looks:
+     `--surface-2` is #EFF2F6 and `--zebra` is #F5F7FA, six points apart on one
+     channel. A band that has to be told apart from a stripe cannot be a
+     lighter shade of the stripe.
+
+     SO IT TAKES `tr.dxband` RATHER THAN A THIRD GREY. §99 already settled what
+     a band naming a group of rows INSIDE a table looks like in this product —
+     `--panel` with `--panel-ink` — and inventing a darker neutral here would be
+     a second vocabulary for one idea (§53.5). It is also what this page wore
+     before §135.5 turned it into a table, so nothing about the look is new;
+     what changed is that the rows under it now have column headings.
+
+     THE BORDER IS ON EVERY BAND, INCLUDING THE FIRST, and that is the one
+     difference from §99. There the first band OPENS the table, so a gap above
+     it would be a gap under nothing. Here a real `<thead>` sits above it in the
+     same navy, and without the break the two merge into one block. */
+  /* ══ A BAND IS A DARKER GREY, NOT A NAVY ONE (§135.8, corrected) ═══
+     Islam: *"the key objectives title line and the pillar name line grey is
+     too close to the alternating grey — make it darker to be more
+     significant"*, and then, of the navy I reached for: *"the band should be
+     darker grey not navy."*
+
+     THE FIRST ANSWER WAS RIGHT ABOUT THE PROBLEM AND WRONG ABOUT THE FIX.
+     `--surface-2` is #EFF2F6 and `--zebra` is #F5F7FA — six points apart on one
+     channel, so a band that had to be told apart from a stripe was a lighter
+     shade of the stripe. Reaching for §99's `tr.dxband` kept one vocabulary for
+     "a band inside a table" (§53.5) and cost two things worth more: the band
+     then wore the SAME navy as the table's own `<thead>` directly above it, and
+     the 4px slot between the two pinned headers (§135.10) leaked a navy strip
+     that read as a second header.
+
+     `--line` IS THE STEP THAT EXISTS. It is the palette's own next neutral —
+     #D6DCE5 light, #333A45 dark — so it tracks the theme without a literal
+     (§25), and `--ink-2` on it measures 6.4:1 light and 7.0:1 dark. */
+  .ftable tr.fband th { background:var(--line); color:var(--ink-2); text-align:left;
+      font:700 11px/1.2 var(--sans); letter-spacing:.06em; text-transform:uppercase;
+      padding:7px 10px; }
+  .ftable td.fmeas { color:var(--ink); font-weight:600; }
+  .ftable td.ftar { font-family:var(--mono); font-size:12px; color:var(--ink-2); }
+  .ftable tr.fon td { background:var(--attn-bg); }
+  .ftable .fmark-w { font:600 11px/1 var(--sans); color:var(--ink-3); margin-left:8px;
+      display:inline-block; min-width:46px; text-align:left; }
+  /* AND ON THE MARKED ROW'S OWN GROUND IT IS THE `-tx` TWIN (§38.4): the
+     accent that works as a FILL is 4.34:1 as TYPE over `--attn-bg`, which is
+     the whole reason every scoring colour has a word-coloured sibling. */
+  .ftable tr.fon .fmark-w { color:var(--attn-tx); }
+  .ftable td.fnone { color:var(--ink-3); font-style:italic; }
   /* The page's own controls sit beside the name and stay reachable with it —
      Islam, asked whether the header carries anything besides the title: "ok".
      `.phead2` is the row each page already builds for them; where its heading
@@ -718,6 +875,14 @@
                              min-height:0; justify-content:flex-end; }
   .setuppane .phead2.named .hright { margin-left:0; }
   .setuppane .phead2.named:empty { display:none; }
+
+  /* THE FIRST SECTION FOLLOWS THE HEADER (§135). `.section`'s 26px top margin
+     is the gap BETWEEN sections, and with the controls row gone the first one
+     was spending it on nothing — 42px of air between a pinned header and the
+     table under it. Only the first: the gap between two sections is still the
+     gap between two sections. */
+  .setuppane .setuphead + .section,
+  .setuppane .setuphead + .secrow { margin-top:0; }
 
   /* ── AND THE TABLE'S HEAD GOES WITH IT (§121.4) ───────────────────
      On the register at 33 rows the headings are gone by the time you are
@@ -735,10 +900,41 @@
      table — and applying a page offset there put the register's headings 293px
      down, measured. So they are excluded rather than overridden: two rules
      fighting over one thead is how a head ends up pinned to neither. */
-  .setuppane { --sethead-h: 46px; }
-  .setuppane .cfg:not(.peoplebox):not(.srctable) table thead th {
+  /* ── AND THE OFFSET IS MEASURED, NOT GUESSED (§135.10) ────────────
+     `--sethead-h` was the literal 46px, and §135 changed the header's height by
+     putting the page's controls in it: it is 42px where the controls are small
+     and 49px where a search box sits on the line. So the table's head pinned
+     4px BELOW the page header on some pages and 3px under it on others — and
+     that 4px slot is a hole between two pinned things, which scrolling rows
+     show through. Exactly what Islam saw, made obvious by a band that happened
+     to be navy.
+
+     Published by a ResizeObserver in the shell, the way `--chrome-h` already
+     is. NOT §28.3's loop: this feeds a sticky OFFSET and nothing else, and an
+     offset cannot change the height it was measured from. The literal survives
+     as the fallback for the frame before the observer first fires. */
+  /* AND `.acgrid` IS THE THIRD, FOUND BY ISLAM RATHER THAN BY A CHECK (§135.2).
+     *"in roles and access … check the table as the design is damaged."*
+
+     It is `overflow-x:auto`, which makes the BOX — not the page — what its head
+     pins against, so the page offset below was applied inside it and pushed the
+     head 141px DOWN, onto rows three and four. Measured: all twelve header
+     cells reported one position. That is the exact fault the note above records
+     about the register ("293px down"), on the one table the exclusion missed.
+
+     STATIC RATHER THAN `top:0`, and that is the decision. This matrix is nine
+     rows and scrolls the page by 60px on an ordinary window, so a sticky head
+     buys nothing here — and its head is TWO ROWS deep with cells spanning both,
+     which is a shape no sticky offset handles well in every engine. A head that
+     cannot pin correctly is better not pinned.
+
+     REPAIRING IT REVEALED WHAT IT WAS COVERING: the "Own business unit" and
+     "Own supporting function" group headings, which had been under the second
+     row since §117 split them. */
+  .setuppane .cfg.acgrid table thead th { position:static; }
+  .setuppane .cfg:not(.peoplebox):not(.srctable):not(.acgrid) table thead th {
       position:sticky; z-index:4;
-      top:calc(var(--chrome-h, 118px) + var(--rail-gap, 12px) + var(--sethead-h));
+      top:calc(var(--chrome-h, 118px) + var(--rail-gap, 12px) + var(--sethead-h, 46px));
       background:var(--panel); }
   /* A HAIRLINE BETWEEN HEADINGS (§121.4). They are uppercase, letter-spaced
      and 8px-padded, so at a narrow pane "Shown in the nav" and "Code" merged
@@ -1701,6 +1897,56 @@
   .ctarow { display:grid; grid-template-columns:1fr 1fr; gap:8px 10px;
             border-top:1px dashed var(--line); margin-top:12px; padding-top:11px; }
   .ctarow .why { grid-column:1 / -1; }
+
+  /* ── THE SEND OUTCOME SPEAKS (§143) ─────────────────────────────────
+     It was `.why` — the legend size, in the page's quietest grey — so a
+     successful send read exactly like an empty space, and `result.ok` was
+     computed and never used. A sentence somebody has to read after an act
+     that cannot be undone is not a legend.
+
+     THE TYPE-SAFE TWINS, never `--good` / `--bad` (§38.4, six times now):
+     measured on this bar at 6.82 and 7.55 in light, 10.45 and 8.14 in dark.
+
+     `--fs-note`, NOT `--fs-small`: small is 12px — the size `.why` already
+     was — and note is 13px, the one the product uses for cells and notes. The
+     first build reached for the wrong constant and the check caught it,
+     because it asks for a size worth READING rather than for a token name. */
+  .msgsaid { font-size:var(--fs-note); }
+  .msgsaid.bad  b { color:var(--bad-tx); }
+
+  /* The Overview's one loud control (§144.8), above the lists it leads away
+     from. Its own row, so the heading under it keeps its spacing. */
+  .msgnew { margin:0 0 20px; }
+
+  /* ── THE OUTCOME, ON THE RECORD (§144) ──────────────────────────────
+     A send that the server answered leaves the composer, so what it did is
+     said on the Overview — above the two lists, with the message it describes
+     sitting in the one below. A band rather than a line: it is the answer to
+     the act you just took, and it goes the next time the page is drawn fresh. */
+  .sentsaid { margin:0 0 18px; padding:11px 16px; border-radius:8px;
+              background:var(--good-bg); border:1px solid var(--good);
+              font-size:var(--fs-note); color:var(--good-tx); }
+  .sentsaid.bad { background:var(--bad-bg); border-color:var(--bad);
+                  color:var(--bad-tx); }
+  .sentsaid .quiet { color:var(--ink-2); font-weight:400; }
+
+  /* ── THE GREETING ROW (spec 022) ────────────────────────────────────
+     ONE LINE, and no prose in it — Islam, of the two-line first draft: "it
+     should be one line you dont need 2 lines .. and no explanations needed in
+     the setting itself it's clear." It borrows `.ctarow`'s dashed rule and
+     spacing, because it is the composer's other settings row and the two
+     belong to the message rather than to the page.
+
+     THE BOX IS SIZED FOR THE ONE WORD IT HOLDS. `.fld` is `width:100%`, which
+     in `.ctarow`'s two-column grid made it half the pane — a field that wide
+     reads as one expecting a sentence. `flex:none` as well as a width, or the
+     flex row would shrink it under `.cfg-lab`'s `flex:1` (§110.8's family:
+     a width alone is not enough inside a flex or table layout). */
+  .ctarow.greetrow { grid-template-columns:1fr; }
+  .greetword { width:120px; max-width:120px; flex:none; }
+  /* The one thing the screen cannot say by showing: that the name above is a
+     sample. Sits under the preview, above the row it explains. */
+  .greetsay { display:block; margin:8px 0 0; }
 
   /* THE BAR DOES NOT MOVE. Pinned to the foot of the window rather than
      sitting at the end of the scroll, so the count and the button stay

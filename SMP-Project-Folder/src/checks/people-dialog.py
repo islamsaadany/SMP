@@ -152,7 +152,7 @@ with sync_playwright() as p:
     land(pg)
     ck("no quick filters", pg.eval_on_selector_all("[data-tkfilter]", "e=>e.length") == 0)
     ck("no row count", pg.evaluate("!document.querySelector('[data-tkcount]')"))
-    ck("the search survived", pg.evaluate("!!document.querySelector('.phead2 [data-tksearch]')"))
+    ck("the search survived", pg.evaluate("!!document.querySelector('.setuphead [data-tksearch]')"))
     ck("Add someone is in the header", pg.evaluate("!!document.querySelector('[data-padd-open]')"))
     ck("...and the Add ROW is gone",
        pg.eval_on_selector_all(".peoplecfg tr.newrow", "e=>e.length") == 0)
@@ -163,7 +163,7 @@ with sync_playwright() as p:
     # because this file owns the header's inventory.
     ck("no count line, and no badge",
        pg.evaluate("!document.querySelector('.pcount')") and
-       pg.eval_on_selector_all(".phead2 .chip", "e=>e.length") == 0)
+       pg.eval_on_selector_all(".setuphead .chip", "e=>e.length") == 0)
 
     # ── 2. THE TABLE WRITES NOTHING ──────────────────────────────────
     # Every collision this register has had was a control being clicked inside a

@@ -11,6 +11,12 @@ PAGES = [("people","People register"), ("mainbu","Official BU list"),
          ("fns","Functions"), ("caps","Capabilities"), ("sets","Figure sets")]
 # Their row order IS the setting somebody arranged, so a sort would be
 # indistinguishable from a rearrangement (spec §6.2).
+# THE FIVE THAT CARRIED QUICK FILTERS BEFORE §135.1. Named, because the claim
+# being tested is that dropping the chips hid nothing — and a table that never
+# had one has nothing to prove. Figure sets is the case that caught this: its
+# rows carry no `data-tkrow` at all, so "every row is flagged" was false and
+# meant nothing.
+HAD_CHIPS = {"units", "mainbu", "companies", "fns", "caps"}
 SORTLESS = {"units", "sets"}
 
 # ONE READER, and it reads a cell the way the product does: an input's VALUE,
@@ -50,7 +56,6 @@ with sync_playwright() as p:
           return { wired:true, rows:rows.length,
                    bar: !!document.querySelector('[data-tkbar="'+k+'"]'),
                    search: !!document.querySelector('[data-tksearch="'+k+'"]'),
-                   chips: document.querySelectorAll('[data-tkfilter^="'+k+'|"]').length,
                    sortables: t.querySelectorAll('[data-tksort]').length,
                    flagged: rows.filter(r=>r.dataset.tkrow).length }; }""", key)
         print("──", label, st)
@@ -62,15 +67,18 @@ with sync_playwright() as p:
         else:
             ck("sortable headers", st["sortables"] > 0, st)
 
-        # ── THE REGISTER'S SEARCH LEFT THE BAR (§116) ────────────────
-        # Islam removed its quick filters and its row count, which left the bar
-        # holding one box on a row of its own — so the box moved into the page
-        # header and the bar went with the rest. The STANDARD is unchanged and
-        # is what is asserted: a table of nine rows or more is searchable. Where
-        # the search box lives is the page's business.
-        if st["rows"] >= 9 or st["chips"]:
-            ck("is searchable (%d rows, %d chips)" % (st["rows"], st["chips"]),
-               st["bar"] or st["search"], st)
+        # ── AND EVERY TABLE'S SEARCH LEFT THE BAR (§116, then §135.1) ──
+        # §116 took the register's quick filters and row count away; §135.1 took
+        # the same pair from the other five, and moved every search box onto the
+        # page's pinned header line. The STANDARD is unchanged and is what is
+        # asserted: a table of nine rows or more is searchable. Where the box
+        # lives is the page's business — which is why this asks whether the
+        # search EXISTS and never where it is drawn (§94.8).
+        if st["rows"] >= 9:
+            ck("is searchable (%d rows)" % st["rows"], st["bar"] or st["search"], st)
+        ck("no quick filters left on it (§135.1)",
+           pg.evaluate("""(k)=>document.querySelectorAll('[data-tkfilter^="'+k+'|"]').length""",
+                       key) == 0)
 
         if st["bar"]:
             names = pg.evaluate(READ, key)
@@ -88,14 +96,13 @@ with sync_playwright() as p:
                   i.value=''; i.dispatchEvent(new Event('input',{bubbles:true}));}""", key)
                 pg.wait_for_timeout(200)
 
-        if st["chips"]:
-            pg.evaluate("""(k)=>document.querySelector('[data-tkfilter^="'+k+'|"]').click()""", key)
-            pg.wait_for_timeout(700)
-            shown = pg.evaluate(SHOWN, key)
-            ck("a filter chip narrows it (%d of %d)" % (shown, st["rows"]), shown <= st["rows"], shown)
-            pg.evaluate("""(k)=>{const c=document.querySelector('[data-tkfilter^="'+k+'|"].on');
-              if(c) c.click();}""", key)
-            pg.wait_for_timeout(700)
+        # NOTHING WAS HIDDEN WHEN THE CHIPS WENT, and this is where that is
+        # proved rather than asserted in a comment: the states the chips used to
+        # filter TO are still drawn, so a retired unit is still a row on the
+        # page. `data-tkrow` is what the chips read, and every row still has it.
+        if key in HAD_CHIPS:
+            ck("every row is still drawn, retired ones included",
+               st["flagged"] == st["rows"], st)
 
         if key not in SORTLESS and st["sortables"] and st["rows"] > 1:
             # A TWO-ROW TABLE RETURNS TO ITS START after ascending then

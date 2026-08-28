@@ -87,8 +87,45 @@ with sync_playwright() as p:
         ck("head sits at the top of the rail @%dpx" % h,
            abs(m["headTop"] - m["railTop"]) <= 1, m)
         # Below the floor the rail stops shrinking on purpose, so "scrolls" is
-        # only required where the list is genuinely taller than the box.
-        ck("the LIST is what scrolls @%dpx" % h, m["scrolls"], m["scrolls"])
+        # only required where the list is genuinely taller than the box — and
+        # WHETHER it is depends on how many pages Setup has. §135.4 removed one
+        # (Email became a section of Send an email) and at 1000px the remaining
+        # seventeen fit, so the literal "it scrolls" became a check reporting a
+        # deliberate change as a fault. The CLAIM is that the scroll, when there
+        # is one, belongs to the LIST and not to the rail or the page — which is
+        # what licenses the cap at all (§101.5). That is what is asserted now.
+        # ── AND THE HEAD AND THE SEARCH HOLD WHILE IT DOES (§135.9) ──
+        # Islam asked for this twice, and it was already true — but it had
+        # never been ASSERTED, which is why "already true" was something I
+        # could only say from a throwaway probe. Both scrolls, because they
+        # fail differently: the page moving under a sticky rail, and the rail's
+        # own list moving under a head that sits outside it.
+        before = pg.evaluate("""()=>{const q=s=>{const e=document.querySelector(s);
+            return e?Math.round(e.getBoundingClientRect().top):null};
+          return [q('.setuprail .rhead'), q('.setuprail .railfind')];}""")
+        pg.evaluate("()=>{const l=document.querySelector('.raillist'); if(l) l.scrollTop=400;}")
+        pg.wait_for_timeout(200)
+        after = pg.evaluate("""()=>{const q=s=>{const e=document.querySelector(s);
+            return e?Math.round(e.getBoundingClientRect().top):null};
+          const l=document.querySelector('.raillist');
+          return [q('.setuprail .rhead'), q('.setuprail .railfind'),
+                  l?Math.round(l.scrollTop):0];}""")
+        ck("SETUP and the search hold while the list scrolls @%dpx" % h,
+           before[0] == after[0] and before[1] == after[1], [before, after])
+        # AND THEY STACK RATHER THAN OVERLAP, which is the way this fix breaks
+        # if the head's height ever changes: the search would pin under the bar.
+        boxes = pg.evaluate("""()=>{const r=s=>{const e=document.querySelector(s);
+            const b=e.getBoundingClientRect(); return [Math.round(b.top), Math.round(b.bottom)];};
+          return {head:r('.setuprail .rhead'), find:r('.setuprail .railfind')};}""")
+        ck("...and the search sits under the bar, not on it @%dpx" % h,
+           boxes["find"][0] >= boxes["head"][1] - 1, boxes)
+        pg.evaluate("()=>{const l=document.querySelector('.raillist'); if(l) l.scrollTop=0;}")
+        pg.wait_for_timeout(150)
+        ck("nothing but the list ever scrolls @%dpx" % h,
+           not pg.evaluate("""()=>{const r=document.querySelector('.setuprail');
+              return r.scrollHeight>r.clientHeight+1;}"""), m)
+        if m["scrolls"]:
+            print("      (the list is taller than its box here, and it is the box that scrolls)")
 
     print("\n── 2 · every entry is reachable by scrolling the LIST ──")
     pg.set_viewport_size({"width": 1600, "height": 800})

@@ -48,11 +48,23 @@ const stub = http.createServer(function (req, res) {
       res.writeHead(code, { "Content-Type": "application/json" }); res.end(b);
     };
     if (MODE === "refuse") return reply(429, { error: { message: "quota" } });
+    if (MODE === "badkey400") return reply(400, { error: { message: "API key not valid. Please pass a valid API key." } });
+    if (MODE === "bad400") return reply(400, { error: { message: "Request contains an invalid argument." } });
     if (MODE === "notfound") return reply(404, { error: { message: "model not found" } });
     if (MODE === "garbage") {
       return reply(200, { candidates: [{ content: { parts: [{ text: "not json at all" }] } }] });
     }
     if (MODE === "empty") return reply(200, { candidates: [] });
+    /* THE PROVIDER THAT REFUSES THE THINKING KNOB (§134.5) — with the words
+       Google ACTUALLY uses, taken verbatim off production: the terse generic,
+       not the verbose "Unknown name" refusal the docs show for a misspelled
+       field. The first stub imitated the documentation, the guard keyed on
+       its wording, and the real refusal sailed past it (§100.3: a stub models
+       the provider, and the provider is what production said). */
+    if (MODE === "nothink" && LAST && LAST.generationConfig &&
+        LAST.generationConfig.thinkingConfig) {
+      return reply(400, { error: { message: "Request contains an invalid argument." } });
+    }
     if (MODE === "hang") return;                       /* never answers: the timeout path */
     /* THE MODEL'S WORDS ON A HANDOFF ARE A TRAP, and the stub sets it (§104).
        A provider that says something helpful-sounding while answering false is
@@ -203,9 +215,21 @@ const stub = http.createServer(function (req, res) {
   ck("and no more of it than that is ever handed out",
      shape && Object.keys(shape).sort().join() === "head,len,looksRight" &&
      !/0{5}/.test(JSON.stringify(shape)), shape);
+  /* GOOGLE'S NEWER FORM IS A KEY, NOT A STRANGER (§132.2). The first real
+     AQ.-prefixed key this row ever met was called "a different kind of
+     credential" and then accepted by the provider one step later — the
+     heuristic must recognise every shape Google issues, and stay humble about
+     the rest. */
+  /* BUILT AT RUNTIME, NOT WRITTEN AS A LITERAL: a plausible-looking AQ. string
+     trips GitHub's secret scanner even when it is fiction, and the scanner is
+     right to be paranoid — so the fixture is assembled where no scanner reads. */
+  process.env.GEMINI_API_KEY = ["AQ", "ExampleNotARealKey0000000000000000000000000000000"].join(".");
+  shape = assistant.keyShape();
+  ck("Google's newer AQ.-prefixed form is recognised too",
+     shape && shape.head.slice(0, 3) === "AQ." && shape.looksRight === true, shape);
   process.env.GEMINI_API_KEY = "ya29.a0AfH6SMBexample-oauth-token-not-a-key";
   shape = assistant.keyShape();
-  ck("a credential of any other shape is called out as one",
+  ck("an unrecognised shape is reported, not endorsed",
      shape && shape.looksRight === false, shape);
   process.env.GEMINI_API_KEY = "  AIzaSyC00000000000000000000000000000000\n";
   ck("and the shape is read AFTER the trim, or a clean key reads as malformed",
@@ -214,7 +238,77 @@ const stub = http.createServer(function (req, res) {
   ck("no key, no shape", assistant.keyShape() === null);
   process.env.GEMINI_API_KEY = "test-key-not-a-real-one";
 
-  console.log("\n6 · what actually goes to the provider");
+  console.log("\n6 · the thinking cap, and the provider that refuses it");
+  /* The cap is SENT by default — retrieval over an in-prompt corpus needs no
+     reasoning, and §133's timeout came straight back at 20s the day the model
+     felt like thinking long. */
+  assistant._resetThinkCap && assistant._resetThinkCap();
+  MODE = "answer"; CALLS = 0;
+  let r6 = await assistant.ask({ kb: kb, question: "x", history: [], who: "w", labels: {} });
+  ck("the thinking cap goes out with the request",
+     r6.ok === true && LAST && LAST.generationConfig &&
+     LAST.generationConfig.thinkingConfig &&
+     LAST.generationConfig.thinkingConfig.thinkingBudget === 0, LAST && LAST.generationConfig);
+  /* AND A PROVIDER THAT REFUSES THE KNOB LOSES THE KNOB, NOT THE ANSWER. */
+  assistant._resetThinkCap();
+  MODE = "nothink"; CALLS = 0;
+  r6 = await assistant.ask({ kb: kb, question: "x", history: [], who: "w", labels: {} });
+  ck("a refused cap is dropped and the question asked again, once",
+     r6.ok === true && CALLS === 2 &&
+     !(LAST.generationConfig && LAST.generationConfig.thinkingConfig), { calls: CALLS });
+  CALLS = 0;
+  r6 = await assistant.ask({ kb: kb, question: "x", history: [], who: "w", labels: {} });
+  ck("and the refusal is remembered for the process",
+     r6.ok === true && CALLS === 1, { calls: CALLS });
+  /* NEVER INTO A BAD KEY: a 400 about the credential is not a 400 about the
+     knob, and retrying it would double every bad-key failure. */
+  assistant._resetThinkCap();
+  MODE = "badkey400"; CALLS = 0;
+  r6 = await assistant.ask({ kb: kb, question: "x", history: [], who: "w", labels: {} });
+  ck("a bad key is never retried into", r6.ok === false && r6.badKey === true && CALLS === 1,
+     { calls: CALLS, r: r6 });
+  /* AND A GENERIC 400 WITHOUT THE KNOB IS NOT RETRIED — the retry is about
+     the knob, and once the knob is off a 400 is the question's own problem.
+     The cap is dropped FIRST through a real refusal, then the provider 400s
+     everything: exactly one call, and the error surfaces. (The first version
+     of this assertion reset the cap in the line above measuring it was off —
+     a test bug its own calls-count exposed.) */
+  assistant._resetThinkCap();
+  MODE = "nothink";
+  await assistant.ask({ kb: kb, question: "x", history: [], who: "w", labels: {} });
+  MODE = "bad400"; CALLS = 0;
+  r6 = await assistant.ask({ kb: kb, question: "x", history: [], who: "w", labels: {} });
+  ck("a 400 with no knob in the request is surfaced, not retried",
+     r6.ok === false && CALLS === 1, { calls: CALLS, r: r6.ok });
+  assistant._resetThinkCap();
+  MODE = "answer";
+
+  console.log("\n7 · the tenant's own words over the shipped ones (§140)");
+  {
+    const shipped = { recipes: [
+      { id: "r1", group: "G", q: "old question", a: "old answer", who: "everyone" },
+      { id: "r2", group: "G", q: "kept question", a: "kept answer", who: "everyone" }
+    ], sections: [], pages: [] };
+    const t = { ov: { r1: { q: "new question", a: "new answer" } },
+                add: [ { id: "kbx1", g: "G", q: "own question", a: "own answer" },
+                       { id: "kbx2", g: "G", q: "", a: "" } ] };
+    const m = assistant.withTenant(shipped, t);
+    ck("an override replaces the shipped wording",
+       m.recipes[0].q === "new question" && m.recipes[0].a === "new answer", m.recipes[0]);
+    ck("an untouched entry is untouched", m.recipes[1].a === "kept answer");
+    ck("an added question joins the corpus, and an empty one does not",
+       m.recipes.length === 3 && m.recipes[2].id === "kbx1", m.recipes.length);
+    const text = assistant.corpusText(m, {});
+    ck("the corpus the model reads carries the tenant's words and not the old ones",
+       text.indexOf("new answer") > -1 && text.indexOf("old answer") === -1 &&
+       text.indexOf("own answer") > -1, null);
+    ck("no tenant, no change — the same object back", assistant.withTenant(shipped, null) === shipped);
+    ck("a malformed tenant blob changes nothing",
+       JSON.stringify(assistant.withTenant(shipped, { ov: "junk", add: 7 }).recipes) ===
+       JSON.stringify(shipped.recipes));
+  }
+
+  console.log("\n8 · what actually goes to the provider");
   MODE = "answer";
   await assistant.ask({ kb: kb, question: "how do I report", history: [], who: "a strategy custodian", labels: { pillar: "direction", pillars: "directions" } });
   const sys = (LAST.systemInstruction.parts || []).map(function (p) { return p.text; }).join("\n");

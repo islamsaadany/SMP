@@ -108,6 +108,21 @@ refuses(headKey, function (s) { s.group.comms = { fromName: "Raya Trade" }; },
   "a unit head cannot change the communication settings");
 allows("smo", function (s) { s.group.comms = { fromName: "Raya Trade" }; },
   "the SMO can");
+
+/* The knowledge base's overlay (§140) — the same shape as comms: named as
+   setup so the refusal points at the page with the pen, refused to anybody
+   the matrix does not give Setup to, and BOTH ENDS asked (§94.2). */
+refuses(headKey, function (s) { s.group.kb = { ov: { "report-a-figure": { q: "q", a: "mine" } } }; },
+  "a unit head cannot rewrite the knowledge base's answers");
+allows("smo", function (s) { s.group.kb = { ov: { "report-a-figure": { q: "q", a: "mine" } } }; },
+  "the SMO can rewrite an answer");
+(function () {
+  const inc = clone(SEED); inc.group.kb = { add: [{ id: "kbx1", g: "Reporting", q: "q", a: "a" }] };
+  const ch = A.collect(SEED, inc, R.worldOf(SEED))
+              .filter(function (c) { return c.what === "the knowledge base's answers"; })[0];
+  check("a knowledge base change is classified as setup, not as unknown",
+        !!ch && ch.kind === "setup", ch && ch.kind);
+})();
 (function () {
   /* A.collect, NOT A.classify — the lesson §54.5 left further down this file,
      applied forward rather than re-learned. */
@@ -1178,7 +1193,211 @@ console.log("\n15 · the strategy | reporting split (§117)");
         R.mayDownloadPlan(wClosed, personOf(closed, custKey), UNIT) === false);
 })();
 
-/* ── 16 · A CUSTODIAN PER PROJECT (§147) ──────────────────────────
+console.log("\n16 · fill the gaps (§145, spec 023)");
+/* The third grant state: a fill-holder writes only where the plan holds
+   nothing, the write carries a pending mark, and the office confirms.
+
+   PROVED ABLE TO FAIL (§94.5): every ALLOWED case below refuses on the
+   pre-§145 build — the stored "fill" grant ranks as nothing there, so the
+   classifier lands the change on unitPlan and the verdict says office-only.
+   The refused cases are each one rule-flip from passing: drop the pend mark
+   requirement and case 3 goes green, drop the blank(stored) requirement and
+   case 4 does. */
+(function () {
+  function withAccess(role, patch) {
+    const s = clone(SEED);
+    s.access = Object.assign({}, s.access,
+      { [role]: Object.assign({}, (s.access || {})[role], patch) });
+    return s;
+  }
+  function fromStored(stored, who, mutate) {
+    const inc = clone(stored); mutate(inc);
+    return A.authorize(stored, inc, personOf(stored, who));
+  }
+  const MARK = { by: "somebody", at: "2026-08-27" };
+
+  /* A stored world whose plan has real gaps, under the fill grant. */
+  function gappy() {
+    const s = withAccess("custodian", { a_unit_own_strat: "fill" });
+    const u = s.units[UNIT];
+    u.aspiration = "";
+    u.items[0].measures[0].compile = "";
+    u.items[0].tactics[0].owner = "";
+    u.items[0].tactics[0].collaborators = [];
+    u.items[0].tactics[0].q1 = 0; u.items[0].tactics[0].q2 = 0;
+    u.items[0].tactics[0].q3 = 0; u.items[0].tactics[0].q4 = 0;
+    return s;
+  }
+
+  /* 1 · a fill: blank → value + mark, on the fill grant. */
+  let s = gappy();
+  let v = fromStored(s, custKey, function (i) {
+    const m = i.units[UNIT].items[0].measures[0];
+    m.compile = "Latest"; m.pend = { compile: MARK };
+  });
+  check("FILL: a blank compile filled with the mark is the custodian's", v.ok, v.refusals.join(" / "));
+
+  /* 2 · the same save with the grant at its shipped default refuses. */
+  s = gappy(); s.access = clone(SEED.access || {});
+  v = fromStored(s, custKey, function (i) {
+    const m = i.units[UNIT].items[0].measures[0];
+    m.compile = "Latest"; m.pend = { compile: MARK };
+  });
+  check("FILL: the same save without the fill grant refuses", !v.ok, "was ALLOWED");
+
+  /* 3 · a fill WITHOUT the mark is an ordinary plan write — office-only. */
+  s = gappy();
+  v = fromStored(s, custKey, function (i) {
+    i.units[UNIT].items[0].measures[0].compile = "Latest";
+  });
+  check("FILL: writing the value without the pending mark refuses", !v.ok, "was ALLOWED");
+
+  /* 4 · a settled value is never the fill grant's, mark or no mark. */
+  s = gappy();
+  v = fromStored(s, custKey, function (i) {
+    const m = i.units[UNIT].items[0].measures[0];
+    m.target = "999"; m.pend = { target: MARK };
+  });
+  check("FILL: overwriting a settled target refuses, even wearing the mark", !v.ok, "was ALLOWED");
+
+  /* 5 · amending while pending stays the fill grant's; 6 · so does the undo. */
+  function pending() {
+    const s2 = gappy();
+    const m = s2.units[UNIT].items[0].measures[0];
+    m.compile = "Latest"; m.pend = { compile: MARK };
+    return s2;
+  }
+  s = pending();
+  v = fromStored(s, custKey, function (i) {
+    i.units[UNIT].items[0].measures[0].compile = "Average";
+  });
+  check("AMEND: a pending value corrected by the filler is allowed", v.ok, v.refusals.join(" / "));
+  s = pending();
+  v = fromStored(s, custKey, function (i) {
+    const m = i.units[UNIT].items[0].measures[0];
+    m.compile = ""; delete m.pend;
+  });
+  check("UNFILL: the filler's own undo is allowed", v.ok, v.refusals.join(" / "));
+
+  /* 7 · confirming is the office's alone; 8 · and the office may. */
+  s = pending();
+  v = fromStored(s, custKey, function (i) {
+    delete i.units[UNIT].items[0].measures[0].pend;
+  });
+  check("CONFIRM: the fill-holder may not lift their own mark", !v.ok, "was ALLOWED");
+  s = pending();
+  v = fromStored(s, "smo", function (i) {
+    delete i.units[UNIT].items[0].measures[0].pend;
+  });
+  check("CONFIRM: the office lifts the mark", v.ok, v.refusals.join(" / "));
+  s = pending();
+  v = fromStored(s, "smo", function (i) {
+    const m = i.units[UNIT].items[0].measures[0];
+    m.compile = "Sum"; delete m.pend;
+  });
+  check("CONFIRM: the office correcting the value confirms in the same act", v.ok, v.refusals.join(" / "));
+
+  /* 9 · the aspiration is a unit-level gap. */
+  s = gappy();
+  v = fromStored(s, custKey, function (i) {
+    i.units[UNIT].aspiration = "Filled by the custodian";
+    i.units[UNIT].pend = { aspiration: MARK };
+  });
+  check("FILL: an empty aspiration is fillable", v.ok, v.refusals.join(" / "));
+
+  /* 10 · quarters move as ONE mark, and only from nothing. */
+  s = gappy();
+  v = fromStored(s, custKey, function (i) {
+    const t = i.units[UNIT].items[0].tactics[0];
+    t.q2 = 1; t.pend = { quarters: MARK, owner: MARK };
+    t.owner = "Somebody Named";
+  });
+  check("FILL: a no-quarter tactic takes its quarters and owner", v.ok, v.refusals.join(" / "));
+  s = withAccess("custodian", { a_unit_own_strat: "fill" });
+  v = fromStored(s, custKey, function (i) {
+    const t = i.units[UNIT].items[0].tactics.filter(function (x) {
+      return x.q1 || x.q2 || x.q3 || x.q4; })[0];
+    t.q4 = t.q4 ? 0 : 1; t.pend = { quarters: MARK };
+  });
+  check("FILL: a tactic that already names a quarter refuses more, mark or not",
+        !v.ok, "was ALLOWED");
+
+  /* 11 · the capability side, through the fn half. */
+  const FN2 = SEED.functionKeys.filter(function (k) {
+    return (SEED.functions[k] || {}).custodian && !(SEED.functions[k] || {}).format;
+  })[0];
+  const fnCust2 = FN2 && (SEED.functions[FN2] || {}).custodian;
+  check("the seed still holds a capability-function custodian for §16", !!fnCust2);
+  if (fnCust2) {
+    const sf = withAccess("custodian", { a_fn_own_strat: "fill" });
+    const cap = sf.group.capabilities.filter(function (c) { return c.fn === FN2; })[0];
+    cap.projects[0].start = "";
+    v = fromStored(sf, fnCust2, function (i) {
+      const p = i.group.capabilities.filter(function (c) { return c.fn === FN2; })[0].projects[0];
+      p.start = "Jan 2026"; p.pend = { start: MARK };
+    });
+    check("FILL: a project's missing start date, on the function half", v.ok, v.refusals.join(" / "));
+    v = fromStored(sf, fnCust2, function (i) {
+      const p = i.group.capabilities.filter(function (c) { return c.fn === FN2; })[0].projects[0];
+      p.name = "Renamed by a fill grant"; p.pend = { start: MARK };
+    });
+    check("FILL: the same grant never renames a project", !v.ok, "was ALLOWED");
+  }
+
+  /* 13 · collaborators join the fillable list (§145.10) — an empty list is
+     a gap, an existing one never opens, and A PENDING NAME CONFERS NO
+     REPORTING RIGHT until the office confirms: being named is what lets a
+     Contributor report the line (§50.2), so this is the half that makes
+     the reversal safe. */
+  s = gappy();
+  v = fromStored(s, custKey, function (i) {
+    const t = i.units[UNIT].items[0].tactics[0];
+    t.collaborators = ["Somebody Supporting"]; t.pend = { collaborators: MARK };
+  });
+  check("FILL: an empty collaborators list is fillable", v.ok, v.refusals.join(" / "));
+  s = gappy();
+  v = fromStored(s, custKey, function (i) {
+    const t = i.units[UNIT].items[0].tactics.filter(function (x) {
+      return (x.collaborators || []).length; })[0];
+    if (!t) { i.__skip = true; return; }
+    t.collaborators = t.collaborators.concat("Somebody Extra");
+    t.pend = Object.assign({}, t.pend, { collaborators: MARK });
+  });
+  check("FILL: adding to an EXISTING collaborators list refuses, mark or not",
+        !v.ok, "was ALLOWED");
+  (function () {
+    const t = { owner: "", collaborators: ["Test Person"],
+                pend: { collaborators: MARK } };
+    const who = { key: "tp", name: "Test Person" };
+    check("RIGHTS: a pending collaborator is not namedOn the line",
+          R.namedOn(t, who) === false);
+    delete t.pend;
+    check("RIGHTS: the same name counts the moment the mark lifts",
+          R.namedOn(t, who) === true);
+    const t2 = { owner: "Test Person", pend: { owner: MARK } };
+    check("RIGHTS: a pending owner is not namedOn either",
+          R.namedOn(t2, who) === false);
+  })();
+
+  /* 14 · u_anal never fills: a strategy page with no fillable field must
+     not draw the fill pen — a pen that opens nothing is §61's trap. */
+  check("mayFillPage: never the SWOT page",
+        R.mayFillPage(R.worldOf(gappy()), personOf(gappy(), custKey), "u_anal", UNIT) === false);
+
+  /* 12 · the rule's own ends. */
+  const wf = R.worldOf(gappy());
+  check("mayFillPage: the fill grant answers for the holder",
+        R.mayFillPage(wf, personOf(gappy(), custKey), "u_plan", UNIT) === true);
+  check("mayFillPage: never for the office (their writes settle)",
+        R.mayFillPage(wf, personOf(gappy(), "smo"), "u_plan", UNIT) === false);
+  check("mayFillPage: never off a strategy page",
+        R.mayFillPage(wf, personOf(gappy(), custKey), "u_report", UNIT) === false);
+  const sOther = withAccess("custodian", { a_unit_own_strat: "fill" });
+  check("mayFillPage: never a unit this sign-in does not hold",
+        R.mayFillPage(R.worldOf(sOther), personOf(sOther, custKey), "u_plan", OTHER) === false);
+})();
+
+/* ── 17 · A CUSTODIAN PER PROJECT (§147) ──────────────────────────
    A function's custodian covers the whole function; where each project has
    its own owner, that owner is a Contributor of the function and reports
    THEIR project — every row it holds — and nothing beside it. Derived from
@@ -1190,7 +1409,7 @@ console.log("\n15 · the strategy | reporting split (§117)");
    no-op assertion is this suite's own recorded fault, and a fixture that
    sets a status to the value the seed already holds would pass every
    refusal vacuously. */
-console.log("\n16 · a custodian per project (§147)");
+console.log("\n17 · a custodian per project (§147)");
 (function () {
   const FN = "it";
   const T = "fn:" + FN;

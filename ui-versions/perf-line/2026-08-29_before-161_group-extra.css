@@ -210,26 +210,6 @@
   }
   .tip:hover::after, .tip:focus::after { display:block; }
 
-  /* THE SAME BUBBLE, WITHOUT THE BADGE (§161). `.hasnote` is the value itself
-     — a direction glyph, a compile rule — carrying its meaning on hover; it
-     must not become a circled "i". So it borrows the bubble and none of the
-     mark: the rules below add it to the two selectors that matter and leave
-     `.tip`'s own box alone.
-
-     `width:max-content` because "More is better" in a 255px box is mostly box.
-     The cap keeps a long compile note from running off the page. */
-  .hasnote { position:relative; }
-  .hasnote::after {
-    content:attr(data-tip); display:none;
-    position:absolute; bottom:calc(100% + 8px); left:50%; transform:translateX(-50%);
-    background:var(--ink); color:var(--ground); font-size:12px; font-weight:400; line-height:1.4;
-    letter-spacing:0; text-transform:none; padding:8px 11px; border-radius:3px;
-    width:max-content; max-width:255px;
-    pointer-events:none; z-index:20; text-align:left;
-  }
-  .hasnote:hover::after, .hasnote:focus::after, .hasnote:focus-visible::after { display:block; }
-  .hasnote:focus-visible { outline:2px solid var(--gold); outline-offset:2px; border-radius:2px; }
-
   /* ── Enabler cards (temple base) ──────────────────────── */
   .base-grid { grid-template-columns:repeat(4,1fr); }
   @media (max-width:860px) { .base-grid { grid-template-columns:repeat(2,1fr); } }

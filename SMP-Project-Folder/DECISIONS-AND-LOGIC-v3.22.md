@@ -20067,3 +20067,105 @@ were worthless until they were re-run against the previous build**:
   are tested now.
 
 Proved able to fail: **3 failures** against the pre-§160 build.
+
+---
+
+## 161 · The Performance line, the Bands button, three bands, and a real hover (v3.60)
+
+Islam's remaining five, from using the product. Settled from a mockup drawn
+INTO the real platform (§41.9) and confirmed before a source was touched.
+
+**THE HOVER WAS WORKING, AND THAT IS THE FINDING.** *"The hover of the
+direction and the compiled are not working."* Measured first: the `title` was
+present on every one and the target was hittable — so it worked, as a **native
+tooltip**: about a second's delay, an 11px target, and **on an iPad it does not
+exist at all**. §127 settled this once for the chat settings and the answer is
+the same — `data-tip`, the platform's own bubble, which opens at once on hover
+**and on focus**, and focus is what a tap gives you. The `title` is REMOVED
+rather than kept beside it, or one value carries two notes a second apart.
+`tabindex="0"` is what makes the tap work and it is a real cost — eight more
+stops on a plan page — taken deliberately, because these pages are opened on a
+tablet. `aria-label` carries the words for anything reading the page aloud.
+
+**THE COLOUR BAR WAS ALSO THE PAGE'S CONTROL ROW, WHICH IS WHY THE BUTTONS
+READ AS A ROW OF THEIR OWN.** Report and Presentation were passed INTO
+`bands(action)` and rendered at the right-hand end of a full-width
+"READING THE COLOURS" banner — so the page's two loudest controls lived inside
+a legend. Islam: put them on the performance line. The banner goes, the three
+controls sit together at the right of the tab row, and **the page gains a whole
+row** for its cards. They travel by `REPORT_CHROME`, the channel §150 already
+built for exactly this (the tab row is drawn before the page that owns the
+controls) — one more page using it rather than a second mechanism.
+
+**WRAPPED AT THE INSERTION POINT, NOT MARGINED PER CONTROL.** Inserted bare
+they land immediately after the last tab and read as two more tabs; a single
+`.tabacts` wrapper carries `margin-left:auto`. The page decides WHAT its
+controls are; the row decides WHERE they go.
+
+**THE WORD IS "Bands", HIS**, over my "Colour key" — and he is right: it is
+what the Setup page that edits them already says, so the button and the setting
+share a noun rather than inventing a second one (§53.5, in vocabulary).
+
+**THREE BANDS: 90+ green, 70 to 89 amber, below 70 red** (his numbers). Four
+bands meant two of them said *this is going wrong* in two shades of the same
+red-orange. **`warn` leaves the DEFAULT and not the product**: the band list is
+a tenant setting, so a deployment that saved four keeps them — which is why
+`needsNote()` still names `warn` and the `--warn` token stays (the SWOT board
+paints Threats with it, nothing to do with scoring). **Nobody's obligations
+move**: bad+warn covered everything below 70 before, and bad covers everything
+below 70 now.
+
+**AND THE CHART LEGEND HAD ITS OWN COPY, ALREADY WRONG.** It hard-coded
+*"On track 70+ · At risk 50–69 · Off track under 50"* while the bands said
+85 / 70 / 50 — two definitions of one thing, drifted, on one page, and found
+only because the mockup made me read that function. It is derived from
+`BANDS.bands` now, like the button, so the legend, the button and every score
+answer to one list.
+
+**THE PANEL SHUTS ON A CLICK OUTSIDE, AND ONLY THIS PANEL.** A `<details>`
+already closes on a second press of its own summary; nothing in the product
+closed one from outside. The listener is bound ONCE on the document, never per
+paint (§24, §47.2), on `pointerdown` because a panel that lingers until the
+mouse comes up reads as having missed the press (§100.4). **Scoped to the bands
+menu deliberately** — Presentation and the header dropdowns are the same
+element and were not asked about (rule 1c) — and the cost is that two
+identical-looking dropdowns now dismiss differently. Recorded as a candidate
+for making general, not as a decision already made.
+
+**§145.14 CAME BACK AND THE MOCKUP CAUGHT IT.** `.tabs button` is (0,1,1) and
+outranks any bare class, so the Bands button first rendered as plain uppercase
+words with no border — inside the mockup, before a source was touched. Every
+rule that has to beat it names the row.
+
+### The trigger for the squeezed-window damage was never found (§161.2)
+
+Islam's screens showed a table header lying across the pinned pane title. I
+could not reproduce it: ten widths from 1000 down to 768, every scroll
+position, opened narrow AND squeezed from wide, on a unit and on a function.
+Two hypotheses were tested and **both were wrong** — the plan tables' header
+cells carry no `idx` class, so §151's frozen-column rules never match them, and
+no `thead th` in a pane is sticky at all.
+
+So what is fixed is the one thing that is **demonstrably undecided**: §151 gave
+the frozen HEADER cells `z-index:4` — the SAME as the pinned title — so which
+paints on top is settled by document order alone, and the table comes later.
+They drop to 3. A tie decided by source order is not a decision.
+
+**AND THE FIRST ATTEMPT BROKE SOMETHING REAL, WHICH IS THE PART WORTH
+KEEPING.** The obvious move was to fix it from above: raise `.pband` to
+`z-index:8` so the title wins against everything. It shipped for about ten
+minutes and `checks/gap-fill.py` went red at once — *"`<div class="pband">`
+intercepts pointer events"* — because a fill field scrolled level with the
+title had become unclickable, the title eating the press. **A guard that costs
+a working interaction is a second fault, not a guard.** `.pband` is left
+exactly as it was. Bisected by putting the number back and watching the check
+turn green, rather than reasoned about (§94.5's habit, applied to a
+regression instead of to a new assertion).
+
+`checks/perf-line.py` sweeps eight widths at every 25px of scroll and asserts
+nothing covers the title.
+
+**This is recorded as a guard, not as a fix.** If Islam sees it again the one
+thing that would settle it is the window width.
+
+Proved able to fail: **7 failures** against the pre-§161 build.

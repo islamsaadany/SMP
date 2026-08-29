@@ -64,6 +64,38 @@ Nothing proceeds past this line without an answer.
 
 ## Built and verified
 
+### v3.60 — the Performance line, Bands, three bands, a real hover (§161)
+
+- Islam's remaining five from using the product; settled from a mockup drawn
+  into the real platform and confirmed before a source was touched.
+- **The hover WAS working** — as a native `title`: a second's delay, an 11px
+  target, and on an iPad nothing at all. It is the product's own bubble now,
+  opening on hover **and on focus**, which is what a tap gives. The `title` is
+  removed rather than kept beside it.
+- **The colour bar was also the page's control row**, which is why Report and
+  Presentation read as a row of their own. Banner gone; the three controls sit
+  right on the Performance line; the page gains a whole row.
+- **Bands** (his word, over "Colour key") — one noun shared with the Setup page
+  that edits them. Opens under its button, shuts on a second press or a click
+  outside.
+- **Three bands: 90+ / 70–89 / below 70.** `warn` leaves the default, not the
+  product — the list is a tenant setting, so a deployment that saved four keeps
+  them. Nobody's note obligations move.
+- **The chart legend kept its own copy and it was already wrong** (70/50/50
+  against the real 85/70/50) — found by reading the function the mockup made me
+  open. Derived now.
+- **§145.14 came back and the mockup caught it**: `.tabs button` outranks a
+  bare class, so the new button first rendered as plain words.
+- **§161.2 — the squeezed-window damage is guarded, not fixed.** The trigger
+  was never reproduced (ten widths, every scroll offset, both ways in, two
+  hypotheses tested and both wrong). What is fixed is the one undecided thing:
+  the frozen header cells tied with the pinned title at z-index 4, so document
+  order decided which won. **The first attempt fixed it from above and broke a
+  real interaction** — raising the title made fill fields unclickable under it,
+  and gap-fill went red within minutes; the title is left alone. The check
+  sweeps eight widths for anything covering it.
+- `checks/perf-line.py` — 7 failures on the pre-§161 build.
+
 ### v3.60 — the squeezed rail and the demo banner (§160)
 
 - Two of Islam's seven from using the product on a smaller window. The other

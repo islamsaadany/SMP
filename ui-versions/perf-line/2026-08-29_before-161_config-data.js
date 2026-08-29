@@ -4354,12 +4354,6 @@ function needsNote(x){
   var p = rowReads(x);
   if (p == null) return false;
   var k = bandOf(p).key;
-  /* `warn` IS KEPT ON PURPOSE (§161). The shipped bands are three now and this
-     tenant has no `warn`, so the second test is dead here — and a tenant that
-     saved the old four still has one, and dropping it would quietly stop
-     asking for a note on every figure between 50 and 69 in their deployment.
-     The ranges happen to coincide on the new defaults (bad is everything below
-     70, which is what bad+warn covered before), so nobody's obligations move. */
   return (k === "bad" || k === "warn") && !(x.obj.note && x.obj.note.trim());
 }
 function missingNotes(u){ return askedItems(u).filter(needsNote); }
@@ -4781,24 +4775,10 @@ Object.keys(UNITS).forEach(function(k){ UNITS[k].ukey = k; });
 
 var BANDS = {
   scope: "tenant",
-  /* THREE, NOT FOUR (§161, Islam: "I want the colors to be 3 colors only, red,
-     green and yellow" — 90+ green, 70 to 90 yellow, below 70 red).
-
-     FOUR BANDS MEANT FOUR COLOURS AND TWO OF THEM WERE THE SAME WARNING. At
-     risk (50-69) and Off track (below 50) both said "this is going wrong" in
-     two shades of the same red-orange, and a reader had to know which was
-     which to get anything from the difference. Three is the vocabulary people
-     already have.
-
-     `warn` LEAVES THE DEFAULT AND NOT THE PRODUCT. The band list is a TENANT
-     setting, so a deployment that has saved four bands keeps them and goes on
-     working — which is why nothing that reads a band key may assume the key
-     is in this list (see `needsNote()` below, which still names `warn`). The
-     `--warn` colour token stays too: the SWOT board paints Threats with it and
-     that has nothing to do with scoring. */
   bands: [
-    { key:"good", floor:90, label:"On track" },
+    { key:"good", floor:85, label:"On track" },
     { key:"attn", floor:70, label:"Needs attention" },
+    { key:"warn", floor:50, label:"At risk" },
     { key:"bad",  floor:0,  label:"Off track" }
   ]
 };

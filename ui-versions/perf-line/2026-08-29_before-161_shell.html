@@ -1841,14 +1841,7 @@
        [data-submit] / [data-repsave] / [data-repcancel] — so the box works
        from outside #panel without a second wiring path (§24). */
     var tabrow = document.getElementById("subtabs");
-    /* WRAPPED, SO THE CONTROLS SIT HARD RIGHT (§161). Inserted bare they land
-       immediately after the last tab and read as two more tabs; the wrapper is
-       what carries `margin-left:auto`. One wrapper at the one insertion point
-       rather than a margin on each control — the page decides WHAT its
-       controls are, the row decides WHERE they go. */
-    if (REPORT_CHROME && tabrow && !railed)
-      tabrow.insertAdjacentHTML("beforeend",
-        '<span class="tabacts">' + REPORT_CHROME + '</span>');
+    if (REPORT_CHROME && tabrow && !railed) tabrow.insertAdjacentHTML("beforeend", REPORT_CHROME);
 
     /* ── AND A TABLE TOO WIDE FOR ITS PANE SCROLLS INSIDE ITSELF (§151) ──
        Done here, once, rather than at the dozen render sites that build a
@@ -5722,28 +5715,6 @@
     var d = el.closest("details.dlmenu");
     if (d) d.open = false;
   }
-
-  /* THE BANDS PANEL SHUTS ON A CLICK OUTSIDE (§161, Islam: "close on clicking
-     outside it or clicking on the button again"). The second half is what a
-     `<details>` already does; the first is not, and no dropdown in the product
-     had it before.
-
-     SCOPED TO THIS PANEL, DELIBERATELY. Presentation and the header dropdowns
-     are the same `<details class="dlmenu">` and they stay as they are — this
-     was asked for one control and widening it silently would change three
-     others nobody mentioned (rule 1c). The cost is that two identical-looking
-     dropdowns now dismiss differently, which is worth flagging rather than
-     hiding: it is a candidate for making general, not a decision already made.
-
-     `pointerdown`, not `click`: a panel that lingers until the mouse comes up
-     reads as having missed the press (§100.4). Bound ONCE on the document,
-     never per paint — this row is rebuilt on every render and a per-render
-     binding would stack (§24, §47.2). */
-  document.addEventListener("pointerdown", function(e){
-    document.querySelectorAll("details.bandsmenu[open]").forEach(function(d){
-      if (!d.contains(e.target)) d.open = false;
-    });
-  }, true);
 
   function sendXlsx(sheets, name){
     /* The blob dance itself lives in pptx.js as sendFileBytes() since §117 —

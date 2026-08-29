@@ -250,7 +250,7 @@ function barRow(main, sub, perf, exec, planned, opts){
 }
 
 function chartLegend(){
-  /* A SECOND COPY OF THE BANDS, AND IT WAS ALREADY LYING (§161). This read
+  /* A SECOND COPY OF THE BANDS, AND IT WAS ALREADY LYING (§163). This read
      "On track 70+ / At risk 50-69 / Off track under 50" while the bands said
      85 / 70 / 50 — two definitions of the same thing, drifted, on one page.
      §53.5: it is derived from `BANDS.bands` now, like the button, so the
@@ -337,7 +337,7 @@ var COMPILE_WORDS = {
    the platform's own hover, so nothing new has to be positioned, and
    `clipTitles()` only fills an EMPTY title so this is never overwritten
    (§93.6). */
-/* THE PRODUCT'S OWN NOTE, NOT THE BROWSER'S (§161). This shipped as a `title`
+/* THE PRODUCT'S OWN NOTE, NOT THE BROWSER'S (§163). This shipped as a `title`
    and Islam reported the hover as "not working" — it was working, and that is
    the finding: a native tooltip waits about a second, hangs off an 11px target,
    and on an iPad DOES NOT EXIST. §127 settled this once for the chat settings
@@ -367,8 +367,8 @@ function dirCell(d){ return d ? noteSpan(d, DIR_WORDS[d] || "") : ""; }
 function compileCell(c){
   if (!c) return "";
   var note = COMPILE_WORDS[c] || "";
-  /* THROUGH `noteSpan`, WHICH IS WHY IT EXISTS (§161.3). This built its own
-     span and set its own `title` — §161 converted the direction cell and left
+  /* THROUGH `noteSpan`, WHICH IS WHY IT EXISTS (§163.3). This built its own
+     span and set its own `title` — §163 converted the direction cell and left
      this one behind, and the two faults then met: the span still carried
      `hasnote`, so the new bubble matched it with NO `data-tip` to fill it and
      painted an EMPTY BLACK BOX, and a second later the browser's tooltip
@@ -629,7 +629,7 @@ var TIP_EXEC = "Execution scores the tactics under this unit's pillars \u2014 ea
 var TIP_THEME = "Performance and execution across every pillar carrying this theme, in every business unit.";
 var TIP_CAP = "Group capabilities are pillars in their own right: performance from their key measures, execution from their tactics.";
 
-/* THE COLOURS MOVE BEHIND A BUTTON (§161) ─────────────────────────────
+/* THE COLOURS MOVE BEHIND A BUTTON (§163) ─────────────────────────────
    It was a full-width bar reading "READING THE COLOURS" with every band spelt
    out, and it carried Report and Presentation at its right end — which is why
    those two read as a row of their own rather than as the page's controls.

@@ -732,6 +732,82 @@ console errors (in this cloud environment, run it via a wrapper that points Play
   holding a bad date is findable without opening each (§93.4). `railSub(html,
   alarm)` tells them apart. **Found by `checks/project-tables.py` going red on
   the day the default flipped**, not by reading the rail.
+- **THE QUESTIONS TRAVEL, AND THE ROUND TRIP MUST BE A FIXED POINT (§161):**
+  the knowledge base exports and imports as one `.xlsx` — the export IS the
+  template (§54) — **matched on `Id`**, because the question text is the
+  office's to edit and so cannot be the key (§87 in a third place). Adds and
+  amends, never removes; an answer put back to the shipped wording CLEARS the
+  override, so the file is the undo (§50.6); an unrecognised id applies
+  **nothing** and is named, being the row that would otherwise become a silent
+  duplicate. **THE SHIPPED TEXT SEPARATES PARAGRAPHS WITH `|` AND A CELL USES A
+  BLANK LINE**, so the same prose arrives spelt two ways and a raw `===` calls
+  an untouched round trip a change on **24 of 64 rows** — `SMPRules.kbSame()`
+  is the ONE comparison, and the first build had two (one in the writer, one in
+  the reader), found only because breaking the writer's produced **0 check
+  failures**: every fixed-point assertion ran through the reader's. *Two places
+  answering "is this the same prose" is how a review says reworded while the
+  writer stores nothing.*
+- **THE PEN PROMISED A PARAGRAPH BREAK IT NEVER MADE (§161.3):** `kbEdCard`'s
+  lede has said *"A blank line is a paragraph break"* since §140 and the read
+  path only ever split on `|`, so an office rewrite typed as two paragraphs
+  rendered as one run-on — on the page AND in the assistant's answer, for
+  twenty versions. `kbParas()` reads both now, in one place (§53.5).
+- **`who` IS THREE, AND THE THIRD MAKES A PAIR DETERMINISTIC (§161.1):**
+  `office` · `others` · `everyone`, with the old two mapping straight on so
+  nothing stored moves (§30.2). §160 handed the office BOTH halves of a
+  two-answer pair and told the model to choose; each side is now served exactly
+  one. **The audience governs the assistant and never the page** — forced, not
+  chosen: the Knowledge base page is the office's (§119.4), so an answer marked
+  `others` obeyed there would be readable by nobody and editable by nobody
+  (§61). The chip is drawn only for the two that are a DECISION, never for
+  `everyone`, which 57 of 64 carry (§41's budget).
+- **A RECIPE IS A PROMISE ABOUT BEHAVIOUR, AND NOBODY WAS REVISITING IT
+  (§160):** `recipes.js` went from §103 to §159 untouched while the platform
+  learned to split the own columns (§117), to fill only what is empty (§145)
+  and to derive two owner roles off the plan (§147) — so fifteen features had
+  no question and five answers said a flat *"the office"* about something the
+  office can now hand over. **When a rule gains an exception, the recipe
+  stating the rule is part of that change.** Two of the corrections were
+  OURS, not the client's: *"submitted by mistake"* sent people to the office
+  for **Reopen my report**, which `canSpeakFor()` draws for the unit's own
+  head or custodian, and three `who:"office"` tags marked things a
+  non-office person can actually do (**Present has no gate at all**, Manage
+  slides is `canSpeakFor`, the **Demo data menu is not role-gated in any
+  way**). **`who` IS PERMISSION NOW, NOT RELEVANCE** — `officeOnly()` filters
+  the corpus by `Rules.isOfficeRole()` before it is sent, the same test
+  `roleWord()` uses one line above — **and the tags had to be re-read before
+  the meaning could be flipped**, or enforcing them would have hidden three
+  real answers. **THE KB DESCRIBES THE PLATFORM, NEVER A TENANT'S
+  CONFIGURATION**: one corpus serves every deployment, so an answer says what
+  the platform *can* do with its condition attached.
+- **A TENANT'S LABEL IS NEVER INFLECTED, AND THE HELP WAS INFLECTING ONE
+  (§160.6, §107.8 for the second time):** `recipeText()` rendered
+  `{pillars}` as `plural(2, L("pillar","bu"))` — **`plural()` returns a COUNT
+  followed by the word** and `bu` is already *"Pillars"* — so the shipped
+  question *"How do I reorder my {pillars}?"* rendered as **"How do I reorder
+  my 2 Pillarss?"** on every deployment from §103 to §159, and `{pillar}`
+  gave *"a Pillars owner"*. There is **no singular anywhere** (`internal` is
+  the platform's own name, not for display), so both tokens take the label
+  exactly as it comes and **every sentence is phrased to accept a plural
+  noun**; where the ROLE is meant, *"Pillar owner"* is written literally,
+  because that is its name on Roles & access and it is not a tenant label.
+  **Proved on the built page, not argued** — a `{pillar}` check that only
+  asserts "nothing unsubstituted" passes happily on *2 Pillarss*.
+- **READ THE DEFAULTS BEFORE CALLING SOMETHING A BUILD (§160.2):** told that
+  nobody should report single lines, I reported it as a code change. It was
+  not: `contrib`, `powner` and `plowner` **all ship at view** on both
+  Reporting halves, so the model asked for was the shipped default plus two
+  cells switched on. *A rule can already be true by configuration, and
+  reading `ACCESS_DEFAULTS` is cheaper than reading the rule.*
+- **THE CODE CAN BE BETTER THAN ITS OWN COMMENT (§160.4):** I reported that
+  offline work never syncs, on the strength of `sync.js` warning *"will retry
+  on the next change"*. There is a **`setInterval(save, 5000)`** for the life
+  of the page and `lastSaved` is set only on `r.ok`, so a failed save is
+  re-posted every five seconds and the work **does** go up on reconnection.
+  What is true is narrower and worth one clause: **only while the tab stays
+  open**, because nothing is stored locally. **AND A FAILED AUTOSAVE IS
+  SILENT** — the debounce and the interval both call `save()` with no
+  callback, so only a pressed button ever reports; recorded, not fixed.
 - **THE KNOWLEDGE BASE IS THE OFFICE'S (§119.4, REVERSING §30 AND §37):**
   `when: inOffice()` on the page def, the shape `c_send` and `c_chat` use —
   never a matrix cell, because who reads the office's own working notes is not
@@ -2583,6 +2659,11 @@ python3 checks/project-custodian.py # a custodian per project (§147): the Proje
                                 # nothing, and a milestone owner is a Contributor who
                                 # reports nothing until the row is opened — both ends,
                                 # three viewers, proved able to fail
+python3 checks/perf-line.py     # the Performance line: Report, Presentation and Bands
+                                # on the tab row, three bands, the hover bubble on
+                                # hover AND focus, and nothing over the pinned title (§163)
+python3 checks/squeezed-rail.py # below 820 the rail reads ACROSS on both sides, and the
+                                # demo banner's invented-content line is gone (§162)
 python3 checks/table-fit.py     # the plan tables FIT the pane at every width — never
                                 # "and it scrolls" — on a unit AND a function, with the
                                 # 620 floor still in force on a wide window (§158)
@@ -2621,6 +2702,18 @@ python3 checks/email-greeting.py # the greeting row is ONE line with no prose, t
                                 # fills it per recipient (§135, over HTTP)
 python3 checks/setup-pages.py   # every Setup page is named ONCE and in the rail's own word,
                                 # and the name and the table head stay on screen (§121)
+python3 checks/knowledge-base.py # the page and db/kb.json draw from ONE source — the
+                                # AGREEMENT, never the count (§103)
+python3 checks/kb-file.py       # the questions file (§161): the round trip is a FIXED
+                                # POINT — downloaded and uploaded untouched it changes
+                                # nothing, before AND after applying — every kind of
+                                # change classified, an unrecognised id refused by name,
+                                # and the audience the file sets obeyed by the page and
+                                # the corpus alike
+node scripts/test-kb-audience.js # who sees which answer (§160): an office answer absent
+                                # for everybody else AND still present for the office, and
+                                # a two-answer question leaving each side exactly one.
+                                # No database, no network — officeOnly() is pure.
 ```
 The mail half needs a database and a password (it spawns its own dev-server):
 `DATABASE_URL=… node scripts/test-email-greeting.js <smo-password>` (§142.6), and
@@ -2658,7 +2751,38 @@ prior sessions (on HR_ERP) accidentally reverted agreed-upon designs.
 
 ---
 
-*Last Updated: 2026-08-29 &mdash; **v3.59: the welcome screen's way out
+*Last Updated: 2026-08-29 &mdash; **v3.62: the Performance line, three bands,
+and two headers found lying across their own rows (&sect;162&ndash;&sect;163)**.
+Islam's seven from using the product on a squeezed window. **Three of them were
+one lesson each.** The hover he reported as *"not working"* WAS working &mdash;
+as a native `title`, which waits a second, hangs off an 11px target and on an
+iPad does not exist; it is the product's own bubble now, opening on hover AND
+on focus, which is what a tap gives. Then he reported *"a black box and later
+the description"* on the compiled cell: that cell built its own span and kept
+its own `title`, so it took the new bubble with **no text to put in it** and
+the browser's tooltip a second behind &mdash; &sect;96's lesson exactly, a
+helper that exists is not a helper that was used. And the bands *"are still
+like the past"* because **they are a row in a table**: `sync.js` hydrates them
+over the baked default, so changing what the product ships with reaches a fresh
+deployment and nothing else (migration 029 moves a tenant still on the shipped
+four and leaves a customised one alone &mdash; both cases driven against a real
+Postgres). **THE ONE WORTH READING IS &sect;163.5**: every Setup table pinned
+its header to a PAGE offset while sitting in a box that scrolls, so the browser
+measured that offset from the top of the TABLE &mdash; the Scoring bands
+heading sat **136px down its own body, across the third row, at every width
+with the page unscrolled**. &sect;130.2 recorded that exact fault, fixed
+`.acgrid`, and stopped; every other Setup table still had it and nobody had
+looked. **AND MY OWN FIRST GUARD BROKE SOMETHING REAL** &mdash; raising the
+pinned pane title above everything made fill fields unclickable beneath it and
+the whole sweep failed; a guard that costs a working interaction is a second
+fault, and the tie it was meant to settle needed breaking from below instead.
+Also: the reading-the-colours banner was the page's control row, which is why
+Report and Presentation read as a row of their own; the squeezed rail said
+`display:flex` for versions and meant nothing by it, because reordering had
+wrapped its rows in a container; and the chart legend was keeping a second copy
+of the bands that already disagreed with them.*
+
+*Earlier: 2026-08-29 &mdash; **v3.59: the welcome screen's way out
 (&sect;159)**. Islam, using what &sect;148 shipped: *"continue to the unit or
 the function button is a bit not obvious."* Five variations drawn in the real
 screen and he chose **B**, one bar across both columns. **The fault was three

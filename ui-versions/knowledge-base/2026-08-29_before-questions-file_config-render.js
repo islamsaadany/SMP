@@ -3085,11 +3085,6 @@ function recipeText(t){
    asks inOffice() (§42: the gate is on the control) and the server classifies
    a GROUP.kb change as setup, so both ends answer alike (§94.2). */
 var KBEDIT = false;
-/* The file menu's open state, and the classified upload waiting for Apply.
-   Both are SCREEN state and neither is stored: a review abandoned by
-   navigating away is a review that never happened (§25, §47.1). */
-var KBFILEMENU = false;
-var KBFILE = null;      /* { changes, name } while a review is on screen */
 
 /* WHICH TAB (§141): "how" or "qa". A SCREEN PREFERENCE (§25, §47.1) — one
    person reading the reference must not decide the tenant's landing tab —
@@ -3103,36 +3098,11 @@ function kbTabSet(t){
   try { localStorage.setItem("smp.kb.tab", t === "qa" ? "qa" : "how"); } catch (e) {}
 }
 
-/* WHO AN ANSWER IS FOR, ON THE CARD (§161). Drawn for the two audiences
-   that are a DECISION and not for `everyone`, which is the default 57 of 64
-   questions carry — a chip on nearly every card is furniture, not a mark
-   (§41's budget). The office sees every card whatever the audience says:
-   this page is the editing surface, and hiding a question here would leave
-   it readable by nobody and editable by nobody (§61). */
-function kbAudChip(w){
-  w = SMPRules.kbAudienceWord(w);
-  if (w === "everyone") return "";
-  return ' <span class="pill kind kbaud-' + w + '">' +
-    esc(SMPRules.KB_AUDIENCE_LABEL[w]) + '</span>';
-}
-/* The picker, in edit mode. Here rather than only in the file, or a question
-   added on this page could be given an audience nowhere but a spreadsheet —
-   which is §61's trap wearing the file's clothes. */
-function kbAudPick(id, w){
-  w = SMPRules.kbAudienceWord(w);
-  return '<label class="kbed-aud"><span>Answered to</span><select data-kbaud="' +
-    esc(id) + '">' +
-    SMPRules.KB_AUDIENCES.map(function(o){
-      return '<option value="' + o + '"' + (o === w ? " selected" : "") + '>' +
-        esc(SMPRules.KB_AUDIENCE_LABEL[o]) + '</option>';
-    }).join("") + '</select></label>';
-}
-
-function kbEdCard(id, q, a, mark, aud){
+function kbEdCard(id, q, a, mark){
   return '<div class="kbed' + (mark === "edited" ? " on" : "") + '">' +
     '<input class="kbed-q" data-kbq="' + esc(id) + '" value="' + esc(q) + '">' +
     '<textarea class="kbed-a" data-kba="' + esc(id) + '">' + esc(a) + '</textarea>' +
-    '<div class="kbed-foot">' + kbAudPick(id, aud) +
+    '<div class="kbed-foot">' +
       (mark === "edited"
         ? '<span class="kbed-mark">Edited for this platform</span>' +
           '<button type="button" class="kbed-reset" data-kbreset="' + esc(id) + '">' +
@@ -3144,73 +3114,6 @@ function kbEdCard(id, q, a, mark, aud){
             'Remove this question</button>'
         : "") +
     '</div></div>';
-}
-
-/* ── WHAT AN UPLOAD WILL DO, BEFORE IT DOES IT (§161) ──────────────
-   The shape the people file and the plan import already use (§48.2, §87):
-   a tally, the rows, and two buttons. Nothing is written until Apply.
-
-   AN UNRECOGNISED ID IS DRAWN IN RED AND APPLIES NOTHING, because that is
-   the row that would otherwise become a silent duplicate of a question
-   that already exists — and the refusal names the way forward (§16.7),
-   which is to clear the Id or correct the spelling.
-
-   THE EMPTY CASE SAYS SO. A file that changes nothing is the answer when
-   somebody re-uploads what they downloaded, and a panel that renders
-   nothing there reads as a page that failed (§45.2). */
-function kbFileReview(){
-  if (!KBFILE) return "";
-  var c = KBFILE.changes, n = kbChangeCount(c);
-  var pill = function(cls, txt){ return '<span class="pill ' + cls + '">' + txt + '</span>'; };
-  var tally =
-    (c.reword.length ? pill("attn", plural(c.reword.length, "answer") + " reworded") : "") +
-    (c.add.length ? pill("", plural(c.add.length, "question") + " added") : "") +
-    (c.reset.length ? pill("", c.reset.length + " back to the standard wording") : "") +
-    (c.audience.length ? pill("", plural(c.audience.length, "audience") + " changed") : "") +
-    (c.unknown.length ? pill("bad", plural(c.unknown.length, "unrecognised id")) : "");
-  var W = SMPRules.KB_AUDIENCE_LABEL;
-  var line = function(id, what, aud, cls){
-    return '<tr' + (cls ? ' class="' + cls + '"' : '') + '><td class="mono">' +
-      esc(id) + '</td><td>' + what + '</td><td>' + esc(aud || "") + '</td></tr>';
-  };
-  var body = "";
-  c.reword.forEach(function(x){
-    body += line(x.id, "Answer reworded", W[x.w]); });
-  c.reset.forEach(function(x){
-    body += line(x.id, "<b>Back to the standard wording</b> &mdash; your change is cleared",
-      W[x.w]); });
-  c.audience.forEach(function(x){
-    body += line(x.id, "Wording unchanged",
-      W[x.w] + " \u2190 " + W[x.from]); });
-  c.add.forEach(function(x){
-    body += line("\u2014", "<b>New question</b> &mdash; &ldquo;" + esc(x.q) + "&rdquo;",
-      W[x.w]); });
-  c.unknown.forEach(function(x){
-    body += line(x.id, '<b class="bad-tx">No question has this id</b> &mdash; nothing will ' +
-      'be applied to this row. Clear the Id to add it as a new question, or correct the ' +
-      'spelling.', "", "kbf-bad"); });
-  /* A FILE THAT COULD NOT BE READ SAYS SO HERE, where the upload is (§48.8),
-     and nothing else is drawn — a tally of zero beside an error reads as
-     though the file was fine and simply changed nothing. */
-  if (KBFILE.problem) {
-    return '<div class="imp kbfile"><div class="imp-step">' +
-      '<div class="note bad-note"><b>' + esc(KBFILE.name || "That file") + '</b> ' +
-      esc(KBFILE.problem) + '</div>' +
-      '<div class="imp-row" style="margin-top:14px">' +
-      '<button class="linkbu" data-kbdiscard="1">Close</button></div></div></div>';
-  }
-  return '<div class="imp kbfile"><div class="imp-step">' +
-    '<h4 class="mini">' + esc(KBFILE.name || "The uploaded file") + '</h4>' +
-    (n || c.unknown.length
-      ? '<div class="imp-tally">' + tally + '</div>' +
-        '<table><thead><tr><th>Id</th><th>What changes</th><th>Audience</th></tr></thead>' +
-        '<tbody>' + body + '</tbody></table>'
-      : '<p class="why">Nothing in this file is different from what is here now.</p>') +
-    '<div class="imp-row" style="margin-top:14px">' +
-      (n ? '<button class="editbtn apply" data-kbapply="1">Apply to the knowledge base</button>'
-         : '') +
-      '<button class="linkbu" data-kbdiscard="1">' + (n ? "Discard" : "Close") + '</button>' +
-    '</div></div></div>';
 }
 
 function kbRecipes(){
@@ -3228,19 +3131,20 @@ function kbRecipes(){
       /* THE TENANT'S WORDING WINS, by the one rule the assistant also reads
          (§140, §103): what this page shows IS what the bot answers from. */
       var o = SMPRules.kbLook(GROUP.kb, r.id);
-      var aud = SMPRules.kbAudience(GROUP.kb, r.id, r.who || g.who);
       if (KBEDIT) {
-        return kbEdCard(r.id, o ? o.q : r.q, o ? o.a : r.a, o ? "edited" : null, aud);
+        return kbEdCard(r.id, o ? o.q : r.q, o ? o.a : r.a, o ? "edited" : null);
       }
       /* AN OVERRIDE IS TYPED TEXT AND RENDERS AS TEXT. The shipped answers
          carry deliberate <b> markup and render raw; a rewritten one must not
          inherit that path — office-only or not, prose typed into a box that
          comes back as live markup is §43's lesson waiting to repeat. */
       if (o) {
+        var who0 = r.who || g.who;
         return '<div class="kb-rec" id="kb-r-' + esc(r.id) + '">' +
-          '<h4 class="kb-q">' + esc(recipeText(o.q)) + kbAudChip(aud) +
+          '<h4 class="kb-q">' + esc(recipeText(o.q)) +
+            (who0 === "office" ? ' <span class="pill kind">Strategy Office</span>' : '') +
           '</h4>' +
-          SMPRules.kbParas(recipeText(o.a)).map(function(para){
+          recipeText(o.a).split("|").map(function(para){
             return '<p class="kb-p">' + esc(para) + '</p>';
           }).join("") + '</div>';
       }
@@ -3254,9 +3158,12 @@ function kbRecipes(){
          heading twice with nothing between them, which reads as a bug; and
          marking by position would leave a lone office recipe unmarked in a
          group that is not the office's. Whoever it is for, it says so. */
+      var who = r.who || g.who;
       return '<div class="kb-rec" id="kb-r-' + esc(r.id) + '">' +
-        '<h4 class="kb-q">' + esc(recipeText(r.q)) + kbAudChip(aud) + '</h4>' +
-        SMPRules.kbParas(recipeText(r.a)).map(function(para){
+        '<h4 class="kb-q">' + esc(recipeText(r.q)) +
+          (who === "office"
+            ? ' <span class="pill kind">Strategy Office</span>' : '') + '</h4>' +
+        recipeText(r.a).split("|").map(function(para){
           return '<p class="kb-p">' + para + '</p>';
         }).join("") +
       '</div>';
@@ -3264,10 +3171,10 @@ function kbRecipes(){
     /* The office's own questions, at the foot of the group they were added
        to — read like any other entry, editable like one of theirs. */
     items += adds.map(function(x){
-      if (KBEDIT) return kbEdCard(x.id, x.q, x.a, "yours", x.w);
+      if (KBEDIT) return kbEdCard(x.id, x.q, x.a, "yours");
       return '<div class="kb-rec" id="kb-r-' + esc(x.id) + '">' +
-        '<h4 class="kb-q">' + esc(recipeText(x.q)) + kbAudChip(x.w) + '</h4>' +
-        SMPRules.kbParas(recipeText(x.a)).map(function(para){
+        '<h4 class="kb-q">' + esc(recipeText(x.q)) + '</h4>' +
+        recipeText(x.a).split("|").map(function(para){
           return '<p class="kb-p">' + esc(para) + '</p>';
         }).join("") + '</div>';
     }).join("");
@@ -3605,42 +3512,7 @@ function renderKB(){
     ? '<button class="editbtn' + (KBEDIT ? " on" : "") + '" data-kbpen="1">' +
         (KBEDIT ? "Done" : "\u270e Edit the answers") + '</button>'
     : "";
-  /* ── THE QUESTIONS FILE (§161) ────────────────────────────────────
-     The register's "Register file" shape (§90), on the questions tab only —
-     nothing on the explanations tab is in the file, so a menu offering to
-     download it there would be offering something else.
-
-     THE UPLOAD IS A <label> STYLED AS THE ITEM: a file picker cannot be
-     opened from script without a gesture, and a control that works in one
-     browser and silently does nothing elsewhere is worse than a plain one
-     (§90, §34's rule about a field's furniture). */
-  var nQtotal = RECIPES.reduce(function(n, g){ return n + g.items.length; }, 0) +
-                SMPRules.kbAllAdds(GROUP.kb).length;
-  var kbFile = !(inOffice() && tab === "qa") ? "" :
-    '<span class="hmenu' + (KBFILEMENU ? " open" : "") + '">' +
-      '<button class="hmenu-btn" data-kbfilemenu="1" aria-haspopup="true" ' +
-        'aria-expanded="' + KBFILEMENU + '">Questions file ' +
-        '<span class="hcar">&#9662;</span></button>' +
-      (KBFILEMENU
-        ? '<div class="hmenu-panel">' +
-            '<button class="hmenu-item" data-dlkb="1">' +
-              '<span class="t">Download the questions</span>' +
-              '<span class="d">All ' + nQtotal + ', in your own wording where you have ' +
-              'changed it, with the standard answer beside each to compare against. ' +
-              'The export and the template are one file.</span></button>' +
-            '<div class="hmenu-sep"></div>' +
-            '<label class="hmenu-item" for="kb-file">' +
-              '<span class="t">Upload a filled file</span>' +
-              '<span class="d">Matched on Id. A row with no Id adds a question; an ' +
-              'answer put back to the standard wording clears your change. You see ' +
-              'every change before anything is applied.</span></label>' +
-            '<input type="file" id="kb-file" accept=".xlsx" class="vh" ' +
-              'aria-label="Choose a filled questions file to upload">' +
-          '</div>'
-        : "") +
-    '</span>';
-  return cfgHead("Knowledge base", [], null, false, null, null, kbFile + kbPen) +
-    kbFileReview() +
+  return cfgHead("Knowledge base", [], null, false, null, null, kbPen) +
     (KBEDIT && tab === "qa"
       ? '<p class="kb-lede kbed-lede">What you write here is what this page shows ' +
         '<b>and</b> what the assistant answers from \u2014 the two can never disagree. ' +

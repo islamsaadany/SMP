@@ -1,7 +1,7 @@
--- 029 · THREE BANDS, AND ONLY WHERE NOBODY HAS CHOSEN OTHERWISE (§161.4)
+-- 029 · THREE BANDS, AND ONLY WHERE NOBODY HAS CHOSEN OTHERWISE (§163.4)
 --
 -- Islam: "I want the colors to be 3 colors only, red, green and yellow" —
--- 90+ green, 70 to 90 yellow, below 70 red. §161 changed the shipped DEFAULT
+-- 90+ green, 70 to 90 yellow, below 70 red. §163 changed the shipped DEFAULT
 -- and the seed, and on his own deployment nothing moved, because THE BANDS
 -- ARE A ROW IN A TABLE: `sync.js` hydrates `BANDS.bands` from the database
 -- over whatever the file was built with. A default only ever reaches a

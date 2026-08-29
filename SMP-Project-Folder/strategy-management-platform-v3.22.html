@@ -845,7 +845,7 @@
   }
   .tip:hover::after, .tip:focus::after { display:block; }
 
-  /* THE SAME BUBBLE, WITHOUT THE BADGE (§161). `.hasnote` is the value itself
+  /* THE SAME BUBBLE, WITHOUT THE BADGE (§163). `.hasnote` is the value itself
      — a direction glyph, a compile rule — carrying its meaning on hover; it
      must not become a circled "i". So it borrows the bubble and none of the
      mark: the rules below add it to the two selectors that matter and leave
@@ -863,7 +863,7 @@
     pointer-events:none; z-index:20; text-align:left;
   }
   .hasnote:hover::after, .hasnote:focus::after, .hasnote:focus-visible::after { display:block; }
-  /* AN EMPTY BUBBLE IS A BLACK BOX, AND THAT IS WHAT SHIPPED (§161.3). The
+  /* AN EMPTY BUBBLE IS A BLACK BOX, AND THAT IS WHAT SHIPPED (§163.3). The
      compiled cell carried `hasnote` while still setting a `title`, so this rule
      matched it with no `data-tip` to fill: `content:attr(data-tip)` resolved to
      nothing and painted a small black rectangle on hover, with the browser's
@@ -1560,7 +1560,7 @@
     .split { grid-template-columns:1fr; }
     /* Stacked, the rail is not sticky and there is no gap above it to fill. */
     .rail { position:static; display:flex; overflow-x:auto; }
-    /* AND THE ITEMS ARE NOT THE RAIL'S CHILDREN ANY MORE (§160). The line
+    /* AND THE ITEMS ARE NOT THE RAIL'S CHILDREN ANY MORE (§162). The line
        above has said `display:flex` since the stacked rail was written, and
        for a long time it did nothing: reordering later wrapped every row in a
        `.sortable` div, so the rail dutifully laid out its ONE child in a row
@@ -2542,7 +2542,7 @@
      "Own supporting function" group headings, which had been under the second
      row since §117 split them. */
   .setuppane .cfg.acgrid table thead th { position:static; }
-  /* AND EVERY OTHER SETUP TABLE HAD THE SAME FAULT, UNLOOKED AT (§161.5).
+  /* AND EVERY OTHER SETUP TABLE HAD THE SAME FAULT, UNLOOKED AT (§163.5).
      The exclusion above fixed `.acgrid` and stopped there. `.cfg` is
      `overflow-x:auto`, which makes the BOX what a sticky head pins against —
      so a PAGE offset resolves inside the table, exactly as §130.2 wrote down.
@@ -5594,7 +5594,23 @@
           border:1px solid var(--line); border-radius:6px; padding:8px 10px;
           min-height:96px; resize:vertical; background:var(--surface); color:var(--ink); }
 .kbed-q:focus-visible, .kbed-a:focus-visible { outline:2px solid var(--focus); outline-offset:-1px; }
-.kbed-foot { display:flex; gap:12px; align-items:center; margin-top:8px; }
+.kbed-foot { display:flex; gap:12px; align-items:center; margin-top:8px;
+  flex-wrap:wrap; }
+/* WHO AN ANSWER IS FOR (§161). The picker sits FIRST in the foot, before the
+   "Edited" mark and its way back, because it is a property of the answer
+   while those two are a property of this tenant's change to it. */
+.kbed-aud { display:flex; align-items:center; gap:7px; font-size:12.5px;
+  color:var(--ink-3); }
+.kbed-aud select { font:inherit; color:var(--ink); background:var(--surface);
+  border:1px solid var(--line); border-radius:4px; padding:3px 6px; }
+/* The chip in read mode. `everyone` is never drawn — it is the default on 57
+   of 64 questions and a mark on nearly every card is furniture (§41). The two
+   that ARE drawn read apart at a glance rather than by their words alone:
+   the office's takes the accent, everybody-else's the quiet surface. */
+.pill.kind.kbaud-office { border-color:var(--gold); color:var(--gold-deep);
+  background:var(--attn-bg); }
+.pill.kind.kbaud-others { border-color:var(--line); color:var(--ink-2);
+  background:var(--surface-2); }
 .kbed-mark { font-size:var(--fs-micro); letter-spacing:.09em; text-transform:uppercase;
              font-weight:700; color:var(--gold-deep); border:1px solid var(--gold);
              border-radius:99px; padding:2px 9px; }
@@ -5627,7 +5643,7 @@
 .kbcount { font-size:var(--fs-micro); font-weight:700; opacity:.75; margin-left:6px; }
 
 
-  /* ── THE BANDS BUTTON AND ITS PANEL (§161) ──────────────────────────
+  /* ── THE BANDS BUTTON AND ITS PANEL (§163) ──────────────────────────
      In arrange.css, concatenated last, and with `#subtabs` in the selector —
      BOTH deliberate. §145.14 is the scar: the tab row styles its own buttons
      with `.tabs button` (0,1,1), which outranks any bare class, so a control
@@ -5661,7 +5677,7 @@
      down the list. */
   .bandslist span { margin-left:auto; color:var(--ink-2);
     font-variant-numeric:tabular-nums; }
-  /* ── THE TIE OVER THE PINNED PANE TITLE (§161.2) ────────────────────
+  /* ── THE TIE OVER THE PINNED PANE TITLE (§163.2) ────────────────────
      Islam, on a squeezed window: "on scrolling down things are damaged", with
      a table header lying across the pinned pane title. The trigger was never
      reproduced — ten widths from 1000 to 768, every scroll offset, opened
@@ -8466,7 +8482,80 @@ THEME.apply();
   function kbLook(t, id) {
     var o = kbTenant(t).ov;
     var e = o && typeof o === "object" ? o[id] : null;
-    return (e && typeof e === "object" && (e.q || e.a)) ? e : null;
+    return (e && typeof e === "object" && (e.q || e.a || e.w)) ? e : null;
+  }
+
+  /* ── WHO AN ANSWER IS FOR (§161, extending §160's two into three) ──
+     Islam, asked whether the questions file may change the audience: "on
+     every question and the question might be seen by only the smo or by
+     other audience or both."
+
+     THE OLD TWO MAP STRAIGHT ON, which is the whole back-compat argument:
+     `office` already meant the office alone, and `everyone` already meant
+     everybody INCLUDING the office, so nothing stored moves and an absent
+     value still reads as `everyone` (§30.2). What is new is `others` —
+     everybody EXCEPT the office — and it is what makes a two-answer pair
+     deterministic: §160 handed the office both halves and told the model to
+     pick, and now each side is served exactly one.
+
+     THE AUDIENCE GOVERNS THE ASSISTANT AND NEVER THE PAGE. The Knowledge
+     base page is the office's (§119.4), so an answer marked `others` shown
+     by this rule on the page would be readable by nobody and therefore
+     editable by nobody — §61's trap. The page shows the office everything
+     with the audience MARKED on it; only `kbSees()` below is consulted when
+     the corpus is assembled. */
+  var KB_AUDIENCES = ["office", "others", "everyone"];
+  var KB_AUDIENCE_LABEL = {
+    office:   "Strategy Office only",
+    others:   "Everyone else",
+    everyone: "Both"
+  };
+  /* The word, whatever arrives: an unknown or absent value is `everyone`,
+     which is the shipped default and the safe direction for a READING
+     permission — a typo must not silently hide an answer from the people it
+     was written for. */
+  function kbAudienceWord(w) {
+    return KB_AUDIENCES.indexOf(String(w || "")) > -1 ? String(w) : "everyone";
+  }
+  /* This tenant's audience for a question, or the shipped one. Read through
+     kbLook so the override lives with the wording it belongs to. */
+  function kbAudience(t, id, shipped) {
+    var o = kbLook(t, id);
+    return kbAudienceWord((o && o.w) || shipped);
+  }
+  /* Is this answer served to this asker? The ONE question the corpus filter
+     asks, so the client, the server and any check cannot answer it
+     differently (§42). */
+  /* ── WHAT SEPARATES TWO PARAGRAPHS (§161.3) ──────────────────────
+     The shipped answers use `|`, because recipes.js is a source file and a
+     separator that cannot appear in prose costs one line to split (§103).
+     The PEN's own lede has said "a blank line is a paragraph break" since
+     §140 and the renderer only ever split on `|` — so an office rewrite
+     typed as two paragraphs rendered as one run-on, on the page AND in the
+     answer the assistant gives. A promise the product made and did not keep.
+
+     Both are read now: `|` for the shipped text, a blank line for anything
+     typed into a textarea or a spreadsheet cell, where `|` is not a thing
+     anybody would reach for. ONE reader, here, so the page, the corpus and
+     the file cannot disagree about where a paragraph ends (§53.5). */
+  function kbParas(t) {
+    return String(t == null ? "" : t)
+      .split(/\s*\|\s*|\n[ \t]*\n\s*/)
+      .map(function (x) { return x.trim(); })
+      .filter(function (x) { return x.length > 0; });
+  }
+
+  /* IS THIS THE SAME PROSE? Asked by the writer (does this override still
+     say what the platform ships, §50.6) and by the questions file's reader
+     (has this row changed at all). TWO COPIES OF THAT QUESTION IS HOW THE
+     REVIEW COMES TO SAY "reworded" WHILE THE WRITER STORES NOTHING (§53.5),
+     which is a disagreement nobody would see until a client's edit vanished.
+     One function, so a change to what counts as a paragraph moves both. */
+  function kbSame(a, b) { return kbParas(a).join("|") === kbParas(b).join("|"); }
+
+  function kbSees(who, isOffice) {
+    var w = kbAudienceWord(who);
+    return isOffice ? w !== "others" : w !== "office";
   }
   function kbAllAdds(t) {
     var a = kbTenant(t).add;
@@ -8858,6 +8947,9 @@ THEME.apply();
     CHAT_DEFAULTS: CHAT_DEFAULTS, CHAT_PROMISE: CHAT_PROMISE,
     chatCfg: chatCfg, chatBeat: chatBeat,
     kbLook: kbLook, kbAdds: kbAdds, kbAllAdds: kbAllAdds,
+    KB_AUDIENCES: KB_AUDIENCES, KB_AUDIENCE_LABEL: KB_AUDIENCE_LABEL,
+    kbAudienceWord: kbAudienceWord, kbAudience: kbAudience, kbSees: kbSees,
+    kbParas: kbParas, kbSame: kbSame,
     PICK_SMO: PICK_SMO, PICK_OWNER: PICK_OWNER
   };
 });
@@ -10749,11 +10841,21 @@ function commsSet(key, value){
    touched it and thought better are byte-identical. What the overrides MEAN
    is `SMPRules.kbLook` / `kbAdds` — one precedence rule for the page and
    the assistant both (§103). */
+/* THE AUDIENCE IS RESOLVED HERE, NOT READ RAW (§161). An item's `who` may
+   be its own or inherited from its group — `recipesFlat()` resolves it and
+   this walk did not, so comparing an incoming audience against `item.who`
+   would have read `undefined` for every question in the Strategy Office
+   group and stored a phantom override on all five. Returns a COPY, so the
+   resolution cannot be written back onto the shipped array. */
 function kbShipped(id){
   for (var i = 0; i < RECIPES.length; i++){
     var g = RECIPES[i];
     for (var j = 0; j < g.items.length; j++){
-      if (g.items[j].id === id) return g.items[j];
+      var it = g.items[j];
+      if (it.id === id) {
+        return { id: it.id, q: it.q, a: it.a, g: g.g,
+                 who: SMPRules.kbAudienceWord(it.who || g.who) };
+      }
     }
   }
   return null;
@@ -10769,20 +10871,42 @@ function kbPrune(){
   if (k.add && !k.add.length) delete k.add;
   if (!Object.keys(k).length) delete GROUP.kb;
 }
-function kbSetOver(id, q, a){
+/* THE AUDIENCE IS THE THIRD THING AN OVERRIDE CAN CARRY (§161), so it is
+   passed and compared exactly like the wording: back to the shipped value
+   and the whole override dies with it. `w` is undefined at every existing
+   call site, which reads as "leave the audience alone" rather than as
+   "set it to nothing" — the distinction matters, because the pen writes
+   q and a together and the file writes all three. */
+function kbSetOver(id, q, a, w){
   var std = kbShipped(id);
   if (!std) return;
   q = String(q == null ? "" : q).trim();
   a = String(a == null ? "" : a).trim();
+  var k = kbWritable();
+  var had = (k.ov && k.ov[id]) || null;
+  var aud = w === undefined ? (had && had.w) : SMPRules.kbAudienceWord(w);
+  var stdAud = SMPRules.kbAudienceWord(std.who);
+  if (aud === stdAud) aud = null;
+  /* COMPARED CANONICALLY, NEVER AS TWO STRINGS (§145's lesson, §54.5's
+     fixed point). The shipped answers separate paragraphs with `|`; the pen
+     and the questions file use a blank line, because neither is a place
+     anybody would type a pipe. The same prose therefore arrives spelt two
+     ways, and a raw `===` would call an untouched download-edit-upload round
+     trip a change on all 64 rows — the platform refusing its own export.
+     Both sides go through the one paragraph reader before they meet. */
+  if (SMPRules.kbSame(q, std.q)) q = "";
+  if (SMPRules.kbSame(a, std.a)) a = "";
   /* Emptied or typed back to the shipped words, the override dies — an
      override that stores the standard wording is a phantom change in every
-     save (§42, §50.6). */
-  var k = kbWritable();
-  if ((!q || q === std.q) && (!a || a === std.a)) {
+     save (§42, §50.6). The audience joins that test: an entry holding only
+     an audience equal to the shipped one is the same phantom. */
+  if ((!q || q === std.q) && (!a || a === std.a) && !aud) {
     if (k.ov) delete k.ov[id];
   } else {
     if (!k.ov) k.ov = {};
-    k.ov[id] = { q: q || std.q, a: a || std.a };
+    var e = { q: q || std.q, a: a || std.a };
+    if (aud) e.w = aud;
+    k.ov[id] = e;
   }
   kbPrune();
 }
@@ -10800,13 +10924,20 @@ function kbAddNew(g){
   k.add.push({ id: "kbx" + n, g: g, q: "", a: "" });
   return "kbx" + n;
 }
-function kbSetAdded(id, q, a){
+function kbSetAdded(id, q, a, w){
   var k = GROUP.kb;
   if (!k || !k.add) return;
   var e = k.add.filter(function(x){ return x.id === id; })[0];
   if (!e) return;
   e.q = String(q == null ? "" : q).trim();
   e.a = String(a == null ? "" : a).trim();
+  /* `everyone` is the default, so it is stored as an ABSENCE (§50.6) — a
+     tenant who never touches the audience is byte-identical to one who set
+     it to Both and back. */
+  if (w !== undefined) {
+    var aud = SMPRules.kbAudienceWord(w);
+    if (aud === "everyone") delete e.w; else e.w = aud;
+  }
 }
 function kbDropAdded(id){
   var k = GROUP.kb;
@@ -14522,7 +14653,7 @@ function needsNote(x){
   var p = rowReads(x);
   if (p == null) return false;
   var k = bandOf(p).key;
-  /* `warn` IS KEPT ON PURPOSE (§161). The shipped bands are three now and this
+  /* `warn` IS KEPT ON PURPOSE (§163). The shipped bands are three now and this
      tenant has no `warn`, so the second test is dead here — and a tenant that
      saved the old four still has one, and dropping it would quietly stop
      asking for a note on every figure between 50 and 69 in their deployment.
@@ -14949,7 +15080,7 @@ Object.keys(UNITS).forEach(function(k){ UNITS[k].ukey = k; });
 
 var BANDS = {
   scope: "tenant",
-  /* THREE, NOT FOUR (§161, Islam: "I want the colors to be 3 colors only, red,
+  /* THREE, NOT FOUR (§163, Islam: "I want the colors to be 3 colors only, red,
      green and yellow" — 90+ green, 70 to 90 yellow, below 70 red).
 
      FOUR BANDS MEANT FOUR COLOURS AND TWO OF THEM WERE THE SAME WARNING. At
@@ -17405,8 +17536,17 @@ function pageInfoFor(key){
    A recipe that REFUSES something keeps one clause of WHY. A bare "not
    yourself" reads as the software being obstructive; "not yourself — a plan
    you're measured against isn't yours to rewrite" reads as a decision somebody
-   made on purpose. Twelve of these refuse something, and those twelve are the
+   made on purpose. A good few of these refuse something, and those are the
    ones people will be annoyed by.
+
+   A REFUSAL THAT HAS STOPPED BEING ABSOLUTE MUST SAY SO. This file sat
+   unchanged from §103 to §148 while the platform learned to open a plan's
+   Strategy half to a role (§117) and to let somebody fill only what is empty
+   (§145) — so five answers went on saying a flat "the office" about something
+   the office can now hand over. A recipe is a promise about behaviour, and a
+   promise nobody revisits is the one a client reads out in a meeting: when a
+   rule gains an exception, the recipe that states the rule is part of the
+   change.
 
    `who` IS RELEVANCE, NEVER PERMISSION. "office" means the answer is only
    useful to somebody who can do it — every word here is readable by everyone,
@@ -17417,193 +17557,365 @@ function pageInfoFor(key){
 
    NO SECTION NUMBERS AND NO INTERNAL VOCABULARY: these are read by somebody
    who has just hit a wall. The tenant's own words for a pillar and a business
-   unit are substituted at render time by L(). */
+   unit are substituted at render time by L().
+
+   AND THE LABEL IS NEVER INFLECTED (§107.8, and see recipeText). `bu` for a
+   pillar is "Pillars" — already plural, with no singular anywhere for a
+   sentence to reach for — so every sentence here takes `{pillar}` exactly as
+   it comes and is phrased to accept a plural noun. Where the ROLE is meant,
+   "Pillar owner" is written literally: that is its name on Roles & access and
+   it is not a tenant label.
+
+   REWRITTEN WITH ISLAM, 2026-08-29. He softened every answer and settled the
+   ten places where the shipped wording did not match the build — the reopen
+   button, the arrows that are not called Arrange, who submits, where a
+   project's Owner is set, the thresholds a tenant can change, and what
+   offline really does. The record of each decision is in the decisions
+   document; what is here is the outcome. */
 var RECIPES = [
 
 { g: "Reporting", items: [
   { id: "report-a-figure", q: "How do I report a figure?",
-    a: "Open your unit, go to <b>Performance</b>, and press <b>Report</b>. That turns the " +
-       "page into a reporting form: each measure takes its actual, and a note if it needs one." +
-       "|<b>Save draft</b> keeps what you have typed without telling anyone. <b>Submit</b> " +
-       "sends it to the office." },
+    a: "Open your unit, go to Performance, and select Report. The page will switch " +
+       "to a reporting form where you can enter the actual for each measure and " +
+       "add a note where needed. Save draft lets you save your progress without " +
+       "submitting it. When everything is ready, select Submit to send the report " +
+       "to the Strategy Office." },
   { id: "draft-vs-submit", q: "What is the difference between Save draft and Submit?",
-    a: "A draft is yours — saved, and nobody is told. Submitting hands the figures to the " +
-       "office and marks your unit as having reported for the cycle." +
-       "|Draft as often as you like; submit once the whole set is right." },
+    a: "Save draft saves your progress without submitting it to the Strategy " +
+       "Office. You can save a draft as often as needed. Submit sends the " +
+       "completed figures to the Strategy Office and marks your unit as reported " +
+       "for the cycle." },
   { id: "report-after-lock", q: "Can I still report once the cycle is locked?",
-    a: "No — once the office locks a cycle the figures are fixed. That is what makes a closed " +
-       "cycle a record of what was true at the time rather than something that keeps moving." +
-       "|If a number is wrong, say so here. The office can still correct it." },
+    a: "Once a reporting cycle is locked, its figures can no longer be edited " +
+       "directly. This keeps the closed cycle as an accurate record of what was " +
+       "reported at the time.|If you notice something that needs correcting, let " +
+       "the Strategy Office know here and they can help update it." },
   { id: "someone-elses-figure", q: "Why is one of my figures somebody else's to enter?",
-    a: "Some numbers belong to a team rather than to the unit that reports them — revenue " +
-       "exists in Finance before anyone asks you for it. Those are grouped into a named " +
-       "<b>figure set</b>, and the set's <b>figure owner</b> enters them wherever they appear." +
-       "|It still counts towards your unit's total, so you can chase it. The page names who owes it." },
+    a: "Some figures are managed centrally by another team. For example, a revenue " +
+       "figure may be owned by Finance even when it contributes to your unit's " +
+       "performance. These figures are grouped into a figure set, and its figure " +
+       "owner is responsible for entering them wherever they appear. The figure " +
+       "still contributes to your unit's results, and the page shows who is " +
+       "responsible for reporting it." },
   { id: "dash-not-zero", q: "Why does my score show a dash instead of 0?",
-    a: "Nothing has been reported for it yet. A dash means <i>not yet measurable</i>; 0 would " +
-       "mean a real result of nothing, and would pull your average down." +
-       "|Report an actual and the score appears." },
+    a: "A dash means the measure is not yet measurable because no actual has been " +
+       "reported. A score of 0 would mean an actual result of zero and would " +
+       "affect the average.|Once an actual is reported, the score will appear." },
   { id: "figure-note", q: "How do I add a note to a figure, and who reads it?",
-    a: "The note sits beside the actual on the reporting form. The office reads it, and it " +
-       "travels with the figure into the review." +
-       "|Use it for the thing a number cannot say — why it moved, or what happens next." },
+    a: "Add the note beside the actual on the reporting form. The Strategy Office " +
+       "can see it, and it will stay with the figure during the review.|Notes are " +
+       "useful for adding context the number alone cannot provide, such as why " +
+       "performance changed or what happens next." },
   { id: "submitted-by-mistake", q: "I submitted by mistake — what now?",
-    a: "Tell the office here. Submitting is how a unit speaks for itself, so it is not " +
-       "something you can quietly take back, but the office can reopen it for you." },
+    a: "Press <b>Reopen my report</b> on the Performance page — it sits beside the " +
+       "Submitted badge — then correct the figures and submit again.|If the cycle " +
+       "has been locked, or you are not your unit's head or strategy custodian, " +
+       "that button is not there: ask the Strategy Office here and they can reopen " +
+       "it for you." },
   { id: "the-dot", q: "What is the dot beside Performance?",
-    a: "It means this subject owes a submission and you are able to make it. It clears when " +
-       "you submit." +
-       "|If you cannot report, you never see it — the platform does not nag somebody who has " +
-       "no control that would clear it." },
+    a: "The dot means there is a report waiting to be submitted and you have " +
+       "permission to submit it. It disappears once the report is submitted.|If " +
+       "you don't have reporting access, the dot won't appear for you." },
   { id: "who-reports", q: "Who reports my unit's figures?",
-    a: "Your unit's <b>strategy custodian</b> or its <b>head</b>. Submitting speaks for the " +
-       "whole unit, so it stays with the people who hold it." +
-       "|Two exceptions: a figure that belongs to a figure set is entered by that set's owner " +
-       "wherever it appears, and the office can report on anyone's behalf." }
+    a: "Your unit's strategy custodian or head can report and submit its figures. " +
+       "Figures that belong to a figure set are entered by that figure set's owner " +
+       "wherever they appear. The Strategy Office can also report on behalf of a " +
+       "unit when needed." },
+  { id: "needs-a-pct", q: "A row says Needs a % — what does it want?",
+    a: "The row is marked In progress, but its progress percentage is still " +
+       "missing. Enter the percentage completed so the platform can calculate the " +
+       "result accurately. Until then, the row is left out of the average and will " +
+       "need to be completed before submitting." },
+  { id: "function-submit", q: "How does a supporting function submit its report?",
+    a: "A supporting function submits from its Reporting page, just like a " +
+       "business unit. One submission covers all the capabilities owned by that " +
+       "function.|Before submitting, make sure any at risk or off track figures " +
+       "have the required notes and that all In progress rows include a progress " +
+       "percentage." },
+  { id: "run-review", q: "How do I run a review, or present one?",
+    a: "From the unit's Performance page, use Report to enter or review figures " +
+       "and Presentation to open the presentation deck or manage its slides." },
+  { id: "picture-slide", q: "How do I put a picture into the review deck?",
+    a: "Go to Presentation › Manage slides, add the image and choose where you " +
+       "want it to appear. It will be included when the presentation deck opens. " +
+       "The image belongs to that reporting cycle and will be archived with it." }
 ]},
 
-{ g: "My plan", items: [
+{ g: "My Plan", items: [
   { id: "plan-mistake", q: "There is a mistake in my plan — how do I fix it?",
-    a: "Not yourself. Plans are corrected by the Strategy Office — a plan you are measured " +
-       "against is not yours to rewrite." +
-       "|Tell them here what is wrong. That covers the aspiration and the SWOT too, not only " +
-       "the measures." },
-  { id: "add-a-row", q: "How do I add a {pillar}, a measure or a tactic?",
-    a: "The office adds them, on your unit's <b>Plan</b> page. Ask here and say where it " +
-       "belongs and what it should be called." },
-  { id: "reorder", q: "How do I reorder my {pillars}?",
-    a: "Press the arrange control in the top-right of the Plan pane, drag the rows by the " +
-       "handles that appear, and press it again when you are done." +
-       "|The order carries through to Performance and Reporting on its own." },
+    a: "If you spot something that needs correcting, let the Strategy Office know " +
+       "here and they can update it. This applies to the full plan, including the " +
+       "aspiration, SWOT and measures. Depending on your access, the Strategy " +
+       "Office may also allow your role to edit Strategy pages directly or use " +
+       "Fill gaps, which lets you complete information that is currently missing." },
+  { id: "add-a-row", q: "How do I add {pillar}, measures or tactics?",
+    a: "New {pillar}, measures and tactics are normally added by the Strategy " +
+       "Office on your unit's Plan page. Let them know here what you would like to " +
+       "add and where it belongs." },
+  { id: "reorder", q: "How do I reorder my {pillar}?",
+    a: "Select the up-and-down arrows in the top-right of the Plan pane, then drag " +
+       "the rows into the order you want. Select them again when you're done.|The " +
+       "new order will automatically carry through to Performance and Reporting." },
   { id: "who-edits-plan", q: "Who can edit my unit's plan, and why not me?",
-    a: "The Strategy Office. A plan is the agreement you are measured against, so it stays " +
-       "with the people who keep the agreement rather than with either side of it." +
-       "|Everything else — reading it, reporting against it, explaining a figure — is yours." },
+    a: "By default, the Strategy Office manages edits to the plan to keep the " +
+       "agreed strategy consistent. Your access can also be extended to allow full " +
+       "Strategy editing or Fill gaps, which lets you complete missing " +
+       "information. Reporting access is managed separately, so being able to " +
+       "report does not automatically mean you can edit the plan." },
   { id: "plan-arrives", q: "How does a plan arrive in the first place?",
-    a: "It is authored once, by the office, and everything after that is reporting against it." +
-       "|If yours is missing or wrong, ask here." },
+    a: "The Strategy Office creates the plan either by uploading the template or " +
+       "building it directly through the platform's Plan pages. Once the plan is " +
+       "in place, reporting is done against it.|If anything is missing or " +
+       "incorrect, let the Strategy Office know here." },
   { id: "old-plan", q: "What happens to my old plan when a new one is uploaded?",
-    a: "It is archived, not deleted, and it can be restored. Nothing an import does is a deletion." },
+    a: "It is archived, not deleted, and can be restored if needed. Uploading a " +
+       "new plan does not delete the previous one." },
   { id: "collaborator", q: "What is a collaborator on a tactic?",
-    a: "Somebody who supports the tactic alongside the person accountable for it. It records " +
-       "who is involved — it does not by itself let them report the line." +
-       "|The office sets them." },
+    a: "A collaborator is someone who supports a tactic alongside the person " +
+       "accountable for it. Collaborators are selected from the people register to " +
+       "ensure each person is correctly identified. Being named as a collaborator " +
+       "does not automatically provide reporting access; the Strategy Office also " +
+       "needs to enable Reporting for Contributors." },
   { id: "change-targets", q: "Can I change my targets during the year?",
-    a: "Not yourself, and the office will usually say no mid-cycle — a target that moves while " +
-       "it is being measured stops being a target." +
-       "|If something genuinely changed, say what and why here." }
+    a: "Targets are normally kept unchanged during a reporting cycle so " +
+       "performance can be measured consistently against what was originally " +
+       "agreed. If circumstances have changed and you believe a target should be " +
+       "reviewed, let the Strategy Office know here and explain what has changed." }
+]},
+
+{ g: "Filling in what's missing", items: [
+  { id: "fill-what", q: "What does Fill in missing elements do?",
+    a: "Fill in missing elements lets you complete information that has not yet " +
+       "been added to the plan, such as a missing target, owner or tactic quarter. " +
+       "It only applies to empty fields, so existing information remains " +
+       "unchanged. Anything you add stays pending until the Strategy Office " +
+       "confirms it." },
+  { id: "fill-what-not", q: "What can I not change while I am filling gaps?",
+    a: "Fill gaps is designed only for information that is currently missing. You " +
+       "won't be able to change existing values or add, remove, rename or reorder " +
+       "rows.|If something already entered needs correcting, let the Strategy " +
+       "Office know here." },
+  { id: "fill-find", q: "How do I find what is missing?",
+    a: "The red bar on each section shows how many items are missing. Select one " +
+       "of the chips to go directly to that item.|Once you start filling gaps, you " +
+       "can use Next gap to move through the missing items one by one." },
+  { id: "fill-pending", q: "Why does the value I filled say pending?",
+    a: "A value you add through Fill gaps stays pending until the Strategy Office " +
+       "confirms it. While it's pending, you can still update or clear it.|If the " +
+       "value affects a score, that score will wait until the value is confirmed." },
+  { id: "fill-dash", q: "I filled the target — why is the score still a dash?",
+    a: "If you have just filled in the target, it is entered but still pending " +
+       "confirmation. Because the score depends on that target, it stays a dash " +
+       "until the Strategy Office confirms it.|You can continue entering figures " +
+       "and saving drafts in the meantime." },
+  { id: "fill-submit", q: "Why won't it let me submit — something is awaiting confirmation?",
+    a: "One or more values used to calculate the report are still awaiting " +
+       "confirmation. The submission message will show which rows are affected. " +
+       "Once the Strategy Office confirms those values, you'll be able to " +
+       "submit.|You can continue reporting and saving drafts in the meantime." },
+  { id: "fill-confirm", q: "How do I confirm what somebody filled in?", who: "office",
+    a: "Select the tick beside the amber pending mark to confirm the value. You " +
+       "can also edit the value if a correction is needed; saving the correction " +
+       "will confirm it at the same time. The page shows how many items are still " +
+       "waiting for confirmation." }
+]},
+
+{ g: "Owners and reporting permissions", items: [
+  { id: "project-owner", q: "What is a project owner?",
+    a: "A project owner is the person named as the project's Owner. To report on " +
+       "the project, two things need to be in place: you must be named as the " +
+       "Owner, and Reporting must be enabled for Project owners under Roles & " +
+       "access. When both are enabled, you can report on the full project." },
+  { id: "pillar-owner", q: "What is a Pillar owner?",
+    a: "A Pillar owner is the person named as the Owner of one of your {pillar}. " +
+       "They report everything inside it — its measures and its tactics — when " +
+       "Reporting is enabled for Pillar owners under Roles &amp; access." },
+  { id: "contributor-role", q: "What is a contributor?",
+    a: "A contributor is someone named within a plan to contribute to a specific " +
+       "item, such as a tactic, project or milestone. If Reporting is enabled for " +
+       "Contributors, they can report on the specific rows where they are " +
+       "named.|Submission remains with the person responsible for the overall unit " +
+       "or function." },
+  { id: "owner-cant-report", q: "I own a project and still cannot report it — why?",
+    a: "Check two things: that you are named as the project's Owner on the " +
+       "project, and that Reporting is enabled for Project owners under Roles " +
+       "&amp; access.|If either needs updating, let the Strategy Office know here " +
+       "and mention the project." },
+  { id: "some-rows-only", q: "Why can I enter some rows on this page and not others?",
+    a: "Your reporting access may apply to specific parts of the page rather than " +
+       "the whole plan. For example, Project owners can report on their projects, " +
+       "Pillar owners on their {pillar}, and Contributors on the rows where they " +
+       "are named.|You can still view the other rows. If you think you should be " +
+       "able to report on a particular row, let the Strategy Office know here." },
+  { id: "owner-from-register", q: "Why is Owner a list of people rather than a box to type in?",
+    a: "Owners are selected from the people register so the platform can correctly " +
+       "connect each person to their reporting permissions. This also avoids " +
+       "issues caused by different spellings of the same name. Existing names " +
+       "imported from older plans are preserved so the plan continues to display " +
+       "as originally uploaded." }
 ]},
 
 { g: "Understanding the numbers", items: [
   { id: "headline", q: "How is my unit's headline number worked out?",
-    a: "From your <b>key objectives</b> — each actual against its target." +
-       "|Not from the {pillars} below, which is why the two can disagree without either being " +
-       "wrong. They sit at different altitudes." },
-  { id: "pillar-vs-objectives", q: "Why does a {pillar} disagree with my objectives?",
-    a: "A {pillar}'s measures are internal to that {pillar}; your objectives are what the unit " +
-       "is judged on. A {pillar} can struggle while the objectives are fine." +
-       "|The platform keeps them apart rather than blending them into one number that answers " +
-       "neither." },
+    a: "Your unit's headline number is calculated from its key objectives, " +
+       "comparing each actual against its target. Performance for your {pillar} is " +
+       "calculated separately, so the two numbers may differ without either being " +
+       "incorrect." },
+  { id: "pillar-vs-objectives", q: "Why do my {pillar} disagree with my objectives?",
+    a: "Each of your {pillar} scores on the measures inside it, while your " +
+       "objectives are the overall results the unit is measured against. Because " +
+       "they measure different things, the two can differ without either being " +
+       "wrong." },
   { id: "execution", q: "What is execution, and why is 100% not “finished”?",
-    a: "It is what has been delivered divided by what should have been delivered <b>by now</b>, " +
-       "worked out from each tactic's quarters." +
-       "|So 100% means exactly on plan, not complete." },
+    a: "Execution compares what has been delivered with what was planned to be " +
+       "delivered by now, based on each tactic's scheduled quarters. So 100% means " +
+       "you're exactly on plan at this point in time, not necessarily that the " +
+       "tactic is complete." },
   { id: "colours", q: "What do the colours mean?",
-    a: "One scale for every figure judged against a benchmark: on track from 85%, needs " +
-       "attention from 70%, at risk from 50%, off track below that." +
-       "|The colour and the word come from the same place, so they can never disagree." },
+    a: "The colours give a quick view of performance against the benchmark. By " +
+       "default: On track from 85%, Needs attention from 70%, At risk from 50%, " +
+       "and Off track below 50% — and the Strategy Office can change these " +
+       "thresholds for your organisation.|The colour and the status word always " +
+       "come from the same scale, so they can never disagree." },
   { id: "focus-measure", q: "What is a focus measure?",
-    a: "One the CEO has marked as a measure the year turns on. It changes no score — it changes " +
-       "what gets looked at first." },
+    a: "A focus measure is a measure the CEO has identified as particularly " +
+       "important for the year. It doesn't change how the score is calculated; it " +
+       "simply highlights the measures that should receive additional attention." },
   { id: "reward-line", q: "What is the reward line?",
-    a: "The point at which delivering the commitment earns. At 100% it is the target itself; " +
-       "set higher, a measure can meet its target without clearing the line and reads as " +
-       "<i>met, not earning</i>." +
-       "|Either way it is scored against its own target exactly as before." },
+    a: "The reward line is the performance level at which a measure becomes " +
+       "eligible for reward. If it's set at 100%, it matches the target. If it's " +
+       "set higher, a measure can meet its target without yet reaching the reward " +
+       "line. The measure's performance score is still calculated against its " +
+       "original target." },
   { id: "unit-to-group", q: "How does my unit's number reach the group's?",
-    a: "Weighted, not averaged. Each unit carries a weight set on the group's <b>Weighting</b> " +
-       "tab, and the group's figure is the weighted average of the unit headlines." +
-       "|Position on the page is not weight — arranging changes nothing." }
+    a: "Unit results contribute to the group's result based on their assigned " +
+       "weight rather than through a simple average. Each unit's weight is set on " +
+       "the group's Weighting tab. Changing the order of units on the page does " +
+       "not affect their weight." }
 ]},
 
 { g: "Capabilities and projects", items: [
   { id: "add-project", q: "How do I add a project to a capability?", who: "office",
-    a: "On the capability's <b>Projects</b> page, with the pen open. Projects belong to the " +
-       "supporting function that owns the capability." },
-  { id: "add-project-ask", q: "How do I add a project to a capability?", who: "everyone",
-    a: "The office adds them. Say which capability it belongs to and what it should be called." },
+    a: "On the capability's <b>Projects</b> page, with the pen open. Projects " +
+       "belong to the supporting function that owns the capability." },
+  { id: "add-project-ask", q: "How do I add a project to a capability?",
+    a: "The Strategy Office can add a project to a capability for you. Let them " +
+       "know which capability it belongs to and what the project should be called." },
   { id: "deliverable-or-outcome", q: "Deliverable or outcome — which is this?",
-    a: "A <b>deliverable</b> is a thing you produce; an <b>outcome</b> is a change you can " +
-       "measure. If it has a target and a direction, it is an outcome." +
-       "|Both are evidence, and the score reads them as two halves." },
+    a: "A deliverable is something the project produces, while an outcome is a " +
+       "measurable change the project is expected to achieve. If an item has a " +
+       "target and direction, it's treated as an outcome. Both contribute to the " +
+       "project's performance score." },
   { id: "project-performance", q: "How is a project's performance worked out?",
-    a: "Half from its deliverables and half from its outcomes. Where a project has only one of " +
-       "the two, that side carries the whole score." },
+    a: "A project's performance is calculated equally from its deliverables and " +
+       "outcomes. If the project has only one of the two, that component carries " +
+       "the full score." },
   { id: "no-outcomes", q: "Why has my project no outcomes section?",
-    a: "Because it has none yet. An empty half is not drawn — a project with no outcomes is a " +
-       "plan that committed to no measurable change, not a broken screen." +
-       "|Open the pen and both halves appear, so you can add the first one." }
+    a: "The Outcomes section is hidden when a project doesn't have any outcomes " +
+       "yet. If you have editing access, open the Edit control and both sections " +
+       "will appear so you can add the first outcome." },
+  { id: "repeating-project", q: "What does Repeats: Each cycle mean on a project?",
+    a: "Repeats: Each cycle means the project starts a new reporting period with " +
+       "each cycle rather than being completed once. When a new cycle opens, the " +
+       "previous figures are archived, the reporting fields are cleared, and the " +
+       "project dates move forward based on the cycle length. Projects without " +
+       "this setting keep their existing figures." }
 ]},
 
-{ g: "Getting at things", items: [
-  { id: "password", q: "How do I change my password?",
-    a: "Ask the office here and they issue a temporary one; you choose your own the moment you " +
-       "use it." +
-       "|<i>If you have forgotten it you cannot reach this chat at all — you are asking from " +
-       "inside the platform. Ask the office by any other route you have.</i>" },
+{ g: "Access and navigation", items: [
+  { id: "strategy-vs-reporting", q: "My access says Strategy and Reporting separately — what is the difference?",
+    a: "Strategy controls access to the plan itself, including the foundation, " +
+       "SWOT and strategic plan. Reporting controls access to performance figures, " +
+       "drafts and submissions. They are managed separately, so you may be able to " +
+       "report against a plan without being able to edit it. Strategy access can " +
+       "also include Fill gaps, which allows you to complete missing information " +
+       "without changing existing content." },
   { id: "other-unit", q: "Why can't I open another business unit?",
-    a: "Access is by page: a unit you are not attached to is removed, not trimmed. You see what " +
-       "your role is attached to." +
-       "|Need something you can't open? Ask here — granting it is the office's to do." },
+    a: "Your access is based on the business units connected to your role, so " +
+       "units you don't have access to won't appear for you. If you need access to " +
+       "another unit, let the Strategy Office know here and they can review your " +
+       "access." },
   { id: "my-role", q: "What does my role let me do?",
-    a: "It depends on what it is attached to as much as what it is called — holding a unit " +
-       "gives you that unit, not all of them. Hold several roles and you get the most generous " +
-       "answer of them, each about its own thing." +
-       "|The <b>Access</b> section above has the full picture." },
+    a: "What you can do depends on both your role and what that role is connected " +
+       "to. For example, being assigned to one unit gives you access to that unit, " +
+       "not automatically to every unit.|If you hold multiple roles, your " +
+       "permissions are combined across the areas each role covers." },
   { id: "get-access", q: "How do I get access to something I cannot open?",
-    a: "Ask here, and say which page and why. Access is the office's to grant." }
+    a: "Let the Strategy Office know here which page you need access to and why. " +
+       "They can review the request and update your access where appropriate." }
 ]},
 
-{ g: "The office's own work", who: "office", items: [
-  { id: "add-person", q: "How do I add somebody to the register?",
-    a: "<b>Setup › People</b>, on the register itself. Give them an employee number or an " +
-       "email — a name is not an identifier, and two people really can share one." },
-  { id: "people-file", q: "How do I upload the people file?",
-    a: "<b>Setup › People</b>, from the register's file menu. It <b>adds and amends and " +
-       "never removes</b> — nobody is retired by being left out of a file." +
-       "|Anything it cannot match is set aside for you to answer rather than guessed at." },
-  { id: "new-cycle", q: "How do I open a new reporting cycle?",
-    a: "<b>Setup › Running the cycle</b>. Opening one archives the figures and then clears " +
-       "them, so every unit is asked again rather than inheriting last quarter's answers." },
-  { id: "run-review", q: "How do I run a review, or present one?",
-    a: "On a unit's <b>Performance</b> page — <b>Report</b> to enter figures, " +
-       "<b>Presentation</b> to project the deck or to manage its slides." },
-  { id: "picture-slide", q: "How do I put a picture into the review deck?",
-    a: "Under <b>Presentation › Manage slides</b>. Pick where it goes and it is assembled " +
-       "into the deck when the deck opens." +
-       "|It belongs to the cycle, so it is archived with the figures." },
-  { id: "branding", q: "How do I set the colours and the logo?",
-    a: "<b>Setup › Branding</b>. The mark must be a PNG — an uploaded SVG can carry code, " +
-       "which is not a risk worth taking for a logo." },
-  { id: "demo-data", q: "What does Demo data do, and why can't I save in it?",
-    a: "It shows the full worked example — an invented tenant, so you can see a filled platform " +
-       "without touching yours. It refuses to save on purpose." +
-       "|<b>Clear project</b> shows the opposite: exactly what a new deployment looks like on " +
-       "day one." },
-  { id: "focus-switch", q: "How do I turn focus measures off?",
-    a: "<b>Setup › Focus measures</b>, on the button in the page header. Off hides them " +
-       "everywhere and keeps every mark, so turning it back on restores them." }
-]},
-
-{ g: "The platform itself", items: [
+{ g: "The platform and support", items: [
+  { id: "ask-the-office", q: "How do I ask the Strategy Office something?",
+    a: "Use the chat bubble in the bottom-right corner of any page to contact the " +
+       "Strategy Office. Your questions and their replies stay together in one " +
+       "ongoing conversation, so you can easily refer back to previous " +
+       "messages.|You can also attach screenshots when helpful." },
+  { id: "assistant-answer", q: "Something answered me straight away — was that a person?",
+    a: "That was the platform assistant. When enabled, it will first try to answer " +
+       "your question using the platform's knowledge base. If the answer doesn't " +
+       "address what you need, select This didn't answer it — send it to the " +
+       "office and someone from the Strategy Office can pick it up. Questions the " +
+       "assistant can't answer are sent to them automatically." },
+  { id: "welcome-screen", q: "What is the screen I get when I sign in?",
+    a: "The welcome screen gives you a quick view of anything that needs your " +
+       "attention, such as a report to submit, missing plan information or a reply " +
+       "from the Strategy Office. Each item includes a shortcut to take you " +
+       "directly to it.|Select Continue to enter the platform." },
+  { id: "take-the-tour", q: "Can I see the introduction again?",
+    a: "Yes. The welcome screen offers <b>Take an intro round</b>, and it appears " +
+       "the next time you sign in — so if you have already moved past it today, " +
+       "you will see it again on your next sign-in.|The introduction uses a worked " +
+       "example rather than your own data, so you can explore the platform without " +
+       "changing or saving anything." },
+  { id: "password", q: "How do I change my password?",
+    a: "If you're already signed in, ask the Strategy Office here and they can " +
+       "issue a temporary password. You'll be asked to choose a new password when " +
+       "you use it.|If you can't sign in, contact the Strategy Office through your " +
+       "usual support channel." },
   { id: "offline", q: "Does it work with no internet, and can I install it?",
-    a: "Yes to both. It is a single page and it keeps itself, so it opens offline, and your " +
-       "browser will offer to install it with its own icon and window." +
-       "|What it cannot do offline is save — anything typed goes up when you are back." },
+    a: "Yes. The platform can be installed through your browser and can also open " +
+       "while you're offline.|Changes cannot be saved without a connection, but " +
+       "they will sync once you're back online — as long as you keep the tab open. " +
+       "Closing it while offline loses whatever you entered, so it is safest to " +
+       "enter figures while connected." },
   { id: "where-data", q: "Where does my data live?",
-    a: "In a database belonging to this deployment. Figures, plans and people are stored there; " +
-       "what you have chosen on screen — light or dark, which columns you show — stays in your " +
-       "own browser." }
+    a: "Your plans, figures and people data are stored in the database for your " +
+       "organization's deployment. Personal display preferences, such as light or " +
+       "dark mode and which columns you choose to show, are stored locally in your " +
+       "browser." },
+  { id: "demo-data", q: "What does Demo data do, and why can't I save in it?",
+    a: "Demo data gives you a fully worked example so you can explore how a " +
+       "completed platform looks without affecting your organization's data. " +
+       "Saving is intentionally disabled in Demo mode. Clear project shows the " +
+       "opposite: what a new deployment looks like before information is added." }
+]},
+
+{ g: "Strategy Office questions", items: [
+  { id: "add-person", q: "How do I add somebody to the register?", who: "office",
+    a: "Go to Setup › People and add them to the register. Make sure to include an " +
+       "employee number or email as a unique identifier, since more than one " +
+       "person may have the same name." },
+  { id: "people-file", q: "How do I upload the people file?", who: "office",
+    a: "Go to Setup › People and use the register's file menu to upload the people " +
+       "file. The upload can add or update people, but it won't remove anyone " +
+       "simply because they're missing from the file. Any records the platform " +
+       "can't confidently match will be set aside for you to review." },
+  { id: "new-cycle", q: "How do I open a new reporting cycle?", who: "office",
+    a: "Go to <b>Setup › Running the cycle</b>. A new cycle can only be opened " +
+       "once the current one is closed.|Opening one archives the previous cycle's " +
+       "figures and clears the reporting fields, so each unit is asked again " +
+       "rather than inheriting the last set of answers." },
+  { id: "branding", q: "How do I set the colours and the logo?", who: "office",
+    a: "Go to Setup › Branding to set the platform colours and logo. Logos should " +
+       "be uploaded in PNG format; SVG files aren't supported for security " +
+       "reasons." },
+  { id: "focus-switch", q: "How do I turn focus measures off?", who: "office",
+    a: "Go to Setup › Focus measures and use the control in the page header to " +
+       "turn them off. This hides focus measures across the platform without " +
+       "removing their settings, so they'll return if you turn the feature back " +
+       "on." }
 ]}
 
 ];
@@ -19979,6 +20291,182 @@ function peopleFromWorkbook(sheets){
   return sheetObjects(sheets["People"] || []);
 }
 
+/* ── THE QUESTIONS FILE (§161) ─────────────────────────────────────────────
+   Islam: "let me able to export and import the questions and answers." He had
+   just done it by hand — the whole corpus into a spreadsheet, softened, and
+   back — so this is that round trip made part of the product.
+
+   THE EXPORT IS THE TEMPLATE, the people file's rule (§54): what downloads is
+   what uploads, so there is no second artefact to keep in step.
+
+   MATCHED ON Id, and that is the whole reason the column exists. The question
+   TEXT is the office's to edit, so it cannot be the key — §87's rule about
+   names and identifiers, arriving in a third place. A blank id is a new
+   question; an id nobody knows applies NOTHING and says so, because that is
+   the row that would otherwise become a silent duplicate.
+
+   PARAGRAPHS ARE BLANK LINES HERE, never the `|` the source file uses: a pipe
+   is not a thing anybody types into a cell. Both are read (SMPRules.kbParas),
+   and kbSetOver compares canonically, so an untouched round trip stores
+   nothing at all (§54.5). */
+/* NO REFERENCE COLUMN. The first build carried a read-only "Standard answer"
+   beside the editable one, because that is the shape Islam worked in by hand
+   (§160's Before/After). Looking at it, he asked for it out: "remove the
+   standard answer from the sheet not to be confused." Two columns of prose
+   that differ only where somebody has edited one is a sheet you have to read
+   twice to know which is which — and the shipped wording is one press away on
+   the page, on the button that also puts it back (§140's "Back to the
+   standard wording"). A comparison you can act on beats a column you cannot.
+
+   REMOVING IT COSTS NOTHING TO OLD FILES: sheetObjects() keys on the heading
+   row, so a file downloaded before today still reads, and its extra column is
+   simply a key nobody asks for (§58's rule — write the new shape, read
+   either). */
+var KB_FILE_COLS = ["Id", "Section", "Question", "Answer", "Audience"];
+
+function kbAudLabels(){
+  return SMPRules.KB_AUDIENCES.map(function(k){
+    return SMPRules.KB_AUDIENCE_LABEL[k];
+  });
+}
+function kbAudFromLabel(v){
+  var t = String(v || "").trim().toLowerCase();
+  var hit = SMPRules.KB_AUDIENCES.filter(function(k){
+    return SMPRules.KB_AUDIENCE_LABEL[k].toLowerCase() === t || k === t;
+  })[0];
+  return hit || null;
+}
+/* Paragraphs as a cell holds them. */
+function kbCellText(a){ return SMPRules.kbParas(a).join("\n\n"); }
+
+function kbReadme(){
+  return { name:"Read me", widths:[104], head:["The questions file"], rows:[
+    ["This is every question the knowledge base answers, and the words it answers with."],
+    [""],
+    ["It is the same file both ways: what you download is what you upload. Edit the"],
+    ["Question, the Answer and the Audience; leave everything else alone."],
+    [""],
+    ["Id — how a row is recognised. Do not change it. The question text is yours to"],
+    ["   edit, so it cannot be what a row is matched on."],
+    ["   Leave the Id EMPTY to add a question of your own — give it a Section."],
+    [""],
+    ["Answer — a blank line inside the cell starts a new paragraph (Alt+Enter)."],
+    [""],
+    ["Audience — who the assistant answers with this. One of:"],
+    ["   " + kbAudLabels().join("   |   ")],
+    [""],
+    ["Putting an Answer back to the standard wording clears your change for that"],
+    ["question, so this file is also how you undo one. The standard wording is on"],
+    ["the Knowledge base page itself: an answer you have changed says so, on the"],
+    ["button that puts it back."],
+    [""],
+    ["Uploading ADDS and AMENDS and never removes: a row you delete from this file"],
+    ["leaves the platform exactly as it was. Remove a question you added on the page."],
+    [""],
+    ["You see everything that will change, and press Apply, before anything is saved."]
+  ]};
+}
+
+function kbWorkbook(){
+  var rows = [];
+  RECIPES.forEach(function(g){
+    g.items.forEach(function(r){
+      var o = SMPRules.kbLook(GROUP.kb, r.id);
+      var aud = SMPRules.kbAudience(GROUP.kb, r.id, r.who || g.who);
+      rows.push([r.id, g.g, (o && o.q) || r.q, kbCellText((o && o.a) || r.a),
+                 SMPRules.KB_AUDIENCE_LABEL[aud]]);
+    });
+  });
+  /* The office's own questions, at the foot. */
+  SMPRules.kbAllAdds(GROUP.kb).forEach(function(x){
+    rows.push([x.id, x.g || "", x.q, kbCellText(x.a),
+               SMPRules.KB_AUDIENCE_LABEL[SMPRules.kbAudienceWord(x.w)]]);
+  });
+  return [
+    kbReadme(),
+    { name:"Questions", widths:[22, 30, 46, 96, 22],
+      head:KB_FILE_COLS,
+      validations:[
+        { range:"E2:E2000", list:kbAudLabels(),
+          error:"Choose who the assistant answers with this question." }
+      ],
+      rows:rows }
+  ];
+}
+
+/* ── READING IT BACK ───────────────────────────────────────────────────────
+   Classifies and applies NOTHING. The caller shows the list and applies it on
+   a press, the way the people file and the plan import already do — a bad
+   paste must not be able to rewrite sixty-four answers in silence.
+
+   Every comparison is canonical, so a file downloaded and uploaded untouched
+   classifies as no change at all. That is the assertion the check makes first,
+   because a round trip that reports work is a round trip nobody trusts. */
+function kbFromWorkbook(sheets){
+  var rows = sheetObjects(sheets["Questions"] || []);
+  var out = { reword:[], audience:[], reset:[], add:[], unknown:[], blank:0 };
+  rows.forEach(function(r){
+    var id = String(r["Id"] || "").trim();
+    var q  = String(r["Question"] || "").trim();
+    var a  = String(r["Answer"] || "").trim();
+    var audRaw = r["Audience"];
+    var aud = kbAudFromLabel(audRaw);
+    if (!q && !a) { out.blank++; return; }
+    /* NEW: no id at all. Given one on apply, never here — minting inside a
+       classifier would leave ids behind on a discarded review. */
+    if (!id) {
+      out.add.push({ g: String(r["Section"] || "").trim(), q:q, a:a, w:aud || "everyone" });
+      return;
+    }
+    var added = SMPRules.kbAllAdds(GROUP.kb).filter(function(x){ return x.id === id; })[0];
+    if (added) {
+      var wasA = SMPRules.kbAudienceWord(added.w);
+      if (!SMPRules.kbSame(added.q, q) || !SMPRules.kbSame(added.a, a))
+        out.reword.push({ id:id, q:q, a:a, w:aud || wasA, mine:true });
+      else if (aud && aud !== wasA)
+        out.audience.push({ id:id, q:q, a:a, w:aud, mine:true, from:wasA });
+      return;
+    }
+    var std = kbShipped(id);
+    if (!std) { out.unknown.push({ id:id, q:q }); return; }
+    var now = SMPRules.kbLook(GROUP.kb, id);
+    var nowQ = (now && now.q) || std.q, nowA = (now && now.a) || std.a;
+    var nowW = SMPRules.kbAudience(GROUP.kb, id, std.who);
+    var sameText = SMPRules.kbSame(q, nowQ) && SMPRules.kbSame(a, nowA);
+    var backToStd = SMPRules.kbSame(q, std.q) && SMPRules.kbSame(a, std.a);
+    if (!sameText) {
+      /* Back to the shipped words IS the way to undo, so it is reported as a
+         reset rather than as another rewording — the two land somewhere
+         different and somebody reading the list needs to know which. */
+      (backToStd && now ? out.reset : out.reword).push({ id:id, q:q, a:a,
+        w: aud || nowW, from:nowW });
+    } else if (aud && aud !== nowW) {
+      out.audience.push({ id:id, q:q, a:a, w:aud, from:nowW });
+    }
+  });
+  return out;
+}
+function kbChangeCount(c){
+  return c.reword.length + c.audience.length + c.reset.length + c.add.length;
+}
+/* Applying is the only place that writes, and it goes through the SAME
+   writers the pen uses — so a rule about what may be stored (an override that
+   equals the shipped wording dies, §50.6) cannot be true on one path and not
+   the other (§53.5). */
+function kbApply(c){
+  c.reset.forEach(function(x){ kbResetOver(x.id); });
+  c.reword.forEach(function(x){
+    if (x.mine) kbSetAdded(x.id, x.q, x.a, x.w); else kbSetOver(x.id, x.q, x.a, x.w);
+  });
+  c.audience.forEach(function(x){
+    if (x.mine) kbSetAdded(x.id, x.q, x.a, x.w); else kbSetOver(x.id, x.q, x.a, x.w);
+  });
+  c.add.forEach(function(x){
+    var id = kbAddNew(x.g || (RECIPES[0] && RECIPES[0].g) || "");
+    kbSetAdded(id, x.q, x.a, x.w);
+  });
+}
+
 </script>
 <script>
 /* ── The plan leaves as slides (§117) ────────────────────────────────
@@ -21032,7 +21520,7 @@ function barRow(main, sub, perf, exec, planned, opts){
 }
 
 function chartLegend(){
-  /* A SECOND COPY OF THE BANDS, AND IT WAS ALREADY LYING (§161). This read
+  /* A SECOND COPY OF THE BANDS, AND IT WAS ALREADY LYING (§163). This read
      "On track 70+ / At risk 50-69 / Off track under 50" while the bands said
      85 / 70 / 50 — two definitions of the same thing, drifted, on one page.
      §53.5: it is derived from `BANDS.bands` now, like the button, so the
@@ -21119,7 +21607,7 @@ var COMPILE_WORDS = {
    the platform's own hover, so nothing new has to be positioned, and
    `clipTitles()` only fills an EMPTY title so this is never overwritten
    (§93.6). */
-/* THE PRODUCT'S OWN NOTE, NOT THE BROWSER'S (§161). This shipped as a `title`
+/* THE PRODUCT'S OWN NOTE, NOT THE BROWSER'S (§163). This shipped as a `title`
    and Islam reported the hover as "not working" — it was working, and that is
    the finding: a native tooltip waits about a second, hangs off an 11px target,
    and on an iPad DOES NOT EXIST. §127 settled this once for the chat settings
@@ -21149,8 +21637,8 @@ function dirCell(d){ return d ? noteSpan(d, DIR_WORDS[d] || "") : ""; }
 function compileCell(c){
   if (!c) return "";
   var note = COMPILE_WORDS[c] || "";
-  /* THROUGH `noteSpan`, WHICH IS WHY IT EXISTS (§161.3). This built its own
-     span and set its own `title` — §161 converted the direction cell and left
+  /* THROUGH `noteSpan`, WHICH IS WHY IT EXISTS (§163.3). This built its own
+     span and set its own `title` — §163 converted the direction cell and left
      this one behind, and the two faults then met: the span still carried
      `hasnote`, so the new bubble matched it with NO `data-tip` to fill it and
      painted an EMPTY BLACK BOX, and a second later the browser's tooltip
@@ -21411,7 +21899,7 @@ var TIP_EXEC = "Execution scores the tactics under this unit's pillars \u2014 ea
 var TIP_THEME = "Performance and execution across every pillar carrying this theme, in every business unit.";
 var TIP_CAP = "Group capabilities are pillars in their own right: performance from their key measures, execution from their tactics.";
 
-/* THE COLOURS MOVE BEHIND A BUTTON (§161) ─────────────────────────────
+/* THE COLOURS MOVE BEHIND A BUTTON (§163) ─────────────────────────────
    It was a full-width bar reading "READING THE COLOURS" with every band spelt
    out, and it carried Report and Presentation at its right end — which is why
    those two read as a row of their own rather than as the page's controls.
@@ -28681,10 +29169,24 @@ function kbSection(id, title, blocks){
    A recipe's answer is one string with `|` between paragraphs. Not an array:
    the file is long enough already, and a separator that cannot appear in prose
    costs nothing to read and one line to split. */
+/* THE LABEL IS TAKEN EXACTLY AS IT COMES (§107.8, fixed 2026-08-29).
+   `{pillars}` used to render `plural(2, L("pillar","bu"))` — and `plural()`
+   returns a COUNT followed by the word, while `bu` for a pillar is already
+   "Pillars". So the shipped question "How do I reorder my {pillars}?" was
+   rendering as "How do I reorder my 2 Pillarss?" on every deployment: a
+   number nobody asked for and a doubled s. §107.8 had already written the
+   rule down — a tenant's label is never inflected, because there is no
+   singular anywhere for a sentence to reach for — and this was the one place
+   still inflecting one, in the product's own help.
+
+   Both tokens now resolve to the label as given. `{pillars}` is kept as an
+   alias so a recipe reworded by a tenant (§140) cannot break by using it,
+   and every sentence in recipes.js is phrased to accept a plural noun. */
 function recipeText(t){
+  var word = L("pillar","bu");
   return String(t)
-    .replace(/\{pillars\}/g, plural(2, L("pillar","bu")))
-    .replace(/\{pillar\}/g, L("pillar","bu"));
+    .replace(/\{pillars\}/g, word)
+    .replace(/\{pillar\}/g, word);
 }
 
 /* THE PEN'S STATE. File-scope like the other page modes; the page is the
@@ -28692,6 +29194,11 @@ function recipeText(t){
    asks inOffice() (§42: the gate is on the control) and the server classifies
    a GROUP.kb change as setup, so both ends answer alike (§94.2). */
 var KBEDIT = false;
+/* The file menu's open state, and the classified upload waiting for Apply.
+   Both are SCREEN state and neither is stored: a review abandoned by
+   navigating away is a review that never happened (§25, §47.1). */
+var KBFILEMENU = false;
+var KBFILE = null;      /* { changes, name } while a review is on screen */
 
 /* WHICH TAB (§141): "how" or "qa". A SCREEN PREFERENCE (§25, §47.1) — one
    person reading the reference must not decide the tenant's landing tab —
@@ -28705,11 +29212,36 @@ function kbTabSet(t){
   try { localStorage.setItem("smp.kb.tab", t === "qa" ? "qa" : "how"); } catch (e) {}
 }
 
-function kbEdCard(id, q, a, mark){
+/* WHO AN ANSWER IS FOR, ON THE CARD (§161). Drawn for the two audiences
+   that are a DECISION and not for `everyone`, which is the default 57 of 64
+   questions carry — a chip on nearly every card is furniture, not a mark
+   (§41's budget). The office sees every card whatever the audience says:
+   this page is the editing surface, and hiding a question here would leave
+   it readable by nobody and editable by nobody (§61). */
+function kbAudChip(w){
+  w = SMPRules.kbAudienceWord(w);
+  if (w === "everyone") return "";
+  return ' <span class="pill kind kbaud-' + w + '">' +
+    esc(SMPRules.KB_AUDIENCE_LABEL[w]) + '</span>';
+}
+/* The picker, in edit mode. Here rather than only in the file, or a question
+   added on this page could be given an audience nowhere but a spreadsheet —
+   which is §61's trap wearing the file's clothes. */
+function kbAudPick(id, w){
+  w = SMPRules.kbAudienceWord(w);
+  return '<label class="kbed-aud"><span>Answered to</span><select data-kbaud="' +
+    esc(id) + '">' +
+    SMPRules.KB_AUDIENCES.map(function(o){
+      return '<option value="' + o + '"' + (o === w ? " selected" : "") + '>' +
+        esc(SMPRules.KB_AUDIENCE_LABEL[o]) + '</option>';
+    }).join("") + '</select></label>';
+}
+
+function kbEdCard(id, q, a, mark, aud){
   return '<div class="kbed' + (mark === "edited" ? " on" : "") + '">' +
     '<input class="kbed-q" data-kbq="' + esc(id) + '" value="' + esc(q) + '">' +
     '<textarea class="kbed-a" data-kba="' + esc(id) + '">' + esc(a) + '</textarea>' +
-    '<div class="kbed-foot">' +
+    '<div class="kbed-foot">' + kbAudPick(id, aud) +
       (mark === "edited"
         ? '<span class="kbed-mark">Edited for this platform</span>' +
           '<button type="button" class="kbed-reset" data-kbreset="' + esc(id) + '">' +
@@ -28721,6 +29253,73 @@ function kbEdCard(id, q, a, mark){
             'Remove this question</button>'
         : "") +
     '</div></div>';
+}
+
+/* ── WHAT AN UPLOAD WILL DO, BEFORE IT DOES IT (§161) ──────────────
+   The shape the people file and the plan import already use (§48.2, §87):
+   a tally, the rows, and two buttons. Nothing is written until Apply.
+
+   AN UNRECOGNISED ID IS DRAWN IN RED AND APPLIES NOTHING, because that is
+   the row that would otherwise become a silent duplicate of a question
+   that already exists — and the refusal names the way forward (§16.7),
+   which is to clear the Id or correct the spelling.
+
+   THE EMPTY CASE SAYS SO. A file that changes nothing is the answer when
+   somebody re-uploads what they downloaded, and a panel that renders
+   nothing there reads as a page that failed (§45.2). */
+function kbFileReview(){
+  if (!KBFILE) return "";
+  var c = KBFILE.changes, n = kbChangeCount(c);
+  var pill = function(cls, txt){ return '<span class="pill ' + cls + '">' + txt + '</span>'; };
+  var tally =
+    (c.reword.length ? pill("attn", plural(c.reword.length, "answer") + " reworded") : "") +
+    (c.add.length ? pill("", plural(c.add.length, "question") + " added") : "") +
+    (c.reset.length ? pill("", c.reset.length + " back to the standard wording") : "") +
+    (c.audience.length ? pill("", plural(c.audience.length, "audience") + " changed") : "") +
+    (c.unknown.length ? pill("bad", plural(c.unknown.length, "unrecognised id")) : "");
+  var W = SMPRules.KB_AUDIENCE_LABEL;
+  var line = function(id, what, aud, cls){
+    return '<tr' + (cls ? ' class="' + cls + '"' : '') + '><td class="mono">' +
+      esc(id) + '</td><td>' + what + '</td><td>' + esc(aud || "") + '</td></tr>';
+  };
+  var body = "";
+  c.reword.forEach(function(x){
+    body += line(x.id, "Answer reworded", W[x.w]); });
+  c.reset.forEach(function(x){
+    body += line(x.id, "<b>Back to the standard wording</b> &mdash; your change is cleared",
+      W[x.w]); });
+  c.audience.forEach(function(x){
+    body += line(x.id, "Wording unchanged",
+      W[x.w] + " \u2190 " + W[x.from]); });
+  c.add.forEach(function(x){
+    body += line("\u2014", "<b>New question</b> &mdash; &ldquo;" + esc(x.q) + "&rdquo;",
+      W[x.w]); });
+  c.unknown.forEach(function(x){
+    body += line(x.id, '<b class="bad-tx">No question has this id</b> &mdash; nothing will ' +
+      'be applied to this row. Clear the Id to add it as a new question, or correct the ' +
+      'spelling.', "", "kbf-bad"); });
+  /* A FILE THAT COULD NOT BE READ SAYS SO HERE, where the upload is (§48.8),
+     and nothing else is drawn — a tally of zero beside an error reads as
+     though the file was fine and simply changed nothing. */
+  if (KBFILE.problem) {
+    return '<div class="imp kbfile"><div class="imp-step">' +
+      '<div class="note bad-note"><b>' + esc(KBFILE.name || "That file") + '</b> ' +
+      esc(KBFILE.problem) + '</div>' +
+      '<div class="imp-row" style="margin-top:14px">' +
+      '<button class="linkbu" data-kbdiscard="1">Close</button></div></div></div>';
+  }
+  return '<div class="imp kbfile"><div class="imp-step">' +
+    '<h4 class="mini">' + esc(KBFILE.name || "The uploaded file") + '</h4>' +
+    (n || c.unknown.length
+      ? '<div class="imp-tally">' + tally + '</div>' +
+        '<table><thead><tr><th>Id</th><th>What changes</th><th>Audience</th></tr></thead>' +
+        '<tbody>' + body + '</tbody></table>'
+      : '<p class="why">Nothing in this file is different from what is here now.</p>') +
+    '<div class="imp-row" style="margin-top:14px">' +
+      (n ? '<button class="editbtn apply" data-kbapply="1">Apply to the knowledge base</button>'
+         : '') +
+      '<button class="linkbu" data-kbdiscard="1">' + (n ? "Discard" : "Close") + '</button>' +
+    '</div></div></div>';
 }
 
 function kbRecipes(){
@@ -28738,20 +29337,19 @@ function kbRecipes(){
       /* THE TENANT'S WORDING WINS, by the one rule the assistant also reads
          (§140, §103): what this page shows IS what the bot answers from. */
       var o = SMPRules.kbLook(GROUP.kb, r.id);
+      var aud = SMPRules.kbAudience(GROUP.kb, r.id, r.who || g.who);
       if (KBEDIT) {
-        return kbEdCard(r.id, o ? o.q : r.q, o ? o.a : r.a, o ? "edited" : null);
+        return kbEdCard(r.id, o ? o.q : r.q, o ? o.a : r.a, o ? "edited" : null, aud);
       }
       /* AN OVERRIDE IS TYPED TEXT AND RENDERS AS TEXT. The shipped answers
          carry deliberate <b> markup and render raw; a rewritten one must not
          inherit that path — office-only or not, prose typed into a box that
          comes back as live markup is §43's lesson waiting to repeat. */
       if (o) {
-        var who0 = r.who || g.who;
         return '<div class="kb-rec" id="kb-r-' + esc(r.id) + '">' +
-          '<h4 class="kb-q">' + esc(recipeText(o.q)) +
-            (who0 === "office" ? ' <span class="pill kind">Strategy Office</span>' : '') +
+          '<h4 class="kb-q">' + esc(recipeText(o.q)) + kbAudChip(aud) +
           '</h4>' +
-          recipeText(o.a).split("|").map(function(para){
+          SMPRules.kbParas(recipeText(o.a)).map(function(para){
             return '<p class="kb-p">' + esc(para) + '</p>';
           }).join("") + '</div>';
       }
@@ -28765,12 +29363,9 @@ function kbRecipes(){
          heading twice with nothing between them, which reads as a bug; and
          marking by position would leave a lone office recipe unmarked in a
          group that is not the office's. Whoever it is for, it says so. */
-      var who = r.who || g.who;
       return '<div class="kb-rec" id="kb-r-' + esc(r.id) + '">' +
-        '<h4 class="kb-q">' + esc(recipeText(r.q)) +
-          (who === "office"
-            ? ' <span class="pill kind">Strategy Office</span>' : '') + '</h4>' +
-        recipeText(r.a).split("|").map(function(para){
+        '<h4 class="kb-q">' + esc(recipeText(r.q)) + kbAudChip(aud) + '</h4>' +
+        SMPRules.kbParas(recipeText(r.a)).map(function(para){
           return '<p class="kb-p">' + para + '</p>';
         }).join("") +
       '</div>';
@@ -28778,10 +29373,10 @@ function kbRecipes(){
     /* The office's own questions, at the foot of the group they were added
        to — read like any other entry, editable like one of theirs. */
     items += adds.map(function(x){
-      if (KBEDIT) return kbEdCard(x.id, x.q, x.a, "yours");
+      if (KBEDIT) return kbEdCard(x.id, x.q, x.a, "yours", x.w);
       return '<div class="kb-rec" id="kb-r-' + esc(x.id) + '">' +
-        '<h4 class="kb-q">' + esc(recipeText(x.q)) + '</h4>' +
-        recipeText(x.a).split("|").map(function(para){
+        '<h4 class="kb-q">' + esc(recipeText(x.q)) + kbAudChip(x.w) + '</h4>' +
+        SMPRules.kbParas(recipeText(x.a)).map(function(para){
           return '<p class="kb-p">' + esc(para) + '</p>';
         }).join("") + '</div>';
     }).join("");
@@ -28830,19 +29425,40 @@ function renderKB(){
            'than delete, and they set passwords for the client\u2019s people but never for ' +
            'a Super user or for each other. The register carries the seat, so moving one ' +
            'there is treated as changing the matrix — not as editing a row.' },
-      { h: "Seven roles, seven kinds of page",
+      { h: "Nine roles, nine kinds of page",
         p: 'The table on <b>Roles &amp; access</b> is roles down the side and kinds of page ' +
            'across the top. Not individual pages — a unit\u2019s five pages answer together, ' +
-           'because &ldquo;may they open this unit&rdquo; is one question, not five.' },
+           'because &ldquo;may they open this unit&rdquo; is one question, not five. The last ' +
+           'row, <i>Everyone else</i>, is not a role anybody holds: it is the floor somebody ' +
+           'with no role at all stands on.' },
+      { h: "Three of the roles are read off the plan",
+        p: '<b>Project owner</b>, <b>' + L1 + ' owner</b> and <b>Contributor</b> are never ' +
+           'granted by hand — being named on the plan is the role. Whoever is named a ' +
+           'project\u2019s Owner is its project owner; whoever is named a ' + L1.toLowerCase() +
+           '\u2019s is its ' + L1.toLowerCase() + ' owner; everybody else a plan names — a ' +
+           'collaborator, a stakeholder, a milestone\u2019s owner — is a contributor. Each ' +
+           'still needs its <b>Reporting</b> cell opened before it reports anything, and then ' +
+           'it reaches only its own lines: the project, the ' + L1.toLowerCase() + ', or the ' +
+           'rows that name the person. None of the three ever submits, because submitting ' +
+           'speaks for the whole subject.' },
       { h: "Own is not a setting",
         p: '<b>Own business unit</b> means the units they hold a role in. The head and the ' +
            'custodian of Mobile own Mobile; a company CEO owns every unit in their company; ' +
            'the SMO and the group CEO own all of it. Nobody types that in — it is read from ' +
            'who is attached to what, so this table and the unit pages cannot disagree.' },
-      { h: "Three states, never more",
+      { h: "Three states, and one cell with a fourth",
         p: 'Each cell is <b>none</b>, <b>view</b> or <b>edit</b>. Edit includes view. Two ' +
            'would not be enough: a unit head reads the weighting table but does not manage ' +
            'it, and that is not expressible in two.' },
+      { h: "Fill gaps sits between reading and editing",
+        p: 'The two <b>Strategy</b> cells carry a fourth setting, <b>Fill gaps</b>: the role ' +
+           'may write where the plan holds nothing — an unset target, an unnamed owner, a ' +
+           'tactic with no quarters — and nowhere else, and never adds, removes, renames or ' +
+           'reorders a row. What they write stays <b>pending</b>: amber, theirs to correct, ' +
+           'counted nowhere, and not scored where a score would read it, until the office ' +
+           'confirms it — with a tick, or simply by correcting the value. Reporting and drafts ' +
+           'flow against a pending value; <b>submitting waits</b> on one, because submitting ' +
+           'says the performance can be read.' },
       { h: "Someone holding several roles",
         p: 'They get the <b>most generous</b> answer of them — but each role answers only ' +
            'about what it is attached to. Owning Mobile and sitting on Finance gives the ' +
@@ -28867,10 +29483,13 @@ function renderKB(){
            'flags, whether its CEO sees the group and the other companies, can only ever ' +
            '<b>narrow</b> what the table allows. Supporting functions belong to no company: ' +
            'they serve all of them.' },
-      { h: "The gate is real, the rest is Phase 2",
-        p: 'Signing in is checked on the server against a stored password. Per-action ' +
-           'authorisation and the change log are not built yet: today the enforcement is ' +
-           'at the door, not at each button.' }
+      { h: "The server decides, not the screen",
+        p: 'Signing in is checked on the server against a stored password, and so is every ' +
+           'save: the change is classified against what is <b>stored</b> — a plan edit, a ' +
+           'figure, a setting, a gap being filled or confirmed — and refused where the ' +
+           'person\u2019s roles do not allow it. A screen that offers something the server ' +
+           'would refuse is a fault, not a shortcut. The same comparison writes the ' +
+           '<b>change log</b>, so who moved a target is answerable.' }
     ]),
     /* ── THE REGISTER'S THREE NOTES, MOVED HERE (§90) ────────────────
        Islam: "remove the notes below the registry table and take them to the
@@ -29095,7 +29714,42 @@ function renderKB(){
     ? '<button class="editbtn' + (KBEDIT ? " on" : "") + '" data-kbpen="1">' +
         (KBEDIT ? "Done" : "\u270e Edit the answers") + '</button>'
     : "";
-  return cfgHead("Knowledge base", [], null, false, null, null, kbPen) +
+  /* ── THE QUESTIONS FILE (§161) ────────────────────────────────────
+     The register's "Register file" shape (§90), on the questions tab only —
+     nothing on the explanations tab is in the file, so a menu offering to
+     download it there would be offering something else.
+
+     THE UPLOAD IS A <label> STYLED AS THE ITEM: a file picker cannot be
+     opened from script without a gesture, and a control that works in one
+     browser and silently does nothing elsewhere is worse than a plain one
+     (§90, §34's rule about a field's furniture). */
+  var nQtotal = RECIPES.reduce(function(n, g){ return n + g.items.length; }, 0) +
+                SMPRules.kbAllAdds(GROUP.kb).length;
+  var kbFile = !(inOffice() && tab === "qa") ? "" :
+    '<span class="hmenu' + (KBFILEMENU ? " open" : "") + '">' +
+      '<button class="hmenu-btn" data-kbfilemenu="1" aria-haspopup="true" ' +
+        'aria-expanded="' + KBFILEMENU + '">Questions file ' +
+        '<span class="hcar">&#9662;</span></button>' +
+      (KBFILEMENU
+        ? '<div class="hmenu-panel">' +
+            '<button class="hmenu-item" data-dlkb="1">' +
+              '<span class="t">Download the questions</span>' +
+              '<span class="d">All ' + nQtotal + ', in your own wording where you have ' +
+              'changed it, with the standard answer beside each to compare against. ' +
+              'The export and the template are one file.</span></button>' +
+            '<div class="hmenu-sep"></div>' +
+            '<label class="hmenu-item" for="kb-file">' +
+              '<span class="t">Upload a filled file</span>' +
+              '<span class="d">Matched on Id. A row with no Id adds a question; an ' +
+              'answer put back to the standard wording clears your change. You see ' +
+              'every change before anything is applied.</span></label>' +
+            '<input type="file" id="kb-file" accept=".xlsx" class="vh" ' +
+              'aria-label="Choose a filled questions file to upload">' +
+          '</div>'
+        : "") +
+    '</span>';
+  return cfgHead("Knowledge base", [], null, false, null, null, kbFile + kbPen) +
+    kbFileReview() +
     (KBEDIT && tab === "qa"
       ? '<p class="kb-lede kbed-lede">What you write here is what this page shows ' +
         '<b>and</b> what the assistant answers from \u2014 the two can never disagree. ' +
@@ -37729,7 +38383,7 @@ var SYNC = (function () {
       /* THE BANNER SAYS WHICH ONE IS ON SCREEN. Both are demo data and neither
          is saved.
 
-         THE FILLED EXAMPLE'S SECOND LINE IS GONE (§160, Islam's call). It read
+         THE FILLED EXAMPLE'S SECOND LINE IS GONE (§162, Islam's call). It read
          "Only Mobile's plan is real — every other unit, every capability's
          content and every reported figure is invented", and it was §21's
          labelling of invented content. The cost is stated rather than hidden:
@@ -39693,7 +40347,7 @@ var SYNC = (function () {
        [data-submit] / [data-repsave] / [data-repcancel] — so the box works
        from outside #panel without a second wiring path (§24). */
     var tabrow = document.getElementById("subtabs");
-    /* WRAPPED, SO THE CONTROLS SIT HARD RIGHT (§161). Inserted bare they land
+    /* WRAPPED, SO THE CONTROLS SIT HARD RIGHT (§163). Inserted bare they land
        immediately after the last tab and read as two more tabs; the wrapper is
        what carries `margin-left:auto`. One wrapper at the one insertion point
        rather than a margin on each control — the page decides WHAT its
@@ -41102,6 +41756,81 @@ var SYNC = (function () {
         if (/^kbx\d+$/.test(id)) kbSetAdded(id, q, a); else kbSetOver(id, q, a);
         paint();
       });
+    });
+    /* THE AUDIENCE (§161). Its own handler rather than joining the q/a one
+       above: that one reads both fields off the card and writes them
+       together, and a <select> firing `change` would send its own value as
+       the question. Passed as the fourth argument, which the writers treat
+       as "leave it alone" when undefined. */
+    document.querySelectorAll("[data-kbaud]").forEach(function(sel){
+      sel.addEventListener("change", function(){
+        var id = sel.dataset.kbaud, card = sel.closest(".kbed");
+        var q = ((card && card.querySelector("[data-kbq]")) || {}).value;
+        var a = ((card && card.querySelector("[data-kba]")) || {}).value;
+        if (/^kbx\d+$/.test(id)) kbSetAdded(id, q, a, sel.value);
+        else kbSetOver(id, q, a, sel.value);
+        paint();
+      });
+    });
+    /* ── THE QUESTIONS FILE (§161) ────────────────────────────────
+       The register file's handlers, on the knowledge base. Every one of them
+       is gated again here rather than trusting the render: a control is drawn
+       for the office and a handler is the thing that actually runs (§42, the
+       gate on the control). */
+    document.querySelectorAll("[data-kbfilemenu]").forEach(function(b){
+      b.addEventListener("click", function(){ KBFILEMENU = !KBFILEMENU; paint(); });
+    });
+    var dlkb = document.querySelector("[data-dlkb]");
+    if (dlkb) dlkb.addEventListener("click", function(){
+      if (!inOffice()) return;
+      KBFILEMENU = false;
+      sendXlsx(kbWorkbook(), "SMP - knowledge base questions.xlsx");
+    });
+    var kbf = document.getElementById("kb-file");
+    if (kbf) kbf.addEventListener("change", function(){
+      if (!inOffice()) return;
+      var file = this.files && this.files[0];
+      if (!file) return;
+      KBFILEMENU = false;   /* its job is done the moment a file is picked */
+      var rx = new FileReader();
+      rx.onload = function(){
+        readXlsx(rx.result).then(function(sheets){
+          /* §48.8: A FILE THAT CANNOT BE READ HAS TO SAY SO, where the upload
+             is. The likely mistake is a people workbook or a plan template
+             dropped here, and naming the sheet that is missing is what tells
+             somebody which file they picked up. */
+          if (!sheets["Questions"]) {
+            KBFILE = { name:file.name, changes:{ reword:[], audience:[], reset:[],
+              add:[], blank:0,
+              unknown:[{ id:"\u2014", q:"" }] } };
+            KBFILE.problem = file.name + " has no sheet called Questions. Download the " +
+              "questions file from Questions file and fill that one.";
+            paint();
+            return;
+          }
+          KBFILE = { name:file.name, changes:kbFromWorkbook(sheets) };
+          paint();
+        }).catch(function(e){
+          KBFILE = { name:file.name, changes:{ reword:[], audience:[], reset:[],
+            add:[], unknown:[], blank:0 },
+            problem:"That file could not be read (" + (e && e.message ? e.message : "unknown") +
+              "). It has to be the .xlsx downloaded from Questions file." };
+          paint();
+        });
+      };
+      rx.readAsArrayBuffer(file);
+      this.value = "";   /* or picking the same file twice fires nothing */
+    });
+    document.querySelectorAll("[data-kbapply]").forEach(function(b){
+      b.addEventListener("click", function(){
+        if (!inOffice() || !KBFILE) return;
+        kbApply(KBFILE.changes);
+        KBFILE = null;
+        paint();
+      });
+    });
+    document.querySelectorAll("[data-kbdiscard]").forEach(function(b){
+      b.addEventListener("click", function(){ KBFILE = null; paint(); });
     });
     document.querySelectorAll("[data-kbreset]").forEach(function(b){
       b.addEventListener("click", function(){ kbResetOver(b.dataset.kbreset); paint(); });
@@ -43575,7 +44304,7 @@ var SYNC = (function () {
     if (d) d.open = false;
   }
 
-  /* THE BANDS PANEL SHUTS ON A CLICK OUTSIDE (§161, Islam: "close on clicking
+  /* THE BANDS PANEL SHUTS ON A CLICK OUTSIDE (§163, Islam: "close on clicking
      outside it or clicking on the button again"). The second half is what a
      `<details>` already does; the first is not, and no dropdown in the product
      had it before.

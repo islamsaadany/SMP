@@ -941,7 +941,7 @@
      "Own supporting function" group headings, which had been under the second
      row since §117 split them. */
   .setuppane .cfg.acgrid table thead th { position:static; }
-  /* AND EVERY OTHER SETUP TABLE HAD THE SAME FAULT, UNLOOKED AT (§161.5).
+  /* AND EVERY OTHER SETUP TABLE HAD THE SAME FAULT, UNLOOKED AT (§163.5).
      The exclusion above fixed `.acgrid` and stopped there. `.cfg` is
      `overflow-x:auto`, which makes the BOX what a sticky head pins against —
      so a PAGE offset resolves inside the table, exactly as §130.2 wrote down.

@@ -457,13 +457,7 @@ var PAGE_TITLE = null;
    not a trade worth making. */
 var PAGE_TOOLS = "";
 var PAGE_ACTS  = "";
-/* THE REPORTING BOX TRAVELS THE SAME WAY (§150). The tab row is written
-   BEFORE the page renders, so a report cannot put its controls there
-   directly — it publishes them here and the shell hangs them on the row
-   afterwards, which is exactly the trip the two slots above already make.
-   Reset with them, or a report's box would survive onto the next page. */
-var REPORT_CHROME = "";
-function pageLineReset(){ PAGE_TOOLS = ""; PAGE_ACTS = ""; REPORT_CHROME = ""; }
+function pageLineReset(){ PAGE_TOOLS = ""; PAGE_ACTS = ""; }
 function pageLineHTML(){
   if (!PAGE_TOOLS && !PAGE_ACTS) return "";
   return (PAGE_TOOLS ? '<div class="headtools">' + PAGE_TOOLS + '</div>' : '') +
@@ -863,21 +857,6 @@ var PPLF = { read:"", plan:null, done:null };
    derived pair reported as you type, because a brand colour that cannot be
    read is a thing to be told about at the moment you enter it, not discovered
    in a screenshot three weeks later. */
-/* The colour the running page is actually painting for a branding slot, as a
-   hex a <input type="color"> will accept. Read from the computed style, never
-   from a table of literals — the palette is themed and tenant-branded, and a
-   second copy of its values is a second thing to keep in step (§25, §53.5). */
-function brandNow(key){
-  var token = { accent: "--gold", bar: "--panel" }[key];
-  if (!token) return "#000000";
-  var v = getComputedStyle(document.documentElement).getPropertyValue(token).trim();
-  if (v.charAt(0) === "#") return v.length === 4
-    ? "#" + v[1] + v[1] + v[2] + v[2] + v[3] + v[3] : v;
-  var m = v.match(/\d+/g);
-  return m ? "#" + m.slice(0,3).map(function(x){
-    return ("0" + (+x).toString(16)).slice(-2); }).join("") : "#000000";
-}
-
 function renderBranding(){
   var mayEdit = grant("c_brand") === "edit";
   var b = branding(), checks = brandChecks(), t = brandTokens();
@@ -888,14 +867,8 @@ function renderBranding(){
     return '<tr><td><b>' + esc(label) + '</b><span class="why">' + esc(note) + '</span></td>' +
       '<td class="cc">' + (mayEdit
         ? '<span class="brandpick">' +
-            /* AN UNSET PICKER OPENS ON WHAT THE PLATFORM IS PAINTING (§155).
-               It opened on #4F46E5 — an indigo that exists nowhere in SMP — so
-               an unbranded tenant met two indigo swatches on the one page that
-               defines colour, while the product around them was navy and gold.
-               `brandNow()` reads the live token rather than repeating a
-               literal, so this cannot go stale the day a palette moves (§25). */
             '<input type="color" class="brandcolor" data-brand="' + key + '" value="' +
-              esc(shown || brandNow(key)) + '" aria-label="' + esc(label) + '">' +
+              esc(shown || "#4F46E5") + '" aria-label="' + esc(label) + '">' +
             '<input type="text" class="fld mono brandhex" data-brandhex="' + key +
               '" value="' + esc(shown) + '" placeholder="not set" spellcheck="false" size="9">' +
             (shown ? '<button class="linkbu" data-brandclear="' + key + '">Clear</button>' : '') +
@@ -1082,15 +1055,7 @@ var PEOPLE_COLS = [
      It sits immediately after the name rather than with the identifiers: it is
      the same fact at a different length, and putting it beside Emp ID would
      imply it identifies somebody, which is exactly what it must not do. */
-  /* OFF BY DEFAULT (§155). Everything above stays true — it is the value the
-     employee file is written in, and on a reconciliation day it is the column
-     you want. But until somebody types a short name it is IDENTICAL to the
-     frozen Name beside it, which today is 33 rows of 33: the register's most
-     valuable column, the one a wide table never scrolls away, spent saying
-     the same thing twice. One tick in Columns brings it back, and a saved
-     choice still wins (§30.2), so nobody who has ever opened the chooser is
-     affected. */
-  { k:"fullname", label:"Full Name", off:true },
+  { k:"fullname", label:"Full Name" },
   { k:"empid",    label:"Emp. ID", off:true },
   /* THE SIGN-IN NAME, OFF BY DEFAULT (§69.11). §35 took it out from under the
      name and it was right to: it cost 31 rows a line each to say what the
@@ -3060,24 +3025,10 @@ function kbSection(id, title, blocks){
    A recipe's answer is one string with `|` between paragraphs. Not an array:
    the file is long enough already, and a separator that cannot appear in prose
    costs nothing to read and one line to split. */
-/* THE LABEL IS TAKEN EXACTLY AS IT COMES (§107.8, fixed 2026-08-29).
-   `{pillars}` used to render `plural(2, L("pillar","bu"))` — and `plural()`
-   returns a COUNT followed by the word, while `bu` for a pillar is already
-   "Pillars". So the shipped question "How do I reorder my {pillars}?" was
-   rendering as "How do I reorder my 2 Pillarss?" on every deployment: a
-   number nobody asked for and a doubled s. §107.8 had already written the
-   rule down — a tenant's label is never inflected, because there is no
-   singular anywhere for a sentence to reach for — and this was the one place
-   still inflecting one, in the product's own help.
-
-   Both tokens now resolve to the label as given. `{pillars}` is kept as an
-   alias so a recipe reworded by a tenant (§140) cannot break by using it,
-   and every sentence in recipes.js is phrased to accept a plural noun. */
 function recipeText(t){
-  var word = L("pillar","bu");
   return String(t)
-    .replace(/\{pillars\}/g, word)
-    .replace(/\{pillar\}/g, word);
+    .replace(/\{pillars\}/g, plural(2, L("pillar","bu")))
+    .replace(/\{pillar\}/g, L("pillar","bu"));
 }
 
 /* THE PEN'S STATE. File-scope like the other page modes; the page is the
@@ -3085,11 +3036,6 @@ function recipeText(t){
    asks inOffice() (§42: the gate is on the control) and the server classifies
    a GROUP.kb change as setup, so both ends answer alike (§94.2). */
 var KBEDIT = false;
-/* The file menu's open state, and the classified upload waiting for Apply.
-   Both are SCREEN state and neither is stored: a review abandoned by
-   navigating away is a review that never happened (§25, §47.1). */
-var KBFILEMENU = false;
-var KBFILE = null;      /* { changes, name } while a review is on screen */
 
 /* WHICH TAB (§141): "how" or "qa". A SCREEN PREFERENCE (§25, §47.1) — one
    person reading the reference must not decide the tenant's landing tab —
@@ -3103,36 +3049,11 @@ function kbTabSet(t){
   try { localStorage.setItem("smp.kb.tab", t === "qa" ? "qa" : "how"); } catch (e) {}
 }
 
-/* WHO AN ANSWER IS FOR, ON THE CARD (§161). Drawn for the two audiences
-   that are a DECISION and not for `everyone`, which is the default 57 of 64
-   questions carry — a chip on nearly every card is furniture, not a mark
-   (§41's budget). The office sees every card whatever the audience says:
-   this page is the editing surface, and hiding a question here would leave
-   it readable by nobody and editable by nobody (§61). */
-function kbAudChip(w){
-  w = SMPRules.kbAudienceWord(w);
-  if (w === "everyone") return "";
-  return ' <span class="pill kind kbaud-' + w + '">' +
-    esc(SMPRules.KB_AUDIENCE_LABEL[w]) + '</span>';
-}
-/* The picker, in edit mode. Here rather than only in the file, or a question
-   added on this page could be given an audience nowhere but a spreadsheet —
-   which is §61's trap wearing the file's clothes. */
-function kbAudPick(id, w){
-  w = SMPRules.kbAudienceWord(w);
-  return '<label class="kbed-aud"><span>Answered to</span><select data-kbaud="' +
-    esc(id) + '">' +
-    SMPRules.KB_AUDIENCES.map(function(o){
-      return '<option value="' + o + '"' + (o === w ? " selected" : "") + '>' +
-        esc(SMPRules.KB_AUDIENCE_LABEL[o]) + '</option>';
-    }).join("") + '</select></label>';
-}
-
-function kbEdCard(id, q, a, mark, aud){
+function kbEdCard(id, q, a, mark){
   return '<div class="kbed' + (mark === "edited" ? " on" : "") + '">' +
     '<input class="kbed-q" data-kbq="' + esc(id) + '" value="' + esc(q) + '">' +
     '<textarea class="kbed-a" data-kba="' + esc(id) + '">' + esc(a) + '</textarea>' +
-    '<div class="kbed-foot">' + kbAudPick(id, aud) +
+    '<div class="kbed-foot">' +
       (mark === "edited"
         ? '<span class="kbed-mark">Edited for this platform</span>' +
           '<button type="button" class="kbed-reset" data-kbreset="' + esc(id) + '">' +
@@ -3144,73 +3065,6 @@ function kbEdCard(id, q, a, mark, aud){
             'Remove this question</button>'
         : "") +
     '</div></div>';
-}
-
-/* ── WHAT AN UPLOAD WILL DO, BEFORE IT DOES IT (§161) ──────────────
-   The shape the people file and the plan import already use (§48.2, §87):
-   a tally, the rows, and two buttons. Nothing is written until Apply.
-
-   AN UNRECOGNISED ID IS DRAWN IN RED AND APPLIES NOTHING, because that is
-   the row that would otherwise become a silent duplicate of a question
-   that already exists — and the refusal names the way forward (§16.7),
-   which is to clear the Id or correct the spelling.
-
-   THE EMPTY CASE SAYS SO. A file that changes nothing is the answer when
-   somebody re-uploads what they downloaded, and a panel that renders
-   nothing there reads as a page that failed (§45.2). */
-function kbFileReview(){
-  if (!KBFILE) return "";
-  var c = KBFILE.changes, n = kbChangeCount(c);
-  var pill = function(cls, txt){ return '<span class="pill ' + cls + '">' + txt + '</span>'; };
-  var tally =
-    (c.reword.length ? pill("attn", plural(c.reword.length, "answer") + " reworded") : "") +
-    (c.add.length ? pill("", plural(c.add.length, "question") + " added") : "") +
-    (c.reset.length ? pill("", c.reset.length + " back to the standard wording") : "") +
-    (c.audience.length ? pill("", plural(c.audience.length, "audience") + " changed") : "") +
-    (c.unknown.length ? pill("bad", plural(c.unknown.length, "unrecognised id")) : "");
-  var W = SMPRules.KB_AUDIENCE_LABEL;
-  var line = function(id, what, aud, cls){
-    return '<tr' + (cls ? ' class="' + cls + '"' : '') + '><td class="mono">' +
-      esc(id) + '</td><td>' + what + '</td><td>' + esc(aud || "") + '</td></tr>';
-  };
-  var body = "";
-  c.reword.forEach(function(x){
-    body += line(x.id, "Answer reworded", W[x.w]); });
-  c.reset.forEach(function(x){
-    body += line(x.id, "<b>Back to the standard wording</b> &mdash; your change is cleared",
-      W[x.w]); });
-  c.audience.forEach(function(x){
-    body += line(x.id, "Wording unchanged",
-      W[x.w] + " \u2190 " + W[x.from]); });
-  c.add.forEach(function(x){
-    body += line("\u2014", "<b>New question</b> &mdash; &ldquo;" + esc(x.q) + "&rdquo;",
-      W[x.w]); });
-  c.unknown.forEach(function(x){
-    body += line(x.id, '<b class="bad-tx">No question has this id</b> &mdash; nothing will ' +
-      'be applied to this row. Clear the Id to add it as a new question, or correct the ' +
-      'spelling.', "", "kbf-bad"); });
-  /* A FILE THAT COULD NOT BE READ SAYS SO HERE, where the upload is (§48.8),
-     and nothing else is drawn — a tally of zero beside an error reads as
-     though the file was fine and simply changed nothing. */
-  if (KBFILE.problem) {
-    return '<div class="imp kbfile"><div class="imp-step">' +
-      '<div class="note bad-note"><b>' + esc(KBFILE.name || "That file") + '</b> ' +
-      esc(KBFILE.problem) + '</div>' +
-      '<div class="imp-row" style="margin-top:14px">' +
-      '<button class="linkbu" data-kbdiscard="1">Close</button></div></div></div>';
-  }
-  return '<div class="imp kbfile"><div class="imp-step">' +
-    '<h4 class="mini">' + esc(KBFILE.name || "The uploaded file") + '</h4>' +
-    (n || c.unknown.length
-      ? '<div class="imp-tally">' + tally + '</div>' +
-        '<table><thead><tr><th>Id</th><th>What changes</th><th>Audience</th></tr></thead>' +
-        '<tbody>' + body + '</tbody></table>'
-      : '<p class="why">Nothing in this file is different from what is here now.</p>') +
-    '<div class="imp-row" style="margin-top:14px">' +
-      (n ? '<button class="editbtn apply" data-kbapply="1">Apply to the knowledge base</button>'
-         : '') +
-      '<button class="linkbu" data-kbdiscard="1">' + (n ? "Discard" : "Close") + '</button>' +
-    '</div></div></div>';
 }
 
 function kbRecipes(){
@@ -3228,19 +3082,20 @@ function kbRecipes(){
       /* THE TENANT'S WORDING WINS, by the one rule the assistant also reads
          (§140, §103): what this page shows IS what the bot answers from. */
       var o = SMPRules.kbLook(GROUP.kb, r.id);
-      var aud = SMPRules.kbAudience(GROUP.kb, r.id, r.who || g.who);
       if (KBEDIT) {
-        return kbEdCard(r.id, o ? o.q : r.q, o ? o.a : r.a, o ? "edited" : null, aud);
+        return kbEdCard(r.id, o ? o.q : r.q, o ? o.a : r.a, o ? "edited" : null);
       }
       /* AN OVERRIDE IS TYPED TEXT AND RENDERS AS TEXT. The shipped answers
          carry deliberate <b> markup and render raw; a rewritten one must not
          inherit that path — office-only or not, prose typed into a box that
          comes back as live markup is §43's lesson waiting to repeat. */
       if (o) {
+        var who0 = r.who || g.who;
         return '<div class="kb-rec" id="kb-r-' + esc(r.id) + '">' +
-          '<h4 class="kb-q">' + esc(recipeText(o.q)) + kbAudChip(aud) +
+          '<h4 class="kb-q">' + esc(recipeText(o.q)) +
+            (who0 === "office" ? ' <span class="pill kind">Strategy Office</span>' : '') +
           '</h4>' +
-          SMPRules.kbParas(recipeText(o.a)).map(function(para){
+          recipeText(o.a).split("|").map(function(para){
             return '<p class="kb-p">' + esc(para) + '</p>';
           }).join("") + '</div>';
       }
@@ -3254,9 +3109,12 @@ function kbRecipes(){
          heading twice with nothing between them, which reads as a bug; and
          marking by position would leave a lone office recipe unmarked in a
          group that is not the office's. Whoever it is for, it says so. */
+      var who = r.who || g.who;
       return '<div class="kb-rec" id="kb-r-' + esc(r.id) + '">' +
-        '<h4 class="kb-q">' + esc(recipeText(r.q)) + kbAudChip(aud) + '</h4>' +
-        SMPRules.kbParas(recipeText(r.a)).map(function(para){
+        '<h4 class="kb-q">' + esc(recipeText(r.q)) +
+          (who === "office"
+            ? ' <span class="pill kind">Strategy Office</span>' : '') + '</h4>' +
+        recipeText(r.a).split("|").map(function(para){
           return '<p class="kb-p">' + para + '</p>';
         }).join("") +
       '</div>';
@@ -3264,10 +3122,10 @@ function kbRecipes(){
     /* The office's own questions, at the foot of the group they were added
        to — read like any other entry, editable like one of theirs. */
     items += adds.map(function(x){
-      if (KBEDIT) return kbEdCard(x.id, x.q, x.a, "yours", x.w);
+      if (KBEDIT) return kbEdCard(x.id, x.q, x.a, "yours");
       return '<div class="kb-rec" id="kb-r-' + esc(x.id) + '">' +
-        '<h4 class="kb-q">' + esc(recipeText(x.q)) + kbAudChip(x.w) + '</h4>' +
-        SMPRules.kbParas(recipeText(x.a)).map(function(para){
+        '<h4 class="kb-q">' + esc(recipeText(x.q)) + '</h4>' +
+        recipeText(x.a).split("|").map(function(para){
           return '<p class="kb-p">' + esc(para) + '</p>';
         }).join("") + '</div>';
     }).join("");
@@ -3316,40 +3174,19 @@ function renderKB(){
            'than delete, and they set passwords for the client\u2019s people but never for ' +
            'a Super user or for each other. The register carries the seat, so moving one ' +
            'there is treated as changing the matrix — not as editing a row.' },
-      { h: "Nine roles, nine kinds of page",
+      { h: "Seven roles, seven kinds of page",
         p: 'The table on <b>Roles &amp; access</b> is roles down the side and kinds of page ' +
            'across the top. Not individual pages — a unit\u2019s five pages answer together, ' +
-           'because &ldquo;may they open this unit&rdquo; is one question, not five. The last ' +
-           'row, <i>Everyone else</i>, is not a role anybody holds: it is the floor somebody ' +
-           'with no role at all stands on.' },
-      { h: "Three of the roles are read off the plan",
-        p: '<b>Project owner</b>, <b>' + L1 + ' owner</b> and <b>Contributor</b> are never ' +
-           'granted by hand — being named on the plan is the role. Whoever is named a ' +
-           'project\u2019s Owner is its project owner; whoever is named a ' + L1.toLowerCase() +
-           '\u2019s is its ' + L1.toLowerCase() + ' owner; everybody else a plan names — a ' +
-           'collaborator, a stakeholder, a milestone\u2019s owner — is a contributor. Each ' +
-           'still needs its <b>Reporting</b> cell opened before it reports anything, and then ' +
-           'it reaches only its own lines: the project, the ' + L1.toLowerCase() + ', or the ' +
-           'rows that name the person. None of the three ever submits, because submitting ' +
-           'speaks for the whole subject.' },
+           'because &ldquo;may they open this unit&rdquo; is one question, not five.' },
       { h: "Own is not a setting",
         p: '<b>Own business unit</b> means the units they hold a role in. The head and the ' +
            'custodian of Mobile own Mobile; a company CEO owns every unit in their company; ' +
            'the SMO and the group CEO own all of it. Nobody types that in — it is read from ' +
            'who is attached to what, so this table and the unit pages cannot disagree.' },
-      { h: "Three states, and one cell with a fourth",
+      { h: "Three states, never more",
         p: 'Each cell is <b>none</b>, <b>view</b> or <b>edit</b>. Edit includes view. Two ' +
            'would not be enough: a unit head reads the weighting table but does not manage ' +
            'it, and that is not expressible in two.' },
-      { h: "Fill gaps sits between reading and editing",
-        p: 'The two <b>Strategy</b> cells carry a fourth setting, <b>Fill gaps</b>: the role ' +
-           'may write where the plan holds nothing — an unset target, an unnamed owner, a ' +
-           'tactic with no quarters — and nowhere else, and never adds, removes, renames or ' +
-           'reorders a row. What they write stays <b>pending</b>: amber, theirs to correct, ' +
-           'counted nowhere, and not scored where a score would read it, until the office ' +
-           'confirms it — with a tick, or simply by correcting the value. Reporting and drafts ' +
-           'flow against a pending value; <b>submitting waits</b> on one, because submitting ' +
-           'says the performance can be read.' },
       { h: "Someone holding several roles",
         p: 'They get the <b>most generous</b> answer of them — but each role answers only ' +
            'about what it is attached to. Owning Mobile and sitting on Finance gives the ' +
@@ -3374,13 +3211,10 @@ function renderKB(){
            'flags, whether its CEO sees the group and the other companies, can only ever ' +
            '<b>narrow</b> what the table allows. Supporting functions belong to no company: ' +
            'they serve all of them.' },
-      { h: "The server decides, not the screen",
-        p: 'Signing in is checked on the server against a stored password, and so is every ' +
-           'save: the change is classified against what is <b>stored</b> — a plan edit, a ' +
-           'figure, a setting, a gap being filled or confirmed — and refused where the ' +
-           'person\u2019s roles do not allow it. A screen that offers something the server ' +
-           'would refuse is a fault, not a shortcut. The same comparison writes the ' +
-           '<b>change log</b>, so who moved a target is answerable.' }
+      { h: "The gate is real, the rest is Phase 2",
+        p: 'Signing in is checked on the server against a stored password. Per-action ' +
+           'authorisation and the change log are not built yet: today the enforcement is ' +
+           'at the door, not at each button.' }
     ]),
     /* ── THE REGISTER'S THREE NOTES, MOVED HERE (§90) ────────────────
        Islam: "remove the notes below the registry table and take them to the
@@ -3605,42 +3439,7 @@ function renderKB(){
     ? '<button class="editbtn' + (KBEDIT ? " on" : "") + '" data-kbpen="1">' +
         (KBEDIT ? "Done" : "\u270e Edit the answers") + '</button>'
     : "";
-  /* ── THE QUESTIONS FILE (§161) ────────────────────────────────────
-     The register's "Register file" shape (§90), on the questions tab only —
-     nothing on the explanations tab is in the file, so a menu offering to
-     download it there would be offering something else.
-
-     THE UPLOAD IS A <label> STYLED AS THE ITEM: a file picker cannot be
-     opened from script without a gesture, and a control that works in one
-     browser and silently does nothing elsewhere is worse than a plain one
-     (§90, §34's rule about a field's furniture). */
-  var nQtotal = RECIPES.reduce(function(n, g){ return n + g.items.length; }, 0) +
-                SMPRules.kbAllAdds(GROUP.kb).length;
-  var kbFile = !(inOffice() && tab === "qa") ? "" :
-    '<span class="hmenu' + (KBFILEMENU ? " open" : "") + '">' +
-      '<button class="hmenu-btn" data-kbfilemenu="1" aria-haspopup="true" ' +
-        'aria-expanded="' + KBFILEMENU + '">Questions file ' +
-        '<span class="hcar">&#9662;</span></button>' +
-      (KBFILEMENU
-        ? '<div class="hmenu-panel">' +
-            '<button class="hmenu-item" data-dlkb="1">' +
-              '<span class="t">Download the questions</span>' +
-              '<span class="d">All ' + nQtotal + ', in your own wording where you have ' +
-              'changed it, with the standard answer beside each to compare against. ' +
-              'The export and the template are one file.</span></button>' +
-            '<div class="hmenu-sep"></div>' +
-            '<label class="hmenu-item" for="kb-file">' +
-              '<span class="t">Upload a filled file</span>' +
-              '<span class="d">Matched on Id. A row with no Id adds a question; an ' +
-              'answer put back to the standard wording clears your change. You see ' +
-              'every change before anything is applied.</span></label>' +
-            '<input type="file" id="kb-file" accept=".xlsx" class="vh" ' +
-              'aria-label="Choose a filled questions file to upload">' +
-          '</div>'
-        : "") +
-    '</span>';
-  return cfgHead("Knowledge base", [], null, false, null, null, kbFile + kbPen) +
-    kbFileReview() +
+  return cfgHead("Knowledge base", [], null, false, null, null, kbPen) +
     (KBEDIT && tab === "qa"
       ? '<p class="kb-lede kbed-lede">What you write here is what this page shows ' +
         '<b>and</b> what the assistant answers from \u2014 the two can never disagree. ' +

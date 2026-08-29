@@ -64,6 +64,32 @@ Nothing proceeds past this line without an answer.
 
 ## Built and verified
 
+### v3.62 — the Performance line, three bands, and two headers over their own rows (§162–§163)
+
+- Islam's seven from a squeezed window; five needed a decision and he gave
+  them, two were defects.
+- **The hover WAS working** — as a native `title`. Product bubble now, on hover
+  and on focus (a tap). Then **the black box**: the compiled cell built its own
+  span and kept its own `title`, so it took the new bubble with no words in it
+  and the tooltip a second later. §96 again.
+- **The bands are a row in a table**, hydrated over the baked default — which
+  is why changing what ships changed nothing for him. Migration 029 moves a
+  tenant still on the shipped four and leaves a customised one alone; both
+  cases and the full round trip driven against a real Postgres.
+- **§163.5, the one worth reading**: every Setup table pinned its header to a
+  PAGE offset inside a box that scrolls, so the offset resolved from the top of
+  the TABLE — the Scoring bands heading 136px down its own body, across the
+  third row, at every width unscrolled. §130.2 fixed `.acgrid` and stopped.
+- **And my own first guard broke something real**: raising the pinned pane
+  title above everything made fill fields unclickable and the sweep failed. The
+  tie needed breaking from below.
+- Also: the colour banner was the page's control row; the squeezed rail had
+  said `display:flex` for versions and meant nothing by it; the chart legend
+  kept a second copy of the bands that already disagreed.
+- **Awaiting sign-off**: the editable Scoring bands table (add/remove a level,
+  set the colour) — the open question is a choice of the product's five colours
+  versus a free picker.
+
 ### v3.60 — the Performance line, Bands, three bands, a real hover (§161)
 
 - Islam's remaining five from using the product; settled from a mockup drawn

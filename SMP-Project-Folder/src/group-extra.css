@@ -210,7 +210,7 @@
   }
   .tip:hover::after, .tip:focus::after { display:block; }
 
-  /* THE SAME BUBBLE, WITHOUT THE BADGE (§161). `.hasnote` is the value itself
+  /* THE SAME BUBBLE, WITHOUT THE BADGE (§163). `.hasnote` is the value itself
      — a direction glyph, a compile rule — carrying its meaning on hover; it
      must not become a circled "i". So it borrows the bubble and none of the
      mark: the rules below add it to the two selectors that matter and leave
@@ -228,7 +228,7 @@
     pointer-events:none; z-index:20; text-align:left;
   }
   .hasnote:hover::after, .hasnote:focus::after, .hasnote:focus-visible::after { display:block; }
-  /* AN EMPTY BUBBLE IS A BLACK BOX, AND THAT IS WHAT SHIPPED (§161.3). The
+  /* AN EMPTY BUBBLE IS A BLACK BOX, AND THAT IS WHAT SHIPPED (§163.3). The
      compiled cell carried `hasnote` while still setting a `title`, so this rule
      matched it with no `data-tip` to fill: `content:attr(data-tip)` resolved to
      nothing and painted a small black rectangle on hover, with the browser's
@@ -925,7 +925,7 @@
     .split { grid-template-columns:1fr; }
     /* Stacked, the rail is not sticky and there is no gap above it to fill. */
     .rail { position:static; display:flex; overflow-x:auto; }
-    /* AND THE ITEMS ARE NOT THE RAIL'S CHILDREN ANY MORE (§160). The line
+    /* AND THE ITEMS ARE NOT THE RAIL'S CHILDREN ANY MORE (§162). The line
        above has said `display:flex` since the stacked rail was written, and
        for a long time it did nothing: reordering later wrapped every row in a
        `.sortable` div, so the rail dutifully laid out its ONE child in a row

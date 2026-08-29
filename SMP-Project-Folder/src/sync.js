@@ -418,7 +418,7 @@ var SYNC = (function () {
       /* THE BANNER SAYS WHICH ONE IS ON SCREEN. Both are demo data and neither
          is saved.
 
-         THE FILLED EXAMPLE'S SECOND LINE IS GONE (§160, Islam's call). It read
+         THE FILLED EXAMPLE'S SECOND LINE IS GONE (§162, Islam's call). It read
          "Only Mobile's plan is real — every other unit, every capability's
          content and every reported figure is invented", and it was §21's
          labelling of invented content. The cost is stated rather than hidden:

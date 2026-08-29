@@ -1,4 +1,4 @@
-"""THE PERFORMANCE LINE, THE BANDS BUTTON, THREE BANDS, AND THE HOVER (§161).
+"""THE PERFORMANCE LINE, THE BANDS BUTTON, THREE BANDS, AND THE HOVER (§163).
 
 Four asks from Islam plus one guard, all on or around a unit's Performance
 page. What is asserted is the promise, never the mechanism (§94.8).

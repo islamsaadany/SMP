@@ -1841,7 +1841,7 @@
        [data-submit] / [data-repsave] / [data-repcancel] — so the box works
        from outside #panel without a second wiring path (§24). */
     var tabrow = document.getElementById("subtabs");
-    /* WRAPPED, SO THE CONTROLS SIT HARD RIGHT (§161). Inserted bare they land
+    /* WRAPPED, SO THE CONTROLS SIT HARD RIGHT (§163). Inserted bare they land
        immediately after the last tab and read as two more tabs; the wrapper is
        what carries `margin-left:auto`. One wrapper at the one insertion point
        rather than a margin on each control — the page decides WHAT its
@@ -3250,6 +3250,81 @@
         if (/^kbx\d+$/.test(id)) kbSetAdded(id, q, a); else kbSetOver(id, q, a);
         paint();
       });
+    });
+    /* THE AUDIENCE (§161). Its own handler rather than joining the q/a one
+       above: that one reads both fields off the card and writes them
+       together, and a <select> firing `change` would send its own value as
+       the question. Passed as the fourth argument, which the writers treat
+       as "leave it alone" when undefined. */
+    document.querySelectorAll("[data-kbaud]").forEach(function(sel){
+      sel.addEventListener("change", function(){
+        var id = sel.dataset.kbaud, card = sel.closest(".kbed");
+        var q = ((card && card.querySelector("[data-kbq]")) || {}).value;
+        var a = ((card && card.querySelector("[data-kba]")) || {}).value;
+        if (/^kbx\d+$/.test(id)) kbSetAdded(id, q, a, sel.value);
+        else kbSetOver(id, q, a, sel.value);
+        paint();
+      });
+    });
+    /* ── THE QUESTIONS FILE (§161) ────────────────────────────────
+       The register file's handlers, on the knowledge base. Every one of them
+       is gated again here rather than trusting the render: a control is drawn
+       for the office and a handler is the thing that actually runs (§42, the
+       gate on the control). */
+    document.querySelectorAll("[data-kbfilemenu]").forEach(function(b){
+      b.addEventListener("click", function(){ KBFILEMENU = !KBFILEMENU; paint(); });
+    });
+    var dlkb = document.querySelector("[data-dlkb]");
+    if (dlkb) dlkb.addEventListener("click", function(){
+      if (!inOffice()) return;
+      KBFILEMENU = false;
+      sendXlsx(kbWorkbook(), "SMP - knowledge base questions.xlsx");
+    });
+    var kbf = document.getElementById("kb-file");
+    if (kbf) kbf.addEventListener("change", function(){
+      if (!inOffice()) return;
+      var file = this.files && this.files[0];
+      if (!file) return;
+      KBFILEMENU = false;   /* its job is done the moment a file is picked */
+      var rx = new FileReader();
+      rx.onload = function(){
+        readXlsx(rx.result).then(function(sheets){
+          /* §48.8: A FILE THAT CANNOT BE READ HAS TO SAY SO, where the upload
+             is. The likely mistake is a people workbook or a plan template
+             dropped here, and naming the sheet that is missing is what tells
+             somebody which file they picked up. */
+          if (!sheets["Questions"]) {
+            KBFILE = { name:file.name, changes:{ reword:[], audience:[], reset:[],
+              add:[], blank:0,
+              unknown:[{ id:"\u2014", q:"" }] } };
+            KBFILE.problem = file.name + " has no sheet called Questions. Download the " +
+              "questions file from Questions file and fill that one.";
+            paint();
+            return;
+          }
+          KBFILE = { name:file.name, changes:kbFromWorkbook(sheets) };
+          paint();
+        }).catch(function(e){
+          KBFILE = { name:file.name, changes:{ reword:[], audience:[], reset:[],
+            add:[], unknown:[], blank:0 },
+            problem:"That file could not be read (" + (e && e.message ? e.message : "unknown") +
+              "). It has to be the .xlsx downloaded from Questions file." };
+          paint();
+        });
+      };
+      rx.readAsArrayBuffer(file);
+      this.value = "";   /* or picking the same file twice fires nothing */
+    });
+    document.querySelectorAll("[data-kbapply]").forEach(function(b){
+      b.addEventListener("click", function(){
+        if (!inOffice() || !KBFILE) return;
+        kbApply(KBFILE.changes);
+        KBFILE = null;
+        paint();
+      });
+    });
+    document.querySelectorAll("[data-kbdiscard]").forEach(function(b){
+      b.addEventListener("click", function(){ KBFILE = null; paint(); });
     });
     document.querySelectorAll("[data-kbreset]").forEach(function(b){
       b.addEventListener("click", function(){ kbResetOver(b.dataset.kbreset); paint(); });
@@ -5723,7 +5798,7 @@
     if (d) d.open = false;
   }
 
-  /* THE BANDS PANEL SHUTS ON A CLICK OUTSIDE (§161, Islam: "close on clicking
+  /* THE BANDS PANEL SHUTS ON A CLICK OUTSIDE (§163, Islam: "close on clicking
      outside it or clicking on the button again"). The second half is what a
      `<details>` already does; the first is not, and no dropdown in the product
      had it before.

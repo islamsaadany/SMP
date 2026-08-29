@@ -897,19 +897,6 @@
     .split { grid-template-columns:1fr; }
     /* Stacked, the rail is not sticky and there is no gap above it to fill. */
     .rail { position:static; display:flex; overflow-x:auto; }
-    /* AND THE ITEMS ARE NOT THE RAIL'S CHILDREN ANY MORE (§160). The line
-       above has said `display:flex` since the stacked rail was written, and
-       for a long time it did nothing: reordering later wrapped every row in a
-       `.sortable` div, so the rail dutifully laid out its ONE child in a row
-       and the pillars went on stacking vertically inside it — 255px of
-       vertical space on a squeezed window, four rows where one was intended.
-       §51.11's family: the markup moved and the rule silently stopped meaning
-       what it said, in the direction that looks deliberate.
-
-       `display:flex` on the wrapper rather than `display:contents`, which also
-       works and would remove the wrapper's BOX — and `makeSortable` measures
-       that box to decide where a dragged row lands. */
-    .rail .sortable { display:flex; gap:2px; flex:0 0 auto; }
     .split .rail::before { display:none; }
     .rail .rhead, .rail .rfoot, .rail .rgroup { display:none; }
     .rail button.ritem { border-bottom:3px solid transparent; border-left:0; white-space:nowrap;

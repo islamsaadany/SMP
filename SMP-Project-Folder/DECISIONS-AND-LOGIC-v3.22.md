@@ -20006,3 +20006,64 @@ pre-§159 build, which is exactly the seven new assertions.
   outside it. Offered with the variations and not taken up; it is one line
   and no design, and it stays a separate ask rather than riding along
   unasked (rule 1b).
+
+---
+
+## 160 · The squeezed rail reads across, and the demo banner loses a line (v3.60)
+
+Two of the seven Islam raised from using the product on a smaller window. The
+other five need a decision from him and are not built.
+
+**THE RAIL HAD SAID `display:flex` FOR VERSIONS AND MEANT NOTHING BY IT.**
+Below 820px the split stacks and the rail becomes a strip — `.rail {
+position:static; display:flex; overflow-x:auto }` has been in the stacked block
+since it was written. What happened later is that reordering wrapped every row
+in a **`.sortable` div**, so the rail dutifully laid out its **one** child in a
+row and the pillars went on stacking vertically inside it. Four rows where one
+was intended, and **255px** of a squeezed window spent on a list of four items.
+**§51.11's family**: the markup moved, the rule silently stopped meaning what
+it said, and it failed in the direction that looks deliberate — a vertical list
+is what a rail looks like, so nothing about the screen said it was wrong.
+
+**AND THE TWO SIDES HAD DRIFTED, WITH THE FUNCTION BEING THE CORRECT ONE**
+(§53.5, from the direction it is usually not read): a supporting function's
+Projects rail has its items as **direct children** of `.rail` and has been
+laying out horizontally all along. Only a unit's pillar rail was broken, and
+running the check against the previous build is what said so — 2 failures, both
+on the unit. The fix is `.rail .sortable { display:flex; gap:2px; flex:0 0 auto }`,
+a no-op on the side that never had the wrapper.
+
+**`display:flex` ON THE WRAPPER, NOT `display:contents`.** Both put the items
+on one row (measured: 255px → 66px, and the strip scrolls to the last item).
+`display:contents` removes the wrapper's **box**, and `makeSortable` measures
+that box to decide where a dragged row lands — so it would have traded a
+layout fault for a reordering one.
+
+**THE INVENTED-CONTENT LINE GOES FROM THE DEMO BANNER** (Islam's call). It read
+*"Only Mobile's plan is real — every other unit, every capability's content and
+every reported figure is invented"*, and it was **§21's labelling**. The cost
+is recorded rather than glossed: nothing on that screen now says which parts
+were made up, so anybody being shown the worked example has to be told. What
+stays is the line that stops somebody mistaking the demo for their own tenant —
+*"Demo data · nothing here is saved"* — which is the half that could do damage
+if it were missing. The Clear project banner is untouched.
+
+### Two assertions that could not fail, both in one check (§160.1)
+
+`checks/squeezed-rail.py` was written, went green, and **two of its assertions
+were worthless until they were re-run against the previous build**:
+
+- **It read the wrong banner.** Asking the page for `#banner` over `file://`
+  returns the BAKED strip (*"Prototype · group shape…"*), because `sync.js`
+  only rewrites that element in demo mode over HTTP and there is no server
+  behind a file:// page (§94.11). It reported a correct removal as a failure.
+  The built file is read instead — the demo branch is a string in the source
+  and needs no browser at all.
+- **It matched a character the file does not hold.** `build.py` inlines the
+  source verbatim, so the built file carries `capability’s` as an escape
+  sequence; the assertion written as `"capability’s …"` in Python resolves
+  to the apostrophe, so **both** clauses tested the rendered form and the
+  assertion passed on the very build it existed to reject (§94.5). Both forms
+  are tested now.
+
+Proved able to fail: **3 failures** against the pre-§160 build.

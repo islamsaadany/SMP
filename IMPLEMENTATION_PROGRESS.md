@@ -64,6 +64,30 @@ Nothing proceeds past this line without an answer.
 
 ## Built and verified
 
+### v3.60 — the squeezed rail and the demo banner (§160)
+
+- Two of Islam's seven from using the product on a smaller window. The other
+  five need a decision from him and are **not built**.
+- **The rail had said `display:flex` for versions and meant nothing by it.**
+  Reordering later wrapped every row in a `.sortable` div, so the rail laid out
+  its ONE child in a row and the pillars stacked inside it — 255px of a
+  squeezed window on a list of four. §51.11's family, failing in the direction
+  that looks deliberate.
+- **The two sides had drifted and the FUNCTION was the correct one**: its
+  projects are direct children of the rail and were horizontal all along. The
+  fix is a no-op there. 255px → 66px, and the strip scrolls to the last item.
+- `display:flex` on the wrapper, never `display:contents` — that removes the
+  box `makeSortable` measures to place a dragged row.
+- **The demo banner loses the invented-content line** (Islam's call). Cost
+  recorded: nothing on that screen now says which parts were made up. The line
+  that stops somebody mistaking the demo for their own tenant stays.
+- **Two assertions in the new check could not fail** until they were run
+  against the previous build: one read the baked banner instead of the demo
+  one (invisible over file://), and one matched a character the built file
+  holds only as an escape sequence. 3 failures on the pre-§160 build once
+  fixed.
+- On its own branch for review: `claude/wave5-demo-line-and-squeezed-rail`.
+
 *The five v3.59 entries below are the UI/UX audit's waves 2 and 3, built and
 checked as separate rounds on one branch and shipping as one version — main
 took v3.52–v3.57 from four other sessions while they were being built.*

@@ -19936,3 +19936,73 @@ three band widths.
   one before it — the register's table 544px past a box that does not scroll,
   and the access matrix clipped with no hover. Pre-existing; a true signal, and
   its own item.
+
+
+## §159 · The welcome screen's way out (v3.59)
+
+Islam, using the screen §148 shipped: *"in the welcome screen. continue to the
+unit or the function button is a bit not obvious. can you give me variations
+for it's design or placement"* — and, from five drawn in the real screen,
+**B**.
+
+**THE FAULT IS THREE THINGS, AND WEIGHT ALONE FIXES ONE.** It is the **only**
+way out — there is no ×, no Escape and no click-outside, so every other
+control on that screen goes somewhere and stays while this one link is the
+entire exit. It was the **quietest thing on the screen**: 13px `--stone` text
+against 15px bold row titles, three bordered buttons and one solid `--cta`.
+And it sat **inside the left column**, so its scope read as the end of
+*Waiting on you* rather than the way past the screen. Measured rather than
+asserted: at 1280px the link's box begins **585px into the columns and 165px
+above their bottom**, and **below 960px it is not even last** — the columns
+stack, so at 900px the screen is 949px tall with **411px of side column after
+the way out**. A person looking for the exit at the foot of the screen finds
+*Your pages* and the intro round.
+
+**ONE BAR ACROSS BOTH COLUMNS ANSWERS ALL THREE.** `.wexit` is a real
+`<button>` inside `.wwrap` and **after `.wcols`**, so it spans the grid, its
+scope is the screen, and it is last at every width including the stacked
+layout. It wears the wide-row shape `.wpages` already uses rather than a
+second vocabulary for *a row you press to go somewhere* (§53.5), and it spends
+none of §41's accent.
+
+**THE EMPTY CASE TAKES THE FILL, AND THAT CLOSES A DRIFT.** §148's approved
+mockup says in its own notes that with nothing waiting the screen reads
+*Nothing is waiting on you* **with Continue as the loud control** — and the
+build never did it, so an empty welcome offered a grey link and nothing else
+(§45.2's empty hand, and §61's dead end). `.wexit.wloud` is **its own class,
+never `.wcta`**: that one means *an action row shouts*, and the exit is not an
+action row — which is also why `checks/welcome.py` §6 can go on asserting that
+no action row wears the fill while asserting separately that the exit does.
+**A row arriving late gives the fill back**: the office's inbox count and the
+chat's unread land after the screen is built, so `unEmpty()` — already the one
+place that removes the empty line — removes `wloud` in the same breath, or the
+budget is spent twice on a screen that is no longer empty.
+
+**THE GREY SUB-LINE IN THE DRAWING IS DELIBERATELY NOT BUILT.** The mockup's
+bar carried *Strategy · Plan* under the name. The label already names the
+destination (§1b-ii: a heading names the thing), and deriving the second line
+means reading the navigation's own words back off `[aria-selected]` — the
+reader §99 **deleted** — with the badge and `.vh` traps §145 records. Recorded
+here rather than dropped silently; it is a small addition if it is wanted.
+
+**Contrast, all four palettes** (§38.5, and the chevron is `--gold-deep`,
+which is the token that keeps failing): label **12.77 / 10.35 / 6.33 / 6.64**,
+chevron **4.99 / 7.90 / 6.81 / 8.54**, and the promoted bar's ink on `--cta`
+**5.54 / 5.18 / 7.37 / 8.32**. The chevron sits on `--surface` and never
+`--surface-2`, where `--gold-deep` measures 4.45.
+
+`checks/welcome.py` §3 asserts the **relationship and not a pixel** (§94.8):
+outside `.wcols`, last in the wrap, a `<button>`, spanning the columns to
+within 1px and sitting below them — so a later change to the gutters stays
+green and a control put back inside the column does not. **Both ends** on the
+fill: not loud with rows waiting (§3), loud with none (§6), and **painted
+rather than merely classed**, or a build that dropped the CSS would pass on
+the class alone (§113.8). Proved able to fail: **7 failures** against the
+pre-§159 build, which is exactly the seven new assertions.
+
+### Recorded, not fixed (§159.1)
+
+- **Escape still does not close the overlay**, and neither does clicking
+  outside it. Offered with the variations and not taken up; it is one line
+  and no design, and it stays a separate ask rather than riding along
+  unasked (rule 1b).

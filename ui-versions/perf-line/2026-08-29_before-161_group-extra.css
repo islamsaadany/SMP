@@ -210,34 +210,6 @@
   }
   .tip:hover::after, .tip:focus::after { display:block; }
 
-  /* THE SAME BUBBLE, WITHOUT THE BADGE (§163). `.hasnote` is the value itself
-     — a direction glyph, a compile rule — carrying its meaning on hover; it
-     must not become a circled "i". So it borrows the bubble and none of the
-     mark: the rules below add it to the two selectors that matter and leave
-     `.tip`'s own box alone.
-
-     `width:max-content` because "More is better" in a 255px box is mostly box.
-     The cap keeps a long compile note from running off the page. */
-  .hasnote { position:relative; }
-  .hasnote::after {
-    content:attr(data-tip); display:none;
-    position:absolute; bottom:calc(100% + 8px); left:50%; transform:translateX(-50%);
-    background:var(--ink); color:var(--ground); font-size:12px; font-weight:400; line-height:1.4;
-    letter-spacing:0; text-transform:none; padding:8px 11px; border-radius:3px;
-    width:max-content; max-width:255px;
-    pointer-events:none; z-index:20; text-align:left;
-  }
-  .hasnote:hover::after, .hasnote:focus::after, .hasnote:focus-visible::after { display:block; }
-  /* AN EMPTY BUBBLE IS A BLACK BOX, AND THAT IS WHAT SHIPPED (§163.3). The
-     compiled cell carried `hasnote` while still setting a `title`, so this rule
-     matched it with no `data-tip` to fill: `content:attr(data-tip)` resolved to
-     nothing and painted a small black rectangle on hover, with the browser's
-     own tooltip arriving a second later underneath. The caller is fixed; this
-     is the guard, so the next element given the class and not the attribute
-     shows nothing rather than a box with nothing in it. */
-  .hasnote:not([data-tip])::after, .hasnote[data-tip=""]::after { display:none !important; }
-  .hasnote:focus-visible { outline:2px solid var(--gold); outline-offset:2px; border-radius:2px; }
-
   /* ── Enabler cards (temple base) ──────────────────────── */
   .base-grid { grid-template-columns:repeat(4,1fr); }
   @media (max-width:860px) { .base-grid { grid-template-columns:repeat(2,1fr); } }
@@ -925,7 +897,7 @@
     .split { grid-template-columns:1fr; }
     /* Stacked, the rail is not sticky and there is no gap above it to fill. */
     .rail { position:static; display:flex; overflow-x:auto; }
-    /* AND THE ITEMS ARE NOT THE RAIL'S CHILDREN ANY MORE (§162). The line
+    /* AND THE ITEMS ARE NOT THE RAIL'S CHILDREN ANY MORE (§160). The line
        above has said `display:flex` since the stacked rail was written, and
        for a long time it did nothing: reordering later wrapped every row in a
        `.sortable` div, so the rail dutifully laid out its ONE child in a row

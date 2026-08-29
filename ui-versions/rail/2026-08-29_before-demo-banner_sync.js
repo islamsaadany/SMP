@@ -416,20 +416,16 @@ var SYNC = (function () {
     if (ban) {
       ban.hidden = !isDemoMode();
       /* THE BANNER SAYS WHICH ONE IS ON SCREEN. Both are demo data and neither
-         is saved.
-
-         THE FILLED EXAMPLE'S SECOND LINE IS GONE (§162, Islam's call). It read
-         "Only Mobile's plan is real — every other unit, every capability's
-         content and every reported figure is invented", and it was §21's
-         labelling of invented content. The cost is stated rather than hidden:
-         nothing on this screen now says which parts were made up, so anybody
-         shown the worked example has to be told. The first line still says
-         it is the demo and that nothing is saved, which is what stops somebody
-         mistaking it for their own tenant — the part that could do damage. */
+         is saved, but the second sentence is only true of the filled one —
+         a Clear Project has no invented content in it to warn about, and
+         warning about it anyway would teach people to stop reading the
+         banner. */
       if (mode === "demo") {
         ban.innerHTML =
           '<span><strong>Demo data \u00b7 nothing here is saved.</strong> The full worked ' +
-          'example, for explaining how the platform works.</span>';
+          'example, for explaining how the platform works.</span>' +
+          '<span><strong>Only Mobile\u2019s plan is real</strong> \u2014 every other unit, every ' +
+          'capability\u2019s content and every reported figure is invented.</span>';
       } else if (mode === "demoClear") {
         ban.innerHTML =
           '<span><strong>Clear project \u00b7 nothing here is saved.</strong> The same ' +

@@ -5748,18 +5748,13 @@
  "bands": [
   {
    "key": "good",
-   "floor": 85,
+   "floor": 90,
    "label": "On track"
   },
   {
    "key": "attn",
    "floor": 70,
    "label": "Needs attention"
-  },
-  {
-   "key": "warn",
-   "floor": 50,
-   "label": "At risk"
   },
   {
    "key": "bad",

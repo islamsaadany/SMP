@@ -941,10 +941,22 @@
      "Own supporting function" group headings, which had been under the second
      row since §117 split them. */
   .setuppane .cfg.acgrid table thead th { position:static; }
+  /* AND EVERY OTHER SETUP TABLE HAD THE SAME FAULT, UNLOOKED AT (§163.5).
+     The exclusion above fixed `.acgrid` and stopped there. `.cfg` is
+     `overflow-x:auto`, which makes the BOX what a sticky head pins against —
+     so a PAGE offset resolves inside the table, exactly as §130.2 wrote down.
+     Measured on Scoring bands: sticky top 136px, table top 246, head top
+     382 — the header pushed 136px down its own body, sitting across the third
+     row at rest, at every width and with the page unscrolled. Islam's "things
+     are damaged" picture, on a page neither of us was looking at.
+
+     `position:static`, following §130.2's own choice rather than inventing a
+     second answer: these are three-to-ten-row tables, and a head that pins
+     buys nothing on a table you can see all of. The register and the source
+     table keep their own handling — they are long, they scroll vertically,
+     and they were already excluded. */
   .setuppane .cfg:not(.peoplebox):not(.srctable):not(.acgrid) table thead th {
-      position:sticky; z-index:4;
-      top:calc(var(--chrome-h, 118px) + var(--rail-gap, 12px) + var(--sethead-h, 46px));
-      background:var(--panel); }
+      position:static; background:var(--panel); }
   /* A HAIRLINE BETWEEN HEADINGS (§121.4). They are uppercase, letter-spaced
      and 8px-padded, so at a narrow pane "Shown in the nav" and "Code" merged
      into one word — measured on Islam's own screenshot. A divider costs no

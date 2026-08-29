@@ -250,19 +250,10 @@ function barRow(main, sub, perf, exec, planned, opts){
 }
 
 function chartLegend(){
-  /* A SECOND COPY OF THE BANDS, AND IT WAS ALREADY LYING (§163). This read
-     "On track 70+ / At risk 50-69 / Off track under 50" while the bands said
-     85 / 70 / 50 — two definitions of the same thing, drifted, on one page.
-     §53.5: it is derived from `BANDS.bands` now, like the button, so the
-     legend, the button and every score answer to one list. */
   return '<div class="chart-legend">' +
-    BANDS.bands.map(function(x, i){
-      var rng = i === 0 ? x.floor + "+"
-        : i === BANDS.bands.length - 1 ? "under " + BANDS.bands[i-1].floor
-        : x.floor + "\u2013" + (BANDS.bands[i-1].floor - 1);
-      return '<span><i class="sw" style="background:var(--' + x.key + ')"></i> ' +
-        esc(x.label) + ' ' + rng + '</span>';
-    }).join("") +
+    '<span><i class="sw" style="background:var(--good)"></i> On track 70+</span>' +
+    '<span><i class="sw" style="background:var(--warn)"></i> At risk 50\u201369</span>' +
+    '<span><i class="sw" style="background:var(--bad)"></i> Off track under 50</span>' +
     '<span><i class="sw" style="background:var(--stone-soft)"></i> Execution</span>' +
     '<span><i class="sw line"></i> Planned</span></div>';
 }
@@ -337,27 +328,10 @@ var COMPILE_WORDS = {
    the platform's own hover, so nothing new has to be positioned, and
    `clipTitles()` only fills an EMPTY title so this is never overwritten
    (§93.6). */
-/* THE PRODUCT'S OWN NOTE, NOT THE BROWSER'S (§163). This shipped as a `title`
-   and Islam reported the hover as "not working" — it was working, and that is
-   the finding: a native tooltip waits about a second, hangs off an 11px target,
-   and on an iPad DOES NOT EXIST. §127 settled this once for the chat settings
-   and the answer is the same here: `data-tip`, the platform's own bubble,
-   which opens at once on hover and on FOCUS — and focus is what a tap gives
-   you, which is the half the browser's tooltip can never do.
-
-   `tabindex="0"` is what makes the tap work, and it is a real cost: eight more
-   stops on a plan page. Taken deliberately — the audience for these pages
-   opens them on a tablet.
-
-   THE `title` IS GONE RATHER THAN KEPT ALONGSIDE. Both would mean two notes
-   for one value, the product's appearing at once and the browser's a second
-   later underneath it. `aria-label` carries the words for anything that reads
-   the page aloud, which the focusable span now announces. */
-function noteSpan(text, note, cls){
-  if (!note) return cls ? '<span class="' + cls + '">' + esc(text) + '</span>' : esc(text);
-  return '<span class="' + (cls ? cls + " " : "") + 'hasnote" tabindex="0" data-tip="' +
-    esc(note).replace(/"/g, "&quot;") + '" aria-label="' + esc(text) + ' \u2014 ' + esc(note) +
-    '">' + esc(text) + '</span>';
+function noteSpan(text, note){
+  return note
+    ? '<span class="hasnote" title="' + esc(note) + '">' + esc(text) + '</span>'
+    : esc(text);
 }
 function dirCell(d){ return d ? noteSpan(d, DIR_WORDS[d] || "") : ""; }
 /* THE REPEATED DEFAULT DROPS TO THE QUIET INK (§149). "Latest" is what almost
@@ -367,18 +341,12 @@ function dirCell(d){ return d ? noteSpan(d, DIR_WORDS[d] || "") : ""; }
 function compileCell(c){
   if (!c) return "";
   var note = COMPILE_WORDS[c] || "";
-  /* THROUGH `noteSpan`, WHICH IS WHY IT EXISTS (§163.3). This built its own
-     span and set its own `title` — §163 converted the direction cell and left
-     this one behind, and the two faults then met: the span still carried
-     `hasnote`, so the new bubble matched it with NO `data-tip` to fill it and
-     painted an EMPTY BLACK BOX, and a second later the browser's tooltip
-     arrived underneath with the words. Islam saw exactly that: "it shows a
-     black box and later it shows the description."
-
-     §96's lesson, again and in the same shape: a helper that exists is not a
-     helper that was used, and nothing catches the difference — both spans
-     render, both carry the class, and only one has the attribute. */
-  return noteSpan(c, note, c === "Latest" ? "cdefault" : "");
+  var cls = [];
+  if (c === "Latest") cls.push("cdefault");
+  if (note) cls.push("hasnote");
+  if (!cls.length) return esc(c);
+  return '<span class="' + cls.join(" ") + '"' +
+    (note ? ' title="' + esc(note) + '"' : '') + '>' + esc(c) + '</span>';
 }
 
 /* Measure name reads left; every figure centres under its column. Progress
@@ -629,50 +597,18 @@ var TIP_EXEC = "Execution scores the tactics under this unit's pillars \u2014 ea
 var TIP_THEME = "Performance and execution across every pillar carrying this theme, in every business unit.";
 var TIP_CAP = "Group capabilities are pillars in their own right: performance from their key measures, execution from their tactics.";
 
-/* THE COLOURS MOVE BEHIND A BUTTON (§163) ─────────────────────────────
-   It was a full-width bar reading "READING THE COLOURS" with every band spelt
-   out, and it carried Report and Presentation at its right end — which is why
-   those two read as a row of their own rather than as the page's controls.
-   Islam: put them on the performance line, and make the colours a button that
-   opens and shuts. The bar goes, the page gains a row, and the three controls
-   sit together where every other page in the product keeps its controls.
-
-   THE WORD IS "Bands", HIS (over "Colour key"). It is what the Setup page that
-   edits them already calls them, so the button and the setting share a noun.
-
-   STILL RENDERED FROM `BANDS.bands`, never restated — editing a threshold in
-   Setup cannot leave this lying, which was the whole point of the bar it
-   replaces. The ranges are derived: the first band reads upward, the last
-   downward, and any band between reads as a span.
-
-   A `<details class="dlmenu">` because that is the product's dropdown and
-   Presentation is standing right beside it (§53.5); a second shape for the
-   same gesture, one control apart, is how two vocabularies get started.
-
-   THE COST, RECORDED BECAUSE IT IS REAL: the colours are now explained only to
-   somebody who presses the button. A red number is a red number to everyone
-   else. Put to Islam in those words before he chose it. */
-function bandsMenu(){
+/* The legend renders from the configured bands rather than restating them,
+   so editing a threshold in Setup cannot leave the legend lying. */
+/* The legend row had free space at its right end and the Arrange button had a
+   row of its own. They share one now. */
+function bands(action){
   var b = BANDS.bands;
-  return '<details class="dlmenu right bandsmenu"><summary class="editbtn">Bands' +
-    '<span class="dlcar" aria-hidden="true">\u25be</span></summary>' +
-    '<div class="menu bandslist" role="menu">' +
-    b.map(function(x, i){
-      var rng = i === 0 ? x.floor + "% and above"
-        : i === b.length - 1 ? "below " + b[i-1].floor + "%"
-        : x.floor + " to " + (b[i-1].floor - 1) + "%";
-      return '<div><i style="background:var(--' + x.key + ')"></i>' +
-        '<b>' + esc(x.label) + '</b><span>' + esc(rng) + '</span></div>';
-    }).join("") + '</div></details>';
-}
-
-/* The page's controls all travel the same way now: written into REPORT_CHROME
-   during the render and hung on the tab row by the shell afterwards, because
-   the tab row is drawn BEFORE the page that owns the controls (§150's channel,
-   used by one more page). */
-function perfActs(action){
-  REPORT_CHROME = (action || "") + bandsMenu();
-  return "";
+  return '<div class="bands"><b>Reading the colours</b>' +
+    b.map(function(x,i){
+      var top = i === 0 ? "%+" : "\u2013" + (b[i-1].floor - 1) + "%";
+      var rng = i === b.length-1 ? "below " + b[i-1].floor + "%" : x.floor + top;
+      return '<span><i style="background:var(--'+x.key+')"></i> '+x.label+' &mdash; '+rng+'</span>';
+    }).join("") + (action ? '<span class="bands-act">' + action + '</span>' : '') + '</div>';
 }
 
 function arrangeBtn(scope, unitKey){
@@ -1272,7 +1208,7 @@ function renderCompanyPerformance(coKey){
     }) +
   '</div>';
 
-  return perfActs("") + head +
+  return bands("") + head +
     section("", "Business units", null,
       GVIEW.units === "table" ? unitsTable(keys)
         : '<div class="gauges g3">' + unitCards(keys) + '</div>',
@@ -1529,7 +1465,7 @@ function whereNext(keys){
       TIP_CAP, viewToggle("caps")) });
 
   GROUP_SECTIONS = SECS.map(function(x){ return x.t; });
-  return perfActs(arrangeBtn("group")) + SECS[Math.min(GSEC, SECS.length - 1)].h;
+  return bands(arrangeBtn("group")) + SECS[Math.min(GSEC, SECS.length - 1)].h;
 }
 var GROUP_SECTIONS = [], GSEC = 0;
 
@@ -1881,7 +1817,7 @@ function renderUnitPerformance(u){
 
      So `.bands` drops to 11px / 9.5px and the dot with it, Report keeps its
      solid fill, and the page keeps the row. See `group-extra.css`. */
-  return perfActs(reportBtn(u.ukey) + presentMenu("unit", u.ukey)) +
+  return bands(reportBtn(u.ukey) + presentMenu("unit", u.ukey)) +
 
     '<div class="scores">' +
       '<div class="card tight primary"><div class="score-h"><h4>' + L("keyobj","bu") + ' performance</h4>' +

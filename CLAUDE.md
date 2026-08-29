@@ -2659,6 +2659,11 @@ python3 checks/project-custodian.py # a custodian per project (§147): the Proje
                                 # nothing, and a milestone owner is a Contributor who
                                 # reports nothing until the row is opened — both ends,
                                 # three viewers, proved able to fail
+python3 checks/perf-line.py     # the Performance line: Report, Presentation and Bands
+                                # on the tab row, three bands, the hover bubble on
+                                # hover AND focus, and nothing over the pinned title (§163)
+python3 checks/squeezed-rail.py # below 820 the rail reads ACROSS on both sides, and the
+                                # demo banner's invented-content line is gone (§162)
 python3 checks/table-fit.py     # the plan tables FIT the pane at every width — never
                                 # "and it scrolls" — on a unit AND a function, with the
                                 # 620 floor still in force on a wide window (§158)
@@ -2746,7 +2751,38 @@ prior sessions (on HR_ERP) accidentally reverted agreed-upon designs.
 
 ---
 
-*Last Updated: 2026-08-29 &mdash; **v3.59: the welcome screen's way out
+*Last Updated: 2026-08-29 &mdash; **v3.62: the Performance line, three bands,
+and two headers found lying across their own rows (&sect;162&ndash;&sect;163)**.
+Islam's seven from using the product on a squeezed window. **Three of them were
+one lesson each.** The hover he reported as *"not working"* WAS working &mdash;
+as a native `title`, which waits a second, hangs off an 11px target and on an
+iPad does not exist; it is the product's own bubble now, opening on hover AND
+on focus, which is what a tap gives. Then he reported *"a black box and later
+the description"* on the compiled cell: that cell built its own span and kept
+its own `title`, so it took the new bubble with **no text to put in it** and
+the browser's tooltip a second behind &mdash; &sect;96's lesson exactly, a
+helper that exists is not a helper that was used. And the bands *"are still
+like the past"* because **they are a row in a table**: `sync.js` hydrates them
+over the baked default, so changing what the product ships with reaches a fresh
+deployment and nothing else (migration 029 moves a tenant still on the shipped
+four and leaves a customised one alone &mdash; both cases driven against a real
+Postgres). **THE ONE WORTH READING IS &sect;163.5**: every Setup table pinned
+its header to a PAGE offset while sitting in a box that scrolls, so the browser
+measured that offset from the top of the TABLE &mdash; the Scoring bands
+heading sat **136px down its own body, across the third row, at every width
+with the page unscrolled**. &sect;130.2 recorded that exact fault, fixed
+`.acgrid`, and stopped; every other Setup table still had it and nobody had
+looked. **AND MY OWN FIRST GUARD BROKE SOMETHING REAL** &mdash; raising the
+pinned pane title above everything made fill fields unclickable beneath it and
+the whole sweep failed; a guard that costs a working interaction is a second
+fault, and the tie it was meant to settle needed breaking from below instead.
+Also: the reading-the-colours banner was the page's control row, which is why
+Report and Presentation read as a row of their own; the squeezed rail said
+`display:flex` for versions and meant nothing by it, because reordering had
+wrapped its rows in a container; and the chart legend was keeping a second copy
+of the bands that already disagreed with them.*
+
+*Earlier: 2026-08-29 &mdash; **v3.59: the welcome screen's way out
 (&sect;159)**. Islam, using what &sect;148 shipped: *"continue to the unit or
 the function button is a bit not obvious."* Five variations drawn in the real
 screen and he chose **B**, one bar across both columns. **The fault was three

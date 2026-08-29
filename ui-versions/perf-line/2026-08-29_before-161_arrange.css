@@ -1469,23 +1469,7 @@
           border:1px solid var(--line); border-radius:6px; padding:8px 10px;
           min-height:96px; resize:vertical; background:var(--surface); color:var(--ink); }
 .kbed-q:focus-visible, .kbed-a:focus-visible { outline:2px solid var(--focus); outline-offset:-1px; }
-.kbed-foot { display:flex; gap:12px; align-items:center; margin-top:8px;
-  flex-wrap:wrap; }
-/* WHO AN ANSWER IS FOR (§161). The picker sits FIRST in the foot, before the
-   "Edited" mark and its way back, because it is a property of the answer
-   while those two are a property of this tenant's change to it. */
-.kbed-aud { display:flex; align-items:center; gap:7px; font-size:12.5px;
-  color:var(--ink-3); }
-.kbed-aud select { font:inherit; color:var(--ink); background:var(--surface);
-  border:1px solid var(--line); border-radius:4px; padding:3px 6px; }
-/* The chip in read mode. `everyone` is never drawn — it is the default on 57
-   of 64 questions and a mark on nearly every card is furniture (§41). The two
-   that ARE drawn read apart at a glance rather than by their words alone:
-   the office's takes the accent, everybody-else's the quiet surface. */
-.pill.kind.kbaud-office { border-color:var(--gold); color:var(--gold-deep);
-  background:var(--attn-bg); }
-.pill.kind.kbaud-others { border-color:var(--line); color:var(--ink-2);
-  background:var(--surface-2); }
+.kbed-foot { display:flex; gap:12px; align-items:center; margin-top:8px; }
 .kbed-mark { font-size:var(--fs-micro); letter-spacing:.09em; text-transform:uppercase;
              font-weight:700; color:var(--gold-deep); border:1px solid var(--gold);
              border-radius:99px; padding:2px 9px; }
@@ -1516,60 +1500,3 @@
 .kbtabs button.on { background:var(--panel); color:var(--panel-ink); }
 .kbtabs button:focus-visible { outline:2px solid var(--focus); outline-offset:-2px; }
 .kbcount { font-size:var(--fs-micro); font-weight:700; opacity:.75; margin-left:6px; }
-
-
-  /* ── THE BANDS BUTTON AND ITS PANEL (§163) ──────────────────────────
-     In arrange.css, concatenated last, and with `#subtabs` in the selector —
-     BOTH deliberate. §145.14 is the scar: the tab row styles its own buttons
-     with `.tabs button` (0,1,1), which outranks any bare class, so a control
-     placed in that row ships UNDRESSED — the mockup reproduced it within a
-     minute of the button being added. Every rule below that has to beat it
-     names the row. */
-  #subtabs .tabacts, .tabs .tabacts { margin-left:auto; display:inline-flex;
-    align-items:center; gap:8px; flex:0 0 auto; }
-  #subtabs { display:flex; align-items:center; }
-  #subtabs .bandsmenu > summary,
-  .tabs .bandsmenu > summary { border:1px solid var(--line); border-radius:99px;
-    padding:6px 13px; background:var(--surface); color:var(--ink-2);
-    font:700 var(--fs-label)/1 var(--sans); letter-spacing:var(--track);
-    text-transform:uppercase; cursor:pointer; display:inline-flex;
-    align-items:center; gap:5px; list-style:none; }
-  #subtabs .bandsmenu > summary:hover,
-  .tabs .bandsmenu > summary:hover { color:var(--ink); border-color:var(--ink-3); }
-  .bandsmenu > summary::-webkit-details-marker { display:none; }
-  /* The panel hangs BELOW the row, so the row may not clip it. The tab row has
-     no reason to hide anything horizontally and this is the only thing that
-     ever escapes it. */
-  #subtabs, nav.tabs { overflow:visible; }
-  .bandsmenu { position:relative; }
-  .bandsmenu > .bandslist { min-width:250px; padding:6px; }
-  .bandslist div { display:flex; align-items:center; gap:10px; padding:7px 10px;
-    font-size:var(--fs-note); color:var(--ink); white-space:nowrap; }
-  .bandslist div + div { border-top:1px solid var(--line-soft); }
-  .bandslist i { width:12px; height:12px; border-radius:3px; flex:0 0 auto; display:block; }
-  .bandslist b { font-weight:700; }
-  /* The number is the thing being looked up, so it ends the line and lines up
-     down the list. */
-  .bandslist span { margin-left:auto; color:var(--ink-2);
-    font-variant-numeric:tabular-nums; }
-  /* ── THE TIE OVER THE PINNED PANE TITLE (§163.2) ────────────────────
-     Islam, on a squeezed window: "on scrolling down things are damaged", with
-     a table header lying across the pinned pane title. The trigger was never
-     reproduced — ten widths from 1000 to 768, every scroll offset, opened
-     narrow AND squeezed from wide, on a unit and a function — and two
-     hypotheses were tested and both were wrong: the plan tables' header cells
-     carry no `idx` class, and no `thead th` in a pane is sticky at all.
-
-     WHAT IS FIXED IS THE ONE THING THAT IS DEMONSTRABLY UNDECIDED. §151 gave
-     the frozen HEADER cells `z-index:4` — the SAME as the pinned title — so
-     which of the two paints on top is settled by document order alone, and the
-     table comes later. A tie decided by source order is not a decision. They
-     drop to 3.
-
-     AND THE FIRST ATTEMPT DID IT FROM ABOVE AND BROKE SOMETHING REAL: raising
-     `.pband` to 8 made the title win against everything, and
-     `checks/gap-fill.py` went red immediately — a fill field scrolled level
-     with the title became unclickable, the title intercepting the press. A
-     guard that costs a working interaction is a second fault, not a guard.
-     `.pband` is left exactly as it was; only the tie is broken. */
-  .tblscroll thead th.idx, .tblscroll thead th.idx + th { z-index:3; }

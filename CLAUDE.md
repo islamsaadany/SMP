@@ -365,8 +365,29 @@ console errors (in this cloud environment, run it via a wrapper that points Play
   `node scripts/test-door.js <smo-password>` against a running dev-server
   after touching `api/auth.js` or `lib/auth.js` (it ends by rate-limiting the
   SMO on purpose — `DELETE FROM login_attempts;` clears it).
+- **A DEBOUNCE IS A DATA-LOSS WINDOW WHEN THE FLUSH CANNOT REACH IT (§170):**
+  `afterPaint()` waited 800ms, and §138's flush-on-leave was supposed to cover
+  that — **`keepalive` caps a body at 64KB and one SMP save is 216,307 bytes**,
+  so over the cap it is a plain fetch the navigation cancels and the net has
+  never once caught anything. Press a cell, refresh 150ms later: lost, on every
+  page. It is a **leading-edge debounce** now — the first change of a burst goes
+  at once and the trailing timer still runs — so one press is durable
+  immediately and five presses cost two POSTs, not five. **In `afterPaint()`
+  and nowhere else**: every writer ends in `paint()` and every `paint()` ends
+  there, so a control added tomorrow is covered and there is no list to forget
+  (§104.7). Typing is untouched — a field writes on `change`, i.e. on BLUR
+  (§35), so a keystroke never reached it. *A limit stated in a comment is not a
+  limit anybody has measured the product against.*
+- **A STUB FAST ENOUGH TO BE CONVENIENT IS FAST ENOUGH TO HIDE A RACE
+  (§170.2):** the first version of the new trial reloaded 150ms after a change
+  and asserted the POST arrived — and **passed on the broken build**, because
+  the stub answers in under a millisecond while a real server parsing 216KB and
+  writing thirty tables does not. §94.5. Assert the property the harness can
+  honestly see (**on the wire inside 250ms** — 0 posts on the old build), and
+  put the reproduction of the LOSS where it can happen: the dev-server and a
+  real Postgres, reading the row back rather than the screen.
 - **A STICKY BOX WITH NO TRAVEL IS NOT STICKY, AND THE PAGE HAD 60px OF SCROLL
-  IT DID NOT NEED (§166):** `.setuprail` is `position:sticky; top:97px` and on
+  IT DID NOT NEED (§167):** `.setuprail` is `position:sticky; top:97px` and on
   a page where the rail is the TALLEST thing in its row it never pins — a
   sticky element cannot travel past its containing block, so the rail scrolls
   away with the page and takes its own pinned head and search with it (measured
@@ -382,7 +403,7 @@ console errors (in this cloud environment, run it via a wrapper that points Play
   `--pane-foot:20px` for a page whose content is capped to the window, with
   `.wrap:has(.setupsplit)` letting the page ask (§114.4's shape). Below the
   floors (rail 260px, box 340px) the page scrolls again by design.
-- **§148's WELCOME SCREEN BLINDS ANY CHECK WRITTEN BEFORE IT (§166.2):**
+- **§148's WELCOME SCREEN BLINDS ANY CHECK WRITTEN BEFORE IT (§167.2):**
   `.welcomeover` covers the viewport, so `elementFromPoint` returns it and
   every click is intercepted. `checks/office-chat.py` had been failing on *"a
   click at its centre reaches the bubble — DIV"* and that was **recorded as a
@@ -392,7 +413,7 @@ console errors (in this cloud environment, run it via a wrapper that points Play
   the flag after `goto` is too late — and neither reaches into the overlay: the
   welcome screen has its own check. *A finding that reproduces on main is still
   a guess about the cause.*
-- **THE COLOUR IS THE BAND'S KEY (§167):** a band's `key` is read as a CSS
+- **THE COLOUR IS THE BAND'S KEY (§168):** a band's `key` is read as a CSS
   token (`var(--good)`, `.pill.good`) AND by `needsNote()`, which asks for an
   explanation on `bad` and `warn` — so picking a level's colour is not
   decoration beside its key, it IS the key, and picking red is what makes that
@@ -404,7 +425,7 @@ console errors (in this cloud environment, run it via a wrapper that points Play
   no band; **two is the floor and the reason is said** (§59). `bands` is keyed
   on `idx` alone, so any number of levels and two sharing a colour both
   round-trip — proved against a real Postgres.
-- **ABSENT IS NOT ZERO WHEN A SETTING IS A NUMBER (§168):** `Number(null)` and
+- **ABSENT IS NOT ZERO WHEN A SETTING IS A NUMBER (§169):** `Number(null)` and
   `Number("")` are both 0 and both finite, so clamping alone answered ONE
   MINUTE for every tenant that had never set the away threshold — §104.10's
   trap in a second place. Test for absence before reading the value as a
@@ -2709,10 +2730,10 @@ python3 checks/project-custodian.py # a custodian per project (§147): the Proje
 python3 checks/setup-sticky.py  # a Setup page that FITS does not scroll, and nothing
                                 # pinned ends up behind the chrome — over HTTP with a
                                 # conversation open, because the Inbox's own two headers
-                                # do not exist over file:// (§166)
+                                # do not exist over file:// (§167)
 python3 checks/scoring-bands.py # the scale is the tenant's: add, remove and recolour a
                                 # level, every control PRESSED and BANDS.bands read back,
-                                # both ends each time (§167)
+                                # both ends each time (§168)
 python3 checks/perf-line.py     # the Performance line: Report, Presentation and Bands
                                 # on the tab row, three bands, the hover bubble on
                                 # hover AND focus, and nothing over the pinned title (§163)
@@ -2805,8 +2826,9 @@ prior sessions (on HR_ERP) accidentally reverted agreed-upon designs.
 
 ---
 
-*Last Updated: 2026-08-29 &mdash; **v3.63: a Setup page that fits, an editable
-scale, and the away threshold (&sect;166&ndash;&sect;168)**. Islam, on the
+*Last Updated: 2026-08-29 &mdash; **v3.64: a Setup page that fits, an editable
+scale, the away threshold, and a change saved at once
+(&sect;167&ndash;&sect;170)**. Islam, on the
 Platform Inbox: *"on scrolling up the messaging headr is lost the side rail of
 the messages header is lost as well and the setup rail header and srach are
 lost all of this is supposed to be sticky."* **THEY ARE ALL STICKY, AND

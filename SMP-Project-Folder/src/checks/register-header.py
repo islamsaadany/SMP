@@ -124,7 +124,7 @@ HITS = """(sel)=>{
 
 
 # THE WELCOME SCREEN COVERS THE PAGE, AND SETTING ITS FLAG AFTER `goto` IS
-# TOO LATE (§148, §166). Over the stub server §148's overlay draws across the
+# TOO LATE (§148, §167). Over the stub server §148's overlay draws across the
 # whole viewport, so every control on the header row reported unreachable —
 # `elementFromPoint` returning the overlay, at all four widths, while the row
 # itself was perfectly fine. Suppressed the way a RETURNING viewer has it, in

@@ -33,7 +33,7 @@ from playwright.sync_api import sync_playwright
 # "Skip for now" session flag), never by deleting or disabling the tour:
 # the tour has its own check, and a suppression that reached into its
 # internals would be this file quietly asserting the tour away.
-# AND §148's WELCOME SCREEN COVERS THE PAGE THE SAME WAY (§166). It shipped
+# AND §148's WELCOME SCREEN COVERS THE PAGE THE SAME WAY (§167). It shipped
 # after this file and nothing here knew about it, so every click landed on
 # `.welcomeover` — which is what "a click at its centre reaches the bubble —
 # DIV" had been reporting, and it was read as a product fault for as long as
@@ -729,7 +729,7 @@ with sync_playwright() as p:
     if "Handover email" in seq and "Away email" in seq:
         ck("the two email settings are next to each other",
            abs(seq.index("Handover email") - seq.index("Away email")) == 1, seq)
-    # ── HOW LONG IS AWAY (§168) ──────────────────────────────────────
+    # ── HOW LONG IS AWAY (§169) ──────────────────────────────────────
     # The box lives on the Away email row and only while that email is ON — a
     # threshold for a send nobody makes is a control with nothing behind it
     # (§61). Asserted here rather than only in `scripts/test-chat.js`, because

@@ -236,7 +236,7 @@
      is the guard, so the next element given the class and not the attribute
      shows nothing rather than a box with nothing in it. */
   .hasnote:not([data-tip])::after, .hasnote[data-tip=""]::after { display:none !important; }
-  /* AND IT MUST NOT OPEN PAST THE EDGE (§164). The bubble centres on its own
+  /* AND IT MUST NOT OPEN PAST THE EDGE (§165). The bubble centres on its own
      value, and the values that carry one — the direction and the compile rule
      — are the LAST columns of the plan tables, inside a box that is
      `overflow-x:auto` and therefore clips. Islam saw "Takes the last measure
@@ -636,7 +636,7 @@
      non-zero. Change the gap and both move together. */
   :root { --rail-gap:22px; }
   /* ── WHAT SITS BELOW A CAPPED BOX IS 80px, AND THREE CAPS RESERVED 20
-     (§166) ────────────────────────────────────────────────────────────
+     (§167) ────────────────────────────────────────────────────────────
      Islam, using the Platform Inbox: *"on scrolling up the messaging header
      is lost, the side rail of the messages header is lost as well, and the
      setup rail header and search are lost — all of this is supposed to be

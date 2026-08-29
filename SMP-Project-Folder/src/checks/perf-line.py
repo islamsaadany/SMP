@@ -70,7 +70,7 @@ with sync_playwright() as p:
         ck("...and on focus, which is what a tap gives",
            pg.evaluate("(e)=>getComputedStyle(e,'::after').display", note) == "block")
 
-    # ── 1b · AND THE BUBBLE MUST FIT (§164). It centres on its own value, and
+    # ── 1b · AND THE BUBBLE MUST FIT (§165). It centres on its own value, and
     # the two values that carry one are the LAST columns of the plan tables,
     # inside a box that is `overflow-x:auto` and therefore clips — Islam saw
     # the note with its right-hand end sliced off. Swept at the widths where

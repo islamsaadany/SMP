@@ -1,4 +1,4 @@
-"""A SETUP PAGE THAT FITS DOES NOT SCROLL, AND THE RAIL'S HEAD STAYS PUT (§166).
+"""A SETUP PAGE THAT FITS DOES NOT SCROLL, AND THE RAIL'S HEAD STAYS PUT (§167).
 
 Islam, using the Platform Inbox: *"on scrolling up the messaging header is
 lost, the side rail of the messages header is lost as well, and the setup rail

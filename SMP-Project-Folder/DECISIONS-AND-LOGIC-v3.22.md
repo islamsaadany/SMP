@@ -20435,7 +20435,7 @@ Proved able to fail: **7 failures** against the pre-§163 build.
 
 ---
 
-## 164 · The note that opened past the edge, and two that were settings (v3.62)
+## 165 · The note that opened past the edge, and two that were settings (v3.62)
 
 Three from Islam. **Only one was code**, and saying so is the point (§160.2).
 
@@ -20458,7 +20458,7 @@ them apart** (the centred one carries `translateX(-50%)`, the anchored one
 `none`). §68.10's class, and the second time in two days that my own probe
 reported a working build broken.
 
-### The two that were settings, not builds (§164.1)
+### The two that were settings, not builds (§165.1)
 
 **THE CUSTODIAN DOES NOT SEE THE MISSING PANEL BECAUSE THE MATRIX SAYS SO.**
 Measured rather than reasoned: on the demo tenant the Mobile custodian's
@@ -20485,14 +20485,14 @@ being silently reset for everybody who ever set one.
 
 `checks/perf-line.py` sweeps three widths, hovering every value that carries a
 note, and asserts none opens past its box. Proved able to fail: **2 failures**
-against the pre-§164 build, at 1180 and 900 — the two widths where it bit.
+against the pre-§165 build, at 1180 and 900 — the two widths where it bit.
 
 ---
 
-## 165 · A default that reached nobody, and a badge that was told once (v3.62)
+## 166 · A default that reached nobody, and a badge that was told once (v3.62)
 
 **"THIS YEAR" WAS ALREADY THE DEFAULT AND THAT WAS NOT THE SAME AS BEING ON.**
-§145.11 reversed it, §164.1 confirmed it reads `true` with nothing stored — and
+§145.11 reversed it, §165.1 confirmed it reads `true` with nothing stored — and
 Islam reported it off a third time, because **a default only ever governs a
 browser that has never stored a value**, and every browser that had touched
 the toggle since §66 was holding an explicit `"0"`. Telling a tenant with
@@ -20519,7 +20519,7 @@ that fetch belongs (a second asker polling in the background is what §98 was
 about). §35's shape: the status you must remember to refresh is the one nobody
 refreshes.
 
-### Found while measuring, and NOT mine (§165.2)
+### Found while measuring, and NOT mine (§166.2)
 
 - **A Roles & access change does save and does survive a refresh.** Islam
   reported it resetting; driven end to end against a real dev-server and a real
@@ -20533,7 +20533,7 @@ refreshes.
 - **The chat bubble's centre is covered by a DIV** — `checks/office-chat.py`
   §1 fails on **main's own build**, so it predates this work. §70 and §93.4's
   family, on the one control that opens the conversation. Recorded, not fixed
-  in passing. **ANSWERED IN §166, AND IT WAS THE CHECK**: the DIV is
+  in passing. **ANSWERED IN §167, AND IT WAS THE CHECK**: the DIV is
   `.welcomeover`, §148's welcome screen, which shipped after that file and
   which it never learned to suppress. Nothing was wrong with the bubble. *A
   finding recorded as a product fault because it reproduced on main is still
@@ -20544,7 +20544,7 @@ refreshes.
 
 ---
 
-## §166 · A Setup page that fits does not scroll, and the rail's head stays put
+## §167 · A Setup page that fits does not scroll, and the rail's head stays put
 
 Islam, using the Platform Inbox: *"in the platofrm inbox page on scrolling up
 the messaging headr is lost the side rail of the messages header is lost as
@@ -20596,7 +20596,7 @@ Inbox does not exist over `file://` (§94.11) and the thread header is only
 drawn once a conversation is open. **16 failures against the previous build**,
 ending in Islam's own symptom verbatim.
 
-### Two checks were blind, and one of them had been reporting a product fault (§166.2)
+### Two checks were blind, and one of them had been reporting a product fault (§167.2)
 
 **§148's WELCOME SCREEN COVERS THE PAGE**, and two checks written before it
 never learned to suppress it. `checks/office-chat.py` §1 had been failing on
@@ -20623,7 +20623,7 @@ writes. §51.11, loudly this time, which is the good case.
 
 ---
 
-## §167 · The scoring bands are the tenant's to set
+## §168 · The scoring bands are the tenant's to set
 
 Islam: *"for the bands make it editable in the scoring bands table in the setup
 .. to remove or add levels and set the values and colors."* Settled from a
@@ -20683,7 +20683,7 @@ failures then a crash** against the previous build.
 
 ---
 
-## §168 · How long somebody counts as away is the tenant's
+## §169 · How long somebody counts as away is the tenant's
 
 Islam: *"in the caht settings for the away email add my a small option to set
 the number of away minuits to send the email."*
@@ -20729,3 +20729,77 @@ and goes **3 red** the moment the endpoint reads a constant again;
 reads it, and that it goes and comes back with the switch, because a server
 that obeys a number nobody can set is §71's own fault (the back half built and
 the control never drawn).
+
+---
+
+## §170 · A change is saved at once, and a burst still coalesces
+
+Islam: *"on every refresh the roles and access table resets. it needs to save
+what I do."* Then, when I reported it saving: *"Is the roles and access saving
+now?"* — and the second asking is what got it measured properly.
+
+**IT DOES SAVE, AND §166.2 WAS RIGHT AS FAR AS IT WENT.** Driven end to end
+against `scripts/dev-server.js` and a real Postgres: press a cell, a POST goes
+out, `access_grants` changes, a full reload brings the new value back. All
+three settings on `smoteam / a_group`, read from the table rather than from the
+screen.
+
+**WHAT §166.2 NEVER TRIED IS REFRESHING IMMEDIATELY**, which is exactly how
+somebody checks whether a setting stuck. Pressed *edit*, reloaded 150ms later:
+the row was unchanged. The change was lost, reproducibly, on every page in the
+product — and *"press, then refresh to see"* is not an unusual thing to do, it
+is the obvious one.
+
+**§138's FLUSH-ON-LEAVE WAS BUILT FOR THIS AND CANNOT REACH IT HERE.** Its own
+comment states the limit honestly — `keepalive` caps a body at 64KB and over
+the cap the flush becomes a plain fetch the navigation cancels — and calls the
+residual "a small corner of a small corner". **Measured on this tenant, one
+save is 216,307 bytes**, three and a half times the cap. So on SMP that corner
+is every save there has ever been, and the net has never once caught anything.
+*A limit stated in a comment is not the same as a limit anybody has measured
+the product against.*
+
+**SO THE WAIT IS WHAT GOES, NOT THE COALESCING.** `afterPaint()` becomes an
+ordinary leading-edge debounce: the first change of a burst is sent
+immediately and the trailing 800ms timer still runs. One press — the
+overwhelmingly common case, and the only case on a settings page — is durable
+the instant it is made; five presses in half a second cost two POSTs instead of
+five. A lone change costs no extra request either, because the trailing tick
+finds the graph identical to `lastSaved` and returns *clean* without posting.
+
+**DELIBERATELY NOT A LIST OF CONTROLS.** Islam asked for "the same rule on the
+other controls", and the way to give it to every control — including one added
+next month — is to put it where they all already end. Every writer in the
+platform finishes with `paint()` and every `paint()` finishes here. A
+per-control list is the list somebody forgets to add to (§104.7, twice).
+
+**AND TYPING IS UNTOUCHED**, which is the one thing the wait was worth having
+for: a text field writes on `change`, which for an input means on BLUR (§35,
+§71.2), so a keystroke has never reached this function at all.
+
+**THE TRAILING TICK RE-ARMS WHEN IT IS REFUSED FOR BEING BUSY.** `save()`
+answers *busy* and schedules nothing, so the last change of a burst that
+collided with an in-flight save used to wait for the 5s interval. It waits
+300ms now.
+
+### The check could not fail, and finding that out is the section (§170.2)
+
+The first version of the new trial pressed a control, reloaded 150ms later and
+asserted the POST had arrived — and it **passed on the pre-§170 build**. The
+stub answers in under a millisecond, so even the plain fetch `flushLeave()`
+issues at `pagehide` lands before the navigation can tear it down; a real
+server parsing 216KB, authorising it and writing thirty tables does not. §94.5
+exactly, and the trap is specific: **a stub fast enough to be convenient is
+fast enough to hide a race.**
+
+So the browser check asserts the property that fixes it and that this harness
+can see honestly — **a change is on the wire inside 250ms**, which is flatly
+false on the previous build (0 posts) and true on this one — plus a regression
+guard that a burst still costs at most two saves. The reproduction of the loss
+itself lives where it can actually happen: against the dev-server and a real
+Postgres, on **Roles & access, Scoring bands and Terminology**, all three
+pressed and then refreshed at 150ms, all three read back from their own tables.
+
+*One of those three read as LOST and was my query, not the product* — I asked
+`labels.bu` for a value the field had written to `labels.grp`. Checked against
+the row rather than the assertion, and the row said Streams.

@@ -1,6 +1,6 @@
 # 026 · An editable scoring scale, and the away threshold
 
-**Version:** v3.63 · **Decisions:** §167, §168 · **Status:** answered; built
+**Version:** v3.64 · **Decisions:** §168, §169 · **Status:** answered; built
 
 Islam, in two messages from using the product:
 

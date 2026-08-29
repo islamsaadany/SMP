@@ -64,7 +64,26 @@ Nothing proceeds past this line without an answer.
 
 ## Built and verified
 
-### v3.63 — a Setup page that fits, an editable scale, and the away threshold (§166–§168)
+### v3.64 — a change is saved at once (§170)
+
+- **Press a setting and refresh straight away, and it used to be lost** — on
+  every page in the product. The autosave waited 800ms; §138's flush-on-leave
+  was meant to cover that and cannot, because `keepalive` caps a body at 64KB
+  and **one SMP save is 216,307 bytes**. Measured, not reasoned: pressed a
+  Roles & access cell, reloaded 150ms later, the row was unchanged.
+- **The wait goes, the coalescing stays.** `afterPaint()` is a leading-edge
+  debounce now: the first change of a burst is sent immediately and the
+  trailing timer still runs, so one press is durable at once and five presses
+  in half a second cost two saves instead of five. Typing is untouched (a field
+  writes on blur, so a keystroke never reached that path).
+- **One place, no list of controls** — every writer ends in `paint()` and every
+  `paint()` ends in `afterPaint()`, so a control added later is covered.
+- Verified end to end against a real Postgres on **Roles & access, Scoring
+  bands and Terminology** — pressed, refreshed at 150ms, read back from their
+  own tables. `checks/save-flush.py` gains the "on the wire inside 250ms"
+  assertion, which is **0 posts on the previous build**.
+
+### v3.64 — a Setup page that fits, an editable scale, and the away threshold (§167–§169)
 
 - **The Platform Inbox's headers, and the Setup rail's, stop being lost.**
   `.setuprail` is sticky and on a page where the rail is the tallest thing in

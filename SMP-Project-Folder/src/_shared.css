@@ -288,7 +288,7 @@
      platform on a monitor that wide. */
   .wrap { margin:0 auto; padding:0 24px var(--page-foot, 80px); }
   /* A PAGE WHOSE CONTENT IS CAPPED TO THE WINDOW ENDS WHERE THE CAPS DO
-     (§166). Every Setup page is a rail beside a pane, both capped and both
+     (§167). Every Setup page is a rail beside a pane, both capped and both
      scrolling their own list, so the page's 80px foot is 80px of nothing
      below the fold — and it is exactly what made the page run 60px past the
      window and slide the rail, with its pinned head, under the chrome. */

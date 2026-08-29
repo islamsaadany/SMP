@@ -69,7 +69,7 @@ const MAX_SHOT = 3 * 1024 * 1024;
 const MAX_TEXT = 4000;
 const FLAGS = ["issue", "idea", "question"];
 
-/* HOW LONG SOMEBODY COUNTS AS "HERE" (§97.5) IS THE TENANT'S NOW (§168).
+/* HOW LONG SOMEBODY COUNTS AS "HERE" (§97.5) IS THE TENANT'S NOW (§169).
    Their own browser stamps here_at every time it asks for new messages — 4
    seconds while the panel is open, 180 while it is not — and how long after
    the last of those they stop counting as present is `chatCfg().away`, set on

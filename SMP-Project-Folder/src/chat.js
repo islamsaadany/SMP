@@ -807,7 +807,7 @@ var CHAT = (function(){
         /* ── 6 · TOLD WHEN A REPLY LANDS AND THEY ARE NOT LOOKING. Beside its
            sibling at last; the two were five rows apart. */
         setRow("mail", "Away email",
-          /* THE SENTENCE READS THE SETTING (§168). It said "three minutes" as
+          /* THE SENTENCE READS THE SETTING (§169). It said "three minutes" as
              prose while the server read a constant, so the two were one edit
              from disagreeing — and the edit is now a box on this very row. */
           "A reply is emailed when they have not had the platform open for " +
@@ -1124,7 +1124,7 @@ var CHAT = (function(){
         : j && j.mailed && j.mailed.sent ? "Sent, and emailed to " + j.mailed.to + "."
         : j && j.mailed && j.mailed.why ? "Sent. No email went out — " + j.mailed.why + "."
         : "Sent." };
-      /* AND THE RAIL'S BADGE IS NO LONGER TRUE (§165). The Setup rail counts
+      /* AND THE RAIL'S BADGE IS NO LONGER TRUE (§166). The Setup rail counts
          `OVQUEUE.waiting`, asked ONCE per visit because a summary is read and
          acted on rather than watched (§108.10). Replying is the act that makes
          it stale: the inbox correctly reads "Waiting 0" and the rail goes on

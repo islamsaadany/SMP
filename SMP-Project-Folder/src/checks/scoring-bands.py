@@ -1,4 +1,4 @@
-"""THE SCORING BANDS ARE THE TENANT'S TO SET (§167).
+"""THE SCORING BANDS ARE THE TENANT'S TO SET (§168).
 
 Islam: *"for the bands make it editable in the scoring bands table in the setup
 .. to remove or add levels and set the values and colors."*

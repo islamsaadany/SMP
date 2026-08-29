@@ -701,7 +701,7 @@ function chatSet(key, value){
      list of exceptions is a list somebody has to remember to add to. */
   var isText = typeof dflt === "string";
   /* AND A NUMBER IS A THIRD TYPE, taken from the default like the other two
-     (§104.7, §168) — `!!value` on a number setting would have stored `true`
+     (§104.7, §169) — `!!value` on a number setting would have stored `true`
      for every minute anybody typed. The clamp is the shared rule's, asked
      once so the box, the server and this writer cannot disagree. */
   var isNum = typeof dflt === "number";
@@ -4856,7 +4856,7 @@ var BANDS = {
   ]
 };
 
-/* ── THE FIVE COLOURS A LEVEL MAY WEAR (§167) ────────────────────────
+/* ── THE FIVE COLOURS A LEVEL MAY WEAR (§168) ────────────────────────
    Islam: *"for the bands make it editable in the scoring bands table in the
    setup .. to remove or add levels and set the values and colors."*
 
@@ -5105,7 +5105,7 @@ function avg(a){
    §47.1) — the same shape as the theme, the People page's columns and the
    rail's terse switch. One person deciding to see both horizons must not
    decide it for the whole tenant, and a toggle that autosaved would. */
-/* THE KEY IS BUMPED, WHICH IS HOW A DEFAULT ACTUALLY REACHES ANYBODY (§165).
+/* THE KEY IS BUMPED, WHICH IS HOW A DEFAULT ACTUALLY REACHES ANYBODY (§166).
    §145.11 reversed the default to SHOWN and Islam reported it off twice more —
    because a default only ever governs a browser that has never stored a value,
    and every browser that had touched the toggle since §66 was holding an

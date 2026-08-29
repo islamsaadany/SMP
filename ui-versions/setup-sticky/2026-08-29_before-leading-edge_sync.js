@@ -50,9 +50,6 @@ var SYNC = (function () {
   var lastSaved = null;    /* the serialized graph the server last accepted */
   var timer = null;
   var saving = false;
-  /* When the last save actually LEFT, so the leading edge below can tell a
-     first change from the fourth in a burst. */
-  var lastFlush = 0;
   /* Kept from boot() so a save can ask the screen to repaint itself. The
      only thing that needs it is the register's password column, which
      cannot be right until the save that created the person has landed. */
@@ -196,7 +193,6 @@ var SYNC = (function () {
     if (now === lastSaved) return say("clean");
     if (now === refusedBody) return say("refused");
     saving = true;
-    lastFlush = Date.now();
     fetch("/api/state", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
@@ -443,18 +439,6 @@ var SYNC = (function () {
           'units, supporting functions and settings stay.</span>';
       }
     }
-  }
-
-  /* THE TRAILING HALF OF THE DEBOUNCE, and it RE-ARMS when it is refused for
-     being busy (§170). `save()` answers "busy" and schedules nothing, so
-     without this the last change of a burst that collided with an in-flight
-     save would wait for the 5s interval — which is where it waited before this
-     existed, and is no reason to leave it there now. */
-  function tick() {
-    timer = null;
-    save(function (state) {
-      if (state === "busy" && !timer) timer = setTimeout(tick, 300);
-    });
   }
 
   /* One shape for every /api/auth call this object makes: post JSON, hand
@@ -758,48 +742,10 @@ var SYNC = (function () {
           land();
         });
     },
-    /* ── A CHANGE IS SAVED AT ONCE, AND A BURST STILL COALESCES (§170) ──
-       Islam: *"on every refresh the roles and access table resets."* It does
-       save — driven end to end against a real Postgres, a pressed cell reaches
-       `access_grants` and survives a reload. What it does not survive is being
-       pressed and the page refreshed inside the 800ms this function waits, and
-       that is exactly how somebody checks whether a setting stuck.
-
-       §138's flush-on-leave was built for this and CANNOT reach it here. It
-       says so itself: `keepalive` caps a body at 64KB and over the cap it
-       becomes a plain fetch the navigation cancels. Measured on this tenant,
-       one save is **216,307 bytes** — three and a half times the cap — so on
-       SMP that net has never once caught anything. The residual §138 recorded
-       as "a small corner" is, for this product, every single save.
-
-       SO THE WAIT IS WHAT GOES, not the coalescing. The first change of a
-       burst is sent IMMEDIATELY and the trailing timer still runs, which is an
-       ordinary leading-edge debounce and buys both things at once: one press —
-       the overwhelmingly common case, and the only one on a settings page — is
-       durable the instant it is made, while five presses in half a second cost
-       two POSTs instead of five. A lone change costs no extra request either:
-       the trailing tick finds the graph identical to `lastSaved` and returns
-       "clean" without posting (§42's diff, one layer up).
-
-       DELIBERATELY NOT A LIST OF CONTROLS. Every writer in the platform ends
-       in `paint()` and every `paint()` ends here, so this reaches a control
-       added tomorrow — and a per-control rule is the list somebody forgets to
-       add to (§104.7, twice already).
-
-       AND TYPING IS NOT AFFECTED, which is the one thing that made the wait
-       worth having: a text field writes on `change`, which for an input means
-       on BLUR (§35, §71.2), so a keystroke has never reached this function.
-
-       WHAT IS STILL OPEN, stated rather than glossed: a SECOND change landing
-       within 800ms of the first, with the page left before the trailing tick,
-       is still lost. Closing that needs a save small enough for `keepalive` —
-       a diff rather than the whole graph — which is a different change. */
     afterPaint: function () {
       if (!live) return;
       if (timer) clearTimeout(timer);
-      timer = setTimeout(tick, 800);
-      var now = Date.now();
-      if (!saving && now - lastFlush >= 800) { lastFlush = now; save(); }
+      timer = setTimeout(save, 800);
     }
   };
 })();

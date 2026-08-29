@@ -367,7 +367,7 @@
   .cfg input.blabel { width:100%; max-width:none; text-align:left;
                       font-family:var(--sans); font-size:13px; }
   .cfg input.bfloor { width:64px; max-width:64px; }
-  /* ── PICKING A LEVEL'S COLOUR (§167) ──────────────────────────────
+  /* ── PICKING A LEVEL'S COLOUR (§168) ──────────────────────────────
      Five swatches in the cell that already carried one, so the row does not
      change shape between reading and editing — the name still starts at the
      same x, which is what lets somebody run their eye down the column while

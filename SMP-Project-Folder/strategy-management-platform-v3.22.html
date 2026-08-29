@@ -300,7 +300,7 @@
      platform on a monitor that wide. */
   .wrap { margin:0 auto; padding:0 24px var(--page-foot, 80px); }
   /* A PAGE WHOSE CONTENT IS CAPPED TO THE WINDOW ENDS WHERE THE CAPS DO
-     (§166). Every Setup page is a rail beside a pane, both capped and both
+     (§167). Every Setup page is a rail beside a pane, both capped and both
      scrolling their own list, so the page's 80px foot is 80px of nothing
      below the fold — and it is exactly what made the page run 60px past the
      window and slide the rail, with its pinned head, under the chrome. */
@@ -877,7 +877,7 @@
      is the guard, so the next element given the class and not the attribute
      shows nothing rather than a box with nothing in it. */
   .hasnote:not([data-tip])::after, .hasnote[data-tip=""]::after { display:none !important; }
-  /* AND IT MUST NOT OPEN PAST THE EDGE (§164). The bubble centres on its own
+  /* AND IT MUST NOT OPEN PAST THE EDGE (§165). The bubble centres on its own
      value, and the values that carry one — the direction and the compile rule
      — are the LAST columns of the plan tables, inside a box that is
      `overflow-x:auto` and therefore clips. Islam saw "Takes the last measure
@@ -1277,7 +1277,7 @@
      non-zero. Change the gap and both move together. */
   :root { --rail-gap:22px; }
   /* ── WHAT SITS BELOW A CAPPED BOX IS 80px, AND THREE CAPS RESERVED 20
-     (§166) ────────────────────────────────────────────────────────────
+     (§167) ────────────────────────────────────────────────────────────
      Islam, using the Platform Inbox: *"on scrolling up the messaging header
      is lost, the side rail of the messages header is lost as well, and the
      setup rail header and search are lost — all of this is supposed to be
@@ -2026,7 +2026,7 @@
   .cfg input.blabel { width:100%; max-width:none; text-align:left;
                       font-family:var(--sans); font-size:13px; }
   .cfg input.bfloor { width:64px; max-width:64px; }
-  /* ── PICKING A LEVEL'S COLOUR (§167) ──────────────────────────────
+  /* ── PICKING A LEVEL'S COLOUR (§168) ──────────────────────────────
      Five swatches in the cell that already carried one, so the row does not
      change shape between reading and editing — the name still starts at the
      same x, which is what lets somebody run their eye down the column while
@@ -6523,7 +6523,7 @@ body.presenting .chatdock { display:none; }
             background:var(--ground); color:var(--ink); padding:7px 9px;
             font-family:inherit; font-size:var(--fs-note); }
 .chset-in:focus-visible { outline:2px solid var(--focus); outline-offset:-1px; }
-/* THE MINUTES BOX IS AS WIDE AS THE NUMBER IT HOLDS (§168), not as wide as
+/* THE MINUTES BOX IS AS WIDE AS THE NUMBER IT HOLDS (§169), not as wide as
    the row: three digits is the whole range, and a full-width box beside the
    words "5 minutes away" reads as a text field somebody should write in. */
 .chset-away { display:flex; align-items:center; gap:8px; }
@@ -8533,7 +8533,7 @@ THEME.apply();
        turning the assistant off silently turned the emails off too. */
     notify: false,
     rep: "",
-    /* ── HOW LONG SOMEBODY COUNTS AS HERE (§168) ───────────────────
+    /* ── HOW LONG SOMEBODY COUNTS AS HERE (§169) ───────────────────
        Islam: *"in the chat settings for the away email add my a small option
        to set the number of away minutes to send the email."* It was
        `HERE_MINUTES = 3` in `api/chat.js` and a hardcoded "three minutes" in
@@ -11088,7 +11088,7 @@ function chatSet(key, value){
      list of exceptions is a list somebody has to remember to add to. */
   var isText = typeof dflt === "string";
   /* AND A NUMBER IS A THIRD TYPE, taken from the default like the other two
-     (§104.7, §168) — `!!value` on a number setting would have stored `true`
+     (§104.7, §169) — `!!value` on a number setting would have stored `true`
      for every minute anybody typed. The clamp is the shared rule's, asked
      once so the box, the server and this writer cannot disagree. */
   var isNum = typeof dflt === "number";
@@ -15243,7 +15243,7 @@ var BANDS = {
   ]
 };
 
-/* ── THE FIVE COLOURS A LEVEL MAY WEAR (§167) ────────────────────────
+/* ── THE FIVE COLOURS A LEVEL MAY WEAR (§168) ────────────────────────
    Islam: *"for the bands make it editable in the scoring bands table in the
    setup .. to remove or add levels and set the values and colors."*
 
@@ -15492,7 +15492,7 @@ function avg(a){
    §47.1) — the same shape as the theme, the People page's columns and the
    rail's terse switch. One person deciding to see both horizons must not
    decide it for the whole tenant, and a toggle that autosaved would. */
-/* THE KEY IS BUMPED, WHICH IS HOW A DEFAULT ACTUALLY REACHES ANYBODY (§165).
+/* THE KEY IS BUMPED, WHICH IS HOW A DEFAULT ACTUALLY REACHES ANYBODY (§166).
    §145.11 reversed the default to SHOWN and Islam reported it off twice more —
    because a default only ever governs a browser that has never stored a value,
    and every browser that had touched the toggle since §66 was holding an
@@ -26648,7 +26648,7 @@ function renderBands(){
   var editable = can && EDITING.bands;
   var b = BANDS.bands;
 
-  /* THE COLOUR IS THE KEY, AND THAT IS THE WHOLE MODEL (§167). A band's `key`
+  /* THE COLOUR IS THE KEY, AND THAT IS THE WHOLE MODEL (§168). A band's `key`
      is read as a CSS token (`var(--good)`, `.pill.good`) AND by `needsNote()`,
      which asks for an explanation on a figure that lands in `bad` or `warn`.
      So a level's colour is not decoration beside its key — it IS the key, and
@@ -36374,7 +36374,7 @@ var CHAT = (function(){
         /* ── 6 · TOLD WHEN A REPLY LANDS AND THEY ARE NOT LOOKING. Beside its
            sibling at last; the two were five rows apart. */
         setRow("mail", "Away email",
-          /* THE SENTENCE READS THE SETTING (§168). It said "three minutes" as
+          /* THE SENTENCE READS THE SETTING (§169). It said "three minutes" as
              prose while the server read a constant, so the two were one edit
              from disagreeing — and the edit is now a box on this very row. */
           "A reply is emailed when they have not had the platform open for " +
@@ -36691,7 +36691,7 @@ var CHAT = (function(){
         : j && j.mailed && j.mailed.sent ? "Sent, and emailed to " + j.mailed.to + "."
         : j && j.mailed && j.mailed.why ? "Sent. No email went out — " + j.mailed.why + "."
         : "Sent." };
-      /* AND THE RAIL'S BADGE IS NO LONGER TRUE (§165). The Setup rail counts
+      /* AND THE RAIL'S BADGE IS NO LONGER TRUE (§166). The Setup rail counts
          `OVQUEUE.waiting`, asked ONCE per visit because a summary is read and
          acted on rather than watched (§108.10). Replying is the act that makes
          it stale: the inbox correctly reads "Waiting 0" and the rail goes on
@@ -38288,6 +38288,9 @@ var SYNC = (function () {
   var lastSaved = null;    /* the serialized graph the server last accepted */
   var timer = null;
   var saving = false;
+  /* When the last save actually LEFT, so the leading edge below can tell a
+     first change from the fourth in a burst. */
+  var lastFlush = 0;
   /* Kept from boot() so a save can ask the screen to repaint itself. The
      only thing that needs it is the register's password column, which
      cannot be right until the save that created the person has landed. */
@@ -38431,6 +38434,7 @@ var SYNC = (function () {
     if (now === lastSaved) return say("clean");
     if (now === refusedBody) return say("refused");
     saving = true;
+    lastFlush = Date.now();
     fetch("/api/state", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
@@ -38677,6 +38681,18 @@ var SYNC = (function () {
           'units, supporting functions and settings stay.</span>';
       }
     }
+  }
+
+  /* THE TRAILING HALF OF THE DEBOUNCE, and it RE-ARMS when it is refused for
+     being busy (§170). `save()` answers "busy" and schedules nothing, so
+     without this the last change of a burst that collided with an in-flight
+     save would wait for the 5s interval — which is where it waited before this
+     existed, and is no reason to leave it there now. */
+  function tick() {
+    timer = null;
+    save(function (state) {
+      if (state === "busy" && !timer) timer = setTimeout(tick, 300);
+    });
   }
 
   /* One shape for every /api/auth call this object makes: post JSON, hand
@@ -38980,10 +38996,48 @@ var SYNC = (function () {
           land();
         });
     },
+    /* ── A CHANGE IS SAVED AT ONCE, AND A BURST STILL COALESCES (§170) ──
+       Islam: *"on every refresh the roles and access table resets."* It does
+       save — driven end to end against a real Postgres, a pressed cell reaches
+       `access_grants` and survives a reload. What it does not survive is being
+       pressed and the page refreshed inside the 800ms this function waits, and
+       that is exactly how somebody checks whether a setting stuck.
+
+       §138's flush-on-leave was built for this and CANNOT reach it here. It
+       says so itself: `keepalive` caps a body at 64KB and over the cap it
+       becomes a plain fetch the navigation cancels. Measured on this tenant,
+       one save is **216,307 bytes** — three and a half times the cap — so on
+       SMP that net has never once caught anything. The residual §138 recorded
+       as "a small corner" is, for this product, every single save.
+
+       SO THE WAIT IS WHAT GOES, not the coalescing. The first change of a
+       burst is sent IMMEDIATELY and the trailing timer still runs, which is an
+       ordinary leading-edge debounce and buys both things at once: one press —
+       the overwhelmingly common case, and the only one on a settings page — is
+       durable the instant it is made, while five presses in half a second cost
+       two POSTs instead of five. A lone change costs no extra request either:
+       the trailing tick finds the graph identical to `lastSaved` and returns
+       "clean" without posting (§42's diff, one layer up).
+
+       DELIBERATELY NOT A LIST OF CONTROLS. Every writer in the platform ends
+       in `paint()` and every `paint()` ends here, so this reaches a control
+       added tomorrow — and a per-control rule is the list somebody forgets to
+       add to (§104.7, twice already).
+
+       AND TYPING IS NOT AFFECTED, which is the one thing that made the wait
+       worth having: a text field writes on `change`, which for an input means
+       on BLUR (§35, §71.2), so a keystroke has never reached this function.
+
+       WHAT IS STILL OPEN, stated rather than glossed: a SECOND change landing
+       within 800ms of the first, with the page left before the trailing tick,
+       is still lost. Closing that needs a save small enough for `keepalive` —
+       a diff rather than the whole graph — which is a different change. */
     afterPaint: function () {
       if (!live) return;
       if (timer) clearTimeout(timer);
-      timer = setTimeout(save, 800);
+      timer = setTimeout(tick, 800);
+      var now = Date.now();
+      if (!saving && now - lastFlush >= 800) { lastFlush = now; save(); }
     }
   };
 })();
@@ -42126,7 +42180,7 @@ var SYNC = (function () {
         paint();
       });
     });
-    /* A LEVEL'S COLOUR, AND THE TWO WAYS THE LIST CHANGES (§167). The colour
+    /* A LEVEL'S COLOUR, AND THE TWO WAYS THE LIST CHANGES (§168). The colour
        is the band's KEY — what its swatch, its pill and `needsNote()` all read
        — so this writes the key and nothing else needs to know. */
     document.querySelectorAll("[data-bcol]").forEach(function(el){

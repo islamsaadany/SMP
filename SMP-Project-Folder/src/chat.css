@@ -316,7 +316,7 @@ body.presenting .chatdock { display:none; }
             background:var(--ground); color:var(--ink); padding:7px 9px;
             font-family:inherit; font-size:var(--fs-note); }
 .chset-in:focus-visible { outline:2px solid var(--focus); outline-offset:-1px; }
-/* THE MINUTES BOX IS AS WIDE AS THE NUMBER IT HOLDS (§168), not as wide as
+/* THE MINUTES BOX IS AS WIDE AS THE NUMBER IT HOLDS (§169), not as wide as
    the row: three digits is the whole range, and a full-width box beside the
    words "5 minutes away" reads as a text field somebody should write in. */
 .chset-away { display:flex; align-items:center; gap:8px; }

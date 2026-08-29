@@ -341,7 +341,7 @@ function renderBands(){
   var editable = can && EDITING.bands;
   var b = BANDS.bands;
 
-  /* THE COLOUR IS THE KEY, AND THAT IS THE WHOLE MODEL (§167). A band's `key`
+  /* THE COLOUR IS THE KEY, AND THAT IS THE WHOLE MODEL (§168). A band's `key`
      is read as a CSS token (`var(--good)`, `.pill.good`) AND by `needsNote()`,
      which asks for an explanation on a figure that lands in `bad` or `warn`.
      So a level's colour is not decoration beside its key — it IS the key, and

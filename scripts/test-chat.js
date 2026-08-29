@@ -209,14 +209,14 @@ async function signIn(who, password) {
     ok(r.body.chat.beat === 15000, "Relaxed means 15000ms");
     ok(r.body.chat.promise === "We answer 9-5", "and the office's own words travel");
 
-    /* ── HOW LONG SOMEBODY COUNTS AS HERE IS THE TENANT'S (§168) ─────
+    /* ── HOW LONG SOMEBODY COUNTS AS HERE IS THE TENANT'S (§169) ─────
        The whole of this feature is that a number on a settings panel changes
        what the SERVER decides, so it is asked of the server with the row aged
        to a fixed distance and the threshold moved either side of it. A screen
        that offers the box and an endpoint still reading a constant is exactly
        the drift `lib/rules.js` exists to prevent, and nothing else here would
        have noticed it. */
-    console.log("\nAND THE AWAY THRESHOLD IS A SETTING, NOT A CONSTANT (§168).");
+    console.log("\nAND THE AWAY THRESHOLD IS A SETTING, NOT A CONSTANT (§169).");
     await client.query(
       "UPDATE chat_threads SET here_at = now() - interval '7 minutes' WHERE person_key = $1",
       [OTHER.key]);

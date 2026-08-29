@@ -20435,6 +20435,57 @@ Proved able to fail: **7 failures** against the pre-§163 build.
 
 ---
 
+## §164 · The assistant refusing well is not the same as answering well (v3.63)
+
+Islam, from production: *"is the reporting cycle open now?"* — and the
+assistant returned the handoff line.
+
+**THE REFUSAL IS CORRECT AND STAYS.** §104's third rule is that a question
+about this deployment's own data sets `answered=false`: the model is given the
+corpus and nothing else, so an answer would have been a guess dressed as a
+fact. And the screenshot is a healthy sign in three ways at once — the handoff
+line only appears when the model was actually reached and declined, so the
+switch, the key and the provider are all working (§123's diagnostic answering
+itself for free).
+
+**WHAT IS WEAK IS THAT IT IS A DEAD END.** The platform states this on two
+screens an ordinary person can see, in plain words: the welcome screen's chip
+while a cycle is open, and Performance, which shows Report for as long as the
+window lasts and, when it has closed, **says so and names the cycle**. So
+somebody asked a question the screen answers and it cost the office a message.
+*Declining well is not the same as being useful, and the gap between them is a
+missing entry rather than a broken rule.*
+
+**AND IT IS A CLASS, NOT A CASE.** *What is my score*, *has Mobile submitted*,
+*who is my custodian* all land in the same place. So two questions, not one:
+`cycle-open` names the two screens, and `assistant-no-data` says outright that
+the assistant can see none of the organisation's own information and where to
+go instead. The second is what stops the next one dead-ending.
+
+**SHIPPED, NOT THE TENANT'S** (§161's distinction): both describe how the
+platform works rather than anything about this client, so they belong in
+`recipes.js` and reach every deployment — a tenant's own additions are for
+what is true of them alone.
+
+Both are **Both** on the audience: the office asks the assistant too, and the
+second one is exactly as true for them.
+
+66 recipes. `checks/kb-file.py` §6 caught the change as it should — the round
+trip is still a fixed point at 67 rows — and `knowledge-base.py`, `kb-pen.py`
+and `test-kb-audience.js` are green, with the full `qa.py` sweep clean.
+
+### The one-character lesson (§164.1)
+
+The first insertion shipped adjacent string literals with **no `+` between
+them**, and `recipes.js` is a file of concatenated strings — so the whole
+module became a SyntaxError and `recipeCount()` could not even be called.
+Loud, immediate and cheap, which is the good kind: a data file that is also a
+source file fails at `require` rather than at render. Worth noting only
+because the fix is to read what the surrounding lines actually do before
+writing between them.
+
+---
+
 ## 165 · The note that opened past the edge, and two that were settings (v3.62)
 
 Three from Islam. **Only one was code**, and saying so is the point (§160.2).

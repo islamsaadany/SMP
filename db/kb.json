@@ -930,6 +930,13 @@
    "who": "everyone"
   },
   {
+   "id": "cycle-open",
+   "group": "Reporting",
+   "q": "How do I know whether the reporting cycle is open?",
+   "a": "Two places say so. The welcome screen when you sign in carries a chip naming the cycle while it is open, and your unit's <b>Performance</b> page shows <b>Report</b> for as long as the window lasts.|When it has closed, that page says so and names the cycle, so you are never left guessing which of the two it is.",
+   "who": "everyone"
+  },
+  {
    "id": "report-after-lock",
    "group": "Reporting",
    "q": "Can I still report once the cycle is locked?",
@@ -1284,6 +1291,13 @@
    "group": "The platform and support",
    "q": "Something answered me straight away — was that a person?",
    "a": "That was the platform assistant. When enabled, it will first try to answer your question using the platform's knowledge base. If the answer doesn't address what you need, select This didn't answer it — send it to the office and someone from the Strategy Office can pick it up. Questions the assistant can't answer are sent to them automatically.",
+   "who": "everyone"
+  },
+  {
+   "id": "assistant-no-data",
+   "group": "The platform and support",
+   "q": "Can the assistant tell me my own figures, or whether something has been submitted?",
+   "a": "No. It knows how the platform works and can see none of your organisation's own information — no figures, no targets, no scores, and nothing about where any unit has got to.|Ask it how something works and it will answer. Ask it what a number is and it will pass the question to the Strategy Office, who can see it.",
    "who": "everyone"
   },
   {

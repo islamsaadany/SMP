@@ -807,9 +807,25 @@ var CHAT = (function(){
         /* ── 6 · TOLD WHEN A REPLY LANDS AND THEY ARE NOT LOOKING. Beside its
            sibling at last; the two were five rows apart. */
         setRow("mail", "Away email",
-          "A reply is emailed when they have not had the platform open for three " +
-          "minutes. Off keeps every conversation inside the platform.",
-          segHtml("mail", "Off", "On", c.mail, true)) +
+          /* THE SENTENCE READS THE SETTING (§168). It said "three minutes" as
+             prose while the server read a constant, so the two were one edit
+             from disagreeing — and the edit is now a box on this very row. */
+          "A reply is emailed when they have not had the platform open for " +
+          plural(c.away, "minute") + ". Off keeps every conversation inside " +
+          "the platform. A shut chat checks in every three minutes, so anything " +
+          "below four can call somebody away while they are at their desk.",
+          segHtml("mail", "Off", "On", c.mail, true),
+          /* ONLY WHILE IT IS ON, the shape `rep` already has under Handover
+             email: a threshold for an email nobody sends is a control with
+             nothing behind it (§61). */
+          (c.mail
+            ? '<div class="chset-ctl chset-away">' +
+                '<input class="chset-num" type="number" data-chaway="1" ' +
+                  'min="' + SMPRules.CHAT_AWAY_MIN + '" max="' + SMPRules.CHAT_AWAY_MAX + '" ' +
+                  'value="' + c.away + '" aria-label="Minutes away before a reply is emailed">' +
+                '<span class="chset-unit">' + plural(c.away, "minute") + ' away</span>' +
+              '</div>'
+            : "")) +
 
         /* ── 7 · THE ONLY ROW THAT CHANGES NOTHING ANYBODY SEES, so it is last.
            The cost is in the tooltip because it is the whole reason this is a
@@ -1228,6 +1244,18 @@ var CHAT = (function(){
         saved();
         /* The hint above it names who was chosen, so the menu redraws — never
            paint(), which would rebuild the page behind an open menu (§30.1). */
+        setMenuPaint();
+        return;
+      }
+      /* THE MINUTES, ON `change` LIKE EVERYTHING ELSE ON THIS PANEL (§35):
+         a number box repainted on every keystroke loses the second digit.
+         The MENU is redrawn afterwards and never `paint()`, because the row's
+         own sentence and the words beside the box both read this value and
+         would otherwise go on naming the old one (§30.1, §63). */
+      var away = e.target.closest("[data-chaway]");
+      if (away) {
+        chatSet("away", away.value);
+        saved();
         setMenuPaint();
         return;
       }

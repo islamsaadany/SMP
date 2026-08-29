@@ -444,7 +444,7 @@ with sync_playwright() as p:
     pg2 = b.new_page()
     pg2.goto(URL); pg2.wait_for_timeout(1200)
     r = pg2.evaluate("""(w) => {
-      try { localStorage.removeItem("smp.ko.year"); } catch (e) {}
+      try { localStorage.removeItem("smp.ko.year2"); } catch (e) {}
       VIEWER = w.smo; leaveModes(); current = w.unit;
       currentSub = "strategy"; CURSEC.strategy = "found";
       KO_VIEW = "cols"; paint();
@@ -455,7 +455,7 @@ with sync_playwright() as p:
     ck("a fresh browser shows both horizons", r["on"] is True and r["cols"] == 3, r)
     r = pg2.evaluate("""() => {
       setKoThisYear(false);
-      return localStorage.getItem("smp.ko.year");
+      return localStorage.getItem("smp.ko.year2");
     }""")
     ck("...and a person's explicit choice is stored to win next time", r == "0", r)
     pg2.close()

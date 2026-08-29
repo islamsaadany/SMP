@@ -700,7 +700,21 @@ function chatSet(key, value){
      chosen — silently, and in a way the picker would then show as nobody. A
      list of exceptions is a list somebody has to remember to add to. */
   var isText = typeof dflt === "string";
-  var v = isText ? String(value == null ? "" : value).trim() : !!value;
+  /* AND A NUMBER IS A THIRD TYPE, taken from the default like the other two
+     (§104.7, §168) — `!!value` on a number setting would have stored `true`
+     for every minute anybody typed. The clamp is the shared rule's, asked
+     once so the box, the server and this writer cannot disagree. */
+  var isNum = typeof dflt === "number";
+  var v;
+  if (isText) v = String(value == null ? "" : value).trim();
+  else if (isNum) {
+    /* CLAMPED BY THE SHARED RULE AND NOT BY A NUMBER WRITTEN HERE, and asked
+       through a one-key object so this stays true of the NEXT number setting
+       without anybody remembering to come back — naming `away` would have
+       been the list of exceptions §104.7 exists to avoid. */
+    var one = {}; one[key] = value;
+    v = SMPRules.chatCfg(one)[key];
+  } else v = !!value;
   var c = chatWritable();
   /* The promise is stored only when it differs from the shipped sentence, so
      improving that sentence later reaches every tenant that never wrote one. */
@@ -4841,6 +4855,51 @@ var BANDS = {
     { key:"bad",  floor:0,  label:"Off track" }
   ]
 };
+
+/* ── THE FIVE COLOURS A LEVEL MAY WEAR (§167) ────────────────────────
+   Islam: *"for the bands make it editable in the scoring bands table in the
+   setup .. to remove or add levels and set the values and colors."*
+
+   These are the product's own scoring colours and there is deliberately no
+   sixth: a band's `key` is the CSS token its swatch, its pill and every chart
+   segment are painted from, so a colour the platform does not carry would
+   render as nothing at all. Picking the colour IS picking the key, which also
+   decides whether a figure landing there has to be explained — `needsNote()`
+   asks for a note on `bad` and `warn` (§163). */
+var BAND_COLOURS = [
+  { key:"good", word:"Green" },
+  { key:"attn", word:"Amber" },
+  { key:"warn", word:"Orange" },
+  { key:"bad",  word:"Red" },
+  { key:"none", word:"Grey" }
+];
+
+/* A LEVEL IS ADDED WHERE THERE IS ROOM FOR ONE, not at an end. The bottom band
+   starts at 0 by construction, so the new one goes immediately above it,
+   halfway between 0 and the band above — which descends by arithmetic rather
+   than by hoping somebody types a number in order. */
+function addBand(){
+  var b = BANDS.bands;
+  var above = b.length > 1 ? b[b.length - 2].floor : 100;
+  var used = {};
+  b.forEach(function(x){ used[x.key] = 1; });
+  var free = BAND_COLOURS.filter(function(c){ return !used[c.key]; })[0];
+  b.splice(b.length - 1, 0, {
+    key: free ? free.key : "attn",
+    floor: Math.max(1, Math.floor(above / 2)),
+    label: "New level"
+  });
+}
+
+/* AND REMOVING ONE PUTS THE FLOOR BACK. Every figure has to land somewhere, so
+   whatever ends up last starts at 0 — take the bottom band away and the one
+   above it inherits that, or a figure of 12 would belong to no band at all. */
+function removeBand(i){
+  var b = BANDS.bands;
+  if (b.length <= 2) return;
+  b.splice(i, 1);
+  b[b.length - 1].floor = 0;
+}
 
 function bandOf(v){
   if (v == null || isNaN(v)) return { key:"none", label:"No data" };

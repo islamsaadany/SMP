@@ -298,7 +298,13 @@
      a measure on the few prose BLOCKS (the Knowledge base already carries one
      and is unaffected), and it is not worth adding before somebody runs the
      platform on a monitor that wide. */
-  .wrap { margin:0 auto; padding:0 24px 80px; }
+  .wrap { margin:0 auto; padding:0 24px var(--page-foot, 80px); }
+  /* A PAGE WHOSE CONTENT IS CAPPED TO THE WINDOW ENDS WHERE THE CAPS DO
+     (§166). Every Setup page is a rail beside a pane, both capped and both
+     scrolling their own list, so the page's 80px foot is 80px of nothing
+     below the fold — and it is exactly what made the page run 60px past the
+     window and slide the rail, with its pinned head, under the chrome. */
+  .wrap:has(.setupsplit) { padding-bottom:var(--pane-foot, 20px); }
 
   .banner { background:var(--panel); color:var(--panel-ink); padding:9px 24px; font-size:var(--fs-small);
             display:flex; gap:10px; justify-content:center; flex-wrap:wrap; align-items:baseline; }
@@ -1270,6 +1276,43 @@
      position are the same by construction and the difference cannot be
      non-zero. Change the gap and both move together. */
   :root { --rail-gap:22px; }
+  /* ── WHAT SITS BELOW A CAPPED BOX IS 80px, AND THREE CAPS RESERVED 20
+     (§166) ────────────────────────────────────────────────────────────
+     Islam, using the Platform Inbox: *"on scrolling up the messaging header
+     is lost, the side rail of the messages header is lost as well, and the
+     setup rail header and search are lost — all of this is supposed to be
+     sticky."*
+
+     THEY ARE ALL STICKY AND ALL THREE WERE MEASURED HOLDING (§135.9 asked
+     eleven window sizes). What is not sticky is `.setuprail` ITSELF on a page
+     where the rail is the tallest thing: a sticky box cannot travel past its
+     containing block, so with the rail as tall as the row that holds it the
+     travel is ZERO and `top:97px` never engages — the rail scrolls away with
+     the page and takes its own pinned head and search with it. Measured on the
+     Inbox at 1440x760: at scroll 60 the rail sits at y=37 and its head at
+     y=38, behind a chrome whose bottom is 75.
+
+     AND THE 60px OF SCROLL IS A GUESSED CONSTANT GOING STALE (§122.5, third
+     time). `.wrap` ends the page with `padding-bottom:80px`; the rail's cap,
+     the register's `.panefill` and the inbox box each reserved `20px`. So a
+     page whose content already fits the window still ran 60px past it, for
+     nothing — and those 60px are exactly what slid the rail under the chrome.
+     One variable now, read by the padding AND by every cap that has to clear
+     it, so the four can never disagree again.
+
+     RESERVING 80 IS THE WRONG WAY ROUND, AND THE CHECK SAID SO. The first
+     build made every cap reserve the page's own 80px foot, and
+     `checks/register-header.py` went red six times on §122.5's assertion that
+     the register's table REACHES the fold — correctly: 80px below a box that
+     is already sized to the window is not breathing room, it is an empty band
+     you have to scroll to see. The foot is right for a page of content and
+     wrong under a box capped to the window, so it is TWO numbers with the caps
+     reading the one that applies to them — and `:has()` is what lets the page
+     ask (the same shape §114.4 uses to seat the remove button).
+
+     Below the floors (rail 260px, box 340px) the page scrolls again by design
+     and the rail goes with it — the split-view case those floors exist for. */
+  :root { --page-foot:80px; --pane-foot:20px; }
   /* Nothing between the panel's padding and the rail. `.split` used to add its
      own 12px on top, which is a second gap the sticky offset knew nothing
      about - so the rail sat 34px down, pinned at 34, and slid the difference.
@@ -1983,6 +2026,26 @@
   .cfg input.blabel { width:100%; max-width:none; text-align:left;
                       font-family:var(--sans); font-size:13px; }
   .cfg input.bfloor { width:64px; max-width:64px; }
+  /* ── PICKING A LEVEL'S COLOUR (§167) ──────────────────────────────
+     Five swatches in the cell that already carried one, so the row does not
+     change shape between reading and editing — the name still starts at the
+     same x, which is what lets somebody run their eye down the column while
+     a pen is open (§88's argument, applied to a control rather than a value).
+
+     THE LIT ONE IS RINGED, NEVER TICKED: a tick drawn on a coloured square is
+     unreadable on three of the five (U+2713 is outside the latin subsets in
+     any case, §120.2), and a ring reads at 14px against every ground the
+     product paints. `box-shadow` rather than a border, or the chosen swatch
+     would be 2px bigger than its neighbours and the row would twitch. */
+  .cfg .bcols { display:inline-flex; gap:3px; vertical-align:middle;
+                margin-right:8px; }
+  .cfg .bcol { width:14px; height:14px; border-radius:3px; border:0; padding:0;
+               cursor:pointer; box-shadow:inset 0 0 0 1px rgb(15 23 42/.22); }
+  .cfg .bcol:hover { box-shadow:inset 0 0 0 1px rgb(15 23 42/.22),
+                                0 0 0 2px var(--surface), 0 0 0 3px var(--line); }
+  .cfg .bcol.on { box-shadow:inset 0 0 0 1px rgb(15 23 42/.22),
+                              0 0 0 2px var(--surface), 0 0 0 3px var(--ink-2); }
+  .cfg .bcol:focus-visible { outline:2px solid var(--gold); outline-offset:3px; }
   .qual.static i { width:20px; height:20px; border:1px solid var(--line); border-radius:2px;
                    display:inline-flex; align-items:center; justify-content:center;
                    font-style:normal; font-size:10px; font-family:var(--mono);
@@ -2128,7 +2191,8 @@
      rail forever on every screen, to fix a state that lasts one scroll. */
   .setuprail { display:flex; flex-direction:column; overflow:hidden;
                max-height:calc(100dvh - var(--chrome-h, 118px)
-                                      - var(--rail-gap, 22px) - 20px);
+                                      - var(--rail-gap, 22px)
+                                      - var(--pane-foot, 20px));
                /* Below this it stops shrinking and the page scrolls instead —
                   §100.5's floor, for the same reason: a rail squeezed into a
                   few rows is not navigation, and a window that short is
@@ -2832,7 +2896,8 @@
   .cfg.peoplebox { overflow:auto; max-height:calc(100vh - 300px); }
   .panefill { display:flex; flex-direction:column;
               max-height:calc(100dvh - var(--chrome-h, 118px)
-                                     - var(--rail-gap, 22px) - 20px);
+                                     - var(--rail-gap, 22px)
+                                     - var(--pane-foot, 20px));
               /* §100.5's floor, and the rail's: below this it stops shrinking
                  and the page scrolls instead, because a table squeezed to two
                  rows is not a table. */
@@ -6326,7 +6391,7 @@ body.presenting .chatdock { display:none; }
    not move when the box gets taller or shorter, so the measurement is stable
    in a way a max-height fed by a height never was. */
 .chinbox { display:grid; grid-template-columns:272px 1fr;
-           height:calc(100dvh - var(--chin-top, 190px) - 20px);
+           height:calc(100dvh - var(--chin-top, 190px) - var(--pane-foot, 20px));
            /* Below this it stops shrinking and the page scrolls instead — a
               thread squeezed into 150px is not a usable screen, and a window
               that short is somebody's split view rather than their laptop. */
@@ -6458,6 +6523,15 @@ body.presenting .chatdock { display:none; }
             background:var(--ground); color:var(--ink); padding:7px 9px;
             font-family:inherit; font-size:var(--fs-note); }
 .chset-in:focus-visible { outline:2px solid var(--focus); outline-offset:-1px; }
+/* THE MINUTES BOX IS AS WIDE AS THE NUMBER IT HOLDS (§168), not as wide as
+   the row: three digits is the whole range, and a full-width box beside the
+   words "5 minutes away" reads as a text field somebody should write in. */
+.chset-away { display:flex; align-items:center; gap:8px; }
+.chset-num { width:72px; border:1px solid var(--line); border-radius:6px;
+             background:var(--surface); color:var(--ink); padding:5px 8px;
+             font-family:inherit; font-size:var(--fs-small); }
+.chset-num:focus-visible { outline:2px solid var(--focus); outline-offset:-1px; }
+.chset-unit { font-size:var(--fs-small); color:var(--ink-3); }
 /* THE COST, WHERE THE CHOICE IS MADE. A semantic colour, not the accent: it
    is a consequence being stated, not something being emphasised. */
 .chset-cost { font-size:var(--fs-micro); color:var(--attn-tx); background:var(--attn-bg);
@@ -8458,9 +8532,31 @@ THEME.apply();
        or not the assistant is on, and tying it to the assistant would mean
        turning the assistant off silently turned the emails off too. */
     notify: false,
-    rep: ""
+    rep: "",
+    /* ── HOW LONG SOMEBODY COUNTS AS HERE (§168) ───────────────────
+       Islam: *"in the chat settings for the away email add my a small option
+       to set the number of away minutes to send the email."* It was
+       `HERE_MINUTES = 3` in `api/chat.js` and a hardcoded "three minutes" in
+       the setting's own tooltip — a number in the source and a second copy of
+       it in prose, which is how a sentence comes to describe a threshold
+       nobody changed it with (§53.5).
+
+       IT LIVES HERE BECAUSE BOTH SIDES NEED IT: the server decides `here` from
+       it and the office's page says what it means, and a client that kept its
+       own copy would explain a rule the server does not follow (§44).
+
+       THE FLOOR IS ONE MINUTE AND IT IS WORTH KNOWING WHY THREE IS MARGINAL.
+       A shut panel stamps `here_at` every 180 seconds (§98's idle beat), so at
+       exactly three minutes somebody sitting at their desk is between beats as
+       often as not — recorded rather than quietly changed, because the shipped
+       default moving is a decision about when emails go out, not a fix. */
+    away: 3
   });
   var CHAT_PROMISE = "Usually answers the same day";
+  /* Named once, so the box's own limits and the clamp behind them are the
+     same pair (§53.5). Two hours is a working morning; past that "away" has
+     stopped meaning away. */
+  var CHAT_AWAY_MIN = 1, CHAT_AWAY_MAX = 120;
 
   function chatCfg(raw) {
     var c = (raw && typeof raw === "object") ? raw : null;
@@ -8476,6 +8572,21 @@ THEME.apply();
       assistant: !!(c && c.assistant === true),
       notify:    !!(c && c.notify === true),
       rep:       (c && typeof c.rep === "string") ? c.rep.trim() : "",
+      /* A NUMBER, CLAMPED AND NEVER NaN. A stored value out of range, a
+         string, or nothing at all all answer the shipped default — this is
+         read on every poll and on every reply, so it may not throw and it may
+         not return something a comparison quietly treats as false. */
+      away:      (function (v) {
+                   /* ABSENT IS NOT ZERO. `Number(null)` is 0 and `Number("")`
+                      is 0, both finite — so a clamp alone answered ONE MINUTE
+                      for every tenant that had never set this, which is the
+                      §104.10 trap in a second place. Absence is tested for
+                      before the value is read as a number. */
+                   if (v === null || v === undefined || v === "") return CHAT_DEFAULTS.away;
+                   var n = Math.round(Number(v));
+                   if (!isFinite(n)) return CHAT_DEFAULTS.away;
+                   return Math.max(CHAT_AWAY_MIN, Math.min(CHAT_AWAY_MAX, n));
+                 })(c && c.away),
       promise: (c && typeof c.promise === "string" && c.promise.trim())
                  ? c.promise.trim() : CHAT_PROMISE
     };
@@ -8960,6 +9071,7 @@ THEME.apply();
     claimsOf: claimsOf, openClaims: openClaims, openClaimFor: openClaimFor,
     namingOn: namingOn, mayName: mayName,
     CHAT_DEFAULTS: CHAT_DEFAULTS, CHAT_PROMISE: CHAT_PROMISE,
+    CHAT_AWAY_MIN: CHAT_AWAY_MIN, CHAT_AWAY_MAX: CHAT_AWAY_MAX,
     chatCfg: chatCfg, chatBeat: chatBeat,
     kbLook: kbLook, kbAdds: kbAdds, kbAllAdds: kbAllAdds,
     KB_AUDIENCES: KB_AUDIENCES, KB_AUDIENCE_LABEL: KB_AUDIENCE_LABEL,
@@ -10975,7 +11087,21 @@ function chatSet(key, value){
      chosen — silently, and in a way the picker would then show as nobody. A
      list of exceptions is a list somebody has to remember to add to. */
   var isText = typeof dflt === "string";
-  var v = isText ? String(value == null ? "" : value).trim() : !!value;
+  /* AND A NUMBER IS A THIRD TYPE, taken from the default like the other two
+     (§104.7, §168) — `!!value` on a number setting would have stored `true`
+     for every minute anybody typed. The clamp is the shared rule's, asked
+     once so the box, the server and this writer cannot disagree. */
+  var isNum = typeof dflt === "number";
+  var v;
+  if (isText) v = String(value == null ? "" : value).trim();
+  else if (isNum) {
+    /* CLAMPED BY THE SHARED RULE AND NOT BY A NUMBER WRITTEN HERE, and asked
+       through a one-key object so this stays true of the NEXT number setting
+       without anybody remembering to come back — naming `away` would have
+       been the list of exceptions §104.7 exists to avoid. */
+    var one = {}; one[key] = value;
+    v = SMPRules.chatCfg(one)[key];
+  } else v = !!value;
   var c = chatWritable();
   /* The promise is stored only when it differs from the shipped sentence, so
      improving that sentence later reaches every tenant that never wrote one. */
@@ -15116,6 +15242,51 @@ var BANDS = {
     { key:"bad",  floor:0,  label:"Off track" }
   ]
 };
+
+/* ── THE FIVE COLOURS A LEVEL MAY WEAR (§167) ────────────────────────
+   Islam: *"for the bands make it editable in the scoring bands table in the
+   setup .. to remove or add levels and set the values and colors."*
+
+   These are the product's own scoring colours and there is deliberately no
+   sixth: a band's `key` is the CSS token its swatch, its pill and every chart
+   segment are painted from, so a colour the platform does not carry would
+   render as nothing at all. Picking the colour IS picking the key, which also
+   decides whether a figure landing there has to be explained — `needsNote()`
+   asks for a note on `bad` and `warn` (§163). */
+var BAND_COLOURS = [
+  { key:"good", word:"Green" },
+  { key:"attn", word:"Amber" },
+  { key:"warn", word:"Orange" },
+  { key:"bad",  word:"Red" },
+  { key:"none", word:"Grey" }
+];
+
+/* A LEVEL IS ADDED WHERE THERE IS ROOM FOR ONE, not at an end. The bottom band
+   starts at 0 by construction, so the new one goes immediately above it,
+   halfway between 0 and the band above — which descends by arithmetic rather
+   than by hoping somebody types a number in order. */
+function addBand(){
+  var b = BANDS.bands;
+  var above = b.length > 1 ? b[b.length - 2].floor : 100;
+  var used = {};
+  b.forEach(function(x){ used[x.key] = 1; });
+  var free = BAND_COLOURS.filter(function(c){ return !used[c.key]; })[0];
+  b.splice(b.length - 1, 0, {
+    key: free ? free.key : "attn",
+    floor: Math.max(1, Math.floor(above / 2)),
+    label: "New level"
+  });
+}
+
+/* AND REMOVING ONE PUTS THE FLOOR BACK. Every figure has to land somewhere, so
+   whatever ends up last starts at 0 — take the bottom band away and the one
+   above it inherits that, or a figure of 12 would belong to no band at all. */
+function removeBand(i){
+  var b = BANDS.bands;
+  if (b.length <= 2) return;
+  b.splice(i, 1);
+  b[b.length - 1].floor = 0;
+}
 
 function bandOf(v){
   if (v == null || isNaN(v)) return { key:"none", label:"No data" };
@@ -26473,12 +26644,32 @@ function renderFactorEditor(){
    One scale for every achievement-against-benchmark figure, held once so the
    legend, the colours and the status words can never drift apart. ── */
 function renderBands(){
-  var editable = grant("c_bands") === "edit" && EDITING.bands;
+  var can = grant("c_bands") === "edit";
+  var editable = can && EDITING.bands;
   var b = BANDS.bands;
 
+  /* THE COLOUR IS THE KEY, AND THAT IS THE WHOLE MODEL (§167). A band's `key`
+     is read as a CSS token (`var(--good)`, `.pill.good`) AND by `needsNote()`,
+     which asks for an explanation on a figure that lands in `bad` or `warn`.
+     So a level's colour is not decoration beside its key — it IS the key, and
+     picking red is what makes that level one a reporter has to explain. Five
+     to pick from, because those are the five the product paints; a sixth
+     would be a colour nothing else in the platform knows. */
   var rows = b.map(function(x, i){
     var top = i === 0 ? "and above" : "to " + (b[i-1].floor - 1) + "%";
-    return '<tr><td><span class="swatch" style="background:var(--' + x.key + ')"></span>' +
+    var colour = editable
+      ? '<span class="bcols">' + BAND_COLOURS.map(function(c){
+          return '<button type="button" class="bcol' + (c.key === x.key ? " on" : "") +
+            '" data-bcol="' + i + '|' + c.key + '" title="' + c.word +
+            '" aria-label="' + c.word + ' for ' + esc(x.label) + '"' +
+            (c.key === x.key ? ' aria-pressed="true"' : '') +
+            ' style="background:var(--' + c.key + ')"></button>';
+        }).join("") + '</span>'
+      : '<span class="swatch" style="background:var(--' + x.key + ')"></span>';
+    /* THE BOTTOM BAND'S FLOOR IS NOT A CHOICE. Every figure has to land
+       somewhere, so the last one starts at 0 and says so rather than offering
+       a box whose only valid answer is the one already in it (§61). */
+    return '<tr><td>' + colour +
       (editable
         ? '<input class="blabel" data-b="' + i + '" value="' + esc(x.label) + '" aria-label="Label for band ' + (i+1) + '" />'
         : '<b>' + esc(x.label) + '</b>') + '</td>' +
@@ -26486,7 +26677,16 @@ function renderBands(){
         ? '<input class="bfloor" data-b="' + i + '" value="' + x.floor + '" aria-label="Floor for ' + esc(x.label) + '" />'
         : '<span class="mono">' + x.floor + '</span>') + '</td>' +
       '<td class="cc"><span class="mono">' + x.floor + '% ' + top + '</span></td>' +
-      '<td><span class="pill ' + x.key + '">' + esc(x.label) + '</span></td></tr>';
+      '<td><span class="pill ' + x.key + '">' + esc(x.label) + '</span></td>' +
+      (editable
+        ? '<td class="cc">' + (b.length > 2
+            ? '<button class="xbtn" data-bdel="' + i + '" type="button" title="Remove this level" ' +
+              'aria-label="Remove ' + esc(x.label) + '">\u00d7</button>'
+            /* TWO IS THE FLOOR, AND THE REASON IS SAID RATHER THAN THE BUTTON
+               MERELY MISSING (§59): one band is not a scale, it is a colour
+               painted on every figure in the tenant. */
+            : '<span class="why" title="A scale needs at least two levels">\u2014</span>') + '</td>'
+        : '') + '</tr>';
   }).join("");
 
   /* Floors must descend, or a figure falls into two bands at once. */
@@ -26496,14 +26696,19 @@ function renderBands(){
   return section("", "Scoring bands",
       null,
       '<div class="cfg-bar plain"><span class="cfg-lab">' + b.length + ' bands</span>' +
-        (grant("c_bands") === "edit"
+        (can
           ? '<button class="editbtn" data-edit="bands">' + (EDITING.bands ? "Done" : "Edit") + '</button>'
           : '') + '</div>' +
-      '<div class="cfg"><table><thead><tr><th style="width:34%">Band</th>' +
+      '<div class="cfg"><table class="bandtbl"><thead><tr><th style="width:34%">Band</th>' +
         '<th class="cc" style="width:16%">Floor</th><th class="cc" style="width:26%">Range</th>' +
-        '<th style="width:24%">Appears as</th></tr></thead><tbody>' + rows + '</tbody></table></div>' +
+        '<th style="width:24%">Appears as</th>' +
+        (editable ? '<th class="cc" style="width:6%"><span class="vh">Remove</span></th>' : '') +
+        '</tr></thead><tbody>' + rows + '</tbody></table></div>' +
+      (editable
+        ? '<div class="cfg-bar plain"><button class="addbtn" data-badd="1" type="button">' +
+          '+ Add a level</button></div>'
+        : '') +
       (ok ? '' : '<div class="note bad-note"><b>Floors must descend.</b> Two bands overlap, so a figure would fall into both. Saving is blocked until the order is fixed.</div>') +
-      '<div class="note"><b>70 and 50 match the platform\'s existing thresholds</b> in <code>src/lib/scoring.ts</code>, so the strategy layer and the functional layer never disagree about a colour. 85 is the added top edge. <i>Reconcile against the codebase &mdash; this is carried from the handoff, not verified.</i></div>' +
       '<div class="note bad-note"><b>Changing a threshold rewrites history.</b> A quarter reported as on track becomes needs attention with no data having changed. Bands are per tenant and change rarely; the warning is what makes a change visible rather than silent.</div>');
 }
 
@@ -36169,9 +36374,25 @@ var CHAT = (function(){
         /* ── 6 · TOLD WHEN A REPLY LANDS AND THEY ARE NOT LOOKING. Beside its
            sibling at last; the two were five rows apart. */
         setRow("mail", "Away email",
-          "A reply is emailed when they have not had the platform open for three " +
-          "minutes. Off keeps every conversation inside the platform.",
-          segHtml("mail", "Off", "On", c.mail, true)) +
+          /* THE SENTENCE READS THE SETTING (§168). It said "three minutes" as
+             prose while the server read a constant, so the two were one edit
+             from disagreeing — and the edit is now a box on this very row. */
+          "A reply is emailed when they have not had the platform open for " +
+          plural(c.away, "minute") + ". Off keeps every conversation inside " +
+          "the platform. A shut chat checks in every three minutes, so anything " +
+          "below four can call somebody away while they are at their desk.",
+          segHtml("mail", "Off", "On", c.mail, true),
+          /* ONLY WHILE IT IS ON, the shape `rep` already has under Handover
+             email: a threshold for an email nobody sends is a control with
+             nothing behind it (§61). */
+          (c.mail
+            ? '<div class="chset-ctl chset-away">' +
+                '<input class="chset-num" type="number" data-chaway="1" ' +
+                  'min="' + SMPRules.CHAT_AWAY_MIN + '" max="' + SMPRules.CHAT_AWAY_MAX + '" ' +
+                  'value="' + c.away + '" aria-label="Minutes away before a reply is emailed">' +
+                '<span class="chset-unit">' + plural(c.away, "minute") + ' away</span>' +
+              '</div>'
+            : "")) +
 
         /* ── 7 · THE ONLY ROW THAT CHANGES NOTHING ANYBODY SEES, so it is last.
            The cost is in the tooltip because it is the whole reason this is a
@@ -36590,6 +36811,18 @@ var CHAT = (function(){
         saved();
         /* The hint above it names who was chosen, so the menu redraws — never
            paint(), which would rebuild the page behind an open menu (§30.1). */
+        setMenuPaint();
+        return;
+      }
+      /* THE MINUTES, ON `change` LIKE EVERYTHING ELSE ON THIS PANEL (§35):
+         a number box repainted on every keystroke loses the second digit.
+         The MENU is redrawn afterwards and never `paint()`, because the row's
+         own sentence and the words beside the box both read this value and
+         would otherwise go on naming the old one (§30.1, §63). */
+      var away = e.target.closest("[data-chaway]");
+      if (away) {
+        chatSet("away", away.value);
+        saved();
         setMenuPaint();
         return;
       }
@@ -41892,6 +42125,22 @@ var SYNC = (function () {
         if (!isNaN(n)) BANDS.bands[+inp.dataset.b].floor = Math.max(0, Math.min(100, n));
         paint();
       });
+    });
+    /* A LEVEL'S COLOUR, AND THE TWO WAYS THE LIST CHANGES (§167). The colour
+       is the band's KEY — what its swatch, its pill and `needsNote()` all read
+       — so this writes the key and nothing else needs to know. */
+    document.querySelectorAll("[data-bcol]").forEach(function(el){
+      el.addEventListener("click", function(){
+        var p = el.dataset.bcol.split("|");
+        BANDS.bands[+p[0]].key = p[1];
+        paint();
+      });
+    });
+    document.querySelectorAll("[data-bdel]").forEach(function(el){
+      el.addEventListener("click", function(){ removeBand(+el.dataset.bdel); paint(); });
+    });
+    document.querySelectorAll("[data-badd]").forEach(function(el){
+      el.addEventListener("click", function(){ addBand(); paint(); });
     });
     /* A unit's company, and a company's two visibility flags. Both are
        configuration: they change who reaches what, never a figure. */

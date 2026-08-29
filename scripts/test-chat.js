@@ -209,6 +209,39 @@ async function signIn(who, password) {
     ok(r.body.chat.beat === 15000, "Relaxed means 15000ms");
     ok(r.body.chat.promise === "We answer 9-5", "and the office's own words travel");
 
+    /* ── HOW LONG SOMEBODY COUNTS AS HERE IS THE TENANT'S (§168) ─────
+       The whole of this feature is that a number on a settings panel changes
+       what the SERVER decides, so it is asked of the server with the row aged
+       to a fixed distance and the threshold moved either side of it. A screen
+       that offers the box and an endpoint still reading a constant is exactly
+       the drift `lib/rules.js` exists to prevent, and nothing else here would
+       have noticed it. */
+    console.log("\nAND THE AWAY THRESHOLD IS A SETTING, NOT A CONSTANT (§168).");
+    await client.query(
+      "UPDATE chat_threads SET here_at = now() - interval '7 minutes' WHERE person_key = $1",
+      [OTHER.key]);
+    await setChat({});
+    r = await call(smo.cookie, { action: "thread", person: OTHER.key });
+    ok(r.body.here === false, "seven minutes out, and the shipped three calls her away");
+    await setChat({ away: 20 });
+    r = await call(smo.cookie, { action: "thread", person: OTHER.key });
+    ok(r.body.here === true, "...and twenty calls the same row here");
+    r = await call(smo.cookie, { action: "queue" });
+    ok(r.body.hereMinutes === 20, "the office's page is told the number in force");
+    /* A STORED VALUE OUT OF RANGE IS CLAMPED, NEVER OBEYED — the endpoint runs
+       on every poll, so a nonsense number must answer something rather than
+       throw or divide by nothing. */
+    await setChat({ away: 99999 });
+    r = await call(smo.cookie, { action: "queue" });
+    ok(r.body.hereMinutes === 120, "an absurd value is clamped to the ceiling");
+    await setChat({ away: "nonsense" });
+    r = await call(smo.cookie, { action: "queue" });
+    ok(r.body.hereMinutes === 3, "and a value that is not a number reads as the default");
+    await setChat({});
+    await client.query(
+      "UPDATE chat_threads SET here_at = now() - interval '10 minutes' WHERE person_key = $1",
+      [OTHER.key]);
+
     console.log("\nWITH THE CHAT OFF, THE SERVER REFUSES — NOT JUST THE SCREEN.");
     await setChat({ on: false });
     r = await call(her.cookie, { action: "say", body: "let me through anyway" });

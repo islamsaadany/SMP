@@ -20533,4 +20533,199 @@ refreshes.
 - **The chat bubble's centre is covered by a DIV** — `checks/office-chat.py`
   §1 fails on **main's own build**, so it predates this work. §70 and §93.4's
   family, on the one control that opens the conversation. Recorded, not fixed
-  in passing.
+  in passing. **ANSWERED IN §166, AND IT WAS THE CHECK**: the DIV is
+  `.welcomeover`, §148's welcome screen, which shipped after that file and
+  which it never learned to suppress. Nothing was wrong with the bubble. *A
+  finding recorded as a product fault because it reproduced on main is still
+  a guess about the cause* — the same overlay was blinding
+  `checks/register-header.py` at four widths at the same time, and neither was
+  found until something else made me read the failure text rather than the
+  count.
+
+---
+
+## §166 · A Setup page that fits does not scroll, and the rail's head stays put
+
+Islam, using the Platform Inbox: *"in the platofrm inbox page on scrolling up
+the messaging headr is lost the side rail of the messages header is lost as
+well and the setup rail header and srach are lost all of this is supposed to be
+sticky."*
+
+**THEY ARE ALL STICKY, AND §135.9 MEASURED THEM HOLDING** at eleven window
+sizes and four scroll positions. That measurement was true and it was of the
+wrong element. What is not sticky is **`.setuprail` itself**, on a page where
+the rail is the tallest thing in its row: a sticky box cannot travel past its
+containing block, so with the rail as tall as the row that holds it the travel
+is **zero**, `top:97px` never engages, and the rail scrolls away with the page
+— taking its own pinned head and search with it. Measured on the Inbox at
+1440×760: at scroll 60 the rail sat at **y=37** and its head at **y=38**,
+behind a chrome whose bottom is 75.
+
+**AND THE 60px OF SCROLL WAS A GUESSED CONSTANT GOING STALE** (§122.5, third
+time). `.wrap` ends every page with `padding-bottom:80px`; the rail's cap, the
+register's `.panefill` and the office inbox's box each reserved **20px**. So a
+Setup page whose content already fitted the window still ran 60px past it, for
+nothing at all — and those 60px are exactly what slid the rail under the
+chrome. One number, wrong, in three places, against a fourth that nobody had
+compared them to.
+
+**RESERVING 80 IS THE WRONG WAY ROUND, AND THE CHECK SAID SO.** The first build
+made every cap reserve the page's own 80px foot, and
+`checks/register-header.py` went red six times on §122.5's assertion that the
+register's table **reaches** the fold — correctly: 80px below a box already
+sized to the window is not breathing room, it is an empty band you have to
+scroll to see. So the foot is **two numbers** — `--page-foot: 80px` for a page
+of content, `--pane-foot: 20px` for a page whose content is capped to the
+window — and the caps read the one that applies to them. `:has(.setupsplit)` is
+what lets the page ask, the shape §114.4 already uses to seat the remove
+button.
+
+Below the floors (rail 260px, inbox box 340px) the page scrolls again by design
+and the rail goes with it. That is the split-view case those floors exist for,
+and it is left alone.
+
+**WHAT `checks/setup-sticky.py` ASSERTS IS THE PROBLEM, NOT THE NUMBER**
+(§94.8): a Setup page whose content fits does not scroll **at all**; one whose
+content does not fit **still does**, or the fix would have been to cap the page
+rather than to reserve the right space; nothing pinned ends up behind the
+chrome at the bottom of the page, at three window sizes, with a conversation
+open and its body scrolled to the end; and the capped box still **reaches** the
+foot, because reserving too much passes every "not lost" assertion while
+wasting a strip of every screen. Over HTTP with a stub, because the Platform
+Inbox does not exist over `file://` (§94.11) and the thread header is only
+drawn once a conversation is open. **16 failures against the previous build**,
+ending in Islam's own symptom verbatim.
+
+### Two checks were blind, and one of them had been reporting a product fault (§166.2)
+
+**§148's WELCOME SCREEN COVERS THE PAGE**, and two checks written before it
+never learned to suppress it. `checks/office-chat.py` §1 had been failing on
+*"a click at its centre reaches the bubble — DIV"*, recorded one section
+earlier as a real defect on the strength of its reproducing on main; the DIV is
+`.welcomeover`. `checks/register-header.py` reported **every control on the
+header row unreachable at all four widths** for the same reason, and set the
+tour's flag *after* `goto`, which is too late in any case. Both suppress the
+welcome the way a returning viewer has it, in an init script, and neither
+reaches into the overlay: the welcome screen has its own check.
+
+**AND THE SLOT ASSERTION WAS ASKING ABOUT SOMETHING §163.5 DELETED.**
+`checks/setup-header.py` §7 measures the gap between the page's pinned title
+and a table's pinned head — and §163.5 un-pinned every ordinary Setup table's
+head, so on those three pages the head can never pin and the check went red
+nine times for the right reason and the wrong claim. It asks the **position**
+now: a head that is `static` cannot leave a slot, and a build that makes one
+sticky again is measured for the slot exactly as before, so nothing is passed
+over by never being asked (§113.8).
+
+**AND `qa.py` AND `checks/gap-fill.py` STILL SPELT THE OLD KEY** — §162 bumped
+`smp.ko.year` to `smp.ko.year2` and both checks went on reading the key nobody
+writes. §51.11, loudly this time, which is the good case.
+
+---
+
+## §167 · The scoring bands are the tenant's to set
+
+Islam: *"for the bands make it editable in the scoring bands table in the setup
+.. to remove or add levels and set the values and colors."* Settled from a
+mockup and confirmed before a source was touched.
+
+The table already let the office rename a band and move a floor. What it could
+not do is change how **many** there are, or what **colour** one wears — so a
+tenant who wanted four levels, or the middle one orange rather than amber, had
+to ask for a build.
+
+**THE COLOUR IS THE KEY, AND THAT IS THE WHOLE MODEL.** A band's `key` is read
+as a CSS token (`var(--good)`, `.pill.good`) **and** by `needsNote()`, which
+asks for an explanation on a figure landing in `bad` or `warn` (§163). So a
+level's colour is not decoration beside its key — it **is** the key, and
+picking red is what makes that level one a reporter has to explain. Five to
+pick from, because those are the five the product paints; a sixth would be a
+colour nothing else in the platform knows how to draw.
+
+**THE FLOORS DESCEND BY ARITHMETIC, NOT BY HOPING SOMEBODY TYPES IN ORDER.** A
+new level goes immediately above the bottom one, halfway between 0 and the band
+above, and takes a colour nothing else is wearing. **Removing one puts the
+floor back**: every figure has to land somewhere, so whatever ends up last
+starts at 0 — take the bottom band away and the one above it inherits that, or
+a figure of 12 would belong to no band at all.
+
+**TWO IS THE FLOOR AND THE REASON IS SAID** (§59): one band is not a scale, it
+is a colour painted on every figure in the tenant. At two levels the × is
+withdrawn and a dash carries the sentence, rather than a control that fails
+when pressed.
+
+**THE LIT SWATCH IS RINGED, NEVER TICKED.** A tick drawn on a coloured square
+is unreadable on three of the five, and U+2713 is outside the latin subsets in
+any case (§120.2). `box-shadow` rather than a border, or the chosen swatch
+would be 2px bigger than its neighbours and the row would twitch as you moved
+along it.
+
+**THE TWO STALE NOTES GO.** One cited `src/lib/scoring.ts` — a file that is not
+in this product and never was, carried from the original handoff with its own
+*"reconcile against the codebase"* caveat attached — and one described
+thresholds of 70 and 50 that §162 replaced. The warning that **changing a
+threshold rewrites history** stays exactly where it is: that is the one thing
+on the page that is still true and still matters.
+
+**THE DATABASE NEEDED NOTHING.** `bands` is keyed on `idx` alone, so any number
+of rows and two levels sharing a colour both store and read back unchanged —
+driven against a real Postgres with five bands, two of them green. The
+authoriser already classified the whole list as `setup` (`TOP_SETUP`).
+
+`checks/scoring-bands.py` **presses every control and reads `BANDS.bands`
+back** (§96 — a field drawn and wired to nothing looks identical and discards
+every keystroke, which is the fault §96 found in the objectives editor, on a
+table of the same shape), asserts both ends each time, and measured rather than
+assumed who may not edit it: `c_bands` is only ever `edit` or `none` in this
+tenant — one person holds it and thirty-two do not — so the absence that exists
+is the whole page, and that is what is asserted. Proved able to fail: **4
+failures then a crash** against the previous build.
+
+---
+
+## §168 · How long somebody counts as away is the tenant's
+
+Islam: *"in the caht settings for the away email add my a small option to set
+the number of away minuits to send the email."*
+
+It was `HERE_MINUTES = 3` in `api/chat.js` **and** a hardcoded *"three
+minutes"* in the setting's own tooltip — a number in the source and a second
+copy of it in prose, which is how a sentence comes to describe a threshold
+nobody changed it with (§53.5). It lives in `lib/rules.js` now, because the
+server decides `here` from it and the office's page explains it, and a client
+keeping its own copy would explain a rule the server does not follow (§44).
+
+**ABSENT IS NOT ZERO**, and the first build got this wrong. `Number(null)` is 0
+and `Number("")` is 0, both finite — so a clamp alone answered **one minute**
+for every tenant that had never set this. §104.10's trap in a second place;
+absence is tested for before the value is read as a number.
+
+**A NUMBER IS A THIRD TYPE IN `chatSet()`**, taken from the default like the
+other two (§104.7) — `!!value` on a number setting would have stored `true` for
+every minute anybody typed. And the clamp is asked through a **one-key object**
+rather than by naming `away`, so it stays true of the next number setting
+without anybody remembering to come back: naming the key would have been the
+list of exceptions §104.7 exists to avoid.
+
+**THE BOX ONLY EXISTS WHILE THE AWAY EMAIL IS ON**, the shape `rep` already has
+under Handover email: a threshold for a send nobody makes is a control with
+nothing behind it (§61). It writes on `change`, never on a keystroke (§35 — a
+number box repainted per keystroke loses the second digit), and redraws the
+**menu** rather than the page, because the row's sentence and the words beside
+the box both read this value and would otherwise go on naming the old one.
+
+**THREE IS MARGINAL AND THAT IS RECORDED RATHER THAN QUIETLY CHANGED.** A shut
+panel stamps `here_at` every 180 seconds (§98's idle beat), so at exactly three
+minutes somebody sitting at their desk is between beats as often as not. The
+shipped default moving is a decision about when emails go out, not a fix — so
+the floor is one minute, the ceiling two hours, and the row's own tooltip says
+that anything below four can call somebody away while they are at their desk.
+
+Both halves proved able to fail: `scripts/test-chat.js` gains five assertions
+that ask the **server** whether a stored number changes what it decides — with
+the row aged to a fixed distance and the threshold moved either side of it —
+and goes **3 red** the moment the endpoint reads a constant again;
+`checks/office-chat.py` asserts the box is on the right row, that the sentence
+reads it, and that it goes and comes back with the switch, because a server
+that obeys a number nobody can set is §71's own fault (the back half built and
+the control never drawn).

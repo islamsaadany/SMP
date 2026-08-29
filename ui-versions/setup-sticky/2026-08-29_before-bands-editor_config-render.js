@@ -337,32 +337,12 @@ function renderFactorEditor(){
    One scale for every achievement-against-benchmark figure, held once so the
    legend, the colours and the status words can never drift apart. ── */
 function renderBands(){
-  var can = grant("c_bands") === "edit";
-  var editable = can && EDITING.bands;
+  var editable = grant("c_bands") === "edit" && EDITING.bands;
   var b = BANDS.bands;
 
-  /* THE COLOUR IS THE KEY, AND THAT IS THE WHOLE MODEL (§167). A band's `key`
-     is read as a CSS token (`var(--good)`, `.pill.good`) AND by `needsNote()`,
-     which asks for an explanation on a figure that lands in `bad` or `warn`.
-     So a level's colour is not decoration beside its key — it IS the key, and
-     picking red is what makes that level one a reporter has to explain. Five
-     to pick from, because those are the five the product paints; a sixth
-     would be a colour nothing else in the platform knows. */
   var rows = b.map(function(x, i){
     var top = i === 0 ? "and above" : "to " + (b[i-1].floor - 1) + "%";
-    var colour = editable
-      ? '<span class="bcols">' + BAND_COLOURS.map(function(c){
-          return '<button type="button" class="bcol' + (c.key === x.key ? " on" : "") +
-            '" data-bcol="' + i + '|' + c.key + '" title="' + c.word +
-            '" aria-label="' + c.word + ' for ' + esc(x.label) + '"' +
-            (c.key === x.key ? ' aria-pressed="true"' : '') +
-            ' style="background:var(--' + c.key + ')"></button>';
-        }).join("") + '</span>'
-      : '<span class="swatch" style="background:var(--' + x.key + ')"></span>';
-    /* THE BOTTOM BAND'S FLOOR IS NOT A CHOICE. Every figure has to land
-       somewhere, so the last one starts at 0 and says so rather than offering
-       a box whose only valid answer is the one already in it (§61). */
-    return '<tr><td>' + colour +
+    return '<tr><td><span class="swatch" style="background:var(--' + x.key + ')"></span>' +
       (editable
         ? '<input class="blabel" data-b="' + i + '" value="' + esc(x.label) + '" aria-label="Label for band ' + (i+1) + '" />'
         : '<b>' + esc(x.label) + '</b>') + '</td>' +
@@ -370,16 +350,7 @@ function renderBands(){
         ? '<input class="bfloor" data-b="' + i + '" value="' + x.floor + '" aria-label="Floor for ' + esc(x.label) + '" />'
         : '<span class="mono">' + x.floor + '</span>') + '</td>' +
       '<td class="cc"><span class="mono">' + x.floor + '% ' + top + '</span></td>' +
-      '<td><span class="pill ' + x.key + '">' + esc(x.label) + '</span></td>' +
-      (editable
-        ? '<td class="cc">' + (b.length > 2
-            ? '<button class="xbtn" data-bdel="' + i + '" type="button" title="Remove this level" ' +
-              'aria-label="Remove ' + esc(x.label) + '">\u00d7</button>'
-            /* TWO IS THE FLOOR, AND THE REASON IS SAID RATHER THAN THE BUTTON
-               MERELY MISSING (§59): one band is not a scale, it is a colour
-               painted on every figure in the tenant. */
-            : '<span class="why" title="A scale needs at least two levels">\u2014</span>') + '</td>'
-        : '') + '</tr>';
+      '<td><span class="pill ' + x.key + '">' + esc(x.label) + '</span></td></tr>';
   }).join("");
 
   /* Floors must descend, or a figure falls into two bands at once. */
@@ -389,19 +360,14 @@ function renderBands(){
   return section("", "Scoring bands",
       null,
       '<div class="cfg-bar plain"><span class="cfg-lab">' + b.length + ' bands</span>' +
-        (can
+        (grant("c_bands") === "edit"
           ? '<button class="editbtn" data-edit="bands">' + (EDITING.bands ? "Done" : "Edit") + '</button>'
           : '') + '</div>' +
-      '<div class="cfg"><table class="bandtbl"><thead><tr><th style="width:34%">Band</th>' +
+      '<div class="cfg"><table><thead><tr><th style="width:34%">Band</th>' +
         '<th class="cc" style="width:16%">Floor</th><th class="cc" style="width:26%">Range</th>' +
-        '<th style="width:24%">Appears as</th>' +
-        (editable ? '<th class="cc" style="width:6%"><span class="vh">Remove</span></th>' : '') +
-        '</tr></thead><tbody>' + rows + '</tbody></table></div>' +
-      (editable
-        ? '<div class="cfg-bar plain"><button class="addbtn" data-badd="1" type="button">' +
-          '+ Add a level</button></div>'
-        : '') +
+        '<th style="width:24%">Appears as</th></tr></thead><tbody>' + rows + '</tbody></table></div>' +
       (ok ? '' : '<div class="note bad-note"><b>Floors must descend.</b> Two bands overlap, so a figure would fall into both. Saving is blocked until the order is fixed.</div>') +
+      '<div class="note"><b>70 and 50 match the platform\'s existing thresholds</b> in <code>src/lib/scoring.ts</code>, so the strategy layer and the functional layer never disagree about a colour. 85 is the added top edge. <i>Reconcile against the codebase &mdash; this is carried from the handoff, not verified.</i></div>' +
       '<div class="note bad-note"><b>Changing a threshold rewrites history.</b> A quarter reported as on track becomes needs attention with no data having changed. Bands are per tenant and change rarely; the warning is what makes a change visible rather than silent.</div>');
 }
 

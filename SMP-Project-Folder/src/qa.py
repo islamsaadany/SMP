@@ -1002,7 +1002,7 @@ with sync_playwright() as p:
     # And it must not appear on the GROUP, whose objectives have always shown
     # both and have nothing to toggle.
     pg.select_option("#asWho", "smo"); pg.wait_for_timeout(200)
-    pg.evaluate("() => { try { localStorage.removeItem('smp.ko.year'); } catch (e) {} }")
+    pg.evaluate("() => { try { localStorage.removeItem('smp.ko.year2'); } catch (e) {} }")
     show_units(pg)
     pg.click('#units [data-u="mobile"]'); pg.wait_for_timeout(200)
     pg.click('#subtabs button:has-text("Strategy")'); pg.wait_for_timeout(250)
@@ -1024,7 +1024,7 @@ with sync_playwright() as p:
       out.chipsOff = read();
       setKoThisYear(true); paint();
       out.chipsOn = read();
-      out.stored = localStorage.getItem("smp.ko.year");
+      out.stored = localStorage.getItem("smp.ko.year2");
       setKoThisYear(false); KO_VIEW = "chips"; paint();
       return out;
     }""")

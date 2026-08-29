@@ -365,6 +365,53 @@ console errors (in this cloud environment, run it via a wrapper that points Play
   `node scripts/test-door.js <smo-password>` against a running dev-server
   after touching `api/auth.js` or `lib/auth.js` (it ends by rate-limiting the
   SMO on purpose — `DELETE FROM login_attempts;` clears it).
+- **A STICKY BOX WITH NO TRAVEL IS NOT STICKY, AND THE PAGE HAD 60px OF SCROLL
+  IT DID NOT NEED (§166):** `.setuprail` is `position:sticky; top:97px` and on
+  a page where the rail is the TALLEST thing in its row it never pins — a
+  sticky element cannot travel past its containing block, so the rail scrolls
+  away with the page and takes its own pinned head and search with it (measured
+  on the Inbox at 1440×760: rail at y=37, head at y=38, chrome ending at 75).
+  **§135.9's eleven-window measurement was true and was of the wrong element.**
+  And the scroll that did it was a **guessed constant going stale** (§122.5,
+  third time): `.wrap` ends the page with `padding-bottom:80px` while the rail's
+  cap, `.panefill` and `.chinbox` each reserved **20px**. **RESERVING 80 IS THE
+  WRONG WAY ROUND and the check said so** — six failures on §122.5's assertion
+  that the register's table REACHES the fold, correctly, because 80px below a
+  box already sized to the window is an empty band you have to scroll to see.
+  So the foot is TWO numbers: `--page-foot:80px` for a page of content,
+  `--pane-foot:20px` for a page whose content is capped to the window, with
+  `.wrap:has(.setupsplit)` letting the page ask (§114.4's shape). Below the
+  floors (rail 260px, box 340px) the page scrolls again by design.
+- **§148's WELCOME SCREEN BLINDS ANY CHECK WRITTEN BEFORE IT (§166.2):**
+  `.welcomeover` covers the viewport, so `elementFromPoint` returns it and
+  every click is intercepted. `checks/office-chat.py` had been failing on *"a
+  click at its centre reaches the bubble — DIV"* and that was **recorded as a
+  product fault** because it reproduced on main; `checks/register-header.py`
+  reported every control on the header row unreachable at four widths. Both
+  suppress it as a RETURNING viewer does, **in an `add_init_script`** — setting
+  the flag after `goto` is too late — and neither reaches into the overlay: the
+  welcome screen has its own check. *A finding that reproduces on main is still
+  a guess about the cause.*
+- **THE COLOUR IS THE BAND'S KEY (§167):** a band's `key` is read as a CSS
+  token (`var(--good)`, `.pill.good`) AND by `needsNote()`, which asks for an
+  explanation on `bad` and `warn` — so picking a level's colour is not
+  decoration beside its key, it IS the key, and picking red is what makes that
+  level one a reporter must explain. Five to choose from and deliberately no
+  sixth: a colour the product does not paint renders as nothing. A new level
+  goes above the bottom one at half the floor above it (descending by
+  arithmetic, never by hoping somebody types in order) and takes an unused
+  colour; **removing one puts the 0 floor back**, or a figure of 12 belongs to
+  no band; **two is the floor and the reason is said** (§59). `bands` is keyed
+  on `idx` alone, so any number of levels and two sharing a colour both
+  round-trip — proved against a real Postgres.
+- **ABSENT IS NOT ZERO WHEN A SETTING IS A NUMBER (§168):** `Number(null)` and
+  `Number("")` are both 0 and both finite, so clamping alone answered ONE
+  MINUTE for every tenant that had never set the away threshold — §104.10's
+  trap in a second place. Test for absence before reading the value as a
+  number. **And a number is a third type in `chatSet()`** (§104.7): `!!value`
+  would have stored `true` for every minute typed, and the clamp is asked
+  through a ONE-KEY OBJECT rather than by naming `away`, so it stays true of
+  the next number setting without anybody remembering to come back.
 - **THE FLOOR IS NOT A ROLE, AND IT MUST BE READ AS ONE (§93):** Islam:
   *"anyone with no role is employee — employee doesn't give the person anything,
   so let's remove this strange role."* It was never granted; §55 DERIVED it, so
@@ -2659,6 +2706,13 @@ python3 checks/project-custodian.py # a custodian per project (§147): the Proje
                                 # nothing, and a milestone owner is a Contributor who
                                 # reports nothing until the row is opened — both ends,
                                 # three viewers, proved able to fail
+python3 checks/setup-sticky.py  # a Setup page that FITS does not scroll, and nothing
+                                # pinned ends up behind the chrome — over HTTP with a
+                                # conversation open, because the Inbox's own two headers
+                                # do not exist over file:// (§166)
+python3 checks/scoring-bands.py # the scale is the tenant's: add, remove and recolour a
+                                # level, every control PRESSED and BANDS.bands read back,
+                                # both ends each time (§167)
 python3 checks/perf-line.py     # the Performance line: Report, Presentation and Bands
                                 # on the tab row, three bands, the hover bubble on
                                 # hover AND focus, and nothing over the pinned title (§163)
@@ -2751,7 +2805,39 @@ prior sessions (on HR_ERP) accidentally reverted agreed-upon designs.
 
 ---
 
-*Last Updated: 2026-08-29 &mdash; **v3.62: the Performance line, three bands,
+*Last Updated: 2026-08-29 &mdash; **v3.63: a Setup page that fits, an editable
+scale, and the away threshold (&sect;166&ndash;&sect;168)**. Islam, on the
+Platform Inbox: *"on scrolling up the messaging headr is lost the side rail of
+the messages header is lost as well and the setup rail header and srach are
+lost all of this is supposed to be sticky."* **THEY ARE ALL STICKY, AND
+&sect;135.9 MEASURED THEM HOLDING at eleven window sizes** &mdash; and that
+measurement was of the wrong element. `.setuprail` is itself sticky, and on a
+page where the rail is the TALLEST thing in its row a sticky box has **zero
+travel**, so `top:97px` never engages and the rail scrolls away carrying its
+own pinned head and search: measured at 1440&times;760, rail at y=37, head at
+y=38, chrome ending at 75. **And the 60px of scroll that did it was a guessed
+constant going stale** (&sect;122.5, third time) &mdash; `.wrap` ends every
+page with `padding-bottom:80px` while the rail's cap, the register's
+`.panefill` and the inbox box each reserved **20**. **My first fix was the
+wrong way round and the check caught it**: reserving the full 80 left the
+register's table 80px short of the fold and `checks/register-header.py` went
+red six times on &sect;122.5's own assertion &mdash; correctly, because 80px
+below a box already sized to the window is an empty band you have to scroll to
+see. Two numbers, then, with `:has(.setupsplit)` letting the page ask which
+applies. **AND TWO CHECKS WERE BLIND TO &sect;148's WELCOME SCREEN**, one of
+them reporting it as a product defect: *"a click at its centre reaches the
+bubble &mdash; DIV"* was `.welcomeover`, and it had been recorded one section
+earlier as real on the strength of reproducing on main &mdash; *a finding that
+reproduces on main is still a guess about the cause*. Also: **the scoring bands
+are the tenant's** (&sect;167) &mdash; add, remove and recolour a level, where
+the colour **is** the key, so picking red is also what makes that level one a
+reporter must explain; two is the floor and the reason is said; the bottom
+level always starts at 0. And **how long somebody counts as away** (&sect;168)
+is a box on the Away email row rather than a constant in `api/chat.js` beside a
+hardcoded *"three minutes"* in prose &mdash; whose first build answered ONE
+MINUTE for every untouched tenant, because `Number(null)` is 0 and finite.
+
+*Earlier: 2026-08-29 &mdash; **v3.62: the Performance line, three bands,
 and two headers found lying across their own rows (&sect;162&ndash;&sect;163)**.
 Islam's seven from using the product on a squeezed window. **Three of them were
 one lesson each.** The hover he reported as *"not working"* WAS working &mdash;

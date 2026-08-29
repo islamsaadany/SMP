@@ -69,12 +69,13 @@ const MAX_SHOT = 3 * 1024 * 1024;
 const MAX_TEXT = 4000;
 const FLAGS = ["issue", "idea", "question"];
 
-/* HOW LONG SOMEBODY COUNTS AS "HERE" (§97.5). Their own browser stamps
-   here_at every time it asks for new messages — 4 seconds while the panel is
-   open, 60 while it is not — so 3 minutes is comfortably longer than the slow
-   cadence plus a missed beat, and short enough that a closed laptop stops
-   counting as present within one coffee. */
-const HERE_MINUTES = 3;
+/* HOW LONG SOMEBODY COUNTS AS "HERE" (§97.5) IS THE TENANT'S NOW (§168).
+   Their own browser stamps here_at every time it asks for new messages — 4
+   seconds while the panel is open, 180 while it is not — and how long after
+   the last of those they stop counting as present is `chatCfg().away`, set on
+   the Away email row. It lives in `lib/rules.js` because the server decides
+   `here` from it and the office's page explains it, and a constant here with
+   a sentence there is two copies of one threshold (§53.5). */
 
 function readBody(req) {
   return new Promise(function (resolve, reject) {
@@ -576,7 +577,7 @@ module.exports = async function handler(req, res) {
         chat: cfg,
         waiting: rows.filter(function (r) { return r.waiting; }).length,
         flagged: rows.filter(function (r) { return +r.flagged > 0; }).length,
-        hereMinutes: HERE_MINUTES,
+        hereMinutes: cfg.away,
         /* WHETHER THIS DEPLOYMENT CAN MAIL AT ALL, so the line above the reply
            box says "no mail is configured here" rather than promising a send
            that was never going to happen. */
@@ -597,7 +598,7 @@ module.exports = async function handler(req, res) {
         [who])).rows;
       await client.query(
         "UPDATE chat_threads SET seen_by_us = now() WHERE person_key = $1", [who]);
-      const here = t.here_at && (Date.now() - new Date(t.here_at).getTime()) < HERE_MINUTES * 60000;
+      const here = t.here_at && (Date.now() - new Date(t.here_at).getTime()) < cfg.away * 60000;
       return send(res, 200, {
         ok: true, person: who, name: t.live_name || t.person_name,
         gone: !t.live_name, unit: t.unit_key, fn: t.fn_key, title: t.title,
@@ -657,7 +658,7 @@ module.exports = async function handler(req, res) {
          never taken from the browser (§74.2). The browser sends the HTML it
          built with the one builder every other message uses (§72.3) — content,
          never a recipient. */
-      const here = t.here_at && (Date.now() - new Date(t.here_at).getTime()) < HERE_MINUTES * 60000;
+      const here = t.here_at && (Date.now() - new Date(t.here_at).getTime()) < cfg.away * 60000;
       let mailed = null;
       if (!here && !cfg.mail) {
         /* SAID, NOT SILENT. The office is shown the same sentence before it

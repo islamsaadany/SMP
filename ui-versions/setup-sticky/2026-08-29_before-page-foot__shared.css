@@ -286,13 +286,7 @@
      a measure on the few prose BLOCKS (the Knowledge base already carries one
      and is unaffected), and it is not worth adding before somebody runs the
      platform on a monitor that wide. */
-  .wrap { margin:0 auto; padding:0 24px var(--page-foot, 80px); }
-  /* A PAGE WHOSE CONTENT IS CAPPED TO THE WINDOW ENDS WHERE THE CAPS DO
-     (§166). Every Setup page is a rail beside a pane, both capped and both
-     scrolling their own list, so the page's 80px foot is 80px of nothing
-     below the fold — and it is exactly what made the page run 60px past the
-     window and slide the rail, with its pinned head, under the chrome. */
-  .wrap:has(.setupsplit) { padding-bottom:var(--pane-foot, 20px); }
+  .wrap { margin:0 auto; padding:0 24px 80px; }
 
   .banner { background:var(--panel); color:var(--panel-ink); padding:9px 24px; font-size:var(--fs-small);
             display:flex; gap:10px; justify-content:center; flex-wrap:wrap; align-items:baseline; }

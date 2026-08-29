@@ -64,6 +64,39 @@ Nothing proceeds past this line without an answer.
 
 ## Built and verified
 
+### v3.63 — a Setup page that fits, an editable scale, and the away threshold (§166–§168)
+
+- **The Platform Inbox's headers, and the Setup rail's, stop being lost.**
+  `.setuprail` is sticky and on a page where the rail is the tallest thing in
+  its row it has **zero travel**, so it never pins — measured on the Inbox at
+  1440×760, rail at y=37 and its head at y=38 behind a chrome ending at 75.
+  The scroll that did it was 60px the page never needed: `.wrap` ends every
+  page with `padding-bottom:80px` while three caps reserved 20 (§122.5's own
+  fault, third time). Two numbers now — `--page-foot` for a page of content,
+  `--pane-foot` for one capped to the window — because reserving the full 80
+  turned the register's table 80px short of the fold and
+  `checks/register-header.py` said so six times.
+- **The scoring bands are the tenant's**: add a level, remove one, and set each
+  one's colour from the five the product paints. The colour **is** the key, so
+  picking red is also what makes that level one a reporter has to explain
+  (`needsNote()`). Two levels is the floor and the reason is on the page; the
+  bottom level always starts at 0. The two stale notes go (one cited a file
+  that is not in this product); the "changing a threshold rewrites history"
+  warning stays.
+- **How long somebody counts as away is a setting**, on the Away email row —
+  1 to 120 minutes, off the shipped 3, read by the server and by the row's own
+  sentence from one place in `lib/rules.js`. It was a constant in `api/chat.js`
+  and a hardcoded "three minutes" in prose beside it.
+- **Two checks were blind to §148's welcome screen** and one of them had been
+  reporting it as a product defect for a section. Both suppress it now.
+- Verified: `checks/setup-sticky.py` (**16 failures** on the previous build),
+  `checks/scoring-bands.py` (**4 then a crash**), `scripts/test-chat.js`
+  (**57 passed**, 3 red with the server's constant restored),
+  `scripts/test-authorize.js` (306 passed), the round trip on a **virgin
+  database** (clean slate / round trip / fixed point / archive all PASS), a
+  five-band tenant with two levels sharing a colour round-tripped through real
+  Postgres, and the full `qa.py` sweep.
+
 ### v3.62 — the Performance line, three bands, and two headers over their own rows (§162–§163)
 
 - Islam's seven from a squeezed window; five needed a decision and he gave

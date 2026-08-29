@@ -3347,6 +3347,22 @@
         paint();
       });
     });
+    /* A LEVEL'S COLOUR, AND THE TWO WAYS THE LIST CHANGES (§167). The colour
+       is the band's KEY — what its swatch, its pill and `needsNote()` all read
+       — so this writes the key and nothing else needs to know. */
+    document.querySelectorAll("[data-bcol]").forEach(function(el){
+      el.addEventListener("click", function(){
+        var p = el.dataset.bcol.split("|");
+        BANDS.bands[+p[0]].key = p[1];
+        paint();
+      });
+    });
+    document.querySelectorAll("[data-bdel]").forEach(function(el){
+      el.addEventListener("click", function(){ removeBand(+el.dataset.bdel); paint(); });
+    });
+    document.querySelectorAll("[data-badd]").forEach(function(el){
+      el.addEventListener("click", function(){ addBand(); paint(); });
+    });
     /* A unit's company, and a company's two visibility flags. Both are
        configuration: they change who reaches what, never a figure. */
     document.querySelectorAll("[data-ucomp]").forEach(function(el){

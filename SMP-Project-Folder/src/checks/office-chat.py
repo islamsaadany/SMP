@@ -33,8 +33,15 @@ from playwright.sync_api import sync_playwright
 # "Skip for now" session flag), never by deleting or disabling the tour:
 # the tour has its own check, and a suppression that reached into its
 # internals would be this file quietly asserting the tour away.
+# AND §148's WELCOME SCREEN COVERS THE PAGE THE SAME WAY (§166). It shipped
+# after this file and nothing here knew about it, so every click landed on
+# `.welcomeover` — which is what "a click at its centre reaches the bubble —
+# DIV" had been reporting, and it was read as a product fault for as long as
+# it stood. Suppressed as a RETURNING viewer has it, never by reaching into
+# the overlay: the welcome screen has its own check.
 def _no_tour(pg):
-    pg.add_init_script("try{sessionStorage.setItem('smp.tour.later','1');}catch(e){}")
+    pg.add_init_script("try{sessionStorage.setItem('smp.tour.later','1');"
+                       "sessionStorage.setItem('smp.welcome.done','1');}catch(e){}")
 
 
 ROOT = pathlib.Path(__file__).resolve().parents[3]
@@ -722,6 +729,38 @@ with sync_playwright() as p:
     if "Handover email" in seq and "Away email" in seq:
         ck("the two email settings are next to each other",
            abs(seq.index("Handover email") - seq.index("Away email")) == 1, seq)
+    # ── HOW LONG IS AWAY (§168) ──────────────────────────────────────
+    # The box lives on the Away email row and only while that email is ON — a
+    # threshold for a send nobody makes is a control with nothing behind it
+    # (§61). Asserted here rather than only in `scripts/test-chat.js`, because
+    # that one proves the SERVER obeys the number and could go on passing with
+    # nothing on screen to set it (§71's fault: the back half built and the
+    # control never drawn).
+    ck("the away threshold is set on the Away email row",
+       pg.evaluate("""()=>{const n=document.querySelector('[data-chaway]');
+           const r=n && n.closest('.chset-row');
+           return !!r && r.querySelector('[data-chset="mail"]') !== null;}"""), None)
+    # AND THE ROW'S OWN SENTENCE READS IT. It said "three minutes" as prose
+    # while the server read a constant; a sentence that cannot follow the
+    # setting is the second copy of it (§53.5).
+    ck("...and the row says the number in force, not a number in the source",
+       pg.evaluate("""()=>{const n=document.querySelector('[data-chaway]');
+           const r=n && n.closest('.chset-row');
+           const t=r && r.querySelector('[data-tip]');
+           const tip=t ? t.getAttribute('data-tip') : '';
+           return tip.indexOf(n.value + ' minute') > -1;}"""), None)
+    # BOTH ENDS (§94.2): turn the away email off and the threshold goes with it.
+    pg.evaluate("""()=>{const b=[...document.querySelectorAll('[data-chset="mail"]')]
+        .find(x=>x.dataset.chval==='0'); if(b) b.click();}""")
+    pg.wait_for_timeout(800)
+    ck("with the away email off there is no threshold to set",
+       pg.eval_on_selector_all("[data-chaway]", "n=>n.length") == 0)
+    pg.evaluate("""()=>{const b=[...document.querySelectorAll('[data-chset="mail"]')]
+        .find(x=>x.dataset.chval==='1'); if(b) b.click();}""")
+    pg.wait_for_timeout(800)
+    ck("...and turning it back on brings it back",
+       pg.eval_on_selector_all("[data-chaway]", "n=>n.length") == 1)
+
     # TEST IS WHERE SOMEBODY STANDS AFTER FLIPPING THE ASSISTANT (§123).
     ck("Test the assistant is in the assistant's own row",
        pg.evaluate("""()=>{const t=document.querySelector('[data-chtest]');

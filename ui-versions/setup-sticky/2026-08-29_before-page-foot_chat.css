@@ -184,7 +184,7 @@ body.presenting .chatdock { display:none; }
    not move when the box gets taller or shorter, so the measurement is stable
    in a way a max-height fed by a height never was. */
 .chinbox { display:grid; grid-template-columns:272px 1fr;
-           height:calc(100dvh - var(--chin-top, 190px) - var(--pane-foot, 20px));
+           height:calc(100dvh - var(--chin-top, 190px) - 20px);
            /* Below this it stops shrinking and the page scrolls instead — a
               thread squeezed into 150px is not a usable screen, and a window
               that short is somebody's split view rather than their laptop. */
@@ -316,15 +316,6 @@ body.presenting .chatdock { display:none; }
             background:var(--ground); color:var(--ink); padding:7px 9px;
             font-family:inherit; font-size:var(--fs-note); }
 .chset-in:focus-visible { outline:2px solid var(--focus); outline-offset:-1px; }
-/* THE MINUTES BOX IS AS WIDE AS THE NUMBER IT HOLDS (§168), not as wide as
-   the row: three digits is the whole range, and a full-width box beside the
-   words "5 minutes away" reads as a text field somebody should write in. */
-.chset-away { display:flex; align-items:center; gap:8px; }
-.chset-num { width:72px; border:1px solid var(--line); border-radius:6px;
-             background:var(--surface); color:var(--ink); padding:5px 8px;
-             font-family:inherit; font-size:var(--fs-small); }
-.chset-num:focus-visible { outline:2px solid var(--focus); outline-offset:-1px; }
-.chset-unit { font-size:var(--fs-small); color:var(--ink-3); }
 /* THE COST, WHERE THE CHOICE IS MADE. A semantic colour, not the accent: it
    is a consequence being stated, not something being emphasised. */
 .chset-cost { font-size:var(--fs-micro); color:var(--attn-tx); background:var(--attn-bg);

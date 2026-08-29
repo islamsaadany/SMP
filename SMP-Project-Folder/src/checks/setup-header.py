@@ -391,10 +391,29 @@ with sync_playwright() as p:
                 if v and v["stuck"]:
                     g = v["gap"]
                     break
-            # NOT SKIPPED IN SILENCE (§54.5): a page whose head never pins is
-            # something to say, not something to pass over.
-            ck("%d %s: no slot between the two pinned heads (%s)" % (w, k, g),
-               g is not None and g <= 1, g if g is not None else "never pinned")
+            # AND SINCE §163.5 THE ORDINARY SETUP TABLE'S HEAD DOES NOT PIN
+            # AT ALL, which is why "never pinned" stopped being something to
+            # report and became the answer. Those heads pinned to a PAGE
+            # offset while sitting in a box that scrolls, so the browser
+            # measured the offset from the top of the TABLE and the head sat
+            # 136px down its own body, across the third row; the cure was
+            # `position:static`, and a head that does not pin cannot leave a
+            # slot under one that does. So the claim is asked of the POSITION
+            # rather than of a gap that can no longer occur (§51.11 — a check
+            # keyed on behaviour deliberately removed goes red for the wrong
+            # reason, and this one went red nine times).
+            #
+            # BOTH BRANCHES ARE REAL ASSERTIONS (§113.8): a build that makes one
+            # of these sticky again is measured for the slot exactly as before,
+            # so nothing is passed over by never being asked.
+            pos = pg.evaluate("""()=>{const th=document.querySelector('.setuppane table thead th');
+              return th ? getComputedStyle(th).position : null;}""")
+            if pos == "static":
+                ck("%d %s: the table's head does not pin, so there is no slot" % (w, k),
+                   g is None, g)
+            else:
+                ck("%d %s: no slot between the two pinned heads (%s)" % (w, k, g),
+                   g is not None and g <= 1, g if g is not None else "never pinned")
     pg.set_viewport_size({"width": 1560, "height": 700})
 
     # AND ONE FINE-GRAINED SWEEP, because "no gap" is the cause and "nothing is

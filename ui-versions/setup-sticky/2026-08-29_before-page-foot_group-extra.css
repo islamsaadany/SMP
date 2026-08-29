@@ -635,43 +635,6 @@
      position are the same by construction and the difference cannot be
      non-zero. Change the gap and both move together. */
   :root { --rail-gap:22px; }
-  /* ── WHAT SITS BELOW A CAPPED BOX IS 80px, AND THREE CAPS RESERVED 20
-     (§166) ────────────────────────────────────────────────────────────
-     Islam, using the Platform Inbox: *"on scrolling up the messaging header
-     is lost, the side rail of the messages header is lost as well, and the
-     setup rail header and search are lost — all of this is supposed to be
-     sticky."*
-
-     THEY ARE ALL STICKY AND ALL THREE WERE MEASURED HOLDING (§135.9 asked
-     eleven window sizes). What is not sticky is `.setuprail` ITSELF on a page
-     where the rail is the tallest thing: a sticky box cannot travel past its
-     containing block, so with the rail as tall as the row that holds it the
-     travel is ZERO and `top:97px` never engages — the rail scrolls away with
-     the page and takes its own pinned head and search with it. Measured on the
-     Inbox at 1440x760: at scroll 60 the rail sits at y=37 and its head at
-     y=38, behind a chrome whose bottom is 75.
-
-     AND THE 60px OF SCROLL IS A GUESSED CONSTANT GOING STALE (§122.5, third
-     time). `.wrap` ends the page with `padding-bottom:80px`; the rail's cap,
-     the register's `.panefill` and the inbox box each reserved `20px`. So a
-     page whose content already fits the window still ran 60px past it, for
-     nothing — and those 60px are exactly what slid the rail under the chrome.
-     One variable now, read by the padding AND by every cap that has to clear
-     it, so the four can never disagree again.
-
-     RESERVING 80 IS THE WRONG WAY ROUND, AND THE CHECK SAID SO. The first
-     build made every cap reserve the page's own 80px foot, and
-     `checks/register-header.py` went red six times on §122.5's assertion that
-     the register's table REACHES the fold — correctly: 80px below a box that
-     is already sized to the window is not breathing room, it is an empty band
-     you have to scroll to see. The foot is right for a page of content and
-     wrong under a box capped to the window, so it is TWO numbers with the caps
-     reading the one that applies to them — and `:has()` is what lets the page
-     ask (the same shape §114.4 uses to seat the remove button).
-
-     Below the floors (rail 260px, box 340px) the page scrolls again by design
-     and the rail goes with it — the split-view case those floors exist for. */
-  :root { --page-foot:80px; --pane-foot:20px; }
   /* Nothing between the panel's padding and the rail. `.split` used to add its
      own 12px on top, which is a second gap the sticky offset knew nothing
      about - so the rail sat 34px down, pinned at 34, and slid the difference.

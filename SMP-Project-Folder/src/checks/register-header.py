@@ -123,10 +123,22 @@ HITS = """(sel)=>{
   return out;}"""
 
 
+# THE WELCOME SCREEN COVERS THE PAGE, AND SETTING ITS FLAG AFTER `goto` IS
+# TOO LATE (§148, §166). Over the stub server §148's overlay draws across the
+# whole viewport, so every control on the header row reported unreachable —
+# `elementFromPoint` returning the overlay, at all four widths, while the row
+# itself was perfectly fine. Suppressed the way a RETURNING viewer has it, in
+# an init script so it is set before the platform reads it; the tour's flag
+# moves there with it, for the same reason.
+def _returning(pg):
+    pg.add_init_script(
+        "try{sessionStorage.setItem('smp.tour.later','1');"
+        "sessionStorage.setItem('smp.welcome.done','1');}catch(e){}")
+
+
 def land(pg):
     pg.goto(URL)
     pg.wait_for_timeout(1900)
-    pg.evaluate("try{sessionStorage.setItem('smp.tour.later','1')}catch(e){}")
     pg.evaluate("()=>document.querySelector('[data-md=\"setup\"]').click()")
     pg.wait_for_timeout(400)
     pg.evaluate("()=>document.querySelector('[data-setupgo=\"people\"]').click()")
@@ -138,6 +150,7 @@ print("one line above the table — " + URL)
 with sync_playwright() as p:
     b = p.chromium.launch()
     pg = b.new_page()
+    _returning(pg)
     pg.on("pageerror", lambda e: errs.append(str(e)))
     pg.on("console", lambda m: errs.append(m.text) if m.type == "error" else None)
 

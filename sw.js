@@ -205,7 +205,7 @@
    Name read off origin/main at the start of this merge and again immediately
    before the push (§94.12, §94.16); "-testcopy" cannot be arrived at by
    coincidence. */
-const SHELL = "smp-shell-v3.58-welcome";
+const SHELL = "smp-shell-v3.59-welcomeexit";
 const ASSETS = [
   "/",
   "/index.html",

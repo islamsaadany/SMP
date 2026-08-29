@@ -360,12 +360,20 @@ with sync_playwright() as p:
             errs.append("PERFORMANCE (%s): Arrange is still here — it belongs to the plan"
                         % label)
         pg.click("[data-report]"); pg.wait_for_timeout(300)
+        # THE BAR MOVED, IT DID NOT GO (§150). The reporting controls now ride
+        # the tab row rather than sitting in the page, so this asked for
+        # `.rep-bar` and correctly found nothing — §51.11's fault caught doing
+        # its job for once: a check keyed on markup that changed, going red
+        # rather than quietly passing. It asks for the CONTROLS and for the
+        # box being in the pinned row, which is what the move was for.
         inrep = pg.evaluate("""() => ({
-          bar: !!document.querySelector(".rep-bar"),
+          box: !!document.querySelector(".repchrome"),
+          inChrome: !!document.querySelector("#subtabs .repchrome"),
           save: !!document.querySelector("[data-repsave]"),
           cancel: !!document.querySelector("[data-repcancel]") })""")
-        if not (inrep["bar"] and inrep["save"] and inrep["cancel"]):
-            errs.append("REPORT (%s): the mode does not carry its own bar (%r)" % (label, inrep))
+        if not (inrep["box"] and inrep["inChrome"] and inrep["save"] and inrep["cancel"]):
+            errs.append("REPORT (%s): the mode does not carry its controls on the tab row (%r)"
+                        % (label, inrep))
         pg.click("[data-repcancel]"); pg.wait_for_timeout(250)
         if pg.query_selector(".rep-bar"):
             errs.append("REPORT (%s): Cancel did not leave the mode" % label)

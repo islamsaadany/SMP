@@ -19488,3 +19488,521 @@ own); every door PRESSED with `current`/`currentSub`/`REPORTING` read back
 reload's second greeting); and **proved able to fail** by running against the
 shipped pre-§148 file, where it fails from the first wait — no overlay ever
 draws (§94.5). Full `qa.py` sweep green on the final build.
+
+
+## 149 · The glyph and the rule say what they mean (v3.59)
+
+The audit's item 06: `DIR.` showed a bare ≥ / ≤ and `COMPILED` read "Latest"
+on nearly every row — a column with one value is furniture wearing a heading.
+Islam **kept the glyphs** and rejected the first draft's words: *"for the
+direction I was thinking if we can make the hover note to say something better
+than at least and at most, some descriptive like Less is better or more is
+better"*, and then the same for the other column — *"take last measure,
+accumulative across the time, average across the time"*.
+
+**THE WORDS ARE A DIRECTION OF TRAVEL, NOT A RESTATEMENT.** "At least the
+target" says what the glyph already says, in more words; "More is better" says
+which way the number should move, which is the thing a reader actually wants
+and the one thing the glyph cannot spell. That is the whole difference between
+the draft and the shipped version, and it is Islam's.
+
+**ONE PAIR OF MAPS, READ BY EVERY SURFACE.** Nine read-mode cells print
+`m.dir` and three print `m.compile`, across the unit, group, company and
+capability tables — so `DIR_WORDS` / `COMPILE_WORDS` and the `dirCell()` /
+`compileCell()` pair live in one place (§53.5, or the plan page and the deck
+end up explaining the same glyph differently). **A stored value outside the
+list keeps its spelling and gets NO note** (§96.2): an imported plan may carry
+a rule this product never offered, and inventing an explanation for it would
+be the platform speaking for the client's own words.
+
+**A SENTENCE IS NOT A COLUMN.** The rail's meta line reads "≥ · latest" as
+prose and is left plain — §99.8's rule (a column heading is a noun, a pill is
+a sentence), applied to a hover.
+
+**AND THE QUIET DEFAULT WEARS NO DOTS** — seen only by building it. The dotted
+underline that says "there is more here" was drawn under every "Latest", which
+made the column *busier* than before the notes existed: the mark was shouting
+on the one value nobody needs to read. The note stays on hover; the standing
+mark goes. The check asserts the two directions say DIFFERENT things (§113.8:
+an agreement assertion passes when both sides vanish — here the fault would be
+one note on both) and that the note never restates the glyph. Six failures
+against the pre-§149 build.
+
+## 150 · The reporting controls ride the tab row (v3.59)
+
+The audit proposed pinning the reporting bar; **Islam proposed the better
+thing**: *"if we take the floating bar to be in a box beside the performance
+icon would that look better?"* It does, and it is also the sounder build — the
+tab row is ALREADY pinned chrome, so the box is on screen for the whole report
+with **no new sticky element and none of the arithmetic one needs** (§122.5's
+entire class of fault, avoided by placement rather than by getting a number
+right). On a 41-figure report the tally, Submit and Save draft used to leave
+the screen on the first scroll.
+
+**ONE BUILDER FOR BOTH SIDES** (`repChrome()`): a unit's report and a
+supporting function's built that bar twice, line for line (§53.5). **The
+cycle line moves to the hover** — it is the one fact here nobody acts on —
+while the count stays written, because it says whether the report is finished.
+
+**THE COLOURS ARE ISLAM'S**: Submit wears the Report orange (`--cta`, the fill
+and ink §94.8 declared as a pair) and Save draft *"the same colour but without
+box and lighter font weight"* — one family in two volumes, the act that ends
+the report against the act that parks it. Inside §41's accent budget: drawn
+only while a cycle is open, for somebody who may report.
+
+**IT TRAVELS LIKE `PAGE_TOOLS`**, because the tab row is written BEFORE the
+page renders: the report publishes `REPORT_CHROME` and the shell hangs it on
+the row afterwards, reset in `pageLineReset()` with the other two or a
+report's box would survive onto the next page.
+
+### 140.1 A control is not a tab because of where it sits
+
+**Putting the controls in the row made them subject to the row's wiring.**
+`wire()` bound every `#subtabs button` as a tab, so pressing **Save draft** set
+`currentSub = undefined`, dropped the modes and repainted — from the outside,
+the report closing itself. The row had never held anything but tabs, so the
+selector had never been wrong before. It is `#subtabs button[data-s]` now: a
+tab is the thing carrying the key, not the thing standing in the row. **Found
+by pressing the button** — every assertion short of clicking it passed (§96's
+family, and the reason `report-chrome.py` presses Save draft and Cancel rather
+than looking for them).
+
+## 151 · A wide table scrolls inside its own box (v3.59)
+
+Islam, using the product on his own laptop: *"I'm stuck with the unit tables
+cut and I can't scroll horizontally."* The page never scrolls sideways by
+design (§27.2 — it drags every sticky element with it), so a plan wider than
+its pane was simply **CUT**, with nothing to reach the rest. The audit's item
+08 in the flesh, and the navigation fault (§136) had been hiding it.
+
+**THE BOX SCROLLS, THE PAGE NEVER DOES.** `min-width:0` on the grid child and
+the pane is what lets the box be narrower than the table inside it — a grid
+item's automatic minimum size is its content, so without it the pane grows and
+the cut comes straight back. **Wrapped unconditionally**, whatever the width:
+`overflow-x:auto` changes nothing while the table fits, and the demo's plan
+fits at 1100px where the client's does not — which is exactly how this reached
+production unnoticed. **Done in one place** after the panel is written, not at
+the dozen render sites that build a table, because the day one of them forgot
+would be the day a client's plan is cut again.
+
+**THE NAME COLUMN STAYS PUT** (Islam's pick, the register's own pattern,
+§69.19): scrolling numbers away from the row they belong to is how a scoring
+table becomes unreadable mid-scroll. `background:inherit` with the ROW
+carrying the ground, exactly as the register learned it (§73.2).
+
+### 141.1 A guessed constant between two frozen columns is a slip
+
+It shipped as `left:38px` — the `#` column's declared width — and **the name
+slid 2.5px on every scroll**, because the rendered border box is that width
+plus its borders. §122.5's rule and the register's own note that the second
+frozen column must equal the first one's rendered border box, met a third
+time. The offset is measured after wrapping and published as `--frozen-1` on
+the box, because every row's cell needs the same number and one of them
+deciding it is how two frozen columns come to disagree. Caught by the check
+asserting the name does **not** move — 9 failures against the previous build.
+
+## 152 · The viewer switcher says the name and the place (v3.59)
+
+Islam: *"this needs to be only the name not the full name + the unit name and
+that's all which will make it much smaller"*, and then *"if we make it all
+visible it will be ok"*. It read "Mohamed Essam — Head of the Strategy
+Management Office" against a 150px cap, so the control cut at the em dash and
+**the half that says what you are looking at was the half never shown**.
+
+The register's own two answers, never a third vocabulary (§53.5):
+`knownName()` with `displayNames()` behind it, so a pair whose short names
+collide is lengthened just enough to read apart and nobody is silently dropped
+from a picker by the dedupe (§130.7, §81.1); and `placeLabel(personAt(p))`,
+the navigation's own word for where somebody sits (§93.12). **The job title
+moves to the hover** — the thing you might want, never the thing you scan by
+— and the cap rises to a ceiling that only catches a genuinely long tenant
+name rather than the ordinary case.
+
+## 153 · Hover and focus are measured too (v3.59, closing §16.17)
+
+`scripts/contrast-sweep.py` walks pages and measures controls **at rest**, so
+every `:hover`, `:focus` and `:disabled` colour in the product had never been
+measured — a palette is only as good as its worst reachable state, and the
+moment a hand is on a control is when its label matters most.
+`checks/state-contrast.py` runs **the sweep's own JS, read out of its source**
+(§67 — two copies of a measuring rule drift, and the copy is the one that goes
+stale) against one representative per kind of control while that control is
+genuinely hovered or focused.
+
+**THE FIRST RUN FOUND THREE, ALL IN LIGHT MODE**, and they are recorded rather
+than quietly repainted, because a palette is the client's decision (rule 1c):
+`.dlcar` at **4.34** hovered (§95's `.editbtn:hover` family, found by accident
+then and by measurement now), a `<b>` at **4.45** (§38.5 for the seventh time:
+`--gold-deep` on `--surface-2`, which clears on white and fails on the quiet
+ground), and `.rnum` at **3.26** — the worst, and it is a NUMBER on a page
+about numbers. The BASELINE is named in the file: the suite stays green on
+what is known and goes red the moment a FOURTH appears or one gets worse, and
+**deleting an entry is how a fix is asserted**. §16.15's pattern, which
+recorded 31 failures rather than pretending they were absent.
+
+**AND `qa.py` WENT RED FOR THE RIGHT REASON** (§150): its reporting assertion
+asked for `.rep-bar`, which had moved to the tab row — §51.11's fault caught
+doing its job for once, going red rather than quietly passing. It asks for the
+controls and for the box being in the pinned row now, which is what the move
+was for.
+
+## 154 · A band's colour as type, not as a mark (v3.59)
+
+§153 measured hover and focus for the first time and found three failures, all
+in light mode. Islam approved the repair, and the three turned out to be **one
+fault wearing three faces**: a scoring colour used as TYPE. §38.4 wrote the
+rule — *"a colour that works as a FILL usually fails as TYPE"* — and gave
+every scoring colour a `-tx` twin for exactly this. **Thirty-one places then
+went on painting text with the fill.**
+
+**`bandInk()` IS THE ONE ANSWER**, beside `band()` where anybody reaching for
+one will see the other: it returns `var(--<key>-tx, var(--<key>))`, and **the
+fallback is load-bearing** — the bands are the tenant's (Setup › Scoring
+bands), so a key with no twin is possible and then paints exactly what it
+paints today rather than nothing. Applied at 30 call sites; the one remaining
+`var(--` + band + `)` is a gauge's FILL and correctly left alone.
+
+**THE OTHER TWO WERE THE SAME MOVE BY HAND**: `.fstrip-sum b` took `--good` as
+text on `--surface-2` (4.45 → 6.45 with the twin), and `.editbtn:hover` put
+`--gold-deep` on the `--attn-bg` wash (4.34 → 5.36 with that wash's own text
+twin). **The ink moves with the ground**, which is the general form of all
+three.
+
+### 144.1 A blanket colour rule is a class name in disguise
+
+The caret fix shipped first as `summary:hover .dlcar { color:var(--ink-2) }`
+and **made it worse — 4.34 → 1.43** — because there are three carets on three
+grounds: one on white, one on the `--attn-bg` wash, and **one on the navy
+chrome**, where a dark ink is nearly invisible. §65.9's rule ("a class name is
+one global namespace") in colour form: the selector was right about the mark
+and wrong about the room it was in. Reverted, and fixed at the control that
+actually failed — where the label and the caret now move together, because
+the caret was only ever inheriting the button's problem.
+
+**MEASURED, NOT REASONED**: the first arithmetic said 4.81 and passed, because
+it used a wash from the wrong palette block — the shipped one is `#F7EFD6`,
+not `#FFFBEB`. Reading the tokens off the running page is what produced 4.34
+and then 5.36.
+
+**AND THE BASELINE IS EMPTY NOW.** §153 recorded the three so the suite could
+stay green on what was known; the entries are gone and `BASELINE = set()`
+stays as the promise that nothing is deliberately accepted. The check named
+the fixes itself, run by run — *"fixed since the baseline was written — remove
+from BASELINE"* — which is what makes deleting an entry the assertion that
+holds a repair.
+
+## 155 · Four visual refinements (v3.59)
+
+Wave 3 of the audit. Islam approved four of five; the fifth he redirected
+(§156). None of these repairs a fault — each makes a screen read better.
+
+**THE GROUP LANDING ANSWERS "WHERE DO I LOOK NEXT".** The first screen of
+every session said how the group was doing in three cards and then stopped,
+with 330px of empty page and the units one click away on another section. It
+answered *how are we doing* and never the question a chief executive opens
+this page with. `whereNext()` draws one entry per business unit, **worst
+first**, each with its own score in its band's TEXT twin (§154).
+
+**NOTHING NEW IS COMPUTED** — `unitObjectives(u)` is the same figure the
+Business units section draws in its gauges, so the summary cannot disagree
+with the detail it summarises (§53.5), and the check asserts exactly that
+entry by entry rather than asserting a number.
+
+**THE CAPTION'S NOUN SHOUTS AND ITS EXPLANATION SPEAKS.** "KEY MEASURES — AS
+PLANNED: THIS YEAR'S TARGET, AND HOW IT COMPILES" set a whole clause in italic
+capitals with letter-spacing: three emphases at once on the hardest form to
+read at length. The label keeps all three, because labels are scanned; the
+clause becomes ordinary text, because sentences are read.
+
+**BRANDING STOPS SHOWING A COLOUR THE PRODUCT NEVER PAINTS.** The pickers
+opened on `#4F46E5`, an indigo that exists nowhere in SMP, so an unbranded
+tenant met two indigo swatches on the one page that defines colour.
+`brandNow()` reads the LIVE token rather than repeating a literal (§25), so it
+cannot go stale the day a palette moves.
+
+**AND THE REGISTER STOPS SAYING THE NAME TWICE.** §93.8's two columns are both
+right and both stay; what changes is the DEFAULT. Until somebody types a short
+name the two are identical — 33 rows of 33 today — which spends the frozen
+column, the one a wide table never scrolls away, on saying the same thing
+twice. One tick in Columns brings it back and a saved choice still wins
+(§30.2), so nobody who has ever opened the chooser is affected.
+
+### 145.1 A control is not navigable because it looks it
+
+The strip's entries first carried `data-u` — the attribute the destination row
+uses — and **went nowhere when pressed**: that loop is
+`document.querySelectorAll("#units [data-u]")`, scoped to the chrome. The
+platform already had the right attribute: `[data-go]` is wired document-wide
+and lands on the unit's Performance page, which is where somebody following a
+low score is going anyway. **§150.1 twice in one session**, and found the same
+way — by pressing the thing, not by reading it.
+
+### 145.2 An assertion can force a design to be wrong
+
+The check first asserted the caption's explainer "reads quieter" by comparing
+COLOUR — and the noun is already the page's quietest ink, so satisfying it
+would have meant an explanation fainter than anything else on the page
+(§38.5's trap from the other side). The two differ in FORM, not in colour:
+one is a label (upper, bold, spaced), the other a sentence. The assertion was
+corrected rather than the design bent to fit it.
+
+Proved able to fail: 12 failures against the pre-§155 build. Full sweep: 33
+viewers, no errors.
+
+## 156 · The line under a number says what the number is (v3.59)
+
+Islam, shown Wave 3's chip proposal, looked past it at the real fault:
+*"the description under the business units performance is confusing either we
+simplify it or remove it and same for the execution it's 104% while the
+description is saying something else and same for the group key objectives
+description."*
+
+**THREE CARDS, THREE DIFFERENT KINDS OF SENTENCE, AND NONE OF THEM SAID WHAT
+ITS NUMBER MEANT.** One was a data-quality note ("All 6 objectives have a
+target set"), one was a derivation that grows with the business (ten unit
+weights, "21 / 14 / 10 / 15 / 8 / 6 / 6 / 7 / 8 / 5"), and one was the same
+fact restated as three more numbers — "Delivered 50% against 48% planned —
+variance +2" under a headline of **104%**, which asks the reader to divide one
+by the other to discover the two agree.
+
+**THE RULE THAT SETTLES ALL THREE**: every card already carries *"How this is
+calculated →"*, which opens the full derivation. So the line under the number
+says **what the number is**, and the arithmetic stays one click away where it
+belongs. The three cards also end up the same height, which they never were.
+
+**THE RATIO IS READ OUT IN WORDS** — `deliveryLine()` prints *ahead of plan* /
+*behind plan* / *exactly on plan*, which is what 104% MEANS. **One function,
+because the group's card and a company's carried the sentence twice** (§53.5)
+and would otherwise explain the same ratio differently; the empty case keeps
+its own words, since "0% delivered against 0% planned" under *Not yet
+measurable* is three false precisions in a row.
+
+**AND THE CHECK ASSERTS THE AGREEMENT, NEVER THE WORDING** (§94.8): the verdict
+must match the card's own figure, whatever that figure is on the day — so a
+tenant whose delivery falls below plan cannot end up reading "ahead of plan",
+and rewording the sentence later keeps the check green.
+
+**THE DELTA BELONGS TO ITS NUMBER.** "▲ 3" was glued to the TITLE by the
+caller, so it sat among the labels, four words from the figure it qualifies,
+and pushed the heading onto two lines. `drillCard` takes it as an option and
+renders it inside `.big` — **which is what the unit's own cards have always
+done** (§53.5 again: the group's card catching up, not a new idea). Its hover
+says what it is measured against.
+
+**AND "primary" STOPS WEARING THE ACCENT**: a footnote to a title, in gold,
+beside a status pill on the same line — two chips competing on one row, and a
+spend against §41's budget for a word that ranks two readings. The page's own
+neutrals; the word unchanged.
+
+Proved able to fail: 4 failures against the pre-§156 build. Wave 1–3 suite and
+the full sweep (33 viewers) green.
+
+---
+
+## 157 · Two faces, and the comparison closes (v3.59)
+
+Islam: *"let's make the 2 fonts available are the sytem font and the source
+san3."*
+
+**§38.7 WAS AN OPEN COMPARISON AND IT IS NOW ANSWERED.** That section embedded
+four faces so they could be judged *in the real product* rather than on a
+specimen sheet — its own note said the axis "collapses into the palette once
+each has a face" — and the judging is done. Inter, Manrope and IBM Plex Sans
+leave: their woff2 files are deleted, their `@font-face` blocks and their
+`:root[data-font=…]` rules go with them (§24 — a rule for a face the product no
+longer carries is worse than no rule, because nothing tells the next reader it
+is dead), and the switch offers **System** and **Source Sans**.
+
+**THE SAVING IS REAL AND IT IS THE SECOND REASON, NOT THE FIRST.** The built
+file goes **2,690,171 → 2,531,861 bytes** (2.69 MB → 2.46 MB): 116 KB of face
+plus its base64 overhead, carried in every handover, every email of the single
+file, every memory stick. The first reason is that a choice with three options
+nobody picked is a choice that costs a reader time.
+
+**THE THREE PLACES MUST AGREE, AND THE LIST IS ALSO THE SANITISER.** A face
+lives in `fonts/`, in `FACES` in `build.py` (which inlines it as a `data:` URI)
+and in `FONTS` in `theme.js` — and `chosenFont()` validates a remembered value
+against that same array, so **removing a face from the list is what makes a
+browser holding `manrope` fall back cleanly** rather than being stranded with
+an attribute no stylesheet answers (§30.2's shape, from the other side). That
+is asserted: a stored `manrope` lands on the system stack with the switch
+still working.
+
+**AN EMBEDDED FACE IS STILL LOADED LAZILY, AND THE CHECK REPORTED A CORRECT
+BUILD BROKEN.** A `data:` URI removes the network and **not the asynchrony**:
+the face sits `unloaded` until something asks for it, `font-display:swap`
+paints the fallback meanwhile, and a width measured in the same frame as the
+attribute is set is therefore the SYSTEM stack's width *under the right family
+name* — 279.95 and 279.95, `font-family` correctly resolved to `"Source Sans
+3", …`, and a working product called broken. `await document.fonts.load()`
+first (227.91 against 279.95), and the decode is asserted as **its own fact**,
+or a face that genuinely never decodes would leave two equal widths and no
+explanation of which of the two things went wrong. §68.10's class, on a
+different instrument: *a correct build reported broken is the same fault as a
+broken build reported clean, and the first instinct — to go and change the
+build's font handling — would have damaged a working embed.*
+
+**AND ONE ASSERTION COULD NOT FAIL WHEN IT WAS WRITTEN** (§94.5): the loop
+derived the attribute key from the family name, and `"IBM Plex Sans".split()[0]`
+is `ibm` while the selector has always been `[data-font="plex"]` — so it looked
+for a string the product never held and passed on the very build it was written
+to reject. The pair is written out.
+
+Proved able to fail: **11 failures** against the pre-§157 build. Wave 1–3
+suite, `save-flush`, `state-contrast` and the full sweep green.
+
+---
+
+## 158 · The plan tables fit the pane they are in (v3.59)
+
+Islam, from the audit's wave 4: the plan tables were being cut off down the
+right-hand side on a smaller window — the last column sliced vertically, the
+heading reading *COMPILE* and the values *Lates*.
+
+**IT IS A FLOOR, AND A FLOOR CANNOT YIELD.** `table { min-width:620px }` stops a
+data table squashing into unreadable columns and is the right default. But a
+unit's plan pane narrows with the window, and once the pane is under 620 the
+table holds its minimum while the pane keeps shrinking, so the last column is
+cut by the pane's edge. Measured on the demo tenant: the pane is **585px at a
+900px window** and the table stays at **exactly 620**, overflowing 35px, then
+75 at 860 and 105 at 830. **§109 wrote this same global rule down from the
+other side** — it made a small front-matter table overflow its own grid track
+by 300px. A rule that is a good default in both directions still has two edges.
+
+**BAND, NOT SLOPE.** It only happens between about **820 and 960px**: above
+that the table fits beside the rail, and below 820 the split stacks and the
+pane is full-width again. That is why walking the product at 1440 and at 768
+finds nothing, and why it survived every sweep the suite has.
+
+**TWO WRONG FIXES WERE DRAWN FIRST, AND EACH TAUGHT SOMETHING.** The obvious
+reading is *the columns need less room*, so the first attempt tightened the
+cell padding — 13px to 7px — and the columns **did** narrow while
+`scrollWidth` stayed at 620 to the pixel, because the flexible Measure column
+absorbed every pixel saved. *Anything that does not move the floor moves
+nothing.* The second attempt was **§108.5's pair** — a scroll shadow and a
+visible track — which is the right answer to *this box scrolls and does not
+say so* and the wrong answer here: the box only scrolls BECAUSE of the floor,
+and a table that fits needs no sign that it continues. It also could not be
+demonstrated: headless Chromium paints no scrollbar (`offsetHeight -
+clientHeight` is 0 either way), and on an iPad — the audience this is for —
+the native track is an overlay that vanishes. **The affordance would have been
+furniture over a fault.**
+
+**§53.5 EARNED ITS KEEP WITHIN A MINUTE.** With the floor gone a unit's Plan
+fits at every width in the band and a supporting **function's** Projects pane
+still ran **11px over at 860 and 41px at 830** — its deliverables table carries
+five columns to the unit's, so what is left once `min-width` yields is the
+columns' own **intrinsic** minimum. Padding could not touch the floor and is
+exactly what moves an intrinsic minimum: **13px → 8px a side** closes it to
+zero at every width **with no column heading pushed onto a second line**, which
+is the failure mode to watch and is asserted rather than assumed. Islam signed
+off *"the columns simply sit a little closer together"*; this is that, and it
+is off again above 1000px.
+
+**`:not(.setuppane)` IS LOAD-BEARING AND WAS FOUND BY THE CHECK, NOT BY
+READING.** Setup's pane is `<div class="pane setuppane">`, so the obvious
+`.pane table` silently took the floor off every Setup table too — and Setup's
+tables are governed by §88's one-line clip and §122.5's capped, deliberately
+scrolling pane. Widening this to Setup would have traded a sliced plan for a
+squashed register, which is the worse of the two.
+
+**AND THE OBVIOUS "BOTH ENDS" ASSERTION COULD NOT FAIL.** It was written —
+*Setup's table keeps its 760px floor* — it went red, and **the fix was the
+check**: `group-extra.css:296` declares `.cfg table { min-width:760px }` and
+**line 528 re-declares `.cfg table { min-width:0 }` unscoped and later**, so
+every Setup table has computed 0 for a long time and the 760 is dead code.
+The **fifth** duplicated rule this project has recorded (§29.2, §51.5, §53.6,
+§88, §93.11) — and, as §93.11 prescribes, found by asking
+`document.styleSheets` what the browser actually holds rather than reading the
+cascade. Measuring that value passes whether or not the exclusion is present,
+which is §113.8's blind spot exactly, so the reach is asserted where it can
+still be falsified: **on the selector the browser holds**. The dead 760 is
+recorded below rather than fixed in passing (rule 1b).
+
+`src/checks/table-fit.py` asserts the promise and not the implementation
+(§94.8): in the band, **nothing overflows** — never *and it has a scrollbar* —
+no heading takes a second line, on **both sides of the switch**, with the
+620 floor and the 13px padding still in force on a wide window (§94.2). Proved
+able to fail: **7 failures** against the pre-§158 build, on both sides at all
+three band widths.
+
+### Recorded, not fixed (§158.1)
+
+- **`.cfg table`'s 760px floor is dead code.** `group-extra.css:296` sets it;
+  line 528 sets `min-width:0` on the same selector, unscoped and later. One of
+  the two is wrong and which one is a decision about how Setup's tables should
+  behave, not a tidy-up to make while looking at the plan pane.
+- **`checks/no-wrap.py` reports 5 failures**, identically on this build and the
+  one before it — the register's table 544px past a box that does not scroll,
+  and the access matrix clipped with no hover. Pre-existing; a true signal, and
+  its own item.
+
+
+## §159 · The welcome screen's way out (v3.59)
+
+Islam, using the screen §148 shipped: *"in the welcome screen. continue to the
+unit or the function button is a bit not obvious. can you give me variations
+for it's design or placement"* — and, from five drawn in the real screen,
+**B**.
+
+**THE FAULT IS THREE THINGS, AND WEIGHT ALONE FIXES ONE.** It is the **only**
+way out — there is no ×, no Escape and no click-outside, so every other
+control on that screen goes somewhere and stays while this one link is the
+entire exit. It was the **quietest thing on the screen**: 13px `--stone` text
+against 15px bold row titles, three bordered buttons and one solid `--cta`.
+And it sat **inside the left column**, so its scope read as the end of
+*Waiting on you* rather than the way past the screen. Measured rather than
+asserted: at 1280px the link's box begins **585px into the columns and 165px
+above their bottom**, and **below 960px it is not even last** — the columns
+stack, so at 900px the screen is 949px tall with **411px of side column after
+the way out**. A person looking for the exit at the foot of the screen finds
+*Your pages* and the intro round.
+
+**ONE BAR ACROSS BOTH COLUMNS ANSWERS ALL THREE.** `.wexit` is a real
+`<button>` inside `.wwrap` and **after `.wcols`**, so it spans the grid, its
+scope is the screen, and it is last at every width including the stacked
+layout. It wears the wide-row shape `.wpages` already uses rather than a
+second vocabulary for *a row you press to go somewhere* (§53.5), and it spends
+none of §41's accent.
+
+**THE EMPTY CASE TAKES THE FILL, AND THAT CLOSES A DRIFT.** §148's approved
+mockup says in its own notes that with nothing waiting the screen reads
+*Nothing is waiting on you* **with Continue as the loud control** — and the
+build never did it, so an empty welcome offered a grey link and nothing else
+(§45.2's empty hand, and §61's dead end). `.wexit.wloud` is **its own class,
+never `.wcta`**: that one means *an action row shouts*, and the exit is not an
+action row — which is also why `checks/welcome.py` §6 can go on asserting that
+no action row wears the fill while asserting separately that the exit does.
+**A row arriving late gives the fill back**: the office's inbox count and the
+chat's unread land after the screen is built, so `unEmpty()` — already the one
+place that removes the empty line — removes `wloud` in the same breath, or the
+budget is spent twice on a screen that is no longer empty.
+
+**THE GREY SUB-LINE IN THE DRAWING IS DELIBERATELY NOT BUILT.** The mockup's
+bar carried *Strategy · Plan* under the name. The label already names the
+destination (§1b-ii: a heading names the thing), and deriving the second line
+means reading the navigation's own words back off `[aria-selected]` — the
+reader §99 **deleted** — with the badge and `.vh` traps §145 records. Recorded
+here rather than dropped silently; it is a small addition if it is wanted.
+
+**Contrast, all four palettes** (§38.5, and the chevron is `--gold-deep`,
+which is the token that keeps failing): label **12.77 / 10.35 / 6.33 / 6.64**,
+chevron **4.99 / 7.90 / 6.81 / 8.54**, and the promoted bar's ink on `--cta`
+**5.54 / 5.18 / 7.37 / 8.32**. The chevron sits on `--surface` and never
+`--surface-2`, where `--gold-deep` measures 4.45.
+
+`checks/welcome.py` §3 asserts the **relationship and not a pixel** (§94.8):
+outside `.wcols`, last in the wrap, a `<button>`, spanning the columns to
+within 1px and sitting below them — so a later change to the gutters stays
+green and a control put back inside the column does not. **Both ends** on the
+fill: not loud with rows waiting (§3), loud with none (§6), and **painted
+rather than merely classed**, or a build that dropped the CSS would pass on
+the class alone (§113.8). Proved able to fail: **7 failures** against the
+pre-§159 build, which is exactly the seven new assertions.
+
+### Recorded, not fixed (§159.1)
+
+- **Escape still does not close the overlay**, and neither does clicking
+  outside it. Offered with the variations and not taken up; it is one line
+  and no design, and it stays a separate ask rather than riding along
+  unasked (rule 1b).

@@ -216,28 +216,6 @@ def main():
         ctx, pg = fresh(browser, port)
         word = pg.inner_text("[data-wcontinue]")
         ck("Continue names the landing place", "Mobile" in word, word)
-        # §159 · THE WAY OUT IS THE SCREEN'S, NOT THE LIST'S. Asserted as the
-        # RELATIONSHIP (§94.8): outside the grid, last in the wrap, and as wide
-        # as the two columns together — never a pixel count, so a later change
-        # to the gutters stays green and a control put back inside the column
-        # does not.
-        geo = pg.evaluate("""(function(){
-          var b=document.querySelector('[data-wcontinue]'),
-              w=document.querySelector('.welcomeover .wwrap'),
-              c=document.querySelector('.welcomeover .wcols');
-          if(!b||!w||!c) return null;
-          var rb=b.getBoundingClientRect(), rc=c.getBoundingClientRect();
-          return {inCols:!!b.closest('.wcols'), parent:b.parentElement.className,
-                  last:w.lastElementChild===b, tag:b.tagName,
-                  dl:Math.round(rb.left-rc.left), dr:Math.round(rb.right-rc.right),
-                  below:Math.round(rb.top-rc.bottom)};})()""")
-        ck("the way out is a real button", geo and geo["tag"] == "BUTTON", geo)
-        ck("…outside the list's column", geo and not geo["inCols"], geo)
-        ck("…and the last thing in the screen", geo and geo["last"], geo)
-        ck("…spanning both columns", geo and abs(geo["dl"]) <= 1 and abs(geo["dr"]) <= 1, geo)
-        ck("…and sitting below them", geo and geo["below"] > 0, geo)
-        ck("with rows waiting it does NOT wear the fill (§41)",
-           pg.locator("[data-wcontinue].wloud").count() == 0)
         pg.click("[data-wcontinue]")
         pg.wait_for_selector(".welcomeover", state="detached", timeout=5000)
         ck("…and the platform under it is on that place",
@@ -295,18 +273,7 @@ def main():
         ck("the empty list says nothing is waiting",
            "Nothing is waiting on you" in pg.inner_text(".wacts"),
            pg.inner_text(".wacts")[:200])
-        ck("…and no action row wears the fill",
-           pg.locator(".welcomeover .wcta").count() == 0)
-        # §159 · and with no other act on the screen the exit is the loud one,
-        # which is what the approved round said and the first build did not do.
-        # BOTH ENDS, or a build that promoted it always would pass here and
-        # fail nothing (the "not loud" half is asserted in §3).
-        ck("…so the way out is the loud control instead",
-           pg.locator("[data-wcontinue].wloud").count() == 1)
-        fill = pg.evaluate("getComputedStyle(document.querySelector('[data-wcontinue]'))"
-                           ".backgroundColor")
-        ck("…and it is actually painted, not merely classed",
-           fill not in ("rgba(0, 0, 0, 0)", "rgb(255, 255, 255)"), fill)
+        ck("…and offers no solid CTA", pg.locator(".welcomeover .wcta").count() == 0)
         ctx.close()
 
         # ── 7 · THE ABSENCES (§94.2) ───────────────────────────────────────

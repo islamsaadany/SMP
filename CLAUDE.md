@@ -121,6 +121,27 @@ A drift between specs and code is a documentation bug — report it before silen
   the client for enforcement. (SMP's current access gate is a client-side placeholder and is
   explicitly NOT real security — it must move server-side before SMP holds anything sensitive.)
 
+#### A FLOOR CANNOT YIELD, AND THAT IS THE WHOLE FAULT (§158)
+- `table { min-width:620px }` stops a data table squashing and is the right
+  default. It is also a FLOOR: a pane that narrows past it does not shrink the
+  table, it **cuts** it — 585px of pane against 620px of table at a 900px
+  window, so the last column is sliced and the heading reads *COMPILE*.
+  **§109 recorded the same global rule from the other side** (a small table
+  overflowing its grid track by 300px): a good default in both directions
+  still has two edges.
+- **Anything that does not move the floor moves nothing.** Tightening cell
+  padding narrowed the columns and left `scrollWidth` at 620 to the pixel,
+  because the flexible column absorbs every pixel saved. Padding is what moves
+  an **intrinsic** minimum, which is the different fault underneath — and both
+  were present, one per side of the switch (§53.5).
+- **An affordance is not a fix when the box only scrolls because of a bug.**
+  §108.5's scroll shadow and visible track answer *this box scrolls and does
+  not say so*; here the answer was for it not to scroll. It could not even be
+  demonstrated: headless paints no scrollbar, and on an iPad the native one is
+  an overlay that vanishes.
+- **`.pane` INCLUDES SETUP** — `<div class="pane setuppane">` — so scope any
+  pane rule with `:not(.setuppane)` or it reaches the register.
+
 #### A pinned header's ground filler paints when it is NOT pinned too (§53.7)
 - `.pane > .pband::before` and `.split .rail::before` fill the gap between the
   chrome and the pinned pair with `--ground`. **CSS cannot ask whether a sticky
@@ -785,6 +806,30 @@ console errors (in this cloud environment, run it via a wrapper that points Play
   outranks the tab rule, §53.5); the check asserts the PAINT — same
   computed ground as the corner's AND a real colour, or both vanishing
   passes (§113.8).
+- **THE ONLY WAY OUT MAY NOT BE THE QUIETEST THING ON THE SCREEN (§159):**
+  the welcome screen's *Continue to Mobile* was a 13px `--stone` link at the
+  foot of the LEFT COLUMN, and there is no ×, no Escape and no click-outside —
+  so every other control on that screen goes somewhere and stays while one
+  link carried the whole exit. **Three faults, and weight fixes one:** it was
+  the quietest thing among three bordered buttons and a solid fill; its scope
+  read as the end of *Waiting on you* rather than the way past the screen; and
+  **below 960px it was not even last** — the columns stack, so at 900px the
+  screen is 949px tall with **411px of side column after the way out**.
+  `.wexit` is one bar **after `.wcols` inside `.wwrap`**, so it spans the grid
+  and is last at every width, wearing `.wpages`' wide-row shape rather than a
+  second vocabulary for *a row you press to go somewhere* (§53.5).
+  **THE EMPTY CASE TAKES THE FILL AND THAT CLOSES A DRIFT** — §148's approved
+  mockup said Continue is the loud control when nothing is waiting and the
+  build never did it (§45.2, §61) — in **its own class `.wloud`, never
+  `.wcta`**, which means *an action row shouts*; that separation is what lets
+  the check assert no action row wears the fill AND that the exit does. **A
+  row arriving late gives it back**: the inbox count and the chat's unread
+  land after the screen is built, so `unEmpty()` — already the one place that
+  removes the empty line — drops `wloud` in the same breath. The drawing's
+  grey *Strategy · Plan* sub-line is **deliberately not built**: the label
+  names the destination (1b-ii) and the second line needs the navigation-word
+  reader §99 deleted. **Escape still does not close it** (§159.1) — offered
+  with the variations, not taken up, and not slipped in unasked.
 - **THE OWN COLUMNS ARE TWO QUESTIONS, AND §94'S LOCK IS A DEFAULT NOW (§117,
   partially reversing §94 at Islam's direction):** each own column on Roles &
   access splits into **Strategy** (the words as agreed — `a_unit_own_strat` /
@@ -2538,11 +2583,16 @@ python3 checks/project-custodian.py # a custodian per project (§147): the Proje
                                 # nothing, and a milestone owner is a Contributor who
                                 # reports nothing until the row is opened — both ends,
                                 # three viewers, proved able to fail
+python3 checks/table-fit.py     # the plan tables FIT the pane at every width — never
+                                # "and it scrolls" — on a unit AND a function, with the
+                                # 620 floor still in force on a wide window (§158)
 python3 checks/office-chat.py   # the chat's client half — serves the built file over HTTP,
                                 # because the whole feature is invisible over file:// (§97.9)
 python3 checks/welcome.py       # the welcome screen (§148): three viewers over HTTP, every
                                 # row asserted against the function its destination page
                                 # calls, every door pressed and read back, and the absences
+                                # — and since §159 the way OUT: outside the list's column,
+                                # last in the wrap, spanning both, and the fill at both ends
 python3 checks/setup-rail.py    # the Setup rail fits the window, every entry is reachable
                                 # by scrolling the LIST, and the cap does not move --chrome-h
                                 # (§101.5 — that last one is what licenses the cap at all)
@@ -2608,7 +2658,58 @@ prior sessions (on HR_ERP) accidentally reverted agreed-upon designs.
 
 ---
 
-*Last Updated: 2026-08-28 &mdash; **v3.58: the welcome screen (&sect;148,
+*Last Updated: 2026-08-29 &mdash; **v3.59: the welcome screen's way out
+(&sect;159)**. Islam, using what &sect;148 shipped: *"continue to the unit or
+the function button is a bit not obvious."* Five variations drawn in the real
+screen and he chose **B**, one bar across both columns. **The fault was three
+things and weight fixes one** &mdash; it is the ONLY exit (no &times;, no
+Escape, no click-outside), it was the quietest thing on a screen holding three
+bordered buttons and a solid fill, and it sat INSIDE the left column, so its
+scope read as the end of the list. **Measured, not asserted**: the link began
+585px into the columns and 165px above their bottom, and **below 960px it was
+not even last** &mdash; at 900px the screen is 949px tall with 411px of side
+column after the way out, so somebody looking for the exit at the foot finds
+*Your pages* and the intro round. **The empty case closes a drift**:
+&sect;148's own approved mockup said Continue becomes the loud control when
+nothing is waiting and the build never did it, so an empty welcome offered a
+grey link and nothing else &mdash; and the promotion is its own class, because
+`.wcta` means *an action row shouts* and this is not one. **The drawing's grey
+sub-line is deliberately not built** and **Escape is deliberately still not
+wired**, both recorded rather than slipped in. Proved able to fail: **7
+failures** against the pre-&sect;159 build, exactly the seven new assertions;
+full `qa.py` green.*
+
+*Earlier: 2026-08-28 &mdash; **v3.59: the UI/UX audit, waves 2&ndash;4
+(&sect;149&ndash;&sect;158)**. Islam: *"I need a refinement plan for the whole
+platform."* Twenty items audited, and what shipped is smaller than the audit
+predicted because measuring kept dissolving items. **The last of them
+(&sect;158) is the one worth reading**: the plan tables were cut off down the
+right on a smaller window, and the cause was that
+`table { min-width:620px }` is a FLOOR &mdash; the pane narrows past it and the
+table does not shrink, it gets sliced (585px of pane against 620px of table at
+900px). **Two wrong fixes were drawn first**: tightening cell padding narrowed
+the columns and left `scrollWidth` at 620 to the pixel, because the flexible
+column absorbs every pixel saved; and &sect;108.5's scroll shadow was an
+affordance over a fault, undemonstrable anyway (headless paints no scrollbar,
+and an iPad's is an overlay that vanishes). **&sect;53.5 paid within a minute**
+&mdash; with the floor gone a unit's Plan fitted and a supporting FUNCTION's
+Projects pane still ran 41px over, a different fault (five columns, intrinsic
+minimum) needing the padding after all. **`:not(.setuppane)` was found by the
+check**: Setup's pane is also `.pane`, so the obvious selector would have
+squashed the register to fix the plan. **And the obvious both-ends assertion
+could not fail** &mdash; `.cfg table`'s 760px floor is dead code, re-declared
+as 0 later in the same file (the fifth duplicated rule this project has
+recorded), so the reach is asserted on the SELECTOR the browser holds.
+Also in the wave: the destination row scrolls instead of breaking below 1100px,
+a failed render says so on the page, the last 800ms survive leaving the page,
+the reporting controls ride the tab row, hover and focus are measured at last
+(three contrast repairs), two typefaces instead of five, and the group cards'
+sentences agree with their numbers. **Nothing else broke between 1440 and
+768** &mdash; five pages, seven widths, both themes &mdash; and my own probe
+cried wolf twice before that could be said, measuring the CENTRE of a control
+half-scrolled under a clip.*
+
+*Earlier: 2026-08-28 &mdash; **v3.58: the welcome screen (&sect;148,
 spec 025)**. Islam: *"let's work on a Welcome screen for the user with what
 needs to be done with good design and name of company and smo and overview of
 his list of actions and info to work on or take an intro round."* Settled over

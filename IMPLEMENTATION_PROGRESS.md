@@ -64,6 +64,166 @@ Nothing proceeds past this line without an answer.
 
 ## Built and verified
 
+*The five v3.59 entries below are the UI/UX audit's waves 2 and 3, built and
+checked as separate rounds on one branch and shipping as one version — main
+took v3.52–v3.57 from four other sessions while they were being built.*
+
+### v3.59 — the welcome screen's way out (§159)
+
+- Islam, on §148's screen: *"continue to the unit or the function button is a
+  bit not obvious"* — five variations drawn in the real screen, and he chose
+  **B**, one bar across both columns.
+- **Three faults, and weight fixes one.** It is the *only* exit (no ×, no
+  Escape, no click-outside); it was the quietest thing on the screen; and it
+  sat inside the left column, so it read as the end of the list. Measured: the
+  link began 585px into the columns and 165px above their bottom, and **below
+  960px it was not even last** — at 900px, 411px of side column came after the
+  way out.
+- **The bar spans the grid**, sits after `.wcols` inside `.wwrap`, and is last
+  at every width. It wears `.wpages`' wide-row shape rather than a second
+  vocabulary (§53.5) and spends none of §41's accent.
+- **The empty case closes a drift**: §148's approved mockup said Continue is
+  the loud control when nothing is waiting and the build never did it, so an
+  empty welcome was a grey link and nothing else. `.wexit.wloud` is its own
+  class, and a row arriving late gives the fill back through `unEmpty()`.
+- **The drawing's grey *Strategy · Plan* sub-line is not built** — the label
+  already names the destination (1b-ii), and the second line needs the
+  navigation-word reader §99 deleted. Recorded, not dropped silently.
+- `checks/welcome.py` — 7 failures on the pre-§159 build, exactly the seven
+  new assertions. Contrast measured in all four palettes (lowest 4.99).
+  **Escape and click-outside still do not close the overlay** — offered with
+  the variations, not taken up, and left as its own ask. **Not merged —
+  awaiting Islam.**
+
+### v3.59 — the plan tables fit the pane (§158)
+
+- Islam, wave 4: on a smaller window the plan tables were cut off down the
+  right — the last column sliced, the heading reading *COMPILE*.
+- **A floor cannot yield.** `table { min-width:620px }` is the right default
+  and the pane narrows past it: at a 900px window the pane is 585 and the
+  table stays at exactly 620. Only between ~820 and 960 — above it fits,
+  below 820 the split stacks — which is why 1440 and 768 both look clean.
+- **Two wrong fixes were drawn first.** Tightening cell padding narrowed the
+  columns and left `scrollWidth` at 620 to the pixel (the flexible column
+  absorbs it); §108.5's scroll shadow and track was an affordance over a
+  fault, and could not even be demonstrated — headless paints no scrollbar,
+  and on an iPad the native one is an overlay that vanishes.
+- **§53.5 paid within a minute**: with the floor gone the unit fits and a
+  supporting function still ran 11px over at 860 and 41px at 830 (five columns,
+  intrinsic minimum). 13px → 8px of cell padding closes it with no heading
+  taking a second line.
+- **`:not(.setuppane)` was found by the check** — Setup's pane is also `.pane`,
+  so the obvious selector stripped the register's floor too.
+- **And the obvious both-ends assertion could not fail**: `.cfg table`'s 760px
+  floor is dead code, re-declared as 0 later in the same file (the fifth
+  duplicate this project has recorded). Asserted on the selector instead.
+- `checks/table-fit.py` — 7 failures on the pre-§158 build. Whole suite and
+  the 33-viewer sweep green. **Not merged — awaiting Islam.**
+
+### v3.59 — two faces (§157)
+
+- Islam: *"let's make the 2 fonts available are the sytem font and the source
+  san3."* §38.7 carried four faces so they could be judged in the real product
+  rather than on a specimen sheet; the judging is done. Inter, Manrope and IBM
+  Plex Sans leave — files, `@font-face` blocks and `[data-font]` rules together
+  (§24) — and the switch offers **System** and **Source Sans**.
+- The built file goes **2,690,171 → 2,531,861 bytes** (2.69 → 2.46 MB), which
+  is 116 KB of face in every handover of the single file.
+- A face lives in three places that must agree — `fonts/`, `FACES` in
+  `build.py`, `FONTS` in `theme.js` — and `FONTS` is also the sanitiser, which
+  is what makes a browser remembering `manrope` fall back to the system stack
+  with the switch still working rather than being stranded.
+- **The check reported a correct build broken first.** A `data:` URI removes
+  the network and not the asynchrony: the face is `unloaded` until asked for,
+  so a width measured in the same frame as the attribute is the system stack's
+  width under the right family name (279.95 = 279.95). `await
+  document.fonts.load()` first (227.91 vs 279.95), with the decode asserted as
+  its own fact.
+- **And one assertion could not fail when written** (§94.5): it derived the
+  attribute key from the family name, and `"IBM Plex Sans".split()[0]` is
+  `ibm` where the selector has always been `plex`.
+- `checks/typeface.py` — 11 failures on the pre-§157 build. Wave 1–3 suite,
+  `save-flush`, `state-contrast` and the 33-viewer sweep green.
+  **Not merged — awaiting Islam.**
+
+### v3.59 — the card sentences and the delta (§156)
+
+- Islam's redirect of Wave 3's item 2: the three group cards each carried a
+  different kind of sentence and none said what its number meant — a data
+  note, ten unit weights, and "variance +2" under a headline of 104%.
+- Each now says what the number IS, with the arithmetic left to "How this is
+  calculated →". `deliveryLine()` reads the ratio out in words — **ahead of
+  plan / behind plan / exactly on plan** — one function for the group's card
+  and a company's, and the check asserts the verdict AGREES with the figure
+  rather than asserting the wording.
+- The ▲ delta moves from the title into the number (where a unit's own cards
+  have always put it); "primary" drops from gold to the page's neutrals.
+- 4 failures on the pre-§156 build; whole suite and 33-viewer sweep green.
+  **Not merged — awaiting Islam.**
+
+
+### v3.59 — Wave 3: four visual refinements (§155)
+
+- **The group landing answers "where do I look next"** — one entry per unit,
+  worst first, each linking to it; the same figures the Business units section
+  already shows, asserted equal entry by entry.
+- **Caption explainers stop shouting**; **Branding's pickers open on the colour
+  the platform actually paints** (read live, never a literal); **Full Name
+  leaves the register's default columns** and stays one tick away.
+- **§155.1**: the strip's entries first carried `data-u` and went nowhere —
+  that wiring is scoped to the chrome. `data-go` is the platform's own
+  document-wide attribute. Found by pressing, §150.1 twice in one session.
+- **§155.2**: an assertion nearly forced a wrong design — "quieter" measured
+  as colour would have made the explanation fainter than the quietest ink.
+  Corrected the check, not the design.
+- `checks/wave3.py` — 12 failures on the pre-§155 build. Full sweep: 33
+  viewers, no errors. **Not merged — awaiting Islam.**
+- **Still with Islam**: the three card sentences (§156 mockup) and whether the
+  chip refinement goes in with them.
+
+
+### v3.59 — the three contrast repairs (§154)
+
+- Islam approved §153's three findings for repair. All three were **one fault**:
+  a scoring colour used as TYPE rather than as a mark — the rail's figure
+  (3.26 → 4.93), the focus strip's count (4.45 → 6.45), the hovered button and
+  its caret (4.34 → 5.36).
+- `bandInk()` beside `band()`, applied at 30 call sites, with a fallback for a
+  tenant band that has no text twin. Two more fixed by hand, same move.
+- **§154.1**: the caret's first fix made it worse (4.34 → 1.43) — a blanket
+  rule hit a caret sitting on the navy chrome. Reverted; fixed at the control
+  that failed.
+- `state-contrast.py`'s baseline is now **empty** — anything failing from here
+  is new. Full sweep: 33 viewers, no errors. **Not merged — awaiting Islam.**
+
+
+### v3.59 — Wave 2 of the UI/UX audit (§149–§153)
+
+- **§151 the tables Islam was stuck on**: a plan wider than its pane was cut
+  with no way to scroll (the page never scrolls sideways, §27.2). It scrolls
+  inside its own box now, with the `#` and name column frozen — and the second
+  frozen column parks against the first one's MEASURED width, because
+  `left:38px` slid the name 2.5px on every scroll (§151.1).
+- **§150 the reporting controls ride the tab row** — Islam's placement, better
+  than the audit's pinned bar: the row is already pinned chrome, so no new
+  sticky element and none of its arithmetic. Submit wears the Report orange,
+  Save draft the same orange as type with no box. **§150.1**: putting them in
+  the row made them subject to the row's wiring — every `#subtabs button` was
+  bound as a tab, so Save draft closed the report. Found by pressing it.
+- **§149 the glyphs keep their place and gain their meaning**: "More is
+  better / Less is better", and the compile rules described; the repeated
+  "Latest" quiet, with no standing dotted mark.
+- **§152 the viewer switcher** reads name + place, job title on the hover.
+- **§153 hover and focus are measured at last** (closes §16.17), reusing the
+  sweep's own rule. Three light-mode failures recorded as a named baseline —
+  `.dlcar` 4.34, `<b>` 4.45, `.rnum` 3.26 — **awaiting Islam's colour
+  decision**, since a palette is his (rule 1c).
+- Checks: `plan-columns.py` (6 failures on the old build), `report-chrome.py`
+  (12), `table-scroll.py` (9), `state-contrast.py` (new), plus qa.py's own
+  reporting assertion updated — it went red for the right reason. Full sweep:
+  33 viewers, no errors. **Not merged — on the branch awaiting Islam's word.**
+
+
 ### v3.58 — the welcome screen (§148, spec 025)
 
 - **One screen after sign-in, before the platform**: "Welcome, <first name>"

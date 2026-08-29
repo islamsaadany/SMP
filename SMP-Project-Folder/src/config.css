@@ -452,7 +452,16 @@
      "Strategy Management Office — all units" would otherwise set the width of
      the chrome's first line and wrap the two buttons beside it onto a second.
      The name truncates; the popup shows it in full. */
-  .viewer .ssbtn { max-width:150px; font-size:11px; padding:1px 5px; line-height:1.4; }
+  /* ── THE WHOLE ANSWER, NOT THE FIRST 150 PIXELS OF IT (§152) ───────────
+     The cap cut "Mohamed Essam — Head of the Strategy Management Office" at
+     the em dash, so the control showed the name and hid the part that says
+     what is being looked at. With the option now reading name + place
+     (§152's own change), the label is short enough to show whole — Islam:
+     *"if we make it all visible it will be ok"* — so the cap rises to a
+     ceiling that only ever catches a genuinely long tenant name rather than
+     the ordinary case. The row has the room: it holds the label, this
+     control and the role line, and wraps as a whole if it ever runs out. */
+  .viewer .ssbtn { max-width:280px; font-size:11px; padding:1px 5px; line-height:1.4; }
 
   /* ══ THE SETUP RAIL (§46.1) ═══════════════════════════════════════
      `.rail` is the unit pages' component, reused wholesale — this block only

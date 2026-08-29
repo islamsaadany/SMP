@@ -61,6 +61,15 @@
   .item-body { padding:4px 16px 18px; border-top:1px solid var(--line-soft); }
   h4.mini { font-size:11px; letter-spacing:.12em; text-transform:uppercase; color:var(--ink-3);
             font-weight:700; margin:22px 0 9px; }
+  /* ── THE NOUN SHOUTS, THE EXPLANATION SPEAKS (§155) ────────────────────
+     A caption like "KEY MEASURES — AS PLANNED: THIS YEAR'S TARGET, AND HOW IT
+     COMPILES" set a whole clause in italic capitals with letter-spacing:
+     three emphases at once, on the hardest form to read at length. The noun
+     keeps every one of them — it is a label and labels are scanned — and the
+     clause after the dash becomes ordinary quiet text, because it is a
+     sentence and sentences are read. Same words, one emphasis each. */
+  h4.mini em { font-style:normal; text-transform:none; letter-spacing:0;
+               font-weight:400; font-size:12px; color:var(--ink-3); }
   @media (max-width:900px) {
     details.item summary { grid-template-columns:30px 1fr 70px 70px; }
     .i-owner, .i-var { display:none; }
@@ -68,8 +77,14 @@
 
   /* Performance is the primary reading; execution sits beside it */
   .card.primary-card { border-color:var(--stone-soft); border-top:3px solid var(--stone-soft); }
-  .score-h .rank { font-size:9.5px; letter-spacing:.1em; color:var(--gold-deep);
-                   border:1px solid var(--gold); border-radius:99px; padding:1px 6px; margin-left:6px; }
+  /* A QUIET OUTLINE, NOT A SECOND GOLD CHIP (§156). "primary" says which of
+     two readings leads; it is a footnote to the title, and in the accent it
+     competed with the status pill on the same line and with the accent budget
+     itself (§41). The border and the ink drop to the page's own neutrals; the
+     word is unchanged. */
+  .score-h .rank { font-size:9.5px; letter-spacing:.1em; color:var(--ink-3);
+                   border:1px solid var(--line); border-radius:99px; padding:1px 6px;
+                   margin-left:6px; font-weight:600; }
   .i-sc.primary b { color:var(--stone); }
 
   /* ── Visual performance rows ─────────────────────────── */
@@ -483,7 +498,15 @@
   .editbtn { font:inherit; font-size:12px; letter-spacing:.08em; text-transform:uppercase;
              font-weight:700; color:var(--gold-deep); background:none;
              border:1px solid var(--gold); border-radius:99px; padding:6px 15px; cursor:pointer; }
-  .editbtn:hover { background:var(--attn-bg); }
+  /* ── THE INK MOVES WITH THE GROUND (§154) ────────────────────────────
+     Measured at 4.34 hovered (§16.17, recorded in §95 and found again by
+     §153's state sweep): the wash arrives on hover and the ink stays where it
+     was, so the label is at its least readable exactly when a hand is on it.
+     `--gold-deep` is right on white (4.99) and one step too light on
+     `--attn-bg`; the wash's OWN text twin is 5.36 — the same pairing this
+     version applies everywhere else a band colour was used as type, rather
+     than a colour invented for one control. */
+  .editbtn:hover { background:var(--attn-bg); color:var(--attn-tx); }
   /* THE ONE SOLID BUTTON (§94). Its ink comes from the same pair as its fill,
      so neither theme can end up with white on white — see the note beside the
      tokens in _shared.css. The hover moves the FILL rather than adding one,

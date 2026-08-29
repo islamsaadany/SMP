@@ -11,6 +11,17 @@ function esc(s){ return String(s).replace(/&/g,"&amp;").replace(/</g,"&lt;"); }
    the strategy layer and the functional layer never disagree about a colour;
    85 is the added top edge that splits on-track from needs-attention. */
 function band(v){ return bandOf(v).key; }
+/* ── A BAND'S COLOUR AS *TYPE*, NOT AS A MARK (§154) ────────────────────
+   §38.4's rule, applied where it had never been: "a colour that works as a
+   FILL usually fails as TYPE", which is why every scoring colour was given a
+   `-tx` twin. Thirty-one places then went on painting TEXT with the fill —
+   invisible until §153 measured a hovered control and found the rail's figure
+   at 3.26 and a scored per-cent at 4.45 on the quiet ground.
+
+   THE FALLBACK IS LOAD-BEARING: the bands are the tenant's (Setup › Scoring
+   bands), so a key without a twin is possible; `var(--x-tx, var(--x))` then
+   paints exactly what it paints today rather than nothing. */
+function bandInk(v){ var k = band(v); return 'var(--' + k + '-tx, var(--' + k + '))'; }
 function bandWord(v){ return bandOf(v).label; }
 /* A score with nothing behind it renders as a dash, never as the number zero
    and never as the word null. This is the brief's rule made a single function
@@ -127,6 +138,29 @@ function plus(id, label){
 }
 
 /* A headline figure whose derivation opens in a modal. */
+/* ── WHAT A DELIVERY RATIO MEANS, IN WORDS (§156) ─────────────────────────
+   Islam, on a card reading 104%: *"it's 104% while the description is saying
+   something else."* The line said "Delivered 50% against 48% planned —
+   variance +2", which is arithmetically the same fact and asks the reader to
+   divide one number by the other to see that it is. The headline is a RATIO;
+   what it needs underneath is the plain-English reading of it, and "variance
+   +2" is a third number rather than a reading.
+
+   ONE FUNCTION, because the group's card and a company's carried the same
+   sentence twice (§53.5) and would otherwise explain the same ratio
+   differently. The empty case keeps its own words: reading "0% delivered
+   against 0% planned" under "Not yet measurable" is three false precisions in
+   a row. */
+function deliveryLine(ex, pl, whose){
+  if (ex == null || pl == null || !pl)
+    return "No tactic " + (whose || "anywhere in the group") +
+           " has a plan against it yet, so there is nothing to deliver against.";
+  var r = Math.round(ex / pl * 100);
+  var verdict = r > 100 ? "ahead of plan" : r < 100 ? "behind plan" : "exactly on plan";
+  return "<b>" + ex + "%</b> of the work delivered against <b>" + pl +
+         "%</b> planned \u2014 <b>" + verdict + "</b>.";
+}
+
 function drillCard(title, val, opts){
   opts = opts || {};
   /* A NUMBER THAT IS NOT A SCORE MUST NOT WEAR A SCORING COLOUR (§68). The
@@ -138,9 +172,16 @@ function drillCard(title, val, opts){
   var id = modalFor(opts.modalTitle || title.replace(/<[^>]*>/g, ""), opts.modalSub, opts.drill);
   var vs = opts.planned != null ? ' <span class="vs">vs ' + opts.planned + '% planned</span>' : '';
   var mark = opts.planned != null ? '<div class="marker" style="left:' + opts.planned + '%"></div>' : '';
+  /* A DELTA BELONGS TO ITS NUMBER (§156). It used to be appended to the
+     TITLE by the caller, so "▲ 3" sat among the labels — pushing the heading
+     onto two lines and standing four words away from the figure it qualifies.
+     The unit's own cards have always drawn it inside `.headline`, beside the
+     number; this is the group's card catching up rather than a new idea
+     (§53.5). */
+  var delta = opts.delta || "";
   var body = val == null
     ? '<div class="big nodata">' + (opts.empty || "Not yet measurable") + '</div><div class="track empty"></div>'
-    : '<div class="big">' + val + '<small>%</small>' + vs + '</div>' +
+    : '<div class="big">' + val + '<small>%</small>' + vs + delta + '</div>' +
       '<div class="track"><div class="fill" style="width:' + val + '%;background:var(--' + b + ')"></div>' + mark + '</div>';
   return '<div class="card' + (opts.primary ? ' primary-card' : '') + '">' +
     '<div class="score-h"><h3>' + title + (opts.primary ? ' <span class="rank">primary</span>' : '') + '</h3>' +
@@ -256,6 +297,58 @@ function qsFill(t){
   return '<span class="qs qs-edit qs-fill">' + out + '</span>';
 }
 
+/* ── WHAT A GLYPH AND A ONE-WORD RULE ACTUALLY MEAN (§149) ───────────────
+   Islam, on the audit's two "columns that say nothing": keep the glyphs, and
+   say something better than "at least / at most" — *"some descriptive like
+   Less is better or more is better"* — and give COMPILED the same treatment,
+   *"take last measure, accumulative across the time, average across the
+   time"*.
+
+   THE WORDS ARE A DIRECTION OF TRAVEL, NOT A RESTATEMENT. "At least the
+   target" says what the glyph already says in longer form; "More is better"
+   says which way the number should move, which is the thing somebody reading
+   a scorecard actually wants and the one thing the glyph cannot spell.
+
+   ONE PAIR OF MAPS, READ BY EVERY SURFACE. Eight read-mode cells across the
+   unit, group, company and capability tables print `m.dir`, and four print
+   `m.compile` — so the words live here and nowhere else, or the plan page and
+   the deck end up explaining the same glyph differently (§53.5).
+
+   A STORED VALUE OUTSIDE THE LIST KEEPS ITS OWN SPELLING AND GETS NO NOTE
+   (§96.2, §130.1): an imported plan may carry a direction or a rule this
+   product never offered, and inventing an explanation for it would be the
+   platform speaking for the client's own words. */
+var DIR_WORDS = { "≥": "More is better", "≤": "Less is better" };
+var COMPILE_WORDS = {
+  Latest:  "Takes the last measure reported",
+  Sum:     "Adds up across the period",
+  Average: "Averages across the period"
+};
+/* The mark is drawn as it always was; the note rides on it. `title` alone —
+   the platform's own hover, so nothing new has to be positioned, and
+   `clipTitles()` only fills an EMPTY title so this is never overwritten
+   (§93.6). */
+function noteSpan(text, note){
+  return note
+    ? '<span class="hasnote" title="' + esc(note) + '">' + esc(text) + '</span>'
+    : esc(text);
+}
+function dirCell(d){ return d ? noteSpan(d, DIR_WORDS[d] || "") : ""; }
+/* THE REPEATED DEFAULT DROPS TO THE QUIET INK (§149). "Latest" is what almost
+   every row says, so at full strength it is a column of noise that hides the
+   two rows saying something else. Quiet, never hidden: the value is still
+   there for anybody reading down the column. */
+function compileCell(c){
+  if (!c) return "";
+  var note = COMPILE_WORDS[c] || "";
+  var cls = [];
+  if (c === "Latest") cls.push("cdefault");
+  if (note) cls.push("hasnote");
+  if (!cls.length) return esc(c);
+  return '<span class="' + cls.join(" ") + '"' +
+    (note ? ' title="' + esc(note) + '"' : '') + '>' + esc(c) + '</span>';
+}
+
 /* Measure name reads left; every figure centres under its column. Progress
    carries the band colour, since it is the row's conclusion. */
 function measureRows(ms, opts){
@@ -272,12 +365,12 @@ function measureRows(ms, opts){
                (on ? handle("Reorder " + m.name) : '') +
                '<span class="idx-n">' + (i+1) + '</span></td><td>' + esc(m.name) + fmark(m.id) +
                (m.horizon ? '<span class="why">measured at ' + esc(m.horizon) + '</span>' : '') +
-               '</td><td class="num">' + esc(m.dir) + '</td><td class="num">' + esc(m.target) +
-               '</td><td class="cc">' + esc(m.compile) + '</td>';
+               '</td><td class="num">' + dirCell(m.dir) + '</td><td class="num">' + esc(m.target) +
+               '</td><td class="cc">' + compileCell(m.compile) + '</td>';
     if (opts.unscored) return head + '</tr>';
     return head + '<td class="num">' + esc(m.actual) + '</td>' +
            (scored
-             ? '<td class="num final" style="color:var(--' + band(m.progress) + ')">' + m.progress + '%</td>'
+             ? '<td class="num final" style="color:' + bandInk(m.progress) + '">' + m.progress + '%</td>'
              : pend
              ? '<td class="cc"><span class="pill none" title="Awaiting Strategy Office ' +
                'confirmation — this row is not counted yet">&mdash;</span></td>'
@@ -355,7 +448,7 @@ function tacticRows(ts, unitKey){
         '<span class="why" style="margin:2px 0 0">due at ' + pl + '%</span></td>'
       : '<td class="num"><span class="pair"><b>' + t.actual + '</b> / ' + pl + '</span></td>' +
         '<td class="num">' + varCell(t.actual, pl) + '</td>' +
-        '<td class="num final" style="color:var(--' + band(r) + ')">' + pct(r) + '</td>';
+        '<td class="num final" style="color:' + bandInk(r) + '">' + pct(r) + '</td>';
     return '<tr data-oi="' + i + '"' + (due && t.actual != null ? '' : ' class="notdue"') + '><td class="idx">' +
       (on ? handle("Reorder " + t.name) : '') +
       '<span class="idx-n">' + (i+1) + '</span></td><td>' + esc(t.name) +
@@ -402,8 +495,8 @@ function pillarRow(it, i, u){
     '<span>' + kindPill(it) + '</span>' +
     '<span><span class="pill theme">' + esc(it.theme) + '</span></span>' +
     '<span class="powner">' + esc(it.owner) + '</span>' +
-    '<span class="num lead" style="color:var(--' + band(perf) + ')">' + pct(perf) + '</span>' +
-    '<span class="num" style="color:var(--' + band(r) + ')">' + pct(r) + '</span>' +
+    '<span class="num lead" style="color:' + bandInk(perf) + '">' + pct(perf) + '</span>' +
+    '<span class="num" style="color:' + bandInk(r) + '">' + pct(r) + '</span>' +
     '<span class="num">' + varCell(pillarExec(it), pillarPlan(it)) + '</span>' +
     '<span class="chev">&#9654;</span></button>' + pillarBody(it, u) + '</div>';
 }
@@ -416,16 +509,16 @@ function scorePair(perf, ex, pl, nMeasures, nScored, hi, lo){
   return '<div class="scores">' +
     '<div class="card tight primary"><div class="score-h"><h4>' + L("measure","bu") + ' performance</h4>' +
       '<span class="pill ' + band(perf) + '">' + bandWord(perf) + '</span></div>' +
-      '<div class="headline"><span class="big" style="color:var(--' + band(perf) + ')">' + pctBig(perf) + '</span></div>' +
+      '<div class="headline"><span class="big" style="color:' + bandInk(perf) + '">' + pctBig(perf) + '</span></div>' +
       '<div class="minirow"><div><em>Measures</em><b>' + nMeasures + '</b>' +
           (nScored < nMeasures ? '<em class="sub-n">' + nScored + ' scored</em>' : '') + '</div>' +
-        '<div><em>Highest</em><b style="color:var(--' + band(hi) + ')">' +
+        '<div><em>Highest</em><b style="color:' + bandInk(hi) + '">' +
           pct(hi) + '</b></div>' +
-        '<div><em>Lowest</em><b style="color:var(--' + band(lo) + ')">' +
+        '<div><em>Lowest</em><b style="color:' + bandInk(lo) + '">' +
           pct(lo) + '</b></div></div></div>' +
     '<div class="card tight"><div class="score-h"><h4>Execution performance</h4>' +
       '<span class="pill ' + band(r) + '">' + bandWord(r) + '</span></div>' +
-      '<div class="headline"><span class="big" style="color:var(--' + band(r) + ')">' + pctBig(r) + '</span>' +
+      '<div class="headline"><span class="big" style="color:' + bandInk(r) + '">' + pctBig(r) + '</span>' +
         (r == null ? '' : '<span class="ofplan">of plan</span>') + '</div>' +
       '<div class="minirow"><div><em>Delivered</em><b>' + pct(ex) + '</b></div>' +
         '<div><em>Planned</em><b>' + pct(pl) + '</b></div>' +
@@ -573,6 +666,48 @@ function draftBtns(){
     '</span>';
 }
 
+/* ── THE REPORTING CONTROLS RIDE THE TAB ROW (§150) ──────────────────────
+   Islam, asked whether the audit's pinned bar should instead be a box beside
+   the Performance tab: *"if we take the floating bar to be in a box beside
+   the performance icon would that look better?"* — and it does, twice over.
+   A 41-figure report used to scroll its tally, Submit and Save draft off the
+   screen on the first flick; the tab row is ALREADY pinned chrome, so the box
+   is on screen for the whole report with no new sticky element and none of
+   the arithmetic one needs (§122.5's whole class of fault, avoided by
+   placement rather than by getting the numbers right).
+
+   ONE BUILDER FOR BOTH SIDES (§53.5). A unit's report and a supporting
+   function's built this bar twice, line for line; two boxes explaining the
+   same state differently is exactly the drift that rule exists to stop.
+
+   THE CYCLE LINE MOVES TO THE HOVER, because the row is shared with the tabs
+   and a date is the one fact here nobody acts on — while the COUNT stays
+   written, since it is what says whether the report is finished.
+
+   THE COLOURS ARE ISLAM'S: Submit wears the Report orange (`--cta`, the fill
+   and ink §94.8 declared as a pair) and Save draft the same orange as TYPE
+   with no box and a lighter weight — one family in two volumes, the act that
+   ends the report against the act that parks it. Inside §41's accent budget:
+   drawn only while a cycle is open, for somebody who may report. */
+function repChrome(target, done, total, pct, mayAll, subd){
+  return '<div class="repchrome">' +
+    '<span title="' + esc(REVIEW.name + " · due " + REVIEW.due) + '">' +
+      '<span class="rc-n">' + done + '</span> ' +
+      '<span class="rc-of">of ' + total + '</span></span>' +
+    '<span class="rc-bar' + (pct < 100 ? " part" : "") + '">' +
+      '<i style="width:' + pct + '%"></i></span>' +
+    (mayAll
+      ? (subd
+          ? '<span class="badge b-done">Submitted</span>' +
+            '<button class="linkbu" data-unsubmit="' + esc(target) + '">Reopen my report</button>'
+          : '<button class="rc-submit" data-submit="' + esc(target) + '">Submit to the SMO</button>' +
+            '<button class="rc-draft" data-repsave="1">Save draft</button>')
+      : '<span class="pill none">View only</span>') +
+    '<button class="linkbu" data-repcancel="1">Cancel</button>' +
+    '<span class="savesay" data-savesay="1" role="status" aria-live="polite"></span>' +
+    '</div>';
+}
+
 /* One button with two entries, the same <details> the template download uses
    (§61) — so a menu's action cannot unmount the button the click is still in
    (§47.2). "Present" starts the deck; "Manage slides" is the editor, and it
@@ -627,7 +762,7 @@ function unitsTable(keys){
       '<td class="num">' + u.items.length + '</td>' +
       '<td class="num">' + pct(r) + '</td>' +
       '<td class="num">' + varCell(unitExec(u), unitPlan(u)) + '</td>' +
-      '<td class="num final" style="color:var(--' + band(ko) + ')">' + pct(ko) + '</td></tr>';
+      '<td class="num final" style="color:' + bandInk(ko) + '">' + pct(ko) + '</td></tr>';
   }).join("");
   return '<div class="cfg"><table><thead><tr>' +
     '<th style="width:30%">Business unit</th><th class="num">Weight</th>' +
@@ -655,7 +790,7 @@ function capsTable(){
         '<b style="color:var(--good-tx)">' + ce.done + '</b> / ' +
         '<b style="color:var(--attn)">' + ce.wip + '</b> / ' +
         '<span style="color:var(--none)">' + ce.todo + '</span></span></td>' +
-      '<td class="num final" style="color:var(--' + band(perf) + ')">' + pct(perf) + '</td></tr>';
+      '<td class="num final" style="color:' + bandInk(perf) + '">' + pct(perf) + '</td></tr>';
   }).join("");
   return '<div class="cfg"><table><thead><tr>' +
     '<th style="width:44%">Capability</th><th class="num">Projects</th>' +
@@ -950,7 +1085,7 @@ function unitCards(keys){
     var u = UNITS[k];
     var pd = miniTable(["Key objective","Direction","Target","H1 actual","Progress"],
       u.keyObjectives.map(function(m){
-        return '<tr><td>' + esc(m.name) + '</td><td class="num">' + esc(m.dir) + '</td>' +
+        return '<tr><td>' + esc(m.name) + '</td><td class="num">' + dirCell(m.dir) + '</td>' +
           '<td class="num">' + esc(m.target) + '</td><td class="num">' + esc(m.actual) +
           '</td><td class="num">' + m.progress + '%</td></tr>';
       }).join("")) +
@@ -1058,10 +1193,7 @@ function renderCompanyPerformance(coKey){
       modalSub: "Weighted across the units in this company"
     }) +
     drillCard("Business units &mdash; execution" + tip(TIP_EXEC), r, {
-      sub: r == null
-        ? "No tactic in these units has a plan against it yet, so there is nothing to deliver against."
-        : "Delivered <b>" + pct(ex) + "</b> against <b>" + pct(pl) +
-          "</b> planned &mdash; variance <b>" + varCell(ex, pl) + "</b>.",
+      sub: deliveryLine(ex, pl, "in these units"),
       drill: execDrill, modalTitle: esc(co.name) + " \u2014 execution",
       modalSub: "Weighted compile of tactic delivery, as a share of plan"
     }) +
@@ -1092,8 +1224,8 @@ function renderGroupPerformance(){
   var koDrill = miniTable(["Objective","Direction","Target","Compile","H1 actual","Progress"],
     GROUP.keyObjectives.map(function(m){
       return '<tr><td>' + (m.group ? esc(m.group) + " &mdash; " : "") + esc(m.name) + '</td>' +
-        '<td class="num">' + esc(m.dir) + '</td><td class="num">' + esc(m.target) + '</td>' +
-        '<td>' + esc(m.compile) + '</td><td class="num">' + esc(m.actual) + '</td>' +
+        '<td class="num">' + dirCell(m.dir) + '</td><td class="num">' + esc(m.target) + '</td>' +
+        '<td>' + compileCell(m.compile) + '</td><td class="num">' + esc(m.actual) + '</td>' +
         '<td class="num">' + m.progress + '%</td></tr>';
     }).join("")) +
     '<p class="sub">Mean of the ' + GROUP.keyObjectives.length + ': <b>' +
@@ -1136,7 +1268,7 @@ function renderGroupPerformance(){
     var pd = miniTable(["Business unit", L("pillar","bu"), "Performance"],
       st.list.map(function(x){
         return '<tr><td>' + esc(x.unit) + '</td><td>' + x.code + ' ' + esc(x.it.name) + '</td>' +
-          '<td class="num final" style="color:var(--' + band(pillarPerf(x.it)) + ')">' + pillarPerf(x.it) + '%</td></tr>';
+          '<td class="num final" style="color:' + bandInk(pillarPerf(x.it)) + '">' + pillarPerf(x.it) + '%</td></tr>';
       }).join("")) +
       '<p class="sub">Mean across <b>' + st.list.length + '</b> ' + L("pillar","bu").toLowerCase() +
       ' carrying this theme, in <b>' + st.units.length + '</b> business units: <b>' + st.perf + '%</b>.</p>';
@@ -1172,10 +1304,10 @@ function renderGroupPerformance(){
         : miniTable(["#","Key objective","Direction","Target","Actual","Progress"],
             c.keyObjectives.map(function(m, i){
               return '<tr><td class="idx">' + (i+1) + '</td><td>' + esc(m.name) + '</td>' +
-                '<td class="num">' + esc(m.dir) + '</td>' +
+                '<td class="num">' + dirCell(m.dir) + '</td>' +
                 '<td class="num">' + (m.target ? esc(m.target) : '<span class="missing">Missing</span>') + '</td>' +
                 '<td class="num">' + esc(m.actual) + '</td>' +
-                '<td class="num final" style="color:var(--' + band(m.progress) + ')">' + pct(m.progress) + '</td></tr>';
+                '<td class="num final" style="color:' + bandInk(m.progress) + '">' + pct(m.progress) + '</td></tr>';
             }).join("")) +
           '<p class="sub">Weighted across <b>' + c.keyObjectives.length + '</b> objectives: <b>' + pct(ko) + '</b>.</p>') +
       miniTable(["#","Project","Deliverables","Outcomes","Performance"],
@@ -1183,7 +1315,7 @@ function renderGroupPerformance(){
           return '<tr><td class="idx">' + (i+1) + '</td><td>' + esc(p.name) + '</td>' +
             '<td class="num">' + pct(projDeliverySide(p)) + '</td>' +
             '<td class="num">' + pct(projOutcomeSide(p)) + '</td>' +
-            '<td class="num final" style="color:var(--' + band(projPerf(p)) + ')">' + pct(projPerf(p)) + '</td></tr>';
+            '<td class="num final" style="color:' + bandInk(projPerf(p)) + '">' + pct(projPerf(p)) + '</td></tr>';
         }).join("")) +
       '<p class="sub">Half from the deliverables side, half from the outcomes side, per side rather than per row.</p>';
     var ed = miniTable(["#","Project","Completed","In progress","Not started"],
@@ -1233,28 +1365,77 @@ function renderGroupPerformance(){
       '</div></div></div>';
   }).join("");
 
+/* ── WHERE TO LOOK NEXT (§155) ─────────────────────────────────────────────
+   The group's first section — the first screen of every session — said how the
+   group was doing in three cards and then stopped, with 330px of empty page
+   under it and the units one click away on another section. It answered "how
+   are we doing" and never "where do I look next", which is the question a
+   chief executive opens this page with.
+
+   NOTHING NEW IS COMPUTED. `unitObjectives(u)` is the same figure the Business
+   units section draws in its gauges, so the strip cannot disagree with the
+   detail it summarises (§53.5) — and `checks/wave3.py` asserts exactly that,
+   entry by entry, rather than asserting a number.
+
+   WORST FIRST, because a list sorted by anything else makes the reader do the
+   sorting. Each entry is a real destination carrying `data-u`, so it is wired
+   by the same loop as every other one in the product (§24) — a chip that
+   looked like a link and went nowhere would be worse than no chip.
+
+   The score wears its band's TEXT twin, never the fill (§154). */
+function whereNext(keys){
+  var rows = keys.map(function(k){
+    var u = UNITS[k];
+    return u ? { k: k, name: navName(u), v: unitObjectives(u) } : null;
+  }).filter(function(r){ return r && r.v != null; });
+  if (rows.length < 2) return "";
+  rows.sort(function(a, b){ return a.v - b.v; });
+  return '<div class="ustrip-h">Where to look next</div><div class="ustrip">' +
+    rows.map(function(r){
+      /* `data-go`, NOT `data-u` (§155.1). The row of destinations at the top
+         wires `#units [data-u]` — scoped to the chrome — so a button carrying
+         that attribute anywhere else looks navigable and does nothing. The
+         platform already has the attribute for exactly this: `[data-go]` is
+         wired document-wide and lands on the unit's Performance page, which
+         is where somebody following a low score is going anyway. Found by
+         pressing it (§96, §150.1 — twice in one session). */
+      return '<button type="button" data-go="' + esc(r.k) + '">' +
+        '<span class="un">' + esc(r.name) + '</span>' +
+        '<span class="uv" style="color:' + bandInk(r.v) + '">' + r.v + '%</span></button>';
+    }).join("") + '</div>';
+}
+
   var SECS = [];
   SECS.push({ t: "Overall performance", h: section("", "Overall performance", null,
       '<div class="scores">' +
         drillCard("Group Key Objectives" + tip("The objectives the group set itself \u2014 each actual against its target, averaged. Authored by the group, never summed from the business units."), groupKeyObjectives(), {
-          primary: true, sub: "The group\'s own scorecard. All <b>" + GROUP.keyObjectives.length + "</b> objectives have a target set.",
+          /* Was "The group's own scorecard. All 6 objectives have a target
+             set." — a data-quality note where the reader wanted to know what
+             the number IS (§156). The count stays, because it is the size of
+             the thing being scored. */
+          primary: true, sub: "The group\u2019s own <b>" + GROUP.keyObjectives.length +
+            "</b> objectives, each scored against its target.",
           drill: koDrill, modalTitle: "Group Key Objectives", modalSub: "The group\'s own scorecard, authored not compiled"
         }) +
-        drillCard("Business units &mdash; performance" + tip(TIP_PERF) + deltaTag("group"), groupUnitsObjectives(), {
-          primary: true, sub: "Each unit\'s own " + L("keyobj","bu") + ", weighted " + UNIT_KEYS.map(function(k){ return UNITS[k].weight; }).join(" / ") + " \u2014 composed on the Weighting tab.",
+        drillCard("Business units &mdash; performance" + tip(TIP_PERF), groupUnitsObjectives(), {
+          delta: deltaTag("group"),
+          /* THE LINE SAYS WHAT THE NUMBER IS, NOT HOW IT WAS MADE (§156).
+             It used to print all ten unit weights — "21 / 14 / 10 / 15 / 8 /
+             6 / 6 / 7 / 8 / 5" — which is a derivation nobody can use at a
+             glance and which grows with the business. "How this is
+             calculated →" is two lines below and opens exactly that. */
+          primary: true, sub: "All <b>" + UNIT_KEYS.length + "</b> business units\u2019 own " +
+            L("keyobj","bu").toLowerCase() + ", weighted by size.",
           drill: perfDrill, modalTitle: "Business units \u2014 performance", modalSub: "Weighted compile across the three units"
         }) +
         drillCard("Business units &mdash; execution" + tip(TIP_EXEC), groupRatio(), {
           /* The sentence has to survive the empty tenant too. Reading
              "Delivered 0% against 0% planned - variance +0" under a card that
              says "Not yet measurable" is three false precisions in a row. */
-          sub: groupRatio() == null
-               ? "No tactic anywhere in the group has a plan against it yet, so there is nothing to deliver against."
-               : "Delivered <b>" + groupExec() + "%</b> against <b>" + groupPlan() +
-                 "%</b> planned &mdash; variance <b>" + varCell(groupExec(), groupPlan()) + "</b>.",
+          sub: deliveryLine(groupExec(), groupPlan()),
           drill: execDrill, modalTitle: "Business units \u2014 execution", modalSub: "Weighted compile of tactic delivery, as a share of plan"
         }) +
-      '</div>') });
+      '</div>' + whereNext(UNIT_KEYS)) });
 
   var arrangeBar = function(label, n){
     return canArrange("group") && ARRANGE
@@ -1385,6 +1566,10 @@ function renderTemple(){
   var cell = function(m){
     return '<div class="ns-item"><span class="ns-label">' + esc(m.name) + '</span>' +
            '<span class="ns-target">' + (m.target ? esc(m.target) : '<span class="missing">Missing</span>') + '</span>' +
+           /* A SENTENCE, NOT A COLUMN (§149, §99.8's rule). The hover words
+              belong on the table cells somebody runs an eye down; this line
+              already reads "≥ · latest" as prose, and half of it wearing a
+              note would be the drift the helpers exist to prevent. */
            '<span class="ns-dir">' + esc(m.dir) + ' &middot; ' + esc(m.compile).toLowerCase() + '</span></div>';
   };
   var ns = '<span class="ko-head">' + L("keyobj","group") + horizonBy() + '</span>' +
@@ -1536,9 +1721,9 @@ function renderUnitPerformance(u){
         var w = ws ? (ws[i] == null ? 0 : ws[i]) : null;
         return '<tr' + (isFocus(m.id) ? ' class="focusrow"' : '') + '><td class="idx">' + (i+1) + '</td>' +
           '<td>' + esc(m.name) + fmark(m.id) + '</td>' +
-          '<td class="num">' + esc(m.dir) + '</td><td class="num">' + esc(m.target) + '</td>' +
+          '<td class="num">' + dirCell(m.dir) + '</td><td class="num">' + esc(m.target) + '</td>' +
           '<td class="num">' + esc(m.actual) + '</td>' +
-          '<td class="num final" style="color:var(--' + band(m.progress) + ')">' + pct(m.progress) + '</td>' +
+          '<td class="num final" style="color:' + bandInk(m.progress) + '">' + pct(m.progress) + '</td>' +
           (ws ? '<td class="num">' + w + '%</td><td class="num">' +
                 (Math.round(m.progress * w) / 100).toFixed(1) + '</td>' : '') + '</tr>';
       }).join("")) +
@@ -1587,7 +1772,7 @@ function renderUnitPerformance(u){
         return '<tr><td class="idx">' + (i+1) + '</td>' +
           '<td>' + pillarCode(u, i) + ' ' + esc(it.name) + '</td>' +
           '<td class="num">' + ms + '</td><td class="num">' + sc + '</td>' +
-          '<td class="num final" style="color:var(--' + band(pp) + ')">' + pct(pp) + '</td></tr>';
+          '<td class="num final" style="color:' + bandInk(pp) + '">' + pct(pp) + '</td></tr>';
       }).join("")) +
     '<p class="sub">Mean across <b>' + pps.length + '</b> of <b>' + u.items.length + '</b> ' +
     plWord.toLowerCase() + ' with something scored: <b>' + pct(pl) + '</b>. ' +
@@ -1601,7 +1786,7 @@ function renderUnitPerformance(u){
         var pr = pillarRatio(it);
         return '<tr><td class="idx">' + (i+1) + '</td><td>' + pillarCode(u, i) + ' ' + esc(it.name) + '</td>' +
           '<td class="num">' + pillarExec(it) + '%</td><td class="num">' + pillarPlan(it) + '%</td>' +
-          '<td class="num final" style="color:var(--' + band(pr) + ')">' + pr + '%</td>' +
+          '<td class="num final" style="color:' + bandInk(pr) + '">' + pr + '%</td>' +
           '<td class="num">' + varCell(pillarExec(it), pillarPlan(it)) + '</td></tr>';
       }).join("")) +
     '<p class="sub">Delivered <b>' + unitExec(u) + '%</b> against <b>' + unitPlan(u) +
@@ -1637,30 +1822,30 @@ function renderUnitPerformance(u){
     '<div class="scores">' +
       '<div class="card tight primary"><div class="score-h"><h4>' + L("keyobj","bu") + ' performance</h4>' +
         '<span class="pill ' + band(ko) + '">' + bandWord(ko) + '</span></div>' +
-        '<div class="headline"><span class="big" style="color:var(--' + band(ko) + ')">' + pctBig(ko) + '</span>' +
+        '<div class="headline"><span class="big" style="color:' + bandInk(ko) + '">' + pctBig(ko) + '</span>' +
           deltaTag(u.ukey) +
           '<button class="drill" data-modal="' + koId + '">See the ' + L("keyobj","bu").toLowerCase() + ' &rarr;</button></div>' +
         '<div class="minirow"><div><em>Objectives</em><b>' + u.keyObjectives.length + '</b></div>' +
-          '<div><em>Highest</em><b style="color:var(--' + band(koHi) + ')">' +
+          '<div><em>Highest</em><b style="color:' + bandInk(koHi) + '">' +
             pct(koHi) + '</b></div>' +
-          '<div><em>Lowest</em><b style="color:var(--' + band(koLo) + ')">' +
+          '<div><em>Lowest</em><b style="color:' + bandInk(koLo) + '">' +
             pct(koLo) + '</b></div></div></div>' +
       /* IN THE MIDDLE, as asked: the objectives are what the unit is judged
          on, the pillars are how it means to get there, and execution is
          whether the work happened. Read left to right that is the argument. */
       '<div class="card tight"><div class="score-h"><h4>' + plWord + ' performance</h4>' +
         '<span class="pill ' + band(pl) + '">' + bandWord(pl) + '</span></div>' +
-        '<div class="headline"><span class="big" style="color:var(--' + band(pl) + ')">' + pctBig(pl) + '</span>' +
+        '<div class="headline"><span class="big" style="color:' + bandInk(pl) + '">' + pctBig(pl) + '</span>' +
           '<button class="drill" data-modal="' + plId + '">See the ' +
             plWord.toLowerCase() + ' &rarr;</button></div>' +
         '<div class="minirow"><div><em>' + plWord + '</em><b>' + u.items.length + '</b></div>' +
-          '<div><em>Highest</em><b style="color:var(--' + band(plHi) + ')">' +
+          '<div><em>Highest</em><b style="color:' + bandInk(plHi) + '">' +
             pct(plHi) + '</b></div>' +
-          '<div><em>Lowest</em><b style="color:var(--' + band(plLo) + ')">' +
+          '<div><em>Lowest</em><b style="color:' + bandInk(plLo) + '">' +
             pct(plLo) + '</b></div></div></div>' +
       '<div class="card tight"><div class="score-h"><h4>Execution performance</h4>' +
         '<span class="pill ' + band(r) + '">' + bandWord(r) + '</span></div>' +
-        '<div class="headline"><span class="big" style="color:var(--' + band(r) + ')">' + pctBig(r) + '</span>' +
+        '<div class="headline"><span class="big" style="color:' + bandInk(r) + '">' + pctBig(r) + '</span>' +
           (r == null ? '' : '<span class="ofplan">of plan</span>') +
           '<button class="drill" data-modal="' + exId + '">See the breakdown &rarr;</button></div>' +
         '<div class="minirow"><div><em>Delivered</em><b>' + pct(unitExec(u)) + '</b></div>' +
@@ -2322,10 +2507,19 @@ function gapCell(page, acKey, row, field, opts){
       gapBandRefresh();
     }, mark ? "pendfld" : "gapfld");
   }
-  /* Read — and fill mode on a settled value reads too. */
+  /* Read — and fill mode on a settled value reads too.
+     `read` IS WHY §149 SURVIVED THE MERGE. A direction and a compile rule are
+     stored as `\u2265` and `Latest`, and §149 gave each a dotted hover saying
+     what it MEANS ("More is better", "Takes the last measure"). gapCell's read
+     path is `esc(val)`, so routing those two cells through it would have
+     silently dropped the words while every check went on passing — the value
+     is still correct, just mute. A hook rather than a special case, because
+     the next field that reads differently from how it is stored will need the
+     same thing (§53.5). */
   var text = blank
     ? (opts.readEmpty !== undefined ? opts.readEmpty : '<span class="missing">Missing</span>')
-    : (opts.flow ? '<span class="flow ' + (opts.cls || "") + '">' + esc(val) + '</span>' : esc(val));
+    : (opts.read ? opts.read(val)
+      : opts.flow ? '<span class="flow ' + (opts.cls || "") + '">' + esc(val) + '</span>' : esc(val));
   return text + pendChip(acKey, row, field);
 }
 
@@ -2926,19 +3120,11 @@ function renderReport(u){
       : '<div class="pane">' + pane + '</div>';
   }
 
-  var bar =
-    '<div class="rep-bar">' +
-      '<div class="kpi"><b>' + c.done + '</b><span>of ' + c.total + ' reported</span></div>' +
-      '<div class="repbar' + (pctDone < 100 ? " part" : "") + '"><i style="width:' + pctDone + '%"></i></div>' +
-      '<span class="why" style="margin:0">' + esc(REVIEW.name) + ' &middot; due ' + esc(REVIEW.due) + '</span>' +
-      (mayAll
-        ? (subd
-            ? '<span class="badge b-done">Submitted</span>' +
-              '<button class="linkbu" data-unsubmit="' + u.ukey + '">Reopen my report</button>'
-            : '<button class="editbtn" data-submit="' + u.ukey + '">Submit to the SMO</button>')
-        : '<span class="pill none">View only</span>') +
-      draftBtns() +
-    '</div>';
+  /* Published to the chrome rather than drawn here (§150): the shell reads
+     REPORT_CHROME after this render and hangs it on the tab row, the same
+     trip PAGE_TOOLS already makes. */
+  REPORT_CHROME = repChrome(u.ukey, c.done, c.total, pctDone, mayAll, subd);
+  var bar = "";
 
   var summary =
     '<h4 class="mini">The owner\'s note on this cycle</h4>' +
@@ -3398,7 +3584,7 @@ function capScoreCards(c){
     cards.push('<div class="card tight primary-card">' +
       '<div class="score-h"><h4>Key objectives <span class="rank">primary</span></h4>' +
         '<span class="pill ' + band(ko) + '">' + bandWord(ko) + '</span></div>' +
-      '<div class="headline"><span class="big" style="color:var(--' + band(ko) + ')">' + pctBig(ko) + '</span></div>' +
+      '<div class="headline"><span class="big" style="color:' + bandInk(ko) + '">' + pctBig(ko) + '</span></div>' +
       '<div class="minirow"><div><em>Objectives</em><b>' + c.keyObjectives.length + '</b></div>' +
         '<div><em>Weighted</em><b>' + c.keyObjectives.map(function(m){ return m.weight == null ? "\u2014" : m.weight; }).join(" / ") + '</b></div>' +
         '<div><em>Reported</em><b>' + c.keyObjectives.filter(function(m){ return m.actual != null && m.actual !== ""; }).length +
@@ -3407,7 +3593,7 @@ function capScoreCards(c){
   cards.push('<div class="card tight' + (ko == null ? " primary-card" : "") + '">' +
     '<div class="score-h"><h4>Project performance' + (ko == null ? ' <span class="rank">primary</span>' : '') + '</h4>' +
       '<span class="pill ' + band(perf) + '">' + bandWord(perf) + '</span></div>' +
-    '<div class="headline"><span class="big" style="color:var(--' + band(perf) + ')">' + pctBig(perf) + '</span></div>' +
+    '<div class="headline"><span class="big" style="color:' + bandInk(perf) + '">' + pctBig(perf) + '</span></div>' +
     '<div class="minirow"><div><em>Deliverables</em><b>' + pct(capDeliverySide(c)) + '</b></div>' +
       '<div><em>Outcomes</em><b>' + pct(capOutcomeSide(c)) + '</b></div>' +
       '<div><em>Projects</em><b>' + c.projects.length + '</b></div></div></div>');
@@ -3421,7 +3607,7 @@ function capScoreCards(c){
   cards.push('<div class="card tight">' +
     '<div class="score-h"><h4>Execution</h4>' +
       '<span class="pill ' + band(ce.pct) + '">' + bandWord(ce.pct) + '</span></div>' +
-    '<div class="headline"><span class="big" style="color:var(--' + band(ce.pct) + ')">' + pctBig(ce.pct) + '</span>' +
+    '<div class="headline"><span class="big" style="color:' + bandInk(ce.pct) + '">' + pctBig(ce.pct) + '</span>' +
       '<span class="ofplan">' + ce.done + ' of ' + ce.total + ' milestones' +
         (ce.pending ? ' &middot; <span class="missing">' + ce.pending +
           ' not counted yet</span>' : '') + '</span></div>' +
@@ -3439,10 +3625,10 @@ function capKOTable(c){
         return '<tr><td class="idx">' + (i+1) + '</td><td>' + esc(m.name) +
           (m.note ? '<span class="why">' + esc(m.note) + '</span>' : '') + '</td>' +
           '<td class="cc">' + (m.weight == null ? "&mdash;" : m.weight + "%") + '</td>' +
-          '<td class="cc">' + esc(m.dir) + '</td>' +
+          '<td class="cc">' + dirCell(m.dir) + '</td>' +
           '<td class="num">' + (m.target ? esc(m.target) : '<span class="missing">Missing</span>') + '</td>' +
           '<td class="num">' + (m.actual == null || m.actual === "" ? "&mdash;" : esc(m.actual)) + '</td>' +
-          '<td class="num final" style="color:var(--' + band(m.progress) + ')">' + pct(m.progress) + '</td></tr>';
+          '<td class="num final" style="color:' + bandInk(m.progress) + '">' + pct(m.progress) + '</td></tr>';
       }).join(""));
 }
 
@@ -3468,7 +3654,7 @@ function projPerformanceBody(p, fk){
       '<td class="num">' + dxTarget(row) + '</td>' +
       '<td class="cc">' + got + '</td>' +
       '<td class="num final"' + (reads == null ? '' :
-        ' style="color:var(--' + band(reads) + ')"') + '>' +
+        ' style="color:' + bandInk(reads) + '"') + '>' +
         (statusPending(o) ? needsPct()
           : has ? pct(reads) : (notDue ? notDueCell() : "&mdash;")) + '</td></tr>';
   }).join("");
@@ -3547,7 +3733,7 @@ function renderFnPerformance(fnKey){
     var rail = railFor(c.projects, sel,
       function(p){ var v = projPerf(p);
         return v == null ? '&mdash;'
-          : '<b style="color:var(--' + band(v) + ')">' + v + '%</b>'; },
+          : '<b style="color:' + bandInk(v) + '">' + v + '%</b>'; },
       function(p){ var m = projMilestones(p);
         return 'execution ' + m.done + ' of ' + m.total +
           (p.owner ? ' &middot; ' + esc(p.owner) : ''); },
@@ -3952,7 +4138,7 @@ function capReportBody(c){
   var may = canReportFnWhole(c.fn);
   var kRows = c.keyObjectives.map(function(m, i){
     return '<tr><td class="idx">' + (i+1) + '</td><td>' + esc(m.name) + '</td>' +
-      '<td class="cc">' + esc(m.dir) + '</td>' +
+      '<td class="cc">' + dirCell(m.dir) + '</td>' +
       '<td class="num">' + (m.target ? esc(m.target) : '<span class="missing">Missing</span>') + '</td>' +
       '<td class="cc">' + capEntryBox(m, splitTarget(String(m.target)).unit, may, m.name) + '</td>' +
       '<td class="notecol">' + capNoteBox(m, may) + '</td></tr>';
@@ -4002,18 +4188,10 @@ function renderFnReport(fnKey){
      second answer everywhere. */
   var fnKeyTarget = "fn:" + fk;
   var mayAll = canSpeakFor(fnKeyTarget), subd = !!(REVIEW.submitted || {})[fnKeyTarget];
-  var bar = '<div class="rep-bar">' +
-      '<div class="kpi"><b>' + done + '</b><span>of ' + total + ' reported</span></div>' +
-      '<div class="repbar' + (pctDone < 100 ? " part" : "") + '"><i style="width:' + pctDone + '%"></i></div>' +
-      '<span class="why" style="margin:0">' + esc(REVIEW.name) + ' &middot; due ' + esc(REVIEW.due) + '</span>' +
-      (mayAll
-        ? (subd
-            ? '<span class="badge b-done">Submitted</span>' +
-              '<button class="linkbu" data-unsubmit="' + esc(fnKeyTarget) + '">Reopen my report</button>'
-            : '<button class="editbtn" data-submit="' + esc(fnKeyTarget) + '">Submit to the SMO</button>')
-        : '<span class="pill none">View only</span>') +
-      draftBtns() +
-    '</div>';
+  /* The same box the unit's report publishes (§150, §53.5) — one builder, so
+     the two sides cannot explain the same state differently. */
+  REPORT_CHROME = repChrome(fnKeyTarget, done, total, pctDone, mayAll, subd);
+  var bar = "";
   return bar + caps.map(function(c){
     return capBand(c) + '<div class="capbody">' + capReportBody(c) + '</div>';
   }).join("");
@@ -4211,9 +4389,10 @@ function unitPlanBody(it, u, railed){
          the office's setter lifts the pending mark (correcting confirms), the
          fill grant reaches only a blank or a still-pending value, and read
          mode carries the chip and the office's tick. \u00a7114's prepend rule for
-         an out-of-list stored value lives inside gapCell now. */
+         an out-of-list stored value lives inside gapCell now, and \u00a7148's
+         hover words come back through `read`. */
       '<td class="cc">' + gapCell("plan", "u_plan", m, "dir",
-        { kind:"select", opts:["\u2265","\u2264"], cls:"mono" }) + '</td>' +
+        { kind:"select", opts:["\u2265","\u2264"], cls:"mono", read:dirCell }) + '</td>' +
       '<td class="num">' + gapCell("plan", "u_plan", m, "target",
         { kind:"input", cls:"mono" }) + '</td>' +
       /* NO 3-YEAR COLUMN. Islam, 2026-08-22: "in the direction plans the key
@@ -4225,7 +4404,7 @@ function unitPlanBody(it, u, railed){
          so nothing a plan already carries is lost. */
       '<td class="cc">' + gapCell("plan", "u_plan", m, "compile",
         { kind:"select", opts:["Sum","Latest","Average"],
-          readEmpty:"\u2014" }) + '</td></tr>';
+          readEmpty:"\u2014", read:compileCell }) + '</td></tr>';
   }).join("");
   var tRows = it.tactics.map(function(t, i){
     return '<tr data-oi="' + i + '"><td class="idx">' +
@@ -4538,7 +4717,7 @@ function unitPerfRail(u){
       esc(u.ukey) + '|' + esc(it.code) + '" data-oi="' + i + '">' +
       (on ? handle("Reorder " + it.name) : '') +
       railName(pillarCode(u, i), it.name) +
-      '<span class="rnum" style="color:var(--' + band(perf) + ');font-weight:700">' + pct(perf) + '</span>' +
+      '<span class="rnum" style="color:' + bandInk(perf) + ';font-weight:700">' + pct(perf) + '</span>' +
       railSub((SHOW_KIND ? esc(it.kind) + ' &middot; ' : '') +
         'execution ' + pct(r) + (it.owner ? ' &middot; ' + esc(it.owner) : '')) +
       '</button>';

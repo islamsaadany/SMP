@@ -20854,3 +20854,68 @@ pressed and then refreshed at 150ms, all three read back from their own tables.
 *One of those three read as LOST and was my query, not the product* — I asked
 `labels.bu` for a value the field had written to `labels.grp`. Checked against
 the row rather than the assertion, and the row said Streams.
+
+---
+
+## §171 · A failed save says so, because the silence was the fault
+
+Islam, a second time after §170 shipped: *"the roles and access are not
+saving."*
+
+**I CANNOT REPRODUCE IT, AND SAYING SO PRECISELY IS THE START.** Driven against
+`scripts/dev-server.js` and a real Postgres, on **the demo tenant and on a
+CLEARED tenant** — which is what a client's deployment actually is (§67) —
+pressing a cell posts, changes `access_grants`, and survives a full reload.
+Pressed and refreshed at 150ms: still saved, since §170. Production's
+`/api/state` answers **401 rather than 500 to an unauthenticated request**, and
+`ensureReady()` runs BEFORE the session check — so every migration applies
+cleanly there, which was the one hypothesis that could be tested from outside.
+The deployed bytes carry §170's code. Everything I can see is working.
+
+**SO THE FAULT TO FIX IS THAT I CANNOT SEE IT.** A save that FAILS wrote one
+line to `console.warn` and nothing else. §32 made a REFUSED save say so on the
+page and stopped there; §160.4 noticed the other half — *"a failed autosave is
+silent"* — and recorded it rather than closing it. Left silent, a 500, a
+dropped connection or a timeout look **exactly like a save that worked**: the
+screen holds the new value, the database does not, and the next reload reverts
+it without a word. Which is, sentence for sentence, what was reported twice.
+
+**THREE SILENCES CLOSED, ONE BANNER.** The element, its styling and its
+clearing on success are all §32's; what changes is that two more outcomes reach
+it and one stops short-circuiting past it.
+
+- **A server error** says so and **names the status**, because "500" sends
+  somebody to the server and "could not reach" sends them to the network —
+  §123's argument one endpoint out, and the reason a number is not jargon to
+  the only person who can act on it.
+- **An unreachable server** says a different sentence, for the same reason.
+- **A remembered refusal was the silent one.** `save()` short-circuits on
+  `refusedBody` and never reached the branch that draws the banner — so
+  somebody who sets a cell, is refused, and sets it back gets no post and no
+  message at all. The sentence is kept beside the body now and shown again.
+  *That is the one shape of this fault that looks precisely like "it just does
+  not save".*
+- **Demo data** says it at the moment of the change. The standing banner has
+  always said it generally; a person who pressed Demo data an hour ago and is
+  now editing Roles & access is not reading the top of the page (§45.2).
+
+**AND `file://` STILL SAYS NOTHING**, deliberately: there is no server, nothing
+was expected to save, and the prototype banner already covers it. A sentence
+per change there would be noise about a state nobody is in by accident
+(§94.11's condition from the other side).
+
+**THIS DOES NOT CLAIM TO FIX HIS PROBLEM AND MUST NOT BE REPORTED AS IF IT
+DID.** It converts an invisible failure into a named one. If the next attempt
+shows a banner, the sentence says where to look; if it shows nothing and the
+value still reverts, then the save is landing and the fault is on the other
+side of it — which is a different investigation, and one that is finally
+possible to start.
+
+`checks/save-said.py` drives all seven states through a stub that can be told
+to fail — 200, 500, a dropped connection, 403 with a list, demo mode, recovery,
+and `file://` — and was watched to fail **5 ways** on the previous build. Two
+of its own first runs were the CHECK: `shutdown()` leaves the socket listening
+so the fetch hung rather than rejecting, and a closed listener cannot be
+rebound inside one run. Modelled by **dropping the connection** instead, which
+is both what a real failure looks like to `fetch()` and the only version that
+runs twice.

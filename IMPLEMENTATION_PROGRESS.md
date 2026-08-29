@@ -64,6 +64,26 @@ Nothing proceeds past this line without an answer.
 
 ## Built and verified
 
+### v3.64 — a failed save says so (§171)
+
+- **Islam reported Roles & access not saving a second time.** It saves in every
+  configuration this repository can build — the demo tenant, a **cleared**
+  tenant (what a real deployment is), and a refresh 150ms after the press, read
+  back from `access_grants` each time. Production's `/api/state` answers 401
+  rather than 500 unauthenticated, and `ensureReady()` runs before the session
+  check, so its migrations apply cleanly. Nothing visible from here is broken.
+- **So what was fixed is the invisibility.** A save that FAILS wrote one line to
+  a console nobody has open, which makes a 500, a dropped connection or a
+  timeout look exactly like a save that worked. Three silences closed: a server
+  error (naming the status), an unreachable server, and — the truly silent one
+  — a **remembered refusal**, where `save()` short-circuits before the banner is
+  ever drawn. Demo data now says so at the moment of the change too.
+- **This is a diagnostic, not a cure.** If the next attempt shows a banner, its
+  sentence says where to look. If it shows nothing and the value still reverts,
+  the save is landing and the fault is past it.
+- `checks/save-said.py` drives seven states through a stub that can be told to
+  fail; **5 red** on the previous build.
+
 ### v3.64 — a change is saved at once (§170)
 
 - **Press a setting and refresh straight away, and it used to be lost** — on

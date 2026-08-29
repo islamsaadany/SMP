@@ -365,6 +365,19 @@ console errors (in this cloud environment, run it via a wrapper that points Play
   `node scripts/test-door.js <smo-password>` against a running dev-server
   after touching `api/auth.js` or `lib/auth.js` (it ends by rate-limiting the
   SMO on purpose — `DELETE FROM login_attempts;` clears it).
+- **A FAILED SAVE MUST SAY SO, AND THREE OF THEM DID NOT (§171):** §32 made a
+  REFUSED save speak and stopped; a save that FAILS wrote one line to
+  `console.warn`, so a 500, a dropped connection or a timeout looked **exactly
+  like a save that worked** — screen updated, database not, next reload
+  reverts. Closed: a server error names its **status** (500 sends you to the
+  server, "could not reach" to the network — §123), and **a remembered
+  refusal** was the truly silent one, because `save()` short-circuits on
+  `refusedBody` and never reached the branch that draws the banner — set a
+  cell, be refused, set it back, and there is no post and no message. Demo mode
+  says it at the moment of the change, not only in the standing banner.
+  `file://` still says nothing, deliberately. **AND A DIAGNOSTIC IS NOT A
+  FIX** — say which it is: this makes an invisible failure visible, it does not
+  claim to have found the cause.
 - **A DEBOUNCE IS A DATA-LOSS WINDOW WHEN THE FLUSH CANNOT REACH IT (§170):**
   `afterPaint()` waited 800ms, and §138's flush-on-leave was supposed to cover
   that — **`keepalive` caps a body at 64KB and one SMP save is 216,307 bytes**,
@@ -2727,6 +2740,10 @@ python3 checks/project-custodian.py # a custodian per project (§147): the Proje
                                 # nothing, and a milestone owner is a Contributor who
                                 # reports nothing until the row is opened — both ends,
                                 # three viewers, proved able to fail
+python3 checks/save-said.py     # a save that FAILS says so on the page: a server
+                                # error naming its status, an unreachable server, a
+                                # remembered refusal, and demo data — seven states
+                                # through a stub that can be told to fail (§171)
 python3 checks/setup-sticky.py  # a Setup page that FITS does not scroll, and nothing
                                 # pinned ends up behind the chrome — over HTTP with a
                                 # conversation open, because the Inbox's own two headers

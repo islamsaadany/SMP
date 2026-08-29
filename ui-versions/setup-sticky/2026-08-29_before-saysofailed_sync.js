@@ -144,12 +144,6 @@ var SYNC = (function () {
      `lastSaved`: that would claim it landed, and the platform would go on
      showing a change the database never took. */
   var refusedBody = null;
-  /* AND THE SENTENCE THAT CAME WITH IT (§171). Without this the second hit on
-     a remembered body is SILENT: `save()` short-circuits on `refusedBody` and
-     never reaches the branch that draws the banner, so somebody who sets a
-     cell, is refused, and sets it back gets no post and no message — the one
-     shape of this fault that looks exactly like "it just does not save". */
-  var refusedWhy = null;
 
   /* A REFUSAL NEEDS A WAY OUT (§48.3).
 
@@ -164,56 +158,6 @@ var SYNC = (function () {
      So the banner carries the only honest recovery: throw away what has not
      been saved and take the server's copy again. It is destructive to local
      work, so it says so and asks first. */
-  /* ── AND A FAILED SAVE SAYS SO TOO (§171) ─────────────────────────
-     Islam, twice: *"the roles and access are not saving."* It saves in every
-     configuration this repository can build — the demo tenant, a CLEARED
-     tenant (what a real deployment is, §67), a fast refresh, read back from
-     `access_grants` each time — so whatever is happening on his deployment is
-     something I cannot see from here. And the reason I cannot see it is the
-     fault worth fixing: **a save that FAILS writes one line to a console
-     nobody has open.**
-
-     §32 made a REFUSED save say so on the page and stopped there, and §160.4
-     recorded the other half — "a failed autosave is silent" — and left it.
-     Left, it means a 500, a dropped connection or a timeout look exactly like
-     a save that worked: the screen holds the new value, the database does not,
-     and the next reload silently reverts. Which is, word for word, what was
-     reported.
-
-     THREE OUTCOMES, ONE BANNER. Refused keeps its list and its Discard button
-     (the change is on screen and the only honest recovery is to throw it
-     away). Failed says the status, because "500" sends somebody to the server
-     and "could not reach" sends them to the network — §123's argument, one
-     endpoint out. Demo mode says the thing the standing banner says generally,
-     at the moment somebody changes something and expects it to stick.
-
-     NOT A NEW COMPONENT: the element, the styling and the clearing on success
-     are all §32's, and this only stops two of the three ways past it being
-     silent. */
-  function notSaved(html) {
-    var el = document.getElementById("refused");
-    if (!el) return;
-    if (!html) { el.hidden = true; el.innerHTML = ""; return; }
-    el.innerHTML = html;
-    el.hidden = false;
-  }
-
-  /* WHY IT DID NOT GO, in the words that name where to look. The status is
-     shown deliberately: a number is not jargon to the one person who can act
-     on it, and without it every failure reads the same. */
-  function showFailed(why) {
-    notSaved("<span><strong>Not saved.</strong> " + esc(why) + "</span>" +
-      "<span>Your change is still on screen and the platform keeps trying. " +
-      "If it does not clear, reload before typing anything else \u2014 what is " +
-      "on screen has not reached the database.</span>");
-  }
-
-  function showDemoBlocked() {
-    notSaved("<span><strong>Not saved \u2014 this is demo data.</strong></span>" +
-      "<span>Nothing changed here is written anywhere. Leave demo data from the " +
-      "menu in the top bar to work on your own tenant.</span>");
-  }
-
   function showRefusal(list) {
     var el = document.getElementById("refused");
     if (!el) return;
@@ -246,15 +190,11 @@ var SYNC = (function () {
   function save(done) {
     var say = function (state) { if (done) done(state); };
     /* The guard that matters: demo data must never reach the database. */
-    /* SAID ONLY FOR DEMO DATA. Opened from `file://` there is no server at
-       all and the prototype banner already says so; a second sentence per
-       change would be noise about something nobody expected to save. */
-    if (isDemoMode()) { showDemoBlocked(); return say("offline"); }
-    if (!live) return say("offline");
+    if (!live || isDemoMode()) return say("offline");
     if (saving) return say("busy");
     var now = serialize();
     if (now === lastSaved) return say("clean");
-    if (now === refusedBody) { showRefusal(refusedWhy); return say("refused"); }
+    if (now === refusedBody) return say("refused");
     saving = true;
     lastFlush = Date.now();
     fetch("/api/state", {
@@ -277,17 +217,10 @@ var SYNC = (function () {
         say("refused");
         return r.json().then(function (j) {
           if (j && j.mustChange) { location.replace("/"); return; }
-          refusedWhy = (j && j.refusals) || null;
-          showRefusal(refusedWhy);
-        }, function () {
-          /* A 403 whose body will not parse is still a refusal, and saying
-             nothing about it is the silence this section exists to remove. */
-          refusedWhy = ["The server refused the change and gave no reason."];
-          showRefusal(refusedWhy);
-        });
+          showRefusal(j && j.refusals);
+        }, function () { showRefusal(null); });
       }
       if (r.ok) {
-        refusedWhy = null;
         showRefusal(null);
         lastSaved = now;
         /* A person created in the register does not exist to the SERVER until
@@ -309,17 +242,12 @@ var SYNC = (function () {
       }
       else {
         say("failed");
-        showFailed("The server answered HTTP " + r.status + ".");
-        console.warn("SMP: save failed (HTTP " + r.status + ")");
+        console.warn("SMP: save failed (HTTP " + r.status + ") — will retry on the next change");
       }
     }).catch(function (e) {
       saving = false;
       say("failed");
-      /* A fetch that rejects is the network, not the server — a different
-         errand, so a different sentence. */
-      showFailed("The platform could not reach the server (" +
-                 (e && e.message ? e.message : "no answer") + ").");
-      console.warn("SMP: save failed (" + (e && e.message) + ")");
+      console.warn("SMP: save failed (" + e.message + ") — will retry on the next change");
     });
   }
 

@@ -1108,6 +1108,19 @@ var CHAT = (function(){
         : j && j.mailed && j.mailed.sent ? "Sent, and emailed to " + j.mailed.to + "."
         : j && j.mailed && j.mailed.why ? "Sent. No email went out — " + j.mailed.why + "."
         : "Sent." };
+      /* AND THE RAIL'S BADGE IS NO LONGER TRUE (§165). The Setup rail counts
+         `OVQUEUE.waiting`, asked ONCE per visit because a summary is read and
+         acted on rather than watched (§108.10). Replying is the act that makes
+         it stale: the inbox correctly reads "Waiting 0" and the rail goes on
+         showing the number it was told when the page loaded. Islam: "all chats
+         are answered and still the rail is showing a notification."
+
+         Cleared rather than recounted — the next paint on the Overview asks
+         again, which is the one place that fetch belongs (a second asker
+         polling in the background is what §98 was about). §35's shape: the
+         status you must remember to refresh is the one nobody refreshes. */
+      if (typeof window !== "undefined" && typeof window.OVQUEUE !== "undefined")
+        window.OVQUEUE = null;
       boxLoadQueue();
       boxLoadThread(who);
     });

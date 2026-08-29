@@ -20486,3 +20486,51 @@ being silently reset for everybody who ever set one.
 `checks/perf-line.py` sweeps three widths, hovering every value that carries a
 note, and asserts none opens past its box. Proved able to fail: **2 failures**
 against the pre-§164 build, at 1180 and 900 — the two widths where it bit.
+
+---
+
+## 165 · A default that reached nobody, and a badge that was told once (v3.62)
+
+**"THIS YEAR" WAS ALREADY THE DEFAULT AND THAT WAS NOT THE SAME AS BEING ON.**
+§145.11 reversed it, §164.1 confirmed it reads `true` with nothing stored — and
+Islam reported it off a third time, because **a default only ever governs a
+browser that has never stored a value**, and every browser that had touched
+the toggle since §66 was holding an explicit `"0"`. Telling a tenant with
+thirty people to press a button once per machine is not an answer.
+
+`KO_YEAR_KEY` is bumped to `smp.ko.year2`. **A new key is a one-time reset,
+not the removal of the preference**: everybody starts from the new default,
+the toggle still works, and a choice made from today still wins in both
+directions (§30.2's shape, deliberately spent once). The old key is left where
+it is — it costs nothing and shows the next reader exactly what was reset.
+
+**THE RAIL'S BADGE WAS TOLD ONCE AND NEVER CORRECTED.** Islam: *"all chats are
+answered and still the rail is showing a notification."* The Setup rail's pill
+counts `OVQUEUE.waiting`, fetched **once per visit** because §108.10 reasoned —
+correctly — that a summary is read and acted on rather than watched. What was
+never asked is what happens when the reading and the acting are on the same
+screen: replying is precisely the act that makes the number false, so the inbox
+reads *Waiting 0* beside a rail still showing the count it was given at load.
+
+Replying now **clears** `OVQUEUE` rather than recounting it. Cleared, the count
+answers `null`, and §108.15 draws no pill for a null — so the stale number goes
+at once and the next visit to the Overview asks again, which is the one place
+that fetch belongs (a second asker polling in the background is what §98 was
+about). §35's shape: the status you must remember to refresh is the one nobody
+refreshes.
+
+### Found while measuring, and NOT mine (§165.2)
+
+- **A Roles & access change does save and does survive a refresh.** Islam
+  reported it resetting; driven end to end against a real dev-server and a real
+  Postgres — sign in, press a cell, POST 200, reload — the value is there
+  before and after. Two wrong diagnoses were discarded on the way and both are
+  worth the space: `paint()` **does** end in `SYNC.afterPaint()`, so the
+  handler's missing `fieldSaved()` was a no-op and the comment I had written
+  for it was false; and a stub server reporting "0 posts" proved nothing,
+  because `SYNC` was never `live` behind it. **A save cannot be tested without
+  a session, and a fix whose story is wrong is not a fix.**
+- **The chat bubble's centre is covered by a DIV** — `checks/office-chat.py`
+  §1 fails on **main's own build**, so it predates this work. §70 and §93.4's
+  family, on the one control that opens the conversation. Recorded, not fixed
+  in passing.

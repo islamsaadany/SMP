@@ -5046,7 +5046,19 @@ function avg(a){
    §47.1) — the same shape as the theme, the People page's columns and the
    rail's terse switch. One person deciding to see both horizons must not
    decide it for the whole tenant, and a toggle that autosaved would. */
-var KO_YEAR_KEY = "smp.ko.year";
+/* THE KEY IS BUMPED, WHICH IS HOW A DEFAULT ACTUALLY REACHES ANYBODY (§165).
+   §145.11 reversed the default to SHOWN and Islam reported it off twice more —
+   because a default only ever governs a browser that has never stored a value,
+   and every browser that had touched the toggle since §66 was holding an
+   explicit "0". Telling him to press the button once per machine is not an
+   answer for a tenant with thirty people.
+
+   A NEW KEY IS A ONE-TIME RESET, NOT THE REMOVAL OF THE PREFERENCE. Everybody
+   starts from the new default; the toggle still works and a choice made from
+   today still wins in both directions (§30.2's shape, deliberately spent
+   once). The old key is left where it is rather than deleted — it costs
+   nothing, and a reader who finds it can see exactly what was reset and when. */
+var KO_YEAR_KEY = "smp.ko.year2";
 /* §145.11 REVERSES §66's DEFAULT (Islam: "let the this year objective
    clicked by default so it can be filled as missing as well"): absent now
    reads as SHOWN, so a missing near target is a visible red word instead

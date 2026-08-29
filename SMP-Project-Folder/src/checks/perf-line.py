@@ -70,6 +70,52 @@ with sync_playwright() as p:
         ck("...and on focus, which is what a tap gives",
            pg.evaluate("(e)=>getComputedStyle(e,'::after').display", note) == "block")
 
+    # ── 1b · AND THE BUBBLE MUST FIT (§164). It centres on its own value, and
+    # the two values that carry one are the LAST columns of the plan tables,
+    # inside a box that is `overflow-x:auto` and therefore clips — Islam saw
+    # the note with its right-hand end sliced off. Swept at the widths where
+    # the pane is narrow enough to bite.
+    #
+    # ANCHORED OR CENTRED IS TOLD BY THE TRANSFORM, not by `left`: an element
+    # placed with `right:0` still reports a used px `left`, so reading `left`
+    # calls an anchored bubble centred and measures a box that is not there.
+    # The first version of this did exactly that and reported a working fix as
+    # 16px over.
+    BUB = """() => {
+      var worst = null;
+      document.querySelectorAll('.hasnote').forEach(function(e){
+        var s = getComputedStyle(e, '::after');
+        if (s.display !== 'block') return;
+        var er = e.getBoundingClientRect(), w = parseFloat(s.width);
+        var box = e.closest('.tblscroll') || e.closest('.pane'); if (!box) return;
+        var br = box.getBoundingClientRect();
+        var centred = s.transform && s.transform !== 'none';
+        var left = centred ? (er.left + er.width/2 - w/2) : (er.right - w);
+        var over = Math.max(Math.round((left + w) - br.right), Math.round(br.left - left));
+        if (over > 1 && (!worst || over > worst.over))
+          worst = {over: over, txt: (e.textContent||'').trim(), centred: centred};
+      });
+      return worst;
+    }"""
+    for wpx in (1440, 1180, 900):
+        pg.set_viewport_size({"width": wpx, "height": 800}); pg.wait_for_timeout(320)
+        u = pg.query_selector('#units [data-u="mobile"]')
+        if u and u.is_visible():
+            u.click(); pg.wait_for_timeout(460)
+        spans = pg.query_selector_all(".hasnote")
+        ck("%d · values carrying a note were found" % wpx, len(spans) > 1, len(spans))
+        bad_one = None
+        for s in spans:
+            try: s.hover(timeout=1200)
+            except Exception: continue
+            pg.wait_for_timeout(55)
+            r = pg.evaluate(BUB)
+            if r: bad_one = r; break
+        ck("%d · no note opens past its box" % wpx, not bad_one, bad_one)
+    pg.set_viewport_size({"width": 1180, "height": 700}); pg.wait_for_timeout(320)
+    u = pg.query_selector('#units [data-u="mobile"]')
+    if u and u.is_visible(): u.click(); pg.wait_for_timeout(460)
+
     # ── 2, 3, 4 · the Performance line
     ck("Performance opens", open_perf(pg))
     ck("the reading-the-colours banner is gone",

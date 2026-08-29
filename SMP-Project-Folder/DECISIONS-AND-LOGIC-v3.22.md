@@ -20432,3 +20432,57 @@ nothing covers the title.
 thing that would settle it is the window width.
 
 Proved able to fail: **7 failures** against the pre-§163 build.
+
+---
+
+## 164 · The note that opened past the edge, and two that were settings (v3.62)
+
+Three from Islam. **Only one was code**, and saying so is the point (§160.2).
+
+**THE BUBBLE WAS CUT OFF.** §163 gave the direction and compile values the
+product's own hover note, and the two values that carry one are the **last
+columns** of the plan tables — inside a box that is `overflow-x:auto` and
+therefore clips. Centred on an 11px value at the right-hand edge, half the
+bubble opened outside the box: *"Takes the last measure report"*, sliced.
+**The product already answers this for `.tip`** — a note in the last cell
+anchors to the edge instead of centring on the mark — so the same rule, for
+the same reason, rather than a second behaviour for *a note near the edge*
+(§53.5). The cell before it is capped instead, having room on both sides.
+
+**AND MY FIRST MEASUREMENT CALLED THE FIX BROKEN.** A `::after` has no
+`getBoundingClientRect`, so the box is computed — and an element placed with
+`right:0` still reports a **used px `left`**, so reading `left` treats an
+anchored bubble as centred and measures a box that is not there: 16px over at
+1180, 44 at 900, on a build that was correct. **The transform is what tells
+them apart** (the centred one carries `translateX(-50%)`, the anchored one
+`none`). §68.10's class, and the second time in two days that my own probe
+reported a working build broken.
+
+### The two that were settings, not builds (§164.1)
+
+**THE CUSTODIAN DOES NOT SEE THE MISSING PANEL BECAUSE THE MATRIX SAYS SO.**
+Measured rather than reasoned: on the demo tenant the Mobile custodian's
+`u_found` / `u_anal` / `u_plan` all answer **`view`**, `mayFill` and
+`mayAuthor` are both false, so `seesGaps()` is false and the bar is not drawn
+— which is §145's own rule that *a plain reader never sees a nag they cannot
+clear*. The grant comes from `ACCESS_DEFAULTS.custodian.a_unit_own_strat`,
+which **§117 shipped at `view` deliberately**: the office authors the strategy
+and the SMO opens it to a role as a considered act. Their **Reporting** half
+is `edit` and untouched.
+
+So the answer is one cell — Roles & access › Strategy custodian › Own business
+unit — Strategy → **Fill gaps** — and NOT a change to the product. Changing
+the shipped default is a real option and a different decision: it would open
+gap-filling for every deployment's custodians, reversing half of §117 for
+everybody rather than for this tenant. Put to Islam that way rather than done.
+
+**AND "THIS YEAR" IS ALREADY ON BY DEFAULT.** §145.11 reversed §66's default
+and `SHOW_KO_THIS_YEAR` reads `true` when nothing is stored — confirmed on the
+running page. A browser that shows it off is one where somebody pressed the
+button: the stored value is an explicit `"1"`/`"0"` and a saved choice still
+wins in both directions (§30.2's shape), which is what stops a preference
+being silently reset for everybody who ever set one.
+
+`checks/perf-line.py` sweeps three widths, hovering every value that carries a
+note, and asserts none opens past its box. Proved able to fail: **2 failures**
+against the pre-§164 build, at 1180 and 900 — the two widths where it bit.

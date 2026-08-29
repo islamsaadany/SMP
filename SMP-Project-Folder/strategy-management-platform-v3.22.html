@@ -871,6 +871,21 @@
      is the guard, so the next element given the class and not the attribute
      shows nothing rather than a box with nothing in it. */
   .hasnote:not([data-tip])::after, .hasnote[data-tip=""]::after { display:none !important; }
+  /* AND IT MUST NOT OPEN PAST THE EDGE (§164). The bubble centres on its own
+     value, and the values that carry one — the direction and the compile rule
+     — are the LAST columns of the plan tables, inside a box that is
+     `overflow-x:auto` and therefore clips. Islam saw "Takes the last measure
+     report" with its right-hand end sliced off.
+
+     The product already answers this for `.tip`, three rules up in
+     arrange.css: a note in the last cell anchors to the edge instead of
+     centring on the mark. The same rule, for the same reason — one behaviour
+     for "a note near the edge", not two (§53.5). */
+  td:last-child .hasnote::after, th:last-child .hasnote::after {
+    left:auto; right:0; transform:none; }
+  /* The cell before it can overflow too once the pane is narrow, and that one
+     has room on both sides — so it is capped rather than re-anchored. */
+  .hasnote::after { max-width:min(255px, 60vw); }
   .hasnote:focus-visible { outline:2px solid var(--gold); outline-offset:2px; border-radius:2px; }
 
   /* ── Enabler cards (temple base) ──────────────────────── */

@@ -161,8 +161,13 @@ function renderAccess(){
      "other", and somebody who owns no unit has no "own". Returning a REASON
      rather than a boolean, because the cell shows it on hover. */
   function notApplicable(roleKey, areaKey){
-    var ownsAll = roleKey === "super" || roleKey === "gceo";
-    if (ownsAll && (areaKey === "a_unit_other" || areaKey === "a_fn_other")) {
+    /* ASKED OF THE SHARED RULE, NOT OF A LIST REPEATED HERE (§175). This
+       carried its own copy of "super or gceo", and the copy is why the SMO
+       team's row was wrong in both directions at once: `roleOwns()` did not
+       count them as owning anything, and this did not mark their other
+       columns either, so four cells did nothing and nobody could see it. */
+    if (SMPRules.ownsEveryPlace(roleKey) &&
+        (areaKey === "a_unit_other" || areaKey === "a_fn_other")) {
       return "Every unit and function is theirs, so there is no “other”.";
     }
     /* The split halves collapse exactly as their whole did (§117): no unit

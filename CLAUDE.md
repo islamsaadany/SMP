@@ -365,6 +365,27 @@ console errors (in this cloud environment, run it via a wrapper that points Play
   `node scripts/test-door.js <smo-password>` against a running dev-server
   after touching `api/auth.js` or `lib/auth.js` (it ends by rate-limiting the
   SMO on purpose — `DELETE FROM login_attempts;` clears it).
+- **WHO OWNS EVERY PLACE WAS TWO LISTS AND THEY DISAGREED (§175):** `roleOwns()`
+  said super and gceo; the matrix's `notApplicable()` said super and gceo; and
+  **neither said `smoteam`** — so an SMO team member owned nothing, read
+  `a_unit_other` for every unit, and their four *own* cells could never be
+  consulted. It also left §89's claim untrue: that row is meant to carry the
+  Super user's grants and the two read DIFFERENT columns. One exported rule
+  (`ownsEveryPlace`) is asked by both sides now. **SMO team joins them at
+  Islam's direction** (*"in case the SMO team is from inside the company as
+  well"*): nothing moves on a default tenant, and one that had NARROWED the
+  other-columns widens for its SMO team — stated, not discovered. **Both CEO
+  rows were already right**, and the question about them is what found this.
+- **ASSERT THE AGREEMENT BETWEEN THE RESOLVER AND THE TABLE, NOT A LIST OF
+  PAIRS (§175.2):** for every role, which columns can `areaFor()` ever answer
+  with, and does the matrix offer exactly those? Offered-and-unreachable is a
+  control with nothing behind it; reachable-and-not-offered is access nobody
+  can grant. Two traps: **a unit page asks the unit areas and a function page
+  the function ones** (crossing all of them made a function head look as though
+  it reached `a_unit_own`), and **`roleWheres()` is not the authority for a
+  DERIVED role** — it falls through to "every unit" for `powner`, so their
+  places come from what `personRoles()` mints. A role nobody holds is named as
+  unmeasured, never passed over (§54.5).
 - **A COLUMN A ROLE COULD NEVER HOLD IS AN OPTION THAT MEANS NOTHING (§174):**
   Islam: *"a project owner has options to edit or fill in a business unit."*
   Right, and the DERIVATION is what says so — `personRoles()` mints `powner`

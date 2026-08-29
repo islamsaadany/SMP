@@ -7970,8 +7970,32 @@ THEME.apply();
   /* OWN is read off the role's attachment, never set. Reaching and OWNING are
      different words: a company CEO whose company may see the others REACHES
      those units without owning them. */
+  /* ── WHO OWNS EVERY PLACE, NAMED ONCE (§175) ──────────────────────
+     Three roles are seated at the group and hold the whole tenant, so every
+     unit and every function is THEIRS and no page is ever "somebody else's".
+     That makes their `other` columns unreachable and their `own` columns the
+     only live ones — which is why the matrix has to read this list too.
+
+     IT WAS TWO LISTS AND THEY DISAGREED, and that is the whole of the bug
+     Islam found by asking about the CEOs. `roleOwns()` said super and gceo;
+     the matrix's own `notApplicable()` said super and gceo; and NEITHER said
+     `smoteam` — so an SMO team member owned nothing, read `a_unit_other` for
+     every unit, and their four `own` cells were controls that could never be
+     consulted. Both sides ask this now, so the table and the resolver cannot
+     drift apart again (§42's rule about one copy of a rule).
+
+     SMO TEAM JOINS THEM AT ISLAM'S DIRECTION: *"in case the SMO team is from
+     inside the company as well, to have their own access."* It also settles an
+     inconsistency §89 had left standing — that row is meant to carry the same
+     grants as the Super user, and until now the two read different columns
+     while looking identical on the table. Nothing moves on a default tenant
+     (both columns ship at edit); a tenant that had NARROWED the other-columns
+     widens for its SMO team, which is the direction intended. */
+  var OWNS_EVERY_PLACE = ["super", "gceo", "smoteam"];
+  function ownsEveryPlace(roleKey) { return OWNS_EVERY_PLACE.indexOf(roleKey) > -1; }
+
   function roleOwns(w, r, target) {
-    if (r.role === "super" || r.role === "gceo") return true;
+    if (ownsEveryPlace(r.role)) return true;
     var at = String(r.at || "");
     if (String(target).indexOf("fn:") === 0) return at === target;
     if (at.indexOf("fn:") === 0) return false;
@@ -9099,6 +9123,7 @@ THEME.apply();
     personActive: personActive, personRoles: personRoles, personRoleKeys: personRoleKeys,
     unitsOfCompany: unitsOfCompany, grantFor: grantFor,
     roleOwns: roleOwns, companyAllows: companyAllows, areaFor: areaFor,
+    OWNS_EVERY_PLACE: OWNS_EVERY_PLACE, ownsEveryPlace: ownsEveryPlace,
     grantIn: grantIn, grantAtPage: grantAtPage, isSMO: isSMO, NO_ROLE: NO_ROLE,
     mayEditAccess: mayEditAccess, mayDestroy: mayDestroy,
     isOffice: isOffice, isOfficeRole: isOfficeRole, isSuperRole: isSuperRole,
@@ -26540,8 +26565,13 @@ function renderAccess(){
      "other", and somebody who owns no unit has no "own". Returning a REASON
      rather than a boolean, because the cell shows it on hover. */
   function notApplicable(roleKey, areaKey){
-    var ownsAll = roleKey === "super" || roleKey === "gceo";
-    if (ownsAll && (areaKey === "a_unit_other" || areaKey === "a_fn_other")) {
+    /* ASKED OF THE SHARED RULE, NOT OF A LIST REPEATED HERE (§175). This
+       carried its own copy of "super or gceo", and the copy is why the SMO
+       team's row was wrong in both directions at once: `roleOwns()` did not
+       count them as owning anything, and this did not mark their other
+       columns either, so four cells did nothing and nobody could see it. */
+    if (SMPRules.ownsEveryPlace(roleKey) &&
+        (areaKey === "a_unit_other" || areaKey === "a_fn_other")) {
       return "Every unit and function is theirs, so there is no “other”.";
     }
     /* The split halves collapse exactly as their whole did (§117): no unit

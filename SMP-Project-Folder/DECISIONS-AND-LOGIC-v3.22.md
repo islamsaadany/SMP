@@ -21107,3 +21107,84 @@ otherwise satisfy every assertion about what is absent (§113.8).
 `checks/access-header.py` measures with a Range (a cell returns one rect however
 many lines it holds, §105.2), asks the derivation rather than a list copied into
 the file, and was watched to fail **13 ways** on the previous build.
+
+---
+
+## §175 · Who owns every place, named once
+
+Islam, after §174 landed: *"what about the CEO and own business unit or
+function?"*
+
+**BOTH CEO ROWS WERE ALREADY RIGHT, AND THE QUESTION IS WHAT FOUND THE ONE THAT
+WAS NOT.** Asked of `areaFor()` rather than of the labels: a **Group CEO** owns
+every unit and every function, so their *own* columns are the live ones and
+their *other* columns were already dashed; a **Company CEO** owns the units
+inside their company (so both unit columns are real, the second narrowed
+further by the company's own visibility flag) and can never hold a function, so
+*own function* was already dashed. Nothing to change on either.
+
+**THE SMO TEAM WAS READING THE WRONG HALF OF THE TABLE.** Measured:
+
+| Row | for a unit | for a function |
+|---|---|---|
+| Super user | `a_unit_own` | `a_fn_own` |
+| **SMO team** | **`a_unit_other`** | **`a_fn_other`** |
+| Group CEO | `a_unit_own` | `a_fn_own` |
+| Company CEO | `a_unit_own` | `a_fn_other` |
+
+`roleOwns()` returned true for `super` and `gceo` and not for `smoteam`, so an
+SMO team member owned nothing, every unit was *other* to them, and their four
+*own* cells were controls that could never be consulted — §174's fault on a row
+neither of us had named. And it left §89's own claim untrue: that row is meant
+to carry the same grants as the Super user, and the two read **different
+columns** while looking identical on the table.
+
+**IT WAS TWO LISTS AND THEY DISAGREED**, which is the real lesson. `roleOwns()`
+said super and gceo; the matrix's `notApplicable()` said super and gceo; and
+neither said smoteam — so the resolver would not give them an *own* column and
+the table would not dash it either. Both sides ask **one** exported rule now
+(`ownsEveryPlace`), so the table and the resolver cannot drift apart again
+(§42, §53.5).
+
+**SMO TEAM JOINS THEM, AT ISLAM'S DIRECTION**: *"B, in case the SMO team is
+from inside the company as well, to have their own access."* **Nothing moves on
+a default tenant** — both columns ship at edit for that row, so the same answer
+comes back from the other column. A tenant that had NARROWED the other-columns
+widens for its SMO team, which is the direction intended and is stated rather
+than discovered.
+
+**NO OTHER CALLER IS AFFECTED, CHECKED RATHER THAN ASSUMED**: `mayAuthorPage()`
+and `mayFillPage()` both short-circuit on `isOffice()` before they reach
+`roleOwns()`, `companyAllows()` returns early for anybody who is not a company
+CEO, and the two arrange rules test `ARRANGE_ROLES`, which the office is not in.
+The only thing that changes is which column `areaFor()` picks.
+
+### The check now asserts the agreement, not a list (§175.2)
+
+`checks/access-header.py` had a hand-written assertion per pair Islam happened
+to notice. It asks the **resolver** now: for every role, which columns can
+`areaFor()` ever answer with — and does the table offer exactly those? A cell
+offered that cannot be reached is a control with nothing behind it; a cell
+reachable and NOT offered is access somebody cannot grant. **Both ends**
+(§113.8), for every role, so the next role, or the next change to who owns
+what, is judged the day it lands.
+
+Two things it had to get right to be worth anything. **A unit page asks the
+unit areas and a function page the function ones** — crossing every area with
+every target asks "what is the unit grant for a function page", which nothing
+in the product does, and it made a function head look as though it reached
+`a_unit_own`. And **`roleWheres()` is not the authority for a derived role**:
+it falls through to *every unit* for `powner`, which is simply untrue, so their
+places come from what `personRoles()` actually mints.
+
+**AND CONTRIBUTOR CANNOT BE MEASURED ON THIS REGISTER**, because nobody on it
+falls through to the floor — so the check names it as unmeasured rather than
+passing over it (§54.5). Its reachability is reasoned from the derivation
+(a unit or a function) and is deliberately not asserted from data that does not
+exist.
+
+**MY OWN PROBE WAS WRONG FIRST, AND IN THE DIRECTION THAT LOOKS LIKE A PRODUCT
+FAULT**: it mapped the body cells to `AREAS[i + 1]`, when `td.ac` is already
+only the area cells and the first of them is `AREAS[0]`. Sixteen failures, every
+one of them an off-by-one — a correct build reported broken, which costs exactly
+as much as the reverse (§68.10).

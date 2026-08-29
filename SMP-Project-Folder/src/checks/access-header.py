@@ -128,53 +128,115 @@ with sync_playwright() as p:
        pg.evaluate("""()=>SMPRules.AREAS.filter(a=>a.short)
            .every(a=>a.label && a.label.length > a.short.length)"""))
 
-    # ── 4 · A COLUMN A ROLE COULD NEVER HOLD IS NOT OFFERED ──────────────
-    # ASKED OF THE DERIVATION, not of a list copied here (§53.5): a role is
-    # held wherever `personRoles()` can mint it, and nowhere else.
-    print("\n4 · cells that could never come up")
+    # ── 4 · EVERY CELL THE TABLE OFFERS CAN ACTUALLY BE REACHED ──────────
+    # THE GENERAL FORM, not a list of the pairs somebody noticed. `areaFor()`
+    # decides which column a page consults; if a role can never make the table
+    # answer with a given column, that cell is a control with nothing behind
+    # it. Asked of the RESOLVER for every role, so a role added later, or a
+    # change to who owns what, is judged the day it lands — which is exactly
+    # what did NOT happen when `roleOwns()` and the matrix each kept their own
+    # idea of who owns everything (§175).
+    #
+    # A UNIT PAGE ASKS THE UNIT AREAS AND A FUNCTION PAGE THE FUNCTION ONES.
+    # Crossing every area with every target asks "what is the unit grant for a
+    # function page", which nothing in the product ever does — and it made a
+    # function head look as though they reached `a_unit_own`.
+    print("\n4 · every cell offered is a cell that can be reached")
     reach = pg.evaluate("""()=>{
-      const w = world();
+      const R = SMPRules, w = world();
+      const pairs = [['unit', UNIT_KEYS], ['unit_strat', UNIT_KEYS],
+                     ['fn', FUNCTION_KEYS.map(k=>'fn:'+k)],
+                     ['fn_strat', FUNCTION_KEYS.map(k=>'fn:'+k)]];
+      /* Granted roles say where they may sit; the derived ones never can —
+         `roleWheres()` falls through to "every unit" for them, which is simply
+         untrue — so their places come from what `personRoles()` actually
+         mints on this register. */
+      const DERIVED = {powner:1, plowner:1, contrib:1};
+      const derived = {};
+      PEOPLE.forEach(p => { (R.personRoles(w, p) || []).forEach(r => {
+        (derived[r.role] = derived[r.role] || {})[r.at] = 1; }); });
       const out = {};
-      (SMPRules.ROLES || []).forEach(r => { out[r.key] = {unit:false, fn:false}; });
-      PEOPLE.forEach(p => {
-        (SMPRules.personRoles(w, p) || []).forEach(r => {
-          if (!out[r.role]) out[r.role] = {unit:false, fn:false};
-          if (String(r.at).indexOf('fn:') === 0) out[r.role].fn = true;
-          else if (r.at !== 'group' && String(r.at).indexOf('co:') !== 0) out[r.role].unit = true;
+      (R.ROLES || []).forEach(role => {
+        let ws;
+        if (DERIVED[role.key]) ws = Object.keys(derived[role.key] || {});
+        else { try { ws = roleWheres(role.key).map(x => x.v); } catch (e) { ws = []; } }
+        const hit = {};
+        ws.forEach(at => {
+          const r = { role: role.key, at: at };
+          pairs.forEach(pr => pr[1].forEach(t => { hit[R.areaFor(pr[0], w, r, t)] = 1; }));
         });
+        out[role.key] = { places: ws.length, reaches: Object.keys(hit) };
       });
       return out; }""")
     offered = pg.evaluate("""()=>{
+      const keys = SMPRules.AREAS.map(a => a.key);
       const out = {};
       document.querySelectorAll('.acgrid tbody tr').forEach(tr => {
-        const name = tr.querySelector('.rolecell b').textContent.trim();
-        out[name] = [...tr.querySelectorAll('td.ac')]
-          .map(td => !!td.querySelector('[data-ac]'));
+        const row = {};
+        [...tr.querySelectorAll('td.ac')].forEach((td, i) => {
+          /* `td.ac` IS ALREADY ONLY THE AREA CELLS — the role's name is a
+             `td.rolecell` and is not in this list — so the first of them is
+             AREAS[0], not AREAS[1]. The off-by-one reported every role as
+             offering columns it does not and withholding ones it does. */
+          row[keys[i]] = !!td.querySelector('[data-ac]'); });
+        out[tr.getAttribute('data-role') || tr.querySelector('.rolecell b').textContent.trim()] = row;
       });
       return out; }""")
-    # Column order follows AREAS: 0 group, 1 unit-own-strat, 2 unit-own,
-    # 3 unit-other, 4 fn-own-strat, 5 fn-own, 6 fn-other, 7 cycle, 8 setup.
+    names = pg.evaluate("()=>{const o={}; (SMPRules.ROLES||[]).forEach(r=>o[r.key]=r.name); return o;}")
+    SPLIT = ["a_unit_own_strat", "a_unit_own", "a_unit_other",
+             "a_fn_own_strat", "a_fn_own", "a_fn_other"]
+    unmeasured = []
+    for key, info in reach.items():
+        name = names.get(key, key)
+        row = offered.get(name)
+        if row is None:
+            continue
+        # NOT SKIPPED IN SILENCE (§54.5). A role nobody on this register holds
+        # has no places to derive, so nothing here can be measured for it — and
+        # saying so is the honest outcome, not passing it over.
+        if not info["places"]:
+            unmeasured.append(name)
+            continue
+        dead = [a for a in SPLIT if a not in info["reaches"] and row.get(a)]
+        ck("%s: no column is offered that this role can never reach" % name,
+           not dead, dead)
+        # BOTH ENDS (§113.8): a build that dashed the whole table would satisfy
+        # every assertion above and be useless.
+        live = [a for a in SPLIT if a in info["reaches"] and not row.get(a)]
+        ck("%s: ...and every column it CAN reach is offered" % name, not live, live)
+    print("  (not measurable on this register: %s)" %
+          (", ".join(unmeasured) if unmeasured else "none"))
+
+    # ── 5 · THE THREE ISLAM NAMED, BY NAME ───────────────────────────────
+    # The general assertion above covers these, and they are written out as
+    # well because the report they came from is worth keeping legible — and
+    # because the third is one where the derivation disagreed with him.
+    print("\n5 · the pairs that were reported")
     ck("a project owner is offered no OWN business unit column",
-       offered.get("Project owner", [True] * 9)[1] is False
-       and offered.get("Project owner", [True] * 9)[2] is False,
-       offered.get("Project owner"))
-    ck("...and the derivation agrees they never hold one",
-       reach.get("powner", {}).get("unit") is False, reach.get("powner"))
+       not offered["Project owner"]["a_unit_own"]
+       and not offered["Project owner"]["a_unit_own_strat"])
     ck("a BU owner is offered no OWN supporting function column",
-       offered.get("BU owner", [True] * 9)[4] is False
-       and offered.get("BU owner", [True] * 9)[5] is False,
-       offered.get("BU owner"))
-    # ── AND THE ONE THAT MUST STAY (§113.8: assert the absence AND the
-    # presence, or a build that dashed the whole table would pass) ────────
+       not offered["BU owner"]["a_fn_own"]
+       and not offered["BU owner"]["a_fn_own_strat"])
     ck("a pillar owner KEEPS the own-function columns",
-       offered.get("Pillar owner", [False] * 9)[4] is True
-       and offered.get("Pillar owner", [False] * 9)[5] is True,
-       offered.get("Pillar owner"))
+       offered["Pillar owner"]["a_fn_own"] and offered["Pillar owner"]["a_fn_own_strat"])
     ck("...because a pillars function really does derive them",
-       reach.get("plowner", {}).get("fn") is True, reach.get("plowner"))
-    ck("...and a project owner keeps OTHER business units",
-       offered.get("Project owner", [False] * 9)[3] is True,
-       offered.get("Project owner"))
+       any(str(a).startswith("fn:") for a in
+           pg.evaluate("""()=>{const w=world(); const s={};
+             PEOPLE.forEach(p=>(SMPRules.personRoles(w,p)||[]).forEach(r=>{
+               if (r.role==='plowner') s[r.at]=1; })); return Object.keys(s);}""")))
+    # AND THE OFFICE ROWS READ THE SAME COLUMNS (§175), which is the whole of
+    # what the SMO team row was getting wrong.
+    same = pg.evaluate("""()=>{const R=SMPRules, w=world(),
+        u=UNIT_KEYS[0], f='fn:'+FUNCTION_KEYS[0];
+      const one=k=>R.areaFor('unit',w,{role:k,at:'group'},u)+'|'+
+                   R.areaFor('fn',w,{role:k,at:'group'},f);
+      return {super:one('super'), smoteam:one('smoteam'), gceo:one('gceo')};}""")
+    ck("the Super user and the SMO team read the same columns",
+       same["super"] == same["smoteam"], same)
+    ck("...and it is the OWN pair, not the other one",
+       same["smoteam"] == "a_unit_own|a_fn_own", same)
+
     pg.close()
     b.close()
 

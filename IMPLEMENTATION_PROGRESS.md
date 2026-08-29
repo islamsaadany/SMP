@@ -64,6 +64,26 @@ Nothing proceeds past this line without an answer.
 
 ## Built and verified
 
+### v3.65 — who owns every place, named once (§175)
+
+- **Islam asked about the CEO rows; both were already right** — a Group CEO owns
+  every unit and function (so the *other* columns were already dashed), a
+  Company CEO owns their company's units and never a function (so *own
+  function* was already dashed).
+- **The question found the SMO team row instead.** It read `a_unit_other` /
+  `a_fn_other` for everything, so its four *own* cells could never be consulted
+  — and it silently behaved differently from the Super user, whose grants it is
+  meant to share.
+- **The cause was two lists**: `roleOwns()` and the matrix each kept their own
+  idea of who owns everything, and neither included the SMO team. One exported
+  rule now, asked by both.
+- **The SMO team joins the Super user and the Group CEO**, at Islam's direction.
+  Nothing moves on a default tenant; a tenant that had narrowed the
+  other-columns widens for its SMO team.
+- **The check asserts the agreement for every role** rather than the pairs
+  somebody noticed — offered-but-unreachable and reachable-but-not-offered,
+  both ends. **3 red** with the SMO team reverted.
+
 ### v3.65 — the matrix header, and two cells that could never come up (§173–§174)
 
 - **The header is smaller and it stays.** Settled from a mockup drawn in the

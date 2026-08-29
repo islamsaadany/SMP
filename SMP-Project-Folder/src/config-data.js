@@ -1467,6 +1467,60 @@ function placeLabel(at){
   return UNITS[at] ? navName(UNITS[at]) : at;
 }
 
+/* ── WHO YOU ARE VIEWING AS (§177) ────────────────────────────────────────
+   Islam, of a project owner's chrome reading PROJECT OWNER &middot; ALL UNITS:
+   *"correct it it should follow the roles and the unit he belongs to."*
+
+   IT WAS KEEPING ITS OWN ANSWER TO A QUESTION THE PLATFORM ALREADY ANSWERS.
+   The line read `p.unit` directly and nothing else, so `p.fn` and `p.company`
+   were never looked at -- 9 of the 33 people on the demo register were told
+   they belong nowhere, every supporting-function person and both company CEOs
+   among them. And the DROPDOWN SIX PIXELS TO ITS LEFT had it right the whole
+   time: §142 labels each option `knownName(p) + placeLabel(personAt(p))`, so
+   Hala's option said *CX* while her note said an em-dash. Two controls on one
+   row answering one question two ways is §53.5 exactly, and the fix is to
+   delete the copy rather than to teach it about functions.
+
+   AND THE PLACE BELONGS TO THE ROLE, NOT TO THE PERSON. 10 of the 33 hold
+   roles in more than one place, and the line named ONE for all of them: Ramy
+   owns a project in IT and a pillar in Mobile and it said "Mobile". So each
+   role is named with where it is held -- read off `personRoles()`, which is
+   the one thing that mints them, never `roleWheres()`, which falls through to
+   *every unit* for a derived role (§175).
+
+   THE SELECT CARRIES THE SEAT, SO THIS DOES NOT REPEAT IT. A role held only
+   where the person sits needs no place -- the control beside it has just said
+   it -- which is what keeps the line to 379px rather than 487px. A role held
+   anywhere ELSE is named, and a role held in SEVERAL places names them all,
+   including the seat: dropping the seat from a list would read as though they
+   held it only in the other place. */
+function viewerRoleLine(p){
+  var seat = placeLabel(personAt(p));
+  var byRole = {}, order = [];
+  personRoles(p).forEach(function(r){
+    var n = roleName(r.role), where = placeLabel(r.at);
+    if (!byRole[n]) { byRole[n] = []; order.push(n); }
+    if (byRole[n].indexOf(where) < 0) byRole[n].push(where);
+  });
+  /* Somebody who holds nothing says so and stops. The seat is on the control
+     beside this one, so repeating it here would be the one place the line
+     said twice what the select has already said -- the rule is applied
+     without an exception rather than with one (§53.5). */
+  if (!order.length) return "No role";
+  return order.map(function(n){
+    var pl = byRole[n];
+    if (pl.length === 1 && pl[0] === seat) return n;
+    return n + ", " + andList(pl);
+  }).join(" \u00b7 ");
+}
+/* "A", "A and B", "A, B and C" -- the platform says `and` rather than a bare
+   comma list, because two places for one role read as one long place name
+   otherwise. */
+function andList(a){
+  return a.length < 2 ? (a[0] || "")
+    : a.slice(0, -1).join(", ") + " and " + a[a.length - 1];
+}
+
 function unitRolesFor(k){
   if (!UNIT_ROLES[k]) UNIT_ROLES[k] = { head:null, custodian:null };
   return UNIT_ROLES[k];

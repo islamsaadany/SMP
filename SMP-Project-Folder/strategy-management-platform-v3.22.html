@@ -12022,6 +12022,60 @@ function placeLabel(at){
   return UNITS[at] ? navName(UNITS[at]) : at;
 }
 
+/* ── WHO YOU ARE VIEWING AS (§177) ────────────────────────────────────────
+   Islam, of a project owner's chrome reading PROJECT OWNER &middot; ALL UNITS:
+   *"correct it it should follow the roles and the unit he belongs to."*
+
+   IT WAS KEEPING ITS OWN ANSWER TO A QUESTION THE PLATFORM ALREADY ANSWERS.
+   The line read `p.unit` directly and nothing else, so `p.fn` and `p.company`
+   were never looked at -- 9 of the 33 people on the demo register were told
+   they belong nowhere, every supporting-function person and both company CEOs
+   among them. And the DROPDOWN SIX PIXELS TO ITS LEFT had it right the whole
+   time: §142 labels each option `knownName(p) + placeLabel(personAt(p))`, so
+   Hala's option said *CX* while her note said an em-dash. Two controls on one
+   row answering one question two ways is §53.5 exactly, and the fix is to
+   delete the copy rather than to teach it about functions.
+
+   AND THE PLACE BELONGS TO THE ROLE, NOT TO THE PERSON. 10 of the 33 hold
+   roles in more than one place, and the line named ONE for all of them: Ramy
+   owns a project in IT and a pillar in Mobile and it said "Mobile". So each
+   role is named with where it is held -- read off `personRoles()`, which is
+   the one thing that mints them, never `roleWheres()`, which falls through to
+   *every unit* for a derived role (§175).
+
+   THE SELECT CARRIES THE SEAT, SO THIS DOES NOT REPEAT IT. A role held only
+   where the person sits needs no place -- the control beside it has just said
+   it -- which is what keeps the line to 379px rather than 487px. A role held
+   anywhere ELSE is named, and a role held in SEVERAL places names them all,
+   including the seat: dropping the seat from a list would read as though they
+   held it only in the other place. */
+function viewerRoleLine(p){
+  var seat = placeLabel(personAt(p));
+  var byRole = {}, order = [];
+  personRoles(p).forEach(function(r){
+    var n = roleName(r.role), where = placeLabel(r.at);
+    if (!byRole[n]) { byRole[n] = []; order.push(n); }
+    if (byRole[n].indexOf(where) < 0) byRole[n].push(where);
+  });
+  /* Somebody who holds nothing says so and stops. The seat is on the control
+     beside this one, so repeating it here would be the one place the line
+     said twice what the select has already said -- the rule is applied
+     without an exception rather than with one (§53.5). */
+  if (!order.length) return "No role";
+  return order.map(function(n){
+    var pl = byRole[n];
+    if (pl.length === 1 && pl[0] === seat) return n;
+    return n + ", " + andList(pl);
+  }).join(" \u00b7 ");
+}
+/* "A", "A and B", "A, B and C" -- the platform says `and` rather than a bare
+   comma list, because two places for one role read as one long place name
+   otherwise. */
+function andList(a){
+  return a.length < 2 ? (a[0] || "")
+    : a.slice(0, -1).join(", ") + " and " + a[a.length - 1];
+}
+
 function unitRolesFor(k){
   if (!UNIT_ROLES[k]) UNIT_ROLES[k] = { head:null, custodian:null };
   return UNIT_ROLES[k];
@@ -40977,19 +41031,28 @@ var SYNC = (function () {
        rather than a stranded middot. */
     document.getElementById("orgname").textContent =
       GROUP.org ? "\u00b7 " + GROUP.org : "";
-    var v = viewer();
-    /* Guarded even though every person currently has a unit: reading
-       UNITS[null].name throws inside paint, which aborts the repaint and
-       leaves the previous screen showing \u2014 a crash that looks like a routing
-       bug. */
-    var where = v.unit === "group" ? "all units"
-              : (v.unit && UNITS[v.unit] ? UNITS[v.unit].name : "\u2014");
-    document.getElementById("viewerNote").innerHTML =
-      /* The roles they hold, not a level. Several is normal — group CEO who
-         also owns Care reads "Group CEO · Business unit owner". */
-      (personRoles(v).map(function(r){ return roleName(r.role); })
-        .filter(function(x, i, a){ return a.indexOf(x) === i; }).join(" &middot; ") || "No role") +
-      " &middot; " + where;
+    /* THE ROLES, AND WHERE EACH IS HELD (§177). One builder, beside
+       `placeLabel()` and asking `personAt()` like every other surface that
+       answers "where does this person sit" (§54). This line used to work it
+       out for itself off `p.unit` and nothing else, which is how it came to
+       say an em-dash for every function head and both company CEOs while the
+       DROPDOWN BESIDE IT said the function’s own name (§142). Two controls
+       on one row answering one question two ways — so the copy goes rather
+       than learning about functions. */
+    /* AND THE WHOLE LINE ON A HOVER. `.viewer-note` is one line with an
+       ellipsis, and below about 1280px this line is longer than the strip has
+       room for -- what gets cut is the tail, which is the PLACE, which is the
+       half §177 exists to add. §88's shape: one line, an ellipsis where it
+       does not fit, the whole value one hover away. Set unconditionally
+       rather than through `clipTitles()`, which is scoped to the setup tables
+       and would have to be widened to reach the chrome -- and unlike the
+       cells that rule was written for, this element carries no other title
+       for a hover to cover. */
+    (function(){
+      var el = document.getElementById("viewerNote");
+      el.textContent = viewerRoleLine(viewer());
+      el.title = el.textContent;
+    })();
 
     if (!current) {
       paintBuildBand();

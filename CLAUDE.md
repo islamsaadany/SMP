@@ -365,6 +365,28 @@ console errors (in this cloud environment, run it via a wrapper that points Play
   `node scripts/test-door.js <smo-password>` against a running dev-server
   after touching `api/auth.js` or `lib/auth.js` (it ends by rate-limiting the
   SMO on purpose — `DELETE FROM login_attempts;` clears it).
+- **THE STRIP KEPT ITS OWN ANSWER, AND THE CONTROL BESIDE IT HAD IT RIGHT
+  (§177):** the *Viewing as* note read `p.unit` and nothing else — never `p.fn`,
+  never `p.company` — so **9 of 33 people were told they belong nowhere** (every
+  supporting-function person, both company CEOs) while the DROPDOWN six pixels
+  left said the function's own name, because §142 built it from
+  `placeLabel(personAt(p))`. §53.5 in the chrome. **The copy goes**; one builder,
+  `viewerRoleLine()`, beside `placeLabel()`. **And the place belongs to the ROLE,
+  not the person** — 10 of 33 hold roles in more than one place and the line named
+  one for all of them; read off `personRoles()`, never `roleWheres()`, which falls
+  through to *every unit* for a derived role (§175, the source of the reported
+  *ALL UNITS*). **THE SELECT CARRIES THE SEAT, SO THE LINE DOES NOT REPEAT IT** —
+  a role held only where the person sits is named without a place (379px at its
+  widest, against 487px for the shape that repeats it); a role held ANYWHERE else
+  is named; a role held in SEVERAL names them all including the seat, or it reads
+  as held only elsewhere. **No role, and stop** — repeating the seat there would
+  be the one place the line said twice what the select had already said.
+  **The strip clips below ~1280 and cuts the TAIL**, which is the place, so the
+  whole line goes on a hover (§88's shape) — set directly, because `clipTitles()`
+  is scoped to the setup tables. Asserted of EVERY active person (the fault was
+  invisible on exactly the nine nobody switches to) and as AGREEMENT with the
+  rule, never a literal; **both ends, and the register must hold an example of
+  each** (§113.8).
 - **THE PAGE SAID MISSING AND THE COUNT SAID NOTHING WAS (§176):** a project
   pane prints the red word in two places the fill grant could not see — an
   **outcome with no target** and a **milestone with no due date** — and a
@@ -2821,6 +2843,9 @@ python3 checks/strategy-split.py # the Strategy | Reporting halves: the cell pre
                                 # open AND closed, both ends each time — and since §145.9
                                 # the .pptx download asserted HIDDEN on every surface while
                                 # the dormant builder is still proved by a direct call
+python3 checks/viewer-line.py   # the Viewing-as line: the roles and where each is
+                                # held, of EVERY person — no em-dashes, the seat never
+                                # repeated, and the whole line on a hover (§177)
 python3 checks/milestone-fill.py # a milestone is filled, and a bounded role fills only
                                 # its own (§176): every red Missing the page prints is one
                                 # the count knows about, the month panel escapes the table's

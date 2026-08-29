@@ -21345,3 +21345,93 @@ identically on `main` — it submits a supporting function and then reads
 overlay in it changed nothing, so the speculative patch was reverted rather
 than left in (§24: a change that fixes nothing is one the next reader takes for
 load-bearing). Recorded, not chased.
+
+---
+
+## §177 · Who you are viewing as — the roles, and where each is held
+
+Islam, of a project owner whose chrome read **PROJECT OWNER · ALL UNITS**:
+*"correct it it should follow the roles and the unit he belongs to."*
+
+### Two faults, both measured before anything was drawn
+
+**IT KEPT ITS OWN ANSWER TO A QUESTION THE PLATFORM ALREADY ANSWERS.** The
+line read `p.unit` and nothing else, so `p.fn` and `p.company` were never
+looked at — **9 of the 33 people on the demo register were told they belong
+nowhere**: every supporting-function person and both company CEOs. Noran Adel,
+head of HR, read *"Function head · Project owner · —"*.
+
+**AND THE CONTROL SIX PIXELS TO ITS LEFT HAD IT RIGHT THE WHOLE TIME.** §142
+labels every option in the *Viewing as* dropdown
+`knownName(p) + placeLabel(personAt(p))` — so Hala's option said **CX** while
+her note said an em-dash. Two controls on one row answering one question two
+ways: §53.5 sitting in the chrome, unnoticed since the split. **So the copy
+goes rather than learning about functions.**
+
+**THE PLACE BELONGS TO THE ROLE, NOT TO THE PERSON.** 10 of the 33 hold roles
+in more than one place and the line named ONE for all of them — Ramy Behairy
+owns a project in **IT** and a pillar in **Mobile**, and it said *Mobile*. Each
+role is now named with where it is held, read off `personRoles()`, which is
+the one thing that mints them; never `roleWheres()`, which falls through to
+*every unit* for a derived role (§175, and the source of the **ALL UNITS** in
+the report that started this).
+
+### The shape, and how the dropdown decided it
+
+Two were drawn — **A** leading on the role (`Project owner, IT · Pillar owner,
+Mobile`) and **C** leading on the place (`IT — Project owner · Mobile — Pillar
+owner`). Islam asked which was better and why, and the answer was on the
+screen rather than in taste: **the select has just said the place**, so C
+leads with the one thing already stated and A leads with the only thing the
+line adds.
+
+**WHICH GAVE A BETTER SHAPE THAN EITHER.** Since the select carries the seat,
+a role held ONLY there needs no place at all:
+
+```
+Ashraf Laithy — Mobile     ->  BU owner
+Noran Adel — HR            ->  Function head · Project owner
+Ramy Behairy — Mobile      ->  Project owner, IT · Pillar owner
+Mennah Farouk — Mobile     ->  Strategy custodian · Project owner, Care (function)
+Fayad Sobhy — Treasury     ->  Function head · Project owner, Treasury and Finance
+Group CFO — the group      ->  No role
+```
+
+**379px at its widest, against 487px for A.** Nothing that differs is hidden;
+only what has just been said is dropped.
+
+**A ROLE HELD IN SEVERAL PLACES NAMES THEM ALL, THE SEAT INCLUDED** — dropping
+the seat from a list would read as though the role were held only in the other
+place, so Rania reads *"Strategy custodian, Care and Care (function)"*. And
+**somebody holding nothing says "No role" and stops**: repeating the seat
+there would be the single place the line said twice what the select had
+already said, so the rule is applied without an exception rather than with one.
+
+### The cost, stated
+
+**THE STRIP CLIPS BELOW ~1280px, AND WHAT IT CUTS IS THE TAIL** — which is the
+place, which is the half this section exists to add. Measured: one line at
+every width from 1920 down to 1000, no sideways scroll, and clipped with an
+ellipsis from 1280. So **the whole line goes on a hover** (§88's shape: one
+line, an ellipsis where it does not fit, the value one hover away). Set
+directly rather than through `clipTitles()`, which is scoped to the setup
+tables and would have had to be widened to reach the chrome — and unlike the
+cells that rule was written for, this element carries no other title for a
+hover to cover.
+
+### Proof
+
+`checks/viewer-line.py` asserts of **every active person**, not a sample —
+the fault was invisible on exactly the nine people nobody thought to switch
+to — and it asserts AGREEMENT with `personRoles()` rather than any literal
+string, so renaming a role or a unit keeps it green. Both ends on the place
+rule (§94.2): a place away from the seat must be named, one at the seat must
+not, **and the register must actually hold an example of each**, or the two
+assertions are true of nothing (§113.8).
+
+**PROVED ABLE TO FAIL — and its first version could only fail once.** It began
+by asking whether `viewerRoleLine` existed and exiting if not, so against the
+previous build it reported one failure and measured nothing else: the same
+trap §176's check fell into an hour earlier. It reads the line **off the
+strip** when there is no builder, so every assertion runs either way — **11
+failures** against `227c583`, naming the nine em-dash people by key.

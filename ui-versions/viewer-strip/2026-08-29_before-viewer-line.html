@@ -1693,28 +1693,19 @@
        rather than a stranded middot. */
     document.getElementById("orgname").textContent =
       GROUP.org ? "\u00b7 " + GROUP.org : "";
-    /* THE ROLES, AND WHERE EACH IS HELD (§177). One builder, beside
-       `placeLabel()` and asking `personAt()` like every other surface that
-       answers "where does this person sit" (§54). This line used to work it
-       out for itself off `p.unit` and nothing else, which is how it came to
-       say an em-dash for every function head and both company CEOs while the
-       DROPDOWN BESIDE IT said the function’s own name (§142). Two controls
-       on one row answering one question two ways — so the copy goes rather
-       than learning about functions. */
-    /* AND THE WHOLE LINE ON A HOVER. `.viewer-note` is one line with an
-       ellipsis, and below about 1280px this line is longer than the strip has
-       room for -- what gets cut is the tail, which is the PLACE, which is the
-       half §177 exists to add. §88's shape: one line, an ellipsis where it
-       does not fit, the whole value one hover away. Set unconditionally
-       rather than through `clipTitles()`, which is scoped to the setup tables
-       and would have to be widened to reach the chrome -- and unlike the
-       cells that rule was written for, this element carries no other title
-       for a hover to cover. */
-    (function(){
-      var el = document.getElementById("viewerNote");
-      el.textContent = viewerRoleLine(viewer());
-      el.title = el.textContent;
-    })();
+    var v = viewer();
+    /* Guarded even though every person currently has a unit: reading
+       UNITS[null].name throws inside paint, which aborts the repaint and
+       leaves the previous screen showing \u2014 a crash that looks like a routing
+       bug. */
+    var where = v.unit === "group" ? "all units"
+              : (v.unit && UNITS[v.unit] ? UNITS[v.unit].name : "\u2014");
+    document.getElementById("viewerNote").innerHTML =
+      /* The roles they hold, not a level. Several is normal — group CEO who
+         also owns Care reads "Group CEO · Business unit owner". */
+      (personRoles(v).map(function(r){ return roleName(r.role); })
+        .filter(function(x, i, a){ return a.indexOf(x) === i; }).join(" &middot; ") || "No role") +
+      " &middot; " + where;
 
     if (!current) {
       paintBuildBand();

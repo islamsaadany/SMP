@@ -20249,3 +20249,25 @@ cannot see the other go wrong).
 believed (§94.5): a raw compare → **4**, the audience filter ignored → **3**,
 a blank line stopping being a paragraph → **4**, the last printing the 24
 falsely-reworded rows by name.
+
+### The reference column went, on sight (§161.5)
+
+The first build carried a read-only **Standard answer** beside the editable
+one, because that is the shape Islam had worked in by hand — §160's
+*Before* / *After*. Looking at it: *"remove the standard answer from the sheet
+not to be confused."*
+
+He is right, and the reason is worth keeping. Two columns of prose that are
+**identical on every row a tenant has not touched** make a sheet you have to
+read twice to know which one you are editing — and the comparison it offered
+is already on the page, on the control that also acts on it: an answer the
+office has changed says so, on the button that puts it back (§140). *A
+comparison you can act on beats a column you can only look at.*
+
+**IT COSTS OLD FILES NOTHING.** `sheetObjects()` keys on the heading row, so a
+file downloaded before today still reads and its extra column is simply a key
+nobody asks for — §58's rule again: write the new shape, read either.
+
+Asserted as an ABSENCE, and of the ROWS as well as the head: a column dropped
+from the heading and still written into every row is a sheet whose columns are
+one out, and every other assertion in the file would go on passing (§113.8).

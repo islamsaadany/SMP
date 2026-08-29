@@ -1250,8 +1250,20 @@ function peopleFromWorkbook(sheets){
    is not a thing anybody types into a cell. Both are read (SMPRules.kbParas),
    and kbSetOver compares canonically, so an untouched round trip stores
    nothing at all (§54.5). */
+/* NO REFERENCE COLUMN. The first build carried a read-only "Standard answer"
+   beside the editable one, because that is the shape Islam worked in by hand
+   (§160's Before/After). Looking at it, he asked for it out: "remove the
+   standard answer from the sheet not to be confused." Two columns of prose
+   that differ only where somebody has edited one is a sheet you have to read
+   twice to know which is which — and the shipped wording is one press away on
+   the page, on the button that also puts it back (§140's "Back to the
+   standard wording"). A comparison you can act on beats a column you cannot.
+
+   REMOVING IT COSTS NOTHING TO OLD FILES: sheetObjects() keys on the heading
+   row, so a file downloaded before today still reads, and its extra column is
+   simply a key nobody asks for (§58's rule — write the new shape, read
+   either). */
 var KB_FILE_COLS = ["Id", "Section", "Question", "Answer", "Audience"];
-var KB_FILE_REF  = "Standard answer";
 
 function kbAudLabels(){
   return SMPRules.KB_AUDIENCES.map(function(k){
@@ -1284,11 +1296,10 @@ function kbReadme(){
     ["Audience — who the assistant answers with this. One of:"],
     ["   " + kbAudLabels().join("   |   ")],
     [""],
-    ["Standard answer — the wording the platform ships, for you to compare against."],
-    ["   It is ignored when you upload; edit the Answer column instead."],
-    [""],
     ["Putting an Answer back to the standard wording clears your change for that"],
-    ["question, so this file is also how you undo one."],
+    ["question, so this file is also how you undo one. The standard wording is on"],
+    ["the Knowledge base page itself: an answer you have changed says so, on the"],
+    ["button that puts it back."],
     [""],
     ["Uploading ADDS and AMENDS and never removes: a row you delete from this file"],
     ["leaves the platform exactly as it was. Remove a question you added on the page."],
@@ -1304,22 +1315,18 @@ function kbWorkbook(){
       var o = SMPRules.kbLook(GROUP.kb, r.id);
       var aud = SMPRules.kbAudience(GROUP.kb, r.id, r.who || g.who);
       rows.push([r.id, g.g, (o && o.q) || r.q, kbCellText((o && o.a) || r.a),
-                 SMPRules.KB_AUDIENCE_LABEL[aud], kbCellText(r.a)]);
+                 SMPRules.KB_AUDIENCE_LABEL[aud]]);
     });
   });
-  /* The office's own questions, at the foot, with an empty reference cell —
-     there is no standard wording to compare a question of theirs against. */
+  /* The office's own questions, at the foot. */
   SMPRules.kbAllAdds(GROUP.kb).forEach(function(x){
     rows.push([x.id, x.g || "", x.q, kbCellText(x.a),
-               SMPRules.KB_AUDIENCE_LABEL[SMPRules.kbAudienceWord(x.w)], ""]);
+               SMPRules.KB_AUDIENCE_LABEL[SMPRules.kbAudienceWord(x.w)]]);
   });
   return [
     kbReadme(),
-    { name:"Questions", widths:[22, 30, 46, 76, 22, 76],
-      head:KB_FILE_COLS.concat([KB_FILE_REF]),
-      /* Written and never read (§65's "Also holds"): locked, so the one column
-         that cannot change anything cannot look as though it might. */
-      lockedCols:[5],
+    { name:"Questions", widths:[22, 30, 46, 96, 22],
+      head:KB_FILE_COLS,
       validations:[
         { range:"E2:E2000", list:kbAudLabels(),
           error:"Choose who the assistant answers with this question." }

@@ -81,14 +81,20 @@ with sync_playwright() as p:
         const q=s.find(x=>x.name==='Questions');
         return {sheets:s.map(x=>x.name), head:q.head, rows:q.rows.length,
                 locked:q.lockedCols||[], vals:(q.validations||[]).length,
+                cells:q.rows[0].length,
                 corpus:RECIPES.reduce((n,g)=>n+g.items.length,0)
                        + SMPRules.kbAllAdds(GROUP.kb).length};}""")
     ck("a Read me and a Questions sheet", m["sheets"] == ["Read me", "Questions"], m["sheets"])
     ck("Id is the first column, because the question text is editable and cannot be the key",
        m["head"][0] == "Id", m["head"])
     ck("one row per question (%d)" % m["rows"], m["rows"] == m["corpus"], m)
-    ck("the reference column is locked — it is written and never read",
-       m["locked"] == [5], m["locked"])
+    # Islam, looking at the first build: "remove the standard answer from the
+    # sheet not to be confused." Asserted as an ABSENCE, and of the ROWS as
+    # well as the head — a column dropped from the heading and still written
+    # into every row is a sheet whose columns are one out (§113.8).
+    ck("no Standard answer column — every column on the sheet is editable",
+       "Standard answer" not in m["head"] and m["cells"] == len(m["head"]),
+       {"head": m["head"], "cells": m["cells"]})
     ck("the audience is a dropdown, not free text", m["vals"] >= 1, m)
 
     print("\n3 · THE ROUND TRIP IS A FIXED POINT")

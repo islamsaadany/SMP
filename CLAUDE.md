@@ -806,6 +806,30 @@ console errors (in this cloud environment, run it via a wrapper that points Play
   outranks the tab rule, §53.5); the check asserts the PAINT — same
   computed ground as the corner's AND a real colour, or both vanishing
   passes (§113.8).
+- **THE ONLY WAY OUT MAY NOT BE THE QUIETEST THING ON THE SCREEN (§159):**
+  the welcome screen's *Continue to Mobile* was a 13px `--stone` link at the
+  foot of the LEFT COLUMN, and there is no ×, no Escape and no click-outside —
+  so every other control on that screen goes somewhere and stays while one
+  link carried the whole exit. **Three faults, and weight fixes one:** it was
+  the quietest thing among three bordered buttons and a solid fill; its scope
+  read as the end of *Waiting on you* rather than the way past the screen; and
+  **below 960px it was not even last** — the columns stack, so at 900px the
+  screen is 949px tall with **411px of side column after the way out**.
+  `.wexit` is one bar **after `.wcols` inside `.wwrap`**, so it spans the grid
+  and is last at every width, wearing `.wpages`' wide-row shape rather than a
+  second vocabulary for *a row you press to go somewhere* (§53.5).
+  **THE EMPTY CASE TAKES THE FILL AND THAT CLOSES A DRIFT** — §148's approved
+  mockup said Continue is the loud control when nothing is waiting and the
+  build never did it (§45.2, §61) — in **its own class `.wloud`, never
+  `.wcta`**, which means *an action row shouts*; that separation is what lets
+  the check assert no action row wears the fill AND that the exit does. **A
+  row arriving late gives it back**: the inbox count and the chat's unread
+  land after the screen is built, so `unEmpty()` — already the one place that
+  removes the empty line — drops `wloud` in the same breath. The drawing's
+  grey *Strategy · Plan* sub-line is **deliberately not built**: the label
+  names the destination (1b-ii) and the second line needs the navigation-word
+  reader §99 deleted. **Escape still does not close it** (§159.1) — offered
+  with the variations, not taken up, and not slipped in unasked.
 - **THE OWN COLUMNS ARE TWO QUESTIONS, AND §94'S LOCK IS A DEFAULT NOW (§117,
   partially reversing §94 at Islam's direction):** each own column on Roles &
   access splits into **Strategy** (the words as agreed — `a_unit_own_strat` /
@@ -2567,6 +2591,8 @@ python3 checks/office-chat.py   # the chat's client half — serves the built fi
 python3 checks/welcome.py       # the welcome screen (§148): three viewers over HTTP, every
                                 # row asserted against the function its destination page
                                 # calls, every door pressed and read back, and the absences
+                                # — and since §159 the way OUT: outside the list's column,
+                                # last in the wrap, spanning both, and the fill at both ends
 python3 checks/setup-rail.py    # the Setup rail fits the window, every entry is reachable
                                 # by scrolling the LIST, and the cap does not move --chrome-h
                                 # (§101.5 — that last one is what licenses the cap at all)
@@ -2632,7 +2658,28 @@ prior sessions (on HR_ERP) accidentally reverted agreed-upon designs.
 
 ---
 
-*Last Updated: 2026-08-28 &mdash; **v3.59: the UI/UX audit, waves 2&ndash;4
+*Last Updated: 2026-08-29 &mdash; **v3.59: the welcome screen's way out
+(&sect;159)**. Islam, using what &sect;148 shipped: *"continue to the unit or
+the function button is a bit not obvious."* Five variations drawn in the real
+screen and he chose **B**, one bar across both columns. **The fault was three
+things and weight fixes one** &mdash; it is the ONLY exit (no &times;, no
+Escape, no click-outside), it was the quietest thing on a screen holding three
+bordered buttons and a solid fill, and it sat INSIDE the left column, so its
+scope read as the end of the list. **Measured, not asserted**: the link began
+585px into the columns and 165px above their bottom, and **below 960px it was
+not even last** &mdash; at 900px the screen is 949px tall with 411px of side
+column after the way out, so somebody looking for the exit at the foot finds
+*Your pages* and the intro round. **The empty case closes a drift**:
+&sect;148's own approved mockup said Continue becomes the loud control when
+nothing is waiting and the build never did it, so an empty welcome offered a
+grey link and nothing else &mdash; and the promotion is its own class, because
+`.wcta` means *an action row shouts* and this is not one. **The drawing's grey
+sub-line is deliberately not built** and **Escape is deliberately still not
+wired**, both recorded rather than slipped in. Proved able to fail: **7
+failures** against the pre-&sect;159 build, exactly the seven new assertions;
+full `qa.py` green.*
+
+*Earlier: 2026-08-28 &mdash; **v3.59: the UI/UX audit, waves 2&ndash;4
 (&sect;149&ndash;&sect;158)**. Islam: *"I need a refinement plan for the whole
 platform."* Twenty items audited, and what shipped is smaller than the audit
 predicted because measuring kept dissolving items. **The last of them

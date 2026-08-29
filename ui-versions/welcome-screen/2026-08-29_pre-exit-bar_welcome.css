@@ -70,34 +70,10 @@
 .welcomeover .wbtn.wcta { background:var(--cta); border-color:var(--cta);
   color:var(--cta-ink); }
 .welcomeover .wbtn.wcta:hover { background:var(--cta-hover); border-color:var(--cta-hover); }
-/* ── THE WAY OUT (§159) ──────────────────────────────────────────────────
-   It was a text link at the foot of the LEFT COLUMN, which is three faults at
-   once: it is the only exit (there is no ×, no Escape, no click-outside), it
-   was the quietest thing on a screen holding three bordered buttons and one
-   solid fill, and it read as the end of the "Waiting on you" list rather than
-   the way past the screen. Below 960px it was not even last — the columns
-   stack, so 411px of side column sat AFTER the way out at 900px wide.
-
-   One bar across both columns answers all three: a real control, spanning the
-   grid so its scope is the screen, and last at every width. It wears the wide
-   row shape .wpages already uses (§53.5) and spends none of §41's accent —
-   except on the one screen where there is no other act to spend it on. */
-.welcomeover .wexit { margin-top:22px; width:100%; display:flex;
-  align-items:center; justify-content:space-between; gap:16px; cursor:pointer;
-  text-align:left; font:inherit; padding:17px 22px; border-radius:var(--r);
-  border:1px solid var(--line); background:var(--surface); color:var(--stone); }
-.welcomeover .wexit .wexlab { font-size:15px; font-weight:800; letter-spacing:-.01em; }
-.welcomeover .wexit .wgo { font-family:var(--mono); font-size:var(--fs-lead);
-  color:var(--gold-deep); }
-.welcomeover .wexit:hover { border-color:var(--gold-deep); }
-.welcomeover .wexit:focus-visible { outline:2px solid var(--focus); outline-offset:2px; }
-/* PROMOTED ONLY WHEN IT IS THE ONLY ACT (§41, §45.2): with nothing waiting
-   there is no CTA on the screen, so the exit takes the fill — its own class,
-   because .wcta means "an action row shouts" and this is not an action row. */
-.welcomeover .wexit.wloud { background:var(--cta); border-color:var(--cta);
-  color:var(--cta-ink); }
-.welcomeover .wexit.wloud .wgo { color:var(--cta-ink); }
-.welcomeover .wexit.wloud:hover { background:var(--cta-hover); border-color:var(--cta-hover); }
+.welcomeover .wcontinue { margin-top:14px; text-align:right; }
+.welcomeover .wcontinue a { font-size:var(--fs-note); font-weight:600;
+  color:var(--stone); text-decoration:none; }
+.welcomeover .wcontinue a:hover { color:var(--gold-deep); }
 
 /* ── The side column ────────────────────────────────────────────────────── */
 .welcomeover .wside { display:flex; flex-direction:column; gap:22px; }

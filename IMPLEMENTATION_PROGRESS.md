@@ -68,6 +68,33 @@ Nothing proceeds past this line without an answer.
 checked as separate rounds on one branch and shipping as one version — main
 took v3.52–v3.57 from four other sessions while they were being built.*
 
+### v3.59 — the welcome screen's way out (§159)
+
+- Islam, on §148's screen: *"continue to the unit or the function button is a
+  bit not obvious"* — five variations drawn in the real screen, and he chose
+  **B**, one bar across both columns.
+- **Three faults, and weight fixes one.** It is the *only* exit (no ×, no
+  Escape, no click-outside); it was the quietest thing on the screen; and it
+  sat inside the left column, so it read as the end of the list. Measured: the
+  link began 585px into the columns and 165px above their bottom, and **below
+  960px it was not even last** — at 900px, 411px of side column came after the
+  way out.
+- **The bar spans the grid**, sits after `.wcols` inside `.wwrap`, and is last
+  at every width. It wears `.wpages`' wide-row shape rather than a second
+  vocabulary (§53.5) and spends none of §41's accent.
+- **The empty case closes a drift**: §148's approved mockup said Continue is
+  the loud control when nothing is waiting and the build never did it, so an
+  empty welcome was a grey link and nothing else. `.wexit.wloud` is its own
+  class, and a row arriving late gives the fill back through `unEmpty()`.
+- **The drawing's grey *Strategy · Plan* sub-line is not built** — the label
+  already names the destination (1b-ii), and the second line needs the
+  navigation-word reader §99 deleted. Recorded, not dropped silently.
+- `checks/welcome.py` — 7 failures on the pre-§159 build, exactly the seven
+  new assertions. Contrast measured in all four palettes (lowest 4.99).
+  **Escape and click-outside still do not close the overlay** — offered with
+  the variations, not taken up, and left as its own ask. **Not merged —
+  awaiting Islam.**
+
 ### v3.59 — the plan tables fit the pane (§158)
 
 - Islam, wave 4: on a smaller window the plan tables were cut off down the

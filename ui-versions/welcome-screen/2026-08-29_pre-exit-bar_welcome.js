@@ -249,10 +249,6 @@ var WELCOME = (function(){
   function unEmpty(list){
     var e = list.querySelector(".wempty");
     if (e) e.remove();
-    /* A row arriving late means the exit is no longer the only act on the
-       screen, so it gives the fill back (§41). */
-    var x = box && box.querySelector("[data-wcontinue]");
-    if (x) x.classList.remove("wloud");
   }
   function watchReplies(list){
     /* The corner's first poll is in flight while this screen is built, so
@@ -328,6 +324,7 @@ var WELCOME = (function(){
           '<div class="wmain">' +
             '<p class="wseclab">Waiting on you</p>' +
             '<div class="wacts"></div>' +
+            '<p class="wcontinue"><a href="#" data-wcontinue>Continue</a></p>' +
           "</div>" +
           '<div class="wside">' +
             '<div class="wpagesbox"><p class="wseclab">Your pages</p>' +
@@ -342,14 +339,6 @@ var WELCOME = (function(){
             "</div>" +
           "</div>" +
         "</div>" +
-        /* THE WAY OUT SPANS BOTH COLUMNS (§159): inside .wwrap and AFTER
-           .wcols, so its scope is the screen rather than the list it used to
-           end — and so it is last at every width, including the stacked
-           layout below 960px, where the side column falls beneath the left
-           one and a control living in that column is stranded mid-screen. */
-        '<button type="button" class="wexit" data-wcontinue>' +
-          '<span class="wexlab"></span><span class="wgo">\u203a</span>' +
-        "</button>" +
       "</div>";
 
     var list = box.querySelector(".wacts");
@@ -368,7 +357,6 @@ var WELCOME = (function(){
       empty.className = "wact wempty";
       empty.innerHTML = '<div class="wwhat"><b>Nothing is waiting on you</b></div>';
       list.appendChild(empty);
-      box.querySelector("[data-wcontinue]").classList.add("wloud");
     }
     acts.forEach(function(a){ list.appendChild(a); });
     if (!office) watchReplies(list);
@@ -427,10 +415,7 @@ var WELCOME = (function(){
 
     /* ── Continue ───────────────────────────────────────────────────────
        The platform under this screen is already on the page §94.6 chose, so
-       Continue only steps aside — and names where that is. The drawing
-       carried a grey "Strategy · Plan" under the name and it is deliberately
-       not built: the label already names the destination, and the second
-       line would mean re-adding the navigation-word reader §99 deleted. */
+       Continue only steps aside — and names where that is. */
     var here = null;
     try { here = typeof current !== "undefined" ? current : null; } catch(e){}
     var word = "Continue";
@@ -438,7 +423,7 @@ var WELCOME = (function(){
       try { word = "Continue to " + subjectName(here); } catch(e){}
     }
     var cont = box.querySelector("[data-wcontinue]");
-    cont.querySelector(".wexlab").textContent = word;
+    cont.textContent = word + " ›";
     cont.addEventListener("click", function(ev){ ev.preventDefault(); dismiss(); });
 
     document.body.appendChild(box);

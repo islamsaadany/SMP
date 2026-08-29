@@ -173,6 +173,42 @@ function renderAccess(){
     if (roleKey === "cceo" && (areaKey === "a_fn_own" || areaKey === "a_fn_own_strat")) {
       return "A company CEO holds no supporting function.";
     }
+    /* ── TWO MORE THAT COULD NEVER COME UP (§174) ─────────────────────
+       Islam: *"a project owner has options to edit or fill in a business
+       unit. Business units have no project owners, they have only pillar
+       owners."* Correct, and it is the derivation that says so rather than a
+       convention: `personRoles()` mints `powner` only from
+       `capabilities[].projects`, and a capability belongs to a FUNCTION
+       (`c.fn`) — so the role is only ever held at `fn:<key>` and a business
+       unit can never be the one this person holds.
+
+       The OTHER columns stay, which is the same reading `fnhead` has had
+       since §117: a project owner holds no unit, so every unit is "other" to
+       them, and that column is how a tenant would let them read one.
+
+       The defaults were already `none` here, so nothing anybody has is
+       changing — what goes is being OFFERED a choice with nothing behind it.
+       An option that cannot do anything is worse than an absent one: it reads
+       as a decision somebody forgot to make. */
+    if (roleKey === "powner" && (areaKey === "a_unit_own" || areaKey === "a_unit_own_strat")) {
+      return "A project owner holds no business unit — projects belong to a " +
+             "supporting function's capabilities.";
+    }
+    /* AND THE MIRROR, WHICH THE SAME LOOK FOUND: a BU owner's scope is a unit
+       and `roleWheres()` offers only units, so "own supporting function" can
+       never be theirs either — `fnhead`'s exclusion above with the sides
+       swapped, missed when that one was written. */
+    if (roleKey === "owner" && (areaKey === "a_fn_own" || areaKey === "a_fn_own_strat")) {
+      return "A business unit owner holds no supporting function.";
+    }
+    /* DELIBERATELY NOT plowner × own function. Islam expected the mirror
+       ("same for pillar owner in the function") and the derivation disagrees:
+       `personRoles()` mints `plowner` from a unit's `items` AND from a
+       function whose `format` is "pillars" (§59) — a supporting function that
+       plans in pillars has pillars, and its pillar owners are derived by the
+       same line as a unit's. Removing that cell would close a real
+       configuration this tenant already has. Left, and said out loud rather
+       than quietly obeyed. */
     return null;
   }
 
@@ -195,16 +231,22 @@ function renderAccess(){
   while (hi < AREAS.length) {
     var ha = AREAS[hi];
     if (!ha.pair) {
-      headTop += '<th class="ac" rowspan="2" title="' + esc(ha.note) + '">' + esc(ha.label) + '</th>';
+      /* THE SHORT WORD IN THE COLUMN, THE FULL ONE ON THE HOVER (§174), so
+         nothing is lost by abbreviating — the heading says "Other Func." and
+         hovering it says which functions and what is in the column. */
+      headTop += '<th class="ac" rowspan="2" title="' +
+        esc(ha.label + " — " + ha.note) + '">' + esc(ha.short || ha.label) + '</th>';
       hi++;
       continue;
     }
     var span = 0;
     while (hi + span < AREAS.length && AREAS[hi + span].pair === ha.pair) span++;
-    headTop += '<th class="ac acpair" colspan="' + span + '">' + esc(ha.pair) + '</th>';
+    headTop += '<th class="ac acpair" colspan="' + span + '" title="' + esc(ha.pair) +
+      '">' + esc(ha.short || ha.pair) + '</th>';
     for (var hj = 0; hj < span; hj++) {
       var hb = AREAS[hi + hj];
-      headSub += '<th class="ac achalf" title="' + esc(hb.note) + '">' + esc(hb.col) + '</th>';
+      headSub += '<th class="ac achalf" title="' + esc(hb.label + " — " + hb.note) +
+        '">' + esc(hb.col) + '</th>';
     }
     hi += span;
   }

@@ -20984,3 +20984,126 @@ the schema was read against what the product can now produce. There are two,
 and the other is SWOT's `cat IN ('s','w','o','t')`, which is closed by
 definition. *A CHECK constraint is a copy of a rule that lives in another file,
 and nothing in a build compares the two.*
+
+---
+
+## §173 · A refresh stays where you are
+
+Islam: *"on refresh don't take me to another page, the refresh stays on the
+same page I'm at."*
+
+**§94.6 IS UNTOUCHED, AND THAT IS THE WHOLE SCOPE.** That section decided where
+a SESSION opens — where the person works — because `var current = "group"` was
+a literal nobody had chosen and everyone landed on a group score they often did
+not own. A RELOAD is a different event and had never been asked about: `current`
+is null on a fresh page, null means *ask the landing rule*, and the landing rule
+does not know you were on Setup › Roles & access ten seconds ago.
+
+**SESSION STORAGE, NOT LOCAL.** A refresh happens inside one session, so
+`sessionStorage` remembers for exactly as long as the question lasts — and
+tomorrow's sign-in still opens where you work, which is §94.6 and is his own
+earlier answer. `localStorage` would have silently reversed a decision nobody
+asked to reverse. A screen preference never touches the state graph (§25,
+§47.1), and a throwing store reads as nothing remembered (§107): a platform
+that will not open is worse than one that opens somewhere else.
+
+**THE PLACE, NEVER A MODE.** Where you were is a destination, a tab and a
+section. Edit, reporting and arrange are MODES and §63.1 drops them on every
+navigation — restoring one would put somebody back inside an edit they had
+left, on a page they did not choose.
+
+**CHECKED, NOT TRUSTED**, which is `entryDest()`'s own rule: a remembered
+destination can stop being reachable between two loads — a role revoked, a unit
+retired — and the tab has to still be one this viewer holds, or the page under
+it is an empty frame. Asked ONCE per load, because `paintUnits()` runs on every
+paint and a restore that ran twice would drag you back after you navigated.
+
+**REMEMBERED WHERE THE SAVE IS**, at the end of `paint()`: every navigation ends
+in a paint, so one line covers a door added tomorrow and there is no list of
+handlers to keep in step (§170's shape, one concern over).
+
+`checks/stay-put.py` asserts the PAIR (§113.8) — a refresh keeps the
+destination, the tab and the section; a new session still lands where §94.6
+says; a mode does not come back; and a remembered place that cannot be reached
+falls back rather than opening nothing.
+
+---
+
+## §174 · The matrix header, and the cells that could never come up
+
+Two asks from using Roles & access, and the second one is a correctness bug.
+
+### The header (settled from a mockup, §174.1)
+
+*"Make the header sticky, and use acronyms to make it smaller — Business unit
+is BU, Function is Func., Supporting is Support — so the header becomes maximum
+2 lines, and align the header content vertically in the middle in the 1st
+row."*
+
+**MEASURED FIRST, AND HIS TWO ASKS FOUGHT.** *"Other supporting functions"* ran
+to THREE lines at 1500px and FOUR at 1180, which is most of why the head was
+83px deep on a squeezed window — but written out in full his own acronyms give
+*"Other Support Func."*, which still wraps to three at 1180. Three wordings
+were drawn in the real page with the line counts beside them; he chose the
+shortest (**Own Func. / Other Func.**) and kept *Reporting cycle* as it is.
+Result: **83px → 53px**, two lines at every width from 1600 to 1024.
+
+**A SECOND FIELD RATHER THAN A RENAME.** `short` is the header's word; `label`
+stays the area's name everywhere it is spoken in a sentence, and the full name
+is on the hover of every heading. An abbreviation is right in a 93px column and
+wrong in prose.
+
+**§163.5 UN-PINNED THIS HEAD AND ITS ARGUMENT SURVIVES INTACT.** That section
+made every Setup table's head `static` because `.cfg` is `overflow-x:auto` — a
+scroll container is what a sticky child pins against, so a PAGE offset resolved
+141px down inside the table (§130.2). What that rules out is pinning to the
+PAGE. It does not rule out pinning to the BOX, which is what the register has
+done since §69.19 — so the box gets a height and the head pins at its top.
+
+**`thead`, NOT `thead th`, AND THAT IS WHAT MAKES A TWO-ROW HEAD WORK.** Pinning
+the cells would need a second `top` for the lower row measured off the upper —
+a guessed constant between two pinned things is a hole rows show through
+(§130.10). A sticky `<thead>` moves as one block on a single offset: measured,
+both rows hold while the rows scroll under them, so there is nothing to keep in
+step.
+
+**AND THE FIRST BUILD COMMITTED §122.5's FAULT WHILE QUOTING IT.** The cap
+subtracted a guessed 52px for the legend under the table and overran the window
+by 5px at 1024×760. It flexes into what is left now, through `.panefill` — the
+register's own expression, on a pane that had to be marked the same way.
+
+### The cells that could never come up (§174.2)
+
+*"A project owner has options to edit or fill in a business unit. Business units
+have no project owners, they have only pillar owners."*
+
+**HE IS RIGHT, AND THE DERIVATION IS WHAT SAYS SO** rather than a convention:
+`personRoles()` mints `powner` only from `capabilities[].projects`, and a
+capability belongs to a FUNCTION (`c.fn`), so the role is only ever held at
+`fn:<key>`. The own-business-unit columns can never be a project owner's.
+**And the same look found the mirror nobody had noticed**: a BU owner's scope is
+a unit and `roleWheres()` offers only units, so *own supporting function* can
+never be theirs either — `fnhead`'s exclusion from §117 with the sides swapped.
+
+**THE OTHER COLUMNS STAY**, following the reading `fnhead` has had since §117: a
+project owner holds no unit, so every unit is *other* to them, and that column
+is how a tenant would let them read one.
+
+**THE DEFAULTS WERE ALREADY `none`, SO NOBODY'S ACCESS MOVES.** What goes is
+being offered a choice with nothing behind it — and an option that cannot do
+anything is worse than an absent one, because it reads as a decision somebody
+forgot to make.
+
+**AND ONE OF HIS TWO EXAMPLES IS WRONG, WHICH IS SAID RATHER THAN QUIETLY
+OBEYED.** He expected the mirror for pillar owners — *"same for pillar owner in
+the function"* — and the derivation disagrees: `plowner` is minted from a unit's
+`items` **and** from a function whose `format` is `"pillars"` (§59). A
+supporting function that plans in pillars really does have pillar owners,
+derived by the same line as a unit's, and this tenant already has such
+functions. Removing that cell would close a live configuration. Left, and the
+check asserts it STAYS — because a build that dashed the whole table would
+otherwise satisfy every assertion about what is absent (§113.8).
+
+`checks/access-header.py` measures with a Range (a cell returns one rect however
+many lines it holds, §105.2), asks the derivation rather than a list copied into
+the file, and was watched to fail **13 ways** on the previous build.

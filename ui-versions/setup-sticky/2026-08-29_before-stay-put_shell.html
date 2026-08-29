@@ -563,60 +563,6 @@
      null makes the first paint ask entryDest() the same way every later one
      does. */
   var current = null, currentSub = null;
-
-  /* ── A REFRESH STAYS WHERE YOU ARE (§173) ──────────────────────────
-     Islam: *"on refresh don't take me to another page, the refresh stays on
-     the same page I'm at."* §94.6 decided where a SESSION opens — where the
-     person works, because "everyone opens on the group's Performance page"
-     was a literal nobody had chosen. That decision is untouched: this only
-     covers a reload, which is not the same event and had been landing you on
-     your own unit's Plan from wherever you happened to be.
-
-     SESSION STORAGE, NOT LOCAL, and the difference is the whole scope. A
-     refresh is inside one session, so `sessionStorage` remembers exactly as
-     long as the question lasts — and tomorrow's sign-in still opens where you
-     work, which is §94.6 and is his own earlier answer. A screen preference
-     never touches the state graph (§25, §47.1).
-
-     THE PLACE, NEVER A MODE. Where you were is a destination, a tab and a
-     section; edit, reporting and arrange are modes and §63.1 drops them on
-     every navigation, so restoring one would put somebody back inside an edit
-     they had left. And a throwing store reads as nothing remembered (§107),
-     because a platform that will not open is worse than one that opens
-     somewhere else. */
-  var WHERE_KEY = "smp.where";
-  var whereAsked = false;
-
-  function rememberWhere(){
-    if (!current) return;
-    try {
-      sessionStorage.setItem(WHERE_KEY, JSON.stringify({
-        d: current, s: currentSub, c: currentSub ? CURSEC[currentSub] : null }));
-    } catch (e) { /* a store that refuses is a preference nobody keeps */ }
-  }
-
-  /* CHECKED AGAINST WHAT THIS VIEWER CAN OPEN, never trusted (§94.6's own
-     rule): a remembered destination can stop being reachable between one load
-     and the next — a role revoked, a unit retired — and following it blindly
-     is how somebody lands on a page that renders nothing. Asked ONCE, because
-     `paintUnits()` runs on every paint and this must not drag you back after
-     you have navigated away. */
-  function restoreWhere(reach){
-    if (whereAsked) return null;
-    whereAsked = true;
-    var raw = null;
-    try { raw = sessionStorage.getItem(WHERE_KEY); } catch (e) { return null; }
-    if (!raw) return null;
-    var w = null;
-    try { w = JSON.parse(raw); } catch (e) { return null; }
-    if (!w || !w.d || reach.indexOf(w.d) === -1) return null;
-    /* The TAB has to still be one this viewer holds at that destination, or
-       the page under it is an empty frame. The section is corrected further
-       down by the renderer itself, so it is enough to hand it over. */
-    var defs = reachable(defsFor(w.d), w.d, w.d);
-    if (!w.s || !defs.some(function(d){ return d.k === w.s; })) return null;
-    return w;
-  }
   /* WHOSE report is open, or null. A target rather than a boolean: the page is
      per unit or per function, and a flag would follow you onto the next one
      (§63.1). Dropped by every navigation, exactly as the edit modes are. */
@@ -1277,22 +1223,12 @@
     if (allowed(SUBS.manage, "group").length) everything.push("manage");
     if (everything.indexOf(current) === -1) {
       var dests = tabs.filter(function(t){ return t.k; });
-      /* WHERE YOU WERE BEATS WHERE YOU WORK, ON A RELOAD ONLY (§173). Null
-         `current` is both the first paint of a session and the first paint
-         after a refresh, and only the remembered place tells them apart. */
-      var back = restoreWhere(everything);
-      if (back) {
-        current = back.d;
-        currentSub = back.s;
-        if (back.c) CURSEC[back.s] = back.c;
-      } else {
-        current = entryDest(everything, dests);
-        /* The PAGE as well as the door, and by the same call the navigation
-           makes — otherwise the first paint lands on whichever tab happens to
-           be first (Strategy) and whichever section happens to be first inside
-           it (Foundation), which is not the plan. */
-        currentSub = current ? entrySub(current) : null;
-      }
+      current = entryDest(everything, dests);
+      /* The PAGE as well as the door, and by the same call the navigation
+         makes — otherwise the first paint lands on whichever tab happens to
+         be first (Strategy) and whichever section happens to be first inside
+         it (Foundation), which is not the plan. */
+      currentSub = current ? entrySub(current) : null;
     }
     var parts = tabs.map(function(t, i){
       if (t.folds) {
@@ -1874,13 +1810,7 @@
              other Setup page is a form or a short list and should keep growing
              the page instead. Both halves of this line came from different
              branches on the same day and both are load-bearing. */
-          /* AND ROLES & ACCESS JOINS IT (§174), for the same reason and by the
-             same mark: its head is now pinned to its own box, and a box only
-             scrolls if something caps it. Flexing into what is left beats a
-             constant here as much as it did there — the legend under the
-             table, the header wrapping to a second line at a narrow width,
-             and §167's two feet all change that number. */
-          (currentSub === "people" || currentSub === "access" ? " panefill" : "") + '">' +
+          (currentSub === "people" ? " panefill" : "") + '">' +
           /* ── AND THE PAGE'S CONTROLS ARE ON IT (§135) ────────────────
              `pageLineHTML()` is read AFTER `body`, because the page's own
              render is what fills the slots. The search sits left of the
@@ -2063,10 +1993,6 @@
        loop — and it REPLACES the body, so the bindings wire() has just made on
        the old nodes die with them rather than doubling up (§47.2). */
     if (PDLG && document.getElementById("modal-b")) personDialogPaint();
-    /* AND WHERE YOU ARE IS REMEMBERED HERE, for the same reason the save is
-       (§173): every navigation ends in a paint, so one line covers a door
-       added tomorrow and there is no list of handlers to keep up to date. */
-    rememberWhere();
     /* Every mutation repaints, so this is where a change becomes a save. */
     SYNC.afterPaint();
   }

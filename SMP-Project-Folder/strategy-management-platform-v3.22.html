@@ -2620,7 +2620,44 @@
      REPAIRING IT REVEALED WHAT IT WAS COVERING: the "Own business unit" and
      "Own supporting function" group headings, which had been under the second
      row since §117 split them. */
-  .setuppane .cfg.acgrid table thead th { position:static; }
+  /* ── THE HEADER STAYS, AND THE BOX IS WHAT SCROLLS (§174) ─────────
+     Islam: *"make the roles and access table header sticky."* §163.5 made it
+     `static` and the reasoning was sound at the time — a PAGE offset resolves
+     inside the box, because `.cfg` is `overflow-x:auto` and a scroll container
+     is what a sticky child pins against, so the head landed 141px down its own
+     body (§130.2). What that argument rules out is pinning to the PAGE. It
+     does not rule out pinning to the BOX, which is what the register has
+     always done (§69.19).
+
+     SO THE BOX GETS A HEIGHT, and that is the real cost, stated: the matrix
+     scrolls inside the window instead of the page scrolling past it. It takes
+     the rail's own expression rather than a constant, exactly as §122.5 made
+     `.panefill` do, so the two halves of the split end at the same place and
+     no number here can go stale.
+
+     `thead`, NOT `thead th`, AND THAT IS WHAT MAKES A TWO-ROW HEAD WORK.
+     Pinning the cells would need a second `top` for the lower row, measured
+     from the upper one — a guessed constant between two pinned things is a
+     hole rows show through (§130.10). A sticky `<thead>` moves as one block
+     with a single offset: measured, both rows hold at the top of the box
+     while the rows scroll under them, so there is nothing to keep in step. */
+  /* FLEXED INTO WHAT IS LEFT, NEVER A CONSTANT. The first build subtracted a
+     guessed 52px for the legend under the table and overran the window by 5px
+     at 1024x760 — §122.5's own fault, committed while quoting it. `.panefill`
+     is the register's expression and the pane already carries it; the box
+     takes whatever the header, the legend and the two feet leave. */
+  .panefill .cfg.acgrid { flex:1 1 auto; min-height:0; max-height:none;
+                          overflow:auto; }
+  .setuppane .cfg.acgrid table thead { position:sticky; top:0; z-index:3; }
+  /* The cells keep their own ground, or rows show through the head as they
+     pass under it — a sticky element paints nothing of its own (§53.7). */
+  .setuppane .cfg.acgrid table thead th { position:static; background:var(--panel); }
+  /* ── AND THE TOP ROW SITS ON THE MIDDLE LINE (§174) ───────────────
+     Islam: *"align the header content vertically in the middle in the 1st
+     row."* It was `bottom`, which is right when every heading is one line and
+     reads as a stagger the moment one of them wraps — the group headings span
+     two rows and sat on the baseline of the second. */
+  .setuppane .cfg.acgrid table thead th { vertical-align:middle; }
   /* AND EVERY OTHER SETUP TABLE HAD THE SAME FAULT, UNLOOKED AT (§163.5).
      The exclusion above fixed `.acgrid` and stopped there. `.cfg` is
      `overflow-x:auto`, which makes the BOX what a sticky head pins against —
@@ -2910,6 +2947,10 @@
                          display:flex; flex-direction:column; }
   .panefill > .section > .phead2 { flex:none; }
   .panefill .cfg.peoplebox { flex:1 1 auto; min-height:0; max-height:none; }
+  /* The legend under the matrix is not the thing that scrolls (§100.5's chain:
+     every sibling that must keep its height says so, or the flex box steals
+     it from the table). */
+  .panefill .chart-legend { flex:none; }
   /* THE VERTICAL STICKY GOES ON THE ROW, NOT ON THE CELL (§69.19). Written
      on `thead th` first, which is what `.cfg.srctable` uses and what every
      reference does — and it did NOTHING: measured, the header scrolled away
@@ -7586,24 +7627,42 @@ THEME.apply();
      view/none for everyone but the office, and ten columns already cost the
      table width; strategy authoring on somebody else's unit stays the
      office's (mayAuthorPage below). */
+  /* ── `short` IS THE HEADER'S WORD, `label` IS THE PRODUCT'S (§174) ──
+     Islam: *"use Acronyms to make the header smaller. Business unit is BU,
+     Function is Func., Supporting is Support, so the header becomes maximum 2
+     lines."* Measured before choosing: "Other supporting functions" ran to
+     THREE lines at 1500px and FOUR at 1180, which is most of why the head was
+     83px deep on a squeezed window.
+
+     A SECOND FIELD RATHER THAN A RENAME, and that is the whole care here.
+     `label` is the area's name everywhere it is spoken in a sentence — the
+     hover on each heading, and anywhere a refusal or a log has to say which
+     area it means — and an abbreviation is right in a 93px column and wrong
+     in prose. So the column takes `short` where it has one and `label`
+     everywhere else, and nothing that reads `label` had to change.
+
+     WRITTEN OUT, HIS ACRONYMS DID NOT MEET HIS OWN CONSTRAINT: "Other Support
+     Func." still wraps to three lines at 1180. Shown the measurement and three
+     wordings, he chose the shortest (option C) and kept "Reporting cycle"
+     as it is. */
   var AREAS = [
     { key:"a_group",      label:"Group",
       note:"Performance, Foundation, Temple, Weighting, Focus" },
     { key:"a_unit_own_strat", label:"Own business unit — Strategy",
-      pair:"Own business unit", col:"Strategy",
+      pair:"Own business unit", short:"Own BU", col:"Strategy",
       note:"Authoring: Foundation · Analysis & SWOT · Plan" },
     { key:"a_unit_own",   label:"Own business unit — Reporting",
-      pair:"Own business unit", col:"Reporting",
+      pair:"Own business unit", short:"Own BU", col:"Reporting",
       note:"Performance · entering figures · saving drafts · submitting" },
-    { key:"a_unit_other", label:"Other business units",
+    { key:"a_unit_other", label:"Other business units", short:"Other BUs",
       note:"Every unit they do not hold" },
     { key:"a_fn_own_strat", label:"Own supporting function — Strategy",
-      pair:"Own supporting function", col:"Strategy",
+      pair:"Own supporting function", short:"Own Func.", col:"Strategy",
       note:"Authoring: a capability's definition and projects" },
     { key:"a_fn_own",     label:"Own supporting function — Reporting",
-      pair:"Own supporting function", col:"Reporting",
+      pair:"Own supporting function", short:"Own Func.", col:"Reporting",
       note:"Performance · entering figures · saving drafts · submitting" },
-    { key:"a_fn_other",   label:"Other supporting functions",
+    { key:"a_fn_other",   label:"Other supporting functions", short:"Other Func.",
       note:"Every function they do not hold" },
     { key:"a_cycle",      label:"Reporting cycle",
       note:"Open, chase and close · Import · Archived plans · Focus measures" },
@@ -26493,6 +26552,42 @@ function renderAccess(){
     if (roleKey === "cceo" && (areaKey === "a_fn_own" || areaKey === "a_fn_own_strat")) {
       return "A company CEO holds no supporting function.";
     }
+    /* ── TWO MORE THAT COULD NEVER COME UP (§174) ─────────────────────
+       Islam: *"a project owner has options to edit or fill in a business
+       unit. Business units have no project owners, they have only pillar
+       owners."* Correct, and it is the derivation that says so rather than a
+       convention: `personRoles()` mints `powner` only from
+       `capabilities[].projects`, and a capability belongs to a FUNCTION
+       (`c.fn`) — so the role is only ever held at `fn:<key>` and a business
+       unit can never be the one this person holds.
+
+       The OTHER columns stay, which is the same reading `fnhead` has had
+       since §117: a project owner holds no unit, so every unit is "other" to
+       them, and that column is how a tenant would let them read one.
+
+       The defaults were already `none` here, so nothing anybody has is
+       changing — what goes is being OFFERED a choice with nothing behind it.
+       An option that cannot do anything is worse than an absent one: it reads
+       as a decision somebody forgot to make. */
+    if (roleKey === "powner" && (areaKey === "a_unit_own" || areaKey === "a_unit_own_strat")) {
+      return "A project owner holds no business unit — projects belong to a " +
+             "supporting function's capabilities.";
+    }
+    /* AND THE MIRROR, WHICH THE SAME LOOK FOUND: a BU owner's scope is a unit
+       and `roleWheres()` offers only units, so "own supporting function" can
+       never be theirs either — `fnhead`'s exclusion above with the sides
+       swapped, missed when that one was written. */
+    if (roleKey === "owner" && (areaKey === "a_fn_own" || areaKey === "a_fn_own_strat")) {
+      return "A business unit owner holds no supporting function.";
+    }
+    /* DELIBERATELY NOT plowner × own function. Islam expected the mirror
+       ("same for pillar owner in the function") and the derivation disagrees:
+       `personRoles()` mints `plowner` from a unit's `items` AND from a
+       function whose `format` is "pillars" (§59) — a supporting function that
+       plans in pillars has pillars, and its pillar owners are derived by the
+       same line as a unit's. Removing that cell would close a real
+       configuration this tenant already has. Left, and said out loud rather
+       than quietly obeyed. */
     return null;
   }
 
@@ -26515,16 +26610,22 @@ function renderAccess(){
   while (hi < AREAS.length) {
     var ha = AREAS[hi];
     if (!ha.pair) {
-      headTop += '<th class="ac" rowspan="2" title="' + esc(ha.note) + '">' + esc(ha.label) + '</th>';
+      /* THE SHORT WORD IN THE COLUMN, THE FULL ONE ON THE HOVER (§174), so
+         nothing is lost by abbreviating — the heading says "Other Func." and
+         hovering it says which functions and what is in the column. */
+      headTop += '<th class="ac" rowspan="2" title="' +
+        esc(ha.label + " — " + ha.note) + '">' + esc(ha.short || ha.label) + '</th>';
       hi++;
       continue;
     }
     var span = 0;
     while (hi + span < AREAS.length && AREAS[hi + span].pair === ha.pair) span++;
-    headTop += '<th class="ac acpair" colspan="' + span + '">' + esc(ha.pair) + '</th>';
+    headTop += '<th class="ac acpair" colspan="' + span + '" title="' + esc(ha.pair) +
+      '">' + esc(ha.short || ha.pair) + '</th>';
     for (var hj = 0; hj < span; hj++) {
       var hb = AREAS[hi + hj];
-      headSub += '<th class="ac achalf" title="' + esc(hb.note) + '">' + esc(hb.col) + '</th>';
+      headSub += '<th class="ac achalf" title="' + esc(hb.label + " — " + hb.note) +
+        '">' + esc(hb.col) + '</th>';
     }
     hi += span;
   }
@@ -39481,6 +39582,60 @@ var SYNC = (function () {
      null makes the first paint ask entryDest() the same way every later one
      does. */
   var current = null, currentSub = null;
+
+  /* ── A REFRESH STAYS WHERE YOU ARE (§173) ──────────────────────────
+     Islam: *"on refresh don't take me to another page, the refresh stays on
+     the same page I'm at."* §94.6 decided where a SESSION opens — where the
+     person works, because "everyone opens on the group's Performance page"
+     was a literal nobody had chosen. That decision is untouched: this only
+     covers a reload, which is not the same event and had been landing you on
+     your own unit's Plan from wherever you happened to be.
+
+     SESSION STORAGE, NOT LOCAL, and the difference is the whole scope. A
+     refresh is inside one session, so `sessionStorage` remembers exactly as
+     long as the question lasts — and tomorrow's sign-in still opens where you
+     work, which is §94.6 and is his own earlier answer. A screen preference
+     never touches the state graph (§25, §47.1).
+
+     THE PLACE, NEVER A MODE. Where you were is a destination, a tab and a
+     section; edit, reporting and arrange are modes and §63.1 drops them on
+     every navigation, so restoring one would put somebody back inside an edit
+     they had left. And a throwing store reads as nothing remembered (§107),
+     because a platform that will not open is worse than one that opens
+     somewhere else. */
+  var WHERE_KEY = "smp.where";
+  var whereAsked = false;
+
+  function rememberWhere(){
+    if (!current) return;
+    try {
+      sessionStorage.setItem(WHERE_KEY, JSON.stringify({
+        d: current, s: currentSub, c: currentSub ? CURSEC[currentSub] : null }));
+    } catch (e) { /* a store that refuses is a preference nobody keeps */ }
+  }
+
+  /* CHECKED AGAINST WHAT THIS VIEWER CAN OPEN, never trusted (§94.6's own
+     rule): a remembered destination can stop being reachable between one load
+     and the next — a role revoked, a unit retired — and following it blindly
+     is how somebody lands on a page that renders nothing. Asked ONCE, because
+     `paintUnits()` runs on every paint and this must not drag you back after
+     you have navigated away. */
+  function restoreWhere(reach){
+    if (whereAsked) return null;
+    whereAsked = true;
+    var raw = null;
+    try { raw = sessionStorage.getItem(WHERE_KEY); } catch (e) { return null; }
+    if (!raw) return null;
+    var w = null;
+    try { w = JSON.parse(raw); } catch (e) { return null; }
+    if (!w || !w.d || reach.indexOf(w.d) === -1) return null;
+    /* The TAB has to still be one this viewer holds at that destination, or
+       the page under it is an empty frame. The section is corrected further
+       down by the renderer itself, so it is enough to hand it over. */
+    var defs = reachable(defsFor(w.d), w.d, w.d);
+    if (!w.s || !defs.some(function(d){ return d.k === w.s; })) return null;
+    return w;
+  }
   /* WHOSE report is open, or null. A target rather than a boolean: the page is
      per unit or per function, and a flag would follow you onto the next one
      (§63.1). Dropped by every navigation, exactly as the edit modes are. */
@@ -40141,12 +40296,22 @@ var SYNC = (function () {
     if (allowed(SUBS.manage, "group").length) everything.push("manage");
     if (everything.indexOf(current) === -1) {
       var dests = tabs.filter(function(t){ return t.k; });
-      current = entryDest(everything, dests);
-      /* The PAGE as well as the door, and by the same call the navigation
-         makes — otherwise the first paint lands on whichever tab happens to
-         be first (Strategy) and whichever section happens to be first inside
-         it (Foundation), which is not the plan. */
-      currentSub = current ? entrySub(current) : null;
+      /* WHERE YOU WERE BEATS WHERE YOU WORK, ON A RELOAD ONLY (§173). Null
+         `current` is both the first paint of a session and the first paint
+         after a refresh, and only the remembered place tells them apart. */
+      var back = restoreWhere(everything);
+      if (back) {
+        current = back.d;
+        currentSub = back.s;
+        if (back.c) CURSEC[back.s] = back.c;
+      } else {
+        current = entryDest(everything, dests);
+        /* The PAGE as well as the door, and by the same call the navigation
+           makes — otherwise the first paint lands on whichever tab happens to
+           be first (Strategy) and whichever section happens to be first inside
+           it (Foundation), which is not the plan. */
+        currentSub = current ? entrySub(current) : null;
+      }
     }
     var parts = tabs.map(function(t, i){
       if (t.folds) {
@@ -40728,7 +40893,13 @@ var SYNC = (function () {
              other Setup page is a form or a short list and should keep growing
              the page instead. Both halves of this line came from different
              branches on the same day and both are load-bearing. */
-          (currentSub === "people" ? " panefill" : "") + '">' +
+          /* AND ROLES & ACCESS JOINS IT (§174), for the same reason and by the
+             same mark: its head is now pinned to its own box, and a box only
+             scrolls if something caps it. Flexing into what is left beats a
+             constant here as much as it did there — the legend under the
+             table, the header wrapping to a second line at a narrow width,
+             and §167's two feet all change that number. */
+          (currentSub === "people" || currentSub === "access" ? " panefill" : "") + '">' +
           /* ── AND THE PAGE'S CONTROLS ARE ON IT (§135) ────────────────
              `pageLineHTML()` is read AFTER `body`, because the page's own
              render is what fills the slots. The search sits left of the
@@ -40911,6 +41082,10 @@ var SYNC = (function () {
        loop — and it REPLACES the body, so the bindings wire() has just made on
        the old nodes die with them rather than doubling up (§47.2). */
     if (PDLG && document.getElementById("modal-b")) personDialogPaint();
+    /* AND WHERE YOU ARE IS REMEMBERED HERE, for the same reason the save is
+       (§173): every navigation ends in a paint, so one line covers a door
+       added tomorrow and there is no list of handlers to keep up to date. */
+    rememberWhere();
     /* Every mutation repaints, so this is where a change becomes a save. */
     SYNC.afterPaint();
   }

@@ -64,6 +64,29 @@ Nothing proceeds past this line without an answer.
 
 ## Built and verified
 
+### v3.65 — the matrix header, and two cells that could never come up (§173–§174)
+
+- **The header is smaller and it stays.** Settled from a mockup drawn in the
+  real page: **83px → 53px**, no heading past two lines from 1600 down to 1024,
+  the top row vertically centred, and both rows of the head pinned while the
+  rows scroll under them. Islam's own acronyms did not meet his own two-line
+  rule at 1180 — shown the measurement he picked the shortest wording (Own
+  Func. / Other Func.) and kept *Reporting cycle*.
+- **`short` is the header's word, `label` is still the product's**, so the full
+  name is on every hover and no sentence anywhere changed.
+- **Two cells that could never come up are gone**: a Project owner is only ever
+  derived on a supporting function, so the own-BU columns can never be theirs;
+  and a BU owner can never hold an own supporting function. Defaults were
+  already `none`, so nobody's access moves — what goes is an option with
+  nothing behind it.
+- **One of the two reported examples was wrong and is recorded as such**: a
+  Pillar owner IS derived on a function that plans in pillars, so those cells
+  stay, and the check asserts they stay.
+- **A refresh stays where you are** (§173) — remembered in sessionStorage, so a
+  new session still opens where §94.6 says.
+- `checks/access-header.py` **13 red** on the previous build; `checks/stay-put.py`
+  asserts both halves.
+
 ### v3.64 — fill is a grant, and the constraint never heard (§172)
 
 - **The Roles & access 500, found.** §145 gave the Strategy cells a third state

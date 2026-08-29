@@ -961,7 +961,44 @@
      REPAIRING IT REVEALED WHAT IT WAS COVERING: the "Own business unit" and
      "Own supporting function" group headings, which had been under the second
      row since §117 split them. */
-  .setuppane .cfg.acgrid table thead th { position:static; }
+  /* ── THE HEADER STAYS, AND THE BOX IS WHAT SCROLLS (§174) ─────────
+     Islam: *"make the roles and access table header sticky."* §163.5 made it
+     `static` and the reasoning was sound at the time — a PAGE offset resolves
+     inside the box, because `.cfg` is `overflow-x:auto` and a scroll container
+     is what a sticky child pins against, so the head landed 141px down its own
+     body (§130.2). What that argument rules out is pinning to the PAGE. It
+     does not rule out pinning to the BOX, which is what the register has
+     always done (§69.19).
+
+     SO THE BOX GETS A HEIGHT, and that is the real cost, stated: the matrix
+     scrolls inside the window instead of the page scrolling past it. It takes
+     the rail's own expression rather than a constant, exactly as §122.5 made
+     `.panefill` do, so the two halves of the split end at the same place and
+     no number here can go stale.
+
+     `thead`, NOT `thead th`, AND THAT IS WHAT MAKES A TWO-ROW HEAD WORK.
+     Pinning the cells would need a second `top` for the lower row, measured
+     from the upper one — a guessed constant between two pinned things is a
+     hole rows show through (§130.10). A sticky `<thead>` moves as one block
+     with a single offset: measured, both rows hold at the top of the box
+     while the rows scroll under them, so there is nothing to keep in step. */
+  /* FLEXED INTO WHAT IS LEFT, NEVER A CONSTANT. The first build subtracted a
+     guessed 52px for the legend under the table and overran the window by 5px
+     at 1024x760 — §122.5's own fault, committed while quoting it. `.panefill`
+     is the register's expression and the pane already carries it; the box
+     takes whatever the header, the legend and the two feet leave. */
+  .panefill .cfg.acgrid { flex:1 1 auto; min-height:0; max-height:none;
+                          overflow:auto; }
+  .setuppane .cfg.acgrid table thead { position:sticky; top:0; z-index:3; }
+  /* The cells keep their own ground, or rows show through the head as they
+     pass under it — a sticky element paints nothing of its own (§53.7). */
+  .setuppane .cfg.acgrid table thead th { position:static; background:var(--panel); }
+  /* ── AND THE TOP ROW SITS ON THE MIDDLE LINE (§174) ───────────────
+     Islam: *"align the header content vertically in the middle in the 1st
+     row."* It was `bottom`, which is right when every heading is one line and
+     reads as a stagger the moment one of them wraps — the group headings span
+     two rows and sat on the baseline of the second. */
+  .setuppane .cfg.acgrid table thead th { vertical-align:middle; }
   /* AND EVERY OTHER SETUP TABLE HAD THE SAME FAULT, UNLOOKED AT (§163.5).
      The exclusion above fixed `.acgrid` and stopped there. `.cfg` is
      `overflow-x:auto`, which makes the BOX what a sticky head pins against —
@@ -1251,6 +1288,10 @@
                          display:flex; flex-direction:column; }
   .panefill > .section > .phead2 { flex:none; }
   .panefill .cfg.peoplebox { flex:1 1 auto; min-height:0; max-height:none; }
+  /* The legend under the matrix is not the thing that scrolls (§100.5's chain:
+     every sibling that must keep its height says so, or the flex box steals
+     it from the table). */
+  .panefill .chart-legend { flex:none; }
   /* THE VERTICAL STICKY GOES ON THE ROW, NOT ON THE CELL (§69.19). Written
      on `thead th` first, which is what `.cfg.srctable` uses and what every
      reference does — and it did NOTHING: measured, the header scrolled away

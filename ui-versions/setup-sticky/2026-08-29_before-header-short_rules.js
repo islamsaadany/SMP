@@ -125,42 +125,24 @@
      view/none for everyone but the office, and ten columns already cost the
      table width; strategy authoring on somebody else's unit stays the
      office's (mayAuthorPage below). */
-  /* ── `short` IS THE HEADER'S WORD, `label` IS THE PRODUCT'S (§174) ──
-     Islam: *"use Acronyms to make the header smaller. Business unit is BU,
-     Function is Func., Supporting is Support, so the header becomes maximum 2
-     lines."* Measured before choosing: "Other supporting functions" ran to
-     THREE lines at 1500px and FOUR at 1180, which is most of why the head was
-     83px deep on a squeezed window.
-
-     A SECOND FIELD RATHER THAN A RENAME, and that is the whole care here.
-     `label` is the area's name everywhere it is spoken in a sentence — the
-     hover on each heading, and anywhere a refusal or a log has to say which
-     area it means — and an abbreviation is right in a 93px column and wrong
-     in prose. So the column takes `short` where it has one and `label`
-     everywhere else, and nothing that reads `label` had to change.
-
-     WRITTEN OUT, HIS ACRONYMS DID NOT MEET HIS OWN CONSTRAINT: "Other Support
-     Func." still wraps to three lines at 1180. Shown the measurement and three
-     wordings, he chose the shortest (option C) and kept "Reporting cycle"
-     as it is. */
   var AREAS = [
     { key:"a_group",      label:"Group",
       note:"Performance, Foundation, Temple, Weighting, Focus" },
     { key:"a_unit_own_strat", label:"Own business unit — Strategy",
-      pair:"Own business unit", short:"Own BU", col:"Strategy",
+      pair:"Own business unit", col:"Strategy",
       note:"Authoring: Foundation · Analysis & SWOT · Plan" },
     { key:"a_unit_own",   label:"Own business unit — Reporting",
-      pair:"Own business unit", short:"Own BU", col:"Reporting",
+      pair:"Own business unit", col:"Reporting",
       note:"Performance · entering figures · saving drafts · submitting" },
-    { key:"a_unit_other", label:"Other business units", short:"Other BUs",
+    { key:"a_unit_other", label:"Other business units",
       note:"Every unit they do not hold" },
     { key:"a_fn_own_strat", label:"Own supporting function — Strategy",
-      pair:"Own supporting function", short:"Own Func.", col:"Strategy",
+      pair:"Own supporting function", col:"Strategy",
       note:"Authoring: a capability's definition and projects" },
     { key:"a_fn_own",     label:"Own supporting function — Reporting",
-      pair:"Own supporting function", short:"Own Func.", col:"Reporting",
+      pair:"Own supporting function", col:"Reporting",
       note:"Performance · entering figures · saving drafts · submitting" },
-    { key:"a_fn_other",   label:"Other supporting functions", short:"Other Func.",
+    { key:"a_fn_other",   label:"Other supporting functions",
       note:"Every function they do not hold" },
     { key:"a_cycle",      label:"Reporting cycle",
       note:"Open, chase and close · Import · Archived plans · Focus measures" },

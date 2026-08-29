@@ -365,6 +365,34 @@ console errors (in this cloud environment, run it via a wrapper that points Play
   `node scripts/test-door.js <smo-password>` against a running dev-server
   after touching `api/auth.js` or `lib/auth.js` (it ends by rate-limiting the
   SMO on purpose — `DELETE FROM login_attempts;` clears it).
+- **A COLUMN A ROLE COULD NEVER HOLD IS AN OPTION THAT MEANS NOTHING (§174):**
+  Islam: *"a project owner has options to edit or fill in a business unit."*
+  Right, and the DERIVATION is what says so — `personRoles()` mints `powner`
+  only from `capabilities[].projects` and a capability belongs to a FUNCTION,
+  so the own-BU columns can never be theirs; the same look found the mirror
+  (**a BU owner** can never hold an own supporting function, `fnhead`'s §117
+  exclusion with the sides swapped). The OTHER columns stay — every unit is
+  "other" to somebody holding none. Defaults were already `none`, so nobody's
+  access moves; **what goes is being offered a choice with nothing behind it.**
+  **AND ONE OF THE TWO EXAMPLES WAS WRONG AND IS SAID SO**: a `plowner` IS
+  derived on a function whose `format` is `"pillars"` (§59), so that cell stays
+  and the check asserts it stays — a build that dashed the whole table would
+  otherwise satisfy every assertion about absence (§113.8).
+- **A TWO-ROW HEAD PINS AS A `thead`, NOT AS CELLS (§174.1):** pinning the
+  cells needs a second `top` for the lower row measured off the upper, which is
+  §130.10's hole between two pinned things; a sticky `<thead>` moves as one
+  block on one offset. **§163.5's argument survives**: it forbids pinning to
+  the PAGE from inside an `overflow` box, not pinning to the BOX — so the box
+  takes a height (`.panefill`, the register's own expression since §69.19) and
+  the head pins at its top. **The first build guessed 52px for the legend and
+  overran the window by 5px** — §122.5's fault committed while quoting it.
+- **A REFRESH IS NOT A NEW SESSION (§173):** §94.6 decided where a SESSION
+  opens (where the person works); a RELOAD had never been asked about and was
+  landing people back on their own unit. Remembered in **`sessionStorage`**, so
+  tomorrow's sign-in still obeys §94.6 — `localStorage` would silently reverse
+  a decision nobody asked to reverse. **The place, never a mode** (§63.1), and
+  the remembered destination is CHECKED against what this viewer can reach, or
+  a revoked role opens an empty frame.
 - **A CHECK CONSTRAINT IS A COPY OF A RULE IN ANOTHER FILE, AND NOTHING
   COMPARES THEM (§172):** §145 gave the Strategy cells a third state, `fill`,
   and `db/schema.sql` went on saying `CHECK (grant_ IN ('none','view','edit'))`
@@ -2754,6 +2782,11 @@ python3 checks/project-custodian.py # a custodian per project (§147): the Proje
                                 # nothing, and a milestone owner is a Contributor who
                                 # reports nothing until the row is opened — both ends,
                                 # three viewers, proved able to fail
+python3 checks/access-header.py # the matrix header: two lines at four widths, centred,
+                                # BOTH rows pinned while the rows scroll, and no column
+                                # offered to a role that could never hold it (§174)
+python3 checks/stay-put.py      # a refresh stays where you are, and a NEW session still
+                                # opens where §94.6 says (§173)
 python3 checks/save-said.py     # a save that FAILS says so on the page: a server
                                 # error naming its status, an unreachable server, a
                                 # remembered refusal, and demo data — seven states

@@ -1635,5 +1635,128 @@ console.log("\n17 · a custodian per project — two roles (§147.7)");
         R.personRoles(R.worldOf(retired), personOf(retired, "t147_own")).length === 0);
 })();
 
+console.log("\n18 · a bounded role fills only what it holds (§176)");
+/* §176 gave a milestone's owner and due date and an outcome's target to the
+   fill grant, and narrowed that grant to the ROWS a bounded role holds.
+   Islam: "his project has missing items. he should be able to fill the
+   missing items" and "the fill grant should be for his project only he is
+   not a cutodian."
+
+   PROVED ABLE TO FAIL (§94.5): on the pre-§176 rules every ALLOWED case here
+   refuses -- an outcome and a milestone are not gap kinds there, so the pass
+   never classifies the change and it lands on capPlan, which is office-only.
+   And the two REFUSED cases go green the moment mayFillRow() is replaced by
+   mayFillPage(), which is exactly the narrowing under test. */
+(function () {
+  const FN = "it";
+  const T = "fn:" + FN;
+  const MARK = { by: "t176_own", at: "2026-08-29" };
+  const capOf = function (st) {
+    return st.group.capabilities.filter(function (c) { return c.fn === FN; })[0];
+  };
+  const fromStored = function (stored, who, mutate) {
+    const inc = clone(stored); mutate(inc);
+    return A.authorize(stored, inc, personOf(stored, who));
+  };
+
+  /* A project owner who holds NOTHING else, over a function with two
+     projects, the Strategy half opened to `fill` -- Islam's own shape. */
+  const base = clone(SEED);
+  base.access.powner = Object.assign({}, base.access.powner,
+    { a_fn_own_strat: "fill", a_fn_own: "edit" });
+  base.people.push({ key: "t176_own", name: "Bounded Filler 176", active: true });
+  const cap = capOf(base);
+  if (!cap || (cap.projects || []).length < 2) {
+    check("§176: the fixture needs a function with two projects", false, FN);
+  } else {
+    const mine = cap.projects[0], theirs = cap.projects[1];
+    mine.owner = "Bounded Filler 176";
+    mine.milestones[0].finish = "";
+    mine.milestones[0].owner = "";
+    if ((mine.outcomes || []).length) mine.outcomes[0].target = "";
+    theirs.milestones[0].finish = "";
+    if ((cap.keyObjectives || []).length) cap.keyObjectives[0].compile = "";
+
+    const w = R.worldOf(base);
+    check("the fixture's filler holds project owner and nothing else",
+          JSON.stringify(R.personRoles(w, personOf(base, "t176_own"))) ===
+          JSON.stringify([{ role: "powner", at: T }]),
+          JSON.stringify(R.personRoles(w, personOf(base, "t176_own"))));
+
+    /* 1 · his own project's milestone: the whole point of §176. */
+    let v = fromStored(base, "t176_own", function (i) {
+      const m = capOf(i).projects[0].milestones[0];
+      m.finish = "Jul 26"; m.pend = { finish: MARK };
+    });
+    check("FILL: a blank due date on HIS project is his", v.ok, v.refusals.join(" / "));
+
+    v = fromStored(base, "t176_own", function (i) {
+      const m = capOf(i).projects[0].milestones[0];
+      m.owner = "Somebody Else"; m.pend = { owner: MARK };
+    });
+    check("FILL: a blank milestone owner on HIS project is his", v.ok, v.refusals.join(" / "));
+
+    if ((mine.outcomes || []).length) {
+      v = fromStored(base, "t176_own", function (i) {
+        const o = capOf(i).projects[0].outcomes[0];
+        o.target = "80%"; o.pend = { target: MARK };
+      });
+      check("FILL: a blank outcome target on HIS project is his", v.ok, v.refusals.join(" / "));
+    }
+
+    /* 2 · the project BESIDE it is not. This is the narrowing. */
+    v = fromStored(base, "t176_own", function (i) {
+      const m = capOf(i).projects[1].milestones[0];
+      m.finish = "Jul 26"; m.pend = { finish: MARK };
+    });
+    check("REFUSED: the same fill on the project beside it", !v.ok,
+          "was ALLOWED — " + JSON.stringify(v.changes.map(function (c) { return c.kind; })));
+
+    /* 3 · nor a gap that sits inside no project at all. */
+    if ((cap.keyObjectives || []).length) {
+      v = fromStored(base, "t176_own", function (i) {
+        const k = capOf(i).keyObjectives[0];
+        k.compile = "Latest"; k.pend = { compile: MARK };
+      });
+      check("REFUSED: the capability's own key objective", !v.ok,
+            "was ALLOWED — " + JSON.stringify(v.changes.map(function (c) { return c.kind; })));
+    }
+
+    /* 4 · and confirming is never the filler's, on his own project either. */
+    const pending = clone(base);
+    (function () {
+      const m = capOf(pending).projects[0].milestones[0];
+      m.finish = "Jul 26"; m.pend = { finish: MARK };
+    })();
+    v = fromStored(pending, "t176_own", function (i) {
+      const m = capOf(i).projects[0].milestones[0];
+      delete m.pend;
+    });
+    check("REFUSED: the filler confirming their own fill", !v.ok,
+          "was ALLOWED — " + JSON.stringify(v.changes.map(function (c) { return c.kind; })));
+
+    /* 5 · THE UNBOUNDED ROLE IS UNTOUCHED (§94.2, the other end): a check
+       that only proves a door shut can be satisfied by shutting every door. */
+    const fnCust = (SEED.functions[FN] || {}).custodian;
+    if (fnCust && personOf(base, fnCust)) {
+      const open = clone(base);
+      open.access.custodian = Object.assign({}, open.access.custodian,
+        { a_fn_own_strat: "fill" });
+      v = fromStored(open, fnCust, function (i) {
+        const m = capOf(i).projects[1].milestones[0];
+        m.finish = "Jul 26"; m.pend = { finish: MARK };
+      });
+      check("a function custodian with fill still reaches every project", v.ok,
+            v.refusals.join(" / "));
+      /* And the office authors it outright, with no mark at all. */
+      v = fromStored(base, "smo", function (i) {
+        capOf(i).projects[1].milestones[0].finish = "Jul 26";
+      });
+      check("the office writes a due date with no mark and it settles", v.ok,
+            v.refusals.join(" / "));
+    }
+  }
+})();
+
 console.log("\n" + pass + " passed, " + fail + " failed");
 process.exit(fail ? 1 : 0);

@@ -1957,15 +1957,8 @@ function authoring(page, acKey){ return !!EDIT_PAGE[page] && mayAuthor(acKey); }
    target. Only `gapCell`, the quarters and the mode bar read this — every
    other `ed ?` site stays false, which is what keeps Add, ×, the drag
    handles and every name field out of fill mode without a second gate. */
-/* §176: AND WHICH ROWS. A bounded role -- a project owner, a pillar owner,
-   a contributor -- fills only what it holds, so a call site that knows the
-   row hands in its context and the answer narrows to that row. Without a
-   `ctx` the page-level answer stands, which is what the office and an
-   unbounded role want and what a gap sitting inside no row (a unit's
-   aspiration) has to have. */
-function filling(page, acKey, ctx){
-  if (!EDIT_PAGE[page] || mayAuthor(acKey)) return false;
-  return ctx ? mayFillRow(acKey, ctx) : mayFill(acKey);
+function filling(page, acKey){
+  return !!EDIT_PAGE[page] && !mayAuthor(acKey) && mayFill(acKey);
 }
 
 /* mayAuthor(), NOT the raw grant (§94). Every "Edit" bar and every pen in
@@ -2155,82 +2148,6 @@ function selectOr(page, value, opts, cls, setter){
   var i = FIELDS.push(setter) - 1;
   return '<select class="fld ' + (cls || '') + '" data-fld="' + i + '">' +
     optionsHtml(opts, function(v){ return String(value) === v; }) + '</select>';
-}
-
-/* ── A DUE DATE IS PICKED, NEVER TYPED (§176) ─────────────────────────
-   Islam: "for the date make it only Month Year like Jul 26 not days and
-   remove the entry and just keep it a calendar selection."
-
-   WHY A MONTH AND NOT A DAY. Every comparison the platform makes about a due
-   date is monthly -- `monthsOf()` reduces every shape it reads to a month,
-   `dueThisCycle()` compares months, `shiftWhen()` moves whole months -- so a
-   day was precision the product could not use and one more thing to get
-   wrong. And `Jul 26` reads one way in every country, where 24/07/26 and
-   07/24/26 do not.
-
-   WHY NOTHING IS TYPED. With no box there is nothing to mistype, nothing to
-   validate and no half-typed value to store: the picker can only produce a
-   shape `monthsOf()`, `dueFits()` and `shiftWhen()` already read (all three
-   asserted in checks/milestone-fill.py). Clearing writes "" and puts the row
-   back to Missing.
-
-   THE POPUP IS position:fixed, and that is not a detail -- a project's tables
-   sit inside `.tblscroll`, an overflow container, which clips an absolute
-   popup to a strip of itself (§45.5 settled the same point for searchsel).
-   It is placed by the shell when it opens, off the button's own rect. */
-var MONTH_ABB = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
-/* What the picker WRITES. Two digits, because that is the shape the plans in
-   this tenant already carry and `shiftWhen()` preserves the width it is given. */
-function monthValue(mi, year){ return MONTH_ABB[mi] + " " + ("0" + (year % 100)).slice(-2); }
-/* Reading a stored value BACK into the picker: which month and which year it
-   should open on. Anything the platform cannot read as a time -- "On-going",
-   "Done" -- opens on the cycle's year with nothing chosen, and is left
-   exactly as it is until somebody picks (§96.2's rule, from the other side:
-   a stored value outside the vocabulary is never silently rewritten). */
-function monthParts(v){
-  var s = String(v == null ? "" : v).trim();
-  var t = monthsOf(s);
-  if (t == null) return { mi: null, year: cycleYear() || new Date().getFullYear() };
-  /* A QUARTER OR A HALF NAMES NO MONTH, and nothing is lit for one. `Q1 2026`
-     reduces to January because that is its FIRST month, which is the right
-     answer for a comparison and the wrong one for a picker: lighting January
-     would have the control assert a month the plan never chose (§15.1 --
-     absent is never zero, and a derived value is not an answer). The YEAR is
-     still right, which is the useful half of what was stored. */
-  var named = s.split(/[^A-Za-z]+/).some(function(w){ return w && monthIndex(w) >= 0; });
-  return { mi: named ? ((t % 12) + 12) % 12 : null, year: Math.floor(t / 12) };
-}
-function monthPickOr(page, value, cls, setter){
-  var shown = value == null ? "" : String(value);
-  if (!EDIT_PAGE[page] || !setter)
-    return shown ? esc(shown) : '<span class="missing">Missing</span>';
-  var i = FIELDS.push(setter) - 1;
-  var p = monthParts(shown);
-  return '<button type="button" class="monthbtn ' + (cls || '') + '" data-month="' + i + '"' +
-    ' data-mi="' + (p.mi == null ? "" : p.mi) + '" data-yr="' + p.year + '"' +
-    ' aria-haspopup="dialog" aria-expanded="false"' +
-    ' title="' + (shown ? "Change the month" : "Pick a month") + '">' +
-    (shown ? '<span class="mval">' + esc(shown) + '</span>'
-           : '<span class="mval mnone">Missing</span>') +
-    '<svg viewBox="0 0 20 20" aria-hidden="true" fill="none" stroke="currentColor" ' +
-      'stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">' +
-      '<rect x="3" y="4.5" width="14" height="12.5" rx="2"/>' +
-      '<path d="M3 8.5h14M7 2.8v3.4M13 2.8v3.4"/></svg></button>';
-}
-/* The panel itself, rebuilt on every year step so the lit month follows the
-   year it belongs to -- Jul 26 lit on 2026 and nothing lit on 2027. */
-function monthPopHtml(mi, year, onYear){
-  return '<div class="mp-yr">' +
-      '<button type="button" class="mp-nav" data-myr="-1" aria-label="Previous year">&lsaquo;</button>' +
-      '<b>' + year + '</b>' +
-      '<button type="button" class="mp-nav" data-myr="1" aria-label="Next year">&rsaquo;</button>' +
-    '</div><div class="mp-grid">' +
-    MONTH_ABB.map(function(w, k){
-      return '<button type="button" class="mp-m' +
-        (onYear && k === mi ? " on" : "") + '" data-mpick="' + k + '">' + w + '</button>';
-    }).join("") +
-    '</div><div class="mp-foot">' +
-      '<button type="button" class="linkbu" data-mclear="1">Clear</button></div>';
 }
 
 /* ── AN OPTION, A LABELLED OPTION, AND A GROUP OF THEM (§130.1) ───────
@@ -2590,14 +2507,7 @@ function gapCell(page, acKey, row, field, opts){
   var blank = SMPRules.gapBlank(val);
   var mark = SMPRules.pendOf(row)[field];
   var ed = authoring(page, acKey);
-  /* §176: DEFAULTING TO "INSIDE NO ROW" IS THE SAFE WAY ROUND. A cell that
-     does not say where it sits -- a unit's aspiration, its key objectives, a
-     capability's -- closes to every bounded role, and a cell that IS inside
-     something hands in its context. The alternative (page-level by default)
-     would have left a project owner filling a capability's objectives because
-     somebody forgot a call site, which is §42's rule in the small: an
-     unstated case resolves to the office's, never to a client role's. */
-  var fl = filling(page, acKey, opts.ctx || {});
+  var fl = filling(page, acKey);
   var draw = function(setter, pendCls){
     /* §130.1 MET §145 AT THE MERGE: an owner or a collaborator is PICKED
        from the register, never typed — so those call sites hand in the
@@ -3993,13 +3903,12 @@ function projFrontMatter(p, ed){
          in fill mode alike: the control hook renders §130.1's register-fed
          list while gapCell keeps the pending lifecycle. */
       row("l", "Owner", gapCell("plan", "k_proj", p, "owner", {
-        ctx: { project: p },
         control: function(set, pendCls){
           return selectOr("plan", p.owner == null ? "" : p.owner,
             ownerChoices(p.owner, true), "ownersel " + (pendCls || ""), set);
         } })) +
-      row("l", "Start", gapCell("plan", "k_proj", p, "start", { ctx: { project: p } })) +
-      row("l", "End",   gapCell("plan", "k_proj", p, "end",   { ctx: { project: p } })) +
+      row("l", "Start", gapCell("plan", "k_proj", p, "start", {})) +
+      row("l", "End",   gapCell("plan", "k_proj", p, "end",   {})) +
       repRow +
     '</div>' +
     '<div class="pfcol pfright">' +
@@ -4025,9 +3934,10 @@ function projPlanBody(p, fk){
     return ed ? '<button class="xbtn" data-rowoff="' + esc(list) + '|' + esc(id) +
       '" title="Remove this row" aria-label="Remove this row">&times;</button>' : '';
   };
-  /* §176 TOOK THE LAST TWO CALLERS OF THE LOCAL `f`: an outcome's target and
-     a milestone's due date both go through gapCell now, so the helper had no
-     caller left and is gone rather than left lying about (§24). */
+  var f = function(v, setter){
+    return ed ? inputOr("plan", v == null ? "" : v, "", setter)
+              : (v ? esc(v) : '<span class="missing">Missing</span>');
+  };
   var sortAttr = function(kind){
     return on ? ' class="sortable" data-item="tr" data-kind="' + kind +
       '" data-fk="' + esc(fk) + '" data-pid="' + esc(p.id) + '"' : '';
@@ -4043,12 +3953,7 @@ function projPlanBody(p, fk){
         xb(d ? "deliverables" : "outcomes", o.id) + '</td>' +
       '<td class="cc">' + dxType(row) + '</td>' +
       '<td class="cc">' + dxDir(row) + '</td>' +
-      /* §176: AN OUTCOME'S TARGET IS FILLABLE, A DELIVERABLE'S IS NOT.
-         `dxTarget` prints a deliverable's fixed "Y/N" -- written for it, not
-         asked of it (§104) -- so there is nothing there to fill; the outcome
-         beside it is the cell that has been printing red Missing all along. */
-      '<td class="num">' + (d ? dxTarget(row)
-        : gapCell("plan", "k_proj", o, "target", { ctx: { project: p, row: o } })) +
+      '<td class="num">' + (d ? dxTarget(row) : f(o.target, function(v){ o.target = v; })) +
       '</td></tr>';
   }).join("") +
   /* TWO ADD BUTTONS UNDER ONE TABLE, as §53.4 had them: one table of two
@@ -4065,23 +3970,9 @@ function projPlanBody(p, fk){
         xb("milestones", m.id) + '</td>' +
       '<td>' + (ed ? inputOr("plan", m.covers || "", "", function(v){ m.covers = v; })
                    : esc(m.covers || "")) + '</td>' +
-      /* §176: BOTH FILLABLE, AND THE OWNER'S EM-DASH BECOMES Missing.
-         A dash is the platform's word for ABSENT, which says nothing is owed
-         -- a milestone with nobody against it IS owed, so it reads like every
-         other gap. The owner is PICKED from the register (§130.1) and the due
-         date from the month panel; gapCell keeps the pending lifecycle around
-         both, and `ctx` narrows them to the project's own owner (§176). */
-      '<td class="cc">' + gapCell("plan", "k_proj", m, "owner", {
-          ctx: { project: p, row: m },
-          control: function(set, pendCls){
-            return selectOr("plan", m.owner == null ? "" : m.owner,
-              ownerChoices(m.owner, true), "ownersel " + (pendCls || ""), set);
-          } }) + '</td>' +
-      '<td class="cc mp-host">' + gapCell("plan", "k_proj", m, "finish", {
-          ctx: { project: p, row: m },
-          control: function(set, pendCls){
-            return monthPickOr("plan", m.finish, pendCls || "", set);
-          } }) + '</td></tr>';
+      '<td class="cc">' + (ed ? ownerSel("plan", m.owner, function(v){ m.owner = v; })
+                              : esc(m.owner || "\u2014")) + '</td>' +
+      '<td class="cc">' + f(m.finish, function(v){ m.finish = v; }) + '</td></tr>';
   }).join("") +
   (ed ? '<tr class="newrow"><td class="idx">+</td><td colspan="4">' +
       '<button class="linkbu" data-rowadd="milestone|' + esc(p.id) + '">Add a milestone</button>' +
@@ -4542,11 +4433,6 @@ function unitPlanBody(it, u, railed){
     return ed ? '<button class="xbtn" data-rowoff="' + esc(list) + '|' + esc(id) +
       '" title="Remove this row" aria-label="Remove this row">&times;</button>' : '';
   };
-  /* §176: WHERE THIS ROW SITS, for the bounded roles. A pillar owner reaches
-     the rows of the pillar whose Owner names them; a contributor reaches the
-     rows that name them. Same shape §147.7 hands the authoriser, so the two
-     sides answer with one voice. */
-  var pctx = function(row){ return { pillarOwner: it.owner, row: row }; };
   var mRows = it.measures.map(function(m, i){
     return '<tr data-oi="' + i + '"><td class="idx">' +
       (on ? handle("Reorder " + m.name) : '') +
@@ -4570,9 +4456,9 @@ function unitPlanBody(it, u, railed){
          an out-of-list stored value lives inside gapCell now, and \u00a7148's
          hover words come back through `read`. */
       '<td class="cc">' + gapCell("plan", "u_plan", m, "dir",
-        { ctx:pctx(m), kind:"select", opts:["\u2265","\u2264"], cls:"mono", read:dirCell }) + '</td>' +
+        { kind:"select", opts:["\u2265","\u2264"], cls:"mono", read:dirCell }) + '</td>' +
       '<td class="num">' + gapCell("plan", "u_plan", m, "target",
-        { ctx:pctx(m), kind:"input", cls:"mono" }) + '</td>' +
+        { kind:"input", cls:"mono" }) + '</td>' +
       /* NO 3-YEAR COLUMN. Islam, 2026-08-22: "in the direction plans the key
          measures are for 1 year only". A pillar's key measures carry one
          target and it is this year's; the three-year horizon belongs to the
@@ -4581,7 +4467,7 @@ function unitPlanBody(it, u, railed){
          import, export and the archive — this removes a column, not a field,
          so nothing a plan already carries is lost. */
       '<td class="cc">' + gapCell("plan", "u_plan", m, "compile",
-        { ctx:pctx(m), kind:"select", opts:["Sum","Latest","Average"],
+        { kind:"select", opts:["Sum","Latest","Average"],
           readEmpty:"\u2014", read:compileCell }) + '</td></tr>';
   }).join("");
   var tRows = it.tactics.map(function(t, i){
@@ -4595,7 +4481,6 @@ function unitPlanBody(it, u, railed){
          fed picker — an owner is PICKED, not typed, in the pen and in fill
          mode alike. */
       '<td>' + gapCell("plan", "u_plan", t, "owner", {
-        ctx:pctx(t),
         readEmpty:'<span class="missing">Missing</span>',
         control: function(set, pendCls){
           return selectOr("plan", t.owner == null ? "" : t.owner,
@@ -4620,7 +4505,7 @@ function unitPlanBody(it, u, railed){
          Read mode keeps §15.1's em-dash: nobody supporting is an ordinary
          answer. */
       '<td class="collabs">' + gapCell("plan", "u_plan", t, "collaborators",
-        { ctx:pctx(t), text: collabText,
+        { text: collabText,
           parse: function(v){ return Array.isArray(v)
             ? v.map(function(x){ return String(x).trim(); }).filter(Boolean)
             : collabParse(v); },
@@ -4635,7 +4520,7 @@ function unitPlanBody(it, u, railed){
          its fill is pending the four stay the filler's — read mode carries
          the same chip and tick every other pending value wears. */
       '<td>' + (ed ? qsEdit(t)
-        : (filling("plan", "u_plan", pctx(t)) &&
+        : (filling("plan", "u_plan") &&
            (SMPRules.quartersBlank(t) || SMPRules.pendOf(t).quarters))
           ? qsFill(t)
           : qs(t) + pendChip("u_plan", t, "quarters")) + '</td></tr>';

@@ -21188,3 +21188,160 @@ FAULT**: it mapped the body cells to `AREAS[i + 1]`, when `td.ac` is already
 only the area cells and the first of them is `AREAS[0]`. Sixteen failures, every
 one of them an off-by-one — a correct build reported broken, which costs exactly
 as much as the reverse (§68.10).
+
+---
+
+## §176 · A milestone is filled, and a bounded role fills only its own
+
+Islam, of a project owner with the Strategy cell set to **Fill gaps** and the
+Reporting cell to **Edit**: *"hesham has the access done that's his project
+and he can't edit for the missing but he can report."* Then, with a screenshot
+of the milestones table showing three red **Missing** due dates: *"his project
+has missing items. he should be able to fill the missing items. check again."*
+
+**HE WAS RIGHT AND MY FIRST ANSWER WAS WRONG.** I had reproduced the symptom on
+a project whose milestone date was merely *unreadable* (`Pending`) and reported
+back that his project owed nothing a fill could reach — the real rows were
+**blank**, and the product was already painting its own red word on them.
+
+### The fault, in one line
+
+**The page printed `Missing` three times and told the fill feature there was
+nothing missing.** Reproduced exactly, on a project owner holding nothing else,
+with the grants set as his screenshot shows:
+
+```
+page shows:   Missing   Missing   Missing
+gapTotal:     0
+Fill button:  0     pen: 0
+```
+
+`GAP_FIELDS` covered a unit's aspiration, its key objectives, a pillar's
+measures and tactics, a capability's key objectives, and a project's **owner,
+start and end** — and stopped. A milestone's owner and due date and an
+outcome's target are the two places a project pane prints the red word, and
+neither was a gap. So the count answered 0, and with nothing missing the
+product correctly draws no control at all: **the product's own vocabulary
+disagreeing with the one feature named after it.**
+
+The milestone's OWNER printed an em-dash rather than `Missing`, which is the
+platform's word for ABSENT and says nothing is owed. A milestone with nobody
+against it *is* owed, so it joins the red word — Islam's call, and **the one
+change on this page that everybody sees, not only a filler**.
+
+**A DELIVERABLE IS DELIBERATELY NOT FILLABLE.** Its direction and target are
+written FOR it (`=` and `Y/N`, §104), so there is nothing there to fill. The
+check asserts that absence, or a build that made everything fillable would
+satisfy every other assertion (§94.2).
+
+### The due date is picked, never typed
+
+Islam: *"the due dates setting should be through dd mmm yy format like 24 Jul
+26"*, then, on the mockup: *"for the date make it only Month Year like Jul 26
+not days and remove the entry and just keep it a calendar selection."*
+
+**A MONTH, BECAUSE A DAY IS PRECISION THE PRODUCT CANNOT USE.** Every
+comparison the platform makes about a due date is monthly — `monthsOf()`
+reduces every shape it reads to a month, `dueThisCycle()` compares months,
+`shiftWhen()` moves whole months — so a day would have been one more thing to
+get wrong and nothing to gain by getting right.
+
+**AND NOTHING IS TYPED, WHICH REMOVES A WHOLE CLASS OF FAULT.** With no box
+there is nothing to mistype, nothing to validate, and no half-typed value to
+store: the picker can only produce a shape the product already reads. Measured
+before it was built — `24 Jul 26` reads, fits and shifts correctly;
+`24/07/2026` reads as **null** in all three, which is exactly the value a free
+text box would have collected. `Jul 26` also reads one way in every country,
+where `24/07/26` and `07/24/26` do not.
+
+**THE PANEL IS `position:fixed`, AND THAT IS NOT A DETAIL.** A project's tables
+sit inside `.tblscroll`, an overflow container, which clips an absolute panel
+to a strip of itself — the mockup reproduced it before a source was touched,
+showing the year row and cutting off the month grid. §45.5 settled the same
+point for `searchsel`. It is mounted on `<body>` and placed off the button's
+rect, and `MONTHPOP.shut()` runs at the end of every paint beside
+`SEARCHSEL.wire()`: the button it belongs to has just been replaced, and a
+panel left hanging over a page it no longer points at is worse than no panel.
+
+**NOTHING IS LIT UNTIL SOMETHING HAS BEEN SET** (§15.1: absent is never zero) —
+an empty cell must not open with July already looking chosen — and the lit
+month belongs to the year it was set in, so stepping to 2027 lights nothing and
+stepping back lights it again. **Clear** writes `""` and puts the row back to
+Missing.
+
+**DATES ALREADY WRITTEN ARE UNTOUCHED.** Filling only ever writes where a field
+holds nothing, so `February 2026`, `Q1 2026` and `On-going` all read exactly as
+they did. The cost is stated rather than glossed: **a quarter can no longer be
+typed into a milestone's due date, in the office's pen either** — one control,
+because two ways of answering one question is §53.5's drift.
+
+### The grant is per page; the reach is per row
+
+Islam: *"the fill grant should be for his project only he is not a cutodian."*
+
+There is no per-project cell on Roles & access and there should not be one, so
+this is a **rule**, exactly as §147.7 narrowed reporting. `mayFillRow()` is
+`mayFillPage()` plus §147.7's `boundedReach()` — the same `ctx` shape, the same
+three answers (a project owner reaches a project whose Owner names them, a
+pillar owner their pillar, a contributor the rows that name them) — and an
+unbounded role is untouched, because the narrowing only applies when *every*
+role that grants fill here is a bounded one.
+
+**APPLIED TO A PILLAR OWNER TOO, UNASKED AND DELIBERATELY**: the sentence is
+about a bounded role, not about projects, and a unit and a function are the
+same product (§53.5). Not applying it on the unit side would have been the
+drift that rule exists to stop.
+
+**A GAP INSIDE NO ROW FALLS OUT CLOSED ON ITS OWN** — a unit's aspiration, its
+key objectives, a capability's — because `boundedReach()` answers false with no
+project and no pillar to name them. And `gapCell` **defaults its context to
+"inside no row"**: a call site that does not say where it sits closes to every
+bounded role, and one that is inside something hands in its context. That is
+the safe way round, and §42's rule in the small — an unstated case resolves to
+the office's, never to a client role's.
+
+**THE COUNT NARROWS WITH THE REACH.** `gapMap()` counts a gap only where this
+viewer could actually close it, because the map feeds the red *N Missing*, the
+per-place chips, the rail's counts and the Next-gap walk — a gap counted at
+somebody who cannot open it is a promise the button breaks (§61's trap wearing
+the count's clothes). Measured: the project owner is counted 6, all on his own
+project; the office is counted 12 across three places.
+
+### What it cost, and what it did not
+
+**NO MIGRATION.** A pending mark rides each row's `extra` JSONB, and
+`outcomes` and `milestones` both have one. Claimed, then proved: the round trip
+now writes a mark on an outcome's target and on a milestone's owner and due
+date and reads all three back off a real Postgres 16, then clears them and
+reads that back too — because "it rides extra" is a claim until something has
+offered it to the database (§172).
+
+**THE SERVER LEARNED THE SAME TWO THINGS.** `gapRows()` now reaches a project's
+outcomes and milestones — BEFORE `splitRows` compares the same lists, or a fill
+falls through unclassified to `capPlan` and is refused as though the filler had
+rewritten the plan — and every change carries the `ctx` the verdict asks
+`mayFillRow()` with. **Built from the STORED graph and nowhere else** (§42): a
+project whose Owner the incoming save has just rewritten must not be what
+decides whether that save was allowed.
+
+**PROVED ABLE TO FAIL, THREE WAYS** (§94.5):
+
+* `checks/milestone-fill.py` against the pre-§176 build — **13 failures**,
+  running to completion rather than dying, which took two corrections of its
+  own: it first crashed at §4 on a missing month button and at §6 on
+  `mayFillRow is not defined`, hiding everything after each. A check that dies
+  proves it can fail and hides the rest (§54.5).
+* `scripts/test-authorize.js` §18 against the pre-§176 rules — **5 failures**,
+  every ALLOWED case, because an outcome and a milestone are not gap kinds
+  there.
+* And the narrowing under its own test: replace `mayFillRow` with
+  `mayFillPage` in the verdict and the **two REFUSED cases go green**. That is
+  the assertion that matters, because on the pre-§176 build everything is
+  refused and a "refused" assertion passes for the wrong reason.
+
+**FOUND ON THE WAY AND NOT FIXED**: `checks/project-tables.py` fails
+identically on `main` — it submits a supporting function and then reads
+`.rep-bar`, a class that is alive in the stylesheet. Suppressing §148's welcome
+overlay in it changed nothing, so the speculative patch was reverted rather
+than left in (§24: a change that fixes nothing is one the next reader takes for
+load-bearing). Recorded, not chased.

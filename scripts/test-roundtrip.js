@@ -199,6 +199,57 @@ function firstDiff(a, b, at) {
      the next one measures). */
   GRANTS.forEach(function (g, i) { delete gBack.access["rtprobe" + i]; });
   await io.writeState(client, gBack);
+  /* ── A PENDING FILL ON A ROW THAT HAS NEVER CARRIED ONE (§176) ─────────
+     §176 made an outcome's target and a milestone's owner and due date
+     fillable, and a fill is stored as `row.pend = { field: {by, at} }`. Those
+     two tables have no `pend` COLUMN — the mark rides `extra`, which is what
+     makes this migration-free — and "rides extra" is a claim, not a fact,
+     until something writes one and reads it back (§172's lesson: a value the
+     round trip has never offered the database is a value nobody has tested).
+     Written on the FIRST project that has both kinds of row, so this says
+     nothing about which project it is. */
+  const pState = await io.readState(client);
+  const pCap = (pState.group.capabilities || []).filter(function (c) {
+    return (c.projects || []).some(function (pr) {
+      return (pr.outcomes || []).length && (pr.milestones || []).length; });
+  })[0];
+  if (!pCap) {
+    console.log("pending marks round trip: SKIPPED — no project with both an outcome and a milestone");
+  } else {
+    const pPr = pCap.projects.filter(function (pr) {
+      return (pr.outcomes || []).length && (pr.milestones || []).length; })[0];
+    const MARK = { by: "rtprobe", at: "2026-08-29" };
+    pPr.outcomes[0].pend = { target: MARK };
+    pPr.milestones[0].pend = { finish: MARK, owner: MARK };
+    await io.writeState(client, pState);
+    const pBack = await io.readState(client);
+    const bCap = (pBack.group.capabilities || []).filter(function (c) { return c.id === pCap.id; })[0];
+    const bPr = ((bCap || {}).projects || []).filter(function (x) { return x.id === pPr.id; })[0];
+    const got = bPr && {
+      outcome: JSON.stringify((bPr.outcomes[0].pend || {}).target),
+      finish:  JSON.stringify((bPr.milestones[0].pend || {}).finish),
+      owner:   JSON.stringify((bPr.milestones[0].pend || {}).owner) };
+    const want = JSON.stringify(MARK);
+    /* Postgres jsonb reorders an object's keys, so {by,at} comes back as
+       {at,by} — the mark is compared as a VALUE, never as a string (§145). */
+    const same_ = function (a) {
+      const o = JSON.parse(a || "null");
+      return !!o && o.by === MARK.by && o.at === MARK.at;
+    };
+    const pOk = got && same_(got.outcome) && same_(got.finish) && same_(got.owner);
+    console.log("pending marks round trip:", pOk ? "PASS" : "FAIL",
+      pOk ? "[outcome.target, milestone.finish, milestone.owner]" : JSON.stringify(got));
+    /* And put it back, or the next run measures this one's leavings. */
+    delete bPr.outcomes[0].pend;
+    delete bPr.milestones[0].pend;
+    await io.writeState(client, pBack);
+    const cleaned = await io.readState(client);
+    const cCap = (cleaned.group.capabilities || []).filter(function (c) { return c.id === pCap.id; })[0];
+    const cPr = ((cCap || {}).projects || []).filter(function (x) { return x.id === pPr.id; })[0];
+    console.log("  ...and clears again:",
+      (!cPr.outcomes[0].pend && !cPr.milestones[0].pend) ? "PASS" : "FAIL");
+  }
+
   console.log("sample:", (await spot(
     "SELECT name, target, actual FROM measures WHERE id='mobile-P1-M2'"))[0]);
 

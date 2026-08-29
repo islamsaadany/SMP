@@ -1154,7 +1154,12 @@ with sync_playwright() as p:
           adds: [...document.querySelectorAll("[data-rowadd]")]
                   .map(e => e.dataset.rowadd.split("|")[0]),
           grips: document.querySelectorAll(".grip").length,
-          fields: document.querySelectorAll(".pane .fld, .pane input").length })""")
+          /* §176: a milestone's due date is a PICKER, not an input, so a
+             count of `.fld, input` alone silently under-reports the editable
+             controls by one per milestone — the number this line prints would
+             go on falling every time a field becomes a button (§51.11). */
+          fields: document.querySelectorAll(
+            ".pane .fld, .pane input, .pane [data-month]").length })""")
         missing = [w for w in wants if w not in got["adds"]]
         if missing:
             errs.append("PLAN EDIT (%s): no Add for %s" % (tag, ", ".join(missing)))

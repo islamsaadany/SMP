@@ -2005,6 +2005,11 @@
        (searchsel.js) — the native control stays where it is, so nothing wire()
        just attached is disturbed. */
     SEARCHSEL.wire();
+    /* AND THE MONTH PANEL GOES (§176). It is mounted on <body> so a repaint
+       cannot take it with the button it belongs to — it would be left hanging
+       over a page it no longer points at. Same reason SEARCHSEL.wire() closes
+       its own popup first (§30.1). */
+    MONTHPOP.shut();
     /* The office's inbox, if this paint drew it. It binds ONCE per rendered
        frame and then fills and refreshes itself on its own clock — nothing in
        it ever calls paint(), or a reply being typed would be thrown away every
@@ -2282,6 +2287,104 @@
       ? lit : lit.querySelector("button,input,select,textarea");
     if (f) f.focus({ preventScroll: true });
   }
+    /* ── THE MONTH PICKER (§176) ────────────────────────────────────────
+       A due date is chosen, never typed. The button carries the FIELDS index
+       and the month and year it is currently showing; the panel is built by
+       monthPopHtml() and mounted on <body> as position:fixed, because a
+       project's tables sit inside `.tblscroll` and an absolute panel is
+       clipped to a strip of it (§45.5 settled this for searchsel).
+
+       PICKING FIRES THE SETTER AND NOTHING ELSE. `data-fld` writes without
+       repainting (§71.2), and this is the same contract: close the panel
+       FIRST -- the click is still inside it (§30.1) -- then write, then let
+       paint() run, which is what turns the red button amber. Stepping the
+       year rebuilds only the panel, so the year can be walked without
+       committing anything. */
+  var MONTHPOP = (function(){
+      var open = null;
+      var shut = function(){
+        if (!open) return;
+        open.pop.remove();
+        open.btn.classList.remove("open");
+        open.btn.setAttribute("aria-expanded", "false");
+        document.removeEventListener("pointerdown", open.onDoc, true);
+        document.removeEventListener("keydown", open.onKey, true);
+        window.removeEventListener("scroll", open.onGone, true);
+        window.removeEventListener("resize", open.onGone, true);
+        open = null;
+      };
+      var place = function(btn, pop){
+        var r = btn.getBoundingClientRect();
+        var h = pop.offsetHeight, w = pop.offsetWidth;
+        var below = window.innerHeight - r.bottom - 8;
+        var top = (below >= h || r.top < h + 8) ? r.bottom + 4 : r.top - h - 4;
+        var left = Math.min(r.left, Math.max(8, window.innerWidth - w - 8));
+        pop.style.top = Math.max(8, top) + "px";
+        pop.style.left = left + "px";
+      };
+      var draw = function(btn){
+        var mi = btn.dataset.mi === "" ? null : +btn.dataset.mi;
+        var yr = +btn.dataset.yr;
+        /* The lit month belongs to the year it was set in: step to 2027 and
+           nothing is lit, step back and Jul lights again. */
+        open.pop.innerHTML = monthPopHtml(mi, yr, yr === open.setYear);
+        place(btn, open.pop);
+      };
+      var write = function(value){
+        var btn = open.btn, i = +btn.dataset.month;
+        shut();
+        var fn = FIELDS[i];
+        if (!fn) return;
+        fn(value);
+        fieldSaved();
+        paint();
+      };
+      document.addEventListener("click", function(ev){
+        var btn = ev.target.closest && ev.target.closest("[data-month]");
+        if (btn) {
+          var was = open && open.btn === btn;
+          shut();
+          if (was) return;
+          var pop = document.createElement("div");
+          pop.className = "monthpop";
+          pop.setAttribute("role", "dialog");
+          pop.setAttribute("aria-label", "Pick a month");
+          document.body.appendChild(pop);
+          var onDoc = function(e){
+            if (!pop.contains(e.target) && !btn.contains(e.target)) shut();
+          };
+          var onKey = function(e){ if (e.key === "Escape") { shut(); btn.focus(); } };
+          var onGone = function(e){ if (!pop.contains(e.target)) shut(); };
+          open = { btn: btn, pop: pop, onDoc: onDoc, onKey: onKey, onGone: onGone,
+                   setYear: +btn.dataset.yr };
+          /* Nothing is lit until a month has been set: an empty cell must not
+             open with July already looking chosen (§15.1, absent never zero). */
+          if (btn.dataset.mi === "") open.setYear = null;
+          btn.classList.add("open");
+          btn.setAttribute("aria-expanded", "true");
+          draw(btn);
+          document.addEventListener("pointerdown", onDoc, true);
+          document.addEventListener("keydown", onKey, true);
+          window.addEventListener("scroll", onGone, true);
+          window.addEventListener("resize", onGone, true);
+          return;
+        }
+        if (!open) return;
+        var step = ev.target.closest("[data-myr]");
+        if (step && open.pop.contains(step)) {
+          open.btn.dataset.yr = +open.btn.dataset.yr + (+step.dataset.myr);
+          draw(open.btn);
+          return;
+        }
+        var pick = ev.target.closest("[data-mpick]");
+        if (pick && open.pop.contains(pick))
+          return write(monthValue(+pick.dataset.mpick, +open.btn.dataset.yr));
+        if (ev.target.closest("[data-mclear]") && open.pop.contains(ev.target))
+          return write("");
+      });
+      return { shut: shut };
+    })();
+
   function wire(){
     /* `[data-s]`, NOT every button in the row (§150.1). The row gained a
        second kind of child when the reporting controls moved onto it, and

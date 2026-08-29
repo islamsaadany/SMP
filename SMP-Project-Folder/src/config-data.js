@@ -4716,6 +4716,13 @@ function mayFill(acKey, target){
   return SMPRules.mayFillPage(world(), viewer(), acKey,
     target === undefined ? TARGET : target);
 }
+/* §176: the same question about ONE ROW. `ctx` is §147.7's shape -- {row},
+   {project} or {pillarOwner} -- so a project owner fills their own project
+   and a pillar owner their own pillar, and nobody fills a neighbour's. */
+function mayFillRow(acKey, ctx, target){
+  return SMPRules.mayFillRow(world(), viewer(), acKey,
+    target === undefined ? TARGET : target, ctx);
+}
 /* MAY THIS PERSON REORDER WHAT THEY ARE LOOKING AT (§101)? A wrapper, never a
    second copy — the answer is lib/rules.js's, asked for the person being viewed
    as, so the handle the screen draws and the save the server accepts cannot
@@ -4977,7 +4984,14 @@ function gapPendRows(target){
     (GROUP.capabilities || []).forEach(function(c){
       if (c.fn !== fk) return;
       (c.keyObjectives || []).forEach(push);
-      (c.projects || []).forEach(push);
+      /* §176: a project's outcomes and milestones carry marks of their own
+         now, so the pending list has to walk them or the office's "N awaiting
+         confirmation" undercounts exactly the values §176 made fillable. */
+      (c.projects || []).forEach(function(pr){
+        push(pr);
+        (pr.outcomes   || []).forEach(push);
+        (pr.milestones || []).forEach(push);
+      });
     });
   } else {
     var u = UNITS[t];
@@ -5002,21 +5016,35 @@ function gapPendCount(target){ return gapPendRows(target).length; }
    to GET there, in the navigation's own words. */
 function gapMap(target){
   var t = String(target || ""), out = [];
-  var G = SMPRules.gapMissing;
+  /* §176: COUNTED ONLY WHERE THIS VIEWER COULD ACTUALLY CLOSE IT. The map
+     feeds the red "N Missing", the per-place chips, the rail's counts and the
+     Next-gap walk, so a gap counted here is a promise that pressing the button
+     opens something. A bounded role -- a project owner, a pillar owner, a
+     contributor -- reaches only its own rows (mayFillRow), so counting the
+     whole subject's gaps at them would send them to a field they cannot type
+     in: §61's trap wearing the count's clothes. The office authors, so
+     everything counts for them, which is the page-level answer. */
+  var canAuthor = {}, reach = function(acKey, ctx){
+    if (!(acKey in canAuthor)) canAuthor[acKey] = mayAuthor(acKey, target);
+    return canAuthor[acKey] || mayFillRow(acKey, ctx, target);
+  };
+  var G = function(acKey, ctx, kind, row){
+    return reach(acKey, ctx) ? SMPRules.gapMissing(kind, row).length : 0;
+  };
   var entry = function(key, label, count, go){
     out.push({ key: key, label: label, count: count, go: go });
   };
   var unitHalf = function(u){
     if (!u) return;
-    var found = G("unit", u).length;
+    var found = G("u_found", {}, "unit", u);
     entry("found", "Foundation", found, { sec: "found", page: "foundation" });
     var ko = 0;
-    (u.keyObjectives || []).forEach(function(m){ ko += G("ko", m).length; });
+    (u.keyObjectives || []).forEach(function(m){ ko += G("u_found", {}, "ko", m); });
     entry("ko", "Objectives", ko, { sec: "found", page: "foundation" });
     (u.items || []).forEach(function(p, i){
-      var n = 0;
-      (p.measures || []).forEach(function(m){ n += G("measure", m).length; });
-      (p.tactics  || []).forEach(function(x){ n += G("tactic", x).length; });
+      var n = 0, pctx = function(row){ return { pillarOwner: p.owner, row: row }; };
+      (p.measures || []).forEach(function(m){ n += G("u_plan", pctx(m), "measure", m); });
+      (p.tactics  || []).forEach(function(x){ n += G("u_plan", pctx(x), "tactic", x); });
       entry("p:" + (p.code || i), pillarCode(u, i), n,
             { sec: "plan", page: "plan", rail: unitRailKey(u), code: p.code });
     });
@@ -5026,14 +5054,22 @@ function gapMap(target){
     if (fo && String(fo.format) === "pillars") { unitHalf(unitLike(t)); return out; }
     var caps = capsOfFunction(fk), ov = 0;
     caps.forEach(function(c){
-      (c.keyObjectives || []).forEach(function(m){ ov += G("capko", m).length; });
+      (c.keyObjectives || []).forEach(function(m){ ov += G("k_found", {}, "capko", m); });
     });
     entry("ov", "Overview", ov, { sec: "found", page: "capfoundation" });
     caps.forEach(function(c){
       (c.projects || []).forEach(function(p){
         /* The projects rail is per CAPABILITY (railKeyFor), and it selects
            by project id — the same pair the rail's own rows write. */
-        entry("pr:" + p.id, projCode(fk, p), G("project", p).length,
+        /* §176: a project's front matter, its outcomes' targets and its
+           milestones' owners and due dates are one place — the project — so
+           they are one count and one chip, and the walk lands on the pane
+           that holds all three. */
+        var pctx = function(row){ return { project: p, row: row }; };
+        var n = G("k_proj", { project: p }, "project", p);
+        (p.outcomes   || []).forEach(function(o){ n += G("k_proj", pctx(o), "outcome", o); });
+        (p.milestones || []).forEach(function(m){ n += G("k_proj", pctx(m), "milestone", m); });
+        entry("pr:" + p.id, projCode(fk, p), n,
               { sec: "proj", page: "plan", rail: "cap:" + c.id, code: p.id });
       });
     });

@@ -365,6 +365,45 @@ console errors (in this cloud environment, run it via a wrapper that points Play
   `node scripts/test-door.js <smo-password>` against a running dev-server
   after touching `api/auth.js` or `lib/auth.js` (it ends by rate-limiting the
   SMO on purpose — `DELETE FROM login_attempts;` clears it).
+- **THE PAGE SAID MISSING AND THE COUNT SAID NOTHING WAS (§176):** a project
+  pane prints the red word in two places the fill grant could not see — an
+  **outcome with no target** and a **milestone with no due date** — and a
+  milestone with no OWNER printed an em-dash, the platform's word for *absent*,
+  which says nothing is owed. So a project owner given *Fill gaps* saw three
+  red Missings, a gap total of **0**, and no control at all: **the product's own
+  vocabulary disagreeing with the one feature named after it.** All three join
+  `GAP_FIELDS`; a **deliverable** deliberately does not (its direction and
+  target are written FOR it, §104) and the check asserts that absence.
+  **THE DUE DATE IS PICKED, NEVER TYPED** — a month and a year (`Jul 26`),
+  because every comparison the product makes is monthly (`monthsOf`,
+  `dueThisCycle`, `shiftWhen`) and a day is precision it cannot use. Measured
+  first: `24 Jul 26` reads, fits and shifts; **`24/07/2026` reads as null in
+  all three**, which is what a free text box would have collected. The panel is
+  **`position:fixed`** or `.tblscroll` clips it to a strip (§45.5, reproduced in
+  the mockup before a source was touched), mounted on `<body>`, and
+  `MONTHPOP.shut()` runs at the end of every paint beside `SEARCHSEL.wire()`.
+  Nothing is lit until something is set (§15.1); **Clear** puts the row back to
+  Missing; **dates already written are untouched**, and the stated cost is that
+  a quarter can no longer be typed into a milestone's due date, in the pen
+  either (§53.5: one control, one answer).
+- **THE GRANT IS PER PAGE AND THE REACH IS PER ROW (§176):** Islam — *"the fill
+  grant should be for his project only he is not a cutodian."* There is no
+  per-project cell and there should not be one, so `mayFillRow()` is
+  `mayFillPage()` plus §147.7's `boundedReach()`, narrowing only when EVERY
+  role granting fill here is a bounded one. **Applied to a pillar owner too**,
+  unasked: the rule is about bounded roles, not about projects (§53.5). A gap
+  inside no row falls out closed on its own, and **`gapCell` defaults its
+  context to "inside no row"** — the safe way round, §42 in the small.
+  **`gapMap()` counts only what this viewer could close**, or the red button
+  promises a field it will not open (§61). **No migration**: the mark rides
+  `extra` on `outcomes` and `milestones` — claimed, then proved by writing one
+  of each against a real Postgres and reading it back (§172). The server's
+  `gapRows()` reaches those rows BEFORE `splitRows` compares them, or a fill
+  falls through to `capPlan` and is refused as authoring; its `ctx` is built
+  from the **stored** graph (§42). Proved able to fail three ways — 13 on the
+  screen, 5 on the server, and **the two REFUSED cases go green the moment
+  `mayFillRow` is swapped for `mayFillPage`**, which is the only proof that
+  matters when a pre-change build refuses everything anyway.
 - **WHO OWNS EVERY PLACE WAS TWO LISTS AND THEY DISAGREED (§175):** `roleOwns()`
   said super and gceo; the matrix's `notApplicable()` said super and gceo; and
   **neither said `smoteam`** — so an SMO team member owned nothing, read
@@ -2782,6 +2821,11 @@ python3 checks/strategy-split.py # the Strategy | Reporting halves: the cell pre
                                 # open AND closed, both ends each time — and since §145.9
                                 # the .pptx download asserted HIDDEN on every surface while
                                 # the dormant builder is still proved by a direct call
+python3 checks/milestone-fill.py # a milestone is filled, and a bounded role fills only
+                                # its own (§176): every red Missing the page prints is one
+                                # the count knows about, the month panel escapes the table's
+                                # scroll box, every pick read back from the DATA, and the
+                                # project beside his stays shut — both ends, three viewers
 python3 checks/gap-fill.py      # fill the gaps (§145): the third toggle where it belongs
                                 # and nowhere else, fill mode's fields AND absences, every
                                 # press read back from the DATA, the pending chip and the

@@ -131,8 +131,17 @@ with sync_playwright() as p:
                cols: body ? body.children.length : 0 };
     }""")
     ck("two header rows", shape["headRows"] == 2, shape["headRows"])
-    ck("the two pair names span their halves",
-       shape["pairs"] == ["Own business unit", "Own supporting function"], shape["pairs"])
+    # §174 SHORTENED THESE HEADINGS and this assertion held the old strings, so
+    # it has been red on main since that merge (§51.11: a check keyed on markup
+    # that changed). It asks the shared rule for the words now — what is under
+    # test is that the header AGREES with lib/rules.js, never what the two of
+    # them happen to say (§53.5, §94.8), so the next rename keeps it green.
+    want = pg.evaluate(
+        "() => [\"a_unit_own_strat\", \"a_fn_own_strat\"].map(function(k){"
+        "  var a = SMPRules.AREAS.filter(function(x){ return x.key === k; })[0] || {};"
+        "  return String(a.short || a.pair || a.label || \"\").trim(); })")
+    ck("the two pair names span their halves, in the rule's own words",
+       shape["pairs"] == want, "header %s, rule %s" % (shape["pairs"], want))
     ck("Strategy | Reporting under each",
        shape["halves"] == ["Strategy", "Reporting", "Strategy", "Reporting"], shape["halves"])
     ck("a body row holds the role and nine answers", shape["cols"] == 10, shape["cols"])

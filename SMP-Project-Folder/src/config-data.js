@@ -581,11 +581,21 @@ function commsSet(key, value){
    touched it and thought better are byte-identical. What the overrides MEAN
    is `SMPRules.kbLook` / `kbAdds` — one precedence rule for the page and
    the assistant both (§103). */
+/* THE AUDIENCE IS RESOLVED HERE, NOT READ RAW (§161). An item's `who` may
+   be its own or inherited from its group — `recipesFlat()` resolves it and
+   this walk did not, so comparing an incoming audience against `item.who`
+   would have read `undefined` for every question in the Strategy Office
+   group and stored a phantom override on all five. Returns a COPY, so the
+   resolution cannot be written back onto the shipped array. */
 function kbShipped(id){
   for (var i = 0; i < RECIPES.length; i++){
     var g = RECIPES[i];
     for (var j = 0; j < g.items.length; j++){
-      if (g.items[j].id === id) return g.items[j];
+      var it = g.items[j];
+      if (it.id === id) {
+        return { id: it.id, q: it.q, a: it.a, g: g.g,
+                 who: SMPRules.kbAudienceWord(it.who || g.who) };
+      }
     }
   }
   return null;
@@ -601,20 +611,42 @@ function kbPrune(){
   if (k.add && !k.add.length) delete k.add;
   if (!Object.keys(k).length) delete GROUP.kb;
 }
-function kbSetOver(id, q, a){
+/* THE AUDIENCE IS THE THIRD THING AN OVERRIDE CAN CARRY (§161), so it is
+   passed and compared exactly like the wording: back to the shipped value
+   and the whole override dies with it. `w` is undefined at every existing
+   call site, which reads as "leave the audience alone" rather than as
+   "set it to nothing" — the distinction matters, because the pen writes
+   q and a together and the file writes all three. */
+function kbSetOver(id, q, a, w){
   var std = kbShipped(id);
   if (!std) return;
   q = String(q == null ? "" : q).trim();
   a = String(a == null ? "" : a).trim();
+  var k = kbWritable();
+  var had = (k.ov && k.ov[id]) || null;
+  var aud = w === undefined ? (had && had.w) : SMPRules.kbAudienceWord(w);
+  var stdAud = SMPRules.kbAudienceWord(std.who);
+  if (aud === stdAud) aud = null;
+  /* COMPARED CANONICALLY, NEVER AS TWO STRINGS (§145's lesson, §54.5's
+     fixed point). The shipped answers separate paragraphs with `|`; the pen
+     and the questions file use a blank line, because neither is a place
+     anybody would type a pipe. The same prose therefore arrives spelt two
+     ways, and a raw `===` would call an untouched download-edit-upload round
+     trip a change on all 64 rows — the platform refusing its own export.
+     Both sides go through the one paragraph reader before they meet. */
+  if (SMPRules.kbSame(q, std.q)) q = "";
+  if (SMPRules.kbSame(a, std.a)) a = "";
   /* Emptied or typed back to the shipped words, the override dies — an
      override that stores the standard wording is a phantom change in every
-     save (§42, §50.6). */
-  var k = kbWritable();
-  if ((!q || q === std.q) && (!a || a === std.a)) {
+     save (§42, §50.6). The audience joins that test: an entry holding only
+     an audience equal to the shipped one is the same phantom. */
+  if ((!q || q === std.q) && (!a || a === std.a) && !aud) {
     if (k.ov) delete k.ov[id];
   } else {
     if (!k.ov) k.ov = {};
-    k.ov[id] = { q: q || std.q, a: a || std.a };
+    var e = { q: q || std.q, a: a || std.a };
+    if (aud) e.w = aud;
+    k.ov[id] = e;
   }
   kbPrune();
 }
@@ -632,13 +664,20 @@ function kbAddNew(g){
   k.add.push({ id: "kbx" + n, g: g, q: "", a: "" });
   return "kbx" + n;
 }
-function kbSetAdded(id, q, a){
+function kbSetAdded(id, q, a, w){
   var k = GROUP.kb;
   if (!k || !k.add) return;
   var e = k.add.filter(function(x){ return x.id === id; })[0];
   if (!e) return;
   e.q = String(q == null ? "" : q).trim();
   e.a = String(a == null ? "" : a).trim();
+  /* `everyone` is the default, so it is stored as an ABSENCE (§50.6) — a
+     tenant who never touches the audience is byte-identical to one who set
+     it to Both and back. */
+  if (w !== undefined) {
+    var aud = SMPRules.kbAudienceWord(w);
+    if (aud === "everyone") delete e.w; else e.w = aud;
+  }
 }
 function kbDropAdded(id){
   var k = GROUP.kb;

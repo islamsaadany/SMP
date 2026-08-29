@@ -20161,3 +20161,91 @@ it is.
   picker is kept for accurate names on the plan and in the deck.
 - **The tour has no mid-session door for anybody outside the office** (§119.4,
   surfacing in an answer for the first time).
+
+---
+
+## §161 · Taking the questions away, and bringing them back (v3.61)
+
+Islam: *"let me able to export and import the questions and answers."* He had
+just done exactly that by hand — the whole corpus into a spreadsheet, softened,
+and back (§160) — so this is that round trip made part of the product, settled
+from a mockup made of the real page before a source was touched.
+
+**THE EXPORT IS THE TEMPLATE**, the people file's rule (§54): what downloads is
+what uploads, so there is no second artefact to keep in step. One `.xlsx`, a
+Read me and a Questions sheet.
+
+**MATCHED ON `Id`, AND THAT IS WHY THE COLUMN EXISTS.** The question TEXT is the
+office's to edit, so it cannot be the key — §87's rule about names and
+identifiers arriving in a third place. A blank Id adds a question; an id nobody
+knows applies **nothing** and is drawn in red, because that is the row that
+would otherwise become a silent duplicate of a question already there.
+
+**ADDS AND AMENDS, NEVER REMOVES** (§54). A row deleted from the file leaves the
+platform untouched, and removing a question stays on the page's own button — a
+filtered spreadsheet must not be able to delete work. An answer put back to the
+shipped wording **clears the override** (§50.6), so the file is also the undo.
+
+**A REVIEW BEFORE ANYTHING IS WRITTEN**, his call over applying straight away:
+the shape the people file and the plan import already use. `kbApply()` is the
+only thing that writes and it goes through the SAME writers the pen uses, so a
+rule about what may be stored cannot be true on one path and not the other.
+
+### Three audiences, and the third is what makes a pair deterministic (§161.1)
+
+Asked whether the file may change who sees an answer, Islam: *"on every question
+and the question might be seen by only the smo or by other audience or both."*
+
+**THE OLD TWO MAP STRAIGHT ON**, which is the whole back-compat argument:
+`office` already meant the office alone and `everyone` already meant everybody
+INCLUDING them, so nothing stored moves and an absent value still reads as
+`everyone` (§30.2). What is new is `others` — everybody EXCEPT the office — and
+it settles something §160 left loose: that section handed the office BOTH halves
+of a two-answer pair with an instruction to choose, and each side is now served
+exactly one. `SMPRules.kbSees()` is the one place that answers it.
+
+**AND THE AUDIENCE GOVERNS THE ASSISTANT, NEVER THIS PAGE** — forced, not
+chosen. The Knowledge base page is the office's (§119.4), so an answer marked
+*Everyone else* obeyed on the page would be readable by nobody and therefore
+editable by nobody (§61's trap). The office sees every question with its
+audience MARKED, which is already how `who:"office"` behaved. The chip is drawn
+for the two audiences that are a DECISION and never for `everyone`, which 57 of
+64 carry — a mark on nearly every card is furniture (§41's budget).
+
+**THE PICKER IS ON THE PAGE TOO**, not only in the file: a question added with
+the pen could otherwise be given an audience nowhere but a spreadsheet, which is
+§61 wearing the file's clothes.
+
+### The pen had been promising something the renderer never did (§161.3)
+
+`kbEdCard`'s lede has said *"A blank line is a paragraph break"* since §140, and
+the read path only ever split on `|`. Measured: an override typed as two
+paragraphs rendered as **one run-on paragraph**, on the page and in the answer
+the assistant gives. A promise the product made and did not keep, for twenty
+versions.
+
+**`SMPRules.kbParas()` READS BOTH** — `|` for the shipped source text, a blank
+line for anything typed into a textarea or a spreadsheet cell, where a pipe is
+not something anybody would reach for. One reader, so the page, the corpus and
+the file cannot disagree about where a paragraph ends (§53.5).
+
+### The round trip has to be a fixed point, and it needed ONE comparison (§161.4)
+
+The same prose now arrives spelt two ways, so a raw `===` would call an
+untouched download-edit-upload round trip a change on **24 of the 64 rows** —
+§54.5's fault exactly, the platform refusing its own export.
+
+**AND THE FIRST BUILD HAD TWO COPIES OF THE COMPARISON**, one in `kbSetOver`
+and one in `kbFromWorkbook`. Found by the check failing to fail: breaking the
+writer's copy produced **0 failures**, because every assertion about the fixed
+point went through the reader's. Two places answering *is this the same prose*
+is how a review says "reworded" while the writer stores nothing — a
+disagreement nobody would see until a client's edit vanished. `kbSame()` is one
+function in `lib/rules.js` now, and the check gained an assertion aimed at the
+WRITER specifically (§113.8: an assertion that only exercises one of two paths
+cannot see the other go wrong).
+
+`checks/kb-file.py` was proved able to fail three ways before its green was
+believed (§94.5): a raw compare → **4**, the audience filter ignored → **3**,
+a blank line stopping being a paragraph → **4**, the last printing the 24
+falsely-reworded rows by name.

@@ -732,6 +732,35 @@ console errors (in this cloud environment, run it via a wrapper that points Play
   holding a bad date is findable without opening each (§93.4). `railSub(html,
   alarm)` tells them apart. **Found by `checks/project-tables.py` going red on
   the day the default flipped**, not by reading the rail.
+- **THE QUESTIONS TRAVEL, AND THE ROUND TRIP MUST BE A FIXED POINT (§161):**
+  the knowledge base exports and imports as one `.xlsx` — the export IS the
+  template (§54) — **matched on `Id`**, because the question text is the
+  office's to edit and so cannot be the key (§87 in a third place). Adds and
+  amends, never removes; an answer put back to the shipped wording CLEARS the
+  override, so the file is the undo (§50.6); an unrecognised id applies
+  **nothing** and is named, being the row that would otherwise become a silent
+  duplicate. **THE SHIPPED TEXT SEPARATES PARAGRAPHS WITH `|` AND A CELL USES A
+  BLANK LINE**, so the same prose arrives spelt two ways and a raw `===` calls
+  an untouched round trip a change on **24 of 64 rows** — `SMPRules.kbSame()`
+  is the ONE comparison, and the first build had two (one in the writer, one in
+  the reader), found only because breaking the writer's produced **0 check
+  failures**: every fixed-point assertion ran through the reader's. *Two places
+  answering "is this the same prose" is how a review says reworded while the
+  writer stores nothing.*
+- **THE PEN PROMISED A PARAGRAPH BREAK IT NEVER MADE (§161.3):** `kbEdCard`'s
+  lede has said *"A blank line is a paragraph break"* since §140 and the read
+  path only ever split on `|`, so an office rewrite typed as two paragraphs
+  rendered as one run-on — on the page AND in the assistant's answer, for
+  twenty versions. `kbParas()` reads both now, in one place (§53.5).
+- **`who` IS THREE, AND THE THIRD MAKES A PAIR DETERMINISTIC (§161.1):**
+  `office` · `others` · `everyone`, with the old two mapping straight on so
+  nothing stored moves (§30.2). §160 handed the office BOTH halves of a
+  two-answer pair and told the model to choose; each side is now served exactly
+  one. **The audience governs the assistant and never the page** — forced, not
+  chosen: the Knowledge base page is the office's (§119.4), so an answer marked
+  `others` obeyed there would be readable by nobody and editable by nobody
+  (§61). The chip is drawn only for the two that are a DECISION, never for
+  `everyone`, which 57 of 64 carry (§41's budget).
 - **A RECIPE IS A PROMISE ABOUT BEHAVIOUR, AND NOBODY WAS REVISITING IT
   (§160):** `recipes.js` went from §103 to §159 untouched while the platform
   learned to split the own columns (§117), to fill only what is empty (§145)
@@ -2670,6 +2699,12 @@ python3 checks/setup-pages.py   # every Setup page is named ONCE and in the rail
                                 # and the name and the table head stay on screen (§121)
 python3 checks/knowledge-base.py # the page and db/kb.json draw from ONE source — the
                                 # AGREEMENT, never the count (§103)
+python3 checks/kb-file.py       # the questions file (§161): the round trip is a FIXED
+                                # POINT — downloaded and uploaded untouched it changes
+                                # nothing, before AND after applying — every kind of
+                                # change classified, an unrecognised id refused by name,
+                                # and the audience the file sets obeyed by the page and
+                                # the corpus alike
 node scripts/test-kb-audience.js # who sees which answer (§160): an office answer absent
                                 # for everybody else AND still present for the office, and
                                 # a two-answer question leaving each side exactly one.

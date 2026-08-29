@@ -1469,23 +1469,7 @@
           border:1px solid var(--line); border-radius:6px; padding:8px 10px;
           min-height:96px; resize:vertical; background:var(--surface); color:var(--ink); }
 .kbed-q:focus-visible, .kbed-a:focus-visible { outline:2px solid var(--focus); outline-offset:-1px; }
-.kbed-foot { display:flex; gap:12px; align-items:center; margin-top:8px;
-  flex-wrap:wrap; }
-/* WHO AN ANSWER IS FOR (§161). The picker sits FIRST in the foot, before the
-   "Edited" mark and its way back, because it is a property of the answer
-   while those two are a property of this tenant's change to it. */
-.kbed-aud { display:flex; align-items:center; gap:7px; font-size:12.5px;
-  color:var(--ink-3); }
-.kbed-aud select { font:inherit; color:var(--ink); background:var(--surface);
-  border:1px solid var(--line); border-radius:4px; padding:3px 6px; }
-/* The chip in read mode. `everyone` is never drawn — it is the default on 57
-   of 64 questions and a mark on nearly every card is furniture (§41). The two
-   that ARE drawn read apart at a glance rather than by their words alone:
-   the office's takes the accent, everybody-else's the quiet surface. */
-.pill.kind.kbaud-office { border-color:var(--gold); color:var(--gold-deep);
-  background:var(--attn-bg); }
-.pill.kind.kbaud-others { border-color:var(--line); color:var(--ink-2);
-  background:var(--surface-2); }
+.kbed-foot { display:flex; gap:12px; align-items:center; margin-top:8px; }
 .kbed-mark { font-size:var(--fs-micro); letter-spacing:.09em; text-transform:uppercase;
              font-weight:700; color:var(--gold-deep); border:1px solid var(--gold);
              border-radius:99px; padding:2px 9px; }

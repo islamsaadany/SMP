@@ -1231,3 +1231,172 @@ function peopleWorkbook(){
 function peopleFromWorkbook(sheets){
   return sheetObjects(sheets["People"] || []);
 }
+
+/* ── THE QUESTIONS FILE (§161) ─────────────────────────────────────────────
+   Islam: "let me able to export and import the questions and answers." He had
+   just done it by hand — the whole corpus into a spreadsheet, softened, and
+   back — so this is that round trip made part of the product.
+
+   THE EXPORT IS THE TEMPLATE, the people file's rule (§54): what downloads is
+   what uploads, so there is no second artefact to keep in step.
+
+   MATCHED ON Id, and that is the whole reason the column exists. The question
+   TEXT is the office's to edit, so it cannot be the key — §87's rule about
+   names and identifiers, arriving in a third place. A blank id is a new
+   question; an id nobody knows applies NOTHING and says so, because that is
+   the row that would otherwise become a silent duplicate.
+
+   PARAGRAPHS ARE BLANK LINES HERE, never the `|` the source file uses: a pipe
+   is not a thing anybody types into a cell. Both are read (SMPRules.kbParas),
+   and kbSetOver compares canonically, so an untouched round trip stores
+   nothing at all (§54.5). */
+var KB_FILE_COLS = ["Id", "Section", "Question", "Answer", "Audience"];
+var KB_FILE_REF  = "Standard answer";
+
+function kbAudLabels(){
+  return SMPRules.KB_AUDIENCES.map(function(k){
+    return SMPRules.KB_AUDIENCE_LABEL[k];
+  });
+}
+function kbAudFromLabel(v){
+  var t = String(v || "").trim().toLowerCase();
+  var hit = SMPRules.KB_AUDIENCES.filter(function(k){
+    return SMPRules.KB_AUDIENCE_LABEL[k].toLowerCase() === t || k === t;
+  })[0];
+  return hit || null;
+}
+/* Paragraphs as a cell holds them. */
+function kbCellText(a){ return SMPRules.kbParas(a).join("\n\n"); }
+
+function kbReadme(){
+  return { name:"Read me", widths:[104], head:["The questions file"], rows:[
+    ["This is every question the knowledge base answers, and the words it answers with."],
+    [""],
+    ["It is the same file both ways: what you download is what you upload. Edit the"],
+    ["Question, the Answer and the Audience; leave everything else alone."],
+    [""],
+    ["Id — how a row is recognised. Do not change it. The question text is yours to"],
+    ["   edit, so it cannot be what a row is matched on."],
+    ["   Leave the Id EMPTY to add a question of your own — give it a Section."],
+    [""],
+    ["Answer — a blank line inside the cell starts a new paragraph (Alt+Enter)."],
+    [""],
+    ["Audience — who the assistant answers with this. One of:"],
+    ["   " + kbAudLabels().join("   |   ")],
+    [""],
+    ["Standard answer — the wording the platform ships, for you to compare against."],
+    ["   It is ignored when you upload; edit the Answer column instead."],
+    [""],
+    ["Putting an Answer back to the standard wording clears your change for that"],
+    ["question, so this file is also how you undo one."],
+    [""],
+    ["Uploading ADDS and AMENDS and never removes: a row you delete from this file"],
+    ["leaves the platform exactly as it was. Remove a question you added on the page."],
+    [""],
+    ["You see everything that will change, and press Apply, before anything is saved."]
+  ]};
+}
+
+function kbWorkbook(){
+  var rows = [];
+  RECIPES.forEach(function(g){
+    g.items.forEach(function(r){
+      var o = SMPRules.kbLook(GROUP.kb, r.id);
+      var aud = SMPRules.kbAudience(GROUP.kb, r.id, r.who || g.who);
+      rows.push([r.id, g.g, (o && o.q) || r.q, kbCellText((o && o.a) || r.a),
+                 SMPRules.KB_AUDIENCE_LABEL[aud], kbCellText(r.a)]);
+    });
+  });
+  /* The office's own questions, at the foot, with an empty reference cell —
+     there is no standard wording to compare a question of theirs against. */
+  SMPRules.kbAllAdds(GROUP.kb).forEach(function(x){
+    rows.push([x.id, x.g || "", x.q, kbCellText(x.a),
+               SMPRules.KB_AUDIENCE_LABEL[SMPRules.kbAudienceWord(x.w)], ""]);
+  });
+  return [
+    kbReadme(),
+    { name:"Questions", widths:[22, 30, 46, 76, 22, 76],
+      head:KB_FILE_COLS.concat([KB_FILE_REF]),
+      /* Written and never read (§65's "Also holds"): locked, so the one column
+         that cannot change anything cannot look as though it might. */
+      lockedCols:[5],
+      validations:[
+        { range:"E2:E2000", list:kbAudLabels(),
+          error:"Choose who the assistant answers with this question." }
+      ],
+      rows:rows }
+  ];
+}
+
+/* ── READING IT BACK ───────────────────────────────────────────────────────
+   Classifies and applies NOTHING. The caller shows the list and applies it on
+   a press, the way the people file and the plan import already do — a bad
+   paste must not be able to rewrite sixty-four answers in silence.
+
+   Every comparison is canonical, so a file downloaded and uploaded untouched
+   classifies as no change at all. That is the assertion the check makes first,
+   because a round trip that reports work is a round trip nobody trusts. */
+function kbFromWorkbook(sheets){
+  var rows = sheetObjects(sheets["Questions"] || []);
+  var out = { reword:[], audience:[], reset:[], add:[], unknown:[], blank:0 };
+  rows.forEach(function(r){
+    var id = String(r["Id"] || "").trim();
+    var q  = String(r["Question"] || "").trim();
+    var a  = String(r["Answer"] || "").trim();
+    var audRaw = r["Audience"];
+    var aud = kbAudFromLabel(audRaw);
+    if (!q && !a) { out.blank++; return; }
+    /* NEW: no id at all. Given one on apply, never here — minting inside a
+       classifier would leave ids behind on a discarded review. */
+    if (!id) {
+      out.add.push({ g: String(r["Section"] || "").trim(), q:q, a:a, w:aud || "everyone" });
+      return;
+    }
+    var added = SMPRules.kbAllAdds(GROUP.kb).filter(function(x){ return x.id === id; })[0];
+    if (added) {
+      var wasA = SMPRules.kbAudienceWord(added.w);
+      if (!SMPRules.kbSame(added.q, q) || !SMPRules.kbSame(added.a, a))
+        out.reword.push({ id:id, q:q, a:a, w:aud || wasA, mine:true });
+      else if (aud && aud !== wasA)
+        out.audience.push({ id:id, q:q, a:a, w:aud, mine:true, from:wasA });
+      return;
+    }
+    var std = kbShipped(id);
+    if (!std) { out.unknown.push({ id:id, q:q }); return; }
+    var now = SMPRules.kbLook(GROUP.kb, id);
+    var nowQ = (now && now.q) || std.q, nowA = (now && now.a) || std.a;
+    var nowW = SMPRules.kbAudience(GROUP.kb, id, std.who);
+    var sameText = SMPRules.kbSame(q, nowQ) && SMPRules.kbSame(a, nowA);
+    var backToStd = SMPRules.kbSame(q, std.q) && SMPRules.kbSame(a, std.a);
+    if (!sameText) {
+      /* Back to the shipped words IS the way to undo, so it is reported as a
+         reset rather than as another rewording — the two land somewhere
+         different and somebody reading the list needs to know which. */
+      (backToStd && now ? out.reset : out.reword).push({ id:id, q:q, a:a,
+        w: aud || nowW, from:nowW });
+    } else if (aud && aud !== nowW) {
+      out.audience.push({ id:id, q:q, a:a, w:aud, from:nowW });
+    }
+  });
+  return out;
+}
+function kbChangeCount(c){
+  return c.reword.length + c.audience.length + c.reset.length + c.add.length;
+}
+/* Applying is the only place that writes, and it goes through the SAME
+   writers the pen uses — so a rule about what may be stored (an override that
+   equals the shipped wording dies, §50.6) cannot be true on one path and not
+   the other (§53.5). */
+function kbApply(c){
+  c.reset.forEach(function(x){ kbResetOver(x.id); });
+  c.reword.forEach(function(x){
+    if (x.mine) kbSetAdded(x.id, x.q, x.a, x.w); else kbSetOver(x.id, x.q, x.a, x.w);
+  });
+  c.audience.forEach(function(x){
+    if (x.mine) kbSetAdded(x.id, x.q, x.a, x.w); else kbSetOver(x.id, x.q, x.a, x.w);
+  });
+  c.add.forEach(function(x){
+    var id = kbAddNew(x.g || (RECIPES[0] && RECIPES[0].g) || "");
+    kbSetAdded(id, x.q, x.a, x.w);
+  });
+}

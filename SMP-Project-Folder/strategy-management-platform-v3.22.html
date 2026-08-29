@@ -5541,7 +5541,23 @@
           border:1px solid var(--line); border-radius:6px; padding:8px 10px;
           min-height:96px; resize:vertical; background:var(--surface); color:var(--ink); }
 .kbed-q:focus-visible, .kbed-a:focus-visible { outline:2px solid var(--focus); outline-offset:-1px; }
-.kbed-foot { display:flex; gap:12px; align-items:center; margin-top:8px; }
+.kbed-foot { display:flex; gap:12px; align-items:center; margin-top:8px;
+  flex-wrap:wrap; }
+/* WHO AN ANSWER IS FOR (§161). The picker sits FIRST in the foot, before the
+   "Edited" mark and its way back, because it is a property of the answer
+   while those two are a property of this tenant's change to it. */
+.kbed-aud { display:flex; align-items:center; gap:7px; font-size:12.5px;
+  color:var(--ink-3); }
+.kbed-aud select { font:inherit; color:var(--ink); background:var(--surface);
+  border:1px solid var(--line); border-radius:4px; padding:3px 6px; }
+/* The chip in read mode. `everyone` is never drawn — it is the default on 57
+   of 64 questions and a mark on nearly every card is furniture (§41). The two
+   that ARE drawn read apart at a glance rather than by their words alone:
+   the office's takes the accent, everybody-else's the quiet surface. */
+.pill.kind.kbaud-office { border-color:var(--gold); color:var(--gold-deep);
+  background:var(--attn-bg); }
+.pill.kind.kbaud-others { border-color:var(--line); color:var(--ink-2);
+  background:var(--surface-2); }
 .kbed-mark { font-size:var(--fs-micro); letter-spacing:.09em; text-transform:uppercase;
              font-weight:700; color:var(--gold-deep); border:1px solid var(--gold);
              border-radius:99px; padding:2px 9px; }
@@ -8356,7 +8372,80 @@ THEME.apply();
   function kbLook(t, id) {
     var o = kbTenant(t).ov;
     var e = o && typeof o === "object" ? o[id] : null;
-    return (e && typeof e === "object" && (e.q || e.a)) ? e : null;
+    return (e && typeof e === "object" && (e.q || e.a || e.w)) ? e : null;
+  }
+
+  /* ── WHO AN ANSWER IS FOR (§161, extending §160's two into three) ──
+     Islam, asked whether the questions file may change the audience: "on
+     every question and the question might be seen by only the smo or by
+     other audience or both."
+
+     THE OLD TWO MAP STRAIGHT ON, which is the whole back-compat argument:
+     `office` already meant the office alone, and `everyone` already meant
+     everybody INCLUDING the office, so nothing stored moves and an absent
+     value still reads as `everyone` (§30.2). What is new is `others` —
+     everybody EXCEPT the office — and it is what makes a two-answer pair
+     deterministic: §160 handed the office both halves and told the model to
+     pick, and now each side is served exactly one.
+
+     THE AUDIENCE GOVERNS THE ASSISTANT AND NEVER THE PAGE. The Knowledge
+     base page is the office's (§119.4), so an answer marked `others` shown
+     by this rule on the page would be readable by nobody and therefore
+     editable by nobody — §61's trap. The page shows the office everything
+     with the audience MARKED on it; only `kbSees()` below is consulted when
+     the corpus is assembled. */
+  var KB_AUDIENCES = ["office", "others", "everyone"];
+  var KB_AUDIENCE_LABEL = {
+    office:   "Strategy Office only",
+    others:   "Everyone else",
+    everyone: "Both"
+  };
+  /* The word, whatever arrives: an unknown or absent value is `everyone`,
+     which is the shipped default and the safe direction for a READING
+     permission — a typo must not silently hide an answer from the people it
+     was written for. */
+  function kbAudienceWord(w) {
+    return KB_AUDIENCES.indexOf(String(w || "")) > -1 ? String(w) : "everyone";
+  }
+  /* This tenant's audience for a question, or the shipped one. Read through
+     kbLook so the override lives with the wording it belongs to. */
+  function kbAudience(t, id, shipped) {
+    var o = kbLook(t, id);
+    return kbAudienceWord((o && o.w) || shipped);
+  }
+  /* Is this answer served to this asker? The ONE question the corpus filter
+     asks, so the client, the server and any check cannot answer it
+     differently (§42). */
+  /* ── WHAT SEPARATES TWO PARAGRAPHS (§161.3) ──────────────────────
+     The shipped answers use `|`, because recipes.js is a source file and a
+     separator that cannot appear in prose costs one line to split (§103).
+     The PEN's own lede has said "a blank line is a paragraph break" since
+     §140 and the renderer only ever split on `|` — so an office rewrite
+     typed as two paragraphs rendered as one run-on, on the page AND in the
+     answer the assistant gives. A promise the product made and did not keep.
+
+     Both are read now: `|` for the shipped text, a blank line for anything
+     typed into a textarea or a spreadsheet cell, where `|` is not a thing
+     anybody would reach for. ONE reader, here, so the page, the corpus and
+     the file cannot disagree about where a paragraph ends (§53.5). */
+  function kbParas(t) {
+    return String(t == null ? "" : t)
+      .split(/\s*\|\s*|\n[ \t]*\n\s*/)
+      .map(function (x) { return x.trim(); })
+      .filter(function (x) { return x.length > 0; });
+  }
+
+  /* IS THIS THE SAME PROSE? Asked by the writer (does this override still
+     say what the platform ships, §50.6) and by the questions file's reader
+     (has this row changed at all). TWO COPIES OF THAT QUESTION IS HOW THE
+     REVIEW COMES TO SAY "reworded" WHILE THE WRITER STORES NOTHING (§53.5),
+     which is a disagreement nobody would see until a client's edit vanished.
+     One function, so a change to what counts as a paragraph moves both. */
+  function kbSame(a, b) { return kbParas(a).join("|") === kbParas(b).join("|"); }
+
+  function kbSees(who, isOffice) {
+    var w = kbAudienceWord(who);
+    return isOffice ? w !== "others" : w !== "office";
   }
   function kbAllAdds(t) {
     var a = kbTenant(t).add;
@@ -8748,6 +8837,9 @@ THEME.apply();
     CHAT_DEFAULTS: CHAT_DEFAULTS, CHAT_PROMISE: CHAT_PROMISE,
     chatCfg: chatCfg, chatBeat: chatBeat,
     kbLook: kbLook, kbAdds: kbAdds, kbAllAdds: kbAllAdds,
+    KB_AUDIENCES: KB_AUDIENCES, KB_AUDIENCE_LABEL: KB_AUDIENCE_LABEL,
+    kbAudienceWord: kbAudienceWord, kbAudience: kbAudience, kbSees: kbSees,
+    kbParas: kbParas, kbSame: kbSame,
     PICK_SMO: PICK_SMO, PICK_OWNER: PICK_OWNER
   };
 });
@@ -10639,11 +10731,21 @@ function commsSet(key, value){
    touched it and thought better are byte-identical. What the overrides MEAN
    is `SMPRules.kbLook` / `kbAdds` — one precedence rule for the page and
    the assistant both (§103). */
+/* THE AUDIENCE IS RESOLVED HERE, NOT READ RAW (§161). An item's `who` may
+   be its own or inherited from its group — `recipesFlat()` resolves it and
+   this walk did not, so comparing an incoming audience against `item.who`
+   would have read `undefined` for every question in the Strategy Office
+   group and stored a phantom override on all five. Returns a COPY, so the
+   resolution cannot be written back onto the shipped array. */
 function kbShipped(id){
   for (var i = 0; i < RECIPES.length; i++){
     var g = RECIPES[i];
     for (var j = 0; j < g.items.length; j++){
-      if (g.items[j].id === id) return g.items[j];
+      var it = g.items[j];
+      if (it.id === id) {
+        return { id: it.id, q: it.q, a: it.a, g: g.g,
+                 who: SMPRules.kbAudienceWord(it.who || g.who) };
+      }
     }
   }
   return null;
@@ -10659,20 +10761,42 @@ function kbPrune(){
   if (k.add && !k.add.length) delete k.add;
   if (!Object.keys(k).length) delete GROUP.kb;
 }
-function kbSetOver(id, q, a){
+/* THE AUDIENCE IS THE THIRD THING AN OVERRIDE CAN CARRY (§161), so it is
+   passed and compared exactly like the wording: back to the shipped value
+   and the whole override dies with it. `w` is undefined at every existing
+   call site, which reads as "leave the audience alone" rather than as
+   "set it to nothing" — the distinction matters, because the pen writes
+   q and a together and the file writes all three. */
+function kbSetOver(id, q, a, w){
   var std = kbShipped(id);
   if (!std) return;
   q = String(q == null ? "" : q).trim();
   a = String(a == null ? "" : a).trim();
+  var k = kbWritable();
+  var had = (k.ov && k.ov[id]) || null;
+  var aud = w === undefined ? (had && had.w) : SMPRules.kbAudienceWord(w);
+  var stdAud = SMPRules.kbAudienceWord(std.who);
+  if (aud === stdAud) aud = null;
+  /* COMPARED CANONICALLY, NEVER AS TWO STRINGS (§145's lesson, §54.5's
+     fixed point). The shipped answers separate paragraphs with `|`; the pen
+     and the questions file use a blank line, because neither is a place
+     anybody would type a pipe. The same prose therefore arrives spelt two
+     ways, and a raw `===` would call an untouched download-edit-upload round
+     trip a change on all 64 rows — the platform refusing its own export.
+     Both sides go through the one paragraph reader before they meet. */
+  if (SMPRules.kbSame(q, std.q)) q = "";
+  if (SMPRules.kbSame(a, std.a)) a = "";
   /* Emptied or typed back to the shipped words, the override dies — an
      override that stores the standard wording is a phantom change in every
-     save (§42, §50.6). */
-  var k = kbWritable();
-  if ((!q || q === std.q) && (!a || a === std.a)) {
+     save (§42, §50.6). The audience joins that test: an entry holding only
+     an audience equal to the shipped one is the same phantom. */
+  if ((!q || q === std.q) && (!a || a === std.a) && !aud) {
     if (k.ov) delete k.ov[id];
   } else {
     if (!k.ov) k.ov = {};
-    k.ov[id] = { q: q || std.q, a: a || std.a };
+    var e = { q: q || std.q, a: a || std.a };
+    if (aud) e.w = aud;
+    k.ov[id] = e;
   }
   kbPrune();
 }
@@ -10690,13 +10814,20 @@ function kbAddNew(g){
   k.add.push({ id: "kbx" + n, g: g, q: "", a: "" });
   return "kbx" + n;
 }
-function kbSetAdded(id, q, a){
+function kbSetAdded(id, q, a, w){
   var k = GROUP.kb;
   if (!k || !k.add) return;
   var e = k.add.filter(function(x){ return x.id === id; })[0];
   if (!e) return;
   e.q = String(q == null ? "" : q).trim();
   e.a = String(a == null ? "" : a).trim();
+  /* `everyone` is the default, so it is stored as an ABSENCE (§50.6) — a
+     tenant who never touches the audience is byte-identical to one who set
+     it to Both and back. */
+  if (w !== undefined) {
+    var aud = SMPRules.kbAudienceWord(w);
+    if (aud === "everyone") delete e.w; else e.w = aud;
+  }
 }
 function kbDropAdded(id){
   var k = GROUP.kb;
@@ -20030,6 +20161,175 @@ function peopleFromWorkbook(sheets){
   return sheetObjects(sheets["People"] || []);
 }
 
+/* ── THE QUESTIONS FILE (§161) ─────────────────────────────────────────────
+   Islam: "let me able to export and import the questions and answers." He had
+   just done it by hand — the whole corpus into a spreadsheet, softened, and
+   back — so this is that round trip made part of the product.
+
+   THE EXPORT IS THE TEMPLATE, the people file's rule (§54): what downloads is
+   what uploads, so there is no second artefact to keep in step.
+
+   MATCHED ON Id, and that is the whole reason the column exists. The question
+   TEXT is the office's to edit, so it cannot be the key — §87's rule about
+   names and identifiers, arriving in a third place. A blank id is a new
+   question; an id nobody knows applies NOTHING and says so, because that is
+   the row that would otherwise become a silent duplicate.
+
+   PARAGRAPHS ARE BLANK LINES HERE, never the `|` the source file uses: a pipe
+   is not a thing anybody types into a cell. Both are read (SMPRules.kbParas),
+   and kbSetOver compares canonically, so an untouched round trip stores
+   nothing at all (§54.5). */
+var KB_FILE_COLS = ["Id", "Section", "Question", "Answer", "Audience"];
+var KB_FILE_REF  = "Standard answer";
+
+function kbAudLabels(){
+  return SMPRules.KB_AUDIENCES.map(function(k){
+    return SMPRules.KB_AUDIENCE_LABEL[k];
+  });
+}
+function kbAudFromLabel(v){
+  var t = String(v || "").trim().toLowerCase();
+  var hit = SMPRules.KB_AUDIENCES.filter(function(k){
+    return SMPRules.KB_AUDIENCE_LABEL[k].toLowerCase() === t || k === t;
+  })[0];
+  return hit || null;
+}
+/* Paragraphs as a cell holds them. */
+function kbCellText(a){ return SMPRules.kbParas(a).join("\n\n"); }
+
+function kbReadme(){
+  return { name:"Read me", widths:[104], head:["The questions file"], rows:[
+    ["This is every question the knowledge base answers, and the words it answers with."],
+    [""],
+    ["It is the same file both ways: what you download is what you upload. Edit the"],
+    ["Question, the Answer and the Audience; leave everything else alone."],
+    [""],
+    ["Id — how a row is recognised. Do not change it. The question text is yours to"],
+    ["   edit, so it cannot be what a row is matched on."],
+    ["   Leave the Id EMPTY to add a question of your own — give it a Section."],
+    [""],
+    ["Answer — a blank line inside the cell starts a new paragraph (Alt+Enter)."],
+    [""],
+    ["Audience — who the assistant answers with this. One of:"],
+    ["   " + kbAudLabels().join("   |   ")],
+    [""],
+    ["Standard answer — the wording the platform ships, for you to compare against."],
+    ["   It is ignored when you upload; edit the Answer column instead."],
+    [""],
+    ["Putting an Answer back to the standard wording clears your change for that"],
+    ["question, so this file is also how you undo one."],
+    [""],
+    ["Uploading ADDS and AMENDS and never removes: a row you delete from this file"],
+    ["leaves the platform exactly as it was. Remove a question you added on the page."],
+    [""],
+    ["You see everything that will change, and press Apply, before anything is saved."]
+  ]};
+}
+
+function kbWorkbook(){
+  var rows = [];
+  RECIPES.forEach(function(g){
+    g.items.forEach(function(r){
+      var o = SMPRules.kbLook(GROUP.kb, r.id);
+      var aud = SMPRules.kbAudience(GROUP.kb, r.id, r.who || g.who);
+      rows.push([r.id, g.g, (o && o.q) || r.q, kbCellText((o && o.a) || r.a),
+                 SMPRules.KB_AUDIENCE_LABEL[aud], kbCellText(r.a)]);
+    });
+  });
+  /* The office's own questions, at the foot, with an empty reference cell —
+     there is no standard wording to compare a question of theirs against. */
+  SMPRules.kbAllAdds(GROUP.kb).forEach(function(x){
+    rows.push([x.id, x.g || "", x.q, kbCellText(x.a),
+               SMPRules.KB_AUDIENCE_LABEL[SMPRules.kbAudienceWord(x.w)], ""]);
+  });
+  return [
+    kbReadme(),
+    { name:"Questions", widths:[22, 30, 46, 76, 22, 76],
+      head:KB_FILE_COLS.concat([KB_FILE_REF]),
+      /* Written and never read (§65's "Also holds"): locked, so the one column
+         that cannot change anything cannot look as though it might. */
+      lockedCols:[5],
+      validations:[
+        { range:"E2:E2000", list:kbAudLabels(),
+          error:"Choose who the assistant answers with this question." }
+      ],
+      rows:rows }
+  ];
+}
+
+/* ── READING IT BACK ───────────────────────────────────────────────────────
+   Classifies and applies NOTHING. The caller shows the list and applies it on
+   a press, the way the people file and the plan import already do — a bad
+   paste must not be able to rewrite sixty-four answers in silence.
+
+   Every comparison is canonical, so a file downloaded and uploaded untouched
+   classifies as no change at all. That is the assertion the check makes first,
+   because a round trip that reports work is a round trip nobody trusts. */
+function kbFromWorkbook(sheets){
+  var rows = sheetObjects(sheets["Questions"] || []);
+  var out = { reword:[], audience:[], reset:[], add:[], unknown:[], blank:0 };
+  rows.forEach(function(r){
+    var id = String(r["Id"] || "").trim();
+    var q  = String(r["Question"] || "").trim();
+    var a  = String(r["Answer"] || "").trim();
+    var audRaw = r["Audience"];
+    var aud = kbAudFromLabel(audRaw);
+    if (!q && !a) { out.blank++; return; }
+    /* NEW: no id at all. Given one on apply, never here — minting inside a
+       classifier would leave ids behind on a discarded review. */
+    if (!id) {
+      out.add.push({ g: String(r["Section"] || "").trim(), q:q, a:a, w:aud || "everyone" });
+      return;
+    }
+    var added = SMPRules.kbAllAdds(GROUP.kb).filter(function(x){ return x.id === id; })[0];
+    if (added) {
+      var wasA = SMPRules.kbAudienceWord(added.w);
+      if (!SMPRules.kbSame(added.q, q) || !SMPRules.kbSame(added.a, a))
+        out.reword.push({ id:id, q:q, a:a, w:aud || wasA, mine:true });
+      else if (aud && aud !== wasA)
+        out.audience.push({ id:id, q:q, a:a, w:aud, mine:true, from:wasA });
+      return;
+    }
+    var std = kbShipped(id);
+    if (!std) { out.unknown.push({ id:id, q:q }); return; }
+    var now = SMPRules.kbLook(GROUP.kb, id);
+    var nowQ = (now && now.q) || std.q, nowA = (now && now.a) || std.a;
+    var nowW = SMPRules.kbAudience(GROUP.kb, id, std.who);
+    var sameText = SMPRules.kbSame(q, nowQ) && SMPRules.kbSame(a, nowA);
+    var backToStd = SMPRules.kbSame(q, std.q) && SMPRules.kbSame(a, std.a);
+    if (!sameText) {
+      /* Back to the shipped words IS the way to undo, so it is reported as a
+         reset rather than as another rewording — the two land somewhere
+         different and somebody reading the list needs to know which. */
+      (backToStd && now ? out.reset : out.reword).push({ id:id, q:q, a:a,
+        w: aud || nowW, from:nowW });
+    } else if (aud && aud !== nowW) {
+      out.audience.push({ id:id, q:q, a:a, w:aud, from:nowW });
+    }
+  });
+  return out;
+}
+function kbChangeCount(c){
+  return c.reword.length + c.audience.length + c.reset.length + c.add.length;
+}
+/* Applying is the only place that writes, and it goes through the SAME
+   writers the pen uses — so a rule about what may be stored (an override that
+   equals the shipped wording dies, §50.6) cannot be true on one path and not
+   the other (§53.5). */
+function kbApply(c){
+  c.reset.forEach(function(x){ kbResetOver(x.id); });
+  c.reword.forEach(function(x){
+    if (x.mine) kbSetAdded(x.id, x.q, x.a, x.w); else kbSetOver(x.id, x.q, x.a, x.w);
+  });
+  c.audience.forEach(function(x){
+    if (x.mine) kbSetAdded(x.id, x.q, x.a, x.w); else kbSetOver(x.id, x.q, x.a, x.w);
+  });
+  c.add.forEach(function(x){
+    var id = kbAddNew(x.g || (RECIPES[0] && RECIPES[0].g) || "");
+    kbSetAdded(id, x.q, x.a, x.w);
+  });
+}
+
 </script>
 <script>
 /* ── The plan leaves as slides (§117) ────────────────────────────────
@@ -28693,6 +28993,11 @@ function recipeText(t){
    asks inOffice() (§42: the gate is on the control) and the server classifies
    a GROUP.kb change as setup, so both ends answer alike (§94.2). */
 var KBEDIT = false;
+/* The file menu's open state, and the classified upload waiting for Apply.
+   Both are SCREEN state and neither is stored: a review abandoned by
+   navigating away is a review that never happened (§25, §47.1). */
+var KBFILEMENU = false;
+var KBFILE = null;      /* { changes, name } while a review is on screen */
 
 /* WHICH TAB (§141): "how" or "qa". A SCREEN PREFERENCE (§25, §47.1) — one
    person reading the reference must not decide the tenant's landing tab —
@@ -28706,11 +29011,36 @@ function kbTabSet(t){
   try { localStorage.setItem("smp.kb.tab", t === "qa" ? "qa" : "how"); } catch (e) {}
 }
 
-function kbEdCard(id, q, a, mark){
+/* WHO AN ANSWER IS FOR, ON THE CARD (§161). Drawn for the two audiences
+   that are a DECISION and not for `everyone`, which is the default 57 of 64
+   questions carry — a chip on nearly every card is furniture, not a mark
+   (§41's budget). The office sees every card whatever the audience says:
+   this page is the editing surface, and hiding a question here would leave
+   it readable by nobody and editable by nobody (§61). */
+function kbAudChip(w){
+  w = SMPRules.kbAudienceWord(w);
+  if (w === "everyone") return "";
+  return ' <span class="pill kind kbaud-' + w + '">' +
+    esc(SMPRules.KB_AUDIENCE_LABEL[w]) + '</span>';
+}
+/* The picker, in edit mode. Here rather than only in the file, or a question
+   added on this page could be given an audience nowhere but a spreadsheet —
+   which is §61's trap wearing the file's clothes. */
+function kbAudPick(id, w){
+  w = SMPRules.kbAudienceWord(w);
+  return '<label class="kbed-aud"><span>Answered to</span><select data-kbaud="' +
+    esc(id) + '">' +
+    SMPRules.KB_AUDIENCES.map(function(o){
+      return '<option value="' + o + '"' + (o === w ? " selected" : "") + '>' +
+        esc(SMPRules.KB_AUDIENCE_LABEL[o]) + '</option>';
+    }).join("") + '</select></label>';
+}
+
+function kbEdCard(id, q, a, mark, aud){
   return '<div class="kbed' + (mark === "edited" ? " on" : "") + '">' +
     '<input class="kbed-q" data-kbq="' + esc(id) + '" value="' + esc(q) + '">' +
     '<textarea class="kbed-a" data-kba="' + esc(id) + '">' + esc(a) + '</textarea>' +
-    '<div class="kbed-foot">' +
+    '<div class="kbed-foot">' + kbAudPick(id, aud) +
       (mark === "edited"
         ? '<span class="kbed-mark">Edited for this platform</span>' +
           '<button type="button" class="kbed-reset" data-kbreset="' + esc(id) + '">' +
@@ -28722,6 +29052,73 @@ function kbEdCard(id, q, a, mark){
             'Remove this question</button>'
         : "") +
     '</div></div>';
+}
+
+/* ── WHAT AN UPLOAD WILL DO, BEFORE IT DOES IT (§161) ──────────────
+   The shape the people file and the plan import already use (§48.2, §87):
+   a tally, the rows, and two buttons. Nothing is written until Apply.
+
+   AN UNRECOGNISED ID IS DRAWN IN RED AND APPLIES NOTHING, because that is
+   the row that would otherwise become a silent duplicate of a question
+   that already exists — and the refusal names the way forward (§16.7),
+   which is to clear the Id or correct the spelling.
+
+   THE EMPTY CASE SAYS SO. A file that changes nothing is the answer when
+   somebody re-uploads what they downloaded, and a panel that renders
+   nothing there reads as a page that failed (§45.2). */
+function kbFileReview(){
+  if (!KBFILE) return "";
+  var c = KBFILE.changes, n = kbChangeCount(c);
+  var pill = function(cls, txt){ return '<span class="pill ' + cls + '">' + txt + '</span>'; };
+  var tally =
+    (c.reword.length ? pill("attn", plural(c.reword.length, "answer") + " reworded") : "") +
+    (c.add.length ? pill("", plural(c.add.length, "question") + " added") : "") +
+    (c.reset.length ? pill("", c.reset.length + " back to the standard wording") : "") +
+    (c.audience.length ? pill("", plural(c.audience.length, "audience") + " changed") : "") +
+    (c.unknown.length ? pill("bad", plural(c.unknown.length, "unrecognised id")) : "");
+  var W = SMPRules.KB_AUDIENCE_LABEL;
+  var line = function(id, what, aud, cls){
+    return '<tr' + (cls ? ' class="' + cls + '"' : '') + '><td class="mono">' +
+      esc(id) + '</td><td>' + what + '</td><td>' + esc(aud || "") + '</td></tr>';
+  };
+  var body = "";
+  c.reword.forEach(function(x){
+    body += line(x.id, "Answer reworded", W[x.w]); });
+  c.reset.forEach(function(x){
+    body += line(x.id, "<b>Back to the standard wording</b> &mdash; your change is cleared",
+      W[x.w]); });
+  c.audience.forEach(function(x){
+    body += line(x.id, "Wording unchanged",
+      W[x.w] + " \u2190 " + W[x.from]); });
+  c.add.forEach(function(x){
+    body += line("\u2014", "<b>New question</b> &mdash; &ldquo;" + esc(x.q) + "&rdquo;",
+      W[x.w]); });
+  c.unknown.forEach(function(x){
+    body += line(x.id, '<b class="bad-tx">No question has this id</b> &mdash; nothing will ' +
+      'be applied to this row. Clear the Id to add it as a new question, or correct the ' +
+      'spelling.', "", "kbf-bad"); });
+  /* A FILE THAT COULD NOT BE READ SAYS SO HERE, where the upload is (§48.8),
+     and nothing else is drawn — a tally of zero beside an error reads as
+     though the file was fine and simply changed nothing. */
+  if (KBFILE.problem) {
+    return '<div class="imp kbfile"><div class="imp-step">' +
+      '<div class="note bad-note"><b>' + esc(KBFILE.name || "That file") + '</b> ' +
+      esc(KBFILE.problem) + '</div>' +
+      '<div class="imp-row" style="margin-top:14px">' +
+      '<button class="linkbu" data-kbdiscard="1">Close</button></div></div></div>';
+  }
+  return '<div class="imp kbfile"><div class="imp-step">' +
+    '<h4 class="mini">' + esc(KBFILE.name || "The uploaded file") + '</h4>' +
+    (n || c.unknown.length
+      ? '<div class="imp-tally">' + tally + '</div>' +
+        '<table><thead><tr><th>Id</th><th>What changes</th><th>Audience</th></tr></thead>' +
+        '<tbody>' + body + '</tbody></table>'
+      : '<p class="why">Nothing in this file is different from what is here now.</p>') +
+    '<div class="imp-row" style="margin-top:14px">' +
+      (n ? '<button class="editbtn apply" data-kbapply="1">Apply to the knowledge base</button>'
+         : '') +
+      '<button class="linkbu" data-kbdiscard="1">' + (n ? "Discard" : "Close") + '</button>' +
+    '</div></div></div>';
 }
 
 function kbRecipes(){
@@ -28739,20 +29136,19 @@ function kbRecipes(){
       /* THE TENANT'S WORDING WINS, by the one rule the assistant also reads
          (§140, §103): what this page shows IS what the bot answers from. */
       var o = SMPRules.kbLook(GROUP.kb, r.id);
+      var aud = SMPRules.kbAudience(GROUP.kb, r.id, r.who || g.who);
       if (KBEDIT) {
-        return kbEdCard(r.id, o ? o.q : r.q, o ? o.a : r.a, o ? "edited" : null);
+        return kbEdCard(r.id, o ? o.q : r.q, o ? o.a : r.a, o ? "edited" : null, aud);
       }
       /* AN OVERRIDE IS TYPED TEXT AND RENDERS AS TEXT. The shipped answers
          carry deliberate <b> markup and render raw; a rewritten one must not
          inherit that path — office-only or not, prose typed into a box that
          comes back as live markup is §43's lesson waiting to repeat. */
       if (o) {
-        var who0 = r.who || g.who;
         return '<div class="kb-rec" id="kb-r-' + esc(r.id) + '">' +
-          '<h4 class="kb-q">' + esc(recipeText(o.q)) +
-            (who0 === "office" ? ' <span class="pill kind">Strategy Office</span>' : '') +
+          '<h4 class="kb-q">' + esc(recipeText(o.q)) + kbAudChip(aud) +
           '</h4>' +
-          recipeText(o.a).split("|").map(function(para){
+          SMPRules.kbParas(recipeText(o.a)).map(function(para){
             return '<p class="kb-p">' + esc(para) + '</p>';
           }).join("") + '</div>';
       }
@@ -28766,12 +29162,9 @@ function kbRecipes(){
          heading twice with nothing between them, which reads as a bug; and
          marking by position would leave a lone office recipe unmarked in a
          group that is not the office's. Whoever it is for, it says so. */
-      var who = r.who || g.who;
       return '<div class="kb-rec" id="kb-r-' + esc(r.id) + '">' +
-        '<h4 class="kb-q">' + esc(recipeText(r.q)) +
-          (who === "office"
-            ? ' <span class="pill kind">Strategy Office</span>' : '') + '</h4>' +
-        recipeText(r.a).split("|").map(function(para){
+        '<h4 class="kb-q">' + esc(recipeText(r.q)) + kbAudChip(aud) + '</h4>' +
+        SMPRules.kbParas(recipeText(r.a)).map(function(para){
           return '<p class="kb-p">' + para + '</p>';
         }).join("") +
       '</div>';
@@ -28779,10 +29172,10 @@ function kbRecipes(){
     /* The office's own questions, at the foot of the group they were added
        to — read like any other entry, editable like one of theirs. */
     items += adds.map(function(x){
-      if (KBEDIT) return kbEdCard(x.id, x.q, x.a, "yours");
+      if (KBEDIT) return kbEdCard(x.id, x.q, x.a, "yours", x.w);
       return '<div class="kb-rec" id="kb-r-' + esc(x.id) + '">' +
-        '<h4 class="kb-q">' + esc(recipeText(x.q)) + '</h4>' +
-        recipeText(x.a).split("|").map(function(para){
+        '<h4 class="kb-q">' + esc(recipeText(x.q)) + kbAudChip(x.w) + '</h4>' +
+        SMPRules.kbParas(recipeText(x.a)).map(function(para){
           return '<p class="kb-p">' + esc(para) + '</p>';
         }).join("") + '</div>';
     }).join("");
@@ -29120,7 +29513,42 @@ function renderKB(){
     ? '<button class="editbtn' + (KBEDIT ? " on" : "") + '" data-kbpen="1">' +
         (KBEDIT ? "Done" : "\u270e Edit the answers") + '</button>'
     : "";
-  return cfgHead("Knowledge base", [], null, false, null, null, kbPen) +
+  /* ── THE QUESTIONS FILE (§161) ────────────────────────────────────
+     The register's "Register file" shape (§90), on the questions tab only —
+     nothing on the explanations tab is in the file, so a menu offering to
+     download it there would be offering something else.
+
+     THE UPLOAD IS A <label> STYLED AS THE ITEM: a file picker cannot be
+     opened from script without a gesture, and a control that works in one
+     browser and silently does nothing elsewhere is worse than a plain one
+     (§90, §34's rule about a field's furniture). */
+  var nQtotal = RECIPES.reduce(function(n, g){ return n + g.items.length; }, 0) +
+                SMPRules.kbAllAdds(GROUP.kb).length;
+  var kbFile = !(inOffice() && tab === "qa") ? "" :
+    '<span class="hmenu' + (KBFILEMENU ? " open" : "") + '">' +
+      '<button class="hmenu-btn" data-kbfilemenu="1" aria-haspopup="true" ' +
+        'aria-expanded="' + KBFILEMENU + '">Questions file ' +
+        '<span class="hcar">&#9662;</span></button>' +
+      (KBFILEMENU
+        ? '<div class="hmenu-panel">' +
+            '<button class="hmenu-item" data-dlkb="1">' +
+              '<span class="t">Download the questions</span>' +
+              '<span class="d">All ' + nQtotal + ', in your own wording where you have ' +
+              'changed it, with the standard answer beside each to compare against. ' +
+              'The export and the template are one file.</span></button>' +
+            '<div class="hmenu-sep"></div>' +
+            '<label class="hmenu-item" for="kb-file">' +
+              '<span class="t">Upload a filled file</span>' +
+              '<span class="d">Matched on Id. A row with no Id adds a question; an ' +
+              'answer put back to the standard wording clears your change. You see ' +
+              'every change before anything is applied.</span></label>' +
+            '<input type="file" id="kb-file" accept=".xlsx" class="vh" ' +
+              'aria-label="Choose a filled questions file to upload">' +
+          '</div>'
+        : "") +
+    '</span>';
+  return cfgHead("Knowledge base", [], null, false, null, null, kbFile + kbPen) +
+    kbFileReview() +
     (KBEDIT && tab === "qa"
       ? '<p class="kb-lede kbed-lede">What you write here is what this page shows ' +
         '<b>and</b> what the assistant answers from \u2014 the two can never disagree. ' +
@@ -41116,6 +41544,81 @@ var SYNC = (function () {
         if (/^kbx\d+$/.test(id)) kbSetAdded(id, q, a); else kbSetOver(id, q, a);
         paint();
       });
+    });
+    /* THE AUDIENCE (§161). Its own handler rather than joining the q/a one
+       above: that one reads both fields off the card and writes them
+       together, and a <select> firing `change` would send its own value as
+       the question. Passed as the fourth argument, which the writers treat
+       as "leave it alone" when undefined. */
+    document.querySelectorAll("[data-kbaud]").forEach(function(sel){
+      sel.addEventListener("change", function(){
+        var id = sel.dataset.kbaud, card = sel.closest(".kbed");
+        var q = ((card && card.querySelector("[data-kbq]")) || {}).value;
+        var a = ((card && card.querySelector("[data-kba]")) || {}).value;
+        if (/^kbx\d+$/.test(id)) kbSetAdded(id, q, a, sel.value);
+        else kbSetOver(id, q, a, sel.value);
+        paint();
+      });
+    });
+    /* ── THE QUESTIONS FILE (§161) ────────────────────────────────
+       The register file's handlers, on the knowledge base. Every one of them
+       is gated again here rather than trusting the render: a control is drawn
+       for the office and a handler is the thing that actually runs (§42, the
+       gate on the control). */
+    document.querySelectorAll("[data-kbfilemenu]").forEach(function(b){
+      b.addEventListener("click", function(){ KBFILEMENU = !KBFILEMENU; paint(); });
+    });
+    var dlkb = document.querySelector("[data-dlkb]");
+    if (dlkb) dlkb.addEventListener("click", function(){
+      if (!inOffice()) return;
+      KBFILEMENU = false;
+      sendXlsx(kbWorkbook(), "SMP - knowledge base questions.xlsx");
+    });
+    var kbf = document.getElementById("kb-file");
+    if (kbf) kbf.addEventListener("change", function(){
+      if (!inOffice()) return;
+      var file = this.files && this.files[0];
+      if (!file) return;
+      KBFILEMENU = false;   /* its job is done the moment a file is picked */
+      var rx = new FileReader();
+      rx.onload = function(){
+        readXlsx(rx.result).then(function(sheets){
+          /* §48.8: A FILE THAT CANNOT BE READ HAS TO SAY SO, where the upload
+             is. The likely mistake is a people workbook or a plan template
+             dropped here, and naming the sheet that is missing is what tells
+             somebody which file they picked up. */
+          if (!sheets["Questions"]) {
+            KBFILE = { name:file.name, changes:{ reword:[], audience:[], reset:[],
+              add:[], blank:0,
+              unknown:[{ id:"\u2014", q:"" }] } };
+            KBFILE.problem = file.name + " has no sheet called Questions. Download the " +
+              "questions file from Questions file and fill that one.";
+            paint();
+            return;
+          }
+          KBFILE = { name:file.name, changes:kbFromWorkbook(sheets) };
+          paint();
+        }).catch(function(e){
+          KBFILE = { name:file.name, changes:{ reword:[], audience:[], reset:[],
+            add:[], unknown:[], blank:0 },
+            problem:"That file could not be read (" + (e && e.message ? e.message : "unknown") +
+              "). It has to be the .xlsx downloaded from Questions file." };
+          paint();
+        });
+      };
+      rx.readAsArrayBuffer(file);
+      this.value = "";   /* or picking the same file twice fires nothing */
+    });
+    document.querySelectorAll("[data-kbapply]").forEach(function(b){
+      b.addEventListener("click", function(){
+        if (!inOffice() || !KBFILE) return;
+        kbApply(KBFILE.changes);
+        KBFILE = null;
+        paint();
+      });
+    });
+    document.querySelectorAll("[data-kbdiscard]").forEach(function(b){
+      b.addEventListener("click", function(){ KBFILE = null; paint(); });
     });
     document.querySelectorAll("[data-kbreset]").forEach(function(b){
       b.addEventListener("click", function(){ kbResetOver(b.dataset.kbreset); paint(); });

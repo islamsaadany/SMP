@@ -17275,8 +17275,17 @@ function pageInfoFor(key){
    A recipe that REFUSES something keeps one clause of WHY. A bare "not
    yourself" reads as the software being obstructive; "not yourself — a plan
    you're measured against isn't yours to rewrite" reads as a decision somebody
-   made on purpose. Twelve of these refuse something, and those twelve are the
+   made on purpose. A good few of these refuse something, and those are the
    ones people will be annoyed by.
+
+   A REFUSAL THAT HAS STOPPED BEING ABSOLUTE MUST SAY SO. This file sat
+   unchanged from §103 to §148 while the platform learned to open a plan's
+   Strategy half to a role (§117) and to let somebody fill only what is empty
+   (§145) — so five answers went on saying a flat "the office" about something
+   the office can now hand over. A recipe is a promise about behaviour, and a
+   promise nobody revisits is the one a client reads out in a meeting: when a
+   rule gains an exception, the recipe that states the rule is part of the
+   change.
 
    `who` IS RELEVANCE, NEVER PERMISSION. "office" means the answer is only
    useful to somebody who can do it — every word here is readable by everyone,
@@ -17287,193 +17296,365 @@ function pageInfoFor(key){
 
    NO SECTION NUMBERS AND NO INTERNAL VOCABULARY: these are read by somebody
    who has just hit a wall. The tenant's own words for a pillar and a business
-   unit are substituted at render time by L(). */
+   unit are substituted at render time by L().
+
+   AND THE LABEL IS NEVER INFLECTED (§107.8, and see recipeText). `bu` for a
+   pillar is "Pillars" — already plural, with no singular anywhere for a
+   sentence to reach for — so every sentence here takes `{pillar}` exactly as
+   it comes and is phrased to accept a plural noun. Where the ROLE is meant,
+   "Pillar owner" is written literally: that is its name on Roles & access and
+   it is not a tenant label.
+
+   REWRITTEN WITH ISLAM, 2026-08-29. He softened every answer and settled the
+   ten places where the shipped wording did not match the build — the reopen
+   button, the arrows that are not called Arrange, who submits, where a
+   project's Owner is set, the thresholds a tenant can change, and what
+   offline really does. The record of each decision is in the decisions
+   document; what is here is the outcome. */
 var RECIPES = [
 
 { g: "Reporting", items: [
   { id: "report-a-figure", q: "How do I report a figure?",
-    a: "Open your unit, go to <b>Performance</b>, and press <b>Report</b>. That turns the " +
-       "page into a reporting form: each measure takes its actual, and a note if it needs one." +
-       "|<b>Save draft</b> keeps what you have typed without telling anyone. <b>Submit</b> " +
-       "sends it to the office." },
+    a: "Open your unit, go to Performance, and select Report. The page will switch " +
+       "to a reporting form where you can enter the actual for each measure and " +
+       "add a note where needed. Save draft lets you save your progress without " +
+       "submitting it. When everything is ready, select Submit to send the report " +
+       "to the Strategy Office." },
   { id: "draft-vs-submit", q: "What is the difference between Save draft and Submit?",
-    a: "A draft is yours — saved, and nobody is told. Submitting hands the figures to the " +
-       "office and marks your unit as having reported for the cycle." +
-       "|Draft as often as you like; submit once the whole set is right." },
+    a: "Save draft saves your progress without submitting it to the Strategy " +
+       "Office. You can save a draft as often as needed. Submit sends the " +
+       "completed figures to the Strategy Office and marks your unit as reported " +
+       "for the cycle." },
   { id: "report-after-lock", q: "Can I still report once the cycle is locked?",
-    a: "No — once the office locks a cycle the figures are fixed. That is what makes a closed " +
-       "cycle a record of what was true at the time rather than something that keeps moving." +
-       "|If a number is wrong, say so here. The office can still correct it." },
+    a: "Once a reporting cycle is locked, its figures can no longer be edited " +
+       "directly. This keeps the closed cycle as an accurate record of what was " +
+       "reported at the time.|If you notice something that needs correcting, let " +
+       "the Strategy Office know here and they can help update it." },
   { id: "someone-elses-figure", q: "Why is one of my figures somebody else's to enter?",
-    a: "Some numbers belong to a team rather than to the unit that reports them — revenue " +
-       "exists in Finance before anyone asks you for it. Those are grouped into a named " +
-       "<b>figure set</b>, and the set's <b>figure owner</b> enters them wherever they appear." +
-       "|It still counts towards your unit's total, so you can chase it. The page names who owes it." },
+    a: "Some figures are managed centrally by another team. For example, a revenue " +
+       "figure may be owned by Finance even when it contributes to your unit's " +
+       "performance. These figures are grouped into a figure set, and its figure " +
+       "owner is responsible for entering them wherever they appear. The figure " +
+       "still contributes to your unit's results, and the page shows who is " +
+       "responsible for reporting it." },
   { id: "dash-not-zero", q: "Why does my score show a dash instead of 0?",
-    a: "Nothing has been reported for it yet. A dash means <i>not yet measurable</i>; 0 would " +
-       "mean a real result of nothing, and would pull your average down." +
-       "|Report an actual and the score appears." },
+    a: "A dash means the measure is not yet measurable because no actual has been " +
+       "reported. A score of 0 would mean an actual result of zero and would " +
+       "affect the average.|Once an actual is reported, the score will appear." },
   { id: "figure-note", q: "How do I add a note to a figure, and who reads it?",
-    a: "The note sits beside the actual on the reporting form. The office reads it, and it " +
-       "travels with the figure into the review." +
-       "|Use it for the thing a number cannot say — why it moved, or what happens next." },
+    a: "Add the note beside the actual on the reporting form. The Strategy Office " +
+       "can see it, and it will stay with the figure during the review.|Notes are " +
+       "useful for adding context the number alone cannot provide, such as why " +
+       "performance changed or what happens next." },
   { id: "submitted-by-mistake", q: "I submitted by mistake — what now?",
-    a: "Tell the office here. Submitting is how a unit speaks for itself, so it is not " +
-       "something you can quietly take back, but the office can reopen it for you." },
+    a: "Press <b>Reopen my report</b> on the Performance page — it sits beside the " +
+       "Submitted badge — then correct the figures and submit again.|If the cycle " +
+       "has been locked, or you are not your unit's head or strategy custodian, " +
+       "that button is not there: ask the Strategy Office here and they can reopen " +
+       "it for you." },
   { id: "the-dot", q: "What is the dot beside Performance?",
-    a: "It means this subject owes a submission and you are able to make it. It clears when " +
-       "you submit." +
-       "|If you cannot report, you never see it — the platform does not nag somebody who has " +
-       "no control that would clear it." },
+    a: "The dot means there is a report waiting to be submitted and you have " +
+       "permission to submit it. It disappears once the report is submitted.|If " +
+       "you don't have reporting access, the dot won't appear for you." },
   { id: "who-reports", q: "Who reports my unit's figures?",
-    a: "Your unit's <b>strategy custodian</b> or its <b>head</b>. Submitting speaks for the " +
-       "whole unit, so it stays with the people who hold it." +
-       "|Two exceptions: a figure that belongs to a figure set is entered by that set's owner " +
-       "wherever it appears, and the office can report on anyone's behalf." }
+    a: "Your unit's strategy custodian or head can report and submit its figures. " +
+       "Figures that belong to a figure set are entered by that figure set's owner " +
+       "wherever they appear. The Strategy Office can also report on behalf of a " +
+       "unit when needed." },
+  { id: "needs-a-pct", q: "A row says Needs a % — what does it want?",
+    a: "The row is marked In progress, but its progress percentage is still " +
+       "missing. Enter the percentage completed so the platform can calculate the " +
+       "result accurately. Until then, the row is left out of the average and will " +
+       "need to be completed before submitting." },
+  { id: "function-submit", q: "How does a supporting function submit its report?",
+    a: "A supporting function submits from its Reporting page, just like a " +
+       "business unit. One submission covers all the capabilities owned by that " +
+       "function.|Before submitting, make sure any at risk or off track figures " +
+       "have the required notes and that all In progress rows include a progress " +
+       "percentage." },
+  { id: "run-review", q: "How do I run a review, or present one?",
+    a: "From the unit's Performance page, use Report to enter or review figures " +
+       "and Presentation to open the presentation deck or manage its slides." },
+  { id: "picture-slide", q: "How do I put a picture into the review deck?",
+    a: "Go to Presentation › Manage slides, add the image and choose where you " +
+       "want it to appear. It will be included when the presentation deck opens. " +
+       "The image belongs to that reporting cycle and will be archived with it." }
 ]},
 
-{ g: "My plan", items: [
+{ g: "My Plan", items: [
   { id: "plan-mistake", q: "There is a mistake in my plan — how do I fix it?",
-    a: "Not yourself. Plans are corrected by the Strategy Office — a plan you are measured " +
-       "against is not yours to rewrite." +
-       "|Tell them here what is wrong. That covers the aspiration and the SWOT too, not only " +
-       "the measures." },
-  { id: "add-a-row", q: "How do I add a {pillar}, a measure or a tactic?",
-    a: "The office adds them, on your unit's <b>Plan</b> page. Ask here and say where it " +
-       "belongs and what it should be called." },
-  { id: "reorder", q: "How do I reorder my {pillars}?",
-    a: "Press the arrange control in the top-right of the Plan pane, drag the rows by the " +
-       "handles that appear, and press it again when you are done." +
-       "|The order carries through to Performance and Reporting on its own." },
+    a: "If you spot something that needs correcting, let the Strategy Office know " +
+       "here and they can update it. This applies to the full plan, including the " +
+       "aspiration, SWOT and measures. Depending on your access, the Strategy " +
+       "Office may also allow your role to edit Strategy pages directly or use " +
+       "Fill gaps, which lets you complete information that is currently missing." },
+  { id: "add-a-row", q: "How do I add {pillar}, measures or tactics?",
+    a: "New {pillar}, measures and tactics are normally added by the Strategy " +
+       "Office on your unit's Plan page. Let them know here what you would like to " +
+       "add and where it belongs." },
+  { id: "reorder", q: "How do I reorder my {pillar}?",
+    a: "Select the up-and-down arrows in the top-right of the Plan pane, then drag " +
+       "the rows into the order you want. Select them again when you're done.|The " +
+       "new order will automatically carry through to Performance and Reporting." },
   { id: "who-edits-plan", q: "Who can edit my unit's plan, and why not me?",
-    a: "The Strategy Office. A plan is the agreement you are measured against, so it stays " +
-       "with the people who keep the agreement rather than with either side of it." +
-       "|Everything else — reading it, reporting against it, explaining a figure — is yours." },
+    a: "By default, the Strategy Office manages edits to the plan to keep the " +
+       "agreed strategy consistent. Your access can also be extended to allow full " +
+       "Strategy editing or Fill gaps, which lets you complete missing " +
+       "information. Reporting access is managed separately, so being able to " +
+       "report does not automatically mean you can edit the plan." },
   { id: "plan-arrives", q: "How does a plan arrive in the first place?",
-    a: "It is authored once, by the office, and everything after that is reporting against it." +
-       "|If yours is missing or wrong, ask here." },
+    a: "The Strategy Office creates the plan either by uploading the template or " +
+       "building it directly through the platform's Plan pages. Once the plan is " +
+       "in place, reporting is done against it.|If anything is missing or " +
+       "incorrect, let the Strategy Office know here." },
   { id: "old-plan", q: "What happens to my old plan when a new one is uploaded?",
-    a: "It is archived, not deleted, and it can be restored. Nothing an import does is a deletion." },
+    a: "It is archived, not deleted, and can be restored if needed. Uploading a " +
+       "new plan does not delete the previous one." },
   { id: "collaborator", q: "What is a collaborator on a tactic?",
-    a: "Somebody who supports the tactic alongside the person accountable for it. It records " +
-       "who is involved — it does not by itself let them report the line." +
-       "|The office sets them." },
+    a: "A collaborator is someone who supports a tactic alongside the person " +
+       "accountable for it. Collaborators are selected from the people register to " +
+       "ensure each person is correctly identified. Being named as a collaborator " +
+       "does not automatically provide reporting access; the Strategy Office also " +
+       "needs to enable Reporting for Contributors." },
   { id: "change-targets", q: "Can I change my targets during the year?",
-    a: "Not yourself, and the office will usually say no mid-cycle — a target that moves while " +
-       "it is being measured stops being a target." +
-       "|If something genuinely changed, say what and why here." }
+    a: "Targets are normally kept unchanged during a reporting cycle so " +
+       "performance can be measured consistently against what was originally " +
+       "agreed. If circumstances have changed and you believe a target should be " +
+       "reviewed, let the Strategy Office know here and explain what has changed." }
+]},
+
+{ g: "Filling in what's missing", items: [
+  { id: "fill-what", q: "What does Fill in missing elements do?",
+    a: "Fill in missing elements lets you complete information that has not yet " +
+       "been added to the plan, such as a missing target, owner or tactic quarter. " +
+       "It only applies to empty fields, so existing information remains " +
+       "unchanged. Anything you add stays pending until the Strategy Office " +
+       "confirms it." },
+  { id: "fill-what-not", q: "What can I not change while I am filling gaps?",
+    a: "Fill gaps is designed only for information that is currently missing. You " +
+       "won't be able to change existing values or add, remove, rename or reorder " +
+       "rows.|If something already entered needs correcting, let the Strategy " +
+       "Office know here." },
+  { id: "fill-find", q: "How do I find what is missing?",
+    a: "The red bar on each section shows how many items are missing. Select one " +
+       "of the chips to go directly to that item.|Once you start filling gaps, you " +
+       "can use Next gap to move through the missing items one by one." },
+  { id: "fill-pending", q: "Why does the value I filled say pending?",
+    a: "A value you add through Fill gaps stays pending until the Strategy Office " +
+       "confirms it. While it's pending, you can still update or clear it.|If the " +
+       "value affects a score, that score will wait until the value is confirmed." },
+  { id: "fill-dash", q: "I filled the target — why is the score still a dash?",
+    a: "If you have just filled in the target, it is entered but still pending " +
+       "confirmation. Because the score depends on that target, it stays a dash " +
+       "until the Strategy Office confirms it.|You can continue entering figures " +
+       "and saving drafts in the meantime." },
+  { id: "fill-submit", q: "Why won't it let me submit — something is awaiting confirmation?",
+    a: "One or more values used to calculate the report are still awaiting " +
+       "confirmation. The submission message will show which rows are affected. " +
+       "Once the Strategy Office confirms those values, you'll be able to " +
+       "submit.|You can continue reporting and saving drafts in the meantime." },
+  { id: "fill-confirm", q: "How do I confirm what somebody filled in?", who: "office",
+    a: "Select the tick beside the amber pending mark to confirm the value. You " +
+       "can also edit the value if a correction is needed; saving the correction " +
+       "will confirm it at the same time. The page shows how many items are still " +
+       "waiting for confirmation." }
+]},
+
+{ g: "Owners and reporting permissions", items: [
+  { id: "project-owner", q: "What is a project owner?",
+    a: "A project owner is the person named as the project's Owner. To report on " +
+       "the project, two things need to be in place: you must be named as the " +
+       "Owner, and Reporting must be enabled for Project owners under Roles & " +
+       "access. When both are enabled, you can report on the full project." },
+  { id: "pillar-owner", q: "What is a Pillar owner?",
+    a: "A Pillar owner is the person named as the Owner of one of your {pillar}. " +
+       "They report everything inside it — its measures and its tactics — when " +
+       "Reporting is enabled for Pillar owners under Roles &amp; access." },
+  { id: "contributor-role", q: "What is a contributor?",
+    a: "A contributor is someone named within a plan to contribute to a specific " +
+       "item, such as a tactic, project or milestone. If Reporting is enabled for " +
+       "Contributors, they can report on the specific rows where they are " +
+       "named.|Submission remains with the person responsible for the overall unit " +
+       "or function." },
+  { id: "owner-cant-report", q: "I own a project and still cannot report it — why?",
+    a: "Check two things: that you are named as the project's Owner on the " +
+       "project, and that Reporting is enabled for Project owners under Roles " +
+       "&amp; access.|If either needs updating, let the Strategy Office know here " +
+       "and mention the project." },
+  { id: "some-rows-only", q: "Why can I enter some rows on this page and not others?",
+    a: "Your reporting access may apply to specific parts of the page rather than " +
+       "the whole plan. For example, Project owners can report on their projects, " +
+       "Pillar owners on their {pillar}, and Contributors on the rows where they " +
+       "are named.|You can still view the other rows. If you think you should be " +
+       "able to report on a particular row, let the Strategy Office know here." },
+  { id: "owner-from-register", q: "Why is Owner a list of people rather than a box to type in?",
+    a: "Owners are selected from the people register so the platform can correctly " +
+       "connect each person to their reporting permissions. This also avoids " +
+       "issues caused by different spellings of the same name. Existing names " +
+       "imported from older plans are preserved so the plan continues to display " +
+       "as originally uploaded." }
 ]},
 
 { g: "Understanding the numbers", items: [
   { id: "headline", q: "How is my unit's headline number worked out?",
-    a: "From your <b>key objectives</b> — each actual against its target." +
-       "|Not from the {pillars} below, which is why the two can disagree without either being " +
-       "wrong. They sit at different altitudes." },
-  { id: "pillar-vs-objectives", q: "Why does a {pillar} disagree with my objectives?",
-    a: "A {pillar}'s measures are internal to that {pillar}; your objectives are what the unit " +
-       "is judged on. A {pillar} can struggle while the objectives are fine." +
-       "|The platform keeps them apart rather than blending them into one number that answers " +
-       "neither." },
+    a: "Your unit's headline number is calculated from its key objectives, " +
+       "comparing each actual against its target. Performance for your {pillar} is " +
+       "calculated separately, so the two numbers may differ without either being " +
+       "incorrect." },
+  { id: "pillar-vs-objectives", q: "Why do my {pillar} disagree with my objectives?",
+    a: "Each of your {pillar} scores on the measures inside it, while your " +
+       "objectives are the overall results the unit is measured against. Because " +
+       "they measure different things, the two can differ without either being " +
+       "wrong." },
   { id: "execution", q: "What is execution, and why is 100% not “finished”?",
-    a: "It is what has been delivered divided by what should have been delivered <b>by now</b>, " +
-       "worked out from each tactic's quarters." +
-       "|So 100% means exactly on plan, not complete." },
+    a: "Execution compares what has been delivered with what was planned to be " +
+       "delivered by now, based on each tactic's scheduled quarters. So 100% means " +
+       "you're exactly on plan at this point in time, not necessarily that the " +
+       "tactic is complete." },
   { id: "colours", q: "What do the colours mean?",
-    a: "One scale for every figure judged against a benchmark: on track from 85%, needs " +
-       "attention from 70%, at risk from 50%, off track below that." +
-       "|The colour and the word come from the same place, so they can never disagree." },
+    a: "The colours give a quick view of performance against the benchmark. By " +
+       "default: On track from 85%, Needs attention from 70%, At risk from 50%, " +
+       "and Off track below 50% — and the Strategy Office can change these " +
+       "thresholds for your organisation.|The colour and the status word always " +
+       "come from the same scale, so they can never disagree." },
   { id: "focus-measure", q: "What is a focus measure?",
-    a: "One the CEO has marked as a measure the year turns on. It changes no score — it changes " +
-       "what gets looked at first." },
+    a: "A focus measure is a measure the CEO has identified as particularly " +
+       "important for the year. It doesn't change how the score is calculated; it " +
+       "simply highlights the measures that should receive additional attention." },
   { id: "reward-line", q: "What is the reward line?",
-    a: "The point at which delivering the commitment earns. At 100% it is the target itself; " +
-       "set higher, a measure can meet its target without clearing the line and reads as " +
-       "<i>met, not earning</i>." +
-       "|Either way it is scored against its own target exactly as before." },
+    a: "The reward line is the performance level at which a measure becomes " +
+       "eligible for reward. If it's set at 100%, it matches the target. If it's " +
+       "set higher, a measure can meet its target without yet reaching the reward " +
+       "line. The measure's performance score is still calculated against its " +
+       "original target." },
   { id: "unit-to-group", q: "How does my unit's number reach the group's?",
-    a: "Weighted, not averaged. Each unit carries a weight set on the group's <b>Weighting</b> " +
-       "tab, and the group's figure is the weighted average of the unit headlines." +
-       "|Position on the page is not weight — arranging changes nothing." }
+    a: "Unit results contribute to the group's result based on their assigned " +
+       "weight rather than through a simple average. Each unit's weight is set on " +
+       "the group's Weighting tab. Changing the order of units on the page does " +
+       "not affect their weight." }
 ]},
 
 { g: "Capabilities and projects", items: [
   { id: "add-project", q: "How do I add a project to a capability?", who: "office",
-    a: "On the capability's <b>Projects</b> page, with the pen open. Projects belong to the " +
-       "supporting function that owns the capability." },
-  { id: "add-project-ask", q: "How do I add a project to a capability?", who: "everyone",
-    a: "The office adds them. Say which capability it belongs to and what it should be called." },
+    a: "On the capability's <b>Projects</b> page, with the pen open. Projects " +
+       "belong to the supporting function that owns the capability." },
+  { id: "add-project-ask", q: "How do I add a project to a capability?",
+    a: "The Strategy Office can add a project to a capability for you. Let them " +
+       "know which capability it belongs to and what the project should be called." },
   { id: "deliverable-or-outcome", q: "Deliverable or outcome — which is this?",
-    a: "A <b>deliverable</b> is a thing you produce; an <b>outcome</b> is a change you can " +
-       "measure. If it has a target and a direction, it is an outcome." +
-       "|Both are evidence, and the score reads them as two halves." },
+    a: "A deliverable is something the project produces, while an outcome is a " +
+       "measurable change the project is expected to achieve. If an item has a " +
+       "target and direction, it's treated as an outcome. Both contribute to the " +
+       "project's performance score." },
   { id: "project-performance", q: "How is a project's performance worked out?",
-    a: "Half from its deliverables and half from its outcomes. Where a project has only one of " +
-       "the two, that side carries the whole score." },
+    a: "A project's performance is calculated equally from its deliverables and " +
+       "outcomes. If the project has only one of the two, that component carries " +
+       "the full score." },
   { id: "no-outcomes", q: "Why has my project no outcomes section?",
-    a: "Because it has none yet. An empty half is not drawn — a project with no outcomes is a " +
-       "plan that committed to no measurable change, not a broken screen." +
-       "|Open the pen and both halves appear, so you can add the first one." }
+    a: "The Outcomes section is hidden when a project doesn't have any outcomes " +
+       "yet. If you have editing access, open the Edit control and both sections " +
+       "will appear so you can add the first outcome." },
+  { id: "repeating-project", q: "What does Repeats: Each cycle mean on a project?",
+    a: "Repeats: Each cycle means the project starts a new reporting period with " +
+       "each cycle rather than being completed once. When a new cycle opens, the " +
+       "previous figures are archived, the reporting fields are cleared, and the " +
+       "project dates move forward based on the cycle length. Projects without " +
+       "this setting keep their existing figures." }
 ]},
 
-{ g: "Getting at things", items: [
-  { id: "password", q: "How do I change my password?",
-    a: "Ask the office here and they issue a temporary one; you choose your own the moment you " +
-       "use it." +
-       "|<i>If you have forgotten it you cannot reach this chat at all — you are asking from " +
-       "inside the platform. Ask the office by any other route you have.</i>" },
+{ g: "Access and navigation", items: [
+  { id: "strategy-vs-reporting", q: "My access says Strategy and Reporting separately — what is the difference?",
+    a: "Strategy controls access to the plan itself, including the foundation, " +
+       "SWOT and strategic plan. Reporting controls access to performance figures, " +
+       "drafts and submissions. They are managed separately, so you may be able to " +
+       "report against a plan without being able to edit it. Strategy access can " +
+       "also include Fill gaps, which allows you to complete missing information " +
+       "without changing existing content." },
   { id: "other-unit", q: "Why can't I open another business unit?",
-    a: "Access is by page: a unit you are not attached to is removed, not trimmed. You see what " +
-       "your role is attached to." +
-       "|Need something you can't open? Ask here — granting it is the office's to do." },
+    a: "Your access is based on the business units connected to your role, so " +
+       "units you don't have access to won't appear for you. If you need access to " +
+       "another unit, let the Strategy Office know here and they can review your " +
+       "access." },
   { id: "my-role", q: "What does my role let me do?",
-    a: "It depends on what it is attached to as much as what it is called — holding a unit " +
-       "gives you that unit, not all of them. Hold several roles and you get the most generous " +
-       "answer of them, each about its own thing." +
-       "|The <b>Access</b> section above has the full picture." },
+    a: "What you can do depends on both your role and what that role is connected " +
+       "to. For example, being assigned to one unit gives you access to that unit, " +
+       "not automatically to every unit.|If you hold multiple roles, your " +
+       "permissions are combined across the areas each role covers." },
   { id: "get-access", q: "How do I get access to something I cannot open?",
-    a: "Ask here, and say which page and why. Access is the office's to grant." }
+    a: "Let the Strategy Office know here which page you need access to and why. " +
+       "They can review the request and update your access where appropriate." }
 ]},
 
-{ g: "The office's own work", who: "office", items: [
-  { id: "add-person", q: "How do I add somebody to the register?",
-    a: "<b>Setup › People</b>, on the register itself. Give them an employee number or an " +
-       "email — a name is not an identifier, and two people really can share one." },
-  { id: "people-file", q: "How do I upload the people file?",
-    a: "<b>Setup › People</b>, from the register's file menu. It <b>adds and amends and " +
-       "never removes</b> — nobody is retired by being left out of a file." +
-       "|Anything it cannot match is set aside for you to answer rather than guessed at." },
-  { id: "new-cycle", q: "How do I open a new reporting cycle?",
-    a: "<b>Setup › Running the cycle</b>. Opening one archives the figures and then clears " +
-       "them, so every unit is asked again rather than inheriting last quarter's answers." },
-  { id: "run-review", q: "How do I run a review, or present one?",
-    a: "On a unit's <b>Performance</b> page — <b>Report</b> to enter figures, " +
-       "<b>Presentation</b> to project the deck or to manage its slides." },
-  { id: "picture-slide", q: "How do I put a picture into the review deck?",
-    a: "Under <b>Presentation › Manage slides</b>. Pick where it goes and it is assembled " +
-       "into the deck when the deck opens." +
-       "|It belongs to the cycle, so it is archived with the figures." },
-  { id: "branding", q: "How do I set the colours and the logo?",
-    a: "<b>Setup › Branding</b>. The mark must be a PNG — an uploaded SVG can carry code, " +
-       "which is not a risk worth taking for a logo." },
-  { id: "demo-data", q: "What does Demo data do, and why can't I save in it?",
-    a: "It shows the full worked example — an invented tenant, so you can see a filled platform " +
-       "without touching yours. It refuses to save on purpose." +
-       "|<b>Clear project</b> shows the opposite: exactly what a new deployment looks like on " +
-       "day one." },
-  { id: "focus-switch", q: "How do I turn focus measures off?",
-    a: "<b>Setup › Focus measures</b>, on the button in the page header. Off hides them " +
-       "everywhere and keeps every mark, so turning it back on restores them." }
-]},
-
-{ g: "The platform itself", items: [
+{ g: "The platform and support", items: [
+  { id: "ask-the-office", q: "How do I ask the Strategy Office something?",
+    a: "Use the chat bubble in the bottom-right corner of any page to contact the " +
+       "Strategy Office. Your questions and their replies stay together in one " +
+       "ongoing conversation, so you can easily refer back to previous " +
+       "messages.|You can also attach screenshots when helpful." },
+  { id: "assistant-answer", q: "Something answered me straight away — was that a person?",
+    a: "That was the platform assistant. When enabled, it will first try to answer " +
+       "your question using the platform's knowledge base. If the answer doesn't " +
+       "address what you need, select This didn't answer it — send it to the " +
+       "office and someone from the Strategy Office can pick it up. Questions the " +
+       "assistant can't answer are sent to them automatically." },
+  { id: "welcome-screen", q: "What is the screen I get when I sign in?",
+    a: "The welcome screen gives you a quick view of anything that needs your " +
+       "attention, such as a report to submit, missing plan information or a reply " +
+       "from the Strategy Office. Each item includes a shortcut to take you " +
+       "directly to it.|Select Continue to enter the platform." },
+  { id: "take-the-tour", q: "Can I see the introduction again?",
+    a: "Yes. The welcome screen offers <b>Take an intro round</b>, and it appears " +
+       "the next time you sign in — so if you have already moved past it today, " +
+       "you will see it again on your next sign-in.|The introduction uses a worked " +
+       "example rather than your own data, so you can explore the platform without " +
+       "changing or saving anything." },
+  { id: "password", q: "How do I change my password?",
+    a: "If you're already signed in, ask the Strategy Office here and they can " +
+       "issue a temporary password. You'll be asked to choose a new password when " +
+       "you use it.|If you can't sign in, contact the Strategy Office through your " +
+       "usual support channel." },
   { id: "offline", q: "Does it work with no internet, and can I install it?",
-    a: "Yes to both. It is a single page and it keeps itself, so it opens offline, and your " +
-       "browser will offer to install it with its own icon and window." +
-       "|What it cannot do offline is save — anything typed goes up when you are back." },
+    a: "Yes. The platform can be installed through your browser and can also open " +
+       "while you're offline.|Changes cannot be saved without a connection, but " +
+       "they will sync once you're back online — as long as you keep the tab open. " +
+       "Closing it while offline loses whatever you entered, so it is safest to " +
+       "enter figures while connected." },
   { id: "where-data", q: "Where does my data live?",
-    a: "In a database belonging to this deployment. Figures, plans and people are stored there; " +
-       "what you have chosen on screen — light or dark, which columns you show — stays in your " +
-       "own browser." }
+    a: "Your plans, figures and people data are stored in the database for your " +
+       "organization's deployment. Personal display preferences, such as light or " +
+       "dark mode and which columns you choose to show, are stored locally in your " +
+       "browser." },
+  { id: "demo-data", q: "What does Demo data do, and why can't I save in it?",
+    a: "Demo data gives you a fully worked example so you can explore how a " +
+       "completed platform looks without affecting your organization's data. " +
+       "Saving is intentionally disabled in Demo mode. Clear project shows the " +
+       "opposite: what a new deployment looks like before information is added." }
+]},
+
+{ g: "Strategy Office questions", items: [
+  { id: "add-person", q: "How do I add somebody to the register?", who: "office",
+    a: "Go to Setup › People and add them to the register. Make sure to include an " +
+       "employee number or email as a unique identifier, since more than one " +
+       "person may have the same name." },
+  { id: "people-file", q: "How do I upload the people file?", who: "office",
+    a: "Go to Setup › People and use the register's file menu to upload the people " +
+       "file. The upload can add or update people, but it won't remove anyone " +
+       "simply because they're missing from the file. Any records the platform " +
+       "can't confidently match will be set aside for you to review." },
+  { id: "new-cycle", q: "How do I open a new reporting cycle?", who: "office",
+    a: "Go to <b>Setup › Running the cycle</b>. A new cycle can only be opened " +
+       "once the current one is closed.|Opening one archives the previous cycle's " +
+       "figures and clears the reporting fields, so each unit is asked again " +
+       "rather than inheriting the last set of answers." },
+  { id: "branding", q: "How do I set the colours and the logo?", who: "office",
+    a: "Go to Setup › Branding to set the platform colours and logo. Logos should " +
+       "be uploaded in PNG format; SVG files aren't supported for security " +
+       "reasons." },
+  { id: "focus-switch", q: "How do I turn focus measures off?", who: "office",
+    a: "Go to Setup › Focus measures and use the control in the page header to " +
+       "turn them off. This hides focus measures across the platform without " +
+       "removing their settings, so they'll return if you turn the feature back " +
+       "on." }
 ]}
 
 ];
@@ -28487,10 +28668,24 @@ function kbSection(id, title, blocks){
    A recipe's answer is one string with `|` between paragraphs. Not an array:
    the file is long enough already, and a separator that cannot appear in prose
    costs nothing to read and one line to split. */
+/* THE LABEL IS TAKEN EXACTLY AS IT COMES (§107.8, fixed 2026-08-29).
+   `{pillars}` used to render `plural(2, L("pillar","bu"))` — and `plural()`
+   returns a COUNT followed by the word, while `bu` for a pillar is already
+   "Pillars". So the shipped question "How do I reorder my {pillars}?" was
+   rendering as "How do I reorder my 2 Pillarss?" on every deployment: a
+   number nobody asked for and a doubled s. §107.8 had already written the
+   rule down — a tenant's label is never inflected, because there is no
+   singular anywhere for a sentence to reach for — and this was the one place
+   still inflecting one, in the product's own help.
+
+   Both tokens now resolve to the label as given. `{pillars}` is kept as an
+   alias so a recipe reworded by a tenant (§140) cannot break by using it,
+   and every sentence in recipes.js is phrased to accept a plural noun. */
 function recipeText(t){
+  var word = L("pillar","bu");
   return String(t)
-    .replace(/\{pillars\}/g, plural(2, L("pillar","bu")))
-    .replace(/\{pillar\}/g, L("pillar","bu"));
+    .replace(/\{pillars\}/g, word)
+    .replace(/\{pillar\}/g, word);
 }
 
 /* THE PEN'S STATE. File-scope like the other page modes; the page is the
@@ -28636,19 +28831,40 @@ function renderKB(){
            'than delete, and they set passwords for the client\u2019s people but never for ' +
            'a Super user or for each other. The register carries the seat, so moving one ' +
            'there is treated as changing the matrix — not as editing a row.' },
-      { h: "Seven roles, seven kinds of page",
+      { h: "Nine roles, nine kinds of page",
         p: 'The table on <b>Roles &amp; access</b> is roles down the side and kinds of page ' +
            'across the top. Not individual pages — a unit\u2019s five pages answer together, ' +
-           'because &ldquo;may they open this unit&rdquo; is one question, not five.' },
+           'because &ldquo;may they open this unit&rdquo; is one question, not five. The last ' +
+           'row, <i>Everyone else</i>, is not a role anybody holds: it is the floor somebody ' +
+           'with no role at all stands on.' },
+      { h: "Three of the roles are read off the plan",
+        p: '<b>Project owner</b>, <b>' + L1 + ' owner</b> and <b>Contributor</b> are never ' +
+           'granted by hand — being named on the plan is the role. Whoever is named a ' +
+           'project\u2019s Owner is its project owner; whoever is named a ' + L1.toLowerCase() +
+           '\u2019s is its ' + L1.toLowerCase() + ' owner; everybody else a plan names — a ' +
+           'collaborator, a stakeholder, a milestone\u2019s owner — is a contributor. Each ' +
+           'still needs its <b>Reporting</b> cell opened before it reports anything, and then ' +
+           'it reaches only its own lines: the project, the ' + L1.toLowerCase() + ', or the ' +
+           'rows that name the person. None of the three ever submits, because submitting ' +
+           'speaks for the whole subject.' },
       { h: "Own is not a setting",
         p: '<b>Own business unit</b> means the units they hold a role in. The head and the ' +
            'custodian of Mobile own Mobile; a company CEO owns every unit in their company; ' +
            'the SMO and the group CEO own all of it. Nobody types that in — it is read from ' +
            'who is attached to what, so this table and the unit pages cannot disagree.' },
-      { h: "Three states, never more",
+      { h: "Three states, and one cell with a fourth",
         p: 'Each cell is <b>none</b>, <b>view</b> or <b>edit</b>. Edit includes view. Two ' +
            'would not be enough: a unit head reads the weighting table but does not manage ' +
            'it, and that is not expressible in two.' },
+      { h: "Fill gaps sits between reading and editing",
+        p: 'The two <b>Strategy</b> cells carry a fourth setting, <b>Fill gaps</b>: the role ' +
+           'may write where the plan holds nothing — an unset target, an unnamed owner, a ' +
+           'tactic with no quarters — and nowhere else, and never adds, removes, renames or ' +
+           'reorders a row. What they write stays <b>pending</b>: amber, theirs to correct, ' +
+           'counted nowhere, and not scored where a score would read it, until the office ' +
+           'confirms it — with a tick, or simply by correcting the value. Reporting and drafts ' +
+           'flow against a pending value; <b>submitting waits</b> on one, because submitting ' +
+           'says the performance can be read.' },
       { h: "Someone holding several roles",
         p: 'They get the <b>most generous</b> answer of them — but each role answers only ' +
            'about what it is attached to. Owning Mobile and sitting on Finance gives the ' +
@@ -28673,10 +28889,13 @@ function renderKB(){
            'flags, whether its CEO sees the group and the other companies, can only ever ' +
            '<b>narrow</b> what the table allows. Supporting functions belong to no company: ' +
            'they serve all of them.' },
-      { h: "The gate is real, the rest is Phase 2",
-        p: 'Signing in is checked on the server against a stored password. Per-action ' +
-           'authorisation and the change log are not built yet: today the enforcement is ' +
-           'at the door, not at each button.' }
+      { h: "The server decides, not the screen",
+        p: 'Signing in is checked on the server against a stored password, and so is every ' +
+           'save: the change is classified against what is <b>stored</b> — a plan edit, a ' +
+           'figure, a setting, a gap being filled or confirmed — and refused where the ' +
+           'person\u2019s roles do not allow it. A screen that offers something the server ' +
+           'would refuse is a fault, not a shortcut. The same comparison writes the ' +
+           '<b>change log</b>, so who moved a target is answerable.' }
     ]),
     /* ── THE REGISTER'S THREE NOTES, MOVED HERE (§90) ────────────────
        Islam: "remove the notes below the registry table and take them to the

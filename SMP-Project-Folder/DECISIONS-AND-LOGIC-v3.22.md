@@ -20006,3 +20006,158 @@ pre-§159 build, which is exactly the seven new assertions.
   outside it. Offered with the variations and not taken up; it is one line
   and no design, and it stays a separate ask rather than riding along
   unasked (rule 1b).
+
+---
+
+## §160 · The knowledge base catches up, and the label was being inflected (v3.60)
+
+`recipes.js` had not been touched since §103 wrote it — v3.31 — while the
+platform went to v3.59. Fifteen features had no question at all and five
+answers had quietly become false. Islam took the whole set away, **softened
+every answer**, and brought back a workbook; this section is what came out of
+reading his revision against the code, question by question, with each
+decision his.
+
+**THE VOICE IS HIS NOW.** The §103 wording was terse by design — *the answer,
+then what to do next* — and his revision is longer, warmer and says
+*Strategy Office* where the old text said *the office*. That is a deliberate
+change of register for the people who read it, and it is kept wholesale: what
+follows are only the places where the words did not match the build.
+
+### The five that conflicted with the platform
+
+**COLLABORATORS AND STAKEHOLDERS, AND THE ANSWER THAT WAS RIGHT.** His
+Resolved Rules sheet said they get no reporting access; his own Q18 said they
+do once the office enables it; `boundedReach()` agreed with the answer. Asked
+to settle it, Islam went further: *"let's drop the concept of anyone can
+report single lines. the reporting can be done by the BU owner and the
+custodian on the overall thing and the project owner and the pillar owners can
+report their own and the figure sets owners report their own figures."*
+
+**AND THEN THERE WAS NOTHING TO BUILD.** I had told him this was a code
+change, and it is not: `contrib`, `powner` and `plowner` **all ship at view**
+on both Reporting halves, so nobody reports single lines today. His model is
+the shipped default plus two cells — Pillar owner and Project owner switched
+to edit on the matrix. Recorded because the correction matters more than the
+finding: *a rule can already be true by configuration, and reading the
+defaults is cheaper than reading the rule.* The function head mirrors the BU
+owner, which was also already the default.
+
+**THE KB DESCRIBES THE PLATFORM, NEVER THE TENANT'S CONFIGURATION.** One
+corpus serves every deployment, so the contributor answers keep the form he
+wrote — *being named does not give reporting access unless the office enables
+it* — which is true whether the cell is on or off. His rules sheet is a tenant
+policy and is worded as one.
+
+**FOCUS MEASURES.** Sheet said off forgets; §102 and his own Q63 said off
+hides and keeps. The answer stands; nothing in the platform changes.
+
+**SUBMITTED BY MISTAKE, AND THIS ONE WAS OURS.** Both his answer and the
+original §103 wording sent the person to the Strategy Office. The reporting
+bar draws **Reopen my report** for `canSpeakFor(target)` — the unit's own head
+or custodian — so they are usually looking at the button while being told to
+go and ask. Rewritten, with the office kept for a locked cycle and for anybody
+who is neither.
+
+**OFFLINE, WHERE MY OWN FINDING WAS WRONG.** I reported that nothing syncs on
+reconnection, on the strength of a console warning that says *"will retry on
+the next change"*. There is a **`setInterval(save, 5000)`** for the life of
+the page and `lastSaved` is set only on `r.ok`, so a failed save is re-posted
+every five seconds and work **does** go up when the connection returns. His
+wording was right and mine was not. *The code was better than its own
+comment, and I read the comment.* One caveat added, because it is the case
+that costs a quarter's figures: **only while the tab stays open** — nothing is
+stored locally, so closing it while offline loses what was entered.
+
+**WHO SUBMITS.** Q29 read *"the overall unit, Pillar or project"*, which says
+a Pillar owner submits. All three bounded roles sit in `OWN_LINES_ONLY` and
+none of them submits. Tail trimmed.
+
+### The Strategy Office's answers are withheld now, and three tags were wrong
+
+Islam: the office's operational answers should reach the office alone. `who`
+had been **relevance and never permission** (spec 016 §3) — the whole corpus
+went to the model and the tag only chose between two public answers.
+`officeOnly()` filters it by the asker's seat, asked through
+`Rules.isOfficeRole()`, the same test `roleWord()` already uses one line
+above, so the two can never describe the person differently.
+
+**THE TAGS HAD TO BE RE-READ BEFORE THE MEANING COULD BE FLIPPED, AND THREE OF
+THE EIGHT WERE WRONG.** *Present* has **no gate at all**; *Manage slides* is
+`canSpeakFor`, so a unit's custodian adds picture slides to their own review;
+and the **Demo data menu is not role-gated in any way**. Withholding those
+would have hidden three real answers from the people who can act on them —
+which is the risk in enforcing a tag that was written to mean *useful to*.
+All three are §103's errors, not his. They move to the sections whose readers
+can act on them.
+
+**THE TWO-ANSWER PAIR IS WORTH MORE THAN IT WAS.** His sheet had collapsed
+*"How do I add a project to a capability?"* into one row, losing the office's
+half. Restored — and with the filter each side now sees only the answer
+written for it, where before both saw both.
+
+### The label was being inflected, in the product's own help (§160.6)
+
+`recipeText()` rendered `{pillars}` as `plural(2, L("pillar","bu"))`.
+**`plural()` returns a COUNT followed by the word**, and `bu` for a pillar is
+already *"Pillars"* — so the shipped question *"How do I reorder my
+{pillars}?"* has been rendering as **"How do I reorder my 2 Pillarss?"** on
+every deployment since §103, and `{pillar}` gives *"a Pillars owner"*.
+
+§107.8 had already written the rule down — **a tenant's label is never
+inflected**, because there is no singular anywhere for a sentence to reach for
+(`internal` is the platform's own name and is not for display) — and this was
+the one place still inflecting one. Both tokens now resolve to the label
+exactly as it comes, `{pillars}` kept as an alias so a tenant's own rewording
+(§140) cannot break by using it, and **every sentence in `recipes.js` is
+phrased to accept a plural noun**. Where the ROLE is meant, *"Pillar owner"*
+is written literally: that is its name on Roles &amp; access and it is not a
+tenant label. Proved on the built page rather than argued —
+`recipeText('reorder my {pillars} / a {pillar} owner')` returned
+*"reorder my 2 Pillarss / a Pillars owner"* before and *"reorder my Pillars /
+a Pillars owner"* after.
+
+### Three paragraphs on the How-it-works tab were stale
+
+More serious than a missing question: a missing answer sends somebody to the
+chat, a **wrong** one sends them away satisfied. *"Seven roles, seven kinds of
+page"* is nine and nine with a floor row under them; *"each cell is none, view
+or edit"* missed the fourth setting the two Strategy cells carry; and
+*"per-action authorisation and the change log are not built yet"* has been
+false since §42 built both — it told a client the platform is less secure than
+it is.
+
+### Smaller, settled with him
+
+- **The thresholds are the tenant's.** 85/70/50 are `scope:"tenant"` and
+  editable, so the answer says *by default* and names who can change them.
+- **A new cycle needs the current one CLOSED**, which is enforced (the Open
+  button is not drawn while one is open). *Fully submitted* is not: closing
+  warns *"N items are unreported"* and proceeds. Worded as the office's way of
+  working rather than as a refusal.
+- **The intro round** appears on the welcome screen, which shows **once per
+  browser session**, so the answer says *next time you sign in*.
+- **There is no button labelled Arrange** — it is the up-and-down arrows, with
+  the word only in the hover (§101's recorded cost).
+- **A project's Owner is set on the project**, not in the register; the
+  register is only the list the name is picked from.
+
+### Recorded, not fixed (§160.9)
+
+- **A FAILED AUTOSAVE IS SILENT.** Both the 800ms debounce and the 5s interval
+  call `save()` with no callback, so `say("failed")` reaches nobody; only a
+  pressed button (`saveNow`) reports. Somebody can enter a quarter's figures
+  offline, close the laptop and never be told. A visible *not saved* mark
+  would close it — its own change, and it needs a mockup, because it touches
+  the chrome on every page.
+- **CONTRIBUTOR AT EDIT IS WIDER THAN ITS NAME.** Dormant while the cell is at
+  view, which is where Islam is leaving it: if it is ever opened, a project's
+  **stakeholders** each reach every row of that project through
+  `boundedReach()`'s project branch, not merely their own line. Whoever turns
+  it on should know what they are turning on.
+- **§130.1's stated purpose does not apply while Contributor is off.** That
+  section made a tactic's owner register-picked so an owner could enter their
+  own figure; with single-line reporting off, the pillar owner enters it. The
+  picker is kept for accurate names on the plan and in the deck.
+- **The tour has no mid-session door for anybody outside the office** (§119.4,
+  surfacing in an answer for the first time).

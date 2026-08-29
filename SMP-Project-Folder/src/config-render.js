@@ -3060,10 +3060,24 @@ function kbSection(id, title, blocks){
    A recipe's answer is one string with `|` between paragraphs. Not an array:
    the file is long enough already, and a separator that cannot appear in prose
    costs nothing to read and one line to split. */
+/* THE LABEL IS TAKEN EXACTLY AS IT COMES (§107.8, fixed 2026-08-29).
+   `{pillars}` used to render `plural(2, L("pillar","bu"))` — and `plural()`
+   returns a COUNT followed by the word, while `bu` for a pillar is already
+   "Pillars". So the shipped question "How do I reorder my {pillars}?" was
+   rendering as "How do I reorder my 2 Pillarss?" on every deployment: a
+   number nobody asked for and a doubled s. §107.8 had already written the
+   rule down — a tenant's label is never inflected, because there is no
+   singular anywhere for a sentence to reach for — and this was the one place
+   still inflecting one, in the product's own help.
+
+   Both tokens now resolve to the label as given. `{pillars}` is kept as an
+   alias so a recipe reworded by a tenant (§140) cannot break by using it,
+   and every sentence in recipes.js is phrased to accept a plural noun. */
 function recipeText(t){
+  var word = L("pillar","bu");
   return String(t)
-    .replace(/\{pillars\}/g, plural(2, L("pillar","bu")))
-    .replace(/\{pillar\}/g, L("pillar","bu"));
+    .replace(/\{pillars\}/g, word)
+    .replace(/\{pillar\}/g, word);
 }
 
 /* THE PEN'S STATE. File-scope like the other page modes; the page is the

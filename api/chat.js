@@ -176,7 +176,11 @@ async function assistantAnswer(client, me, question) {
       /* The tenant's rewritten and added answers, laid over the shipped
          corpus by the same rule the page renders with (§140). */
       kb: assistant.withTenant(kb, (org.extra || {}).kb), question: question, history: hist,
-      who: roleWord(me), labels: labels
+      who: roleWord(me), labels: labels,
+      /* The office's own operational answers are withheld from everybody else
+         (2026-08-29). Asked of the SEAT, the same test roleWord() above uses,
+         so the two can never describe the person differently. */
+      isOffice: Rules.isOfficeRole(String((me && me.role) || ""))
     });
     /* VISIBLE TO THE OPERATOR, INVISIBLE TO THE PERSON (§133, §123's rule).
        The person's screen stays silent by design — §112.2 — but a failure
@@ -506,7 +510,11 @@ module.exports = async function handler(req, res) {
         const q = "How is my unit's headline number worked out?";
         const out = await assistant.ask({
           kb: assistant.withTenant(kb, (orgT.extra || {}).kb), question: q, history: [],
-          who: "a member of the Strategy Office", labels: ((orgT.extra || {}).labels) || {}
+          who: "a member of the Strategy Office", labels: ((orgT.extra || {}).labels) || {},
+          /* The diagnostic is run FROM the office and must exercise the whole
+             corpus: a filtered one would test a smaller thing than the one it
+             is reporting on. */
+          isOffice: true
         });
         if (out && out.badKey) {
           /* REPORTED AGAINST THE KEY, because that is what is wrong and that

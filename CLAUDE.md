@@ -732,6 +732,53 @@ console errors (in this cloud environment, run it via a wrapper that points Play
   holding a bad date is findable without opening each (§93.4). `railSub(html,
   alarm)` tells them apart. **Found by `checks/project-tables.py` going red on
   the day the default flipped**, not by reading the rail.
+- **A RECIPE IS A PROMISE ABOUT BEHAVIOUR, AND NOBODY WAS REVISITING IT
+  (§160):** `recipes.js` went from §103 to §159 untouched while the platform
+  learned to split the own columns (§117), to fill only what is empty (§145)
+  and to derive two owner roles off the plan (§147) — so fifteen features had
+  no question and five answers said a flat *"the office"* about something the
+  office can now hand over. **When a rule gains an exception, the recipe
+  stating the rule is part of that change.** Two of the corrections were
+  OURS, not the client's: *"submitted by mistake"* sent people to the office
+  for **Reopen my report**, which `canSpeakFor()` draws for the unit's own
+  head or custodian, and three `who:"office"` tags marked things a
+  non-office person can actually do (**Present has no gate at all**, Manage
+  slides is `canSpeakFor`, the **Demo data menu is not role-gated in any
+  way**). **`who` IS PERMISSION NOW, NOT RELEVANCE** — `officeOnly()` filters
+  the corpus by `Rules.isOfficeRole()` before it is sent, the same test
+  `roleWord()` uses one line above — **and the tags had to be re-read before
+  the meaning could be flipped**, or enforcing them would have hidden three
+  real answers. **THE KB DESCRIBES THE PLATFORM, NEVER A TENANT'S
+  CONFIGURATION**: one corpus serves every deployment, so an answer says what
+  the platform *can* do with its condition attached.
+- **A TENANT'S LABEL IS NEVER INFLECTED, AND THE HELP WAS INFLECTING ONE
+  (§160.6, §107.8 for the second time):** `recipeText()` rendered
+  `{pillars}` as `plural(2, L("pillar","bu"))` — **`plural()` returns a COUNT
+  followed by the word** and `bu` is already *"Pillars"* — so the shipped
+  question *"How do I reorder my {pillars}?"* rendered as **"How do I reorder
+  my 2 Pillarss?"** on every deployment from §103 to §159, and `{pillar}`
+  gave *"a Pillars owner"*. There is **no singular anywhere** (`internal` is
+  the platform's own name, not for display), so both tokens take the label
+  exactly as it comes and **every sentence is phrased to accept a plural
+  noun**; where the ROLE is meant, *"Pillar owner"* is written literally,
+  because that is its name on Roles & access and it is not a tenant label.
+  **Proved on the built page, not argued** — a `{pillar}` check that only
+  asserts "nothing unsubstituted" passes happily on *2 Pillarss*.
+- **READ THE DEFAULTS BEFORE CALLING SOMETHING A BUILD (§160.2):** told that
+  nobody should report single lines, I reported it as a code change. It was
+  not: `contrib`, `powner` and `plowner` **all ship at view** on both
+  Reporting halves, so the model asked for was the shipped default plus two
+  cells switched on. *A rule can already be true by configuration, and
+  reading `ACCESS_DEFAULTS` is cheaper than reading the rule.*
+- **THE CODE CAN BE BETTER THAN ITS OWN COMMENT (§160.4):** I reported that
+  offline work never syncs, on the strength of `sync.js` warning *"will retry
+  on the next change"*. There is a **`setInterval(save, 5000)`** for the life
+  of the page and `lastSaved` is set only on `r.ok`, so a failed save is
+  re-posted every five seconds and the work **does** go up on reconnection.
+  What is true is narrower and worth one clause: **only while the tab stays
+  open**, because nothing is stored locally. **AND A FAILED AUTOSAVE IS
+  SILENT** — the debounce and the interval both call `save()` with no
+  callback, so only a pressed button ever reports; recorded, not fixed.
 - **THE KNOWLEDGE BASE IS THE OFFICE'S (§119.4, REVERSING §30 AND §37):**
   `when: inOffice()` on the page def, the shape `c_send` and `c_chat` use —
   never a matrix cell, because who reads the office's own working notes is not
@@ -2621,6 +2668,12 @@ python3 checks/email-greeting.py # the greeting row is ONE line with no prose, t
                                 # fills it per recipient (§135, over HTTP)
 python3 checks/setup-pages.py   # every Setup page is named ONCE and in the rail's own word,
                                 # and the name and the table head stay on screen (§121)
+python3 checks/knowledge-base.py # the page and db/kb.json draw from ONE source — the
+                                # AGREEMENT, never the count (§103)
+node scripts/test-kb-audience.js # who sees which answer (§160): an office answer absent
+                                # for everybody else AND still present for the office, and
+                                # a two-answer question leaving each side exactly one.
+                                # No database, no network — officeOnly() is pure.
 ```
 The mail half needs a database and a password (it spawns its own dev-server):
 `DATABASE_URL=… node scripts/test-email-greeting.js <smo-password>` (§142.6), and

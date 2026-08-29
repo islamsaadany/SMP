@@ -228,6 +228,14 @@
     pointer-events:none; z-index:20; text-align:left;
   }
   .hasnote:hover::after, .hasnote:focus::after, .hasnote:focus-visible::after { display:block; }
+  /* AN EMPTY BUBBLE IS A BLACK BOX, AND THAT IS WHAT SHIPPED (§161.3). The
+     compiled cell carried `hasnote` while still setting a `title`, so this rule
+     matched it with no `data-tip` to fill: `content:attr(data-tip)` resolved to
+     nothing and painted a small black rectangle on hover, with the browser's
+     own tooltip arriving a second later underneath. The caller is fixed; this
+     is the guard, so the next element given the class and not the attribute
+     shows nothing rather than a box with nothing in it. */
+  .hasnote:not([data-tip])::after, .hasnote[data-tip=""]::after { display:none !important; }
   .hasnote:focus-visible { outline:2px solid var(--gold); outline-offset:2px; border-radius:2px; }
 
   /* ── Enabler cards (temple base) ──────────────────────── */

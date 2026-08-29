@@ -863,6 +863,14 @@
     pointer-events:none; z-index:20; text-align:left;
   }
   .hasnote:hover::after, .hasnote:focus::after, .hasnote:focus-visible::after { display:block; }
+  /* AN EMPTY BUBBLE IS A BLACK BOX, AND THAT IS WHAT SHIPPED (§161.3). The
+     compiled cell carried `hasnote` while still setting a `title`, so this rule
+     matched it with no `data-tip` to fill: `content:attr(data-tip)` resolved to
+     nothing and painted a small black rectangle on hover, with the browser's
+     own tooltip arriving a second later underneath. The caller is fixed; this
+     is the guard, so the next element given the class and not the attribute
+     shows nothing rather than a box with nothing in it. */
+  .hasnote:not([data-tip])::after, .hasnote[data-tip=""]::after { display:none !important; }
   .hasnote:focus-visible { outline:2px solid var(--gold); outline-offset:2px; border-radius:2px; }
 
   /* ── Enabler cards (temple base) ──────────────────────── */
@@ -2534,10 +2542,22 @@
      "Own supporting function" group headings, which had been under the second
      row since §117 split them. */
   .setuppane .cfg.acgrid table thead th { position:static; }
+  /* AND EVERY OTHER SETUP TABLE HAD THE SAME FAULT, UNLOOKED AT (§161.5).
+     The exclusion above fixed `.acgrid` and stopped there. `.cfg` is
+     `overflow-x:auto`, which makes the BOX what a sticky head pins against —
+     so a PAGE offset resolves inside the table, exactly as §130.2 wrote down.
+     Measured on Scoring bands: sticky top 136px, table top 246, head top
+     382 — the header pushed 136px down its own body, sitting across the third
+     row at rest, at every width and with the page unscrolled. Islam's "things
+     are damaged" picture, on a page neither of us was looking at.
+
+     `position:static`, following §130.2's own choice rather than inventing a
+     second answer: these are three-to-ten-row tables, and a head that pins
+     buys nothing on a table you can see all of. The register and the source
+     table keep their own handling — they are long, they scroll vertically,
+     and they were already excluded. */
   .setuppane .cfg:not(.peoplebox):not(.srctable):not(.acgrid) table thead th {
-      position:sticky; z-index:4;
-      top:calc(var(--chrome-h, 118px) + var(--rail-gap, 12px) + var(--sethead-h, 46px));
-      background:var(--panel); }
+      position:static; background:var(--panel); }
   /* A HAIRLINE BETWEEN HEADINGS (§121.4). They are uppercase, letter-spaced
      and 8px-padded, so at a narrow pane "Shown in the nav" and "Code" merged
      into one word — measured on Islam's own screenshot. A divider costs no
@@ -21115,11 +21135,11 @@ var COMPILE_WORDS = {
    for one value, the product's appearing at once and the browser's a second
    later underneath it. `aria-label` carries the words for anything that reads
    the page aloud, which the focusable span now announces. */
-function noteSpan(text, note){
-  return note
-    ? '<span class="hasnote" tabindex="0" data-tip="' + esc(note).replace(/"/g, "&quot;") +
-      '" aria-label="' + esc(text) + ' — ' + esc(note) + '">' + esc(text) + '</span>'
-    : esc(text);
+function noteSpan(text, note, cls){
+  if (!note) return cls ? '<span class="' + cls + '">' + esc(text) + '</span>' : esc(text);
+  return '<span class="' + (cls ? cls + " " : "") + 'hasnote" tabindex="0" data-tip="' +
+    esc(note).replace(/"/g, "&quot;") + '" aria-label="' + esc(text) + ' \u2014 ' + esc(note) +
+    '">' + esc(text) + '</span>';
 }
 function dirCell(d){ return d ? noteSpan(d, DIR_WORDS[d] || "") : ""; }
 /* THE REPEATED DEFAULT DROPS TO THE QUIET INK (§149). "Latest" is what almost
@@ -21129,12 +21149,18 @@ function dirCell(d){ return d ? noteSpan(d, DIR_WORDS[d] || "") : ""; }
 function compileCell(c){
   if (!c) return "";
   var note = COMPILE_WORDS[c] || "";
-  var cls = [];
-  if (c === "Latest") cls.push("cdefault");
-  if (note) cls.push("hasnote");
-  if (!cls.length) return esc(c);
-  return '<span class="' + cls.join(" ") + '"' +
-    (note ? ' title="' + esc(note) + '"' : '') + '>' + esc(c) + '</span>';
+  /* THROUGH `noteSpan`, WHICH IS WHY IT EXISTS (§161.3). This built its own
+     span and set its own `title` — §161 converted the direction cell and left
+     this one behind, and the two faults then met: the span still carried
+     `hasnote`, so the new bubble matched it with NO `data-tip` to fill it and
+     painted an EMPTY BLACK BOX, and a second later the browser's tooltip
+     arrived underneath with the words. Islam saw exactly that: "it shows a
+     black box and later it shows the description."
+
+     §96's lesson, again and in the same shape: a helper that exists is not a
+     helper that was used, and nothing catches the difference — both spans
+     render, both carry the class, and only one has the attribute. */
+  return noteSpan(c, note, c === "Latest" ? "cdefault" : "");
 }
 
 /* Measure name reads left; every figure centres under its column. Progress

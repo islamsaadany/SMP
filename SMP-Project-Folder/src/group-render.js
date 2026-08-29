@@ -353,11 +353,11 @@ var COMPILE_WORDS = {
    for one value, the product's appearing at once and the browser's a second
    later underneath it. `aria-label` carries the words for anything that reads
    the page aloud, which the focusable span now announces. */
-function noteSpan(text, note){
-  return note
-    ? '<span class="hasnote" tabindex="0" data-tip="' + esc(note).replace(/"/g, "&quot;") +
-      '" aria-label="' + esc(text) + ' — ' + esc(note) + '">' + esc(text) + '</span>'
-    : esc(text);
+function noteSpan(text, note, cls){
+  if (!note) return cls ? '<span class="' + cls + '">' + esc(text) + '</span>' : esc(text);
+  return '<span class="' + (cls ? cls + " " : "") + 'hasnote" tabindex="0" data-tip="' +
+    esc(note).replace(/"/g, "&quot;") + '" aria-label="' + esc(text) + ' \u2014 ' + esc(note) +
+    '">' + esc(text) + '</span>';
 }
 function dirCell(d){ return d ? noteSpan(d, DIR_WORDS[d] || "") : ""; }
 /* THE REPEATED DEFAULT DROPS TO THE QUIET INK (§149). "Latest" is what almost
@@ -367,12 +367,18 @@ function dirCell(d){ return d ? noteSpan(d, DIR_WORDS[d] || "") : ""; }
 function compileCell(c){
   if (!c) return "";
   var note = COMPILE_WORDS[c] || "";
-  var cls = [];
-  if (c === "Latest") cls.push("cdefault");
-  if (note) cls.push("hasnote");
-  if (!cls.length) return esc(c);
-  return '<span class="' + cls.join(" ") + '"' +
-    (note ? ' title="' + esc(note) + '"' : '') + '>' + esc(c) + '</span>';
+  /* THROUGH `noteSpan`, WHICH IS WHY IT EXISTS (§161.3). This built its own
+     span and set its own `title` — §161 converted the direction cell and left
+     this one behind, and the two faults then met: the span still carried
+     `hasnote`, so the new bubble matched it with NO `data-tip` to fill it and
+     painted an EMPTY BLACK BOX, and a second later the browser's tooltip
+     arrived underneath with the words. Islam saw exactly that: "it shows a
+     black box and later it shows the description."
+
+     §96's lesson, again and in the same shape: a helper that exists is not a
+     helper that was used, and nothing catches the difference — both spans
+     render, both carry the class, and only one has the attribute. */
+  return noteSpan(c, note, c === "Latest" ? "cdefault" : "");
 }
 
 /* Measure name reads left; every figure centres under its column. Progress

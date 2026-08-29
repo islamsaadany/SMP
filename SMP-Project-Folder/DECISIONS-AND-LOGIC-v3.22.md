@@ -20919,3 +20919,68 @@ so the fetch hung rather than rejecting, and a closed listener cannot be
 rebound inside one run. Modelled by **dropping the connection** instead, which
 is both what a real failure looks like to `fetch()` and the only version that
 runs twice.
+
+---
+
+## §172 · Fill is a grant, and the constraint never heard
+
+Islam, for the third time — and this time with the answer attached, because
+§171 had made the failure speak: *"Not saved. The server answered HTTP 500."*
+
+**THAT SENTENCE IS THE WHOLE SECTION.** Two rounds were spent looking in the
+wrong place because the product said nothing; one line of visible diagnosis
+turned it into a twenty-minute hunt.
+
+**§145 GAVE THE STRATEGY CELLS A THIRD STATE AND THE DATABASE WAS NEVER TOLD.**
+View / **Fill gaps** / Edit has been on the matrix since spec 023;
+`lib/rules.js` has ranked it since that day (`STATE_RANK` = none 0, view 1,
+fill 2, edit 3); the authoriser judges it; and `db/schema.sql` went on saying
+
+    grant_ text NOT NULL CHECK (grant_ IN ('none','view','edit'))
+
+So the moment anybody granted Fill gaps to a role, the INSERT violated the
+constraint, `writeState` threw, and `/api/state` answered **500**.
+
+**AND IT DID NOT STOP AT THAT ONE SAVE, WHICH IS WHY IT READ AS "NOTHING
+SAVES".** The whole graph is posted every time, so the refused value stayed on
+screen and in every later payload: from that press onward, **every save of
+every page in the product failed**. Setup, branding, a reported figure — all of
+it, on one bad cell. Reproduced end to end against a real Postgres, then fixed
+and reproduced clean: pressing Fill gaps posts 200 and `access_grants` holds
+`fill`.
+
+**WHY NOTHING CAUGHT IT, AND IT IS §94.2 WITH THE SIGN REVERSED.** The seed
+grants no `fill` anywhere, so the round trip, the fixed point and every
+deploy test wrote only the three old values — the fourth was **never once
+offered to the database**. A check that exercises only the shipped defaults
+cannot see a value nobody has set. Four layers agreed (the screen drew it, the
+shared rule ranked it, the authoriser allowed it, the writer sent it) and the
+fifth was never asked.
+
+So `scripts/test-roundtrip.js` writes one grant of **every value in
+`STATE_RANK`** and reads them all back — taken from the shared rule, not
+listed in the test, so a state added tomorrow is exercised the day it is added
+and there is no list to remember (§104.7's shape, in a test). It fails loudly
+on the old constraint with Postgres's own message, watched before the green was
+believed.
+
+**THE MIGRATION IS IDEMPOTENT AND BACKFILLS NOTHING.** `DROP CONSTRAINT IF
+EXISTS` then re-add, so a virgin deployment (which gets the four-value CHECK
+straight from `schema.sql`) and an existing one end identical — both driven.
+And no stored row can be `fill`, because the database refused every one of
+them, so widening what is allowed moves nobody's access.
+
+**THE SAVE BUTTON WAS THE RIGHT INSTINCT ABOUT THE WRONG LAYER.** Islam asked
+whether the matrix should open with an Edit button and commit with Save. It
+would not have helped: a 500 is a 500 whether a timer sends the body or a
+button does, and the only difference would have been a click before the same
+red banner. The reason the change appeared to vanish was never *when* the save
+was sent — §170 had already made that immediate — it was that the server could
+not take it. Recorded rather than argued away, because the question is a fair
+one and the answer is about where the fault was, not about the design.
+
+**AND THE GENERAL FORM IS WORTH THE SWEEP IT COST**: every value-list CHECK in
+the schema was read against what the product can now produce. There are two,
+and the other is SWOT's `cat IN ('s','w','o','t')`, which is closed by
+definition. *A CHECK constraint is a copy of a rule that lives in another file,
+and nothing in a build compares the two.*

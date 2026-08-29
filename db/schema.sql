@@ -293,7 +293,13 @@ CREATE TABLE IF NOT EXISTS unit_roles (
 CREATE TABLE IF NOT EXISTS access_grants (
   role_key text NOT NULL,
   page_key text NOT NULL,
-  grant_   text NOT NULL CHECK (grant_ IN ('none','view','edit')),
+  -- FOUR VALUES, BECAUSE §145 ADDED ONE AND THIS DID NOT FOLLOW (§172).
+  -- `fill` is the Strategy halves' third state — may write what is empty,
+  -- may not touch what is written. The screen has offered it since §145 and
+  -- the database refused it, so the FIRST tenant to grant it put a value in
+  -- the graph that Postgres would not take, and every save from then on —
+  -- of anything, anywhere in the product — died on this constraint.
+  grant_   text NOT NULL CHECK (grant_ IN ('none','view','fill','edit')),
   PRIMARY KEY (role_key, page_key)
 );
 

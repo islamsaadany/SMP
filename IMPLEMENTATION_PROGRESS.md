@@ -64,6 +64,26 @@ Nothing proceeds past this line without an answer.
 
 ## Built and verified
 
+### v3.64 — fill is a grant, and the constraint never heard (§172)
+
+- **The Roles & access 500, found.** §145 gave the Strategy cells a third state
+  — **Fill gaps** — and `db/schema.sql` still allowed only none/view/edit. So
+  granting it violated a CHECK constraint, `writeState` threw, and the save
+  answered 500.
+- **It was never one save.** The whole graph is posted each time, so the refused
+  value stayed on screen and in every later payload: from that press onward
+  **every save of every page failed**. That is why it read as "Roles & access
+  never saves".
+- Fixed in `schema.sql` and migration **030** (idempotent, backfills nothing —
+  no stored row could hold a value the database was refusing). Both paths
+  driven: a virgin database and an existing one.
+- **The blind spot is closed**: the seed grants no `fill`, so the round trip had
+  never offered the fourth value to the database. It now writes one grant of
+  every value in `STATE_RANK` — read from the shared rule, not listed — and
+  fails loudly on the old constraint.
+- §171's banner is what made this findable in twenty minutes instead of another
+  round of guessing.
+
 ### v3.64 — a failed save says so (§171)
 
 - **Islam reported Roles & access not saving a second time.** It saves in every

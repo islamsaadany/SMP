@@ -365,6 +365,20 @@ console errors (in this cloud environment, run it via a wrapper that points Play
   `node scripts/test-door.js <smo-password>` against a running dev-server
   after touching `api/auth.js` or `lib/auth.js` (it ends by rate-limiting the
   SMO on purpose — `DELETE FROM login_attempts;` clears it).
+- **A CHECK CONSTRAINT IS A COPY OF A RULE IN ANOTHER FILE, AND NOTHING
+  COMPARES THEM (§172):** §145 gave the Strategy cells a third state, `fill`,
+  and `db/schema.sql` went on saying `CHECK (grant_ IN ('none','view','edit'))`
+  — so granting Fill gaps threw in Postgres and `/api/state` answered **500**.
+  **And it did not stop at that save**: the whole graph is posted every time,
+  so the refused value stayed in every later payload and EVERY save of EVERY
+  page failed from then on, which is why it reads as "nothing saves".
+  **§94.2 with the sign reversed** — the seed grants no `fill`, so the round
+  trip had never once offered the fourth value to the database while four
+  layers agreed about it. The test now writes one grant of every value in
+  `STATE_RANK`, read from the shared rule rather than listed, so a state added
+  tomorrow is exercised that day. **Widening a value list is a migration**
+  (030), idempotent, and backfills nothing — no stored row can hold the value
+  the database was refusing.
 - **A FAILED SAVE MUST SAY SO, AND THREE OF THEM DID NOT (§171):** §32 made a
   REFUSED save speak and stopped; a save that FAILS wrote one line to
   `console.warn`, so a 500, a dropped connection or a timeout looked **exactly

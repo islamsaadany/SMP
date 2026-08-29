@@ -161,10 +161,48 @@ function firstDiff(a, b, at) {
   console.log("mobile measures:", (await spot(
     "SELECT count(*) n FROM measures m JOIN pillars p ON m.pillar_id=p.id WHERE p.unit_key='mobile'"))[0].n);
   console.log("access grants:", (await spot("SELECT count(*) n FROM access_grants"))[0].n);
+
+  /* ── EVERY GRANT VALUE THE SCREEN CAN PRODUCE, NOT ONLY THE SHIPPED THREE
+     (§172) ────────────────────────────────────────────────────────────────
+     §145 gave the two Strategy cells a third state, `fill`, and the CHECK on
+     `access_grants` was never widened — so the first tenant to grant it got a
+     500 on that save AND on every save afterwards, of any page, because the
+     refused value stays in the posted graph. It reads exactly like "Roles &
+     access never saves", and that is how it was reported three times.
+
+     NOTHING HERE COULD HAVE SEEN IT. The seed grants no `fill` anywhere, so
+     this file wrote only none/view/edit and the fourth value was never once
+     offered to the database — §94.2's rule with the sign reversed: a check
+     that exercises only the shipped defaults cannot see a value nobody has
+     set. So the values are taken from the SHARED RULE rather than listed
+     here, and one is written and read back for each: a state added to
+     `STATE_RANK` tomorrow is exercised the day it is added, with no list to
+     remember. */
+  const RULES = require("../lib/rules.js");
+  const GRANTS = Object.keys(RULES.STATE_RANK);
+  const gState = await io.readState(client);
+  gState.access = JSON.parse(JSON.stringify(gState.access || {}));
+  GRANTS.forEach(function (g, i) {
+    gState.access["rtprobe" + i] = { a_unit_own_strat: g };
+  });
+  await io.writeState(client, gState);
+  const gBack = await io.readState(client);
+  const gGot = GRANTS.map(function (g, i) {
+    const row = gBack.access["rtprobe" + i];
+    return row && row.a_unit_own_strat;
+  });
+  const gOk = JSON.stringify(gGot) === JSON.stringify(GRANTS);
+  console.log("every grant value round trips:", gOk ? "PASS" : "FAIL",
+    "[" + GRANTS.join(", ") + "]" + (gOk ? "" : " got [" + gGot.join(", ") + "]"));
+  /* Put the tenant back, so this file stays a fixed point for whatever runs
+     after it (§94.2's other half: a trial that leaves state behind is a trial
+     the next one measures). */
+  GRANTS.forEach(function (g, i) { delete gBack.access["rtprobe" + i]; });
+  await io.writeState(client, gBack);
   console.log("sample:", (await spot(
     "SELECT name, target, actual FROM measures WHERE id='mobile-P1-M2'"))[0]);
 
   client.release();
   await pool.end();
-  if (!equal || !slateOk || !archOk) process.exit(1);
+  if (!equal || !slateOk || !archOk || !gOk) process.exit(1);
 })().catch(function (e) { console.error("FAIL:", e); process.exit(1); });

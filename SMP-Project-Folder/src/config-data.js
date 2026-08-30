@@ -5299,7 +5299,18 @@ function gapPendCount(target){ return gapPendRows(target).length; }
    read THIS list, so a count can never disagree with the fields it points
    at (§116.2: the count and the queue are one list). Each entry names how
    to GET there, in the navigation's own words. */
-function gapMap(target){
+/* §192: THE SAME MAP COUNTS THE OTHER THING. Islam, as the SMO: *"I'm
+   getting this badge but I don't know where they are — I think we need a
+   flow like the filling to take me through the confirmation areas so I can
+   confirm."* The badge said 3 and pointed nowhere, which is §16.7's rule
+   ("a count that cannot take you to what it counts is a count that makes
+   work") and the exact fault §177.2 fixed for the gaps.
+
+   ONE MAP, NOT A SECOND ONE BESIDE IT. Every place, how to get there and in
+   whose words is already answered here; a `pendMap()` written alongside would
+   be a second copy of the navigation and would drift the first time a page
+   moved (§53.5). `pend` swaps only what is COUNTED on each row. */
+function gapMap(target, pend){
   var t = String(target || ""), out = [];
   /* §177: COUNTED ONLY WHERE THIS VIEWER COULD ACTUALLY CLOSE IT. The map
      feeds the red "N Missing", the per-place chips, the rail's counts and the
@@ -5314,7 +5325,19 @@ function gapMap(target){
     return canAuthor[acKey] || mayFillRow(acKey, ctx, target);
   };
   var G = function(acKey, ctx, kind, row){
-    return reach(acKey, ctx) ? SMPRules.gapMissing(kind, row).length : 0;
+    if (!reach(acKey, ctx)) return 0;
+    /* A PENDING MARK IS COUNTED ONLY FOR A FIELD THAT KIND ACTUALLY HAS
+       (§192). `pend` rides each row's own object and nothing prunes it, so a
+       mark left behind by a field that has since stopped being fillable
+       (collaborators, §187) would be counted and then walked to a tick that
+       is not drawn — a count promising a control that does not exist (§61).
+       Asked through GAP_FIELDS, the same list the gaps are counted from. */
+    if (pend) {
+      var marks = SMPRules.pendOf(row);
+      return (SMPRules.GAP_FIELDS[kind] || []).filter(function(f){
+        return !!marks[f]; }).length;
+    }
+    return SMPRules.gapMissing(kind, row).length;
   };
   var entry = function(key, label, count, go){
     out.push({ key: key, label: label, count: count, go: go });
@@ -5365,6 +5388,14 @@ function gapMap(target){
 }
 function gapTotal(target){
   return gapMap(target).reduce(function(a, e){ return a + e.count; }, 0);
+}
+/* Where the pending values are, in the same shape and the same order as the
+   gaps (§192). The TOTAL still comes from `gapPendCount()`, which walks the
+   stored rows rather than the map — the two are asserted to agree, because a
+   count that disagrees with the walk it feeds is exactly what this section
+   exists to remove (§116.2). */
+function pendMap(target){
+  return gapMap(target, true);
 }
 /* Who the counts are FOR: somebody who can act on them — the fill grant or
    the office. A plain reader never sees a nag they cannot clear (§69). */

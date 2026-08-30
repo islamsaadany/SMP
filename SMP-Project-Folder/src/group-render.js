@@ -2515,19 +2515,20 @@ function pendChip(acKey, row, field){
   var tick = "";
   if (mayAuthor(acKey)) {
     var i = PENDS.push({ row: row, field: field, acKey: acKey }) - 1;
-    tick = '<button class="gapok" data-pconf="' + i + '" title="Confirm — ' +
+    /* §192: `pendwalk` MARKS IT WITHOUT STYLING IT — the same separation the
+       gap walk needs (§177.2: *this control answers a pending value* and
+       *paint it* are different facts, and merging them restyles the tick to
+       fix a walker). */
+    tick = '<button class="gapok pendwalk" data-pconf="' + i + '" title="Confirm — ' +
       'this value becomes settled" aria-label="Confirm this value">&#10003;</button>';
   }
   return '<span class="pchip" title="' + esc(say) + '">pending</span>' + tick;
 }
-/* The subject-wide count, drawn only when there is one (§41's budget) and
-   only for somebody who can act on it — the office confirms, the filler
-   corrects (§93.4: a count sits one press from where the gap is closed). */
-function pendBadge(acKey){
-  var n = gapPendCount(TARGET);
-  if (!n || (!mayAuthor(acKey) && !mayFill(acKey))) return '';
-  return '<span class="pendcount">' + n + ' awaiting confirmation</span>';
-}
+/* pendBadge() was here. It drew the subject-wide pending count in the pillar
+   band's right slot; §192 moved that number onto the totals row with the
+   other subject-wide counts, where it can be walked and where it cannot land
+   under the fill button. Removed rather than left uncalled (§24): a builder
+   nothing calls is one the next reader has to prove is dead. */
 /* ── THE MISSING BAR (§145.14, reshaping §145.12 from Islam's r2 mockup) ──
    The WHOLE signal lives in the section row beside Foundation · SWOT · Plan
    — read mode included, no line of the page spent: red "N Missing", one
@@ -2557,10 +2558,47 @@ function missBarCta(total){
   return '<button type="button" class="fillcta" data-fillcta="' +
     esc(fillPageForSec(sec)) + '">Fill in missing elements</button>';
 }
+/* ── THE PENDING COUNT, AND A WAY TO WALK TO THEM (§192) ────────────
+   Islam, as the SMO: *"I'm getting this badge but I don't know where they
+   are — I think we need a flow like the filling to take me through the
+   confirmation areas so I can confirm."*
+
+   IT WAS ON THE WRONG ROW, AND UNDER A BUTTON. `pendBadge()` drew it in the
+   pillar band's right slot, which reserves 76px — room for two pen glyphs —
+   while the fill grant's control beside it is a WORDED button 138 to 184px
+   wide. Measured on the real page: 160px of overlap reading, 110px filling,
+   so the two printed on top of each other (Islam's screenshot). A reserved
+   width that has to be kept in step with somebody else's wording is a
+   constant that goes stale (§122.5), so the fix is not a bigger number.
+
+   AND THE NUMBER WAS NEVER THE PILLAR'S. `gapPendCount(TARGET)` counts the
+   WHOLE subject, and the row above the pane is already where the subject's
+   totals live — *"26 Missing · LG01 9 · LG02 7"*. Drawn on one pillar's band
+   it was saying it belonged to that pillar. Option B of the mockup, Islam's
+   pick: it goes where the other totals are, and the collision goes with it.
+
+   THE WALK IS THE GAP WALK'S OWN (§177.2), over the ticks instead of the
+   fields. `pendMap()` is `gapMap()` counting marks, so the places, their
+   order and the words are one answer for both. */
+/* NAMED FOR THE TOTAL, because `pendChip()` is already taken by the mark that
+   sits on ONE value — and a function declaration hoists over its twin in a
+   concatenated file, so the second spelling silently replaced the first and
+   every per-value chip and confirm tick in the product stopped being drawn.
+   §56.7's collision, in the same shape: one scope, two plausible names, no
+   error, and the fault shows up somewhere else entirely (here: the walk found
+   no ticks to walk). Found by driving it. */
+function pendTotalChip(n){
+  return '<span class="pendcount" title="Filled values awaiting Strategy ' +
+    'Office confirmation">' + n + ' awaiting confirmation</span>';
+}
 function missBar(){
   if (typeof seesGaps !== "function" || !seesGaps()) return '';
   var map = gapMap(TARGET), total = gapTotal(TARGET);
-  if (!total) return '';
+  var pend = typeof gapPendCount === "function" ? gapPendCount(TARGET) : 0;
+  /* DRAWN FOR EITHER. Before §192 the bar existed only while something was
+     missing, so a plan entirely filled and entirely unconfirmed drew nothing
+     at all — which is the state the office is in when they get the badge. */
+  if (!total && !pend) return '';
   var chips = map.filter(function(e){ return e.count > 0; }).map(function(e){
     return '<button type="button" class="mchip"' +
       ' data-gkey="' + esc(e.key) + '"' +
@@ -2570,9 +2608,24 @@ function missBar(){
       ' title="' + plural(e.count, "missing element") + ' — press to go">' +
       missChipInner(e) + '</button>';
   }).join("");
+  /* THE WALK IS ONLY OFFERED TO SOMEBODY WHO CAN CONFIRM. A filler sees the
+     count — those values are still theirs to correct — and confirming is the
+     office's alone (§145), so a Next-pending button drawn for them would walk
+     to a tick that is not there (§61, and §177's own rule that a count is a
+     promise the press opens something). */
+  /* WHO MAY CONFIRM, asked of the SUBJECT rather than of one page key. A unit
+     is judged on `u_plan` and a capability function on `k_proj`, so the
+     literal that worked on a unit would have hidden the walk on every function
+     — §53.5's drift, and the exact reason `seesGaps()` beside it asks the
+     whole list rather than naming a page. */
+  var mayConfirm = SMPRules.FILL_PAGES.some(function(pg){ return mayAuthor(pg); });
+  var walk = pend && mayConfirm ? ' <button type="button" ' +
+    'class="pendcta" data-nextpend="1">Next pending &rarr;&nbsp;' +
+    '<span class="npleft">' + pend + ' left</span></button>' : '';
   return '<div class="missbar" data-gapband="1">' +
-    '<span class="secmiss">' + total + ' Missing</span>' + chips +
-    '<span class="gaptail">' + missBarCta(total) + '</span></div>';
+    (total ? '<span class="secmiss">' + total + ' Missing</span>' : '') + chips +
+    (pend ? '<span class="pendtail">' + pendTotalChip(pend) + walk + '</span>' : '') +
+    '<span class="gaptail">' + (total ? missBarCta(total) : '') + '</span></div>';
 }
 /* The counts rewritten IN PLACE after a fill — §63's write-into-the-node,
    because a repaint here would destroy the field being typed into (§71.2).
@@ -4239,7 +4292,10 @@ function projPlanBody(p, fk){
     ? '<div class="pband"><span class="pband-code">' + esc(projCode(fk, p)) + '</span>' +
         '<span class="pband-name">' +
           textOr("plan", p.name, "", function(v){ p.name = v; }) + '</span></div>'
-    : pillarBand(projCode(fk, p), p.name, pendBadge("u_plan"));
+    /* §192: the pending count left this slot for the totals row above — it
+       was the SUBJECT's number on one pillar's band, printing under the fill
+       button. `pendBadge()` is deleted rather than left uncalled (§24). */
+    : pillarBand(projCode(fk, p), p.name);
   return band + paneActs("plan", "u_plan") +
     projFrontMatter(p, ed) +
     '<h4 class="mini">' + DX_HEADING +
@@ -4781,7 +4837,7 @@ function unitPlanBody(it, u, railed){
         (meta ? '<div class="pmeta">' + meta + '</div>' : '') + '</div>' +
         kindPill(it) +
         (mayEditPlan() ? penBtn("plan", "u_plan") : '') + '</div>'
-    : pillarBand(code, it.name, pendBadge("u_plan")) + paneActs("plan", "u_plan");
+    : pillarBand(code, it.name) + paneActs("plan", "u_plan");
   return head +
     /* ── THE PILLAR'S OWNER, CORRECTABLE AT LAST (§130.1) ────────────────
        Islam, asked whether the pillar's owner should join the other four:

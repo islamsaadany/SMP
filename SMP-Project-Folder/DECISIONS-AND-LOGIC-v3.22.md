@@ -23274,3 +23274,116 @@ an unidentified list.
 **416 assertions pass.** Proved able to fail by reverting each guard in turn:
 **19 red** without the `splitRows` guard, **3** without the pillar guard, **3**
 without the project guard.
+
+---
+
+## §192 — The pending count says where, and walks you there (v3.80)
+
+Islam, as the SMO, with a screenshot of the two labels printed on top of each
+other:
+
+> *"as an SMO I'm getting this badge but I don't know where they are — I think
+> we need a flow like the filling to take me through the confirmation areas so
+> I can confirm."*
+
+Two faults, and they are one decision apart.
+
+### It was on the wrong row, under a button
+
+`pendBadge()` drew the count in the pillar band's right slot. `.pband` reserves
+**76px** on its right — room for two 28px pen glyphs, which is what used to sit
+there. The fill grant's control beside it is a **worded** button: *Done filling*
+at 138px, *Fill in missing elements* at 184px, *Review pending · 5* at 127px.
+
+Measured on the real page before anything was written: **160px of overlap
+reading, 110px filling**. The check reproduces it on the previous build as
+`{'worst': 127, 'pair': ['5 awaiting confirmation', 'Review pending · 5']}` —
+Islam's screenshot, in numbers.
+
+**The answer is not a bigger reserve.** A width that has to be kept in step with
+somebody else's wording is a guessed constant, and §122.5 is the record of what
+those do.
+
+### And the number was never that pillar's
+
+`gapPendCount(TARGET)` counts the **whole subject**. Drawn on one pillar's band
+it was saying it belonged to that pillar — and the row above the pane is already
+where the subject's totals live (*"26 Missing · LG01 9 · LG02 7"*).
+
+Two placements were drawn and Islam picked **B**: the count joins the other
+totals. The collision goes with it, by construction rather than by arithmetic.
+
+### The walk
+
+§16.7: *a count that cannot take you to what it counts is a count that makes
+work* — the exact fault §177.2 fixed for the gaps, left standing on the other
+half of the same feature.
+
+**The same shape as the gap walk, deliberately**: one behaviour to learn, and
+the three traps §177.2 already paid for — the cursor marked on the walkable
+element, places crossed by the same-page test rather than by what happens to be
+visible, and landing queued behind the click (§30.1's guard holds the paint, so
+the ticks do not exist until the press has landed).
+
+**`pendMap()` is `gapMap()` counting marks.** Every place, how to reach it and
+in whose words is already answered there; a second map written alongside would
+be a second copy of the navigation and would drift the first time a page moved
+(§53.5). A mark is counted only for a field that kind still HAS — `pend` rides
+each row and nothing prunes it, so a mark left by a field that stopped being
+fillable (collaborators, §187) would be counted and then walked to a tick that
+is not drawn (§61).
+
+**The walk is offered only to somebody who can confirm**, and the gate asks the
+SUBJECT rather than naming a page: a unit is judged on `u_plan` and a capability
+function on `k_proj`, so the literal that worked on a unit would have hidden the
+walk on every function.
+
+### The bug worth reading: two functions, one name
+
+The bar's new chip was called `pendChip(n)`. **`pendChip(acKey, row, field)`
+already existed** — the mark that sits on one value, with the office's confirm
+tick inside it, called from six places. A function declaration hoists over its
+twin in a concatenated file, so the second spelling silently replaced the first
+and **every per-value chip and confirm tick in the product stopped being drawn**.
+
+§56.7 exactly: one scope, two plausible names, no error anywhere, and the fault
+surfaces somewhere else entirely — here, the new walk found no ticks to walk to
+and reported `NOTHING` five times. **Found by driving it**, not by reading it.
+
+### Proof
+
+`checks/pending-walk.py` is new and asserts what nothing else does: the count is
+off the band and on the totals row; **nothing in the band or the corner overlaps
+anything, measured in pixels in both modes** (a class assertion goes green on a
+build where the two sit on each other); the walk reaches every pending value
+across two rails and two sections and wraps; the tick it lands on confirms, and
+the count *and* the button's own label both follow. **Both ends** (§113.8): a
+filler is shown the count and offered no walk, having no tick to walk to.
+
+**The state is made** (§94.2) — the demo has no pending values at all.
+
+**Proved able to fail: 14 red** against the previous build, including the
+reported overlap. And that count is only honest because the check was taught to
+**report a missing thing rather than crash on it** — the first run died on
+`pendMap is not defined` and reported 2.
+
+### Found and NOT fixed: the GAP walk does not reach every place (§192.4)
+
+Running `checks/gap-walk.py` beside the new one turned up two failures — and
+they are **not this section's**. They reproduce byte for byte on `origin/main`'s
+own shipped build:
+
+    unit / filler: the walk reaches every place the band names (5)
+      — reached ['unit:mobile|01', 'unit:mobile|02'] of 5,
+        chips ['found', 'ko', 'p:01', 'p:02', 'p:03', 'p:04']
+
+Walking a unit's gaps end to end bounces between the first two pillars and never
+reaches Foundation, Objectives, or the third and fourth pillars. §177.2 wrote
+that traversal and its own check has been red on it since; **the new pending
+walk crosses into Foundation correctly**, which is what makes the difference
+visible.
+
+**Recorded rather than fixed.** It is a behaviour change to a shipped control
+and it is not what was asked for here (rule 1b), and quietly changing a walk
+somebody is using while fixing a different one is how two faults become
+indistinguishable. Islam's call.

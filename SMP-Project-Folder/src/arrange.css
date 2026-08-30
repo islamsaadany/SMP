@@ -1260,8 +1260,10 @@
     vertical-align:1px; }
   .gapok:hover { border-color:var(--good-tx); }
   .gapok:focus-visible { outline:2px solid var(--good); outline-offset:1px; }
-  /* The subject-wide count on the pane band (§93.4: one press from where
-     the gap is closed). */
+  /* The subject-wide count. §192 moved it OFF the pillar band and onto the
+     totals row, where the subject's other counts already are — on the band it
+     was the whole unit's number wearing one pillar's clothes, and it printed
+     under the fill grant's worded button (160px of overlap, measured). */
   .pendcount { display:inline-block; background:var(--attn-bg); color:var(--attn-tx);
     border:1px solid var(--attn); border-radius:20px; font-size:10.5px;
     font-weight:600; padding:1px 9px; letter-spacing:0; text-transform:none; }
@@ -1312,10 +1314,29 @@
     padding:4px 13px; cursor:pointer; font-family:inherit; white-space:nowrap; }
   .fillcta:hover, .missbar button.fillcta:hover { filter:brightness(1.08);
     background:var(--bad); color:var(--surface); }
-  /* Quiet amber: only pending remains — the office's move, still correctable. */
-  .pendcta { border:1px solid var(--attn); background:var(--attn-bg);
+  /* Quiet amber: only pending remains — the office's move, still correctable.
+     THE SECOND SELECTOR IS NOT A DUPLICATE (§145.14, written four rules up and
+     paid for again here): inside the bar this sits in `nav.tabs`, where
+     `.tabs button` (0,1,1) outranks a bare class (0,1,0) and would strip it to
+     plain words while the identical control outside the row wore the design.
+     One declaration, two selectors, so the two homes cannot drift. */
+  .pendcta, .missbar button.pendcta { border:1px solid var(--attn);
+    background:var(--attn-bg);
     color:var(--attn-tx); border-radius:8px; font-size:12px; font-weight:600;
     padding:4px 12px; cursor:pointer; font-family:inherit; white-space:nowrap; }
+  .pendcta:hover, .missbar button.pendcta:hover { background:var(--attn-bg);
+    color:var(--attn-tx); filter:brightness(1.06); }
+  /* §192: THE PENDING PAIR SITS AFTER THE RED CHIPS AND BEFORE THE RED
+     BUTTON — red means missing, amber means pending, and keeping them in two
+     groups is what stops the row reading as one long list of alarms (§145.14:
+     never mixed). The count and its walk are one group, so the walk can never
+     land under anything the way it did on the band. */
+  .missbar .pendtail { display:inline-flex; align-items:center; gap:6px;
+    flex-wrap:wrap; padding-left:4px; }
+  /* The walk's own cursor, on a tick rather than a field. `.gaplit` already
+     rings whatever the gap walk has landed on; a tick is a 22px square, so it
+     takes the ring and nothing else. */
+  .pendwalk.gaplit { outline:2px solid var(--attn); outline-offset:2px; }
   .gapdone { color:var(--good-tx); font-size:12px; font-weight:600; }
   /* The corner pair: the worded button takes the second slot beside §101's
      arrows (right:0 when it stands alone). */

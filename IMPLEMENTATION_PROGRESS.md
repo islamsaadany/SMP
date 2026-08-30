@@ -68,6 +68,26 @@ Nothing proceeds past this line without an answer.
 
 ## Built and verified
 
+### v3.80 — the pending count says where, and walks you there (§192)
+
+- **The badge pointed nowhere.** As the SMO you were told three values were
+  waiting for you and given no way to find them.
+- **And it printed under the button beside it** — 160 pixels of overlap
+  reading, 110 while filling, measured on the real page.
+- **The number was never that pillar's**: it counts the whole unit. It moves to
+  the totals row where the unit's other counts already are (Islam's pick of two
+  drawn options), and the collision goes with it.
+- **"Next pending" walks you through them**, the same way "Next gap" already
+  does — across pillars and across sections — landing on the tick that confirms
+  each one. Confirming updates the count and the button as you go.
+- **Only somebody who can confirm gets the walk.** A filler sees the count,
+  because those values are still theirs to correct.
+- **The bug worth knowing:** the new chip was given a name the product already
+  used for something else, which silently stopped every confirm tick in the
+  platform being drawn. Found by driving it, not by reading it.
+- Proof: `checks/pending-walk.py` is new — 14 red on the build before,
+  including the reported overlap.
+
 ### v3.79 — a line the platform cannot name is nobody's to change (§191)
 
 - **The hole.** The system works out what changed by matching plan lines

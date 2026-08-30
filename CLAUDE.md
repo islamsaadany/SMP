@@ -775,6 +775,33 @@ console errors (in this cloud environment, run it via a wrapper that points Play
   an empty array, so `onlyOwnLines()` answered false and a floor person given
   edit could rewrite their unit's WHOLE plan — wider than a Contributor, which is
   the opposite of a floor. `OWN_LINES_ONLY` carries the floor beside `contrib`.
+- **THE PENDING COUNT SAYS WHERE, AND WALKS YOU THERE (§192):** Islam, as
+  the SMO — *"I'm getting this badge but I don't know where they are — I think
+  we need a flow like the filling to take me through the confirmation areas so
+  I can confirm."* **IT WAS ON THE WRONG ROW, UNDER A BUTTON**: `.pband`
+  reserves 76px (two pen glyphs) and the fill grant's control beside it is a
+  WORDED button of 127–184px — **160px of overlap reading, 110 filling**,
+  measured; the check reproduces it on the previous build as *['5 awaiting
+  confirmation', 'Review pending · 5']*. A reserve kept in step with somebody
+  else's wording is a guessed constant (§122.5), so the answer is not a bigger
+  number. **AND THE NUMBER WAS NEVER THAT PILLAR'S** — `gapPendCount()` counts
+  the whole SUBJECT, and the totals row above the pane is where the subject's
+  counts already live; Islam picked that placement from two drawn options, and
+  the collision goes with it by construction. **THE WALK IS THE GAP WALK'S
+  OWN** (§16.7: a count that cannot take you to what it counts makes work;
+  §177.2's fault on the other half of the same feature), and **`pendMap()` is
+  `gapMap()` counting marks** — one navigation, or the two drift (§53.5); a
+  mark is counted only for a field that kind still HAS, or it walks to a tick
+  that is not drawn (§61, and §187's retired collaborators are exactly such a
+  mark). **The gate asks the SUBJECT, never one page key** (`u_plan` on a unit,
+  `k_proj` on a function). **AND THE BUG WAS TWO FUNCTIONS SHARING A NAME**:
+  the bar's new chip was `pendChip(n)` and `pendChip(acKey,row,field)` already
+  existed — the per-value mark carrying the office's confirm tick, called from
+  six places — so a declaration hoisted over its twin and **every confirm tick
+  in the product stopped being drawn**, silently (§56.7). *Found by driving it.*
+  `checks/pending-walk.py`: 14 red on the previous build, and that count is
+  only honest because the check reports a missing thing rather than crashing on
+  it (its first run died and reported 2).
 - **A LINE THE PLATFORM CANNOT NAME IS NOBODY'S TO CHANGE (§191):** the
   authoriser matches plan rows BY ID; `byId()` drops a row with none — rightly,
   two rows sharing `undefined` are not one row — and the loops that walk those
@@ -3155,6 +3182,11 @@ python3 checks/refusal-keeps-work.py # a refusal costs the row it named and noth
                                 # with no row address offering no put-back. The stub runs
                                 # the REAL authoriser, because a canned 403 would be a
                                 # fiction about the one thing under test
+python3 checks/pending-walk.py  # the pending count is on the totals row and NOT on the
+                                # band, nothing in the corner overlaps (in PIXELS, both
+                                # modes), the walk crosses two rails and two sections and
+                                # wraps, the tick it lands on confirms, and a filler gets
+                                # the count and no walk (§192)
 python3 checks/gap-walk.py      # the band's chips and Next gap actually go somewhere:
                                 # a unit AND a function, as the filler AND the office,
                                 # every place the band names reached (§177.2)

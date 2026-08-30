@@ -2461,6 +2461,93 @@
     }
     if (els.length) gapLight(els[0]);
   }
+  /* ── AND THE SAME WALK OVER THE PENDING VALUES (§192) ──────────────
+     Islam, as the SMO: *"I'm getting this badge but I don't know where they
+     are — I think we need a flow like the filling to take me through the
+     confirmation areas so I can confirm."* §16.7's rule: a count that cannot
+     take you to what it counts is a count that makes work.
+
+     THE SAME SHAPE AS THE GAP WALK, deliberately — one behaviour to learn,
+     and the same three traps already paid for there (§177.2): the cursor is
+     marked on the WALKABLE element, a place is crossed by the same page test
+     rather than by what happens to be visible, and landing queues behind the
+     click (§30.1's CLICKING guard holds the paint, so the ticks do not exist
+     until the press has landed).
+
+     THE PLACES COME FROM `pendMap()`, which is `gapMap()` counting marks — so
+     the order, the words and the navigation are one answer for both walks and
+     cannot drift (§53.5). The chips it walks are BUILT here rather than drawn
+     on the bar: the office asked for a way THROUGH them, not for a second row
+     of counts beside the missing ones (§41's budget). */
+  var PENDWALK_KEY = null;
+  function pendPlaces(){
+    if (typeof pendMap !== "function") return [];
+    return pendMap(TARGET).filter(function(e){ return e.count > 0; });
+  }
+  function pendPlaceKey(e){
+    return e && e.go && e.go.rail ? e.go.rail + "|" + e.go.code : null;
+  }
+  function pendWalkTicks(place){
+    var root = document;
+    if (place) root = document.querySelector('[data-gplace="' +
+      place.replace(/"/g, '\\"') + '"]') || document;
+    return [].slice.call(root.querySelectorAll(".pendwalk"));
+  }
+  function pendLight(el){
+    document.querySelectorAll(".gaplit").forEach(function(e){ e.classList.remove("gaplit"); });
+    document.querySelectorAll("[data-gapat]").forEach(function(e){
+      e.removeAttribute("data-gapat"); });
+    el.setAttribute("data-gapat", "1");
+    el.classList.add("gaplit");
+    el.scrollIntoView({ block: "center" });
+    el.focus({ preventScroll: true });
+  }
+  function pendShown(e){
+    return (!e.go.rail || RAIL_SHOWN[e.go.rail] === e.go.code) &&
+           (!e.go.sec || CURSEC[currentSub] === e.go.sec);
+  }
+  function pendAt(places){
+    for (var i = 0; i < places.length; i++)
+      if (places[i].key === PENDWALK_KEY) return i;
+    for (var j = 0; j < places.length; j++) if (pendShown(places[j])) return j;
+    return -1;
+  }
+  /* Navigating by the place's OWN description rather than by pressing a chip,
+     because there is no chip to press — the same three `data-` values the
+     missing chips carry, read straight off the map that produced them. */
+  function pendGoTo(e){
+    PENDWALK_KEY = e.key;
+    if (e.go.sec && typeof CURSEC !== "undefined") CURSEC[currentSub] = e.go.sec;
+    if (e.go.rail) RAIL[e.go.rail] = e.go.code;
+    paint();
+    if (typeof toPaneTop === "function") toPaneTop();
+    setTimeout(function(){
+      var t = pendWalkTicks(pendPlaceKey(e));
+      if (!t.length) t = pendWalkTicks();
+      if (t.length) pendLight(t[0]);
+    }, 0);
+  }
+  function pendWalk(){
+    var places = pendPlaces();
+    if (!places.length) return;
+    var i = pendAt(places);
+    var ticks = pendWalkTicks(i >= 0 ? pendPlaceKey(places[i]) : null);
+    var cur = document.querySelector("[data-gapat]");
+    var at = cur ? ticks.indexOf(cur) : -1;
+    if (ticks.length && at < ticks.length - 1) return pendLight(ticks[at + 1]);
+    var here = i >= 0 ? pendPlaceKey(places[i]) : null;
+    var hereSec = i >= 0 ? (places[i].go.sec || "") : "";
+    var n = places.length;
+    for (var step = 1; step <= n; step++) {
+      var e = places[((i < 0 ? 0 : i) + step) % n];
+      var ep = pendPlaceKey(e);
+      var samePage = ep === here &&
+        (ep !== null || (e.go.sec || "") === hereSec);
+      if (!samePage) return pendGoTo(e);
+    }
+    if (ticks.length) pendLight(ticks[0]);
+  }
+
     /* ── THE MONTH PICKER (§177) ────────────────────────────────────────
        A due date is chosen, never typed. The button carries the FIELDS index
        and the month and year it is currently showing; the panel is built by
@@ -6110,6 +6197,7 @@
         return;
       }
       if (ev.target.closest("[data-nextgap]")) gapWalk();
+      if (ev.target.closest("[data-nextpend]")) pendWalk();
     });
     /* §145.14: the same two controls OUTSIDE the bar — the corner button and
        the empty-page pointer — wired directly (they are repainted, never

@@ -21973,3 +21973,61 @@ through the FALLBACK, on the long names a real tenant carries.
 `firstNameOf(_, "Abd El Moniem Mahmoud")` reads **Abd El Moniem** where the old
 split read *Abd*. `qa.py`, `checks/office-chat.py` and
 `checks/people-dialog.py` all green.
+
+## §182 · The units' marks, put back where they are missing
+
+Islam: *"the business units had logos earlier that appeared in their
+presentations and they disappeared now."* And, when the first answer explained
+the mechanism rather than answering: *"I don't understand what are you saying, I
+need the logos to appears. is the logos there are not?"*
+
+**THE ANSWER IS YES, AND THE FIRST REPLY BURIED IT.** Every step was driven
+rather than read: the marks are in `db/seed-state.json` for all ten units,
+`present.js` still draws them on the cover and in every slide's footer, they
+survive `writeState`/`readState` byte for byte, and they survive migration
+004's clean slate — 10 of 10 kept. Opening a real presentation renders the
+cover mark. *A question asked in plain words is owed a plain answer first, and
+the mechanism afterwards* (A12).
+
+**WHAT WAS MISSING IS THE OTHER HALF: THE SEED ONLY EVER RUNS ONCE.**
+`ensureReady` writes it when `org` is empty and never again, so a tenant
+deployed BEFORE §52 shipped the marks (v3.21) has units carrying no `logo` at
+all, and nothing has ever filled them in. **The code was right the whole time
+and the data never arrived**, which is exactly why it reads as *disappeared*.
+
+**§113.7's LESSON FROM THE OTHER SIDE.** That section recorded a fault
+invisible to every existing-database test; this one is invisible to every
+FRESH-database test, because a fresh database gets the marks from the seed and
+finds nothing to do. Neither could have been found by testing only the case in
+front of you.
+
+### The fill
+
+Migration **032**, one `UPDATE` per unit, `WHERE extra->>'logo' IS NULL` —
+**only where there is nothing**. A `logo` is not a column: it rides `units.extra`
+because `state-io` files every key it does not recognise there (§52), which is
+also why it needed no migration to be stored in the first place.
+
+**THE ONE COST, STATED RATHER THAN DISCOVERED.** Setup › Business units has a
+Remove button, so a unit whose mark was deliberately taken away has it put
+back. It runs a single time per database (the `_sql_migrations` registry sees
+to that), so removing it again sticks.
+
+**THE MARKS ARE THE CLIENT'S OWN**, extracted from their brand manual with the
+colours read off the vector artwork (§52) — not invented content, which is why
+they belong in a tenant at all (§21). They are Raya's, so this migration is
+Raya's: when the platform serves more than one tenant (§36), a migration
+carrying one client's artwork is precisely the thing that must not run for
+another. Named here rather than discovered later.
+
+### Proof
+
+Against a real Postgres 16, on a tenant **built to predate the marks** (the
+seed written with every `logo` deleted): 0 of 10 before, 10 of 10 after,
+byte-identical to the shipped artwork, **a mark somebody had already set left
+untouched**, running it twice changes nothing, and the marks read back out
+through the platform's own `readState`.
+
+And the deck itself is shot rather than described —
+`design-mockups/unit-marks/` carries the covers for three units and the footer
+on a content slide, from the running product.

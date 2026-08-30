@@ -205,7 +205,18 @@
    Name read off origin/main at the start of this merge and again immediately
    before the push (§94.12, §94.16); "-testcopy" cannot be arrived at by
    coincidence. */
-const SHELL = "smp-shell-v3.65-ownsevery";
+/* v3.66-emaillink — §176: a link in an email has nothing to be relative to.
+   `SMPRules.webUrl()` completes a typed link where it is typed and refuses one
+   that cannot be an address, on the page AND in api/mail.js; the test email no
+   longer falls back to "#"; and both emails ask one question about where the
+   platform is. The built file's bytes changed, which is the whole trigger
+   (§91).
+
+   Name read off origin/main at the start of this merge and confirmed again
+   immediately before the push (§94.12, §94.16) — main, the branch and the LIVE
+   site were all serving "smp-shell-v3.65-ownsevery", so "-emaillink" is a name
+   nobody has served. `node --check sw.js` run after the merge (§146.2). */
+const SHELL = "smp-shell-v3.66-emaillink";
 const ASSETS = [
   "/",
   "/index.html",

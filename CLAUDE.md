@@ -775,6 +775,32 @@ console errors (in this cloud environment, run it via a wrapper that points Play
   an empty array, so `onlyOwnLines()` answered false and a floor person given
   edit could rewrite their unit's WHOLE plan — wider than a Contributor, which is
   the opposite of a floor. `OWN_LINES_ONLY` carries the floor beside `contrib`.
+- **EDITING KEEPS ITS HEAD, AND THE NAME GETS THE LINE (§194):** Islam —
+  *"when I edit a plan or a pillar it loses its design and the name box becomes
+  very small … and on editing we still need to maintain the pillar Code and name
+  fixed so on scrolling down I can still see that save button."* Measured on
+  Mobile's plan at 1500px with the pen open: the name box **228px in a 1225px
+  pane** (19% of the line), and at 480px of scroll the code, the name AND the
+  Done tick all off screen (top −211). **"Loses its design" is exact** —
+  reading has pinned `.pane > .pband` since §53.7 and editing, which REPLACES
+  that band with `.ptitle`, pinned nothing: the mode you WORK in was the one
+  that lost the page's identity. `edhead` is a marker, not a style; reading's
+  band is untouched (§53.5: two modes, two questions) and the editing head
+  takes **the same sticky offset**, so switching does not jump. Same window,
+  so the same two answers as the band: an **opaque ground** or rows slide
+  through it, and the `::before` filler for the strip above (§53.7).
+  **NOT a negative margin** — §121.2's fault is a NON-sticky row pulled under a
+  pinned one; this whole row pins, the pen included. **The name had no width to
+  grow into**: §189 made it a growing box and the code and box shared an `h3`
+  in a shrink-to-fit column — the column flexes now and it is **228 → 1101px**.
+  *A growing field in a container that does not grow is a fixed field.*
+  **AND THE NOTE BAR IS HIDDEN AT ISLAM'S CHOICE** (*"hide the note bar for
+  now"*), with the cost recorded: `sub` is still stored and renders NOWHERE, so
+  a value that arrived with an upload can no longer be corrected from any
+  screen — §61's trap, entered deliberately and reversibly. The builder is
+  deleted, not commented out (§24). `checks/plan-edit-head.py` asserts the box
+  as a **ratio of the pane** and never a pixel count (§94.8): **10 red** on the
+  build before.
 - **A REPLY SAYS IT WENT AS SOON AS IT HAS GONE (§193):** Islam — *"the
   messages are sent in the box but still there is sending.."*, with the reply
   plainly IN the thread above it, then correcting the diagnosis mid-fix: *"the

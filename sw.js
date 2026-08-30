@@ -216,7 +216,7 @@
    immediately before the push (§94.12, §94.16) — main, the branch and the LIVE
    site were all serving "smp-shell-v3.65-ownsevery", so "-emaillink" is a name
    nobody has served. `node --check sw.js` run after the merge (§146.2). */
-const SHELL = "smp-shell-v3.82-sent-when-sent";
+const SHELL = "smp-shell-v3.83-editing-keeps-its-head";
 const ASSETS = [
   "/",
   "/index.html",

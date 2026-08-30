@@ -88,6 +88,18 @@ Nothing proceeds past this line without an answer.
 - Proof: `checks/pending-walk.py` is new — 14 red on the build before,
   including the reported overlap.
 
+### v3.83 — editing a pillar keeps its head (§194)
+
+- **The name box now runs the whole line** — it was 228px in a pane 1225px
+  wide, which is why a long title stacked up in a narrow column.
+- **The code, the name and the Done tick stay put when you scroll.** Reading
+  has always kept a band pinned; editing had no equivalent, so the mode you
+  work in was the one that lost its place.
+- **The unlabelled box under Owner is hidden**, as you asked. Worth knowing:
+  that field is still stored but now shows nowhere, so a value that came in
+  with an upload can't be corrected from any screen. One line to give back.
+- Proof: `checks/plan-edit-head.py` is new — 10 red on the build before.
+
 ### v3.82 — "Sending…" stops lying, and home moves left (§193)
 
 - **The reply says "Sent." within about two seconds** instead of sitting on

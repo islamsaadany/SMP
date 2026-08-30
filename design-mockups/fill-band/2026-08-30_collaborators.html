@@ -1,0 +1,127 @@
+<title>The collaborators box</title>
+<style>
+  :root{
+    --ground:#F5F7FA; --surface:#FFFFFF; --surface-2:#EFF2F6; --panel:#12243F;
+    --ink:#1B2534; --ink-2:#4A5568; --ink-3:#6B7688; --line:#D6DCE5;
+    --bad:#B3341F; --bad-tx:#9C2C1A; --good-tx:#1E7A48; --r-sm:6px;
+    --sans:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;
+  }
+  @media (prefers-color-scheme: dark){ :root:not([data-theme="light"]){
+    --ground:#0E1622; --surface:#16202E; --surface-2:#1D2836; --panel:#0B1526;
+    --ink:#E8ECF2; --ink-2:#B4BECC; --ink-3:#8592A5; --line:#333A45;
+    --bad:#E06A52; --bad-tx:#F08A72; --good-tx:#5FCB92;
+  }}
+  :root[data-theme="dark"]{
+    --ground:#0E1622; --surface:#16202E; --surface-2:#1D2836; --panel:#0B1526;
+    --ink:#E8ECF2; --ink-2:#B4BECC; --ink-3:#8592A5; --line:#333A45;
+    --bad:#E06A52; --bad-tx:#F08A72; --good-tx:#5FCB92;
+  }
+  body{background:var(--ground); color:var(--ink); font:14px/1.5 var(--sans);
+    margin:0; padding:26px 20px 70px;}
+  .wrap{max-width:1040px; margin:0 auto;}
+  h1{font-size:19px; margin:0 0 4px; letter-spacing:-.2px;}
+  .lede{color:var(--ink-2); font-size:13px; margin:0 0 8px; max-width:76ch;}
+  .tag{font-size:10px; letter-spacing:.09em; text-transform:uppercase;
+    font-weight:700; color:var(--ink-3); margin:26px 0 8px;}
+  .tag.now{color:var(--bad-tx);} .tag.a{color:var(--good-tx);}
+  .card{background:var(--surface); border:1px solid var(--line);
+    border-radius:10px; padding:0; overflow:hidden;}
+  table{width:100%; border-collapse:collapse;}
+  th{background:var(--panel); color:#fff; font:700 10.5px/1 var(--sans);
+    letter-spacing:.06em; text-transform:uppercase; text-align:left; padding:10px;}
+  td{border-bottom:1px solid var(--line); padding:9px 10px; font-size:13px;
+    vertical-align:middle;}
+  .fld{border:1px solid var(--line); background:var(--surface); color:var(--ink);
+    border-radius:var(--r-sm); padding:5px 9px; font:inherit; font-size:12.5px;
+    width:100%; box-sizing:border-box;}
+  .fld.gap{border:1px dashed var(--bad);}
+  .fld.gap::placeholder{color:var(--bad); font-weight:600; opacity:.75;}
+  .pick{display:flex; align-items:center; justify-content:space-between; gap:8px;}
+  .pick .car{color:var(--ink-3); font-size:10px;}
+  .miss{color:var(--bad-tx); font-weight:600;}
+  .note{color:var(--ink-3); font-size:12.5px; margin:12px 0 0; max-width:80ch;}
+  .note b{color:var(--ink);}
+  .bar{display:flex; align-items:center; gap:9px; justify-content:flex-end;
+    padding:0 2px 10px; flex-wrap:wrap;}
+  .n{color:var(--bad-tx); font-weight:800; font-size:14px;}
+  .chip{border:1px solid var(--bad); color:var(--bad-tx); border-radius:18px;
+    padding:2px 10px; font-size:11.5px; font-weight:600; background:transparent;}
+  .cta{background:var(--bad); border:1px solid var(--bad); color:#fff;
+    border-radius:8px; padding:5px 13px; font:700 12px var(--sans);}
+</style>
+<div class="wrap">
+<h1>The collaborators box</h1>
+<p class="lede">You asked to stop counting missing collaborators as missing
+items. The count and the walk now ignore them. The box still <em>looks</em>
+missing — this is that last piece.</p>
+
+<div class="tag now">Now — the box says missing, the count says nothing is</div>
+<div class="bar"><span class="n">1 Missing</span><span class="chip">MB01 1</span>
+  <span class="cta">Next gap → 1 left</span></div>
+<div class="card">
+  <table>
+    <thead><tr><th>#</th><th>Tactic</th><th>Owner</th><th>Collabs.</th></tr></thead>
+    <tbody>
+      <tr><td>1</td><td>Clean and standardize customer data</td>
+        <td><div class="fld pick"><span>Ramy Behairy</span><span class="car">▾</span></div></td>
+        <td><div class="fld gap pick"><span class="miss">Missing</span><span class="car">▾</span></div></td></tr>
+      <tr><td>2</td><td>End-to-end order-to-cash</td>
+        <td><div class="fld pick"><span>Amaka Eze</span><span class="car">▾</span></div></td>
+        <td><div class="fld gap pick"><span class="miss">Missing</span><span class="car">▾</span></div></td></tr>
+      <tr><td>3</td><td>Digitize sales reporting</td>
+        <td><div class="fld pick"><span>Amr Bakr</span><span class="car">▾</span></div></td>
+        <td><div class="fld gap pick"><span class="miss">Missing</span><span class="car">▾</span></div></td></tr>
+    </tbody>
+  </table>
+</div>
+<p class="note">Three red boxes on this screen and the bar above says
+<b>1 Missing</b>. The person filling it in has to work out which of the four
+reds the count means — and the answer is none of the three you can see.</p>
+
+<div class="tag a">Option A — an ordinary empty box (recommended)</div>
+<div class="bar"><span class="n">1 Missing</span><span class="chip">MB01 1</span>
+  <span class="cta">Next gap → 1 left</span></div>
+<div class="card">
+  <table>
+    <thead><tr><th>#</th><th>Tactic</th><th>Owner</th><th>Collabs.</th></tr></thead>
+    <tbody>
+      <tr><td>1</td><td>Clean and standardize customer data</td>
+        <td><div class="fld pick"><span>Ramy Behairy</span><span class="car">▾</span></div></td>
+        <td><div class="fld pick"><span style="color:var(--ink-3)">Add someone…</span><span class="car">▾</span></div></td></tr>
+      <tr><td>2</td><td>End-to-end order-to-cash</td>
+        <td><div class="fld pick"><span>Amaka Eze</span><span class="car">▾</span></div></td>
+        <td><div class="fld pick"><span style="color:var(--ink-3)">Add someone…</span><span class="car">▾</span></div></td></tr>
+      <tr><td>3</td><td>Digitize sales reporting</td>
+        <td><div class="fld pick"><span>Amr Bakr</span><span class="car">▾</span></div></td>
+        <td><div class="fld pick"><span style="color:var(--ink-3)">Add someone…</span><span class="car">▾</span></div></td></tr>
+    </tbody>
+  </table>
+</div>
+<p class="note">Red is kept for what is actually owed, so the one red box on the
+page is the one the count is about. The box is <b>still fillable</b> — a
+collaborator is still something you may add, it is simply not something the plan
+is waiting for. <b>Cost:</b> nothing signals the box exists until you look at
+it; the grey <i>Add someone…</i> is what says so.</p>
+
+<div class="tag">Option B — leave it out of fill mode entirely</div>
+<div class="card">
+  <table>
+    <thead><tr><th>#</th><th>Tactic</th><th>Owner</th><th>Collabs.</th></tr></thead>
+    <tbody>
+      <tr><td>1</td><td>Clean and standardize customer data</td>
+        <td><div class="fld pick"><span>Ramy Behairy</span><span class="car">▾</span></div></td>
+        <td style="color:var(--ink-3)">—</td></tr>
+      <tr><td>2</td><td>End-to-end order-to-cash</td>
+        <td><div class="fld pick"><span>Amaka Eze</span><span class="car">▾</span></div></td>
+        <td style="color:var(--ink-3)">—</td></tr>
+    </tbody>
+  </table>
+</div>
+<p class="note">Fill mode shows only what is owed, so the column reads but does
+not open. <b>Cost, and it is the bigger one:</b> whoever is filling gaps can no
+longer add a collaborator at all — they would have to be given the full pen, or
+ask the office. That takes something away that works today.</p>
+
+<p class="note" style="margin-top:26px"><b>My recommendation: A.</b> It removes
+the false alarm and takes nothing away. B is tidier and costs a real ability.</p>
+</div>

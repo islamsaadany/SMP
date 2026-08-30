@@ -4837,9 +4837,29 @@ function unitPlanBody(it, u, railed){
           : qs(t) + pendChip("u_plan", t, "quarters")) + '</td></tr>';
   }).join("");
   var meta = pillarMeta(it, ed);
+  /* ── EDITING KEEPS ITS HEAD, AND THE NAME GETS THE LINE (§194) ──────
+     Islam: *"when I edit a plan or a pillar it loses its design and the name
+     box becomes very small — it can be along the line … and on editing we
+     still need to maintain the pillar Code and name fixed so on scrolling
+     down I can still see that save button."*
+
+     Both halves measured on Mobile's plan at 1500px with the pen open: the
+     name box was **228px** inside a pane over a thousand wide, because the
+     code and the box share an `h3` inside a shrink-to-fit column; and at 480px
+     of scroll the code, the name AND the Done tick were all off screen
+     (top −211). Reading keeps `.pane > .pband` pinned the whole time —
+     EDITING HAD NO EQUIVALENT, which is exactly what "loses its design" is.
+
+     `edhead` is the marker, not a style: what pins is the head somebody is
+     WORKING in, and reading's own band is untouched (§53.5 — one question,
+     one answer, and the two are different questions). The column takes
+     `flex:1` so the growing box (§189) fills the line instead of taking a
+     slice of it. */
   var head = showHead
-    ? '<div class="ptitle hoverpen"><div><h3>' + code + '&nbsp; ' +
-        (ed ? textOr("plan", it.name, "", function(v){ it.name = v; }) : esc(it.name)) + '</h3>' +
+    ? '<div class="ptitle hoverpen' + (ed ? ' edhead' : '') + '"><div class="pthead"><h3>' +
+        '<span class="ptcode">' + code + '</span>' +
+        (ed ? textOr("plan", it.name, "ptname", function(v){ it.name = v; })
+            : '&nbsp; ' + esc(it.name)) + '</h3>' +
         (meta ? '<div class="pmeta">' + meta + '</div>' : '') + '</div>' +
         kindPill(it) +
         (mayEditPlan() ? penBtn("plan", "u_plan") : '') + '</div>'
@@ -4879,10 +4899,25 @@ function unitPlanBody(it, u, railed){
        IT IS STILL EDITABLE while the plan is being corrected, because the
        field is real data that arrived with the upload and a page that cannot
        show it also cannot fix it. Read-only, it is gone. */
-    (ed
-      ? '<p class="sub" style="margin:10px 0 0">' +
-        textOr("plan", it.sub || "", "", function(v){ it.sub = v; }) + '</p>'
-      : '') +
+    /* ── AND THE NOTE BAR IS NOT DRAWN (§194, Islam: "hide the note bar
+       for now") ────────────────────────────────────────────────────────
+       This was the box under Owner with no label at all — his *"the line
+       under the owner has no title and I don't understand what this is."*
+       It is the pillar's `sub`, hidden when reading since August (only Mobile
+       ever filled it in, so a line that appeared for one pillar and not the
+       others made the page jump) and left editable here on the reasoning that
+       a page which cannot SHOW a field also cannot FIX it.
+
+       Offered a label, he chose to hide it instead. **THE COST IS REAL AND
+       IS THE REASON THAT REASONING EXISTED**: `sub` is still stored and now
+       renders nowhere at all, so a value that arrived with an upload can no
+       longer be corrected or cleared from any screen (§61's trap, entered
+       deliberately and reversibly — "for now"). Nothing reads it, so nothing
+       displays wrongly; it is simply out of reach.
+
+       THE BUILDER IS DELETED, NOT COMMENTED OUT (§24) — dead code kept "for
+       reference" is code the next reader has to prove is dead. Giving it back
+       is one `textOr` call, and this note says where. */
     /* The "Plan only" notice went in 3.4. The tab you are on says Plan, the
        table headings say "as planned", and every actual column reads em-dash -
        three statements of the same thing above a fourth. */

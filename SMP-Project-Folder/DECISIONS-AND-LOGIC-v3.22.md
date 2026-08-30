@@ -23517,3 +23517,103 @@ Measured on the built page: for the office the row now reads
 `HOME · | · Group ▾ · | · Units|Functions · [destinations] · | · GEAR`; for a
 unit head, who has **no gear at all**, `HOME · | · Group ▾ · [destinations]` —
 which is the case that makes the move worth making.
+
+---
+
+## §194 — Editing keeps its head, and the name gets the line (v3.83)
+
+Islam: *"when I edit a plan or a pillar it loses its design and the name box
+becomes very small — it can be along the line … and on editing we still need to
+maintain the pillar Code and name fixed so on scrolling down I can still see
+that save button."* And, offered a label for the third box: *"hide the note bar
+for now."*
+
+### All three measured before anything was written
+
+On Mobile's plan at 1500px with the pen open:
+
+* the name box was **228px** inside a pane **1225px** wide — 19% of the line;
+* at **480px of scroll the code, the name AND the Done tick were all off
+  screen** (top −211);
+* the box under Owner had **no label at all**.
+
+**"Loses its design" is exact.** Reading has kept `.pane > .pband` pinned since
+§53.7 — a grey band carrying the code and the name, with its own ground and its
+own filler for the strip above it. Editing replaces that band with `.ptitle`,
+which pins nothing. So the mode you are WORKING in is the one that loses the
+page's identity, and the Done tick with it.
+
+### The head that is being worked in is the head that pins
+
+`edhead` is a marker, not a style. Reading's band is untouched — the two modes
+are different questions and §53.5 asks each once — and the editing head takes
+**the same sticky offset**, so switching between them holds the page at the
+same line instead of jumping.
+
+Two things come along because it is the same window (§53.7): an **opaque
+ground**, or rows slide through the head; and the `::before` filler for the
+strip between the chrome and the head, which is the gap that showed a navy
+table header cutting across the page above its own heading.
+
+**Not a negative margin** (§130/§121.2). That fault is a NON-sticky row pulled
+under a pinned one, which slides out on scroll. This whole row pins, the pen
+included, so the Done tick travels with the name it belongs to.
+
+### The name had no width to grow into
+
+§189 made the title a growing box; it was still **228px**, because the code and
+the box shared an `h3` inside a shrink-to-fit column. The column flexes now and
+the box takes what is left: **228 → 1101px**, 90% of the pane. A long title
+wraps across the pane instead of stacking in a gutter.
+
+*A growing field in a container that does not grow is a fixed field.*
+
+### The note bar is hidden, and the cost is the reason it was ever shown
+
+The unlabelled box is the pillar's `sub` — hidden when reading since August
+(only Mobile ever filled it in, so a line that appeared for one pillar and not
+the others made the page jump) and left editable on the reasoning that **a page
+which cannot SHOW a field also cannot FIX it**.
+
+Islam was offered a label and chose to hide it. So `sub` is still stored and now
+renders **nowhere at all**: a value that arrived with an upload can no longer be
+corrected or cleared from any screen. That is §61's trap, entered deliberately
+and reversibly (*"for now"*), and it is written down here rather than discovered
+later. Nothing reads the field, so nothing displays wrongly — it is simply out
+of reach. The builder is **deleted rather than commented out** (§24); giving it
+back is one `textOr` call.
+
+### Proof
+
+`checks/plan-edit-head.py` is new. It asserts the name box as a **ratio of the
+pane** and never a pixel count (§94.8), so a later change to the gutters stays
+green and a box pinned back to a slice does not; the code, the name and the Done
+tick **on screen** after scrolling, which is the complaint measured as the
+complaint; the editing head pinning at **the same offset reading uses**; and
+both ends (§113.8) — the head is pinned only while the pen is open, and closing
+it puts reading's own band back.
+
+**Proved able to fail: 10 red** against the build before it.
+
+### Found and NOT fixed: `project-tables.py` dies on a class the product stopped drawing
+
+Running it beside §194 turned up a crash, and it is **not §194's** — it
+reproduces byte for byte on `origin/main`'s own shipped build:
+
+    Page.eval_on_selector: Failed to find element matching selector ".rep-bar"
+
+`.rep-bar` still has rules in `arrange.css` and **nothing in the product renders
+it** — §24's exact fault, CSS outliving the element it dressed — and the check
+reaches for it to read the reporting bar's words after a submission.
+
+**The damage is contained and worth stating precisely:** the crash is at the
+very END of the file, after every other assertion has passed (0 failures up to
+that line), so what is lost is the last two assertions about what the bar SAYS
+once a report is submitted. Everything else that file covers is still covering.
+
+Recorded rather than fixed: naming the class that replaced it is a decision
+about what that assertion should now be, in §105's area, and not what this
+section was asked to touch (rule 1b). It is the third stale selector this
+session — after `duplicates.py`'s `.pdband` and the walker's own — and §51.11
+says the same thing each time: **when a control changes shape, grep the checks
+for the old selector.**

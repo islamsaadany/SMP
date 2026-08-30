@@ -4396,13 +4396,65 @@
           return;
         }
         ROLESTOP = null;
+        /* ── A SEAT IS ASKED ABOUT, NEVER SLIPPED THROUGH (§186) ───────
+           Islam, from the deployment: "hussein khaled is a custodian and
+           getting the super user … investigate how this happened as you
+           assured me that it's impossible." It was not impossible: §92 grants
+           a one-destination role ON THE PICK, a seat has exactly one
+           destination, and so the most powerful grant in the product was a
+           single `change` event with nothing in between.
+
+           §92's argument still holds for every OTHER role — a door behind a
+           door is a broken control — and it was an argument about a role
+           whose second question has one answer, never about how much the role
+           is worth. What a seat needs is not a second question; it is the
+           first one, asked out loud.
+
+           The dialog NAMES what it hands over rather than saying "are you
+           sure": the whole failure mode is somebody landing on the wrong line
+           of a dropdown, and a confirmation that does not say which line they
+           landed on catches none of them. */
+        /* ── A SEAT IS ASKED ABOUT, NEVER SLIPPED THROUGH (§186) ───────
+           The ask is STATE, drawn by the dialog's own body, and never a modal
+           of its own: the register's repaint rebuilds that dialog on every
+           change (§116.6), so a second modal opened from here is overwritten
+           before anybody can read it. Measured, not reasoned — the first
+           build did exactly that and the person form painted straight back
+           over the question. */
+        if (SMPRules.isSeatRole(role)) {
+          SEATASK = { key: key, role: role, at: at };
+          paint();
+          return;
+        }
+        SEATASK = null;
         grantPersonRole(key, role, at);
         ADDROLE = null; ADDROLE_KIND = "";
         paint();
     }
+
     R.querySelectorAll("[data-prole-pick]").forEach(function(sel){
       sel.addEventListener("change", function(){
         tryGrantRole(sel.dataset.prolePick, sel.value);
+      });
+    });
+    /* §186's two answers. Cancel puts the picker back to "Choose a role…"
+       rather than leaving the seat showing: a select still displaying the
+       value it was just refused fires no `change` if it is picked again
+       (§110), so the control would read as dead for exactly the person who
+       changed their mind. */
+    R.querySelectorAll("[data-seatno]").forEach(function(b){
+      b.addEventListener("click", function(){
+        SEATASK = null; ADDROLE_KIND = ""; paint();
+      });
+    });
+    R.querySelectorAll("[data-seatyes]").forEach(function(b){
+      b.addEventListener("click", function(){
+        var a = SEATASK;
+        SEATASK = null;
+        if (!a) { paint(); return; }
+        grantPersonRole(a.key, a.role, a.at);
+        ADDROLE = null; ADDROLE_KIND = "";
+        paint();
       });
     });
     R.querySelectorAll("[data-prole-off]").forEach(function(b){

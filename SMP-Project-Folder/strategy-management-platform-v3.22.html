@@ -4181,6 +4181,19 @@
      faint for exactly the reason the dotted CHARACTER was. Same weight of
      ring, filled or not, is a difference that survives the size. */
   .saidmark.done { border-color:var(--ink-3); background:none; }
+  /* ── THE SEAT ASK (§186) ────────────────────────────────────────────
+     Plain prose in the platform's own modal, not a warning panel. What makes
+     this catch a mis-click is that it NAMES the role and the person; dressing
+     it in red would say "something is wrong", which is not true — handing
+     somebody a seat is an ordinary thing the Super user does on purpose. */
+  .seatask { display:block; margin-top:8px; padding:10px 12px;
+             background:var(--surface-2); border:1px solid var(--line);
+             border-radius:var(--r-sm); }
+  .seatask b { display:block; margin-bottom:6px; }
+  .seatask p { margin:0 0 8px; max-width:56ch; font-size:var(--fs-small); }
+  .seatask .why { color:var(--ink-3); }
+  .seatask .pdrt { display:flex; gap:14px; justify-content:flex-end;
+                   align-items:center; }
   /* Why a dismissal did not land (§171's rule, on a write that rides no
      autosave and so has no banner of its own). --bad-tx because it is WORDS,
      not a fill (§38.5). */
@@ -8221,6 +8234,50 @@ THEME.apply();
      running the office. */
   function mayEditAccess(w, person) { return isSMO(w, person); }
 
+  /* ── A SEAT IS NOT AN ORDINARY ROLE (§186) ────────────────────────
+     Islam, from the deployment: *"hussein khaled is a custodian and getting
+     the super user … you assured me it's impossible."* It was not
+     impossible, and the route is one unconfirmed selection: the register's
+     role picker offers every role a `<select>` can hold and commits on the
+     `change` event, so ONE pick on the most powerful grant in the product
+     writes `p.role = "super"` with nothing in between.
+
+     The SERVER has always been right about this — a change to somebody's
+     seat classifies as `access`, which `mayEditAccess()` keeps to the Super
+     user — so what was wrong is entirely the SCREEN, offering a control the
+     save refuses for everybody but the one person it does not refuse, for
+     whom it goes through instantly and silently. §42's drift, in the most
+     dangerous place it could be.
+
+     NAMED HERE, not in the browser, because three surfaces have to agree
+     about which roles these are: the picker, the people workbook's Role
+     column, and the register's own watch for a seat nobody meant to grant.
+     `cceo` is on the list although it is held at a company rather than the
+     group — what makes a seat a seat is that it is a property of the PERSON
+     (§33) rather than something a unit points at, and handing one out is a
+     decision about the organisation rather than about a plan. */
+  var SEAT_ROLES = ["super", "smoteam", "gceo", "cceo"];
+  function isSeatRole(k) { return SEAT_ROLES.indexOf(k) > -1; }
+
+  /* A SEAT SITTING SOMEWHERE ELSE (§186). A seat is held over the group (or,
+     for a company CEO, over their company) and the people who hold one sit
+     there too — so a seat whose place is NOT where the person sits is the
+     shape of an accident, and it is exactly what the chrome's own role line
+     already prints with a place beside it (§178).
+
+     THE OFFICE IS NOT FLAGGED, and that is why the test is the PLACE rather
+     than "holds a seat and something else": the bootstrap SMO holds
+     super@group AND heads the SMO function (§118), so a rule about holding
+     two roles would nag about the one row that is certainly correct. */
+  function seatOutOfPlace(w, p, at) {
+    var wrong = null;
+    personRoles(w, p).forEach(function (r) {
+      if (wrong || !isSeatRole(r.role)) return;
+      if (r.at !== at) wrong = r;
+    });
+    return wrong;
+  }
+
   /* 2 · WHO MAY DESTROY SOMETHING. Retiring is reversible and keeps every
      attribution true (§69); deleting, clearing a plan and clearing the tenant
      are not, and a mistake there is not recoverable from inside the product.
@@ -9458,6 +9515,8 @@ THEME.apply();
     OWNS_EVERY_PLACE: OWNS_EVERY_PLACE, ownsEveryPlace: ownsEveryPlace,
     grantIn: grantIn, grantAtPage: grantAtPage, isSMO: isSMO, NO_ROLE: NO_ROLE,
     mayEditAccess: mayEditAccess, mayDestroy: mayDestroy,
+    SEAT_ROLES: SEAT_ROLES, isSeatRole: isSeatRole,
+    seatOutOfPlace: seatOutOfPlace,
     isOffice: isOffice, isOfficeRole: isOfficeRole, isSuperRole: isSuperRole,
     mayIssuePasswordTo: mayIssuePasswordTo,
     STRATEGY_PAGES: STRATEGY_PAGES, isStrategyPage: isStrategyPage,
@@ -10981,6 +11040,11 @@ var SAIDFAIL = null;
    person working through it and "3 of 7" would count down twice as fast.
    Screen state, never the tenant's (§25.2). */
 var PDLG = null;
+/* The seat the picker is asking about (§186). STATE, rendered by the person
+   dialog's own body — never its own `openModalHtml()`, which the register's
+   repaint overwrites the instant anything changes (§116.6: paint() repaints
+   the dialog too). ROLESTOP's shape, for ROLESTOP's reason. */
+var SEATASK = null;
 /* The People render publishes the dialog's builders here (§116) — see the note
    beside the assignment for why they cannot simply be module-level functions. */
 var PEOPLEDLG = null;
@@ -13275,7 +13339,22 @@ function roleKeyByName(name){
    reads off somebody attached to a unit and holding nothing else (§49.5). A
    file naming it would be asking for a role that arrives by itself, so the
    template does not offer it and the reader says so plainly. */
-function roleIsGrantable(key){ return !!key && !SMPRules.isOwnLinesRole(key); }
+/* ── AND A SEAT IS NOT OFFERED BY SOMEBODY WHO MAY NOT GIVE ONE (§186) ──
+   Islam, from the deployment: "hussein khaled is a custodian and getting the
+   super user." The picker offered every role to anybody who could reach it,
+   and commits on the `change` event — so the most powerful grant in the
+   product was ONE selection with nothing in between, and the only thing that
+   ever stopped it was the server refusing the save afterwards.
+
+   THE SAME QUESTION THE SERVER ASKS (§42): `mayEditAccess()`, because
+   granting a seat IS changing who may do what, which is why the authoriser
+   has always classified it as `access`. Asked of the person doing the
+   granting, never of the person receiving it. */
+function roleIsGrantable(key, by){
+  if (!key || SMPRules.isOwnLinesRole(key)) return false;
+  if (!SMPRules.isSeatRole(key)) return true;
+  return SMPRules.mayEditAccess(world(), by || viewer());
+}
 /* ══ WHO NEEDS ATTENTION, IN ONE ORDERED QUEUE (§116) ═════════════════
    Islam: "I want it to become a button at top showing pending requests …
    that opens the profiles that needs attention in the pop up modal that
@@ -13326,6 +13405,27 @@ function attentionOf(p, all){
      from here: the crash needed a declaration AND a register placement that
      disagree, so it lived only over HTTP (§94.11) and only for somebody
      already placed — the one case the queue's own check had not made. */
+  /* ── A SEAT SITTING SOMEWHERE ELSE (§186) ─────────────────────────
+     Islam, having found a custodian wearing Super user: "this might be
+     repeated somewhere else and people are getting super user." So the
+     register watches, rather than the answer being a list I read out once.
+
+     THE TEST IS THE PLACE, not "holds a seat and something else": the
+     bootstrap SMO holds super@group AND heads the SMO function (§118), so
+     the two-roles reading would nag about the one row that is certainly
+     right. A seat is held where the person sits; one held somewhere else is
+     the shape of an accident, and it is exactly what the chrome's own role
+     line already prints with a place beside it (§178).
+
+     IT SORTS ABOVE EVERYTHING BUT A COLLISION. Somebody holding rights
+     nobody meant to give them is not a gap to fill in when convenient. */
+  var seat = SMPRules.seatOutOfPlace(world(), p, personAt(p));
+  if (seat)
+    why.push({ kind:"seat", say:"They hold " + roleName(seat.role) + " over " +
+      roleWhereLabel(seat.at) + ", and they sit in " +
+      (personAt(p) ? roleWhereLabel(personAt(p)) : "no part of the business") +
+      ". A seat is the Super user\u2019s to give \u2014 take it off with the \u00d7 " +
+      "on the chip if nobody meant to." });
   if (saidOutstanding(p))
     why.push({ kind:"said", say:"They said they work in " + roleWhereLabel(said) +
       (personAt(p) ? " \u2014 the register says " + roleWhereLabel(personAt(p)) : "") + "." });
@@ -13388,7 +13488,11 @@ function dupeSentence(dupes){
            (others.length ? " (" + others.join(", ") + ")" : "") + ".";
   }).join(" ");
 }
-var ATTN_ORDER = ["dupe", "said", "noident", "noemail", "nopw", "samename"];
+/* §186: `seat` sits directly under `dupe`. A collision is first because it
+   makes every other count wrong; rights nobody meant to give are second
+   because they are the only entry here that is not a gap to fill in when
+   convenient. A row can carry both, and `why[0]` is what it sorts on. */
+var ATTN_ORDER = ["dupe", "seat", "said", "noident", "noemail", "nopw", "samename"];
 function attentionQueue(){
   var out = [];
   var all = registerDupes();          /* once for the whole queue, not per row */
@@ -13685,6 +13789,16 @@ function planPeopleFile(rows){
       if (!roleKey) {
         plan.problems.push({ at:at, msg:'"' + role + '" is not one of the roles. Choose from the ' +
           'dropdown in the Role column.' });
+        return;
+      }
+      /* A SEAT NAMED IN A FILE IS THE SAME GRANT BY ANOTHER ROAD (§186), so
+         it is refused for the same reason and the sentence says which of the
+         two refusals this is — a role that cannot be granted at all, and a
+         role this person cannot be the one to grant, send somebody to two
+         different places. */
+      if (SMPRules.isSeatRole(roleKey) && !roleIsGrantable(roleKey)) {
+        plan.problems.push({ at:at, msg:'"' + role + '" is a seat, and seats are ' +
+          'the Super user\u2019s to give. Ask them to set this one on the register.' });
         return;
       }
       if (!roleIsGrantable(roleKey)) {
@@ -20975,7 +21089,12 @@ function peopleWorkbook(){
   var names = mainbuNames();
   /* Neither floor role is offered, for the same reason the reader refuses
      them: both are derived, not granted. */
-  var roleNames = ROLES.filter(function(r){ return !SMPRules.isOwnLinesRole(r.key); })
+  /* §186: AND NO SEAT IN A FILE SOMEBODY CANNOT GIVE ONE WITH. The Role
+     column is the second road to `p.role = "super"` — the reader grants what
+     it names — so the template offered by somebody who may not hand out a
+     seat does not list one. `roleIsGrantable()` is the same question the
+     picker asks, so the file and the screen cannot disagree (§53.5). */
+  var roleNames = ROLES.filter(function(r){ return roleIsGrantable(r.key); })
                        .map(function(r){ return r.name; });
   /* COLUMNS MOVED WHEN Unit WAS INSERTED (§65): Role G→H, Status H→I. A
      validation range is a POSITION and nothing warns when it stops matching
@@ -28647,7 +28766,7 @@ function renderPeople(){
             ROLES.filter(function(r){ return roleIsGrantable(r.key); }).map(function(r){
               return '<option value="' + r.key + '"' + (r.key === ADDROLE_KIND ? " selected" : "") +
                 '>' + esc(r.name) + '</option>';
-            }).join("") + '</select>' + roleStop(p)
+            }).join("") + '</select>' + roleStop(p) + seatAsk(p)
         : '<button class="linkbu" data-prole-open="' + p.key + '">+ role</button>');
   }
 
@@ -28668,6 +28787,42 @@ function renderPeople(){
   function roleStop(p){
     if (!ROLESTOP || ROLESTOP.key !== p.key) return "";
     return '<span class="rolestop">' + esc(ROLESTOP.why) + '</span>';
+  }
+
+  /* ── ASKING BEFORE A SEAT IS HANDED OVER (§186) ────────────────────
+     Islam, from the deployment: *"hussein khaled is a custodian and getting
+     the super user … you assured me that it's impossible."* It was not: §92
+     grants a one-destination role ON THE PICK, and a seat has exactly one
+     destination, so the most powerful grant in the product was a single
+     `change` event with nothing in between.
+
+     §92's argument survives for every other role — a door behind a door is a
+     broken control — and it was about a role whose second question has one
+     answer, never about how much the role is worth. What a seat needs is not
+     a second question; it is the first one, asked out loud.
+
+     IT NAMES THE ROLE AND WHAT IT HANDS OVER. The failure mode is landing on
+     the wrong line of a dropdown, and a confirmation that does not say which
+     line catches none of them. */
+  var SEAT_GIVES = {
+    super:   "Everything, including who may do what, and this register.",
+    smoteam: "Everything the Strategy Office does \u2014 every plan, every cycle, " +
+             "and every page of Setup.",
+    gceo:    "Every unit and every function in the group, and the group\u2019s own pages.",
+    cceo:    "Their whole company, and whatever its settings let them see beyond it."
+  };
+  function seatAsk(p){
+    if (!SEATASK || SEATASK.key !== p.key) return "";
+    var r = SEATASK.role;
+    return '<div class="seatask"><b>Give ' + esc(p.name) + " " +
+      esc(roleName(r)) + '?</b>' +
+      '<p>' + (SEAT_GIVES[r] || "") + '</p>' +
+      '<p class="why">A seat stays with the person wherever they move \u2014 it is ' +
+      'not a job on one plan. They keep the roles they already hold.</p>' +
+      '<span class="pdrt">' +
+        '<button class="linkbu" data-seatno="1">Cancel</button>' +
+        '<button class="linkbu tk-save" data-seatyes="1">Give ' +
+          esc(roleName(r)) + '</button></span></div>';
   }
 
   /* ── THE DECLARATION, AS A MARK (§116.4) ──────────────────────────
@@ -44658,13 +44813,65 @@ var SYNC = (function () {
           return;
         }
         ROLESTOP = null;
+        /* ── A SEAT IS ASKED ABOUT, NEVER SLIPPED THROUGH (§186) ───────
+           Islam, from the deployment: "hussein khaled is a custodian and
+           getting the super user … investigate how this happened as you
+           assured me that it's impossible." It was not impossible: §92 grants
+           a one-destination role ON THE PICK, a seat has exactly one
+           destination, and so the most powerful grant in the product was a
+           single `change` event with nothing in between.
+
+           §92's argument still holds for every OTHER role — a door behind a
+           door is a broken control — and it was an argument about a role
+           whose second question has one answer, never about how much the role
+           is worth. What a seat needs is not a second question; it is the
+           first one, asked out loud.
+
+           The dialog NAMES what it hands over rather than saying "are you
+           sure": the whole failure mode is somebody landing on the wrong line
+           of a dropdown, and a confirmation that does not say which line they
+           landed on catches none of them. */
+        /* ── A SEAT IS ASKED ABOUT, NEVER SLIPPED THROUGH (§186) ───────
+           The ask is STATE, drawn by the dialog's own body, and never a modal
+           of its own: the register's repaint rebuilds that dialog on every
+           change (§116.6), so a second modal opened from here is overwritten
+           before anybody can read it. Measured, not reasoned — the first
+           build did exactly that and the person form painted straight back
+           over the question. */
+        if (SMPRules.isSeatRole(role)) {
+          SEATASK = { key: key, role: role, at: at };
+          paint();
+          return;
+        }
+        SEATASK = null;
         grantPersonRole(key, role, at);
         ADDROLE = null; ADDROLE_KIND = "";
         paint();
     }
+
     R.querySelectorAll("[data-prole-pick]").forEach(function(sel){
       sel.addEventListener("change", function(){
         tryGrantRole(sel.dataset.prolePick, sel.value);
+      });
+    });
+    /* §186's two answers. Cancel puts the picker back to "Choose a role…"
+       rather than leaving the seat showing: a select still displaying the
+       value it was just refused fires no `change` if it is picked again
+       (§110), so the control would read as dead for exactly the person who
+       changed their mind. */
+    R.querySelectorAll("[data-seatno]").forEach(function(b){
+      b.addEventListener("click", function(){
+        SEATASK = null; ADDROLE_KIND = ""; paint();
+      });
+    });
+    R.querySelectorAll("[data-seatyes]").forEach(function(b){
+      b.addEventListener("click", function(){
+        var a = SEATASK;
+        SEATASK = null;
+        if (!a) { paint(); return; }
+        grantPersonRole(a.key, a.role, a.at);
+        ADDROLE = null; ADDROLE_KIND = "";
+        paint();
       });
     });
     R.querySelectorAll("[data-prole-off]").forEach(function(b){

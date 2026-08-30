@@ -1530,7 +1530,7 @@ function renderPeople(){
             ROLES.filter(function(r){ return roleIsGrantable(r.key); }).map(function(r){
               return '<option value="' + r.key + '"' + (r.key === ADDROLE_KIND ? " selected" : "") +
                 '>' + esc(r.name) + '</option>';
-            }).join("") + '</select>' + roleStop(p)
+            }).join("") + '</select>' + roleStop(p) + seatAsk(p)
         : '<button class="linkbu" data-prole-open="' + p.key + '">+ role</button>');
   }
 
@@ -1551,6 +1551,42 @@ function renderPeople(){
   function roleStop(p){
     if (!ROLESTOP || ROLESTOP.key !== p.key) return "";
     return '<span class="rolestop">' + esc(ROLESTOP.why) + '</span>';
+  }
+
+  /* ── ASKING BEFORE A SEAT IS HANDED OVER (§186) ────────────────────
+     Islam, from the deployment: *"hussein khaled is a custodian and getting
+     the super user … you assured me that it's impossible."* It was not: §92
+     grants a one-destination role ON THE PICK, and a seat has exactly one
+     destination, so the most powerful grant in the product was a single
+     `change` event with nothing in between.
+
+     §92's argument survives for every other role — a door behind a door is a
+     broken control — and it was about a role whose second question has one
+     answer, never about how much the role is worth. What a seat needs is not
+     a second question; it is the first one, asked out loud.
+
+     IT NAMES THE ROLE AND WHAT IT HANDS OVER. The failure mode is landing on
+     the wrong line of a dropdown, and a confirmation that does not say which
+     line catches none of them. */
+  var SEAT_GIVES = {
+    super:   "Everything, including who may do what, and this register.",
+    smoteam: "Everything the Strategy Office does \u2014 every plan, every cycle, " +
+             "and every page of Setup.",
+    gceo:    "Every unit and every function in the group, and the group\u2019s own pages.",
+    cceo:    "Their whole company, and whatever its settings let them see beyond it."
+  };
+  function seatAsk(p){
+    if (!SEATASK || SEATASK.key !== p.key) return "";
+    var r = SEATASK.role;
+    return '<div class="seatask"><b>Give ' + esc(p.name) + " " +
+      esc(roleName(r)) + '?</b>' +
+      '<p>' + (SEAT_GIVES[r] || "") + '</p>' +
+      '<p class="why">A seat stays with the person wherever they move \u2014 it is ' +
+      'not a job on one plan. They keep the roles they already hold.</p>' +
+      '<span class="pdrt">' +
+        '<button class="linkbu" data-seatno="1">Cancel</button>' +
+        '<button class="linkbu tk-save" data-seatyes="1">Give ' +
+          esc(roleName(r)) + '</button></span></div>';
   }
 
   /* ── THE DECLARATION, AS A MARK (§116.4) ──────────────────────────

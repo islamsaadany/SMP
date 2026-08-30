@@ -365,6 +365,33 @@ console errors (in this cloud environment, run it via a wrapper that points Play
   `node scripts/test-door.js <smo-password>` against a running dev-server
   after touching `api/auth.js` or `lib/auth.js` (it ends by rate-limiting the
   SMO on purpose — `DELETE FROM login_attempts;` clears it).
+- **A SEAT IS NOT AN ORDINARY ROLE (§186):** Islam — *"hussein khaled is a
+  custodian and getting the super user … you assured me that it's
+  impossible."* **It was not.** The register's role picker is a plain
+  `<select>` and §92 grants a ONE-DESTINATION role on the pick — a seat has
+  one destination — so the most powerful grant in the product was a single
+  `change` event with nothing in between; the people workbook's Role column
+  is the same grant by another road. **One line stood behind both**:
+  `roleIsGrantable()` excluded only the derived floor roles and said nothing
+  about seats. **THE SERVER WAS ALWAYS RIGHT** (a seat move classifies as
+  `access`, §89), so the fault was the SCREEN offering what the save refuses —
+  and going through instantly for the one person it does not refuse (§42's
+  drift, in the worst place). Now: `roleIsGrantable()` asks
+  `mayEditAccess()` **of the granter**, so the picker AND the template narrow
+  together; and the Super user is **asked out loud**, with the ask NAMING the
+  role and what it hands over (the failure mode is landing on the wrong line,
+  and a confirmation that does not say which line catches none of them).
+  **THE ASK IS STATE IN THE DIALOG'S BODY, never a modal of its own** —
+  measured: `openModalHtml()` was painted straight back over by the
+  register's own repaint (§116.6); `ROLESTOP`'s shape for `ROLESTOP`'s
+  reason. **Cancel restores the picker** or a select still showing the
+  refused value fires no `change` (§110). **AND THE REGISTER WATCHES**: a
+  seat whose place is not where the person SITS joins the attention queue,
+  under a collision and above every gap. **The test is the PLACE, not "holds
+  two roles"** — the bootstrap SMO holds super@group AND heads the SMO
+  function (§118), so the other reading nags about the one certainly-correct
+  row. **Not claimed: who granted it and when** — `change_log` holds that and
+  it needs the database.
 - **VIEWING AS SOMEBODY IS JUDGED AS SOMEBODY (§185):** Islam — *"Hala got
   this error, when I view as her I didn't get it … the view-as function is not
   showing exactly what people see."* Measured: one edit, judged twice — REFUSED

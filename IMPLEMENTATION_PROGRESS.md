@@ -68,6 +68,27 @@ Nothing proceeds past this line without an answer.
 
 ## Built and verified
 
+### v3.65 — a function could not report at all, and Save draft never finished (§183)
+
+- **A supporting function that plans in pillars reported nothing.** Its
+  reporting page is drawn by the unit's renderer, and both field handlers
+  looked the subject up with `UNITS[current]` — undefined for `fn:…` — so the
+  handler threw and every figure and note typed was discarded in silence.
+  Measured: 0 saves before, 1 after. §63's own fault in the two places that
+  fix did not reach.
+- **Save draft sat on "Saving…" for ever.** A caller arriving while another
+  save was in flight was told `"busy"` and nothing ever followed up. Since
+  §170's leading-edge autosave this is the ordinary sequence, not a race: the
+  button you press right after typing lands inside the flight. Such a caller
+  is parked and answered when the next save settles.
+- `"busy"` stops being an outcome, so both readers of it go — including
+  §170's 300ms retry timer, which the parking replaces.
+- `checks/report-saves.py` is new: a figure and a note on a unit, a capability
+  function AND a pillars function must reach the stored plan and schedule a
+  save. **5 red** on the previous build.
+- **Not reproduced:** filling a missing date on a function stamps its pending
+  mark correctly here. Left open rather than claimed fixed.
+
 ### v3.65 — dismissing a declaration (§180)
 
 - **Accepting always worked** — driven, not read: Use it moved the person, the

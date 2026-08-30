@@ -22031,3 +22031,100 @@ through the platform's own `readState`.
 And the deck itself is shot rather than described —
 `design-mockups/unit-marks/` carries the covers for three units and the footer
 on a content slide, from the running product.
+
+## §183 · A supporting function could not report at all, and Save draft never finished
+
+Islam, urgent: *"for the supporting functions the reporting doesn't autosave"*
+— and, minutes later, *"the reporting then saving to draft keep saying saving
+and nothing happens but when I exit and come back the entered number saved."*
+
+Two faults, both on the reporting page, both silent.
+
+### 1 · A function that plans in PILLARS reported nothing
+
+A **capability** function's reporting page draws its own controls
+(`data-crep`, `data-cnote`, `data-cpick`, `data-cpct`) and all four were
+sound. A function that plans in **pillars** (§59) is drawn by the UNIT's
+renderer, so its fields carry `data-rep` and `data-note` — and both of those
+handlers resolved the subject with **`UNITS[current]`**, which for
+`"fn:merchandising"` is `undefined`. `findById` then read `u.ukey` off nothing
+and **threw**.
+
+So on such a function **every figure and every note typed was discarded in
+silence**: the value never reached the row, no save was ever scheduled, and
+the only witness was `Cannot read properties of undefined (reading 'ukey')` in
+a console nobody has open. Measured before the fix: **0 saves posted**, the
+figure still at its old value; after: **1 save, the value stored, no error**.
+
+**§63's OWN FAULT, IN THE TWO PLACES THAT FIX DID NOT REACH.** That section
+wrote down `UNITS["fn:…"] is undefined — §59's unitLike() rule, one place
+still asking differently` and corrected the place it had found. `unitLike()`
+has existed since §59 to be the one answer; these two never asked it.
+
+**`unitLike()` AND NOT `unitLikeWritable()`.** This handler finds a row that
+already exists and writes one value into it, and the reading view hands out
+the function's REAL arrays (§61), so the write goes through. The writing half
+MINTS containers, which is a side effect nothing here asks for — §42 and
+§50.6: a reader must never create the field it was looking for.
+
+**WHY NOTHING CAUGHT IT.** `qa.py` asserts *"performance/report/arrange
+(function): one page, a Report mode, and 3 sortables all bound"* — true, and
+about the page RENDERING. A15's own sentence: walking a page proves it
+renders, and this was never a rendering fault. And **a save cannot be observed
+over `file://` at all** (§94.11), which is where every sweep runs.
+
+### 2 · Save draft sat on "Saving…" for ever
+
+`save()` answered **`"busy"`** the instant a caller arrived while another save
+was in flight, and the Save draft handler's branch for it drew *"Saving…"* —
+a word with no follow-up, because nothing ever told the button that the flight
+had landed. The figure did save (the in-flight autosave carried it), so the
+screen sat on a present participle over a change that was safely stored:
+exactly *"nothing happens, but when I exit and come back the number saved"*.
+
+**SINCE §170 THIS IS THE ORDINARY CASE, NOT A RACE.** That section made the
+autosave leading-edge, so the first change of a burst posts at once — and the
+button somebody reaches for straight after typing lands squarely inside that
+flight. The commonest sequence in the product hit the one unhandled outcome.
+
+A caller arriving mid-flight is **parked** and answered when the next save
+settles — and it is a real save, not the in-flight one's answer borrowed:
+that flight serialized BEFORE this change, so its success says nothing about
+whether this change reached the server. Re-running is right either way and
+costs nothing when there is nothing new (`serialize() === lastSaved` answers
+`"clean"` at once). The queue is an ARRAY: two presses and a flush-on-leave
+can all arrive inside one flight, and dropping any of them puts *"Saving…"*
+back for good.
+
+**`"busy"` IS NO LONGER AN OUTCOME**, so both readers of it go rather than
+being left unreachable (§24). The Save draft branch is deleted, and `tick()` —
+§170's trailing debounce, which RE-ARMED itself every 300ms on a `"busy"`
+answer — collapses into a plain `save()`, because the parking is precisely
+what that timer was arranging by hand and without the wait. Two mechanisms for
+one job is how they drift, and `tick()`'s own comment had already stopped
+being true.
+
+### Proof
+
+`checks/report-saves.py` is new: a figure and a note typed on **all three
+shapes** — a unit, a capability function, a pillars function — must reach the
+STORED plan and schedule a save, nothing may throw, and Save draft must answer
+rather than sit on *"Saving…"*. Served over HTTP with a stub that counts the
+posts, because none of it is observable from a file.
+
+It asserts the AGREEMENT across the three rather than any count of controls —
+the fault left every control in place. `merchandising` is named as the seed's
+only pillars function, so a seed that loses it fails loudly here rather than
+quietly dropping the case the file exists for (§54.5).
+
+**Proved able to fail: 5 red** against the shipped previous build, ending in
+the production error verbatim. `qa.py`, `checks/save-flush.py`,
+`checks/save-said.py`, `checks/gap-fill.py` and
+`checks/project-custodian.py` all green.
+
+**Not reproduced, and said so:** the second half of the first report — *"the
+filling the missing dates doesn't save or come for confirmation like the
+owners"* — could not be made to happen. Filling a project's Start and a
+milestone's due date as a filler on a supporting function stamps
+`pend.start` / `pend.finish` exactly as the owner does. Left open rather than
+claimed fixed.

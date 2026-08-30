@@ -2899,6 +2899,11 @@ python3 checks/strategy-split.py # the Strategy | Reporting halves: the cell pre
                                 # open AND closed, both ends each time — and since §145.9
                                 # the .pptx download asserted HIDDEN on every surface while
                                 # the dormant builder is still proved by a direct call
+python3 checks/report-saves.py  # reporting REACHES THE STORED PLAN and schedules a save, on
+                                # a unit, a capability function AND one that plans in pillars
+                                # — over HTTP, because a save cannot be seen over file:// at
+                                # all; plus Save draft answering rather than sitting on
+                                # "Saving…" (§183)
 python3 checks/project-dates.py # a project's Start and End are PICKED as `Jul 26`, and the
                                 # overrun warning reads them the platform's way — an EXACT set,
                                 # because Date.parse("Jul 26") is 26 July 2001 and any

@@ -46,6 +46,12 @@ var SYNC = (function () {
        is no server to carry a message. */
     try { CHAT.mount(); } catch (e) {}
   }
+  /* Callers that asked to save while one was in flight, answered when the
+     next one settles (§183). An array rather than a single slot: two people
+     pressing Save draft and a flush-on-leave can all arrive inside one
+     flight, and dropping any of them puts the word "Saving…" back on screen
+     for good. */
+  var queued = [];
   var live = false;        /* hydrated from the API; saves flow only then */
   var lastSaved = null;    /* the serialized graph the server last accepted */
   var timer = null;
@@ -244,14 +250,53 @@ var SYNC = (function () {
      or it could not be reached. The autosave calls this with no callback and
      behaves exactly as it did. */
   function save(done) {
-    var say = function (state) { if (done) done(state); };
+    /* ONE EXIT, so a path added later cannot forget the parked callers
+       (§104.7). `say` reports to THIS caller and then drains anybody who
+       arrived while the flight was open — by re-running the save, because
+       their change may not have been in it. */
+    var say = function (state) {
+      if (done) done(state);
+      if (!queued.length || saving) return;
+      var waiting = queued.splice(0, queued.length);
+      /* Deferred, so the drain cannot recurse inside the settle handler that
+         has only just set `saving = false`. */
+      setTimeout(function () {
+        save(function (st) { waiting.forEach(function (f) { if (f) f(st); }); });
+      }, 0);
+    };
     /* The guard that matters: demo data must never reach the database. */
     /* SAID ONLY FOR DEMO DATA. Opened from `file://` there is no server at
        all and the prototype banner already says so; a second sentence per
        change would be noise about something nobody expected to save. */
     if (isDemoMode()) { showDemoBlocked(); return say("offline"); }
     if (!live) return say("offline");
-    if (saving) return say("busy");
+    /* ── ASKED WHILE ONE IS ALREADY IN FLIGHT (§183) ────────────────────
+       Islam: *"the reporting then saving to draft keep saying saving and
+       nothing happens but when I exit and come back the entered number
+       saved."*
+
+       Both halves were true. `"busy"` was answered the moment Save draft was
+       pressed and the only caller drew **"Saving…"** for it — a word with no
+       follow-up, because nothing ever told the button that the flight it was
+       waiting behind had landed. The figure did save (the autosave §170 had
+       already started carried it), so the screen sat on a present participle
+       for ever over a change that was safely stored.
+
+       Since §170 made the autosave LEADING-EDGE, this is not a rare race: the
+       first change of a burst posts at once, and Save draft pressed in the
+       next moment lands squarely inside that flight. The button people reach
+       for after typing is the one most likely to hit it.
+
+       So a caller that arrives mid-flight is PARKED and answered when the
+       next save settles — and it is a real save, not the in-flight one's
+       answer borrowed: that flight serialized BEFORE this change, so its
+       success says nothing about whether this change reached the server.
+       Re-running is correct in both cases and costs nothing when there is
+       nothing new (`serialize() === lastSaved` answers "clean" at once).
+
+       `"busy"` is therefore no longer an outcome anything can be told — the
+       five §63 named are the whole set again. */
+    if (saving) { queued.push(done); return; }
     var now = serialize();
     if (now === lastSaved) return say("clean");
     if (now === refusedBody) { showRefusal(refusedWhy); return say("refused"); }
@@ -517,16 +562,22 @@ var SYNC = (function () {
     }
   }
 
-  /* THE TRAILING HALF OF THE DEBOUNCE, and it RE-ARMS when it is refused for
-     being busy (§170). `save()` answers "busy" and schedules nothing, so
-     without this the last change of a burst that collided with an in-flight
-     save would wait for the 5s interval — which is where it waited before this
-     existed, and is no reason to leave it there now. */
+  /* THE TRAILING HALF OF THE DEBOUNCE (§170).
+
+     It used to RE-ARM itself on a `"busy"` answer, because `save()` refused a
+     caller that arrived mid-flight and scheduled nothing — so without the
+     retry the last change of a burst that collided with an in-flight save
+     waited for the 5s interval.
+
+     §183 gave `save()` the parking that makes that unnecessary: a caller
+     arriving mid-flight is held and the save is RE-RUN when the flight
+     settles, which is precisely what this timer was arranging by hand, and
+     without the 300ms wait. So the retry goes rather than being left
+     unreachable (§24) — two mechanisms for one job is how they drift, and
+     this one's own comment had already stopped being true. */
   function tick() {
     timer = null;
-    save(function (state) {
-      if (state === "busy" && !timer) timer = setTimeout(tick, 300);
-    });
+    save();
   }
 
   /* One shape for every /api/auth call this object makes: post JSON, hand

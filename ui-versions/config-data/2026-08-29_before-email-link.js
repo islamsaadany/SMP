@@ -741,20 +741,8 @@ function commsShape(){
     footer:   c.footer || COMMS_FOOTER_DEFAULT(),
     accent:   b.accent || "",
     panel:    b.bar || "",
-    /* ── WHERE THE PLATFORM IS, ANSWERED ONCE (spec 027) ──────────────
-       It was `origin + "/"` here and `origin + location.pathname` in chat.js,
-       so the two emails this product sends disagreed about what "Open the
-       platform" means: one landed on the sign-in gate, the other on the
-       platform itself. §53.5 with an inbox on the end of it. The PATHNAME is
-       the right of the two — the platform is served at /raya-trade (§35.6) and
-       the root is the gate — and chat.js asks this now rather than keeping its
-       own copy.
-
-       EMPTY WHERE THERE IS NO ADDRESS TO GIVE. Opened from a file `origin` is
-       the string "null", and a link built on that is worse than no link:
-       every caller draws no button rather than a dead one. */
     href:     (typeof location !== "undefined" && location.origin && location.origin !== "null")
-                ? location.origin + location.pathname : ""
+                ? location.origin + "/" : ""
   };
 }
 function COMMS_FOOTER_DEFAULT(){
@@ -1477,60 +1465,6 @@ function placeLabel(at){
     return clash ? nm + " (function)" : nm;
   }
   return UNITS[at] ? navName(UNITS[at]) : at;
-}
-
-/* ── WHO YOU ARE VIEWING AS (§178) ────────────────────────────────────────
-   Islam, of a project owner's chrome reading PROJECT OWNER &middot; ALL UNITS:
-   *"correct it it should follow the roles and the unit he belongs to."*
-
-   IT WAS KEEPING ITS OWN ANSWER TO A QUESTION THE PLATFORM ALREADY ANSWERS.
-   The line read `p.unit` directly and nothing else, so `p.fn` and `p.company`
-   were never looked at -- 9 of the 33 people on the demo register were told
-   they belong nowhere, every supporting-function person and both company CEOs
-   among them. And the DROPDOWN SIX PIXELS TO ITS LEFT had it right the whole
-   time: §142 labels each option `knownName(p) + placeLabel(personAt(p))`, so
-   Hala's option said *CX* while her note said an em-dash. Two controls on one
-   row answering one question two ways is §53.5 exactly, and the fix is to
-   delete the copy rather than to teach it about functions.
-
-   AND THE PLACE BELONGS TO THE ROLE, NOT TO THE PERSON. 10 of the 33 hold
-   roles in more than one place, and the line named ONE for all of them: Ramy
-   owns a project in IT and a pillar in Mobile and it said "Mobile". So each
-   role is named with where it is held -- read off `personRoles()`, which is
-   the one thing that mints them, never `roleWheres()`, which falls through to
-   *every unit* for a derived role (§175).
-
-   THE SELECT CARRIES THE SEAT, SO THIS DOES NOT REPEAT IT. A role held only
-   where the person sits needs no place -- the control beside it has just said
-   it -- which is what keeps the line to 379px rather than 487px. A role held
-   anywhere ELSE is named, and a role held in SEVERAL places names them all,
-   including the seat: dropping the seat from a list would read as though they
-   held it only in the other place. */
-function viewerRoleLine(p){
-  var seat = placeLabel(personAt(p));
-  var byRole = {}, order = [];
-  personRoles(p).forEach(function(r){
-    var n = roleName(r.role), where = placeLabel(r.at);
-    if (!byRole[n]) { byRole[n] = []; order.push(n); }
-    if (byRole[n].indexOf(where) < 0) byRole[n].push(where);
-  });
-  /* Somebody who holds nothing says so and stops. The seat is on the control
-     beside this one, so repeating it here would be the one place the line
-     said twice what the select has already said -- the rule is applied
-     without an exception rather than with one (§53.5). */
-  if (!order.length) return "No role";
-  return order.map(function(n){
-    var pl = byRole[n];
-    if (pl.length === 1 && pl[0] === seat) return n;
-    return n + ", " + andList(pl);
-  }).join(" \u00b7 ");
-}
-/* "A", "A and B", "A, B and C" -- the platform says `and` rather than a bare
-   comma list, because two places for one role read as one long place name
-   otherwise. */
-function andList(a){
-  return a.length < 2 ? (a[0] || "")
-    : a.slice(0, -1).join(", ") + " and " + a[a.length - 1];
 }
 
 function unitRolesFor(k){
@@ -4782,13 +4716,6 @@ function mayFill(acKey, target){
   return SMPRules.mayFillPage(world(), viewer(), acKey,
     target === undefined ? TARGET : target);
 }
-/* §177: the same question about ONE ROW. `ctx` is §147.7's shape -- {row},
-   {project} or {pillarOwner} -- so a project owner fills their own project
-   and a pillar owner their own pillar, and nobody fills a neighbour's. */
-function mayFillRow(acKey, ctx, target){
-  return SMPRules.mayFillRow(world(), viewer(), acKey,
-    target === undefined ? TARGET : target, ctx);
-}
 /* MAY THIS PERSON REORDER WHAT THEY ARE LOOKING AT (§101)? A wrapper, never a
    second copy — the answer is lib/rules.js's, asked for the person being viewed
    as, so the handle the screen draws and the save the server accepts cannot
@@ -5050,14 +4977,7 @@ function gapPendRows(target){
     (GROUP.capabilities || []).forEach(function(c){
       if (c.fn !== fk) return;
       (c.keyObjectives || []).forEach(push);
-      /* §177: a project's outcomes and milestones carry marks of their own
-         now, so the pending list has to walk them or the office's "N awaiting
-         confirmation" undercounts exactly the values §177 made fillable. */
-      (c.projects || []).forEach(function(pr){
-        push(pr);
-        (pr.outcomes   || []).forEach(push);
-        (pr.milestones || []).forEach(push);
-      });
+      (c.projects || []).forEach(push);
     });
   } else {
     var u = UNITS[t];
@@ -5082,35 +5002,21 @@ function gapPendCount(target){ return gapPendRows(target).length; }
    to GET there, in the navigation's own words. */
 function gapMap(target){
   var t = String(target || ""), out = [];
-  /* §177: COUNTED ONLY WHERE THIS VIEWER COULD ACTUALLY CLOSE IT. The map
-     feeds the red "N Missing", the per-place chips, the rail's counts and the
-     Next-gap walk, so a gap counted here is a promise that pressing the button
-     opens something. A bounded role -- a project owner, a pillar owner, a
-     contributor -- reaches only its own rows (mayFillRow), so counting the
-     whole subject's gaps at them would send them to a field they cannot type
-     in: §61's trap wearing the count's clothes. The office authors, so
-     everything counts for them, which is the page-level answer. */
-  var canAuthor = {}, reach = function(acKey, ctx){
-    if (!(acKey in canAuthor)) canAuthor[acKey] = mayAuthor(acKey, target);
-    return canAuthor[acKey] || mayFillRow(acKey, ctx, target);
-  };
-  var G = function(acKey, ctx, kind, row){
-    return reach(acKey, ctx) ? SMPRules.gapMissing(kind, row).length : 0;
-  };
+  var G = SMPRules.gapMissing;
   var entry = function(key, label, count, go){
     out.push({ key: key, label: label, count: count, go: go });
   };
   var unitHalf = function(u){
     if (!u) return;
-    var found = G("u_found", {}, "unit", u);
+    var found = G("unit", u).length;
     entry("found", "Foundation", found, { sec: "found", page: "foundation" });
     var ko = 0;
-    (u.keyObjectives || []).forEach(function(m){ ko += G("u_found", {}, "ko", m); });
+    (u.keyObjectives || []).forEach(function(m){ ko += G("ko", m).length; });
     entry("ko", "Objectives", ko, { sec: "found", page: "foundation" });
     (u.items || []).forEach(function(p, i){
-      var n = 0, pctx = function(row){ return { pillarOwner: p.owner, row: row }; };
-      (p.measures || []).forEach(function(m){ n += G("u_plan", pctx(m), "measure", m); });
-      (p.tactics  || []).forEach(function(x){ n += G("u_plan", pctx(x), "tactic", x); });
+      var n = 0;
+      (p.measures || []).forEach(function(m){ n += G("measure", m).length; });
+      (p.tactics  || []).forEach(function(x){ n += G("tactic", x).length; });
       entry("p:" + (p.code || i), pillarCode(u, i), n,
             { sec: "plan", page: "plan", rail: unitRailKey(u), code: p.code });
     });
@@ -5120,22 +5026,14 @@ function gapMap(target){
     if (fo && String(fo.format) === "pillars") { unitHalf(unitLike(t)); return out; }
     var caps = capsOfFunction(fk), ov = 0;
     caps.forEach(function(c){
-      (c.keyObjectives || []).forEach(function(m){ ov += G("k_found", {}, "capko", m); });
+      (c.keyObjectives || []).forEach(function(m){ ov += G("capko", m).length; });
     });
     entry("ov", "Overview", ov, { sec: "found", page: "capfoundation" });
     caps.forEach(function(c){
       (c.projects || []).forEach(function(p){
         /* The projects rail is per CAPABILITY (railKeyFor), and it selects
            by project id — the same pair the rail's own rows write. */
-        /* §177: a project's front matter, its outcomes' targets and its
-           milestones' owners and due dates are one place — the project — so
-           they are one count and one chip, and the walk lands on the pane
-           that holds all three. */
-        var pctx = function(row){ return { project: p, row: row }; };
-        var n = G("k_proj", { project: p }, "project", p);
-        (p.outcomes   || []).forEach(function(o){ n += G("k_proj", pctx(o), "outcome", o); });
-        (p.milestones || []).forEach(function(m){ n += G("k_proj", pctx(m), "milestone", m); });
-        entry("pr:" + p.id, projCode(fk, p), n,
+        entry("pr:" + p.id, projCode(fk, p), G("project", p).length,
               { sec: "proj", page: "plan", rail: "cap:" + c.id, code: p.id });
       });
     });

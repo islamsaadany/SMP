@@ -5820,7 +5820,7 @@
      `.pband` is left exactly as it was; only the tie is broken. */
   .tblscroll thead th.idx, .tblscroll thead th.idx + th { z-index:3; }
 
-/* ── THE MONTH PICKER (§176) ─────────────────────────────────────────────
+/* ── THE MONTH PICKER (§177) ─────────────────────────────────────────────
    A due date is a month and a year, chosen — no box, so nothing to mistype
    and nothing to validate (Islam: "remove the entry and just keep it a
    calendar selection"). The button wears the same three states every gap
@@ -8280,7 +8280,7 @@ THEME.apply();
     tactic:  ["owner", "collaborators", "quarters"],
     capko:   ["dir", "target", "compile", "weight"],
     project: ["owner", "start", "end"],
-    /* §176: THE PAGE ALREADY CALLED THESE MISSING. A project pane prints the
+    /* §177: THE PAGE ALREADY CALLED THESE MISSING. A project pane prints the
        red word in exactly two more places -- an outcome with no target, and a
        milestone with no due date -- and a milestone with no owner printed an
        em-dash, which is the platform's word for ABSENT and says nothing is
@@ -8986,6 +8986,54 @@ THEME.apply();
     return s.slice(0, a) + region + s.slice(end);
   }
 
+  /* ── A LINK IN AN EMAIL HAS NOTHING TO BE RELATIVE TO (spec 027) ────────
+     Islam, on the button in a message he sent himself: macOS "The application
+     can't be opened. -50". The link was `smp-orpin-tau.vercel.app` — what he
+     typed, taken exactly as typed and sent. A BROWSER forgives a missing
+     scheme because it has an address bar to guess with; an EMAIL has no base
+     document, so the mail client hands the raw string to the operating system,
+     which looks for a file of that name and refuses. The button is dead for
+     every recipient, and nothing on the way out said so.
+
+     ONE FUNCTION, ASKED BY BOTH SIDES, which is why it is here rather than in
+     mail.js: the composer completes what somebody typed, and api/mail.js
+     refuses what arrives — and a screen that tidies a value the server judges
+     by a different rule is §42's drift with an inbox on the end of it.
+
+     COMPLETING IS NOT GUESSING. `https://` is added only where what is there
+     is already a host: a dot, no space, and no scheme of its own. Anything
+     else is REFUSED rather than decorated, because inventing an address is how
+     a message goes out pointing somewhere nobody meant.
+
+     AND ONLY http(s) SURVIVE. `javascript:` and `data:` are refused outright —
+     harmless in a mail client, and this same string is rendered into the
+     platform's own live preview, which is a page (§43.6). A scheme the product
+     does not send is not a scheme it should carry. */
+  function webUrl(raw) {
+    var s = String(raw == null ? "" : raw).trim();
+    if (!s) return "";
+    /* A scheme it already has decides it: http and https pass, everything
+       else — mailto, javascript, data, file — is not a link to the platform. */
+    var m = s.match(/^([a-zA-Z][a-zA-Z0-9+.-]*):/);
+    if (m) return /^https?$/i.test(m[1]) ? s : "";
+    /* Protocol-relative, which an email cannot resolve either. */
+    if (s.indexOf("//") === 0) return "https:" + s;
+    /* A host, and nothing that could be a stray sentence: no whitespace, at
+       least one dot, and something on each side of it. A bare path ("/plan")
+       fails here on purpose — in an email it points at nothing. */
+    if (!/\s/.test(s) && /^[^\s\/?#]+\.[^\s\/?#]+/.test(s)) return "https://" + s;
+    return "";
+  }
+
+  /* Did completing it change what was typed? The composer says so rather than
+     silently rewriting somebody's field — and the two questions are separate
+     because "this cannot be a link" and "this needed https://" send a person
+     to two different places. */
+  function webUrlFixed(raw) {
+    var out = webUrl(raw);
+    return !!out && out !== String(raw == null ? "" : raw).trim();
+  }
+
   function namedOn(row, person) {
     if (!row || !person) return false;
     /* THE NAME THE REGISTER SHOWS COUNTS TOO (§130.7). The plan's owner and
@@ -9103,7 +9151,7 @@ THEME.apply();
 
   /* Which of a person's roles is what lets them edit here. The floor rule
      applies when the floor is ALL they have. */
-  /* ONE WALK, ASKED FOR A STATE (§176). `editingRoles` and `fillingRoles`
+  /* ONE WALK, ASKED FOR A STATE (§177). `editingRoles` and `fillingRoles`
      differ by one string, and two copies of "which of this person's roles
      answers `x` here" is how the edit path and the fill path come to disagree
      about who a bounded role is (§53.5). */
@@ -9173,7 +9221,7 @@ THEME.apply();
     if (via.some(function (r) { return OWN_LINES_ONLY.indexOf(r) === -1; })) return true;
     return via.some(function (r) { return boundedReach(person, r, ctx); });
   }
-  /* ── AND A BOUNDED ROLE FILLS ONLY WHAT IT HOLDS (§176) ──────────
+  /* ── AND A BOUNDED ROLE FILLS ONLY WHAT IT HOLDS (§177) ──────────
      mayReportRow()'s mirror, and for the same reason. Islam, on a project
      owner given Fill gaps over a supporting function: "the fill grant should
      be for his project only he is not a cutodian." The grant is per PAGE --
@@ -9226,6 +9274,7 @@ THEME.apply();
     nameWords: nameWords, knownGuess: knownGuess, nameRuns: nameRuns,
     firstName: firstName,
     GREET_OPEN: GREET_OPEN, GREET_CLOSE: GREET_CLOSE, GREET_NAME: GREET_NAME,
+    webUrl: webUrl, webUrlFixed: webUrlFixed,
     greetFill: greetFill,
     editingRoles: editingRoles, onlyVia: onlyVia, rolesOrFloor: rolesOrFloor,
     OWN_LINES_ONLY: OWN_LINES_ONLY, onlyOwnLines: onlyOwnLines,
@@ -11296,8 +11345,20 @@ function commsShape(){
     footer:   c.footer || COMMS_FOOTER_DEFAULT(),
     accent:   b.accent || "",
     panel:    b.bar || "",
+    /* ── WHERE THE PLATFORM IS, ANSWERED ONCE (spec 027) ──────────────
+       It was `origin + "/"` here and `origin + location.pathname` in chat.js,
+       so the two emails this product sends disagreed about what "Open the
+       platform" means: one landed on the sign-in gate, the other on the
+       platform itself. §53.5 with an inbox on the end of it. The PATHNAME is
+       the right of the two — the platform is served at /raya-trade (§35.6) and
+       the root is the gate — and chat.js asks this now rather than keeping its
+       own copy.
+
+       EMPTY WHERE THERE IS NO ADDRESS TO GIVE. Opened from a file `origin` is
+       the string "null", and a link built on that is worse than no link:
+       every caller draws no button rather than a dead one. */
     href:     (typeof location !== "undefined" && location.origin && location.origin !== "null")
-                ? location.origin + "/" : ""
+                ? location.origin + location.pathname : ""
   };
 }
 function COMMS_FOOTER_DEFAULT(){
@@ -12022,7 +12083,7 @@ function placeLabel(at){
   return UNITS[at] ? navName(UNITS[at]) : at;
 }
 
-/* ── WHO YOU ARE VIEWING AS (§177) ────────────────────────────────────────
+/* ── WHO YOU ARE VIEWING AS (§178) ────────────────────────────────────────
    Islam, of a project owner's chrome reading PROJECT OWNER &middot; ALL UNITS:
    *"correct it it should follow the roles and the unit he belongs to."*
 
@@ -15325,7 +15386,7 @@ function mayFill(acKey, target){
   return SMPRules.mayFillPage(world(), viewer(), acKey,
     target === undefined ? TARGET : target);
 }
-/* §176: the same question about ONE ROW. `ctx` is §147.7's shape -- {row},
+/* §177: the same question about ONE ROW. `ctx` is §147.7's shape -- {row},
    {project} or {pillarOwner} -- so a project owner fills their own project
    and a pillar owner their own pillar, and nobody fills a neighbour's. */
 function mayFillRow(acKey, ctx, target){
@@ -15593,9 +15654,9 @@ function gapPendRows(target){
     (GROUP.capabilities || []).forEach(function(c){
       if (c.fn !== fk) return;
       (c.keyObjectives || []).forEach(push);
-      /* §176: a project's outcomes and milestones carry marks of their own
+      /* §177: a project's outcomes and milestones carry marks of their own
          now, so the pending list has to walk them or the office's "N awaiting
-         confirmation" undercounts exactly the values §176 made fillable. */
+         confirmation" undercounts exactly the values §177 made fillable. */
       (c.projects || []).forEach(function(pr){
         push(pr);
         (pr.outcomes   || []).forEach(push);
@@ -15625,7 +15686,7 @@ function gapPendCount(target){ return gapPendRows(target).length; }
    to GET there, in the navigation's own words. */
 function gapMap(target){
   var t = String(target || ""), out = [];
-  /* §176: COUNTED ONLY WHERE THIS VIEWER COULD ACTUALLY CLOSE IT. The map
+  /* §177: COUNTED ONLY WHERE THIS VIEWER COULD ACTUALLY CLOSE IT. The map
      feeds the red "N Missing", the per-place chips, the rail's counts and the
      Next-gap walk, so a gap counted here is a promise that pressing the button
      opens something. A bounded role -- a project owner, a pillar owner, a
@@ -15670,7 +15731,7 @@ function gapMap(target){
       (c.projects || []).forEach(function(p){
         /* The projects rail is per CAPABILITY (railKeyFor), and it selects
            by project id — the same pair the rail's own rows write. */
-        /* §176: a project's front matter, its outcomes' targets and its
+        /* §177: a project's front matter, its outcomes' targets and its
            milestones' owners and due dates are one place — the project — so
            they are one count and one chip, and the walk lands on the pane
            that holds all three. */
@@ -21728,7 +21789,14 @@ var MAIL = (function(){
             "receives one.\n\nThe header carries your organisation's name and your " +
             "accent colour. The footer below carries whatever you set on the " +
             "Communication page.\n\nIf this looks right, it is ready to use.",
-      cta: { label: "Open the platform", href: o.href || "#" }
+      /* ── NEVER "#" (spec 027) ──────────────────────────────────────
+         It was `o.href || "#"`, and a "#" in an EMAIL is not a quiet no-op the
+         way it is on a page: there is no base document, so the mail client
+         hands it to the operating system and macOS answers "The application
+         can't be opened. -50". html() draws no button at all when the link is
+         empty, which is the honest shape — a test of the design that offers no
+         button is better than one offering a button that cannot open. */
+      cta: { label: "Open the platform", href: o.href || "" }
     });
   }
 
@@ -23696,7 +23764,7 @@ function authoring(page, acKey){ return !!EDIT_PAGE[page] && mayAuthor(acKey); }
    target. Only `gapCell`, the quarters and the mode bar read this — every
    other `ed ?` site stays false, which is what keeps Add, ×, the drag
    handles and every name field out of fill mode without a second gate. */
-/* §176: AND WHICH ROWS. A bounded role -- a project owner, a pillar owner,
+/* §177: AND WHICH ROWS. A bounded role -- a project owner, a pillar owner,
    a contributor -- fills only what it holds, so a call site that knows the
    row hands in its context and the answer narrows to that row. Without a
    `ctx` the page-level answer stands, which is what the office and an
@@ -23896,7 +23964,7 @@ function selectOr(page, value, opts, cls, setter){
     optionsHtml(opts, function(v){ return String(value) === v; }) + '</select>';
 }
 
-/* ── A DUE DATE IS PICKED, NEVER TYPED (§176) ─────────────────────────
+/* ── A DUE DATE IS PICKED, NEVER TYPED (§177) ─────────────────────────
    Islam: "for the date make it only Month Year like Jul 26 not days and
    remove the entry and just keep it a calendar selection."
 
@@ -24329,7 +24397,7 @@ function gapCell(page, acKey, row, field, opts){
   var blank = SMPRules.gapBlank(val);
   var mark = SMPRules.pendOf(row)[field];
   var ed = authoring(page, acKey);
-  /* §176: DEFAULTING TO "INSIDE NO ROW" IS THE SAFE WAY ROUND. A cell that
+  /* §177: DEFAULTING TO "INSIDE NO ROW" IS THE SAFE WAY ROUND. A cell that
      does not say where it sits -- a unit's aspiration, its key objectives, a
      capability's -- closes to every bounded role, and a cell that IS inside
      something hands in its context. The alternative (page-level by default)
@@ -24382,7 +24450,7 @@ function gapCell(page, acKey, row, field, opts){
        §50.6's rule carried from §130.1's collaborators: an emptied list
        DELETES its key, or a tactic nobody supports and one never asked
        stop being byte-identical and every save carries a phantom change. */
-    /* §176.2: MARKED FOR THE WALKER, AND NOT PAINTED. `Next gap` had nothing
+    /* §177.2: MARKED FOR THE WALKER, AND NOT PAINTED. `Next gap` had nothing
        to walk in the office's pen, because `gapfld` is fill mode's class and
        an author's fields carry none — so the loudest button on the bar has
        never done anything for the person who uses it most. `gapwalk` carries
@@ -25129,7 +25197,7 @@ function capBand(c){
    to persist. It is dropped when the viewer leaves the capability. */
 var RAIL = {};
 function railKeyFor(c){ return "cap:" + c.id; }
-/* ── WHAT EACH RAIL ACTUALLY DREW (§176.2) ────────────────────────────────
+/* ── WHAT EACH RAIL ACTUALLY DREW (§177.2) ────────────────────────────────
    `RAIL` holds only what somebody has PICKED, and both pickers below fall
    back to the first item — so on a page nobody has clicked, `RAIL` is empty
    while three panes are plainly on the screen. The gap walker asked `RAIL`
@@ -25139,7 +25207,7 @@ function railKeyFor(c){ return "cap:" + c.id; }
    so the two cannot disagree (§53.5) — reset by the shell before each paint,
    like PAGE_TOOLS and PAGE_ACTS (§130). */
 var RAIL_SHOWN = {};
-/* THE PANE SAYS WHICH PLACE IT IS (§176.2). A gap chip lands on a place and
+/* THE PANE SAYS WHICH PLACE IT IS (§177.2). A gap chip lands on a place and
    then lights that place's first gap -- and a FUNCTION'S projects page draws
    every capability at once, so "the first gap on the page" belonged to
    whichever pane happened to be topmost and the chip for MKT03 lit a field
@@ -25794,7 +25862,7 @@ function projPlanBody(p, fk){
     return ed ? '<button class="xbtn" data-rowoff="' + esc(list) + '|' + esc(id) +
       '" title="Remove this row" aria-label="Remove this row">&times;</button>' : '';
   };
-  /* §176 TOOK THE LAST TWO CALLERS OF THE LOCAL `f`: an outcome's target and
+  /* §177 TOOK THE LAST TWO CALLERS OF THE LOCAL `f`: an outcome's target and
      a milestone's due date both go through gapCell now, so the helper had no
      caller left and is gone rather than left lying about (§24). */
   var sortAttr = function(kind){
@@ -25812,7 +25880,7 @@ function projPlanBody(p, fk){
         xb(d ? "deliverables" : "outcomes", o.id) + '</td>' +
       '<td class="cc">' + dxType(row) + '</td>' +
       '<td class="cc">' + dxDir(row) + '</td>' +
-      /* §176: AN OUTCOME'S TARGET IS FILLABLE, A DELIVERABLE'S IS NOT.
+      /* §177: AN OUTCOME'S TARGET IS FILLABLE, A DELIVERABLE'S IS NOT.
          `dxTarget` prints a deliverable's fixed "Y/N" -- written for it, not
          asked of it (§104) -- so there is nothing there to fill; the outcome
          beside it is the cell that has been printing red Missing all along. */
@@ -25834,12 +25902,12 @@ function projPlanBody(p, fk){
         xb("milestones", m.id) + '</td>' +
       '<td>' + (ed ? inputOr("plan", m.covers || "", "", function(v){ m.covers = v; })
                    : esc(m.covers || "")) + '</td>' +
-      /* §176: BOTH FILLABLE, AND THE OWNER'S EM-DASH BECOMES Missing.
+      /* §177: BOTH FILLABLE, AND THE OWNER'S EM-DASH BECOMES Missing.
          A dash is the platform's word for ABSENT, which says nothing is owed
          -- a milestone with nobody against it IS owed, so it reads like every
          other gap. The owner is PICKED from the register (§130.1) and the due
          date from the month panel; gapCell keeps the pending lifecycle around
-         both, and `ctx` narrows them to the project's own owner (§176). */
+         both, and `ctx` narrows them to the project's own owner (§177). */
       '<td class="cc">' + gapCell("plan", "k_proj", m, "owner", {
           ctx: { project: p, row: m },
           control: function(set, pendCls){
@@ -26314,7 +26382,7 @@ function unitPlanBody(it, u, railed){
     return ed ? '<button class="xbtn" data-rowoff="' + esc(list) + '|' + esc(id) +
       '" title="Remove this row" aria-label="Remove this row">&times;</button>' : '';
   };
-  /* §176: WHERE THIS ROW SITS, for the bounded roles. A pillar owner reaches
+  /* §177: WHERE THIS ROW SITS, for the bounded roles. A pillar owner reaches
      the rows of the pillar whose Owner names them; a contributor reaches the
      rows that name them. Same shape §147.7 hands the authoriser, so the two
      sides answer with one voice. */
@@ -37137,7 +37205,11 @@ var CHAT = (function(){
         title: "The Strategy Office replied",
         preheader: text.slice(0, 140),
         body: text + "\n\nOpen the platform to answer.",
-        cta: { label: "Open the platform", href: location.origin + location.pathname }
+        /* THE SAME ANSWER THE TEST EMAIL USES (spec 027). This line was the
+           second copy of "where is the platform" and the two had drifted:
+           commsShape() said the gate, this said the platform. One asker now,
+           and an empty answer draws no button rather than a broken one. */
+        cta: { label: "Open the platform", href: sh.href || "" }
       });
     } catch (e) { /* No mail builder here is not a reason to refuse the reply. */ }
 
@@ -41034,7 +41106,7 @@ var SYNC = (function () {
     /* Field setters are registered during render, so the list is emptied first
        or stale closures accumulate on every repaint. */
     FIELDS.length = 0;
-    /* §176.2: and what each rail drew LAST time is not what it will draw this
+    /* §177.2: and what each rail drew LAST time is not what it will draw this
        time — the same reason FIELDS is emptied here. */
     for (var rk in RAIL_SHOWN) delete RAIL_SHOWN[rk];
     /* Same reason, same line (§96): the objectives editor registers the array
@@ -41069,7 +41141,7 @@ var SYNC = (function () {
        rather than a stranded middot. */
     document.getElementById("orgname").textContent =
       GROUP.org ? "\u00b7 " + GROUP.org : "";
-    /* THE ROLES, AND WHERE EACH IS HELD (§177). One builder, beside
+    /* THE ROLES, AND WHERE EACH IS HELD (§178). One builder, beside
        `placeLabel()` and asking `personAt()` like every other surface that
        answers "where does this person sit" (§54). This line used to work it
        out for itself off `p.unit` and nothing else, which is how it came to
@@ -41080,7 +41152,7 @@ var SYNC = (function () {
     /* AND THE WHOLE LINE ON A HOVER. `.viewer-note` is one line with an
        ellipsis, and below about 1280px this line is longer than the strip has
        room for -- what gets cut is the tail, which is the PLACE, which is the
-       half §177 exists to add. §88's shape: one line, an ellipsis where it
+       half §178 exists to add. §88's shape: one line, an ellipsis where it
        does not fit, the whole value one hover away. Set unconditionally
        rather than through `clipTitles()`, which is scoped to the setup tables
        and would have to be widened to reach the chrome -- and unlike the
@@ -41390,7 +41462,7 @@ var SYNC = (function () {
        (searchsel.js) — the native control stays where it is, so nothing wire()
        just attached is disturbed. */
     SEARCHSEL.wire();
-    /* AND THE MONTH PANEL GOES (§176). It is mounted on <body> so a repaint
+    /* AND THE MONTH PANEL GOES (§177). It is mounted on <body> so a repaint
        cannot take it with the button it belongs to — it would be left hanging
        over a page it no longer points at. Same reason SEARCHSEL.wire() closes
        its own popup first (§30.1). */
@@ -41644,12 +41716,12 @@ var SYNC = (function () {
      press landed on. When the page holds none, the walk goes to the first
      PLACE still owing — through the band's own chip, so the two ways of
      moving cannot disagree about where a place is. */
-  /* ── WALKING THE GAPS (§145.14, made to work in §176.2) ──────────────
+  /* ── WALKING THE GAPS (§145.14, made to work in §177.2) ──────────────
      Islam, pressing it: *"the CUS01 3 button just opens the project and the
      next gap does nothing."* Three faults, and each hid the next.
 
      1 · THE SELECTOR WAS AN ELEMENT TYPE. `.fld.gapfld` means an input or a
-         select wearing fill mode's class, so §176's month picker — a BUTTON —
+         select wearing fill mode's class, so §177's month picker — a BUTTON —
          was invisible to it, and on a project whose only gaps are due dates
          the walker found nothing and fell back to clicking the chip for the
          page it was already on. `.gapwalk` is the marker now, put on by
@@ -41669,7 +41741,7 @@ var SYNC = (function () {
   function gapWalkFields(place){
     /* Scoped to ONE place when a chip has just named one -- a function's
        projects page draws every capability at once, so the page's first gap
-       is not the chip's first gap (§176.2). */
+       is not the chip's first gap (§177.2). */
     var root = document;
     if (place) root = document.querySelector('[data-gplace="' +
       place.replace(/"/g, '\\"') + '"]') || document;
@@ -41710,7 +41782,7 @@ var SYNC = (function () {
   function gapChipShown(c){
     /* RAIL_SHOWN, not RAIL: the first holds what the renderer DREW, the
        second only what somebody has picked, and on a page nobody has clicked
-       the second is empty while the panes are plainly there (§176.2). */
+       the second is empty while the panes are plainly there (§177.2). */
     return (!c.dataset.grail || RAIL_SHOWN[c.dataset.grail] === c.dataset.gcode) &&
            (!c.dataset.gsec || CURSEC[currentSub] === c.dataset.gsec);
   }
@@ -41771,7 +41843,7 @@ var SYNC = (function () {
     }
     if (els.length) gapLight(els[0]);
   }
-    /* ── THE MONTH PICKER (§176) ────────────────────────────────────────
+    /* ── THE MONTH PICKER (§177) ────────────────────────────────────────
        A due date is chosen, never typed. The button carries the FIELDS index
        and the month and year it is currently showing; the panel is built by
        monthPopHtml() and mounted on <body> as position:fixed, because a
@@ -44336,6 +44408,33 @@ var SYNC = (function () {
         paintMsgPreview();
       });
     });
+    /* ── THE LINK IS COMPLETED WHERE IT IS TYPED (spec 027) ─────────
+       Islam typed `smp-orpin-tau.vercel.app` and the message went out with it
+       verbatim. In an email that is not an address at all — there is no base
+       document for it to be relative to — so the mail client handed it to
+       macOS, which looked for a file of that name and answered "-50". The
+       button was dead for everybody who pressed it.
+
+       ON `change`, WHICH FOR A TEXT BOX MEANS ON BLUR (§35) — never on
+       `input`, or `https://` would appear in front of the third character
+       somebody typed and the caret would sit behind it. So it happens once,
+       when they have finished, and it is WRITTEN INTO THE FIELD: seeing the
+       scheme appear IS the explanation, and a value quietly corrected on the
+       way out is one nobody can check (§124 — whatever reads a value cleans
+       it, rather than an instruction to go and look).
+
+       NOTHING IS REFUSED HERE. A half-typed address is a normal thing to have
+       in a box you are still filling in; the refusal belongs at the moment of
+       sending, where there is something to refuse. */
+    var ctahref = document.getElementById("msgctahref");
+    if (ctahref) ctahref.addEventListener("change", function(){
+      var fixed = SMPRules.webUrl(ctahref.value);
+      if (!fixed || fixed === ctahref.value.trim()) return;
+      ctahref.value = fixed;
+      sendmsg().ctaHref = fixed;
+      sendmsgTouched();
+      paintMsgPreview();
+    });
 
     /* THE OVERVIEW'S ONE LOUD CONTROL (§144.8). It moves to the other tab
        rather than doing anything itself — the composer is where the act
@@ -44597,6 +44696,18 @@ var SYNC = (function () {
       if (!sendmsgHasAny()) return say("Choose who it goes to first.", false);
       if (!st.subject.trim()) return say("It needs a subject.", false);
       if (!st.body.trim()) return say("It needs something in it.", false);
+      /* ── A BUTTON THAT CANNOT OPEN IS REFUSED (spec 027) ──────────
+         The blur above completes anything that CAN be completed, so what is
+         left here is a value no amount of tidying makes into a web address —
+         and the alternative to saying so is what happened: the message goes,
+         and every person who presses the button gets their operating system's
+         refusal instead of the platform. The one moment this can still be
+         stopped is before the confirmation, so it is checked here rather than
+         inside reallySend(), where a person has already said yes. */
+      if (st.ctaHref.trim() && !SMPRules.webUrl(st.ctaHref))
+        return say("The button's link is not a web address, so it would not open " +
+                   "for anybody. Give it one starting https:// — or clear it " +
+                   "to send with no button.", false);
       var n = (st.aud && st.aud.to) ? st.aud.to.length : 0;
       if (!n) return say("That comes to nobody with an address.", false);
       /* ── THE CONFIRMATION IS THE PLATFORM'S OWN (§95) ──────────────
@@ -44680,8 +44791,10 @@ var SYNC = (function () {
              server fills it once per recipient, because who they are is the
              server's answer (spec 022, §74.2). */
           greeting: st.greet == null ? null : { word: st.greet },
-          cta: (st.ctaLabel.trim() && st.ctaHref.trim())
-                 ? { label: st.ctaLabel.trim(), href: st.ctaHref.trim() } : null
+          /* THROUGH THE RULE, never the raw box: the two sends and the
+             preview must draw the same link, and it must be one that opens. */
+          cta: (st.ctaLabel.trim() && SMPRules.webUrl(st.ctaHref))
+                 ? { label: st.ctaLabel.trim(), href: SMPRules.webUrl(st.ctaHref) } : null
         })
       }, function(err, j){
         msgsend.disabled = false; st.busy = false;
@@ -44747,6 +44860,13 @@ var SYNC = (function () {
       }
       if (!st.subject.trim()) return say("It needs a subject before it can be previewed.", false);
       if (!st.body.trim()) return say("It needs something in it.", false);
+      /* THE SAME REFUSAL SEND MAKES (spec 027). A copy that quietly dropped the
+         button would be a preview of a message nobody can send — and the point
+         of a copy is to see what the recipients will see. */
+      if (st.ctaHref.trim() && !SMPRules.webUrl(st.ctaHref))
+        return say("The button's link is not a web address, so it would not open " +
+                   "for anybody. Give it one starting https:// — or clear it " +
+                   "to send with no button.", false);
       var me = (typeof SYNC !== "undefined" && SYNC.person && SYNC.person()) || null;
       var row = me ? PEOPLE.filter(function(p){ return p.key === me.key; })[0] : null;
       var addr = row ? String(row.email == null ? "" : row.email).trim() : "";
@@ -44769,8 +44889,10 @@ var SYNC = (function () {
              there is one recipient and the browser knows who they are. */
           greeting: st.greet == null ? null
                       : { word: st.greet, name: SMPRules.firstName(row) },
-          cta: (st.ctaLabel.trim() && st.ctaHref.trim())
-                 ? { label: st.ctaLabel.trim(), href: st.ctaHref.trim() } : null
+          /* THROUGH THE RULE, never the raw box: the two sends and the
+             preview must draw the same link, and it must be one that opens. */
+          cta: (st.ctaLabel.trim() && SMPRules.webUrl(st.ctaHref))
+                 ? { label: st.ctaLabel.trim(), href: SMPRules.webUrl(st.ctaHref) } : null
         }),
         body: st.body.trim(),
         fromName: sh.fromName,
@@ -45208,7 +45330,7 @@ var SYNC = (function () {
         if (chip.dataset.grail) RAIL[chip.dataset.grail] = chip.dataset.gcode;
         paint();
         if (typeof toPaneTop === "function") toPaneTop();
-        /* §176.2: AND IT LANDS ON THE GAP IT NAMED. Islam: *"the CUS01 3
+        /* §177.2: AND IT LANDS ON THE GAP IT NAMED. Islam: *"the CUS01 3
            button just opens the project."* It did exactly that — the chip
            says how many are missing there and then left you to find them,
            which on a project of five milestones is the work the button was

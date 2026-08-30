@@ -21191,6 +21191,128 @@ as much as the reverse (§68.10).
 
 ---
 
+## §176 · A link in an email has nothing to be relative to
+
+Islam, having sent himself a message with a button and pressed it — macOS:
+**"The application can't be opened. −50"**. Asked for the link, he pasted it:
+
+> `smp-orpin-tau.vercel.app`
+
+**THAT IS WHAT HE TYPED, AND THE PLATFORM MAILED IT VERBATIM.** A **browser**
+forgives a missing `https://` because it has an address bar to guess with. An
+**email has no base document**, so there is nothing for a relative link to be
+relative *to*: the mail client hands the raw string to the operating system,
+macOS looks for a file of that name, and answers `-50`. The button was dead for
+**every recipient**, not only for him, and nothing between typing it and
+sending it said so.
+
+**THE DIAGNOSIS TOOK THREE ANSWERS AND THE FIRST TWO WERE WRONG.** He first
+reported the test send as not working; I proved the send path sound end to end
+(19/19 on the server against a real Postgres, and a browser probe pressing the
+button at six window sizes) and asked what he saw. *"Nothing happened at all"*
+— which is a disabled button, so I went hunting for what disables it. Then the
+screenshot arrived and the email had **already been delivered**: the send was
+never the fault, the link inside it was. *The symptom a person reports is the
+one they can see, and it is not always the one nearest the cause.*
+
+### One rule, and it lives where both sides can ask it
+
+`SMPRules.webUrl(raw)` in `lib/rules.js` — the shared module, because the
+composer **completes** and the server **refuses**, and a screen that tidies a
+value the server judges by a different rule is §42's drift with an inbox on the
+end of it.
+
+| Typed | Becomes | Why |
+|---|---|---|
+| `smp-orpin-tau.vercel.app` | `https://smp-orpin-tau.vercel.app` | a host, completed |
+| `//x.io` | `https://x.io` | protocol-relative resolves against nothing in mail |
+| `https://…` · `http://…` | unchanged | already an address |
+| `javascript:` · `data:` · `mailto:` | **refused** | not a link to the platform |
+| `/raya-trade` | **refused** | a path points at nothing once the message has left |
+| `click here` | **refused** | not an address at all |
+
+**COMPLETING IS NOT GUESSING.** `https://` is added only where what is there is
+already a host — a dot, no whitespace, no scheme of its own. Everything else is
+refused rather than decorated, because **inventing an address is how a message
+goes out pointing somewhere nobody meant**.
+
+**AND ONLY http(s) SURVIVE.** A scheme the product never sends is not one it
+should carry: this same string is rendered into the platform's own live
+preview, which is a page (§43.6).
+
+### Where it is asked, and why each place
+
+**ON BLUR IN THE BOX, NEVER ON `input`** (§35) — on `input` the scheme lands in
+front of the third character somebody types and the caret sits behind it. So it
+happens once, when they have finished, and it is **written into the field**:
+seeing `https://` appear *is* the explanation, and a value quietly corrected on
+the way out is one nobody can check (§124 — whatever reads a value cleans it,
+rather than an instruction to go and look).
+
+**NOTHING IS REFUSED THERE.** A half-typed address is a normal thing to have in
+a box you are still filling in; the refusal belongs at the moment of sending,
+where there is something to refuse — and **before the confirmation**, because
+that is the last moment it can still be stopped. **Send me a copy** carries the
+identical refusal in the identical words: a copy that quietly dropped the
+button would be a preview of a message nobody can send (§53.5).
+
+**AND THE SERVER ASKS AGAIN**, because a guard that only lives on the screen is
+decoration (§42, §44, §98.2). **What it does not claim is stated rather than
+implied**: the `html` is built by the page and posted whole (§72.3), so it
+checks the link the composer *says* it used, not every href inside that
+document. It stops the product sending a dead button. It is not a sanitiser.
+
+**THE RECORD STORES THE COMPLETED LINK**, because the Overview reads it and a
+re-opened draft puts it straight back into the composer and out again.
+
+### Two more, found by looking rather than reported
+
+**THE TEST EMAIL SHIPPED `href="#"`** whenever the platform did not know its own
+address — `o.href || "#"` in `sampleFor`. On a page `#` is a quiet no-op; **in
+an inbox it is the same −50**. `html()` already draws no button when the link
+is empty, so the fallback is `""` now: a test of the design that offers no
+button beats one offering a button that cannot open.
+
+**AND THE TWO EMAILS DISAGREED ABOUT WHERE THE PLATFORM IS.** `commsShape()`
+said `origin + "/"` — the **sign-in gate** — and `chat.js` said
+`origin + location.pathname` — the **platform**, which is where it is served
+(§35.6). Two builders, one question, no shared answer: §53.5 with an inbox on
+the end of it. The pathname wins and `chat.js` asks `commsShape()` rather than
+keeping its own copy. **Empty where there is no address to give**: opened from
+a file `origin` is the string `"null"`, and a link built on that is worse than
+no link.
+
+### Why nothing caught it
+
+**No check had ever pressed either send button.** Grep the suite before today
+and `data-mailtest` appears nowhere in `checks/` — the whole surface is the
+empty state over `file://` (§94.11), so it was never driven, and every
+assertion that did exist asks whether the page *renders*. **A dead link renders
+perfectly.**
+
+`checks/email-link.py` asserts **the link that leaves**, read out of the html
+actually posted to `/api/mail` — never the value in the box, which is what
+looked right the whole time. Both surfaces, **both ends** of the refusal (it
+says so **and** nothing goes, or a build that silently dropped the button would
+pass the second alone), and both emails' destination.
+
+**Proved able to fail (§94.5): 18 failures against the previous build**, among
+them `and it is absolute — ['smp-orpin-tau.vercel.app']` — the reported fault,
+reproduced by the check.
+
+### Recorded, not fixed
+
+- **Messages already sent keep their dead button.** Nothing recalls them.
+- **`checks/send-overview.py` is blocked by §148's welcome overlay** — it
+  suppresses the tour and not the welcome screen, so it cannot reach the page.
+  Confirmed on main's own build before this change, so it is §167.2's gap in a
+  check that section did not sweep, not a consequence of this one.
+- **`scripts/test-mail-send.js` fails on main too**, at the audience resolving
+  to nobody. Checked against a virgin database and against stashed sources
+  before being called pre-existing.
+
+---
+
 ## §177 · A milestone is filled, and a bounded role fills only its own
 
 Islam, of a project owner with the Strategy cell set to **Fill gaps** and the

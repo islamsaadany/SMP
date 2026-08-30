@@ -1661,9 +1661,6 @@
     /* Field setters are registered during render, so the list is emptied first
        or stale closures accumulate on every repaint. */
     FIELDS.length = 0;
-    /* §177.2: and what each rail drew LAST time is not what it will draw this
-       time — the same reason FIELDS is emptied here. */
-    for (var rk in RAIL_SHOWN) delete RAIL_SHOWN[rk];
     /* Same reason, same line (§96): the objectives editor registers the array
        its Add and Remove act on, and an index from the last paint would act on
        the paint before it. */
@@ -1696,28 +1693,19 @@
        rather than a stranded middot. */
     document.getElementById("orgname").textContent =
       GROUP.org ? "\u00b7 " + GROUP.org : "";
-    /* THE ROLES, AND WHERE EACH IS HELD (§178). One builder, beside
-       `placeLabel()` and asking `personAt()` like every other surface that
-       answers "where does this person sit" (§54). This line used to work it
-       out for itself off `p.unit` and nothing else, which is how it came to
-       say an em-dash for every function head and both company CEOs while the
-       DROPDOWN BESIDE IT said the function’s own name (§142). Two controls
-       on one row answering one question two ways — so the copy goes rather
-       than learning about functions. */
-    /* AND THE WHOLE LINE ON A HOVER. `.viewer-note` is one line with an
-       ellipsis, and below about 1280px this line is longer than the strip has
-       room for -- what gets cut is the tail, which is the PLACE, which is the
-       half §178 exists to add. §88's shape: one line, an ellipsis where it
-       does not fit, the whole value one hover away. Set unconditionally
-       rather than through `clipTitles()`, which is scoped to the setup tables
-       and would have to be widened to reach the chrome -- and unlike the
-       cells that rule was written for, this element carries no other title
-       for a hover to cover. */
-    (function(){
-      var el = document.getElementById("viewerNote");
-      el.textContent = viewerRoleLine(viewer());
-      el.title = el.textContent;
-    })();
+    var v = viewer();
+    /* Guarded even though every person currently has a unit: reading
+       UNITS[null].name throws inside paint, which aborts the repaint and
+       leaves the previous screen showing \u2014 a crash that looks like a routing
+       bug. */
+    var where = v.unit === "group" ? "all units"
+              : (v.unit && UNITS[v.unit] ? UNITS[v.unit].name : "\u2014");
+    document.getElementById("viewerNote").innerHTML =
+      /* The roles they hold, not a level. Several is normal — group CEO who
+         also owns Care reads "Group CEO · Business unit owner". */
+      (personRoles(v).map(function(r){ return roleName(r.role); })
+        .filter(function(x, i, a){ return a.indexOf(x) === i; }).join(" &middot; ") || "No role") +
+      " &middot; " + where;
 
     if (!current) {
       paintBuildBand();
@@ -2017,11 +2005,6 @@
        (searchsel.js) — the native control stays where it is, so nothing wire()
        just attached is disturbed. */
     SEARCHSEL.wire();
-    /* AND THE MONTH PANEL GOES (§177). It is mounted on <body> so a repaint
-       cannot take it with the button it belongs to — it would be left hanging
-       over a page it no longer points at. Same reason SEARCHSEL.wire() closes
-       its own popup first (§30.1). */
-    MONTHPOP.shut();
     /* The office's inbox, if this paint drew it. It binds ONCE per rendered
        frame and then fills and refreshes itself on its own clock — nothing in
        it ever calls paint(), or a reply being typed would be thrown away every
@@ -2271,231 +2254,34 @@
      press landed on. When the page holds none, the walk goes to the first
      PLACE still owing — through the band's own chip, so the two ways of
      moving cannot disagree about where a place is. */
-  /* ── WALKING THE GAPS (§145.14, made to work in §177.2) ──────────────
-     Islam, pressing it: *"the CUS01 3 button just opens the project and the
-     next gap does nothing."* Three faults, and each hid the next.
-
-     1 · THE SELECTOR WAS AN ELEMENT TYPE. `.fld.gapfld` means an input or a
-         select wearing fill mode's class, so §177's month picker — a BUTTON —
-         was invisible to it, and on a project whose only gaps are due dates
-         the walker found nothing and fell back to clicking the chip for the
-         page it was already on. `.gapwalk` is the marker now, put on by
-         gapCell in both modes and carrying no styling of its own.
-     2 · AN AUTHOR'S FIELDS WERE NEVER MARKED AT ALL, so this had never done
-         anything in the office's pen — the loudest button on the bar, dead
-         for the person who uses it most.
-     3 · IT USED `document.activeElement` AS ITS CURSOR, and pressing the
-         button moves focus TO THE BUTTON, so every press computed "I am
-         nowhere" and lit the first field again. It reads the lit element
-         instead, which nothing but this function touches.
-
-     AND IT CROSSES PLACES, because the button says "N left" of the whole
-     subject: exhaust this page and it presses the next chip that still owes,
-     then walks that page's first gap — behind `setTimeout`, because a real
-     press holds the paint until the click lands (§30.1, §145.14). */
-  function gapWalkFields(place){
-    /* Scoped to ONE place when a chip has just named one -- a function's
-       projects page draws every capability at once, so the page's first gap
-       is not the chip's first gap (§177.2). */
-    var root = document;
-    if (place) root = document.querySelector('[data-gplace="' +
-      place.replace(/"/g, '\\"') + '"]') || document;
-    return [].slice.call(root.querySelectorAll(".gapwalk, .qs-fill"));
-  }
-  function gapLight(el){
-    document.querySelectorAll(".gaplit").forEach(function(e){ e.classList.remove("gaplit"); });
-    /* THE CURSOR IS MARKED ON THE WALKABLE ELEMENT, NOT ON THE LIT ONE. For a
-       §130.1 picker those are two different nodes -- the native select is
-       hidden and its `.ssbtn` is what gets the ring -- and the ssbtn is a
-       SIBLING, so a cursor read back off the lit element found nothing among
-       the fields and every press lit the first one again (§34: whoever hides
-       a field hides its furniture, and whoever walks to one must still know
-       which field it was). */
-    document.querySelectorAll("[data-gapat]").forEach(function(e){
-      e.removeAttribute("data-gapat"); });
-    el.setAttribute("data-gapat", "1");
-    /* §130.1's pickers are searchsel-enhanced: the native select is HIDDEN in
-       place with a button in front of it, so ringing the select itself lights
-       nothing anybody can see (§34: whoever hides a field hides its
-       furniture — and whoever walks to one walks to its furniture). */
-    var lit = el;
+  function gapWalk(){
+    var els = [].slice.call(document.querySelectorAll(".fld.gapfld, .qs-fill"));
+    if (!els.length){
+      var chip = document.querySelector("[data-gapband] .mchip:not(.done)");
+      if (chip) chip.click();
+      return;
+    }
+    var cur = document.activeElement, at = -1;
+    for (var i = 0; i < els.length; i++)
+      if (cur && (els[i] === cur || els[i].contains(cur))) { at = i; break; }
+    var next = els[(at + 1) % els.length];
+    /* §130.1's pickers are searchsel-enhanced: the native select is HIDDEN
+       in place with a button in front of it, so ringing or focusing the
+       select itself lights nothing anybody can see (§34: whoever hides a
+       field hides its furniture — and whoever walks to one walks to its
+       furniture). */
+    var lit = next;
     if (lit.previousElementSibling && lit.previousElementSibling.classList &&
         lit.previousElementSibling.classList.contains("ssbtn"))
       lit = lit.previousElementSibling;
+    els.forEach(function(e){ e.classList.remove("gaplit"); });
+    document.querySelectorAll(".ssbtn.gaplit").forEach(function(e){ e.classList.remove("gaplit"); });
     lit.classList.add("gaplit");
     lit.scrollIntoView({ block: "center" });
     var f = lit.matches("input,select,textarea,button")
       ? lit : lit.querySelector("button,input,select,textarea");
     if (f) f.focus({ preventScroll: true });
   }
-  /* The first place that still owes and is NOT already on the screen.
-     A FUNCTION'S PROJECTS PAGE DRAWS EVERY CAPABILITY AT ONCE, each with its
-     own rail, so several chips can be showing at the same moment — "the next
-     chip after the current one" picked one of those and the walk appeared to
-     wrap without going anywhere. Asked as "is this one visible" instead,
-     which is the same question a unit's single rail answers trivially. */
-  function gapChipShown(c){
-    /* RAIL_SHOWN, not RAIL: the first holds what the renderer DREW, the
-       second only what somebody has picked, and on a page nobody has clicked
-       the second is empty while the panes are plainly there (§177.2). */
-    return (!c.dataset.grail || RAIL_SHOWN[c.dataset.grail] === c.dataset.gcode) &&
-           (!c.dataset.gsec || CURSEC[currentSub] === c.dataset.gsec);
-  }
-  function gapChips(){
-    return [].slice.call(document.querySelectorAll("[data-gapband] .mchip:not(.done)"));
-  }
-  function gapPlaceOfChip(c){
-    return c && c.dataset.grail ? c.dataset.grail + "|" + c.dataset.gcode : null;
-  }
-  /* WHICH CHIP'S PLACE WE ARE WALKING. Remembered across paints, because
-     landing on a place repaints the page and the answer has to survive that;
-     falls back to the first place that is actually on screen, which is what
-     the first press of all needs. */
-  var GAPWALK_KEY = null;
-  function gapChipAt(chips){
-    for (var i = 0; i < chips.length; i++)
-      if (chips[i].dataset.gkey === GAPWALK_KEY) return i;
-    for (var j = 0; j < chips.length; j++) if (gapChipShown(chips[j])) return j;
-    return -1;
-  }
-  function gapGoTo(chip){
-    GAPWALK_KEY = chip.dataset.gkey;
-    var place = gapPlaceOfChip(chip);
-    chip.click();
-    setTimeout(function(){
-      var f = gapWalkFields(place);
-      if (!f.length) f = gapWalkFields();
-      if (f.length) gapLight(f[0]);
-    }, 0);
-  }
-  function gapWalk(){
-    var chips = gapChips();
-    var i = gapChipAt(chips);
-    var els = gapWalkFields(i >= 0 ? gapPlaceOfChip(chips[i]) : null);
-    var cur = document.querySelector("[data-gapat]");
-    var at = cur ? els.indexOf(cur) : -1;
-    if (els.length && at < els.length - 1) return gapLight(els[at + 1]);
-    /* Exhausted here. THE NEXT PLACE IN THE BAND'S OWN ORDER, not the first
-       one that happens to be off screen -- taking the first sent the walk
-       between two places for ever and never reached the third.
-
-       AND WHAT IS SKIPPED IS THE SAME PAGE, NOT WHAT IS VISIBLE. Skipping
-       every chip already on screen looked right and was not: a function's
-       projects page draws several capabilities at once, so a project that was
-       plainly visible had never been WALKED -- the field list is scoped to one
-       place. Two chips are the same page when they name the same place, or
-       when neither names one and both sit in the same section (a unit's
-       Foundation and Objectives are two chips over one page). */
-    var here = i >= 0 ? gapPlaceOfChip(chips[i]) : null;
-    var hereSec = i >= 0 ? (chips[i].dataset.gsec || "") : "";
-    var n = chips.length;
-    for (var step = 1; step <= n; step++) {
-      var c = chips[((i < 0 ? 0 : i) + step) % n];
-      var cp = gapPlaceOfChip(c);
-      var samePage = cp === here &&
-        (cp !== null || (c.dataset.gsec || "") === hereSec);
-      if (!samePage) return gapGoTo(c);
-    }
-    if (els.length) gapLight(els[0]);
-  }
-    /* ── THE MONTH PICKER (§177) ────────────────────────────────────────
-       A due date is chosen, never typed. The button carries the FIELDS index
-       and the month and year it is currently showing; the panel is built by
-       monthPopHtml() and mounted on <body> as position:fixed, because a
-       project's tables sit inside `.tblscroll` and an absolute panel is
-       clipped to a strip of it (§45.5 settled this for searchsel).
-
-       PICKING FIRES THE SETTER AND NOTHING ELSE. `data-fld` writes without
-       repainting (§71.2), and this is the same contract: close the panel
-       FIRST -- the click is still inside it (§30.1) -- then write, then let
-       paint() run, which is what turns the red button amber. Stepping the
-       year rebuilds only the panel, so the year can be walked without
-       committing anything. */
-  var MONTHPOP = (function(){
-      var open = null;
-      var shut = function(){
-        if (!open) return;
-        open.pop.remove();
-        open.btn.classList.remove("open");
-        open.btn.setAttribute("aria-expanded", "false");
-        document.removeEventListener("pointerdown", open.onDoc, true);
-        document.removeEventListener("keydown", open.onKey, true);
-        window.removeEventListener("scroll", open.onGone, true);
-        window.removeEventListener("resize", open.onGone, true);
-        open = null;
-      };
-      var place = function(btn, pop){
-        var r = btn.getBoundingClientRect();
-        var h = pop.offsetHeight, w = pop.offsetWidth;
-        var below = window.innerHeight - r.bottom - 8;
-        var top = (below >= h || r.top < h + 8) ? r.bottom + 4 : r.top - h - 4;
-        var left = Math.min(r.left, Math.max(8, window.innerWidth - w - 8));
-        pop.style.top = Math.max(8, top) + "px";
-        pop.style.left = left + "px";
-      };
-      var draw = function(btn){
-        var mi = btn.dataset.mi === "" ? null : +btn.dataset.mi;
-        var yr = +btn.dataset.yr;
-        /* The lit month belongs to the year it was set in: step to 2027 and
-           nothing is lit, step back and Jul lights again. */
-        open.pop.innerHTML = monthPopHtml(mi, yr, yr === open.setYear);
-        place(btn, open.pop);
-      };
-      var write = function(value){
-        var btn = open.btn, i = +btn.dataset.month;
-        shut();
-        var fn = FIELDS[i];
-        if (!fn) return;
-        fn(value);
-        fieldSaved();
-        paint();
-      };
-      document.addEventListener("click", function(ev){
-        var btn = ev.target.closest && ev.target.closest("[data-month]");
-        if (btn) {
-          var was = open && open.btn === btn;
-          shut();
-          if (was) return;
-          var pop = document.createElement("div");
-          pop.className = "monthpop";
-          pop.setAttribute("role", "dialog");
-          pop.setAttribute("aria-label", "Pick a month");
-          document.body.appendChild(pop);
-          var onDoc = function(e){
-            if (!pop.contains(e.target) && !btn.contains(e.target)) shut();
-          };
-          var onKey = function(e){ if (e.key === "Escape") { shut(); btn.focus(); } };
-          var onGone = function(e){ if (!pop.contains(e.target)) shut(); };
-          open = { btn: btn, pop: pop, onDoc: onDoc, onKey: onKey, onGone: onGone,
-                   setYear: +btn.dataset.yr };
-          /* Nothing is lit until a month has been set: an empty cell must not
-             open with July already looking chosen (§15.1, absent never zero). */
-          if (btn.dataset.mi === "") open.setYear = null;
-          btn.classList.add("open");
-          btn.setAttribute("aria-expanded", "true");
-          draw(btn);
-          document.addEventListener("pointerdown", onDoc, true);
-          document.addEventListener("keydown", onKey, true);
-          window.addEventListener("scroll", onGone, true);
-          window.addEventListener("resize", onGone, true);
-          return;
-        }
-        if (!open) return;
-        var step = ev.target.closest("[data-myr]");
-        if (step && open.pop.contains(step)) {
-          open.btn.dataset.yr = +open.btn.dataset.yr + (+step.dataset.myr);
-          draw(open.btn);
-          return;
-        }
-        var pick = ev.target.closest("[data-mpick]");
-        if (pick && open.pop.contains(pick))
-          return write(monthValue(+pick.dataset.mpick, +open.btn.dataset.yr));
-        if (ev.target.closest("[data-mclear]") && open.pop.contains(ev.target))
-          return write("");
-      });
-      return { shut: shut };
-    })();
-
   function wire(){
     /* `[data-s]`, NOT every button in the row (§150.1). The row gained a
        second kind of child when the reporting controls moved onto it, and
@@ -4963,33 +4749,6 @@
         paintMsgPreview();
       });
     });
-    /* ── THE LINK IS COMPLETED WHERE IT IS TYPED (spec 027) ─────────
-       Islam typed `smp-orpin-tau.vercel.app` and the message went out with it
-       verbatim. In an email that is not an address at all — there is no base
-       document for it to be relative to — so the mail client handed it to
-       macOS, which looked for a file of that name and answered "-50". The
-       button was dead for everybody who pressed it.
-
-       ON `change`, WHICH FOR A TEXT BOX MEANS ON BLUR (§35) — never on
-       `input`, or `https://` would appear in front of the third character
-       somebody typed and the caret would sit behind it. So it happens once,
-       when they have finished, and it is WRITTEN INTO THE FIELD: seeing the
-       scheme appear IS the explanation, and a value quietly corrected on the
-       way out is one nobody can check (§124 — whatever reads a value cleans
-       it, rather than an instruction to go and look).
-
-       NOTHING IS REFUSED HERE. A half-typed address is a normal thing to have
-       in a box you are still filling in; the refusal belongs at the moment of
-       sending, where there is something to refuse. */
-    var ctahref = document.getElementById("msgctahref");
-    if (ctahref) ctahref.addEventListener("change", function(){
-      var fixed = SMPRules.webUrl(ctahref.value);
-      if (!fixed || fixed === ctahref.value.trim()) return;
-      ctahref.value = fixed;
-      sendmsg().ctaHref = fixed;
-      sendmsgTouched();
-      paintMsgPreview();
-    });
 
     /* THE OVERVIEW'S ONE LOUD CONTROL (§144.8). It moves to the other tab
        rather than doing anything itself — the composer is where the act
@@ -5251,18 +5010,6 @@
       if (!sendmsgHasAny()) return say("Choose who it goes to first.", false);
       if (!st.subject.trim()) return say("It needs a subject.", false);
       if (!st.body.trim()) return say("It needs something in it.", false);
-      /* ── A BUTTON THAT CANNOT OPEN IS REFUSED (spec 027) ──────────
-         The blur above completes anything that CAN be completed, so what is
-         left here is a value no amount of tidying makes into a web address —
-         and the alternative to saying so is what happened: the message goes,
-         and every person who presses the button gets their operating system's
-         refusal instead of the platform. The one moment this can still be
-         stopped is before the confirmation, so it is checked here rather than
-         inside reallySend(), where a person has already said yes. */
-      if (st.ctaHref.trim() && !SMPRules.webUrl(st.ctaHref))
-        return say("The button's link is not a web address, so it would not open " +
-                   "for anybody. Give it one starting https:// — or clear it " +
-                   "to send with no button.", false);
       var n = (st.aud && st.aud.to) ? st.aud.to.length : 0;
       if (!n) return say("That comes to nobody with an address.", false);
       /* ── THE CONFIRMATION IS THE PLATFORM'S OWN (§95) ──────────────
@@ -5346,10 +5093,8 @@
              server fills it once per recipient, because who they are is the
              server's answer (spec 022, §74.2). */
           greeting: st.greet == null ? null : { word: st.greet },
-          /* THROUGH THE RULE, never the raw box: the two sends and the
-             preview must draw the same link, and it must be one that opens. */
-          cta: (st.ctaLabel.trim() && SMPRules.webUrl(st.ctaHref))
-                 ? { label: st.ctaLabel.trim(), href: SMPRules.webUrl(st.ctaHref) } : null
+          cta: (st.ctaLabel.trim() && st.ctaHref.trim())
+                 ? { label: st.ctaLabel.trim(), href: st.ctaHref.trim() } : null
         })
       }, function(err, j){
         msgsend.disabled = false; st.busy = false;
@@ -5415,13 +5160,6 @@
       }
       if (!st.subject.trim()) return say("It needs a subject before it can be previewed.", false);
       if (!st.body.trim()) return say("It needs something in it.", false);
-      /* THE SAME REFUSAL SEND MAKES (spec 027). A copy that quietly dropped the
-         button would be a preview of a message nobody can send — and the point
-         of a copy is to see what the recipients will see. */
-      if (st.ctaHref.trim() && !SMPRules.webUrl(st.ctaHref))
-        return say("The button's link is not a web address, so it would not open " +
-                   "for anybody. Give it one starting https:// — or clear it " +
-                   "to send with no button.", false);
       var me = (typeof SYNC !== "undefined" && SYNC.person && SYNC.person()) || null;
       var row = me ? PEOPLE.filter(function(p){ return p.key === me.key; })[0] : null;
       var addr = row ? String(row.email == null ? "" : row.email).trim() : "";
@@ -5444,10 +5182,8 @@
              there is one recipient and the browser knows who they are. */
           greeting: st.greet == null ? null
                       : { word: st.greet, name: SMPRules.firstName(row) },
-          /* THROUGH THE RULE, never the raw box: the two sends and the
-             preview must draw the same link, and it must be one that opens. */
-          cta: (st.ctaLabel.trim() && SMPRules.webUrl(st.ctaHref))
-                 ? { label: st.ctaLabel.trim(), href: SMPRules.webUrl(st.ctaHref) } : null
+          cta: (st.ctaLabel.trim() && st.ctaHref.trim())
+                 ? { label: st.ctaLabel.trim(), href: st.ctaHref.trim() } : null
         }),
         body: st.body.trim(),
         fromName: sh.fromName,
@@ -5885,20 +5621,6 @@
         if (chip.dataset.grail) RAIL[chip.dataset.grail] = chip.dataset.gcode;
         paint();
         if (typeof toPaneTop === "function") toPaneTop();
-        /* §177.2: AND IT LANDS ON THE GAP IT NAMED. Islam: *"the CUS01 3
-           button just opens the project."* It did exactly that — the chip
-           says how many are missing there and then left you to find them,
-           which on a project of five milestones is the work the button was
-           supposed to save. Queued, because a real press holds the paint
-           until the click lands (§30.1) and the fields do not exist until it
-           has (§145.14's own fault, in the control beside it). */
-        var place = chip.dataset.grail
-          ? chip.dataset.grail + "|" + chip.dataset.gcode : null;
-        setTimeout(function(){
-          var f = gapWalkFields(place);
-          if (!f.length) f = gapWalkFields();
-          if (f.length) gapLight(f[0]);
-        }, 0);
         return;
       }
       if (ev.target.closest("[data-fillcta]")) {

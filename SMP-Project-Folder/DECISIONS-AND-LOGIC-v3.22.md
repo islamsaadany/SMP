@@ -23129,6 +23129,12 @@ second — so it takes whichever of border or outline is actually painting, and
 asks *is there a ring of some kind, in a real colour* (§94.8: a check written
 against the problem survives the fix changing shape).
 
+**And `duplicates.py` was reaching for the band too** — §51.11's fault, and it
+**crashed rather than passing quietly**, which is the good way for that to fail:
+`Failed to find element matching selector "#modal-b .pdband"`. Moved to the new
+contract, and given the assertion the old one could not make — that the ringed
+box is **the Name**, which is the field that clears a name collision.
+
 **And that check's SUBJECT had drifted, which is its own lesson.** It opened
 `smo` to measure "the dialog is compact", and that was the ordinary form until
 §187 gave the SMO a seat over the group while they sit in the SMO function —

@@ -4128,6 +4128,15 @@
   .phead2 .pnocust { font-size:11.5px; font-weight:600; cursor:help;
     color:var(--warn-tx); background:var(--warn-bg); border-radius:var(--r-pill);
     padding:6px 11px; white-space:nowrap; }
+  /* ── HOW MANY HOLD A SEAT (§187) ────────────────────────────────────
+     QUIET, not amber. The chip beside it is a WARNING — a unit nobody is
+     keeping up to date — and this is a FACT that is true on every healthy
+     tenant: an office has seats, and saying so in alarm colours would cry
+     wolf on every page load until nobody read either of them (§41's budget,
+     from the other side). It reads as a value, and the hover is the list. */
+  .phead2 .pseats { font-size:11.5px; font-weight:600; cursor:help;
+    color:var(--ink-2); background:var(--surface-2); border-radius:var(--r-pill);
+    padding:6px 11px; white-space:nowrap; }
   /* ── THE ONE LOUD THING ON THE PAGE (§94.8's accent budget) ──────── */
   .attnbtn { display:inline-flex; align-items:center; gap:7px; border:0;
     background:var(--cta); color:var(--cta-ink); cursor:pointer;
@@ -6904,9 +6913,37 @@ body.presenting .tourdock { display:none; }
   font-size:var(--fs-small); max-width:min(340px, 60vw); }
 
 /* ── The navy band: greeting leads, tenant signs on the separator ───────── */
+/* ── THE ROLES STACK; THE TENANT HOLDS ITS PLACE (§187) ─────────────────
+   Islam: *"the roles can come under each other if that long, to avoid that
+   the company name and SMO section come down."*
+
+   The band was a flex row ALLOWED TO WRAP, so two long role chips filled the
+   line and the whole tenant block — the mark, the name, Strategy Management
+   Office — dropped underneath them. Measured, and it was not a narrow-window
+   problem: it happened at every width tested, 1440 included.
+
+       width   before            after
+       1440    294px, below      204px, beside
+       1100    294px, below      204px, beside
+        900    329px, below      239px, beside
+
+   `nowrap` with a flexible greeting is what makes the chips stack INSIDE
+   their own column instead of pushing the column beside them away. The cost
+   is stated: on a wide window the greeting is narrower, because the tenant
+   block now always reserves its width.
+
+   AND BELOW 820px THE OLD STACKING COMES BACK ON PURPOSE — that is the width
+   at which two columns stop being honest, and forcing them side by side
+   there would trade one broken layout for another. */
 .welcomeover .whero { background:var(--panel); color:var(--panel-ink);
   border-radius:var(--r-md); padding:30px 34px 28px; display:flex;
-  justify-content:space-between; align-items:center; gap:30px; flex-wrap:wrap; }
+  justify-content:space-between; align-items:stretch; gap:30px; flex-wrap:nowrap; }
+.welcomeover .wgreet { flex:1 1 0; min-width:0; }
+.welcomeover .wtenant { flex:0 0 auto; }
+@media (max-width:820px){
+  .welcomeover .whero { flex-wrap:wrap; align-items:center; }
+  .welcomeover .wgreet { flex:1 1 auto; }
+}
 .welcomeover .wkick { font-size:var(--fs-micro); letter-spacing:.18em;
   text-transform:uppercase; color:var(--panel-accent); font-weight:700; margin:0 0 10px; }
 .welcomeover .wgreet h2 { margin:0 0 12px; font-size:30px; font-weight:800;
@@ -8013,8 +8050,26 @@ THEME.apply();
     if (!p) return [];
     if (!personActive(p)) return [];   /* a retired person holds nothing */
     var out = [];
-    var seat = p.role || (p.level === "smo" ? "super"
-                        : p.level === "ceo" ? (p.company ? "cceo" : "gceo") : null);
+    /* ── THE SEAT IS GRANTED, NEVER DERIVED (§187) ────────────────────
+       Islam: *"level smo shouldn't be a super user — super user is only
+       granted by the super user in the registry, for now."*
+
+       This read `p.level` as a fallback: the pre-§33 field that levels used
+       before roles replaced them. Nothing in the product has written it for
+       fifty versions — it survives only in two dead prototype files that are
+       not in the build — but `personRoles()` is what BOTH sides ask, so a
+       person object carrying `level:"smo"` derived Super user on the screen
+       AND on the server, and an unrecognised key on a person round-trips
+       through `people.extra` untouched. An ungated fallback nobody was
+       watching, which is the exact shape of the thing §186 was about.
+
+       THE COST IS STATED, NOT GLOSSED: if any row on any tenant still relies
+       on `level` and has no `role`, that person loses the seat and it is
+       granted again on the register — which is where Islam has said seats
+       come from. §33's migration set `role` on every row it moved, so no row
+       should be in that state; a row that is, was never migrated and is a
+       thing to find rather than to keep working by accident. */
+    var seat = p.role || null;
     if (seat) out.push({ role: seat, at: p.company ? "co:" + p.company : (p.at || "group") });
 
     w.unitKeys.forEach(function (k) {
@@ -8404,13 +8459,22 @@ THEME.apply();
        so only a tactic with NO quarter at all is a gap (§128) — and while
        that fill is pending the four move together.
 
-       `collaborators` joined at Islam's direction (§145.10, reversing
-       this section's own first exclusion): an EMPTY list is a gap, an
-       existing list is never the filler's — and because being named is
-       what lets a Contributor report the line (§50.2), a pending name
-       CONFERS NOTHING until the office confirms: namedOn() below skips
-       any field still wearing the mark. */
-    tactic:  ["owner", "collaborators", "quarters"],
+       `collaborators` IS OUT AGAIN (§187, reversing §145.10 at Islam's
+       direction: *"remove the missing collaborators as missing items"*).
+       §145.10 put it in — itself reversing this section's first exclusion —
+       on the reasoning that an empty list is a place the plan holds
+       nothing. It is not: a tactic with nobody supporting it is a tactic
+       ONE person owns, which is an ordinary and complete way to write a
+       line, and every one of them was being counted as owing something.
+       An optional blank is not a gap (§119.1's own rule, which the deck
+       has followed for collaborators all along) — so this brings the fill
+       count into line with what the deck already declined to mark.
+
+       Recorded as a reversal rather than overwritten, per Principle II:
+       the machinery §145.10 built is untouched and one word gives it back.
+       The `owner` stays, because a line nobody owns is a line nobody can
+       report. */
+    tactic:  ["owner", "quarters"],
     capko:   ["dir", "target", "compile", "weight"],
     project: ["owner", "start", "end"],
     /* §177: THE PAGE ALREADY CALLED THESE MISSING. A project pane prints the
@@ -29717,6 +29781,39 @@ function renderPeople(){
       'Strategy custodian role from their row here.">' +
       plural(noCust.length, "unit") + ' with no custodian</span>';
 
+  /* ── AND HOW MANY PEOPLE HOLD A SEAT (§187) ────────────────────────
+     Islam, after §186: *"where will I find this out if it's applied to anyone
+     else?"* The attention queue catches a seat sitting somewhere other than
+     where its holder does — which is the shape an accident takes — and it
+     is deliberately quiet about a seat held BY somebody who sits at the group,
+     because for them the two agree and there is nothing anomalous to say.
+
+     THAT LEAVES A HOLE, and this closes it: a plain total that cannot be
+     quiet about anybody. It is the register's own equivalent of the
+     custodian chip above — the one outstanding thing on this page that is
+     not a QUESTION about a person, so it is not a stop in a queue; it is a
+     fact you go and read.
+
+     ALWAYS DRAWN, unlike the chip beside it, and that is the point. A count
+     that vanishes at some number is a count you cannot trust to be
+     complete — and this one exists precisely to be the complete list. It
+     names them on the hover in the order the register holds them. */
+  var seatHolders = PEOPLE.filter(function(p){
+    return personActive(p) &&
+      SMPRules.personRoles(world(), p).some(function(r){
+        return SMPRules.isSeatRole(r.role); });
+  });
+  var seatChip = !mayEdit ? "" :
+    '<span class="pseats" title="' +
+      esc(seatHolders.map(function(p){
+        return p.name + " \u2014 " + SMPRules.personRoles(world(), p)
+          .filter(function(r){ return SMPRules.isSeatRole(r.role); })
+          .map(function(r){ return roleName(r.role); }).join(", ");
+      }).join("\n")) + '\n\nA seat is granted by the Super user on this ' +
+      'register and by nothing else. Take one off with the \u00d7 on the chip ' +
+      'in the Roles column.">' +
+      plural(seatHolders.length, "person", "people") + ' hold a seat</span>';
+
   /* NO BADGE AND NO COUNT LINE (§122). Islam: "the SMO badge remove it and
      remove the 77 people active text ... and accordingly the whole table
      should be just below the buttons line."
@@ -29735,7 +29832,7 @@ function renderPeople(){
       [],
       "people", false, null, null,
       '<span class="hsearch">' + tkSearchOnly("people", "Search the register\u2026") + '</span>' +
-      attnBtn + noCustChip + addBtn + fileMenu + colMenu + pwMenu) +
+      attnBtn + noCustChip + seatChip + addBtn + fileMenu + colMenu + pwMenu) +
 
     section("", "",
       null,
@@ -37574,7 +37671,13 @@ var CHAT = (function(){
       if (box.tab === "waiting" && !t.waiting) return false;
       if (box.tab === "flagged" && !(+t.flagged > 0)) return false;
       if (!q) return true;
+      /* SEARCHED BY BOTH (§187). Typing what is ON SCREEN has to find the
+         row — and a typed short name is not always a prefix of the full one
+         (§93.8: `known` is stored, not derived), so matching the full name
+         alone would leave exactly those people unfindable. */
       return String(t.live_name || t.person_name || "").toLowerCase().indexOf(q) > -1 ||
+             String(nameOf(t.person_key, t.live_name || t.person_name) || "")
+               .toLowerCase().indexOf(q) > -1 ||
              String(t.last_body || "").toLowerCase().indexOf(q) > -1;
     });
   }
@@ -37626,10 +37729,23 @@ var CHAT = (function(){
     rows.forEach(function(t){
       var g = t.waiting ? "Waiting on us" : "Answered";
       if (g !== group) { group = g; out.push('<div class="chqsep">' + g + "</div>"); }
-      var last = (t.last_from_office ? ((t.last_by || "Office") + ": ") : "") + (t.last_body || "");
+      /* §187: THE LIST SAYS THE NAME, NOT THE FULL LEGAL ONE. §181 did the
+         thread, the inbox heading and both reply placeholders and stopped at
+         the QUEUE — a different builder, and the one place the office spends
+         most of its time looking. `last_by` is a name with no key beside it,
+         so it goes through the same reader with the raw value as its
+         fallback, where `knownGuess()` shortens it (§130.7's rule). */
+      var last = (t.last_from_office ? (nameOf(null, t.last_by) || "Office") + ": " : "") +
+                 (t.last_body || "");
       out.push('<button class="chqrow' + (box.person === t.person_key ? " on" : "") + '" ' +
         'type="button" data-chpick="' + esc2(t.person_key) + '">' +
-        '<span class="chnm">' + esc2(t.live_name || t.person_name || t.person_key) + "</span>" +
+        /* THE FULL NAME MOVES TO THE HOVER, never away (§181, §93.8): two
+           people whose short names read alike are still two rows, and the
+           register's own reader is what lengthens the guess for them. */
+        '<span class="chnm" title="' +
+          esc2(t.live_name || t.person_name || t.person_key) + '">' +
+          esc2(nameOf(t.person_key, t.live_name || t.person_name) || t.person_key) +
+        "</span>" +
         '<span class="chtm">' + esc2(when(t.last_at)) + "</span>" +
         '<span class="chsn">' + esc2(last) + "</span>" +
         (+t.unread > 0 ? '<span class="chun">' + (+t.unread) + "</span>" : "") +

@@ -68,6 +68,31 @@ Nothing proceeds past this line without an answer.
 
 ## Built and verified
 
+### v3.75 — a seat is granted, never derived, and four small ones (§187)
+
+- **`level: "smo"` no longer makes anybody a Super user.** The role rules read
+  a field from before roles existed, so a person carrying it derived Super
+  user on the screen *and* on the server. Nothing has written it for fifty
+  versions — which is what made it dangerous. Islam's instruction: a seat is
+  granted on the register and nothing else.
+- **"N people hold a seat" on the register**, with every holder on the hover.
+  This closes the hole I measured and told him about: the attention queue is
+  deliberately quiet about a seat held by somebody who sits at the group.
+  Always drawn — a count that vanishes cannot be trusted to be complete.
+- **Collaborators are no longer a missing item** (reversing §145.10 at his
+  direction). A tactic with nobody supporting it is one person's to run.
+- **The welcome header** at 204px — his pick from the mockup. The tenant block
+  held its place at every width tested; below 820px it stacks again on
+  purpose, and that is asserted.
+- **The chat inbox list shows the name, not the full one.** §181 did the
+  thread and stopped at the queue — a different builder. Search matches both.
+- Proof: `checks/seat-count-and-small.py` is new, every assertion at both
+  ends, **9 red** on main's build. `test-authorize.js` §22 added and its
+  collaborators block moved to the new contract — **352 passed**.
+- **Out of this round by his call:** the Overview redesign and the
+  squeezed-window damage. **The chat caret** is banked with his answer — it
+  happens while typing, after a few seconds, which points at the poll.
+
 ### v3.74 — a seat is not an ordinary role (§186)
 
 - **It was not impossible, and I had said it was.** The register's role picker

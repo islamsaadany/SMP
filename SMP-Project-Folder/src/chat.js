@@ -911,7 +911,13 @@ var CHAT = (function(){
       if (box.tab === "waiting" && !t.waiting) return false;
       if (box.tab === "flagged" && !(+t.flagged > 0)) return false;
       if (!q) return true;
+      /* SEARCHED BY BOTH (§187). Typing what is ON SCREEN has to find the
+         row — and a typed short name is not always a prefix of the full one
+         (§93.8: `known` is stored, not derived), so matching the full name
+         alone would leave exactly those people unfindable. */
       return String(t.live_name || t.person_name || "").toLowerCase().indexOf(q) > -1 ||
+             String(nameOf(t.person_key, t.live_name || t.person_name) || "")
+               .toLowerCase().indexOf(q) > -1 ||
              String(t.last_body || "").toLowerCase().indexOf(q) > -1;
     });
   }
@@ -963,10 +969,23 @@ var CHAT = (function(){
     rows.forEach(function(t){
       var g = t.waiting ? "Waiting on us" : "Answered";
       if (g !== group) { group = g; out.push('<div class="chqsep">' + g + "</div>"); }
-      var last = (t.last_from_office ? ((t.last_by || "Office") + ": ") : "") + (t.last_body || "");
+      /* §187: THE LIST SAYS THE NAME, NOT THE FULL LEGAL ONE. §181 did the
+         thread, the inbox heading and both reply placeholders and stopped at
+         the QUEUE — a different builder, and the one place the office spends
+         most of its time looking. `last_by` is a name with no key beside it,
+         so it goes through the same reader with the raw value as its
+         fallback, where `knownGuess()` shortens it (§130.7's rule). */
+      var last = (t.last_from_office ? (nameOf(null, t.last_by) || "Office") + ": " : "") +
+                 (t.last_body || "");
       out.push('<button class="chqrow' + (box.person === t.person_key ? " on" : "") + '" ' +
         'type="button" data-chpick="' + esc2(t.person_key) + '">' +
-        '<span class="chnm">' + esc2(t.live_name || t.person_name || t.person_key) + "</span>" +
+        /* THE FULL NAME MOVES TO THE HOVER, never away (§181, §93.8): two
+           people whose short names read alike are still two rows, and the
+           register's own reader is what lengthens the guess for them. */
+        '<span class="chnm" title="' +
+          esc2(t.live_name || t.person_name || t.person_key) + '">' +
+          esc2(nameOf(t.person_key, t.live_name || t.person_name) || t.person_key) +
+        "</span>" +
         '<span class="chtm">' + esc2(when(t.last_at)) + "</span>" +
         '<span class="chsn">' + esc2(last) + "</span>" +
         (+t.unread > 0 ? '<span class="chun">' + (+t.unread) + "</span>" : "") +

@@ -22628,3 +22628,135 @@ picker **on the row**, which §116 moved into the person dialog, and it set
 paint reads a modal that only the opener creates (§51.11, §70).
 
 345 server assertions pass; `qa.py` clean.
+
+---
+
+## §187 · A seat is granted and never derived, a count that cannot be quiet, and three small ones
+
+Islam's round after §186, in his order.
+
+---
+
+### 1 · `level: "smo"` is not a Super user
+
+*"level smo shouldn't be a super user — super user is only granted by the super
+user in the registry, for now."*
+
+`personRoles()` read `p.level` — the pre-§33 field, from before roles replaced
+levels — as a fallback beside `p.role`. So a person object carrying
+`level:"smo"` derived **Super user**, on the screen AND on the server, because
+`personRoles()` is the one function both sides ask. And an unrecognised key on
+a person round-trips through `people.extra` untouched, so once it landed it
+would stay.
+
+**Nothing in the product has written it for fifty versions** — it survives only
+in two dead prototype files that are not in the build — which is exactly what
+made it dangerous: an ungated fallback nobody was watching, §186's shape in a
+second place.
+
+**THE COST IS STATED, NOT GLOSSED.** If any row on any tenant still relies on
+`level` and has no `role`, that person loses the seat and it is granted again
+on the register — which is where Islam has said seats come from. §33's
+migration set `role` on every row it moved, so no row should be in that state;
+one that is was never migrated, and is a thing to find rather than to keep
+working by accident.
+
+---
+
+### 2 · "N people hold a seat"
+
+*"where will I find this out if it's applied to anyone else?"*
+
+§186's attention queue catches a seat sitting somewhere other than where its
+holder sits — the shape an accident takes — and is deliberately quiet about a
+seat held **by somebody who sits at the group**, because for them the two agree
+and there is nothing anomalous to say. Measured, and stated to Islam as a hole
+before this was built.
+
+So the register carries a plain total that cannot be quiet about anybody, with
+every holder named on the hover. It is the register's own equivalent of the
+missing-custodian chip beside it: **the outstanding thing on this page that is
+not a question about a person**, so not a stop in a queue — a fact you go and
+read.
+
+**ALWAYS DRAWN, unlike the chip beside it, and that is the point.** A count
+that vanishes at some number is a count you cannot trust to be complete, and
+this one exists precisely to be the complete list.
+
+**QUIET, NOT AMBER.** The chip beside it is a warning; this is a fact true on
+every healthy tenant. Alarm colours here would cry wolf on every page load
+until nobody read either of them (§41's budget, from the other side).
+
+---
+
+### 3 · Collaborators are not a missing item
+
+*"remove the missing collaborators as missing items."* **Reversing §145.10**,
+which itself reversed §145's first exclusion.
+
+§145.10 made an empty collaborators list fillable on the reasoning that it is
+a place the plan holds nothing. It is not: **a tactic with nobody supporting it
+is a tactic one person owns**, which is an ordinary and complete way to write a
+line — and every one of them was being counted as owing something. An optional
+blank is not a gap, which is §119.1's own rule and the reason the DECK has
+never marked these.
+
+The `owner` stays: a line nobody owns is a line nobody can report. The
+machinery §145.10 built is untouched and one word gives it back.
+
+---
+
+### 4 · The welcome header
+
+His pick from the mockup. `.whero` was a flex row **allowed to wrap**, so two
+long role chips filled the line and the whole tenant block dropped beneath
+them — at **every width measured, 1440 included**:
+
+| width | before | after |
+|---|---|---|
+| 1440 | 294px, tenant below | 204px, tenant beside |
+| 1100 | 294px, tenant below | 204px, tenant beside |
+| 900 | 329px, tenant below | 239px, tenant beside |
+
+`nowrap` with a flexible greeting is what makes the chips stack INSIDE their
+own column rather than pushing the column beside them away. **Below 820px the
+old stacking comes back on purpose** — that is the width at which two columns
+stop being honest — and it is asserted, so it never reads as a regression.
+
+---
+
+### 5 · The chat inbox list says the name
+
+§181 shortened the thread, the inbox heading and both reply placeholders and
+**stopped at the queue** — a different builder, and the one place the office
+spends most of its time looking. The full name moves to the hover, never away
+(§93.8: two people whose short names read alike are still two rows).
+
+**AND THE SEARCH MATCHES BOTH.** Typing what is on screen has to find the row,
+and a typed short name is not always a prefix of the full one, so matching the
+full name alone would leave exactly those people unfindable.
+
+---
+
+### Proof
+
+`checks/seat-count-and-small.py` is new and every assertion is at **both ends**
+(§113.8): the fallback derives nothing AND a granted seat still does;
+collaborators are off the gap list AND the owner is still on it; the tenant
+block holds its place at three widths AND stacks again below 820. **The seat
+count is asserted as AGREEMENT with the register, never as a number** (§94.8),
+so a tenant with different people stays green and a count that drifts from its
+own source does not.
+
+**Proved able to fail: 9 red** against main's build.
+
+`scripts/test-authorize.js` gains **§22** (the fallback, both ends, asked of
+the rule AND through `authorize()`), and its §16 collaborators block moves to
+the new contract — it was asserting §145.10, which this reverses. **352 passed,
+0 failed.**
+
+**Deliberately not in this round** (Islam: *"out for now"*): the Overview panel
+redesign and the squeezed-window damage. **And the chat caret** — he has said
+it happens *while typing, after a few seconds*, which points at the poll
+refreshing the thread under a typing hand; recorded here so the next round
+starts from that rather than from a blank page.

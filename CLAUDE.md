@@ -365,6 +365,44 @@ console errors (in this cloud environment, run it via a wrapper that points Play
   `node scripts/test-door.js <smo-password>` against a running dev-server
   after touching `api/auth.js` or `lib/auth.js` (it ends by rate-limiting the
   SMO on purpose — `DELETE FROM login_attempts;` clears it).
+- **A SEAT IS GRANTED AND NEVER DERIVED (§187):** Islam — *"level smo
+  shouldn't be a super user — super user is only granted by the super user in
+  the registry, for now."* `personRoles()` read `p.level` (the pre-§33 field)
+  beside `p.role`, so a person carrying `level:"smo"` derived **Super user on
+  the screen AND on the server** — one function, both sides — and an
+  unrecognised key round-trips through `people.extra` untouched. Nothing has
+  written it for fifty versions, which is what made it dangerous: an ungated
+  fallback nobody was watching, §186's shape again. **The cost is stated**: a
+  row still relying on `level` with no `role` loses the seat and is granted
+  again on the register, which is where seats come from.
+- **A COUNT THAT CANNOT BE QUIET ABOUT ANYBODY (§187):** §186's queue catches
+  a seat sitting somewhere other than where its holder sits and is
+  deliberately silent about one held BY somebody who sits at the group — a
+  hole, measured and stated before this was built. So the register carries
+  **"N people hold a seat"**, every holder on the hover. **ALWAYS DRAWN**,
+  unlike the custodian chip beside it: a count that vanishes at some number
+  cannot be trusted to be complete, and this exists to be the complete list.
+  **Quiet, not amber** — the chip beside it is a warning, this is a fact true
+  on every healthy tenant, and alarm colours would cry wolf until nobody read
+  either (§41, from the other side). Asserted as AGREEMENT with the register,
+  never as a number (§94.8).
+- **COLLABORATORS ARE NOT A GAP (§187, reversing §145.10):** *"remove the
+  missing collaborators as missing items."* A tactic with nobody supporting
+  it is a tactic ONE person owns — a complete way to write a line — and every
+  one was being counted as owing something. An optional blank is not a gap
+  (§119.1, which is why the DECK never marked these). The `owner` stays: a
+  line nobody owns is a line nobody can report.
+- **THE WELCOME HEADER'S ROLES STACK (§187):** `.whero` was a flex row ALLOWED
+  TO WRAP, so two long chips pushed the whole tenant block below them — at
+  **every width, 1440 included** (294px → 204px). `nowrap` with a flexible
+  greeting stacks the chips INSIDE their column instead. **Below 820 the old
+  stacking returns on purpose** and is asserted, so it never reads as a
+  regression.
+- **THE CHAT INBOX LIST SAYS THE NAME (§187):** §181 shortened the thread, the
+  heading and both placeholders and **stopped at the queue** — a different
+  builder, and where the office actually looks. Full name to the hover, and
+  **the search matches both**, because a typed short name is not always a
+  prefix of the full one (§93.8).
 - **A SEAT IS NOT AN ORDINARY ROLE (§186):** Islam — *"hussein khaled is a
   custodian and getting the super user … you assured me that it's
   impossible."* **It was not.** The register's role picker is a plain

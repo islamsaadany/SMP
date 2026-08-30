@@ -2481,6 +2481,39 @@ function renderPeople(){
       'Strategy custodian role from their row here.">' +
       plural(noCust.length, "unit") + ' with no custodian</span>';
 
+  /* ── AND HOW MANY PEOPLE HOLD A SEAT (§187) ────────────────────────
+     Islam, after §186: *"where will I find this out if it's applied to anyone
+     else?"* The attention queue catches a seat sitting somewhere other than
+     where its holder does — which is the shape an accident takes — and it
+     is deliberately quiet about a seat held BY somebody who sits at the group,
+     because for them the two agree and there is nothing anomalous to say.
+
+     THAT LEAVES A HOLE, and this closes it: a plain total that cannot be
+     quiet about anybody. It is the register's own equivalent of the
+     custodian chip above — the one outstanding thing on this page that is
+     not a QUESTION about a person, so it is not a stop in a queue; it is a
+     fact you go and read.
+
+     ALWAYS DRAWN, unlike the chip beside it, and that is the point. A count
+     that vanishes at some number is a count you cannot trust to be
+     complete — and this one exists precisely to be the complete list. It
+     names them on the hover in the order the register holds them. */
+  var seatHolders = PEOPLE.filter(function(p){
+    return personActive(p) &&
+      SMPRules.personRoles(world(), p).some(function(r){
+        return SMPRules.isSeatRole(r.role); });
+  });
+  var seatChip = !mayEdit ? "" :
+    '<span class="pseats" title="' +
+      esc(seatHolders.map(function(p){
+        return p.name + " \u2014 " + SMPRules.personRoles(world(), p)
+          .filter(function(r){ return SMPRules.isSeatRole(r.role); })
+          .map(function(r){ return roleName(r.role); }).join(", ");
+      }).join("\n")) + '\n\nA seat is granted by the Super user on this ' +
+      'register and by nothing else. Take one off with the \u00d7 on the chip ' +
+      'in the Roles column.">' +
+      plural(seatHolders.length, "person", "people") + ' hold a seat</span>';
+
   /* NO BADGE AND NO COUNT LINE (§122). Islam: "the SMO badge remove it and
      remove the 77 people active text ... and accordingly the whole table
      should be just below the buttons line."
@@ -2499,7 +2532,7 @@ function renderPeople(){
       [],
       "people", false, null, null,
       '<span class="hsearch">' + tkSearchOnly("people", "Search the register\u2026") + '</span>' +
-      attnBtn + noCustChip + addBtn + fileMenu + colMenu + pwMenu) +
+      attnBtn + noCustChip + seatChip + addBtn + fileMenu + colMenu + pwMenu) +
 
     section("", "",
       null,

@@ -348,7 +348,7 @@ with sync_playwright() as p:
     a = state(dk)
     ck("outstanding: it is counted and it is in the queue",
        a["count"] == 1 and a["inQueue"] and a["outstanding"], a)
-    ck("...and wears the solid ring", a["glyph"] == "\u25ce" and not a["done"], a)
+    ck("...and wears the waiting ring", not a["done"], a)
 
     # BOTH CONTROLS, in the row's own dialog.
     pg.evaluate("(k)=>{PDLG={key:k,mode:'edit'};paint();}", dk)
@@ -366,27 +366,49 @@ with sync_playwright() as p:
        z["count"] == 0 and not z["inQueue"] and not z["outstanding"], z)
     ck("...but the CLAIM is still on record and readable",
        z["at"] == "fn:finance" and z["dismissed"] is True, z)
-    ck("...and the mark is a DIFFERENT GLYPH, not a different colour",
-       z["glyph"] == "\u25cc" and z["done"], z)
+    ck("...and the row's mark says answered",
+       z["done"], z)
 
-    # AND THE GLYPH DRAWS (§52, §120.2). A font subset maps far more than it
-    # has outlines for, so a mark can be mapped and ship as a blank box —
-    # and INK ALONE CANNOT SAY: an absent character renders a hollow
-    # rectangle, which has ink of its own. The test is whether the bitmap
-    # DIFFERS from the one a guaranteed-absent character produces.
-    drawn = pg.evaluate("""()=>{
-      const fam=getComputedStyle(document.querySelector('.saidmark')).fontFamily;
-      const draw=(ch)=>{const c=document.createElement('canvas');c.width=64;c.height=64;
-        const x=c.getContext('2d');x.fillStyle='#000';x.font='48px '+fam;
-        x.textBaseline='middle';x.fillText(ch,6,32);
-        return x.getImageData(0,0,64,64).data;};
-      const tofu=draw('\uE000');
-      const test=(ch)=>{const d=draw(ch);let n=0;
-        for(let i=3;i<d.length;i+=4) if(Math.abs(d[i]-tofu[i])>24) n++;
-        return Math.round(n/40.96)/10;};
-      return { dotted:test('\u25CC'), solid:test('\u25CE'), tofu:test('\uE000') };}""")
-    ck("both rings are drawn, not tofu boxes",
-       drawn["tofu"] < 1.0 and drawn["dotted"] >= 1.0 and drawn["solid"] >= 1.0, drawn)
+    # AND THE MARK IS VISIBLE, WHICH IS NOT THE SAME QUESTION (§185).
+    # §180 shipped `◎`/`◌` and measured them the wrong way: it asked whether
+    # each glyph DIFFERED from the tofu rectangle, which the dotted circle
+    # does — by about one pixel of ink. Re-measured in the font this mark
+    # actually computes to, the bullseye laid down 53 ink pixels and the
+    # dotted circle 29, against tofu's 28. So the answered mark was, to
+    # anybody looking at it, nothing at all: Islam, "I dismissed the case but
+    # the small mark is not there."
+    #
+    # A GLYPH THAT DIFFERS FROM TOFU BY ONE PIXEL PASSES "IT IS DRAWN" AND
+    # FAILS "IT IS A MARK." So the mark is CSS now, and what is asserted is
+    # what a person can see: two rings of the SAME footprint — the row must
+    # not move when one becomes the other (§88) — telling each other apart by
+    # being filled or open, never by ink alone at 9px.
+    marks = pg.evaluate("""()=>{
+      const one=(cls)=>{const e=document.createElement('span');
+        e.className='saidmark'+(cls?' '+cls:'');e.textContent='x';
+        document.body.appendChild(e);
+        const cs=getComputedStyle(e), r=e.getBoundingClientRect();
+        const o={w:Math.round(r.width),h:Math.round(r.height),
+                 border:parseFloat(cs.borderTopWidth),
+                 round:cs.borderTopLeftRadius,
+                 ink:cs.borderTopColor,
+                 filled:cs.backgroundColor!=='rgba(0, 0, 0, 0)'};
+        e.remove();return o;};
+      return {waiting:one(''), answered:one('done')};}""")
+    w, a = marks["waiting"], marks["answered"]
+    ck("the mark is a drawn ring, not a character that may not exist",
+       w["w"] >= 7 and w["border"] >= 1.5 and w["round"] == "50%", w)
+    ck("...and the two are the SAME size, so the row cannot move",
+       (w["w"], w["h"]) == (a["w"], a["h"]), marks)
+    ck("...and the same weight of ring, so neither is the faint one",
+       w["border"] == a["border"], marks)
+    # THE DIFFERENCE IS THE SHAPE. Colour alone was measured and rejected in
+    # §180's own mockup (gold against grey at 9px); this asserts that the
+    # shape still carries it, so a build that went back to two inks fails.
+    ck("waiting is FILLED and answered is OPEN",
+       w["filled"] and not a["filled"], marks)
+    ck("...and the ink moves with it rather than instead of it",
+       w["ink"] != a["ink"], marks)
 
     # A dismissed claim keeps the way back and loses the way it came.
     pg.evaluate("(k)=>{PDLG={key:k,mode:'edit'};paint();}", dk)

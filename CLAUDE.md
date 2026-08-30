@@ -365,6 +365,70 @@ console errors (in this cloud environment, run it via a wrapper that points Play
   `node scripts/test-door.js <smo-password>` against a running dev-server
   after touching `api/auth.js` or `lib/auth.js` (it ends by rate-limiting the
   SMO on purpose — `DELETE FROM login_attempts;` clears it).
+- **A SEAT IS NOT AN ORDINARY ROLE (§186):** Islam — *"hussein khaled is a
+  custodian and getting the super user … you assured me that it's
+  impossible."* **It was not.** The register's role picker is a plain
+  `<select>` and §92 grants a ONE-DESTINATION role on the pick — a seat has
+  one destination — so the most powerful grant in the product was a single
+  `change` event with nothing in between; the people workbook's Role column
+  is the same grant by another road. **One line stood behind both**:
+  `roleIsGrantable()` excluded only the derived floor roles and said nothing
+  about seats. **THE SERVER WAS ALWAYS RIGHT** (a seat move classifies as
+  `access`, §89), so the fault was the SCREEN offering what the save refuses —
+  and going through instantly for the one person it does not refuse (§42's
+  drift, in the worst place). Now: `roleIsGrantable()` asks
+  `mayEditAccess()` **of the granter**, so the picker AND the template narrow
+  together; and the Super user is **asked out loud**, with the ask NAMING the
+  role and what it hands over (the failure mode is landing on the wrong line,
+  and a confirmation that does not say which line catches none of them).
+  **THE ASK IS STATE IN THE DIALOG'S BODY, never a modal of its own** —
+  measured: `openModalHtml()` was painted straight back over by the
+  register's own repaint (§116.6); `ROLESTOP`'s shape for `ROLESTOP`'s
+  reason. **Cancel restores the picker** or a select still showing the
+  refused value fires no `change` (§110). **AND THE REGISTER WATCHES**: a
+  seat whose place is not where the person SITS joins the attention queue,
+  under a collision and above every gap. **The test is the PLACE, not "holds
+  two roles"** — the bootstrap SMO holds super@group AND heads the SMO
+  function (§118), so the other reading nags about the one certainly-correct
+  row. **Not claimed: who granted it and when** — `change_log` holds that and
+  it needs the database.
+- **VIEWING AS SOMEBODY IS JUDGED AS SOMEBODY (§185):** Islam — *"Hala got
+  this error, when I view as her I didn't get it … the view-as function is not
+  showing exactly what people see."* Measured: one edit, judged twice — REFUSED
+  for her, ACCEPTED for the office. `/api/state` reads the person off the
+  SESSION, so viewing as somebody changed everything the screen DREW and
+  nothing the server ACCEPTED: no refusal anybody meets could be reproduced,
+  and the office could write through a colleague's view what that colleague
+  never could. **The drawing side is faithful** — the three places that read
+  the real session are deliberate (the switcher, *Send me a copy*, the welcome
+  screen's is-this-me guard). **`SMPRules.actingFor()` is the rule** (§42:
+  testable without a database), and it can only NARROW: the gate is the SEAT
+  ROLE ON THE SESSION, the simulated person is looked up in the STORED people,
+  and an unknown key is REFUSED rather than treated as somebody with no roles.
+  **A refusal while simulating says so** (`judgedAs` on the 403 — *"Setup is
+  the SMO's"* is baffling when you ARE the SMO). **The remembered refusal is
+  per viewer**, or switching back runs into a body remembered under somebody
+  else's rights. **The change log still names who SIGNED IN** — authorised as
+  them, made by you.
+- **A WAY BACK TO THE WELCOME SCREEN (§185):** a house beside the gear, Islam's
+  placement. **It does not ride on the gear** — `menuHTML()` returns nothing
+  for anybody with no Setup destination, so hanging it there would give the way
+  back to the office alone (§61). `WELCOME.open()` keeps only the two silences
+  about whether the screen can EXIST (a projector, a file) — pressing a button
+  IS the ask — and **never `markDone()`**, or the screen opens itself unasked
+  next paint. Wired in `wireMenu()`, because `paintUnits()` destroys that row
+  (§29.5); it navigates nowhere, so an open edit survives it.
+- **A GLYPH THAT DIFFERS FROM TOFU BY ONE PIXEL PASSES "IT IS DRAWN" AND FAILS
+  "IT IS A MARK" (§185):** Islam — *"I dismissed the case but the small mark is
+  not there."* §180 proved `◌` was not tofu by asking whether it DIFFERED from
+  the tofu rectangle. Re-measured in the font the mark computes to: bullseye
+  **53** ink pixels, dotted circle **29**, tofu **28**. §52/§120.2 are about a
+  character MAPPED and not DRAWN; this is drawn and invisible. It is **CSS**
+  now — a 9px circle, 2px ring, filled waiting / open answered — under our
+  control and unable to fall back to another font (§45's colour-emoji answer,
+  second place). **The first CSS draft repeated the mistake**: a 1.5px dash on
+  a 9px circle rounds to 1px and lays about four marks. Full against empty, at
+  the same weight. The check asserts the visible mark, not the glyph (§51.11).
 - **A DATE THE PLATFORM CANNOT READ IS A GAP, AND A REFUSAL COSTS ONE ROW
   (§184):** Islam, on the CX strategy custodian — *"they lost all data they
   inputed … and I didn't get them as the SMO."* The refusal was CORRECT:

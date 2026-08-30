@@ -1362,7 +1362,7 @@
           '<div class="navscroll" id="navscroll">' + parts.slice(d0, d1 + 1).join("") + '</div>' +
           '<div class="navfade l" hidden></div><div class="navfade r" hidden></div>' +
         '</div>' +
-        parts.slice(d1 + 1).join("")) + chromeActsHTML();
+        parts.slice(d1 + 1).join("")) + menuHTML();
     /* Only destinations. A fold button lives in the same row but goes nowhere \u2014
        binding it here set current to undefined and reset the page to Group, which
        made expanding a fold navigate. */
@@ -1465,49 +1465,9 @@
     '<path d="M3 6.5h9M15.5 6.5h1.5M3 13.5h4M10.5 13.5h6.5"/>' +
     '<circle cx="13.6" cy="6.5" r="2.1"/><circle cx="8.6" cy="13.5" r="2.1"/></g></svg>';
 
-  /* ── THE WAY BACK TO THE WELCOME SCREEN (§185) ──────────────────────
-     Islam: *"Allow me to go back to the welcome screen somehow."* It is
-     offered once a session, so what is waiting on you was readable for one
-     moment and then only by signing out again.
-
-     A HOUSE, BESIDE THE GEAR — his placement, over the Setup rail and the
-     Knowledge base. It has to be reachable from every page, and the other two
-     are not: the rail is two presses and needs Setup, and the Knowledge base
-     has been the office's since §119.4, so nobody else could get back.
-
-     NOT DRAWN WHERE THE SCREEN CANNOT EXIST — a projector, or a file with no
-     session — because a control that does nothing is worse than none (§61).
-     The same two silences `WELCOME.open()` keeps, asked once here so the
-     button and the screen cannot disagree about when it is possible. */
-  var ICON_HOME =
-    '<svg viewBox="0 0 20 20" class="navmenusvg" aria-hidden="true">' +
-    '<g stroke="currentColor" stroke-width="1.6" stroke-linecap="round" ' +
-    'stroke-linejoin="round" fill="none">' +
-    '<path d="M3 8.6 10 3.2l7 5.4V16a1 1 0 0 1-1 1h-3.4v-4.6H7.4V17H4a1 1 0 0 1-1-1Z"/>' +
-    '</g></svg>';
-  function welcomeBtnHTML(){
-    if (typeof WELCOME === "undefined" || !WELCOME.open) return "";
-    if (location.protocol === "file:") return "";
-    if (document.body && document.body.classList.contains("presenting")) return "";
-    return '<button type="button" class="navmenu-btn navmenu-ico navmenu-solo" ' +
-      'data-welcomego="1" title="What is waiting on me" ' +
-      'aria-label="What is waiting on me">' + ICON_HOME + '</button>';
-  }
-
   /* The menu lives inside the row so it sits on the same baseline as the tabs,
      but its panel is absolutely positioned, so a long list never widens the
      row or pushes the units along. */
-  /* BOTH CONTROLS, AND THE WELCOME BUTTON DOES NOT RIDE ON THE GEAR (§185).
-     `menuHTML()` returns nothing at all for anybody with no Setup destination
-     — which is most of the register — so hanging the house off it would have
-     given the way back to the office alone, and the welcome screen is
-     everybody's (§61's trap: the people it is most for are the ones who would
-     have lost it). The separator belongs to whichever is drawn first. */
-  function chromeActsHTML(){
-    var home = welcomeBtnHTML(), gear = menuHTML();
-    if (!home && !gear) return "";
-    return '<span class="sep pinsep"></span>' + home + gear;
-  }
   function menuHTML(){
     var gs = menuGroups();
     if (!gs.length) return "";
@@ -1516,7 +1476,8 @@
        being a menu button and becomes a link — press it and you are on the
        page, with the rail carrying everything the menu used to list. */
     var only = gs[0].items[0];
-    return '<button type="button" class="navmenu-btn navmenu-ico navmenu-solo' +
+    return '<span class="sep pinsep"></span>' +
+      '<button type="button" class="navmenu-btn navmenu-ico navmenu-solo' +
         (on ? " here" : "") + '" data-md="setup" data-ms="' + only.k + '" ' +
         'title="Setup" aria-label="Setup">' + ICON_MANAGE + '</button>';
   }
@@ -1538,25 +1499,6 @@
         current = b.dataset.md;
         currentSub = b.dataset.ms;
         paint(); window.scrollTo(0,0);
-      });
-    });
-    /* §185's way back. WIRED HERE, beside the gear, because `paintUnits()`
-       rewrites this row's innerHTML and whoever destroys the wiring re-does
-       it in the same function (§29.5) — a handler bound in the page-wide
-       wire() would die the next time the destination row repainted.
-
-       IT NAVIGATES NOWHERE. The welcome screen is an overlay over the page
-       you are already on, so there is no destination to leave modes for and
-       nothing to scroll — pressing it while editing leaves the edit exactly
-       where it was, which is what a person who only wants to look expects. */
-    document.querySelectorAll("#units [data-welcomego]").forEach(function(b){
-      b.addEventListener("click", function(e){
-        e.stopPropagation();
-        if (typeof WELCOME === "undefined" || !WELCOME.open) return;
-        /* The person being VIEWED, never the session (§185): the screen says
-           what is waiting on whoever this view belongs to, which is the whole
-           reason the viewer switcher sits on it. */
-        try { WELCOME.open(viewer()); } catch(err){}
       });
     });
   }
@@ -4396,65 +4338,13 @@
           return;
         }
         ROLESTOP = null;
-        /* ── A SEAT IS ASKED ABOUT, NEVER SLIPPED THROUGH (§186) ───────
-           Islam, from the deployment: "hussein khaled is a custodian and
-           getting the super user … investigate how this happened as you
-           assured me that it's impossible." It was not impossible: §92 grants
-           a one-destination role ON THE PICK, a seat has exactly one
-           destination, and so the most powerful grant in the product was a
-           single `change` event with nothing in between.
-
-           §92's argument still holds for every OTHER role — a door behind a
-           door is a broken control — and it was an argument about a role
-           whose second question has one answer, never about how much the role
-           is worth. What a seat needs is not a second question; it is the
-           first one, asked out loud.
-
-           The dialog NAMES what it hands over rather than saying "are you
-           sure": the whole failure mode is somebody landing on the wrong line
-           of a dropdown, and a confirmation that does not say which line they
-           landed on catches none of them. */
-        /* ── A SEAT IS ASKED ABOUT, NEVER SLIPPED THROUGH (§186) ───────
-           The ask is STATE, drawn by the dialog's own body, and never a modal
-           of its own: the register's repaint rebuilds that dialog on every
-           change (§116.6), so a second modal opened from here is overwritten
-           before anybody can read it. Measured, not reasoned — the first
-           build did exactly that and the person form painted straight back
-           over the question. */
-        if (SMPRules.isSeatRole(role)) {
-          SEATASK = { key: key, role: role, at: at };
-          paint();
-          return;
-        }
-        SEATASK = null;
         grantPersonRole(key, role, at);
         ADDROLE = null; ADDROLE_KIND = "";
         paint();
     }
-
     R.querySelectorAll("[data-prole-pick]").forEach(function(sel){
       sel.addEventListener("change", function(){
         tryGrantRole(sel.dataset.prolePick, sel.value);
-      });
-    });
-    /* §186's two answers. Cancel puts the picker back to "Choose a role…"
-       rather than leaving the seat showing: a select still displaying the
-       value it was just refused fires no `change` if it is picked again
-       (§110), so the control would read as dead for exactly the person who
-       changed their mind. */
-    R.querySelectorAll("[data-seatno]").forEach(function(b){
-      b.addEventListener("click", function(){
-        SEATASK = null; ADDROLE_KIND = ""; paint();
-      });
-    });
-    R.querySelectorAll("[data-seatyes]").forEach(function(b){
-      b.addEventListener("click", function(){
-        var a = SEATASK;
-        SEATASK = null;
-        if (!a) { paint(); return; }
-        grantPersonRole(a.key, a.role, a.at);
-        ADDROLE = null; ADDROLE_KIND = "";
-        paint();
       });
     });
     R.querySelectorAll("[data-prole-off]").forEach(function(b){

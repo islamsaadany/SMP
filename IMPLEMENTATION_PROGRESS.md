@@ -68,6 +68,60 @@ Nothing proceeds past this line without an answer.
 
 ## Built and verified
 
+### v3.74 — a seat is not an ordinary role (§186)
+
+- **It was not impossible, and I had said it was.** The register's role picker
+  is a plain dropdown, and a role with one destination is granted on the pick
+  (§92) — a seat has one destination. So Super user was one selection with
+  nothing in between. The people file's Role column was the same grant by
+  another road.
+- **One line stood behind both:** the grantable test excluded only the derived
+  floor roles and said nothing about seats.
+- **The server was always right** — a seat move is an `access` change, which
+  is the Super user's. The fault was the screen offering what the save
+  refuses, and going through instantly for the one person it does not refuse.
+- **Now:** seats are not offered to anybody who may not give one, in the
+  picker or in the workbook template; and the Super user is asked, with the
+  ask naming the person, the role and what it hands over.
+- **The ask is state in the dialog's body, never its own modal** — the first
+  build used one and the register's repaint painted straight back over it.
+- **The register watches**: a seat whose place is not where the person sits
+  joins the attention queue, under a collision and above every gap. The test
+  is the place, not "holds two roles" — the bootstrap SMO holds a seat and
+  heads the SMO function, and must not be nagged.
+- **Not claimed:** who granted Hussein's seat and when. The change log holds
+  it; that needs the database.
+- Proof: `checks/seat-grant.py` is new, every assertion at both ends, proved
+  able to fail **2 and 3** ways. `role-picker.py` moved to the new contract —
+  it was asserting §92's grant-on-pick, which is the behaviour that caused
+  this. 345 server assertions pass; `qa.py` clean.
+
+### v3.73 — viewing as somebody, a way back, and a mark nobody could see (§185)
+
+- **"Viewing as" used your rights, not theirs.** Measured: the same edit,
+  refused for Hala and accepted for the SMO. The server reads the person off
+  the session, so simulating somebody changed everything the screen drew and
+  nothing it accepted — no refusal anybody meets could be reproduced from the
+  office, and the office could write through a colleague's view what that
+  colleague never could. The simulated person now travels with the save.
+- **It can only narrow.** The gate is the seat role on the session, the person
+  is looked up in the stored register, and an unknown key is refused rather
+  than treated as somebody with no roles. `SMPRules.actingFor()` is the rule,
+  so it is testable without a database.
+- **A refusal while simulating says so** — "Setup is the SMO's" is baffling
+  when you are the SMO.
+- **A way back to the welcome screen**: a house beside the gear, drawn
+  independently of it so it is not the office's alone.
+- **The dismissed mark is CSS, not a character.** §180 proved the dotted circle
+  was not tofu; re-measured, it laid down 29 ink pixels against tofu's 28. It
+  is a 9px ring now, filled while waiting and open once answered.
+- Proof: `test-authorize.js` §21 (**345 passed**), `people-dialog.py`
+  re-pointed at the visible mark, `welcome.py` and `refusal-keeps-work.py`
+  green, `qa.py` clean.
+- **Awaiting sign-off, not applied:** the welcome header when somebody holds
+  two long roles — the tenant block wraps below at every width measured
+  (294px → 204px header). Mockup published; rule 1c, nothing touched.
+
 ### v3.72 — a date the platform cannot read, and a refusal that costs one row (§184)
 
 - **The CX custodian's loss, reproduced against the real authoriser first.**

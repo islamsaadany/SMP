@@ -158,6 +158,13 @@ with sync_playwright() as p:
         pg.evaluate("()=>document.querySelector('[data-prole-open]').click()")
         pg.wait_for_timeout(300)
         ck(role + ": the option is in the list", pick_role(pg, "cfo", role))
+        # §186: A SEAT ASKS FIRST, and Company CEO is one. The other three in
+        # this list are jobs on a plan and land on the pick as they always
+        # did — which is the distinction under test, so it is confirmed here
+        # rather than the ask being pressed unconditionally.
+        pg.evaluate("""()=>{const b=document.querySelector('#modal-b [data-seatyes]');
+            if(b) b.click();}""")
+        pg.wait_for_timeout(400)
         held = roles_of(pg, "cfo")
         ck(role + " at " + at + " — the graph",
            any(r["role"] == want["role"] and r["at"] == want["at"] for r in held), held)
@@ -172,10 +179,20 @@ with sync_playwright() as p:
         ck(role + " at " + at + " — the row", role.lower() in (chip_text(pg, "cfo") or "").lower(),
            chip_text(pg, "cfo"))
 
-    # ── 3. A SEAT OVER THE GROUP IGNORES THE UNIT (§92) ──────────────
-    # Somebody sitting in Mobile can be the Super user; the Unit cell has
-    # nothing to say about a role with one destination, and must not refuse it.
-    print("\n3. a seat over the group ignores the Unit (§92)")
+    # ── 3. A SEAT OVER THE GROUP IGNORES THE UNIT, AND ASKS FIRST ────
+    # §92's half is unchanged: somebody sitting in Mobile can be the Super
+    # user, so the Unit cell has nothing to say about a role with one
+    # destination and must not refuse it.
+    #
+    # WHAT §186 CHANGED IS THE OTHER HALF, and this check asserted it: §92
+    # granted a one-destination role ON THE PICK, which made the most
+    # powerful grant in the product one dropdown change with nothing in
+    # between — Islam, from the deployment: "hussein khaled is a custodian
+    # and getting the super user." A seat is asked about now, and this moves
+    # with the decision rather than pinning the build that caused it (§94.8:
+    # a check written against the problem survives; one written against the
+    # last instruction has to be rewritten every time somebody changes it).
+    print("\n3. a seat over the group ignores the Unit (§92), and asks (§186)")
     for role, key in (("Super user", "super"), ("SMO team", "smoteam"), ("Group CEO", "gceo")):
         people(pg)
         open_row(pg, "cfo")
@@ -183,10 +200,20 @@ with sync_playwright() as p:
         pg.evaluate("()=>document.querySelector('[data-prole-open]').click()")
         pg.wait_for_timeout(300)
         pick_role(pg, "cfo", role)
+        # NOTHING YET — an ask that grants anyway is a notice, not a question.
+        ck(role + ": not granted on the pick",
+           not any(r["role"] == key for r in roles_of(pg, "cfo")), roles_of(pg, "cfo"))
+        ask = pg.evaluate("""()=>{const a=document.querySelector('#modal-b .seatask');
+            return a ? a.innerText.replace(/\\s+/g,' ').trim() : null;}""")
+        ck(role + ": the ask names it", ask and role in ask, ask)
+        ck(role + ": not refused — the Unit has nothing to say about a seat",
+           stop_text(pg) is None, stop_text(pg))
+        pg.evaluate("()=>{const b=document.querySelector('#modal-b [data-seatyes]');"
+                    " if(b) b.click();}")
+        pg.wait_for_timeout(500)
         held = roles_of(pg, "cfo")
-        ck(role + " granted at the group",
+        ck(role + " granted at the group once confirmed",
            any(r["role"] == key and r["at"] == "group" for r in held), held)
-        ck(role + ": not refused", stop_text(pg) is None, stop_text(pg))
 
     # ── 4. A PICK THAT CANNOT LAND SAYS SO ───────────────────────────
     # BOTH ENDS AGAIN, and this is the pair the old control could not tell

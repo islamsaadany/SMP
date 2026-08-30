@@ -172,6 +172,11 @@ var SAIDFAIL = null;
    person working through it and "3 of 7" would count down twice as fast.
    Screen state, never the tenant's (§25.2). */
 var PDLG = null;
+/* The seat the picker is asking about (§186). STATE, rendered by the person
+   dialog's own body — never its own `openModalHtml()`, which the register's
+   repaint overwrites the instant anything changes (§116.6: paint() repaints
+   the dialog too). ROLESTOP's shape, for ROLESTOP's reason. */
+var SEATASK = null;
 /* The People render publishes the dialog's builders here (§116) — see the note
    beside the assignment for why they cannot simply be module-level functions. */
 var PEOPLEDLG = null;
@@ -2466,7 +2471,22 @@ function roleKeyByName(name){
    reads off somebody attached to a unit and holding nothing else (§49.5). A
    file naming it would be asking for a role that arrives by itself, so the
    template does not offer it and the reader says so plainly. */
-function roleIsGrantable(key){ return !!key && !SMPRules.isOwnLinesRole(key); }
+/* ── AND A SEAT IS NOT OFFERED BY SOMEBODY WHO MAY NOT GIVE ONE (§186) ──
+   Islam, from the deployment: "hussein khaled is a custodian and getting the
+   super user." The picker offered every role to anybody who could reach it,
+   and commits on the `change` event — so the most powerful grant in the
+   product was ONE selection with nothing in between, and the only thing that
+   ever stopped it was the server refusing the save afterwards.
+
+   THE SAME QUESTION THE SERVER ASKS (§42): `mayEditAccess()`, because
+   granting a seat IS changing who may do what, which is why the authoriser
+   has always classified it as `access`. Asked of the person doing the
+   granting, never of the person receiving it. */
+function roleIsGrantable(key, by){
+  if (!key || SMPRules.isOwnLinesRole(key)) return false;
+  if (!SMPRules.isSeatRole(key)) return true;
+  return SMPRules.mayEditAccess(world(), by || viewer());
+}
 /* ══ WHO NEEDS ATTENTION, IN ONE ORDERED QUEUE (§116) ═════════════════
    Islam: "I want it to become a button at top showing pending requests …
    that opens the profiles that needs attention in the pop up modal that
@@ -2517,6 +2537,27 @@ function attentionOf(p, all){
      from here: the crash needed a declaration AND a register placement that
      disagree, so it lived only over HTTP (§94.11) and only for somebody
      already placed — the one case the queue's own check had not made. */
+  /* ── A SEAT SITTING SOMEWHERE ELSE (§186) ─────────────────────────
+     Islam, having found a custodian wearing Super user: "this might be
+     repeated somewhere else and people are getting super user." So the
+     register watches, rather than the answer being a list I read out once.
+
+     THE TEST IS THE PLACE, not "holds a seat and something else": the
+     bootstrap SMO holds super@group AND heads the SMO function (§118), so
+     the two-roles reading would nag about the one row that is certainly
+     right. A seat is held where the person sits; one held somewhere else is
+     the shape of an accident, and it is exactly what the chrome's own role
+     line already prints with a place beside it (§178).
+
+     IT SORTS ABOVE EVERYTHING BUT A COLLISION. Somebody holding rights
+     nobody meant to give them is not a gap to fill in when convenient. */
+  var seat = SMPRules.seatOutOfPlace(world(), p, personAt(p));
+  if (seat)
+    why.push({ kind:"seat", say:"They hold " + roleName(seat.role) + " over " +
+      roleWhereLabel(seat.at) + ", and they sit in " +
+      (personAt(p) ? roleWhereLabel(personAt(p)) : "no part of the business") +
+      ". A seat is the Super user\u2019s to give \u2014 take it off with the \u00d7 " +
+      "on the chip if nobody meant to." });
   if (saidOutstanding(p))
     why.push({ kind:"said", say:"They said they work in " + roleWhereLabel(said) +
       (personAt(p) ? " \u2014 the register says " + roleWhereLabel(personAt(p)) : "") + "." });
@@ -2579,7 +2620,11 @@ function dupeSentence(dupes){
            (others.length ? " (" + others.join(", ") + ")" : "") + ".";
   }).join(" ");
 }
-var ATTN_ORDER = ["dupe", "said", "noident", "noemail", "nopw", "samename"];
+/* §186: `seat` sits directly under `dupe`. A collision is first because it
+   makes every other count wrong; rights nobody meant to give are second
+   because they are the only entry here that is not a gap to fill in when
+   convenient. A row can carry both, and `why[0]` is what it sorts on. */
+var ATTN_ORDER = ["dupe", "seat", "said", "noident", "noemail", "nopw", "samename"];
 function attentionQueue(){
   var out = [];
   var all = registerDupes();          /* once for the whole queue, not per row */
@@ -2876,6 +2921,16 @@ function planPeopleFile(rows){
       if (!roleKey) {
         plan.problems.push({ at:at, msg:'"' + role + '" is not one of the roles. Choose from the ' +
           'dropdown in the Role column.' });
+        return;
+      }
+      /* A SEAT NAMED IN A FILE IS THE SAME GRANT BY ANOTHER ROAD (§186), so
+         it is refused for the same reason and the sentence says which of the
+         two refusals this is — a role that cannot be granted at all, and a
+         role this person cannot be the one to grant, send somebody to two
+         different places. */
+      if (SMPRules.isSeatRole(roleKey) && !roleIsGrantable(roleKey)) {
+        plan.problems.push({ at:at, msg:'"' + role + '" is a seat, and seats are ' +
+          'the Super user\u2019s to give. Ask them to set this one on the register.' });
         return;
       }
       if (!roleIsGrantable(roleKey)) {

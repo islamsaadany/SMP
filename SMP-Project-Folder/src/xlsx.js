@@ -1122,7 +1122,12 @@ function peopleWorkbook(){
   var names = mainbuNames();
   /* Neither floor role is offered, for the same reason the reader refuses
      them: both are derived, not granted. */
-  var roleNames = ROLES.filter(function(r){ return !SMPRules.isOwnLinesRole(r.key); })
+  /* §186: AND NO SEAT IN A FILE SOMEBODY CANNOT GIVE ONE WITH. The Role
+     column is the second road to `p.role = "super"` — the reader grants what
+     it names — so the template offered by somebody who may not hand out a
+     seat does not list one. `roleIsGrantable()` is the same question the
+     picker asks, so the file and the screen cannot disagree (§53.5). */
+  var roleNames = ROLES.filter(function(r){ return roleIsGrantable(r.key); })
                        .map(function(r){ return r.name; });
   /* COLUMNS MOVED WHEN Unit WAS INSERTED (§65): Role G→H, Status H→I. A
      validation range is a POSITION and nothing warns when it stops matching

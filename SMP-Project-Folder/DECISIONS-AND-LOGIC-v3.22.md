@@ -23129,6 +23129,21 @@ second — so it takes whichever of border or outline is actually painting, and
 asks *is there a ring of some kind, in a real colour* (§94.8: a check written
 against the problem survives the fix changing shape).
 
+### And the SHIPPED file was a version behind, caught at the merge
+
+The rebuild refused to match `strategy-management-platform-v3.22.html` by 1130
+bytes, and the diff was exactly the last two source edits: **the broken ring CSS
+the parser had discarded**, and the old `dupe` fingerprint. The shipped copy had
+been taken before those, and nothing after it re-copied.
+
+**Every check reads `src/strategy-management-platform.html`, and production
+serves the other one** (§105.6, from the other side — that section records
+testing against the wrong bytes and calling a good fix broken; this is shipping
+the wrong bytes while every check reads the good ones and prints green). The
+byte-identical rule is the only thing standing between those two files, and it
+is what caught this. Re-copied, rebuilt, and the checks re-run against the
+SHIPPED file rather than the source one.
+
 **And `duplicates.py` was reaching for the band too** — §51.11's fault, and it
 **crashed rather than passing quietly**, which is the good way for that to fail:
 `Failed to find element matching selector "#modal-b .pdband"`. Moved to the new

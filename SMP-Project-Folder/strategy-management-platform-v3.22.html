@@ -4318,9 +4318,18 @@
      it takes `--warn-tx` at full strength on the tinted ground.
 
      THE SENTENCE IS THE FIELD'S, so it wraps and sits inside the ring: a note
-     underneath the ring would read as being about the field below it. */
-  .pdlg .pdf.attn { background:var(--warn-bg); border:1px solid var(--warn-tx);
-    border-radius:var(--r-sm); padding:8px 10px 9px; margin:-8px -10px -9px; }
+     underneath the ring would read as being about the field below it.
+
+     THE RING IS OUT OF FLOW, and that is not a detail: a border with padding
+     and a negative margin to pay for it moves the field's own top by 8px, so
+     it stops sharing a grid row with its neighbours — `register-header.py`
+     caught exactly that, reporting two rows leaving a cell empty at every
+     width. An `outline` and a `box-shadow` spread paint outside the box
+     without changing it, so the grid is untouched and the ring still reads as
+     surrounding the field. */
+  .pdlg .pdf.attn { border-radius:var(--r-sm);
+    outline:2px solid var(--warn-tx); outline-offset:4px;
+    box-shadow:0 0 0 4px var(--warn-bg); background:var(--warn-bg); }
   .pdlg .pdf.attn > .pdfl { color:var(--warn-tx); }
   .pdlg .attnsay { font-size:12px; font-weight:600; line-height:1.45;
     color:var(--warn-tx); white-space:normal; }
@@ -13538,7 +13547,18 @@ function attnMark(kind, p){
   }
   if (kind === "noemail" || kind === "noident")
     return String(p.email || "") + "|" + String(p.empId || "");
-  if (kind === "samename" || kind === "dupe")
+  /* A COLLISION IS WHO IT IS WITH AND WHAT ON, never a name: two rows sharing
+     an address and the same two rows sharing an employee number are two
+     different things to look at, and answering one must not answer the other
+     (§87). Sorted, so the same pair fingerprints the same way from either
+     row. */
+  if (kind === "dupe")
+    return personDupe(p, registerDupes()).map(function(x){
+      return x.kind + ":" + (x.rows || []).map(function(r){
+        return r && r.key; }).filter(Boolean).sort().join(","); }).sort().join("|");
+  /* A NAME THAT READS THE SAME is answered by amending a Name, so the name is
+     the fact. */
+  if (kind === "samename")
     return String(readName(p) || p.name || "");
   return "";
 }

@@ -86,17 +86,51 @@ var CHAT = (function(){
        goes through is the only place this cannot be forgotten. Found by
        qa.py, which walks every Setup page over file:// as the SMO. */
     if (!servable()) { done("There is no server behind this file.", null); return; }
+    /* ── AND A REQUEST THAT NEVER ANSWERS MUST STILL ANSWER (§193) ─────
+       Islam: *"the messages are sent in the box but still there is
+       sending.."* — with the reply plainly THERE in the thread above it. The
+       message reached the database and the request never came back, so
+       `done` was never called and the word *Sending…* stood for ever. There
+       was no timeout here at all: every caller waited on a promise that had
+       stopped being about anything.
+
+       ONE PLACE, because that is this function's whole reason for existing —
+       the comment above says so about `servable()` and the same argument
+       covers this. A timeout is not a failure and is not said as one: the
+       reply may well have gone, and the thread underneath is the evidence
+       (`replySend` reads it). */
+    var ctl = typeof AbortController === "function" ? new AbortController() : null;
+    var late = setTimeout(function(){ if (ctl) ctl.abort(); }, POST_WAIT);
+    var answered = false;
+    var finish = function(err, j){
+      if (answered) return;
+      answered = true;
+      clearTimeout(late);
+      done(err, j);
+    };
     fetch("/api/chat", { method:"POST", cache:"no-store",
                          headers:{ "Content-Type":"application/json" },
-                         body: JSON.stringify(body) })
+                         body: JSON.stringify(body),
+                         signal: ctl ? ctl.signal : undefined })
       .then(function(r){ return r.json().then(function(j){ j.__status = r.status; return j; }); })
-      .then(function(j){ done(j && j.ok ? null : ((j && j.error) || "failed"), j); })
+      .then(function(j){ finish(j && j.ok ? null : ((j && j.error) || "failed"), j); })
       /* A NETWORK FAILURE SPEAKS THE PRODUCT'S LANGUAGE, not the browser's
          (§139): "Failed to fetch" is what fetch() says, and it reached the
          screen verbatim through the send path's rollback note. Every caller
          already handles the sentinel "failed" as "say it did not send". */
-      .catch(function(){ done("failed", null); });
+      /* AN ABORT IS OUR OWN CLOCK, NOT THE NETWORK'S — said as what it is,
+         because "it did not send" and "we do not know" send somebody to two
+         different places (§123's rule, one surface in). */
+      .catch(function(e){
+        finish(e && e.name === "AbortError" ? NO_ANSWER : "failed", null); });
   }
+  /* Long enough that a slow send is not called dead — the server stores the
+     message and then tries to email, and the email is the slow half — and
+     short enough that nobody sits looking at a word that has stopped being
+     true. Vercel cuts a function off before this, so reaching it means the
+     answer is not coming. */
+  var POST_WAIT = 25000;
+  var NO_ANSWER = "no answer";
 
   /* WHERE SOMEBODY WAS USED TO BE CAPTURED AND SENT WITH EVERY MESSAGE — the
      page, the subject, the cycle and the build, drawn under the sender's own
@@ -1064,6 +1098,22 @@ var CHAT = (function(){
     /* THE REPLY BOX IS ONLY REBUILT WHEN THE PERSON CHANGES. Redrawing it on
        every poll would wipe a half-written answer — the exact fault §71.2 was
        raised about, one surface further out. */
+    /* ── THE THREAD ANSWERS FOR THE SEND (§193) ───────────────────────
+       Islam: *"the messages are sent in the box but still there is
+       sending.."* — with the reply plainly there above it. The word waited on
+       a request, and a request can stop coming back; the thread is the
+       evidence and it arrives on the poll regardless. So the moment the
+       message being sent is IN the thread, *Sending…* has stopped being true
+       and is replaced here, whatever the request is doing.
+
+       Matched on the office's own side and on the exact words, because that
+       is what was posted; a message that has not arrived leaves the word
+       alone, which is the honest state while it really is in flight. */
+    if (box.sending && (d.messages || []).some(function(m){
+          return m && m.from_office && String(m.body || "").trim() === box.sending; })) {
+      box.sending = null;
+      box.note = { text: "Sent." };
+    }
     var existing = pane.querySelector("[data-chreply]");
     var keep = existing && existing.dataset.chreply === d.person ? existing.value : null;
 
@@ -1092,6 +1142,16 @@ var CHAT = (function(){
       if (atEnd) body.scrollTop = body.scrollHeight;
       var head = pane.querySelector("[data-chdone]");
       if (head) head.textContent = d.waiting ? "Mark answered" : "Put back on the list";
+      /* THE NOTE IS REWRITTEN IN PLACE ON THIS PATH TOO (§193). §188 leaves
+         the footer alone so the composer being typed into is not destroyed —
+         right, and it also froze the one line in the footer that is not a
+         control. Written into the node rather than by redrawing it (§63), so
+         the box beside it is still untouched. */
+      var n2 = el("chreplynote");
+      if (n2) {
+        n2.className = "chnote" + (box.note && box.note.bad ? " bad" : "");
+        n2.textContent = box.note ? box.note.text : "";
+      }
       return;
     }
 
@@ -1218,6 +1278,8 @@ var CHAT = (function(){
     if (!text) return;
     var btn = pane.querySelector("[data-chreplysend]");
     if (btn) btn.disabled = true;
+    /* §193: WHAT IS IN FLIGHT, so the thread itself can answer for it. */
+    box.sending = text;
     box.note = { text: "Sending…" };
     if (note) { note.className = "chnote"; note.textContent = box.note.text; }
 
@@ -1246,10 +1308,33 @@ var CHAT = (function(){
     post(body, function(err, j){
       if (btn) btn.disabled = false;
       if (err) {
-        box.note = { text: err, bad: true };
-        if (note) { note.className = "chnote bad"; note.textContent = err; }
+        /* HAS THE THREAD ALREADY ANSWERED FOR IT? `box.sending` is cleared the
+           moment the message is seen in the thread, so an empty one here means
+           the send is CONFIRMED and this late error is only about the email
+           (§193). Saying "no answer" over a delivered reply would be the
+           screen taking back something true. */
+        var confirmed = !box.sending;
+        box.sending = null;
+        /* A TIMEOUT IS NOT A FAILURE AND MUST NOT BE DRESSED AS ONE. The
+           message may well have gone — it is stored before the email is tried
+           — so this says what is true and points at the evidence, which is on
+           the same screen. Not red, because red says it did not send. */
+        var no = err === NO_ANSWER;
+        if (!(confirmed && no)) {
+          box.note = no
+            ? { text: "No answer from the server. The reply may still have gone — " +
+                      "it appears above if it did." }
+            : { text: err, bad: true };
+          if (note) {
+            note.className = "chnote" + (no ? "" : " bad");
+            note.textContent = box.note.text;
+          }
+        }
+        /* AND ASK THE THREAD, which is the one thing that actually knows. */
+        boxLoadThread(who);
         return;
       }
+      box.sending = null;
       if (ta) { ta.value = ""; ta.style.height = ""; }
       /* THE FOUR REAL OUTCOMES, SAID PLAINLY (§63's rule for Save draft). A
          reply that landed and an email that did not are two different pieces
@@ -1277,6 +1362,24 @@ var CHAT = (function(){
       boxLoadQueue();
       boxLoadThread(who);
     });
+    /* ── AND THE SCREEN STOPS WAITING ON THE EMAIL (§193) ──────────────
+       Islam, correcting the first diagnosis: *"the reply back of the sending
+       came back it just takes a long time."* Right, and that is the whole of
+       it — the server STORES the message and then tries to EMAIL it, and only
+       answers when both are done. The email is the slow half, so *Sending…*
+       stood for as long as a mail provider took, on a reply that was already
+       delivered and already visible in the thread.
+
+       So the thread is asked once, soon, rather than waited for: the moment it
+       comes back holding the message, the redraw above replaces the word with
+       *Sent.* — and when the request finally answers it upgrades that to
+       *Sent, and emailed to …*. Two true sentences in the right order rather
+       than one stale one.
+
+       ONLY WHILE SOMETHING IS IN FLIGHT (`box.sending` is cleared by whichever
+       answers first), so a send that answers quickly costs nothing extra —
+       and never a poll of its own (§98: what costs is polling, not messages). */
+    setTimeout(function(){ if (box.sending) boxLoadThread(who); }, 1200);
   }
 
   /* Called at the end of paint(), beside SEARCHSEL.wire(). Everything is bound

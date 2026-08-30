@@ -1355,7 +1355,7 @@
        below. */
     var isDest = tabs.map(function(t){ return !!t.k; });
     var d0 = isDest.indexOf(true), d1 = isDest.lastIndexOf(true);
-    document.getElementById("units").innerHTML = (d0 === -1
+    document.getElementById("units").innerHTML = chromeHomeHTML() + (d0 === -1
       ? parts.join("")
       : parts.slice(0, d0).join("") +
         '<div class="navclip">' +
@@ -1503,10 +1503,27 @@
      given the way back to the office alone, and the welcome screen is
      everybody's (§61's trap: the people it is most for are the ones who would
      have lost it). The separator belongs to whichever is drawn first. */
+  /* ── THE HOUSE LEADS THE ROW (§193.2) ──────────────────────────────
+     Islam: *"let's move the home screen to the top left for all people so it
+     becomes their home in general."* It sat at the far right beside the gear,
+     which is where the SETUP door is — and Setup is the office's, so the way
+     back to your own starting page was keeping company with a control most of
+     the register never sees. On the left it is the first thing on the row and
+     reads as where you begin, which is what it is.
+
+     TWO HALVES, because they now sit at opposite ends. The separator belongs
+     to whichever side draws — the house takes one AFTER it, the gear one
+     BEFORE — and neither is drawn when its own button is not, or the row ends
+     in a hairline attached to nothing (§24). `pinsep` keeps both out of the
+     scrolling region: a separator that scrolls away leaves the control it
+     divides looking like a destination (§136). */
+  function chromeHomeHTML(){
+    var home = welcomeBtnHTML();
+    return home ? home + '<span class="sep pinsep"></span>' : "";
+  }
   function chromeActsHTML(){
-    var home = welcomeBtnHTML(), gear = menuHTML();
-    if (!home && !gear) return "";
-    return '<span class="sep pinsep"></span>' + home + gear;
+    var gear = menuHTML();
+    return gear ? '<span class="sep pinsep"></span>' + gear : "";
   }
   function menuHTML(){
     var gs = menuGroups();

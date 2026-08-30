@@ -23428,3 +23428,92 @@ a look is his (rule 1c). **Open item, waiting on him.**
 
 Proved able to fail: putting the two class decisions back makes
 `checks/gap-walk.py` red twice again, exactly as it is on `origin/main`.
+
+---
+
+## §193 — A reply says it went as soon as it has gone (v3.82)
+
+Islam: *"the messages are sent in the box but still there is sending.. under the
+chat box"* — with the reply plainly THERE in the thread above it. Then, in the
+middle of the fix and correcting the first diagnosis: *"the reply back of the
+sending came back it just takes a long time."*
+
+**That correction is the whole of it.** The server STORES the reply and then
+tries to EMAIL it, and only answers when both are done. The email is the slow
+half — so *Sending…* stood for as long as a mail provider took, over a reply
+that was already delivered and already on screen.
+
+### Two sentences in the right order, not one stale one
+
+* The thread is asked once, soon (1.2s), and the moment it comes back holding
+  the message the word becomes **Sent.** The screen stops waiting on the email.
+* When the request finally answers, that upgrades to **Sent, and emailed to …**
+  — which is the sentence Islam's own screenshot shows, and the one the office
+  actually wants.
+
+Measured end to end against a server that stores immediately and answers after
+eight seconds: `Sending…` at 0.3s, **`Sent.` at 2s**, `Sent, and emailed to
+mohamed_walid@rayatrade.com.` at 8s.
+
+**The thread is the evidence, and it was on the same screen the whole time.**
+The word waited on a request; a request can be slow or stop coming back, and the
+thread cannot lie about whether the message is in it.
+
+### And a request that never answers must still answer
+
+`post()` had **no timeout at all** — every caller waited on a promise that had
+stopped being about anything. It has a clock now, in the ONE place every chat
+request goes through, which is that function's whole reason for existing (its
+own comment makes exactly this argument about `servable()`).
+
+**A timeout is not a failure and is not dressed as one.** The message may well
+have gone — it is stored before the email is tried — so it says
+*"No answer from the server. The reply may still have gone — it appears above if
+it did."* and points at the evidence, not in red. "It did not send" and "we do
+not know" send somebody to two different places (§123's rule, one surface in).
+
+**And it can never take back a `Sent.` the thread has already confirmed** —
+`box.sending` is cleared by whichever answers first, so a late timeout over a
+delivered reply says nothing at all. Without that guard the backstop would have
+replaced a true sentence with a doubt at 25 seconds.
+
+### The footer had a second way to freeze
+
+§188 leaves the composer's footer alone on a poll so the box being typed into is
+not destroyed — right, and it also froze the one line in that footer which is
+not a control. The note is now written into the node on that path too (§63),
+which touches nothing beside it.
+
+### The stub was lying, and it cost a wrong diagnosis
+
+`api/chat.js` returns a thread's fields at the **top level**; the first stub
+nested them under `"thread"`, so `box.data` had no messages at all, every
+reading said 0, and the product looked broken when the stub was. §100.3, paid
+for again: **a stub must model the server.**
+
+`checks/reply-said.py` is new — the slow send, the hung send, and both ends
+(nothing taken back, nothing dressed as an error).
+
+---
+
+## §193.2 — The house leads the row (v3.82)
+
+Islam: *"let's move the home screen to the top left for all people so it becomes
+their home in general."*
+
+It sat at the far right beside the gear — and the gear is the **Setup** door,
+which is the office's. So the way back to your own starting page was keeping
+company with a control most of the register never sees. §185 had already
+refused to hang it OFF the gear for that reason; this finishes the thought and
+moves it to the other end of the row.
+
+`chromeActsHTML()` splits in two: the house leads with a separator **after** it,
+the gear trails with one **before**, and neither draws its separator when its
+own button is absent — or the row ends in a hairline attached to nothing (§24).
+Both stay outside the scrolling region (§136): a separator that scrolls away
+leaves the control it divides looking like a destination.
+
+Measured on the built page: for the office the row now reads
+`HOME · | · Group ▾ · | · Units|Functions · [destinations] · | · GEAR`; for a
+unit head, who has **no gear at all**, `HOME · | · Group ▾ · [destinations]` —
+which is the case that makes the move worth making.

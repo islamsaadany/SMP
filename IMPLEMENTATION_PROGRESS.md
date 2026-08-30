@@ -88,6 +88,20 @@ Nothing proceeds past this line without an answer.
 - Proof: `checks/pending-walk.py` is new — 14 red on the build before,
   including the reported overlap.
 
+### v3.82 — "Sending…" stops lying, and home moves left (§193)
+
+- **The reply says "Sent." within about two seconds** instead of sitting on
+  *Sending…* for as long as the email takes. The server stores your reply first
+  and emails it second, and it only used to speak when both were done.
+- **Then it upgrades to "Sent, and emailed to …"** when the email finishes —
+  two true sentences in the right order.
+- **A request that never comes back now says so** rather than leaving the word
+  up for ever. It says the reply may still have gone and points at the thread,
+  because that's the truth — and it can never take back a "Sent." you've
+  already seen.
+- **The home button moved to the far left**, for everyone. It was beside the
+  gear, and the gear is the Setup door — which most people never see at all.
+
 ### v3.80b — the gap walk reaches every place again (§192.4)
 
 - **"Next gap" on a unit reached two places out of five**, then ran out. It was

@@ -775,6 +775,42 @@ console errors (in this cloud environment, run it via a wrapper that points Play
   an empty array, so `onlyOwnLines()` answered false and a floor person given
   edit could rewrite their unit's WHOLE plan — wider than a Contributor, which is
   the opposite of a floor. `OWN_LINES_ONLY` carries the floor beside `contrib`.
+- **A REPLY SAYS IT WENT AS SOON AS IT HAS GONE (§193):** Islam — *"the
+  messages are sent in the box but still there is sending.."*, with the reply
+  plainly IN the thread above it, then correcting the diagnosis mid-fix: *"the
+  reply back of the sending came back it just takes a long time."* **That
+  correction is the whole of it**: the server STORES the reply and then EMAILS
+  it and answers only when both are done, so *Sending…* stood for as long as a
+  mail provider took over a message already delivered. **The thread is the
+  evidence and it was on the same screen the whole time** — it is asked once at
+  1.2s and the word becomes **Sent.**; the request's own answer then upgrades
+  it to **Sent, and emailed to …**. Measured against an 8-second send: 0.3s
+  *Sending…*, **2s Sent.**, 8s the emailed sentence. **AND `post()` HAD NO
+  TIMEOUT AT ALL** — a request that stopped coming back left the word standing
+  for ever; there is a clock now in the ONE place every chat request goes
+  through (that function's own reason for existing). **A timeout is not a
+  failure and is not dressed as one** — *"the reply may still have gone — it
+  appears above if it did"*, not red (§123: *it did not send* and *we do not
+  know* send somebody to two different places) — **and it can never take back a
+  `Sent.` the thread has confirmed**, or the backstop would replace a true
+  sentence with a doubt at 25s. §188's body-only redraw froze the footer's one
+  non-control line, so the note is written into the node there too (§63). **The
+  stub was lying and it cost a wrong diagnosis**: `api/chat.js` returns a
+  thread's fields at the TOP LEVEL and the first stub nested them, so every
+  reading said 0 messages and the product looked broken when the stub was
+  (§100.3).
+- **THE HOUSE LEADS THE ROW (§193.2):** Islam — *"move the home screen to the
+  top left for all people so it becomes their home in general."* It sat beside
+  the gear, and the gear is the SETUP door, which is the office's — so the way
+  back to your own starting page kept company with a control most of the
+  register never sees (§185 refused to hang it OFF the gear for that reason;
+  this finishes the thought). `chromeActsHTML()` splits: the house leads with a
+  separator AFTER it, the gear trails with one BEFORE, and neither draws its
+  separator when its own button is absent, or the row ends in a hairline
+  attached to nothing (§24). Both stay outside the scroll region (§136).
+  Measured: a unit head, who has **no gear at all**, now reads
+  `HOME · | · Group ▾ · [destinations]` — the case that makes the move worth
+  making.
 - **THE GAP WALK WALKED WHAT THE COUNT NO LONGER COUNTED (§192.4):** *"Next
   gap"* on a unit reached two of five places and the run ended — **and it was
   never stuck**: traced press by press it walks every field it has MARKED, and

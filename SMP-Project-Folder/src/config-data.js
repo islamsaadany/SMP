@@ -156,6 +156,14 @@ var ADDROLE = null, ADDROLE_KIND = "owner";
    (§25.2) — it is the outcome of one press, cleared by the press that
    succeeds, by opening the picker again and by leaving the row. */
 var ROLESTOP = null;
+/* ── AND WHY A DISMISSAL DID NOT LAND (§180) ──────────────────────────
+   `{key, why}`, or null. ROLESTOP's shape and ROLESTOP's reasons: a property
+   of the screen and never of the person (§25.2), the outcome of one press,
+   cleared by the press that succeeds. A declaration lives outside the state
+   graph, so this write does not ride the autosave and has no banner of its
+   own to appear in — without this a refused dismissal is silent, which is the
+   fault §171 exists to stop. */
+var SAIDFAIL = null;
 /* ── WHICH PERSON THE DIALOG HAS OPEN, AND WHY (§116) ─────────────────
    `{key, mode, queue, at}` or null. `mode` is "edit", "add" or "queue"; the
    queue carries the LIST IT STARTED WITH and a position in it, rather than
@@ -1031,6 +1039,48 @@ function setKnownName(p, v){
    whose first two names match would otherwise read as one row for anybody who
    has hidden Full Name. A TYPED value always wins and is never lengthened; the
    SMO wrote exactly what they meant. */
+/* ── THE NAME A PERSON IS CALLED, ANYWHERE (§181) ─────────────────────
+   Islam: "we need to use the name only across the platform for better
+   usability." The register has answered this since §93.8 — a typed short
+   name, else the leading words of the full one, lengthened just enough where
+   two people would otherwise read alike (§81.1) — and the surfaces that
+   NAME somebody in passing were each answering it their own way: the figure
+   sets' owner list printed the full legal name, and the chat printed whatever
+   the server had stored.
+
+   `knownName()` needs the person and the disambiguation map; this is the
+   version for a caller that has only a KEY and, sometimes, a name the server
+   sent. It resolves through the register where it can, and falls back to the
+   shared name rule where it cannot — a person the register no longer holds
+   still reads as a name rather than as a key.
+
+   NOT `shortName()`, which is the SENTENCE form (§93.6): the wizard, the
+   picker's prose and the audience list read as prose, and this is the LABEL
+   the register itself shows. */
+function nameOf(key, fallback){
+  var p = null;
+  try { p = typeof personBy === "function" ? personBy(key) : null; } catch(e){}
+  if (p) return knownName(p, displayNames());
+  var raw = String(fallback == null ? "" : fallback).trim();
+  if (!raw) return "";
+  try { return SMPRules.knownGuess(raw) || raw; } catch(e){ return raw; }
+}
+
+/* And the FIRST name alone, for the one place that addresses somebody rather
+   than naming them: the chat's reply box. Through `SMPRules.firstName()`, the
+   same reader the email greeting uses (§135) — a compound first name is kept
+   whole, so this register's "Abd El Moniem" is not greeted as "Abd", and a
+   typed short name wins over the guess. */
+function firstNameOf(key, fallback){
+  var p = null;
+  try { p = typeof personBy === "function" ? personBy(key) : null; } catch(e){}
+  try {
+    if (p) return SMPRules.firstName(p) || "";
+    var raw = String(fallback == null ? "" : fallback).trim();
+    return raw ? (SMPRules.firstName({ name: raw }) || raw) : "";
+  } catch(e){ return String(fallback || "").split(/\s+/)[0] || ""; }
+}
+
 function displayNames(){
   var seen = {}, out = {};
   PEOPLE.forEach(function(p){
@@ -2454,7 +2504,10 @@ function attentionOf(p, all){
   if (dupes.length) why.push({ kind:"dupe", say: dupeSentence(dupes) });
   /* Then what they SAID about themselves, which is a question waiting on an
      answer rather than a gap (§56). */
-  var said = SAIDWHERE && !SAIDWHERE.__error ? SAIDWHERE[p.key] : null;
+  /* §180: read through saidAt()/saidOutstanding(), never out of the map —
+     an ANSWERED claim is not waiting on anybody, and the queue, the count and
+     the row's mark must not be able to disagree about the same row (§53.5). */
+  var said = saidAt(p.key);
   /* ONE VOCABULARY PER SENTENCE (§116.9). This names two places and
      compares them, so both halves must be spelt by the same function or a
      match reads as a difference — `roleWhereLabel` on both, which is what
@@ -2464,7 +2517,7 @@ function attentionOf(p, all){
      from here: the crash needed a declaration AND a register placement that
      disagree, so it lived only over HTTP (§94.11) and only for somebody
      already placed — the one case the queue's own check had not made. */
-  if (said && said !== personAt(p))
+  if (saidOutstanding(p))
     why.push({ kind:"said", say:"They said they work in " + roleWhereLabel(said) +
       (personAt(p) ? " \u2014 the register says " + roleWhereLabel(personAt(p)) : "") + "." });
   /* Then the two gaps. NULL IS NOT ZERO (§93): PWSTATES is null until the
@@ -3595,13 +3648,32 @@ function projMilestones(p){
 /* A milestone whose finish date falls after its project's end date is saved
    exactly as entered. The platform never refuses it \u2014 it says so, and offers
    the two things that might be true. */
+/* ── READ THE DATES THE WAY THE PLATFORM READS EVERY OTHER DATE (§179) ──
+   This asked `Date.parse` directly, which is the one reader in the product
+   that does NOT understand the shapes the product actually stores -- and with
+   §179 putting a month picker on Start and End it became actively wrong
+   rather than merely deaf: `Date.parse("Jul 26")` is 26 July **2001**, so
+   every milestone would have overrun every project, on every pane, from the
+   day the picker shipped. A dead warning woken as a false one.
+
+   `monthsOf()` is the reader the rest of the platform uses, and it already
+   knows `Jul 26`, `Q4 2026`, `H1 26`, `31 May 2026` and the rest. The END
+   takes `last:true`, so a project ending "Q4 2026" ends in DECEMBER rather
+   than October -- the same argument `monthsOf` documents for a cycle named
+   Q2 covering April to June.
+
+   THE COMPARISON IS MONTHLY, which is the accepted consequence of §177's
+   month-only dates: a milestone due in the month the project ends is not an
+   overrun. The `timeline` gate is deliberately LEFT AS IT WAS -- §109 removed
+   the pill that set it and recorded widening this guard as its own decision,
+   and this section is about the reader, not about which projects are asked. */
 function projOverruns(p){
   if (p.timeline !== "date" || !p.end) return [];
-  var endT = Date.parse(p.end);
-  if (isNaN(endT)) return [];
+  var endM = monthsOf(p.end, true);
+  if (endM == null) return [];
   return (p.milestones || []).filter(function(m){
-    var t = Date.parse(m.finish);
-    return !isNaN(t) && t > endT;
+    var t = monthsOf(m.finish);
+    return t != null && t > endM;
   });
 }
 function capPerf(c){
@@ -3689,37 +3761,16 @@ function fullYear(y){
 }
 /* Months since year zero, so two dates in different years compare with one
    subtraction. Null when the text is not a time at all -- which is what the
-   upload notice reports and what "Done" in a due-date column produces. */
+   upload notice reports and what "Done" in a due-date column produces.
+
+   THE READER ITSELF MOVED TO `lib/rules.js` (§184). The server had to be able
+   to ask "is this a date" -- a value it cannot read is a GAP, and until §184
+   only the browser knew which values those were, so the screen offered a
+   filler a control the save then refused. What is left here is the one thing
+   the shared rule cannot know: which year an unyeared quarter belongs to,
+   which is this tenant's cycle. */
 function monthsOf(v, last){
-  var s = String(v == null ? "" : v).trim();
-  if (!s) return null;
-  var m;
-  /* W3 Mar 26 / Week 3 March 2026 -- the week is read and discarded, because
-     the comparison is monthly. It is kept in the TEXT for the person. */
-  if ((m = /^w(?:eek)?\s*[1-5]\s+([a-z]+)\.?\s*'?(\d{2,4})$/i.exec(s)))
-    return monthIndex(m[1]) < 0 ? null : fullYear(m[2]) * 12 + monthIndex(m[1]);
-  /* July 26 / Jul 2026 / Dec 26 */
-  if ((m = /^([a-z]+)\.?\s*'?(\d{2,4})$/i.exec(s)))
-    return monthIndex(m[1]) < 0 ? null : fullYear(m[2]) * 12 + monthIndex(m[1]);
-  /* Q3 2026 / Q3 -- a quarter is its FIRST month, or its last when `last`
-     is asked for, which is how a cycle named Q2 covers April to June. */
-  if ((m = /^q([1-4])\s*'?(\d{2,4})?$/i.exec(s))) {
-    var qy = m[2] ? fullYear(m[2]) : cycleYear();
-    return qy == null ? null : qy * 12 + (+m[1] - 1) * 3 + (last ? 2 : 0);
-  }
-  /* H1 2026 / H2 26 -- a half year, which is what a review is usually called
-     and what the old reader could not see at all. */
-  if ((m = /^h([12])\s*'?(\d{2,4})?$/i.exec(s))) {
-    var hy = m[2] ? fullYear(m[2]) : cycleYear();
-    return hy == null ? null : hy * 12 + (+m[1] - 1) * 6 + (last ? 5 : 0);
-  }
-  /* FY26 / 2026 -- a whole year. */
-  if ((m = /^(?:fy)?\s*'?(\d{4})$/i.exec(s)))
-    return fullYear(m[1]) * 12 + (last ? 11 : 0);
-  /* 31 May 2026, and anything else a browser genuinely reads as a date. */
-  var t = Date.parse(s);
-  if (!isNaN(t)) { var d = new Date(t); return d.getFullYear() * 12 + d.getMonth(); }
-  return null;
+  return SMPRules.whenMonths(v, last, cycleYear());
 }
 /* THE CYCLE'S OWN CLOSING MONTH, taken from `REVIEW.to` -- which has said
    "Jun 2026" since the review model existed -- rather than parsed out of its

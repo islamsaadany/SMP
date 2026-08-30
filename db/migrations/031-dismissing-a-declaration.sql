@@ -1,0 +1,43 @@
+-- 031 · DISMISSING A DECLARATION (§180)
+--
+-- Islam: "the people register I concluded the issue but the notification is
+-- still there."
+--
+-- Accepting what somebody said about where they work has always worked: the
+-- SMO presses Use it, `attachPersonAt()` moves them, and the note stops
+-- showing the moment the two agree. What has never existed is a way to say
+-- the OTHER answer — "no, the register was already right" — so a claim the
+-- SMO disagrees with kept its mark, its place in the attention queue, the
+-- register's badge, the rail's pill and the Setup Overview's row FOR EVER.
+--
+-- And the Overview has promised that way out since §108.10, in as many words:
+-- "N people said where they work — accept or dismiss". The copy and the
+-- product had disagreed since the day it was written.
+--
+-- WHY A COLUMN RATHER THAN A DELETE. Islam's own pick of three: the claim
+-- stays on record and is marked answered. It is the shape the rest of the
+-- platform already has — an import archives rather than deletes (§22),
+-- retiring a person keeps the row (§35), a switch that destroys data is a
+-- delete with a friendly label (§44) — and it leaves "they said Logistics and
+-- we said no" answerable in three months. Deleting the row was drawn as the
+-- alternative and turned down.
+--
+-- NOTHING IS BACKFILLED, and that is the correct reading rather than a
+-- shortcut: every declaration standing today is one nobody has answered, which
+-- is exactly what NULL means here. A tenant that has never dismissed anything
+-- and a fresh deployment end in the same state.
+--
+-- IT MOVES NOBODY'S ACCESS. A declaration grants nothing (§56) — it is a
+-- statement the SMO reads and acts on — so recording that it was answered
+-- cannot change what anybody may open.
+--
+-- A NEW DECLARATION CLEARS THE DISMISSAL, in api/auth.js rather than here: if
+-- somebody says where they work again, that is a fresh statement and it is
+-- owed a fresh answer. Without that, one dismissal would silence a person for
+-- the life of the tenant.
+--
+-- IDEMPOTENT, and `bu_declarations` is outside the state graph (§56), so no
+-- save can TRUNCATE this away.
+
+ALTER TABLE bu_declarations ADD COLUMN IF NOT EXISTS dismissed_on timestamptz;
+ALTER TABLE bu_declarations ADD COLUMN IF NOT EXISTS dismissed_by text;

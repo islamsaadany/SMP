@@ -862,7 +862,29 @@
      There is one honest thing to show before the answer arrives, and it is
      nothing. The gate is hidden until the session check resolves; if a session
      is live the platform is opened and the gate is never seen at all. */
+  /* ── WAS A CREDENTIAL ASKED FOR THIS VISIT (§179) ────────────────────────
+     Islam: "when I sign out and sign in I don't get the welcome screen."
+
+     Right, and the cause is that the welcome screen remembers "seen" in
+     sessionStorage while SIGNING OUT ONLY RELOADS THE PAGE IN THE SAME TAB —
+     so the memory outlives the session it was meant to belong to, and the
+     next sign-in is greeted by nothing. §148 meant "once per session" and
+     what the browser calls a session is not what a person does.
+
+     The rule is ONCE PER SIGN-IN: greeted whenever a credential was actually
+     accepted, never on a plain refresh, and never when an existing session is
+     simply resumed (opening the gate signed in bounces straight through, and
+     being re-greeted for walking past your own front door is the fault this
+     replaces, not a fix for it).
+
+     ASKED IS SET HERE AND NOWHERE ELSE, because this is the only function that
+     can put a credential card on screen: a sign-in path added later is
+     invisible until it calls show(), so it cannot forget to be counted
+     (§104.7 — a list of exceptions is a list somebody forgets to add to). */
+  var ASKED = false;
+
   function show(which) {
+    if (which === "login" || which === "change") ASKED = true;
     loginCard.style.display = which === "login" ? "block" : "none";
     changeCard.style.display = which === "change" ? "block" : "none";
     document.body.classList.add("ready");
@@ -900,7 +922,16 @@
   var PLATFORM = HOSTED
     ? "/" + TENANT
     : "SMP-Project-Folder/strategy-management-platform-v3.22.html";
-  function openPlatform() { location.replace(PLATFORM); }
+  /* The one door into the platform, so it is where the welcome screen's memory
+     is cleared (§179). The KEY IS SPELT ONCE HERE and once in welcome.js, which
+     is one copy too many and is still the smaller evil: the gate is a separate
+     document that shares no code with the platform, and the alternative is a
+     third file existing only to hold a string. A wrong key here fails visibly —
+     you are greeted every time — rather than silently. */
+  function openPlatform() {
+    if (ASKED) { try { sessionStorage.removeItem("smp.welcome.done"); } catch (e) {} }
+    location.replace(PLATFORM);
+  }
   function fail(el, msg) { el.textContent = msg; el.style.display = "block"; }
   function clearFail(el) { el.style.display = "none"; }
 

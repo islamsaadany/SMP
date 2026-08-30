@@ -2478,6 +2478,20 @@
      which is the fault this replaces. */
   .saidmark { margin-left:6px; color:var(--gold-deep); font-size:11px;
     cursor:help; }
+  /* ── ANSWERED, AND VISIBLY SO (§180) ────────────────────────────────
+     The GLYPH carries the state, not the colour: `◎` waiting, `◌` answered.
+     One ring in two inks was drawn first and the mockup killed it — the mark
+     is 9.6px wide at 11px type, and gold against grey at that size is not a
+     difference anybody reads (measured: rgb(138,107,34) vs rgb(99,108,121)).
+     The ink still moves, so the two agree rather than fight, but it is the
+     shape that does the work. */
+  .saidmark.done { color:var(--ink-3); }
+  /* Why a dismissal did not land (§171's rule, on a write that rides no
+     autosave and so has no banner of its own). --bad-tx because it is WORDS,
+     not a fill (§38.5). */
+  .saidwhere .saidfail { display:block; color:var(--bad-tx); font-weight:600; }
+  /* An answered claim is still readable and is not asking for anything. */
+  .saidwhere.done { color:var(--ink-3); }
   /* A sub-line under a value, on ITS own line and clipped like one. `.why` was
      doing this job and carries a top margin meant for prose. */
   .vwhy { display:block; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;

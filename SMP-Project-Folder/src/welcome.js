@@ -58,6 +58,18 @@ var WELCOME = (function(){
   /* The register's row for the signed-in person — the API's person carries a
      key and a name, and everything else (attachment, roles, a typed short
      name) lives on the register (§93.8). */
+  /* Is the screen being drawn for the person who actually signed in, or for
+     somebody the SMO is viewing as? Only the session can answer it — the
+     register row is the same row either way (§179). No SYNC means no
+     simulation is possible, so it is true. */
+  function isSelf(person){
+    try {
+      if (typeof SYNC === "undefined" || !SYNC.person) return true;
+      var me = SYNC.person();
+      return !me || !person || me.key === person.key;
+    } catch(e){ return true; }
+  }
+
   function rowFor(person){
     try { return (typeof personBy === "function" && personBy(person.key)) || person; }
     catch(e){ return person; }
@@ -355,7 +367,14 @@ var WELCOME = (function(){
     var list = box.querySelector(".wacts");
     var acts = office ? officeActs(list)
                       : submitRows(targets).concat(gapRows(targets));
-    if (!office) {
+    /* THE REPLY ROW IS THE SIGNED-IN PERSON'S AND CANNOT BE SIMULATED (§179).
+       There is one conversation per person and it belongs to the SESSION, not
+       to the view (§97) — so while viewing as somebody else `CHAT.unread()`
+       still answers about YOU, and drawing it would put your unread messages
+       on their screen under their name. It is left out rather than shown wrong:
+       a row that lies is worse than a row that is missing, and the office's own
+       rows below are tenant-wide, so they simulate honestly. */
+    if (!office && isSelf(person)) {
       var un = 0;
       try { un = (typeof CHAT !== "undefined" && CHAT.unread) ? CHAT.unread() : 0; } catch(e){}
       if (un > 0) { var rr = replyRow(un); rr.classList.add("wact-reply"); acts.push(rr); }
@@ -371,7 +390,7 @@ var WELCOME = (function(){
       box.querySelector("[data-wcontinue]").classList.add("wloud");
     }
     acts.forEach(function(a){ list.appendChild(a); });
-    if (!office) watchReplies(list);
+    if (!office && isSelf(person)) watchReplies(list);
 
     /* ── Your pages ─────────────────────────────────────────────────── */
     var pages = box.querySelector(".wpages");
@@ -441,7 +460,85 @@ var WELCOME = (function(){
     cont.querySelector(".wexlab").textContent = word;
     cont.addEventListener("click", function(ev){ ev.preventDefault(); dismiss(); });
 
+    viewerBar(box);
     document.body.appendChild(box);
+    /* AFTER the box is in the document, or there is nothing to enhance: the
+       switcher is 33 people and searchsel takes over any select past five
+       (§45.5). Its popup is `.sspop` at z-index 120, above this overlay's 60,
+       so it opens over the screen rather than under it — checked, not assumed. */
+    try { SEARCHSEL.wire(); } catch(e){}
+  }
+
+  /* ── VIEWING AS, ABOVE THE GREETING (§179) ───────────────────────────────
+     Islam: "the viewing as should be available from the welcome screen." It
+     could not be reached at all — this overlay covers the viewport, so the
+     control in the bar underneath is behind it (§167.2 recorded the same
+     screen swallowing clicks meant for the page).
+
+     ABOVE THE HERO, NOT INSIDE IT — Islam's pick from two drawn placements.
+
+     WHO GETS IT IS ASKED, NEVER RE-TESTED: `SYNC.isSMOSession()` is the same
+     function the chrome's own switcher asks, so the two can never disagree
+     about who the SMO is, and it FAILS CLOSED — no SYNC, no answer, no
+     control. A switcher shown to somebody who is not the SMO would serve them
+     another person's screen wearing their own name, which is the worst reading
+     available (sync.js says so at length; this does not restate the rule, it
+     asks it).
+
+     THE OPTIONS ARE THE CHROME'S OWN, cloned rather than rebuilt: fillViewers()
+     already settles what a person is called here (`knownName` through
+     `displayNames`, so a colliding pair reads apart) and where they sit
+     (`placeLabel`, the navigation's word). Building a second list would be a
+     second vocabulary for one question (§53.5, §142).
+
+     NEVER A CLONE OF THE SELECT ITSELF — that would put `id="asWho"` in the
+     document twice, and `getElementById` then answers with whichever came
+     first. This is its own element with its own id, and it DRIVES the chrome's
+     one instead of repeating what it does: setting the value and firing
+     `change` runs the shell's single handler (leaveModes, VIEWER, repaint),
+     so a change made to that handler tomorrow reaches this control for free. */
+  function viewerBar(over){
+    var smo = false;
+    try { smo = !!(typeof SYNC !== "undefined" && SYNC.isSMOSession && SYNC.isSMOSession()); }
+    catch(e){ smo = false; }
+    if (!smo) return;
+    var src = document.getElementById("asWho");
+    if (!src || !src.options.length) return;
+
+    var bar = document.createElement("div");
+    bar.className = "wviewbar";
+    var lab = document.createElement("label");
+    lab.setAttribute("for", "wAsWho");
+    lab.textContent = "Viewing as";
+    var sel = document.createElement("select");
+    sel.id = "wAsWho";
+    for (var i = 0; i < src.options.length; i++)
+      sel.appendChild(src.options[i].cloneNode(true));
+    sel.value = src.value;
+    sel.addEventListener("change", function(){
+      var key = sel.value;
+      /* The chrome's handler is the one that switches the platform. Fire it
+         rather than repeating it — and only then redraw this screen, so the
+         doors it builds are the ones the new viewer can actually reach. */
+      src.value = key;
+      src.dispatchEvent(new Event("change"));
+      redraw(key);
+    });
+    bar.appendChild(lab); bar.appendChild(sel);
+    over.querySelector(".wwrap").insertBefore(bar, over.querySelector(".whero"));
+  }
+
+  /* Rebuild this screen for whoever is being viewed as. NEVER markDone(): a
+     switch is not a dismissal, and marking it would leave the screen unable to
+     come back for the person you were about to look at. */
+  function redraw(key){
+    var was = box;
+    box = null;
+    if (was) was.remove();
+    var p = null;
+    try { p = (typeof personBy === "function" && personBy(key)) || { key: key, name: key }; }
+    catch(e){ p = { key: key, name: key }; }
+    try { build(p); } catch(e){ box = null; }
   }
 
   function dismiss(){

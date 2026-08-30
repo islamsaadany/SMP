@@ -415,8 +415,14 @@ CREATE TABLE IF NOT EXISTS plan_archives (
 -- page. Outside the state graph and without a foreign key, because a save
 -- TRUNCATEs the thirty tables CASCADE and would otherwise take this with it —
 -- the same two reasons `credentials` is shaped this way. Added by migration 017.
+-- `dismissed_on` is the SMO's answer of "no, the register was already right"
+-- (§180, migration 031). NULL is the only honest default: every declaration
+-- that has not been answered is one nobody has answered. A new declaration
+-- clears it in api/auth.js, because saying it again is a fresh statement.
 CREATE TABLE IF NOT EXISTS bu_declarations (
-  person_key  text PRIMARY KEY,
-  at          text NOT NULL,
-  declared_on timestamptz NOT NULL DEFAULT now()
+  person_key   text PRIMARY KEY,
+  at           text NOT NULL,
+  declared_on  timestamptz NOT NULL DEFAULT now(),
+  dismissed_on timestamptz,
+  dismissed_by text
 );

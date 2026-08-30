@@ -6,8 +6,12 @@ version (rules A2 / A11, changed 2026-08-20) — those go only when asked for.
 
 **Where it runs:** Vercel, production tracks `main`. Static files plus two
 serverless functions (`/api/state`, `/api/auth`) against Neon Postgres.
-**Latest version:** v3.58 on `main` (§148, the welcome screen, spec 025 —
-merged 2026-08-28 on Islam's word).
+**Latest version:** v3.65 on `main` (§178, the Viewing-as line). §179 is on
+`claude/four-fixes-welcome-dates-types`, built and checked, **not merged** —
+`main` is Islam's call every time.
+
+*(This line read v3.58 while the section below it ran to v3.65: a documentation
+drift, flagged before it was corrected rather than quietly realigned.)*
 
 **Sign in as:** `SMO` / `1234` — a password change is forced at once (§43.1,
 reversing §19.4).
@@ -63,6 +67,106 @@ Nothing proceeds past this line without an answer.
   is a true signal — do not silence it.
 
 ## Built and verified
+
+### v3.72 — a date the platform cannot read, and a refusal that costs one row (§184)
+
+- **The CX custodian's loss, reproduced against the real authoriser first.**
+  An empty due date filled is accepted; the same act on a date holding
+  `30/09/2026` is refused, because a non-blank value is not a gap so
+  correcting it is *authoring*, which is the office's. The refusal is right.
+  The loss is that the whole graph posts together, so one refused row failed
+  the whole save and took three legitimate fills with it — and the only
+  control on the banner destroyed them. That is why the SMO never received
+  them: they were never stored.
+- **`monthsOf()` moved into `lib/rules.js`.** The platform's definition of a
+  time lived in the browser alone, so the screen and the server answered "is
+  this a date" differently. One reader now; `dueFits()` uses it too.
+- **An unreadable date is a gap**, keyed on the field name (`start`, `end`,
+  `finish`), asked by the counts, the cell and the server through one
+  function. A readable one is still the office's — asserted at both ends.
+- **The row opens AND still shows what is stored.** Rendering *Missing* over
+  `30/09/2026` would hide the value the person is being asked to correct.
+- **A refusal now carries an address**, not only a sentence: target, row id,
+  field, and the value the row held. The banner names the lines and offers
+  **"Put back those lines and save the rest"**. Discard stays, and is never
+  the only control again.
+- **A change with no row address offers no button** — the server decides
+  that, because a button that cannot work is worse than the destructive one.
+- **Nothing stored, nothing migrated.**
+- Proof: `test-authorize.js` §19–§20 (**336 passed**), proved able to fail 3
+  and 2 ways; `checks/refusal-keeps-work.py` is new, drives the whole path in
+  a browser with the **real authoriser behind the stub**, and is **11 red** on
+  the previous build; `checks/milestone-fill.py` §9. `qa.py` clean.
+- **Recorded, not fixed:** the put-back is offered only when every refusal in
+  one response is addressable. A save mixing an addressable refusal with an
+  un-addressable one still offers Discard alone — nothing is destroyed
+  unasked, but the platform cannot rescue it automatically.
+
+### v3.65 — a function could not report at all, and Save draft never finished (§183)
+
+- **A supporting function that plans in pillars reported nothing.** Its
+  reporting page is drawn by the unit's renderer, and both field handlers
+  looked the subject up with `UNITS[current]` — undefined for `fn:…` — so the
+  handler threw and every figure and note typed was discarded in silence.
+  Measured: 0 saves before, 1 after. §63's own fault in the two places that
+  fix did not reach.
+- **Save draft sat on "Saving…" for ever.** A caller arriving while another
+  save was in flight was told `"busy"` and nothing ever followed up. Since
+  §170's leading-edge autosave this is the ordinary sequence, not a race: the
+  button you press right after typing lands inside the flight. Such a caller
+  is parked and answered when the next save settles.
+- `"busy"` stops being an outcome, so both readers of it go — including
+  §170's 300ms retry timer, which the parking replaces.
+- `checks/report-saves.py` is new: a figure and a note on a unit, a capability
+  function AND a pillars function must reach the stored plan and schedule a
+  save. **5 red** on the previous build.
+- **Not reproduced:** filling a missing date on a function stamps its pending
+  mark correctly here. Left open rather than claimed fixed.
+
+### v3.65 — dismissing a declaration (§180)
+
+- **Accepting always worked** — driven, not read: Use it moved the person, the
+  count cleared, the queue emptied. What never existed was the other answer.
+- **There was no dismiss anywhere** — not on the row, not in the dialog, not in
+  the server — so a claim the SMO disagreed with kept its mark, its queue
+  entry, the register badge, the rail pill and the Overview row for ever. The
+  Overview has promised "accept or dismiss" since §108.10.
+- **The claim is kept and marked answered** (Islam's pick of three), not
+  deleted. Migration 031, nothing backfilled, nobody's access moves.
+- **Saying it again clears the answer** — a fresh statement is owed a fresh
+  reply. There is deliberately no un-dismiss: changing your mind is accepting.
+- **The glyph carries the state, not the colour** — `◎` waiting, `◌` answered.
+  One ring in two inks was drawn first and the mockup killed it: 9.6px at 11px
+  type is too small for a colour to be a state.
+- Proved against a real Postgres 16 (virgin round trip, and the migration on a
+  tenant that predates the column) and in `checks/people-dialog.py` §8,
+  **proved able to fail twice**.
+
+### v3.65 — four from using it (§179)
+
+- **Viewing as reaches the welcome screen.** The screen covers the window, so
+  the control underneath could not be reached at all. It sits above the
+  greeting — Islam's pick of two placements drawn in the running product — and
+  switching redraws the screen for that person. Only a Super-user session gets
+  it, asked through the same function the chrome asks.
+- **Greeted on every sign-in.** "Seen" was remembered for the browser session
+  and signing out only reloads the page in the same tab, so the memory outlived
+  the session. It is cleared when a credential is accepted — never on a plain
+  refresh, never on a resume.
+- **A project's Start and End are picked, as `Jul 26`** — §177's own control,
+  reused rather than a second way to say a date. **Not only a look:**
+  `30/4/2026` was unreadable to the platform, so that project's End was no date
+  and the overrun warning could never fire on it; and `Date.parse("Jul 26")` is
+  26 July **2001**, so shipping the picker without repairing the reader would
+  have woken a dead warning as a false one on every milestone.
+- **Deliverable and Outcome are plain text.** One builder, three panes; the
+  column keeps its measure so nothing reflows, and the rows come in 17px
+  shorter.
+- Dates already written are untouched, a quarter can no longer be a Start or
+  End, and nothing moves on the demo (2 overruns before, 2 after).
+- `checks/project-dates.py` is new (**5 red** on the previous build);
+  `checks/welcome.py` gains §8 and §9 (**2 red**); `checks/project-header.py`
+  presses the picker instead of typing. `qa.py` green.
 
 ### v3.65 — who owns every place, named once (§175)
 

@@ -1079,17 +1079,69 @@ var PWSTATES = null;   /* key -> "none" | "temporary" | "set", once asked */
    annotated every row with a note confirming the row would be a register
    nobody reads. */
 function saidWhereNote(p, editable){
-  if (!SAIDWHERE) return "";
-  var said = SAIDWHERE[p.key];
+  var said = saidAt(p.key);
   if (!said || said === personAt(p)) return "";
-  return '<span class="why saidwhere">They said ' + esc(roleWhereLabel(said)) +
-    (editable ? ' <button class="linkbu" data-usesaid="' + esc(p.key) + '">Use it</button>' : '') +
+  /* ── TWO ANSWERS, NOT ONE (§180) ──────────────────────────────────
+     "Use it" moves them; "Dismiss" records that you looked and the register
+     was already right. Only ONE of them existed until now, so a claim you
+     disagreed with had no reply at all — and the Setup Overview had been
+     offering "accept or dismiss" the whole time.
+
+     ONCE DISMISSED, Use it STAYS. Changing your mind is accepting, which is
+     the same act it always was; there is deliberately no "un-dismiss" button,
+     because a second control for "put it back to unanswered" would be a third
+     state nobody asked for, and saying it again does that anyway (the server
+     clears the answer on a fresh declaration). */
+  var done = saidDismissed(p.key);
+  return '<span class="why saidwhere' + (done ? " done" : "") + '">They said ' +
+    esc(roleWhereLabel(said)) + (done ? " \u2014 dismissed" : "") +
+    (editable
+      ? ' <button class="linkbu" data-usesaid="' + esc(p.key) + '">Use it</button>' +
+        (done ? "" : ' <button class="linkbu" data-dropsaid="' + esc(p.key) + '">Dismiss</button>')
+      : '') +
+    (SAIDFAIL && SAIDFAIL.key === p.key
+      ? '<b class="saidfail">' + esc(SAIDFAIL.why) + '</b>' : '') +
     '</span>';
 }
 /* And for the same reason, what each person said about where they work (§56):
    a declaration lives outside the state graph, so the register asks for it
    separately and simply has nothing to show from a file. */
 var SAIDWHERE = null;  /* key -> the `at` they picked, once asked */
+
+/* ── WHAT THEY SAID, AND WHETHER IT HAS BEEN ANSWERED (§180) ──────────
+   Two shapes cross the wire, deliberately (api/auth.js says why): an
+   OUTSTANDING claim is the bare string it has always been, and a DISMISSED one
+   is `{at, dismissed}`. So a client older than §180 reads every outstanding
+   claim exactly as before, and the one shape it cannot understand is the one
+   already answered — the safe way round (§58: write the new, read either).
+
+   FIVE PLACES READ THIS — the row's mark, the row's note, the Overview's
+   count, the attention queue and the accept handler — and every one of them
+   asks these two rather than reaching into the map. A second place that
+   unwrapped the shape by hand is exactly how the count and the mark come to
+   disagree about the same row (§53.5). */
+function saidRaw(key){
+  if (!SAIDWHERE || SAIDWHERE.__error) return null;
+  return SAIDWHERE[key] || null;
+}
+function saidAt(key){
+  var v = saidRaw(key);
+  if (!v) return null;
+  return typeof v === "string" ? v : (v.at || null);
+}
+/* Has the SMO answered it? A string is a claim nobody has replied to. */
+function saidDismissed(key){
+  var v = saidRaw(key);
+  return !!(v && typeof v !== "string" && v.dismissed);
+}
+/* THE ONE TEST FOR "THIS IS WAITING ON SOMEBODY". Silent agreement is not an
+   outstanding item (§56) and neither is an answered claim (§180) — asked here
+   once so the mark, the count and the queue can never disagree. */
+function saidOutstanding(p){
+  if (!p) return false;
+  var at = saidAt(p.key);
+  return !!at && at !== personAt(p) && !saidDismissed(p.key);
+}
 
 /* ── THE THREE COUNTS THE OVERVIEW AND THE REGISTER SHARE (§108.10) ──
    NULL IS "WE HAVE NOT ASKED", AND IT IS NOT ZERO. Both of these depend on a
@@ -1123,10 +1175,12 @@ function noPasswordCount(){
 function saidWhereCount(){
   var live = typeof SYNC !== "undefined" && SYNC.isLive();
   if (!live || !SAIDWHERE || SAIDWHERE.__error) return null;
+  /* §180: an ANSWERED claim is not waiting on anybody, and this is the count
+     the Overview's row and the rail's pill are both built from — asked through
+     saidOutstanding() so it cannot say something different from the mark on
+     the row it points at. */
   return PEOPLE.filter(function(p){
-    if (!personActive(p)) return false;
-    var said = SAIDWHERE[p.key];
-    return !!said && said !== personAt(p);
+    return personActive(p) && saidOutstanding(p);
   }).length;
 }
 
@@ -1504,11 +1558,28 @@ function renderPeople(){
      rule, so a SIBLING would start a second line and grow the row — which is
      exactly the fault this replaces. Inside it, always. */
   function saidMark(p){
-    if (!SAIDWHERE || SAIDWHERE.__error) return "";
-    var said = SAIDWHERE[p.key];
+    var said = saidAt(p.key);
     if (!said || said === personAt(p)) return "";
-    return '<span class="saidmark" title="They said they work in ' +
-      esc(roleWhereLabel(said)) + '. Open their row to accept it.">&#9678;</span>';
+    /* ── TWO MARKS, BECAUSE A COLOUR IS NOT A STATE AT THIS SIZE (§180) ──
+       Islam's pick of two drawn answers. The first proposal kept ONE ring and
+       shifted it from `--gold-deep` to `--ink-3`, and the mockup killed it:
+       the ring is 9.6px wide at 11px type, and at that size the two inks are
+       not a difference anybody reads. So the GLYPH carries the state — a solid
+       ring for a claim still waiting, a dotted one for a claim answered — and
+       the colour follows rather than leads.
+
+       AND THE DOTTED RING WAS MEASURED BEFORE IT WAS CHOSEN (§52, §120.2). A
+       font subset maps far more than it draws, so a mark can be mapped and
+       ship as a blank box; U+25CC differs from the tofu rectangle by 1.3% of
+       its box, which is what says it is drawn. Ink alone could not have
+       answered it — an absent glyph renders a hollow rectangle, which has ink
+       of its own. */
+    var done = saidDismissed(p.key);
+    return '<span class="saidmark' + (done ? " done" : "") +
+      '" title="They said they work in ' + esc(roleWhereLabel(said)) +
+      (done ? ' \u2014 dismissed. Open their row to accept it after all.'
+            : '. Open their row to accept or dismiss it.') +
+      '">' + (done ? "&#9676;" : "&#9678;") + '</span>';
   }
 
   /* ══ THE EDITING HALF, IN ONE PLACE (§116) ═══════════════════════════
@@ -3974,10 +4045,23 @@ function renderSetsSetup(){
       }).join("") + '</select>';
   };
   var ownerOptions = function(sel, attr){
+    /* §181: THE NAME THE REGISTER SHOWS, not the full legal one. This printed
+       "Mohamed Hassanin Ehsan Hassanin — Senior Manager (Sales)" and every
+       option in the list was longer than the control. The register settled
+       what somebody is called in §93.8 and the viewer switcher has read it
+       since §142; this was one of the two surfaces still answering it its own
+       way (§53.5).
+
+       THE TITLE STAYS. It is what tells two people apart in a list of
+       thirty-three, and it is the thing you pick BY — the same shape the
+       switcher uses, where the place does that job. The VALUE is still the
+       key, so nothing about what is stored changes. */
+    var dn = displayNames();
     return '<select class="fld" ' + attr + '><option value="">\u2014</option>' +
       PEOPLE.filter(personActive).map(function(p){
-        return '<option value="' + esc(p.key) + '"' + (p.key === sel ? " selected" : "") + '>' +
-          esc(p.name) + (p.title ? " \u2014 " + esc(p.title) : "") + '</option>';
+        return '<option value="' + esc(p.key) + '"' + (p.key === sel ? " selected" : "") +
+          ' title="' + esc(p.name + (p.title ? " \u2014 " + p.title : "")) + '">' +
+          esc(knownName(p, dn)) + (p.title ? " \u2014 " + esc(p.title) : "") + '</option>';
       }).join("") + '</select>';
   };
   var pickOptions = function(sel, attr){

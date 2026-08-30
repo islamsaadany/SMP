@@ -21638,3 +21638,690 @@ missing one (§94.8).
 **PROVED ABLE TO FAIL: 14 failures against `3aabe85`** — and the failure
 detail is the report itself: the unit filler's walk lights a field and never
 moves, while the function side and the office light nothing at all.
+
+## §179 · Four from using it: the welcome screen, the dates, the type column
+
+Four things Islam asked for in one message, settled from a mockup made of the
+real product (`design-mockups/four-fixes/`) before a source was touched.
+
+### 1 · Viewing as, on the welcome screen
+
+*"The viewing as should be available from the welcome screen."*
+
+It could not be reached at all: §148's screen is `position:fixed; inset:0`, so
+the control in the bar underneath is behind it — the same overlay §167.2 caught
+swallowing clicks meant for the page, this time swallowing a whole control.
+
+**ABOVE THE HERO, NOT INSIDE IT.** Two placements were drawn in the running
+product and Islam picked the bar above the greeting. The other put it under the
+role chips, which is where the recommendation went — the chips say who you are
+and where your roles are held, and the control changes exactly that — and the
+recommendation is recorded as having lost, not re-argued (A9).
+
+**WHO GETS IT IS ASKED, NEVER RE-TESTED.** `SYNC.isSMOSession()` is exported
+and called; the note beside it in `sync.js` is explicit that this question must
+have one answer, because a switcher shown to somebody who is not the SMO serves
+them another person's screen wearing their own name (§45.3). It **fails
+closed**: no SYNC, no answer, no control.
+
+**THE OPTIONS ARE THE CHROME'S OWN, CLONED.** `fillViewers()` already settles
+what a person is called here and where they sit (§142, §130.7, §93.12).
+Building a second list would be a second vocabulary for one question (§53.5) —
+so the `<option>` elements are cloned. **The SELECT is not**: a clone would put
+`id="asWho"` in the document twice, and `getElementById` then answers with
+whichever came first, which is a control silently driving the wrong thing. It
+is its own element that **drives the chrome's** — setting the value and firing
+`change` runs the shell's single handler (`leaveModes`, `VIEWER`, repaint), so
+a change made to that handler tomorrow reaches this control for free.
+
+**A SWITCH IS NOT A DISMISSAL.** Redrawing never calls `markDone()`, or the
+screen could not come back for the person you were about to look at.
+
+**THE REPLY ROW IS LEFT OUT WHILE SIMULATING**, and that is a decision rather
+than an omission: there is one conversation per person and it belongs to the
+SESSION, not to the view (§97), so `CHAT.unread()` still answers about *you* —
+drawing it would put your unread messages on somebody else's screen under their
+name. The office's rows below are tenant-wide and simulate honestly. A row that
+lies is worse than a row that is missing.
+
+**AND THE DRAWING FOUND ONE THING THE ASK DID NOT.** §178's role line, which
+follows the control everywhere else, would repeat the chips six pixels above
+it. It is dropped on this screen and only this screen.
+
+### 2 · Greeted on every sign-in
+
+*"When I sign out and sign in I don't get the welcome screen."*
+
+**Nothing was broken; the memory outlived the thing it belonged to.** §148
+remembers "seen" in `sessionStorage`, and **signing out only reloads the page
+in the same tab** — so the flag survives, and the next sign-in is greeted by
+nothing. What the browser calls a session is not what a person does.
+
+The rule is **once per sign-in**: greeted whenever a credential was actually
+accepted, never on a plain refresh, and **never on a resume** — opening the
+gate while signed in bounces straight through, and being re-greeted for walking
+past your own front door is the fault this replaces, not a fix for it.
+
+**ASKED IS SET IN `show()` AND NOWHERE ELSE**, because that is the only
+function that can put a credential card on screen: a sign-in path added later
+is invisible until it calls `show()`, so it cannot forget to be counted
+(§104.7 — a list of exceptions is a list somebody forgets to add to). The key
+is spelt once in the gate and once in `welcome.js`, which is one copy too many
+and is still the smaller evil: they are separate documents sharing no code, and
+a wrong key **fails visibly** — greeted every time — rather than silently.
+
+**Not changed, and worth knowing:** a session that simply EXPIRES and is signed
+into again is greeted (it goes through the login card); `smp.where` (§173) is
+untouched, so a fresh sign-in still lands where the last visit left off rather
+than where §94.6 would choose. That is its own decision and was not asked.
+
+### 3 · A project's Start and End are picked, as `Jul 26`
+
+Asked first as *"make the dates here dd-mmm YY like 25-Jul 26"*, then narrowed
+by Islam himself to **month and year, no days** — which is the shape §177
+settled for a milestone's due date, in his own words at the time: *"make it
+only Month Year like Jul 26 not days and remove the entry and just keep it a
+calendar selection."*
+
+So this is **that control, not a second way to say a date** (§53.5). Every
+argument §177 wrote down holds here: the comparisons the platform makes about a
+project's span are monthly, a day is precision it cannot use, and with no box
+there is nothing to mistype.
+
+**IT WAS NOT ONLY A LOOK, AND THAT IS THE FINDING.** The free box had collected
+`30/4/2026` on a live tenant. `monthsOf()` cannot read it at all — no month
+name, not a quarter, and `Date.parse` gives NaN — so that project's End was, to
+the platform, **no date**, and `projOverruns()` could never fire on it.
+`1/1/2026` beside it read as January **by luck**: the browser takes slashes
+month-first, so `3/4/2026` would have read as March.
+
+**AND THE CHANGE WOULD HAVE WOKEN A DEAD WARNING AS A WRONG ONE.**
+`projOverruns()` used `Date.parse` directly, and **`Date.parse("Jul 26")` is
+26 July 2001** — so the moment the picker shipped, every milestone would have
+overrun every project on every pane. It reads through `monthsOf()` now, with
+the END taking the span's **last** month (a project ending "Q4 2026" ends in
+December, not October — the rule `monthsOf` already documents for a cycle named
+Q2 covering April to June). Measured on the previous build, `Jan 27` reads as
+January **2001** and drops out of the comparison entirely.
+
+**THE `timeline` GATE IS DELIBERATELY LEFT ALONE.** §109 removed the pill that
+set it and recorded widening this guard as its own decision; this section is
+about the reader.
+
+**Three costs, stated rather than discovered.** Dates already written are **not
+touched** — a project still showing `30/4/2026` shows it until somebody opens
+the pen and picks, because guessing whether that means April is inventing a
+date (§96.2). **A quarter can no longer be set** as a Start or an End, the same
+trade §177 took. And on the demo nothing moves at all: its dates are
+`30 Apr 2026`, which both readers understand — **2 overruns before, 2 after,
+the same project** — so this is a fix for what a client can type, not for what
+the worked example contains.
+
+### 4 · Deliverable and Outcome as plain text
+
+*"For the types deliverable and Outcome don't make them chips let's make them
+normal text."*
+
+A chip is a mark on a value that could be one of several, or one the eye has to
+pick out of a sentence. This column holds one word per row out of two, under a
+heading that already asks the question — so the border was boxing the only
+thing in the cell. §93's ruling about the register's Unit chip, on a different
+table: *an ordinary value now.*
+
+**THE MEASURE SURVIVES THE BOX, and it is the half that was load-bearing.**
+"Deliverable" and "Outcome" are seven characters apart, so left to themselves
+the column reads as two different marks rather than one question answered two
+ways — and a column that resizes with its rows drags every column beside it.
+`.dxtype` carries that width and nothing else, which is why it is its own class
+rather than a stripped `.pill`: *this column has a fixed measure* and *paint a
+box round it* are two different facts, and merging them is what made removing
+one remove both.
+
+One builder feeds all three project panes, so Plan, Performance and Reporting
+change together — and the rows come in **17px shorter** across six, because the
+chip's padding was setting the row height.
+
+**A drift corrected in passing:** this file has said since §99 that the Type
+column was deleted with the split. §99.7 removed the split and the column came
+back; the record said otherwise for eighty sections.
+
+### Proof
+
+`checks/project-dates.py` is new and asserts the two halves nothing else
+covered — the overrun reader as an **exact set** (a build with `Date.parse`
+passes any "something overran" test and fails this) and the type column on
+**all three panes**, both ends: the chip gone, the words still there, the
+measure kept, and every cell rendering at one width. **5 red** against the
+shipped pre-§179 file.
+
+`checks/project-header.py` presses the new picker instead of typing, and
+asserts that what it writes is a shape `monthsOf()` can read — plus **both
+ends**, that Start and End are the picker and *not* a box, since asserting only
+"a control exists" passes on the build that let `30/4/2026` in.
+
+`checks/welcome.py` gains §8 and §9. §9 drives the **real gate**, because
+"greeted on every sign-in" is a property of `index.html` and the platform
+together and neither half shows it alone — `SMP_WELCOME_GATE` points it at
+another gate so the failure can be proved. **2 red** against the previous
+build and gate.
+
+**Two of that check's own first runs were the harness, not the product.** An
+`add_init_script` runs on *every* document a context loads, so the flag it set
+to model "already greeted" was re-written when the platform loaded and quietly
+undid the thing under test — the check would have failed against a correct
+build. And both new sections **crashed instead of reporting** on the old build,
+which is the one run where the count is the whole point; they degrade now.
+
+`qa.py` green, contrast sweep unchanged at its 13 pre-existing `.missing`
+failures, and the build parses.
+
+## §180 · Dismissing what somebody said about where they work
+
+Islam: *"the people register I concluded the issue but the notification is
+still there."*
+
+**DIAGNOSED BY DRIVING IT, NOT BY READING IT** — and the first thing that
+found was that nothing was broken. A person in Mobile who said Logistics,
+**Use it** pressed: they moved to Logistics, the count cleared, the queue
+emptied. Accepting has always worked.
+
+**WHAT HAS NEVER EXISTED IS THE OTHER ANSWER.** Searching the whole register
+for a dismiss control returned nothing, and `api/auth.js` had no action for
+one. So a claim the SMO looks at and *disagrees with* keeps its mark, its
+place in the attention queue, the register's badge, the rail's pill and the
+Overview's row **for ever**. There was no way to say *no, the register was
+already right*.
+
+**AND THE OVERVIEW HAS BEEN PROMISING IT SINCE §108.10**, in as many words —
+*"N people said where they work — accept or dismiss"* — while the row's own
+hover said only *"Open their row to accept it"*. The copy and the product had
+disagreed since the day that row was written.
+
+### What dismissing does
+
+Islam's pick of three drawn answers: **the claim stays on record and is marked
+answered**, rather than being deleted or the wording being quietly corrected.
+It is the shape the rest of the platform already has — an import archives
+rather than deletes (§22), retiring a person keeps the row (§35), a switch
+that destroys data is a delete with a friendly label (§44) — and it leaves
+*"they said Logistics and we said no"* answerable in three months.
+
+`dismissed_on` / `dismissed_by` on `bu_declarations` (migration 031,
+idempotent). **Nothing is backfilled**, which is the correct reading rather
+than a shortcut: every declaration standing today is one nobody has answered,
+and that is exactly what NULL means. **It moves nobody's access** — a
+declaration grants nothing (§56), so recording that it was answered cannot
+change what anybody may open.
+
+**SAYING IT AGAIN CLEARS THE ANSWER**, in `api/auth.js` rather than in the
+migration: a dismissal is the SMO's reply to one statement, and a new
+statement is owed a new reply. Cleared whether or not the place changed —
+*"I still work in Logistics"* is a thing somebody can mean to say. Without it,
+one dismissal would silence a person for the life of the tenant.
+
+**THERE IS DELIBERATELY NO UN-DISMISS.** Changing your mind is *accepting*,
+which is the act that always existed, so **Use it stays** on an answered claim
+and only **Dismiss** goes. A third control for *put it back to unanswered*
+would be a third state nobody asked for, and re-declaring already does it.
+
+### Two shapes on the wire, and one pair of readers
+
+An outstanding claim is still the **bare string** it has always been; only a
+dismissed one becomes `{at, dismissed}`. So a client older than §180 reads
+every outstanding claim exactly as before, and the one shape it cannot
+understand is the one already answered — **the safe way round** (§58: write
+the new, read either).
+
+**FIVE PLACES READ THIS MAP** — the row's mark, the row's note, the Overview's
+count, the attention queue and the accept handler — so `saidAt()`,
+`saidDismissed()` and `saidOutstanding()` are asked by all five and nothing
+reaches into the map by hand. A second place unwrapping the shape itself is
+exactly how the count and the mark come to disagree about the same row
+(§53.5).
+
+**A FAILED DISMISSAL SAYS SO** (§171). This write rides no autosave — a
+declaration lives outside the state graph — so it has no banner of its own to
+appear in. The press is applied locally, and a refusal **puts it back** and
+prints the server's own sentence: `SAIDFAIL` is `ROLESTOP`'s shape and
+`ROLESTOP`'s reasons (§110, §25.2).
+
+### The mark, and why the first answer was wrong
+
+The first proposal kept ONE ring and shifted it from `--gold-deep` to
+`--ink-3`. **The mockup killed it**: the mark is **9.6px wide at 11px type**,
+and at that size `rgb(138,107,34)` against `rgb(99,108,121)` is not a
+difference anybody reads. Measured, not eyeballed.
+
+So **the GLYPH carries the state** — `◎` waiting, `◌` answered — and the
+colour follows rather than leads. Islam picked that over the alternative of no
+mark at all, whose cost was that the table could no longer tell *"nobody said
+anything"* from *"somebody did and you answered"*.
+
+**AND THE DOTTED RING WAS MEASURED BEFORE IT WAS CHOSEN** (§52, §120.2). A
+font subset maps far more than it draws, so a mark can be mapped and ship as a
+blank box. **Ink alone could not have answered it** — an absent character
+renders a hollow rectangle, which has ink of its own, and the first attempt at
+this measurement reported the missing glyph as 9.1% ink and nearly cleared it
+on that basis. The discriminator is whether the bitmap **differs from the tofu
+rectangle**: U+25CC differs by 1.3% of its box, U+25CE by 1.9%, and U+E000 by
+0.0% — which is what says the first two are drawn.
+
+### Proof
+
+`checks/people-dialog.py` §8, over HTTP: outstanding counts and queues and
+wears the solid ring; answered does neither and wears the dotted one; the
+claim is still readable either way; both controls in the dialog, and only
+**Use it** once answered. The glyph assertion is the tofu comparison above.
+**Proved able to fail twice** — one glyph in two colours (the answer the
+mockup killed) fails the glyph assertion; a count that reads the map directly
+instead of `saidOutstanding()` fails the counting one.
+
+Against a **real Postgres 16**: the round trip and the fixed point pass on a
+**virgin database**, and the migration is driven on a tenant that predates the
+column — applies, is idempotent, keeps the existing claim, backfills nothing,
+records the answer, clears it on a fresh declaration, and touches no row when
+asked to dismiss something nobody said.
+
+`qa.py` green; `checks/setup-overview.py` green, which is the other surface
+this count feeds.
+
+## §181 · The name, not the full name — across the platform
+
+Islam, of the figure sets' owner list: *"I need the name only not the full
+name. and generally we need to use the name only across the platform for
+better usability."* And, of the chat: *"the names in the chat needs to be only
+the name not full name."*
+
+**THE REGISTER SETTLED THIS IN §93.8** — *Name* and *Full Name* became two
+columns, `knownName()` reads the first (a typed short name, else the leading
+words of the full one, lengthened just enough where two people would otherwise
+read alike, §81.1), and the viewer switcher has read it since §142. Two
+surfaces were still answering the same question their own way (§53.5): the
+figure sets' owner list printed the full legal name, and the chat printed
+whatever the server had stored.
+
+`nameOf(key, fallback)` is the version for a caller that has a KEY rather than
+a register row — it resolves through the register where it can and falls back
+to the **shared** name rule where it cannot, so somebody the register no longer
+holds still reads as a name rather than as a key. `firstNameOf()` is beside it
+for the one place that ADDRESSES rather than names — the chat's reply box.
+
+**AND THE FIRST NAME WAS BEING TAKEN WITH `split(" ")[0]`**, twice in the chat.
+That is the fault §135 wrote down for the email greeting and fixed there only:
+this register holds **Abd El Moniem**, which is one first name, and the reply
+box was calling him *Abd*. Through `SMPRules.firstName()` now, the same reader
+the greeting uses.
+
+**THE TITLE STAYS ON THE OWNER LIST**, and that is deliberate: it is what tells
+two people apart among thirty-three and it is what you pick by — the same shape
+the viewer switcher uses, where the PLACE does that job. The full name moves to
+the option's hover. The stored value is unchanged: still the person's key, so
+nothing about who owns a set moves.
+
+**WHAT WAS DELIBERATELY LEFT ALONE.** The register's own *Full Name* field and
+column, the merge wizard, and the row hovers all keep the full name — there the
+full name IS the subject, not a way of referring to somebody in passing. A
+sweep that shortened those would have removed the only place the long name can
+be read.
+
+### Proof
+
+The demo register cannot show this: all 33 names are two or three words, so
+`knownName()` returns them unchanged — which is why the shortening is asserted
+through the FALLBACK, on the long names a real tenant carries.
+`nameOf(_, "Mohamed Hassanin Ehsan Hassanin")` reads **Mohamed Hassanin**, and
+`firstNameOf(_, "Abd El Moniem Mahmoud")` reads **Abd El Moniem** where the old
+split read *Abd*. `qa.py`, `checks/office-chat.py` and
+`checks/people-dialog.py` all green.
+
+## §182 · The units' marks, put back where they are missing
+
+Islam: *"the business units had logos earlier that appeared in their
+presentations and they disappeared now."* And, when the first answer explained
+the mechanism rather than answering: *"I don't understand what are you saying, I
+need the logos to appears. is the logos there are not?"*
+
+**THE ANSWER IS YES, AND THE FIRST REPLY BURIED IT.** Every step was driven
+rather than read: the marks are in `db/seed-state.json` for all ten units,
+`present.js` still draws them on the cover and in every slide's footer, they
+survive `writeState`/`readState` byte for byte, and they survive migration
+004's clean slate — 10 of 10 kept. Opening a real presentation renders the
+cover mark. *A question asked in plain words is owed a plain answer first, and
+the mechanism afterwards* (A12).
+
+**WHAT WAS MISSING IS THE OTHER HALF: THE SEED ONLY EVER RUNS ONCE.**
+`ensureReady` writes it when `org` is empty and never again, so a tenant
+deployed BEFORE §52 shipped the marks (v3.21) has units carrying no `logo` at
+all, and nothing has ever filled them in. **The code was right the whole time
+and the data never arrived**, which is exactly why it reads as *disappeared*.
+
+**§113.7's LESSON FROM THE OTHER SIDE.** That section recorded a fault
+invisible to every existing-database test; this one is invisible to every
+FRESH-database test, because a fresh database gets the marks from the seed and
+finds nothing to do. Neither could have been found by testing only the case in
+front of you.
+
+### The fill
+
+Migration **032**, one `UPDATE` per unit, `WHERE extra->>'logo' IS NULL` —
+**only where there is nothing**. A `logo` is not a column: it rides `units.extra`
+because `state-io` files every key it does not recognise there (§52), which is
+also why it needed no migration to be stored in the first place.
+
+**THE ONE COST, STATED RATHER THAN DISCOVERED.** Setup › Business units has a
+Remove button, so a unit whose mark was deliberately taken away has it put
+back. It runs a single time per database (the `_sql_migrations` registry sees
+to that), so removing it again sticks.
+
+**THE MARKS ARE THE CLIENT'S OWN**, extracted from their brand manual with the
+colours read off the vector artwork (§52) — not invented content, which is why
+they belong in a tenant at all (§21). They are Raya's, so this migration is
+Raya's: when the platform serves more than one tenant (§36), a migration
+carrying one client's artwork is precisely the thing that must not run for
+another. Named here rather than discovered later.
+
+### Proof
+
+Against a real Postgres 16, on a tenant **built to predate the marks** (the
+seed written with every `logo` deleted): 0 of 10 before, 10 of 10 after,
+byte-identical to the shipped artwork, **a mark somebody had already set left
+untouched**, running it twice changes nothing, and the marks read back out
+through the platform's own `readState`.
+
+And the deck itself is shot rather than described —
+`design-mockups/unit-marks/` carries the covers for three units and the footer
+on a content slide, from the running product.
+
+## §183 · A supporting function could not report at all, and Save draft never finished
+
+Islam, urgent: *"for the supporting functions the reporting doesn't autosave"*
+— and, minutes later, *"the reporting then saving to draft keep saying saving
+and nothing happens but when I exit and come back the entered number saved."*
+
+Two faults, both on the reporting page, both silent.
+
+### 1 · A function that plans in PILLARS reported nothing
+
+A **capability** function's reporting page draws its own controls
+(`data-crep`, `data-cnote`, `data-cpick`, `data-cpct`) and all four were
+sound. A function that plans in **pillars** (§59) is drawn by the UNIT's
+renderer, so its fields carry `data-rep` and `data-note` — and both of those
+handlers resolved the subject with **`UNITS[current]`**, which for
+`"fn:merchandising"` is `undefined`. `findById` then read `u.ukey` off nothing
+and **threw**.
+
+So on such a function **every figure and every note typed was discarded in
+silence**: the value never reached the row, no save was ever scheduled, and
+the only witness was `Cannot read properties of undefined (reading 'ukey')` in
+a console nobody has open. Measured before the fix: **0 saves posted**, the
+figure still at its old value; after: **1 save, the value stored, no error**.
+
+**§63's OWN FAULT, IN THE TWO PLACES THAT FIX DID NOT REACH.** That section
+wrote down `UNITS["fn:…"] is undefined — §59's unitLike() rule, one place
+still asking differently` and corrected the place it had found. `unitLike()`
+has existed since §59 to be the one answer; these two never asked it.
+
+**`unitLike()` AND NOT `unitLikeWritable()`.** This handler finds a row that
+already exists and writes one value into it, and the reading view hands out
+the function's REAL arrays (§61), so the write goes through. The writing half
+MINTS containers, which is a side effect nothing here asks for — §42 and
+§50.6: a reader must never create the field it was looking for.
+
+**WHY NOTHING CAUGHT IT.** `qa.py` asserts *"performance/report/arrange
+(function): one page, a Report mode, and 3 sortables all bound"* — true, and
+about the page RENDERING. A15's own sentence: walking a page proves it
+renders, and this was never a rendering fault. And **a save cannot be observed
+over `file://` at all** (§94.11), which is where every sweep runs.
+
+### 2 · Save draft sat on "Saving…" for ever
+
+`save()` answered **`"busy"`** the instant a caller arrived while another save
+was in flight, and the Save draft handler's branch for it drew *"Saving…"* —
+a word with no follow-up, because nothing ever told the button that the flight
+had landed. The figure did save (the in-flight autosave carried it), so the
+screen sat on a present participle over a change that was safely stored:
+exactly *"nothing happens, but when I exit and come back the number saved"*.
+
+**SINCE §170 THIS IS THE ORDINARY CASE, NOT A RACE.** That section made the
+autosave leading-edge, so the first change of a burst posts at once — and the
+button somebody reaches for straight after typing lands squarely inside that
+flight. The commonest sequence in the product hit the one unhandled outcome.
+
+A caller arriving mid-flight is **parked** and answered when the next save
+settles — and it is a real save, not the in-flight one's answer borrowed:
+that flight serialized BEFORE this change, so its success says nothing about
+whether this change reached the server. Re-running is right either way and
+costs nothing when there is nothing new (`serialize() === lastSaved` answers
+`"clean"` at once). The queue is an ARRAY: two presses and a flush-on-leave
+can all arrive inside one flight, and dropping any of them puts *"Saving…"*
+back for good.
+
+**`"busy"` IS NO LONGER AN OUTCOME**, so both readers of it go rather than
+being left unreachable (§24). The Save draft branch is deleted, and `tick()` —
+§170's trailing debounce, which RE-ARMED itself every 300ms on a `"busy"`
+answer — collapses into a plain `save()`, because the parking is precisely
+what that timer was arranging by hand and without the wait. Two mechanisms for
+one job is how they drift, and `tick()`'s own comment had already stopped
+being true.
+
+### Proof
+
+`checks/report-saves.py` is new: a figure and a note typed on **all three
+shapes** — a unit, a capability function, a pillars function — must reach the
+STORED plan and schedule a save, nothing may throw, and Save draft must answer
+rather than sit on *"Saving…"*. Served over HTTP with a stub that counts the
+posts, because none of it is observable from a file.
+
+It asserts the AGREEMENT across the three rather than any count of controls —
+the fault left every control in place. `merchandising` is named as the seed's
+only pillars function, so a seed that loses it fails loudly here rather than
+quietly dropping the case the file exists for (§54.5).
+
+**Proved able to fail: 5 red** against the shipped previous build, ending in
+the production error verbatim. `qa.py`, `checks/save-flush.py`,
+`checks/save-said.py`, `checks/gap-fill.py` and
+`checks/project-custodian.py` all green.
+
+**Not reproduced, and said so:** the second half of the first report — *"the
+filling the missing dates doesn't save or come for confirmation like the
+owners"* — could not be made to happen. Filling a project's Start and a
+milestone's due date as a filler on a supporting function stamps
+`pend.start` / `pend.finish` exactly as the owner does. Left open rather than
+claimed fixed.
+
+---
+
+## §184 · A date the platform cannot read, and a refusal that costs only the row it named
+
+Islam, from the deployment: *"the issue is with the CX department the strategy
+custodian got this error on submitting the report and they lost all data they
+inputed and the dates showed waiting confirmation and I didn't get them as
+the SMO."*
+
+**THE REFUSAL WAS CORRECT. THE LOSS WAS EVERYTHING AROUND IT.** Reproduced
+against the real authoriser before a line was written, and it comes out in
+three runs:
+
+| what was done | classified | verdict |
+|---|---|---|
+| an **empty** due date filled | `gapFill` | accepted |
+| a due date holding **`30/09/2026`** corrected | `capPlan` | **refused** |
+| all three in **one save** | both | **refused** |
+
+`R.gapBlank("30/09/2026")` is **false** — the value is not empty — so
+correcting it was not filling a gap, it was authoring a plan, which is the
+office's (§94). That refusal is right on its own terms and the platform has
+no business changing it.
+
+What is wrong is what happened next. **The whole graph posts together**, so
+one refused row failed the whole save; every later post still carried it, so
+every later save was refused too; and the only control on the banner was
+**"Discard the change and reload"**, which threw away the three good fills
+with it. They had never reached the database, which is exactly why the SMO
+never received them. From the custodian's side: an error, then nothing.
+
+So §184 is two fixes, and the second is the larger one.
+
+---
+
+### 1 · A date the platform cannot read is a gap
+
+`monthsOf()` is the platform's definition of a time — what decides whether a
+row is due, what `dueFits()` calls a date on upload, what the overrun warning
+compares — **and it lived in the browser alone**. The server had no way to
+ask, so the screen and the save answered "is this a date" differently. §42's
+drift with a lost afternoon on the end of it.
+
+**THE READER MOVES INTO `lib/rules.js` WHOLE** (§130.7's shape, where the name
+rule made the same move): `whenMonths(v, last, cycleYear)` is the pure
+function, the regexes and the two-digit-year rule unchanged, and
+`monthsOf(v, last)` is now one line — the wrapper supplying the one thing the
+shared rule cannot know, which is this tenant's cycle year.
+
+**`whenReadable()` ASKS THE SHAPE, NOT THE MONTH.** A bare `Q3` names no year
+and is still a time somebody wrote; it resolves against the cycle on a page
+and against nothing on a server that is not looking at one. So readability is
+the same reader asked with a year *supplied* — never a second list of
+regexes, which is precisely how "a date" came to mean two things in the first
+place (§53.5). `dueFits()` moves onto it too, which closes a smaller bug of
+its own: it asked `monthsOf(v) != null`, so on a tenant whose cycle names no
+year a bare `Q3` read as not-a-date on upload while every due comparison read
+it fine.
+
+**THE GAP TEST IS KEYED ON THE FIELD NAME.** `start`, `end` and `finish` appear
+in `GAP_FIELDS` as dates and as nothing else, so `GAP_WHEN` answers for a
+project's front matter and a milestone's due date without either call site
+having to remember which it is. `gapEmptyValue(field, v)` and
+`gapEmpty(field, row)` are the ONE test that `gapMissing()`, `gapCell()` and
+`lib/authorize.js`'s gap pass all now ask — one definition, so the field that
+opens is the field the save accepts.
+
+**AND THE RULE REACHES DATES ONLY.** An unreadable *target* is still a target
+somebody wrote; opening every field whose value looks odd would be a different
+decision nobody asked for. Asserted, at both ends.
+
+**`blank` AND `open` ARE KEPT APART IN `gapCell`, DELIBERATELY.** `blank` is
+*there is nothing to show* and drives the placeholder and the read text;
+`open` is *this is a gap* and drives whether a filler gets a control.
+Collapsing them was the tempting wrong fix: the row would have rendered the
+word **Missing** over `30/09/2026`, hiding the very value the person is being
+asked to correct (§96.2). It opens, and it still shows what is stored.
+
+**Nothing is stored and nothing is migrated.** The mark rides `extra` as it
+has since §177.
+
+---
+
+### 2 · Do not draw a control that will be refused
+
+Satisfied by construction, not by new machinery, and that is the point: with
+one definition of a gap, `gapCell()`'s fill branch and the authoriser's gap
+pass are asking the same function about the same value. What §184 adds is the
+**assertion** — for a filler, the row a month picker is drawn on must be a row
+`gapMissing()` names, and the correction it writes must be one the server
+classifies as `gapFill`. Both ends, on the screen and through the shared rule.
+
+---
+
+### 3 · A refusal costs the row it named, and nothing else
+
+The first two fixes remove *this* cause. They do not stop partial loss in
+general, and Islam's question was exactly that — *"is that covering the fix
+for reporting without losing the data even aprtially?"* No. Only this does.
+
+**THE VERDICT NOW CARRIES AN ADDRESS, NOT ONLY A SENTENCE.** `no()` records the
+change it came from, so `authorize()` returns `refused: [{ why, kind, target,
+rows: [{ id, name, field, had, from }] }]` beside the unchanged `refusals`
+strings — the target, the row, the field, and **the value the row HELD**.
+
+**THE PLAN HALF HAD TO LEARN TO NAME ITS ROWS.** `splitRows()`'s `onPlan` was a
+bare signal, which is why the CX refusal could say *"a project's milestones
+(care)"* and nothing about which one. It hands over the rows that moved now —
+and **`planMoved` stays the gate, byte for byte**. Deriving the gate from the
+row list instead would quietly *widen* what is allowed: `same()` is
+stringify-based, so a key-ORDER difference (which is what Postgres jsonb hands
+back, §145) trips the omit-compare and produces no differing key, and a save
+that used to be refused would start passing. §42 fails closed.
+
+**`had` SEPARATES "IT HELD NULL" FROM "THE KEY WAS NOT THERE."** Putting a null
+back where nothing was is a change of its own, and would be refused a second
+time — the button would look like it did nothing (§96).
+
+**THE BANNER NAMES THE LINES AND OFFERS TO KEEP THE WORK.** *"Put back those
+lines and save the rest"* reverts exactly the named fields to the stored
+value, repaints, and saves — everything else the person typed stays where it
+is. Discard remains, because it is the only way out when a refusal names no
+rows; it is simply never the only control again. The two read in two volumes:
+the one that keeps the work wears a border, the destructive one stays an
+underlined link (§41's budget — no new colour, the banner's own text token).
+
+**THE ADDRESS IS TARGET + ROW ID, NEVER A PATH.** A path would be a second
+description of the state graph's shape, kept in `sync.js` and drifting from
+the one `collect()` walks; an id inside a named subtree is the address the
+whole product already uses (§48: a snapshot is keyed by id, never by
+position). An `fn:` target resolves to the function **and its capabilities**,
+because that is how `collectFunction()` and `collectCapabilities()` split a
+function's plan between them — getting it wrong here would mean a project's
+rows could never be found.
+
+**A ROW IT CANNOT FIND IS SAID, NEVER SWALLOWED**, or the put-back re-posts the
+same refusal and reads as a dead button.
+
+**AND THE OFFER IS THE SERVER'S ANSWER, NOT THE CLIENT'S.** `undoable` is
+computed where the changes are classified; a client working it out for itself
+would be a second copy of the rule (§42). A change to **which rows exist** —
+a project removed, a list reordered — has no field address, so no put-back is
+offered at all: a button that would not work is worse than the destructive
+one, because it looks like it did something.
+
+**THE REMEMBERED REFUSAL REMEMBERS ITS ROWS**, for §171's own reason: `save()`
+short-circuits on `refusedBody`, so the second hit on a remembered body draws
+the banner from what is held — and without the rows the offer would vanish the
+moment somebody changed something and changed it back.
+
+---
+
+### Proof
+
+`scripts/test-authorize.js` gains **§19** (the reader, the gap rule, the CX
+case reproduced, and the other end: a date that READS is still the office's)
+and **§20** (the address — id, name, held value, `had` — and a change with no
+row address saying so). **336 passed, 0 failed.**
+
+**Proved able to fail (§94.5), twice.** `gapBlank` put back inside
+`gapEmpty` → **3 red**, among them *"all three in one save — the report,
+reproduced"*. `onPlan(null)` put back → **2 red**.
+
+`checks/refusal-keeps-work.py` is new and drives the whole path in a browser:
+one refused row among three, the banner naming it, the button PRESSED
+(`elementFromPoint` at its centre, §93.4), the refused field back to the
+server's value, **both fills untouched and still pending**, a second post that
+is ACCEPTED, the banner cleared — and the other end, a refusal nothing can put
+back offering no button. **The stub runs the real authoriser** as a
+subprocess (§100.3): a canned 403 would be a fiction about the one thing under
+test. **Proved able to fail: 11 red** against the shipped pre-§184 build,
+including the banner reading *"…cannot be changed here.Discard the change and
+reload"* and nothing else.
+
+`checks/milestone-fill.py` gains **§9**: the filler is offered a control on
+the unreadable date, exactly one, reachable, **still showing `30/09/2026`**,
+walkable by Next gap, and on a row `gapMissing()` names.
+
+**Two of that section's own first-run failures were the check.** It counted
+six month buttons because §7 had left the page as the OFFICE, whose pen opens
+every field (§50.6 — a check that measures the wrong state passes or fails for
+reasons of its own); and `refusal-keeps-work.py`'s console listener reported
+the 403 it exists to produce, because Chromium logs every non-2xx fetch as an
+error (§128 — a measurement wrong in the direction of *broken* costs as much
+as one wrong the other way).
+
+Green: `qa.py` (no errors), `project-dates.py`, `gap-fill.py`,
+`report-saves.py`, `owner-picker.py`, `repeat-project.py`, `plan-fields.py`,
+`project-custodian.py`.
+
+**Recorded, not fixed.** The put-back is offered only when EVERY refusal in
+the response is addressable. A save that mixes an addressable refusal with an
+un-addressable one still offers Discard alone — the work is on screen and
+nothing destroys it unasked, but the platform cannot rescue it automatically.
+Narrowing that further means teaching the register, the access matrix and the
+cycle to name rows, which is its own piece of work.

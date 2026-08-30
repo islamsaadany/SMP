@@ -171,9 +171,15 @@ var CHAT = (function(){
        Office" is a ruling as far as the reader is concerned. It is from the
        office (that is whose side of the conversation it is on) and it says
        plainly that a machine wrote it. */
+    /* §181: THE NAME, NOT THE FULL NAME. A conversation is the one place a
+       person is addressed rather than listed, and it was printing "Islam Adel
+       Nabil Mohamed" on every line — twice over on the office's side, where
+       the sender's name sits beside "Strategy Office". `nameOf()` is the
+       register's own answer, with the shared name rule behind it for somebody
+       the register no longer holds. */
     var who = m.bot ? "Assistant · answered from the knowledge base"
-            : m.from_office ? ((m.by_name || "The office") + " · Strategy Office")
-                            : (mineIsOffice ? (m.by_name || "") : "You");
+            : m.from_office ? ((nameOf(m.by_key, m.by_name) || "The office") + " · Strategy Office")
+                            : (mineIsOffice ? nameOf(m.by_key, m.by_name) : "You");
     var pic = m.has_shot
       ? '<button class="chshot" type="button" data-chshot="' + m.id + '">' +
         '<span class="chthumb"></span> Screenshot — open</button>'
@@ -974,7 +980,9 @@ var CHAT = (function(){
      server makes the same call again when the reply lands (§97.5) — this line
      is the office being shown the rule, never the rule itself. */
   function presenceHtml(d){
-    var name = String(d.name || "They").split(/\s+/)[0];
+    /* FIRST NAME THROUGH THE SHARED RULE (§135, §181), never split(" ")[0] —
+       "Abd El Moniem" is one first name, and this register holds it. */
+    var name = firstNameOf(d.person, d.name) || "They";
     /* THE FIFTH STATE, AND IT COMES FIRST. With the chat off nobody can open
        an answer, so what somebody's presence would have decided does not
        arise — saying "Yara is away" here would be true and beside the point. */
@@ -1018,7 +1026,7 @@ var CHAT = (function(){
 
     pane.innerHTML =
       '<div class="chthead">' +
-        "<div><div class=\"chnm\">" + esc2(d.name || d.person) + "</div>" +
+        "<div><div class=\"chnm\">" + esc2(nameOf(d.person, d.name) || d.person) + "</div>" +
         '<div class="chmeta">' + esc2([placeOf(d), d.address].filter(Boolean).join(" · ")) + "</div></div>" +
         '<div class="chacts">' +
           '<button class="chmini" type="button" data-chdone="' + esc2(d.person) + '">' +

@@ -3053,7 +3053,26 @@
            reporting page and is NOT a unit on "Figures I report" — that page
            carries rows from several units at once, so each field names its
            own. One handler, because two would drift (§42.3). */
-        var hit = findById(UNITS[el.dataset.repu || current], el.dataset.rep);
+        /* ── AND A SUPPORTING FUNCTION IS A DESTINATION TOO (§183) ────────
+           This said `UNITS[...]`, and on a function that plans in pillars
+           `current` is "fn:merchandising" — for which `UNITS[...]` is
+           undefined. `findById` then read `u.ukey` off nothing and THREW, so
+           **every figure and every note typed on such a function's reporting
+           page was discarded in silence**: the value never reached the row,
+           the save was never scheduled, and the only witness was a console
+           nobody has open. §63's own fault ("`UNITS["fn:…"]` is undefined —
+           one place still asking differently"), in the two places that fix
+           did not reach.
+
+           `unitLike()` and NOT `unitLikeWritable()`: this handler finds a row
+           that already exists and writes one value into it, and the reading
+           view hands out the function's REAL arrays (§61) — so the write goes
+           through — while the writing half MINTS containers, which is a side
+           effect nothing here asks for (§42, §50.6: a reader must never create
+           the field it was looking for). */
+        var subj = unitLike(el.dataset.repu || current);
+        if (!subj) return;
+        var hit = findById(subj, el.dataset.rep);
         if (!hit) return;
         var v = el.value.trim();
         /* The field holds the bare number; the unit lives in the suffix beside
@@ -3084,7 +3103,14 @@
     });
     document.querySelectorAll("[data-note]").forEach(function(el){
       el.addEventListener("change", function(){
-        var hit = findById(UNITS[current], el.dataset.note);
+        /* The same fault and the same fix as the figure beside it (§183): a
+           note typed on a pillars function's reporting page threw and was
+           lost. The note is the half a reporter is REQUIRED to write when a
+           figure is off track (§105's submit refusal), so losing it silently
+           also made that refusal impossible to satisfy. */
+        var subj = unitLike(current);
+        if (!subj) return;
+        var hit = findById(subj, el.dataset.note);
         if (hit) { hit.obj.note = el.value; paint(); }
       });
     });
@@ -4407,11 +4433,42 @@
     R.querySelectorAll("[data-usesaid]").forEach(function(b){
       b.addEventListener("click", function(){
         var key = b.dataset.usesaid;
-        var said = SAIDWHERE && SAIDWHERE[key];
+        var said = saidAt(key);
         var p = personBy(key);
         if (!p || !said) return;
+        SAIDFAIL = null;
         attachPersonAt(p, said);
         paint();
+      });
+    });
+
+    /* THE OTHER ANSWER (§180): the register was already right. Unlike Use it
+       beside it, this touches nothing in the state graph — a declaration lives
+       outside it (§56) — so there is no save to carry it and it goes straight
+       to the server.
+
+       WRITTEN LOCALLY BEFORE THE ANSWER COMES BACK, and that is deliberate:
+       the map is this screen's copy of a server fact, the press has to look
+       like it landed, and a failure PUTS IT BACK rather than leaving the row
+       claiming an answer the database never took (§171 — a failed write that
+       says nothing is the fault, not the failure). */
+    R.querySelectorAll("[data-dropsaid]").forEach(function(b){
+      b.addEventListener("click", function(){
+        var key = b.dataset.dropsaid;
+        var was = SAIDWHERE && SAIDWHERE[key];
+        if (!was || typeof SYNC === "undefined" || !SYNC.dismissWhere) return;
+        SAIDFAIL = null;
+        SAIDWHERE[key] = { at: saidAt(key), dismissed: true };
+        paint();
+        SYNC.dismissWhere(key, function(err){
+          if (!err) return;
+          /* PUT IT BACK, AND SAY SO. Leaving the row claiming an answer the
+             database never took is the silent failure §171 was written about;
+             the sentence is the server's own, because it owns the refusal. */
+          SAIDWHERE[key] = was;
+          SAIDFAIL = { key: key, why: "Not saved \u2014 " + String(err.message || err) };
+          paint();
+        });
       });
     });
 
@@ -5769,10 +5826,19 @@
         };
         show("Saving…", "");
         if (typeof SYNC === "undefined" || !SYNC.saveNow) { show("Saved", "ok"); return; }
+        /* `"busy"` USED TO BE A SIXTH OUTCOME AND IT IS GONE (§183). It was
+           answered the instant Save draft was pressed inside an autosave's
+           flight, and the branch here drew "Saving…" — a word with no
+           follow-up, because nothing ever told this button that the flight had
+           landed. The figure did save; the screen sat on a present participle
+           for ever. SYNC now parks such a caller and answers it when the next
+           save settles, so the five outcomes §63 named are the whole set
+           again — and this branch is deleted rather than left unreachable,
+           because a branch nobody can reach is one the next reader takes for
+           load-bearing (§24). */
         SYNC.saveNow(function(state){
           if (state === "saved" || state === "clean") show("Saved", "ok");
           else if (state === "offline") show("Nothing to save — no server here", "");
-          else if (state === "busy") show("Saving…", "");
           else show("Not saved — see the message above", "bad");
         });
       });

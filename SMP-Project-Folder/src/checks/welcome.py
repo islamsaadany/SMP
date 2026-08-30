@@ -35,6 +35,16 @@ BASE = json.loads((ROOT / "db/seed-state.json").read_text())
 PERSON = {"key": "own_mob", "name": "Mennah Farouk"}
 STATE = BASE
 CHATANS = {"unread": 0, "queue": None}
+# §179 · §9 signs in through the REAL gate, because "greeted on every sign-in"
+# is a property of index.html and the platform together and neither half can
+# show it alone. GATEMODE picks which document `/` serves; AUTHGET is what a
+# page load finds — a live session (resume) or none (the login card).
+GATEMODE = "stub"
+AUTHGET = {"ok": False}
+# SMP_WELCOME_GATE points §9 at another index.html — which is how "prove it
+# can fail" is run for the sign-in half: the fix is half in the gate and half
+# in the platform, so swapping only the platform proves nothing.
+REALGATE = pathlib.Path(os.environ.get("SMP_WELCOME_GATE") or (ROOT / "index.html")).read_bytes()
 
 errs, bad = [], 0
 
@@ -61,6 +71,9 @@ class H(http.server.BaseHTTPRequestHandler):
         self.wfile.write(body)
 
     def do_GET(self):
+        if self.path.startswith("/api/auth"):
+            self._send(200, json.dumps(AUTHGET).encode(), "application/json")
+            return
         if self.path.startswith("/api/state"):
             self._send(200, json.dumps({"ok": True, "state": STATE, "person": PERSON}).encode(),
                        "application/json")
@@ -68,11 +81,20 @@ class H(http.server.BaseHTTPRequestHandler):
         if self.path.startswith("/raya-trade"):
             self._send(200, HTML, "text/html; charset=utf-8")
             return
-        self._send(200, GATE, "text/html; charset=utf-8")
+        self._send(200, REALGATE if GATEMODE == "real" else GATE,
+                   "text/html; charset=utf-8")
 
     def do_POST(self):
         n = int(self.headers.get("Content-Length") or 0)
         raw = self.rfile.read(n)
+        if self.path.startswith("/api/auth"):
+            body = json.loads(raw or b"{}")
+            if body.get("action") == "login":
+                self._send(200, json.dumps({"ok": True, "person": PERSON}).encode(),
+                           "application/json")
+            else:
+                self._send(200, b'{"ok":true}', "application/json")
+            return
         if not self.path.startswith("/api/chat"):
             self._send(200, b'{"ok":true}', "application/json")
             return
@@ -123,7 +145,7 @@ def gapped_seed():
 
 
 def main():
-    global PERSON, STATE, CHATANS
+    global PERSON, STATE, CHATANS, GATEMODE, AUTHGET
     socketserver.TCPServer.allow_reuse_address = True
     srv = socketserver.TCPServer(("127.0.0.1", 0), H)
     port = srv.server_address[1]
@@ -308,6 +330,137 @@ def main():
         ck("…and it is actually painted, not merely classed",
            fill not in ("rgba(0, 0, 0, 0)", "rgb(255, 255, 255)"), fill)
         ctx.close()
+
+        # ── 8 · VIEWING AS, ON THE WELCOME SCREEN (§179) ───────────────────
+        # Islam: "the viewing as should be available from the welcome screen."
+        # BOTH ENDS, and the closed end is the one that matters: a switcher
+        # drawn for somebody who is not the SMO serves them another person's
+        # screen under their own name (sync.js §45.3).
+        print("§8 viewing as, above the greeting (§179)")
+        PERSON = {"key": "smo", "name": "Mohamed Essam", "role": "super"}
+        STATE = BASE
+        CHATANS = {"unread": 0, "queue": None}
+        ctx, pg = fresh(browser, port)
+        has_bar = pg.locator(".welcomeover .wviewbar select").count() == 1
+        ck("the SMO gets the switcher", has_bar)
+        # WITHOUT IT THE REST OF §8 IS UNMEASURABLE, so it is SAID rather than
+        # crashed through: a check that dies on its first failure hides how
+        # many things are wrong, which is the one thing a "prove it can fail"
+        # run exists to count (§54.5 — a case nobody measured is named, never
+        # passed over).
+        if not has_bar:
+            print("  ----    the rest of §8 needs the switcher — not measured")
+        if has_bar:
+            # ABOVE the hero, which is the placement Islam picked of the two drawn
+            # — asserted as the RELATIONSHIP, never as a pixel (§94.8).
+            order = pg.evaluate("""()=>{const w=document.querySelector('.welcomeover .wwrap');
+                const bar=w.querySelector('.wviewbar'), hero=w.querySelector('.whero');
+                return [ [...w.children].indexOf(bar), [...w.children].indexOf(hero),
+                         Math.round(bar.getBoundingClientRect().bottom) <=
+                           Math.round(hero.getBoundingClientRect().top) ];}""")
+            ck("…above the greeting, not inside it", order[0] == 0 and order[0] < order[1] and order[2], order)
+            # ONE VOCABULARY: the options are the chrome's own (§53.5). Compared as
+            # a LIST, so a build that rebuilt them from a second source fails even
+            # when the two happen to hold the same people.
+            same = pg.evaluate("""()=>{const a=[...document.querySelectorAll('#asWho option')].map(o=>o.textContent);
+                const b=[...document.querySelectorAll('#wAsWho option')].map(o=>o.textContent);
+                return [a.length, b.length, JSON.stringify(a)===JSON.stringify(b)];}""")
+            ck("…listing exactly what the chrome's own switcher lists", same[2] and same[0] > 1, same)
+            # NEVER A DUPLICATE ID — a cloned select would put `asWho` in the
+            # document twice and getElementById would answer with whichever came
+            # first, which is a control that silently drives the wrong thing.
+            ck("…and `asWho` still names exactly one element",
+               pg.eval_on_selector_all("#asWho", "e=>e.length") == 1)
+            # PRESSED, and the platform read back (§70). Switching redraws the
+            # screen for that person AND moves the platform underneath.
+            pg.select_option("#wAsWho", "own_mob")
+            pg.wait_for_timeout(700)
+            got = pg.evaluate("""()=>({ viewer: window.VIEWER,
+                chrome: document.getElementById('asWho').value,
+                greet: (document.querySelector('.welcomeover .wgreet h2')||{}).textContent||'',
+                still: !!document.querySelector('.welcomeover') });""")
+            ck("switching moves the platform's own viewer", got["viewer"] == "own_mob", got)
+            ck("…and the chrome's control follows", got["chrome"] == "own_mob", got)
+            ck("…the screen stays up, redrawn for them", got["still"] and "Mennah" in got["greet"], got)
+            # A SWITCH IS NOT A DISMISSAL: marking it done would leave the screen
+            # unable to come back for the person you were about to look at.
+            ck("…and it was not marked as seen",
+               pg.evaluate("sessionStorage.getItem('smp.welcome.done')") is None)
+        ctx.close()
+
+        # The closed end.
+        PERSON = {"key": "own_mob", "name": "Mennah Farouk"}
+        ctx, pg = fresh(browser, port)
+        ck("somebody who is not the SMO gets NO switcher",
+           pg.locator(".welcomeover .wviewbar").count() == 0)
+        ctx.close()
+
+        # ── 9 · GREETED ON EVERY SIGN-IN (§179) ────────────────────────────
+        # Islam: "When I sign out and sign in I don't get the welcome screen."
+        # Signing out only reloads the page in the same tab, so sessionStorage
+        # outlives the session it belonged to. Driven through the REAL gate,
+        # because neither half shows this alone.
+        print("§9 greeted on every sign-in, never on a resume (§179)")
+        GATEMODE = "real"
+        PERSON = {"key": "own_mob", "name": "Mennah Farouk"}
+        STATE = BASE
+
+        AUTHGET = {"ok": False}          # no session -> the login card
+        ctx = browser.new_context(viewport={"width": 1440, "height": 950})
+        pg = ctx.new_page()
+        _no_tour(pg)
+        pg.goto("http://127.0.0.1:%d/" % port)
+        pg.wait_for_selector("#loginForm", timeout=8000)
+        # THE STATE IS MADE (§94.2): a tab that has already been greeted once,
+        # which is exactly what a sign-out leaves behind.
+        #
+        # SET ON THE PAGE, NEVER IN AN INIT SCRIPT: an init script runs on
+        # EVERY document the context loads, so it would re-write the flag when
+        # the platform loads and quietly undo the thing under test — the check
+        # would then fail against a correct build (§68.10's class of fault, in
+        # a harness). sessionStorage is per-origin and the gate and the
+        # platform share one, so setting it here is what a sign-out leaves.
+        pg.evaluate("sessionStorage.setItem('smp.welcome.done','1')")
+        pg.fill("#user", "someone@example.com")
+        pg.fill("#password", "whatever")
+        pg.click("#loginForm button[type=submit]")
+        # WAITED FOR, NOT ASSERTED ON A TIMEOUT: the failure this section
+        # exists to catch IS "no welcome ever appears", so waiting for the
+        # selector would raise instead of reporting, and a "prove it can fail"
+        # run would end in a stack trace with nothing counted.
+        greeted = False
+        for _ in range(30):
+            if pg.locator(".welcomeover").count() == 1:
+                greeted = True
+                break
+            pg.wait_for_timeout(500)
+        ck("signing in again greets you, with the tab already marked", greeted)
+        ctx.close()
+
+        # AND A RESUME IS NOT A SIGN-IN. Opening the gate with a live session
+        # bounces straight through, and being re-greeted for walking past your
+        # own front door is the fault this replaces, not a fix for it.
+        AUTHGET = {"ok": True, "person": PERSON}
+        ctx = browser.new_context(viewport={"width": 1440, "height": 950})
+        pg = ctx.new_page()
+        _no_tour(pg)
+        # Walked rather than stubbed: greeted once, dismissed, then back to
+        # the front door with the session still live. The gate cannot be
+        # evaluated against on this path — it redirects before a script can
+        # run — and walking it is the honest reproduction anyway.
+        pg.goto("http://127.0.0.1:%d/raya-trade" % port)
+        pg.wait_for_selector(".welcomeover", timeout=15000)
+        pg.click("[data-wcontinue]")
+        pg.wait_for_selector(".welcomeover", state="detached", timeout=5000)
+        pg.goto("http://127.0.0.1:%d/" % port)
+        pg.wait_for_timeout(2500)
+        ck("…but resuming a live session does not",
+           pg.locator(".welcomeover").count() == 0)
+        ck("…and the memory it was told to keep is still there",
+           pg.evaluate("sessionStorage.getItem('smp.welcome.done')") == "1")
+        ctx.close()
+        GATEMODE = "stub"
+        AUTHGET = {"ok": False}
 
         # ── 7 · THE ABSENCES (§94.2) ───────────────────────────────────────
         print("§7 where the screen must NOT be")

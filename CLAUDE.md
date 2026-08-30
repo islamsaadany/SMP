@@ -365,6 +365,36 @@ console errors (in this cloud environment, run it via a wrapper that points Play
   `node scripts/test-door.js <smo-password>` against a running dev-server
   after touching `api/auth.js` or `lib/auth.js` (it ends by rate-limiting the
   SMO on purpose — `DELETE FROM login_attempts;` clears it).
+- **A DATE THE PLATFORM CANNOT READ IS A GAP, AND A REFUSAL COSTS ONE ROW
+  (§184):** Islam, on the CX strategy custodian — *"they lost all data they
+  inputed … and I didn't get them as the SMO."* The refusal was CORRECT:
+  `gapBlank("30/09/2026")` is false, so correcting it was authoring, which is
+  the office's (§94). **The loss was everything around it** — the whole graph
+  posts together, so one refused row failed the whole save, and the only
+  control on the banner destroyed the three good fills with it. **`monthsOf()`
+  MOVES INTO `lib/rules.js`** as `whenMonths(v, last, cycleYear)` (§130.7's
+  shape), because the server had no way to ask "is this a date" and so
+  answered differently from the screen — §42's drift. `whenReadable()` asks
+  the SHAPE with a year supplied, never a second list of regexes (§53.5);
+  `dueFits()` moves onto it too. `GAP_WHEN` is keyed on the FIELD NAME
+  (`start`·`end`·`finish` are dates in `GAP_FIELDS` and nothing else), and
+  `gapEmpty()` is the ONE test `gapMissing()`, `gapCell()` and the
+  authoriser's gap pass all ask. **`blank` AND `open` STAY APART** — the row
+  opens to a filler AND still shows `30/09/2026`, or the fix hides the value
+  somebody is being asked to correct (§96.2). **THE VERDICT CARRIES AN
+  ADDRESS**: `refused: [{why, kind, target, rows:[{id,name,field,had,from}]}]`
+  beside the unchanged sentences, so the banner names the lines and offers to
+  **put back those and save the rest**; Discard stays but is never the only
+  control again. **`splitRows`' plan half names its rows**, with `planMoved`
+  unchanged as the gate — deriving it from the rows would WIDEN what is
+  allowed, because a key-order difference (Postgres jsonb, §145) trips the
+  omit-compare and produces no differing key. **`had` separates held-null from
+  key-absent**, or the put-back is a change of its own and is refused again.
+  **The address is target + row id, never a path** (§48); an `fn:` target
+  resolves to the function AND its capabilities. **`undoable` is the SERVER's
+  answer** (§42), and a change to WHICH rows exist offers no button at all —
+  one that cannot work is worse than the destructive one. Nothing stored,
+  nothing migrated.
 - **THE STRIP KEPT ITS OWN ANSWER, AND THE CONTROL BESIDE IT HAD IT RIGHT
   (§178):** the *Viewing as* note read `p.unit` and nothing else — never `p.fn`,
   never `p.company` — so **9 of 33 people were told they belong nowhere** (every
@@ -2884,7 +2914,13 @@ cd SMP-Project-Folder/src
 python3 build.py     # assembles strategy-management-platform.html (must be byte-identical to the shipped vX.Y file)
 python3 qa.py        # walks every page as every viewer, reports console errors (needs Playwright + Chromium)
 python3 checks/people-dialog.py # the register reads and the dialog writes: the queue,
-                                # Add, and neat with every column on (§116, over HTTP)
+                                # Add, and neat with every column on (§116, over HTTP) —
+                                # §8 covers dismissing a declaration (§180): outstanding
+                                # counts and queues and wears a SOLID ring, answered does
+                                # neither and wears a DOTTED one, the claim stays readable
+                                # either way, and both rings are proved DRAWN rather than
+                                # tofu boxes (ink alone cannot say — an absent glyph
+                                # renders a rectangle that has ink of its own)
 python3 checks/register-header.py # one line above the table and a dialog that fits the
                                 # window — the HEADER's height, not .hright's (§122)
 python3 checks/role-picker.py   # giving somebody a role: every control PRESSED,
@@ -2893,6 +2929,23 @@ python3 checks/strategy-split.py # the Strategy | Reporting halves: the cell pre
                                 # open AND closed, both ends each time — and since §145.9
                                 # the .pptx download asserted HIDDEN on every surface while
                                 # the dormant builder is still proved by a direct call
+python3 checks/report-saves.py  # reporting REACHES THE STORED PLAN and schedules a save, on
+                                # a unit, a capability function AND one that plans in pillars
+                                # — over HTTP, because a save cannot be seen over file:// at
+                                # all; plus Save draft answering rather than sitting on
+                                # "Saving…" (§183)
+python3 checks/project-dates.py # a project's Start and End are PICKED as `Jul 26`, and the
+                                # overrun warning reads them the platform's way — an EXACT set,
+                                # because Date.parse("Jul 26") is 26 July 2001 and any
+                                # "something overran" test passes on the old reader (§179);
+                                # plus the type column unchipped on all three panes, both ends
+python3 checks/refusal-keeps-work.py # a refusal costs the row it named and nothing
+                                # else (§184): one refused row among three, the banner
+                                # naming it, the button PRESSED, both fills untouched and
+                                # a second post ACCEPTED — and the other end, a refusal
+                                # with no row address offering no put-back. The stub runs
+                                # the REAL authoriser, because a canned 403 would be a
+                                # fiction about the one thing under test
 python3 checks/gap-walk.py      # the band's chips and Next gap actually go somewhere:
                                 # a unit AND a function, as the filler AND the office,
                                 # every place the band names reached (§177.2)
@@ -3037,7 +3090,49 @@ prior sessions (on HR_ERP) accidentally reverted agreed-upon designs.
 
 ---
 
-*Last Updated: 2026-08-30 &mdash; **v3.65: a link in an email has nothing to
+*Last Updated: 2026-08-30 &mdash; **v3.72: a date the platform cannot read,
+and a refusal that costs only the row it named (&sect;184)**. Islam, from the
+deployment: *"the CX strategy custodian got this error on submitting the report
+and they lost all data they inputed and the dates showed waiting confirmation
+and I didn't get them as the SMO."* **THE REFUSAL WAS CORRECT AND THE LOSS WAS
+EVERYTHING AROUND IT** &mdash; reproduced against the real authoriser before a
+line was written: an empty due date filled is `gapFill` and accepted; the same
+act on a date holding **`30/09/2026`** is `capPlan` and refused, because a
+non-blank value is not a gap, so correcting it is authoring and authoring is
+the office's (&sect;94). Right on its own terms. What is wrong is that **the
+whole graph posts together**, so that one row failed the whole save, took three
+legitimate fills with it, and the only control on the banner was *Discard the
+change and reload*. They never reached the database, which is exactly why the
+SMO never received them. **`monthsOf()` MOVES INTO THE SHARED RULES** &mdash;
+the platform's definition of a time lived in the browser alone, so the screen
+and the save answered *"is this a date"* differently (&sect;42's drift) &mdash;
+and an unreadable date is a GAP now, keyed on the field name, asked by the
+counts, the cell and the server through one function. **`blank` and `open`
+stay apart deliberately**: the row opens to a filler AND still shows
+`30/09/2026`, because rendering the word *Missing* over it would hide the value
+somebody is being asked to correct (&sect;96.2). **AND THE SECOND FIX IS THE
+LARGER ONE, BECAUSE THE FIRST TWO DO NOT ANSWER THE QUESTION HE ASKED**
+&mdash; *"is that covering the fix for reporting without losing the data even
+aprtially?"* No. So the verdict carries an ADDRESS now, not only a sentence:
+target, row id, field, and the value the row HELD. The banner names the lines
+and offers to **put back those and save the rest**; Discard stays, and is never
+the only control again. **`splitRows`' plan half had to learn to name its
+rows** &mdash; with `planMoved` unchanged as the gate, because deriving it from
+the row list would quietly WIDEN what is allowed (a key-order difference is
+what Postgres jsonb hands back, &sect;145). **`undoable` is the SERVER's
+answer**, and a change to WHICH rows exist offers no button at all: one that
+cannot work is worse than the destructive one, because it looks like it did
+something. **Proved able to fail three ways** &mdash; `gapBlank` restored: 3
+red, among them *"all three in one save &mdash; the report, reproduced"*;
+`onPlan(null)` restored: 2 red; and `checks/refusal-keeps-work.py` against the
+shipped previous build: **11 red**, the banner reading *"&hellip;cannot be
+changed here.Discard the change and reload"* and nothing else. **Two of the new
+checks' own first-run failures were the CHECK** &mdash; six month buttons
+counted because an earlier section had left the page as the office
+(&sect;50.6), and a console listener reporting the 403 the file exists to
+produce (&sect;128). 336 server assertions pass; `qa.py` clean.*
+
+*Earlier: 2026-08-30 &mdash; **v3.65: a link in an email has nothing to
 be relative to (&sect;176, spec 027)**. Islam pressed the button in a message he
 had sent himself: **"The application can't be opened. &minus;50"**. The link was
 `smp-orpin-tau.vercel.app` &mdash; what he typed, mailed verbatim. **A browser

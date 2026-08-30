@@ -46,6 +46,12 @@ var SYNC = (function () {
        is no server to carry a message. */
     try { CHAT.mount(); } catch (e) {}
   }
+  /* Callers that asked to save while one was in flight, answered when the
+     next one settles (§183). An array rather than a single slot: two people
+     pressing Save draft and a flush-on-leave can all arrive inside one
+     flight, and dropping any of them puts the word "Saving…" back on screen
+     for good. */
+  var queued = [];
   var live = false;        /* hydrated from the API; saves flow only then */
   var lastSaved = null;    /* the serialized graph the server last accepted */
   var timer = null;
@@ -150,6 +156,13 @@ var SYNC = (function () {
      cell, is refused, and sets it back gets no post and no message — the one
      shape of this fault that looks exactly like "it just does not save". */
   var refusedWhy = null;
+  /* §184: AND THE ROWS IT NAMED. Remembered beside the sentence for the same
+     reason the sentence is: `save()` short-circuits on `refusedBody`, so the
+     second hit on a remembered body draws the banner from these and nothing
+     else — without them the offer to put the rows back would vanish the
+     moment somebody changed something and changed it back. */
+  var refusedRows = null;
+  var refusedUndoable = false;
 
   /* A REFUSAL NEEDS A WAY OUT (§48.3).
 
@@ -214,18 +227,151 @@ var SYNC = (function () {
       "menu in the top bar to work on your own tenant.</span>");
   }
 
-  function showRefusal(list) {
+  /* ── PUTTING BACK ONLY WHAT WAS REFUSED (§184) ───────────────────
+     Islam, on a strategy custodian: *"they lost all data they inputed."*
+     The refusal itself was correct — one row genuinely was the office's —
+     and the loss was everything around it. The whole graph posts together,
+     so one refused row fails the whole save, and until now the only control
+     on the banner was *Discard the change and reload*: the honest answer
+     while the platform could not say WHICH row it had objected to, and a
+     destructive one the moment it can.
+
+     The server now names them (`refusedChanges`), with the value each field
+     HELD. Putting them back is therefore not a guess and not a reload: the
+     named fields go back to the stored value, everything else the person
+     typed stays exactly where it is, and the next save carries it.
+
+     THE ADDRESS IS THE TARGET AND THE ROW ID, NEVER A PATH. A path would be
+     a second description of the state graph's shape, kept here and drifting
+     from the one `collect()` walks (§53.5); an id inside a named subtree is
+     the address the whole product already uses (§48: a snapshot is keyed by
+     id, never by position). */
+  var FIELD_WORDS = {
+    finish: "Due date", start: "Start", end: "End", owner: "Owner",
+    target: "Target", target3y: "3-year target", dir: "Direction",
+    compile: "Compile rule", weight: "Weight", name: "Name",
+    collaborators: "Collaborators", stakeholders: "Stakeholders",
+    brief: "Brief", aspiration: "Aspiration", actual: "Figure", note: "Note",
+    pct: "Progress", status: "Status", pend: "Awaiting confirmation"
+  };
+  function fieldWord(f) { return FIELD_WORDS[f] || String(f); }
+
+  /* Where a target's rows live. A capability belongs to a supporting
+     function, so an `fn:` target is BOTH the function and its capabilities —
+     which is exactly how collectFunction() and collectCapabilities() split a
+     function's plan between them, and getting it wrong here would mean a
+     project's rows could never be found. */
+  function refusedRoots(target) {
+    var t = String(target || "group");
+    if (t.indexOf("fn:") === 0) {
+      var k = t.slice(3), out = [];
+      if (typeof FUNCTIONS !== "undefined" && FUNCTIONS[k]) out.push(FUNCTIONS[k]);
+      if (typeof GROUP !== "undefined")
+        (GROUP.capabilities || []).forEach(function (c) { if (c && c.fn === k) out.push(c); });
+      return out;
+    }
+    if (t !== "group" && typeof UNITS !== "undefined" && UNITS[t]) return [UNITS[t]];
+    return typeof GROUP !== "undefined" ? [GROUP] : [];
+  }
+  /* The first object under `root` carrying this id. Ids are minted per unit
+     and per capability (renumberUnit/renumberCapability), so within one
+     target they are unique — which is the property that makes this safe and
+     the reason it is scoped to the target rather than run over the graph. */
+  function rowWithId(root, id) {
+    var found = null;
+    (function walk(v) {
+      if (found || !v || typeof v !== "object") return;
+      if (!Array.isArray(v) && v.id === id) { found = v; return; }
+      (Array.isArray(v) ? v : Object.keys(v).map(function (k) { return v[k]; }))
+        .forEach(walk);
+    })(root);
+    return found;
+  }
+  /* Put every named field back to what the server holds. Returns the rows it
+     could NOT find, because a "put back" that silently missed one would post
+     the same refusal again and read as the button doing nothing (§96). */
+  function putBackRefused(changes) {
+    var missed = [];
+    (changes || []).forEach(function (ch) {
+      var roots = refusedRoots(ch.target);
+      (ch.rows || []).forEach(function (r) {
+        var row = null;
+        roots.forEach(function (rt) { if (!row) row = rowWithId(rt, r.id); });
+        if (!row) { missed.push(r); return; }
+        /* ABSENT IS NOT NULL. A field the stored row did not have is DELETED,
+           or the put-back is itself a change and is refused all over again
+           (§50.6's rule, arriving from the server this time). */
+        if (r.had === false) delete row[r.field];
+        else row[r.field] = r.from == null ? r.from : JSON.parse(JSON.stringify(r.from));
+      });
+    });
+    return missed;
+  }
+
+  function showRefusal(list, changes, undoable) {
     var el = document.getElementById("refused");
     if (!el) return;
     if (!list || !list.length) { el.hidden = true; el.innerHTML = ""; return; }
+    /* One line per row, so "which line was it?" is answered on the banner
+       rather than by hunting the page. Deduplicated by row and field: a
+       milestone whose date and pending mark both moved is ONE line to a
+       person and two entries to the classifier. */
+    var seen = {}, lines = [];
+    (changes || []).forEach(function (ch) {
+      (ch.rows || []).forEach(function (r) {
+        if (r.field === "pend") return;          /* the mark, not the value */
+        var k = ch.target + "\u0000" + r.id + "\u0000" + r.field;
+        if (seen[k]) return;
+        seen[k] = 1;
+        lines.push((r.name ? esc(r.name) : esc(r.id)) +
+                   " \u2014 " + esc(fieldWord(r.field)));
+      });
+    });
     el.innerHTML = "<span><strong>Not saved.</strong> " +
       (list.length === 1 ? "" : "The server refused this change:") + "</span>" +
       (list.length === 1
         ? "<span>" + esc(list[0]) + "</span>"
         : "<ul>" + list.map(function (x) { return "<li>" + esc(x) + "</li>"; }).join("") + "</ul>") +
-      '<span><button type="button" class="refused-undo" id="refused-undo">' +
-      "Discard the change and reload</button></span>";
+      (lines.length
+        ? "<span><b>" + plural(lines.length, "line") + " refused:</b></span><ul>" +
+          lines.map(function (x) { return "<li>" + x + "</li>"; }).join("") + "</ul>"
+        : "") +
+      "<span>" +
+      (undoable
+        ? '<button type="button" class="refused-keep" id="refused-keep">Put back ' +
+          (lines.length === 1 ? "that line" : "those lines") +
+          " and save the rest</button> "
+        : "") +
+      '<button type="button" class="refused-undo" id="refused-undo">' +
+      "Discard everything and reload</button></span>";
     el.hidden = false;
+    /* THE OFFERED ONE IS THE ONE THAT KEEPS THE WORK. Discard stays — it is
+       the only way out when the refusal names no rows — but it is never the
+       only control again when the platform knows what to put back. */
+    var k = document.getElementById("refused-keep");
+    if (k) k.addEventListener("click", function () {
+      var missed = putBackRefused(changes);
+      if (missed.length) {
+        /* Said, never swallowed: a row the platform cannot find is a row it
+           cannot put back, and pretending otherwise re-posts the refusal. */
+        notSaved("<span><strong>Not saved.</strong> " + esc(list[0]) + "</span>" +
+          "<span>" + plural(missed.length, "refused line") +
+          " could not be put back automatically \u2014 they are no longer on this " +
+          "page. Reload to take the stored version again.</span>" +
+          '<span><button type="button" class="refused-undo" id="refused-undo">' +
+          "Discard everything and reload</button></span>");
+        var u2 = document.getElementById("refused-undo");
+        if (u2) u2.addEventListener("click", function () { location.reload(); });
+        return;
+      }
+      refusedWhy = null; refusedRows = null; refusedBody = null;
+      showRefusal(null);
+      /* Repaint first: the reverted values have to be what the person sees
+         before anything else happens, or the page argues with the database
+         about a row that was just put back (§35). */
+      if (typeof paint === "function") paint();
+      save();
+    });
     var u = document.getElementById("refused-undo");
     if (u) u.addEventListener("click", function () {
       if (!confirm("Discard everything changed since the last successful save, " +
@@ -244,17 +390,59 @@ var SYNC = (function () {
      or it could not be reached. The autosave calls this with no callback and
      behaves exactly as it did. */
   function save(done) {
-    var say = function (state) { if (done) done(state); };
+    /* ONE EXIT, so a path added later cannot forget the parked callers
+       (§104.7). `say` reports to THIS caller and then drains anybody who
+       arrived while the flight was open — by re-running the save, because
+       their change may not have been in it. */
+    var say = function (state) {
+      if (done) done(state);
+      if (!queued.length || saving) return;
+      var waiting = queued.splice(0, queued.length);
+      /* Deferred, so the drain cannot recurse inside the settle handler that
+         has only just set `saving = false`. */
+      setTimeout(function () {
+        save(function (st) { waiting.forEach(function (f) { if (f) f(st); }); });
+      }, 0);
+    };
     /* The guard that matters: demo data must never reach the database. */
     /* SAID ONLY FOR DEMO DATA. Opened from `file://` there is no server at
        all and the prototype banner already says so; a second sentence per
        change would be noise about something nobody expected to save. */
     if (isDemoMode()) { showDemoBlocked(); return say("offline"); }
     if (!live) return say("offline");
-    if (saving) return say("busy");
+    /* ── ASKED WHILE ONE IS ALREADY IN FLIGHT (§183) ────────────────────
+       Islam: *"the reporting then saving to draft keep saying saving and
+       nothing happens but when I exit and come back the entered number
+       saved."*
+
+       Both halves were true. `"busy"` was answered the moment Save draft was
+       pressed and the only caller drew **"Saving…"** for it — a word with no
+       follow-up, because nothing ever told the button that the flight it was
+       waiting behind had landed. The figure did save (the autosave §170 had
+       already started carried it), so the screen sat on a present participle
+       for ever over a change that was safely stored.
+
+       Since §170 made the autosave LEADING-EDGE, this is not a rare race: the
+       first change of a burst posts at once, and Save draft pressed in the
+       next moment lands squarely inside that flight. The button people reach
+       for after typing is the one most likely to hit it.
+
+       So a caller that arrives mid-flight is PARKED and answered when the
+       next save settles — and it is a real save, not the in-flight one's
+       answer borrowed: that flight serialized BEFORE this change, so its
+       success says nothing about whether this change reached the server.
+       Re-running is correct in both cases and costs nothing when there is
+       nothing new (`serialize() === lastSaved` answers "clean" at once).
+
+       `"busy"` is therefore no longer an outcome anything can be told — the
+       five §63 named are the whole set again. */
+    if (saving) { queued.push(done); return; }
     var now = serialize();
     if (now === lastSaved) return say("clean");
-    if (now === refusedBody) { showRefusal(refusedWhy); return say("refused"); }
+    if (now === refusedBody) {
+      showRefusal(refusedWhy, refusedRows, refusedUndoable);
+      return say("refused");
+    }
     saving = true;
     lastFlush = Date.now();
     fetch("/api/state", {
@@ -278,16 +466,19 @@ var SYNC = (function () {
         return r.json().then(function (j) {
           if (j && j.mustChange) { location.replace("/"); return; }
           refusedWhy = (j && j.refusals) || null;
-          showRefusal(refusedWhy);
+          refusedRows = (j && j.refusedChanges) || null;
+          refusedUndoable = !!(j && j.undoable);
+          showRefusal(refusedWhy, refusedRows, refusedUndoable);
         }, function () {
           /* A 403 whose body will not parse is still a refusal, and saying
              nothing about it is the silence this section exists to remove. */
           refusedWhy = ["The server refused the change and gave no reason."];
+          refusedRows = null; refusedUndoable = false;
           showRefusal(refusedWhy);
         });
       }
       if (r.ok) {
-        refusedWhy = null;
+        refusedWhy = null; refusedRows = null; refusedUndoable = false;
         showRefusal(null);
         lastSaved = now;
         /* A person created in the register does not exist to the SERVER until
@@ -517,16 +708,22 @@ var SYNC = (function () {
     }
   }
 
-  /* THE TRAILING HALF OF THE DEBOUNCE, and it RE-ARMS when it is refused for
-     being busy (§170). `save()` answers "busy" and schedules nothing, so
-     without this the last change of a burst that collided with an in-flight
-     save would wait for the 5s interval — which is where it waited before this
-     existed, and is no reason to leave it there now. */
+  /* THE TRAILING HALF OF THE DEBOUNCE (§170).
+
+     It used to RE-ARM itself on a `"busy"` answer, because `save()` refused a
+     caller that arrived mid-flight and scheduled nothing — so without the
+     retry the last change of a burst that collided with an in-flight save
+     waited for the 5s interval.
+
+     §183 gave `save()` the parking that makes that unnecessary: a caller
+     arriving mid-flight is held and the save is RE-RUN when the flight
+     settles, which is precisely what this timer was arranging by hand, and
+     without the 300ms wait. So the retry goes rather than being left
+     unreachable (§24) — two mechanisms for one job is how they drift, and
+     this one's own comment had already stopped being true. */
   function tick() {
     timer = null;
-    save(function (state) {
-      if (state === "busy" && !timer) timer = setTimeout(tick, 300);
-    });
+    save();
   }
 
   /* One shape for every /api/auth call this object makes: post JSON, hand
@@ -609,6 +806,14 @@ var SYNC = (function () {
        caller in here uses, so a menu item does not have to be handed one. */
     setMode: function (next) { setMode(next, repaint || function(){}); },
     person: function () { return person; },
+    /* WHO THE SMO IS, ASKED AND NEVER COPIED (§179). The welcome screen draws
+       the viewer switcher too, and the note above isSMOSession() is explicit
+       that this question must have ONE answer: a control that is dangerous
+       when wrong must fail closed, and two files each testing `role ===
+       "super"` is exactly how one of them comes to test something else.
+       Exported rather than re-asked — §42's rule about one copy of a rule,
+       on the chrome. */
+    isSMOSession: function () { return isSMOSession(); },
     /* The three password operations, all SMO-only and all checked again on
        the server — this object is the convenience, never the enforcement. */
     setPassword: function (key, pw, done) {
@@ -638,6 +843,14 @@ var SYNC = (function () {
        graph for the same reason credentials are, so the People page asks for
        it separately — and gets nothing at all from file://, where the register
        is whatever the demo baked in. */
+    /* THE SMO'S OTHER ANSWER (§180). "Use it" is an ordinary edit of the
+       person's BU and needs no endpoint; this one records that the claim was
+       looked at and refused, so it has to reach the server — and the server
+       asks the gate again rather than trusting this (§42). */
+    dismissWhere: function (key, done) {
+      authPost({ action: "dismissWhere", person: key },
+        function (err) { done(err); });
+    },
     declarations: function (done) {
       authPost({ action: "declarations" },
         function (err, j) { done(err, err ? null : (j.said || {})); });

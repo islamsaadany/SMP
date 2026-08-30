@@ -4294,15 +4294,31 @@ function projPlanBody(p, fk){
      a project marked "By quarter" whose end date happened to be a date. The
      field is untouched in the data and on the import template; what goes is a
      pill nobody could act on. */
+  /* ── AND THE SAVE TRAVELS WITH THE BAND (§194.2) ────────────────────
+     Islam: *"when I scroll down the freezed banner doesn't contain the save
+     button which should be there."* §194 pinned the head and put the pen
+     INSIDE it — on a UNIT's pillar. A capability's project pane builds its own
+     band, and `.pane > .pband` has been sticky since §53.7, so the band pinned
+     correctly and the pen did not: `paneActs` is `position:absolute` against
+     the PANE, so it scrolled away while the band stayed. The identity froze
+     and the way to save went with the page.
+
+     §53.5, and the reason it keeps being worth saying: two panes doing the
+     same job wore one header (§51.3) and then drifted the moment one of them
+     learned something. In edit mode the acts go in the band's own right slot,
+     so the pair cannot separate again; READING is untouched, where the pen
+     sits in the pane's corner and has nothing to stay level with. */
+  var acts = paneActs("plan", "u_plan");
   var band = ed
-    ? '<div class="pband"><span class="pband-code">' + esc(projCode(fk, p)) + '</span>' +
+    ? '<div class="pband edband"><span class="pband-code">' + esc(projCode(fk, p)) + '</span>' +
         '<span class="pband-name">' +
-          textOr("plan", p.name, "", function(v){ p.name = v; }) + '</span></div>'
+          textOr("plan", p.name, "", function(v){ p.name = v; }) + '</span>' +
+        (acts ? '<span class="pband-r">' + acts + '</span>' : '') + '</div>'
     /* §192: the pending count left this slot for the totals row above — it
        was the SUBJECT's number on one pillar's band, printing under the fill
        button. `pendBadge()` is deleted rather than left uncalled (§24). */
-    : pillarBand(projCode(fk, p), p.name);
-  return band + paneActs("plan", "u_plan") +
+    : pillarBand(projCode(fk, p), p.name) + acts;
+  return band +
     projFrontMatter(p, ed) +
     '<h4 class="mini">' + DX_HEADING +
       ' <em>\u2014 what the project hands over, and what it is meant to change</em></h4>' +

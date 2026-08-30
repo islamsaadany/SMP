@@ -1680,6 +1680,15 @@
   .pane .ptitle.edhead .ptname { flex:1; min-width:0;
     font:400 17px/1.3 var(--serif); }
   .pane .ptitle.edhead .penbtn { position:static; flex:none; }
+  /* §194.2: THE PROJECT PANE'S BAND CARRIES ITS OWN ACTS while editing. The
+     band is already sticky (§53.7); `.paneact` is absolute against the PANE,
+     so left outside it the Done button scrolled away from the name it belongs
+     to. In flow, in the band's right slot, the pair cannot separate. */
+  .pane .pband.edband .paneact { position:static; height:auto; display:flex;
+    align-items:center; gap:8px; }
+  .pane .pband.edband .paneact .cornerbtn,
+  .pane .pband.edband .paneact .penbtn { position:static; flex:none;
+    visibility:visible; opacity:1; }
   .pane .ptitle .pmeta { color:var(--ink-3); font-size:12.5px; margin-top:3px; }
   .planonly { font-size:12.5px; color:var(--ink-3); margin:10px 0 0; }
   .planonly b { color:var(--gold-deep); letter-spacing:.09em; text-transform:uppercase;
@@ -5504,6 +5513,22 @@
      in a pill sized for 11px uppercase text floats; the caret stays, because
      it is what says this opens a list rather than going somewhere. */
   .units .navmenu-btn.navmenu-ico{padding:5px 9px;gap:4px}
+  /* ── THE HOME MARK (§194.3) ─────────────────────────────────────────
+     Islam picked F from six drawn in the real bar: square, gold. The round
+     faint-filled shape it had was `navmenu-ico`'s, which belongs to the gear
+     at the other end — on the left, leading the row, it reads as a place you
+     go rather than a control borrowed from somewhere else.
+
+     ITS OWN CLASS, NEVER `.here`. Gold on this row already means "the
+     destination you are on", and this is gold for a different reason; keeping
+     them apart is what lets either change without the other (§87's twins, in
+     CSS). The hover LIFTS rather than repaints, so it cannot be mistaken for
+     a selection changing. */
+  .units .navmenu-btn.homemark{ background:var(--gold); border-color:var(--gold);
+    color:var(--on-accent); border-radius:5px; padding:0; width:30px; height:30px; }
+  .units .navmenu-btn.homemark:hover{ background:var(--gold); border-color:var(--gold);
+    color:var(--on-accent); filter:brightness(1.08); }
+  .units .navmenu-btn.homemark:focus-visible{ outline:2px solid #fff; outline-offset:2px; }
   .navmenusvg{width:15px;height:15px;display:block}
   /* The panel, its group bands, its buttons and the caret are all gone with
      the two-door split (§47.7): the gear is one destination now, so there is
@@ -26852,15 +26877,31 @@ function projPlanBody(p, fk){
      a project marked "By quarter" whose end date happened to be a date. The
      field is untouched in the data and on the import template; what goes is a
      pill nobody could act on. */
+  /* ── AND THE SAVE TRAVELS WITH THE BAND (§194.2) ────────────────────
+     Islam: *"when I scroll down the freezed banner doesn't contain the save
+     button which should be there."* §194 pinned the head and put the pen
+     INSIDE it — on a UNIT's pillar. A capability's project pane builds its own
+     band, and `.pane > .pband` has been sticky since §53.7, so the band pinned
+     correctly and the pen did not: `paneActs` is `position:absolute` against
+     the PANE, so it scrolled away while the band stayed. The identity froze
+     and the way to save went with the page.
+
+     §53.5, and the reason it keeps being worth saying: two panes doing the
+     same job wore one header (§51.3) and then drifted the moment one of them
+     learned something. In edit mode the acts go in the band's own right slot,
+     so the pair cannot separate again; READING is untouched, where the pen
+     sits in the pane's corner and has nothing to stay level with. */
+  var acts = paneActs("plan", "u_plan");
   var band = ed
-    ? '<div class="pband"><span class="pband-code">' + esc(projCode(fk, p)) + '</span>' +
+    ? '<div class="pband edband"><span class="pband-code">' + esc(projCode(fk, p)) + '</span>' +
         '<span class="pband-name">' +
-          textOr("plan", p.name, "", function(v){ p.name = v; }) + '</span></div>'
+          textOr("plan", p.name, "", function(v){ p.name = v; }) + '</span>' +
+        (acts ? '<span class="pband-r">' + acts + '</span>' : '') + '</div>'
     /* §192: the pending count left this slot for the totals row above — it
        was the SUBJECT's number on one pillar's band, printing under the fill
        button. `pendBadge()` is deleted rather than left uncalled (§24). */
-    : pillarBand(projCode(fk, p), p.name);
-  return band + paneActs("plan", "u_plan") +
+    : pillarBand(projCode(fk, p), p.name) + acts;
+  return band +
     projFrontMatter(p, ed) +
     '<h4 class="mini">' + DX_HEADING +
       ' <em>\u2014 what the project hands over, and what it is meant to change</em></h4>' +
@@ -42735,7 +42776,16 @@ var SYNC = (function () {
     if (typeof WELCOME === "undefined" || !WELCOME.open) return "";
     if (location.protocol === "file:") return "";
     if (document.body && document.body.classList.contains("presenting")) return "";
-    return '<button type="button" class="navmenu-btn navmenu-ico navmenu-solo" ' +
+    /* §194.3: SQUARE AND GOLD, Islam's pick of six drawn in the real bar
+       ("F for the homemark"). The circle it wore was `navmenu-ico`'s, built
+       for the gear beside it; on the left, leading the row, a square reads as
+       a place rather than a control borrowed from the other end.
+
+       THE ONE COST WAS STATED BEFORE HE CHOSE and stands: gold on this row
+       means "the destination you are on", so a permanently gold house borrows
+       that meaning. It is its own class rather than `.here`, so the two can be
+       told apart in the stylesheet and either can change without the other. */
+    return '<button type="button" class="navmenu-btn navmenu-ico navmenu-solo homemark" ' +
       'data-welcomego="1" title="What is waiting on me" ' +
       'aria-label="What is waiting on me">' + ICON_HOME + '</button>';
   }

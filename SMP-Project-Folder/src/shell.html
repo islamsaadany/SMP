@@ -1489,7 +1489,16 @@
     if (typeof WELCOME === "undefined" || !WELCOME.open) return "";
     if (location.protocol === "file:") return "";
     if (document.body && document.body.classList.contains("presenting")) return "";
-    return '<button type="button" class="navmenu-btn navmenu-ico navmenu-solo" ' +
+    /* §194.3: SQUARE AND GOLD, Islam's pick of six drawn in the real bar
+       ("F for the homemark"). The circle it wore was `navmenu-ico`'s, built
+       for the gear beside it; on the left, leading the row, a square reads as
+       a place rather than a control borrowed from the other end.
+
+       THE ONE COST WAS STATED BEFORE HE CHOSE and stands: gold on this row
+       means "the destination you are on", so a permanently gold house borrows
+       that meaning. It is its own class rather than `.here`, so the two can be
+       told apart in the stylesheet and either can change without the other. */
+    return '<button type="button" class="navmenu-btn navmenu-ico navmenu-solo homemark" ' +
       'data-welcomego="1" title="What is waiting on me" ' +
       'aria-label="What is waiting on me">' + ICON_HOME + '</button>';
   }

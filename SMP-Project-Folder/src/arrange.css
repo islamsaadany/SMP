@@ -1093,6 +1093,22 @@
      in a pill sized for 11px uppercase text floats; the caret stays, because
      it is what says this opens a list rather than going somewhere. */
   .units .navmenu-btn.navmenu-ico{padding:5px 9px;gap:4px}
+  /* ── THE HOME MARK (§194.3) ─────────────────────────────────────────
+     Islam picked F from six drawn in the real bar: square, gold. The round
+     faint-filled shape it had was `navmenu-ico`'s, which belongs to the gear
+     at the other end — on the left, leading the row, it reads as a place you
+     go rather than a control borrowed from somewhere else.
+
+     ITS OWN CLASS, NEVER `.here`. Gold on this row already means "the
+     destination you are on", and this is gold for a different reason; keeping
+     them apart is what lets either change without the other (§87's twins, in
+     CSS). The hover LIFTS rather than repaints, so it cannot be mistaken for
+     a selection changing. */
+  .units .navmenu-btn.homemark{ background:var(--gold); border-color:var(--gold);
+    color:var(--on-accent); border-radius:5px; padding:0; width:30px; height:30px; }
+  .units .navmenu-btn.homemark:hover{ background:var(--gold); border-color:var(--gold);
+    color:var(--on-accent); filter:brightness(1.08); }
+  .units .navmenu-btn.homemark:focus-visible{ outline:2px solid #fff; outline-offset:2px; }
   .navmenusvg{width:15px;height:15px;display:block}
   /* The panel, its group bands, its buttons and the caret are all gone with
      the two-door split (§47.7): the gear is one destination now, so there is

@@ -62,17 +62,24 @@ const LOG_ROW_CAP = 200;
 
 async function logChanges(client, person, changes) {
   if (!changes || !changes.length) return;
+  /* ONE STATEMENT, NOT ONE PER CHANGE (§195). A save's whole cost is the
+     number of times it has to wait for the database, and a plan import
+     produces a change per unit — so this loop was quietly adding a network
+     crossing each. The rows are the same rows, in the same order. */
   try {
-    for (const ch of changes) {
+    const vals = [], params = [];
+    changes.forEach(function (ch, i) {
       const rows = ch.rows && ch.rows.length
         ? { count: ch.rows.length, moved: ch.rows.slice(0, LOG_ROW_CAP) }
         : null;
-      await client.query(
-        "INSERT INTO change_log (person_key, person_name, kind, target, what, rows_) " +
-        "VALUES ($1,$2,$3,$4,$5,$6)",
-        [person.key, person.name || null, ch.kind, ch.target, ch.what,
-         rows ? JSON.stringify(rows) : null]);
-    }
+      const b = i * 6;
+      vals.push("($" + (b+1) + ",$" + (b+2) + ",$" + (b+3) + ",$" + (b+4) + ",$" + (b+5) + ",$" + (b+6) + ")");
+      params.push(person.key, person.name || null, ch.kind, ch.target, ch.what,
+                  rows ? JSON.stringify(rows) : null);
+    });
+    await client.query(
+      "INSERT INTO change_log (person_key, person_name, kind, target, what, rows_) VALUES " +
+      vals.join(","), params);
   } catch (e) {
     /* A log that cannot be written must not lose a save that already landed.
        It is reported to the function's own output, where it is visible. */

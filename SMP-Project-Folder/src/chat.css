@@ -116,6 +116,12 @@ body.presenting .chatdock { display:none; }
 /* THE OFFICE'S SIDE CARRIES THE ACCENT EDGE, and it is the one thing that
    distinguishes the two — never a filled bubble on either side, because a
    colour block per line is a lot of colour for a page this quiet (§41). */
+/* IT ALSO LEFT THE PLATFORM (§188). Quiet, on the byline beside the time —
+   a fact about how the message travelled, never about what it says, so it
+   takes the byline's own ink and none of its own. */
+.chmail { display:inline-flex; align-items:center; gap:4px; cursor:help;
+          font-size:var(--fs-micro); font-weight:600; color:var(--ink-3); }
+.chmail svg { width:12px; height:12px; }
 .chmsg.chthem { align-self:flex-start; }
 .chmsg.chthem .chbod { background:var(--surface); border:1px solid var(--line);
                        border-left:2px solid var(--gold); border-radius:4px 10px 10px 4px; }

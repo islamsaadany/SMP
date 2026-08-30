@@ -22760,3 +22760,145 @@ redesign and the squeezed-window damage. **And the chat caret** — he has said
 it happens *while typing, after a few seconds*, which points at the poll
 refreshing the thread under a typing hand; recorded here so the next round
 starts from that rather than from a blank page.
+
+---
+
+## §188 · The office inbox: the caret, the box, the pill and the tag
+
+Four things from Islam using the inbox, and three of them are one omission:
+**§97 built the CORNER panel carefully against exactly these faults, and the
+office's own inbox — the surface the office actually lives in — got a thinner
+version that skipped them.**
+
+---
+
+### 1 · The caret
+
+*"When I'm replying in the chat inbox suddenly the mark goes out of the chat
+box and I bring it back to focus again."*
+
+The inbox polls every ten seconds and `drawThread()` rewrites the whole thread
+pane. The reply box is inside it. There is a comment on that function claiming
+the composer is only rebuilt when the person changes — **and it is half of what
+it claims**: the VALUE is carried across, the element is replaced regardless.
+That is why this reads as the cursor jumping rather than as work being lost.
+
+**Now only the messages redraw** while the thread is already this person's and
+the composer has the cursor. A reply landing mid-sentence still appears — the
+body is the part that changes — and the part being used is left alone.
+
+**NOT "SKIP THE POLL WHILE TYPING"**, which would hold back the very thing the
+poll is for. The half that must not move is the composer, and it is the half
+that is no longer touched.
+
+---
+
+### 2 · The box that could not grow
+
+*"Chat box to wrap the content not disappearing."*
+
+The corner's composer has grown to fit since §97 (`#chatsay`, capped at 120px).
+The office's reply box is the same control **with the handler missing** — one
+row for ever, everything past the first line scrolling out of sight.
+
+`chGrow` is one grower for both, named once (§53.5): two copies of *how tall
+should this box be* is how one of them stops matching the other. Wired in
+`drawThread()` rather than `wireInbox()`, because that element is replaced on
+every person change and a listener bound to the one before it dies with it
+(§29.5 — whoever destroys the wiring re-does it, in the same function).
+
+---
+
+### 3 · The pill that would not move
+
+*"I replied to the person and still I get the notification on the side rail,
+and the waiting is 0 while the chat is still in the waiting."*
+
+**Both numbers on that screen were right and of different ages.** The Inbox
+re-asks its queue on every beat; the rail's pill is `OVQUEUE`, fetched ONCE per
+visit (§108.10 — *"a summary somebody reads and then acts on, not a live
+board"*) and never told the summary had stopped being true.
+
+That reasoning holds for a page nobody is acting on. **It stops holding the
+moment the act is on screen**: replying is what makes the number wrong, and it
+happens two panes away from the pill.
+
+So the inbox hands its own answer to the shell — one fetch, two readers, which
+is §108.10's own rule that the rail cannot disagree with the page it points at.
+**And the pill is rewritten in place, never by repainting**: a `paint()` there
+would rebuild the whole Setup page including the reply box, which is the fault
+§188.1 exists to prevent.
+
+---
+
+### 4 · A reply that left by email says so
+
+*"If the previous message was sent by email let's add a tag to it that it was
+sent by email as well."*
+
+The platform has chased people by email since §97.5 and **recorded nothing about
+it**: the outcome went to the browser, was shown once under the composer, and
+was forgotten. A thread read the next morning could not say which of its replies
+had actually gone out.
+
+**ONE COLUMN HOLDING THE ADDRESS** (`emailed_to`, migration 033), never a
+boolean beside one (§104.7). The address rather than a flag because *"it was
+emailed"* and *"it went to hala_latif@rayacorp.com"* answer different questions
+and the second answers both — and a person's address on the register can change
+afterwards, so reading it back would say where it would go NOW, not where it
+went.
+
+**WRITTEN ONLY WHEN IT ACTUALLY WENT.** A failed send leaves it null, which is
+the same thing an untouched row says, because it is the same fact.
+
+**NOTHING IS BACKFILLED, AND THAT WAS A CHOICE.** Islam was offered inference —
+mark it emailed if the person was away — and turned it down. Nothing was written
+down, so nothing is claimed: every message before today is honestly untagged.
+
+**On the byline, not in the bubble**: the bubble is what was SAID and this is a
+fact about how it travelled. A mark with the address on the hover, not a
+sentence repeated on every reply (§41's budget).
+
+---
+
+### Proof
+
+`checks/office-inbox.py` is new, served over HTTP with a stub because none of
+this exists over `file://` (§94.11). **6 red** against main's build.
+
+**Two of its own first runs were the check**, both worth keeping:
+
+* **Playwright types `\n` as ENTER, and Enter sends.** The box was emptied, so
+  every caret assertion compared `""` with `""` and passed — a check that could
+  not fail (§94.5). It now asserts there is something written in it.
+* **129 characters in a 964px composer fits on one line**, so the grow test
+  called a working build broken (§128: a measurement wrong in the direction of
+  *broken* costs as much as one wrong the other way).
+
+`checks/office-chat.py` green; `qa.py` clean.
+
+---
+
+## §188.5 · The plan's titles cannot wrap — mockup only
+
+Islam: *"wrap the content of the plans edit boxes across pillars and functions,
+specially for the titles and descriptions, as they become hard to read when the
+lines get long."*
+
+**It is not that they wrap badly. They cannot wrap at all.** Every title and
+description on a plan is an `<input>`, which is a single line by definition —
+the pillar name, the objective, the measure, the tactic, the milestone, the
+sub-line. Only the project Brief is a real text box, and even that is fixed at
+two rows.
+
+Measured on a unit's Plan pane with the pen open and realistic titles:
+
+| width | boxes | clipped now | clipped after |
+|---|---|---|---|
+| 1440 | 23 | **4** | 0 |
+| 1100 | 23 | **8** | 0 |
+
+Drawn and **not applied** — Islam chose mockup-first. Published as an artifact
+with the cost stated: rows get taller while the pen is on, the tables keep their
+width, reading mode is untouched, and short fields (targets, dates, codes) are
+deliberately left alone.

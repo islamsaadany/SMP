@@ -6481,6 +6481,12 @@ body.presenting .chatdock { display:none; }
 /* THE OFFICE'S SIDE CARRIES THE ACCENT EDGE, and it is the one thing that
    distinguishes the two — never a filled bubble on either side, because a
    colour block per line is a lot of colour for a page this quiet (§41). */
+/* IT ALSO LEFT THE PLATFORM (§188). Quiet, on the byline beside the time —
+   a fact about how the message travelled, never about what it says, so it
+   takes the byline's own ink and none of its own. */
+.chmail { display:inline-flex; align-items:center; gap:4px; cursor:help;
+          font-size:var(--fs-micro); font-weight:600; color:var(--ink-3); }
+.chmail svg { width:12px; height:12px; }
 .chmsg.chthem { align-self:flex-start; }
 .chmsg.chthem .chbod { background:var(--surface); border:1px solid var(--line);
                        border-left:2px solid var(--gold); border-radius:4px 10px 10px 4px; }
@@ -36967,9 +36973,30 @@ var CHAT = (function(){
       out = '<button class="chout" type="button" data-chhuman="1">' +
             "This didn\u2019t answer it \u2014 send it to the office</button>";
     }
+    /* ── AND WHETHER IT LEFT THE PLATFORM (§188) ──────────────────────
+       Islam: *"if the previous message was sent by email let's add a tag to
+       it that it was sent by email as well."* The chase has existed since
+       §97.5 and was reported to the browser once, under the composer, and
+       written down nowhere — so a thread read the next morning could not say
+       which of its replies had actually gone out.
+
+       ON THE BYLINE, not in the bubble: the bubble is what was SAID and this
+       is a fact about how it travelled. A mark rather than a sentence, with
+       the address on the hover — the office knows what "emailed" means and
+       does not need the line repeated on every reply (§41's budget).
+
+       NULL IS "IT DID NOT LEAVE", which is what every message before today
+       honestly is: nothing was recorded, so nothing is claimed. */
+    var went = m.emailed_to
+      ? '<span class="chmail" title="Also emailed to ' + esc2(m.emailed_to) + '">' +
+        '<svg viewBox="0 0 16 16" aria-hidden="true" fill="none" stroke="currentColor" ' +
+        'stroke-width="1.5" stroke-linejoin="round">' +
+        '<rect x="1.5" y="3.5" width="13" height="9" rx="1.5"/>' +
+        '<path d="m2 4.5 6 4 6-4"/></svg>Emailed</span>'
+      : "";
     return '<div class="chmsg ' + (mine ? "chme" : "chthem") + (m.bot ? " chbot" : "") + '">' +
       '<div class="chwho"><span>' + esc2(who) + "</span><span>" + esc2(when(m.at)) + "</span>" +
-      flag + "</div>" +
+      went + flag + "</div>" +
       '<div class="chbod">' + esc2(m.body) + pic + "</div>" + out + "</div>";
   }
 
@@ -37313,10 +37340,7 @@ var CHAT = (function(){
       if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); send(); }
       if (e.key === "Escape") setOpen(false);
     });
-    say.addEventListener("input", function(){
-      this.style.height = "auto";
-      this.style.height = Math.min(120, this.scrollHeight) + "px";
-    });
+    say.addEventListener("input", chGrow);
     /* Coming back to the tab is the moment a badge is most likely to be
        wrong, and the cheapest time to ask. `visibilitychange` is the one that
        matters — `focus` alone does not fire when a background tab is brought
@@ -37786,6 +37810,15 @@ var CHAT = (function(){
       " — this will also go to " + esc2(d.address) + ".</div>";
   }
 
+  /* ONE GROWER FOR BOTH COMPOSERS (§188, §53.5). The corner's was written
+     inline in wire(); the inbox needed the same thing, and two copies of "how
+     tall should this box be" is how one of them stops matching the other. */
+  var CH_GROW_MAX = 120;
+  function chGrow(){
+    this.style.height = "auto";
+    this.style.height = Math.min(CH_GROW_MAX, this.scrollHeight) + "px";
+  }
+
   function drawThread(){
     var pane = el("chthread"); if (!pane) return;
     var d = box.data;
@@ -37795,13 +37828,38 @@ var CHAT = (function(){
       return;
     }
     /* THE REPLY BOX IS ONLY REBUILT WHEN THE PERSON CHANGES. Redrawing it on
-       every four-second poll would wipe a half-written answer — the exact
-       fault §71.2 was raised about, one surface further out. */
+       every poll would wipe a half-written answer — the exact fault §71.2 was
+       raised about, one surface further out. */
     var existing = pane.querySelector("[data-chreply]");
     var keep = existing && existing.dataset.chreply === d.person ? existing.value : null;
 
     var body = pane.querySelector("#chtbody");
     var atEnd = body ? (body.scrollHeight - body.scrollTop - body.clientHeight < 40) : true;
+
+    /* ── AND KEEPING THE TEXT IS NOT KEEPING THE CARET (§188) ──────────
+       Islam: *"when I'm replying in the chat inbox suddenly the mark goes out
+       of the chat box and I bring it back to focus again."* The rule above
+       was written and is half of what it claims: the VALUE is carried across,
+       and the element is replaced regardless — so every ten seconds the box
+       being typed into is destroyed, and focus and the cursor go with it.
+       The words survived, which is why this reads as the cursor jumping
+       rather than as work being lost.
+
+       WHEN THE THREAD IS ALREADY THIS PERSON'S AND THE COMPOSER HAS THE
+       CURSOR, ONLY THE MESSAGES ARE REDRAWN. A reply landing mid-sentence
+       still appears — the body is the part that changes — and the footer,
+       which is the part being used, is left alone.
+
+       NOT "SKIP THE POLL WHILE TYPING": that would hold back the very thing
+       the poll is for. The half that must not move is the composer, and it is
+       the half that is now not touched. */
+    if (keep != null && body && existing === document.activeElement) {
+      body.innerHTML = threadHtml(d.messages || [], true, true);
+      if (atEnd) body.scrollTop = body.scrollHeight;
+      var head = pane.querySelector("[data-chdone]");
+      if (head) head.textContent = d.waiting ? "Mark answered" : "Put back on the list";
+      return;
+    }
 
     pane.innerHTML =
       '<div class="chthead">' +
@@ -37828,13 +37886,67 @@ var CHAT = (function(){
 
     var ta = pane.querySelector("[data-chreply]");
     if (ta && keep != null) ta.value = keep;
+    /* ── AND IT GROWS WITH WHAT IS WRITTEN IN IT (§188) ────────────────
+       Islam: *"chat box to wrap the content not disappearing."* The corner
+       panel's composer has grown to fit since §97 (`#chatsay`, capped at
+       120px); the office's reply box is the same control with the handler
+       missing, so it stayed one row for ever and everything past the first
+       line scrolled out of sight while it was being written.
+
+       The same cap and the same two lines, wired here rather than in
+       wireInbox(): this element is REPLACED on every person change, and a
+       listener bound to the one before it dies with it (§29.5 — whoever
+       destroys the wiring re-does it, in the same function). */
+    if (ta) {
+      ta.addEventListener("input", chGrow);
+      chGrow.call(ta);
+    }
     var nb = el("chtbody");
     if (nb && atEnd) nb.scrollTop = nb.scrollHeight;
+  }
+
+  /* ── THE RAIL'S COUNT IS THE INBOX'S COUNT (§188) ──────────────────
+     Islam: *"I replied to the person and still I get the notification on the
+     side rail, and the waiting is 0 while the chat is still in the
+     waiting."* Both halves of that screen were right and they were of
+     different ages: the Inbox re-asks its queue on every beat, and the rail's
+     pill is `OVQUEUE`, fetched ONCE per visit (§108.10 — "a summary somebody
+     reads and then acts on, not a live board") and never told that the
+     summary just stopped being true.
+
+     That reasoning holds for a page nobody is acting ON. It stops holding the
+     moment the act itself is on screen: replying is what makes the number
+     wrong, and it happens two panes away from the pill.
+
+     SO THE INBOX'S OWN ANSWER IS HANDED TO THE SHELL rather than the shell
+     polling for it. One fetch, two readers — §108.10's own rule that the
+     rail's number cannot disagree with the page it points at, which it could
+     only keep while nothing changed underneath it. */
+  function shellCount(j){
+    if (typeof window === "undefined" || !j) return;
+    try { window.OVQUEUE = { waiting: j.waiting | 0, flagged: j.flagged | 0 }; }
+    catch (e) {}
+    /* AND THE PILL IS REWRITTEN IN PLACE, NEVER BY REPAINTING (§97, §145.12).
+       A paint() here would rebuild the whole Setup page — including the reply
+       box being typed into, which is the fault two lines of this file exist
+       to prevent. So the one number that changed is written into the one
+       element that shows it, the way the gap band's counts already are. */
+    try {
+      var btn = document.querySelector('.ritem[data-setupgo="chat"]');
+      if (!btn) return;
+      var pill = btn.querySelector(".riwait");
+      var n = j.waiting | 0;
+      if (!n) { if (pill) pill.remove(); return; }
+      if (!pill) return;                  /* it appears on the next paint */
+      pill.textContent = String(n);
+      pill.title = n + " waiting on this page";
+    } catch (e) {}
   }
 
   function boxLoadQueue(then){
     post({ action:"queue" }, function(err, j){
       if (err || !j) return;
+      shellCount(j);
       box.threads = j.threads || [];
       drawQueue();
       ["waiting", "flagged"].forEach(function(k){

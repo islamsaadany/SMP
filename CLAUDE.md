@@ -365,6 +365,27 @@ console errors (in this cloud environment, run it via a wrapper that points Play
   `node scripts/test-door.js <smo-password>` against a running dev-server
   after touching `api/auth.js` or `lib/auth.js` (it ends by rate-limiting the
   SMO on purpose — `DELETE FROM login_attempts;` clears it).
+- **THE OFFICE INBOX GOT A THINNER PANEL THAN THE CORNER (§188):** three of
+  Islam's four are one omission — §97 built the CORNER against exactly these
+  faults and the office's own inbox skipped them. **The caret**: the inbox
+  polls every 10s and `drawThread()` rewrites the pane the reply box is in;
+  its comment claims the composer is only rebuilt on a person change and is
+  HALF TRUE — the value is carried across, the element is replaced regardless,
+  which is why it reads as the cursor jumping rather than work lost. Only the
+  MESSAGES redraw while the composer has the cursor — never "skip the poll
+  while typing", which holds back the thing the poll is for. **The box**: the
+  corner's composer has grown to fit since §97; this was the same control with
+  the handler missing. `chGrow` is one grower for both (§53.5), wired in
+  `drawThread()` because that element is replaced on every person change
+  (§29.5). **The pill**: both numbers were right and of DIFFERENT AGES — the
+  inbox re-asks every beat, `OVQUEUE` is fetched once per visit (§108.10) and
+  was never told the summary stopped being true; replying is the act that
+  makes it wrong. The inbox hands the shell its own answer, and the pill is
+  rewritten IN PLACE — a `paint()` there would rebuild the reply box, which is
+  the fault above. **The tag**: the chase has existed since §97.5 and recorded
+  NOTHING; `emailed_to` (033) holds the ADDRESS, never a boolean (§104.7),
+  written only when it actually went, and **nothing is backfilled** — Islam
+  was offered inference and turned it down.
 - **A SEAT IS GRANTED AND NEVER DERIVED (§187):** Islam — *"level smo
   shouldn't be a super user — super user is only granted by the super user in
   the registry, for now."* `personRoles()` read `p.level` (the pre-§33 field)

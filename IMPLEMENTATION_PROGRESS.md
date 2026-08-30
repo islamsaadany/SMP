@@ -68,6 +68,35 @@ Nothing proceeds past this line without an answer.
 
 ## Built and verified
 
+### v3.76 — the office inbox: the caret, the box, the pill and the tag (§188)
+
+- **Three of the four are one omission.** The corner chat panel was built
+  carefully against exactly these faults; the office's own inbox — the surface
+  the office lives in — got a thinner version that skipped them.
+- **The caret** no longer jumps: only the messages redraw while you have the
+  cursor in the reply box. Your text was already being carried across, which
+  is why it read as the cursor moving rather than work being lost.
+- **The reply box grows** with what you type, like the corner's already did.
+- **The rail's pill follows the inbox.** Both numbers were right and of
+  different ages — the inbox re-asks every beat, the pill was fetched once per
+  visit and never told the summary had changed. Replying is the act that makes
+  it wrong. The pill is rewritten in place, never by repainting.
+- **A reply that left by email says so**, with the address on the hover.
+  Migration 033 adds the column. Nothing is backfilled — the platform never
+  recorded it, so nothing is claimed for messages already sent.
+- Proof: `checks/office-inbox.py` is new, over HTTP with a stub, **6 red** on
+  main. Two of its own first runs were the check: Playwright types `\n` as
+  Enter (which sends), so the caret assertions compared "" with "" and passed;
+  and 129 characters in a 964px box fits on one line, so the grow test called
+  a working build broken.
+
+### Awaiting sign-off — the plan's titles (§188.5)
+
+- Measured with the pen open: **4 of 23 boxes clip their text at 1440px, 8 at
+  1100px.** Not because they wrap badly — because every title on a plan is a
+  single-line input and cannot wrap at all.
+- Mockup published; nothing applied.
+
 ### v3.75 — a seat is granted, never derived, and four small ones (§187)
 
 - **`level: "smo"` no longer makes anybody a Super user.** The role rules read

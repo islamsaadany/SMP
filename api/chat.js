@@ -107,9 +107,13 @@ const str = function (v, max) {
    tell an automated answer from a colleague's has no way to draw the
    difference, and the whole point of the column is that the difference is
    drawn. */
+/* `emailed_to` joins them for §188 — the ONE place these columns are named,
+   which is the whole reason that comment above exists: a column added to two
+   of the three readers is the bug nobody sees until a message renders
+   without the thing it was given. */
 const MSG_COLS =
   "id, at, from_office, by_key, by_name, body, flag, bot, source, handoff, " +
-  "(shot IS NOT NULL) AS has_shot";
+  "emailed_to, (shot IS NOT NULL) AS has_shot";
 
 /* ── WHAT THE OFFICE HAS SET ABOUT THE CHAT (§98) ───────────────────────
    ONE SMALL QUERY, not `readState()`. This endpoint has never read the
@@ -638,9 +642,12 @@ module.exports = async function handler(req, res) {
         "SELECT here_at FROM chat_threads WHERE person_key = $1", [who])).rows[0];
       if (!t) return send(res, 404, { ok: false, error: "No conversation with that person." });
 
-      await client.query(
+      /* THE ID COMES BACK, because §188 marks THIS message once the email
+         has actually gone — not the thread, and not the next one. */
+      const said = (await client.query(
         "INSERT INTO chat_messages (person_key, from_office, by_key, by_name, body) " +
-        "VALUES ($1,true,$2,$3,$4)", [who, me.key, me.name || null, text]);
+        "VALUES ($1,true,$2,$3,$4) RETURNING id",
+        [who, me.key, me.name || null, text])).rows[0];
       /* ANSWERED BY THE ACT, not by remembering to set it — the status nobody
          sets is the status somebody has to remember (§71). */
       await client.query(
@@ -681,6 +688,22 @@ module.exports = async function handler(req, res) {
               html: String(body.html)
             });
             mailed = { sent: !!id, to: addr, why: id ? null : "no mail is configured here" };
+            /* ── AND THE MESSAGE REMEMBERS IT (§188) ────────────────────
+               Islam: "if the previous message was sent by email let's add a
+               tag to it that it was sent by email as well." The chase has
+               existed since §97.5 and was reported to the browser once and
+               written down nowhere, so a thread read tomorrow could not say
+               which of its replies had left the platform.
+
+               WRITTEN ONLY WHEN IT ACTUALLY WENT. A failed send leaves this
+               null, which is the same thing an untouched row says — because
+               it is the same fact. A tag on a message that never left would
+               be worse than no tag (§35: absence reported as presence). */
+            if (id && said && said.id) {
+              await client.query(
+                "UPDATE chat_messages SET emailed_to = $2 WHERE id = $1",
+                [said.id, addr]);
+            }
           } catch (e) {
             /* A FAILED EMAIL IS NOT A FAILED REPLY. The message is already in
                the conversation and the person will see it the moment they

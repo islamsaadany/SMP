@@ -23160,3 +23160,480 @@ a row with **nothing outstanding** now — MADE, because every person in the dem
 carries no employee number and so is outstanding for `noident` (§94.2) — and a
 row that HAS an item is asserted separately: it may scroll, because it has more
 in it, but it must still fit on screen and its ring must orphan nothing.
+
+---
+
+## §191 — A line the platform cannot name is nobody's to change (v3.79)
+
+Found while chasing a refusal that was itself correct (Walid's, above). It is
+not what he hit; it is what looking for it turned up.
+
+### The hole
+
+The authoriser matches plan rows **by id** to work out what changed. `byId()`
+drops a row that has none — rightly, since two rows sharing `undefined` are not
+one row — and the loops that walk those maps then found **nothing to classify**.
+Nothing classified reads as *no change*, and no change is allowed.
+
+Measured before a line was written, on the shipped build: with the ids stripped,
+a **view-only unit head** could rewrite a key objective, a pillar, a measure, a
+tactic and a project's front matter. Every one of those saves came back accepted.
+With the ids present all of them are refused.
+
+**§42 promises that an unclassified change is the SMO's.** This is the one place
+that promise was not kept, and it failed **open**.
+
+### Three states, not one
+
+Each leaves a row unjudged in its own way, and only the first is obvious:
+
+* **no id** — `byId` skips the row, the map comes back empty;
+* **a null id** — `byId` KEEPS it, under the string `"null"`, so a whole list
+  collapses onto one entry and five of six rows are never compared;
+* **a duplicate** — the second row silently takes the first's place in the map.
+  §96.2 fixed a minter that produced duplicates; this is the other end, and it
+  does not assume that fix has always been in place.
+
+### Three walks, and the sweep is what found the other two
+
+`splitRows` is the shared row comparison, and guarding it closed **three of the
+four** cases I first measured. The pillar list and the project list build their
+own maps rather than going through it, so the guard did not reach them — a
+pillar's name and weight, and a project's owner, brief, stakeholders, Start and
+End, all stayed writable while the rows *inside* those same projects were
+correctly refused.
+
+**A fix that closes three of four holes is exactly the kind that gets trusted.**
+The sweep across all nine plan lists × three broken states is what found the
+other two, and it is now the test.
+
+### The rule
+
+A list that cannot be matched row to row is judged **as a whole**: byte-identical
+costs nobody anything, and anything else is a plan change and the office's.
+
+**Never matched by position** (§48). Position is not identity — one row inserted
+and everything after it reads as edited.
+
+**The gap pass stops too.** It clears what it classifies from the clone, so
+running it over a list whose rows cannot be told apart would wipe one row's
+change while crediting it to another.
+
+**The cost is stated, not discovered:** on a tenant that really holds such rows,
+that list is the office's until they open it and save once, which mints the ids
+(`mintRowId`, `renumberUnit`). Nothing else about the plan moves.
+
+### And then the shipped data was swept, which was the other half of the ask
+
+Every plan line in the product carries a unique id — **except the group's own
+six key objectives**, exactly as §96.4 recorded: only rows ADDED were ever given
+one, and a list where one row is identified and six are not is worse than either
+state, so it was left. Nothing had needed the ids until now.
+
+**Nobody could ever have exploited those six** — the group's own strategy is
+refused wholesale by a different rule, whatever the ids say, and that was
+measured too. So minting them is not repairing a hole. It removes the one list
+the new guard would otherwise refuse for everybody but the office, and it gives
+a cycle snapshot and an archive six rows they can tell apart (§48: a snapshot is
+keyed by id, and six rows keyed `null` are six rows it cannot separate).
+
+**The spelling is the product's own.** `koSettle()` has minted `group-KO<n>` for
+every group objective added since it was written, so this is that convention and
+not a second one beside it (§53.5). Written into the DATA rather than filled in
+by a reader, because a reader that writes what it reads puts a phantom change
+into every save (§42, §50.6 — and §96.4's own reason for running it from Add and
+Remove rather than from paint).
+
+### Migration 034, and the draft that would have caused what it was fixing
+
+The first draft numbered from `idx`. On a tenant that had already had a row
+added by hand, that mints a name the row is holding — **a duplicate, which the
+new guard treats exactly like a missing id**, so the list would have stayed
+refused for everybody but the office and the migration would have caused the
+very thing it exists to remove. Caught by driving it against a real Postgres 16
+rather than by reading it.
+
+It continues past the highest `-KO<n>` already present, which is what
+`koSettle()` does. Proved on a real database in four states:
+
+* a tenant with all six blank → `group-KO1..6`, matching the seed;
+* a tenant holding one id that the naive version would have collided with →
+  six unique ids, **and the existing one untouched**;
+* run twice → not a byte moves;
+* a virgin deployment → the full round trip, clean slate, fixed point and
+  archive round trip all PASS.
+
+### Proof
+
+`test-authorize.js` §23: nine lists × three broken states, each refused, each
+paired with the assertion that **leaving the list alone is not itself a change**
+— or a build that refused every save would pass. **Both ends** (§113.8): the
+healthy plan is still judged exactly as before, and the office can still correct
+an unidentified list.
+
+**416 assertions pass.** Proved able to fail by reverting each guard in turn:
+**19 red** without the `splitRows` guard, **3** without the pillar guard, **3**
+without the project guard.
+
+---
+
+## §192 — The pending count says where, and walks you there (v3.80)
+
+Islam, as the SMO, with a screenshot of the two labels printed on top of each
+other:
+
+> *"as an SMO I'm getting this badge but I don't know where they are — I think
+> we need a flow like the filling to take me through the confirmation areas so
+> I can confirm."*
+
+Two faults, and they are one decision apart.
+
+### It was on the wrong row, under a button
+
+`pendBadge()` drew the count in the pillar band's right slot. `.pband` reserves
+**76px** on its right — room for two 28px pen glyphs, which is what used to sit
+there. The fill grant's control beside it is a **worded** button: *Done filling*
+at 138px, *Fill in missing elements* at 184px, *Review pending · 5* at 127px.
+
+Measured on the real page before anything was written: **160px of overlap
+reading, 110px filling**. The check reproduces it on the previous build as
+`{'worst': 127, 'pair': ['5 awaiting confirmation', 'Review pending · 5']}` —
+Islam's screenshot, in numbers.
+
+**The answer is not a bigger reserve.** A width that has to be kept in step with
+somebody else's wording is a guessed constant, and §122.5 is the record of what
+those do.
+
+### And the number was never that pillar's
+
+`gapPendCount(TARGET)` counts the **whole subject**. Drawn on one pillar's band
+it was saying it belonged to that pillar — and the row above the pane is already
+where the subject's totals live (*"26 Missing · LG01 9 · LG02 7"*).
+
+Two placements were drawn and Islam picked **B**: the count joins the other
+totals. The collision goes with it, by construction rather than by arithmetic.
+
+### The walk
+
+§16.7: *a count that cannot take you to what it counts is a count that makes
+work* — the exact fault §177.2 fixed for the gaps, left standing on the other
+half of the same feature.
+
+**The same shape as the gap walk, deliberately**: one behaviour to learn, and
+the three traps §177.2 already paid for — the cursor marked on the walkable
+element, places crossed by the same-page test rather than by what happens to be
+visible, and landing queued behind the click (§30.1's guard holds the paint, so
+the ticks do not exist until the press has landed).
+
+**`pendMap()` is `gapMap()` counting marks.** Every place, how to reach it and
+in whose words is already answered there; a second map written alongside would
+be a second copy of the navigation and would drift the first time a page moved
+(§53.5). A mark is counted only for a field that kind still HAS — `pend` rides
+each row and nothing prunes it, so a mark left by a field that stopped being
+fillable (collaborators, §187) would be counted and then walked to a tick that
+is not drawn (§61).
+
+**The walk is offered only to somebody who can confirm**, and the gate asks the
+SUBJECT rather than naming a page: a unit is judged on `u_plan` and a capability
+function on `k_proj`, so the literal that worked on a unit would have hidden the
+walk on every function.
+
+### The bug worth reading: two functions, one name
+
+The bar's new chip was called `pendChip(n)`. **`pendChip(acKey, row, field)`
+already existed** — the mark that sits on one value, with the office's confirm
+tick inside it, called from six places. A function declaration hoists over its
+twin in a concatenated file, so the second spelling silently replaced the first
+and **every per-value chip and confirm tick in the product stopped being drawn**.
+
+§56.7 exactly: one scope, two plausible names, no error anywhere, and the fault
+surfaces somewhere else entirely — here, the new walk found no ticks to walk to
+and reported `NOTHING` five times. **Found by driving it**, not by reading it.
+
+### Proof
+
+`checks/pending-walk.py` is new and asserts what nothing else does: the count is
+off the band and on the totals row; **nothing in the band or the corner overlaps
+anything, measured in pixels in both modes** (a class assertion goes green on a
+build where the two sit on each other); the walk reaches every pending value
+across two rails and two sections and wraps; the tick it lands on confirms, and
+the count *and* the button's own label both follow. **Both ends** (§113.8): a
+filler is shown the count and offered no walk, having no tick to walk to.
+
+**The state is made** (§94.2) — the demo has no pending values at all.
+
+**Proved able to fail: 14 red** against the previous build, including the
+reported overlap. And that count is only honest because the check was taught to
+**report a missing thing rather than crash on it** — the first run died on
+`pendMap is not defined` and reported 2.
+
+### Found and NOT fixed: the GAP walk does not reach every place (§192.4)
+
+Running `checks/gap-walk.py` beside the new one turned up two failures — and
+they are **not this section's**. They reproduce byte for byte on `origin/main`'s
+own shipped build:
+
+    unit / filler: the walk reaches every place the band names (5)
+      — reached ['unit:mobile|01', 'unit:mobile|02'] of 5,
+        chips ['found', 'ko', 'p:01', 'p:02', 'p:03', 'p:04']
+
+Walking a unit's gaps end to end bounces between the first two pillars and never
+reaches Foundation, Objectives, or the third and fourth pillars. §177.2 wrote
+that traversal and its own check has been red on it since; **the new pending
+walk crosses into Foundation correctly**, which is what makes the difference
+visible.
+
+Islam: *"did we resolve it? or do you need to ask me something?"* Nothing to
+ask — it is a plain defect with an existing check that already says what
+correct looks like, so holding it for alignment was over-cautious.
+
+**IT WAS NEVER STUCK.** Traced press by press: it walks every field it has
+marked, and in that pillar it had marked **six** while the band counted **one**.
+Five of the six were **collaborator pickers**.
+
+**§187 IS THE CAUSE, AND THIS IS ITS OTHER HALF.** That section took
+`collaborators` out of `GAP_FIELDS` at Islam's direction — *"remove the missing
+collaborators as missing items"* — so the counts stopped including them. The
+walker does not read `GAP_FIELDS`: it marks any blank fillable cell. So the
+count moved and the walk did not, and every press was spent on rows nothing was
+asking about — six in the first pillar, five in the second, and the run of
+presses exhausted before it ever reached Foundation, Objectives or the last two
+pillars. **The count and the walk are one list (§116.2) and they had stopped
+being one.**
+
+`SMPRules.isGapField(field)` is the test, in the shared module beside the table
+it reads, and asked of the WHOLE table rather than of one kind — the cell
+builder is shared and is not told which kind of row it is drawing. The union
+fails in the safe direction: a field that is a gap somewhere is walked wherever
+it is blank, which is a nuisance, where the other way round would silently skip
+a real gap.
+
+**`gapfld` IS DELIBERATELY UNTOUCHED.** Whether the cell is FILLABLE is a
+separate decision and §187 did not change it — a collaborator list is still
+something a filler may write. Only its membership of the *walk* moves.
+
+**FLAGGED, AND THEN WITHDRAWN — THE FINDING WAS MINE, NOT THE PRODUCT'S.**
+
+I reported that the collaborators cell still wears the red dashed *Missing*
+dress in fill mode, showed Islam a screenshot, drew two options and recommended
+one. **It does not, and never did.** Measured properly on Mobile's plan in fill
+mode, as a filler, reading what is actually PAINTED:
+
+    a real gap field   shows "Missing"  border: dashed rgb(176, 68, 52)
+    COLLABORATORS ×5   shows "—"        border: solid  rgb(214, 220, 229)
+
+`--line`, the ordinary grey every picker wears. The collaborators box is
+already an ordinary empty control saying nothing is chosen.
+
+**How I got it wrong is the part worth keeping.** I listed the elements
+carrying `.gapfld` and read that as "boxes wearing the red dress". For a
+§130.1 picker those are two different nodes: `gapfld` lands on the NATIVE
+select, which searchsel hides in place at `opacity:0` (§34, §45.5), and what a
+person sees is the `.ssbtn` beside it — which takes its class from
+`searchsel.js` and inherits nothing. **A class list is not a paint**, which is
+the same lesson §68.10 records from the other direction, and §130.3 and §192
+both say in their checks: measure the pixels.
+
+So there is nothing to build. The mockup at
+`design-mockups/fill-band/2026-08-30_collaborators.html` drew a "Now" panel
+that does not exist and its Option A is the shipped behaviour; it is kept as
+the record of the error rather than deleted, marked at the top.
+
+**What IS true, and is what Islam asked to confirm:** an empty collaborators
+list is not a gap and never triggers anything. `GAP_FIELDS.tactic` is
+`["owner","quarters"]`; `gapMissing()` on a tactic with no collaborators
+returns `[]`; the page's gap total on that pane reads **1**, which is the one
+real gap. It does not count, does not raise a chip, does not draw the red
+button and is not walked (§192.4).
+
+Proved able to fail: putting the two class decisions back makes
+`checks/gap-walk.py` red twice again, exactly as it is on `origin/main`.
+
+---
+
+## §193 — A reply says it went as soon as it has gone (v3.82)
+
+Islam: *"the messages are sent in the box but still there is sending.. under the
+chat box"* — with the reply plainly THERE in the thread above it. Then, in the
+middle of the fix and correcting the first diagnosis: *"the reply back of the
+sending came back it just takes a long time."*
+
+**That correction is the whole of it.** The server STORES the reply and then
+tries to EMAIL it, and only answers when both are done. The email is the slow
+half — so *Sending…* stood for as long as a mail provider took, over a reply
+that was already delivered and already on screen.
+
+### Two sentences in the right order, not one stale one
+
+* The thread is asked once, soon (1.2s), and the moment it comes back holding
+  the message the word becomes **Sent.** The screen stops waiting on the email.
+* When the request finally answers, that upgrades to **Sent, and emailed to …**
+  — which is the sentence Islam's own screenshot shows, and the one the office
+  actually wants.
+
+Measured end to end against a server that stores immediately and answers after
+eight seconds: `Sending…` at 0.3s, **`Sent.` at 2s**, `Sent, and emailed to
+mohamed_walid@rayatrade.com.` at 8s.
+
+**The thread is the evidence, and it was on the same screen the whole time.**
+The word waited on a request; a request can be slow or stop coming back, and the
+thread cannot lie about whether the message is in it.
+
+### And a request that never answers must still answer
+
+`post()` had **no timeout at all** — every caller waited on a promise that had
+stopped being about anything. It has a clock now, in the ONE place every chat
+request goes through, which is that function's whole reason for existing (its
+own comment makes exactly this argument about `servable()`).
+
+**A timeout is not a failure and is not dressed as one.** The message may well
+have gone — it is stored before the email is tried — so it says
+*"No answer from the server. The reply may still have gone — it appears above if
+it did."* and points at the evidence, not in red. "It did not send" and "we do
+not know" send somebody to two different places (§123's rule, one surface in).
+
+**And it can never take back a `Sent.` the thread has already confirmed** —
+`box.sending` is cleared by whichever answers first, so a late timeout over a
+delivered reply says nothing at all. Without that guard the backstop would have
+replaced a true sentence with a doubt at 25 seconds.
+
+### The footer had a second way to freeze
+
+§188 leaves the composer's footer alone on a poll so the box being typed into is
+not destroyed — right, and it also froze the one line in that footer which is
+not a control. The note is now written into the node on that path too (§63),
+which touches nothing beside it.
+
+### The stub was lying, and it cost a wrong diagnosis
+
+`api/chat.js` returns a thread's fields at the **top level**; the first stub
+nested them under `"thread"`, so `box.data` had no messages at all, every
+reading said 0, and the product looked broken when the stub was. §100.3, paid
+for again: **a stub must model the server.**
+
+`checks/reply-said.py` is new — the slow send, the hung send, and both ends
+(nothing taken back, nothing dressed as an error).
+
+---
+
+## §193.2 — The house leads the row (v3.82)
+
+Islam: *"let's move the home screen to the top left for all people so it becomes
+their home in general."*
+
+It sat at the far right beside the gear — and the gear is the **Setup** door,
+which is the office's. So the way back to your own starting page was keeping
+company with a control most of the register never sees. §185 had already
+refused to hang it OFF the gear for that reason; this finishes the thought and
+moves it to the other end of the row.
+
+`chromeActsHTML()` splits in two: the house leads with a separator **after** it,
+the gear trails with one **before**, and neither draws its separator when its
+own button is absent — or the row ends in a hairline attached to nothing (§24).
+Both stay outside the scrolling region (§136): a separator that scrolls away
+leaves the control it divides looking like a destination.
+
+Measured on the built page: for the office the row now reads
+`HOME · | · Group ▾ · | · Units|Functions · [destinations] · | · GEAR`; for a
+unit head, who has **no gear at all**, `HOME · | · Group ▾ · [destinations]` —
+which is the case that makes the move worth making.
+
+---
+
+## §194 — Editing keeps its head, and the name gets the line (v3.83)
+
+Islam: *"when I edit a plan or a pillar it loses its design and the name box
+becomes very small — it can be along the line … and on editing we still need to
+maintain the pillar Code and name fixed so on scrolling down I can still see
+that save button."* And, offered a label for the third box: *"hide the note bar
+for now."*
+
+### All three measured before anything was written
+
+On Mobile's plan at 1500px with the pen open:
+
+* the name box was **228px** inside a pane **1225px** wide — 19% of the line;
+* at **480px of scroll the code, the name AND the Done tick were all off
+  screen** (top −211);
+* the box under Owner had **no label at all**.
+
+**"Loses its design" is exact.** Reading has kept `.pane > .pband` pinned since
+§53.7 — a grey band carrying the code and the name, with its own ground and its
+own filler for the strip above it. Editing replaces that band with `.ptitle`,
+which pins nothing. So the mode you are WORKING in is the one that loses the
+page's identity, and the Done tick with it.
+
+### The head that is being worked in is the head that pins
+
+`edhead` is a marker, not a style. Reading's band is untouched — the two modes
+are different questions and §53.5 asks each once — and the editing head takes
+**the same sticky offset**, so switching between them holds the page at the
+same line instead of jumping.
+
+Two things come along because it is the same window (§53.7): an **opaque
+ground**, or rows slide through the head; and the `::before` filler for the
+strip between the chrome and the head, which is the gap that showed a navy
+table header cutting across the page above its own heading.
+
+**Not a negative margin** (§130/§121.2). That fault is a NON-sticky row pulled
+under a pinned one, which slides out on scroll. This whole row pins, the pen
+included, so the Done tick travels with the name it belongs to.
+
+### The name had no width to grow into
+
+§189 made the title a growing box; it was still **228px**, because the code and
+the box shared an `h3` inside a shrink-to-fit column. The column flexes now and
+the box takes what is left: **228 → 1101px**, 90% of the pane. A long title
+wraps across the pane instead of stacking in a gutter.
+
+*A growing field in a container that does not grow is a fixed field.*
+
+### The note bar is hidden, and the cost is the reason it was ever shown
+
+The unlabelled box is the pillar's `sub` — hidden when reading since August
+(only Mobile ever filled it in, so a line that appeared for one pillar and not
+the others made the page jump) and left editable on the reasoning that **a page
+which cannot SHOW a field also cannot FIX it**.
+
+Islam was offered a label and chose to hide it. So `sub` is still stored and now
+renders **nowhere at all**: a value that arrived with an upload can no longer be
+corrected or cleared from any screen. That is §61's trap, entered deliberately
+and reversibly (*"for now"*), and it is written down here rather than discovered
+later. Nothing reads the field, so nothing displays wrongly — it is simply out
+of reach. The builder is **deleted rather than commented out** (§24); giving it
+back is one `textOr` call.
+
+### Proof
+
+`checks/plan-edit-head.py` is new. It asserts the name box as a **ratio of the
+pane** and never a pixel count (§94.8), so a later change to the gutters stays
+green and a box pinned back to a slice does not; the code, the name and the Done
+tick **on screen** after scrolling, which is the complaint measured as the
+complaint; the editing head pinning at **the same offset reading uses**; and
+both ends (§113.8) — the head is pinned only while the pen is open, and closing
+it puts reading's own band back.
+
+**Proved able to fail: 10 red** against the build before it.
+
+### Found and NOT fixed: `project-tables.py` dies on a class the product stopped drawing
+
+Running it beside §194 turned up a crash, and it is **not §194's** — it
+reproduces byte for byte on `origin/main`'s own shipped build:
+
+    Page.eval_on_selector: Failed to find element matching selector ".rep-bar"
+
+`.rep-bar` still has rules in `arrange.css` and **nothing in the product renders
+it** — §24's exact fault, CSS outliving the element it dressed — and the check
+reaches for it to read the reporting bar's words after a submission.
+
+**The damage is contained and worth stating precisely:** the crash is at the
+very END of the file, after every other assertion has passed (0 failures up to
+that line), so what is lost is the last two assertions about what the bar SAYS
+once a report is submitted. Everything else that file covers is still covering.
+
+Recorded rather than fixed: naming the class that replaced it is a decision
+about what that assertion should now be, in §105's area, and not what this
+section was asked to touch (rule 1b). It is the third stale selector this
+session — after `duplicates.py`'s `.pdband` and the walker's own — and §51.11
+says the same thing each time: **when a control changes shape, grep the checks
+for the old selector.**

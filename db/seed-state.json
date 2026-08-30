@@ -104,6 +104,7 @@
   ],
   "keyObjectives": [
    {
+    "id": "group-KO1",
     "name": "Revenue",
     "group": null,
     "dir": "≥",
@@ -114,6 +115,7 @@
     "progress": 43
    },
    {
+    "id": "group-KO2",
     "name": "EBITDA",
     "group": null,
     "dir": "≥",
@@ -124,6 +126,7 @@
     "progress": 78
    },
    {
+    "id": "group-KO3",
     "name": "Earnings concentration",
     "group": null,
     "dir": "≤",
@@ -134,6 +137,7 @@
     "progress": 87
    },
    {
+    "id": "group-KO4",
     "name": "Mobile Distribution",
     "group": "Market share",
     "dir": "≥",
@@ -144,6 +148,7 @@
     "progress": 88
    },
    {
+    "id": "group-KO5",
     "name": "CE Distribution",
     "group": "Market share",
     "dir": "≥",
@@ -154,6 +159,7 @@
     "progress": 78
    },
    {
+    "id": "group-KO6",
     "name": "Retail",
     "group": "Market share",
     "dir": "≥",

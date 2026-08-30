@@ -1637,6 +1637,49 @@
   .pane .ptitle { display:flex; justify-content:space-between; align-items:flex-start; gap:14px;
     flex-wrap:wrap; padding-bottom:12px; border-bottom:1px solid var(--line-soft); }
   .pane .ptitle h3 { font:400 19px/1.25 var(--serif); margin:0; }
+  /* ── THE HEAD YOU ARE EDITING IN STAYS PUT (§194) ───────────────────
+     Islam: *"on editing we still need to maintain the pillar Code and name
+     fixed so on scrolling down I can still see that save button."* Measured
+     before: at 480px of scroll the code, the name and the Done tick were all
+     off screen. Reading has kept `.pane > .pband` pinned since §53.7; this is
+     the same idea for the head that replaces it while the pen is open, at the
+     SAME offset, so the two modes hold the page at the same line and
+     switching between them does not jump.
+
+     THE GROUND IS OPAQUE AND THE FILLER IS THE BAND'S OWN (§53.7): a sticky
+     head with a transparent background has rows sliding through it, and the
+     strip between the chrome and the head is a window onto the same. Both
+     are answered here exactly as they are for the band, because it is the
+     same window.
+
+     NOT A NEGATIVE MARGIN (§130): §121.2's fault is a NON-sticky row pulled
+     under a pinned one, which slides out on scroll. This whole row pins, the
+     pen included, so the Done tick travels with the name it belongs to. */
+  .pane .ptitle.edhead {
+    position:sticky; z-index:4;
+    top:calc(var(--chrome-h, 118px) + var(--rail-gap, 22px) + 1px);
+    background:var(--surface-2);
+    margin:calc(var(--pane-pad) * -1) -18px 14px;
+    padding:11px 18px 11px 18px;
+    border-radius:var(--r) var(--r) 0 0;
+    box-shadow:inset 3px 0 0 var(--gold), 0 1px 0 var(--line);
+    border-bottom:0; align-items:center; }
+  .pane .ptitle.edhead::before {
+    content:""; position:absolute; left:-1px; right:-1px; bottom:100%;
+    height:calc(var(--rail-gap, 22px) + 2px); background:var(--ground); }
+  /* THE NAME TAKES THE LINE. The code and the box shared an `h3` in a
+     shrink-to-fit column, which is how a growing field (§189) ended up 228px
+     wide inside a pane over a thousand: it had no width to grow into. The
+     column flexes, the h3 is a row, and the box takes what is left — so a
+     long title wraps across the pane instead of stacking in a gutter. */
+  .pane .ptitle .pthead { min-width:0; flex:1; }
+  .pane .ptitle.edhead h3 { display:flex; align-items:center; gap:10px;
+    font-size:17px; }
+  .pane .ptitle .ptcode { flex:none; font:600 13px/1 var(--mono);
+    color:var(--stone); letter-spacing:.05em; }
+  .pane .ptitle.edhead .ptname { flex:1; min-width:0;
+    font:400 17px/1.3 var(--serif); }
+  .pane .ptitle.edhead .penbtn { position:static; flex:none; }
   .pane .ptitle .pmeta { color:var(--ink-3); font-size:12.5px; margin-top:3px; }
   .planonly { font-size:12.5px; color:var(--ink-3); margin:10px 0 0; }
   .planonly b { color:var(--gold-deep); letter-spacing:.09em; text-transform:uppercase;
@@ -5628,8 +5671,10 @@
     vertical-align:1px; }
   .gapok:hover { border-color:var(--good-tx); }
   .gapok:focus-visible { outline:2px solid var(--good); outline-offset:1px; }
-  /* The subject-wide count on the pane band (§93.4: one press from where
-     the gap is closed). */
+  /* The subject-wide count. §192 moved it OFF the pillar band and onto the
+     totals row, where the subject's other counts already are — on the band it
+     was the whole unit's number wearing one pillar's clothes, and it printed
+     under the fill grant's worded button (160px of overlap, measured). */
   .pendcount { display:inline-block; background:var(--attn-bg); color:var(--attn-tx);
     border:1px solid var(--attn); border-radius:20px; font-size:10.5px;
     font-weight:600; padding:1px 9px; letter-spacing:0; text-transform:none; }
@@ -5680,10 +5725,29 @@
     padding:4px 13px; cursor:pointer; font-family:inherit; white-space:nowrap; }
   .fillcta:hover, .missbar button.fillcta:hover { filter:brightness(1.08);
     background:var(--bad); color:var(--surface); }
-  /* Quiet amber: only pending remains — the office's move, still correctable. */
-  .pendcta { border:1px solid var(--attn); background:var(--attn-bg);
+  /* Quiet amber: only pending remains — the office's move, still correctable.
+     THE SECOND SELECTOR IS NOT A DUPLICATE (§145.14, written four rules up and
+     paid for again here): inside the bar this sits in `nav.tabs`, where
+     `.tabs button` (0,1,1) outranks a bare class (0,1,0) and would strip it to
+     plain words while the identical control outside the row wore the design.
+     One declaration, two selectors, so the two homes cannot drift. */
+  .pendcta, .missbar button.pendcta { border:1px solid var(--attn);
+    background:var(--attn-bg);
     color:var(--attn-tx); border-radius:8px; font-size:12px; font-weight:600;
     padding:4px 12px; cursor:pointer; font-family:inherit; white-space:nowrap; }
+  .pendcta:hover, .missbar button.pendcta:hover { background:var(--attn-bg);
+    color:var(--attn-tx); filter:brightness(1.06); }
+  /* §192: THE PENDING PAIR SITS AFTER THE RED CHIPS AND BEFORE THE RED
+     BUTTON — red means missing, amber means pending, and keeping them in two
+     groups is what stops the row reading as one long list of alarms (§145.14:
+     never mixed). The count and its walk are one group, so the walk can never
+     land under anything the way it did on the band. */
+  .missbar .pendtail { display:inline-flex; align-items:center; gap:6px;
+    flex-wrap:wrap; padding-left:4px; }
+  /* The walk's own cursor, on a tick rather than a field. `.gaplit` already
+     rings whatever the gap walk has landed on; a tick is a 22px square, so it
+     takes the ring and nothing else. */
+  .pendwalk.gaplit { outline:2px solid var(--attn); outline-offset:2px; }
   .gapdone { color:var(--good-tx); font-size:12px; font-weight:600; }
   /* The corner pair: the worded button takes the second slot beside §101's
      arrows (right:0 when it stands alone). */
@@ -8695,6 +8759,30 @@ THEME.apply();
      pending fill is answered, not missing, so it is not in this list; the
      gap band, the tab badge and the rail counts all count through here
      (§145.12: one definition, or the counts disagree with the fields). */
+  /* IS THIS FIELD EVER A GAP AT ALL (§192.4)? Asked of the WHOLE table rather
+     than of one kind, because the cell builder is shared and is not told which
+     kind of row it is drawing — and the union fails in the safe direction: a
+     field that is a gap somewhere is walked everywhere it is blank (a
+     nuisance), where the other way round would silently skip a real gap.
+
+     §187 is why this exists. It removed `collaborators` from GAP_FIELDS at
+     Islam's direction — *"remove the missing collaborators as missing items"* —
+     so the COUNTS stopped including them, and the walker, which marks any
+     blank fillable cell, did not. Measured on a unit's plan: the band said one
+     gap in that pillar and "Next gap" walked six fields, five of them
+     collaborator pickers, so the walk spent every press on rows nothing was
+     asking about and never reached the other four places. The count and the
+     walk are one list (§116.2) and they had stopped being one. */
+  var GAP_ANY = null;
+  function isGapField(field) {
+    if (!GAP_ANY) {
+      GAP_ANY = {};
+      Object.keys(GAP_FIELDS).forEach(function (k) {
+        GAP_FIELDS[k].forEach(function (f) { GAP_ANY[f] = 1; });
+      });
+    }
+    return !!GAP_ANY[field];
+  }
   function gapMissing(kind, row) {
     return (GAP_FIELDS[kind] || []).filter(function (f) {
       if (pendOf(row)[f]) return false;
@@ -9645,6 +9733,7 @@ THEME.apply();
     focusOn: focusOn,
     mayAuthorPage: mayAuthorPage,
     GAP_FIELDS: GAP_FIELDS, GAP_SCORE_FIELDS: GAP_SCORE_FIELDS,
+    isGapField: isGapField,
     gapBlank: gapBlank, quartersBlank: quartersBlank,
     WHEN_MONTHS: WHEN_MONTHS, whenMonths: whenMonths, whenReadable: whenReadable,
     GAP_WHEN: GAP_WHEN, gapWhenField: gapWhenField,
@@ -9892,13 +9981,28 @@ var GROUP = {
     ["Covering", "all over Egypt and Nigeria"],
     ["Empowered by", "a diversified portfolio, economy of scale, extensive reach, exceptional customer experience, and premium after-sales support (owning the value chain)"]
   ],
+  /* THE SIX CARRY THEIR OWN IDS (§191, closing §96.4). Only rows ADDED here
+     were ever given one, so the shipped six were the ONE list in the whole
+     product that nothing could name — §96.4 recorded it and left it, because
+     a list where one row is identified and six are not is worse than either
+     state, and nothing had needed the ids yet. §191 needs them: a list that
+     cannot be matched row to row is now judged as a whole and refused, and
+     an archive or a cycle snapshot is keyed by id (§48), so six rows keyed
+     `null` are six rows a snapshot cannot tell apart.
+
+     THE SPELLING IS `koSettle()`'s OWN — `group-KO<n>` — not a second
+     convention beside it (§53.5); that function has been minting exactly this
+     for every row added since it was written. Written into the DATA rather
+     than filled in by a reader, because a reader that writes what it reads
+     puts a phantom change into every save (§42, §50.6, and §96.4's own
+     reason for running it from Add and Remove rather than from paint). */
   keyObjectives: [
-    { name: "Revenue",                group: null,           dir: "≥", target3y: "34B EGP", target: "18B EGP", compile: "Sum",    actual: "7.8B",  progress: 43 },
-    { name: "EBITDA",                 group: null,           dir: "≥", target3y: "8.5%", target: "6.5%",    compile: "Latest", actual: "5.1%",  progress: 78 },
-    { name: "Earnings concentration", group: null,           dir: "≤", target3y: "30%", target: "40%",     compile: "Latest", actual: "46%",   progress: 87 },
-    { name: "Mobile Distribution",    group: "Market share", dir: "≥", target3y: "38%", target: "32%",     compile: "Latest", actual: "28%",   progress: 88 },
-    { name: "CE Distribution",        group: "Market share", dir: "≥", target3y: "24%", target: "18%",     compile: "Latest", actual: "14%",   progress: 78 },
-    { name: "Retail",                 group: "Market share", dir: "≥", target3y: "18%", target: "12%",     compile: "Latest", actual: "9%",    progress: 75 }
+    { id: "group-KO1", name: "Revenue",                group: null,           dir: "≥", target3y: "34B EGP", target: "18B EGP", compile: "Sum",    actual: "7.8B",  progress: 43 },
+    { id: "group-KO2", name: "EBITDA",                 group: null,           dir: "≥", target3y: "8.5%", target: "6.5%",    compile: "Latest", actual: "5.1%",  progress: 78 },
+    { id: "group-KO3", name: "Earnings concentration", group: null,           dir: "≤", target3y: "30%", target: "40%",     compile: "Latest", actual: "46%",   progress: 87 },
+    { id: "group-KO4", name: "Mobile Distribution",    group: "Market share", dir: "≥", target3y: "38%", target: "32%",     compile: "Latest", actual: "28%",   progress: 88 },
+    { id: "group-KO5", name: "CE Distribution",        group: "Market share", dir: "≥", target3y: "24%", target: "18%",     compile: "Latest", actual: "14%",   progress: 78 },
+    { id: "group-KO6", name: "Retail",                 group: "Market share", dir: "≥", target3y: "18%", target: "12%",     compile: "Latest", actual: "9%",    progress: 75 }
   ],
   themes: [
     { ab: "OT",  name: "One Trade",          note: "New for 2026" },
@@ -16287,7 +16391,18 @@ function gapPendCount(target){ return gapPendRows(target).length; }
    read THIS list, so a count can never disagree with the fields it points
    at (§116.2: the count and the queue are one list). Each entry names how
    to GET there, in the navigation's own words. */
-function gapMap(target){
+/* §192: THE SAME MAP COUNTS THE OTHER THING. Islam, as the SMO: *"I'm
+   getting this badge but I don't know where they are — I think we need a
+   flow like the filling to take me through the confirmation areas so I can
+   confirm."* The badge said 3 and pointed nowhere, which is §16.7's rule
+   ("a count that cannot take you to what it counts is a count that makes
+   work") and the exact fault §177.2 fixed for the gaps.
+
+   ONE MAP, NOT A SECOND ONE BESIDE IT. Every place, how to get there and in
+   whose words is already answered here; a `pendMap()` written alongside would
+   be a second copy of the navigation and would drift the first time a page
+   moved (§53.5). `pend` swaps only what is COUNTED on each row. */
+function gapMap(target, pend){
   var t = String(target || ""), out = [];
   /* §177: COUNTED ONLY WHERE THIS VIEWER COULD ACTUALLY CLOSE IT. The map
      feeds the red "N Missing", the per-place chips, the rail's counts and the
@@ -16302,7 +16417,19 @@ function gapMap(target){
     return canAuthor[acKey] || mayFillRow(acKey, ctx, target);
   };
   var G = function(acKey, ctx, kind, row){
-    return reach(acKey, ctx) ? SMPRules.gapMissing(kind, row).length : 0;
+    if (!reach(acKey, ctx)) return 0;
+    /* A PENDING MARK IS COUNTED ONLY FOR A FIELD THAT KIND ACTUALLY HAS
+       (§192). `pend` rides each row's own object and nothing prunes it, so a
+       mark left behind by a field that has since stopped being fillable
+       (collaborators, §187) would be counted and then walked to a tick that
+       is not drawn — a count promising a control that does not exist (§61).
+       Asked through GAP_FIELDS, the same list the gaps are counted from. */
+    if (pend) {
+      var marks = SMPRules.pendOf(row);
+      return (SMPRules.GAP_FIELDS[kind] || []).filter(function(f){
+        return !!marks[f]; }).length;
+    }
+    return SMPRules.gapMissing(kind, row).length;
   };
   var entry = function(key, label, count, go){
     out.push({ key: key, label: label, count: count, go: go });
@@ -16353,6 +16480,14 @@ function gapMap(target){
 }
 function gapTotal(target){
   return gapMap(target).reduce(function(a, e){ return a + e.count; }, 0);
+}
+/* Where the pending values are, in the same shape and the same order as the
+   gaps (§192). The TOTAL still comes from `gapPendCount()`, which walks the
+   stored rows rather than the map — the two are asserted to agree, because a
+   count that disagrees with the walk it feeds is exactly what this section
+   exists to remove (§116.2). */
+function pendMap(target){
+  return gapMap(target, true);
 }
 /* Who the counts are FOR: somebody who can act on them — the fill grant or
    the office. A plain reader never sees a nag they cannot clear (§69). */
@@ -24938,19 +25073,20 @@ function pendChip(acKey, row, field){
   var tick = "";
   if (mayAuthor(acKey)) {
     var i = PENDS.push({ row: row, field: field, acKey: acKey }) - 1;
-    tick = '<button class="gapok" data-pconf="' + i + '" title="Confirm — ' +
+    /* §192: `pendwalk` MARKS IT WITHOUT STYLING IT — the same separation the
+       gap walk needs (§177.2: *this control answers a pending value* and
+       *paint it* are different facts, and merging them restyles the tick to
+       fix a walker). */
+    tick = '<button class="gapok pendwalk" data-pconf="' + i + '" title="Confirm — ' +
       'this value becomes settled" aria-label="Confirm this value">&#10003;</button>';
   }
   return '<span class="pchip" title="' + esc(say) + '">pending</span>' + tick;
 }
-/* The subject-wide count, drawn only when there is one (§41's budget) and
-   only for somebody who can act on it — the office confirms, the filler
-   corrects (§93.4: a count sits one press from where the gap is closed). */
-function pendBadge(acKey){
-  var n = gapPendCount(TARGET);
-  if (!n || (!mayAuthor(acKey) && !mayFill(acKey))) return '';
-  return '<span class="pendcount">' + n + ' awaiting confirmation</span>';
-}
+/* pendBadge() was here. It drew the subject-wide pending count in the pillar
+   band's right slot; §192 moved that number onto the totals row with the
+   other subject-wide counts, where it can be walked and where it cannot land
+   under the fill button. Removed rather than left uncalled (§24): a builder
+   nothing calls is one the next reader has to prove is dead. */
 /* ── THE MISSING BAR (§145.14, reshaping §145.12 from Islam's r2 mockup) ──
    The WHOLE signal lives in the section row beside Foundation · SWOT · Plan
    — read mode included, no line of the page spent: red "N Missing", one
@@ -24980,10 +25116,47 @@ function missBarCta(total){
   return '<button type="button" class="fillcta" data-fillcta="' +
     esc(fillPageForSec(sec)) + '">Fill in missing elements</button>';
 }
+/* ── THE PENDING COUNT, AND A WAY TO WALK TO THEM (§192) ────────────
+   Islam, as the SMO: *"I'm getting this badge but I don't know where they
+   are — I think we need a flow like the filling to take me through the
+   confirmation areas so I can confirm."*
+
+   IT WAS ON THE WRONG ROW, AND UNDER A BUTTON. `pendBadge()` drew it in the
+   pillar band's right slot, which reserves 76px — room for two pen glyphs —
+   while the fill grant's control beside it is a WORDED button 138 to 184px
+   wide. Measured on the real page: 160px of overlap reading, 110px filling,
+   so the two printed on top of each other (Islam's screenshot). A reserved
+   width that has to be kept in step with somebody else's wording is a
+   constant that goes stale (§122.5), so the fix is not a bigger number.
+
+   AND THE NUMBER WAS NEVER THE PILLAR'S. `gapPendCount(TARGET)` counts the
+   WHOLE subject, and the row above the pane is already where the subject's
+   totals live — *"26 Missing · LG01 9 · LG02 7"*. Drawn on one pillar's band
+   it was saying it belonged to that pillar. Option B of the mockup, Islam's
+   pick: it goes where the other totals are, and the collision goes with it.
+
+   THE WALK IS THE GAP WALK'S OWN (§177.2), over the ticks instead of the
+   fields. `pendMap()` is `gapMap()` counting marks, so the places, their
+   order and the words are one answer for both. */
+/* NAMED FOR THE TOTAL, because `pendChip()` is already taken by the mark that
+   sits on ONE value — and a function declaration hoists over its twin in a
+   concatenated file, so the second spelling silently replaced the first and
+   every per-value chip and confirm tick in the product stopped being drawn.
+   §56.7's collision, in the same shape: one scope, two plausible names, no
+   error, and the fault shows up somewhere else entirely (here: the walk found
+   no ticks to walk). Found by driving it. */
+function pendTotalChip(n){
+  return '<span class="pendcount" title="Filled values awaiting Strategy ' +
+    'Office confirmation">' + n + ' awaiting confirmation</span>';
+}
 function missBar(){
   if (typeof seesGaps !== "function" || !seesGaps()) return '';
   var map = gapMap(TARGET), total = gapTotal(TARGET);
-  if (!total) return '';
+  var pend = typeof gapPendCount === "function" ? gapPendCount(TARGET) : 0;
+  /* DRAWN FOR EITHER. Before §192 the bar existed only while something was
+     missing, so a plan entirely filled and entirely unconfirmed drew nothing
+     at all — which is the state the office is in when they get the badge. */
+  if (!total && !pend) return '';
   var chips = map.filter(function(e){ return e.count > 0; }).map(function(e){
     return '<button type="button" class="mchip"' +
       ' data-gkey="' + esc(e.key) + '"' +
@@ -24993,9 +25166,24 @@ function missBar(){
       ' title="' + plural(e.count, "missing element") + ' — press to go">' +
       missChipInner(e) + '</button>';
   }).join("");
+  /* THE WALK IS ONLY OFFERED TO SOMEBODY WHO CAN CONFIRM. A filler sees the
+     count — those values are still theirs to correct — and confirming is the
+     office's alone (§145), so a Next-pending button drawn for them would walk
+     to a tick that is not there (§61, and §177's own rule that a count is a
+     promise the press opens something). */
+  /* WHO MAY CONFIRM, asked of the SUBJECT rather than of one page key. A unit
+     is judged on `u_plan` and a capability function on `k_proj`, so the
+     literal that worked on a unit would have hidden the walk on every function
+     — §53.5's drift, and the exact reason `seesGaps()` beside it asks the
+     whole list rather than naming a page. */
+  var mayConfirm = SMPRules.FILL_PAGES.some(function(pg){ return mayAuthor(pg); });
+  var walk = pend && mayConfirm ? ' <button type="button" ' +
+    'class="pendcta" data-nextpend="1">Next pending &rarr;&nbsp;' +
+    '<span class="npleft">' + pend + ' left</span></button>' : '';
   return '<div class="missbar" data-gapband="1">' +
-    '<span class="secmiss">' + total + ' Missing</span>' + chips +
-    '<span class="gaptail">' + missBarCta(total) + '</span></div>';
+    (total ? '<span class="secmiss">' + total + ' Missing</span>' : '') + chips +
+    (pend ? '<span class="pendtail">' + pendTotalChip(pend) + walk + '</span>' : '') +
+    '<span class="gaptail">' + (total ? missBarCta(total) : '') + '</span></div>';
 }
 /* The counts rewritten IN PLACE after a fill — §63's write-into-the-node,
    because a repaint here would destroy the field being typed into (§71.2).
@@ -25137,7 +25325,7 @@ function gapCell(page, acKey, row, field, opts){
       if (opts.del && SMPRules.gapBlank(nv)) delete row[field];
       else row[field] = nv;
       gapLift(row, field); gapBandRefresh();
-    }, open ? "gapwalk" : "");
+    }, open && SMPRules.isGapField(field) ? "gapwalk" : "");
   }
   if (fl && (open || mark)) {
     return draw(function(v){
@@ -25148,7 +25336,13 @@ function gapCell(page, acKey, row, field, opts){
       }
       else { row[field] = nv; gapStamp(row, field); }
       gapBandRefresh();
-    }, mark ? "pendfld" : "gapfld gapwalk");
+      /* §192.4: `gapwalk` ONLY WHERE THE FIELD IS ACTUALLY COUNTED. The walk
+         and the count are one list (§116.2) and §187 split them: it took
+         collaborators out of GAP_FIELDS, so the band stopped counting them and
+         this class went on marking them. `gapfld` is untouched — whether the
+         cell is FILLABLE is a separate decision and §187 did not change it. */
+    }, mark ? "pendfld"
+            : (SMPRules.isGapField(field) ? "gapfld gapwalk" : "gapfld"));
   }
   /* Read — and fill mode on a settled value reads too.
      `read` IS WHY §149 SURVIVED THE MERGE. A direction and a compile rule are
@@ -26662,7 +26856,10 @@ function projPlanBody(p, fk){
     ? '<div class="pband"><span class="pband-code">' + esc(projCode(fk, p)) + '</span>' +
         '<span class="pband-name">' +
           textOr("plan", p.name, "", function(v){ p.name = v; }) + '</span></div>'
-    : pillarBand(projCode(fk, p), p.name, pendBadge("u_plan"));
+    /* §192: the pending count left this slot for the totals row above — it
+       was the SUBJECT's number on one pillar's band, printing under the fill
+       button. `pendBadge()` is deleted rather than left uncalled (§24). */
+    : pillarBand(projCode(fk, p), p.name);
   return band + paneActs("plan", "u_plan") +
     projFrontMatter(p, ed) +
     '<h4 class="mini">' + DX_HEADING +
@@ -27198,13 +27395,33 @@ function unitPlanBody(it, u, railed){
           : qs(t) + pendChip("u_plan", t, "quarters")) + '</td></tr>';
   }).join("");
   var meta = pillarMeta(it, ed);
+  /* ── EDITING KEEPS ITS HEAD, AND THE NAME GETS THE LINE (§194) ──────
+     Islam: *"when I edit a plan or a pillar it loses its design and the name
+     box becomes very small — it can be along the line … and on editing we
+     still need to maintain the pillar Code and name fixed so on scrolling
+     down I can still see that save button."*
+
+     Both halves measured on Mobile's plan at 1500px with the pen open: the
+     name box was **228px** inside a pane over a thousand wide, because the
+     code and the box share an `h3` inside a shrink-to-fit column; and at 480px
+     of scroll the code, the name AND the Done tick were all off screen
+     (top −211). Reading keeps `.pane > .pband` pinned the whole time —
+     EDITING HAD NO EQUIVALENT, which is exactly what "loses its design" is.
+
+     `edhead` is the marker, not a style: what pins is the head somebody is
+     WORKING in, and reading's own band is untouched (§53.5 — one question,
+     one answer, and the two are different questions). The column takes
+     `flex:1` so the growing box (§189) fills the line instead of taking a
+     slice of it. */
   var head = showHead
-    ? '<div class="ptitle hoverpen"><div><h3>' + code + '&nbsp; ' +
-        (ed ? textOr("plan", it.name, "", function(v){ it.name = v; }) : esc(it.name)) + '</h3>' +
+    ? '<div class="ptitle hoverpen' + (ed ? ' edhead' : '') + '"><div class="pthead"><h3>' +
+        '<span class="ptcode">' + code + '</span>' +
+        (ed ? textOr("plan", it.name, "ptname", function(v){ it.name = v; })
+            : '&nbsp; ' + esc(it.name)) + '</h3>' +
         (meta ? '<div class="pmeta">' + meta + '</div>' : '') + '</div>' +
         kindPill(it) +
         (mayEditPlan() ? penBtn("plan", "u_plan") : '') + '</div>'
-    : pillarBand(code, it.name, pendBadge("u_plan")) + paneActs("plan", "u_plan");
+    : pillarBand(code, it.name) + paneActs("plan", "u_plan");
   return head +
     /* ── THE PILLAR'S OWNER, CORRECTABLE AT LAST (§130.1) ────────────────
        Islam, asked whether the pillar's owner should join the other four:
@@ -27240,10 +27457,25 @@ function unitPlanBody(it, u, railed){
        IT IS STILL EDITABLE while the plan is being corrected, because the
        field is real data that arrived with the upload and a page that cannot
        show it also cannot fix it. Read-only, it is gone. */
-    (ed
-      ? '<p class="sub" style="margin:10px 0 0">' +
-        textOr("plan", it.sub || "", "", function(v){ it.sub = v; }) + '</p>'
-      : '') +
+    /* ── AND THE NOTE BAR IS NOT DRAWN (§194, Islam: "hide the note bar
+       for now") ────────────────────────────────────────────────────────
+       This was the box under Owner with no label at all — his *"the line
+       under the owner has no title and I don't understand what this is."*
+       It is the pillar's `sub`, hidden when reading since August (only Mobile
+       ever filled it in, so a line that appeared for one pillar and not the
+       others made the page jump) and left editable here on the reasoning that
+       a page which cannot SHOW a field also cannot FIX it.
+
+       Offered a label, he chose to hide it instead. **THE COST IS REAL AND
+       IS THE REASON THAT REASONING EXISTED**: `sub` is still stored and now
+       renders nowhere at all, so a value that arrived with an upload can no
+       longer be corrected or cleared from any screen (§61's trap, entered
+       deliberately and reversibly — "for now"). Nothing reads it, so nothing
+       displays wrongly; it is simply out of reach.
+
+       THE BUILDER IS DELETED, NOT COMMENTED OUT (§24) — dead code kept "for
+       reference" is code the next reader has to prove is dead. Giving it back
+       is one `textOr` call, and this note says where. */
     /* The "Plan only" notice went in 3.4. The tab you are on says Plan, the
        table headings say "as planned", and every actual column reads em-dash -
        three statements of the same thing above a fourth. */
@@ -37118,17 +37350,51 @@ var CHAT = (function(){
        goes through is the only place this cannot be forgotten. Found by
        qa.py, which walks every Setup page over file:// as the SMO. */
     if (!servable()) { done("There is no server behind this file.", null); return; }
+    /* ── AND A REQUEST THAT NEVER ANSWERS MUST STILL ANSWER (§193) ─────
+       Islam: *"the messages are sent in the box but still there is
+       sending.."* — with the reply plainly THERE in the thread above it. The
+       message reached the database and the request never came back, so
+       `done` was never called and the word *Sending…* stood for ever. There
+       was no timeout here at all: every caller waited on a promise that had
+       stopped being about anything.
+
+       ONE PLACE, because that is this function's whole reason for existing —
+       the comment above says so about `servable()` and the same argument
+       covers this. A timeout is not a failure and is not said as one: the
+       reply may well have gone, and the thread underneath is the evidence
+       (`replySend` reads it). */
+    var ctl = typeof AbortController === "function" ? new AbortController() : null;
+    var late = setTimeout(function(){ if (ctl) ctl.abort(); }, POST_WAIT);
+    var answered = false;
+    var finish = function(err, j){
+      if (answered) return;
+      answered = true;
+      clearTimeout(late);
+      done(err, j);
+    };
     fetch("/api/chat", { method:"POST", cache:"no-store",
                          headers:{ "Content-Type":"application/json" },
-                         body: JSON.stringify(body) })
+                         body: JSON.stringify(body),
+                         signal: ctl ? ctl.signal : undefined })
       .then(function(r){ return r.json().then(function(j){ j.__status = r.status; return j; }); })
-      .then(function(j){ done(j && j.ok ? null : ((j && j.error) || "failed"), j); })
+      .then(function(j){ finish(j && j.ok ? null : ((j && j.error) || "failed"), j); })
       /* A NETWORK FAILURE SPEAKS THE PRODUCT'S LANGUAGE, not the browser's
          (§139): "Failed to fetch" is what fetch() says, and it reached the
          screen verbatim through the send path's rollback note. Every caller
          already handles the sentinel "failed" as "say it did not send". */
-      .catch(function(){ done("failed", null); });
+      /* AN ABORT IS OUR OWN CLOCK, NOT THE NETWORK'S — said as what it is,
+         because "it did not send" and "we do not know" send somebody to two
+         different places (§123's rule, one surface in). */
+      .catch(function(e){
+        finish(e && e.name === "AbortError" ? NO_ANSWER : "failed", null); });
   }
+  /* Long enough that a slow send is not called dead — the server stores the
+     message and then tries to email, and the email is the slow half — and
+     short enough that nobody sits looking at a word that has stopped being
+     true. Vercel cuts a function off before this, so reaching it means the
+     answer is not coming. */
+  var POST_WAIT = 25000;
+  var NO_ANSWER = "no answer";
 
   /* WHERE SOMEBODY WAS USED TO BE CAPTURED AND SENT WITH EVERY MESSAGE — the
      page, the subject, the cycle and the build, drawn under the sender's own
@@ -38096,6 +38362,22 @@ var CHAT = (function(){
     /* THE REPLY BOX IS ONLY REBUILT WHEN THE PERSON CHANGES. Redrawing it on
        every poll would wipe a half-written answer — the exact fault §71.2 was
        raised about, one surface further out. */
+    /* ── THE THREAD ANSWERS FOR THE SEND (§193) ───────────────────────
+       Islam: *"the messages are sent in the box but still there is
+       sending.."* — with the reply plainly there above it. The word waited on
+       a request, and a request can stop coming back; the thread is the
+       evidence and it arrives on the poll regardless. So the moment the
+       message being sent is IN the thread, *Sending…* has stopped being true
+       and is replaced here, whatever the request is doing.
+
+       Matched on the office's own side and on the exact words, because that
+       is what was posted; a message that has not arrived leaves the word
+       alone, which is the honest state while it really is in flight. */
+    if (box.sending && (d.messages || []).some(function(m){
+          return m && m.from_office && String(m.body || "").trim() === box.sending; })) {
+      box.sending = null;
+      box.note = { text: "Sent." };
+    }
     var existing = pane.querySelector("[data-chreply]");
     var keep = existing && existing.dataset.chreply === d.person ? existing.value : null;
 
@@ -38124,6 +38406,16 @@ var CHAT = (function(){
       if (atEnd) body.scrollTop = body.scrollHeight;
       var head = pane.querySelector("[data-chdone]");
       if (head) head.textContent = d.waiting ? "Mark answered" : "Put back on the list";
+      /* THE NOTE IS REWRITTEN IN PLACE ON THIS PATH TOO (§193). §188 leaves
+         the footer alone so the composer being typed into is not destroyed —
+         right, and it also froze the one line in the footer that is not a
+         control. Written into the node rather than by redrawing it (§63), so
+         the box beside it is still untouched. */
+      var n2 = el("chreplynote");
+      if (n2) {
+        n2.className = "chnote" + (box.note && box.note.bad ? " bad" : "");
+        n2.textContent = box.note ? box.note.text : "";
+      }
       return;
     }
 
@@ -38250,6 +38542,8 @@ var CHAT = (function(){
     if (!text) return;
     var btn = pane.querySelector("[data-chreplysend]");
     if (btn) btn.disabled = true;
+    /* §193: WHAT IS IN FLIGHT, so the thread itself can answer for it. */
+    box.sending = text;
     box.note = { text: "Sending…" };
     if (note) { note.className = "chnote"; note.textContent = box.note.text; }
 
@@ -38278,10 +38572,33 @@ var CHAT = (function(){
     post(body, function(err, j){
       if (btn) btn.disabled = false;
       if (err) {
-        box.note = { text: err, bad: true };
-        if (note) { note.className = "chnote bad"; note.textContent = err; }
+        /* HAS THE THREAD ALREADY ANSWERED FOR IT? `box.sending` is cleared the
+           moment the message is seen in the thread, so an empty one here means
+           the send is CONFIRMED and this late error is only about the email
+           (§193). Saying "no answer" over a delivered reply would be the
+           screen taking back something true. */
+        var confirmed = !box.sending;
+        box.sending = null;
+        /* A TIMEOUT IS NOT A FAILURE AND MUST NOT BE DRESSED AS ONE. The
+           message may well have gone — it is stored before the email is tried
+           — so this says what is true and points at the evidence, which is on
+           the same screen. Not red, because red says it did not send. */
+        var no = err === NO_ANSWER;
+        if (!(confirmed && no)) {
+          box.note = no
+            ? { text: "No answer from the server. The reply may still have gone — " +
+                      "it appears above if it did." }
+            : { text: err, bad: true };
+          if (note) {
+            note.className = "chnote" + (no ? "" : " bad");
+            note.textContent = box.note.text;
+          }
+        }
+        /* AND ASK THE THREAD, which is the one thing that actually knows. */
+        boxLoadThread(who);
         return;
       }
+      box.sending = null;
       if (ta) { ta.value = ""; ta.style.height = ""; }
       /* THE FOUR REAL OUTCOMES, SAID PLAINLY (§63's rule for Save draft). A
          reply that landed and an email that did not are two different pieces
@@ -38309,6 +38626,24 @@ var CHAT = (function(){
       boxLoadQueue();
       boxLoadThread(who);
     });
+    /* ── AND THE SCREEN STOPS WAITING ON THE EMAIL (§193) ──────────────
+       Islam, correcting the first diagnosis: *"the reply back of the sending
+       came back it just takes a long time."* Right, and that is the whole of
+       it — the server STORES the message and then tries to EMAIL it, and only
+       answers when both are done. The email is the slow half, so *Sending…*
+       stood for as long as a mail provider took, on a reply that was already
+       delivered and already visible in the thread.
+
+       So the thread is asked once, soon, rather than waited for: the moment it
+       comes back holding the message, the redraw above replaces the word with
+       *Sent.* — and when the request finally answers it upgrades that to
+       *Sent, and emailed to …*. Two true sentences in the right order rather
+       than one stale one.
+
+       ONLY WHILE SOMETHING IS IN FLIGHT (`box.sending` is cleared by whichever
+       answers first), so a send that answers quickly costs nothing extra —
+       and never a poll of its own (§98: what costs is polling, not messages). */
+    setTimeout(function(){ if (box.sending) boxLoadThread(who); }, 1200);
   }
 
   /* Called at the end of paint(), beside SEARCHSEL.wire(). Everything is bound
@@ -42266,7 +42601,7 @@ var SYNC = (function () {
        below. */
     var isDest = tabs.map(function(t){ return !!t.k; });
     var d0 = isDest.indexOf(true), d1 = isDest.lastIndexOf(true);
-    document.getElementById("units").innerHTML = (d0 === -1
+    document.getElementById("units").innerHTML = chromeHomeHTML() + (d0 === -1
       ? parts.join("")
       : parts.slice(0, d0).join("") +
         '<div class="navclip">' +
@@ -42414,10 +42749,27 @@ var SYNC = (function () {
      given the way back to the office alone, and the welcome screen is
      everybody's (§61's trap: the people it is most for are the ones who would
      have lost it). The separator belongs to whichever is drawn first. */
+  /* ── THE HOUSE LEADS THE ROW (§193.2) ──────────────────────────────
+     Islam: *"let's move the home screen to the top left for all people so it
+     becomes their home in general."* It sat at the far right beside the gear,
+     which is where the SETUP door is — and Setup is the office's, so the way
+     back to your own starting page was keeping company with a control most of
+     the register never sees. On the left it is the first thing on the row and
+     reads as where you begin, which is what it is.
+
+     TWO HALVES, because they now sit at opposite ends. The separator belongs
+     to whichever side draws — the house takes one AFTER it, the gear one
+     BEFORE — and neither is drawn when its own button is not, or the row ends
+     in a hairline attached to nothing (§24). `pinsep` keeps both out of the
+     scrolling region: a separator that scrolls away leaves the control it
+     divides looking like a destination (§136). */
+  function chromeHomeHTML(){
+    var home = welcomeBtnHTML();
+    return home ? home + '<span class="sep pinsep"></span>' : "";
+  }
   function chromeActsHTML(){
-    var home = welcomeBtnHTML(), gear = menuHTML();
-    if (!home && !gear) return "";
-    return '<span class="sep pinsep"></span>' + home + gear;
+    var gear = menuHTML();
+    return gear ? '<span class="sep pinsep"></span>' + gear : "";
   }
   function menuHTML(){
     var gs = menuGroups();
@@ -43372,6 +43724,93 @@ var SYNC = (function () {
     }
     if (els.length) gapLight(els[0]);
   }
+  /* ── AND THE SAME WALK OVER THE PENDING VALUES (§192) ──────────────
+     Islam, as the SMO: *"I'm getting this badge but I don't know where they
+     are — I think we need a flow like the filling to take me through the
+     confirmation areas so I can confirm."* §16.7's rule: a count that cannot
+     take you to what it counts is a count that makes work.
+
+     THE SAME SHAPE AS THE GAP WALK, deliberately — one behaviour to learn,
+     and the same three traps already paid for there (§177.2): the cursor is
+     marked on the WALKABLE element, a place is crossed by the same page test
+     rather than by what happens to be visible, and landing queues behind the
+     click (§30.1's CLICKING guard holds the paint, so the ticks do not exist
+     until the press has landed).
+
+     THE PLACES COME FROM `pendMap()`, which is `gapMap()` counting marks — so
+     the order, the words and the navigation are one answer for both walks and
+     cannot drift (§53.5). The chips it walks are BUILT here rather than drawn
+     on the bar: the office asked for a way THROUGH them, not for a second row
+     of counts beside the missing ones (§41's budget). */
+  var PENDWALK_KEY = null;
+  function pendPlaces(){
+    if (typeof pendMap !== "function") return [];
+    return pendMap(TARGET).filter(function(e){ return e.count > 0; });
+  }
+  function pendPlaceKey(e){
+    return e && e.go && e.go.rail ? e.go.rail + "|" + e.go.code : null;
+  }
+  function pendWalkTicks(place){
+    var root = document;
+    if (place) root = document.querySelector('[data-gplace="' +
+      place.replace(/"/g, '\\"') + '"]') || document;
+    return [].slice.call(root.querySelectorAll(".pendwalk"));
+  }
+  function pendLight(el){
+    document.querySelectorAll(".gaplit").forEach(function(e){ e.classList.remove("gaplit"); });
+    document.querySelectorAll("[data-gapat]").forEach(function(e){
+      e.removeAttribute("data-gapat"); });
+    el.setAttribute("data-gapat", "1");
+    el.classList.add("gaplit");
+    el.scrollIntoView({ block: "center" });
+    el.focus({ preventScroll: true });
+  }
+  function pendShown(e){
+    return (!e.go.rail || RAIL_SHOWN[e.go.rail] === e.go.code) &&
+           (!e.go.sec || CURSEC[currentSub] === e.go.sec);
+  }
+  function pendAt(places){
+    for (var i = 0; i < places.length; i++)
+      if (places[i].key === PENDWALK_KEY) return i;
+    for (var j = 0; j < places.length; j++) if (pendShown(places[j])) return j;
+    return -1;
+  }
+  /* Navigating by the place's OWN description rather than by pressing a chip,
+     because there is no chip to press — the same three `data-` values the
+     missing chips carry, read straight off the map that produced them. */
+  function pendGoTo(e){
+    PENDWALK_KEY = e.key;
+    if (e.go.sec && typeof CURSEC !== "undefined") CURSEC[currentSub] = e.go.sec;
+    if (e.go.rail) RAIL[e.go.rail] = e.go.code;
+    paint();
+    if (typeof toPaneTop === "function") toPaneTop();
+    setTimeout(function(){
+      var t = pendWalkTicks(pendPlaceKey(e));
+      if (!t.length) t = pendWalkTicks();
+      if (t.length) pendLight(t[0]);
+    }, 0);
+  }
+  function pendWalk(){
+    var places = pendPlaces();
+    if (!places.length) return;
+    var i = pendAt(places);
+    var ticks = pendWalkTicks(i >= 0 ? pendPlaceKey(places[i]) : null);
+    var cur = document.querySelector("[data-gapat]");
+    var at = cur ? ticks.indexOf(cur) : -1;
+    if (ticks.length && at < ticks.length - 1) return pendLight(ticks[at + 1]);
+    var here = i >= 0 ? pendPlaceKey(places[i]) : null;
+    var hereSec = i >= 0 ? (places[i].go.sec || "") : "";
+    var n = places.length;
+    for (var step = 1; step <= n; step++) {
+      var e = places[((i < 0 ? 0 : i) + step) % n];
+      var ep = pendPlaceKey(e);
+      var samePage = ep === here &&
+        (ep !== null || (e.go.sec || "") === hereSec);
+      if (!samePage) return pendGoTo(e);
+    }
+    if (ticks.length) pendLight(ticks[0]);
+  }
+
     /* ── THE MONTH PICKER (§177) ────────────────────────────────────────
        A due date is chosen, never typed. The button carries the FIELDS index
        and the month and year it is currently showing; the panel is built by
@@ -47021,6 +47460,7 @@ var SYNC = (function () {
         return;
       }
       if (ev.target.closest("[data-nextgap]")) gapWalk();
+      if (ev.target.closest("[data-nextpend]")) pendWalk();
     });
     /* §145.14: the same two controls OUTSIDE the bar — the corner button and
        the empty-page pointer — wired directly (they are repainted, never

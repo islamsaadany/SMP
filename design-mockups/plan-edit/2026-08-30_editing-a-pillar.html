@@ -1,0 +1,154 @@
+<title>Editing a pillar</title>
+<style>
+  :root{
+    --ground:#F5F7FA; --surface:#FFFFFF; --surface-2:#EFF2F6; --panel:#12243F;
+    --ink:#1B2534; --ink-2:#4A5568; --ink-3:#6B7688; --stone:#6B7688;
+    --line:#D6DCE5; --gold:#C9A227; --bad-tx:#9C2C1A; --good-tx:#1E7A48;
+    --r-sm:6px;
+    --mono:ui-monospace,SFMono-Regular,Menlo,monospace;
+    --sans:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;
+  }
+  @media (prefers-color-scheme: dark){ :root:not([data-theme="light"]){
+    --ground:#0E1622; --surface:#16202E; --surface-2:#1D2836; --panel:#0B1526;
+    --ink:#E8ECF2; --ink-2:#B4BECC; --ink-3:#8592A5; --stone:#8592A5;
+    --line:#333A45; --bad-tx:#F08A72; --good-tx:#5FCB92;
+  }}
+  :root[data-theme="dark"]{
+    --ground:#0E1622; --surface:#16202E; --surface-2:#1D2836; --panel:#0B1526;
+    --ink:#E8ECF2; --ink-2:#B4BECC; --ink-3:#8592A5; --stone:#8592A5;
+    --line:#333A45; --bad-tx:#F08A72; --good-tx:#5FCB92;
+  }
+  body{background:var(--ground); color:var(--ink); font:14px/1.5 var(--sans);
+    margin:0; padding:26px 20px 70px;}
+  .wrap{max-width:1080px; margin:0 auto;}
+  h1{font-size:19px; margin:0 0 4px; letter-spacing:-.2px;}
+  .lede{color:var(--ink-2); font-size:13px; margin:0 0 26px; max-width:76ch;}
+  .tag{font-size:10px; letter-spacing:.09em; text-transform:uppercase;
+    font-weight:700; color:var(--ink-3); margin:26px 0 8px;}
+  .tag.now{color:var(--bad-tx);}
+  .tag.then{color:var(--good-tx);}
+  .pane{background:var(--surface); border:1px solid var(--line);
+    border-radius:10px; overflow:hidden; position:relative;}
+  .ptitle{display:flex; align-items:flex-start; gap:14px; padding:15px 18px 12px;}
+  .ptitle h3{margin:0; font:650 19px/1.35 var(--sans); letter-spacing:-.012em;
+    display:flex; align-items:baseline; gap:8px;}
+  .code{font:600 13px/1 var(--mono); color:var(--stone); letter-spacing:.05em;}
+  .fld{border:1px solid var(--line); background:var(--surface); color:var(--ink);
+    border-radius:var(--r-sm); padding:6px 9px; font:inherit; box-sizing:border-box;
+    resize:none; width:100%;}
+  .namefld{font:650 19px/1.35 var(--sans); letter-spacing:-.012em;}
+  .pmeta{color:var(--ink-3); font-size:11.5px; margin-top:6px;}
+  .pen{margin-left:auto; flex:none; width:28px; height:28px; border-radius:50%;
+    border:1px solid var(--gold); background:var(--surface); color:var(--gold);
+    display:flex; align-items:center; justify-content:center; cursor:pointer;
+    font-size:14px;}
+  .pfront{padding:0 18px 4px;}
+  .pfrow{display:flex; align-items:center; gap:12px; background:var(--surface-2);
+    border-radius:var(--r-sm); padding:8px 12px; margin:0 0 10px;}
+  .pfrow em{font-style:normal; font-size:10.5px; letter-spacing:.06em;
+    text-transform:uppercase; color:var(--ink-3); font-weight:700; min-width:96px;}
+  .pfval{flex:1; min-width:0;}
+  .body{padding:6px 18px 22px; color:var(--ink-3); font-size:12.5px;}
+  table{width:100%; border-collapse:collapse; margin-top:4px;}
+  th{background:var(--panel); color:#fff; font:700 10.5px/1 var(--sans);
+    letter-spacing:.06em; text-transform:uppercase; text-align:left; padding:9px 10px;}
+  td{border-bottom:1px solid var(--line); padding:8px 10px; font-size:13px;
+    color:var(--ink);}
+  .note{color:var(--ink-3); font-size:12.5px; margin:12px 0 0; max-width:80ch;}
+  .note b{color:var(--ink);}
+  .bad{color:var(--bad-tx); font-weight:700;}
+  .mark{outline:2px dashed var(--bad-tx); outline-offset:3px; border-radius:4px;}
+  /* the pinned head, in the "after" pane */
+  .scroller{max-height:250px; overflow:auto; border-radius:10px;}
+  .pinned .ptitle{position:sticky; top:0; z-index:3; background:var(--surface-2);
+    border-bottom:1px solid var(--line); padding:11px 18px;}
+  .pinned .ptitle h3{font-size:17px;}
+  .pinned .namefld{font-size:17px;}
+  .three{display:grid; gap:6px; margin:0 0 20px; padding:0; list-style:none;}
+  .three li{display:flex; gap:10px; font-size:13px; color:var(--ink-2);}
+  .three b{color:var(--ink);}
+  .n{flex:none; width:20px; height:20px; border-radius:50%; background:var(--panel);
+    color:#fff; font:700 11px/20px var(--sans); text-align:center;}
+</style>
+<div class="wrap">
+<h1>Editing a pillar</h1>
+<p class="lede">Three things you asked about, measured on Mobile's plan with the
+pen open at 1500px wide.</p>
+<ul class="three">
+  <li><span class="n">1</span><span>The name box is <b>228px</b> in a pane more
+    than a thousand wide, so a title wraps to three lines in a column.</span></li>
+  <li><span class="n">2</span><span>A box under the Owner with <b>no label</b>.
+    It is the pillar's note from the upload &mdash; hidden when reading, editable
+    only so it can be corrected. Nothing on screen says so.</span></li>
+  <li><span class="n">3</span><span>Scroll 480px and the <b>code, the name and
+    the Done button are all gone</b>. Reading keeps a band pinned; editing has
+    no equivalent.</span></li>
+</ul>
+
+<div class="tag now">Now</div>
+<div class="pane">
+  <div class="ptitle">
+    <div style="min-width:0">
+      <h3><span class="code">MB01</span>
+        <span class="mark" style="display:inline-block;width:228px">
+          <textarea class="fld namefld" rows="3">Digital &amp; Data-Driven Operations</textarea>
+        </span></h3>
+      <div class="pmeta">theme VC</div>
+    </div>
+    <button class="pen">&#10003;</button>
+  </div>
+  <div class="pfront">
+    <div class="pfrow"><em>Owner</em><div class="pfval">
+      <input class="fld" value="Ramy Behairy"></div></div>
+    <div class="mark"><textarea class="fld" rows="1">End-state: unified market intelligence engine</textarea></div>
+  </div>
+  <div class="body">
+    <table><thead><tr><th>#</th><th>Measure</th><th>Dir.</th><th>Target</th></tr></thead>
+      <tbody><tr><td>1</td><td>Data duplicate rate</td><td>&le;</td><td>2%</td></tr>
+      <tr><td>2</td><td>Orders processed digitally</td><td>&ge;</td><td>90%</td></tr></tbody></table>
+  </div>
+</div>
+<p class="note">The two dashed marks are the two boxes in question. The name box
+takes a fixed slice of the line; the box under Owner says nothing about itself.</p>
+
+<div class="tag then">Proposed</div>
+<div class="pane pinned">
+  <div class="scroller">
+    <div class="ptitle">
+      <div style="min-width:0;flex:1">
+        <h3 style="display:flex;align-items:center;gap:10px">
+          <span class="code">MB01</span>
+          <textarea class="fld namefld" rows="1" style="flex:1">Digital &amp; Data-Driven Operations</textarea></h3>
+      </div>
+      <button class="pen">&#10003;</button>
+    </div>
+    <div class="pfront" style="padding-top:12px">
+      <div class="pfrow"><em>Owner</em><div class="pfval">
+        <input class="fld" value="Ramy Behairy"></div></div>
+      <div class="pfrow"><em>Note</em><div class="pfval">
+        <textarea class="fld" rows="1">End-state: unified market intelligence engine</textarea></div></div>
+    </div>
+    <div class="body">
+      <table><thead><tr><th>#</th><th>Measure</th><th>Dir.</th><th>Target</th></tr></thead>
+        <tbody>
+        <tr><td>1</td><td>Data duplicate rate</td><td>&le;</td><td>2%</td></tr>
+        <tr><td>2</td><td>Orders processed digitally</td><td>&ge;</td><td>90%</td></tr>
+        <tr><td>3</td><td>Time to close the books</td><td>&le;</td><td>4 days</td></tr>
+        <tr><td>4</td><td>Self-service adoption</td><td>&ge;</td><td>60%</td></tr>
+        <tr><td>5</td><td>Manual touchpoints</td><td>&le;</td><td>12</td></tr>
+        <tr><td>6</td><td>Data quality index</td><td>&ge;</td><td>95%</td></tr></tbody></table>
+    </div>
+  </div>
+</div>
+<p class="note"><b>Scroll the pane above</b> &mdash; the code, the name and the
+Done tick stay put, which is the third fix. The name box now runs the width of
+the line, and the note carries a label so you know what it is.</p>
+<p class="note"><b>The one cost</b>, said plainly: the pinned row takes about
+44px off the top of the pane while you are editing, so two fewer rows of the
+table are on screen at once. Reading is untouched &mdash; this only applies
+while the pen is open.</p>
+<p class="note"><b>Not changed:</b> the note stays hidden when reading, as you
+decided in August &mdash; only one unit ever filled it in, and a line that
+appears for one pillar and not the others made the page jump. This gives it a
+label where it is already shown, and nothing more.</p>
+</div>

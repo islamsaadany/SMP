@@ -68,6 +68,90 @@ Nothing proceeds past this line without an answer.
 
 ## Built and verified
 
+### v3.80 — the pending count says where, and walks you there (§192)
+
+- **The badge pointed nowhere.** As the SMO you were told three values were
+  waiting for you and given no way to find them.
+- **And it printed under the button beside it** — 160 pixels of overlap
+  reading, 110 while filling, measured on the real page.
+- **The number was never that pillar's**: it counts the whole unit. It moves to
+  the totals row where the unit's other counts already are (Islam's pick of two
+  drawn options), and the collision goes with it.
+- **"Next pending" walks you through them**, the same way "Next gap" already
+  does — across pillars and across sections — landing on the tick that confirms
+  each one. Confirming updates the count and the button as you go.
+- **Only somebody who can confirm gets the walk.** A filler sees the count,
+  because those values are still theirs to correct.
+- **The bug worth knowing:** the new chip was given a name the product already
+  used for something else, which silently stopped every confirm tick in the
+  platform being drawn. Found by driving it, not by reading it.
+- Proof: `checks/pending-walk.py` is new — 14 red on the build before,
+  including the reported overlap.
+
+### v3.83 — editing a pillar keeps its head (§194)
+
+- **The name box now runs the whole line** — it was 228px in a pane 1225px
+  wide, which is why a long title stacked up in a narrow column.
+- **The code, the name and the Done tick stay put when you scroll.** Reading
+  has always kept a band pinned; editing had no equivalent, so the mode you
+  work in was the one that lost its place.
+- **The unlabelled box under Owner is hidden**, as you asked. Worth knowing:
+  that field is still stored but now shows nowhere, so a value that came in
+  with an upload can't be corrected from any screen. One line to give back.
+- Proof: `checks/plan-edit-head.py` is new — 10 red on the build before.
+
+### v3.82 — "Sending…" stops lying, and home moves left (§193)
+
+- **The reply says "Sent." within about two seconds** instead of sitting on
+  *Sending…* for as long as the email takes. The server stores your reply first
+  and emails it second, and it only used to speak when both were done.
+- **Then it upgrades to "Sent, and emailed to …"** when the email finishes —
+  two true sentences in the right order.
+- **A request that never comes back now says so** rather than leaving the word
+  up for ever. It says the reply may still have gone and points at the thread,
+  because that's the truth — and it can never take back a "Sent." you've
+  already seen.
+- **The home button moved to the far left**, for everyone. It was beside the
+  gear, and the gear is the Setup door — which most people never see at all.
+
+### v3.80b — the gap walk reaches every place again (§192.4)
+
+- **"Next gap" on a unit reached two places out of five**, then ran out. It was
+  never stuck: it walks every field it has marked, and in the first pillar it
+  had marked **six** while the band counted **one**.
+- **Five of the six were collaborator boxes.** When we stopped counting missing
+  collaborators as missing items, the counts changed and the walker didn't — so
+  every press went to a row nothing was asking about, and the walk never got as
+  far as Foundation, Objectives or the last two pillars.
+- Now the walk visits exactly what the count counts.
+- **Left alone, and flagged:** a collaborator box still shows the red "Missing"
+  dress while you're filling, even though it is no longer counted. That's a look
+  question, so it needs a mockup and your say-so.
+- It was reproduced on what's live now before anything was changed, so we knew
+  it wasn't from the work beside it.
+
+### v3.79 — a line the platform cannot name is nobody's to change (§191)
+
+- **The hole.** The system works out what changed by matching plan lines
+  against their reference numbers. A line with no number matched nothing, so
+  nothing was compared — which read as *nothing changed*, and nothing changed
+  is allowed. Measured: a **view-only** unit head could rewrite a key
+  objective, a pillar, a measure, a tactic and a project's details.
+- **Three ways a line goes unnamed** — no number, an empty one, or two lines
+  sharing one — and all three are now refused.
+- **Three places do the matching**, not one. Fixing the shared one closed three
+  of four cases; the sweep across all nine lists found the other two.
+- **The rule:** a list the system cannot match line by line is the Strategy
+  Office's. Leaving it alone still costs nobody anything.
+- **The shipped data is clean** except the group's own six objectives, which
+  nobody could ever have edited anyway — they're refused by a separate rule.
+  They now carry numbers, with migration 034 for tenants already running.
+- **The first draft of that migration would have caused the problem it fixes** —
+  it would have handed an existing line a number another line already had.
+  Caught by running it against a real database, in four different shapes.
+- Proof: 416 assertions pass. Proved able to fail — 19 / 3 / 3 red with each
+  of the three guards taken out in turn.
+
 ### v3.78 — an attention item you can answer, on the box it is about (§190)
 
 - **Three of the seven kinds could never be cleared.** A seat somebody meant to

@@ -1,0 +1,146 @@
+<title>The pending count's seat</title>
+<style>
+  :root{
+    --ground:#F5F7FA; --surface:#FFFFFF; --surface-2:#EFF2F6; --panel:#12243F;
+    --ink:#1B2534; --ink-2:#4A5568; --ink-3:#6B7688; --stone:#6B7688;
+    --line:#D6DCE5; --attn-bg:#FDF3DF; --attn-tx:#8A6100;
+    --bad:#B3341F; --bad-tx:#9C2C1A; --r-sm:6px;
+    --mono:ui-monospace,SFMono-Regular,Menlo,monospace;
+    --sans:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;
+  }
+  @media (prefers-color-scheme: dark){ :root:not([data-theme="light"]){
+    --ground:#0E1622; --surface:#16202E; --surface-2:#1D2836; --panel:#0B1526;
+    --ink:#E8ECF2; --ink-2:#B4BECC; --ink-3:#8592A5; --stone:#8592A5;
+    --line:#333A45; --attn-bg:#3A2E12; --attn-tx:#E7B94A;
+    --bad:#E06A52; --bad-tx:#F08A72;
+  }}
+  :root[data-theme="dark"]{
+    --ground:#0E1622; --surface:#16202E; --surface-2:#1D2836; --panel:#0B1526;
+    --ink:#E8ECF2; --ink-2:#B4BECC; --ink-3:#8592A5; --stone:#8592A5;
+    --line:#333A45; --attn-bg:#3A2E12; --attn-tx:#E7B94A;
+    --bad:#E06A52; --bad-tx:#F08A72;
+  }
+  body{background:var(--ground); color:var(--ink); font:14px/1.5 var(--sans);
+    padding:26px 20px 60px; margin:0;}
+  .wrap{max-width:1120px; margin:0 auto;}
+  h1{font-size:19px; margin:0 0 4px; letter-spacing:-.2px;}
+  .lede{color:var(--ink-2); font-size:13px; margin:0 0 8px; max-width:74ch;}
+  .opt{margin:26px 0 0;}
+  .tag{font-size:10px; letter-spacing:.09em; text-transform:uppercase;
+    font-weight:700; color:var(--ink-3); margin:0 0 7px;}
+  .tag.now{color:var(--bad-tx);}
+  .pane{position:relative; background:var(--surface); border:1px solid var(--line);
+    border-radius:10px; overflow:hidden;}
+  .pband{display:flex; align-items:center; gap:11px; background:var(--surface-2);
+    padding:13px 18px; padding-right:76px; border-bottom:1px solid var(--line);
+    position:relative;}
+  .pband-code{font:600 13px/1 var(--mono); color:var(--stone); letter-spacing:.05em;}
+  .pband-name{font:650 19px/1.3 var(--sans); color:var(--ink); letter-spacing:-.012em;}
+  .pband-r{margin-left:auto; display:inline-flex; align-items:center; gap:10px; flex:none;}
+  .pendcount{display:inline-block; background:var(--attn-bg); color:var(--attn-tx);
+    border:1px solid var(--attn-tx); border-radius:20px; padding:3px 11px;
+    font-size:11.5px; font-weight:600; white-space:nowrap;}
+  .paneact{position:absolute; top:12px; right:12px; height:0; z-index:5;}
+  .cornerbtn{position:absolute; top:0; right:0; white-space:nowrap;
+    border:1px solid var(--line); background:var(--surface); color:var(--ink);
+    border-radius:var(--r-sm); padding:5px 12px; font:600 12px var(--sans);
+    cursor:pointer;}
+  .cornerbtn.red{background:var(--bad); border-color:var(--bad); color:#fff;}
+  .body{padding:16px 18px 20px; color:var(--ink-3); font-size:12.5px;}
+  /* ── OPTION A: one row in the corner ───────────────────────────── */
+  .a .paneact{display:flex; align-items:center; gap:10px; height:auto;}
+  .a .cornerbtn{position:static;}
+  .a .pband{padding-right:300px;}
+  /* ── OPTION B: the count joins the totals above the pane ───────── */
+  .missbar{display:flex; align-items:center; justify-content:flex-end; gap:9px;
+    padding:0 2px 10px; flex-wrap:wrap;}
+  .missn{color:var(--bad-tx); font-weight:800; font-size:15px; margin-right:4px;}
+  .mchip{border:1px solid var(--bad-tx); color:var(--bad-tx); border-radius:20px;
+    padding:3px 11px; font-size:11.5px; font-weight:700; background:transparent;
+    cursor:pointer;}
+  .fillcta{background:var(--bad); border:1px solid var(--bad); color:#fff;
+    border-radius:var(--r-sm); padding:6px 14px; font:700 12.5px var(--sans);
+    cursor:pointer;}
+  .note{color:var(--ink-3); font-size:12.5px; margin:11px 0 0; max-width:78ch;}
+  .note b{color:var(--ink);}
+  .bad{color:var(--bad-tx); font-weight:700;}
+</style>
+<div class="wrap">
+<h1>The pending count's seat</h1>
+<p class="lede">The band reserves 76&nbsp;pixels on its right — room for two small pen
+icons. A worded button needs 138 to 184. So the count lands underneath it.
+Measured on the real page: <b>160&nbsp;px of overlap</b> reading, 110&nbsp;px while
+filling.</p>
+
+<div class="opt">
+  <div class="tag now">Now — the two print on top of each other</div>
+  <div class="missbar">
+    <span class="missn">26 Missing</span>
+    <button class="mchip">LG01 9</button><button class="mchip">LG02 7</button>
+    <button class="mchip">LG03 10</button>
+    <button class="fillcta">Next gap → 26 left</button>
+  </div>
+  <div class="pane">
+    <div class="pband">
+      <span class="pband-code">LG01</span>
+      <span class="pband-name">Digital Transformation</span>
+      <span class="pband-r"><span class="pendcount">3 awaiting confirmation</span></span>
+    </div>
+    <div class="paneact"><button class="cornerbtn">Done filling</button></div>
+    <div class="body">Key measures…</div>
+  </div>
+</div>
+
+<div class="opt a">
+  <div class="tag">Option A — the count sits beside the button</div>
+  <div class="missbar">
+    <span class="missn">26 Missing</span>
+    <button class="mchip">LG01 9</button><button class="mchip">LG02 7</button>
+    <button class="mchip">LG03 10</button>
+    <button class="fillcta">Next gap → 26 left</button>
+  </div>
+  <div class="pane">
+    <div class="pband">
+      <span class="pband-code">LG01</span>
+      <span class="pband-name">Digital Transformation</span>
+    </div>
+    <div class="paneact">
+      <span class="pendcount">3 awaiting confirmation</span>
+      <button class="cornerbtn">Done filling</button>
+    </div>
+    <div class="body">Key measures…</div>
+  </div>
+  <p class="note">They become one row, so they lay themselves out and
+  <b>cannot overlap at any wording</b> — no reserved width to keep in step with
+  the button's words. The cost: the count leaves the band, so it reads as
+  belonging to the button rather than to the pillar.</p>
+</div>
+
+<div class="opt">
+  <div class="tag">Option B — the count joins the other totals</div>
+  <div class="missbar">
+    <span class="missn">26 Missing</span>
+    <button class="mchip">LG01 9</button><button class="mchip">LG02 7</button>
+    <button class="mchip">LG03 10</button>
+    <span class="pendcount">3 awaiting confirmation</span>
+    <button class="fillcta">Next gap → 26 left</button>
+  </div>
+  <div class="pane">
+    <div class="pband">
+      <span class="pband-code">LG01</span>
+      <span class="pband-name">Digital Transformation</span>
+    </div>
+    <div class="paneact"><button class="cornerbtn">Done filling</button></div>
+    <div class="body">Key measures…</div>
+  </div>
+  <p class="note">That number is <b>the whole unit's</b>, not this pillar's —
+  it counts everything awaiting confirmation across the plan, and the row above
+  is already where the unit's totals live. So it goes where it belongs and the
+  collision disappears with it. The cost: one more thing on a row that already
+  holds five, and the count is a step further from the tick that clears it.</p>
+</div>
+
+<p class="note" style="margin-top:30px"><b>My recommendation: B.</b> A moves the
+collision out of the way; B removes the reason it was there. A unit-wide count
+on one pillar's band was saying it belonged to that pillar.</p>
+</div>

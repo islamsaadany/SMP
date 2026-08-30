@@ -21814,3 +21814,113 @@ which is the one run where the count is the whole point; they degrade now.
 
 `qa.py` green, contrast sweep unchanged at its 13 pre-existing `.missing`
 failures, and the build parses.
+
+## §180 · Dismissing what somebody said about where they work
+
+Islam: *"the people register I concluded the issue but the notification is
+still there."*
+
+**DIAGNOSED BY DRIVING IT, NOT BY READING IT** — and the first thing that
+found was that nothing was broken. A person in Mobile who said Logistics,
+**Use it** pressed: they moved to Logistics, the count cleared, the queue
+emptied. Accepting has always worked.
+
+**WHAT HAS NEVER EXISTED IS THE OTHER ANSWER.** Searching the whole register
+for a dismiss control returned nothing, and `api/auth.js` had no action for
+one. So a claim the SMO looks at and *disagrees with* keeps its mark, its
+place in the attention queue, the register's badge, the rail's pill and the
+Overview's row **for ever**. There was no way to say *no, the register was
+already right*.
+
+**AND THE OVERVIEW HAS BEEN PROMISING IT SINCE §108.10**, in as many words —
+*"N people said where they work — accept or dismiss"* — while the row's own
+hover said only *"Open their row to accept it"*. The copy and the product had
+disagreed since the day that row was written.
+
+### What dismissing does
+
+Islam's pick of three drawn answers: **the claim stays on record and is marked
+answered**, rather than being deleted or the wording being quietly corrected.
+It is the shape the rest of the platform already has — an import archives
+rather than deletes (§22), retiring a person keeps the row (§35), a switch
+that destroys data is a delete with a friendly label (§44) — and it leaves
+*"they said Logistics and we said no"* answerable in three months.
+
+`dismissed_on` / `dismissed_by` on `bu_declarations` (migration 031,
+idempotent). **Nothing is backfilled**, which is the correct reading rather
+than a shortcut: every declaration standing today is one nobody has answered,
+and that is exactly what NULL means. **It moves nobody's access** — a
+declaration grants nothing (§56), so recording that it was answered cannot
+change what anybody may open.
+
+**SAYING IT AGAIN CLEARS THE ANSWER**, in `api/auth.js` rather than in the
+migration: a dismissal is the SMO's reply to one statement, and a new
+statement is owed a new reply. Cleared whether or not the place changed —
+*"I still work in Logistics"* is a thing somebody can mean to say. Without it,
+one dismissal would silence a person for the life of the tenant.
+
+**THERE IS DELIBERATELY NO UN-DISMISS.** Changing your mind is *accepting*,
+which is the act that always existed, so **Use it stays** on an answered claim
+and only **Dismiss** goes. A third control for *put it back to unanswered*
+would be a third state nobody asked for, and re-declaring already does it.
+
+### Two shapes on the wire, and one pair of readers
+
+An outstanding claim is still the **bare string** it has always been; only a
+dismissed one becomes `{at, dismissed}`. So a client older than §180 reads
+every outstanding claim exactly as before, and the one shape it cannot
+understand is the one already answered — **the safe way round** (§58: write
+the new, read either).
+
+**FIVE PLACES READ THIS MAP** — the row's mark, the row's note, the Overview's
+count, the attention queue and the accept handler — so `saidAt()`,
+`saidDismissed()` and `saidOutstanding()` are asked by all five and nothing
+reaches into the map by hand. A second place unwrapping the shape itself is
+exactly how the count and the mark come to disagree about the same row
+(§53.5).
+
+**A FAILED DISMISSAL SAYS SO** (§171). This write rides no autosave — a
+declaration lives outside the state graph — so it has no banner of its own to
+appear in. The press is applied locally, and a refusal **puts it back** and
+prints the server's own sentence: `SAIDFAIL` is `ROLESTOP`'s shape and
+`ROLESTOP`'s reasons (§110, §25.2).
+
+### The mark, and why the first answer was wrong
+
+The first proposal kept ONE ring and shifted it from `--gold-deep` to
+`--ink-3`. **The mockup killed it**: the mark is **9.6px wide at 11px type**,
+and at that size `rgb(138,107,34)` against `rgb(99,108,121)` is not a
+difference anybody reads. Measured, not eyeballed.
+
+So **the GLYPH carries the state** — `◎` waiting, `◌` answered — and the
+colour follows rather than leads. Islam picked that over the alternative of no
+mark at all, whose cost was that the table could no longer tell *"nobody said
+anything"* from *"somebody did and you answered"*.
+
+**AND THE DOTTED RING WAS MEASURED BEFORE IT WAS CHOSEN** (§52, §120.2). A
+font subset maps far more than it draws, so a mark can be mapped and ship as a
+blank box. **Ink alone could not have answered it** — an absent character
+renders a hollow rectangle, which has ink of its own, and the first attempt at
+this measurement reported the missing glyph as 9.1% ink and nearly cleared it
+on that basis. The discriminator is whether the bitmap **differs from the tofu
+rectangle**: U+25CC differs by 1.3% of its box, U+25CE by 1.9%, and U+E000 by
+0.0% — which is what says the first two are drawn.
+
+### Proof
+
+`checks/people-dialog.py` §8, over HTTP: outstanding counts and queues and
+wears the solid ring; answered does neither and wears the dotted one; the
+claim is still readable either way; both controls in the dialog, and only
+**Use it** once answered. The glyph assertion is the tofu comparison above.
+**Proved able to fail twice** — one glyph in two colours (the answer the
+mockup killed) fails the glyph assertion; a count that reads the map directly
+instead of `saidOutstanding()` fails the counting one.
+
+Against a **real Postgres 16**: the round trip and the fixed point pass on a
+**virgin database**, and the migration is driven on a tenant that predates the
+column — applies, is idempotent, keeps the existing claim, backfills nothing,
+records the answer, clears it on a fresh declaration, and touches no row when
+asked to dismiss something nobody said.
+
+`qa.py` green; `checks/setup-overview.py` green, which is the other surface
+this count feeds.

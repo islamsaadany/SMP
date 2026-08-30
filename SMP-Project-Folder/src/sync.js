@@ -646,6 +646,14 @@ var SYNC = (function () {
        graph for the same reason credentials are, so the People page asks for
        it separately — and gets nothing at all from file://, where the register
        is whatever the demo baked in. */
+    /* THE SMO'S OTHER ANSWER (§180). "Use it" is an ordinary edit of the
+       person's BU and needs no endpoint; this one records that the claim was
+       looked at and refused, so it has to reach the server — and the server
+       asks the gate again rather than trusting this (§42). */
+    dismissWhere: function (key, done) {
+      authPost({ action: "dismissWhere", person: key },
+        function (err) { done(err); });
+    },
     declarations: function (done) {
       authPost({ action: "declarations" },
         function (err, j) { done(err, err ? null : (j.said || {})); });

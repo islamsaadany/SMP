@@ -68,6 +68,25 @@ Nothing proceeds past this line without an answer.
 
 ## Built and verified
 
+### v3.65 — dismissing a declaration (§180)
+
+- **Accepting always worked** — driven, not read: Use it moved the person, the
+  count cleared, the queue emptied. What never existed was the other answer.
+- **There was no dismiss anywhere** — not on the row, not in the dialog, not in
+  the server — so a claim the SMO disagreed with kept its mark, its queue
+  entry, the register badge, the rail pill and the Overview row for ever. The
+  Overview has promised "accept or dismiss" since §108.10.
+- **The claim is kept and marked answered** (Islam's pick of three), not
+  deleted. Migration 031, nothing backfilled, nobody's access moves.
+- **Saying it again clears the answer** — a fresh statement is owed a fresh
+  reply. There is deliberately no un-dismiss: changing your mind is accepting.
+- **The glyph carries the state, not the colour** — `◎` waiting, `◌` answered.
+  One ring in two inks was drawn first and the mockup killed it: 9.6px at 11px
+  type is too small for a colour to be a state.
+- Proved against a real Postgres 16 (virgin round trip, and the migration on a
+  tenant that predates the column) and in `checks/people-dialog.py` §8,
+  **proved able to fail twice**.
+
 ### v3.65 — four from using it (§179)
 
 - **Viewing as reaches the welcome screen.** The screen covers the window, so

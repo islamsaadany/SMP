@@ -2884,7 +2884,13 @@ cd SMP-Project-Folder/src
 python3 build.py     # assembles strategy-management-platform.html (must be byte-identical to the shipped vX.Y file)
 python3 qa.py        # walks every page as every viewer, reports console errors (needs Playwright + Chromium)
 python3 checks/people-dialog.py # the register reads and the dialog writes: the queue,
-                                # Add, and neat with every column on (§116, over HTTP)
+                                # Add, and neat with every column on (§116, over HTTP) —
+                                # §8 covers dismissing a declaration (§180): outstanding
+                                # counts and queues and wears a SOLID ring, answered does
+                                # neither and wears a DOTTED one, the claim stays readable
+                                # either way, and both rings are proved DRAWN rather than
+                                # tofu boxes (ink alone cannot say — an absent glyph
+                                # renders a rectangle that has ink of its own)
 python3 checks/register-header.py # one line above the table and a dialog that fits the
                                 # window — the HEADER's height, not .hright's (§122)
 python3 checks/role-picker.py   # giving somebody a role: every control PRESSED,

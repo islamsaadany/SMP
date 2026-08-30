@@ -156,6 +156,14 @@ var ADDROLE = null, ADDROLE_KIND = "owner";
    (§25.2) — it is the outcome of one press, cleared by the press that
    succeeds, by opening the picker again and by leaving the row. */
 var ROLESTOP = null;
+/* ── AND WHY A DISMISSAL DID NOT LAND (§180) ──────────────────────────
+   `{key, why}`, or null. ROLESTOP's shape and ROLESTOP's reasons: a property
+   of the screen and never of the person (§25.2), the outcome of one press,
+   cleared by the press that succeeds. A declaration lives outside the state
+   graph, so this write does not ride the autosave and has no banner of its
+   own to appear in — without this a refused dismissal is silent, which is the
+   fault §171 exists to stop. */
+var SAIDFAIL = null;
 /* ── WHICH PERSON THE DIALOG HAS OPEN, AND WHY (§116) ─────────────────
    `{key, mode, queue, at}` or null. `mode` is "edit", "add" or "queue"; the
    queue carries the LIST IT STARTED WITH and a position in it, rather than
@@ -2454,7 +2462,10 @@ function attentionOf(p, all){
   if (dupes.length) why.push({ kind:"dupe", say: dupeSentence(dupes) });
   /* Then what they SAID about themselves, which is a question waiting on an
      answer rather than a gap (§56). */
-  var said = SAIDWHERE && !SAIDWHERE.__error ? SAIDWHERE[p.key] : null;
+  /* §180: read through saidAt()/saidOutstanding(), never out of the map —
+     an ANSWERED claim is not waiting on anybody, and the queue, the count and
+     the row's mark must not be able to disagree about the same row (§53.5). */
+  var said = saidAt(p.key);
   /* ONE VOCABULARY PER SENTENCE (§116.9). This names two places and
      compares them, so both halves must be spelt by the same function or a
      match reads as a difference — `roleWhereLabel` on both, which is what
@@ -2464,7 +2475,7 @@ function attentionOf(p, all){
      from here: the crash needed a declaration AND a register placement that
      disagree, so it lived only over HTTP (§94.11) and only for somebody
      already placed — the one case the queue's own check had not made. */
-  if (said && said !== personAt(p))
+  if (saidOutstanding(p))
     why.push({ kind:"said", say:"They said they work in " + roleWhereLabel(said) +
       (personAt(p) ? " \u2014 the register says " + roleWhereLabel(personAt(p)) : "") + "." });
   /* Then the two gaps. NULL IS NOT ZERO (§93): PWSTATES is null until the

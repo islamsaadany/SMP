@@ -320,6 +320,83 @@ with sync_playwright() as p:
     ck("...and empties the dialog rather than hiding a form in it",
        pg.eval_on_selector("#modal-b", "e=>e.innerHTML.trim()") == "")
 
+    # ── 8 · DISMISSING A DECLARATION (§180) ──────────────────────────
+    # The register offered only "Use it", so a claim the SMO DISAGREES with
+    # had no reply at all — while the Setup Overview had been saying "accept
+    # or dismiss" since §108.10. BOTH ENDS everywhere (§113.8): the answered
+    # state must be visibly different AND must stop counting, and the
+    # outstanding state must still do both of the things it always did.
+    print("\n8. dismissing what somebody said (§180)")
+    land(pg)
+    dk = pg.evaluate("""()=>{const p=PEOPLE.filter(x=>personAt(x)
+        && personAt(x)!=='fn:finance' && !x.retired)[0]; return p ? p.key : null;}""")
+
+    def state(k):
+        return pg.evaluate("""(k)=>{const m=document.querySelector('.saidmark');
+            return { count:saidWhereCount(),
+                     inQueue: attentionQueue().some(e=>e.key===k &&
+                        e.why.some(w=>w.kind==='said')),
+                     glyph: m ? m.textContent.trim() : null,
+                     done: !!(m && m.classList.contains('done')),
+                     outstanding: saidOutstanding(personBy(k)),
+                     at: saidAt(k), dismissed: saidDismissed(k) };}""", k)
+
+    # OUTSTANDING — the shape a server older than §180 also sends (a string),
+    # which is why it is written as one here (§58: read either).
+    pg.evaluate("(k)=>{ SAIDWHERE = {}; SAIDWHERE[k]='fn:finance'; paint(); }", dk)
+    pg.wait_for_timeout(600)
+    a = state(dk)
+    ck("outstanding: it is counted and it is in the queue",
+       a["count"] == 1 and a["inQueue"] and a["outstanding"], a)
+    ck("...and wears the solid ring", a["glyph"] == "\u25ce" and not a["done"], a)
+
+    # BOTH CONTROLS, in the row's own dialog.
+    pg.evaluate("(k)=>{PDLG={key:k,mode:'edit'};paint();}", dk)
+    pg.wait_for_timeout(600)
+    btns = pg.evaluate("""()=>{const n=document.querySelector('#modal-b .saidwhere');
+        return n ? [...n.querySelectorAll('button')].map(b=>b.textContent.trim()) : [];}""")
+    ck("the dialog offers Use it AND Dismiss", btns == ["Use it", "Dismiss"], btns)
+
+    # DISMISSED — the shape §180's server sends for an answered claim.
+    pg.evaluate("(k)=>{ SAIDWHERE = {}; SAIDWHERE[k]={at:'fn:finance',dismissed:'2026-08-30'};"
+                " PDLG=null; paint(); }", dk)
+    pg.wait_for_timeout(600)
+    z = state(dk)
+    ck("answered: it stops counting and leaves the queue",
+       z["count"] == 0 and not z["inQueue"] and not z["outstanding"], z)
+    ck("...but the CLAIM is still on record and readable",
+       z["at"] == "fn:finance" and z["dismissed"] is True, z)
+    ck("...and the mark is a DIFFERENT GLYPH, not a different colour",
+       z["glyph"] == "\u25cc" and z["done"], z)
+
+    # AND THE GLYPH DRAWS (§52, §120.2). A font subset maps far more than it
+    # has outlines for, so a mark can be mapped and ship as a blank box —
+    # and INK ALONE CANNOT SAY: an absent character renders a hollow
+    # rectangle, which has ink of its own. The test is whether the bitmap
+    # DIFFERS from the one a guaranteed-absent character produces.
+    drawn = pg.evaluate("""()=>{
+      const fam=getComputedStyle(document.querySelector('.saidmark')).fontFamily;
+      const draw=(ch)=>{const c=document.createElement('canvas');c.width=64;c.height=64;
+        const x=c.getContext('2d');x.fillStyle='#000';x.font='48px '+fam;
+        x.textBaseline='middle';x.fillText(ch,6,32);
+        return x.getImageData(0,0,64,64).data;};
+      const tofu=draw('\uE000');
+      const test=(ch)=>{const d=draw(ch);let n=0;
+        for(let i=3;i<d.length;i+=4) if(Math.abs(d[i]-tofu[i])>24) n++;
+        return Math.round(n/40.96)/10;};
+      return { dotted:test('\u25CC'), solid:test('\u25CE'), tofu:test('\uE000') };}""")
+    ck("both rings are drawn, not tofu boxes",
+       drawn["tofu"] < 1.0 and drawn["dotted"] >= 1.0 and drawn["solid"] >= 1.0, drawn)
+
+    # A dismissed claim keeps the way back and loses the way it came.
+    pg.evaluate("(k)=>{PDLG={key:k,mode:'edit'};paint();}", dk)
+    pg.wait_for_timeout(600)
+    btns2 = pg.evaluate("""()=>{const n=document.querySelector('#modal-b .saidwhere');
+        return n ? [...n.querySelectorAll('button')].map(b=>b.textContent.trim()) : [];}""")
+    ck("once answered, Use it stays and Dismiss goes", btns2 == ["Use it"], btns2)
+    pg.evaluate("()=>{ SAIDWHERE = null; PDLG = null; SAIDFAIL = null; paint(); }")
+    pg.wait_for_timeout(400)
+
     ck("no console errors", not errs, errs[:3])
     b.close()
 

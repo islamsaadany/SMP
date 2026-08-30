@@ -4407,11 +4407,42 @@
     R.querySelectorAll("[data-usesaid]").forEach(function(b){
       b.addEventListener("click", function(){
         var key = b.dataset.usesaid;
-        var said = SAIDWHERE && SAIDWHERE[key];
+        var said = saidAt(key);
         var p = personBy(key);
         if (!p || !said) return;
+        SAIDFAIL = null;
         attachPersonAt(p, said);
         paint();
+      });
+    });
+
+    /* THE OTHER ANSWER (§180): the register was already right. Unlike Use it
+       beside it, this touches nothing in the state graph — a declaration lives
+       outside it (§56) — so there is no save to carry it and it goes straight
+       to the server.
+
+       WRITTEN LOCALLY BEFORE THE ANSWER COMES BACK, and that is deliberate:
+       the map is this screen's copy of a server fact, the press has to look
+       like it landed, and a failure PUTS IT BACK rather than leaving the row
+       claiming an answer the database never took (§171 — a failed write that
+       says nothing is the fault, not the failure). */
+    R.querySelectorAll("[data-dropsaid]").forEach(function(b){
+      b.addEventListener("click", function(){
+        var key = b.dataset.dropsaid;
+        var was = SAIDWHERE && SAIDWHERE[key];
+        if (!was || typeof SYNC === "undefined" || !SYNC.dismissWhere) return;
+        SAIDFAIL = null;
+        SAIDWHERE[key] = { at: saidAt(key), dismissed: true };
+        paint();
+        SYNC.dismissWhere(key, function(err){
+          if (!err) return;
+          /* PUT IT BACK, AND SAY SO. Leaving the row claiming an answer the
+             database never took is the silent failure §171 was written about;
+             the sentence is the server's own, because it owns the refusal. */
+          SAIDWHERE[key] = was;
+          SAIDFAIL = { key: key, why: "Not saved \u2014 " + String(err.message || err) };
+          paint();
+        });
       });
     });
 

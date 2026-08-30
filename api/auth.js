@@ -424,8 +424,14 @@ module.exports = async function handler(req, res) {
         : (await client.query("SELECT 1 FROM units WHERE key = $1 AND active", [at])).rowCount;
       if (!known) return send(res, 400, { ok: false, error: "That is not somewhere in this organisation." });
       await client.query(
+        /* AND SAYING IT AGAIN CLEARS THE ANSWER (§180). A dismissal is the
+           SMO's reply to one statement; a new statement is owed a new reply,
+           or one dismissal would silence a person for the life of the tenant.
+           Cleared whether or not the place changed — "I still work in
+           Logistics" is a thing somebody can mean to say. */
         "INSERT INTO bu_declarations (person_key, at) VALUES ($1, $2) " +
-        "ON CONFLICT (person_key) DO UPDATE SET at = EXCLUDED.at, declared_on = now()",
+        "ON CONFLICT (person_key) DO UPDATE SET at = EXCLUDED.at, " +
+        "declared_on = now(), dismissed_on = NULL, dismissed_by = NULL",
         [person.key, at]);
       return send(res, 200, { ok: true, at: at });
     }
@@ -437,10 +443,52 @@ module.exports = async function handler(req, res) {
       if (!person || person.role !== "super") {
         return send(res, 403, { ok: false, error: "The register is the SMO's." });
       }
-      const rows = (await client.query("SELECT person_key, at FROM bu_declarations")).rows;
+      const rows = (await client.query(
+        "SELECT person_key, at, dismissed_on FROM bu_declarations")).rows;
+      /* §180 · TWO SHAPES, DELIBERATELY. An undismissed declaration is still
+         the bare string it has always been, so a client older than this
+         reads every outstanding claim exactly as before; only a DISMISSED one
+         becomes {at, dismissed}, which such a client reads as an object and
+         draws no note for — the safe way round, since the one it cannot
+         understand is the one that is already answered. §58's rule: write the
+         new shape, and leave the old one readable. */
       const said = {};
-      rows.forEach(function (r) { said[r.person_key] = r.at; });
+      rows.forEach(function (r) {
+        said[r.person_key] = r.dismissed_on
+          ? { at: r.at, dismissed: r.dismissed_on }
+          : r.at;
+      });
       return send(res, 200, { ok: true, said: said });
+    }
+
+    /* ── THE OTHER ANSWER (§180) ────────────────────────────────────────
+       "No, the register was already right." Accepting has always been an
+       ordinary edit of the person's BU on the People page; this is the reply
+       that has never existed, and without it a claim the SMO disagrees with
+       nags on five surfaces for ever.
+
+       IT STORES AN ANSWER, NOT A DELETION (Islam's pick): the claim stays
+       readable on the row and in the dialog, marked as answered.
+
+       THE SAME GATE AS READING THEM. Whoever may see every declaration may
+       answer one — and the gate is asked HERE rather than trusted from the
+       screen (§42), because a control that only hides is decoration. It
+       touches nothing but this table, so it moves nobody's access. */
+    if (action === "dismissWhere") {
+      const person = await auth.getSession(client, req);
+      if (!person || person.role !== "super") {
+        return send(res, 403, { ok: false, error: "The register is the SMO's." });
+      }
+      const key = String(body.person || "").trim();
+      if (!key) return send(res, 400, { ok: false, error: "Which person?" });
+      /* Nothing is INSERTED: dismissing something nobody said is not a state
+         this table should be able to hold, so an unknown key changes nothing
+         and says so rather than inventing a row (§15.1). */
+      const r = await client.query(
+        "UPDATE bu_declarations SET dismissed_on = now(), dismissed_by = $2 " +
+        "WHERE person_key = $1", [key, person.key]);
+      if (!r.rowCount) return send(res, 404, { ok: false, error: "They have not said where they work." });
+      return send(res, 200, { ok: true });
     }
 
     if (action === "passwordStates") {

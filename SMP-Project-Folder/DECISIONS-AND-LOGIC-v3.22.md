@@ -22974,3 +22974,168 @@ reported zero editable fields and would have been called clean. `leaveModes()`
 first, every time.
 
 `plan-fields.py`, `owner-picker.py`, `gap-fill.py` green.
+
+---
+
+## §190 — An attention item you can answer, on the box it is about (v3.78)
+
+Islam, from the register:
+
+> *"attention items that stays attention item is a problem always give me the
+> option to dismiss and make gnerally the dismiss under the box with the issue
+> and mark the issue box with some sort of surrounding outline to make sure I
+> understand what is the issue"*
+
+Two asks, and they are one argument.
+
+### The queue could raise, and only three of seven kinds could be answered
+
+`attentionOf()` raises seven kinds: a collision, a declaration, a seat sitting
+somewhere else, no identifier, no address, no password, and two people whose
+name reads the same. Four of them are answered by editing a field, and they
+leave the queue when the field changes — but the other three are facts somebody
+has already looked at and accepted:
+
+* **a seat** somebody genuinely means to give (§186 exists precisely to raise
+  it, and the office still has to be able to say *yes, on purpose*);
+* **no password**, for a row that never signs in;
+* **two people whose name reads the same** — sometimes they simply are two
+  people (§87), and the register is right as it stands.
+
+For those three the item was a **life sentence**. It counted on the button, on
+the Setup Overview and on the welcome screen for ever, and the only way to clear
+it was to change data that was already correct. A count nobody can get to zero
+is a count people stop reading, which takes the six kinds that *do* matter down
+with it.
+
+### The sentence had no address
+
+§116.2 put the queue's sentences in a band **above** the fields. That is where
+they went because there was nowhere else, and it says what is wrong while
+leaving nine boxes to guess between — worst on the two items that name a place
+(*"they hold Super user over the group"*, *"the Official BU list says Retail
+Stores"*), which read as being about whichever box you look at first.
+
+So the sentence moves onto the field it is about, inside a ring:
+
+* **`attentionOf()` hands each entry the FIELD it points at** (`w.at`), from one
+  table beside the kinds. A kind added later is outlined the day it is added and
+  there is no list in the renderer to forget (§104.7's rule, on a render).
+* **The ring is the whole field, label and control together.** The label is what
+  names the box, so ringing the input alone leaves the name outside the thing
+  being pointed at.
+* **The warning ground, not the bad one.** An outstanding item is something to
+  answer, not something broken (§168: the colour is the meaning).
+* **A kind no field answers is said, never dropped.** *"They have never been
+  issued a password"* is answered from the header's Passwords menu, so it goes
+  in a block of its own at the end — with its dismiss, because an item that can
+  only be left standing is exactly what he is describing (§61).
+
+**The band goes** rather than being kept alongside: two copies of one sentence is
+worse than either (§53.5). And it was the QUEUE's alone, so anybody who reached
+the same row through *Edit details* had been told nothing at all — the move
+fixes that for free.
+
+### A dismissal remembers WHAT it answered
+
+This is the part that makes a dismiss safe to give at all. `attnMark()`
+fingerprints the **fact** — which seat over which place, which address, which
+collision — and the item returns the moment the fingerprint changes. So
+dismissing *"they hold Super user"* says nothing about the **next** seat somebody
+is given, which is the fault §186 was written to catch and which one press would
+otherwise have silenced for ever. It is §180's own rule (*saying it again clears
+the answer*) applied to every kind at once.
+
+**Stored as an absence** (§50.6): `p.attnOff` exists only while something is
+dismissed and the last key leaving deletes it, so a register nobody has answered
+and one answered and re-raised are byte-identical and no save carries a phantom
+change (§42's `branding()` scar). It rides `people.extra`, so **nothing is
+migrated** — §177 proved that round trip against a real Postgres.
+
+**Filtered in `attentionOf()` and nowhere else.** The queue, the count, the
+button, the Overview row and the welcome screen all read through it, so a
+dismissal applied at any one of them would leave the others still counting
+(§116.2: the count and the queue are the same list).
+
+**The server needs nothing.** A change to a person's row that is not their seat
+and is not a removal already classifies as `setup`, which is the office's —
+§42's fall-through doing its job.
+
+### The one kind that keeps its own control
+
+A **declaration** is accepted or dismissed on its own note, in the field itself,
+because it lives outside the state graph (§56, §180). It gets the ring — it is an
+issue, and the ring is what says which box — and deliberately **no second
+Dismiss** beside the one already there.
+
+### Proof
+
+`checks/attention-dismiss.py` is new, and asserts the three things nothing else
+does:
+
+* every kind can be answered, and `said` has exactly **one** control rather than
+  two;
+* the sentence sits on the box that answers it, and the ring is **painted**
+  rather than merely classed — ground, border width and a real colour, because a
+  class assertion goes green on a build where the ring renders as nothing
+  (§145.14);
+* one press clears it from the queue, the count **and** the button, and moving
+  the dismissed seat **brings it straight back**.
+
+**Both ends every time** (§113.8): a clean row wears no ring and offers no
+Dismiss, or a build that outlined every field would pass. **The state is made**
+(§94.2) — the demo raises one kind on its own, so five of the six would ship
+unexercised.
+
+**Proved able to fail: 21 red** against the pre-§190 build.
+
+Two of that file's own first-run failures were the check:
+
+* **the stub answered the wrong action names.** `sync.js` asks
+  `passwordStates` and reads `j.states`, and `declarations` reads `j.said`; the
+  stub said `passwords` and `j.declarations`, so both fell through to
+  `{"ok":true}`, the client stored `{}`, and the two server-backed kinds were
+  reported as *not raised* by a build that raises them perfectly. **The action
+  names are the product's — read them out of `sync.js`, never guess them.**
+  (`people-dialog.py` carries the same two typos and has since it was written;
+  its `said` assertions have been passing over an empty map.)
+* **it asked before the two fetches landed.** They fire on a paint, so the
+  answer arrives after the first assertions run.
+
+`people-dialog.py`'s band assertion **moved to the new contract** rather than
+being deleted with the old markup (§51.11), and now asserts the absence of the
+band as well.
+
+### And the ring had to be out of flow, which `register-header.py` found
+
+The first ring was a border with padding and a negative margin to pay for it —
+which moves the field's own `top` by 8px, so it stops sharing a grid row with
+its neighbours. §122's check reported **two rows leaving a cell empty at every
+width**, correctly. An `outline` with an offset and a `box-shadow` spread paint
+outside the box without changing it: the grid is untouched and the ring still
+reads as surrounding the field.
+
+**And §93.11 bit for the fourth time in `config.css` on the way.** The
+replacement's prose landed *after* the `*/` that closed the comment above it, so
+the parser met words where a selector belonged and discarded everything down to
+the next `*/` — the whole ring block. Every assertion about the ring failed
+reading `rgba(0, 0, 0, 0)` against `rgba(0, 0, 0, 0)`, which is the shape of a
+rule the browser is not holding at all. *When a declaration that provably
+matches provably does nothing, suspect the parser rather than the cascade.*
+
+**And the check had to measure the ring as DRAWN, not as expected.** It asked
+for `borderTopWidth`, which was right for the first build and false for the
+second — so it takes whichever of border or outline is actually painting, and
+asks *is there a ring of some kind, in a real colour* (§94.8: a check written
+against the problem survives the fix changing shape).
+
+**And that check's SUBJECT had drifted, which is its own lesson.** It opened
+`smo` to measure "the dialog is compact", and that was the ordinary form until
+§187 gave the SMO a seat over the group while they sit in the SMO function —
+so from §190 it was measuring a form of eleven fields plus three lines of alarm,
+and it went red on a change that had not made the form any longer. **The rule
+was right and what it was pointed at had changed** (§50.6's family). It measures
+a row with **nothing outstanding** now — MADE, because every person in the demo
+carries no employee number and so is outstanding for `noident` (§94.2) — and a
+row that HAS an item is asserted separately: it may scroll, because it has more
+in it, but it must still fit on screen and its ring must orphan nothing.

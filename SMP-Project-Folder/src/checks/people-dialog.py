@@ -237,9 +237,16 @@ with sync_playwright() as p:
     pg.wait_for_timeout(700)
     ck("it opens the first of them", pg.evaluate("!!document.querySelector('#modal-b .pdlg')"))
     ck("...says where you are", " of " in pg.eval_on_selector("#modal-s", "e=>e.textContent"))
-    ck("...and says WHY, above the fields",
-       pg.evaluate("!!document.querySelector('#modal-b .pdband')") and
-       len(pg.eval_on_selector("#modal-b .pdband", "e=>e.textContent").strip()) > 20)
+    # §190 MOVED THE SENTENCE ONTO THE BOX IT IS ABOUT. It used to be a band
+    # above the fields (§116.2), which said what was wrong and left nine boxes
+    # to guess between — so this asserts the new contract rather than being
+    # deleted with the old markup (§51.11).
+    ck("...and says WHY, on the box it is about",
+       pg.evaluate("document.querySelectorAll('#modal-b .pdf.attn .attnsay').length") > 0 and
+       len(pg.eval_on_selector("#modal-b .pdf.attn .attnsay",
+                               "e=>e.textContent").strip()) > 20)
+    ck("...and the band that used to carry it is gone",
+       not pg.evaluate("!!document.querySelector('#modal-b .pdband')"))
     first = pg.evaluate("PDLG.key")
     pg.evaluate("()=>document.querySelector('[data-pdlg-next]').click()")
     pg.wait_for_timeout(700)

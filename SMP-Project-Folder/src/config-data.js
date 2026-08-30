@@ -2514,6 +2514,103 @@ function roleIsGrantable(key, by){
    register computes `registerDupes()` once per paint and this is called from
    the header inside that same paint, so reaching for its variable would have
    worked by accident and broken the moment anything else asked. */
+/* ── AN ATTENTION ITEM YOU CAN ANSWER (§190) ────────────────────────────
+   Islam: *"attention items that stays attention item is a problem — always
+   give me the option to dismiss."* He was looking at HIS OWN ROW, flagged for
+   holding Super user, by §187's rule, which assumed seat holders sit at the
+   group and had never met an office that sits in a function. The rule is not
+   wrong so much as unknowable: **nothing can tell an intended seat from an
+   accidental one**, and §180 had already settled the shape for exactly that
+   case — the office looks, and says.
+
+   ONE DISMISS FOR EVERY KIND, not a second special case beside the
+   declaration's. That one is its own thing because it lives OUTSIDE the state
+   graph (§56 — a save truncates thirty tables and a declaration must survive
+   it); every other item is about the register's own row, so the answer rides
+   the row.
+
+   A DISMISSAL REMEMBERS WHAT IT ANSWERED, never merely that it was pressed.
+   `attnMark()` fingerprints the FACT — which seat, which address, which
+   collision — and the item comes back the moment the fingerprint changes. So
+   dismissing "they hold Super user" says nothing about the NEXT seat somebody
+   is given, which is precisely the fault §186 exists to catch and would
+   otherwise be silenced for ever by one press. §180's rule ("saying it again
+   clears the answer"), applied to every kind at once.
+
+   STORED AS AN ABSENCE (§50.6): `p.attnOff` exists only while something is
+   dismissed, and the last key leaving deletes it — so a register nobody has
+   answered and one answered and re-raised are byte-identical, and no save
+   carries a phantom change. It rides `people.extra`, so nothing is migrated
+   (§177 proved that round trip against a real Postgres).
+
+   THE SERVER NEEDS NOTHING: a change to a person's row that is not their seat
+   and is not a removal already classifies as `setup`, which is the office's
+   (§42's fall-through doing its job). */
+var FROZEN_ATTN = Object.freeze({});
+function attnOff(p){ return (p && p.attnOff) || FROZEN_ATTN; }
+/* What was answered, as a fact rather than a timestamp. A kind with no
+   fingerprint here is one whose facts are simply present or absent, and "" is
+   an honest fingerprint for that. */
+function attnMark(kind, p){
+  if (!p) return "";
+  if (kind === "seat") {
+    var seat = SMPRules.seatOutOfPlace(world(), p, personAt(p));
+    return seat ? seat.role + "@" + seat.at + "|" + (personAt(p) || "") : "";
+  }
+  if (kind === "noemail" || kind === "noident")
+    return String(p.email || "") + "|" + String(p.empId || "");
+  /* A COLLISION IS WHO IT IS WITH AND WHAT ON, never a name: two rows sharing
+     an address and the same two rows sharing an employee number are two
+     different things to look at, and answering one must not answer the other
+     (§87). Sorted, so the same pair fingerprints the same way from either
+     row. */
+  if (kind === "dupe")
+    return personDupe(p, registerDupes()).map(function(x){
+      return x.kind + ":" + (x.rows || []).map(function(r){
+        return r && r.key; }).filter(Boolean).sort().join(","); }).sort().join("|");
+  /* A NAME THAT READS THE SAME is answered by amending a Name, so the name is
+     the fact. */
+  if (kind === "samename")
+    return String(readName(p) || p.name || "");
+  return "";
+}
+function attnDismissed(p, kind){
+  var was = attnOff(p)[kind];
+  return was !== undefined && was === attnMark(kind, p);
+}
+function setAttnOff(p, kind, on){
+  if (!p) return;
+  if (on) {
+    p.attnOff = p.attnOff || {};
+    p.attnOff[kind] = attnMark(kind, p);
+    return;
+  }
+  if (!p.attnOff) return;
+  delete p.attnOff[kind];
+  if (!Object.keys(p.attnOff).length) delete p.attnOff;
+}
+/* WHICH BOX THE ISSUE IS ABOUT (§190). Islam: "mark the issue box with some
+   sort of surrounding outline to make sure I understand what is the issue."
+   The label the dialog draws, so the outline lands on the control that
+   answers it — and a kind with no field says so rather than pointing
+   somewhere plausible. */
+var ATTN_FIELD = {
+  seat:     "Roles",
+  said:     "Unit or function",
+  noident:  "Emp. ID",
+  noemail:  "Email",
+  dupe:     "Name",
+  samename: "Name",
+  nopw:     null
+};
+/* AND THE ONE KIND THAT ALREADY HAD AN ANSWER (§180). A declaration is
+   accepted or dismissed on its own note, in the field itself, because it lives
+   outside the state graph and its answer goes to the server rather than onto
+   the row. It still gets the outline — it is an issue, and the outline is what
+   says which box — and deliberately not a second Dismiss beside the one that
+   is already there (§53.5: one question, one control). */
+var ATTN_OWNCTRL = { said: 1 };
+
 function attentionOf(p, all){
   if (!p || !personActive(p)) return null;
   var why = [];
@@ -2603,6 +2700,22 @@ function attentionOf(p, all){
           : "do " + others.map(function(x){ return x.name; }).join(" and ")) +
         ". Amend a Name so each reads apart." });
   }
+  /* ── AND WHAT THE OFFICE HAS ALREADY ANSWERED (§190) ──────────────
+     Filtered HERE, at the one place every surface reads — the queue, the
+     count, the button, the Overview row and the welcome screen all come
+     through `attentionOf()`, so a dismissal that were applied at any one of
+     them would leave the others still counting it (§53.5, and §116.2's own
+     rule that the count and the queue are the same list).
+
+     EACH ENTRY CARRIES WHERE IT POINTS, so the dialog can outline the control
+     that answers it rather than leaving somebody to guess which of nine boxes
+     the sentence is about. */
+  why = why.filter(function(w){ return !attnDismissed(p, w.kind); })
+           .map(function(w){
+             w.at = ATTN_FIELD[w.kind] || null;
+             w.own = !!ATTN_OWNCTRL[w.kind];
+             return w;
+           });
   return why.length ? { key:p.key, why:why } : null;
 }
 /* The sentence a duplicate makes, said once so the chip and the queue cannot

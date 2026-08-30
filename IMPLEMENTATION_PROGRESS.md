@@ -68,6 +68,31 @@ Nothing proceeds past this line without an answer.
 
 ## Built and verified
 
+### v3.78 — an attention item you can answer, on the box it is about (§190)
+
+- **Three of the seven kinds could never be cleared.** A seat somebody meant to
+  give, a row that never signs in, and two people who really are two people —
+  each counted on the button, the Setup Overview and the welcome screen for
+  ever, with no data to change that would answer them. A count nobody can get
+  to zero is one people stop reading.
+- **Every kind has a Dismiss now**, under the box it is about, except a
+  declaration — which has had its own since §180 and keeps exactly one control.
+- **The sentence moved onto the field**, inside a ring on the whole field
+  (label and control), in the warning ground. §116.2's band above the fields
+  said what was wrong and left nine boxes to guess between — and it was the
+  queue's alone, so *Edit details* said nothing at all.
+- **A dismissal remembers WHAT it answered.** Dismissing a Super user seat says
+  nothing about the next one: move the person and the item comes straight back.
+  That is what makes a dismiss safe to give at §186's own alarm.
+- Stored as an absence on `people.extra` — **no migration**, and no server
+  change (a non-seat person edit already classifies as `setup`).
+- Proof: `checks/attention-dismiss.py` is new — one item per kind, the ring
+  measured as paint, one press clearing all three surfaces, both ends.
+  **21 red** on the pre-§190 build. `qa.py` clean.
+- **Two of its own first failures were the check**: the stub answered the wrong
+  action names, so the two server-backed kinds read as *not raised* on a build
+  that raises them perfectly. `people-dialog.py` carries the same two typos.
+
 ### v3.77 — plan titles you can read while you edit them (§189)
 
 - **They could not wrap at all.** Every title and description on a plan was a

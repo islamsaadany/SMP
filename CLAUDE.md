@@ -775,6 +775,41 @@ console errors (in this cloud environment, run it via a wrapper that points Play
   an empty array, so `onlyOwnLines()` answered false and a floor person given
   edit could rewrite their unit's WHOLE plan — wider than a Contributor, which is
   the opposite of a floor. `OWN_LINES_ONLY` carries the floor beside `contrib`.
+- **AN ATTENTION ITEM YOU CAN ANSWER, ON THE BOX IT IS ABOUT (§190):** Islam
+  — *"attention items that stays attention item is a problem always give me the
+  option to dismiss and make gnerally the dismiss under the box with the issue
+  and mark the issue box with some sort of surrounding outline."* Four of the
+  seven kinds are answered by editing a field; **three were a life sentence**
+  — a seat somebody meant to give, a row that never signs in, two people who
+  really are two people (§87) — counting on the button, the Overview and the
+  welcome screen for ever with no data to change that would clear them, and **a
+  count nobody can get to zero is one people stop reading**, which takes the six
+  that matter down with it. **A DISMISSAL REMEMBERS WHAT IT ANSWERED**:
+  `attnMark()` fingerprints the FACT (which seat over which place, which
+  address, which collision) and the item returns the moment it changes, so
+  dismissing *"they hold Super user"* says nothing about the NEXT seat
+  — §186's whole reason, and §180's rule applied to every kind at once.
+  **Stored as an ABSENCE** (§50.6) riding `people.extra`, so **no migration**,
+  and **filtered in `attentionOf()` alone** — the queue, the count, the button,
+  the Overview row and the welcome screen all read through it (§116.2: one
+  list). **The server needs nothing**: a non-seat, non-removal change to a
+  person's row already classifies as `setup` (§42's fall-through). **§116.2's
+  BAND GOES** — it said what was wrong above nine boxes and left you to guess
+  which, worst on the two items that name a place, and it was the QUEUE's alone
+  so *Edit details* said nothing at all; the sentence sits under the control
+  that answers it, inside a ring on the WHOLE field (the label is what names the
+  box) in the WARNING ground, because outstanding is not broken (§168). **A
+  kind no field answers is SAID, never dropped** — *no password* is answered
+  from the header's menu, so it takes a block of its own (§61). **A declaration
+  keeps its own control** (§180) and gains the ring and no second Dismiss
+  (§53.5). Proved able to fail: **21 red**; and two of the check's own first
+  failures were the CHECK — **the stub answered the wrong action names**
+  (`sync.js` asks `passwordStates` reading `j.states`, `declarations` reading
+  `j.said`), so both fell through to `{ok:true}`, the client stored `{}` and two
+  kinds were reported as not raised by a build that raises them perfectly.
+  *Read an action name out of `sync.js`, never guess it — `people-dialog.py`
+  carries the same two typos and its `said` assertions have been passing over an
+  empty map since the day it was written.*
 - **A DASH MEANT "WE NEVER ASKED" (§93):** *"the password status is all dash now
   … some people already changed the passwords."* Nothing was lost —
   `credentials` is its own table outside the TRUNCATE (§69). The fetch was gated
@@ -3055,6 +3090,11 @@ SMP/
 cd SMP-Project-Folder/src
 python3 build.py     # assembles strategy-management-platform.html (must be byte-identical to the shipped vX.Y file)
 python3 qa.py        # walks every page as every viewer, reports console errors (needs Playwright + Chromium)
+python3 checks/attention-dismiss.py # every attention item can be ANSWERED, on the box it
+                                # is about: one item per kind (five of six made, §94.2),
+                                # the ring measured as PAINT not as a class, one press
+                                # clearing the queue AND the count AND the button, and
+                                # moving a dismissed seat bringing it straight back (§190)
 python3 checks/people-dialog.py # the register reads and the dialog writes: the queue,
                                 # Add, and neat with every column on (§116, over HTTP) —
                                 # §8 covers dismissing a declaration (§180): outstanding
@@ -3232,7 +3272,42 @@ prior sessions (on HR_ERP) accidentally reverted agreed-upon designs.
 
 ---
 
-*Last Updated: 2026-08-30 &mdash; **v3.72: a date the platform cannot read,
+*Last Updated: 2026-08-30 &mdash; **v3.78: an attention item you can
+answer, on the box it is about (&sect;190)**. Islam, from the register:
+*"attention items that stays attention item is a problem always give me the
+option to dismiss and make gnerally the dismiss under the box with the issue and
+mark the issue box with some sort of surrounding outline to make sure I
+understand what is the issue."* **THREE OF THE SEVEN KINDS WERE A LIFE
+SENTENCE** &mdash; a seat somebody genuinely meant to give (&sect;186 exists to
+raise it, and the office still has to be able to say *yes, on purpose*), a row
+that never signs in, and two people who really are two people (&sect;87)
+&mdash; counting on the button, the Setup Overview and the welcome screen for
+ever, with no data to change that would clear them. **A count nobody can get to
+zero is a count people stop reading**, and it takes the six kinds that do matter
+down with it. **A DISMISSAL REMEMBERS WHAT IT ANSWERED**, which is the whole of
+why one is safe to give: `attnMark()` fingerprints the FACT &mdash; which seat
+over which place, which address, which collision &mdash; so dismissing *"they
+hold Super user"* says nothing about the NEXT seat somebody is given, and moving
+the dismissed person brings the item straight back. &sect;180's rule (*saying it
+again clears the answer*) applied to every kind at once. Stored as an absence
+riding `people.extra`, so nothing is migrated, and filtered in `attentionOf()`
+alone, because the queue, the count, the button, the Overview row and the
+welcome screen all read through it (&sect;116.2: one list). **AND THE SENTENCE
+GAINED AN ADDRESS**: &sect;116.2's band said what was wrong ABOVE nine boxes and
+left you to guess which &mdash; worst on the two items that name a place, which
+read as being about whichever box you look at first &mdash; and it was the
+QUEUE's alone, so anybody reaching the same row through *Edit details* was told
+nothing at all. The band goes; the sentence sits under the control that answers
+it, inside a ring on the whole field, in the WARNING ground, because outstanding
+is not broken (&sect;168). **A kind no field answers is SAID, never dropped**,
+and a declaration keeps the one control it has had since &sect;180 rather than
+gaining a second (&sect;53.5). **Proved able to fail: 21 red** &mdash; and two
+of the check's own first failures were the CHECK: **the stub answered the wrong
+action names**, so both server-backed kinds were reported as not raised by a
+build that raises them perfectly. *An action name is the product's &mdash; read
+it out of `sync.js`, never guess it.* `qa.py` clean.*
+
+*Earlier: 2026-08-30 &mdash; **v3.72: a date the platform cannot read,
 and a refusal that costs only the row it named (&sect;184)**. Islam, from the
 deployment: *"the CX strategy custodian got this error on submitting the report
 and they lost all data they inputed and the dates showed waiting confirmation

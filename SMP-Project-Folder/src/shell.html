@@ -4587,6 +4587,29 @@
       });
     });
 
+    /* ── ANSWERING AN ATTENTION ITEM (§190) ───────────────────────────
+       Islam: "attention items that stays attention item is a problem — always
+       give me the option to dismiss." Every kind now has one, under the box it
+       is about.
+
+       IT WRITES THE FACT, NOT A PRESS. setAttnOff() stores what was answered
+       (§190's fingerprint), so the item comes back the moment that fact
+       changes — dismissing a Super user seat says nothing about the NEXT seat
+       somebody is given, which is exactly what §186 exists to catch.
+
+       AN ORDINARY EDIT OF THE ROW, so it rides the autosave and the server
+       authorises it as `setup` like every other person change (§42's
+       fall-through). paint() is what redraws the dialog, since §116 made the
+       register's repaint reach it. */
+    R.querySelectorAll("[data-attnoff]").forEach(function(b){
+      b.addEventListener("click", function(){
+        var p = personBy(b.dataset.attnoff);
+        if (!p || !b.dataset.attnkind) return;
+        setAttnOff(p, b.dataset.attnkind, true);
+        paint();
+      });
+    });
+
     /* One temporary password for everyone who has none. The SERVER picks the
        set — this sends a password and nothing else — so the worst a stale
        screen can do is issue to a shorter list than it showed. */

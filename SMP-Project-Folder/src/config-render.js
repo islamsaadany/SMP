@@ -1708,14 +1708,74 @@ function renderPeople(){
   }
   /* The dialog's body. `groups` is a marker rather than a field, so the two
      headings cannot drift out of step with what sits under them. */
+  /* ── AND THE ISSUE IS DRAWN ON THE BOX THAT ANSWERS IT (§190) ─────
+     Islam: "attention items that stays attention item is a problem — always
+     give me the option to dismiss, and make generally the dismiss under the
+     box with the issue and mark the issue box with some sort of surrounding
+     outline to make sure I understand what is the issue."
+
+     Both halves of that are one argument. §116.2 made the queue open each
+     person in this dialog and print the sentence ABOVE the fields, which says
+     what is wrong and leaves nine boxes to guess between — and the two items
+     that name a place ("they hold Super user over the group", "the Official BU
+     list says Retail Stores") read as being about whichever box you look at
+     first. The outline is the address.
+
+     ONE MARKUP FOR EVERY KIND. `attentionOf()` hands each entry the FIELD it
+     is about, so a kind added later is outlined the day it is added and there
+     is no list here to forget (§104.7's rule, on a render).
+
+     A KIND WITH NO FIELD IS SAID, NEVER DROPPED. "They have never been issued
+     a password" is answered from the header's Passwords menu, not from a box
+     in this dialog, so it goes in a block of its own at the end — dismissible
+     like the rest, because an item that can only be left standing is exactly
+     what he is describing. */
+  function attnFor(p){
+    var a = p && p.key ? attentionOf(p) : null;
+    var by = {};
+    (a ? a.why : []).forEach(function(w){
+      var k = w.at || "";
+      (by[k] = by[k] || []).push(w);
+    });
+    return by;
+  }
+  function attnBlock(p, list){
+    return list.map(function(w){
+      return '<div class="attnsay">' + esc(w.say) +
+        (w.own ? '' :
+          ' <button class="linkbu attndrop" data-attnoff="' + esc(p.key) +
+          '" data-attnkind="' + esc(w.kind) + '">Dismiss</button>') +
+        '</div>';
+    }).join("");
+  }
   function personFieldsHtml(p, add){
-    return '<div class="pdlg">' + personFields(p, add).map(function(f){
+    /* NEVER ON THE ADD FORM: a person who is not on the register yet has no
+       row for anything to be outstanding about, and attentionOf() would be
+       asked about a draft (§116's NEWDRAFT). */
+    var by = add ? {} : attnFor(p), drawn = {};
+    var body = personFields(p, add).map(function(f){
       if (f.label === "Group")
         return '<div class="pdsect">' + (f.html === "who"
           ? "Who they are" : "Where they sit, and what they may do") + '</div>';
-      return '<div class="pdf' + (f.wide ? ' wide' : '') + '">' +
-        '<div class="pdfl">' + esc(f.label) + '</div>' + f.html + '</div>';
-    }).join("") + '</div>';
+      var mine = by[f.label] || [];
+      if (mine.length) drawn[f.label] = 1;
+      return '<div class="pdf' + (f.wide ? ' wide' : '') +
+        (mine.length ? ' attn' : '') + '">' +
+        '<div class="pdfl">' + esc(f.label) + '</div>' + f.html +
+        (mine.length ? attnBlock(p, mine) : '') + '</div>';
+    }).join("");
+    /* What no field can answer, and anything whose field this person's form
+       does not draw — said in full rather than counted and hidden. Asked of
+       what was ACTUALLY drawn, never of the label list, or a field the form
+       omits for this person takes its issue silently with it (§61). */
+    var loose = [];
+    Object.keys(by).forEach(function(k){
+      if (!drawn[k]) loose = loose.concat(by[k]);
+    });
+    return '<div class="pdlg">' + body +
+      (loose.length
+        ? '<div class="pdf wide attn attnloose">' + attnBlock(p, loose) + '</div>'
+        : '') + '</div>';
   }
 
   /* roleWhereCell() was here. It drew the picker's second half — "Choose
@@ -2176,15 +2236,14 @@ function renderPeople(){
     var p = personBy(PDLG.key);
     if (!p) return "";
     var add = PDLG.mode === "add";
-    var q = PDLG.mode === "queue" ? attentionOf(p) : null;
-    /* WHY THIS PERSON IS IN THE QUEUE, said above the fields rather than found
-       among them. It is re-asked here rather than carried in PDLG, so a thing
-       fixed a moment ago stops being said the moment it is fixed (§48.2: never
-       trust the render that drew the control). */
-    var band = q
-      ? '<div class="pdband">' + q.why.map(function(w){
-          return '<span>' + esc(w.say) + '</span>'; }).join("") + '</div>'
-      : "";
+    /* §116.2's BAND WENT WHEN THE FIELDS LEARNED TO SAY IT (§190). It printed
+       the queue's sentences above the form, which said what was wrong and left
+       nine boxes to guess between — and the two items that name a place read
+       as being about whichever box you looked at first. The sentence now sits
+       under the control that answers it, with the outline saying which. Two
+       copies of one sentence is worse than either (§53.5), and it was the
+       queue's ALONE, so somebody who reached the same row through Edit details
+       was told nothing at all. */
     var stop = add && NEWPERSON.hit
       /* ── THE STOP, AND THE ONE WAY PAST IT (§87.3) ────────────────
          Never "add them again": it names who is already here, offers their row,
@@ -2205,7 +2264,7 @@ function renderPeople(){
             '</b> is already here and the name reads the same. Add if they are two ' +
             'people; if not, give the role to them instead.</span></div>'; })()
       : "";
-    return band + stop + personFieldsHtml(p, add);
+    return stop + personFieldsHtml(p, add);
   }
   function personDialogFoot(){
     if (!PDLG) return "";

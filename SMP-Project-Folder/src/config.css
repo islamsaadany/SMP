@@ -2619,6 +2619,40 @@
   .pdband.bad { background:var(--bad-bg); color:var(--bad-tx); }
   .pdband .pdways { display:flex; gap:14px; flex-wrap:wrap; margin-top:3px;
     font-weight:600; }
+  /* ── THE OUTLINE, AND THE ANSWER UNDER IT (§190) ───────────────────
+     Islam: "mark the issue box with some sort of surrounding outline to make
+     sure I understand what is the issue", with the dismiss under it.
+
+     A RING AROUND THE WHOLE FIELD, label and control together — the label is
+     what names the box, so ringing the input alone leaves the name outside the
+     thing being pointed at. The warning ground rather than the bad one: an
+     outstanding item is something to answer, not something broken (§168's
+     rule that the colour is the meaning), and §130.8's argument holds — the
+     ring has to differ from the dialog's own ground by more than a shade, so
+     it takes `--warn-tx` at full strength on the tinted ground.
+
+     THE SENTENCE IS THE FIELD'S, so it wraps and sits inside the ring: a note
+     underneath the ring would read as being about the field below it.
+
+     THE RING IS OUT OF FLOW, and that is not a detail: a border with padding
+     and a negative margin to pay for it moves the field's own top by 8px, so
+     it stops sharing a grid row with its neighbours — `register-header.py`
+     caught exactly that, reporting two rows leaving a cell empty at every
+     width. An `outline` and a `box-shadow` spread paint outside the box
+     without changing it, so the grid is untouched and the ring still reads as
+     surrounding the field. */
+  .pdlg .pdf.attn { border-radius:var(--r-sm);
+    outline:2px solid var(--warn-tx); outline-offset:4px;
+    box-shadow:0 0 0 4px var(--warn-bg); background:var(--warn-bg); }
+  .pdlg .pdf.attn > .pdfl { color:var(--warn-tx); }
+  .pdlg .attnsay { font-size:12px; font-weight:600; line-height:1.45;
+    color:var(--warn-tx); white-space:normal; }
+  .pdlg .attnsay + .attnsay { margin-top:5px; }
+  .pdlg .attnsay .attndrop { display:inline-block; margin-left:2px;
+    color:var(--warn-tx); font-weight:700; }
+  /* A KIND NO FIELD ANSWERS still gets its ring and its dismiss — it simply
+     has nothing above it to ring (§190). */
+  .pdlg .attnloose { gap:0; }
   .pdfoot { display:flex; align-items:center; justify-content:space-between;
     gap:16px; border-top:1px solid var(--line-soft); margin-top:18px;
     padding-top:13px; flex-wrap:wrap; }

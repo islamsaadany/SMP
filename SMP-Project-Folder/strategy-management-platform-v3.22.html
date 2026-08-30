@@ -4305,6 +4305,31 @@
   .pdband.bad { background:var(--bad-bg); color:var(--bad-tx); }
   .pdband .pdways { display:flex; gap:14px; flex-wrap:wrap; margin-top:3px;
     font-weight:600; }
+  /* ── THE OUTLINE, AND THE ANSWER UNDER IT (§190) ───────────────────
+     Islam: "mark the issue box with some sort of surrounding outline to make
+     sure I understand what is the issue", with the dismiss under it.
+
+     A RING AROUND THE WHOLE FIELD, label and control together — the label is
+     what names the box, so ringing the input alone leaves the name outside the
+     thing being pointed at. The warning ground rather than the bad one: an
+     outstanding item is something to answer, not something broken (§168's
+     rule that the colour is the meaning), and §130.8's argument holds — the
+     ring has to differ from the dialog's own ground by more than a shade, so
+     it takes `--warn-tx` at full strength on the tinted ground.
+
+     THE SENTENCE IS THE FIELD'S, so it wraps and sits inside the ring: a note
+     underneath the ring would read as being about the field below it. */
+  .pdlg .pdf.attn { background:var(--warn-bg); border:1px solid var(--warn-tx);
+    border-radius:var(--r-sm); padding:8px 10px 9px; margin:-8px -10px -9px; }
+  .pdlg .pdf.attn > .pdfl { color:var(--warn-tx); }
+  .pdlg .attnsay { font-size:12px; font-weight:600; line-height:1.45;
+    color:var(--warn-tx); white-space:normal; }
+  .pdlg .attnsay + .attnsay { margin-top:5px; }
+  .pdlg .attnsay .attndrop { display:inline-block; margin-left:2px;
+    color:var(--warn-tx); font-weight:700; }
+  /* A KIND NO FIELD ANSWERS still gets its ring and its dismiss — it simply
+     has nothing above it to ring (§190). */
+  .pdlg .attnloose { gap:0; }
   .pdfoot { display:flex; align-items:center; justify-content:space-between;
     gap:16px; border-top:1px solid var(--line-soft); margin-top:18px;
     padding-top:13px; flex-wrap:wrap; }
@@ -13468,6 +13493,92 @@ function roleIsGrantable(key, by){
    register computes `registerDupes()` once per paint and this is called from
    the header inside that same paint, so reaching for its variable would have
    worked by accident and broken the moment anything else asked. */
+/* ── AN ATTENTION ITEM YOU CAN ANSWER (§190) ────────────────────────────
+   Islam: *"attention items that stays attention item is a problem — always
+   give me the option to dismiss."* He was looking at HIS OWN ROW, flagged for
+   holding Super user, by §187's rule, which assumed seat holders sit at the
+   group and had never met an office that sits in a function. The rule is not
+   wrong so much as unknowable: **nothing can tell an intended seat from an
+   accidental one**, and §180 had already settled the shape for exactly that
+   case — the office looks, and says.
+
+   ONE DISMISS FOR EVERY KIND, not a second special case beside the
+   declaration's. That one is its own thing because it lives OUTSIDE the state
+   graph (§56 — a save truncates thirty tables and a declaration must survive
+   it); every other item is about the register's own row, so the answer rides
+   the row.
+
+   A DISMISSAL REMEMBERS WHAT IT ANSWERED, never merely that it was pressed.
+   `attnMark()` fingerprints the FACT — which seat, which address, which
+   collision — and the item comes back the moment the fingerprint changes. So
+   dismissing "they hold Super user" says nothing about the NEXT seat somebody
+   is given, which is precisely the fault §186 exists to catch and would
+   otherwise be silenced for ever by one press. §180's rule ("saying it again
+   clears the answer"), applied to every kind at once.
+
+   STORED AS AN ABSENCE (§50.6): `p.attnOff` exists only while something is
+   dismissed, and the last key leaving deletes it — so a register nobody has
+   answered and one answered and re-raised are byte-identical, and no save
+   carries a phantom change. It rides `people.extra`, so nothing is migrated
+   (§177 proved that round trip against a real Postgres).
+
+   THE SERVER NEEDS NOTHING: a change to a person's row that is not their seat
+   and is not a removal already classifies as `setup`, which is the office's
+   (§42's fall-through doing its job). */
+var FROZEN_ATTN = Object.freeze({});
+function attnOff(p){ return (p && p.attnOff) || FROZEN_ATTN; }
+/* What was answered, as a fact rather than a timestamp. A kind with no
+   fingerprint here is one whose facts are simply present or absent, and "" is
+   an honest fingerprint for that. */
+function attnMark(kind, p){
+  if (!p) return "";
+  if (kind === "seat") {
+    var seat = SMPRules.seatOutOfPlace(world(), p, personAt(p));
+    return seat ? seat.role + "@" + seat.at + "|" + (personAt(p) || "") : "";
+  }
+  if (kind === "noemail" || kind === "noident")
+    return String(p.email || "") + "|" + String(p.empId || "");
+  if (kind === "samename" || kind === "dupe")
+    return String(readName(p) || p.name || "");
+  return "";
+}
+function attnDismissed(p, kind){
+  var was = attnOff(p)[kind];
+  return was !== undefined && was === attnMark(kind, p);
+}
+function setAttnOff(p, kind, on){
+  if (!p) return;
+  if (on) {
+    p.attnOff = p.attnOff || {};
+    p.attnOff[kind] = attnMark(kind, p);
+    return;
+  }
+  if (!p.attnOff) return;
+  delete p.attnOff[kind];
+  if (!Object.keys(p.attnOff).length) delete p.attnOff;
+}
+/* WHICH BOX THE ISSUE IS ABOUT (§190). Islam: "mark the issue box with some
+   sort of surrounding outline to make sure I understand what is the issue."
+   The label the dialog draws, so the outline lands on the control that
+   answers it — and a kind with no field says so rather than pointing
+   somewhere plausible. */
+var ATTN_FIELD = {
+  seat:     "Roles",
+  said:     "Unit or function",
+  noident:  "Emp. ID",
+  noemail:  "Email",
+  dupe:     "Name",
+  samename: "Name",
+  nopw:     null
+};
+/* AND THE ONE KIND THAT ALREADY HAD AN ANSWER (§180). A declaration is
+   accepted or dismissed on its own note, in the field itself, because it lives
+   outside the state graph and its answer goes to the server rather than onto
+   the row. It still gets the outline — it is an issue, and the outline is what
+   says which box — and deliberately not a second Dismiss beside the one that
+   is already there (§53.5: one question, one control). */
+var ATTN_OWNCTRL = { said: 1 };
+
 function attentionOf(p, all){
   if (!p || !personActive(p)) return null;
   var why = [];
@@ -13557,6 +13668,22 @@ function attentionOf(p, all){
           : "do " + others.map(function(x){ return x.name; }).join(" and ")) +
         ". Amend a Name so each reads apart." });
   }
+  /* ── AND WHAT THE OFFICE HAS ALREADY ANSWERED (§190) ──────────────
+     Filtered HERE, at the one place every surface reads — the queue, the
+     count, the button, the Overview row and the welcome screen all come
+     through `attentionOf()`, so a dismissal that were applied at any one of
+     them would leave the others still counting it (§53.5, and §116.2's own
+     rule that the count and the queue are the same list).
+
+     EACH ENTRY CARRIES WHERE IT POINTS, so the dialog can outline the control
+     that answers it rather than leaving somebody to guess which of nine boxes
+     the sentence is about. */
+  why = why.filter(function(w){ return !attnDismissed(p, w.kind); })
+           .map(function(w){
+             w.at = ATTN_FIELD[w.kind] || null;
+             w.own = !!ATTN_OWNCTRL[w.kind];
+             return w;
+           });
   return why.length ? { key:p.key, why:why } : null;
 }
 /* The sentence a duplicate makes, said once so the chip and the queue cannot
@@ -29074,14 +29201,74 @@ function renderPeople(){
   }
   /* The dialog's body. `groups` is a marker rather than a field, so the two
      headings cannot drift out of step with what sits under them. */
+  /* ── AND THE ISSUE IS DRAWN ON THE BOX THAT ANSWERS IT (§190) ─────
+     Islam: "attention items that stays attention item is a problem — always
+     give me the option to dismiss, and make generally the dismiss under the
+     box with the issue and mark the issue box with some sort of surrounding
+     outline to make sure I understand what is the issue."
+
+     Both halves of that are one argument. §116.2 made the queue open each
+     person in this dialog and print the sentence ABOVE the fields, which says
+     what is wrong and leaves nine boxes to guess between — and the two items
+     that name a place ("they hold Super user over the group", "the Official BU
+     list says Retail Stores") read as being about whichever box you look at
+     first. The outline is the address.
+
+     ONE MARKUP FOR EVERY KIND. `attentionOf()` hands each entry the FIELD it
+     is about, so a kind added later is outlined the day it is added and there
+     is no list here to forget (§104.7's rule, on a render).
+
+     A KIND WITH NO FIELD IS SAID, NEVER DROPPED. "They have never been issued
+     a password" is answered from the header's Passwords menu, not from a box
+     in this dialog, so it goes in a block of its own at the end — dismissible
+     like the rest, because an item that can only be left standing is exactly
+     what he is describing. */
+  function attnFor(p){
+    var a = p && p.key ? attentionOf(p) : null;
+    var by = {};
+    (a ? a.why : []).forEach(function(w){
+      var k = w.at || "";
+      (by[k] = by[k] || []).push(w);
+    });
+    return by;
+  }
+  function attnBlock(p, list){
+    return list.map(function(w){
+      return '<div class="attnsay">' + esc(w.say) +
+        (w.own ? '' :
+          ' <button class="linkbu attndrop" data-attnoff="' + esc(p.key) +
+          '" data-attnkind="' + esc(w.kind) + '">Dismiss</button>') +
+        '</div>';
+    }).join("");
+  }
   function personFieldsHtml(p, add){
-    return '<div class="pdlg">' + personFields(p, add).map(function(f){
+    /* NEVER ON THE ADD FORM: a person who is not on the register yet has no
+       row for anything to be outstanding about, and attentionOf() would be
+       asked about a draft (§116's NEWDRAFT). */
+    var by = add ? {} : attnFor(p), drawn = {};
+    var body = personFields(p, add).map(function(f){
       if (f.label === "Group")
         return '<div class="pdsect">' + (f.html === "who"
           ? "Who they are" : "Where they sit, and what they may do") + '</div>';
-      return '<div class="pdf' + (f.wide ? ' wide' : '') + '">' +
-        '<div class="pdfl">' + esc(f.label) + '</div>' + f.html + '</div>';
-    }).join("") + '</div>';
+      var mine = by[f.label] || [];
+      if (mine.length) drawn[f.label] = 1;
+      return '<div class="pdf' + (f.wide ? ' wide' : '') +
+        (mine.length ? ' attn' : '') + '">' +
+        '<div class="pdfl">' + esc(f.label) + '</div>' + f.html +
+        (mine.length ? attnBlock(p, mine) : '') + '</div>';
+    }).join("");
+    /* What no field can answer, and anything whose field this person's form
+       does not draw — said in full rather than counted and hidden. Asked of
+       what was ACTUALLY drawn, never of the label list, or a field the form
+       omits for this person takes its issue silently with it (§61). */
+    var loose = [];
+    Object.keys(by).forEach(function(k){
+      if (!drawn[k]) loose = loose.concat(by[k]);
+    });
+    return '<div class="pdlg">' + body +
+      (loose.length
+        ? '<div class="pdf wide attn attnloose">' + attnBlock(p, loose) + '</div>'
+        : '') + '</div>';
   }
 
   /* roleWhereCell() was here. It drew the picker's second half — "Choose
@@ -29542,15 +29729,14 @@ function renderPeople(){
     var p = personBy(PDLG.key);
     if (!p) return "";
     var add = PDLG.mode === "add";
-    var q = PDLG.mode === "queue" ? attentionOf(p) : null;
-    /* WHY THIS PERSON IS IN THE QUEUE, said above the fields rather than found
-       among them. It is re-asked here rather than carried in PDLG, so a thing
-       fixed a moment ago stops being said the moment it is fixed (§48.2: never
-       trust the render that drew the control). */
-    var band = q
-      ? '<div class="pdband">' + q.why.map(function(w){
-          return '<span>' + esc(w.say) + '</span>'; }).join("") + '</div>'
-      : "";
+    /* §116.2's BAND WENT WHEN THE FIELDS LEARNED TO SAY IT (§190). It printed
+       the queue's sentences above the form, which said what was wrong and left
+       nine boxes to guess between — and the two items that name a place read
+       as being about whichever box you looked at first. The sentence now sits
+       under the control that answers it, with the outline saying which. Two
+       copies of one sentence is worse than either (§53.5), and it was the
+       queue's ALONE, so somebody who reached the same row through Edit details
+       was told nothing at all. */
     var stop = add && NEWPERSON.hit
       /* ── THE STOP, AND THE ONE WAY PAST IT (§87.3) ────────────────
          Never "add them again": it names who is already here, offers their row,
@@ -29571,7 +29757,7 @@ function renderPeople(){
             '</b> is already here and the name reads the same. Add if they are two ' +
             'people; if not, give the role to them instead.</span></div>'; })()
       : "";
-    return band + stop + personFieldsHtml(p, add);
+    return stop + personFieldsHtml(p, add);
   }
   function personDialogFoot(){
     if (!PDLG) return "";
@@ -45289,6 +45475,29 @@ var SYNC = (function () {
           SAIDFAIL = { key: key, why: "Not saved \u2014 " + String(err.message || err) };
           paint();
         });
+      });
+    });
+
+    /* ── ANSWERING AN ATTENTION ITEM (§190) ───────────────────────────
+       Islam: "attention items that stays attention item is a problem — always
+       give me the option to dismiss." Every kind now has one, under the box it
+       is about.
+
+       IT WRITES THE FACT, NOT A PRESS. setAttnOff() stores what was answered
+       (§190's fingerprint), so the item comes back the moment that fact
+       changes — dismissing a Super user seat says nothing about the NEXT seat
+       somebody is given, which is exactly what §186 exists to catch.
+
+       AN ORDINARY EDIT OF THE ROW, so it rides the autosave and the server
+       authorises it as `setup` like every other person change (§42's
+       fall-through). paint() is what redraws the dialog, since §116 made the
+       register's repaint reach it. */
+    R.querySelectorAll("[data-attnoff]").forEach(function(b){
+      b.addEventListener("click", function(){
+        var p = personBy(b.dataset.attnoff);
+        if (!p || !b.dataset.attnkind) return;
+        setAttnOff(p, b.dataset.attnkind, true);
+        paint();
       });
     });
 

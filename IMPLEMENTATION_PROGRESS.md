@@ -68,6 +68,23 @@ Nothing proceeds past this line without an answer.
 
 ## Built and verified
 
+### v3.77 — plan titles you can read while you edit them (§189)
+
+- **They could not wrap at all.** Every title and description on a plan was a
+  single-line input. Measured with the pen open: 4 of 23 boxes clipped at
+  1440px, 8 at 1100px on a unit's Plan; on a function's Projects the
+  Description column already had two clipped cells in the demo's own data.
+- **Pillar, measure, tactic, milestone, description, deliverable, outcome,
+  project name, sub-line and the Brief** all grow to fit now, on units and
+  functions alike.
+- **Short fields are untouched** — direction, target, compile rule, dates,
+  Repeats, and the picked owner and collaborators. Asserted, so a build that
+  turned everything into a paragraph box would fail.
+- **It broke the remove ×**, which now sat under the field instead of beside
+  it — caught by `plan-fields.py` going red, not by reading the CSS.
+- Proof: `checks/plan-wrap.py` is new, asserts the problem rather than the
+  control, both ends, two widths, both panes. **14 red** on main.
+
 ### v3.76 — the office inbox: the caret, the box, the pill and the tag (§188)
 
 - **Three of the four are one omission.** The corner chat panel was built

@@ -22902,3 +22902,75 @@ Drawn and **not applied** — Islam chose mockup-first. Published as an artifact
 with the cost stated: rows get taller while the pen is on, the tables keep their
 width, reading mode is untouched, and short fields (targets, dates, codes) are
 deliberately left alone.
+
+---
+
+## §189 · Prose you can read while you edit it
+
+Islam, confirming the mockup: *"wrap the content of the plans edit boxes across
+pillars and functions, specially for the titles and descriptions."*
+
+**IT WAS NOT THAT THEY WRAPPED BADLY — THEY COULD NOT WRAP AT ALL.** Every title
+and description on a plan was `inputOr()`, and an `<input>` is a single line by
+definition. A long title did not shorten or wrap; it ran past the end of its box
+and you scrolled sideways inside it to read your own words.
+
+Measured with the pen open, before:
+
+| pane | width | boxes | clipped |
+|---|---|---|---|
+| a unit's Plan | 1440 | 23 | **4** |
+| a unit's Plan | 1100 | 23 | **8** |
+| a function's Projects | 1440 | 28 | **3**, two of them Description |
+
+**`textOr()` IS ITS OWN BUILDER, NOT A FLAG ON `inputOr`.** Which fields are
+PROSE is a decision per call site and not something a builder can infer — an
+owner is picked, a target is one value, a direction is a symbol. Guessing by
+class is how the target field quietly becomes a paragraph box.
+
+**A GROWING BOX, NOT A TALLER ONE.** `fieldOr()`'s two rows is a guess that is
+too many for a short title and too few for a long one; this is sized to what is
+actually in it, on every paint and on every keystroke. `growFields()` runs at
+the end of `paint()` beside `SEARCHSEL.wire()`, for that function's own reason:
+these are rebuilt on every paint, and a height measured before the row is laid
+out is a height measured against nothing.
+
+**ENTER IS NOT A NEWLINE HERE.** A plan row's name is one line of prose however
+long it is, and the tables, the deck and both workbooks all print it as one.
+Enter blurs, which is what commits the value (§35) — so the key does exactly
+what it did when this was an input.
+
+**THE SHORT FIELDS ARE UNTOUCHED, AND IT IS ASSERTED**: direction, target,
+compile rule, dates, Repeats, and the picked owner and collaborators. Giving
+those room to wrap would make every row taller for nothing.
+
+### And it broke §114.4, which its own check caught
+
+`display:block` on the textarea took the whole cell and pushed the remove **×**
+onto a second line — the exact fault §114.4 exists to prevent
+(`td:has(> .fld + .xbtn) > .fld { width: calc(100% - 30px) }` seats the pair on
+one line, and a block element ignores that by taking the row anyway).
+`inline-block` with the same width restores it.
+
+**Found by `checks/plan-fields.py` going red, not by reading the cascade** —
+which is the argument for that check having been written at all: swapping the
+ELEMENT under a rule keyed on `.fld` is not a change anybody would think to
+re-check by hand.
+
+### Proof
+
+`checks/plan-wrap.py` is new. It asserts **the problem, not the control**
+(§94.8) — nothing clips, at two widths, on a unit AND a function — and **both
+ends** (§113.8): the prose fields grow *and* the short ones are still
+single-line, or a build that made everything a paragraph box would pass. A box
+sized to fit never scrolls inside itself, so that is asserted too: one that does
+is a box still hiding words.
+
+**Proved able to fail: 14 red** against main's build.
+
+**§50.6 bit while it was being written**: the pen TOGGLES, so the first section
+left it on and pressing it for the second turned it OFF — the function's pane
+reported zero editable fields and would have been called clean. `leaveModes()`
+first, every time.
+
+`plan-fields.py`, `owner-picker.py`, `gap-fill.py` green.

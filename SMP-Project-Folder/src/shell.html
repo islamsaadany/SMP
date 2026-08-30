@@ -2075,6 +2075,11 @@
        (searchsel.js) — the native control stays where it is, so nothing wire()
        just attached is disturbed. */
     SEARCHSEL.wire();
+    /* §189: size every growing prose box to what is in it. Here, at the end
+       of paint(), for SEARCHSEL's own reason — these are rebuilt on every
+       paint, and a height measured before the row is laid out is a height
+       measured against nothing. */
+    if (typeof growFields === "function") growFields();
     /* AND THE MONTH PANEL GOES (§177). It is mounted on <body> so a repaint
        cannot take it with the button it belongs to — it would be left hanging
        over a page it no longer points at. Same reason SEARCHSEL.wire() closes

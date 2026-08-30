@@ -2139,6 +2139,50 @@ function fieldOr(page, value, cls, setter){
   var i = FIELDS.push(setter) - 1;
   return '<textarea class="fld ' + (cls || '') + '" data-fld="' + i + '" rows="2">' + esc(value) + '</textarea>';
 }
+/* ── PROSE YOU CAN READ WHILE YOU EDIT IT (§189) ──────────────────────
+   Islam: *"wrap the content of the plans edit boxes across pillars and
+   functions, specially for the titles and descriptions, as they become hard
+   to read when the lines get long."*
+
+   IT IS NOT THAT THEY WRAPPED BADLY — THEY COULD NOT WRAP AT ALL. Every
+   title and description on a plan was `inputOr()`, and an `<input>` is a
+   single line by definition, so a long title ran past the end of its box and
+   you scrolled sideways inside it to read your own words. Measured with the
+   pen open: 4 of 23 boxes clipped at 1440px, 8 at 1100px on a unit's Plan,
+   and on a function's Projects the Description column already had two clipped
+   cells in the demo's own data before anybody typed a long one.
+
+   A GROWING TEXTAREA, NOT A TALLER ONE. `fieldOr()`'s two rows is a guess
+   that is too many for a short title and too few for a long one; this is
+   sized to what is actually in it, on every paint and on every keystroke.
+
+   IT IS ITS OWN BUILDER RATHER THAN A FLAG ON `inputOr`, because which
+   fields are PROSE is a decision per call site and not something a builder
+   can infer: an owner is picked, a target is one value, a direction is a
+   symbol. Guessing by class is how the target field would quietly become a
+   paragraph box.
+
+   ENTER IS NOT A NEWLINE HERE. These are titles, not notes — a plan row's
+   name is one line of prose however long it is, and the tables, the deck and
+   both workbooks all print it as one. Enter blurs, which is what commits the
+   value (§35), so the key does what it did when this was an input. */
+/* Size every growing box to what is in it. Called at the end of paint()
+   beside SEARCHSEL.wire(), because these are rebuilt on every paint and a
+   height measured before the row is laid out is a height measured against
+   nothing. */
+function growFields(root){
+  (root || document).querySelectorAll("textarea.fld.grow").forEach(function(t){
+    t.style.height = "auto";
+    t.style.height = (t.scrollHeight + 2) + "px";
+  });
+}
+function textOr(page, value, cls, setter){
+  if (!EDIT_PAGE[page] || !setter)
+    return '<span class="' + (cls || '') + '">' + esc(value) + '</span>';
+  var i = FIELDS.push(setter) - 1;
+  return '<textarea class="fld grow ' + (cls || '') + '" data-fld="' + i +
+    '" rows="1">' + esc(value) + '</textarea>';
+}
 function inputOr(page, value, cls, setter){
   if (!EDIT_PAGE[page] || !setter) return '<span class="' + (cls || '') + '">' + esc(value) + '</span>';
   var i = FIELDS.push(setter) - 1;
@@ -4090,7 +4134,7 @@ function projFrontMatter(p, ed){
       repRow +
     '</div>' +
     '<div class="pfcol pfright">' +
-      row("r", "Brief", ed ? fieldOr("plan", p.brief || "", "", function(v){ p.brief = v; })
+      row("r", "Brief", ed ? textOr("plan", p.brief || "", "", function(v){ p.brief = v; })
                            : '<p>' + esc(p.brief || "") + '</p>') +
       row("r", "Stakeholders", stake) +
     '</div>' +
@@ -4126,7 +4170,7 @@ function projPlanBody(p, fk){
     var o = row.obj, d = dxIsDeliv(row);
     return '<tr data-oi="' + i + '"><td class="idx">' +
       (on ? handle("Reorder " + o.name) : '') + '<span class="idx-n">' + (i+1) + '</span></td>' +
-      '<td>' + (ed ? inputOr("plan", o.name, "", function(v){ o.name = v; }) : esc(o.name)) +
+      '<td>' + (ed ? textOr("plan", o.name, "", function(v){ o.name = v; }) : esc(o.name)) +
         xb(d ? "deliverables" : "outcomes", o.id) + '</td>' +
       '<td class="cc">' + dxType(row) + '</td>' +
       '<td class="cc">' + dxDir(row) + '</td>' +
@@ -4148,9 +4192,9 @@ function projPlanBody(p, fk){
   var mRows = p.milestones.map(function(m, i){
     return '<tr data-oi="' + i + '"><td class="idx">' +
       (on ? handle("Reorder " + m.name) : '') + '<span class="idx-n">' + (i+1) + '</span></td>' +
-      '<td>' + (ed ? inputOr("plan", m.name, "", function(v){ m.name = v; }) : esc(m.name)) +
+      '<td>' + (ed ? textOr("plan", m.name, "", function(v){ m.name = v; }) : esc(m.name)) +
         xb("milestones", m.id) + '</td>' +
-      '<td>' + (ed ? inputOr("plan", m.covers || "", "", function(v){ m.covers = v; })
+      '<td>' + (ed ? textOr("plan", m.covers || "", "", function(v){ m.covers = v; })
                    : esc(m.covers || "")) + '</td>' +
       /* §177: BOTH FILLABLE, AND THE OWNER'S EM-DASH BECOMES Missing.
          A dash is the platform's word for ABSENT, which says nothing is owed
@@ -4194,7 +4238,7 @@ function projPlanBody(p, fk){
   var band = ed
     ? '<div class="pband"><span class="pband-code">' + esc(projCode(fk, p)) + '</span>' +
         '<span class="pband-name">' +
-          inputOr("plan", p.name, "", function(v){ p.name = v; }) + '</span></div>'
+          textOr("plan", p.name, "", function(v){ p.name = v; }) + '</span></div>'
     : pillarBand(projCode(fk, p), p.name, pendBadge("u_plan"));
   return band + paneActs("plan", "u_plan") +
     projFrontMatter(p, ed) +
@@ -4641,7 +4685,7 @@ function unitPlanBody(it, u, railed){
     return '<tr data-oi="' + i + '"><td class="idx">' +
       (on ? handle("Reorder " + m.name) : '') +
       '<span class="idx-n">' + (i+1) + '</span></td>' +
-      '<td>' + (ed ? inputOr("plan", m.name, "", function(v){ m.name = v; }) : esc(m.name)) +
+      '<td>' + (ed ? textOr("plan", m.name, "", function(v){ m.name = v; }) : esc(m.name)) +
         xb("measures", m.id) + '</td>' +
       /* EDITABLE SINCE §114, reversing §31's read-only. That section closed the
          direction and the compile rule because "they change what a figure
@@ -4678,7 +4722,7 @@ function unitPlanBody(it, u, railed){
     return '<tr data-oi="' + i + '"><td class="idx">' +
       (on ? handle("Reorder " + t.name) : '') +
       '<span class="idx-n">' + (i+1) + '</span></td>' +
-      '<td>' + (ed ? inputOr("plan", t.name, "", function(v){ t.name = v; }) : esc(t.name)) +
+      '<td>' + (ed ? textOr("plan", t.name, "", function(v){ t.name = v; }) : esc(t.name)) +
         xb("tactics", t.id) + '</td>' +
       /* §145 MERGED WITH §130.1: gapCell keeps the pending lifecycle and
          the read-mode Missing word; the control hook renders the register-
@@ -4733,7 +4777,7 @@ function unitPlanBody(it, u, railed){
   var meta = pillarMeta(it, ed);
   var head = showHead
     ? '<div class="ptitle hoverpen"><div><h3>' + code + '&nbsp; ' +
-        (ed ? inputOr("plan", it.name, "", function(v){ it.name = v; }) : esc(it.name)) + '</h3>' +
+        (ed ? textOr("plan", it.name, "", function(v){ it.name = v; }) : esc(it.name)) + '</h3>' +
         (meta ? '<div class="pmeta">' + meta + '</div>' : '') + '</div>' +
         kindPill(it) +
         (mayEditPlan() ? penBtn("plan", "u_plan") : '') + '</div>'
@@ -4775,7 +4819,7 @@ function unitPlanBody(it, u, railed){
        show it also cannot fix it. Read-only, it is gone. */
     (ed
       ? '<p class="sub" style="margin:10px 0 0">' +
-        inputOr("plan", it.sub || "", "", function(v){ it.sub = v; }) + '</p>'
+        textOr("plan", it.sub || "", "", function(v){ it.sub = v; }) + '</p>'
       : '') +
     /* The "Plan only" notice went in 3.4. The tab you are on says Plan, the
        table headings say "as planned", and every actual column reads em-dash -

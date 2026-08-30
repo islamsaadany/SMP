@@ -365,6 +365,25 @@ console errors (in this cloud environment, run it via a wrapper that points Play
   `node scripts/test-door.js <smo-password>` against a running dev-server
   after touching `api/auth.js` or `lib/auth.js` (it ends by rate-limiting the
   SMO on purpose — `DELETE FROM login_attempts;` clears it).
+- **THE PLAN'S TITLES COULD NOT WRAP AT ALL (§189):** Islam — *"wrap the
+  content of the plans edit boxes across pillars and functions, specially for
+  the titles and descriptions."* Not a bad wrap: every title and description
+  was `inputOr()`, and an `<input>` is ONE LINE by definition, so a long title
+  ran off the end and you scrolled sideways inside it. Measured with the pen
+  open: 4 of 23 clipped at 1440, 8 at 1100 on a unit's Plan; two Descriptions
+  clipped on a function's Projects in the demo's OWN data. **`textOr()` is its
+  own builder, never a flag on `inputOr`** — which fields are prose is a
+  decision per call site (an owner is picked, a target is one value), and
+  guessing by class is how a target becomes a paragraph box. **A GROWING box,
+  not a taller one**: `fieldOr()`'s two rows is too many for a short title and
+  too few for a long one; `growFields()` runs at the end of `paint()` beside
+  `SEARCHSEL.wire()`, for that function's own reason. **Enter still blurs** —
+  a plan row's name is one line of prose however long, and blur is what
+  commits (§35). **The short fields are untouched and it is asserted.**
+  **AND IT BROKE §114.4**: `display:block` took the whole cell and pushed the
+  remove × onto a second line — `inline-block` restores it, and it was found
+  by `checks/plan-fields.py` GOING RED, not by reading the cascade, which is
+  the argument for that check existing.
 - **THE OFFICE INBOX GOT A THINNER PANEL THAN THE CORNER (§188):** three of
   Islam's four are one omission — §97 built the CORNER against exactly these
   faults and the office's own inbox skipped them. **The caret**: the inbox

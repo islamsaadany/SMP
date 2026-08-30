@@ -1344,17 +1344,37 @@ console.log("\n16 · fill the gaps (§145, spec 023)");
     check("FILL: the same grant never renames a project", !v.ok, "was ALLOWED");
   }
 
-  /* 13 · collaborators join the fillable list (§145.10) — an empty list is
-     a gap, an existing one never opens, and A PENDING NAME CONFERS NO
-     REPORTING RIGHT until the office confirms: being named is what lets a
-     Contributor report the line (§50.2), so this is the half that makes
-     the reversal safe. */
+  /* 13 · COLLABORATORS ARE NOT A GAP (§187, reversing §145.10 at Islam's
+     direction: "remove the missing collaborators as missing items").
+
+     §145.10 made an empty list fillable on the reasoning that it is a place
+     the plan holds nothing. It is not: a tactic with nobody supporting it is
+     a tactic ONE person owns, which is a complete way to write a line — and
+     every one of them was being counted as owing something. An optional
+     blank is not a gap (§119.1, which is why the DECK never marked these).
+
+     BOTH ENDS, or a build that emptied GAP_FIELDS entirely would pass: an
+     empty list no longer opens, AND the owner beside it still does. */
   s = gappy();
   v = fromStored(s, custKey, function (i) {
     const t = i.units[UNIT].items[0].tactics[0];
     t.collaborators = ["Somebody Supporting"]; t.pend = { collaborators: MARK };
   });
-  check("FILL: an empty collaborators list is fillable", v.ok, v.refusals.join(" / "));
+  check("REFUSED: an empty collaborators list is not a gap", !v.ok, "was ALLOWED");
+  check("...and collaborators is off the tactic's gap list",
+        R.GAP_FIELDS.tactic.indexOf("collaborators") === -1,
+        JSON.stringify(R.GAP_FIELDS.tactic));
+  check("...while a tactic owning nobody still owes nothing for it",
+        R.gapMissing("tactic", { owner: "A", q1: 1 }).length === 0,
+        JSON.stringify(R.gapMissing("tactic", { owner: "A", q1: 1 })));
+  /* THE OTHER END: the owner is still fillable, and is the reason it stayed —
+     a line nobody owns is a line nobody can report. */
+  s = gappy();
+  v = fromStored(s, custKey, function (i) {
+    const t = i.units[UNIT].items[0].tactics[0];
+    t.owner = "Somebody Accountable"; t.pend = { owner: MARK };
+  });
+  check("FILL: a tactic with no owner is still fillable", v.ok, v.refusals.join(" / "));
   s = gappy();
   v = fromStored(s, custKey, function (i) {
     const t = i.units[UNIT].items[0].tactics.filter(function (x) {
@@ -1363,7 +1383,7 @@ console.log("\n16 · fill the gaps (§145, spec 023)");
     t.collaborators = t.collaborators.concat("Somebody Extra");
     t.pend = Object.assign({}, t.pend, { collaborators: MARK });
   });
-  check("FILL: adding to an EXISTING collaborators list refuses, mark or not",
+  check("REFUSED: adding to an EXISTING collaborators list, mark or not",
         !v.ok, "was ALLOWED");
   (function () {
     const t = { owner: "", collaborators: ["Test Person"],
@@ -1996,6 +2016,42 @@ console.log("\n21 · viewing as somebody is judged as somebody (§185)");
   check("§185: the refusal is a sentence somebody can act on",
         /Only the SMO/.test(R.actingFor(personOf(base, "t185_hala"), "smo",
                                         "custodian", people).refuse));
+})();
+
+console.log("\n22 · a seat is granted, never derived (§187)");
+/* Islam: "level smo shouldn't be a super user — super user is only granted by
+   the super user in the registry, for now."
+
+   personRoles() read `p.level`, the pre-§33 field, as a fallback — so a person
+   object carrying `level:"smo"` derived Super user on the SCREEN and on the
+   SERVER, and an unrecognised key on a person round-trips through
+   `people.extra` untouched. Nothing in the product has written it for fifty
+   versions; it was an ungated fallback nobody was watching, which is §186's
+   shape exactly.
+
+   BOTH ENDS (§113.8): the fallback is gone AND a granted seat still works, or
+   a build that stopped deriving seats altogether would pass. */
+(function () {
+  const w = R.worldOf(SEED);
+  check("§187: level:\"smo\" derives nothing",
+        R.personRoles(w, { key: "t187", name: "T", level: "smo", unit: "group" }).length === 0);
+  check("§187: level:\"ceo\" derives nothing",
+        R.personRoles(w, { key: "t187", name: "T", level: "ceo", unit: "group" }).length === 0);
+  const real = R.personRoles(w, { key: "t187", name: "T", role: "super", unit: "group" });
+  check("§187: a GRANTED seat still derives",
+        real.length === 1 && real[0].role === "super" && real[0].at === "group",
+        JSON.stringify(real));
+  /* And the server agrees, which is the half that matters: a save that tries
+     to promote through the old field is judged on what personRoles() answers,
+     so this is asserted through authorize() and not only through the rule. */
+  const cust = SEED.people.filter(function (p) {
+    return R.personRoles(w, p).some(function (r) { return r.role === "custodian"; }); })[0];
+  const inc = clone(SEED);
+  const t = inc.people.filter(function (p) { return p.key === cust.key; })[0];
+  t.level = "smo";
+  check("§187: posting the old field promotes nobody",
+        !A.authorize(SEED, inc, cust).ok ||
+        !R.personRoles(R.worldOf(inc), t).some(function (r) { return r.role === "super"; }));
 })();
 
 console.log("\n" + pass + " passed, " + fail + " failed");

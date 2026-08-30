@@ -79,7 +79,12 @@ CREATE TABLE IF NOT EXISTS chat_messages (
   -- THE OFFICE'S OWN CLASSIFICATION, and only the office's — this is where
   -- §71's issue / idea / question went. Nobody should have to classify their
   -- own question before they are allowed to ask it.
-  flag        TEXT
+  flag        TEXT,
+  -- WHERE IT ALSO WENT, when the office chased somebody who was not here
+  -- (§188). NULL means it did not leave the platform. The address rather than
+  -- a flag: a person's address on the register can change afterwards, so
+  -- reading it back would say where it would go NOW, not where it went.
+  emailed_to  TEXT
 );
 
 CREATE INDEX IF NOT EXISTS chat_threads_waiting ON chat_threads (waiting, last_at DESC);

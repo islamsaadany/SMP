@@ -338,6 +338,22 @@
   .banner.refused ul { margin:4px 0 0; padding-left:18px; }
   .banner.refused li { margin:2px 0; }
 
+  /* ── A PROSE FIELD IN A PLAN (§189) ─────────────────────────────────
+     A title is one line of prose however long it is, so this must read as a
+     field that happens to be tall rather than as a notes box: no resize grip,
+     no inner scrollbar (the height is set to fit, so there is never anything
+     to scroll), and the same metrics as the `<input>` it replaced, or a row
+     holding one of each reads as two kinds of control. */
+  /* INLINE-BLOCK, NOT BLOCK, and that is §114.4 (found by its own check going
+     red, not by reading): a cell holding a field AND a remove × seats the two
+     on one line by giving the field `calc(100% - 30px)` — a `display:block`
+     textarea takes the whole row regardless and pushes the × underneath it,
+     which is the exact fault §114.4 exists to prevent, reintroduced by
+     swapping the element under it. */
+  textarea.fld.grow { resize:none; overflow:hidden; line-height:1.45;
+                      min-height:0; display:inline-block; width:100%;
+                      vertical-align:middle; }
+
   /* ── THE BOOT SKELETON (§94.10) ───────────────────────────────────
      What is on screen between opening the platform and the database
      answering. Islam: "it opens on a color scheme and then it glitches and
@@ -4128,6 +4144,15 @@
   .phead2 .pnocust { font-size:11.5px; font-weight:600; cursor:help;
     color:var(--warn-tx); background:var(--warn-bg); border-radius:var(--r-pill);
     padding:6px 11px; white-space:nowrap; }
+  /* ── HOW MANY HOLD A SEAT (§187) ────────────────────────────────────
+     QUIET, not amber. The chip beside it is a WARNING — a unit nobody is
+     keeping up to date — and this is a FACT that is true on every healthy
+     tenant: an office has seats, and saying so in alarm colours would cry
+     wolf on every page load until nobody read either of them (§41's budget,
+     from the other side). It reads as a value, and the hover is the list. */
+  .phead2 .pseats { font-size:11.5px; font-weight:600; cursor:help;
+    color:var(--ink-2); background:var(--surface-2); border-radius:var(--r-pill);
+    padding:6px 11px; white-space:nowrap; }
   /* ── THE ONE LOUD THING ON THE PAGE (§94.8's accent budget) ──────── */
   .attnbtn { display:inline-flex; align-items:center; gap:7px; border:0;
     background:var(--cta); color:var(--cta-ink); cursor:pointer;
@@ -4280,6 +4305,31 @@
   .pdband.bad { background:var(--bad-bg); color:var(--bad-tx); }
   .pdband .pdways { display:flex; gap:14px; flex-wrap:wrap; margin-top:3px;
     font-weight:600; }
+  /* ── THE OUTLINE, AND THE ANSWER UNDER IT (§190) ───────────────────
+     Islam: "mark the issue box with some sort of surrounding outline to make
+     sure I understand what is the issue", with the dismiss under it.
+
+     A RING AROUND THE WHOLE FIELD, label and control together — the label is
+     what names the box, so ringing the input alone leaves the name outside the
+     thing being pointed at. The warning ground rather than the bad one: an
+     outstanding item is something to answer, not something broken (§168's
+     rule that the colour is the meaning), and §130.8's argument holds — the
+     ring has to differ from the dialog's own ground by more than a shade, so
+     it takes `--warn-tx` at full strength on the tinted ground.
+
+     THE SENTENCE IS THE FIELD'S, so it wraps and sits inside the ring: a note
+     underneath the ring would read as being about the field below it. */
+  .pdlg .pdf.attn { background:var(--warn-bg); border:1px solid var(--warn-tx);
+    border-radius:var(--r-sm); padding:8px 10px 9px; margin:-8px -10px -9px; }
+  .pdlg .pdf.attn > .pdfl { color:var(--warn-tx); }
+  .pdlg .attnsay { font-size:12px; font-weight:600; line-height:1.45;
+    color:var(--warn-tx); white-space:normal; }
+  .pdlg .attnsay + .attnsay { margin-top:5px; }
+  .pdlg .attnsay .attndrop { display:inline-block; margin-left:2px;
+    color:var(--warn-tx); font-weight:700; }
+  /* A KIND NO FIELD ANSWERS still gets its ring and its dismiss — it simply
+     has nothing above it to ring (§190). */
+  .pdlg .attnloose { gap:0; }
   .pdfoot { display:flex; align-items:center; justify-content:space-between;
     gap:16px; border-top:1px solid var(--line-soft); margin-top:18px;
     padding-top:13px; flex-wrap:wrap; }
@@ -6472,6 +6522,12 @@ body.presenting .chatdock { display:none; }
 /* THE OFFICE'S SIDE CARRIES THE ACCENT EDGE, and it is the one thing that
    distinguishes the two — never a filled bubble on either side, because a
    colour block per line is a lot of colour for a page this quiet (§41). */
+/* IT ALSO LEFT THE PLATFORM (§188). Quiet, on the byline beside the time —
+   a fact about how the message travelled, never about what it says, so it
+   takes the byline's own ink and none of its own. */
+.chmail { display:inline-flex; align-items:center; gap:4px; cursor:help;
+          font-size:var(--fs-micro); font-weight:600; color:var(--ink-3); }
+.chmail svg { width:12px; height:12px; }
 .chmsg.chthem { align-self:flex-start; }
 .chmsg.chthem .chbod { background:var(--surface); border:1px solid var(--line);
                        border-left:2px solid var(--gold); border-radius:4px 10px 10px 4px; }
@@ -6904,9 +6960,37 @@ body.presenting .tourdock { display:none; }
   font-size:var(--fs-small); max-width:min(340px, 60vw); }
 
 /* ── The navy band: greeting leads, tenant signs on the separator ───────── */
+/* ── THE ROLES STACK; THE TENANT HOLDS ITS PLACE (§187) ─────────────────
+   Islam: *"the roles can come under each other if that long, to avoid that
+   the company name and SMO section come down."*
+
+   The band was a flex row ALLOWED TO WRAP, so two long role chips filled the
+   line and the whole tenant block — the mark, the name, Strategy Management
+   Office — dropped underneath them. Measured, and it was not a narrow-window
+   problem: it happened at every width tested, 1440 included.
+
+       width   before            after
+       1440    294px, below      204px, beside
+       1100    294px, below      204px, beside
+        900    329px, below      239px, beside
+
+   `nowrap` with a flexible greeting is what makes the chips stack INSIDE
+   their own column instead of pushing the column beside them away. The cost
+   is stated: on a wide window the greeting is narrower, because the tenant
+   block now always reserves its width.
+
+   AND BELOW 820px THE OLD STACKING COMES BACK ON PURPOSE — that is the width
+   at which two columns stop being honest, and forcing them side by side
+   there would trade one broken layout for another. */
 .welcomeover .whero { background:var(--panel); color:var(--panel-ink);
   border-radius:var(--r-md); padding:30px 34px 28px; display:flex;
-  justify-content:space-between; align-items:center; gap:30px; flex-wrap:wrap; }
+  justify-content:space-between; align-items:stretch; gap:30px; flex-wrap:nowrap; }
+.welcomeover .wgreet { flex:1 1 0; min-width:0; }
+.welcomeover .wtenant { flex:0 0 auto; }
+@media (max-width:820px){
+  .welcomeover .whero { flex-wrap:wrap; align-items:center; }
+  .welcomeover .wgreet { flex:1 1 auto; }
+}
 .welcomeover .wkick { font-size:var(--fs-micro); letter-spacing:.18em;
   text-transform:uppercase; color:var(--panel-accent); font-weight:700; margin:0 0 10px; }
 .welcomeover .wgreet h2 { margin:0 0 12px; font-size:30px; font-weight:800;
@@ -8013,8 +8097,26 @@ THEME.apply();
     if (!p) return [];
     if (!personActive(p)) return [];   /* a retired person holds nothing */
     var out = [];
-    var seat = p.role || (p.level === "smo" ? "super"
-                        : p.level === "ceo" ? (p.company ? "cceo" : "gceo") : null);
+    /* ── THE SEAT IS GRANTED, NEVER DERIVED (§187) ────────────────────
+       Islam: *"level smo shouldn't be a super user — super user is only
+       granted by the super user in the registry, for now."*
+
+       This read `p.level` as a fallback: the pre-§33 field that levels used
+       before roles replaced them. Nothing in the product has written it for
+       fifty versions — it survives only in two dead prototype files that are
+       not in the build — but `personRoles()` is what BOTH sides ask, so a
+       person object carrying `level:"smo"` derived Super user on the screen
+       AND on the server, and an unrecognised key on a person round-trips
+       through `people.extra` untouched. An ungated fallback nobody was
+       watching, which is the exact shape of the thing §186 was about.
+
+       THE COST IS STATED, NOT GLOSSED: if any row on any tenant still relies
+       on `level` and has no `role`, that person loses the seat and it is
+       granted again on the register — which is where Islam has said seats
+       come from. §33's migration set `role` on every row it moved, so no row
+       should be in that state; a row that is, was never migrated and is a
+       thing to find rather than to keep working by accident. */
+    var seat = p.role || null;
     if (seat) out.push({ role: seat, at: p.company ? "co:" + p.company : (p.at || "group") });
 
     w.unitKeys.forEach(function (k) {
@@ -8404,13 +8506,22 @@ THEME.apply();
        so only a tactic with NO quarter at all is a gap (§128) — and while
        that fill is pending the four move together.
 
-       `collaborators` joined at Islam's direction (§145.10, reversing
-       this section's own first exclusion): an EMPTY list is a gap, an
-       existing list is never the filler's — and because being named is
-       what lets a Contributor report the line (§50.2), a pending name
-       CONFERS NOTHING until the office confirms: namedOn() below skips
-       any field still wearing the mark. */
-    tactic:  ["owner", "collaborators", "quarters"],
+       `collaborators` IS OUT AGAIN (§187, reversing §145.10 at Islam's
+       direction: *"remove the missing collaborators as missing items"*).
+       §145.10 put it in — itself reversing this section's first exclusion —
+       on the reasoning that an empty list is a place the plan holds
+       nothing. It is not: a tactic with nobody supporting it is a tactic
+       ONE person owns, which is an ordinary and complete way to write a
+       line, and every one of them was being counted as owing something.
+       An optional blank is not a gap (§119.1's own rule, which the deck
+       has followed for collaborators all along) — so this brings the fill
+       count into line with what the deck already declined to mark.
+
+       Recorded as a reversal rather than overwritten, per Principle II:
+       the machinery §145.10 built is untouched and one word gives it back.
+       The `owner` stays, because a line nobody owns is a line nobody can
+       report. */
+    tactic:  ["owner", "quarters"],
     capko:   ["dir", "target", "compile", "weight"],
     project: ["owner", "start", "end"],
     /* §177: THE PAGE ALREADY CALLED THESE MISSING. A project pane prints the
@@ -13382,6 +13493,92 @@ function roleIsGrantable(key, by){
    register computes `registerDupes()` once per paint and this is called from
    the header inside that same paint, so reaching for its variable would have
    worked by accident and broken the moment anything else asked. */
+/* ── AN ATTENTION ITEM YOU CAN ANSWER (§190) ────────────────────────────
+   Islam: *"attention items that stays attention item is a problem — always
+   give me the option to dismiss."* He was looking at HIS OWN ROW, flagged for
+   holding Super user, by §187's rule, which assumed seat holders sit at the
+   group and had never met an office that sits in a function. The rule is not
+   wrong so much as unknowable: **nothing can tell an intended seat from an
+   accidental one**, and §180 had already settled the shape for exactly that
+   case — the office looks, and says.
+
+   ONE DISMISS FOR EVERY KIND, not a second special case beside the
+   declaration's. That one is its own thing because it lives OUTSIDE the state
+   graph (§56 — a save truncates thirty tables and a declaration must survive
+   it); every other item is about the register's own row, so the answer rides
+   the row.
+
+   A DISMISSAL REMEMBERS WHAT IT ANSWERED, never merely that it was pressed.
+   `attnMark()` fingerprints the FACT — which seat, which address, which
+   collision — and the item comes back the moment the fingerprint changes. So
+   dismissing "they hold Super user" says nothing about the NEXT seat somebody
+   is given, which is precisely the fault §186 exists to catch and would
+   otherwise be silenced for ever by one press. §180's rule ("saying it again
+   clears the answer"), applied to every kind at once.
+
+   STORED AS AN ABSENCE (§50.6): `p.attnOff` exists only while something is
+   dismissed, and the last key leaving deletes it — so a register nobody has
+   answered and one answered and re-raised are byte-identical, and no save
+   carries a phantom change. It rides `people.extra`, so nothing is migrated
+   (§177 proved that round trip against a real Postgres).
+
+   THE SERVER NEEDS NOTHING: a change to a person's row that is not their seat
+   and is not a removal already classifies as `setup`, which is the office's
+   (§42's fall-through doing its job). */
+var FROZEN_ATTN = Object.freeze({});
+function attnOff(p){ return (p && p.attnOff) || FROZEN_ATTN; }
+/* What was answered, as a fact rather than a timestamp. A kind with no
+   fingerprint here is one whose facts are simply present or absent, and "" is
+   an honest fingerprint for that. */
+function attnMark(kind, p){
+  if (!p) return "";
+  if (kind === "seat") {
+    var seat = SMPRules.seatOutOfPlace(world(), p, personAt(p));
+    return seat ? seat.role + "@" + seat.at + "|" + (personAt(p) || "") : "";
+  }
+  if (kind === "noemail" || kind === "noident")
+    return String(p.email || "") + "|" + String(p.empId || "");
+  if (kind === "samename" || kind === "dupe")
+    return String(readName(p) || p.name || "");
+  return "";
+}
+function attnDismissed(p, kind){
+  var was = attnOff(p)[kind];
+  return was !== undefined && was === attnMark(kind, p);
+}
+function setAttnOff(p, kind, on){
+  if (!p) return;
+  if (on) {
+    p.attnOff = p.attnOff || {};
+    p.attnOff[kind] = attnMark(kind, p);
+    return;
+  }
+  if (!p.attnOff) return;
+  delete p.attnOff[kind];
+  if (!Object.keys(p.attnOff).length) delete p.attnOff;
+}
+/* WHICH BOX THE ISSUE IS ABOUT (§190). Islam: "mark the issue box with some
+   sort of surrounding outline to make sure I understand what is the issue."
+   The label the dialog draws, so the outline lands on the control that
+   answers it — and a kind with no field says so rather than pointing
+   somewhere plausible. */
+var ATTN_FIELD = {
+  seat:     "Roles",
+  said:     "Unit or function",
+  noident:  "Emp. ID",
+  noemail:  "Email",
+  dupe:     "Name",
+  samename: "Name",
+  nopw:     null
+};
+/* AND THE ONE KIND THAT ALREADY HAD AN ANSWER (§180). A declaration is
+   accepted or dismissed on its own note, in the field itself, because it lives
+   outside the state graph and its answer goes to the server rather than onto
+   the row. It still gets the outline — it is an issue, and the outline is what
+   says which box — and deliberately not a second Dismiss beside the one that
+   is already there (§53.5: one question, one control). */
+var ATTN_OWNCTRL = { said: 1 };
+
 function attentionOf(p, all){
   if (!p || !personActive(p)) return null;
   var why = [];
@@ -13471,6 +13668,22 @@ function attentionOf(p, all){
           : "do " + others.map(function(x){ return x.name; }).join(" and ")) +
         ". Amend a Name so each reads apart." });
   }
+  /* ── AND WHAT THE OFFICE HAS ALREADY ANSWERED (§190) ──────────────
+     Filtered HERE, at the one place every surface reads — the queue, the
+     count, the button, the Overview row and the welcome screen all come
+     through `attentionOf()`, so a dismissal that were applied at any one of
+     them would leave the others still counting it (§53.5, and §116.2's own
+     rule that the count and the queue are the same list).
+
+     EACH ENTRY CARRIES WHERE IT POINTS, so the dialog can outline the control
+     that answers it rather than leaving somebody to guess which of nine boxes
+     the sentence is about. */
+  why = why.filter(function(w){ return !attnDismissed(p, w.kind); })
+           .map(function(w){
+             w.at = ATTN_FIELD[w.kind] || null;
+             w.own = !!ATTN_OWNCTRL[w.kind];
+             return w;
+           });
   return why.length ? { key:p.key, why:why } : null;
 }
 /* The sentence a duplicate makes, said once so the chip and the queue cannot
@@ -24329,6 +24542,50 @@ function fieldOr(page, value, cls, setter){
   var i = FIELDS.push(setter) - 1;
   return '<textarea class="fld ' + (cls || '') + '" data-fld="' + i + '" rows="2">' + esc(value) + '</textarea>';
 }
+/* ── PROSE YOU CAN READ WHILE YOU EDIT IT (§189) ──────────────────────
+   Islam: *"wrap the content of the plans edit boxes across pillars and
+   functions, specially for the titles and descriptions, as they become hard
+   to read when the lines get long."*
+
+   IT IS NOT THAT THEY WRAPPED BADLY — THEY COULD NOT WRAP AT ALL. Every
+   title and description on a plan was `inputOr()`, and an `<input>` is a
+   single line by definition, so a long title ran past the end of its box and
+   you scrolled sideways inside it to read your own words. Measured with the
+   pen open: 4 of 23 boxes clipped at 1440px, 8 at 1100px on a unit's Plan,
+   and on a function's Projects the Description column already had two clipped
+   cells in the demo's own data before anybody typed a long one.
+
+   A GROWING TEXTAREA, NOT A TALLER ONE. `fieldOr()`'s two rows is a guess
+   that is too many for a short title and too few for a long one; this is
+   sized to what is actually in it, on every paint and on every keystroke.
+
+   IT IS ITS OWN BUILDER RATHER THAN A FLAG ON `inputOr`, because which
+   fields are PROSE is a decision per call site and not something a builder
+   can infer: an owner is picked, a target is one value, a direction is a
+   symbol. Guessing by class is how the target field would quietly become a
+   paragraph box.
+
+   ENTER IS NOT A NEWLINE HERE. These are titles, not notes — a plan row's
+   name is one line of prose however long it is, and the tables, the deck and
+   both workbooks all print it as one. Enter blurs, which is what commits the
+   value (§35), so the key does what it did when this was an input. */
+/* Size every growing box to what is in it. Called at the end of paint()
+   beside SEARCHSEL.wire(), because these are rebuilt on every paint and a
+   height measured before the row is laid out is a height measured against
+   nothing. */
+function growFields(root){
+  (root || document).querySelectorAll("textarea.fld.grow").forEach(function(t){
+    t.style.height = "auto";
+    t.style.height = (t.scrollHeight + 2) + "px";
+  });
+}
+function textOr(page, value, cls, setter){
+  if (!EDIT_PAGE[page] || !setter)
+    return '<span class="' + (cls || '') + '">' + esc(value) + '</span>';
+  var i = FIELDS.push(setter) - 1;
+  return '<textarea class="fld grow ' + (cls || '') + '" data-fld="' + i +
+    '" rows="1">' + esc(value) + '</textarea>';
+}
 function inputOr(page, value, cls, setter){
   if (!EDIT_PAGE[page] || !setter) return '<span class="' + (cls || '') + '">' + esc(value) + '</span>';
   var i = FIELDS.push(setter) - 1;
@@ -26280,7 +26537,7 @@ function projFrontMatter(p, ed){
       repRow +
     '</div>' +
     '<div class="pfcol pfright">' +
-      row("r", "Brief", ed ? fieldOr("plan", p.brief || "", "", function(v){ p.brief = v; })
+      row("r", "Brief", ed ? textOr("plan", p.brief || "", "", function(v){ p.brief = v; })
                            : '<p>' + esc(p.brief || "") + '</p>') +
       row("r", "Stakeholders", stake) +
     '</div>' +
@@ -26316,7 +26573,7 @@ function projPlanBody(p, fk){
     var o = row.obj, d = dxIsDeliv(row);
     return '<tr data-oi="' + i + '"><td class="idx">' +
       (on ? handle("Reorder " + o.name) : '') + '<span class="idx-n">' + (i+1) + '</span></td>' +
-      '<td>' + (ed ? inputOr("plan", o.name, "", function(v){ o.name = v; }) : esc(o.name)) +
+      '<td>' + (ed ? textOr("plan", o.name, "", function(v){ o.name = v; }) : esc(o.name)) +
         xb(d ? "deliverables" : "outcomes", o.id) + '</td>' +
       '<td class="cc">' + dxType(row) + '</td>' +
       '<td class="cc">' + dxDir(row) + '</td>' +
@@ -26338,9 +26595,9 @@ function projPlanBody(p, fk){
   var mRows = p.milestones.map(function(m, i){
     return '<tr data-oi="' + i + '"><td class="idx">' +
       (on ? handle("Reorder " + m.name) : '') + '<span class="idx-n">' + (i+1) + '</span></td>' +
-      '<td>' + (ed ? inputOr("plan", m.name, "", function(v){ m.name = v; }) : esc(m.name)) +
+      '<td>' + (ed ? textOr("plan", m.name, "", function(v){ m.name = v; }) : esc(m.name)) +
         xb("milestones", m.id) + '</td>' +
-      '<td>' + (ed ? inputOr("plan", m.covers || "", "", function(v){ m.covers = v; })
+      '<td>' + (ed ? textOr("plan", m.covers || "", "", function(v){ m.covers = v; })
                    : esc(m.covers || "")) + '</td>' +
       /* §177: BOTH FILLABLE, AND THE OWNER'S EM-DASH BECOMES Missing.
          A dash is the platform's word for ABSENT, which says nothing is owed
@@ -26384,7 +26641,7 @@ function projPlanBody(p, fk){
   var band = ed
     ? '<div class="pband"><span class="pband-code">' + esc(projCode(fk, p)) + '</span>' +
         '<span class="pband-name">' +
-          inputOr("plan", p.name, "", function(v){ p.name = v; }) + '</span></div>'
+          textOr("plan", p.name, "", function(v){ p.name = v; }) + '</span></div>'
     : pillarBand(projCode(fk, p), p.name, pendBadge("u_plan"));
   return band + paneActs("plan", "u_plan") +
     projFrontMatter(p, ed) +
@@ -26831,7 +27088,7 @@ function unitPlanBody(it, u, railed){
     return '<tr data-oi="' + i + '"><td class="idx">' +
       (on ? handle("Reorder " + m.name) : '') +
       '<span class="idx-n">' + (i+1) + '</span></td>' +
-      '<td>' + (ed ? inputOr("plan", m.name, "", function(v){ m.name = v; }) : esc(m.name)) +
+      '<td>' + (ed ? textOr("plan", m.name, "", function(v){ m.name = v; }) : esc(m.name)) +
         xb("measures", m.id) + '</td>' +
       /* EDITABLE SINCE §114, reversing §31's read-only. That section closed the
          direction and the compile rule because "they change what a figure
@@ -26868,7 +27125,7 @@ function unitPlanBody(it, u, railed){
     return '<tr data-oi="' + i + '"><td class="idx">' +
       (on ? handle("Reorder " + t.name) : '') +
       '<span class="idx-n">' + (i+1) + '</span></td>' +
-      '<td>' + (ed ? inputOr("plan", t.name, "", function(v){ t.name = v; }) : esc(t.name)) +
+      '<td>' + (ed ? textOr("plan", t.name, "", function(v){ t.name = v; }) : esc(t.name)) +
         xb("tactics", t.id) + '</td>' +
       /* §145 MERGED WITH §130.1: gapCell keeps the pending lifecycle and
          the read-mode Missing word; the control hook renders the register-
@@ -26923,7 +27180,7 @@ function unitPlanBody(it, u, railed){
   var meta = pillarMeta(it, ed);
   var head = showHead
     ? '<div class="ptitle hoverpen"><div><h3>' + code + '&nbsp; ' +
-        (ed ? inputOr("plan", it.name, "", function(v){ it.name = v; }) : esc(it.name)) + '</h3>' +
+        (ed ? textOr("plan", it.name, "", function(v){ it.name = v; }) : esc(it.name)) + '</h3>' +
         (meta ? '<div class="pmeta">' + meta + '</div>' : '') + '</div>' +
         kindPill(it) +
         (mayEditPlan() ? penBtn("plan", "u_plan") : '') + '</div>'
@@ -26965,7 +27222,7 @@ function unitPlanBody(it, u, railed){
        show it also cannot fix it. Read-only, it is gone. */
     (ed
       ? '<p class="sub" style="margin:10px 0 0">' +
-        inputOr("plan", it.sub || "", "", function(v){ it.sub = v; }) + '</p>'
+        textOr("plan", it.sub || "", "", function(v){ it.sub = v; }) + '</p>'
       : '') +
     /* The "Plan only" notice went in 3.4. The tab you are on says Plan, the
        table headings say "as planned", and every actual column reads em-dash -
@@ -28944,14 +29201,74 @@ function renderPeople(){
   }
   /* The dialog's body. `groups` is a marker rather than a field, so the two
      headings cannot drift out of step with what sits under them. */
+  /* ── AND THE ISSUE IS DRAWN ON THE BOX THAT ANSWERS IT (§190) ─────
+     Islam: "attention items that stays attention item is a problem — always
+     give me the option to dismiss, and make generally the dismiss under the
+     box with the issue and mark the issue box with some sort of surrounding
+     outline to make sure I understand what is the issue."
+
+     Both halves of that are one argument. §116.2 made the queue open each
+     person in this dialog and print the sentence ABOVE the fields, which says
+     what is wrong and leaves nine boxes to guess between — and the two items
+     that name a place ("they hold Super user over the group", "the Official BU
+     list says Retail Stores") read as being about whichever box you look at
+     first. The outline is the address.
+
+     ONE MARKUP FOR EVERY KIND. `attentionOf()` hands each entry the FIELD it
+     is about, so a kind added later is outlined the day it is added and there
+     is no list here to forget (§104.7's rule, on a render).
+
+     A KIND WITH NO FIELD IS SAID, NEVER DROPPED. "They have never been issued
+     a password" is answered from the header's Passwords menu, not from a box
+     in this dialog, so it goes in a block of its own at the end — dismissible
+     like the rest, because an item that can only be left standing is exactly
+     what he is describing. */
+  function attnFor(p){
+    var a = p && p.key ? attentionOf(p) : null;
+    var by = {};
+    (a ? a.why : []).forEach(function(w){
+      var k = w.at || "";
+      (by[k] = by[k] || []).push(w);
+    });
+    return by;
+  }
+  function attnBlock(p, list){
+    return list.map(function(w){
+      return '<div class="attnsay">' + esc(w.say) +
+        (w.own ? '' :
+          ' <button class="linkbu attndrop" data-attnoff="' + esc(p.key) +
+          '" data-attnkind="' + esc(w.kind) + '">Dismiss</button>') +
+        '</div>';
+    }).join("");
+  }
   function personFieldsHtml(p, add){
-    return '<div class="pdlg">' + personFields(p, add).map(function(f){
+    /* NEVER ON THE ADD FORM: a person who is not on the register yet has no
+       row for anything to be outstanding about, and attentionOf() would be
+       asked about a draft (§116's NEWDRAFT). */
+    var by = add ? {} : attnFor(p), drawn = {};
+    var body = personFields(p, add).map(function(f){
       if (f.label === "Group")
         return '<div class="pdsect">' + (f.html === "who"
           ? "Who they are" : "Where they sit, and what they may do") + '</div>';
-      return '<div class="pdf' + (f.wide ? ' wide' : '') + '">' +
-        '<div class="pdfl">' + esc(f.label) + '</div>' + f.html + '</div>';
-    }).join("") + '</div>';
+      var mine = by[f.label] || [];
+      if (mine.length) drawn[f.label] = 1;
+      return '<div class="pdf' + (f.wide ? ' wide' : '') +
+        (mine.length ? ' attn' : '') + '">' +
+        '<div class="pdfl">' + esc(f.label) + '</div>' + f.html +
+        (mine.length ? attnBlock(p, mine) : '') + '</div>';
+    }).join("");
+    /* What no field can answer, and anything whose field this person's form
+       does not draw — said in full rather than counted and hidden. Asked of
+       what was ACTUALLY drawn, never of the label list, or a field the form
+       omits for this person takes its issue silently with it (§61). */
+    var loose = [];
+    Object.keys(by).forEach(function(k){
+      if (!drawn[k]) loose = loose.concat(by[k]);
+    });
+    return '<div class="pdlg">' + body +
+      (loose.length
+        ? '<div class="pdf wide attn attnloose">' + attnBlock(p, loose) + '</div>'
+        : '') + '</div>';
   }
 
   /* roleWhereCell() was here. It drew the picker's second half — "Choose
@@ -29412,15 +29729,14 @@ function renderPeople(){
     var p = personBy(PDLG.key);
     if (!p) return "";
     var add = PDLG.mode === "add";
-    var q = PDLG.mode === "queue" ? attentionOf(p) : null;
-    /* WHY THIS PERSON IS IN THE QUEUE, said above the fields rather than found
-       among them. It is re-asked here rather than carried in PDLG, so a thing
-       fixed a moment ago stops being said the moment it is fixed (§48.2: never
-       trust the render that drew the control). */
-    var band = q
-      ? '<div class="pdband">' + q.why.map(function(w){
-          return '<span>' + esc(w.say) + '</span>'; }).join("") + '</div>'
-      : "";
+    /* §116.2's BAND WENT WHEN THE FIELDS LEARNED TO SAY IT (§190). It printed
+       the queue's sentences above the form, which said what was wrong and left
+       nine boxes to guess between — and the two items that name a place read
+       as being about whichever box you looked at first. The sentence now sits
+       under the control that answers it, with the outline saying which. Two
+       copies of one sentence is worse than either (§53.5), and it was the
+       queue's ALONE, so somebody who reached the same row through Edit details
+       was told nothing at all. */
     var stop = add && NEWPERSON.hit
       /* ── THE STOP, AND THE ONE WAY PAST IT (§87.3) ────────────────
          Never "add them again": it names who is already here, offers their row,
@@ -29441,7 +29757,7 @@ function renderPeople(){
             '</b> is already here and the name reads the same. Add if they are two ' +
             'people; if not, give the role to them instead.</span></div>'; })()
       : "";
-    return band + stop + personFieldsHtml(p, add);
+    return stop + personFieldsHtml(p, add);
   }
   function personDialogFoot(){
     if (!PDLG) return "";
@@ -29717,6 +30033,39 @@ function renderPeople(){
       'Strategy custodian role from their row here.">' +
       plural(noCust.length, "unit") + ' with no custodian</span>';
 
+  /* ── AND HOW MANY PEOPLE HOLD A SEAT (§187) ────────────────────────
+     Islam, after §186: *"where will I find this out if it's applied to anyone
+     else?"* The attention queue catches a seat sitting somewhere other than
+     where its holder does — which is the shape an accident takes — and it
+     is deliberately quiet about a seat held BY somebody who sits at the group,
+     because for them the two agree and there is nothing anomalous to say.
+
+     THAT LEAVES A HOLE, and this closes it: a plain total that cannot be
+     quiet about anybody. It is the register's own equivalent of the
+     custodian chip above — the one outstanding thing on this page that is
+     not a QUESTION about a person, so it is not a stop in a queue; it is a
+     fact you go and read.
+
+     ALWAYS DRAWN, unlike the chip beside it, and that is the point. A count
+     that vanishes at some number is a count you cannot trust to be
+     complete — and this one exists precisely to be the complete list. It
+     names them on the hover in the order the register holds them. */
+  var seatHolders = PEOPLE.filter(function(p){
+    return personActive(p) &&
+      SMPRules.personRoles(world(), p).some(function(r){
+        return SMPRules.isSeatRole(r.role); });
+  });
+  var seatChip = !mayEdit ? "" :
+    '<span class="pseats" title="' +
+      esc(seatHolders.map(function(p){
+        return p.name + " \u2014 " + SMPRules.personRoles(world(), p)
+          .filter(function(r){ return SMPRules.isSeatRole(r.role); })
+          .map(function(r){ return roleName(r.role); }).join(", ");
+      }).join("\n")) + '\n\nA seat is granted by the Super user on this ' +
+      'register and by nothing else. Take one off with the \u00d7 on the chip ' +
+      'in the Roles column.">' +
+      plural(seatHolders.length, "person", "people") + ' hold a seat</span>';
+
   /* NO BADGE AND NO COUNT LINE (§122). Islam: "the SMO badge remove it and
      remove the 77 people active text ... and accordingly the whole table
      should be just below the buttons line."
@@ -29735,7 +30084,7 @@ function renderPeople(){
       [],
       "people", false, null, null,
       '<span class="hsearch">' + tkSearchOnly("people", "Search the register\u2026") + '</span>' +
-      attnBtn + noCustChip + addBtn + fileMenu + colMenu + pwMenu) +
+      attnBtn + noCustChip + seatChip + addBtn + fileMenu + colMenu + pwMenu) +
 
     section("", "",
       null,
@@ -36870,9 +37219,30 @@ var CHAT = (function(){
       out = '<button class="chout" type="button" data-chhuman="1">' +
             "This didn\u2019t answer it \u2014 send it to the office</button>";
     }
+    /* ── AND WHETHER IT LEFT THE PLATFORM (§188) ──────────────────────
+       Islam: *"if the previous message was sent by email let's add a tag to
+       it that it was sent by email as well."* The chase has existed since
+       §97.5 and was reported to the browser once, under the composer, and
+       written down nowhere — so a thread read the next morning could not say
+       which of its replies had actually gone out.
+
+       ON THE BYLINE, not in the bubble: the bubble is what was SAID and this
+       is a fact about how it travelled. A mark rather than a sentence, with
+       the address on the hover — the office knows what "emailed" means and
+       does not need the line repeated on every reply (§41's budget).
+
+       NULL IS "IT DID NOT LEAVE", which is what every message before today
+       honestly is: nothing was recorded, so nothing is claimed. */
+    var went = m.emailed_to
+      ? '<span class="chmail" title="Also emailed to ' + esc2(m.emailed_to) + '">' +
+        '<svg viewBox="0 0 16 16" aria-hidden="true" fill="none" stroke="currentColor" ' +
+        'stroke-width="1.5" stroke-linejoin="round">' +
+        '<rect x="1.5" y="3.5" width="13" height="9" rx="1.5"/>' +
+        '<path d="m2 4.5 6 4 6-4"/></svg>Emailed</span>'
+      : "";
     return '<div class="chmsg ' + (mine ? "chme" : "chthem") + (m.bot ? " chbot" : "") + '">' +
       '<div class="chwho"><span>' + esc2(who) + "</span><span>" + esc2(when(m.at)) + "</span>" +
-      flag + "</div>" +
+      went + flag + "</div>" +
       '<div class="chbod">' + esc2(m.body) + pic + "</div>" + out + "</div>";
   }
 
@@ -37216,10 +37586,7 @@ var CHAT = (function(){
       if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); send(); }
       if (e.key === "Escape") setOpen(false);
     });
-    say.addEventListener("input", function(){
-      this.style.height = "auto";
-      this.style.height = Math.min(120, this.scrollHeight) + "px";
-    });
+    say.addEventListener("input", chGrow);
     /* Coming back to the tab is the moment a badge is most likely to be
        wrong, and the cheapest time to ask. `visibilitychange` is the one that
        matters — `focus` alone does not fire when a background tab is brought
@@ -37574,7 +37941,13 @@ var CHAT = (function(){
       if (box.tab === "waiting" && !t.waiting) return false;
       if (box.tab === "flagged" && !(+t.flagged > 0)) return false;
       if (!q) return true;
+      /* SEARCHED BY BOTH (§187). Typing what is ON SCREEN has to find the
+         row — and a typed short name is not always a prefix of the full one
+         (§93.8: `known` is stored, not derived), so matching the full name
+         alone would leave exactly those people unfindable. */
       return String(t.live_name || t.person_name || "").toLowerCase().indexOf(q) > -1 ||
+             String(nameOf(t.person_key, t.live_name || t.person_name) || "")
+               .toLowerCase().indexOf(q) > -1 ||
              String(t.last_body || "").toLowerCase().indexOf(q) > -1;
     });
   }
@@ -37626,10 +37999,23 @@ var CHAT = (function(){
     rows.forEach(function(t){
       var g = t.waiting ? "Waiting on us" : "Answered";
       if (g !== group) { group = g; out.push('<div class="chqsep">' + g + "</div>"); }
-      var last = (t.last_from_office ? ((t.last_by || "Office") + ": ") : "") + (t.last_body || "");
+      /* §187: THE LIST SAYS THE NAME, NOT THE FULL LEGAL ONE. §181 did the
+         thread, the inbox heading and both reply placeholders and stopped at
+         the QUEUE — a different builder, and the one place the office spends
+         most of its time looking. `last_by` is a name with no key beside it,
+         so it goes through the same reader with the raw value as its
+         fallback, where `knownGuess()` shortens it (§130.7's rule). */
+      var last = (t.last_from_office ? (nameOf(null, t.last_by) || "Office") + ": " : "") +
+                 (t.last_body || "");
       out.push('<button class="chqrow' + (box.person === t.person_key ? " on" : "") + '" ' +
         'type="button" data-chpick="' + esc2(t.person_key) + '">' +
-        '<span class="chnm">' + esc2(t.live_name || t.person_name || t.person_key) + "</span>" +
+        /* THE FULL NAME MOVES TO THE HOVER, never away (§181, §93.8): two
+           people whose short names read alike are still two rows, and the
+           register's own reader is what lengthens the guess for them. */
+        '<span class="chnm" title="' +
+          esc2(t.live_name || t.person_name || t.person_key) + '">' +
+          esc2(nameOf(t.person_key, t.live_name || t.person_name) || t.person_key) +
+        "</span>" +
         '<span class="chtm">' + esc2(when(t.last_at)) + "</span>" +
         '<span class="chsn">' + esc2(last) + "</span>" +
         (+t.unread > 0 ? '<span class="chun">' + (+t.unread) + "</span>" : "") +
@@ -37670,6 +38056,15 @@ var CHAT = (function(){
       " — this will also go to " + esc2(d.address) + ".</div>";
   }
 
+  /* ONE GROWER FOR BOTH COMPOSERS (§188, §53.5). The corner's was written
+     inline in wire(); the inbox needed the same thing, and two copies of "how
+     tall should this box be" is how one of them stops matching the other. */
+  var CH_GROW_MAX = 120;
+  function chGrow(){
+    this.style.height = "auto";
+    this.style.height = Math.min(CH_GROW_MAX, this.scrollHeight) + "px";
+  }
+
   function drawThread(){
     var pane = el("chthread"); if (!pane) return;
     var d = box.data;
@@ -37679,13 +38074,38 @@ var CHAT = (function(){
       return;
     }
     /* THE REPLY BOX IS ONLY REBUILT WHEN THE PERSON CHANGES. Redrawing it on
-       every four-second poll would wipe a half-written answer — the exact
-       fault §71.2 was raised about, one surface further out. */
+       every poll would wipe a half-written answer — the exact fault §71.2 was
+       raised about, one surface further out. */
     var existing = pane.querySelector("[data-chreply]");
     var keep = existing && existing.dataset.chreply === d.person ? existing.value : null;
 
     var body = pane.querySelector("#chtbody");
     var atEnd = body ? (body.scrollHeight - body.scrollTop - body.clientHeight < 40) : true;
+
+    /* ── AND KEEPING THE TEXT IS NOT KEEPING THE CARET (§188) ──────────
+       Islam: *"when I'm replying in the chat inbox suddenly the mark goes out
+       of the chat box and I bring it back to focus again."* The rule above
+       was written and is half of what it claims: the VALUE is carried across,
+       and the element is replaced regardless — so every ten seconds the box
+       being typed into is destroyed, and focus and the cursor go with it.
+       The words survived, which is why this reads as the cursor jumping
+       rather than as work being lost.
+
+       WHEN THE THREAD IS ALREADY THIS PERSON'S AND THE COMPOSER HAS THE
+       CURSOR, ONLY THE MESSAGES ARE REDRAWN. A reply landing mid-sentence
+       still appears — the body is the part that changes — and the footer,
+       which is the part being used, is left alone.
+
+       NOT "SKIP THE POLL WHILE TYPING": that would hold back the very thing
+       the poll is for. The half that must not move is the composer, and it is
+       the half that is now not touched. */
+    if (keep != null && body && existing === document.activeElement) {
+      body.innerHTML = threadHtml(d.messages || [], true, true);
+      if (atEnd) body.scrollTop = body.scrollHeight;
+      var head = pane.querySelector("[data-chdone]");
+      if (head) head.textContent = d.waiting ? "Mark answered" : "Put back on the list";
+      return;
+    }
 
     pane.innerHTML =
       '<div class="chthead">' +
@@ -37712,13 +38132,67 @@ var CHAT = (function(){
 
     var ta = pane.querySelector("[data-chreply]");
     if (ta && keep != null) ta.value = keep;
+    /* ── AND IT GROWS WITH WHAT IS WRITTEN IN IT (§188) ────────────────
+       Islam: *"chat box to wrap the content not disappearing."* The corner
+       panel's composer has grown to fit since §97 (`#chatsay`, capped at
+       120px); the office's reply box is the same control with the handler
+       missing, so it stayed one row for ever and everything past the first
+       line scrolled out of sight while it was being written.
+
+       The same cap and the same two lines, wired here rather than in
+       wireInbox(): this element is REPLACED on every person change, and a
+       listener bound to the one before it dies with it (§29.5 — whoever
+       destroys the wiring re-does it, in the same function). */
+    if (ta) {
+      ta.addEventListener("input", chGrow);
+      chGrow.call(ta);
+    }
     var nb = el("chtbody");
     if (nb && atEnd) nb.scrollTop = nb.scrollHeight;
+  }
+
+  /* ── THE RAIL'S COUNT IS THE INBOX'S COUNT (§188) ──────────────────
+     Islam: *"I replied to the person and still I get the notification on the
+     side rail, and the waiting is 0 while the chat is still in the
+     waiting."* Both halves of that screen were right and they were of
+     different ages: the Inbox re-asks its queue on every beat, and the rail's
+     pill is `OVQUEUE`, fetched ONCE per visit (§108.10 — "a summary somebody
+     reads and then acts on, not a live board") and never told that the
+     summary just stopped being true.
+
+     That reasoning holds for a page nobody is acting ON. It stops holding the
+     moment the act itself is on screen: replying is what makes the number
+     wrong, and it happens two panes away from the pill.
+
+     SO THE INBOX'S OWN ANSWER IS HANDED TO THE SHELL rather than the shell
+     polling for it. One fetch, two readers — §108.10's own rule that the
+     rail's number cannot disagree with the page it points at, which it could
+     only keep while nothing changed underneath it. */
+  function shellCount(j){
+    if (typeof window === "undefined" || !j) return;
+    try { window.OVQUEUE = { waiting: j.waiting | 0, flagged: j.flagged | 0 }; }
+    catch (e) {}
+    /* AND THE PILL IS REWRITTEN IN PLACE, NEVER BY REPAINTING (§97, §145.12).
+       A paint() here would rebuild the whole Setup page — including the reply
+       box being typed into, which is the fault two lines of this file exist
+       to prevent. So the one number that changed is written into the one
+       element that shows it, the way the gap band's counts already are. */
+    try {
+      var btn = document.querySelector('.ritem[data-setupgo="chat"]');
+      if (!btn) return;
+      var pill = btn.querySelector(".riwait");
+      var n = j.waiting | 0;
+      if (!n) { if (pill) pill.remove(); return; }
+      if (!pill) return;                  /* it appears on the next paint */
+      pill.textContent = String(n);
+      pill.title = n + " waiting on this page";
+    } catch (e) {}
   }
 
   function boxLoadQueue(then){
     post({ action:"queue" }, function(err, j){
       if (err || !j) return;
+      shellCount(j);
       box.threads = j.threads || [];
       drawQueue();
       ["waiting", "flagged"].forEach(function(k){
@@ -42492,6 +42966,11 @@ var SYNC = (function () {
        (searchsel.js) — the native control stays where it is, so nothing wire()
        just attached is disturbed. */
     SEARCHSEL.wire();
+    /* §189: size every growing prose box to what is in it. Here, at the end
+       of paint(), for SEARCHSEL's own reason — these are rebuilt on every
+       paint, and a height measured before the row is laid out is a height
+       measured against nothing. */
+    if (typeof growFields === "function") growFields();
     /* AND THE MONTH PANEL GOES (§177). It is mounted on <body> so a repaint
        cannot take it with the button it belongs to — it would be left hanging
        over a page it no longer points at. Same reason SEARCHSEL.wire() closes
@@ -44996,6 +45475,29 @@ var SYNC = (function () {
           SAIDFAIL = { key: key, why: "Not saved \u2014 " + String(err.message || err) };
           paint();
         });
+      });
+    });
+
+    /* ── ANSWERING AN ATTENTION ITEM (§190) ───────────────────────────
+       Islam: "attention items that stays attention item is a problem — always
+       give me the option to dismiss." Every kind now has one, under the box it
+       is about.
+
+       IT WRITES THE FACT, NOT A PRESS. setAttnOff() stores what was answered
+       (§190's fingerprint), so the item comes back the moment that fact
+       changes — dismissing a Super user seat says nothing about the NEXT seat
+       somebody is given, which is exactly what §186 exists to catch.
+
+       AN ORDINARY EDIT OF THE ROW, so it rides the autosave and the server
+       authorises it as `setup` like every other person change (§42's
+       fall-through). paint() is what redraws the dialog, since §116 made the
+       register's repaint reach it. */
+    R.querySelectorAll("[data-attnoff]").forEach(function(b){
+      b.addEventListener("click", function(){
+        var p = personBy(b.dataset.attnoff);
+        if (!p || !b.dataset.attnkind) return;
+        setAttnOff(p, b.dataset.attnkind, true);
+        paint();
       });
     });
 

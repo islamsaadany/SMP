@@ -326,22 +326,6 @@
   .banner.refused ul { margin:4px 0 0; padding-left:18px; }
   .banner.refused li { margin:2px 0; }
 
-  /* ── A PROSE FIELD IN A PLAN (§189) ─────────────────────────────────
-     A title is one line of prose however long it is, so this must read as a
-     field that happens to be tall rather than as a notes box: no resize grip,
-     no inner scrollbar (the height is set to fit, so there is never anything
-     to scroll), and the same metrics as the `<input>` it replaced, or a row
-     holding one of each reads as two kinds of control. */
-  /* INLINE-BLOCK, NOT BLOCK, and that is §114.4 (found by its own check going
-     red, not by reading): a cell holding a field AND a remove × seats the two
-     on one line by giving the field `calc(100% - 30px)` — a `display:block`
-     textarea takes the whole row regardless and pushes the × underneath it,
-     which is the exact fault §114.4 exists to prevent, reintroduced by
-     swapping the element under it. */
-  textarea.fld.grow { resize:none; overflow:hidden; line-height:1.45;
-                      min-height:0; display:inline-block; width:100%;
-                      vertical-align:middle; }
-
   /* ── THE BOOT SKELETON (§94.10) ───────────────────────────────────
      What is on screen between opening the platform and the database
      answering. Islam: "it opens on a color scheme and then it glitches and

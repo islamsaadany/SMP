@@ -31,37 +31,9 @@
   font-size:var(--fs-small); max-width:min(340px, 60vw); }
 
 /* ── The navy band: greeting leads, tenant signs on the separator ───────── */
-/* ── THE ROLES STACK; THE TENANT HOLDS ITS PLACE (§187) ─────────────────
-   Islam: *"the roles can come under each other if that long, to avoid that
-   the company name and SMO section come down."*
-
-   The band was a flex row ALLOWED TO WRAP, so two long role chips filled the
-   line and the whole tenant block — the mark, the name, Strategy Management
-   Office — dropped underneath them. Measured, and it was not a narrow-window
-   problem: it happened at every width tested, 1440 included.
-
-       width   before            after
-       1440    294px, below      204px, beside
-       1100    294px, below      204px, beside
-        900    329px, below      239px, beside
-
-   `nowrap` with a flexible greeting is what makes the chips stack INSIDE
-   their own column instead of pushing the column beside them away. The cost
-   is stated: on a wide window the greeting is narrower, because the tenant
-   block now always reserves its width.
-
-   AND BELOW 820px THE OLD STACKING COMES BACK ON PURPOSE — that is the width
-   at which two columns stop being honest, and forcing them side by side
-   there would trade one broken layout for another. */
 .welcomeover .whero { background:var(--panel); color:var(--panel-ink);
   border-radius:var(--r-md); padding:30px 34px 28px; display:flex;
-  justify-content:space-between; align-items:stretch; gap:30px; flex-wrap:nowrap; }
-.welcomeover .wgreet { flex:1 1 0; min-width:0; }
-.welcomeover .wtenant { flex:0 0 auto; }
-@media (max-width:820px){
-  .welcomeover .whero { flex-wrap:wrap; align-items:center; }
-  .welcomeover .wgreet { flex:1 1 auto; }
-}
+  justify-content:space-between; align-items:center; gap:30px; flex-wrap:wrap; }
 .welcomeover .wkick { font-size:var(--fs-micro); letter-spacing:.18em;
   text-transform:uppercase; color:var(--panel-accent); font-weight:700; margin:0 0 10px; }
 .welcomeover .wgreet h2 { margin:0 0 12px; font-size:30px; font-weight:800;

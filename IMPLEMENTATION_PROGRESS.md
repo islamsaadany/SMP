@@ -68,6 +68,102 @@ Nothing proceeds past this line without an answer.
 
 ## Built and verified
 
+### v3.78 — an attention item you can answer, on the box it is about (§190)
+
+- **Three of the seven kinds could never be cleared.** A seat somebody meant to
+  give, a row that never signs in, and two people who really are two people —
+  each counted on the button, the Setup Overview and the welcome screen for
+  ever, with no data to change that would answer them. A count nobody can get
+  to zero is one people stop reading.
+- **Every kind has a Dismiss now**, under the box it is about, except a
+  declaration — which has had its own since §180 and keeps exactly one control.
+- **The sentence moved onto the field**, inside a ring on the whole field
+  (label and control), in the warning ground. §116.2's band above the fields
+  said what was wrong and left nine boxes to guess between — and it was the
+  queue's alone, so *Edit details* said nothing at all.
+- **A dismissal remembers WHAT it answered.** Dismissing a Super user seat says
+  nothing about the next one: move the person and the item comes straight back.
+  That is what makes a dismiss safe to give at §186's own alarm.
+- Stored as an absence on `people.extra` — **no migration**, and no server
+  change (a non-seat person edit already classifies as `setup`).
+- Proof: `checks/attention-dismiss.py` is new — one item per kind, the ring
+  measured as paint, one press clearing all three surfaces, both ends.
+  **21 red** on the pre-§190 build. `qa.py` clean.
+- **Two of its own first failures were the check**: the stub answered the wrong
+  action names, so the two server-backed kinds read as *not raised* on a build
+  that raises them perfectly. `people-dialog.py` carries the same two typos.
+
+### v3.77 — plan titles you can read while you edit them (§189)
+
+- **They could not wrap at all.** Every title and description on a plan was a
+  single-line input. Measured with the pen open: 4 of 23 boxes clipped at
+  1440px, 8 at 1100px on a unit's Plan; on a function's Projects the
+  Description column already had two clipped cells in the demo's own data.
+- **Pillar, measure, tactic, milestone, description, deliverable, outcome,
+  project name, sub-line and the Brief** all grow to fit now, on units and
+  functions alike.
+- **Short fields are untouched** — direction, target, compile rule, dates,
+  Repeats, and the picked owner and collaborators. Asserted, so a build that
+  turned everything into a paragraph box would fail.
+- **It broke the remove ×**, which now sat under the field instead of beside
+  it — caught by `plan-fields.py` going red, not by reading the CSS.
+- Proof: `checks/plan-wrap.py` is new, asserts the problem rather than the
+  control, both ends, two widths, both panes. **14 red** on main.
+
+### v3.76 — the office inbox: the caret, the box, the pill and the tag (§188)
+
+- **Three of the four are one omission.** The corner chat panel was built
+  carefully against exactly these faults; the office's own inbox — the surface
+  the office lives in — got a thinner version that skipped them.
+- **The caret** no longer jumps: only the messages redraw while you have the
+  cursor in the reply box. Your text was already being carried across, which
+  is why it read as the cursor moving rather than work being lost.
+- **The reply box grows** with what you type, like the corner's already did.
+- **The rail's pill follows the inbox.** Both numbers were right and of
+  different ages — the inbox re-asks every beat, the pill was fetched once per
+  visit and never told the summary had changed. Replying is the act that makes
+  it wrong. The pill is rewritten in place, never by repainting.
+- **A reply that left by email says so**, with the address on the hover.
+  Migration 033 adds the column. Nothing is backfilled — the platform never
+  recorded it, so nothing is claimed for messages already sent.
+- Proof: `checks/office-inbox.py` is new, over HTTP with a stub, **6 red** on
+  main. Two of its own first runs were the check: Playwright types `\n` as
+  Enter (which sends), so the caret assertions compared "" with "" and passed;
+  and 129 characters in a 964px box fits on one line, so the grow test called
+  a working build broken.
+
+### Awaiting sign-off — the plan's titles (§188.5)
+
+- Measured with the pen open: **4 of 23 boxes clip their text at 1440px, 8 at
+  1100px.** Not because they wrap badly — because every title on a plan is a
+  single-line input and cannot wrap at all.
+- Mockup published; nothing applied.
+
+### v3.75 — a seat is granted, never derived, and four small ones (§187)
+
+- **`level: "smo"` no longer makes anybody a Super user.** The role rules read
+  a field from before roles existed, so a person carrying it derived Super
+  user on the screen *and* on the server. Nothing has written it for fifty
+  versions — which is what made it dangerous. Islam's instruction: a seat is
+  granted on the register and nothing else.
+- **"N people hold a seat" on the register**, with every holder on the hover.
+  This closes the hole I measured and told him about: the attention queue is
+  deliberately quiet about a seat held by somebody who sits at the group.
+  Always drawn — a count that vanishes cannot be trusted to be complete.
+- **Collaborators are no longer a missing item** (reversing §145.10 at his
+  direction). A tactic with nobody supporting it is one person's to run.
+- **The welcome header** at 204px — his pick from the mockup. The tenant block
+  held its place at every width tested; below 820px it stacks again on
+  purpose, and that is asserted.
+- **The chat inbox list shows the name, not the full one.** §181 did the
+  thread and stopped at the queue — a different builder. Search matches both.
+- Proof: `checks/seat-count-and-small.py` is new, every assertion at both
+  ends, **9 red** on main's build. `test-authorize.js` §22 added and its
+  collaborators block moved to the new contract — **352 passed**.
+- **Out of this round by his call:** the Overview redesign and the
+  squeezed-window damage. **The chat caret** is banked with his answer — it
+  happens while typing, after a few seconds, which points at the poll.
+
 ### v3.74 — a seat is not an ordinary role (§186)
 
 - **It was not impossible, and I had said it was.** The register's role picker

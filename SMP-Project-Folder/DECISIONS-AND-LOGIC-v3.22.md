@@ -22628,3 +22628,520 @@ picker **on the row**, which §116 moved into the person dialog, and it set
 paint reads a modal that only the opener creates (§51.11, §70).
 
 345 server assertions pass; `qa.py` clean.
+
+---
+
+## §187 · A seat is granted and never derived, a count that cannot be quiet, and three small ones
+
+Islam's round after §186, in his order.
+
+---
+
+### 1 · `level: "smo"` is not a Super user
+
+*"level smo shouldn't be a super user — super user is only granted by the super
+user in the registry, for now."*
+
+`personRoles()` read `p.level` — the pre-§33 field, from before roles replaced
+levels — as a fallback beside `p.role`. So a person object carrying
+`level:"smo"` derived **Super user**, on the screen AND on the server, because
+`personRoles()` is the one function both sides ask. And an unrecognised key on
+a person round-trips through `people.extra` untouched, so once it landed it
+would stay.
+
+**Nothing in the product has written it for fifty versions** — it survives only
+in two dead prototype files that are not in the build — which is exactly what
+made it dangerous: an ungated fallback nobody was watching, §186's shape in a
+second place.
+
+**THE COST IS STATED, NOT GLOSSED.** If any row on any tenant still relies on
+`level` and has no `role`, that person loses the seat and it is granted again
+on the register — which is where Islam has said seats come from. §33's
+migration set `role` on every row it moved, so no row should be in that state;
+one that is was never migrated, and is a thing to find rather than to keep
+working by accident.
+
+---
+
+### 2 · "N people hold a seat"
+
+*"where will I find this out if it's applied to anyone else?"*
+
+§186's attention queue catches a seat sitting somewhere other than where its
+holder sits — the shape an accident takes — and is deliberately quiet about a
+seat held **by somebody who sits at the group**, because for them the two agree
+and there is nothing anomalous to say. Measured, and stated to Islam as a hole
+before this was built.
+
+So the register carries a plain total that cannot be quiet about anybody, with
+every holder named on the hover. It is the register's own equivalent of the
+missing-custodian chip beside it: **the outstanding thing on this page that is
+not a question about a person**, so not a stop in a queue — a fact you go and
+read.
+
+**ALWAYS DRAWN, unlike the chip beside it, and that is the point.** A count
+that vanishes at some number is a count you cannot trust to be complete, and
+this one exists precisely to be the complete list.
+
+**QUIET, NOT AMBER.** The chip beside it is a warning; this is a fact true on
+every healthy tenant. Alarm colours here would cry wolf on every page load
+until nobody read either of them (§41's budget, from the other side).
+
+---
+
+### 3 · Collaborators are not a missing item
+
+*"remove the missing collaborators as missing items."* **Reversing §145.10**,
+which itself reversed §145's first exclusion.
+
+§145.10 made an empty collaborators list fillable on the reasoning that it is
+a place the plan holds nothing. It is not: **a tactic with nobody supporting it
+is a tactic one person owns**, which is an ordinary and complete way to write a
+line — and every one of them was being counted as owing something. An optional
+blank is not a gap, which is §119.1's own rule and the reason the DECK has
+never marked these.
+
+The `owner` stays: a line nobody owns is a line nobody can report. The
+machinery §145.10 built is untouched and one word gives it back.
+
+---
+
+### 4 · The welcome header
+
+His pick from the mockup. `.whero` was a flex row **allowed to wrap**, so two
+long role chips filled the line and the whole tenant block dropped beneath
+them — at **every width measured, 1440 included**:
+
+| width | before | after |
+|---|---|---|
+| 1440 | 294px, tenant below | 204px, tenant beside |
+| 1100 | 294px, tenant below | 204px, tenant beside |
+| 900 | 329px, tenant below | 239px, tenant beside |
+
+`nowrap` with a flexible greeting is what makes the chips stack INSIDE their
+own column rather than pushing the column beside them away. **Below 820px the
+old stacking comes back on purpose** — that is the width at which two columns
+stop being honest — and it is asserted, so it never reads as a regression.
+
+---
+
+### 5 · The chat inbox list says the name
+
+§181 shortened the thread, the inbox heading and both reply placeholders and
+**stopped at the queue** — a different builder, and the one place the office
+spends most of its time looking. The full name moves to the hover, never away
+(§93.8: two people whose short names read alike are still two rows).
+
+**AND THE SEARCH MATCHES BOTH.** Typing what is on screen has to find the row,
+and a typed short name is not always a prefix of the full one, so matching the
+full name alone would leave exactly those people unfindable.
+
+---
+
+### Proof
+
+`checks/seat-count-and-small.py` is new and every assertion is at **both ends**
+(§113.8): the fallback derives nothing AND a granted seat still does;
+collaborators are off the gap list AND the owner is still on it; the tenant
+block holds its place at three widths AND stacks again below 820. **The seat
+count is asserted as AGREEMENT with the register, never as a number** (§94.8),
+so a tenant with different people stays green and a count that drifts from its
+own source does not.
+
+**Proved able to fail: 9 red** against main's build.
+
+`scripts/test-authorize.js` gains **§22** (the fallback, both ends, asked of
+the rule AND through `authorize()`), and its §16 collaborators block moves to
+the new contract — it was asserting §145.10, which this reverses. **352 passed,
+0 failed.**
+
+**Deliberately not in this round** (Islam: *"out for now"*): the Overview panel
+redesign and the squeezed-window damage. **And the chat caret** — he has said
+it happens *while typing, after a few seconds*, which points at the poll
+refreshing the thread under a typing hand; recorded here so the next round
+starts from that rather than from a blank page.
+
+---
+
+## §188 · The office inbox: the caret, the box, the pill and the tag
+
+Four things from Islam using the inbox, and three of them are one omission:
+**§97 built the CORNER panel carefully against exactly these faults, and the
+office's own inbox — the surface the office actually lives in — got a thinner
+version that skipped them.**
+
+---
+
+### 1 · The caret
+
+*"When I'm replying in the chat inbox suddenly the mark goes out of the chat
+box and I bring it back to focus again."*
+
+The inbox polls every ten seconds and `drawThread()` rewrites the whole thread
+pane. The reply box is inside it. There is a comment on that function claiming
+the composer is only rebuilt when the person changes — **and it is half of what
+it claims**: the VALUE is carried across, the element is replaced regardless.
+That is why this reads as the cursor jumping rather than as work being lost.
+
+**Now only the messages redraw** while the thread is already this person's and
+the composer has the cursor. A reply landing mid-sentence still appears — the
+body is the part that changes — and the part being used is left alone.
+
+**NOT "SKIP THE POLL WHILE TYPING"**, which would hold back the very thing the
+poll is for. The half that must not move is the composer, and it is the half
+that is no longer touched.
+
+---
+
+### 2 · The box that could not grow
+
+*"Chat box to wrap the content not disappearing."*
+
+The corner's composer has grown to fit since §97 (`#chatsay`, capped at 120px).
+The office's reply box is the same control **with the handler missing** — one
+row for ever, everything past the first line scrolling out of sight.
+
+`chGrow` is one grower for both, named once (§53.5): two copies of *how tall
+should this box be* is how one of them stops matching the other. Wired in
+`drawThread()` rather than `wireInbox()`, because that element is replaced on
+every person change and a listener bound to the one before it dies with it
+(§29.5 — whoever destroys the wiring re-does it, in the same function).
+
+---
+
+### 3 · The pill that would not move
+
+*"I replied to the person and still I get the notification on the side rail,
+and the waiting is 0 while the chat is still in the waiting."*
+
+**Both numbers on that screen were right and of different ages.** The Inbox
+re-asks its queue on every beat; the rail's pill is `OVQUEUE`, fetched ONCE per
+visit (§108.10 — *"a summary somebody reads and then acts on, not a live
+board"*) and never told the summary had stopped being true.
+
+That reasoning holds for a page nobody is acting on. **It stops holding the
+moment the act is on screen**: replying is what makes the number wrong, and it
+happens two panes away from the pill.
+
+So the inbox hands its own answer to the shell — one fetch, two readers, which
+is §108.10's own rule that the rail cannot disagree with the page it points at.
+**And the pill is rewritten in place, never by repainting**: a `paint()` there
+would rebuild the whole Setup page including the reply box, which is the fault
+§188.1 exists to prevent.
+
+---
+
+### 4 · A reply that left by email says so
+
+*"If the previous message was sent by email let's add a tag to it that it was
+sent by email as well."*
+
+The platform has chased people by email since §97.5 and **recorded nothing about
+it**: the outcome went to the browser, was shown once under the composer, and
+was forgotten. A thread read the next morning could not say which of its replies
+had actually gone out.
+
+**ONE COLUMN HOLDING THE ADDRESS** (`emailed_to`, migration 033), never a
+boolean beside one (§104.7). The address rather than a flag because *"it was
+emailed"* and *"it went to hala_latif@rayacorp.com"* answer different questions
+and the second answers both — and a person's address on the register can change
+afterwards, so reading it back would say where it would go NOW, not where it
+went.
+
+**WRITTEN ONLY WHEN IT ACTUALLY WENT.** A failed send leaves it null, which is
+the same thing an untouched row says, because it is the same fact.
+
+**NOTHING IS BACKFILLED, AND THAT WAS A CHOICE.** Islam was offered inference —
+mark it emailed if the person was away — and turned it down. Nothing was written
+down, so nothing is claimed: every message before today is honestly untagged.
+
+**On the byline, not in the bubble**: the bubble is what was SAID and this is a
+fact about how it travelled. A mark with the address on the hover, not a
+sentence repeated on every reply (§41's budget).
+
+---
+
+### Proof
+
+`checks/office-inbox.py` is new, served over HTTP with a stub because none of
+this exists over `file://` (§94.11). **6 red** against main's build.
+
+**Two of its own first runs were the check**, both worth keeping:
+
+* **Playwright types `\n` as ENTER, and Enter sends.** The box was emptied, so
+  every caret assertion compared `""` with `""` and passed — a check that could
+  not fail (§94.5). It now asserts there is something written in it.
+* **129 characters in a 964px composer fits on one line**, so the grow test
+  called a working build broken (§128: a measurement wrong in the direction of
+  *broken* costs as much as one wrong the other way).
+
+`checks/office-chat.py` green; `qa.py` clean.
+
+---
+
+## §188.5 · The plan's titles cannot wrap — mockup only
+
+Islam: *"wrap the content of the plans edit boxes across pillars and functions,
+specially for the titles and descriptions, as they become hard to read when the
+lines get long."*
+
+**It is not that they wrap badly. They cannot wrap at all.** Every title and
+description on a plan is an `<input>`, which is a single line by definition —
+the pillar name, the objective, the measure, the tactic, the milestone, the
+sub-line. Only the project Brief is a real text box, and even that is fixed at
+two rows.
+
+Measured on a unit's Plan pane with the pen open and realistic titles:
+
+| width | boxes | clipped now | clipped after |
+|---|---|---|---|
+| 1440 | 23 | **4** | 0 |
+| 1100 | 23 | **8** | 0 |
+
+Drawn and **not applied** — Islam chose mockup-first. Published as an artifact
+with the cost stated: rows get taller while the pen is on, the tables keep their
+width, reading mode is untouched, and short fields (targets, dates, codes) are
+deliberately left alone.
+
+---
+
+## §189 · Prose you can read while you edit it
+
+Islam, confirming the mockup: *"wrap the content of the plans edit boxes across
+pillars and functions, specially for the titles and descriptions."*
+
+**IT WAS NOT THAT THEY WRAPPED BADLY — THEY COULD NOT WRAP AT ALL.** Every title
+and description on a plan was `inputOr()`, and an `<input>` is a single line by
+definition. A long title did not shorten or wrap; it ran past the end of its box
+and you scrolled sideways inside it to read your own words.
+
+Measured with the pen open, before:
+
+| pane | width | boxes | clipped |
+|---|---|---|---|
+| a unit's Plan | 1440 | 23 | **4** |
+| a unit's Plan | 1100 | 23 | **8** |
+| a function's Projects | 1440 | 28 | **3**, two of them Description |
+
+**`textOr()` IS ITS OWN BUILDER, NOT A FLAG ON `inputOr`.** Which fields are
+PROSE is a decision per call site and not something a builder can infer — an
+owner is picked, a target is one value, a direction is a symbol. Guessing by
+class is how the target field quietly becomes a paragraph box.
+
+**A GROWING BOX, NOT A TALLER ONE.** `fieldOr()`'s two rows is a guess that is
+too many for a short title and too few for a long one; this is sized to what is
+actually in it, on every paint and on every keystroke. `growFields()` runs at
+the end of `paint()` beside `SEARCHSEL.wire()`, for that function's own reason:
+these are rebuilt on every paint, and a height measured before the row is laid
+out is a height measured against nothing.
+
+**ENTER IS NOT A NEWLINE HERE.** A plan row's name is one line of prose however
+long it is, and the tables, the deck and both workbooks all print it as one.
+Enter blurs, which is what commits the value (§35) — so the key does exactly
+what it did when this was an input.
+
+**THE SHORT FIELDS ARE UNTOUCHED, AND IT IS ASSERTED**: direction, target,
+compile rule, dates, Repeats, and the picked owner and collaborators. Giving
+those room to wrap would make every row taller for nothing.
+
+### And it broke §114.4, which its own check caught
+
+`display:block` on the textarea took the whole cell and pushed the remove **×**
+onto a second line — the exact fault §114.4 exists to prevent
+(`td:has(> .fld + .xbtn) > .fld { width: calc(100% - 30px) }` seats the pair on
+one line, and a block element ignores that by taking the row anyway).
+`inline-block` with the same width restores it.
+
+**Found by `checks/plan-fields.py` going red, not by reading the cascade** —
+which is the argument for that check having been written at all: swapping the
+ELEMENT under a rule keyed on `.fld` is not a change anybody would think to
+re-check by hand.
+
+### Proof
+
+`checks/plan-wrap.py` is new. It asserts **the problem, not the control**
+(§94.8) — nothing clips, at two widths, on a unit AND a function — and **both
+ends** (§113.8): the prose fields grow *and* the short ones are still
+single-line, or a build that made everything a paragraph box would pass. A box
+sized to fit never scrolls inside itself, so that is asserted too: one that does
+is a box still hiding words.
+
+**Proved able to fail: 14 red** against main's build.
+
+**§50.6 bit while it was being written**: the pen TOGGLES, so the first section
+left it on and pressing it for the second turned it OFF — the function's pane
+reported zero editable fields and would have been called clean. `leaveModes()`
+first, every time.
+
+`plan-fields.py`, `owner-picker.py`, `gap-fill.py` green.
+
+---
+
+## §190 — An attention item you can answer, on the box it is about (v3.78)
+
+Islam, from the register:
+
+> *"attention items that stays attention item is a problem always give me the
+> option to dismiss and make gnerally the dismiss under the box with the issue
+> and mark the issue box with some sort of surrounding outline to make sure I
+> understand what is the issue"*
+
+Two asks, and they are one argument.
+
+### The queue could raise, and only three of seven kinds could be answered
+
+`attentionOf()` raises seven kinds: a collision, a declaration, a seat sitting
+somewhere else, no identifier, no address, no password, and two people whose
+name reads the same. Four of them are answered by editing a field, and they
+leave the queue when the field changes — but the other three are facts somebody
+has already looked at and accepted:
+
+* **a seat** somebody genuinely means to give (§186 exists precisely to raise
+  it, and the office still has to be able to say *yes, on purpose*);
+* **no password**, for a row that never signs in;
+* **two people whose name reads the same** — sometimes they simply are two
+  people (§87), and the register is right as it stands.
+
+For those three the item was a **life sentence**. It counted on the button, on
+the Setup Overview and on the welcome screen for ever, and the only way to clear
+it was to change data that was already correct. A count nobody can get to zero
+is a count people stop reading, which takes the six kinds that *do* matter down
+with it.
+
+### The sentence had no address
+
+§116.2 put the queue's sentences in a band **above** the fields. That is where
+they went because there was nowhere else, and it says what is wrong while
+leaving nine boxes to guess between — worst on the two items that name a place
+(*"they hold Super user over the group"*, *"the Official BU list says Retail
+Stores"*), which read as being about whichever box you look at first.
+
+So the sentence moves onto the field it is about, inside a ring:
+
+* **`attentionOf()` hands each entry the FIELD it points at** (`w.at`), from one
+  table beside the kinds. A kind added later is outlined the day it is added and
+  there is no list in the renderer to forget (§104.7's rule, on a render).
+* **The ring is the whole field, label and control together.** The label is what
+  names the box, so ringing the input alone leaves the name outside the thing
+  being pointed at.
+* **The warning ground, not the bad one.** An outstanding item is something to
+  answer, not something broken (§168: the colour is the meaning).
+* **A kind no field answers is said, never dropped.** *"They have never been
+  issued a password"* is answered from the header's Passwords menu, so it goes
+  in a block of its own at the end — with its dismiss, because an item that can
+  only be left standing is exactly what he is describing (§61).
+
+**The band goes** rather than being kept alongside: two copies of one sentence is
+worse than either (§53.5). And it was the QUEUE's alone, so anybody who reached
+the same row through *Edit details* had been told nothing at all — the move
+fixes that for free.
+
+### A dismissal remembers WHAT it answered
+
+This is the part that makes a dismiss safe to give at all. `attnMark()`
+fingerprints the **fact** — which seat over which place, which address, which
+collision — and the item returns the moment the fingerprint changes. So
+dismissing *"they hold Super user"* says nothing about the **next** seat somebody
+is given, which is the fault §186 was written to catch and which one press would
+otherwise have silenced for ever. It is §180's own rule (*saying it again clears
+the answer*) applied to every kind at once.
+
+**Stored as an absence** (§50.6): `p.attnOff` exists only while something is
+dismissed and the last key leaving deletes it, so a register nobody has answered
+and one answered and re-raised are byte-identical and no save carries a phantom
+change (§42's `branding()` scar). It rides `people.extra`, so **nothing is
+migrated** — §177 proved that round trip against a real Postgres.
+
+**Filtered in `attentionOf()` and nowhere else.** The queue, the count, the
+button, the Overview row and the welcome screen all read through it, so a
+dismissal applied at any one of them would leave the others still counting
+(§116.2: the count and the queue are the same list).
+
+**The server needs nothing.** A change to a person's row that is not their seat
+and is not a removal already classifies as `setup`, which is the office's —
+§42's fall-through doing its job.
+
+### The one kind that keeps its own control
+
+A **declaration** is accepted or dismissed on its own note, in the field itself,
+because it lives outside the state graph (§56, §180). It gets the ring — it is an
+issue, and the ring is what says which box — and deliberately **no second
+Dismiss** beside the one already there.
+
+### Proof
+
+`checks/attention-dismiss.py` is new, and asserts the three things nothing else
+does:
+
+* every kind can be answered, and `said` has exactly **one** control rather than
+  two;
+* the sentence sits on the box that answers it, and the ring is **painted**
+  rather than merely classed — ground, border width and a real colour, because a
+  class assertion goes green on a build where the ring renders as nothing
+  (§145.14);
+* one press clears it from the queue, the count **and** the button, and moving
+  the dismissed seat **brings it straight back**.
+
+**Both ends every time** (§113.8): a clean row wears no ring and offers no
+Dismiss, or a build that outlined every field would pass. **The state is made**
+(§94.2) — the demo raises one kind on its own, so five of the six would ship
+unexercised.
+
+**Proved able to fail: 21 red** against the pre-§190 build.
+
+Two of that file's own first-run failures were the check:
+
+* **the stub answered the wrong action names.** `sync.js` asks
+  `passwordStates` and reads `j.states`, and `declarations` reads `j.said`; the
+  stub said `passwords` and `j.declarations`, so both fell through to
+  `{"ok":true}`, the client stored `{}`, and the two server-backed kinds were
+  reported as *not raised* by a build that raises them perfectly. **The action
+  names are the product's — read them out of `sync.js`, never guess them.**
+  (`people-dialog.py` carries the same two typos and has since it was written;
+  its `said` assertions have been passing over an empty map.)
+* **it asked before the two fetches landed.** They fire on a paint, so the
+  answer arrives after the first assertions run.
+
+`people-dialog.py`'s band assertion **moved to the new contract** rather than
+being deleted with the old markup (§51.11), and now asserts the absence of the
+band as well.
+
+### And the ring had to be out of flow, which `register-header.py` found
+
+The first ring was a border with padding and a negative margin to pay for it —
+which moves the field's own `top` by 8px, so it stops sharing a grid row with
+its neighbours. §122's check reported **two rows leaving a cell empty at every
+width**, correctly. An `outline` with an offset and a `box-shadow` spread paint
+outside the box without changing it: the grid is untouched and the ring still
+reads as surrounding the field.
+
+**And §93.11 bit for the fourth time in `config.css` on the way.** The
+replacement's prose landed *after* the `*/` that closed the comment above it, so
+the parser met words where a selector belonged and discarded everything down to
+the next `*/` — the whole ring block. Every assertion about the ring failed
+reading `rgba(0, 0, 0, 0)` against `rgba(0, 0, 0, 0)`, which is the shape of a
+rule the browser is not holding at all. *When a declaration that provably
+matches provably does nothing, suspect the parser rather than the cascade.*
+
+**And the check had to measure the ring as DRAWN, not as expected.** It asked
+for `borderTopWidth`, which was right for the first build and false for the
+second — so it takes whichever of border or outline is actually painting, and
+asks *is there a ring of some kind, in a real colour* (§94.8: a check written
+against the problem survives the fix changing shape).
+
+**And `duplicates.py` was reaching for the band too** — §51.11's fault, and it
+**crashed rather than passing quietly**, which is the good way for that to fail:
+`Failed to find element matching selector "#modal-b .pdband"`. Moved to the new
+contract, and given the assertion the old one could not make — that the ringed
+box is **the Name**, which is the field that clears a name collision.
+
+**And that check's SUBJECT had drifted, which is its own lesson.** It opened
+`smo` to measure "the dialog is compact", and that was the ordinary form until
+§187 gave the SMO a seat over the group while they sit in the SMO function —
+so from §190 it was measuring a form of eleven fields plus three lines of alarm,
+and it went red on a change that had not made the form any longer. **The rule
+was right and what it was pointed at had changed** (§50.6's family). It measures
+a row with **nothing outstanding** now — MADE, because every person in the demo
+carries no employee number and so is outstanding for `noident` (§94.2) — and a
+row that HAS an item is asserted separately: it may scroll, because it has more
+in it, but it must still fit on screen and its ring must orphan nothing.

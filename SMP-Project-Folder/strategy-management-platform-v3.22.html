@@ -4146,16 +4146,41 @@
      INSIDE the value's own line. `.val` is display:block under §88's clip rule,
      so a sibling would start a second line and take the row from 39px to 57px —
      which is the fault this replaces. */
-  .saidmark { margin-left:6px; color:var(--gold-deep); font-size:11px;
-    cursor:help; }
-  /* ── ANSWERED, AND VISIBLY SO (§180) ────────────────────────────────
-     The GLYPH carries the state, not the colour: `◎` waiting, `◌` answered.
-     One ring in two inks was drawn first and the mockup killed it — the mark
-     is 9.6px wide at 11px type, and gold against grey at that size is not a
-     difference anybody reads (measured: rgb(138,107,34) vs rgb(99,108,121)).
-     The ink still moves, so the two agree rather than fight, but it is the
-     shape that does the work. */
-  .saidmark.done { color:var(--ink-3); }
+  /* ── ANSWERED, AND VISIBLY SO (§180, DRAWN PROPERLY IN §185) ────────
+     The SHAPE carries the state, not the colour: a filled ring while the
+     claim is waiting, an open dashed one once it has been answered. The ink
+     moves with it so the two agree rather than fight, but at this size a
+     colour alone is not a difference anybody reads (measured: rgb(138,107,34)
+     against rgb(99,108,121) on a 9.6px mark).
+
+     IT IS A BORDER NOW, NOT A CHARACTER, AND THAT IS §185's WHOLE FINDING.
+     §180 shipped `◎` and `◌` and measured them the wrong way: it asked
+     whether the glyph DIFFERED from the tofu rectangle, which U+25CC does —
+     by about one pixel of ink. Re-measured in the built page, in the font
+     this mark actually computes to: the bullseye lays down 53 ink pixels and
+     the dotted circle **29, against tofu's 28**. So the answered mark was, to
+     anybody looking at it, nothing at all — Islam: *"I dismissed the case but
+     the small mark is not there."*
+
+     A GLYPH THAT DIFFERS FROM TOFU BY ONE PIXEL PASSES "IT IS DRAWN" AND
+     FAILS "IT IS A MARK." (§52, §120.2, from a side neither of them saw: both
+     are about a character that is MAPPED and not drawn; this one is drawn and
+     not legible.) So it is CSS, which is under our control, scales, takes
+     currentColor and cannot fall back to somebody else's font — §45's answer
+     to the colour emoji, in a second place. */
+  .saidmark { margin-left:6px; font-size:11px; cursor:help;
+    display:inline-block; vertical-align:middle;
+    width:9px; height:9px; border-radius:50%;
+    border:2px solid var(--gold-deep); background:var(--gold-deep);
+    /* The character inside is kept for a copy-paste and a screen reader, and
+       is not what is looked at. */
+    text-indent:-999em; overflow:hidden; }
+  /* FULL AGAINST EMPTY, NOT SOLID AGAINST DASHED. The first CSS draft was a
+     dashed ring, and measuring it caught §180's own mistake a second time: at
+     a 9px circle a 1.5px dash rounds to 1px and lays down about four marks —
+     faint for exactly the reason the dotted CHARACTER was. Same weight of
+     ring, filled or not, is a difference that survives the size. */
+  .saidmark.done { border-color:var(--ink-3); background:none; }
   /* Why a dismissal did not land (§171's rule, on a write that rides no
      autosave and so has no banner of its own). --bad-tx because it is WORDS,
      not a fill (§38.5). */
@@ -8425,6 +8450,36 @@ THEME.apply();
      again (§53.5). */
   function whenReadable(v) { return whenMonths(v, false, 2000) != null; }
 
+  /* ── WHOSE RIGHTS A SAVE IS JUDGED BY (§185) ──────────────────────
+     Islam: *"Hala got this error, when I view as her I didn't get it — so
+     the view-as function is not showing exactly what people see."*
+     Viewing as somebody changed everything the screen DREW and nothing the
+     server ACCEPTED, so no refusal anybody met could be reproduced, and the
+     office could write through a colleague's view what that colleague could
+     never write themselves.
+
+     A RULE, NOT A BRANCH IN THE ENDPOINT, for §42's reason: it decides who
+     may act as whom, which is exactly the kind of question that must have
+     one answer and be testable without a database.
+
+     IT CAN ONLY NARROW, and the three answers are what make that true.
+     `seatRole` is the seat the SESSION carries — never a role read out of
+     the state, which is the thing being written — so a forged `viewAs` from
+     a session that cannot simulate buys nothing and is judged as itself.
+     An unknown key is REFUSED rather than treated as somebody with no roles:
+     "no roles" is a narrowing that hides a mistake instead of reporting it. */
+  function actingFor(me, viewAs, seatRole, people) {
+    var want = typeof viewAs === "string" ? viewAs.trim() : "";
+    if (!me || !want || want === me.key) return { person: me };
+    if (seatRole !== "super")
+      return { refuse: "Only the SMO can act through somebody else's view." };
+    var them = null;
+    (people || []).forEach(function (p) { if (p && p.key === want) them = p; });
+    if (!them)
+      return { refuse: "The register does not hold the person this view belongs to." };
+    return { person: them, simulated: true };
+  }
+
   function gapBlank(v) { return v == null || String(v).trim() === ""; }
   /* The virtual quarters field, read as one. */
   function quartersBlank(t) { return !t.q1 && !t.q2 && !t.q3 && !t.q4; }
@@ -9414,6 +9469,7 @@ THEME.apply();
     gapBlank: gapBlank, quartersBlank: quartersBlank,
     WHEN_MONTHS: WHEN_MONTHS, whenMonths: whenMonths, whenReadable: whenReadable,
     GAP_WHEN: GAP_WHEN, gapWhenField: gapWhenField,
+    actingFor: actingFor,
     gapEmptyValue: gapEmptyValue, gapEmpty: gapEmpty,
     pendOf: pendOf, pendingScore: pendingScore, mayFillPage: mayFillPage,
     FILL_PAGES: FILL_PAGES, gapMissing: gapMissing,
@@ -39221,8 +39277,35 @@ var WELCOME = (function(){
     return true;
   }
 
+  /* ── ASKING FOR IT BACK (§185) ──────────────────────────────────────
+     Islam: *"Allow me to go back to the welcome screen somehow."* The screen
+     is offered once a session and then never again, so what is waiting on
+     you — the submission, the gaps, the unanswered replies — was readable for
+     one moment and then only by signing out.
+
+     DELIBERATELY NOT `offer()` WITH THE GUARD REMOVED. `offer()` answers
+     "should this take the screen unasked", and every one of its silences is
+     about that question: a projector, a file, a session that has already been
+     greeted. Pressing a button IS the ask, so the only silences that survive
+     are the two that are about whether the screen can exist at all.
+
+     AND IT DOES NOT `markDone()`. Asking for it back says nothing about
+     whether it has been seen — that mark is what stops it opening ITSELF a
+     second time, and clearing it here would put it in front of somebody on
+     their next paint (§107's rule about a memory that answers one question
+     answering only that one). */
+  function open(person){
+    if (!person) return false;
+    if (location.protocol === "file:") return false;
+    if (document.body && document.body.classList.contains("presenting")) return false;
+    if (box) return true;
+    try { build(person); } catch(e){ box = null; return false; }
+    return true;
+  }
+
   return {
     offer: offer,
+    open: open,
     showing: function(){ return !!box; },
     dismiss: dismiss
   };
@@ -39387,6 +39470,49 @@ var SYNC = (function () {
      never reaches the branch that draws the banner, so somebody who sets a
      cell, is refused, and sets it back gets no post and no message — the one
      shape of this fault that looks exactly like "it just does not save". */
+  /* ── WHO THE SAVE IS JUDGED AS (§185) ──────────────────────────────
+     Islam: *"Hala got this error, when I view as her I didn't get it — so
+     the view-as function is not showing exactly what people see."* Right,
+     and it was not a display fault. Measured, one edit judged twice:
+
+         judged as Hala : REFUSED — a plan is corrected by the SMO
+         judged as SMO  : ACCEPTED
+
+     Viewing as somebody changed everything the screen DREW and nothing the
+     server ACCEPTED, because authorisation reads the session cookie. So the
+     office could never reproduce anybody's refusal — and, the other way
+     round, could silently write things through a colleague's view that the
+     colleague could never have written themselves.
+
+     The simulated person now travels with the save and the server judges
+     against THEM. It can only ever narrow: the gate on using it at all is
+     the same seat role that draws the switcher, and a session without it
+     is judged as itself exactly as before.
+
+     Islam's choice, with the cost stated before he made it: you can no
+     longer correct somebody's data while wearing their view — you switch
+     back to yourself first, which is what the refusal now tells you. */
+  function actingAs() {
+    if (!person) return null;
+    /* ONLY WHERE THE SWITCHER IS ACTUALLY THERE. `viewer()` REASSIGNS
+       `window.VIEWER` to the first person on the register when it cannot find
+       the key it holds (§69.15's "lost" case) — so on a deployment whose
+       signed-in SMO is not yet ON the register, VIEWER points at a stranger
+       through nobody's choice. Sending that would have every one of their
+       saves judged as that stranger: a narrowing, which is the safe
+       direction, and still a bootstrap tenant unable to set itself up.
+       Asked through isSMOSession() and the register, which together are
+       exactly when the control that sets VIEWER is drawn at all. */
+    if (!isSMOSession()) return null;
+    if (!PEOPLE.some(function (p) { return p.key === person.key; })) return null;
+    var v = typeof window !== "undefined" ? window.VIEWER : null;
+    return v && v !== person.key ? v : null;
+  }
+  function bodyFor(state) {
+    var who = actingAs();
+    return '{"state":' + state + (who ? ',"viewAs":' + JSON.stringify(who) : "") + "}";
+  }
+
   var refusedWhy = null;
   /* §184: AND THE ROWS IT NAMED. Remembered beside the sentence for the same
      reason the sentence is: `save()` short-circuits on `refusedBody`, so the
@@ -39395,6 +39521,11 @@ var SYNC = (function () {
      moment somebody changed something and changed it back. */
   var refusedRows = null;
   var refusedUndoable = false;
+  /* Who `refusedBody` was judged as, so it is never held against somebody
+     else's rights (§185). */
+  var refusedAs = null;
+  /* WHOSE RIGHTS THE SERVER USED, when they were not yours (§185). */
+  var refusedJudged = null;
 
   /* A REFUSAL NEEDS A WAY OUT (§48.3).
 
@@ -39540,7 +39671,7 @@ var SYNC = (function () {
     return missed;
   }
 
-  function showRefusal(list, changes, undoable) {
+  function showRefusal(list, changes, undoable, judged) {
     var el = document.getElementById("refused");
     if (!el) return;
     if (!list || !list.length) { el.hidden = true; el.innerHTML = ""; return; }
@@ -39559,7 +39690,16 @@ var SYNC = (function () {
                    " \u2014 " + esc(fieldWord(r.field)));
       });
     });
-    el.innerHTML = "<span><strong>Not saved.</strong> " +
+    /* THE MISSING HALF OF THE SENTENCE (§185). "Setup is the SMO's" reads as
+       a bug when you ARE the SMO — it is true because the save was judged as
+       the person whose view you are wearing, and nothing on the screen said
+       so. Named first, because it is what makes the rest make sense. */
+    el.innerHTML = (judged
+        ? "<span><strong>You are viewing as " + esc(judged.name) + ".</strong> " +
+          "This was judged as them, not as you \u2014 switch back to your own " +
+          "view to make it yourself.</span>"
+        : "") +
+      "<span><strong>Not saved.</strong> " +
       (list.length === 1 ? "" : "The server refused this change:") + "</span>" +
       (list.length === 1
         ? "<span>" + esc(list[0]) + "</span>"
@@ -39671,8 +39811,15 @@ var SYNC = (function () {
     if (saving) { queued.push(done); return; }
     var now = serialize();
     if (now === lastSaved) return say("clean");
+    /* THE REMEMBERED REFUSAL IS PER VIEWER (§185). The same graph refused for
+       one person is not refused for another, so switching back to yourself
+       must not run into a body remembered under somebody else's rights —
+       which would silence a save that is now perfectly legitimate. */
+    if (refusedAs !== actingAs()) { refusedBody = null; refusedWhy = null;
+                                    refusedRows = null; refusedUndoable = false;
+                                    refusedJudged = null; }
     if (now === refusedBody) {
-      showRefusal(refusedWhy, refusedRows, refusedUndoable);
+      showRefusal(refusedWhy, refusedRows, refusedUndoable, refusedJudged);
       return say("refused");
     }
     saving = true;
@@ -39680,7 +39827,7 @@ var SYNC = (function () {
     fetch("/api/state", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: '{"state":' + now + "}"
+      body: bodyFor(now)
     }).then(function (r) {
       saving = false;
       /* REFUSED, not failed (spec 006). The server has decided this person may
@@ -39693,24 +39840,26 @@ var SYNC = (function () {
          the door, not a banner. */
       if (r.status === 401) { location.replace("/"); return; }
       if (r.status === 403) {
-        refusedBody = now;
+        refusedBody = now; refusedAs = actingAs();
         say("refused");
         return r.json().then(function (j) {
           if (j && j.mustChange) { location.replace("/"); return; }
           refusedWhy = (j && j.refusals) || null;
           refusedRows = (j && j.refusedChanges) || null;
           refusedUndoable = !!(j && j.undoable);
-          showRefusal(refusedWhy, refusedRows, refusedUndoable);
+          refusedJudged = (j && j.judgedAs) || null;
+          showRefusal(refusedWhy, refusedRows, refusedUndoable, refusedJudged);
         }, function () {
           /* A 403 whose body will not parse is still a refusal, and saying
              nothing about it is the silence this section exists to remove. */
           refusedWhy = ["The server refused the change and gave no reason."];
-          refusedRows = null; refusedUndoable = false;
+          refusedRows = null; refusedUndoable = false; refusedJudged = null;
           showRefusal(refusedWhy);
         });
       }
       if (r.ok) {
         refusedWhy = null; refusedRows = null; refusedUndoable = false;
+        refusedJudged = null;
         showRefusal(null);
         lastSaved = now;
         /* A person created in the register does not exist to the SERVER until
@@ -40010,8 +40159,9 @@ var SYNC = (function () {
     if (!live || isDemoMode() || saving) return;
     if (timer) { clearTimeout(timer); timer = null; }
     var now = serialize();
-    if (now === lastSaved || now === refusedBody) return;
-    var body = '{"state":' + now + "}";
+    if (now === lastSaved) return;
+    if (now === refusedBody && refusedAs === actingAs()) return;
+    var body = bodyFor(now);
     try {
       fetch("/api/state", {
         method: "POST",
@@ -41474,7 +41624,7 @@ var SYNC = (function () {
           '<div class="navscroll" id="navscroll">' + parts.slice(d0, d1 + 1).join("") + '</div>' +
           '<div class="navfade l" hidden></div><div class="navfade r" hidden></div>' +
         '</div>' +
-        parts.slice(d1 + 1).join("")) + menuHTML();
+        parts.slice(d1 + 1).join("")) + chromeActsHTML();
     /* Only destinations. A fold button lives in the same row but goes nowhere \u2014
        binding it here set current to undefined and reset the page to Group, which
        made expanding a fold navigate. */
@@ -41577,9 +41727,49 @@ var SYNC = (function () {
     '<path d="M3 6.5h9M15.5 6.5h1.5M3 13.5h4M10.5 13.5h6.5"/>' +
     '<circle cx="13.6" cy="6.5" r="2.1"/><circle cx="8.6" cy="13.5" r="2.1"/></g></svg>';
 
+  /* ── THE WAY BACK TO THE WELCOME SCREEN (§185) ──────────────────────
+     Islam: *"Allow me to go back to the welcome screen somehow."* It is
+     offered once a session, so what is waiting on you was readable for one
+     moment and then only by signing out again.
+
+     A HOUSE, BESIDE THE GEAR — his placement, over the Setup rail and the
+     Knowledge base. It has to be reachable from every page, and the other two
+     are not: the rail is two presses and needs Setup, and the Knowledge base
+     has been the office's since §119.4, so nobody else could get back.
+
+     NOT DRAWN WHERE THE SCREEN CANNOT EXIST — a projector, or a file with no
+     session — because a control that does nothing is worse than none (§61).
+     The same two silences `WELCOME.open()` keeps, asked once here so the
+     button and the screen cannot disagree about when it is possible. */
+  var ICON_HOME =
+    '<svg viewBox="0 0 20 20" class="navmenusvg" aria-hidden="true">' +
+    '<g stroke="currentColor" stroke-width="1.6" stroke-linecap="round" ' +
+    'stroke-linejoin="round" fill="none">' +
+    '<path d="M3 8.6 10 3.2l7 5.4V16a1 1 0 0 1-1 1h-3.4v-4.6H7.4V17H4a1 1 0 0 1-1-1Z"/>' +
+    '</g></svg>';
+  function welcomeBtnHTML(){
+    if (typeof WELCOME === "undefined" || !WELCOME.open) return "";
+    if (location.protocol === "file:") return "";
+    if (document.body && document.body.classList.contains("presenting")) return "";
+    return '<button type="button" class="navmenu-btn navmenu-ico navmenu-solo" ' +
+      'data-welcomego="1" title="What is waiting on me" ' +
+      'aria-label="What is waiting on me">' + ICON_HOME + '</button>';
+  }
+
   /* The menu lives inside the row so it sits on the same baseline as the tabs,
      but its panel is absolutely positioned, so a long list never widens the
      row or pushes the units along. */
+  /* BOTH CONTROLS, AND THE WELCOME BUTTON DOES NOT RIDE ON THE GEAR (§185).
+     `menuHTML()` returns nothing at all for anybody with no Setup destination
+     — which is most of the register — so hanging the house off it would have
+     given the way back to the office alone, and the welcome screen is
+     everybody's (§61's trap: the people it is most for are the ones who would
+     have lost it). The separator belongs to whichever is drawn first. */
+  function chromeActsHTML(){
+    var home = welcomeBtnHTML(), gear = menuHTML();
+    if (!home && !gear) return "";
+    return '<span class="sep pinsep"></span>' + home + gear;
+  }
   function menuHTML(){
     var gs = menuGroups();
     if (!gs.length) return "";
@@ -41588,8 +41778,7 @@ var SYNC = (function () {
        being a menu button and becomes a link — press it and you are on the
        page, with the rail carrying everything the menu used to list. */
     var only = gs[0].items[0];
-    return '<span class="sep pinsep"></span>' +
-      '<button type="button" class="navmenu-btn navmenu-ico navmenu-solo' +
+    return '<button type="button" class="navmenu-btn navmenu-ico navmenu-solo' +
         (on ? " here" : "") + '" data-md="setup" data-ms="' + only.k + '" ' +
         'title="Setup" aria-label="Setup">' + ICON_MANAGE + '</button>';
   }
@@ -41611,6 +41800,25 @@ var SYNC = (function () {
         current = b.dataset.md;
         currentSub = b.dataset.ms;
         paint(); window.scrollTo(0,0);
+      });
+    });
+    /* §185's way back. WIRED HERE, beside the gear, because `paintUnits()`
+       rewrites this row's innerHTML and whoever destroys the wiring re-does
+       it in the same function (§29.5) — a handler bound in the page-wide
+       wire() would die the next time the destination row repainted.
+
+       IT NAVIGATES NOWHERE. The welcome screen is an overlay over the page
+       you are already on, so there is no destination to leave modes for and
+       nothing to scroll — pressing it while editing leaves the edit exactly
+       where it was, which is what a person who only wants to look expects. */
+    document.querySelectorAll("#units [data-welcomego]").forEach(function(b){
+      b.addEventListener("click", function(e){
+        e.stopPropagation();
+        if (typeof WELCOME === "undefined" || !WELCOME.open) return;
+        /* The person being VIEWED, never the session (§185): the screen says
+           what is waiting on whoever this view belongs to, which is the whole
+           reason the viewer switcher sits on it. */
+        try { WELCOME.open(viewer()); } catch(err){}
       });
     });
   }

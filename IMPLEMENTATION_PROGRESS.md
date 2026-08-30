@@ -68,6 +68,32 @@ Nothing proceeds past this line without an answer.
 
 ## Built and verified
 
+### v3.73 — viewing as somebody, a way back, and a mark nobody could see (§185)
+
+- **"Viewing as" used your rights, not theirs.** Measured: the same edit,
+  refused for Hala and accepted for the SMO. The server reads the person off
+  the session, so simulating somebody changed everything the screen drew and
+  nothing it accepted — no refusal anybody meets could be reproduced from the
+  office, and the office could write through a colleague's view what that
+  colleague never could. The simulated person now travels with the save.
+- **It can only narrow.** The gate is the seat role on the session, the person
+  is looked up in the stored register, and an unknown key is refused rather
+  than treated as somebody with no roles. `SMPRules.actingFor()` is the rule,
+  so it is testable without a database.
+- **A refusal while simulating says so** — "Setup is the SMO's" is baffling
+  when you are the SMO.
+- **A way back to the welcome screen**: a house beside the gear, drawn
+  independently of it so it is not the office's alone.
+- **The dismissed mark is CSS, not a character.** §180 proved the dotted circle
+  was not tofu; re-measured, it laid down 29 ink pixels against tofu's 28. It
+  is a 9px ring now, filled while waiting and open once answered.
+- Proof: `test-authorize.js` §21 (**345 passed**), `people-dialog.py`
+  re-pointed at the visible mark, `welcome.py` and `refusal-keeps-work.py`
+  green, `qa.py` clean.
+- **Awaiting sign-off, not applied:** the welcome header when somebody holds
+  two long roles — the tenant block wraps below at every width measured
+  (294px → 204px header). Mockup published; rule 1c, nothing touched.
+
 ### v3.72 — a date the platform cannot read, and a refusal that costs one row (§184)
 
 - **The CX custodian's loss, reproduced against the real authoriser first.**

@@ -2476,41 +2476,16 @@
      INSIDE the value's own line. `.val` is display:block under §88's clip rule,
      so a sibling would start a second line and take the row from 39px to 57px —
      which is the fault this replaces. */
-  /* ── ANSWERED, AND VISIBLY SO (§180, DRAWN PROPERLY IN §185) ────────
-     The SHAPE carries the state, not the colour: a filled ring while the
-     claim is waiting, an open dashed one once it has been answered. The ink
-     moves with it so the two agree rather than fight, but at this size a
-     colour alone is not a difference anybody reads (measured: rgb(138,107,34)
-     against rgb(99,108,121) on a 9.6px mark).
-
-     IT IS A BORDER NOW, NOT A CHARACTER, AND THAT IS §185's WHOLE FINDING.
-     §180 shipped `◎` and `◌` and measured them the wrong way: it asked
-     whether the glyph DIFFERED from the tofu rectangle, which U+25CC does —
-     by about one pixel of ink. Re-measured in the built page, in the font
-     this mark actually computes to: the bullseye lays down 53 ink pixels and
-     the dotted circle **29, against tofu's 28**. So the answered mark was, to
-     anybody looking at it, nothing at all — Islam: *"I dismissed the case but
-     the small mark is not there."*
-
-     A GLYPH THAT DIFFERS FROM TOFU BY ONE PIXEL PASSES "IT IS DRAWN" AND
-     FAILS "IT IS A MARK." (§52, §120.2, from a side neither of them saw: both
-     are about a character that is MAPPED and not drawn; this one is drawn and
-     not legible.) So it is CSS, which is under our control, scales, takes
-     currentColor and cannot fall back to somebody else's font — §45's answer
-     to the colour emoji, in a second place. */
-  .saidmark { margin-left:6px; font-size:11px; cursor:help;
-    display:inline-block; vertical-align:middle;
-    width:9px; height:9px; border-radius:50%;
-    border:2px solid var(--gold-deep); background:var(--gold-deep);
-    /* The character inside is kept for a copy-paste and a screen reader, and
-       is not what is looked at. */
-    text-indent:-999em; overflow:hidden; }
-  /* FULL AGAINST EMPTY, NOT SOLID AGAINST DASHED. The first CSS draft was a
-     dashed ring, and measuring it caught §180's own mistake a second time: at
-     a 9px circle a 1.5px dash rounds to 1px and lays down about four marks —
-     faint for exactly the reason the dotted CHARACTER was. Same weight of
-     ring, filled or not, is a difference that survives the size. */
-  .saidmark.done { border-color:var(--ink-3); background:none; }
+  .saidmark { margin-left:6px; color:var(--gold-deep); font-size:11px;
+    cursor:help; }
+  /* ── ANSWERED, AND VISIBLY SO (§180) ────────────────────────────────
+     The GLYPH carries the state, not the colour: `◎` waiting, `◌` answered.
+     One ring in two inks was drawn first and the mockup killed it — the mark
+     is 9.6px wide at 11px type, and gold against grey at that size is not a
+     difference anybody reads (measured: rgb(138,107,34) vs rgb(99,108,121)).
+     The ink still moves, so the two agree rather than fight, but it is the
+     shape that does the work. */
+  .saidmark.done { color:var(--ink-3); }
   /* Why a dismissal did not land (§171's rule, on a write that rides no
      autosave and so has no banner of its own). --bad-tx because it is WORDS,
      not a fill (§38.5). */

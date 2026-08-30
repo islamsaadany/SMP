@@ -1933,5 +1933,70 @@ console.log("\n20 · a refusal names the rows it refused (§184)");
         JSON.stringify(v.refused));
 })();
 
+console.log("\n21 · viewing as somebody is judged as somebody (§185)");
+/* Islam: *"Hala got this error, when I view as her I didn't get it — so the
+   view-as function is not showing exactly what people see."*
+
+   THE MEASUREMENT THAT SETTLED IT, kept as an assertion: one edit, one
+   screen, two answers. The whole fault is that authorisation read the
+   session cookie while the page read the simulation, so the office could
+   never reproduce anybody's refusal — and could write through a colleague's
+   view what that colleague could never write.
+
+   `actingFor()` can only NARROW, and these are the three answers that make
+   that true. A session without the seat is judged as itself, so a forged
+   `viewAs` buys nothing (§42: a switch that only hides a control is
+   decoration); an unknown key is REFUSED rather than treated as somebody
+   with no roles, because "no roles" is a narrowing that hides a mistake
+   instead of reporting it. */
+(function () {
+  const FN = "it";
+  const capOf = function (st) {
+    return st.group.capabilities.filter(function (c) { return c.fn === FN; })[0];
+  };
+  const base = clone(SEED);
+  base.functions[FN].custodian = "t185_hala";
+  base.people.push({ key: "t185_hala", name: "Hala 185", active: true });
+  const smo = personOf(base, "smo") || { key: "smo", name: "SMO" };
+
+  /* The same edit, judged twice — the report, as an assertion. */
+  const edit = function () {
+    const i = clone(base);
+    capOf(i).projects[0].milestones[0].finish = "Dec 27";
+    return i;
+  };
+  const asHer = A.authorize(base, edit(), personOf(base, "t185_hala"));
+  const asSMO = A.authorize(base, edit(), smo);
+  check("the edit IS refused for her", !asHer.ok, asHer.refusals.join(" / "));
+  check("...and accepted for the office — which is why it could not be seen",
+        asSMO.ok, asSMO.refusals.join(" / "));
+
+  /* And the rule that closes it. */
+  const people = base.people;
+  check("§185: no viewAs is judged as yourself",
+        R.actingFor(smo, "", "super", people).person.key === "smo");
+  check("§185: viewAs YOURSELF is not a simulation either",
+        !R.actingFor(smo, "smo", "super", people).simulated);
+  const sim = R.actingFor(smo, "t185_hala", "super", people);
+  check("§185: the office viewing as her is judged as HER",
+        sim.person && sim.person.key === "t185_hala" && sim.simulated === true,
+        JSON.stringify(sim));
+  check("§185: and authorising with that person reproduces her refusal",
+        !A.authorize(base, edit(), sim.person).ok);
+
+  /* THE OTHER END (§113.8): it must not be a way to become somebody else. */
+  check("§185: a session without the seat cannot simulate at all",
+        !!R.actingFor(personOf(base, "t185_hala"), "smo", "custodian", people).refuse);
+  check("§185: ...and a person the register does not hold is refused, never " +
+        "waved through as somebody with no roles",
+        !!R.actingFor(smo, "nobody_at_all", "super", people).refuse);
+  /* A forged viewAs from a session that cannot simulate is REFUSED rather
+     than silently ignored: ignoring it would judge the save as the forger,
+     which is wider than what they asked for and hides that they asked. */
+  check("§185: the refusal is a sentence somebody can act on",
+        /Only the SMO/.test(R.actingFor(personOf(base, "t185_hala"), "smo",
+                                        "custodian", people).refuse));
+})();
+
 console.log("\n" + pass + " passed, " + fail + " failed");
 process.exit(fail ? 1 : 0);

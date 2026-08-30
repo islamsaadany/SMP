@@ -560,8 +560,35 @@ var WELCOME = (function(){
     return true;
   }
 
+  /* ── ASKING FOR IT BACK (§185) ──────────────────────────────────────
+     Islam: *"Allow me to go back to the welcome screen somehow."* The screen
+     is offered once a session and then never again, so what is waiting on
+     you — the submission, the gaps, the unanswered replies — was readable for
+     one moment and then only by signing out.
+
+     DELIBERATELY NOT `offer()` WITH THE GUARD REMOVED. `offer()` answers
+     "should this take the screen unasked", and every one of its silences is
+     about that question: a projector, a file, a session that has already been
+     greeted. Pressing a button IS the ask, so the only silences that survive
+     are the two that are about whether the screen can exist at all.
+
+     AND IT DOES NOT `markDone()`. Asking for it back says nothing about
+     whether it has been seen — that mark is what stops it opening ITSELF a
+     second time, and clearing it here would put it in front of somebody on
+     their next paint (§107's rule about a memory that answers one question
+     answering only that one). */
+  function open(person){
+    if (!person) return false;
+    if (location.protocol === "file:") return false;
+    if (document.body && document.body.classList.contains("presenting")) return false;
+    if (box) return true;
+    try { build(person); } catch(e){ box = null; return false; }
+    return true;
+  }
+
   return {
     offer: offer,
+    open: open,
     showing: function(){ return !!box; },
     dismiss: dismiss
   };

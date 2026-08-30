@@ -155,6 +155,49 @@ var SYNC = (function () {
      never reaches the branch that draws the banner, so somebody who sets a
      cell, is refused, and sets it back gets no post and no message — the one
      shape of this fault that looks exactly like "it just does not save". */
+  /* ── WHO THE SAVE IS JUDGED AS (§185) ──────────────────────────────
+     Islam: *"Hala got this error, when I view as her I didn't get it — so
+     the view-as function is not showing exactly what people see."* Right,
+     and it was not a display fault. Measured, one edit judged twice:
+
+         judged as Hala : REFUSED — a plan is corrected by the SMO
+         judged as SMO  : ACCEPTED
+
+     Viewing as somebody changed everything the screen DREW and nothing the
+     server ACCEPTED, because authorisation reads the session cookie. So the
+     office could never reproduce anybody's refusal — and, the other way
+     round, could silently write things through a colleague's view that the
+     colleague could never have written themselves.
+
+     The simulated person now travels with the save and the server judges
+     against THEM. It can only ever narrow: the gate on using it at all is
+     the same seat role that draws the switcher, and a session without it
+     is judged as itself exactly as before.
+
+     Islam's choice, with the cost stated before he made it: you can no
+     longer correct somebody's data while wearing their view — you switch
+     back to yourself first, which is what the refusal now tells you. */
+  function actingAs() {
+    if (!person) return null;
+    /* ONLY WHERE THE SWITCHER IS ACTUALLY THERE. `viewer()` REASSIGNS
+       `window.VIEWER` to the first person on the register when it cannot find
+       the key it holds (§69.15's "lost" case) — so on a deployment whose
+       signed-in SMO is not yet ON the register, VIEWER points at a stranger
+       through nobody's choice. Sending that would have every one of their
+       saves judged as that stranger: a narrowing, which is the safe
+       direction, and still a bootstrap tenant unable to set itself up.
+       Asked through isSMOSession() and the register, which together are
+       exactly when the control that sets VIEWER is drawn at all. */
+    if (!isSMOSession()) return null;
+    if (!PEOPLE.some(function (p) { return p.key === person.key; })) return null;
+    var v = typeof window !== "undefined" ? window.VIEWER : null;
+    return v && v !== person.key ? v : null;
+  }
+  function bodyFor(state) {
+    var who = actingAs();
+    return '{"state":' + state + (who ? ',"viewAs":' + JSON.stringify(who) : "") + "}";
+  }
+
   var refusedWhy = null;
   /* §184: AND THE ROWS IT NAMED. Remembered beside the sentence for the same
      reason the sentence is: `save()` short-circuits on `refusedBody`, so the
@@ -163,6 +206,11 @@ var SYNC = (function () {
      moment somebody changed something and changed it back. */
   var refusedRows = null;
   var refusedUndoable = false;
+  /* Who `refusedBody` was judged as, so it is never held against somebody
+     else's rights (§185). */
+  var refusedAs = null;
+  /* WHOSE RIGHTS THE SERVER USED, when they were not yours (§185). */
+  var refusedJudged = null;
 
   /* A REFUSAL NEEDS A WAY OUT (§48.3).
 
@@ -308,7 +356,7 @@ var SYNC = (function () {
     return missed;
   }
 
-  function showRefusal(list, changes, undoable) {
+  function showRefusal(list, changes, undoable, judged) {
     var el = document.getElementById("refused");
     if (!el) return;
     if (!list || !list.length) { el.hidden = true; el.innerHTML = ""; return; }
@@ -327,7 +375,16 @@ var SYNC = (function () {
                    " \u2014 " + esc(fieldWord(r.field)));
       });
     });
-    el.innerHTML = "<span><strong>Not saved.</strong> " +
+    /* THE MISSING HALF OF THE SENTENCE (§185). "Setup is the SMO's" reads as
+       a bug when you ARE the SMO — it is true because the save was judged as
+       the person whose view you are wearing, and nothing on the screen said
+       so. Named first, because it is what makes the rest make sense. */
+    el.innerHTML = (judged
+        ? "<span><strong>You are viewing as " + esc(judged.name) + ".</strong> " +
+          "This was judged as them, not as you \u2014 switch back to your own " +
+          "view to make it yourself.</span>"
+        : "") +
+      "<span><strong>Not saved.</strong> " +
       (list.length === 1 ? "" : "The server refused this change:") + "</span>" +
       (list.length === 1
         ? "<span>" + esc(list[0]) + "</span>"
@@ -439,8 +496,15 @@ var SYNC = (function () {
     if (saving) { queued.push(done); return; }
     var now = serialize();
     if (now === lastSaved) return say("clean");
+    /* THE REMEMBERED REFUSAL IS PER VIEWER (§185). The same graph refused for
+       one person is not refused for another, so switching back to yourself
+       must not run into a body remembered under somebody else's rights —
+       which would silence a save that is now perfectly legitimate. */
+    if (refusedAs !== actingAs()) { refusedBody = null; refusedWhy = null;
+                                    refusedRows = null; refusedUndoable = false;
+                                    refusedJudged = null; }
     if (now === refusedBody) {
-      showRefusal(refusedWhy, refusedRows, refusedUndoable);
+      showRefusal(refusedWhy, refusedRows, refusedUndoable, refusedJudged);
       return say("refused");
     }
     saving = true;
@@ -448,7 +512,7 @@ var SYNC = (function () {
     fetch("/api/state", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: '{"state":' + now + "}"
+      body: bodyFor(now)
     }).then(function (r) {
       saving = false;
       /* REFUSED, not failed (spec 006). The server has decided this person may
@@ -461,24 +525,26 @@ var SYNC = (function () {
          the door, not a banner. */
       if (r.status === 401) { location.replace("/"); return; }
       if (r.status === 403) {
-        refusedBody = now;
+        refusedBody = now; refusedAs = actingAs();
         say("refused");
         return r.json().then(function (j) {
           if (j && j.mustChange) { location.replace("/"); return; }
           refusedWhy = (j && j.refusals) || null;
           refusedRows = (j && j.refusedChanges) || null;
           refusedUndoable = !!(j && j.undoable);
-          showRefusal(refusedWhy, refusedRows, refusedUndoable);
+          refusedJudged = (j && j.judgedAs) || null;
+          showRefusal(refusedWhy, refusedRows, refusedUndoable, refusedJudged);
         }, function () {
           /* A 403 whose body will not parse is still a refusal, and saying
              nothing about it is the silence this section exists to remove. */
           refusedWhy = ["The server refused the change and gave no reason."];
-          refusedRows = null; refusedUndoable = false;
+          refusedRows = null; refusedUndoable = false; refusedJudged = null;
           showRefusal(refusedWhy);
         });
       }
       if (r.ok) {
         refusedWhy = null; refusedRows = null; refusedUndoable = false;
+        refusedJudged = null;
         showRefusal(null);
         lastSaved = now;
         /* A person created in the register does not exist to the SERVER until
@@ -778,8 +844,9 @@ var SYNC = (function () {
     if (!live || isDemoMode() || saving) return;
     if (timer) { clearTimeout(timer); timer = null; }
     var now = serialize();
-    if (now === lastSaved || now === refusedBody) return;
-    var body = '{"state":' + now + "}";
+    if (now === lastSaved) return;
+    if (now === refusedBody && refusedAs === actingAs()) return;
+    var body = bodyFor(now);
     try {
       fetch("/api/state", {
         method: "POST",

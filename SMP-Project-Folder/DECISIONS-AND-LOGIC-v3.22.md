@@ -22325,3 +22325,188 @@ un-addressable one still offers Discard alone — the work is on screen and
 nothing destroys it unasked, but the platform cannot rescue it automatically.
 Narrowing that further means teaching the register, the access matrix and the
 cycle to name rows, which is its own piece of work.
+
+---
+
+## §185 · Viewing as somebody is judged as somebody, a way back, and a mark that could not be seen
+
+Four from using the deployed product. Three are built; the fourth is a mockup
+awaiting sign-off.
+
+---
+
+### 1 · "Viewing as" showed her screen and used your rights
+
+Islam: *"If Hala got this error and when I view as her I didn't get it, then
+there is a problem with the view-as function — it's not showing exactly what
+people see even with the errors. We need a deep check for that."*
+
+**HE IS RIGHT, AND IT IS NOT A DISPLAY FAULT.** Measured before anything was
+written — one edit, one screen, judged twice:
+
+```
+judged as Hala : REFUSED — A plan is corrected by the SMO …
+judged as SMO  : ACCEPTED
+```
+
+`/api/state` reads the person off the **session cookie**. Viewing as somebody
+changed everything the screen DREW and nothing the server ACCEPTED. Two
+consequences, and the second is the worse one:
+
+* **No refusal anybody meets can be reproduced by the office.** Which is
+  exactly the report, and it means every "I can't reproduce it" from this desk
+  was worthless for the whole class of authorisation faults.
+* **The office could write, through a colleague's view, what that colleague
+  could never write themselves** — silently, with the screen showing their name.
+
+**THE DRAWING SIDE IS FAITHFUL.** Swept: everything that decides what to show
+reads `viewer()`. The three places that read the real session are deliberate
+and stay — the switcher itself (§69.15), *Send me a copy* (§95: a test that
+followed the simulation would put a real message in a real colleague's inbox),
+and the welcome screen's own is-this-me guard. **It is the save path alone.**
+
+**THE SIMULATED PERSON NOW TRAVELS WITH THE SAVE.** Islam's choice of three,
+with the cost stated before he made it: you can no longer correct somebody's
+data while wearing their view — you switch back to yourself first, and the
+refusal now tells you so.
+
+**`actingFor()` IS A RULE IN `lib/rules.js`, NOT A BRANCH IN THE ENDPOINT**
+(§42): who may act as whom is exactly the kind of question that must have one
+answer and be testable without a database.
+
+**AND IT CAN ONLY NARROW.** Three answers make that true, and each is asserted:
+
+* the gate is the **seat role on the SESSION**, the same fact that draws the
+  switcher — so a session that cannot simulate is judged as itself exactly as
+  before, and a forged `viewAs` buys nothing (§42: a switch that only hides a
+  control is decoration);
+* the simulated person is looked up in the **stored** people, never taken from
+  the incoming state;
+* an unknown key is **REFUSED**, never treated as somebody with no roles —
+  "no roles" is a narrowing that hides a mistake instead of reporting it.
+
+**A REFUSAL WHILE SIMULATING SAYS SO.** *"Setup is the SMO's"* is a baffling
+thing to read when you **are** the SMO, and only the server knows the missing
+half of that sentence — so the 403 carries `judgedAs` and the banner leads with
+*"You are viewing as Hala. This was judged as them, not as you."*
+
+**THE REMEMBERED REFUSAL IS PER VIEWER.** §171's short-circuit compares the
+serialised graph; the same graph refused for one person is not refused for
+another, so switching back to yourself would have run into a body remembered
+under somebody else's rights and silenced a save that is now legitimate.
+
+**THE CHANGE LOG STILL NAMES WHO SIGNED IN.** The save is AUTHORISED as the
+person being viewed — that is the fix — and it was MADE by whoever is at the
+keyboard. A log that named the simulation could not answer *who moved this*.
+
+---
+
+### 2 · A way back to the welcome screen
+
+Islam: *"Allow me to go back to the welcome screen somehow."* It is offered
+once a session (§148), so what is waiting on you was readable for one moment
+and afterwards only by signing out.
+
+**A HOUSE, BESIDE THE GEAR** — his placement, over the Setup rail and the
+Knowledge base. It has to be reachable from every page and the other two are
+not: the rail is two presses and needs Setup, and the Knowledge base has been
+the office's since §119.4, so nobody else could get back.
+
+**IT DOES NOT RIDE ON THE GEAR.** `menuHTML()` returns nothing at all for
+anybody with no Setup destination — most of the register — so hanging the house
+off it would have given the way back to the office alone, which is §61's trap
+pointed at the people the screen is most for. `chromeActsHTML()` draws both and
+owns the separator.
+
+**`WELCOME.open()` IS NOT `offer()` WITH THE GUARD REMOVED.** `offer()` answers
+*should this take the screen unasked*, and every one of its silences is about
+that question. Pressing a button IS the ask, so the only silences that survive
+are the two about whether the screen can exist at all — a projector, and a file
+with no session. **And it does not `markDone()`**: asking for it back says
+nothing about whether it has been seen, and clearing that mark would put the
+screen in front of somebody unasked on their next paint.
+
+**WIRED IN `wireMenu()`**, beside the gear, because `paintUnits()` rewrites that
+row's innerHTML and whoever destroys the wiring re-does it in the same function
+(§29.5). **It navigates nowhere** — the screen is an overlay over the page you
+are already on — so pressing it mid-edit leaves the edit where it was.
+
+---
+
+### 3 · The dismissed mark that could not be seen
+
+Islam: *"I dismissed the case but the small mark is not there."*
+
+**IT WAS DRAWN. IT WAS NOT LEGIBLE, AND §180 MEASURED THE WRONG THING.** That
+section shipped `◎` waiting and `◌` answered and proved the glyphs were not
+tofu by asking whether each **differed from the tofu rectangle** — which the
+dotted circle does, by about one pixel of ink. Re-measured in the font this
+mark actually computes to (the system stack, not an embedded subset):
+
+| | ink pixels |
+|---|---|
+| `◎` bullseye, waiting | 53 |
+| `◌` dotted circle, answered | **29** |
+| the tofu rectangle | **28** |
+
+**A GLYPH THAT DIFFERS FROM TOFU BY ONE PIXEL PASSES "IT IS DRAWN" AND FAILS
+"IT IS A MARK."** §52 and §120.2 are both about a character that is MAPPED and
+not DRAWN; this is the third case neither saw — drawn, and invisible.
+
+**IT IS CSS NOW**: a 9px circle, 2px ring, filled while the claim is waiting and
+open once it has been answered. Under our control, scales, takes the token ink,
+and cannot fall back to somebody else's font — §45's answer to the colour emoji,
+in a second place.
+
+**AND THE FIRST CSS DRAFT REPEATED THE MISTAKE.** It was a *dashed* ring, and
+measuring it caught that: at a 9px circle a 1.5px dash rounds to 1px and lays
+down about four marks — faint for exactly the reason the dotted character was.
+**Full against empty, at the same weight**, is the difference that survives the
+size.
+
+**THE CHECK MOVED WITH IT** (§51.11). `checks/people-dialog.py` asserted the
+GLYPHS, which is a question about a build that no longer exists; it asserts what
+a person can see — two rings of the same footprint, so the row cannot move
+(§88), the same ring weight so neither is the faint one, and the shape carrying
+the state with the ink following rather than leading.
+
+---
+
+### 4 · The header, when somebody holds two roles — mockup only
+
+Islam: *"the roles can come under each other if that long to avoid that the
+company name and smo section come down."*
+
+`.whero` is a flex row that is allowed to **wrap**, so two long role chips fill
+the line and the whole tenant block — the mark, *Raya Trade*, *Strategy
+Management Office* — drops beneath them. **Measured, and it is not a
+narrow-window problem:**
+
+| width | header now | proposed |
+|---|---|---|
+| 1440 | 294px, tenant below | 204px, tenant beside |
+| 1100 | 294px, tenant below | 204px, tenant beside |
+| 900 | 329px, tenant below | 239px, tenant beside |
+
+Four lines of CSS, drawn against the real screen and **not applied**: rule 1c,
+a mockup first. Published as an artifact with the cost stated (the greeting
+column is narrower on a wide window; below 820px the old stacking returns on
+purpose).
+
+---
+
+### Proof
+
+`scripts/test-authorize.js` gains **§21**: the report kept as an assertion (the
+same edit refused for her and accepted for the office), then the four answers
+`actingFor()` gives — judged as yourself with no `viewAs`, judged as HER when
+the office simulates, and **both ends** (§113.8): a session without the seat
+cannot simulate at all, and a person the register does not hold is refused
+rather than waved through. **345 passed, 0 failed.**
+
+`checks/people-dialog.py` re-pointed at the visible mark. `checks/welcome.py`
+and `checks/refusal-keeps-work.py` green; `qa.py` clean.
+
+**Not reproduced and said so:** nothing about item 3 was visible from this
+session's network — the egress proxy refuses the deployment — so the §184 merge
+went out unverified against the live site and is still worth checking.

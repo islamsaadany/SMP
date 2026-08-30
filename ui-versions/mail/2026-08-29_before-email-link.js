@@ -240,14 +240,7 @@ var MAIL = (function(){
             "receives one.\n\nThe header carries your organisation's name and your " +
             "accent colour. The footer below carries whatever you set on the " +
             "Communication page.\n\nIf this looks right, it is ready to use.",
-      /* ── NEVER "#" (spec 027) ──────────────────────────────────────
-         It was `o.href || "#"`, and a "#" in an EMAIL is not a quiet no-op the
-         way it is on a page: there is no base document, so the mail client
-         hands it to the operating system and macOS answers "The application
-         can't be opened. -50". html() draws no button at all when the link is
-         empty, which is the honest shape — a test of the design that offers no
-         button is better than one offering a button that cannot open. */
-      cta: { label: "Open the platform", href: o.href || "" }
+      cta: { label: "Open the platform", href: o.href || "#" }
     });
   }
 

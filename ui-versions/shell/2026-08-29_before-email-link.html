@@ -4749,33 +4749,6 @@
         paintMsgPreview();
       });
     });
-    /* ── THE LINK IS COMPLETED WHERE IT IS TYPED (spec 027) ─────────
-       Islam typed `smp-orpin-tau.vercel.app` and the message went out with it
-       verbatim. In an email that is not an address at all — there is no base
-       document for it to be relative to — so the mail client handed it to
-       macOS, which looked for a file of that name and answered "-50". The
-       button was dead for everybody who pressed it.
-
-       ON `change`, WHICH FOR A TEXT BOX MEANS ON BLUR (§35) — never on
-       `input`, or `https://` would appear in front of the third character
-       somebody typed and the caret would sit behind it. So it happens once,
-       when they have finished, and it is WRITTEN INTO THE FIELD: seeing the
-       scheme appear IS the explanation, and a value quietly corrected on the
-       way out is one nobody can check (§124 — whatever reads a value cleans
-       it, rather than an instruction to go and look).
-
-       NOTHING IS REFUSED HERE. A half-typed address is a normal thing to have
-       in a box you are still filling in; the refusal belongs at the moment of
-       sending, where there is something to refuse. */
-    var ctahref = document.getElementById("msgctahref");
-    if (ctahref) ctahref.addEventListener("change", function(){
-      var fixed = SMPRules.webUrl(ctahref.value);
-      if (!fixed || fixed === ctahref.value.trim()) return;
-      ctahref.value = fixed;
-      sendmsg().ctaHref = fixed;
-      sendmsgTouched();
-      paintMsgPreview();
-    });
 
     /* THE OVERVIEW'S ONE LOUD CONTROL (§144.8). It moves to the other tab
        rather than doing anything itself — the composer is where the act
@@ -5037,18 +5010,6 @@
       if (!sendmsgHasAny()) return say("Choose who it goes to first.", false);
       if (!st.subject.trim()) return say("It needs a subject.", false);
       if (!st.body.trim()) return say("It needs something in it.", false);
-      /* ── A BUTTON THAT CANNOT OPEN IS REFUSED (spec 027) ──────────
-         The blur above completes anything that CAN be completed, so what is
-         left here is a value no amount of tidying makes into a web address —
-         and the alternative to saying so is what happened: the message goes,
-         and every person who presses the button gets their operating system's
-         refusal instead of the platform. The one moment this can still be
-         stopped is before the confirmation, so it is checked here rather than
-         inside reallySend(), where a person has already said yes. */
-      if (st.ctaHref.trim() && !SMPRules.webUrl(st.ctaHref))
-        return say("The button's link is not a web address, so it would not open " +
-                   "for anybody. Give it one starting https:// — or clear it " +
-                   "to send with no button.", false);
       var n = (st.aud && st.aud.to) ? st.aud.to.length : 0;
       if (!n) return say("That comes to nobody with an address.", false);
       /* ── THE CONFIRMATION IS THE PLATFORM'S OWN (§95) ──────────────
@@ -5132,10 +5093,8 @@
              server fills it once per recipient, because who they are is the
              server's answer (spec 022, §74.2). */
           greeting: st.greet == null ? null : { word: st.greet },
-          /* THROUGH THE RULE, never the raw box: the two sends and the
-             preview must draw the same link, and it must be one that opens. */
-          cta: (st.ctaLabel.trim() && SMPRules.webUrl(st.ctaHref))
-                 ? { label: st.ctaLabel.trim(), href: SMPRules.webUrl(st.ctaHref) } : null
+          cta: (st.ctaLabel.trim() && st.ctaHref.trim())
+                 ? { label: st.ctaLabel.trim(), href: st.ctaHref.trim() } : null
         })
       }, function(err, j){
         msgsend.disabled = false; st.busy = false;
@@ -5201,13 +5160,6 @@
       }
       if (!st.subject.trim()) return say("It needs a subject before it can be previewed.", false);
       if (!st.body.trim()) return say("It needs something in it.", false);
-      /* THE SAME REFUSAL SEND MAKES (spec 027). A copy that quietly dropped the
-         button would be a preview of a message nobody can send — and the point
-         of a copy is to see what the recipients will see. */
-      if (st.ctaHref.trim() && !SMPRules.webUrl(st.ctaHref))
-        return say("The button's link is not a web address, so it would not open " +
-                   "for anybody. Give it one starting https:// — or clear it " +
-                   "to send with no button.", false);
       var me = (typeof SYNC !== "undefined" && SYNC.person && SYNC.person()) || null;
       var row = me ? PEOPLE.filter(function(p){ return p.key === me.key; })[0] : null;
       var addr = row ? String(row.email == null ? "" : row.email).trim() : "";
@@ -5230,10 +5182,8 @@
              there is one recipient and the browser knows who they are. */
           greeting: st.greet == null ? null
                       : { word: st.greet, name: SMPRules.firstName(row) },
-          /* THROUGH THE RULE, never the raw box: the two sends and the
-             preview must draw the same link, and it must be one that opens. */
-          cta: (st.ctaLabel.trim() && SMPRules.webUrl(st.ctaHref))
-                 ? { label: st.ctaLabel.trim(), href: SMPRules.webUrl(st.ctaHref) } : null
+          cta: (st.ctaLabel.trim() && st.ctaHref.trim())
+                 ? { label: st.ctaLabel.trim(), href: st.ctaHref.trim() } : null
         }),
         body: st.body.trim(),
         fromName: sh.fromName,

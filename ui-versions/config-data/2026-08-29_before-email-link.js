@@ -741,20 +741,8 @@ function commsShape(){
     footer:   c.footer || COMMS_FOOTER_DEFAULT(),
     accent:   b.accent || "",
     panel:    b.bar || "",
-    /* ── WHERE THE PLATFORM IS, ANSWERED ONCE (spec 027) ──────────────
-       It was `origin + "/"` here and `origin + location.pathname` in chat.js,
-       so the two emails this product sends disagreed about what "Open the
-       platform" means: one landed on the sign-in gate, the other on the
-       platform itself. §53.5 with an inbox on the end of it. The PATHNAME is
-       the right of the two — the platform is served at /raya-trade (§35.6) and
-       the root is the gate — and chat.js asks this now rather than keeping its
-       own copy.
-
-       EMPTY WHERE THERE IS NO ADDRESS TO GIVE. Opened from a file `origin` is
-       the string "null", and a link built on that is worse than no link:
-       every caller draws no button rather than a dead one. */
     href:     (typeof location !== "undefined" && location.origin && location.origin !== "null")
-                ? location.origin + location.pathname : ""
+                ? location.origin + "/" : ""
   };
 }
 function COMMS_FOOTER_DEFAULT(){

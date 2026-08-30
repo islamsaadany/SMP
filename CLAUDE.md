@@ -2508,6 +2508,37 @@ console errors (in this cloud environment, run it via a wrapper that points Play
   touching `mail.js`. "Present" ≠ "accepted" ≠ "verified": the page reports only
   what was actually asked, and matches a bad key on Resend's MESSAGE because
   Resend answers an invalid key with **400**, not 401.
+- **A LINK IN AN EMAIL HAS NOTHING TO BE RELATIVE TO (§176, spec 027):**
+  Islam pressed the button in a message he had sent himself and macOS answered
+  **"The application can't be opened. −50"**. The link was
+  `smp-orpin-tau.vercel.app` — what he typed, mailed verbatim. **A BROWSER
+  FORGIVES A MISSING `https://` BECAUSE IT HAS AN ADDRESS BAR TO GUESS WITH; AN
+  EMAIL HAS NO BASE DOCUMENT**, so the mail client hands the raw string to the
+  operating system, which looks for a file of that name. The button was dead for
+  **every recipient**. `SMPRules.webUrl()` is the ONE rule — in `lib/rules.js`,
+  because the composer COMPLETES and the server REFUSES, and a screen that tidies
+  a value the server judges differently is §42's drift with an inbox on the end
+  of it. **COMPLETING IS NOT GUESSING**: `https://` is added only where what is
+  there is already a host (a dot, no whitespace, no scheme), and everything else
+  — a bare path, a sentence, `javascript:` — is refused rather than decorated,
+  because inventing an address is how a message goes out pointing somewhere
+  nobody meant. **ON BLUR, NEVER ON `input`** (§35), and **written into the
+  field**, because seeing the scheme appear IS the explanation (§124). The
+  refusal is at SEND, before the confirmation — the last moment it can be
+  stopped — and **Send me a copy carries the identical one**, or a copy that
+  quietly dropped the button is a preview of a message nobody can send (§53.5).
+  **What the server guard does NOT claim is stated**: the html is posted whole
+  (§72.3), so it checks the link the composer declares, not every href in that
+  document. **TWO MORE FOUND BY LOOKING**: the test email shipped `href="#"`
+  whenever the platform did not know its own address (a quiet no-op on a page,
+  the same −50 in an inbox), and **the two emails disagreed about where the
+  platform IS** — `commsShape()` said the gate, `chat.js` said the platform
+  (§53.5 again); the pathname wins and chat.js asks rather than keeping a copy.
+  **AND NO CHECK HAD EVER PRESSED EITHER SEND BUTTON** — `data-mailtest`
+  appeared nowhere in `checks/`, because the whole surface is the empty state
+  over `file://` (§94.11), and **a dead link renders perfectly**. *The symptom a
+  person reports is the one they can SEE: two rounds went into proving the send
+  worked before the screenshot showed the email had already arrived.*
 - **A TEST COPY IS A SEND, AND IT SAYS SO (since v3.56, §146):** two kinds of
   email leave this platform and only one was recorded — `send` wrote a row and a
   row per recipient, while `test` (*Send me a copy*, and the test send on Email
@@ -2827,6 +2858,10 @@ python3 checks/squeezed-rail.py # below 820 the rail reads ACROSS on both sides,
 python3 checks/table-fit.py     # the plan tables FIT the pane at every width — never
                                 # "and it scrolls" — on a unit AND a function, with the
                                 # 620 floor still in force on a wide window (§158)
+python3 checks/email-link.py    # the link that LEAVES, read out of the html posted to
+                                # /api/mail — never the value in the box, which looked
+                                # right the whole time; both send buttons, both ends of
+                                # the refusal, and both emails' destination (§176)
 python3 checks/office-chat.py   # the chat's client half — serves the built file over HTTP,
                                 # because the whole feature is invisible over file:// (§97.9)
 python3 checks/welcome.py       # the welcome screen (§148): three viewers over HTTP, every
@@ -2911,7 +2946,40 @@ prior sessions (on HR_ERP) accidentally reverted agreed-upon designs.
 
 ---
 
-*Last Updated: 2026-08-29 &mdash; **v3.64: a Setup page that fits, an editable
+*Last Updated: 2026-08-30 &mdash; **v3.65: a link in an email has nothing to
+be relative to (&sect;176, spec 027)**. Islam pressed the button in a message he
+had sent himself: **"The application can't be opened. &minus;50"**. The link was
+`smp-orpin-tau.vercel.app` &mdash; what he typed, mailed verbatim. **A browser
+forgives a missing `https://` because it has an address bar to guess with; an
+email has no base document**, so the mail client hands the raw string to macOS,
+which looks for a file of that name. The button was dead for **every
+recipient**, and nothing between typing it and sending it said so.
+**THE FIRST TWO ANSWERS WERE WRONG AND THAT IS THE LESSON**: he reported the
+test send as not working, so I proved the send path sound end to end (19/19 on
+the server against a real Postgres; the button pressed in a browser at six
+window sizes) and asked what he saw &mdash; *"nothing happened at all"*, which
+is a disabled button, so I went hunting for what disables it. Then the
+screenshot arrived and **the email had already been delivered**: the send was
+never the fault. *The symptom a person reports is the one they can SEE, and it
+is not always the one nearest the cause.* One rule now (`SMPRules.webUrl`) in
+the shared module, because the composer COMPLETES and the server REFUSES and
+two rules for one question is &sect;42's drift with an inbox on the end of it
+&mdash; and **completing is not guessing**: only a value that is already a host
+gets a scheme, everything else is refused, since inventing an address is how a
+message goes out pointing somewhere nobody meant. **Two more found by looking**:
+the test email shipped `href="#"` whenever the platform did not know its own
+address (a quiet no-op on a page, the same &minus;50 in an inbox), and the two
+emails **disagreed about where the platform is** &mdash; one sent people to the
+sign-in gate, the other to the platform. **AND NO CHECK HAD EVER PRESSED EITHER
+SEND BUTTON**: `data-mailtest` appeared nowhere in `checks/`, because the whole
+surface is the empty state over `file://` &mdash; and **a dead link renders
+perfectly**. `checks/email-link.py` asserts the link that LEAVES, read out of
+the html actually posted, and was proved able to fail first: **18 failures**
+against the previous build, among them `and it is absolute &mdash;
+['smp-orpin-tau.vercel.app']`, the reported fault reproduced. Recorded and not
+fixed: messages already sent keep their dead button.*
+
+*Earlier: 2026-08-29 &mdash; **v3.64: a Setup page that fits, an editable
 scale, the away threshold, and a change saved at once
 (&sect;167&ndash;&sect;170)**. Islam, on the
 Platform Inbox: *"on scrolling up the messaging headr is lost the side rail of

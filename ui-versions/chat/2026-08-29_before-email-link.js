@@ -1102,11 +1102,7 @@ var CHAT = (function(){
         title: "The Strategy Office replied",
         preheader: text.slice(0, 140),
         body: text + "\n\nOpen the platform to answer.",
-        /* THE SAME ANSWER THE TEST EMAIL USES (spec 027). This line was the
-           second copy of "where is the platform" and the two had drifted:
-           commsShape() said the gate, this said the platform. One asker now,
-           and an empty answer draws no button rather than a broken one. */
-        cta: { label: "Open the platform", href: sh.href || "" }
+        cta: { label: "Open the platform", href: location.origin + location.pathname }
       });
     } catch (e) { /* No mail builder here is not a reason to refuse the reply. */ }
 

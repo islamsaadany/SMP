@@ -23412,10 +23412,19 @@ a real gap.
 separate decision and §187 did not change it — a collaborator list is still
 something a filler may write. Only its membership of the *walk* moves.
 
-**Flagged, not changed:** the collaborators cell still renders in fill mode
-with the red *Missing* dress that `gapfld` carries, so on that screen it still
-LOOKS like a missing item while the count correctly ignores it. That is a
-visual decision and needs a mockup (rule 1c), so it is Islam's to call.
+**Flagged, not changed — AND ISLAM HAS PARKED IT** (*"keep it as a note for
+later"*): the collaborators cell still renders in fill mode with the red
+*Missing* dress that `gapfld` carries — a 1px dashed `--bad` border — so on
+that screen it still LOOKS like a missing item while the count correctly
+ignores it. Measured on Mobile's plan in fill mode: **1 real gap and 5
+collaborator boxes, all six wearing the same border**
+(`design-mockups/fill-band/2026-08-30_collab-box.png` is the picture he was
+shown).
+
+It is one line (`gapfld` follows `isGapField` the way `gapwalk` now does) and
+it is deliberately NOT taken: the cell stays fillable either way — §187 changed
+what is COUNTED, not what may be written — so this is purely how it looks, and
+a look is his (rule 1c). **Open item, waiting on him.**
 
 Proved able to fail: putting the two class decisions back makes
 `checks/gap-walk.py` red twice again, exactly as it is on `origin/main`.

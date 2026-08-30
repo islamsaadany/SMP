@@ -3761,37 +3761,16 @@ function fullYear(y){
 }
 /* Months since year zero, so two dates in different years compare with one
    subtraction. Null when the text is not a time at all -- which is what the
-   upload notice reports and what "Done" in a due-date column produces. */
+   upload notice reports and what "Done" in a due-date column produces.
+
+   THE READER ITSELF MOVED TO `lib/rules.js` (§184). The server had to be able
+   to ask "is this a date" -- a value it cannot read is a GAP, and until §184
+   only the browser knew which values those were, so the screen offered a
+   filler a control the save then refused. What is left here is the one thing
+   the shared rule cannot know: which year an unyeared quarter belongs to,
+   which is this tenant's cycle. */
 function monthsOf(v, last){
-  var s = String(v == null ? "" : v).trim();
-  if (!s) return null;
-  var m;
-  /* W3 Mar 26 / Week 3 March 2026 -- the week is read and discarded, because
-     the comparison is monthly. It is kept in the TEXT for the person. */
-  if ((m = /^w(?:eek)?\s*[1-5]\s+([a-z]+)\.?\s*'?(\d{2,4})$/i.exec(s)))
-    return monthIndex(m[1]) < 0 ? null : fullYear(m[2]) * 12 + monthIndex(m[1]);
-  /* July 26 / Jul 2026 / Dec 26 */
-  if ((m = /^([a-z]+)\.?\s*'?(\d{2,4})$/i.exec(s)))
-    return monthIndex(m[1]) < 0 ? null : fullYear(m[2]) * 12 + monthIndex(m[1]);
-  /* Q3 2026 / Q3 -- a quarter is its FIRST month, or its last when `last`
-     is asked for, which is how a cycle named Q2 covers April to June. */
-  if ((m = /^q([1-4])\s*'?(\d{2,4})?$/i.exec(s))) {
-    var qy = m[2] ? fullYear(m[2]) : cycleYear();
-    return qy == null ? null : qy * 12 + (+m[1] - 1) * 3 + (last ? 2 : 0);
-  }
-  /* H1 2026 / H2 26 -- a half year, which is what a review is usually called
-     and what the old reader could not see at all. */
-  if ((m = /^h([12])\s*'?(\d{2,4})?$/i.exec(s))) {
-    var hy = m[2] ? fullYear(m[2]) : cycleYear();
-    return hy == null ? null : hy * 12 + (+m[1] - 1) * 6 + (last ? 5 : 0);
-  }
-  /* FY26 / 2026 -- a whole year. */
-  if ((m = /^(?:fy)?\s*'?(\d{4})$/i.exec(s)))
-    return fullYear(m[1]) * 12 + (last ? 11 : 0);
-  /* 31 May 2026, and anything else a browser genuinely reads as a date. */
-  var t = Date.parse(s);
-  if (!isNaN(t)) { var d = new Date(t); return d.getFullYear() * 12 + d.getMonth(); }
-  return null;
+  return SMPRules.whenMonths(v, last, cycleYear());
 }
 /* THE CYCLE'S OWN CLOSING MONTH, taken from `REVIEW.to` -- which has said
    "Jun 2026" since the review model existed -- rather than parsed out of its

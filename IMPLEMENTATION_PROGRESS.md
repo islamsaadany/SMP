@@ -68,6 +68,40 @@ Nothing proceeds past this line without an answer.
 
 ## Built and verified
 
+### v3.72 — a date the platform cannot read, and a refusal that costs one row (§184)
+
+- **The CX custodian's loss, reproduced against the real authoriser first.**
+  An empty due date filled is accepted; the same act on a date holding
+  `30/09/2026` is refused, because a non-blank value is not a gap so
+  correcting it is *authoring*, which is the office's. The refusal is right.
+  The loss is that the whole graph posts together, so one refused row failed
+  the whole save and took three legitimate fills with it — and the only
+  control on the banner destroyed them. That is why the SMO never received
+  them: they were never stored.
+- **`monthsOf()` moved into `lib/rules.js`.** The platform's definition of a
+  time lived in the browser alone, so the screen and the server answered "is
+  this a date" differently. One reader now; `dueFits()` uses it too.
+- **An unreadable date is a gap**, keyed on the field name (`start`, `end`,
+  `finish`), asked by the counts, the cell and the server through one
+  function. A readable one is still the office's — asserted at both ends.
+- **The row opens AND still shows what is stored.** Rendering *Missing* over
+  `30/09/2026` would hide the value the person is being asked to correct.
+- **A refusal now carries an address**, not only a sentence: target, row id,
+  field, and the value the row held. The banner names the lines and offers
+  **"Put back those lines and save the rest"**. Discard stays, and is never
+  the only control again.
+- **A change with no row address offers no button** — the server decides
+  that, because a button that cannot work is worse than the destructive one.
+- **Nothing stored, nothing migrated.**
+- Proof: `test-authorize.js` §19–§20 (**336 passed**), proved able to fail 3
+  and 2 ways; `checks/refusal-keeps-work.py` is new, drives the whole path in
+  a browser with the **real authoriser behind the stub**, and is **11 red** on
+  the previous build; `checks/milestone-fill.py` §9. `qa.py` clean.
+- **Recorded, not fixed:** the put-back is offered only when every refusal in
+  one response is addressable. A save mixing an addressable refusal with an
+  un-addressable one still offers Discard alone — nothing is destroyed
+  unasked, but the platform cannot rescue it automatically.
+
 ### v3.65 — a function could not report at all, and Save draft never finished (§183)
 
 - **A supporting function that plans in pillars reported nothing.** Its

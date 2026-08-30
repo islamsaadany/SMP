@@ -324,6 +324,17 @@
                   border:0; padding:0; margin:0; cursor:pointer;
                   text-decoration:underline; text-underline-offset:2px; }
   .refused-undo:focus-visible { outline:2px solid currentColor; outline-offset:2px; }
+  /* THE ONE THAT KEEPS THE WORK IS THE ONE THAT LOOKS LIKE A BUTTON (§184).
+     Discard reads as a deliberate choice, above; putting the refused lines
+     back and saving the rest is the ordinary next step, so it wears a border
+     and the pair reads in two volumes rather than one. No new colour: the
+     banner's own text token, which is already measured against --bad-bg
+     (§38.4 — the tint and its TEXT twin, never the solid fill). */
+  .refused-keep { font:inherit; font-weight:700; color:inherit; background:none;
+                  border:1.5px solid currentColor; border-radius:var(--r-sm, 6px);
+                  padding:3px 10px; margin:0 6px 0 0; cursor:pointer; }
+  .refused-keep:hover { background:color-mix(in srgb, currentColor 10%, transparent); }
+  .refused-keep:focus-visible { outline:2px solid currentColor; outline-offset:2px; }
   .banner.refused ul { margin:4px 0 0; padding-left:18px; }
   .banner.refused li { margin:2px 0; }
 
@@ -8342,9 +8353,105 @@ THEME.apply();
      nothing: none of them changes what this cycle's figure means. */
   var GAP_SCORE_FIELDS = ["dir", "target", "compile", "weight", "quarters"];
 
+  /* ── WHEN A DATE IS A DATE (§184) ─────────────────────────────────
+     `monthsOf()` in the platform is what decides whether a row is due, what
+     `dueFits()` calls a date on upload, and what the overrun warning
+     compares — so it is the platform's definition of a time, and until now
+     it lived in the browser alone. THE SERVER NEEDED IT: §184's whole
+     fault is that a value the platform cannot read — `30/09/2026`, typed
+     before §179 gave these fields a picker — is not blank, so the screen
+     let a filler correct it and the server classified the correction as
+     AUTHORING and refused it. Two answers to "is this a date", one per
+     side, which is §42's drift with a lost afternoon on the end of it.
+
+     So the reader moves here whole, as a pure function taking the cycle's
+     year rather than reading REVIEW, and `monthsOf()` becomes a one-line
+     wrapper (§130.7's shape, where the name rule made the same move).
+     Nothing about what it reads changes — the regexes, the two-digit year
+     rule and the quarter/half `last` behaviour are as they were. */
+  var WHEN_MONTHS = ["jan","feb","mar","apr","may","jun",
+                     "jul","aug","sep","oct","nov","dec"];
+  function whenMonthIndex(w) {
+    return WHEN_MONTHS.indexOf(String(w || "").slice(0, 3).toLowerCase());
+  }
+  function whenFullYear(y) {
+    var n = +y;
+    if (!n && n !== 0) return null;
+    /* "26" is 2026, not 26 AD — a plan is never written about the year 26. */
+    return n < 100 ? 2000 + n : n;
+  }
+  /* Months since year zero, so two dates in different years compare with one
+     subtraction. Null when the text is not a time at all — which is what the
+     upload notice reports and what "Done" in a due-date column produces.
+     `cyYear` is the cycle's year, used only where a quarter or a half names
+     none; null there means the SHAPE is still read (see whenReadable). */
+  function whenMonths(v, last, cyYear) {
+    var s = String(v == null ? "" : v).trim();
+    if (!s) return null;
+    var m;
+    /* W3 Mar 26 / Week 3 March 2026 — the week is read and discarded,
+       because the comparison is monthly. It is kept in the TEXT. */
+    if ((m = /^w(?:eek)?\s*[1-5]\s+([a-z]+)\.?\s*'?(\d{2,4})$/i.exec(s)))
+      return whenMonthIndex(m[1]) < 0 ? null : whenFullYear(m[2]) * 12 + whenMonthIndex(m[1]);
+    /* July 26 / Jul 2026 / Dec 26 */
+    if ((m = /^([a-z]+)\.?\s*'?(\d{2,4})$/i.exec(s)))
+      return whenMonthIndex(m[1]) < 0 ? null : whenFullYear(m[2]) * 12 + whenMonthIndex(m[1]);
+    /* Q3 2026 / Q3 — a quarter is its FIRST month, or its last when `last`
+       is asked for, which is how a cycle named Q2 covers April to June. */
+    if ((m = /^q([1-4])\s*'?(\d{2,4})?$/i.exec(s))) {
+      var qy = m[2] ? whenFullYear(m[2]) : cyYear;
+      return qy == null ? null : qy * 12 + (+m[1] - 1) * 3 + (last ? 2 : 0);
+    }
+    /* H1 2026 / H2 26 — a half year, which is what a review is usually
+       called and what the old reader could not see at all. */
+    if ((m = /^h([12])\s*'?(\d{2,4})?$/i.exec(s))) {
+      var hy = m[2] ? whenFullYear(m[2]) : cyYear;
+      return hy == null ? null : hy * 12 + (+m[1] - 1) * 6 + (last ? 5 : 0);
+    }
+    /* FY26 / 2026 — a whole year. */
+    if ((m = /^(?:fy)?\s*'?(\d{4})$/i.exec(s)))
+      return whenFullYear(m[1]) * 12 + (last ? 11 : 0);
+    /* 31 May 2026, and anything else a browser genuinely reads as a date. */
+    var t = Date.parse(s);
+    if (!isNaN(t)) { var d = new Date(t); return d.getFullYear() * 12 + d.getMonth(); }
+    return null;
+  }
+  /* CAN THE PLATFORM READ THIS AT ALL — the SHAPE, never which month it
+     lands on. A bare "Q3" names no year and is still a time somebody wrote;
+     it resolves against the cycle on a page and against nothing on a server
+     that is not looking at one, so readability is asked with a year SUPPLIED
+     rather than with none. One reader, asked twice — never a second list of
+     regexes, which is exactly how "a date" would come to mean two things
+     again (§53.5). */
+  function whenReadable(v) { return whenMonths(v, false, 2000) != null; }
+
   function gapBlank(v) { return v == null || String(v).trim() === ""; }
   /* The virtual quarters field, read as one. */
   function quartersBlank(t) { return !t.q1 && !t.q2 && !t.q3 && !t.q4; }
+
+  /* THE THREE GAP FIELDS THAT HOLD A TIME (§184). Keyed on the FIELD NAME,
+     not on the row kind, because `start`, `end` and `finish` appear in
+     GAP_FIELDS as dates and as nothing else — so one list answers for a
+     project's front matter and a milestone's due date without either call
+     site having to remember which it is. */
+  var GAP_WHEN = ["start", "end", "finish"];
+  function gapWhenField(f) { return GAP_WHEN.indexOf(f) > -1; }
+  /* IS THIS FIELD A GAP — the ONE test the screen, the counts, the deck and
+     the server all ask. A gap is a place holding nothing the platform can
+     USE, which for a date includes a value it cannot read: a milestone due
+     `30/09/2026` is a row the plan says nothing usable about, the page
+     already prints a red note naming it, and every score treats it as no
+     date at all. Before §184 it was merely non-blank, so the fill grant
+     would not open it, the office was the only one who could correct it,
+     and a filler who tried had the whole save refused. */
+  function gapEmptyValue(field, v) {
+    if (gapBlank(v)) return true;
+    return gapWhenField(field) && !whenReadable(v);
+  }
+  function gapEmpty(field, row) {
+    if (field === "quarters") return quartersBlank(row);
+    return gapEmptyValue(field, row ? row[field] : null);
+  }
 
   /* The pending marks on a row (or on the unit itself, for aspiration):
      `pend = { field: {by, at} }`. Stored as an ABSENCE — confirming
@@ -8359,8 +8466,7 @@ THEME.apply();
   function gapMissing(kind, row) {
     return (GAP_FIELDS[kind] || []).filter(function (f) {
       if (pendOf(row)[f]) return false;
-      if (f === "quarters") return quartersBlank(row);
-      return gapBlank(row[f]);
+      return gapEmpty(f, row);
     });
   }
   function pendingScore(row) {
@@ -9306,6 +9412,9 @@ THEME.apply();
     mayAuthorPage: mayAuthorPage,
     GAP_FIELDS: GAP_FIELDS, GAP_SCORE_FIELDS: GAP_SCORE_FIELDS,
     gapBlank: gapBlank, quartersBlank: quartersBlank,
+    WHEN_MONTHS: WHEN_MONTHS, whenMonths: whenMonths, whenReadable: whenReadable,
+    GAP_WHEN: GAP_WHEN, gapWhenField: gapWhenField,
+    gapEmptyValue: gapEmptyValue, gapEmpty: gapEmpty,
     pendOf: pendOf, pendingScore: pendingScore, mayFillPage: mayFillPage,
     FILL_PAGES: FILL_PAGES, gapMissing: gapMissing,
     namedOn: namedOn, namedInUnit: namedInUnit,
@@ -14405,37 +14514,16 @@ function fullYear(y){
 }
 /* Months since year zero, so two dates in different years compare with one
    subtraction. Null when the text is not a time at all -- which is what the
-   upload notice reports and what "Done" in a due-date column produces. */
+   upload notice reports and what "Done" in a due-date column produces.
+
+   THE READER ITSELF MOVED TO `lib/rules.js` (§184). The server had to be able
+   to ask "is this a date" -- a value it cannot read is a GAP, and until §184
+   only the browser knew which values those were, so the screen offered a
+   filler a control the save then refused. What is left here is the one thing
+   the shared rule cannot know: which year an unyeared quarter belongs to,
+   which is this tenant's cycle. */
 function monthsOf(v, last){
-  var s = String(v == null ? "" : v).trim();
-  if (!s) return null;
-  var m;
-  /* W3 Mar 26 / Week 3 March 2026 -- the week is read and discarded, because
-     the comparison is monthly. It is kept in the TEXT for the person. */
-  if ((m = /^w(?:eek)?\s*[1-5]\s+([a-z]+)\.?\s*'?(\d{2,4})$/i.exec(s)))
-    return monthIndex(m[1]) < 0 ? null : fullYear(m[2]) * 12 + monthIndex(m[1]);
-  /* July 26 / Jul 2026 / Dec 26 */
-  if ((m = /^([a-z]+)\.?\s*'?(\d{2,4})$/i.exec(s)))
-    return monthIndex(m[1]) < 0 ? null : fullYear(m[2]) * 12 + monthIndex(m[1]);
-  /* Q3 2026 / Q3 -- a quarter is its FIRST month, or its last when `last`
-     is asked for, which is how a cycle named Q2 covers April to June. */
-  if ((m = /^q([1-4])\s*'?(\d{2,4})?$/i.exec(s))) {
-    var qy = m[2] ? fullYear(m[2]) : cycleYear();
-    return qy == null ? null : qy * 12 + (+m[1] - 1) * 3 + (last ? 2 : 0);
-  }
-  /* H1 2026 / H2 26 -- a half year, which is what a review is usually called
-     and what the old reader could not see at all. */
-  if ((m = /^h([12])\s*'?(\d{2,4})?$/i.exec(s))) {
-    var hy = m[2] ? fullYear(m[2]) : cycleYear();
-    return hy == null ? null : hy * 12 + (+m[1] - 1) * 6 + (last ? 5 : 0);
-  }
-  /* FY26 / 2026 -- a whole year. */
-  if ((m = /^(?:fy)?\s*'?(\d{4})$/i.exec(s)))
-    return fullYear(m[1]) * 12 + (last ? 11 : 0);
-  /* 31 May 2026, and anything else a browser genuinely reads as a date. */
-  var t = Date.parse(s);
-  if (!isNaN(t)) { var d = new Date(t); return d.getFullYear() * 12 + d.getMonth(); }
-  return null;
+  return SMPRules.whenMonths(v, last, cycleYear());
 }
 /* THE CYCLE'S OWN CLOSING MONTH, taken from `REVIEW.to` -- which has said
    "Jun 2026" since the review model existed -- rather than parsed out of its
@@ -19219,11 +19307,19 @@ var MS_STATUS_WORDS = ["done", "pending", "completed", "complete", "not started"
    all, which is still exactly the case that started this: "Done" and
    "Pending" sitting in a due-date column.
 
-   `monthsOf` is the reader the PRODUCT uses to decide whether a row is due,
-   so anything it can read is a date the platform can compare. Asking a second
-   question here would be a second definition of "a date" (§42, in the small). */
+   `SMPRules.whenReadable` is the reader the PRODUCT uses to decide whether a
+   row is due, so anything it can read is a date the platform can compare.
+   Asking a second question here would be a second definition of "a date"
+   (§42, in the small) -- and since §184 it is also what decides whether an
+   unreadable date is a GAP, so the upload's notice and the fill grant agree
+   about the same values by construction.
+
+   THE SHAPE, NOT THE MONTH (§184). This asked `monthsOf(v) != null`, which
+   resolves a bare "Q3" against the CYCLE -- so on a tenant whose cycle names
+   no year, "Q3" read as not-a-date here while every due comparison read it
+   fine. `whenReadable` asks the shape alone, which is the question. */
 function dueFits(v){
-  return monthsOf(v) != null;
+  return SMPRules.whenReadable(v);
 }
 
 /* ── Capability templates (§16.4, §15.12) ─────────────────────────────────
@@ -24507,6 +24603,21 @@ function gapCell(page, acKey, row, field, opts){
      back. §145.10's cell is why they exist — one pair, beside `num`. */
   var val = opts.text ? opts.text(row) : row[field];
   var blank = SMPRules.gapBlank(val);
+  /* IS THIS A GAP — which for a DATE is wider than blank (§184). A milestone
+     due `30/09/2026` holds a value the platform cannot read: every score
+     treats it as no date, the pane already prints a red note naming it, and
+     yet the fill grant would not open it, so the only person who could
+     correct it was the office. `gapEmptyValue` is the shared test the SERVER
+     also asks, which is the whole point — the field that opens here is the
+     field the save accepts (§42).
+
+     KEPT APART FROM `blank` DELIBERATELY. `blank` is "there is nothing to
+     show", and it drives the placeholder and the read text; a value the
+     reader cannot parse is still a value somebody typed, so it is DISPLAYED
+     rather than replaced by the word Missing (§96.2). One is about writing,
+     the other about showing, and collapsing them would hide the very value
+     the person needs to see in order to correct it. */
+  var open = SMPRules.gapEmptyValue(field, val);
   var mark = SMPRules.pendOf(row)[field];
   var ed = authoring(page, acKey);
   /* §177: DEFAULTING TO "INSIDE NO ROW" IS THE SAFE WAY ROUND. A cell that
@@ -24574,9 +24685,9 @@ function gapCell(page, acKey, row, field, opts){
       if (opts.del && SMPRules.gapBlank(nv)) delete row[field];
       else row[field] = nv;
       gapLift(row, field); gapBandRefresh();
-    }, blank ? "gapwalk" : "");
+    }, open ? "gapwalk" : "");
   }
-  if (fl && (blank || mark)) {
+  if (fl && (open || mark)) {
     return draw(function(v){
       var nv = put(v);
       if (SMPRules.gapBlank(nv)) {
@@ -39277,6 +39388,13 @@ var SYNC = (function () {
      cell, is refused, and sets it back gets no post and no message — the one
      shape of this fault that looks exactly like "it just does not save". */
   var refusedWhy = null;
+  /* §184: AND THE ROWS IT NAMED. Remembered beside the sentence for the same
+     reason the sentence is: `save()` short-circuits on `refusedBody`, so the
+     second hit on a remembered body draws the banner from these and nothing
+     else — without them the offer to put the rows back would vanish the
+     moment somebody changed something and changed it back. */
+  var refusedRows = null;
+  var refusedUndoable = false;
 
   /* A REFUSAL NEEDS A WAY OUT (§48.3).
 
@@ -39341,18 +39459,151 @@ var SYNC = (function () {
       "menu in the top bar to work on your own tenant.</span>");
   }
 
-  function showRefusal(list) {
+  /* ── PUTTING BACK ONLY WHAT WAS REFUSED (§184) ───────────────────
+     Islam, on a strategy custodian: *"they lost all data they inputed."*
+     The refusal itself was correct — one row genuinely was the office's —
+     and the loss was everything around it. The whole graph posts together,
+     so one refused row fails the whole save, and until now the only control
+     on the banner was *Discard the change and reload*: the honest answer
+     while the platform could not say WHICH row it had objected to, and a
+     destructive one the moment it can.
+
+     The server now names them (`refusedChanges`), with the value each field
+     HELD. Putting them back is therefore not a guess and not a reload: the
+     named fields go back to the stored value, everything else the person
+     typed stays exactly where it is, and the next save carries it.
+
+     THE ADDRESS IS THE TARGET AND THE ROW ID, NEVER A PATH. A path would be
+     a second description of the state graph's shape, kept here and drifting
+     from the one `collect()` walks (§53.5); an id inside a named subtree is
+     the address the whole product already uses (§48: a snapshot is keyed by
+     id, never by position). */
+  var FIELD_WORDS = {
+    finish: "Due date", start: "Start", end: "End", owner: "Owner",
+    target: "Target", target3y: "3-year target", dir: "Direction",
+    compile: "Compile rule", weight: "Weight", name: "Name",
+    collaborators: "Collaborators", stakeholders: "Stakeholders",
+    brief: "Brief", aspiration: "Aspiration", actual: "Figure", note: "Note",
+    pct: "Progress", status: "Status", pend: "Awaiting confirmation"
+  };
+  function fieldWord(f) { return FIELD_WORDS[f] || String(f); }
+
+  /* Where a target's rows live. A capability belongs to a supporting
+     function, so an `fn:` target is BOTH the function and its capabilities —
+     which is exactly how collectFunction() and collectCapabilities() split a
+     function's plan between them, and getting it wrong here would mean a
+     project's rows could never be found. */
+  function refusedRoots(target) {
+    var t = String(target || "group");
+    if (t.indexOf("fn:") === 0) {
+      var k = t.slice(3), out = [];
+      if (typeof FUNCTIONS !== "undefined" && FUNCTIONS[k]) out.push(FUNCTIONS[k]);
+      if (typeof GROUP !== "undefined")
+        (GROUP.capabilities || []).forEach(function (c) { if (c && c.fn === k) out.push(c); });
+      return out;
+    }
+    if (t !== "group" && typeof UNITS !== "undefined" && UNITS[t]) return [UNITS[t]];
+    return typeof GROUP !== "undefined" ? [GROUP] : [];
+  }
+  /* The first object under `root` carrying this id. Ids are minted per unit
+     and per capability (renumberUnit/renumberCapability), so within one
+     target they are unique — which is the property that makes this safe and
+     the reason it is scoped to the target rather than run over the graph. */
+  function rowWithId(root, id) {
+    var found = null;
+    (function walk(v) {
+      if (found || !v || typeof v !== "object") return;
+      if (!Array.isArray(v) && v.id === id) { found = v; return; }
+      (Array.isArray(v) ? v : Object.keys(v).map(function (k) { return v[k]; }))
+        .forEach(walk);
+    })(root);
+    return found;
+  }
+  /* Put every named field back to what the server holds. Returns the rows it
+     could NOT find, because a "put back" that silently missed one would post
+     the same refusal again and read as the button doing nothing (§96). */
+  function putBackRefused(changes) {
+    var missed = [];
+    (changes || []).forEach(function (ch) {
+      var roots = refusedRoots(ch.target);
+      (ch.rows || []).forEach(function (r) {
+        var row = null;
+        roots.forEach(function (rt) { if (!row) row = rowWithId(rt, r.id); });
+        if (!row) { missed.push(r); return; }
+        /* ABSENT IS NOT NULL. A field the stored row did not have is DELETED,
+           or the put-back is itself a change and is refused all over again
+           (§50.6's rule, arriving from the server this time). */
+        if (r.had === false) delete row[r.field];
+        else row[r.field] = r.from == null ? r.from : JSON.parse(JSON.stringify(r.from));
+      });
+    });
+    return missed;
+  }
+
+  function showRefusal(list, changes, undoable) {
     var el = document.getElementById("refused");
     if (!el) return;
     if (!list || !list.length) { el.hidden = true; el.innerHTML = ""; return; }
+    /* One line per row, so "which line was it?" is answered on the banner
+       rather than by hunting the page. Deduplicated by row and field: a
+       milestone whose date and pending mark both moved is ONE line to a
+       person and two entries to the classifier. */
+    var seen = {}, lines = [];
+    (changes || []).forEach(function (ch) {
+      (ch.rows || []).forEach(function (r) {
+        if (r.field === "pend") return;          /* the mark, not the value */
+        var k = ch.target + "\u0000" + r.id + "\u0000" + r.field;
+        if (seen[k]) return;
+        seen[k] = 1;
+        lines.push((r.name ? esc(r.name) : esc(r.id)) +
+                   " \u2014 " + esc(fieldWord(r.field)));
+      });
+    });
     el.innerHTML = "<span><strong>Not saved.</strong> " +
       (list.length === 1 ? "" : "The server refused this change:") + "</span>" +
       (list.length === 1
         ? "<span>" + esc(list[0]) + "</span>"
         : "<ul>" + list.map(function (x) { return "<li>" + esc(x) + "</li>"; }).join("") + "</ul>") +
-      '<span><button type="button" class="refused-undo" id="refused-undo">' +
-      "Discard the change and reload</button></span>";
+      (lines.length
+        ? "<span><b>" + plural(lines.length, "line") + " refused:</b></span><ul>" +
+          lines.map(function (x) { return "<li>" + x + "</li>"; }).join("") + "</ul>"
+        : "") +
+      "<span>" +
+      (undoable
+        ? '<button type="button" class="refused-keep" id="refused-keep">Put back ' +
+          (lines.length === 1 ? "that line" : "those lines") +
+          " and save the rest</button> "
+        : "") +
+      '<button type="button" class="refused-undo" id="refused-undo">' +
+      "Discard everything and reload</button></span>";
     el.hidden = false;
+    /* THE OFFERED ONE IS THE ONE THAT KEEPS THE WORK. Discard stays — it is
+       the only way out when the refusal names no rows — but it is never the
+       only control again when the platform knows what to put back. */
+    var k = document.getElementById("refused-keep");
+    if (k) k.addEventListener("click", function () {
+      var missed = putBackRefused(changes);
+      if (missed.length) {
+        /* Said, never swallowed: a row the platform cannot find is a row it
+           cannot put back, and pretending otherwise re-posts the refusal. */
+        notSaved("<span><strong>Not saved.</strong> " + esc(list[0]) + "</span>" +
+          "<span>" + plural(missed.length, "refused line") +
+          " could not be put back automatically \u2014 they are no longer on this " +
+          "page. Reload to take the stored version again.</span>" +
+          '<span><button type="button" class="refused-undo" id="refused-undo">' +
+          "Discard everything and reload</button></span>");
+        var u2 = document.getElementById("refused-undo");
+        if (u2) u2.addEventListener("click", function () { location.reload(); });
+        return;
+      }
+      refusedWhy = null; refusedRows = null; refusedBody = null;
+      showRefusal(null);
+      /* Repaint first: the reverted values have to be what the person sees
+         before anything else happens, or the page argues with the database
+         about a row that was just put back (§35). */
+      if (typeof paint === "function") paint();
+      save();
+    });
     var u = document.getElementById("refused-undo");
     if (u) u.addEventListener("click", function () {
       if (!confirm("Discard everything changed since the last successful save, " +
@@ -39420,7 +39671,10 @@ var SYNC = (function () {
     if (saving) { queued.push(done); return; }
     var now = serialize();
     if (now === lastSaved) return say("clean");
-    if (now === refusedBody) { showRefusal(refusedWhy); return say("refused"); }
+    if (now === refusedBody) {
+      showRefusal(refusedWhy, refusedRows, refusedUndoable);
+      return say("refused");
+    }
     saving = true;
     lastFlush = Date.now();
     fetch("/api/state", {
@@ -39444,16 +39698,19 @@ var SYNC = (function () {
         return r.json().then(function (j) {
           if (j && j.mustChange) { location.replace("/"); return; }
           refusedWhy = (j && j.refusals) || null;
-          showRefusal(refusedWhy);
+          refusedRows = (j && j.refusedChanges) || null;
+          refusedUndoable = !!(j && j.undoable);
+          showRefusal(refusedWhy, refusedRows, refusedUndoable);
         }, function () {
           /* A 403 whose body will not parse is still a refusal, and saying
              nothing about it is the silence this section exists to remove. */
           refusedWhy = ["The server refused the change and gave no reason."];
+          refusedRows = null; refusedUndoable = false;
           showRefusal(refusedWhy);
         });
       }
       if (r.ok) {
-        refusedWhy = null;
+        refusedWhy = null; refusedRows = null; refusedUndoable = false;
         showRefusal(null);
         lastSaved = now;
         /* A person created in the register does not exist to the SERVER until

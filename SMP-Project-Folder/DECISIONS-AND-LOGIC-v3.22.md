@@ -22128,3 +22128,200 @@ owners"* — could not be made to happen. Filling a project's Start and a
 milestone's due date as a filler on a supporting function stamps
 `pend.start` / `pend.finish` exactly as the owner does. Left open rather than
 claimed fixed.
+
+---
+
+## §184 · A date the platform cannot read, and a refusal that costs only the row it named
+
+Islam, from the deployment: *"the issue is with the CX department the strategy
+custodian got this error on submitting the report and they lost all data they
+inputed and the dates showed waiting confirmation and I didn't get them as
+the SMO."*
+
+**THE REFUSAL WAS CORRECT. THE LOSS WAS EVERYTHING AROUND IT.** Reproduced
+against the real authoriser before a line was written, and it comes out in
+three runs:
+
+| what was done | classified | verdict |
+|---|---|---|
+| an **empty** due date filled | `gapFill` | accepted |
+| a due date holding **`30/09/2026`** corrected | `capPlan` | **refused** |
+| all three in **one save** | both | **refused** |
+
+`R.gapBlank("30/09/2026")` is **false** — the value is not empty — so
+correcting it was not filling a gap, it was authoring a plan, which is the
+office's (§94). That refusal is right on its own terms and the platform has
+no business changing it.
+
+What is wrong is what happened next. **The whole graph posts together**, so
+one refused row failed the whole save; every later post still carried it, so
+every later save was refused too; and the only control on the banner was
+**"Discard the change and reload"**, which threw away the three good fills
+with it. They had never reached the database, which is exactly why the SMO
+never received them. From the custodian's side: an error, then nothing.
+
+So §184 is two fixes, and the second is the larger one.
+
+---
+
+### 1 · A date the platform cannot read is a gap
+
+`monthsOf()` is the platform's definition of a time — what decides whether a
+row is due, what `dueFits()` calls a date on upload, what the overrun warning
+compares — **and it lived in the browser alone**. The server had no way to
+ask, so the screen and the save answered "is this a date" differently. §42's
+drift with a lost afternoon on the end of it.
+
+**THE READER MOVES INTO `lib/rules.js` WHOLE** (§130.7's shape, where the name
+rule made the same move): `whenMonths(v, last, cycleYear)` is the pure
+function, the regexes and the two-digit-year rule unchanged, and
+`monthsOf(v, last)` is now one line — the wrapper supplying the one thing the
+shared rule cannot know, which is this tenant's cycle year.
+
+**`whenReadable()` ASKS THE SHAPE, NOT THE MONTH.** A bare `Q3` names no year
+and is still a time somebody wrote; it resolves against the cycle on a page
+and against nothing on a server that is not looking at one. So readability is
+the same reader asked with a year *supplied* — never a second list of
+regexes, which is precisely how "a date" came to mean two things in the first
+place (§53.5). `dueFits()` moves onto it too, which closes a smaller bug of
+its own: it asked `monthsOf(v) != null`, so on a tenant whose cycle names no
+year a bare `Q3` read as not-a-date on upload while every due comparison read
+it fine.
+
+**THE GAP TEST IS KEYED ON THE FIELD NAME.** `start`, `end` and `finish` appear
+in `GAP_FIELDS` as dates and as nothing else, so `GAP_WHEN` answers for a
+project's front matter and a milestone's due date without either call site
+having to remember which it is. `gapEmptyValue(field, v)` and
+`gapEmpty(field, row)` are the ONE test that `gapMissing()`, `gapCell()` and
+`lib/authorize.js`'s gap pass all now ask — one definition, so the field that
+opens is the field the save accepts.
+
+**AND THE RULE REACHES DATES ONLY.** An unreadable *target* is still a target
+somebody wrote; opening every field whose value looks odd would be a different
+decision nobody asked for. Asserted, at both ends.
+
+**`blank` AND `open` ARE KEPT APART IN `gapCell`, DELIBERATELY.** `blank` is
+*there is nothing to show* and drives the placeholder and the read text;
+`open` is *this is a gap* and drives whether a filler gets a control.
+Collapsing them was the tempting wrong fix: the row would have rendered the
+word **Missing** over `30/09/2026`, hiding the very value the person is being
+asked to correct (§96.2). It opens, and it still shows what is stored.
+
+**Nothing is stored and nothing is migrated.** The mark rides `extra` as it
+has since §177.
+
+---
+
+### 2 · Do not draw a control that will be refused
+
+Satisfied by construction, not by new machinery, and that is the point: with
+one definition of a gap, `gapCell()`'s fill branch and the authoriser's gap
+pass are asking the same function about the same value. What §184 adds is the
+**assertion** — for a filler, the row a month picker is drawn on must be a row
+`gapMissing()` names, and the correction it writes must be one the server
+classifies as `gapFill`. Both ends, on the screen and through the shared rule.
+
+---
+
+### 3 · A refusal costs the row it named, and nothing else
+
+The first two fixes remove *this* cause. They do not stop partial loss in
+general, and Islam's question was exactly that — *"is that covering the fix
+for reporting without losing the data even aprtially?"* No. Only this does.
+
+**THE VERDICT NOW CARRIES AN ADDRESS, NOT ONLY A SENTENCE.** `no()` records the
+change it came from, so `authorize()` returns `refused: [{ why, kind, target,
+rows: [{ id, name, field, had, from }] }]` beside the unchanged `refusals`
+strings — the target, the row, the field, and **the value the row HELD**.
+
+**THE PLAN HALF HAD TO LEARN TO NAME ITS ROWS.** `splitRows()`'s `onPlan` was a
+bare signal, which is why the CX refusal could say *"a project's milestones
+(care)"* and nothing about which one. It hands over the rows that moved now —
+and **`planMoved` stays the gate, byte for byte**. Deriving the gate from the
+row list instead would quietly *widen* what is allowed: `same()` is
+stringify-based, so a key-ORDER difference (which is what Postgres jsonb hands
+back, §145) trips the omit-compare and produces no differing key, and a save
+that used to be refused would start passing. §42 fails closed.
+
+**`had` SEPARATES "IT HELD NULL" FROM "THE KEY WAS NOT THERE."** Putting a null
+back where nothing was is a change of its own, and would be refused a second
+time — the button would look like it did nothing (§96).
+
+**THE BANNER NAMES THE LINES AND OFFERS TO KEEP THE WORK.** *"Put back those
+lines and save the rest"* reverts exactly the named fields to the stored
+value, repaints, and saves — everything else the person typed stays where it
+is. Discard remains, because it is the only way out when a refusal names no
+rows; it is simply never the only control again. The two read in two volumes:
+the one that keeps the work wears a border, the destructive one stays an
+underlined link (§41's budget — no new colour, the banner's own text token).
+
+**THE ADDRESS IS TARGET + ROW ID, NEVER A PATH.** A path would be a second
+description of the state graph's shape, kept in `sync.js` and drifting from
+the one `collect()` walks; an id inside a named subtree is the address the
+whole product already uses (§48: a snapshot is keyed by id, never by
+position). An `fn:` target resolves to the function **and its capabilities**,
+because that is how `collectFunction()` and `collectCapabilities()` split a
+function's plan between them — getting it wrong here would mean a project's
+rows could never be found.
+
+**A ROW IT CANNOT FIND IS SAID, NEVER SWALLOWED**, or the put-back re-posts the
+same refusal and reads as a dead button.
+
+**AND THE OFFER IS THE SERVER'S ANSWER, NOT THE CLIENT'S.** `undoable` is
+computed where the changes are classified; a client working it out for itself
+would be a second copy of the rule (§42). A change to **which rows exist** —
+a project removed, a list reordered — has no field address, so no put-back is
+offered at all: a button that would not work is worse than the destructive
+one, because it looks like it did something.
+
+**THE REMEMBERED REFUSAL REMEMBERS ITS ROWS**, for §171's own reason: `save()`
+short-circuits on `refusedBody`, so the second hit on a remembered body draws
+the banner from what is held — and without the rows the offer would vanish the
+moment somebody changed something and changed it back.
+
+---
+
+### Proof
+
+`scripts/test-authorize.js` gains **§19** (the reader, the gap rule, the CX
+case reproduced, and the other end: a date that READS is still the office's)
+and **§20** (the address — id, name, held value, `had` — and a change with no
+row address saying so). **336 passed, 0 failed.**
+
+**Proved able to fail (§94.5), twice.** `gapBlank` put back inside
+`gapEmpty` → **3 red**, among them *"all three in one save — the report,
+reproduced"*. `onPlan(null)` put back → **2 red**.
+
+`checks/refusal-keeps-work.py` is new and drives the whole path in a browser:
+one refused row among three, the banner naming it, the button PRESSED
+(`elementFromPoint` at its centre, §93.4), the refused field back to the
+server's value, **both fills untouched and still pending**, a second post that
+is ACCEPTED, the banner cleared — and the other end, a refusal nothing can put
+back offering no button. **The stub runs the real authoriser** as a
+subprocess (§100.3): a canned 403 would be a fiction about the one thing under
+test. **Proved able to fail: 11 red** against the shipped pre-§184 build,
+including the banner reading *"…cannot be changed here.Discard the change and
+reload"* and nothing else.
+
+`checks/milestone-fill.py` gains **§9**: the filler is offered a control on
+the unreadable date, exactly one, reachable, **still showing `30/09/2026`**,
+walkable by Next gap, and on a row `gapMissing()` names.
+
+**Two of that section's own first-run failures were the check.** It counted
+six month buttons because §7 had left the page as the OFFICE, whose pen opens
+every field (§50.6 — a check that measures the wrong state passes or fails for
+reasons of its own); and `refusal-keeps-work.py`'s console listener reported
+the 403 it exists to produce, because Chromium logs every non-2xx fetch as an
+error (§128 — a measurement wrong in the direction of *broken* costs as much
+as one wrong the other way).
+
+Green: `qa.py` (no errors), `project-dates.py`, `gap-fill.py`,
+`report-saves.py`, `owner-picker.py`, `repeat-project.py`, `plan-fields.py`,
+`project-custodian.py`.
+
+**Recorded, not fixed.** The put-back is offered only when EVERY refusal in
+the response is addressable. A save that mixes an addressable refusal with an
+un-addressable one still offers Discard alone — the work is on screen and
+nothing destroys it unasked, but the platform cannot rescue it automatically.
+Narrowing that further means teaching the register, the access matrix and the
+cycle to name rows, which is its own piece of work.

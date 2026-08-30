@@ -128,9 +128,21 @@ module.exports = async function handler(req, res) {
               || { key: person.key, name: person.name };
       const verdict = authorize(stored, state, me);
       if (!verdict.ok) {
+        /* §184: SAY WHICH ROWS, NOT ONLY WHY. `refusals` is unchanged and
+           still carries the sentences §171's banner reads. `refusedChanges`
+           is the address of every field the verdict would not take, with the
+           value it HELD — so the platform can put back exactly those and
+           save the rest, instead of offering nothing but "discard
+           everything". `undoable` is the server's own answer to "is every
+           refusal addressable", because a client that worked it out for
+           itself would be a second copy of that rule (§42). */
+        const undoable = verdict.refused.length > 0 &&
+          verdict.refused.every(function (r) { return r.rows && r.rows.length; });
         return send(res, 403, { ok: false, refused: true,
                                 error: verdict.refusals.join(" "),
-                                refusals: verdict.refusals });
+                                refusals: verdict.refusals,
+                                refusedChanges: verdict.refused,
+                                undoable: undoable });
       }
 
       await writeState(client, state);

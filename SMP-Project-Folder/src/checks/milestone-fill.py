@@ -329,6 +329,94 @@ with sync_playwright() as p:
     else:
         ck("the office's pen is there to test the stored shapes with", False)
 
+    # ── 8 · A DATE THE PLATFORM CANNOT READ IS A GAP (§184) ──────────────
+    # Islam, on the CX strategy custodian: they filled three empty due dates
+    # and touched a fourth holding `30/09/2026` — a value `monthsOf()` cannot
+    # read at all — and the whole save came back refused, taking the three
+    # good fills with it. Non-blank was not a gap, so the fill grant would
+    # not open that row, the office was the only one who could correct it,
+    # and the person who tried lost everything else in the same post.
+    #
+    # THE TWO HALVES ARE MEASURED SEPARATELY, because collapsing them is the
+    # tempting wrong fix: the row OPENS to a filler (it is a gap) and still
+    # SHOWS what is stored (it is not blank). A build that answered "Missing"
+    # in both places would hide the very value somebody needs to see in order
+    # to correct it (§96.2).
+    print("\n9 · a due date the platform cannot read")
+    # BACK TO THE FILLER. §7 left the page as the OFFICE, whose pen opens
+    # every field there is — so the first run of this section counted six
+    # month buttons and called a correct build broken (§50.6: a check that
+    # measures the wrong state passes or fails for reasons of its own).
+    be(setup["who"], setup["mine"])
+    pg.evaluate("""(a) => {
+      const cap = (GROUP.capabilities || []).filter(c => c.id === a.cap)[0];
+      /* Every milestone in the capability gets a readable date first, so what
+         is measured below is this ONE row and not §3's leftovers. */
+      (cap.projects || []).forEach(pr => {
+        (pr.milestones || []).forEach(m => { m.finish = "Q2 2026";
+                                             if (!m.owner) m.owner = "Noran Adel"; });
+        (pr.outcomes || []).forEach(o => { if (!o.target) o.target = "1"; });
+        if (!pr.owner) pr.owner = "Noran Adel";
+        if (!pr.start) pr.start = "Q1 2026";
+        if (!pr.end) pr.end = "Q4 2026";
+      });
+      const pr = (cap.projects || []).filter(x => x.id === a.mine)[0];
+      pr.milestones[0].finish = "30/09/2026";
+      leaveModes(); paint();
+    }""", setup)
+    pg.wait_for_timeout(450)
+
+    ck("the shared reader says it is not a date",
+       pg.evaluate("() => SMPRules.whenReadable('30/09/2026') === false"))
+    ck("...and the fill rule therefore calls the row a gap",
+       pg.evaluate("() => SMPRules.gapEmpty('finish', { finish: '30/09/2026' }) === true"))
+    ck("...while a date it CAN read is still the office's",
+       pg.evaluate("() => SMPRules.gapEmpty('finish', { finish: 'Jul 26' }) === false"))
+    # The rule is the FIELD's, not every field's: an unreadable TARGET is
+    # still a target somebody wrote, and opening it would be a different
+    # decision nobody asked for.
+    ck("...and it reaches dates only",
+       pg.evaluate("() => SMPRules.gapEmpty('target', { target: '30/09/2026' }) === false"))
+
+    counted = pg.evaluate("() => gapTotal(TARGET)")
+    ck("the bad date is COUNTED as owed", counted >= 1, counted)
+    pg.click("[data-fillcta]")
+    pg.wait_for_timeout(600)
+    bad_row = pg.evaluate("""(a) => {
+      const btns = Array.from(document.querySelectorAll('#panel [data-month]'));
+      const hit = btns.filter(b => (b.textContent || '').indexOf('30/09/2026') > -1)[0];
+      if (!hit) return { count: btns.length, texts: btns.map(b => b.textContent.trim()) };
+      const r = hit.getBoundingClientRect();
+      const at = document.elementFromPoint(r.left + r.width / 2, r.top + r.height / 2);
+      return { found: true, count: btns.length,
+               reachable: !!(at && (at === hit || hit.contains(at))),
+               walkable: hit.classList.contains('gapwalk') ||
+                         !!hit.closest('.gapwalk'),
+               shows: (hit.textContent || '').trim() };
+    }""", setup)
+    ck("the filler is offered a control on it", bad_row.get("found"), bad_row)
+    if bad_row.get("found"):
+        ck("...exactly one, the row that owes something", bad_row["count"] == 1, bad_row)
+        ck("...a click at its centre reaches it", bad_row["reachable"], bad_row)
+        # THE OTHER HALF: the value is SHOWN, never replaced by the word
+        # Missing — it is what the person is being asked to correct.
+        ck("...and it still shows what is stored", "30/09/2026" in bad_row["shows"], bad_row)
+        ck("...and Next gap can walk to it", bad_row["walkable"], bad_row)
+
+    # AND THE CONTROL THAT IS DRAWN IS ON A ROW THE COUNT NAMES. §177's rule
+    # from §184's side: the page's own controls and `gapMissing()` have to be
+    # about the same rows, or the red button promises a field it will not open.
+    ck("the row the control sits on is one the gap rule names",
+       pg.evaluate("""(a) => {
+         const cap = (GROUP.capabilities || []).filter(c => c.id === a.cap)[0];
+         const pr = (cap.projects || []).filter(x => x.id === a.mine)[0];
+         const owed = pr.milestones.filter(m => SMPRules.gapMissing("milestone", m).length);
+         return owed.length === 1 && owed[0].finish === "30/09/2026";
+       }""", setup))
+
+    pg.evaluate("() => { if (MONTHPOP) MONTHPOP.shut(); leaveModes(); paint(); }")
+    pg.wait_for_timeout(300)
+
 print("")
 if errs:
     print("PAGE ERRORS: " + " | ".join(errs[:4]))

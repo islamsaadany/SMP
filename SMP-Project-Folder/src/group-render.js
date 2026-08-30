@@ -2588,6 +2588,21 @@ function gapCell(page, acKey, row, field, opts){
      back. §145.10's cell is why they exist — one pair, beside `num`. */
   var val = opts.text ? opts.text(row) : row[field];
   var blank = SMPRules.gapBlank(val);
+  /* IS THIS A GAP — which for a DATE is wider than blank (§184). A milestone
+     due `30/09/2026` holds a value the platform cannot read: every score
+     treats it as no date, the pane already prints a red note naming it, and
+     yet the fill grant would not open it, so the only person who could
+     correct it was the office. `gapEmptyValue` is the shared test the SERVER
+     also asks, which is the whole point — the field that opens here is the
+     field the save accepts (§42).
+
+     KEPT APART FROM `blank` DELIBERATELY. `blank` is "there is nothing to
+     show", and it drives the placeholder and the read text; a value the
+     reader cannot parse is still a value somebody typed, so it is DISPLAYED
+     rather than replaced by the word Missing (§96.2). One is about writing,
+     the other about showing, and collapsing them would hide the very value
+     the person needs to see in order to correct it. */
+  var open = SMPRules.gapEmptyValue(field, val);
   var mark = SMPRules.pendOf(row)[field];
   var ed = authoring(page, acKey);
   /* §177: DEFAULTING TO "INSIDE NO ROW" IS THE SAFE WAY ROUND. A cell that
@@ -2655,9 +2670,9 @@ function gapCell(page, acKey, row, field, opts){
       if (opts.del && SMPRules.gapBlank(nv)) delete row[field];
       else row[field] = nv;
       gapLift(row, field); gapBandRefresh();
-    }, blank ? "gapwalk" : "");
+    }, open ? "gapwalk" : "");
   }
-  if (fl && (blank || mark)) {
+  if (fl && (open || mark)) {
     return draw(function(v){
       var nv = put(v);
       if (SMPRules.gapBlank(nv)) {

@@ -366,7 +366,7 @@ console errors (in this cloud environment, run it via a wrapper that points Play
   after touching `api/auth.js` or `lib/auth.js` (it ends by rate-limiting the
   SMO on purpose — `DELETE FROM login_attempts;` clears it).
 - **THE STRIP KEPT ITS OWN ANSWER, AND THE CONTROL BESIDE IT HAD IT RIGHT
-  (§177):** the *Viewing as* note read `p.unit` and nothing else — never `p.fn`,
+  (§178):** the *Viewing as* note read `p.unit` and nothing else — never `p.fn`,
   never `p.company` — so **9 of 33 people were told they belong nowhere** (every
   supporting-function person, both company CEOs) while the DROPDOWN six pixels
   left said the function's own name, because §142 built it from
@@ -387,7 +387,7 @@ console errors (in this cloud environment, run it via a wrapper that points Play
   invisible on exactly the nine nobody switches to) and as AGREEMENT with the
   rule, never a literal; **both ends, and the register must hold an example of
   each** (§113.8).
-- **THE PAGE SAID MISSING AND THE COUNT SAID NOTHING WAS (§176):** a project
+- **THE PAGE SAID MISSING AND THE COUNT SAID NOTHING WAS (§177):** a project
   pane prints the red word in two places the fill grant could not see — an
   **outcome with no target** and a **milestone with no due date** — and a
   milestone with no OWNER printed an em-dash, the platform's word for *absent*,
@@ -408,9 +408,9 @@ console errors (in this cloud environment, run it via a wrapper that points Play
   Missing; **dates already written are untouched**, and the stated cost is that
   a quarter can no longer be typed into a milestone's due date, in the pen
   either (§53.5: one control, one answer).
-- **THE BAND'S BUTTONS WENT NOWHERE, FIVE WAYS (§176.2):** Islam — *"the CUS01
+- **THE BAND'S BUTTONS WENT NOWHERE, FIVE WAYS (§177.2):** Islam — *"the CUS01
   3 button just opens the project and the next gap does nothing."* Each fault hid
-  the next. **The walker asked for an element TYPE** (`.fld.gapfld`), so §176's
+  the next. **The walker asked for an element TYPE** (`.fld.gapfld`), so §177's
   month picker — a button — was invisible and a project owing only due dates had
   nothing to walk; the marker is **`.gapwalk`**, carrying NO styling, because
   *this control fills a gap* and *paint it red* are different facts and merging
@@ -427,7 +427,7 @@ console errors (in this cloud environment, run it via a wrapper that points Play
   chip's own rail-and-code pair, one builder for both. **Crossing places skips by
   SAME PAGE, not by VISIBLE**: a project can be on screen and never walked,
   because the field list is scoped. Landing is queued behind `setTimeout` (§30.1).
-- **THE GRANT IS PER PAGE AND THE REACH IS PER ROW (§176):** Islam — *"the fill
+- **THE GRANT IS PER PAGE AND THE REACH IS PER ROW (§177):** Islam — *"the fill
   grant should be for his project only he is not a cutodian."* There is no
   per-project cell and there should not be one, so `mayFillRow()` is
   `mayFillPage()` plus §147.7's `boundedReach()`, narrowing only when EVERY
@@ -2864,12 +2864,12 @@ python3 checks/strategy-split.py # the Strategy | Reporting halves: the cell pre
                                 # the dormant builder is still proved by a direct call
 python3 checks/gap-walk.py      # the band's chips and Next gap actually go somewhere:
                                 # a unit AND a function, as the filler AND the office,
-                                # every place the band names reached (§176.2)
+                                # every place the band names reached (§177.2)
 python3 checks/viewer-line.py   # the Viewing-as line: the roles and where each is
                                 # held, of EVERY person — no em-dashes, the seat never
-                                # repeated, and the whole line on a hover (§177)
+                                # repeated, and the whole line on a hover (§178)
 python3 checks/milestone-fill.py # a milestone is filled, and a bounded role fills only
-                                # its own (§176): every red Missing the page prints is one
+                                # its own (§177): every red Missing the page prints is one
                                 # the count knows about, the month panel escapes the table's
                                 # scroll box, every pick read back from the DATA, and the
                                 # project beside his stays shut — both ends, three viewers

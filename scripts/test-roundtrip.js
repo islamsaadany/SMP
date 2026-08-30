@@ -199,8 +199,8 @@ function firstDiff(a, b, at) {
      the next one measures). */
   GRANTS.forEach(function (g, i) { delete gBack.access["rtprobe" + i]; });
   await io.writeState(client, gBack);
-  /* ── A PENDING FILL ON A ROW THAT HAS NEVER CARRIED ONE (§176) ─────────
-     §176 made an outcome's target and a milestone's owner and due date
+  /* ── A PENDING FILL ON A ROW THAT HAS NEVER CARRIED ONE (§177) ─────────
+     §177 made an outcome's target and a milestone's owner and due date
      fillable, and a fill is stored as `row.pend = { field: {by, at} }`. Those
      two tables have no `pend` COLUMN — the mark rides `extra`, which is what
      makes this migration-free — and "rides extra" is a claim, not a fact,

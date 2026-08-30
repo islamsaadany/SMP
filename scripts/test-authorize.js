@@ -1635,14 +1635,14 @@ console.log("\n17 · a custodian per project — two roles (§147.7)");
         R.personRoles(R.worldOf(retired), personOf(retired, "t147_own")).length === 0);
 })();
 
-console.log("\n18 · a bounded role fills only what it holds (§176)");
-/* §176 gave a milestone's owner and due date and an outcome's target to the
+console.log("\n18 · a bounded role fills only what it holds (§177)");
+/* §177 gave a milestone's owner and due date and an outcome's target to the
    fill grant, and narrowed that grant to the ROWS a bounded role holds.
    Islam: "his project has missing items. he should be able to fill the
    missing items" and "the fill grant should be for his project only he is
    not a cutodian."
 
-   PROVED ABLE TO FAIL (§94.5): on the pre-§176 rules every ALLOWED case here
+   PROVED ABLE TO FAIL (§94.5): on the pre-§177 rules every ALLOWED case here
    refuses -- an outcome and a milestone are not gap kinds there, so the pass
    never classifies the change and it lands on capPlan, which is office-only.
    And the two REFUSED cases go green the moment mayFillRow() is replaced by
@@ -1667,7 +1667,7 @@ console.log("\n18 · a bounded role fills only what it holds (§176)");
   base.people.push({ key: "t176_own", name: "Bounded Filler 176", active: true });
   const cap = capOf(base);
   if (!cap || (cap.projects || []).length < 2) {
-    check("§176: the fixture needs a function with two projects", false, FN);
+    check("§177: the fixture needs a function with two projects", false, FN);
   } else {
     const mine = cap.projects[0], theirs = cap.projects[1];
     mine.owner = "Bounded Filler 176";

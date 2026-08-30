@@ -1467,7 +1467,7 @@ function placeLabel(at){
   return UNITS[at] ? navName(UNITS[at]) : at;
 }
 
-/* ── WHO YOU ARE VIEWING AS (§177) ────────────────────────────────────────
+/* ── WHO YOU ARE VIEWING AS (§178) ────────────────────────────────────────
    Islam, of a project owner's chrome reading PROJECT OWNER &middot; ALL UNITS:
    *"correct it it should follow the roles and the unit he belongs to."*
 
@@ -4770,7 +4770,7 @@ function mayFill(acKey, target){
   return SMPRules.mayFillPage(world(), viewer(), acKey,
     target === undefined ? TARGET : target);
 }
-/* §176: the same question about ONE ROW. `ctx` is §147.7's shape -- {row},
+/* §177: the same question about ONE ROW. `ctx` is §147.7's shape -- {row},
    {project} or {pillarOwner} -- so a project owner fills their own project
    and a pillar owner their own pillar, and nobody fills a neighbour's. */
 function mayFillRow(acKey, ctx, target){
@@ -5038,9 +5038,9 @@ function gapPendRows(target){
     (GROUP.capabilities || []).forEach(function(c){
       if (c.fn !== fk) return;
       (c.keyObjectives || []).forEach(push);
-      /* §176: a project's outcomes and milestones carry marks of their own
+      /* §177: a project's outcomes and milestones carry marks of their own
          now, so the pending list has to walk them or the office's "N awaiting
-         confirmation" undercounts exactly the values §176 made fillable. */
+         confirmation" undercounts exactly the values §177 made fillable. */
       (c.projects || []).forEach(function(pr){
         push(pr);
         (pr.outcomes   || []).forEach(push);
@@ -5070,7 +5070,7 @@ function gapPendCount(target){ return gapPendRows(target).length; }
    to GET there, in the navigation's own words. */
 function gapMap(target){
   var t = String(target || ""), out = [];
-  /* §176: COUNTED ONLY WHERE THIS VIEWER COULD ACTUALLY CLOSE IT. The map
+  /* §177: COUNTED ONLY WHERE THIS VIEWER COULD ACTUALLY CLOSE IT. The map
      feeds the red "N Missing", the per-place chips, the rail's counts and the
      Next-gap walk, so a gap counted here is a promise that pressing the button
      opens something. A bounded role -- a project owner, a pillar owner, a
@@ -5115,7 +5115,7 @@ function gapMap(target){
       (c.projects || []).forEach(function(p){
         /* The projects rail is per CAPABILITY (railKeyFor), and it selects
            by project id — the same pair the rail's own rows write. */
-        /* §176: a project's front matter, its outcomes' targets and its
+        /* §177: a project's front matter, its outcomes' targets and its
            milestones' owners and due dates are one place — the project — so
            they are one count and one chip, and the walk lands on the pane
            that holds all three. */

@@ -1574,7 +1574,7 @@
      `.pband` is left exactly as it was; only the tie is broken. */
   .tblscroll thead th.idx, .tblscroll thead th.idx + th { z-index:3; }
 
-/* ── THE MONTH PICKER (§176) ─────────────────────────────────────────────
+/* ── THE MONTH PICKER (§177) ─────────────────────────────────────────────
    A due date is a month and a year, chosen — no box, so nothing to mistype
    and nothing to validate (Islam: "remove the entry and just keep it a
    calendar selection"). The button wears the same three states every gap

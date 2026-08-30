@@ -1,4 +1,4 @@
-"""A MILESTONE IS FILLED, AND A BOUNDED ROLE FILLS ONLY ITS OWN (§176).
+"""A MILESTONE IS FILLED, AND A BOUNDED ROLE FILLS ONLY ITS OWN (§177).
 
 Islam, of a project owner who could report and could not fill: *"his project
 has missing items. he should be able to fill the missing items."* — and, of
@@ -39,7 +39,7 @@ WHAT IS ASSERTED, and why each is here rather than in checks/gap-fill.py:
 THE CHECK MAKES ITS STATE (§94.2): every demo project's milestones carry a
 date and an owner, so a check that only opened one would measure nothing.
 
-PROVED ABLE TO FAIL (§94.5): against the pre-§176 build it fails from §2 —
+PROVED ABLE TO FAIL (§94.5): against the pre-§177 build it fails from §2 —
 the page prints Missing and the gap total answers 0, there is no month
 button, and the fill grant reaches every project in the function.
 """

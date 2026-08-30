@@ -1,9 +1,9 @@
-"""THE GAP BAND'S CHIPS AND ITS WALKER ACTUALLY GO SOMEWHERE (§176.2).
+"""THE GAP BAND'S CHIPS AND ITS WALKER ACTUALLY GO SOMEWHERE (§177.2).
 
 Islam, pressing them: *"the CUS01 3 button just opens the project and the next
 gap does nothing."* Both were true, and each fault hid the next:
 
-· the walker asked for `.fld.gapfld` — an element TYPE — so §176's month
+· the walker asked for `.fld.gapfld` — an element TYPE — so §177's month
   picker, a button, was invisible to it and a project owing only due dates
   had nothing to walk;
 · an author's fields were never marked at all, so it had never done anything
@@ -24,7 +24,7 @@ button that is dead for the office). Every chip lands in its OWN place, and
 walking the whole subject reaches every place the band names rather than
 bouncing between two.
 
-PROVED ABLE TO FAIL (§94.5): against the pre-§176.2 build the walk is stuck
+PROVED ABLE TO FAIL (§94.5): against the pre-§177.2 build the walk is stuck
 on its first field in all four combinations, and the chips land in the wrong
 project.
 """
@@ -68,7 +68,7 @@ FN_STATE = """(g) => {
            filler: FUNCTIONS[fk].custodian };
 }"""
 # WHERE THE WALK IS, ASKED OF THE PRODUCT'S OWN AFFORDANCE FIRST. `.gaplit`
-# is the ring §145.14 already drew; `[data-gapat]` is §176.2's cursor. Reading
+# is the ring §145.14 already drew; `[data-gapat]` is §177.2's cursor. Reading
 # the ring means this measures a build that has no cursor on its own terms
 # rather than merely noticing that the cursor is absent (§94.8).
 WHERE = """() => {

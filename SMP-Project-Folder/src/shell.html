@@ -1661,7 +1661,7 @@
     /* Field setters are registered during render, so the list is emptied first
        or stale closures accumulate on every repaint. */
     FIELDS.length = 0;
-    /* §176.2: and what each rail drew LAST time is not what it will draw this
+    /* §177.2: and what each rail drew LAST time is not what it will draw this
        time — the same reason FIELDS is emptied here. */
     for (var rk in RAIL_SHOWN) delete RAIL_SHOWN[rk];
     /* Same reason, same line (§96): the objectives editor registers the array
@@ -1696,7 +1696,7 @@
        rather than a stranded middot. */
     document.getElementById("orgname").textContent =
       GROUP.org ? "\u00b7 " + GROUP.org : "";
-    /* THE ROLES, AND WHERE EACH IS HELD (§177). One builder, beside
+    /* THE ROLES, AND WHERE EACH IS HELD (§178). One builder, beside
        `placeLabel()` and asking `personAt()` like every other surface that
        answers "where does this person sit" (§54). This line used to work it
        out for itself off `p.unit` and nothing else, which is how it came to
@@ -1707,7 +1707,7 @@
     /* AND THE WHOLE LINE ON A HOVER. `.viewer-note` is one line with an
        ellipsis, and below about 1280px this line is longer than the strip has
        room for -- what gets cut is the tail, which is the PLACE, which is the
-       half §177 exists to add. §88's shape: one line, an ellipsis where it
+       half §178 exists to add. §88's shape: one line, an ellipsis where it
        does not fit, the whole value one hover away. Set unconditionally
        rather than through `clipTitles()`, which is scoped to the setup tables
        and would have to be widened to reach the chrome -- and unlike the
@@ -2017,7 +2017,7 @@
        (searchsel.js) — the native control stays where it is, so nothing wire()
        just attached is disturbed. */
     SEARCHSEL.wire();
-    /* AND THE MONTH PANEL GOES (§176). It is mounted on <body> so a repaint
+    /* AND THE MONTH PANEL GOES (§177). It is mounted on <body> so a repaint
        cannot take it with the button it belongs to — it would be left hanging
        over a page it no longer points at. Same reason SEARCHSEL.wire() closes
        its own popup first (§30.1). */
@@ -2271,12 +2271,12 @@
      press landed on. When the page holds none, the walk goes to the first
      PLACE still owing — through the band's own chip, so the two ways of
      moving cannot disagree about where a place is. */
-  /* ── WALKING THE GAPS (§145.14, made to work in §176.2) ──────────────
+  /* ── WALKING THE GAPS (§145.14, made to work in §177.2) ──────────────
      Islam, pressing it: *"the CUS01 3 button just opens the project and the
      next gap does nothing."* Three faults, and each hid the next.
 
      1 · THE SELECTOR WAS AN ELEMENT TYPE. `.fld.gapfld` means an input or a
-         select wearing fill mode's class, so §176's month picker — a BUTTON —
+         select wearing fill mode's class, so §177's month picker — a BUTTON —
          was invisible to it, and on a project whose only gaps are due dates
          the walker found nothing and fell back to clicking the chip for the
          page it was already on. `.gapwalk` is the marker now, put on by
@@ -2296,7 +2296,7 @@
   function gapWalkFields(place){
     /* Scoped to ONE place when a chip has just named one -- a function's
        projects page draws every capability at once, so the page's first gap
-       is not the chip's first gap (§176.2). */
+       is not the chip's first gap (§177.2). */
     var root = document;
     if (place) root = document.querySelector('[data-gplace="' +
       place.replace(/"/g, '\\"') + '"]') || document;
@@ -2337,7 +2337,7 @@
   function gapChipShown(c){
     /* RAIL_SHOWN, not RAIL: the first holds what the renderer DREW, the
        second only what somebody has picked, and on a page nobody has clicked
-       the second is empty while the panes are plainly there (§176.2). */
+       the second is empty while the panes are plainly there (§177.2). */
     return (!c.dataset.grail || RAIL_SHOWN[c.dataset.grail] === c.dataset.gcode) &&
            (!c.dataset.gsec || CURSEC[currentSub] === c.dataset.gsec);
   }
@@ -2398,7 +2398,7 @@
     }
     if (els.length) gapLight(els[0]);
   }
-    /* ── THE MONTH PICKER (§176) ────────────────────────────────────────
+    /* ── THE MONTH PICKER (§177) ────────────────────────────────────────
        A due date is chosen, never typed. The button carries the FIELDS index
        and the month and year it is currently showing; the panel is built by
        monthPopHtml() and mounted on <body> as position:fixed, because a
@@ -5835,7 +5835,7 @@
         if (chip.dataset.grail) RAIL[chip.dataset.grail] = chip.dataset.gcode;
         paint();
         if (typeof toPaneTop === "function") toPaneTop();
-        /* §176.2: AND IT LANDS ON THE GAP IT NAMED. Islam: *"the CUS01 3
+        /* §177.2: AND IT LANDS ON THE GAP IT NAMED. Islam: *"the CUS01 3
            button just opens the project."* It did exactly that — the chip
            says how many are missing there and then left you to find them,
            which on a project of five milestones is the work the button was

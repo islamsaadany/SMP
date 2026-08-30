@@ -1957,7 +1957,7 @@ function authoring(page, acKey){ return !!EDIT_PAGE[page] && mayAuthor(acKey); }
    target. Only `gapCell`, the quarters and the mode bar read this — every
    other `ed ?` site stays false, which is what keeps Add, ×, the drag
    handles and every name field out of fill mode without a second gate. */
-/* §176: AND WHICH ROWS. A bounded role -- a project owner, a pillar owner,
+/* §177: AND WHICH ROWS. A bounded role -- a project owner, a pillar owner,
    a contributor -- fills only what it holds, so a call site that knows the
    row hands in its context and the answer narrows to that row. Without a
    `ctx` the page-level answer stands, which is what the office and an
@@ -2157,7 +2157,7 @@ function selectOr(page, value, opts, cls, setter){
     optionsHtml(opts, function(v){ return String(value) === v; }) + '</select>';
 }
 
-/* ── A DUE DATE IS PICKED, NEVER TYPED (§176) ─────────────────────────
+/* ── A DUE DATE IS PICKED, NEVER TYPED (§177) ─────────────────────────
    Islam: "for the date make it only Month Year like Jul 26 not days and
    remove the entry and just keep it a calendar selection."
 
@@ -2590,7 +2590,7 @@ function gapCell(page, acKey, row, field, opts){
   var blank = SMPRules.gapBlank(val);
   var mark = SMPRules.pendOf(row)[field];
   var ed = authoring(page, acKey);
-  /* §176: DEFAULTING TO "INSIDE NO ROW" IS THE SAFE WAY ROUND. A cell that
+  /* §177: DEFAULTING TO "INSIDE NO ROW" IS THE SAFE WAY ROUND. A cell that
      does not say where it sits -- a unit's aspiration, its key objectives, a
      capability's -- closes to every bounded role, and a cell that IS inside
      something hands in its context. The alternative (page-level by default)
@@ -2643,7 +2643,7 @@ function gapCell(page, acKey, row, field, opts){
        §50.6's rule carried from §130.1's collaborators: an emptied list
        DELETES its key, or a tactic nobody supports and one never asked
        stop being byte-identical and every save carries a phantom change. */
-    /* §176.2: MARKED FOR THE WALKER, AND NOT PAINTED. `Next gap` had nothing
+    /* §177.2: MARKED FOR THE WALKER, AND NOT PAINTED. `Next gap` had nothing
        to walk in the office's pen, because `gapfld` is fill mode's class and
        an author's fields carry none — so the loudest button on the bar has
        never done anything for the person who uses it most. `gapwalk` carries
@@ -3390,7 +3390,7 @@ function capBand(c){
    to persist. It is dropped when the viewer leaves the capability. */
 var RAIL = {};
 function railKeyFor(c){ return "cap:" + c.id; }
-/* ── WHAT EACH RAIL ACTUALLY DREW (§176.2) ────────────────────────────────
+/* ── WHAT EACH RAIL ACTUALLY DREW (§177.2) ────────────────────────────────
    `RAIL` holds only what somebody has PICKED, and both pickers below fall
    back to the first item — so on a page nobody has clicked, `RAIL` is empty
    while three panes are plainly on the screen. The gap walker asked `RAIL`
@@ -3400,7 +3400,7 @@ function railKeyFor(c){ return "cap:" + c.id; }
    so the two cannot disagree (§53.5) — reset by the shell before each paint,
    like PAGE_TOOLS and PAGE_ACTS (§130). */
 var RAIL_SHOWN = {};
-/* THE PANE SAYS WHICH PLACE IT IS (§176.2). A gap chip lands on a place and
+/* THE PANE SAYS WHICH PLACE IT IS (§177.2). A gap chip lands on a place and
    then lights that place's first gap -- and a FUNCTION'S projects page draws
    every capability at once, so "the first gap on the page" belonged to
    whichever pane happened to be topmost and the chip for MKT03 lit a field
@@ -4055,7 +4055,7 @@ function projPlanBody(p, fk){
     return ed ? '<button class="xbtn" data-rowoff="' + esc(list) + '|' + esc(id) +
       '" title="Remove this row" aria-label="Remove this row">&times;</button>' : '';
   };
-  /* §176 TOOK THE LAST TWO CALLERS OF THE LOCAL `f`: an outcome's target and
+  /* §177 TOOK THE LAST TWO CALLERS OF THE LOCAL `f`: an outcome's target and
      a milestone's due date both go through gapCell now, so the helper had no
      caller left and is gone rather than left lying about (§24). */
   var sortAttr = function(kind){
@@ -4073,7 +4073,7 @@ function projPlanBody(p, fk){
         xb(d ? "deliverables" : "outcomes", o.id) + '</td>' +
       '<td class="cc">' + dxType(row) + '</td>' +
       '<td class="cc">' + dxDir(row) + '</td>' +
-      /* §176: AN OUTCOME'S TARGET IS FILLABLE, A DELIVERABLE'S IS NOT.
+      /* §177: AN OUTCOME'S TARGET IS FILLABLE, A DELIVERABLE'S IS NOT.
          `dxTarget` prints a deliverable's fixed "Y/N" -- written for it, not
          asked of it (§104) -- so there is nothing there to fill; the outcome
          beside it is the cell that has been printing red Missing all along. */
@@ -4095,12 +4095,12 @@ function projPlanBody(p, fk){
         xb("milestones", m.id) + '</td>' +
       '<td>' + (ed ? inputOr("plan", m.covers || "", "", function(v){ m.covers = v; })
                    : esc(m.covers || "")) + '</td>' +
-      /* §176: BOTH FILLABLE, AND THE OWNER'S EM-DASH BECOMES Missing.
+      /* §177: BOTH FILLABLE, AND THE OWNER'S EM-DASH BECOMES Missing.
          A dash is the platform's word for ABSENT, which says nothing is owed
          -- a milestone with nobody against it IS owed, so it reads like every
          other gap. The owner is PICKED from the register (§130.1) and the due
          date from the month panel; gapCell keeps the pending lifecycle around
-         both, and `ctx` narrows them to the project's own owner (§176). */
+         both, and `ctx` narrows them to the project's own owner (§177). */
       '<td class="cc">' + gapCell("plan", "k_proj", m, "owner", {
           ctx: { project: p, row: m },
           control: function(set, pendCls){
@@ -4575,7 +4575,7 @@ function unitPlanBody(it, u, railed){
     return ed ? '<button class="xbtn" data-rowoff="' + esc(list) + '|' + esc(id) +
       '" title="Remove this row" aria-label="Remove this row">&times;</button>' : '';
   };
-  /* §176: WHERE THIS ROW SITS, for the bounded roles. A pillar owner reaches
+  /* §177: WHERE THIS ROW SITS, for the bounded roles. A pillar owner reaches
      the rows of the pillar whose Owner names them; a contributor reaches the
      rows that name them. Same shape §147.7 hands the authoriser, so the two
      sides answer with one voice. */

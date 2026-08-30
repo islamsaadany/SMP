@@ -1154,7 +1154,7 @@ with sync_playwright() as p:
           adds: [...document.querySelectorAll("[data-rowadd]")]
                   .map(e => e.dataset.rowadd.split("|")[0]),
           grips: document.querySelectorAll(".grip").length,
-          /* §176: a milestone's due date is a PICKER, not an input, so a
+          /* §177: a milestone's due date is a PICKER, not an input, so a
              count of `.fld, input` alone silently under-reports the editable
              controls by one per milestone — the number this line prints would
              go on falling every time a field becomes a button (§51.11). */

@@ -1,4 +1,4 @@
-"""WHO YOU ARE VIEWING AS — THE ROLES, AND WHERE EACH IS HELD (§177).
+"""WHO YOU ARE VIEWING AS — THE ROLES, AND WHERE EACH IS HELD (§178).
 
 Islam, of a project owner's chrome reading PROJECT OWNER · ALL UNITS:
 *"correct it it should follow the roles and the unit he belongs to."*
@@ -29,7 +29,7 @@ WHAT IS ASSERTED, and why each is here:
   ellipsis, and the half that gets cut is the place — so the title has to
   carry it (§88's shape).
 
-PROVED ABLE TO FAIL (§94.5): against the pre-§177 build it fails on the
+PROVED ABLE TO FAIL (§94.5): against the pre-§178 build it fails on the
 em-dashes, on every role held away from the seat, and on the hover.
 """
 import sys

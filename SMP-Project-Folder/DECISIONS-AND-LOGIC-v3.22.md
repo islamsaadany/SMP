@@ -21191,7 +21191,7 @@ as much as the reverse (§68.10).
 
 ---
 
-## §176 · A milestone is filled, and a bounded role fills only its own
+## §177 · A milestone is filled, and a bounded role fills only its own
 
 Islam, of a project owner with the Strategy cell set to **Fill gaps** and the
 Reporting cell to **Edit**: *"hesham has the access done that's his project
@@ -21326,17 +21326,17 @@ decides whether that save was allowed.
 
 **PROVED ABLE TO FAIL, THREE WAYS** (§94.5):
 
-* `checks/milestone-fill.py` against the pre-§176 build — **13 failures**,
+* `checks/milestone-fill.py` against the pre-§177 build — **13 failures**,
   running to completion rather than dying, which took two corrections of its
   own: it first crashed at §4 on a missing month button and at §6 on
   `mayFillRow is not defined`, hiding everything after each. A check that dies
   proves it can fail and hides the rest (§54.5).
-* `scripts/test-authorize.js` §18 against the pre-§176 rules — **5 failures**,
+* `scripts/test-authorize.js` §18 against the pre-§177 rules — **5 failures**,
   every ALLOWED case, because an outcome and a milestone are not gap kinds
   there.
 * And the narrowing under its own test: replace `mayFillRow` with
   `mayFillPage` in the verdict and the **two REFUSED cases go green**. That is
-  the assertion that matters, because on the pre-§176 build everything is
+  the assertion that matters, because on the pre-§177 build everything is
   refused and a "refused" assertion passes for the wrong reason.
 
 **FOUND ON THE WAY AND NOT FIXED**: `checks/project-tables.py` fails
@@ -21348,7 +21348,7 @@ load-bearing). Recorded, not chased.
 
 ---
 
-## §177 · Who you are viewing as — the roles, and where each is held
+## §178 · Who you are viewing as — the roles, and where each is held
 
 Islam, of a project owner whose chrome read **PROJECT OWNER · ALL UNITS**:
 *"correct it it should follow the roles and the unit he belongs to."*
@@ -21432,15 +21432,15 @@ assertions are true of nothing (§113.8).
 **PROVED ABLE TO FAIL — and its first version could only fail once.** It began
 by asking whether `viewerRoleLine` existed and exiting if not, so against the
 previous build it reported one failure and measured nothing else: the same
-trap §176's check fell into an hour earlier. It reads the line **off the
+trap §177's check fell into an hour earlier. It reads the line **off the
 strip** when there is no builder, so every assertion runs either way — **11
 failures** against `227c583`, naming the nine em-dash people by key.
 
 ---
 
-## §176.2 · The gap band's chips and its walker actually go somewhere
+## §177.2 · The gap band's chips and its walker actually go somewhere
 
-Islam, pressing what §176 had just given him: *"the banner appears but the
+Islam, pressing what §177 had just given him: *"the banner appears but the
 buttons are not functioning — the CUS01 3 button just opens the project and
 the next gap does nothing."*
 
@@ -21449,7 +21449,7 @@ whole control read as dead rather than as slightly wrong.
 
 **1 · THE SELECTOR WAS AN ELEMENT TYPE.** `gapWalk()` asked for
 `.fld.gapfld` — an input or a select wearing fill mode's class — so the
-moment §176 made a gap a **button** the walker stopped seeing it, and on a
+moment §177 made a gap a **button** the walker stopped seeing it, and on a
 project whose only gaps are due dates it found nothing at all. §104.7's rule
 in a new place: a list of the things you happen to have today is a list
 somebody forgets to add to. The marker is `.gapwalk` now, put on by `gapCell`
@@ -21509,7 +21509,7 @@ paint until the click lands (§30.1) and the fields do not exist until it has �
 check that only walks the fill grant cannot see a button that is dead for the
 office), and asserts that every press marks a field, that the walk does not
 sit on one, and that it reaches every place the band names. It reads the
-product's own `.gaplit` ring in preference to §176.2's cursor, so a build with
+product's own `.gaplit` ring in preference to §177.2's cursor, so a build with
 no cursor is measured on its own terms rather than merely noticed to be
 missing one (§94.8).
 

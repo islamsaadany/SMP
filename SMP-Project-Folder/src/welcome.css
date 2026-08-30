@@ -12,6 +12,24 @@
                -webkit-font-smoothing:antialiased; }
 .welcomeover .wwrap { max-width:1140px; margin:0 auto; padding:34px 24px 60px; }
 
+/* ── VIEWING AS, ABOVE THE GREETING (§179) ──────────────────────────────
+   Islam's pick of two drawn placements. It sits on the PAGE's ground, not on
+   the hero's navy, so it takes the page's own ink — the drawing that put it
+   here first wore `--panel-ink` inherited from the hero and measured as a
+   pale label on a pale ground, which is §38.5's fault in a mockup rather than
+   in the product. Right-aligned: it is the one thing on this screen that is
+   about the screen rather than about the person being greeted, so it keeps
+   out of the greeting's reading line. */
+.welcomeover .wviewbar { display:flex; justify-content:flex-end;
+  align-items:center; gap:9px; margin:0 0 12px; }
+.welcomeover .wviewbar label { font-size:var(--fs-micro); letter-spacing:.14em;
+  text-transform:uppercase; font-weight:700; color:var(--ink-3); }
+/* searchsel replaces the select with a `.ssbtn` past five options (§45.5) and
+   hides the native one in place, so both are sized here — never the button
+   alone, or a tenant with five people gets an unstyled dropdown. */
+.welcomeover .wviewbar select, .welcomeover .wviewbar .ssbtn {
+  font-size:var(--fs-small); max-width:min(340px, 60vw); }
+
 /* ── The navy band: greeting leads, tenant signs on the separator ───────── */
 .welcomeover .whero { background:var(--panel); color:var(--panel-ink);
   border-radius:var(--r-md); padding:30px 34px 28px; display:flex;

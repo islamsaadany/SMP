@@ -2511,19 +2511,6 @@
      faint for exactly the reason the dotted CHARACTER was. Same weight of
      ring, filled or not, is a difference that survives the size. */
   .saidmark.done { border-color:var(--ink-3); background:none; }
-  /* ── THE SEAT ASK (§186) ────────────────────────────────────────────
-     Plain prose in the platform's own modal, not a warning panel. What makes
-     this catch a mis-click is that it NAMES the role and the person; dressing
-     it in red would say "something is wrong", which is not true — handing
-     somebody a seat is an ordinary thing the Super user does on purpose. */
-  .seatask { display:block; margin-top:8px; padding:10px 12px;
-             background:var(--surface-2); border:1px solid var(--line);
-             border-radius:var(--r-sm); }
-  .seatask b { display:block; margin-bottom:6px; }
-  .seatask p { margin:0 0 8px; max-width:56ch; font-size:var(--fs-small); }
-  .seatask .why { color:var(--ink-3); }
-  .seatask .pdrt { display:flex; gap:14px; justify-content:flex-end;
-                   align-items:center; }
   /* Why a dismissal did not land (§171's rule, on a write that rides no
      autosave and so has no banner of its own). --bad-tx because it is WORDS,
      not a fill (§38.5). */

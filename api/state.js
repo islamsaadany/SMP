@@ -16,6 +16,7 @@ const io = require("../lib/state-io.js");
 const { writeState, readState, ensureReady } = io;
 const auth = require("../lib/auth.js");
 const { authorize } = require("../lib/authorize.js");
+const R = require("../lib/rules.js");
 
 /* The six env-var spellings Neon and Vercel use between them live in ONE
    place now (lib/state-io.js): this was copied here and into api/auth.js
@@ -126,16 +127,61 @@ module.exports = async function handler(req, res) {
       const stored = await readState(client);
       const me = (stored.people || []).filter(function (p) { return p.key === person.key; })[0]
               || { key: person.key, name: person.name };
-      const verdict = authorize(stored, state, me);
+
+      /* ── VIEWING AS SOMEBODY IS JUDGED AS SOMEBODY (§185) ────────────
+         Islam: *"Hala got this error, when I view as her I didn't get it."*
+         The screen drew her view and the save was checked against the SMO's
+         rights, so no refusal she meets could ever be reproduced — and the
+         office could write through her view what she could never write.
+
+         THE RULE IS IN `lib/rules.js`, not here (§42): who may act as whom is
+         exactly the kind of question that must have one answer and be
+         testable without a database. It can only narrow — the gate is the
+         SEAT ROLE ON THE SESSION, the same fact that draws the switcher, so a
+         session that cannot simulate is judged as itself exactly as before
+         and a forged `viewAs` buys nothing. The simulated person is looked up
+         in the STORED people, never taken from the incoming state. */
+      const act = R.actingFor(me, body && body.viewAs, person.role, stored.people);
+      if (act.refuse) {
+        return send(res, 403, { ok: false, refused: true, error: act.refuse,
+                                refusals: [act.refuse], refusedChanges: [],
+                                undoable: false });
+      }
+      const acting = act.person;
+
+      const verdict = authorize(stored, state, acting);
       if (!verdict.ok) {
+        /* §184: SAY WHICH ROWS, NOT ONLY WHY. `refusals` is unchanged and
+           still carries the sentences §171's banner reads. `refusedChanges`
+           is the address of every field the verdict would not take, with the
+           value it HELD — so the platform can put back exactly those and
+           save the rest, instead of offering nothing but "discard
+           everything". `undoable` is the server's own answer to "is every
+           refusal addressable", because a client that worked it out for
+           itself would be a second copy of that rule (§42). */
+        const undoable = verdict.refused.length > 0 &&
+          verdict.refused.every(function (r) { return r.rows && r.rows.length; });
         return send(res, 403, { ok: false, refused: true,
                                 error: verdict.refusals.join(" "),
-                                refusals: verdict.refusals });
+                                refusals: verdict.refusals,
+                                refusedChanges: verdict.refused,
+                                undoable: undoable,
+                                /* §185: AND WHO IT WAS JUDGED AS, when that is
+                                   not you. "Setup is the SMO's" is a baffling
+                                   thing to read when you ARE the SMO; the
+                                   banner needs the missing half of the
+                                   sentence, and only the server knows it. */
+                                judgedAs: acting.key === me.key ? null
+                                  : { key: acting.key, name: acting.name || acting.key } });
       }
 
       await writeState(client, state);
       /* Logged AFTER the write and outside its transaction on purpose: a log
          entry for a save that did not land is worse than a missing one. */
+      /* THE LOG NAMES WHO SIGNED IN, NEVER THE SIMULATION (§185). The save
+         was AUTHORISED as the person being viewed — that is the fix — but it
+         was MADE by whoever is at the keyboard, and a change log that named
+         the simulation would be a log that cannot answer "who moved this". */
       await logChanges(client, me, verdict.changes);
       return send(res, 200, { ok: true });
     }

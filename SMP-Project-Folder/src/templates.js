@@ -632,11 +632,19 @@ var MS_STATUS_WORDS = ["done", "pending", "completed", "complete", "not started"
    all, which is still exactly the case that started this: "Done" and
    "Pending" sitting in a due-date column.
 
-   `monthsOf` is the reader the PRODUCT uses to decide whether a row is due,
-   so anything it can read is a date the platform can compare. Asking a second
-   question here would be a second definition of "a date" (§42, in the small). */
+   `SMPRules.whenReadable` is the reader the PRODUCT uses to decide whether a
+   row is due, so anything it can read is a date the platform can compare.
+   Asking a second question here would be a second definition of "a date"
+   (§42, in the small) -- and since §184 it is also what decides whether an
+   unreadable date is a GAP, so the upload's notice and the fill grant agree
+   about the same values by construction.
+
+   THE SHAPE, NOT THE MONTH (§184). This asked `monthsOf(v) != null`, which
+   resolves a bare "Q3" against the CYCLE -- so on a tenant whose cycle names
+   no year, "Q3" read as not-a-date here while every due comparison read it
+   fine. `whenReadable` asks the shape alone, which is the question. */
 function dueFits(v){
-  return monthsOf(v) != null;
+  return SMPRules.whenReadable(v);
 }
 
 /* ── Capability templates (§16.4, §15.12) ─────────────────────────────────

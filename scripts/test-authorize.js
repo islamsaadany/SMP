@@ -1758,5 +1758,245 @@ console.log("\n18 · a bounded role fills only what it holds (§177)");
   }
 })();
 
+console.log("\n19 · a date the platform cannot read is a gap (§184)");
+/* Islam, on the CX strategy custodian: "they lost all data they inputed and
+   the dates showed waiting confirmation and I didn't get them as the SMO."
+
+   THE REFUSAL WAS CORRECT AND THE LOSS WAS EVERYTHING AROUND IT. He filled
+   three empty milestone due dates -- accepted, marked pending -- and touched
+   a fourth whose stored value was `30/09/2026`, a value `monthsOf()` cannot
+   read at all. Non-blank is not a gap, so correcting it classified as
+   AUTHORING and the whole save was refused; the whole graph posts together,
+   so the three good fills went down with it, and the only control on the
+   banner destroyed them.
+
+   Two halves are asserted here, and BOTH ENDS of each (§113.8):
+     · an unreadable date IS a gap, so filling it is accepted...
+     · ...while a date the platform CAN read is still the office's, or §184
+       has quietly handed every date to every filler.
+
+   PROVED ABLE TO FAIL (§94.5): put `gapBlank` back inside `R.gapEmpty` and
+   the first case refuses -- and the third, which is the one that reproduces
+   the report: three good fills refused because a fourth row was in the same
+   post. */
+(function () {
+  const FN = "it";
+  const T = "fn:" + FN;
+  const MARK = { by: "t184_fill", at: "2026-08-30" };
+  const capOf = function (st) {
+    return st.group.capabilities.filter(function (c) { return c.fn === FN; })[0];
+  };
+  const fromStored = function (stored, who, mutate) {
+    const inc = clone(stored); mutate(inc);
+    return A.authorize(stored, inc, personOf(stored, who));
+  };
+
+  /* The reader itself, before anything is asked of the authoriser. */
+  check("§184: `30/09/2026` is not a date the platform can read",
+        R.whenReadable("30/09/2026") === false);
+  check("§184: `Jul 26` is", R.whenReadable("Jul 26") === true);
+  check("§184: a bare quarter is, with no cycle to resolve it",
+        R.whenReadable("Q3") === true && R.whenMonths("Q3", false, null) === null);
+  check("§184: an unreadable due date is a GAP",
+        R.gapEmpty("finish", { finish: "30/09/2026" }) === true);
+  check("§184: a readable one is not",
+        R.gapEmpty("finish", { finish: "Jul 26" }) === false);
+  check("§184: and the rule is the FIELD's, not every field's — an unreadable " +
+        "TARGET is still a target somebody wrote",
+        R.gapEmpty("target", { target: "30/09/2026" }) === false);
+
+  const base = clone(SEED);
+  base.access.custodian = Object.assign({}, base.access.custodian,
+    { a_fn_own_strat: "fill" });
+  base.functions[FN].custodian = "t184_fill";
+  base.people.push({ key: "t184_fill", name: "Filler 184", active: true });
+  const cap = capOf(base);
+  if (!cap || !(cap.projects || []).length || (cap.projects[0].milestones || []).length < 3) {
+    check("§184: the fixture needs a project with three milestones", false, FN);
+  } else {
+    /* THE STATE IS MADE, because no seed row carries a bad date (§94.2): one
+       unreadable, two empty — the CX shape exactly. */
+    const ms = cap.projects[0].milestones;
+    ms[0].finish = "30/09/2026";
+    ms[1].finish = "";
+    ms[2].finish = "";
+
+    let v = fromStored(base, "t184_fill", function (i) {
+      const m = capOf(i).projects[0].milestones[0];
+      m.finish = "Sep 26"; m.pend = { finish: MARK };
+    });
+    check("FILL: correcting a due date the platform cannot read", v.ok,
+          v.refusals.join(" / "));
+
+    v = fromStored(base, "t184_fill", function (i) {
+      const m = capOf(i).projects[0].milestones;
+      m[0].finish = "Sep 26"; m[0].pend = { finish: MARK };
+      m[1].finish = "Jul 26"; m[1].pend = { finish: MARK };
+      m[2].finish = "Aug 26"; m[2].pend = { finish: MARK };
+    });
+    check("FILL: all three in one save — the report, reproduced", v.ok,
+          v.refusals.join(" / "));
+
+    /* THE OTHER END. A date that reads is a plan decision and stays one. */
+    const good = clone(base);
+    capOf(good).projects[0].milestones[0].finish = "Nov 26";
+    v = fromStored(good, "t184_fill", function (i) {
+      const m = capOf(i).projects[0].milestones[0];
+      m.finish = "Dec 27"; m.pend = { finish: MARK };
+    });
+    check("REFUSED: correcting a due date that READS is still the office's", !v.ok,
+          "was ALLOWED — " + JSON.stringify(v.changes.map(function (c) { return c.kind; })));
+  }
+})();
+
+console.log("\n20 · a refusal names the rows it refused (§184)");
+/* THE SECOND HALF OF THE SAME FAULT. Even with §184's date rule, some row
+   somewhere will be genuinely refused — and until now the verdict said only
+   WHY, so the platform had nothing to put back and the only way past a
+   refusal was to discard every unsaved change on the page.
+
+   What is asserted is the ADDRESS: target, row id, field, and the value the
+   row HELD — enough for the client to revert exactly those and re-save the
+   rest. And `undoable`, the server's own answer to "is every refusal
+   addressable", because a client working that out for itself would be a
+   second copy of the rule (§42).
+
+   BOTH ENDS: a refusal that CAN be put back, and one that cannot — a change
+   to which rows exist has no row address, and saying so is what stops the
+   client offering a button that would not work. */
+(function () {
+  const FN = "it";
+  const capOf = function (st) {
+    return st.group.capabilities.filter(function (c) { return c.fn === FN; })[0];
+  };
+  const base = clone(SEED);
+  base.functions[FN].custodian = "t184_row";
+  base.people.push({ key: "t184_row", name: "Row Namer 184", active: true });
+  const run = function (mutate) {
+    const inc = clone(base); mutate(inc);
+    return A.authorize(base, inc, personOf(base, "t184_row"));
+  };
+
+  /* A custodian correcting a milestone's due date: plan, and refused. */
+  let v = run(function (i) { capOf(i).projects[0].milestones[0].finish = "Dec 27"; });
+  check("the plan refusal happens at all", !v.ok);
+  const hit = (v.refused || []).filter(function (r) {
+    return (r.rows || []).some(function (x) { return x.field === "finish"; }); })[0];
+  check("...and it names the row and the field", !!hit,
+        JSON.stringify(v.refused));
+  if (hit) {
+    const row = hit.rows.filter(function (x) { return x.field === "finish"; })[0];
+    check("...with the id the plan actually holds",
+          row.id === capOf(base).projects[0].milestones[0].id, row.id);
+    check("...the row's NAME, so the banner can say which line",
+          row.name === capOf(base).projects[0].milestones[0].name, row.name);
+    check("...and the value it HELD, which is what gets put back",
+          row.from === capOf(base).projects[0].milestones[0].finish, row.from);
+    check("...`had` says the key was there, so it is set and not deleted",
+          row.had === true);
+    check("every refusal is addressable, so the offer can be made",
+          v.refused.every(function (r) { return r.rows && r.rows.length; }));
+  }
+
+  /* A project's own front matter — §179's Start and End (§184's other half). */
+  v = run(function (i) { capOf(i).projects[0].start = "Jan 27"; });
+  const front = (v.refused || []).filter(function (r) {
+    return (r.rows || []).some(function (x) { return x.field === "start"; }); })[0];
+  check("a project's Start is named too", !!front, JSON.stringify(v.refused));
+  if (front) {
+    const row = front.rows.filter(function (x) { return x.field === "start"; })[0];
+    check("...addressed by the PROJECT's id", row.id === capOf(base).projects[0].id, row.id);
+  }
+
+  /* A field the stored row did not have at all: `had` false, so the client
+     DELETES rather than writing null — a null where nothing was is a change
+     of its own and would be refused a second time. */
+  const bare = clone(base);
+  delete capOf(bare).projects[0].milestones[0].owner;
+  v = (function () {
+    const inc = clone(bare);
+    capOf(inc).projects[0].milestones[0].owner = "Somebody";
+    return A.authorize(bare, inc, personOf(bare, "t184_row"));
+  })();
+  const own = (v.refused || []).filter(function (r) {
+    return (r.rows || []).some(function (x) { return x.field === "owner"; }); })[0];
+  check("a field the stored row never had is marked absent, not null",
+        !!own && own.rows.filter(function (x) { return x.field === "owner"; })[0].had === false,
+        JSON.stringify(own && own.rows));
+
+  /* THE OTHER END: a change with no row address says so. Removing a project
+     changes WHICH rows exist, which no field revert can undo. */
+  v = run(function (i) { capOf(i).projects.pop(); });
+  check("removing a project is refused", !v.ok);
+  check("...and is NOT addressable, so no put-back is offered",
+        (v.refused || []).some(function (r) { return !r.rows || !r.rows.length; }),
+        JSON.stringify(v.refused));
+})();
+
+console.log("\n21 · viewing as somebody is judged as somebody (§185)");
+/* Islam: *"Hala got this error, when I view as her I didn't get it — so the
+   view-as function is not showing exactly what people see."*
+
+   THE MEASUREMENT THAT SETTLED IT, kept as an assertion: one edit, one
+   screen, two answers. The whole fault is that authorisation read the
+   session cookie while the page read the simulation, so the office could
+   never reproduce anybody's refusal — and could write through a colleague's
+   view what that colleague could never write.
+
+   `actingFor()` can only NARROW, and these are the three answers that make
+   that true. A session without the seat is judged as itself, so a forged
+   `viewAs` buys nothing (§42: a switch that only hides a control is
+   decoration); an unknown key is REFUSED rather than treated as somebody
+   with no roles, because "no roles" is a narrowing that hides a mistake
+   instead of reporting it. */
+(function () {
+  const FN = "it";
+  const capOf = function (st) {
+    return st.group.capabilities.filter(function (c) { return c.fn === FN; })[0];
+  };
+  const base = clone(SEED);
+  base.functions[FN].custodian = "t185_hala";
+  base.people.push({ key: "t185_hala", name: "Hala 185", active: true });
+  const smo = personOf(base, "smo") || { key: "smo", name: "SMO" };
+
+  /* The same edit, judged twice — the report, as an assertion. */
+  const edit = function () {
+    const i = clone(base);
+    capOf(i).projects[0].milestones[0].finish = "Dec 27";
+    return i;
+  };
+  const asHer = A.authorize(base, edit(), personOf(base, "t185_hala"));
+  const asSMO = A.authorize(base, edit(), smo);
+  check("the edit IS refused for her", !asHer.ok, asHer.refusals.join(" / "));
+  check("...and accepted for the office — which is why it could not be seen",
+        asSMO.ok, asSMO.refusals.join(" / "));
+
+  /* And the rule that closes it. */
+  const people = base.people;
+  check("§185: no viewAs is judged as yourself",
+        R.actingFor(smo, "", "super", people).person.key === "smo");
+  check("§185: viewAs YOURSELF is not a simulation either",
+        !R.actingFor(smo, "smo", "super", people).simulated);
+  const sim = R.actingFor(smo, "t185_hala", "super", people);
+  check("§185: the office viewing as her is judged as HER",
+        sim.person && sim.person.key === "t185_hala" && sim.simulated === true,
+        JSON.stringify(sim));
+  check("§185: and authorising with that person reproduces her refusal",
+        !A.authorize(base, edit(), sim.person).ok);
+
+  /* THE OTHER END (§113.8): it must not be a way to become somebody else. */
+  check("§185: a session without the seat cannot simulate at all",
+        !!R.actingFor(personOf(base, "t185_hala"), "smo", "custodian", people).refuse);
+  check("§185: ...and a person the register does not hold is refused, never " +
+        "waved through as somebody with no roles",
+        !!R.actingFor(smo, "nobody_at_all", "super", people).refuse);
+  /* A forged viewAs from a session that cannot simulate is REFUSED rather
+     than silently ignored: ignoring it would judge the save as the forger,
+     which is wider than what they asked for and hides that they asked. */
+  check("§185: the refusal is a sentence somebody can act on",
+        /Only the SMO/.test(R.actingFor(personOf(base, "t185_hala"), "smo",
+                                        "custodian", people).refuse));
+})();
+
 console.log("\n" + pass + " passed, " + fail + " failed");
 process.exit(fail ? 1 : 0);

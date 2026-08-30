@@ -324,6 +324,17 @@
                   border:0; padding:0; margin:0; cursor:pointer;
                   text-decoration:underline; text-underline-offset:2px; }
   .refused-undo:focus-visible { outline:2px solid currentColor; outline-offset:2px; }
+  /* THE ONE THAT KEEPS THE WORK IS THE ONE THAT LOOKS LIKE A BUTTON (§184).
+     Discard reads as a deliberate choice, above; putting the refused lines
+     back and saving the rest is the ordinary next step, so it wears a border
+     and the pair reads in two volumes rather than one. No new colour: the
+     banner's own text token, which is already measured against --bad-bg
+     (§38.4 — the tint and its TEXT twin, never the solid fill). */
+  .refused-keep { font:inherit; font-weight:700; color:inherit; background:none;
+                  border:1.5px solid currentColor; border-radius:var(--r-sm, 6px);
+                  padding:3px 10px; margin:0 6px 0 0; cursor:pointer; }
+  .refused-keep:hover { background:color-mix(in srgb, currentColor 10%, transparent); }
+  .refused-keep:focus-visible { outline:2px solid currentColor; outline-offset:2px; }
   .banner.refused ul { margin:4px 0 0; padding-left:18px; }
   .banner.refused li { margin:2px 0; }
 
@@ -4135,8 +4146,60 @@
      INSIDE the value's own line. `.val` is display:block under §88's clip rule,
      so a sibling would start a second line and take the row from 39px to 57px —
      which is the fault this replaces. */
-  .saidmark { margin-left:6px; color:var(--gold-deep); font-size:11px;
-    cursor:help; }
+  /* ── ANSWERED, AND VISIBLY SO (§180, DRAWN PROPERLY IN §185) ────────
+     The SHAPE carries the state, not the colour: a filled ring while the
+     claim is waiting, an open dashed one once it has been answered. The ink
+     moves with it so the two agree rather than fight, but at this size a
+     colour alone is not a difference anybody reads (measured: rgb(138,107,34)
+     against rgb(99,108,121) on a 9.6px mark).
+
+     IT IS A BORDER NOW, NOT A CHARACTER, AND THAT IS §185's WHOLE FINDING.
+     §180 shipped `◎` and `◌` and measured them the wrong way: it asked
+     whether the glyph DIFFERED from the tofu rectangle, which U+25CC does —
+     by about one pixel of ink. Re-measured in the built page, in the font
+     this mark actually computes to: the bullseye lays down 53 ink pixels and
+     the dotted circle **29, against tofu's 28**. So the answered mark was, to
+     anybody looking at it, nothing at all — Islam: *"I dismissed the case but
+     the small mark is not there."*
+
+     A GLYPH THAT DIFFERS FROM TOFU BY ONE PIXEL PASSES "IT IS DRAWN" AND
+     FAILS "IT IS A MARK." (§52, §120.2, from a side neither of them saw: both
+     are about a character that is MAPPED and not drawn; this one is drawn and
+     not legible.) So it is CSS, which is under our control, scales, takes
+     currentColor and cannot fall back to somebody else's font — §45's answer
+     to the colour emoji, in a second place. */
+  .saidmark { margin-left:6px; font-size:11px; cursor:help;
+    display:inline-block; vertical-align:middle;
+    width:9px; height:9px; border-radius:50%;
+    border:2px solid var(--gold-deep); background:var(--gold-deep);
+    /* The character inside is kept for a copy-paste and a screen reader, and
+       is not what is looked at. */
+    text-indent:-999em; overflow:hidden; }
+  /* FULL AGAINST EMPTY, NOT SOLID AGAINST DASHED. The first CSS draft was a
+     dashed ring, and measuring it caught §180's own mistake a second time: at
+     a 9px circle a 1.5px dash rounds to 1px and lays down about four marks —
+     faint for exactly the reason the dotted CHARACTER was. Same weight of
+     ring, filled or not, is a difference that survives the size. */
+  .saidmark.done { border-color:var(--ink-3); background:none; }
+  /* ── THE SEAT ASK (§186) ────────────────────────────────────────────
+     Plain prose in the platform's own modal, not a warning panel. What makes
+     this catch a mis-click is that it NAMES the role and the person; dressing
+     it in red would say "something is wrong", which is not true — handing
+     somebody a seat is an ordinary thing the Super user does on purpose. */
+  .seatask { display:block; margin-top:8px; padding:10px 12px;
+             background:var(--surface-2); border:1px solid var(--line);
+             border-radius:var(--r-sm); }
+  .seatask b { display:block; margin-bottom:6px; }
+  .seatask p { margin:0 0 8px; max-width:56ch; font-size:var(--fs-small); }
+  .seatask .why { color:var(--ink-3); }
+  .seatask .pdrt { display:flex; gap:14px; justify-content:flex-end;
+                   align-items:center; }
+  /* Why a dismissal did not land (§171's rule, on a write that rides no
+     autosave and so has no banner of its own). --bad-tx because it is WORDS,
+     not a fill (§38.5). */
+  .saidwhere .saidfail { display:block; color:var(--bad-tx); font-weight:600; }
+  /* An answered claim is still readable and is not asking for anything. */
+  .saidwhere.done { color:var(--ink-3); }
   /* A sub-line under a value, on ITS own line and clipped like one. `.why` was
      doing this job and carries a top margin meant for prose. */
   .vwhy { display:block; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;
@@ -4821,11 +4884,19 @@
                   color:var(--gold-deep); font-weight:700; }
   tr.notdue td { opacity:.62; }
 
-  /* ── ONE ROW SHAPE (§104) ────────────────────────────────────────
-     The Type pill takes a fixed box: "Deliverable" and "Outcome" are seven
+  /* ── ONE ROW SHAPE (§104, unchipped in §179) ─────────────────────
+     The Type column takes a fixed box: "Deliverable" and "Outcome" are seven
      characters apart, and left to themselves the column reads as two
-     different marks rather than one question answered two ways. */
-  td .pill.tk { min-width:92px; justify-content:center; }
+     different marks rather than one question answered two ways -- and a
+     column that resizes with its rows moves every column beside it.
+
+     It was a `.pill.tk` until §179 and is plain text now (Islam: "don't make
+     them chips let's make them normal text"). The MEASURE is what was doing
+     the work and it stays; the border was boxing the only thing in the cell.
+     `--ink-2` because a classification is not the row's subject -- the name
+     beside it is -- and the chip it replaces read in that same ink. */
+  td .dxtype { display:inline-block; min-width:92px; text-align:center;
+               color:var(--ink-2); }
   /* A value the plan writes rather than asks for. Quiet, because a field
      nobody can change should not look like a field. */
   .fixedval { color:var(--ink-3); }
@@ -6814,6 +6885,24 @@ body.presenting .tourdock { display:none; }
                -webkit-font-smoothing:antialiased; }
 .welcomeover .wwrap { max-width:1140px; margin:0 auto; padding:34px 24px 60px; }
 
+/* ── VIEWING AS, ABOVE THE GREETING (§179) ──────────────────────────────
+   Islam's pick of two drawn placements. It sits on the PAGE's ground, not on
+   the hero's navy, so it takes the page's own ink — the drawing that put it
+   here first wore `--panel-ink` inherited from the hero and measured as a
+   pale label on a pale ground, which is §38.5's fault in a mockup rather than
+   in the product. Right-aligned: it is the one thing on this screen that is
+   about the screen rather than about the person being greeted, so it keeps
+   out of the greeting's reading line. */
+.welcomeover .wviewbar { display:flex; justify-content:flex-end;
+  align-items:center; gap:9px; margin:0 0 12px; }
+.welcomeover .wviewbar label { font-size:var(--fs-micro); letter-spacing:.14em;
+  text-transform:uppercase; font-weight:700; color:var(--ink-3); }
+/* searchsel replaces the select with a `.ssbtn` past five options (§45.5) and
+   hides the native one in place, so both are sized here — never the button
+   alone, or a tenant with five people gets an unstyled dropdown. */
+.welcomeover .wviewbar select, .welcomeover .wviewbar .ssbtn {
+  font-size:var(--fs-small); max-width:min(340px, 60vw); }
+
 /* ── The navy band: greeting leads, tenant signs on the separator ───────── */
 .welcomeover .whero { background:var(--panel); color:var(--panel-ink);
   border-radius:var(--r-md); padding:30px 34px 28px; display:flex;
@@ -8145,6 +8234,50 @@ THEME.apply();
      running the office. */
   function mayEditAccess(w, person) { return isSMO(w, person); }
 
+  /* ── A SEAT IS NOT AN ORDINARY ROLE (§186) ────────────────────────
+     Islam, from the deployment: *"hussein khaled is a custodian and getting
+     the super user … you assured me it's impossible."* It was not
+     impossible, and the route is one unconfirmed selection: the register's
+     role picker offers every role a `<select>` can hold and commits on the
+     `change` event, so ONE pick on the most powerful grant in the product
+     writes `p.role = "super"` with nothing in between.
+
+     The SERVER has always been right about this — a change to somebody's
+     seat classifies as `access`, which `mayEditAccess()` keeps to the Super
+     user — so what was wrong is entirely the SCREEN, offering a control the
+     save refuses for everybody but the one person it does not refuse, for
+     whom it goes through instantly and silently. §42's drift, in the most
+     dangerous place it could be.
+
+     NAMED HERE, not in the browser, because three surfaces have to agree
+     about which roles these are: the picker, the people workbook's Role
+     column, and the register's own watch for a seat nobody meant to grant.
+     `cceo` is on the list although it is held at a company rather than the
+     group — what makes a seat a seat is that it is a property of the PERSON
+     (§33) rather than something a unit points at, and handing one out is a
+     decision about the organisation rather than about a plan. */
+  var SEAT_ROLES = ["super", "smoteam", "gceo", "cceo"];
+  function isSeatRole(k) { return SEAT_ROLES.indexOf(k) > -1; }
+
+  /* A SEAT SITTING SOMEWHERE ELSE (§186). A seat is held over the group (or,
+     for a company CEO, over their company) and the people who hold one sit
+     there too — so a seat whose place is NOT where the person sits is the
+     shape of an accident, and it is exactly what the chrome's own role line
+     already prints with a place beside it (§178).
+
+     THE OFFICE IS NOT FLAGGED, and that is why the test is the PLACE rather
+     than "holds a seat and something else": the bootstrap SMO holds
+     super@group AND heads the SMO function (§118), so a rule about holding
+     two roles would nag about the one row that is certainly correct. */
+  function seatOutOfPlace(w, p, at) {
+    var wrong = null;
+    personRoles(w, p).forEach(function (r) {
+      if (wrong || !isSeatRole(r.role)) return;
+      if (r.at !== at) wrong = r;
+    });
+    return wrong;
+  }
+
   /* 2 · WHO MAY DESTROY SOMETHING. Retiring is reversible and keeps every
      attribution true (§69); deleting, clearing a plan and clearing the tenant
      are not, and a mistake there is not recoverable from inside the product.
@@ -8302,9 +8435,135 @@ THEME.apply();
      nothing: none of them changes what this cycle's figure means. */
   var GAP_SCORE_FIELDS = ["dir", "target", "compile", "weight", "quarters"];
 
+  /* ── WHEN A DATE IS A DATE (§184) ─────────────────────────────────
+     `monthsOf()` in the platform is what decides whether a row is due, what
+     `dueFits()` calls a date on upload, and what the overrun warning
+     compares — so it is the platform's definition of a time, and until now
+     it lived in the browser alone. THE SERVER NEEDED IT: §184's whole
+     fault is that a value the platform cannot read — `30/09/2026`, typed
+     before §179 gave these fields a picker — is not blank, so the screen
+     let a filler correct it and the server classified the correction as
+     AUTHORING and refused it. Two answers to "is this a date", one per
+     side, which is §42's drift with a lost afternoon on the end of it.
+
+     So the reader moves here whole, as a pure function taking the cycle's
+     year rather than reading REVIEW, and `monthsOf()` becomes a one-line
+     wrapper (§130.7's shape, where the name rule made the same move).
+     Nothing about what it reads changes — the regexes, the two-digit year
+     rule and the quarter/half `last` behaviour are as they were. */
+  var WHEN_MONTHS = ["jan","feb","mar","apr","may","jun",
+                     "jul","aug","sep","oct","nov","dec"];
+  function whenMonthIndex(w) {
+    return WHEN_MONTHS.indexOf(String(w || "").slice(0, 3).toLowerCase());
+  }
+  function whenFullYear(y) {
+    var n = +y;
+    if (!n && n !== 0) return null;
+    /* "26" is 2026, not 26 AD — a plan is never written about the year 26. */
+    return n < 100 ? 2000 + n : n;
+  }
+  /* Months since year zero, so two dates in different years compare with one
+     subtraction. Null when the text is not a time at all — which is what the
+     upload notice reports and what "Done" in a due-date column produces.
+     `cyYear` is the cycle's year, used only where a quarter or a half names
+     none; null there means the SHAPE is still read (see whenReadable). */
+  function whenMonths(v, last, cyYear) {
+    var s = String(v == null ? "" : v).trim();
+    if (!s) return null;
+    var m;
+    /* W3 Mar 26 / Week 3 March 2026 — the week is read and discarded,
+       because the comparison is monthly. It is kept in the TEXT. */
+    if ((m = /^w(?:eek)?\s*[1-5]\s+([a-z]+)\.?\s*'?(\d{2,4})$/i.exec(s)))
+      return whenMonthIndex(m[1]) < 0 ? null : whenFullYear(m[2]) * 12 + whenMonthIndex(m[1]);
+    /* July 26 / Jul 2026 / Dec 26 */
+    if ((m = /^([a-z]+)\.?\s*'?(\d{2,4})$/i.exec(s)))
+      return whenMonthIndex(m[1]) < 0 ? null : whenFullYear(m[2]) * 12 + whenMonthIndex(m[1]);
+    /* Q3 2026 / Q3 — a quarter is its FIRST month, or its last when `last`
+       is asked for, which is how a cycle named Q2 covers April to June. */
+    if ((m = /^q([1-4])\s*'?(\d{2,4})?$/i.exec(s))) {
+      var qy = m[2] ? whenFullYear(m[2]) : cyYear;
+      return qy == null ? null : qy * 12 + (+m[1] - 1) * 3 + (last ? 2 : 0);
+    }
+    /* H1 2026 / H2 26 — a half year, which is what a review is usually
+       called and what the old reader could not see at all. */
+    if ((m = /^h([12])\s*'?(\d{2,4})?$/i.exec(s))) {
+      var hy = m[2] ? whenFullYear(m[2]) : cyYear;
+      return hy == null ? null : hy * 12 + (+m[1] - 1) * 6 + (last ? 5 : 0);
+    }
+    /* FY26 / 2026 — a whole year. */
+    if ((m = /^(?:fy)?\s*'?(\d{4})$/i.exec(s)))
+      return whenFullYear(m[1]) * 12 + (last ? 11 : 0);
+    /* 31 May 2026, and anything else a browser genuinely reads as a date. */
+    var t = Date.parse(s);
+    if (!isNaN(t)) { var d = new Date(t); return d.getFullYear() * 12 + d.getMonth(); }
+    return null;
+  }
+  /* CAN THE PLATFORM READ THIS AT ALL — the SHAPE, never which month it
+     lands on. A bare "Q3" names no year and is still a time somebody wrote;
+     it resolves against the cycle on a page and against nothing on a server
+     that is not looking at one, so readability is asked with a year SUPPLIED
+     rather than with none. One reader, asked twice — never a second list of
+     regexes, which is exactly how "a date" would come to mean two things
+     again (§53.5). */
+  function whenReadable(v) { return whenMonths(v, false, 2000) != null; }
+
+  /* ── WHOSE RIGHTS A SAVE IS JUDGED BY (§185) ──────────────────────
+     Islam: *"Hala got this error, when I view as her I didn't get it — so
+     the view-as function is not showing exactly what people see."*
+     Viewing as somebody changed everything the screen DREW and nothing the
+     server ACCEPTED, so no refusal anybody met could be reproduced, and the
+     office could write through a colleague's view what that colleague could
+     never write themselves.
+
+     A RULE, NOT A BRANCH IN THE ENDPOINT, for §42's reason: it decides who
+     may act as whom, which is exactly the kind of question that must have
+     one answer and be testable without a database.
+
+     IT CAN ONLY NARROW, and the three answers are what make that true.
+     `seatRole` is the seat the SESSION carries — never a role read out of
+     the state, which is the thing being written — so a forged `viewAs` from
+     a session that cannot simulate buys nothing and is judged as itself.
+     An unknown key is REFUSED rather than treated as somebody with no roles:
+     "no roles" is a narrowing that hides a mistake instead of reporting it. */
+  function actingFor(me, viewAs, seatRole, people) {
+    var want = typeof viewAs === "string" ? viewAs.trim() : "";
+    if (!me || !want || want === me.key) return { person: me };
+    if (seatRole !== "super")
+      return { refuse: "Only the SMO can act through somebody else's view." };
+    var them = null;
+    (people || []).forEach(function (p) { if (p && p.key === want) them = p; });
+    if (!them)
+      return { refuse: "The register does not hold the person this view belongs to." };
+    return { person: them, simulated: true };
+  }
+
   function gapBlank(v) { return v == null || String(v).trim() === ""; }
   /* The virtual quarters field, read as one. */
   function quartersBlank(t) { return !t.q1 && !t.q2 && !t.q3 && !t.q4; }
+
+  /* THE THREE GAP FIELDS THAT HOLD A TIME (§184). Keyed on the FIELD NAME,
+     not on the row kind, because `start`, `end` and `finish` appear in
+     GAP_FIELDS as dates and as nothing else — so one list answers for a
+     project's front matter and a milestone's due date without either call
+     site having to remember which it is. */
+  var GAP_WHEN = ["start", "end", "finish"];
+  function gapWhenField(f) { return GAP_WHEN.indexOf(f) > -1; }
+  /* IS THIS FIELD A GAP — the ONE test the screen, the counts, the deck and
+     the server all ask. A gap is a place holding nothing the platform can
+     USE, which for a date includes a value it cannot read: a milestone due
+     `30/09/2026` is a row the plan says nothing usable about, the page
+     already prints a red note naming it, and every score treats it as no
+     date at all. Before §184 it was merely non-blank, so the fill grant
+     would not open it, the office was the only one who could correct it,
+     and a filler who tried had the whole save refused. */
+  function gapEmptyValue(field, v) {
+    if (gapBlank(v)) return true;
+    return gapWhenField(field) && !whenReadable(v);
+  }
+  function gapEmpty(field, row) {
+    if (field === "quarters") return quartersBlank(row);
+    return gapEmptyValue(field, row ? row[field] : null);
+  }
 
   /* The pending marks on a row (or on the unit itself, for aspiration):
      `pend = { field: {by, at} }`. Stored as an ABSENCE — confirming
@@ -8319,8 +8578,7 @@ THEME.apply();
   function gapMissing(kind, row) {
     return (GAP_FIELDS[kind] || []).filter(function (f) {
       if (pendOf(row)[f]) return false;
-      if (f === "quarters") return quartersBlank(row);
-      return gapBlank(row[f]);
+      return gapEmpty(f, row);
     });
   }
   function pendingScore(row) {
@@ -9257,6 +9515,8 @@ THEME.apply();
     OWNS_EVERY_PLACE: OWNS_EVERY_PLACE, ownsEveryPlace: ownsEveryPlace,
     grantIn: grantIn, grantAtPage: grantAtPage, isSMO: isSMO, NO_ROLE: NO_ROLE,
     mayEditAccess: mayEditAccess, mayDestroy: mayDestroy,
+    SEAT_ROLES: SEAT_ROLES, isSeatRole: isSeatRole,
+    seatOutOfPlace: seatOutOfPlace,
     isOffice: isOffice, isOfficeRole: isOfficeRole, isSuperRole: isSuperRole,
     mayIssuePasswordTo: mayIssuePasswordTo,
     STRATEGY_PAGES: STRATEGY_PAGES, isStrategyPage: isStrategyPage,
@@ -9266,6 +9526,10 @@ THEME.apply();
     mayAuthorPage: mayAuthorPage,
     GAP_FIELDS: GAP_FIELDS, GAP_SCORE_FIELDS: GAP_SCORE_FIELDS,
     gapBlank: gapBlank, quartersBlank: quartersBlank,
+    WHEN_MONTHS: WHEN_MONTHS, whenMonths: whenMonths, whenReadable: whenReadable,
+    GAP_WHEN: GAP_WHEN, gapWhenField: gapWhenField,
+    actingFor: actingFor,
+    gapEmptyValue: gapEmptyValue, gapEmpty: gapEmpty,
     pendOf: pendOf, pendingScore: pendingScore, mayFillPage: mayFillPage,
     FILL_PAGES: FILL_PAGES, gapMissing: gapMissing,
     namedOn: namedOn, namedInUnit: namedInUnit,
@@ -10760,6 +11024,14 @@ var ADDROLE = null, ADDROLE_KIND = "owner";
    (§25.2) — it is the outcome of one press, cleared by the press that
    succeeds, by opening the picker again and by leaving the row. */
 var ROLESTOP = null;
+/* ── AND WHY A DISMISSAL DID NOT LAND (§180) ──────────────────────────
+   `{key, why}`, or null. ROLESTOP's shape and ROLESTOP's reasons: a property
+   of the screen and never of the person (§25.2), the outcome of one press,
+   cleared by the press that succeeds. A declaration lives outside the state
+   graph, so this write does not ride the autosave and has no banner of its
+   own to appear in — without this a refused dismissal is silent, which is the
+   fault §171 exists to stop. */
+var SAIDFAIL = null;
 /* ── WHICH PERSON THE DIALOG HAS OPEN, AND WHY (§116) ─────────────────
    `{key, mode, queue, at}` or null. `mode` is "edit", "add" or "queue"; the
    queue carries the LIST IT STARTED WITH and a position in it, rather than
@@ -10768,6 +11040,11 @@ var ROLESTOP = null;
    person working through it and "3 of 7" would count down twice as fast.
    Screen state, never the tenant's (§25.2). */
 var PDLG = null;
+/* The seat the picker is asking about (§186). STATE, rendered by the person
+   dialog's own body — never its own `openModalHtml()`, which the register's
+   repaint overwrites the instant anything changes (§116.6: paint() repaints
+   the dialog too). ROLESTOP's shape, for ROLESTOP's reason. */
+var SEATASK = null;
 /* The People render publishes the dialog's builders here (§116) — see the note
    beside the assignment for why they cannot simply be module-level functions. */
 var PEOPLEDLG = null;
@@ -11635,6 +11912,48 @@ function setKnownName(p, v){
    whose first two names match would otherwise read as one row for anybody who
    has hidden Full Name. A TYPED value always wins and is never lengthened; the
    SMO wrote exactly what they meant. */
+/* ── THE NAME A PERSON IS CALLED, ANYWHERE (§181) ─────────────────────
+   Islam: "we need to use the name only across the platform for better
+   usability." The register has answered this since §93.8 — a typed short
+   name, else the leading words of the full one, lengthened just enough where
+   two people would otherwise read alike (§81.1) — and the surfaces that
+   NAME somebody in passing were each answering it their own way: the figure
+   sets' owner list printed the full legal name, and the chat printed whatever
+   the server had stored.
+
+   `knownName()` needs the person and the disambiguation map; this is the
+   version for a caller that has only a KEY and, sometimes, a name the server
+   sent. It resolves through the register where it can, and falls back to the
+   shared name rule where it cannot — a person the register no longer holds
+   still reads as a name rather than as a key.
+
+   NOT `shortName()`, which is the SENTENCE form (§93.6): the wizard, the
+   picker's prose and the audience list read as prose, and this is the LABEL
+   the register itself shows. */
+function nameOf(key, fallback){
+  var p = null;
+  try { p = typeof personBy === "function" ? personBy(key) : null; } catch(e){}
+  if (p) return knownName(p, displayNames());
+  var raw = String(fallback == null ? "" : fallback).trim();
+  if (!raw) return "";
+  try { return SMPRules.knownGuess(raw) || raw; } catch(e){ return raw; }
+}
+
+/* And the FIRST name alone, for the one place that addresses somebody rather
+   than naming them: the chat's reply box. Through `SMPRules.firstName()`, the
+   same reader the email greeting uses (§135) — a compound first name is kept
+   whole, so this register's "Abd El Moniem" is not greeted as "Abd", and a
+   typed short name wins over the guess. */
+function firstNameOf(key, fallback){
+  var p = null;
+  try { p = typeof personBy === "function" ? personBy(key) : null; } catch(e){}
+  try {
+    if (p) return SMPRules.firstName(p) || "";
+    var raw = String(fallback == null ? "" : fallback).trim();
+    return raw ? (SMPRules.firstName({ name: raw }) || raw) : "";
+  } catch(e){ return String(fallback || "").split(/\s+/)[0] || ""; }
+}
+
 function displayNames(){
   var seen = {}, out = {};
   PEOPLE.forEach(function(p){
@@ -13020,7 +13339,22 @@ function roleKeyByName(name){
    reads off somebody attached to a unit and holding nothing else (§49.5). A
    file naming it would be asking for a role that arrives by itself, so the
    template does not offer it and the reader says so plainly. */
-function roleIsGrantable(key){ return !!key && !SMPRules.isOwnLinesRole(key); }
+/* ── AND A SEAT IS NOT OFFERED BY SOMEBODY WHO MAY NOT GIVE ONE (§186) ──
+   Islam, from the deployment: "hussein khaled is a custodian and getting the
+   super user." The picker offered every role to anybody who could reach it,
+   and commits on the `change` event — so the most powerful grant in the
+   product was ONE selection with nothing in between, and the only thing that
+   ever stopped it was the server refusing the save afterwards.
+
+   THE SAME QUESTION THE SERVER ASKS (§42): `mayEditAccess()`, because
+   granting a seat IS changing who may do what, which is why the authoriser
+   has always classified it as `access`. Asked of the person doing the
+   granting, never of the person receiving it. */
+function roleIsGrantable(key, by){
+  if (!key || SMPRules.isOwnLinesRole(key)) return false;
+  if (!SMPRules.isSeatRole(key)) return true;
+  return SMPRules.mayEditAccess(world(), by || viewer());
+}
 /* ══ WHO NEEDS ATTENTION, IN ONE ORDERED QUEUE (§116) ═════════════════
    Islam: "I want it to become a button at top showing pending requests …
    that opens the profiles that needs attention in the pop up modal that
@@ -13058,7 +13392,10 @@ function attentionOf(p, all){
   if (dupes.length) why.push({ kind:"dupe", say: dupeSentence(dupes) });
   /* Then what they SAID about themselves, which is a question waiting on an
      answer rather than a gap (§56). */
-  var said = SAIDWHERE && !SAIDWHERE.__error ? SAIDWHERE[p.key] : null;
+  /* §180: read through saidAt()/saidOutstanding(), never out of the map —
+     an ANSWERED claim is not waiting on anybody, and the queue, the count and
+     the row's mark must not be able to disagree about the same row (§53.5). */
+  var said = saidAt(p.key);
   /* ONE VOCABULARY PER SENTENCE (§116.9). This names two places and
      compares them, so both halves must be spelt by the same function or a
      match reads as a difference — `roleWhereLabel` on both, which is what
@@ -13068,7 +13405,28 @@ function attentionOf(p, all){
      from here: the crash needed a declaration AND a register placement that
      disagree, so it lived only over HTTP (§94.11) and only for somebody
      already placed — the one case the queue's own check had not made. */
-  if (said && said !== personAt(p))
+  /* ── A SEAT SITTING SOMEWHERE ELSE (§186) ─────────────────────────
+     Islam, having found a custodian wearing Super user: "this might be
+     repeated somewhere else and people are getting super user." So the
+     register watches, rather than the answer being a list I read out once.
+
+     THE TEST IS THE PLACE, not "holds a seat and something else": the
+     bootstrap SMO holds super@group AND heads the SMO function (§118), so
+     the two-roles reading would nag about the one row that is certainly
+     right. A seat is held where the person sits; one held somewhere else is
+     the shape of an accident, and it is exactly what the chrome's own role
+     line already prints with a place beside it (§178).
+
+     IT SORTS ABOVE EVERYTHING BUT A COLLISION. Somebody holding rights
+     nobody meant to give them is not a gap to fill in when convenient. */
+  var seat = SMPRules.seatOutOfPlace(world(), p, personAt(p));
+  if (seat)
+    why.push({ kind:"seat", say:"They hold " + roleName(seat.role) + " over " +
+      roleWhereLabel(seat.at) + ", and they sit in " +
+      (personAt(p) ? roleWhereLabel(personAt(p)) : "no part of the business") +
+      ". A seat is the Super user\u2019s to give \u2014 take it off with the \u00d7 " +
+      "on the chip if nobody meant to." });
+  if (saidOutstanding(p))
     why.push({ kind:"said", say:"They said they work in " + roleWhereLabel(said) +
       (personAt(p) ? " \u2014 the register says " + roleWhereLabel(personAt(p)) : "") + "." });
   /* Then the two gaps. NULL IS NOT ZERO (§93): PWSTATES is null until the
@@ -13130,7 +13488,11 @@ function dupeSentence(dupes){
            (others.length ? " (" + others.join(", ") + ")" : "") + ".";
   }).join(" ");
 }
-var ATTN_ORDER = ["dupe", "said", "noident", "noemail", "nopw", "samename"];
+/* §186: `seat` sits directly under `dupe`. A collision is first because it
+   makes every other count wrong; rights nobody meant to give are second
+   because they are the only entry here that is not a gap to fill in when
+   convenient. A row can carry both, and `why[0]` is what it sorts on. */
+var ATTN_ORDER = ["dupe", "seat", "said", "noident", "noemail", "nopw", "samename"];
 function attentionQueue(){
   var out = [];
   var all = registerDupes();          /* once for the whole queue, not per row */
@@ -13427,6 +13789,16 @@ function planPeopleFile(rows){
       if (!roleKey) {
         plan.problems.push({ at:at, msg:'"' + role + '" is not one of the roles. Choose from the ' +
           'dropdown in the Role column.' });
+        return;
+      }
+      /* A SEAT NAMED IN A FILE IS THE SAME GRANT BY ANOTHER ROAD (§186), so
+         it is refused for the same reason and the sentence says which of the
+         two refusals this is — a role that cannot be granted at all, and a
+         role this person cannot be the one to grant, send somebody to two
+         different places. */
+      if (SMPRules.isSeatRole(roleKey) && !roleIsGrantable(roleKey)) {
+        plan.problems.push({ at:at, msg:'"' + role + '" is a seat, and seats are ' +
+          'the Super user\u2019s to give. Ask them to set this one on the register.' });
         return;
       }
       if (!roleIsGrantable(roleKey)) {
@@ -14199,13 +14571,32 @@ function projMilestones(p){
 /* A milestone whose finish date falls after its project's end date is saved
    exactly as entered. The platform never refuses it \u2014 it says so, and offers
    the two things that might be true. */
+/* ── READ THE DATES THE WAY THE PLATFORM READS EVERY OTHER DATE (§179) ──
+   This asked `Date.parse` directly, which is the one reader in the product
+   that does NOT understand the shapes the product actually stores -- and with
+   §179 putting a month picker on Start and End it became actively wrong
+   rather than merely deaf: `Date.parse("Jul 26")` is 26 July **2001**, so
+   every milestone would have overrun every project, on every pane, from the
+   day the picker shipped. A dead warning woken as a false one.
+
+   `monthsOf()` is the reader the rest of the platform uses, and it already
+   knows `Jul 26`, `Q4 2026`, `H1 26`, `31 May 2026` and the rest. The END
+   takes `last:true`, so a project ending "Q4 2026" ends in DECEMBER rather
+   than October -- the same argument `monthsOf` documents for a cycle named
+   Q2 covering April to June.
+
+   THE COMPARISON IS MONTHLY, which is the accepted consequence of §177's
+   month-only dates: a milestone due in the month the project ends is not an
+   overrun. The `timeline` gate is deliberately LEFT AS IT WAS -- §109 removed
+   the pill that set it and recorded widening this guard as its own decision,
+   and this section is about the reader, not about which projects are asked. */
 function projOverruns(p){
   if (p.timeline !== "date" || !p.end) return [];
-  var endT = Date.parse(p.end);
-  if (isNaN(endT)) return [];
+  var endM = monthsOf(p.end, true);
+  if (endM == null) return [];
   return (p.milestones || []).filter(function(m){
-    var t = Date.parse(m.finish);
-    return !isNaN(t) && t > endT;
+    var t = monthsOf(m.finish);
+    return t != null && t > endM;
   });
 }
 function capPerf(c){
@@ -14293,37 +14684,16 @@ function fullYear(y){
 }
 /* Months since year zero, so two dates in different years compare with one
    subtraction. Null when the text is not a time at all -- which is what the
-   upload notice reports and what "Done" in a due-date column produces. */
+   upload notice reports and what "Done" in a due-date column produces.
+
+   THE READER ITSELF MOVED TO `lib/rules.js` (§184). The server had to be able
+   to ask "is this a date" -- a value it cannot read is a GAP, and until §184
+   only the browser knew which values those were, so the screen offered a
+   filler a control the save then refused. What is left here is the one thing
+   the shared rule cannot know: which year an unyeared quarter belongs to,
+   which is this tenant's cycle. */
 function monthsOf(v, last){
-  var s = String(v == null ? "" : v).trim();
-  if (!s) return null;
-  var m;
-  /* W3 Mar 26 / Week 3 March 2026 -- the week is read and discarded, because
-     the comparison is monthly. It is kept in the TEXT for the person. */
-  if ((m = /^w(?:eek)?\s*[1-5]\s+([a-z]+)\.?\s*'?(\d{2,4})$/i.exec(s)))
-    return monthIndex(m[1]) < 0 ? null : fullYear(m[2]) * 12 + monthIndex(m[1]);
-  /* July 26 / Jul 2026 / Dec 26 */
-  if ((m = /^([a-z]+)\.?\s*'?(\d{2,4})$/i.exec(s)))
-    return monthIndex(m[1]) < 0 ? null : fullYear(m[2]) * 12 + monthIndex(m[1]);
-  /* Q3 2026 / Q3 -- a quarter is its FIRST month, or its last when `last`
-     is asked for, which is how a cycle named Q2 covers April to June. */
-  if ((m = /^q([1-4])\s*'?(\d{2,4})?$/i.exec(s))) {
-    var qy = m[2] ? fullYear(m[2]) : cycleYear();
-    return qy == null ? null : qy * 12 + (+m[1] - 1) * 3 + (last ? 2 : 0);
-  }
-  /* H1 2026 / H2 26 -- a half year, which is what a review is usually called
-     and what the old reader could not see at all. */
-  if ((m = /^h([12])\s*'?(\d{2,4})?$/i.exec(s))) {
-    var hy = m[2] ? fullYear(m[2]) : cycleYear();
-    return hy == null ? null : hy * 12 + (+m[1] - 1) * 6 + (last ? 5 : 0);
-  }
-  /* FY26 / 2026 -- a whole year. */
-  if ((m = /^(?:fy)?\s*'?(\d{4})$/i.exec(s)))
-    return fullYear(m[1]) * 12 + (last ? 11 : 0);
-  /* 31 May 2026, and anything else a browser genuinely reads as a date. */
-  var t = Date.parse(s);
-  if (!isNaN(t)) { var d = new Date(t); return d.getFullYear() * 12 + d.getMonth(); }
-  return null;
+  return SMPRules.whenMonths(v, last, cycleYear());
 }
 /* THE CYCLE'S OWN CLOSING MONTH, taken from `REVIEW.to` -- which has said
    "Jun 2026" since the review model existed -- rather than parsed out of its
@@ -19107,11 +19477,19 @@ var MS_STATUS_WORDS = ["done", "pending", "completed", "complete", "not started"
    all, which is still exactly the case that started this: "Done" and
    "Pending" sitting in a due-date column.
 
-   `monthsOf` is the reader the PRODUCT uses to decide whether a row is due,
-   so anything it can read is a date the platform can compare. Asking a second
-   question here would be a second definition of "a date" (§42, in the small). */
+   `SMPRules.whenReadable` is the reader the PRODUCT uses to decide whether a
+   row is due, so anything it can read is a date the platform can compare.
+   Asking a second question here would be a second definition of "a date"
+   (§42, in the small) -- and since §184 it is also what decides whether an
+   unreadable date is a GAP, so the upload's notice and the fill grant agree
+   about the same values by construction.
+
+   THE SHAPE, NOT THE MONTH (§184). This asked `monthsOf(v) != null`, which
+   resolves a bare "Q3" against the CYCLE -- so on a tenant whose cycle names
+   no year, "Q3" read as not-a-date here while every due comparison read it
+   fine. `whenReadable` asks the shape alone, which is the question. */
 function dueFits(v){
-  return monthsOf(v) != null;
+  return SMPRules.whenReadable(v);
 }
 
 /* ── Capability templates (§16.4, §15.12) ─────────────────────────────────
@@ -20711,7 +21089,12 @@ function peopleWorkbook(){
   var names = mainbuNames();
   /* Neither floor role is offered, for the same reason the reader refuses
      them: both are derived, not granted. */
-  var roleNames = ROLES.filter(function(r){ return !SMPRules.isOwnLinesRole(r.key); })
+  /* §186: AND NO SEAT IN A FILE SOMEBODY CANNOT GIVE ONE WITH. The Role
+     column is the second road to `p.role = "super"` — the reader grants what
+     it names — so the template offered by somebody who may not hand out a
+     seat does not list one. `roleIsGrantable()` is the same question the
+     picker asks, so the file and the screen cannot disagree (§53.5). */
+  var roleNames = ROLES.filter(function(r){ return roleIsGrantable(r.key); })
                        .map(function(r){ return r.name; });
   /* COLUMNS MOVED WHEN Unit WAS INSERTED (§65): Role G→H, Status H→I. A
      validation range is a POSITION and nothing warns when it stops matching
@@ -24395,6 +24778,21 @@ function gapCell(page, acKey, row, field, opts){
      back. §145.10's cell is why they exist — one pair, beside `num`. */
   var val = opts.text ? opts.text(row) : row[field];
   var blank = SMPRules.gapBlank(val);
+  /* IS THIS A GAP — which for a DATE is wider than blank (§184). A milestone
+     due `30/09/2026` holds a value the platform cannot read: every score
+     treats it as no date, the pane already prints a red note naming it, and
+     yet the fill grant would not open it, so the only person who could
+     correct it was the office. `gapEmptyValue` is the shared test the SERVER
+     also asks, which is the whole point — the field that opens here is the
+     field the save accepts (§42).
+
+     KEPT APART FROM `blank` DELIBERATELY. `blank` is "there is nothing to
+     show", and it drives the placeholder and the read text; a value the
+     reader cannot parse is still a value somebody typed, so it is DISPLAYED
+     rather than replaced by the word Missing (§96.2). One is about writing,
+     the other about showing, and collapsing them would hide the very value
+     the person needs to see in order to correct it. */
+  var open = SMPRules.gapEmptyValue(field, val);
   var mark = SMPRules.pendOf(row)[field];
   var ed = authoring(page, acKey);
   /* §177: DEFAULTING TO "INSIDE NO ROW" IS THE SAFE WAY ROUND. A cell that
@@ -24462,9 +24860,9 @@ function gapCell(page, acKey, row, field, opts){
       if (opts.del && SMPRules.gapBlank(nv)) delete row[field];
       else row[field] = nv;
       gapLift(row, field); gapBandRefresh();
-    }, blank ? "gapwalk" : "");
+    }, open ? "gapwalk" : "");
   }
-  if (fl && (blank || mark)) {
+  if (fl && (open || mark)) {
     return draw(function(v){
       var nv = put(v);
       if (SMPRules.gapBlank(nv)) {
@@ -25421,10 +25819,24 @@ var DX_PCT = "Performance";
 var MS_PCT = "Progress";
 function dxIsDeliv(row){ return row.kind === "d"; }
 function dxType(row){
-  /* One box for both words: "Deliverable" and "Outcome" are seven characters
-     apart, so left to themselves the column reads as two different marks
-     rather than one question answered two ways. The width is in the CSS. */
-  return '<span class="pill kind tk">' + (dxIsDeliv(row) ? "Deliverable" : "Outcome") + '</span>';
+  /* PLAIN TEXT, NEVER A CHIP (§179). Islam: "for the types deliverable and
+     Outcome don't make them chips let's make them normal text."
+
+     A chip is a mark on a value that could be one of several, or one the eye
+     has to pick out of a sentence. This column holds one word per row out of
+     two, under a heading that already asks the question -- so the border was
+     boxing the only thing in the cell. §93's ruling about the register's Unit
+     chip, on a different table: "an ordinary value now."
+
+     THE WIDTH SURVIVES THE BOX, and it is the half that was load-bearing:
+     "Deliverable" and "Outcome" are seven characters apart, so left to
+     themselves the column reads as two different marks rather than one
+     question answered two ways -- and a column that resizes with its rows
+     drags every column beside it. `.dxtype` carries that width and nothing
+     else, which is why it is its own class rather than a stripped `.pill`:
+     "this column has a fixed measure" and "paint a box round it" are two
+     different facts, and merging them is what made removing one remove both. */
+  return '<span class="dxtype">' + (dxIsDeliv(row) ? "Deliverable" : "Outcome") + '</span>';
 }
 /* A deliverable's direction and target are written FOR it rather than asked
    OF it, and shown quietly, because a value nobody can change should not look
@@ -25835,8 +26247,36 @@ function projFrontMatter(p, ed){
           return selectOr("plan", p.owner == null ? "" : p.owner,
             ownerChoices(p.owner, true), "ownersel " + (pendCls || ""), set);
         } })) +
-      row("l", "Start", gapCell("plan", "k_proj", p, "start", { ctx: { project: p } })) +
-      row("l", "End",   gapCell("plan", "k_proj", p, "end",   { ctx: { project: p } })) +
+      /* §179: A PROJECT'S SPAN IS PICKED TOO, AND IN THE SAME WORDS. Islam
+         asked for `Jul 26` here after settling exactly that shape for a
+         milestone's due date in §177 -- so this is that control, not a second
+         way to say a date (§53.5). Every argument §177 wrote down holds: the
+         comparisons the platform makes about a project's span are monthly, a
+         day is precision it cannot use, and `Jan 26` reads one way in every
+         country where `1/1/2026` reads two.
+
+         AND IT WAS NOT ONLY A LOOK. A free box had collected `30/4/2026` on a
+         live tenant, which `monthsOf()` cannot read at all -- so that project's
+         End was, to the platform, no date, and `projOverruns()` below could
+         never fire on it. `1/1/2026` beside it read as January by luck, the
+         browser taking slashes month-first; `3/4/2026` would have read as
+         March. With no box there is nothing to mistype (§177).
+
+         DATES ALREADY WRITTEN ARE NOT TOUCHED. `monthPickOr` shows what is
+         stored and rewrites nothing until somebody picks -- guessing whether
+         `30/4/2026` means April is inventing a date (§96.2). The cost, stated
+         rather than discovered: a quarter can no longer be set as a Start or
+         an End, the same trade §177 took for a milestone. */
+      row("l", "Start", gapCell("plan", "k_proj", p, "start", {
+        ctx: { project: p },
+        control: function(set, pendCls){
+          return monthPickOr("plan", p.start, pendCls || "", set);
+        } })) +
+      row("l", "End",   gapCell("plan", "k_proj", p, "end", {
+        ctx: { project: p },
+        control: function(set, pendCls){
+          return monthPickOr("plan", p.end, pendCls || "", set);
+        } })) +
       repRow +
     '</div>' +
     '<div class="pfcol pfright">' +
@@ -27875,17 +28315,69 @@ var PWSTATES = null;   /* key -> "none" | "temporary" | "set", once asked */
    annotated every row with a note confirming the row would be a register
    nobody reads. */
 function saidWhereNote(p, editable){
-  if (!SAIDWHERE) return "";
-  var said = SAIDWHERE[p.key];
+  var said = saidAt(p.key);
   if (!said || said === personAt(p)) return "";
-  return '<span class="why saidwhere">They said ' + esc(roleWhereLabel(said)) +
-    (editable ? ' <button class="linkbu" data-usesaid="' + esc(p.key) + '">Use it</button>' : '') +
+  /* ── TWO ANSWERS, NOT ONE (§180) ──────────────────────────────────
+     "Use it" moves them; "Dismiss" records that you looked and the register
+     was already right. Only ONE of them existed until now, so a claim you
+     disagreed with had no reply at all — and the Setup Overview had been
+     offering "accept or dismiss" the whole time.
+
+     ONCE DISMISSED, Use it STAYS. Changing your mind is accepting, which is
+     the same act it always was; there is deliberately no "un-dismiss" button,
+     because a second control for "put it back to unanswered" would be a third
+     state nobody asked for, and saying it again does that anyway (the server
+     clears the answer on a fresh declaration). */
+  var done = saidDismissed(p.key);
+  return '<span class="why saidwhere' + (done ? " done" : "") + '">They said ' +
+    esc(roleWhereLabel(said)) + (done ? " \u2014 dismissed" : "") +
+    (editable
+      ? ' <button class="linkbu" data-usesaid="' + esc(p.key) + '">Use it</button>' +
+        (done ? "" : ' <button class="linkbu" data-dropsaid="' + esc(p.key) + '">Dismiss</button>')
+      : '') +
+    (SAIDFAIL && SAIDFAIL.key === p.key
+      ? '<b class="saidfail">' + esc(SAIDFAIL.why) + '</b>' : '') +
     '</span>';
 }
 /* And for the same reason, what each person said about where they work (§56):
    a declaration lives outside the state graph, so the register asks for it
    separately and simply has nothing to show from a file. */
 var SAIDWHERE = null;  /* key -> the `at` they picked, once asked */
+
+/* ── WHAT THEY SAID, AND WHETHER IT HAS BEEN ANSWERED (§180) ──────────
+   Two shapes cross the wire, deliberately (api/auth.js says why): an
+   OUTSTANDING claim is the bare string it has always been, and a DISMISSED one
+   is `{at, dismissed}`. So a client older than §180 reads every outstanding
+   claim exactly as before, and the one shape it cannot understand is the one
+   already answered — the safe way round (§58: write the new, read either).
+
+   FIVE PLACES READ THIS — the row's mark, the row's note, the Overview's
+   count, the attention queue and the accept handler — and every one of them
+   asks these two rather than reaching into the map. A second place that
+   unwrapped the shape by hand is exactly how the count and the mark come to
+   disagree about the same row (§53.5). */
+function saidRaw(key){
+  if (!SAIDWHERE || SAIDWHERE.__error) return null;
+  return SAIDWHERE[key] || null;
+}
+function saidAt(key){
+  var v = saidRaw(key);
+  if (!v) return null;
+  return typeof v === "string" ? v : (v.at || null);
+}
+/* Has the SMO answered it? A string is a claim nobody has replied to. */
+function saidDismissed(key){
+  var v = saidRaw(key);
+  return !!(v && typeof v !== "string" && v.dismissed);
+}
+/* THE ONE TEST FOR "THIS IS WAITING ON SOMEBODY". Silent agreement is not an
+   outstanding item (§56) and neither is an answered claim (§180) — asked here
+   once so the mark, the count and the queue can never disagree. */
+function saidOutstanding(p){
+  if (!p) return false;
+  var at = saidAt(p.key);
+  return !!at && at !== personAt(p) && !saidDismissed(p.key);
+}
 
 /* ── THE THREE COUNTS THE OVERVIEW AND THE REGISTER SHARE (§108.10) ──
    NULL IS "WE HAVE NOT ASKED", AND IT IS NOT ZERO. Both of these depend on a
@@ -27919,10 +28411,12 @@ function noPasswordCount(){
 function saidWhereCount(){
   var live = typeof SYNC !== "undefined" && SYNC.isLive();
   if (!live || !SAIDWHERE || SAIDWHERE.__error) return null;
+  /* §180: an ANSWERED claim is not waiting on anybody, and this is the count
+     the Overview's row and the rail's pill are both built from — asked through
+     saidOutstanding() so it cannot say something different from the mark on
+     the row it points at. */
   return PEOPLE.filter(function(p){
-    if (!personActive(p)) return false;
-    var said = SAIDWHERE[p.key];
-    return !!said && said !== personAt(p);
+    return personActive(p) && saidOutstanding(p);
   }).length;
 }
 
@@ -28272,7 +28766,7 @@ function renderPeople(){
             ROLES.filter(function(r){ return roleIsGrantable(r.key); }).map(function(r){
               return '<option value="' + r.key + '"' + (r.key === ADDROLE_KIND ? " selected" : "") +
                 '>' + esc(r.name) + '</option>';
-            }).join("") + '</select>' + roleStop(p)
+            }).join("") + '</select>' + roleStop(p) + seatAsk(p)
         : '<button class="linkbu" data-prole-open="' + p.key + '">+ role</button>');
   }
 
@@ -28295,16 +28789,69 @@ function renderPeople(){
     return '<span class="rolestop">' + esc(ROLESTOP.why) + '</span>';
   }
 
+  /* ── ASKING BEFORE A SEAT IS HANDED OVER (§186) ────────────────────
+     Islam, from the deployment: *"hussein khaled is a custodian and getting
+     the super user … you assured me that it's impossible."* It was not: §92
+     grants a one-destination role ON THE PICK, and a seat has exactly one
+     destination, so the most powerful grant in the product was a single
+     `change` event with nothing in between.
+
+     §92's argument survives for every other role — a door behind a door is a
+     broken control — and it was about a role whose second question has one
+     answer, never about how much the role is worth. What a seat needs is not
+     a second question; it is the first one, asked out loud.
+
+     IT NAMES THE ROLE AND WHAT IT HANDS OVER. The failure mode is landing on
+     the wrong line of a dropdown, and a confirmation that does not say which
+     line catches none of them. */
+  var SEAT_GIVES = {
+    super:   "Everything, including who may do what, and this register.",
+    smoteam: "Everything the Strategy Office does \u2014 every plan, every cycle, " +
+             "and every page of Setup.",
+    gceo:    "Every unit and every function in the group, and the group\u2019s own pages.",
+    cceo:    "Their whole company, and whatever its settings let them see beyond it."
+  };
+  function seatAsk(p){
+    if (!SEATASK || SEATASK.key !== p.key) return "";
+    var r = SEATASK.role;
+    return '<div class="seatask"><b>Give ' + esc(p.name) + " " +
+      esc(roleName(r)) + '?</b>' +
+      '<p>' + (SEAT_GIVES[r] || "") + '</p>' +
+      '<p class="why">A seat stays with the person wherever they move \u2014 it is ' +
+      'not a job on one plan. They keep the roles they already hold.</p>' +
+      '<span class="pdrt">' +
+        '<button class="linkbu" data-seatno="1">Cancel</button>' +
+        '<button class="linkbu tk-save" data-seatyes="1">Give ' +
+          esc(roleName(r)) + '</button></span></div>';
+  }
+
   /* ── THE DECLARATION, AS A MARK (§116.4) ──────────────────────────
      One ring on the value's own line. `.val` is display:block under §88's clip
      rule, so a SIBLING would start a second line and grow the row — which is
      exactly the fault this replaces. Inside it, always. */
   function saidMark(p){
-    if (!SAIDWHERE || SAIDWHERE.__error) return "";
-    var said = SAIDWHERE[p.key];
+    var said = saidAt(p.key);
     if (!said || said === personAt(p)) return "";
-    return '<span class="saidmark" title="They said they work in ' +
-      esc(roleWhereLabel(said)) + '. Open their row to accept it.">&#9678;</span>';
+    /* ── TWO MARKS, BECAUSE A COLOUR IS NOT A STATE AT THIS SIZE (§180) ──
+       Islam's pick of two drawn answers. The first proposal kept ONE ring and
+       shifted it from `--gold-deep` to `--ink-3`, and the mockup killed it:
+       the ring is 9.6px wide at 11px type, and at that size the two inks are
+       not a difference anybody reads. So the GLYPH carries the state — a solid
+       ring for a claim still waiting, a dotted one for a claim answered — and
+       the colour follows rather than leads.
+
+       AND THE DOTTED RING WAS MEASURED BEFORE IT WAS CHOSEN (§52, §120.2). A
+       font subset maps far more than it draws, so a mark can be mapped and
+       ship as a blank box; U+25CC differs from the tofu rectangle by 1.3% of
+       its box, which is what says it is drawn. Ink alone could not have
+       answered it — an absent glyph renders a hollow rectangle, which has ink
+       of its own. */
+    var done = saidDismissed(p.key);
+    return '<span class="saidmark' + (done ? " done" : "") +
+      '" title="They said they work in ' + esc(roleWhereLabel(said)) +
+      (done ? ' \u2014 dismissed. Open their row to accept it after all.'
+            : '. Open their row to accept or dismiss it.') +
+      '">' + (done ? "&#9676;" : "&#9678;") + '</span>';
   }
 
   /* ══ THE EDITING HALF, IN ONE PLACE (§116) ═══════════════════════════
@@ -30770,10 +31317,23 @@ function renderSetsSetup(){
       }).join("") + '</select>';
   };
   var ownerOptions = function(sel, attr){
+    /* §181: THE NAME THE REGISTER SHOWS, not the full legal one. This printed
+       "Mohamed Hassanin Ehsan Hassanin — Senior Manager (Sales)" and every
+       option in the list was longer than the control. The register settled
+       what somebody is called in §93.8 and the viewer switcher has read it
+       since §142; this was one of the two surfaces still answering it its own
+       way (§53.5).
+
+       THE TITLE STAYS. It is what tells two people apart in a list of
+       thirty-three, and it is the thing you pick BY — the same shape the
+       switcher uses, where the place does that job. The VALUE is still the
+       key, so nothing about what is stored changes. */
+    var dn = displayNames();
     return '<select class="fld" ' + attr + '><option value="">\u2014</option>' +
       PEOPLE.filter(personActive).map(function(p){
-        return '<option value="' + esc(p.key) + '"' + (p.key === sel ? " selected" : "") + '>' +
-          esc(p.name) + (p.title ? " \u2014 " + esc(p.title) : "") + '</option>';
+        return '<option value="' + esc(p.key) + '"' + (p.key === sel ? " selected" : "") +
+          ' title="' + esc(p.name + (p.title ? " \u2014 " + p.title : "")) + '">' +
+          esc(knownName(p, dn)) + (p.title ? " \u2014 " + esc(p.title) : "") + '</option>';
       }).join("") + '</select>';
   };
   var pickOptions = function(sel, attr){
@@ -36274,9 +36834,15 @@ var CHAT = (function(){
        Office" is a ruling as far as the reader is concerned. It is from the
        office (that is whose side of the conversation it is on) and it says
        plainly that a machine wrote it. */
+    /* §181: THE NAME, NOT THE FULL NAME. A conversation is the one place a
+       person is addressed rather than listed, and it was printing "Islam Adel
+       Nabil Mohamed" on every line — twice over on the office's side, where
+       the sender's name sits beside "Strategy Office". `nameOf()` is the
+       register's own answer, with the shared name rule behind it for somebody
+       the register no longer holds. */
     var who = m.bot ? "Assistant · answered from the knowledge base"
-            : m.from_office ? ((m.by_name || "The office") + " · Strategy Office")
-                            : (mineIsOffice ? (m.by_name || "") : "You");
+            : m.from_office ? ((nameOf(m.by_key, m.by_name) || "The office") + " · Strategy Office")
+                            : (mineIsOffice ? nameOf(m.by_key, m.by_name) : "You");
     var pic = m.has_shot
       ? '<button class="chshot" type="button" data-chshot="' + m.id + '">' +
         '<span class="chthumb"></span> Screenshot — open</button>'
@@ -37077,7 +37643,9 @@ var CHAT = (function(){
      server makes the same call again when the reply lands (§97.5) — this line
      is the office being shown the rule, never the rule itself. */
   function presenceHtml(d){
-    var name = String(d.name || "They").split(/\s+/)[0];
+    /* FIRST NAME THROUGH THE SHARED RULE (§135, §181), never split(" ")[0] —
+       "Abd El Moniem" is one first name, and this register holds it. */
+    var name = firstNameOf(d.person, d.name) || "They";
     /* THE FIFTH STATE, AND IT COMES FIRST. With the chat off nobody can open
        an answer, so what somebody's presence would have decided does not
        arise — saying "Yara is away" here would be true and beside the point. */
@@ -37121,7 +37689,7 @@ var CHAT = (function(){
 
     pane.innerHTML =
       '<div class="chthead">' +
-        "<div><div class=\"chnm\">" + esc2(d.name || d.person) + "</div>" +
+        "<div><div class=\"chnm\">" + esc2(nameOf(d.person, d.name) || d.person) + "</div>" +
         '<div class="chmeta">' + esc2([placeOf(d), d.address].filter(Boolean).join(" · ")) + "</div></div>" +
         '<div class="chacts">' +
           '<button class="chmini" type="button" data-chdone="' + esc2(d.person) + '">' +
@@ -38362,6 +38930,18 @@ var WELCOME = (function(){
   /* The register's row for the signed-in person — the API's person carries a
      key and a name, and everything else (attachment, roles, a typed short
      name) lives on the register (§93.8). */
+  /* Is the screen being drawn for the person who actually signed in, or for
+     somebody the SMO is viewing as? Only the session can answer it — the
+     register row is the same row either way (§179). No SYNC means no
+     simulation is possible, so it is true. */
+  function isSelf(person){
+    try {
+      if (typeof SYNC === "undefined" || !SYNC.person) return true;
+      var me = SYNC.person();
+      return !me || !person || me.key === person.key;
+    } catch(e){ return true; }
+  }
+
   function rowFor(person){
     try { return (typeof personBy === "function" && personBy(person.key)) || person; }
     catch(e){ return person; }
@@ -38659,7 +39239,14 @@ var WELCOME = (function(){
     var list = box.querySelector(".wacts");
     var acts = office ? officeActs(list)
                       : submitRows(targets).concat(gapRows(targets));
-    if (!office) {
+    /* THE REPLY ROW IS THE SIGNED-IN PERSON'S AND CANNOT BE SIMULATED (§179).
+       There is one conversation per person and it belongs to the SESSION, not
+       to the view (§97) — so while viewing as somebody else `CHAT.unread()`
+       still answers about YOU, and drawing it would put your unread messages
+       on their screen under their name. It is left out rather than shown wrong:
+       a row that lies is worse than a row that is missing, and the office's own
+       rows below are tenant-wide, so they simulate honestly. */
+    if (!office && isSelf(person)) {
       var un = 0;
       try { un = (typeof CHAT !== "undefined" && CHAT.unread) ? CHAT.unread() : 0; } catch(e){}
       if (un > 0) { var rr = replyRow(un); rr.classList.add("wact-reply"); acts.push(rr); }
@@ -38675,7 +39262,7 @@ var WELCOME = (function(){
       box.querySelector("[data-wcontinue]").classList.add("wloud");
     }
     acts.forEach(function(a){ list.appendChild(a); });
-    if (!office) watchReplies(list);
+    if (!office && isSelf(person)) watchReplies(list);
 
     /* ── Your pages ─────────────────────────────────────────────────── */
     var pages = box.querySelector(".wpages");
@@ -38745,7 +39332,85 @@ var WELCOME = (function(){
     cont.querySelector(".wexlab").textContent = word;
     cont.addEventListener("click", function(ev){ ev.preventDefault(); dismiss(); });
 
+    viewerBar(box);
     document.body.appendChild(box);
+    /* AFTER the box is in the document, or there is nothing to enhance: the
+       switcher is 33 people and searchsel takes over any select past five
+       (§45.5). Its popup is `.sspop` at z-index 120, above this overlay's 60,
+       so it opens over the screen rather than under it — checked, not assumed. */
+    try { SEARCHSEL.wire(); } catch(e){}
+  }
+
+  /* ── VIEWING AS, ABOVE THE GREETING (§179) ───────────────────────────────
+     Islam: "the viewing as should be available from the welcome screen." It
+     could not be reached at all — this overlay covers the viewport, so the
+     control in the bar underneath is behind it (§167.2 recorded the same
+     screen swallowing clicks meant for the page).
+
+     ABOVE THE HERO, NOT INSIDE IT — Islam's pick from two drawn placements.
+
+     WHO GETS IT IS ASKED, NEVER RE-TESTED: `SYNC.isSMOSession()` is the same
+     function the chrome's own switcher asks, so the two can never disagree
+     about who the SMO is, and it FAILS CLOSED — no SYNC, no answer, no
+     control. A switcher shown to somebody who is not the SMO would serve them
+     another person's screen wearing their own name, which is the worst reading
+     available (sync.js says so at length; this does not restate the rule, it
+     asks it).
+
+     THE OPTIONS ARE THE CHROME'S OWN, cloned rather than rebuilt: fillViewers()
+     already settles what a person is called here (`knownName` through
+     `displayNames`, so a colliding pair reads apart) and where they sit
+     (`placeLabel`, the navigation's word). Building a second list would be a
+     second vocabulary for one question (§53.5, §142).
+
+     NEVER A CLONE OF THE SELECT ITSELF — that would put `id="asWho"` in the
+     document twice, and `getElementById` then answers with whichever came
+     first. This is its own element with its own id, and it DRIVES the chrome's
+     one instead of repeating what it does: setting the value and firing
+     `change` runs the shell's single handler (leaveModes, VIEWER, repaint),
+     so a change made to that handler tomorrow reaches this control for free. */
+  function viewerBar(over){
+    var smo = false;
+    try { smo = !!(typeof SYNC !== "undefined" && SYNC.isSMOSession && SYNC.isSMOSession()); }
+    catch(e){ smo = false; }
+    if (!smo) return;
+    var src = document.getElementById("asWho");
+    if (!src || !src.options.length) return;
+
+    var bar = document.createElement("div");
+    bar.className = "wviewbar";
+    var lab = document.createElement("label");
+    lab.setAttribute("for", "wAsWho");
+    lab.textContent = "Viewing as";
+    var sel = document.createElement("select");
+    sel.id = "wAsWho";
+    for (var i = 0; i < src.options.length; i++)
+      sel.appendChild(src.options[i].cloneNode(true));
+    sel.value = src.value;
+    sel.addEventListener("change", function(){
+      var key = sel.value;
+      /* The chrome's handler is the one that switches the platform. Fire it
+         rather than repeating it — and only then redraw this screen, so the
+         doors it builds are the ones the new viewer can actually reach. */
+      src.value = key;
+      src.dispatchEvent(new Event("change"));
+      redraw(key);
+    });
+    bar.appendChild(lab); bar.appendChild(sel);
+    over.querySelector(".wwrap").insertBefore(bar, over.querySelector(".whero"));
+  }
+
+  /* Rebuild this screen for whoever is being viewed as. NEVER markDone(): a
+     switch is not a dismissal, and marking it would leave the screen unable to
+     come back for the person you were about to look at. */
+  function redraw(key){
+    var was = box;
+    box = null;
+    if (was) was.remove();
+    var p = null;
+    try { p = (typeof personBy === "function" && personBy(key)) || { key: key, name: key }; }
+    catch(e){ p = { key: key, name: key }; }
+    try { build(p); } catch(e){ box = null; }
   }
 
   function dismiss(){
@@ -38767,8 +39432,35 @@ var WELCOME = (function(){
     return true;
   }
 
+  /* ── ASKING FOR IT BACK (§185) ──────────────────────────────────────
+     Islam: *"Allow me to go back to the welcome screen somehow."* The screen
+     is offered once a session and then never again, so what is waiting on
+     you — the submission, the gaps, the unanswered replies — was readable for
+     one moment and then only by signing out.
+
+     DELIBERATELY NOT `offer()` WITH THE GUARD REMOVED. `offer()` answers
+     "should this take the screen unasked", and every one of its silences is
+     about that question: a projector, a file, a session that has already been
+     greeted. Pressing a button IS the ask, so the only silences that survive
+     are the two that are about whether the screen can exist at all.
+
+     AND IT DOES NOT `markDone()`. Asking for it back says nothing about
+     whether it has been seen — that mark is what stops it opening ITSELF a
+     second time, and clearing it here would put it in front of somebody on
+     their next paint (§107's rule about a memory that answers one question
+     answering only that one). */
+  function open(person){
+    if (!person) return false;
+    if (location.protocol === "file:") return false;
+    if (document.body && document.body.classList.contains("presenting")) return false;
+    if (box) return true;
+    try { build(person); } catch(e){ box = null; return false; }
+    return true;
+  }
+
   return {
     offer: offer,
+    open: open,
     showing: function(){ return !!box; },
     dismiss: dismiss
   };
@@ -38824,6 +39516,12 @@ var SYNC = (function () {
        is no server to carry a message. */
     try { CHAT.mount(); } catch (e) {}
   }
+  /* Callers that asked to save while one was in flight, answered when the
+     next one settles (§183). An array rather than a single slot: two people
+     pressing Save draft and a flush-on-leave can all arrive inside one
+     flight, and dropping any of them puts the word "Saving…" back on screen
+     for good. */
+  var queued = [];
   var live = false;        /* hydrated from the API; saves flow only then */
   var lastSaved = null;    /* the serialized graph the server last accepted */
   var timer = null;
@@ -38927,7 +39625,62 @@ var SYNC = (function () {
      never reaches the branch that draws the banner, so somebody who sets a
      cell, is refused, and sets it back gets no post and no message — the one
      shape of this fault that looks exactly like "it just does not save". */
+  /* ── WHO THE SAVE IS JUDGED AS (§185) ──────────────────────────────
+     Islam: *"Hala got this error, when I view as her I didn't get it — so
+     the view-as function is not showing exactly what people see."* Right,
+     and it was not a display fault. Measured, one edit judged twice:
+
+         judged as Hala : REFUSED — a plan is corrected by the SMO
+         judged as SMO  : ACCEPTED
+
+     Viewing as somebody changed everything the screen DREW and nothing the
+     server ACCEPTED, because authorisation reads the session cookie. So the
+     office could never reproduce anybody's refusal — and, the other way
+     round, could silently write things through a colleague's view that the
+     colleague could never have written themselves.
+
+     The simulated person now travels with the save and the server judges
+     against THEM. It can only ever narrow: the gate on using it at all is
+     the same seat role that draws the switcher, and a session without it
+     is judged as itself exactly as before.
+
+     Islam's choice, with the cost stated before he made it: you can no
+     longer correct somebody's data while wearing their view — you switch
+     back to yourself first, which is what the refusal now tells you. */
+  function actingAs() {
+    if (!person) return null;
+    /* ONLY WHERE THE SWITCHER IS ACTUALLY THERE. `viewer()` REASSIGNS
+       `window.VIEWER` to the first person on the register when it cannot find
+       the key it holds (§69.15's "lost" case) — so on a deployment whose
+       signed-in SMO is not yet ON the register, VIEWER points at a stranger
+       through nobody's choice. Sending that would have every one of their
+       saves judged as that stranger: a narrowing, which is the safe
+       direction, and still a bootstrap tenant unable to set itself up.
+       Asked through isSMOSession() and the register, which together are
+       exactly when the control that sets VIEWER is drawn at all. */
+    if (!isSMOSession()) return null;
+    if (!PEOPLE.some(function (p) { return p.key === person.key; })) return null;
+    var v = typeof window !== "undefined" ? window.VIEWER : null;
+    return v && v !== person.key ? v : null;
+  }
+  function bodyFor(state) {
+    var who = actingAs();
+    return '{"state":' + state + (who ? ',"viewAs":' + JSON.stringify(who) : "") + "}";
+  }
+
   var refusedWhy = null;
+  /* §184: AND THE ROWS IT NAMED. Remembered beside the sentence for the same
+     reason the sentence is: `save()` short-circuits on `refusedBody`, so the
+     second hit on a remembered body draws the banner from these and nothing
+     else — without them the offer to put the rows back would vanish the
+     moment somebody changed something and changed it back. */
+  var refusedRows = null;
+  var refusedUndoable = false;
+  /* Who `refusedBody` was judged as, so it is never held against somebody
+     else's rights (§185). */
+  var refusedAs = null;
+  /* WHOSE RIGHTS THE SERVER USED, when they were not yours (§185). */
+  var refusedJudged = null;
 
   /* A REFUSAL NEEDS A WAY OUT (§48.3).
 
@@ -38992,18 +39745,160 @@ var SYNC = (function () {
       "menu in the top bar to work on your own tenant.</span>");
   }
 
-  function showRefusal(list) {
+  /* ── PUTTING BACK ONLY WHAT WAS REFUSED (§184) ───────────────────
+     Islam, on a strategy custodian: *"they lost all data they inputed."*
+     The refusal itself was correct — one row genuinely was the office's —
+     and the loss was everything around it. The whole graph posts together,
+     so one refused row fails the whole save, and until now the only control
+     on the banner was *Discard the change and reload*: the honest answer
+     while the platform could not say WHICH row it had objected to, and a
+     destructive one the moment it can.
+
+     The server now names them (`refusedChanges`), with the value each field
+     HELD. Putting them back is therefore not a guess and not a reload: the
+     named fields go back to the stored value, everything else the person
+     typed stays exactly where it is, and the next save carries it.
+
+     THE ADDRESS IS THE TARGET AND THE ROW ID, NEVER A PATH. A path would be
+     a second description of the state graph's shape, kept here and drifting
+     from the one `collect()` walks (§53.5); an id inside a named subtree is
+     the address the whole product already uses (§48: a snapshot is keyed by
+     id, never by position). */
+  var FIELD_WORDS = {
+    finish: "Due date", start: "Start", end: "End", owner: "Owner",
+    target: "Target", target3y: "3-year target", dir: "Direction",
+    compile: "Compile rule", weight: "Weight", name: "Name",
+    collaborators: "Collaborators", stakeholders: "Stakeholders",
+    brief: "Brief", aspiration: "Aspiration", actual: "Figure", note: "Note",
+    pct: "Progress", status: "Status", pend: "Awaiting confirmation"
+  };
+  function fieldWord(f) { return FIELD_WORDS[f] || String(f); }
+
+  /* Where a target's rows live. A capability belongs to a supporting
+     function, so an `fn:` target is BOTH the function and its capabilities —
+     which is exactly how collectFunction() and collectCapabilities() split a
+     function's plan between them, and getting it wrong here would mean a
+     project's rows could never be found. */
+  function refusedRoots(target) {
+    var t = String(target || "group");
+    if (t.indexOf("fn:") === 0) {
+      var k = t.slice(3), out = [];
+      if (typeof FUNCTIONS !== "undefined" && FUNCTIONS[k]) out.push(FUNCTIONS[k]);
+      if (typeof GROUP !== "undefined")
+        (GROUP.capabilities || []).forEach(function (c) { if (c && c.fn === k) out.push(c); });
+      return out;
+    }
+    if (t !== "group" && typeof UNITS !== "undefined" && UNITS[t]) return [UNITS[t]];
+    return typeof GROUP !== "undefined" ? [GROUP] : [];
+  }
+  /* The first object under `root` carrying this id. Ids are minted per unit
+     and per capability (renumberUnit/renumberCapability), so within one
+     target they are unique — which is the property that makes this safe and
+     the reason it is scoped to the target rather than run over the graph. */
+  function rowWithId(root, id) {
+    var found = null;
+    (function walk(v) {
+      if (found || !v || typeof v !== "object") return;
+      if (!Array.isArray(v) && v.id === id) { found = v; return; }
+      (Array.isArray(v) ? v : Object.keys(v).map(function (k) { return v[k]; }))
+        .forEach(walk);
+    })(root);
+    return found;
+  }
+  /* Put every named field back to what the server holds. Returns the rows it
+     could NOT find, because a "put back" that silently missed one would post
+     the same refusal again and read as the button doing nothing (§96). */
+  function putBackRefused(changes) {
+    var missed = [];
+    (changes || []).forEach(function (ch) {
+      var roots = refusedRoots(ch.target);
+      (ch.rows || []).forEach(function (r) {
+        var row = null;
+        roots.forEach(function (rt) { if (!row) row = rowWithId(rt, r.id); });
+        if (!row) { missed.push(r); return; }
+        /* ABSENT IS NOT NULL. A field the stored row did not have is DELETED,
+           or the put-back is itself a change and is refused all over again
+           (§50.6's rule, arriving from the server this time). */
+        if (r.had === false) delete row[r.field];
+        else row[r.field] = r.from == null ? r.from : JSON.parse(JSON.stringify(r.from));
+      });
+    });
+    return missed;
+  }
+
+  function showRefusal(list, changes, undoable, judged) {
     var el = document.getElementById("refused");
     if (!el) return;
     if (!list || !list.length) { el.hidden = true; el.innerHTML = ""; return; }
-    el.innerHTML = "<span><strong>Not saved.</strong> " +
+    /* One line per row, so "which line was it?" is answered on the banner
+       rather than by hunting the page. Deduplicated by row and field: a
+       milestone whose date and pending mark both moved is ONE line to a
+       person and two entries to the classifier. */
+    var seen = {}, lines = [];
+    (changes || []).forEach(function (ch) {
+      (ch.rows || []).forEach(function (r) {
+        if (r.field === "pend") return;          /* the mark, not the value */
+        var k = ch.target + "\u0000" + r.id + "\u0000" + r.field;
+        if (seen[k]) return;
+        seen[k] = 1;
+        lines.push((r.name ? esc(r.name) : esc(r.id)) +
+                   " \u2014 " + esc(fieldWord(r.field)));
+      });
+    });
+    /* THE MISSING HALF OF THE SENTENCE (§185). "Setup is the SMO's" reads as
+       a bug when you ARE the SMO — it is true because the save was judged as
+       the person whose view you are wearing, and nothing on the screen said
+       so. Named first, because it is what makes the rest make sense. */
+    el.innerHTML = (judged
+        ? "<span><strong>You are viewing as " + esc(judged.name) + ".</strong> " +
+          "This was judged as them, not as you \u2014 switch back to your own " +
+          "view to make it yourself.</span>"
+        : "") +
+      "<span><strong>Not saved.</strong> " +
       (list.length === 1 ? "" : "The server refused this change:") + "</span>" +
       (list.length === 1
         ? "<span>" + esc(list[0]) + "</span>"
         : "<ul>" + list.map(function (x) { return "<li>" + esc(x) + "</li>"; }).join("") + "</ul>") +
-      '<span><button type="button" class="refused-undo" id="refused-undo">' +
-      "Discard the change and reload</button></span>";
+      (lines.length
+        ? "<span><b>" + plural(lines.length, "line") + " refused:</b></span><ul>" +
+          lines.map(function (x) { return "<li>" + x + "</li>"; }).join("") + "</ul>"
+        : "") +
+      "<span>" +
+      (undoable
+        ? '<button type="button" class="refused-keep" id="refused-keep">Put back ' +
+          (lines.length === 1 ? "that line" : "those lines") +
+          " and save the rest</button> "
+        : "") +
+      '<button type="button" class="refused-undo" id="refused-undo">' +
+      "Discard everything and reload</button></span>";
     el.hidden = false;
+    /* THE OFFERED ONE IS THE ONE THAT KEEPS THE WORK. Discard stays — it is
+       the only way out when the refusal names no rows — but it is never the
+       only control again when the platform knows what to put back. */
+    var k = document.getElementById("refused-keep");
+    if (k) k.addEventListener("click", function () {
+      var missed = putBackRefused(changes);
+      if (missed.length) {
+        /* Said, never swallowed: a row the platform cannot find is a row it
+           cannot put back, and pretending otherwise re-posts the refusal. */
+        notSaved("<span><strong>Not saved.</strong> " + esc(list[0]) + "</span>" +
+          "<span>" + plural(missed.length, "refused line") +
+          " could not be put back automatically \u2014 they are no longer on this " +
+          "page. Reload to take the stored version again.</span>" +
+          '<span><button type="button" class="refused-undo" id="refused-undo">' +
+          "Discard everything and reload</button></span>");
+        var u2 = document.getElementById("refused-undo");
+        if (u2) u2.addEventListener("click", function () { location.reload(); });
+        return;
+      }
+      refusedWhy = null; refusedRows = null; refusedBody = null;
+      showRefusal(null);
+      /* Repaint first: the reverted values have to be what the person sees
+         before anything else happens, or the page argues with the database
+         about a row that was just put back (§35). */
+      if (typeof paint === "function") paint();
+      save();
+    });
     var u = document.getElementById("refused-undo");
     if (u) u.addEventListener("click", function () {
       if (!confirm("Discard everything changed since the last successful save, " +
@@ -39022,23 +39917,72 @@ var SYNC = (function () {
      or it could not be reached. The autosave calls this with no callback and
      behaves exactly as it did. */
   function save(done) {
-    var say = function (state) { if (done) done(state); };
+    /* ONE EXIT, so a path added later cannot forget the parked callers
+       (§104.7). `say` reports to THIS caller and then drains anybody who
+       arrived while the flight was open — by re-running the save, because
+       their change may not have been in it. */
+    var say = function (state) {
+      if (done) done(state);
+      if (!queued.length || saving) return;
+      var waiting = queued.splice(0, queued.length);
+      /* Deferred, so the drain cannot recurse inside the settle handler that
+         has only just set `saving = false`. */
+      setTimeout(function () {
+        save(function (st) { waiting.forEach(function (f) { if (f) f(st); }); });
+      }, 0);
+    };
     /* The guard that matters: demo data must never reach the database. */
     /* SAID ONLY FOR DEMO DATA. Opened from `file://` there is no server at
        all and the prototype banner already says so; a second sentence per
        change would be noise about something nobody expected to save. */
     if (isDemoMode()) { showDemoBlocked(); return say("offline"); }
     if (!live) return say("offline");
-    if (saving) return say("busy");
+    /* ── ASKED WHILE ONE IS ALREADY IN FLIGHT (§183) ────────────────────
+       Islam: *"the reporting then saving to draft keep saying saving and
+       nothing happens but when I exit and come back the entered number
+       saved."*
+
+       Both halves were true. `"busy"` was answered the moment Save draft was
+       pressed and the only caller drew **"Saving…"** for it — a word with no
+       follow-up, because nothing ever told the button that the flight it was
+       waiting behind had landed. The figure did save (the autosave §170 had
+       already started carried it), so the screen sat on a present participle
+       for ever over a change that was safely stored.
+
+       Since §170 made the autosave LEADING-EDGE, this is not a rare race: the
+       first change of a burst posts at once, and Save draft pressed in the
+       next moment lands squarely inside that flight. The button people reach
+       for after typing is the one most likely to hit it.
+
+       So a caller that arrives mid-flight is PARKED and answered when the
+       next save settles — and it is a real save, not the in-flight one's
+       answer borrowed: that flight serialized BEFORE this change, so its
+       success says nothing about whether this change reached the server.
+       Re-running is correct in both cases and costs nothing when there is
+       nothing new (`serialize() === lastSaved` answers "clean" at once).
+
+       `"busy"` is therefore no longer an outcome anything can be told — the
+       five §63 named are the whole set again. */
+    if (saving) { queued.push(done); return; }
     var now = serialize();
     if (now === lastSaved) return say("clean");
-    if (now === refusedBody) { showRefusal(refusedWhy); return say("refused"); }
+    /* THE REMEMBERED REFUSAL IS PER VIEWER (§185). The same graph refused for
+       one person is not refused for another, so switching back to yourself
+       must not run into a body remembered under somebody else's rights —
+       which would silence a save that is now perfectly legitimate. */
+    if (refusedAs !== actingAs()) { refusedBody = null; refusedWhy = null;
+                                    refusedRows = null; refusedUndoable = false;
+                                    refusedJudged = null; }
+    if (now === refusedBody) {
+      showRefusal(refusedWhy, refusedRows, refusedUndoable, refusedJudged);
+      return say("refused");
+    }
     saving = true;
     lastFlush = Date.now();
     fetch("/api/state", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: '{"state":' + now + "}"
+      body: bodyFor(now)
     }).then(function (r) {
       saving = false;
       /* REFUSED, not failed (spec 006). The server has decided this person may
@@ -39051,21 +39995,26 @@ var SYNC = (function () {
          the door, not a banner. */
       if (r.status === 401) { location.replace("/"); return; }
       if (r.status === 403) {
-        refusedBody = now;
+        refusedBody = now; refusedAs = actingAs();
         say("refused");
         return r.json().then(function (j) {
           if (j && j.mustChange) { location.replace("/"); return; }
           refusedWhy = (j && j.refusals) || null;
-          showRefusal(refusedWhy);
+          refusedRows = (j && j.refusedChanges) || null;
+          refusedUndoable = !!(j && j.undoable);
+          refusedJudged = (j && j.judgedAs) || null;
+          showRefusal(refusedWhy, refusedRows, refusedUndoable, refusedJudged);
         }, function () {
           /* A 403 whose body will not parse is still a refusal, and saying
              nothing about it is the silence this section exists to remove. */
           refusedWhy = ["The server refused the change and gave no reason."];
+          refusedRows = null; refusedUndoable = false; refusedJudged = null;
           showRefusal(refusedWhy);
         });
       }
       if (r.ok) {
-        refusedWhy = null;
+        refusedWhy = null; refusedRows = null; refusedUndoable = false;
+        refusedJudged = null;
         showRefusal(null);
         lastSaved = now;
         /* A person created in the register does not exist to the SERVER until
@@ -39295,16 +40244,22 @@ var SYNC = (function () {
     }
   }
 
-  /* THE TRAILING HALF OF THE DEBOUNCE, and it RE-ARMS when it is refused for
-     being busy (§170). `save()` answers "busy" and schedules nothing, so
-     without this the last change of a burst that collided with an in-flight
-     save would wait for the 5s interval — which is where it waited before this
-     existed, and is no reason to leave it there now. */
+  /* THE TRAILING HALF OF THE DEBOUNCE (§170).
+
+     It used to RE-ARM itself on a `"busy"` answer, because `save()` refused a
+     caller that arrived mid-flight and scheduled nothing — so without the
+     retry the last change of a burst that collided with an in-flight save
+     waited for the 5s interval.
+
+     §183 gave `save()` the parking that makes that unnecessary: a caller
+     arriving mid-flight is held and the save is RE-RUN when the flight
+     settles, which is precisely what this timer was arranging by hand, and
+     without the 300ms wait. So the retry goes rather than being left
+     unreachable (§24) — two mechanisms for one job is how they drift, and
+     this one's own comment had already stopped being true. */
   function tick() {
     timer = null;
-    save(function (state) {
-      if (state === "busy" && !timer) timer = setTimeout(tick, 300);
-    });
+    save();
   }
 
   /* One shape for every /api/auth call this object makes: post JSON, hand
@@ -39359,8 +40314,9 @@ var SYNC = (function () {
     if (!live || isDemoMode() || saving) return;
     if (timer) { clearTimeout(timer); timer = null; }
     var now = serialize();
-    if (now === lastSaved || now === refusedBody) return;
-    var body = '{"state":' + now + "}";
+    if (now === lastSaved) return;
+    if (now === refusedBody && refusedAs === actingAs()) return;
+    var body = bodyFor(now);
     try {
       fetch("/api/state", {
         method: "POST",
@@ -39387,6 +40343,14 @@ var SYNC = (function () {
        caller in here uses, so a menu item does not have to be handed one. */
     setMode: function (next) { setMode(next, repaint || function(){}); },
     person: function () { return person; },
+    /* WHO THE SMO IS, ASKED AND NEVER COPIED (§179). The welcome screen draws
+       the viewer switcher too, and the note above isSMOSession() is explicit
+       that this question must have ONE answer: a control that is dangerous
+       when wrong must fail closed, and two files each testing `role ===
+       "super"` is exactly how one of them comes to test something else.
+       Exported rather than re-asked — §42's rule about one copy of a rule,
+       on the chrome. */
+    isSMOSession: function () { return isSMOSession(); },
     /* The three password operations, all SMO-only and all checked again on
        the server — this object is the convenience, never the enforcement. */
     setPassword: function (key, pw, done) {
@@ -39416,6 +40380,14 @@ var SYNC = (function () {
        graph for the same reason credentials are, so the People page asks for
        it separately — and gets nothing at all from file://, where the register
        is whatever the demo baked in. */
+    /* THE SMO'S OTHER ANSWER (§180). "Use it" is an ordinary edit of the
+       person's BU and needs no endpoint; this one records that the claim was
+       looked at and refused, so it has to reach the server — and the server
+       asks the gate again rather than trusting this (§42). */
+    dismissWhere: function (key, done) {
+      authPost({ action: "dismissWhere", person: key },
+        function (err) { done(err); });
+    },
     declarations: function (done) {
       authPost({ action: "declarations" },
         function (err, j) { done(err, err ? null : (j.said || {})); });
@@ -40807,7 +41779,7 @@ var SYNC = (function () {
           '<div class="navscroll" id="navscroll">' + parts.slice(d0, d1 + 1).join("") + '</div>' +
           '<div class="navfade l" hidden></div><div class="navfade r" hidden></div>' +
         '</div>' +
-        parts.slice(d1 + 1).join("")) + menuHTML();
+        parts.slice(d1 + 1).join("")) + chromeActsHTML();
     /* Only destinations. A fold button lives in the same row but goes nowhere \u2014
        binding it here set current to undefined and reset the page to Group, which
        made expanding a fold navigate. */
@@ -40910,9 +41882,49 @@ var SYNC = (function () {
     '<path d="M3 6.5h9M15.5 6.5h1.5M3 13.5h4M10.5 13.5h6.5"/>' +
     '<circle cx="13.6" cy="6.5" r="2.1"/><circle cx="8.6" cy="13.5" r="2.1"/></g></svg>';
 
+  /* ── THE WAY BACK TO THE WELCOME SCREEN (§185) ──────────────────────
+     Islam: *"Allow me to go back to the welcome screen somehow."* It is
+     offered once a session, so what is waiting on you was readable for one
+     moment and then only by signing out again.
+
+     A HOUSE, BESIDE THE GEAR — his placement, over the Setup rail and the
+     Knowledge base. It has to be reachable from every page, and the other two
+     are not: the rail is two presses and needs Setup, and the Knowledge base
+     has been the office's since §119.4, so nobody else could get back.
+
+     NOT DRAWN WHERE THE SCREEN CANNOT EXIST — a projector, or a file with no
+     session — because a control that does nothing is worse than none (§61).
+     The same two silences `WELCOME.open()` keeps, asked once here so the
+     button and the screen cannot disagree about when it is possible. */
+  var ICON_HOME =
+    '<svg viewBox="0 0 20 20" class="navmenusvg" aria-hidden="true">' +
+    '<g stroke="currentColor" stroke-width="1.6" stroke-linecap="round" ' +
+    'stroke-linejoin="round" fill="none">' +
+    '<path d="M3 8.6 10 3.2l7 5.4V16a1 1 0 0 1-1 1h-3.4v-4.6H7.4V17H4a1 1 0 0 1-1-1Z"/>' +
+    '</g></svg>';
+  function welcomeBtnHTML(){
+    if (typeof WELCOME === "undefined" || !WELCOME.open) return "";
+    if (location.protocol === "file:") return "";
+    if (document.body && document.body.classList.contains("presenting")) return "";
+    return '<button type="button" class="navmenu-btn navmenu-ico navmenu-solo" ' +
+      'data-welcomego="1" title="What is waiting on me" ' +
+      'aria-label="What is waiting on me">' + ICON_HOME + '</button>';
+  }
+
   /* The menu lives inside the row so it sits on the same baseline as the tabs,
      but its panel is absolutely positioned, so a long list never widens the
      row or pushes the units along. */
+  /* BOTH CONTROLS, AND THE WELCOME BUTTON DOES NOT RIDE ON THE GEAR (§185).
+     `menuHTML()` returns nothing at all for anybody with no Setup destination
+     — which is most of the register — so hanging the house off it would have
+     given the way back to the office alone, and the welcome screen is
+     everybody's (§61's trap: the people it is most for are the ones who would
+     have lost it). The separator belongs to whichever is drawn first. */
+  function chromeActsHTML(){
+    var home = welcomeBtnHTML(), gear = menuHTML();
+    if (!home && !gear) return "";
+    return '<span class="sep pinsep"></span>' + home + gear;
+  }
   function menuHTML(){
     var gs = menuGroups();
     if (!gs.length) return "";
@@ -40921,8 +41933,7 @@ var SYNC = (function () {
        being a menu button and becomes a link — press it and you are on the
        page, with the rail carrying everything the menu used to list. */
     var only = gs[0].items[0];
-    return '<span class="sep pinsep"></span>' +
-      '<button type="button" class="navmenu-btn navmenu-ico navmenu-solo' +
+    return '<button type="button" class="navmenu-btn navmenu-ico navmenu-solo' +
         (on ? " here" : "") + '" data-md="setup" data-ms="' + only.k + '" ' +
         'title="Setup" aria-label="Setup">' + ICON_MANAGE + '</button>';
   }
@@ -40944,6 +41955,25 @@ var SYNC = (function () {
         current = b.dataset.md;
         currentSub = b.dataset.ms;
         paint(); window.scrollTo(0,0);
+      });
+    });
+    /* §185's way back. WIRED HERE, beside the gear, because `paintUnits()`
+       rewrites this row's innerHTML and whoever destroys the wiring re-does
+       it in the same function (§29.5) — a handler bound in the page-wide
+       wire() would die the next time the destination row repainted.
+
+       IT NAVIGATES NOWHERE. The welcome screen is an overlay over the page
+       you are already on, so there is no destination to leave modes for and
+       nothing to scroll — pressing it while editing leaves the edit exactly
+       where it was, which is what a person who only wants to look expects. */
+    document.querySelectorAll("#units [data-welcomego]").forEach(function(b){
+      b.addEventListener("click", function(e){
+        e.stopPropagation();
+        if (typeof WELCOME === "undefined" || !WELCOME.open) return;
+        /* The person being VIEWED, never the session (§185): the screen says
+           what is waiting on whoever this view belongs to, which is the whole
+           reason the viewer switcher sits on it. */
+        try { WELCOME.open(viewer()); } catch(err){}
       });
     });
   }
@@ -42498,7 +43528,26 @@ var SYNC = (function () {
            reporting page and is NOT a unit on "Figures I report" — that page
            carries rows from several units at once, so each field names its
            own. One handler, because two would drift (§42.3). */
-        var hit = findById(UNITS[el.dataset.repu || current], el.dataset.rep);
+        /* ── AND A SUPPORTING FUNCTION IS A DESTINATION TOO (§183) ────────
+           This said `UNITS[...]`, and on a function that plans in pillars
+           `current` is "fn:merchandising" — for which `UNITS[...]` is
+           undefined. `findById` then read `u.ukey` off nothing and THREW, so
+           **every figure and every note typed on such a function's reporting
+           page was discarded in silence**: the value never reached the row,
+           the save was never scheduled, and the only witness was a console
+           nobody has open. §63's own fault ("`UNITS["fn:…"]` is undefined —
+           one place still asking differently"), in the two places that fix
+           did not reach.
+
+           `unitLike()` and NOT `unitLikeWritable()`: this handler finds a row
+           that already exists and writes one value into it, and the reading
+           view hands out the function's REAL arrays (§61) — so the write goes
+           through — while the writing half MINTS containers, which is a side
+           effect nothing here asks for (§42, §50.6: a reader must never create
+           the field it was looking for). */
+        var subj = unitLike(el.dataset.repu || current);
+        if (!subj) return;
+        var hit = findById(subj, el.dataset.rep);
         if (!hit) return;
         var v = el.value.trim();
         /* The field holds the bare number; the unit lives in the suffix beside
@@ -42529,7 +43578,14 @@ var SYNC = (function () {
     });
     document.querySelectorAll("[data-note]").forEach(function(el){
       el.addEventListener("change", function(){
-        var hit = findById(UNITS[current], el.dataset.note);
+        /* The same fault and the same fix as the figure beside it (§183): a
+           note typed on a pillars function's reporting page threw and was
+           lost. The note is the half a reporter is REQUIRED to write when a
+           figure is off track (§105's submit refusal), so losing it silently
+           also made that refusal impossible to satisfy. */
+        var subj = unitLike(current);
+        if (!subj) return;
+        var hit = findById(subj, el.dataset.note);
         if (hit) { hit.obj.note = el.value; paint(); }
       });
     });
@@ -43757,13 +44813,65 @@ var SYNC = (function () {
           return;
         }
         ROLESTOP = null;
+        /* ── A SEAT IS ASKED ABOUT, NEVER SLIPPED THROUGH (§186) ───────
+           Islam, from the deployment: "hussein khaled is a custodian and
+           getting the super user … investigate how this happened as you
+           assured me that it's impossible." It was not impossible: §92 grants
+           a one-destination role ON THE PICK, a seat has exactly one
+           destination, and so the most powerful grant in the product was a
+           single `change` event with nothing in between.
+
+           §92's argument still holds for every OTHER role — a door behind a
+           door is a broken control — and it was an argument about a role
+           whose second question has one answer, never about how much the role
+           is worth. What a seat needs is not a second question; it is the
+           first one, asked out loud.
+
+           The dialog NAMES what it hands over rather than saying "are you
+           sure": the whole failure mode is somebody landing on the wrong line
+           of a dropdown, and a confirmation that does not say which line they
+           landed on catches none of them. */
+        /* ── A SEAT IS ASKED ABOUT, NEVER SLIPPED THROUGH (§186) ───────
+           The ask is STATE, drawn by the dialog's own body, and never a modal
+           of its own: the register's repaint rebuilds that dialog on every
+           change (§116.6), so a second modal opened from here is overwritten
+           before anybody can read it. Measured, not reasoned — the first
+           build did exactly that and the person form painted straight back
+           over the question. */
+        if (SMPRules.isSeatRole(role)) {
+          SEATASK = { key: key, role: role, at: at };
+          paint();
+          return;
+        }
+        SEATASK = null;
         grantPersonRole(key, role, at);
         ADDROLE = null; ADDROLE_KIND = "";
         paint();
     }
+
     R.querySelectorAll("[data-prole-pick]").forEach(function(sel){
       sel.addEventListener("change", function(){
         tryGrantRole(sel.dataset.prolePick, sel.value);
+      });
+    });
+    /* §186's two answers. Cancel puts the picker back to "Choose a role…"
+       rather than leaving the seat showing: a select still displaying the
+       value it was just refused fires no `change` if it is picked again
+       (§110), so the control would read as dead for exactly the person who
+       changed their mind. */
+    R.querySelectorAll("[data-seatno]").forEach(function(b){
+      b.addEventListener("click", function(){
+        SEATASK = null; ADDROLE_KIND = ""; paint();
+      });
+    });
+    R.querySelectorAll("[data-seatyes]").forEach(function(b){
+      b.addEventListener("click", function(){
+        var a = SEATASK;
+        SEATASK = null;
+        if (!a) { paint(); return; }
+        grantPersonRole(a.key, a.role, a.at);
+        ADDROLE = null; ADDROLE_KIND = "";
+        paint();
       });
     });
     R.querySelectorAll("[data-prole-off]").forEach(function(b){
@@ -43852,11 +44960,42 @@ var SYNC = (function () {
     R.querySelectorAll("[data-usesaid]").forEach(function(b){
       b.addEventListener("click", function(){
         var key = b.dataset.usesaid;
-        var said = SAIDWHERE && SAIDWHERE[key];
+        var said = saidAt(key);
         var p = personBy(key);
         if (!p || !said) return;
+        SAIDFAIL = null;
         attachPersonAt(p, said);
         paint();
+      });
+    });
+
+    /* THE OTHER ANSWER (§180): the register was already right. Unlike Use it
+       beside it, this touches nothing in the state graph — a declaration lives
+       outside it (§56) — so there is no save to carry it and it goes straight
+       to the server.
+
+       WRITTEN LOCALLY BEFORE THE ANSWER COMES BACK, and that is deliberate:
+       the map is this screen's copy of a server fact, the press has to look
+       like it landed, and a failure PUTS IT BACK rather than leaving the row
+       claiming an answer the database never took (§171 — a failed write that
+       says nothing is the fault, not the failure). */
+    R.querySelectorAll("[data-dropsaid]").forEach(function(b){
+      b.addEventListener("click", function(){
+        var key = b.dataset.dropsaid;
+        var was = SAIDWHERE && SAIDWHERE[key];
+        if (!was || typeof SYNC === "undefined" || !SYNC.dismissWhere) return;
+        SAIDFAIL = null;
+        SAIDWHERE[key] = { at: saidAt(key), dismissed: true };
+        paint();
+        SYNC.dismissWhere(key, function(err){
+          if (!err) return;
+          /* PUT IT BACK, AND SAY SO. Leaving the row claiming an answer the
+             database never took is the silent failure §171 was written about;
+             the sentence is the server's own, because it owns the refusal. */
+          SAIDWHERE[key] = was;
+          SAIDFAIL = { key: key, why: "Not saved \u2014 " + String(err.message || err) };
+          paint();
+        });
       });
     });
 
@@ -45214,10 +46353,19 @@ var SYNC = (function () {
         };
         show("Saving…", "");
         if (typeof SYNC === "undefined" || !SYNC.saveNow) { show("Saved", "ok"); return; }
+        /* `"busy"` USED TO BE A SIXTH OUTCOME AND IT IS GONE (§183). It was
+           answered the instant Save draft was pressed inside an autosave's
+           flight, and the branch here drew "Saving…" — a word with no
+           follow-up, because nothing ever told this button that the flight had
+           landed. The figure did save; the screen sat on a present participle
+           for ever. SYNC now parks such a caller and answers it when the next
+           save settles, so the five outcomes §63 named are the whole set
+           again — and this branch is deleted rather than left unreachable,
+           because a branch nobody can reach is one the next reader takes for
+           load-bearing (§24). */
         SYNC.saveNow(function(state){
           if (state === "saved" || state === "clean") show("Saved", "ok");
           else if (state === "offline") show("Nothing to save — no server here", "");
-          else if (state === "busy") show("Saving…", "");
           else show("Not saved — see the message above", "bad");
         });
       });

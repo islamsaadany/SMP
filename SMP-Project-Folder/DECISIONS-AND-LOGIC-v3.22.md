@@ -23412,19 +23412,39 @@ a real gap.
 separate decision and §187 did not change it — a collaborator list is still
 something a filler may write. Only its membership of the *walk* moves.
 
-**Flagged, not changed — AND ISLAM HAS PARKED IT** (*"keep it as a note for
-later"*): the collaborators cell still renders in fill mode with the red
-*Missing* dress that `gapfld` carries — a 1px dashed `--bad` border — so on
-that screen it still LOOKS like a missing item while the count correctly
-ignores it. Measured on Mobile's plan in fill mode: **1 real gap and 5
-collaborator boxes, all six wearing the same border**
-(`design-mockups/fill-band/2026-08-30_collab-box.png` is the picture he was
-shown).
+**FLAGGED, AND THEN WITHDRAWN — THE FINDING WAS MINE, NOT THE PRODUCT'S.**
 
-It is one line (`gapfld` follows `isGapField` the way `gapwalk` now does) and
-it is deliberately NOT taken: the cell stays fillable either way — §187 changed
-what is COUNTED, not what may be written — so this is purely how it looks, and
-a look is his (rule 1c). **Open item, waiting on him.**
+I reported that the collaborators cell still wears the red dashed *Missing*
+dress in fill mode, showed Islam a screenshot, drew two options and recommended
+one. **It does not, and never did.** Measured properly on Mobile's plan in fill
+mode, as a filler, reading what is actually PAINTED:
+
+    a real gap field   shows "Missing"  border: dashed rgb(176, 68, 52)
+    COLLABORATORS ×5   shows "—"        border: solid  rgb(214, 220, 229)
+
+`--line`, the ordinary grey every picker wears. The collaborators box is
+already an ordinary empty control saying nothing is chosen.
+
+**How I got it wrong is the part worth keeping.** I listed the elements
+carrying `.gapfld` and read that as "boxes wearing the red dress". For a
+§130.1 picker those are two different nodes: `gapfld` lands on the NATIVE
+select, which searchsel hides in place at `opacity:0` (§34, §45.5), and what a
+person sees is the `.ssbtn` beside it — which takes its class from
+`searchsel.js` and inherits nothing. **A class list is not a paint**, which is
+the same lesson §68.10 records from the other direction, and §130.3 and §192
+both say in their checks: measure the pixels.
+
+So there is nothing to build. The mockup at
+`design-mockups/fill-band/2026-08-30_collaborators.html` drew a "Now" panel
+that does not exist and its Option A is the shipped behaviour; it is kept as
+the record of the error rather than deleted, marked at the top.
+
+**What IS true, and is what Islam asked to confirm:** an empty collaborators
+list is not a gap and never triggers anything. `GAP_FIELDS.tactic` is
+`["owner","quarters"]`; `gapMissing()` on a tactic with no collaborators
+returns `[]`; the page's gap total on that pane reads **1**, which is the one
+real gap. It does not count, does not raise a chip, does not draw the red
+button and is not walked (§192.4).
 
 Proved able to fail: putting the two class decisions back makes
 `checks/gap-walk.py` red twice again, exactly as it is on `origin/main`.

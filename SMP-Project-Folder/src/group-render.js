@@ -2643,12 +2643,19 @@ function gapCell(page, acKey, row, field, opts){
        §50.6's rule carried from §130.1's collaborators: an emptied list
        DELETES its key, or a tactic nobody supports and one never asked
        stop being byte-identical and every save carries a phantom change. */
+    /* §176.2: MARKED FOR THE WALKER, AND NOT PAINTED. `Next gap` had nothing
+       to walk in the office's pen, because `gapfld` is fill mode's class and
+       an author's fields carry none — so the loudest button on the bar has
+       never done anything for the person who uses it most. `gapwalk` carries
+       no styling at all: what the walker needs to know is "this control fills
+       a gap", which is a different fact from "paint it red", and merging the
+       two would have restyled every blank field in the pen to fix a button. */
     return draw(function(v){
       var nv = put(v);
       if (opts.del && SMPRules.gapBlank(nv)) delete row[field];
       else row[field] = nv;
       gapLift(row, field); gapBandRefresh();
-    });
+    }, blank ? "gapwalk" : "");
   }
   if (fl && (blank || mark)) {
     return draw(function(v){
@@ -2659,7 +2666,7 @@ function gapCell(page, acKey, row, field, opts){
       }
       else { row[field] = nv; gapStamp(row, field); }
       gapBandRefresh();
-    }, mark ? "pendfld" : "gapfld");
+    }, mark ? "pendfld" : "gapfld gapwalk");
   }
   /* Read — and fill mode on a settled value reads too.
      `read` IS WHY §149 SURVIVED THE MERGE. A direction and a compile rule are
@@ -3383,11 +3390,34 @@ function capBand(c){
    to persist. It is dropped when the viewer leaves the capability. */
 var RAIL = {};
 function railKeyFor(c){ return "cap:" + c.id; }
+/* ── WHAT EACH RAIL ACTUALLY DREW (§176.2) ────────────────────────────────
+   `RAIL` holds only what somebody has PICKED, and both pickers below fall
+   back to the first item — so on a page nobody has clicked, `RAIL` is empty
+   while three panes are plainly on the screen. The gap walker asked `RAIL`
+   whether a chip's place was showing, got "no" for a place in front of it,
+   and pressed the chip for the page it was already on: "Next gap" moved
+   nothing. This is the RESOLVED answer, written where the resolving happens,
+   so the two cannot disagree (§53.5) — reset by the shell before each paint,
+   like PAGE_TOOLS and PAGE_ACTS (§130). */
+var RAIL_SHOWN = {};
+/* THE PANE SAYS WHICH PLACE IT IS (§176.2). A gap chip lands on a place and
+   then lights that place's first gap -- and a FUNCTION'S projects page draws
+   every capability at once, so "the first gap on the page" belonged to
+   whichever pane happened to be topmost and the chip for MKT03 lit a field
+   in MKT02. The pane carries the same rail-and-code pair the chip does,
+   built HERE so the two cannot spell it differently (§53.5). */
+function gapPlaceAttr(railKey, code){
+  return code == null ? "" :
+    ' data-gplace="' + esc(railKey + "|" + code) + '"';
+}
+function railShow(k, id){ if (id != null) RAIL_SHOWN[k] = id; return id; }
 function railPick(c){
   var k = railKeyFor(c), want = RAIL[k];
   var list = c.projects || [];
   if (!list.length) return null;
-  for (var i = 0; i < list.length; i++) if (list[i].id === want) return list[i];
+  for (var i = 0; i < list.length; i++)
+    if (list[i].id === want) { railShow(k, list[i].id); return list[i]; }
+  railShow(k, list[0].id);
   return list[0];
 }
 /* ── ONE ITEM STILL GETS THE RAIL (§130.2, reversing the line below) ────
@@ -4178,7 +4208,8 @@ function renderFnProjects(fnKey){
        right for reading and wrong while a plan is being authored: with one
        project there would be nowhere to press Add. */
     var pane = projPlanBody(sel, fk);
-    return capBand(c) + '<div class="capbody">' +
+    return capBand(c) + '<div class="capbody"' +
+        gapPlaceAttr(railKeyFor(c), sel.id) + '>' +
       ((ed || on)
         ? '<div class="split">' + rail + '<div class="pane">' + pane + '</div></div>'
         : splitOrPane(c.projects, sel, rail, pane)) + '</div>';
@@ -4383,9 +4414,11 @@ function renderFnReport(fnKey){
    the rail says so. */
 function unitRailKey(u){ return "unit:" + u.ukey; }
 function unitRailPick(u){
-  var want = RAIL[unitRailKey(u)], list = u.items || [];
+  var k = unitRailKey(u), want = RAIL[k], list = u.items || [];
   if (!list.length) return null;
-  for (var i = 0; i < list.length; i++) if (list[i].code === want) return list[i];
+  for (var i = 0; i < list.length; i++)
+    if (list[i].code === want) { railShow(k, list[i].code); return list[i]; }
+  railShow(k, list[0].code);
   return list[0];
 }
 function unitRailFor(u, sel){
@@ -4766,8 +4799,10 @@ function renderUnitPlan(u){
         ' &middot; drag by the handle to reorder, here and inside each ' +
         L("pillar","bu").toLowerCase().replace(/s$/, "") + '</p>' : '') +
     (railWorthIt(u.items)
-      ? '<div class="split">' + unitRailFor(u, sel) + '<div class="pane">' + unitPlanBody(sel, u, true) + '</div></div>'
-      : '<div class="pane">' + unitPlanBody(sel, u, false) + '</div>');
+      ? '<div class="split"' + gapPlaceAttr(unitRailKey(u), sel.code) + '>' +
+          unitRailFor(u, sel) + '<div class="pane">' + unitPlanBody(sel, u, true) + '</div></div>'
+      : '<div class="pane"' + gapPlaceAttr(unitRailKey(u), sel.code) + '>' +
+          unitPlanBody(sel, u, false) + '</div>');
 }
 
 

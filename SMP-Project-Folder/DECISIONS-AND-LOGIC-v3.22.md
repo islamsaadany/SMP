@@ -21435,3 +21435,84 @@ previous build it reported one failure and measured nothing else: the same
 trap §176's check fell into an hour earlier. It reads the line **off the
 strip** when there is no builder, so every assertion runs either way — **11
 failures** against `227c583`, naming the nine em-dash people by key.
+
+---
+
+## §176.2 · The gap band's chips and its walker actually go somewhere
+
+Islam, pressing what §176 had just given him: *"the banner appears but the
+buttons are not functioning — the CUS01 3 button just opens the project and
+the next gap does nothing."*
+
+Both were true. **Five faults, and each one hid the next**, which is why the
+whole control read as dead rather than as slightly wrong.
+
+**1 · THE SELECTOR WAS AN ELEMENT TYPE.** `gapWalk()` asked for
+`.fld.gapfld` — an input or a select wearing fill mode's class — so the
+moment §176 made a gap a **button** the walker stopped seeing it, and on a
+project whose only gaps are due dates it found nothing at all. §104.7's rule
+in a new place: a list of the things you happen to have today is a list
+somebody forgets to add to. The marker is `.gapwalk` now, put on by `gapCell`
+and carrying **no styling of its own** — what the walker needs to know is
+*this control fills a gap*, which is a different fact from *paint it red*,
+and merging the two would have restyled every blank field in the office's pen
+in order to fix a button.
+
+**2 · AN AUTHOR'S FIELDS WERE NEVER MARKED AT ALL.** `gapfld` is fill mode's
+class, so in the office's pen there was nothing to walk — **"Next gap" has
+never done anything for the person who uses it most**, on units as well as
+functions, since §145.14 shipped it.
+
+**3 · IT USED `document.activeElement` AS ITS CURSOR.** Pressing the button
+moves focus to the button, so every press computed *I am nowhere* and lit the
+first field again. **And the cursor is marked on the WALKABLE element, not on
+the lit one** — for a §130.1 picker those are two different nodes, because the
+native select is hidden and its `.ssbtn` sibling takes the ring, so a cursor
+read back off the lit element found nothing among the fields (§34 again:
+whoever hides a field hides its furniture, and whoever walks to one must still
+know which field it was).
+
+**4 · IT ASKED `RAIL` WHETHER A PLACE WAS ON SCREEN, AND `RAIL` HOLDS ONLY
+WHAT SOMEBODY HAS PICKED.** Both rail pickers fall back to the first item, so
+on a page nobody has clicked `RAIL` is empty while three panes are plainly
+there — every chip tested as unvisited and the walk pressed the chip for the
+page it was already on. `RAIL_SHOWN` is the **resolved** answer, written where
+the resolving happens so the two cannot disagree (§53.5), and reset before
+each paint beside `FIELDS`.
+
+**5 · THE CHIP LIT THE FIRST GAP ON THE PAGE.** A function's projects page
+draws **every capability at once**, so "the first gap" belonged to whichever
+pane was topmost and the chip for MKT03 lit a field in MKT02. The pane carries
+`data-gplace` — the same rail-and-code pair the chip does, built by one helper
+so the two cannot spell it differently — and the landing is scoped to it.
+
+### And the walk crosses places, because the button says so
+
+*Next gap → 7 left* counts the whole subject, so exhausting a page moves to
+the next one. Two goes at the rule, and the first was wrong in an instructive
+way: **skipping every chip already on screen** looked right and was not — on a
+function page a project can be plainly visible and never have been *walked*,
+because the field list is scoped to one place. The test is **same page**, not
+**visible**: two chips are the same page when they name the same place, or
+when neither names one and both sit in the same section (a unit's Foundation
+and Objectives are two chips over one page). Measured: a unit's six chips
+reach five pages, a function's three chips reach three.
+
+The landing is queued behind `setTimeout`, because a real press holds the
+paint until the click lands (§30.1) and the fields do not exist until it has —
+§145.14's own fault, in the control beside it.
+
+### Proof
+
+`checks/gap-walk.py` presses the real controls on a **unit** and on a
+**function**, as the **filler** and as the **office** (§53.5 and §94.2: a
+check that only walks the fill grant cannot see a button that is dead for the
+office), and asserts that every press marks a field, that the walk does not
+sit on one, and that it reaches every place the band names. It reads the
+product's own `.gaplit` ring in preference to §176.2's cursor, so a build with
+no cursor is measured on its own terms rather than merely noticed to be
+missing one (§94.8).
+
+**PROVED ABLE TO FAIL: 14 failures against `3aabe85`** — and the failure
+detail is the report itself: the unit filler's walk lights a field and never
+moves, while the function side and the office light nothing at all.

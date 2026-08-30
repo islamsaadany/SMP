@@ -24382,12 +24382,19 @@ function gapCell(page, acKey, row, field, opts){
        §50.6's rule carried from §130.1's collaborators: an emptied list
        DELETES its key, or a tactic nobody supports and one never asked
        stop being byte-identical and every save carries a phantom change. */
+    /* §176.2: MARKED FOR THE WALKER, AND NOT PAINTED. `Next gap` had nothing
+       to walk in the office's pen, because `gapfld` is fill mode's class and
+       an author's fields carry none — so the loudest button on the bar has
+       never done anything for the person who uses it most. `gapwalk` carries
+       no styling at all: what the walker needs to know is "this control fills
+       a gap", which is a different fact from "paint it red", and merging the
+       two would have restyled every blank field in the pen to fix a button. */
     return draw(function(v){
       var nv = put(v);
       if (opts.del && SMPRules.gapBlank(nv)) delete row[field];
       else row[field] = nv;
       gapLift(row, field); gapBandRefresh();
-    });
+    }, blank ? "gapwalk" : "");
   }
   if (fl && (blank || mark)) {
     return draw(function(v){
@@ -24398,7 +24405,7 @@ function gapCell(page, acKey, row, field, opts){
       }
       else { row[field] = nv; gapStamp(row, field); }
       gapBandRefresh();
-    }, mark ? "pendfld" : "gapfld");
+    }, mark ? "pendfld" : "gapfld gapwalk");
   }
   /* Read — and fill mode on a settled value reads too.
      `read` IS WHY §149 SURVIVED THE MERGE. A direction and a compile rule are
@@ -25122,11 +25129,34 @@ function capBand(c){
    to persist. It is dropped when the viewer leaves the capability. */
 var RAIL = {};
 function railKeyFor(c){ return "cap:" + c.id; }
+/* ── WHAT EACH RAIL ACTUALLY DREW (§176.2) ────────────────────────────────
+   `RAIL` holds only what somebody has PICKED, and both pickers below fall
+   back to the first item — so on a page nobody has clicked, `RAIL` is empty
+   while three panes are plainly on the screen. The gap walker asked `RAIL`
+   whether a chip's place was showing, got "no" for a place in front of it,
+   and pressed the chip for the page it was already on: "Next gap" moved
+   nothing. This is the RESOLVED answer, written where the resolving happens,
+   so the two cannot disagree (§53.5) — reset by the shell before each paint,
+   like PAGE_TOOLS and PAGE_ACTS (§130). */
+var RAIL_SHOWN = {};
+/* THE PANE SAYS WHICH PLACE IT IS (§176.2). A gap chip lands on a place and
+   then lights that place's first gap -- and a FUNCTION'S projects page draws
+   every capability at once, so "the first gap on the page" belonged to
+   whichever pane happened to be topmost and the chip for MKT03 lit a field
+   in MKT02. The pane carries the same rail-and-code pair the chip does,
+   built HERE so the two cannot spell it differently (§53.5). */
+function gapPlaceAttr(railKey, code){
+  return code == null ? "" :
+    ' data-gplace="' + esc(railKey + "|" + code) + '"';
+}
+function railShow(k, id){ if (id != null) RAIL_SHOWN[k] = id; return id; }
 function railPick(c){
   var k = railKeyFor(c), want = RAIL[k];
   var list = c.projects || [];
   if (!list.length) return null;
-  for (var i = 0; i < list.length; i++) if (list[i].id === want) return list[i];
+  for (var i = 0; i < list.length; i++)
+    if (list[i].id === want) { railShow(k, list[i].id); return list[i]; }
+  railShow(k, list[0].id);
   return list[0];
 }
 /* ── ONE ITEM STILL GETS THE RAIL (§130.2, reversing the line below) ────
@@ -25917,7 +25947,8 @@ function renderFnProjects(fnKey){
        right for reading and wrong while a plan is being authored: with one
        project there would be nowhere to press Add. */
     var pane = projPlanBody(sel, fk);
-    return capBand(c) + '<div class="capbody">' +
+    return capBand(c) + '<div class="capbody"' +
+        gapPlaceAttr(railKeyFor(c), sel.id) + '>' +
       ((ed || on)
         ? '<div class="split">' + rail + '<div class="pane">' + pane + '</div></div>'
         : splitOrPane(c.projects, sel, rail, pane)) + '</div>';
@@ -26122,9 +26153,11 @@ function renderFnReport(fnKey){
    the rail says so. */
 function unitRailKey(u){ return "unit:" + u.ukey; }
 function unitRailPick(u){
-  var want = RAIL[unitRailKey(u)], list = u.items || [];
+  var k = unitRailKey(u), want = RAIL[k], list = u.items || [];
   if (!list.length) return null;
-  for (var i = 0; i < list.length; i++) if (list[i].code === want) return list[i];
+  for (var i = 0; i < list.length; i++)
+    if (list[i].code === want) { railShow(k, list[i].code); return list[i]; }
+  railShow(k, list[0].code);
   return list[0];
 }
 function unitRailFor(u, sel){
@@ -26505,8 +26538,10 @@ function renderUnitPlan(u){
         ' &middot; drag by the handle to reorder, here and inside each ' +
         L("pillar","bu").toLowerCase().replace(/s$/, "") + '</p>' : '') +
     (railWorthIt(u.items)
-      ? '<div class="split">' + unitRailFor(u, sel) + '<div class="pane">' + unitPlanBody(sel, u, true) + '</div></div>'
-      : '<div class="pane">' + unitPlanBody(sel, u, false) + '</div>');
+      ? '<div class="split"' + gapPlaceAttr(unitRailKey(u), sel.code) + '>' +
+          unitRailFor(u, sel) + '<div class="pane">' + unitPlanBody(sel, u, true) + '</div></div>'
+      : '<div class="pane"' + gapPlaceAttr(unitRailKey(u), sel.code) + '>' +
+          unitPlanBody(sel, u, false) + '</div>');
 }
 
 
@@ -40999,6 +41034,9 @@ var SYNC = (function () {
     /* Field setters are registered during render, so the list is emptied first
        or stale closures accumulate on every repaint. */
     FIELDS.length = 0;
+    /* §176.2: and what each rail drew LAST time is not what it will draw this
+       time — the same reason FIELDS is emptied here. */
+    for (var rk in RAIL_SHOWN) delete RAIL_SHOWN[rk];
     /* Same reason, same line (§96): the objectives editor registers the array
        its Add and Remove act on, and an index from the last paint would act on
        the paint before it. */
@@ -41606,33 +41644,132 @@ var SYNC = (function () {
      press landed on. When the page holds none, the walk goes to the first
      PLACE still owing — through the band's own chip, so the two ways of
      moving cannot disagree about where a place is. */
-  function gapWalk(){
-    var els = [].slice.call(document.querySelectorAll(".fld.gapfld, .qs-fill"));
-    if (!els.length){
-      var chip = document.querySelector("[data-gapband] .mchip:not(.done)");
-      if (chip) chip.click();
-      return;
-    }
-    var cur = document.activeElement, at = -1;
-    for (var i = 0; i < els.length; i++)
-      if (cur && (els[i] === cur || els[i].contains(cur))) { at = i; break; }
-    var next = els[(at + 1) % els.length];
-    /* §130.1's pickers are searchsel-enhanced: the native select is HIDDEN
-       in place with a button in front of it, so ringing or focusing the
-       select itself lights nothing anybody can see (§34: whoever hides a
-       field hides its furniture — and whoever walks to one walks to its
-       furniture). */
-    var lit = next;
+  /* ── WALKING THE GAPS (§145.14, made to work in §176.2) ──────────────
+     Islam, pressing it: *"the CUS01 3 button just opens the project and the
+     next gap does nothing."* Three faults, and each hid the next.
+
+     1 · THE SELECTOR WAS AN ELEMENT TYPE. `.fld.gapfld` means an input or a
+         select wearing fill mode's class, so §176's month picker — a BUTTON —
+         was invisible to it, and on a project whose only gaps are due dates
+         the walker found nothing and fell back to clicking the chip for the
+         page it was already on. `.gapwalk` is the marker now, put on by
+         gapCell in both modes and carrying no styling of its own.
+     2 · AN AUTHOR'S FIELDS WERE NEVER MARKED AT ALL, so this had never done
+         anything in the office's pen — the loudest button on the bar, dead
+         for the person who uses it most.
+     3 · IT USED `document.activeElement` AS ITS CURSOR, and pressing the
+         button moves focus TO THE BUTTON, so every press computed "I am
+         nowhere" and lit the first field again. It reads the lit element
+         instead, which nothing but this function touches.
+
+     AND IT CROSSES PLACES, because the button says "N left" of the whole
+     subject: exhaust this page and it presses the next chip that still owes,
+     then walks that page's first gap — behind `setTimeout`, because a real
+     press holds the paint until the click lands (§30.1, §145.14). */
+  function gapWalkFields(place){
+    /* Scoped to ONE place when a chip has just named one -- a function's
+       projects page draws every capability at once, so the page's first gap
+       is not the chip's first gap (§176.2). */
+    var root = document;
+    if (place) root = document.querySelector('[data-gplace="' +
+      place.replace(/"/g, '\\"') + '"]') || document;
+    return [].slice.call(root.querySelectorAll(".gapwalk, .qs-fill"));
+  }
+  function gapLight(el){
+    document.querySelectorAll(".gaplit").forEach(function(e){ e.classList.remove("gaplit"); });
+    /* THE CURSOR IS MARKED ON THE WALKABLE ELEMENT, NOT ON THE LIT ONE. For a
+       §130.1 picker those are two different nodes -- the native select is
+       hidden and its `.ssbtn` is what gets the ring -- and the ssbtn is a
+       SIBLING, so a cursor read back off the lit element found nothing among
+       the fields and every press lit the first one again (§34: whoever hides
+       a field hides its furniture, and whoever walks to one must still know
+       which field it was). */
+    document.querySelectorAll("[data-gapat]").forEach(function(e){
+      e.removeAttribute("data-gapat"); });
+    el.setAttribute("data-gapat", "1");
+    /* §130.1's pickers are searchsel-enhanced: the native select is HIDDEN in
+       place with a button in front of it, so ringing the select itself lights
+       nothing anybody can see (§34: whoever hides a field hides its
+       furniture — and whoever walks to one walks to its furniture). */
+    var lit = el;
     if (lit.previousElementSibling && lit.previousElementSibling.classList &&
         lit.previousElementSibling.classList.contains("ssbtn"))
       lit = lit.previousElementSibling;
-    els.forEach(function(e){ e.classList.remove("gaplit"); });
-    document.querySelectorAll(".ssbtn.gaplit").forEach(function(e){ e.classList.remove("gaplit"); });
     lit.classList.add("gaplit");
     lit.scrollIntoView({ block: "center" });
     var f = lit.matches("input,select,textarea,button")
       ? lit : lit.querySelector("button,input,select,textarea");
     if (f) f.focus({ preventScroll: true });
+  }
+  /* The first place that still owes and is NOT already on the screen.
+     A FUNCTION'S PROJECTS PAGE DRAWS EVERY CAPABILITY AT ONCE, each with its
+     own rail, so several chips can be showing at the same moment — "the next
+     chip after the current one" picked one of those and the walk appeared to
+     wrap without going anywhere. Asked as "is this one visible" instead,
+     which is the same question a unit's single rail answers trivially. */
+  function gapChipShown(c){
+    /* RAIL_SHOWN, not RAIL: the first holds what the renderer DREW, the
+       second only what somebody has picked, and on a page nobody has clicked
+       the second is empty while the panes are plainly there (§176.2). */
+    return (!c.dataset.grail || RAIL_SHOWN[c.dataset.grail] === c.dataset.gcode) &&
+           (!c.dataset.gsec || CURSEC[currentSub] === c.dataset.gsec);
+  }
+  function gapChips(){
+    return [].slice.call(document.querySelectorAll("[data-gapband] .mchip:not(.done)"));
+  }
+  function gapPlaceOfChip(c){
+    return c && c.dataset.grail ? c.dataset.grail + "|" + c.dataset.gcode : null;
+  }
+  /* WHICH CHIP'S PLACE WE ARE WALKING. Remembered across paints, because
+     landing on a place repaints the page and the answer has to survive that;
+     falls back to the first place that is actually on screen, which is what
+     the first press of all needs. */
+  var GAPWALK_KEY = null;
+  function gapChipAt(chips){
+    for (var i = 0; i < chips.length; i++)
+      if (chips[i].dataset.gkey === GAPWALK_KEY) return i;
+    for (var j = 0; j < chips.length; j++) if (gapChipShown(chips[j])) return j;
+    return -1;
+  }
+  function gapGoTo(chip){
+    GAPWALK_KEY = chip.dataset.gkey;
+    var place = gapPlaceOfChip(chip);
+    chip.click();
+    setTimeout(function(){
+      var f = gapWalkFields(place);
+      if (!f.length) f = gapWalkFields();
+      if (f.length) gapLight(f[0]);
+    }, 0);
+  }
+  function gapWalk(){
+    var chips = gapChips();
+    var i = gapChipAt(chips);
+    var els = gapWalkFields(i >= 0 ? gapPlaceOfChip(chips[i]) : null);
+    var cur = document.querySelector("[data-gapat]");
+    var at = cur ? els.indexOf(cur) : -1;
+    if (els.length && at < els.length - 1) return gapLight(els[at + 1]);
+    /* Exhausted here. THE NEXT PLACE IN THE BAND'S OWN ORDER, not the first
+       one that happens to be off screen -- taking the first sent the walk
+       between two places for ever and never reached the third.
+
+       AND WHAT IS SKIPPED IS THE SAME PAGE, NOT WHAT IS VISIBLE. Skipping
+       every chip already on screen looked right and was not: a function's
+       projects page draws several capabilities at once, so a project that was
+       plainly visible had never been WALKED -- the field list is scoped to one
+       place. Two chips are the same page when they name the same place, or
+       when neither names one and both sit in the same section (a unit's
+       Foundation and Objectives are two chips over one page). */
+    var here = i >= 0 ? gapPlaceOfChip(chips[i]) : null;
+    var hereSec = i >= 0 ? (chips[i].dataset.gsec || "") : "";
+    var n = chips.length;
+    for (var step = 1; step <= n; step++) {
+      var c = chips[((i < 0 ? 0 : i) + step) % n];
+      var cp = gapPlaceOfChip(c);
+      var samePage = cp === here &&
+        (cp !== null || (c.dataset.gsec || "") === hereSec);
+      if (!samePage) return gapGoTo(c);
+    }
+    if (els.length) gapLight(els[0]);
   }
     /* ── THE MONTH PICKER (§176) ────────────────────────────────────────
        A due date is chosen, never typed. The button carries the FIELDS index
@@ -45071,6 +45208,20 @@ var SYNC = (function () {
         if (chip.dataset.grail) RAIL[chip.dataset.grail] = chip.dataset.gcode;
         paint();
         if (typeof toPaneTop === "function") toPaneTop();
+        /* §176.2: AND IT LANDS ON THE GAP IT NAMED. Islam: *"the CUS01 3
+           button just opens the project."* It did exactly that — the chip
+           says how many are missing there and then left you to find them,
+           which on a project of five milestones is the work the button was
+           supposed to save. Queued, because a real press holds the paint
+           until the click lands (§30.1) and the fields do not exist until it
+           has (§145.14's own fault, in the control beside it). */
+        var place = chip.dataset.grail
+          ? chip.dataset.grail + "|" + chip.dataset.gcode : null;
+        setTimeout(function(){
+          var f = gapWalkFields(place);
+          if (!f.length) f = gapWalkFields();
+          if (f.length) gapLight(f[0]);
+        }, 0);
         return;
       }
       if (ev.target.closest("[data-fillcta]")) {

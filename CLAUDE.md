@@ -408,6 +408,25 @@ console errors (in this cloud environment, run it via a wrapper that points Play
   Missing; **dates already written are untouched**, and the stated cost is that
   a quarter can no longer be typed into a milestone's due date, in the pen
   either (§53.5: one control, one answer).
+- **THE BAND'S BUTTONS WENT NOWHERE, FIVE WAYS (§176.2):** Islam — *"the CUS01
+  3 button just opens the project and the next gap does nothing."* Each fault hid
+  the next. **The walker asked for an element TYPE** (`.fld.gapfld`), so §176's
+  month picker — a button — was invisible and a project owing only due dates had
+  nothing to walk; the marker is **`.gapwalk`**, carrying NO styling, because
+  *this control fills a gap* and *paint it red* are different facts and merging
+  them restyles the office's pen to fix a button. **An author's fields were never
+  marked at all**, so Next gap had never worked for the office, on units either.
+  **It used `document.activeElement` as its cursor** and the press moves focus to
+  the button — and the cursor is marked on the WALKABLE element, never the lit
+  one, because a §130.1 picker rings its `.ssbtn` SIBLING (§34). **It asked
+  `RAIL`**, which holds only what somebody PICKED and is empty on a page nobody
+  clicked while the panes are plainly there — `RAIL_SHOWN` is the resolved answer,
+  written where the resolving happens (§53.5) and reset beside `FIELDS`. **And a
+  chip lit the first gap on the PAGE**, which on a function's projects page (every
+  capability drawn at once) belongs to another pane — `data-gplace` carries the
+  chip's own rail-and-code pair, one builder for both. **Crossing places skips by
+  SAME PAGE, not by VISIBLE**: a project can be on screen and never walked,
+  because the field list is scoped. Landing is queued behind `setTimeout` (§30.1).
 - **THE GRANT IS PER PAGE AND THE REACH IS PER ROW (§176):** Islam — *"the fill
   grant should be for his project only he is not a cutodian."* There is no
   per-project cell and there should not be one, so `mayFillRow()` is
@@ -2843,6 +2862,9 @@ python3 checks/strategy-split.py # the Strategy | Reporting halves: the cell pre
                                 # open AND closed, both ends each time — and since §145.9
                                 # the .pptx download asserted HIDDEN on every surface while
                                 # the dormant builder is still proved by a direct call
+python3 checks/gap-walk.py      # the band's chips and Next gap actually go somewhere:
+                                # a unit AND a function, as the filler AND the office,
+                                # every place the band names reached (§176.2)
 python3 checks/viewer-line.py   # the Viewing-as line: the roles and where each is
                                 # held, of EVERY person — no em-dashes, the seat never
                                 # repeated, and the whole line on a hover (§177)

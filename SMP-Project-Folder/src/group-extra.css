@@ -1012,6 +1012,15 @@
   .pane .ptitle.edhead .ptname { flex:1; min-width:0;
     font:400 17px/1.3 var(--serif); }
   .pane .ptitle.edhead .penbtn { position:static; flex:none; }
+  /* §194.2: THE PROJECT PANE'S BAND CARRIES ITS OWN ACTS while editing. The
+     band is already sticky (§53.7); `.paneact` is absolute against the PANE,
+     so left outside it the Done button scrolled away from the name it belongs
+     to. In flow, in the band's right slot, the pair cannot separate. */
+  .pane .pband.edband .paneact { position:static; height:auto; display:flex;
+    align-items:center; gap:8px; }
+  .pane .pband.edband .paneact .cornerbtn,
+  .pane .pband.edband .paneact .penbtn { position:static; flex:none;
+    visibility:visible; opacity:1; }
   .pane .ptitle .pmeta { color:var(--ink-3); font-size:12.5px; margin-top:3px; }
   .planonly { font-size:12.5px; color:var(--ink-3); margin:10px 0 0; }
   .planonly b { color:var(--gold-deep); letter-spacing:.09em; text-transform:uppercase;

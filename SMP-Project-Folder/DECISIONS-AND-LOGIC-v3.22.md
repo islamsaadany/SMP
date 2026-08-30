@@ -23160,3 +23160,117 @@ a row with **nothing outstanding** now — MADE, because every person in the dem
 carries no employee number and so is outstanding for `noident` (§94.2) — and a
 row that HAS an item is asserted separately: it may scroll, because it has more
 in it, but it must still fit on screen and its ring must orphan nothing.
+
+---
+
+## §191 — A line the platform cannot name is nobody's to change (v3.79)
+
+Found while chasing a refusal that was itself correct (Walid's, above). It is
+not what he hit; it is what looking for it turned up.
+
+### The hole
+
+The authoriser matches plan rows **by id** to work out what changed. `byId()`
+drops a row that has none — rightly, since two rows sharing `undefined` are not
+one row — and the loops that walk those maps then found **nothing to classify**.
+Nothing classified reads as *no change*, and no change is allowed.
+
+Measured before a line was written, on the shipped build: with the ids stripped,
+a **view-only unit head** could rewrite a key objective, a pillar, a measure, a
+tactic and a project's front matter. Every one of those saves came back accepted.
+With the ids present all of them are refused.
+
+**§42 promises that an unclassified change is the SMO's.** This is the one place
+that promise was not kept, and it failed **open**.
+
+### Three states, not one
+
+Each leaves a row unjudged in its own way, and only the first is obvious:
+
+* **no id** — `byId` skips the row, the map comes back empty;
+* **a null id** — `byId` KEEPS it, under the string `"null"`, so a whole list
+  collapses onto one entry and five of six rows are never compared;
+* **a duplicate** — the second row silently takes the first's place in the map.
+  §96.2 fixed a minter that produced duplicates; this is the other end, and it
+  does not assume that fix has always been in place.
+
+### Three walks, and the sweep is what found the other two
+
+`splitRows` is the shared row comparison, and guarding it closed **three of the
+four** cases I first measured. The pillar list and the project list build their
+own maps rather than going through it, so the guard did not reach them — a
+pillar's name and weight, and a project's owner, brief, stakeholders, Start and
+End, all stayed writable while the rows *inside* those same projects were
+correctly refused.
+
+**A fix that closes three of four holes is exactly the kind that gets trusted.**
+The sweep across all nine plan lists × three broken states is what found the
+other two, and it is now the test.
+
+### The rule
+
+A list that cannot be matched row to row is judged **as a whole**: byte-identical
+costs nobody anything, and anything else is a plan change and the office's.
+
+**Never matched by position** (§48). Position is not identity — one row inserted
+and everything after it reads as edited.
+
+**The gap pass stops too.** It clears what it classifies from the clone, so
+running it over a list whose rows cannot be told apart would wipe one row's
+change while crediting it to another.
+
+**The cost is stated, not discovered:** on a tenant that really holds such rows,
+that list is the office's until they open it and save once, which mints the ids
+(`mintRowId`, `renumberUnit`). Nothing else about the plan moves.
+
+### And then the shipped data was swept, which was the other half of the ask
+
+Every plan line in the product carries a unique id — **except the group's own
+six key objectives**, exactly as §96.4 recorded: only rows ADDED were ever given
+one, and a list where one row is identified and six are not is worse than either
+state, so it was left. Nothing had needed the ids until now.
+
+**Nobody could ever have exploited those six** — the group's own strategy is
+refused wholesale by a different rule, whatever the ids say, and that was
+measured too. So minting them is not repairing a hole. It removes the one list
+the new guard would otherwise refuse for everybody but the office, and it gives
+a cycle snapshot and an archive six rows they can tell apart (§48: a snapshot is
+keyed by id, and six rows keyed `null` are six rows it cannot separate).
+
+**The spelling is the product's own.** `koSettle()` has minted `group-KO<n>` for
+every group objective added since it was written, so this is that convention and
+not a second one beside it (§53.5). Written into the DATA rather than filled in
+by a reader, because a reader that writes what it reads puts a phantom change
+into every save (§42, §50.6 — and §96.4's own reason for running it from Add and
+Remove rather than from paint).
+
+### Migration 034, and the draft that would have caused what it was fixing
+
+The first draft numbered from `idx`. On a tenant that had already had a row
+added by hand, that mints a name the row is holding — **a duplicate, which the
+new guard treats exactly like a missing id**, so the list would have stayed
+refused for everybody but the office and the migration would have caused the
+very thing it exists to remove. Caught by driving it against a real Postgres 16
+rather than by reading it.
+
+It continues past the highest `-KO<n>` already present, which is what
+`koSettle()` does. Proved on a real database in four states:
+
+* a tenant with all six blank → `group-KO1..6`, matching the seed;
+* a tenant holding one id that the naive version would have collided with →
+  six unique ids, **and the existing one untouched**;
+* run twice → not a byte moves;
+* a virgin deployment → the full round trip, clean slate, fixed point and
+  archive round trip all PASS.
+
+### Proof
+
+`test-authorize.js` §23: nine lists × three broken states, each refused, each
+paired with the assertion that **leaving the list alone is not itself a change**
+— or a build that refused every save would pass. **Both ends** (§113.8): the
+healthy plan is still judged exactly as before, and the office can still correct
+an unidentified list.
+
+**416 assertions pass.** Proved able to fail by reverting each guard in turn:
+**19 red** without the `splitRows` guard, **3** without the pillar guard, **3**
+without the project guard.

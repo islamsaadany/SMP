@@ -68,6 +68,28 @@ Nothing proceeds past this line without an answer.
 
 ## Built and verified
 
+### v3.79 — a line the platform cannot name is nobody's to change (§191)
+
+- **The hole.** The system works out what changed by matching plan lines
+  against their reference numbers. A line with no number matched nothing, so
+  nothing was compared — which read as *nothing changed*, and nothing changed
+  is allowed. Measured: a **view-only** unit head could rewrite a key
+  objective, a pillar, a measure, a tactic and a project's details.
+- **Three ways a line goes unnamed** — no number, an empty one, or two lines
+  sharing one — and all three are now refused.
+- **Three places do the matching**, not one. Fixing the shared one closed three
+  of four cases; the sweep across all nine lists found the other two.
+- **The rule:** a list the system cannot match line by line is the Strategy
+  Office's. Leaving it alone still costs nobody anything.
+- **The shipped data is clean** except the group's own six objectives, which
+  nobody could ever have edited anyway — they're refused by a separate rule.
+  They now carry numbers, with migration 034 for tenants already running.
+- **The first draft of that migration would have caused the problem it fixes** —
+  it would have handed an existing line a number another line already had.
+  Caught by running it against a real database, in four different shapes.
+- Proof: 416 assertions pass. Proved able to fail — 19 / 3 / 3 red with each
+  of the three guards taken out in turn.
+
 ### v3.78 — an attention item you can answer, on the box it is about (§190)
 
 - **Three of the seven kinds could never be cleared.** A seat somebody meant to

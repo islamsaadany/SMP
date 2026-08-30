@@ -775,6 +775,33 @@ console errors (in this cloud environment, run it via a wrapper that points Play
   an empty array, so `onlyOwnLines()` answered false and a floor person given
   edit could rewrite their unit's WHOLE plan — wider than a Contributor, which is
   the opposite of a floor. `OWN_LINES_ONLY` carries the floor beside `contrib`.
+- **A LINE THE PLATFORM CANNOT NAME IS NOBODY'S TO CHANGE (§191):** the
+  authoriser matches plan rows BY ID; `byId()` drops a row with none — rightly,
+  two rows sharing `undefined` are not one row — and the loops that walk those
+  maps then found **nothing to classify**, which reads as *no change* and was
+  ALLOWED. Measured on the shipped build: with the ids stripped a **view-only
+  unit head** could rewrite a key objective, a pillar, a measure, a tactic and
+  a project's front matter. **§42's promise that an unclassified change is the
+  SMO's, failing OPEN in the one place it was not kept.** **THREE STATES, each
+  unjudged its own way**: no id; a NULL id (`byId` keeps it under the string
+  `"null"`, so a whole list collapses onto one entry); and a DUPLICATE (§96.2
+  from the other end). **THREE WALKS** — `splitRows`, the pillar list and the
+  project list each build their own maps, so guarding the shared one closed
+  three of four cases and **the sweep found the other two**: *a fix that closes
+  three of four holes is exactly the kind that gets trusted.* The rule is
+  **judge the list as a whole** — byte-identical costs nobody anything,
+  anything else is the office's — and **never by position** (§48). The gap pass
+  stops too, or it would clear one row's change while crediting it to another.
+  **AND THE SHIPPED DATA WAS SWEPT**: every plan line carries a unique id except
+  the group's own six (§96.4's recorded omission), which **nobody could ever
+  have exploited** — the group's strategy is refused wholesale by another rule —
+  so minting them removes the one list the guard would otherwise refuse, and
+  gives a snapshot six rows it can tell apart. Migration 034, in `koSettle()`'s
+  own `group-KO<n>` spelling, **continuing past the highest already present**:
+  the first draft numbered from `idx` and would have minted a name an existing
+  row was holding — a duplicate, which the new guard treats exactly like a
+  missing id, so *the migration would have caused the very thing it exists to
+  remove.* Found by driving it against a real Postgres 16, in four states.
 - **AN ATTENTION ITEM YOU CAN ANSWER, ON THE BOX IT IS ABOUT (§190):** Islam
   — *"attention items that stays attention item is a problem always give me the
   option to dismiss and make gnerally the dismiss under the box with the issue

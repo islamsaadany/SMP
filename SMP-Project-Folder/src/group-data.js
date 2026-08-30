@@ -96,13 +96,28 @@ var GROUP = {
     ["Covering", "all over Egypt and Nigeria"],
     ["Empowered by", "a diversified portfolio, economy of scale, extensive reach, exceptional customer experience, and premium after-sales support (owning the value chain)"]
   ],
+  /* THE SIX CARRY THEIR OWN IDS (§191, closing §96.4). Only rows ADDED here
+     were ever given one, so the shipped six were the ONE list in the whole
+     product that nothing could name — §96.4 recorded it and left it, because
+     a list where one row is identified and six are not is worse than either
+     state, and nothing had needed the ids yet. §191 needs them: a list that
+     cannot be matched row to row is now judged as a whole and refused, and
+     an archive or a cycle snapshot is keyed by id (§48), so six rows keyed
+     `null` are six rows a snapshot cannot tell apart.
+
+     THE SPELLING IS `koSettle()`'s OWN — `group-KO<n>` — not a second
+     convention beside it (§53.5); that function has been minting exactly this
+     for every row added since it was written. Written into the DATA rather
+     than filled in by a reader, because a reader that writes what it reads
+     puts a phantom change into every save (§42, §50.6, and §96.4's own
+     reason for running it from Add and Remove rather than from paint). */
   keyObjectives: [
-    { name: "Revenue",                group: null,           dir: "≥", target3y: "34B EGP", target: "18B EGP", compile: "Sum",    actual: "7.8B",  progress: 43 },
-    { name: "EBITDA",                 group: null,           dir: "≥", target3y: "8.5%", target: "6.5%",    compile: "Latest", actual: "5.1%",  progress: 78 },
-    { name: "Earnings concentration", group: null,           dir: "≤", target3y: "30%", target: "40%",     compile: "Latest", actual: "46%",   progress: 87 },
-    { name: "Mobile Distribution",    group: "Market share", dir: "≥", target3y: "38%", target: "32%",     compile: "Latest", actual: "28%",   progress: 88 },
-    { name: "CE Distribution",        group: "Market share", dir: "≥", target3y: "24%", target: "18%",     compile: "Latest", actual: "14%",   progress: 78 },
-    { name: "Retail",                 group: "Market share", dir: "≥", target3y: "18%", target: "12%",     compile: "Latest", actual: "9%",    progress: 75 }
+    { id: "group-KO1", name: "Revenue",                group: null,           dir: "≥", target3y: "34B EGP", target: "18B EGP", compile: "Sum",    actual: "7.8B",  progress: 43 },
+    { id: "group-KO2", name: "EBITDA",                 group: null,           dir: "≥", target3y: "8.5%", target: "6.5%",    compile: "Latest", actual: "5.1%",  progress: 78 },
+    { id: "group-KO3", name: "Earnings concentration", group: null,           dir: "≤", target3y: "30%", target: "40%",     compile: "Latest", actual: "46%",   progress: 87 },
+    { id: "group-KO4", name: "Mobile Distribution",    group: "Market share", dir: "≥", target3y: "38%", target: "32%",     compile: "Latest", actual: "28%",   progress: 88 },
+    { id: "group-KO5", name: "CE Distribution",        group: "Market share", dir: "≥", target3y: "24%", target: "18%",     compile: "Latest", actual: "14%",   progress: 78 },
+    { id: "group-KO6", name: "Retail",                 group: "Market share", dir: "≥", target3y: "18%", target: "12%",     compile: "Latest", actual: "9%",    progress: 75 }
   ],
   themes: [
     { ab: "OT",  name: "One Trade",          note: "New for 2026" },

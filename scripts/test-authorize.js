@@ -2054,5 +2054,100 @@ console.log("\n22 · a seat is granted, never derived (§187)");
         !R.personRoles(R.worldOf(inc), t).some(function (r) { return r.role === "super"; }));
 })();
 
+console.log("\n23 · a line the platform cannot name is nobody's to change (§191)");
+/* Found while chasing a refusal that WAS correct. `byId()` drops a row with no
+   id — rightly, two rows sharing `undefined` are not one row — and the loops
+   that walk those maps then found nothing to classify, which reads as "no
+   change" and was allowed. Measured before the fix: a VIEW-ONLY unit head
+   could rewrite a key objective, a pillar, a measure, a tactic and a project's
+   front matter.
+
+   THREE BROKEN STATES, because each leaves a row unjudged in its own way: no
+   id at all, a null one (`byId` keeps it under the string "null", so a whole
+   list collapses onto one entry), and a DUPLICATE, where the second row takes
+   the first one's place in the map.
+
+   NINE LISTS, because the platform has THREE walks that build their own maps
+   rather than going through splitRows — the pillars, the projects, and
+   splitRows itself — and a fix that closed two of the three is exactly the
+   kind that gets trusted. The sweep is what found the other two.
+
+   BOTH ENDS (§113.8): the healthy plan is asserted UNCHANGED, or a build that
+   refused every plan write would pass all of this. */
+(function () {
+  const UNIT = "logistics", FN = "it";
+  const capOf = function (s) {
+    return (s.group.capabilities || []).filter(function (c) { return c.fn === FN; })[0] ||
+           s.group.capabilities[0]; };
+  /* Two plain readers: a unit head holds no strategy grant on their own unit
+     (§94), and a CFO holds nothing at all over this function. */
+  const HEAD = "loghead", OTHER = "cfo";
+  const LISTS = [
+    ["a unit's key objectives", HEAD,
+     function (s) { return s.units[UNIT].keyObjectives; },
+     function (i) { i.units[UNIT].keyObjectives[0].name = "X";
+                    i.units[UNIT].keyObjectives[0].target = "9"; }],
+    ["a unit's pillars", HEAD,
+     function (s) { return s.units[UNIT].items; },
+     function (i) { i.units[UNIT].items[0].name = "X"; i.units[UNIT].items[0].weight = 99; }],
+    ["a pillar's measures", HEAD,
+     function (s) { return s.units[UNIT].items[0].measures; },
+     function (i) { i.units[UNIT].items[0].measures[0].target = "9"; }],
+    ["a pillar's tactics", HEAD,
+     function (s) { return s.units[UNIT].items[0].tactics; },
+     function (i) { i.units[UNIT].items[0].tactics[0].owner = "X"; }],
+    ["a capability's key objectives", OTHER,
+     function (s) { return capOf(s).keyObjectives; },
+     function (i) { capOf(i).keyObjectives[0].target = "9"; }],
+    ["a capability's projects", OTHER,
+     function (s) { return capOf(s).projects; },
+     function (i) { capOf(i).projects[0].name = "X"; capOf(i).projects[0].owner = "X"; }],
+    ["a project's deliverables", OTHER,
+     function (s) { return capOf(s).projects[0].deliverables || []; },
+     function (i) { capOf(i).projects[0].deliverables[0].name = "X"; }],
+    ["a project's outcomes", OTHER,
+     function (s) { return capOf(s).projects[0].outcomes || []; },
+     function (i) { capOf(i).projects[0].outcomes[0].target = "9"; }],
+    ["a project's milestones", OTHER,
+     function (s) { return capOf(s).projects[0].milestones || []; },
+     function (i) { capOf(i).projects[0].milestones[0].name = "X"; }]
+  ];
+  const BREAK = {
+    "no id":      function (r) { delete r.id; },
+    "a null id":  function (r) { r.id = null; },
+    "one id for the lot": function (r) { r.id = "SAME"; }
+  };
+  LISTS.forEach(function (L) {
+    const label = L[0], who = L[1], listOf = L[2], edit = L[3];
+    /* THE OTHER END FIRST: with the ids as shipped, this same edit is refused
+       for its own reason, and the plan is still writable by the office. */
+    let stored = clone(SEED), inc = clone(stored);
+    edit(inc);
+    check("§191: " + label + " — the healthy list is still judged",
+          !A.authorize(stored, inc, personOf(stored, who)).ok);
+    Object.keys(BREAK).forEach(function (how) {
+      stored = clone(SEED);
+      const rows = listOf(stored);
+      if (!rows.length) { check("§191: " + label + " has rows to break", false); return; }
+      rows.forEach(BREAK[how]);
+      inc = clone(stored);
+      edit(inc);
+      check("§191: " + label + " with " + how + " is refused",
+            !A.authorize(stored, inc, personOf(stored, who)).ok, "was ALLOWED");
+      /* AND AN UNTOUCHED LIST COSTS NOBODY ANYTHING — a tenant that simply
+         holds such rows must still be able to save everything else. */
+      check("§191: ...and leaving it alone is not itself a change",
+            A.authorize(stored, clone(stored), personOf(stored, who)).ok);
+    });
+  });
+  /* And the office is not locked out of its own plan by the guard. */
+  const s = clone(SEED);
+  s.units[UNIT].keyObjectives.forEach(function (r) { delete r.id; });
+  const i2 = clone(s);
+  i2.units[UNIT].keyObjectives[0].target = "9";
+  check("§191: the office may still correct an unidentified list",
+        A.authorize(s, i2, personOf(s, "smo")).ok);
+})();
+
 console.log("\n" + pass + " passed, " + fail + " failed");
 process.exit(fail ? 1 : 0);

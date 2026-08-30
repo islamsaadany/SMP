@@ -23383,7 +23383,39 @@ that traversal and its own check has been red on it since; **the new pending
 walk crosses into Foundation correctly**, which is what makes the difference
 visible.
 
-**Recorded rather than fixed.** It is a behaviour change to a shipped control
-and it is not what was asked for here (rule 1b), and quietly changing a walk
-somebody is using while fixing a different one is how two faults become
-indistinguishable. Islam's call.
+Islam: *"did we resolve it? or do you need to ask me something?"* Nothing to
+ask — it is a plain defect with an existing check that already says what
+correct looks like, so holding it for alignment was over-cautious.
+
+**IT WAS NEVER STUCK.** Traced press by press: it walks every field it has
+marked, and in that pillar it had marked **six** while the band counted **one**.
+Five of the six were **collaborator pickers**.
+
+**§187 IS THE CAUSE, AND THIS IS ITS OTHER HALF.** That section took
+`collaborators` out of `GAP_FIELDS` at Islam's direction — *"remove the missing
+collaborators as missing items"* — so the counts stopped including them. The
+walker does not read `GAP_FIELDS`: it marks any blank fillable cell. So the
+count moved and the walk did not, and every press was spent on rows nothing was
+asking about — six in the first pillar, five in the second, and the run of
+presses exhausted before it ever reached Foundation, Objectives or the last two
+pillars. **The count and the walk are one list (§116.2) and they had stopped
+being one.**
+
+`SMPRules.isGapField(field)` is the test, in the shared module beside the table
+it reads, and asked of the WHOLE table rather than of one kind — the cell
+builder is shared and is not told which kind of row it is drawing. The union
+fails in the safe direction: a field that is a gap somewhere is walked wherever
+it is blank, which is a nuisance, where the other way round would silently skip
+a real gap.
+
+**`gapfld` IS DELIBERATELY UNTOUCHED.** Whether the cell is FILLABLE is a
+separate decision and §187 did not change it — a collaborator list is still
+something a filler may write. Only its membership of the *walk* moves.
+
+**Flagged, not changed:** the collaborators cell still renders in fill mode
+with the red *Missing* dress that `gapfld` carries, so on that screen it still
+LOOKS like a missing item while the count correctly ignores it. That is a
+visual decision and needs a mockup (rule 1c), so it is Islam's to call.
+
+Proved able to fail: putting the two class decisions back makes
+`checks/gap-walk.py` red twice again, exactly as it is on `origin/main`.

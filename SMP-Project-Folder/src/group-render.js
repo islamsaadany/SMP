@@ -2767,7 +2767,7 @@ function gapCell(page, acKey, row, field, opts){
       if (opts.del && SMPRules.gapBlank(nv)) delete row[field];
       else row[field] = nv;
       gapLift(row, field); gapBandRefresh();
-    }, open ? "gapwalk" : "");
+    }, open && SMPRules.isGapField(field) ? "gapwalk" : "");
   }
   if (fl && (open || mark)) {
     return draw(function(v){
@@ -2778,7 +2778,13 @@ function gapCell(page, acKey, row, field, opts){
       }
       else { row[field] = nv; gapStamp(row, field); }
       gapBandRefresh();
-    }, mark ? "pendfld" : "gapfld gapwalk");
+      /* §192.4: `gapwalk` ONLY WHERE THE FIELD IS ACTUALLY COUNTED. The walk
+         and the count are one list (§116.2) and §187 split them: it took
+         collaborators out of GAP_FIELDS, so the band stopped counting them and
+         this class went on marking them. `gapfld` is untouched — whether the
+         cell is FILLABLE is a separate decision and §187 did not change it. */
+    }, mark ? "pendfld"
+            : (SMPRules.isGapField(field) ? "gapfld gapwalk" : "gapfld"));
   }
   /* Read — and fill mode on a settled value reads too.
      `read` IS WHY §149 SURVIVED THE MERGE. A direction and a compile rule are

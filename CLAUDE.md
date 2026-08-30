@@ -775,6 +775,24 @@ console errors (in this cloud environment, run it via a wrapper that points Play
   an empty array, so `onlyOwnLines()` answered false and a floor person given
   edit could rewrite their unit's WHOLE plan — wider than a Contributor, which is
   the opposite of a floor. `OWN_LINES_ONLY` carries the floor beside `contrib`.
+- **THE GAP WALK WALKED WHAT THE COUNT NO LONGER COUNTED (§192.4):** *"Next
+  gap"* on a unit reached two of five places and the run ended — **and it was
+  never stuck**: traced press by press it walks every field it has MARKED, and
+  in that pillar it had marked **six** while the band counted **one**. Five
+  were collaborator pickers. **§187's other half**: that section removed
+  `collaborators` from `GAP_FIELDS` (*"remove the missing collaborators as
+  missing items"*) so the counts stopped including them, and the walker does
+  not read `GAP_FIELDS` — it marks any blank fillable cell. The count moved and
+  the walk did not, so every press was spent on rows nothing was asking about
+  and the presses ran out before Foundation, Objectives and two more pillars.
+  **The count and the walk are one list (§116.2) and they had stopped being
+  one.** `SMPRules.isGapField()` is the test, asked of the WHOLE table rather
+  than of one kind — the cell builder is shared and is not told which kind of
+  row it draws — and the union fails in the SAFE direction (walking one extra
+  blank is a nuisance; skipping a real gap is a miss). **`gapfld` is untouched**:
+  whether a cell is FILLABLE is a separate decision §187 did not make.
+  *Reproduced on `origin/main`'s own build first, so it was known not to be
+  the change beside it.*
 - **THE PENDING COUNT SAYS WHERE, AND WALKS YOU THERE (§192):** Islam, as
   the SMO — *"I'm getting this badge but I don't know where they are — I think
   we need a flow like the filling to take me through the confirmation areas so

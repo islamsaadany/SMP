@@ -88,6 +88,22 @@ Nothing proceeds past this line without an answer.
 - Proof: `checks/pending-walk.py` is new — 14 red on the build before,
   including the reported overlap.
 
+### v3.80b — the gap walk reaches every place again (§192.4)
+
+- **"Next gap" on a unit reached two places out of five**, then ran out. It was
+  never stuck: it walks every field it has marked, and in the first pillar it
+  had marked **six** while the band counted **one**.
+- **Five of the six were collaborator boxes.** When we stopped counting missing
+  collaborators as missing items, the counts changed and the walker didn't — so
+  every press went to a row nothing was asking about, and the walk never got as
+  far as Foundation, Objectives or the last two pillars.
+- Now the walk visits exactly what the count counts.
+- **Left alone, and flagged:** a collaborator box still shows the red "Missing"
+  dress while you're filling, even though it is no longer counted. That's a look
+  question, so it needs a mockup and your say-so.
+- It was reproduced on what's live now before anything was changed, so we knew
+  it wasn't from the work beside it.
+
 ### v3.79 — a line the platform cannot name is nobody's to change (§191)
 
 - **The hole.** The system works out what changed by matching plan lines

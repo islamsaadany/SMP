@@ -8716,6 +8716,30 @@ THEME.apply();
      pending fill is answered, not missing, so it is not in this list; the
      gap band, the tab badge and the rail counts all count through here
      (§145.12: one definition, or the counts disagree with the fields). */
+  /* IS THIS FIELD EVER A GAP AT ALL (§192.4)? Asked of the WHOLE table rather
+     than of one kind, because the cell builder is shared and is not told which
+     kind of row it is drawing — and the union fails in the safe direction: a
+     field that is a gap somewhere is walked everywhere it is blank (a
+     nuisance), where the other way round would silently skip a real gap.
+
+     §187 is why this exists. It removed `collaborators` from GAP_FIELDS at
+     Islam's direction — *"remove the missing collaborators as missing items"* —
+     so the COUNTS stopped including them, and the walker, which marks any
+     blank fillable cell, did not. Measured on a unit's plan: the band said one
+     gap in that pillar and "Next gap" walked six fields, five of them
+     collaborator pickers, so the walk spent every press on rows nothing was
+     asking about and never reached the other four places. The count and the
+     walk are one list (§116.2) and they had stopped being one. */
+  var GAP_ANY = null;
+  function isGapField(field) {
+    if (!GAP_ANY) {
+      GAP_ANY = {};
+      Object.keys(GAP_FIELDS).forEach(function (k) {
+        GAP_FIELDS[k].forEach(function (f) { GAP_ANY[f] = 1; });
+      });
+    }
+    return !!GAP_ANY[field];
+  }
   function gapMissing(kind, row) {
     return (GAP_FIELDS[kind] || []).filter(function (f) {
       if (pendOf(row)[f]) return false;
@@ -9666,6 +9690,7 @@ THEME.apply();
     focusOn: focusOn,
     mayAuthorPage: mayAuthorPage,
     GAP_FIELDS: GAP_FIELDS, GAP_SCORE_FIELDS: GAP_SCORE_FIELDS,
+    isGapField: isGapField,
     gapBlank: gapBlank, quartersBlank: quartersBlank,
     WHEN_MONTHS: WHEN_MONTHS, whenMonths: whenMonths, whenReadable: whenReadable,
     GAP_WHEN: GAP_WHEN, gapWhenField: gapWhenField,
@@ -25257,7 +25282,7 @@ function gapCell(page, acKey, row, field, opts){
       if (opts.del && SMPRules.gapBlank(nv)) delete row[field];
       else row[field] = nv;
       gapLift(row, field); gapBandRefresh();
-    }, open ? "gapwalk" : "");
+    }, open && SMPRules.isGapField(field) ? "gapwalk" : "");
   }
   if (fl && (open || mark)) {
     return draw(function(v){
@@ -25268,7 +25293,13 @@ function gapCell(page, acKey, row, field, opts){
       }
       else { row[field] = nv; gapStamp(row, field); }
       gapBandRefresh();
-    }, mark ? "pendfld" : "gapfld gapwalk");
+      /* §192.4: `gapwalk` ONLY WHERE THE FIELD IS ACTUALLY COUNTED. The walk
+         and the count are one list (§116.2) and §187 split them: it took
+         collaborators out of GAP_FIELDS, so the band stopped counting them and
+         this class went on marking them. `gapfld` is untouched — whether the
+         cell is FILLABLE is a separate decision and §187 did not change it. */
+    }, mark ? "pendfld"
+            : (SMPRules.isGapField(field) ? "gapfld gapwalk" : "gapfld"));
   }
   /* Read — and fill mode on a settled value reads too.
      `read` IS WHY §149 SURVIVED THE MERGE. A direction and a compile rule are

@@ -216,6 +216,18 @@
    immediately before the push (§94.12, §94.16) — main, the branch and the LIVE
    site were all serving "smp-shell-v3.65-ownsevery", so "-emaillink" is a name
    nobody has served. `node --check sw.js` run after the merge (§146.2). */
+/* v3.83-editing-keeps-its-head — §191–§194: a line the platform cannot name is
+   nobody's to change; the pending count says where and walks you there; the gap
+   walk stops walking what the count no longer counts; a reply says it went as
+   soon as it has gone; the house leads the row; and editing a pillar keeps its
+   head. The built file's bytes changed, which is the whole trigger (§91).
+
+   Name read off origin/main at the start of this merge and confirmed again
+   immediately before the push (§94.12, §94.16) — main is serving
+   "smp-shell-v3.78-dismiss-on-the-box", so "-editing-keeps-its-head" is a name
+   nobody has served, and the suffix says whose the change is rather than being
+   a number two sessions can reach for correctly and still collide on (§99).
+   `node --check sw.js` run after the merge (§146.2). */
 const SHELL = "smp-shell-v3.83-editing-keeps-its-head";
 const ASSETS = [
   "/",

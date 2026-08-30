@@ -522,8 +522,17 @@ function pillarRow(it, i, u){
   return '<div class="prow-wrap" data-oi="' + i + '">' +
     '<button class="prow" style="' + pgrid(on) + '" aria-expanded="false" data-p="' + i + '">' +
     (on ? handle("Reorder " + it.name) : '') +
-    '<span class="pname"><b><span class="pcode">' + pillarCode(u, i) + '</span> ' + esc(it.name) + '</b>' +
-      (it.sub ? '<span class="psub">' + esc(it.sub) + '</span>' : '') + '</span>' +
+    /* THE PILLAR'S NOTE IS GONE FROM EVERY SCREEN (§196.2). §194 removed the
+       bar that EDITED it, at Islam's direction, and left this — the rail row's
+       grey sub-line — so the value was readable in one place and correctable
+       in none: the worst of the three states (§61). Islam: *"pillar note
+       remove it for now."*
+
+       THE STORED VALUE IS UNTOUCHED. `sub` still round-trips through
+       `units.extra` exactly as it did, so nothing an upload wrote is lost and
+       one line gives the sub-line back — which is what "for now" asks for.
+       Deleting the data is a separate, irreversible act and is not this. */
+    '<span class="pname"><b><span class="pcode">' + pillarCode(u, i) + '</span> ' + esc(it.name) + '</b></span>' +
     '<span>' + kindPill(it) + '</span>' +
     '<span><span class="pill theme">' + esc(it.theme) + '</span></span>' +
     '<span class="powner">' + esc(it.owner) + '</span>' +
@@ -4137,14 +4146,26 @@ function projFrontMatter(p, ed){
      "Repeats: No" on every build-once project is noise (§41's budget, in
      words). The setter DELETES the key on the default (§50.6): a project
      unmarked and one never asked must be byte-identical. */
-  var repRow = "";
+  var repRow = "", repVal = repeatLabel(p.repeats);
   if (ed) {
+    var repOpts = ["No"].concat(REPEAT_MONTHS.map(repeatLabel));
+    /* A STORED VALUE THE LIST DOES NOT OFFER IS KEPT AND OFFERED (§96.2,
+       §114): `"cycle"` from before §196, or a month count somebody set on
+       another deployment. Displaying it wrong, or dropping it on the first
+       repaint, are both worse than one extra line in a dropdown. */
+    if (repOpts.indexOf(repVal) < 0) repOpts.splice(1, 0, repVal);
     repRow = row("l", "Repeats",
-      selectOr("plan", p.repeats === "cycle" ? "Each cycle" : "No",
-        ["No", "Each cycle"], "",
-        function(v){ if (v === "Each cycle") p.repeats = "cycle"; else delete p.repeats; }));
-  } else if (p.repeats === "cycle") {
-    repRow = row("l", "Repeats", "Each cycle");
+      selectOr("plan", repVal, repOpts, "", function(v){
+        var n = REPEAT_MONTHS.filter(function(m){ return repeatLabel(m) === v; })[0];
+        if (n) p.repeats = n;
+        else if (v === "Each cycle") p.repeats = "cycle";
+        /* DELETED on the default (§50.6): a project unmarked and one never
+           asked must be byte-identical, or every save carries a phantom
+           change and a non-office save is refused for ever (§42). */
+        else delete p.repeats;
+      }));
+  } else if (repeatsOn(p)) {
+    repRow = row("l", "Repeats", esc(repVal));
   }
   return '<div class="pfront">' +
     '<div class="pfcol">' +

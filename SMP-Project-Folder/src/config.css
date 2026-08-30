@@ -306,7 +306,6 @@
   .prow[aria-expanded="true"] { background:var(--surface-2); }
   .pname { display:flex; flex-direction:column; gap:2px; min-width:0; }
   .pname b { font-size:14.5px; font-weight:600; }
-  .pname .psub { font-size:11.5px; color:var(--ink-3); font-weight:400; }
   .powner { font-size:12.5px; color:var(--ink-2); }
   .prow .num, .ptotal .num, .phead .num { text-align:right;
         font-family:var(--mono); font-variant-numeric:tabular-nums; }

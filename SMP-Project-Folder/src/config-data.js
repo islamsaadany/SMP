@@ -6171,24 +6171,69 @@ function clearAllNotes(){
 
    The capability's own key objectives clear every cycle regardless: they are
    per-cycle figures, the function's KPIs, same as a unit's measures. */
+/* ── HOW OFTEN A PROJECT REPEATS, IN MONTHS (§196) ─────────────────────
+   Islam: *"the repeat might not be each cycle — the repeat might be half
+   annual or every quarter, so it's a count of months for repetition."*
+
+   §115 stored ONE WORD, `"cycle"`, and moved every date on by the closed
+   cycle's own length. That is exactly right for a project whose rhythm IS
+   the cycle's, and it has nothing to say about one that runs quarterly in a
+   tenant that reports half-yearly — which is the case he brought.
+
+   `"cycle"` IS STILL READ AND STILL MEANS WHAT IT MEANT (§30.2). A project
+   marked before today behaves identically, and the option goes on being
+   offered while it is the stored value rather than being quietly rewritten
+   to a number that might not be the same one (§96.2). Nothing is migrated,
+   because nothing about the old value stopped being true. */
+var REPEAT_MONTHS = [3, 6, 12];
+function repeatLabel(v){
+  if (v === "cycle") return "Each cycle";
+  var n = Number(v);
+  return n > 0 ? "Every " + plural(n, "month") : "No";
+}
+function repeatsOn(p){ return !!p && (p.repeats === "cycle" || Number(p.repeats) > 0); }
+
+/* HOW FAR THE DATES MOVE when a cycle opens.
+
+   A repeating project always advances to its NEXT run — the question is only
+   how far. A rhythm SHORTER than the cycle advances by however many whole
+   runs the closed cycle covered: quarterly across a six-month cycle moves
+   six months, not three, or the project lands in the past the moment the
+   cycle opens. A rhythm LONGER advances by one full run, which is where its
+   next one genuinely falls — an annual project closing a half-yearly cycle
+   moves a year, to the same months next year.
+
+   THE LIMIT, SAID RATHER THAN DISCOVERED: opening a cycle is the only moment
+   the platform re-asks anything, so a quarterly project is re-asked when the
+   cycle opens and not twice inside it. Its DATES keep the quarterly rhythm;
+   the asking keeps the cycle's. Anything else needs the product to have a
+   notion of time passing between cycles, and it has none. */
+function repeatSpan(p, span){
+  if (!repeatsOn(p)) return 0;
+  if (p.repeats === "cycle") return span;
+  var n = Number(p.repeats);
+  return Math.max(1, Math.round(span / n)) * n;
+}
+
 function capNewCycle(c, span){
   (c.keyObjectives || []).forEach(function(m){ m.actual = ""; m.progress = null; m.note = ""; });
   (c.projects || []).forEach(function(p){
-    if (p.repeats !== "cycle") return;
+    var by = repeatSpan(p, span);
+    if (!by) return;
     (p.deliverables || []).forEach(function(d){
       d.status = null; d.pct = null; d.note = "";
-      if (d.due) d.due = shiftWhen(d.due, span);
+      if (d.due) d.due = shiftWhen(d.due, by);
     });
     (p.outcomes || []).forEach(function(o){
       o.actual = null; o.progress = null; o.note = "";
-      if (o.measureAt) o.measureAt = shiftWhen(o.measureAt, span);
+      if (o.measureAt) o.measureAt = shiftWhen(o.measureAt, by);
     });
     (p.milestones || []).forEach(function(m){
       m.status = null; m.pct = null; m.note = "";
-      if (m.finish) m.finish = shiftWhen(m.finish, span);
+      if (m.finish) m.finish = shiftWhen(m.finish, by);
     });
-    if (p.start) p.start = shiftWhen(p.start, span);
-    if (p.end)   p.end   = shiftWhen(p.end, span);
+    if (p.start) p.start = shiftWhen(p.start, by);
+    if (p.end)   p.end   = shiftWhen(p.end, by);
   });
 }
 function clearForNewCycle(){

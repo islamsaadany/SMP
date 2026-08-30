@@ -133,24 +133,59 @@ with sync_playwright() as pw:
         # IT ASKS PER ROW INSTEAD: every one of the five rows this section
         # then drives must carry a field, which is the thing that has to be
         # true and stays true whatever else the block grows.
+        # §179: Start and End are a MONTH PICKER now, not a box — so the
+        # query has to admit a button, and the two are asserted BY NAME below
+        # rather than merely counted. A query that only looked for fields
+        # would report "no field behind Start" for a control that is working
+        # exactly as designed.
         got = pg.evaluate("""()=>{const out={};
           [...document.querySelectorAll('.pfront .pfrow')].forEach(r=>{
-            const el=r.querySelector('input, textarea, select');
+            const el=r.querySelector('input, textarea, select, button.monthbtn');
             /* By CLASS MEMBERSHIP, never by the last word of className:
                searchsel.js appends `ss-native` to the select it enhances, so
                the last class is the enhancement rather than the field. */
             out[r.querySelector('em').textContent.trim()] = !el ? null
               : el.tagName.toLowerCase() +
-                (el.classList.contains('ownersel') ? '.ownersel' : '');});
+                (el.classList.contains('ownersel') ? '.ownersel' : '') +
+                (el.classList.contains('monthbtn') ? '.monthbtn' : '');});
           return out;}""")
         want = ["Owner", "Start", "End", "Brief", "Stakeholders"]
         ck("a field behind every one of the five",
            all(got.get(k) for k in want), got)
         ck("and the owner among them is a list from the register",
            got.get("Owner") == "select.ownersel", got)
+        # BOTH ENDS (§94.2, §113.8): the picker is there AND the box is gone.
+        # Asserting only "a control exists" would pass on the old build, where
+        # the control was a text input that let `30/4/2026` in — the value
+        # §179 exists to make unwritable.
+        ck("Start and End are the month picker, not a box",
+           got.get("Start") == "button.monthbtn" and got.get("End") == "button.monthbtn", got)
+        # ── Start and End go through the REAL picker (§70) ────────────────
+        # Pressed, not set: a control that renders and does nothing has
+        # shipped five times in this project, and setting a value from script
+        # would prove nothing about the button somebody actually presses.
+        for label, mi, field, want_val in (("Start", 1, "start", "Feb 26"),
+                                           ("End", 10, "end", "Nov 26")):
+            pg.evaluate("""(label)=>{
+              const row=[...document.querySelectorAll('.pfront .pfrow')]
+                .find(r=>r.querySelector('em').textContent.trim()===label);
+              row.querySelector('button.monthbtn').click();}""", label)
+            pg.wait_for_timeout(220)
+            opened = pg.eval_on_selector_all(".monthpop", "e=>e.length")
+            ck("%-13s opens a month panel" % label, opened == 1, opened)
+            pg.click('.monthpop [data-mpick="%d"]' % mi)
+            pg.wait_for_timeout(340)
+            stored = pg.evaluate("(f) => capsOfFunction('%s')[0].projects[0][f]" % FN, field)
+            ck("%-13s is written as a month the platform reads" % label,
+               stored == want_val, "picked %d, stored %r" % (mi, stored))
+            # THE VALUE MUST READ BACK, which is the whole point of §179: the
+            # old box collected `30/4/2026`, which monthsOf() cannot read at
+            # all, so the project's End was no date and nothing that depends
+            # on it could ever fire.
+            reads = pg.evaluate("(v)=>monthsOf(v)", stored)
+            ck("%-13s ...and monthsOf() reads it" % label, reads is not None, stored)
+
         for label, typed, field in (("Owner", "Someone Else", "owner"),
-                                    ("Start", "3 Feb 2026", "start"),
-                                    ("End", "31 Dec 2026", "end"),
                                     ("Brief", "A rewritten brief.", "brief"),
                                     ("Stakeholders", "Treasury, Risk", "stakeholders")):
             pg.evaluate("""([label, typed]) => {
@@ -179,7 +214,7 @@ with sync_playwright() as pw:
         after = pg.evaluate("""() => { const p = capsOfFunction('%s')[0].projects[0];
           return [p.owner, p.start, p.end]; }""" % FN)
         ck("and survives a repaint",
-           after == ["Someone Else", "3 Feb 2026", "31 Dec 2026"], after)
+           after == ["Someone Else", "Feb 26", "Nov 26"], after)
     ck("no console errors", not errs, errs[:1])
     pg.close()
     b.close()

@@ -6,8 +6,12 @@ version (rules A2 / A11, changed 2026-08-20) — those go only when asked for.
 
 **Where it runs:** Vercel, production tracks `main`. Static files plus two
 serverless functions (`/api/state`, `/api/auth`) against Neon Postgres.
-**Latest version:** v3.58 on `main` (§148, the welcome screen, spec 025 —
-merged 2026-08-28 on Islam's word).
+**Latest version:** v3.65 on `main` (§178, the Viewing-as line). §179 is on
+`claude/four-fixes-welcome-dates-types`, built and checked, **not merged** —
+`main` is Islam's call every time.
+
+*(This line read v3.58 while the section below it ran to v3.65: a documentation
+drift, flagged before it was corrected rather than quietly realigned.)*
 
 **Sign in as:** `SMO` / `1234` — a password change is forced at once (§43.1,
 reversing §19.4).
@@ -63,6 +67,32 @@ Nothing proceeds past this line without an answer.
   is a true signal — do not silence it.
 
 ## Built and verified
+
+### v3.65 — four from using it (§179)
+
+- **Viewing as reaches the welcome screen.** The screen covers the window, so
+  the control underneath could not be reached at all. It sits above the
+  greeting — Islam's pick of two placements drawn in the running product — and
+  switching redraws the screen for that person. Only a Super-user session gets
+  it, asked through the same function the chrome asks.
+- **Greeted on every sign-in.** "Seen" was remembered for the browser session
+  and signing out only reloads the page in the same tab, so the memory outlived
+  the session. It is cleared when a credential is accepted — never on a plain
+  refresh, never on a resume.
+- **A project's Start and End are picked, as `Jul 26`** — §177's own control,
+  reused rather than a second way to say a date. **Not only a look:**
+  `30/4/2026` was unreadable to the platform, so that project's End was no date
+  and the overrun warning could never fire on it; and `Date.parse("Jul 26")` is
+  26 July **2001**, so shipping the picker without repairing the reader would
+  have woken a dead warning as a false one on every milestone.
+- **Deliverable and Outcome are plain text.** One builder, three panes; the
+  column keeps its measure so nothing reflows, and the rows come in 17px
+  shorter.
+- Dates already written are untouched, a quarter can no longer be a Start or
+  End, and nothing moves on the demo (2 overruns before, 2 after).
+- `checks/project-dates.py` is new (**5 red** on the previous build);
+  `checks/welcome.py` gains §8 and §9 (**2 red**); `checks/project-header.py`
+  presses the picker instead of typing. `qa.py` green.
 
 ### v3.65 — who owns every place, named once (§175)
 

@@ -575,11 +575,19 @@
                   color:var(--gold-deep); font-weight:700; }
   tr.notdue td { opacity:.62; }
 
-  /* ── ONE ROW SHAPE (§104) ────────────────────────────────────────
-     The Type pill takes a fixed box: "Deliverable" and "Outcome" are seven
+  /* ── ONE ROW SHAPE (§104, unchipped in §179) ─────────────────────
+     The Type column takes a fixed box: "Deliverable" and "Outcome" are seven
      characters apart, and left to themselves the column reads as two
-     different marks rather than one question answered two ways. */
-  td .pill.tk { min-width:92px; justify-content:center; }
+     different marks rather than one question answered two ways -- and a
+     column that resizes with its rows moves every column beside it.
+
+     It was a `.pill.tk` until §179 and is plain text now (Islam: "don't make
+     them chips let's make them normal text"). The MEASURE is what was doing
+     the work and it stays; the border was boxing the only thing in the cell.
+     `--ink-2` because a classification is not the row's subject -- the name
+     beside it is -- and the chip it replaces read in that same ink. */
+  td .dxtype { display:inline-block; min-width:92px; text-align:center;
+               color:var(--ink-2); }
   /* A value the plan writes rather than asks for. Quiet, because a field
      nobody can change should not look like a field. */
   .fixedval { color:var(--ink-3); }

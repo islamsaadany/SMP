@@ -3595,13 +3595,32 @@ function projMilestones(p){
 /* A milestone whose finish date falls after its project's end date is saved
    exactly as entered. The platform never refuses it \u2014 it says so, and offers
    the two things that might be true. */
+/* ── READ THE DATES THE WAY THE PLATFORM READS EVERY OTHER DATE (§179) ──
+   This asked `Date.parse` directly, which is the one reader in the product
+   that does NOT understand the shapes the product actually stores -- and with
+   §179 putting a month picker on Start and End it became actively wrong
+   rather than merely deaf: `Date.parse("Jul 26")` is 26 July **2001**, so
+   every milestone would have overrun every project, on every pane, from the
+   day the picker shipped. A dead warning woken as a false one.
+
+   `monthsOf()` is the reader the rest of the platform uses, and it already
+   knows `Jul 26`, `Q4 2026`, `H1 26`, `31 May 2026` and the rest. The END
+   takes `last:true`, so a project ending "Q4 2026" ends in DECEMBER rather
+   than October -- the same argument `monthsOf` documents for a cycle named
+   Q2 covering April to June.
+
+   THE COMPARISON IS MONTHLY, which is the accepted consequence of §177's
+   month-only dates: a milestone due in the month the project ends is not an
+   overrun. The `timeline` gate is deliberately LEFT AS IT WAS -- §109 removed
+   the pill that set it and recorded widening this guard as its own decision,
+   and this section is about the reader, not about which projects are asked. */
 function projOverruns(p){
   if (p.timeline !== "date" || !p.end) return [];
-  var endT = Date.parse(p.end);
-  if (isNaN(endT)) return [];
+  var endM = monthsOf(p.end, true);
+  if (endM == null) return [];
   return (p.milestones || []).filter(function(m){
-    var t = Date.parse(m.finish);
-    return !isNaN(t) && t > endT;
+    var t = monthsOf(m.finish);
+    return t != null && t > endM;
   });
 }
 function capPerf(c){

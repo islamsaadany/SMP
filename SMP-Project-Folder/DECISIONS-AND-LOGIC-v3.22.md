@@ -21638,3 +21638,179 @@ missing one (§94.8).
 **PROVED ABLE TO FAIL: 14 failures against `3aabe85`** — and the failure
 detail is the report itself: the unit filler's walk lights a field and never
 moves, while the function side and the office light nothing at all.
+
+## §179 · Four from using it: the welcome screen, the dates, the type column
+
+Four things Islam asked for in one message, settled from a mockup made of the
+real product (`design-mockups/four-fixes/`) before a source was touched.
+
+### 1 · Viewing as, on the welcome screen
+
+*"The viewing as should be available from the welcome screen."*
+
+It could not be reached at all: §148's screen is `position:fixed; inset:0`, so
+the control in the bar underneath is behind it — the same overlay §167.2 caught
+swallowing clicks meant for the page, this time swallowing a whole control.
+
+**ABOVE THE HERO, NOT INSIDE IT.** Two placements were drawn in the running
+product and Islam picked the bar above the greeting. The other put it under the
+role chips, which is where the recommendation went — the chips say who you are
+and where your roles are held, and the control changes exactly that — and the
+recommendation is recorded as having lost, not re-argued (A9).
+
+**WHO GETS IT IS ASKED, NEVER RE-TESTED.** `SYNC.isSMOSession()` is exported
+and called; the note beside it in `sync.js` is explicit that this question must
+have one answer, because a switcher shown to somebody who is not the SMO serves
+them another person's screen wearing their own name (§45.3). It **fails
+closed**: no SYNC, no answer, no control.
+
+**THE OPTIONS ARE THE CHROME'S OWN, CLONED.** `fillViewers()` already settles
+what a person is called here and where they sit (§142, §130.7, §93.12).
+Building a second list would be a second vocabulary for one question (§53.5) —
+so the `<option>` elements are cloned. **The SELECT is not**: a clone would put
+`id="asWho"` in the document twice, and `getElementById` then answers with
+whichever came first, which is a control silently driving the wrong thing. It
+is its own element that **drives the chrome's** — setting the value and firing
+`change` runs the shell's single handler (`leaveModes`, `VIEWER`, repaint), so
+a change made to that handler tomorrow reaches this control for free.
+
+**A SWITCH IS NOT A DISMISSAL.** Redrawing never calls `markDone()`, or the
+screen could not come back for the person you were about to look at.
+
+**THE REPLY ROW IS LEFT OUT WHILE SIMULATING**, and that is a decision rather
+than an omission: there is one conversation per person and it belongs to the
+SESSION, not to the view (§97), so `CHAT.unread()` still answers about *you* —
+drawing it would put your unread messages on somebody else's screen under their
+name. The office's rows below are tenant-wide and simulate honestly. A row that
+lies is worse than a row that is missing.
+
+**AND THE DRAWING FOUND ONE THING THE ASK DID NOT.** §178's role line, which
+follows the control everywhere else, would repeat the chips six pixels above
+it. It is dropped on this screen and only this screen.
+
+### 2 · Greeted on every sign-in
+
+*"When I sign out and sign in I don't get the welcome screen."*
+
+**Nothing was broken; the memory outlived the thing it belonged to.** §148
+remembers "seen" in `sessionStorage`, and **signing out only reloads the page
+in the same tab** — so the flag survives, and the next sign-in is greeted by
+nothing. What the browser calls a session is not what a person does.
+
+The rule is **once per sign-in**: greeted whenever a credential was actually
+accepted, never on a plain refresh, and **never on a resume** — opening the
+gate while signed in bounces straight through, and being re-greeted for walking
+past your own front door is the fault this replaces, not a fix for it.
+
+**ASKED IS SET IN `show()` AND NOWHERE ELSE**, because that is the only
+function that can put a credential card on screen: a sign-in path added later
+is invisible until it calls `show()`, so it cannot forget to be counted
+(§104.7 — a list of exceptions is a list somebody forgets to add to). The key
+is spelt once in the gate and once in `welcome.js`, which is one copy too many
+and is still the smaller evil: they are separate documents sharing no code, and
+a wrong key **fails visibly** — greeted every time — rather than silently.
+
+**Not changed, and worth knowing:** a session that simply EXPIRES and is signed
+into again is greeted (it goes through the login card); `smp.where` (§173) is
+untouched, so a fresh sign-in still lands where the last visit left off rather
+than where §94.6 would choose. That is its own decision and was not asked.
+
+### 3 · A project's Start and End are picked, as `Jul 26`
+
+Asked first as *"make the dates here dd-mmm YY like 25-Jul 26"*, then narrowed
+by Islam himself to **month and year, no days** — which is the shape §177
+settled for a milestone's due date, in his own words at the time: *"make it
+only Month Year like Jul 26 not days and remove the entry and just keep it a
+calendar selection."*
+
+So this is **that control, not a second way to say a date** (§53.5). Every
+argument §177 wrote down holds here: the comparisons the platform makes about a
+project's span are monthly, a day is precision it cannot use, and with no box
+there is nothing to mistype.
+
+**IT WAS NOT ONLY A LOOK, AND THAT IS THE FINDING.** The free box had collected
+`30/4/2026` on a live tenant. `monthsOf()` cannot read it at all — no month
+name, not a quarter, and `Date.parse` gives NaN — so that project's End was, to
+the platform, **no date**, and `projOverruns()` could never fire on it.
+`1/1/2026` beside it read as January **by luck**: the browser takes slashes
+month-first, so `3/4/2026` would have read as March.
+
+**AND THE CHANGE WOULD HAVE WOKEN A DEAD WARNING AS A WRONG ONE.**
+`projOverruns()` used `Date.parse` directly, and **`Date.parse("Jul 26")` is
+26 July 2001** — so the moment the picker shipped, every milestone would have
+overrun every project on every pane. It reads through `monthsOf()` now, with
+the END taking the span's **last** month (a project ending "Q4 2026" ends in
+December, not October — the rule `monthsOf` already documents for a cycle named
+Q2 covering April to June). Measured on the previous build, `Jan 27` reads as
+January **2001** and drops out of the comparison entirely.
+
+**THE `timeline` GATE IS DELIBERATELY LEFT ALONE.** §109 removed the pill that
+set it and recorded widening this guard as its own decision; this section is
+about the reader.
+
+**Three costs, stated rather than discovered.** Dates already written are **not
+touched** — a project still showing `30/4/2026` shows it until somebody opens
+the pen and picks, because guessing whether that means April is inventing a
+date (§96.2). **A quarter can no longer be set** as a Start or an End, the same
+trade §177 took. And on the demo nothing moves at all: its dates are
+`30 Apr 2026`, which both readers understand — **2 overruns before, 2 after,
+the same project** — so this is a fix for what a client can type, not for what
+the worked example contains.
+
+### 4 · Deliverable and Outcome as plain text
+
+*"For the types deliverable and Outcome don't make them chips let's make them
+normal text."*
+
+A chip is a mark on a value that could be one of several, or one the eye has to
+pick out of a sentence. This column holds one word per row out of two, under a
+heading that already asks the question — so the border was boxing the only
+thing in the cell. §93's ruling about the register's Unit chip, on a different
+table: *an ordinary value now.*
+
+**THE MEASURE SURVIVES THE BOX, and it is the half that was load-bearing.**
+"Deliverable" and "Outcome" are seven characters apart, so left to themselves
+the column reads as two different marks rather than one question answered two
+ways — and a column that resizes with its rows drags every column beside it.
+`.dxtype` carries that width and nothing else, which is why it is its own class
+rather than a stripped `.pill`: *this column has a fixed measure* and *paint a
+box round it* are two different facts, and merging them is what made removing
+one remove both.
+
+One builder feeds all three project panes, so Plan, Performance and Reporting
+change together — and the rows come in **17px shorter** across six, because the
+chip's padding was setting the row height.
+
+**A drift corrected in passing:** this file has said since §99 that the Type
+column was deleted with the split. §99.7 removed the split and the column came
+back; the record said otherwise for eighty sections.
+
+### Proof
+
+`checks/project-dates.py` is new and asserts the two halves nothing else
+covered — the overrun reader as an **exact set** (a build with `Date.parse`
+passes any "something overran" test and fails this) and the type column on
+**all three panes**, both ends: the chip gone, the words still there, the
+measure kept, and every cell rendering at one width. **5 red** against the
+shipped pre-§179 file.
+
+`checks/project-header.py` presses the new picker instead of typing, and
+asserts that what it writes is a shape `monthsOf()` can read — plus **both
+ends**, that Start and End are the picker and *not* a box, since asserting only
+"a control exists" passes on the build that let `30/4/2026` in.
+
+`checks/welcome.py` gains §8 and §9. §9 drives the **real gate**, because
+"greeted on every sign-in" is a property of `index.html` and the platform
+together and neither half shows it alone — `SMP_WELCOME_GATE` points it at
+another gate so the failure can be proved. **2 red** against the previous
+build and gate.
+
+**Two of that check's own first runs were the harness, not the product.** An
+`add_init_script` runs on *every* document a context loads, so the flag it set
+to model "already greeted" was re-written when the platform loaded and quietly
+undid the thing under test — the check would have failed against a correct
+build. And both new sections **crashed instead of reporting** on the old build,
+which is the one run where the count is the whole point; they degrade now.
+
+`qa.py` green, contrast sweep unchanged at its 13 pre-existing `.missing`
+failures, and the build parses.

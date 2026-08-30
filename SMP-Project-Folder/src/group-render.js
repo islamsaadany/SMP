@@ -3614,10 +3614,24 @@ var DX_PCT = "Performance";
 var MS_PCT = "Progress";
 function dxIsDeliv(row){ return row.kind === "d"; }
 function dxType(row){
-  /* One box for both words: "Deliverable" and "Outcome" are seven characters
-     apart, so left to themselves the column reads as two different marks
-     rather than one question answered two ways. The width is in the CSS. */
-  return '<span class="pill kind tk">' + (dxIsDeliv(row) ? "Deliverable" : "Outcome") + '</span>';
+  /* PLAIN TEXT, NEVER A CHIP (§179). Islam: "for the types deliverable and
+     Outcome don't make them chips let's make them normal text."
+
+     A chip is a mark on a value that could be one of several, or one the eye
+     has to pick out of a sentence. This column holds one word per row out of
+     two, under a heading that already asks the question -- so the border was
+     boxing the only thing in the cell. §93's ruling about the register's Unit
+     chip, on a different table: "an ordinary value now."
+
+     THE WIDTH SURVIVES THE BOX, and it is the half that was load-bearing:
+     "Deliverable" and "Outcome" are seven characters apart, so left to
+     themselves the column reads as two different marks rather than one
+     question answered two ways -- and a column that resizes with its rows
+     drags every column beside it. `.dxtype` carries that width and nothing
+     else, which is why it is its own class rather than a stripped `.pill`:
+     "this column has a fixed measure" and "paint a box round it" are two
+     different facts, and merging them is what made removing one remove both. */
+  return '<span class="dxtype">' + (dxIsDeliv(row) ? "Deliverable" : "Outcome") + '</span>';
 }
 /* A deliverable's direction and target are written FOR it rather than asked
    OF it, and shown quietly, because a value nobody can change should not look
@@ -4028,8 +4042,36 @@ function projFrontMatter(p, ed){
           return selectOr("plan", p.owner == null ? "" : p.owner,
             ownerChoices(p.owner, true), "ownersel " + (pendCls || ""), set);
         } })) +
-      row("l", "Start", gapCell("plan", "k_proj", p, "start", { ctx: { project: p } })) +
-      row("l", "End",   gapCell("plan", "k_proj", p, "end",   { ctx: { project: p } })) +
+      /* §179: A PROJECT'S SPAN IS PICKED TOO, AND IN THE SAME WORDS. Islam
+         asked for `Jul 26` here after settling exactly that shape for a
+         milestone's due date in §177 -- so this is that control, not a second
+         way to say a date (§53.5). Every argument §177 wrote down holds: the
+         comparisons the platform makes about a project's span are monthly, a
+         day is precision it cannot use, and `Jan 26` reads one way in every
+         country where `1/1/2026` reads two.
+
+         AND IT WAS NOT ONLY A LOOK. A free box had collected `30/4/2026` on a
+         live tenant, which `monthsOf()` cannot read at all -- so that project's
+         End was, to the platform, no date, and `projOverruns()` below could
+         never fire on it. `1/1/2026` beside it read as January by luck, the
+         browser taking slashes month-first; `3/4/2026` would have read as
+         March. With no box there is nothing to mistype (§177).
+
+         DATES ALREADY WRITTEN ARE NOT TOUCHED. `monthPickOr` shows what is
+         stored and rewrites nothing until somebody picks -- guessing whether
+         `30/4/2026` means April is inventing a date (§96.2). The cost, stated
+         rather than discovered: a quarter can no longer be set as a Start or
+         an End, the same trade §177 took for a milestone. */
+      row("l", "Start", gapCell("plan", "k_proj", p, "start", {
+        ctx: { project: p },
+        control: function(set, pendCls){
+          return monthPickOr("plan", p.start, pendCls || "", set);
+        } })) +
+      row("l", "End",   gapCell("plan", "k_proj", p, "end", {
+        ctx: { project: p },
+        control: function(set, pendCls){
+          return monthPickOr("plan", p.end, pendCls || "", set);
+        } })) +
       repRow +
     '</div>' +
     '<div class="pfcol pfright">' +

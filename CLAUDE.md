@@ -2893,6 +2893,11 @@ python3 checks/strategy-split.py # the Strategy | Reporting halves: the cell pre
                                 # open AND closed, both ends each time — and since §145.9
                                 # the .pptx download asserted HIDDEN on every surface while
                                 # the dormant builder is still proved by a direct call
+python3 checks/project-dates.py # a project's Start and End are PICKED as `Jul 26`, and the
+                                # overrun warning reads them the platform's way — an EXACT set,
+                                # because Date.parse("Jul 26") is 26 July 2001 and any
+                                # "something overran" test passes on the old reader (§179);
+                                # plus the type column unchipped on all three panes, both ends
 python3 checks/gap-walk.py      # the band's chips and Next gap actually go somewhere:
                                 # a unit AND a function, as the filler AND the office,
                                 # every place the band names reached (§177.2)

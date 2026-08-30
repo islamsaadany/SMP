@@ -609,6 +609,14 @@ var SYNC = (function () {
        caller in here uses, so a menu item does not have to be handed one. */
     setMode: function (next) { setMode(next, repaint || function(){}); },
     person: function () { return person; },
+    /* WHO THE SMO IS, ASKED AND NEVER COPIED (§179). The welcome screen draws
+       the viewer switcher too, and the note above isSMOSession() is explicit
+       that this question must have ONE answer: a control that is dangerous
+       when wrong must fail closed, and two files each testing `role ===
+       "super"` is exactly how one of them comes to test something else.
+       Exported rather than re-asked — §42's rule about one copy of a rule,
+       on the chrome. */
+    isSMOSession: function () { return isSMOSession(); },
     /* The three password operations, all SMO-only and all checked again on
        the server — this object is the convenience, never the enforcement. */
     setPassword: function (key, pw, done) {

@@ -1039,6 +1039,48 @@ function setKnownName(p, v){
    whose first two names match would otherwise read as one row for anybody who
    has hidden Full Name. A TYPED value always wins and is never lengthened; the
    SMO wrote exactly what they meant. */
+/* ── THE NAME A PERSON IS CALLED, ANYWHERE (§181) ─────────────────────
+   Islam: "we need to use the name only across the platform for better
+   usability." The register has answered this since §93.8 — a typed short
+   name, else the leading words of the full one, lengthened just enough where
+   two people would otherwise read alike (§81.1) — and the surfaces that
+   NAME somebody in passing were each answering it their own way: the figure
+   sets' owner list printed the full legal name, and the chat printed whatever
+   the server had stored.
+
+   `knownName()` needs the person and the disambiguation map; this is the
+   version for a caller that has only a KEY and, sometimes, a name the server
+   sent. It resolves through the register where it can, and falls back to the
+   shared name rule where it cannot — a person the register no longer holds
+   still reads as a name rather than as a key.
+
+   NOT `shortName()`, which is the SENTENCE form (§93.6): the wizard, the
+   picker's prose and the audience list read as prose, and this is the LABEL
+   the register itself shows. */
+function nameOf(key, fallback){
+  var p = null;
+  try { p = typeof personBy === "function" ? personBy(key) : null; } catch(e){}
+  if (p) return knownName(p, displayNames());
+  var raw = String(fallback == null ? "" : fallback).trim();
+  if (!raw) return "";
+  try { return SMPRules.knownGuess(raw) || raw; } catch(e){ return raw; }
+}
+
+/* And the FIRST name alone, for the one place that addresses somebody rather
+   than naming them: the chat's reply box. Through `SMPRules.firstName()`, the
+   same reader the email greeting uses (§135) — a compound first name is kept
+   whole, so this register's "Abd El Moniem" is not greeted as "Abd", and a
+   typed short name wins over the guess. */
+function firstNameOf(key, fallback){
+  var p = null;
+  try { p = typeof personBy === "function" ? personBy(key) : null; } catch(e){}
+  try {
+    if (p) return SMPRules.firstName(p) || "";
+    var raw = String(fallback == null ? "" : fallback).trim();
+    return raw ? (SMPRules.firstName({ name: raw }) || raw) : "";
+  } catch(e){ return String(fallback || "").split(/\s+/)[0] || ""; }
+}
+
 function displayNames(){
   var seen = {}, out = {};
   PEOPLE.forEach(function(p){

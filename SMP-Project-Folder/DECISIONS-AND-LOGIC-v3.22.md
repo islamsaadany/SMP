@@ -21924,3 +21924,52 @@ asked to dismiss something nobody said.
 
 `qa.py` green; `checks/setup-overview.py` green, which is the other surface
 this count feeds.
+
+## §181 · The name, not the full name — across the platform
+
+Islam, of the figure sets' owner list: *"I need the name only not the full
+name. and generally we need to use the name only across the platform for
+better usability."* And, of the chat: *"the names in the chat needs to be only
+the name not full name."*
+
+**THE REGISTER SETTLED THIS IN §93.8** — *Name* and *Full Name* became two
+columns, `knownName()` reads the first (a typed short name, else the leading
+words of the full one, lengthened just enough where two people would otherwise
+read alike, §81.1), and the viewer switcher has read it since §142. Two
+surfaces were still answering the same question their own way (§53.5): the
+figure sets' owner list printed the full legal name, and the chat printed
+whatever the server had stored.
+
+`nameOf(key, fallback)` is the version for a caller that has a KEY rather than
+a register row — it resolves through the register where it can and falls back
+to the **shared** name rule where it cannot, so somebody the register no longer
+holds still reads as a name rather than as a key. `firstNameOf()` is beside it
+for the one place that ADDRESSES rather than names — the chat's reply box.
+
+**AND THE FIRST NAME WAS BEING TAKEN WITH `split(" ")[0]`**, twice in the chat.
+That is the fault §135 wrote down for the email greeting and fixed there only:
+this register holds **Abd El Moniem**, which is one first name, and the reply
+box was calling him *Abd*. Through `SMPRules.firstName()` now, the same reader
+the greeting uses.
+
+**THE TITLE STAYS ON THE OWNER LIST**, and that is deliberate: it is what tells
+two people apart among thirty-three and it is what you pick by — the same shape
+the viewer switcher uses, where the PLACE does that job. The full name moves to
+the option's hover. The stored value is unchanged: still the person's key, so
+nothing about who owns a set moves.
+
+**WHAT WAS DELIBERATELY LEFT ALONE.** The register's own *Full Name* field and
+column, the merge wizard, and the row hovers all keep the full name — there the
+full name IS the subject, not a way of referring to somebody in passing. A
+sweep that shortened those would have removed the only place the long name can
+be read.
+
+### Proof
+
+The demo register cannot show this: all 33 names are two or three words, so
+`knownName()` returns them unchanged — which is why the shortening is asserted
+through the FALLBACK, on the long names a real tenant carries.
+`nameOf(_, "Mohamed Hassanin Ehsan Hassanin")` reads **Mohamed Hassanin**, and
+`firstNameOf(_, "Abd El Moniem Mahmoud")` reads **Abd El Moniem** where the old
+split read *Abd*. `qa.py`, `checks/office-chat.py` and
+`checks/people-dialog.py` all green.

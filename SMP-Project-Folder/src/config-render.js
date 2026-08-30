@@ -4045,10 +4045,23 @@ function renderSetsSetup(){
       }).join("") + '</select>';
   };
   var ownerOptions = function(sel, attr){
+    /* §181: THE NAME THE REGISTER SHOWS, not the full legal one. This printed
+       "Mohamed Hassanin Ehsan Hassanin — Senior Manager (Sales)" and every
+       option in the list was longer than the control. The register settled
+       what somebody is called in §93.8 and the viewer switcher has read it
+       since §142; this was one of the two surfaces still answering it its own
+       way (§53.5).
+
+       THE TITLE STAYS. It is what tells two people apart in a list of
+       thirty-three, and it is the thing you pick BY — the same shape the
+       switcher uses, where the place does that job. The VALUE is still the
+       key, so nothing about what is stored changes. */
+    var dn = displayNames();
     return '<select class="fld" ' + attr + '><option value="">\u2014</option>' +
       PEOPLE.filter(personActive).map(function(p){
-        return '<option value="' + esc(p.key) + '"' + (p.key === sel ? " selected" : "") + '>' +
-          esc(p.name) + (p.title ? " \u2014 " + esc(p.title) : "") + '</option>';
+        return '<option value="' + esc(p.key) + '"' + (p.key === sel ? " selected" : "") +
+          ' title="' + esc(p.name + (p.title ? " \u2014 " + p.title : "")) + '">' +
+          esc(knownName(p, dn)) + (p.title ? " \u2014 " + esc(p.title) : "") + '</option>';
       }).join("") + '</select>';
   };
   var pickOptions = function(sel, attr){

@@ -11683,6 +11683,48 @@ function setKnownName(p, v){
    whose first two names match would otherwise read as one row for anybody who
    has hidden Full Name. A TYPED value always wins and is never lengthened; the
    SMO wrote exactly what they meant. */
+/* ── THE NAME A PERSON IS CALLED, ANYWHERE (§181) ─────────────────────
+   Islam: "we need to use the name only across the platform for better
+   usability." The register has answered this since §93.8 — a typed short
+   name, else the leading words of the full one, lengthened just enough where
+   two people would otherwise read alike (§81.1) — and the surfaces that
+   NAME somebody in passing were each answering it their own way: the figure
+   sets' owner list printed the full legal name, and the chat printed whatever
+   the server had stored.
+
+   `knownName()` needs the person and the disambiguation map; this is the
+   version for a caller that has only a KEY and, sometimes, a name the server
+   sent. It resolves through the register where it can, and falls back to the
+   shared name rule where it cannot — a person the register no longer holds
+   still reads as a name rather than as a key.
+
+   NOT `shortName()`, which is the SENTENCE form (§93.6): the wizard, the
+   picker's prose and the audience list read as prose, and this is the LABEL
+   the register itself shows. */
+function nameOf(key, fallback){
+  var p = null;
+  try { p = typeof personBy === "function" ? personBy(key) : null; } catch(e){}
+  if (p) return knownName(p, displayNames());
+  var raw = String(fallback == null ? "" : fallback).trim();
+  if (!raw) return "";
+  try { return SMPRules.knownGuess(raw) || raw; } catch(e){ return raw; }
+}
+
+/* And the FIRST name alone, for the one place that addresses somebody rather
+   than naming them: the chat's reply box. Through `SMPRules.firstName()`, the
+   same reader the email greeting uses (§135) — a compound first name is kept
+   whole, so this register's "Abd El Moniem" is not greeted as "Abd", and a
+   typed short name wins over the guess. */
+function firstNameOf(key, fallback){
+  var p = null;
+  try { p = typeof personBy === "function" ? personBy(key) : null; } catch(e){}
+  try {
+    if (p) return SMPRules.firstName(p) || "";
+    var raw = String(fallback == null ? "" : fallback).trim();
+    return raw ? (SMPRules.firstName({ name: raw }) || raw) : "";
+  } catch(e){ return String(fallback || "").split(/\s+/)[0] || ""; }
+}
+
 function displayNames(){
   var seen = {}, out = {};
   PEOPLE.forEach(function(p){
@@ -30953,10 +30995,23 @@ function renderSetsSetup(){
       }).join("") + '</select>';
   };
   var ownerOptions = function(sel, attr){
+    /* §181: THE NAME THE REGISTER SHOWS, not the full legal one. This printed
+       "Mohamed Hassanin Ehsan Hassanin — Senior Manager (Sales)" and every
+       option in the list was longer than the control. The register settled
+       what somebody is called in §93.8 and the viewer switcher has read it
+       since §142; this was one of the two surfaces still answering it its own
+       way (§53.5).
+
+       THE TITLE STAYS. It is what tells two people apart in a list of
+       thirty-three, and it is the thing you pick BY — the same shape the
+       switcher uses, where the place does that job. The VALUE is still the
+       key, so nothing about what is stored changes. */
+    var dn = displayNames();
     return '<select class="fld" ' + attr + '><option value="">\u2014</option>' +
       PEOPLE.filter(personActive).map(function(p){
-        return '<option value="' + esc(p.key) + '"' + (p.key === sel ? " selected" : "") + '>' +
-          esc(p.name) + (p.title ? " \u2014 " + esc(p.title) : "") + '</option>';
+        return '<option value="' + esc(p.key) + '"' + (p.key === sel ? " selected" : "") +
+          ' title="' + esc(p.name + (p.title ? " \u2014 " + p.title : "")) + '">' +
+          esc(knownName(p, dn)) + (p.title ? " \u2014 " + esc(p.title) : "") + '</option>';
       }).join("") + '</select>';
   };
   var pickOptions = function(sel, attr){
@@ -36457,9 +36512,15 @@ var CHAT = (function(){
        Office" is a ruling as far as the reader is concerned. It is from the
        office (that is whose side of the conversation it is on) and it says
        plainly that a machine wrote it. */
+    /* §181: THE NAME, NOT THE FULL NAME. A conversation is the one place a
+       person is addressed rather than listed, and it was printing "Islam Adel
+       Nabil Mohamed" on every line — twice over on the office's side, where
+       the sender's name sits beside "Strategy Office". `nameOf()` is the
+       register's own answer, with the shared name rule behind it for somebody
+       the register no longer holds. */
     var who = m.bot ? "Assistant · answered from the knowledge base"
-            : m.from_office ? ((m.by_name || "The office") + " · Strategy Office")
-                            : (mineIsOffice ? (m.by_name || "") : "You");
+            : m.from_office ? ((nameOf(m.by_key, m.by_name) || "The office") + " · Strategy Office")
+                            : (mineIsOffice ? nameOf(m.by_key, m.by_name) : "You");
     var pic = m.has_shot
       ? '<button class="chshot" type="button" data-chshot="' + m.id + '">' +
         '<span class="chthumb"></span> Screenshot — open</button>'
@@ -37260,7 +37321,9 @@ var CHAT = (function(){
      server makes the same call again when the reply lands (§97.5) — this line
      is the office being shown the rule, never the rule itself. */
   function presenceHtml(d){
-    var name = String(d.name || "They").split(/\s+/)[0];
+    /* FIRST NAME THROUGH THE SHARED RULE (§135, §181), never split(" ")[0] —
+       "Abd El Moniem" is one first name, and this register holds it. */
+    var name = firstNameOf(d.person, d.name) || "They";
     /* THE FIFTH STATE, AND IT COMES FIRST. With the chat off nobody can open
        an answer, so what somebody's presence would have decided does not
        arise — saying "Yara is away" here would be true and beside the point. */
@@ -37304,7 +37367,7 @@ var CHAT = (function(){
 
     pane.innerHTML =
       '<div class="chthead">' +
-        "<div><div class=\"chnm\">" + esc2(d.name || d.person) + "</div>" +
+        "<div><div class=\"chnm\">" + esc2(nameOf(d.person, d.name) || d.person) + "</div>" +
         '<div class="chmeta">' + esc2([placeOf(d), d.address].filter(Boolean).join(" · ")) + "</div></div>" +
         '<div class="chacts">' +
           '<button class="chmini" type="button" data-chdone="' + esc2(d.person) + '">' +

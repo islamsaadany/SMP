@@ -131,6 +131,16 @@ with sync_playwright() as pw:
     ck("...first on the row (§193.2)", d.get("first"), d)
     ck("...vertically centred — the reported damage",
        abs(d["mid"] - d["rowMid"]) <= 1, (d["mid"], d["rowMid"]))
+    # §200.2: AND SQUARE AT EVERY WIDTH. The row is flex, and with nothing
+    # saying this box may not shrink it was a 24×34 gold RECTANGLE at 1000px —
+    # "still damaged", the day after the centring fix. Asserted narrow, where
+    # the squeeze happened, never only wide.
+    pg.set_viewport_size({"width": 1000, "height": 950}); pg.wait_for_timeout(400)
+    sq = pg.evaluate(READ)
+    ck("...and still a 34px SQUARE at 1000px — the row may not squeeze it",
+       sq["w"] == sq["h"] == 34, (sq["w"], sq["h"]))
+    pg.set_viewport_size({"width": 1500, "height": 950}); pg.wait_for_timeout(400)
+    d = pg.evaluate(READ)
     ck("...and a click at its centre reaches it", d.get("reaches"), d)
 
     print("\n── 2 · GOLD, because this office has something waiting")

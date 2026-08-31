@@ -248,7 +248,13 @@
    035, because a stored map beats a changed default (§30.2).
    Name checked against origin/main serving "smp-shell-v3.94-collaborators-are-
    fillable"; confirm again immediately before the push (§94.16). */
-const SHELL = "smp-shell-v3.95-the-viewer-is-never-somebody-else";
+/* v3.96-home-is-never-blocked — §209: a refusal while simulating no longer
+   traps the person there; switching back to YOURSELF always goes through and
+   the pending work saves as you, which is the recovery §185 designed. A third
+   person stays blocked while a save cannot land. Name checked against
+   origin/main serving "smp-shell-v3.95-the-viewer-is-never-somebody-else";
+   confirm again immediately before the push (§94.16). */
+const SHELL = "smp-shell-v3.96-home-is-never-blocked";
 const ASSETS = [
   "/",
   "/index.html",

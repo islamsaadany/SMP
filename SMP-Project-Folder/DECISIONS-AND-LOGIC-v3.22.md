@@ -24135,3 +24135,24 @@ opposite of the instruction. Driven as a real no-role person with the floor
 closed: no destinations, no tabs, no gear, no page errors, and the page's own
 sentence — *"No pages granted. The roles this person holds reach nothing. That
 is the table working as configured, not an error."*
+
+## §209 — Home is never blocked (v3.96)
+
+From Islam's screenshot within the hour: viewing as Mokhtar with a
+consumerfinanc refusal standing and *Discard everything and reload* the only
+control. Checking the §204 fix against that picture found a trap OF THE FIX'S
+OWN MAKING: a refusal while simulating blocked every switch — including the
+one the banner itself advises, *"switch back to your own view to make it
+yourself"* — because the switch re-runs the save, the save is judged as the
+simulated person, and it is refused again. The person is stuck with one
+destructive button: §184's fault, rebuilt by a fix.
+
+**THE RE-LABELLING DANGER DOES NOT EXIST ON THE WAY HOME.** §204 holds a
+switch so pending work cannot be handed to an identity that did not make it.
+Switching to the SESSION person hands the work to YOU — which is exactly the
+recovery §185 designed, and only the SMO session draws the switcher at all.
+So: home always goes through; a THIRD person is still blocked while a save
+cannot land. Proved both ways in `checks/viewer-switch.py` §2b — and two of
+that section's own first failures were the CHECK, riding section 2's
+remembered refusal into a switch it then blamed on this rule (§94.2: put the
+state back first).

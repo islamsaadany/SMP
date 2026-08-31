@@ -739,10 +739,23 @@ console.log("\n9 · employee and contributor");
         R.personRoleKeys(R.worldOf(base), personOf(base, key)).join());
   check("...and it is not offered as a role either",
         R.ROLE_KEYS.indexOf(R.NO_ROLE) === -1, R.ROLE_KEYS.join());
-  check("...but they still see their own unit",
-        R.grantIn(R.worldOf(base), personOf(base, key), "unit", UNIT) === "view",
+  /* §207 REVERSES WHAT THIS USED TO ASSERT. It read "...but they still see
+     their own unit", on the floor's shipped `a_unit_own: view`. Islam:
+     "anyone who has no role should default as Employee with no access to
+     anything." The floor is what applies when NO decision has been made, so
+     it must be the safe answer rather than the friendly one — and on a
+     platform holding a group's strategy the friendly one meant anybody the
+     register holds could read the group's plan with nobody granting
+     anything. BOTH ENDS, or a build that emptied the map entirely would
+     satisfy the first line: nothing is open, AND a granted role still
+     opens what it grants (the Contributor case below is that half). */
+  check("...and they open NOTHING, not even their own unit (§207)",
+        R.grantIn(R.worldOf(base), personOf(base, key), "unit", UNIT) === "none",
         R.grantIn(R.worldOf(base), personOf(base, key), "unit", UNIT));
-  check("...and not somebody else's",
+  check("...nor the group",
+        R.grantIn(R.worldOf(base), personOf(base, key), "group", "group") === "none",
+        R.grantIn(R.worldOf(base), personOf(base, key), "group", "group"));
+  check("...nor somebody else's unit",
         R.grantIn(R.worldOf(base), personOf(base, key), "unit",
                   Object.keys(SEED.units)[1]) === "none");
 

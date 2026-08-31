@@ -1426,18 +1426,32 @@ console.log("\n16 · fill the gaps (§145, spec 023)");
   });
   check("REFUSED: adding to an EXISTING collaborators list, mark or not",
         !v.ok, "was ALLOWED");
+  /* §218 REVERSES §145.10 AT ISLAM'S DIRECTION, and the assertions are
+     rewritten rather than deleted: this pair used to say a filled-but-
+     unconfirmed name conferred nothing, which was true only while the
+     office's tick existed. With the approval gone there is nothing to wait
+     for, and a name the page plainly shows now counts.
+
+     THE COST WAS STATED BEFORE IT WAS ACCEPTED: somebody who may fill gaps
+     can write their own name into an empty Owner and thereby gain the right
+     to report that line. Islam: *"the custodian is already choosing from
+     lists and he is responsible."* Asserted so the reversal is deliberate
+     and a future build cannot drift back through it unnoticed. */
   (function () {
     const t = { owner: "", collaborators: ["Test Person"],
                 pend: { collaborators: MARK } };
     const who = { key: "tp", name: "Test Person" };
-    check("RIGHTS: a pending collaborator is not namedOn the line",
-          R.namedOn(t, who) === false);
+    check("RIGHTS (§218): a filled collaborator counts at once",
+          R.namedOn(t, who) === true);
     delete t.pend;
-    check("RIGHTS: the same name counts the moment the mark lifts",
+    check("RIGHTS: and still counts with no mark on it",
           R.namedOn(t, who) === true);
     const t2 = { owner: "Test Person", pend: { owner: MARK } };
-    check("RIGHTS: a pending owner is not namedOn either",
-          R.namedOn(t2, who) === false);
+    check("RIGHTS (§218): a filled owner counts at once too",
+          R.namedOn(t2, who) === true);
+    const t3 = { owner: "Somebody Else", collaborators: [] };
+    check("RIGHTS: and somebody the line does not name still counts for nothing",
+          R.namedOn(t3, who) === false);
   })();
 
   /* 14 · u_anal never fills: a strategy page with no fillable field must
@@ -2256,6 +2270,73 @@ console.log("\n23 · a line the platform cannot name is nobody's to change (§19
    red, because the change falls through to capPlan on one side and to the
    unknown sweep on the other — both office-only, which is the correct
    DEFAULT and exactly why it has to be stated. */
+console.log("\n25 · the target decides the Strategy column (§217)");
+(function () {
+  /* Islam, on Hala and on CF: a custodian granted Edit on their own
+     supporting function still could not correct its plan, while a grant on
+     BUSINESS UNITS silently let them. The three unit-shaped guards named a
+     unit page key outright and the target they are handed can be `fn:<key>`,
+     because a pillars function is classified through the unit pass (§59).
+
+     ASSERTED IN BOTH DIRECTIONS AND ON BOTH SIDES OF THE SWITCH. One of them
+     alone cannot see the fault: before the fix the fn column granted nothing
+     and the unit column granted everything, so a test that only checked "the
+     custodian can edit" passes on the broken build by setting the wrong
+     cell. */
+  function withAccess(role, patch) {
+    const s = clone(SEED);
+    s.access = Object.assign({}, s.access,
+      { [role]: Object.assign({}, (s.access || {})[role], patch) });
+    return s;
+  }
+  function fromStored(stored, who, mutate) {
+    const inc = clone(stored); mutate(inc);
+    return A.authorize(stored, inc, personOf(stored, who));
+  }
+  const FK = Object.keys(SEED.functions).filter(function (k) {
+    return String((SEED.functions[k] || {}).format) === "pillars";
+  })[0];
+  check("§217: the seed holds a function that plans in pillars", !!FK);
+  if (FK) {
+    const CUST = "own_it";
+    const edit = function (i) {
+      i.functions[FK].items[0].tactics[0].owner = "Somebody New";
+    };
+    const base = function (patch) {
+      const s = withAccess("custodian", patch);
+      s.functions[FK].custodian = CUST;
+      if (s.review) s.review.state = "open";
+      return s;
+    };
+    let r = fromStored(base({ a_fn_own_strat: "edit", a_unit_own_strat: "view" }), CUST, edit);
+    check("§217: the FUNCTION column at edit authors a pillars function's plan",
+          r.ok, r.refusals.join(" / "));
+    r = fromStored(base({ a_fn_own_strat: "view", a_unit_own_strat: "edit" }), CUST, edit);
+    check("§217: ...and the BUSINESS UNIT column at edit does NOT", !r.ok);
+    r = fromStored(base({ a_fn_own_strat: "view", a_unit_own_strat: "view" }), CUST, edit);
+    check("§217: ...and neither column open refuses it", !r.ok);
+
+    /* THE UNIT SIDE IS UNTOUCHED, and it is asserted rather than assumed:
+       the pairing returns the page it was given for a unit target, so a
+       build that mapped everything to the function column would pass every
+       assertion above and break every business unit. */
+    const UK = Object.keys(SEED.units)[0];
+    const uedit = function (i) { i.units[UK].items[0].tactics[0].owner = "Somebody New"; };
+    const ubase = function (patch) {
+      const s = withAccess("custodian", patch);
+      s.unitRoles = Object.assign({}, s.unitRoles,
+        { [UK]: Object.assign({}, (s.unitRoles || {})[UK], { custodian: CUST }) });
+      if (s.review) s.review.state = "open";
+      return s;
+    };
+    r = fromStored(ubase({ a_unit_own_strat: "edit", a_fn_own_strat: "view" }), CUST, uedit);
+    check("§217: a unit's own column at edit still authors its plan",
+          r.ok, r.refusals.join(" / "));
+    r = fromStored(ubase({ a_unit_own_strat: "view", a_fn_own_strat: "edit" }), CUST, uedit);
+    check("§217: ...and the FUNCTION column does not reach a unit", !r.ok);
+  }
+})();
+
 console.log("\n24 · the Overview is mandatory, and fillable (§214)");
 (function () {
   const MARK2 = { by: "own_it", at: "2026-08-31T00:00:00.000Z" };

@@ -24775,3 +24775,172 @@ The **"could not reach the server (Failed to fetch)"** on *Next pending*. It
 could not be reproduced here and no cause is claimed — it is a network-level
 failure, and none of the faults above produces one. Left open rather than
 attached to a fix it may have nothing to do with.
+
+---
+
+## §217 — THE TARGET DECIDES THE STRATEGY COLUMN
+
+Found while answering why Hala could not correct a definition and why the CF
+custodian could not change an owner: `lib/authorize.js`'s three unit-shaped
+guards — `unitFoundation`, `unitAnalysis`, `unitPlan` — each named a UNIT page
+key outright, while the target they are handed can be `fn:<key>`. A supporting
+function that plans in pillars is classified through the unit-shaped pass
+(§59, and that is right), so **a supporting function's plan was authorised
+against the BUSINESS UNIT Strategy column.**
+
+**MEASURED IN BOTH DIRECTIONS, AND IT WAS EXACTLY BACKWARDS.** With a
+custodian on a pillars function, changing a tactic's owner:
+
+| Roles & access | before | after |
+|---|---|---|
+| Supporting function · Strategy = Edit | refused | **accepted** |
+| Business unit · Strategy = Edit | **accepted** | refused |
+
+So the office could not grant what the table said they were granting, and
+granted something else without meaning to. `mayFillRow` two lines below had
+been asking `planPageOf(target)` all along, which is what made it findable.
+
+**ONE PAIRING, NAMED ONCE.** `strategyPageOf(target, unitPage)` in
+`lib/rules.js`; `planPageOf()` keeps its name and its three callers and
+becomes that asked for the plan, or the two answers drift the way §211's did.
+
+**ASSERTED ON BOTH SIDES OF THE SWITCH AND IN BOTH DIRECTIONS** — a test that
+only checked "the custodian can edit" passes on the broken build by setting
+the wrong cell. **2 red** with the fix reverted; the unit half stays green
+either way, which is the guard against a build that mapped everything to the
+function column.
+
+---
+
+## §218 — THE OFFICE'S APPROVAL ON A FILL IS GONE
+
+Islam: *"please remove the approval of the SMO on the missing filling … the
+custodian is already choosing from lists and he is responsible. He can't enter
+anything from his mind. The confirmation is just a gate that we never
+needed."*
+
+Put to him first that the gate was doing a second job — being named an Owner
+is what confers the right to report a line, so §145.10 deliberately made a
+filled-but-unconfirmed name silent. He answered that the custodian is
+responsible. **That is his decision and it is recorded as his**: somebody who
+may fill gaps can now write their own name into an empty Owner and gain that
+line's reporting right.
+
+**WHAT SURVIVES IS THE STAMP, NOT THE GATE.** `pend` is still written and
+still read by the authoriser, so a person who fills a value can still correct
+their own typo (§145's *"still the filler's to correct"*). It decides nothing
+else: no amber chip, no confirm tick, no Review-pending count, no walk, and
+the value counts in the score the moment it is written.
+
+**AND IT IS WHAT UNSTUCK CONSUMER FINANCE.** `tacticPlanned()` returned null
+while a tactic's quarters were pending, so a tactic whose timeline had just
+been filled in read as NOT DUE — and a row that is not due is not asked, so it
+vanished from the report under *"Not asked — outside this cycle"*. Measured on
+one tactic with its quarters unchanged: **settled 41 rows asked, pending 40,
+tick removed 41 again.** Nine CF tactics were in exactly that state.
+
+**DELETED RATHER THAN LEFT CALLERLESS** (§24): `GAP_SCORE_FIELDS`,
+`pendingScore()`, `gapScoreWait()`, `gapPendRows()`, `gapPendCount()`,
+`pendMap()`, `pendChip()`, `pendTotalChip()`, `pendCountLine()`, the whole
+§192 pending walk, the confirm-tick handler, and `checks/pending-walk.py` with
+them. The prose that promised an approval went in the same edit, or the
+product goes on saying what it stopped doing.
+
+**THE TWO REVERSED ASSERTIONS WERE REWRITTEN, NOT DELETED** — in
+`test-authorize.js` and `checks/gap-fill.py` — so the reversal is deliberate
+and a later build cannot drift back through it unnoticed.
+
+---
+
+## §219 — COMMIT THE BOX BEFORE LEAVING
+
+Islam, on Hala: *"she updated the definition of her capability and left and
+came back didn't find it."*
+
+**The save path was not the fault, and neither was her permission** — filling
+a blank definition is accepted, measured against the real authoriser. Every
+bound field in the product writes on `change`, which for a text box means when
+the cursor LEAVES it (§35), and §138's leave-flush sends work that is already
+in the graph. So typing a definition and then closing the tab wrote nothing at
+all: no error, because from the platform's side nothing was ever entered.
+
+§170 closed the debounce window; this is the same window one step earlier —
+the value had not reached the graph to be debounced. `commitFocus()` blurs the
+active element before the flush. **`blur()` rather than a synthesised
+`change`**: it is what the browser itself does when focus moves, so a field
+wired any other way behaves the same and one already committed fires nothing.
+
+**NOT CLAIMED**: that this was her path. It could not be reproduced from the
+demo, and it is recorded as the mechanism rather than as her diagnosis.
+
+---
+
+## §220 — A CLOSED REPORT IS CLOSED
+
+Islam: *"the submit or the save as a draft locks the report and in both cases
+you can find the button Reopen to unlock it."*
+
+**MEASURED FIRST: nothing was ever locked.** After pressing Submit, all twelve
+figure boxes and the owner's note were still fully editable — the bar changed
+its wording and nothing behind it closed, so a report could be changed after
+the office had received it and what they were told they were sent was not what
+the database held.
+
+`REVIEW.parked` joins `submitted` in `lib/authorize.js`'s per-target list, so
+parking a report is classified exactly as submitting one — it speaks for the
+whole unit in the same way (§53.5). **ONE REOPEN FOR BOTH STATES**, and
+submitting clears a parked draft, or two closed states at once would leave
+Reopen clearing one of them. The last key leaving deletes the map (§50.6).
+
+**DISABLED, NOT ONLY DIMMED.** `pointer-events:none` is a look, not a lock —
+the keyboard walks straight past it — so every control inside the report is
+genuinely disabled and the dimming is what says so. Readable rather than
+hidden: reviewing a closed report is most of why anybody reopens it. Applied
+once after the render rather than at each render site, so a control added
+later is covered the day it is added.
+
+**CANCEL BECOMES CLOSE**, and that is a correction rather than a rename: the
+handler is `REPORTING = null; paint()` and nothing is discarded, so the old
+word promised a threat it never carried out.
+
+**THE COST IS STATED**: Save draft stops meaning *save and keep typing*. Every
+draft save ends the sitting and carrying on costs one press of Reopen. Drawn
+in a mockup of the real page and signed off before a source was touched.
+
+---
+
+## §221 — SUBMIT IS SHUT UNTIL THE REPORT IS COMPLETE
+
+Islam: *"we need to remove the ability of people to submit a report that is not
+complete … the submit to SMO should be dimmed with a hover noting that he can't
+submit until full reporting of all numbers … and of course they shouldn't be
+able to submit if they still have something missing in the plan itself."*
+
+Two new blockers beside the three that existed: **`owed`** (rows asked this
+cycle with no figure) and **`gaps`** (what the plan itself is still missing).
+All five are now said BEFORE the press rather than in a pop-up after it.
+
+**THE GAP COUNT IGNORES THE VIEWER, and that is the whole point of the second
+rule.** `gapMap()` is scoped to what the person looking could actually close
+(§177), which is right for the counts they are asked to clear and wrong here:
+a unit head would submit past holes only the office can fill, because to them
+the count reads zero. `gapTotalAll()` is the same walk with the reach ignored.
+
+**`aria-disabled`, NEVER `disabled`.** A disabled button takes no focus, and
+the reason opens on hover AND on focus (§163) — so `disabled` would put the
+explanation out of reach of anybody without a mouse. The click handler still
+refuses; the hover is the explanation, not the enforcement.
+
+**ONE LIST OF REASONS BEHIND BOTH FORMS.** `submitWhyShort()` is the bubble's
+wording and `submitRefusal()` the banner's, both read from `submitBlockers()`,
+or the control and its explanation start disagreeing about why it is shut.
+
+**AND IT IS WHAT CATCHES A PLAN LIKE CF's**: a tactic with no quarters at all
+is already a gap (§128), so a report whose plan is that incomplete can no
+longer be submitted as complete — which is how *"3 of 3, Submitted"* happened.
+
+**THE COSTS WERE STATED ON THE MOCKUP BEFORE IT WAS AGREED**: a report already
+submitted re-opens as incomplete; a unit can be blocked by a gap only the
+office can close (the hover names it, so it is a message and not a dead end);
+and the server still accepts an incomplete submission, because this is a screen
+rule as the existing three are. Recorded, not glossed.

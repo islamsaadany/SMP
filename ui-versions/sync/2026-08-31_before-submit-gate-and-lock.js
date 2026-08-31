@@ -919,30 +919,7 @@ var SYNC = (function () {
      left open (an edit made during an in-flight save, the tab gone before it
      settles) is the small corner of a small corner, and the 5s interval owns
      it whenever the tab survives. */
-  /* ── COMMIT THE BOX BEFORE LEAVING (§219) ─────────────────────────
-     Islam, on Hala: *"she updated the definition of her capability and left
-     and came back didn't find it."* The save path was not the fault — every
-     bound field in the product writes on `change`, which for a text box
-     means WHEN THE CURSOR LEAVES IT (§35), and this flush sends work that
-     is already in the graph. So typing a definition and then closing the
-     tab wrote nothing at all: no error, because from the platform's side
-     nothing was ever entered.
-
-     §170 closed the debounce window and this is the window one step
-     earlier — the value had not reached the graph to be debounced.
-
-     `blur()` rather than a synthesised `change`: it is what the browser
-     itself does when focus moves, so a field wired any other way behaves
-     the same, and a field already committed fires nothing. Wrapped, because
-     a throw here would take the flush with it and lose everything else. */
-  function commitFocus() {
-    try {
-      var el = document.activeElement;
-      if (el && el !== document.body && typeof el.blur === "function") el.blur();
-    } catch (e) { /* leaving anyway */ }
-  }
   function flushLeave() {
-    commitFocus();
     if (!live || isDemoMode() || saving) return;
     if (timer) { clearTimeout(timer); timer = null; }
     var now = serialize();

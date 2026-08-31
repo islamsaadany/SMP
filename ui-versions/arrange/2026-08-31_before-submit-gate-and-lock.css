@@ -1472,43 +1472,6 @@
   .repchrome .rc-draft:hover { text-decoration:underline; }
   .repchrome .rc-draft:focus-visible { outline:2px solid var(--gold); outline-offset:2px; }
 
-  /* ── A CLOSED REPORT, AND THE WAY BACK (§220) ──────────────────────────
-     Submitted or parked as a draft: the report is read-only and says so by
-     going quiet. Readable, because reviewing a closed report is most of why
-     anybody reopens it — so the table keeps more of its ink than the
-     controls do. The controls are genuinely `disabled`; this is what makes
-     that visible. */
-  .replocked input, .replocked textarea, .replocked select,
-  .replocked .fld { opacity:.45; }
-  .replocked table { opacity:.72; }
-  .repchrome .rc-state { font-size:11.5px; font-weight:700; letter-spacing:.06em;
-    text-transform:uppercase; }
-  .repchrome .rc-state.draft { color:var(--ink-3); }
-  .repchrome .rc-state.done  { color:var(--good-tx); }
-  .repchrome .rc-reopen { background:transparent; color:var(--cta);
-    border:1px solid var(--cta); border-radius:6px; padding:6px 14px;
-    font:inherit; font-size:12px; font-weight:700; letter-spacing:.06em;
-    text-transform:uppercase; cursor:pointer; }
-  .repchrome .rc-reopen:hover { background:var(--cta); color:var(--cta-ink); }
-  .repchrome .rc-reopen:focus-visible { outline:2px solid var(--gold); outline-offset:2px; }
-
-  /* ── NOT READY TO SUBMIT (§221) ────────────────────────────────────────
-     The same button in the same place at the same size, so nothing moves
-     when it becomes live — what changes is that it stops shouting. It keeps
-     its focus ring: `aria-disabled` leaves it reachable on purpose, because
-     the reason opens on focus as well as on hover and a `disabled` button
-     would put that explanation out of reach of the keyboard. */
-  .repchrome .rc-submit[aria-disabled="true"] { background:transparent;
-    color:var(--ink-3); border-color:var(--line); cursor:not-allowed; }
-  .repchrome .rc-submit[aria-disabled="true"]:hover { background:transparent;
-    border-color:var(--line); }
-  /* The bubble opens DOWNWARD and hard right: this button sits at the end of
-     the tab row, so a centred note would hang off the page and an upward one
-     would cover the navigation (§165's rule, at the other edge). */
-  .repchrome .hasnote::after { white-space:pre-line; left:auto; right:0;
-    transform:none; bottom:auto; top:calc(100% + 8px);
-    width:max-content; max-width:min(300px, 60vw); }
-
   /* ── A WIDE TABLE SCROLLS INSIDE ITS OWN BOX (§151) ─────────────────────
      Islam, from his own laptop on Mazaya: *"I'm stuck with the unit tables cut
      and I can't scroll horizontally."* The page deliberately never scrolls

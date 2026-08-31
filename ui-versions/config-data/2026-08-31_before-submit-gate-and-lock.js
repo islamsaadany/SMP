@@ -3770,7 +3770,7 @@ function capById(id){
 
 function capKOScore(c){
   /* Pending confirmation leaves the average (§145), as everywhere. */
-  var list = (c.keyObjectives || []).filter(function(m){ return m.progress != null; });
+  var list = (c.keyObjectives || []).filter(function(m){ return m.progress != null && !SMPRules.pendingScore(m); });
   if (!list.length) return null;
   var tw = 0, sum = 0;
   list.forEach(function(m){ var w = m.weight == null ? 1 : m.weight; tw += w; sum += m.progress * w; });
@@ -4795,64 +4795,37 @@ function fnMissingNotes(fk){ return fnAskedItems(fk).filter(needsNote); }
    note (a red number nobody explained is what a review meeting stalls on),
    and a row that said In progress and never said how far (§104.10 -- the
    score leaves it out, so submitting would file a report with a hole in it). */
-/* §220: has this report been closed — submitted, or parked as a draft?
-   One reading, so the bar, the lock and the pen cannot disagree (§53.5). */
-function reportParked(target){
-  return !!((REVIEW.parked || {})[String(target || "")]);
-}
-function reportClosed(target){
-  return reportParked(target) ||
-         !!((REVIEW.submitted || {})[String(target || "")]);
-}
 function submitBlockers(target){
   var t = String(target || ""), fn = t.indexOf("fn:") === 0;
   var rows = fn ? fnAskedItems(t.slice(3)) : askedItems(UNITS[t] || { keyObjectives:[], items:[] });
-  var counted = fn ? fnReportedCount(t.slice(3))
-                   : reportedCount(UNITS[t] || { keyObjectives:[], items:[] });
   return { notes: rows.filter(needsNote),
            pending: rows.filter(function(x){ return statusPending(x.obj); }),
-           /* §221, Islam: *"remove the ability of people to submit a report
-              that is not complete … until everything is submitted the report
-              should be only saved as draft."* Two rules, and the second is
-              his too: a plan still missing something is not ready to be
-              reported on either. The gap count IGNORES the viewer, or a unit
-              head would submit past holes only the office can fill. */
-           owed: Math.max(0, counted.total - counted.done),
-           gaps: gapTotalAll(t),
-           /* §218: `confirms` GOES WITH THE APPROVAL. It named values the
-              office had not yet ticked, and there is no tick — a filled
-              value is live, so there is nothing for a submission to wait
-              on. The two remaining rules are unchanged. */ };
+           /* §145: a value the office has not yet confirmed, where a score
+              reads it. Reporting and drafts flow; submitting says
+              "performance can be read", and against an unconfirmed number
+              it cannot (Islam, 2026-08-27). Only the office can clear this
+              one, so the refusal must send the person to them. */
+           confirms: gapScoreWait(t) };
 }
 /* The refusal in words, or "" when nothing is in the way. Said in ONE place so
    the two Submits cannot explain themselves differently. */
 function submitRefusal(target){
   var b = submitBlockers(target), say = [];
-  if (b.owed) say.push(plural(b.owed, "figure") +
-    " still to enter.");
-  if (b.gaps) say.push(plural(b.gaps, "item") +
-    " missing in the plan.");
   if (b.pending.length) say.push(plural(b.pending.length, "row") +
     " said In progress and did not say how far. Enter a per-cent for each.");
   if (b.notes.length) say.push(plural(b.notes.length, "figure") +
     " " + (b.notes.length === 1 ? "is" : "are") +
     " at risk or off track with no note. Add a line to each.");
+  if (b.confirms.length) {
+    var named = b.confirms.slice(0, 4).map(function(x){
+      return x.obj.name || x.obj.id || "a row"; });
+    say.push(plural(b.confirms.length, "value") +
+      (b.confirms.length === 1 ? " is" : " are") +
+      " awaiting Strategy Office confirmation (" + named.join(", ") +
+      (b.confirms.length > 4 ? ", …" : "") + "). Reporting and drafts are " +
+      "unaffected — submitting opens when the office confirms.");
+  }
   return say.join("\n\n");
-}
-/* ── THE SAME REFUSAL, SHORT ENOUGH FOR A HOVER (§221) ──────────────────
-   `submitRefusal()` explains at the length a banner can carry; the dimmed
-   button has to say it in a bubble. ONE LIST OF REASONS behind both, or the
-   control and the explanation start disagreeing about why it is shut. */
-function submitWhyShort(target){
-  var b = submitBlockers(target), lines = [];
-  if (b.owed)  lines.push(plural(b.owed, "figure") + " still to enter");
-  if (b.gaps)  lines.push(plural(b.gaps, "item") + " missing in the plan");
-  if (b.pending.length) lines.push(plural(b.pending.length, "row") +
-    " said In progress with no per-cent");
-  if (b.notes.length)   lines.push(plural(b.notes.length, "figure") +
-    " at risk with no note");
-  if (!lines.length) return "";
-  return "Cannot submit yet:\n\u2022 " + lines.join("\n\u2022 ");
 }
 function unitState(u){ return reportState(reportedCount(u), u.ukey); }
 function fnState(fk){ return reportState(fnReportedCount(fk), "fn:" + fk); }
@@ -5160,16 +5133,16 @@ function mayMarkFocus(){
 var KO_WEIGHTS = { mobile: [40, 25, 20, 15] };
 
 function koScore(list, weights){
-  /* §218: an objective counts as soon as it has a figure — nothing waits
-     on the office any more. */
-  var vals = list.filter(function(m){ return !m.milestone && m.progress != null; });
+  /* `pendingScore` (§145): an objective with a pending target/direction/
+     compile leaves the average until the office confirms it. */
+  var vals = list.filter(function(m){ return !m.milestone && m.progress != null && !SMPRules.pendingScore(m); });
   if (!vals.length) return null;
   if (!weights) {
     return Math.round(vals.reduce(function(a, m){ return a + m.progress; }, 0) / vals.length);
   }
   var tot = 0, acc = 0;
   list.forEach(function(m, i){
-    if (m.milestone || m.progress == null) return;
+    if (m.milestone || m.progress == null || SMPRules.pendingScore(m)) return;
     var w = weights[i] == null ? 0 : weights[i];
     acc += m.progress * w; tot += w;
   });
@@ -5320,15 +5293,11 @@ function quartersOf(t){
   return [t.q1, t.q2, t.q3, t.q4].map(function(x){ return x ? 1 : 0; });
 }
 function tacticPlanned(t){
-  /* §218: A FILLED QUARTER COUNTS AT ONCE. This used to return null while
-     the quarters waited on the office, so a tactic whose timeline had just
-     been filled in read as NOT DUE — and a row that is not due is not
-     asked, so it vanished from the report under the words "Not asked —
-     outside this cycle". Measured on one tactic with its quarters
-     unchanged: settled 41 rows asked, pending 40, tick removed 41 again.
-     That is what Consumer Finance was looking at — nine tactics filled in
-     and none of them reportable. With no approval there is nothing to
-     wait for. */
+  /* Quarters filled but not yet confirmed (§145): the tactic's timeline is
+     not settled, so it reads as not-yet-due — null, never zero — and every
+     downstream reader (due, ratio, the execution averages) already handles
+     that shape. */
+  if (SMPRules.pendOf(t).quarters) return null;
   var q = quartersOf(t), total = 0, elapsed = 0;
   for (var i = 0; i < 4; i++) {
     if (!q[i]) continue;
@@ -5342,6 +5311,58 @@ function tacticPlanned(t){
    and averaging a zero into execution would say otherwise. */
 function tacticDue(t){ return tacticPlanned(t) > 0; }
 
+/* ── WHAT IS STILL AWAITING THE OFFICE'S CONFIRMATION (§145) ────────────
+   Every pending-fill mark on a subject, one entry per marked field. The
+   COUNT the pane band shows, the rows the Submit refusal names and the
+   scores' exclusions are all read off this one list — a count that cannot
+   take you to what it counts is a count that makes work (§116.2). */
+function gapPendRows(target){
+  var out = [], t = String(target || "");
+  var push = function(row){
+    var p = SMPRules.pendOf(row);
+    Object.keys(p).forEach(function(f){
+      out.push({ obj: row, field: f, mark: p[f] });
+    });
+  };
+  if (t.indexOf("fn:") === 0) {
+    var fk = t.slice(3), fo = functionOf(fk);
+    if (fo && String(fo.format) === "pillars") {
+      var fu = unitLike(t);
+      if (fu) {
+        push(fu);
+        (fu.keyObjectives || []).forEach(push);
+        (fu.items || []).forEach(function(p){
+          (p.measures || []).forEach(push);
+          (p.tactics || []).forEach(push);
+        });
+      }
+    }
+    (GROUP.capabilities || []).forEach(function(c){
+      if (c.fn !== fk) return;
+      (c.keyObjectives || []).forEach(push);
+      /* §177: a project's outcomes and milestones carry marks of their own
+         now, so the pending list has to walk them or the office's "N awaiting
+         confirmation" undercounts exactly the values §177 made fillable. */
+      (c.projects || []).forEach(function(pr){
+        push(pr);
+        (pr.outcomes   || []).forEach(push);
+        (pr.milestones || []).forEach(push);
+      });
+    });
+  } else {
+    var u = UNITS[t];
+    if (u) {
+      push(u);
+      (u.keyObjectives || []).forEach(push);
+      (u.items || []).forEach(function(p){
+        (p.measures || []).forEach(push);
+        (p.tactics || []).forEach(push);
+      });
+    }
+  }
+  return out;
+}
+function gapPendCount(target){ return gapPendRows(target).length; }
 
 /* ── WHERE THE MISSING THINGS ARE (§145.12) ─────────────────────────────
    One map of every place holding gaps, counted through the shared
@@ -5360,7 +5381,7 @@ function tacticDue(t){ return tacticPlanned(t) > 0; }
    whose words is already answered here; a `pendMap()` written alongside would
    be a second copy of the navigation and would drift the first time a page
    moved (§53.5). `pend` swaps only what is COUNTED on each row. */
-function gapMap(target, all){
+function gapMap(target, pend){
   var t = String(target || ""), out = [];
   /* §177: COUNTED ONLY WHERE THIS VIEWER COULD ACTUALLY CLOSE IT. The map
      feeds the red "N Missing", the per-place chips, the rail's counts and the
@@ -5370,18 +5391,32 @@ function gapMap(target, all){
      whole subject's gaps at them would send them to a field they cannot type
      in: §61's trap wearing the count's clothes. The office authors, so
      everything counts for them, which is the page-level answer. */
-  /* §221: AND A MODE THAT IGNORES WHO IS LOOKING. The scoping above is
-     right for the counts somebody is asked to clear, and wrong for the
-     question "does this plan still owe anything" — a submission gate that
-     read the viewer's own reach would let a unit head submit a plan with
-     holes in it simply because the holes are the office's to fill. */
   var canAuthor = {}, reach = function(acKey, ctx){
-    if (all) return true;
     if (!(acKey in canAuthor)) canAuthor[acKey] = mayAuthor(acKey, target);
     return canAuthor[acKey] || mayFillRow(acKey, ctx, target);
   };
   var G = function(acKey, ctx, kind, row){
     if (!reach(acKey, ctx)) return 0;
+    /* A PENDING MARK IS COUNTED ONLY FOR A FIELD THAT KIND ACTUALLY HAS
+       (§192). `pend` rides each row's own object and nothing prunes it, so a
+       mark left behind by a field that has since stopped being fillable
+       (collaborators, §187) would be counted and then walked to a tick that
+       is not drawn — a count promising a control that does not exist (§61).
+       Asked through GAP_FIELDS, the same list the gaps are counted from. */
+    if (pend) {
+      var marks = SMPRules.pendOf(row);
+      /* §214.4: THE FILLABLE LIST, NOT THE COUNTED ONE. §192 chose
+         `GAP_FIELDS` and its own words say why — a mark for a field that has
+         stopped being FILLABLE would be walked to a tick that is not drawn —
+         but that is exactly what `GAP_FILLABLE` answers, and the two lists
+         have since parted three times (collaborators §205, a function's key
+         objectives §214.2, its definition here). `gapCell` draws the confirm
+         tick for every fillable field, so asking the counted list left the
+         office unable to FIND a fill it can plainly see and tick. §205's
+         fault in the walk rather than in the save. */
+      return (SMPRules.GAP_FILLABLE[kind] || []).filter(function(f){
+        return !!marks[f]; }).length;
+    }
     return SMPRules.gapMissing(kind, row).length;
   };
   var entry = function(key, label, count, go){
@@ -5508,9 +5543,13 @@ function gapMap(target, all){
 function gapTotal(target){
   return gapMap(target).reduce(function(a, e){ return a + e.count; }, 0);
 }
-/* Everything the plan owes, whoever is looking (§221) — what Submit waits on. */
-function gapTotalAll(target){
-  return gapMap(target, true).reduce(function(a, e){ return a + e.count; }, 0);
+/* Where the pending values are, in the same shape and the same order as the
+   gaps (§192). The TOTAL still comes from `gapPendCount()`, which walks the
+   stored rows rather than the map — the two are asserted to agree, because a
+   count that disagrees with the walk it feeds is exactly what this section
+   exists to remove (§116.2). */
+function pendMap(target){
+  return gapMap(target, true);
 }
 /* Who the counts are FOR: somebody who can act on them — the fill grant or
    the office. A plain reader never sees a nag they cannot clear (§69). */
@@ -5518,6 +5557,13 @@ function seesGaps(target){
   var t = target === undefined ? TARGET : target;
   return SMPRules.FILL_PAGES.some(function(pg){
     return mayFill(pg, t) || mayAuthor(pg, t);
+  });
+}
+/* Only the fields a score reads block a submission — a pending owner or
+   date changes no figure's meaning (§145, Islam's boundary). */
+function gapScoreWait(target){
+  return gapPendRows(target).filter(function(x){
+    return SMPRules.GAP_SCORE_FIELDS.indexOf(x.field) > -1;
   });
 }
 function tacticRatio(t){
@@ -5800,7 +5846,7 @@ function viaCarrier(p, own, roll){
    office's confirmation is not scored (§145): the comparison is not ready,
    so it leaves the average the way an unmeasured outcome already does
    (§104.10) — the reported actual is kept and shown, only the score waits. */
-function scorableMeasures(p){ return (p.measures || []).filter(function(m){ return m.target && m.progress != null; }); }
+function scorableMeasures(p){ return (p.measures || []).filter(function(m){ return m.target && m.progress != null && !SMPRules.pendingScore(m); }); }
 function pillarPerf(p){
   return viaCarrier(p,
     function(){ return avg(scorableMeasures(p).map(function(m){ return m.progress; })); },

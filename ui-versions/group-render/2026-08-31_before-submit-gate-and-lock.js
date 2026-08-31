@@ -387,10 +387,12 @@ function measureRows(ms, opts){
   opts = opts || {};
   var on = arranging("unit", opts.unit);
   return ms.map(function(m, i){
-    /* §218: nothing is held back for the office any more — a filled target
-       or direction is live, so a measure is scored the moment it has a
-       figure to score. */
-    var scored = m.target && m.progress != null;
+    /* §145: a measure whose target, direction or compile is awaiting the
+       office's confirmation is not scored — the actual is shown (it is
+       real), the score reads a dash with the reason on hover, and the
+       averages already left it out (`scorableMeasures`). */
+    var pend = SMPRules.pendingScore(m);
+    var scored = m.target && m.progress != null && !pend;
     var head = '<tr data-oi="' + i + '"' + (isFocus(m.id) ? ' class="focusrow"' : '') + '><td class="idx">' +
                (on ? handle("Reorder " + m.name) : '') +
                '<span class="idx-n">' + (i+1) + '</span></td><td>' + esc(m.name) + fmark(m.id) +
@@ -401,8 +403,21 @@ function measureRows(ms, opts){
     return head + '<td class="num">' + esc(m.actual) + '</td>' +
            (scored
              ? '<td class="num final" style="color:' + bandInk(m.progress) + '">' + m.progress + '%</td>'
+             : pend
+             ? '<td class="cc"><span class="pill none" title="Awaiting Strategy Office ' +
+               'confirmation — this row is not counted yet">&mdash;</span></td>'
              : '<td class="cc"><span class="pill none">Not scored</span></td>') + '</tr>';
   }).join("");
+}
+/* The sentence under a table with rows the score is not counting (§106's
+   shape: a score that moves — or refuses to move — for a reason nothing on
+   the page states is a score nobody can defend). Drawn only when there is
+   something to say. */
+function pendCountLine(list){
+  var n = (list || []).filter(function(m){ return SMPRules.pendingScore(m); }).length;
+  if (!n) return "";
+  return '<p class="sub pendwait">' + plural(n, "row") +
+    ' not counted yet &mdash; awaiting Strategy Office confirmation.</p>';
 }
 function measureHead(unscored){
   return '<thead><tr><th class="idx">#</th><th>Measure</th><th class="cc">Dir.</th><th class="cc">Target</th>' +
@@ -567,6 +582,7 @@ function pillarBody(it, u){
     '<div class="scroll"><table>' + measureHead() +
       '<tbody class="sortable" data-item="tr" data-kind="measures" data-u="' + uk + '">' +
       measureRows(it.measures, { unit: uk }) + '</tbody></table></div>' +
+    pendCountLine(it.measures) +
     '<h5 class="mini">' + L("tactic","bu") + '</h5>' +
     '<div class="scroll"><table>' + tacticHead() +
       '<tbody class="sortable" data-item="tr" data-kind="tactics" data-u="' + uk + '">' +
@@ -746,7 +762,7 @@ function draftBtns(){
    with no box and a lighter weight — one family in two volumes, the act that
    ends the report against the act that parks it. Inside §41's accent budget:
    drawn only while a cycle is open, for somebody who may report. */
-function repChrome(target, done, total, pct, mayAll, subd, parked, submitWhy){
+function repChrome(target, done, total, pct, mayAll, subd){
   return '<div class="repchrome">' +
     '<span title="' + esc(REVIEW.name + " · due " + REVIEW.due) + '">' +
       '<span class="rc-n">' + done + '</span> ' +
@@ -754,26 +770,13 @@ function repChrome(target, done, total, pct, mayAll, subd, parked, submitWhy){
     '<span class="rc-bar' + (pct < 100 ? " part" : "") + '">' +
       '<i style="width:' + pct + '%"></i></span>' +
     (mayAll
-      ? (subd || parked
-          ? '<span class="rc-state ' + (subd ? 'done">Submitted' : 'draft">Draft saved') +
-            '</span><button class="rc-reopen" data-unsubmit="' + esc(target) + '">Reopen</button>'
-          : submitWhy
-          /* §221: NOT READY, SO THE CONTROL SAYS SO BEFORE IT IS PRESSED.
-             `aria-disabled` rather than `disabled`, because a disabled button
-             takes no focus and the reason would be unreachable without a
-             mouse — the bubble opens on hover AND on focus (§163). The click
-             handler still refuses, so the hover is the explanation and not
-             the enforcement. */
-          ? '<button class="rc-submit hasnote" data-submit="' + esc(target) + '"' +
-              ' aria-disabled="true" data-tip="' + esc(submitWhy) + '">Submit to the SMO</button>' +
-            '<button class="rc-draft" data-repsave="1">Save draft</button>'
+      ? (subd
+          ? '<span class="badge b-done">Submitted</span>' +
+            '<button class="linkbu" data-unsubmit="' + esc(target) + '">Reopen my report</button>'
           : '<button class="rc-submit" data-submit="' + esc(target) + '">Submit to the SMO</button>' +
             '<button class="rc-draft" data-repsave="1">Save draft</button>')
       : '<span class="pill none">View only</span>') +
-    /* §220: CLOSE, NOT CANCEL. The handler is `REPORTING = null; paint()` and
-       nothing is discarded — figures are written as they are typed — so the
-       old word promised a threat it never carried out. */
-    '<button class="linkbu" data-repcancel="1">Close</button>' +
+    '<button class="linkbu" data-repcancel="1">Cancel</button>' +
     '<span class="savesay" data-savesay="1" role="status" aria-live="polite"></span>' +
     '</div>';
 }
@@ -1993,6 +1996,9 @@ function editBar(page, acKey){
         inner = '<button class="editbtn fdone" data-page="' + page + '">Done filling</button>';
       else if (gapTotal(TARGET))
         inner = '<button class="fillcta" data-fillcta="' + page + '">Fill in missing elements</button>';
+      else if (gapPendCount(TARGET))
+        inner = '<button class="pendcta" data-page="' + page + '">Review pending &middot; ' +
+          gapPendCount(TARGET) + '</button>';
       else inner = '';
       return (dl || inner) ? '<div class="pageact">' + dl + inner + '</div>' : '';
     }
@@ -2103,6 +2109,10 @@ function penBtn(page, acKey){
     if (miss) return '<button class="fillcta cornerbtn" data-fillcta="' + page +
       '" title="' + plural(miss, "missing element") + ' in this plan">' +
       'Fill in missing elements</button>';
+    var pend = gapPendCount(TARGET);
+    if (pend) return '<button class="pendcta cornerbtn" data-page="' + page +
+      '" title="Filled values awaiting Strategy Office confirmation — still yours to correct">' +
+      'Review pending &middot; ' + pend + '</button>';
     return '';
   }
   var on = EDIT_PAGE[page];
@@ -2485,6 +2495,7 @@ function collabSel(page, list, setter){
    office write through the ordinary pen DELETES the mark on that field —
    correcting is confirming. The server judges the same transitions from
    the diff (lib/authorize.js's gap pass), so nothing here is trusted. */
+var PENDS = [];
 function gapStamp(row, field){
   row.pend = row.pend || {};
   row.pend[field] = { by: (viewer() || {}).key || null,
@@ -2503,6 +2514,25 @@ var GAP_WORDS = { dir:"Direction", target:"Target", target3y:"3-year target",
                   compile:"Compile rule", owner:"Owner", quarters:"Quarters",
                   start:"Start", end:"End", aspiration:"Aspiration",
                   weight:"Weight" };
+function pendChip(acKey, row, field){
+  var p = SMPRules.pendOf(row)[field];
+  if (!p) return '';
+  var per = p.by ? personBy(p.by) : null;
+  var who = (per && per.name) || p.by || "";
+  var say = (GAP_WORDS[field] || field) + " filled" + (who ? " by " + who : "") +
+            (p.at ? ", " + p.at : "") + " — awaiting Strategy Office confirmation";
+  var tick = "";
+  if (mayAuthor(acKey)) {
+    var i = PENDS.push({ row: row, field: field, acKey: acKey }) - 1;
+    /* §192: `pendwalk` MARKS IT WITHOUT STYLING IT — the same separation the
+       gap walk needs (§177.2: *this control answers a pending value* and
+       *paint it* are different facts, and merging them restyles the tick to
+       fix a walker). */
+    tick = '<button class="gapok pendwalk" data-pconf="' + i + '" title="Confirm — ' +
+      'this value becomes settled" aria-label="Confirm this value">&#10003;</button>';
+  }
+  return '<span class="pchip" title="' + esc(say) + '">pending</span>' + tick;
+}
 /* pendBadge() was here. It drew the subject-wide pending count in the pillar
    band's right slot; §192 moved that number onto the totals row with the
    other subject-wide counts, where it can be walked and where it cannot land
@@ -2537,18 +2567,47 @@ function missBarCta(total){
   return '<button type="button" class="fillcta" data-fillcta="' +
     esc(fillPageForSec(sec)) + '">Fill in missing elements</button>';
 }
-/* §218: THE PENDING HALF OF THIS BAR IS GONE. §192 put a count and a walk
-   here for values waiting on the office; with the approval removed there is
-   nothing to wait for, so the bar counts what is MISSING and nothing else.
-   The walk's machinery went with it rather than being left callerless — a
-   builder nobody calls is one the next reader takes for load-bearing (§24). */
+/* ── THE PENDING COUNT, AND A WAY TO WALK TO THEM (§192) ────────────
+   Islam, as the SMO: *"I'm getting this badge but I don't know where they
+   are — I think we need a flow like the filling to take me through the
+   confirmation areas so I can confirm."*
+
+   IT WAS ON THE WRONG ROW, AND UNDER A BUTTON. `pendBadge()` drew it in the
+   pillar band's right slot, which reserves 76px — room for two pen glyphs —
+   while the fill grant's control beside it is a WORDED button 138 to 184px
+   wide. Measured on the real page: 160px of overlap reading, 110px filling,
+   so the two printed on top of each other (Islam's screenshot). A reserved
+   width that has to be kept in step with somebody else's wording is a
+   constant that goes stale (§122.5), so the fix is not a bigger number.
+
+   AND THE NUMBER WAS NEVER THE PILLAR'S. `gapPendCount(TARGET)` counts the
+   WHOLE subject, and the row above the pane is already where the subject's
+   totals live — *"26 Missing · LG01 9 · LG02 7"*. Drawn on one pillar's band
+   it was saying it belonged to that pillar. Option B of the mockup, Islam's
+   pick: it goes where the other totals are, and the collision goes with it.
+
+   THE WALK IS THE GAP WALK'S OWN (§177.2), over the ticks instead of the
+   fields. `pendMap()` is `gapMap()` counting marks, so the places, their
+   order and the words are one answer for both. */
+/* NAMED FOR THE TOTAL, because `pendChip()` is already taken by the mark that
+   sits on ONE value — and a function declaration hoists over its twin in a
+   concatenated file, so the second spelling silently replaced the first and
+   every per-value chip and confirm tick in the product stopped being drawn.
+   §56.7's collision, in the same shape: one scope, two plausible names, no
+   error, and the fault shows up somewhere else entirely (here: the walk found
+   no ticks to walk). Found by driving it. */
+function pendTotalChip(n){
+  return '<span class="pendcount" title="Filled values awaiting Strategy ' +
+    'Office confirmation">' + n + ' awaiting confirmation</span>';
+}
 function missBar(){
   if (typeof seesGaps !== "function" || !seesGaps()) return '';
   var map = gapMap(TARGET), total = gapTotal(TARGET);
-  /* §218: nothing is awaiting confirmation any more, so the bar is drawn
-     for what is MISSING and nothing else — which is what it was before
-     §192 added the pending half. */
-  if (!total) return '';
+  var pend = typeof gapPendCount === "function" ? gapPendCount(TARGET) : 0;
+  /* DRAWN FOR EITHER. Before §192 the bar existed only while something was
+     missing, so a plan entirely filled and entirely unconfirmed drew nothing
+     at all — which is the state the office is in when they get the badge. */
+  if (!total && !pend) return '';
   var chips = map.filter(function(e){ return e.count > 0; }).map(function(e){
     return '<button type="button" class="mchip"' +
       ' data-gkey="' + esc(e.key) + '"' +
@@ -2563,8 +2622,18 @@ function missBar(){
      office's alone (§145), so a Next-pending button drawn for them would walk
      to a tick that is not there (§61, and §177's own rule that a count is a
      promise the press opens something). */
+  /* WHO MAY CONFIRM, asked of the SUBJECT rather than of one page key. A unit
+     is judged on `u_plan` and a capability function on `k_proj`, so the
+     literal that worked on a unit would have hidden the walk on every function
+     — §53.5's drift, and the exact reason `seesGaps()` beside it asks the
+     whole list rather than naming a page. */
+  var mayConfirm = SMPRules.FILL_PAGES.some(function(pg){ return mayAuthor(pg); });
+  var walk = pend && mayConfirm ? ' <button type="button" ' +
+    'class="pendcta" data-nextpend="1">Next pending &rarr;&nbsp;' +
+    '<span class="npleft">' + pend + ' left</span></button>' : '';
   return '<div class="missbar" data-gapband="1">' +
     (total ? '<span class="secmiss">' + total + ' Missing</span>' : '') + chips +
+    (pend ? '<span class="pendtail">' + pendTotalChip(pend) + walk + '</span>' : '') +
     '<span class="gaptail">' + (total ? missBarCta(total) : '') + '</span></div>';
 }
 /* The counts rewritten IN PLACE after a fill — §63's write-into-the-node,
@@ -2760,7 +2829,7 @@ function gapCell(page, acKey, row, field, opts){
         '<span class="wasval"> \u2014 currently \u201C' + esc(val) + '\u201D</span>'
     : (opts.read ? opts.read(val)
       : opts.flow ? '<span class="flow ' + (opts.cls || "") + '">' + esc(val) + '</span>' : esc(val));
-  return text;
+  return text + pendChip(acKey, row, field);
 }
 
 /* Two readings of the same targets. Columns compares them down a line; chips
@@ -2960,7 +3029,8 @@ function koView(list, isGroup, acKey){
      including a pending direction or compile, which have no column here, or
      the office would have nothing to confirm them from in read mode. */
   var chips = function(m){
-    return "";
+    return pendChip(acKey, m, "dir") + pendChip(acKey, m, "target3y") +
+           pendChip(acKey, m, "target") + pendChip(acKey, m, "compile");
   };
   if (KO_VIEW === "chips") {
     return '<div class="ochips">' + list.map(function(m){
@@ -3553,8 +3623,7 @@ function renderReport(u){
   /* Published to the chrome rather than drawn here (§150): the shell reads
      REPORT_CHROME after this render and hangs it on the tab row, the same
      trip PAGE_TOOLS already makes. */
-  REPORT_CHROME = repChrome(u.ukey, c.done, c.total, pctDone, mayAll, subd,
-                            reportParked(u.ukey), submitWhyShort(u.ukey));
+  REPORT_CHROME = repChrome(u.ukey, c.done, c.total, pctDone, mayAll, subd);
   var bar = "";
 
   var summary =
@@ -4752,8 +4821,7 @@ function renderFnReport(fnKey){
   var mayAll = canSpeakFor(fnKeyTarget), subd = !!(REVIEW.submitted || {})[fnKeyTarget];
   /* The same box the unit's report publishes (§150, §53.5) — one builder, so
      the two sides cannot explain the same state differently. */
-  REPORT_CHROME = repChrome(fnKeyTarget, done, total, pctDone, mayAll, subd,
-                            reportParked(fnKeyTarget), submitWhyShort(fnKeyTarget));
+  REPORT_CHROME = repChrome(fnKeyTarget, done, total, pctDone, mayAll, subd);
   var bar = "";
   return bar + caps.map(function(c){
     return capBand(c) + '<div class="capbody">' + capReportBody(c) + '</div>';
@@ -5060,7 +5128,7 @@ function unitPlanBody(it, u, railed){
         : (filling("plan", "u_plan", pctx(t)) &&
            (SMPRules.quartersBlank(t) || SMPRules.pendOf(t).quarters))
           ? qsFill(t)
-          : qs(t)) + '</td></tr>';
+          : qs(t) + pendChip("u_plan", t, "quarters")) + '</td></tr>';
   }).join("");
   var meta = pillarMeta(it, ed);
   /* ── EDITING KEEPS ITS HEAD, AND THE NAME GETS THE LINE (§194) ──────
@@ -5392,11 +5460,11 @@ function koReadBlock(list, emptyLine){
          count said nothing was). The em-dash is what the Weight column beside
          it has always drawn for an absent optional value. */
       return '<div class="orow"><span class="on">' + esc(m.name) +
-          '</span>' +
+          pendChip("k_found", m, "dir") + pendChip("k_found", m, "compile") + '</span>' +
         '<span class="ot">' + (m.target ? esc(m.target) : '&mdash;') +
-          '</span>' +
+          pendChip("k_found", m, "target") + '</span>' +
         '<span class="ot h">' + (m.weight == null ? "&mdash;" : m.weight + "%") +
-          '</span></div>';
+          pendChip("k_found", m, "weight") + '</span></div>';
     }).join("");
 }
 /* The capability objectives editor — koEdit's shape with the WEIGHT column a
@@ -5499,6 +5567,7 @@ function unitPerfPane(it, u, railed){
     '<div class="scroll"><table>' + measureHead() +
       '<tbody class="sortable" data-item="tr" data-kind="measures" data-u="' + uk + '">' +
       measureRows(it.measures, { unit: uk }) + '</tbody></table></div>' +
+    pendCountLine(it.measures) +
     '<h5 class="mini">' + L("tactic","bu") + '</h5>' +
     '<div class="scroll"><table>' + tacticHead() +
       '<tbody class="sortable" data-item="tr" data-kind="tactics" data-u="' + uk + '">' +

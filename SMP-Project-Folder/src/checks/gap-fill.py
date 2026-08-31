@@ -181,86 +181,61 @@ with sync_playwright() as p:
     ck("amending a pending value writes and keeps the mark",
        not r.get("none") and r["compile"] == "Average" and r["pend"], r)
 
-    # ── 4 · READ MODE: THE CHIP, THE COUNT, AND NO TICK FOR THE FILLER ──
-    print("\n4 · pending reads as pending, and the tick is the office's")
+    # ── 4 · §218: THE APPROVAL IS GONE, AND IT IS ASSERTED AS AN ABSENCE ──
+    print("\n4 · a filled value is live at once (§218)")
     pg.click('.pane .paneact .fdone[data-page="plan"]'); pg.wait_for_timeout(400)
     r = pg.evaluate("""() => ({
       chips: document.querySelectorAll('.pane .pchip').length,
       ticks: document.querySelectorAll('.pane .gapok').length,
-      badge: (document.querySelector('.pendcount') || {}).textContent || "" })""")
-    ck("the pending chips are drawn in read mode", r["chips"] >= 2, r)
-    ck("the custodian sees no confirm tick", r["ticks"] == 0, r)
-    ck("the count sits on the band", "awaiting confirmation" in r["badge"], r)
+      badge: document.querySelectorAll('.pendcount').length,
+      cta:   document.querySelectorAll('.pendcta').length,
+      wait:  document.querySelectorAll('.pendwait').length })""")
+    ck("no 'pending' chip is drawn", r["chips"] == 0, r)
+    ck("no confirm tick is drawn", r["ticks"] == 0, r)
+    ck("no 'awaiting confirmation' count", r["badge"] == 0, r)
+    ck("no Review-pending control", r["cta"] == 0, r)
+    ck("no 'not counted yet' line", r["wait"] == 0, r)
+    # BOTH ENDS (§113.8): a build that drew no plan at all would pass every
+    # absence above, so the page must still be showing the values themselves.
+    r = pg.evaluate("""(w) => {
+      const p = UNITS[w.unit].items[0];
+      return { rows: document.querySelectorAll('.pane table tr').length,
+               filled: String(p.measures[0].compile || ""),
+               stamped: !!(p.measures[0].pend) };
+    }""", who)
+    ck("...and the plan is still on screen", r["rows"] > 3, r)
+    ck("the fill itself is still there", bool(r["filled"]), r)
+    ck("and the stamp is still kept, so the filler can correct it",
+       r["stamped"] is True, r)
 
-    # ── 5 · THE SCORE WAITS, THE REPORT DOES NOT ────────────────────────
-    print("\n5 · a pending target: dash, excluded, submit refused, draft alive")
+    # ── 5 · THE SCORE COUNTS IT STRAIGHT AWAY ───────────────────────────
+    print("\n5 · a filled target scores at once, and Submit does not wait")
     r = pg.evaluate("""(w) => {
       const p = UNITS[w.unit].items[0], m = p.measures[1];
       const inBefore = scorableMeasures(p).some(x => x.id === m.id);
       m.pend = { target: { by: w.cust, at: "2026-08-27" } };
       const inAfter = scorableMeasures(p).some(x => x.id === m.id);
       paint();
-      return { inBefore, inAfter, prog: m.progress,
-               pending: SMPRules.pendingScore(m) };
+      return { inBefore, inAfter };
     }""", who)
     pg.wait_for_timeout(300)
-    ck("the rule reads the row as score-pending", r["pending"] is True)
-    # THE RELATIONSHIP, NOT THE NUMBER (§94.14): excluding a value near the
-    # mean does not move a rounded average, so membership is what is asserted.
-    ck("the row leaves the scorable set the average reads",
-       r["inBefore"] is True and r["inAfter"] is False, r)
+    ck("a stamped row stays in the set the average reads",
+       r["inBefore"] is True and r["inAfter"] is True, r)
     be(pg, who["cust"], who["unit"], "performance")
-    perf = pg.evaluate("""() => {
-      const line = document.querySelector('.pendwait');
-      const dash = [...document.querySelectorAll('.pill.none')]
-        .some(e => (e.title || "").includes('not counted yet'));
-      return { dash, line: line ? line.textContent : "" };
-    }""")
-    ck("the score reads a dash with the reason on hover", perf["dash"], perf)
-    ck("...and the table says why — 'not counted yet'",
-       "not counted yet" in perf["line"] and
-       "awaiting Strategy Office confirmation" in perf["line"], perf)
+    perf = pg.evaluate("""() => ({
+      dash: [...document.querySelectorAll('.pill.none')]
+              .some(e => (e.title || "").includes('not counted yet')),
+      line: document.querySelectorAll('.pendwait').length })""")
+    ck("no dash standing in for a real score", perf["dash"] is False, perf)
+    ck("...and no sentence explaining a wait", perf["line"] == 0, perf)
     sub = pg.evaluate("""(w) => submitRefusal(w.unit)""", who)
-    ck("Submit is refused, naming the wait",
-       "awaiting Strategy Office confirmation" in sub, sub[:120])
-    ck("...and the refusal says reporting and drafts are unaffected",
-       "unaffected" in sub, sub[:160])
-    blockers = pg.evaluate("""(w) => submitBlockers(w.unit).confirms.length""", who)
-    ck("the blocker list carries the pending rows", blockers >= 2, blockers)
-
-    # ── 6 · THE OFFICE CONFIRMS — BY TICK, AND BY CORRECTING ────────────
-    print("\n6 · confirming, both of the office's ways")
-    be(pg, who["smo"], who["unit"], "strategy", "plan")
-    r = pg.evaluate("""() => ({
-      ticks: document.querySelectorAll('.pane .gapok').length })""")
-    ck("the office sees the confirm ticks", r["ticks"] >= 1, r)
-    r = pg.evaluate("""(w) => {
-      const t = document.querySelector('.pane .gapok');
-      if (!t) return { none: true };
-      t.click();
-      return { left: Object.keys(UNITS[w.unit].items[0].measures[0].pend || {}).length };
-    }""", who)
-    pg.wait_for_timeout(400)
-    ck("the tick lifts the mark from the data", not r.get("none") and r["left"] == 0, r)
-
-    # correcting confirms: the office edits the pending target through the pen
-    r = pg.evaluate("""(w) => {
-      const m = UNITS[w.unit].items[0].measures[1];
-      return { pendBefore: !!(m.pend && m.pend.target) };
-    }""", who)
-    ck("(fixture) the second measure still holds its pending target", r["pendBefore"])
-    pg.click('.pane .paneact .penbtn[data-page="plan"]'); pg.wait_for_timeout(400)
-    r = pg.evaluate("""(w) => {
-      const m = UNITS[w.unit].items[0].measures[1];
-      const flds = [...document.querySelectorAll('.pane .fld')];
-      const mine = flds.filter(f => f.value === String(m.target))[0];
-      if (!mine) return { none: true };
-      mine.value = m.target + " corrected";
-      mine.dispatchEvent(new Event('change', { bubbles: true }));
-      return { target: m.target, pend: !!(m.pend && m.pend.target) };
-    }""", who)
-    ck("an office write settles the value — correcting confirms",
-       not r.get("none") and r["pend"] is False, r)
+    ck("Submit no longer names a confirmation",
+       "awaiting Strategy Office confirmation" not in sub, sub[:140])
+    blk = pg.evaluate("""(w) => Object.keys(submitBlockers(w.unit))""", who)
+    ck("...and `confirms` has left the blocker list", "confirms" not in blk, blk)
+    # AND THE TWO REAL RULES SURVIVE, or a build that emptied the whole
+    # refusal would pass both assertions above (§113.8).
+    ck("the note rule still blocks", "note" in sub.lower(), sub[:140])
 
     # ── 7 · THE FOUNDATION'S GAPS FILL THE SAME WAY ─────────────────────
     print("\n7 · the key objectives table, through the same one builder")
@@ -307,8 +282,12 @@ with sync_playwright() as p:
     ck("two register names picked land in the array and wear the mark",
        not r.get("none") and not r.get("few") and
        r["list"] == r["picked"] and r["pend"], r)
-    ck("...and the pending name confers NO reporting right (§50.2 held)",
-       r.get("named") is False, r)
+    # §218 REVERSES §145.10 at Islam's direction: with the approval gone
+    # there is nothing for the name to wait for, so it counts at once. The
+    # cost was stated before it was accepted — somebody who may fill gaps can
+    # name themselves and thereby gain that line's reporting right.
+    ck("...and a filled name confers the reporting right at once (§218)",
+       r.get("named") is True, r)
     r = pg.evaluate("""(w) => {
       const t = UNITS[w.unit].items[0].tactics[0];
       const name = t.collaborators[0];

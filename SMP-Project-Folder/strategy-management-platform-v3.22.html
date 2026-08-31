@@ -5878,6 +5878,43 @@
   .repchrome .rc-draft:hover { text-decoration:underline; }
   .repchrome .rc-draft:focus-visible { outline:2px solid var(--gold); outline-offset:2px; }
 
+  /* ── A CLOSED REPORT, AND THE WAY BACK (§220) ──────────────────────────
+     Submitted or parked as a draft: the report is read-only and says so by
+     going quiet. Readable, because reviewing a closed report is most of why
+     anybody reopens it — so the table keeps more of its ink than the
+     controls do. The controls are genuinely `disabled`; this is what makes
+     that visible. */
+  .replocked input, .replocked textarea, .replocked select,
+  .replocked .fld { opacity:.45; }
+  .replocked table { opacity:.72; }
+  .repchrome .rc-state { font-size:11.5px; font-weight:700; letter-spacing:.06em;
+    text-transform:uppercase; }
+  .repchrome .rc-state.draft { color:var(--ink-3); }
+  .repchrome .rc-state.done  { color:var(--good-tx); }
+  .repchrome .rc-reopen { background:transparent; color:var(--cta);
+    border:1px solid var(--cta); border-radius:6px; padding:6px 14px;
+    font:inherit; font-size:12px; font-weight:700; letter-spacing:.06em;
+    text-transform:uppercase; cursor:pointer; }
+  .repchrome .rc-reopen:hover { background:var(--cta); color:var(--cta-ink); }
+  .repchrome .rc-reopen:focus-visible { outline:2px solid var(--gold); outline-offset:2px; }
+
+  /* ── NOT READY TO SUBMIT (§221) ────────────────────────────────────────
+     The same button in the same place at the same size, so nothing moves
+     when it becomes live — what changes is that it stops shouting. It keeps
+     its focus ring: `aria-disabled` leaves it reachable on purpose, because
+     the reason opens on focus as well as on hover and a `disabled` button
+     would put that explanation out of reach of the keyboard. */
+  .repchrome .rc-submit[aria-disabled="true"] { background:transparent;
+    color:var(--ink-3); border-color:var(--line); cursor:not-allowed; }
+  .repchrome .rc-submit[aria-disabled="true"]:hover { background:transparent;
+    border-color:var(--line); }
+  /* The bubble opens DOWNWARD and hard right: this button sits at the end of
+     the tab row, so a centred note would hang off the page and an upward one
+     would cover the navigation (§165's rule, at the other edge). */
+  .repchrome .hasnote::after { white-space:pre-line; left:auto; right:0;
+    transform:none; bottom:auto; top:calc(100% + 8px);
+    width:max-content; max-width:min(300px, 60vw); }
+
   /* ── A WIDE TABLE SCROLLS INSIDE ITS OWN BOX (§151) ─────────────────────
      Islam, from his own laptop on Mazaya: *"I'm stuck with the unit tables cut
      and I can't scroll horizontally."* The page deliberately never scrolls
@@ -8813,14 +8850,24 @@ var GAP_OPTIONAL = { tactic: ["collaborators"],
     });
     return out;
   })();
-  /* The fields a SCORE reads. A row with one of these pending is not
-     scored — the comparison is not ready, so it reads null and leaves the
-     average the way an unmeasured outcome already does (§104.10) — and
-     Submit waits on them, because submitting says "performance can be
-     read" (Islam, 2026-08-27: report and draft freely, never submit past
-     a pending target). A pending owner, date or 3-year target gates
-     nothing: none of them changes what this cycle's figure means. */
-  var GAP_SCORE_FIELDS = ["dir", "target", "compile", "weight", "quarters"];
+  /* ── THE OFFICE'S APPROVAL IS GONE (§218) ─────────────────────────
+     Islam: *"please remove the approval of the SMO on the missing filling
+     … the custodian is already choosing from lists and he is responsible.
+     The confirmation is just a gate that we never needed."* Put to him
+     that being named an Owner is what confers the right to report a line,
+     so the gate was doing a second job; he answered that the custodian is
+     responsible, and that is his call to make.
+
+     WHAT SURVIVES IS THE STAMP, NOT THE GATE. `pend` is still written and
+     still read by the authoriser, so somebody who fills a value can still
+     correct their own typo (§145's "still the filler's to correct"). It
+     no longer decides anything: no amber, no tick, no waiting, and the
+     value counts in the score the moment it is written.
+
+     `GAP_SCORE_FIELDS` and `pendingScore()` went with the gate. They
+     answered "is this row's comparison not ready yet", and with no gate
+     the answer is always no — a predicate that cannot be true is worse
+     than none, because the next reader takes it for load-bearing (§24). */
 
   /* ── WHEN A DATE IS A DATE (§184) ─────────────────────────────────
      `monthsOf()` in the platform is what decides whether a row is due, what
@@ -8992,12 +9039,6 @@ var GAP_OPTIONAL = { tactic: ["collaborators"],
       return gapEmpty(f, row);
     });
   }
-  function pendingScore(row) {
-    var p = pendOf(row);
-    for (var i = 0; i < GAP_SCORE_FIELDS.length; i++)
-      if (p[GAP_SCORE_FIELDS[i]]) return true;
-    return false;
-  }
 
   /* May this person FILL this page's gaps? The same ownsIt walk as
      mayAuthorPage — a non-office role never fills a unit or function it
@@ -9086,10 +9127,35 @@ var GAP_OPTIONAL = { tactic: ["collaborators"],
     return grantAtPage(w, person, reportPageOf(target), target) === "edit";
   }
 
+  /* ── WHICH STRATEGY PAGE GOVERNS THIS TARGET (§217) ───────────────
+     A unit's three strategy pages resolve to `unit_strat`, a function's two
+     to `fn_strat` — so this is really the question "whose Strategy column
+     decides here", and it must be asked of the TARGET rather than assumed
+     from the page the caller happens to be thinking about.
+
+     `lib/authorize.js` assumed. Its plan, foundation and SWOT guards each
+     named a UNIT page key outright while the target they were handed can be
+     `fn:<key>` — a supporting function that plans in pillars is classified
+     through the unit-shaped pass (§59), which is right — so a pillars
+     function's plan was authorised against the BUSINESS UNIT column. Both
+     directions were wrong at once and it was measured both ways: granting a
+     custodian Edit on their own supporting function's Strategy changed
+     nothing, and granting Edit on business units silently handed them
+     authority over supporting functions' plans. The gap guard two lines
+     below had it right the whole time, which is what made it findable.
+
+     ONE PAIRING, NAMED ONCE. `planPageOf` keeps its name and its callers and
+     becomes this asked for the plan, or the two answers drift the way §211's
+     did. */
+  var STRATEGY_PAIR = { u_found: "k_found", u_anal: "k_found", u_plan: "k_proj" };
+  function strategyPageOf(target, unitPage) {
+    return String(target).indexOf("fn:") === 0
+      ? (STRATEGY_PAIR[unitPage] || "k_proj") : unitPage;
+  }
   /* A unit arranges its Plan; a supporting function arranges its Projects.
      One place, so the two panes cannot be asked different questions (§53.5). */
   function planPageOf(target) {
-    return String(target).indexOf("fn:") === 0 ? "k_proj" : "u_plan";
+    return strategyPageOf(target, "u_plan");
   }
   /* The same pairing for the Reporting half (§117). */
   function reportPageOf(target) {
@@ -9741,15 +9807,19 @@ var GAP_OPTIONAL = { tactic: ["collaborators"],
       .concat(nameRuns(person.name))
       .map(function (s) { return s.trim().toLowerCase(); })
       .filter(function (s) { return !!s; });
-    /* §145.10: A PENDING NAME CONFERS NOTHING. Being named here is what
-       lets a Contributor report the line, so a name the custodian filled
-       but the office has not confirmed is visible on the page and silent
-       in this rule — the same shape as the score waiting on the target.
-       Field by field, because an owner confirmed long ago must not lose
-       their line over a collaborator still pending beside them. */
-    var pd = pendOf(row);
-    var hits = (pd.owner ? [] : [row.owner]).concat(
-      !pd.collaborators && Array.isArray(row.collaborators) ? row.collaborators : []);
+    /* §218 REVERSES §145.10 AT ISLAM'S DIRECTION. That section made a
+       filled-but-unconfirmed name silent here, because being named is what
+       lets somebody report the line — so the office's tick was the thing
+       standing between filling in a name and gaining a reporting right.
+       With the tick gone the skip has nothing to wait for, and leaving it
+       would make an owner that the page plainly shows count for nothing.
+
+       THE COST IS REAL AND WAS STATED BEFORE IT WAS ACCEPTED: a person who
+       may fill gaps can now write their own name into an empty Owner and
+       report that line. Islam: *"the custodian is already choosing from
+       lists and he is responsible."* */
+    var hits = [row.owner].concat(
+      Array.isArray(row.collaborators) ? row.collaborators : []);
     return hits.some(function (h) {
       return h != null && me.indexOf(String(h).trim().toLowerCase()) > -1;
     });
@@ -9956,18 +10026,18 @@ var GAP_OPTIONAL = { tactic: ["collaborators"],
     isOffice: isOffice, isOfficeRole: isOfficeRole, isSuperRole: isSuperRole,
     mayIssuePasswordTo: mayIssuePasswordTo,
     STRATEGY_PAGES: STRATEGY_PAGES, isStrategyPage: isStrategyPage,
-    ARRANGE_ROLES: ARRANGE_ROLES, mayArrange: mayArrange, planPageOf: planPageOf,
+    ARRANGE_ROLES: ARRANGE_ROLES, mayArrange: mayArrange, planPageOf: planPageOf, strategyPageOf: strategyPageOf,
     reportPageOf: reportPageOf, mayDownloadPlan: mayDownloadPlan,
     focusOn: focusOn,
     mayAuthorPage: mayAuthorPage,
-    GAP_FIELDS: GAP_FIELDS, GAP_FILLABLE: GAP_FILLABLE, GAP_SCORE_FIELDS: GAP_SCORE_FIELDS,
+    GAP_FIELDS: GAP_FIELDS, GAP_FILLABLE: GAP_FILLABLE,
     isGapField: isGapField,
     gapBlank: gapBlank, quartersBlank: quartersBlank,
     WHEN_MONTHS: WHEN_MONTHS, whenMonths: whenMonths, whenReadable: whenReadable,
     GAP_WHEN: GAP_WHEN, gapWhenField: gapWhenField,
     actingFor: actingFor,
     gapEmptyValue: gapEmptyValue, gapEmpty: gapEmpty,
-    pendOf: pendOf, pendingScore: pendingScore, mayFillPage: mayFillPage,
+    pendOf: pendOf, mayFillPage: mayFillPage,
     FILL_PAGES: FILL_PAGES, gapMissing: gapMissing,
     namedOn: namedOn, namedInUnit: namedInUnit,
     namedInFn: namedInFn, capProjectOf: capProjectOf,
@@ -15495,7 +15565,7 @@ function capById(id){
 
 function capKOScore(c){
   /* Pending confirmation leaves the average (§145), as everywhere. */
-  var list = (c.keyObjectives || []).filter(function(m){ return m.progress != null && !SMPRules.pendingScore(m); });
+  var list = (c.keyObjectives || []).filter(function(m){ return m.progress != null; });
   if (!list.length) return null;
   var tw = 0, sum = 0;
   list.forEach(function(m){ var w = m.weight == null ? 1 : m.weight; tw += w; sum += m.progress * w; });
@@ -16520,37 +16590,64 @@ function fnMissingNotes(fk){ return fnAskedItems(fk).filter(needsNote); }
    note (a red number nobody explained is what a review meeting stalls on),
    and a row that said In progress and never said how far (§104.10 -- the
    score leaves it out, so submitting would file a report with a hole in it). */
+/* §220: has this report been closed — submitted, or parked as a draft?
+   One reading, so the bar, the lock and the pen cannot disagree (§53.5). */
+function reportParked(target){
+  return !!((REVIEW.parked || {})[String(target || "")]);
+}
+function reportClosed(target){
+  return reportParked(target) ||
+         !!((REVIEW.submitted || {})[String(target || "")]);
+}
 function submitBlockers(target){
   var t = String(target || ""), fn = t.indexOf("fn:") === 0;
   var rows = fn ? fnAskedItems(t.slice(3)) : askedItems(UNITS[t] || { keyObjectives:[], items:[] });
+  var counted = fn ? fnReportedCount(t.slice(3))
+                   : reportedCount(UNITS[t] || { keyObjectives:[], items:[] });
   return { notes: rows.filter(needsNote),
            pending: rows.filter(function(x){ return statusPending(x.obj); }),
-           /* §145: a value the office has not yet confirmed, where a score
-              reads it. Reporting and drafts flow; submitting says
-              "performance can be read", and against an unconfirmed number
-              it cannot (Islam, 2026-08-27). Only the office can clear this
-              one, so the refusal must send the person to them. */
-           confirms: gapScoreWait(t) };
+           /* §221, Islam: *"remove the ability of people to submit a report
+              that is not complete … until everything is submitted the report
+              should be only saved as draft."* Two rules, and the second is
+              his too: a plan still missing something is not ready to be
+              reported on either. The gap count IGNORES the viewer, or a unit
+              head would submit past holes only the office can fill. */
+           owed: Math.max(0, counted.total - counted.done),
+           gaps: gapTotalAll(t),
+           /* §218: `confirms` GOES WITH THE APPROVAL. It named values the
+              office had not yet ticked, and there is no tick — a filled
+              value is live, so there is nothing for a submission to wait
+              on. The two remaining rules are unchanged. */ };
 }
 /* The refusal in words, or "" when nothing is in the way. Said in ONE place so
    the two Submits cannot explain themselves differently. */
 function submitRefusal(target){
   var b = submitBlockers(target), say = [];
+  if (b.owed) say.push(plural(b.owed, "figure") +
+    " still to enter.");
+  if (b.gaps) say.push(plural(b.gaps, "item") +
+    " missing in the plan.");
   if (b.pending.length) say.push(plural(b.pending.length, "row") +
     " said In progress and did not say how far. Enter a per-cent for each.");
   if (b.notes.length) say.push(plural(b.notes.length, "figure") +
     " " + (b.notes.length === 1 ? "is" : "are") +
     " at risk or off track with no note. Add a line to each.");
-  if (b.confirms.length) {
-    var named = b.confirms.slice(0, 4).map(function(x){
-      return x.obj.name || x.obj.id || "a row"; });
-    say.push(plural(b.confirms.length, "value") +
-      (b.confirms.length === 1 ? " is" : " are") +
-      " awaiting Strategy Office confirmation (" + named.join(", ") +
-      (b.confirms.length > 4 ? ", …" : "") + "). Reporting and drafts are " +
-      "unaffected — submitting opens when the office confirms.");
-  }
   return say.join("\n\n");
+}
+/* ── THE SAME REFUSAL, SHORT ENOUGH FOR A HOVER (§221) ──────────────────
+   `submitRefusal()` explains at the length a banner can carry; the dimmed
+   button has to say it in a bubble. ONE LIST OF REASONS behind both, or the
+   control and the explanation start disagreeing about why it is shut. */
+function submitWhyShort(target){
+  var b = submitBlockers(target), lines = [];
+  if (b.owed)  lines.push(plural(b.owed, "figure") + " still to enter");
+  if (b.gaps)  lines.push(plural(b.gaps, "item") + " missing in the plan");
+  if (b.pending.length) lines.push(plural(b.pending.length, "row") +
+    " said In progress with no per-cent");
+  if (b.notes.length)   lines.push(plural(b.notes.length, "figure") +
+    " at risk with no note");
+  if (!lines.length) return "";
+  return "Cannot submit yet:\n\u2022 " + lines.join("\n\u2022 ");
 }
 function unitState(u){ return reportState(reportedCount(u), u.ukey); }
 function fnState(fk){ return reportState(fnReportedCount(fk), "fn:" + fk); }
@@ -16858,16 +16955,16 @@ function mayMarkFocus(){
 var KO_WEIGHTS = { mobile: [40, 25, 20, 15] };
 
 function koScore(list, weights){
-  /* `pendingScore` (§145): an objective with a pending target/direction/
-     compile leaves the average until the office confirms it. */
-  var vals = list.filter(function(m){ return !m.milestone && m.progress != null && !SMPRules.pendingScore(m); });
+  /* §218: an objective counts as soon as it has a figure — nothing waits
+     on the office any more. */
+  var vals = list.filter(function(m){ return !m.milestone && m.progress != null; });
   if (!vals.length) return null;
   if (!weights) {
     return Math.round(vals.reduce(function(a, m){ return a + m.progress; }, 0) / vals.length);
   }
   var tot = 0, acc = 0;
   list.forEach(function(m, i){
-    if (m.milestone || m.progress == null || SMPRules.pendingScore(m)) return;
+    if (m.milestone || m.progress == null) return;
     var w = weights[i] == null ? 0 : weights[i];
     acc += m.progress * w; tot += w;
   });
@@ -17018,11 +17115,15 @@ function quartersOf(t){
   return [t.q1, t.q2, t.q3, t.q4].map(function(x){ return x ? 1 : 0; });
 }
 function tacticPlanned(t){
-  /* Quarters filled but not yet confirmed (§145): the tactic's timeline is
-     not settled, so it reads as not-yet-due — null, never zero — and every
-     downstream reader (due, ratio, the execution averages) already handles
-     that shape. */
-  if (SMPRules.pendOf(t).quarters) return null;
+  /* §218: A FILLED QUARTER COUNTS AT ONCE. This used to return null while
+     the quarters waited on the office, so a tactic whose timeline had just
+     been filled in read as NOT DUE — and a row that is not due is not
+     asked, so it vanished from the report under the words "Not asked —
+     outside this cycle". Measured on one tactic with its quarters
+     unchanged: settled 41 rows asked, pending 40, tick removed 41 again.
+     That is what Consumer Finance was looking at — nine tactics filled in
+     and none of them reportable. With no approval there is nothing to
+     wait for. */
   var q = quartersOf(t), total = 0, elapsed = 0;
   for (var i = 0; i < 4; i++) {
     if (!q[i]) continue;
@@ -17036,58 +17137,6 @@ function tacticPlanned(t){
    and averaging a zero into execution would say otherwise. */
 function tacticDue(t){ return tacticPlanned(t) > 0; }
 
-/* ── WHAT IS STILL AWAITING THE OFFICE'S CONFIRMATION (§145) ────────────
-   Every pending-fill mark on a subject, one entry per marked field. The
-   COUNT the pane band shows, the rows the Submit refusal names and the
-   scores' exclusions are all read off this one list — a count that cannot
-   take you to what it counts is a count that makes work (§116.2). */
-function gapPendRows(target){
-  var out = [], t = String(target || "");
-  var push = function(row){
-    var p = SMPRules.pendOf(row);
-    Object.keys(p).forEach(function(f){
-      out.push({ obj: row, field: f, mark: p[f] });
-    });
-  };
-  if (t.indexOf("fn:") === 0) {
-    var fk = t.slice(3), fo = functionOf(fk);
-    if (fo && String(fo.format) === "pillars") {
-      var fu = unitLike(t);
-      if (fu) {
-        push(fu);
-        (fu.keyObjectives || []).forEach(push);
-        (fu.items || []).forEach(function(p){
-          (p.measures || []).forEach(push);
-          (p.tactics || []).forEach(push);
-        });
-      }
-    }
-    (GROUP.capabilities || []).forEach(function(c){
-      if (c.fn !== fk) return;
-      (c.keyObjectives || []).forEach(push);
-      /* §177: a project's outcomes and milestones carry marks of their own
-         now, so the pending list has to walk them or the office's "N awaiting
-         confirmation" undercounts exactly the values §177 made fillable. */
-      (c.projects || []).forEach(function(pr){
-        push(pr);
-        (pr.outcomes   || []).forEach(push);
-        (pr.milestones || []).forEach(push);
-      });
-    });
-  } else {
-    var u = UNITS[t];
-    if (u) {
-      push(u);
-      (u.keyObjectives || []).forEach(push);
-      (u.items || []).forEach(function(p){
-        (p.measures || []).forEach(push);
-        (p.tactics || []).forEach(push);
-      });
-    }
-  }
-  return out;
-}
-function gapPendCount(target){ return gapPendRows(target).length; }
 
 /* ── WHERE THE MISSING THINGS ARE (§145.12) ─────────────────────────────
    One map of every place holding gaps, counted through the shared
@@ -17106,7 +17155,7 @@ function gapPendCount(target){ return gapPendRows(target).length; }
    whose words is already answered here; a `pendMap()` written alongside would
    be a second copy of the navigation and would drift the first time a page
    moved (§53.5). `pend` swaps only what is COUNTED on each row. */
-function gapMap(target, pend){
+function gapMap(target, all){
   var t = String(target || ""), out = [];
   /* §177: COUNTED ONLY WHERE THIS VIEWER COULD ACTUALLY CLOSE IT. The map
      feeds the red "N Missing", the per-place chips, the rail's counts and the
@@ -17116,32 +17165,18 @@ function gapMap(target, pend){
      whole subject's gaps at them would send them to a field they cannot type
      in: §61's trap wearing the count's clothes. The office authors, so
      everything counts for them, which is the page-level answer. */
+  /* §221: AND A MODE THAT IGNORES WHO IS LOOKING. The scoping above is
+     right for the counts somebody is asked to clear, and wrong for the
+     question "does this plan still owe anything" — a submission gate that
+     read the viewer's own reach would let a unit head submit a plan with
+     holes in it simply because the holes are the office's to fill. */
   var canAuthor = {}, reach = function(acKey, ctx){
+    if (all) return true;
     if (!(acKey in canAuthor)) canAuthor[acKey] = mayAuthor(acKey, target);
     return canAuthor[acKey] || mayFillRow(acKey, ctx, target);
   };
   var G = function(acKey, ctx, kind, row){
     if (!reach(acKey, ctx)) return 0;
-    /* A PENDING MARK IS COUNTED ONLY FOR A FIELD THAT KIND ACTUALLY HAS
-       (§192). `pend` rides each row's own object and nothing prunes it, so a
-       mark left behind by a field that has since stopped being fillable
-       (collaborators, §187) would be counted and then walked to a tick that
-       is not drawn — a count promising a control that does not exist (§61).
-       Asked through GAP_FIELDS, the same list the gaps are counted from. */
-    if (pend) {
-      var marks = SMPRules.pendOf(row);
-      /* §214.4: THE FILLABLE LIST, NOT THE COUNTED ONE. §192 chose
-         `GAP_FIELDS` and its own words say why — a mark for a field that has
-         stopped being FILLABLE would be walked to a tick that is not drawn —
-         but that is exactly what `GAP_FILLABLE` answers, and the two lists
-         have since parted three times (collaborators §205, a function's key
-         objectives §214.2, its definition here). `gapCell` draws the confirm
-         tick for every fillable field, so asking the counted list left the
-         office unable to FIND a fill it can plainly see and tick. §205's
-         fault in the walk rather than in the save. */
-      return (SMPRules.GAP_FILLABLE[kind] || []).filter(function(f){
-        return !!marks[f]; }).length;
-    }
     return SMPRules.gapMissing(kind, row).length;
   };
   var entry = function(key, label, count, go){
@@ -17268,13 +17303,9 @@ function gapMap(target, pend){
 function gapTotal(target){
   return gapMap(target).reduce(function(a, e){ return a + e.count; }, 0);
 }
-/* Where the pending values are, in the same shape and the same order as the
-   gaps (§192). The TOTAL still comes from `gapPendCount()`, which walks the
-   stored rows rather than the map — the two are asserted to agree, because a
-   count that disagrees with the walk it feeds is exactly what this section
-   exists to remove (§116.2). */
-function pendMap(target){
-  return gapMap(target, true);
+/* Everything the plan owes, whoever is looking (§221) — what Submit waits on. */
+function gapTotalAll(target){
+  return gapMap(target, true).reduce(function(a, e){ return a + e.count; }, 0);
 }
 /* Who the counts are FOR: somebody who can act on them — the fill grant or
    the office. A plain reader never sees a nag they cannot clear (§69). */
@@ -17282,13 +17313,6 @@ function seesGaps(target){
   var t = target === undefined ? TARGET : target;
   return SMPRules.FILL_PAGES.some(function(pg){
     return mayFill(pg, t) || mayAuthor(pg, t);
-  });
-}
-/* Only the fields a score reads block a submission — a pending owner or
-   date changes no figure's meaning (§145, Islam's boundary). */
-function gapScoreWait(target){
-  return gapPendRows(target).filter(function(x){
-    return SMPRules.GAP_SCORE_FIELDS.indexOf(x.field) > -1;
   });
 }
 function tacticRatio(t){
@@ -17571,7 +17595,7 @@ function viaCarrier(p, own, roll){
    office's confirmation is not scored (§145): the comparison is not ready,
    so it leaves the average the way an unmeasured outcome already does
    (§104.10) — the reported actual is kept and shown, only the score waits. */
-function scorableMeasures(p){ return (p.measures || []).filter(function(m){ return m.target && m.progress != null && !SMPRules.pendingScore(m); }); }
+function scorableMeasures(p){ return (p.measures || []).filter(function(m){ return m.target && m.progress != null; }); }
 function pillarPerf(p){
   return viaCarrier(p,
     function(){ return avg(scorableMeasures(p).map(function(m){ return m.progress; })); },
@@ -23878,12 +23902,10 @@ function measureRows(ms, opts){
   opts = opts || {};
   var on = arranging("unit", opts.unit);
   return ms.map(function(m, i){
-    /* §145: a measure whose target, direction or compile is awaiting the
-       office's confirmation is not scored — the actual is shown (it is
-       real), the score reads a dash with the reason on hover, and the
-       averages already left it out (`scorableMeasures`). */
-    var pend = SMPRules.pendingScore(m);
-    var scored = m.target && m.progress != null && !pend;
+    /* §218: nothing is held back for the office any more — a filled target
+       or direction is live, so a measure is scored the moment it has a
+       figure to score. */
+    var scored = m.target && m.progress != null;
     var head = '<tr data-oi="' + i + '"' + (isFocus(m.id) ? ' class="focusrow"' : '') + '><td class="idx">' +
                (on ? handle("Reorder " + m.name) : '') +
                '<span class="idx-n">' + (i+1) + '</span></td><td>' + esc(m.name) + fmark(m.id) +
@@ -23894,21 +23916,8 @@ function measureRows(ms, opts){
     return head + '<td class="num">' + esc(m.actual) + '</td>' +
            (scored
              ? '<td class="num final" style="color:' + bandInk(m.progress) + '">' + m.progress + '%</td>'
-             : pend
-             ? '<td class="cc"><span class="pill none" title="Awaiting Strategy Office ' +
-               'confirmation — this row is not counted yet">&mdash;</span></td>'
              : '<td class="cc"><span class="pill none">Not scored</span></td>') + '</tr>';
   }).join("");
-}
-/* The sentence under a table with rows the score is not counting (§106's
-   shape: a score that moves — or refuses to move — for a reason nothing on
-   the page states is a score nobody can defend). Drawn only when there is
-   something to say. */
-function pendCountLine(list){
-  var n = (list || []).filter(function(m){ return SMPRules.pendingScore(m); }).length;
-  if (!n) return "";
-  return '<p class="sub pendwait">' + plural(n, "row") +
-    ' not counted yet &mdash; awaiting Strategy Office confirmation.</p>';
 }
 function measureHead(unscored){
   return '<thead><tr><th class="idx">#</th><th>Measure</th><th class="cc">Dir.</th><th class="cc">Target</th>' +
@@ -24073,7 +24082,6 @@ function pillarBody(it, u){
     '<div class="scroll"><table>' + measureHead() +
       '<tbody class="sortable" data-item="tr" data-kind="measures" data-u="' + uk + '">' +
       measureRows(it.measures, { unit: uk }) + '</tbody></table></div>' +
-    pendCountLine(it.measures) +
     '<h5 class="mini">' + L("tactic","bu") + '</h5>' +
     '<div class="scroll"><table>' + tacticHead() +
       '<tbody class="sortable" data-item="tr" data-kind="tactics" data-u="' + uk + '">' +
@@ -24253,7 +24261,7 @@ function draftBtns(){
    with no box and a lighter weight — one family in two volumes, the act that
    ends the report against the act that parks it. Inside §41's accent budget:
    drawn only while a cycle is open, for somebody who may report. */
-function repChrome(target, done, total, pct, mayAll, subd){
+function repChrome(target, done, total, pct, mayAll, subd, parked, submitWhy){
   return '<div class="repchrome">' +
     '<span title="' + esc(REVIEW.name + " · due " + REVIEW.due) + '">' +
       '<span class="rc-n">' + done + '</span> ' +
@@ -24261,13 +24269,26 @@ function repChrome(target, done, total, pct, mayAll, subd){
     '<span class="rc-bar' + (pct < 100 ? " part" : "") + '">' +
       '<i style="width:' + pct + '%"></i></span>' +
     (mayAll
-      ? (subd
-          ? '<span class="badge b-done">Submitted</span>' +
-            '<button class="linkbu" data-unsubmit="' + esc(target) + '">Reopen my report</button>'
+      ? (subd || parked
+          ? '<span class="rc-state ' + (subd ? 'done">Submitted' : 'draft">Draft saved') +
+            '</span><button class="rc-reopen" data-unsubmit="' + esc(target) + '">Reopen</button>'
+          : submitWhy
+          /* §221: NOT READY, SO THE CONTROL SAYS SO BEFORE IT IS PRESSED.
+             `aria-disabled` rather than `disabled`, because a disabled button
+             takes no focus and the reason would be unreachable without a
+             mouse — the bubble opens on hover AND on focus (§163). The click
+             handler still refuses, so the hover is the explanation and not
+             the enforcement. */
+          ? '<button class="rc-submit hasnote" data-submit="' + esc(target) + '"' +
+              ' aria-disabled="true" data-tip="' + esc(submitWhy) + '">Submit to the SMO</button>' +
+            '<button class="rc-draft" data-repsave="1">Save draft</button>'
           : '<button class="rc-submit" data-submit="' + esc(target) + '">Submit to the SMO</button>' +
             '<button class="rc-draft" data-repsave="1">Save draft</button>')
       : '<span class="pill none">View only</span>') +
-    '<button class="linkbu" data-repcancel="1">Cancel</button>' +
+    /* §220: CLOSE, NOT CANCEL. The handler is `REPORTING = null; paint()` and
+       nothing is discarded — figures are written as they are typed — so the
+       old word promised a threat it never carried out. */
+    '<button class="linkbu" data-repcancel="1">Close</button>' +
     '<span class="savesay" data-savesay="1" role="status" aria-live="polite"></span>' +
     '</div>';
 }
@@ -25487,9 +25508,6 @@ function editBar(page, acKey){
         inner = '<button class="editbtn fdone" data-page="' + page + '">Done filling</button>';
       else if (gapTotal(TARGET))
         inner = '<button class="fillcta" data-fillcta="' + page + '">Fill in missing elements</button>';
-      else if (gapPendCount(TARGET))
-        inner = '<button class="pendcta" data-page="' + page + '">Review pending &middot; ' +
-          gapPendCount(TARGET) + '</button>';
       else inner = '';
       return (dl || inner) ? '<div class="pageact">' + dl + inner + '</div>' : '';
     }
@@ -25600,10 +25618,6 @@ function penBtn(page, acKey){
     if (miss) return '<button class="fillcta cornerbtn" data-fillcta="' + page +
       '" title="' + plural(miss, "missing element") + ' in this plan">' +
       'Fill in missing elements</button>';
-    var pend = gapPendCount(TARGET);
-    if (pend) return '<button class="pendcta cornerbtn" data-page="' + page +
-      '" title="Filled values awaiting Strategy Office confirmation — still yours to correct">' +
-      'Review pending &middot; ' + pend + '</button>';
     return '';
   }
   var on = EDIT_PAGE[page];
@@ -25986,7 +26000,6 @@ function collabSel(page, list, setter){
    office write through the ordinary pen DELETES the mark on that field —
    correcting is confirming. The server judges the same transitions from
    the diff (lib/authorize.js's gap pass), so nothing here is trusted. */
-var PENDS = [];
 function gapStamp(row, field){
   row.pend = row.pend || {};
   row.pend[field] = { by: (viewer() || {}).key || null,
@@ -26005,25 +26018,6 @@ var GAP_WORDS = { dir:"Direction", target:"Target", target3y:"3-year target",
                   compile:"Compile rule", owner:"Owner", quarters:"Quarters",
                   start:"Start", end:"End", aspiration:"Aspiration",
                   weight:"Weight" };
-function pendChip(acKey, row, field){
-  var p = SMPRules.pendOf(row)[field];
-  if (!p) return '';
-  var per = p.by ? personBy(p.by) : null;
-  var who = (per && per.name) || p.by || "";
-  var say = (GAP_WORDS[field] || field) + " filled" + (who ? " by " + who : "") +
-            (p.at ? ", " + p.at : "") + " — awaiting Strategy Office confirmation";
-  var tick = "";
-  if (mayAuthor(acKey)) {
-    var i = PENDS.push({ row: row, field: field, acKey: acKey }) - 1;
-    /* §192: `pendwalk` MARKS IT WITHOUT STYLING IT — the same separation the
-       gap walk needs (§177.2: *this control answers a pending value* and
-       *paint it* are different facts, and merging them restyles the tick to
-       fix a walker). */
-    tick = '<button class="gapok pendwalk" data-pconf="' + i + '" title="Confirm — ' +
-      'this value becomes settled" aria-label="Confirm this value">&#10003;</button>';
-  }
-  return '<span class="pchip" title="' + esc(say) + '">pending</span>' + tick;
-}
 /* pendBadge() was here. It drew the subject-wide pending count in the pillar
    band's right slot; §192 moved that number onto the totals row with the
    other subject-wide counts, where it can be walked and where it cannot land
@@ -26058,47 +26052,18 @@ function missBarCta(total){
   return '<button type="button" class="fillcta" data-fillcta="' +
     esc(fillPageForSec(sec)) + '">Fill in missing elements</button>';
 }
-/* ── THE PENDING COUNT, AND A WAY TO WALK TO THEM (§192) ────────────
-   Islam, as the SMO: *"I'm getting this badge but I don't know where they
-   are — I think we need a flow like the filling to take me through the
-   confirmation areas so I can confirm."*
-
-   IT WAS ON THE WRONG ROW, AND UNDER A BUTTON. `pendBadge()` drew it in the
-   pillar band's right slot, which reserves 76px — room for two pen glyphs —
-   while the fill grant's control beside it is a WORDED button 138 to 184px
-   wide. Measured on the real page: 160px of overlap reading, 110px filling,
-   so the two printed on top of each other (Islam's screenshot). A reserved
-   width that has to be kept in step with somebody else's wording is a
-   constant that goes stale (§122.5), so the fix is not a bigger number.
-
-   AND THE NUMBER WAS NEVER THE PILLAR'S. `gapPendCount(TARGET)` counts the
-   WHOLE subject, and the row above the pane is already where the subject's
-   totals live — *"26 Missing · LG01 9 · LG02 7"*. Drawn on one pillar's band
-   it was saying it belonged to that pillar. Option B of the mockup, Islam's
-   pick: it goes where the other totals are, and the collision goes with it.
-
-   THE WALK IS THE GAP WALK'S OWN (§177.2), over the ticks instead of the
-   fields. `pendMap()` is `gapMap()` counting marks, so the places, their
-   order and the words are one answer for both. */
-/* NAMED FOR THE TOTAL, because `pendChip()` is already taken by the mark that
-   sits on ONE value — and a function declaration hoists over its twin in a
-   concatenated file, so the second spelling silently replaced the first and
-   every per-value chip and confirm tick in the product stopped being drawn.
-   §56.7's collision, in the same shape: one scope, two plausible names, no
-   error, and the fault shows up somewhere else entirely (here: the walk found
-   no ticks to walk). Found by driving it. */
-function pendTotalChip(n){
-  return '<span class="pendcount" title="Filled values awaiting Strategy ' +
-    'Office confirmation">' + n + ' awaiting confirmation</span>';
-}
+/* §218: THE PENDING HALF OF THIS BAR IS GONE. §192 put a count and a walk
+   here for values waiting on the office; with the approval removed there is
+   nothing to wait for, so the bar counts what is MISSING and nothing else.
+   The walk's machinery went with it rather than being left callerless — a
+   builder nobody calls is one the next reader takes for load-bearing (§24). */
 function missBar(){
   if (typeof seesGaps !== "function" || !seesGaps()) return '';
   var map = gapMap(TARGET), total = gapTotal(TARGET);
-  var pend = typeof gapPendCount === "function" ? gapPendCount(TARGET) : 0;
-  /* DRAWN FOR EITHER. Before §192 the bar existed only while something was
-     missing, so a plan entirely filled and entirely unconfirmed drew nothing
-     at all — which is the state the office is in when they get the badge. */
-  if (!total && !pend) return '';
+  /* §218: nothing is awaiting confirmation any more, so the bar is drawn
+     for what is MISSING and nothing else — which is what it was before
+     §192 added the pending half. */
+  if (!total) return '';
   var chips = map.filter(function(e){ return e.count > 0; }).map(function(e){
     return '<button type="button" class="mchip"' +
       ' data-gkey="' + esc(e.key) + '"' +
@@ -26113,18 +26078,8 @@ function missBar(){
      office's alone (§145), so a Next-pending button drawn for them would walk
      to a tick that is not there (§61, and §177's own rule that a count is a
      promise the press opens something). */
-  /* WHO MAY CONFIRM, asked of the SUBJECT rather than of one page key. A unit
-     is judged on `u_plan` and a capability function on `k_proj`, so the
-     literal that worked on a unit would have hidden the walk on every function
-     — §53.5's drift, and the exact reason `seesGaps()` beside it asks the
-     whole list rather than naming a page. */
-  var mayConfirm = SMPRules.FILL_PAGES.some(function(pg){ return mayAuthor(pg); });
-  var walk = pend && mayConfirm ? ' <button type="button" ' +
-    'class="pendcta" data-nextpend="1">Next pending &rarr;&nbsp;' +
-    '<span class="npleft">' + pend + ' left</span></button>' : '';
   return '<div class="missbar" data-gapband="1">' +
     (total ? '<span class="secmiss">' + total + ' Missing</span>' : '') + chips +
-    (pend ? '<span class="pendtail">' + pendTotalChip(pend) + walk + '</span>' : '') +
     '<span class="gaptail">' + (total ? missBarCta(total) : '') + '</span></div>';
 }
 /* The counts rewritten IN PLACE after a fill — §63's write-into-the-node,
@@ -26320,7 +26275,7 @@ function gapCell(page, acKey, row, field, opts){
         '<span class="wasval"> \u2014 currently \u201C' + esc(val) + '\u201D</span>'
     : (opts.read ? opts.read(val)
       : opts.flow ? '<span class="flow ' + (opts.cls || "") + '">' + esc(val) + '</span>' : esc(val));
-  return text + pendChip(acKey, row, field);
+  return text;
 }
 
 /* Two readings of the same targets. Columns compares them down a line; chips
@@ -26520,8 +26475,7 @@ function koView(list, isGroup, acKey){
      including a pending direction or compile, which have no column here, or
      the office would have nothing to confirm them from in read mode. */
   var chips = function(m){
-    return pendChip(acKey, m, "dir") + pendChip(acKey, m, "target3y") +
-           pendChip(acKey, m, "target") + pendChip(acKey, m, "compile");
+    return "";
   };
   if (KO_VIEW === "chips") {
     return '<div class="ochips">' + list.map(function(m){
@@ -27114,7 +27068,8 @@ function renderReport(u){
   /* Published to the chrome rather than drawn here (§150): the shell reads
      REPORT_CHROME after this render and hangs it on the tab row, the same
      trip PAGE_TOOLS already makes. */
-  REPORT_CHROME = repChrome(u.ukey, c.done, c.total, pctDone, mayAll, subd);
+  REPORT_CHROME = repChrome(u.ukey, c.done, c.total, pctDone, mayAll, subd,
+                            reportParked(u.ukey), submitWhyShort(u.ukey));
   var bar = "";
 
   var summary =
@@ -28312,7 +28267,8 @@ function renderFnReport(fnKey){
   var mayAll = canSpeakFor(fnKeyTarget), subd = !!(REVIEW.submitted || {})[fnKeyTarget];
   /* The same box the unit's report publishes (§150, §53.5) — one builder, so
      the two sides cannot explain the same state differently. */
-  REPORT_CHROME = repChrome(fnKeyTarget, done, total, pctDone, mayAll, subd);
+  REPORT_CHROME = repChrome(fnKeyTarget, done, total, pctDone, mayAll, subd,
+                            reportParked(fnKeyTarget), submitWhyShort(fnKeyTarget));
   var bar = "";
   return bar + caps.map(function(c){
     return capBand(c) + '<div class="capbody">' + capReportBody(c) + '</div>';
@@ -28619,7 +28575,7 @@ function unitPlanBody(it, u, railed){
         : (filling("plan", "u_plan", pctx(t)) &&
            (SMPRules.quartersBlank(t) || SMPRules.pendOf(t).quarters))
           ? qsFill(t)
-          : qs(t) + pendChip("u_plan", t, "quarters")) + '</td></tr>';
+          : qs(t)) + '</td></tr>';
   }).join("");
   var meta = pillarMeta(it, ed);
   /* ── EDITING KEEPS ITS HEAD, AND THE NAME GETS THE LINE (§194) ──────
@@ -28951,11 +28907,11 @@ function koReadBlock(list, emptyLine){
          count said nothing was). The em-dash is what the Weight column beside
          it has always drawn for an absent optional value. */
       return '<div class="orow"><span class="on">' + esc(m.name) +
-          pendChip("k_found", m, "dir") + pendChip("k_found", m, "compile") + '</span>' +
+          '</span>' +
         '<span class="ot">' + (m.target ? esc(m.target) : '&mdash;') +
-          pendChip("k_found", m, "target") + '</span>' +
+          '</span>' +
         '<span class="ot h">' + (m.weight == null ? "&mdash;" : m.weight + "%") +
-          pendChip("k_found", m, "weight") + '</span></div>';
+          '</span></div>';
     }).join("");
 }
 /* The capability objectives editor — koEdit's shape with the WEIGHT column a
@@ -29058,7 +29014,6 @@ function unitPerfPane(it, u, railed){
     '<div class="scroll"><table>' + measureHead() +
       '<tbody class="sortable" data-item="tr" data-kind="measures" data-u="' + uk + '">' +
       measureRows(it.measures, { unit: uk }) + '</tbody></table></div>' +
-    pendCountLine(it.measures) +
     '<h5 class="mini">' + L("tactic","bu") + '</h5>' +
     '<div class="scroll"><table>' + tacticHead() +
       '<tbody class="sortable" data-item="tr" data-kind="tactics" data-u="' + uk + '">' +
@@ -29184,7 +29139,7 @@ function stateCell(roleKey, areaKey, editable, disabled){
   var states = (areaKey === "a_unit_own_strat" || areaKey === "a_fn_own_strat")
     ? ["view", "fill", "edit"] : ["view", "edit"];
   var WORD = { view: "May read",
-               fill: "May fill what’s empty — Missing values only, pending until the office confirms",
+               fill: "May fill what’s empty — Missing values only, and they count straight away",
                edit: "May read and change" };
   var ICON = { view: ICON_EYE, fill: ICON_FILL, edit: ICON_PEN };
   var opts = states.map(function(o){
@@ -42753,7 +42708,30 @@ var SYNC = (function () {
      left open (an edit made during an in-flight save, the tab gone before it
      settles) is the small corner of a small corner, and the 5s interval owns
      it whenever the tab survives. */
+  /* ── COMMIT THE BOX BEFORE LEAVING (§219) ─────────────────────────
+     Islam, on Hala: *"she updated the definition of her capability and left
+     and came back didn't find it."* The save path was not the fault — every
+     bound field in the product writes on `change`, which for a text box
+     means WHEN THE CURSOR LEAVES IT (§35), and this flush sends work that
+     is already in the graph. So typing a definition and then closing the
+     tab wrote nothing at all: no error, because from the platform's side
+     nothing was ever entered.
+
+     §170 closed the debounce window and this is the window one step
+     earlier — the value had not reached the graph to be debounced.
+
+     `blur()` rather than a synthesised `change`: it is what the browser
+     itself does when focus moves, so a field wired any other way behaves
+     the same, and a field already committed fires nothing. Wrapped, because
+     a throw here would take the flush with it and lose everything else. */
+  function commitFocus() {
+    try {
+      var el = document.activeElement;
+      if (el && el !== document.body && typeof el.blur === "function") el.blur();
+    } catch (e) { /* leaving anyway */ }
+  }
   function flushLeave() {
+    commitFocus();
     if (!live || isDemoMode() || saving) return;
     if (timer) { clearTimeout(timer); timer = null; }
     var now = serialize();
@@ -44763,7 +44741,6 @@ var SYNC = (function () {
        the paint before it. */
     if (typeof KOLISTS !== "undefined") KOLISTS.length = 0;
     /* §145: the confirm ticks register the row they act on the same way. */
-    if (typeof PENDS !== "undefined") PENDS.length = 0;
     fillViewers();
     paintUnits();
     /* ── TARGET IS DERIVED FROM `current`, SO IT IS SET AFTER IT SETTLES ──
@@ -45025,6 +45002,39 @@ var SYNC = (function () {
     if (REPORT_CHROME && tabrow && !railed)
       tabrow.insertAdjacentHTML("beforeend",
         '<span class="tabacts">' + REPORT_CHROME + '</span>');
+
+    /* ── A CLOSED REPORT IS CLOSED (§220) ────────────────────────────────
+       Islam: *"the submit or the save as a draft locks the report."* Before
+       this, submitting changed the WORDING and nothing else — measured: all
+       twelve figure boxes and the owner's note stayed fully editable after
+       Submit, so a report could be changed after the office had received it
+       and what they were told they were sent was not what the database held.
+
+       DISABLED, NOT ONLY DIMMED. `pointer-events:none` is a look, not a
+       lock — the keyboard walks straight past it — so every control inside
+       the report is actually disabled and the dimming is what says so.
+       Read-only rather than hidden: a closed report still has to be
+       readable, which is most of why anybody reopens it.
+
+       Done here, after the render, rather than at each of the render sites
+       that draw a reporting control: one place, so a control added later is
+       covered the day it is added (§104.7's argument). */
+    (function(){
+      var panel = document.getElementById("panel");
+      if (!panel) return;
+      var shut = !!(REPORTING && typeof reportClosed === "function" &&
+                    reportClosed(REPORTING));
+      panel.classList.toggle("replocked", shut);
+      if (!shut) return;
+      panel.querySelectorAll("input, textarea, select, button")
+        .forEach(function(el){
+          /* The way OUT of the closed state is not part of the closed
+             state — Reopen and Close live on the tab row, outside #panel,
+             but a report body that grows one later must not lock it. */
+          if (el.hasAttribute("data-unsubmit") || el.hasAttribute("data-repcancel")) return;
+          el.disabled = true;
+        });
+    })();
 
     /* ── AND A TABLE TOO WIDE FOR ITS PANE SCROLLS INSIDE ITSELF (§151) ──
        Done here, once, rather than at the dozen render sites that build a
@@ -45538,92 +45548,6 @@ var SYNC = (function () {
       if (!samePage) return gapGoTo(c);
     }
     if (els.length) gapLight(els[0]);
-  }
-  /* ── AND THE SAME WALK OVER THE PENDING VALUES (§192) ──────────────
-     Islam, as the SMO: *"I'm getting this badge but I don't know where they
-     are — I think we need a flow like the filling to take me through the
-     confirmation areas so I can confirm."* §16.7's rule: a count that cannot
-     take you to what it counts is a count that makes work.
-
-     THE SAME SHAPE AS THE GAP WALK, deliberately — one behaviour to learn,
-     and the same three traps already paid for there (§177.2): the cursor is
-     marked on the WALKABLE element, a place is crossed by the same page test
-     rather than by what happens to be visible, and landing queues behind the
-     click (§30.1's CLICKING guard holds the paint, so the ticks do not exist
-     until the press has landed).
-
-     THE PLACES COME FROM `pendMap()`, which is `gapMap()` counting marks — so
-     the order, the words and the navigation are one answer for both walks and
-     cannot drift (§53.5). The chips it walks are BUILT here rather than drawn
-     on the bar: the office asked for a way THROUGH them, not for a second row
-     of counts beside the missing ones (§41's budget). */
-  var PENDWALK_KEY = null;
-  function pendPlaces(){
-    if (typeof pendMap !== "function") return [];
-    return pendMap(TARGET).filter(function(e){ return e.count > 0; });
-  }
-  function pendPlaceKey(e){
-    return e && e.go && e.go.rail ? e.go.rail + "|" + e.go.code : null;
-  }
-  function pendWalkTicks(place){
-    var root = document;
-    if (place) root = document.querySelector('[data-gplace="' +
-      place.replace(/"/g, '\\"') + '"]') || document;
-    return [].slice.call(root.querySelectorAll(".pendwalk"));
-  }
-  function pendLight(el){
-    document.querySelectorAll(".gaplit").forEach(function(e){ e.classList.remove("gaplit"); });
-    document.querySelectorAll("[data-gapat]").forEach(function(e){
-      e.removeAttribute("data-gapat"); });
-    el.setAttribute("data-gapat", "1");
-    el.classList.add("gaplit");
-    el.scrollIntoView({ block: "center" });
-    el.focus({ preventScroll: true });
-  }
-  function pendShown(e){
-    return (!e.go.rail || RAIL_SHOWN[e.go.rail] === e.go.code) &&
-           (!e.go.sec || CURSEC[currentSub] === e.go.sec);
-  }
-  function pendAt(places){
-    for (var i = 0; i < places.length; i++)
-      if (places[i].key === PENDWALK_KEY) return i;
-    for (var j = 0; j < places.length; j++) if (pendShown(places[j])) return j;
-    return -1;
-  }
-  /* Navigating by the place's OWN description rather than by pressing a chip,
-     because there is no chip to press — the same three `data-` values the
-     missing chips carry, read straight off the map that produced them. */
-  function pendGoTo(e){
-    PENDWALK_KEY = e.key;
-    if (e.go.sec && typeof CURSEC !== "undefined") CURSEC[currentSub] = e.go.sec;
-    if (e.go.rail) RAIL[e.go.rail] = e.go.code;
-    paint();
-    if (typeof toPaneTop === "function") toPaneTop();
-    setTimeout(function(){
-      var t = pendWalkTicks(pendPlaceKey(e));
-      if (!t.length) t = pendWalkTicks();
-      if (t.length) pendLight(t[0]);
-    }, 0);
-  }
-  function pendWalk(){
-    var places = pendPlaces();
-    if (!places.length) return;
-    var i = pendAt(places);
-    var ticks = pendWalkTicks(i >= 0 ? pendPlaceKey(places[i]) : null);
-    var cur = document.querySelector("[data-gapat]");
-    var at = cur ? ticks.indexOf(cur) : -1;
-    if (ticks.length && at < ticks.length - 1) return pendLight(ticks[at + 1]);
-    var here = i >= 0 ? pendPlaceKey(places[i]) : null;
-    var hereSec = i >= 0 ? (places[i].go.sec || "") : "";
-    var n = places.length;
-    for (var step = 1; step <= n; step++) {
-      var e = places[((i < 0 ? 0 : i) + step) % n];
-      var ep = pendPlaceKey(e);
-      var samePage = ep === here &&
-        (ep !== null || (e.go.sec || "") === hereSec);
-      if (!samePage) return pendGoTo(e);
-    }
-    if (ticks.length) pendLight(ticks[0]);
   }
 
     /* ── THE MONTH PICKER (§177) ────────────────────────────────────────
@@ -46354,11 +46278,32 @@ var SYNC = (function () {
       b.addEventListener("click", function(){
         var t = b.dataset.submit, why = submitRefusal(t);
         if (why) { alert(why + "\n\nNothing has been submitted."); return; }
-        REVIEW.submitted[t] = true; paint();
+        REVIEW.submitted[t] = true;
+        /* Submitting supersedes a parked draft: two closed states at once
+           would leave Reopen clearing one of them. */
+        if (REVIEW.parked) {
+          delete REVIEW.parked[t];
+          if (!Object.keys(REVIEW.parked).length) delete REVIEW.parked;
+        }
+        paint();
       });
     });
+    /* §220: ONE REOPEN FOR BOTH CLOSED STATES. A report is closed by
+       submitting it or by parking it as a draft, and the way back must not
+       depend on which — two buttons for one act is how the two states start
+       behaving differently (§53.5). */
     document.querySelectorAll("[data-unsubmit]").forEach(function(b){
-      b.addEventListener("click", function(){ delete REVIEW.submitted[b.dataset.unsubmit]; paint(); });
+      b.addEventListener("click", function(){
+        var t = b.dataset.unsubmit;
+        if (REVIEW.submitted) delete REVIEW.submitted[t];
+        if (REVIEW.parked) {
+          delete REVIEW.parked[t];
+          /* The last key leaving deletes the map (§50.6), or every save
+             carries a phantom change for ever. */
+          if (!Object.keys(REVIEW.parked).length) delete REVIEW.parked;
+        }
+        paint();
+      });
     });
     /* Source of figures (§16.7, reshaped in §16.7a). WHO is chosen once at the
        top; each row is then a single mark. The half-set problem the first
@@ -49138,10 +49083,19 @@ var SYNC = (function () {
            again — and this branch is deleted rather than left unreachable,
            because a branch nobody can reach is one the next reader takes for
            load-bearing (§24). */
+        /* §220: SAVING A DRAFT CLOSES THE REPORT. Islam: *"the save draft
+           should dim the full report until he press reopen so it opens
+           again."* Written BEFORE the save, so the state travels with it —
+           parking after the answer would need a second save, and a person
+           who closed the tab in between would come back to an open report
+           they believe they parked. */
+        if (REPORTING) { REVIEW.parked = REVIEW.parked || {};
+                         REVIEW.parked[REPORTING] = true; }
         SYNC.saveNow(function(state){
           if (state === "saved" || state === "clean") show("Saved", "ok");
           else if (state === "offline") show("Nothing to save — no server here", "");
           else show("Not saved — see the message above", "bad");
+          paint();
         });
       });
     });
@@ -49229,14 +49183,6 @@ var SYNC = (function () {
     });
     /* Confirming a pending fill — the office's act, re-asked at the click.
        The registry is this paint's, exactly as FIELDS is (§48.2's shape). */
-    document.querySelectorAll("[data-pconf]").forEach(function(b){
-      b.addEventListener("click", function(){
-        var e = PENDS[+b.dataset.pconf];
-        if (!e || !mayAuthor(e.acKey)) return;
-        gapLift(e.row, e.field);
-        paint();
-      });
-    });
     /* ── THE GAP BAND'S CHIPS AND WALKER (§145.12) ─────────────────────
        ONE handler on the band, by delegation: gapBandRefresh() rewrites the
        chips' contents in place between paints (a repaint would destroy the
@@ -49274,7 +49220,6 @@ var SYNC = (function () {
         return;
       }
       if (ev.target.closest("[data-nextgap]")) gapWalk();
-      if (ev.target.closest("[data-nextpend]")) pendWalk();
     });
     /* §145.14: the same two controls OUTSIDE the bar — the corner button and
        the empty-page pointer — wired directly (they are repainted, never

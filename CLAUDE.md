@@ -404,6 +404,73 @@ console errors (in this cloud environment, run it via a wrapper that points Play
   name — the real-database test caught it (§100.3). **NOT fixed and said so**: a
   genuine refusal is still a refusal, and if they continue while naming a
   function nobody opened, this diagnosis is wrong.
+- **THE TARGET DECIDES THE STRATEGY COLUMN (§217):** `lib/authorize.js`'s
+  `unitFoundation`, `unitAnalysis` and `unitPlan` guards each named a UNIT page
+  key outright, while the target they are handed can be `fn:<key>` — a pillars
+  function is classified through the unit-shaped pass (§59, and that is right)
+  — so **a supporting function's plan was authorised against the BUSINESS UNIT
+  Strategy column.** Measured, and exactly backwards: granting a custodian Edit
+  on their own supporting function changed **nothing**, granting Edit on
+  business units **let them author functions' plans**. `mayFillRow` two lines
+  below had been asking `planPageOf(target)` all along, which is what made it
+  findable. **ONE PAIRING, NAMED ONCE** — `strategyPageOf(target, unitPage)`,
+  with `planPageOf()` becoming that asked for the plan (§53.5). **Asserted in
+  both directions AND on both sides of the switch**: a test that only checks
+  "the custodian can edit" passes on the broken build by setting the wrong
+  cell. 2 red reverted; the unit half green either way.
+- **THE OFFICE'S APPROVAL ON A FILL IS GONE (§218, reversing §145.10):** Islam
+  — *"the custodian is already choosing from lists and he is responsible. The
+  confirmation is just a gate that we never needed."* Put to him that the gate
+  also stopped a filler naming themselves an Owner and thereby gaining that
+  line's reporting right; **he decided, and it is recorded as his.** **WHAT
+  SURVIVES IS THE STAMP, NOT THE GATE** — `pend` is still written and still
+  read by the authoriser, so a filler can correct their own typo (§145), and it
+  decides nothing else. **AND IT IS WHAT UNSTUCK CF**: `tacticPlanned()`
+  returned null while quarters were pending, so a just-filled timeline read as
+  NOT DUE and the row vanished under *"Not asked — outside this cycle"* —
+  measured on one tactic, **settled 41 asked, pending 40, tick removed 41**.
+  `GAP_SCORE_FIELDS`, `pendingScore`, `gapScoreWait`, `gapPendRows/Count`,
+  `pendMap`, `pendChip`, `pendTotalChip`, `pendCountLine`, §192's whole walk and
+  `checks/pending-walk.py` are DELETED, not left callerless (§24). **The two
+  reversed assertions were REWRITTEN rather than deleted**, so a later build
+  cannot drift back through them unnoticed.
+- **COMMIT THE BOX BEFORE LEAVING (§219):** Islam, on Hala — *"she updated the
+  definition of her capability and left and came back didn't find it."* Not the
+  save path and not her permission (filling a blank definition is accepted,
+  measured): every bound field writes on `change`, i.e. **when the cursor
+  leaves it** (§35), and §138's flush sends what is already in the graph. So
+  typing and closing the tab wrote nothing at all — no error, because nothing
+  was ever entered. §170 closed the debounce window; this is that window one
+  step earlier. **`blur()`, never a synthesised `change`** — it is what the
+  browser does when focus moves, so a field wired any other way behaves the
+  same and one already committed fires nothing. **Not claimed to be her path**,
+  and it could not be reproduced from the demo.
+- **A CLOSED REPORT IS CLOSED (§220):** *"the submit or the save as a draft
+  locks the report and in both cases you can find the button Reopen."*
+  **Measured first: nothing was ever locked** — after Submit all 12 figure
+  boxes and the note stayed editable, so a report could change after the office
+  received it. `REVIEW.parked` joins `submitted` in the authoriser's per-target
+  list (parking speaks for the unit exactly as submitting does); **one Reopen
+  for both**, and submitting clears a park or Reopen would clear one of two.
+  **DISABLED, NOT ONLY DIMMED** — `pointer-events:none` is a look and the
+  keyboard walks past it — and **readable**, because reviewing a closed report
+  is most of why anybody reopens it. Applied once after the render, so a
+  control added later is covered the day it is added. **Cancel becomes Close**,
+  a correction not a rename: the handler discards nothing. **Cost stated**:
+  Save draft stops meaning *save and keep typing*.
+- **SUBMIT IS SHUT UNTIL THE REPORT IS COMPLETE (§221):** two blockers beside
+  the three that existed — **`owed`** (rows asked with no figure) and
+  **`gaps`** (what the plan still lacks) — all five now said BEFORE the press.
+  **THE GAP COUNT IGNORES THE VIEWER**: `gapMap()` is scoped to what the person
+  could close (§177), right for the counts they clear and wrong here, or a unit
+  head submits past holes only the office can fill because to them it reads
+  zero. **`aria-disabled`, NEVER `disabled`** — a disabled button takes no
+  focus and the reason opens on hover AND focus (§163); the click handler still
+  refuses, so the hover explains rather than enforces. **One list of reasons
+  behind both wordings** (`submitWhyShort` for the bubble, `submitRefusal` for
+  the banner), or the control and its explanation disagree about why it is
+  shut. **And it catches a plan like CF's**: a tactic with no quarters is
+  already a gap (§128), so *"3 of 3, Submitted"* can no longer happen.
 - **A PLAN TRAVELS ROW BY ROW (§215):** Islam — *"for the business units, when
   you change a small thing it just sends the thing that changed. Is there any
   risk?"* §210 stopped at a top-level part because finer needs arrays matched by
@@ -3417,11 +3484,11 @@ python3 checks/refusal-keeps-work.py # a refusal costs the row it named and noth
                                 # with no row address offering no put-back. The stub runs
                                 # the REAL authoriser, because a canned 403 would be a
                                 # fiction about the one thing under test
-python3 checks/pending-walk.py  # the pending count is on the totals row and NOT on the
-                                # band, nothing in the corner overlaps (in PIXELS, both
-                                # modes), the walk crosses two rails and two sections and
-                                # wraps, the tick it lands on confirms, and a filler gets
-                                # the count and no walk (§192)
+python3 checks/submit-gate.py  # Submit is shut until the report is complete and the
+                                # plan holds no gaps, with the reason on hover; Save
+                                # draft and Submit both LOCK the report (controls
+                                # actually disabled, never a class) and one Reopen
+                                # unlocks either (§220, §221)
 python3 checks/gap-walk.py      # the band's chips and Next gap actually go somewhere:
                                 # a unit AND a function, as the filler AND the office,
                                 # every place the band names reached (§177.2)

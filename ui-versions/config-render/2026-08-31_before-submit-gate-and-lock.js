@@ -115,7 +115,7 @@ function stateCell(roleKey, areaKey, editable, disabled){
   var states = (areaKey === "a_unit_own_strat" || areaKey === "a_fn_own_strat")
     ? ["view", "fill", "edit"] : ["view", "edit"];
   var WORD = { view: "May read",
-               fill: "May fill what’s empty — Missing values only, and they count straight away",
+               fill: "May fill what’s empty — Missing values only, pending until the office confirms",
                edit: "May read and change" };
   var ICON = { view: ICON_EYE, fill: ICON_FILL, edit: ICON_PEN };
   var opts = states.map(function(o){

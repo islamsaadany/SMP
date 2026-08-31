@@ -24481,6 +24481,42 @@ Invisible to a page-load error listener and identical to a button that does
 nothing. `checks/plan-builder.py` went red, on a UNIT. *Run the whole suite, not
 the file you edited* — and prefer deleting a named function to slicing a range.
 
+### §214.2 — A function's key objectives are not counted
+
+Islam, narrowing §214 the moment he saw it: *"the key objectives should not
+count as missing in the functions in general. The definition is OK and the
+owner is OK, but the key objective specifically should not count."*
+
+Right, and it is §119.1's own rule: a capability with no objectives is judged by
+its projects and a function with none by its pillars, so an objective is an
+OPTIONAL line — and an optional blank is not a gap. What the Overview owes is
+the sentence saying what it is, and nothing else.
+
+**THEY STAY FILLABLE, AND THAT IS THE WHOLE CARE IN THIS CHANGE.** §205 is the
+lesson paid rather than repeated: §187 stopped collaborators being counted by
+EMPTYING `GAP_FIELDS.tactic`, which is the one list the SERVER also reads — so
+the screen went on opening the cell while every save of one was refused, and a
+BU owner met a refusal among rows that were accepted. `GAP_OPTIONAL` exists for
+exactly this, and `capko`'s four fields move into it: **counted** and
+**fillable** are two questions, and this answers only the first. Verified from
+the module rather than assumed — `GAP_FIELDS.capko` is `[]` and
+`GAP_FILLABLE.capko` is still all four.
+
+**AND THE PAGE HAD TO STOP SAYING THE WORD.** `koReadBlock()` printed a red
+`Missing` over a blank target, hardcoded rather than read from the field list —
+so leaving it would have put the red word over a count of nought, which is §177's
+own fault with the sign reversed (there the page said missing and the count said
+nothing was). It draws an **em-dash**, which is what the Weight column beside it
+has always drawn for an absent optional value.
+
+**A UNIT IS UNTOUCHED** — `GAP_FIELDS.ko` is unchanged, a unit's key objectives
+still count, and the check asserts it in both directions so a build that stopped
+counting everything would not pass.
+
+**PROVED ABLE TO FAIL**: putting the four fields back into `GAP_FIELDS.capko`
+turns **2** assertions red. 434 server tests still pass, which is the evidence
+the fills still land.
+
 ### Not explained
 
 The **"could not reach the server (Failed to fetch)"** on *Next pending*. It

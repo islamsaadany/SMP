@@ -384,6 +384,22 @@ console errors (in this cloud environment, run it via a wrapper that points Play
   remove × onto a second line — `inline-block` restores it, and it was found
   by `checks/plan-fields.py` GOING RED, not by reading the cascade, which is
   the argument for that check existing.
+- **COUNTED AND FILLABLE ARE TWO QUESTIONS (§214.2):** Islam — *"the key
+  objectives should not count as missing in the functions in general. The
+  definition is OK and the owner is OK, but the key objective specifically
+  should not count."* §119.1's rule: a capability with none is judged by its
+  projects, a function with none by its pillars, so an objective is an OPTIONAL
+  line and an optional blank is not a gap. `capko`'s four fields move from
+  `GAP_FIELDS` into **`GAP_OPTIONAL`** rather than being deleted — §205's lesson
+  paid rather than repeated, because §187 stopped collaborators counting by
+  emptying the one list the SERVER also reads, so the cell opened and every save
+  of it was refused. Verified from the module, not assumed. **AND THE PAGE HAD
+  TO STOP SAYING THE WORD**: `koReadBlock()` hardcoded a red `Missing` over a
+  blank target, so leaving it would print the alarm over a count of nought —
+  §177's fault with the sign reversed. An em-dash, which is what the Weight
+  column beside it already drew. **A UNIT IS UNTOUCHED** and asserted both ways.
+  2 red with the fields put back; 434 server tests still pass, which is the
+  evidence the fills still land.
 - **A COUNTED GAP MUST BE ONE THE SAVE ACCEPTS (§214):** Islam — *"all the
   overview for the functions planning by pillars should be mandatory and be
   counted as missing."* `GAP_FIELDS.cap = ["def"]`, ONE entry for both function

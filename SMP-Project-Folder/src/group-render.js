@@ -5454,9 +5454,15 @@ function koReadBlock(list, emptyLine){
     list.map(function(m){
       /* §145: the pending chips, including a direction or compile that has no
          column here — read mode is where the office's tick is. */
+      /* §214.2: AN EM-DASH, NOT THE RED WORD. A function's key objectives
+         stopped being counted as missing, and a page that prints `Missing`
+         over a count of nought is the product arguing with itself — §177's
+         own fault with the sign reversed (there the page said missing and the
+         count said nothing was). The em-dash is what the Weight column beside
+         it has always drawn for an absent optional value. */
       return '<div class="orow"><span class="on">' + esc(m.name) +
           pendChip("k_found", m, "dir") + pendChip("k_found", m, "compile") + '</span>' +
-        '<span class="ot">' + (m.target ? esc(m.target) : '<span class="missing">Missing</span>') +
+        '<span class="ot">' + (m.target ? esc(m.target) : '&mdash;') +
           pendChip("k_found", m, "target") + '</span>' +
         '<span class="ot h">' + (m.weight == null ? "&mdash;" : m.weight + "%") +
           pendChip("k_found", m, "weight") + '</span></div>';

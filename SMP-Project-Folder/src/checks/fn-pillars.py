@@ -172,9 +172,24 @@ with sync_playwright() as p:
     mc = pg.evaluate("(t)=>gapMap(t).map(e=>e.key)", TC)
     ok("the pillars function's map names `ov`", "ov" in m, m)
     ok("...as the projects function's does", "ov" in mc, mc)
-    ok("...and it counts the capability field list (target + weight = 2)",
-       pg.evaluate("(t)=>gapMap(t).filter(e=>e.key==='ov')[0].count", T) == 2,
+    # §214.2: AN OBJECTIVE OWING EVERYTHING COUNTS NOTHING. Islam: "the key
+    # objectives should not count as missing in the functions in general."
+    # Asserted BOTH WAYS, because a build that stopped counting the whole
+    # Overview would satisfy the first half alone (§113.8).
+    ok("...and an objective owing a target and a weight counts NOTHING",
+       pg.evaluate("(t)=>gapMap(t).filter(e=>e.key==='ov')[0].count", T) == 0,
        pg.evaluate("(t)=>gapMap(t).filter(e=>e.key==='ov')[0].count", T))
+    ok("...but they are still FILLABLE (§205: counted and fillable are two questions)",
+       pg.evaluate("()=>(SMPRules.GAP_FILLABLE.capko||[]).length") == 4,
+       pg.evaluate("()=>SMPRules.GAP_FILLABLE.capko"))
+    ok("...and the page prints no red word over them",
+       pg.evaluate("()=>document.querySelectorAll('#panel .orow .missing').length") == 0,
+       pg.evaluate("()=>[...document.querySelectorAll('#panel .orow')].map(r=>r.textContent.trim())"))
+    ok("...while a UNIT still counts its own objectives (§53.5: untouched)",
+       pg.evaluate("""()=>{ const u=UNITS[UNIT_KEYS[0]];
+         const had=u.keyObjectives[0].target; u.keyObjectives[0].target='';
+         const n=gapMap(UNIT_KEYS[0]).filter(e=>e.key==='ko')[0].count;
+         u.keyObjectives[0].target=had; return n; }""") >= 1)
     ok("...and no Foundation half survives on a function",
        "found" not in m and "ko" not in m, m)
 

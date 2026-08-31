@@ -2879,7 +2879,7 @@ function koToggle(){
    the two disagree keeps both exactly as typed and shows the near one's,
    because inventing a single unit for a row that holds two would be the
    platform deciding something nobody said (§96.2). */
-function koUnitOf(m){
+function targetUnitOf(m){
   if (!m) return "";
   var u = splitTarget(m.target).unit;
   return u || splitTarget(m.target3y).unit || "";
@@ -2901,20 +2901,20 @@ function koUnitOf(m){
    already there must leave the plan byte-identical, or every visit to this
    table puts a phantom change into the next save and a non-office save is
    refused for the rest of the cycle. */
-function koSetUnit(m, u){
+function setTargetUnit(m, u){
   var want = String(u == null ? "" : u).trim();
-  if (want === koUnitOf(m)) return;
+  if (want === targetUnitOf(m)) return;
   /* BUILT HERE RATHER THAN THROUGH `joinTarget`, and that is deliberate:
      joinTarget takes its separator from the value it is REPLACING, which is
      exactly right when the unit has not changed and exactly wrong here —
      "6.2B EGP" carries no space, so keeping it would turn a change to "SQM"
-     into "6.2SQM". The convention belongs to the NEW unit (KO_TIGHT above).
+     into "6.2SQM". The convention belongs to the NEW unit (TIGHT_UNITS above).
 
      WHAT IS WRITTEN STILL ROUND-TRIPS, which is the property the whole
      feature rests on: joinTarget reads the separator back out of the stored
      string, so a value written here splits and rejoins to itself, and the
      check asserts that over everything the plan holds. */
-  var sep = want && !KO_TIGHT[want] ? " " : "";
+  var sep = want && !TIGHT_UNITS[want] ? " " : "";
   ["target", "target3y"].forEach(function(f){
     var v = m[f];
     if (v == null || v === "") return;   /* nothing to attach it to */
@@ -2924,7 +2924,7 @@ function koSetUnit(m, u){
 /* A unit with no target to sit inside cannot be stored, so the field says so
    rather than accepting a word and losing it on the next paint (§61: a control
    that takes input and discards it is worse than one that is not there). */
-function koHasTarget(m){
+function hasTargetToHoldAUnit(m){
   return !!(String(m.target || "").trim() || String(m.target3y || "").trim());
 }
 
@@ -2949,7 +2949,7 @@ function koHasTarget(m){
    dropdown that could not show them would either display the row wrong or
    drop the unit on the first repaint, and both are worse than one extra
    entry. Nothing is rewritten by this list — only what the pen writes next. */
-var KO_UNITS = ["", "%", "#", "EGP", "M EGP", "B EGP", "SQM", "d", "h"];
+var TARGET_UNITS = ["", "%", "#", "EGP", "M EGP", "B EGP", "SQM", "d", "h"];
 /* WRITTEN AGAINST THE NUMBER, OR AFTER A SPACE — and it is the PLAN's own
    habit, read off the shipped data rather than invented: `30%`, `100#` and
    `6.2B EGP` are written tight, while `28 EGP`, `4 d` and `24 h` take a space.
@@ -2959,9 +2959,9 @@ var KO_UNITS = ["", "%", "#", "EGP", "M EGP", "B EGP", "SQM", "d", "h"];
    tight, a word takes a space" gets `EGP` right and `B EGP` wrong, and the
    difference is convention, not grammar. Nine entries is cheaper to read than
    a predicate nobody can quite state. */
-var KO_TIGHT = { "%":1, "#":1, "M EGP":1, "B EGP":1 };
-function koUnitOpts(cur){
-  var opts = KO_UNITS.slice();
+var TIGHT_UNITS = { "%":1, "#":1, "M EGP":1, "B EGP":1 };
+function targetUnitOpts(cur){
+  var opts = TARGET_UNITS.slice();
   if (cur && opts.indexOf(cur) < 0) opts.splice(1, 0, cur);
   return opts;
 }
@@ -3059,12 +3059,12 @@ function koEdit(list, page, acKey, owner){
            the count. It is `inputOr` like the NAME beside it: a fact about
            how the objective is written, which is authoring. */
         '<td class="cc">' + (pg
-          ? (koHasTarget(m)
-              ? selectOr(pg, koUnitOf(m), koUnitOpts(koUnitOf(m)), "",
-                  function(v){ koSetUnit(m, v); })
+          ? (hasTargetToHoldAUnit(m)
+              ? selectOr(pg, targetUnitOf(m), targetUnitOpts(targetUnitOf(m)), "",
+                  function(v){ setTargetUnit(m, v); })
               : '<span class="why" title="Set a target first \u2014 the unit is ' +
                 'written with it">\u2014</span>')
-          : esc(koUnitOf(m))) + '</td>' +
+          : esc(targetUnitOf(m))) + '</td>' +
         '<td class="cc">' + gapCell(page, acKey, m, "target3y",
           { kind:"input", cls:"mono" }) + '</td>' +
         '<td class="cc">' + gapCell(page, acKey, m, "target",
@@ -4960,6 +4960,25 @@ function unitPlanBody(it, u, railed){
          hover words come back through `read`. */
       '<td class="cc">' + gapCell("plan", "u_plan", m, "dir",
         { ctx:pctx(m), kind:"select", opts:["\u2265","\u2264"], cls:"mono", read:dirCell }) + '</td>' +
+      /* §199.5: THE SAME UNIT PICKER AS A KEY OBJECTIVE'S. Islam, of the
+         measures: *"let's do the same fix."* They have the identical shape —
+         76 of them across the plan, the unit typed into the target — so they
+         get the identical control, from the identical functions. Two tables
+         asking one question must not answer it twice (§53.5), which is why
+         `targetUnitOf`/`setTargetUnit` lost their `ko` prefix rather than
+         being copied.
+
+         THE PEN ONLY, exactly as on a key objective: a unit is not a gap, so
+         it does not go through gapCell and does not join the count. The
+         READING table (measureRows) is untouched — it prints `esc(m.target)`,
+         the whole string, which is where §199.4 put the unit back. */
+      (ed
+        ? '<td class="cc">' + (hasTargetToHoldAUnit(m)
+            ? selectOr("plan", targetUnitOf(m), targetUnitOpts(targetUnitOf(m)), "",
+                function(v){ setTargetUnit(m, v); })
+            : '<span class="why" title="Set a target first \u2014 the unit is ' +
+              'written with it">\u2014</span>') + '</td>'
+        : '') +
       '<td class="num">' + gapCell("plan", "u_plan", m, "target",
         { ctx:pctx(m), kind:"input", cls:"mono" }) + '</td>' +
       /* NO 3-YEAR COLUMN. Islam, 2026-08-22: "in the direction plans the key
@@ -5115,8 +5134,12 @@ function unitPlanBody(it, u, railed){
        table headings say "as planned", and every actual column reads em-dash -
        three statements of the same thing above a fourth. */
     '<h4 class="mini">Key measures <em>\u2014 as planned: this year\u2019s target, and how it compiles</em></h4>' +
-    miniTable(["#","Measure","Dir.","Target","Compiled"],
-      mRows + addRow(5, "measure", "Add a measure"), sortAttr("measures")) +
+    /* §199.5: the Unit heading appears only with the pen, because the column
+       under it does — and `addRow`'s span has to follow, or the Add row stops
+       reaching the end of the table the moment somebody opens the pen. */
+    miniTable(ed ? ["#","Measure","Dir.","Unit","Target","Compiled"]
+                 : ["#","Measure","Dir.","Target","Compiled"],
+      mRows + addRow(ed ? 6 : 5, "measure", "Add a measure"), sortAttr("measures")) +
     '<h4 class="mini">Tactics <em>\u2014 who carries it, who supports, and in which quarters</em></h4>' +
     miniTable(["#","Tactic","Owner","Collabs.","Quarters"],
       tRows + addRow(4, "tactic", "Add a tactic"), sortAttr("tactics"));

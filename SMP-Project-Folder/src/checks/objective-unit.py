@@ -81,7 +81,7 @@ with sync_playwright() as pw:
     print("\n── 2 · the setter")
     t = pg.evaluate("""() => {
       const go = (a, b2, u) => { const m = {target:a, target3y:b2};
-        koSetUnit(m, u); return [m.target, m.target3y]; };
+        setTargetUnit(m, u); return [m.target, m.target3y]; };
       return { word: go("100","1500","SQM"),
                same: go("30%","45%","%"),
                swap: go("2.4B EGP","6.2B EGP","SQM"),
@@ -101,8 +101,8 @@ with sync_playwright() as pw:
     # asserts the convention rather than inventing one.
     sep = pg.evaluate("""() => {
       const out = {};
-      KO_UNITS.forEach(u => { const m = {target:"6.2B EGP"};
-        koSetUnit(m, u); out[u || '(none)'] = m.target; });
+      TARGET_UNITS.forEach(u => { const m = {target:"6.2B EGP"};
+        setTargetUnit(m, u); out[u || '(none)'] = m.target; });
       return out; }""")
     ck("a scaled currency is written tight — 6.2B EGP / 6.2M EGP",
        sep.get("B EGP") == "6.2B EGP" and sep.get("M EGP") == "6.2M EGP", sep)
@@ -116,8 +116,8 @@ with sync_playwright() as pw:
     # reader could not take apart again would be a plan the pen had broken.
     rt = pg.evaluate("""() => {
       const bad = [];
-      KO_UNITS.concat(["M USD"]).forEach(u => {
-        const m = {target:"6.2B EGP"}; koSetUnit(m, u);
+      TARGET_UNITS.concat(["M USD"]).forEach(u => {
+        const m = {target:"6.2B EGP"}; setTargetUnit(m, u);
         const s = splitTarget(m.target);
         if (joinTarget(m.target, s.value, s.unit) !== m.target) bad.push(["rejoin", u, m.target]);
         if (s.unit !== String(u).trim()) bad.push(["read back", u, s.unit]);
@@ -130,7 +130,7 @@ with sync_playwright() as pw:
     same = pg.evaluate("""() => {
       const m = {target:"2.4B EGP", target3y:"6.2B EGP", name:"x"};
       const was = JSON.stringify(m);
-      koSetUnit(m, koUnitOf(m));
+      setTargetUnit(m, targetUnitOf(m));
       return { was: was, now: JSON.stringify(m) };
     }""")
     ck("the row is byte-identical afterwards", same["was"] == same["now"], same)
@@ -200,11 +200,60 @@ with sync_playwright() as pw:
        w.get("now") == ["1.6 SQM", "2.4 SQM"], w)
 
     print("\n── 7b · a unit the list does not offer is kept (§96.2, §114)")
-    keep = pg.evaluate("() => koUnitOpts('M USD')")
+    keep = pg.evaluate("() => targetUnitOpts('M USD')")
     ck("'M USD' is offered because a row holds it",
        "M USD" in keep and keep.index("M USD") == 1, keep)
     ck("...and the standard list is still all there",
        all(u in keep for u in ["%", "#", "EGP", "M EGP", "B EGP"]), keep)
+
+    print("\n── 7c · a PILLAR MEASURE gets the same picker (§199.5)")
+    # Islam: "for the pillar measures let's do the same fix." Identical shape,
+    # identical control, from the IDENTICAL functions — two tables asking one
+    # question must not answer it twice (§53.5), which is why the helpers lost
+    # their `ko` prefix rather than being copied.
+    pg.evaluate("() => { EDIT_PAGE['foundation'] = false; paint(); }")
+    pg.click('[data-u="mobile"]'); pg.wait_for_timeout(400)
+    pg.click('[data-s="strategy"]'); pg.wait_for_timeout(300)
+    pg.click('[data-sub2="plan"]'); pg.wait_for_timeout(700)
+    read = pg.evaluate("""() => [...document.querySelectorAll('.pane table tbody tr')]
+      .slice(0,2).map(r => [...r.querySelectorAll('td')].map(c=>c.innerText.trim()).slice(0,5))""")
+    ck("reading a measure keeps the unit ON the figure",
+       any("%" in (c or "") for r in read for c in r), read)
+    pg.evaluate("() => { EDIT_PAGE['plan'] = true; paint(); }")
+    pg.wait_for_timeout(700)
+    pm = pg.evaluate("""() => {
+      const tbl = [...document.querySelectorAll('.pane table')]
+        .find(t => (t.querySelector('thead')||{}).textContent.indexOf('Measure') > -1);
+      if (!tbl) return { noTable: true };
+      const row = tbl.querySelector('tbody tr');
+      const sel = row.querySelectorAll('td')[3].querySelector('select');
+      const last = tbl.querySelector('tbody tr:last-child td[colspan]');
+      let was = null, wrote = null;
+      if (sel) { const m = UNITS.mobile.items[0].measures[0];
+        was = m.target; sel.value = "SQM";
+        sel.dispatchEvent(new Event('change',{bubbles:true}));
+        wrote = m.target; m.target = was; }
+      return { heads: [...tbl.querySelectorAll('thead th')].map(t=>t.textContent.trim()),
+               cells: row.querySelectorAll('td').length,
+               addSpan: last ? last.getAttribute('colspan') : null,
+               opts: sel ? [...sel.options].map(o=>o.value) : null,
+               showing: sel ? sel.value : null, was: was, wrote: wrote };
+    }""")
+    ck("the pen's measures table has a Unit heading",
+       pm.get("heads") and pm["heads"][3] == "Unit", pm.get("heads"))
+    ck("...and the Add row still reaches the end of it",
+       str(pm.get("addSpan")) == str(pm.get("cells")), pm)
+    ck("...offering exactly the same list as an objective's",
+       pm.get("opts") == pg.evaluate("() => TARGET_UNITS"), pm.get("opts"))
+    ck("...and picking reaches the stored plan", pm.get("wrote") == "1 SQM", pm)
+    pg.evaluate("() => { EDIT_PAGE['plan'] = false; paint(); }")
+    pg.wait_for_timeout(300)
+    hid = pg.evaluate("""() => {
+      const tbl = [...document.querySelectorAll('.pane table')]
+        .find(t => (t.querySelector('thead')||{}).textContent.indexOf('Measure') > -1);
+      return tbl ? [...tbl.querySelectorAll('thead th')].map(t=>t.textContent.trim()) : null; }""")
+    ck("...and the column is gone again when the pen closes",
+       hid and "Unit" not in hid, hid)
 
     print("\n── 8 · a unit is not a gap")
     g = pg.evaluate("""() => ({

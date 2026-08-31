@@ -42834,11 +42834,26 @@ var SYNC = (function () {
       if (after) after();
     };
     if (typeof SYNC === "undefined" || !SYNC.saveNow) return go();
+    /* §209: HOME IS NEVER BLOCKED. A refusal while simulating left the person
+       TRAPPED: the banner's own advice is "switch back to your own view to
+       make it yourself", and this function — holding the switch until the
+       save lands — refused that switch too, because the save re-runs judged
+       as the simulated person and is refused again. Measured: viewing as
+       somebody, one refused change, and the only control left standing was
+       Discard everything (§184's fault, rebuilt by the fix for §204).
+
+       The re-labelling danger §204 guards does not exist on the way HOME:
+       work re-labelled to the SESSION person becomes YOURS, which is exactly
+       the recovery §185 designed — and only the SMO session draws this
+       switcher at all. Switching to a THIRD person stays blocked. */
+    var me = null;
+    try { me = SYNC.person() && SYNC.person().key; } catch(e){}
     SYNC.saveNow(function(how){
       if (how === "saved" || how === "clean" || how === "offline") return go();
-      /* Refused or failed: the banner sync.js already drew says what
-         happened, and the view stays where it is so the work keeps the
-         identity that made it. */
+      if (me && key === me) return go();
+      /* Refused or failed, and not the way home: the banner sync.js already
+         drew says what happened, and the view stays where it is so the work
+         keeps the identity that made it. */
       var sel2 = document.getElementById("asWho");
       if (sel2) sel2.value = VIEWER;   /* a select shows the refused value (§110) */
     });

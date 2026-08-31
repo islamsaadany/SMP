@@ -700,6 +700,52 @@
       send.textContent = n ? "Send to " + plural(n, "person", "people") : "Send";
   }
 
+  /* ── THE WORK YOU DID AS YOURSELF IS SAVED AS YOURSELF (§204) ──────
+     Islam, from the deployment: the SMO team filled gaps, switched the
+     viewer, and the save came back with four refusals naming the register,
+     the archives, a SWOT and a plan — none of which they had touched while
+     simulating.
+
+     THE SWITCH WAS RE-LABELLING WORK ALREADY DONE. `sync.js` stamps
+     `viewAs` from `window.VIEWER` at the moment a body is POSTED, not at
+     the moment the change was made — and both switchers set VIEWER and
+     painted immediately, with no flush in between. So anything not yet on
+     the server (the trailing debounce, a save still in flight, and above
+     all a FAILED save, which the 5s interval keeps re-posting) went up
+     under the new identity and was judged as somebody who may not do it.
+     A 504 earlier in the day is enough to leave work in that state for
+     minutes.
+
+     So the switch WAITS for a clean server before it happens. Nothing about
+     what a simulated view shows or allows changes — that is §185 and it is
+     right (Islam: *"view as should show what this user see and can do"*).
+
+     A FAILED OR REFUSED SAVE DOES NOT SWITCH, and says so: switching then
+     would hand the same work to the next identity and produce exactly the
+     banner this exists to prevent. "clean" and "offline" go straight
+     through — there is nothing to mislabel, and a platform opened from a
+     file has no server to wait for. */
+  function switchViewer(key, after){
+    var go = function(){
+      leaveModes();
+      VIEWER = key;
+      var sel = document.getElementById("asWho");
+      if (sel) sel.value = VIEWER;
+      current = null; currentSub = null;
+      paint(); window.scrollTo(0, 0);
+      if (after) after();
+    };
+    if (typeof SYNC === "undefined" || !SYNC.saveNow) return go();
+    SYNC.saveNow(function(how){
+      if (how === "saved" || how === "clean" || how === "offline") return go();
+      /* Refused or failed: the banner sync.js already drew says what
+         happened, and the view stays where it is so the work keeps the
+         identity that made it. */
+      var sel2 = document.getElementById("asWho");
+      if (sel2) sel2.value = VIEWER;   /* a select shows the refused value (§110) */
+    });
+  }
+
   function leaveModes(){
     Object.keys(EDIT_PAGE).forEach(function(k){ EDIT_PAGE[k] = false; });
     Object.keys(EDITING).forEach(function(k){ EDITING[k] = false; });
@@ -4142,9 +4188,7 @@
     });
     document.querySelectorAll("[data-as]").forEach(function(b){
       b.addEventListener("click", function(){
-        VIEWER = b.dataset.as;
-        document.getElementById("asWho").value = VIEWER;
-        current = null; currentSub = null; paint(); window.scrollTo(0,0);
+        switchViewer(b.dataset.as);
       });
     });
     /* The SMO issues a temporary password; the server checks the policy and
@@ -7558,8 +7602,7 @@
        editable for somebody the rule closes them to (§94). The same fault the
        unit-to-unit handler fixed for edit modes, on the one path that skipped
        it. */
-    leaveModes();
-    VIEWER = sel.value; current = null; currentSub = null; paint(); window.scrollTo(0,0);
+    switchViewer(sel.value);
   });
 
   /* The three nav rows sit in one sticky container, so nothing has to be

@@ -22642,7 +22642,14 @@ var MAIL = (function(){
     var onPanel = inkOn(panel), kicker = mix(onPanel, panel, 0.28);
     /* #8A94A6 on the mail ground is 2.83:1 — measured, and the second of the
        two failures in this file's first draft. */
-    var ink = "#1B2330", quiet = "#6B7686", line = "#E3E8EF", outer = "#626C7C";
+    /* §203: NO `outer` ANY MORE. The organisation's name was printed a
+       THIRD time in a grey line under the whole card — Islam: *"remove the
+       raya trade small title in the bottom, it's already in the long title
+       above."* It is in the header, and the footer line under the rule says
+       *"Sent from Raya Trade — Strategy Management Office"*, so the third
+       copy said nothing and was the one furthest from anything it explained.
+       The colour goes with the line it painted (§24). */
+    var ink = "#1B2330", quiet = "#6B7686", line = "#E3E8EF";
 
     var cta = (o.cta && o.cta.label && o.cta.href)
       /* A button is a table with a background, because a styled <a> loses its
@@ -22719,8 +22726,6 @@ var MAIL = (function(){
               (o.footer ? e(o.footer).replace(/\n/g, "<br>") : "") + '</p>' +
           '</td></tr>' +
         '</table>' +
-        '<div style="font:400 11px/1.5 Helvetica,Arial,sans-serif;color:' + outer + ';padding:14px 8px 0">' +
-          e(org) + '</div>' +
       '</td></tr></table></body></html>';
   }
 
@@ -42689,6 +42694,52 @@ var SYNC = (function () {
       send.textContent = n ? "Send to " + plural(n, "person", "people") : "Send";
   }
 
+  /* ── THE WORK YOU DID AS YOURSELF IS SAVED AS YOURSELF (§204) ──────
+     Islam, from the deployment: the SMO team filled gaps, switched the
+     viewer, and the save came back with four refusals naming the register,
+     the archives, a SWOT and a plan — none of which they had touched while
+     simulating.
+
+     THE SWITCH WAS RE-LABELLING WORK ALREADY DONE. `sync.js` stamps
+     `viewAs` from `window.VIEWER` at the moment a body is POSTED, not at
+     the moment the change was made — and both switchers set VIEWER and
+     painted immediately, with no flush in between. So anything not yet on
+     the server (the trailing debounce, a save still in flight, and above
+     all a FAILED save, which the 5s interval keeps re-posting) went up
+     under the new identity and was judged as somebody who may not do it.
+     A 504 earlier in the day is enough to leave work in that state for
+     minutes.
+
+     So the switch WAITS for a clean server before it happens. Nothing about
+     what a simulated view shows or allows changes — that is §185 and it is
+     right (Islam: *"view as should show what this user see and can do"*).
+
+     A FAILED OR REFUSED SAVE DOES NOT SWITCH, and says so: switching then
+     would hand the same work to the next identity and produce exactly the
+     banner this exists to prevent. "clean" and "offline" go straight
+     through — there is nothing to mislabel, and a platform opened from a
+     file has no server to wait for. */
+  function switchViewer(key, after){
+    var go = function(){
+      leaveModes();
+      VIEWER = key;
+      var sel = document.getElementById("asWho");
+      if (sel) sel.value = VIEWER;
+      current = null; currentSub = null;
+      paint(); window.scrollTo(0, 0);
+      if (after) after();
+    };
+    if (typeof SYNC === "undefined" || !SYNC.saveNow) return go();
+    SYNC.saveNow(function(how){
+      if (how === "saved" || how === "clean" || how === "offline") return go();
+      /* Refused or failed: the banner sync.js already drew says what
+         happened, and the view stays where it is so the work keeps the
+         identity that made it. */
+      var sel2 = document.getElementById("asWho");
+      if (sel2) sel2.value = VIEWER;   /* a select shows the refused value (§110) */
+    });
+  }
+
   function leaveModes(){
     Object.keys(EDIT_PAGE).forEach(function(k){ EDIT_PAGE[k] = false; });
     Object.keys(EDITING).forEach(function(k){ EDITING[k] = false; });
@@ -44263,6 +44314,36 @@ var SYNC = (function () {
     var top = (below < h + 12 && r.top > below) ? Math.max(8, r.top - h - 6) : r.bottom + 6;
     pop.style.left = Math.round(left) + "px";
     pop.style.top = Math.round(top) + "px";
+  }
+
+  /* ── AND A PRESS OUTSIDE PUTS IT AWAY (§203) ───────────────────────
+     Islam: *"when I choose the who to send to from the filters when I click
+     outside the drop down let it close. of course what is selected is
+     saved."* Nothing is at risk — every tick is written to `SENDMSG` the
+     moment it is made (`data-aud`'s own handler) and `DDOPEN` is only which
+     panel is on screen — so closing is purely putting the panel away.
+
+     ON `pointerdown`, NOT `click` (§100.4): a panel that lingers until the
+     mouse comes up reads as having missed the press. WIRED ONCE, at the
+     document, and never in `wire()` — that runs on every paint, so a
+     listener added there would stack one deep per repaint (§24, §47.2), and
+     this one repaints.
+
+     TWO THINGS ARE NOT "OUTSIDE": the panel itself, obviously, and the
+     BUTTON ROW — the buttons already toggle, so letting this fire there
+     would close the panel and then the button's own handler would reopen
+     it, or worse, close the one being opened. */
+  var DD_OUTSIDE = false;
+  function ddWireOutside(){
+    if (DD_OUTSIDE) return;
+    DD_OUTSIDE = true;
+    document.addEventListener("pointerdown", function(ev){
+      if (!DDOPEN) return;
+      var t = ev.target;
+      if (t && t.closest && (t.closest(".ddpop") || t.closest(".ddbar"))) return;
+      DDOPEN = null;
+      paint();
+    }, true);
   }
 
   /* A row's action menu is position:fixed, so somebody has to put it where its
@@ -46101,9 +46182,7 @@ var SYNC = (function () {
     });
     document.querySelectorAll("[data-as]").forEach(function(b){
       b.addEventListener("click", function(){
-        VIEWER = b.dataset.as;
-        document.getElementById("asWho").value = VIEWER;
-        current = null; currentSub = null; paint(); window.scrollTo(0,0);
+        switchViewer(b.dataset.as);
       });
     });
     /* The SMO issues a temporary password; the server checks the policy and
@@ -47387,6 +47466,7 @@ var SYNC = (function () {
       });
     });
     positionDD();
+    ddWireOutside();
 
     /* ── Drafts (§76.1) ─────────────────────────────────────────────
        The word is written into the element, not painted: pressing Save must
@@ -49516,8 +49596,7 @@ var SYNC = (function () {
        editable for somebody the rule closes them to (§94). The same fault the
        unit-to-unit handler fixed for edit modes, on the one path that skipped
        it. */
-    leaveModes();
-    VIEWER = sel.value; current = null; currentSub = null; paint(); window.scrollTo(0,0);
+    switchViewer(sel.value);
   });
 
   /* The three nav rows sit in one sticky container, so nothing has to be

@@ -23920,3 +23920,54 @@ behind is Setup. **The null case was checked and deliberately not branched** —
 `WELCOME.offer()` runs after the boot paint (`sync.js`), so `current` is always
 set by then, and §24 says not to write a branch for a path that cannot be
 reached. **2 red** with the Setup branch removed.
+
+## §204 — Switching the viewer saves first, as you (v3.93)
+
+From the live deployment, mid-morning. The SMO team were filling gaps on
+Consumer Finance and the save came back refused four ways — the register, the
+archives, a unit's SWOT, a unit's plan — none of which they had touched.
+Islam: *"we already fixed that!!!"* **§184's fix was intact**; this is a
+different fault wearing the same red banner, and establishing which was most
+of the work.
+
+**THE FIRST LINE OF THE BANNER IS THE WHOLE THING**: *"You are viewing as Abd
+El Moniem."* `sync.js` stamps `viewAs` from `window.VIEWER` at the moment a
+body is POSTED, not at the moment the change was made — and both switchers
+(the register's `[data-as]` buttons and the chrome's `asWho` select) set
+VIEWER and painted with no flush in between. So anything not yet on the
+server went up under the newly-chosen identity: the trailing debounce, a save
+still in flight, and above all **a FAILED save, which the 5s interval keeps
+re-posting**. One 504 earlier in the day leaves work in that state for
+minutes, which is why it repeated and why it looked like the old bug.
+
+**MEASURED ON THE SHIPPED BUILD, THROUGH THE REAL SWITCHER**: an edit made as
+the office posted stamped `ceo`, the person just switched to. On the fixed
+build the same edit posts with no name at all. That one line is the finding —
+*the switch was re-labelling work already done.*
+
+`switchViewer()` is the ONE helper both switchers call (§53.5 — two switchers
+were how they came to differ: only one of them called `leaveModes()`). It
+saves first and switches in the callback. **A refused or failed save does not
+switch**, and puts the select back (§110: a select still showing the refused
+value fires no further `change`), because switching then would hand the same
+work to the next identity and produce exactly the banner this exists to
+prevent. `clean` and `offline` go straight through — nothing to mislabel, and
+a platform opened from a file has no server to wait for.
+
+**NOTHING ABOUT WHAT A SIMULATED VIEW SHOWS OR ALLOWS CHANGES.** A read-only
+view-as was proposed here and withdrawn on Islam's instruction, twice and
+emphatically: *"view as should show what this user see and can do"* and
+*"doesn't block the edit completely — take care not to damage the
+functionality."* He is right, and §185 is untouched.
+
+`checks/viewer-switch.py` drives the REAL control rather than the new helper,
+so it runs against a build that does not have it — which is how the shipped
+build was proved to carry the fault (**1 red**, `posts seen: ['ceo']`).
+
+### Recorded, not built
+
+The banner's only BUTTON is still *Discard everything and reload*; the way out
+of this particular refusal was a SENTENCE telling you to switch back. §184's
+put-back needs row addresses and these were whole-area refusals, so it offered
+nothing. A *"switch back and save"* button belongs there and is not in this
+change.

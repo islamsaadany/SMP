@@ -131,7 +131,7 @@ with sync_playwright() as pw:
     for tag, walk in (
         ("plan", lambda: go_project(pg)),
         ("performance", lambda: (pg.click('[data-s="fnperf"]'), pg.wait_for_timeout(620))),
-        ("reporting", lambda: (pg.click('[data-report="fn:%s"]' % FN), pg.wait_for_timeout(620))),
+        ("reporting", lambda: (pg.click('[data-s=report]'), pg.wait_for_timeout(620))),
     ):
         walk()
         cells = type_cells(pg)

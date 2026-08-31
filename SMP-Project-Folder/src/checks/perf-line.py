@@ -128,14 +128,24 @@ with sync_playwright() as p:
       var sr=st.getBoundingClientRect(), ar=acts.getBoundingClientRect();
       var tabs=[].map.call(st.querySelectorAll('button[data-s]'), function(t){
         return Math.round(t.getBoundingClientRect().top); });
+      var rt=st.querySelector('button[data-s=report]');
       return {names:names, rightGap:Math.round(sr.right-ar.right),
+              repTab: !!rt && !rt.closest('.tabacts'),
               sameLine: tabs.length ? Math.abs(Math.round(ar.top+ar.height/2)
                         - (tabs[0] + 16)) < 40 : false,
               actsTop:Math.round(ar.top), tabTop:tabs[0]};
     }""")
     ck("the controls are in the tab row", row and not row.get("noacts"), row)
     if row and not row.get("noacts"):
-        ck("...all three of them, named", row["names"] == ["Report", "Presentation", "Bands"], row["names"])
+        # §222: REPORT HAS LEFT THIS GROUP AND BECOME A TAB. Islam asked for
+        # Reporting "as a tab beside the Strategy and Performance, with its
+        # distinct orange colour" — so the right-hand group is two now, and
+        # the third control is on the SAME row as a tab rather than an action.
+        # Asserted as the pair, or a build that simply lost Report would
+        # satisfy the shorter list on its own (§113.8).
+        ck("...both of them, named", row["names"] == ["Presentation", "Bands"], row["names"])
+        ck("...and Reporting is a tab on that row, not an action",
+           row.get("repTab") is True, row)
         # RIGHT-ALIGNED IS THE ASK, so it is measured against the row's own
         # right edge rather than against a pixel count that a later gutter
         # change would falsify (§94.14).

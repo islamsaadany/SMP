@@ -24944,3 +24944,72 @@ submitted re-opens as incomplete; a unit can be blocked by a gap only the
 office can close (the hover names it, so it is a message and not a dead end);
 and the server still accepts an incomplete submission, because this is a screen
 rule as the existing three are. Recorded, not glossed.
+
+---
+
+## §222 — REPORTING IS A TAB
+
+Islam: *"how about for the reporting to split it as a tab beside the Strategy
+and Performance to be more obvious to the users with its distinct orange
+colour."* Three treatments were drawn in the real page and he picked **B**,
+the solid fill when selected.
+
+**WHAT THIS REVISITS.** §63 removed a *Reporting* SECTION from inside
+Performance, on his own point that *"performance is a result of reporting, so
+having inside performance 2 buttons performance and reporting actually
+doesn't make sense."* That argument was about two siblings under one heading
+and it still holds. A top-level tab is a different placement: Reporting stops
+being buried inside the thing it produces. Recorded as a change of mind
+rather than an oversight.
+
+**THE REPORT BUTTON GOES WITH IT.** A button that opens what a tab beside it
+opens is a control with no audience of its own — §94.15's argument, which
+retired the Arrange button. `reportBtn()` is DELETED rather than left uncalled
+(§24). §94's ruling survives the move: *"make it all orange to obvious for the
+user"* is the tab's fill now, and the accent budget is unchanged because the
+fill MOVED rather than multiplied.
+
+**`when` IS THE CYCLE, `ac` IS THE GRANT.** `allowed()` already asks the
+grant, so the def only answers the other half — the same pair `reportBtn()`
+asked, because a tab that opens nothing is worse than no tab (§61). Measured:
+cycle closed → two tabs; cycle open → three.
+
+**BEING ON THE TAB IS THE MODE**, set once in `paint()` rather than inside
+each of the two render functions, or a unit and a function would carry their
+own copy of the same rule (§53.5).
+
+**AND THE TAB CREATED A FAULT THE CHECK CAUGHT: CLOSE WENT DEAD.** `REPORTING`
+is now set by `paint()` from the tab you are on, so the old handler's
+`REPORTING = null; paint()` put it straight back — the control rendered
+perfectly and did nothing, which is §96's family exactly. Close leaves the TAB
+now, landing on whichever tab is marked `primary`, read off the ROW rather
+than from a list of keys in the handler.
+
+**NINE CHECKS PRESSED THE OLD BUTTON** (§51.11 for the seventh time). All nine
+were repointed at the tab — and the first sweep did it with a blanket string
+replacement that put double quotes inside double-quoted Python strings and
+broke four files at parse time. An unquoted attribute value is valid CSS and
+cannot close a string of either kind.
+
+**FOUR CHECKS THEN FOUND REAL WORK**:
+`perf-line` asserted three controls on the tab row and there are two;
+`strategy-office` measured the tab's ink against a TRANSPARENT ground and got
+a meaningless 3.79, because the fill only exists while the tab is selected —
+and re-queries after the press, since selecting it repaints the row and
+`getComputedStyle` on a detached node returns empty strings;
+`report-chrome` measured Submit's fill on a report §221 had dimmed;
+`project-tables` could not press Submit at all, because **Playwright treats
+`aria-disabled` as disabled** — worth knowing, and the press is forced there
+because the click handler is still the enforcement.
+
+**AND SIX OF THE TEN DEMO UNITS SHIP ALREADY SUBMITTED**, so with §220's lock
+they now open read-only. That is the feature working and it changes what the
+demo shows — stated rather than absorbed.
+
+**A SAVE THAT DID NOT HAPPEN DOES NOT CLOSE THE REPORT** (§220, corrected
+here): the first build parked BEFORE the save and repainted in the callback,
+which broke §63.2 — the outcome is written into the button a repaint replaces,
+so the word vanished in the frame it appeared and three checks went red — and
+worse, it parked a report whose save had FAILED. Now: save, park only on
+success, and let the repainted bar be the confirmation, since it says *Draft
+saved* in its own right.

@@ -56,7 +56,7 @@ def goto_reporting(pg):
     pg.evaluate("""()=>{const b=[...document.querySelectorAll('#subtabs button')]
         .find(x=>x.textContent.trim().indexOf('Performance')===0); if(b)b.click()}""")
     pg.wait_for_timeout(300)
-    r = pg.query_selector("[data-report]")
+    r = pg.query_selector('[data-s=report]')
     if r: r.click(); pg.wait_for_timeout(400)
     return bool(r)
 

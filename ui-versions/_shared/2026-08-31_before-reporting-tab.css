@@ -441,23 +441,6 @@
   .tabs button:hover { background:var(--ground); color:var(--ink); }
   .tabs button[aria-selected="true"] { background:var(--over-bg); color:var(--gold-deep); font-weight:600; }
   .tabs button:focus-visible { outline:2px solid var(--gold); outline-offset:2px; }
-  /* ── THE REPORTING TAB WEARS THE REPORT ORANGE (§222) ──────────────────
-     Islam picked the solid fill of three drawn options: the volume the Report
-     button had, moved onto the tab that replaces it. Unmistakable while you
-     are in it, which is the point — everything typed there is going to the
-     office.
-
-     `--cta`/`--cta-ink` are the pair §94.8 declared TOGETHER: the fill and
-     the ink that survives on it. Never `--cta` as type on a light ground and
-     never white on the bright half, which is §38.4's trap in both
-     directions.
-
-     `.tabs button.cta` is (0,2,1) against `.tabs button`'s (0,1,1), so it
-     wins without an !important — the mistake §40 recorded, where an enforced
-     rule went on winning after the argument had changed. */
-  .tabs button.cta { color:var(--cta); font-weight:600; }
-  .tabs button.cta:hover { background:var(--ground); color:var(--cta); }
-  .tabs button.cta[aria-selected="true"] { background:var(--cta); color:var(--cta-ink); }
 
   .view { padding-top:32px; }
   [hidden] { display:none !important; }

@@ -246,11 +246,16 @@ with sync_playwright() as p:
     # is not a position but the ORDER OF LOUDNESS — the legend must be plainly
     # quieter than the controls beside it, which is the thing that was wrong
     # and the thing a later stylesheet edit could silently undo.
-    print("\n4 · Report and Presentation, in a legend that is quieter than they are")
+    print("\n4 · Presentation in a legend, and Report gone to its own tab (§222)")
     be(pg, who["smo"], who["unit"], "performance")
     v = pg.evaluate("""() => {
       const bands = document.querySelector(".bands");
-      const rep = document.querySelector("[data-report]");
+      /* §222: REPORT HAS LEFT THIS ROW. It is a tab beside Strategy and
+         Performance now, so the solid button §94.8 measured here is gone —
+         its loudness is asserted where it moved to (checks/submit-gate.py).
+         What this section still owns is the legend and Presentation. */
+      const gone = !document.querySelector('[data-report]');
+      const rep = document.querySelector('.bands details.dlmenu > summary');
       /* THE SUMMARY, NOT `[data-present]`. Presentation is a <details>, so
          the element carrying that attribute is a menu ITEM inside the closed
          popup — it has a box, at a position that means nothing. The first
@@ -273,6 +278,7 @@ with sync_playwright() as p:
       const rb = rep.getBoundingClientRect(), bb = bands.getBoundingClientRect();
       const pb = pres.getBoundingClientRect();
       return {
+        gone: gone,
         inBands: !!rep.closest(".bands") && !!pres.closest(".bands"),
         /* ONE LINE means the buttons sit inside the legend's own box, not
            wrapped onto a second row of it. Measured, because "same line" is a
@@ -290,7 +296,8 @@ with sync_playwright() as p:
     if v.get("missing"):
         ck("the Performance page draws both buttons and a legend", False, v["missing"])
     else:
-        ck("Report and Presentation ride in the legend", v["inBands"] is True, v)
+        ck("the Report BUTTON has left the page (§222)", v.get("gone") is True, v)
+        ck("Presentation still rides in the legend", v["inBands"] is True, v)
         ck("...on one line with it", v["oneLine"] is True, v)
         ck("...without touching", v["gap"] >= 4, v["gap"])
         ck("the legend is SMALLER than the buttons beside it",
@@ -309,8 +316,18 @@ with sync_playwright() as p:
         pg.evaluate("(t)=>{ document.documentElement.setAttribute('data-theme', t); }", theme)
         pg.wait_for_timeout(200)
         c = pg.evaluate("""() => {
-          const rep = document.querySelector("[data-report]"); if (!rep) return null;
-          const cs = getComputedStyle(rep);
+          /* §222: THE FILL IS ON THE TAB, AND ONLY WHILE IT IS SELECTED.
+             Measured unselected the tab is transparent, and comparing an ink
+             against `rgba(0,0,0,0)` produces a number that means nothing —
+             which is exactly what the first run after the move reported. */
+          const rep = document.querySelector('[data-s=report]'); if (!rep) return null;
+          rep.click();
+          /* AND RE-QUERY AFTER THE PRESS. Selecting the tab repaints the row,
+             so the node measured before the click is detached — and
+             `getComputedStyle` on a detached node returns empty strings, which
+             made the colour parser throw rather than report. */
+          const lit = document.querySelector('[data-s=report]'); if (!lit) return null;
+          const cs = getComputedStyle(lit);
           const lum = (c) => { const m = c.match(/[\\d.]+/g).map(Number);
             const f = m.slice(0,3).map(x => { x/=255; return x<=0.03928 ? x/12.92 : Math.pow((x+0.055)/1.055,2.4); });
             return 0.2126*f[0] + 0.7152*f[1] + 0.0722*f[2]; };

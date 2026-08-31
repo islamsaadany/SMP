@@ -120,7 +120,7 @@ with sync_playwright() as pw:
             pg.wait_for_timeout(400)
         pg.click('[data-u="%s"]' % target); pg.wait_for_timeout(500)
         pg.click('[data-s="%s"]' % tab); pg.wait_for_timeout(600)
-        pg.evaluate("()=>{const b=document.querySelector('[data-report]'); if(b)b.click();}")
+        pg.evaluate("()=>{const b=document.querySelector('[data-s=report]'); if(b)b.click();}")
         pg.wait_for_timeout(900)
         ck("Report mode opens", pg.evaluate("REPORTING") == target, pg.evaluate("REPORTING"))
 
@@ -217,7 +217,24 @@ with sync_playwright() as pw:
                     break
             ck("Save draft answers rather than sitting on \u201cSaving\u2026\u201d",
                word != "Saving\u2026", word)
-            ck("...and the answer is that it saved", word == "Saved", word)
+            # §220: THE ANSWER MOVED FROM A WORD TO THE BAR. Save draft now
+            # CLOSES the report, so the repaint after a successful save turns
+            # the bar into "Draft saved · Reopen" — which says the same thing
+            # and, unlike a word beside a button the repaint replaces, is
+            # still there a second later (§63.2's own reason, reversed).
+            #
+            # ASSERTED AS A PAIR, or a build that simply stopped answering
+            # satisfies either half alone: parked in the DATA, and said on
+            # the screen.
+            landed = pg.evaluate("""()=>({
+                parked: !!(REVIEW.parked || {})[REPORTING || ''] ||
+                        Object.keys(REVIEW.parked || {}).length > 0,
+                state: (document.querySelector('.rc-state') || {}).textContent || ''
+              })""")
+            ck("...and the answer is that it parked the report",
+               landed["parked"] is True, landed)
+            ck("...and the bar says Draft saved",
+               "Draft saved" in landed["state"], landed)
 
     b.close()
 srv.shutdown()

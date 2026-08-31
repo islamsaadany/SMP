@@ -404,6 +404,29 @@ console errors (in this cloud environment, run it via a wrapper that points Play
   name — the real-database test caught it (§100.3). **NOT fixed and said so**: a
   genuine refusal is still a refusal, and if they continue while naming a
   function nobody opened, this diagnosis is wrong.
+- **REPORTING IS A TAB (§222, revisiting §63):** Islam — *"split it as a tab
+  beside the Strategy and Performance … with its distinct orange colour"*;
+  three treatments drawn in the real page, he picked the **solid fill when
+  selected**. §63 removed a Reporting SECTION from INSIDE Performance and that
+  argument still holds — this is a different placement, and Reporting stops
+  being buried in the thing it produces. **THE REPORT BUTTON GOES WITH IT**
+  (§94.15: a control with no audience of its own), `reportBtn()` DELETED not
+  left uncalled (§24), and the accent budget is unchanged because the fill
+  MOVED rather than multiplied. **`when` is the cycle, `ac` is the grant** —
+  the same pair the button asked, or it is a tab that opens nothing (§61).
+  **Being on the tab IS the mode**, set once in `paint()` and never in each
+  render (§53.5). **AND THE TAB KILLED CLOSE**: `REPORTING` is set from the
+  tab, so `REPORTING = null; paint()` put it straight back — rendered
+  perfectly, did nothing (§96). Close leaves the TAB now, landing on the
+  `primary` one read off the ROW. **NINE CHECKS PRESSED THE OLD BUTTON**
+  (§51.11, seventh time) and four then found real work — a row of three that
+  is two, an ink measured against a TRANSPARENT ground (the fill exists only
+  while selected, and the node must be re-queried after the press because the
+  repaint detaches it), a fill measured on a report §221 had dimmed, and
+  **Playwright treating `aria-disabled` as disabled**, so a forced press keeps
+  the refusal path under test. **Six of the ten demo units ship already
+  submitted**, so with §220's lock they now open read-only — the feature
+  working, and a change to what the demo shows.
 - **THE TARGET DECIDES THE STRATEGY COLUMN (§217):** `lib/authorize.js`'s
   `unitFoundation`, `unitAnalysis` and `unitPlan` guards each named a UNIT page
   key outright, while the target they are handed can be `fn:<key>` — a pillars

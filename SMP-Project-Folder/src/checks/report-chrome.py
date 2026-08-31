@@ -41,10 +41,25 @@ def open_report(pg):
     for bt in pg.query_selector_all("#subtabs button"):
         if (bt.text_content() or "").strip().lower().startswith("performance"):
             bt.click(); pg.wait_for_timeout(400); break
-    rep = pg.query_selector("[data-report]")
+    rep = pg.query_selector('[data-s=report]')
     if not rep:
         return False
     rep.click(); pg.wait_for_timeout(500)
+    # §221: SUBMIT IS DIMMED UNTIL THE REPORT IS COMPLETE, so the colours
+    # below — which are about how the two controls read AGAINST EACH OTHER —
+    # have to be measured on a report that is ready. Every note the plan is
+    # waiting on is answered first; that is state this check MAKES rather
+    # than one the demo happens to be in (§94.2).
+    pg.evaluate("""() => {
+      const u = UNITS[current]; if (!u) return;
+      const fix = (r) => { if (r.actual == null || r.actual === "") r.actual = r.target || 1;
+                           r.note = r.note || "explained"; };
+      (u.keyObjectives || []).forEach(fix);
+      (u.items || []).forEach(p => { (p.measures || []).forEach(fix);
+                                     (p.tactics || []).forEach(fix); });
+      paint();
+    }""")
+    pg.wait_for_timeout(400)
     return True
 
 

@@ -307,14 +307,10 @@
           return [{ k:"found", ac:"k_found", label:"Overview", render:renderFnFoundation },
                   plan];
         } },
-      { k:"fnperf", ac:"k_perf", label:"Performance", primary:true,
+      { k:"fnperf", ac:"k_perf", label:"Performance", primary:true, dot:true,
         render: function(k){
           return REPORTING === k ? renderFnReport(k) : renderFnPerformance(k);
-        } },
-      /* The same tab on the other side of the switch (§53.5, §222). */
-      { k:"report", ac:"k_report", label:"Reporting", dot:true, cta:true,
-        when: function(){ return !!reportSectionState(); },
-        render: function(k){ return renderFnReport(k); } }
+        } }
     ],
     /* A COMPANY HAS ONE TAB, AND THAT IS THE POINT (§68). It carries no
        strategy of its own — no plan, no foundation, no objectives (§23) — so a
@@ -353,33 +349,10 @@
          which is what it always was for two weeks a quarter (§15.10), now said
          in the navigation instead of in a comment. REPORTING holds the TARGET
          rather than a boolean, so it can never open somebody else's report. */
-      { k:"performance", ac:"u_perf", label:"Performance", primary:true,
+      { k:"performance", ac:"u_perf", label:"Performance", primary:true, dot:true,
         render: function(u){
           return REPORTING === u.ukey ? renderReport(u) : renderUnitPerformance(u);
-        } },
-      /* ── REPORTING IS A TAB (§222, revisiting §63) ────────────────────
-         Islam: *"how about for the reporting to split it as a tab beside the
-         Strategy and Performance to be more obvious to the users, with its
-         distinct orange colour."*
-
-         §63 removed a Reporting SECTION from inside Performance, on his own
-         point that *"performance is a result of reporting, so having inside
-         performance 2 buttons performance and reporting doesn't make
-         sense."* That argument was about two siblings under one heading, and
-         it still holds — this is not that. A top-level tab stops Reporting
-         being buried inside the thing it produces, and the Report button it
-         replaces was one control among four on the right of the row.
-
-         `when` IS THE CYCLE, `ac` IS THE GRANT. `allowed()` already asks the
-         grant, so this only has to answer the other half — and it is the
-         same pair `reportBtn()` asked, because a tab that opens nothing is
-         worse than no tab (§61).
-
-         THE DOT MOVES HERE from Performance. It means "you owe a
-         submission", and that now has a tab of its own to sit on. */
-      { k:"report", ac:"u_report", label:"Reporting", dot:true, cta:true,
-        when: function(){ return !!reportSectionState(); },
-        render: function(u){ return renderReport(u); } }
+        } }
     ],
     /* Setup is what EXISTS: decided once, revisited rarely.
 
@@ -2021,7 +1994,7 @@
        from the strategy word") \u2014 the missing bar in the section row below
        carries the total, the places and the action, through missBar(). */
     document.getElementById("subtabs").innerHTML = railed ? "" : defs.map(function(d){
-      var cls = (d.primary ? "primary" : "") + (d.cta ? " cta" : "") +
+      var cls = (d.primary ? "primary" : "") +
         (d.dot && reportPending(TARGET) ? " dot" : "");
       return '<button role="tab" data-s="' + d.k + '"' +
         (cls.trim() ? ' class="' + cls.trim() + '"' : '') +
@@ -2089,13 +2062,6 @@
        2026-08-27); the error itself is kept, folded behind a closed
        disclosure, so the office can still read it without it shouting at
        anybody else. */
-    /* §222: BEING ON THE TAB IS THE MODE. `leaveModes()` clears REPORTING on
-       every tab change, so the tab has to set it back — done HERE, once,
-       rather than inside each of the two render functions, or the unit and
-       the function would each carry their own copy of the same rule (§53.5).
-       It holds the TARGET rather than a boolean, so it can never open
-       somebody else's report. */
-    if (def && def.k === "report") REPORTING = current;
     var body;
     try {
       body = (current === "group" || current === "setup" || current === "manage")
@@ -6232,26 +6198,8 @@
         REPORTING = this.dataset.report; paint(); window.scrollTo(0,0);
       });
     });
-    /* §222: CLOSE LEAVES THE TAB, NOT ONLY THE MODE — and this is a fault the
-       tab created rather than a tidy-up. `REPORTING` is now set by paint()
-       from the tab you are on, so clearing it and repainting put it straight
-       back: Close rendered perfectly and did nothing, which is §96's family
-       exactly. Caught by `checks/report-chrome.py` pressing it.
-
-       It goes back to the tab marked `primary` — Performance on both sides of
-       the switch — read off the ROW rather than from a list of keys here, so
-       a destination whose primary tab is something else still lands
-       somewhere real instead of on a key this handler happened to know. */
     document.querySelectorAll("[data-repcancel]").forEach(function(b){
-      b.addEventListener("click", function(){
-        REPORTING = null;
-        var home = document.querySelector('#subtabs [role="tab"].primary');
-        if (home && home.dataset.s && home.dataset.s !== currentSub) {
-          leaveModes();
-          currentSub = home.dataset.s;
-        }
-        paint(); window.scrollTo(0,0);
-      });
+      b.addEventListener("click", function(){ REPORTING = null; paint(); window.scrollTo(0,0); });
     });
     /* SAVE DRAFT, AND IT SAYS THE TRUE THING (§63.2). The word is written into
        the element rather than through a repaint: paint() would replace the
@@ -6277,39 +6225,19 @@
            again — and this branch is deleted rather than left unreachable,
            because a branch nobody can reach is one the next reader takes for
            load-bearing (§24). */
-        /* §220: SAVING A DRAFT CLOSES THE REPORT — BUT ONLY IF IT SAVED.
-           Islam: *"the save draft should dim the full report until he press
-           reopen so it opens again."*
-
-           THE FIRST BUILD PARKED FIRST AND REPAINTED IN THE CALLBACK, AND
-           THAT BROKE §63.2 — the outcome is written INTO this button because
-           a repaint replaces the very control that was pressed, so the word
-           vanished in the frame it appeared and three checks went red saying
-           the save never answered. It also parked a report whose save had
-           FAILED, which is the worse half: the screen would have shown a
-           tidy "Draft saved" over work that never left the browser.
-
-           So the order is: save, then park only on success, and let the
-           REPAINTED BAR be the confirmation — it says "Draft saved" in its
-           own right, which is a better answer than a word beside a button
-           that is about to be replaced. A failure leaves the report OPEN and
-           keeps §63.2's sentence, because that is the case somebody has to
-           act on. */
-        var target = REPORTING;
+        /* §220: SAVING A DRAFT CLOSES THE REPORT. Islam: *"the save draft
+           should dim the full report until he press reopen so it opens
+           again."* Written BEFORE the save, so the state travels with it —
+           parking after the answer would need a second save, and a person
+           who closed the tab in between would come back to an open report
+           they believe they parked. */
+        if (REPORTING) { REVIEW.parked = REVIEW.parked || {};
+                         REVIEW.parked[REPORTING] = true; }
         SYNC.saveNow(function(state){
-          if (state === "saved" || state === "clean") {
-            if (target) { REVIEW.parked = REVIEW.parked || {};
-                          REVIEW.parked[target] = true; }
-            /* NO WORD ON SUCCESS, and that is the point rather than an
-               omission: the repaint below turns the bar into "Draft saved ·
-               Reopen", which says the same thing and does not disappear a
-               frame later. §63.2's sentence survives for the outcomes that
-               still need one — the ones somebody has to act on. */
-            paint();
-            return;
-          }
-          if (state === "offline") show("Nothing to save — no server here", "");
+          if (state === "saved" || state === "clean") show("Saved", "ok");
+          else if (state === "offline") show("Nothing to save — no server here", "");
           else show("Not saved — see the message above", "bad");
+          paint();
         });
       });
     });

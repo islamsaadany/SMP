@@ -36,9 +36,14 @@ DEST = "fn:finance"
 # §63 folded reporting out of it, and Reporting is a MODE reached from a
 # button there — pressing for a section row lands on Performance twice and
 # reports it under two names (§50.6, which cost twelve versions).
+# §222: REPORTING IS ITS OWN TAB, so the third pane is reached from
+# Reporting rather than from inside Performance. The label follows the
+# navigation, because a label that names a page the walk did not open is
+# §50.6's fault — twelve versions of measuring the wrong page under the
+# right name.
 PAGES = [("Strategy / Projects", "Strategy", "Projects", False),
          ("Performance", "Performance", None, False),
-         ("Performance / Report", "Performance", None, True)]
+         ("Reporting / Report", "Performance", None, True)]
 
 bad = 0
 errs = []
@@ -69,10 +74,17 @@ def goto(pg, key, tab, sec, report):
             .find(x=>x.textContent.trim().indexOf(t)===0); if(b)b.click()}""", [sel, t])
         pg.wait_for_timeout(250)
     if report:
-        r = pg.query_selector("[data-report]")
+        r = pg.query_selector('[data-s=report]')
         if not r:
-            return "no Report button"
+            return "no Reporting tab"
         r.click()
+        pg.wait_for_timeout(300)
+        # §220: A SUBMITTED REPORT IS READ-ONLY, and six of the ten demo units
+        # ship already submitted — so a check that drives the fields has to
+        # reopen first. Pressing the product's own control rather than
+        # clearing the flag, because that is the way a person gets back in.
+        pg.evaluate("""() => { const b = document.querySelector('.rc-reopen');
+                               if (b) b.click(); }""")
         pg.wait_for_timeout(350)
     return pg.evaluate("""()=>{const a=document.querySelector('#subtabs [aria-selected="true"]'),
         b=document.querySelector('#secrow [aria-selected="true"]');
@@ -482,7 +494,13 @@ with sync_playwright() as p:
             return "(there is no Submit to press)"
         said = {}
         pg.once("dialog", lambda d: (said.update(m=d.message), d.dismiss()))
-        pg.click("[data-submit]", timeout=3000); pg.wait_for_timeout(350)
+        # §221: THE BUTTON IS DIMMED FOR EXACTLY THESE REASONS NOW, and
+        # Playwright treats `aria-disabled` as disabled and refuses to click
+        # it — which is itself worth knowing. `force` presses it anyway,
+        # because the click handler is still the enforcement: the dimming is
+        # the explanation given BEFORE the press, not a replacement for the
+        # refusal after it, and this section is about the refusal.
+        pg.click("[data-submit]", timeout=3000, force=True); pg.wait_for_timeout(350)
         return said.get("m", "")
 
     # 1 · a row that owes a per-cent stops it (§104.10 with teeth)
@@ -512,6 +530,20 @@ with sync_playwright() as p:
     pg.evaluate("""() => {
       fnMissingNotes("finance").forEach(x => x.obj.note = "Explained.");
       fnAskedItems("finance").forEach(x => { if (statusPending(x.obj)) x.obj.pct = 50; });
+      /* §221 ADDED TWO MORE WAYS TO BE UNREADY, so "nothing in the way" now
+         has to mean all five: every asked figure entered, and the plan
+         holding no gaps of its own. */
+      fnAskedItems("finance").forEach(x => {
+        const o = x.obj;
+        if (x.kind === "deliverable" || x.kind === "milestone") {
+          if (!statusGiven(o)) { o.status = "done"; o.pct = 100; }
+        } else if (o.actual == null || o.actual === "") o.actual = o.target || 1;
+      });
+      capsOfFunction("finance").forEach(c => (c.projects || []).forEach(pr => {
+        (pr.milestones || []).forEach(m => { if (!m.finish) m.finish = "Q4 26";
+                                             if (!m.owner) m.owner = pr.owner || "Owner"; });
+        (pr.outcomes || []).forEach(o => { if (!o.target) o.target = "1"; });
+      }));
       paint();
     }""")
     pg.wait_for_timeout(250)
@@ -519,7 +551,7 @@ with sync_playwright() as p:
        pg.evaluate("() => submitRefusal('%s')" % DEST))
     said = press()
     ck("...and then it submits", pg.evaluate("() => !!REVIEW.submitted['%s']" % DEST), said)
-    ck("...the dot on the Performance tab clears",
+    ck("...the dot on the Reporting tab clears",
        not pg.evaluate("() => reportPending('%s')" % DEST))
     # §199.2: `.rep-bar` HAS NOT EXISTED FOR VERSIONS. The reporting bar is
     # `.repchrome` (repChrome()), and this line CRASHED the whole file rather

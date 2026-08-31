@@ -673,17 +673,37 @@ function arrangeBtn(scope, unitKey){
     ? '<button class="editbtn" data-arrange="1">' + (ARRANGE ? "Done" : "Arrange") + '</button>' : '';
 }
 
-/* §222: THE REPORT BUTTON IS GONE, AND THE TAB IS WHY. Islam asked for
-   Reporting as a tab beside Strategy and Performance; a button that opens
-   what a tab beside it opens is a control with no audience of its own, which
-   is the argument that retired the Arrange button (§94.15). `reportBtn()` is
-   DELETED rather than left uncalled — a builder nobody calls is one the next
-   reader takes for load-bearing (§24).
+/* ── The Performance page's own actions (§63) ─────────────────────────
+   PERFORMANCE IS A RESULT OF REPORTING, so a row of two sibling tabs reading
+   Performance | Report inside a tab already called Performance was asking the
+   same word twice and calling one of them a page. Islam: "having inside
+   performance 2 buttons performance and reporting actually doesn't make
+   sense." Performance is now what opens, and reporting is something you GO AND
+   DO from it and come back from — which is what it always was for two weeks a
+   quarter (§15.10), finally said in the navigation.
 
-   §94's ruling survives the move: "make it all orange to obvious for the
-   user" is now the tab's solid fill while you are in it, and the accent
-   budget is unchanged because the fill moved rather than multiplied — drawn
-   only while a cycle is open, only for somebody who may report. */
+   REPORT, then PRESENTATION. Entering figures is the thing somebody came here
+   to do during a cycle; presenting is the thing they do at the end of one.
+   Arrange has left entirely: it belongs to the plan, which is where the order
+   is decided (§63.3). */
+function reportBtn(target){
+  var r = reportSectionState();
+  if (!r) return "";
+  var ac = String(target).indexOf("fn:") === 0 ? "k_report" : "u_report";
+  if (grantAt(ac, target) === "none") return "";
+  /* ── SOLID, NOT OUTLINED (§94, Islam 2026-08-25) ────────────────
+     "the report button in performance make it all orange to obvious for the
+     user." It is the one thing somebody came to this page to DO during a
+     cycle, and it was wearing the same quiet outline as Presentation, Arrange
+     and every other secondary control in the product.
+
+     THE ACCENT BUDGET IS NOT BROKEN BY THIS (§41). It is one solid fill, on
+     one button, drawn only while a cycle is OPEN and only for somebody who
+     may report — so the page is back to its quiet register for the rest of
+     the quarter, which is what a budget means. */
+  return '<button class="editbtn cta" data-report="' + esc(target) + '"' +
+    ' title="Enter this cycle\u2019s figures">Report' + r.badge + '</button>';
+}
 
 /* SAVE DRAFT AND CANCEL (§63.2). Islam: "keep save draft button as a feeling
    for the user that he is saving keeping the autosave just in case."
@@ -1867,7 +1887,7 @@ function renderUnitPerformance(u){
 
      So `.bands` drops to 11px / 9.5px and the dot with it, Report keeps its
      solid fill, and the page keeps the row. See `group-extra.css`. */
-  return perfActs(presentMenu("unit", u.ukey)) +
+  return perfActs(reportBtn(u.ukey) + presentMenu("unit", u.ukey)) +
 
     '<div class="scores">' +
       '<div class="card tight primary"><div class="score-h"><h4>' + L("keyobj","bu") + ' performance</h4>' +
@@ -4167,7 +4187,7 @@ function renderFnPerformance(fnKey){
      anyone who can view this page, assembling the review from whatever the
      platform holds at that moment. */
   if (!caps.length) return fnNothingBehind(fk);
-  return '<div class="pageact">' + presentMenu("fn", fk) + '</div>' +
+  return '<div class="pageact">' + reportBtn("fn:" + fk) + presentMenu("fn", fk) + '</div>' +
     caps.map(function(c){
     var sel = railPick(c);
     if (!sel) return capBand(c) + '<div class="capbody">' + capScoreCards(c) + capKOTable(c) +

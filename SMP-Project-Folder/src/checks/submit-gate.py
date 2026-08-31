@@ -89,7 +89,7 @@ def open_report(pg, unit="mobile"):
     pg.wait_for_timeout(300)
     pg.click('[data-s="performance"]')
     pg.wait_for_timeout(400)
-    pg.evaluate("() => { const b = document.querySelector('[data-report]'); if (b) b.click(); }")
+    pg.evaluate("() => { const b = document.querySelector('[data-s=report]'); if (b) b.click(); }")
     pg.wait_for_timeout(600)
 
 
@@ -178,8 +178,22 @@ with sync_playwright() as p:
     # 4 - SAVE DRAFT CLOSES THE REPORT
     print("\n4 · Save draft parks it, and Reopen brings it back (§220)")
     before = bar_state(pg)
+    # A SAVE THAT DID NOT HAPPEN MUST NOT CLOSE THE REPORT (§220). Opened from
+    # a file there is no server, so Save draft answers "offline" and parks
+    # NOTHING — asserted here rather than worked around, because parking on a
+    # failed save is the worse half of the fault this ordering exists to
+    # avoid: a tidy "Draft saved" over work that never left the browser.
     pg.evaluate("() => { const b = document.querySelector('[data-repsave]'); if (b) b.click(); }")
     pg.wait_for_timeout(700)
+    off = bar_state(pg)
+    ck("with no server, Save draft parks nothing", off["editable"] == before["editable"], off)
+    ck("...and says so", "no server" in off["words"], off["words"])
+    # THE LOCK ITSELF IS THEN DRIVEN THROUGH THE STATE, because the button
+    # cannot reach it over file:// (§94.11) — what is under test here is the
+    # closed report, not the save.
+    pg.evaluate("""() => { REVIEW.parked = REVIEW.parked || {};
+                           REVIEW.parked[current] = true; paint(); }""")
+    pg.wait_for_timeout(500)
     r = bar_state(pg)
     ck("every control in the report is disabled", r["editable"] == 0, r)
     ck("...and there were controls to disable", before["editable"] > 0, before)

@@ -79,7 +79,7 @@ def walk_subtabs(pg):
             # sections drop to one has no row at all).
             el = pg.query_selector('#secrow-in [data-sub2="%s"]' % s2)
             if el and el.is_visible(): el.click(); pg.wait_for_timeout(120)
-        rep = pg.query_selector("[data-report]")
+        rep = pg.query_selector('[data-s=report]')
         if rep:
             rep.click(); pg.wait_for_timeout(150)
             back = pg.query_selector("[data-repcancel]")
@@ -347,7 +347,7 @@ with sync_playwright() as p:
         pg.click('#subtabs button:has-text("Performance")'); pg.wait_for_timeout(300)
         perf = pg.evaluate("""() => ({
           secrow: !document.getElementById("secrow").hidden,
-          report: !!document.querySelector("[data-report]"),
+          report: !!document.querySelector('[data-s=report]'),
           present: !!document.querySelector("details.dlmenu [data-present]"),
           arrange: !!document.querySelector("[data-arrange]") })""")
         if perf["secrow"]:
@@ -359,7 +359,7 @@ with sync_playwright() as p:
         if perf["arrange"]:
             errs.append("PERFORMANCE (%s): Arrange is still here — it belongs to the plan"
                         % label)
-        pg.click("[data-report]"); pg.wait_for_timeout(300)
+        pg.click('[data-s=report]'); pg.wait_for_timeout(300)
         # THE BAR MOVED, IT DID NOT GO (§150). The reporting controls now ride
         # the tab row rather than sitting in the page, so this asked for
         # `.rep-bar` and correctly found nothing — §51.11's fault caught doing

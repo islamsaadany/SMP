@@ -384,6 +384,23 @@ console errors (in this cloud environment, run it via a wrapper that points Play
   remove × onto a second line — `inline-block` restores it, and it was found
   by `checks/plan-fields.py` GOING RED, not by reading the cascade, which is
   the argument for that check existing.
+- **A SENTENCE NOBODY HAS SETTLED IS A QUESTION MARK ON THE PAGE (§214.3):**
+  Islam — *"remove the line that's talking about the Retail aspiration … I will
+  think later how to edit it, to avoid any confusion."* The line was
+  information rather than a description (1b-ii) and the FACT is still worth
+  stating — where a supporting function's aspiration and SWOT live is said
+  nowhere else — but it had already been wrong once inside a day (§213.1) and
+  sat at the top of a page people are being asked to fill in. Removed from both
+  of a pillars function's pages; `whereFoundationLives()` **DELETED rather than
+  left callerless** (§24), so bringing it back is a decision somebody makes and
+  not a line somebody finds. **RECORDED AS OUTSTANDING** — nothing now says a
+  function's strategy is its parent's — and asserted as an ABSENCE, by the
+  PARENT'S NAME rather than by the wording, which is the part not settled
+  (§94.8). **AND ONE CHECK HELD A NUMBER §214.2 HAD MOVED**:
+  `milestone-fill.py` asked for `>= 3` owing places, true only while a
+  capability's objectives counted, so a deliberate decision read as a
+  regression — it compares the office's map with the bounded role's now. Third
+  time this file has recorded a literal outliving its decision.
 - **COUNTED AND FILLABLE ARE TWO QUESTIONS (§214.2):** Islam — *"the key
   objectives should not count as missing in the functions in general. The
   definition is OK and the owner is OK, but the key objective specifically

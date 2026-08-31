@@ -114,6 +114,30 @@ with sync_playwright() as p:
     ok("...the pillars one naming the FUNCTION", a["labels"][:1] == ["Function"], a["labels"])
     ok("...the projects one naming the CAPABILITY", c["labels"][:1] == ["Capability"], c["labels"])
 
+    print("\n── 2b · and no explanatory line above either (§214.3)")
+    # Islam: "remove the line that's talking about the Retail aspiration … I
+    # will think later how to edit it." Asserted as an ABSENCE, so it cannot
+    # creep back unnoticed — and by the PARENT'S NAME rather than by the
+    # wording, which is precisely what he has not settled (§94.8).
+    for t, what in ((T, "pillars"), (TC, "projects")):
+        open_at(pg, t)
+        top = pg.evaluate("()=>{const s=document.querySelector('#panel > p.sub');"
+                          "return s?s.textContent.trim():null}")
+        ok("the " + what + " function's Overview opens on no prose line", top is None, top)
+        parent = pg.evaluate("(k)=>{const f=FUNCTIONS[k];return f.under&&UNITS[f.under]?UNITS[f.under].name:null}",
+                             t[3:])
+        if parent:
+            ok("...and nothing on it names the parent unit",
+               parent not in (pg.evaluate("()=>document.querySelector('#panel').textContent") or ""),
+               parent)
+    # ...and the PLAN page lost it too, which is where it was first put.
+    pg.evaluate("(t)=>{ current=t; currentSub='fnstrat'; CURSEC.fnstrat='proj'; paint(); }", T)
+    pg.wait_for_timeout(450)
+    ok("...and the Plan page opens on no prose line either",
+       pg.evaluate("()=>{const s=document.querySelector('#panel > p.sub');"
+                   "return s?s.textContent.trim():null}") is None,
+       pg.evaluate("()=>{const s=document.querySelector('#panel > p.sub');return s?s.textContent.trim():null}"))
+
     print("\n── 3 · no aspiration, no who-we-are, no SWOT on either")
     for t, what in ((T, "pillars"), (TC, "projects")):
         open_at(pg, t)

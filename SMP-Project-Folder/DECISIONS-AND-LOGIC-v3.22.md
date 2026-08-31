@@ -24517,6 +24517,40 @@ counting everything would not pass.
 turns **2** assertions red. 434 server tests still pass, which is the evidence
 the fills still land.
 
+### §214.3 — The "plans under …" line is removed
+
+Islam: *"in the merchandising remove the line that's talking about the Retail
+aspiration … I will think later how to edit it, let's remove it for them to
+avoid any confusion."*
+
+It was information rather than a description (rule 1b-ii), and the fact is still
+worth stating — where a supporting function's aspiration and SWOT actually live
+is said nowhere else in the product. **What it is NOT is settled wording**, and
+a sentence nobody has settled, sitting at the top of a page people are being
+asked to fill in, is a question mark rather than an answer. It had already been
+wrong once inside a day (§213.1: it named the key objectives as the parent's,
+which stopped being true on the card beside it), which is the evidence for
+taking it out rather than drafting a third version on his behalf.
+
+Removed from BOTH of a pillars function's pages, and `whereFoundationLives()` is
+**DELETED rather than left with no callers** (§24) — bringing it back is then a
+decision somebody makes, not a line somebody finds.
+
+**RECORDED AS OUTSTANDING, NOT CLOSED**: nothing on either page now says a
+supporting function's strategy is the parent unit's. Asserted as an ABSENCE in
+`checks/fn-pillars.py` §2b so it cannot creep back unnoticed — and by the
+PARENT'S NAME rather than by the wording, which is exactly what has not been
+settled (§94.8).
+
+**AND ONE CHECK WAS ASSERTING A NUMBER §214.2 HAD MOVED.**
+`checks/milestone-fill.py` asked the office's gap map for `>= 3` places and a
+total `> 3`, which held only while a capability's key objectives were counted —
+so a deliberate decision read as a regression. What that section is about is
+that the office is counted MORE places than a bounded role, which is true
+whatever the totals are; it compares the two maps now. §94.8, and the third
+time this file has recorded a literal outliving the decision it was written
+under.
+
 ### Not explained
 
 The **"could not reach the server (Failed to fetch)"** on *Next pending*. It

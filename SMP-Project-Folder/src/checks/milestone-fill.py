@@ -285,10 +285,17 @@ with sync_playwright() as p:
       author: mayAuthor("k_proj")
     })""")
     ck("the office authors the page", office["author"])
-    ck("...and is counted every place that owes, not only one",
-       len(office["map"]) >= 3, office)
-    ck("...more than the project owner was counted",
-       office["total"] > 3, office)
+    # §94.8: THE RELATIONSHIP, NEVER THE NUMBER. This asked for `>= 3` places
+    # and `total > 3`, which held only while a capability's key objectives were
+    # counted as missing — §214.2 stopped counting them at Islam's direction
+    # ("the key objectives should not count as missing in the functions in
+    # general"), and the literal turned a deliberate decision into a red line.
+    # What the section is actually about is that the office is counted MORE
+    # than a bounded role is, which is true whatever the totals are.
+    ck("...and is counted every place that owes, not only the one he owns",
+       len(office["map"]) > len(reach["map"]), {"office": office, "bounded": reach["map"]})
+    ck("...and more of them than the project owner was",
+       office["total"] > 1, office)
 
     # ── 8 · A DATE ALREADY WRITTEN IS NOT REWRITTEN BY BEING LOOKED AT ───
     print("\n8 · what a plan already carries survives the picker")

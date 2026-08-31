@@ -4567,31 +4567,24 @@ function projPlanBody(p, fk){
     dueNote(p) + overrunNote(p);
 }
 
-/* WHERE THIS FUNCTION'S STRATEGY LIVES (§211.2, §212, §213). Information
-   rather than a description (rule 1b-ii): a supporting function sits under a
-   unit and inherits that unit's strategy, and no other line on either of its
-   pages says so. ONE builder, because both pages say it and two copies drift
-   (§53.5); quiet, because it is context for the work below rather than a
-   heading over it.
+/* THE "PLANS UNDER …" LINE IS GONE (§214.3). Islam: *"in the merchandising
+   remove the line that's talking about the Retail aspiration … I will think
+   later how to edit it, let's remove it for them to avoid any confusion."*
 
-   IT NAMES ONLY WHAT IS ACTUALLY THE PARENT'S (§213). The first draft said
-   *"its aspiration, SWOT and key objectives are set there"* — true when §212
-   drew a unit's foundation here, and FALSE the moment the objectives became
-   the function's own, on the very card beside this sentence. Caught by
-   looking at the screenshot, not by reading the code: a line that contradicts
-   the page under it reads as the page being wrong. */
-function whereFoundationLives(fk){
-  var f = FUNCTIONS[fk];
-  if (!f) return "";
-  var up = f.under ? UNITS[f.under] : null;
-  return '<p class="sub" style="margin:0 0 12px">This function plans under ' +
-    (up ? esc(up.name) : 'the group') + ' — its ' +
-    esc(L("aspiration", "bu").toLowerCase()) + ' and SWOT are set there.</p>';
-}
+   It was information rather than a description (rule 1b-ii) and it is still a
+   fact worth stating — where a supporting function's aspiration and SWOT
+   actually live is said nowhere else. What it is NOT is settled wording, and a
+   sentence nobody has settled, sitting at the top of a page people are filling
+   in, is a question mark rather than an answer. Removed whole rather than
+   reworded on his behalf, and its builder is DELETED rather than left with no
+   callers (§24) — so bringing it back is a decision somebody makes, not a
+   line somebody finds.
+
+   RECORDED AS OUTSTANDING, not closed: nothing on either of a supporting
+   function's pages now says its strategy is the parent unit's. */
 function renderFnProjects(fnKey){
   var fk = fnKeyOf(fnKey), caps = capsOfFunction(fk);
-  if (fnPlansInPillars(FUNCTIONS[fk]))
-    return whereFoundationLives(fk) + renderUnitPlan(fnAsUnit(fk));
+  if (fnPlansInPillars(FUNCTIONS[fk])) return renderUnitPlan(fnAsUnit(fk));
   if (!caps.length) return fnNothingBehind(fk);
   var ed = projEditing(), on = projArranging(fk);
   /* Gone here for the same reason and in the same breath (§94.15, §53.5):
@@ -5320,8 +5313,8 @@ function renderUnitPlan(u){
 /* ── A PILLARS FUNCTION'S OVERVIEW (§213) ─────────────────────────────
    The capability function's two cards, carried by the function itself: what
    it is, and what it is judged on. No aspiration, no SWOT, no who-we-are —
-   those belong to the unit it plans under, and `whereFoundationLives()` says
-   so in one line above.
+   those belong to the unit it plans under — §214.3 removed the line that
+   said so, at Islam's direction, until he settles its wording.
 
    `def` IS A NEW FIELD ON THE FUNCTION and needs no migration: `functions`
    names six columns in `lib/state-io.js` and files everything else into
@@ -5337,8 +5330,7 @@ function fnPillarsOverview(fk){
      objective added against the reading view would be pushed onto an empty
      every function shares. */
   var list = (ed ? unitLikeWritable("fn:" + fk) : unitLike("fn:" + fk)).keyObjectives || [];
-  return whereFoundationLives(fk) +
-    editBar("capfoundation", "k_found") +
+  return editBar("capfoundation", "k_found") +
     fillBarOr("capfoundation", "k_found",
       list.reduce(function(a, m){
         return a + SMPRules.gapMissing("capko", m).length; }, 0),

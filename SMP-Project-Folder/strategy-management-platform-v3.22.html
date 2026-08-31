@@ -8752,7 +8752,21 @@ THEME.apply();
        optional blank is not a gap (§119.1, §187), and fill mode cannot ADD a
        row (§145) — so counting it would promise a control that does not
        exist (§61). */
-    cap:     ["def"],
+    /* §214.4 REVERSES §214 (Islam: *"for the functions that plan with pillars
+       remove the elements of the overview from the missing items"*).
+
+       §214 made the definition mandatory, on his instruction and scoped to
+       pillars functions; the capability side was added here for §53.5, so
+       that it stays ONE page with ONE answer. The reversal takes both back
+       for the same reason — a definition counted on one format and not the
+       other is exactly the drift §211 cost a day and §213 closed. Capability
+       functions are simply back where they were for their whole life.
+
+       STILL FILLABLE, in `GAP_OPTIONAL` beside the objectives — §205's rule
+       for the third time: counted and fillable are two questions, and
+       answering the first by emptying the list the SERVER reads is what
+       refuses a save the screen has already offered. */
+    cap:     [],
     project: ["owner", "start", "end"],
     /* §177: THE PAGE ALREADY CALLED THESE MISSING. A project pane prints the
        red word in exactly two more places -- an outcome with no target, and a
@@ -8789,8 +8803,9 @@ THEME.apply();
      GAP_FIELDS plus the optional blanks. Nothing is fillable that was not
      fillable before §187; this restores what that section removed by
      accident while keeping what it removed on purpose. */
-  var GAP_OPTIONAL = { tactic: ["collaborators"],
-                     capko:  ["dir", "target", "compile", "weight"] };
+var GAP_OPTIONAL = { tactic: ["collaborators"],
+                     capko:  ["dir", "target", "compile", "weight"],
+                     cap:    ["def"] };
   var GAP_FILLABLE = (function () {
     var out = {};
     Object.keys(GAP_FIELDS).forEach(function (k) {
@@ -10043,6 +10058,61 @@ THEME.apply();
      register, a matrix, a cycle. */
   var BY_KEY = ["units", "functions", "companies", "unitRoles"];
 
+  /* ── ROW-LEVEL, FOR A PLAN (§215) ──────────────────────────────────────
+     Islam: *"for the business units we need to apply the same thing — when
+     you change a small thing it just sends the thing that changed."*
+
+     §210 stopped at a top-level part on purpose and said why: finer needs
+     arrays matched by ROW ID rather than by position, or a save lands a value
+     on somebody else's row when two people have added rows (§48). Every plan
+     row has carried a unique id since §191 (219 of 219 across the demo, none
+     missing, none shared), so that is now a matching problem rather than a
+     guessing one.
+
+     AND THE OTHER HALF OF THE RISK IS GONE BY THE RULES. Adding, removing or
+     reordering a pillar needs authoring rights, which are the office's alone
+     (§94) — a custodian or a BU owner can only fill blanks and report. So the
+     two people who share a unit day to day cannot change WHICH rows exist,
+     which is exactly the case that made position-matching dangerous.
+
+     THE ADDRESSABLE LISTS ARE NAMED, NEVER DISCOVERED. A shape this does not
+     recognise falls back to sending the whole part, which is §210's behaviour
+     and always correct — the fine-grained path is an optimisation that must
+     never be the only way a change can travel. */
+  /* ── THE ADDRESSABLE TREE (§216 generalises §215) ─────────────────────
+     Hala, a strategy custodian and project owner working on CX, was refused
+     with *"a project's milestones (admin) cannot be changed here"* — naming a
+     supporting function she had never opened. Measured: EVERY capability in
+     the tenant lives in `group`, which travels as ONE top-level part, so a
+     save made on CX carries all eight functions' plans and any difference
+     between her tab's copy and the stored one is judged as HERS.
+
+     THE PART IS CALLED `group`, AND THAT IS WORTH SAYING because the first
+     build of this said `org` — the name §210's own comment uses in prose —
+     and every unit test passed, because those tests built their own fixture
+     with the wrong name too. The end-to-end test against a real Postgres is
+     what caught it (§100.3: a fixture that does not model the server is
+     testing something the product does not do).
+
+     §215's own fault, in the one place §210 could not reach: units and
+     functions are keyed maps and were split; capabilities are an ARRAY inside
+     a part, and were not.
+
+     A shape not in this tree returns null and the part travels whole, exactly
+     as before — the fine path stays an optimisation, never the only way. */
+  var ROW_TREE = {
+    /* a unit, or a function that plans in pillars */
+    keyObjectives: {},
+    items:         { measures: {}, tactics: {} },
+    /* the group's capabilities, and the projects inside them */
+    capabilities:  { keyObjectives: {},
+                     projects: { deliverables: {}, outcomes: {}, milestones: {} } }
+  };
+  /* Which top-level parts are worth addressing this way, and how they are
+     reached: a keyed map (`units.mobile`) or the part itself (`org`). */
+  var ROW_PARTS_MAP  = ["units", "functions"];
+  var ROW_PARTS_FLAT = ["group"];
+
   function isMap(v) {
     return !!v && typeof v === "object" && !Array.isArray(v);
   }
@@ -10060,17 +10130,115 @@ THEME.apply();
   }
   function same(a, b) { return canon(a) === canon(b); }
 
-  /* ── WHAT CHANGED ───────────────────────────────────────────────────
-     `base` is what the server last confirmed; `next` is what is on screen.
-     Returns { set: { path: value }, del: [path] } with paths one or two
-     segments deep, dot-joined.
+  /* Row lists compare by ID, everything else on the object compares whole. */
+  function idsOf(list) {
+    if (!Array.isArray(list)) return null;
+    var out = [], seen = {};
+    for (var i = 0; i < list.length; i++) {
+      var r = list[i];
+      if (!r || typeof r !== "object") return null;      /* not a row list */
+      var id = r.id;
+      /* §191: A LIST THE PLATFORM CANNOT NAME IS ONE NOBODY MAY ADDRESS.
+         A missing, null or repeated id means this list falls back to
+         travelling whole — the same answer the authoriser gives it. */
+      if (id === undefined || id === null || id === "") return null;
+      if (seen[id]) return null;
+      seen[id] = 1; out.push(String(id));
+    }
+    return out;
+  }
+  function sameIds(a, b) {
+    var x = idsOf(a), y = idsOf(b);
+    if (!x || !y || x.length !== y.length) return false;
+    /* ORDER INCLUDED, deliberately: reordering IS a change the authoriser
+       classifies by comparing id order (§101), so a reorder must travel as a
+       whole list and never as a set of field edits. */
+    for (var i = 0; i < x.length; i++) if (x[i] !== y[i]) return false;
+    return true;
+  }
+  function byId(list) {
+    var m = {};
+    (list || []).forEach(function (r) { if (r && r.id != null) m[String(r.id)] = r; });
+    return m;
+  }
+  /* The changed FIELDS of one row, skipping the lists it carries — those are
+     walked separately so a measure never rides inside its pillar. */
+  function fieldDiff(a, b, skip) {
+    var set = {}, del = [], keys = {}, any = false;
+    Object.keys(a || {}).forEach(function (k) { keys[k] = 1; });
+    Object.keys(b || {}).forEach(function (k) { keys[k] = 1; });
+    Object.keys(keys).forEach(function (k) {
+      if (skip && skip.indexOf(k) > -1) return;
+      var inB = Object.prototype.hasOwnProperty.call(b || {}, k);
+      if (!inB) { del.push(k); any = true; return; }
+      if (!same((a || {})[k], b[k])) { set[k] = b[k]; any = true; }
+    });
+    return any ? { set: set, del: del } : null;
+  }
 
-     A KEY THAT WENT IS NOT A KEY SET TO NULL. `priorCycle` is legitimately
-     null on a tenant that has never closed a cycle, so "null means remove"
-     would make an ordinary value indistinguishable from a deletion — and a
-     deletion is how a unit is removed. They are two lists. */
+  /* ── ONE OBJECT, WALKED DOWN THE TREE (§215, generalised by §216) ────
+     Appends row edits for `obj` and everything addressable beneath it.
+     Returns FALSE the moment anything is structural — a row added, removed or
+     moved, a list the platform cannot name, or a shape not in the tree — and
+     the caller then sends the part whole, which is always correct.
+
+     `here` is the path walked so far: alternating list name and row id, so
+     ["capabilities","cap1","projects"] addresses a project inside cap1. The
+     server validates against the SAME tree rather than walking freely. */
+  function walkRows(at, here, tree, a, b, out) {
+    if (!isMap(a) || !isMap(b)) return false;
+    var skip = [];
+    var names = Object.keys(tree);
+    for (var i = 0; i < names.length; i++) {
+      var name = names[i], la = a[name], lb = b[name];
+      if (la === undefined && lb === undefined) continue;
+      if (!Array.isArray(la) || !Array.isArray(lb)) return false;
+      skip.push(name);
+      if (same(la, lb)) continue;
+      if (!sameIds(la, lb)) return false;              /* structural — whole */
+      var ma = byId(la), mb = byId(lb), ids = Object.keys(ma);
+      for (var j = 0; j < ids.length; j++) {
+        var ra = ma[ids[j]], rb = mb[ids[j]];
+        if (same(ra, rb)) continue;
+        var below = tree[name];
+        if (Object.keys(below).length &&
+            !walkRows(at, here.concat([name, ids[j]]), below, ra, rb, out)) return false;
+        var fd = fieldDiff(ra, rb, Object.keys(below));
+        if (fd) out.push({ at: at, path: here.concat([name]), id: ids[j],
+                           set: fd.set, del: fd.del });
+      }
+    }
+    /* Anything on the PART ITSELF that moved travels with no id — an
+       aspiration, a name, the SWOT. Only at the top: a nested row's own fields
+       are emitted by the caller that found it, and emitting them here as well
+       produced the row twice, the second time with a path that addresses no
+       list (`items/p1`) and so is refused on arrival. */
+    if (!here.length) {
+      var top = fieldDiff(a, b, skip);
+      if (top) out.push({ at: at, path: [], id: null, set: top.set, del: top.del });
+    }
+    return true;
+  }
+
+  /* The tree a given part is walked with. A keyed map's entries are plans; a
+     flat part is the group, whose addressable half is its capabilities. */
+  function treeFor(part) {
+    if (ROW_PARTS_MAP.indexOf(part) > -1)
+      return { keyObjectives: ROW_TREE.keyObjectives, items: ROW_TREE.items };
+    if (ROW_PARTS_FLAT.indexOf(part) > -1)
+      return { capabilities: ROW_TREE.capabilities };
+    return null;
+  }
+  function entryRows(at, part, a, b) {
+    var tree = treeFor(part);
+    if (!tree) return null;
+    var out = [];
+    if (!walkRows(at, [], tree, a, b, out)) return null;
+    return out.length ? out : null;
+  }
+
   function graphChanges(base, next) {
-    var set = {}, del = [];
+    var set = {}, del = [], rows = [];
     base = base || {}; next = next || {};
     var keys = {};
     Object.keys(base).forEach(function (k) { keys[k] = 1; });
@@ -10087,13 +10255,34 @@ THEME.apply();
         Object.keys(sub).forEach(function (s) {
           var has = Object.prototype.hasOwnProperty.call(n, s);
           if (!has) { del.push(k + "." + s); return; }
-          if (!same(b[s], n[s])) set[k + "." + s] = n[s];
+          if (same(b[s], n[s])) return;
+          /* §215: ROW BY ROW WHERE THE SHAPE ALLOWS IT, AND WHOLE OTHERWISE.
+             `entryRows` returns null for anything structural — a row added,
+             removed or moved, or a list it cannot name — and the entry then
+             travels exactly as §210 sent it. The coarse path is never removed,
+             so a shape this does not understand still saves correctly. */
+          if (!(b[s] === undefined || n[s] === undefined)) {
+            var r = entryRows(k + "." + s, k, b[s], n[s]);
+            if (r) { rows = rows.concat(r); return; }
+          }
+          set[k + "." + s] = n[s];
         });
         return;
       }
-      if (!same(b, n)) set[k] = n;
+      if (same(b, n)) return;
+      /* §216: A FLAT PART IS WALKED TOO. `org` carries every capability in the
+         tenant, so before this a save made on one function travelled with all
+         of them and a stale copy of somebody else's plan was judged as this
+         person's — the refusal naming a function they had never opened. */
+      if (ROW_PARTS_FLAT.indexOf(k) > -1) {
+        var fr = entryRows(k, k, b, n);
+        if (fr) { rows = rows.concat(fr); return; }
+      }
+      set[k] = n;
     });
-    return { set: set, del: del };
+    var out = { set: set, del: del };
+    if (rows.length) out.rows = rows;
+    return out;
   }
 
   /* ── APPLY THEM ONTO A TARGET ───────────────────────────────────────
@@ -10108,6 +10297,7 @@ THEME.apply();
      and both should stop here. §42's rule that an unstated case resolves the
      safe way, on the write path. */
   var MAX_SEGMENTS = 2;
+  function bad(why) { return { ok: false, error: why }; }
   function applyChanges(target, changes) {
     if (!changes || typeof changes !== "object")
       return { ok: false, error: "no changes to apply" };
@@ -10124,11 +10314,74 @@ THEME.apply();
         return { ok: false, error: "a change reaches inside a part that is written whole: " + paths[i] };
     }
 
+    /* ── ROW EDITS ARE VALIDATED BEFORE ANY OF THEM IS APPLIED (§215) ──
+       A save is the one place where being approximately right is worse than
+       failing, so the whole list is checked first and applied second: a body
+       naming one row it cannot resolve changes nothing at all, rather than
+       half-landing and leaving a plan nobody can reason about.
+
+       THE SHAPE IS AN ALLOW-LIST, NEVER A WALK. `path` is [] , [list], or
+       [list, pillarId, sublist] and nothing else — replacing §210's blanket
+       "no path deeper than two" with something equally strict rather than
+       with a general resolver, which is where a bug here would be dangerous.
+
+       A ROW IS FOUND BY ID. Not by position, which is the whole reason §210
+       stopped short of this (§48). An id the stored graph does not hold is a
+       refusal: it means the client is working from a plan that no longer
+       exists, and guessing which row it meant is exactly the fault. */
+    var rows = Array.isArray(changes.rows) ? changes.rows : [];
+    var plan = [];
+    for (var r = 0; r < rows.length; r++) {
+      var e = rows[r];
+      if (!isMap(e) || typeof e.at !== "string") return bad("a row edit has no address");
+      if (!isMap(e.set) || !Array.isArray(e.del || []))
+        return bad("a row edit is not shaped like one");
+      var path = Array.isArray(e.path) ? e.path : null;
+      if (!path) return bad("a row edit has no path");
+
+      /* WHERE IT STARTS. Either a keyed map's entry (`units.mobile`) or a flat
+         part (`org`) — nothing else is addressable, and an unknown address is
+         refused rather than resolved. */
+      var seg = e.at.split("."), host = null, part = seg[0];
+      if (seg.length === 2 && ROW_PARTS_MAP.indexOf(part) > -1 && seg[1])
+        host = isMap(target[part]) ? target[part][seg[1]] : null;
+      else if (seg.length === 1 && ROW_PARTS_FLAT.indexOf(part) > -1)
+        host = target[part];
+      else return bad("a row edit names a part this server does not address: " + e.at);
+      if (!isMap(host)) return bad("a row edit names something that is not here: " + e.at);
+
+      /* WALKED DOWN THE SAME TREE THE DIFFER USED, never freely: the path is
+         list name / row id / list name … and every step is checked against the
+         tree before it is taken. A row is found by ID and never by position
+         (§48) — an id the stored graph does not hold is a refusal, because it
+         means the client is describing a plan that no longer exists. */
+      var tree = treeFor(part), holder = host, okShape = true;
+      for (var q = 0; q < path.length && okShape; q += 2) {
+        var listName = path[q];
+        if (!tree || !Object.prototype.hasOwnProperty.call(tree, listName)) { okShape = false; break; }
+        if (q + 1 < path.length) {
+          holder = byId(holder[listName])[String(path[q + 1])] || null;
+          if (!isMap(holder)) return bad("a row edit names a row that is not here: " + path[q + 1]);
+          tree = tree[listName];
+        } else {
+          holder = byId(holder[listName])[String(e.id)] || null;
+        }
+      }
+      if (!okShape) return bad("a row edit path this server does not apply: " + path.join("/"));
+      if (path.length % 2 === 0 && path.length) return bad("a row edit path is malformed: " + path.join("/"));
+      if (!isMap(holder)) return bad("a row edit names a row that is not here: " + e.id);
+      plan.push({ row: holder, set: e.set, del: e.del || [] });
+    }
+
     Object.keys(set).forEach(function (p) {
       var parts = p.split(".");
       if (parts.length === 1) { target[parts[0]] = set[p]; return; }
       if (!isMap(target[parts[0]])) target[parts[0]] = {};
       target[parts[0]][parts[1]] = set[p];
+    });
+    plan.forEach(function (e) {
+      Object.keys(e.set).forEach(function (k) { e.row[k] = e.set[k]; });
+      e.del.forEach(function (k) { delete e.row[k]; });
     });
     del.forEach(function (p) {
       var parts = p.split(".");
@@ -10143,7 +10396,8 @@ THEME.apply();
      than a claim. */
   function countChanges(changes) {
     if (!changes) return 0;
-    return Object.keys(changes.set || {}).length + ((changes.del || []).length);
+    return Object.keys(changes.set || {}).length + ((changes.del || []).length) +
+           ((changes.rows || []).length);
   }
 
   return { graphChanges: graphChanges, applyChanges: applyChanges,
@@ -16876,7 +17130,16 @@ function gapMap(target, pend){
        Asked through GAP_FIELDS, the same list the gaps are counted from. */
     if (pend) {
       var marks = SMPRules.pendOf(row);
-      return (SMPRules.GAP_FIELDS[kind] || []).filter(function(f){
+      /* §214.4: THE FILLABLE LIST, NOT THE COUNTED ONE. §192 chose
+         `GAP_FIELDS` and its own words say why — a mark for a field that has
+         stopped being FILLABLE would be walked to a tick that is not drawn —
+         but that is exactly what `GAP_FILLABLE` answers, and the two lists
+         have since parted three times (collaborators §205, a function's key
+         objectives §214.2, its definition here). `gapCell` draws the confirm
+         tick for every fillable field, so asking the counted list left the
+         office unable to FIND a fill it can plainly see and tick. §205's
+         fault in the walk rather than in the save. */
+      return (SMPRules.GAP_FILLABLE[kind] || []).filter(function(f){
         return !!marks[f]; }).length;
     }
     return SMPRules.gapMissing(kind, row).length;
@@ -28579,7 +28842,13 @@ function fnPillarsOverview(fk){
              "undefined" the way `fieldOr(page, f.def, …)` did — that third
              argument is a CLASS, not a placeholder (§213.1, found in a
              screenshot). */
-          gapCell("capfoundation", "k_found", f, "def", { kind:"area" }) +
+          /* §214.4: AN EM-DASH, NOT THE RED WORD. The definition stopped
+             being counted, and a page printing `Missing` over a count of
+             nought is the product arguing with itself (§177, sign reversed).
+             `readEmpty` is the hook gapCell already carries for exactly this.
+             It stays FILLABLE — the box still opens and still saves. */
+          gapCell("capfoundation", "k_found", f, "def",
+                  { kind:"area", readEmpty:"&mdash;" }) +
         '</dd></div>' +
       '</dl></div>' +
       '<div class="card"><div class="cardhead"><h2 class="sec first">' + L("keyobj","bu") + '</h2>' +
@@ -28647,7 +28916,8 @@ function renderFnFoundation(fnKey){
            one page, one answer (§53.5), or a fill grant would reach a
            function's definition and not a capability's. */
         '<div class="clause"><dt>Definition</dt><dd>' +
-          gapCell("capfoundation", "k_found", c, "def", { kind:"area" }) + '</dd></div>' +
+          gapCell("capfoundation", "k_found", c, "def",
+                  { kind:"area", readEmpty:"&mdash;" }) + '</dd></div>' +
       '</dl></div>' +
       '<div class="card"><div class="cardhead"><h2 class="sec first">' + L("keyobj","bu") + '</h2>' +
         '<span class="pill horizon">Horizon &middot; ' + horizonLabel() + '</span></div>' +

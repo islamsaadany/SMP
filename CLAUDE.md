@@ -3590,7 +3590,34 @@ prior sessions (on HR_ERP) accidentally reverted agreed-upon designs.
 
 ---
 
-*Last Updated: 2026-08-31 &mdash; **v3.98: a supporting function's Overview
+*Last Updated: 2026-08-31 &mdash; **v3.99: a plan travels row by row, and a
+capability travels on its own (&sect;215, &sect;216).** Islam, on the
+deployment: *"the CX is still getting errors on filling"* &mdash; Hala, working
+on **CX**, refused by *"a project's milestones (**admin**) cannot be changed
+here"*. **THE REFUSAL NAMED A FUNCTION SHE HAD NEVER OPENED.** Measured: every
+capability in the tenant lives in the `group` part, `group` travelled WHOLE, and
+one milestone owner sent **33,433 bytes** carrying all eight functions' plans —
+so a difference anybody else had made was judged as hers, her own legitimate
+work was thrown away with the refusal (a save is all-or-nothing, &sect;184), and
+her stale copy would have wiped theirs. &sect;210 split the four keyed MAPS and
+stopped; capabilities are an ARRAY inside a part. **33,433 &rarr; 168 bytes**,
+and &sect;215 took a unit's plan the same way &mdash; 27,600 &rarr; ~200 &mdash;
+so two of the office filling ONE unit at once now both land. **ANYTHING
+STRUCTURAL STILL TRAVELS WHOLE**, which is the whole safety argument: a row
+added, removed or moved falls back to &sect;210's behaviour, and adding a pillar
+needs authoring rights the office alone holds (&sect;94), so the two people who
+share a unit cannot change which rows exist. **THREE THINGS THE TESTS TAUGHT**:
+the first build named the wrong part (`org`, the word the prose uses; it is
+`group`) and every unit test passed because the fixtures carried the same wrong
+name &mdash; the real-database test caught it (&sect;100.3); breaking the
+structural guard made the differ THROW, the suite died at that trial and
+`grep -c FAIL` read ZERO, a falsification that looked like a pass; and a
+structural change ALONE falls back by accident, so only one **beside a field
+edit** exposes the guard at all. `scripts/test-cx-refusal.js` runs her exact
+scenario against main's module and this one: refused, her work thrown away and
+the other function's wiped on main; accepted and both surviving here.
+
+*Earlier: 2026-08-31 &mdash; **v3.98: a supporting function's Overview
 is a supporting function's Overview (&sect;211&ndash;&sect;214.3).** Islam, on
 Consumer Finance and Merchandising: *"they have a missing item banner in the
 foundation"*, and *"pressing on the CON01 22 it doesn't take me to the pillars

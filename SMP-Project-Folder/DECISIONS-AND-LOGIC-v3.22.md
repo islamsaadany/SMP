@@ -24689,6 +24689,86 @@ does not own — she is refused, correctly, and the screen should not have opene
 it. If refusals continue after this ships and still name a function she has not
 opened, the diagnosis above is wrong and it needs looking at again.
 
+### §215 — A plan travels row by row
+
+Islam: *"for the business units, we need to apply the same thing — when you
+change a small thing it just sends the thing that changed. Is there any risk?"*
+
+§210 stopped at a top-level part and said why: finer needs arrays matched by
+ROW ID rather than by position, or a save lands a value on somebody else's row
+(§48). **Both halves of that risk are answered.** Every plan row has carried a
+unique id since §191 — measured, 219 of 219 across the demo, none missing and
+none shared. And Islam's own point closed the other: adding, removing or
+reordering a pillar needs authoring rights, which are the office's alone (§94),
+so the two people who share a unit day to day cannot change WHICH rows exist —
+exactly the case that made position-matching dangerous.
+
+**ANYTHING STRUCTURAL STILL TRAVELS WHOLE.** The addressable lists are NAMED
+rather than discovered, and a shape the module does not recognise returns null
+and the part is sent as §210 sent it. The fine path is an optimisation and must
+never be the only way a change can travel.
+
+**ORDER IS PART OF "SAME ROWS"**, or a reorder — which the authoriser judges by
+comparing id order (§101) — would travel as a set of field edits and leave the
+order behind.
+
+**THE SERVER VALIDATES EVERY ROW EDIT BEFORE APPLYING ANY.** Half a save is
+worse than none: a body naming one row it cannot resolve changes nothing at all.
+§210's blanket "no path deeper than two" becomes an ALLOW-LIST of shapes rather
+than a general resolver, which is where a bug here would be dangerous.
+
+27,600 bytes → ~200, though the point is collisions rather than speed: two of
+the office filling ONE unit at once now both land, which fails before this.
+
+**AND THE HARNESS LIED FIRST.** Breaking the structural guard made the differ
+THROW, the suite died at that trial, and `grep -c FAIL` read ZERO — a
+falsification that looked like a pass. A throw is a failure now, and the failure
+path returns a shape the assertions can still read.
+
+**AND THE CASE THE FIRST TESTS COULD NOT SEE.** A structural change ALONE
+produces no row edits and falls back by accident, so removing the guard broke
+nothing measurable. One BESIDE a field edit is where a new pillar silently never
+reaches the database while the screen shows it. Guards fail 8 / 5 / 2 when
+broken.
+
+### §216 — And a capability travels on its own
+
+Islam, from the deployment: *"the CX is still getting errors on filling"* —
+Hala, a strategy custodian and project owner working on **CX**, refused with
+*"a project's milestones (**admin**) cannot be changed here"*.
+
+**THE REFUSAL NAMED A FUNCTION SHE HAD NEVER OPENED, and that is the clue.**
+Measured: every capability in the tenant lives in the `group` part, and `group`
+travelled WHOLE — one milestone owner sent **33,433 bytes** carrying all eight
+functions' plans. So any difference between her tab's copy and the stored graph,
+made by anybody, was judged as HERS; her own legitimate work was thrown away
+with the refusal, because a save is all-or-nothing (§184); and her stale copy
+would have wiped theirs.
+
+§215's fix in the one place §210 could not reach: units and functions are keyed
+MAPS and were split; capabilities are an **array inside a part** and were not.
+The addressing is a declared TREE now, walked identically by the differ and by
+the server. **33,433 → 168 bytes.**
+
+**AND THE FIRST BUILD NAMED THE WRONG PART.** It said `org` — the word §210's
+own prose uses — and the part is called `group`. Every unit test passed, because
+the fixtures were built with the same wrong name. The end-to-end test against a
+real Postgres is what caught it (§100.3).
+
+**Reproduced end to end** in her exact shape — a stale tab, somebody else's
+change to another function in between — and asserted as a BEFORE AND AFTER
+(`scripts/test-cx-refusal.js`), because the fault is only visible as a
+difference: refused, her work thrown away and the other function's wiped on
+main; accepted, both surviving, on this. 15 red with capabilities not
+addressable.
+
+**NOT FIXED, AND SAID SO.** A genuine refusal is still a refusal. Islam
+reported that milestones saved while deliverables and outcomes did not; every
+role against every permission setting was tried on both the reporting and the
+filling path, and milestones and outcomes behave IDENTICALLY in all of them. No
+theory is offered for that, and if the refusals continue while naming a function
+nobody opened, this diagnosis is wrong.
+
 ### Not explained
 
 The **"could not reach the server (Failed to fetch)"** on *Next pending*. It

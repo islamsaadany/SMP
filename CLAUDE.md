@@ -384,6 +384,42 @@ console errors (in this cloud environment, run it via a wrapper that points Play
   remove × onto a second line — `inline-block` restores it, and it was found
   by `checks/plan-fields.py` GOING RED, not by reading the cascade, which is
   the argument for that check existing.
+- **A BOX FROM THE COMPUTER WHEN A MESSAGE LANDS (§225):** Islam — a browser
+  notification for platform messages, *"for the SMO when someone replies, and
+  for the users when the SMO replies to them"*, wording **B** (who wrote, and
+  the first line), *"and the user can swithc off inside the platform as well"*,
+  **per device**. **THREE SWITCHES, AND ALL THREE MUST SAY YES**: the company's
+  (`chat.popup`, off by default — only an explicit `true` turns it on, §104),
+  the person's own bell in the conversation, and the browser's permission —
+  three decisions by three people, none standing in for another. **NOT NAMED
+  `notify`**, which is already the handover email (§87's twins, in a settings
+  object). **THE PERSON'S IS PER DEVICE AND THAT IS THE TRUTH, NOT A SHORTCUT**
+  — the browser's permission is per device too, so a switch claiming to follow
+  somebody everywhere would read ON on the laptop and stay silent on the iPad;
+  `localStorage`, **stored as an ABSENCE** (§50.6), and **a throwing store
+  reads as ON** (the opposite of §107's tour: the failure that matters is
+  nagging somebody who said no, and that needs the key PRESENT). **THE PAIR IN
+  THE HEADER HAD TO BE GROUPED** — `.chx` carried `margin-left:auto` itself, so
+  a second one is pushed right independently and the two land a gap apart;
+  the group is **`.chbtns`, never `.chacts`**, which already exists under
+  `.chthead`, one letter from `.chathead` (§65.9). **FOUR ANSWERS, THREE
+  DRAWN**: office off, or no `Notification` at all (an iOS Safari **tab**), and
+  nothing is drawn (§61); a browser that **refused** still gets a bell,
+  `aria-disabled` and never `disabled`, or the sentence explaining the silence
+  cannot be reached (§221, §163). **ASKED ON A GESTURE ONLY** — opening the
+  panel, or pressing the bell on. **THE OFFICE IS THE HALF THAT NEEDED THE
+  SERVER**: their corner is their OWN conversation and the Inbox's clock stops
+  the moment they leave that page (`boxBeat`), so `mine` carries `waiting` /
+  `waitingWho` / `waitingBody` **for the office only** — one query for a handful
+  of people (§98), the same two facts everybody else's box carries (§53.5).
+  **NAMED IN `out.chat` OR IT NEVER ARRIVES**: that object lists the keys it
+  forwards, so `popup` had to be added there too — §135's `greet` exactly, and
+  without it the bell would never draw on the deployment. **NOTHING WHERE IT IS
+  ALREADY ON SCREEN** (panel open; office reading the queue), **the first
+  answer of a session never announces**, and **one tag per side** so a waiting
+  question never replaces a reply. **THE ROW SITS ABOVE THE TWO EMAIL ROWS,
+  NEVER BETWEEN THEM** — the first build split the pair §127 had just brought
+  together, and the check said so.
 - **A CAPABILITY TRAVELS ON ITS OWN (§216):** Islam, from the deployment —
   *"the CX is still getting errors on filling"* — with Hala, working on **CX**,
   refused by *"a project's milestones (**admin**) cannot be changed here"*.

@@ -25073,3 +25073,129 @@ left*.
 **THE CHECK'S ASSERTION WAS REWRITTEN, NOT DELETED.** `fn-pillars.py` asserted
 the bar was ABSENT — which is exactly the state Hala met — so it asserts the
 three things that are true instead: no red count, no owing chips, and a door.
+
+---
+
+## §224 — THE FORMAT DECIDES THE DECK
+
+Islam: *"the consumer finance presentation is not showing anything."*
+
+The Present handler branched on the **`fn:` prefix alone** and sent every
+supporting function to the capability deck — so a function that plans in
+**pillars**, which has no capabilities at all, opened a deck reading
+*"Capability review · 0 capabilities"* and nothing under it. Reproduced on the
+demo's own pillars function before a line was changed.
+
+**§63.4 FIXED THE OTHER HALF OF THIS AND LEFT THE WHOLE OF IT.** That section
+gave the button a target, because before it a pillars function could not be
+presented at all — and routed every `fn:` to `openDeckFn`, which is right for a
+capability function and wrong for the other format. §59's rule in the one place
+still asking by prefix: the deck comes through `unitLike()`, which resolves both
+kinds of key in one place, and the FORMAT is what chooses the builder.
+
+---
+
+## §224.2 — THE DEFINITION IS THE OFFICE'S (reversing §214 and §223's occasion)
+
+Islam: *"Remove the defintion of the functions overview from the filling what's
+missing or filling what's empty the SMO will do it."*
+
+§214 made a supporting function's definition a **counted** gap; §214.4 took the
+objectives back out and left it counted; §223 then found that a page whose only
+blank was optional had no door at all and opened one on what is *fillable*. This
+removes the definition from **both** questions: `GAP_OPTIONAL.cap` loses its one
+entry, so `GAP_FILLABLE.cap` is empty and a capability's definition is neither
+counted nor offered to a filler.
+
+**RECORDED AS A REVERSAL, NOT AN EDIT.** §214's argument — that a function's
+definition is the one line of its overview nobody else can write — was sound and
+Islam decided otherwise: the office authors it. The cost is stated rather than
+implied: a function whose definition is blank now shows nothing asking for it on
+any screen, and the only way it gets written is the office's pen.
+
+---
+
+## §225 — A BOX FROM THE COMPUTER WHEN A MESSAGE LANDS
+
+Islam: *a browser notification for the platform messages — for the SMO when
+someone writes in, and for the users when the SMO replies to them*; wording **B**
+(who wrote, and the first line), *"and the user can swithc off inside the
+platform as well"*, **per device**.
+
+**THREE SWITCHES, AND ALL THREE MUST SAY YES.** The company's (`chat.popup`, the
+office's row in Chat settings, **off by default** like `assistant` and `notify` —
+only an explicit `true` turns it on, so a stale value cannot switch it on by
+accident, §104), the person's own bell, and the browser's permission. They are
+three different decisions by three different people and none of them stands in
+for another.
+
+**NOT NAMED `notify`.** That key is already the handover email. §87's twins, in a
+settings object where a wrong guess would have silently rewired an email nobody
+asked to change.
+
+**THE PERSON'S IS PER DEVICE, AND THAT IS THE TRUTH RATHER THAN A SHORTCUT.**
+The browser's permission is per device too, so a switch claiming to follow
+somebody everywhere would read as ON on the laptop and stay silent on the iPad,
+whose Safari was never asked. It lives in `localStorage` beside the theme and the
+column choices (§25, §47.1) and the hover says *"on this device"* rather than
+leaving that to be discovered. **Stored as an ABSENCE** (§50.6): the key exists
+only while somebody has turned it OFF, so a browser that has never been asked and
+one switched back on are the same state. **A throwing store reads as ON** — the
+opposite way round from §107's tour, because the failure that matters here is
+nagging somebody who said no, and that requires the key to be PRESENT.
+
+**THE BELL IS IN THE CONVERSATION IT IS ABOUT**, beside the minimise — and the
+pair had to be **grouped**, because `.chx` carried `margin-left:auto` itself, so
+a second one is pushed right independently and the two land a gap apart with the
+heading squeezed between them. The group takes the margin; the class is
+`.chbtns`, **never `.chacts`**, which already exists under `.chthead` — one
+letter from `.chathead`, and reusing the child name is a trap for whoever edits
+one of them next (§65.9).
+
+**FOUR ANSWERS, THREE OF THEM DRAWN.** The office's switch off, or a browser with
+no `Notification` at all (an iOS Safari **tab** — it exists only for a home-screen
+install), and there is nothing here to decide, so no control is drawn (§61). A
+browser that has **refused** still gets a bell, struck through and
+**`aria-disabled`, never `disabled`** — or it takes no focus and the one sentence
+explaining the silence can never be reached (§221, §163). Otherwise it is this
+person's own switch.
+
+**THE PERMISSION IS ASKED ON A GESTURE AND NOWHERE ELSE** — opening the panel, or
+pressing the bell to turn them on. Browsers only allow the question after one,
+and a permission box thrown at somebody who has not asked for anything is the one
+people refuse out of reflex; a refusal is then theirs to undo, not ours.
+
+**THE OFFICE IS THE HALF THAT NEEDED THE SERVER.** Their corner is their OWN
+conversation, so nothing in the reply path could ever speak for the queue — and
+the Platform Inbox's clock **stops the moment they navigate away** (`boxBeat`
+checks for its own node), which is every page but one. The corner's poll is the
+only thing that runs everywhere, so `mine` now carries `waiting`, `waitingWho`
+and `waitingBody` **for the office only**: one query for a handful of people, and
+everybody else's poll is exactly as cheap as it was (§98). It carries the same
+two facts as everybody else's box, so the office is not served a bare number
+where a person is served a sentence (§53.5).
+
+**NAMED ON THE SERVER OR IT NEVER ARRIVES.** `out.chat` lists the keys it
+forwards, so `popup` had to be added there as well as to the rules — §135's fault
+exactly, where `greet` was missing from the posted body and every stored row
+would have said no message ever greeted anybody. Without that line the bell would
+never have been drawn on the deployment while every unit test passed.
+
+**NOTHING IS SHOWN WHERE THE THING IS ALREADY ON SCREEN** — not while the panel
+is open, and not while the office is reading the queue itself. **The first answer
+of a session never announces**, or signing in with three questions waiting would
+throw a box at somebody who has not been away. **ONE TAG PER SIDE**
+(`smp-chat` / `smp-chat-office`), so a second reply replaces the first rather than
+stacking a column of boxes on somebody who has been away from the screen — and a
+question waiting never replaces a reply on the office's own conversation.
+
+**THE NAME IS ASSERTED AS AGREEMENT WITH THE THREAD**, never as a literal:
+`nameOf()` resolves through the register, so a hardcoded name would pass on a
+build that printed the raw person key (§53.5, §94.8).
+
+`checks/office-chat.py` §14 models the browser rather than using a real one —
+every reader asks `window.Notification` at call time, so a stand-in installed at
+runtime needs no reload and is the only way to read back **what** was shown,
+which is most of what wording B claims. It asserts both ends of all three
+switches (§94.2), and **the refused press is forced**, because Playwright treats
+`aria-disabled` as disabled and that path is exactly what is under test (§222).

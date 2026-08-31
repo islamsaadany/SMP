@@ -254,7 +254,13 @@
    person stays blocked while a save cannot land. Name checked against
    origin/main serving "smp-shell-v3.95-the-viewer-is-never-somebody-else";
    confirm again immediately before the push (§94.16). */
-const SHELL = "smp-shell-v3.96-home-is-never-blocked";
+/* v3.97-only-what-changed — §210: a save carries the parts it changed and the
+   server applies them onto its own stored copy, instead of the client's whole
+   graph replacing the database's. Ends the silent overwrite of other people's
+   saved work, and a refusal can only name what actually travelled. Name checked
+   against origin/main serving "smp-shell-v3.96-home-is-never-blocked"; confirm
+   again immediately before the push (§94.16). */
+const SHELL = "smp-shell-v3.97-only-what-changed";
 const ASSETS = [
   "/",
   "/index.html",

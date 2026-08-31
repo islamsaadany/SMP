@@ -1087,12 +1087,20 @@
             ? '<span class="rgwait" title="' + gwait +
               ' waiting behind this group">' + gwait + '</span>'
             : '') +
-          /* The entry count KEEPS its job and its quiet shape. The audit's
-             complaint was that it wore the shape of a number that changes
-             while never changing — answered by giving the changing number a
-             different shape, not by taking this one away: folded, it is the
-             only thing that says how much is behind the heading. */
-          '<span class="rgn">' + items.length + '</span></button>' +
+          /* THE ENTRY COUNT, AND ONLY WHILE FOLDED (§198.2). Its own argument
+             above is exactly right and stops one word short: *folded, it is
+             the only thing that says how much is behind the heading.* Open,
+             the rows ARE that — a number saying how many lines sit directly
+             beneath it, while they are all on screen, is the same fault
+             §122 removed from the register's header ("the count said how big
+             the register is — the table under it IS that").
+
+             It keeps its quiet mono shape, so it still cannot be mistaken for
+             `rgwait` beside it; what goes is drawing it at the one moment it
+             says nothing. Now BOTH numbers on this row appear only when
+             folded, and both are about what you cannot see. */
+          (shut ? '<span class="rgn">' + items.length + '</span>' : '') +
+          '</button>' +
         '<div class="rgitems" data-railitems="' + g.k + '"' + (shut ? " hidden" : "") + '>' +
           items.map(function(d){
             var w = ATT[d.k] || 0;

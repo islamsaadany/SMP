@@ -228,7 +228,7 @@
    nobody has served, and the suffix says whose the change is rather than being
    a number two sessions can reach for correctly and still collide on (§99).
    `node --check sw.js` run after the merge (§146.2). */
-const SHELL = "smp-shell-v3.85-repeat-in-months";
+const SHELL = "smp-shell-v3.86-a-unit-of-its-own";
 const ASSETS = [
   "/",
   "/index.html",

@@ -521,7 +521,12 @@ with sync_playwright() as p:
     ck("...and then it submits", pg.evaluate("() => !!REVIEW.submitted['%s']" % DEST), said)
     ck("...the dot on the Performance tab clears",
        not pg.evaluate("() => reportPending('%s')" % DEST))
-    bar = pg.eval_on_selector(".rep-bar", "e=>e.textContent")
+    # §199.2: `.rep-bar` HAS NOT EXISTED FOR VERSIONS. The reporting bar is
+    # `.repchrome` (repChrome()), and this line CRASHED the whole file rather
+    # than failing one assertion — which is why everything below it has gone
+    # unrun. §51.11 from the loud end: a selector that no longer matches
+    # usually passes quietly; this one took the check down with it.
+    bar = pg.eval_on_selector(".repchrome", "e=>e.textContent")
     ck("...the bar says Submitted and offers Reopen",
        "Submitted" in bar and "Reopen" in bar, bar)
     if pg.query_selector("[data-unsubmit]"):

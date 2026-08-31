@@ -2855,9 +2855,84 @@ function koToggle(){
    same value, and the 3-year loses its "3-year" prefix there — with only one
    number left, a label saying which one it is has nothing to distinguish it
    from. */
+/* ── THE UNIT IS ITS OWN COLUMN, AND NOTHING NEW IS STORED (§199) ──────
+   Islam: *"for the key objectives we need a unit, as some are numbers, some
+   might be money and some are SQM."*
+
+   THERE IS NO UNIT FIELD AND THERE DOES NOT NEED TO BE. The unit has always
+   been typed INTO the target — `"6.2B EGP"`, `"60000 SQM"`, `"100#"` — and
+   the platform has held a matched pair for taking that apart and putting it
+   back since the upload template gained a Unit column: `splitTarget` and
+   `joinTarget`, which the download already round-trips through on every
+   export. Measured before a line was written: **178 targets across every
+   unit, capability, group objective and pillar measure in the shipped plan,
+   0 round-trip failures.**
+
+   SO THE COLUMN IS A VIEW OF WHAT IS ALREADY THERE. `target` goes on holding
+   the whole string, all 103 places that read it keep working, the deck and
+   both workbooks are untouched, and there is no migration — which is the
+   difference between this and adding a field: a second home for the unit
+   would be a second source of truth, and the two would drift the first time
+   anything wrote only one of them (§53.5).
+
+   THE NEAR TARGET NAMES THE UNIT, falling back to the far one. A row where
+   the two disagree keeps both exactly as typed and shows the near one's,
+   because inventing a single unit for a row that holds two would be the
+   platform deciding something nobody said (§96.2). */
+function koUnitOf(m){
+  if (!m) return "";
+  var u = splitTarget(m.target).unit;
+  return u || splitTarget(m.target3y).unit || "";
+}
+/* The number alone, for a column that now says the unit once at the end of the
+   row. A value the splitter cannot read is returned WHOLE rather than blanked:
+   it is still what somebody typed (§96.2, again). */
+function koNum(v){
+  if (v == null || v === "") return "";
+  var s = splitTarget(v);
+  return s.value || String(v);
+}
+
+/* WRITING THE UNIT WRITES THE TARGETS, because that is where it lives (§199).
+   Both horizons take it: a row whose 3-year target is measured in one thing
+   and this year's in another is not something anybody has asked for, and
+   showing ONE unit while silently leaving the other would be the column
+   telling a half-truth.
+
+   THE SEPARATOR IS DERIVED FROM THE NEW UNIT, never carried from the old
+   spacing. `joinTarget` reads the gap out of the value it is given, which is
+   right when the unit has not changed and wrong here: "100#" carries no space,
+   so keeping it would turn a change to "trips" into "100trips". Passing an
+   empty original asks joinTarget for its own rule instead — a space before a
+   word, none before a symbol.
+
+   AN UNCHANGED UNIT WRITES NOTHING AT ALL (§50.6, §42): re-typing what is
+   already there must leave the plan byte-identical, or every visit to this
+   table puts a phantom change into the next save and a non-office save is
+   refused for the rest of the cycle. */
+function koSetUnit(m, u){
+  var want = String(u == null ? "" : u).trim();
+  if (want === koUnitOf(m)) return;
+  ["target", "target3y"].forEach(function(f){
+    var v = m[f];
+    if (v == null || v === "") return;   /* nothing to attach it to */
+    m[f] = joinTarget("", splitTarget(v).value, want);
+  });
+}
+/* A unit with no target to sit inside cannot be stored, so the field says so
+   rather than accepting a word and losing it on the next paint (§61: a control
+   that takes input and discards it is worse than one that is not there). */
+function koHasTarget(m){
+  return !!(String(m.target || "").trim() || String(m.target3y || "").trim());
+}
+
 function koView(list, isGroup, acKey){
   var near = isGroup || SHOW_KO_THIS_YEAR;
   var miss = '<span class="missing">Missing</span>';
+  /* Drawn only where at least one row HAS one — a column of empty cells on a
+     plan whose targets are all bare percentages is a column that says nothing
+     (§41's budget, and 46 of the 178 measured carry no unit at all). */
+  var anyUnit = list.some(function(m){ return !!koUnitOf(m); });
   /* §145: every pending mark on the row, chips beside the values it shows —
      including a pending direction or compile, which have no column here, or
      the office would have nothing to confirm them from in read mode. */
@@ -2866,6 +2941,10 @@ function koView(list, isGroup, acKey){
            pendChip(acKey, m, "target") + pendChip(acKey, m, "compile");
   };
   if (KO_VIEW === "chips") {
+    /* THE CHIP LAYOUT KEEPS THE WHOLE STRING (§199). A chip is one figure with
+       nothing beside it to line up against, so splitting the unit off would
+       cost the reading and buy nothing — the column exists so a COLUMN can be
+       read down, and there is no column here. */
     return '<div class="ochips">' + list.map(function(m){
       var far = m.target3y ? esc(m.target3y) : miss;
       return '<div class="ochip"><b>' + esc(m.name) + '</b>' +
@@ -2874,14 +2953,19 @@ function koView(list, isGroup, acKey){
               : '<div class="v">' + far + '</div>') + chips(m) + '</div>';
     }).join("") + '</div>';
   }
-  return '<div class="ohead' + (near ? '' : ' one') + '"><span>Objective</span>' +
+  var cls = (near ? '' : ' one') + (anyUnit ? ' wu' : '');
+  return '<div class="ohead' + cls + '"><span>Objective</span>' +
+      (anyUnit ? '<span>Unit</span>' : '') +
       '<span>' + horizonColLabel() + '</span>' +
       (near ? '<span>This year</span>' : '') + '</div>' +
     list.map(function(m){
-      return '<div class="orow' + (near ? '' : ' one') + '"><span class="on">' + esc(m.name) +
+      var u = koUnitOf(m);
+      return '<div class="orow' + cls + '"><span class="on">' + esc(m.name) +
         chips(m) + '</span>' +
-        '<span class="ot h">' + (m.target3y ? esc(m.target3y) : miss) + '</span>' +
-        (near ? '<span class="ot">' + (m.target ? esc(m.target) : miss) + '</span>' : '') + '</div>';
+        (anyUnit ? '<span class="ou">' + (u ? esc(u) : "") + '</span>' : '') +
+        '<span class="ot h">' + (m.target3y ? esc(koNum(m.target3y)) : miss) + '</span>' +
+        (near ? '<span class="ot">' + (m.target ? esc(koNum(m.target)) : miss) + '</span>' : '') +
+        '</div>';
     }).join("");
 }
 /* The far column says WHICH year when the tenant has set one — "By 2028" reads
@@ -2920,6 +3004,7 @@ function koEdit(list, page, acKey, owner){
      registers its own, exactly as a field registers its own setter. */
   var li = KOLISTS.push({ list: list, owner: owner }) - 1;
   return '<div class="scroll"><table><thead><tr><th>Objective</th><th class="cc">Dir.</th>' +
+    '<th class="cc">Unit</th>' +
     '<th class="cc">3-year</th><th class="cc">This year</th><th class="cc">Compile</th><th></th></tr></thead><tbody>' +
     list.map(function(m, i){
       /* \u00a7130: the four gap-fillable columns go through gapCell \u2014 in the
@@ -2930,6 +3015,17 @@ function koEdit(list, page, acKey, owner){
       return '<tr><td>' + inputOr(pg, m.name, "", function(v){ m.name = v; }) + '</td>' +
         '<td class="cc">' + gapCell(page, acKey, m, "dir",
           { kind:"select", opts:["\u2265", "\u2264"] }) + '</td>' +
+        /* §199: THE OFFICE'S, NOT THE FILLER'S. A unit is not a gap — 46 of
+           the 178 targets in the shipped plan carry none and are complete
+           without one — so it does not go through gapCell and does not join
+           the count. It is `inputOr` like the NAME beside it: a fact about
+           how the objective is written, which is authoring. */
+        '<td class="cc">' + (pg
+          ? (koHasTarget(m)
+              ? inputOr(pg, koUnitOf(m), "", function(v){ koSetUnit(m, v); })
+              : '<span class="why" title="Set a target first \u2014 the unit is ' +
+                'written with it">\u2014</span>')
+          : esc(koUnitOf(m))) + '</td>' +
         '<td class="cc">' + gapCell(page, acKey, m, "target3y",
           { kind:"input", cls:"mono" }) + '</td>' +
         '<td class="cc">' + gapCell(page, acKey, m, "target",

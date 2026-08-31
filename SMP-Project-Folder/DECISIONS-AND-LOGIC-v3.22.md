@@ -23920,3 +23920,104 @@ behind is Setup. **The null case was checked and deliberately not branched** —
 `WELCOME.offer()` runs after the boot paint (`sync.js`), so `current` is always
 set by then, and §24 says not to write a branch for a path that cannot be
 reached. **2 red** with the Setup branch removed.
+
+## §204 — Switching the viewer saves first, as you (v3.93)
+
+From the live deployment, mid-morning. The SMO team were filling gaps on
+Consumer Finance and the save came back refused four ways — the register, the
+archives, a unit's SWOT, a unit's plan — none of which they had touched.
+Islam: *"we already fixed that!!!"* **§184's fix was intact**; this is a
+different fault wearing the same red banner, and establishing which was most
+of the work.
+
+**THE FIRST LINE OF THE BANNER IS THE WHOLE THING**: *"You are viewing as Abd
+El Moniem."* `sync.js` stamps `viewAs` from `window.VIEWER` at the moment a
+body is POSTED, not at the moment the change was made — and both switchers
+(the register's `[data-as]` buttons and the chrome's `asWho` select) set
+VIEWER and painted with no flush in between. So anything not yet on the
+server went up under the newly-chosen identity: the trailing debounce, a save
+still in flight, and above all **a FAILED save, which the 5s interval keeps
+re-posting**. One 504 earlier in the day leaves work in that state for
+minutes, which is why it repeated and why it looked like the old bug.
+
+**MEASURED ON THE SHIPPED BUILD, THROUGH THE REAL SWITCHER**: an edit made as
+the office posted stamped `ceo`, the person just switched to. On the fixed
+build the same edit posts with no name at all. That one line is the finding —
+*the switch was re-labelling work already done.*
+
+`switchViewer()` is the ONE helper both switchers call (§53.5 — two switchers
+were how they came to differ: only one of them called `leaveModes()`). It
+saves first and switches in the callback. **A refused or failed save does not
+switch**, and puts the select back (§110: a select still showing the refused
+value fires no further `change`), because switching then would hand the same
+work to the next identity and produce exactly the banner this exists to
+prevent. `clean` and `offline` go straight through — nothing to mislabel, and
+a platform opened from a file has no server to wait for.
+
+**NOTHING ABOUT WHAT A SIMULATED VIEW SHOWS OR ALLOWS CHANGES.** A read-only
+view-as was proposed here and withdrawn on Islam's instruction, twice and
+emphatically: *"view as should show what this user see and can do"* and
+*"doesn't block the edit completely — take care not to damage the
+functionality."* He is right, and §185 is untouched.
+
+`checks/viewer-switch.py` drives the REAL control rather than the new helper,
+so it runs against a build that does not have it — which is how the shipped
+build was proved to carry the fault (**1 red**, `posts seen: ['ceo']`).
+
+### Recorded, not built
+
+The banner's only BUTTON is still *Discard everything and reload*; the way out
+of this particular refusal was a SENTENCE telling you to switch back. §184's
+put-back needs row addresses and these were whole-area refusals, so it offered
+nothing. A *"switch back and save"* button belongs there and is not in this
+change.
+
+## §205 — Fillable is not the same list as counted (v3.94)
+
+From the live deployment. A BU owner filling gaps had five lines refused, and
+one of them was **"Enable a seamless customer experience — Collaborators"**,
+sitting among rows that were accepted. Islam settled the design in one line:
+*"collaborators are fillable but not counted as missing."*
+
+**§187's DECISION WAS RIGHT AND THE WAY IT WAS CARRIED OUT WAS NOT.** That
+section removed `collaborators` from `GAP_FIELDS` so the band would stop
+counting an optional blank as owed — correct, and `GAP_FIELDS` is also the
+only list the authoriser's gap pass walks. So the SCREEN went on opening the
+cell (an empty list is blank, and `filling()` asks only about the page) while
+every save of one was refused as authoring. **§42's drift: a control drawn and
+a save refused**, silent for as long as nobody used it, and invisible to every
+check because the one that covered it asserted the refusal as correct.
+
+`GAP_FILLABLE` is `GAP_FIELDS` plus the optional blanks, and the server walks
+that. Nothing became fillable that was not fillable before §187, and nothing
+became counted: the band, the rail, the chips, the deck's Missing and Submit
+all still read `GAP_FIELDS` and none of them moves. It is §192.4's separation
+— the WALK is not the COUNT — arriving a second time, for the same reason and
+in the next layer down.
+
+**The guard §187 actually wanted is untouched and is asserted beside it**: a
+list that already names somebody is not a gap and never opens to a filler.
+
+### What was ruled out on the way, and how
+
+Three explanations were given to Islam before this one and two were wrong.
+Recorded because the cost was his trust, not just time:
+
+- **View-as re-labelling the save.** Real (§204, fixed), and not this: the
+  second screenshot carried no *viewing as* line at all.
+- **A stale tab overwriting.** Real and proved against a live Postgres — a tab
+  that is behind silently destroys another person's saved work, with no error
+  — and still not this. It stays on the list as its own fault to fix.
+- **Phantom changes from painting.** Ruled OUT by measurement, four ways: a
+  load posts nothing; a state round-tripped through a real Postgres posts
+  nothing; a sparse tenant (no SWOT, no archives, no emails) posts nothing;
+  and a view-as gap fill posts **exactly two things** — the value and its
+  pending mark.
+
+**THE LESSON IS ABOUT WHAT I DID, NOT WHAT THE CODE DID.** Each theory was
+stated as a diagnosis when it was a hypothesis, and each fitted the one
+screenshot in front of me. What broke the deadlock was Islam refusing the
+explanation — *"omar didn't touch the foundation and he shouldn't be able to"*
+— which is a fact about the product, not a theory, and it eliminated three
+candidates at once. **A user's account of what they did not do is evidence;
+treat it as harder than the theory it contradicts.**

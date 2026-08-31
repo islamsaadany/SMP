@@ -1344,23 +1344,51 @@ console.log("\n16 · fill the gaps (§145, spec 023)");
     check("FILL: the same grant never renames a project", !v.ok, "was ALLOWED");
   }
 
-  /* 13 · COLLABORATORS ARE NOT A GAP (§187, reversing §145.10 at Islam's
-     direction: "remove the missing collaborators as missing items").
+  /* 13 · COLLABORATORS ARE FILLABLE AND NOT COUNTED (§205, correcting how
+     §187 was implemented rather than what it decided).
 
-     §145.10 made an empty list fillable on the reasoning that it is a place
-     the plan holds nothing. It is not: a tactic with nobody supporting it is
-     a tactic ONE person owns, which is a complete way to write a line — and
-     every one of them was being counted as owing something. An optional
-     blank is not a gap (§119.1, which is why the DECK never marked these).
+     §187 said: "remove the missing collaborators as missing items" — an
+     optional blank is not a gap (§119.1), and every tactic with nobody
+     supporting it was being counted as owing something. That decision
+     stands and the counts still exclude them.
 
-     BOTH ENDS, or a build that emptied GAP_FIELDS entirely would pass: an
-     empty list no longer opens, AND the owner beside it still does. */
+     WHAT WENT WRONG IS THAT IT WAS DONE BY EMPTYING THE ONE LIST THE SERVER
+     ALSO READS. The screen went on opening the cell — an empty list is
+     blank, and `filling()` only asks about the page — while every save of
+     one was refused as authoring. It reached the deployment: a BU owner
+     filling gaps had "Enable a seamless customer experience —
+     Collaborators" refused among rows that were accepted. Islam, settling
+     it: "collaborators are fillable but not counted as missing."
+
+     SO BOTH HALVES ARE ASSERTED HERE, because each alone is satisfied by a
+     build that gets the other wrong. */
   s = gappy();
   v = fromStored(s, custKey, function (i) {
     const t = i.units[UNIT].items[0].tactics[0];
     t.collaborators = ["Somebody Supporting"]; t.pend = { collaborators: MARK };
   });
-  check("REFUSED: an empty collaborators list is not a gap", !v.ok, "was ALLOWED");
+  check("FILL: an empty collaborators list IS fillable", v.ok,
+        (v.refusals || []).join(" / "));
+  check("...and is still NOT counted as missing",
+        R.GAP_FIELDS.tactic.indexOf("collaborators") < 0, R.GAP_FIELDS.tactic);
+  check("...so a tactic owing nothing else counts 0",
+        R.gapMissing("tactic", { owner: "Somebody", q1: 1, collaborators: [] }).length === 0,
+        R.gapMissing("tactic", { owner: "Somebody", q1: 1, collaborators: [] }));
+  /* AND THE THING §187 ACTUALLY GUARDED IS UNTOUCHED: a list that already
+     has somebody in it is not a gap and never opens to the filler. */
+  s = gappy();
+  v = fromStored(s, custKey, function (i) {
+    const t = i.units[UNIT].items[0].tactics[0];
+    t.collaborators = ["Already There"]; t.pend = { collaborators: MARK };
+    return t;
+  });
+  s.units[UNIT].items[0].tactics[0].collaborators = ["Already There"];
+  v = fromStored(s, custKey, function (i) {
+    const t = i.units[UNIT].items[0].tactics[0];
+    t.collaborators = ["Already There", "Sneaked In"];
+    t.pend = { collaborators: MARK };
+  });
+  check("REFUSED: adding to a list that already has somebody", !v.ok, "was ALLOWED");
   check("...and collaborators is off the tactic's gap list",
         R.GAP_FIELDS.tactic.indexOf("collaborators") === -1,
         JSON.stringify(R.GAP_FIELDS.tactic));

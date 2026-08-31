@@ -191,7 +191,15 @@ READ = """() => {
 def open_page(pw):
     br = pw.chromium.launch()
     pg = br.new_page(viewport={"width": 1400, "height": 1100})
-    pg.add_init_script("try{sessionStorage.setItem('smp.tour.later','1');}catch(e){}")
+    # §167.2, AND THIS FILE WAS WINNING A RACE RATHER THAN AVOIDING IT:
+    # the welcome screen (§148) covers the viewport, so every click lands on
+    # `.welcomeover`. Sections 1–6 happened to press Setup before the screen
+    # was built (it opens after the boot paint); anything that waits first
+    # met it. Suppressed as a RETURNING viewer has it, in an init script —
+    # setting the flag after `goto` is too late — and never by reaching into
+    # the welcome screen, which has its own check.
+    pg.add_init_script("try{sessionStorage.setItem('smp.tour.later','1');"
+                       "sessionStorage.setItem('smp.welcome.done','1');}catch(e){}")
     pg.on("console", lambda m: errs.append(m.text) if m.type == "error" else None)
     pg.on("pageerror", lambda e: errs.append(str(e)))
     pg.goto(URL)
@@ -453,6 +461,90 @@ def go():
             if _p.get("key") == "smo":
                 _p["role"] = "super"
         PERSON["role"] = "super"
+        br.close()
+
+        # ══ 7 · A PRESS OUTSIDE PUTS THE PICKER AWAY (§203) ════════
+        # Islam: "when I choose the who to send to from the filters, when I
+        # click outside the drop down let it close. Of course what is
+        # selected is saved." Nothing is at risk — every tick is written to
+        # SENDMSG as it is made — so this is purely putting the panel away.
+        # THE TWO THINGS THAT MUST NOT CLOSE IT are asserted beside it: a
+        # press inside the panel (its own search box), and a press on
+        # another filter's button, which must SWITCH rather than shut.
+        print("\n7 · a press outside closes the recipient picker")
+        br, pg = open_page(pw)
+        to_write(pg)
+        pg.click('[data-ddopen="roles"]')
+        pg.wait_for_timeout(400)
+        ck("the panel opens", pg.evaluate("() => !!document.querySelector('.ddpop')"))
+        n = pg.evaluate("""() => {
+          const rows=[...document.querySelectorAll('.ddpop [data-aud]')].slice(0,2);
+          rows.forEach(r => { r.checked = true;
+            r.dispatchEvent(new Event('change',{bubbles:true})); });
+          return rows.length; }""")
+        pg.wait_for_timeout(500)
+        ck("...two roles ticked", n == 2, n)
+        # TICKING MUST NOT CLOSE IT — a list you are ticking is not answered
+        # until you stop (§130.1's rule, from the other side).
+        ck("...and ticking leaves it open",
+           pg.evaluate("() => !!document.querySelector('.ddpop')"))
+        chosen = pg.evaluate("() => (sendmsg().criteria.roles || []).slice()")
+        pg.mouse.click(1200, 940)
+        pg.wait_for_timeout(500)
+        ck("a press outside closes it",
+           pg.evaluate("() => !document.querySelector('.ddpop')"))
+        ck("...and what was chosen is kept",
+           pg.evaluate("() => (sendmsg().criteria.roles || []).slice()") == chosen
+           and len(chosen) == 2, chosen)
+        ck("...with the count still on the button",
+           pg.evaluate("""() => { const b =
+             document.querySelector('[data-ddopen="roles"] .ddn');
+             return b ? b.textContent.trim() : null; }""") == "2")
+        # inside is not outside
+        pg.click('[data-ddopen="units"]')
+        pg.wait_for_timeout(400)
+        pg.click(".ddpop .ddsearch")
+        pg.wait_for_timeout(300)
+        ck("a press INSIDE the panel does not close it",
+           pg.evaluate("() => !!document.querySelector('.ddpop')"))
+        pg.click('[data-ddopen="fns"]')
+        pg.wait_for_timeout(400)
+        ck("...and another filter's button still SWITCHES panels",
+           pg.evaluate("""() => { const p = document.querySelector('.ddpop');
+             return !!p && p.dataset.ddpop === 'fns'; }"""))
+        # WIRED ONCE: wire() runs on every paint, so a listener added there
+        # would stack one deep per repaint (§24, §47.2) — and this repaints.
+        pg.evaluate("() => { for (let i=0;i<5;i++) paint(); }")
+        pg.wait_for_timeout(500)
+        pg.click('[data-ddopen="roles"]')
+        pg.wait_for_timeout(400)
+        pg.mouse.click(1200, 940)
+        pg.wait_for_timeout(500)
+        ck("after five repaints one press still just closes it",
+           pg.evaluate("() => !document.querySelector('.ddpop')"))
+        ck("...and the ticks survived all of it",
+           pg.evaluate("() => (sendmsg().criteria.roles || []).length") == 2)
+        br.close()
+
+        # ══ 8 · THE ORGANISATION IS NAMED ONCE UNDER THE CARD (§203) ═
+        # Islam: "remove the raya trade small title in the bottom, it's
+        # already in the long title above." Asserted on the BUILT email
+        # rather than on the page: the line lived outside the card's table,
+        # so nothing on the composer would have shown it going.
+        print("\n8 · the email does not sign itself twice")
+        br, pg = open_page(pw)
+        m = pg.evaluate("""() => {
+          const h = MAIL.html({ org:"Raya Trade", title:"A heading",
+                                body:"A line.", footer:"Sent from Raya Trade" });
+          const d = document.createElement('div'); d.innerHTML = h;
+          const tbl = d.querySelector('table');
+          return { afterTables: [...d.querySelectorAll('table')]
+                     .map(t => (t.nextElementSibling||{}).tagName || null),
+                   orgCount: (h.match(/Raya Trade/g)||[]).length,
+                   stray: !!d.querySelector('table + div') }; }""")
+        ck("no grey line hangs under the card", m and not m["stray"], m)
+        ck("...and the name is not printed a third time",
+           m and m["orgCount"] <= 2, m)
         br.close()
 
 

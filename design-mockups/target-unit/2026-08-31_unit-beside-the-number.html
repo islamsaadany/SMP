@@ -1,0 +1,353 @@
+<title>Target and its unit</title>
+<style>
+  :root{
+    --navy:#0D1F6B; --navy-2:#16325C;
+    --gold:#C9821E; --gold-soft:#F3E3C9;
+    --ground:#F1F3F7; --surface:#FFFFFF; --surface-2:#F7F9FC;
+    --line:#DCE2EC; --line-soft:#EDF0F6;
+    --ink:#16233F; --ink-2:#4C5875; --ink-3:#7B879E;
+    --bad:#B3261E; --good:#1E7A4C;
+    --sans:"Inter",-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+    --mono:"SFMono-Regular",Menlo,Consolas,monospace;
+  }
+  :root:not([data-theme="light"]){ }
+  @media (prefers-color-scheme: dark){
+    :root:not([data-theme="light"]){
+      --navy:#0B1740; --navy-2:#0B1740;
+      --gold:#E0A34A; --gold-soft:#3A2E17;
+      --ground:#0B1120; --surface:#151C2C; --surface-2:#1B2333;
+      --line:#333A45; --line-soft:#262E3C;
+      --ink:#E8EDF5; --ink-2:#B6C0D2; --ink-3:#8B97A9;
+      --bad:#F0857D; --good:#5BC08D;
+    }
+  }
+  :root[data-theme="dark"]{
+    --navy:#0B1740; --navy-2:#0B1740;
+    --gold:#E0A34A; --gold-soft:#3A2E17;
+    --ground:#0B1120; --surface:#151C2C; --surface-2:#1B2333;
+    --line:#333A45; --line-soft:#262E3C;
+    --ink:#E8EDF5; --ink-2:#B6C0D2; --ink-3:#8B97A9;
+    --bad:#F0857D; --good:#5BC08D;
+  }
+
+  body{ background:var(--ground); color:var(--ink); font-family:var(--sans);
+    font-size:14.5px; line-height:1.55; }
+  .page{ max-width:1120px; margin:0 auto; padding:34px 26px 80px; }
+
+  header.top{ margin-bottom:30px; }
+  .kick{ font-size:10.5px; letter-spacing:.14em; text-transform:uppercase;
+    color:var(--ink-3); font-weight:700; margin:0 0 8px; }
+  h1{ font-size:29px; line-height:1.15; margin:0 0 10px; letter-spacing:-.02em; }
+  .lede{ margin:0; color:var(--ink-2); max-width:64ch; font-size:15px; }
+
+  section{ margin-top:34px; }
+  h2{ font-size:12px; letter-spacing:.11em; text-transform:uppercase;
+    color:var(--ink-3); font-weight:700; margin:0 0 12px; }
+  .panel{ background:var(--surface); border:1px solid var(--line);
+    border-radius:12px; padding:20px 22px 24px; }
+  .panel + .panel{ margin-top:16px; }
+  .ptag{ display:inline-flex; align-items:center; gap:7px; font-size:11px;
+    font-weight:700; letter-spacing:.07em; text-transform:uppercase;
+    padding:4px 10px; border-radius:20px; margin-bottom:14px; }
+  .ptag.now{ background:var(--surface-2); color:var(--ink-2); border:1px solid var(--line); }
+  .ptag.prop{ background:var(--gold-soft); color:var(--gold); border:1px solid var(--gold); }
+
+  /* ── the platform's own table ───────────────────────────── */
+  .tblwrap{ overflow-x:auto; }
+  table{ border-collapse:separate; border-spacing:0; width:100%;
+    min-width:660px; font-size:13.5px; }
+  thead th{ background:var(--navy); color:#fff; font-size:10.5px; font-weight:700;
+    letter-spacing:.11em; text-transform:uppercase; text-align:left;
+    padding:13px 14px; white-space:nowrap; }
+  thead th:first-child{ border-radius:9px 0 0 0; width:44px; }
+  thead th:last-child{ border-radius:0 9px 0 0; }
+  tbody td{ padding:9px 14px; border-bottom:1px solid var(--line-soft);
+    vertical-align:middle; }
+  tbody tr:nth-child(even) td{ background:var(--surface-2); }
+  .num{ color:var(--ink-3); font-size:12.5px; }
+  .grip{ color:var(--ink-3); margin-right:8px; }
+  .cc{ text-align:center; }
+
+  .fld{ display:inline-block; width:100%; box-sizing:border-box;
+    border:1px solid var(--line); border-radius:8px; padding:8px 11px;
+    background:var(--surface); color:var(--ink); font:inherit; font-size:13.5px; }
+  .fld.mono{ font-family:var(--mono); text-align:center; }
+  .fld.sel{ padding-right:26px; background-image:none; }
+  .selwrap{ position:relative; display:inline-block; width:100%; }
+  .selwrap::after{ content:"\25be"; position:absolute; right:9px; top:50%;
+    transform:translateY(-50%); color:var(--ink-3); font-size:10px;
+    pointer-events:none; }
+  .unitcell{ width:92px; }
+  .dircell{ width:88px; }
+  .tgtcell{ width:200px; }
+  .compcell{ width:130px; }
+  .lit{ border:2px solid var(--gold); box-shadow:0 0 0 3px rgba(201,130,30,.16);
+    padding:7px 10px; }
+  .caret::after{ content:""; display:inline-block; width:1px; height:15px;
+    background:var(--ink); margin-left:1px; vertical-align:-3px;
+    animation:blink 1.05s steps(1) infinite; }
+  @keyframes blink{ 50%{ opacity:0; } }
+  @media (prefers-reduced-motion: reduce){ .caret::after{ animation:none; } }
+  .xrm{ color:var(--ink-3); margin-left:8px; }
+
+  /* the proposed field: a number box with the unit fixed beside it */
+  .unitfld{ display:flex; align-items:stretch; width:100%;
+    border:1px solid var(--line); border-radius:8px; overflow:hidden;
+    background:var(--surface); }
+  .unitfld.lit{ border:2px solid var(--gold); box-shadow:0 0 0 3px rgba(201,130,30,.16); }
+  .unitfld .n{ flex:1; min-width:0; padding:8px 10px; font-family:var(--mono);
+    text-align:right; color:var(--ink); font-size:13.5px; }
+  .unitfld .u{ display:flex; align-items:center; padding:0 11px 0 9px;
+    background:var(--surface-2); border-left:1px solid var(--line);
+    color:var(--ink-2); font-size:12.5px; font-weight:600; white-space:nowrap; }
+  .unitfld.plain .u{ display:none; }
+
+  .cap{ margin:12px 0 0; font-size:13px; color:var(--ink-2); }
+  .cap b{ color:var(--ink); }
+
+  /* ── the walk-through ───────────────────────────────────── */
+  .steps{ display:grid; gap:12px; margin-top:6px; }
+  .step{ display:grid; grid-template-columns:26px 1fr; gap:12px;
+    align-items:start; }
+  .stepn{ width:26px; height:26px; border-radius:50%; background:var(--navy);
+    color:#fff; font-size:12px; font-weight:700; display:flex;
+    align-items:center; justify-content:center; }
+  .step p{ margin:2px 0 0; color:var(--ink-2); }
+  .step p b{ color:var(--ink); }
+  code{ font-family:var(--mono); font-size:12.5px; background:var(--surface-2);
+    border:1px solid var(--line); border-radius:5px; padding:1px 6px; }
+
+  /* ── the cases ──────────────────────────────────────────── */
+  .cases{ width:100%; border-collapse:collapse; margin-top:4px; min-width:0; }
+  .cases th, .cases td{ text-align:left; padding:11px 12px;
+    border-bottom:1px solid var(--line-soft); vertical-align:middle;
+    font-size:13.5px; }
+  .cases thead th{ background:none; color:var(--ink-3); font-size:10.5px;
+    letter-spacing:.09em; text-transform:uppercase; border-radius:0;
+    border-bottom:1px solid var(--line); padding-bottom:8px; }
+  .cases tbody tr:nth-child(even) td{ background:none; }
+  .mini{ display:inline-flex; align-items:stretch; border:1px solid var(--line);
+    border-radius:6px; overflow:hidden; background:var(--surface); }
+  .mini .n{ padding:5px 9px; font-family:var(--mono); font-size:12.5px; }
+  .mini .u{ padding:5px 8px; background:var(--surface-2);
+    border-left:1px solid var(--line); font-size:11.5px; font-weight:600;
+    color:var(--ink-2); }
+  .stored{ font-family:var(--mono); font-size:12.5px; color:var(--ink-2); }
+
+  .ask{ margin-top:34px; background:var(--surface); border:1px solid var(--gold);
+    border-left:4px solid var(--gold); border-radius:10px; padding:18px 20px; }
+  .ask h3{ margin:0 0 8px; font-size:15px; }
+  .ask p{ margin:0 0 8px; color:var(--ink-2); }
+  .ask p:last-child{ margin-bottom:0; }
+  .foot{ margin-top:30px; color:var(--ink-3); font-size:12.5px; }
+</style>
+
+<div class="page">
+
+<header class="top">
+  <p class="kick">Mockup &middot; 31 August 2026</p>
+  <h1>The unit sits beside the number, not inside it</h1>
+  <p class="lede">You type <code>1</code> into a target whose unit is already
+  <code>%</code>, save, reopen &mdash; and it reads <code>1%</code> again. Nothing is
+  broken: that is the inheritance you asked for in &sect;199.6. What is wrong is that
+  the number and its unit share one box, so there is no way to tell whether you are
+  meant to type the unit or not. This is the fix, drawn.</p>
+</header>
+
+<section>
+  <h2>What happens now</h2>
+  <div class="panel">
+    <span class="ptag now">Today &middot; v3.92</span>
+    <div class="tblwrap">
+      <table>
+        <thead><tr>
+          <th>#</th><th>Measure</th><th>Dir.</th><th>Unit</th><th>Target</th><th>Compiled</th>
+        </tr></thead>
+        <tbody>
+          <tr>
+            <td class="num"><span class="grip">&#9776;</span>1</td>
+            <td><span class="fld">Data duplicate rate</span><span class="xrm">&times;</span></td>
+            <td class="dircell"><span class="selwrap"><span class="fld sel cc">&le;</span></span></td>
+            <td class="unitcell"><span class="selwrap"><span class="fld sel cc">%</span></span></td>
+            <td class="tgtcell"><span class="fld mono lit caret">1</span></td>
+            <td class="compcell"><span class="selwrap"><span class="fld sel">Latest</span></span></td>
+          </tr>
+          <tr>
+            <td class="num"><span class="grip">&#9776;</span>2</td>
+            <td><span class="fld">App coverage rate</span><span class="xrm">&times;</span></td>
+            <td class="dircell"><span class="selwrap"><span class="fld sel cc">&ge;</span></span></td>
+            <td class="unitcell"><span class="selwrap"><span class="fld sel cc">%</span></span></td>
+            <td class="tgtcell"><span class="fld mono">50%</span></td>
+            <td class="compcell"><span class="selwrap"><span class="fld sel">Latest</span></span></td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+    <p class="cap">Row 1 is mid-edit. The unit column says <b>%</b> and the box says
+    <b>1</b> &mdash; and row 2 beside it says <b>50%</b>. Two rows, two spellings of the
+    same thing, and nothing on the screen says which one the platform wants. On blur
+    the <b>1</b> becomes <b>1%</b>, which reads as the platform undoing your typing.</p>
+  </div>
+</section>
+
+<section>
+  <h2>What it would become</h2>
+  <div class="panel">
+    <span class="ptag prop">Proposed</span>
+    <div class="tblwrap">
+      <table>
+        <thead><tr>
+          <th>#</th><th>Measure</th><th>Dir.</th><th>Unit</th><th>Target</th><th>Compiled</th>
+        </tr></thead>
+        <tbody>
+          <tr>
+            <td class="num"><span class="grip">&#9776;</span>1</td>
+            <td><span class="fld">Data duplicate rate</span><span class="xrm">&times;</span></td>
+            <td class="dircell"><span class="selwrap"><span class="fld sel cc">&le;</span></span></td>
+            <td class="unitcell"><span class="selwrap"><span class="fld sel cc">%</span></span></td>
+            <td class="tgtcell">
+              <span class="unitfld lit"><span class="n caret">1</span><span class="u">%</span></span>
+            </td>
+            <td class="compcell"><span class="selwrap"><span class="fld sel">Latest</span></span></td>
+          </tr>
+          <tr>
+            <td class="num"><span class="grip">&#9776;</span>2</td>
+            <td><span class="fld">App coverage rate</span><span class="xrm">&times;</span></td>
+            <td class="dircell"><span class="selwrap"><span class="fld sel cc">&ge;</span></span></td>
+            <td class="unitcell"><span class="selwrap"><span class="fld sel cc">%</span></span></td>
+            <td class="tgtcell">
+              <span class="unitfld"><span class="n">50</span><span class="u">%</span></span>
+            </td>
+            <td class="compcell"><span class="selwrap"><span class="fld sel">Latest</span></span></td>
+          </tr>
+          <tr>
+            <td class="num"><span class="grip">&#9776;</span>3</td>
+            <td><span class="fld">Warehouse space</span><span class="xrm">&times;</span></td>
+            <td class="dircell"><span class="selwrap"><span class="fld sel cc">&ge;</span></span></td>
+            <td class="unitcell"><span class="selwrap"><span class="fld sel cc">SQM</span></span></td>
+            <td class="tgtcell">
+              <span class="unitfld"><span class="n">12,000</span><span class="u">SQM</span></span>
+            </td>
+            <td class="compcell"><span class="selwrap"><span class="fld sel">Latest</span></span></td>
+          </tr>
+          <tr>
+            <td class="num"><span class="grip">&#9776;</span>4</td>
+            <td><span class="fld">Stores opened</span><span class="xrm">&times;</span></td>
+            <td class="dircell"><span class="selwrap"><span class="fld sel cc">&ge;</span></span></td>
+            <td class="unitcell"><span class="selwrap"><span class="fld sel cc">&mdash;</span></span></td>
+            <td class="tgtcell">
+              <span class="unitfld plain"><span class="n">14</span><span class="u"></span></span>
+            </td>
+            <td class="compcell"><span class="selwrap"><span class="fld sel">Sum</span></span></td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+    <p class="cap">The box holds the <b>number only</b>. The unit is fixed beside it, on
+    its own quiet ground, taken from the Unit column &mdash; you cannot type into it and
+    you never have to. Row 4 has no unit, so there is nothing beside the box and the
+    field behaves exactly as it does today.</p>
+  </div>
+</section>
+
+<section>
+  <h2>What a person does, step by step</h2>
+  <div class="panel">
+    <div class="steps">
+      <div class="step"><div class="stepn">1</div>
+        <p>They pick <b>%</b> in the Unit column. The <b>%</b> appears beside every
+        target box on that row, at once &mdash; <b>that is the whole point</b>: the
+        screen says the unit is handled before they type anything.</p></div>
+      <div class="step"><div class="stepn">2</div>
+        <p>They type <code>90</code>. They see <b>90 %</b>, made of their number and the
+        row's unit, so there is no question about whether to add the sign.</p></div>
+      <div class="step"><div class="stepn">3</div>
+        <p>They leave the field. <b>Nothing visibly changes</b> &mdash; which is the
+        repair. Today the box silently becomes <code>90%</code>; here what was on screen
+        while typing is what is on screen afterwards.</p></div>
+      <div class="step"><div class="stepn">4</div>
+        <p>They reopen it tomorrow and the box still says <code>90</code> with <b>%</b>
+        beside it. Today it says <code>90%</code>, and typing over it starts the
+        confusion again.</p></div>
+    </div>
+    <p class="cap"><b>Nothing about storage changes.</b> The plan still holds
+    <code>90%</code> as one value, the reading view still shows <code>90%</code> as one
+    figure, the deck and the workbook are untouched, and the server judges exactly what
+    it judges today. This is only how the field is drawn while somebody is writing in
+    it &mdash; which is where the confusion was.</p>
+  </div>
+</section>
+
+<section>
+  <h2>The cases it has to answer</h2>
+  <div class="panel">
+    <table class="cases">
+      <thead><tr>
+        <th>Stored</th><th>Unit column</th><th>Drawn while editing</th><th>Why</th>
+      </tr></thead>
+      <tbody>
+        <tr>
+          <td class="stored">90%</td><td>%</td>
+          <td><span class="mini"><span class="n">90</span><span class="u">%</span></span></td>
+          <td>The ordinary case.</td>
+        </tr>
+        <tr>
+          <td class="stored">14</td><td>&mdash;</td>
+          <td><span class="mini"><span class="n">14</span></span></td>
+          <td>No unit, so nothing beside it. Unchanged from today.</td>
+        </tr>
+        <tr>
+          <td class="stored">6.2M EGP</td><td>M EGP</td>
+          <td><span class="mini"><span class="n">6.2</span><span class="u">M EGP</span></span></td>
+          <td>A money unit reads the same way.</td>
+        </tr>
+        <tr>
+          <td class="stored">100 M USD</td><td>M USD</td>
+          <td><span class="mini"><span class="n">100</span><span class="u">M USD</span></span></td>
+          <td>A unit the shipped list does not offer is still kept and still
+          shown (&sect;96.2) &mdash; nothing is rewritten.</td>
+        </tr>
+        <tr>
+          <td class="stored">Q4 2026</td><td>&mdash;</td>
+          <td><span class="mini"><span class="n">Q4 2026</span></span></td>
+          <td>Not a number with a unit, so the box holds the whole thing exactly as
+          it arrived.</td>
+        </tr>
+        <tr>
+          <td class="stored"><em style="color:var(--ink-3)">empty</em></td><td>%</td>
+          <td><span class="mini"><span class="n" style="color:var(--ink-3)">&nbsp;&nbsp;&nbsp;</span><span class="u">%</span></span></td>
+          <td>An empty target still shows the unit it will take, so somebody filling a
+          gap knows what they are typing into. Emptied, the plan stores nothing at all
+          &mdash; never a bare <code>%</code>.</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</section>
+
+<section>
+  <h2>Where it applies</h2>
+  <div class="panel">
+    <p class="cap" style="margin-top:0">Everywhere the Unit column already exists, and
+    nowhere else &mdash; a <b>key objective</b>'s 3-year and this-year targets, and a
+    <b>pillar measure</b>'s target, in the office's pen and in a custodian's fill mode
+    alike. One builder for all of them, so the two sides of the platform cannot come to
+    disagree about how a target is written (&sect;53.5).</p>
+  </div>
+</section>
+
+<div class="ask">
+  <h3>Before I build it</h3>
+  <p>Two things worth your word, because both are visible and neither is obvious:</p>
+  <p><b>The number sits to the right, against its unit</b>, the way a figure and its
+  unit read on a page. Today it is centred in the box. Say if you would rather it
+  stayed centred.</p>
+  <p><b>The unit's chip is quiet grey, not gold.</b> It is a fact about the row rather
+  than something to press, and gold on this screen means <em>you can act on
+  this</em>.</p>
+</div>
+
+<p class="foot">design-mockups/target-unit/2026-08-31_unit-beside-the-number.html &middot;
+Drawn from the live v3.92 table. Nothing in the platform has been changed.</p>
+
+</div>

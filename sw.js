@@ -241,7 +241,7 @@
    Setup as well as the units, functions and companies it already named.
    Name checked against origin/main serving "smp-shell-v3.89-the-unit-is-
    inherited"; confirm again immediately before the merge push (§94.16). */
-const SHELL = "smp-shell-v3.93-the-switch-saves-first";
+const SHELL = "smp-shell-v3.94-collaborators-are-fillable";
 const ASSETS = [
   "/",
   "/index.html",

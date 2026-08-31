@@ -8713,6 +8713,36 @@ THEME.apply();
     outcome:   ["target"],
     milestone: ["owner", "finish"]
   };
+  /* ── FILLABLE IS NOT THE SAME LIST AS COUNTED (§205) ────────────────
+     From the deployment: a BU owner filling gaps had *"Enable a seamless
+     customer experience — Collaborators"* refused, among rows that were
+     accepted. Islam settled it in one line: *"collaborators are fillable
+     but not counted as missing."*
+
+     THE SERVER WALKED THE COUNTING LIST. §187 took collaborators OUT of
+     GAP_FIELDS so the band would stop nagging about an optional blank —
+     correct, and it also took away the only list the authoriser's gap pass
+     reads, so the SCREEN went on opening the cell (an empty list is blank,
+     and `filling()` only asks the page) while every save of it was refused
+     as authoring. §42's drift: a control drawn and a save refused, silent
+     until somebody used it.
+
+     So the two questions are separated, the way §192.4 already separated
+     the WALK from the count for the same reason. `GAP_FIELDS` stays the
+     answer to *is this owed* — the band, the rail, the chips, the deck's
+     Missing and Submit all read it and none of them changes. `GAP_FILLABLE`
+     is the answer to *may a filler write this where it is empty*, and it is
+     GAP_FIELDS plus the optional blanks. Nothing is fillable that was not
+     fillable before §187; this restores what that section removed by
+     accident while keeping what it removed on purpose. */
+  var GAP_OPTIONAL = { tactic: ["collaborators"] };
+  var GAP_FILLABLE = (function () {
+    var out = {};
+    Object.keys(GAP_FIELDS).forEach(function (k) {
+      out[k] = GAP_FIELDS[k].concat(GAP_OPTIONAL[k] || []);
+    });
+    return out;
+  })();
   /* The fields a SCORE reads. A row with one of these pending is not
      scored — the comparison is not ready, so it reads null and leaves the
      average the way an unmeasured outcome already does (§104.10) — and
@@ -9860,7 +9890,7 @@ THEME.apply();
     reportPageOf: reportPageOf, mayDownloadPlan: mayDownloadPlan,
     focusOn: focusOn,
     mayAuthorPage: mayAuthorPage,
-    GAP_FIELDS: GAP_FIELDS, GAP_SCORE_FIELDS: GAP_SCORE_FIELDS,
+    GAP_FIELDS: GAP_FIELDS, GAP_FILLABLE: GAP_FILLABLE, GAP_SCORE_FIELDS: GAP_SCORE_FIELDS,
     isGapField: isGapField,
     gapBlank: gapBlank, quartersBlank: quartersBlank,
     WHEN_MONTHS: WHEN_MONTHS, whenMonths: whenMonths, whenReadable: whenReadable,

@@ -30,7 +30,8 @@ from playwright.sync_api import sync_playwright
 # the tour has its own check, and a suppression that reached into its
 # internals would be this file quietly asserting the tour away.
 def _no_tour(pg):
-    pg.add_init_script("try{sessionStorage.setItem('smp.tour.later','1');}catch(e){}")
+    pg.add_init_script("try{sessionStorage.setItem('smp.tour.later','1');"
+                       "sessionStorage.setItem('smp.welcome.done','1');}catch(e){}")
 
 
 ROOT = pathlib.Path(__file__).resolve().parents[3]
@@ -195,6 +196,9 @@ with sync_playwright() as p:
     ck("...with a box, and at the top of the page",
        v["navRendered"] is True and v["atTop"] == "chrome", v["atTop"])
     ck("the page is painted", v["painted"] is True, v)
+    # §201: a server that ANSWERED raises no wall.
+    ck("no no-server wall on a live answer",
+       pg.query_selector("#noserver") is None)
     # The tenant's branding is what is on screen — not the file's.
     ck("the bar wears the TENANT's colour, which the file does not hold",
        v["navBg"] == rgb(TENANT_BAR), "%s, wanted %s" % (v["navBg"], rgb(TENANT_BAR)))
@@ -228,6 +232,80 @@ with sync_playwright() as p:
     v = pg.evaluate(SKELETON)
     ck("the baked data is painted anyway", v["painted"] is True, v)
     ck("...and the skeleton came down", v["skeleton"] is False and v["booting"] is False, v)
+
+    # ── §201: THE WALL. Islam, after a hard refresh met a hiccup: "it
+    # opened on the prototype page with no way to exit it!!" — the baked
+    # example painted SILENTLY, wearing Raya Trade's data as though it were
+    # his. The example may paint (that is the fallback working); what may
+    # not happen is nobody being told. The wall says whose data it is not,
+    # offers the retry, and can be stepped past deliberately.
+    # a build that lost the wall must FAIL here, not crash the check (§192)
+    try:
+        pg.wait_for_selector("#noserver", timeout=8000)
+    except Exception:
+        pass
+    w = pg.evaluate("""() => {
+      const d = document.getElementById("noserver");
+      if (!d) return { covers: false, atMid: false, saysExample: false,
+                       saysNotYours: false, saysSafe: false,
+                       retryHits: false, dismiss: false, missing: "no #noserver" };
+      const card = d.querySelector(".nosrv-card");
+      const txt = card ? card.textContent : "";
+      const r = d.getBoundingClientRect();
+      const mid = document.elementFromPoint(innerWidth / 2, innerHeight / 2);
+      const btn = d.querySelector("[data-nosrv-retry]");
+      const br = btn ? btn.getBoundingClientRect() : null;
+      const hit = br ? document.elementFromPoint(br.left + br.width / 2,
+                                                 br.top + br.height / 2) : null;
+      /* a fixed inset:0 box stops at the demo page's scrollbar (~15px), so
+         the tolerance is a scrollbar's width — what matters is measured
+         separately: the point in the MIDDLE lands on the wall */
+      return { covers: r.width >= innerWidth - 30 && r.height >= innerHeight - 30,
+               atMid: !!(mid && mid.closest("#noserver")),
+               saysExample: txt.indexOf("built-in example") >= 0,
+               saysNotYours: txt.indexOf("not your organisation") >= 0 ||
+                             txt.indexOf("not your organisation".replace("organisation","organization")) >= 0,
+               saysSafe: txt.indexOf("safe on the server") >= 0,
+               retryHits: hit === btn,
+               dismiss: !!d.querySelector("[data-nosrv-view]") };
+    }""")
+    ck("the wall is up and covers the page", w["covers"] and w["atMid"], w)
+    ck("...it names the example as not this tenant's data",
+       w["saysExample"] and w["saysNotYours"] and w["saysSafe"], w)
+    ck("...Try again is really reachable (a press lands on it)", w["retryHits"], w)
+    ck("...and a deliberate way past exists", w["dismiss"], w)
+
+    # The retry is a reload: with the server answering again it must land
+    # LIVE and wall-free — the way out Islam did not have. On a build with
+    # no wall there is nothing to press, and that is already four failures
+    # above; report these two rather than hanging on a click (§192).
+    if w.get("missing"):
+        ck("Try again reloads into the live tenant, no wall", False, w)
+        ck("'Look at the example anyway' takes the wall down", False, w)
+    else:
+        MODE["status"] = 200
+        pg.click("[data-nosrv-retry]")
+        pg.wait_for_selector("#panel .bands, #panel .card, #panel table, #panel .note",
+                             timeout=15000)
+        pg.wait_for_timeout(400)
+        ck("Try again reloads into the live tenant, no wall",
+           pg.query_selector("#noserver") is None
+           and pg.evaluate("() => !!document.querySelector('nav.units')"))
+
+        # And the dismiss is a choice that sticks for the session's look-around.
+        MODE["status"] = 500
+        pg2 = page()
+        pg2.goto(URL, wait_until="domcontentloaded")
+        pg2.wait_for_selector("#noserver", timeout=15000)
+        pg2.click("[data-nosrv-view]")
+        pg2.wait_for_timeout(200)
+        ck("'Look at the example anyway' takes the wall down",
+           pg2.query_selector("#noserver") is None)
+        ck("...and the example is then usable",
+           pg2.evaluate("""() => {
+             const el = document.elementFromPoint(innerWidth / 2, 120);
+             return !!el && !el.closest('#noserver'); }"""))
+        pg2.close()
     pg.close()
 
     # ── 5 · REFUSED IS NOT A PAINT ──────────────────────────────────

@@ -1675,3 +1675,26 @@
            font-weight:600; }
 .mp-foot { display:flex; justify-content:flex-end; padding-top:8px; margin-top:6px;
            border-top:1px solid var(--line); }
+
+  /* ── THE SERVER DID NOT ANSWER (§201) ─────────────────────────────────
+     Over everything, deliberately: the page behind it is the worked example
+     pretending to be nobody's tenant, and the one thing this must never be
+     is missable. Plain tokens only — the tenant's branding never arrived,
+     which is the whole situation. */
+  #noserver { position:fixed; inset:0; z-index:9000; display:flex;
+    align-items:center; justify-content:center;
+    background:color-mix(in srgb, var(--ground) 72%, transparent);
+    backdrop-filter: blur(2px); }
+  .nosrv-card { background:var(--surface); border:1px solid var(--line);
+    border-radius:12px; padding:26px 30px; max-width:440px; width:calc(100% - 48px);
+    box-shadow:0 18px 50px rgba(0,0,0,.25); text-align:left; }
+  .nosrv-card h2 { margin:0 0 8px; font:700 19px/1.25 var(--sans); color:var(--ink); }
+  .nosrv-card p { margin:0 0 12px; font-size:13.5px; color:var(--ink-2); }
+  .nosrv-try { color:var(--ink-3); font-size:12px; }
+  .nosrv-btn { display:block; width:100%; background:var(--panel); color:var(--panel-ink);
+    border:1px solid var(--panel); border-radius:8px; padding:10px 16px;
+    font:700 13.5px var(--sans); cursor:pointer; margin:4px 0 10px; }
+  .nosrv-btn:hover { filter:brightness(1.12); }
+  .nosrv-link { display:block; width:100%; background:none; border:0;
+    color:var(--ink-3); font:600 12px var(--sans); cursor:pointer;
+    text-decoration:underline; padding:2px; }

@@ -1415,6 +1415,61 @@ console.log("\n16 · fill the gaps (§145, spec 023)");
   const sOther = withAccess("custodian", { a_unit_own_strat: "fill" });
   check("mayFillPage: never a unit this sign-in does not hold",
         R.mayFillPage(R.worldOf(sOther), personOf(sOther, custKey), "u_plan", OTHER) === false);
+
+  /* 15 · A MISSING UNIT IS THE FILLER'S TO ADD (§201.2). Islam, from the
+     deployment: "on filling the missing by the custodian he can't fill the
+     unit while he needs to fill if missing." The unit rides ON the target
+     string ("30" → "30%"), so to the diff it looks like amending a settled
+     value — which case 4 above rightly refuses. `unitAddedOnly()` is the
+     narrow licence: the NUMBER byte-identical, the stored unit empty, a
+     unit arriving, under the pend mark. Anything wider is authoring. */
+  function bare() {
+    const s2 = withAccess("custodian", { a_unit_own_strat: "fill" });
+    const m = s2.units[UNIT].keyObjectives[0];
+    m.target3y = "30"; delete m.pend;
+    return s2;
+  }
+  s = bare();
+  v = fromStored(s, custKey, function (i) {
+    const m = i.units[UNIT].keyObjectives[0];
+    m.target3y = "30%"; m.pend = { target3y: MARK };
+  });
+  check("UNIT: adding a unit to a bare target, marked pending, is the filler's",
+        v.ok, v.refusals.join(" / "));
+  s = bare();
+  v = fromStored(s, custKey, function (i) {
+    i.units[UNIT].keyObjectives[0].target3y = "30%";
+  });
+  check("UNIT: the same change without the mark refuses — still the office's",
+        !v.ok, "was ALLOWED");
+  s = bare();
+  v = fromStored(s, custKey, function (i) {
+    const m = i.units[UNIT].keyObjectives[0];
+    m.target3y = "31%"; m.pend = { target3y: MARK };
+  });
+  check("UNIT: moving the NUMBER as well refuses — that is authoring",
+        !v.ok, "was ALLOWED");
+  /* the undo: taking the pending unit back off is the filler's too */
+  s = bare();
+  s.units[UNIT].keyObjectives[0].target3y = "30%";
+  s.units[UNIT].keyObjectives[0].pend = { target3y: MARK };
+  v = fromStored(s, custKey, function (i) {
+    const m = i.units[UNIT].keyObjectives[0];
+    m.target3y = "30"; delete m.pend;
+  });
+  check("UNIT: taking the unit back OFF (the undo) is accepted",
+        v.ok, v.refusals.join(" / "));
+  /* and the grant is the gate */
+  s = bare(); s.access = clone(SEED.access || {});
+  v = fromStored(s, custKey, function (i) {
+    const m = i.units[UNIT].keyObjectives[0];
+    m.target3y = "30%"; m.pend = { target3y: MARK };
+  });
+  check("UNIT: with the grant at VIEW the same act refuses", !v.ok, "was ALLOWED");
+  /* the rule's own ends, so a loosened regex fails here and not in the field */
+  check("unitAddedOnly: only target fields", !R.unitAddedOnly("name", "30", "30%"));
+  check("unitAddedOnly: a unit already there is never re-licensed",
+        !R.unitAddedOnly("target", "30%", "30 SQM"));
 })();
 
 /* ── 17 · A CUSTODIAN PER PROJECT — TWO ROLES, NOT ONE (§147.7) ────

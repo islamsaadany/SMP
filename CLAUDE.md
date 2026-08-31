@@ -3411,7 +3411,42 @@ prior sessions (on HR_ERP) accidentally reverted agreed-upon designs.
 
 ---
 
-*Last Updated: 2026-08-31 &mdash; **v3.89: the unit, the repeat in months,
+*Last Updated: 2026-08-31 &mdash; **v3.91: the wall, and the fillable unit
+(&sect;200.2&ndash;&sect;201.2).** Three fixes from Islam using the shipped
+v3.89, all reported in one message. **The house glyph stopped being squeezed**
+(&sect;200.2): drawn right, sat in a flex row that shrinks its items &mdash;
+`flex:none`, asserted as a SQUARE at 1000px. **A boot that lands on the baked
+example says so** (&sect;201): *"it opened on the prototype page with no way to
+exit it!!"* &mdash; my first reading was wrong (I answered about &sect;173),
+and the real path is `sync.js`: a failed or 8-second-late `/api/state` lands
+`land()` on the baked Raya Trade demo SILENTLY. The fallback stays (&sect;94.10
+built it so a broken server never leaves a grey page); what changes is that a
+wall now says it is the built-in example, not your data, that your data is safe
+on the server &mdash; `save()` already refused while not live, so the wall
+makes an existing refusal VISIBLE &mdash; with *Try again*, a 10s probe that
+reloads by itself the moment the server answers (a 500 keeps waiting rather
+than reload-looping), and a deliberate *Look at the example anyway*
+(&sect;61: a wall with no way past is a trap). Asserted in
+`checks/boot-skeleton.py` &sect;4, the ONE file that can see the boot path
+(&sect;94.11), proved able to fail: **7 red** with the wall's call removed.
+**And a missing unit is the filler's to add** (&sect;201.2): *"he can't fill
+the unit while he needs to fill if missing"* &mdash; right, and it was
+&sect;184's shape one field over: the unit rides ON the target string
+(&sect;199.4), so adding `%` to a bare `30` amends a non-blank value and
+amending is the office's. `SMPRules.unitAddedOnly()` is the narrowest yes
+&mdash; target fields only, stored unit EMPTY, number byte-identical &mdash;
+asked by the screen to draw the picker and by the server to accept the save
+from ONE function (&sect;42); the write is a PENDING fill (&sect;145), the
+undo is its own transition, and **a unit is still not a counted gap** (46 of
+178 shipped targets have none and are complete), so the picker offers without
+nagging and a row whose unit is set stays the office's. The measures table
+grows its Unit column decided ONCE per table, or header, rows and Add-row span
+disagree (&sect;53.5). Proved at both ends: seven new authoriser cases (2 red
+with the rule stubbed false), and `checks/objective-unit.py` &sect;9 drives
+the exact state from his screenshot through real fill mode and reads the plan
+back, inheritance included. `test-authorize` 423/0.*
+
+*Earlier: 2026-08-31 &mdash; **v3.89: the unit, the repeat in months,
 the Overview, the welcome screen's cycle, and the corner that comes back
 (&sect;195&ndash;&sect;200).** A save cost **236 network crossings and costs
 45** &mdash; the 504 Islam hit filling CX, root-caused by counting rather than

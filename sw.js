@@ -228,7 +228,14 @@
    nobody has served, and the suffix says whose the change is rather than being
    a number two sessions can reach for correctly and still collide on (§99).
    `node --check sw.js` run after the merge (§146.2). */
-const SHELL = "smp-shell-v3.90-the-house-does-not-squeeze";
+/* v3.91-the-wall-and-the-fillable-unit — §200.2 (the house glyph stops being
+   squeezed by the flex row), §201 (a boot that lands on the baked example says
+   so on a wall, with a retry and a deliberate way past — it painted Raya Trade
+   silently before), and §201.2 (a custodian in fill mode can put the missing
+   UNIT on a bare target, pending, under the same grant as the value beside it).
+   Name checked against origin/main serving "smp-shell-v3.89-the-unit-is-
+   inherited"; confirm again immediately before the merge push (§94.16). */
+const SHELL = "smp-shell-v3.91-the-wall-and-the-fillable-unit";
 const ASSETS = [
   "/",
   "/index.html",

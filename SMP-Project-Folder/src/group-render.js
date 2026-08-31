@@ -2957,6 +2957,33 @@ function hasTargetToHoldAUnit(m){
   return !!(String(m.target || "").trim() || String(m.target3y || "").trim());
 }
 
+/* ── THE FILLER SETS A MISSING UNIT (§201.2) ───────────────────────────
+   Islam: *"he can't fill the unit while he needs to fill if missing."* Drawn
+   only where the row's unit is EMPTY — a unit already set stays the
+   office's — and the write stamps a pending mark on every target it
+   touched, because a fill is pending until the office confirms it (§145).
+   Clearing it back lifts the marks, which is the undo the server's own
+   transition expects. NOT a counted gap: 46 of the shipped 178 targets
+   carry no unit and are complete without one, so this offers without
+   nagging (§119.1: an optional blank is not a gap). */
+function fillUnitOffered(page, acKey, m, ctx){
+  return filling(page, acKey, ctx || {}) &&
+         !targetUnitOf(m) && hasTargetToHoldAUnit(m);
+}
+function fillUnitCell(page, acKey, m, ctx){
+  if (!fillUnitOffered(page, acKey, m, ctx)) return null;
+  return selectOr(page, "", targetUnitOpts(""), "", function(v){
+    var had = { target: m.target, target3y: m.target3y };
+    setTargetUnit(m, v);
+    ["target", "target3y"].forEach(function(f){
+      if (m[f] === had[f]) return;
+      if (String(v == null ? "" : v).trim()) gapStamp(m, f);
+      else gapLift(m, f);
+    });
+    gapBandRefresh();
+  });
+}
+
 /* ── THE UNITS ARE PICKED FROM A LIST (§199.4) ─────────────────────────
    Islam, on money: *"the financial units can be B EGP or M EGP or EGP only"*,
    and on counts: *"# into trips and orders is tricky, as we will need to add
@@ -3093,7 +3120,7 @@ function koEdit(list, page, acKey, owner){
                   function(v){ setTargetUnit(m, v); })
               : '<span class="why" title="Set a target first \u2014 the unit is ' +
                 'written with it">\u2014</span>')
-          : esc(targetUnitOf(m))) + '</td>' +
+          : (fillUnitCell(page, acKey, m) || esc(targetUnitOf(m)))) + '</td>' +
         '<td class="cc">' + gapCell(page, acKey, m, "target3y",
           { kind:"input", cls:"mono", parse: unitInherit(m) }) + '</td>' +
         '<td class="cc">' + gapCell(page, acKey, m, "target",
@@ -4965,6 +4992,10 @@ function unitPlanBody(it, u, railed){
      rows that name them. Same shape §147.7 hands the authoriser, so the two
      sides answer with one voice. */
   var pctx = function(row){ return { pillarOwner: it.owner, row: row }; };
+  /* §201.2: does this table carry a Unit column right now? The office's pen
+     always; a filler's only while some row has a missing unit to offer. */
+  var unitCol = !ed && it.measures.some(function(m){
+    return fillUnitOffered("plan", "u_plan", m, pctx(m)); });
   var mRows = it.measures.map(function(m, i){
     return '<tr data-oi="' + i + '"><td class="idx">' +
       (on ? handle("Reorder " + m.name) : '') +
@@ -5007,6 +5038,13 @@ function unitPlanBody(it, u, railed){
                 function(v){ setTargetUnit(m, v); })
             : '<span class="why" title="Set a target first \u2014 the unit is ' +
               'written with it">\u2014</span>') + '</td>'
+        : unitCol
+        /* §201.2: fill mode. The COLUMN is decided once for the whole table
+           (unitCol, below) or the header and the rows stop agreeing about
+           how many cells a row has; a row with nothing to offer gets the
+           unit it already carries, read-only. */
+        ? '<td class="cc">' + (fillUnitCell("plan", "u_plan", m, pctx(m))
+            || esc(targetUnitOf(m))) + '</td>'
         : '') +
       '<td class="num">' + gapCell("plan", "u_plan", m, "target",
         { ctx:pctx(m), kind:"input", cls:"mono", parse: unitInherit(m) }) + '</td>' +
@@ -5166,9 +5204,9 @@ function unitPlanBody(it, u, railed){
     /* §199.5: the Unit heading appears only with the pen, because the column
        under it does — and `addRow`'s span has to follow, or the Add row stops
        reaching the end of the table the moment somebody opens the pen. */
-    miniTable(ed ? ["#","Measure","Dir.","Unit","Target","Compiled"]
+    miniTable((ed || unitCol) ? ["#","Measure","Dir.","Unit","Target","Compiled"]
                  : ["#","Measure","Dir.","Target","Compiled"],
-      mRows + addRow(ed ? 6 : 5, "measure", "Add a measure"), sortAttr("measures")) +
+      mRows + addRow((ed || unitCol) ? 6 : 5, "measure", "Add a measure"), sortAttr("measures")) +
     '<h4 class="mini">Tactics <em>\u2014 who carries it, who supports, and in which quarters</em></h4>' +
     miniTable(["#","Tactic","Owner","Collabs.","Quarters"],
       tRows + addRow(4, "tactic", "Add a tactic"), sortAttr("tactics"));

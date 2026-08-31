@@ -17,6 +17,7 @@ const { writeState, readState, ensureReady } = io;
 const auth = require("../lib/auth.js");
 const { authorize } = require("../lib/authorize.js");
 const R = require("../lib/rules.js");
+const D = require("../lib/graph-diff.js");
 
 /* The six env-var spellings Neon and Vercel use between them live in ONE
    place now (lib/state-io.js): this was copied here and into api/auth.js
@@ -114,10 +115,34 @@ module.exports = async function handler(req, res) {
     }
     if (req.method === "POST") {
       const body = await readBody(req);
-      const state = body && body.state;
-      /* A minimal shape check — a malformed save must fail loudly rather than
-         wipe the tenant with nothing to write back. */
-      if (!state || !state.group || !state.units || !Array.isArray(state.unitKeys) || !state.unitKeys.length) {
+      /* ── WHAT CHANGED, APPLIED ONTO OUR OWN COPY (§210) ──────────────
+         Islam: *"why is the whole plan is sent, why don't we just send the
+         changed element only not to cause this issue?"*
+
+         Until now this took the client's whole graph and wrote it, throwing
+         away whatever the database held — so a tab that had been open a
+         while silently erased everybody else's saved work (measured against
+         a real Postgres), and work done before a view switch rode into a
+         save under the wrong identity and was refused naming parts nobody
+         had touched (§204).
+
+         A client now sends only the parts it changed and they are applied
+         ONTO THE STORED GRAPH, a few lines below where `stored` is read.
+         Everything downstream is untouched: the authoriser still compares a
+         stored graph with an incoming one, and `writeState` still writes a
+         whole graph. Only the way `incoming` is arrived at has changed, and
+         that was the whole of the fault.
+
+         THE WHOLE-GRAPH PATH STAYS, for exactly one reason: tabs that are
+         open right now are running the previous build and will go on posting
+         `{state}` until somebody reloads them. Refusing those would turn a
+         data-safety fix into an outage for everybody mid-sentence. They keep
+         the old behaviour — including its exposure — until they reload, which
+         §208's sign-out makes short work of. */
+      const changes = body && body.changes;
+      let state = body && body.state;
+      if (!changes && (!state || !state.group || !state.units ||
+                       !Array.isArray(state.unitKeys) || !state.unitKeys.length)) {
         return send(res, 400, { ok: false, error: "state is missing or not shaped like the platform's graph" });
       }
 
@@ -155,6 +180,15 @@ module.exports = async function handler(req, res) {
                                 undoable: false });
       }
       const acting = act.person;
+
+      /* §210: the incoming graph is the STORED one with this client's changes
+         laid over it. Anything they did not touch is what the database holds
+         at this moment, not what their tab happened to be showing. */
+      if (changes) {
+        const applied = D.applyChanges(JSON.parse(JSON.stringify(stored)), changes);
+        if (!applied.ok) return send(res, 400, { ok: false, error: applied.error });
+        state = applied.state;
+      }
 
       const verdict = authorize(stored, state, acting);
       if (!verdict.ok) {

@@ -1,0 +1,26 @@
+-- §210.2 — EVERYBODY ONTO THE NEW SAVE, ONCE
+--
+-- Islam, after §210 landed: "can we push a full reload or a logout as we did
+-- earlier to enforce the refresh?"
+--
+-- Yes, and the sign-out is the only lever that reaches an ALREADY-OPEN tab.
+-- Bumping the service worker's cache name (v3.97) replaces what a browser
+-- fetches NEXT time; it does nothing to a tab that is already running the
+-- previous build's JavaScript. That tab goes on posting the whole graph —
+-- and therefore goes on being able to overwrite somebody else's saved work,
+-- which is the one thing §210 exists to stop.
+--
+-- Ending the sessions reaches it: the tab's next request comes back 401,
+-- `sync.js` sends it to the gate, and signing in loads the page fresh — on
+-- the new build, posting only what changed.
+--
+-- WHAT IT COSTS, STATED: anybody who has an edit that has not yet reached the
+-- server when their tab is turned away loses that edit. The window is small
+-- (the autosave sends the first change of a burst immediately, §170) and it
+-- is not nothing. It is the smaller risk: the alternative is leaving tabs
+-- running the build that silently destroys other people's work.
+--
+-- `credentials` is untouched — a sign-in, not a reset, and nobody needs a new
+-- password issued. Runs once: migrations are recorded in `_sql_migrations`
+-- and never re-applied, so this does not sign people out on every deploy.
+DELETE FROM sessions;

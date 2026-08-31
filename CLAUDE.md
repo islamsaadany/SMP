@@ -384,6 +384,26 @@ console errors (in this cloud environment, run it via a wrapper that points Play
   remove × onto a second line — `inline-block` restores it, and it was found
   by `checks/plan-fields.py` GOING RED, not by reading the cascade, which is
   the argument for that check existing.
+- **A CAPABILITY TRAVELS ON ITS OWN (§216):** Islam, from the deployment —
+  *"the CX is still getting errors on filling"* — with Hala, working on **CX**,
+  refused by *"a project's milestones (**admin**) cannot be changed here"*.
+  **THE REFUSAL NAMED A FUNCTION SHE HAD NEVER OPENED, and that is the clue.**
+  Measured: every capability in the tenant lives in the `group` part and `group`
+  travelled WHOLE — one milestone owner sent **33,433 bytes** carrying all eight
+  functions' plans, so any difference between her tab and the stored graph, made
+  by anybody, was judged as hers. §215's fix in the one place §210 could not
+  reach: units and functions are keyed MAPS and were split; capabilities are an
+  **array inside a part** and were not. The addressing is a declared TREE now,
+  walked identically by the differ and the server, with anything outside it
+  falling back to the whole part. **33,433 → 168 bytes.** Reproduced end to end
+  against a real Postgres in her exact shape — stale tab, somebody else's change
+  to another function in between — and **the other function's work survives**,
+  which fails before the fix; 15 red with it switched off. **AND THE FIRST BUILD
+  NAMED THE WRONG PART** (`org`, the word §210's prose uses; it is `group`) and
+  **every unit test passed**, because they built the fixture with the same wrong
+  name — the real-database test caught it (§100.3). **NOT fixed and said so**: a
+  genuine refusal is still a refusal, and if they continue while naming a
+  function nobody opened, this diagnosis is wrong.
 - **A PLAN TRAVELS ROW BY ROW (§215):** Islam — *"for the business units, when
   you change a small thing it just sends the thing that changed. Is there any
   risk?"* §210 stopped at a top-level part because finer needs arrays matched by

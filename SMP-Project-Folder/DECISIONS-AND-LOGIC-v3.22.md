@@ -24642,6 +24642,53 @@ data goes: the edit travels, the new pillar is silently dropped, and the screen
 shows a row the database never received. That pairing is asserted now, four
 ways, and the guards fail 8 / 5 / 2 when broken.
 
+### §216 — A capability travels on its own
+
+Islam, from the deployment, with a photograph of the screen: *"the CX is still
+getting errors on filling."* Hala — a strategy custodian and project owner,
+working on **CX** — refused with:
+
+> Filling a project milestone (**admin**) needs the fill-the-gaps grant…
+> A plan is corrected by the SMO — a project's milestones (**admin**) cannot be
+> changed here.
+> 1 line refused: *Prepare a tender for a new real store — Owner*
+
+**THE REFUSAL NAMES A FUNCTION SHE HAS NEVER OPENED, and that is the whole
+clue.** Measured rather than reasoned: every capability in the tenant lives in
+the `group` part, and `group` travelled WHOLE. One milestone owner changed sent
+**33,433 bytes** carrying all eight functions' plans — so any difference between
+her tab's copy and the stored one, made by anybody, was judged as hers.
+
+§215's fix in the one place §210 could not reach: units and functions are keyed
+MAPS and were split entry by entry; capabilities are an **array inside a part**
+and were not. The addressing generalises to a declared TREE — `keyObjectives`
+and `items` (with `measures`/`tactics`) on a plan; `capabilities` (with their
+`keyObjectives`, and `projects` with `deliverables`/`outcomes`/`milestones`) on
+the group — walked identically by the differ and by the server, with anything
+outside it falling back to the whole part.
+
+**33,433 bytes → 168.**
+
+**REPRODUCED AND CLOSED END TO END** against a real Postgres, in the shape she
+hit: her tab opened, somebody else changes a milestone on ANOTHER function, she
+fills one row on her own. Her save is accepted, names no function she never
+opened, her fill lands, **and the other function's work survives**. That last
+assertion fails before the fix. Switching the fix off gives **15 failures** in
+`test-graph-diff.js` — the exact state she was in.
+
+**AND THE FIRST BUILD NAMED THE WRONG PART.** It said `org`, which is the word
+§210's own prose uses; the part is called `group`. **Every unit test passed**,
+because those tests built their fixture with the same wrong name — the
+end-to-end test against a real database is what caught it. §100.3 again: a
+fixture that does not model the server is testing something the product does
+not do.
+
+**WHAT THIS DOES NOT FIX, stated rather than implied**: a genuine refusal is
+still a refusal. If Hala edits a row she may not — a milestone on a project she
+does not own — she is refused, correctly, and the screen should not have opened
+it. If refusals continue after this ships and still name a function she has not
+opened, the diagnosis above is wrong and it needs looking at again.
+
 ### Not explained
 
 The **"could not reach the server (Failed to fetch)"** on *Next pending*. It

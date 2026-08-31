@@ -162,6 +162,45 @@ function clientBody(baseline, screen) {
               end.units[U].aspiration);
       }
 
+      /* ── §216 · THE CX REFUSAL, REPRODUCED AND CLOSED ───────────────
+         Hala, working on CX, was refused with "a project's milestones
+         (admin) cannot be changed here" — naming a function she had never
+         opened. Every capability lives in `org`, which travelled as ONE
+         part, so her save carried every function's plan and a difference
+         somebody else had made was judged as hers. */
+      {
+        await io.writeState(c, seed);
+        const g0 = await io.readState(c);
+        const caps = (g0.group && g0.group.capabilities) || [];
+        const mine = 0;
+        const other = caps.findIndex((x, i) => i > 0 && x.fn !== caps[0].fn);
+        if (caps.length > 1 && other > 0 &&
+            (caps[mine].projects || []).length && (caps[other].projects || []).length) {
+          /* Her tab is opened NOW. */
+          const herTab = clone(g0);
+          /* Somebody else then changes a milestone on the OTHER function. */
+          const theirs = clone(await io.readState(c));
+          theirs.group.capabilities[other].projects[0].milestones[0].owner = "SOMEBODY ELSE";
+          const rT = serverSave(await io.readState(c), clientBody(clone(g0), theirs), smo);
+          if (rT.ok) await io.writeState(c, rT.state);
+          /* She fills ONE row on her own capability, from the stale tab. */
+          const herScreen = clone(herTab);
+          herScreen.group.capabilities[mine].projects[0].milestones[0].owner = "HALA FILLED THIS";
+          const rH = serverSave(await io.readState(c), clientBody(herTab, herScreen), smo);
+          if (rH.ok) await io.writeState(c, rH.state);
+          const end = await io.readState(c);
+          check("§216: her save is accepted", rH.ok, rH.error);
+          check("§216: ...and it does not name a function she never opened",
+                rH.ok || !/admin|" + caps[other].fn + "/.test(rH.error || ""), rH.error);
+          check("§216: her own fill landed",
+                end.group.capabilities[mine].projects[0].milestones[0].owner === "HALA FILLED THIS",
+                end.group.capabilities[mine].projects[0].milestones[0].owner);
+          check("§216: ...and the OTHER function's work survives her stale tab",
+                end.group.capabilities[other].projects[0].milestones[0].owner === "SOMEBODY ELSE",
+                end.group.capabilities[other].projects[0].milestones[0].owner);
+        } else check("(the seed has no second function with projects to test §216 with)", true);
+      }
+
       check("two people on two units: the first one's work survives",
             fin.units[U].aspiration === "FILLED BY THE FIRST", fin.units[U].aspiration);
       check("...and the second one's landed",

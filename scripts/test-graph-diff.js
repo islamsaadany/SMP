@@ -288,5 +288,103 @@ console.log("\n§215 · row-level changes");
   });
 })();
 
+/* ── §216 · A SAVE MADE ON ONE FUNCTION MUST NOT CARRY ANOTHER'S ──────
+   Hala — a strategy custodian and project owner working on CX — was refused
+   with *"a project's milestones (admin) cannot be changed here"*, naming a
+   supporting function she had never opened.
+
+   EVERY CAPABILITY IN THE TENANT LIVES IN `org`, which travelled as ONE part.
+   So her save carried all eight functions' plans, and any difference between
+   her tab's copy and the stored one was judged as HERS. §215's fix for units
+   and functions, in the one place §210 could not reach: capabilities are an
+   ARRAY inside a part rather than a keyed map. */
+console.log("\n§216 · a capability travels on its own");
+(function () {
+  const seed = JSON.parse(fs.readFileSync("/home/user/SMP/db/seed-state.json", "utf8"));
+  const world = () => ({ group: clone(seed.group), units: clone(seed.units),
+                         functions: clone(seed.functions), people: clone(seed.people) });
+  const caps = world().group.capabilities || [];
+  check("§216: the seed holds capabilities across several functions",
+        caps.length > 1 && new Set(caps.map(c => c.fn)).size > 1,
+        caps.length + " caps, " + new Set(caps.map(c => c.fn)).size + " functions");
+
+  const edit = (f) => { const n = world(); f(n); return n; };
+  const land = (f) => {
+    try {
+      const b = world(), n = edit(f);
+      const ch = D.graphChanges(b, n);
+      const r = D.applyChanges(world(), ch);
+      return { ch: ch, ok: r.ok, state: r.state, want: n, error: r.error };
+    } catch (e) { return { ch: { set:{}, del:[] }, ok:false, error:"THREW: " + e.message }; }
+  };
+
+  /* — one row, addressed, and NOTHING else on the wire — */
+  [["a milestone's owner",  n => { n.group.capabilities[0].projects[0].milestones[0].owner = "Hala"; }],
+   ["a milestone's due date", n => { n.group.capabilities[0].projects[0].milestones[0].finish = "Jul 26"; }],
+   ["an outcome's target",  n => { const o = n.group.capabilities[0].projects[0].outcomes;
+                                   if (o && o.length) o[0].target = "99"; }],
+   ["a project's brief",    n => { n.group.capabilities[0].projects[0].brief = "Reworded"; }],
+   ["a capability's definition", n => { n.group.capabilities[0].def = "Reworded"; }],
+   ["a capability objective", n => { const k = n.group.capabilities[0].keyObjectives;
+                                     if (k && k.length) k[0].target = "42"; }]
+  ].forEach(function (pair) {
+    const got = land(pair[1]);
+    check("§216: " + pair[0] + " travels as ONE row",
+          (got.ch.rows || []).length === 1, JSON.stringify(got.ch).slice(0, 110));
+    check("§216: ...and the whole group does NOT",
+          !Object.keys(got.ch.set || {}).length, Object.keys(got.ch.set || {}).join(","));
+    check("§216: ...and it lands exactly", got.ok && D.sameValue(got.state, got.want),
+          got.error || "the graph differs");
+  });
+
+  /* — THE REPORTED FAULT: a stale copy of ANOTHER function's plan must not
+       ride along and be judged as this person's change. — */
+  (function () {
+    const stored = world();
+    /* Somebody else has since changed a capability on a DIFFERENT function. */
+    const otherFn = stored.group.capabilities.findIndex(
+      (c, i) => i > 0 && c.fn !== stored.group.capabilities[0].fn);
+    check("§216: the seed has a second function with a capability", otherFn > 0, otherFn);
+    if (otherFn > 0) {
+      stored.group.capabilities[otherFn].projects[0].milestones[0].owner = "SOMEBODY ELSE";
+      /* Her tab was opened BEFORE that, and she edits only her own row. */
+      const herTab = world();
+      const herScreen = clone(herTab);
+      herScreen.group.capabilities[0].projects[0].milestones[0].owner = "Hala";
+      const ch = D.graphChanges(herTab, herScreen);
+      const named = JSON.stringify(ch);
+      check("§216: her save names ONLY her own capability",
+            (ch.rows || []).length === 1 &&
+            ch.rows[0].path[1] === stored.group.capabilities[0].id, named.slice(0, 120));
+      check("§216: ...and does not carry the whole group",
+            !Object.keys(ch.set || {}).length, Object.keys(ch.set || {}).join(","));
+      /* Applied onto the CURRENT stored graph, the other function is untouched. */
+      const r = D.applyChanges(clone(stored), ch);
+      check("§216: applying it leaves the other function alone", r.ok &&
+            r.state.group.capabilities[otherFn].projects[0].milestones[0].owner === "SOMEBODY ELSE",
+            r.ok ? r.state.group.capabilities[otherFn].projects[0].milestones[0].owner : r.error);
+      check("§216: ...and her own row landed", r.ok &&
+            r.state.group.capabilities[0].projects[0].milestones[0].owner === "Hala",
+            r.ok ? r.state.group.capabilities[0].projects[0].milestones[0].owner : r.error);
+    }
+  })();
+
+  /* — AND STRUCTURE STILL TRAVELS WHOLE — */
+  [["a project added",    n => { n.group.capabilities[0].projects.push({ id:"NEWP", name:"New" }); }],
+   ["a milestone removed", n => { n.group.capabilities[0].projects[0].milestones.pop(); }],
+   ["a capability added", n => { n.group.capabilities.push({ id:"NEWC", fn:"smo", projects:[], keyObjectives:[] }); }],
+   ["a milestone edited AND one added",
+    n => { n.group.capabilities[0].projects[0].milestones[0].owner = "Hala";
+           n.group.capabilities[0].projects[0].milestones.push({ id:"NEWM", name:"New" }); }]
+  ].forEach(function (pair) {
+    const got = land(pair[1]);
+    check("§216: " + pair[0] + " falls back to the whole group",
+          !(got.ch.rows || []).length && !!got.ch.set.group,
+          JSON.stringify(got.ch).slice(0, 100));
+    check("§216: ...and still lands exactly", got.ok && D.sameValue(got.state, got.want),
+          got.error || "the graph differs");
+  });
+})();
+
 console.log("\n" + pass + " passed, " + fail + " failed");
 process.exit(fail ? 1 : 0);

@@ -1,0 +1,26 @@
+-- §208 — EVERYBODY SIGNS IN AGAIN, ONCE
+--
+-- Islam, after §206: "you need to logout anyone with my access now even me
+-- for a relogin."
+--
+-- §206 fixed the platform handing an unmatched session the first row of the
+-- register — its view AND its roles, which on this tenant is the bootstrap
+-- SMO. The fix stops it happening again; it says nothing about a browser
+-- somewhere that is still holding a session opened while it was happening.
+-- A session is a row here and a cookie there, so the only way to be certain
+-- nobody is still carrying one is to end them all and have people sign in
+-- again.
+--
+-- WHY ALL OF THEM AND NOT ONLY THE SUPER USER'S. The fault was that a
+-- session resolved to SOMEBODY ELSE, so "sessions with your access" is not a
+-- set that can be selected: the session rows are honest about whose they are
+-- and the substitution happened afterwards, in the browser. Ending every one
+-- is the only selection that certainly contains the affected ones.
+--
+-- WHAT IT COSTS: everybody signs in again, once, on the next deployment.
+-- Nothing else is touched — `credentials` keeps every password, so this is a
+-- sign-in, not a reset, and nobody needs a new one issued.
+--
+-- IT RUNS ONCE. Migrations are recorded in `_sql_migrations` and never
+-- re-applied, so this does not sign people out on every deploy.
+DELETE FROM sessions;

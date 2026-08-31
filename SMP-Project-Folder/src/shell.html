@@ -2276,6 +2276,36 @@
     pop.style.top = Math.round(top) + "px";
   }
 
+  /* ── AND A PRESS OUTSIDE PUTS IT AWAY (§203) ───────────────────────
+     Islam: *"when I choose the who to send to from the filters when I click
+     outside the drop down let it close. of course what is selected is
+     saved."* Nothing is at risk — every tick is written to `SENDMSG` the
+     moment it is made (`data-aud`'s own handler) and `DDOPEN` is only which
+     panel is on screen — so closing is purely putting the panel away.
+
+     ON `pointerdown`, NOT `click` (§100.4): a panel that lingers until the
+     mouse comes up reads as having missed the press. WIRED ONCE, at the
+     document, and never in `wire()` — that runs on every paint, so a
+     listener added there would stack one deep per repaint (§24, §47.2), and
+     this one repaints.
+
+     TWO THINGS ARE NOT "OUTSIDE": the panel itself, obviously, and the
+     BUTTON ROW — the buttons already toggle, so letting this fire there
+     would close the panel and then the button's own handler would reopen
+     it, or worse, close the one being opened. */
+  var DD_OUTSIDE = false;
+  function ddWireOutside(){
+    if (DD_OUTSIDE) return;
+    DD_OUTSIDE = true;
+    document.addEventListener("pointerdown", function(ev){
+      if (!DDOPEN) return;
+      var t = ev.target;
+      if (t && t.closest && (t.closest(".ddpop") || t.closest(".ddbar"))) return;
+      DDOPEN = null;
+      paint();
+    }, true);
+  }
+
   /* A row's action menu is position:fixed, so somebody has to put it where its
      button is. It is placed AFTER the paint that created it — measuring an
      element before it is in the document gives zeroes — and flipped above the
@@ -5398,6 +5428,7 @@
       });
     });
     positionDD();
+    ddWireOutside();
 
     /* ── Drafts (§76.1) ─────────────────────────────────────────────
        The word is written into the element, not painted: pressing Save must

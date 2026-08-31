@@ -241,7 +241,14 @@
    Setup as well as the units, functions and companies it already named.
    Name checked against origin/main serving "smp-shell-v3.89-the-unit-is-
    inherited"; confirm again immediately before the merge push (§94.16). */
-const SHELL = "smp-shell-v3.94-collaborators-are-fillable";
+/* v3.95-the-viewer-is-never-somebody-else — §206: a live session whose person
+   the hydrated register does not match resolved to PEOPLE[0], so it was served
+   the first register row's VIEW and its ROLES (very often the bootstrap SMO's).
+   §207: the no-role floor opens nothing — the default, the seed and migration
+   035, because a stored map beats a changed default (§30.2).
+   Name checked against origin/main serving "smp-shell-v3.94-collaborators-are-
+   fillable"; confirm again immediately before the push (§94.16). */
+const SHELL = "smp-shell-v3.95-the-viewer-is-never-somebody-else";
 const ASSETS = [
   "/",
   "/index.html",

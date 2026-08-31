@@ -4911,10 +4911,43 @@ var VIEWER = "smo";
    own people, and the Demo button swaps the two datasets — and before
    2026-08-20 either one left a departed key selected and threw on the next
    repaint. */
+/* ── AND ON A LIVE TENANT IT STANDS NOBODY IN (§206) ──────────────────
+   From the deployment: a colleague signed in as themselves and was shown
+   "Welcome, <the SMO>" with the Super user chip, and the access to match.
+
+   THIS FUNCTION WAS THE SUBSTITUTION. `VIEWER = PEOPLE[0].key` is right for
+   the two cases the note above names — the baked example being replaced by
+   the tenant's own people, and the Demo button swapping datasets — where
+   the alternative is a throw on the next repaint and nobody is signed in as
+   anybody. It is catastrophic for the third case nobody listed: a LIVE
+   session whose person the hydrated register does not hold. `grant`,
+   `reaches` and `paint` all read straight off this result, so standing in
+   the first row of the register hands that person's ROLES to somebody else
+   — and the first row of a tenant is very often the bootstrap SMO.
+
+   §69.15 recorded exactly this sentence — "a person the platform could not
+   find was shown the FIRST PERSON'S VIEW" — and fixed the two chrome
+   controls it had noticed, leaving the substitution itself in place.
+
+   So the fallback survives where it was needed and is closed where it is
+   dangerous: with a live session, an unmatched viewer resolves to a
+   STRANGER — a person-shaped row holding nothing, so every rule answers no
+   — and `sync.js` has already put the "signed in but not on this register"
+   note on the page saying so. A value that is dangerous when wrong fails
+   closed (§69.15's own rule, on the value rather than on the controls).
+
+   `level` goes with it: §187 stopped deriving a seat from it, so it granted
+   nothing, and a dead field spelling "smo" on the one object that stands in
+   for a stranger is the last place to leave one (§24). */
 function viewer(){
   var v = PEOPLE.filter(function(p){ return p.key === VIEWER; })[0];
   if (v) return v;
-  if (!PEOPLE.length) return { key: VIEWER, name: "\u2014", title: "", level: "smo", unit: "group" };
+  var stranger = { key: VIEWER, name: "\u2014", title: "", unit: null };
+  if (!PEOPLE.length) return stranger;
+  var liveNow = false;
+  try { liveNow = typeof SYNC !== "undefined" && !!SYNC.isLive && SYNC.isLive(); }
+  catch (e) { liveNow = false; }
+  if (liveNow) return stranger;
   VIEWER = PEOPLE[0].key;
   return PEOPLE[0];
 }

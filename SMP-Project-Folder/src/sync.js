@@ -654,10 +654,24 @@ var SYNC = (function () {
        note below this one already makes. */
     if (!box || !sel) { paint(); return; }
     var known = PEOPLE.some(function (p) { return p.key === person.key; });
-    if (known) {
-      window.VIEWER = person.key;
-      sel.value = person.key;
-    }
+    /* §206: VIEWER IS SET EITHER WAY, AND NEVER LEFT AT ITS DEFAULT.
+       `var VIEWER = "smo"` is the file:// demo's starting point and it is a
+       REAL PERSON KEY — on a live tenant it is the bootstrap SMO. This was
+       inside `if (known)`, so a signed-in person the hydrated register does
+       not hold kept somebody else's key: measured, session
+       `mohamed.mokhtar` with `VIEWER === "smo"`. Everything that asks
+       `viewer()` rather than the session then answers as the SMO — the
+       welcome screen the house button opens (§185) among them, which is how
+       a colleague can be shown another person's greeting and chips while
+       correctly signed in as themselves.
+
+       Setting it regardless makes `viewer()` find NOBODY, which is exactly
+       what the note below already tells the person has happened — that
+       comment says "render nobody" and the code was still pointing at the
+       first key in the file. §69.15's own rule, one variable further in: a
+       value that is dangerous when wrong must fail closed. */
+    window.VIEWER = person.key;
+    if (known) sel.value = person.key;
     /* AND IF THE REGISTER DOES NOT HOLD THEM, RENDER NOBODY. `VIEWER` was
        simply left where it was — at whoever the list happens to start with —
        so a person the platform could not find was shown the FIRST PERSON'S

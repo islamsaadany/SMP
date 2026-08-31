@@ -5375,24 +5375,56 @@ function gapMap(target, pend){
   var entry = function(key, label, count, go){
     out.push({ key: key, label: label, count: count, go: go });
   };
-  var unitHalf = function(u){
+  /* ── A UNIT AND A PILLARS FUNCTION ARE THE SAME SHAPE AND NOT THE SAME
+     VOCABULARY (§211) ──────────────────────────────────────────────────
+     Islam, on Consumer Finance and Merchandising: *"pressing on the CON01 22
+     it doesn't take me to the pillars, it's stuck in the overview."*
+
+     This walked a pillars function through `unitLike()` — right, and §59's
+     whole point — and then handed out the UNIT's words for the two things
+     that are not shared:
+
+       · the SECTION. A unit's plan is `plan`; a function's is `proj`,
+         labelled "Plan" for this format (§59). Setting `CURSEC` to a section
+         the page does not have leaves the renderer on its first one, which
+         is the Overview — the reported symptom exactly.
+
+       · the ACCESS KEY. A unit's are `u_found`/`u_plan`, a function's
+         `k_found`/`k_proj`, and `reach()` here is what decides whether a gap
+         is COUNTED AT ALL. Measured on the demo's pillars function: its
+         custodian, holding the function's Strategy cell at `fill`, answers
+         false to both `u_` keys and true to both `k_` ones — so every count
+         came out ZERO and no fill control was drawn, for the one person the
+         feature is for. It looked right only from the office, who passes
+         every key. §61's trap, hidden behind a permission that happened to
+         be true for whoever was looking.
+
+     `page` is deliberately NOT in the vocabulary: `EDIT_PAGE.plan` is one
+     mode for both (§145, and the note above `mayEditPlan`), and
+     `fillPageForSec` already answers for `proj` as well as `plan`. Splitting
+     it would be inventing a difference the product does not have. */
+  var UNIT_WORDS = { found: "u_found", plan: "u_plan", sec: "plan" };
+  var FN_WORDS   = { found: "k_found", plan: "k_proj", sec: "proj" };
+  var unitHalf = function(u, w){
     if (!u) return;
-    var found = G("u_found", {}, "unit", u);
+    w = w || UNIT_WORDS;
+    var found = G(w.found, {}, "unit", u);
     entry("found", "Foundation", found, { sec: "found", page: "foundation" });
     var ko = 0;
-    (u.keyObjectives || []).forEach(function(m){ ko += G("u_found", {}, "ko", m); });
+    (u.keyObjectives || []).forEach(function(m){ ko += G(w.found, {}, "ko", m); });
     entry("ko", "Objectives", ko, { sec: "found", page: "foundation" });
     (u.items || []).forEach(function(p, i){
       var n = 0, pctx = function(row){ return { pillarOwner: p.owner, row: row }; };
-      (p.measures || []).forEach(function(m){ n += G("u_plan", pctx(m), "measure", m); });
-      (p.tactics  || []).forEach(function(x){ n += G("u_plan", pctx(x), "tactic", x); });
+      (p.measures || []).forEach(function(m){ n += G(w.plan, pctx(m), "measure", m); });
+      (p.tactics  || []).forEach(function(x){ n += G(w.plan, pctx(x), "tactic", x); });
       entry("p:" + (p.code || i), pillarCode(u, i), n,
-            { sec: "plan", page: "plan", rail: unitRailKey(u), code: p.code });
+            { sec: w.sec, page: "plan", rail: unitRailKey(u), code: p.code });
     });
   };
   if (t.indexOf("fn:") === 0) {
     var fk = t.slice(3), fo = functionOf(fk);
-    if (fo && String(fo.format) === "pillars") { unitHalf(unitLike(t)); return out; }
+    if (fo && String(fo.format) === "pillars") {
+      unitHalf(unitLike(t), FN_WORDS); return out; }
     var caps = capsOfFunction(fk), ov = 0;
     caps.forEach(function(c){
       (c.keyObjectives || []).forEach(function(m){ ov += G("k_found", {}, "capko", m); });

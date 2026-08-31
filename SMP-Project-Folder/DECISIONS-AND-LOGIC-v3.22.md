@@ -24226,3 +24226,71 @@ stub that does not model the server is testing something the product does not
 do — it applies the change list through the same shared module now. *The 500s
 were the first thing to look at, and the temptation was to read them as the
 product breaking.*
+
+## §211 — A unit and a pillars function are the same shape and not the same vocabulary (in progress)
+
+Islam, on Consumer Finance and Merchandising: *"they don't have an overview
+page as they are functions planning in pillars however they have a missing item
+banner in the foundation"* and *"pressing on the CON01 22 it doesn't take me to
+the pillars it's stuck in the overview."*
+
+Two faults, and only the second is settled here. The first is a design question
+put back to him and not yet answered.
+
+### The navigation (settled, in this commit)
+
+`gapMap()` walks a pillars function through `unitLike()` — right, and §59's
+whole point — and then handed out the UNIT's words for the two things that are
+not shared.
+
+**THE SECTION.** A unit's plan section is `plan`; a function's is `proj`,
+labelled "Plan" for this format (§59). Setting `CURSEC` to a section the page
+does not have leaves the renderer on its FIRST one, which is the Overview —
+the reported symptom exactly, and it reads as a dead chip rather than as a
+wrong destination. Measured on Merchandising: pressing `MRC01 6` moved
+`CURSEC.fnstrat` from `found` to `found` and set the rail correctly, so the
+rail knew where to go and the page did not.
+
+**THE ACCESS KEY.** A unit's are `u_found`/`u_plan`, a function's `k_found`/
+`k_proj`, and `reach()` is what decides whether a gap is COUNTED AT ALL. The
+key was plainly wrong and is corrected — **and it is recorded that no
+difference could be demonstrated on the demo**: on the shipped access matrix
+neither the custodian nor the head can fill a pillars function's plan under
+either key, so the two answers agree at false. Corrected because a function's
+page is gated on the function's key, not because a measurement forced it.
+
+`page` is deliberately NOT in the vocabulary. `EDIT_PAGE.plan` is one mode for
+both (§145) and `fillPageForSec` already answers for `proj` as well as `plan`;
+splitting it would invent a difference the product does not have.
+
+### The banner (measured, not yet fixed — it is Islam's call)
+
+`GAP_FIELDS.unit` is `["aspiration"]`, and **a pillars function has no
+foundation of its own**: `FUNCTIONS.merchandising` carries no `foundation` key
+at all, `unitLike()` returns null for it, and so does `unitLikeWritable()`. So
+the platform asks the function for a field it can never hold, counts it as one
+missing for ever, and the Overview draws **`1 Missing · Foundation 1 · Fill in
+missing elements`** over a page whose entire content is one sentence saying
+*"Open Plan to see it."*
+
+**The red button was pressed and does nothing.** Measured: no fill mode, no
+section change, `#panel .gapwalk` = 0, no request, no error. §61 exactly — a
+count promising a control that does not exist — and the loudest control on the
+page is the one with nothing behind it.
+
+Islam's proposal is to remove the Overview from a pillars function entirely.
+**Put back to him with the finding that it does not on its own resolve the
+case**: delete the tab and the count still stands, now pointing at a section
+that is not there, so the button goes from doing nothing on the Overview to
+doing nothing anywhere. The order has to be the count first, the tab second.
+Flagged with it: removing the tab **reverses his own ruling of 2026-08-24**
+(*"the function that plans in pillars has overview as well"*), and the sentence
+naming where the foundation actually lives is information rather than a
+description (rule 1b-ii) and would move to the Plan rather than be deleted.
+
+### Not explained
+
+The **"could not reach the server (Failed to fetch)"** on *Next pending*. It
+could not be reproduced here and no cause is claimed — it is a network-level
+failure, and it is not produced by either fault above. Left open rather than
+attached to a fix it may have nothing to do with.

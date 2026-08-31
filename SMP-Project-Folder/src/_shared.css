@@ -455,9 +455,22 @@
      `.tabs button.cta` is (0,2,1) against `.tabs button`'s (0,1,1), so it
      wins without an !important — the mistake §40 recorded, where an enforced
      rule went on winning after the argument had changed. */
-  .tabs button.cta { color:var(--cta); font-weight:600; }
-  .tabs button.cta:hover { background:var(--ground); color:var(--cta); }
-  .tabs button.cta[aria-selected="true"] { background:var(--cta); color:var(--cta-ink); }
+  /* §222.2: THE FILL IS ALWAYS ON, not only while the tab is selected. Islam:
+     *"the reporting button should always become orange even if it's not open,
+     and it's appearing as long as the cycle is open."* The first build gave
+     the orange to the word when unselected and the fill only on selection,
+     which made it quiet exactly when somebody needs to notice it — the old
+     Report button was solid at all times, and that is the volume being moved
+     rather than a new one being added (§41's budget: the tab is drawn only
+     while a cycle is open, for somebody who may report).
+
+     SELECTION IS STILL SAID, in the deeper half of the same pair — a tab that
+     never changes when you are standing on it stops answering "where am I".
+     `--cta-hover` is that half and is declared for every palette beside
+     `--cta`, so this needs no new token and no literal (§25). */
+  .tabs button.cta { background:var(--cta); color:var(--cta-ink); font-weight:600; }
+  .tabs button.cta:hover { background:var(--cta-hover); color:var(--cta-ink); }
+  .tabs button.cta[aria-selected="true"] { background:var(--cta-hover); color:var(--cta-ink); }
 
   .view { padding-top:32px; }
   [hidden] { display:none !important; }

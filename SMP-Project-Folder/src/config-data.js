@@ -5360,7 +5360,7 @@ function tacticDue(t){ return tacticPlanned(t) > 0; }
    whose words is already answered here; a `pendMap()` written alongside would
    be a second copy of the navigation and would drift the first time a page
    moved (§53.5). `pend` swaps only what is COUNTED on each row. */
-function gapMap(target, all){
+function gapMap(target, all, fillable){
   var t = String(target || ""), out = [];
   /* §177: COUNTED ONLY WHERE THIS VIEWER COULD ACTUALLY CLOSE IT. The map
      feeds the red "N Missing", the per-place chips, the rail's counts and the
@@ -5382,6 +5382,22 @@ function gapMap(target, all){
   };
   var G = function(acKey, ctx, kind, row){
     if (!reach(acKey, ctx)) return 0;
+    /* §223: COUNTED AND FILLABLE ARE TWO QUESTIONS, AND THE DOOR ASKS THE
+       SECOND. §214.2 and §214.4 took a function's key objectives and its
+       definition OUT of the counted list at Islam's direction — *"should not
+       count as missing"* — and left them fillable, which was the right half
+       to answer. The half nobody asked was how anybody would then REACH
+       them: fill mode is entered from the "Fill in missing elements" button,
+       and that button is drawn from the COUNTED total, so a page whose only
+       blanks are optional offered no way in at all. Hala, on CX: the
+       Definition read as an em-dash with no control anywhere.
+
+       §205's lesson from the other side: that one recorded a cell the screen
+       OPENED and the server refused; this is a cell the server ACCEPTS and
+       the screen never opens. */
+    if (fillable)
+      return (SMPRules.GAP_FILLABLE[kind] || []).filter(function(f){
+        return SMPRules.gapEmpty(f, row); }).length;
     return SMPRules.gapMissing(kind, row).length;
   };
   var entry = function(key, label, count, go){
@@ -5511,6 +5527,12 @@ function gapTotal(target){
 /* Everything the plan owes, whoever is looking (§221) — what Submit waits on. */
 function gapTotalAll(target){
   return gapMap(target, true).reduce(function(a, e){ return a + e.count; }, 0);
+}
+/* What this viewer could fill in, counted or not (§223) — what decides
+   whether the door into fill mode is drawn at all. Always at least the
+   counted total, because everything counted is also fillable. */
+function gapOpenable(target){
+  return gapMap(target, false, true).reduce(function(a, e){ return a + e.count; }, 0);
 }
 /* Who the counts are FOR: somebody who can act on them — the fill grant or
    the office. A plain reader never sees a nag they cannot clear (§69). */

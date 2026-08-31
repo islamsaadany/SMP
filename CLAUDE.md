@@ -404,6 +404,33 @@ console errors (in this cloud environment, run it via a wrapper that points Play
   name — the real-database test caught it (§100.3). **NOT fixed and said so**: a
   genuine refusal is still a refusal, and if they continue while naming a
   function nobody opened, this diagnosis is wrong.
+- **COUNTED AND FILLABLE ARE TWO QUESTIONS, AND THE DOOR ASKS THE SECOND
+  (§223):** Islam — *"Hala from CX can't fill the missing definition"*, with
+  the Definition an em-dash and no control on the page. Measured:
+  `mayFillPage` **true**, `gapTotal` **0**, **not one fill control drawn** —
+  her permission was never the issue and the server accepts the save. **THE
+  UNSTATED COST OF §214.2 AND §214.4**: both took fields out of the COUNTED
+  list at Islam's direction and both carefully left them FILLABLE, and nobody
+  asked how they would then be REACHED — fill mode is entered from the *Fill
+  in missing elements* button, which is drawn from the counted total, so a
+  page whose only blanks are optional had no door at all. **§205 from the
+  other side**: that one is a cell the screen opens and the server refuses;
+  this is one the server accepts and the screen never opens. `gapOpenable()`
+  is `gapMap()` counting FILLABLE-and-blank and decides the DOOR; the red
+  count and the chips still come from the counted total, so a bar with
+  nothing owed carries no number, no chips and the words *Fill in what is
+  empty* (§177 with the sign reversed, §214.4's own argument). **The walk
+  stops offering a next gap that is not there.** `fn-pillars.py` asserted the
+  bar was ABSENT — the exact state Hala met — and was REWRITTEN to assert no
+  count, no chips, and a door.
+- **THE REPORTING TAB IS ORANGE AT ALL TIMES (§222.2):** *"it should always
+  become orange even if it's not open."* §222's first build gave the orange to
+  the WORD unselected and the fill only on selection, so the tab was quiet in
+  exactly the state where somebody needs to notice it — the old Report button
+  was solid always, and this is that volume MOVED, not a new one (§41 holds:
+  drawn only while a cycle is open, for somebody who may report). Selection is
+  still said, in `--cta-hover`, the deeper half of the same pair — no new
+  token, no literal (§25).
 - **REPORTING IS A TAB (§222, revisiting §63):** Islam — *"split it as a tab
   beside the Strategy and Performance … with its distinct orange colour"*;
   three treatments drawn in the real page, he picked the **solid fill when

@@ -1971,8 +1971,14 @@ function editBar(page, acKey){
       var inner;
       if (EDIT_PAGE[page])
         inner = '<button class="editbtn fdone" data-page="' + page + '">Done filling</button>';
+      /* §223: THE DOOR ASKS WHAT IS FILLABLE, THE WORDS ASK WHAT IS COUNTED.
+         A page whose only blanks are optional (§214.2, §214.4) counts nought
+         and still has something to fill in — offering no way in was how Hala
+         met a Definition she could edit and no control to edit it with. */
       else if (gapTotal(TARGET))
         inner = '<button class="fillcta" data-fillcta="' + page + '">Fill in missing elements</button>';
+      else if (gapOpenable(TARGET))
+        inner = '<button class="fillcta" data-fillcta="' + page + '">Fill in what is empty</button>';
       else inner = '';
       return (dl || inner) ? '<div class="pageact">' + dl + inner + '</div>' : '';
     }
@@ -2083,6 +2089,12 @@ function penBtn(page, acKey){
     if (miss) return '<button class="fillcta cornerbtn" data-fillcta="' + page +
       '" title="' + plural(miss, "missing element") + ' in this plan">' +
       'Fill in missing elements</button>';
+    /* §223: nothing COUNTED, but something fillable — same door, quieter
+       words, because nothing here is owed. */
+    var open = gapOpenable(TARGET);
+    if (open) return '<button class="fillcta cornerbtn" data-fillcta="' + page +
+      '" title="' + plural(open, "empty field") + ' you can fill in">' +
+      'Fill in what is empty</button>';
     return '';
   }
   var on = EDIT_PAGE[page];
@@ -2511,11 +2523,17 @@ function fillPageForSec(sec){
 }
 function missBarCta(total){
   var inFill = EDIT_PAGE.plan || EDIT_PAGE.foundation || EDIT_PAGE.capfoundation;
-  if (inFill) return '<button type="button" class="fillcta" data-nextgap="1">' +
+  /* §223: WITH NOTHING OWED THE WALK HAS NOTHING TO WALK, so the door stays
+     a door and does not offer to take you to a next gap that is not there. */
+  if (inFill && total) return '<button type="button" class="fillcta" data-nextgap="1">' +
     'Next gap &rarr;&nbsp;<span class="ngleft">' + total + ' left</span></button>';
+  if (inFill) return '<button class="editbtn fdone" data-page="' +
+    esc(fillPageForSec((typeof CURSEC !== "undefined" && CURSEC[currentSub]) || "")) +
+    '">Done filling</button>';
   var sec = (typeof CURSEC !== "undefined" && CURSEC[currentSub]) || "";
   return '<button type="button" class="fillcta" data-fillcta="' +
-    esc(fillPageForSec(sec)) + '">Fill in missing elements</button>';
+    esc(fillPageForSec(sec)) + '">' +
+    (total ? 'Fill in missing elements' : 'Fill in what is empty') + '</button>';
 }
 /* §218: THE PENDING HALF OF THIS BAR IS GONE. §192 put a count and a walk
    here for values waiting on the office; with the approval removed there is
@@ -2528,7 +2546,11 @@ function missBar(){
   /* §218: nothing is awaiting confirmation any more, so the bar is drawn
      for what is MISSING and nothing else — which is what it was before
      §192 added the pending half. */
-  if (!total) return '';
+  /* §223: DRAWN FOR EITHER — what is owed, or what is merely fillable. With
+     nothing owed the bar carries no red count and no chips; it is the way in
+     and nothing else. */
+  var openable = typeof gapOpenable === "function" ? gapOpenable(TARGET) : 0;
+  if (!total && !openable) return '';
   var chips = map.filter(function(e){ return e.count > 0; }).map(function(e){
     return '<button type="button" class="mchip"' +
       ' data-gkey="' + esc(e.key) + '"' +
@@ -2545,7 +2567,8 @@ function missBar(){
      promise the press opens something). */
   return '<div class="missbar" data-gapband="1">' +
     (total ? '<span class="secmiss">' + total + ' Missing</span>' : '') + chips +
-    '<span class="gaptail">' + (total ? missBarCta(total) : '') + '</span></div>';
+    '<span class="gaptail">' +
+    (total || openable ? missBarCta(total) : '') + '</span></div>';
 }
 /* The counts rewritten IN PLACE after a fill — §63's write-into-the-node,
    because a repaint here would destroy the field being typed into (§71.2).

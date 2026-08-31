@@ -235,9 +235,20 @@ with sync_playwright() as p:
         ok("...and the page draws no red word", 
            pg.evaluate("()=>document.querySelectorAll('#panel .missing').length") == 0,
            pg.evaluate("()=>[...document.querySelectorAll('#panel .missing')].map(x=>x.textContent)"))
-        ok("...and no missing bar at all",
-           pg.evaluate("()=>!document.querySelector('.missbar')"),
-           pg.evaluate("()=>{const m=document.querySelector('.missbar');return m?m.textContent:null}"))
+        # §223: NO COUNT, BUT STILL A DOOR. §214.4 asserted the bar was absent
+        # entirely, and that was the fault Hala met on CX: fill mode is
+        # entered from that bar, so a page whose only blanks are optional
+        # offered no way in and the Definition sat as an em-dash she could
+        # not touch. The bar is drawn now with no red number and no chips —
+        # it is the way in and nothing else.
+        bar = pg.evaluate("""()=>{const m=document.querySelector('.missbar');
+          return m ? { text:m.textContent,
+                       red:!!m.querySelector('.secmiss'),
+                       chips:m.querySelectorAll('.mchip').length,
+                       door:!!m.querySelector('[data-fillcta]') } : null;}""")
+        ok("...the bar carries no red count", bool(bar) and not bar["red"], bar)
+        ok("...and no owing chips", bool(bar) and bar["chips"] == 0, bar)
+        ok("...but it still opens the way in (§223)", bool(bar) and bar["door"], bar)
     # BUT IT IS STILL FILLABLE, or §205's fault repeats: the box opens, the
     # person types, and the save refuses what the screen offered.
     ok("the definition is still fillable (§205)",

@@ -25013,3 +25013,63 @@ so the word vanished in the frame it appeared and three checks went red — and
 worse, it parked a report whose save had FAILED. Now: save, park only on
 success, and let the repainted bar be the confirmation, since it says *Draft
 saved* in its own right.
+
+---
+
+## §222.2 — THE REPORTING TAB IS ORANGE AT ALL TIMES
+
+Islam, having used it: *"the reporting button should always become orange even
+if it's not open, and it's appearing as long as the cycle is open."*
+
+§222's first build gave the orange to the WORD when unselected and the fill
+only on selection — so the tab was quiet in exactly the state where somebody
+needs to notice it. The old Report button was solid at all times, and this is
+that volume MOVED rather than a new one added: §41's budget holds, because the
+tab is still drawn only while a cycle is open and only for somebody who may
+report.
+
+**SELECTION IS STILL SAID**, in `--cta-hover` — the deeper half of the same
+pair, declared for every palette beside `--cta`, so this needs no new token and
+no literal (§25). A tab that never changes when you are standing on it stops
+answering *where am I*.
+
+---
+
+## §223 — COUNTED AND FILLABLE ARE TWO QUESTIONS, AND THE DOOR ASKS THE SECOND
+
+Islam, from the deployment: *"Hala from CX can't fill the missing
+definition"* — with a screenshot of *Definition* reading an em-dash and no
+control anywhere on the page.
+
+**MEASURED: `mayFillPage` TRUE, `gapTotal` 0, AND NOT ONE FILL CONTROL DRAWN.**
+Her permission was never in question and the server accepts the save; what was
+missing was any way in.
+
+**THIS IS THE UNSTATED COST OF §214.2 AND §214.4.** Both took fields OUT of the
+counted list at Islam's direction — a function's key objectives, then its
+definition, *"should not count as missing"* — and both were careful to leave
+them FILLABLE, which is the half that was asked about. The half nobody asked is
+how anybody then REACHES them: fill mode is entered from the *Fill in missing
+elements* button, and that button is drawn from the COUNTED total. A page whose
+only blanks are optional counts nought, so the bar was not drawn, so there was
+no door, so the field could be filled by nobody.
+
+**§205's LESSON FROM THE OTHER SIDE.** That one recorded a cell the screen
+OPENED and the server REFUSED; this is a cell the server ACCEPTS and the screen
+never opens. The same pair of lists, the opposite direction.
+
+**THE FIX IS ONE QUESTION MORE, NOT ONE LIST FEWER.** `gapOpenable()` is
+`gapMap()` counting what is FILLABLE-and-blank rather than what is COUNTED, and
+it decides whether the door is drawn; the red number and the chips still come
+from the counted total. With nothing owed the bar carries no count, no chips and
+no red — it is the way in and nothing else — and the words change to *Fill in
+what is empty*, because a bar saying "missing" over a count of nought is §177
+with the sign reversed (§214.4's own argument).
+
+**AND THE WALK STOPS OFFERING A NEXT GAP THAT IS NOT THERE**: inside fill mode
+with nothing counted the tail reads *Done filling* rather than *Next gap → 0
+left*.
+
+**THE CHECK'S ASSERTION WAS REWRITTEN, NOT DELETED.** `fn-pillars.py` asserted
+the bar was ABSENT — which is exactly the state Hala met — so it asserts the
+three things that are true instead: no red count, no owing chips, and a door.

@@ -467,9 +467,22 @@
      `.tabs button.cta` is (0,2,1) against `.tabs button`'s (0,1,1), so it
      wins without an !important — the mistake §40 recorded, where an enforced
      rule went on winning after the argument had changed. */
-  .tabs button.cta { color:var(--cta); font-weight:600; }
-  .tabs button.cta:hover { background:var(--ground); color:var(--cta); }
-  .tabs button.cta[aria-selected="true"] { background:var(--cta); color:var(--cta-ink); }
+  /* §222.2: THE FILL IS ALWAYS ON, not only while the tab is selected. Islam:
+     *"the reporting button should always become orange even if it's not open,
+     and it's appearing as long as the cycle is open."* The first build gave
+     the orange to the word when unselected and the fill only on selection,
+     which made it quiet exactly when somebody needs to notice it — the old
+     Report button was solid at all times, and that is the volume being moved
+     rather than a new one being added (§41's budget: the tab is drawn only
+     while a cycle is open, for somebody who may report).
+
+     SELECTION IS STILL SAID, in the deeper half of the same pair — a tab that
+     never changes when you are standing on it stops answering "where am I".
+     `--cta-hover` is that half and is declared for every palette beside
+     `--cta`, so this needs no new token and no literal (§25). */
+  .tabs button.cta { background:var(--cta); color:var(--cta-ink); font-weight:600; }
+  .tabs button.cta:hover { background:var(--cta-hover); color:var(--cta-ink); }
+  .tabs button.cta[aria-selected="true"] { background:var(--cta-hover); color:var(--cta-ink); }
 
   .view { padding-top:32px; }
   [hidden] { display:none !important; }
@@ -17172,7 +17185,7 @@ function tacticDue(t){ return tacticPlanned(t) > 0; }
    whose words is already answered here; a `pendMap()` written alongside would
    be a second copy of the navigation and would drift the first time a page
    moved (§53.5). `pend` swaps only what is COUNTED on each row. */
-function gapMap(target, all){
+function gapMap(target, all, fillable){
   var t = String(target || ""), out = [];
   /* §177: COUNTED ONLY WHERE THIS VIEWER COULD ACTUALLY CLOSE IT. The map
      feeds the red "N Missing", the per-place chips, the rail's counts and the
@@ -17194,6 +17207,22 @@ function gapMap(target, all){
   };
   var G = function(acKey, ctx, kind, row){
     if (!reach(acKey, ctx)) return 0;
+    /* §223: COUNTED AND FILLABLE ARE TWO QUESTIONS, AND THE DOOR ASKS THE
+       SECOND. §214.2 and §214.4 took a function's key objectives and its
+       definition OUT of the counted list at Islam's direction — *"should not
+       count as missing"* — and left them fillable, which was the right half
+       to answer. The half nobody asked was how anybody would then REACH
+       them: fill mode is entered from the "Fill in missing elements" button,
+       and that button is drawn from the COUNTED total, so a page whose only
+       blanks are optional offered no way in at all. Hala, on CX: the
+       Definition read as an em-dash with no control anywhere.
+
+       §205's lesson from the other side: that one recorded a cell the screen
+       OPENED and the server refused; this is a cell the server ACCEPTS and
+       the screen never opens. */
+    if (fillable)
+      return (SMPRules.GAP_FILLABLE[kind] || []).filter(function(f){
+        return SMPRules.gapEmpty(f, row); }).length;
     return SMPRules.gapMissing(kind, row).length;
   };
   var entry = function(key, label, count, go){
@@ -17323,6 +17352,12 @@ function gapTotal(target){
 /* Everything the plan owes, whoever is looking (§221) — what Submit waits on. */
 function gapTotalAll(target){
   return gapMap(target, true).reduce(function(a, e){ return a + e.count; }, 0);
+}
+/* What this viewer could fill in, counted or not (§223) — what decides
+   whether the door into fill mode is drawn at all. Always at least the
+   counted total, because everything counted is also fillable. */
+function gapOpenable(target){
+  return gapMap(target, false, true).reduce(function(a, e){ return a + e.count; }, 0);
 }
 /* Who the counts are FOR: somebody who can act on them — the fill grant or
    the office. A plain reader never sees a nag they cannot clear (§69). */
@@ -25503,8 +25538,14 @@ function editBar(page, acKey){
       var inner;
       if (EDIT_PAGE[page])
         inner = '<button class="editbtn fdone" data-page="' + page + '">Done filling</button>';
+      /* §223: THE DOOR ASKS WHAT IS FILLABLE, THE WORDS ASK WHAT IS COUNTED.
+         A page whose only blanks are optional (§214.2, §214.4) counts nought
+         and still has something to fill in — offering no way in was how Hala
+         met a Definition she could edit and no control to edit it with. */
       else if (gapTotal(TARGET))
         inner = '<button class="fillcta" data-fillcta="' + page + '">Fill in missing elements</button>';
+      else if (gapOpenable(TARGET))
+        inner = '<button class="fillcta" data-fillcta="' + page + '">Fill in what is empty</button>';
       else inner = '';
       return (dl || inner) ? '<div class="pageact">' + dl + inner + '</div>' : '';
     }
@@ -25615,6 +25656,12 @@ function penBtn(page, acKey){
     if (miss) return '<button class="fillcta cornerbtn" data-fillcta="' + page +
       '" title="' + plural(miss, "missing element") + ' in this plan">' +
       'Fill in missing elements</button>';
+    /* §223: nothing COUNTED, but something fillable — same door, quieter
+       words, because nothing here is owed. */
+    var open = gapOpenable(TARGET);
+    if (open) return '<button class="fillcta cornerbtn" data-fillcta="' + page +
+      '" title="' + plural(open, "empty field") + ' you can fill in">' +
+      'Fill in what is empty</button>';
     return '';
   }
   var on = EDIT_PAGE[page];
@@ -26043,11 +26090,17 @@ function fillPageForSec(sec){
 }
 function missBarCta(total){
   var inFill = EDIT_PAGE.plan || EDIT_PAGE.foundation || EDIT_PAGE.capfoundation;
-  if (inFill) return '<button type="button" class="fillcta" data-nextgap="1">' +
+  /* §223: WITH NOTHING OWED THE WALK HAS NOTHING TO WALK, so the door stays
+     a door and does not offer to take you to a next gap that is not there. */
+  if (inFill && total) return '<button type="button" class="fillcta" data-nextgap="1">' +
     'Next gap &rarr;&nbsp;<span class="ngleft">' + total + ' left</span></button>';
+  if (inFill) return '<button class="editbtn fdone" data-page="' +
+    esc(fillPageForSec((typeof CURSEC !== "undefined" && CURSEC[currentSub]) || "")) +
+    '">Done filling</button>';
   var sec = (typeof CURSEC !== "undefined" && CURSEC[currentSub]) || "";
   return '<button type="button" class="fillcta" data-fillcta="' +
-    esc(fillPageForSec(sec)) + '">Fill in missing elements</button>';
+    esc(fillPageForSec(sec)) + '">' +
+    (total ? 'Fill in missing elements' : 'Fill in what is empty') + '</button>';
 }
 /* §218: THE PENDING HALF OF THIS BAR IS GONE. §192 put a count and a walk
    here for values waiting on the office; with the approval removed there is
@@ -26060,7 +26113,11 @@ function missBar(){
   /* §218: nothing is awaiting confirmation any more, so the bar is drawn
      for what is MISSING and nothing else — which is what it was before
      §192 added the pending half. */
-  if (!total) return '';
+  /* §223: DRAWN FOR EITHER — what is owed, or what is merely fillable. With
+     nothing owed the bar carries no red count and no chips; it is the way in
+     and nothing else. */
+  var openable = typeof gapOpenable === "function" ? gapOpenable(TARGET) : 0;
+  if (!total && !openable) return '';
   var chips = map.filter(function(e){ return e.count > 0; }).map(function(e){
     return '<button type="button" class="mchip"' +
       ' data-gkey="' + esc(e.key) + '"' +
@@ -26077,7 +26134,8 @@ function missBar(){
      promise the press opens something). */
   return '<div class="missbar" data-gapband="1">' +
     (total ? '<span class="secmiss">' + total + ' Missing</span>' : '') + chips +
-    '<span class="gaptail">' + (total ? missBarCta(total) : '') + '</span></div>';
+    '<span class="gaptail">' +
+    (total || openable ? missBarCta(total) : '') + '</span></div>';
 }
 /* The counts rewritten IN PLACE after a fill — §63's write-into-the-node,
    because a repaint here would destroy the field being typed into (§71.2).
@@ -40537,9 +40595,9 @@ var TOUR = (function(){
             "set ourselves is going, and whether the work happened."; } },
 
         { dest:"$own", tab:"performance",
-          targets:["#panel [data-report]"],
+          targets:["#subtabs [data-s='report']"],
           title:"Where your figures go in",
-          body:function(at){ return "While a reporting cycle is open, <b>Report</b> is where " +
+          body:function(at){ return "While a reporting cycle is open, <b>Reporting</b> is where " +
             "you enter this quarter's figures and submit them for the " +
             (isFnPlace(at) ? "function" : "unit") + "."; } },
 
@@ -40637,9 +40695,9 @@ var TOUR = (function(){
                "and when they do the gap is the conversation." },
 
         { dest:"$own", tab:"performance",
-          targets:["#panel [data-report]"],
+          targets:["#subtabs [data-s='report']"],
           title:"Where the figures come in",
-          body:"While a cycle is open, <b>Report</b> is where this quarter's figures are " +
+          body:"While a cycle is open, <b>Reporting</b> is where this quarter's figures are " +
                "entered and submitted. Submitting speaks for the whole unit, which is why it " +
                "sits with you and your custodian." },
 
@@ -41062,7 +41120,7 @@ var TOUR = (function(){
      whose whole job is agreement (§53.5).
 
    - EVERY DOOR PRESSES THE PLATFORM'S OWN CONTROLS — [data-u], [data-s],
-     [data-md], [data-setupgo], [data-report] — never a second copy of the
+     [data-md], [data-setupgo], [data-s="report"] — never a second copy of the
      navigation (§107's rule, for the tour's reason). And every door runs
      BEHIND setTimeout(…, 0): the handler fires on a real click, §30.1's
      CLICKING guard holds any paint until the click lands, and a walk that
@@ -41170,7 +41228,14 @@ var WELCOME = (function(){
       var fn = String(t).indexOf("fn:") === 0;
       if (tab === "strategy") press('#subtabs [data-s="' + (fn ? "fnstrat" : "strategy") + '"]');
       if (tab === "performance") press('#subtabs [data-s="' + (fn ? "fnperf" : "performance") + '"]');
-      if (report) press('[data-report="' + t + '"]');
+      /* §222: REPORTING IS A TAB NOW, so this door presses the tab rather
+         than the button it used to. The button was deleted with the move and
+         this selector went on matching nothing — which `press()` swallows by
+         design, so the row landed on Performance and quietly stopped. §51.11
+         in the PRODUCT rather than in a check: a control changed shape and a
+         selector somewhere else went on failing silently, in the
+         safe-looking direction. Caught by checks/welcome.py. */
+      if (report) press('#subtabs [data-s="report"]');
       window.scrollTo(0, 0);
     }, 0);
   }
@@ -49082,11 +49147,11 @@ var SYNC = (function () {
     /* ── Reporting is a MODE now (§63.1) ─────────────────────────────
        Enter from Performance, leave with Cancel. Nothing is written by either:
        every figure was already saved as it was typed. */
-    document.querySelectorAll("[data-report]").forEach(function(b){
-      b.addEventListener("click", function(){
-        REPORTING = this.dataset.report; paint(); window.scrollTo(0,0);
-      });
-    });
+    /* §222: THE `[data-report]` HANDLER IS GONE WITH ITS BUTTON. Reporting
+       is a tab, and `paint()` sets the mode from the tab you are on — so this
+       wiring had nothing left to bind to. Deleted rather than left matching
+       nothing, because a handler for a control that no longer exists is one
+       the next reader takes for load-bearing (§24). */
     /* §222: CLOSE LEAVES THE TAB, NOT ONLY THE MODE — and this is a fault the
        tab created rather than a tidy-up. `REPORTING` is now set by paint()
        from the tab you are on, so clearing it and repainting put it straight

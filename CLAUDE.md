@@ -384,6 +384,30 @@ console errors (in this cloud environment, run it via a wrapper that points Play
   remove × onto a second line — `inline-block` restores it, and it was found
   by `checks/plan-fields.py` GOING RED, not by reading the cascade, which is
   the argument for that check existing.
+- **A COUNTED GAP MUST BE ONE THE SAVE ACCEPTS (§214):** Islam — *"all the
+  overview for the functions planning by pillars should be mandatory and be
+  counted as missing."* `GAP_FIELDS.cap = ["def"]`, ONE entry for both function
+  formats, because since §213 it is one page and two answers to one question is
+  §211's drift. **THE SERVER CHANGED IN THE SAME BREATH**: counting a gap the
+  save refuses is §184 exactly — a red chip, a control that opens, a save that
+  fails — so the gap pass runs on a clone of the capability ahead of the `def`
+  comparison that made it `capPlan`, and on a clone of the FUNCTION in
+  `collectFunction()` ahead of the unknown sweep. **`def` STAYS OUT OF
+  `FN_KNOWN`**: what the pass does not classify falls through to that sweep and
+  is the office's (§42), the safe way round — putting it in would leave a
+  non-fill change seen by NOTHING on a pillars function, which is §191. The cell
+  is **`gapCell`, never `fieldOr`** (`kind:"area"`), or a fill-grant holder
+  meets a read-only line (§61). **"NO OBJECTIVES AT ALL" IS NOT A GAP, and not
+  from taste**: a function judged by its pillars legitimately has none (§119.1,
+  §187), and **fill mode cannot ADD a row** (§145), so it would be a mark
+  nobody could clear. Cost measured: all 8 demo capabilities already carry a
+  definition. **AND REMOVING DEAD CODE BROKE A LIVE PATH** — deleting the
+  unused `fnOverviewHas()` by slicing between two anchors took `foundKeyFor()`
+  with it, so **every clause Add and Remove in the product threw inside its own
+  click handler**, business units included: invisible to a page-load error
+  listener and identical to a button that does nothing. `plan-builder.py` went
+  red, on a UNIT. *Run the whole suite, not the file you edited — and delete a
+  named function, never a range.*
 - **A SUPPORTING FUNCTION'S OVERVIEW IS A SUPPORTING FUNCTION'S OVERVIEW
   (§211, §212, §213):** three sections on one page, two of them wrong, and the
   record of why is the point. **§211** — Islam: *"pressing on the CON01 22 it

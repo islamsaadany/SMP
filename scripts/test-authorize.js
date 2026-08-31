@@ -2245,5 +2245,89 @@ console.log("\n23 · a line the platform cannot name is nobody's to change (§19
         A.authorize(s, i2, personOf(s, "smo")).ok);
 })();
 
+/* 24 · THE OVERVIEW IS MANDATORY, AND FILLABLE (§214) ──────────────────
+   Islam: *"all the overview for the functions planning by pillars should be
+   mandatory and be counted as missing."* A blank definition is a gap now, on
+   BOTH function formats, because since §213 it is one page (§53.5) — so the
+   save has to accept the fill, or the count is §184's refusal waiting to
+   happen: a red chip, a control that opens, and a save that fails.
+
+   Proved able to fail: with `GAP_FIELDS.cap` removed the two FILL cases go
+   red, because the change falls through to capPlan on one side and to the
+   unknown sweep on the other — both office-only, which is the correct
+   DEFAULT and exactly why it has to be stated. */
+console.log("\n24 · the Overview is mandatory, and fillable (§214)");
+(function () {
+  const MARK2 = { by: "own_it", at: "2026-08-31T00:00:00.000Z" };
+  /* The two helpers every fill section builds for itself — each IIFE in this
+     file keeps its own, so they are local here too rather than hoisted into a
+     shared scope nothing else expects. */
+  function withAccess(role, patch) {
+    const s = clone(SEED);
+    s.access = Object.assign({}, s.access,
+      { [role]: Object.assign({}, (s.access || {})[role], patch) });
+    return s;
+  }
+  function fromStored(stored, who, mutate) {
+    const inc = clone(stored); mutate(inc);
+    return A.authorize(stored, inc, personOf(stored, who));
+  }
+  /* — the capability half — */
+  const FNC = Object.keys(SEED.functions).filter(function (k) {
+    return (SEED.functions[k] || {}).custodian && !(SEED.functions[k] || {}).format;
+  })[0];
+  const cust = FNC && (SEED.functions[FNC] || {}).custodian;
+  check("§214: the seed holds a capability-function custodian", !!cust);
+  if (cust) {
+    const sf = withAccess("custodian", { a_fn_own_strat: "fill" });
+    const cp = sf.group.capabilities.filter(function (c) { return c.fn === FNC; })[0];
+    cp.def = "";
+    let r = fromStored(sf, cust, function (i) {
+      const c = i.group.capabilities.filter(function (x) { return x.fn === FNC; })[0];
+      c.def = "What this capability is."; c.pend = { def: MARK2 };
+    });
+    check("§214: FILL a capability's blank definition", r.ok, r.refusals.join(" / "));
+    /* AND THE SAME GRANT MAY NOT REWRITE ONE THAT IS ALREADY WRITTEN — the
+       whole difference between filling and authoring (§145). */
+    const sf2 = withAccess("custodian", { a_fn_own_strat: "fill" });
+    r = fromStored(sf2, cust, function (i) {
+      const c = i.group.capabilities.filter(function (x) { return x.fn === FNC; })[0];
+      c.def = "Rewritten by a fill grant."; c.pend = { def: MARK2 };
+    });
+    check("§214: ...and never rewrites one already written", !r.ok, "was ALLOWED");
+  }
+
+  /* — the pillars half, which is a different code path entirely — */
+  const FNP = Object.keys(SEED.functions).filter(function (k) {
+    return String((SEED.functions[k] || {}).format) === "pillars" &&
+           (SEED.functions[k] || {}).custodian;
+  })[0];
+  check("§214: the seed holds a pillars-function custodian", !!FNP, Object.keys(SEED.functions));
+  if (FNP) {
+    const who = SEED.functions[FNP].custodian;
+    const sf = withAccess("custodian", { a_fn_own_strat: "fill" });
+    delete sf.functions[FNP].def;
+    let r = fromStored(sf, who, function (i) {
+      i.functions[FNP].def = "What this function is.";
+      i.functions[FNP].pend = { def: MARK2 };
+    });
+    check("§214: FILL a pillars function's blank definition", r.ok, r.refusals.join(" / "));
+
+    const sf2 = withAccess("custodian", { a_fn_own_strat: "fill" });
+    sf2.functions[FNP].def = "Already written.";
+    r = fromStored(sf2, who, function (i) {
+      i.functions[FNP].def = "Rewritten by a fill grant."; i.functions[FNP].pend = { def: MARK2 };
+    });
+    check("§214: ...and never rewrites one already written", !r.ok, "was ALLOWED");
+
+    /* AND THE OFFICE STILL AUTHORS IT — locking something down proves nothing
+       unless the right person stayed open (§102). */
+    const sf3 = clone(SEED);
+    sf3.functions[FNP].def = "Already written.";
+    r = fromStored(sf3, "smo", function (i) { i.functions[FNP].def = "The office's wording."; });
+    check("§214: the office rewrites it freely", r.ok, r.refusals.join(" / "));
+  }
+})();
+
 console.log("\n" + pass + " passed, " + fail + " failed");
 process.exit(fail ? 1 : 0);

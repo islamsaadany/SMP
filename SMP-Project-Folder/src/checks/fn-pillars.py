@@ -178,6 +178,45 @@ with sync_playwright() as p:
     ok("...and no Foundation half survives on a function",
        "found" not in m and "ko" not in m, m)
 
+    print("\n── 5b · the Overview is MANDATORY (§214)")
+    # §94.2: MAKE the blank definition — every demo capability has one.
+    pg.evaluate("""(a)=>{ delete FUNCTIONS[a.fk].def;
+      const c=capsOfFunction(a.cap)[0]; if (c) c.def='';
+      EDIT_PAGE.capfoundation=false; paint(); }""", {"fk": fk, "cap": cap})
+    pg.wait_for_timeout(400)
+    for t, what in ((T, "pillars"), (TC, "projects")):
+        n = pg.evaluate("(t)=>{const e=gapMap(t).filter(x=>x.key==='ov')[0];return e?e.count:null}", t)
+        ok("a blank definition is counted as missing on the " + what + " function",
+           n is not None and n >= 1, n)
+    open_at(pg, T)
+    last = pg.evaluate("()=>{const d=[...document.querySelectorAll('#panel dd')].pop();"
+                       "return d?d.textContent.trim():''}")
+    ok("...the page prints the word", "Missing" in last, last)
+    chip = pg.query_selector(".missbar .mchip")
+    ok("...the band offers a chip for it", chip is not None,
+       pg.evaluate("()=>{const m=document.querySelector('.missbar');return m?m.textContent:null}"))
+    if chip:
+        chip.click(); pg.wait_for_timeout(650)
+        ok("...which lands on the Overview",
+           pg.evaluate("()=>CURSEC.fnstrat") == "found", pg.evaluate("()=>CURSEC.fnstrat"))
+        # §61: a counted gap must open something somebody can type in.
+        f = pg.query_selector("#panel .gapwalk")
+        ok("...with a field under the cursor", f is not None)
+        if f:
+            was = pg.evaluate("(t)=>gapMap(t).filter(x=>x.key==='ov')[0].count", T)
+            f.click(); f.fill("What this function is.")
+            pg.evaluate("()=>document.activeElement.blur()"); pg.wait_for_timeout(450)
+            ok("...and typing it reaches the STORED function",
+               pg.evaluate("(k)=>FUNCTIONS[k].def", fk) == "What this function is.",
+               pg.evaluate("(k)=>FUNCTIONS[k].def", fk))
+            now = pg.evaluate("(t)=>gapMap(t).filter(x=>x.key==='ov')[0].count", T)
+            # THE DELTA, NEVER THE TOTAL (§94.8). §5 left an objective owing a
+            # target and a weight, which the Overview also counts — asserting 0
+            # here measured those rather than the definition, and reported a
+            # working fill as broken.
+            ok("...and the Overview owes exactly one thing less",
+               now == was - 1, {"before": was, "after": now})
+
     print("\n── 6 · the workbook stops asking, and a UNIT'S IS UNTOUCHED")
     wb = pg.evaluate("""(t)=>{
       const shape=(u)=>planWorkbook(u).map(s=>({name:s.name,head:s.head}));

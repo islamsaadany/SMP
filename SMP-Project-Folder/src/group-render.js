@@ -5349,15 +5349,18 @@ function fnPillarsOverview(fk){
         '<div class="clause"><dt>Led by</dt><dd>' +
           (f.head ? esc(personName(f.head)) : "&mdash;") + '</dd></div>' +
         '<div class="clause"><dt>Definition</dt><dd>' +
-          /* `|| ""` IS LOAD-BEARING (§213): `fieldOr()`'s second argument is
-             the VALUE and its third is a class, not a placeholder — so an
-             absent `def` reaches `esc(undefined)` and the card reads
-             **"Definition: undefined"**. A capability's never does because
-             the seed always gives it a string; a function's is absent until
-             somebody types one, which is the state this page opens in.
-             Found in a screenshot, not in the code. */
-          fieldOr(ed ? "capfoundation" : null, f.def || "", "",
-                  function(v){ FUNCTIONS[fk].def = v; }) + '</dd></div>' +
+          /* §214: THROUGH `gapCell`, NOT `fieldOr`. The definition is a gap
+             now, and a counted gap has to be typable by whoever the count is
+             shown to — a fill-grant holder seeing it in the band and finding
+             a read-only line is §61 exactly, and their save would be refused
+             (§184). `area`, because it is a sentence.
+
+             `gapCell` reads `row[field]`, so it never renders the word
+             "undefined" the way `fieldOr(page, f.def, …)` did — that third
+             argument is a CLASS, not a placeholder (§213.1, found in a
+             screenshot). */
+          gapCell("capfoundation", "k_found", f, "def", { kind:"area" }) +
+        '</dd></div>' +
       '</dl></div>' +
       '<div class="card"><div class="cardhead"><h2 class="sec first">' + L("keyobj","bu") + '</h2>' +
         '<span class="pill horizon">Horizon &middot; ' + horizonLabel() + '</span></div>' +
@@ -5420,9 +5423,11 @@ function renderFnFoundation(fnKey){
         '<div class="clause"><dt>Carried by</dt><dd>' +
           esc(f ? f.name : "\u2014") +
           (f && f.head ? " \u2014 " + esc(personName(f.head)) : "") + '</dd></div>' +
+        /* §214: the same fillable cell the other format's Overview draws —
+           one page, one answer (§53.5), or a fill grant would reach a
+           function's definition and not a capability's. */
         '<div class="clause"><dt>Definition</dt><dd>' +
-          fieldOr(authoring("capfoundation", "k_found") ? "capfoundation" : null,
-                  c.def, "", function(v){ c.def = v; }) + '</dd></div>' +
+          gapCell("capfoundation", "k_found", c, "def", { kind:"area" }) + '</dd></div>' +
       '</dl></div>' +
       '<div class="card"><div class="cardhead"><h2 class="sec first">' + L("keyobj","bu") + '</h2>' +
         '<span class="pill horizon">Horizon &middot; ' + horizonLabel() + '</span></div>' +

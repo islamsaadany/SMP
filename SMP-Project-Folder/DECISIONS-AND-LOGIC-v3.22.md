@@ -24425,6 +24425,62 @@ got `[]`, and reported a working round trip as broken three ways. *A
 measurement wrong in the direction of "broken" costs as much as one wrong in
 the direction of "clean".*
 
+### §214 — The Overview is mandatory, and fillable
+
+Islam, confirming §213: *"with this structure the overview should be always
+filled, so there is no need to build a feature where if something is missing it
+disappears. Now all the overview for the functions planning by pillars should be
+mandatory and be counted as missing."*
+
+**THE DEFINITION IS A GAP**, on BOTH function formats — `GAP_FIELDS.cap =
+["def"]`, one entry, because since §213 it is one page and two answers to one
+question is the drift §211 cost a day. A blank one prints `Missing`, joins the
+red bar as `Overview N`, and its chip lands on the box with the cursor in it.
+
+**THE SAVE HAD TO ACCEPT IT IN THE SAME CHANGE.** Counting a gap the server
+refuses is §184 exactly — a red chip, a control that opens, and a save that
+fails, which is the Consumer Finance report one field over. So the gap pass runs
+on both sides: on a clone of the capability, ahead of the `def` comparison that
+made it `capPlan`; and on a clone of the FUNCTION in `collectFunction()`, ahead
+of the unknown sweep. **`def` STAYS OUT OF `FN_KNOWN` deliberately** — what the
+pass does not classify falls through to that sweep and is the office's (§42),
+which is the safe way round; putting it in would leave a non-fill change to it
+seen by nothing at all on a pillars function, and §191 is what happens when a
+change reaches nobody.
+
+**THE CELL IS `gapCell`, NOT `fieldOr`** (`kind:"area"`, because it is a
+sentence). A counted gap has to be typable by whoever the count is shown to, or
+a fill-grant holder meets a read-only line — §61 — and the office's own write
+still settles the mark rather than leaving it pending (§145: correcting is
+confirming).
+
+**"NO OBJECTIVES AT ALL" IS DELIBERATELY NOT A GAP**, and the reason is not
+taste: a function judged by its pillars legitimately has none (§119.1, §187 —
+an optional blank is not a gap), and **fill mode cannot ADD a row** (§145), so
+counting it would raise a mark nobody with a fill grant could ever clear. Stated
+to Islam as reversible rather than settled.
+
+**THE COST IS MEASURED**: all 8 demo capabilities already carry a definition, so
+the count moves nowhere on the shipped data and flags only genuinely blank ones.
+
+**PROVED ABLE TO FAIL** (§94.5): with `GAP_FIELDS.cap` emptied, both FILL cases
+in `test-authorize.js` §24 go red — because the change correctly falls through
+to `capPlan` on one side and the unknown sweep on the other, which is the right
+DEFAULT and exactly why it has to be stated. 434 pass.
+
+**AND ONE ASSERTION MEASURED THE WRONG THING FIRST**: it asked for the Overview
+count to reach 0 after the fill, while an earlier section had left an objective
+owing a target and a weight — which the Overview also counts. It asserts the
+DELTA now (§94.8): one thing less owed, never a total.
+
+**AND REMOVING DEAD CODE BROKE A LIVE PATH.** Deleting the now-unused
+`fnOverviewHas()` by slicing between two anchors took `foundKeyFor()` with it,
+because it had been inserted between them — so **every clause Add and Remove in
+the product threw inside its own click handler**, on business units included.
+Invisible to a page-load error listener and identical to a button that does
+nothing. `checks/plan-builder.py` went red, on a UNIT. *Run the whole suite, not
+the file you edited* — and prefer deleting a named function to slicing a range.
+
 ### Not explained
 
 The **"could not reach the server (Failed to fetch)"** on *Next pending*. It

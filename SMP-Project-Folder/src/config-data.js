@@ -3714,6 +3714,24 @@ function functionOf(key){ return FUNCTIONS[key] || null; }
    The writing view, always: this is only ever called from a handler that is
    about to push or splice, and `fnAsUnit()`'s shared frozen empty is not a
    list anybody may write to (§50.6). */
+/* WHICH FOUNDATION KEY A TARGET IS GATED ON (§212). The group's, a unit's, or
+   a function's — named once, because the alternative is the ternary that was
+   written at every call site and got a function wrong at two of them. §211's
+   fault, and it fails CLOSED: the control renders and the press returns in
+   silence.
+
+   §214: AND IT WAS DELETED BY ACCIDENT AND PUT BACK. Removing the dead
+   `fnOverviewHas()` by slicing between two anchors took this with it, because
+   it had been inserted between them — every clause Add and Remove in the
+   product then threw inside its own click handler, which is invisible to a
+   page-load error listener and looked exactly like a button that does
+   nothing. `checks/plan-builder.py` caught it, on a UNIT, which is the
+   argument for running the whole suite rather than the file you edited. */
+function foundKeyFor(target){
+  var t = String(target || "");
+  if (t === "group") return "g_found";
+  return t.indexOf("fn:") === 0 ? "k_found" : "u_found";
+}
 function koHolderById(id){
   var s = String(id || "");
   if (s.indexOf("fn:") === 0) {
@@ -5479,13 +5497,16 @@ function gapMap(target, pend){
       /* THE SAME OVERVIEW ENTRY A CAPABILITY FUNCTION GETS, because since
          §213 it is the same page, counted from the same field list (§53.5).
          Drawn ahead of the pillars so the band reads down the page. */
-      var fov = 0;
+      /* §214: the definition first, then each objective — the same two the
+         capability branch counts below, from the same field lists. */
+      var fov = G("k_found", {}, "cap", fo);
       (unitLike(t).keyObjectives || []).forEach(function(m){
         fov += G("k_found", {}, "capko", m); });
       entry("ov", "Overview", fov, { sec: "found", page: "capfoundation" });
       unitHalf(unitLike(t), FN_WORDS); return out; }
     var caps = capsOfFunction(fk), ov = 0;
     caps.forEach(function(c){
+      ov += G("k_found", {}, "cap", c);           /* §214: its definition */
       (c.keyObjectives || []).forEach(function(m){ ov += G("k_found", {}, "capko", m); });
     });
     entry("ov", "Overview", ov, { sec: "found", page: "capfoundation" });

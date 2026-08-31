@@ -1013,6 +1013,7 @@ with sync_playwright() as p:
         const oh = document.querySelector('.ohead');
         return { on: SHOW_KO_THIS_YEAR,
                  cols: oh ? oh.querySelectorAll('span').length : null,
+                 heads: oh ? [...oh.querySelectorAll('span')].map(e=>e.textContent.trim()) : null,
                  chip: (document.querySelector('.ochip') || {}).innerText || null };
       };
       const out = { toggle: !!document.querySelector('[data-koyear]') };
@@ -1030,9 +1031,24 @@ with sync_playwright() as p:
     }""")
     if not ko["toggle"]:
         errs.append("KO YEAR: no toggle on a unit's foundation")
-    if ko["colsOff"]["cols"] != 2 or ko["colsOn"]["cols"] != 3:
-        errs.append("KO YEAR: the columns view shows %r off and %r on, wanted 2 and 3"
+    # §199: ASSERT THE RELATIONSHIP, NOT THE COUNT (§94.8). This read `2 and 3`
+    # and went red the day the Unit column shipped — correctly noticing a
+    # change and wrongly calling it a fault, because what the toggle promises
+    # is that it DROPS THIS YEAR'S COLUMN, not that the table has three. Now it
+    # survives the next column too, and still fails a build where the toggle
+    # stops dropping anything.
+    if not (ko["colsOn"]["cols"] and ko["colsOff"]["cols"]
+            and ko["colsOn"]["cols"] == ko["colsOff"]["cols"] + 1):
+        errs.append("KO YEAR: the toggle must drop exactly one column — %r off, %r on"
                     % (ko["colsOff"]["cols"], ko["colsOn"]["cols"]))
+    # And the column it drops is THIS YEAR'S, never somebody else's (§113.8:
+    # "one fewer column" is preserved by dropping the wrong one).
+    if ko["colsOn"].get("heads") and "This year" not in ko["colsOn"]["heads"]:
+        errs.append("KO YEAR: with the toggle on there is no This year column (%r)"
+                    % ko["colsOn"]["heads"])
+    if ko["colsOff"].get("heads") and "This year" in ko["colsOff"]["heads"]:
+        errs.append("KO YEAR: with the toggle off This year is still drawn (%r)"
+                    % ko["colsOff"]["heads"])
     if not ko["chipsOn"]["chip"] or "3-year" not in ko["chipsOn"]["chip"]:
         errs.append("KO YEAR: the chips view does not carry both horizons when on (%r)"
                     % ko["chipsOn"]["chip"])

@@ -77,10 +77,18 @@ function run(label, D) {
     incoming.group.capabilities[OTHER].projects[0].milestones[0].owner === "SOMEBODY ELSE";
   const landed = incoming &&
     incoming.group.capabilities[HERS].projects[0].milestones[0].status === "wip";
-  console.log("   her own edit    : " + (landed ? "landed" : "LOST"));
+  /* A REFUSED SAVE WRITES NOTHING — `api/state.js` answers 403 and returns
+     before `writeState`. So "her edit is in the incoming graph" is not the
+     question anybody cares about; the question is whether it REACHED THE
+     DATABASE, and on a refusal it did not, however legitimate it was. Naming
+     it "landed" measured the wrong thing and read as reassurance. */
+  const reached = v.ok && landed;
+  console.log("   her own work    : " +
+    (reached ? "reached the database"
+             : v.ok ? "LOST" : "THROWN AWAY — the whole save was refused"));
   console.log("   the OTHER function's work: " + (kept ? "survived" : "WIPED"));
   console.log("");
-  return { accepted: !!v.ok, landed: !!landed, kept: !!kept,
+  return { accepted: !!v.ok, landed: !!landed, reached: !!reached, kept: !!kept,
            parts: parts, rows: rows, bytes: bytes,
            /* THE ASSERTION THAT MATTERS: does the refusal name a function she
               never opened? Asked by NAME rather than by the wording, which is
@@ -102,7 +110,7 @@ const after = run("WITH THE FIX", require("/home/user/SMP/lib/graph-diff.js"));
 console.log("what must be true of the fix:");
 expect("her save is accepted", after.accepted, true);
 expect("...and names no function she never opened", after.namesOther, false);
-expect("her own edit lands", after.landed, true);
+expect("her own work reaches the database", after.reached, true);
 expect("the other function's work survives", after.kept, true);
 expect("only her own row travels", after.rows === 1 && !after.parts.length, true);
 
@@ -111,7 +119,8 @@ if (before) {
   console.log("and the fault was REAL — on main, the same scenario:");
   expect("was refused", before.accepted, false);
   expect("...naming a function she never opened", before.namesOther, true);
-  expect("and wiped the other function's work", before.kept, false);
+  expect("and threw her own legitimate work away", before.reached, false);
+  expect("and would have wiped the other function's work", before.kept, false);
   expect("carrying the whole group", before.parts.indexOf("group") > -1, true);
 } else {
   console.log("\n(no /tmp/live-diff.js — the before half was not run)");

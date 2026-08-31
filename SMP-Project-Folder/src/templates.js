@@ -903,6 +903,29 @@ function validateCapPlan(c, rows){
     if (r.type === "PROJECT" && r.timeline && timelineKey(r.timeline) == null)
       problems.push({ at:at, msg:'timeline "' + r.timeline + '" is not Quarters or Dates' });
 
+    /* §197.3: A PROJECT'S OWN DATES ARE READ TOO. A milestone's due date has
+       been checked since §103 and these two never were — so `On-going` in a
+       Start or an End came straight in, and every score that reads a date
+       then treated the project as having none. Islam's live tenant had
+       exactly that. Since §179 the pane cannot produce it (the field is a
+       month picker), which left the workbook as the one door still open.
+
+       A NOTICE, NOT A PROBLEM — the same weight the milestone's due date
+       carries. The value is saved exactly as entered and the plan still
+       loads, because refusing a whole upload over one cell would be worse
+       than importing it and marking it: §197.3 makes the pane say Missing
+       over that value, and the fill grant opens the picker on it (§184). */
+    if (r.type === "PROJECT") {
+      ["start", "end"].forEach(function(f){
+        var v = String(r[f] == null ? "" : r[f]).trim();
+        if (!v) return;
+        if (!dueFits(v))
+          notices.push({ at:at, msg:'the ' + f + ' date "' + v +
+            '" is not a date, a month or a quarter \u2014 saved exactly as entered, ' +
+            'and the plan will show it as Missing until somebody picks one' });
+      });
+    }
+
     if (r.type === "OUTCOME") {
       if (!r.value) notices.push({ at:at, msg:"no target — recorded, not scored" });
       if (!r.measure_at) notices.push({ at:at, msg:"no measurement time — will be asked every cycle" });

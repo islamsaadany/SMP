@@ -2804,8 +2804,29 @@ function gapCell(page, acKey, row, field, opts){
      is still correct, just mute. A hook rather than a special case, because
      the next field that reads differently from how it is stored will need the
      same thing (§53.5). */
+  /* §197.3: A DATE THE PLATFORM CANNOT READ SAYS SO, AND STILL SHOWS ITSELF.
+     Islam: *"for any project that marks on going to be missing, and when they
+     go and fill they get into the date selection."* The filling half was
+     already built — `open` is exactly this case and the control is §177's
+     month panel — and the PAGE said nothing: the bar read "1 Missing" over
+     three rows that all looked filled in, so whoever was closing gaps had to
+     guess which, and `On-going` looks like a perfectly good answer.
+
+     THE WORD LEADS AND THE VALUE FOLLOWS IT. Missing is what the count uses,
+     so the page and the bar finally agree; and the value stays on screen
+     because somebody is being asked to CORRECT it, which §184 settled and
+     this must not undo (§96.2). The value is quiet rather than red: red type
+     on a value means *this figure is off track* everywhere else, and one
+     colour cannot carry two meanings on one screen.
+
+     `open && !blank` IS THE WHOLE CONDITION — a blank falls to the branch
+     above, and `open` is only ever wider than `blank` for a date (§184's
+     GAP_WHEN), so no other kind of field can reach this. */
   var text = blank
     ? (opts.readEmpty !== undefined ? opts.readEmpty : '<span class="missing">Missing</span>')
+    : open
+      ? '<span class="missing">Missing</span>' +
+        '<span class="wasval"> \u2014 currently \u201C' + esc(val) + '\u201D</span>'
     : (opts.read ? opts.read(val)
       : opts.flow ? '<span class="flow ' + (opts.cls || "") + '">' + esc(val) + '</span>' : esc(val));
   return text + pendChip(acKey, row, field);

@@ -257,6 +257,47 @@ var WELCOME = (function(){
     return "Setup";
   }
 
+  /* ── WHAT IS WAITING, WITHOUT DRAWING THE SCREEN (§197.2) ─────────────
+     Islam: *"it can be option E when there is no actions waiting there and
+     it turns gold when there is action required, so the SMO or any other
+     team can notice the difference and go for actions."*
+
+     SO THE MARK HAS TO ASK THE SCREEN'S OWN QUESTION. A house that goes gold
+     on one list and opens a screen built from another is the fault §16.7
+     names: a signal that cannot take you to what it signals. It counts the
+     SAME BUILDERS the screen draws from — `submitRows`, `gapRows` and
+     `attentionRows()`, the last of which is the Setup Overview's list too,
+     so three surfaces now answer from one (§108.10, §116.2, §53.5).
+
+     THEY BUILD DETACHED ROWS AND ARE ASKED FOR THEIR LENGTH. Counting by
+     repeating their tests would be a second copy of every one of them, and
+     the two would drift the first time a row gained a condition; a handful
+     of nodes per paint is the price of that never happening.
+
+     THE CHAT IS READ FROM MEMORY, NEVER FETCHED. `CHAT.unread()` is whatever
+     the corner's last poll left behind, and the office's side rides
+     `attentionRows()`'s own chat row (which draws nothing until OVQUEUE has
+     answered, §108.10) — asking the server once per paint would put a
+     network request in the navigation bar. The cost, stated: a reply that
+     lands between paints turns the mark gold on the NEXT paint, not the
+     instant it arrives. */
+  function waiting(person){
+    if (!person) return 0;
+    var n = 0;
+    try {
+      var row = rowFor(person), rs = rolesOf(row), targets = ownTargets(row, rs);
+      n += submitRows(targets).length;
+      n += gapRows(targets).length;
+      if (inOffice(rs)) {
+        try { n += attentionRows().length; } catch(e){}
+      }
+      try {
+        if (typeof CHAT !== "undefined" && CHAT.unread && CHAT.unread() > 0) n++;
+      } catch(e){}
+    } catch(e){ return 0; }
+    return n;
+  }
+
   /* ── LATE ANSWERS LAND IN PLACE (§71.2) ──────────────────────────────── */
   function unEmpty(list){
     var e = list.querySelector(".wempty");
@@ -589,6 +630,7 @@ var WELCOME = (function(){
   return {
     offer: offer,
     open: open,
+    waiting: waiting,
     showing: function(){ return !!box; },
     dismiss: dismiss
   };

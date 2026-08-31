@@ -689,6 +689,11 @@
   .missing { color:var(--bad); font-style:italic; font-family:var(--sans);
              font-size:12.5px; font-weight:400; }
   .ochip .h .missing { font-size:11.5px; }
+  /* The value behind a Missing the platform could not read (§197.3). QUIET,
+     never red: red on a value means "off track" everywhere else in this
+     product, and the row already carries the red word that says what is
+     wrong. This is the evidence beside it, not a second alarm. */
+  .wasval { color:var(--ink-3); font-style:normal; font-size:12px; font-weight:400; }
 
   /* SWOT points are numbered so they can be referred to in a review; the
      numbers stay quiet so they never compete with the text. */
@@ -1104,10 +1109,23 @@
      them apart is what lets either change without the other (§87's twins, in
      CSS). The hover LIFTS rather than repaints, so it cannot be mistaken for
      a selection changing. */
-  .units .navmenu-btn.homemark{ background:var(--gold); border-color:var(--gold);
-    color:var(--on-accent); border-radius:5px; padding:0; width:30px; height:30px; }
-  .units .navmenu-btn.homemark:hover{ background:var(--gold); border-color:var(--gold);
-    color:var(--on-accent); filter:brightness(1.08); }
+  /* THE ROW IS `align-items:stretch`, SO A FIXED HEIGHT TOP-ALIGNS (§197.2).
+     Every sibling on this row is the row's full 46px; the mark asks for 34
+     and therefore sat at the top edge with 12px of nothing beneath it, which
+     is what read as damaged. `align-self:center` is the whole fix — measured,
+     not reasoned: box y=29 h=30 inside a row y=29 h=46. */
+  .units .navmenu-btn.homemark{ background:none; border-color:transparent;
+    color:rgba(255,255,255,.86); border-radius:5px; padding:0;
+    width:34px; height:34px; align-self:center; }
+  .units .navmenu-btn.homemark .navmenusvg{ width:21px; height:21px; }
+  .units .navmenu-btn.homemark:hover{ background:rgba(255,255,255,.16);
+    border-color:transparent; color:#fff; }
+  /* AND GOLD WHEN THERE IS SOMETHING TO ANSWER. Same box, same mark size, so
+     the row does not move when the state changes — only the fill arrives. */
+  .units .navmenu-btn.homemark.homemark-on{ background:var(--gold);
+    border-color:var(--gold); color:var(--on-accent); }
+  .units .navmenu-btn.homemark.homemark-on:hover{ background:var(--gold);
+    border-color:var(--gold); color:var(--on-accent); filter:brightness(1.08); }
   .units .navmenu-btn.homemark:focus-visible{ outline:2px solid #fff; outline-offset:2px; }
   .navmenusvg{width:15px;height:15px;display:block}
   /* The panel, its group bands, its buttons and the caret are all gone with

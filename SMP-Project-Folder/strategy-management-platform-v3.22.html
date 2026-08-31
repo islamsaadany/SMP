@@ -5108,6 +5108,11 @@
   .missing { color:var(--bad); font-style:italic; font-family:var(--sans);
              font-size:12.5px; font-weight:400; }
   .ochip .h .missing { font-size:11.5px; }
+  /* The value behind a Missing the platform could not read (§197.3). QUIET,
+     never red: red on a value means "off track" everywhere else in this
+     product, and the row already carries the red word that says what is
+     wrong. This is the evidence beside it, not a second alarm. */
+  .wasval { color:var(--ink-3); font-style:normal; font-size:12px; font-weight:400; }
 
   /* SWOT points are numbered so they can be referred to in a review; the
      numbers stay quiet so they never compete with the text. */
@@ -5523,10 +5528,23 @@
      them apart is what lets either change without the other (§87's twins, in
      CSS). The hover LIFTS rather than repaints, so it cannot be mistaken for
      a selection changing. */
-  .units .navmenu-btn.homemark{ background:var(--gold); border-color:var(--gold);
-    color:var(--on-accent); border-radius:5px; padding:0; width:30px; height:30px; }
-  .units .navmenu-btn.homemark:hover{ background:var(--gold); border-color:var(--gold);
-    color:var(--on-accent); filter:brightness(1.08); }
+  /* THE ROW IS `align-items:stretch`, SO A FIXED HEIGHT TOP-ALIGNS (§197.2).
+     Every sibling on this row is the row's full 46px; the mark asks for 34
+     and therefore sat at the top edge with 12px of nothing beneath it, which
+     is what read as damaged. `align-self:center` is the whole fix — measured,
+     not reasoned: box y=29 h=30 inside a row y=29 h=46. */
+  .units .navmenu-btn.homemark{ background:none; border-color:transparent;
+    color:rgba(255,255,255,.86); border-radius:5px; padding:0;
+    width:34px; height:34px; align-self:center; }
+  .units .navmenu-btn.homemark .navmenusvg{ width:21px; height:21px; }
+  .units .navmenu-btn.homemark:hover{ background:rgba(255,255,255,.16);
+    border-color:transparent; color:#fff; }
+  /* AND GOLD WHEN THERE IS SOMETHING TO ANSWER. Same box, same mark size, so
+     the row does not move when the state changes — only the fill arrives. */
+  .units .navmenu-btn.homemark.homemark-on{ background:var(--gold);
+    border-color:var(--gold); color:var(--on-accent); }
+  .units .navmenu-btn.homemark.homemark-on:hover{ background:var(--gold);
+    border-color:var(--gold); color:var(--on-accent); filter:brightness(1.08); }
   .units .navmenu-btn.homemark:focus-visible{ outline:2px solid #fff; outline-offset:2px; }
   .navmenusvg{width:15px;height:15px;display:block}
   /* The panel, its group bands, its buttons and the caret are all gone with
@@ -20185,6 +20203,29 @@ function validateCapPlan(c, rows){
     if (r.type === "PROJECT" && r.timeline && timelineKey(r.timeline) == null)
       problems.push({ at:at, msg:'timeline "' + r.timeline + '" is not Quarters or Dates' });
 
+    /* §197.3: A PROJECT'S OWN DATES ARE READ TOO. A milestone's due date has
+       been checked since §103 and these two never were — so `On-going` in a
+       Start or an End came straight in, and every score that reads a date
+       then treated the project as having none. Islam's live tenant had
+       exactly that. Since §179 the pane cannot produce it (the field is a
+       month picker), which left the workbook as the one door still open.
+
+       A NOTICE, NOT A PROBLEM — the same weight the milestone's due date
+       carries. The value is saved exactly as entered and the plan still
+       loads, because refusing a whole upload over one cell would be worse
+       than importing it and marking it: §197.3 makes the pane say Missing
+       over that value, and the fill grant opens the picker on it (§184). */
+    if (r.type === "PROJECT") {
+      ["start", "end"].forEach(function(f){
+        var v = String(r[f] == null ? "" : r[f]).trim();
+        if (!v) return;
+        if (!dueFits(v))
+          notices.push({ at:at, msg:'the ' + f + ' date "' + v +
+            '" is not a date, a month or a quarter \u2014 saved exactly as entered, ' +
+            'and the plan will show it as Missing until somebody picks one' });
+      });
+    }
+
     if (r.type === "OUTCOME") {
       if (!r.value) notices.push({ at:at, msg:"no target — recorded, not scored" });
       if (!r.measure_at) notices.push({ at:at, msg:"no measurement time — will be asked every cycle" });
@@ -25431,8 +25472,29 @@ function gapCell(page, acKey, row, field, opts){
      is still correct, just mute. A hook rather than a special case, because
      the next field that reads differently from how it is stored will need the
      same thing (§53.5). */
+  /* §197.3: A DATE THE PLATFORM CANNOT READ SAYS SO, AND STILL SHOWS ITSELF.
+     Islam: *"for any project that marks on going to be missing, and when they
+     go and fill they get into the date selection."* The filling half was
+     already built — `open` is exactly this case and the control is §177's
+     month panel — and the PAGE said nothing: the bar read "1 Missing" over
+     three rows that all looked filled in, so whoever was closing gaps had to
+     guess which, and `On-going` looks like a perfectly good answer.
+
+     THE WORD LEADS AND THE VALUE FOLLOWS IT. Missing is what the count uses,
+     so the page and the bar finally agree; and the value stays on screen
+     because somebody is being asked to CORRECT it, which §184 settled and
+     this must not undo (§96.2). The value is quiet rather than red: red type
+     on a value means *this figure is off track* everywhere else, and one
+     colour cannot carry two meanings on one screen.
+
+     `open && !blank` IS THE WHOLE CONDITION — a blank falls to the branch
+     above, and `open` is only ever wider than `blank` for a date (§184's
+     GAP_WHEN), so no other kind of field can reach this. */
   var text = blank
     ? (opts.readEmpty !== undefined ? opts.readEmpty : '<span class="missing">Missing</span>')
+    : open
+      ? '<span class="missing">Missing</span>' +
+        '<span class="wasval"> \u2014 currently \u201C' + esc(val) + '\u201D</span>'
     : (opts.read ? opts.read(val)
       : opts.flow ? '<span class="flow ' + (opts.cls || "") + '">' + esc(val) + '</span>' : esc(val));
   return text + pendChip(acKey, row, field);
@@ -37419,6 +37481,29 @@ var CHAT = (function(){
      only between asking and being answered, and it goes back to 180s the
      moment the office replies. */
   var POLL_WAIT = 15000;
+  /* ── AND A FOURTH, FOR THE ANSWER THAT HAS NEVER COME (§197) ───────────
+     Islam: *"I didn't see the icon on login and when I sent to myself a
+     message it appeared again"* — and the chat was NOT off.
+
+     THE CORNER IS CREATED HIDDEN and the only thing that ever reveals it is
+     a SUCCESSFUL answer (`dock.hidden = !cfg.on`, below). A 500, a timeout
+     or a dropped connection matches neither that branch nor the 401/403 one,
+     so nothing showed it — and the next attempt was POLL_SHUT away. Three
+     minutes with no way to reach the office, on the one morning the server
+     was having trouble, which is exactly when somebody wants it. Measured:
+     one failed first poll and the corner was still absent eight seconds
+     later, with the poll count still at 1.
+
+     So while the first answer is still outstanding the beat is short, for a
+     BOUNDED number of tries — about half a minute, which covers a database
+     waking up — and then falls back to POLL_SHUT rather than asking every
+     five seconds for ever against a server that is not coming back (§98.1's
+     whole argument). It is the SAME timer, not a second one: two mechanisms
+     for "ask again" is how they drift (§53.5). */
+  var POLL_FIRST = 5000;
+  var FIRST_TRIES = 6;
+  var firstTries = 0;
+  function firstRun(){ return !loaded && firstTries < FIRST_TRIES; }
   var PIC_EDGE = 1600;
 
   /* What the server last told us the office has set. Started from the shared
@@ -37783,7 +37868,12 @@ var CHAT = (function(){
         state.unread = j.unread || 0;
         state.thread = j.thread || null;
         state.office = !!j.office;
+        /* THE FIRST ANSWER ENDS THE SHORT BEAT (§197). The interval was set
+           before it arrived, so the clock is re-struck here — the same thing
+           the cadence change below does, for the same reason. */
+        var firstAnswer = !loaded;
         loaded = true;
+        firstTries = 0;
         /* THE SETTINGS ARRIVE WITH THE ANSWER, so a switch the office flips
            reaches every open browser within one beat. If the cadence changed,
            the clock is reset — not on the next open, which could be tomorrow. */
@@ -37803,7 +37893,7 @@ var CHAT = (function(){
         if (arrived && !open) announce();
         /* The clock changes with the state, not only with the panel: somebody
            who has just been answered stops expecting and goes back to 180s. */
-        if (wasWaiting !== expecting()) beat();
+        if (firstAnswer || wasWaiting !== expecting()) beat();
         /* Opened, and something new arrived while it was open — read it. */
         if (open && state.unread > 0) post({ action:"seen" }, function(){ state.unread = 0; });
       } else if (j && (j.__status === 401 || j.__status === 403)) {
@@ -37812,6 +37902,16 @@ var CHAT = (function(){
            refusal, and stop asking. */
         var d = el("chatdock"); if (d) d.hidden = true;
         stop();
+      } else if (!loaded) {
+        /* THE SERVER DID NOT ANSWER, AND THAT IS NOT AN ANSWER (§197).
+           Nothing is shown and nothing is hidden — we still do not know
+           whether this tenant has the chat on, and guessing either way is
+           worse than waiting: an optimistic bubble that vanishes on the next
+           beat is a control that lied. What changes is only HOW SOON we ask
+           again. Counted, so it cannot become a five-second poll for ever
+           against a server that is down. */
+        firstTries++;
+        if (!firstRun()) beat();
       }
     });
   }
@@ -37830,7 +37930,9 @@ var CHAT = (function(){
        starts it again, and the poll it fires on the way back is what makes
        the badge right before anybody has looked at it. */
     if (document.hidden) return;
-    timer = setInterval(poll, open ? (cfg.beat || 4000) : (expecting() ? POLL_WAIT : POLL_SHUT));
+    timer = setInterval(poll, firstRun() ? POLL_FIRST
+      : open ? (cfg.beat || 4000)
+      : (expecting() ? POLL_WAIT : POLL_SHUT));
   }
 
   /* ONE SHOT, AND THE CLASS IS TAKEN OFF AGAIN so the next reply can announce
@@ -40064,6 +40166,47 @@ var WELCOME = (function(){
     return "Setup";
   }
 
+  /* ── WHAT IS WAITING, WITHOUT DRAWING THE SCREEN (§197.2) ─────────────
+     Islam: *"it can be option E when there is no actions waiting there and
+     it turns gold when there is action required, so the SMO or any other
+     team can notice the difference and go for actions."*
+
+     SO THE MARK HAS TO ASK THE SCREEN'S OWN QUESTION. A house that goes gold
+     on one list and opens a screen built from another is the fault §16.7
+     names: a signal that cannot take you to what it signals. It counts the
+     SAME BUILDERS the screen draws from — `submitRows`, `gapRows` and
+     `attentionRows()`, the last of which is the Setup Overview's list too,
+     so three surfaces now answer from one (§108.10, §116.2, §53.5).
+
+     THEY BUILD DETACHED ROWS AND ARE ASKED FOR THEIR LENGTH. Counting by
+     repeating their tests would be a second copy of every one of them, and
+     the two would drift the first time a row gained a condition; a handful
+     of nodes per paint is the price of that never happening.
+
+     THE CHAT IS READ FROM MEMORY, NEVER FETCHED. `CHAT.unread()` is whatever
+     the corner's last poll left behind, and the office's side rides
+     `attentionRows()`'s own chat row (which draws nothing until OVQUEUE has
+     answered, §108.10) — asking the server once per paint would put a
+     network request in the navigation bar. The cost, stated: a reply that
+     lands between paints turns the mark gold on the NEXT paint, not the
+     instant it arrives. */
+  function waiting(person){
+    if (!person) return 0;
+    var n = 0;
+    try {
+      var row = rowFor(person), rs = rolesOf(row), targets = ownTargets(row, rs);
+      n += submitRows(targets).length;
+      n += gapRows(targets).length;
+      if (inOffice(rs)) {
+        try { n += attentionRows().length; } catch(e){}
+      }
+      try {
+        if (typeof CHAT !== "undefined" && CHAT.unread && CHAT.unread() > 0) n++;
+      } catch(e){}
+    } catch(e){ return 0; }
+    return n;
+  }
+
   /* ── LATE ANSWERS LAND IN PLACE (§71.2) ──────────────────────────────── */
   function unEmpty(list){
     var e = list.querySelector(".wempty");
@@ -40396,6 +40539,7 @@ var WELCOME = (function(){
   return {
     offer: offer,
     open: open,
+    waiting: waiting,
     showing: function(){ return !!box; },
     dismiss: dismiss
   };
@@ -42841,18 +42985,35 @@ var SYNC = (function () {
     if (typeof WELCOME === "undefined" || !WELCOME.open) return "";
     if (location.protocol === "file:") return "";
     if (document.body && document.body.classList.contains("presenting")) return "";
-    /* §194.3: SQUARE AND GOLD, Islam's pick of six drawn in the real bar
-       ("F for the homemark"). The circle it wore was `navmenu-ico`'s, built
-       for the gear beside it; on the left, leading the row, a square reads as
-       a place rather than a control borrowed from the other end.
+    /* §197.2: QUIET WHEN NOTHING IS WAITING, GOLD WHEN SOMETHING IS.
+       Islam, having lived with §194.3's permanently gold square: *"it can be
+       option E when there is no actions waiting there and it turns gold when
+       there is action required, so the SMO or any other team can notice the
+       difference and go for actions."*
 
-       THE ONE COST WAS STATED BEFORE HE CHOSE and stands: gold on this row
-       means "the destination you are on", so a permanently gold house borrows
-       that meaning. It is its own class rather than `.here`, so the two can be
-       told apart in the stylesheet and either can change without the other. */
-    return '<button type="button" class="navmenu-btn navmenu-ico navmenu-solo homemark" ' +
-      'data-welcomego="1" title="What is waiting on me" ' +
-      'aria-label="What is waiting on me">' + ICON_HOME + '</button>';
+       THAT ALSO SPENDS THE COST §194.3 RECORDED RATHER THAN CARRYING IT.
+       Gold on this row means *the destination you are on*, and a house that
+       is always gold borrows that meaning for nothing; a house that is gold
+       only when it has something to say is USING it. The two stay separate
+       classes (`homemark` / `.here`) so either can change without the other.
+
+       THE COUNT IS THE WELCOME SCREEN'S OWN (§16.7): the mark goes gold on
+       exactly the list the screen it opens will show, so pressing it can
+       never land on "Nothing is waiting on you". `WELCOME.waiting` is asked
+       of `viewer()` — the person being viewed AS, the same one `open()` is
+       given below, or the office would see their own queue while looking
+       through somebody else's eyes (§185).
+
+       THE BOX DOES NOT CHANGE SIZE between the two states. A mark that grew
+       when something arrived would shift every destination name on the row
+       (§41.8's rule: the control you are about to press must not move). */
+    var n = 0;
+    try { n = WELCOME.waiting ? WELCOME.waiting(viewer()) : 0; } catch(e){}
+    var say = n ? plural(n, "thing") + " waiting on you" : "What is waiting on me";
+    return '<button type="button" class="navmenu-btn navmenu-solo homemark' +
+      (n ? ' homemark-on' : '') + '" ' +
+      'data-welcomego="1" title="' + say + '" ' +
+      'aria-label="' + say + '">' + ICON_HOME + '</button>';
   }
 
   /* The menu lives inside the row so it sits on the same baseline as the tabs,

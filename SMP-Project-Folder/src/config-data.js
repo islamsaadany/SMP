@@ -5403,16 +5403,41 @@ function gapMap(target, pend){
      mode for both (§145, and the note above `mayEditPlan`), and
      `fillPageForSec` already answers for `proj` as well as `plan`. Splitting
      it would be inventing a difference the product does not have. */
+  /* `found: null` MEANS THE FOUNDATION IS NOT THIS SUBJECT'S (§211.2).
+     Islam: *"they have a missing item banner in the foundation"* — and there
+     is nothing behind it. `GAP_FIELDS.unit` is `["aspiration"]`, and a
+     function that plans in pillars HAS NO FOUNDATION OF ITS OWN: its
+     aspiration, SWOT and key objectives are the parent unit's, which the page
+     said in its own words while the count argued with it. Measured:
+     `FUNCTIONS.merchandising` carries no `foundation` key at all, `unitLike()`
+     returns null for it and so does `unitLikeWritable()` — so the platform was
+     asking for a field the subject can never hold, counting it as one missing
+     for ever, and drawing a red *Fill in missing elements* over it. Pressed:
+     no fill mode, no section change, ZERO fields. §61 exactly, with the
+     loudest control on the page the one with nothing behind it.
+
+     THE KEY OBJECTIVES GO WITH IT, and that is deliberate rather than
+     incidental: a pillars function's have no authoring surface anywhere in the
+     product (§129's own recorded hole), so counting them would promise a
+     control that does not exist — the same fault one row down.
+
+     `builder.js` HAD ALREADY DECIDED THIS: `builderSections()` guards the
+     Foundation, Objectives and SWOT sections with `route === "unit"`, so the
+     plan builder has always treated a pillars function as having no
+     foundation of its own. Two parts of the product answering one question
+     differently (§53.5) — this is the other one catching up. */
   var UNIT_WORDS = { found: "u_found", plan: "u_plan", sec: "plan" };
-  var FN_WORDS   = { found: "k_found", plan: "k_proj", sec: "proj" };
+  var FN_WORDS   = { found: null,      plan: "k_proj", sec: "proj" };
   var unitHalf = function(u, w){
     if (!u) return;
     w = w || UNIT_WORDS;
-    var found = G(w.found, {}, "unit", u);
-    entry("found", "Foundation", found, { sec: "found", page: "foundation" });
-    var ko = 0;
-    (u.keyObjectives || []).forEach(function(m){ ko += G(w.found, {}, "ko", m); });
-    entry("ko", "Objectives", ko, { sec: "found", page: "foundation" });
+    if (w.found) {
+      var found = G(w.found, {}, "unit", u);
+      entry("found", "Foundation", found, { sec: "found", page: "foundation" });
+      var ko = 0;
+      (u.keyObjectives || []).forEach(function(m){ ko += G(w.found, {}, "ko", m); });
+      entry("ko", "Objectives", ko, { sec: "found", page: "foundation" });
+    }
     (u.items || []).forEach(function(p, i){
       var n = 0, pctx = function(row){ return { pillarOwner: p.owner, row: row }; };
       (p.measures || []).forEach(function(m){ n += G(w.plan, pctx(m), "measure", m); });

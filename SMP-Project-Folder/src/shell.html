@@ -259,10 +259,34 @@
              The KEY stays `found` and the access key stays `k_found`: renaming
              either would lose every stored preference and every grant pointing
              at it, for a word (§65, the same rule as `bu`). */
+          /* AND A FUNCTION THAT PLANS IN PILLARS HAS NO OVERVIEW AT ALL
+             (§211.2, REVERSING the 2026-08-24 ruling recorded above at
+             Islam's direction: *"for functions planning in pillars they
+             shouldn't have an overview just the plan … this is an empty tab
+             with no need"*).
+
+             He is right, and the page had been saying so itself: for this
+             format `renderFnFoundation()` returned ONE SENTENCE — *"Its
+             foundation is Retail Stores's … Open Plan to see it"* — and
+             nothing else. A section whose only content is a pointer at the
+             section beside it is §32's door behind a door.
+
+             The earlier ruling is not wrong about the WORD (a function gets
+             Overview, not Foundation, whichever way it plans) and that half
+             stands for a capability function, which has capabilities to
+             describe. What changed is that the page for THIS format turned
+             out to have nothing to describe.
+
+             THE SENTENCE IS INFORMATION, NOT A DESCRIPTION (rule 1b-ii), so
+             it moves to the top of the Plan rather than being deleted: where
+             the aspiration and the key objectives actually live is a fact
+             this page cannot otherwise state. */
+          var pillars = fnPlansInPillars(FUNCTIONS[fnKeyOf(k)]);
+          var plan = { k:"proj", ac:"k_proj", label:pillars ? "Plan" : "Projects",
+                       render:renderFnProjects };
+          if (pillars) return [plan];
           return [{ k:"found", ac:"k_found", label:"Overview", render:renderFnFoundation },
-                  { k:"proj",  ac:"k_proj",
-                    label:fnPlansInPillars(FUNCTIONS[fnKeyOf(k)]) ? "Plan" : "Projects",
-                    render:renderFnProjects }];
+                  plan];
         } },
       { k:"fnperf", ac:"k_perf", label:"Performance", primary:true, dot:true,
         render: function(k){
@@ -2146,22 +2170,34 @@
        than one long scroll. The row exists only where there are sections. */
     var secrow = document.getElementById("secrow");
     var onSecPage = current === "group" && currentSub === "performance" && GROUP_SECTIONS.length;
+    /* §145.14: THE MISSING BAR LIVES IN THIS ROW'S FREE SPACE (Islam: "that
+       bar with that button is what goes up beside the plan, not to waste
+       lines") — the total, one red chip per place that owes, and the red
+       button, on the strategy tabs only, read mode too. */
+    var missHTML = ((currentSub === "strategy" || currentSub === "fnstrat") &&
+      typeof missBar === "function") ? missBar() : "";
+    /* THE ROW IS NOT ONLY FOR SECTIONS, AND §211.2 IS WHAT PROVED IT. That
+       section left a pillars function with ONE section — and `> 1` took the
+       whole row away, the missing bar with it, so a function that genuinely
+       owed targets on its pillar measures would have lost the count AND the
+       fill button: §61 by exactly the road the same section was closing. The
+       row draws when it has sections to offer OR a bar to carry.
+
+       ONE SECTION STILL DRAWS NO BUTTON. A tab row of one says nothing —
+       §68's argument for a company having a single tab and therefore no row,
+       and the reason a pillars function's Strategy now goes straight to the
+       Plan rather than showing a lone tab above it. */
     /* `!railed`: a Setup page's sections were drawn into its own pane above, so
        drawing them here as well would be the same two buttons in two places. */
-    if (!railed && secs && secs.length > 1) {
+    if (!railed && secs && secs.length && (secs.length > 1 || missHTML)) {
       /* The same third row the group's Performance sections already use. One
          row that means "sections of the tab above", wherever it appears. */
       secrow.hidden = false;
-      document.getElementById("secrow-in").innerHTML = secs.map(function(s){
-        return '<button role="tab" data-sub2="' + s.k + '"' + (s.cls ? ' class="' + s.cls + '"' : '') +
-          ' aria-selected="' + (s.k === def.k) + '">' + s.label + '</button>';
-      }).join("") +
-        /* §145.14: THE MISSING BAR LIVES IN THIS ROW'S FREE SPACE (Islam:
-           "that bar with that button is what goes up beside the plan, not
-           to waste lines") — the total, one red chip per place that owes,
-           and the red button, on the strategy tabs only, read mode too. */
-        ((currentSub === "strategy" || currentSub === "fnstrat") &&
-         typeof missBar === "function" ? missBar() : "");
+      document.getElementById("secrow-in").innerHTML =
+        (secs.length > 1 ? secs.map(function(s){
+          return '<button role="tab" data-sub2="' + s.k + '"' + (s.cls ? ' class="' + s.cls + '"' : '') +
+            ' aria-selected="' + (s.k === def.k) + '">' + s.label + '</button>';
+        }).join("") : "") + missHTML;
     } else {
       secrow.hidden = !onSecPage;
       /* HIDDEN IS NOT EMPTY, AND IT HAS TO BE BOTH (§63.6). The row kept the

@@ -384,6 +384,41 @@ console errors (in this cloud environment, run it via a wrapper that points Play
   remove × onto a second line — `inline-block` restores it, and it was found
   by `checks/plan-fields.py` GOING RED, not by reading the cascade, which is
   the argument for that check existing.
+- **A PILLARS FUNCTION HAS NO FOUNDATION, AND THE COUNT WAS ASKING FOR ONE
+  (§211, §211.2):** Islam — *"they have a missing item banner in the foundation"*
+  and *"pressing on the CON01 22 it doesn't take me to the pillars it's stuck in
+  the overview."* **ONE CAUSE, TWO SYMPTOMS**: `gapMap()` walks this format
+  through `unitLike()` — right, and §59's whole point — and then handed out a
+  UNIT's words for the two things the shapes do not share. The **section**: a
+  unit's plan is `plan`, a function's is `proj` (labelled "Plan", §59), and
+  setting `CURSEC` to a section the page does not have leaves the renderer on
+  its FIRST one — the Overview, the reported symptom exactly. The **access
+  key**: `u_found`/`u_plan` against `k_found`/`k_proj`, corrected because a
+  function's page is gated on the function's key, and **recorded that no
+  difference could be shown on the demo**, where both answer false. `page` stays
+  OUT of the vocabulary: `EDIT_PAGE.plan` is one mode for both (§145) and
+  `fillPageForSec` already answers for `proj`. **THE BANNER WAS A FIELD THE
+  SUBJECT CANNOT HOLD** — `GAP_FIELDS.unit` is `["aspiration"]`, and this format
+  has no foundation of its own (`FUNCTIONS[x].foundation` absent, `unitLike()`
+  and `unitLikeWritable()` both null), so it counted 1 missing for ever and the
+  red button **was pressed and does nothing**: no fill mode, no section change,
+  zero fields (§61, with the loudest control on the page the empty one). The key
+  objectives go with it deliberately — they have no authoring surface anywhere
+  (§129's recorded hole). **`builder.js` HAD ALREADY DECIDED THIS**, guarding
+  Foundation/Objectives/SWOT with `route === "unit"`: §53.5, and this is the
+  other half catching up. **THE OVERVIEW GOES, REVERSING 2026-08-24** (*"the
+  function that plans in pillars has overview as well"*) at Islam's direction —
+  the ruling is still right about the WORD, and a capability function keeps its
+  section because it has capabilities to describe; this format had one sentence
+  pointing at the section beside it (§32). The sentence is **information, not a
+  description** (1b-ii) and moves to the top of the Plan; the dead branch is
+  DELETED (§24). **AND THE BAR NEARLY WENT WITH THE TAB**: the missing bar lives
+  in the section row (§145.14) gated on `secs.length > 1`, so one section would
+  have taken the count AND the fill button from a function that genuinely owes
+  targets — §61 by the road this was closing. The row draws for sections OR a
+  bar; **one section still draws no tab button** (§68). **The tour had a step
+  pointing at it** and would have lit nothing — dropped like the SWOT step
+  (§107). 12 red on the previous build, the banner and the dead chip verbatim.
 - **THE OFFICE INBOX GOT A THINNER PANEL THAN THE CORNER (§188):** three of
   Islam's four are one omission — §97 built the CORNER against exactly these
   faults and the office's own inbox skipped them. **The caret**: the inbox
@@ -3373,6 +3408,11 @@ node scripts/test-graph-diff.js # the change list on its own: only what changed
                                 # travels, applying it to a DIFFERENT target leaves
                                 # that target's other work alone, a removal is not a
                                 # null, and an unknown path is refused (§210)
+python3 checks/fn-pillars.py     # a function that plans in pillars: no gap counted for a
+                                # foundation it cannot hold, the band's chip LANDING on the
+                                # pillar (never the section key — the old fault was a key the
+                                # page does not have), the bar surviving a single section, and
+                                # a capability function keeping BOTH of its own (§211)
 python3 checks/knowledge-base.py # the page and db/kb.json draw from ONE source — the
                                 # AGREEMENT, never the count (§103)
 python3 checks/kb-file.py       # the questions file (§161): the round trip is a FIXED

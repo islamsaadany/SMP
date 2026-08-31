@@ -148,12 +148,27 @@ var TOUR = (function(){
   function isFnPlace(k){ return String(k).indexOf("fn:") === 0; }
   var FN_TABS = { strategy:"fnstrat", performance:"fnperf" };
   var FN_SECS = { found:"found", plan:"proj", swot:null };
+  /* AND A FUNCTION THAT PLANS IN PILLARS HAS NO OVERVIEW EITHER (§211.2).
+     The SWOT was the one genuine difference until that section removed the
+     second: this format's Strategy tab is the Plan and nothing else, so a
+     `found` step here would press `[data-sub2="found"]` and light nothing —
+     which is the fault this whole mechanism exists to avoid, arriving by a
+     shape it did not know about. Dropped like the SWOT, so the counter goes
+     on counting what is actually walked. */
+  function fnIsPillars(place){
+    try {
+      var f = FUNCTIONS[String(place).slice(3)];
+      return !!f && typeof fnPlansInPillars === "function" && fnPlansInPillars(f);
+    } catch (e) { return false; }
+  }
   function tabKeyFor(place, k){
     return isFnPlace(place) ? (FN_TABS[k] || k) : k;
   }
   function secKeyFor(place, k){
     if (!k) return k;
-    return isFnPlace(place) ? FN_SECS[k] : k;
+    if (!isFnPlace(place)) return k;
+    if (k === "found" && fnIsPillars(place)) return null;
+    return FN_SECS[k];
   }
   /* The steps this story really has, for this place: concepts resolved, and
      anything the place cannot show dropped. */

@@ -4569,7 +4569,21 @@ function projPlanBody(p, fk){
 
 function renderFnProjects(fnKey){
   var fk = fnKeyOf(fnKey), caps = capsOfFunction(fk);
-  if (fnPlansInPillars(FUNCTIONS[fk])) return renderUnitPlan(fnAsUnit(fk));
+  /* WHERE THE FOUNDATION ACTUALLY LIVES, ON THE PAGE THAT IS LEFT (§211.2).
+     This sentence was the whole of the Overview until that section was
+     removed, and it is INFORMATION rather than a description (rule 1b-ii):
+     a pillars function's aspiration, SWOT and key objectives are the parent
+     unit's, and nothing else on this page says so. One line, above the plan
+     it explains. */
+  if (fnPlansInPillars(FUNCTIONS[fk])) {
+    var pf = FUNCTIONS[fk], up = pf.under ? UNITS[pf.under] : null;
+    return '<p class="sub" style="margin:0 0 12px">Its foundation is ' +
+      (up ? esc(up.name) + '’s' : 'the group’s') +
+      ' — the aspiration, the SWOT and the ' +
+      esc(L("keyobj", "bu").toLowerCase()) + ' are set there. What is planned ' +
+      'here is the work under them.</p>' +
+      renderUnitPlan(fnAsUnit(fk));
+  }
   if (!caps.length) return fnNothingBehind(fk);
   var ed = projEditing(), on = projArranging(fk);
   /* Gone here for the same reason and in the same breath (§94.15, §53.5):
@@ -5296,19 +5310,12 @@ function renderUnitPlan(u){
    The third column is WEIGHT rather than a three-year target: a capability's
    objectives carry the optional weighting and have never had a horizon. */
 function renderFnFoundation(fnKey){
+  /* THE PILLARS BRANCH IS GONE, NOT LEFT UNREACHABLE (§24, §211.2): with the
+     Overview removed for that format this function is never called with such a
+     function, and a branch nobody can reach is one the next reader takes for
+     load-bearing. Its one sentence moved to the top of `renderFnProjects`,
+     which is the page that is left. */
   var fk = fnKeyOf(fnKey), caps = capsOfFunction(fk);
-  /* A pillars function has no capabilities to describe, and no foundation of
-     its own yet — it belongs to whatever it sits under. Said plainly rather
-     than drawn as an empty card: an empty labelled block asserts that
-     something is missing when the plan simply does not work that way (§15.1). */
-  if (fnPlansInPillars(FUNCTIONS[fk])) {
-    var f = FUNCTIONS[fk], parent = f.under ? UNITS[f.under] : null;
-    return '<div class="note"><b>' + esc(f.name) + ' plans in ' +
-      L("pillar","bu").toLowerCase() + '.</b> Its foundation is ' +
-      (parent ? esc(parent.name) + '\u2019s' : 'the group\u2019s') +
-      ' \u2014 the aspiration, the SWOT and the key objectives are set there, and ' +
-      'what is planned here is the work under them. Open <b>Plan</b> to see it.</div>';
-  }
   var ed = authoring("capfoundation", "k_found");
   /* §145: the fill grant opens the same editor, whose gap cells then draw
      only the blanks — Add and Remove stay the author's. */

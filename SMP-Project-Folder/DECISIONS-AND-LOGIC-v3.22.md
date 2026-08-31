@@ -24263,34 +24263,78 @@ page is gated on the function's key, not because a measurement forced it.
 both (§145) and `fillPageForSec` already answers for `proj` as well as `plan`;
 splitting it would invent a difference the product does not have.
 
-### The banner (measured, not yet fixed — it is Islam's call)
+### §211.2 — The banner, and the tab it sat on
 
-`GAP_FIELDS.unit` is `["aspiration"]`, and **a pillars function has no
-foundation of its own**: `FUNCTIONS.merchandising` carries no `foundation` key
-at all, `unitLike()` returns null for it, and so does `unitLikeWritable()`. So
-the platform asks the function for a field it can never hold, counts it as one
-missing for ever, and the Overview draws **`1 Missing · Foundation 1 · Fill in
-missing elements`** over a page whose entire content is one sentence saying
-*"Open Plan to see it."*
+Both removed, at Islam's direction after the finding was put to him:
+*"for functions planning in pillars they shouldn't have an overview just the
+plan … this is an empty tab with no need."*
 
-**The red button was pressed and does nothing.** Measured: no fill mode, no
-section change, `#panel .gapwalk` = 0, no request, no error. §61 exactly — a
-count promising a control that does not exist — and the loudest control on the
-page is the one with nothing behind it.
+**THE COUNT WAS ASKING FOR A FIELD THE SUBJECT CANNOT HOLD.**
+`GAP_FIELDS.unit` is `["aspiration"]`, and a function that plans in pillars has
+no foundation of its own — its aspiration, SWOT and key objectives are the
+parent unit's, which `renderFnFoundation()` said in its own words while the
+count argued with it. Measured: `FUNCTIONS.merchandising` carries no
+`foundation` key at all, and both `unitLike()` and `unitLikeWritable()` return
+null for it, so the gap could never be closed by anybody. The Overview drew
+**`1 Missing · Foundation 1 · Fill in missing elements`** over it.
 
-Islam's proposal is to remove the Overview from a pillars function entirely.
-**Put back to him with the finding that it does not on its own resolve the
-case**: delete the tab and the count still stands, now pointing at a section
-that is not there, so the button goes from doing nothing on the Overview to
-doing nothing anywhere. The order has to be the count first, the tab second.
-Flagged with it: removing the tab **reverses his own ruling of 2026-08-24**
-(*"the function that plans in pillars has overview as well"*), and the sentence
-naming where the foundation actually lives is information rather than a
-description (rule 1b-ii) and would move to the Plan rather than be deleted.
+**THE RED BUTTON WAS PRESSED AND DOES NOTHING** — no fill mode, no section
+change, `#panel .gapwalk` = 0, no request, no error. §61 exactly, with the
+loudest control on the page the one with nothing behind it.
+
+**THE KEY OBJECTIVES GO WITH IT, DELIBERATELY.** A pillars function's have no
+authoring surface anywhere in the product (§129's own recorded hole), so
+counting them promises a control that does not exist — the same fault one row
+down. Stated rather than left implied: they are now unreachable AND uncounted,
+where before they were unreachable and counted.
+
+**`builder.js` HAD ALREADY DECIDED THIS.** `builderSections()` guards
+Foundation, Objectives and SWOT with `route === "unit"`, so the plan builder
+has always treated this format as having no foundation of its own. Two parts of
+the product answering one question differently (§53.5); this is the other one
+catching up, which is also why the change is smaller than it looks.
+
+**THE OVERVIEW GOES, REVERSING THE 2026-08-24 RULING** (*"the function that
+plans in pillars has overview as well"*). Recorded as a reversal, per Principle
+II. That ruling is still right about the WORD — a capability function gets
+Overview rather than Foundation, and keeps its section, because it has
+capabilities to describe. What changed is that this format turned out to have
+nothing to describe: one sentence pointing at the section beside it, which is
+§32's door behind a door.
+
+**THE SENTENCE IS INFORMATION, NOT A DESCRIPTION** (rule 1b-ii), so it moves to
+the top of the Plan rather than being deleted: where the aspiration and the key
+objectives actually live is a fact this page cannot otherwise state. The dead
+branch in `renderFnFoundation()` is DELETED, not left unreachable (§24).
+
+**AND THE BAR NEARLY WENT WITH THE TAB.** The missing bar lives in the section
+row (§145.14) and that row was gated on `secs.length > 1` — so leaving this
+format with one section would have taken the count AND the fill button away
+from a function that genuinely owes targets on its pillars: §61 by exactly the
+road this section was closing, and it would have looked like a clean removal.
+The row draws when it has sections to offer OR a bar to carry; **one section
+still draws no tab button**, because a row of one says nothing (§68's own
+argument for a company's single tab).
+
+**THE TOUR HAD A STEP POINTING AT IT.** `FN_SECS` mapped `found` to `found` for
+every function, so a `found` step on this format would have pressed
+`[data-sub2="found"]` and lit nothing — the fault that whole mechanism exists to
+avoid, arriving by a shape it did not know about. Dropped like the SWOT step, so
+the counter goes on counting what is actually walked (§107).
+
+**PROVED ABLE TO FAIL** (§94.5): `checks/fn-pillars.py` is green here and gives
+**12 failures** against the previous build, among them the reported banner
+verbatim (*"2 Missing · Foundation 1 · MRC02 1"*) and the chip press leaving
+`RAIL` at `{}` — "stuck in the overview", reproduced. Every state it measures is
+MADE (§94.2): the demo's pillars function owes nothing on its pillars. It asserts
+the LANDING rather than the section key, because the old fault was a key the page
+did not have; and it asserts a capability function keeps BOTH sections, or a
+build that dropped the Overview everywhere would satisfy every other assertion
+(§113.8).
 
 ### Not explained
 
 The **"could not reach the server (Failed to fetch)"** on *Next pending*. It
 could not be reproduced here and no cause is claimed — it is a network-level
-failure, and it is not produced by either fault above. Left open rather than
-attached to a fix it may have nothing to do with.
+failure, and neither fault above produces one. Left open rather than attached to
+a fix it may have nothing to do with.

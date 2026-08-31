@@ -23971,3 +23971,53 @@ of this particular refusal was a SENTENCE telling you to switch back. §184's
 put-back needs row addresses and these were whole-area refusals, so it offered
 nothing. A *"switch back and save"* button belongs there and is not in this
 change.
+
+## §205 — Fillable is not the same list as counted (v3.94)
+
+From the live deployment. A BU owner filling gaps had five lines refused, and
+one of them was **"Enable a seamless customer experience — Collaborators"**,
+sitting among rows that were accepted. Islam settled the design in one line:
+*"collaborators are fillable but not counted as missing."*
+
+**§187's DECISION WAS RIGHT AND THE WAY IT WAS CARRIED OUT WAS NOT.** That
+section removed `collaborators` from `GAP_FIELDS` so the band would stop
+counting an optional blank as owed — correct, and `GAP_FIELDS` is also the
+only list the authoriser's gap pass walks. So the SCREEN went on opening the
+cell (an empty list is blank, and `filling()` asks only about the page) while
+every save of one was refused as authoring. **§42's drift: a control drawn and
+a save refused**, silent for as long as nobody used it, and invisible to every
+check because the one that covered it asserted the refusal as correct.
+
+`GAP_FILLABLE` is `GAP_FIELDS` plus the optional blanks, and the server walks
+that. Nothing became fillable that was not fillable before §187, and nothing
+became counted: the band, the rail, the chips, the deck's Missing and Submit
+all still read `GAP_FIELDS` and none of them moves. It is §192.4's separation
+— the WALK is not the COUNT — arriving a second time, for the same reason and
+in the next layer down.
+
+**The guard §187 actually wanted is untouched and is asserted beside it**: a
+list that already names somebody is not a gap and never opens to a filler.
+
+### What was ruled out on the way, and how
+
+Three explanations were given to Islam before this one and two were wrong.
+Recorded because the cost was his trust, not just time:
+
+- **View-as re-labelling the save.** Real (§204, fixed), and not this: the
+  second screenshot carried no *viewing as* line at all.
+- **A stale tab overwriting.** Real and proved against a live Postgres — a tab
+  that is behind silently destroys another person's saved work, with no error
+  — and still not this. It stays on the list as its own fault to fix.
+- **Phantom changes from painting.** Ruled OUT by measurement, four ways: a
+  load posts nothing; a state round-tripped through a real Postgres posts
+  nothing; a sparse tenant (no SWOT, no archives, no emails) posts nothing;
+  and a view-as gap fill posts **exactly two things** — the value and its
+  pending mark.
+
+**THE LESSON IS ABOUT WHAT I DID, NOT WHAT THE CODE DID.** Each theory was
+stated as a diagnosis when it was a hypothesis, and each fitted the one
+screenshot in front of me. What broke the deadlock was Islam refusing the
+explanation — *"omar didn't touch the foundation and he shouldn't be able to"*
+— which is a fact about the product, not a theory, and it eliminated three
+candidates at once. **A user's account of what they did not do is evidence;
+treat it as harder than the theory it contradicts.**

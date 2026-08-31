@@ -17,7 +17,7 @@
      whose whole job is agreement (§53.5).
 
    - EVERY DOOR PRESSES THE PLATFORM'S OWN CONTROLS — [data-u], [data-s],
-     [data-md], [data-setupgo], [data-report] — never a second copy of the
+     [data-md], [data-setupgo], [data-s="report"] — never a second copy of the
      navigation (§107's rule, for the tour's reason). And every door runs
      BEHIND setTimeout(…, 0): the handler fires on a real click, §30.1's
      CLICKING guard holds any paint until the click lands, and a walk that
@@ -125,7 +125,14 @@ var WELCOME = (function(){
       var fn = String(t).indexOf("fn:") === 0;
       if (tab === "strategy") press('#subtabs [data-s="' + (fn ? "fnstrat" : "strategy") + '"]');
       if (tab === "performance") press('#subtabs [data-s="' + (fn ? "fnperf" : "performance") + '"]');
-      if (report) press('[data-report="' + t + '"]');
+      /* §222: REPORTING IS A TAB NOW, so this door presses the tab rather
+         than the button it used to. The button was deleted with the move and
+         this selector went on matching nothing — which `press()` swallows by
+         design, so the row landed on Performance and quietly stopped. §51.11
+         in the PRODUCT rather than in a check: a control changed shape and a
+         selector somewhere else went on failing silently, in the
+         safe-looking direction. Caught by checks/welcome.py. */
+      if (report) press('#subtabs [data-s="report"]');
       window.scrollTo(0, 0);
     }, 0);
   }

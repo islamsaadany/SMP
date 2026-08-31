@@ -6227,11 +6227,11 @@
     /* ── Reporting is a MODE now (§63.1) ─────────────────────────────
        Enter from Performance, leave with Cancel. Nothing is written by either:
        every figure was already saved as it was typed. */
-    document.querySelectorAll("[data-report]").forEach(function(b){
-      b.addEventListener("click", function(){
-        REPORTING = this.dataset.report; paint(); window.scrollTo(0,0);
-      });
-    });
+    /* §222: THE `[data-report]` HANDLER IS GONE WITH ITS BUTTON. Reporting
+       is a tab, and `paint()` sets the mode from the tab you are on — so this
+       wiring had nothing left to bind to. Deleted rather than left matching
+       nothing, because a handler for a control that no longer exists is one
+       the next reader takes for load-bearing (§24). */
     /* §222: CLOSE LEAVES THE TAB, NOT ONLY THE MODE — and this is a fault the
        tab created rather than a tidy-up. `REPORTING` is now set by paint()
        from the tab you are on, so clearing it and repainting put it straight

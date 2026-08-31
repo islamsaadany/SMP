@@ -270,7 +270,11 @@ def main():
         pg.wait_for_timeout(400)
         ck("Open reporting lands on the unit", pg.evaluate("current") == "mobile",
            pg.evaluate("current"))
-        ck("…on Performance", pg.evaluate("currentSub") == "performance",
+        # §222: REPORTING IS ITS OWN TAB, so the door lands there rather than
+        # on Performance. The door still presses Performance first, which is
+        # the honest fallback when no cycle is open and the Reporting tab is
+        # therefore not drawn.
+        ck("…on the Reporting tab", pg.evaluate("currentSub") == "report",
            pg.evaluate("currentSub"))
         ck("…with reporting mode entered",
            pg.evaluate("typeof REPORTING!=='undefined' && REPORTING==='mobile'"))

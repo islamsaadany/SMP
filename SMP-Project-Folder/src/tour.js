@@ -279,9 +279,9 @@ var TOUR = (function(){
             "set ourselves is going, and whether the work happened."; } },
 
         { dest:"$own", tab:"performance",
-          targets:["#panel [data-report]"],
+          targets:["#subtabs [data-s='report']"],
           title:"Where your figures go in",
-          body:function(at){ return "While a reporting cycle is open, <b>Report</b> is where " +
+          body:function(at){ return "While a reporting cycle is open, <b>Reporting</b> is where " +
             "you enter this quarter's figures and submit them for the " +
             (isFnPlace(at) ? "function" : "unit") + "."; } },
 
@@ -379,9 +379,9 @@ var TOUR = (function(){
                "and when they do the gap is the conversation." },
 
         { dest:"$own", tab:"performance",
-          targets:["#panel [data-report]"],
+          targets:["#subtabs [data-s='report']"],
           title:"Where the figures come in",
-          body:"While a cycle is open, <b>Report</b> is where this quarter's figures are " +
+          body:"While a cycle is open, <b>Reporting</b> is where this quarter's figures are " +
                "entered and submitted. Submitting speaks for the whole unit, which is why it " +
                "sits with you and your custodian." },
 

@@ -1116,9 +1116,16 @@
      damaged", measured: w 34 → 28 → 24 → 23 as the window narrows, on the old
      build and the new alike. `flex:none` is the whole fix: a mark is a fixed
      thing, and the row's slack belongs to the destinations that scroll. */
+  /* AND CENTRED ACROSS, NOT ONLY DOWN (§200.3). `.navmenu-btn` is an
+     inline-flex WORDED pill — `align-items:center` with the text starting at
+     the left, which is right for a word and wrong for a single mark in a
+     square. Measured: 1px of gold to the left of the house and 12px to the
+     right, at every width, in both states. `justify-content` was `normal`
+     and had simply never been asked. */
   .units .navmenu-btn.homemark{ background:none; border-color:transparent;
     color:rgba(255,255,255,.86); border-radius:5px; padding:0;
-    width:34px; height:34px; flex:none; align-self:center; }
+    width:34px; height:34px; flex:none; align-self:center;
+    justify-content:center; }
   .units .navmenu-btn.homemark .navmenusvg{ width:21px; height:21px; }
   .units .navmenu-btn.homemark:hover{ background:rgba(255,255,255,.16);
     border-color:transparent; color:#fff; }

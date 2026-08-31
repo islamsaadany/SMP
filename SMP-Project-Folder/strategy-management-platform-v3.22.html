@@ -5522,9 +5522,16 @@
      damaged", measured: w 34 → 28 → 24 → 23 as the window narrows, on the old
      build and the new alike. `flex:none` is the whole fix: a mark is a fixed
      thing, and the row's slack belongs to the destinations that scroll. */
+  /* AND CENTRED ACROSS, NOT ONLY DOWN (§200.3). `.navmenu-btn` is an
+     inline-flex WORDED pill — `align-items:center` with the text starting at
+     the left, which is right for a word and wrong for a single mark in a
+     square. Measured: 1px of gold to the left of the house and 12px to the
+     right, at every width, in both states. `justify-content` was `normal`
+     and had simply never been asked. */
   .units .navmenu-btn.homemark{ background:none; border-color:transparent;
     color:rgba(255,255,255,.86); border-radius:5px; padding:0;
-    width:34px; height:34px; flex:none; align-self:center; }
+    width:34px; height:34px; flex:none; align-self:center;
+    justify-content:center; }
   .units .navmenu-btn.homemark .navmenusvg{ width:21px; height:21px; }
   .units .navmenu-btn.homemark:hover{ background:rgba(255,255,255,.16);
     border-color:transparent; color:#fff; }
@@ -7217,8 +7224,26 @@ body.presenting .tourdock { display:none; }
 .welcomeover .wpages a:hover { color:var(--gold-deep); }
 .welcomeover .wtour { background:var(--over-bg); border:1px solid var(--over-line);
   border-radius:var(--r); padding:18px; }
-.welcomeover .wtour h3 { margin:0 0 6px; font-size:var(--fs-lead); font-weight:700;
+/* ── THE FOLD (§202) ────────────────────────────────────────────────────
+   The heading IS the control, so it takes the whole row and carries the
+   caret at its far end — one target, and the obvious one. The card keeps
+   its padding in both states, or opening it would shift the column. */
+.welcomeover .wtoggle { display:flex; width:100%; align-items:center; gap:10px;
+  background:none; border:0; padding:0; margin:0; cursor:pointer;
+  color:inherit; font:inherit; text-align:left; }
+.welcomeover .wtour h3 { margin:0; font-size:var(--fs-lead); font-weight:700;
   letter-spacing:-.01em; }
+.welcomeover .wtcar { margin-left:auto; color:var(--gold-deep); font-family:var(--mono);
+  font-size:var(--fs-lead); line-height:1; transform:rotate(90deg);
+  transition:transform .15s ease; }
+.welcomeover .wtour.wtopen .wtcar { transform:rotate(-90deg); }
+.welcomeover .wtoggle:hover h3 { color:var(--gold-deep); }
+.welcomeover .wtoggle:focus-visible { outline:2px solid var(--gold);
+  outline-offset:3px; border-radius:4px; }
+@media (prefers-reduced-motion: reduce) {
+  .welcomeover .wtcar { transition:none; }
+}
+.welcomeover .wtourbody { margin-top:10px; }
 .welcomeover .wtour p { margin:0 0 14px; font-size:var(--fs-note); color:var(--ink-2); }
 .welcomeover .wtourbtns { display:flex; gap:10px; align-items:center; }
 .welcomeover .wtbtn { font:inherit; cursor:pointer; font-size:var(--fs-small);
@@ -40662,12 +40687,33 @@ var WELCOME = (function(){
             '<div class="wpagesbox"><p class="wseclab">Your pages</p>' +
               '<div class="wcard wpages"></div></div>' +
             cyc +
+            /* ── THE INTRO ROUND FOLDS (§202) ────────────────────────────
+               Islam: *"make the take an intro round a by default collapsed
+               box that expands on a click and collapse on a click as well."*
+               It is the ONE thing on this screen that is not waiting on
+               anybody — the two columns above it are work, and a card
+               spending four lines on an optional two-minute walk reads as
+               loudly as they do. Closed it is one line that still says the
+               round exists, which is the whole of what it has to do until
+               somebody wants it (§41's budget, on space rather than colour).
+
+               THE HEADING IS THE CONTROL, not a caret beside it: a title
+               with a fold arrow to its right gives two targets for one act
+               and the smaller one is the one people press (§32). `hidden`
+               on the body, never `display` (the shell's own rule), and
+               `aria-expanded` on the button so the state is announced. */
             '<div class="wtour" hidden>' +
-              "<h3>Take an intro round</h3>" +
-              "<p>A short walk of the platform on the worked example — about two minutes.</p>" +
-              '<div class="wtourbtns">' +
-                '<button type="button" class="wtbtn" data-wtour>Start the round</button>' +
-                '<button type="button" class="wtghost" data-wnotnow>Not now</button>' +
+              '<button type="button" class="wtoggle" data-wtoggle ' +
+                'aria-expanded="false">' +
+                "<h3>Take an intro round</h3>" +
+                '<span class="wtcar" aria-hidden="true">›</span>' +
+              "</button>" +
+              '<div class="wtourbody" data-wtourbody hidden>' +
+                "<p>A short walk of the platform on the worked example — about two minutes.</p>" +
+                '<div class="wtourbtns">' +
+                  '<button type="button" class="wtbtn" data-wtour>Start the round</button>' +
+                  '<button type="button" class="wtghost" data-wnotnow>Not now</button>' +
+                "</div>" +
               "</div>" +
             "</div>" +
           "</div>" +
@@ -40760,6 +40806,17 @@ var WELCOME = (function(){
       tourCard.querySelector("[data-wnotnow]").addEventListener("click", function(){
         tourCard.hidden = true;
       });
+      /* THE FOLD (§202). One handler on the heading, reading the state off
+         the body rather than keeping a flag beside it — two copies of "is it
+         open" is how a card ends up drawn open and announced shut (§53.5). */
+      var tbtn = tourCard.querySelector("[data-wtoggle]");
+      var tbody = tourCard.querySelector("[data-wtourbody]");
+      tbtn.addEventListener("click", function(){
+        var openNow = tbody.hidden;
+        tbody.hidden = !openNow;
+        tbtn.setAttribute("aria-expanded", openNow ? "true" : "false");
+        tourCard.classList.toggle("wtopen", openNow);
+      });
     }
 
     /* ── Continue ───────────────────────────────────────────────────────
@@ -40768,10 +40825,20 @@ var WELCOME = (function(){
        carried a grey "Strategy · Plan" under the name and it is deliberately
        not built: the label already names the destination, and the second
        line would mean re-adding the navigation-word reader §99 deleted. */
+    /* AND SETUP IS A PLACE TOO (§202). Islam: *"the continue button should
+       show continue to the function or BU name."* It already did for a unit,
+       a function, a company and the group — and read a bare "Continue" from
+       Setup, which is where the house button now sits beside the gear
+       (§193.2), so it is a common way in rather than an edge. Measured
+       before it was changed: `mobile` → "Continue to Mobile", `fn:finance` →
+       "Continue to Finance", `setup` → "Continue". The word is the
+       navigation's own; `placeLabel` does not answer for Setup because Setup
+       is not a place a ROLE is held, which is what that function is for. */
     var here = null;
     try { here = typeof current !== "undefined" ? current : null; } catch(e){}
     var word = "Continue";
-    if (here && here !== "setup" && here !== "manage") {
+    if (here === "setup" || here === "manage") word = "Continue to Setup";
+    else if (here) {
       try { word = "Continue to " + subjectName(here); } catch(e){}
     }
     var cont = box.querySelector("[data-wcontinue]");

@@ -23874,3 +23874,49 @@ screenshot (bare 3-year, missing this-year, empty Unit) through the real fill
 mode and reads the plan back, inheritance included. And one working note paid
 for twice: a `git checkout` mid-proof wiped the uncommitted rules — recovered
 from the built file, which held the inlined copy, and everything re-run green.
+
+## §202 — Three from the welcome screen (v3.92)
+
+Islam, using v3.91: the house is *"still not centered in the yellow box"*, the
+intro round should be *"a by default collapsed box that expands on a click and
+collapse on a click as well"*, and Continue should *"show continue to the
+function or BU name like Continue to Finance or Continue to Mobile"*.
+
+**THE HOUSE WAS SQUARE AND THE MARK WAS NOT IN THE MIDDLE OF IT.** §200.2 gave
+the box `flex:none` and made it a 34px square at every width — measured, green,
+and half the answer: `.navmenu-btn` is an inline-flex WORDED pill, so it centres
+DOWN (`align-items:center`) and starts its content at the LEFT, which is right
+for a word and wrong for one mark in a square. Measured before the fix: **1px of
+gold left of the house and 12px right**, at 1500 and at 1000, in both states;
+`justify-content` was `normal` and had simply never been asked. Now 7/7/7/7.
+**The check's square assertion could not have caught it** — a box can be a
+perfect square with the mark jammed against an edge — so the four GAPS are what
+is asserted now, at both widths: **3 red** with the declaration removed.
+
+**THE INTRO ROUND FOLDS.** It is the one thing on that screen not waiting on
+anybody — the columns above it are work — and a card spending four lines on an
+optional two-minute walk reads as loudly as they do. Shut, it is one line that
+still NAMES the round, because a fold that hides its own name is a feature
+nobody finds (§61). **The heading is the control**, not a caret beside it: a
+title with an arrow to its right offers two targets for one act and the smaller
+one is the one people press (§32). `hidden` on the body and `aria-expanded` on
+the button, with the open/shut state read off the body rather than kept in a
+flag beside it (§53.5). *Not now* is unchanged and lives inside the body, so it
+appears only once the card is open, which is the only place it means anything.
+**6 red** with the card drawn open by default — and one of them is `welcome.py`
+§4, which pressed *Start the round* directly and now has to open the fold first:
+the check catching its own dependency is the change being real.
+
+**AND CONTINUE ALREADY NAMED FOUR KINDS OF PLACE AND MISSED THE FIFTH.**
+Measured rather than assumed: `mobile` → *Continue to Mobile*, `fn:finance` →
+*Continue to Finance*, `co:distribution` → *Continue to Distribution*, `group` →
+*Continue to the group*, and **`setup` → *Continue***. `placeLabel()` does not
+answer for Setup because Setup is not a place a ROLE is held, which is what that
+function is for — so the guard skipped it and left the bare word. Setup is where
+the **house button now sits, beside the gear** (§193.2), so it is a common way
+onto this screen rather than an edge case. *Continue to Setup* is the
+navigation's own word and is honest: Continue steps aside (§159), and the page
+behind is Setup. **The null case was checked and deliberately not branched** —
+`WELCOME.offer()` runs after the boot paint (`sync.js`), so `current` is always
+set by then, and §24 says not to write a branch for a path that cannot be
+reached. **2 red** with the Setup branch removed.

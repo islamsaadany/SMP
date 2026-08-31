@@ -444,12 +444,33 @@ var WELCOME = (function(){
             '<div class="wpagesbox"><p class="wseclab">Your pages</p>' +
               '<div class="wcard wpages"></div></div>' +
             cyc +
+            /* ── THE INTRO ROUND FOLDS (§202) ────────────────────────────
+               Islam: *"make the take an intro round a by default collapsed
+               box that expands on a click and collapse on a click as well."*
+               It is the ONE thing on this screen that is not waiting on
+               anybody — the two columns above it are work, and a card
+               spending four lines on an optional two-minute walk reads as
+               loudly as they do. Closed it is one line that still says the
+               round exists, which is the whole of what it has to do until
+               somebody wants it (§41's budget, on space rather than colour).
+
+               THE HEADING IS THE CONTROL, not a caret beside it: a title
+               with a fold arrow to its right gives two targets for one act
+               and the smaller one is the one people press (§32). `hidden`
+               on the body, never `display` (the shell's own rule), and
+               `aria-expanded` on the button so the state is announced. */
             '<div class="wtour" hidden>' +
-              "<h3>Take an intro round</h3>" +
-              "<p>A short walk of the platform on the worked example — about two minutes.</p>" +
-              '<div class="wtourbtns">' +
-                '<button type="button" class="wtbtn" data-wtour>Start the round</button>' +
-                '<button type="button" class="wtghost" data-wnotnow>Not now</button>' +
+              '<button type="button" class="wtoggle" data-wtoggle ' +
+                'aria-expanded="false">' +
+                "<h3>Take an intro round</h3>" +
+                '<span class="wtcar" aria-hidden="true">›</span>' +
+              "</button>" +
+              '<div class="wtourbody" data-wtourbody hidden>' +
+                "<p>A short walk of the platform on the worked example — about two minutes.</p>" +
+                '<div class="wtourbtns">' +
+                  '<button type="button" class="wtbtn" data-wtour>Start the round</button>' +
+                  '<button type="button" class="wtghost" data-wnotnow>Not now</button>' +
+                "</div>" +
               "</div>" +
             "</div>" +
           "</div>" +
@@ -542,6 +563,17 @@ var WELCOME = (function(){
       tourCard.querySelector("[data-wnotnow]").addEventListener("click", function(){
         tourCard.hidden = true;
       });
+      /* THE FOLD (§202). One handler on the heading, reading the state off
+         the body rather than keeping a flag beside it — two copies of "is it
+         open" is how a card ends up drawn open and announced shut (§53.5). */
+      var tbtn = tourCard.querySelector("[data-wtoggle]");
+      var tbody = tourCard.querySelector("[data-wtourbody]");
+      tbtn.addEventListener("click", function(){
+        var openNow = tbody.hidden;
+        tbody.hidden = !openNow;
+        tbtn.setAttribute("aria-expanded", openNow ? "true" : "false");
+        tourCard.classList.toggle("wtopen", openNow);
+      });
     }
 
     /* ── Continue ───────────────────────────────────────────────────────
@@ -550,10 +582,20 @@ var WELCOME = (function(){
        carried a grey "Strategy · Plan" under the name and it is deliberately
        not built: the label already names the destination, and the second
        line would mean re-adding the navigation-word reader §99 deleted. */
+    /* AND SETUP IS A PLACE TOO (§202). Islam: *"the continue button should
+       show continue to the function or BU name."* It already did for a unit,
+       a function, a company and the group — and read a bare "Continue" from
+       Setup, which is where the house button now sits beside the gear
+       (§193.2), so it is a common way in rather than an edge. Measured
+       before it was changed: `mobile` → "Continue to Mobile", `fn:finance` →
+       "Continue to Finance", `setup` → "Continue". The word is the
+       navigation's own; `placeLabel` does not answer for Setup because Setup
+       is not a place a ROLE is held, which is what that function is for. */
     var here = null;
     try { here = typeof current !== "undefined" ? current : null; } catch(e){}
     var word = "Continue";
-    if (here && here !== "setup" && here !== "manage") {
+    if (here === "setup" || here === "manage") word = "Continue to Setup";
+    else if (here) {
       try { word = "Continue to " + subjectName(here); } catch(e){}
     }
     var cont = box.querySelector("[data-wcontinue]");

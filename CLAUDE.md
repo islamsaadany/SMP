@@ -3411,7 +3411,33 @@ prior sessions (on HR_ERP) accidentally reverted agreed-upon designs.
 
 ---
 
-*Last Updated: 2026-08-31 &mdash; **v3.91: the wall, and the fillable unit
+*Last Updated: 2026-08-31 &mdash; **v3.92: three from the welcome screen
+(&sect;202).** Islam, using v3.91. **The house was SQUARE and the mark was not
+in the middle of it** &mdash; &sect;200.2 fixed the box and that was half the
+answer: `.navmenu-btn` is a worded pill, so it centres DOWN and starts its
+content at the LEFT, which is right for a word and wrong for one mark in a
+square. Measured: **1px of gold left of the house, 12px right**, at every
+width, in both states; `justify-content` was `normal` and had never been asked.
+Now 7/7/7/7 &mdash; and **the check's square assertion could never have caught
+it**, so the four GAPS are what is asserted now (3 red without the fix).
+**The intro round folds**: it is the one thing on that screen not waiting on
+anybody, and shut it is one line that still NAMES the round (&sect;61 &mdash; a
+fold hiding its own name is a feature nobody finds). The HEADING is the control,
+never a caret beside it (&sect;32: two targets for one act, and the smaller one
+is the one people press); open/shut is read off the body rather than kept in a
+flag beside it (&sect;53.5). 6 red drawn open &mdash; one of them `welcome.py`
+&sect;4, which pressed *Start the round* directly and must open the fold first.
+**And Continue already named four kinds of place and missed the fifth**:
+measured, `mobile`&rarr;*Continue to Mobile*, `fn:finance`&rarr;*Continue to
+Finance*, `group`&rarr;*Continue to the group*, and **`setup`&rarr;*Continue***
+&mdash; `placeLabel()` does not answer for Setup, because Setup is not a place a
+ROLE is held. Setup is where the house now sits beside the gear (&sect;193.2),
+so it is a common way in; *Continue to Setup* is honest, since Continue steps
+aside and the page behind is Setup. **The null case was checked and deliberately
+not branched** &mdash; `WELCOME.offer()` runs after the boot paint, so `current`
+is always set (&sect;24: no branch for a path that cannot be reached).*
+
+*Earlier: 2026-08-31 &mdash; **v3.91: the wall, and the fillable unit
 (&sect;200.2&ndash;&sect;201.2).** Three fixes from Islam using the shipped
 v3.89, all reported in one message. **The house glyph stopped being squeezed**
 (&sect;200.2): drawn right, sat in a flex row that shrinks its items &mdash;

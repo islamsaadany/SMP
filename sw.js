@@ -235,7 +235,13 @@
    UNIT on a bare target, pending, under the same grant as the value beside it).
    Name checked against origin/main serving "smp-shell-v3.89-the-unit-is-
    inherited"; confirm again immediately before the merge push (§94.16). */
-const SHELL = "smp-shell-v3.91-the-wall-and-the-fillable-unit";
+/* v3.92-the-round-folds — §202: the house is centred INSIDE its square (the
+   box was fixed in §200.2 and the mark still sat 1px from one edge and 12 from
+   the other), the intro-round card folds shut by default, and Continue names
+   Setup as well as the units, functions and companies it already named.
+   Name checked against origin/main serving "smp-shell-v3.89-the-unit-is-
+   inherited"; confirm again immediately before the merge push (§94.16). */
+const SHELL = "smp-shell-v3.92-the-round-folds";
 const ASSETS = [
   "/",
   "/index.html",

@@ -13,7 +13,8 @@ shell = open('shell.html').read()
 # inlined FIRST so config-data.js can alias it. Two copies of "may this person
 # edit this" would drift, and the drift is silent: a screen that offers an edit
 # the server then refuses (spec 006 §2).
-for tag, f in [("RULES","../../lib/rules.js"), ("AUDIENCE","../../lib/audience.js"),
+for tag, f in [("RULES","../../lib/rules.js"), ("DIFF","../../lib/graph-diff.js"),
+               ("AUDIENCE","../../lib/audience.js"),
                ("DATA","group-data.js"), ("CONFIGDATA","config-data.js"),
                ("ARRANGE","arrange.js"), ("PAGEINFO","pageinfo.js"), ("RECIPES","recipes.js"), ("TEMPLATES","templates.js"), ("XLSX","xlsx.js"),
                ("PPTX","pptx.js"),

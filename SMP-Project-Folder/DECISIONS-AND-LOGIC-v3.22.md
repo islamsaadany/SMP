@@ -24156,3 +24156,73 @@ cannot land. Proved both ways in `checks/viewer-switch.py` §2b — and two of
 that section's own first failures were the CHECK, riding section 2's
 remembered refusal into a switch it then blamed on this rule (§94.2: put the
 state back first).
+
+## §210 — Send what changed, and apply it onto our own copy (v3.97)
+
+Islam, after a morning of refusals naming things nobody had touched:
+*"why is the whole plan is sent, why don't we just send the changed element
+only not to cause this issue?"*
+
+**HE IS RIGHT, AND IT IS THE ROOT THE DAY'S THREE FAULTS SHARE.** Every save
+posted the WHOLE graph and `writeState` threw the database's copy away and
+took the client's. So:
+
+- work done before a view switch rode into a save under the new identity, and
+  the refusal named parts the person never touched (§204);
+- a tab open a while **silently overwrote everybody else's saved work** —
+  measured against a real Postgres, an aspiration and a register rename both
+  gone, no error anywhere;
+- and a refusal could name any part of the product, because every part of the
+  product was in the envelope.
+
+**THE SHAPE IS "APPLY, DON'T REPLACE".** The client sends the parts it
+changed; `api/state.js` applies them ONTO THE STORED GRAPH and judges the
+result exactly as it judged a posted graph before. **Nothing downstream
+changes** — `authorize()` still compares a stored graph with an incoming one,
+`writeState()` still writes a whole graph — and that containment is the whole
+reason this was safe to do in an afternoon on a live product: the
+security-critical file is untouched, and 427 authoriser assertions say so.
+
+`lib/graph-diff.js` is ONE module both sides use (§42). Two definitions of
+*what counts as a change* is the drift that writes a value into the wrong part
+of a plan.
+
+**THE GRANULARITY IS A TOP-LEVEL PART**, except the four maps keyed by
+subject — `units`, `functions`, `companies`, `unitRoles` — compared entry by
+entry. Filling a gap on Consumer Finance sends one part. **Finer than that
+needs arrays matched by row ID rather than position** (§48's rule, in a place
+where getting it wrong writes a number against somebody else's measure), and
+that is its own change. **The residue is stated rather than implied: two
+people editing THE SAME unit still resolve last-write-wins on that unit.**
+Two people on different units, or on a unit and the register, no longer touch
+each other at all — which is exactly what was happening today.
+
+**A KEY THAT WENT IS NOT A KEY SET TO NULL.** `priorCycle` is legitimately
+null on a tenant that has never closed a cycle, so one list would make an
+ordinary value indistinguishable from a deletion — and a deletion is how a
+unit is removed. `set` and `del` are two lists.
+
+**A PATH THE SERVER DOES NOT UNDERSTAND IS REFUSED, NEVER GUESSED AT.** A save
+is the one place where approximately right is worse than failing.
+
+**THE WHOLE-GRAPH PATH STAYS**, for exactly one reason: tabs open right now
+run the previous build and will post `{state}` until somebody reloads. Refusing
+those would turn a data-safety fix into an outage mid-sentence. They keep the
+old behaviour, and its exposure, until they reload — which §208's sign-out
+makes short work of.
+
+**PROVED, AND PROVED ABLE TO FAIL.** `scripts/test-two-tabs.js` replays the
+morning against a real Postgres through the real reader, writer, authoriser
+and applier; `SMP_WHOLE_GRAPH=1` restores the old behaviour and it goes from
+**11/11 to 4 failures** — the office's aspiration, register rename and cycle
+note destroyed, and one of two custodians on two units losing their fill.
+`test-graph-diff.js` 23/0 on the module alone. Virgin-database round trip
+PASS.
+
+**AND ONE CHECK'S STUB HAD TO LEARN THE SAME STEP** (§100.3):
+`refusal-keeps-work.py` runs the REAL authoriser behind a stub that read
+`body.state`, so it answered 500 to every save and reported 14 failures. A
+stub that does not model the server is testing something the product does not
+do — it applies the change list through the same shared module now. *The 500s
+were the first thing to look at, and the temptation was to read them as the
+product breaking.*

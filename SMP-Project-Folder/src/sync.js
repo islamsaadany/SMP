@@ -230,9 +230,37 @@ var SYNC = (function () {
     var v = typeof window !== "undefined" ? window.VIEWER : null;
     return v && v !== person.key ? v : null;
   }
+  /* ── THE ENVELOPE CARRIES WHAT CHANGED (§210) ─────────────────────
+     Islam: *"why is the whole plan is sent, why don't we just send the
+     changed element only not to cause this issue?"*
+
+     `lastSaved` is the serialized graph the SERVER last accepted, which is
+     exactly the baseline a change list needs — it is set on hydration and
+     again after every save that landed, and it is already the thing `save()`
+     compares against to decide there is anything to do at all.
+
+     THE WHOLE GRAPH IS STILL SENT IN ONE CASE, and it is deliberate: when
+     there is no baseline to diff against. That happens before the first
+     hydration and if `lastSaved` will not parse — and in both, "everything"
+     is the honest answer rather than a guess at a subset. `SMPDiff` is the
+     shared module the server applies with (§42): the browser computing a
+     change list the server understands differently is the drift that would
+     write a value into the wrong part of the plan.
+
+     THE SERVER APPLIES IT ONTO ITS OWN COPY, which is what stops an open tab
+     erasing somebody else's work — that is in `api/state.js`, not here. */
   function bodyFor(state) {
     var who = actingAs();
-    return '{"state":' + state + (who ? ',"viewAs":' + JSON.stringify(who) : "") + "}";
+    var tail = who ? ',"viewAs":' + JSON.stringify(who) : "";
+    var base = null;
+    if (lastSaved) { try { base = JSON.parse(lastSaved); } catch (e) { base = null; } }
+    if (base && typeof SMPDiff !== "undefined" && SMPDiff.graphChanges) {
+      try {
+        var changes = SMPDiff.graphChanges(base, JSON.parse(state));
+        return '{"changes":' + JSON.stringify(changes) + tail + "}";
+      } catch (e) { /* fall through to the whole graph */ }
+    }
+    return '{"state":' + state + tail + "}";
   }
 
   var refusedWhy = null;

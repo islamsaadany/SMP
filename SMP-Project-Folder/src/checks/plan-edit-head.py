@@ -53,6 +53,16 @@ class H(http.server.BaseHTTPRequestHandler):
             self._s(HTML, 200, "text/html; charset=utf-8"); return
         self._s(b"<!doctype html><title>gate</title>", 200, "text/html; charset=utf-8")
     def do_POST(self):
+        # DRAIN THE REQUEST (§210, and pending-walk.py hit this first). A save
+        # now carries only what changed, which is small enough for
+        # `flushLeave`'s keepalive path — and a keepalive request answered
+        # without being read is reset as the page goes away, which the browser
+        # reports as a console error. Always was wrong; only now visible.
+        try:
+            n = int(self.headers.get("Content-Length") or 0)
+            if n: self.rfile.read(n)
+        except Exception:
+            pass
         self._s(b'{"ok":true,"unread":0,"threads":[],"chat":{"on":false},"states":{},"said":{}}')
 
 class SRV(socketserver.ThreadingTCPServer): allow_reuse_address = True

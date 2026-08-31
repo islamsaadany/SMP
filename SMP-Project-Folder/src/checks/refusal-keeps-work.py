@@ -84,9 +84,25 @@ JUDGE = tempfile.NamedTemporaryFile("w", suffix=".js", delete=False)
 JUDGE.write("""
 const fs = require("fs");
 const { authorize } = require(process.argv[2] + "/lib/authorize.js");
+const D = require(process.argv[2] + "/lib/graph-diff.js");
 const stored = JSON.parse(fs.readFileSync(process.argv[3], "utf8"));
 const person = JSON.parse(process.argv[4]);
-const incoming = JSON.parse(fs.readFileSync(0, "utf8")).state;
+/* §210: THE STUB MODELS THE SERVER, or it is testing something the product
+   does not do (§100.3). A client sends the parts it changed and the server
+   applies them onto ITS OWN stored graph before judging — so this does the
+   same, through the same shared module, rather than reading a whole graph
+   that no current client posts. The whole-graph path is kept for the same
+   reason api/state.js keeps it: a tab open on an older build still posts it. */
+const body = JSON.parse(fs.readFileSync(0, "utf8"));
+let incoming = body.state;
+if (body.changes) {
+  const applied = D.applyChanges(JSON.parse(JSON.stringify(stored)), body.changes);
+  if (!applied.ok) {
+    process.stdout.write(JSON.stringify({ ok: false, error: applied.error }));
+    process.exit(0);
+  }
+  incoming = applied.state;
+}
 const v = authorize(stored, incoming, person);
 if (v.ok) { process.stdout.write(JSON.stringify({ ok: true })); }
 else {

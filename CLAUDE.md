@@ -3362,6 +3362,10 @@ python3 checks/email-greeting.py # the greeting row is ONE line with no prose, t
                                 # fills it per recipient (§135, over HTTP)
 python3 checks/setup-pages.py   # every Setup page is named ONCE and in the rail's own word,
                                 # and the name and the table head stay on screen (§121)
+node scripts/test-graph-diff.js # the change list on its own: only what changed
+                                # travels, applying it to a DIFFERENT target leaves
+                                # that target's other work alone, a removal is not a
+                                # null, and an unknown path is refused (§210)
 python3 checks/knowledge-base.py # the page and db/kb.json draw from ONE source — the
                                 # AGREEMENT, never the count (§103)
 python3 checks/kb-file.py       # the questions file (§161): the round trip is a FIXED
@@ -3375,6 +3379,11 @@ node scripts/test-kb-audience.js # who sees which answer (§160): an office answ
                                 # a two-answer question leaving each side exactly one.
                                 # No database, no network — officeOnly() is pure.
 ```
+Two people, one database — the scenario that was destroying work before §210
+(needs a throwaway Postgres; `SMP_WHOLE_GRAPH=1` restores the old behaviour and
+it must go red):
+`DATABASE_URL=… node scripts/test-two-tabs.js`
+
 The mail half needs a database and a password (it spawns its own dev-server):
 `DATABASE_URL=… node scripts/test-email-greeting.js <smo-password>` (§142.6), and
 `DATABASE_URL=… node scripts/test-test-copies.js <smo-password>` (§146).
@@ -3411,7 +3420,38 @@ prior sessions (on HR_ERP) accidentally reverted agreed-upon designs.
 
 ---
 
-*Last Updated: 2026-08-31 &mdash; **v3.92: three from the welcome screen
+*Last Updated: 2026-08-31 &mdash; **v3.97: send what changed, and apply it
+onto our own copy (&sect;210).** Islam, after a morning of refusals naming
+things nobody had touched: *"why is the whole plan is sent, why don't we just
+send the changed element only not to cause this issue?"* **He is right, and it
+is the root the day's three faults share.** Every save posted the WHOLE graph
+and the database's copy was thrown away and replaced with the client's &mdash;
+so work done before a view switch rode into a save under the new identity
+(&sect;204), **a tab open a while silently overwrote everybody else's saved
+work** (measured against a real Postgres: an aspiration and a register rename,
+both gone, no error anywhere), and a refusal could name any part of the
+product because every part was in the envelope. **THE SHAPE IS "APPLY, DON'T
+REPLACE"**: the client sends the parts it changed and `api/state.js` applies
+them ONTO THE STORED GRAPH before judging. **Nothing downstream changes** —
+`authorize()` still compares stored with incoming, `writeState()` still writes
+a whole graph &mdash; and that containment is why this was safe to do in an
+afternoon on a live product. `lib/graph-diff.js` is ONE module both sides use
+(&sect;42). **The granularity is a top-level part**, except the four maps keyed
+by subject, compared entry by entry; **finer needs arrays matched by row ID**
+(&sect;48) and is its own change, so the residue is stated rather than implied:
+two people on the SAME unit still resolve last-write-wins there, and everyone
+else no longer collides at all. **A key that went is not a key set to null**
+(`priorCycle` is legitimately null), so `set` and `del` are two lists; **a path
+the server does not understand is refused, never guessed at**. **The
+whole-graph path stays** for tabs open on the previous build, because refusing
+them would turn a data-safety fix into an outage mid-sentence. Proved and
+proved able to fail: `SMP_WHOLE_GRAPH=1` restores the old behaviour and
+`test-two-tabs.js` goes **11/11 &rarr; 4 failures**. And one check's stub had
+to learn the same step (&sect;100.3) &mdash; it read `body.state`, answered 500
+to every save and reported 14 failures; *a stub that does not model the server
+is testing something the product does not do.*
+
+*Earlier: 2026-08-31 &mdash; **v3.92: three from the welcome screen
 (&sect;202).** Islam, using v3.91. **The house was SQUARE and the mark was not
 in the middle of it** &mdash; &sect;200.2 fixed the box and that was half the
 answer: `.navmenu-btn` is a worded pill, so it centres DOWN and starts its

@@ -209,7 +209,13 @@ with sync_playwright() as p:
     errs2 = []
     pg.on("pageerror", lambda e: errs2.append(str(e).split("\n")[0]))
     # A returning viewer: the tour's own session flag, same as boot-skeleton.py.
-    pg.add_init_script("try{sessionStorage.setItem('smp.tour.later','1');}catch(e){}")
+    # §167.2, in a fourth file. The welcome screen (§148) covers the viewport,
+    # so every click lands on `.welcomeover` — this suppressed the TOUR and not
+    # the welcome, and had been winning a race against it rather than avoiding
+    # it. Suppressed as a RETURNING viewer has it, in an init script, and never
+    # by reaching into the welcome screen, which has its own check.
+    pg.add_init_script("try{sessionStorage.setItem('smp.tour.later','1');"
+                       "sessionStorage.setItem('smp.welcome.done','1');}catch(e){}")
     pg.goto(base + "/raya-trade"); pg.wait_for_timeout(2500)
     healed = pg.evaluate("(FUNCTIONS['cfx'].items[0].tactics || []).map(x => x === null ? '<<null>>' : x.id)")
     ck("hydration healed the stored null", healed == ["fn:cfx-P1-T1"], healed)

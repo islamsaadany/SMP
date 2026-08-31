@@ -8136,8 +8136,35 @@ THEME.apply();
        it today, on the day they upgraded and without anybody choosing it.
        It starts where they already are; the SMO tightens it on the matrix,
        which is the whole reason the role is a row of its own. */
-    employee:  { a_group:"view", a_unit_own:"view", a_unit_own_strat:"view", a_unit_other:"none",
-                 a_fn_own:"view", a_fn_own_strat:"view", a_fn_other:"none", a_cycle:"none", a_setup:"none" }
+    /* ── THE FLOOR OPENS NOTHING (§207) ───────────────────────────────
+       Islam: *"anyone who has no role should default as Employee with no
+       access to anything."*
+
+       §93 settled that the floor is not a ROLE — nobody holds it, the picker
+       does not offer it, `personRoles()` returns `[]` — while keeping it as a
+       matrix row titled *Everyone else*, because what somebody with no role
+       may open is still the client's to answer. This is that answer, and it
+       is now nothing.
+
+       WHAT IT SHIPPED AS AND WHY THAT IS NO LONGER RIGHT: `a_group:"view"`
+       plus view on their own unit and their own function. That was a
+       reasonable reading of "an employee should see where they work", and it
+       is the wrong default for a platform holding a group's strategy: it
+       means anybody the register holds — including a row created by a people
+       upload, and including a session the register cannot match (§206) — can
+       read the group's plan and figures without anybody granting anything.
+       A floor is what applies when NO decision has been made, so it must be
+       the safe answer, not the friendly one.
+
+       THE COST IS STATED. On a tenant that has never touched these cells,
+       people relying on the floor to read their own unit lose that reading
+       and it is given back by granting a role or by opening the row on Roles
+       & access — which is the deliberate act this makes it. A tenant that
+       HAS stored values keeps them (§30.2: a saved map is merged with the
+       defaults, never replaced), so this reaches fresh deployments and
+       untouched cells and changes nothing somebody has already decided. */
+    employee:  { a_group:"none", a_unit_own:"none", a_unit_own_strat:"none", a_unit_other:"none",
+                 a_fn_own:"none", a_fn_own_strat:"none", a_fn_other:"none", a_cycle:"none", a_setup:"none" }
   };
 
   /* `fill` sits between view and edit (§145, spec 023): everywhere the
@@ -16162,10 +16189,43 @@ var VIEWER = "smo";
    own people, and the Demo button swaps the two datasets — and before
    2026-08-20 either one left a departed key selected and threw on the next
    repaint. */
+/* ── AND ON A LIVE TENANT IT STANDS NOBODY IN (§206) ──────────────────
+   From the deployment: a colleague signed in as themselves and was shown
+   "Welcome, <the SMO>" with the Super user chip, and the access to match.
+
+   THIS FUNCTION WAS THE SUBSTITUTION. `VIEWER = PEOPLE[0].key` is right for
+   the two cases the note above names — the baked example being replaced by
+   the tenant's own people, and the Demo button swapping datasets — where
+   the alternative is a throw on the next repaint and nobody is signed in as
+   anybody. It is catastrophic for the third case nobody listed: a LIVE
+   session whose person the hydrated register does not hold. `grant`,
+   `reaches` and `paint` all read straight off this result, so standing in
+   the first row of the register hands that person's ROLES to somebody else
+   — and the first row of a tenant is very often the bootstrap SMO.
+
+   §69.15 recorded exactly this sentence — "a person the platform could not
+   find was shown the FIRST PERSON'S VIEW" — and fixed the two chrome
+   controls it had noticed, leaving the substitution itself in place.
+
+   So the fallback survives where it was needed and is closed where it is
+   dangerous: with a live session, an unmatched viewer resolves to a
+   STRANGER — a person-shaped row holding nothing, so every rule answers no
+   — and `sync.js` has already put the "signed in but not on this register"
+   note on the page saying so. A value that is dangerous when wrong fails
+   closed (§69.15's own rule, on the value rather than on the controls).
+
+   `level` goes with it: §187 stopped deriving a seat from it, so it granted
+   nothing, and a dead field spelling "smo" on the one object that stands in
+   for a stranger is the last place to leave one (§24). */
 function viewer(){
   var v = PEOPLE.filter(function(p){ return p.key === VIEWER; })[0];
   if (v) return v;
-  if (!PEOPLE.length) return { key: VIEWER, name: "\u2014", title: "", level: "smo", unit: "group" };
+  var stranger = { key: VIEWER, name: "\u2014", title: "", unit: null };
+  if (!PEOPLE.length) return stranger;
+  var liveNow = false;
+  try { liveNow = typeof SYNC !== "undefined" && !!SYNC.isLive && SYNC.isLive(); }
+  catch (e) { liveNow = false; }
+  if (liveNow) return stranger;
   VIEWER = PEOPLE[0].key;
   return PEOPLE[0];
 }
@@ -41673,10 +41733,24 @@ var SYNC = (function () {
        note below this one already makes. */
     if (!box || !sel) { paint(); return; }
     var known = PEOPLE.some(function (p) { return p.key === person.key; });
-    if (known) {
-      window.VIEWER = person.key;
-      sel.value = person.key;
-    }
+    /* §206: VIEWER IS SET EITHER WAY, AND NEVER LEFT AT ITS DEFAULT.
+       `var VIEWER = "smo"` is the file:// demo's starting point and it is a
+       REAL PERSON KEY — on a live tenant it is the bootstrap SMO. This was
+       inside `if (known)`, so a signed-in person the hydrated register does
+       not hold kept somebody else's key: measured, session
+       `mohamed.mokhtar` with `VIEWER === "smo"`. Everything that asks
+       `viewer()` rather than the session then answers as the SMO — the
+       welcome screen the house button opens (§185) among them, which is how
+       a colleague can be shown another person's greeting and chips while
+       correctly signed in as themselves.
+
+       Setting it regardless makes `viewer()` find NOBODY, which is exactly
+       what the note below already tells the person has happened — that
+       comment says "render nobody" and the code was still pointing at the
+       first key in the file. §69.15's own rule, one variable further in: a
+       value that is dangerous when wrong must fail closed. */
+    window.VIEWER = person.key;
+    if (known) sel.value = person.key;
     /* AND IF THE REGISTER DOES NOT HOLD THEM, RENDER NOBODY. `VIEWER` was
        simply left where it was — at whoever the list happens to start with —
        so a person the platform could not find was shown the FIRST PERSON'S

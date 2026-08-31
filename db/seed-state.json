@@ -5682,12 +5682,12 @@
    "a_setup": "none"
   },
   "employee": {
-   "a_group": "view",
-   "a_unit_own": "view",
-   "a_unit_own_strat": "view",
+   "a_group": "none",
+   "a_unit_own": "none",
+   "a_unit_own_strat": "none",
    "a_unit_other": "none",
-   "a_fn_own": "view",
-   "a_fn_own_strat": "view",
+   "a_fn_own": "none",
+   "a_fn_own_strat": "none",
    "a_fn_other": "none",
    "a_cycle": "none",
    "a_setup": "none"

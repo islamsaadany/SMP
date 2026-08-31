@@ -24093,3 +24093,45 @@ did not do is evidence, and harder evidence than a theory that fits.
 The stale-tab overwrite (a tab that is behind silently destroys another
 person's saved work, proved end to end against a real Postgres) is unrelated,
 unfixed, and remains the most dangerous thing known about the platform.
+
+## §207 — The floor opens nothing (v3.95)
+
+Islam: *"anyone who has no role should default as Employee with no access to
+anything."*
+
+§93 settled that the floor is not a ROLE — nobody holds it, the picker does
+not offer it, `personRoles()` returns `[]` — while keeping it as a matrix row
+titled *Everyone else*, because what somebody with no role may open is still
+the client's to answer. **This is that answer.**
+
+It shipped as `view` on the group, on the person's own unit and on their own
+supporting function. That reads as *an employee should see where they work*,
+and it is the wrong default for a platform holding a group's strategy: it
+means anybody the register holds — including a row created by a people
+upload, and including the stranger §206 now resolves an unmatched session to
+— can read the group's plan and its figures with nobody having granted
+anything.
+
+**IT TOOK THREE CHANGES, NOT ONE, AND THAT IS THE PART WORTH KEEPING.**
+`ACCESS_DEFAULTS` alone changed nothing on any existing deployment: the map
+is stored per tenant and MERGED with the defaults, never replaced (§30.2), and
+the seed writes all nine cells — so the default reaches only a cell nobody has
+stored. Measured after changing the default alone: the floor still answered
+`a_group: view`. So the seed is regenerated (`extract-state.js`, which reads
+the defaults) and **migration 035** closes the row on a tenant already
+deployed. A rule changed in one layer of a three-layer product is a rule
+changed nowhere.
+
+**035 IS DELIBERATELY UNCONDITIONAL**, unlike 029 which moved only tenants
+still on the shipped values: a floor is what applies when no decision has been
+made, and this closes it everywhere. It is given back by granting a role or by
+opening the row on Roles & access, which makes it a deliberate act rather than
+a default nobody chose. Only the `employee` row is touched.
+
+**AND §46's CRASH CLASS DOES NOT FIRE.** That section recorded `paint()`
+falling back to the UNFILTERED page list when the reachable one came out empty
+— which here would have shown a person with no access *everything*, the exact
+opposite of the instruction. Driven as a real no-role person with the floor
+closed: no destinations, no tabs, no gear, no page errors, and the page's own
+sentence — *"No pages granted. The roles this person holds reach nothing. That
+is the table working as configured, not an error."*

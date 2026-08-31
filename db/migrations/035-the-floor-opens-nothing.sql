@@ -1,0 +1,32 @@
+-- §207 — THE FLOOR OPENS NOTHING
+--
+-- Islam: "anyone who has no role should default as Employee with no access to
+-- anything."
+--
+-- §93 settled that the floor is not a ROLE — nobody holds it, the picker does
+-- not offer it, personRoles() returns [] — while keeping it as a matrix row
+-- titled "Everyone else", because what somebody with no role may open is
+-- still the client's to answer. This is that answer.
+--
+-- WHY A MIGRATION AND NOT JUST A DEFAULT. The access map is stored per tenant
+-- and MERGED with the shipped defaults, never replaced (§30.2), so changing
+-- ACCESS_DEFAULTS reaches a fresh deployment and any cell nobody has stored —
+-- and every existing tenant has these nine stored, because the seed writes
+-- them. Without this, the change is invisible on the only deployment that
+-- matters.
+--
+-- WHAT IT CHANGES: the floor shipped with `view` on the group, on the
+-- person's own unit and on their own supporting function. That reads as "an
+-- employee should see where they work" and it is the wrong default for a
+-- platform holding a group's strategy — it means anybody the register holds,
+-- including a row created by a people upload, can read the group's plan and
+-- figures with nobody having granted anything.
+--
+-- IT IS DELIBERATELY UNCONDITIONAL, unlike 029 which moved only tenants still
+-- on the shipped values. A floor is what applies when no decision has been
+-- made; this closes it everywhere and it is given back by granting a role, or
+-- by opening the row again on Roles & access — which is now a deliberate act
+-- rather than a default nobody chose.
+--
+-- Only the `employee` row is touched. Every real role is untouched.
+UPDATE access_grants SET grant_ = 'none' WHERE role_key = 'employee';

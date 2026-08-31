@@ -8725,7 +8725,34 @@ THEME.apply();
        The `owner` stays, because a line nobody owns is a line nobody can
        report. */
     tactic:  ["owner", "quarters"],
-    capko:   ["dir", "target", "compile", "weight"],
+    /* §214.2: A FUNCTION'S KEY OBJECTIVES ARE NOT COUNTED (Islam: *"the key
+       objectives should not count as missing in the functions in general.
+       The definition is OK and the owner is OK, but the key objective
+       specifically should not count."*). A capability with none is judged by
+       its projects and a function with none by its pillars — so an objective
+       is an optional line, and an optional blank is not a gap (§119.1, §187).
+
+       THEY STAY FILLABLE, which is what `GAP_OPTIONAL` is for and is §205's
+       lesson paid rather than repeated: §187 stopped collaborators counting
+       by EMPTYING the one list the server also reads, so the screen went on
+       opening the cell while every save of one was refused — a BU owner met a
+       refusal among rows that were accepted. COUNTED and FILLABLE are two
+       questions and this answers only the first. */
+    capko:   [],
+    /* §214: THE OVERVIEW IS MANDATORY (Islam: *"all the overview for the
+       functions planning by pillars should be mandatory and be counted as
+       missing"*). `cap` is the holder of that page — a capability on one
+       function format, the function itself on the other (§213) — and what it
+       owes is the sentence saying what it is.
+
+       ONE ENTRY FOR BOTH, or the two Overviews start answering the same
+       question differently, which is the drift §211 cost a day and §213
+       closed by construction. It is deliberately NOT "and at least one key
+       objective": a function judged by its pillars legitimately has none, an
+       optional blank is not a gap (§119.1, §187), and fill mode cannot ADD a
+       row (§145) — so counting it would promise a control that does not
+       exist (§61). */
+    cap:     ["def"],
     project: ["owner", "start", "end"],
     /* §177: THE PAGE ALREADY CALLED THESE MISSING. A project pane prints the
        red word in exactly two more places -- an outcome with no target, and a
@@ -8762,7 +8789,8 @@ THEME.apply();
      GAP_FIELDS plus the optional blanks. Nothing is fillable that was not
      fillable before §187; this restores what that section removed by
      accident while keeping what it removed on purpose. */
-  var GAP_OPTIONAL = { tactic: ["collaborators"] };
+  var GAP_OPTIONAL = { tactic: ["collaborators"],
+                     capko:  ["dir", "target", "compile", "weight"] };
   var GAP_FILLABLE = (function () {
     var out = {};
     Object.keys(GAP_FIELDS).forEach(function (k) {
@@ -15148,6 +15176,44 @@ var CAP_FUNCTION = {
 GROUP.capabilities.forEach(function(c){ c.fn = CAP_FUNCTION[c.name] || null; });
 
 function functionOf(key){ return FUNCTIONS[key] || null; }
+/* WHO HOLDS A LIST OF KEY OBJECTIVES ON A SUPPORTING FUNCTION'S OVERVIEW
+   (§213). A capability, or — since that page exists for both formats — the
+   FUNCTION itself, addressed as `fn:<key>`. One resolver, because the add and
+   the remove each look the holder up and two lookups that must agree are how
+   §53.5 gets paid for twice.
+
+   The writing view, always: this is only ever called from a handler that is
+   about to push or splice, and `fnAsUnit()`'s shared frozen empty is not a
+   list anybody may write to (§50.6). */
+/* WHICH FOUNDATION KEY A TARGET IS GATED ON (§212). The group's, a unit's, or
+   a function's — named once, because the alternative is the ternary that was
+   written at every call site and got a function wrong at two of them. §211's
+   fault, and it fails CLOSED: the control renders and the press returns in
+   silence.
+
+   §214: AND IT WAS DELETED BY ACCIDENT AND PUT BACK. Removing the dead
+   `fnOverviewHas()` by slicing between two anchors took this with it, because
+   it had been inserted between them — every clause Add and Remove in the
+   product then threw inside its own click handler, which is invisible to a
+   page-load error listener and looked exactly like a button that does
+   nothing. `checks/plan-builder.py` caught it, on a UNIT, which is the
+   argument for running the whole suite rather than the file you edited. */
+function foundKeyFor(target){
+  var t = String(target || "");
+  if (t === "group") return "g_found";
+  return t.indexOf("fn:") === 0 ? "k_found" : "u_found";
+}
+function koHolderById(id){
+  var s = String(id || "");
+  if (s.indexOf("fn:") === 0) {
+    var u = unitLikeWritable(s);
+    if (!u) return null;
+    return { list: u.keyObjectives, target: s };
+  }
+  var c = capById(s);
+  if (!c) return null;
+  return { list: c.keyObjectives, target: c.fn ? "fn:" + c.fn : null, cap: c };
+}
 function capById(id){
   return GROUP.capabilities.filter(function(c){ return c.id === id; })[0] || null;
 }
@@ -16818,26 +16884,100 @@ function gapMap(target, pend){
   var entry = function(key, label, count, go){
     out.push({ key: key, label: label, count: count, go: go });
   };
-  var unitHalf = function(u){
+  /* ── A UNIT AND A PILLARS FUNCTION ARE THE SAME SHAPE AND NOT THE SAME
+     VOCABULARY (§211) ──────────────────────────────────────────────────
+     Islam, on Consumer Finance and Merchandising: *"pressing on the CON01 22
+     it doesn't take me to the pillars, it's stuck in the overview."*
+
+     This walked a pillars function through `unitLike()` — right, and §59's
+     whole point — and then handed out the UNIT's words for the two things
+     that are not shared:
+
+       · the SECTION. A unit's plan is `plan`; a function's is `proj`,
+         labelled "Plan" for this format (§59). Setting `CURSEC` to a section
+         the page does not have leaves the renderer on its first one, which
+         is the Overview — the reported symptom exactly.
+
+       · the ACCESS KEY. A unit's are `u_found`/`u_plan`, a function's
+         `k_found`/`k_proj`, and `reach()` here is what decides whether a gap
+         is COUNTED AT ALL. Measured on the demo's pillars function: its
+         custodian, holding the function's Strategy cell at `fill`, answers
+         false to both `u_` keys and true to both `k_` ones — so every count
+         came out ZERO and no fill control was drawn, for the one person the
+         feature is for. It looked right only from the office, who passes
+         every key. §61's trap, hidden behind a permission that happened to
+         be true for whoever was looking.
+
+     `page` is deliberately NOT in the vocabulary: `EDIT_PAGE.plan` is one
+     mode for both (§145, and the note above `mayEditPlan`), and
+     `fillPageForSec` already answers for `proj` as well as `plan`. Splitting
+     it would be inventing a difference the product does not have. */
+  /* `found: null` MEANS THE FOUNDATION IS NOT THIS SUBJECT'S (§211.2).
+     Islam: *"they have a missing item banner in the foundation"* — and there
+     is nothing behind it. `GAP_FIELDS.unit` is `["aspiration"]`, and a
+     function that plans in pillars HAS NO FOUNDATION OF ITS OWN: its
+     aspiration, SWOT and key objectives are the parent unit's, which the page
+     said in its own words while the count argued with it. Measured:
+     `FUNCTIONS.merchandising` carries no `foundation` key at all, `unitLike()`
+     returns null for it and so does `unitLikeWritable()` — so the platform was
+     asking for a field the subject can never hold, counting it as one missing
+     for ever, and drawing a red *Fill in missing elements* over it. Pressed:
+     no fill mode, no section change, ZERO fields. §61 exactly, with the
+     loudest control on the page the one with nothing behind it.
+
+     THE KEY OBJECTIVES GO WITH IT, and that is deliberate rather than
+     incidental: a pillars function's have no authoring surface anywhere in the
+     product (§129's own recorded hole), so counting them would promise a
+     control that does not exist — the same fault one row down.
+
+     `builder.js` HAD ALREADY DECIDED THIS: `builderSections()` guards the
+     Foundation, Objectives and SWOT sections with `route === "unit"`, so the
+     plan builder has always treated a pillars function as having no
+     foundation of its own. Two parts of the product answering one question
+     differently (§53.5) — this is the other one catching up. */
+  var UNIT_WORDS = { found: "u_found", plan: "u_plan", sec: "plan" };
+  /* NO FOUNDATION HALF FOR A FUNCTION (§213). §211.2 dropped it on a premise
+     that was false (this format CAN store all five fields), §212 put it back
+     with a unit's foundation page behind it, and Islam corrected the shape:
+     a supporting function never authors an aspiration or a SWOT — it inherits
+     the unit's — so what it owes is what a CAPABILITY owes, and that is
+     counted below as the Overview. Nothing is counted that no page shows
+     (§61), and nothing is shown that the subject does not own. */
+  var FN_WORDS   = { found: null, plan: "k_proj", sec: "proj" };
+  var unitHalf = function(u, w){
     if (!u) return;
-    var found = G("u_found", {}, "unit", u);
-    entry("found", "Foundation", found, { sec: "found", page: "foundation" });
-    var ko = 0;
-    (u.keyObjectives || []).forEach(function(m){ ko += G("u_found", {}, "ko", m); });
-    entry("ko", "Objectives", ko, { sec: "found", page: "foundation" });
+    w = w || UNIT_WORDS;
+    if (w.found) {
+      var found = G(w.found, {}, "unit", u);
+      entry("found", "Foundation", found, { sec: "found", page: "foundation" });
+      var ko = 0;
+      (u.keyObjectives || []).forEach(function(m){ ko += G(w.found, {}, "ko", m); });
+      entry("ko", "Objectives", ko, { sec: "found", page: "foundation" });
+    }
     (u.items || []).forEach(function(p, i){
       var n = 0, pctx = function(row){ return { pillarOwner: p.owner, row: row }; };
-      (p.measures || []).forEach(function(m){ n += G("u_plan", pctx(m), "measure", m); });
-      (p.tactics  || []).forEach(function(x){ n += G("u_plan", pctx(x), "tactic", x); });
+      (p.measures || []).forEach(function(m){ n += G(w.plan, pctx(m), "measure", m); });
+      (p.tactics  || []).forEach(function(x){ n += G(w.plan, pctx(x), "tactic", x); });
       entry("p:" + (p.code || i), pillarCode(u, i), n,
-            { sec: "plan", page: "plan", rail: unitRailKey(u), code: p.code });
+            { sec: w.sec, page: "plan", rail: unitRailKey(u), code: p.code });
     });
   };
   if (t.indexOf("fn:") === 0) {
     var fk = t.slice(3), fo = functionOf(fk);
-    if (fo && String(fo.format) === "pillars") { unitHalf(unitLike(t)); return out; }
+    if (fo && String(fo.format) === "pillars") {
+      /* THE SAME OVERVIEW ENTRY A CAPABILITY FUNCTION GETS, because since
+         §213 it is the same page, counted from the same field list (§53.5).
+         Drawn ahead of the pillars so the band reads down the page. */
+      /* §214: the definition first, then each objective — the same two the
+         capability branch counts below, from the same field lists. */
+      var fov = G("k_found", {}, "cap", fo);
+      (unitLike(t).keyObjectives || []).forEach(function(m){
+        fov += G("k_found", {}, "capko", m); });
+      entry("ov", "Overview", fov, { sec: "found", page: "capfoundation" });
+      unitHalf(unitLike(t), FN_WORDS); return out; }
     var caps = capsOfFunction(fk), ov = 0;
     caps.forEach(function(c){
+      ov += G("k_found", {}, "cap", c);           /* §214: its definition */
       (c.keyObjectives || []).forEach(function(m){ ov += G("k_found", {}, "capko", m); });
     });
     entry("ov", "Overview", ov, { sec: "found", page: "capfoundation" });
@@ -17084,6 +17224,24 @@ function fnAsUnit(fk){
    thrown away one line later — the import would report the rows it wrote and
    the function would still be empty. fnWriteBack() is the other half of the
    pair, and neither is any use without it. */
+/* AND THE TWO SCALARS HAD TO WRITE THROUGH (§212). Minting the containers is
+   enough for every ARRAY on this view, because an array is handed out by
+   reference and a row edited in place lands in the function itself. The
+   aspiration and the end in mind are STRINGS, so `u.aspiration = v` — which is
+   exactly what `renderUnitFoundation()`'s setter does, and it is the same
+   setter for a unit — would have written to the fresh object `fnAsUnit()`
+   returns and been thrown away on the next paint.
+
+   §61's own trap, one field narrower: that section found an IMPORT reporting
+   rows it never wrote, and the same shape was still waiting for the first
+   screen that let somebody type into these two. Silent, and in the
+   safe-looking direction: the field accepts the text, the page redraws, the
+   words are gone.
+
+   Fixed HERE rather than at the call site, so every renderer that already
+   knows how to write a unit's foundation writes a function's correctly
+   without being told which it has (§53.5). `enumerable` so the view still
+   stringifies the way the reading one does. */
 function fnWritable(fk){
   var f = FUNCTIONS[fk];
   if (!f || !fnPlansInPillars(f)) return null;
@@ -17091,7 +17249,15 @@ function fnWritable(fk){
   if (!Array.isArray(f.clauses)) f.clauses = [];
   if (!Array.isArray(f.keyObjectives)) f.keyObjectives = [];
   if (!f.swot || f.swot === FN_NO_SWOT) f.swot = { s:[], w:[], o:[], t:[] };
-  return fnAsUnit(fk);
+  var u = fnAsUnit(fk);
+  ["aspiration", "endInMind"].forEach(function(k){
+    Object.defineProperty(u, k, {
+      enumerable: true, configurable: true,
+      get: function(){ return f[k] || ""; },
+      set: function(v){ f[k] = v; }
+    });
+  });
+  return u;
 }
 function fnWriteBack(fk, u){
   var f = FUNCTIONS[fk];
@@ -20103,9 +20269,16 @@ function createFromPlan(u, d){
         status:"Not started", actual:null, slide:x.source_slide, notes:x.notes });
       made++;
     } else if (x.type === "NORTHSTAR") {
-      u.keyObjectives.push({ id:x.id, name:x.name, dir:x.direction || "\u2265",
+      /* §213: a supporting function's objectives carry a WEIGHT and no 3-year
+         target, a unit's the reverse. Both come through here, and an absent
+         column is an absent key — never a 0, which `Number("")` would make it
+         and which reads as a real weight of nought (§104.10). */
+      var ko = { id:x.id, name:x.name, dir:x.direction || "\u2265",
         target3y:t3, target:t1, compile:x.compile || "Latest", actual:"", progress:null,
-        slide:x.source_slide });
+        slide:x.source_slide };
+      if (x.weight != null && String(x.weight).trim() !== "")
+        ko.weight = Number(x.weight);
+      u.keyObjectives.push(ko);
       made++;
     } else if (["STRENGTH","WEAKNESS","OPPORTUNITY","THREAT"].indexOf(x.type) > -1) {
       var key = { STRENGTH:"s", WEAKNESS:"w", OPPORTUNITY:"o", THREAT:"t" }[x.type];
@@ -21204,9 +21377,25 @@ function planWorkbook(u){
   var readmeSheet = readme("plan", "Business unit or function", planSubjectNames());
   readmeSheet.rows[1][1] = picked;
 
-  return [
-    readmeSheet,
+  /* THE FILE STOPS ASKING A FUNCTION FOR A STRATEGY IT DOES NOT AUTHOR
+     (§213, Islam: *"if you're talking about the template of the functions,
+     yes you can drop these columns of course"*).
 
+     A supporting function inherits its aspiration, SWOT and who-we-are from
+     the unit it plans under, so a template offering it those three sheets was
+     asking for content the product now has nowhere to show — which is the
+     fault §212 spent a section removing, arriving from the file end. Its
+     objectives take a CAPABILITY's shape for the same reason: that is what its
+     Overview draws, and a 3-year target column would collect a value no page
+     renders while the Weight the page shows would have nowhere to come from.
+
+     A UNIT'S WORKBOOK IS UNTOUCHED — every sheet, every column, every
+     validation range — and that is asserted rather than assumed. */
+  var isFn = !!(u && String(u.ukey || "").indexOf("fn:") === 0);
+
+  return [
+    readmeSheet]
+  .concat(isFn ? [] : [
     { name:"Foundation", widths:[20, 78],
       head:["Label", "Text"],
       rows:u.clauses.map(function(c){ return [c[0], c[1]]; }) },
@@ -21220,8 +21409,25 @@ function planWorkbook(u){
            are planning TO — an input, not a default the platform hands them,
            and a pre-filled year reads as a decision somebody already made. */
         ["Horizon (the year this plan runs to)", GROUP.horizon || ""]
-      ] },
-
+      ] }
+  ])
+  .concat(isFn ? [
+    /* A function's objectives, in its Overview's own columns. `numCols` and
+       every validation range move with the columns — a range is a POSITION
+       (§65), and leaving them where a unit's are would validate the wrong
+       cells in silence. */
+    { name:"Objectives", widths:[36, 11, 16, 10, 12, 10],
+      head:["Objective", "Direction", "This year target", "Unit", "Compile", "Weight %"],
+      numCols:[2, 5],
+      validations:[{ range:"B2:B60", list:DIRS },
+                   { range:"D2:D60", list:units, soft:true },
+                   { range:"E2:E60", list:COMPILES }],
+      rows:u.keyObjectives.map(function(m){
+        var a = splitTarget(m.target);
+        return [m.name, m.dir, a.value, a.unit, m.compile,
+                m.weight == null ? "" : m.weight];
+      }) }
+  ] : [
     { name:"Objectives", widths:[36, 18, 11, 16, 16, 10, 12],
       head:["Objective", "Group", "Direction", "3-year target", "This year target", "Unit", "Compile"],
       numCols:[3, 4],
@@ -21240,8 +21446,9 @@ function planWorkbook(u){
         .reduce(function(acc, pair){
           (u.swot[pair[0]] || []).forEach(function(x){ acc.push([pair[1], x]); });
           return acc;
-        }, []) },
-
+        }, []) }
+  ])
+  .concat([
     { name:"Pillars", widths:[40, 14, 22, 22],
       head:["Pillar", "Kind", "Theme", "Owner"],
       validations:[{ range:"B2:B60", list:KINDS },
@@ -21279,7 +21486,7 @@ function planWorkbook(u){
         });
         return acc;
       }, []) }
-  ];
+  ]);
 }
 
 /* Reporting is unchanged: it is per unit, it amends rows that already exist,
@@ -21525,9 +21732,15 @@ function planFromWorkbook(u, sheets){
   var kN = 0;
   sheetObjects(sheets["Objectives"]).forEach(function(r){
     if (!r["Objective"]) return;
+    /* §213: a function's sheet has no "3-year target" and DOES have a
+       "Weight %"; a unit's is the other way round. Read by header name and
+       both files pass through one reader — an absent column simply reads
+       undefined, which is what an absent value already means here (§58's
+       rule: write the new label, read either). */
     rows.push({ id:mint("KO" + (++kN)), type:"NORTHSTAR", name:r["Objective"],
       group:r["Group"], direction:r["Direction"], value:r["This year target"],
-      value_3y:r["3-year target"], unit:r["Unit"], compile:r["Compile"] });
+      value_3y:r["3-year target"], unit:r["Unit"], compile:r["Compile"],
+      weight:r["Weight %"] });
   });
 
   var swotN = { Strength:0, Weakness:0, Opportunity:0, Threat:0 };
@@ -27582,6 +27795,21 @@ function projPlanBody(p, fk){
     dueNote(p) + overrunNote(p);
 }
 
+/* THE "PLANS UNDER …" LINE IS GONE (§214.3). Islam: *"in the merchandising
+   remove the line that's talking about the Retail aspiration … I will think
+   later how to edit it, let's remove it for them to avoid any confusion."*
+
+   It was information rather than a description (rule 1b-ii) and it is still a
+   fact worth stating — where a supporting function's aspiration and SWOT
+   actually live is said nowhere else. What it is NOT is settled wording, and a
+   sentence nobody has settled, sitting at the top of a page people are filling
+   in, is a question mark rather than an answer. Removed whole rather than
+   reworded on his behalf, and its builder is DELETED rather than left with no
+   callers (§24) — so bringing it back is a decision somebody makes, not a
+   line somebody finds.
+
+   RECORDED AS OUTSTANDING, not closed: nothing on either of a supporting
+   function's pages now says its strategy is the parent unit's. */
 function renderFnProjects(fnKey){
   var fk = fnKeyOf(fnKey), caps = capsOfFunction(fk);
   if (fnPlansInPillars(FUNCTIONS[fk])) return renderUnitPlan(fnAsUnit(fk));
@@ -28310,20 +28538,84 @@ function renderUnitPlan(u){
 
    The third column is WEIGHT rather than a three-year target: a capability's
    objectives carry the optional weighting and have never had a horizon. */
+/* ── A PILLARS FUNCTION'S OVERVIEW (§213) ─────────────────────────────
+   The capability function's two cards, carried by the function itself: what
+   it is, and what it is judged on. No aspiration, no SWOT, no who-we-are —
+   those belong to the unit it plans under — §214.3 removed the line that
+   said so, at Islam's direction, until he settles its wording.
+
+   `def` IS A NEW FIELD ON THE FUNCTION and needs no migration: `functions`
+   names six columns in `lib/state-io.js` and files everything else into
+   `extra` (verified, the same route `format`, `under` and `items` already
+   take). A capability has carried one since the model existed; this is the
+   function finally being asked the same question. */
+function fnPillarsOverview(fk){
+  var f = FUNCTIONS[fk];
+  if (!f) return "";
+  var ed = authoring("capfoundation", "k_found");
+  /* THE WRITING VIEW MINTS THE CONTAINER (§50.6). `fnAsUnit()` hands out a
+     SHARED frozen empty where `keyObjectives` does not exist, so a first
+     objective added against the reading view would be pushed onto an empty
+     every function shares. */
+  var list = (ed ? unitLikeWritable("fn:" + fk) : unitLike("fn:" + fk)).keyObjectives || [];
+  return editBar("capfoundation", "k_found") +
+    fillBarOr("capfoundation", "k_found",
+      list.reduce(function(a, m){
+        return a + SMPRules.gapMissing("capko", m).length; }, 0),
+      "the overview") +
+    '<div class="fgrid">' +
+      '<div class="card"><h2 class="sec first">What it is</h2><dl style="margin:0">' +
+        '<div class="clause"><dt>Function</dt><dd>' + esc(f.name) + '</dd></div>' +
+        '<div class="clause"><dt>Led by</dt><dd>' +
+          (f.head ? esc(personName(f.head)) : "&mdash;") + '</dd></div>' +
+        '<div class="clause"><dt>Definition</dt><dd>' +
+          /* §214: THROUGH `gapCell`, NOT `fieldOr`. The definition is a gap
+             now, and a counted gap has to be typable by whoever the count is
+             shown to — a fill-grant holder seeing it in the band and finding
+             a read-only line is §61 exactly, and their save would be refused
+             (§184). `area`, because it is a sentence.
+
+             `gapCell` reads `row[field]`, so it never renders the word
+             "undefined" the way `fieldOr(page, f.def, …)` did — that third
+             argument is a CLASS, not a placeholder (§213.1, found in a
+             screenshot). */
+          gapCell("capfoundation", "k_found", f, "def", { kind:"area" }) +
+        '</dd></div>' +
+      '</dl></div>' +
+      '<div class="card"><div class="cardhead"><h2 class="sec first">' + L("keyobj","bu") + '</h2>' +
+        '<span class="pill horizon">Horizon &middot; ' + horizonLabel() + '</span></div>' +
+        ((ed || filling("capfoundation", "k_found"))
+          ? capKoEdit({ id:"fn:" + fk, keyObjectives:list })
+          : koReadBlock(list,
+              "None. This function is judged by its " +
+              esc(L("pillar","bu").toLowerCase()) + ".")) +
+      '</div>' +
+    '</div>';
+}
 function renderFnFoundation(fnKey){
   var fk = fnKeyOf(fnKey), caps = capsOfFunction(fk);
-  /* A pillars function has no capabilities to describe, and no foundation of
-     its own yet — it belongs to whatever it sits under. Said plainly rather
-     than drawn as an empty card: an empty labelled block asserts that
-     something is missing when the plan simply does not work that way (§15.1). */
-  if (fnPlansInPillars(FUNCTIONS[fk])) {
-    var f = FUNCTIONS[fk], parent = f.under ? UNITS[f.under] : null;
-    return '<div class="note"><b>' + esc(f.name) + ' plans in ' +
-      L("pillar","bu").toLowerCase() + '.</b> Its foundation is ' +
-      (parent ? esc(parent.name) + '\u2019s' : 'the group\u2019s') +
-      ' \u2014 the aspiration, the SWOT and the key objectives are set there, and ' +
-      'what is planned here is the work under them. Open <b>Plan</b> to see it.</div>';
-  }
+  /* A SUPPORTING FUNCTION'S OVERVIEW IS A SUPPORTING FUNCTION'S OVERVIEW,
+     WHICHEVER WAY IT PLANS (§213). Islam: *"what if the overview of the
+     functions that plan in pillars [were] like the overview of the functions
+     that plan as projects … because the function will never have an
+     aspiration, will never have a foundation, but they will have maybe key
+     objectives."*
+
+     Right, and §212 had reached for the wrong neighbour: it gave this format
+     a UNIT's foundation — who we are, a winning aspiration, an end in mind —
+     which is the strategy the function INHERITS from the unit it plans under
+     and never authors itself. What it does have is what a capability has: a
+     definition, and some key objectives.
+
+     So both formats draw the same two cards, and the only difference is what
+     carries them — a capability each on one side, the function itself on the
+     other. Same page key (`capfoundation`), same access key (`k_found`), same
+     builder for the objectives (§53.5).
+
+     A UNIT IS UNTOUCHED BY ALL OF THIS, deliberately and at Islam's
+     instruction: `renderUnitFoundation()` is exactly what it always was, on
+     `foundation`/`u_found`, and nothing here calls it. */
+  if (fnPlansInPillars(FUNCTIONS[fk])) return fnPillarsOverview(fk);
   var ed = authoring("capfoundation", "k_found");
   /* §145: the fill grant opens the same editor, whose gap cells then draw
      only the blanks — Add and Remove stay the author's. */
@@ -28343,28 +28635,19 @@ function renderFnFoundation(fnKey){
        pen; a row minted empty carries the same shape the seed's rows have. */
     var koBlock = (ed || fl)
       ? capKoEdit(c)
-      : c.keyObjectives.length
-      ? '<div class="ohead"><span>Objective</span><span>This year</span><span>Weight</span></div>' +
-        c.keyObjectives.map(function(m){
-          /* §145: the pending chips, including a direction or compile that
-             has no column here — read mode is where the office's tick is. */
-          return '<div class="orow"><span class="on">' + esc(m.name) +
-              pendChip("k_found", m, "dir") + pendChip("k_found", m, "compile") + '</span>' +
-            '<span class="ot">' + (m.target ? esc(m.target) : '<span class="missing">Missing</span>') +
-              pendChip("k_found", m, "target") + '</span>' +
-            '<span class="ot h">' + (m.weight == null ? "&mdash;" : m.weight + "%") +
-              pendChip("k_found", m, "weight") + '</span></div>';
-        }).join("")
-      : '<p class="sub" style="margin:0">None. This capability is judged by its projects.</p>';
+      : koReadBlock(c.keyObjectives,
+          "None. This capability is judged by its projects.");
     return capBand(c) + '<div class="capbody"><div class="fgrid">' +
       '<div class="card"><h2 class="sec first">What it is</h2><dl style="margin:0">' +
         '<div class="clause"><dt>Capability</dt><dd>' + esc(c.name) + '</dd></div>' +
         '<div class="clause"><dt>Carried by</dt><dd>' +
           esc(f ? f.name : "\u2014") +
           (f && f.head ? " \u2014 " + esc(personName(f.head)) : "") + '</dd></div>' +
+        /* §214: the same fillable cell the other format's Overview draws —
+           one page, one answer (§53.5), or a fill grant would reach a
+           function's definition and not a capability's. */
         '<div class="clause"><dt>Definition</dt><dd>' +
-          fieldOr(authoring("capfoundation", "k_found") ? "capfoundation" : null,
-                  c.def, "", function(v){ c.def = v; }) + '</dd></div>' +
+          gapCell("capfoundation", "k_found", c, "def", { kind:"area" }) + '</dd></div>' +
       '</dl></div>' +
       '<div class="card"><div class="cardhead"><h2 class="sec first">' + L("keyobj","bu") + '</h2>' +
         '<span class="pill horizon">Horizon &middot; ' + horizonLabel() + '</span></div>' +
@@ -28378,10 +28661,41 @@ function renderFnFoundation(fnKey){
     '">+ Add a capability</button></div>' : '');
 }
 
+/* ── A SUPPORTING FUNCTION'S KEY OBJECTIVES, READ (§213) ──────────────
+   Lifted out of the capability branch unchanged so a capability's card and a
+   pillars function's cannot drift into two answers about one table (§53.5) —
+   the whole reason §211 cost a day. The empty line is the caller's, because
+   what an empty list MEANS differs: a capability with none is judged by its
+   projects; a function with none is judged by its pillars. */
+function koReadBlock(list, emptyLine){
+  if (!(list || []).length)
+    return '<p class="sub" style="margin:0">' + emptyLine + '</p>';
+  return '<div class="ohead"><span>Objective</span><span>This year</span><span>Weight</span></div>' +
+    list.map(function(m){
+      /* §145: the pending chips, including a direction or compile that has no
+         column here — read mode is where the office's tick is. */
+      /* §214.2: AN EM-DASH, NOT THE RED WORD. A function's key objectives
+         stopped being counted as missing, and a page that prints `Missing`
+         over a count of nought is the product arguing with itself — §177's
+         own fault with the sign reversed (there the page said missing and the
+         count said nothing was). The em-dash is what the Weight column beside
+         it has always drawn for an absent optional value. */
+      return '<div class="orow"><span class="on">' + esc(m.name) +
+          pendChip("k_found", m, "dir") + pendChip("k_found", m, "compile") + '</span>' +
+        '<span class="ot">' + (m.target ? esc(m.target) : '&mdash;') +
+          pendChip("k_found", m, "target") + '</span>' +
+        '<span class="ot h">' + (m.weight == null ? "&mdash;" : m.weight + "%") +
+          pendChip("k_found", m, "weight") + '</span></div>';
+    }).join("");
+}
 /* The capability objectives editor — koEdit's shape with the WEIGHT column a
    capability's rows actually carry, addressed by capId + index the way the
    Temple's tables are (no ids: the seed's rows never had them, and §96.4's
    rule about mixed lists says do not mint some now). */
+/* §213: addressed by HOLDER id, which is a capability's `id` or `fn:<key>` for
+   a function that plans in pillars — the same string `koHolderById()` resolves
+   on the other side of the click, so one table serves both and the add/remove
+   handlers have one thing to look up. */
 function capKoEdit(c){
   var pg = "capfoundation";
   /* §145: the four gap-fillable columns through gapCell; the NAME, Remove
@@ -39870,6 +40184,12 @@ var TOUR = (function(){
   function isFnPlace(k){ return String(k).indexOf("fn:") === 0; }
   var FN_TABS = { strategy:"fnstrat", performance:"fnperf" };
   var FN_SECS = { found:"found", plan:"proj", swot:null };
+  /* §211.2 dropped `found` here for a function that plans in pillars, because
+     that section had removed its Overview. §212 put the Overview back for
+     every format — both tabs, always — so the step points at a section that
+     exists again and the drop is REMOVED rather than left standing: a rule
+     kept after its reason expires is one the next reader takes as load-bearing
+     (§94.15). The SWOT is the one genuine difference once more. */
   function tabKeyFor(place, k){
     return isFnPlace(place) ? (FN_TABS[k] || k) : k;
   }
@@ -42549,10 +42869,53 @@ var SYNC = (function () {
              The KEY stays `found` and the access key stays `k_found`: renaming
              either would lose every stored preference and every grant pointing
              at it, for a word (§65, the same rule as `bu`). */
+          /* AND A FUNCTION THAT PLANS IN PILLARS HAS NO OVERVIEW AT ALL
+             (§211.2, REVERSING the 2026-08-24 ruling recorded above at
+             Islam's direction: *"for functions planning in pillars they
+             shouldn't have an overview just the plan … this is an empty tab
+             with no need"*).
+
+             He is right, and the page had been saying so itself: for this
+             format `renderFnFoundation()` returned ONE SENTENCE — *"Its
+             foundation is Retail Stores's … Open Plan to see it"* — and
+             nothing else. A section whose only content is a pointer at the
+             section beside it is §32's door behind a door.
+
+             The earlier ruling is not wrong about the WORD (a function gets
+             Overview, not Foundation, whichever way it plans) and that half
+             stands for a capability function, which has capabilities to
+             describe. What changed is that the page for THIS format turned
+             out to have nothing to describe.
+
+             THE SENTENCE IS INFORMATION, NOT A DESCRIPTION (rule 1b-ii), so
+             it moves to the top of the Plan rather than being deleted: where
+             the aspiration and the key objectives actually live is a fact
+             this page cannot otherwise state. */
+          var pillars = fnPlansInPillars(FUNCTIONS[fnKeyOf(k)]);
+          var plan = { k:"proj", ac:"k_proj", label:pillars ? "Plan" : "Projects",
+                       render:renderFnProjects };
+          /* §212 REVERSES §211.2 AND RESTORES BOTH SECTIONS FOR EVERY
+             FORMAT. §211.2 removed the Overview here on a premise measured
+             against the wrong field name and simply WRONG: a pillars function
+             CAN hold an aspiration, an end in mind, who-we-are clauses, a
+             SWOT and key objectives — `fnAsUnit()` carries all five,
+             `fnWriteBack()` writes all five, and an uploaded plan puts them
+             there. The tab it deleted was the only place any of that could
+             ever have shown.
+
+             A conditional tab was built next and Islam replaced it with
+             something simpler: *"maintain the overview and the plan sub tabs
+             but in the overview if it's empty, it's empty and if we need to
+             add something, you find the button to add something."* Right, and
+             it is the honest reading of what was broken — THE PAGE, never the
+             tab. It held one sentence pointing at the section beside it; it
+             holds the function's own foundation now, with the same Add
+             controls a unit's has, so an empty one is an empty page you can
+             fill rather than a dead end (§61) — and nothing about the
+             navigation depends on the data, so a tab cannot appear and
+             disappear as rows arrive (§45.2). */
           return [{ k:"found", ac:"k_found", label:"Overview", render:renderFnFoundation },
-                  { k:"proj",  ac:"k_proj",
-                    label:fnPlansInPillars(FUNCTIONS[fnKeyOf(k)]) ? "Plan" : "Projects",
-                    render:renderFnProjects }];
+                  plan];
         } },
       { k:"fnperf", ac:"k_perf", label:"Performance", primary:true, dot:true,
         render: function(k){
@@ -44436,22 +44799,34 @@ var SYNC = (function () {
        than one long scroll. The row exists only where there are sections. */
     var secrow = document.getElementById("secrow");
     var onSecPage = current === "group" && currentSub === "performance" && GROUP_SECTIONS.length;
+    /* §145.14: THE MISSING BAR LIVES IN THIS ROW'S FREE SPACE (Islam: "that
+       bar with that button is what goes up beside the plan, not to waste
+       lines") — the total, one red chip per place that owes, and the red
+       button, on the strategy tabs only, read mode too. */
+    var missHTML = ((currentSub === "strategy" || currentSub === "fnstrat") &&
+      typeof missBar === "function") ? missBar() : "";
+    /* THE ROW IS NOT ONLY FOR SECTIONS, AND §211.2 IS WHAT PROVED IT. That
+       section left a pillars function with ONE section — and `> 1` took the
+       whole row away, the missing bar with it, so a function that genuinely
+       owed targets on its pillar measures would have lost the count AND the
+       fill button: §61 by exactly the road the same section was closing. The
+       row draws when it has sections to offer OR a bar to carry.
+
+       ONE SECTION STILL DRAWS NO BUTTON. A tab row of one says nothing —
+       §68's argument for a company having a single tab and therefore no row,
+       and the reason a pillars function's Strategy now goes straight to the
+       Plan rather than showing a lone tab above it. */
     /* `!railed`: a Setup page's sections were drawn into its own pane above, so
        drawing them here as well would be the same two buttons in two places. */
-    if (!railed && secs && secs.length > 1) {
+    if (!railed && secs && secs.length && (secs.length > 1 || missHTML)) {
       /* The same third row the group's Performance sections already use. One
          row that means "sections of the tab above", wherever it appears. */
       secrow.hidden = false;
-      document.getElementById("secrow-in").innerHTML = secs.map(function(s){
-        return '<button role="tab" data-sub2="' + s.k + '"' + (s.cls ? ' class="' + s.cls + '"' : '') +
-          ' aria-selected="' + (s.k === def.k) + '">' + s.label + '</button>';
-      }).join("") +
-        /* §145.14: THE MISSING BAR LIVES IN THIS ROW'S FREE SPACE (Islam:
-           "that bar with that button is what goes up beside the plan, not
-           to waste lines") — the total, one red chip per place that owes,
-           and the red button, on the strategy tabs only, read mode too. */
-        ((currentSub === "strategy" || currentSub === "fnstrat") &&
-         typeof missBar === "function" ? missBar() : "");
+      document.getElementById("secrow-in").innerHTML =
+        (secs.length > 1 ? secs.map(function(s){
+          return '<button role="tab" data-sub2="' + s.k + '"' + (s.cls ? ' class="' + s.cls + '"' : '') +
+            ' aria-selected="' + (s.k === def.k) + '">' + s.label + '</button>';
+        }).join("") : "") + missHTML;
     } else {
       secrow.hidden = !onSecPage;
       /* HIDDEN IS NOT EMPTY, AND IT HAS TO BE BOTH (§63.6). The row kept the
@@ -48684,7 +49059,10 @@ var SYNC = (function () {
     document.querySelectorAll("[data-clauseadd]").forEach(function(b){
       b.addEventListener("click", function(){
         var t = b.dataset.clauseadd;
-        if (!mayAuthor(t === "group" ? "g_found" : "u_found", t === "group" ? null : t)) return;
+        /* §212: a function's page is gated on the FUNCTION's key. Gating an
+           `fn:` target on `u_found` is §211's fault exactly, and here it fails
+           CLOSED — the button renders and the click returns silently. */
+        if (!mayAuthor(foundKeyFor(t), t === "group" ? null : t)) return;
         if (BUILDER && BUILDER.target === t) { openBuilderForm("clause", { target:t }); return; }
         var o = t === "group" ? GROUP : unitLikeWritable(t);
         if (!o || !Array.isArray(o.clauses)) return;
@@ -48696,7 +49074,7 @@ var SYNC = (function () {
     document.querySelectorAll("[data-clauserm]").forEach(function(b){
       b.addEventListener("click", function(){
         var a = b.dataset.clauserm.split("|"), t = a[0], i = +a[1];
-        if (!mayAuthor(t === "group" ? "g_found" : "u_found", t === "group" ? null : t)) return;
+        if (!mayAuthor(foundKeyFor(t), t === "group" ? null : t)) return;
         var o = t === "group" ? GROUP : unitLikeWritable(t);
         if (!o || !Array.isArray(o.clauses) || !o.clauses[i]) return;
         if ((String(o.clauses[i][0] || "").trim() || String(o.clauses[i][1] || "").trim()) &&
@@ -48708,24 +49086,28 @@ var SYNC = (function () {
     });
     document.querySelectorAll("[data-capkoadd]").forEach(function(b){
       b.addEventListener("click", function(){
-        var c = capById(b.dataset.capkoadd);
-        if (!c) return;
-        var t = c.fn ? "fn:" + c.fn : null;
+        /* §213: a capability, or the FUNCTION itself on a pillars function's
+           Overview — one resolver for both, because the two handlers must
+           agree about what a holder is. */
+        var h = koHolderById(b.dataset.capkoadd);
+        if (!h || !h.list) return;
+        var t = h.target;
         if (!mayAuthor("k_found", t)) return;
-        if (BUILDER && BUILDER.target === t) { openBuilderForm("capko", { capId:c.id }); return; }
-        c.keyObjectives.push({ name:"", dir:"≥", target:"", compile:"Latest",
+        if (BUILDER && BUILDER.target === t && h.cap) {
+          openBuilderForm("capko", { capId:h.cap.id }); return; }
+        h.list.push({ name:"", dir:"≥", target:"", compile:"Latest",
           weight:null, actual:"", progress:null });
         fieldSaved(); paint();
       });
     });
     document.querySelectorAll("[data-capkorm]").forEach(function(b){
       b.addEventListener("click", function(){
-        var a = b.dataset.capkorm.split("|"), c = capById(a[0]), i = +a[1];
-        if (!c || !c.keyObjectives[i]) return;
-        if (!mayAuthor("k_found", c.fn ? "fn:" + c.fn : null)) return;
-        if (c.keyObjectives[i].name &&
-            !confirm("Remove " + c.keyObjectives[i].name + "? This cannot be undone here.")) return;
-        c.keyObjectives.splice(i, 1);
+        var a = b.dataset.capkorm.split("|"), h = koHolderById(a[0]), i = +a[1];
+        if (!h || !h.list || !h.list[i]) return;
+        if (!mayAuthor("k_found", h.target)) return;
+        if (h.list[i].name &&
+            !confirm("Remove " + h.list[i].name + "? This cannot be undone here.")) return;
+        h.list.splice(i, 1);
         fieldSaved(); paint();
       });
     });

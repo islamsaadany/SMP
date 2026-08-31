@@ -3531,7 +3531,49 @@ prior sessions (on HR_ERP) accidentally reverted agreed-upon designs.
 
 ---
 
-*Last Updated: 2026-08-31 &mdash; **v3.97: send what changed, and apply it
+*Last Updated: 2026-08-31 &mdash; **v3.98: a supporting function's Overview
+is a supporting function's Overview (&sect;211&ndash;&sect;214.3).** Islam, on
+Consumer Finance and Merchandising: *"they have a missing item banner in the
+foundation"*, and *"pressing on the CON01 22 it doesn't take me to the pillars
+it's stuck in the overview"*. **THREE SECTIONS ON ONE PAGE, TWO OF THEM WRONG,
+and the record of why is the point.** &sect;211 found the navigation fault &mdash;
+`gapMap()` walks a pillars function through `unitLike()` (right, &sect;59) and
+handed out a UNIT's words for the two things not shared, so `CURSEC` was set to
+a section the page does not have and the renderer fell back to its first, which
+is the Overview. **&sect;211.2 THEN REMOVED THE OVERVIEW ON A MEASUREMENT OF THE
+WRONG FIELD** &mdash; a pillars function does not store `foundation`; it stores
+`aspiration`, `endInMind`, `clauses` and `swot` directly, exactly as
+`fnAsUnit()` reads them and `fnWriteBack()` writes them &mdash; so *"it can
+never hold one"* was false, and the deleted tab was the only place an uploaded
+aspiration or SWOT could ever have shown. *A predicate false for the right
+reason and false for the wrong reason is indistinguishable from outside, and
+the whole conclusion rested on which it was.* **&sect;212 put it back with a
+UNIT's foundation page**, which was the wrong neighbour, and **&sect;213 is the
+shape**: a supporting function inherits its aspiration and SWOT from the unit
+it plans under and never authors them, so it takes the CAPABILITY function's
+Overview &mdash; *What it is* (Function &middot; Led by &middot; **Definition**)
+and *Key Objectives* (Objective &middot; This year &middot; **Weight**), one
+builder for both formats and asserted as their AGREEMENT rather than as a list
+of headings. **THE TEMPLATE STOPPED ASKING** for a strategy a function does not
+author (no Foundation, Aspiration or SWOT sheet; a Weight in place of the
+3-year target) **and a UNIT'S IS UNTOUCHED**, measured rather than claimed.
+**&sect;214 MADE THE OVERVIEW MANDATORY** &mdash; and the server changed in the
+same breath, because counting a gap the save refuses is &sect;184 exactly.
+**&sect;214.2 THEN TOOK THE OBJECTIVES BACK OUT** at Islam's direction
+(*"the key objective specifically should not count"*), into `GAP_OPTIONAL`
+rather than out of the shared list, which is &sect;205's lesson paid rather
+than repeated. **&sect;214.3 removed the explanatory line** until its wording is
+settled, recorded as outstanding. **THREE FAULTS WERE FOUND BY LOOKING AT
+SCREENSHOTS AND NOT BY READING CODE** &mdash; a line contradicting the card
+beside it, an empty definition printing *"undefined"*, and a red *Missing* left
+standing over a value that had stopped being counted &mdash; and one by running
+the whole suite rather than the file just edited: deleting a dead function by
+slicing between two anchors took a live one with it, and **every clause Add and
+Remove in the product, business units included, threw inside its own click
+handler**, invisible to a page-load error listener and identical to a button
+that does nothing.
+
+*Earlier: 2026-08-31 &mdash; **v3.97: send what changed, and apply it
 onto our own copy (&sect;210).** Islam, after a morning of refusals naming
 things nobody had touched: *"why is the whole plan is sent, why don't we just
 send the changed element only not to cause this issue?"* **He is right, and it

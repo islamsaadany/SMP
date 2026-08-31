@@ -3705,6 +3705,26 @@ var CAP_FUNCTION = {
 GROUP.capabilities.forEach(function(c){ c.fn = CAP_FUNCTION[c.name] || null; });
 
 function functionOf(key){ return FUNCTIONS[key] || null; }
+/* WHO HOLDS A LIST OF KEY OBJECTIVES ON A SUPPORTING FUNCTION'S OVERVIEW
+   (§213). A capability, or — since that page exists for both formats — the
+   FUNCTION itself, addressed as `fn:<key>`. One resolver, because the add and
+   the remove each look the holder up and two lookups that must agree are how
+   §53.5 gets paid for twice.
+
+   The writing view, always: this is only ever called from a handler that is
+   about to push or splice, and `fnAsUnit()`'s shared frozen empty is not a
+   list anybody may write to (§50.6). */
+function koHolderById(id){
+  var s = String(id || "");
+  if (s.indexOf("fn:") === 0) {
+    var u = unitLikeWritable(s);
+    if (!u) return null;
+    return { list: u.keyObjectives, target: s };
+  }
+  var c = capById(s);
+  if (!c) return null;
+  return { list: c.keyObjectives, target: c.fn ? "fn:" + c.fn : null, cap: c };
+}
 function capById(id){
   return GROUP.capabilities.filter(function(c){ return c.id === id; })[0] || null;
 }
@@ -5466,13 +5486,14 @@ function gapMap(target, pend){
      foundation of its own. Two parts of the product answering one question
      differently (§53.5) — this is the other one catching up. */
   var UNIT_WORDS = { found: "u_found", plan: "u_plan", sec: "plan" };
-  /* §212 PUTS THE FOUNDATION HALF BACK. §211.2 dropped it on a premise that
-     turned out to be false — this format CAN hold all five foundation fields,
-     and now has a page that shows and edits them — so the gap is real, it is
-     reachable, and the chip lands on a field somebody can type in (§116.2: a
-     count that cannot take you to what it counts is a count that makes
-     work). */
-  var FN_WORDS   = { found: "k_found", plan: "k_proj", sec: "proj" };
+  /* NO FOUNDATION HALF FOR A FUNCTION (§213). §211.2 dropped it on a premise
+     that was false (this format CAN store all five fields), §212 put it back
+     with a unit's foundation page behind it, and Islam corrected the shape:
+     a supporting function never authors an aspiration or a SWOT — it inherits
+     the unit's — so what it owes is what a CAPABILITY owes, and that is
+     counted below as the Overview. Nothing is counted that no page shows
+     (§61), and nothing is shown that the subject does not own. */
+  var FN_WORDS   = { found: null, plan: "k_proj", sec: "proj" };
   var unitHalf = function(u, w){
     if (!u) return;
     w = w || UNIT_WORDS;
@@ -5494,6 +5515,13 @@ function gapMap(target, pend){
   if (t.indexOf("fn:") === 0) {
     var fk = t.slice(3), fo = functionOf(fk);
     if (fo && String(fo.format) === "pillars") {
+      /* THE SAME OVERVIEW ENTRY A CAPABILITY FUNCTION GETS, because since
+         §213 it is the same page, counted from the same field list (§53.5).
+         Drawn ahead of the pillars so the band reads down the page. */
+      var fov = 0;
+      (unitLike(t).keyObjectives || []).forEach(function(m){
+        fov += G("k_found", {}, "capko", m); });
+      entry("ov", "Overview", fov, { sec: "found", page: "capfoundation" });
       unitHalf(unitLike(t), FN_WORDS); return out; }
     var caps = capsOfFunction(fk), ov = 0;
     caps.forEach(function(c){

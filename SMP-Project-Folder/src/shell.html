@@ -6476,24 +6476,28 @@
     });
     document.querySelectorAll("[data-capkoadd]").forEach(function(b){
       b.addEventListener("click", function(){
-        var c = capById(b.dataset.capkoadd);
-        if (!c) return;
-        var t = c.fn ? "fn:" + c.fn : null;
+        /* §213: a capability, or the FUNCTION itself on a pillars function's
+           Overview — one resolver for both, because the two handlers must
+           agree about what a holder is. */
+        var h = koHolderById(b.dataset.capkoadd);
+        if (!h || !h.list) return;
+        var t = h.target;
         if (!mayAuthor("k_found", t)) return;
-        if (BUILDER && BUILDER.target === t) { openBuilderForm("capko", { capId:c.id }); return; }
-        c.keyObjectives.push({ name:"", dir:"≥", target:"", compile:"Latest",
+        if (BUILDER && BUILDER.target === t && h.cap) {
+          openBuilderForm("capko", { capId:h.cap.id }); return; }
+        h.list.push({ name:"", dir:"≥", target:"", compile:"Latest",
           weight:null, actual:"", progress:null });
         fieldSaved(); paint();
       });
     });
     document.querySelectorAll("[data-capkorm]").forEach(function(b){
       b.addEventListener("click", function(){
-        var a = b.dataset.capkorm.split("|"), c = capById(a[0]), i = +a[1];
-        if (!c || !c.keyObjectives[i]) return;
-        if (!mayAuthor("k_found", c.fn ? "fn:" + c.fn : null)) return;
-        if (c.keyObjectives[i].name &&
-            !confirm("Remove " + c.keyObjectives[i].name + "? This cannot be undone here.")) return;
-        c.keyObjectives.splice(i, 1);
+        var a = b.dataset.capkorm.split("|"), h = koHolderById(a[0]), i = +a[1];
+        if (!h || !h.list || !h.list[i]) return;
+        if (!mayAuthor("k_found", h.target)) return;
+        if (h.list[i].name &&
+            !confirm("Remove " + h.list[i].name + "? This cannot be undone here.")) return;
+        h.list.splice(i, 1);
         fieldSaved(); paint();
       });
     });

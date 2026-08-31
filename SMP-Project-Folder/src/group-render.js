@@ -3281,26 +3281,14 @@ function koBand(objectives, page, acKey, owner, isGroup){
     koBlock(objectives, page, acKey, owner, isGroup, true) + '</div>';
 }
 
-/* THE ACCESS KEY IS AN ARGUMENT, AND THE DEFAULT IS THE UNIT'S (§212).
-   A pillars function's Overview is this page — the shapes really are the same
-   (§59) — and the ONE thing not shared is the key it is gated on: `u_found`
-   for a unit, `k_found` for a function. §211 is the whole reason this is a
-   parameter rather than a hardcoded string: handing a function the unit's key
-   is what made every count read zero for the person doing the work, and it
-   looked right from the office, who passes both.
-
-   `page` stays "foundation" for both, deliberately: `EDIT_PAGE` is one pen
-   mode for both shapes, and splitting it would invent a difference the
-   product does not have (§211). */
-function renderUnitFoundation(u, acKey){
-  acKey = acKey || "u_found";
-  var upg = authoring("foundation", acKey) ? "foundation" : null;
+function renderUnitFoundation(u){
+  var upg = authoring("foundation", "u_found") ? "foundation" : null;
   /* THE FIRST LINE CAN BE WRITTEN (§129's audit). The pen edited a clause's
      TEXT and never its lead, and an empty list rendered nothing to edit and
      no way to add — so a from-scratch unit could not say who it is at all
      (§61's trap on the oldest surface in the product). The lead opens with
      the pen because the leads are the unit's own words, not a fixed form. */
-  return fillBarOr("foundation", acKey,
+  return fillBarOr("foundation", "u_found",
       SMPRules.gapMissing("unit", u).length +
       (u.keyObjectives || []).reduce(function(a, m){
         return a + SMPRules.gapMissing("ko", m).length; }, 0),
@@ -3318,10 +3306,10 @@ function renderUnitFoundation(u, acKey){
       (upg ? '<div class="addrow"><button class="editbtn" data-clauseadd="' + esc(u.ukey) +
         '">+ Add a line</button></div>' : '') + '</div>' +
       aspirationCard(L("aspiration","bu"), u.aspiration, u.endInMind, u.keyObjectives, "foundation",
-        function(v){ u.aspiration = v; }, function(v){ u.endInMind = v; }, acKey,
+        function(v){ u.aspiration = v; }, function(v){ u.endInMind = v; }, "u_found",
         false, u) +
     '</div>' +
-    koBand(u.keyObjectives, "foundation", acKey, u, false);
+    koBand(u.keyObjectives, "foundation", "u_found", u, false);
 }
 
 /* ── UNIT · Analysis ───────────────────────────────────────────────
@@ -5327,26 +5315,75 @@ function renderUnitPlan(u){
 
    The third column is WEIGHT rather than a three-year target: a capability's
    objectives carry the optional weighting and have never had a horizon. */
+/* ── A PILLARS FUNCTION'S OVERVIEW (§213) ─────────────────────────────
+   The capability function's two cards, carried by the function itself: what
+   it is, and what it is judged on. No aspiration, no SWOT, no who-we-are —
+   those belong to the unit it plans under, and `whereFoundationLives()` says
+   so in one line above.
+
+   `def` IS A NEW FIELD ON THE FUNCTION and needs no migration: `functions`
+   names six columns in `lib/state-io.js` and files everything else into
+   `extra` (verified, the same route `format`, `under` and `items` already
+   take). A capability has carried one since the model existed; this is the
+   function finally being asked the same question. */
+function fnPillarsOverview(fk){
+  var f = FUNCTIONS[fk];
+  if (!f) return "";
+  var ed = authoring("capfoundation", "k_found");
+  /* THE WRITING VIEW MINTS THE CONTAINER (§50.6). `fnAsUnit()` hands out a
+     SHARED frozen empty where `keyObjectives` does not exist, so a first
+     objective added against the reading view would be pushed onto an empty
+     every function shares. */
+  var list = (ed ? unitLikeWritable("fn:" + fk) : unitLike("fn:" + fk)).keyObjectives || [];
+  return whereFoundationLives(fk) +
+    editBar("capfoundation", "k_found") +
+    fillBarOr("capfoundation", "k_found",
+      list.reduce(function(a, m){
+        return a + SMPRules.gapMissing("capko", m).length; }, 0),
+      "the overview") +
+    '<div class="fgrid">' +
+      '<div class="card"><h2 class="sec first">What it is</h2><dl style="margin:0">' +
+        '<div class="clause"><dt>Function</dt><dd>' + esc(f.name) + '</dd></div>' +
+        '<div class="clause"><dt>Led by</dt><dd>' +
+          (f.head ? esc(personName(f.head)) : "&mdash;") + '</dd></div>' +
+        '<div class="clause"><dt>Definition</dt><dd>' +
+          fieldOr(ed ? "capfoundation" : null, f.def, "",
+                  function(v){ FUNCTIONS[fk].def = v; }) + '</dd></div>' +
+      '</dl></div>' +
+      '<div class="card"><div class="cardhead"><h2 class="sec first">' + L("keyobj","bu") + '</h2>' +
+        '<span class="pill horizon">Horizon &middot; ' + horizonLabel() + '</span></div>' +
+        ((ed || filling("capfoundation", "k_found"))
+          ? capKoEdit({ id:"fn:" + fk, keyObjectives:list })
+          : koReadBlock(list,
+              "None. This function is judged by its " +
+              esc(L("pillar","bu").toLowerCase()) + ".")) +
+      '</div>' +
+    '</div>';
+}
 function renderFnFoundation(fnKey){
   var fk = fnKeyOf(fnKey), caps = capsOfFunction(fk);
-  /* A PILLARS FUNCTION GETS THE UNIT'S FOUNDATION PAGE (§212, replacing both
-     the one sentence that stood here and §211.2's deletion of it). It holds
-     the same five things a unit's foundation holds, so it is drawn by the
-     same builder rather than a second one that would drift (§53.5) — with
-     `k_found` as the key, which is the only difference there is.
+  /* A SUPPORTING FUNCTION'S OVERVIEW IS A SUPPORTING FUNCTION'S OVERVIEW,
+     WHICHEVER WAY IT PLANS (§213). Islam: *"what if the overview of the
+     functions that plan in pillars [were] like the overview of the functions
+     that plan as projects … because the function will never have an
+     aspiration, will never have a foundation, but they will have maybe key
+     objectives."*
 
-     `unitLikeWritable()` WHILE THE PEN IS ON, the reading view otherwise, and
-     that is not a nicety: `fnAsUnit()` hands out a SHARED FROZEN EMPTY where
-     an array does not exist yet (§50.6 — a reader must never create what it
-     looked for), so a first clause or a first objective typed against the
-     reading view would be pushed onto an empty every function shares. The
-     writing half mints the containers and writes the two scalars through. */
-  if (fnPlansInPillars(FUNCTIONS[fk])) {
-    var writing = authoring("foundation", "k_found") || filling("foundation", "k_found");
-    return whereFoundationLives(fk) +
-      renderUnitFoundation(writing ? unitLikeWritable("fn:" + fk) : unitLike("fn:" + fk),
-                           "k_found");
-  }
+     Right, and §212 had reached for the wrong neighbour: it gave this format
+     a UNIT's foundation — who we are, a winning aspiration, an end in mind —
+     which is the strategy the function INHERITS from the unit it plans under
+     and never authors itself. What it does have is what a capability has: a
+     definition, and some key objectives.
+
+     So both formats draw the same two cards, and the only difference is what
+     carries them — a capability each on one side, the function itself on the
+     other. Same page key (`capfoundation`), same access key (`k_found`), same
+     builder for the objectives (§53.5).
+
+     A UNIT IS UNTOUCHED BY ALL OF THIS, deliberately and at Islam's
+     instruction: `renderUnitFoundation()` is exactly what it always was, on
+     `foundation`/`u_found`, and nothing here calls it. */
+  if (fnPlansInPillars(FUNCTIONS[fk])) return fnPillarsOverview(fk);
   var ed = authoring("capfoundation", "k_found");
   /* §145: the fill grant opens the same editor, whose gap cells then draw
      only the blanks — Add and Remove stay the author's. */
@@ -5366,19 +5403,8 @@ function renderFnFoundation(fnKey){
        pen; a row minted empty carries the same shape the seed's rows have. */
     var koBlock = (ed || fl)
       ? capKoEdit(c)
-      : c.keyObjectives.length
-      ? '<div class="ohead"><span>Objective</span><span>This year</span><span>Weight</span></div>' +
-        c.keyObjectives.map(function(m){
-          /* §145: the pending chips, including a direction or compile that
-             has no column here — read mode is where the office's tick is. */
-          return '<div class="orow"><span class="on">' + esc(m.name) +
-              pendChip("k_found", m, "dir") + pendChip("k_found", m, "compile") + '</span>' +
-            '<span class="ot">' + (m.target ? esc(m.target) : '<span class="missing">Missing</span>') +
-              pendChip("k_found", m, "target") + '</span>' +
-            '<span class="ot h">' + (m.weight == null ? "&mdash;" : m.weight + "%") +
-              pendChip("k_found", m, "weight") + '</span></div>';
-        }).join("")
-      : '<p class="sub" style="margin:0">None. This capability is judged by its projects.</p>';
+      : koReadBlock(c.keyObjectives,
+          "None. This capability is judged by its projects.");
     return capBand(c) + '<div class="capbody"><div class="fgrid">' +
       '<div class="card"><h2 class="sec first">What it is</h2><dl style="margin:0">' +
         '<div class="clause"><dt>Capability</dt><dd>' + esc(c.name) + '</dd></div>' +
@@ -5401,10 +5427,35 @@ function renderFnFoundation(fnKey){
     '">+ Add a capability</button></div>' : '');
 }
 
+/* ── A SUPPORTING FUNCTION'S KEY OBJECTIVES, READ (§213) ──────────────
+   Lifted out of the capability branch unchanged so a capability's card and a
+   pillars function's cannot drift into two answers about one table (§53.5) —
+   the whole reason §211 cost a day. The empty line is the caller's, because
+   what an empty list MEANS differs: a capability with none is judged by its
+   projects; a function with none is judged by its pillars. */
+function koReadBlock(list, emptyLine){
+  if (!(list || []).length)
+    return '<p class="sub" style="margin:0">' + emptyLine + '</p>';
+  return '<div class="ohead"><span>Objective</span><span>This year</span><span>Weight</span></div>' +
+    list.map(function(m){
+      /* §145: the pending chips, including a direction or compile that has no
+         column here — read mode is where the office's tick is. */
+      return '<div class="orow"><span class="on">' + esc(m.name) +
+          pendChip("k_found", m, "dir") + pendChip("k_found", m, "compile") + '</span>' +
+        '<span class="ot">' + (m.target ? esc(m.target) : '<span class="missing">Missing</span>') +
+          pendChip("k_found", m, "target") + '</span>' +
+        '<span class="ot h">' + (m.weight == null ? "&mdash;" : m.weight + "%") +
+          pendChip("k_found", m, "weight") + '</span></div>';
+    }).join("");
+}
 /* The capability objectives editor — koEdit's shape with the WEIGHT column a
    capability's rows actually carry, addressed by capId + index the way the
    Temple's tables are (no ids: the seed's rows never had them, and §96.4's
    rule about mixed lists says do not mint some now). */
+/* §213: addressed by HOLDER id, which is a capability's `id` or `fn:<key>` for
+   a function that plans in pillars — the same string `koHolderById()` resolves
+   on the other side of the click, so one table serves both and the add/remove
+   handlers have one thing to look up. */
 function capKoEdit(c){
   var pg = "capfoundation";
   /* §145: the four gap-fillable columns through gapCell; the NAME, Remove

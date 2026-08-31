@@ -461,9 +461,16 @@ function createFromPlan(u, d){
         status:"Not started", actual:null, slide:x.source_slide, notes:x.notes });
       made++;
     } else if (x.type === "NORTHSTAR") {
-      u.keyObjectives.push({ id:x.id, name:x.name, dir:x.direction || "\u2265",
+      /* §213: a supporting function's objectives carry a WEIGHT and no 3-year
+         target, a unit's the reverse. Both come through here, and an absent
+         column is an absent key — never a 0, which `Number("")` would make it
+         and which reads as a real weight of nought (§104.10). */
+      var ko = { id:x.id, name:x.name, dir:x.direction || "\u2265",
         target3y:t3, target:t1, compile:x.compile || "Latest", actual:"", progress:null,
-        slide:x.source_slide });
+        slide:x.source_slide };
+      if (x.weight != null && String(x.weight).trim() !== "")
+        ko.weight = Number(x.weight);
+      u.keyObjectives.push(ko);
       made++;
     } else if (["STRENGTH","WEAKNESS","OPPORTUNITY","THREAT"].indexOf(x.type) > -1) {
       var key = { STRENGTH:"s", WEAKNESS:"w", OPPORTUNITY:"o", THREAT:"t" }[x.type];

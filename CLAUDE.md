@@ -384,47 +384,45 @@ console errors (in this cloud environment, run it via a wrapper that points Play
   remove × onto a second line — `inline-block` restores it, and it was found
   by `checks/plan-fields.py` GOING RED, not by reading the cascade, which is
   the argument for that check existing.
-- **THE OVERVIEW HOLDS WHAT THE FUNCTION HOLDS (§211, §212):** Islam — *"they
-  have a missing item banner in the foundation"*, *"pressing on the CON01 22 it
-  doesn't take me to the pillars it's stuck in the overview"*, and then
-  *"maintain the overview and the plan sub tabs but in the overview if it's
-  empty, it's empty and if we need to add something, you find the button to add
-  something."* **THE NAVIGATION FAULT WAS A VOCABULARY ONE**: `gapMap()` walks
-  this format through `unitLike()` — right, §59's point — and handed out the
-  UNIT's words for the two things not shared. A unit's plan section is `plan`, a
-  function's is `proj` (labelled "Plan"), and **setting `CURSEC` to a section
-  the page does not have leaves the renderer on its FIRST one** — the Overview,
-  the reported symptom exactly; and the access key is `k_found`/`k_proj`, not
-  `u_found`/`u_plan`, which is what made counts read zero for the person doing
-  the work while looking right from the office, who passes both. **§211.2 THEN
-  REMOVED THE OVERVIEW ON A MEASUREMENT OF THE WRONG FIELD** — a pillars
-  function does not store `foundation`, it stores `aspiration`, `endInMind`,
-  `clauses` and `swot` directly, exactly as `fnAsUnit()` reads them and
-  `fnWriteBack()` writes them, so *"it can never hold one"* was false and the
-  deleted tab was the only place an uploaded aspiration or SWOT could ever have
-  shown. *A predicate false for the right reason and false for the wrong reason
-  is indistinguishable from outside, and the whole conclusion rested on which.*
-  **THE PAGE WAS BROKEN, NEVER THE TAB**: both sections always, and the Overview
-  draws the UNIT's own foundation page — one builder (§53.5) with the access key
-  as an ARGUMENT, `page` staying `"foundation"` for both because `EDIT_PAGE` is
-  one pen mode. A conditional tab was built first and Islam's version is better:
-  it **dissolves** *"how do I add the first one"* rather than answering it, and
-  a tab that appears and disappears as rows arrive reads as broken (§45.2).
-  **AND THE TWO SCALARS HAD TO WRITE THROUGH** — minting containers covers every
-  ARRAY (handed out by reference), but `u.aspiration = v` on `fnAsUnit()`'s fresh
-  object is discarded on the next paint: the field takes the words, the page
-  redraws, they are gone. Fixed in `fnWritable()` with accessors, so every
-  renderer that can write a unit's foundation writes a function's without being
-  told which it has. **`unitLikeWritable()` ONLY WHILE THE PEN IS ON**, or a
-  first clause is pushed onto the SHARED frozen empty (§50.6) — asserted by
-  looking at the OTHER functions after the add. **`foundKeyFor()` NAMES THE KEY
-  ONCE**: the clause add/remove handlers each spelt `t === "group" ? "g_found" :
-  "u_found"`, so an `fn:` target was gated on a unit's key and **failed CLOSED**
-  — the button renders and the press returns in silence. **AND THE MISSING BAR
-  IS GATED ON `secs.length > 1`**, found only because §211.2 briefly left one
-  section: it would take the count AND the fill button from any viewer whose
-  grant hides one of two. The row draws for sections OR a bar. 14 red on main,
-  the report reproduced verbatim — both chips landing on `found` with 0 fields.
+- **A SUPPORTING FUNCTION'S OVERVIEW IS A SUPPORTING FUNCTION'S OVERVIEW
+  (§211, §212, §213):** three sections on one page, two of them wrong, and the
+  record of why is the point. **§211** — Islam: *"pressing on the CON01 22 it
+  doesn't take me to the pillars it's stuck in the overview"* — `gapMap()`
+  walks a pillars function through `unitLike()` (right, §59) and handed out a
+  UNIT's words for the two things not shared: a unit's plan section is `plan`,
+  a function's is `proj`, and **setting `CURSEC` to a section the page does not
+  have leaves the renderer on its FIRST one**; and the key is `k_found`/
+  `k_proj`, which is what made counts read zero for the person doing the work
+  while reading right from the office, who passes both. **§211.2 then removed
+  the Overview on a probe of `FUNCTIONS[x].foundation`** — a field name that
+  does not exist on a UNIT either, so the predicate was false for the wrong
+  reason and *false-for-the-right-reason and false-for-the-wrong-reason are
+  indistinguishable from outside*. **§212 put it back with a UNIT's foundation
+  page**, which was the wrong neighbour. **§213 is the shape**: a supporting
+  function inherits its aspiration and SWOT from the unit it plans under and
+  never authors them, so it takes the CAPABILITY function's Overview — *What it
+  is* (Function · Led by · **Definition**) and *Key Objectives* (Objective ·
+  This year · **Weight**) — same page key, same access key, `koReadBlock()`
+  lifted out so one table serves both (§53.5, closed by construction).
+  **A UNIT IS UNTOUCHED AND IT IS ASSERTED**, at Islam's instruction:
+  `renderUnitFoundation()` reverted exactly, §212's parameterisation DELETED
+  (§24), and the check measures a unit's page and its whole workbook, because
+  *"we did not touch it"* is a claim and not a measurement. **`def` IS NEW ON
+  THE FUNCTION** and needs no migration — `functions` names six columns and
+  files the rest into `extra`, the route `format` and `under` already take.
+  **THE TEMPLATE STOPS ASKING**: no Foundation, Aspiration or SWOT sheet for a
+  function, and its Objectives sheet trades the 3-year target for a Weight —
+  **a validation range is a POSITION** (§65), so the ranges move with the
+  columns or they validate the wrong cells in silence. The reader takes either
+  file by HEADER NAME (§58), and `weight` is set only when the cell holds
+  something, because `Number("")` is 0 and nought is a real weight (§104.10).
+  **AND THE COST IS STATED**: a function's objectives now carry a weight and no
+  3-year target, the reverse of before. **AND THE MISSING BAR IS GATED ON
+  `secs.length > 1`** — found because §211.2 briefly left one section, and it
+  would strip the count AND the fill button from any viewer whose grant hides
+  one of two. 10 red on main; and one of the check's own failures was the
+  CHECK — `planFromWorkbook()` returns a FLAT array, not `{rows}`, so a working
+  round trip was reported broken three ways.
 - **THE OFFICE INBOX GOT A THINNER PANEL THAN THE CORNER (§188):** three of
   Islam's four are one omission — §97 built the CORNER against exactly these
   faults and the office's own inbox skipped them. **The caret**: the inbox
@@ -3414,13 +3412,14 @@ node scripts/test-graph-diff.js # the change list on its own: only what changed
                                 # travels, applying it to a DIFFERENT target leaves
                                 # that target's other work alone, a removal is not a
                                 # null, and an unknown path is refused (§210)
-python3 checks/fn-pillars.py     # a function that plans in pillars: BOTH sections always, an
-                                # empty Overview that can be filled (every press read back
-                                # from the STORED function, never the screen), the aspiration
-                                # LANDING rather than dying on a fresh view, nothing pushed
-                                # onto the shared frozen empty, and every chip asserted by
-                                # where it LEAVES THE PAGE — the old fault was a section key
-                                # the page does not have (§211, §212)
+python3 checks/fn-pillars.py     # the two supporting-function formats draw ONE Overview:
+                                # asserted as their AGREEMENT, never as a list of headings;
+                                # every press read back from the STORED function; the
+                                # absences asserted on the CARDS (the line above the page
+                                # names all three, so a text search passes on a broken
+                                # build); a weight surviving the round trip; and a UNIT's
+                                # page AND workbook measured in full, because "we did not
+                                # touch it" is a claim, not a measurement (§211–§213)
 python3 checks/knowledge-base.py # the page and db/kb.json draw from ONE source — the
                                 # AGREEMENT, never the count (§103)
 python3 checks/kb-file.py       # the questions file (§161): the round trip is a FIXED

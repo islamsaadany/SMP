@@ -24355,6 +24355,76 @@ STORED function rather than from the screen (§96), and a unit and a capability
 function are asserted UNTOUCHED, or a build that changed every subject would
 satisfy the rest (§113.8, §53.5).
 
+### §213 — A supporting function's Overview is a supporting function's Overview
+
+Islam, on what §212 shipped: *"what if the overview of the functions that plan
+in pillars [were] like the overview of the functions that plan as projects …
+because the function will never have an aspiration, will never have a
+foundation, but they will have maybe key objectives — and I believe this is
+present in the functions that plan as projects, please verify this."*
+
+**VERIFIED, IN THREE PARTS.** Capability functions do have key objectives — 10
+across 6 of the 7, held per capability, shown as Objective · This year ·
+**Weight**. A function having no aspiration is sound. And the third part
+**contradicted him, which was the useful one**: the plan template a pillars
+function downloads for itself carried a **Foundation sheet and an Aspiration
+sheet**, and `planSubjectNames()` offers pillars functions in the dropdown — so
+the file was actively asking a function for the two things he says it will never
+have. Answering the question he asked found the thing he could not have known.
+
+**§212 REACHED FOR THE WRONG NEIGHBOUR.** It gave this format a UNIT's
+foundation page — who we are, a winning aspiration, an end in mind — which is
+precisely the strategy a supporting function INHERITS from the unit it plans
+under and never authors. What it resembles is a CAPABILITY: a definition, and
+some key objectives. So both function formats draw the same two cards on the
+same page key (`capfoundation`) and the same access key (`k_found`), and
+`koReadBlock()` is lifted out so one table serves both — the drift that cost
+§211 a day, closed by construction.
+
+**A UNIT IS UNTOUCHED, AT ISLAM'S INSTRUCTION** (*"we should not change
+anything about the unit, careful about this"*): `renderUnitFoundation()` is
+reverted to exactly what it was, on `foundation`/`u_found`, and nothing on the
+function side calls it. §212's parameterisation of it is GONE rather than left
+unused (§24). The check asserts a unit's page and a unit's workbook in full,
+because "we did not touch it" is a claim and not a measurement.
+
+**`def` IS A NEW FIELD ON THE FUNCTION** and needs no migration: `functions`
+names six columns in `lib/state-io.js` and files everything else into `extra`
+— verified, the same route `format`, `under` and `items` already take. Without
+it "What it is" would repeat the name the page already shows.
+
+**THE TEMPLATE STOPS ASKING** (Islam: *"yes you can drop these columns of
+course"*). A function's file is Read me · Objectives · Pillars · Measures ·
+Tactics; its Objectives sheet is Objective · Direction · This year · Unit ·
+Compile · **Weight %**. A unit's is byte-for-byte what it was — every sheet,
+every column, every validation range. **A RANGE IS A POSITION** (§65), so the
+validations move with the columns rather than staying where a unit's are and
+validating the wrong cells in silence.
+
+**THE READER TAKES EITHER FILE** (§58's rule again): it reads by header name,
+so an absent "3-year target" and an absent "Weight %" each read undefined,
+which is what an absent value already means. `weight` is set only when the cell
+holds something — `Number("")` is 0, and a weight of nought is a real value
+(§104.10).
+
+**THE COST IS STATED, NOT IMPLIED**: a function's objectives now carry a weight
+and no 3-year target, where before they carried the reverse. Nothing in the
+demo has any, so nothing moves there; a tenant whose functions already hold
+objectives stops being asked for their 3-year targets.
+
+**PROVED ABLE TO FAIL** (§94.5): **10 failures** against `main`. Every state is
+MADE (§94.2); every press is read back from the STORED function (§96); the two
+formats are asserted to AGREE rather than against a literal list (§94.8); and
+the absences are asserted on the CARDS, never in the page text — the line above
+the page names the aspiration, the SWOT and the objectives, so a text search
+would pass on a build that still drew all three (§113.8 from the other side).
+
+**AND ONE OF THE CHECK'S OWN FAILURES WAS THE CHECK**: `planFromWorkbook()`
+returns a FLAT array, not `{rows}`, so the round-trip section asked for `.rows`,
+got `[]`, and reported a working round trip as broken three ways. *A
+measurement wrong in the direction of "broken" costs as much as one wrong in
+the direction of "clean".*
+
 ### Not explained
 
 The **"could not reach the server (Failed to fetch)"** on *Next pending*. It

@@ -417,9 +417,25 @@ function planWorkbook(u){
   var readmeSheet = readme("plan", "Business unit or function", planSubjectNames());
   readmeSheet.rows[1][1] = picked;
 
-  return [
-    readmeSheet,
+  /* THE FILE STOPS ASKING A FUNCTION FOR A STRATEGY IT DOES NOT AUTHOR
+     (§213, Islam: *"if you're talking about the template of the functions,
+     yes you can drop these columns of course"*).
 
+     A supporting function inherits its aspiration, SWOT and who-we-are from
+     the unit it plans under, so a template offering it those three sheets was
+     asking for content the product now has nowhere to show — which is the
+     fault §212 spent a section removing, arriving from the file end. Its
+     objectives take a CAPABILITY's shape for the same reason: that is what its
+     Overview draws, and a 3-year target column would collect a value no page
+     renders while the Weight the page shows would have nowhere to come from.
+
+     A UNIT'S WORKBOOK IS UNTOUCHED — every sheet, every column, every
+     validation range — and that is asserted rather than assumed. */
+  var isFn = !!(u && String(u.ukey || "").indexOf("fn:") === 0);
+
+  return [
+    readmeSheet]
+  .concat(isFn ? [] : [
     { name:"Foundation", widths:[20, 78],
       head:["Label", "Text"],
       rows:u.clauses.map(function(c){ return [c[0], c[1]]; }) },
@@ -433,8 +449,25 @@ function planWorkbook(u){
            are planning TO — an input, not a default the platform hands them,
            and a pre-filled year reads as a decision somebody already made. */
         ["Horizon (the year this plan runs to)", GROUP.horizon || ""]
-      ] },
-
+      ] }
+  ])
+  .concat(isFn ? [
+    /* A function's objectives, in its Overview's own columns. `numCols` and
+       every validation range move with the columns — a range is a POSITION
+       (§65), and leaving them where a unit's are would validate the wrong
+       cells in silence. */
+    { name:"Objectives", widths:[36, 11, 16, 10, 12, 10],
+      head:["Objective", "Direction", "This year target", "Unit", "Compile", "Weight %"],
+      numCols:[2, 5],
+      validations:[{ range:"B2:B60", list:DIRS },
+                   { range:"D2:D60", list:units, soft:true },
+                   { range:"E2:E60", list:COMPILES }],
+      rows:u.keyObjectives.map(function(m){
+        var a = splitTarget(m.target);
+        return [m.name, m.dir, a.value, a.unit, m.compile,
+                m.weight == null ? "" : m.weight];
+      }) }
+  ] : [
     { name:"Objectives", widths:[36, 18, 11, 16, 16, 10, 12],
       head:["Objective", "Group", "Direction", "3-year target", "This year target", "Unit", "Compile"],
       numCols:[3, 4],
@@ -453,8 +486,9 @@ function planWorkbook(u){
         .reduce(function(acc, pair){
           (u.swot[pair[0]] || []).forEach(function(x){ acc.push([pair[1], x]); });
           return acc;
-        }, []) },
-
+        }, []) }
+  ])
+  .concat([
     { name:"Pillars", widths:[40, 14, 22, 22],
       head:["Pillar", "Kind", "Theme", "Owner"],
       validations:[{ range:"B2:B60", list:KINDS },
@@ -492,7 +526,7 @@ function planWorkbook(u){
         });
         return acc;
       }, []) }
-  ];
+  ]);
 }
 
 /* Reporting is unchanged: it is per unit, it amends rows that already exist,
@@ -738,9 +772,15 @@ function planFromWorkbook(u, sheets){
   var kN = 0;
   sheetObjects(sheets["Objectives"]).forEach(function(r){
     if (!r["Objective"]) return;
+    /* §213: a function's sheet has no "3-year target" and DOES have a
+       "Weight %"; a unit's is the other way round. Read by header name and
+       both files pass through one reader — an absent column simply reads
+       undefined, which is what an absent value already means here (§58's
+       rule: write the new label, read either). */
     rows.push({ id:mint("KO" + (++kN)), type:"NORTHSTAR", name:r["Objective"],
       group:r["Group"], direction:r["Direction"], value:r["This year target"],
-      value_3y:r["3-year target"], unit:r["Unit"], compile:r["Compile"] });
+      value_3y:r["3-year target"], unit:r["Unit"], compile:r["Compile"],
+      weight:r["Weight %"] });
   });
 
   var swotN = { Strength:0, Weakness:0, Opportunity:0, Threat:0 };

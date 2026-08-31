@@ -330,6 +330,89 @@ with sync_playwright() as pw:
     ck("'unit' is not a gap field — 46 of 178 targets have none and are complete",
        not g["inGapFields"], g)
 
+    # ── 9 · THE FILLER SETS A MISSING UNIT (§201.2) ────────────────────
+    # Islam, from the deployment: "on filling the missing by the custodian
+    # he can't fill the unit while he needs to fill if missing." The exact
+    # state from his screenshot — a bare 3-year, a missing this-year, an
+    # empty Unit — must offer the picker in fill mode, stamp the pend mark,
+    # and leave a row whose unit IS set alone (that one stays the office's).
+    print("\n── 9 · fill mode offers the picker on a missing unit (§201.2)")
+    setup = pg.evaluate("""() => {
+      const u = "mobile";
+      ACCESS.custodian = ACCESS.custodian || {};
+      ACCESS.custodian.a_unit_own_strat = "fill";
+      ACCESS.custodian.a_unit_own = "edit";
+      const kos = UNITS[u].keyObjectives;
+      kos[0].target3y = "30"; kos[0].target = ""; delete kos[0].pend;
+      kos[1].target3y = "50%"; kos[1].target = "40%"; delete kos[1].pend;
+      const cust = (UNIT_ROLES[u] || {}).custodian;
+      VIEWER = cust; leaveModes();
+      current = u; currentSub = "strategy"; CURSEC.strategy = "foundation";
+      paint();
+      return { unit: u, cust: cust };
+    }""")
+    pg.wait_for_timeout(450)
+    ck("the custodian holds a fill way in", setup["cust"] is not None
+       and pg.query_selector('[data-fillcta="foundation"]') is not None)
+    pg.click('[data-fillcta="foundation"]')
+    pg.wait_for_timeout(600)
+    fv = pg.evaluate("""(a) => {
+      const kos = UNITS[a.unit].keyObjectives;
+      const rows = [...document.querySelectorAll('#panel table tbody tr')];
+      const row = rows.find(r => (r.textContent||"").indexOf(kos[0].name) >= 0);
+      const row2 = rows.find(r => (r.textContent||"").indexOf(kos[1].name) >= 0);
+      const cell = row ? row.children[2] : null;
+      const sel = cell ? cell.querySelector('select') : null;
+      const before = gapTotal(a.unit);
+      if (sel) { sel.value = "%"; sel.dispatchEvent(new Event('change',{bubbles:true})); }
+      const m = kos[0];
+      return { picker: !!sel,
+               opts: sel ? [...sel.options].map(o=>o.value) : null,
+               noPicker2: !!(row2 && !row2.children[2].querySelector('select')),
+               t3: m.target3y, pend3: !!(m.pend && m.pend.target3y),
+               t: m.target, pendT: !!(m.pend && m.pend.target),
+               before: before, after: gapTotal(a.unit) };
+    }""", setup)
+    ck("the bare row's Unit cell is a picker", fv["picker"], fv)
+    ck("...offering the fixed list", fv.get("opts") == pg.evaluate("() => TARGET_UNITS"),
+       fv.get("opts"))
+    ck("a row whose unit is set gets none — that one stays the office's",
+       fv["noPicker2"], fv)
+    ck("picking % lands on the 3-year target, PENDING",
+       fv["t3"] == "30%" and fv["pend3"], fv)
+    ck("...the blank this-year untouched", fv["t"] == "" and not fv["pendT"], fv)
+    ck("...and the gap count did not move — a unit is not a gap",
+       fv["before"] == fv["after"] and fv["before"] >= 1, fv)
+    # filling the missing value now inherits the unit just set
+    iv = pg.evaluate("""(a) => {
+      paint();
+      return new Promise(res => setTimeout(() => {
+        const kos = UNITS[a.unit].keyObjectives;
+        const rows = [...document.querySelectorAll('#panel table tbody tr')];
+        const row = rows.find(r => (r.textContent||"").indexOf(kos[0].name) >= 0);
+        const inp = row ? row.children[4].querySelector('input') : null;
+        if (!inp) { res({no:"this-year input"}); return; }
+        inp.value = "25"; inp.dispatchEvent(new Event('change',{bubbles:true}));
+        const pickerGone = !row.children[2].querySelector('select');
+        res({ t: kos[0].target, pendT: !!(kos[0].pend && kos[0].pend.target),
+              pickerGone: pickerGone,
+              plain: row.children[2].textContent.trim() });
+      }, 400));
+    }""", setup)
+    ck("a bare 25 typed after inherits it — 25%, pending",
+       iv.get("t") == "25%" and iv.get("pendT") is True, iv)
+    ck("once set the picker leaves and the unit reads plain",
+       iv.get("pickerGone") is True and iv.get("plain") == "%", iv)
+    # both ends: the shared rule the server judges by
+    ua = pg.evaluate("""() => ({
+      fill: SMPRules.unitAddedOnly('target3y', '30', '30%'),
+      moved: SMPRules.unitAddedOnly('target3y', '30', '31%'),
+      notAUnitField: SMPRules.unitAddedOnly('name', '30', '30%') });""")
+    ck("the server's own test agrees: unit added, number unmoved",
+       ua["fill"] and not ua["moved"] and not ua["notAUnitField"], ua)
+    pg.evaluate("() => { leaveModes(); paint(); }")
+    pg.wait_for_timeout(300)
+
     pg.evaluate("() => { EDIT_PAGE['foundation'] = false; paint(); }")
     pg.wait_for_timeout(200)
     ck("no console errors", not errs, errs[:2])

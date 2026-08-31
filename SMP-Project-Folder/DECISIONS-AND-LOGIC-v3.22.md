@@ -23808,3 +23808,115 @@ leading-edge window, with the inherited unit in what reached the server.
 round trip PASS, full sweep ERRORS: none. Three test-side false alarms on the
 way, each verified innocent before being believed (§68.10's rule: a correct
 build reported broken costs as much as the reverse).
+
+## §200.2 — The house glyph does not squeeze (v3.90)
+
+Islam, after the merge: *"gold icon still damaged."* The mark was drawn right
+and SAT in a flex row that shrinks its items — at a narrow chrome the 34px
+button gave up width and the SVG inside squashed. `flex:none` on `.homemark`,
+and `checks/home-mark.py` measures the button as a SQUARE at 1000px, which is
+the assertion that fails on the shipped build and cannot be faked by fixing the
+glyph alone.
+
+## §201 — A boot that lands on the example says so (v3.91)
+
+Islam, after a hard refresh: *"it opened on the prototype page with no way to
+exit it!! fix it."* **My first reading was wrong** — I answered about §173's
+stay-put, and the real path is in `sync.js`: when `/api/state` fails, or the
+8-second backstop fires first, `land()` paints the BAKED Raya Trade example and
+says NOTHING. Correct as a fallback (§94.10 built it so a broken server never
+leaves a grey page), and silent — so a hiccup at refresh time put another
+organisation's data on his screen wearing his URL, with no control anywhere
+that says what happened or takes you back. `save()` already refuses while the
+boot never went live, so no keystroke made there can reach the database — the
+wall makes that refusal VISIBLE instead of discovered.
+
+**The wall says three things and offers two ways out**: this is the built-in
+example, it is not your organisation's data, and your data is safe on the
+server; *Try again* reloads, a 10-second probe reloads BY ITSELF the moment the
+server answers (ok or a 401/403 — those go to the gate, which is an answer; a
+500 keeps waiting rather than reload-looping a broken server), and *Look at the
+example anyway* steps past deliberately, because the example is a real thing to
+look at and a wall with no way past is §61's trap. Asserted in
+`checks/boot-skeleton.py` §4 — the one check that can see any of this (§94.11:
+the whole boot path is invisible over `file://`) — and proved able to fail:
+**7 red** with the wall's one call removed, including that a build without it
+paints the example silently, which is the reported fault verbatim.
+
+## §201.2 — A missing unit is the filler's to add (v3.91)
+
+Islam: *"on filling the missing by the custodian he can't fill the unit while
+he needs to fill if missing."* Exactly right, and the refusal was §184's shape
+one field over: the unit rides ON the target string (§199.4 — `30` becomes
+`30%`), so to the diff, adding one is amending a non-blank value, and amending
+is the office's. The custodian could fill an EMPTY target with `25%` and could
+not finish a `30` somebody had typed without its unit.
+
+**`unitAddedOnly()` is the narrowest rule that says yes**, in `lib/rules.js`
+because the screen draws the picker and the server accepts the save off ONE
+function (§42): only `target`/`target3y`, only where the stored value carries
+NO unit, and only where the number is byte-identical — `30`→`31%` is still
+authoring and still refused. The write is a PENDING fill like any other
+(§145): the mark is stamped, the office confirms or corrects, and taking the
+unit back off is the undo the server's own transition expects. **A unit is
+still not a counted gap** (§199: 46 of the shipped 178 targets have none and
+are complete) — the picker is OFFERED in fill mode, on the bare rows only, and
+joins no count, no chip and no walk; a row whose unit is set shows it as plain
+text, because that one stays the office's. The measures table grows its Unit
+column only while some row on it offers the picker, decided ONCE per table so
+the header, the rows and the Add row's span cannot disagree (§53.5).
+
+Proved at both ends: `test-authorize.js` gained seven cases (accepted with the
+mark; refused without it; refused when the number moves; the undo accepted;
+refused at view; and the rule's own edges) — **2 red** with `unitAddedOnly`
+stubbed false; `checks/objective-unit.py` §9 drives the exact state from his
+screenshot (bare 3-year, missing this-year, empty Unit) through the real fill
+mode and reads the plan back, inheritance included. And one working note paid
+for twice: a `git checkout` mid-proof wiped the uncommitted rules — recovered
+from the built file, which held the inlined copy, and everything re-run green.
+
+## §202 — Three from the welcome screen (v3.92)
+
+Islam, using v3.91: the house is *"still not centered in the yellow box"*, the
+intro round should be *"a by default collapsed box that expands on a click and
+collapse on a click as well"*, and Continue should *"show continue to the
+function or BU name like Continue to Finance or Continue to Mobile"*.
+
+**THE HOUSE WAS SQUARE AND THE MARK WAS NOT IN THE MIDDLE OF IT.** §200.2 gave
+the box `flex:none` and made it a 34px square at every width — measured, green,
+and half the answer: `.navmenu-btn` is an inline-flex WORDED pill, so it centres
+DOWN (`align-items:center`) and starts its content at the LEFT, which is right
+for a word and wrong for one mark in a square. Measured before the fix: **1px of
+gold left of the house and 12px right**, at 1500 and at 1000, in both states;
+`justify-content` was `normal` and had simply never been asked. Now 7/7/7/7.
+**The check's square assertion could not have caught it** — a box can be a
+perfect square with the mark jammed against an edge — so the four GAPS are what
+is asserted now, at both widths: **3 red** with the declaration removed.
+
+**THE INTRO ROUND FOLDS.** It is the one thing on that screen not waiting on
+anybody — the columns above it are work — and a card spending four lines on an
+optional two-minute walk reads as loudly as they do. Shut, it is one line that
+still NAMES the round, because a fold that hides its own name is a feature
+nobody finds (§61). **The heading is the control**, not a caret beside it: a
+title with an arrow to its right offers two targets for one act and the smaller
+one is the one people press (§32). `hidden` on the body and `aria-expanded` on
+the button, with the open/shut state read off the body rather than kept in a
+flag beside it (§53.5). *Not now* is unchanged and lives inside the body, so it
+appears only once the card is open, which is the only place it means anything.
+**6 red** with the card drawn open by default — and one of them is `welcome.py`
+§4, which pressed *Start the round* directly and now has to open the fold first:
+the check catching its own dependency is the change being real.
+
+**AND CONTINUE ALREADY NAMED FOUR KINDS OF PLACE AND MISSED THE FIFTH.**
+Measured rather than assumed: `mobile` → *Continue to Mobile*, `fn:finance` →
+*Continue to Finance*, `co:distribution` → *Continue to Distribution*, `group` →
+*Continue to the group*, and **`setup` → *Continue***. `placeLabel()` does not
+answer for Setup because Setup is not a place a ROLE is held, which is what that
+function is for — so the guard skipped it and left the bare word. Setup is where
+the **house button now sits, beside the gear** (§193.2), so it is a common way
+onto this screen rather than an edge case. *Continue to Setup* is the
+navigation's own word and is honest: Continue steps aside (§159), and the page
+behind is Setup. **The null case was checked and deliberately not branched** —
+`WELCOME.offer()` runs after the boot paint (`sync.js`), so `current` is always
+set by then, and §24 says not to write a branch for a path that cannot be
+reached. **2 red** with the Setup branch removed.

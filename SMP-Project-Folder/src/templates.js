@@ -43,11 +43,11 @@ function csvRow(cols, o){ return cols.map(function(c){ return csvCell(o[c]); }).
 /* A target is held as one string. The template splits it into a number and a
    unit, which is how the source file carries it and the only form arithmetic
    can use. Anything unparseable travels whole in `value`. */
-function splitTarget(s){
-  if (s == null) return { value:"", unit:"" };
-  var m = String(s).trim().match(/^(-?[\d.,]+)\s*(.*)$/);
-  return m ? { value:m[1], unit:m[2] } : { value:String(s), unit:"" };
-}
+/* §201.2 moved the definition into lib/rules.js, because the SERVER now asks
+   the same question (is this change only a unit arriving?) and two regexes
+   answering "where does the number end" is §42's drift. This wrapper keeps
+   every existing call site working. */
+function splitTarget(s){ return SMPRules.targetParts(s); }
 /* Rebuilding a target from its parts must give back the original spacing:
    "6.2B EGP" splits to 6.2 and "B EGP" and has to rejoin without a space,
    while "24 h" has to keep one. The separator is read from what is stored

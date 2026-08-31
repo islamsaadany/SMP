@@ -3411,7 +3411,68 @@ prior sessions (on HR_ERP) accidentally reverted agreed-upon designs.
 
 ---
 
-*Last Updated: 2026-08-31 &mdash; **v3.89: the unit, the repeat in months,
+*Last Updated: 2026-08-31 &mdash; **v3.92: three from the welcome screen
+(&sect;202).** Islam, using v3.91. **The house was SQUARE and the mark was not
+in the middle of it** &mdash; &sect;200.2 fixed the box and that was half the
+answer: `.navmenu-btn` is a worded pill, so it centres DOWN and starts its
+content at the LEFT, which is right for a word and wrong for one mark in a
+square. Measured: **1px of gold left of the house, 12px right**, at every
+width, in both states; `justify-content` was `normal` and had never been asked.
+Now 7/7/7/7 &mdash; and **the check's square assertion could never have caught
+it**, so the four GAPS are what is asserted now (3 red without the fix).
+**The intro round folds**: it is the one thing on that screen not waiting on
+anybody, and shut it is one line that still NAMES the round (&sect;61 &mdash; a
+fold hiding its own name is a feature nobody finds). The HEADING is the control,
+never a caret beside it (&sect;32: two targets for one act, and the smaller one
+is the one people press); open/shut is read off the body rather than kept in a
+flag beside it (&sect;53.5). 6 red drawn open &mdash; one of them `welcome.py`
+&sect;4, which pressed *Start the round* directly and must open the fold first.
+**And Continue already named four kinds of place and missed the fifth**:
+measured, `mobile`&rarr;*Continue to Mobile*, `fn:finance`&rarr;*Continue to
+Finance*, `group`&rarr;*Continue to the group*, and **`setup`&rarr;*Continue***
+&mdash; `placeLabel()` does not answer for Setup, because Setup is not a place a
+ROLE is held. Setup is where the house now sits beside the gear (&sect;193.2),
+so it is a common way in; *Continue to Setup* is honest, since Continue steps
+aside and the page behind is Setup. **The null case was checked and deliberately
+not branched** &mdash; `WELCOME.offer()` runs after the boot paint, so `current`
+is always set (&sect;24: no branch for a path that cannot be reached).*
+
+*Earlier: 2026-08-31 &mdash; **v3.91: the wall, and the fillable unit
+(&sect;200.2&ndash;&sect;201.2).** Three fixes from Islam using the shipped
+v3.89, all reported in one message. **The house glyph stopped being squeezed**
+(&sect;200.2): drawn right, sat in a flex row that shrinks its items &mdash;
+`flex:none`, asserted as a SQUARE at 1000px. **A boot that lands on the baked
+example says so** (&sect;201): *"it opened on the prototype page with no way to
+exit it!!"* &mdash; my first reading was wrong (I answered about &sect;173),
+and the real path is `sync.js`: a failed or 8-second-late `/api/state` lands
+`land()` on the baked Raya Trade demo SILENTLY. The fallback stays (&sect;94.10
+built it so a broken server never leaves a grey page); what changes is that a
+wall now says it is the built-in example, not your data, that your data is safe
+on the server &mdash; `save()` already refused while not live, so the wall
+makes an existing refusal VISIBLE &mdash; with *Try again*, a 10s probe that
+reloads by itself the moment the server answers (a 500 keeps waiting rather
+than reload-looping), and a deliberate *Look at the example anyway*
+(&sect;61: a wall with no way past is a trap). Asserted in
+`checks/boot-skeleton.py` &sect;4, the ONE file that can see the boot path
+(&sect;94.11), proved able to fail: **7 red** with the wall's call removed.
+**And a missing unit is the filler's to add** (&sect;201.2): *"he can't fill
+the unit while he needs to fill if missing"* &mdash; right, and it was
+&sect;184's shape one field over: the unit rides ON the target string
+(&sect;199.4), so adding `%` to a bare `30` amends a non-blank value and
+amending is the office's. `SMPRules.unitAddedOnly()` is the narrowest yes
+&mdash; target fields only, stored unit EMPTY, number byte-identical &mdash;
+asked by the screen to draw the picker and by the server to accept the save
+from ONE function (&sect;42); the write is a PENDING fill (&sect;145), the
+undo is its own transition, and **a unit is still not a counted gap** (46 of
+178 shipped targets have none and are complete), so the picker offers without
+nagging and a row whose unit is set stays the office's. The measures table
+grows its Unit column decided ONCE per table, or header, rows and Add-row span
+disagree (&sect;53.5). Proved at both ends: seven new authoriser cases (2 red
+with the rule stubbed false), and `checks/objective-unit.py` &sect;9 drives
+the exact state from his screenshot through real fill mode and reads the plan
+back, inheritance included. `test-authorize` 423/0.*
+
+*Earlier: 2026-08-31 &mdash; **v3.89: the unit, the repeat in months,
 the Overview, the welcome screen's cycle, and the corner that comes back
 (&sect;195&ndash;&sect;200).** A save cost **236 network crossings and costs
 45** &mdash; the 504 Islam hit filling CX, root-caused by counting rather than

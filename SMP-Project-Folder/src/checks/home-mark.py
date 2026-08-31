@@ -99,6 +99,14 @@ READ = """() => {
            w: Math.round(r.width), h: Math.round(r.height),
            mid: Math.round(r.y + r.height/2), rowMid: Math.round(row.y + row.height/2),
            svgW: sr ? Math.round(sr.width) : null,
+           /* §202: THE MARK'S OWN MARGINS INSIDE THE BOX. The button box
+              can be a perfect square with the house jammed against one
+              edge — measured 1px left, 12px right — so the square is not
+              the assertion, the four gaps are. */
+           padL: sr ? Math.round(sr.left - r.left) : null,
+           padR: sr ? Math.round(r.right - sr.right) : null,
+           padT: sr ? Math.round(sr.top - r.top) : null,
+           padB: sr ? Math.round(r.bottom - sr.bottom) : null,
            first: document.getElementById('units').firstElementChild === h,
            reaches: !!(hit && h.contains(hit)), waiting: n };
 }"""
@@ -131,7 +139,28 @@ with sync_playwright() as pw:
     ck("...first on the row (§193.2)", d.get("first"), d)
     ck("...vertically centred — the reported damage",
        abs(d["mid"] - d["rowMid"]) <= 1, (d["mid"], d["rowMid"]))
+    # §200.2: AND SQUARE AT EVERY WIDTH. The row is flex, and with nothing
+    # saying this box may not shrink it was a 24×34 gold RECTANGLE at 1000px —
+    # "still damaged", the day after the centring fix. Asserted narrow, where
+    # the squeeze happened, never only wide.
+    pg.set_viewport_size({"width": 1000, "height": 950}); pg.wait_for_timeout(400)
+    sq = pg.evaluate(READ)
+    ck("...and still a 34px SQUARE at 1000px — the row may not squeeze it",
+       sq["w"] == sq["h"] == 34, (sq["w"], sq["h"]))
+    # §202: AND THE HOUSE IS CENTRED INSIDE THAT SQUARE. `.navmenu-btn` is a
+    # worded pill — align-items:center with the text starting at the left —
+    # so the box was square and the mark sat hard against one edge (1px left,
+    # 12px right, at every width, in both states). The four gaps are the
+    # assertion; a square box alone passes on the build that was reported.
+    ck("...with the house CENTRED in it at 1000px, not against an edge",
+       abs(sq["padL"] - sq["padR"]) <= 1 and abs(sq["padT"] - sq["padB"]) <= 1,
+       (sq["padL"], sq["padR"], sq["padT"], sq["padB"]))
+    pg.set_viewport_size({"width": 1500, "height": 950}); pg.wait_for_timeout(400)
+    d = pg.evaluate(READ)
     ck("...and a click at its centre reaches it", d.get("reaches"), d)
+    ck("...and centred at 1500 too", abs(d["padL"] - d["padR"]) <= 1
+       and abs(d["padT"] - d["padB"]) <= 1,
+       (d["padL"], d["padR"], d["padT"], d["padB"]))
 
     print("\n── 2 · GOLD, because this office has something waiting")
     ck("something is waiting", isinstance(d["waiting"], int) and d["waiting"] > 0, d["waiting"])

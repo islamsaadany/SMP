@@ -5517,9 +5517,21 @@
      and therefore sat at the top edge with 12px of nothing beneath it, which
      is what read as damaged. `align-self:center` is the whole fix — measured,
      not reasoned: box y=29 h=30 inside a row y=29 h=46. */
+  /* §200.2: THE HOUSE DOES NOT SQUEEZE. The row is flex and nothing said this
+     box may not shrink, so at ~1000px it was a 24×34 gold RECTANGLE — "still
+     damaged", measured: w 34 → 28 → 24 → 23 as the window narrows, on the old
+     build and the new alike. `flex:none` is the whole fix: a mark is a fixed
+     thing, and the row's slack belongs to the destinations that scroll. */
+  /* AND CENTRED ACROSS, NOT ONLY DOWN (§200.3). `.navmenu-btn` is an
+     inline-flex WORDED pill — `align-items:center` with the text starting at
+     the left, which is right for a word and wrong for a single mark in a
+     square. Measured: 1px of gold to the left of the house and 12px to the
+     right, at every width, in both states. `justify-content` was `normal`
+     and had simply never been asked. */
   .units .navmenu-btn.homemark{ background:none; border-color:transparent;
     color:rgba(255,255,255,.86); border-radius:5px; padding:0;
-    width:34px; height:34px; align-self:center; }
+    width:34px; height:34px; flex:none; align-self:center;
+    justify-content:center; }
   .units .navmenu-btn.homemark .navmenusvg{ width:21px; height:21px; }
   .units .navmenu-btn.homemark:hover{ background:rgba(255,255,255,.16);
     border-color:transparent; color:#fff; }
@@ -6076,6 +6088,29 @@
            font-weight:600; }
 .mp-foot { display:flex; justify-content:flex-end; padding-top:8px; margin-top:6px;
            border-top:1px solid var(--line); }
+
+  /* ── THE SERVER DID NOT ANSWER (§201) ─────────────────────────────────
+     Over everything, deliberately: the page behind it is the worked example
+     pretending to be nobody's tenant, and the one thing this must never be
+     is missable. Plain tokens only — the tenant's branding never arrived,
+     which is the whole situation. */
+  #noserver { position:fixed; inset:0; z-index:9000; display:flex;
+    align-items:center; justify-content:center;
+    background:color-mix(in srgb, var(--ground) 72%, transparent);
+    backdrop-filter: blur(2px); }
+  .nosrv-card { background:var(--surface); border:1px solid var(--line);
+    border-radius:12px; padding:26px 30px; max-width:440px; width:calc(100% - 48px);
+    box-shadow:0 18px 50px rgba(0,0,0,.25); text-align:left; }
+  .nosrv-card h2 { margin:0 0 8px; font:700 19px/1.25 var(--sans); color:var(--ink); }
+  .nosrv-card p { margin:0 0 12px; font-size:13.5px; color:var(--ink-2); }
+  .nosrv-try { color:var(--ink-3); font-size:12px; }
+  .nosrv-btn { display:block; width:100%; background:var(--panel); color:var(--panel-ink);
+    border:1px solid var(--panel); border-radius:8px; padding:10px 16px;
+    font:700 13.5px var(--sans); cursor:pointer; margin:4px 0 10px; }
+  .nosrv-btn:hover { filter:brightness(1.12); }
+  .nosrv-link { display:block; width:100%; background:none; border:0;
+    color:var(--ink-3); font:600 12px var(--sans); cursor:pointer;
+    text-decoration:underline; padding:2px; }
 
   /* ── Presentation mode ────────────────────────────────────────────
      A mode, not a page: it takes the whole window, the app chrome disappears,
@@ -7189,8 +7224,26 @@ body.presenting .tourdock { display:none; }
 .welcomeover .wpages a:hover { color:var(--gold-deep); }
 .welcomeover .wtour { background:var(--over-bg); border:1px solid var(--over-line);
   border-radius:var(--r); padding:18px; }
-.welcomeover .wtour h3 { margin:0 0 6px; font-size:var(--fs-lead); font-weight:700;
+/* ── THE FOLD (§202) ────────────────────────────────────────────────────
+   The heading IS the control, so it takes the whole row and carries the
+   caret at its far end — one target, and the obvious one. The card keeps
+   its padding in both states, or opening it would shift the column. */
+.welcomeover .wtoggle { display:flex; width:100%; align-items:center; gap:10px;
+  background:none; border:0; padding:0; margin:0; cursor:pointer;
+  color:inherit; font:inherit; text-align:left; }
+.welcomeover .wtour h3 { margin:0; font-size:var(--fs-lead); font-weight:700;
   letter-spacing:-.01em; }
+.welcomeover .wtcar { margin-left:auto; color:var(--gold-deep); font-family:var(--mono);
+  font-size:var(--fs-lead); line-height:1; transform:rotate(90deg);
+  transition:transform .15s ease; }
+.welcomeover .wtour.wtopen .wtcar { transform:rotate(-90deg); }
+.welcomeover .wtoggle:hover h3 { color:var(--gold-deep); }
+.welcomeover .wtoggle:focus-visible { outline:2px solid var(--gold);
+  outline-offset:3px; border-radius:4px; }
+@media (prefers-reduced-motion: reduce) {
+  .welcomeover .wtcar { transition:none; }
+}
+.welcomeover .wtourbody { margin-top:10px; }
 .welcomeover .wtour p { margin:0 0 14px; font-size:var(--fs-note); color:var(--ink-2); }
 .welcomeover .wtourbtns { display:flex; gap:10px; align-items:center; }
 .welcomeover .wtbtn { font:inherit; cursor:pointer; font-size:var(--fs-small);
@@ -9239,6 +9292,31 @@ THEME.apply();
                  ? c.promise.trim() : CHAT_PROMISE
     };
   }
+  /* ── A UNIT ADDED TO A BARE NUMBER IS A FILL, NOT AN EDIT (§201.2) ────
+     Islam, watching a custodian fill gaps: *"he can't fill the unit while he
+     needs to fill if missing."* A target reading `30` with no unit is a
+     number the plan has not finished saying; the custodian could fill an
+     EMPTY target and could not put the unit on one already typed, because
+     changing `30` to `30%` amends a non-blank value and amending is the
+     office's — the CX refusal's shape (§184), one field over.
+
+     THE RULE IS THE NARROWEST THAT SAYS YES: only `target`/`target3y`, only
+     where the stored value carries NO unit at all, and only where the NUMBER
+     is byte-identical — anything that also moves the number is still
+     authoring. Asked by the screen to draw the picker and by the server to
+     accept the save, from ONE function, or the two drift (§42, §185). */
+  var UNIT_FIELDS = { target: 1, target3y: 1 };
+  function targetParts(s) {
+    if (s == null) return { value: "", unit: "" };
+    var m = String(s).trim().match(/^(-?[\d.,]+)\s*(.*)$/);
+    return m ? { value: m[1], unit: m[2] } : { value: String(s), unit: "" };
+  }
+  function unitAddedOnly(field, was, now) {
+    if (!UNIT_FIELDS[field]) return false;
+    var a = targetParts(was), b = targetParts(now);
+    return !!a.value && a.unit === "" && b.unit !== "" && a.value === b.value;
+  }
+
   /* How often an open panel asks, in milliseconds. Named here rather than in
      the client, so the setting and the number it means cannot drift apart —
      and so the check can assert the pair. */
@@ -9813,6 +9891,7 @@ THEME.apply();
     CHAT_DEFAULTS: CHAT_DEFAULTS, CHAT_PROMISE: CHAT_PROMISE,
     CHAT_AWAY_MIN: CHAT_AWAY_MIN, CHAT_AWAY_MAX: CHAT_AWAY_MAX,
     chatCfg: chatCfg, chatBeat: chatBeat,
+    targetParts: targetParts, unitAddedOnly: unitAddedOnly,
     kbLook: kbLook, kbAdds: kbAdds, kbAllAdds: kbAllAdds,
     KB_AUDIENCES: KB_AUDIENCES, KB_AUDIENCE_LABEL: KB_AUDIENCE_LABEL,
     kbAudienceWord: kbAudienceWord, kbAudience: kbAudience, kbSees: kbSees,
@@ -19351,11 +19430,11 @@ function csvRow(cols, o){ return cols.map(function(c){ return csvCell(o[c]); }).
 /* A target is held as one string. The template splits it into a number and a
    unit, which is how the source file carries it and the only form arithmetic
    can use. Anything unparseable travels whole in `value`. */
-function splitTarget(s){
-  if (s == null) return { value:"", unit:"" };
-  var m = String(s).trim().match(/^(-?[\d.,]+)\s*(.*)$/);
-  return m ? { value:m[1], unit:m[2] } : { value:String(s), unit:"" };
-}
+/* §201.2 moved the definition into lib/rules.js, because the SERVER now asks
+   the same question (is this change only a unit arriving?) and two regexes
+   answering "where does the number end" is §42's drift. This wrapper keeps
+   every existing call site working. */
+function splitTarget(s){ return SMPRules.targetParts(s); }
 /* Rebuilding a target from its parts must give back the original spacing:
    "6.2B EGP" splits to 6.2 and "B EGP" and has to rejoin without a space,
    while "24 h" has to keep one. The separator is read from what is stored
@@ -25633,6 +25712,33 @@ function hasTargetToHoldAUnit(m){
   return !!(String(m.target || "").trim() || String(m.target3y || "").trim());
 }
 
+/* ── THE FILLER SETS A MISSING UNIT (§201.2) ───────────────────────────
+   Islam: *"he can't fill the unit while he needs to fill if missing."* Drawn
+   only where the row's unit is EMPTY — a unit already set stays the
+   office's — and the write stamps a pending mark on every target it
+   touched, because a fill is pending until the office confirms it (§145).
+   Clearing it back lifts the marks, which is the undo the server's own
+   transition expects. NOT a counted gap: 46 of the shipped 178 targets
+   carry no unit and are complete without one, so this offers without
+   nagging (§119.1: an optional blank is not a gap). */
+function fillUnitOffered(page, acKey, m, ctx){
+  return filling(page, acKey, ctx || {}) &&
+         !targetUnitOf(m) && hasTargetToHoldAUnit(m);
+}
+function fillUnitCell(page, acKey, m, ctx){
+  if (!fillUnitOffered(page, acKey, m, ctx)) return null;
+  return selectOr(page, "", targetUnitOpts(""), "", function(v){
+    var had = { target: m.target, target3y: m.target3y };
+    setTargetUnit(m, v);
+    ["target", "target3y"].forEach(function(f){
+      if (m[f] === had[f]) return;
+      if (String(v == null ? "" : v).trim()) gapStamp(m, f);
+      else gapLift(m, f);
+    });
+    gapBandRefresh();
+  });
+}
+
 /* ── THE UNITS ARE PICKED FROM A LIST (§199.4) ─────────────────────────
    Islam, on money: *"the financial units can be B EGP or M EGP or EGP only"*,
    and on counts: *"# into trips and orders is tricky, as we will need to add
@@ -25769,7 +25875,7 @@ function koEdit(list, page, acKey, owner){
                   function(v){ setTargetUnit(m, v); })
               : '<span class="why" title="Set a target first \u2014 the unit is ' +
                 'written with it">\u2014</span>')
-          : esc(targetUnitOf(m))) + '</td>' +
+          : (fillUnitCell(page, acKey, m) || esc(targetUnitOf(m)))) + '</td>' +
         '<td class="cc">' + gapCell(page, acKey, m, "target3y",
           { kind:"input", cls:"mono", parse: unitInherit(m) }) + '</td>' +
         '<td class="cc">' + gapCell(page, acKey, m, "target",
@@ -27641,6 +27747,10 @@ function unitPlanBody(it, u, railed){
      rows that name them. Same shape §147.7 hands the authoriser, so the two
      sides answer with one voice. */
   var pctx = function(row){ return { pillarOwner: it.owner, row: row }; };
+  /* §201.2: does this table carry a Unit column right now? The office's pen
+     always; a filler's only while some row has a missing unit to offer. */
+  var unitCol = !ed && it.measures.some(function(m){
+    return fillUnitOffered("plan", "u_plan", m, pctx(m)); });
   var mRows = it.measures.map(function(m, i){
     return '<tr data-oi="' + i + '"><td class="idx">' +
       (on ? handle("Reorder " + m.name) : '') +
@@ -27683,6 +27793,13 @@ function unitPlanBody(it, u, railed){
                 function(v){ setTargetUnit(m, v); })
             : '<span class="why" title="Set a target first \u2014 the unit is ' +
               'written with it">\u2014</span>') + '</td>'
+        : unitCol
+        /* §201.2: fill mode. The COLUMN is decided once for the whole table
+           (unitCol, below) or the header and the rows stop agreeing about
+           how many cells a row has; a row with nothing to offer gets the
+           unit it already carries, read-only. */
+        ? '<td class="cc">' + (fillUnitCell("plan", "u_plan", m, pctx(m))
+            || esc(targetUnitOf(m))) + '</td>'
         : '') +
       '<td class="num">' + gapCell("plan", "u_plan", m, "target",
         { ctx:pctx(m), kind:"input", cls:"mono", parse: unitInherit(m) }) + '</td>' +
@@ -27842,9 +27959,9 @@ function unitPlanBody(it, u, railed){
     /* §199.5: the Unit heading appears only with the pen, because the column
        under it does — and `addRow`'s span has to follow, or the Add row stops
        reaching the end of the table the moment somebody opens the pen. */
-    miniTable(ed ? ["#","Measure","Dir.","Unit","Target","Compiled"]
+    miniTable((ed || unitCol) ? ["#","Measure","Dir.","Unit","Target","Compiled"]
                  : ["#","Measure","Dir.","Target","Compiled"],
-      mRows + addRow(ed ? 6 : 5, "measure", "Add a measure"), sortAttr("measures")) +
+      mRows + addRow((ed || unitCol) ? 6 : 5, "measure", "Add a measure"), sortAttr("measures")) +
     '<h4 class="mini">Tactics <em>\u2014 who carries it, who supports, and in which quarters</em></h4>' +
     miniTable(["#","Tactic","Owner","Collabs.","Quarters"],
       tRows + addRow(4, "tactic", "Add a tactic"), sortAttr("tactics"));
@@ -40570,12 +40687,33 @@ var WELCOME = (function(){
             '<div class="wpagesbox"><p class="wseclab">Your pages</p>' +
               '<div class="wcard wpages"></div></div>' +
             cyc +
+            /* ── THE INTRO ROUND FOLDS (§202) ────────────────────────────
+               Islam: *"make the take an intro round a by default collapsed
+               box that expands on a click and collapse on a click as well."*
+               It is the ONE thing on this screen that is not waiting on
+               anybody — the two columns above it are work, and a card
+               spending four lines on an optional two-minute walk reads as
+               loudly as they do. Closed it is one line that still says the
+               round exists, which is the whole of what it has to do until
+               somebody wants it (§41's budget, on space rather than colour).
+
+               THE HEADING IS THE CONTROL, not a caret beside it: a title
+               with a fold arrow to its right gives two targets for one act
+               and the smaller one is the one people press (§32). `hidden`
+               on the body, never `display` (the shell's own rule), and
+               `aria-expanded` on the button so the state is announced. */
             '<div class="wtour" hidden>' +
-              "<h3>Take an intro round</h3>" +
-              "<p>A short walk of the platform on the worked example — about two minutes.</p>" +
-              '<div class="wtourbtns">' +
-                '<button type="button" class="wtbtn" data-wtour>Start the round</button>' +
-                '<button type="button" class="wtghost" data-wnotnow>Not now</button>' +
+              '<button type="button" class="wtoggle" data-wtoggle ' +
+                'aria-expanded="false">' +
+                "<h3>Take an intro round</h3>" +
+                '<span class="wtcar" aria-hidden="true">›</span>' +
+              "</button>" +
+              '<div class="wtourbody" data-wtourbody hidden>' +
+                "<p>A short walk of the platform on the worked example — about two minutes.</p>" +
+                '<div class="wtourbtns">' +
+                  '<button type="button" class="wtbtn" data-wtour>Start the round</button>' +
+                  '<button type="button" class="wtghost" data-wnotnow>Not now</button>' +
+                "</div>" +
               "</div>" +
             "</div>" +
           "</div>" +
@@ -40668,6 +40806,17 @@ var WELCOME = (function(){
       tourCard.querySelector("[data-wnotnow]").addEventListener("click", function(){
         tourCard.hidden = true;
       });
+      /* THE FOLD (§202). One handler on the heading, reading the state off
+         the body rather than keeping a flag beside it — two copies of "is it
+         open" is how a card ends up drawn open and announced shut (§53.5). */
+      var tbtn = tourCard.querySelector("[data-wtoggle]");
+      var tbody = tourCard.querySelector("[data-wtourbody]");
+      tbtn.addEventListener("click", function(){
+        var openNow = tbody.hidden;
+        tbody.hidden = !openNow;
+        tbtn.setAttribute("aria-expanded", openNow ? "true" : "false");
+        tourCard.classList.toggle("wtopen", openNow);
+      });
     }
 
     /* ── Continue ───────────────────────────────────────────────────────
@@ -40676,10 +40825,20 @@ var WELCOME = (function(){
        carried a grey "Strategy · Plan" under the name and it is deliberately
        not built: the label already names the destination, and the second
        line would mean re-adding the navigation-word reader §99 deleted. */
+    /* AND SETUP IS A PLACE TOO (§202). Islam: *"the continue button should
+       show continue to the function or BU name."* It already did for a unit,
+       a function, a company and the group — and read a bare "Continue" from
+       Setup, which is where the house button now sits beside the gear
+       (§193.2), so it is a common way in rather than an edge. Measured
+       before it was changed: `mobile` → "Continue to Mobile", `fn:finance` →
+       "Continue to Finance", `setup` → "Continue". The word is the
+       navigation's own; `placeLabel` does not answer for Setup because Setup
+       is not a place a ROLE is held, which is what that function is for. */
     var here = null;
     try { here = typeof current !== "undefined" ? current : null; } catch(e){}
     var word = "Continue";
-    if (here && here !== "setup" && here !== "manage") {
+    if (here === "setup" || here === "manage") word = "Continue to Setup";
+    else if (here) {
       try { word = "Continue to " + subjectName(here); } catch(e){}
     }
     var cont = box.querySelector("[data-wcontinue]");
@@ -40871,6 +41030,43 @@ var SYNC = (function () {
        is no server to carry a message. */
     try { CHAT.mount(); } catch (e) {}
   }
+  /* ── THE WALL FOR A SERVER THAT DID NOT ANSWER (§201) ─────────────────
+     Drawn only from land(), only when hydration failed over http. It retries
+     on its own: any answer that means the server is back (ok, or a 401/403
+     that will route to the gate) reloads; a 500 keeps waiting rather than
+     reload-looping a broken deployment. */
+  function noServerWall() {
+    if (document.getElementById("noserver")) return;
+    var d = document.createElement("div");
+    d.id = "noserver";
+    d.setAttribute("role", "alertdialog");
+    d.setAttribute("aria-label", "The server did not answer");
+    d.innerHTML =
+      '<div class="nosrv-card">' +
+        '<h2>The server did not answer</h2>' +
+        '<p>What is behind this notice is the built-in example \u2014 not ' +
+          'your organisation\u2019s data \u2014 and nothing entered here is ' +
+          'saved. Your data is safe on the server.</p>' +
+        '<p class="nosrv-try" data-nosrv-note>Trying again automatically\u2026</p>' +
+        '<button type="button" class="nosrv-btn" data-nosrv-retry>Try again</button>' +
+        '<button type="button" class="nosrv-link" data-nosrv-view>' +
+          'Look at the example anyway</button>' +
+      '</div>';
+    document.body.appendChild(d);
+    d.querySelector("[data-nosrv-retry]").addEventListener("click", function () {
+      location.reload();
+    });
+    d.querySelector("[data-nosrv-view]").addEventListener("click", function () {
+      clearInterval(probe);
+      d.remove();
+    });
+    var probe = setInterval(function () {
+      fetch("/api/state", { cache: "no-store" }).then(function (r) {
+        if (r.ok || r.status === 401 || r.status === 403) location.reload();
+      }).catch(function () {});
+    }, 10000);
+  }
+
   /* Callers that asked to save while one was in flight, answered when the
      next one settles (§183). An array rather than a single slot: two people
      pressing Save draft and a flush-on-leave can all arrive inside one
@@ -41851,7 +42047,28 @@ var SYNC = (function () {
            so it reads as one step rather than a stutter — below the threshold
            anybody perceives as a delay, and only ever the remainder. */
         var wait = Math.max(0, BOOT_FLOOR - (bootNow() - t0));
-        setTimeout(function () { bootLand(); (then || paint)(); }, wait);
+        setTimeout(function () {
+          bootLand(); (then || paint)();
+          /* ── LANDING ON THE EXAMPLE MUST SAY SO (§201) ────────────────
+             Islam, after a hard refresh on a morning the server was slow:
+             *"it opened on the prototype page with no way to exit it."*
+             He is right on both counts. When hydration fails or times out,
+             what paints is the BAKED worked example — Raya Trade — wearing
+             only a banner that calls itself a prototype, with nothing that
+             says "this is not your tenant, the server did not answer", and
+             the only way back is a reload nobody was told to make.
+
+             `live` is false on exactly this path and no other, so a wall is
+             drawn over the page: what is behind it is the example, nothing
+             typed into it is saved (`save()` already refuses while !live —
+             the wall makes the refusal VISIBLE instead of silent), Try again
+             reloads, and it retries by itself so a server that wakes up
+             brings the real page back with nobody pressing anything.
+             Looking at the example anyway stays possible — that was the old
+             behaviour's one virtue — but as a stated choice, never a
+             default. */
+          if (enabled && !live) noServerWall();
+        }, wait);
       }
       /* NOBODY IS LEFT LOOKING AT GREY. If the answer has not come, the baked
          data is still better than a loading state with no end — and it is

@@ -46,6 +46,43 @@ var SYNC = (function () {
        is no server to carry a message. */
     try { CHAT.mount(); } catch (e) {}
   }
+  /* ── THE WALL FOR A SERVER THAT DID NOT ANSWER (§201) ─────────────────
+     Drawn only from land(), only when hydration failed over http. It retries
+     on its own: any answer that means the server is back (ok, or a 401/403
+     that will route to the gate) reloads; a 500 keeps waiting rather than
+     reload-looping a broken deployment. */
+  function noServerWall() {
+    if (document.getElementById("noserver")) return;
+    var d = document.createElement("div");
+    d.id = "noserver";
+    d.setAttribute("role", "alertdialog");
+    d.setAttribute("aria-label", "The server did not answer");
+    d.innerHTML =
+      '<div class="nosrv-card">' +
+        '<h2>The server did not answer</h2>' +
+        '<p>What is behind this notice is the built-in example \u2014 not ' +
+          'your organisation\u2019s data \u2014 and nothing entered here is ' +
+          'saved. Your data is safe on the server.</p>' +
+        '<p class="nosrv-try" data-nosrv-note>Trying again automatically\u2026</p>' +
+        '<button type="button" class="nosrv-btn" data-nosrv-retry>Try again</button>' +
+        '<button type="button" class="nosrv-link" data-nosrv-view>' +
+          'Look at the example anyway</button>' +
+      '</div>';
+    document.body.appendChild(d);
+    d.querySelector("[data-nosrv-retry]").addEventListener("click", function () {
+      location.reload();
+    });
+    d.querySelector("[data-nosrv-view]").addEventListener("click", function () {
+      clearInterval(probe);
+      d.remove();
+    });
+    var probe = setInterval(function () {
+      fetch("/api/state", { cache: "no-store" }).then(function (r) {
+        if (r.ok || r.status === 401 || r.status === 403) location.reload();
+      }).catch(function () {});
+    }, 10000);
+  }
+
   /* Callers that asked to save while one was in flight, answered when the
      next one settles (§183). An array rather than a single slot: two people
      pressing Save draft and a flush-on-leave can all arrive inside one
@@ -1026,7 +1063,28 @@ var SYNC = (function () {
            so it reads as one step rather than a stutter — below the threshold
            anybody perceives as a delay, and only ever the remainder. */
         var wait = Math.max(0, BOOT_FLOOR - (bootNow() - t0));
-        setTimeout(function () { bootLand(); (then || paint)(); }, wait);
+        setTimeout(function () {
+          bootLand(); (then || paint)();
+          /* ── LANDING ON THE EXAMPLE MUST SAY SO (§201) ────────────────
+             Islam, after a hard refresh on a morning the server was slow:
+             *"it opened on the prototype page with no way to exit it."*
+             He is right on both counts. When hydration fails or times out,
+             what paints is the BAKED worked example — Raya Trade — wearing
+             only a banner that calls itself a prototype, with nothing that
+             says "this is not your tenant, the server did not answer", and
+             the only way back is a reload nobody was told to make.
+
+             `live` is false on exactly this path and no other, so a wall is
+             drawn over the page: what is behind it is the example, nothing
+             typed into it is saved (`save()` already refuses while !live —
+             the wall makes the refusal VISIBLE instead of silent), Try again
+             reloads, and it retries by itself so a server that wakes up
+             brings the real page back with nobody pressing anything.
+             Looking at the example anyway stays possible — that was the old
+             behaviour's one virtue — but as a stated choice, never a
+             default. */
+          if (enabled && !live) noServerWall();
+        }, wait);
       }
       /* NOBODY IS LEFT LOOKING AT GREY. If the answer has not come, the baked
          data is still better than a loading state with no end — and it is

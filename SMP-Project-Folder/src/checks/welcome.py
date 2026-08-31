@@ -214,6 +214,52 @@ def main():
            pg.locator(".wpages a").count() == 3, pg.inner_text(".wpages"))
         ck("the intro round is offered to somebody the tour has a story for",
            pg.locator(".wtour").is_visible())
+
+        # ── §202 · AND IT IS SHUT UNTIL SOMEBODY ASKS ─────────────────────
+        # Islam: "make the take an intro round a by default collapsed box
+        # that expands on a click and collapse on a click as well." Shut it
+        # still SAYS the round exists — a fold that hides its own name is a
+        # feature nobody finds (§61) — and the state is announced, not only
+        # drawn, or a screen reader is told it is open while it is shut.
+        fold = pg.evaluate("""(function(){
+          var c=document.querySelector('.wtour');
+          if(!c) return null;
+          var body=c.querySelector('[data-wtourbody]'),
+              btn=c.querySelector('[data-wtoggle]');
+          return { named: c.textContent.indexOf('Take an intro round') > -1,
+                   bodyHidden: !!(body && body.hidden),
+                   aria: btn && btn.getAttribute('aria-expanded'),
+                   startShown: !!(c.querySelector('[data-wtour]') || {}).offsetParent,
+                   h: Math.round(c.getBoundingClientRect().height) };})()""")
+        ck("the round's card is CLOSED to begin with",
+           fold and fold["bodyHidden"] and fold["aria"] == "false", fold)
+        ck("...and still names itself while shut", fold and fold["named"], fold)
+        ck("...with nothing to press inside it yet",
+           fold and not fold["startShown"], fold)
+        shutH = fold["h"] if fold else 0
+        pg.click("[data-wtoggle]")
+        pg.wait_for_timeout(150)
+        op = pg.evaluate("""(function(){
+          var c=document.querySelector('.wtour'),
+              body=c.querySelector('[data-wtourbody]'),
+              btn=c.querySelector('[data-wtoggle]');
+          return { bodyHidden: !!body.hidden, aria: btn.getAttribute('aria-expanded'),
+                   startShown: !!c.querySelector('[data-wtour]').offsetParent,
+                   h: Math.round(c.getBoundingClientRect().height) };})()""")
+        ck("one press opens it", op["bodyHidden"] is False and op["aria"] == "true", op)
+        ck("...the round is then reachable", op["startShown"], op)
+        ck("...and the card actually grew", op["h"] > shutH, (shutH, op["h"]))
+        pg.click("[data-wtoggle]")
+        pg.wait_for_timeout(150)
+        again = pg.evaluate("""(function(){
+          var c=document.querySelector('.wtour'),
+              body=c.querySelector('[data-wtourbody]'),
+              btn=c.querySelector('[data-wtoggle]');
+          return { bodyHidden: !!body.hidden, aria: btn.getAttribute('aria-expanded'),
+                   h: Math.round(c.getBoundingClientRect().height) };})()""")
+        ck("...and the next press closes it again",
+           again["bodyHidden"] and again["aria"] == "false"
+           and again["h"] == shutH, (again, shutH))
         ctx.close()
 
         # ── 2 · THE DOORS ARE REAL, AND THE SCREEN IS ONCE PER SESSION ─────
@@ -238,6 +284,34 @@ def main():
         ctx, pg = fresh(browser, port)
         word = pg.inner_text("[data-wcontinue]")
         ck("Continue names the landing place", "Mobile" in word, word)
+        # §202: AND SETUP IS A PLACE TOO. Islam saw a bare "Continue"; every
+        # unit, function and company already named itself, and Setup — where
+        # the house button sits beside the gear (§193.2) — did not. Asserted
+        # of every kind, so a build that named none of them fails here too.
+        labs = pg.evaluate("""(function(){
+          var out={}, mine=PEOPLE.filter(function(x){return x.key==='mobhead';})[0]
+                       || PEOPLE[0];
+          ['setup','manage','mobile','fn:finance','group'].forEach(function(t){
+            WELCOME.dismiss(); current=t; WELCOME.open(mine);
+            var e=document.querySelector('[data-wcontinue] .wexlab');
+            out[t]=e?e.textContent:null; });
+          WELCOME.dismiss(); return out;})()""")
+        ck("...Setup names itself rather than reading a bare Continue",
+           labs.get("setup") == "Continue to Setup"
+           and labs.get("manage") == "Continue to Setup", labs)
+        ck("...and a unit, a function and the group each name themselves",
+           labs.get("mobile") == "Continue to Mobile"
+           and labs.get("fn:finance") == "Continue to Finance"
+           and "group" in (labs.get("group") or ""), labs)
+        # PUT THE SCREEN BACK THE WAY THE SECTION FOUND IT (§94.2 from the
+        # other side): the probe above dismissed the overlay, and everything
+        # below measures it. A reload would not do — the screen is once per
+        # session, so it would come back to no overlay at all.
+        pg.evaluate("""(function(){
+          current='mobile';
+          WELCOME.open(PEOPLE.filter(function(x){return x.key==='mobhead';})[0]
+                       || PEOPLE[0]);})()""")
+        pg.wait_for_timeout(200)
         # §159 · THE WAY OUT IS THE SCREEN'S, NOT THE LIST'S. Asserted as the
         # RELATIONSHIP (§94.8): outside the grid, last in the wrap, and as wide
         # as the two columns together — never a pixel count, so a later change
@@ -268,6 +342,9 @@ def main():
 
         print("§4 the intro round is a handoff to the real tour")
         ctx, pg = fresh(browser, port)
+        # §202: THE CARD IS SHUT UNTIL SOMEBODY OPENS IT, so the round is two
+        # presses now rather than one. The fold's own assertions are §11.
+        pg.click("[data-wtoggle]")
         pg.click("[data-wtour]")
         pg.wait_for_selector(".welcomeover", state="detached", timeout=5000)
         pg.wait_for_timeout(600)

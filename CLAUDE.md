@@ -384,6 +384,21 @@ console errors (in this cloud environment, run it via a wrapper that points Play
   remove × onto a second line — `inline-block` restores it, and it was found
   by `checks/plan-fields.py` GOING RED, not by reading the cascade, which is
   the argument for that check existing.
+- **THE OVERVIEW OWES NOTHING (§214.4, reversing §214):** Islam — *"for the
+  functions that plan with pillars remove the elements of the overview from the
+  missing items."* **REVERSED ON BOTH FORMATS, and that is not a widening**: the
+  capability side only ever counted the definition because §213 made it one page
+  and §53.5 gives one page one answer — counting it on one format and not the
+  other is the drift §211 cost a day finding. **STILL FILLABLE**, in
+  `GAP_OPTIONAL` (§205, third time in a day: answering *counted* by emptying the
+  list the SERVER reads is what refuses a save the screen has offered). **AND
+  THE PAGE STOPPED SAYING THE WORD** — a red `Missing` over a count of nought is
+  §177 with the sign reversed; `gapCell`'s own `readEmpty` draws the em-dash the
+  Weight column beside it already used. **AND A HOLE CLOSED ON THE WAY PAST**:
+  `gapMap`'s pending branch asked `GAP_FIELDS`, and §192's own comment says the
+  question is whether the field is still FILLABLE — the two lists have now
+  parted three times, and `gapCell` draws the confirm tick for every fillable
+  field, so the office could not FIND a fill it could plainly see and tick.
 - **A SENTENCE NOBODY HAS SETTLED IS A QUESTION MARK ON THE PAGE (§214.3):**
   Islam — *"remove the line that's talking about the Retail aspiration … I will
   think later how to edit it, to avoid any confusion."* The line was

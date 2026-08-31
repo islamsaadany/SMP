@@ -5405,7 +5405,16 @@ function gapMap(target, pend){
        Asked through GAP_FIELDS, the same list the gaps are counted from. */
     if (pend) {
       var marks = SMPRules.pendOf(row);
-      return (SMPRules.GAP_FIELDS[kind] || []).filter(function(f){
+      /* §214.4: THE FILLABLE LIST, NOT THE COUNTED ONE. §192 chose
+         `GAP_FIELDS` and its own words say why — a mark for a field that has
+         stopped being FILLABLE would be walked to a tick that is not drawn —
+         but that is exactly what `GAP_FILLABLE` answers, and the two lists
+         have since parted three times (collaborators §205, a function's key
+         objectives §214.2, its definition here). `gapCell` draws the confirm
+         tick for every fillable field, so asking the counted list left the
+         office unable to FIND a fill it can plainly see and tick. §205's
+         fault in the walk rather than in the save. */
+      return (SMPRules.GAP_FILLABLE[kind] || []).filter(function(f){
         return !!marks[f]; }).length;
     }
     return SMPRules.gapMissing(kind, row).length;

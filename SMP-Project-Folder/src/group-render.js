@@ -5351,7 +5351,13 @@ function fnPillarsOverview(fk){
              "undefined" the way `fieldOr(page, f.def, …)` did — that third
              argument is a CLASS, not a placeholder (§213.1, found in a
              screenshot). */
-          gapCell("capfoundation", "k_found", f, "def", { kind:"area" }) +
+          /* §214.4: AN EM-DASH, NOT THE RED WORD. The definition stopped
+             being counted, and a page printing `Missing` over a count of
+             nought is the product arguing with itself (§177, sign reversed).
+             `readEmpty` is the hook gapCell already carries for exactly this.
+             It stays FILLABLE — the box still opens and still saves. */
+          gapCell("capfoundation", "k_found", f, "def",
+                  { kind:"area", readEmpty:"&mdash;" }) +
         '</dd></div>' +
       '</dl></div>' +
       '<div class="card"><div class="cardhead"><h2 class="sec first">' + L("keyobj","bu") + '</h2>' +
@@ -5419,7 +5425,8 @@ function renderFnFoundation(fnKey){
            one page, one answer (§53.5), or a fill grant would reach a
            function's definition and not a capability's. */
         '<div class="clause"><dt>Definition</dt><dd>' +
-          gapCell("capfoundation", "k_found", c, "def", { kind:"area" }) + '</dd></div>' +
+          gapCell("capfoundation", "k_found", c, "def",
+                  { kind:"area", readEmpty:"&mdash;" }) + '</dd></div>' +
       '</dl></div>' +
       '<div class="card"><div class="cardhead"><h2 class="sec first">' + L("keyobj","bu") + '</h2>' +
         '<span class="pill horizon">Horizon &middot; ' + horizonLabel() + '</span></div>' +

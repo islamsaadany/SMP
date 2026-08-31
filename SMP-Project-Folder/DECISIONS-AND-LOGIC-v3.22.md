@@ -24551,6 +24551,42 @@ whatever the totals are; it compares the two maps now. §94.8, and the third
 time this file has recorded a literal outliving the decision it was written
 under.
 
+### §214.4 — The Overview owes nothing (reversing §214)
+
+Islam: *"a quick adjustment for ease of use — for the functions that plan with
+pillars remove the elements of the overview from the missing items."*
+
+§214 made the definition mandatory on his instruction, scoped to pillars
+functions; §214.2 then took the key objectives back out. This takes the last of
+it — the Overview contributes nothing to the missing count.
+
+**REVERSED ON BOTH FORMATS, and that is not a widening.** The capability side
+only ever counted the definition because §213 made it one page and §53.5 says
+one page gets one answer. Counting it on one format and not the other would put
+the two Overviews back out of step, which is precisely the drift §211 cost a day
+finding and §213 closed by construction. Capability functions are simply back
+where they had been for their whole life.
+
+**STILL FILLABLE** — `GAP_OPTIONAL`, beside the objectives §214.2 put there.
+§205's rule for the third time in one day: *counted* and *fillable* are two
+questions, and answering the first by emptying the list the SERVER reads is what
+refuses a save the screen has already offered.
+
+**AND THE PAGE HAD TO STOP SAYING THE WORD.** With the count at nought a red
+`Missing` over the definition is the product arguing with itself — §177's fault
+with the sign reversed — so it reads as an em-dash, which is what the Weight
+column beside it already drew for an absent optional value. `gapCell` already
+carried `readEmpty` for exactly this.
+
+**AND ONE HOLE WAS CLOSED ON THE WAY PAST.** `gapMap`'s pending branch asked
+`GAP_FIELDS` — §192 chose that list and its own comment says why: *a mark for a
+field that has stopped being FILLABLE would be walked to a tick that is not
+drawn*. But `GAP_FILLABLE` is the list that answers that question, and the two
+have now parted three times (collaborators §205, a function's key objectives
+§214.2, its definition here). `gapCell` draws the confirm tick for every
+fillable field, so asking the counted list left the office unable to FIND a fill
+it could plainly see and tick. §205's fault in the WALK rather than in the save.
+
 ### Not explained
 
 The **"could not reach the server (Failed to fetch)"** on *Next pending*. It

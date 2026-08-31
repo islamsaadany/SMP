@@ -217,44 +217,46 @@ with sync_playwright() as p:
     ok("...and no Foundation half survives on a function",
        "found" not in m and "ko" not in m, m)
 
-    print("\n── 5b · the Overview is MANDATORY (§214)")
-    # §94.2: MAKE the blank definition — every demo capability has one.
+    print("\n── 5b · the Overview owes NOTHING (§214.4, reversing §214)")
+    # Islam: "for the functions that plan with pillars remove the elements of
+    # the overview from the missing items." §214 made the definition
+    # mandatory; this takes it back — on BOTH formats, because the capability
+    # side only ever counted it to keep the two Overviews one page (§53.5).
+    # §94.2: MAKE the empty state — every demo capability has a definition.
     pg.evaluate("""(a)=>{ delete FUNCTIONS[a.fk].def;
       const c=capsOfFunction(a.cap)[0]; if (c) c.def='';
       EDIT_PAGE.capfoundation=false; paint(); }""", {"fk": fk, "cap": cap})
     pg.wait_for_timeout(400)
     for t, what in ((T, "pillars"), (TC, "projects")):
-        n = pg.evaluate("(t)=>{const e=gapMap(t).filter(x=>x.key==='ov')[0];return e?e.count:null}", t)
-        ok("a blank definition is counted as missing on the " + what + " function",
-           n is not None and n >= 1, n)
-    open_at(pg, T)
-    last = pg.evaluate("()=>{const d=[...document.querySelectorAll('#panel dd')].pop();"
-                       "return d?d.textContent.trim():''}")
-    ok("...the page prints the word", "Missing" in last, last)
-    chip = pg.query_selector(".missbar .mchip")
-    ok("...the band offers a chip for it", chip is not None,
-       pg.evaluate("()=>{const m=document.querySelector('.missbar');return m?m.textContent:null}"))
-    if chip:
-        chip.click(); pg.wait_for_timeout(650)
-        ok("...which lands on the Overview",
-           pg.evaluate("()=>CURSEC.fnstrat") == "found", pg.evaluate("()=>CURSEC.fnstrat"))
-        # §61: a counted gap must open something somebody can type in.
-        f = pg.query_selector("#panel .gapwalk")
-        ok("...with a field under the cursor", f is not None)
-        if f:
-            was = pg.evaluate("(t)=>gapMap(t).filter(x=>x.key==='ov')[0].count", T)
-            f.click(); f.fill("What this function is.")
-            pg.evaluate("()=>document.activeElement.blur()"); pg.wait_for_timeout(450)
-            ok("...and typing it reaches the STORED function",
-               pg.evaluate("(k)=>FUNCTIONS[k].def", fk) == "What this function is.",
-               pg.evaluate("(k)=>FUNCTIONS[k].def", fk))
-            now = pg.evaluate("(t)=>gapMap(t).filter(x=>x.key==='ov')[0].count", T)
-            # THE DELTA, NEVER THE TOTAL (§94.8). §5 left an objective owing a
-            # target and a weight, which the Overview also counts — asserting 0
-            # here measured those rather than the definition, and reported a
-            # working fill as broken.
-            ok("...and the Overview owes exactly one thing less",
-               now == was - 1, {"before": was, "after": now})
+        e = pg.evaluate("(t)=>{const x=gapMap(t).filter(y=>y.key==='ov')[0];return x?x.count:None}"
+                        .replace("None", "null"), t)
+        ok("a blank definition counts NOTHING on the " + what + " function", e == 0, e)
+        open_at(pg, t)
+        ok("...and the page draws no red word", 
+           pg.evaluate("()=>document.querySelectorAll('#panel .missing').length") == 0,
+           pg.evaluate("()=>[...document.querySelectorAll('#panel .missing')].map(x=>x.textContent)"))
+        ok("...and no missing bar at all",
+           pg.evaluate("()=>!document.querySelector('.missbar')"),
+           pg.evaluate("()=>{const m=document.querySelector('.missbar');return m?m.textContent:null}"))
+    # BUT IT IS STILL FILLABLE, or §205's fault repeats: the box opens, the
+    # person types, and the save refuses what the screen offered.
+    ok("the definition is still fillable (§205)",
+       pg.evaluate("()=>(SMPRules.GAP_FILLABLE.cap||[]).indexOf('def')") == 0,
+       pg.evaluate("()=>SMPRules.GAP_FILLABLE.cap"))
+    open_at(pg, T, pen=True)
+    d = pg.query_selector_all("#panel dd textarea, #panel dd input")
+    ok("...and the box opens behind the pen", len(d) >= 1, len(d))
+    if d:
+        d[-1].click(); d[-1].fill("What this function is.")
+        pg.evaluate("()=>document.activeElement.blur()"); pg.wait_for_timeout(420)
+        ok("...and writing it reaches the STORED function",
+           pg.evaluate("(k)=>FUNCTIONS[k].def", fk) == "What this function is.",
+           pg.evaluate("(k)=>FUNCTIONS[k].def", fk))
+    ok("...and a UNIT still counts its own objectives (§53.5: untouched)",
+       pg.evaluate("""()=>{ const u=UNITS[UNIT_KEYS[0]];
+         const had=u.keyObjectives[0].target; u.keyObjectives[0].target='';
+         const n=gapMap(UNIT_KEYS[0]).filter(e=>e.key==='ko')[0].count;
+         u.keyObjectives[0].target=had; return n; }""") >= 1)
 
     print("\n── 6 · the workbook stops asking, and a UNIT'S IS UNTOUCHED")
     wb = pg.evaluate("""(t)=>{

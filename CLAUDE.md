@@ -3362,6 +3362,13 @@ python3 checks/email-greeting.py # the greeting row is ONE line with no prose, t
                                 # fills it per recipient (§135, over HTTP)
 python3 checks/setup-pages.py   # every Setup page is named ONCE and in the rail's own word,
                                 # and the name and the table head stay on screen (§121)
+python3 checks/save-fidelity.py # WHAT THE SCREEN HOLDS IS WHAT THE SERVER HOLDS
+                                # (§210): real controls driven — typing with the
+                                # pen open, a dropdown, adding and removing a row,
+                                # reporting a figure — then the server's copy is
+                                # compared with the screen's. A change the diff
+                                # fails to NOTICE is silent data loss, so this
+                                # asserts AGREEMENT, never a literal (§94.8)
 node scripts/test-graph-diff.js # the change list on its own: only what changed
                                 # travels, applying it to a DIFFERENT target leaves
                                 # that target's other work alone, a removal is not a

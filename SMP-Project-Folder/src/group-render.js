@@ -2924,6 +2924,35 @@ function setTargetUnit(m, u){
 /* A unit with no target to sit inside cannot be stored, so the field says so
    rather than accepting a word and losing it on the next paint (§61: a control
    that takes input and discards it is worse than one that is not there). */
+/* ── A NUMBER TYPED INTO A ROW TAKES THAT ROW'S UNIT (§199.6) ──────────
+   Islam, from a group objective reading `3-year 30` with no unit at all:
+   *"the objectives need to inherit the unit automatically as they are entered
+   as a number in the value cell."*
+
+   §199 only ever wrote the unit onto targets that ALREADY EXISTED, so the
+   order of work decided the result: set the unit, then type the number, and
+   the number was stored bare and the unit silently lost. Setting a unit and
+   then filling the row is the obvious way round, and it was the one that did
+   not work.
+
+   ONLY A BARE NUMBER INHERITS. "TBD" must not become "TBD%", and a value
+   somebody typed WITH its own unit ("50 EGP") is what they meant — it is left
+   exactly as typed, and the picker then shows it, because the unit is read
+   back out of the target (§96.2: never rewrite what somebody wrote).
+
+   THE ROW'S UNIT IS THE OTHER HORIZON'S when this one is empty, which is what
+   `targetUnitOf` already answers — so filling `This year` on a row whose
+   3-year reads `30%` gives `50%` without anybody picking anything twice. */
+function unitInherit(m){
+  return function(v){
+    var t = String(v == null ? "" : v).trim();
+    if (!t || !/^-?[\d.,]+$/.test(t)) return v;   /* not a bare number */
+    var u = targetUnitOf(m);
+    if (!u) return v;
+    return t + (TIGHT_UNITS[u] ? "" : " ") + u;
+  };
+}
+
 function hasTargetToHoldAUnit(m){
   return !!(String(m.target || "").trim() || String(m.target3y || "").trim());
 }
@@ -3066,9 +3095,9 @@ function koEdit(list, page, acKey, owner){
                 'written with it">\u2014</span>')
           : esc(targetUnitOf(m))) + '</td>' +
         '<td class="cc">' + gapCell(page, acKey, m, "target3y",
-          { kind:"input", cls:"mono" }) + '</td>' +
+          { kind:"input", cls:"mono", parse: unitInherit(m) }) + '</td>' +
         '<td class="cc">' + gapCell(page, acKey, m, "target",
-          { kind:"input", cls:"mono" }) + '</td>' +
+          { kind:"input", cls:"mono", parse: unitInherit(m) }) + '</td>' +
         '<td class="cc">' + gapCell(page, acKey, m, "compile",
           { kind:"select", opts:["Sum", "Latest", "Average"] }) + '</td>' +
         '<td class="cc">' + (editing
@@ -4980,7 +5009,7 @@ function unitPlanBody(it, u, railed){
               'written with it">\u2014</span>') + '</td>'
         : '') +
       '<td class="num">' + gapCell("plan", "u_plan", m, "target",
-        { ctx:pctx(m), kind:"input", cls:"mono" }) + '</td>' +
+        { ctx:pctx(m), kind:"input", cls:"mono", parse: unitInherit(m) }) + '</td>' +
       /* NO 3-YEAR COLUMN. Islam, 2026-08-22: "in the direction plans the key
          measures are for 1 year only". A pillar's key measures carry one
          target and it is this year's; the three-year horizon belongs to the

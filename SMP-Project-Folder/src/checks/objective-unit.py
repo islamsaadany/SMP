@@ -206,6 +206,74 @@ with sync_playwright() as pw:
     ck("...and the standard list is still all there",
        all(u in keep for u in ["%", "#", "EGP", "M EGP", "B EGP"]), keep)
 
+    print("\n── 7d · a number typed into a row INHERITS its unit (§199.6)")
+    # Islam, from a group objective reading `3-year 30` with no unit at all:
+    # "the objectives need to inherit the unit automatically as they are
+    # entered as a number in the value cell." §199 only wrote the unit onto
+    # targets that ALREADY EXISTED, so setting the unit and then filling the
+    # row — the obvious order — lost it.
+    inh = pg.evaluate("""() => {
+      const t = (row, typed) => unitInherit(row)(typed);
+      return { pct:   t({target:"", target3y:"45%"}, "30"),
+               tight: t({target:"1.6B EGP"}, "2.4"),
+               space: t({target:"33 EGP"}, "28"),
+               none:  t({target:"", target3y:"45"}, "30"),
+               word:  t({target3y:"45%"}, "TBD"),
+               own:   t({target3y:"45%"}, "50 EGP"),
+               blank: t({target3y:"45%"}, ""),
+               neg:   t({target3y:"45%"}, "-3") };
+    }""")
+    ck("a bare number takes the row's unit", inh["pct"] == "30%", inh)
+    ck("...with the right separator, both ways",
+       inh["tight"] == "2.4B EGP" and inh["space"] == "28 EGP", inh)
+    ck("a row with no unit is left exactly as typed", inh["none"] == "30", inh)
+    ck("something that is NOT a number never inherits — 'TBD%' would be wrong",
+       inh["word"] == "TBD", inh)
+    ck("a value typed WITH its own unit is what somebody meant (§96.2)",
+       inh["own"] == "50 EGP", inh)
+    ck("clearing stays cleared", inh["blank"] == "", inh)
+    ck("a negative number is still a number", inh["neg"] == "-3%", inh)
+
+    # AND THE WHOLE FLOW, through the real controls, on a row emptied first
+    # (§94.2 — the demo has no blank objective to walk).
+    pg.evaluate("() => { EDIT_PAGE['foundation'] = true; paint(); }")
+    pg.wait_for_timeout(500)
+    step = {}
+    step["empty"] = pg.evaluate("""() => { const m = UNITS.logistics.keyObjectives[0];
+      m.target = ""; m.target3y = ""; paint(); return [m.target3y, m.target]; }""")
+    pg.wait_for_timeout(400)
+    step["typed30"] = pg.evaluate("""() => {
+      const m = UNITS.logistics.keyObjectives[0];
+      const i = document.querySelectorAll('.koband tbody tr')[0]
+                  .querySelectorAll('td')[3].querySelector('input');
+      i.value = "30"; i.dispatchEvent(new Event('change',{bubbles:true}));
+      return [m.target3y, m.target]; }""")
+    # A FIELD WRITES WITHOUT REPAINTING (§71.2), so on a row that had NO target
+    # the Unit picker appears at the next paint rather than instantly. Stated
+    # here rather than worked around: repainting under a typing hand is the
+    # fault that rule exists to prevent.
+    pg.evaluate("() => paint()"); pg.wait_for_timeout(500)
+    step["pickedPct"] = pg.evaluate("""() => {
+      const m = UNITS.logistics.keyObjectives[0];
+      const s = document.querySelectorAll('.koband tbody tr')[0]
+                  .querySelectorAll('td')[2].querySelector('select');
+      s.value = "%"; s.dispatchEvent(new Event('change',{bubbles:true}));
+      return [m.target3y, m.target]; }""")
+    pg.wait_for_timeout(400)
+    step["typed50"] = pg.evaluate("""() => {
+      const m = UNITS.logistics.keyObjectives[0];
+      const i = document.querySelectorAll('.koband tbody tr')[0]
+                  .querySelectorAll('td')[4].querySelector('input');
+      i.value = "50"; i.dispatchEvent(new Event('change',{bubbles:true}));
+      return [m.target3y, m.target]; }""")
+    ck("typing 30 into an empty row stores it bare", step["typed30"] == ["30", ""], step)
+    ck("...picking % then reaches the value already there",
+       step["pickedPct"] == ["30%", ""], step)
+    ck("...and the NEXT number inherits it without being asked",
+       step["typed50"] == ["30%", "50%"], step)
+    pg.evaluate("() => { EDIT_PAGE['foundation'] = false; paint(); }")
+    pg.wait_for_timeout(300)
+
     print("\n── 7c · a PILLAR MEASURE gets the same picker (§199.5)")
     # Islam: "for the pillar measures let's do the same fix." Identical shape,
     # identical control, from the IDENTICAL functions — two tables asking one

@@ -3411,7 +3411,35 @@ prior sessions (on HR_ERP) accidentally reverted agreed-upon designs.
 
 ---
 
-*Last Updated: 2026-08-30 &mdash; **v3.78: an attention item you can
+*Last Updated: 2026-08-31 &mdash; **v3.89: the unit, the repeat in months,
+the Overview, the welcome screen's cycle, and the corner that comes back
+(&sect;195&ndash;&sect;200).** A save cost **236 network crossings and costs
+45** &mdash; the 504 Islam hit filling CX, root-caused by counting rather than
+theorising: the writer issued an INSERT inside four loops and the reader asked
+33 questions one at a time; both travel batched now, the reader as ONE message
+from ONE snapshot, with the bind-parameter cap chunked out loud (&sect;195).
+**The repeat is a count of months** with `"cycle"` still meaning what it meant
+(&sect;196); **the chat corner retries its first answer** instead of staying
+hidden three minutes after one failed poll &mdash; his report, and my first
+diagnosis was wrong (&sect;197); **the home mark is quiet until something
+waits, then gold**, counting the welcome screen's own list so it can never
+open onto "Nothing is waiting on you" (&sect;197.2); **an unreadable date
+reads Missing with the value beside it** and the workbook finally checks a
+project's own dates (&sect;197.3); **the Setup Overview leads with the
+queue** and the rail counts only what is folded (&sect;198); **a key
+objective and a pillar measure get a UNIT** &mdash; stored NOWHERE, because
+178 targets round-trip through the split/join pair with zero failures, so the
+column is a view: picked from a fixed list (money is B EGP &middot; M EGP
+&middot; EGP only, `#` committed to), set in the pen, riding the figure in
+the view, and **a typed number inherits the row's unit** (&sect;199); **the
+cycle summary joined the welcome screen gated on `c_cycle`**, because
+business-wide figures on everyone's screen would be a new disclosure arriving
+as a layout idea (&sect;200). Before this merge, both live incidents were
+REPLAYED: the CX refusal keeps every good fill and offers the put-back; a 504
+mid-save loses nothing, says so, and the retry lands it. 19/19 checks,
+authoriser 416/0, overlapping saves torn-write-free, full sweep clean.*
+
+*Earlier: 2026-08-30 &mdash; **v3.78: an attention item you can
 answer, on the box it is about (&sect;190)**. Islam, from the register:
 *"attention items that stays attention item is a problem always give me the
 option to dismiss and make gnerally the dismiss under the box with the issue and

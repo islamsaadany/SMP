@@ -8870,9 +8870,22 @@ THEME.apply();
      GAP_FIELDS plus the optional blanks. Nothing is fillable that was not
      fillable before §187; this restores what that section removed by
      accident while keeping what it removed on purpose. */
+/* §224.2: THE DEFINITION IS THE OFFICE'S, and it is a fill decision rather
+   than a counting one. Islam, having seen §223 open the door on it: *"remove
+   the definition of the functions overview from the filling what's missing or
+   filling what's empty — the SMO will do it."*
+
+   `cap` therefore has NOTHING fillable, which is why the entry goes rather
+   than becoming an empty array: §223's door asks whether anything on the page
+   is fillable, so an empty list already closes it for the definition while
+   leaving the key objectives beside it open, which is what he asked for.
+
+   ONE LIST, BOTH SIDES (§205). The authoriser reads this same map, so the
+   save refuses a filler's definition exactly where the screen declines to
+   open it — the pair §205 exists to keep together, in the direction that
+   closes rather than opens. */
 var GAP_OPTIONAL = { tactic: ["collaborators"],
-                     capko:  ["dir", "target", "compile", "weight"],
-                     cap:    ["def"] };
+                     capko:  ["dir", "target", "compile", "weight"] };
   var GAP_FILLABLE = (function () {
     var out = {};
     Object.keys(GAP_FIELDS).forEach(function (k) {
@@ -45971,9 +45984,25 @@ var SYNC = (function () {
     document.querySelectorAll("[data-present]").forEach(function(b){
       b.addEventListener("click", function(){
         closeDlMenu(this);
+        /* §224: THE FORMAT DECIDES THE DECK, NOT THE PREFIX. Islam: *"the
+           consumer finance presentation is not showing anything."* This
+           branched on `fn:` alone and sent EVERY function to the capability
+           deck — so a function that plans in PILLARS, which has no
+           capabilities at all, opened a deck reading "Capability review · 0
+           capabilities" and nothing else. Reproduced on the demo's own
+           pillars function before a line was changed.
+
+           §63.4 fixed the other half of this — the button used to carry no
+           target and a pillars function could not be presented at all — and
+           routed every `fn:` to `openDeckFn`, which is right for a capability
+           function and wrong for the other format. §59's rule in the one
+           place still asking by prefix: a pillars function's plan is
+           unit-shaped, so it takes the unit deck through `unitLike()`, which
+           resolves both kinds of key in one place. */
         var t = this.dataset.present;
-        if (t.indexOf("fn:") === 0) openDeckFn(t.slice(3));
-        else openDeck(UNITS[t]);
+        var fk = t.indexOf("fn:") === 0 ? t.slice(3) : null;
+        if (fk && !fnPlansInPillars(FUNCTIONS[fk])) openDeckFn(fk);
+        else openDeck(unitLike(t));
       });
     });
     /* Picture slides — beside Present, because it is the deck they go into

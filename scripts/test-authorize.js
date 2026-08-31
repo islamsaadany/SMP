@@ -2337,7 +2337,7 @@ console.log("\n25 · the target decides the Strategy column (§217)");
   }
 })();
 
-console.log("\n24 · the Overview is mandatory, and fillable (§214)");
+console.log("\n24 · the Overview is mandatory; its definition is the office's (§214, §224.2)");
 (function () {
   const MARK2 = { by: "own_it", at: "2026-08-31T00:00:00.000Z" };
   /* The two helpers every fill section builds for itself — each IIFE in this
@@ -2367,7 +2367,11 @@ console.log("\n24 · the Overview is mandatory, and fillable (§214)");
       const c = i.group.capabilities.filter(function (x) { return x.fn === FNC; })[0];
       c.def = "What this capability is."; c.pend = { def: MARK2 };
     });
-    check("§214: FILL a capability's blank definition", r.ok, r.refusals.join(" / "));
+    /* §224.2 REVERSES §214's FILL AT ISLAM'S DIRECTION: *"remove the
+       definition of the functions overview from the filling … the SMO will
+       do it."* Rewritten rather than deleted, so the reversal is deliberate
+       and a later build cannot drift back through it unnoticed. */
+    check("§224.2: a filler may NOT write a capability's definition", !r.ok);
     /* AND THE SAME GRANT MAY NOT REWRITE ONE THAT IS ALREADY WRITTEN — the
        whole difference between filling and authoring (§145). */
     const sf2 = withAccess("custodian", { a_fn_own_strat: "fill" });
@@ -2392,7 +2396,7 @@ console.log("\n24 · the Overview is mandatory, and fillable (§214)");
       i.functions[FNP].def = "What this function is.";
       i.functions[FNP].pend = { def: MARK2 };
     });
-    check("§214: FILL a pillars function's blank definition", r.ok, r.refusals.join(" / "));
+    check("§224.2: ...nor a pillars function's", !r.ok);
 
     const sf2 = withAccess("custodian", { a_fn_own_strat: "fill" });
     sf2.functions[FNP].def = "Already written.";

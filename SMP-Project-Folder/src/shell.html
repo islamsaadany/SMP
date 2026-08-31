@@ -3051,9 +3051,25 @@
     document.querySelectorAll("[data-present]").forEach(function(b){
       b.addEventListener("click", function(){
         closeDlMenu(this);
+        /* §224: THE FORMAT DECIDES THE DECK, NOT THE PREFIX. Islam: *"the
+           consumer finance presentation is not showing anything."* This
+           branched on `fn:` alone and sent EVERY function to the capability
+           deck — so a function that plans in PILLARS, which has no
+           capabilities at all, opened a deck reading "Capability review · 0
+           capabilities" and nothing else. Reproduced on the demo's own
+           pillars function before a line was changed.
+
+           §63.4 fixed the other half of this — the button used to carry no
+           target and a pillars function could not be presented at all — and
+           routed every `fn:` to `openDeckFn`, which is right for a capability
+           function and wrong for the other format. §59's rule in the one
+           place still asking by prefix: a pillars function's plan is
+           unit-shaped, so it takes the unit deck through `unitLike()`, which
+           resolves both kinds of key in one place. */
         var t = this.dataset.present;
-        if (t.indexOf("fn:") === 0) openDeckFn(t.slice(3));
-        else openDeck(UNITS[t]);
+        var fk = t.indexOf("fn:") === 0 ? t.slice(3) : null;
+        if (fk && !fnPlansInPillars(FUNCTIONS[fk])) openDeckFn(fk);
+        else openDeck(unitLike(t));
       });
     });
     /* Picture slides — beside Present, because it is the deck they go into

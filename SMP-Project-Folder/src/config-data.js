@@ -4153,6 +4153,45 @@ function fnShows(k){
   var f = FUNCTIONS[k];
   return !!f && f.active !== false && (fnHasWork(k) || fnCanFill(k));
 }
+/* ── DOES A PILLARS FUNCTION'S OVERVIEW EXIST (§212) ──────────────────
+   Islam, having read that removing it outright hides content that arrives
+   with an upload: *"always give the SMO the ability to add something to the
+   overview. How would they do this if the page is not appearing — that's the
+   challenge."*
+
+   THE ANSWER IS THAT THE TAB STOPPED BEING CONDITIONAL. A `fnShows()`-shaped
+   rule was built first — show it if it HOLDS something, or if you are the
+   person who could put something there — and Islam replaced it with the
+   simpler thing: both tabs always, and an empty Overview carrying the same
+   Add controls a unit's foundation has. That REMOVES the question rather
+   than answering it, which is better: nothing about the navigation then
+   depends on the data, so §45.2's fault — a page that appears and disappears
+   reads as broken — cannot arise at all.
+
+   WHAT SURVIVES IS THIS ONE PREDICATE, and only for a SENTENCE: whether the
+   function holds a foundation of its own decides whether the line above the
+   page admits it. Asked of all five fields, because a plan that arrived
+   carrying a SWOT and nothing else still holds something. */
+/* WHICH FOUNDATION KEY A TARGET IS GATED ON (§212). The group's, a unit's, or
+   a function's — named once, because the alternative is the ternary that was
+   written at every call site and got a function wrong at two of them. §211's
+   fault, and it fails CLOSED: the control renders and the press returns in
+   silence. */
+function foundKeyFor(target){
+  var t = String(target || "");
+  if (t === "group") return "g_found";
+  return t.indexOf("fn:") === 0 ? "k_found" : "u_found";
+}
+function fnOverviewHas(k){
+  var f = FUNCTIONS[k];
+  if (!f) return false;
+  if (String(f.aspiration || "").trim() || String(f.endInMind || "").trim()) return true;
+  if ((f.keyObjectives || []).length) return true;
+  if ((f.clauses || []).some(function(c){
+    return c && (String(c[0] || "").trim() || String(c[1] || "").trim()); })) return true;
+  var s = f.swot || {};
+  return ["s", "w", "o", "t"].some(function(q){ return (s[q] || []).length; });
+}
 function fnsReachable(){
   return FUNCTION_KEYS.filter(function(k){ return fnShows(k) && reachesFn(k); });
 }
@@ -5427,7 +5466,13 @@ function gapMap(target, pend){
      foundation of its own. Two parts of the product answering one question
      differently (§53.5) — this is the other one catching up. */
   var UNIT_WORDS = { found: "u_found", plan: "u_plan", sec: "plan" };
-  var FN_WORDS   = { found: null,      plan: "k_proj", sec: "proj" };
+  /* §212 PUTS THE FOUNDATION HALF BACK. §211.2 dropped it on a premise that
+     turned out to be false — this format CAN hold all five foundation fields,
+     and now has a page that shows and edits them — so the gap is real, it is
+     reachable, and the chip lands on a field somebody can type in (§116.2: a
+     count that cannot take you to what it counts is a count that makes
+     work). */
+  var FN_WORDS   = { found: "k_found", plan: "k_proj", sec: "proj" };
   var unitHalf = function(u, w){
     if (!u) return;
     w = w || UNIT_WORDS;
@@ -5698,6 +5743,24 @@ function fnAsUnit(fk){
    thrown away one line later — the import would report the rows it wrote and
    the function would still be empty. fnWriteBack() is the other half of the
    pair, and neither is any use without it. */
+/* AND THE TWO SCALARS HAD TO WRITE THROUGH (§212). Minting the containers is
+   enough for every ARRAY on this view, because an array is handed out by
+   reference and a row edited in place lands in the function itself. The
+   aspiration and the end in mind are STRINGS, so `u.aspiration = v` — which is
+   exactly what `renderUnitFoundation()`'s setter does, and it is the same
+   setter for a unit — would have written to the fresh object `fnAsUnit()`
+   returns and been thrown away on the next paint.
+
+   §61's own trap, one field narrower: that section found an IMPORT reporting
+   rows it never wrote, and the same shape was still waiting for the first
+   screen that let somebody type into these two. Silent, and in the
+   safe-looking direction: the field accepts the text, the page redraws, the
+   words are gone.
+
+   Fixed HERE rather than at the call site, so every renderer that already
+   knows how to write a unit's foundation writes a function's correctly
+   without being told which it has (§53.5). `enumerable` so the view still
+   stringifies the way the reading one does. */
 function fnWritable(fk){
   var f = FUNCTIONS[fk];
   if (!f || !fnPlansInPillars(f)) return null;
@@ -5705,7 +5768,15 @@ function fnWritable(fk){
   if (!Array.isArray(f.clauses)) f.clauses = [];
   if (!Array.isArray(f.keyObjectives)) f.keyObjectives = [];
   if (!f.swot || f.swot === FN_NO_SWOT) f.swot = { s:[], w:[], o:[], t:[] };
-  return fnAsUnit(fk);
+  var u = fnAsUnit(fk);
+  ["aspiration", "endInMind"].forEach(function(k){
+    Object.defineProperty(u, k, {
+      enumerable: true, configurable: true,
+      get: function(){ return f[k] || ""; },
+      set: function(v){ f[k] = v; }
+    });
+  });
+  return u;
 }
 function fnWriteBack(fk, u){
   var f = FUNCTIONS[fk];

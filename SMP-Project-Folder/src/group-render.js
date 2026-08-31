@@ -3281,14 +3281,26 @@ function koBand(objectives, page, acKey, owner, isGroup){
     koBlock(objectives, page, acKey, owner, isGroup, true) + '</div>';
 }
 
-function renderUnitFoundation(u){
-  var upg = authoring("foundation", "u_found") ? "foundation" : null;
+/* THE ACCESS KEY IS AN ARGUMENT, AND THE DEFAULT IS THE UNIT'S (§212).
+   A pillars function's Overview is this page — the shapes really are the same
+   (§59) — and the ONE thing not shared is the key it is gated on: `u_found`
+   for a unit, `k_found` for a function. §211 is the whole reason this is a
+   parameter rather than a hardcoded string: handing a function the unit's key
+   is what made every count read zero for the person doing the work, and it
+   looked right from the office, who passes both.
+
+   `page` stays "foundation" for both, deliberately: `EDIT_PAGE` is one pen
+   mode for both shapes, and splitting it would invent a difference the
+   product does not have (§211). */
+function renderUnitFoundation(u, acKey){
+  acKey = acKey || "u_found";
+  var upg = authoring("foundation", acKey) ? "foundation" : null;
   /* THE FIRST LINE CAN BE WRITTEN (§129's audit). The pen edited a clause's
      TEXT and never its lead, and an empty list rendered nothing to edit and
      no way to add — so a from-scratch unit could not say who it is at all
      (§61's trap on the oldest surface in the product). The lead opens with
      the pen because the leads are the unit's own words, not a fixed form. */
-  return fillBarOr("foundation", "u_found",
+  return fillBarOr("foundation", acKey,
       SMPRules.gapMissing("unit", u).length +
       (u.keyObjectives || []).reduce(function(a, m){
         return a + SMPRules.gapMissing("ko", m).length; }, 0),
@@ -3306,10 +3318,10 @@ function renderUnitFoundation(u){
       (upg ? '<div class="addrow"><button class="editbtn" data-clauseadd="' + esc(u.ukey) +
         '">+ Add a line</button></div>' : '') + '</div>' +
       aspirationCard(L("aspiration","bu"), u.aspiration, u.endInMind, u.keyObjectives, "foundation",
-        function(v){ u.aspiration = v; }, function(v){ u.endInMind = v; }, "u_found",
+        function(v){ u.aspiration = v; }, function(v){ u.endInMind = v; }, acKey,
         false, u) +
     '</div>' +
-    koBand(u.keyObjectives, "foundation", "u_found", u, false);
+    koBand(u.keyObjectives, "foundation", acKey, u, false);
 }
 
 /* ── UNIT · Analysis ───────────────────────────────────────────────
@@ -4567,23 +4579,29 @@ function projPlanBody(p, fk){
     dueNote(p) + overrunNote(p);
 }
 
+/* WHERE THIS FUNCTION'S STRATEGY LIVES (§211.2, §212). Information rather
+   than a description (rule 1b-ii): a pillars function sits under a unit and
+   inherits that unit's strategy, and no other line on either of its pages
+   says so. ONE builder, because both pages say it and two copies drift
+   (§53.5); quiet, because it is context for the work below rather than a
+   heading over it.
+
+   It admits what is held HERE only where there is something — otherwise the
+   sentence would argue with the page it sits on. */
+function whereFoundationLives(fk){
+  var f = FUNCTIONS[fk];
+  if (!f) return "";
+  var up = f.under ? UNITS[f.under] : null;
+  return '<p class="sub" style="margin:0 0 12px">This function plans under ' +
+    (up ? esc(up.name) : 'the group') + ' — its ' +
+    esc(L("aspiration", "bu").toLowerCase()) + ', SWOT and ' +
+    esc(L("keyobj", "bu").toLowerCase()) + ' are set there' +
+    (fnOverviewHas(fk) ? ', as well as anything held here.' : '.') + '</p>';
+}
 function renderFnProjects(fnKey){
   var fk = fnKeyOf(fnKey), caps = capsOfFunction(fk);
-  /* WHERE THE FOUNDATION ACTUALLY LIVES, ON THE PAGE THAT IS LEFT (§211.2).
-     This sentence was the whole of the Overview until that section was
-     removed, and it is INFORMATION rather than a description (rule 1b-ii):
-     a pillars function's aspiration, SWOT and key objectives are the parent
-     unit's, and nothing else on this page says so. One line, above the plan
-     it explains. */
-  if (fnPlansInPillars(FUNCTIONS[fk])) {
-    var pf = FUNCTIONS[fk], up = pf.under ? UNITS[pf.under] : null;
-    return '<p class="sub" style="margin:0 0 12px">Its foundation is ' +
-      (up ? esc(up.name) + '’s' : 'the group’s') +
-      ' — the aspiration, the SWOT and the ' +
-      esc(L("keyobj", "bu").toLowerCase()) + ' are set there. What is planned ' +
-      'here is the work under them.</p>' +
-      renderUnitPlan(fnAsUnit(fk));
-  }
+  if (fnPlansInPillars(FUNCTIONS[fk]))
+    return whereFoundationLives(fk) + renderUnitPlan(fnAsUnit(fk));
   if (!caps.length) return fnNothingBehind(fk);
   var ed = projEditing(), on = projArranging(fk);
   /* Gone here for the same reason and in the same breath (§94.15, §53.5):
@@ -5310,12 +5328,25 @@ function renderUnitPlan(u){
    The third column is WEIGHT rather than a three-year target: a capability's
    objectives carry the optional weighting and have never had a horizon. */
 function renderFnFoundation(fnKey){
-  /* THE PILLARS BRANCH IS GONE, NOT LEFT UNREACHABLE (§24, §211.2): with the
-     Overview removed for that format this function is never called with such a
-     function, and a branch nobody can reach is one the next reader takes for
-     load-bearing. Its one sentence moved to the top of `renderFnProjects`,
-     which is the page that is left. */
   var fk = fnKeyOf(fnKey), caps = capsOfFunction(fk);
+  /* A PILLARS FUNCTION GETS THE UNIT'S FOUNDATION PAGE (§212, replacing both
+     the one sentence that stood here and §211.2's deletion of it). It holds
+     the same five things a unit's foundation holds, so it is drawn by the
+     same builder rather than a second one that would drift (§53.5) — with
+     `k_found` as the key, which is the only difference there is.
+
+     `unitLikeWritable()` WHILE THE PEN IS ON, the reading view otherwise, and
+     that is not a nicety: `fnAsUnit()` hands out a SHARED FROZEN EMPTY where
+     an array does not exist yet (§50.6 — a reader must never create what it
+     looked for), so a first clause or a first objective typed against the
+     reading view would be pushed onto an empty every function shares. The
+     writing half mints the containers and writes the two scalars through. */
+  if (fnPlansInPillars(FUNCTIONS[fk])) {
+    var writing = authoring("foundation", "k_found") || filling("foundation", "k_found");
+    return whereFoundationLives(fk) +
+      renderUnitFoundation(writing ? unitLikeWritable("fn:" + fk) : unitLike("fn:" + fk),
+                           "k_found");
+  }
   var ed = authoring("capfoundation", "k_found");
   /* §145: the fill grant opens the same editor, whose gap cells then draw
      only the blanks — Add and Remove stay the author's. */

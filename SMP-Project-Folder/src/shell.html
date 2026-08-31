@@ -284,7 +284,26 @@
           var pillars = fnPlansInPillars(FUNCTIONS[fnKeyOf(k)]);
           var plan = { k:"proj", ac:"k_proj", label:pillars ? "Plan" : "Projects",
                        render:renderFnProjects };
-          if (pillars) return [plan];
+          /* §212 REVERSES §211.2 AND RESTORES BOTH SECTIONS FOR EVERY
+             FORMAT. §211.2 removed the Overview here on a premise measured
+             against the wrong field name and simply WRONG: a pillars function
+             CAN hold an aspiration, an end in mind, who-we-are clauses, a
+             SWOT and key objectives — `fnAsUnit()` carries all five,
+             `fnWriteBack()` writes all five, and an uploaded plan puts them
+             there. The tab it deleted was the only place any of that could
+             ever have shown.
+
+             A conditional tab was built next and Islam replaced it with
+             something simpler: *"maintain the overview and the plan sub tabs
+             but in the overview if it's empty, it's empty and if we need to
+             add something, you find the button to add something."* Right, and
+             it is the honest reading of what was broken — THE PAGE, never the
+             tab. It held one sentence pointing at the section beside it; it
+             holds the function's own foundation now, with the same Add
+             controls a unit's has, so an empty one is an empty page you can
+             fill rather than a dead end (§61) — and nothing about the
+             navigation depends on the data, so a tab cannot appear and
+             disappear as rows arrive (§45.2). */
           return [{ k:"found", ac:"k_found", label:"Overview", render:renderFnFoundation },
                   plan];
         } },
@@ -6430,7 +6449,10 @@
     document.querySelectorAll("[data-clauseadd]").forEach(function(b){
       b.addEventListener("click", function(){
         var t = b.dataset.clauseadd;
-        if (!mayAuthor(t === "group" ? "g_found" : "u_found", t === "group" ? null : t)) return;
+        /* §212: a function's page is gated on the FUNCTION's key. Gating an
+           `fn:` target on `u_found` is §211's fault exactly, and here it fails
+           CLOSED — the button renders and the click returns silently. */
+        if (!mayAuthor(foundKeyFor(t), t === "group" ? null : t)) return;
         if (BUILDER && BUILDER.target === t) { openBuilderForm("clause", { target:t }); return; }
         var o = t === "group" ? GROUP : unitLikeWritable(t);
         if (!o || !Array.isArray(o.clauses)) return;
@@ -6442,7 +6464,7 @@
     document.querySelectorAll("[data-clauserm]").forEach(function(b){
       b.addEventListener("click", function(){
         var a = b.dataset.clauserm.split("|"), t = a[0], i = +a[1];
-        if (!mayAuthor(t === "group" ? "g_found" : "u_found", t === "group" ? null : t)) return;
+        if (!mayAuthor(foundKeyFor(t), t === "group" ? null : t)) return;
         var o = t === "group" ? GROUP : unitLikeWritable(t);
         if (!o || !Array.isArray(o.clauses) || !o.clauses[i]) return;
         if ((String(o.clauses[i][0] || "").trim() || String(o.clauses[i][1] || "").trim()) &&

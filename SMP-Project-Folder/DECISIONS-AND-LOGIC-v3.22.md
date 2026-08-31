@@ -24263,78 +24263,101 @@ page is gated on the function's key, not because a measurement forced it.
 both (§145) and `fillPageForSec` already answers for `proj` as well as `plan`;
 splitting it would invent a difference the product does not have.
 
-### §211.2 — The banner, and the tab it sat on
+### §211.2 — The banner, and the tab it sat on (SUPERSEDED BY §212 THE SAME DAY)
 
-Both removed, at Islam's direction after the finding was put to him:
-*"for functions planning in pillars they shouldn't have an overview just the
-plan … this is an empty tab with no need."*
+Recorded rather than deleted, because what it got wrong is the useful part.
 
-**THE COUNT WAS ASKING FOR A FIELD THE SUBJECT CANNOT HOLD.**
-`GAP_FIELDS.unit` is `["aspiration"]`, and a function that plans in pillars has
-no foundation of its own — its aspiration, SWOT and key objectives are the
-parent unit's, which `renderFnFoundation()` said in its own words while the
-count argued with it. Measured: `FUNCTIONS.merchandising` carries no
-`foundation` key at all, and both `unitLike()` and `unitLikeWritable()` return
-null for it, so the gap could never be closed by anybody. The Overview drew
-**`1 Missing · Foundation 1 · Fill in missing elements`** over it.
+It removed the Overview from a pillars function outright, on the finding that
+the platform was asking that format for an **aspiration it can never hold** —
+`FUNCTIONS[x].foundation` absent, `unitLike()` and `unitLikeWritable()` both
+returning null for it — so the count was a promise nothing could keep and the
+red *Fill in missing elements* button opened nothing.
 
-**THE RED BUTTON WAS PRESSED AND DOES NOTHING** — no fill mode, no section
-change, `#panel .gapwalk` = 0, no request, no error. §61 exactly, with the
-loudest control on the page the one with nothing behind it.
+**THE MEASUREMENT WAS OF THE WRONG FIELD.** A pillars function does not store
+its foundation under `foundation`; it stores `aspiration`, `endInMind`,
+`clauses` and `swot` directly on the function, exactly as `fnAsUnit()` reads
+them and `fnWriteBack()` writes them. Every one of those probes was asking for
+a key that does not exist on a UNIT either. *A predicate that returns false for
+the right reason and false for the wrong reason is indistinguishable from
+outside, and the whole conclusion rested on which it was.*
 
-**THE KEY OBJECTIVES GO WITH IT, DELIBERATELY.** A pillars function's have no
-authoring surface anywhere in the product (§129's own recorded hole), so
-counting them promises a control that does not exist — the same fault one row
-down. Stated rather than left implied: they are now unreachable AND uncounted,
-where before they were unreachable and counted.
+What was genuinely true, and survives into §212: the button opened nothing, the
+page held one sentence pointing at the section beside it, and the chip landed
+on a section key the page does not have.
 
-**`builder.js` HAD ALREADY DECIDED THIS.** `builderSections()` guards
-Foundation, Objectives and SWOT with `route === "unit"`, so the plan builder
-has always treated this format as having no foundation of its own. Two parts of
-the product answering one question differently (§53.5); this is the other one
-catching up, which is also why the change is smaller than it looks.
+### §212 — The Overview holds what the function holds
 
-**THE OVERVIEW GOES, REVERSING THE 2026-08-24 RULING** (*"the function that
-plans in pillars has overview as well"*). Recorded as a reversal, per Principle
-II. That ruling is still right about the WORD — a capability function gets
-Overview rather than Foundation, and keeps its section, because it has
-capabilities to describe. What changed is that this format turned out to have
-nothing to describe: one sentence pointing at the section beside it, which is
-§32's door behind a door.
+Islam, on the conditional tab built after the correction: *"maintain the
+overview and the plan sub tabs but in the overview if it's empty, it's empty
+and if we need to add something, you find the button to add something."*
 
-**THE SENTENCE IS INFORMATION, NOT A DESCRIPTION** (rule 1b-ii), so it moves to
-the top of the Plan rather than being deleted: where the aspiration and the key
-objectives actually live is a fact this page cannot otherwise state. The dead
-branch in `renderFnFoundation()` is DELETED, not left unreachable (§24).
+**THE PAGE WAS BROKEN, NEVER THE TAB.** That is the whole correction. A pillars
+function can hold all five foundation fields; the Overview showed one sentence
+instead of showing them, so the only place any of it could ever appear was a
+page that declined to. A plan uploaded with an aspiration, a SWOT or key
+objectives put them somewhere no screen has ever rendered.
 
-**AND THE BAR NEARLY WENT WITH THE TAB.** The missing bar lives in the section
-row (§145.14) and that row was gated on `secs.length > 1` — so leaving this
-format with one section would have taken the count AND the fill button away
-from a function that genuinely owes targets on its pillars: §61 by exactly the
-road this section was closing, and it would have looked like a clean removal.
-The row draws when it has sections to offer OR a bar to carry; **one section
-still draws no tab button**, because a row of one says nothing (§68's own
-argument for a company's single tab).
+**BOTH SECTIONS, ALWAYS.** A `fnShows()`-shaped rule was built first — draw the
+tab where the function HOLDS something or where the person looking COULD put
+something there — and Islam replaced it with the simpler thing. He is right:
+that rule answers *"how do I add the first one"*; removing the condition
+**dissolves the question**, and it also removes §45.2's fault, where a tab that
+appears and disappears as rows arrive reads as broken.
 
-**THE TOUR HAD A STEP POINTING AT IT.** `FN_SECS` mapped `found` to `found` for
-every function, so a `found` step on this format would have pressed
-`[data-sub2="found"]` and lit nothing — the fault that whole mechanism exists to
-avoid, arriving by a shape it did not know about. Dropped like the SWOT step, so
-the counter goes on counting what is actually walked (§107).
+**THE PAGE IS THE UNIT'S FOUNDATION PAGE, WITH ONE ARGUMENT CHANGED.**
+`renderUnitFoundation(u, acKey)` takes the access key now, defaulting to
+`u_found`; a function passes `k_found`. §211 is the whole reason that is a
+parameter and not a string: handing a function the unit's key is what made
+every count read zero for the person doing the work, and it looked correct from
+the office, who passes both. `page` stays `"foundation"` for both — `EDIT_PAGE`
+is one pen mode for both shapes.
 
-**PROVED ABLE TO FAIL** (§94.5): `checks/fn-pillars.py` is green here and gives
-**12 failures** against the previous build, among them the reported banner
-verbatim (*"2 Missing · Foundation 1 · MRC02 1"*) and the chip press leaving
-`RAIL` at `{}` — "stuck in the overview", reproduced. Every state it measures is
-MADE (§94.2): the demo's pillars function owes nothing on its pillars. It asserts
-the LANDING rather than the section key, because the old fault was a key the page
-did not have; and it asserts a capability function keeps BOTH sections, or a
-build that dropped the Overview everywhere would satisfy every other assertion
-(§113.8).
+**AND THE TWO SCALARS HAD TO WRITE THROUGH.** Minting the containers is enough
+for every ARRAY on that view — an array is handed out by reference, so a row
+edited in place lands in the function. The aspiration and the end in mind are
+STRINGS, and `u.aspiration = v` (the setter a unit already uses) would have
+written to the fresh object `fnAsUnit()` returns and been discarded on the next
+paint: the field takes the words, the page redraws, they are gone. §61's own
+trap one field narrower, and it is fixed in `fnWritable()` with accessors, so
+every renderer that knows how to write a unit's foundation writes a function's
+correctly without being told which it has (§53.5).
+
+**`unitLikeWritable()` ONLY WHILE THE PEN IS ON.** `fnAsUnit()` hands out a
+SHARED frozen empty where an array does not exist (§50.6), so a first clause
+typed against the reading view would be pushed onto an empty every function
+shares. Asserted by looking at the OTHER functions after the add, which is the
+only way that fault shows.
+
+**`foundKeyFor()` NAMES THE KEY ONCE.** The clause add and remove handlers each
+carried `t === "group" ? "g_found" : "u_found"`, so an `fn:` target was gated on
+a unit's key at both — and it fails CLOSED, which is why nobody had seen it: the
+button renders, the press returns in silence.
+
+**THE COUNT IS REAL AGAIN AND ITS CHIP LANDS.** The foundation half is back in
+`gapMap()` with `k_found`, and every chip is asserted by where it LEAVES THE
+PAGE rather than by the key it sets — the original fault was a key the page does
+not have, so asserting the key would have passed on it.
+
+**WHAT §211 CONTRIBUTED AND KEEPS**: the section word (`proj`, not `plan`), the
+access key, and the discovery that the missing bar is gated on
+`secs.length > 1` — which would have taken the count and the fill button away
+from any viewer whose grant hides one of the two sections. The row draws for
+sections OR a bar now. §211.2's tour change is REVERSED with its reason: the
+Overview exists again, so a rule kept past its reason is one the next reader
+takes as load-bearing (§94.15).
+
+**PROVED ABLE TO FAIL** (§94.5): `checks/fn-pillars.py` gives **14 failures**
+against `main` and **14** against §211.2's build, and the run against main
+reproduces the report verbatim — both chips landing on `found` with **0** fields
+to type in, which is *"it doesn't take me to the pillars, it's stuck in the
+overview"*. Every state is MADE (§94.2), every press is read back from the
+STORED function rather than from the screen (§96), and a unit and a capability
+function are asserted UNTOUCHED, or a build that changed every subject would
+satisfy the rest (§113.8, §53.5).
 
 ### Not explained
 
 The **"could not reach the server (Failed to fetch)"** on *Next pending*. It
 could not be reproduced here and no cause is claimed — it is a network-level
-failure, and neither fault above produces one. Left open rather than attached to
-a fix it may have nothing to do with.
+failure, and none of the faults above produces one. Left open rather than
+attached to a fix it may have nothing to do with.

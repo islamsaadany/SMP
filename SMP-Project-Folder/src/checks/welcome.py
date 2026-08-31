@@ -482,6 +482,60 @@ def main():
                        "return WELCOME.offer({key:'own_mob',name:'x'});})()") is False)
         ctx.close()
 
+        # ══ 10 · THE CYCLE, AND WHO MAY SEE IT (§200) ═══════════════════
+        # Islam: "the cycle statistics table is already needed there." Built
+        # as Option A of two drawn — the business's own figures, shown only to
+        # somebody who could already open the page that holds them.
+        #
+        # THE GATE IS THE POINT, NOT THE PLACEMENT. `cycleTotals()` counts
+        # every unit AND every supporting function (§105), and the Reporting
+        # cycle page is gated on `c_cycle`; a unit head does not hold it. So
+        # this is asserted from BOTH ENDS (§113.8) — drawn for the office AND
+        # withheld from a unit head — because a build that drew it for nobody
+        # would satisfy the second half on its own.
+        print("\n── 10 · the cycle summary, and its gate")
+        PERSON = {"key": "smo", "name": "Mohamed Essam", "role": "super"}
+        STATE = BASE
+        ctx, pg = fresh(browser, port)
+        d = pg.evaluate("""() => {
+          const c = document.querySelector('.welcomeover .wcyc');
+          const t = (typeof cycleTotals === 'function') ? cycleTotals() : null;
+          return { grant: grant('c_cycle'),
+                   text: c ? (c.innerText||'').replace(/\\s+/g,' ').trim() : null,
+                   inSide: !!document.querySelector('.wside .wcyc'),
+                   afterPages: !!document.querySelector('.wpagesbox + .wcyc'),
+                   heroChip: !!document.querySelector('.welcomeover .wcycle'),
+                   totals: t };
+        }""")
+        ck("the office may open the cycle page", d["grant"] != "none", d["grant"])
+        ck("...so the block is drawn", bool(d["text"]), d)
+        ck("...in the side column, under Your pages", d["inSide"] and d["afterPages"], d)
+        # AGREEMENT WITH THE SOURCE, never a literal (§94.8, §108.10): three
+        # surfaces read cycleTotals() and none of them may disagree.
+        t = d["totals"]
+        ck("...and its figures ARE cycleTotals()",
+           t and ("%d of %d" % (t["done"], t["total"])) in d["text"]
+             and ("Submitted %d" % t["sub"]) in d["text"], (t, d["text"]))
+        # §87's twins: the hero chip said the cycle was open and so does the
+        # block — two places saying one thing is how a screen repeats itself.
+        ck("...and the hero chip has gone, because the block says it",
+           not d["heroChip"], d)
+        ctx.close()
+
+        PERSON = {"key": "mobhead", "name": "Ramy Behairy"}
+        ctx, pg = fresh(browser, port)
+        u = pg.evaluate("""() => ({
+          grant: grant('c_cycle'),
+          block: !!document.querySelector('.welcomeover .wcyc'),
+          heroChip: !!document.querySelector('.welcomeover .wcycle'),
+          screen: !!document.querySelector('.welcomeover') })""")
+        ck("a unit head may NOT open the cycle page", u["grant"] == "none", u)
+        ck("...so the business's figures are not shown to them", not u["block"], u)
+        ck("...but they still learn the cycle is open, from the chip",
+           u["heroChip"], u)
+        ck("...and their welcome screen is otherwise intact", u["screen"], u)
+        ctx.close()
+
         browser.close()
     srv.shutdown()
 

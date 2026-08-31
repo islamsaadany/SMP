@@ -49,6 +49,29 @@ var CHAT = (function(){
      only between asking and being answered, and it goes back to 180s the
      moment the office replies. */
   var POLL_WAIT = 15000;
+  /* ── AND A FOURTH, FOR THE ANSWER THAT HAS NEVER COME (§197) ───────────
+     Islam: *"I didn't see the icon on login and when I sent to myself a
+     message it appeared again"* — and the chat was NOT off.
+
+     THE CORNER IS CREATED HIDDEN and the only thing that ever reveals it is
+     a SUCCESSFUL answer (`dock.hidden = !cfg.on`, below). A 500, a timeout
+     or a dropped connection matches neither that branch nor the 401/403 one,
+     so nothing showed it — and the next attempt was POLL_SHUT away. Three
+     minutes with no way to reach the office, on the one morning the server
+     was having trouble, which is exactly when somebody wants it. Measured:
+     one failed first poll and the corner was still absent eight seconds
+     later, with the poll count still at 1.
+
+     So while the first answer is still outstanding the beat is short, for a
+     BOUNDED number of tries — about half a minute, which covers a database
+     waking up — and then falls back to POLL_SHUT rather than asking every
+     five seconds for ever against a server that is not coming back (§98.1's
+     whole argument). It is the SAME timer, not a second one: two mechanisms
+     for "ask again" is how they drift (§53.5). */
+  var POLL_FIRST = 5000;
+  var FIRST_TRIES = 6;
+  var firstTries = 0;
+  function firstRun(){ return !loaded && firstTries < FIRST_TRIES; }
   var PIC_EDGE = 1600;
 
   /* What the server last told us the office has set. Started from the shared
@@ -413,7 +436,12 @@ var CHAT = (function(){
         state.unread = j.unread || 0;
         state.thread = j.thread || null;
         state.office = !!j.office;
+        /* THE FIRST ANSWER ENDS THE SHORT BEAT (§197). The interval was set
+           before it arrived, so the clock is re-struck here — the same thing
+           the cadence change below does, for the same reason. */
+        var firstAnswer = !loaded;
         loaded = true;
+        firstTries = 0;
         /* THE SETTINGS ARRIVE WITH THE ANSWER, so a switch the office flips
            reaches every open browser within one beat. If the cadence changed,
            the clock is reset — not on the next open, which could be tomorrow. */
@@ -433,7 +461,7 @@ var CHAT = (function(){
         if (arrived && !open) announce();
         /* The clock changes with the state, not only with the panel: somebody
            who has just been answered stops expecting and goes back to 180s. */
-        if (wasWaiting !== expecting()) beat();
+        if (firstAnswer || wasWaiting !== expecting()) beat();
         /* Opened, and something new arrived while it was open — read it. */
         if (open && state.unread > 0) post({ action:"seen" }, function(){ state.unread = 0; });
       } else if (j && (j.__status === 401 || j.__status === 403)) {
@@ -442,6 +470,16 @@ var CHAT = (function(){
            refusal, and stop asking. */
         var d = el("chatdock"); if (d) d.hidden = true;
         stop();
+      } else if (!loaded) {
+        /* THE SERVER DID NOT ANSWER, AND THAT IS NOT AN ANSWER (§197).
+           Nothing is shown and nothing is hidden — we still do not know
+           whether this tenant has the chat on, and guessing either way is
+           worse than waiting: an optimistic bubble that vanishes on the next
+           beat is a control that lied. What changes is only HOW SOON we ask
+           again. Counted, so it cannot become a five-second poll for ever
+           against a server that is down. */
+        firstTries++;
+        if (!firstRun()) beat();
       }
     });
   }
@@ -460,7 +498,9 @@ var CHAT = (function(){
        starts it again, and the poll it fires on the way back is what makes
        the badge right before anybody has looked at it. */
     if (document.hidden) return;
-    timer = setInterval(poll, open ? (cfg.beat || 4000) : (expecting() ? POLL_WAIT : POLL_SHUT));
+    timer = setInterval(poll, firstRun() ? POLL_FIRST
+      : open ? (cfg.beat || 4000)
+      : (expecting() ? POLL_WAIT : POLL_SHUT));
   }
 
   /* ONE SHOT, AND THE CLASS IS TAKEN OFF AGAIN so the next reply can announce

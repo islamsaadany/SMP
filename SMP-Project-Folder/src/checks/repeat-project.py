@@ -74,17 +74,82 @@ with sync_playwright() as p:
         pg.click("#units .navswitch"); pg.wait_for_timeout(150)
     pg.click('#units button[data-u="fn:finance"]'); pg.wait_for_timeout(500)
     pg.click('.pane .paneact .penbtn[data-page="plan"]'); pg.wait_for_timeout(500)
+    # §196: THE MARK IS A COUNT OF MONTHS. What is asserted is that every
+    # option the control OFFERS writes the value its label names — never a
+    # list of literals here, or the check and the product each hold their own
+    # idea of the vocabulary and only one of them is the product (§53.5).
     r = pg.evaluate("""() => {
       const p = capsOfFunction("finance")[0].projects[0];
       const row = [...document.querySelectorAll('.pfront .pfrow')]
         .find(x => x.querySelector('em').textContent.trim() === 'Repeats');
       const sel = row && row.querySelector('select');
       if (!sel) return { none: true };
-      sel.value = "Each cycle";
+      const offered = [...sel.options].map(o => o.value);
+      const wrote = {};
+      offered.forEach(v => {
+        sel.value = v;
+        sel.dispatchEvent(new Event('change', { bubbles: true }));
+        wrote[v] = ("repeats" in p) ? p.repeats : null;
+      });
+      return { offered: offered, wrote: wrote };
+    }""")
+    ck("the pen offers a month count, not one word",
+       r.get("offered") == ["No", "Every 3 months", "Every 6 months", "Every 12 months"],
+       r.get("offered"))
+    ck("...and every option writes what its label says",
+       r.get("wrote") == {"No": None, "Every 3 months": 3,
+                          "Every 6 months": 6, "Every 12 months": 12}, r.get("wrote"))
+    pg.wait_for_timeout(300)
+
+    # §30.2 / §96.2: a project marked BEFORE §196 keeps its behaviour, and the
+    # word goes on being offered while it is the stored value — never quietly
+    # rewritten to a number that might not mean the same thing.
+    r = pg.evaluate("""() => {
+      const p = capsOfFunction("finance")[0].projects[0];
+      p.repeats = "cycle"; paint();
+      const row = [...document.querySelectorAll('.pfront .pfrow')]
+        .find(x => x.querySelector('em').textContent.trim() === 'Repeats');
+      const sel = row && row.querySelector('select');
+      return { offered: sel ? [...sel.options].map(o => o.value) : null,
+               showing: sel ? sel.value : null,
+               stillStored: p.repeats,
+               movesBy: repeatSpan(p, 6) };
+    }""")
+    ck("a legacy 'Each cycle' is still offered while it is what is stored",
+       r.get("offered", [])[:2] == ["No", "Each cycle"], r.get("offered"))
+    ck("...and shown, and not rewritten",
+       r.get("showing") == "Each cycle" and r.get("stillStored") == "cycle", r)
+    ck("...and still means the cycle's own length", r.get("movesBy") == 6, r)
+    pg.wait_for_timeout(200)
+
+    # HOW FAR THE DATES MOVE, asked of the rule rather than of a rendered date.
+    r = pg.evaluate("""() => ({
+      q_short: repeatSpan({repeats:3},  6),   // quarterly, half-yearly cycle
+      q_same:  repeatSpan({repeats:6},  6),
+      q_long:  repeatSpan({repeats:12}, 6),   // annual, half-yearly cycle
+      legacy:  repeatSpan({repeats:"cycle"}, 6),
+      none:    repeatSpan({}, 6)
+    })""")
+    ck("a quarterly project keeps pace with a six-month cycle (6, not 3)",
+       r["q_short"] == 6, r)
+    ck("a six-month project moves six", r["q_same"] == 6, r)
+    ck("an annual project moves to its next run a year on, not half of one",
+       r["q_long"] == 12, r)
+    ck("an unmarked project moves nothing at all", r["none"] == 0, r)
+    pg.wait_for_timeout(200)
+    pg.evaluate("""() => { const p = capsOfFunction("finance")[0].projects[0];
+                           delete p.repeats; paint(); }""")
+    pg.wait_for_timeout(300)
+    r = pg.evaluate("""() => {
+      const p = capsOfFunction("finance")[0].projects[0];
+      const row = [...document.querySelectorAll('.pfront .pfrow')]
+        .find(x => x.querySelector('em').textContent.trim() === 'Repeats');
+      const sel = row && row.querySelector('select');
+      sel.value = "Every 6 months";
       sel.dispatchEvent(new Event('change', { bubbles: true }));
       return { stored: p.repeats };
     }""")
-    ck("the Repeats select writes the mark", r.get("stored") == "cycle", r)
+    ck("the Repeats select writes the mark", r.get("stored") == 6, r)
     pg.wait_for_timeout(300)
     r = pg.evaluate("""() => {
       const p = capsOfFunction("finance")[0].projects[0];
@@ -98,7 +163,7 @@ with sync_playwright() as p:
     pg.wait_for_timeout(300)
     # read mode: row absent when unmarked, present when marked
     pg.evaluate("""() => {
-      capsOfFunction("finance")[0].projects[0].repeats = "cycle";
+      capsOfFunction("finance")[0].projects[0].repeats = 6;
       EDIT_PAGE.plan = false; paint(); }""")
     pg.wait_for_timeout(300)
     r = pg.evaluate("""() => {

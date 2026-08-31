@@ -522,8 +522,17 @@ function pillarRow(it, i, u){
   return '<div class="prow-wrap" data-oi="' + i + '">' +
     '<button class="prow" style="' + pgrid(on) + '" aria-expanded="false" data-p="' + i + '">' +
     (on ? handle("Reorder " + it.name) : '') +
-    '<span class="pname"><b><span class="pcode">' + pillarCode(u, i) + '</span> ' + esc(it.name) + '</b>' +
-      (it.sub ? '<span class="psub">' + esc(it.sub) + '</span>' : '') + '</span>' +
+    /* THE PILLAR'S NOTE IS GONE FROM EVERY SCREEN (§196.2). §194 removed the
+       bar that EDITED it, at Islam's direction, and left this — the rail row's
+       grey sub-line — so the value was readable in one place and correctable
+       in none: the worst of the three states (§61). Islam: *"pillar note
+       remove it for now."*
+
+       THE STORED VALUE IS UNTOUCHED. `sub` still round-trips through
+       `units.extra` exactly as it did, so nothing an upload wrote is lost and
+       one line gives the sub-line back — which is what "for now" asks for.
+       Deleting the data is a separate, irreversible act and is not this. */
+    '<span class="pname"><b><span class="pcode">' + pillarCode(u, i) + '</span> ' + esc(it.name) + '</b></span>' +
     '<span>' + kindPill(it) + '</span>' +
     '<span><span class="pill theme">' + esc(it.theme) + '</span></span>' +
     '<span class="powner">' + esc(it.owner) + '</span>' +
@@ -2795,8 +2804,29 @@ function gapCell(page, acKey, row, field, opts){
      is still correct, just mute. A hook rather than a special case, because
      the next field that reads differently from how it is stored will need the
      same thing (§53.5). */
+  /* §197.3: A DATE THE PLATFORM CANNOT READ SAYS SO, AND STILL SHOWS ITSELF.
+     Islam: *"for any project that marks on going to be missing, and when they
+     go and fill they get into the date selection."* The filling half was
+     already built — `open` is exactly this case and the control is §177's
+     month panel — and the PAGE said nothing: the bar read "1 Missing" over
+     three rows that all looked filled in, so whoever was closing gaps had to
+     guess which, and `On-going` looks like a perfectly good answer.
+
+     THE WORD LEADS AND THE VALUE FOLLOWS IT. Missing is what the count uses,
+     so the page and the bar finally agree; and the value stays on screen
+     because somebody is being asked to CORRECT it, which §184 settled and
+     this must not undo (§96.2). The value is quiet rather than red: red type
+     on a value means *this figure is off track* everywhere else, and one
+     colour cannot carry two meanings on one screen.
+
+     `open && !blank` IS THE WHOLE CONDITION — a blank falls to the branch
+     above, and `open` is only ever wider than `blank` for a date (§184's
+     GAP_WHEN), so no other kind of field can reach this. */
   var text = blank
     ? (opts.readEmpty !== undefined ? opts.readEmpty : '<span class="missing">Missing</span>')
+    : open
+      ? '<span class="missing">Missing</span>' +
+        '<span class="wasval"> \u2014 currently \u201C' + esc(val) + '\u201D</span>'
     : (opts.read ? opts.read(val)
       : opts.flow ? '<span class="flow ' + (opts.cls || "") + '">' + esc(val) + '</span>' : esc(val));
   return text + pendChip(acKey, row, field);
@@ -2825,6 +2855,146 @@ function koToggle(){
    same value, and the 3-year loses its "3-year" prefix there — with only one
    number left, a label saying which one it is has nothing to distinguish it
    from. */
+/* ── THE UNIT IS ITS OWN COLUMN, AND NOTHING NEW IS STORED (§199) ──────
+   Islam: *"for the key objectives we need a unit, as some are numbers, some
+   might be money and some are SQM."*
+
+   THERE IS NO UNIT FIELD AND THERE DOES NOT NEED TO BE. The unit has always
+   been typed INTO the target — `"6.2B EGP"`, `"60000 SQM"`, `"100#"` — and
+   the platform has held a matched pair for taking that apart and putting it
+   back since the upload template gained a Unit column: `splitTarget` and
+   `joinTarget`, which the download already round-trips through on every
+   export. Measured before a line was written: **178 targets across every
+   unit, capability, group objective and pillar measure in the shipped plan,
+   0 round-trip failures.**
+
+   SO THE COLUMN IS A VIEW OF WHAT IS ALREADY THERE. `target` goes on holding
+   the whole string, all 103 places that read it keep working, the deck and
+   both workbooks are untouched, and there is no migration — which is the
+   difference between this and adding a field: a second home for the unit
+   would be a second source of truth, and the two would drift the first time
+   anything wrote only one of them (§53.5).
+
+   THE NEAR TARGET NAMES THE UNIT, falling back to the far one. A row where
+   the two disagree keeps both exactly as typed and shows the near one's,
+   because inventing a single unit for a row that holds two would be the
+   platform deciding something nobody said (§96.2). */
+function targetUnitOf(m){
+  if (!m) return "";
+  var u = splitTarget(m.target).unit;
+  return u || splitTarget(m.target3y).unit || "";
+}
+/* WRITING THE UNIT WRITES THE TARGETS, because that is where it lives (§199).
+   Both horizons take it: a row whose 3-year target is measured in one thing
+   and this year's in another is not something anybody has asked for, and
+   showing ONE unit while silently leaving the other would be the column
+   telling a half-truth.
+
+   THE SEPARATOR IS DERIVED FROM THE NEW UNIT, never carried from the old
+   spacing. `joinTarget` reads the gap out of the value it is given, which is
+   right when the unit has not changed and wrong here: "100#" carries no space,
+   so keeping it would turn a change to "trips" into "100trips". Passing an
+   empty original asks joinTarget for its own rule instead — a space before a
+   word, none before a symbol.
+
+   AN UNCHANGED UNIT WRITES NOTHING AT ALL (§50.6, §42): re-typing what is
+   already there must leave the plan byte-identical, or every visit to this
+   table puts a phantom change into the next save and a non-office save is
+   refused for the rest of the cycle. */
+function setTargetUnit(m, u){
+  var want = String(u == null ? "" : u).trim();
+  if (want === targetUnitOf(m)) return;
+  /* BUILT HERE RATHER THAN THROUGH `joinTarget`, and that is deliberate:
+     joinTarget takes its separator from the value it is REPLACING, which is
+     exactly right when the unit has not changed and exactly wrong here —
+     "6.2B EGP" carries no space, so keeping it would turn a change to "SQM"
+     into "6.2SQM". The convention belongs to the NEW unit (TIGHT_UNITS above).
+
+     WHAT IS WRITTEN STILL ROUND-TRIPS, which is the property the whole
+     feature rests on: joinTarget reads the separator back out of the stored
+     string, so a value written here splits and rejoins to itself, and the
+     check asserts that over everything the plan holds. */
+  var sep = want && !TIGHT_UNITS[want] ? " " : "";
+  ["target", "target3y"].forEach(function(f){
+    var v = m[f];
+    if (v == null || v === "") return;   /* nothing to attach it to */
+    m[f] = splitTarget(v).value + (want ? sep + want : "");
+  });
+}
+/* A unit with no target to sit inside cannot be stored, so the field says so
+   rather than accepting a word and losing it on the next paint (§61: a control
+   that takes input and discards it is worse than one that is not there). */
+/* ── A NUMBER TYPED INTO A ROW TAKES THAT ROW'S UNIT (§199.6) ──────────
+   Islam, from a group objective reading `3-year 30` with no unit at all:
+   *"the objectives need to inherit the unit automatically as they are entered
+   as a number in the value cell."*
+
+   §199 only ever wrote the unit onto targets that ALREADY EXISTED, so the
+   order of work decided the result: set the unit, then type the number, and
+   the number was stored bare and the unit silently lost. Setting a unit and
+   then filling the row is the obvious way round, and it was the one that did
+   not work.
+
+   ONLY A BARE NUMBER INHERITS. "TBD" must not become "TBD%", and a value
+   somebody typed WITH its own unit ("50 EGP") is what they meant — it is left
+   exactly as typed, and the picker then shows it, because the unit is read
+   back out of the target (§96.2: never rewrite what somebody wrote).
+
+   THE ROW'S UNIT IS THE OTHER HORIZON'S when this one is empty, which is what
+   `targetUnitOf` already answers — so filling `This year` on a row whose
+   3-year reads `30%` gives `50%` without anybody picking anything twice. */
+function unitInherit(m){
+  return function(v){
+    var t = String(v == null ? "" : v).trim();
+    if (!t || !/^-?[\d.,]+$/.test(t)) return v;   /* not a bare number */
+    var u = targetUnitOf(m);
+    if (!u) return v;
+    return t + (TIGHT_UNITS[u] ? "" : " ") + u;
+  };
+}
+
+function hasTargetToHoldAUnit(m){
+  return !!(String(m.target || "").trim() || String(m.target3y || "").trim());
+}
+
+/* ── THE UNITS ARE PICKED FROM A LIST (§199.4) ─────────────────────────
+   Islam, on money: *"the financial units can be B EGP or M EGP or EGP only"*,
+   and on counts: *"# into trips and orders is tricky, as we will need to add
+   units all the time, so let's commit to #"*.
+
+   BOTH ARE THE SAME DECISION and it is the right one. A free box invites a
+   fourth spelling of the same currency and a different noun for every kind of
+   thing counted — and the moment two rows say `#` and `trips` for the same
+   idea, nothing can compare them and somebody has to maintain a vocabulary
+   nobody agreed. A short fixed list is the maintenance NOT happening.
+
+   `#` IS THE COMMITMENT, not a placeholder for a better word later. §199's
+   own mockup argued for `trips` and `orders`; he priced that and turned it
+   down, and the cost is recorded rather than re-argued: a count says how
+   MANY and the objective's name says of what.
+
+   A STORED VALUE OUTSIDE THE LIST IS KEPT AND OFFERED (§96.2, §114). The
+   shipped plan holds `M`, `K` and `M USD` on four rows between them; a
+   dropdown that could not show them would either display the row wrong or
+   drop the unit on the first repaint, and both are worse than one extra
+   entry. Nothing is rewritten by this list — only what the pen writes next. */
+var TARGET_UNITS = ["", "%", "#", "EGP", "M EGP", "B EGP", "SQM", "d", "h"];
+/* WRITTEN AGAINST THE NUMBER, OR AFTER A SPACE — and it is the PLAN's own
+   habit, read off the shipped data rather than invented: `30%`, `100#` and
+   `6.2B EGP` are written tight, while `28 EGP`, `4 d` and `24 h` take a space.
+   A scaled currency reads as one token (`6.2B EGP`) and a bare one does not.
+
+   IT IS A LIST RATHER THAN A RULE because there is no rule: "a symbol is
+   tight, a word takes a space" gets `EGP` right and `B EGP` wrong, and the
+   difference is convention, not grammar. Nine entries is cheaper to read than
+   a predicate nobody can quite state. */
+var TIGHT_UNITS = { "%":1, "#":1, "M EGP":1, "B EGP":1 };
+function targetUnitOpts(cur){
+  var opts = TARGET_UNITS.slice();
+  if (cur && opts.indexOf(cur) < 0) opts.splice(1, 0, cur);
+  return opts;
+}
+
 function koView(list, isGroup, acKey){
   var near = isGroup || SHOW_KO_THIS_YEAR;
   var miss = '<span class="missing">Missing</span>';
@@ -2844,6 +3014,17 @@ function koView(list, isGroup, acKey){
               : '<div class="v">' + far + '</div>') + chips(m) + '</div>';
     }).join("") + '</div>';
   }
+  /* §199.4: THE READING VIEW KEEPS THE UNIT ON THE FIGURE. §199 split it into
+     a column of its own and Islam looked at it: *"let the unit be set in the
+     edit table, but in the view attach the unit to the target."*
+
+     He is right, and the reason is worth keeping. The argument for splitting
+     was that a column of targets could then be read straight down — but the
+     unit is a property of ONE ROW, not of the table, so a column of them lines
+     up "B EGP" against "%" against "SQM" and gives the eye nothing. What
+     reading a plan actually needs is each figure complete where it stands.
+     The column stays where a unit IS one question with one answer: the pen,
+     where it is being set. */
   return '<div class="ohead' + (near ? '' : ' one') + '"><span>Objective</span>' +
       '<span>' + horizonColLabel() + '</span>' +
       (near ? '<span>This year</span>' : '') + '</div>' +
@@ -2890,6 +3071,7 @@ function koEdit(list, page, acKey, owner){
      registers its own, exactly as a field registers its own setter. */
   var li = KOLISTS.push({ list: list, owner: owner }) - 1;
   return '<div class="scroll"><table><thead><tr><th>Objective</th><th class="cc">Dir.</th>' +
+    '<th class="cc">Unit</th>' +
     '<th class="cc">3-year</th><th class="cc">This year</th><th class="cc">Compile</th><th></th></tr></thead><tbody>' +
     list.map(function(m, i){
       /* \u00a7130: the four gap-fillable columns go through gapCell \u2014 in the
@@ -2900,10 +3082,22 @@ function koEdit(list, page, acKey, owner){
       return '<tr><td>' + inputOr(pg, m.name, "", function(v){ m.name = v; }) + '</td>' +
         '<td class="cc">' + gapCell(page, acKey, m, "dir",
           { kind:"select", opts:["\u2265", "\u2264"] }) + '</td>' +
+        /* §199: THE OFFICE'S, NOT THE FILLER'S. A unit is not a gap — 46 of
+           the 178 targets in the shipped plan carry none and are complete
+           without one — so it does not go through gapCell and does not join
+           the count. It is `inputOr` like the NAME beside it: a fact about
+           how the objective is written, which is authoring. */
+        '<td class="cc">' + (pg
+          ? (hasTargetToHoldAUnit(m)
+              ? selectOr(pg, targetUnitOf(m), targetUnitOpts(targetUnitOf(m)), "",
+                  function(v){ setTargetUnit(m, v); })
+              : '<span class="why" title="Set a target first \u2014 the unit is ' +
+                'written with it">\u2014</span>')
+          : esc(targetUnitOf(m))) + '</td>' +
         '<td class="cc">' + gapCell(page, acKey, m, "target3y",
-          { kind:"input", cls:"mono" }) + '</td>' +
+          { kind:"input", cls:"mono", parse: unitInherit(m) }) + '</td>' +
         '<td class="cc">' + gapCell(page, acKey, m, "target",
-          { kind:"input", cls:"mono" }) + '</td>' +
+          { kind:"input", cls:"mono", parse: unitInherit(m) }) + '</td>' +
         '<td class="cc">' + gapCell(page, acKey, m, "compile",
           { kind:"select", opts:["Sum", "Latest", "Average"] }) + '</td>' +
         '<td class="cc">' + (editing
@@ -4137,14 +4331,26 @@ function projFrontMatter(p, ed){
      "Repeats: No" on every build-once project is noise (§41's budget, in
      words). The setter DELETES the key on the default (§50.6): a project
      unmarked and one never asked must be byte-identical. */
-  var repRow = "";
+  var repRow = "", repVal = repeatLabel(p.repeats);
   if (ed) {
+    var repOpts = ["No"].concat(REPEAT_MONTHS.map(repeatLabel));
+    /* A STORED VALUE THE LIST DOES NOT OFFER IS KEPT AND OFFERED (§96.2,
+       §114): `"cycle"` from before §196, or a month count somebody set on
+       another deployment. Displaying it wrong, or dropping it on the first
+       repaint, are both worse than one extra line in a dropdown. */
+    if (repOpts.indexOf(repVal) < 0) repOpts.splice(1, 0, repVal);
     repRow = row("l", "Repeats",
-      selectOr("plan", p.repeats === "cycle" ? "Each cycle" : "No",
-        ["No", "Each cycle"], "",
-        function(v){ if (v === "Each cycle") p.repeats = "cycle"; else delete p.repeats; }));
-  } else if (p.repeats === "cycle") {
-    repRow = row("l", "Repeats", "Each cycle");
+      selectOr("plan", repVal, repOpts, "", function(v){
+        var n = REPEAT_MONTHS.filter(function(m){ return repeatLabel(m) === v; })[0];
+        if (n) p.repeats = n;
+        else if (v === "Each cycle") p.repeats = "cycle";
+        /* DELETED on the default (§50.6): a project unmarked and one never
+           asked must be byte-identical, or every save carries a phantom
+           change and a non-office save is refused for ever (§42). */
+        else delete p.repeats;
+      }));
+  } else if (repeatsOn(p)) {
+    repRow = row("l", "Repeats", esc(repVal));
   }
   return '<div class="pfront">' +
     '<div class="pfcol">' +
@@ -4783,8 +4989,27 @@ function unitPlanBody(it, u, railed){
          hover words come back through `read`. */
       '<td class="cc">' + gapCell("plan", "u_plan", m, "dir",
         { ctx:pctx(m), kind:"select", opts:["\u2265","\u2264"], cls:"mono", read:dirCell }) + '</td>' +
+      /* §199.5: THE SAME UNIT PICKER AS A KEY OBJECTIVE'S. Islam, of the
+         measures: *"let's do the same fix."* They have the identical shape —
+         76 of them across the plan, the unit typed into the target — so they
+         get the identical control, from the identical functions. Two tables
+         asking one question must not answer it twice (§53.5), which is why
+         `targetUnitOf`/`setTargetUnit` lost their `ko` prefix rather than
+         being copied.
+
+         THE PEN ONLY, exactly as on a key objective: a unit is not a gap, so
+         it does not go through gapCell and does not join the count. The
+         READING table (measureRows) is untouched — it prints `esc(m.target)`,
+         the whole string, which is where §199.4 put the unit back. */
+      (ed
+        ? '<td class="cc">' + (hasTargetToHoldAUnit(m)
+            ? selectOr("plan", targetUnitOf(m), targetUnitOpts(targetUnitOf(m)), "",
+                function(v){ setTargetUnit(m, v); })
+            : '<span class="why" title="Set a target first \u2014 the unit is ' +
+              'written with it">\u2014</span>') + '</td>'
+        : '') +
       '<td class="num">' + gapCell("plan", "u_plan", m, "target",
-        { ctx:pctx(m), kind:"input", cls:"mono" }) + '</td>' +
+        { ctx:pctx(m), kind:"input", cls:"mono", parse: unitInherit(m) }) + '</td>' +
       /* NO 3-YEAR COLUMN. Islam, 2026-08-22: "in the direction plans the key
          measures are for 1 year only". A pillar's key measures carry one
          target and it is this year's; the three-year horizon belongs to the
@@ -4938,8 +5163,12 @@ function unitPlanBody(it, u, railed){
        table headings say "as planned", and every actual column reads em-dash -
        three statements of the same thing above a fourth. */
     '<h4 class="mini">Key measures <em>\u2014 as planned: this year\u2019s target, and how it compiles</em></h4>' +
-    miniTable(["#","Measure","Dir.","Target","Compiled"],
-      mRows + addRow(5, "measure", "Add a measure"), sortAttr("measures")) +
+    /* §199.5: the Unit heading appears only with the pen, because the column
+       under it does — and `addRow`'s span has to follow, or the Add row stops
+       reaching the end of the table the moment somebody opens the pen. */
+    miniTable(ed ? ["#","Measure","Dir.","Unit","Target","Compiled"]
+                 : ["#","Measure","Dir.","Target","Compiled"],
+      mRows + addRow(ed ? 6 : 5, "measure", "Add a measure"), sortAttr("measures")) +
     '<h4 class="mini">Tactics <em>\u2014 who carries it, who supports, and in which quarters</em></h4>' +
     miniTable(["#","Tactic","Owner","Collabs.","Quarters"],
       tRows + addRow(4, "tactic", "Add a tactic"), sortAttr("tactics"));

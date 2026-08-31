@@ -5106,29 +5106,41 @@ function renderOverview(){
   var t = cycleTotals();
   var att = attentionRows();
 
-  /* THE CYCLE STRIP IS THE SAME FOUR NUMBERS THE CYCLE PAGE OPENS WITH, from
-     cycleTotals() (§108.9) — read here and acted on there, which is why the
-     strip carries a way through rather than any control of its own. */
-  var strip =
-    '<div class="ovcycle">' +
-      '<div class="ovcyc-l">' +
-        '<div class="ovcyc-name">' + esc(REVIEW.name) +
-          ' <span class="badge b-' + (open ? "open" : "none") + '">' +
-          (open ? "Open" : "Closed") + '</span></div>' +
-        /* ONE SENTENCE, TWO SURFACES (§120.1) — and it says so when a tenant
-           has set no dates, rather than printing the separators alone. */
-        '<div class="ovcyc-meta">' + esc(cycleMeta()) + '</div>' +
-      '</div>' +
-      '<div class="ovcyc-n"><b>' + t.done + '</b><span>of ' + t.total +
-        ' items reported</span></div>' +
-      '<div class="ovcyc-chips">' +
-        '<span class="badge b-done">' + t.sub + ' submitted</span>' +
-        '<span class="badge b-part">' + t.progress + ' in progress</span>' +
-        (t.none ? '<span class="badge b-late">' + t.none + ' not started</span>' : '') +
-      '</div>' +
+  /* ── THE WORK FIRST, THE CONTEXT BESIDE IT (§198) ──────────────────────
+     Islam picked Option B from two drawn in the real page. The audit behind
+     it, measured as the office with things actually waiting:
+
+       · 264 pixels of content beside an 870-pixel rail — the page the gear
+         lands on was the shortest in Setup.
+       · The biggest thing on it answered a DIFFERENT question. "222 of 245
+         items reported" is how much the whole business has reported; the
+         office opens Setup to ask *is anything waiting on me*, and that was
+         in 13px grey underneath.
+
+     So the queue leads and the cycle becomes a standing summary in a column
+     beside it. NOTHING NEW IS COUNTED — the rows are `attentionRows()` and
+     the numbers are `cycleTotals()`, exactly as before (§108.9, §108.10);
+     what changes is which one the eye lands on first.
+
+     BELOW 900px IT STACKS, queue first, which is CSS and not a second
+     builder — a summary page whose shape depended on a JS width test would
+     be measuring the window in two places (§27.1). */
+  var side =
+    '<aside class="ovside">' +
+      '<h4>' + esc(REVIEW.name) +
+        ' <span class="badge b-' + (open ? "open" : "none") + '">' +
+        (open ? "Open" : "Closed") + '</span></h4>' +
+      '<div class="ovsline"><span>Reported</span><b>' + t.done + ' of ' + t.total + '</b></div>' +
+      '<div class="ovsline"><span>Submitted</span><b>' + t.sub + '</b></div>' +
+      '<div class="ovsline"><span>In progress</span><b>' + t.progress + '</b></div>' +
+      (t.none ? '<div class="ovsline"><span>Not started</span><b class="ovlate">' +
+        t.none + '</b></div>' : '') +
+      /* ONE SENTENCE, TWO SURFACES (§120.1) — and it says so when a tenant has
+         set no dates, rather than printing the separators alone. */
+      '<div class="ovsmeta">' + esc(cycleMeta()) + '</div>' +
       '<button type="button" class="editbtn ovcyc-go" data-setupgo="cycle">' +
         'Open the cycle page</button>' +
-    '</div>';
+    '</aside>';
 
   var body = att.length
     ? '<div class="ovlist">' + att.map(function(r){
@@ -5144,10 +5156,20 @@ function renderOverview(){
       '<span>Everything the Overview watches is clear. The rest of Setup is in ' +
       'the list on the left.</span></div>';
 
+  /* THE HEADING CARRIES THE TOTAL, because a count belongs on the thing it
+     counts and the rows below it are that thing (§116.2). Never a zero: the
+     empty state says it in words one line down (§108.10). */
+  var n = att.reduce(function(a, r){ return a + (r.n | 0); }, 0);
+
   return cfgHead("Overview", [], null, false, null, null, "") +
-    strip +
-    '<div class="ovh">Waiting on the office</div>' +
-    body;
+    '<div class="ovcols">' +
+      '<div class="ovmain">' +
+        '<div class="ovh">Waiting on the office' +
+          (n ? ' \u2014 <em>' + plural(n, "thing") + '</em>' : '') + '</div>' +
+        body +
+      '</div>' +
+      side +
+    '</div>';
 }
 
 /* ── Setup · Reporting cycle ────────────────────────────────────────

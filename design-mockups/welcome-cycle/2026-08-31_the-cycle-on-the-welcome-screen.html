@@ -1,0 +1,269 @@
+<title>The cycle on the welcome screen</title>
+<style>
+  :root{
+    --ground:#F5F7FA; --surface:#FFFFFF; --surface-2:#EFF2F6; --panel:#12243F;
+    --ink:#1B2534; --ink-2:#4A5568; --ink-3:#6B7688; --stone:#6B7688;
+    --line:#D6DCE5; --gold:#C9A227; --gold-deep:#8A6100;
+    --cta:#B5502A; --attn-bg:#FDF3DF; --attn-tx:#8A6100;
+    --bad:#B3341F; --bad-tx:#9C2C1A; --good-tx:#1E7A48;
+    --r-sm:6px; --r:10px;
+    --mono:ui-monospace,SFMono-Regular,Menlo,monospace;
+    --sans:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+  }
+  @media (prefers-color-scheme: dark){ :root:not([data-theme="light"]){
+    --ground:#0E1622; --surface:#16202E; --surface-2:#1D2836; --panel:#0B1526;
+    --ink:#E8ECF2; --ink-2:#B4BECC; --ink-3:#8592A5; --stone:#8592A5;
+    --line:#333A45; --gold:#D9B441; --gold-deep:#E7B94A;
+    --attn-bg:#3A2E12; --attn-tx:#E7B94A; --bad:#E06A52; --bad-tx:#F08A72;
+    --good-tx:#5FCB92;
+  }}
+  :root[data-theme="dark"]{
+    --ground:#0E1622; --surface:#16202E; --surface-2:#1D2836; --panel:#0B1526;
+    --ink:#E8ECF2; --ink-2:#B4BECC; --ink-3:#8592A5; --stone:#8592A5;
+    --line:#333A45; --gold:#D9B441; --gold-deep:#E7B94A;
+    --attn-bg:#3A2E12; --attn-tx:#E7B94A; --bad:#E06A52; --bad-tx:#F08A72;
+    --good-tx:#5FCB92;
+  }
+  body{background:var(--ground); color:var(--ink); font:14px/1.5 var(--sans); margin:0;
+    padding:26px 20px 80px;}
+  .wrap{max-width:1180px; margin:0 auto;}
+  h1{font-size:20px; margin:0 0 4px; letter-spacing:-.25px;}
+  .lede{color:var(--ink-2); font-size:13px; margin:0 0 6px; max-width:80ch;}
+  .tag{font:700 10px/1 var(--sans); letter-spacing:.1em; text-transform:uppercase;
+    color:var(--ink-3); margin:30px 0 9px;}
+  .tag.now{color:var(--bad-tx);} .tag.a{color:var(--good-tx);}
+  .tag b{font-size:12.5px; letter-spacing:0; text-transform:none; color:var(--ink);}
+
+  /* the real screen */
+  .scr{background:var(--ground); border:1px solid var(--line); border-radius:var(--r);
+    padding:16px; }
+  .whero{background:var(--panel); border-radius:var(--r); padding:18px 22px;
+    display:flex; align-items:center; gap:22px; color:#fff; flex-wrap:nowrap;}
+  .wgreet{flex:1; min-width:0;}
+  .wkick{font:700 9.5px/1 var(--sans); letter-spacing:.13em; text-transform:uppercase;
+    color:var(--gold); margin:0 0 7px;}
+  .whero h2{margin:0 0 9px; font:700 27px/1.1 var(--sans); letter-spacing:-.5px;}
+  .wwho{display:flex; gap:7px; flex-wrap:wrap;}
+  .chip{border:1px solid rgba(255,255,255,.32); border-radius:20px; padding:3px 10px;
+    font:700 11px var(--sans); color:rgba(255,255,255,.9);}
+  .chip.gold{border-color:var(--gold); color:var(--gold);}
+  .wtenant{flex:none; border-left:1px solid rgba(255,255,255,.22); padding-left:20px;}
+  .wmark{width:34px; height:34px; border-radius:7px; background:#fff; color:var(--panel);
+    font:800 13px/34px var(--sans); text-align:center; margin-bottom:7px;}
+  .wtenant h3{margin:0; font:700 17px/1.1 var(--sans);}
+  .woffice{font:700 9px/1 var(--sans); letter-spacing:.11em; text-transform:uppercase;
+    color:rgba(255,255,255,.6); margin-top:5px;}
+
+  .wcols{display:grid; grid-template-columns:minmax(0,1fr) 336px; gap:20px;
+    margin-top:18px; align-items:start;}
+  .wseclab{font:700 10px/1 var(--sans); letter-spacing:.12em; text-transform:uppercase;
+    color:var(--ink-3); margin:0 0 8px;}
+  .wacts{background:var(--surface); border:1px solid var(--line); border-radius:var(--r);
+    overflow:hidden;}
+  .wact{display:flex; align-items:center; gap:12px; padding:13px 15px;
+    border-bottom:1px solid var(--line);}
+  .wact:last-child{border-bottom:0;}
+  .wact b{flex:1; min-width:0; font-weight:600; font-size:13.5px;}
+  .wact b small{display:block; color:var(--ink-3); font-size:11.5px; font-weight:400;}
+  .wgo2{color:var(--gold-deep); font:700 12px var(--sans); white-space:nowrap;}
+  .wempty{padding:16px; font-weight:700;}
+  .wpagesbox{background:var(--surface); border:1px solid var(--line);
+    border-radius:var(--r); padding:4px 15px;}
+  .wpage{display:flex; justify-content:space-between; align-items:center; gap:10px;
+    padding:11px 0; border-bottom:1px solid var(--line); font-weight:600; font-size:13px;}
+  .wpage:last-child{border-bottom:0;}
+  .wpage span:last-child{color:var(--ink-3);}
+  .wexit{display:flex; justify-content:space-between; align-items:center;
+    background:var(--cta); color:#fff; border-radius:var(--r); padding:17px 20px;
+    margin-top:18px; font:700 15px var(--sans);}
+
+  /* the new block */
+  .wcyc{background:var(--surface); border:1px solid var(--line); border-radius:var(--r);
+    padding:12px 15px 14px; margin-top:14px;}
+  .wcyc h4{margin:0 0 8px; font:700 12px/1.3 var(--sans); display:flex;
+    align-items:center; gap:8px; flex-wrap:wrap;}
+  .bdg{font:700 9px/1 var(--sans); letter-spacing:.07em; text-transform:uppercase;
+    border:1px solid currentColor; border-radius:20px; padding:3px 7px;}
+  .bopen{color:var(--good-tx);}
+  .cline{display:flex; justify-content:space-between; align-items:baseline; gap:10px;
+    font-size:12.5px; padding:5px 0; border-bottom:1px solid var(--line);}
+  .cline:last-of-type{border-bottom:0;}
+  .cline b{font-variant-numeric:tabular-nums;}
+  .cline b.late{color:var(--bad-tx);}
+  .cmeta{color:var(--ink-3); font-size:11px; margin-top:8px;}
+  .mark{outline:2px dashed var(--good-tx); outline-offset:4px; border-radius:var(--r);}
+
+  .note{color:var(--ink-3); font-size:12.5px; margin:12px 0 0; max-width:84ch;}
+  .note b{color:var(--ink);}
+  .risk{background:var(--attn-bg); border:1px solid var(--attn-tx); color:var(--attn-tx);
+    border-radius:var(--r-sm); padding:13px 15px; font-size:13px; margin:18px 0 0;}
+  .risk b{color:var(--attn-tx);}
+  .two{display:grid; grid-template-columns:1fr 1fr; gap:16px; align-items:start;}
+  @media (max-width:1000px){ .two{grid-template-columns:1fr;} }
+  .mini .whero h2{font-size:20px;} .mini .whero{padding:14px 16px; gap:14px;}
+  .mini .wcols{grid-template-columns:1fr; gap:12px;}
+  .mini .scr{padding:12px;}
+</style>
+<div class="wrap">
+<h1>The cycle on the welcome screen</h1>
+<p class="lede">You asked to see how it changes. The screen already <i>names</i> the
+cycle — the gold chip in the hero reads <b>H1 2026 cycle is open</b> — so what is
+being added is the numbers. Drawn on the real screen at 1500px, as the office.</p>
+
+<div class="risk"><b>One thing to decide before the placement, because it is not
+about layout.</b> The figure <b>222 of 245</b> counts every unit and every
+supporting function in the business, and the page that shows it — Reporting
+cycle — is access&#8209;gated. A unit head does not normally hold that key. So
+putting the business&#8209;wide numbers on <i>everyone's</i> welcome screen shows
+the whole company's reporting state to people the platform currently does not
+show it to. <b>That is why there are two options below rather than two
+placements.</b></div>
+
+<div class="tag now">Now &mdash; the cycle is named, not counted</div>
+<div class="scr">
+  <div class="whero">
+    <div class="wgreet">
+      <p class="wkick">Strategy Management Platform</p>
+      <h2>Welcome, Mohamed</h2>
+      <div class="wwho"><span class="chip">Super user · the group</span>
+        <span class="chip">Function head · Strategy Management Office</span>
+        <span class="chip gold">● H1 2026 cycle is open</span></div>
+    </div>
+    <div class="wtenant"><div class="wmark">RT</div><h3>Raya Trade</h3>
+      <div class="woffice">Strategy Management Office</div></div>
+  </div>
+  <div class="wcols">
+    <div>
+      <p class="wseclab">Waiting on you</p>
+      <div class="wacts">
+        <div class="wact"><b>4 conversations waiting for an answer</b>
+          <span class="wgo2">Open the inbox ›</span></div>
+        <div class="wact"><b>3 units with no custodian</b>
+          <span class="wgo2">People register ›</span></div>
+      </div>
+    </div>
+    <div>
+      <p class="wseclab">Your pages</p>
+      <div class="wpagesbox">
+        <div class="wpage"><span>Setup — Overview</span><span>›</span></div>
+        <div class="wpage"><span>The group — Performance</span><span>›</span></div>
+      </div>
+    </div>
+  </div>
+  <div class="wexit"><span>Continue to the group</span><span>›</span></div>
+</div>
+
+<div class="risk" style="background:transparent;border-color:var(--good-tx);color:var(--ink-2)">
+<b style="color:var(--good-tx)">BUILT &mdash; Option A.</b> Measured on the real
+screen for four viewers: the office (grant <i>edit</i>) and a group CEO (grant
+<i>view</i>) get the block; a unit head and a strategy custodian (grant
+<i>none</i>) do not, and keep the gold hero chip instead &mdash; so they still
+learn the cycle is open without being shown the business's figures. The chip is
+dropped only where the block replaces it. Option B is not built and remains its
+own decision.</div>
+
+<div class="tag a">Option A &mdash; <b>the business's cycle, shown only to those who may already see it</b></div>
+<div class="scr">
+  <div class="whero">
+    <div class="wgreet">
+      <p class="wkick">Strategy Management Platform</p>
+      <h2>Welcome, Mohamed</h2>
+      <div class="wwho"><span class="chip">Super user · the group</span>
+        <span class="chip">Function head · Strategy Management Office</span></div>
+    </div>
+    <div class="wtenant"><div class="wmark">RT</div><h3>Raya Trade</h3>
+      <div class="woffice">Strategy Management Office</div></div>
+  </div>
+  <div class="wcols">
+    <div>
+      <p class="wseclab">Waiting on you</p>
+      <div class="wacts">
+        <div class="wact"><b>4 conversations waiting for an answer</b>
+          <span class="wgo2">Open the inbox ›</span></div>
+        <div class="wact"><b>3 units with no custodian</b>
+          <span class="wgo2">People register ›</span></div>
+      </div>
+    </div>
+    <div>
+      <p class="wseclab">Your pages</p>
+      <div class="wpagesbox">
+        <div class="wpage"><span>Setup — Overview</span><span>›</span></div>
+        <div class="wpage"><span>The group — Performance</span><span>›</span></div>
+      </div>
+      <div class="wcyc mark">
+        <h4>H1 2026 <span class="bdg bopen">Open</span></h4>
+        <div class="cline"><span>Reported</span><b>222 of 245</b></div>
+        <div class="cline"><span>Submitted</span><b>6</b></div>
+        <div class="cline"><span>In progress</span><b>10</b></div>
+        <div class="cline"><span>Not started</span><b class="late">1</b></div>
+        <div class="cmeta">Jan to Jun 2026 · due 15 Jul 2026</div>
+      </div>
+    </div>
+  </div>
+  <div class="wexit"><span>Continue to the group</span><span>›</span></div>
+</div>
+<p class="note"><b>The same block as the Setup Overview</b>, in the same column
+position — one vocabulary for "the cycle, as context" across both screens
+(§53.5), and nothing new is computed. <b>The gold chip in the hero goes</b>, or
+the screen says the cycle is open twice. <b>Cost:</b> a unit head's side column
+is unchanged from today, so for most of the register this changes nothing at
+all.</p>
+
+<div class="tag a">Option B &mdash; <b>everybody gets a cycle block, and it is about them</b></div>
+<div class="two">
+  <div>
+    <p class="tag" style="margin:0 0 7px">The office sees the business</p>
+    <div class="scr mini">
+      <div class="whero"><div class="wgreet"><p class="wkick">Strategy Management Platform</p>
+        <h2>Welcome, Mohamed</h2></div></div>
+      <div class="wcols"><div>
+        <p class="wseclab">Waiting on you</p>
+        <div class="wacts"><div class="wact"><b>4 conversations waiting</b>
+          <span class="wgo2">Inbox ›</span></div></div>
+        <div class="wcyc mark">
+          <h4>H1 2026 <span class="bdg bopen">Open</span></h4>
+          <div class="cline"><span>Reported across the business</span><b>222 of 245</b></div>
+          <div class="cline"><span>Submitted</span><b>6 of 17</b></div>
+          <div class="cline"><span>Not started</span><b class="late">1</b></div>
+          <div class="cmeta">Due 15 Jul 2026</div>
+        </div>
+      </div></div>
+    </div>
+  </div>
+  <div>
+    <p class="tag" style="margin:0 0 7px">A unit head sees their own</p>
+    <div class="scr mini">
+      <div class="whero"><div class="wgreet"><p class="wkick">Strategy Management Platform</p>
+        <h2>Welcome, Ramy</h2></div></div>
+      <div class="wcols"><div>
+        <p class="wseclab">Waiting on you</p>
+        <div class="wacts"><div class="wact"><b>Submit Mobile’s H1 2026 report
+          <small>12 of 18 reported · 2 need notes</small></b>
+          <span class="wgo2">Open reporting ›</span></div></div>
+        <div class="wcyc mark">
+          <h4>H1 2026 <span class="bdg bopen">Open</span></h4>
+          <div class="cline"><span>Mobile — reported</span><b>12 of 18</b></div>
+          <div class="cline"><span>Submitted</span><b class="late">Not yet</b></div>
+          <div class="cmeta">Due 15 Jul 2026 · 14 days left</div>
+        </div>
+      </div></div>
+    </div>
+  </div>
+</div>
+<p class="note"><b>Nobody is shown anything they could not already open</b> — a
+unit head's block is their own unit's, which is on their own Performance page.
+And a deadline with days left is worth more to the person who has to meet it
+than to the office watching. <b>Cost, and it is real:</b> two different blocks
+means two things to keep true, and for a unit head it partly repeats what the
+row directly above it already says.</p>
+
+<div class="risk" style="background:transparent;border-color:var(--line);color:var(--ink-2)">
+<b>My recommendation: A, and then B as a second step if you want it.</b> A is
+the small move — the same block the Overview already has, in the same place,
+gated on a key that already exists, and no new question about what anybody may
+see. B is a better screen for the eleven unit and function heads who are not the
+office, and it is a genuinely new thing to design and keep true, so I would
+rather it be its own decision than ride along with this one.
+<br><br><b>Either way the gold chip in the hero goes</b>, because the block says
+what it said.</div>
+</div>

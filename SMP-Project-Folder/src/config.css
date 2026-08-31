@@ -306,7 +306,6 @@
   .prow[aria-expanded="true"] { background:var(--surface-2); }
   .pname { display:flex; flex-direction:column; gap:2px; min-width:0; }
   .pname b { font-size:14.5px; font-weight:600; }
-  .pname .psub { font-size:11.5px; color:var(--ink-3); font-weight:400; }
   .powner { font-size:12.5px; color:var(--ink-2); }
   .prow .num, .ptotal .num, .phead .num { text-align:right;
         font-family:var(--mono); font-variant-numeric:tabular-nums; }
@@ -1031,55 +1030,42 @@
      one strip is how a summary stops reading as a summary (§B5). What it does
      NOT borrow is the layout: `.fstrip` is a card with a titled head and a
      body, and this is one row that ends in a way through. */
-  .ovcycle { display:flex; align-items:center; gap:22px; flex-wrap:wrap;
-             justify-content:flex-end;
-             background:var(--surface); border:1px solid var(--line);
-             border-radius:var(--r); padding:14px 18px; margin:0 0 22px; }
-  .ovcyc-name { font:700 13.5px/1.3 var(--sans); color:var(--ink);
-                display:flex; align-items:center; gap:9px; }
-  .ovcyc-meta { color:var(--ink-3); font-size:12px; margin-top:3px; }
-  /* THE NUMBER IS THE SERIF ONE THE CYCLE PAGE USES, at the size a summary
-     wants rather than the size the page it summarises wants. */
-  .ovcyc-n { display:flex; align-items:baseline; gap:7px; font-family:var(--serif); }
-  .ovcyc-n b { font-size:27px; font-weight:400; color:var(--ink); }
-  .ovcyc-n span { font-size:13px; color:var(--ink-3); font-family:var(--sans); }
-  .ovcyc-chips { display:flex; gap:7px; flex-wrap:wrap; }
-  /* THE BUTTON HOLDS ITS PLACE (§120.4). The strip is one wrapping row, so
-     below about 1280px the button dropped onto a line of its own and the strip
-     grew from 72px to 126px — not broken, but it reads as an accident rather
-     than a decision. The numbers and the chips are what should give way: they
-     are facts and wrap gracefully, while the way through is a control and
-     wants to stay where the eye last left it.
+  /* ── THE OVERVIEW IS TWO COLUMNS (§198) ───────────────────────────────
+     Islam picked Option B from two drawn in the real page. The queue takes
+     the width, the cycle stands beside it as a summary. §24: the one-row
+     strip and every rule that shaped it are DELETED, not left behind —
+     including §120.4's wrap argument, which was three paragraphs about a
+     control that no longer shares a line with anything.
 
-     `order` rather than a media query, because the wrap point depends on the
-     tenant's own cycle name and dates, not on a width anybody can name. */
-  /* THE BUTTON HOLDS ITS PLACE (§120.4). The strip is one wrapping row, and
-     below about 1280px the button dropped to a line of its own, growing the
-     strip from 72px to 126px — not broken, but it reads as an accident.
+     THE STACK POINT IS CSS, NOT A WIDTH TEST IN JAVASCRIPT. A summary page
+     that measured the window in two places would eventually disagree with
+     itself (§27.1); below 900px the columns become one and the QUEUE is
+     first, because that is the half somebody came for. */
+  .ovcols { display:grid; grid-template-columns:minmax(0,1fr) 320px;
+            gap:16px; align-items:start; }
+  .ovmain { min-width:0; }
+  @media (max-width:900px){ .ovcols { grid-template-columns:1fr; } }
 
-     THE FIRST ATTEMPT MADE IT WORSE, and the reason is worth the line: giving
-     the button `margin-left:auto` when `.ovcyc-n` already had one puts TWO
-     auto margins in the row, and they split the free space between them — so
-     the button was pushed out and wrapped at 1400px instead of 1280.
-
-     ONE auto margin, and the NAME takes the slack. The name and dates are the
-     only part that can afford to shrink (they wrap onto two lines gracefully);
-     the number, the chips and the way through are all fixed things. */
-  /* `flex-basis: 0`, NOT `auto`, and that is the whole mechanism: with
-     `flex-wrap:wrap` the browser fits items by their BASIS first and wraps
-     what will not fit — it only shrinks items already sharing a line. At
-     `auto` the name's basis is its full text, so the row overflowed and the
-     button wrapped; at `0` the name asks for nothing, everything fits on one
-     line, and the name then GROWS into whatever is left over. */
-  .ovcyc-l { flex:1 1 0; min-width:240px; }
-  /* THE ONE AUTO MARGIN, and it is on the button rather than the numbers:
-     the name grows now, so the numbers are pushed right without help — and
-     when the row DOES wrap at a genuinely narrow width, this keeps the button
-     at the right rather than letting it jump to the left of the second line,
-     which is what made a wrap read as a mistake rather than a decision. */
-  .ovcyc-go { white-space:nowrap; flex:0 0 auto; }
-  .ovcyc-n { flex:0 0 auto; }
-  .ovcyc-chips { flex:0 0 auto; }
+  /* The cycle, as a standing summary. It borrows the Reporting cycle page's
+     own ground, border and `.badge` chips — this is that page's numbers, and
+     two different-looking versions of one set is how a summary stops reading
+     as a summary (§B5). What it no longer borrows is the SIZE: 27px of serif
+     was the loudest thing on a page about something else. */
+  .ovside { background:var(--surface); border:1px solid var(--line);
+            border-radius:var(--r); padding:13px 15px 15px; }
+  .ovside h4 { margin:0 0 9px; font:700 12px/1.3 var(--sans); color:var(--ink);
+               display:flex; align-items:center; gap:8px; flex-wrap:wrap; }
+  .ovsline { display:flex; justify-content:space-between; align-items:baseline;
+             gap:10px; font-size:13px; padding:6px 0;
+             border-bottom:1px solid var(--line); }
+  .ovsline b { font-weight:700; font-variant-numeric:tabular-nums; }
+  /* Not started is the one figure that is a problem rather than a fact, so it
+     is the one that takes a colour — as TYPE, which is why it is `--bad-tx`
+     and not `--bad` (§38.5, and this file has paid for that one six times). */
+  .ovsline b.ovlate { color:var(--bad-tx); }
+  .ovsmeta { color:var(--ink-3); font-size:11.5px; margin:9px 0 0; }
+  .ovside .ovcyc-go { width:100%; margin-top:11px; }
+  .ovcyc-go { white-space:nowrap; }
 
   .ovh { font:700 10.5px/1 var(--sans); letter-spacing:.11em; text-transform:uppercase;
          color:var(--ink-2); margin:0 0 8px; display:flex; align-items:center; gap:10px; }

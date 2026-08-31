@@ -2044,7 +2044,6 @@
   .prow[aria-expanded="true"] { background:var(--surface-2); }
   .pname { display:flex; flex-direction:column; gap:2px; min-width:0; }
   .pname b { font-size:14.5px; font-weight:600; }
-  .pname .psub { font-size:11.5px; color:var(--ink-3); font-weight:400; }
   .powner { font-size:12.5px; color:var(--ink-2); }
   .prow .num, .ptotal .num, .phead .num { text-align:right;
         font-family:var(--mono); font-variant-numeric:tabular-nums; }
@@ -2769,55 +2768,42 @@
      one strip is how a summary stops reading as a summary (§B5). What it does
      NOT borrow is the layout: `.fstrip` is a card with a titled head and a
      body, and this is one row that ends in a way through. */
-  .ovcycle { display:flex; align-items:center; gap:22px; flex-wrap:wrap;
-             justify-content:flex-end;
-             background:var(--surface); border:1px solid var(--line);
-             border-radius:var(--r); padding:14px 18px; margin:0 0 22px; }
-  .ovcyc-name { font:700 13.5px/1.3 var(--sans); color:var(--ink);
-                display:flex; align-items:center; gap:9px; }
-  .ovcyc-meta { color:var(--ink-3); font-size:12px; margin-top:3px; }
-  /* THE NUMBER IS THE SERIF ONE THE CYCLE PAGE USES, at the size a summary
-     wants rather than the size the page it summarises wants. */
-  .ovcyc-n { display:flex; align-items:baseline; gap:7px; font-family:var(--serif); }
-  .ovcyc-n b { font-size:27px; font-weight:400; color:var(--ink); }
-  .ovcyc-n span { font-size:13px; color:var(--ink-3); font-family:var(--sans); }
-  .ovcyc-chips { display:flex; gap:7px; flex-wrap:wrap; }
-  /* THE BUTTON HOLDS ITS PLACE (§120.4). The strip is one wrapping row, so
-     below about 1280px the button dropped onto a line of its own and the strip
-     grew from 72px to 126px — not broken, but it reads as an accident rather
-     than a decision. The numbers and the chips are what should give way: they
-     are facts and wrap gracefully, while the way through is a control and
-     wants to stay where the eye last left it.
+  /* ── THE OVERVIEW IS TWO COLUMNS (§198) ───────────────────────────────
+     Islam picked Option B from two drawn in the real page. The queue takes
+     the width, the cycle stands beside it as a summary. §24: the one-row
+     strip and every rule that shaped it are DELETED, not left behind —
+     including §120.4's wrap argument, which was three paragraphs about a
+     control that no longer shares a line with anything.
 
-     `order` rather than a media query, because the wrap point depends on the
-     tenant's own cycle name and dates, not on a width anybody can name. */
-  /* THE BUTTON HOLDS ITS PLACE (§120.4). The strip is one wrapping row, and
-     below about 1280px the button dropped to a line of its own, growing the
-     strip from 72px to 126px — not broken, but it reads as an accident.
+     THE STACK POINT IS CSS, NOT A WIDTH TEST IN JAVASCRIPT. A summary page
+     that measured the window in two places would eventually disagree with
+     itself (§27.1); below 900px the columns become one and the QUEUE is
+     first, because that is the half somebody came for. */
+  .ovcols { display:grid; grid-template-columns:minmax(0,1fr) 320px;
+            gap:16px; align-items:start; }
+  .ovmain { min-width:0; }
+  @media (max-width:900px){ .ovcols { grid-template-columns:1fr; } }
 
-     THE FIRST ATTEMPT MADE IT WORSE, and the reason is worth the line: giving
-     the button `margin-left:auto` when `.ovcyc-n` already had one puts TWO
-     auto margins in the row, and they split the free space between them — so
-     the button was pushed out and wrapped at 1400px instead of 1280.
-
-     ONE auto margin, and the NAME takes the slack. The name and dates are the
-     only part that can afford to shrink (they wrap onto two lines gracefully);
-     the number, the chips and the way through are all fixed things. */
-  /* `flex-basis: 0`, NOT `auto`, and that is the whole mechanism: with
-     `flex-wrap:wrap` the browser fits items by their BASIS first and wraps
-     what will not fit — it only shrinks items already sharing a line. At
-     `auto` the name's basis is its full text, so the row overflowed and the
-     button wrapped; at `0` the name asks for nothing, everything fits on one
-     line, and the name then GROWS into whatever is left over. */
-  .ovcyc-l { flex:1 1 0; min-width:240px; }
-  /* THE ONE AUTO MARGIN, and it is on the button rather than the numbers:
-     the name grows now, so the numbers are pushed right without help — and
-     when the row DOES wrap at a genuinely narrow width, this keeps the button
-     at the right rather than letting it jump to the left of the second line,
-     which is what made a wrap read as a mistake rather than a decision. */
-  .ovcyc-go { white-space:nowrap; flex:0 0 auto; }
-  .ovcyc-n { flex:0 0 auto; }
-  .ovcyc-chips { flex:0 0 auto; }
+  /* The cycle, as a standing summary. It borrows the Reporting cycle page's
+     own ground, border and `.badge` chips — this is that page's numbers, and
+     two different-looking versions of one set is how a summary stops reading
+     as a summary (§B5). What it no longer borrows is the SIZE: 27px of serif
+     was the loudest thing on a page about something else. */
+  .ovside { background:var(--surface); border:1px solid var(--line);
+            border-radius:var(--r); padding:13px 15px 15px; }
+  .ovside h4 { margin:0 0 9px; font:700 12px/1.3 var(--sans); color:var(--ink);
+               display:flex; align-items:center; gap:8px; flex-wrap:wrap; }
+  .ovsline { display:flex; justify-content:space-between; align-items:baseline;
+             gap:10px; font-size:13px; padding:6px 0;
+             border-bottom:1px solid var(--line); }
+  .ovsline b { font-weight:700; font-variant-numeric:tabular-nums; }
+  /* Not started is the one figure that is a problem rather than a fact, so it
+     is the one that takes a colour — as TYPE, which is why it is `--bad-tx`
+     and not `--bad` (§38.5, and this file has paid for that one six times). */
+  .ovsline b.ovlate { color:var(--bad-tx); }
+  .ovsmeta { color:var(--ink-3); font-size:11.5px; margin:9px 0 0; }
+  .ovside .ovcyc-go { width:100%; margin-top:11px; }
+  .ovcyc-go { white-space:nowrap; }
 
   .ovh { font:700 10.5px/1 var(--sans); letter-spacing:.11em; text-transform:uppercase;
          color:var(--ink-2); margin:0 0 8px; display:flex; align-items:center; gap:10px; }
@@ -5109,6 +5095,11 @@
   .missing { color:var(--bad); font-style:italic; font-family:var(--sans);
              font-size:12.5px; font-weight:400; }
   .ochip .h .missing { font-size:11.5px; }
+  /* The value behind a Missing the platform could not read (§197.3). QUIET,
+     never red: red on a value means "off track" everywhere else in this
+     product, and the row already carries the red word that says what is
+     wrong. This is the evidence beside it, not a second alarm. */
+  .wasval { color:var(--ink-3); font-style:normal; font-size:12px; font-weight:400; }
 
   /* SWOT points are numbered so they can be referred to in a review; the
      numbers stay quiet so they never compete with the text. */
@@ -5211,8 +5202,6 @@
   .cfg .pick .src{font-size:11px;color:var(--ink-3)}
 
   /* ── Reporting ──────────────────────────────────────────────────── */
-  .rep-bar{display:flex;align-items:center;gap:18px;flex-wrap:wrap;padding:14px 18px;
-    background:var(--surface);border:1px solid var(--line);border-radius:var(--r);margin:0 0 16px}
   .kpi{display:flex;align-items:baseline;gap:8px}
   .kpi b{font:400 26px/1 var(--serif)}
   .kpi span{color:var(--ink-3);font-size:12.5px}
@@ -5222,7 +5211,6 @@
     overflow:hidden;flex:1;min-width:120px;max-width:260px}
   .repbar i{display:block;height:100%;background:var(--good)}
   .repbar.part i{background:var(--attn)}
-  .rep-bar .why{margin-left:auto}
   input.field{font:inherit;font-family:var(--mono);font-size:13px;padding:6px 10px;width:104px;
     border:1px solid var(--line);border-radius:var(--r);text-align:right;background:var(--surface);
     color:var(--ink)}
@@ -5524,10 +5512,23 @@
      them apart is what lets either change without the other (§87's twins, in
      CSS). The hover LIFTS rather than repaints, so it cannot be mistaken for
      a selection changing. */
-  .units .navmenu-btn.homemark{ background:var(--gold); border-color:var(--gold);
-    color:var(--on-accent); border-radius:5px; padding:0; width:30px; height:30px; }
-  .units .navmenu-btn.homemark:hover{ background:var(--gold); border-color:var(--gold);
-    color:var(--on-accent); filter:brightness(1.08); }
+  /* THE ROW IS `align-items:stretch`, SO A FIXED HEIGHT TOP-ALIGNS (§197.2).
+     Every sibling on this row is the row's full 46px; the mark asks for 34
+     and therefore sat at the top edge with 12px of nothing beneath it, which
+     is what read as damaged. `align-self:center` is the whole fix — measured,
+     not reasoned: box y=29 h=30 inside a row y=29 h=46. */
+  .units .navmenu-btn.homemark{ background:none; border-color:transparent;
+    color:rgba(255,255,255,.86); border-radius:5px; padding:0;
+    width:34px; height:34px; align-self:center; }
+  .units .navmenu-btn.homemark .navmenusvg{ width:21px; height:21px; }
+  .units .navmenu-btn.homemark:hover{ background:rgba(255,255,255,.16);
+    border-color:transparent; color:#fff; }
+  /* AND GOLD WHEN THERE IS SOMETHING TO ANSWER. Same box, same mark size, so
+     the row does not move when the state changes — only the fill arrives. */
+  .units .navmenu-btn.homemark.homemark-on{ background:var(--gold);
+    border-color:var(--gold); color:var(--on-accent); }
+  .units .navmenu-btn.homemark.homemark-on:hover{ background:var(--gold);
+    border-color:var(--gold); color:var(--on-accent); filter:brightness(1.08); }
   .units .navmenu-btn.homemark:focus-visible{ outline:2px solid #fff; outline-offset:2px; }
   .navmenusvg{width:15px;height:15px;display:block}
   /* The panel, its group bands, its buttons and the caret are all gone with
@@ -7199,6 +7200,30 @@ body.presenting .tourdock { display:none; }
 .welcomeover .wtghost { font:inherit; cursor:pointer; font-size:var(--fs-small);
   font-weight:600; border:0; background:none; color:var(--ink-3); padding:8px 6px; }
 .welcomeover .wtghost:hover { color:var(--ink); }
+
+/* ── THE CYCLE, ON THE WELCOME SCREEN (§200) ────────────────────────────
+   The Setup Overview's own summary, in the same shape: "the cycle, as
+   context" should look like itself wherever it is drawn (§53.5). It sits
+   under Your pages, in the column that holds what is true rather than what
+   is owed — the left column is the work. */
+.wcyc{ background:var(--surface); border:1px solid var(--line);
+       border-radius:var(--r); padding:12px 15px 14px; margin-top:14px; }
+.wcyc h4{ margin:0 0 8px; font:700 12px/1.3 var(--sans); color:var(--ink);
+          display:flex; align-items:center; gap:8px; flex-wrap:wrap; }
+.wbdg{ font:700 9px/1 var(--sans); letter-spacing:.07em; text-transform:uppercase;
+       border:1px solid currentColor; border-radius:20px; padding:3px 7px; }
+.wb-open{ color:var(--good-tx); }
+.wb-shut{ color:var(--ink-3); }
+.wcycline{ display:flex; justify-content:space-between; align-items:baseline;
+           gap:10px; font-size:12.5px; padding:5px 0;
+           border-bottom:1px solid var(--line); }
+.wcycline:last-of-type{ border-bottom:0; }
+.wcycline b{ font-weight:700; font-variant-numeric:tabular-nums; }
+/* Not started is the one figure that is a problem rather than a fact, so it
+   is the one that takes a colour — as TYPE, hence `--bad-tx` and not `--bad`
+   (§38.5, which this project has paid for six times). */
+.wcycline b.wlate{ color:var(--bad-tx); }
+.wcycmeta{ color:var(--ink-3); font-size:11px; margin:9px 0 0; }
 
 /* ══ THE PLAN BUILDER (§129, spec 020) ══════════════════════════════
    The band is CHROME — it sits under the tab rows, spans the window like
@@ -17288,24 +17313,69 @@ function clearAllNotes(){
 
    The capability's own key objectives clear every cycle regardless: they are
    per-cycle figures, the function's KPIs, same as a unit's measures. */
+/* ── HOW OFTEN A PROJECT REPEATS, IN MONTHS (§196) ─────────────────────
+   Islam: *"the repeat might not be each cycle — the repeat might be half
+   annual or every quarter, so it's a count of months for repetition."*
+
+   §115 stored ONE WORD, `"cycle"`, and moved every date on by the closed
+   cycle's own length. That is exactly right for a project whose rhythm IS
+   the cycle's, and it has nothing to say about one that runs quarterly in a
+   tenant that reports half-yearly — which is the case he brought.
+
+   `"cycle"` IS STILL READ AND STILL MEANS WHAT IT MEANT (§30.2). A project
+   marked before today behaves identically, and the option goes on being
+   offered while it is the stored value rather than being quietly rewritten
+   to a number that might not be the same one (§96.2). Nothing is migrated,
+   because nothing about the old value stopped being true. */
+var REPEAT_MONTHS = [3, 6, 12];
+function repeatLabel(v){
+  if (v === "cycle") return "Each cycle";
+  var n = Number(v);
+  return n > 0 ? "Every " + plural(n, "month") : "No";
+}
+function repeatsOn(p){ return !!p && (p.repeats === "cycle" || Number(p.repeats) > 0); }
+
+/* HOW FAR THE DATES MOVE when a cycle opens.
+
+   A repeating project always advances to its NEXT run — the question is only
+   how far. A rhythm SHORTER than the cycle advances by however many whole
+   runs the closed cycle covered: quarterly across a six-month cycle moves
+   six months, not three, or the project lands in the past the moment the
+   cycle opens. A rhythm LONGER advances by one full run, which is where its
+   next one genuinely falls — an annual project closing a half-yearly cycle
+   moves a year, to the same months next year.
+
+   THE LIMIT, SAID RATHER THAN DISCOVERED: opening a cycle is the only moment
+   the platform re-asks anything, so a quarterly project is re-asked when the
+   cycle opens and not twice inside it. Its DATES keep the quarterly rhythm;
+   the asking keeps the cycle's. Anything else needs the product to have a
+   notion of time passing between cycles, and it has none. */
+function repeatSpan(p, span){
+  if (!repeatsOn(p)) return 0;
+  if (p.repeats === "cycle") return span;
+  var n = Number(p.repeats);
+  return Math.max(1, Math.round(span / n)) * n;
+}
+
 function capNewCycle(c, span){
   (c.keyObjectives || []).forEach(function(m){ m.actual = ""; m.progress = null; m.note = ""; });
   (c.projects || []).forEach(function(p){
-    if (p.repeats !== "cycle") return;
+    var by = repeatSpan(p, span);
+    if (!by) return;
     (p.deliverables || []).forEach(function(d){
       d.status = null; d.pct = null; d.note = "";
-      if (d.due) d.due = shiftWhen(d.due, span);
+      if (d.due) d.due = shiftWhen(d.due, by);
     });
     (p.outcomes || []).forEach(function(o){
       o.actual = null; o.progress = null; o.note = "";
-      if (o.measureAt) o.measureAt = shiftWhen(o.measureAt, span);
+      if (o.measureAt) o.measureAt = shiftWhen(o.measureAt, by);
     });
     (p.milestones || []).forEach(function(m){
       m.status = null; m.pct = null; m.note = "";
-      if (m.finish) m.finish = shiftWhen(m.finish, span);
+      if (m.finish) m.finish = shiftWhen(m.finish, by);
     });
-    if (p.start) p.start = shiftWhen(p.start, span);
-    if (p.end)   p.end   = shiftWhen(p.end, span);
+    if (p.start) p.start = shiftWhen(p.start, by);
+    if (p.end)   p.end   = shiftWhen(p.end, by);
   });
 }
 function clearForNewCycle(){
@@ -20140,6 +20210,29 @@ function validateCapPlan(c, rows){
     }
     if (r.type === "PROJECT" && r.timeline && timelineKey(r.timeline) == null)
       problems.push({ at:at, msg:'timeline "' + r.timeline + '" is not Quarters or Dates' });
+
+    /* §197.3: A PROJECT'S OWN DATES ARE READ TOO. A milestone's due date has
+       been checked since §103 and these two never were — so `On-going` in a
+       Start or an End came straight in, and every score that reads a date
+       then treated the project as having none. Islam's live tenant had
+       exactly that. Since §179 the pane cannot produce it (the field is a
+       month picker), which left the workbook as the one door still open.
+
+       A NOTICE, NOT A PROBLEM — the same weight the milestone's due date
+       carries. The value is saved exactly as entered and the plan still
+       loads, because refusing a whole upload over one cell would be worse
+       than importing it and marking it: §197.3 makes the pane say Missing
+       over that value, and the fill grant opens the picker on it (§184). */
+    if (r.type === "PROJECT") {
+      ["start", "end"].forEach(function(f){
+        var v = String(r[f] == null ? "" : r[f]).trim();
+        if (!v) return;
+        if (!dueFits(v))
+          notices.push({ at:at, msg:'the ' + f + ' date "' + v +
+            '" is not a date, a month or a quarter \u2014 saved exactly as entered, ' +
+            'and the plan will show it as Missing until somebody picks one' });
+      });
+    }
 
     if (r.type === "OUTCOME") {
       if (!r.value) notices.push({ at:at, msg:"no target — recorded, not scored" });
@@ -23105,8 +23198,17 @@ function pillarRow(it, i, u){
   return '<div class="prow-wrap" data-oi="' + i + '">' +
     '<button class="prow" style="' + pgrid(on) + '" aria-expanded="false" data-p="' + i + '">' +
     (on ? handle("Reorder " + it.name) : '') +
-    '<span class="pname"><b><span class="pcode">' + pillarCode(u, i) + '</span> ' + esc(it.name) + '</b>' +
-      (it.sub ? '<span class="psub">' + esc(it.sub) + '</span>' : '') + '</span>' +
+    /* THE PILLAR'S NOTE IS GONE FROM EVERY SCREEN (§196.2). §194 removed the
+       bar that EDITED it, at Islam's direction, and left this — the rail row's
+       grey sub-line — so the value was readable in one place and correctable
+       in none: the worst of the three states (§61). Islam: *"pillar note
+       remove it for now."*
+
+       THE STORED VALUE IS UNTOUCHED. `sub` still round-trips through
+       `units.extra` exactly as it did, so nothing an upload wrote is lost and
+       one line gives the sub-line back — which is what "for now" asks for.
+       Deleting the data is a separate, irreversible act and is not this. */
+    '<span class="pname"><b><span class="pcode">' + pillarCode(u, i) + '</span> ' + esc(it.name) + '</b></span>' +
     '<span>' + kindPill(it) + '</span>' +
     '<span><span class="pill theme">' + esc(it.theme) + '</span></span>' +
     '<span class="powner">' + esc(it.owner) + '</span>' +
@@ -25378,8 +25480,29 @@ function gapCell(page, acKey, row, field, opts){
      is still correct, just mute. A hook rather than a special case, because
      the next field that reads differently from how it is stored will need the
      same thing (§53.5). */
+  /* §197.3: A DATE THE PLATFORM CANNOT READ SAYS SO, AND STILL SHOWS ITSELF.
+     Islam: *"for any project that marks on going to be missing, and when they
+     go and fill they get into the date selection."* The filling half was
+     already built — `open` is exactly this case and the control is §177's
+     month panel — and the PAGE said nothing: the bar read "1 Missing" over
+     three rows that all looked filled in, so whoever was closing gaps had to
+     guess which, and `On-going` looks like a perfectly good answer.
+
+     THE WORD LEADS AND THE VALUE FOLLOWS IT. Missing is what the count uses,
+     so the page and the bar finally agree; and the value stays on screen
+     because somebody is being asked to CORRECT it, which §184 settled and
+     this must not undo (§96.2). The value is quiet rather than red: red type
+     on a value means *this figure is off track* everywhere else, and one
+     colour cannot carry two meanings on one screen.
+
+     `open && !blank` IS THE WHOLE CONDITION — a blank falls to the branch
+     above, and `open` is only ever wider than `blank` for a date (§184's
+     GAP_WHEN), so no other kind of field can reach this. */
   var text = blank
     ? (opts.readEmpty !== undefined ? opts.readEmpty : '<span class="missing">Missing</span>')
+    : open
+      ? '<span class="missing">Missing</span>' +
+        '<span class="wasval"> \u2014 currently \u201C' + esc(val) + '\u201D</span>'
     : (opts.read ? opts.read(val)
       : opts.flow ? '<span class="flow ' + (opts.cls || "") + '">' + esc(val) + '</span>' : esc(val));
   return text + pendChip(acKey, row, field);
@@ -25408,6 +25531,146 @@ function koToggle(){
    same value, and the 3-year loses its "3-year" prefix there — with only one
    number left, a label saying which one it is has nothing to distinguish it
    from. */
+/* ── THE UNIT IS ITS OWN COLUMN, AND NOTHING NEW IS STORED (§199) ──────
+   Islam: *"for the key objectives we need a unit, as some are numbers, some
+   might be money and some are SQM."*
+
+   THERE IS NO UNIT FIELD AND THERE DOES NOT NEED TO BE. The unit has always
+   been typed INTO the target — `"6.2B EGP"`, `"60000 SQM"`, `"100#"` — and
+   the platform has held a matched pair for taking that apart and putting it
+   back since the upload template gained a Unit column: `splitTarget` and
+   `joinTarget`, which the download already round-trips through on every
+   export. Measured before a line was written: **178 targets across every
+   unit, capability, group objective and pillar measure in the shipped plan,
+   0 round-trip failures.**
+
+   SO THE COLUMN IS A VIEW OF WHAT IS ALREADY THERE. `target` goes on holding
+   the whole string, all 103 places that read it keep working, the deck and
+   both workbooks are untouched, and there is no migration — which is the
+   difference between this and adding a field: a second home for the unit
+   would be a second source of truth, and the two would drift the first time
+   anything wrote only one of them (§53.5).
+
+   THE NEAR TARGET NAMES THE UNIT, falling back to the far one. A row where
+   the two disagree keeps both exactly as typed and shows the near one's,
+   because inventing a single unit for a row that holds two would be the
+   platform deciding something nobody said (§96.2). */
+function targetUnitOf(m){
+  if (!m) return "";
+  var u = splitTarget(m.target).unit;
+  return u || splitTarget(m.target3y).unit || "";
+}
+/* WRITING THE UNIT WRITES THE TARGETS, because that is where it lives (§199).
+   Both horizons take it: a row whose 3-year target is measured in one thing
+   and this year's in another is not something anybody has asked for, and
+   showing ONE unit while silently leaving the other would be the column
+   telling a half-truth.
+
+   THE SEPARATOR IS DERIVED FROM THE NEW UNIT, never carried from the old
+   spacing. `joinTarget` reads the gap out of the value it is given, which is
+   right when the unit has not changed and wrong here: "100#" carries no space,
+   so keeping it would turn a change to "trips" into "100trips". Passing an
+   empty original asks joinTarget for its own rule instead — a space before a
+   word, none before a symbol.
+
+   AN UNCHANGED UNIT WRITES NOTHING AT ALL (§50.6, §42): re-typing what is
+   already there must leave the plan byte-identical, or every visit to this
+   table puts a phantom change into the next save and a non-office save is
+   refused for the rest of the cycle. */
+function setTargetUnit(m, u){
+  var want = String(u == null ? "" : u).trim();
+  if (want === targetUnitOf(m)) return;
+  /* BUILT HERE RATHER THAN THROUGH `joinTarget`, and that is deliberate:
+     joinTarget takes its separator from the value it is REPLACING, which is
+     exactly right when the unit has not changed and exactly wrong here —
+     "6.2B EGP" carries no space, so keeping it would turn a change to "SQM"
+     into "6.2SQM". The convention belongs to the NEW unit (TIGHT_UNITS above).
+
+     WHAT IS WRITTEN STILL ROUND-TRIPS, which is the property the whole
+     feature rests on: joinTarget reads the separator back out of the stored
+     string, so a value written here splits and rejoins to itself, and the
+     check asserts that over everything the plan holds. */
+  var sep = want && !TIGHT_UNITS[want] ? " " : "";
+  ["target", "target3y"].forEach(function(f){
+    var v = m[f];
+    if (v == null || v === "") return;   /* nothing to attach it to */
+    m[f] = splitTarget(v).value + (want ? sep + want : "");
+  });
+}
+/* A unit with no target to sit inside cannot be stored, so the field says so
+   rather than accepting a word and losing it on the next paint (§61: a control
+   that takes input and discards it is worse than one that is not there). */
+/* ── A NUMBER TYPED INTO A ROW TAKES THAT ROW'S UNIT (§199.6) ──────────
+   Islam, from a group objective reading `3-year 30` with no unit at all:
+   *"the objectives need to inherit the unit automatically as they are entered
+   as a number in the value cell."*
+
+   §199 only ever wrote the unit onto targets that ALREADY EXISTED, so the
+   order of work decided the result: set the unit, then type the number, and
+   the number was stored bare and the unit silently lost. Setting a unit and
+   then filling the row is the obvious way round, and it was the one that did
+   not work.
+
+   ONLY A BARE NUMBER INHERITS. "TBD" must not become "TBD%", and a value
+   somebody typed WITH its own unit ("50 EGP") is what they meant — it is left
+   exactly as typed, and the picker then shows it, because the unit is read
+   back out of the target (§96.2: never rewrite what somebody wrote).
+
+   THE ROW'S UNIT IS THE OTHER HORIZON'S when this one is empty, which is what
+   `targetUnitOf` already answers — so filling `This year` on a row whose
+   3-year reads `30%` gives `50%` without anybody picking anything twice. */
+function unitInherit(m){
+  return function(v){
+    var t = String(v == null ? "" : v).trim();
+    if (!t || !/^-?[\d.,]+$/.test(t)) return v;   /* not a bare number */
+    var u = targetUnitOf(m);
+    if (!u) return v;
+    return t + (TIGHT_UNITS[u] ? "" : " ") + u;
+  };
+}
+
+function hasTargetToHoldAUnit(m){
+  return !!(String(m.target || "").trim() || String(m.target3y || "").trim());
+}
+
+/* ── THE UNITS ARE PICKED FROM A LIST (§199.4) ─────────────────────────
+   Islam, on money: *"the financial units can be B EGP or M EGP or EGP only"*,
+   and on counts: *"# into trips and orders is tricky, as we will need to add
+   units all the time, so let's commit to #"*.
+
+   BOTH ARE THE SAME DECISION and it is the right one. A free box invites a
+   fourth spelling of the same currency and a different noun for every kind of
+   thing counted — and the moment two rows say `#` and `trips` for the same
+   idea, nothing can compare them and somebody has to maintain a vocabulary
+   nobody agreed. A short fixed list is the maintenance NOT happening.
+
+   `#` IS THE COMMITMENT, not a placeholder for a better word later. §199's
+   own mockup argued for `trips` and `orders`; he priced that and turned it
+   down, and the cost is recorded rather than re-argued: a count says how
+   MANY and the objective's name says of what.
+
+   A STORED VALUE OUTSIDE THE LIST IS KEPT AND OFFERED (§96.2, §114). The
+   shipped plan holds `M`, `K` and `M USD` on four rows between them; a
+   dropdown that could not show them would either display the row wrong or
+   drop the unit on the first repaint, and both are worse than one extra
+   entry. Nothing is rewritten by this list — only what the pen writes next. */
+var TARGET_UNITS = ["", "%", "#", "EGP", "M EGP", "B EGP", "SQM", "d", "h"];
+/* WRITTEN AGAINST THE NUMBER, OR AFTER A SPACE — and it is the PLAN's own
+   habit, read off the shipped data rather than invented: `30%`, `100#` and
+   `6.2B EGP` are written tight, while `28 EGP`, `4 d` and `24 h` take a space.
+   A scaled currency reads as one token (`6.2B EGP`) and a bare one does not.
+
+   IT IS A LIST RATHER THAN A RULE because there is no rule: "a symbol is
+   tight, a word takes a space" gets `EGP` right and `B EGP` wrong, and the
+   difference is convention, not grammar. Nine entries is cheaper to read than
+   a predicate nobody can quite state. */
+var TIGHT_UNITS = { "%":1, "#":1, "M EGP":1, "B EGP":1 };
+function targetUnitOpts(cur){
+  var opts = TARGET_UNITS.slice();
+  if (cur && opts.indexOf(cur) < 0) opts.splice(1, 0, cur);
+  return opts;
+}
+
 function koView(list, isGroup, acKey){
   var near = isGroup || SHOW_KO_THIS_YEAR;
   var miss = '<span class="missing">Missing</span>';
@@ -25427,6 +25690,17 @@ function koView(list, isGroup, acKey){
               : '<div class="v">' + far + '</div>') + chips(m) + '</div>';
     }).join("") + '</div>';
   }
+  /* §199.4: THE READING VIEW KEEPS THE UNIT ON THE FIGURE. §199 split it into
+     a column of its own and Islam looked at it: *"let the unit be set in the
+     edit table, but in the view attach the unit to the target."*
+
+     He is right, and the reason is worth keeping. The argument for splitting
+     was that a column of targets could then be read straight down — but the
+     unit is a property of ONE ROW, not of the table, so a column of them lines
+     up "B EGP" against "%" against "SQM" and gives the eye nothing. What
+     reading a plan actually needs is each figure complete where it stands.
+     The column stays where a unit IS one question with one answer: the pen,
+     where it is being set. */
   return '<div class="ohead' + (near ? '' : ' one') + '"><span>Objective</span>' +
       '<span>' + horizonColLabel() + '</span>' +
       (near ? '<span>This year</span>' : '') + '</div>' +
@@ -25473,6 +25747,7 @@ function koEdit(list, page, acKey, owner){
      registers its own, exactly as a field registers its own setter. */
   var li = KOLISTS.push({ list: list, owner: owner }) - 1;
   return '<div class="scroll"><table><thead><tr><th>Objective</th><th class="cc">Dir.</th>' +
+    '<th class="cc">Unit</th>' +
     '<th class="cc">3-year</th><th class="cc">This year</th><th class="cc">Compile</th><th></th></tr></thead><tbody>' +
     list.map(function(m, i){
       /* \u00a7130: the four gap-fillable columns go through gapCell \u2014 in the
@@ -25483,10 +25758,22 @@ function koEdit(list, page, acKey, owner){
       return '<tr><td>' + inputOr(pg, m.name, "", function(v){ m.name = v; }) + '</td>' +
         '<td class="cc">' + gapCell(page, acKey, m, "dir",
           { kind:"select", opts:["\u2265", "\u2264"] }) + '</td>' +
+        /* §199: THE OFFICE'S, NOT THE FILLER'S. A unit is not a gap — 46 of
+           the 178 targets in the shipped plan carry none and are complete
+           without one — so it does not go through gapCell and does not join
+           the count. It is `inputOr` like the NAME beside it: a fact about
+           how the objective is written, which is authoring. */
+        '<td class="cc">' + (pg
+          ? (hasTargetToHoldAUnit(m)
+              ? selectOr(pg, targetUnitOf(m), targetUnitOpts(targetUnitOf(m)), "",
+                  function(v){ setTargetUnit(m, v); })
+              : '<span class="why" title="Set a target first \u2014 the unit is ' +
+                'written with it">\u2014</span>')
+          : esc(targetUnitOf(m))) + '</td>' +
         '<td class="cc">' + gapCell(page, acKey, m, "target3y",
-          { kind:"input", cls:"mono" }) + '</td>' +
+          { kind:"input", cls:"mono", parse: unitInherit(m) }) + '</td>' +
         '<td class="cc">' + gapCell(page, acKey, m, "target",
-          { kind:"input", cls:"mono" }) + '</td>' +
+          { kind:"input", cls:"mono", parse: unitInherit(m) }) + '</td>' +
         '<td class="cc">' + gapCell(page, acKey, m, "compile",
           { kind:"select", opts:["Sum", "Latest", "Average"] }) + '</td>' +
         '<td class="cc">' + (editing
@@ -26720,14 +27007,26 @@ function projFrontMatter(p, ed){
      "Repeats: No" on every build-once project is noise (§41's budget, in
      words). The setter DELETES the key on the default (§50.6): a project
      unmarked and one never asked must be byte-identical. */
-  var repRow = "";
+  var repRow = "", repVal = repeatLabel(p.repeats);
   if (ed) {
+    var repOpts = ["No"].concat(REPEAT_MONTHS.map(repeatLabel));
+    /* A STORED VALUE THE LIST DOES NOT OFFER IS KEPT AND OFFERED (§96.2,
+       §114): `"cycle"` from before §196, or a month count somebody set on
+       another deployment. Displaying it wrong, or dropping it on the first
+       repaint, are both worse than one extra line in a dropdown. */
+    if (repOpts.indexOf(repVal) < 0) repOpts.splice(1, 0, repVal);
     repRow = row("l", "Repeats",
-      selectOr("plan", p.repeats === "cycle" ? "Each cycle" : "No",
-        ["No", "Each cycle"], "",
-        function(v){ if (v === "Each cycle") p.repeats = "cycle"; else delete p.repeats; }));
-  } else if (p.repeats === "cycle") {
-    repRow = row("l", "Repeats", "Each cycle");
+      selectOr("plan", repVal, repOpts, "", function(v){
+        var n = REPEAT_MONTHS.filter(function(m){ return repeatLabel(m) === v; })[0];
+        if (n) p.repeats = n;
+        else if (v === "Each cycle") p.repeats = "cycle";
+        /* DELETED on the default (§50.6): a project unmarked and one never
+           asked must be byte-identical, or every save carries a phantom
+           change and a non-office save is refused for ever (§42). */
+        else delete p.repeats;
+      }));
+  } else if (repeatsOn(p)) {
+    repRow = row("l", "Repeats", esc(repVal));
   }
   return '<div class="pfront">' +
     '<div class="pfcol">' +
@@ -27366,8 +27665,27 @@ function unitPlanBody(it, u, railed){
          hover words come back through `read`. */
       '<td class="cc">' + gapCell("plan", "u_plan", m, "dir",
         { ctx:pctx(m), kind:"select", opts:["\u2265","\u2264"], cls:"mono", read:dirCell }) + '</td>' +
+      /* §199.5: THE SAME UNIT PICKER AS A KEY OBJECTIVE'S. Islam, of the
+         measures: *"let's do the same fix."* They have the identical shape —
+         76 of them across the plan, the unit typed into the target — so they
+         get the identical control, from the identical functions. Two tables
+         asking one question must not answer it twice (§53.5), which is why
+         `targetUnitOf`/`setTargetUnit` lost their `ko` prefix rather than
+         being copied.
+
+         THE PEN ONLY, exactly as on a key objective: a unit is not a gap, so
+         it does not go through gapCell and does not join the count. The
+         READING table (measureRows) is untouched — it prints `esc(m.target)`,
+         the whole string, which is where §199.4 put the unit back. */
+      (ed
+        ? '<td class="cc">' + (hasTargetToHoldAUnit(m)
+            ? selectOr("plan", targetUnitOf(m), targetUnitOpts(targetUnitOf(m)), "",
+                function(v){ setTargetUnit(m, v); })
+            : '<span class="why" title="Set a target first \u2014 the unit is ' +
+              'written with it">\u2014</span>') + '</td>'
+        : '') +
       '<td class="num">' + gapCell("plan", "u_plan", m, "target",
-        { ctx:pctx(m), kind:"input", cls:"mono" }) + '</td>' +
+        { ctx:pctx(m), kind:"input", cls:"mono", parse: unitInherit(m) }) + '</td>' +
       /* NO 3-YEAR COLUMN. Islam, 2026-08-22: "in the direction plans the key
          measures are for 1 year only". A pillar's key measures carry one
          target and it is this year's; the three-year horizon belongs to the
@@ -27521,8 +27839,12 @@ function unitPlanBody(it, u, railed){
        table headings say "as planned", and every actual column reads em-dash -
        three statements of the same thing above a fourth. */
     '<h4 class="mini">Key measures <em>\u2014 as planned: this year\u2019s target, and how it compiles</em></h4>' +
-    miniTable(["#","Measure","Dir.","Target","Compiled"],
-      mRows + addRow(5, "measure", "Add a measure"), sortAttr("measures")) +
+    /* §199.5: the Unit heading appears only with the pen, because the column
+       under it does — and `addRow`'s span has to follow, or the Add row stops
+       reaching the end of the table the moment somebody opens the pen. */
+    miniTable(ed ? ["#","Measure","Dir.","Unit","Target","Compiled"]
+                 : ["#","Measure","Dir.","Target","Compiled"],
+      mRows + addRow(ed ? 6 : 5, "measure", "Add a measure"), sortAttr("measures")) +
     '<h4 class="mini">Tactics <em>\u2014 who carries it, who supports, and in which quarters</em></h4>' +
     miniTable(["#","Tactic","Owner","Collabs.","Quarters"],
       tRows + addRow(4, "tactic", "Add a tactic"), sortAttr("tactics"));
@@ -32892,29 +33214,41 @@ function renderOverview(){
   var t = cycleTotals();
   var att = attentionRows();
 
-  /* THE CYCLE STRIP IS THE SAME FOUR NUMBERS THE CYCLE PAGE OPENS WITH, from
-     cycleTotals() (§108.9) — read here and acted on there, which is why the
-     strip carries a way through rather than any control of its own. */
-  var strip =
-    '<div class="ovcycle">' +
-      '<div class="ovcyc-l">' +
-        '<div class="ovcyc-name">' + esc(REVIEW.name) +
-          ' <span class="badge b-' + (open ? "open" : "none") + '">' +
-          (open ? "Open" : "Closed") + '</span></div>' +
-        /* ONE SENTENCE, TWO SURFACES (§120.1) — and it says so when a tenant
-           has set no dates, rather than printing the separators alone. */
-        '<div class="ovcyc-meta">' + esc(cycleMeta()) + '</div>' +
-      '</div>' +
-      '<div class="ovcyc-n"><b>' + t.done + '</b><span>of ' + t.total +
-        ' items reported</span></div>' +
-      '<div class="ovcyc-chips">' +
-        '<span class="badge b-done">' + t.sub + ' submitted</span>' +
-        '<span class="badge b-part">' + t.progress + ' in progress</span>' +
-        (t.none ? '<span class="badge b-late">' + t.none + ' not started</span>' : '') +
-      '</div>' +
+  /* ── THE WORK FIRST, THE CONTEXT BESIDE IT (§198) ──────────────────────
+     Islam picked Option B from two drawn in the real page. The audit behind
+     it, measured as the office with things actually waiting:
+
+       · 264 pixels of content beside an 870-pixel rail — the page the gear
+         lands on was the shortest in Setup.
+       · The biggest thing on it answered a DIFFERENT question. "222 of 245
+         items reported" is how much the whole business has reported; the
+         office opens Setup to ask *is anything waiting on me*, and that was
+         in 13px grey underneath.
+
+     So the queue leads and the cycle becomes a standing summary in a column
+     beside it. NOTHING NEW IS COUNTED — the rows are `attentionRows()` and
+     the numbers are `cycleTotals()`, exactly as before (§108.9, §108.10);
+     what changes is which one the eye lands on first.
+
+     BELOW 900px IT STACKS, queue first, which is CSS and not a second
+     builder — a summary page whose shape depended on a JS width test would
+     be measuring the window in two places (§27.1). */
+  var side =
+    '<aside class="ovside">' +
+      '<h4>' + esc(REVIEW.name) +
+        ' <span class="badge b-' + (open ? "open" : "none") + '">' +
+        (open ? "Open" : "Closed") + '</span></h4>' +
+      '<div class="ovsline"><span>Reported</span><b>' + t.done + ' of ' + t.total + '</b></div>' +
+      '<div class="ovsline"><span>Submitted</span><b>' + t.sub + '</b></div>' +
+      '<div class="ovsline"><span>In progress</span><b>' + t.progress + '</b></div>' +
+      (t.none ? '<div class="ovsline"><span>Not started</span><b class="ovlate">' +
+        t.none + '</b></div>' : '') +
+      /* ONE SENTENCE, TWO SURFACES (§120.1) — and it says so when a tenant has
+         set no dates, rather than printing the separators alone. */
+      '<div class="ovsmeta">' + esc(cycleMeta()) + '</div>' +
       '<button type="button" class="editbtn ovcyc-go" data-setupgo="cycle">' +
         'Open the cycle page</button>' +
-    '</div>';
+    '</aside>';
 
   var body = att.length
     ? '<div class="ovlist">' + att.map(function(r){
@@ -32930,10 +33264,20 @@ function renderOverview(){
       '<span>Everything the Overview watches is clear. The rest of Setup is in ' +
       'the list on the left.</span></div>';
 
+  /* THE HEADING CARRIES THE TOTAL, because a count belongs on the thing it
+     counts and the rows below it are that thing (§116.2). Never a zero: the
+     empty state says it in words one line down (§108.10). */
+  var n = att.reduce(function(a, r){ return a + (r.n | 0); }, 0);
+
   return cfgHead("Overview", [], null, false, null, null, "") +
-    strip +
-    '<div class="ovh">Waiting on the office</div>' +
-    body;
+    '<div class="ovcols">' +
+      '<div class="ovmain">' +
+        '<div class="ovh">Waiting on the office' +
+          (n ? ' \u2014 <em>' + plural(n, "thing") + '</em>' : '') + '</div>' +
+        body +
+      '</div>' +
+      side +
+    '</div>';
 }
 
 /* ── Setup · Reporting cycle ────────────────────────────────────────
@@ -37354,6 +37698,29 @@ var CHAT = (function(){
      only between asking and being answered, and it goes back to 180s the
      moment the office replies. */
   var POLL_WAIT = 15000;
+  /* ── AND A FOURTH, FOR THE ANSWER THAT HAS NEVER COME (§197) ───────────
+     Islam: *"I didn't see the icon on login and when I sent to myself a
+     message it appeared again"* — and the chat was NOT off.
+
+     THE CORNER IS CREATED HIDDEN and the only thing that ever reveals it is
+     a SUCCESSFUL answer (`dock.hidden = !cfg.on`, below). A 500, a timeout
+     or a dropped connection matches neither that branch nor the 401/403 one,
+     so nothing showed it — and the next attempt was POLL_SHUT away. Three
+     minutes with no way to reach the office, on the one morning the server
+     was having trouble, which is exactly when somebody wants it. Measured:
+     one failed first poll and the corner was still absent eight seconds
+     later, with the poll count still at 1.
+
+     So while the first answer is still outstanding the beat is short, for a
+     BOUNDED number of tries — about half a minute, which covers a database
+     waking up — and then falls back to POLL_SHUT rather than asking every
+     five seconds for ever against a server that is not coming back (§98.1's
+     whole argument). It is the SAME timer, not a second one: two mechanisms
+     for "ask again" is how they drift (§53.5). */
+  var POLL_FIRST = 5000;
+  var FIRST_TRIES = 6;
+  var firstTries = 0;
+  function firstRun(){ return !loaded && firstTries < FIRST_TRIES; }
   var PIC_EDGE = 1600;
 
   /* What the server last told us the office has set. Started from the shared
@@ -37718,7 +38085,12 @@ var CHAT = (function(){
         state.unread = j.unread || 0;
         state.thread = j.thread || null;
         state.office = !!j.office;
+        /* THE FIRST ANSWER ENDS THE SHORT BEAT (§197). The interval was set
+           before it arrived, so the clock is re-struck here — the same thing
+           the cadence change below does, for the same reason. */
+        var firstAnswer = !loaded;
         loaded = true;
+        firstTries = 0;
         /* THE SETTINGS ARRIVE WITH THE ANSWER, so a switch the office flips
            reaches every open browser within one beat. If the cadence changed,
            the clock is reset — not on the next open, which could be tomorrow. */
@@ -37738,7 +38110,7 @@ var CHAT = (function(){
         if (arrived && !open) announce();
         /* The clock changes with the state, not only with the panel: somebody
            who has just been answered stops expecting and goes back to 180s. */
-        if (wasWaiting !== expecting()) beat();
+        if (firstAnswer || wasWaiting !== expecting()) beat();
         /* Opened, and something new arrived while it was open — read it. */
         if (open && state.unread > 0) post({ action:"seen" }, function(){ state.unread = 0; });
       } else if (j && (j.__status === 401 || j.__status === 403)) {
@@ -37747,6 +38119,16 @@ var CHAT = (function(){
            refusal, and stop asking. */
         var d = el("chatdock"); if (d) d.hidden = true;
         stop();
+      } else if (!loaded) {
+        /* THE SERVER DID NOT ANSWER, AND THAT IS NOT AN ANSWER (§197).
+           Nothing is shown and nothing is hidden — we still do not know
+           whether this tenant has the chat on, and guessing either way is
+           worse than waiting: an optimistic bubble that vanishes on the next
+           beat is a control that lied. What changes is only HOW SOON we ask
+           again. Counted, so it cannot become a five-second poll for ever
+           against a server that is down. */
+        firstTries++;
+        if (!firstRun()) beat();
       }
     });
   }
@@ -37765,7 +38147,9 @@ var CHAT = (function(){
        starts it again, and the poll it fires on the way back is what makes
        the badge right before anybody has looked at it. */
     if (document.hidden) return;
-    timer = setInterval(poll, open ? (cfg.beat || 4000) : (expecting() ? POLL_WAIT : POLL_SHUT));
+    timer = setInterval(poll, firstRun() ? POLL_FIRST
+      : open ? (cfg.beat || 4000)
+      : (expecting() ? POLL_WAIT : POLL_SHUT));
   }
 
   /* ONE SHOT, AND THE CLASS IS TAKEN OFF AGAIN so the next reply can announce
@@ -39999,6 +40383,47 @@ var WELCOME = (function(){
     return "Setup";
   }
 
+  /* ── WHAT IS WAITING, WITHOUT DRAWING THE SCREEN (§197.2) ─────────────
+     Islam: *"it can be option E when there is no actions waiting there and
+     it turns gold when there is action required, so the SMO or any other
+     team can notice the difference and go for actions."*
+
+     SO THE MARK HAS TO ASK THE SCREEN'S OWN QUESTION. A house that goes gold
+     on one list and opens a screen built from another is the fault §16.7
+     names: a signal that cannot take you to what it signals. It counts the
+     SAME BUILDERS the screen draws from — `submitRows`, `gapRows` and
+     `attentionRows()`, the last of which is the Setup Overview's list too,
+     so three surfaces now answer from one (§108.10, §116.2, §53.5).
+
+     THEY BUILD DETACHED ROWS AND ARE ASKED FOR THEIR LENGTH. Counting by
+     repeating their tests would be a second copy of every one of them, and
+     the two would drift the first time a row gained a condition; a handful
+     of nodes per paint is the price of that never happening.
+
+     THE CHAT IS READ FROM MEMORY, NEVER FETCHED. `CHAT.unread()` is whatever
+     the corner's last poll left behind, and the office's side rides
+     `attentionRows()`'s own chat row (which draws nothing until OVQUEUE has
+     answered, §108.10) — asking the server once per paint would put a
+     network request in the navigation bar. The cost, stated: a reply that
+     lands between paints turns the mark gold on the NEXT paint, not the
+     instant it arrives. */
+  function waiting(person){
+    if (!person) return 0;
+    var n = 0;
+    try {
+      var row = rowFor(person), rs = rolesOf(row), targets = ownTargets(row, rs);
+      n += submitRows(targets).length;
+      n += gapRows(targets).length;
+      if (inOffice(rs)) {
+        try { n += attentionRows().length; } catch(e){}
+      }
+      try {
+        if (typeof CHAT !== "undefined" && CHAT.unread && CHAT.unread() > 0) n++;
+      } catch(e){}
+    } catch(e){ return 0; }
+    return n;
+  }
+
   /* ── LATE ANSWERS LAND IN PLACE (§71.2) ──────────────────────────────── */
   function unEmpty(list){
     var e = list.querySelector(".wempty");
@@ -40031,6 +40456,58 @@ var WELCOME = (function(){
     ask();
   }
 
+  /* ── THE CYCLE, FOR WHOEVER MAY ALREADY SEE IT (§200) ─────────────────
+     Islam: *"the cycle statistics table is already needed there."* He is
+     right — the welcome screen is where you land, and the cycle is the thing
+     the whole reporting half of the product turns on.
+
+     WHO MAY SEE IT IS THE QUESTION, NOT WHERE IT GOES. `cycleTotals()` counts
+     every unit AND every supporting function in the business (§105), and the
+     page that shows it — Reporting cycle — is access-gated on `c_cycle`. A
+     unit head does not normally hold that key. So putting the business-wide
+     figures on EVERYONE's welcome screen would show the whole company's
+     reporting state to people the platform deliberately does not show it to:
+     a genuinely new disclosure, arriving as a side effect of a layout idea.
+
+     It is therefore gated on the key that already answers the question, and
+     the gate is asked HERE rather than by hiding a control (§42, §44): a
+     viewer without it gets exactly the screen they get today.
+
+     NOTHING NEW IS COUNTED. It is `cycleTotals()` and `cycleMeta()` — the
+     same pair the Setup Overview's own column reads (§198) and the Reporting
+     cycle page opens with (§108.9) — so three surfaces cannot disagree about
+     one cycle. And it is the SAME SHAPE as the Overview's column, because
+     "the cycle, as context" should look like itself wherever it appears
+     (§53.5).
+
+     A SECOND STEP WAS DRAWN AND DELIBERATELY NOT BUILT: a per-person block
+     ("Mobile — 12 of 18 reported · not submitted · 14 days left") would serve
+     the eleven unit and function heads who are not the office far better.
+     Islam: *"start with A for now."* It is a different thing to keep true,
+     and it should be its own decision rather than ride along with this one. */
+  function cycleBlock(){
+    try {
+      if (typeof REVIEW === "undefined" || !REVIEW) return "";
+      if (typeof grant !== "function" || grant("c_cycle") === "none") return "";
+      var t = cycleTotals();
+      var open = REVIEW.state === "open";
+      return '<div class="wcyc">' +
+        "<h4>" + wesc(REVIEW.name || "") +
+          ' <span class="wbdg ' + (open ? "wb-open" : "wb-shut") + '">' +
+          (open ? "Open" : "Closed") + "</span></h4>" +
+        cycLine("Reported", t.done + " of " + t.total) +
+        cycLine("Submitted", String(t.sub)) +
+        cycLine("In progress", String(t.progress)) +
+        (t.none ? cycLine("Not started", String(t.none), true) : "") +
+        '<p class="wcycmeta">' + wesc(cycleMeta()) + "</p>" +
+        "</div>";
+    } catch(e){ return ""; }
+  }
+  function cycLine(label, value, late){
+    return '<div class="wcycline"><span>' + wesc(label) + "</span>" +
+      "<b" + (late ? ' class="wlate"' : "") + ">" + wesc(value) + "</b></div>";
+  }
+
   /* ── THE SCREEN ──────────────────────────────────────────────────────── */
   function build(person){
     var row = rowFor(person), rs = rolesOf(row), office = inOffice(rs);
@@ -40052,7 +40529,13 @@ var WELCOME = (function(){
       if (at) chips.push('<span class="wchip">' + wesc(subjectName(at)) + "</span>");
     }
     var open = typeof REVIEW !== "undefined" && REVIEW && REVIEW.state === "open";
-    if (open) chips.push('<span class="wchip wcycle"><i></i>' +
+    /* §200: THE CHIP GOES WHERE THE BLOCK IS DRAWN. It said "H1 2026 cycle is
+       open" and the summary below says that and four numbers; two places
+       saying it is how a screen starts repeating itself (§87's twins). Kept
+       for everybody the block is NOT drawn for, because for them it is still
+       the only thing that names the cycle at all. */
+    var cyc = cycleBlock();
+    if (open && !cyc) chips.push('<span class="wchip wcycle"><i></i>' +
       wesc((REVIEW.name || "The") + " cycle is open") + "</span>");
 
     var org = "";
@@ -40086,6 +40569,7 @@ var WELCOME = (function(){
           '<div class="wside">' +
             '<div class="wpagesbox"><p class="wseclab">Your pages</p>' +
               '<div class="wcard wpages"></div></div>' +
+            cyc +
             '<div class="wtour" hidden>' +
               "<h3>Take an intro round</h3>" +
               "<p>A short walk of the platform on the worked example — about two minutes.</p>" +
@@ -40331,6 +40815,7 @@ var WELCOME = (function(){
   return {
     offer: offer,
     open: open,
+    waiting: waiting,
     showing: function(){ return !!box; },
     dismiss: dismiss
   };
@@ -42374,12 +42859,20 @@ var SYNC = (function () {
             ? '<span class="rgwait" title="' + gwait +
               ' waiting behind this group">' + gwait + '</span>'
             : '') +
-          /* The entry count KEEPS its job and its quiet shape. The audit's
-             complaint was that it wore the shape of a number that changes
-             while never changing — answered by giving the changing number a
-             different shape, not by taking this one away: folded, it is the
-             only thing that says how much is behind the heading. */
-          '<span class="rgn">' + items.length + '</span></button>' +
+          /* THE ENTRY COUNT, AND ONLY WHILE FOLDED (§198.2). Its own argument
+             above is exactly right and stops one word short: *folded, it is
+             the only thing that says how much is behind the heading.* Open,
+             the rows ARE that — a number saying how many lines sit directly
+             beneath it, while they are all on screen, is the same fault
+             §122 removed from the register's header ("the count said how big
+             the register is — the table under it IS that").
+
+             It keeps its quiet mono shape, so it still cannot be mistaken for
+             `rgwait` beside it; what goes is drawing it at the one moment it
+             says nothing. Now BOTH numbers on this row appear only when
+             folded, and both are about what you cannot see. */
+          (shut ? '<span class="rgn">' + items.length + '</span>' : '') +
+          '</button>' +
         '<div class="rgitems" data-railitems="' + g.k + '"' + (shut ? " hidden" : "") + '>' +
           items.map(function(d){
             var w = ATT[d.k] || 0;
@@ -42776,18 +43269,35 @@ var SYNC = (function () {
     if (typeof WELCOME === "undefined" || !WELCOME.open) return "";
     if (location.protocol === "file:") return "";
     if (document.body && document.body.classList.contains("presenting")) return "";
-    /* §194.3: SQUARE AND GOLD, Islam's pick of six drawn in the real bar
-       ("F for the homemark"). The circle it wore was `navmenu-ico`'s, built
-       for the gear beside it; on the left, leading the row, a square reads as
-       a place rather than a control borrowed from the other end.
+    /* §197.2: QUIET WHEN NOTHING IS WAITING, GOLD WHEN SOMETHING IS.
+       Islam, having lived with §194.3's permanently gold square: *"it can be
+       option E when there is no actions waiting there and it turns gold when
+       there is action required, so the SMO or any other team can notice the
+       difference and go for actions."*
 
-       THE ONE COST WAS STATED BEFORE HE CHOSE and stands: gold on this row
-       means "the destination you are on", so a permanently gold house borrows
-       that meaning. It is its own class rather than `.here`, so the two can be
-       told apart in the stylesheet and either can change without the other. */
-    return '<button type="button" class="navmenu-btn navmenu-ico navmenu-solo homemark" ' +
-      'data-welcomego="1" title="What is waiting on me" ' +
-      'aria-label="What is waiting on me">' + ICON_HOME + '</button>';
+       THAT ALSO SPENDS THE COST §194.3 RECORDED RATHER THAN CARRYING IT.
+       Gold on this row means *the destination you are on*, and a house that
+       is always gold borrows that meaning for nothing; a house that is gold
+       only when it has something to say is USING it. The two stay separate
+       classes (`homemark` / `.here`) so either can change without the other.
+
+       THE COUNT IS THE WELCOME SCREEN'S OWN (§16.7): the mark goes gold on
+       exactly the list the screen it opens will show, so pressing it can
+       never land on "Nothing is waiting on you". `WELCOME.waiting` is asked
+       of `viewer()` — the person being viewed AS, the same one `open()` is
+       given below, or the office would see their own queue while looking
+       through somebody else's eyes (§185).
+
+       THE BOX DOES NOT CHANGE SIZE between the two states. A mark that grew
+       when something arrived would shift every destination name on the row
+       (§41.8's rule: the control you are about to press must not move). */
+    var n = 0;
+    try { n = WELCOME.waiting ? WELCOME.waiting(viewer()) : 0; } catch(e){}
+    var say = n ? plural(n, "thing") + " waiting on you" : "What is waiting on me";
+    return '<button type="button" class="navmenu-btn navmenu-solo homemark' +
+      (n ? ' homemark-on' : '') + '" ' +
+      'data-welcomego="1" title="' + say + '" ' +
+      'aria-label="' + say + '">' + ICON_HOME + '</button>';
   }
 
   /* The menu lives inside the row so it sits on the same baseline as the tabs,

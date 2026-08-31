@@ -23637,3 +23637,174 @@ section was asked to touch (rule 1b). It is the third stale selector this
 session — after `duplicates.py`'s `.pdband` and the walker's own — and §51.11
 says the same thing each time: **when a control changes shape, grep the checks
 for the old selector.**
+
+## §195 — A save cost 236 network crossings; it costs 45 (v3.84)
+
+Islam, filling gaps on CX: *"Not saved. The server answered HTTP 504."* A 504
+is the function killed at its time limit, so the question is what a save spends
+its time on. Measured against a real Postgres with the full 306KB graph: the
+writer issued an INSERT **inside four loops** — one per capability, per
+project, per unit and per pillar — 190 round trips of a 236-trip save.
+Invisible over a unix socket at 111ms; a network crossing each in production,
+and 30,000ms ÷ 236 is 127ms, a cross-region signature.
+
+**The rows are gathered and written per table**: 190 → 42. Same rows, same
+columns, same `idx` (taken from each child list's own position), table order
+unchanged so every foreign key still meets its parent first. **The bind cap is
+asked for out loud** — Postgres takes 65535 parameters, and batching is what
+made a single statement able to grow, so `insertMany` chunks under it.
+**§195.2: the READ travels as one message** — all 33 of `readState`'s
+statements are plain SQL, none depending on another; sent as one, they also
+come from ONE snapshot (a multi-statement simple query is one implicit
+transaction), where 33 separate reads could straddle somebody else's write.
+The list is an optimisation, never a contract: `q` falls back to a real query
+for anything not on it. Proved by forcing the batch to fail and comparing the
+two readers byte for byte — identical on a full tenant and a cleared one. The
+change log's loop became one statement too. `maxDuration` 30 → 60 as headroom,
+not as the fix.
+
+Round trip deep-equal and fixed point PASS on a virgin database AND an
+existing tenant; authoriser 416/0; the built platform byte-identical — server
+only.
+
+## §196 — The repeat is a count of months (v3.85)
+
+Islam: *"the repeat might not be each cycle — the repeat might be half annual
+or every quarter, so it's a count of months for repetition."* §115 stored one
+word, `"cycle"`, and shifted dates by the closed cycle's length. `repeats` now
+holds a NUMBER of months (3 · 6 · 12), and **`"cycle"` is still read and still
+means what it meant** (§30.2) — offered while it is the stored value, never
+silently rewritten (§96.2). **How far the dates move**: a rhythm shorter than
+the cycle advances by the whole runs the cycle covered (quarterly across six
+months moves six, or the project lands in the past); a longer one advances by
+one full run (annual after a half-year moves a year, to its next real run).
+The limit said out loud: opening a cycle is the only moment the platform
+re-asks anything, so a quarterly project is re-asked per cycle — its DATES
+keep the quarterly rhythm, the asking keeps the cycle's.
+
+**§196.2 — the pillar note is gone from every screen.** §194 removed the bar
+that edited it and left the rail's grey sub-line, so the value was readable in
+one place and correctable in none (§61's worst state). Islam: *"pillar note
+remove it for now."* The display and its CSS are deleted (§24); **the stored
+value is untouched**, because "for now" asks for reversible and deleting data
+is not.
+
+## §197 — The corner comes back, the home mark says when, and On-going says Missing (v3.86)
+
+**The chat corner.** Islam: *"I didn't see the icon on login and when I sent
+to myself a message it appeared again"* — and, correcting the first diagnosis,
+*"the chat wasn't off."* He was right. The dock is created HIDDEN and only a
+SUCCESSFUL poll reveals it; a 500, timeout or dropped connection matched
+neither the ok branch nor the 401/403 one, so nothing showed it and the next
+attempt was three minutes away. Measured: one failed first poll, still hidden
+at eight seconds, poll count 1. **While the first answer is outstanding the
+beat is short, for a bounded number of tries** (~30s, a database waking up),
+then falls back — the SAME timer, never a second one (§53.5), and nothing is
+guessed: an optimistic bubble that vanished would be a control that lied.
+`checks/chat-corner.py`: 5 red on the build before.
+
+**§197.2 — the home mark.** *"The home button is damaged"*: the row is
+`align-items:stretch`, every sibling full height, and a fixed-height mark
+top-aligned with 12px of nothing under it — `align-self:center`. Then his
+design: **no box when nothing is waiting, gold when something is** — which
+spends the cost §194.3 recorded (a house that is always gold borrows the
+row's "you are here" gold for nothing). `WELCOME.waiting()` counts the welcome
+screen's OWN builders plus `attentionRows()`, so a gold house can never open
+onto "Nothing is waiting on you" (§16.7) and three surfaces answer from one
+list. The box never changes size between states (§41.8). 7 red on the build
+before.
+
+**§197.3 — a date the platform cannot read says so on the page.** The count
+said "1 Missing" over rows that all looked filled in; now the word **Missing**
+leads and the value follows in quiet type — still shown, because somebody is
+being asked to correct it (§184, §96.2), and quiet because red on a value
+means *off track* everywhere else. `open && !blank` is the whole condition.
+**And the workbook door is closed**: a milestone's due date was checked since
+§103 and a project's start/end never were, so `On-going` walked straight in —
+a notice now, same weight, plan still loads.
+
+## §198 — The Setup Overview leads with the work (v3.84, Option B)
+
+Islam picked B of two drawn. The audit in numbers: 264px of content beside an
+870px rail, and the biggest thing on the page — "222 of 245 items reported" —
+answering the CYCLE's question when the office opens Setup to ask *is anything
+waiting on me*. The queue takes the width; the cycle stands beside it as a
+column summary; below 900px they stack queue-first, in CSS. Nothing new is
+counted — `attentionRows()` and `cycleTotals()` exactly as before.
+
+**§198.2 — the rail counts only what is hidden.** The mockup's claim that the
+two rail numbers wear one look was OVERSTATED (grey mono vs a gold pill —
+measured, and said so): what is really wrong is an entry count drawn on an
+OPEN group, counting rows already on screen — §122's register fault in the
+rail. Drawn only while folded now, the rule the gold pill already followed.
+
+## §199 — A key objective's unit, with nothing new stored (v3.86–v3.89)
+
+Islam: *"for the key objectives we need a unit, as some are numbers, some
+might be money and some are SQM."* **There is no unit field and there does not
+need to be**: the unit has always been typed INTO the target, and
+`splitTarget`/`joinTarget` have round-tripped it on every download since the
+template gained a Unit column. Measured first: **178 targets across every
+unit, capability, group objective and pillar measure — zero round-trip
+failures.** So the column is a VIEW of what is stored: `target` keeps the
+whole string, all 103 readers keep working, no migration. That measurement is
+the feature's licence and the check's first assertion.
+
+**§199.4 — two corrections, both Islam's.** *"Let the unit be set in the edit
+table, but in the view attach the unit to the target"* — right: a unit is a
+property of ONE ROW, so a column of them lines "B EGP" against "%" and gives
+the eye nothing; the reading view keeps each figure complete where it stands,
+and the column lives only in the pen. And the vocabulary is a PICKED list —
+*"the financial units can be B EGP or M EGP or EGP only"*, *"let's commit to
+#"* — because a free box invites a fourth spelling of one currency and a noun
+per counted thing. A stored value outside the list (`M`, `K`, `M USD` on four
+shipped rows) is kept and offered (§96.2). **The separator is the plan's own
+habit, read off the data**: `30%`, `100#`, `6.2B EGP` tight; `28 EGP`, `4 d`
+spaced — a list, not a rule, because "symbol tight, word spaced" gets `EGP`
+right and `B EGP` wrong.
+
+**§199.5 — the pillar measures get the same fix**, from the SAME functions:
+`koUnitOf`/`koSetUnit` became `targetUnitOf`/`setTargetUnit`, because two
+tables asking one question must not answer it twice (§53.5) and a name tying
+a shared helper to one caller invites the copy. The Add row's colspan follows
+the pen's extra column or it stops reaching the table's end.
+
+**§199.6 — a number typed into a row inherits its unit.** Islam, from a group
+objective reading `3-year 30`: set the unit, then fill the row — the obvious
+order — and the number was stored bare, the unit silently lost, because §199
+only wrote onto targets that already existed. Only a BARE number inherits
+("TBD" must not become "TBD%"; "50 EGP" is what somebody meant and stays);
+the row's unit is the other horizon's when this one is empty. Stated, not
+worked around: a field writes without repainting (§71.2), so on a row with NO
+target the picker appears at the next paint. Flagged, not built: the Temple
+page edits the same group objectives through plain boxes and inherits nothing.
+
+## §200 — The cycle on the welcome screen, and who may see it (v3.87)
+
+Islam: *"the cycle statistics table is already needed there."* Right about the
+placement; **who may see it was the real question**. `cycleTotals()` counts
+every unit AND function in the business (§105) and the Reporting cycle page is
+gated on `c_cycle` — a unit head does not hold it — so the business-wide
+figures on EVERYONE's screen would be a new disclosure arriving as a side
+effect of a layout idea. Gated on the key that already answers it: measured
+across four viewers, the office (edit) and a group CEO (view) get the block; a
+unit head and a custodian (none) do not and KEEP the gold hero chip, so they
+still learn the cycle is open. The chip is dropped only where the block
+replaces it (§87's twins). Same shape and same pair as the Overview's column —
+three surfaces, one answer. Option B (a per-person block) was drawn and
+deliberately not built: *"start with A for now."*
+
+### The stress pass before this merge (2026-08-31)
+
+Both live incidents replayed and confirmed closed: the CX refusal (one refused
+row among good fills, through the REAL authoriser — the fills survive, the
+banner names the row, put-back works, the second save is accepted) and the 504
+(server down mid-save then recovering — the change stays on screen, the banner
+names the status, the 5-second retry lands it). Ten rapid saves and three
+OVERLAPPING saves against a real Postgres: no errors, no torn write, nothing
+half-truncated. Every new control proved to put a save ON THE WIRE within the
+leading-edge window, with the inherited unit in what reached the server.
+19/19 checks, authoriser 416/0, chat server 57/0, door 11/0, virgin-deploy
+round trip PASS, full sweep ERRORS: none. Three test-side false alarms on the
+way, each verified innocent before being believed (§68.10's rule: a correct
+build reported broken costs as much as the reverse).

@@ -257,6 +257,47 @@ var WELCOME = (function(){
     return "Setup";
   }
 
+  /* ── WHAT IS WAITING, WITHOUT DRAWING THE SCREEN (§197.2) ─────────────
+     Islam: *"it can be option E when there is no actions waiting there and
+     it turns gold when there is action required, so the SMO or any other
+     team can notice the difference and go for actions."*
+
+     SO THE MARK HAS TO ASK THE SCREEN'S OWN QUESTION. A house that goes gold
+     on one list and opens a screen built from another is the fault §16.7
+     names: a signal that cannot take you to what it signals. It counts the
+     SAME BUILDERS the screen draws from — `submitRows`, `gapRows` and
+     `attentionRows()`, the last of which is the Setup Overview's list too,
+     so three surfaces now answer from one (§108.10, §116.2, §53.5).
+
+     THEY BUILD DETACHED ROWS AND ARE ASKED FOR THEIR LENGTH. Counting by
+     repeating their tests would be a second copy of every one of them, and
+     the two would drift the first time a row gained a condition; a handful
+     of nodes per paint is the price of that never happening.
+
+     THE CHAT IS READ FROM MEMORY, NEVER FETCHED. `CHAT.unread()` is whatever
+     the corner's last poll left behind, and the office's side rides
+     `attentionRows()`'s own chat row (which draws nothing until OVQUEUE has
+     answered, §108.10) — asking the server once per paint would put a
+     network request in the navigation bar. The cost, stated: a reply that
+     lands between paints turns the mark gold on the NEXT paint, not the
+     instant it arrives. */
+  function waiting(person){
+    if (!person) return 0;
+    var n = 0;
+    try {
+      var row = rowFor(person), rs = rolesOf(row), targets = ownTargets(row, rs);
+      n += submitRows(targets).length;
+      n += gapRows(targets).length;
+      if (inOffice(rs)) {
+        try { n += attentionRows().length; } catch(e){}
+      }
+      try {
+        if (typeof CHAT !== "undefined" && CHAT.unread && CHAT.unread() > 0) n++;
+      } catch(e){}
+    } catch(e){ return 0; }
+    return n;
+  }
+
   /* ── LATE ANSWERS LAND IN PLACE (§71.2) ──────────────────────────────── */
   function unEmpty(list){
     var e = list.querySelector(".wempty");
@@ -289,6 +330,58 @@ var WELCOME = (function(){
     ask();
   }
 
+  /* ── THE CYCLE, FOR WHOEVER MAY ALREADY SEE IT (§200) ─────────────────
+     Islam: *"the cycle statistics table is already needed there."* He is
+     right — the welcome screen is where you land, and the cycle is the thing
+     the whole reporting half of the product turns on.
+
+     WHO MAY SEE IT IS THE QUESTION, NOT WHERE IT GOES. `cycleTotals()` counts
+     every unit AND every supporting function in the business (§105), and the
+     page that shows it — Reporting cycle — is access-gated on `c_cycle`. A
+     unit head does not normally hold that key. So putting the business-wide
+     figures on EVERYONE's welcome screen would show the whole company's
+     reporting state to people the platform deliberately does not show it to:
+     a genuinely new disclosure, arriving as a side effect of a layout idea.
+
+     It is therefore gated on the key that already answers the question, and
+     the gate is asked HERE rather than by hiding a control (§42, §44): a
+     viewer without it gets exactly the screen they get today.
+
+     NOTHING NEW IS COUNTED. It is `cycleTotals()` and `cycleMeta()` — the
+     same pair the Setup Overview's own column reads (§198) and the Reporting
+     cycle page opens with (§108.9) — so three surfaces cannot disagree about
+     one cycle. And it is the SAME SHAPE as the Overview's column, because
+     "the cycle, as context" should look like itself wherever it appears
+     (§53.5).
+
+     A SECOND STEP WAS DRAWN AND DELIBERATELY NOT BUILT: a per-person block
+     ("Mobile — 12 of 18 reported · not submitted · 14 days left") would serve
+     the eleven unit and function heads who are not the office far better.
+     Islam: *"start with A for now."* It is a different thing to keep true,
+     and it should be its own decision rather than ride along with this one. */
+  function cycleBlock(){
+    try {
+      if (typeof REVIEW === "undefined" || !REVIEW) return "";
+      if (typeof grant !== "function" || grant("c_cycle") === "none") return "";
+      var t = cycleTotals();
+      var open = REVIEW.state === "open";
+      return '<div class="wcyc">' +
+        "<h4>" + wesc(REVIEW.name || "") +
+          ' <span class="wbdg ' + (open ? "wb-open" : "wb-shut") + '">' +
+          (open ? "Open" : "Closed") + "</span></h4>" +
+        cycLine("Reported", t.done + " of " + t.total) +
+        cycLine("Submitted", String(t.sub)) +
+        cycLine("In progress", String(t.progress)) +
+        (t.none ? cycLine("Not started", String(t.none), true) : "") +
+        '<p class="wcycmeta">' + wesc(cycleMeta()) + "</p>" +
+        "</div>";
+    } catch(e){ return ""; }
+  }
+  function cycLine(label, value, late){
+    return '<div class="wcycline"><span>' + wesc(label) + "</span>" +
+      "<b" + (late ? ' class="wlate"' : "") + ">" + wesc(value) + "</b></div>";
+  }
+
   /* ── THE SCREEN ──────────────────────────────────────────────────────── */
   function build(person){
     var row = rowFor(person), rs = rolesOf(row), office = inOffice(rs);
@@ -310,7 +403,13 @@ var WELCOME = (function(){
       if (at) chips.push('<span class="wchip">' + wesc(subjectName(at)) + "</span>");
     }
     var open = typeof REVIEW !== "undefined" && REVIEW && REVIEW.state === "open";
-    if (open) chips.push('<span class="wchip wcycle"><i></i>' +
+    /* §200: THE CHIP GOES WHERE THE BLOCK IS DRAWN. It said "H1 2026 cycle is
+       open" and the summary below says that and four numbers; two places
+       saying it is how a screen starts repeating itself (§87's twins). Kept
+       for everybody the block is NOT drawn for, because for them it is still
+       the only thing that names the cycle at all. */
+    var cyc = cycleBlock();
+    if (open && !cyc) chips.push('<span class="wchip wcycle"><i></i>' +
       wesc((REVIEW.name || "The") + " cycle is open") + "</span>");
 
     var org = "";
@@ -344,6 +443,7 @@ var WELCOME = (function(){
           '<div class="wside">' +
             '<div class="wpagesbox"><p class="wseclab">Your pages</p>' +
               '<div class="wcard wpages"></div></div>' +
+            cyc +
             '<div class="wtour" hidden>' +
               "<h3>Take an intro round</h3>" +
               "<p>A short walk of the platform on the worked example — about two minutes.</p>" +
@@ -589,6 +689,7 @@ var WELCOME = (function(){
   return {
     offer: offer,
     open: open,
+    waiting: waiting,
     showing: function(){ return !!box; },
     dismiss: dismiss
   };

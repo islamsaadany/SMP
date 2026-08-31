@@ -127,6 +127,47 @@ with sync_playwright() as p:
        all(x is None for x in POSTS), POSTS)
     REFUSE_AS[0] = "__never__"
 
+    print("\n2b · and a refusal while SIMULATING never traps you there (§209)")
+    # PUT THE STATE BACK FIRST (§94.2): section 2 leaves a REMEMBERED refusal
+    # on the office's own graph, and saveNow short-circuits on the remembered
+    # body — so the first switch below would be blocked for section 2's
+    # reason, not this section's. Settle it with an accepted save.
+    pg.evaluate("""() => { UNITS.mobile.aspiration = "Settled " + Date.now(); }""")
+    pg.wait_for_timeout(100)
+    pg.evaluate("() => new Promise(r => SYNC.saveNow(r))")
+    pg.wait_for_timeout(500)
+    # The banner's own advice is "switch back to your own view to make it
+    # yourself" — and the §204 fix, holding every switch until the save
+    # lands, blocked that switch too: the save re-runs judged as the
+    # simulated person and is refused again, leaving Discard as the only
+    # control (§184's fault, rebuilt by a fix). Home is never blocked; a
+    # THIRD person still is.
+    pg.evaluate("""(k) => { const s=document.getElementById('asWho');
+      if (s) { s.value=k; s.dispatchEvent(new Event('change',{bubbles:true})); } }""", other)
+    pg.wait_for_timeout(1400)
+    ck("simulating again", pg.evaluate("() => VIEWER") == other, pg.evaluate("() => VIEWER"))
+    REFUSE_AS[0] = other          # everything done as them is refused
+    pg.evaluate("""() => { UNITS.mobile.aspiration = "Refused while simulating " + Date.now(); }""")
+    pg.wait_for_timeout(100)
+    pg.evaluate("() => new Promise(r => SYNC.saveNow(r))")
+    pg.wait_for_timeout(700)
+    third = pg.evaluate("""(o) => (PEOPLE.find(x => personActive(x) && x.unit
+      && x.key !== 'smo' && x.key !== o) || {}).key""", other)
+    pg.evaluate("""(k) => { const s=document.getElementById('asWho');
+      if (s) { s.value=k; s.dispatchEvent(new Event('change',{bubbles:true})); } }""", third)
+    pg.wait_for_timeout(1400)
+    ck("a THIRD person is still refused — the work keeps its label",
+       pg.evaluate("() => VIEWER") == other, pg.evaluate("() => VIEWER"))
+    pg.evaluate("""() => { const s=document.getElementById('asWho');
+      if (s) { s.value='smo'; s.dispatchEvent(new Event('change',{bubbles:true})); } }""")
+    pg.wait_for_timeout(1400)
+    ck("switching BACK TO YOURSELF is never blocked",
+       pg.evaluate("() => VIEWER") == "smo", pg.evaluate("() => VIEWER"))
+    REFUSE_AS[0] = "__never__"
+    how = pg.evaluate("() => new Promise(r => SYNC.saveNow(r))")
+    ck("...and the work then saves AS YOU — the recovery the banner promises",
+       how in ("saved", "clean"), how)
+
     print("\n3 · no post ever carries a name for work made as somebody else")
     ck("every post so far is either the office's or the simulated view's, never mixed",
        all(x is None or x == other for x in POSTS), POSTS)

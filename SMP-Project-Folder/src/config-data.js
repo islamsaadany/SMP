@@ -4173,45 +4173,6 @@ function fnShows(k){
   var f = FUNCTIONS[k];
   return !!f && f.active !== false && (fnHasWork(k) || fnCanFill(k));
 }
-/* ── DOES A PILLARS FUNCTION'S OVERVIEW EXIST (§212) ──────────────────
-   Islam, having read that removing it outright hides content that arrives
-   with an upload: *"always give the SMO the ability to add something to the
-   overview. How would they do this if the page is not appearing — that's the
-   challenge."*
-
-   THE ANSWER IS THAT THE TAB STOPPED BEING CONDITIONAL. A `fnShows()`-shaped
-   rule was built first — show it if it HOLDS something, or if you are the
-   person who could put something there — and Islam replaced it with the
-   simpler thing: both tabs always, and an empty Overview carrying the same
-   Add controls a unit's foundation has. That REMOVES the question rather
-   than answering it, which is better: nothing about the navigation then
-   depends on the data, so §45.2's fault — a page that appears and disappears
-   reads as broken — cannot arise at all.
-
-   WHAT SURVIVES IS THIS ONE PREDICATE, and only for a SENTENCE: whether the
-   function holds a foundation of its own decides whether the line above the
-   page admits it. Asked of all five fields, because a plan that arrived
-   carrying a SWOT and nothing else still holds something. */
-/* WHICH FOUNDATION KEY A TARGET IS GATED ON (§212). The group's, a unit's, or
-   a function's — named once, because the alternative is the ternary that was
-   written at every call site and got a function wrong at two of them. §211's
-   fault, and it fails CLOSED: the control renders and the press returns in
-   silence. */
-function foundKeyFor(target){
-  var t = String(target || "");
-  if (t === "group") return "g_found";
-  return t.indexOf("fn:") === 0 ? "k_found" : "u_found";
-}
-function fnOverviewHas(k){
-  var f = FUNCTIONS[k];
-  if (!f) return false;
-  if (String(f.aspiration || "").trim() || String(f.endInMind || "").trim()) return true;
-  if ((f.keyObjectives || []).length) return true;
-  if ((f.clauses || []).some(function(c){
-    return c && (String(c[0] || "").trim() || String(c[1] || "").trim()); })) return true;
-  var s = f.swot || {};
-  return ["s", "w", "o", "t"].some(function(q){ return (s[q] || []).length; });
-}
 function fnsReachable(){
   return FUNCTION_KEYS.filter(function(k){ return fnShows(k) && reachesFn(k); });
 }

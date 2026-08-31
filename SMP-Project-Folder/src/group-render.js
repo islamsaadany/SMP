@@ -4567,24 +4567,26 @@ function projPlanBody(p, fk){
     dueNote(p) + overrunNote(p);
 }
 
-/* WHERE THIS FUNCTION'S STRATEGY LIVES (§211.2, §212). Information rather
-   than a description (rule 1b-ii): a pillars function sits under a unit and
-   inherits that unit's strategy, and no other line on either of its pages
-   says so. ONE builder, because both pages say it and two copies drift
+/* WHERE THIS FUNCTION'S STRATEGY LIVES (§211.2, §212, §213). Information
+   rather than a description (rule 1b-ii): a supporting function sits under a
+   unit and inherits that unit's strategy, and no other line on either of its
+   pages says so. ONE builder, because both pages say it and two copies drift
    (§53.5); quiet, because it is context for the work below rather than a
    heading over it.
 
-   It admits what is held HERE only where there is something — otherwise the
-   sentence would argue with the page it sits on. */
+   IT NAMES ONLY WHAT IS ACTUALLY THE PARENT'S (§213). The first draft said
+   *"its aspiration, SWOT and key objectives are set there"* — true when §212
+   drew a unit's foundation here, and FALSE the moment the objectives became
+   the function's own, on the very card beside this sentence. Caught by
+   looking at the screenshot, not by reading the code: a line that contradicts
+   the page under it reads as the page being wrong. */
 function whereFoundationLives(fk){
   var f = FUNCTIONS[fk];
   if (!f) return "";
   var up = f.under ? UNITS[f.under] : null;
   return '<p class="sub" style="margin:0 0 12px">This function plans under ' +
     (up ? esc(up.name) : 'the group') + ' — its ' +
-    esc(L("aspiration", "bu").toLowerCase()) + ', SWOT and ' +
-    esc(L("keyobj", "bu").toLowerCase()) + ' are set there' +
-    (fnOverviewHas(fk) ? ', as well as anything held here.' : '.') + '</p>';
+    esc(L("aspiration", "bu").toLowerCase()) + ' and SWOT are set there.</p>';
 }
 function renderFnProjects(fnKey){
   var fk = fnKeyOf(fnKey), caps = capsOfFunction(fk);
@@ -5347,7 +5349,14 @@ function fnPillarsOverview(fk){
         '<div class="clause"><dt>Led by</dt><dd>' +
           (f.head ? esc(personName(f.head)) : "&mdash;") + '</dd></div>' +
         '<div class="clause"><dt>Definition</dt><dd>' +
-          fieldOr(ed ? "capfoundation" : null, f.def, "",
+          /* `|| ""` IS LOAD-BEARING (§213): `fieldOr()`'s second argument is
+             the VALUE and its third is a class, not a placeholder — so an
+             absent `def` reaches `esc(undefined)` and the card reads
+             **"Definition: undefined"**. A capability's never does because
+             the seed always gives it a string; a function's is absent until
+             somebody types one, which is the state this page opens in.
+             Found in a screenshot, not in the code. */
+          fieldOr(ed ? "capfoundation" : null, f.def || "", "",
                   function(v){ FUNCTIONS[fk].def = v; }) + '</dd></div>' +
       '</dl></div>' +
       '<div class="card"><div class="cardhead"><h2 class="sec first">' + L("keyobj","bu") + '</h2>' +

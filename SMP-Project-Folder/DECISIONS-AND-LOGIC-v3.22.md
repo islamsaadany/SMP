@@ -24021,3 +24021,75 @@ explanation — *"omar didn't touch the foundation and he shouldn't be able to"*
 — which is a fact about the product, not a theory, and it eliminated three
 candidates at once. **A user's account of what they did not do is evidence;
 treat it as harder than the theory it contradicts.**
+
+## §206 — A live session is never answered with somebody else (v3.95)
+
+From the deployment, and the most serious thing found today. A colleague
+signed in with his own address and was shown **"Welcome, Islam"** — the SMO's
+greeting, the Super user chip, the SMO's pages — and had the access to match.
+Islam: *"the care is having super user access that we already fixed
+earlier!!"* and *"they entered their email but they found this welcome
+page."*
+
+**IT WAS NOT THE SESSION.** The sign-in was correct and the chrome said so on
+an earlier screenshot from the same person (*SIGNED IN AS MOHAMED MOKHTAR —
+BU OWNER*). What was wrong is the answer to *who am I looking at*:
+
+```js
+function viewer(){
+  var v = PEOPLE.filter(p => p.key === VIEWER)[0];
+  if (v) return v;
+  VIEWER = PEOPLE[0].key;      // the FIRST PERSON on the register stands in
+  return PEOPLE[0];
+}
+```
+
+`grant`, `reaches`, `paint` and every page read straight off this, so a
+signed-in person the hydrated register does not match is served the first
+register row's VIEW **and that row's ROLES** — and the first row of a tenant
+is very often the bootstrap SMO. That is the super user access, and the
+welcome screen, from one line.
+
+**The substitution was written for two cases where it is right** and both are
+named in its own comment: the baked example being replaced by the tenant's
+people, and the Demo button swapping datasets. In both, nobody is signed in
+as anybody and the alternative is a throw on the next repaint. **The third
+case was never listed** — a LIVE session — and it is the one where standing
+somebody in is a disclosure.
+
+So the fallback survives where it was needed and closes where it is
+dangerous: with a live session an unmatched viewer resolves to a STRANGER, a
+person-shaped row holding nothing, so every rule answers no. `sync.js`
+already puts *"signed in but is not on this register"* on the page, which is
+now the whole of what that person sees. `window.VIEWER` is also set from the
+session either way, rather than only when the person is known, so it can
+never be left holding another person's key (measured: session
+`mohamed.mokhtar` with `VIEWER === "smo"`).
+
+**§69.15 WROTE THIS SENTENCE DOWN AND FIXED THE WRONG HALF.** Its note reads
+*"a person the platform could not find was shown the FIRST PERSON'S VIEW,
+wearing their own name in the corner — the SMO's pages served to somebody who
+is not the SMO"*, and it hardened the two chrome CONTROLS while leaving the
+substitution that produced the view. A rule stated about a symptom and
+applied to the nearest instance of it.
+
+### What this cost, and the lesson that is mine
+
+Four explanations were given to Islam before this one and three were wrong —
+the viewer switch re-labelling a save (§204, real but not this), a stale tab
+(real, proved against Postgres, still not this), and caching (ruled out; the
+headers were already `no-store`). Each fitted the screenshot in front of me
+and each was stated as a diagnosis rather than as a hypothesis, on a live
+platform, to a client whose team was blocked.
+
+**What broke it open was his refusal to accept the explanation** — *"omar
+didn't touch the foundation and he shouldn't be able to"* and *"they entered
+their email"* — both statements of fact about what the product does, which
+eliminated whole families of theory at once. A user's account of what they
+did not do is evidence, and harder evidence than a theory that fits.
+
+### Still open
+
+The stale-tab overwrite (a tab that is behind silently destroys another
+person's saved work, proved end to end against a real Postgres) is unrelated,
+unfixed, and remains the most dangerous thing known about the platform.

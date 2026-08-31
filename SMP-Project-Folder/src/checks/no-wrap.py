@@ -42,7 +42,26 @@ MEASURE = r"""() => {
        §69.20) — so the contract is not "never wider", it is "never wider than
        something you can scroll to". A table overflowing a box that does not
        scroll is content nobody can reach, which is the fault worth failing. */
-    const box = t.closest('.cfg') || t.parentElement;
+    /* THE BOX THAT ACTUALLY SCROLLS, not the first `.cfg` above the table.
+       §151 wrapped every wide table in its own `.tblscroll`, and this walked
+       straight past it to the outer `.cfg` — whose scrollWidth equals its
+       clientWidth precisely BECAUSE the inner box takes the scroll. So a
+       register that scrolls perfectly well was reported as 544px of content
+       nobody can reach. §51.11: the markup grew a layer and the check was
+       never re-read.
+
+       Walked from the table upward to the nearest ancestor that can scroll
+       sideways, falling back to the old answer when there is none — so a
+       table in a box that genuinely cannot scroll still fails, which is the
+       fault this section exists to catch. */
+    let box = t.parentElement, scroller = null;
+    while (box && box !== document.body) {
+      if (['auto', 'scroll'].indexOf(getComputedStyle(box).overflowX) > -1) {
+        scroller = box; break;
+      }
+      box = box.parentElement;
+    }
+    box = scroller || t.closest('.cfg') || t.parentElement;
     if (box) {
       const overBy = Math.round(t.getBoundingClientRect().width - box.clientWidth);
       if (overBy > 2) {
@@ -165,6 +184,17 @@ with sync_playwright() as p:
                 if (td.title) return;
                 const kids=td.querySelectorAll('.val, .why, b, .mono');
                 (kids.length?[...kids]:[td]).forEach(el=>{
+                  /* §88's RULE IS ABOUT TEXT: a value clipped by the
+                     one-line cap must be readable some other way, or the
+                     table hides content. An element with NO text has nothing
+                     to be unreadable — the four this flagged are the access
+                     matrix's toggle cells, whose BUTTONS sit 15px past the
+                     cell at 1000px. That is a control overflowing, which the
+                     table-overflow assertion above already judges (and
+                     passes, because that table scrolls). Reported as "clipped
+                     with nothing to read it by :: " — an empty quotation,
+                     which is what said it was measuring nothing. */
+                  if (!(el.textContent||'').trim()) return;
                   if (el.scrollWidth-el.clientWidth>1 && !el.title)
                     out.push((el.textContent||'').trim().slice(0,40));
                 });

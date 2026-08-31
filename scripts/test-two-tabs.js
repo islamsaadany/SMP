@@ -124,6 +124,44 @@ function clientBody(baseline, screen) {
       const rB = serverSave(await io.readState(c), clientBody(tabB, scrB), smo);
       if (rB.ok) await io.writeState(c, rB.state);
       const fin = await io.readState(c);
+      /* ── AND THE CASE §210 LEFT OPEN: THE SAME UNIT (§215) ──────────
+         Two of the office filling gaps on ONE unit at once, from tabs opened
+         before either saved. Until row-level this was last-write-wins: the
+         second save carried the whole unit and quietly undid the first. It is
+         the Consumer Finance morning exactly, one level down. */
+      {
+        await io.writeState(c, seed);
+        const t0 = await io.readState(c);
+        const one = clone(t0), two = clone(t0);
+        const scr1 = clone(one), scr2 = clone(two);
+        const u1 = scr1.units[U], u2 = scr2.units[U];
+        /* Two different rows of the SAME unit — a measure on the first pillar
+           and a tactic's owner on the second, which is what two people filling
+           the same plan actually touch. */
+        u1.items[0].measures[0].target = "FIRST PERSON";
+        const p2i = u2.items.length > 1 ? 1 : 0;
+        u2.items[p2i].tactics[0].owner = "SECOND PERSON";
+        const r1 = serverSave(await io.readState(c), clientBody(one, scr1), smo);
+        if (r1.ok) await io.writeState(c, r1.state);
+        const r2 = serverSave(await io.readState(c), clientBody(two, scr2), smo);
+        if (r2.ok) await io.writeState(c, r2.state);
+        const end = await io.readState(c);
+        check("§215: both saves on the SAME unit were accepted", r1.ok && r2.ok,
+              (r1.error || "") + " / " + (r2.error || ""));
+        check("§215: the first person's fill SURVIVES the second's save",
+              end.units[U].items[0].measures[0].target === "FIRST PERSON",
+              end.units[U].items[0].measures[0].target);
+        check("§215: ...and the second person's landed too",
+              end.units[U].items[p2i].tactics[0].owner === "SECOND PERSON",
+              end.units[U].items[p2i].tactics[0].owner);
+        /* AND NOTHING ELSE ON THAT UNIT MOVED — the point of sending a row
+           rather than a unit is that everything untouched stays untouched. */
+        check("§215: ...and the rest of the unit is untouched",
+              end.units[U].aspiration === seed.units[U].aspiration &&
+              end.units[U].items.length === seed.units[U].items.length,
+              end.units[U].aspiration);
+      }
+
       check("two people on two units: the first one's work survives",
             fin.units[U].aspiration === "FILLED BY THE FIRST", fin.units[U].aspiration);
       check("...and the second one's landed",

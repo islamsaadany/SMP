@@ -24587,6 +24587,61 @@ have now parted three times (collaborators §205, a function's key objectives
 fillable field, so asking the counted list left the office unable to FIND a fill
 it could plainly see and tick. §205's fault in the WALK rather than in the save.
 
+### §215 — A plan travels row by row
+
+Islam: *"for the business units we need to apply the same thing — when you
+change a small thing it just sends the thing that changed. Is there any risk?"*
+
+§210 stopped at a top-level part and said exactly why: finer needs arrays
+matched by ROW ID rather than by position, or a save lands a value on somebody
+else's row when two people have added rows (§48).
+
+**BOTH HALVES OF THAT RISK ARE NOW ANSWERED, AND ONE OF THEM BY ISLAM.**
+Every plan row has carried a unique id since §191 — measured before building:
+**219 of 219 rows across every unit, none missing, none shared** — so matching
+is a lookup rather than a guess. And Islam's own point closed the other half:
+adding, removing or reordering a pillar requires authoring rights, which are
+the office's alone (§94); a custodian or a BU owner can only fill blanks and
+report. The two people who share a unit day to day **cannot change which rows
+exist**, which is the case that made position-matching dangerous.
+
+**THE ADDRESSABLE LISTS ARE NAMED, NEVER DISCOVERED** — `keyObjectives` and
+`items` on the entry, `measures` and `tactics` inside a pillar. A shape the
+differ does not recognise returns null and the entry travels WHOLE, which is
+§210's behaviour and always correct: **the fine path is an optimisation and
+must never be the only way a change can travel.**
+
+**ORDER IS PART OF "SAME ROWS", deliberately.** Reordering IS a change the
+authoriser classifies by comparing id order (§101), so a reorder travels whole
+rather than as a set of field edits that would leave the order behind.
+
+**THE SERVER VALIDATES EVERY ROW EDIT BEFORE APPLYING ANY OF THEM.** A body
+naming one row it cannot resolve changes nothing at all — half a save leaves a
+plan nobody can reason about. And §210's blanket *no path deeper than two* is
+replaced by an ALLOW-LIST of three shapes rather than by a general resolver,
+which is where a bug here would be dangerous.
+
+**MEASURED**: a typed target went from **27,600 bytes to about 200**. But speed
+was never the point — the round trips were fixed in §195. The point is the
+Consumer Finance morning one level down: two of the office filling gaps on ONE
+unit at once, both saves landing, neither erasing the other. Proved against a
+real Postgres in `test-two-tabs.js`, and **proved able to fail**: with row-level
+off, the first person's fill reverts to its stored value.
+
+**AND THE HARNESS WAS LYING BEFORE IT COULD PROVE ANYTHING.** Breaking the
+structural guard made the differ THROW on a removed row, so the suite died at
+that trial and `grep -c FAIL` read **zero** — a falsification that looked like
+a pass. A throw is reported as a failure now (§192's rule, earned again), and
+the failure path returns a shape the assertions can still read, or the
+reporting of a failure fails in turn.
+
+**THE CASE THE FIRST TESTS COULD NOT SEE**: a structural change ALONE produces
+no row edits and falls back to whole by accident, so removing the guard broke
+nothing measurable. A structural change **beside** a field edit is where the
+data goes: the edit travels, the new pillar is silently dropped, and the screen
+shows a row the database never received. That pairing is asserted now, four
+ways, and the guards fail 8 / 5 / 2 when broken.
+
 ### Not explained
 
 The **"could not reach the server (Failed to fetch)"** on *Next pending*. It

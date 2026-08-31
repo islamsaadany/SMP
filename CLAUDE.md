@@ -384,6 +384,30 @@ console errors (in this cloud environment, run it via a wrapper that points Play
   remove × onto a second line — `inline-block` restores it, and it was found
   by `checks/plan-fields.py` GOING RED, not by reading the cascade, which is
   the argument for that check existing.
+- **A PLAN TRAVELS ROW BY ROW (§215):** Islam — *"for the business units, when
+  you change a small thing it just sends the thing that changed. Is there any
+  risk?"* §210 stopped at a top-level part because finer needs arrays matched by
+  ROW ID and not by position (§48). **BOTH HALVES OF THAT RISK ARE ANSWERED**:
+  every plan row has carried a unique id since §191 (measured — **219 of 219**,
+  none missing, none shared), and Islam's own point closed the other — adding,
+  removing or reordering a pillar needs authoring rights, which are the office's
+  alone (§94), so the two people who share a unit **cannot change which rows
+  exist**. **THE LISTS ARE NAMED, NEVER DISCOVERED** (`keyObjectives`, `items`,
+  and `measures`/`tactics` inside a pillar); anything else returns null and the
+  entry travels WHOLE — *the fine path is an optimisation and must never be the
+  only way a change can travel*. **ORDER IS PART OF "SAME ROWS"**, or a reorder
+  the authoriser judges by id order (§101) would travel as field edits and leave
+  the order behind. **THE SERVER VALIDATES EVERY ROW EDIT BEFORE APPLYING ANY**
+  — half a save is worse than none — and §210's blanket depth cap becomes an
+  ALLOW-LIST of three shapes, never a general resolver. **27,600 bytes → ~200**,
+  though the point is collisions, not speed: two of the office filling ONE unit
+  at once now both land. **AND THE HARNESS LIED FIRST**: breaking the guard made
+  the differ THROW, the suite died at that trial, and `grep -c FAIL` read ZERO —
+  a falsification that looked like a pass. A throw is a failure now, and the
+  failure path returns a shape the assertions can still read. **AND THE CASE THE
+  FIRST TESTS COULD NOT SEE**: a structural change ALONE falls back by accident;
+  one **beside a field edit** is where a new pillar silently never reaches the
+  database while the screen shows it. Guards fail 8 / 5 / 2 when broken.
 - **THE OVERVIEW OWES NOTHING (§214.4, reversing §214):** Islam — *"for the
   functions that plan with pillars remove the elements of the overview from the
   missing items."* **REVERSED ON BOTH FORMATS, and that is not a widening**: the

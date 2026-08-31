@@ -4584,20 +4584,10 @@
   /* One column fewer when the near horizon is hidden (§51.16) — the grid has
      to lose the track, not just its content, or the row keeps a 96px hole. */
   .ohead.one, .orow.one { grid-template-columns:minmax(0,1fr) 96px; }
-  /* §199: WITH A UNIT COLUMN. Narrow, because a unit is a word or two ("SQM",
-     "B EGP", "%") and the room belongs to the objective's name. Left-aligned
-     against the right-aligned figures beside it, so the eye can tell at a
-     glance which column is a label and which is a number. */
-  .ohead.wu, .orow.wu { grid-template-columns:minmax(0,1fr) 76px 96px 96px; }
-  .ohead.one.wu, .orow.one.wu { grid-template-columns:minmax(0,1fr) 76px 96px; }
-  .ohead.wu span:nth-child(2), .orow.wu .ou { text-align:left; }
-  .orow .ou { color:var(--ink-3); font-size:12.5px; align-self:center; }
   .ohead { display:grid; grid-template-columns:minmax(0,1fr) 96px 96px; gap:14px;
            padding-bottom:8px; border-bottom:1px solid var(--line); font-size:10px;
            letter-spacing:.1em; text-transform:uppercase; color:var(--ink-3); font-weight:700; }
   .ohead span:not(:first-child) { text-align:right; }
-  /* The Unit heading follows its column back to the left (the rule above
-     right-aligns every heading but the first, and this one is not a number). */
   .orow { display:grid; grid-template-columns:minmax(0,1fr) 96px 96px; gap:14px;
           align-items:baseline; padding:10px 0; border-bottom:1px solid var(--line-soft); }
   .orow:last-child { border-bottom:0; }
@@ -7210,6 +7200,30 @@ body.presenting .tourdock { display:none; }
 .welcomeover .wtghost { font:inherit; cursor:pointer; font-size:var(--fs-small);
   font-weight:600; border:0; background:none; color:var(--ink-3); padding:8px 6px; }
 .welcomeover .wtghost:hover { color:var(--ink); }
+
+/* ── THE CYCLE, ON THE WELCOME SCREEN (§200) ────────────────────────────
+   The Setup Overview's own summary, in the same shape: "the cycle, as
+   context" should look like itself wherever it is drawn (§53.5). It sits
+   under Your pages, in the column that holds what is true rather than what
+   is owed — the left column is the work. */
+.wcyc{ background:var(--surface); border:1px solid var(--line);
+       border-radius:var(--r); padding:12px 15px 14px; margin-top:14px; }
+.wcyc h4{ margin:0 0 8px; font:700 12px/1.3 var(--sans); color:var(--ink);
+          display:flex; align-items:center; gap:8px; flex-wrap:wrap; }
+.wbdg{ font:700 9px/1 var(--sans); letter-spacing:.07em; text-transform:uppercase;
+       border:1px solid currentColor; border-radius:20px; padding:3px 7px; }
+.wb-open{ color:var(--good-tx); }
+.wb-shut{ color:var(--ink-3); }
+.wcycline{ display:flex; justify-content:space-between; align-items:baseline;
+           gap:10px; font-size:12.5px; padding:5px 0;
+           border-bottom:1px solid var(--line); }
+.wcycline:last-of-type{ border-bottom:0; }
+.wcycline b{ font-weight:700; font-variant-numeric:tabular-nums; }
+/* Not started is the one figure that is a problem rather than a fact, so it
+   is the one that takes a colour — as TYPE, hence `--bad-tx` and not `--bad`
+   (§38.5, which this project has paid for six times). */
+.wcycline b.wlate{ color:var(--bad-tx); }
+.wcycmeta{ color:var(--ink-3); font-size:11px; margin:9px 0 0; }
 
 /* ══ THE PLAN BUILDER (§129, spec 020) ══════════════════════════════
    The band is CHROME — it sits under the tab rows, spans the window like
@@ -25546,15 +25560,6 @@ function koUnitOf(m){
   var u = splitTarget(m.target).unit;
   return u || splitTarget(m.target3y).unit || "";
 }
-/* The number alone, for a column that now says the unit once at the end of the
-   row. A value the splitter cannot read is returned WHOLE rather than blanked:
-   it is still what somebody typed (§96.2, again). */
-function koNum(v){
-  if (v == null || v === "") return "";
-  var s = splitTarget(v);
-  return s.value || String(v);
-}
-
 /* WRITING THE UNIT WRITES THE TARGETS, because that is where it lives (§199).
    Both horizons take it: a row whose 3-year target is measured in one thing
    and this year's in another is not something anybody has asked for, and
@@ -25575,10 +25580,21 @@ function koNum(v){
 function koSetUnit(m, u){
   var want = String(u == null ? "" : u).trim();
   if (want === koUnitOf(m)) return;
+  /* BUILT HERE RATHER THAN THROUGH `joinTarget`, and that is deliberate:
+     joinTarget takes its separator from the value it is REPLACING, which is
+     exactly right when the unit has not changed and exactly wrong here —
+     "6.2B EGP" carries no space, so keeping it would turn a change to "SQM"
+     into "6.2SQM". The convention belongs to the NEW unit (KO_TIGHT above).
+
+     WHAT IS WRITTEN STILL ROUND-TRIPS, which is the property the whole
+     feature rests on: joinTarget reads the separator back out of the stored
+     string, so a value written here splits and rejoins to itself, and the
+     check asserts that over everything the plan holds. */
+  var sep = want && !KO_TIGHT[want] ? " " : "";
   ["target", "target3y"].forEach(function(f){
     var v = m[f];
     if (v == null || v === "") return;   /* nothing to attach it to */
-    m[f] = joinTarget("", splitTarget(v).value, want);
+    m[f] = splitTarget(v).value + (want ? sep + want : "");
   });
 }
 /* A unit with no target to sit inside cannot be stored, so the field says so
@@ -25588,13 +25604,47 @@ function koHasTarget(m){
   return !!(String(m.target || "").trim() || String(m.target3y || "").trim());
 }
 
+/* ── THE UNITS ARE PICKED FROM A LIST (§199.4) ─────────────────────────
+   Islam, on money: *"the financial units can be B EGP or M EGP or EGP only"*,
+   and on counts: *"# into trips and orders is tricky, as we will need to add
+   units all the time, so let's commit to #"*.
+
+   BOTH ARE THE SAME DECISION and it is the right one. A free box invites a
+   fourth spelling of the same currency and a different noun for every kind of
+   thing counted — and the moment two rows say `#` and `trips` for the same
+   idea, nothing can compare them and somebody has to maintain a vocabulary
+   nobody agreed. A short fixed list is the maintenance NOT happening.
+
+   `#` IS THE COMMITMENT, not a placeholder for a better word later. §199's
+   own mockup argued for `trips` and `orders`; he priced that and turned it
+   down, and the cost is recorded rather than re-argued: a count says how
+   MANY and the objective's name says of what.
+
+   A STORED VALUE OUTSIDE THE LIST IS KEPT AND OFFERED (§96.2, §114). The
+   shipped plan holds `M`, `K` and `M USD` on four rows between them; a
+   dropdown that could not show them would either display the row wrong or
+   drop the unit on the first repaint, and both are worse than one extra
+   entry. Nothing is rewritten by this list — only what the pen writes next. */
+var KO_UNITS = ["", "%", "#", "EGP", "M EGP", "B EGP", "SQM", "d", "h"];
+/* WRITTEN AGAINST THE NUMBER, OR AFTER A SPACE — and it is the PLAN's own
+   habit, read off the shipped data rather than invented: `30%`, `100#` and
+   `6.2B EGP` are written tight, while `28 EGP`, `4 d` and `24 h` take a space.
+   A scaled currency reads as one token (`6.2B EGP`) and a bare one does not.
+
+   IT IS A LIST RATHER THAN A RULE because there is no rule: "a symbol is
+   tight, a word takes a space" gets `EGP` right and `B EGP` wrong, and the
+   difference is convention, not grammar. Nine entries is cheaper to read than
+   a predicate nobody can quite state. */
+var KO_TIGHT = { "%":1, "#":1, "M EGP":1, "B EGP":1 };
+function koUnitOpts(cur){
+  var opts = KO_UNITS.slice();
+  if (cur && opts.indexOf(cur) < 0) opts.splice(1, 0, cur);
+  return opts;
+}
+
 function koView(list, isGroup, acKey){
   var near = isGroup || SHOW_KO_THIS_YEAR;
   var miss = '<span class="missing">Missing</span>';
-  /* Drawn only where at least one row HAS one — a column of empty cells on a
-     plan whose targets are all bare percentages is a column that says nothing
-     (§41's budget, and 46 of the 178 measured carry no unit at all). */
-  var anyUnit = list.some(function(m){ return !!koUnitOf(m); });
   /* §145: every pending mark on the row, chips beside the values it shows —
      including a pending direction or compile, which have no column here, or
      the office would have nothing to confirm them from in read mode. */
@@ -25603,10 +25653,6 @@ function koView(list, isGroup, acKey){
            pendChip(acKey, m, "target") + pendChip(acKey, m, "compile");
   };
   if (KO_VIEW === "chips") {
-    /* THE CHIP LAYOUT KEEPS THE WHOLE STRING (§199). A chip is one figure with
-       nothing beside it to line up against, so splitting the unit off would
-       cost the reading and buy nothing — the column exists so a COLUMN can be
-       read down, and there is no column here. */
     return '<div class="ochips">' + list.map(function(m){
       var far = m.target3y ? esc(m.target3y) : miss;
       return '<div class="ochip"><b>' + esc(m.name) + '</b>' +
@@ -25615,19 +25661,25 @@ function koView(list, isGroup, acKey){
               : '<div class="v">' + far + '</div>') + chips(m) + '</div>';
     }).join("") + '</div>';
   }
-  var cls = (near ? '' : ' one') + (anyUnit ? ' wu' : '');
-  return '<div class="ohead' + cls + '"><span>Objective</span>' +
-      (anyUnit ? '<span>Unit</span>' : '') +
+  /* §199.4: THE READING VIEW KEEPS THE UNIT ON THE FIGURE. §199 split it into
+     a column of its own and Islam looked at it: *"let the unit be set in the
+     edit table, but in the view attach the unit to the target."*
+
+     He is right, and the reason is worth keeping. The argument for splitting
+     was that a column of targets could then be read straight down — but the
+     unit is a property of ONE ROW, not of the table, so a column of them lines
+     up "B EGP" against "%" against "SQM" and gives the eye nothing. What
+     reading a plan actually needs is each figure complete where it stands.
+     The column stays where a unit IS one question with one answer: the pen,
+     where it is being set. */
+  return '<div class="ohead' + (near ? '' : ' one') + '"><span>Objective</span>' +
       '<span>' + horizonColLabel() + '</span>' +
       (near ? '<span>This year</span>' : '') + '</div>' +
     list.map(function(m){
-      var u = koUnitOf(m);
-      return '<div class="orow' + cls + '"><span class="on">' + esc(m.name) +
+      return '<div class="orow' + (near ? '' : ' one') + '"><span class="on">' + esc(m.name) +
         chips(m) + '</span>' +
-        (anyUnit ? '<span class="ou">' + (u ? esc(u) : "") + '</span>' : '') +
-        '<span class="ot h">' + (m.target3y ? esc(koNum(m.target3y)) : miss) + '</span>' +
-        (near ? '<span class="ot">' + (m.target ? esc(koNum(m.target)) : miss) + '</span>' : '') +
-        '</div>';
+        '<span class="ot h">' + (m.target3y ? esc(m.target3y) : miss) + '</span>' +
+        (near ? '<span class="ot">' + (m.target ? esc(m.target) : miss) + '</span>' : '') + '</div>';
     }).join("");
 }
 /* The far column says WHICH year when the tenant has set one — "By 2028" reads
@@ -25684,7 +25736,8 @@ function koEdit(list, page, acKey, owner){
            how the objective is written, which is authoring. */
         '<td class="cc">' + (pg
           ? (koHasTarget(m)
-              ? inputOr(pg, koUnitOf(m), "", function(v){ koSetUnit(m, v); })
+              ? selectOr(pg, koUnitOf(m), koUnitOpts(koUnitOf(m)), "",
+                  function(v){ koSetUnit(m, v); })
               : '<span class="why" title="Set a target first \u2014 the unit is ' +
                 'written with it">\u2014</span>')
           : esc(koUnitOf(m))) + '</td>' +
@@ -40351,6 +40404,58 @@ var WELCOME = (function(){
     ask();
   }
 
+  /* ── THE CYCLE, FOR WHOEVER MAY ALREADY SEE IT (§200) ─────────────────
+     Islam: *"the cycle statistics table is already needed there."* He is
+     right — the welcome screen is where you land, and the cycle is the thing
+     the whole reporting half of the product turns on.
+
+     WHO MAY SEE IT IS THE QUESTION, NOT WHERE IT GOES. `cycleTotals()` counts
+     every unit AND every supporting function in the business (§105), and the
+     page that shows it — Reporting cycle — is access-gated on `c_cycle`. A
+     unit head does not normally hold that key. So putting the business-wide
+     figures on EVERYONE's welcome screen would show the whole company's
+     reporting state to people the platform deliberately does not show it to:
+     a genuinely new disclosure, arriving as a side effect of a layout idea.
+
+     It is therefore gated on the key that already answers the question, and
+     the gate is asked HERE rather than by hiding a control (§42, §44): a
+     viewer without it gets exactly the screen they get today.
+
+     NOTHING NEW IS COUNTED. It is `cycleTotals()` and `cycleMeta()` — the
+     same pair the Setup Overview's own column reads (§198) and the Reporting
+     cycle page opens with (§108.9) — so three surfaces cannot disagree about
+     one cycle. And it is the SAME SHAPE as the Overview's column, because
+     "the cycle, as context" should look like itself wherever it appears
+     (§53.5).
+
+     A SECOND STEP WAS DRAWN AND DELIBERATELY NOT BUILT: a per-person block
+     ("Mobile — 12 of 18 reported · not submitted · 14 days left") would serve
+     the eleven unit and function heads who are not the office far better.
+     Islam: *"start with A for now."* It is a different thing to keep true,
+     and it should be its own decision rather than ride along with this one. */
+  function cycleBlock(){
+    try {
+      if (typeof REVIEW === "undefined" || !REVIEW) return "";
+      if (typeof grant !== "function" || grant("c_cycle") === "none") return "";
+      var t = cycleTotals();
+      var open = REVIEW.state === "open";
+      return '<div class="wcyc">' +
+        "<h4>" + wesc(REVIEW.name || "") +
+          ' <span class="wbdg ' + (open ? "wb-open" : "wb-shut") + '">' +
+          (open ? "Open" : "Closed") + "</span></h4>" +
+        cycLine("Reported", t.done + " of " + t.total) +
+        cycLine("Submitted", String(t.sub)) +
+        cycLine("In progress", String(t.progress)) +
+        (t.none ? cycLine("Not started", String(t.none), true) : "") +
+        '<p class="wcycmeta">' + wesc(cycleMeta()) + "</p>" +
+        "</div>";
+    } catch(e){ return ""; }
+  }
+  function cycLine(label, value, late){
+    return '<div class="wcycline"><span>' + wesc(label) + "</span>" +
+      "<b" + (late ? ' class="wlate"' : "") + ">" + wesc(value) + "</b></div>";
+  }
+
   /* ── THE SCREEN ──────────────────────────────────────────────────────── */
   function build(person){
     var row = rowFor(person), rs = rolesOf(row), office = inOffice(rs);
@@ -40372,7 +40477,13 @@ var WELCOME = (function(){
       if (at) chips.push('<span class="wchip">' + wesc(subjectName(at)) + "</span>");
     }
     var open = typeof REVIEW !== "undefined" && REVIEW && REVIEW.state === "open";
-    if (open) chips.push('<span class="wchip wcycle"><i></i>' +
+    /* §200: THE CHIP GOES WHERE THE BLOCK IS DRAWN. It said "H1 2026 cycle is
+       open" and the summary below says that and four numbers; two places
+       saying it is how a screen starts repeating itself (§87's twins). Kept
+       for everybody the block is NOT drawn for, because for them it is still
+       the only thing that names the cycle at all. */
+    var cyc = cycleBlock();
+    if (open && !cyc) chips.push('<span class="wchip wcycle"><i></i>' +
       wesc((REVIEW.name || "The") + " cycle is open") + "</span>");
 
     var org = "";
@@ -40406,6 +40517,7 @@ var WELCOME = (function(){
           '<div class="wside">' +
             '<div class="wpagesbox"><p class="wseclab">Your pages</p>' +
               '<div class="wcard wpages"></div></div>' +
+            cyc +
             '<div class="wtour" hidden>' +
               "<h3>Take an intro round</h3>" +
               "<p>A short walk of the platform on the worked example — about two minutes.</p>" +

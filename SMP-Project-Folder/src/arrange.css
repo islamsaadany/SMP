@@ -178,20 +178,10 @@
   /* One column fewer when the near horizon is hidden (§51.16) — the grid has
      to lose the track, not just its content, or the row keeps a 96px hole. */
   .ohead.one, .orow.one { grid-template-columns:minmax(0,1fr) 96px; }
-  /* §199: WITH A UNIT COLUMN. Narrow, because a unit is a word or two ("SQM",
-     "B EGP", "%") and the room belongs to the objective's name. Left-aligned
-     against the right-aligned figures beside it, so the eye can tell at a
-     glance which column is a label and which is a number. */
-  .ohead.wu, .orow.wu { grid-template-columns:minmax(0,1fr) 76px 96px 96px; }
-  .ohead.one.wu, .orow.one.wu { grid-template-columns:minmax(0,1fr) 76px 96px; }
-  .ohead.wu span:nth-child(2), .orow.wu .ou { text-align:left; }
-  .orow .ou { color:var(--ink-3); font-size:12.5px; align-self:center; }
   .ohead { display:grid; grid-template-columns:minmax(0,1fr) 96px 96px; gap:14px;
            padding-bottom:8px; border-bottom:1px solid var(--line); font-size:10px;
            letter-spacing:.1em; text-transform:uppercase; color:var(--ink-3); font-weight:700; }
   .ohead span:not(:first-child) { text-align:right; }
-  /* The Unit heading follows its column back to the left (the rule above
-     right-aligns every heading but the first, and this one is not a number). */
   .orow { display:grid; grid-template-columns:minmax(0,1fr) 96px 96px; gap:14px;
           align-items:baseline; padding:10px 0; border-bottom:1px solid var(--line-soft); }
   .orow:last-child { border-bottom:0; }

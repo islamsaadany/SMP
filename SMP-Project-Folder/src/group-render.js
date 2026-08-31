@@ -2884,15 +2884,6 @@ function koUnitOf(m){
   var u = splitTarget(m.target).unit;
   return u || splitTarget(m.target3y).unit || "";
 }
-/* The number alone, for a column that now says the unit once at the end of the
-   row. A value the splitter cannot read is returned WHOLE rather than blanked:
-   it is still what somebody typed (§96.2, again). */
-function koNum(v){
-  if (v == null || v === "") return "";
-  var s = splitTarget(v);
-  return s.value || String(v);
-}
-
 /* WRITING THE UNIT WRITES THE TARGETS, because that is where it lives (§199).
    Both horizons take it: a row whose 3-year target is measured in one thing
    and this year's in another is not something anybody has asked for, and
@@ -2913,10 +2904,21 @@ function koNum(v){
 function koSetUnit(m, u){
   var want = String(u == null ? "" : u).trim();
   if (want === koUnitOf(m)) return;
+  /* BUILT HERE RATHER THAN THROUGH `joinTarget`, and that is deliberate:
+     joinTarget takes its separator from the value it is REPLACING, which is
+     exactly right when the unit has not changed and exactly wrong here —
+     "6.2B EGP" carries no space, so keeping it would turn a change to "SQM"
+     into "6.2SQM". The convention belongs to the NEW unit (KO_TIGHT above).
+
+     WHAT IS WRITTEN STILL ROUND-TRIPS, which is the property the whole
+     feature rests on: joinTarget reads the separator back out of the stored
+     string, so a value written here splits and rejoins to itself, and the
+     check asserts that over everything the plan holds. */
+  var sep = want && !KO_TIGHT[want] ? " " : "";
   ["target", "target3y"].forEach(function(f){
     var v = m[f];
     if (v == null || v === "") return;   /* nothing to attach it to */
-    m[f] = joinTarget("", splitTarget(v).value, want);
+    m[f] = splitTarget(v).value + (want ? sep + want : "");
   });
 }
 /* A unit with no target to sit inside cannot be stored, so the field says so
@@ -2926,13 +2928,47 @@ function koHasTarget(m){
   return !!(String(m.target || "").trim() || String(m.target3y || "").trim());
 }
 
+/* ── THE UNITS ARE PICKED FROM A LIST (§199.4) ─────────────────────────
+   Islam, on money: *"the financial units can be B EGP or M EGP or EGP only"*,
+   and on counts: *"# into trips and orders is tricky, as we will need to add
+   units all the time, so let's commit to #"*.
+
+   BOTH ARE THE SAME DECISION and it is the right one. A free box invites a
+   fourth spelling of the same currency and a different noun for every kind of
+   thing counted — and the moment two rows say `#` and `trips` for the same
+   idea, nothing can compare them and somebody has to maintain a vocabulary
+   nobody agreed. A short fixed list is the maintenance NOT happening.
+
+   `#` IS THE COMMITMENT, not a placeholder for a better word later. §199's
+   own mockup argued for `trips` and `orders`; he priced that and turned it
+   down, and the cost is recorded rather than re-argued: a count says how
+   MANY and the objective's name says of what.
+
+   A STORED VALUE OUTSIDE THE LIST IS KEPT AND OFFERED (§96.2, §114). The
+   shipped plan holds `M`, `K` and `M USD` on four rows between them; a
+   dropdown that could not show them would either display the row wrong or
+   drop the unit on the first repaint, and both are worse than one extra
+   entry. Nothing is rewritten by this list — only what the pen writes next. */
+var KO_UNITS = ["", "%", "#", "EGP", "M EGP", "B EGP", "SQM", "d", "h"];
+/* WRITTEN AGAINST THE NUMBER, OR AFTER A SPACE — and it is the PLAN's own
+   habit, read off the shipped data rather than invented: `30%`, `100#` and
+   `6.2B EGP` are written tight, while `28 EGP`, `4 d` and `24 h` take a space.
+   A scaled currency reads as one token (`6.2B EGP`) and a bare one does not.
+
+   IT IS A LIST RATHER THAN A RULE because there is no rule: "a symbol is
+   tight, a word takes a space" gets `EGP` right and `B EGP` wrong, and the
+   difference is convention, not grammar. Nine entries is cheaper to read than
+   a predicate nobody can quite state. */
+var KO_TIGHT = { "%":1, "#":1, "M EGP":1, "B EGP":1 };
+function koUnitOpts(cur){
+  var opts = KO_UNITS.slice();
+  if (cur && opts.indexOf(cur) < 0) opts.splice(1, 0, cur);
+  return opts;
+}
+
 function koView(list, isGroup, acKey){
   var near = isGroup || SHOW_KO_THIS_YEAR;
   var miss = '<span class="missing">Missing</span>';
-  /* Drawn only where at least one row HAS one — a column of empty cells on a
-     plan whose targets are all bare percentages is a column that says nothing
-     (§41's budget, and 46 of the 178 measured carry no unit at all). */
-  var anyUnit = list.some(function(m){ return !!koUnitOf(m); });
   /* §145: every pending mark on the row, chips beside the values it shows —
      including a pending direction or compile, which have no column here, or
      the office would have nothing to confirm them from in read mode. */
@@ -2941,10 +2977,6 @@ function koView(list, isGroup, acKey){
            pendChip(acKey, m, "target") + pendChip(acKey, m, "compile");
   };
   if (KO_VIEW === "chips") {
-    /* THE CHIP LAYOUT KEEPS THE WHOLE STRING (§199). A chip is one figure with
-       nothing beside it to line up against, so splitting the unit off would
-       cost the reading and buy nothing — the column exists so a COLUMN can be
-       read down, and there is no column here. */
     return '<div class="ochips">' + list.map(function(m){
       var far = m.target3y ? esc(m.target3y) : miss;
       return '<div class="ochip"><b>' + esc(m.name) + '</b>' +
@@ -2953,19 +2985,25 @@ function koView(list, isGroup, acKey){
               : '<div class="v">' + far + '</div>') + chips(m) + '</div>';
     }).join("") + '</div>';
   }
-  var cls = (near ? '' : ' one') + (anyUnit ? ' wu' : '');
-  return '<div class="ohead' + cls + '"><span>Objective</span>' +
-      (anyUnit ? '<span>Unit</span>' : '') +
+  /* §199.4: THE READING VIEW KEEPS THE UNIT ON THE FIGURE. §199 split it into
+     a column of its own and Islam looked at it: *"let the unit be set in the
+     edit table, but in the view attach the unit to the target."*
+
+     He is right, and the reason is worth keeping. The argument for splitting
+     was that a column of targets could then be read straight down — but the
+     unit is a property of ONE ROW, not of the table, so a column of them lines
+     up "B EGP" against "%" against "SQM" and gives the eye nothing. What
+     reading a plan actually needs is each figure complete where it stands.
+     The column stays where a unit IS one question with one answer: the pen,
+     where it is being set. */
+  return '<div class="ohead' + (near ? '' : ' one') + '"><span>Objective</span>' +
       '<span>' + horizonColLabel() + '</span>' +
       (near ? '<span>This year</span>' : '') + '</div>' +
     list.map(function(m){
-      var u = koUnitOf(m);
-      return '<div class="orow' + cls + '"><span class="on">' + esc(m.name) +
+      return '<div class="orow' + (near ? '' : ' one') + '"><span class="on">' + esc(m.name) +
         chips(m) + '</span>' +
-        (anyUnit ? '<span class="ou">' + (u ? esc(u) : "") + '</span>' : '') +
-        '<span class="ot h">' + (m.target3y ? esc(koNum(m.target3y)) : miss) + '</span>' +
-        (near ? '<span class="ot">' + (m.target ? esc(koNum(m.target)) : miss) + '</span>' : '') +
-        '</div>';
+        '<span class="ot h">' + (m.target3y ? esc(m.target3y) : miss) + '</span>' +
+        (near ? '<span class="ot">' + (m.target ? esc(m.target) : miss) + '</span>' : '') + '</div>';
     }).join("");
 }
 /* The far column says WHICH year when the tenant has set one — "By 2028" reads
@@ -3022,7 +3060,8 @@ function koEdit(list, page, acKey, owner){
            how the objective is written, which is authoring. */
         '<td class="cc">' + (pg
           ? (koHasTarget(m)
-              ? inputOr(pg, koUnitOf(m), "", function(v){ koSetUnit(m, v); })
+              ? selectOr(pg, koUnitOf(m), koUnitOpts(koUnitOf(m)), "",
+                  function(v){ koSetUnit(m, v); })
               : '<span class="why" title="Set a target first \u2014 the unit is ' +
                 'written with it">\u2014</span>')
           : esc(koUnitOf(m))) + '</td>' +

@@ -82,19 +82,49 @@ with sync_playwright() as pw:
     t = pg.evaluate("""() => {
       const go = (a, b2, u) => { const m = {target:a, target3y:b2};
         koSetUnit(m, u); return [m.target, m.target3y]; };
-      return { word: go("100","1500","trips"),
+      return { word: go("100","1500","SQM"),
                same: go("30%","45%","%"),
                swap: go("2.4B EGP","6.2B EGP","SQM"),
                bare: go("60000","","SQM"),
                clear: go("30%","45%","") };
     }""")
-    ck("a WORD unit gets a space — '100' + trips",
-       t["word"] == ["100 trips", "1500 trips"], t["word"])
+    ck("a spaced unit gets its space", t["word"] == ["100 SQM", "1500 SQM"], t["word"])
     ck("a SYMBOL unit gets none", t["same"] == ["30%", "45%"], t["same"])
     ck("both horizons take it", t["swap"] == ["2.4 SQM", "6.2 SQM"], t["swap"])
     ck("an empty horizon is left empty, not given a bare unit",
        t["bare"] == ["60000 SQM", ""], t["bare"])
     ck("clearing the unit leaves the numbers", t["clear"] == ["30", "45"], t["clear"])
+
+    print("\n── 2b · the separator is the PLAN's own habit, not a rule (§199.4)")
+    # `%` and `#` and a SCALED currency are written against the number; a bare
+    # currency and a word take a space. Read off the shipped data, so this
+    # asserts the convention rather than inventing one.
+    sep = pg.evaluate("""() => {
+      const out = {};
+      KO_UNITS.forEach(u => { const m = {target:"6.2B EGP"};
+        koSetUnit(m, u); out[u || '(none)'] = m.target; });
+      return out; }""")
+    ck("a scaled currency is written tight — 6.2B EGP / 6.2M EGP",
+       sep.get("B EGP") == "6.2B EGP" and sep.get("M EGP") == "6.2M EGP", sep)
+    ck("a bare currency takes a space — 6.2 EGP", sep.get("EGP") == "6.2 EGP", sep)
+    ck("% and # are tight", sep.get("%") == "6.2%" and sep.get("#") == "6.2#", sep)
+    ck("clearing leaves the number alone", sep.get("(none)") == "6.2", sep)
+
+    print("\n── 2c · anything the pen writes still round-trips")
+    # THE LICENCE AGAIN, from the writing side. §1 proves it of what is stored;
+    # this proves it of what this feature will store from now on — a value the
+    # reader could not take apart again would be a plan the pen had broken.
+    rt = pg.evaluate("""() => {
+      const bad = [];
+      KO_UNITS.concat(["M USD"]).forEach(u => {
+        const m = {target:"6.2B EGP"}; koSetUnit(m, u);
+        const s = splitTarget(m.target);
+        if (joinTarget(m.target, s.value, s.unit) !== m.target) bad.push(["rejoin", u, m.target]);
+        if (s.unit !== String(u).trim()) bad.push(["read back", u, s.unit]);
+      });
+      return bad; }""")
+    ck("every unit the picker offers writes a value that reads back as itself",
+       not rt, rt)
 
     print("\n── 3 · an unchanged unit writes NOTHING (§50.6)")
     same = pg.evaluate("""() => {
@@ -105,45 +135,31 @@ with sync_playwright() as pw:
     }""")
     ck("the row is byte-identical afterwards", same["was"] == same["now"], same)
 
-    print("\n── 4 · the reading table")
+    print("\n── 4 · the reading view keeps the unit ON the figure (§199.4)")
+    # §199 split it into a column of its own and Islam looked at it: *"let the
+    # unit be set in the edit table, but in the view attach the unit to the
+    # target."* The column belonged where the unit is SET, not where the plan
+    # is read — a column of units lines "B EGP" up against "%" and gives the
+    # eye nothing, while a figure needs to be complete where it stands.
     pg.click('[data-u="logistics"]'); pg.wait_for_timeout(400)
     pg.click('[data-s="strategy"]'); pg.wait_for_timeout(300)
     pg.click('[data-sub2="found"]'); pg.wait_for_timeout(600)
-    # The chips layout is the default; the columns view is what gained a column.
     pg.evaluate("() => { KO_VIEW='cols'; SHOW_KO_THIS_YEAR = true; paint(); }")
     pg.wait_for_timeout(500)
     v = pg.evaluate("""() => {
       const h = document.querySelector('.ohead');
       return { head: h ? [...h.children].map(c=>c.textContent.trim()) : null,
-               rows: [...document.querySelectorAll('.orow')].slice(0,3).map(r =>
+               rows: [...document.querySelectorAll('.orow')].slice(0,4).map(r =>
                  [...r.children].map(c => (c.innerText||'').replace(/\\s+/g,' ').trim())),
-               unitCol: !!document.querySelector('.orow .ou') };
+               strayCol: !!document.querySelector('.orow .ou') };
     }""")
-    ck("the heading gained Unit, in second place",
-       v["head"] and v["head"][1] == "Unit", v["head"])
-    ck("a money row says the unit once and the numbers bare",
-       v["rows"] and v["rows"][0][1] == "B EGP"
-       and v["rows"][0][2] == "2.4" and v["rows"][0][3] == "1.6", v["rows"][:1])
-    ck("...and a percentage row does the same",
-       any(r[1] == "%" and "%" not in r[2] for r in v["rows"]), v["rows"])
-
-    print("\n── 5 · drawn only where a unit exists (§41)")
-    none = pg.evaluate("""() => {
-      const ko = UNITS.logistics.keyObjectives;
-      const keep = ko.map(m => [m.target, m.target3y]);
-      ko.forEach(m => { m.target = splitTarget(m.target).value;
-                        m.target3y = splitTarget(m.target3y).value; });
-      paint();
-      const h = document.querySelector('.ohead');
-      const out = { head: h ? [...h.children].map(c=>c.textContent.trim()) : null,
-                    anyCell: !!document.querySelector('.orow .ou') };
-      ko.forEach((m,i) => { m.target = keep[i][0]; m.target3y = keep[i][1]; });
-      paint();
-      return out;
-    }""")
-    ck("with no unit anywhere, no Unit column at all",
-       none["head"] and "Unit" not in none["head"], none["head"])
-    ck("...and no empty cells left behind", not none["anyCell"], none)
+    ck("there is NO Unit column in the reading view",
+       v["head"] and "Unit" not in v["head"], v["head"])
+    ck("...and no cell left behind from one (§24)", not v["strayCol"], v)
+    ck("a money figure is complete where it stands",
+       any(c == "2.4B EGP" for r in v["rows"] for c in r), v["rows"][:2])
+    ck("...and so is a percentage",
+       any(c.endswith("%") for r in v["rows"] for c in r), v["rows"])
 
     print("\n── 6 · the chip layout is deliberately untouched")
     chips = pg.evaluate("""() => { KO_VIEW='chips'; paint();
@@ -155,21 +171,40 @@ with sync_playwright() as pw:
     print("\n── 7 · the editor writes the plan, and only the office's pen has it")
     pg.evaluate("() => { EDIT_PAGE['foundation'] = true; paint(); }")
     pg.wait_for_timeout(500)
+    # §199.4: IT IS A PICKER NOW, NOT A BOX. Islam: "the financial units can be
+    # B EGP or M EGP or EGP only" and "let's commit to #" — both are the same
+    # decision, and a fixed list is the vocabulary maintenance not happening.
     w = pg.evaluate("""() => {
       const heads = [...document.querySelectorAll('.koband thead th')].map(t=>t.textContent.trim());
       const row = document.querySelectorAll('.koband tbody tr')[0];
-      const box = row.querySelectorAll('td')[2].querySelector('input');
-      if (!box) return { heads: heads, noBox: true };
+      const sel = row.querySelectorAll('td')[2].querySelector('select');
+      if (!sel) return { heads: heads, noPicker: row.querySelectorAll('td')[2].innerHTML.slice(0,90) };
       const m = UNITS.logistics.keyObjectives[0];
       const was = [m.target, m.target3y];
-      box.value = "SQM"; box.dispatchEvent(new Event('change', {bubbles:true}));
+      const opts = [...sel.options].map(o => o.value);
+      const showing = sel.value;
+      sel.value = "SQM"; sel.dispatchEvent(new Event('change', {bubbles:true}));
       const now = [m.target, m.target3y];
       m.target = was[0]; m.target3y = was[1];
-      return { heads: heads, was: was, now: now };
+      return { heads: heads, opts: opts, showing: showing, was: was, now: now };
     }""")
     ck("the pen's table has a Unit column", "Unit" in (w.get("heads") or []), w.get("heads"))
-    ck("...and typing in it reaches the stored plan",
+    ck("...and it is a PICKER, not a free box", not w.get("noPicker"), w)
+    ck("...showing what the row already holds", w.get("showing") == "B EGP", w.get("showing"))
+    ck("...offering the three currencies and nothing else made up",
+       [o for o in (w.get("opts") or []) if "EGP" in o] == ["EGP", "M EGP", "B EGP"],
+       w.get("opts"))
+    ck("...and # among them, committed to rather than a placeholder",
+       "#" in (w.get("opts") or []), w.get("opts"))
+    ck("...and picking reaches the stored plan",
        w.get("now") == ["1.6 SQM", "2.4 SQM"], w)
+
+    print("\n── 7b · a unit the list does not offer is kept (§96.2, §114)")
+    keep = pg.evaluate("() => koUnitOpts('M USD')")
+    ck("'M USD' is offered because a row holds it",
+       "M USD" in keep and keep.index("M USD") == 1, keep)
+    ck("...and the standard list is still all there",
+       all(u in keep for u in ["%", "#", "EGP", "M EGP", "B EGP"]), keep)
 
     print("\n── 8 · a unit is not a gap")
     g = pg.evaluate("""() => ({

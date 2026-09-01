@@ -6,9 +6,8 @@ version (rules A2 / A11, changed 2026-08-20) — those go only when asked for.
 
 **Where it runs:** Vercel, production tracks `main`. Static files plus two
 serverless functions (`/api/state`, `/api/auth`) against Neon Postgres.
-**Latest version:** v3.65 on `main` (§178, the Viewing-as line). §179 is on
-`claude/four-fixes-welcome-dates-types`, built and checked, **not merged** —
-`main` is Islam's call every time.
+**Latest version:** §230/§230.2 on `main` (the hard-refresh notice: a late
+answer lands in place, and the notice speaks the user's language).
 
 *(This line read v3.58 while the section below it ran to v3.65: a documentation
 drift, flagged before it was corrected rather than quietly realigned.)*
@@ -68,7 +67,7 @@ Nothing proceeds past this line without an answer.
 
 ## Built and verified
 
-### §230 / §230.2 — the hard-refresh notice (on `claude/hard-refresh-deployment-errors-jm0yin`, not merged)
+### §230 / §230.2 — the hard-refresh notice (merged to `main` 2026-09-01)
 
 - **§230:** when the server's answer arrives after the page's 8-second
   give-up (cold start after a deployment), the real page now appears by

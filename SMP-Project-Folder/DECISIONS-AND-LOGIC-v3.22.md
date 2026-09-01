@@ -25802,3 +25802,46 @@ neighbourhood — plan-fields, gap-fill, gap-walk, owner-picker,
 milestone-fill, submit-gate, objective-unit, fn-ko-edit, enter-commits,
 foundation-objectives, plan-builder, repeat-project, table-fit,
 pillar-project-remove — and the full `qa.py` sweep green.
+
+## §234 — ADD SLIDE AFTER: THE BUTTON SAYS WHERE THE SLIDE LANDS (2026-09-01)
+
+Islam, on Manage slides: *"for the button add slide let's make it add slide
+after. so people can understand that the empty slide will be added after the
+slide they are stopping on. or shall we add as well a rearrange of slides but
+valid only for the added slides while the original slides flow stays intact
+but he can rearrange around?"*
+
+**THE SECOND HALF WAS ALREADY BUILT, AND SAYING SO IS THE ANSWER** (§160.2:
+read what exists before calling something a build). The rearrange he describes
+is §51.10's `slidesMove()`, shipped since v3.22's ancestry: the ▲▼ pair in a
+selected slide's control row moves an ADDED slide over its neighbour — over a
+generated slide too, which is how a picture travels from the pillars to the
+SWOT without naming an anchor — and only added slides move, because the
+generated order is the deck's own and not ours to shuffle. Exactly the design
+he proposed, already in force. That he proposed it as new is itself a
+finding about the arrows' findability, recorded below as a question rather
+than answered with an unasked redesign (rule 1c).
+
+**THE LABEL CHANGE IS HIS, IN HIS WORDS**: `+ Add a slide` → **`+ Add slide
+after`**. The insert-after behaviour is unchanged — `slidesAdd()` has spliced
+after the selection since §51.8 — what changes is that the button now SAYS the
+one fact about itself that a first-time presenter cannot see: where the slide
+will land. **The hint under it re-divides rather than repeats**: it read
+*"after the one selected"*, and with "after" now on the button the two would
+have said the word twice in one breath — so the hint keeps only its half of
+the sentence (*"the one selected"* / *"the slide selected below"*), and the
+pair reads as one line: *Add slide after — the one selected.* The read-mode
+pane's prose names the control by its new name in the same edit, because a
+sentence pointing at a button that is not there any more is §87's twins in
+prose (§51.11 from the wording side).
+
+**Verified by driving it**, not by reading: the button pressed on Mobile's
+deck with slide 3 selected — the new slide lands at position 4, arrives
+selected, the arrows still step it over a generated neighbour, a generated
+slide still offers no arrows, no console errors. **The probe's one red was the
+probe**: `.editbtn` uppercases by CSS, so the rendered text is `+ ADD SLIDE
+AFTER` and an exact-case compare called a correct build broken (§97.9's
+rendered-case lesson, again).
+
+**Open, his call**: if he had not found the ▲▼ arrows, making them more
+visible is a design change and goes through a mockup first.

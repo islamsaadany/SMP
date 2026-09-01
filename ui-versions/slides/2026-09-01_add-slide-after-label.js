@@ -103,7 +103,7 @@ function picStyle(p){
 }
 /* `blank` is the EDITOR's flag and nothing else's. A slide with no picture in
    it is not a slide and must never reach a projector (§50.2) — but the moment
-   after you press Add slide after it is exactly that, and a rail that does not show
+   after you press Add a slide it is exactly that, and a rail that does not show
    the thing you just made is a rail that swallowed it. So the deck asks
    without the flag and the editor asks with it. */
 function pslideHtml(sl, blank){
@@ -345,9 +345,9 @@ function slidesPaint(){
      that is not there. */
   var list = document.getElementById("slidelist");
   list.innerHTML = '<div class="sl-add"><button class="editbtn" data-sladd="1">' +
-      '+ Add slide after</button>' +
+      '+ Add a slide</button>' +
       '<span class="picsub">' + (SLED.sel && SLED.sel.indexOf("ps:") === 0
-        ? "the one selected" : "the slide selected below") + '</span></div>' +
+        ? "after the one selected" : "after the slide selected below") + '</span></div>' +
     all.map(function(el, i){
     var mine = !!el.dataset.ps;
     return '<div class="slrow' + (el.dataset.ed === SLED.sel ? " on" : "") +
@@ -394,7 +394,7 @@ function slidesPaneHtml(cur, sl){
       '<div class="sstage"><div class="sstage-in"></div></div>' +
       '<div class="slctl slctl-read"><p class="picsub">This slide is built by the ' +
       'platform from what the unit has reported, and is refreshed every time the ' +
-      'deck opens. <b>Add slide after</b> puts your own pictures after it.</p></div>';
+      'deck opens. <b>Add a slide</b> puts your own pictures after it.</p></div>';
   }
   var pics = sl.pics || [];
   var across = Math.max(1, Math.min(PIC_PER_SLIDE, +sl.layout || 1));

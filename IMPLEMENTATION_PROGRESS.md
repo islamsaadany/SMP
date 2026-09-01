@@ -70,6 +70,21 @@ Nothing proceeds past this line without an answer.
 
 ## Built and verified
 
+### §234 — "Add slide after" (2026-09-01, on `claude/slide-insertion-rearrange-fga828`)
+
+Islam's wording on Manage slides' Add button: `+ Add a slide` becomes
+**`+ Add slide after`**, so the button says where the empty slide lands. The
+hint under it keeps only its half of the sentence ("the one selected" / "the
+slide selected below") instead of repeating "after"; the read-mode prose names
+the control by its new name. **His rearrange question needed no build**: §51.10's
+▲▼ arrows already move ADDED slides only, over generated neighbours too, with
+the generated order fixed — exactly the design he proposed. Verified by driving
+Mobile's deck: slide added at position 4 with slide 3 selected, arrives
+selected, arrows still step it, generated slides offer none, no errors.
+**Waiting on Islam**: whether the ▲▼ arrows were findable — if not, making
+them more visible is a mockup-first design change.
+
+
 ### §230 / §230.2 — the hard-refresh notice (merged to `main` 2026-09-01)
 
 - **§230:** when the server's answer arrives after the page's 8-second

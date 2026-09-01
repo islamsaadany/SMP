@@ -25494,8 +25494,6 @@ that quietly brought the link back would pass.
 (server / data / example — asserted as a regex over the whole card), keep Try
 again reachable by a real press, and keep the way past removed. ALL GREEN on
 the build; full `qa.py` clean.
----
-
 ## §231 — A BOX THAT ARRIVES WITH NO TAB OPEN
 
 Islam, having turned §225's notifications on: *"I didn't get any notifications
@@ -25631,6 +25629,83 @@ that service can only hand it over while the browser is still running
 somewhere; quit Chrome entirely and it arrives next time it opens. A sleeping
 machine gets it on waking. **iPhone and iPad still need the platform added to
 the home screen** — Apple's rule, and the setting says so.
+
+### §231.3 — THE LIBRARY'S ABSENCE MUST NOT BE AN OUTAGE
+
+Islam, minutes after the §231 merge: *"the chat bubble disappeared!"*
+
+**REPRODUCED, NOT GUESSED.** `lib/push.js` required `web-push` at its top
+level, and `api/chat.js` requires `lib/push.js` at ITS top level — so anything
+that stopped the library loading stopped the **whole chat endpoint** loading.
+With the package moved aside the dev-server would not start at all; in a
+serverless function that is a 500 on every `/api/chat` request. And §197 is
+explicit that **the corner is created hidden and only a SUCCESSFUL answer ever
+reveals it**: a 500 matches neither that branch nor the 401/403 one, so nothing
+shows it. The bubble does not break — it is simply never drawn.
+
+**§104's RULE, ONE MODULE OUT.** No key, a refusal, a timeout and the switch
+off all land on the chat exactly as it worked before the assistant existed, and
+*"the package did not load"* belongs on that list. A notification helper must
+degrade to **no push**, never to **no conversation**. The require is inside a
+`try` now, remembered so it is attempted once, and every path through the module
+returns a failure instead of throwing.
+
+**WHY THE PACKAGE WAS MISSING IN PRODUCTION IS NOT CLAIMED.** `package.json` and
+`package-lock.json` both carry it and `node_modules` is not committed, so the
+deployment should install it; whatever the reason, the endpoint must not depend
+on it. *A dependency that can take a working feature down is a dependency that
+will.*
+
+**ASSERTED AS THE SHAPE, NOT A BEHAVIOUR.** A top-level require is precisely
+what could not be caught, so its **absence** is what `scripts/test-push.js`
+checks — along with the require sitting inside a `try`, and `api/chat.js` still
+requiring this module, which is why the first two matter at all. A test that
+moved the package aside would prove the same thing and could not run twice.
+
+### §231.4 — A FAILED ASK IS NOT AN ANSWER, AND THE INBOX SAID IT WAS
+
+Islam, on the Platform Inbox with §231.3's endpoint down: *"all conversations
+are gone!! what happened?"*
+
+**NOTHING HAD.** `boxLoadQueue` opened `if (err || !j) return;` — a silent
+return — so `box.threads` stayed exactly as it started, which is empty, and
+`drawQueue()` went on to print **"No conversations yet."** That is a statement
+about somebody's DATA, made when nothing was ever read. The three counts read
+**0 · 0 · 0** beside it, for the same reason.
+
+**REPRODUCED ON A DATABASE HOLDING EVERY CONVERSATION**, with only the endpoint
+answering 500: the screen matched his screenshot exactly, tab for tab and word
+for word. So the claim that nothing was lost is a measurement rather than a
+reassurance — and it was worth making before anything was changed.
+
+**§93's FAULT ON THE SURFACE WHERE BEING WRONG IS MOST FRIGHTENING.** That
+section made the register's password column say *unreadable* rather than *none*
+when the ask failed, and gave the reason: *counting an error as absence reports
+everybody as having none.* The same shape, one page over, about the thing a
+client's people wrote in confidence. **And §105's own rule** — an empty state
+describes THIS filter, never the whole product — extended by one: it describes
+what was actually READ, and never what could not be.
+
+The failure is now recorded rather than swallowed; the page says it, says
+plainly that nothing has been lost, and carries **Try again**, which reloads the
+queue AND any open conversation — both failed together and both must come back
+together, or one pane is fixed while the one beside it still says the server is
+unreachable. **The counts read a dash**, because absent is not nought (§35).
+
+**IT DRAWS ONLY WHEN THERE IS NOTHING TO SHOW.** A poll that fails after a good
+one leaves the list somebody is reading exactly where it was — a working list
+replaced by an error is a worse answer than a stale one.
+
+**OUTSTANDING RATHER THAN BROKEN.** The warning ground the attention items
+already use (§168, §190), not an alarm colour: the conversations are fine, the
+connection is not, and red would say the opposite.
+
+**AND THE GOOD PATH IS ASSERTED IN THE SAME BREATH** (§94.2): an assertion that
+a failure is reported passes on a build that reports one always, so the check
+brings the server back, presses Try again, and requires the conversations to
+draw and the counts to be numbers again.
+---
+
 
 ## §232 — REMOVING A PILLAR OR A PROJECT (2026-09-01)
 

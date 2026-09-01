@@ -95,7 +95,12 @@ var CHAT = (function(){
      the word has to survive the redraw that reports it. Cleared when the
      conversation changes, because it is news about this one. */
   var box = { person: null, threads: [], data: null, timer: null, q: "",
-              tab: "waiting", note: null };
+              tab: "waiting", note: null,
+              /* §231.4: WHETHER WE HAVE EVER MANAGED TO ASK. `null` until an
+                 answer arrives, and a sentence once one has failed — because
+                 an empty list and a list nobody could fetch are two different
+                 things and only one of them is about the data. */
+              err: null, asked: false };
 
   function servable(){ return location.protocol !== "file:"; }
   function el(id){ return document.getElementById(id); }
@@ -1410,6 +1415,20 @@ var CHAT = (function(){
   function drawQueue(){
     var list = el("chqlist"); if (!list) return;
     var rows = boxRows();
+    /* NOTHING WE COULD NOT FETCH IS REPORTED AS NOTHING THERE (§231.4).
+       This comes FIRST, before every empty state below, because those all
+       describe the DATA and this one describes the ASK — and with rows in
+       hand it does not draw at all, so a poll that fails after a good one
+       leaves the list somebody is reading exactly where it was. */
+    if (box.err && !rows.length) {
+      list.innerHTML = '<div class="chnothing chqfail">' +
+        "<b>We could not load the conversations.</b> " + esc2(box.err) +
+        " Nothing has been lost \u2014 this is about the connection, not " +
+        "your conversations." +
+        ' <button class="chlink" type="button" data-chretry="1">Try again</button>' +
+        "</div>";
+      return;
+    }
     if (!rows.length) {
       /* AN EMPTY LIST SAYS WHERE EVERYTHING WENT (§105). "Nobody is waiting"
          is true and was a dead end: with an answered conversation hidden
@@ -1509,8 +1528,16 @@ var CHAT = (function(){
     var pane = el("chthread"); if (!pane) return;
     var d = box.data;
     if (!d) {
-      pane.innerHTML = '<div class="chnothing">Pick somebody on the left to read what they ' +
-        "wrote and answer them.</div>";
+      /* AND HERE TOO: "pick somebody on the left" is an invitation, and an
+         invitation offered to somebody whose click just failed is the same
+         lie one pane over (§231.4). */
+      pane.innerHTML = '<div class="chnothing' + (box.err ? " chqfail" : "") + '">' +
+        (box.err
+          ? "<b>We could not open that conversation.</b> " + esc2(box.err) +
+            " Nothing has been lost." +
+            ' <button class="chlink" type="button" data-chretry="1">Try again</button>'
+          : "Pick somebody on the left to read what they wrote and answer them.") +
+        "</div>";
       return;
     }
     /* THE REPLY BOX IS ONLY REBUILT WHEN THE PERSON CHANGES. Redrawing it on
@@ -1657,20 +1684,55 @@ var CHAT = (function(){
 
   function boxLoadQueue(then){
     post({ action:"queue" }, function(err, j){
-      if (err || !j) return;
+      /* A FAILED ASK IS NOT AN ANSWER (§93, §231.4). This returned in silence,
+         so `box.threads` stayed as it started — empty — and the page went on
+         to print "No conversations yet", which is a statement about somebody's
+         DATA made when nothing was ever read. Islam, on that screen: "all
+         conversations are gone!! what happened?" Nothing had; the endpoint was
+         down (§231.3) and the list simply never loaded.
+
+         §35's rule, on the surface where being wrong is most frightening: a
+         dash means we have not asked, and it must never render as nought. */
+      if (err || !j) {
+        box.err = (err === "failed" || err === true)
+          ? "We could not reach the server."
+          : "The server did not answer (" + String(err) + ").";
+        box.asked = true;
+        drawQueue(); boxCounts(null);
+        if (then) then();
+        return;
+      }
+      box.err = null; box.asked = true;
       shellCount(j);
       box.threads = j.threads || [];
       drawQueue();
-      ["waiting", "flagged"].forEach(function(k){
-        var n = document.querySelector('[data-chn="' + k + '"]');
-        if (n) n.textContent = String(j[k] || 0);
-      });
+      boxCounts(j);
       if (then) then();
     });
   }
+  /* ONE WRITER FOR THE TWO TAB COUNTS, so "we could not ask" cannot reach one
+     of them and not the other (§53.5). A null is the dash. */
+  function boxCounts(j){
+    ["waiting", "flagged"].forEach(function(k){
+      var n = document.querySelector('[data-chn="' + k + '"]');
+      if (n) n.textContent = j ? String(j[k] || 0) : "\u2014";
+    });
+  }
+
   function boxLoadThread(who, then){
     post({ action:"thread", person:who }, function(err, j){
-      if (err || !j) return;
+      /* THE SAME RULE ONE PANE OVER (§231.4). A conversation that could not be
+         fetched left the pane on whatever it last held — or on its empty
+         prompt — with nothing saying the ask had failed. */
+      if (err || !j) {
+        box.err = (err === "failed" || err === true)
+          ? "We could not reach the server."
+          : "The server did not answer (" + String(err) + ").";
+        drawThread();
+        if (then) then();
+        return;
+      }
+      box.err = null;
       box.data = j; drawThread();
       if (then) then();
     });
@@ -1982,6 +2044,17 @@ var CHAT = (function(){
           boxLoadQueue();
           if (box.person) boxLoadThread(box.person);
         });
+        return;
+      }
+      /* TRY AGAIN (§231.4). It asks for the queue AND, where one was open, the
+         conversation — both failed together and both have to come back
+         together, or pressing it fixes the list and leaves the pane beside it
+         still saying the server is unreachable. */
+      if (e.target.closest("[data-chretry]")) {
+        box.err = null;
+        drawQueue(); if (box.person) drawThread();
+        boxLoadQueue();
+        if (box.person) boxLoadThread(box.person);
         return;
       }
       var tab = e.target.closest("[data-chtab]");

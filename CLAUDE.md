@@ -384,6 +384,44 @@ console errors (in this cloud environment, run it via a wrapper that points Play
   remove × onto a second line — `inline-block` restores it, and it was found
   by `checks/plan-fields.py` GOING RED, not by reading the cascade, which is
   the argument for that check existing.
+- **A FAILED ASK IS NOT AN ANSWER, AND THE INBOX SAID IT WAS (§231.4):** Islam,
+  on the Platform Inbox with §231.3's endpoint down — *"all conversations are
+  gone!! what happened?"* **NOTHING HAD.** `boxLoadQueue` opened
+  `if (err || !j) return;`, so `box.threads` stayed empty as initialised and the
+  page printed **"No conversations yet"** — a statement about somebody's DATA
+  made when nothing was ever read, with **0 · 0 · 0** beside it.
+  **REPRODUCED ON A DATABASE HOLDING EVERY CONVERSATION**, endpoint answering
+  500: the screen matched his screenshot word for word, so "nothing was lost" is
+  a measurement and not a reassurance. **§93's fault where being wrong is most
+  frightening** (that one made the password column say *unreadable* rather than
+  *none* — counting an error as absence reports everybody as having none), and
+  **§105's rule extended by one**: an empty state describes what was actually
+  READ, never what could not be. The failure is recorded now, said plainly with
+  *nothing has been lost*, and carries **Try again** — which reloads the queue
+  AND any open conversation, or one pane is fixed while its neighbour still says
+  the server is unreachable. **The counts read a dash** (§35: absent is not
+  nought). **DRAWN ONLY WHEN THERE IS NOTHING TO SHOW** — a poll failing after a
+  good one leaves the list somebody is reading where it was. **Warning ground,
+  never an alarm colour** (§168, §190): the conversations are fine, the
+  connection is not. **And the good path is asserted in the same breath**
+  (§94.2), because a failure-reported assertion passes on a build that reports
+  one always.
+- **A DEPENDENCY MUST NOT BE ABLE TO TAKE THE FEATURE IT SERVES DOWN (§231.3):**
+  Islam, minutes after the §231 merge — *"the chat bubble disappeared!"*
+  `lib/push.js` required `web-push` at its TOP level and `api/chat.js` requires
+  `lib/push.js` at ITS top level, so anything stopping the library loading
+  stopped **the whole chat endpoint** loading — reproduced: with the package
+  moved aside the dev-server will not start. And §197 is explicit that **the
+  corner is created hidden and only a SUCCESSFUL answer reveals it**, so a 500
+  matches no branch and the bubble is simply never drawn. **§104's rule one
+  module out**: no key, a refusal, a timeout and the switch off all land on the
+  chat as it worked before, and *"the package did not load"* belongs on that
+  list — a notification helper degrades to **no push**, never to **no
+  conversation**. Loaded inside a `try` now, remembered so it is attempted once.
+  **Why it was missing in production is NOT claimed** (the lockfile carries it);
+  the endpoint must not depend on it either way. **Asserted as the SHAPE** — a
+  top-level require is what cannot be caught, so its absence is the assertion,
+  and a test that moved the package aside could not run twice.
 - **A BOX THAT ARRIVES WITH NO TAB OPEN (§231):** Islam, having turned §225 on
   — *"I didn't get any notifications despite enabling the notifications"* — and
   then, correcting two wrong diagnoses, *"stop assuming wrong things, the bell

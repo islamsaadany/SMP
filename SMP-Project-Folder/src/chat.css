@@ -380,6 +380,15 @@ body.presenting .chatdock { display:none; }
                      text-decoration:underline; text-underline-offset:2px; }
 .chnothing .chlink:hover { color:var(--gold); }
 .chnothing .chlink:focus-visible { outline:2px solid var(--gold); outline-offset:2px; }
+/* WE COULD NOT ASK — a different KIND of thing from "there is nothing here"
+   (§231.4), so it does not read in the same quiet grey as an empty list.
+   OUTSTANDING RATHER THAN BROKEN, in the warning ground the attention items
+   already use (§168, §190): the conversations are fine, the connection is not,
+   and an alarm colour here would say the opposite. Wider than the empty state,
+   because it is a sentence rather than a phrase. */
+.chnothing.chqfail { color:var(--ink); max-width:44ch;
+                     background:var(--warn-bg); border:1px solid var(--warn);
+                     border-radius:8px; padding:14px 16px; }
 
 @media (max-width:820px) {
   .chinbox { grid-template-columns:1fr; }

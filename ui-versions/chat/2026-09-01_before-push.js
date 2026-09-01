@@ -466,15 +466,8 @@ var CHAT = (function(){
            the clock is reset — not on the next open, which could be tomorrow. */
         if (j.chat) {
           var wasBeat = cfg.beat;
-          var wasPop = cfg.popup, wasKey = cfg.vapid;
           cfg = j.chat;
           if (cfg.beat !== wasBeat) beat();
-          /* §226: THE COMPANY'S SWITCH REACHES EVERY BROWSER THROUGH THIS
-             POLL, so this is where a device that must now subscribe — or must
-             stop — finds out. Only when something actually moved: `pushSync`
-             posts, and running it on every poll would be a request per beat
-             for a state that changes about once a year. */
-          if (cfg.popup !== wasPop || cfg.vapid !== wasKey) pushSync();
         }
         var dock = el("chatdock");
         /* OFF MEANS GONE (§98.2). Not disabled, not explaining itself — the
@@ -590,103 +583,8 @@ var CHAT = (function(){
      spending it well. Called when the panel is OPENED (§225). */
   function popAsk(){
     if (!popCan() || !cfg.popup || !popMine()) return;
-    if (Notification.permission === "default") {
-      try {
-        var q = Notification.requestPermission();
-        /* AND SUBSCRIBE THE MOMENT THEY SAY YES (§226), not on the next
-           paint: `requestPermission` resolves with the answer, and the
-           gesture that opened the panel is what licensed the question. */
-        if (q && q.then) q.then(function(){ pushSync(); drawBell(); });
-      } catch (e) { /* the older callback shape; the next paint catches up */ }
-      return;
-    }
-    pushSync();
-  }
-
-  /* What this browser will actually do, in one sentence — never what the
-     switch says, which is the difference §226.2 exists to close. */
-  function popStatusLine(companyOn){
-    if (!companyOn) return "Nobody is notified. The away email still goes out.";
-    var st = popState();
-    if (st === "unsupported") {
-      return "<b>This browser cannot show them</b> \u2014 on an iPhone or iPad, " +
-             "add the platform to the home screen first.";
-    }
-    if (st === "denied") {
-      return "<b>This browser is blocking them</b> \u2014 allow notifications for " +
-             "this site in its settings.";
-    }
-    if (st === "default") {
-      return "<b>This browser has not been asked yet</b> \u2014 open your own " +
-             "conversation in the corner and allow them.";
-    }
-    return PUSHED ? "Arriving on this device, with or without a tab open."
-                  : "Allowed on this device.";
-  }
-
-  /* ── A BOX THAT ARRIVES WITH NO TAB OPEN (§226) ───────────────────────
-     §225 drew the box from this file, and measured across 45 seconds with the
-     tab in the background it drew nothing at all: the poll stops dead while
-     `document.hidden` (§98.1), so the only notification the product could
-     deliver was one for somebody already looking at the screen that shows it.
-     The server sends now, and the service worker receives — which is why it
-     works with no tab open.
-
-     THE SUBSCRIPTION IS THE SWITCH. There is no second flag anywhere saying
-     "this device wants them": a device that has said yes has a row on the
-     server, and turning the bell off deletes it (§50.6, §104.7). So this one
-     function is called wherever any of the three switches might have moved,
-     and it makes the server agree with what this browser actually holds. */
-  var PUSHED = false;                 /* is THIS device subscribed, as of now */
-  function pushCan(){
-    return typeof navigator !== "undefined" && "serviceWorker" in navigator &&
-           typeof window !== "undefined" && "PushManager" in window;
-  }
-  function b64(s){
-    /* A VAPID key travels as url-safe base64 and `PushManager` wants bytes. */
-    var pad = "=".repeat((4 - (s.length % 4)) % 4);
-    var raw = atob((s + pad).replace(/-/g, "+").replace(/_/g, "/"));
-    var out = new Uint8Array(raw.length);
-    for (var i = 0; i < raw.length; i++) out[i] = raw.charCodeAt(i);
-    return out;
-  }
-  function pushSync(){
-    if (!pushCan()) return;
-    var want = !!(cfg.popup && popMine() && popState() === "granted");
-    navigator.serviceWorker.ready.then(function(reg){
-      return reg.pushManager.getSubscription().then(function(sub){
-        if (!want) {
-          if (!sub) { PUSHED = false; return; }
-          /* TOLD BOTH WAYS ROUND. The browser forgets it and the server
-             forgets it — a row left behind would go on being sent to a
-             device that has thrown the key away, for ever. */
-          var ep = sub.endpoint;
-          return sub.unsubscribe().catch(function(){}).then(function(){
-            PUSHED = false;
-            post({ action:"pushOff", endpoint: ep }, function(){});
-          });
-        }
-        if (sub) {
-          /* ALREADY SUBSCRIBED, AND IT IS STILL SENT. A push service expires
-             an endpoint on its own schedule and the server may have dropped
-             a row it was told was gone; re-registering the same endpoint
-             replaces its row rather than adding one, so this is free. */
-          PUSHED = true;
-          return post({ action:"pushOn", sub: sub.toJSON() }, function(){});
-        }
-        if (!cfg.vapid) return;       /* no key here — nothing to subscribe to */
-        return reg.pushManager.subscribe({
-          /* NOT OPTIONAL, AND NOT A PREFERENCE: every browser that supports
-             push requires a visible notification for each one delivered, and
-             refuses to subscribe without this being true. */
-          userVisibleOnly: true,
-          applicationServerKey: b64(cfg.vapid)
-        }).then(function(made){
-          PUSHED = true;
-          post({ action:"pushOn", sub: made.toJSON() }, function(){});
-        }).catch(function(){ PUSHED = false; });
-      });
-    }).catch(function(){ /* no worker registered yet; the next call catches it */ });
+    if (Notification.permission !== "default") return;
+    try { Notification.requestPermission(); } catch (e) { /* older shape */ }
   }
   /* WHO WROTE, AND THE FIRST LINE (Islam's wording B). The newest message is
      the one that just arrived; its author is resolved through the same
@@ -695,13 +593,6 @@ var CHAT = (function(){
   function popShow(){
     if (!popCan() || !cfg.popup || !popMine()) return;
     if (Notification.permission !== "granted") return;
-    /* NOT WHERE THE SERVICE WORKER IS ALREADY DOING IT (§226). One box, one
-       source: on a subscribed device the server sends and the worker draws,
-       and this drawing one too would give somebody two boxes for one message.
-       This path is what still serves a browser where push could not be set
-       up — and it is still bounded by the tab being visible, which is the
-       whole reason §226 exists. */
-    if (PUSHED) return;
     var m = state.messages[state.messages.length - 1];
     if (!m) return;
     var who = m.bot ? "Strategy Office \u00b7 Assistant"
@@ -745,45 +636,24 @@ var CHAT = (function(){
     if (!cfg.popup || st === "unsupported") { b.hidden = true; return; }
     b.hidden = false;
     var mine = popMine();
-    /* FOUR STATES, AND THE FIRST BUILD DREW TWO (§226.2). It read `mine`
-       alone, so a browser that had not yet been asked showed the bell ON with
-       a hover promising a box that could never appear — §124's fault exactly,
-       presence reported as proof, and it makes the whole of §226 look broken
-       on a device that never answered the permission question. The bell says
-       what will actually HAPPEN on this device, which is the only thing
-       anybody is reading it for. */
-    var state = !mine        ? "off"
-              : st === "denied"  ? "blocked"
-              : st === "default" ? "ask"
-                                 : "on";
-    var on = (state === "on");
+    var refused = (st === "denied");
+    var on = mine && !refused;
     b.innerHTML = on ? BELL_ON : BELL_OFF;
     b.classList.toggle("belloff", !on);
     b.setAttribute("aria-pressed", on ? "true" : "false");
-    b.removeAttribute("aria-disabled");
-    if (state === "blocked") {
-      /* `aria-disabled`, NEVER `disabled` — a disabled button takes no focus,
-         and the one sentence explaining the silence would then be reachable
-         by hover alone (§221, §163). */
+    if (refused) {
       b.setAttribute("aria-disabled", "true");
       b.title = "Your browser is blocking these boxes on this device. " +
                 "Turn them back on in its site settings.";
       b.setAttribute("aria-label", "Notifications are blocked by this browser");
-    } else if (state === "ask") {
-      /* AND PRESSING IT ASKS, rather than switching off the thing that is not
-         on yet — which is what the first build did, so the only control on
-         the screen made it worse (§61). */
-      b.title = "Your browser has not been asked yet. Press to allow boxes " +
-                "on this device.";
-      b.setAttribute("aria-label", "Allow notifications on this device");
-    } else if (on) {
-      b.title = "A box appears on this device when a message lands, even with " +
-                "this tab in the background. Press to stop them here.";
-      b.setAttribute("aria-label", "Stop notifications on this device");
     } else {
-      b.title = "No box on this device when a message lands. " +
-                "Press to turn them on here.";
-      b.setAttribute("aria-label", "Notify me on this device");
+      b.removeAttribute("aria-disabled");
+      b.title = on ? "A box appears on this device when a reply lands. " +
+                     "Press to stop them here."
+                   : "No box on this device when a reply lands. " +
+                     "Press to turn them on here.";
+      b.setAttribute("aria-label", on ? "Stop notifications on this device"
+                                      : "Notify me on this device");
     }
   }
 
@@ -799,7 +669,6 @@ var CHAT = (function(){
     if (el("chinbox")) return;
     if (!popCan() || !cfg.popup || !popMine()) return;
     if (Notification.permission !== "granted") return;
-    if (PUSHED) return;                 /* the worker draws it (§226) */
     var who = j.waitingWho || "Somebody";
     var line = String(j.waitingBody || "").replace(/\s+/g, " ").trim();
     if (line.length > 120) line = line.slice(0, 119) + "\u2026";
@@ -943,17 +812,8 @@ var CHAT = (function(){
          undo it and the press does nothing, which is why it is `aria-disabled`
          and not `disabled`: the sentence still has to be reachable. */
       if (this.getAttribute("aria-disabled") === "true") return;
-      /* NOT ASKED YET: the press IS the gesture a browser requires, so it
-         asks rather than switching off something that was never on (§226.2).
-         Their switch is already on — this bell reads "ask" precisely because
-         `popMine()` is true — so there is nothing to store. */
-      if (popMine() && popState() === "default") { popAsk(); drawBell(); return; }
       var on = !popMine();
       popMineSet(on);
-      /* THE SERVER IS TOLD IN THE SAME BREATH (§226). The subscription IS
-         this switch, so a bell pressed off that left a row behind would go on
-         sending to a device whose owner has just said no. */
-      pushSync();
       /* Turning them ON is the gesture the browser wants, so this is the
          second and last place the question is asked. */
       if (on) popAsk();
@@ -1244,22 +1104,14 @@ var CHAT = (function(){
            they are not — so it opens that group rather than splitting it. */
         setRow("popup", "Notifications",
           "A box from the computer the moment a reply lands \u2014 and, for the " +
-          "office, the moment somebody writes in. It arrives with the platform " +
-          "in another tab, behind another app, or with no tab open at all; on a " +
-          "laptop the browser still has to be running somewhere. It shows who " +
-          "wrote and the first line. This switch turns it on for the company; " +
+          "office, the moment somebody writes in \u2014 while the platform is open " +
+          "in a tab; the away email is for when it is not. It shows who wrote and " +
+          "the first line. This switch turns it on for the company; " +
           "each person is then asked once by their own browser, and each has a " +
-          "bell in their own conversation to stop it on that device. On an " +
-          "iPhone or iPad it works only where the platform has been added to " +
-          "the home screen.",
-          segHtml("popup", "Off", "On", c.popup, true),
-          /* THE STATUS STAYS ON THE PAGE, like "No one is set" on the Handover
-             email row (§127): this is a fact about right now, not a
-             description of how the setting works, and behind a hover somebody
-             turns it on, their own browser never allows it, and nothing ever
-             says so. It is about THIS browser, because that is the only one
-             this screen can honestly speak for. */
-          '<div class="chset-hint">' + popStatusLine(c.popup) + '</div>') +
+          "bell in their own conversation to stop it on that device. On an iPhone " +
+          "or iPad it works only where the platform has been added to the home " +
+          "screen.",
+          segHtml("popup", "Off", "On", c.popup, true)) +
 
         /* ── 6 · TOLD WHEN THE ASSISTANT GIVES UP. Only while the assistant is
            on, as before: a handover that cannot happen has nobody to tell. */
@@ -1878,9 +1730,7 @@ var CHAT = (function(){
         /* AND THE BELL IN THEIR OWN CORNER (§225), for the same reason the
            `on` branch below echoes locally: the office flipping this would
            otherwise press On and see no bell until their next poll. */
-        if (seg.dataset.chset === "popup") {
-          cfg.popup = chatCfg().popup; drawBell(); pushSync();
-        }
+        if (seg.dataset.chset === "popup") { cfg.popup = chatCfg().popup; drawBell(); }
         if (seg.dataset.chset === "on") {
           var nowOn = chatCfg().on;
           var banner = el("chsetoff");

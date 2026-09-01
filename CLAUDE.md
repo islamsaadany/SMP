@@ -384,6 +384,45 @@ console errors (in this cloud environment, run it via a wrapper that points Play
   remove × onto a second line — `inline-block` restores it, and it was found
   by `checks/plan-fields.py` GOING RED, not by reading the cascade, which is
   the argument for that check existing.
+- **A BOX THAT ARRIVES WITH NO TAB OPEN (§226):** Islam, having turned §225 on
+  — *"I didn't get any notifications despite enabling the notifications"* — and
+  then, correcting two wrong diagnoses, *"stop assuming wrong things, the bell
+  is allowed and in the chat box is on."* **HE WAS RIGHT AND I WAS READING
+  RATHER THAN MEASURING.** Measured: with the tab in the background, **0
+  requests and 0 boxes across 45 seconds**, then **both boxes at once** on
+  coming back — the one moment they are worth nothing. **THE CAUSE PREDATES
+  §225**: §98.1 stops the chat's clock dead while `document.hidden` so the
+  database can sleep, which is right for a badge you see next time you look and
+  exactly wrong for a notification, whose job is to reach somebody NOT looking.
+  *A feature can be correct in every line and still sit on a decision that makes
+  it pointless.* **SO THE BROWSER STOPS ASKING AND THE SERVER SENDS**:
+  `lib/push.js` is the one place a notification leaves the platform (`mailer.js`
+  mirrored — only place the credential is read, nothing it returns contains it,
+  knows nothing about who anybody is), and `sw.js` receives. **A DEPENDENCY,
+  AND §72's REFUSAL STILL STANDS**: Gemini is one POST, web push is RFC 8291 +
+  8292 and this sandbox cannot reach a push service, so hand-rolled crypto could
+  never be tested against what it must satisfy — 17 packages, stated not hidden.
+  **THE KEY PAIR IS MINTED ON FIRST USE INTO THE DATABASE** (env override), or
+  the feature is off on every deployment until an engineer pastes two strings
+  into Vercel; the cost is said — a dump now holds a key that could send a box
+  to a subscribed device, smaller than the password hashes already there.
+  **THE SUBSCRIPTION IS THE SWITCH** — no `on` column to disagree with it
+  (§104.7, §50.6) — and it is written against the **signed-in person, never a
+  key from the body** (§185), with an **https** endpoint only, because our own
+  server fetches it (§71). **ONE BOX, ONE SOURCE** (§53.5): on a subscribed
+  device the page stands its own box down, or one message draws two. **A 410
+  DROPS THAT DEVICE AND A 500 DROPS NOTHING**, and a notification never costs
+  the message it is about. **§226.2 — THE BELL HAD TO SAY WHAT WOULD HAPPEN**:
+  §225 read the person's switch alone, so a browser never asked showed ON with
+  a hover promising a box that could not appear (§124), and the only control
+  switched OFF the thing that was not on (§61) — four states now, and the press
+  ASKS in the third. **AND THE REPLY PUSH LANDED IN THE WRONG BRANCH** — both
+  `thread` and `reply` contain a line starting `const here = t.here_at` and a
+  first-occurrence replace took `thread`, so READING a conversation notified and
+  ANSWERING one did not; found by the endpoint test, not by reading (§96).
+  **NOT CLAIMED**: "browser closed" is true on a phone and partly true on a
+  laptop (the service can only hand it over while the browser runs somewhere),
+  and iOS still needs the platform on the home screen.
 - **A BOX FROM THE COMPUTER WHEN A MESSAGE LANDS (§225):** Islam — a browser
   notification for platform messages, *"for the SMO when someone replies, and
   for the users when the SMO replies to them"*, wording **B** (who wrote, and
@@ -3635,6 +3674,10 @@ python3 checks/email-link.py    # the link that LEAVES, read out of the html pos
                                 # /api/mail — never the value in the box, which looked
                                 # right the whole time; both send buttons, both ends of
                                 # the refusal, and both emails' destination (§176)
+node scripts/test-push.js       # a box with no tab open (§226): a throwaway HTTPS
+                                # server stands IN FRONT of the real push service, so
+                                # the encrypted body and the VAPID header are read off
+                                # the wire — needs a real Postgres, no network
 python3 checks/office-chat.py   # the chat's client half — serves the built file over HTTP,
                                 # because the whole feature is invisible over file:// (§97.9)
 python3 checks/welcome.py       # the welcome screen (§148): three viewers over HTTP, every

@@ -23,6 +23,7 @@ half — who may read whose conversation, and what a reply does — is
 `scripts/test-chat.js`, against a real Postgres, because that is where those
 questions are actually answered.
 """
+import base64
 import json, pathlib, threading, http.server, socketserver, time
 from playwright.sync_api import sync_playwright
 
@@ -49,7 +50,14 @@ HTML = (ROOT / "SMP-Project-Folder/src/strategy-management-platform.html").read_
 SEED = json.loads((ROOT / "db/seed-state.json").read_text())
 PERSON = {"key": "smo", "name": "Mohamed Essam", "role": "super"}
 
+# A real-shaped VAPID public key: 65 raw bytes, url-safe base64 — the browser
+# decodes it before subscribing, so a wrong shape fails there rather than here.
+VAPID = base64.urlsafe_b64encode(b"\x04" + bytes(range(64))).decode().rstrip("=")
+
 # What the stub /api/chat answers with, and whether it answers at all.
+# What the browser has told the server about this device (§226).
+PUSH = {"subs": [], "off": []}
+
 CHAT = {"status": 200, "messages": [], "unread": 0, "thread": None, "polls": 0, "said": [],
         "test": None,
         "cfg": {"on": True, "shots": True, "promise": "Usually answers the same day",
@@ -140,6 +148,17 @@ class H(http.server.BaseHTTPRequestHandler):
             self._send(200, json.dumps({"ok": True, "steps": CHAT.get("test") or []}).encode(),
                        "application/json")
             return
+        # §226: THE STUB MODELS THE SERVER. A device says yes and the row is
+        # kept here, so the check can read back what the browser actually
+        # posted rather than trusting that it meant to.
+        if body.get("action") == "pushOn":
+            PUSH["subs"].append(body.get("sub") or {})
+            self._send(200, b'{"ok":true}', "application/json")
+            return
+        if body.get("action") == "pushOff":
+            PUSH["off"].append(body.get("endpoint") or "")
+            self._send(200, b'{"ok":true}', "application/json")
+            return
         if body.get("action") == "queue":
             self._send(200, json.dumps({
                 "ok": True, "office": True, "threads": BOXQUEUE, "chat": CHAT["cfg"],
@@ -165,7 +184,9 @@ class H(http.server.BaseHTTPRequestHandler):
             "unread": CHAT["unread"], "thread": CHAT["thread"],
             "waiting": CHAT.get("owaiting", 0),
             "waitingWho": CHAT.get("owho"), "waitingBody": CHAT.get("obody"),
-            "chat": CHAT["cfg"]}).encode(), "application/json")
+            "chat": dict(CHAT["cfg"],
+                         vapid=(VAPID if CHAT["cfg"].get("popup") else ""))}).encode(),
+            "application/json")
 
 
 srv = socketserver.ThreadingTCPServer(("127.0.0.1", 0), H)
@@ -779,10 +800,24 @@ with sync_playwright() as p:
     # tooltip cannot say "nobody is chosen" to somebody who never hovers.
     left = pg.eval_on_selector_all(".chset .chset-hint, .chset .chset-cost",
                                    "n=>n.map(x=>x.innerText)")
-    ck("the prose is gone from the page", len(left) <= 1, left)
+    # ASSERT THE PROBLEM, NOT THE NUMBER (§94.8). This read `len(left) <= 1`,
+    # which was a literal standing in for "the prose is gone" and true only
+    # while exactly one row had a live status. §226 gave Notifications one too
+    # — a fact about what THIS browser will do — and the count went red on a
+    # deliberate addition. What §127 actually settled is that an EXPLANATION
+    # goes behind a mark and a STATUS stays on the page, and the difference
+    # between them is length: a status is a statement of fact, not a paragraph
+    # about how a setting works.
+    longest = max([len(x) for x in left] + [0])
+    ck("the prose is gone from the page (longest line %d chars)" % longest,
+       longest <= 110, left)
+    # ...AND THE STATUSES ARE STILL THERE. A tooltip cannot say "nobody is
+    # chosen" to somebody who never hovers, so this is the half that must not
+    # be lost while tidying the half above.
+    joined = " ".join(left).lower()
     ck("but the live status is not",
-       len(left) == 1 and ("wait" in left[0].lower() or "emailed" in left[0].lower()
-                           or "no one is set" in left[0].lower()), left)
+       len(left) >= 1 and ("wait" in joined or "emailed" in joined
+                           or "no one is set" in joined or "notified" in joined), left)
 
     # A TAP OPENS IT. Hover does not exist on a tablet, and every explanation
     # now lives behind one of these — so a mark that answers only a mouse is
@@ -1180,6 +1215,146 @@ with sync_playwright() as p:
     CHAT["cfg"].pop("popup", None)
     CHAT["messages"] = []; CHAT["unread"] = 0
     poll_once(25000)
+
+    # ── 15 · A BOX THAT ARRIVES WITH NO TAB OPEN (§226) ──────────────────
+    # §225 drew the box from the page, and measured across 45 seconds with the
+    # tab in the background it drew NOTHING — the poll stops dead while
+    # `document.hidden` (§98.1). The server sends now and the service worker
+    # receives, so what is measured here is the browser's half of that: when
+    # this device subscribes, when it stops, and that the page then stands its
+    # own box down so nobody ever gets two.
+    #
+    # THE PUSH MANAGER IS STOOD IN FOR, not the whole service worker: a real
+    # `subscribe()` reaches Google's or Apple's service, which nothing here can
+    # do — and the real thing is proved end to end against a real library and a
+    # real TLS endpoint in `scripts/test-push.js`. What is left is our own
+    # logic, and that is exactly what a stand-in can measure.
+    print("\n15 · a box that arrives with no tab open")
+
+    def fake_worker():
+        pg.evaluate("""() => {
+            window.__subs = [];
+            let held = null;
+            const mgr = {
+              getSubscription: () => Promise.resolve(held),
+              subscribe: (opts) => {
+                window.__subs.push({ userVisibleOnly: opts.userVisibleOnly,
+                                     keyLen: (opts.applicationServerKey || []).length });
+                held = {
+                  endpoint: "https://push.example.test/dev/one",
+                  toJSON: () => ({ endpoint: "https://push.example.test/dev/one",
+                                   keys: { p256dh: "P", auth: "A" } }),
+                  unsubscribe: () => { held = null; return Promise.resolve(true); }
+                };
+                return Promise.resolve(held);
+              }
+            };
+            Object.defineProperty(navigator, "serviceWorker", {
+              configurable: true,
+              get: () => ({ ready: Promise.resolve({ pushManager: mgr }) })
+            });
+            window.__held = () => held; }""")
+
+    CHAT["messages"] = []; CHAT["unread"] = 0
+    CHAT["owaiting"] = 0; CHAT.pop("owho", None); CHAT.pop("obody", None)
+    CHAT["cfg"] = dict(CHAT["cfg"], on=True, beat=4000)
+    CHAT["cfg"].pop("popup", None)
+    del PUSH["subs"][:]; del PUSH["off"][:]
+    pg.evaluate("() => { try { sessionStorage.removeItem('smp.where'); } catch (e) {} }")
+    pg.add_init_script("(" + FAKE_JS + ")('granted');")
+    pg.goto(URL, wait_until="networkidle")
+    pg.wait_for_selector("#chatdock:not([hidden])", timeout=10000)
+    fake_worker()
+
+    # ── WITH THE OFFICE'S SWITCH OFF, NOTHING IS SUBSCRIBED ──────────────
+    pg.click("#chatbtn"); pg.wait_for_timeout(700)
+    # (An assertion that cannot fail is not an assertion, §94.5 — so what is
+    # measured is the EFFECT: with the company switch off nothing subscribes.)
+    ck("with notifications off for the company, this device subscribes to nothing",
+       len(PUSH["subs"]) == 0, PUSH["subs"])
+    ck("...and nothing was posted about it either",
+       len(PUSH["off"]) == 0, PUSH["off"])
+    pg.click("#chatclose")
+
+    # ── THE OFFICE TURNS IT ON: THE DEVICE SUBSCRIBES ────────────────────
+    CHAT["cfg"] = dict(CHAT["cfg"], popup=True)
+    got = poll_once(30000); pg.wait_for_timeout(900)
+    ck("  (the switch reached the browser)", got, "no poll inside 30s")
+    ck("with it on, this device subscribes", len(PUSH["subs"]) == 1, PUSH["subs"])
+    if PUSH["subs"]:
+        ck("...sending the endpoint the browser was given",
+           PUSH["subs"][0].get("endpoint", "").startswith("https://"),
+           PUSH["subs"][0].get("endpoint"))
+        ck("...and its two keys",
+           bool((PUSH["subs"][0].get("keys") or {}).get("p256dh")) and
+           bool((PUSH["subs"][0].get("keys") or {}).get("auth")), PUSH["subs"][0])
+    # `userVisibleOnly` IS NOT A PREFERENCE: every browser that supports push
+    # requires a visible notification per delivery and refuses to subscribe
+    # without it — a build that dropped it would fail on a real browser and
+    # pass every assertion that only looks at the row.
+    opts = pg.evaluate("() => window.__subs || []")
+    ck("...with userVisibleOnly, which no browser makes optional",
+       len(opts) == 1 and opts[0]["userVisibleOnly"] is True, opts)
+    ck("...and the key decoded to 65 bytes",
+       len(opts) == 1 and opts[0]["keyLen"] == 65, opts)
+
+    # ── AND THE PAGE STANDS ITS OWN BOX DOWN ─────────────────────────────
+    # One box, one source (§53.5). On a subscribed device the worker draws it;
+    # the page drawing one too is two boxes for one message.
+    pg.wait_for_timeout(200)
+    fake_browser("granted")
+    reply("The March import is what carried it.", "2026-09-01T09:00:00Z")
+    ck("a reply draws no box from the page while the worker has it",
+       len(pops()) == 0, pops())
+    # BOTH ENDS (§94.2): with this device NOT subscribed the page still draws
+    # it, or the assertion above would pass on a build that shows nothing.
+    pg.evaluate("() => { window.__subs = []; }")
+    pg.click("#chatbtn"); pg.wait_for_timeout(300)
+    pg.click("#chatbell"); pg.wait_for_timeout(700)          # bell off
+    ck("turning the bell off tells the server to forget this device",
+       len(PUSH["off"]) == 1, PUSH["off"])
+    ck("...and the browser forgets it too",
+       pg.evaluate("() => window.__held() === null"))
+    was = len(PUSH["subs"])
+    pg.click("#chatbell"); pg.wait_for_timeout(900)          # and back on
+    # ASSERT THE STATE, NOT A COUNT OF POSTS. `pushSync` runs wherever any of
+    # the three switches might have moved and re-posting the same endpoint is
+    # deliberate and free (the server replaces the row rather than adding one),
+    # so counting requests measures how many places call it — which is a
+    # number that changes for good reasons (§94.8).
+    ck("turning it back on subscribes again",
+       len(PUSH["subs"]) > was and pg.evaluate("() => window.__held() !== null"),
+       {"before": was, "after": len(PUSH["subs"])})
+    pg.click("#chatclose")
+
+    # ── THE BELL SAYS WHAT WILL ACTUALLY HAPPEN (§226.2) ─────────────────
+    # The first build read the person's own switch alone, so a browser that had
+    # never been asked showed the bell ON with a hover promising a box that
+    # could never appear (§124: presence reported as proof) — and the only
+    # control on the screen switched OFF the thing that was not on yet (§61).
+    fake_browser("default")
+    pg.click("#chatbtn"); pg.wait_for_timeout(600)
+    st = pg.evaluate("""() => { const b = document.getElementById('chatbell');
+        return { pressed: b.getAttribute('aria-pressed'), tip: b.title,
+                 dis: b.getAttribute('aria-disabled') }; }""")
+    ck("a browser that has not been asked does not read as on",
+       st["pressed"] == "false", st)
+    ck("...and says so", "not been asked" in (st["tip"] or "").lower(), st["tip"])
+    ck("...and is still pressable, so the reason can be reached",
+       st["dis"] is None, st)
+    asked = pg.evaluate("() => window.__asked")
+    pg.click("#chatbell"); pg.wait_for_timeout(400)
+    ck("pressing it ASKS rather than switching off what is not on",
+       pg.evaluate("() => window.__asked") > asked and
+       pg.evaluate("() => localStorage.getItem('smp.chat.popup')") is None,
+       {"asked": pg.evaluate("() => window.__asked"),
+        "stored": pg.evaluate("() => localStorage.getItem('smp.chat.popup')")})
+    pg.click("#chatclose")
+
+    CHAT["cfg"].pop("popup", None)
+    del PUSH["subs"][:]; del PUSH["off"][:]
+    CHAT["messages"] = []; CHAT["unread"] = 0
+    poll_once(30000)
 
     # ── 7 · AND A SESSION THE SERVER REFUSES, LAST ON PURPOSE ────────────
     # A refused session takes the corner away rather than leaving a control

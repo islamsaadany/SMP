@@ -25199,3 +25199,141 @@ runtime needs no reload and is the only way to read back **what** was shown,
 which is most of what wording B claims. It asserts both ends of all three
 switches (§94.2), and **the refused press is forced**, because Playwright treats
 `aria-disabled` as disabled and that path is exactly what is under test (§222).
+
+---
+
+## §226 — A BOX THAT ARRIVES WITH NO TAB OPEN
+
+Islam, having turned §225's notifications on: *"I didn't get any notifications
+despite enabling the notifications."* And, correcting my first two diagnoses:
+*"stop assuming wrong things, the bell is allowed and in the chat box is on."*
+
+**HE WAS RIGHT AND I WAS GUESSING.** The first answer blamed the browser's
+permission, which he had already granted; the second blamed his being on the
+Inbox page. Both were states he was not in, and both were reached by reading
+rather than measuring — the exact fault this file exists to record.
+
+**MEASURED, AND IT IS A HOLE IN THE FEATURE ITSELF.** With the tab in the
+background: **zero requests to the server across 45 seconds, and zero boxes.**
+The instant the tab came back, **both boxes appeared at once** — the one moment
+they are worth nothing, because the person is already looking at the screen
+that shows them.
+
+**THE CAUSE PREDATES §225 BY MONTHS.** §98.1 stops the chat's clock dead while
+`document.hidden`, so the database can sleep overnight instead of being kept
+awake by a tab somebody left open on Friday. That was right for a badge you see
+next time you look. It is exactly wrong for a notification, whose whole job is
+to reach somebody who is **not** looking — and §225 was built on top of it and
+never asked. *A feature can be correct in every line and still be sitting on a
+decision that makes it pointless.*
+
+**SO THE BROWSER STOPS ASKING AND THE SERVER SENDS.** `lib/push.js` is the one
+place a notification leaves the platform, mirroring `lib/mailer.js`
+deliberately (§72, §97.5): the only place the credential is read, nothing it
+returns or throws contains it, and it knows nothing about who anybody is. The
+service worker receives, which is why it works with no tab open at all.
+
+**WHY A DEPENDENCY, WHEN §72 REFUSED ONE.** That refusal was right: talking to
+Gemini is one POST and an SDK would have been a hundred files spelling `fetch`.
+Web push is not one POST — RFC 8291 is an ECDH agreement, an HKDF and an
+AES-128-GCM record, RFC 8292 an ES256 JWT beside it, and every one of them is
+wrong the same way, which is that nothing arrives and nothing says why. The
+deciding fact is that **this sandbox cannot reach a push service**, so
+hand-rolled crypto could never be tested against the thing it has to satisfy.
+`web-push` is the reference implementation of both; what is left to test is our
+own plumbing, and that is testable. Stated rather than hidden: 17 packages.
+
+**THE KEY PAIR IS MINTED ON FIRST USE AND KEPT IN THE DATABASE**, with an
+environment override. The alternative is a setup step nobody can perform: this
+platform already applies its own schema, migrations and seed on first contact
+with an empty database, and a feature that instead needed somebody to generate
+a pair on a laptop and paste two strings into Vercel would be **off on every
+deployment until an engineer visits**. The cost is said rather than glossed: a
+database dump now contains a key that could send a notification to a subscribed
+device — smaller than the password hashes and live session tokens already in
+there, and the same trust boundary rather than a new one.
+
+**THE SUBSCRIPTION IS THE SWITCH.** There is no `on` column beside it to
+disagree with: a device that said yes has a row, one that has not does not, and
+turning the bell off deletes it (§104.7, §50.6). That is also what makes the
+person's switch genuinely per device without anything having to remember which
+device is which — and it makes `pushSync()` the one function called wherever
+any of the three switches might have moved.
+
+**THE ROW IS WRITTEN AGAINST THE SIGNED-IN PERSON, NEVER A KEY FROM THE BODY.**
+Taking `person` from the browser would let anybody subscribe their own phone to
+somebody else's conversation and read every reply that person is sent — §185's
+rule, one endpoint out. The endpoint must be an **https URL**, because our own
+server fetches it and anything else is somebody choosing the host (§71).
+
+**ONE BOX, ONE SOURCE (§53.5).** On a subscribed device the server sends and the
+worker draws; the page must not draw one too, or a single message produces two
+boxes. §225's own in-page path survives for a browser where push could not be
+set up — still bounded by the tab being visible, which is the whole reason this
+section exists.
+
+**A DEAD SUBSCRIPTION IS DROPPED, NOT RETRIED.** A 404 or 410 is the push
+service saying the device is gone; any other failure leaves the row alone,
+because a 500 from Apple is about Apple. And a notification **never costs the
+message it is about**: it runs after the message is stored and the thread is
+already waiting (§104's ordering), inside a try that swallows.
+
+### §226.2 — THE BELL HAD TO SAY WHAT WOULD ACTUALLY HAPPEN
+
+§225's bell read the person's own switch alone, so a browser that had not yet
+answered the permission question showed it **ON**, with a hover promising *"A
+box appears on this device when a reply lands"* — measured, with no box
+appearing. §124 exactly: presence reported as proof. **And the only control on
+the screen made it worse** — pressing it switched the notifications OFF, which
+is not the thing that was wrong (§61).
+
+Four states now — off · blocked · not yet asked · on — and in the third the
+press **asks** rather than switching off something that was never on. The
+settings row gained a live status line in the same breath, the shape §127
+settled for *"No one is set"*: a status is a fact about right now, not a
+description, and behind a hover somebody turns notifications on, their own
+browser never allows it, and nothing ever says so.
+
+**AND ONE ASSERTION HAD TO BE REWRITTEN RATHER THAN SATISFIED.** §127's check
+read `len(left) <= 1` — one live status line on the whole panel — which was a
+literal standing in for *"the prose is gone"* and true only while exactly one
+row had a status. A deliberate addition turned it red. It measures the
+difference §127 actually settled now: an explanation goes behind a mark, a
+status stays on the page, and what separates them is length (§94.8, for the
+second time in two sections).
+
+### PROOF
+
+`scripts/test-push.js` (23 assertions) stands a throwaway HTTPS server **in
+front of the real push service** — an endpoint is only a URL a browser hands
+over, so a test can hand over one of its own (§100.3) — and reads the encrypted
+body and the VAPID header **off the wire**, which is the only place those
+claims are true or false. It covers the key pair being minted exactly once, a
+410 dropping one device and only that one, a 500 dropping nothing, the office's
+devices being chosen and nobody else's, the sender never being told about their
+own message, a retired person's device being skipped, and **a whole-graph save
+not reaching any of it** (§56).
+
+`scripts/test-chat.js` §226 (18 more) covers the endpoint: who may subscribe,
+whose device the row is written against, the three refused endpoint shapes, and
+**that the two write paths actually send** — which is where it caught a real
+mistake. My reply-side push had landed in the **`thread`** action rather than
+**`reply`**, because both branches contain a line beginning `const here =
+t.here_at` and a first-occurrence replace took the wrong one. It rendered
+perfectly and reading a conversation sent a notification while answering one
+sent none. *§96's family: the back half built and wired to the wrong control.*
+
+`checks/office-chat.py` §15 measures the browser's half against a stand-in
+push manager, and `/tmp` falsification runs confirm both new guards are
+load-bearing: with the one-box-one-source guard removed the page draws a second
+box over the worker's, and with the bell's not-yet-asked state removed it reads
+as ON while promising a box that cannot appear.
+
+### WHAT IS NOT CLAIMED
+
+**"With the browser closed" is true on a phone and partly true on a laptop.**
+The message is delivered by Apple's or Google's own service, and on a desktop
+that service can only hand it over while the browser is still running
+somewhere; quit Chrome entirely and it arrives next time it opens. A sleeping
+machine gets it on waking. **iPhone and iPad still need the platform added to
+the home screen** — Apple's rule, and the setting says so.

@@ -182,12 +182,7 @@ function deckSlides(u){
         (m.note ? '<td class="dnote">' + esc(m.note) + '</td>' : '<td class="dnote empty">&mdash;</td>') +
         '</tr>';
     }).join("");
-    /* §235: Islam — "the slide can be set between the measures and tactics
-       because that's a valid place to be." The lowercase suffix keeps the key
-       clear of the tactics anchor below ("p" + code), which stored slides
-       already name. */
-    S.push('<section class="dslide" data-split="' + pillarCode(u, pi) + 'M"' +
-      anch("p" + pillarCode(u, pi) + "m", "After " + pillarCode(u, pi) + " — key measures") + '>' +
+    S.push('<section class="dslide" data-split="' + pillarCode(u, pi) + 'M">' +
       deckPillarHead(u, p, pi, "Key measures") +
       '<table class="zebra withnote"><thead><tr><th class="idx">#</th><th>Measure</th>' +
       '<th class="num">Dir.</th><th class="num">Target</th><th class="num">Actual</th>' +
@@ -364,10 +359,7 @@ function deckSlidesFn(fk){
          shares that builder and the pen shows everything. */
       var dxRowsHtml = dxRows(p).filter(function(r){
         return !SMPRules.isHidden(r.obj); }).map(dxRow).join("");
-      /* §235: the unit ruling's mirror — between a project's deliverables and
-         its milestones is a valid place too, or the two sides drift (§53.5). */
-      S.push('<section class="dslide" data-split="' + esc(p.id) + 'D"' +
-        anch("dx" + p.id, "After " + p.name + " — deliverables and outcomes") + '>' +
+      S.push('<section class="dslide" data-split="' + esc(p.id) + 'D">' +
         '<h2>' + esc(p.name) + '<span class="dwhich">Deliverables and outcomes</span></h2>' +
         '<table class="zebra withnote"><thead><tr><th class="idx">#</th>' +
         '<th>Deliverables &amp; outcomes</th><th>Type</th><th class="num">Due date</th>' +

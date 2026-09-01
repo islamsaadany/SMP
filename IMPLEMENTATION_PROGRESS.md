@@ -70,6 +70,20 @@ Nothing proceeds past this line without an answer.
 
 ## Built and verified
 
+### §235 — a picture slide can travel the whole deck (2026-09-01, same branch)
+
+Islam, using §234's arrows: "the rearrange of slides doesn't move around the
+fixed slides of the main flow." Measured: 25 dead presses of 28 on Mobile's
+deck; a function's slide never moved at all. The stored position is an anchor
+(§50.3) and the arrows stepped blindly one row, so a press into an unanchored
+run recomputed the same position — a button doing nothing, silently. His two
+decisions: the arrows now jump to the nearest real landing place, and between
+a pillar's measures and tactics IS a place (each measures slide takes its own
+anchor; a project's deliverables slide mirrors it on a function's deck,
+§53.5). Projector honours the new places for free — one placement function.
+`checks/slide-move.py`: 5 red on the pre-§235 build, 18 green after;
+hide-element, project-tables, repeat-project and full qa.py green.
+
 ### §234 — "Add slide after" (2026-09-01, on `claude/slide-insertion-rearrange-fga828`)
 
 Islam's wording on Manage slides' Add button: `+ Add a slide` becomes
@@ -81,8 +95,8 @@ the control by its new name. **His rearrange question needed no build**: §51.10
 the generated order fixed — exactly the design he proposed. Verified by driving
 Mobile's deck: slide added at position 4 with slide 3 selected, arrives
 selected, arrows still step it, generated slides offer none, no errors.
-**Waiting on Islam**: whether the ▲▼ arrows were findable — if not, making
-them more visible is a mockup-first design change.
+*(The open findability question answered itself in §235: he found the
+arrows, and they were broken — fixed there.)*
 
 
 ### §230 / §230.2 — the hard-refresh notice (merged to `main` 2026-09-01)

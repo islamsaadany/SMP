@@ -25845,3 +25845,65 @@ rendered-case lesson, again).
 
 **Open, his call**: if he had not found the ▲▼ arrows, making them more
 visible is a design change and goes through a mockup first.
+
+## §235 — A PICTURE SLIDE CAN TRAVEL THE WHOLE DECK (2026-09-01)
+
+Islam, answering §234's open question by using the arrows: *"the rearrange of
+slides doesn't move around the fixed slides of the main flow"* — and, offered
+the honest-jump fix with its stated cost, *"1 is better and the slide can be
+set between the measures and tactics because that's a valid place to be."*
+
+**HE FOUND THE ARROWS, AND THEY WERE MOSTLY DEAD.** Measured before anything
+was written: a slide added at the top of Mobile's deck and Move down pressed
+28 times moved **3 times and then sat at position 4 for 25 straight presses**;
+on a function's deck it never moved at all. §234's claim that the arrows "step
+over generated neighbours" was true only where the neighbour happened to carry
+an anchor — my one-step probe landed on exactly such a spot and I generalised
+from it (§94.2's lesson wearing a green tick: a probe that samples one
+position proves that position).
+
+**THE FAULT IS THE STEP, NOT THE STORE.** A stored position is an ANCHOR plus
+a place among that anchor's own slides (§50.3), so the set of places a slide
+can live is the set of anchors — and `slidesMove()` stepped blindly one row.
+Wherever the next row carried no anchor, the press recomputed the SAME
+position and repainted in place: a button that does nothing, silently (§61's
+family — present, enabled, and answering every DOM probe).
+
+**TWO CHANGES, BOTH HIS:**
+
+1. **The arrows walk the places that exist.** A press goes to the nearest row
+   that IS a place — an anchored slide, or another picture slide (which keeps
+   sibling reordering one step at a time) — over the whole run of fixed slides
+   in one visible hop. A slide whose next row carries the same anchor is a
+   fit-pass continuation's parent, so the walk passes the clones and lands
+   after the last of them (a wrinkle the OLD tactics anchor already had on a
+   split table, closed for both). The ceiling is after the cover, the floor is
+   before Thank you (§128: the deck closes on it), and at either end the press
+   does nothing rather than wrapping.
+
+2. **Between the two halves of a subject is a place** — his ruling, verbatim.
+   Each pillar's KEY MEASURES slide takes an anchor of its own
+   (`p<CODE>m`, lowercase suffix so it can never collide with the tactics
+   anchor `p<CODE>` that stored slides already name), and — §53.5, one
+   product — a project's DELIVERABLES & OUTCOMES slide takes `dx<projectId>`
+   on the function's deck, so a picture sits between a project's deliverables
+   and its milestones too. The anchors ride the pillar code and the project
+   id, the same stability class as the anchors beside them; nothing stored
+   moves, no migration, and the PROJECTOR honours the new places for free
+   because `insertPictureSlides()` is the one placement both surfaces use.
+
+**Deliberately NOT anchored**: the SWOT run (its comment has said since §50.3
+that "after SWOT" means after all four, on purpose), the section dividers, and
+the gap between a divider and its first table — the arrows now hop those
+honestly instead of pretending. Anchors are consumed BEFORE `deckFitPass()`
+clones anything, in both `openDeckWith()` and `slidesAssemble()`, so the
+duplicate-anchor trap the §50.3 comment warns about stays closed.
+
+`checks/slide-move.py` walks a slide DOWN the whole deck and UP again, on a
+unit AND a function, asserting the problem and never a layout (§94.8): no
+silent press until the floor, the floor reached, a stop between the two halves
+of one subject, the position surviving a repaint, the fixed flow untouched,
+and the store emptied on remove (§50.6). **Proved able to fail first: 5 red
+on the pre-§235 build** — the unit stuck at 4, the function stuck at 1,
+reproducing his report before a source was touched. Neighbourhood green:
+hide-element, project-tables, repeat-project, and the full qa.py sweep.

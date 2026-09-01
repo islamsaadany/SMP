@@ -25976,3 +25976,167 @@ fault — the slides case fits it and was not separately reproduced from his
 account. **The way out for tabs already open**: a tab running the previous
 build still posts what it posts; the refusal machinery already answers it,
 and a reload picks up the split.
+
+---
+
+## §235
+
+**YTD IS MEASURED AGAINST THE PART OF THE YEAR THAT HAS PASSED.**
+
+Islam, of a live reporting round: *"the reporting of YTD is being compared
+with the full year target without proration which is the wrong practice ..
+the tactics are compared to the dates and same for the milestones but the
+measures and objectives we need to consider this proration approach."*
+
+**HE IS RIGHT, AND THE PLATFORM HAD THREE ANSWERS TO ONE QUESTION.** A tactic
+was compared with the share of its own quarters already elapsed; a milestone
+with its due date; and a measure with its **whole-year target**, flat, however
+far into the year the round was. Measured on the shipped tenant: of the 26 Sum
+measures carrying a reported actual, the median read **45 points low**, and
+**18 of 26 crossed out of Off track** once the benchmark was the target due by
+now. The group's own headline revenue read **43%** — Off track, red, a written
+explanation demanded before the unit could submit — for 7.8B EGP banked at the
+half year against an 18B EGP year. It is 87%.
+
+**THE PLAN ALREADY SAID WHICH ROWS PRORATE, which is what made this cheap.**
+`compile` is the discriminator: *Sum* adds up across the period, so six months
+of accumulation against twelve months of target is the wrong comparison;
+*Latest* is a rate or a share at a point in time and *Average* is already
+normalised, so neither has anything to prorate — and with no baseline stored,
+prorating them would be inventing a glide path nobody agreed. 32 of 137 rows
+are Sum. No new field, and the client's own plan decides.
+
+**PRORATE THE TARGET, THEN COMPARE — NEVER THE RATIO.** Dividing a score by the
+elapsed share is right for "more is better" and exactly backwards for "less is
+better", so the share goes on the target and one expression serves both
+directions. The demo carries no ≤ Sum measure, so `checks/ytd-proration.py`
+MAKES one (§94.2) and asserts the **125%** only the correct arithmetic
+produces; the divided-ratio build reads 150% and the check goes red.
+
+**THE STORED FIGURE DOES NOT MOVE.** `progress` goes on holding the raw
+actual-against-the-annual-target ratio and the score is DERIVED
+(`measureScore()`), which is the tactic's own shape moved over — `tacticPlanned`
+has been derived rather than stored since the quarters model. So every archive
+and every closed cycle reads exactly as it did, **nothing is migrated**, and the
+Focus board keeps reading the raw figure on purpose: Islam chose that **reward
+stays a year-end judgement**, so "Earning" still means 100% of the whole target.
+One number for standing, one for pace, and each falls out where it belongs.
+
+### §235.1 — the review point was two fields, and they disagreed
+
+Shown the fix, Islam sent a screenshot of a supporting function's reporting
+screen: every tactic reading **"Due at 100%"**. *"noting that due at is what we
+are measured against 100% is confusing."*
+
+**THE NUMBER WAS WRONG, NOT THE WORD.** `tacticPlanned()` read
+`REVIEW.endsQuarter` — the quarter the CYCLE ends in — while the quarter pips
+two columns to the left read `GROUP.asOfQuarter`, whose own comment says *"The
+review point. H1 means Q1 and Q2 have passed."* **In the worked example both
+are 2**, so they agree, and nobody had ever seen it. On a year-long cycle
+reported in-year they diverge completely: measured over the 84 demo tactics, a
+cycle ending Q4 makes **every single one read 100% — one distinct value, a
+column that cannot vary**, while the pips on the same row correctly show Q2.
+§53.5 in the arithmetic rather than the layout. And `GROUP.asOfQuarter` had
+**no editor anywhere in the product**, so it sat wherever the seed left it.
+
+**IT NEARLY COST THE WHOLE FIX.** Prorating by `endsQuarter / 4` is 4/4 on his
+tenant — the change would have shipped and **done nothing on the deployment
+that reported the bug.** Found before building, which is the only reason it was
+cheap.
+
+**IT IS A MONTH, BECAUSE HIS CYCLES ARE.** *"cycles are customized it depends on
+the month of reporting. so we might be reporting till month 8 in the year then
+it's an 8 months review cycle."* A quarter cannot say eight months.
+`REVIEW.asOfMonth` rides the review row's **`extra`**, so there is no migration
+(§177's own road); the plan year runs January to December, asked outright.
+
+**THREE THINGS MAKE IT SAFE TO SHIP.** The fallback: an unset review point falls
+back to the quarter the cycle ends in, which is what this used to mean, so
+**nobody's tactic figure moves until the office sets a month** — and on his
+tenant, where the fallback is Q4, no measure prorates either until he does.
+The fallback **never writes** (§42, §50.6: a reader that creates the field it
+looked for puts a phantom change into every save). And clearing the picker
+**deletes the key**, so an unasked cycle and one set and cleared are
+byte-identical.
+
+**TACTICS COUNT MONTHS** (his choice, put to him with the alternatives): a
+tactic standing in a half-finished quarter gets credit for the part that has
+happened — Q2–Q4 reviewed at August is 5 of 9 months. Whole quarters would say
+a tactic planned for the quarter we are standing in has not started. The
+quarter arithmetic survives as the fallback for a cycle whose year cannot be
+read, because returning null there would empty every reporting page.
+
+**AND THE GATE THAT ALREADY EXISTED COMES BACK.** A tactic whose span has not
+begun says *"Not asked — outside this cycle"* and nobody is chased. On his
+tenant that was defeated: rows that had not started were being asked for
+figures and told 100% was due.
+
+### §235.2 — what the tables say
+
+Settled over five mockup revisions built from the running page, not from the
+stylesheet (§41.9). Each of these is Islam's own wording or his own decision:
+
+* **Target → Annual target**, so the column says outright that it is the year's
+  number, which is what makes the quiet figure beside the actual make sense.
+* **H1 actual → YTD actual**, carrying what is due by now inside the cell,
+  smaller and in the quiet ink — the benchmark, not the answer, so it steps
+  back the way a repeated Compile rule already does (§149). The rename also
+  removes a wrong word: `"H1 actual"` was a **hardcoded literal** that read H1
+  in a Q3 cycle too.
+* **Variance goes** from both Performance tables — the pair already shows it.
+* **`Deliv. / plan` → `YTD delivery`, and both halves carry the per cent sign.**
+  Islam: *"what is 45/50? what is this unit?"* Both are per cents of that
+  tactic's own plan and the product never printed the sign — **while the same
+  cell has always printed "due at 50%" WITH it in its unreported state**. One
+  cell, two spellings of one unit, which is the evidence rather than a taste.
+* **`Of plan` → `Progress`**, so both tables on the page end in the same word.
+* **`Due at` → `YTD Target`, KEPT on the reporting screen.** This **reverses**
+  his own previous round ("take it off the reporting screen"), recorded as a
+  reversal rather than done quietly: the number was the fault, not the column.
+* **The reporter's note reaches Performance**, under the row's name rather than
+  in a column of its own — which is not a new idea: `capKOTable()` has shown
+  notes exactly that way all along, so the unit's page was the one out of step
+  (§53.5), and the deck already carries a Note column on five tables. It costs
+  **no width**, measured, which matters because §158 has these tables cut off
+  on a narrow pane already.
+* **Direction comes off the slides** (his call: obvious to an audience).
+  **Smaller than it looked, and checked before agreeing**: `Compile` appears in
+  `present.js` **zero** times — the deck has never shown it — and the only
+  other place either word survives is `pptx.js`, whose button has returned `''`
+  above its own gate since §145.9, so nobody can reach it. Left alone rather
+  than editing something invisible.
+
+**THE SERVER NEEDED NOTHING**, and that is checked rather than assumed: a
+change to `review.asOfMonth` is not in `REVIEW_PER_TARGET`, so it classifies as
+`cycle` and lands on `edits(w, person, "a_cycle", "group")` — the office —
+which is exactly right for a value that decides what every figure in the tenant
+is measured against. Asserted **both ways** (§94.2), and proved able to fail:
+taking the field out of what the authoriser compares turns the two refusals
+green-to-red.
+
+**PROVED ABLE TO FAIL THREE WAYS** before the green run was believed (§94.5):
+nothing prorating → **4 red**; the review point ignoring the month the office
+picked → **2 red**; the ratio prorated instead of the target → **3 red**.
+
+**AND THE SWEEP'S OWN METHOD HAD TO CHANGE.** `qa.py` modelled "nothing
+reported" by blanking `progress`, which was sound while the score WAS that
+stored value and asserts nothing now that it is derived from the actual —
+§51.11's fault one layer in, the check's machinery rather than its selectors.
+It clears the actual too, and the two SCORES assertions go red without it.
+`setup-overview.py` moved with `cycleMeta()`, which no longer prints the review
+point (the strip carries the control, and saying it twice is how two things
+start to disagree); `repeat-project.py` learned to pick a month, because a
+cycle now refuses to open without one — §47.8 removed a hard-coded end quarter
+because *"a wrong guess silently changes every unit's execution score"*, and
+defaulting this would put that guess straight back.
+
+**RECORDED AND NOT DONE.** `GROUP.asOfQuarter` now has no reader in the product
+and `REVIEW.endsQuarter` is read only as the fallback; both should be retired
+in a follow-up migration together, and neither is dead-code-by-accident — they
+are named here so the next reader knows. **Still to sweep, at Islam's own
+instruction** (*"after that we make the sweep other tables"*): the group's,
+a company's and a unit's drill tables still say `Of plan`, `H1 actual`,
+`Delivered / Planned / Var.` and read `m.progress` directly rather than the
+prorated score. And the two he has not yet answered: whether the quiet figure
+should be drawn on a rate row at all, where it repeats the annual target
+exactly; and whether `Of plan` should become `Progress` everywhere.

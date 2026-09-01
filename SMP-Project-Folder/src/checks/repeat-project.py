@@ -200,6 +200,14 @@ with sync_playwright() as p:
     pg.click("[data-opencycle]"); pg.wait_for_timeout(400)
     pg.fill("#nc-name", "H2 2026")
     pg.fill("#nc-from", "Jul 2026"); pg.fill("#nc-to", "Dec 2026")
+    # §235: A CYCLE IS NOW OPENED WITH A REVIEW POINT, and it is picked rather
+    # than typed -- the whole feature exists because a review point nobody
+    # chose was deciding every score. Pressed through the real picker, because
+    # writing NEWCYCLE.asOfMonth directly would test a door nobody can open.
+    pg.click(".newcycle .monthbtn"); pg.wait_for_timeout(250)
+    pg.evaluate("""()=>{const b=[...document.querySelectorAll('.monthpop [data-mpick]')]
+        .find(x=>/Dec/.test(x.textContent)); if(b)b.click();}""")
+    pg.wait_for_timeout(300)
     pg.wait_for_timeout(200)
     pg.click("[data-nc-go]"); pg.wait_for_timeout(800)
 

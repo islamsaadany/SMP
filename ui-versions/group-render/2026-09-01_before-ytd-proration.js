@@ -273,11 +273,7 @@ function chartLegend(){
 function qs(t){
   var q = quartersOf(t), out = "";
   for (var i = 0; i < 4; i++) {
-    /* §235: ONE ANSWER TO "HOW FAR ARE WE". This read `GROUP.asOfQuarter`
-       while the figures beside it read `REVIEW.endsQuarter` -- two fields, one
-       meaning, disagreeing on the same row the moment a cycle is not reported
-       at its own end. Both now go through the review point. */
-    var cls = q[i] ? (quarterPast(i) ? "on past" : "on") : "";
+    var cls = q[i] ? (i + 1 <= GROUP.asOfQuarter ? "on past" : "on") : "";
     out += '<i class="' + cls + '">' + (i + 1) + "</i>";
   }
   return '<span class="qs">' + out + "</span>";
@@ -394,39 +390,25 @@ function measureRows(ms, opts){
     /* §218: nothing is held back for the office any more — a filled target
        or direction is live, so a measure is scored the moment it has a
        figure to score. */
-    /* §235: the score is the PRORATED one; `m.progress` stays the stored raw
-       ratio and is what the Focus board reads (reward is a year-end
-       judgement). */
-    var sc = measureScore(m), scored = m.target && sc != null;
+    var scored = m.target && m.progress != null;
     var head = '<tr data-oi="' + i + '"' +
                (SMPRules.isHidden(m) ? ' class="hiddenrow"'
                 : isFocus(m.id) ? ' class="focusrow"' : '') + '><td class="idx">' +
                (on ? handle("Reorder " + m.name) : '') +
                '<span class="idx-n">' + (i+1) + '</span></td><td>' + esc(m.name) + hidChip(m) + fmark(m.id) +
                (m.horizon ? '<span class="why">measured at ' + esc(m.horizon) + '</span>' : '') +
-               (m.note ? '<span class="why">' + esc(m.note) + '</span>' : '') +
                '</td><td class="num">' + dirCell(m.dir) + '</td><td class="num">' + esc(m.target) +
                '</td><td class="cc">' + compileCell(m.compile) + '</td>';
     if (opts.unscored) return head + '</tr>';
-    /* THE BENCHMARK RIDES INSIDE THE FIGURE'S CELL, small and in the quiet
-       ink -- it is what the row is measured against, not the answer, so it
-       steps back the way a repeated Compile rule already does (§149). */
-    var dueLab = measureDueLabel(m);
-    var actCell = (m.actual == null || m.actual === "") ? '&mdash;'
-      : dueLab ? '<span class="pair"><b>' + esc(m.actual) + '</b> <i>/ ' + esc(dueLab) + '</i></span>'
-               : esc(m.actual);
-    return head + '<td class="num">' + actCell + '</td>' +
+    return head + '<td class="num">' + esc(m.actual) + '</td>' +
            (scored
-             ? '<td class="num final" style="color:' + bandInk(sc) + '">' + sc + '%</td>'
+             ? '<td class="num final" style="color:' + bandInk(m.progress) + '">' + m.progress + '%</td>'
              : '<td class="cc"><span class="pill none">Not scored</span></td>') + '</tr>';
   }).join("");
 }
 function measureHead(unscored){
-  /* §235: "Annual target" says outright that it is the year's number, which
-     is what makes the quiet figure beside the actual make sense. And "YTD
-     actual" replaces a hardcoded "H1 actual" that read H1 in every cycle. */
-  return '<thead><tr><th class="idx">#</th><th>Measure</th><th class="cc">Dir.</th><th class="cc">Annual target</th>' +
-    '<th class="cc">Compile</th>' + (unscored ? '' : '<th class="cc">YTD actual</th><th class="cc">Progress</th>') +
+  return '<thead><tr><th class="idx">#</th><th>Measure</th><th class="cc">Dir.</th><th class="cc">Target</th>' +
+    '<th class="cc">Compile</th>' + (unscored ? '' : '<th class="cc">H1 actual</th><th class="cc">Progress</th>') +
     '</tr></thead>';
 }
 
@@ -478,35 +460,28 @@ function tacticRows(ts, unitKey){
                                      : '<span class="pill warn">' + esc(t.status) + '</span>';
     /* Three distinct states, and they must not look alike: not yet due, due
        but unreported, and reported. */
-    /* §235: BOTH HALVES ARE PER CENTS of this tactic's own plan and the sign
-       is written, because "45 / 50" reads as a count of things -- and the same
-       cell has always printed "due at 50%" WITH the sign in its unreported
-       state, so one cell spelt one unit two ways. */
     var tail = !due
-      ? '<td class="cc" colspan="2"><span class="pill kind">Not yet due</span></td>'
+      ? '<td class="cc" colspan="3"><span class="pill kind">Not yet due</span></td>'
       : t.actual == null
-      ? '<td class="cc" colspan="2"><span class="pill none">Not reported</span>' +
+      ? '<td class="cc" colspan="3"><span class="pill none">Not reported</span>' +
         '<span class="why" style="margin:2px 0 0">due at ' + pl + '%</span></td>'
-      : '<td class="num"><span class="pair"><b>' + t.actual + '%</b> <i>/ ' + pl + '%</i></span></td>' +
+      : '<td class="num"><span class="pair"><b>' + t.actual + '</b> / ' + pl + '</span></td>' +
+        '<td class="num">' + varCell(t.actual, pl) + '</td>' +
         '<td class="num final" style="color:' + bandInk(r) + '">' + pct(r) + '</td>';
     return '<tr data-oi="' + i + '"' +
       (SMPRules.isHidden(t) ? ' class="hiddenrow"'
         : due && t.actual != null ? '' : ' class="notdue"') + '><td class="idx">' +
       (on ? handle("Reorder " + t.name) : '') +
       '<span class="idx-n">' + (i+1) + '</span></td><td>' + esc(t.name) + hidChip(t) +
-      (t.outcome ? '<span class="why">' + esc(t.outcome) + '</span>' : '') +
-      (t.note ? '<span class="why">' + esc(t.note) + '</span>' : '') + '</td>' +
+      (t.outcome ? '<span class="why">' + esc(t.outcome) + '</span>' : '') + '</td>' +
       '<td>' + esc(t.owner) + '</td><td class="collabs">' + collabCell(t) + '</td>' +
       '<td>' + qs(t) + '</td><td class="cc">' + status + '</td>' + tail + '</tr>';
   }).join("");
 }
 function tacticHead(){
   return '<thead><tr><th class="idx">#</th><th>Tactic</th><th>Owner</th><th>Collabs.</th><th>Quarters</th>' +
-    /* §235: VARIANCE GOES -- the pair beside it already shows it, and the
-       column was spending width to restate a subtraction. "Of plan" becomes
-       "Progress" so both tables on the page end in the same word. */
-    '<th class="cc">Status</th><th class="cc">YTD delivery</th>' +
-    '<th class="cc">Progress</th></tr></thead>';
+    '<th class="cc">Status</th><th class="cc">Deliv. / plan</th><th class="cc">Var.</th>' +
+    '<th class="cc">Of plan</th></tr></thead>';
 }
 
 
@@ -2268,15 +2243,6 @@ function monthPickOr(page, value, cls, setter){
   var shown = value == null ? "" : String(value);
   if (!EDIT_PAGE[page] || !setter)
     return shown ? esc(shown) : '<span class="missing">Missing</span>';
-  return monthBtnHtml(shown, cls, setter);
-}
-/* THE BUTTON ITSELF, drawn for anybody who may set the value (§235). The plan
-   pages reach it through `monthPickOr` and its edit-mode gate; the reporting
-   cycle has no edit mode and reaches it directly, because the office either
-   may change the review point or is not offered a control at all. One builder,
-   because two would drift about what a month looks like (§53.5). */
-function monthBtnHtml(value, cls, setter){
-  var shown = value == null ? "" : String(value);
   var i = FIELDS.push(setter) - 1;
   var p = monthParts(shown);
   return '<button type="button" class="monthbtn ' + (cls || '') + '" data-month="' + i + '"' +
@@ -3566,7 +3532,7 @@ function renderReport(u){
 
     var tTable = ts.length
       ? '<h4 class="mini">Tactics</h4>' +
-        miniTable(["#", "Tactic", "Owner", "Quarters", "YTD Target", "Reported", "Note"],
+        miniTable(["#", "Tactic", "Owner", "Quarters", "Due at", "Reported", "Note"],
           ts.map(function(x, i){
             if (!x.asked) {
               return '<tr class="notdue"><td class="idx">' + (i+1) + '</td>' +

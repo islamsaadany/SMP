@@ -5296,23 +5296,6 @@ function renderCycle(){
     '<div class="fstrip" style="margin-bottom:20px"><div class="fstrip-head">' +
       '<span class="fstrip-t">' + esc(REVIEW.name) + '</span>' +
       '<span class="fstrip-meta">' + esc(cycleMeta()) + '</span>' +
-      /* ── THE REVIEW POINT, EDITABLE WHILE THE CYCLE RUNS (§235) ──────
-         Islam: "if I will set the cycle dates you need to give me the ability
-         to set this on opening the cycle and ability to edit this in an open
-         cycle." Before this there was NO control anywhere -- the value could
-         only ever be whatever the seed left, which is how a tenant came to be
-         reporting in Q2 against a platform that thought the year was over.
-
-         It is a MONTH because a quarter cannot say "eight months in", and it
-         is the platform's own month picker rather than a box, for §177's own
-         reason: with no box there is nothing to mistype and the picker can
-         only produce a shape `monthsOf()` already reads. */
-      '<span class="fstrip-meta asof">reported as of ' +
-        (can && open
-          ? monthBtnHtml(REVIEW.asOfMonth || "", "asofbtn", function(v){
-              if (v) REVIEW.asOfMonth = v; else delete REVIEW.asOfMonth;
-            })
-          : esc(REVIEW.asOfMonth || reviewAsOfLabel())) + '</span>' +
       '<span class="badge b-' + (open ? "open" : "none") + '">' + (open ? "Open" : "Closed") + '</span>' +
       (can
         ? (open
@@ -5344,14 +5327,14 @@ function renderCycle(){
             esc(NEWCYCLE.to) + '" placeholder="Jun 2027"></label>' +
           '<label><span>Reports due</span><input class="fld" id="nc-due" value="' +
             esc(NEWCYCLE.due) + '" placeholder="15 Jul 2027"></label>' +
-          '<label><span>Reporting as of</span>' +
-            monthBtnHtml(NEWCYCLE.asOfMonth || "", "asofbtn", function(v){
-              if (v) NEWCYCLE.asOfMonth = v; else delete NEWCYCLE.asOfMonth;
-            }) + '</label>' +
+          '<label><span>Ends in quarter</span><select class="fld" id="nc-q">' +
+            [1,2,3,4].map(function(q){
+              return '<option value="' + q + '"' +
+                (Number(NEWCYCLE.endsQuarter) === q ? " selected" : "") + '>Q' + q + '</option>';
+            }).join("") + '</select></label>' +
         '</div>' +
-        '<div class="nc-why"><b>The month decides what every figure is measured against.</b> ' +
-          'A target that adds up across the year is compared with the share of it due by then, ' +
-          'and a tactic whose span has not started yet is not asked for.</div>' +
+        '<div class="nc-why"><b>The quarter decides which tactics are asked for.</b> ' +
+          'A tactic whose span has not started yet is not counted as unreported.</div>' +
         '<div class="nc-act">' +
           '<button class="editbtn" data-nc-go="1">Open this cycle</button>' +
           '<button class="linkbu" data-nc-cancel="1">Cancel</button></div></div>'

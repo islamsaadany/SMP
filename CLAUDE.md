@@ -427,6 +427,54 @@ console errors (in this cloud environment, run it via a wrapper that points Play
   different targets never touch. Proved able to fail: 11 red on the differ's
   pre-build, and end-to-end on a real Postgres the whole-graph flag fails
   with the reported sentence to the word.
+- **YTD IS MEASURED AGAINST THE PART OF THE YEAR THAT HAS PASSED (§235):**
+  Islam — *"the reporting of YTD is being compared with the full year target
+  without proration which is the wrong practice."* Three answers to one
+  question: a tactic was compared with its own elapsed quarters, a milestone
+  with its date, a measure with the **whole year**, flat. Measured: of 26 Sum
+  measures with an actual, the median read **45 points low** and **18 crossed
+  out of Off track**; group revenue read 43% for a half year that is 87%.
+  **THE PLAN ALREADY SAID WHICH ROWS PRORATE** — `compile`: *Sum* adds up so it
+  prorates, *Latest* is a rate at a point in time and *Average* is normalised,
+  and with no baseline stored, prorating those would invent a glide path.
+  **PRORATE THE TARGET, THEN COMPARE, NEVER THE RATIO**: dividing a score by the
+  elapsed share is backwards for a ≤ measure, so the demo having none, the
+  check MAKES one and asserts the 125% only the right arithmetic gives.
+  **THE STORED FIGURE DOES NOT MOVE** — `progress` keeps the raw
+  actual-against-annual ratio and the score is DERIVED (`measureScore()`, the
+  tactic's own shape moved over), so archives and closed cycles read as they
+  did, nothing is migrated, and the Focus board keeps the raw figure because
+  **reward stays a year-end judgement** (his call).
+  **AND THE REVIEW POINT WAS TWO FIELDS THAT DISAGREED (§235.1):**
+  `tacticPlanned()` read `REVIEW.endsQuarter` (the CYCLE's end) while the
+  quarter pips read `GROUP.asOfQuarter` (*"the review point"*) — identical in
+  the demo, divergent on any cycle reported in-year: over 84 demo tactics a
+  Q4 cycle makes **every one read 100%**, one distinct value, while the pips
+  on the same row say Q2. It **nearly cost the whole fix**: prorating by
+  `endsQuarter/4` is 4/4 on his tenant, so the change would have done nothing
+  on the deployment that reported the bug. **IT IS A MONTH** (*"we might be
+  reporting till month 8"*), `REVIEW.asOfMonth` riding `review.extra` so
+  **no migration**, picked not typed (§177), set at cycle open AND editable
+  mid-cycle — there was no editor at all before. **THE FALLBACK IS WHAT MAKES
+  IT SAFE**: unset falls back to the cycle's quarter end, so nothing moves
+  until the office sets a month, and it **never writes** (§42, §50.6).
+  **Tactics count MONTHS**, so a half-finished quarter counts for its part.
+  **AND THE `Not asked` GATE COMES BACK** — rows that had not started were
+  being asked for figures. §235.2 carries the table wording, all his:
+  *Annual target* · *YTD actual* · *YTD delivery* with the per cent sign on
+  both halves (*"what is 45/50?"* — and the same cell already printed
+  *"due at 50%"* WITH the sign) · Variance gone · *Of plan* → *Progress* ·
+  *Due at* → *YTD Target*, KEPT, **reversing his own previous round** and
+  recorded as a reversal · the reporter's note on Performance **under the
+  name**, which `capKOTable()` has done all along, costing no width (§158).
+  **`Compile` was never on a slide** and the .pptx is unreachable (§145.9), so
+  that half of "remove them from slides" was checked and not done.
+  **The server needed nothing** and it is asserted both ways: `asOfMonth` is
+  not in `REVIEW_PER_TARGET`, so it classifies as `cycle` — the office's.
+  Proved able to fail three ways (4 / 2 / 3 red). **AND `qa.py`'s OWN METHOD
+  MOVED**: it modelled "nothing reported" by blanking `progress`, which
+  asserts nothing once the score is derived from the actual — §51.11 in a
+  check's machinery rather than its selectors.
 - **A DEPENDENCY MUST NOT BE ABLE TO TAKE THE FEATURE IT SERVES DOWN (§231.3):**
   Islam, minutes after the §231 merge — *"the chat bubble disappeared!"*
   `lib/push.js` required `web-push` at its TOP level and `api/chat.js` requires
@@ -3748,6 +3796,15 @@ python3 checks/submit-gate.py  # Submit is shut until the report is complete and
                                 # draft and Submit both LOCK the report (controls
                                 # actually disabled, never a class) and one Reopen
                                 # unlocks either (§220, §221)
+python3 checks/ytd-proration.py # YTD is measured against the part of the year that has
+                                # PASSED (§235): the review point is a month and the
+                                # office picks it; Sum prorates and Latest must not; the
+                                # TARGET is prorated, never the ratio (a made-up ≤ row
+                                # reads 125%, where a divided ratio reads 150%); the
+                                # stored `progress` is asserted UNCHANGED beside the new
+                                # score; and every deck row is counted against its own
+                                # header, because dropping a column from a header and not
+                                # from the row is this change's easiest mistake
 python3 checks/gap-walk.py      # the band's chips and Next gap actually go somewhere:
                                 # a unit AND a function, as the filler AND the office,
                                 # every place the band names reached (§177.2)
@@ -3929,7 +3986,24 @@ prior sessions (on HR_ERP) accidentally reverted agreed-upon designs.
 
 ---
 
-*Last Updated: 2026-09-01 &mdash; **&sect;234: one function's submit must not
+*Last Updated: 2026-09-01 &mdash; **&sect;235: YTD is measured against the
+part of the year that has passed.** Islam, from a live round: the reporting of
+YTD was compared with the full-year target without proration. Measured before
+building: of 26 Sum measures with an actual the median read 45 points low, and
+18 of 26 crossed out of Off track. The plan already said which rows prorate
+(`compile`), the target is prorated and never the ratio, the stored `progress`
+is untouched so archives still read, and reward stays a year-end judgement. On
+the way, the finding that reshaped it: **the review point was two fields that
+disagreed**, and prorating by the cycle's end quarter would have done nothing
+at all on the tenant that reported the bug. It is a month now, set by the
+office and editable mid-cycle, riding `review.extra` with no migration and
+falling back so nothing moves until they set one. 24/24 on
+`checks/ytd-proration.py`, proved able to fail three ways &middot; 454/0
+authoriser (3 new, both ways) &middot; 126/0 differ &middot; full `qa.py` sweep
+green &middot; `setup-overview`, `repeat-project`, `table-fit`,
+`project-tables`, `submit-gate`, `fn-pillars` green.*
+
+*Earlier: 2026-09-01 &mdash; **&sect;234: one function's submit must not
 carry everybody's report state.** Islam, from a live client session:
 *"emergency error that we fixed 100 times before"* &mdash; a CF custodian
 refused with **"You cannot report for admin."** four times over, and slides

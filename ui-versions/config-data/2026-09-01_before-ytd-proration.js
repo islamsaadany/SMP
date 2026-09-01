@@ -3770,10 +3770,10 @@ function capById(id){
 
 function capKOScore(c){
   /* Pending confirmation leaves the average (§145), as everywhere. */
-  var list = (c.keyObjectives || []).filter(function(m){ return measureScore(m) != null; });
+  var list = (c.keyObjectives || []).filter(function(m){ return m.progress != null; });
   if (!list.length) return null;
   var tw = 0, sum = 0;
-  list.forEach(function(m){ var w = m.weight == null ? 1 : m.weight; tw += w; sum += measureScore(m) * w; });
+  list.forEach(function(m){ var w = m.weight == null ? 1 : m.weight; tw += w; sum += m.progress * w; });
   return tw ? Math.round(sum / tw) : null;
 }
 
@@ -4726,10 +4726,7 @@ function reportedCount(u){
 function rowReads(x){
   if (x.kind === "tactic") return tacticRatio(x.obj);
   if (x.kind === "deliverable" || x.kind === "milestone") return statusReads(x.obj);
-  /* §235: the prorated score, so a unit is asked to explain a figure that is
-     actually behind rather than one that only looks behind against a whole
-     year. The note rule and the Submit gate both hang off this. */
-  return measureScore(x.obj);
+  return x.obj.progress;
 }
 function needsNote(x){
   var p = rowReads(x);
@@ -4921,11 +4918,8 @@ function cycleMeta(){
   else if (to)    bits.push("until " + to);
   if (due) bits.push("due " + due);
   if (!bits.length) bits.push("Dates not set");
-  /* §235: THE REVIEW POINT IS NOT PRINTED HERE ANY MORE. It used to read
-     "as of Q" + endsQuarter -- the words of `GROUP.asOfQuarter` over the value
-     of a different field -- and it is now a control on the strip beside this,
-     so printing it here as well would say one thing twice and let the two
-     disagree the moment one is edited (§53.5). */
+  if (REVIEW.endsQuarter != null && REVIEW.endsQuarter !== "")
+    bits.push("as of Q" + REVIEW.endsQuarter);
   return bits.join(" \u00b7 ");
 }
 
@@ -5172,22 +5166,16 @@ function koScore(list, weights){
   /* §218: an objective counts as soon as it has a figure — nothing waits
      on the office any more. */
   /* §233: hidden is not counted, weighted or not. */
-  /* §235: THE SCORE IS `measureScore()`, NOT THE STORED `progress`. One
-     reader for every average in the product, or the headline and the row it
-     expands to would disagree about the same measure. */
-  var vals = list.filter(function(m){
-    return !SMPRules.isHidden(m) && !m.milestone && measureScore(m) != null; });
+  var vals = list.filter(function(m){ return !SMPRules.isHidden(m) && !m.milestone && m.progress != null; });
   if (!vals.length) return null;
   if (!weights) {
-    return Math.round(vals.reduce(function(a, m){ return a + measureScore(m); }, 0) / vals.length);
+    return Math.round(vals.reduce(function(a, m){ return a + m.progress; }, 0) / vals.length);
   }
   var tot = 0, acc = 0;
   list.forEach(function(m, i){
-    if (SMPRules.isHidden(m) || m.milestone) return;
-    var v = measureScore(m);
-    if (v == null) return;
+    if (SMPRules.isHidden(m) || m.milestone || m.progress == null) return;
     var w = weights[i] == null ? 0 : weights[i];
-    acc += v * w; tot += w;
+    acc += m.progress * w; tot += w;
   });
   return tot ? Math.round(acc / tot) : null;
 }
@@ -5335,150 +5323,21 @@ function bandOf(v){
 function quartersOf(t){
   return [t.q1, t.q2, t.q3, t.q4].map(function(x){ return x ? 1 : 0; });
 }
-
-/* ── THE REVIEW POINT (§235) ──────────────────────────────────────────────
-   HOW FAR THROUGH THE PLAN YEAR ARE WE. One answer, asked by everything that
-   compares a figure with a benchmark: a measure's prorated target, a tactic's
-   expected delivery, and the quarter pips.
-
-   IT IS A MONTH AND NOT A QUARTER, and that is Islam's own case rather than a
-   preference: "we might be reporting till month 8 in the year then it's an 8
-   months review cycle." A quarter cannot say eight months.
-
-   BEFORE THIS THERE WERE TWO FIELDS AND THEY DISAGREED. `REVIEW.endsQuarter`
-   is the quarter the CYCLE ends in and was what `tacticPlanned()` read;
-   `GROUP.asOfQuarter` is named for the review point ("H1 means Q1 and Q2 have
-   passed") and was read by the pips alone. In the worked example both are 2,
-   so they agree and nobody ever saw it. On a year-long cycle reported in-year
-   they diverge completely: measured over the 84 demo tactics, a cycle ending
-   Q4 makes every single one read "due at 100%" -- one distinct value, a column
-   that cannot vary -- while the pips two columns away correctly show Q2. Same
-   row, two answers. §53.5, in the arithmetic rather than the layout.
-
-   THE FALLBACK IS WHAT MAKES THIS SAFE TO SHIP. A tenant that has never been
-   asked keeps EXACTLY today's behaviour, because an unset review point falls
-   back to the quarter the cycle ends in -- which is what this used to mean.
-   Nobody's score moves until the office sets a month. And the fallback NEVER
-   WRITES: a reader that creates the field it looked for puts a phantom change
-   into every save (§42, §50.6). */
-function reviewAsOf(){
-  var m = REVIEW.asOfMonth ? monthsOf(REVIEW.asOfMonth) : null;
-  if (m != null) return m;
-  var y = cycleYear();
-  if (y == null) return null;
-  var q = Number(REVIEW.endsQuarter);
-  if (!q || q < 1 || q > 4) q = 4;
-  return y * 12 + (q * 3 - 1);   /* the LAST month of that quarter */
-}
-/* The review point written the way a month is written everywhere else. Falls
-   back to the derived quarter-end so a tenant that has never set one still
-   reads a true sentence rather than a dash. */
-function reviewAsOfLabel(){
-  var t = reviewAsOf();
-  if (t == null) return "\u2014";
-  return monthValue(((t % 12) + 12) % 12, Math.floor(t / 12));
-}
-/* Months of the plan year already passed, 1 to 12. The plan year runs January
-   to December (Islam, asked outright), so the count is from the cycle's year. */
-function elapsedMonths(){
-  var a = reviewAsOf(), y = cycleYear();
-  if (a == null || y == null) return null;
-  return Math.max(0, Math.min(12, a - y * 12 + 1));
-}
-/* Is this quarter behind us? A quarter counts as passed when its LAST month
-   has, which is what `asOfQuarter` meant before it became a month (H1 means Q1
-   and Q2 have passed). The quarter fallback is kept for a cycle whose year
-   cannot be read, exactly as tacticPlanned() keeps it. */
-function quarterPast(i){
-  var a = reviewAsOf(), y = cycleYear();
-  if (a == null || y == null) return (i + 1) <= (Number(REVIEW.endsQuarter) || 4);
-  return y * 12 + i * 3 + 2 <= a;
-}
-function elapsedShare(){
-  var m = elapsedMonths();
-  return m == null ? null : m / 12;
-}
-/* WHICH MEASURES PRORATE, and the plan already answers it. `compile` says what
-   kind of number this is: "Sum" adds up across the period, so six months of
-   accumulation against twelve months of target is the wrong comparison;
-   "Latest" is a rate or a share at a point in time and "Average" is already
-   normalised, so neither has anything to prorate -- and with no baseline
-   stored, prorating them would be inventing a glide path. Measured on the
-   shipped tenant: 32 of 137 rows are Sum. */
-function prorates(m){ return String(m && m.compile || "").toLowerCase() === "sum"; }
-/* The number this row is actually measured against right now.
-   PRORATE THE TARGET, THEN COMPARE -- never the ratio. Dividing a score by the
-   elapsed share is right for "more is better" and exactly backwards for "less
-   is better", so the share goes on the target and one expression serves both
-   directions. */
-function measureDue(m){
-  if (!m || !m.target) return null;
-  var t = parseFloat(String(m.target).replace(/[^0-9.]/g, ""));
-  if (isNaN(t)) return null;
-  if (!prorates(m)) return t;
-  var s = elapsedShare();
-  return s == null ? t : t * s;
-}
-/* WHAT THE ROW SCORES. Derived, never stored -- `m.progress` goes on holding
-   the raw actual-against-the-ANNUAL-target ratio exactly as it always has, so
-   every archive and every closed cycle still reads as it did and nothing is
-   migrated. The Focus board reads that raw figure on purpose (§235: reward
-   stays a year-end judgement); everything else reads this. */
-function measureScore(m){
-  if (!m) return null;
-  var due = measureDue(m);
-  if (due == null || !due) return null;
-  var a = parseFloat(String(m.actual == null ? "" : m.actual).replace(/[^0-9.]/g, ""));
-  if (isNaN(a)) return null;
-  if (m.dir === "\u2264" && !a) return null;
-  return Math.max(0, Math.min(150, Math.round((m.dir === "\u2264" ? due / a : a / due) * 100)));
-}
-/* What a prorated row is measured against, written the way the target is --
-   drawn as the quiet half of the YTD actual cell. Null where there is nothing
-   worth saying. */
-function measureDueLabel(m){
-  var due = measureDue(m);
-  if (due == null) return null;
-  /* JOINED THE PLATFORM'S OWN WAY, never by hand: `18B EGP` keeps its spelling,
-     so the benchmark reads `9B EGP` beside it rather than `9 B EGP`. One
-     joiner, the same one the reporting page uses to put a typed figure back
-     together (§53.5). */
-  return joinTarget(String(m.target), String(Math.round(due * 100) / 100),
-                    splitTarget(String(m.target)).unit || "");
-}
 function tacticPlanned(t){
-  /* §218: A FILLED QUARTER COUNTS AT ONCE -- this used to return null while
+  /* §218: A FILLED QUARTER COUNTS AT ONCE. This used to return null while
      the quarters waited on the office, so a tactic whose timeline had just
-     been filled in read as NOT DUE, vanished from the report under "Not asked
-     -- outside this cycle", and could never be reported on.
-
-     §235: AND IT COUNTS MONTHS, NOT WHOLE QUARTERS. The review point is a
-     month, so a tactic standing in a half-finished quarter gets credit for the
-     part that has actually happened (Islam, asked outright). A tactic running
-     Q2-Q4 reviewed at August has had 5 of its 9 months. Whole quarters would
-     say a tactic planned for the quarter we are standing in has not started.
-
-     The quarter arithmetic is kept as the fallback for a cycle whose year
-     cannot be read: returning null there would make every tactic "not asked"
-     and empty the reporting page, which is a far worse failure than a coarse
-     answer. */
-  var q = quartersOf(t), y = cycleYear(), a = reviewAsOf();
-  if (y == null || a == null) {
-    var tot = 0, el = 0;
-    for (var j = 0; j < 4; j++) {
-      if (!q[j]) continue;
-      tot++;
-      if (j + 1 <= REVIEW.endsQuarter) el++;
-    }
-    return tot ? Math.round(el / tot * 100) : null;
-  }
-  var total = 0, elapsed = 0;
+     been filled in read as NOT DUE — and a row that is not due is not
+     asked, so it vanished from the report under the words "Not asked —
+     outside this cycle". Measured on one tactic with its quarters
+     unchanged: settled 41 rows asked, pending 40, tick removed 41 again.
+     That is what Consumer Finance was looking at — nine tactics filled in
+     and none of them reportable. With no approval there is nothing to
+     wait for. */
+  var q = quartersOf(t), total = 0, elapsed = 0;
   for (var i = 0; i < 4; i++) {
     if (!q[i]) continue;
-    for (var k = 0; k < 3; k++) {
-      total++;
-      if (y * 12 + i * 3 + k <= a) elapsed++;
-    }
+    total++;
+    if (i + 1 <= REVIEW.endsQuarter) elapsed++;
   }
   if (!total) return null;
   return Math.round(elapsed / total * 100);
@@ -5974,10 +5833,10 @@ function viaCarrier(p, own, roll){
 /* §233: a hidden row leaves every average — the same skip on every reader,
    through the one shared predicate (SMPRules.isHidden), or the deck and the
    page would disagree about one number. */
-function scorableMeasures(p){ return (p.measures || []).filter(function(m){ return !SMPRules.isHidden(m) && m.target && measureScore(m) != null; }); }
+function scorableMeasures(p){ return (p.measures || []).filter(function(m){ return !SMPRules.isHidden(m) && m.target && m.progress != null; }); }
 function pillarPerf(p){
   return viaCarrier(p,
-    function(){ return avg(scorableMeasures(p).map(measureScore)); },
+    function(){ return avg(scorableMeasures(p).map(function(m){ return m.progress; })); },
     function(f){ return avg(fnItems(f).map(pillarPerf)); });
 }
 function dueTactics(p){ return SMPRules.shown(p.tactics).filter(tacticDue); }

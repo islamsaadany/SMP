@@ -69,6 +69,7 @@ function deckSlides(u){
   var aimRows = SMPRules.shown(u.keyObjectives).map(function(m, i){
     return '<tr><td class="idx">' + (i+1) + '</td>' +
       '<td class="lead">' + esc(m.name) + fmark(m.id) + '</td>' +
+      '<td class="num">' + esc(m.dir) + '</td>' +
       '<td class="num big3">' + (m.target3y ? esc(m.target3y) : "&mdash;") + '</td>' +
       (aimNear
         ? '<td class="num">' + (m.target ? esc(m.target) : '<span class="missing">Missing</span>') + '</td>'
@@ -84,7 +85,7 @@ function deckSlides(u){
     '</div><div class="aimbottom"><span class="dlab">' + L("keyobj","bu") +
       horizonBy() + '</span>' +
       '<table class="zebra dbig"><thead><tr><th class="idx">#</th><th>Objective</th>' +
-      '<th class="num">' + horizonColLabel() + '</th>' +
+      '<th class="num">Dir.</th><th class="num">' + horizonColLabel() + '</th>' +
       (aimNear ? '<th class="num">This year</th>' : '') +
       '</tr></thead><tbody>' + aimRows + '</tbody></table>' +
     '</div></section>');
@@ -108,14 +109,15 @@ function deckSlides(u){
   var oRows = SMPRules.shown(u.keyObjectives).map(function(m, i){
     return '<tr><td class="idx">' + (i+1) + '</td>' +
       '<td class="lead">' + esc(m.name) + fmark(m.id) + '</td>' +
+      '<td class="num">' + esc(m.dir) + '</td>' +
       '<td class="num">' + (m.target ? esc(m.target) : "&mdash;") + '</td>' +
       '<td class="num">' + esc(m.actual) + '</td>' +
-      '<td class="num final ' + dBand(measureScore(m)) + '">' + dPct(measureScore(m)) + '</td></tr>';
+      '<td class="num final ' + dBand(m.progress) + '">' + dPct(m.progress) + '</td></tr>';
   }).join("");
   S.push('<section class="dslide"' + anch("objectives", L("keyobj","bu") + " \u2014 after the table") +
     '><h2>' + L("keyobj","bu") + ' &mdash; where we stand</h2>' +
     '<table class="zebra dbig"><thead><tr><th class="idx">#</th><th>Objective</th>' +
-    '<th class="num">This year</th><th class="num">Actual</th>' +
+    '<th class="num">Dir.</th><th class="num">This year</th><th class="num">Actual</th>' +
     '<th class="num">Progress</th></tr></thead><tbody>' + oRows + '</tbody></table></section>');
 
   /* 5 — SWOT opens with its own page, then one category per slide. */
@@ -173,16 +175,17 @@ function deckSlides(u){
     var mRows = SMPRules.shown(p.measures).map(function(m, i){
       return '<tr><td class="idx">' + (i+1) + '</td>' +
         '<td class="lead">' + esc(m.name) + fmark(m.id) + '</td>' +
+        '<td class="num">' + esc(m.dir) + '</td>' +
         '<td class="num">' + (m.target ? esc(m.target) : '<span class="missing">Missing</span>') + '</td>' +
         '<td class="num">' + esc(m.actual) + '</td>' +
-        '<td class="num final ' + dBand(measureScore(m)) + '">' + dPct(measureScore(m)) + '</td>' +
+        '<td class="num final ' + dBand(m.progress) + '">' + dPct(m.progress) + '</td>' +
         (m.note ? '<td class="dnote">' + esc(m.note) + '</td>' : '<td class="dnote empty">&mdash;</td>') +
         '</tr>';
     }).join("");
     S.push('<section class="dslide" data-split="' + pillarCode(u, pi) + 'M">' +
       deckPillarHead(u, p, pi, "Key measures") +
       '<table class="zebra withnote"><thead><tr><th class="idx">#</th><th>Measure</th>' +
-      '<th class="num">Target</th><th class="num">Actual</th>' +
+      '<th class="num">Dir.</th><th class="num">Target</th><th class="num">Actual</th>' +
       '<th class="num">Progress</th><th>Note</th></tr></thead><tbody>' + mRows + '</tbody></table></section>');
 
     var tRows = SMPRules.shown(p.tactics).map(function(t, i){
@@ -198,8 +201,7 @@ function deckSlides(u){
         '<td class="lead">' + esc(t.name) + '</td><td>' + esc(t.owner) + '</td>' +
         '<td class="collabs">' + collabCell(t) + '</td>' +
         '<td class="num">' + spanLabel(t) + '</td>' +
-        '<td class="num">' + (t.actual == null ? "&mdash;" : t.actual + "%") +
-          ' / ' + tacticPlanned(t) + '%</td>' +
+        '<td class="num">' + (t.actual == null ? "&mdash;" : t.actual) + ' / ' + tacticPlanned(t) + '</td>' +
         '<td class="num final ' + dBand(tacticRatio(t)) + '">' + dPct(tacticRatio(t)) + '</td>' +
         (t.note ? '<td class="dnote">' + esc(t.note) + '</td>' : '<td class="dnote empty">&mdash;</td>') +
         '</tr>';
@@ -285,15 +287,16 @@ function deckSlidesFn(fk){
         return '<tr><td class="idx">' + (i+1) + '</td>' +
           '<td class="lead">' + esc(m.name) + '</td>' +
           '<td class="num">' + (m.weight == null ? "&mdash;" : m.weight + "%") + '</td>' +
+          '<td class="num">' + esc(m.dir) + '</td>' +
           '<td class="num">' + (m.target ? esc(m.target) : '<span class="missing">Missing</span>') + '</td>' +
           '<td class="num">' + (m.actual == null || m.actual === "" ? "&mdash;" : esc(m.actual)) + '</td>' +
-          '<td class="num final ' + dBand(measureScore(m)) + '">' + dPct(measureScore(m)) + '</td>' +
+          '<td class="num final ' + dBand(m.progress) + '">' + dPct(m.progress) + '</td>' +
           (m.note ? '<td class="dnote">' + esc(m.note) + '</td>' : '<td class="dnote empty">&mdash;</td>') + '</tr>';
       }).join("");
       S.push('<section class="dslide"><h2>Key objectives &mdash; where we stand' +
         '<span class="dwhich">' + esc(c.name) + '</span></h2>' +
         '<table class="zebra withnote"><thead><tr><th class="idx">#</th><th>Objective</th>' +
-        '<th class="num">Weight</th><th class="num">Target</th>' +
+        '<th class="num">Weight</th><th class="num">Dir.</th><th class="num">Target</th>' +
         '<th class="num">Actual</th><th class="num">Score</th><th>Note</th></tr></thead>' +
         '<tbody>' + kRows + '</tbody></table></section>');
     }

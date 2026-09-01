@@ -213,21 +213,26 @@ with sync_playwright() as p:
     full = pg.evaluate("""()=>{REVIEW.from='Jan 2026';REVIEW.to='Jun 2026';
       REVIEW.due='15 Jul 2026';REVIEW.endsQuarter=2;currentSub='overview';paint();
       return document.querySelector('.ovsmeta').textContent.trim();}""")
-    ck("with dates, it reads as a span", full == "Jan 2026 to Jun 2026 \u00b7 due 15 Jul 2026 \u00b7 as of Q2", full)
+    # §235: THE SENTENCE NO LONGER CARRIES THE REVIEW POINT. It used to end
+    # "as of Q" + endsQuarter -- the words of one field over the value of
+    # another -- and the review point is now a control on the cycle strip, so
+    # printing it here as well would say one thing twice and let the two
+    # disagree the moment one is edited.
+    ck("with dates, it reads as a span", full == "Jan 2026 to Jun 2026 \u00b7 due 15 Jul 2026", full)
     bare = pg.evaluate("""()=>{REVIEW.from='';REVIEW.to='';REVIEW.due='';
       REVIEW.endsQuarter=4;paint();
       return document.querySelector('.ovsmeta').textContent.trim();}""")
-    ck("with none, it says the dates are not set", bare == "Dates not set \u00b7 as of Q4", bare)
+    ck("with none, it says the dates are not set", bare == "Dates not set", bare)
     ck("and never prints a bare separator",
        " \u00b7  \u00b7 " not in bare and not bare.startswith("\u00b7"), bare)
     onCycle = pg.evaluate("""()=>{currentSub='cycle';paint();
-      return document.querySelector('.fstrip-meta').textContent.trim();}""")
+      return document.querySelector('.fstrip-meta:not(.asof)').textContent.trim();}""")
     ck("the Reporting cycle page says exactly the same", onCycle == bare, (bare, onCycle))
     # ONE END IS NOT A SPAN: "Jan 2026 to" is worse than saying nothing.
     half = pg.evaluate("""()=>{REVIEW.from='Jan 2026';REVIEW.to='';REVIEW.due='';
       currentSub='overview';paint();
       return document.querySelector('.ovsmeta').textContent.trim();}""")
-    ck("one end alone is reported on its own terms", half == "from Jan 2026 \u00b7 as of Q4", half)
+    ck("one end alone is reported on its own terms", half == "from Jan 2026", half)
     pg.evaluate("""()=>{REVIEW.from='Jan 2026';REVIEW.to='Jun 2026';
       REVIEW.due='15 Jul 2026';REVIEW.endsQuarter=2;paint();}""")
     pg.wait_for_timeout(200)

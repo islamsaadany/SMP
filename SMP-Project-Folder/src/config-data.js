@@ -118,7 +118,6 @@ var EDIT_PAGE = { foundation:false, analysis:false, temple:false };
 
 /* How the objectives box reads. A view preference, not stored on the object —
    it changes nothing about the strategy, only how one box is laid out. */
-var KO_VIEW = "chips";
 
 /* Configuration screens open read-only. Editing is entered deliberately, which
    is what makes a change to a weight or a threshold an act rather than a slip. */
@@ -5202,22 +5201,119 @@ function mayMarkFocus(){
    equal-weighted, which is the default nobody has to defend. */
 var KO_WEIGHTS = { mobile: [40, 25, 20, 15] };
 
+/* ── A FIGURE READ AT ITS TARGET'S SCALE (§237) ─────────────────────────
+   Islam, of a unit's objectives table: *"actual revenue is reported in details
+   by the unit — it needs to be squeezed to follow the target format like 3.59,
+   not the full number."* His row reads target **3.59B EGP** against actual
+   **3,590,800,500**. Both are right; they are written at different scales, so
+   the row cannot be read across, and on a slide the long one is what the eye
+   lands on.
+
+   DISPLAY ONLY. What was reported is stored exactly as it was entered and
+   nothing is rounded away — this is a reading of a value, not a rewriting of
+   one, so the full figure stays in the hover and in the workbook.
+
+   THE RULE HAS TO NOT MISFIRE ON THE ORDINARY CASE, which is the whole
+   difficulty: §199.6 says a bare number inherits its row's unit, so "8"
+   against a target of "6 M EGP" means eight MILLION and must be left alone.
+   The only reading under which a bare number is a full figure rather than a
+   figure in the target's unit is when it is ABSURDLY larger than the target —
+   so the gate is **1000x**, which is not a taste: it is one whole magnitude
+   step (K, M, B are each 1000 apart), and a figure genuinely a thousand times
+   its target would be a performance of 100,000%, which no report contains.
+   Below that nothing is touched, so every real figure in the demo is
+   unchanged and it is asserted.
+
+   The decimals follow the TARGET's, so the two line up in the column, and the
+   unit is rejoined with the target's own spacing (`joinTarget`). A target with
+   no magnitude, an actual that carries its own unit, or anything unparseable
+   returns the value exactly as stored. */
+var FIGURE_MAGNITUDES = { B: 1e9, M: 1e6, K: 1e3 };
+function figureScaled(target, actual){
+  var raw = actual == null ? "" : String(actual).trim();
+  if (!raw) return raw;
+  var t = splitTarget(target), a = splitTarget(raw);
+  if (a.unit || !t.unit) return raw;                      /* already carries one */
+  var mag = FIGURE_MAGNITUDES[t.unit.charAt(0).toUpperCase()];
+  if (!mag) return raw;
+  var av = parseFloat(a.value.replace(/,/g, ""));
+  var tv = parseFloat(String(t.value).replace(/,/g, ""));
+  if (isNaN(av) || isNaN(tv) || !tv) return raw;
+  if (Math.abs(av) < Math.abs(tv) * 1000) return raw;     /* a figure in the target's own unit */
+  var dp = (String(t.value).split(".")[1] || "").length;
+  return joinTarget(target, (av / mag).toFixed(dp), t.unit);
+}
+/* The same figure as a title, so the full number is never lost to the reader
+   who wants it — empty when nothing was shortened, which is what lets a caller
+   hand it straight to `title=""` without deciding anything. */
+function figureFull(target, actual){
+  var raw = actual == null ? "" : String(actual).trim();
+  return figureScaled(target, raw) === raw ? "" : raw;
+}
+
+/* ── WHAT EACH OBJECTIVE WEIGHS (§237) ──────────────────────────────────
+   Islam: *"there is no weighting on the objectives in units it needs to be
+   added, and in the functions planning as pillars it's there but if it's
+   missing it should be considered equally weighted objectives not 0."*
+
+   THE SECOND HALF IS THE BUG, and it is one of the two mechanisms that put a
+   dash where a reported figure should be. `koScore()` read
+   `weights[i] == null ? 0 : weights[i]` — so a blank weight counted at
+   NOTHING, and where every reported row was blank the total came to nought
+   and the whole headline returned null. Measured: the same objectives read
+   **90%** equally weighted and **a dash** on that weighting.
+
+   THE RULE, IN ONE SENTENCE: a blank weight counts as the average of the
+   weights that WERE set; if none were set at all, every objective counts
+   equally. So a blank can never be worth nothing, never dominate, and a
+   half-filled column behaves like a sensible reading of a half-filled column
+   rather than like a scoring decision nobody made.
+
+   TWO PLACES HOLD A WEIGHT AND THAT IS WHY THIS TAKES BOTH. A capability's
+   and a function's objectives carry `weight` ON THE ROW; a unit's have lived
+   in `KO_WEIGHTS[ukey]` as an array BY POSITION since long before rows had
+   ids — which is §48's own hazard (a row removed from the middle shifts every
+   weight below it onto the wrong objective). The row wins where it is set, so
+   the unit's new column writes the row and the stored array stays readable
+   for a tenant that has one. Nothing is migrated and nothing is rewritten. */
+function koWeights(list, legacy){
+  var raw = (list || []).map(function(m, i){
+    var w = (m && m.weight != null && m.weight !== "") ? Number(m.weight) : null;
+    if (w == null && legacy && legacy[i] != null) w = Number(legacy[i]);
+    return (w == null || isNaN(w)) ? null : w;
+  });
+  var set = raw.filter(function(w){ return w != null; });
+  if (!set.length) return null;                       /* nothing weighted at all */
+  var mean = set.reduce(function(a, b){ return a + b; }, 0) / set.length;
+  return raw.map(function(w){ return w == null ? mean : w; });
+}
+/* Whether this list is weighted at all — what a table asks before drawing a
+   Weight column nobody has filled in (§237, Islam: *"if there is no weights
+   submitted the table shouldn't show weights"*). */
+function koWeighted(list, legacy){ return !!koWeights(list, legacy); }
 function koScore(list, weights){
   /* §218: an objective counts as soon as it has a figure — nothing waits
      on the office any more. */
   /* §233: hidden is not counted, weighted or not. */
-  var vals = list.filter(function(m){ return !SMPRules.isHidden(m) && !m.milestone && m.progress != null; });
+  var counts = function(m){
+    return !SMPRules.isHidden(m) && !m.milestone && m.progress != null;
+  };
+  var vals = (list || []).filter(counts);
   if (!vals.length) return null;
-  if (!weights) {
+  var flat = function(){
     return Math.round(vals.reduce(function(a, m){ return a + m.progress; }, 0) / vals.length);
-  }
+  };
+  var ws = koWeights(list, weights);
+  if (!ws) return flat();
   var tot = 0, acc = 0;
   list.forEach(function(m, i){
-    if (SMPRules.isHidden(m) || m.milestone || m.progress == null) return;
-    var w = weights[i] == null ? 0 : weights[i];
-    acc += m.progress * w; tot += w;
+    if (!counts(m)) return;
+    acc += m.progress * ws[i]; tot += ws[i];
   });
-  return tot ? Math.round(acc / tot) : null;
+  /* Every weight that was set is a literal zero — an answer, but not one a
+     score can be divided by. Equal weighting rather than a dash: a figure that
+     is in must be seen (§237). */
+  return tot ? Math.round(acc / tot) : flat();
 }
 
 /* ── Weighting factors: configurable from the start ───────────────────────

@@ -3735,9 +3735,6 @@
         paint();
       });
     });
-    document.querySelectorAll("[data-kov]").forEach(function(b){
-      b.addEventListener("click", function(){ KO_VIEW = b.dataset.kov; paint(); });
-    });
     document.querySelectorAll("[data-tadd]").forEach(function(b){
       b.addEventListener("click", function(){
         var k = b.dataset.tadd;

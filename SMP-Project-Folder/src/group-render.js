@@ -411,7 +411,7 @@ function measureRows(ms, opts){
                '</td><td class="num">' + dirCell(m.dir) + '</td><td class="num">' + esc(m.target) +
                '</td><td class="cc">' + compileCell(m.compile) + '</td>';
     if (opts.unscored) return head + '</tr>';
-    return head + '<td class="num">' + esc(m.actual) + '</td>' +
+    return head + '<td class="num">' + figShown(m) + '</td>' +
            (scored
              ? '<td class="num final" style="color:' + bandInk(m.progress) + '">' + m.progress + '%</td>'
              : '<td class="cc"><span class="pill none">Not scored</span></td>') + '</tr>';
@@ -1151,7 +1151,7 @@ function unitCards(keys){
     var pd = miniTable(["Key objective","Direction","Target","H1 actual","Progress"],
       u.keyObjectives.map(function(m){
         return '<tr><td>' + esc(m.name) + '</td><td class="num">' + dirCell(m.dir) + '</td>' +
-          '<td class="num">' + esc(m.target) + '</td><td class="num">' + esc(m.actual) +
+          '<td class="num">' + esc(m.target) + '</td><td class="num">' + figShown(m) +
           '</td><td class="num">' + m.progress + '%</td></tr>';
       }).join("")) +
       '<p class="sub">Headline: <b>' + unitObjectives(u) + '%</b> &mdash; ' + (KO_WEIGHTS[u.ukey] ? 'weighted' : 'equal weight') + ' across its Key Objectives. Contributes at <b>' +
@@ -1290,7 +1290,7 @@ function renderGroupPerformance(){
     GROUP.keyObjectives.map(function(m){
       return '<tr><td>' + (m.group ? esc(m.group) + " &mdash; " : "") + esc(m.name) + '</td>' +
         '<td class="num">' + dirCell(m.dir) + '</td><td class="num">' + esc(m.target) + '</td>' +
-        '<td>' + compileCell(m.compile) + '</td><td class="num">' + esc(m.actual) + '</td>' +
+        '<td>' + compileCell(m.compile) + '</td><td class="num">' + figShown(m) + '</td>' +
         '<td class="num">' + m.progress + '%</td></tr>';
     }).join("")) +
     '<p class="sub">Mean of the ' + GROUP.keyObjectives.length + ': <b>' +
@@ -1371,7 +1371,7 @@ function renderGroupPerformance(){
               return '<tr><td class="idx">' + (i+1) + '</td><td>' + esc(m.name) + '</td>' +
                 '<td class="num">' + dirCell(m.dir) + '</td>' +
                 '<td class="num">' + (m.target ? esc(m.target) : '<span class="missing">Missing</span>') + '</td>' +
-                '<td class="num">' + esc(m.actual) + '</td>' +
+                '<td class="num">' + figShown(m) + '</td>' +
                 '<td class="num final" style="color:' + bandInk(m.progress) + '">' + pct(m.progress) + '</td></tr>';
             }).join("")) +
           '<p class="sub">Weighted across <b>' + c.keyObjectives.length + '</b> objectives: <b>' + pct(ko) + '</b>.</p>') +
@@ -1774,7 +1774,13 @@ function renderUnitPerformance(u){
                            .map(function(m){ return m.progress; });
   var koHi = kps.length ? Math.max.apply(null, kps) : null;
   var koLo = kps.length ? Math.min.apply(null, kps) : null;
-  var ws = KO_WEIGHTS[u.ukey];
+  /* §237: THE RESOLVED WEIGHTS, never the raw array. A row's own `weight`
+     wins, a blank takes the average of the ones that were set, and a list
+     nobody has weighted answers null — so this table shows the two extra
+     columns exactly when the score is actually weighted, and the number in
+     them is the number koScore() divided by (§53.5: a breakdown that
+     disagrees with the headline it sits under is worse than none). */
+  var ws = koWeights(u.keyObjectives, KO_WEIGHTS[u.ukey]);
 
   /* The unit's Key Objectives are authored on its Foundation, but they are what
      this page scores — so the breakdown opens from the headline rather than
@@ -1783,11 +1789,11 @@ function renderUnitPerformance(u){
     '<p class="sub" style="margin:0 0 14px">' + TIP_PERF + '</p>' +
     miniTable(["#", L("keyobj","bu"), "Dir.", "Target", "H1 actual", "Progress"].concat(ws ? ["Weight","Contribution"] : []),
       u.keyObjectives.map(function(m, i){
-        var w = ws ? (ws[i] == null ? 0 : ws[i]) : null;
+        var w = ws ? Math.round(ws[i] * 10) / 10 : null;
         return '<tr' + (isFocus(m.id) ? ' class="focusrow"' : '') + '><td class="idx">' + (i+1) + '</td>' +
           '<td>' + esc(m.name) + fmark(m.id) + '</td>' +
           '<td class="num">' + dirCell(m.dir) + '</td><td class="num">' + esc(m.target) + '</td>' +
-          '<td class="num">' + esc(m.actual) + '</td>' +
+          '<td class="num">' + figShown(m) + '</td>' +
           '<td class="num final" style="color:' + bandInk(m.progress) + '">' + pct(m.progress) + '</td>' +
           (ws ? '<td class="num">' + w + '%</td><td class="num">' +
                 (Math.round(m.progress * w) / 100).toFixed(1) + '</td>' : '') + '</tr>';
@@ -2810,11 +2816,7 @@ function koYearToggle(){
     ' title="' + (SHOW_KO_THIS_YEAR ? "Hide this year\u2019s target" : "Show this year\u2019s target") +
     '">This year</button>';
 }
-function koToggle(){
-  return '<span class="minisw" role="group" aria-label="Objectives layout">' +
-    '<button data-kov="cols"  aria-pressed="' + (KO_VIEW === "cols")  + '" title="Columns">&#9776;</button>' +
-    '<button data-kov="chips" aria-pressed="' + (KO_VIEW === "chips") + '" title="Chips">&#9632;&#9632;</button></span>';
-}
+
 
 /* `isGroup` decides whether the near horizon is shown: it is hidden on a
    UNIT's objectives and kept on the group's (§51.16). The chips view drops the
@@ -2997,16 +2999,19 @@ function koView(list, isGroup, acKey){
   var chips = function(m){
     return "";
   };
-  if (KO_VIEW === "chips") {
-    return '<div class="ochips">' + list.map(function(m){
-      var far = m.target3y ? esc(m.target3y) : miss;
-      return '<div class="ochip' + (SMPRules.isHidden(m) ? ' hiddenrow' : '') +
-        '"><b>' + esc(m.name) + '</b>' + hidChip(m) +
-        (near ? '<div class="v">' + (m.target ? esc(m.target) : miss) + '</div>' +
-                '<div class="h">3-year ' + far + '</div>'
-              : '<div class="v">' + far + '</div>') + chips(m) + '</div>';
-    }).join("") + '</div>';
-  }
+  /* §237: THE OBJECTIVES READ AS A TABLE, AND THE LAYOUT SWITCH IS GONE.
+     Islam: *"the other toggle that shows the objective in table or cards —
+     remove it and make the view in table only."*
+
+     The cards gave each objective its own box with the 3-year figure beneath
+     it in small grey type; the table lines the targets up in a column an eye
+     can run down, which is what reading a plan actually needs. The chips
+     branch, `koToggle()`, `KO_VIEW`, its click handler and the `.ochips` /
+     `.ochip` rules are DELETED rather than left unreachable (§24) — CSS left
+     behind is what a later reader takes for load-bearing, and a mockup drawn
+     from the stylesheet then draws something the product does not have
+     (§41.9's own scar).
+
   /* §199.4: THE READING VIEW KEEPS THE UNIT ON THE FIGURE. §199 split it into
      a column of its own and Islam looked at it: *"let the unit be set in the
      edit table, but in the view attach the unit to the target."*
@@ -3091,9 +3096,22 @@ function koEdit(list, page, acKey, owner){
      hand in two different arrays (the group's and a unit's) — so the table
      registers its own, exactly as a field registers its own setter. */
   var li = KOLISTS.push({ list: list, owner: owner }) - 1;
+  /* §237: A UNIT'S OBJECTIVES GET A WEIGHT COLUMN, which reverses §226's
+     "the unit side is untouched" at Islam's own instruction: *"there is no
+     weighting on the objectives in units it needs to be added."* Recorded as
+     a reversal rather than overwritten — that earlier note is why this table
+     was left behind when the function's gained the column.
+
+     IT WRITES THE ROW, not `KO_WEIGHTS`. The stored array is positional
+     (§48: remove the middle row and every weight below it lands on the wrong
+     objective), and a capability's and a function's objectives have carried
+     `weight` on the row all along — so the column the office now sees on all
+     three writes one field and `koWeights()` resolves the old array behind it
+     for a tenant that already has one. */
   return '<div class="scroll"><table><thead><tr><th>Objective</th><th class="cc">Dir.</th>' +
     '<th class="cc">Unit</th>' +
-    '<th class="cc">3-year</th><th class="cc">This year</th><th class="cc">Compile</th><th></th></tr></thead><tbody>' +
+    '<th class="cc">3-year</th><th class="cc">This year</th><th class="cc">Compile</th>' +
+    '<th class="cc">Weight %</th><th></th></tr></thead><tbody>' +
     list.map(function(m, i){
       /* \u00a7130: the four gap-fillable columns go through gapCell \u2014 in the
          office's edit they are the same bound fields as before (with the
@@ -3122,6 +3140,12 @@ function koEdit(list, page, acKey, owner){
           { kind:"input", cls:"mono", parse: unitInherit(m) }) + '</td>' +
         '<td class="cc">' + gapCell(page, acKey, m, "compile",
           { kind:"select", opts:["Sum", "Latest", "Average"] }) + '</td>' +
+        /* §237: the same cell the capability's table already draws — one
+           column, one field, one answer on all three surfaces (§53.5). Left
+           blank it is not nought: koWeights() gives it the average of the
+           weights that were set. */
+        '<td class="cc">' + gapCell(page, acKey, m, "weight",
+          { kind:"input", cls:"mono", num:true }) + '</td>' +
         '<td class="cc">' + (editing
           ? eyeBtn(m, page, acKey) +
             ' <button class="rmbtn" data-korm="' + li + '|' + i + '">Remove</button>' : '') +
@@ -3260,7 +3284,7 @@ function koBlock(objectives, page, acKey, owner, isGroup, editing){
          and there is nothing there to toggle (§51.16). Hidden in edit for the
          same reason the layout switch is: authoring shows every field there is,
          so a control that hides one would be lying about what is stored. */
-      (editing ? '' : (isGroup ? '' : koYearToggle()) + koToggle()) + '</div>' +
+      (editing ? '' : (isGroup ? '' : koYearToggle())) + '</div>' +
     (editing ? koEdit(objectives, page, acKey, owner) : koView(objectives, isGroup, acKey));
 }
 
@@ -4164,7 +4188,7 @@ function capKOTable(c){
           '<td class="cc">' + (m.weight == null ? "&mdash;" : m.weight + "%") + '</td>' +
           '<td class="cc">' + dirCell(m.dir) + '</td>' +
           '<td class="num">' + (m.target ? esc(m.target) : '<span class="missing">Missing</span>') + '</td>' +
-          '<td class="num">' + (m.actual == null || m.actual === "" ? "&mdash;" : esc(m.actual)) + '</td>' +
+          '<td class="num">' + (m.actual == null || m.actual === "" ? "&mdash;" : figShown(m)) + '</td>' +
           '<td class="num final" style="color:' + bandInk(m.progress) + '">' + pct(m.progress) + '</td></tr>';
       }).join(""));
 }
@@ -5517,10 +5541,27 @@ function renderFnFoundation(fnKey){
    the whole reason §211 cost a day. The empty line is the caller's, because
    what an empty list MEANS differs: a capability with none is judged by its
    projects; a function with none is judged by its pillars. */
+/* ONE CELL, EVERYWHERE A FIGURE IS READ AGAINST ITS TARGET (§237). The
+   shortened form is what is shown and the full one is on the hover, so nothing
+   a unit reported is ever out of reach — and the decision about WHETHER to
+   shorten is made once, in `figureScaled()`, rather than at nine call sites
+   that would drift (§53.5). */
+function figShown(m){
+  var s = figureScaled(m.target, m.actual), full = figureFull(m.target, m.actual);
+  return full ? '<span title="' + esc(full) + '">' + esc(s) + '</span>' : esc(s);
+}
 function koReadBlock(list, emptyLine){
   if (!(list || []).length)
     return '<p class="sub" style="margin:0">' + emptyLine + '</p>';
-  return '<div class="ohead"><span>Objective</span><span>This year</span><span>Weight</span></div>' +
+  /* §237, Islam: *"in the functions overview if there is no weights submitted
+     the table shouldn't show weights."* A column of em-dashes says nothing
+     except that a question was asked and not answered — and since §237 a blank
+     weight is not nought but an equal share, so the column would also be
+     stating a value nobody set. `.one` is the two-column shape `koView()`
+     already uses when it drops a column; there is no second layout here. */
+  var wtd = koWeighted(list);
+  return '<div class="ohead' + (wtd ? '' : ' one') + '"><span>Objective</span>' +
+      '<span>This year</span>' + (wtd ? '<span>Weight</span>' : '') + '</div>' +
     list.map(function(m){
       /* §145: the pending chips, including a direction or compile that has no
          column here — read mode is where the office's tick is. */
@@ -5530,13 +5571,14 @@ function koReadBlock(list, emptyLine){
          own fault with the sign reversed (there the page said missing and the
          count said nothing was). The em-dash is what the Weight column beside
          it has always drawn for an absent optional value. */
-      return '<div class="orow' + (SMPRules.isHidden(m) ? ' hiddenrow' : '') +
+      return '<div class="orow' + (wtd ? '' : ' one') +
+          (SMPRules.isHidden(m) ? ' hiddenrow' : '') +
           '"><span class="on">' + esc(m.name) + hidChip(m) +
           '</span>' +
         '<span class="ot">' + (m.target ? esc(m.target) : '&mdash;') +
           '</span>' +
-        '<span class="ot h">' + (m.weight == null ? "&mdash;" : m.weight + "%") +
-          '</span></div>';
+        (wtd ? '<span class="ot h">' + (m.weight == null ? "&mdash;" : m.weight + "%") +
+          '</span>' : '') + '</div>';
     }).join("");
 }
 /* The capability objectives editor — koEdit's shape with the WEIGHT column a

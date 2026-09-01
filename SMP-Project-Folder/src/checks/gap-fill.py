@@ -426,7 +426,7 @@ with sync_playwright() as p:
       try { localStorage.removeItem("smp.ko.year2"); } catch (e) {}
       VIEWER = w.smo; leaveModes(); current = w.unit;
       currentSub = "strategy"; CURSEC.strategy = "found";
-      KO_VIEW = "cols"; paint();
+      paint();  /* §237: one layout, nothing to select */
       const oh = document.querySelector(".ohead");
       return { on: SHOW_KO_THIS_YEAR,
                cols: oh ? oh.querySelectorAll("span").length : null };

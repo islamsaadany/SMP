@@ -4031,7 +4031,27 @@ prior sessions (on HR_ERP) accidentally reverted agreed-upon designs.
 
 ---
 
-*Last Updated: 2026-09-01 &mdash; **&sect;242: a supporting function's report
+*Last Updated: 2026-09-01 &mdash; **&sect;244: every subject that reports is on
+the cycle board.** Told that a function planning in pillars appears nowhere on
+the page the office watches, Islam: *"put them on the unit half."* It was
+filtered off BOTH halves &mdash; the function half asks for capabilities, which
+a pillars function has none of by construction (&sect;59), and the unit half read
+`activeKeys()`, which is units &mdash; so such a function could be a week late
+and the board would carry no row for it. `boardUnitTargets()` is the one list
+the rows AND `cycleTotals()` walk, so the headline can never disagree with what
+is drawn (&sect;53.5, and &sect;108.1's miscount where the parts grew and the
+divisor did not); its counts come from `reportedCount(unitLike(t))`, the same
+function its own Reporting page draws from. **AND THE BOARD PRINTED "Care"
+TWICE** &mdash; this tenant has a unit and a function of that name, and the
+function half rendered `f.name` where `placeLabel()` already answers it
+(&sect;65, &sect;93.12); found by the new check, not by reading. **AND ONE
+CHECK HELD A COPY OF BOARD MEMBERSHIP**: `setup-overview.py` computed the board's
+size as `activeKeys().length + boardFunctionKeys().length`, which this change
+makes incomplete &mdash; it asks `boardUnitTargets()` now, the third time this
+file has recorded a literal outliving the decision behind it (&sect;214.3).
+`checks/cycle-board.py`: **7 red** on the pre-&sect;244 build.*
+
+*Earlier the same day: **&sect;242: a supporting function's report
 is asked for, and its objectives can be answered; &sect;243: the review deck,
 and the weights its objectives are scored by.** Islam, from a live client
 session: *"for the functions planning in pillars the key objectives reporting

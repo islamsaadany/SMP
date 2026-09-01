@@ -298,6 +298,37 @@ async function main() {
     eq("…carrying the seat, not a boolean", team[0] && team[0].seat, "super");
   });
 
+  /* ── 10 · a way in (§147.14) ──────────────────────────────────
+     A PLATFORM WITH NO ACCOUNTS IS A PLATFORM NOBODY CAN OPEN, and there is
+     nothing inside it that could grant the first one — the consultants page
+     is behind the sign-in it would create. This is §43.1's own answer one
+     level out, and it carries the same trade: one screen, once. */
+  await P.withPlatform(pg, async function (c) {
+    const first = (await c.query("SELECT email, is_admin, must_change, kind FROM accounts " +
+      "WHERE email = $1", [P.bootstrapEmail()])).rows[0];
+    check("the platform bootstraps a first office account", !!first, P.bootstrapEmail());
+    if (first) {
+      check("…as the platform admin", first.is_admin === true && first.kind === "office", first);
+      /* THE FIRST THING IT CAN DO IS STOP BEING THIS. A known password that
+         did not force a change is a back door, which is §43.1's whole
+         reversal of §19.4. */
+      check("…which must be changed at once", first.must_change === true, first);
+      const auth2 = require("../lib/auth.js");
+      check("…and the known password is the one said in the open",
+            auth2.verifyPassword("1234", (await c.query(
+              "SELECT password_hash FROM accounts WHERE email = $1",
+              [P.bootstrapEmail()])).rows[0].password_hash));
+    }
+    /* AND IT IS NEVER PUT BACK. Asked of the whole table rather than of this
+       address, so an office that has since removed it does not find it
+       returned under them — the same rule the client's bootstrap follows. */
+    await c.query("UPDATE accounts SET must_change = false WHERE email = $1", [P.bootstrapEmail()]);
+    await P.bootstrapOffice(c);
+    const again = (await c.query("SELECT must_change FROM accounts WHERE email = $1",
+      [P.bootstrapEmail()])).rows[0];
+    check("…and never re-made once any account exists", again && again.must_change === false, again);
+  });
+
   console.log("\n" + pass + " passed, " + fail + " failed");
   await pool.end();
   process.exit(fail ? 1 : 0);

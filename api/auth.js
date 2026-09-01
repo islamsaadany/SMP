@@ -110,13 +110,30 @@ module.exports = async function handler(req, res) {
        request (§36.4). An unknown client and one this account may not open are
        the same refusal, so trying slugs tells nobody anything. */
     const body = req.method === "POST" ? await readBody(req) : {};
-    client = await P.connectFor(pg, P.clientSlugFrom(req, body));
-    await ensureReady(client, client._smpClient.schema_name);
-    /* Which client this request is about — the sessions are the platform's,
-       the people are this client's, and every lookup below needs both. */
-    const CLIENT_KEY = client._smpClient.key;
-
     const action = body.action || (req.method === "GET" ? "me" : "");
+
+    /* ── THE DOOR'S OWN FOUR, AND THEY NEED NO CLIENT (§147.13) ────
+       Identity is `platform.accounts`, which is shared: is anyone signed in,
+       sign in, sign out, change the password. Every query in all four is
+       platform-qualified already — the client was resolved purely to hand
+       back a connection, and on a deployment whose registry is not filled in
+       that turned the door itself into a dead end.
+
+       Everything below them really is about one client — a register's people,
+       their password states, where somebody says they work — and resolves one
+       exactly as before. */
+    const DOOR = ["me", "login", "logout", "change"];
+    const atDoor = DOOR.indexOf(action) > -1;
+    let CLIENT_KEY = null;
+    if (atDoor) {
+      client = await P.connectPlatform(pg);
+    } else {
+      client = await P.connectFor(pg, P.clientSlugFrom(req, body));
+      await ensureReady(client, client._smpClient.schema_name);
+      /* Which client this request is about — the sessions are the platform's,
+         the people are this client's, and every lookup below needs both. */
+      CLIENT_KEY = client._smpClient.key;
+    }
 
     if (action === "me") {
       /* ASKED WITHOUT A CLIENT (spec 024). This is the door's own question —
@@ -197,7 +214,11 @@ module.exports = async function handler(req, res) {
     }
 
     if (action === "change") {
-      const person = await auth.getSession(client, req, CLIENT_KEY);
+      /* ASKED WITHOUT A CLIENT, for `me`'s reason and one more: this is the
+         forced change after a temporary password, and refusing it because the
+         session belongs to a client other than the default would strand
+         somebody at the one screen they cannot get past. */
+      const person = await auth.getSession(client, req, null);
       if (!person) return send(res, 401, { ok: false, error: "sign in first" });
       const why = auth.passwordPolicy(body.password);
       if (why) return send(res, 400, { ok: false, error: "The password needs " + why + "." });

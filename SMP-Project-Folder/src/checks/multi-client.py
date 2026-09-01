@@ -79,8 +79,29 @@ def main():
             pg.goto(BASE + "/", wait_until="networkidle")
             check("the door asks for an email", "Email" in pg.inner_text("#accessLabel"),
                   pg.inner_text("#accessLabel"))
-            check("no client's name is on the door",
-                  "raya" not in pg.inner_text("body").lower(), "a client is named on the front door")
+            # A MARK IS NOT TEXT, AND THIS ASSERTION ONLY READ TEXT (§147.15).
+            # It passed for as long as the door carried Raya Trade's lockup —
+            # a <use href="#raya-trade"> says nothing to inner_text — so the
+            # one client whose door it was NOT went on being named on it, in
+            # the loudest way a screen can. §113.8's blind spot in my own
+            # check: I asserted the words and the fault was a picture.
+            named = pg.evaluate("""() => {
+              const txt = (document.body.innerText || '').toLowerCase();
+              const attr = (e, n) => (e.getAttribute(n) || '');
+              const marks = Array.from(document.querySelectorAll('use, img, svg, symbol'))
+                .map(e => [attr(e,'href'), attr(e,'xlink:href'), attr(e,'src'),
+                           attr(e,'aria-label'), attr(e,'id')].join(' ').toLowerCase())
+                .filter(x => x.trim());
+              const ids = Array.from(document.querySelectorAll('[id]'))
+                .map(e => String(e.id).toLowerCase());
+              return { txt, marks, ids }; }""")
+            for client in ("raya", "rhi", "el-abd"):
+                check("no client is named on the door in words (%s)" % client,
+                      client not in named["txt"], named["txt"][:120])
+                check("…nor drawn on it (%s)" % client,
+                      not any(client in m for m in named["marks"]), named["marks"])
+                check("…nor left in its markup (%s)" % client,
+                      not any(client in i for i in named["ids"]), named["ids"])
             # ASSERTED AS ABSENCES, because the fault this guards is the office's
             # pages LEAKING BACK onto the front page, where anybody can read them
             # (§94.2 from the negative side: a check that only looks for
@@ -95,6 +116,23 @@ def main():
             words = pg.inner_text("body")
             for w in ("Consultants", "Who sees what", "Clients"):
                 check("the door does not name '%s'" % w, w not in words)
+
+            # AND THE DOOR ANSWERS ON A DEPLOYMENT THAT IS NOT SET UP YET
+            # (§147.13). Signing in is not about a client — identity is shared
+            # — so the door's own four questions must never be refused for a
+            # client reason. Asked of a client that certainly is not in the
+            # registry: the answer must be about the SIGN-IN, never about a
+            # client, or the one screen somebody needs in order to fix
+            # anything is the screen that turns them away (§16.7).
+            door = pg.evaluate("""async () => {
+              const r = await fetch('/api/auth?client=no_such_client_at_all',
+                { cache: 'no-store' });
+              const j = await r.json().catch(() => ({}));
+              return { status: r.status, ok: j.ok, error: j.error || '' }; }""")
+            check("the door answers even when the client cannot be resolved",
+                  door["ok"] is True, door)
+            check("…and never refuses a sign-in for a client reason",
+                  "client" not in (door["error"] or "").lower(), door)
 
             # A PERSON KEY IS NOT A WAY IN ANY MORE (Islam, 2026-08-28).
             pg.fill("#user", "smo"); pg.fill("#password", CLIENTP[1])

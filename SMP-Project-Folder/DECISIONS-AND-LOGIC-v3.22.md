@@ -19492,3 +19492,76 @@ cheaper than any of it.
 `accounts.role` and `account_clients.is_super`, the two columns revision 3
 removed, so the one script that sets a deployment up would have failed on the
 shape it was setting up. Reading it would not have shown that.
+
+### 147.13 · The door was refusing sign-in for a client reason
+
+Islam, on a deployment carrying this code with its registry not yet filled in:
+*"the starting page is with raya trade and it gave me this message"* — **"That
+client is not available."**
+
+**NOTHING WAS BROKEN AND NOTHING WAS LOST**, and establishing that first was
+most of the work: the deployment had the new code and the old database, so
+`platform.clients` held no row and the boundary refused, correctly, the client
+it was asked for. Reproduced exactly against a v2.0-shaped database.
+
+**BUT SIGNING IN IS NOT ABOUT A CLIENT.** Identity is `platform.accounts`,
+which is shared, and the door's four actions — is anyone signed in, sign in,
+sign out, change the password — are **already platform-qualified in every
+query**. `connectFor()` was answering all four purely to hand back a
+connection, and the comment above `me` said in as many words that the question
+is *"asked without a client"*.
+
+**THE COST IS THE FAULT §16.7 NAMES**: a refusal must send somebody to the
+place that can fix it, and this one named a place that could not — the one
+screen you need in order to set anything up is the screen that turns you away,
+pointing at clients when the answer is a migration. `connectPlatform()` is the
+door's connection; everything below the four really is about one client and
+resolves one exactly as before. **`change` goes with them**, because it is the
+forced change after a temporary password: refusing it because the session
+belongs to a client other than the default would strand somebody at the one
+screen they cannot get past.
+
+### 147.14 · A way in (§43.1's own rule, one level out)
+
+**A PLATFORM WITH NO ACCOUNTS IS A PLATFORM NOBODY CAN OPEN**, and there is
+nothing inside it that could grant the first one — the consultants page is
+behind the sign-in it would create. The client's schema has answered this since
+v3.12 with `smo` / `1234` forced to change at once, and this is the same answer
+one level out, carrying the same trade in the same words: **the convenience it
+buys is one screen, once.**
+
+The address is Islam's, from an **environment variable** so a deployment that
+is not Forefront's does not inherit it; `must_change` is true, so the first
+thing the account can do is stop being this; and it is **never put back**,
+asked of the whole table rather than of that address, so an office that has
+since removed it does not find it returned under them.
+
+**IT DOES NOT REGISTER A CLIENT**, and that is deliberate: moving 44 tables
+into a new schema is what `migrate-to-multi-client.js` is for, and a schema
+move triggered by a page load is not a thing this product should be able to do.
+So a bootstrapped platform signs you in and tells you no client has been given
+to this account yet — which is true, and is a sentence somebody can act on.
+
+### 147.15 · A mark is not text, and my own check only read text
+
+The door carried **Raya Trade's lockup**, and had since the gate was Raya's
+sign-in. That is revision 2's own rule broken in the loudest way a screen can:
+it told everybody at every other client whose door they were standing at.
+
+**AND `checks/multi-client.py` ASSERTED THE WORDS.** `"raya" not in
+inner_text(body)` passes forever against a `<use href="#raya-trade">`, because
+a picture says nothing to `innerText` — §113.8's blind spot, in a check I wrote
+this session and proved able to fail on everything except this. It asks for the
+name in the **words, the marks and the markup** now, of three clients rather
+than one, and was watched to fail with the lockup put back.
+
+**NOTHING REPLACES IT.** The wall above 980px and `.mobrand` below it both
+already say FOREFRONT CONSULTING, and a third copy of one fact on one screen is
+what §120 took off the register's header. The sprite, `.clientmark`,
+`--client-mark` and the responsive rules go with it (§24) — leftover CSS is what
+a later reader takes for load-bearing.
+
+**And the redirect's fallback was a client's name too**: `clientKey ||
+"raya-trade"` sent anybody the server had not given a client to one particular
+client's address. Nobody to open means **Forefront's own platform**, which is
+where the cards are and where a person with no client is told so.

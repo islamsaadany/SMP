@@ -127,7 +127,6 @@
     --icon: #8894a8;
     /* The tenant's own mark. Its two brand colours, read off the vector
        artwork in the client's brand manual, not sampled from a screenshot. */
-    --client-mark: #282e76;
     --client-flag: #3a67b1;
   }
   @media (prefers-color-scheme: dark) {
@@ -178,7 +177,6 @@
       --btn-shadow: rgba(0, 0, 0, 0.45);
       --icon: #7f8b9d;
       /* Reversed on a dark ground, which is how the client supplies it. */
-      --client-mark: #ffffff;
       --client-flag: #ffffff;
     }
   }
@@ -227,7 +225,6 @@
     --btn-shadow: rgba(0, 0, 0, 0.45);
     --icon: #7f8b9d;
     /* Reversed on a dark ground, which is how the client supplies it. */
-    --client-mark: #ffffff;
     --client-flag: #ffffff;
   }
 
@@ -251,18 +248,6 @@
      handed over, not the asset: they carry an opaque grey ground and would
      paint a rectangle around themselves here.
      --------------------------------------------------------------- */
-  .sprite { position: absolute; width: 0; height: 0; overflow: hidden; }
-  .clientmark {
-    display: block; width: 150px; height: 31.2px; margin: 0 auto 18px;
-  }
-  /* The fills are declared INLINE inside the symbol, not here: a <use>
-     clones into a shadow tree that a document selector cannot reach.
-     Custom properties cross that boundary, so the tokens still theme it. */
-  /* Separates whose platform this is from the greeting. Without it the
-     lockup reads as a picture inside the greeting rather than a letterhead
-     over it. */
-  .clientmark + hr { border: 0; border-top: 1px solid var(--line); margin: 0 0 20px; }
-
   * { margin: 0; padding: 0; box-sizing: border-box; }
   [hidden] { display: none !important; }
   body {
@@ -539,8 +524,6 @@
     .card { padding: 30px 22px 26px; border-radius: 16px; }
     /* Same reason as the short-window block: the mark's ~49px was 2px more
        than a 320x640 phone had left. Measured at 320, not assumed from 390. */
-    .clientmark { width: 132px; height: 27.5px; margin-bottom: 14px; }
-    .clientmark + hr { margin-bottom: 16px; }
   }
   /* SHORT windows, not narrow ones. Measured: the wall's content needs about
      600px of height, so on a 1024x560 laptop the quote fell below the fold and
@@ -570,8 +553,6 @@
 
      Measured at every size, not estimated from one that passed. */
   @media (max-height: 700px) {
-    .clientmark { width: 120px; height: 25px; margin-bottom: 10px; }
-    .clientmark + hr { margin-bottom: 12px; }
   }
   /* An entrance is a courtesy; for anyone who has asked for less motion it is
      an obstacle. Nothing here depends on an animation to become visible. */
@@ -582,31 +563,11 @@
 </head>
 <body>
 
-<svg class="sprite" aria-hidden="true" focusable="false">
-<defs>
-  <path id="rt_5_1" d="M.042999269 0 .2290039 .7299957H.3710022L.55700686 0H.44799806L.40400697 .18499756H.19700623L.15299988 0H.042999269M.21699524 .27400209H.3829956L.33299256 .4850006C.32433573 .5223338 .3171692 .5548299 .31149293 .582489 .3058268 .61015829 .30199687 .6289978 .30000306 .63900759 .29799906 .6289978 .29433189 .61015829 .28900147 .582489 .28367106 .5548299 .27633668 .52266439 .2669983 .48599244L.21699524 .27400209Z"/>
-  <path id="rt_5_124" d="M.083999637 0V.7299957H.31300355C.3590037 .7299957 .39900209 .7211609 .43299867 .7034912 .46699525 .6858317 .49349467 .66100057 .51249697 .6289978 .5314992 .59699508 .54100039 .55933126 .54100039 .51600649 .54100039 .46733094 .52849838 .42516075 .50349429 .38949586 .47850038 .35383097 .44466654 .32866416 .4019928 .31399537L.5509949 0H.42799378L.29499818 .30000306H.19200135V0H.083999637M.19200135 .39500428H.31300355C.34900413 .39500428 .3776703 .405838 .39900209 .4275055 .42033387 .44917298 .43099977 .478007 .43099977 .51400759 .43099977 .55134078 .42033387 .5806732 .39900209 .602005 .3776703 .6233368 .34900413 .6340027 .31300355 .6340027H.19200135V.39500428Z"/>
-  <path id="rt_5_136" d="M.2460022 0V.6309967H.050994874V.7310028H.548996V.6309967H.3540039V0H.2460022Z"/>
-  <path id="rt_5_33" d="M.08299255 0V.7299957H.28700257C.33499656 .7299957 .3766581 .72083029 .4119873 .7024994 .44732667 .6841685 .4748281 .6583354 .49449159 .625 .5141652 .5916646 .5240021 .5523326 .5240021 .5070038V.22399903C.5240021 .17933147 .5141652 .13999431 .49449159 .10598755 .4748281 .07199097 .44732667 .04582723 .4119873 .027496338 .3766581 .009165446 .33499656 0 .28700257 0H.08299255M.19099427 .0980072H.28700257C.32700096 .0980072 .35850016 .10917155 .38150025 .13150025 .40450035 .15382894 .41600038 .18466187 .41600038 .22399903V.5070038C.41600038 .54566958 .40450035 .5761668 .38150025 .5984955 .35850016 .62083438 .32700096 .6320038 .28700257 .6320038H.19099427V.0980072Z"/>
-  <path id="rt_5_37" d="M.09399414 0V.7299957H.522995V.6340027H.19999695V.42700196H.4880066V.33200074H.19999695V.09599304H.522995V0H.09399414Z"/>
-</defs>
-<symbol id="raya-trade" viewBox="0 0 157.66 32.82">
-  <g style="fill:var(--client-mark)">
-    <path transform="matrix(1,0,0,-1,54.995805,7.5039064)" d="M0 0-3.68-7.406-7.36 0"/>
-    <path transform="matrix(1,0,0,-1,18.16771,15.65329)" d="M0 0H-4.194V3.552H0C3.133 3.552 3.171 0 0 0M29.972-5.399 24.067 8.079H16.954L9.949-7.474C9.949-4.627 8.903-1.567 6.53-1.567 11.793 .027 10.263 8.079 3.445 8.079H-10.725V-9.686H-4.089V-4.014C1.351-4.014 2.718-2.996 2.718-8.376 2.718-9.486 3.174-9.686 4.086-9.686H15.722L20.726 2.246 24.864-9.686 26.638-9.673 25.379-5.944C25.379-5.944 29.504-5.933 29.76-5.923 30.068-5.825 30.024-5.536 29.972-5.399"/>
-    <path transform="matrix(1,0,0,-1,50.988405,25.338898)" d="M0 0 .286 .012C.955 .012 1.384 .937 1.744 1.64 2.044 2.211 2.278 2.678 2.303 2.729L9.291 17.765H15.763L23.523 0H16.957L12.587 11.932 7.755 0H.359"/>
-    <use data-text="T" xlink:href="#rt_5_136" transform="matrix(14.6443,0,0,-14.6443,108.45041,22.3219)"/>
-    <use data-text="R" xlink:href="#rt_5_124" transform="matrix(14.6443,0,0,-14.6443,118.55498,22.3219)"/>
-    <use data-text="A" xlink:href="#rt_5_1" transform="matrix(14.6443,0,0,-14.6443,128.65955,22.3219)"/>
-    <use data-text="D" xlink:href="#rt_5_33" transform="matrix(14.6443,0,0,-14.6443,138.76412,22.3219)"/>
-    <use data-text="E" xlink:href="#rt_5_37" transform="matrix(14.6443,0,0,-14.6443,148.86867,22.3219)"/>
-  </g>
-  <g style="fill:var(--client-flag)">
-    <path transform="matrix(1,0,0,-1,91.19791,22.0112)" d="M0 0-7.406 3.68 0 7.36"/>
-    <path transform="matrix(1,0,0,-1,92.3763,10.97171)" d="M0 0 7.406-3.68 0-7.36"/>
-  </g>
-</symbol>
-</svg>
+<!-- THE CLIENT-MARK SPRITE IS GONE WITH THE MARK IT DREW (§147.15, §24).
+     It was 23 lines of path data for one client's lockup on a door that
+     belongs to no client. `.clientmark`, `--client-mark` and the sprite
+     rules go with it — leftover CSS is what a later reader takes for
+     load-bearing, which is the whole of §24. -->
 
 <div class="gate">
 
@@ -712,8 +673,13 @@
 
       <!-- Sign in -->
       <div class="card" id="login">
-        <svg class="clientmark" role="img" aria-label="Raya Trade"><use href="#raya-trade"/></svg>
-        <hr>
+        <!-- NO CLIENT'S MARK ON THE DOOR (§147.15, and revision 2's own rule).
+             It carried Raya Trade's lockup, which is the same fault as naming
+             a client on the front page and worse for being a picture: it told
+             everybody at every other client whose door they were standing at.
+             Nothing replaces it — the wall above 980px and .mobrand below it
+             both already say FOREFRONT CONSULTING, and a third copy of one
+             fact on one screen is what §120 took off the register's header. -->
         <h2>Welcome back</h2>
         <p>Sign in to continue</p>
         <form id="loginForm">
@@ -770,8 +736,6 @@
 
       <!-- First sign-in: the issued password is temporary -->
       <div class="card" id="change">
-        <svg class="clientmark" role="img" aria-label="Raya Trade"><use href="#raya-trade"/></svg>
-        <hr>
         <h2>Choose your own password</h2>
         <p>The one you were issued is temporary</p>
         <form id="changeForm">
@@ -922,8 +886,15 @@
      real relative path stands and there is only ever the one file. */
   var HOSTED = location.protocol === "http:" || location.protocol === "https:";
   var OFFLINE_FILE = "SMP-Project-Folder/strategy-management-platform-v3.22.html";
+  /* AND THE FALLBACK IS NOT A CLIENT'S NAME. It read `clientKey ||
+     "raya-trade"`, so anybody the server did not hand a client to was sent to
+     one particular client's address — which on a deployment where that client
+     is not theirs is a refusal, and on one where it is not registered is a
+     dead end. Nobody to open means Forefront's own platform, which is where
+     the cards are and where a person with no client is told so. */
   function openPlatform(clientKey) {
-    location.replace(HOSTED ? "/" + (clientKey || "raya-trade") : OFFLINE_FILE);
+    if (!HOSTED) { location.replace(OFFLINE_FILE); return; }
+    location.replace(clientKey ? "/" + clientKey : "/platform");
   }
   function fail(el, msg) { el.textContent = msg; el.style.display = "block"; }
   function clearFail(el) { el.style.display = "none"; }

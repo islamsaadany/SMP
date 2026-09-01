@@ -1356,6 +1356,59 @@ with sync_playwright() as p:
     CHAT["messages"] = []; CHAT["unread"] = 0
     poll_once(30000)
 
+    # ── 16 · A FAILED ASK IS NOT AN ANSWER (§231.4) ──────────────────────
+    # Islam, on the Platform Inbox: "all conversations are gone!! what
+    # happened?" Nothing had. The endpoint was down (§231.3), `boxLoadQueue`
+    # returned in silence, `box.threads` stayed as it started — empty — and the
+    # page printed "No conversations yet": a statement about somebody's DATA,
+    # made when nothing was ever read. §93's fault on the surface where being
+    # wrong is most frightening.
+    #
+    # THE DATABASE IS NOT TOUCHED HERE. Only the endpoint fails, so whatever
+    # the page prints is about the FETCH.
+    print("\n16 · a failed ask is not an answer")
+    pg.evaluate("() => { try { sessionStorage.removeItem('smp.where'); } catch (e) {} }")
+    pg.goto(URL, wait_until="networkidle")
+    pg.wait_for_timeout(1200)
+    CHAT["status"] = 500
+    pg.click('[data-md="setup"]'); pg.wait_for_timeout(800)
+    pg.click('[data-setupgo="chat"]'); pg.wait_for_timeout(2200)
+    pg.click('[data-chtab="all"]'); pg.wait_for_timeout(600)
+    said = pg.inner_text(".chnothing").strip() if pg.query_selector(".chnothing") else ""
+    ck("the page does not report an empty inbox it never read",
+       "no conversations yet" not in said.lower(), said)
+    ck("...it says the ask failed", "could not" in said.lower(), said)
+    ck("...and that nothing has been lost", "lost" in said.lower(), said)
+    ck("...and offers a way to try again",
+       pg.query_selector("[data-chretry]") is not None)
+    # ABSENT IS NOT ZERO (§35). A count of 0 beside a list nobody could fetch
+    # is the same lie in a smaller space.
+    counts = pg.eval_on_selector_all("[data-chn]", "n => n.map(x => x.textContent)")
+    ck("the counts read as unknown, never as nought",
+       all(c.strip() not in ("0", "") for c in counts), counts)
+    # AND IT IS PRESSABLE, not merely present (§70, §93.4).
+    hit = pg.evaluate("""() => { const b = document.querySelector('[data-chretry]');
+        if (!b) return 'missing'; const r = b.getBoundingClientRect();
+        const e = document.elementFromPoint(r.left + r.width / 2, r.top + r.height / 2);
+        return e && e.closest('[data-chretry]') ? 'retry' : (e ? e.tagName : 'nothing'); }""")
+    ck("a click at its centre reaches Try again", hit == "retry", hit)
+
+    # ── AND THE GOOD PATH IS UNCHANGED (§94.2) ───────────────────────────
+    # An assertion that a failure is reported passes on a build that reports a
+    # failure always. The server comes back and the queue must draw normally.
+    CHAT["status"] = 200
+    pg.click("[data-chretry]"); pg.wait_for_timeout(1500)
+    ck("Try again loads the conversations",
+       pg.eval_on_selector_all(".chqrow", "n => n.length") > 0,
+       pg.eval_on_selector_all(".chqrow", "n => n.length"))
+    ck("...and the failure line is gone",
+       pg.query_selector(".chqfail") is None)
+    counts = pg.eval_on_selector_all("[data-chn]", "n => n.map(x => x.textContent)")
+    ck("...and the counts are numbers again",
+       all(c.strip().isdigit() for c in counts), counts)
+    pg.goto(URL, wait_until="networkidle")
+    pg.wait_for_selector("#chatdock:not([hidden])", timeout=10000)
+
     # ── 7 · AND A SESSION THE SERVER REFUSES, LAST ON PURPOSE ────────────
     # A refused session takes the corner away rather than leaving a control
     # that answers every press with a refusal. It runs AFTER the console

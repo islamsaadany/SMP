@@ -25663,3 +25663,46 @@ what could not be caught, so its **absence** is what `scripts/test-push.js`
 checks — along with the require sitting inside a `try`, and `api/chat.js` still
 requiring this module, which is why the first two matter at all. A test that
 moved the package aside would prove the same thing and could not run twice.
+
+### §231.4 — A FAILED ASK IS NOT AN ANSWER, AND THE INBOX SAID IT WAS
+
+Islam, on the Platform Inbox with §231.3's endpoint down: *"all conversations
+are gone!! what happened?"*
+
+**NOTHING HAD.** `boxLoadQueue` opened `if (err || !j) return;` — a silent
+return — so `box.threads` stayed exactly as it started, which is empty, and
+`drawQueue()` went on to print **"No conversations yet."** That is a statement
+about somebody's DATA, made when nothing was ever read. The three counts read
+**0 · 0 · 0** beside it, for the same reason.
+
+**REPRODUCED ON A DATABASE HOLDING EVERY CONVERSATION**, with only the endpoint
+answering 500: the screen matched his screenshot exactly, tab for tab and word
+for word. So the claim that nothing was lost is a measurement rather than a
+reassurance — and it was worth making before anything was changed.
+
+**§93's FAULT ON THE SURFACE WHERE BEING WRONG IS MOST FRIGHTENING.** That
+section made the register's password column say *unreadable* rather than *none*
+when the ask failed, and gave the reason: *counting an error as absence reports
+everybody as having none.* The same shape, one page over, about the thing a
+client's people wrote in confidence. **And §105's own rule** — an empty state
+describes THIS filter, never the whole product — extended by one: it describes
+what was actually READ, and never what could not be.
+
+The failure is now recorded rather than swallowed; the page says it, says
+plainly that nothing has been lost, and carries **Try again**, which reloads the
+queue AND any open conversation — both failed together and both must come back
+together, or one pane is fixed while the one beside it still says the server is
+unreachable. **The counts read a dash**, because absent is not nought (§35).
+
+**IT DRAWS ONLY WHEN THERE IS NOTHING TO SHOW.** A poll that fails after a good
+one leaves the list somebody is reading exactly where it was — a working list
+replaced by an error is a worse answer than a stale one.
+
+**OUTSTANDING RATHER THAN BROKEN.** The warning ground the attention items
+already use (§168, §190), not an alarm colour: the conversations are fine, the
+connection is not, and red would say the opposite.
+
+**AND THE GOOD PATH IS ASSERTED IN THE SAME BREATH** (§94.2): an assertion that
+a failure is reported passes on a build that reports one always, so the check
+brings the server back, presses Try again, and requires the conversations to
+draw and the counts to be numbers again.

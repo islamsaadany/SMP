@@ -81,6 +81,22 @@ A drift between specs and code is a documentation bug — report it before silen
   rejected; `design-mockups/` is produced again from today.)*
 - **After ANY UI change, save a snapshot of the changed file to `ui-versions/` (see UI Version Tracking below).**
 
+### 1d. DESIGN JUDGMENTS ARE MADE ON THE REAL CLIENT VIEW (2026-09-01)
+- **The baked demo is NOT a reference for design decisions.** Islam, rejecting
+  a design audit measured on it: *"the demo view is not a reference for you to
+  fix upon, this is exceptional — you need to audit the actual client view in
+  Raya Trade."* The demo's invented numbers underperform on purpose, so any
+  conclusion about colour volume, alarm density or empty space drawn from it
+  is a conclusion about the demo, not the product.
+- **Red marks underperformance only, and that is by design** — a screen full
+  of red is a screen full of underperforming data, not a styling fault.
+- **SMP is a laptop tool, not an iPad tool.** Compact controls are fine;
+  do not propose touch-target or hover-affordance work on that premise.
+- **The small-caps label style is the chosen voice** of the product, not a
+  fault to correct.
+- Recorded after four of six audit findings were rejected on exactly these
+  misreadings (2026-09-01, *"that's a very poor evaluation"*).
+
 ### 2. Think Before Acting
 - **Don't follow commands blindly** — analyze requests and challenge if something seems incorrect or risky.
 - **Align before action** — if there's ambiguity or risk, discuss first.

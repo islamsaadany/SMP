@@ -82,10 +82,6 @@ var CHAT = (function(){
 
   var open = false, mounted = false, timer = null;
   var state = { messages: [], unread: 0, thread: null, office: false };
-  /* HOW MANY WERE WAITING LAST TIME WE ASKED — the office's half of §225.
-     `null` until the first answer, so the very first poll of a session can
-     never announce a queue that was already there when they signed in. */
-  var lastWaiting = null;
   var loaded = false, sending = false, shot = null, lastErr = "";
   /* The office inbox's own state, kept apart: the two surfaces poll on
      different clocks and a person in the office has both open at once. */
@@ -317,28 +313,15 @@ var CHAT = (function(){
         '<div class="chathead">' +
           "<div><div class=\"cht\">Strategy Office</div>" +
           '<div class="chs" id="chatsub"></div></div>' +
-          /* GROUPED, NEVER TWO CONTROLS EACH PUSHED RIGHT ON THEIR OWN. `.chx`
-             used to carry `margin-left:auto` itself, so a second one would be
-             pushed to the right INDEPENDENTLY and the two would land a gap
-             apart with the heading squeezed between them. The pair takes the
-             margin now and the buttons sit side by side. */
-          '<div class="chbtns">' +
-            /* THE BELL IS THIS PERSON'S SWITCH, ON THIS DEVICE (§225) — drawn
-               only where it can decide something: hidden when the office has
-               turned notifications off for the tenant and on a browser with no
-               Notification at all, because a control that changes nothing is
-               not a choice (§61). Its state is written in by drawBell(). */
-            '<button class="chx chbell" id="chatbell" type="button" hidden></button>' +
-            /* A MINUS, NOT A CROSS (Islam: "it need to be a minimize button as
-               there is no closing actually"). Nothing is closed by pressing it
-               — the conversation is permanent, one per person, and it is the
-               same one next time. A × promises an end to something that has
-               none, and on a chat it reads as "discard this". */
-            '<button class="chx" id="chatclose" type="button" title="Minimise" ' +
-              'aria-label="Minimise this conversation">' +
-              '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" ' +
-              'stroke-linecap="round" aria-hidden="true"><path d="M6 12h12"/></svg></button>' +
-          "</div>" +
+          /* A MINUS, NOT A CROSS (Islam: "it need to be a minimize button as
+             there is no closing actually"). Nothing is closed by pressing it —
+             the conversation is permanent, one per person, and it is the same
+             one next time. A × promises an end to something that has none, and
+             on a chat it reads as "discard this". */
+          '<button class="chx" id="chatclose" type="button" title="Minimise" ' +
+            'aria-label="Minimise this conversation">' +
+            '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" ' +
+            'stroke-linecap="round" aria-hidden="true"><path d="M6 12h12"/></svg></button>' +
         "</div>" +
         '<div class="chatbody" id="chatbody"></div>' +
         '<div class="chatfoot">' +
@@ -405,8 +388,6 @@ var CHAT = (function(){
         (waiting ? ' style="background:var(--attn)"' : '') + '></span> ' +
         esc2(cfg.promise);
     }
-    drawBell();
-
     var n = el("chatn");
     if (n) {
       if (state.unread > 0 && !open) { n.hidden = false; n.textContent = String(state.unread); }
@@ -477,13 +458,7 @@ var CHAT = (function(){
         if (dock) dock.hidden = !cfg.on;
         if (!cfg.on && open) setOpen(false);
         drawPanel();
-        if (arrived && !open) { announce(); popShow(); }
-        /* AND THE OFFICE IS TOLD WHEN SOMEBODY WRITES TO THEM (§225). Their
-           corner is their OWN conversation, so nothing above this could ever
-           speak for the queue — and the Platform Inbox's own clock stops the
-           moment they navigate away (`boxBeat`), which is every page but one.
-           This poll runs everywhere, so this is the only place it can live. */
-        popOffice(j);
+        if (arrived && !open) announce();
         /* The clock changes with the state, not only with the panel: somebody
            who has just been answered stops expecting and goes back to 180s. */
         if (firstAnswer || wasWaiting !== expecting()) beat();
@@ -532,166 +507,6 @@ var CHAT = (function(){
      itself too. Everything about it is in CSS, including the respect for
      `prefers-reduced-motion` — a corner that jumps at somebody who has asked
      not to be jumped at is worse than a silent badge. */
-  /* ── A BOX FROM THE COMPUTER WHEN A REPLY LANDS (§225) ──────────────────
-     Islam: *"a browser notification for the platform messages — for the SMO
-     when someone replies, and for the users when the SMO replies to them"*,
-     wording B: who wrote, and the first line.
-
-     THREE SWITCHES, AND ALL THREE MUST SAY YES. The company's (`cfg.popup`,
-     the office's row in Chat settings), the person's own, and the browser's
-     permission. They are genuinely three different decisions by three
-     different people, so none of them stands in for another.
-
-     THE PERSON'S IS PER DEVICE, in `localStorage` beside the theme and the
-     column choices (§25, §47.1) — and per device is not a shortcut, it is
-     the truth: the browser's permission is per device too, so a switch
-     claiming to follow somebody everywhere would be off on the laptop and
-     still silent on the iPad, whose Safari was never asked. The hover says
-     "on this device" rather than leaving that to be discovered.
-
-     STORED AS AN ABSENCE (§50.6): the key exists only while somebody has
-     turned it OFF, so a browser that has never been asked and one switched
-     back on are the same state, and a reader never creates what it looked
-     for. A throwing store reads as ON — the same way round as §107's tour,
-     because the failure that matters is nagging somebody who said no, and
-     that requires the key to be PRESENT. */
-  var POPKEY = "smp.chat.popup";
-  function popMine(){
-    try { return localStorage.getItem(POPKEY) !== "off"; }
-    catch (e) { return true; }
-  }
-  function popMineSet(on){
-    try { if (on) localStorage.removeItem(POPKEY);
-          else localStorage.setItem(POPKEY, "off"); }
-    catch (e) { /* a browser that will not store it simply keeps them on */ }
-  }
-  /* Whether the box could be shown at all — asked of the browser rather than
-     assumed, because `Notification` does not exist in an iOS Safari tab (it
-     is there only for a home-screen install) and reading `.permission` off
-     `undefined` would throw on the one platform this is least able to serve. */
-  function popCan(){
-    return typeof window !== "undefined" && "Notification" in window;
-  }
-  function popState(){
-    if (!popCan()) return "unsupported";
-    return Notification.permission;              /* granted · denied · default */
-  }
-  /* ASKED ON A PRESS, NEVER ON ARRIVAL. Browsers only allow the question
-     after a gesture, and a permission box thrown at somebody who has not
-     asked for anything is the one people refuse out of reflex — and a
-     refusal is theirs to undo, not ours, so it is worth spending once and
-     spending it well. Called when the panel is OPENED (§225). */
-  function popAsk(){
-    if (!popCan() || !cfg.popup || !popMine()) return;
-    if (Notification.permission !== "default") return;
-    try { Notification.requestPermission(); } catch (e) { /* older shape */ }
-  }
-  /* WHO WROTE, AND THE FIRST LINE (Islam's wording B). The newest message is
-     the one that just arrived; its author is resolved through the same
-     `nameOf()` the thread uses, so a notification cannot name somebody the
-     panel would call something else (§53.5). */
-  function popShow(){
-    if (!popCan() || !cfg.popup || !popMine()) return;
-    if (Notification.permission !== "granted") return;
-    var m = state.messages[state.messages.length - 1];
-    if (!m) return;
-    var who = m.bot ? "Strategy Office \u00b7 Assistant"
-            : (nameOf(m.by_key, m.by_name) || "Strategy Office");
-    var line = String(m.body || "").replace(/\s+/g, " ").trim();
-    if (line.length > 120) line = line.slice(0, 119) + "\u2026";
-    try {
-      /* ONE TAG, so a second reply REPLACES the first rather than stacking a
-         column of boxes on somebody who has been away from the screen. */
-      var n = new Notification(who, { body: line, tag: "smp-chat",
-                                      icon: "/icons/icon-192.png" });
-      n.onclick = function(){
-        try { window.focus(); } catch (e) {}
-        setOpen(true); drawPanel();
-        try { n.close(); } catch (e) {}
-      };
-    } catch (e) { /* never let a notification break the poll it rides on */ }
-  }
-
-  /* THE BELL SAYS WHAT IS HAPPENING, AND IT IS WRITTEN INTO THE NODE (§63,
-     §188). The head is never rebuilt while the panel is open, so this fills
-     the button that is already there rather than replacing it.
-
-     FOUR ANSWERS, THREE OF THEM DRAWN. The office off, or a browser with no
-     Notification at all, and there is nothing here to decide, so the control
-     is not drawn (§61). A browser that has REFUSED still gets a bell, struck
-     through and marked `aria-disabled` — never `disabled`, or it takes no
-     focus and the one sentence explaining the silence can never be reached
-     (§221, §163). Otherwise it is this person's own switch. */
-  var BELL_ON = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" ' +
-    'stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">' +
-    '<path d="M18 8a6 6 0 1 0-12 0c0 7-3 9-3 9h18s-3-2-3-9"/>' +
-    '<path d="M13.7 21a2 2 0 0 1-3.4 0"/></svg>';
-  var BELL_OFF = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" ' +
-    'stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">' +
-    '<path d="M18 8a6 6 0 1 0-12 0c0 7-3 9-3 9h18s-3-2-3-9"/>' +
-    '<path d="M13.7 21a2 2 0 0 1-3.4 0"/><path d="m3 3 18 18"/></svg>';
-  function drawBell(){
-    var b = el("chatbell"); if (!b) return;
-    var st = popState();
-    if (!cfg.popup || st === "unsupported") { b.hidden = true; return; }
-    b.hidden = false;
-    var mine = popMine();
-    var refused = (st === "denied");
-    var on = mine && !refused;
-    b.innerHTML = on ? BELL_ON : BELL_OFF;
-    b.classList.toggle("belloff", !on);
-    b.setAttribute("aria-pressed", on ? "true" : "false");
-    if (refused) {
-      b.setAttribute("aria-disabled", "true");
-      b.title = "Your browser is blocking these boxes on this device. " +
-                "Turn them back on in its site settings.";
-      b.setAttribute("aria-label", "Notifications are blocked by this browser");
-    } else {
-      b.removeAttribute("aria-disabled");
-      b.title = on ? "A box appears on this device when a reply lands. " +
-                     "Press to stop them here."
-                   : "No box on this device when a reply lands. " +
-                     "Press to turn them on here.";
-      b.setAttribute("aria-label", on ? "Stop notifications on this device"
-                                      : "Notify me on this device");
-    }
-  }
-
-  /* NOT WHILE THEY ARE LOOKING AT THE QUEUE. The Platform Inbox redraws every
-     ten seconds and shows the name and the line already, so a box repeating it
-     is noise — the same argument as `!open` above, one page out. */
-  function popOffice(j){
-    if (!j || !j.office) { lastWaiting = null; return; }
-    var n = j.waiting | 0;
-    var was = lastWaiting;
-    lastWaiting = n;
-    if (was === null || n <= was) return;
-    if (el("chinbox")) return;
-    if (!popCan() || !cfg.popup || !popMine()) return;
-    if (Notification.permission !== "granted") return;
-    var who = j.waitingWho || "Somebody";
-    var line = String(j.waitingBody || "").replace(/\s+/g, " ").trim();
-    if (line.length > 120) line = line.slice(0, 119) + "\u2026";
-    try {
-      /* ITS OWN TAG, so a question waiting and a reply on the office's own
-         conversation never replace one another. */
-      var b = new Notification(who, { body: line, tag: "smp-chat-office",
-                                      icon: "/icons/icon-192.png" });
-      b.onclick = function(){
-        try { window.focus(); } catch (e) {}
-        try { b.close(); } catch (e) {}
-        /* STRAIGHT TO THE QUEUE, through the platform's own control rather
-           than a second copy of the navigation (§107). */
-        var go = document.querySelector('[data-md="setup"]');
-        if (go) go.click();
-        setTimeout(function(){
-          var r = document.querySelector('[data-setupgo="chat"]');
-          if (r) r.click();
-        }, 0);
-      };
-    } catch (e) { /* never let a notification break the poll it rides on */ }
-  }
-
   function announce(){
     var b = el("chatbtn");
     if (!b) return;
@@ -717,12 +532,6 @@ var CHAT = (function(){
       var body = el("chatbody"); if (body) body.scrollTop = body.scrollHeight;
       var t = el("chatsay"); if (t) t.focus();
       if (state.unread > 0) post({ action:"seen" }, function(){ state.unread = 0; drawPanel(); });
-      /* THE PERMISSION IS ASKED ON A GESTURE AND NOWHERE ELSE — opening the
-         panel is the moment somebody has shown they care about this
-         conversation, and it is the only moment a browser will allow the
-         question at all. It asks once; after that the answer is the
-         browser's and ours to respect. */
-      popAsk();
       poll();
     }
     beat();
@@ -807,18 +616,6 @@ var CHAT = (function(){
 
     el("chatbtn").addEventListener("click", function(){ setOpen(!open); });
     el("chatclose").addEventListener("click", function(){ setOpen(false); });
-    el("chatbell").addEventListener("click", function(){
-      /* A REFUSED BROWSER IS NOT OURS TO ARGUE WITH — the hover says where to
-         undo it and the press does nothing, which is why it is `aria-disabled`
-         and not `disabled`: the sentence still has to be reachable. */
-      if (this.getAttribute("aria-disabled") === "true") return;
-      var on = !popMine();
-      popMineSet(on);
-      /* Turning them ON is the gesture the browser wants, so this is the
-         second and last place the question is asked. */
-      if (on) popAsk();
-      drawBell();
-    });
     el("chatsend").addEventListener("click", send);
     /* DELEGATED, because the message it sits on is redrawn by every poll — a
        handler bound to the button itself would be destroyed four seconds after
@@ -1086,34 +883,7 @@ var CHAT = (function(){
             (BOXTEST.steps ? testHtml(BOXTEST.steps) : "") +
           '</div>') +
 
-        /* ── 5 · TOLD WHILE THEY ARE HERE (§225). Islam, correcting my first
-           framing of it: *"the notification is when the person is opening the
-           tab already and email when he is not opening the platform — what is
-           the correlation here?"* None, and that is the point: they are
-           complementary, not alternatives, so they sit together and each says
-           which moment it covers.
-
-           THE COMPANY SWITCH IS ONE OF THREE, and the row says so rather than
-           implying this alone decides it: each person is asked by their own
-           browser, and each has a bell in the conversation itself. */
-        /* AND IT SITS ABOVE THE TWO EMAIL ROWS, NEVER BETWEEN THEM. §127's
-           whole finding about this panel was that the two email settings had
-           drifted five rows apart; the first build of this row put itself
-           straight between them, and the check said so. All three answer "how
-           is somebody told" — this one while they are here, those two when
-           they are not — so it opens that group rather than splitting it. */
-        setRow("popup", "Notifications",
-          "A box from the computer the moment a reply lands \u2014 and, for the " +
-          "office, the moment somebody writes in \u2014 while the platform is open " +
-          "in a tab; the away email is for when it is not. It shows who wrote and " +
-          "the first line. This switch turns it on for the company; " +
-          "each person is then asked once by their own browser, and each has a " +
-          "bell in their own conversation to stop it on that device. On an iPhone " +
-          "or iPad it works only where the platform has been added to the home " +
-          "screen.",
-          segHtml("popup", "Off", "On", c.popup, true)) +
-
-        /* ── 6 · TOLD WHEN THE ASSISTANT GIVES UP. Only while the assistant is
+        /* ── 5 · TOLD WHEN THE ASSISTANT GIVES UP. Only while the assistant is
            on, as before: a handover that cannot happen has nobody to tell. */
         (c.assistant
           ? setRow("notify", "Handover email",
@@ -1132,8 +902,8 @@ var CHAT = (function(){
               (c.notify ? '<div class="chset-ctl chset-who">' + repPicker(c.rep) + '</div>' : ''))
           : "") +
 
-        /* ── 7 · AND TOLD WHEN THEY ARE NOT LOOKING. Beside its sibling at
-           last; the two were five rows apart. */
+        /* ── 6 · TOLD WHEN A REPLY LANDS AND THEY ARE NOT LOOKING. Beside its
+           sibling at last; the two were five rows apart. */
         setRow("mail", "Away email",
           /* THE SENTENCE READS THE SETTING (§169). It said "three minutes" as
              prose while the server read a constant, so the two were one edit
@@ -1155,7 +925,7 @@ var CHAT = (function(){
               '</div>'
             : "")) +
 
-        /* ── 8 · THE ONLY ROW THAT CHANGES NOTHING ANYBODY SEES, so it is last.
+        /* ── 7 · THE ONLY ROW THAT CHANGES NOTHING ANYBODY SEES, so it is last.
            The cost is in the tooltip because it is the whole reason this is a
            setting rather than a number in the source (§98). */
         setRow("fast", "Reply checks",
@@ -1727,10 +1497,6 @@ var CHAT = (function(){
         /* The two things on the page that this changes, written into the nodes
            they are about — never paint(), which would rebuild the queue and
            the half-typed reply behind an open menu (§30.1). */
-        /* AND THE BELL IN THEIR OWN CORNER (§225), for the same reason the
-           `on` branch below echoes locally: the office flipping this would
-           otherwise press On and see no bell until their next poll. */
-        if (seg.dataset.chset === "popup") { cfg.popup = chatCfg().popup; drawBell(); }
         if (seg.dataset.chset === "on") {
           var nowOn = chatCfg().on;
           var banner = el("chsetoff");

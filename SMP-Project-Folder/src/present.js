@@ -370,7 +370,7 @@ function deckSlidesFn(fk){
           '<td class="lead">' + esc(m.name) +
           (m.covers ? '<span class="dsub">' + esc(m.covers) + '</span>' : '') + '</td>' +
           '<td>' + esc(m.owner || "—") + '</td>' +
-          /* §224: the same cell the deck's tactic tables carry (§50). */
+          /* §227: the same cell the deck's tactic tables carry (§50). */
           '<td class="collabs">' + collabCell(m) + '</td>' +
           '<td class="num' + (over.indexOf(m.id) > -1 ? ' warn' : '') + '">' + esc(m.finish) +
           (over.indexOf(m.id) > -1 ? ' <span class="dsub">after the project ends</span>' : '') + '</td>' +

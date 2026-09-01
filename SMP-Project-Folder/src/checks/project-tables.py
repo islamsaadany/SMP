@@ -110,7 +110,7 @@ READ = """
           cells: [...r.children].map(c => ({
             text: c.textContent.trim(), span: +c.colSpan,
             box: !!c.querySelector("input,select,textarea,button"),
-            /* §224: a collaborators cell's em-dash is the ANSWER — "nobody
+            /* §227: a collaborators cell's em-dash is the ANSWER — "nobody
                supporting is a real and ordinary answer, not an omission"
                (§15.1, §187) — where every other bare dash is the table
                asking a question the row cannot answer (§99). The class is

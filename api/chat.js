@@ -288,7 +288,40 @@ module.exports = async function handler(req, res) {
          next save. `beat` is the number, not the flag, because the number is
          what the client sets its clock to (§98). */
       out.chat = { on: cfg.on, shots: cfg.shots, promise: cfg.promise,
+                   /* §225: NAMED HERE OR IT NEVER ARRIVES. This object lists
+                      the keys it forwards, so a setting added to the rules and
+                      not added here is silently dropped and the control it
+                      draws never appears — §135's fault, where `greet` was
+                      missing from the posted body and every stored row would
+                      have said no message ever greeted anybody. */
+                   popup: cfg.popup,
                    beat: Rules.chatBeat({ fast: cfg.fast }) };
+      /* AND THE OFFICE IS TOLD HOW MANY ARE WAITING (§225). Their corner is
+         the only thing that polls on EVERY page — the Platform Inbox's own
+         clock stops the moment they navigate away (`boxBeat`) — so without
+         this the office would only be notified of a new question while sitting
+         on the page that already shows it, which is no notification at all.
+         One COUNT for a handful of people, and only for the office: everybody
+         else's poll is exactly as cheap as it was (§98). */
+      if (office) {
+        /* THE SAME TWO FACTS AS EVERYBODY ELSE'S BOX — who, and the first
+           line (Islam's wording B) — so the office is not served a bare
+           number where a person is served a sentence (§53.5). The newest
+           waiting conversation is the one that just arrived. */
+        const w = (await client.query(
+          "SELECT count(*)::int AS n, " +
+          "  (SELECT coalesce(p.name, t2.person_name, t2.person_key) " +
+          "     FROM chat_threads t2 LEFT JOIN people p ON p.key = t2.person_key " +
+          "    WHERE t2.waiting ORDER BY t2.last_at DESC LIMIT 1) AS who, " +
+          "  (SELECT m.body FROM chat_threads t3 " +
+          "     JOIN chat_messages m ON m.person_key = t3.person_key " +
+          "    WHERE t3.waiting ORDER BY t3.last_at DESC, m.at DESC, m.id DESC " +
+          "    LIMIT 1) AS body " +
+          "FROM chat_threads WHERE waiting")).rows[0] || {};
+        out.waiting = w.n | 0;
+        out.waitingWho = w.who || null;
+        out.waitingBody = w.body || null;
+      }
       return send(res, 200, out);
     }
 

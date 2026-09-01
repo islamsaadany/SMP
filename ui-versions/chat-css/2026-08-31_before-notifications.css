@@ -73,21 +73,12 @@ body.presenting .chatdock { display:none; }
 .chathead .cht { font-size:var(--fs-body); font-weight:650; line-height:1.25; }
 .chathead .chs { font-size:var(--fs-micro); color:var(--panel-quiet); margin-top:2px;
                  display:flex; align-items:center; gap:5px; }
-/* THE MARGIN IS ON THE GROUP, NEVER ON EACH BUTTON (§225): two controls each
-   carrying `margin-left:auto` are each pushed right on their own and land a
-   gap apart with the heading squeezed between them. */
-.chathead .chbtns { margin-left:auto; display:flex; align-items:center; gap:2px; }
-.chathead .chx { background:none; border:none; color:var(--panel-quiet);
+.chathead .chx { margin-left:auto; background:none; border:none; color:var(--panel-quiet);
                  cursor:pointer; line-height:0; padding:4px; border-radius:5px;
                  display:grid; place-items:center; }
 .chathead .chx svg { width:16px; height:16px; }
 .chathead .chx:hover { color:var(--panel-ink); background:rgb(255 255 255/.12); }
 .chathead .chx:focus-visible { outline:2px solid var(--panel-ink); outline-offset:1px; }
-.chathead .chbell[hidden] { display:none; }
-/* OFF IS QUIETER, NOT ABSENT — the struck bell has to stay findable, because
-   it is the only way back on. */
-.chathead .chbell.belloff { opacity:.62; }
-.chathead .chbell.belloff:hover { opacity:1; }
 .chatdot { width:6px; height:6px; border-radius:50%; background:var(--good); flex:none; }
 
 .chatbody { padding:14px 13px; display:flex; flex-direction:column; gap:14px;

@@ -25074,7 +25074,195 @@ left*.
 the bar was ABSENT — which is exactly the state Hala met — so it asserts the
 three things that are true instead: no red count, no owing chips, and a door.
 
-## §224 — A MILESTONE'S COLLABORATORS, THE TACTIC'S RULE MOVED OVER
+---
+
+## §224 — THE FORMAT DECIDES THE DECK
+
+Islam: *"the consumer finance presentation is not showing anything."*
+
+The Present handler branched on the **`fn:` prefix alone** and sent every
+supporting function to the capability deck — so a function that plans in
+**pillars**, which has no capabilities at all, opened a deck reading
+*"Capability review · 0 capabilities"* and nothing under it. Reproduced on the
+demo's own pillars function before a line was changed.
+
+**§63.4 FIXED THE OTHER HALF OF THIS AND LEFT THE WHOLE OF IT.** That section
+gave the button a target, because before it a pillars function could not be
+presented at all — and routed every `fn:` to `openDeckFn`, which is right for a
+capability function and wrong for the other format. §59's rule in the one place
+still asking by prefix: the deck comes through `unitLike()`, which resolves both
+kinds of key in one place, and the FORMAT is what chooses the builder.
+
+---
+
+## §224.2 — THE DEFINITION IS THE OFFICE'S (reversing §214 and §223's occasion)
+
+Islam: *"Remove the defintion of the functions overview from the filling what's
+missing or filling what's empty the SMO will do it."*
+
+§214 made a supporting function's definition a **counted** gap; §214.4 took the
+objectives back out and left it counted; §223 then found that a page whose only
+blank was optional had no door at all and opened one on what is *fillable*. This
+removes the definition from **both** questions: `GAP_OPTIONAL.cap` loses its one
+entry, so `GAP_FILLABLE.cap` is empty and a capability's definition is neither
+counted nor offered to a filler.
+
+**RECORDED AS A REVERSAL, NOT AN EDIT.** §214's argument — that a function's
+definition is the one line of its overview nobody else can write — was sound and
+Islam decided otherwise: the office authors it. The cost is stated rather than
+implied: a function whose definition is blank now shows nothing asking for it on
+any screen, and the only way it gets written is the office's pen.
+
+---
+
+## §225 — A BOX FROM THE COMPUTER WHEN A MESSAGE LANDS
+
+Islam: *a browser notification for the platform messages — for the SMO when
+someone writes in, and for the users when the SMO replies to them*; wording **B**
+(who wrote, and the first line), *"and the user can swithc off inside the
+platform as well"*, **per device**.
+
+**THREE SWITCHES, AND ALL THREE MUST SAY YES.** The company's (`chat.popup`, the
+office's row in Chat settings, **off by default** like `assistant` and `notify` —
+only an explicit `true` turns it on, so a stale value cannot switch it on by
+accident, §104), the person's own bell, and the browser's permission. They are
+three different decisions by three different people and none of them stands in
+for another.
+
+**NOT NAMED `notify`.** That key is already the handover email. §87's twins, in a
+settings object where a wrong guess would have silently rewired an email nobody
+asked to change.
+
+**THE PERSON'S IS PER DEVICE, AND THAT IS THE TRUTH RATHER THAN A SHORTCUT.**
+The browser's permission is per device too, so a switch claiming to follow
+somebody everywhere would read as ON on the laptop and stay silent on the iPad,
+whose Safari was never asked. It lives in `localStorage` beside the theme and the
+column choices (§25, §47.1) and the hover says *"on this device"* rather than
+leaving that to be discovered. **Stored as an ABSENCE** (§50.6): the key exists
+only while somebody has turned it OFF, so a browser that has never been asked and
+one switched back on are the same state. **A throwing store reads as ON** — the
+opposite way round from §107's tour, because the failure that matters here is
+nagging somebody who said no, and that requires the key to be PRESENT.
+
+**THE BELL IS IN THE CONVERSATION IT IS ABOUT**, beside the minimise — and the
+pair had to be **grouped**, because `.chx` carried `margin-left:auto` itself, so
+a second one is pushed right independently and the two land a gap apart with the
+heading squeezed between them. The group takes the margin; the class is
+`.chbtns`, **never `.chacts`**, which already exists under `.chthead` — one
+letter from `.chathead`, and reusing the child name is a trap for whoever edits
+one of them next (§65.9).
+
+**FOUR ANSWERS, THREE OF THEM DRAWN.** The office's switch off, or a browser with
+no `Notification` at all (an iOS Safari **tab** — it exists only for a home-screen
+install), and there is nothing here to decide, so no control is drawn (§61). A
+browser that has **refused** still gets a bell, struck through and
+**`aria-disabled`, never `disabled`** — or it takes no focus and the one sentence
+explaining the silence can never be reached (§221, §163). Otherwise it is this
+person's own switch.
+
+**THE PERMISSION IS ASKED ON A GESTURE AND NOWHERE ELSE** — opening the panel, or
+pressing the bell to turn them on. Browsers only allow the question after one,
+and a permission box thrown at somebody who has not asked for anything is the one
+people refuse out of reflex; a refusal is then theirs to undo, not ours.
+
+**THE OFFICE IS THE HALF THAT NEEDED THE SERVER.** Their corner is their OWN
+conversation, so nothing in the reply path could ever speak for the queue — and
+the Platform Inbox's clock **stops the moment they navigate away** (`boxBeat`
+checks for its own node), which is every page but one. The corner's poll is the
+only thing that runs everywhere, so `mine` now carries `waiting`, `waitingWho`
+and `waitingBody` **for the office only**: one query for a handful of people, and
+everybody else's poll is exactly as cheap as it was (§98). It carries the same
+two facts as everybody else's box, so the office is not served a bare number
+where a person is served a sentence (§53.5).
+
+**NAMED ON THE SERVER OR IT NEVER ARRIVES.** `out.chat` lists the keys it
+forwards, so `popup` had to be added there as well as to the rules — §135's fault
+exactly, where `greet` was missing from the posted body and every stored row
+would have said no message ever greeted anybody. Without that line the bell would
+never have been drawn on the deployment while every unit test passed.
+
+**NOTHING IS SHOWN WHERE THE THING IS ALREADY ON SCREEN** — not while the panel
+is open, and not while the office is reading the queue itself. **The first answer
+of a session never announces**, or signing in with three questions waiting would
+throw a box at somebody who has not been away. **ONE TAG PER SIDE**
+(`smp-chat` / `smp-chat-office`), so a second reply replaces the first rather than
+stacking a column of boxes on somebody who has been away from the screen — and a
+question waiting never replaces a reply on the office's own conversation.
+
+**THE NAME IS ASSERTED AS AGREEMENT WITH THE THREAD**, never as a literal:
+`nameOf()` resolves through the register, so a hardcoded name would pass on a
+build that printed the raw person key (§53.5, §94.8).
+
+`checks/office-chat.py` §14 models the browser rather than using a real one —
+every reader asks `window.Notification` at call time, so a stand-in installed at
+runtime needs no reload and is the only way to read back **what** was shown,
+which is most of what wording B claims. It asserts both ends of all three
+switches (§94.2), and **the refused press is forced**, because Playwright treats
+`aria-disabled` as disabled and that path is exactly what is under test (§222).
+
+## §226 — A FUNCTION'S OBJECTIVES ARE WRITTEN AT THE PAGE'S WIDTH (2026-09-01)
+
+Islam, from Consumer Finance's Overview: *"the keyobjectives table is tight I
+can't see the direction and I can't find the unit and the ibjectives cell is not
+wrapping"*, and minutes later, *"led by is not open to edit"*. Settled from a
+mockup drawn out of the REAL page (1c) and both open decisions were his:
+**"don't touch the unit side"**, and **Led by opens for the office**.
+
+**FOUR SYMPTOMS, AND THREE OF THEM ARE ONE OMISSION.** The function Overview's
+objectives table (`capKoEdit`, both formats since §213) edits INSIDE the
+half-width `fgrid` card — measured at a 1500px window: the card 691px, the table
+647px against the 620px floor (§158's other side), the Objective input **101px**
+and the Dir. select **34px**, which is a select whose value cannot be drawn.
+§96.6 fixed exactly this squeeze on a unit's Foundation — *the table gets the
+window while it is being written* — and that fix never reached the function's
+Overview; §199's Unit column and §189's wrapping prose never reached `capKoEdit`
+either. A page assembled from the unit's parts, three parts behind.
+
+**WHILE IT IS WRITTEN, THE TABLE TAKES A BAND** under the two cards — `.koband`,
+the unit's own expression — **on BOTH formats**, because the two draw ONE page
+(§53.5) and a squeeze fixed on one side of it is §211's drift straight back.
+Reading mode keeps the card on both, for §96.6's own reason: the objectives
+belong beside what the function is when you are READING it. Measured after:
+647px → 1393px, every column readable.
+
+**THE UNIT COLUMN IS §199's, NOT A COUSIN OF IT**: the same
+`targetUnitOf`/`setTargetUnit`/`targetUnitOpts` trio, the same
+`parse: unitInherit(m)` on This year (§199.6 — a bare number inherits the row's
+unit), the same `fillUnitCell` for a filler setting a MISSING one (§201.2), and
+the same why-dash on a row with no target to hold one. Nothing is stored — the
+unit rides the target string here exactly as it does everywhere else — and the
+server needed NOTHING: `gapFieldPass` already runs `unitAddedOnly` for every row
+kind, so a function's row was accepted before the screen could offer it.
+
+**THE NAME IS PROSE** — §189's `textOr`, a growing box that wraps — in
+`capKoEdit` only. The unit's `koEdit` keeps its one-line input **at Islam's
+instruction**, recorded as his and asserted as a measurement (§8 of the check),
+not assumed: the two sides of the switch now deliberately differ on this one
+cell, and the check is what will say so if anybody "fixes" it.
+
+**LED BY OPENS, FOR THE OFFICE, THROUGH THE REGISTER'S OWN DOOR.** The row is a
+read-only mirror of `FUNCTIONS[k].head` — the fnhead ROLE pointer, §33's
+one-fact-one-door — so the control is Setup's own `assignPicker` writing through
+`grantPersonRole`, and this row and Setup › Supporting functions' Head column
+can never disagree. **Office-only, and that is the server talking**: a head
+change classifies as Setup (`FN_SETUP`), so drawing the picker for a custodian
+holding an opened strategy cell would be the screen offering what the save
+refuses (§42's drift, the named fault of §94's three). Asserted at BOTH ENDS: the
+office picks and the head + attachment are read back; a non-office author gets
+their fields AND no picker. The sentence explaining the control is a hover, never
+a printed line (1b-ii) — the approved mockup drew it as a line and the standing
+rule outranks the drawing; recorded rather than slipped past.
+
+**THE CHECK GUESSED AND THE PRODUCT WAS RIGHT**: `checks/fn-ko-edit.py` first
+asserted `"1.6 B EGP"` and the platform wrote `"1.6B EGP"` — §199.4's own
+convention, the money units are TIGHT. The expectation moved to the platform's
+rule, not the other way round. Proved able to fail: **5 red against the
+pre-§226 build** before the run even completes (the band selectors find
+nothing). `fn-pillars`, `foundation-objectives`, `objective-unit`, `gap-fill`
+and the full `qa.py` sweep all green after.
+*(Built as §224/§225 in a parallel session; renumbered here because main took those numbers first — §94's own precedent, recorded rather than overwritten.)*
+
+## §227 — A MILESTONE'S COLLABORATORS, THE TACTIC'S RULE MOVED OVER
 
 Islam: *"for the projects milestones please add collaborators beside the owner
 column similar to the collabroators in the tactics in the units. align with me
@@ -25141,7 +25329,7 @@ is Islam's to decorate), the plan BUILDER's add-milestone form does not ask for
 them (the tactic's form does not either — they are added in the pen), and the
 hidden .pptx plan deck (§145.9) was left untouched.
 
-## §225 — THE PROJECT'S NAME GETS THE LINE
+## §228 — THE PROJECT'S NAME GETS THE LINE
 
 Islam, with a screenshot of FIN01's editing band: *"the project box is
 squeezed for no need we have space to make it one line."* A three-word title

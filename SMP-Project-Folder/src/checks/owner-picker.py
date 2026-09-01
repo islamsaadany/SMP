@@ -316,7 +316,7 @@ with sync_playwright() as p:
            pg.evaluate("(id)=>GROUP.capabilities.find(c=>c.fn==='marketing').projects.find(p=>p.id===id).owner", pid)
            == "Dina Shawky")
 
-        # §224: COLLABORATORS BESIDE THE OWNER — the tactic's ticking list on
+        # §227: COLLABORATORS BESIDE THE OWNER — the tactic's ticking list on
         # the milestone row, pressed and read back from the DATA (§96: an
         # editor wired to nothing looks identical and discards every tick).
         f2 = pg.evaluate("""()=>({

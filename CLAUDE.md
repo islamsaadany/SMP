@@ -384,6 +384,64 @@ console errors (in this cloud environment, run it via a wrapper that points Play
   remove × onto a second line — `inline-block` restores it, and it was found
   by `checks/plan-fields.py` GOING RED, not by reading the cascade, which is
   the argument for that check existing.
+- **A FUNCTION'S OBJECTIVES ARE WRITTEN AT THE PAGE'S WIDTH (§226):** Islam —
+  *"the keyobjectives table is tight I can't see the direction and I can't find
+  the unit and the ibjectives cell is not wrapping"*, and *"led by is not open
+  to edit"*. Three of the four are ONE omission: the function Overview's
+  `capKoEdit` (both formats, §213) edited inside the half-width fgrid card —
+  Objective input **101px**, Dir. select **34px** at 1500px — and §96.6's band,
+  §199's Unit column and §189's wrapping prose had each reached the unit's
+  table and never this one. **In edit/fill mode the table takes a `.koband`
+  under the cards, on BOTH formats** (§53.5 — one page), reading mode keeps the
+  card; the Unit column is §199's own trio plus `unitInherit` and
+  `fillUnitCell`, nothing stored, **no server change** (`gapFieldPass` already
+  runs `unitAddedOnly` per row kind); the name is `textOr` in `capKoEdit`
+  ONLY — **the unit side is untouched at Islam's instruction**, asserted as a
+  measurement. **Led by opens for the office through the register's own door**:
+  Setup's `assignPicker` writing `FUNCTIONS[k].head` via `grantPersonRole`
+  (§33, one fact one door), office-only because a head change classifies as
+  Setup — both ends asserted, and the explanatory sentence is a hover (1b-ii),
+  not the mockup's printed line. **The check guessed and the product was
+  right**: it asserted `"1.6 B EGP"` where §199.4's convention writes
+  `"1.6B EGP"` — the expectation moved to the platform's rule. 5 red on the
+  pre-§226 build; `fn-pillars`, `foundation-objectives`, `objective-unit`,
+  `gap-fill` and the full sweep green after.
+- **A BOX FROM THE COMPUTER WHEN A MESSAGE LANDS (§225):** Islam — a browser
+  notification for platform messages, *"for the SMO when someone replies, and
+  for the users when the SMO replies to them"*, wording **B** (who wrote, and
+  the first line), *"and the user can swithc off inside the platform as well"*,
+  **per device**. **THREE SWITCHES, AND ALL THREE MUST SAY YES**: the company's
+  (`chat.popup`, off by default — only an explicit `true` turns it on, §104),
+  the person's own bell in the conversation, and the browser's permission —
+  three decisions by three people, none standing in for another. **NOT NAMED
+  `notify`**, which is already the handover email (§87's twins, in a settings
+  object). **THE PERSON'S IS PER DEVICE AND THAT IS THE TRUTH, NOT A SHORTCUT**
+  — the browser's permission is per device too, so a switch claiming to follow
+  somebody everywhere would read ON on the laptop and stay silent on the iPad;
+  `localStorage`, **stored as an ABSENCE** (§50.6), and **a throwing store
+  reads as ON** (the opposite of §107's tour: the failure that matters is
+  nagging somebody who said no, and that needs the key PRESENT). **THE PAIR IN
+  THE HEADER HAD TO BE GROUPED** — `.chx` carried `margin-left:auto` itself, so
+  a second one is pushed right independently and the two land a gap apart;
+  the group is **`.chbtns`, never `.chacts`**, which already exists under
+  `.chthead`, one letter from `.chathead` (§65.9). **FOUR ANSWERS, THREE
+  DRAWN**: office off, or no `Notification` at all (an iOS Safari **tab**), and
+  nothing is drawn (§61); a browser that **refused** still gets a bell,
+  `aria-disabled` and never `disabled`, or the sentence explaining the silence
+  cannot be reached (§221, §163). **ASKED ON A GESTURE ONLY** — opening the
+  panel, or pressing the bell on. **THE OFFICE IS THE HALF THAT NEEDED THE
+  SERVER**: their corner is their OWN conversation and the Inbox's clock stops
+  the moment they leave that page (`boxBeat`), so `mine` carries `waiting` /
+  `waitingWho` / `waitingBody` **for the office only** — one query for a handful
+  of people (§98), the same two facts everybody else's box carries (§53.5).
+  **NAMED IN `out.chat` OR IT NEVER ARRIVES**: that object lists the keys it
+  forwards, so `popup` had to be added there too — §135's `greet` exactly, and
+  without it the bell would never draw on the deployment. **NOTHING WHERE IT IS
+  ALREADY ON SCREEN** (panel open; office reading the queue), **the first
+  answer of a session never announces**, and **one tag per side** so a waiting
+  question never replaces a reply. **THE ROW SITS ABOVE THE TWO EMAIL ROWS,
+  NEVER BETWEEN THEM** — the first build split the pair §127 had just brought
+  together, and the check said so.
 - **A CAPABILITY TRAVELS ON ITS OWN (§216):** Islam, from the deployment —
   *"the CX is still getting errors on filling"* — with Hala, working on **CX**,
   refused by *"a project's milestones (**admin**) cannot be changed here"*.
@@ -404,7 +462,7 @@ console errors (in this cloud environment, run it via a wrapper that points Play
   name — the real-database test caught it (§100.3). **NOT fixed and said so**: a
   genuine refusal is still a refusal, and if they continue while naming a
   function nobody opened, this diagnosis is wrong.
-- **A MILESTONE'S COLLABORATORS, THE TACTIC'S RULE MOVED OVER (§224):** Islam —
+- **A MILESTONE'S COLLABORATORS, THE TACTIC'S RULE MOVED OVER (§227):** Islam —
   *"add collaborators beside the owner column similar to the collaborators in
   the tactics in the units. align with me."* Aligned first; both decisions his:
   **being named is a reporting right** (the word means on a milestone what it
@@ -3668,6 +3726,12 @@ node scripts/test-graph-diff.js # the change list on its own: only what changed
                                 # travels, applying it to a DIFFERENT target leaves
                                 # that target's other work alone, a removal is not a
                                 # null, and an unknown path is refused (§210)
+python3 checks/fn-ko-edit.py    # a function's objectives are written at the page's
+                                # width (§226): the editing table in a band on BOTH
+                                # formats, the Unit column writing the stored target,
+                                # a wrapping name that writes the DATA, Led by opened
+                                # for the office and refused to everybody else — both
+                                # ends — and the unit side untouched, measured
 python3 checks/fn-pillars.py     # the two supporting-function formats draw ONE Overview:
                                 # asserted as their AGREEMENT, never as a list of headings;
                                 # every press read back from the STORED function; the
@@ -3730,8 +3794,21 @@ prior sessions (on HR_ERP) accidentally reverted agreed-upon designs.
 
 ---
 
-*Last Updated: 2026-09-01 &mdash; **v3.100: a milestone's collaborators, the
-tactic's rule moved over (&sect;224).** Islam: *"for the projects milestones
+*Last Updated: 2026-09-01 &mdash; **&sect;226: a function's objectives are
+written at the page's width.** Islam, from Consumer Finance's Overview: the
+table tight, the direction invisible, no unit, the objective not wrapping, and
+Led by not open to edit. Three of the four were ONE omission &mdash; the
+function Overview's editor had been left three unit-side fixes behind
+(&sect;96.6's band, &sect;199's Unit column, &sect;189's wrapping prose).
+Settled from a mockup drawn out of the real page; his two decisions recorded:
+the unit side untouched, Led by opened for the office through the register's
+own door. The full account is &sect;226 in the decisions log; the check is
+`checks/fn-ko-edit.py`, proved able to fail (5 red pre-&sect;226).*
+
+*Earlier, same day: **a milestone's collaborators, the
+tactic's rule moved over (&sect;227, built as &sect;224 before main took the
+number), and the project band's name box takes the line (&sect;228 — §194's
+fix reaching the `edband`, 181px of 1223 and three lines &rarr; 85% and one).** Islam: *"for the projects milestones
 please add collaborators beside the owner column similar to the collaborators
 in the tactics in the units. align with me to make the addition correctly."*
 Aligned before building, and both decisions are his: being named a collaborator
@@ -3749,7 +3826,6 @@ name (&sect;22); the round trip is proved a fixed point. The header is
 `table-fit.py` going red, and it is the word the tactics wear on every surface
 (&sect;53.5). Falsified before believed: the derivation reverted fails 2, the
 fill rule 1, of 451.*
-
 *Earlier: 2026-08-31 &mdash; **v3.99: a plan travels row by row, and a
 capability travels on its own (&sect;215, &sect;216).** Islam, on the
 deployment: *"the CX is still getting errors on filling"* &mdash; Hala, working

@@ -967,7 +967,7 @@ function capPlanWorkbook(c){
         return acc;
       }, []) },
 
-    /* §224: Collaborators beside the Owner, the tactics sheet's own column —
+    /* §227: Collaborators beside the Owner, the tactics sheet's own column —
        comma-separated names, and the export carries them or a download-and-
        re-upload would silently drop every one (§22: an upload AUTHORS). */
     { name:"Milestones", widths:[34, 38, 52, 16, 26, 14],
@@ -1090,7 +1090,7 @@ function capPlanFromWorkbook(c, sheets){
        spelling -- `covers` is an identifier, "Description" is a label. */
     row.covers = r["Description"] != null ? r["Description"] : r["What it covers"];
     row.owner = r["Owner"];
-    /* §224: normalised to the pipe-joined shape the differ compares and
+    /* §227: normalised to the pipe-joined shape the differ compares and
        applyCapPlan splits — the same road the Projects sheet's Stakeholders
        already travel. A file written before the column reads "" (§58). */
     row.collaborators = (r["Collaborators"] || "").split(/[,|]/)

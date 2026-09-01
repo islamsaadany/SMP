@@ -152,7 +152,7 @@ def run(pg):
     ck("...and reading's band is back",
        pg.evaluate("()=>!!document.querySelector('.pane > .pband')"))
 
-    print("\n5 · a project's band — the name gets the line there too (§225)")
+    print("\n5 · a project's band — the name gets the line there too (§228)")
     # The other side of the switch (A15): §194 fixed the pillar's head and
     # the project BAND kept the fault — Islam's FIN01 screenshot, a title on
     # three lines in a shrunk box beside an empty band. Same assertion shape:

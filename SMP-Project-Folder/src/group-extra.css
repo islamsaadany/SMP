@@ -1021,7 +1021,7 @@
   .pane .pband.edband .paneact .cornerbtn,
   .pane .pband.edband .paneact .penbtn { position:static; flex:none;
     visibility:visible; opacity:1; }
-  /* ── THE PROJECT'S NAME GETS THE LINE (§225) ─────────────────────────
+  /* ── THE PROJECT'S NAME GETS THE LINE (§228) ─────────────────────────
      Islam: *"the project box is squeezed for no need we have space to make
      it one line."* §194's fault exactly, on the band its fix did not reach:
      the growing box (§189) is `width:100%` of `.pband-name`, and a flex item

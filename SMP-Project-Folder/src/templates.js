@@ -1004,7 +1004,7 @@ function diffCapPlan(c, rows){
       cmp("name", hit.obj.name, r.name);
       cmp("what it covers", hit.obj.covers, r.covers);
       cmp("owner", hit.obj.owner, r.owner);
-      /* §224: compared pipe-joined, the shape both readers normalise to —
+      /* §227: compared pipe-joined, the shape both readers normalise to —
          the same contract the project's stakeholders keep above. */
       cmp("collaborators", (hit.obj.collaborators || []).join("|"), r.collaborators);
       cmp("finish", hit.obj.finish, r.finish);
@@ -1066,7 +1066,7 @@ function createFromCapPlan(c, d){
       var p3 = projectById(x.parent_id); if (!p3) return;
       var m3 = { id:x.id, name:x.name, covers:x.covers || "",
         owner:x.owner || "", finish:x.finish || "", status:null };
-      /* §224: set only when somebody is named — an absent key and an empty
+      /* §227: set only when somebody is named — an absent key and an empty
          list must stay byte-identical (§50.6), so nothing writes []. */
       var col = (x.collaborators || "").split(/[,|]/)
         .map(function(s){ return s.trim(); }).filter(Boolean);
@@ -1093,7 +1093,7 @@ function applyCapPlan(c, d){
       if (ch.f === "brief")          o.brief = ch.now;
       if (ch.f === "owner")          o.owner = ch.now;
       if (ch.f === "stakeholders")   o.stakeholders = ch.now ? ch.now.split("|").map(function(s){ return s.trim(); }).filter(Boolean) : [];
-      /* §224: cmp never fires on an emptied value, so `ch.now` is always a
+      /* §227: cmp never fires on an emptied value, so `ch.now` is always a
          real list here — a file adds and amends, it never removes (§54). */
       if (ch.f === "collaborators")  o.collaborators = ch.now.split("|").map(function(s){ return s.trim(); }).filter(Boolean);
       if (ch.f === "timeline")       o.timeline = timelineKey(ch.now) || o.timeline;

@@ -59,8 +59,17 @@ with sync_playwright() as p:
       document.querySelectorAll('#panel td').forEach(function(td){
         var t = td.textContent.trim();
         if (t !== '\\u2265' && t !== '\\u2264') return;
-        var s = td.querySelector('[title]');
-        out.push({glyph: t, note: s ? s.getAttribute('title') : null});
+        /* §163 MOVED THESE OFF THE BROWSER'S OWN TOOLTIP and onto the
+           platform's bubble, because a native `title` waits a second, hangs
+           off an 11px target and does not exist on a tablet at all. This
+           check went on reading `[title]` and so reported a working build as
+           having lost its explanations — §51.11, in a check nobody had
+           re-read since the control changed shape. `data-tip` is what the
+           bubble is filled from; `title` is accepted as well, so a cell that
+           still carries one is not called broken. */
+        var s = td.querySelector('[data-tip], [title]');
+        out.push({glyph: t, note: s ? (s.getAttribute('data-tip') ||
+                                       s.getAttribute('title')) : null});
       });
       return out;
     }""")
@@ -81,9 +90,10 @@ with sync_playwright() as p:
       document.querySelectorAll('#panel td').forEach(function(td){
         var t = td.textContent.trim();
         if (['Latest','Sum','Average'].indexOf(t) < 0) return;
-        var s = td.querySelector('[title]');
+        var s = td.querySelector('[data-tip], [title]');
         var el = td.querySelector('span') || td;
-        out.push({val: t, note: s ? s.getAttribute('title') : null,
+        out.push({val: t, note: s ? (s.getAttribute('data-tip') ||
+                                     s.getAttribute('title')) : null,
                   colour: getComputedStyle(el).color,
                   quiet: !!td.querySelector('.cdefault')});
       });

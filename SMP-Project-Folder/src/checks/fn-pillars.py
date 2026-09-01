@@ -241,18 +241,40 @@ with sync_playwright() as p:
         # offered no way in and the Definition sat as an em-dash she could
         # not touch. The bar is drawn now with no red number and no chips —
         # it is the way in and nothing else.
-        bar = pg.evaluate("""()=>{const m=document.querySelector('.missbar');
-          return m ? { text:m.textContent,
-                       red:!!m.querySelector('.secmiss'),
-                       chips:m.querySelectorAll('.mchip').length,
-                       door:!!m.querySelector('[data-fillcta]') } : null;}""")
-        ok("...the bar carries no red count", bool(bar) and not bar["red"], bar)
-        ok("...and no owing chips", bool(bar) and bar["chips"] == 0, bar)
-        ok("...but it still opens the way in (§223)", bool(bar) and bar["door"], bar)
+        # §224.2 REVERSES §223 FOR THIS ONE FIELD at Islam's direction:
+        # *"remove the definition of the functions overview from the filling
+        # … the SMO will do it."* §223's rule is untouched and still opens the
+        # door wherever something IS fillable; the definition simply stopped
+        # being one, so a page whose only blank is the definition offers no
+        # bar at all — which is the state §214.4 described and §223 corrected
+        # for the wrong reason. Asserted as the absence, with the server's
+        # agreement asserted below, or the screen and the save drift (§205).
+        # THE CLAIM IS ABOUT THE DEFINITION, NOT ABOUT THE BAR. The key
+        # objectives on this same page are still fillable (§214.2 left them
+        # so), so the door legitimately appears for THEM — asserting its
+        # absence would be asserting that the objectives stopped being
+        # fillable too, which nobody asked for. What must be true is that
+        # entering fill mode opens no control over the DEFINITION itself.
+        opened = pg.evaluate("""()=>{
+          const d=document.querySelector('[data-fillcta]'); if(d) d.click();
+          return true;}""")
+        pg.wait_for_timeout(400)
+        defc = pg.evaluate("""()=>{
+          const rows=[...document.querySelectorAll('#panel *')].filter(
+            e=>e.children.length===0 && /^Definition$/.test((e.textContent||'').trim()));
+          if(!rows.length) return {noRow:true};
+          const cell=rows[0].nextElementSibling;
+          return { has: !!cell,
+                   controls: cell ? cell.querySelectorAll('input,textarea,select,button').length : -1,
+                   text: cell ? (cell.textContent||'').trim().slice(0,40) : null };}""")
+        ok("...and fill mode opens no control over the definition (§224.2)",
+           defc.get("controls") == 0, defc)
+        pg.evaluate("""()=>{const d=document.querySelector('.fdone'); if(d) d.click();}""")
+        pg.wait_for_timeout(300)
     # BUT IT IS STILL FILLABLE, or §205's fault repeats: the box opens, the
     # person types, and the save refuses what the screen offered.
-    ok("the definition is still fillable (§205)",
-       pg.evaluate("()=>(SMPRules.GAP_FILLABLE.cap||[]).indexOf('def')") == 0,
+    ok("the definition is NOT fillable, on both sides (§224.2, §205)",
+       pg.evaluate("()=>(SMPRules.GAP_FILLABLE.cap||[]).indexOf('def')") == -1,
        pg.evaluate("()=>SMPRules.GAP_FILLABLE.cap"))
     open_at(pg, T, pen=True)
     d = pg.query_selector_all("#panel dd textarea, #panel dd input")

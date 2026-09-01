@@ -156,9 +156,15 @@ class H(http.server.BaseHTTPRequestHandler):
             return
         if body.get("action") == "mine":
             CHAT["polls"] += 1
+        # THE STUB MODELS THE SERVER (§100.3): the office's `mine` answer also
+        # carries how many are waiting, and who wrote last — the only thing
+        # that polls on every page, so the only thing that can tell the office
+        # a question arrived while they were somewhere else (§225).
         self._send(200, json.dumps({
             "ok": True, "office": True, "messages": CHAT["messages"],
             "unread": CHAT["unread"], "thread": CHAT["thread"],
+            "waiting": CHAT.get("owaiting", 0),
+            "waitingWho": CHAT.get("owho"), "waitingBody": CHAT.get("obody"),
             "chat": CHAT["cfg"]}).encode(), "application/json")
 
 
@@ -876,6 +882,304 @@ with sync_playwright() as p:
        bool(rb["note"]) and not rb["wait"], rb)
     CHAT["cfg"]["assistant"] = False
     CHAT["messages"] = []
+
+    # ── 14 · A BOX FROM THE COMPUTER WHEN A REPLY LANDS (§225) ───────────
+    # THREE SWITCHES, AND ALL THREE MUST SAY YES: the office's row in Chat
+    # settings, this person's own bell, and the browser's permission. Each is
+    # asserted at BOTH ENDS (§94.2) — a check that only looks for the box
+    # appearing cannot see a build that shows it to somebody who said no, and
+    # that is the failure that matters.
+    print("\n14 · a box from the computer when a reply lands")
+
+    # THE BROWSER IS MODELLED, NOT REAL. Every reader asks `window.Notification`
+    # at call time rather than at load, so the stand-in can be installed here
+    # without reloading the page under test — and a stand-in is the only way to
+    # read back WHAT was shown, which is most of what wording B claims.
+    FAKE_JS = """(perm) => {
+            window.__pops = []; window.__asked = 0;
+            function N(title, opts){
+              window.__pops.push({title: title, body: (opts || {}).body,
+                                  tag: (opts || {}).tag});
+              this.close = function(){};
+            }
+            N.permission = perm;
+            N.requestPermission = function(){ window.__asked++;
+                                              return Promise.resolve(N.permission); };
+            window.Notification = N; }"""
+    def fake_browser(perm="granted"):
+        pg.evaluate(FAKE_JS, perm)
+    def pops():
+        return pg.evaluate("() => window.__pops || []")
+    def reply(body, at):
+        """A reply lands from the office, the way the poll would bring it.
+
+        AND THE CLIENT MUST ACTUALLY HAVE ASKED. A shut panel on an answered
+        conversation is on the 180s idle beat (§98.1), so a wait that ends
+        without a poll leaves every "no box appeared" assertion below passing
+        because NOTHING HAPPENED — §94.5's own trap, and it was live here until
+        the falsification run found it."""
+        CHAT["messages"].append({
+            "id": 500 + len(CHAT["messages"]), "at": at, "from_office": True,
+            "by_key": "smo", "by_name": "Nada Kamal", "body": body,
+            "flag": None, "has_shot": False})
+        CHAT["unread"] = CHAT.get("unread", 0) + 1
+        got = poll_once(30000)
+        pg.wait_for_timeout(400)
+        ck("  (the reply reached the browser)", got, "no poll inside 30s")
+
+    # A clean start: sync the client's idea of unread with the stub's, or the
+    # first arrival below would not read as an arrival at all.
+    CHAT["messages"] = []; CHAT["unread"] = 0
+    CHAT["cfg"] = dict(CHAT["cfg"], on=True, beat=4000)
+    CHAT["cfg"].pop("popup", None)
+    poll_once(25000); pg.wait_for_timeout(300)
+    fake_browser("granted")
+
+    # ── THE OFFICE'S SWITCH IS OFF (the shipped default) ─────────────────
+    if pg.eval_on_selector("#chatpanel", "e => e.hidden"):
+        pg.click("#chatbtn")
+    pg.wait_for_selector("#chatpanel:not([hidden])")
+    pg.wait_for_timeout(200)
+    ck("with the office's switch off there is no bell to press",
+       pg.eval_on_selector("#chatbell", "e => e.hidden"))
+    pg.click("#chatclose")
+    reply("Off for the tenant.", "2026-08-25T10:00:00Z")
+    ck("...and no box at all", len(pops()) == 0, pops())
+
+    # ── THE OFFICE TURNS IT ON ───────────────────────────────────────────
+    CHAT["cfg"] = dict(CHAT["cfg"], popup=True)
+    poll_once(25000); pg.wait_for_timeout(300)
+    pg.click("#chatbtn")
+    pg.wait_for_selector("#chatpanel:not([hidden])")
+    pg.wait_for_timeout(200)
+    ck("with it on, the bell is drawn",
+       not pg.eval_on_selector("#chatbell", "e => e.hidden"))
+
+    # GROUPED WITH THE MINIMISE, NEVER TWO CONTROLS EACH PUSHED RIGHT. That
+    # was the fault the mockup caught: `.chx` carried `margin-left:auto`, so a
+    # second one lands a gap apart with the heading squeezed between them.
+    # Asserted as the RELATIONSHIP (§94.8) — side by side, on one line, with
+    # the minimise still last — never as a pixel position.
+    box = pg.evaluate("""() => {
+        const b = document.getElementById('chatbell').getBoundingClientRect();
+        const c = document.getElementById('chatclose').getBoundingClientRect();
+        return {gap: Math.round(c.left - b.right),
+                dy: Math.round(Math.abs((b.top + b.height / 2) - (c.top + c.height / 2))),
+                order: b.left < c.left}; }""")
+    ck("the bell sits beside the minimise (%dpx apart)" % box["gap"],
+       0 <= box["gap"] <= 12, box)
+    # ONE ROW IS NOT ONE `top` (§122.4) — two controls of two heights on one
+    # line have two tops, so the middles are what agree.
+    ck("...on the same line", box["dy"] <= 2, box)
+    ck("...and the minimise is still the last thing on the row", box["order"], box)
+
+    # ── THE PERSON'S OWN SWITCH, ON THIS DEVICE ──────────────────────────
+    st = pg.evaluate("""() => ({
+        pressed: document.getElementById('chatbell').getAttribute('aria-pressed'),
+        key: localStorage.getItem('smp.chat.popup'),
+        tip: document.getElementById('chatbell').title }) """)
+    ck("it starts on, and says so", st["pressed"] == "true", st)
+    # STORED AS AN ABSENCE (§50.6): on is the state with no key at all, so a
+    # browser that has never been asked and one switched back on are identical.
+    ck("...with nothing stored while it is on", st["key"] is None, st)
+    ck("...and the hover says it is this device",
+       "device" in (st["tip"] or "").lower(), st["tip"])
+
+    pg.click("#chatbell")
+    pg.wait_for_timeout(200)
+    st = pg.evaluate("""() => ({
+        pressed: document.getElementById('chatbell').getAttribute('aria-pressed'),
+        key: localStorage.getItem('smp.chat.popup'),
+        off: document.getElementById('chatbell').classList.contains('belloff') }) """)
+    ck("pressing it turns them off", st["pressed"] == "false" and st["off"], st)
+    ck("...and that is what is stored", st["key"] == "off", st)
+
+    pg.click("#chatclose")
+    reply("Switched off by me.", "2026-08-25T10:05:00Z")
+    ck("a reply lands with no box while the person has them off",
+       len(pops()) == 0, pops())
+
+    # ── BACK ON, AND THE BOX SAYS WHO AND THE FIRST LINE (wording B) ─────
+    pg.click("#chatbtn"); pg.wait_for_timeout(250)
+    pg.click("#chatbell"); pg.wait_for_timeout(200)
+    ck("pressing it again turns them back on",
+       pg.eval_on_selector("#chatbell", "e => e.getAttribute('aria-pressed')") == "true")
+    ck("...and the key is removed rather than set to something (§50.6)",
+       pg.evaluate("() => localStorage.getItem('smp.chat.popup')") is None)
+    pg.click("#chatclose")
+    fake_browser("granted")
+    reply("The March import is what carried it.", "2026-08-25T10:10:00Z")
+    ps = pops()
+    ck("a reply now shows exactly one box", len(ps) == 1, ps)
+    if len(ps) == 1:
+        # THE NAME IS ASSERTED AS AGREEMENT WITH THE THREAD, never as a literal
+        # (§53.5, §94.8): `nameOf()` resolves through the register, so a
+        # hardcoded name would pass on a build that printed the raw key.
+        pg.click("#chatbtn"); pg.wait_for_timeout(300)
+        said = pg.evaluate("""() => {
+            const w = document.querySelectorAll('#chatbody .chwho span:first-child');
+            return w.length ? w[w.length - 1].textContent.trim() : ''; }""")
+        ck("...titled with the sender, the same words the thread prints",
+           bool(ps[0]["title"]) and said.startswith(ps[0]["title"]),
+           {"box": ps[0]["title"], "thread": said})
+        ck("...and never the bare person key", ps[0]["title"] != "smo", ps[0]["title"])
+        ck("...carrying the first line of the message",
+           ps[0]["body"] == "The March import is what carried it.", ps[0]["body"])
+        # ONE TAG, so a second reply replaces the first rather than stacking a
+        # column of boxes on somebody who has been away from the screen.
+        ck("...under one tag, so a second reply replaces it",
+           ps[0]["tag"] == "smp-chat", ps[0]["tag"])
+        pg.click("#chatclose")
+
+    # ── NOTHING WHILE THE PANEL IS OPEN ──────────────────────────────────
+    # The conversation is on screen; a box saying what is already visible is
+    # noise, and the arrival guard already reads `!open`.
+    pg.click("#chatbtn"); pg.wait_for_timeout(250)
+    fake_browser("granted")
+    reply("And this one lands while they are reading.", "2026-08-25T10:15:00Z")
+    ck("no box while the conversation is open", len(pops()) == 0, pops())
+    pg.click("#chatclose")
+
+    # ── A BROWSER THAT HAS REFUSED ───────────────────────────────────────
+    # Still drawn, or the silence is inexplicable — and `aria-disabled`, never
+    # `disabled`, so the one sentence that explains it can be reached by hover
+    # AND by focus (§221, §163).
+    fake_browser("denied")
+    pg.click("#chatbtn"); pg.wait_for_timeout(300)
+    st = pg.evaluate("""() => { const b = document.getElementById('chatbell');
+        return {hidden: b.hidden, dis: b.getAttribute('aria-disabled'),
+                real: b.disabled, tip: b.title,
+                pressed: b.getAttribute('aria-pressed')}; }""")
+    ck("a browser that refused still shows the bell", not st["hidden"], st)
+    ck("...marked aria-disabled and not disabled",
+       st["dis"] == "true" and not st["real"], st)
+    ck("...saying the browser is what is blocking it",
+       "browser" in (st["tip"] or "").lower(), st["tip"])
+    # FORCED, BECAUSE PLAYWRIGHT TREATS `aria-disabled` AS DISABLED (§222) —
+    # and this is exactly the path under test: the control still takes a press
+    # and still has to refuse it.
+    pg.click("#chatbell", force=True); pg.wait_for_timeout(200)
+    ck("...and pressing it changes nothing",
+       pg.evaluate("() => localStorage.getItem('smp.chat.popup')") is None and
+       pg.eval_on_selector("#chatbell", "e => e.getAttribute('aria-disabled')") == "true")
+    pg.click("#chatclose")
+
+    # ── THE PERMISSION IS ASKED ON A GESTURE, AND NOWHERE ELSE ───────────
+    # Browsers only allow the question after one, and a box thrown at somebody
+    # who has not asked for anything is the one people refuse out of reflex.
+    fake_browser("default")
+    reply("Nobody has opened anything yet.", "2026-08-25T10:20:00Z")
+    ck("nothing is asked while the panel is shut",
+       pg.evaluate("() => window.__asked") == 0)
+    ck("...and no box either, with no permission",
+       len(pops()) == 0, pops())
+    pg.click("#chatbtn"); pg.wait_for_timeout(400)
+    ck("opening the conversation is what asks",
+       pg.evaluate("() => window.__asked") >= 1,
+       pg.evaluate("() => window.__asked"))
+    pg.click("#chatclose")
+
+    # ── AND THE OFFICE IS TOLD WHEN SOMEBODY WRITES TO THEM ─────────────
+    # Islam named the office FIRST. Their corner is their own conversation, so
+    # nothing above this speaks for the queue — and the Platform Inbox's clock
+    # stops the moment they leave that page, which is every page but one.
+    # SIGNING IN WITH QUESTIONS ALREADY WAITING MUST NOT THROW A BOX at somebody
+    # who has not been away — so this needs a FRESH page with the queue already
+    # standing, not a rise from nought on a session that has been open all along
+    # (which is a real arrival and correctly announces).
+    # The conversation's own unread is cleared first, or its box fires here too
+    # and the office's assertions read the wrong one. (The stub's `seen` does
+    # not clear it the way the real endpoint does — §100.3, in the small.)
+    CHAT["messages"] = []; CHAT["unread"] = 0
+    CHAT["owaiting"] = 2
+    CHAT["owho"] = "Hend Farouk"
+    CHAT["obody"] = "The Q3 target on Active Base still reads 4.2M."
+    pg.add_init_script("(" + FAKE_JS + ")('granted');")
+    # AND THE RELOAD MUST NOT LAND BACK ON THE INBOX. §173 remembers where you
+    # were in `sessionStorage`, so a plain reload from the office's own Platform
+    # Inbox — which section 12 leaves the page on — reopens THERE, `#chinbox` is
+    # present, and the queue's box correctly stays silent. The product is right;
+    # the check was measuring from the one page that silences it, and every
+    # office assertion failed while the person's half passed. Forgetting the
+    # remembered place is what makes this a fresh session.
+    pg.evaluate("() => { try { sessionStorage.removeItem('smp.where'); } catch (e) {} }")
+    pg.goto(URL, wait_until="networkidle")
+    pg.wait_for_selector("#chatdock:not([hidden])", timeout=10000)
+    poll_once(25000); pg.wait_for_timeout(400)
+    ck("the first answer of a session never announces a queue that was already there",
+       len(pops()) == 0, pops())
+    # THE CORNER IS OPENED so this runs on the fast beat — with a conversation
+    # that is neither waiting nor unread the shut panel asks every 180s (§98.1)
+    # and nothing below would happen inside the wait. It also puts the office's
+    # OWN conversation on screen, which must not suppress the queue's box: the
+    # two are about different things, and only the Inbox itself silences it.
+    pg.click("#chatbtn"); pg.wait_for_timeout(400)
+    fake_browser("granted")
+    CHAT["owaiting"] = 3
+    CHAT["owho"] = "Ramy Behairy"
+    CHAT["obody"] = "Mobile's plan will not open for me."
+    poll_once(25000); pg.wait_for_timeout(400)
+    ps = pops()
+    # A FAILURE HERE NAMES ITS CAUSE. Four things have to be true for the box to
+    # appear, and an empty list says which of them was not (§123's argument, in
+    # a check).
+    diag = pg.evaluate("""() => ({
+        perm: window.Notification && window.Notification.permission,
+        off: localStorage.getItem('smp.chat.popup'),
+        bell: !(document.getElementById('chatbell') || {}).hidden,
+        inbox: !!document.getElementById('chinbox') })""")
+    ck("a question arriving shows the office one box", len(ps) == 1,
+       dict(diag, pops=ps))
+    if len(ps) == 1:
+        ck("...titled with who wrote", ps[0]["title"] == "Ramy Behairy", ps[0]["title"])
+        ck("...carrying their first line",
+           ps[0]["body"] == "Mobile's plan will not open for me.", ps[0]["body"])
+        # ITS OWN TAG, or a question waiting and a reply on the office's own
+        # conversation would replace one another.
+        ck("...under its own tag, not the conversation's",
+           ps[0]["tag"] == "smp-chat-office", ps[0]["tag"])
+    # BOTH ENDS (§94.2): a queue that has not grown says nothing at all.
+    fake_browser("granted")
+    got = poll_once(30000); pg.wait_for_timeout(400)
+    ck("  (and it asked again)", got, "no poll inside 30s")
+    ck("...and nothing while the number has not moved", len(pops()) == 0, pops())
+    # NOR WHILE THEY ARE LOOKING AT THE QUEUE — the page shows the name and the
+    # line already, which is the same argument as `!open` one page out.
+    pg.click('[data-md="setup"]'); pg.wait_for_timeout(700)
+    pg.click('[data-setupgo="chat"]'); pg.wait_for_timeout(900)
+    # AND THE CORNER IS OPENED AFTER ARRIVING, not before: a pointerdown outside
+    # the dock minimises it (§100.4), so opening it first and then navigating
+    # puts it back on the 180s beat — and the assertion below would then pass
+    # because no poll ever happened rather than because nothing was shown.
+    pg.click("#chatbtn"); pg.wait_for_timeout(500)
+    fake_browser("granted")
+    CHAT["owaiting"] = 4
+    CHAT["owho"] = "Hala Nabil"
+    CHAT["obody"] = "CX still refuses my fill."
+    got = poll_once(30000); pg.wait_for_timeout(500)
+    ck("  (the office's browser asked while on that page)", got, "no poll inside 30s")
+    ck("no box while the office is reading the queue itself", len(pops()) == 0, pops())
+    CHAT["owaiting"] = 0; CHAT.pop("owho", None); CHAT.pop("obody", None)
+    # Back off the Inbox, or everything below measures a page it is not about.
+    pg.goto(URL, wait_until="networkidle")
+    pg.wait_for_selector("#chatdock:not([hidden])", timeout=10000)
+    pg.wait_for_timeout(400)
+
+    # ── A BROWSER WITH NO NOTIFICATIONS AT ALL (an iOS Safari tab) ───────
+    # Nothing to decide, so nothing is drawn (§61) — and reading `.permission`
+    # off a missing constructor must not throw on the one platform this is
+    # least able to serve.
+    pg.evaluate("() => { try { delete window.Notification; } catch (e) { window.Notification = undefined; } }")
+    pg.click("#chatbtn"); pg.wait_for_timeout(300)
+    ck("no bell on a browser that cannot show one",
+       pg.eval_on_selector("#chatbell", "e => e.hidden"))
+    ck("...and the conversation still works",
+       not pg.eval_on_selector("#chatpanel", "e => e.hidden"))
+    pg.click("#chatclose")
+    fake_browser("granted")
+    CHAT["cfg"].pop("popup", None)
+    CHAT["messages"] = []; CHAT["unread"] = 0
+    poll_once(25000)
 
     # ── 7 · AND A SESSION THE SERVER REFUSES, LAST ON PURPOSE ────────────
     # A refused session takes the corner away rather than leaving a control

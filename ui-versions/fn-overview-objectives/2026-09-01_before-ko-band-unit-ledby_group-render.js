@@ -4134,9 +4134,6 @@ function projPerformanceBody(p, fk){
     return '<tr' + (quiet ? ' class="notdue"' : '') + '>' +
       '<td class="idx">' + (i+1) + '</td><td>' + esc(m.name) + '</td>' +
       '<td class="cc">' + esc(m.owner || "\u2014") + '</td>' +
-      /* \u00a7224: the same read the tactics table gives Performance \u2014 who supports
-         the row, em-dash when nobody (\u00a715.1: absent, never an alarm). */
-      '<td class="collabs">' + collabCell(m) + '</td>' +
       '<td class="cc">' + dxDate(m.finish, m.status === "done") + '</td>' +
       '<td class="cc">' + (quiet ? notDueCell() : msPill(m)) + '</td>' +
       '<td class="num final">' + (statusPending(m) ? needsPct()
@@ -4156,7 +4153,7 @@ function projPerformanceBody(p, fk){
     '<h4 class="mini">' + DX_HEADING + '</h4>' +
     miniTable(["#","Deliverables &amp; outcomes","Type","Target","Status",DX_PCT], dxr) +
     '<h4 class="mini">Milestones <em>' + mst.done + ' of ' + mst.total + ' completed</em></h4>' +
-    miniTable(["#","Milestone","Owner","Collabs.","Due date","Status",MS_PCT], mRows);
+    miniTable(["#","Milestone","Owner","Due date","Status",MS_PCT], mRows);
 }
 
 /* A FUNCTION WHOSE PLAN LIVES IN ITS CAPABILITIES AND WHICH CARRIES NONE
@@ -4437,33 +4434,13 @@ function projPlanBody(p, fk){
             return selectOr("plan", m.owner == null ? "" : m.owner,
               ownerChoices(m.owner, true), "ownersel " + (pendCls || ""), set);
           } }) + '</td>' +
-      /* §227: COLLABORATORS BESIDE THE OWNER — the tactic's cell moved over
-         (§145.10, §130.1), because "similar to the tactics" is the ask and
-         one shape for one word is the rule (§53.5). Ticked from the same
-         register list the owner is picked from, never typed; fillable only
-         while EMPTY and never counted as missing (§187 holds on both sides
-         of the switch); an emptied list DELETES its key (§50.6). Being named
-         here is a reporting right — namedOn() reads the row whole — which is
-         why the cell sits behind the same pen as the owner. */
-      '<td class="collabs">' + gapCell("plan", "k_proj", m, "collaborators", {
-          ctx: { project: p, row: m }, text: collabText,
-          parse: function(v){ return Array.isArray(v)
-            ? v.map(function(x){ return String(x).trim(); }).filter(Boolean)
-            : collabParse(v); },
-          del: true,
-          readEmpty: '<span class="nobody">&mdash;</span>',
-          control: function(set, pendCls){
-            return selectManyOr("plan", collabNames(m),
-              ownerChoices(collabNames(m), false),
-              "collabsel " + (pendCls || ""), set);
-          } }) + '</td>' +
       '<td class="cc mp-host">' + gapCell("plan", "k_proj", m, "finish", {
           ctx: { project: p, row: m },
           control: function(set, pendCls){
             return monthPickOr("plan", m.finish, pendCls || "", set);
           } }) + '</td></tr>';
   }).join("") +
-  (ed ? '<tr class="newrow"><td class="idx">+</td><td colspan="5">' +
+  (ed ? '<tr class="newrow"><td class="idx">+</td><td colspan="4">' +
       '<button class="linkbu" data-rowadd="milestone|' + esc(p.id) + '">Add a milestone</button>' +
     '</td></tr>' : '');
   /* The owner sits on the band rather than in the rail. A pillar has two
@@ -4520,9 +4497,7 @@ function projPlanBody(p, fk){
        changes: "What it covers" was a question, "Description" is the word the
        tactics sheet has always used for the same thing. The stored field keeps
        its spelling (§58, §65): `covers` is an identifier, this is a label. */
-    /* "Collabs." — the word the tactics column wears on every surface
-       (§53.5), and the whole 11px the full word cost a 515px pane at 830. */
-    miniTable(["#","Milestone","Description","Owner","Collabs.","Due date"], mRows) +
+    miniTable(["#","Milestone","Description","Owner","Due date"], mRows) +
     dueNote(p) + overrunNote(p);
 }
 
@@ -5290,20 +5265,6 @@ function fnPillarsOverview(fk){
      objective added against the reading view would be pushed onto an empty
      every function shares. */
   var list = (ed ? unitLikeWritable("fn:" + fk) : unitLike("fn:" + fk)).keyObjectives || [];
-  /* §226: WHILE IT IS BEING WRITTEN, THE TABLE GETS THE PAGE — §96.6's rule,
-     which fixed exactly this squeeze on a unit's Foundation and never reached
-     the function's Overview: inside the fgrid card the Objective box measured
-     101px and the Dir. select 34px at a 1500px window, which is a select whose
-     value cannot be seen. Reading mode keeps the card, because the objectives
-     belong beside what the function is when you are READING it. */
-  var fl = filling("capfoundation", "k_found");
-  var koCard = '<div class="cardhead"><h2 class="sec first">' + L("keyobj","bu") + '</h2>' +
-      '<span class="pill horizon">Horizon &middot; ' + horizonLabel() + '</span></div>' +
-      ((ed || fl)
-        ? capKoEdit({ id:"fn:" + fk, keyObjectives:list })
-        : koReadBlock(list,
-            "None. This function is judged by its " +
-            esc(L("pillar","bu").toLowerCase()) + "."));
   return editBar("capfoundation", "k_found") +
     fillBarOr("capfoundation", "k_found",
       list.reduce(function(a, m){
@@ -5312,18 +5273,8 @@ function fnPillarsOverview(fk){
     '<div class="fgrid">' +
       '<div class="card"><h2 class="sec first">What it is</h2><dl style="margin:0">' +
         '<div class="clause"><dt>Function</dt><dd>' + esc(f.name) + '</dd></div>' +
-        /* §226: LED BY OPENS, FOR THE OFFICE (Islam: "led by by office ok").
-           The picker is Setup's own assignPicker writing the SAME head pointer
-           through grantPersonRole — one fact, one door (§33), so this and
-           Setup › Supporting functions can never disagree. Office-only because
-           the server classifies a head change as Setup (FN_SETUP), and a pen
-           held by anybody else would be the screen offering what the save
-           refuses (§42). The sentence is a hover, never a printed line (1b-ii). */
-        '<div class="clause"><dt>Led by</dt><dd' +
-          (ed && inOffice() ? ' title="Names the function’s head — the same fact the register holds"' : '') + '>' +
-          (ed && inOffice()
-            ? assignPicker("fn:" + fk, "fnhead", f.head || null, true)
-            : (f.head ? esc(personName(f.head)) : "&mdash;")) + '</dd></div>' +
+        '<div class="clause"><dt>Led by</dt><dd>' +
+          (f.head ? esc(personName(f.head)) : "&mdash;") + '</dd></div>' +
         '<div class="clause"><dt>Definition</dt><dd>' +
           /* §214: THROUGH `gapCell`, NOT `fieldOr`. The definition is a gap
              now, and a counted gap has to be typable by whoever the count is
@@ -5344,9 +5295,15 @@ function fnPillarsOverview(fk){
                   { kind:"area", readEmpty:"&mdash;" }) +
         '</dd></div>' +
       '</dl></div>' +
-      ((ed || fl) ? '' : '<div class="card">' + koCard + '</div>') +
-    '</div>' +
-    ((ed || fl) ? '<div class="card koband">' + koCard + '</div>' : '');
+      '<div class="card"><div class="cardhead"><h2 class="sec first">' + L("keyobj","bu") + '</h2>' +
+        '<span class="pill horizon">Horizon &middot; ' + horizonLabel() + '</span></div>' +
+        ((ed || filling("capfoundation", "k_found"))
+          ? capKoEdit({ id:"fn:" + fk, keyObjectives:list })
+          : koReadBlock(list,
+              "None. This function is judged by its " +
+              esc(L("pillar","bu").toLowerCase()) + ".")) +
+      '</div>' +
+    '</div>';
 }
 function renderFnFoundation(fnKey){
   var fk = fnKeyOf(fnKey), caps = capsOfFunction(fk);
@@ -5393,12 +5350,6 @@ function renderFnFoundation(fnKey){
       ? capKoEdit(c)
       : koReadBlock(c.keyObjectives,
           "None. This capability is judged by its projects.");
-    /* §226: WHILE IT IS BEING WRITTEN, THE TABLE GETS THE PAGE — the same
-       band the pillars format takes, because the two formats draw ONE page
-       (§53.5) and a squeeze fixed on one side of it is §211's drift back. */
-    var koCard = '<div class="cardhead"><h2 class="sec first">' + L("keyobj","bu") + '</h2>' +
-        '<span class="pill horizon">Horizon &middot; ' + horizonLabel() + '</span></div>' +
-        koBlock;
     return capBand(c) + '<div class="capbody"><div class="fgrid">' +
       '<div class="card"><h2 class="sec first">What it is</h2><dl style="margin:0">' +
         '<div class="clause"><dt>Capability</dt><dd>' + esc(c.name) + '</dd></div>' +
@@ -5412,10 +5363,10 @@ function renderFnFoundation(fnKey){
           gapCell("capfoundation", "k_found", c, "def",
                   { kind:"area", readEmpty:"&mdash;" }) + '</dd></div>' +
       '</dl></div>' +
-      ((ed || fl) ? '' : '<div class="card">' + koCard + '</div>') +
-    '</div>' +
-    ((ed || fl) ? '<div class="card koband">' + koCard + '</div>' : '') +
-    '</div>';
+      '<div class="card"><div class="cardhead"><h2 class="sec first">' + L("keyobj","bu") + '</h2>' +
+        '<span class="pill horizon">Horizon &middot; ' + horizonLabel() + '</span></div>' +
+        koBlock + '</div>' +
+    '</div></div>';
   }).join("") +
   /* A second capability for the same function, added where the first is
      described. addCapability() is the ONE minter (§51.11) — the Temple's
@@ -5465,29 +5416,14 @@ function capKoEdit(c){
      and Add stay the author's — a fill-mode render draws them read-only or
      not at all. */
   var ed = authoring(pg, "k_found");
-  /* §226: the same three answers the unit's table got and this one never did —
-     the NAME is prose and wraps (§189's textOr; a function's objective titles
-     clipped at 101px in the card this table used to edit inside), the UNIT is
-     §199's column exactly (a view of the target string, nothing stored, the
-     office picks it and a filler may set a MISSING one), and a bare number
-     typed into This year inherits the row's unit (§199.6). The unit's own
-     koEdit is deliberately untouched — Islam: "don't touch the unit side". */
   return '<div class="scroll"><table><thead><tr><th>Objective</th><th class="cc">Dir.</th>' +
-    '<th class="cc">Unit</th>' +
     '<th class="cc">This year</th><th class="cc">Compile</th><th class="cc">Weight %</th><th></th></tr></thead><tbody>' +
     c.keyObjectives.map(function(m, i){
-      return '<tr><td>' + textOr(ed ? pg : null, m.name, "", function(v){ m.name = v; }) + '</td>' +
+      return '<tr><td>' + inputOr(ed ? pg : null, m.name, "", function(v){ m.name = v; }) + '</td>' +
         '<td class="cc">' + gapCell(pg, "k_found", m, "dir",
           { kind:"select", opts:["≥", "≤"] }) + '</td>' +
-        '<td class="cc">' + (ed
-          ? (hasTargetToHoldAUnit(m)
-              ? selectOr(pg, targetUnitOf(m), targetUnitOpts(targetUnitOf(m)), "",
-                  function(v){ setTargetUnit(m, v); })
-              : '<span class="why" title="Set a target first — the unit is ' +
-                'written with it">—</span>')
-          : (fillUnitCell(pg, "k_found", m) || esc(targetUnitOf(m)))) + '</td>' +
         '<td class="cc">' + gapCell(pg, "k_found", m, "target",
-          { kind:"input", cls:"mono", parse: unitInherit(m) }) + '</td>' +
+          { kind:"input", cls:"mono" }) + '</td>' +
         '<td class="cc">' + gapCell(pg, "k_found", m, "compile",
           { kind:"select", opts:["Sum", "Latest", "Average"] }) + '</td>' +
         '<td class="cc">' + gapCell(pg, "k_found", m, "weight",

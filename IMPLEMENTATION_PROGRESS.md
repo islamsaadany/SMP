@@ -70,23 +70,23 @@ Nothing proceeds past this line without an answer.
 
 ## Built and verified
 
-### §235.2 — slide by slide, only the originals pinned (2026-09-01, same branch)
+### §236.3 — slide by slide, only the originals pinned (2026-09-01, same branch)
 
-Islam, testing §235: "the slides jump from slide 9 to 13 one jump .. the added
+Islam, testing §236.2: "the slides jump from slide 9 to 13 one jump .. the added
 slides can move slide by slide the prohipted slides from the movement are the
-original slides." Right — §235 stopped the dead presses and drew its landing
+original slides." Right — §236.2 stopped the dead presses and drew its landing
 places from the anchors that already existed, so the SWOT run and the pillar
 dividers were still hopped four at a time. Every ORIGINAL slide is a landing
 place now (unit: SWOT title, three categories, each pillar title; function:
 capability cover, key objectives, project title, milestones), existing keys
 unmoved so placed pictures stay put, no migration. A split table's parts stay
 ONE stop — a picture cannot sit between a table and its own continuation.
-`checks/slide-move.py`: 6 red pre-§235.2 (printing his jump), 20 green after;
+`checks/slide-move.py`: 6 red pre-§236.3 (printing his jump), 20 green after;
 deck-adjacent checks and full qa.py green.
 
-### §235 — a picture slide can travel the whole deck (2026-09-01, same branch)
+### §236.2 — a picture slide can travel the whole deck (2026-09-01, same branch)
 
-Islam, using §234's arrows: "the rearrange of slides doesn't move around the
+Islam, using §236's arrows: "the rearrange of slides doesn't move around the
 fixed slides of the main flow." Measured: 25 dead presses of 28 on Mobile's
 deck; a function's slide never moved at all. The stored position is an anchor
 (§50.3) and the arrows stepped blindly one row, so a press into an unanchored
@@ -95,10 +95,10 @@ decisions: the arrows now jump to the nearest real landing place, and between
 a pillar's measures and tactics IS a place (each measures slide takes its own
 anchor; a project's deliverables slide mirrors it on a function's deck,
 §53.5). Projector honours the new places for free — one placement function.
-`checks/slide-move.py`: 5 red on the pre-§235 build, 18 green after;
+`checks/slide-move.py`: 5 red on the pre-§236.2 build, 18 green after;
 hide-element, project-tables, repeat-project and full qa.py green.
 
-### §234 — "Add slide after" (2026-09-01, on `claude/slide-insertion-rearrange-fga828`)
+### §236 — "Add slide after" (2026-09-01, on `claude/slide-insertion-rearrange-fga828`)
 
 Islam's wording on Manage slides' Add button: `+ Add a slide` becomes
 **`+ Add slide after`**, so the button says where the empty slide lands. The
@@ -109,7 +109,7 @@ the control by its new name. **His rearrange question needed no build**: §51.10
 the generated order fixed — exactly the design he proposed. Verified by driving
 Mobile's deck: slide added at position 4 with slide 3 selected, arrives
 selected, arrows still step it, generated slides offer none, no errors.
-*(The open findability question answered itself in §235: he found the
+*(The open findability question answered itself in §236.2: he found the
 arrows, and they were broken — fixed there.)*
 
 

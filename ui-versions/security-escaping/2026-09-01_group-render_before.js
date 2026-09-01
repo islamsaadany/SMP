@@ -6,18 +6,7 @@
      Performance  = the score from a pillar's KEY MEASURES. Primary.
      Execution    = the score from its TACTICS. Secondary, never blended in. */
 
-/* ── ONE ESCAPER, SAFE IN BOTH CONTEXTS (2026-09-01 security sweep) ──────
-   This was a TEXT-NODE escaper (`&` and `<` only) and it is used inside
-   double-quoted HTML attributes ~226 times — where a literal " in tenant data
-   breaks out of the attribute and, because the CSP allows inline handlers, an
-   injected onfocus=/onerror= runs in the reader's browser (an SMO's, with full
-   SMO authority). Two call sites had hand-patched .replace(/"/g,"&quot;") on
-   top of esc(); those become harmless no-ops now that esc() escapes the quote
-   itself. Escaping >, " and ' as well is INERT in a text node — an entity
-   renders as the character — so nothing that displays normally changes; only a
-   payload is neutralised. Verified: esc()'s output is only ever concatenated
-   into innerHTML, never compared, stored as a key, or read back. */
-function esc(s){ return String(s).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;").replace(/'/g,"&#39;"); }
+function esc(s){ return String(s).replace(/&/g,"&amp;").replace(/</g,"&lt;"); }
 /* Four bands. 70 and 50 match the platform's existing STATUS_THRESHOLDS so
    the strategy layer and the functional layer never disagree about a colour;
    85 is the added top edge that splits on-track from needs-attention. */

@@ -10298,6 +10298,24 @@ var GAP_OPTIONAL = { tactic: ["collaborators"],
      register, a matrix, a cycle. */
   var BY_KEY = ["units", "functions", "companies", "unitRoles"];
 
+  /* ── THE REVIEW IS A TENANT-WIDE ENVELOPE, SPLIT PER TARGET (§234) ────
+     A CF custodian pressed Submit and was refused with "You cannot report
+     for admin." four times over — four functions he had never opened, in the
+     middle of a session where their own custodians were reporting. `review`
+     holds four maps keyed by TARGET for the WHOLE tenant (submitted · parked
+     · note · slides), and it travelled WHOLE: his stale copy, applied onto
+     the stored graph, reverted every submission and note the others had
+     written since his tab loaded, and the authoriser rightly judged those
+     reversions as his — §216's fault one part over, because the plans were
+     split per subject and the reporting envelope never was. Now one submit
+     travels as `review.submitted.fn:cf` and nothing else.
+
+     THE AUTHORISER READS THIS SAME LIST (lib/authorize.js's per-target
+     loop): two lists of "which review fields are keyed by target" is how a
+     field joins one and silently travels whole through the other. */
+  var REVIEW_PER_TARGET = ["submitted", "parked", "note", "slides"];
+  var SUB_TARGET = { review: REVIEW_PER_TARGET };
+
   /* ── ROW-LEVEL, FOR A PLAN (§215) ──────────────────────────────────────
      Islam: *"for the business units we need to apply the same thing — when
      you change a small thing it just sends the thing that changed."*
@@ -10460,6 +10478,58 @@ var GAP_OPTIONAL = { tactic: ["collaborators"],
     return true;
   }
 
+  /* ── THE REVIEW, FIELD BY FIELD AND TARGET BY TARGET (§234) ──────────
+     Splits a SUB_TARGET part (the review) into per-field changes, and its
+     per-target maps into per-entry ones — `review.state` when the office
+     moves the cycle, `review.submitted.fn:cf` when one function submits.
+     A field this cannot address finely still travels, whole, as its own
+     2-segment path: the fine path is an optimisation and must never be the
+     only way a change can travel (§210). Returns true always — once both
+     sides are maps, per-field sets and dels reproduce the next copy exactly,
+     so there is nothing left to fall back to. */
+  function keysAddressable(m) {
+    /* A key that cannot be a path segment — a dot inside it, or nothing at
+       all — sends its whole field instead. No target the platform mints
+       carries a dot (unit keys, "fn:<key>"); this is the guard for one that
+       somehow does, because a path the server refuses fails the WHOLE save. */
+    return Object.keys(m).every(function (t) { return t && t.indexOf(".") < 0; });
+  }
+  function splitSubTarget(part, a, b, set, del) {
+    /* A FIELD name that cannot be a path segment sends the whole PART — the
+       differ must never emit a path the server refuses, because that fails
+       the save entirely where travelling whole would have landed it. No
+       field the platform writes has one; this guards a stored stranger. */
+    if (!keysAddressable(a) || !keysAddressable(b)) return false;
+    var fields = {};
+    Object.keys(a).forEach(function (f) { fields[f] = 1; });
+    Object.keys(b).forEach(function (f) { fields[f] = 1; });
+    Object.keys(fields).forEach(function (f) {
+      var inB = Object.prototype.hasOwnProperty.call(b, f);
+      if (!inB) { del.push(part + "." + f); return; }
+      if (same(a[f], b[f])) return;
+      /* A per-target map compares entry by entry. The base's side may be
+         absent — a tenant that has never parked anything holds no `parked` —
+         and absent compares as empty, so the first park still travels as one
+         entry and not as the whole new map beside everybody's future ones. */
+      var ma = a[f] === undefined ? {} : a[f];
+      if (SUB_TARGET[part].indexOf(f) > -1 && isMap(ma) && isMap(b[f]) &&
+          keysAddressable(ma) && keysAddressable(b[f])) {
+        var ts = {};
+        Object.keys(ma).forEach(function (t) { ts[t] = 1; });
+        Object.keys(b[f]).forEach(function (t) { ts[t] = 1; });
+        Object.keys(ts).forEach(function (t) {
+          var has = Object.prototype.hasOwnProperty.call(b[f], t);
+          if (!has) { del.push(part + "." + f + "." + t); return; }
+          if (same(ma[t], b[f][t])) return;
+          set[part + "." + f + "." + t] = b[f][t];
+        });
+        return;
+      }
+      set[part + "." + f] = b[f];
+    });
+    return true;
+  }
+
   /* The tree a given part is walked with. A keyed map's entries are plans; a
      flat part is the group, whose addressable half is its capabilities. */
   function treeFor(part) {
@@ -10510,6 +10580,11 @@ var GAP_OPTIONAL = { tactic: ["collaborators"],
         return;
       }
       if (same(b, n)) return;
+      /* §234: THE REVIEW SPLITS PER FIELD AND PER TARGET — one function's
+         submit must never carry every other function's report state. */
+      if (SUB_TARGET[k] && isMap(b) && isMap(n)) {
+        if (splitSubTarget(k, b, n, set, del)) return;
+      }
       /* §216: A FLAT PART IS WALKED TOO. `org` carries every capability in the
          tenant, so before this a save made on one function travelled with all
          of them and a stale copy of somebody else's plan was judged as this
@@ -10536,7 +10611,10 @@ var GAP_OPTIONAL = { tactic: ["collaborators"],
      server (which cannot happen — they deploy together) or a forged body,
      and both should stop here. §42's rule that an unstated case resolves the
      safe way, on the write path. */
-  var MAX_SEGMENTS = 2;
+  /* THE PATH SHAPES ARE AN ALLOW-LIST, NEVER A WALK (§215's rule, on the
+     part paths too): one segment for a whole part, two for a keyed map's
+     entry or a review field, three ONLY for a review per-target entry
+     (§234). Anything else is refused rather than resolved. */
   function bad(why) { return { ok: false, error: why }; }
   function applyChanges(target, changes) {
     if (!changes || typeof changes !== "object")
@@ -10548,10 +10626,13 @@ var GAP_OPTIONAL = { tactic: ["collaborators"],
     var paths = Object.keys(set).concat(del);
     for (var i = 0; i < paths.length; i++) {
       var parts = String(paths[i]).split(".");
-      if (!parts.length || parts.length > MAX_SEGMENTS || parts.some(function (p) { return !p; }))
+      if (!parts.length || parts.length > 3 || parts.some(function (p) { return !p; }))
         return { ok: false, error: "a change names a path this server does not apply: " + paths[i] };
-      if (parts.length === 2 && BY_KEY.indexOf(parts[0]) < 0)
+      if (parts.length === 2 && BY_KEY.indexOf(parts[0]) < 0 && !SUB_TARGET[parts[0]])
         return { ok: false, error: "a change reaches inside a part that is written whole: " + paths[i] };
+      if (parts.length === 3 &&
+          !(SUB_TARGET[parts[0]] && SUB_TARGET[parts[0]].indexOf(parts[1]) > -1))
+        return { ok: false, error: "a change names a path this server does not apply: " + paths[i] };
     }
 
     /* ── ROW EDITS ARE VALIDATED BEFORE ANY OF THEM IS APPLIED (§215) ──
@@ -10617,7 +10698,12 @@ var GAP_OPTIONAL = { tactic: ["collaborators"],
       var parts = p.split(".");
       if (parts.length === 1) { target[parts[0]] = set[p]; return; }
       if (!isMap(target[parts[0]])) target[parts[0]] = {};
-      target[parts[0]][parts[1]] = set[p];
+      if (parts.length === 2) { target[parts[0]][parts[1]] = set[p]; return; }
+      /* §234: a review per-target entry lands inside its own field's map,
+         creating the map if this tenant has never held one — the first
+         park writes review.parked.fn:cf into a review with no `parked`. */
+      if (!isMap(target[parts[0]][parts[1]])) target[parts[0]][parts[1]] = {};
+      target[parts[0]][parts[1]][parts[2]] = set[p];
     });
     plan.forEach(function (e) {
       Object.keys(e.set).forEach(function (k) { e.row[k] = e.set[k]; });
@@ -10626,7 +10712,11 @@ var GAP_OPTIONAL = { tactic: ["collaborators"],
     del.forEach(function (p) {
       var parts = p.split(".");
       if (parts.length === 1) { delete target[parts[0]]; return; }
-      if (isMap(target[parts[0]])) delete target[parts[0]][parts[1]];
+      if (!isMap(target[parts[0]])) return;
+      if (parts.length === 2) { delete target[parts[0]][parts[1]]; return; }
+      /* §234: reopening deletes review.submitted.<target> — the key goes,
+         never a false left behind (§50.6), and only that target's. */
+      if (isMap(target[parts[0]][parts[1]])) delete target[parts[0]][parts[1]][parts[2]];
     });
     return { ok: true, state: target };
   }
@@ -10641,7 +10731,8 @@ var GAP_OPTIONAL = { tactic: ["collaborators"],
   }
 
   return { graphChanges: graphChanges, applyChanges: applyChanges,
-           countChanges: countChanges, BY_KEY: BY_KEY, sameValue: same };
+           countChanges: countChanges, BY_KEY: BY_KEY, sameValue: same,
+           REVIEW_PER_TARGET: REVIEW_PER_TARGET };
 });
 
 </script>
@@ -23830,7 +23921,18 @@ var MAIL = (function(){
      Performance  = the score from a pillar's KEY MEASURES. Primary.
      Execution    = the score from its TACTICS. Secondary, never blended in. */
 
-function esc(s){ return String(s).replace(/&/g,"&amp;").replace(/</g,"&lt;"); }
+/* ── ONE ESCAPER, SAFE IN BOTH CONTEXTS (2026-09-01 security sweep) ──────
+   This was a TEXT-NODE escaper (`&` and `<` only) and it is used inside
+   double-quoted HTML attributes ~226 times — where a literal " in tenant data
+   breaks out of the attribute and, because the CSP allows inline handlers, an
+   injected onfocus=/onerror= runs in the reader's browser (an SMO's, with full
+   SMO authority). Two call sites had hand-patched .replace(/"/g,"&quot;") on
+   top of esc(); those become harmless no-ops now that esc() escapes the quote
+   itself. Escaping >, " and ' as well is INERT in a text node — an entity
+   renders as the character — so nothing that displays normally changes; only a
+   payload is neutralised. Verified: esc()'s output is only ever concatenated
+   into innerHTML, never compared, stored as a key, or read back. */
+function esc(s){ return String(s).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;").replace(/'/g,"&#39;"); }
 /* Four bands. 70 and 50 match the platform's existing STATUS_THRESHOLDS so
    the strategy layer and the functional layer never disagree about a colour;
    85 is the added top edge that splits on-track from needs-attention. */
@@ -29481,10 +29583,18 @@ function unitPerfPane(it, u, railed){
    Labels · Roles & access · and the factor editor that extends Weighting.
    ─────────────────────────────────────────────────────────────────────── */
 
+/* ── THE TENANT'S LABEL COMES OUT CLEANED (2026-09-01 security sweep) ────
+   A label (the word for Pillar / Measure / Aspiration …) is editable text and
+   was rendered RAW at ~43 sites — and, through recipeText(), spliced raw into
+   the knowledge base. A label of `<img src=x onerror=…>` therefore ran as code
+   for every reader in the tenant. Escaping HERE fixes both at once, because
+   every reader goes through L(). Safe: L()'s 88 uses are all display-only
+   (verified — no comparison, key, or data-attribute read back), and a normal
+   label has no special characters, so cleaning it changes nothing on screen. */
 function L(key, scope){
   var e = LABELS.entries.filter(function(x){ return x.key === key; })[0];
-  if (!e) return key;
-  return (scope === "group" ? e.group : e.bu) || e.internal;
+  if (!e) return esc(key);
+  return esc((scope === "group" ? e.group : e.bu) || e.internal);
 }
 
 /* ── Labels ─────────────────────────────────────────────────────────── */
@@ -37250,7 +37360,7 @@ function deckSlides(u){
   /* 5 — SWOT opens with its own page, then one category per slide. */
   var sw = [["s","Strengths","good"],["w","Weaknesses","bad"],
             ["o","Opportunities","stone"],["t","Threats","warn"]];
-  /* §235.2 (Islam: "the added slides can move slide by slide — the prohibited
+  /* §236.3 (Islam: "the added slides can move slide by slide — the prohibited
      slides are the original slides"): EVERY fixed slide carries an anchor now,
      so every gap between two originals is a place a picture can live. This
      reverses §50.3's after-SWOT-means-after-all-four for the arrows; the LAST
@@ -37318,7 +37428,7 @@ function deckSlides(u){
         (m.note ? '<td class="dnote">' + esc(m.note) + '</td>' : '<td class="dnote empty">&mdash;</td>') +
         '</tr>';
     }).join("");
-    /* §235: Islam — "the slide can be set between the measures and tactics
+    /* §236.2: Islam — "the slide can be set between the measures and tactics
        because that's a valid place to be." The lowercase suffix keeps the key
        clear of the tactics anchor below ("p" + code), which stored slides
        already name. */
@@ -37411,7 +37521,7 @@ function deckSlidesFn(fk){
 
     /* The capability's cover carries its definition and its readings — key
        objectives only where it has any (§15.1: absent, never zero). */
-    /* §235.2's anchors, mirrored on the function's deck (§53.5): keyed on the
+    /* §236.3's anchors, mirrored on the function's deck (§53.5): keyed on the
        capability's and the project's ids, the same stability class as the
        "cap"+id and "dx"+id anchors beside them. */
     S.push('<section class="dslide d-cover"' + anch("cap" + c.id + "c", "After " + c.name + " — cover") +
@@ -37506,7 +37616,7 @@ function deckSlidesFn(fk){
          shares that builder and the pen shows everything. */
       var dxRowsHtml = dxRows(p).filter(function(r){
         return !SMPRules.isHidden(r.obj); }).map(dxRow).join("");
-      /* §235: the unit ruling's mirror — between a project's deliverables and
+      /* §236.2: the unit ruling's mirror — between a project's deliverables and
          its milestones is a valid place too, or the two sides drift (§53.5). */
       S.push('<section class="dslide" data-split="' + esc(p.id) + 'D"' +
         anch("dx" + p.id, "After " + p.name + " — deliverables and outcomes") + '>' +
@@ -38379,14 +38489,14 @@ function slidesAdd(){
   slidesPaint();
 }
 
-/* UP AND DOWN (§51.10; the walk re-cut in §235). Only picture slides move:
+/* UP AND DOWN (§51.10; the walk re-cut in §236.2). Only picture slides move:
    the generated ones are the deck's own order and are not ours to shuffle.
 
    A PRESS MUST LAND SOMEWHERE A SLIDE CAN ACTUALLY LIVE. A stored position is
    an anchor plus a place among that anchor's own slides (§50.3), so stepping
    blindly one row recomputed the SAME position wherever the next row carries
    no anchor — the button repainted in place and did nothing, silently
-   (measured: 25 dead presses of 28 walking Mobile's deck, §235). So the walk
+   (measured: 25 dead presses of 28 walking Mobile's deck, §236.2). So the walk
    goes to the nearest row that IS a place: an anchored slide, or another
    picture slide (which keeps sibling reordering one step at a time). A slide
    whose NEXT row carries the same anchor is a fit-pass continuation's parent
@@ -42054,7 +42164,10 @@ var TOUR = (function(){
 var WELCOME = (function(){
   var box = null;
 
-  function wesc(s){ return String(s).replace(/&/g,"&amp;").replace(/</g,"&lt;"); }
+  /* Escapes >, " and ' as well, matching esc() — inert for the text this
+     currently renders, and safe the moment any of it moves into an attribute
+     (2026-09-01 security sweep). */
+  function wesc(s){ return String(s).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;").replace(/'/g,"&#39;"); }
 
   function seenThisSession(){
     try { return sessionStorage.getItem("smp.welcome.done") === "1"; }

@@ -2,18 +2,10 @@
    Labels · Roles & access · and the factor editor that extends Weighting.
    ─────────────────────────────────────────────────────────────────────── */
 
-/* ── THE TENANT'S LABEL COMES OUT CLEANED (2026-09-01 security sweep) ────
-   A label (the word for Pillar / Measure / Aspiration …) is editable text and
-   was rendered RAW at ~43 sites — and, through recipeText(), spliced raw into
-   the knowledge base. A label of `<img src=x onerror=…>` therefore ran as code
-   for every reader in the tenant. Escaping HERE fixes both at once, because
-   every reader goes through L(). Safe: L()'s 88 uses are all display-only
-   (verified — no comparison, key, or data-attribute read back), and a normal
-   label has no special characters, so cleaning it changes nothing on screen. */
 function L(key, scope){
   var e = LABELS.entries.filter(function(x){ return x.key === key; })[0];
-  if (!e) return esc(key);
-  return esc((scope === "group" ? e.group : e.bu) || e.internal);
+  if (!e) return key;
+  return (scope === "group" ? e.group : e.bu) || e.internal;
 }
 
 /* ── Labels ─────────────────────────────────────────────────────────── */

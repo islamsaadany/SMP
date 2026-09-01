@@ -1,4 +1,4 @@
-# ── A PICTURE SLIDE CAN TRAVEL THE WHOLE DECK (§235) ─────────────────────
+# ── A PICTURE SLIDE CAN TRAVEL THE WHOLE DECK (§236.2) ─────────────────────
 # Islam: "the rearrange of slides doesn't move around the fixed slides of the
 # main flow", and, of the gap inside a pillar: "the slide can be set between
 # the measures and tactics because that's a valid place to be."
@@ -7,7 +7,7 @@
 # among that anchor's own slides (§50.3), and the arrows stepped blindly one
 # row — so wherever the next row was unanchored the press recomputed the same
 # position and repainted in place: a button that does nothing, silently.
-# Measured on the pre-§235 build: 25 dead presses of 28 walking Mobile's deck.
+# Measured on the pre-§236.2 build: 25 dead presses of 28 walking Mobile's deck.
 #
 # So this walks a slide DOWN the whole deck and UP again, on a unit AND a
 # function (§53.5), and asserts THE PROBLEM, not a layout (§94.8):
@@ -64,7 +64,7 @@ def walk(pg, side):
         p = pos(pg)
         if p == trail[-1]: break          # the floor — or a dead press
         trail.append(p)
-    # §235.2 (Islam: "the slides jump from slide 9 to 13 one jump .. the added
+    # §236.3 (Islam: "the slides jump from slide 9 to 13 one jump .. the added
     # slides can move slide by slide"): EVERY fixed slide is a landing place,
     # so a press moves the slide by exactly one — the only permitted grouping
     # is a run of fixed slides SHARING an anchor (a split table's parts: a
@@ -90,7 +90,7 @@ def walk(pg, side):
     ok(side + ": the walk reaches the slide before Thank you",
        trail[-1] == len(rail(pg)) - 2, (trail[-1], len(rail(pg)) - 2))
 
-    # the §235 ruling: somewhere on the way it parked INSIDE a subject's pair —
+    # the §236.2 ruling: somewhere on the way it parked INSIDE a subject's pair —
     # after the …M/…D half, before the …T/…M half of the same code. With the
     # ps slide at rail index p, the fixed slides (whose order never changes)
     # sit at every other index in order: fixed[p-1] above it, fixed[p] below.

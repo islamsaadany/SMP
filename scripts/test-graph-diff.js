@@ -386,5 +386,152 @@ console.log("\n§216 · a capability travels on its own");
   });
 })();
 
+/* ── §234 · THE REVIEW SPLITS PER TARGET ───────────────────────────────
+   The live incident: a CF custodian pressed Submit from a tab loaded before
+   four other functions reported, the whole stale `review` travelled, wiped
+   their submissions on the stored graph, and the authoriser refused with
+   "You cannot report for admin." — four functions he had never opened.
+   One person's report state must travel as that target's entry and nothing
+   else, exactly as §215 did for a unit's plan and §216 for a capability. */
+console.log("\n§234 · one function's submit carries nobody else's report");
+(function () {
+  const rv = () => ({
+    review: { name: "H1", state: "open", endsQuarter: 2,
+              submitted: { mobile: true }, note: { mobile: "fine" } },
+    people: [{ key: "a", name: "A" }]
+  });
+
+  /* — the incident, replayed — */
+  {
+    const base = rv();                       // his tab hydrated here
+    const stored = rv();                     // the server has since moved on
+    ["fn:admin", "fn:customerexperi", "fn:hr", "fn:logistics"].forEach(t => {
+      stored.review.submitted[t] = true;
+    });
+    const next = rv();                       // his own act: submit CF
+    next.review.submitted["fn:cf"] = true;
+    const ch = D.graphChanges(base, next);
+    check("§234: the submit travels as ONE review entry",
+          D.countChanges(ch) === 1 && D.sameValue(ch.set["review.submitted.fn:cf"], true),
+          JSON.stringify(ch).slice(0, 120));
+    const r = D.applyChanges(clone(stored), ch);
+    check("§234: the four other functions' submissions SURVIVE", r.ok &&
+          ["fn:admin", "fn:customerexperi", "fn:hr", "fn:logistics"]
+            .every(t => r.state.review.submitted[t] === true),
+          r.error || JSON.stringify(r.state.review.submitted));
+    check("§234: ...and his own landed", r.ok && r.state.review.submitted["fn:cf"] === true);
+  }
+
+  /* — reopening DELETES the key, and only that target's (§50.6) — */
+  {
+    const base = rv(); base.review.submitted["fn:cf"] = true;
+    const stored = clone(base); stored.review.submitted["fn:admin"] = true;
+    const next = rv();                       // fn:cf reopened: key gone
+    const ch = D.graphChanges(base, next);
+    check("§234: a reopen is a delete of ONE entry",
+          D.countChanges(ch) === 1 && ch.del[0] === "review.submitted.fn:cf",
+          JSON.stringify(ch));
+    const r = D.applyChanges(clone(stored), ch);
+    check("§234: ...and applying it leaves the other submission standing",
+          r.ok && r.state.review.submitted["fn:admin"] === true &&
+          !("fn:cf" in r.state.review.submitted), r.error);
+  }
+
+  /* — the first entry of a map the review never held (parked, slides) — */
+  {
+    const base = rv(), next = rv();
+    next.review.parked = { "fn:cf": true };
+    const ch = D.graphChanges(base, next);
+    check("§234: the first park travels as its own entry",
+          D.countChanges(ch) === 1 && D.sameValue(ch.set["review.parked.fn:cf"], true),
+          JSON.stringify(ch));
+    const stored = rv(); stored.review.parked = { "fn:admin": true };
+    const r = D.applyChanges(clone(stored), ch);
+    check("§234: ...and lands beside a park it never saw", r.ok &&
+          r.state.review.parked["fn:admin"] === true && r.state.review.parked["fn:cf"] === true,
+          r.error);
+    /* And the LAST slide leaving deletes the whole map (slides.js does). */
+    const b2 = rv(); b2.review.slides = { mobile: [{ id: "s1" }] };
+    const n2 = rv();                          // delete REVIEW.slides
+    const ch2 = D.graphChanges(b2, n2);
+    check("§234: the last slide leaving deletes the FIELD",
+          D.countChanges(ch2) === 1 && ch2.del[0] === "review.slides",
+          JSON.stringify(ch2));
+    const r2 = D.applyChanges(clone(b2), ch2);
+    check("§234: ...and applying removes it", r2.ok && !("slides" in r2.state.review));
+  }
+
+  /* — the office's own fields travel per FIELD, never dragging the maps — */
+  {
+    const base = rv(), next = rv();
+    next.review.state = "closed";
+    const ch = D.graphChanges(base, next);
+    check("§234: the cycle's state travels as review.state alone",
+          D.countChanges(ch) === 1 && ch.set["review.state"] === "closed",
+          JSON.stringify(ch));
+    const stored = rv(); stored.review.submitted["fn:hr"] = true;
+    const r = D.applyChanges(clone(stored), ch);
+    check("§234: ...and a submission made meanwhile survives it",
+          r.ok && r.state.review.submitted["fn:hr"] === true, r.error);
+  }
+
+  /* — a round trip is still a fixed point with all of it at once — */
+  {
+    const base = rv(), next = rv();
+    next.review.submitted["fn:cf"] = true;
+    delete next.review.note.mobile;
+    next.review.state = "closed";
+    const ch = D.graphChanges(base, next);
+    const r = D.applyChanges(clone(base), ch);
+    check("§234: submit + note removed + state, applied to the base, IS the screen",
+          r.ok && D.sameValue(r.state, next), r.error || "differs");
+  }
+
+  /* — the honest fallbacks — */
+  {
+    /* A target key carrying a dot cannot be a path segment: the FIELD goes
+       whole rather than a path the server would refuse (§210's rule). */
+    const base = rv(), next = rv();
+    next.review.submitted["fn:a.b"] = true;
+    const ch = D.graphChanges(base, next);
+    check("§234: an unaddressable target sends its field whole",
+          !!ch.set["review.submitted"] && Object.keys(ch.set).length === 1,
+          JSON.stringify(ch).slice(0, 120));
+    /* A review that is not a map on either side travels whole, as before. */
+    const b2 = rv(); b2.review = null;
+    const n2 = rv();
+    const ch2 = D.graphChanges(b2, n2);
+    check("§234: a review arriving from nothing travels whole",
+          !!ch2.set.review, JSON.stringify(Object.keys(ch2.set)));
+    /* And a FIELD name that cannot be a path segment sends the whole part —
+       the differ must never emit a path the server then refuses, because
+       that fails the save where travelling whole would have landed it. */
+    const b3 = rv(); b3.review["a.stranger"] = 1;
+    const n3 = rv(); n3.review["a.stranger"] = 2;
+    const ch3 = D.graphChanges(b3, n3);
+    check("§234: an unaddressable FIELD name sends the whole review",
+          !!ch3.set.review && Object.keys(ch3.set).length === 1,
+          JSON.stringify(Object.keys(ch3.set)));
+    const r3 = D.applyChanges(clone(b3), ch3);
+    check("§234: ...and it still lands", r3.ok && D.sameValue(r3.state, n3), r3.error);
+  }
+
+  /* — and the server refuses what is not on the allow-list — */
+  [["review.submitted.fn:cf.deep", "four segments"],
+   ["review.name.mobile", "a scalar field has no entries"],
+   ["cycle.focus.mobile", "three segments outside the review"]].forEach(([p, why]) => {
+    const out = D.applyChanges(clone(SEED), { set: { [p]: 1 }, del: [] });
+    check("§234 refused: " + why + " (" + p + ")", !out.ok, "was applied");
+  });
+  {
+    /* And the paths the split emits ARE accepted — both directions, or a
+       differ emitting what the server refuses fails every save it touches. */
+    const out = D.applyChanges(clone(SEED),
+      { set: { "review.submitted.fn:cf": true, "review.state": "open" },
+        del: ["review.note.mobile"] });
+    check("§234 accepted: the split's own paths apply", out.ok, out.error);
+  }
+})();
+
 console.log("\n" + pass + " passed, " + fail + " failed");
 process.exit(fail ? 1 : 0);

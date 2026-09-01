@@ -542,14 +542,14 @@ function slidesAdd(){
   slidesPaint();
 }
 
-/* UP AND DOWN (§51.10; the walk re-cut in §235). Only picture slides move:
+/* UP AND DOWN (§51.10; the walk re-cut in §236.2). Only picture slides move:
    the generated ones are the deck's own order and are not ours to shuffle.
 
    A PRESS MUST LAND SOMEWHERE A SLIDE CAN ACTUALLY LIVE. A stored position is
    an anchor plus a place among that anchor's own slides (§50.3), so stepping
    blindly one row recomputed the SAME position wherever the next row carries
    no anchor — the button repainted in place and did nothing, silently
-   (measured: 25 dead presses of 28 walking Mobile's deck, §235). So the walk
+   (measured: 25 dead presses of 28 walking Mobile's deck, §236.2). So the walk
    goes to the nearest row that IS a place: an anchored slide, or another
    picture slide (which keeps sibling reordering one step at a time). A slide
    whose NEXT row carries the same anchor is a fit-pass continuation's parent

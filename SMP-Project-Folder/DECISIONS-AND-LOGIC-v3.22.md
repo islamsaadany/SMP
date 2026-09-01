@@ -25878,7 +25878,151 @@ milestone-fill, submit-gate, objective-unit, fn-ko-edit, enter-commits,
 foundation-objectives, plan-builder, repeat-project, table-fit,
 pillar-project-remove — and the full `qa.py` sweep green.
 
-## §234 — ADD SLIDE AFTER: THE BUTTON SAYS WHERE THE SLIDE LANDS (2026-09-01)
+## §234 — ONE FUNCTION'S SUBMIT MUST NOT CARRY EVERYBODY'S REPORT STATE (2026-09-01)
+
+Islam, from a live client session, with the screenshot on screen: *"emergency
+error that we fixed 100 times before"* — a CF strategy custodian refused with
+**"You cannot report for admin. … customerexperi. … hr. … logistics."**, four
+supporting functions he had never opened, and the only control on the banner
+*Discard everything and reload*. Then, naming the shape himself: *"so every
+section reported is separate from the other functions so we don't send the
+whole reports for all plans in the same time"* — and the slides the same
+morning: *"someone was adding the slides and signed out and in and they lost
+progress."*
+
+**HE IS RIGHT THAT IT IS THE SAME FAULT, AND IT IS §216'S, ONE PART OVER.**
+§210 split the four keyed maps, §215 split a unit's plan row by row, §216
+split the group's capabilities — and `review` was never touched. It is ONE
+top-level part carrying four maps keyed by TARGET for the WHOLE tenant
+(`submitted` · `parked` · `note` · `slides`), so the moment anybody submits,
+parks, writes the cycle note or adds a slide, their tab's ENTIRE stale copy
+of everyone's report state travels as `set.review`, is applied onto the
+stored graph, and reverts every submission, park, note and slide written
+since that tab loaded. The authoriser then rightly judges those reversions
+as this person's — the per-target loop mints one `reportState` change per
+reverted target, and a custodian holds none of them. **Reproduced before a
+line was written**: base = his tab, stored = base plus four functions'
+submissions, next = base plus his own — the change list read `set.review`
+(the whole envelope), applying it read `fn:admin submitted → gone`, and the
+classifier answered `reportState fn:admin | fn:customerexperi | fn:hr |
+fn:logistics | fn:cf`. The screenshot, in code.
+
+**AND THE SLIDES ARE THE SAME WOUND FROM THE OTHER SIDE.** His refusal is
+the case where the victim's rights STOP the save; the office's own save is
+ACCEPTED, so when the office (or anybody allowed everything) saved from a
+stale tab, the wipe went through silently — which is exactly "adding slides,
+signed out and in, progress gone". A fault that refuses the powerless and
+silently robs the powerful is one fault, not two.
+
+**THE FIX IS THE SPLIT THE OTHER PARTS ALREADY HAVE.** `graph-diff.js`
+learns `SUB_TARGET = { review: REVIEW_PER_TARGET }`: a SUB_TARGET part is
+compared FIELD BY FIELD (`review.state` when the office moves the cycle),
+and its per-target maps ENTRY BY ENTRY — one submit travels as
+`review.submitted.fn:cf` and nothing else, one slide set as
+`review.slides.mobile`, a reopen as a DELETE of one key (§50.6: the key
+goes, never a false left behind). Applying creates the field's map when the
+tenant has never held one, so the first park still lands. **The apply
+side's paths stay an allow-list, never a walk** (§215's rule): three
+segments are accepted ONLY as `review.<one of the four>.<target>`; a scalar
+field with an entry path, four segments, or three segments outside the
+review are refused by name. **The honest fallbacks stay** (§210: the fine
+path is an optimisation, never the only way): a target key that cannot be a
+path segment (a dot inside it — no key the platform mints has one) sends
+its whole FIELD, and a review that is not a map on both sides travels whole
+exactly as before.
+
+**ONE LIST, EXPORTED** (§53.5). The authoriser's per-target loop and the
+differ's split must agree about which review fields are keyed by target —
+a field joining one and not the other would travel whole through the
+differ while the classifier splits it, which is this fault reborn. So
+`REVIEW_PER_TARGET` lives in `graph-diff.js`, exported, and
+`lib/authorize.js` requires it; the old duplicate literal is gone.
+
+**THE RESIDUE IS STATED, AS §210 STATED ITS OWN**: two people acting on the
+SAME target's report state at the same moment still resolve last-write-wins
+on that one entry (two people adding slides to one unit, say). Different
+targets no longer touch each other at all — which is the whole of what was
+reported.
+
+**PROVED, AND PROVED ABLE TO FAIL** (§94.5). `test-graph-diff.js` §234:
+the incident replayed (the submit travels as ONE entry, the four other
+submissions SURVIVE), the reopen-deletes-one-key case, the first park into
+a map that never existed, the last slide deleting the field, the office's
+scalar beside a meanwhile-submission, a full mixed round trip asserted as a
+FIXED POINT, both fallbacks, and the allow-list from both directions —
+refused paths refused AND the split's own paths accepted, because a differ
+emitting what the server refuses fails every save it touches. Against the
+pre-§234 module: **11 red**, the incident assertion among them. And
+end-to-end through the REAL reader, writer, authoriser and change-applier
+against a real Postgres 16 (`test-two-tabs.js` §234): a unit custodian
+submits from a tab loaded before the office submitted another unit's report
+and hung a slide on it — accepted, his submission landed, the other unit's
+submission and slides SURVIVE; under `SMP_WHOLE_GRAPH=1` it fails with
+**"You cannot report for retailstores."**, the reported sentence to the
+word, on a unit he never opened. The §234 check block itself threw on its
+first run (a detail expression on a SUCCESSFUL save — `JSON.stringify` of
+nothing has no `.slice`) and was fixed as the check, §192's rule that a
+harness must report a broken trial rather than die on it. 124/0 on the
+differ, 451/0 on the authoriser, 24/0 on two-tabs, round trip PASS on a
+virgin database (clean slate included — its one FAIL on the way was the
+check re-run against a database the previous run had already written back,
+not the product), `report-saves` and `save-fidelity` green over HTTP
+(median save 164 bytes against a 297,662-byte graph), full `qa.py` sweep
+green.
+
+**NOT CLAIMED**: whether Abd El Moniem's exact tab was also stale in other
+parts, and whether every "lost progress" report this morning was this one
+fault — the slides case fits it and was not separately reproduced from his
+account. **The way out for tabs already open**: a tab running the previous
+build still posts what it posts; the refusal machinery already answers it,
+and a reload picks up the split.
+
+---
+
+## §235 — One escaper, safe in an attribute (2026-09-01 security sweep)
+
+A security review found the platform's main text-cleaner `esc()` escaped only
+`&` and `<` — correct for text between tags, unsafe inside an HTML attribute,
+where a literal `"` in tenant data breaks out of the quotes. It is used inside
+double-quoted attributes ~226 times, and because the CSP allows
+`'unsafe-inline'`, an injected `onfocus=`/`onerror=` **executes** in the
+reader's browser — the SMO's, with full SMO authority (role changes, password
+resets). The attacker input is anything editable: a person's name, a plan
+note, a renamed label, a cell in an uploaded `.xlsx`. Two sites had
+hand-patched `.replace(/"/g,"&quot;")`, which is the gap being noticed and
+never generalised. Separately, the tenant's LABELS were rendered RAW at ~43
+sites and, via `recipeText()`, spliced raw into the knowledge base, so a
+relabelled Pillar of `<img onerror=…>` ran for every reader.
+
+**THE FIX IS THREE ONE-LINERS, AND IT IS INERT FOR NORMAL CONTENT.** `esc()`
+(and `welcome.js`'s `wesc()`) now also escape `>`, `"` and `'`; an entity
+renders as its character, so nothing displayed normally changes — verified
+that `esc()`'s output is only ever concatenated into innerHTML (never compared,
+keyed, or read back), and the two hand-patches become harmless no-ops. `L()`
+now returns through `esc()`, which closes the 43 raw label sites AND the
+knowledge-base substitution in one place because every reader goes through
+`L()`; its 88 uses are all display-only. The KB's deliberate `<b>` markup is
+untouched (the answer template is trusted; only the spliced label was not), and
+the raw-`<p>` render is deliberately left alone to preserve formatting.
+
+**COST, STATED NOT HIDDEN:** a label CONTAINING `& < > " '` (none of the 8
+real labels do) would show as an entity in a couple of double-cleaned spots —
+cosmetic, never a broken flow, access, or figure.
+
+**PROVED NOT TO DAMAGE ANYTHING:** `qa.py` clean (every page, every viewer),
+and `report-saves`, `gap-fill`, `submit-gate`, `knowledge-base` and
+`fn-ko-edit` all green — reporting a figure and a note reaches the stored plan,
+filling and submitting and editing all behave exactly as before. Numbers
+contain none of these characters, so reporting is byte-for-byte unchanged.
+
+**STILL OPEN, recorded rather than done here:** the `'unsafe-inline'` → hashed
+CSP backstop that would neutralise any future escaping gap (the page has no
+inline handlers, so it is achievable), and a `.vercelignore` so `db/`, `lib/`
+and `scripts/` are not served as static files (no secrets are exposed today —
+this is attack-surface hygiene).
+
+
+## §236 — ADD SLIDE AFTER: THE BUTTON SAYS WHERE THE SLIDE LANDS (2026-09-01)
 
 Islam, on Manage slides: *"for the button add slide let's make it add slide
 after. so people can understand that the empty slide will be added after the
@@ -25921,9 +26065,9 @@ rendered-case lesson, again).
 **Open, his call**: if he had not found the ▲▼ arrows, making them more
 visible is a design change and goes through a mockup first.
 
-## §235 — A PICTURE SLIDE CAN TRAVEL THE WHOLE DECK (2026-09-01)
+## §236.2 — A PICTURE SLIDE CAN TRAVEL THE WHOLE DECK (2026-09-01)
 
-Islam, answering §234's open question by using the arrows: *"the rearrange of
+Islam, answering §236's open question by using the arrows: *"the rearrange of
 slides doesn't move around the fixed slides of the main flow"* — and, offered
 the honest-jump fix with its stated cost, *"1 is better and the slide can be
 set between the measures and tactics because that's a valid place to be."*
@@ -25931,7 +26075,7 @@ set between the measures and tactics because that's a valid place to be."*
 **HE FOUND THE ARROWS, AND THEY WERE MOSTLY DEAD.** Measured before anything
 was written: a slide added at the top of Mobile's deck and Move down pressed
 28 times moved **3 times and then sat at position 4 for 25 straight presses**;
-on a function's deck it never moved at all. §234's claim that the arrows "step
+on a function's deck it never moved at all. §236's claim that the arrows "step
 over generated neighbours" was true only where the neighbour happened to carry
 an anchor — my one-step probe landed on exactly such a spot and I generalised
 from it (§94.2's lesson wearing a green tick: a probe that samples one
@@ -25979,30 +26123,30 @@ unit AND a function, asserting the problem and never a layout (§94.8): no
 silent press until the floor, the floor reached, a stop between the two halves
 of one subject, the position surviving a repaint, the fixed flow untouched,
 and the store emptied on remove (§50.6). **Proved able to fail first: 5 red
-on the pre-§235 build** — the unit stuck at 4, the function stuck at 1,
+on the pre-§236.2 build** — the unit stuck at 4, the function stuck at 1,
 reproducing his report before a source was touched. Neighbourhood green:
 hide-element, project-tables, repeat-project, and the full qa.py sweep.
 
-## §235.2 — SLIDE BY SLIDE, AND ONLY THE ORIGINALS ARE PINNED (2026-09-01)
+## §236.3 — SLIDE BY SLIDE, AND ONLY THE ORIGINALS ARE PINNED (2026-09-01)
 
-Islam, testing §235: *"I tested but the slides jump from slide 9 to 13 one jump
+Islam, testing §236.2: *"I tested but the slides jump from slide 9 to 13 one jump
 .. the added slides can move slide by slide the prohipted slides from the
 movement are the original slides form the ferformance as is now."*
 
-**HE IS RIGHT AND §235 HALF-SOLVED IT.** That section replaced the silent dead
+**HE IS RIGHT AND §236.2 HALF-SOLVED IT.** That section replaced the silent dead
 press with an honest jump and drew its list of landing places from the anchors
 that happened to exist — the SWOT run, the section dividers and the pillar
 title pages had none, so a press hopped four slides at once. Reproduced on his
 numbers before anything was written: the walk read **1, 2, 3, 4, 9, 10, 12, 13,
 15, 16, 18…**, and the 4→9 hop is the SWOT run, the 10→12 the pillar divider.
 *A fix that removes the lie is not the same as a fix that grants the ability* —
-§235's own "deliberately NOT anchored" list is what he is objecting to, and it
+§236.2's own "deliberately NOT anchored" list is what he is objecting to, and it
 was mine to propose, not to keep.
 
 **THE RULE IS NOW ONE SENTENCE**: every ORIGINAL slide is a landing place;
 what is pinned is the originals' own order. So an added slide moves one slide
 per press, top to bottom, and nothing in the generated flow can be reordered —
-which is the shape he asked for in §234 and has now had to ask for twice.
+which is the shape he asked for in §236 and has now had to ask for twice.
 
 **EVERY FIXED SLIDE CARRIES AN ANCHOR.** Added on the unit's deck: the SWOT
 title page, the first three SWOT categories, and each pillar's title page;
@@ -26032,6 +26176,6 @@ arrows walk.
 `checks/slide-move.py` gains the assertions that make this falsifiable: every
 fixed slide is a landing place, every place has its OWN key, and the walk's
 stops equal the deck's own slide list — down and back up, on a unit AND a
-function (§53.5). **Proved able to fail first: 6 red on the pre-§235.2 build**,
+function (§53.5). **Proved able to fail first: 6 red on the pre-§236.3 build**,
 printing his jump verbatim. hide-element, project-tables, repeat-project and
 the full qa.py sweep green after.

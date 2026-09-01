@@ -260,7 +260,7 @@
    saved work, and a refusal can only name what actually travelled. Name checked
    against origin/main serving "smp-shell-v3.96-home-is-never-blocked"; confirm
    again immediately before the push (§94.16). */
-const SHELL = "smp-shell-v4.08-chat-back";
+const SHELL = "smp-shell-v4.11-slide-walk";
 const ASSETS = [
   "/",
   "/index.html",

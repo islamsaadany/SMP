@@ -123,7 +123,7 @@ function deckSlides(u){
   /* 5 — SWOT opens with its own page, then one category per slide. */
   var sw = [["s","Strengths","good"],["w","Weaknesses","bad"],
             ["o","Opportunities","stone"],["t","Threats","warn"]];
-  /* §235.2 (Islam: "the added slides can move slide by slide — the prohibited
+  /* §236.3 (Islam: "the added slides can move slide by slide — the prohibited
      slides are the original slides"): EVERY fixed slide carries an anchor now,
      so every gap between two originals is a place a picture can live. This
      reverses §50.3's after-SWOT-means-after-all-four for the arrows; the LAST
@@ -191,7 +191,7 @@ function deckSlides(u){
         (m.note ? '<td class="dnote">' + esc(m.note) + '</td>' : '<td class="dnote empty">&mdash;</td>') +
         '</tr>';
     }).join("");
-    /* §235: Islam — "the slide can be set between the measures and tactics
+    /* §236.2: Islam — "the slide can be set between the measures and tactics
        because that's a valid place to be." The lowercase suffix keeps the key
        clear of the tactics anchor below ("p" + code), which stored slides
        already name. */
@@ -284,7 +284,7 @@ function deckSlidesFn(fk){
 
     /* The capability's cover carries its definition and its readings — key
        objectives only where it has any (§15.1: absent, never zero). */
-    /* §235.2's anchors, mirrored on the function's deck (§53.5): keyed on the
+    /* §236.3's anchors, mirrored on the function's deck (§53.5): keyed on the
        capability's and the project's ids, the same stability class as the
        "cap"+id and "dx"+id anchors beside them. */
     S.push('<section class="dslide d-cover"' + anch("cap" + c.id + "c", "After " + c.name + " — cover") +
@@ -379,7 +379,7 @@ function deckSlidesFn(fk){
          shares that builder and the pen shows everything. */
       var dxRowsHtml = dxRows(p).filter(function(r){
         return !SMPRules.isHidden(r.obj); }).map(dxRow).join("");
-      /* §235: the unit ruling's mirror — between a project's deliverables and
+      /* §236.2: the unit ruling's mirror — between a project's deliverables and
          its milestones is a valid place too, or the two sides drift (§53.5). */
       S.push('<section class="dslide" data-split="' + esc(p.id) + 'D"' +
         anch("dx" + p.id, "After " + p.name + " — deliverables and outcomes") + '>' +

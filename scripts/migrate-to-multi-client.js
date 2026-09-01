@@ -118,8 +118,19 @@ async function main() {
 
     for (const cl of [LIVE].concat(NEW_CLIENTS)) {
       await pc.query(
+        /* THE SCHEMA IS UPDATED, NOT LEFT ALONE (§147.21). A deployment may
+           already have ADOPTED this client — one row saying it lives in
+           `public`, which is what lets the code ship before this script runs.
+           `DO NOTHING` would then leave the row pointing at a schema this
+           script has just emptied, and every request would resolve to it: the
+           client would go dark at the exact moment its tables arrived safely.
+           The name and industry are only filled where the row has none, so an
+           office that has renamed a client keeps its own words. */
         "INSERT INTO clients (key, name, schema_name, industry, kind) VALUES ($1,$2,$3,$4,$5) " +
-        "ON CONFLICT (key) DO NOTHING", [cl.key, cl.name, cl.schema, cl.industry, cl.kind || "client"]);
+        "ON CONFLICT (key) DO UPDATE SET schema_name = EXCLUDED.schema_name, " +
+        "  name = CASE WHEN clients.name = '' THEN EXCLUDED.name ELSE clients.name END, " +
+        "  industry = CASE WHEN clients.industry = '' THEN EXCLUDED.industry ELSE clients.industry END",
+        [cl.key, cl.name, cl.schema, cl.industry, cl.kind || "client"]);
     }
     say("registry: " + (await pc.query("SELECT count(*)::int AS n FROM clients")).rows[0].n + " clients.");
 

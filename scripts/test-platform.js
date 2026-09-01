@@ -378,6 +378,24 @@ async function main() {
       !auth3.verifyPassword("1234", now.password_hash));
   });
 
+  /* ── 12 · the tenant that was already here (§147.21) ──────────
+     A deployment carrying this code and an unmigrated database has a real
+     client in it and no row saying so. Adoption registers it WHERE IT ALREADY
+     LIVES — no table moves — which is what lets the code ship without the
+     migration having to land in the same breath. */
+  await P.withPlatform(pg, async function (c) {
+    /* A platform that already knows its clients is not missing one. */
+    await c.query("DELETE FROM _platform_migrations WHERE name = $1",
+                  ["003-adopt-the-existing-tenant.js"]);
+    const before = (await c.query("SELECT count(*)::int AS n FROM clients")).rows[0].n;
+    const skipped = await P.adoptExistingTenant(c);
+    check("a platform that already has clients adopts nothing",
+          before > 0 && skipped.adopted === null, { before: before, got: skipped });
+    /* AND ONCE: the row it just wrote says it has been asked. */
+    const again = await P.adoptExistingTenant(c);
+    check("…and does not ask again", again.adopted === null, again);
+  });
+
   console.log("\n" + pass + " passed, " + fail + " failed");
   await pool.end();
   process.exit(fail ? 1 : 0);

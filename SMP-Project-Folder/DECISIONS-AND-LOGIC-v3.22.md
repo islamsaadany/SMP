@@ -19700,3 +19700,74 @@ the seat they arrive holding is **the rule's answer**, not a row that does not
 exist; the person key is minted by `officePersonKey()`, now one function rather
 than a line inside `setTeam`, because two spellings of a person key are two
 people.
+
+### 147.21 · The tenant that was already here
+
+Islam, looking at a preview with the branch deployed and the migration not run:
+*"raya trade should be appearing there."* It should. A deployment carrying this
+code and an unmigrated database holds a **real client** — its plan, its people,
+its reported figures — and no row saying so, so the boundary refuses it and
+Forefront's cards are empty.
+
+**IT MOVES NOTHING.** Adoption is one row in the registry saying the client
+lives in the schema it already lives in. `schema_name` has always been a
+**column** rather than a convention, so `public` is as legal a value as
+`raya_trade` — which is what makes this cheap and reversible: delete the row
+and the deployment is exactly as it was.
+
+**AND IT IS WHAT DECOUPLES THE CODE FROM THE MIGRATION.** Without it this
+branch cannot be deployed until `migrate-to-multi-client.js` has run, or the
+live client goes dark — two things that must land in the same breath, which is
+the most dangerous shape a release can have. With it, the branch is safe on its
+own and moving the tables becomes tidying that can happen any time, or never.
+
+Three guards, because adopting the wrong thing is worse than adopting nothing:
+only when the registry is **empty**; only when the original schema really holds
+a tenant, **asked of the org row** rather than of the tables, because
+`schema.sql` creates the shape for anything that touches it and an empty shape
+is not a client; and **once, recorded**, so an office that deliberately removes
+this client does not find it back on the next deploy.
+
+**AND THE MIGRATION HAD TO LEARN IT.** Its `INSERT … ON CONFLICT (key) DO
+NOTHING` would have left an adopted row pointing at `public` **after that
+schema had just been emptied** — the client would go dark at the exact moment
+its tables arrived safely. It updates `schema_name` now, and fills the name and
+industry only where the row has none, so an office that has renamed a client
+keeps its own words. Proved in both orders.
+
+**What it deliberately does NOT do:** the client's own people have no accounts
+until either the migration makes them or somebody issues them a password from
+the People page. Forefront can open the client; its staff cannot sign in yet.
+Stated rather than half-done — a partial migration wearing a whole one's
+clothes is worse than a stated limit.
+
+### 147.22 · The office row was written from a second lookup
+
+Adoption worked and the page still said **"Islam Saadany is signed in but is
+not on this register"** over a plan that was sitting right there. `api/state.js`
+asked `seatIn()` **again** to find who this person is inside the client — and
+that returns nothing for an office account with no row on it, which is exactly
+the case §147.20 had just made reachable.
+
+§147.20's fault one layer on, and the same shape: **`getSession()` has already
+answered this**, including the seat the rule gives somebody arriving without
+one, so asking the database a second way could only ever disagree with it. It
+uses the session's own answer.
+
+### 147.23 · The way back was a loop
+
+The client's name in the chrome went to `"/"`, and the door hands somebody over
+to what they can **open** — so for anybody holding exactly one client, the way
+back to the cards walked out of the client and straight back into it. On a
+deployment with one client that is the **only** route to Forefront's own pages,
+so the platform's super user could not reach Consultants or Who sees what at
+all.
+
+**§32 IS NOT IN TENSION WITH THIS**: *one destination is not a question* is
+about where a **sign-in** lands; this control is somebody asking for the list on
+purpose. The two answers differ because the questions do.
+
+**AND THE CHECK PASSED FOR THE WRONG REASON THE WHOLE TIME** — it pressed the
+control as the admin, who can open several clients, so the door sent them to
+the cards anyway and the loop never showed. It is pressed as the **consultant
+with one client** now, which is the only viewer the fault was ever visible on.

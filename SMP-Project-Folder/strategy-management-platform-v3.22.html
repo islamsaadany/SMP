@@ -36227,7 +36227,18 @@ var SYNC = (function () {
          back (a client's own person) the label is untouched. */
       var org = document.getElementById("orgname");
       if (org) org.hidden = true;
-      back.addEventListener("click", function () { location.assign("/"); });
+      /* STRAIGHT TO THE PLATFORM, NOT THROUGH THE DOOR (§147.23). It went to
+         "/", and the door hands somebody over to what they can OPEN — so on a
+         deployment where this person has exactly one client, the way back to
+         the cards walked out of the client and straight back into it. A loop,
+         and the only route to Forefront's own pages, so the platform's super
+         user could not reach Consultants or Who sees what at all.
+
+         §32 is not in tension with this: "one destination is not a question"
+         is about where a SIGN-IN lands, and this control is somebody asking
+         for the list on purpose. The two answers differ because the questions
+         do. */
+      back.addEventListener("click", function () { location.assign("/platform"); });
     }
     /* DRAWN BEFORE ANYTHING CAN RETURN. The branch below stops the whole
        chrome when the signed-in person is not on this client's register — and

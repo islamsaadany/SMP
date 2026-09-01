@@ -209,6 +209,21 @@ def main():
             pg2.wait_for_load_state("networkidle"); pg2.wait_for_timeout(1500)
             check("somebody with one client opens it, with no card in the way",
                   pg2.url.endswith("/raya-trade"), pg2.url)
+            # AND THE WAY BACK IS NOT A LOOP (§147.23). It went to "/", and the
+            # door hands somebody over to what they can OPEN — so for exactly
+            # this person, holding one client, the way back walked out of the
+            # client and straight back into it. INVISIBLE on the admin above,
+            # who has several: the door sends them to the cards anyway, so the
+            # assertion in §3 passed for the wrong reason the whole time.
+            b2 = pg2.query_selector("#clientback")
+            check("a consultant with one client is still offered the way back", bool(b2))
+            if b2:
+                b2.click()
+                pg2.wait_for_load_state("networkidle"); pg2.wait_for_timeout(1800)
+                check("…and it reaches the platform rather than looping back in",
+                      pg2.url.rstrip("/").endswith("/platform"), pg2.url)
+                pg2.goto(BASE + "/raya-trade", wait_until="networkidle")
+                pg2.wait_for_timeout(2000)
 
             # ── 5 · a client's own person ───────────────────────────
             pg3 = b.new_page(viewport={"width": 1200, "height": 800})

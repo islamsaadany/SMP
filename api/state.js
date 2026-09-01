@@ -112,8 +112,19 @@ module.exports = async function handler(req, res) {
          later, or a team changed while nobody was looking, would otherwise
          leave a person signed in and holding nothing. */
       if (person.kind !== "client") {
-        const seat = await auth.seatIn(client, client._smpClient.key, person.email);
-        await P.ensureOfficeRow(client, seat, { name: person.name, email: person.email, kind: person.kind });
+        /* THE SEAT THE SESSION ALREADY RESOLVED, not a second lookup (§147.22).
+           This asked `seatIn()` again — which returns nothing for an office
+           account with no row on this client — so the platform's super user
+           opening a client nobody has been put on got NO register row, and the
+           page told them they were "signed in but not on this register" over a
+           plan that was sitting right there.
+
+           §147.20's fault one layer on, and the same shape: getSession() has
+           already answered this, including the seat the RULE gives somebody
+           arriving without one, so asking the database a second way could only
+           ever disagree with it. */
+        await P.ensureOfficeRow(client, { person_key: person.key, seat: person.seat },
+          { name: person.name, email: person.email, kind: person.kind });
       }
       const state = await readState(client);
       /* WHAT THE CHROME NEEDS TO DRAW THE WAY BACK (spec 024): the client's

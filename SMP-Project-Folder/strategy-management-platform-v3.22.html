@@ -36558,6 +36558,19 @@ var SYNC = (function () {
              password now gets the same answer — the server refuses the state
              until a real one is chosen, and the gate is where that happens. */
           if (r.status === 401 || r.status === 403) { location.replace("/"); throw new Error("sign in"); }
+          /* ── AN ADDRESS THAT NAMES NO CLIENT (§147.19) ──────────────
+             Since a client's path became a PATTERN rather than four named
+             ones, any single-segment address reaches this file — so a typo,
+             or a client that has been retired, now lands here instead of
+             404ing at the edge. And the catch below falls back to the BAKED
+             worked example, which would put Raya Trade's units and figures on
+             screen under somebody else's address: §94.10's fault, made
+             reachable by the fix for §147.19.
+
+             The platform's own cards are where somebody with a bad client
+             address should be, and it is the one page that can tell them
+             which clients they actually have. */
+          if (r.status === 404) { location.replace("/platform"); throw new Error("sign in"); }
           if (!r.ok) throw new Error("HTTP " + r.status);
           return r.json();
         })

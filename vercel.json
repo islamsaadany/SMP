@@ -72,19 +72,7 @@
       "destination": "/platform.html"
     },
     {
-      "source": "/raya-trade",
-      "destination": "/SMP-Project-Folder/strategy-management-platform-v3.22.html"
-    },
-    {
-      "source": "/rhi",
-      "destination": "/SMP-Project-Folder/strategy-management-platform-v3.22.html"
-    },
-    {
-      "source": "/el-abd",
-      "destination": "/SMP-Project-Folder/strategy-management-platform-v3.22.html"
-    },
-    {
-      "source": "/demo",
+      "source": "/:client([a-z0-9][a-z0-9-]{0,48})",
       "destination": "/SMP-Project-Folder/strategy-management-platform-v3.22.html"
     }
   ]

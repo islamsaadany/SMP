@@ -38,10 +38,29 @@ const TYPES = { ".html": "text/html; charset=utf-8", ".js": "text/javascript",
    production: sending it from http://localhost would pin the browser to https
    for localhost, which breaks every other local server on the machine. */
 const VERCEL = JSON.parse(fs.readFileSync(path.join(ROOT, "vercel.json"), "utf8"));
-/* Every rewrite whose destination is the platform file is a client's path. */
-const CLIENTS = (VERCEL.rewrites || [])
-  .filter(function (r) { return r.destination && /strategy-management-platform/.test(r.destination); })
-  .map(function (r) { return r.source; });
+/* ── A CLIENT'S PATH IS A PATTERN, NOT A LIST (§147.19) ────────────
+   It was four named paths, and the product can CREATE a client — so making
+   one produced a card that opened a page the server had never heard of. The
+   platform could make something it could not serve, and nothing said so: the
+   card was right, the schema was right, and the address 404'd.
+
+   ONE REWRITE, matching a single lower-case segment. The exclusions come for
+   free from the pattern rather than from a list to keep in step: it has no
+   dot, so every real file (`sw.js`, `favicon.svg`, `manifest.webmanifest`) is
+   outside it by construction; it is one segment, so `/api/state` is too; and
+   `/platform` is matched by the rewrite ABOVE it, which wins on order.
+
+   Read from vercel.json as before — three files carry this mapping and they
+   must stay in step (§35.6) — but as a REGEX now, so what runs locally is
+   what Vercel will do. */
+const CLIENT_RE = (function () {
+  const r = (VERCEL.rewrites || [])
+    .filter(function (x) { return x.destination && /strategy-management-platform/.test(x.destination); })[0];
+  if (!r) return null;
+  /* `/:name(pattern)` is Vercel's own spelling; a plain path is taken whole. */
+  const m = /^\/:[A-Za-z0-9_]+\((.*)\)$/.exec(r.source);
+  return new RegExp("^/" + (m ? m[1] : r.source.replace(/^\//, "")) + "$");
+})();
 const SECURITY = ((VERCEL.headers || []).filter(function (h) { return h.source === "/(.*)"; })[0] || {})
   .headers.filter(function (h) { return h.key !== "Strict-Transport-Security"; });
 
@@ -61,7 +80,9 @@ http.createServer(function (req, res) {
      ships. Without it the gate's /raya-trade link 404s locally and the
      pretty URL is only ever exercised in production — which is the one
      place a broken link costs something. Keep the two in step. */
-  if (CLIENTS.indexOf(url.pathname) > -1) p = path.join(ROOT, PLATFORM_FILE);
+  if (CLIENT_RE && url.pathname !== "/platform" && CLIENT_RE.test(url.pathname)) {
+    p = path.join(ROOT, PLATFORM_FILE);
+  }
   /* Forefront's own platform, at the clean path vercel.json rewrites — the
      same rule the client paths follow: what is tested here is what ships. */
   if (url.pathname === "/platform") p = path.join(ROOT, "platform.html");
@@ -72,5 +93,5 @@ http.createServer(function (req, res) {
   });
 }).listen(PORT, function () {
   console.log("dev server on http://localhost:" + PORT);
-  console.log("clients: " + (CLIENTS.join(", ") || "(none in vercel.json)"));
+  console.log("client paths: " + (CLIENT_RE ? CLIENT_RE.source : "(none in vercel.json)"));
 });

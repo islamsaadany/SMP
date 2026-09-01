@@ -19639,3 +19639,64 @@ favour to one person hands a known password to everybody. Asserted, along with
 the one that actually matters: **a chosen password is not replaced on the next
 deploy.** Both watched to fail — the registry row removed so it runs every
 time → 2, the WHERE widened → 1.
+
+### 147.18 · Nothing yet is not a dead end
+
+Islam, signed in: *"now I opened but I can't see the clients"* — and there were
+none, which is true. What was wrong is what the page did about it.
+
+`drawClients()` **returned** on an empty list, before the *+ Add a client* card
+was appended — so **the one person who can create a client was the one shown a
+dead end**, and the sentence it showed them said to ask the platform's super
+user, which is who they are. §61's trap in its purest form: the only way to get
+a client is to add one, and the control that adds one was hidden precisely when
+there were none.
+
+**AND THE EMPTY STATE SAYS WHAT THIS READER CAN DO ABOUT IT.** Somebody who may
+add one is told to; somebody who may not is told who to ask. A refusal names
+the place that can fix it (§16.7) — and for those two people that is not the
+same place.
+
+### 147.19 · A client's path is a pattern, not a list
+
+`vercel.json` named four client paths, and **the product can create a client**
+— so making one produced a card that opened a page the server had never heard
+of. The platform could make something it could not serve, and nothing said so:
+the card was right, the schema was right, and the address 404'd.
+
+**ONE REWRITE**, matching a single lower-case segment, and the exclusions come
+from the pattern rather than from a second list to keep in step: it has no dot,
+so every real file (`sw.js`, `favicon.svg`, `manifest.webmanifest`) is outside
+it by construction; it is one segment, so `/api/state` is too; and `/platform`
+is matched by the rewrite above it, which wins on order. `dev-server.js` reads
+it as a **regex** now — still from `vercel.json`, because three files carry
+this mapping and they must stay in step (§35.6).
+
+**AND IT OPENED A TRAP THAT HAD TO BE CLOSED IN THE SAME EDIT.** With any
+address reaching the platform file, a typo or a retired client lands there
+instead of 404ing at the edge — and `boot()`'s catch falls back to the **baked
+worked example**, which would put Raya Trade's units and figures on screen
+under somebody else's address. §94.10's fault, made reachable by this fix. A
+404 now goes to `/platform`, which is the one page that can tell somebody which
+clients they actually have.
+
+### 147.20 · The seat was asked before the rule that says it is not needed
+
+Creating a client from the cards produced one that **could not be opened**, and
+the card said it could the whole time — §94's screen-says-yes / server-says-no,
+in the file that exists to prevent it.
+
+`getSession()` read `if (!seat) throw notThisClient()` **before** the rules
+below it were asked, so an office account with no row on that client was turned
+away before `mayOpenClient()` — which says yes for the platform's super user —
+was ever consulted. **The rule had the case written down and this never reached
+it**: `seatFor()`'s own comment says *"somebody has to be able to open a client
+nobody is on yet — the one they just created"*, which is exactly what creating
+a client from the cards produces.
+
+**A CLIENT'S OWN PERSON STILL NEEDS THE ROW** — it is the only thing that says
+which client they belong to, so for them its absence is still the answer. And
+the seat they arrive holding is **the rule's answer**, not a row that does not
+exist; the person key is minted by `officePersonKey()`, now one function rather
+than a line inside `setTeam`, because two spellings of a person key are two
+people.

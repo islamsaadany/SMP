@@ -300,12 +300,25 @@
     post({ action: "cards" }).then(function (j) {
       grid.textContent = "";
       if (!j.ok) { say(j.error || "Could not read your clients.", true); return; }
-      if (!j.cards.length) {
-        say("No client has been given to this account yet. Ask the platform's super user.");
-        return;
-      }
+      /* ── THE WAY IN IS DRAWN WHEN THERE IS NOTHING (§147.18, §61) ──
+         This RETURNED on an empty list, before the Add card was appended — so
+         the one person who can create a client was the one shown a dead end,
+         and the sentence it showed them said to ask the platform's super
+         user, which is who they are. §61's trap in its purest form: the only
+         way to get a client is to add one, and the control that adds one was
+         hidden precisely when there were none.
+
+         AND THE EMPTY STATE SAYS WHAT THIS READER CAN DO ABOUT IT. Somebody
+         who may add one is told to; somebody who may not is told who to ask.
+         A refusal names the place that can fix it (§16.7), and for these two
+         people that is not the same place. */
       j.cards.forEach(function (c) { grid.appendChild(cardFor(c)); });
       if (j.canAdd) grid.appendChild(addCard());
+      if (!j.cards.length) {
+        say(j.canAdd
+          ? "No clients yet. Add the first one — it is created with its own name and nothing else."
+          : "No client has been given to this account yet. Ask the platform's super user.");
+      }
     }).catch(function (e) {
       if (String(e.message) === "sign in") return;
       grid.textContent = ""; say("Could not reach the server.", true);

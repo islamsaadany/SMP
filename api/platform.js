@@ -314,7 +314,7 @@ module.exports = async function handler(req, res) {
         }
         /* The person key this account IS inside that client — minted once from
            the address, and never from the name, which changes. */
-        const personKey = "ff_" + email.split("@")[0].replace(/[^a-z0-9]+/g, "_").slice(0, 24);
+        const personKey = P.officePersonKey(email);
         const seat = FF.SEAT_KEYS.indexOf(String(body.seat)) > -1 ? String(body.seat) : "smoteam";
         /* ONE SUPER USER PER CLIENT is a unique index, so naming a second one
            MOVES the seat: whoever held it becomes SMO team, and only then is

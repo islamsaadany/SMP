@@ -424,6 +424,54 @@ def main():
                 check("…and there is no way to switch datasets at all, for " + who,
                       not gone["mode"], gone)
 
+            # ── 12 · a client nobody has been put on (§147.20) ──────
+            # THE ADMIN REACHES EVERY CLIENT, and `seatFor()` says so in as
+            # many words — "somebody has to be able to open a client nobody is
+            # on yet — the one they just created". `getSession` asked for a
+            # seat row BEFORE the rules and turned them away first, so making
+            # a client from the cards produced one that could not be opened.
+            # Asked at BOTH ENDS, because the card said yes the whole time.
+            seatless = api(pg, {"action": "cards"})
+            spare = [c for c in seatless["cards"] if c["key"] != "raya-trade" and c["canOpen"]]
+            check("there is a client the admin holds no seat on", bool(spare),
+                  [(c["key"], c.get("seat"), c["canOpen"]) for c in seatless["cards"]])
+            if spare:
+                key = spare[0]["key"]
+                check("…and the card says they may open it", spare[0].get("seat") is None, spare[0])
+                got = pg.evaluate("""async (k) => {
+                  const r = await fetch('/api/state?client=' + k, { cache: 'no-store' });
+                  const j = await r.json();
+                  return { status: r.status, ok: !!j.ok,
+                           seat: j.person && j.person.seat, error: j.error || '' }; }""", key)
+                check("…and the server opens it too", got["ok"] is True, got)
+                # ARRIVING WITHOUT A SEAT THEY HOLD THE CLIENT'S OWN SUPER USER
+                # SEAT — the rule's answer, not a row that does not exist.
+                check("…holding the seat the rule gives them", got["seat"] == "super", got)
+
+            # ── 13 · nothing yet is not a dead end (§147.18, §61) ───
+            # The Add card was appended AFTER the empty-state returned, so the
+            # one person who can create a client was the one shown a dead end
+            # — and told to ask the platform's super user, which is who they
+            # are. The list is emptied on the wire rather than in the
+            # database, so the fixture the rest of this file measures is
+            # untouched.
+            pg.route("**/api/platform", lambda route: (
+                route.fulfill(status=200, content_type="application/json",
+                              body='{"ok":true,"cards":[],"canAdd":true,'
+                                   '"canConsultants":true,"canAccess":true}')
+                if b'"cards"' in (route.request.post_data_buffer or b'') else route.continue_()))
+            pg.goto(BASE + "/platform", wait_until="networkidle")
+            pg.wait_for_timeout(1400)
+            empty = pg.evaluate("""() => ({
+              add: document.querySelectorAll('.ccard.add').length,
+              words: (document.getElementById('page') || {}).innerText || '' })""")
+            check("with no clients at all, the way in is still drawn", empty["add"] == 1, empty)
+            check("…and the words say what this reader can do about it",
+                  "Add the first one" in empty["words"], empty["words"][:140])
+            check("…and do not send the super user to ask themselves",
+                  "Ask the platform" not in empty["words"], empty["words"][:140])
+            pg.unroute("**/api/platform")
+
             check("no page errors anywhere", not errs, errs)
             b.close()
     finally:

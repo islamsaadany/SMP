@@ -195,24 +195,45 @@ with sync_playwright() as p:
 
     # ── 8 · a blank weight is never nought ──────────────────────────────────
     print("\n── 8 · a blank weight counts as the average, never as nought")
-    w = js(pg, """() => ({
-      noneSet:      koScore([{progress:90},{progress:50}], null),
-      blankOnTheOnlyReportedRow:
-                    koScore([{progress:null,weight:40},{progress:null,weight:25},
-                             {progress:90,  weight:null},{progress:null,weight:15}], null),
-      everySetWeightZero: koScore([{progress:90,weight:0},{progress:50,weight:0}], null),
-      weighted:     koScore([{progress:90,weight:80},{progress:50,weight:20}], null),
-      legacyArray:  koScore([{progress:90},{progress:50}], [80,20]),
-      rowBeatsLegacy: koScore([{progress:90,weight:20},{progress:50,weight:20}], [80,20])
-    })""")
-    ok("a list nobody weighted is the plain mean", w.get("noneSet") == 70, w)
+    # §239 MADE THE SCORE DERIVED, so a fixture that only sets `progress`
+    # measures nothing at all — `measureScore()` reads the actual against a
+    # prorated target. The rows carry real figures now and the expectations are
+    # computed FROM that reader, so this asserts the WEIGHTING RULE and stays
+    # true when the score itself changes again (§94.8).
+    w = js(pg, """() => {
+      const row = (target, actual, weight) =>
+        ({ dir: "\u2265", compile: "Latest", target: target, actual: actual, weight: weight });
+      const A = row("100", "90"), B = row("100", "50");
+      const sA = measureScore(A), sB = measureScore(B);
+      const flat = Math.round((sA + sB) / 2);
+      const wtd = Math.round((sA * 80 + sB * 20) / 100);
+      const blankRow = row("100", "90");                 /* no weight at all */
+      const unreported = w => ({ dir: "\u2265", compile: "Latest", target: "100", weight: w });
+      return {
+        sA: sA, sB: sB, flat: flat, wtd: wtd,
+        noneSet:      koScore([A, B], null),
+        blankOnTheOnlyReportedRow:
+                      koScore([unreported(40), unreported(25), blankRow, unreported(15)], null),
+        everySetWeightZero:
+                      koScore([row("100","90",0), row("100","50",0)], null),
+        weighted:     koScore([row("100","90",80), row("100","50",20)], null),
+        legacyArray:  koScore([A, B], [80, 20]),
+        rowBeatsLegacy: koScore([row("100","90",20), row("100","50",20)], [80, 20])
+      };
+    }""")
+    ok("the score reader answers at all, so this measures something (§113.8)",
+       w.get("sA") is not None and w.get("sB") is not None and w.get("sA") != w.get("sB"), w)
+    ok("a list nobody weighted is the plain mean", w.get("noneSet") == w.get("flat"), w)
     ok("a blank weight on the only reported row scores it, never a dash",
-       w.get("blankOnTheOnlyReportedRow") == 90, w)
+       w.get("blankOnTheOnlyReportedRow") == w.get("sA"), w)
     ok("...and every set weight being zero falls back to equal, not to a dash",
-       w.get("everySetWeightZero") == 70, w)
-    ok("a genuinely weighted list is still weighted", w.get("weighted") == 82, w)
-    ok("a tenant's stored weights array is still read", w.get("legacyArray") == 82, w)
-    ok("...and the row's own weight wins over it", w.get("rowBeatsLegacy") == 70, w)
+       w.get("everySetWeightZero") == w.get("flat"), w)
+    ok("a genuinely weighted list is still weighted",
+       w.get("weighted") == w.get("wtd") and w.get("wtd") != w.get("flat"), w)
+    ok("a tenant's stored weights array is still read",
+       w.get("legacyArray") == w.get("wtd"), w)
+    ok("...and the row's own weight wins over it",
+       w.get("rowBeatsLegacy") == w.get("flat"), w)
 
     # ── 9 · the unit's weight column, pressed ───────────────────────────────
     print("\n── 9 · a unit's objectives carry a weight column, and it writes")

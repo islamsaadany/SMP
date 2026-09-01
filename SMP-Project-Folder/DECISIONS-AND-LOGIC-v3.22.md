@@ -25976,3 +25976,44 @@ fault — the slides case fits it and was not separately reproduced from his
 account. **The way out for tabs already open**: a tab running the previous
 build still posts what it posts; the refusal machinery already answers it,
 and a reload picks up the split.
+
+### §234.2 — WHY VIEW-AS COULD NEVER SHOW THE SMO THIS ERROR (2026-09-01)
+
+Islam, after §234 shipped: *"THE ERROR THAT ABDEL MONEM GOT I NEVER GOT IN
+THE VIEW AS."* He is right, and it is structural, not timing luck — the
+first two explanations offered (tab age, figures-not-submit) were true and
+incomplete, and the complete one was found in `shell.html`'s own §204
+machinery.
+
+**THE PRE-§234 BUG HAD TWO FACES, AND THE SMO ONLY EVER MET THE SILENT
+ONE.** The stale review envelope riding a save was REFUSED when the acting
+person's rights were narrow (the custodian's wall) and **ACCEPTED when they
+were not** — the SMO may change anything, so the same collision landed as a
+silent overwrite of everyone else's submissions, parks, notes and slides.
+Same fault, no alarm. That silent face IS the lost slides.
+
+**AND VIEW-AS POSTS FROM THE SMO'S OWN TAB.** Every autosave the SMO made
+as themselves — and above all the flush `switchViewer()` runs AT THE MOMENT
+OF SWITCHING into a view (§204: work done as yourself is saved as yourself,
+which is correct and stays) — was judged as the SMO and accepted, forcing
+the server to match the SMO's tab. By the time any save was judged as the
+simulated person, the staleness the refusal needed had been erased **by the
+act of entering view-as**. The error was unreachable from the SMO's testing
+method by construction: the identity that tests is the identity that was
+allowed to commit the crime silently.
+
+**MEASURED, NOT ARGUED**: (1) direct-vs-view-as verdicts are IDENTICAL on
+allowed and refused acts, sentence for sentence (§185 holds); (2) on the
+pre-§234 module, the same stale tab + Submit under view-as DOES produce the
+four refusals — identity was never the missing variable; (3) driven in a
+real browser through the real switcher, a 403 under view-as draws the
+banner, names the functions and says who it was judged as — the screen
+hides nothing.
+
+**NOTHING MORE TO FIX**: §234's split closes both faces at once — nothing
+stale travels for anybody, so the refusal face cannot fire and the silent
+face cannot overwrite. What remains true and is stated as the method's
+honest limit: view-as changes who is JUDGED, never which tab's history does
+the posting — a bug that lives in somebody else's timeline needs two real
+sessions, which is what `test-two-tabs.js` automates against a real
+Postgres, the §234 incident verbatim among its cases.

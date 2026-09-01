@@ -213,7 +213,7 @@ with sync_playwright() as p:
     full = pg.evaluate("""()=>{REVIEW.from='Jan 2026';REVIEW.to='Jun 2026';
       REVIEW.due='15 Jul 2026';REVIEW.endsQuarter=2;currentSub='overview';paint();
       return document.querySelector('.ovsmeta').textContent.trim();}""")
-    # §235: THE SENTENCE NO LONGER CARRIES THE REVIEW POINT. It used to end
+    # §239: THE SENTENCE NO LONGER CARRIES THE REVIEW POINT. It used to end
     # "as of Q" + endsQuarter -- the words of one field over the value of
     # another -- and the review point is now a control on the cycle strip, so
     # printing it here as well would say one thing twice and let the two

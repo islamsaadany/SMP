@@ -342,7 +342,7 @@
   td.final { font-weight:700; font-size:14px; }
   .pair { font-family:var(--mono); font-variant-numeric:tabular-nums; white-space:nowrap; }
   .pair b { font-weight:700; }
-  /* §235: THE BENCHMARK STEPS BACK. `.pair` shows a figure against what it is
+  /* §239: THE BENCHMARK STEPS BACK. `.pair` shows a figure against what it is
      measured by -- delivered against due, YTD actual against the share of the
      target owed by now -- and the second half is the benchmark, not the
      answer. Smaller and in the quiet ink, the way a repeated Compile rule

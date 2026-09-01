@@ -406,6 +406,21 @@ console errors (in this cloud environment, run it via a wrapper that points Play
   connection is not. **And the good path is asserted in the same breath**
   (§94.2), because a failure-reported assertion passes on a build that reports
   one always.
+- **A VIEW-AS SESSION STARTS WHERE THEIR SESSION WOULD START (§237):** Islam,
+  closing §234.2's finding — *"viewing as needs to have the same server
+  connection and relation and not inherit my SMO abilities … so I get the
+  errors."* The judging half has been the viewed person's since §185; what
+  stayed the SMO's was the TAB (§234.2: its history made the §234 error
+  unreachable from view-as, because the switch's own §204 flush had already
+  re-aligned the server as the SMO). `switchViewer` now calls `SYNC.rebase()`
+  after a clean flush: one GET, the boot's own `hydrate()` (§53.5), `LIVE`
+  refreshed, `lastSaved` reset — a fresh sign-in by that person. **Three
+  paths deliberately do not rebase**: file://‌/demo (nothing of the server's
+  to take), a failed fetch (old baseline, never a blocked way — §209), and
+  the refused way home, where taking the server's copy would silently destroy
+  the work §184's banner offers to put back. Time is the stated limit — no
+  switch can wear a tab that was open for hours; `test-two-tabs.js` guards
+  that class. `checks/viewas-fresh.py`: 4 red on the pre-§237 build.
 - **ONE FUNCTION'S SUBMIT MUST NOT CARRY EVERYBODY'S REPORT STATE (§234):**
   Islam, from a live client session — *"emergency error that we fixed 100
   times before"*: a CF custodian refused with **"You cannot report for
@@ -427,7 +442,7 @@ console errors (in this cloud environment, run it via a wrapper that points Play
   different targets never touch. Proved able to fail: 11 red on the differ's
   pre-build, and end-to-end on a real Postgres the whole-graph flag fails
   with the reported sentence to the word.
-- **YTD IS MEASURED AGAINST THE PART OF THE YEAR THAT HAS PASSED (§235):**
+- **YTD IS MEASURED AGAINST THE PART OF THE YEAR THAT HAS PASSED (§239):**
   Islam — *"the reporting of YTD is being compared with the full year target
   without proration which is the wrong practice."* Three answers to one
   question: a tactic was compared with its own elapsed quarters, a milestone
@@ -445,7 +460,7 @@ console errors (in this cloud environment, run it via a wrapper that points Play
   tactic's own shape moved over), so archives and closed cycles read as they
   did, nothing is migrated, and the Focus board keeps the raw figure because
   **reward stays a year-end judgement** (his call).
-  **AND THE REVIEW POINT WAS TWO FIELDS THAT DISAGREED (§235.1):**
+  **AND THE REVIEW POINT WAS TWO FIELDS THAT DISAGREED (§239.1):**
   `tacticPlanned()` read `REVIEW.endsQuarter` (the CYCLE's end) while the
   quarter pips read `GROUP.asOfQuarter` (*"the review point"*) — identical in
   the demo, divergent on any cycle reported in-year: over 84 demo tactics a
@@ -460,7 +475,7 @@ console errors (in this cloud environment, run it via a wrapper that points Play
   until the office sets a month, and it **never writes** (§42, §50.6).
   **Tactics count MONTHS**, so a half-finished quarter counts for its part.
   **AND THE `Not asked` GATE COMES BACK** — rows that had not started were
-  being asked for figures. §235.2 carries the table wording, all his:
+  being asked for figures. §239.2 carries the table wording, all his:
   *Annual target* · *YTD actual* · *YTD delivery* with the per cent sign on
   both halves (*"what is 45/50?"* — and the same cell already printed
   *"due at 50%"* WITH the sign) · Variance gone · *Of plan* → *Progress* ·
@@ -3797,7 +3812,7 @@ python3 checks/submit-gate.py  # Submit is shut until the report is complete and
                                 # actually disabled, never a class) and one Reopen
                                 # unlocks either (§220, §221)
 python3 checks/ytd-proration.py # YTD is measured against the part of the year that has
-                                # PASSED (§235): the review point is a month and the
+                                # PASSED (§239): the review point is a month and the
                                 # office picks it; Sum prorates and Latest must not; the
                                 # TARGET is prorated, never the ratio (a made-up ≤ row
                                 # reads 125%, where a divided ratio reads 150%); the
@@ -3811,6 +3826,11 @@ python3 checks/gap-walk.py      # the band's chips and Next gap actually go some
 python3 checks/viewer-line.py   # the Viewing-as line: the roles and where each is
                                 # held, of EVERY person — no em-dashes, the seat never
                                 # repeated, and the whole line on a hover (§178)
+python3 checks/viewas-fresh.py  # a view-as session starts where their session would
+                                # start (§237): the switch rebases on the server's
+                                # graph, the first save under the view carries only the
+                                # view's own act, and the refused way home keeps the
+                                # work — against a stub whose dataset MOVES mid-run
 python3 checks/milestone-fill.py # a milestone is filled, and a bounded role fills only
                                 # its own (§177): every red Missing the page prints is one
                                 # the count knows about, the month panel escapes the table's
@@ -3986,7 +4006,7 @@ prior sessions (on HR_ERP) accidentally reverted agreed-upon designs.
 
 ---
 
-*Last Updated: 2026-09-01 &mdash; **&sect;235: YTD is measured against the
+*Last Updated: 2026-09-01 &mdash; **&sect;239: YTD is measured against the
 part of the year that has passed.** Islam, from a live round: the reporting of
 YTD was compared with the full-year target without proration. Measured before
 building: of 26 Sum measures with an actual the median read 45 points low, and
@@ -4002,6 +4022,119 @@ falling back so nothing moves until they set one. 24/24 on
 authoriser (3 new, both ways) &middot; 126/0 differ &middot; full `qa.py` sweep
 green &middot; `setup-overview`, `repeat-project`, `table-fit`,
 `project-tables`, `submit-gate`, `fn-pillars` green.*
+
+*Earlier: 2026-09-01 &mdash; **&sect;238: the security follow-ups &mdash;
+a CSP net and no dev files served.** The two items &sect;235 recorded as open,
+both done and verified live. **(1) A build-time hashed CSP** as defence behind
+the escaping fix: `build.py` injects a `<meta http-equiv="Content-Security-Policy">`
+into the built platform whose `script-src` allow-lists every inline `<script>`
+by the SHA-256 of its exact bytes and permits nothing else inline &mdash; so an
+injected `onerror=`/`onfocus=` cannot RUN even if an escaping gap is ever
+reintroduced. Hashed in the same build that emits the scripts, so it can never
+go stale (the one failure mode a hashed CSP otherwise risks &mdash; &sect;91's
+"a stale hash is a page that does not load"). The `vercel.json` header keeps
+`'unsafe-inline'` for the GATE (`index.html`, not built here); the meta is a
+second, stricter policy scoped to the platform, and the browser enforces both,
+so a script must pass both &mdash; real blocks pass (hash), an injected handler
+is blocked (no hash, no unsafe-inline). Only `script-src` is set, so nothing
+else about the policy changes. Proved by `checks/csp-net.py` over HTTP (real
+scripts run, an injected `onerror=` does NOT fire) and by a full `qa.py` walk
+(every page, every viewer, ERRORS none) &mdash; the app adds all handlers with
+`addEventListener` and injects no `<script>` at runtime, so nothing legitimate
+relies on inline execution. **(2) A `.vercelignore`** so the deployment stops
+serving internal files: sources, in-repo checks, mockups, snapshots, docs and a
+separate app skeleton were all publicly fetchable (no secrets &mdash; keys are
+server env vars, and the client rules already ship inline). None are needed by
+the running site, so excluding them touches no runtime dependency; `lib/` and
+`db/` are deliberately KEPT because the `api/*` functions require them (the
+documented low-severity residual &mdash; server source, still no secrets). Live
+after deploy: `scripts/`, `smp-app/` &c. now 404, the gate, platform and API
+all 200. **STILL OPEN &mdash; the server-side DB write** ("every save wipes and
+rewrites all 31 tables"): the acute cost was already removed by &sect;195
+(batched reads and writes), and closing the rest means an incremental writer or
+a read-authorise-write lock on the LIVE database write path &mdash; the one
+change that could corrupt production data, so it is recorded for a dedicated,
+staged pass rather than rushed.*
+
+*Earlier: 2026-09-01 &mdash; **&sect;237: a view-as session starts where
+their session would start.** Islam, closing &sect;234.2's finding: *"viewing
+as needs to have the same server connection and relation and not inherit my
+SMO abilities &hellip; so I get the errors."* The judging half has been the
+viewed person's since &sect;185; what stayed the SMO's was the TAB, and
+&sect;234.2 records how its history made the &sect;234 error unreachable from
+view-as. `switchViewer` now rebases on the server's graph after a clean
+&sect;204 flush &mdash; one GET, the boot's own `hydrate()`, `LIVE` and
+`lastSaved` reset &mdash; a fresh sign-in by that person. The refused way
+home deliberately does NOT rebase (&sect;184's put-back would be silently
+destroyed), nor file://, demo, or a failed fetch. `checks/viewas-fresh.py`
+against a stub whose dataset moves mid-run: **4 red** on the pre-&sect;237
+build; viewer-switch, welcome, refusal-keeps-work, save-flush,
+boot-skeleton, save-fidelity, report-saves, gap-fill, submit-gate, 126/0,
+451/0 and the full sweep green.*
+
+*Earlier: 2026-09-01 &mdash; **&sect;236 / &sect;236.2 / &sect;236.3:
+the added slide moves slide by slide.** Islam, on Manage slides: the Add
+button becomes **"+ Add slide after"** in his words, so it says where the empty
+slide lands (&sect;236); then, of the arrows, *"the rearrange of slides doesn't
+move around the fixed slides of the main flow"* &mdash; measured, **25 dead
+presses of 28** walking Mobile's deck and a function's slide never moving at
+all, because a stored position is an ANCHOR (&sect;50.3) and the arrows stepped
+blindly one row, so a press into an unanchored run recomputed the same position
+and repainted in place. &sect;236.2 made the press land on the nearest real
+place and, on his ruling, made **between a pillar's measures and tactics** a
+place (mirrored on a function: between a project's deliverables and its
+milestones). He tested again &mdash; *"the slides jump from slide 9 to 13 one
+jump .. the added slides can move slide by slide the prohipted slides from the
+movement are the original slides"* &mdash; and he was right: &sect;236.2 removed
+the lie and drew its landing places from the anchors that happened to exist, so
+its own "deliberately NOT anchored" list (the SWOT run, the section dividers)
+was still hopped four at a time. **&sect;236.3 is the rule in one sentence:
+every ORIGINAL slide is a landing place, and what is pinned is the originals'
+own order.** Every fixed slide carries an anchor now; **the existing keys do
+not move** (&sect;30.2 applied to anchors &mdash; `swot`, `p<CODE>`, `cap<id>`
+are untouched), so every picture already placed in a live tenant stays exactly
+where it sits, and there is no migration. One grouping survives and is not a
+gap: the parts of a table split by `deckFitPass()` share their parent's anchor
+and are ONE stop, after the last part &mdash; a picture cannot live between a
+table and its own continuation. `checks/slide-move.py` asserts the problem and
+never a layout (&sect;94.8): every fixed slide a landing place, every place its
+OWN key (a non-adjacent repeat would silently merge two gaps into one
+position), and the walk's stops equal the deck's own slide list, down and back
+up, on a unit AND a function. **5 red then 6 red** on the two builds before,
+each printing his report verbatim. **AND THE LESSON IS MINE**: &sect;236's
+one-step probe landed on a spot that happened to work and I generalised from
+it &mdash; a probe that samples one position proves that position (&sect;94.2
+wearing a green tick).*
+
+*Earlier: 2026-09-01 &mdash; **&sect;235: one escaper, safe in an
+attribute.** A security sweep found the platform's main text-cleaner `esc()`
+escaped only `&` and `<` &mdash; a text-node escaper &mdash; while being used
+inside double-quoted HTML attributes ~226 times. A literal `"` in tenant data
+(a name, a plan note, an uploaded workbook cell) broke out of the attribute,
+and because the CSP allows `'unsafe-inline'` an injected `onfocus=`/`onerror=`
+ran in the reader's browser &mdash; the SMO's, with full SMO authority. Two
+sites had hand-patched `.replace(/"/g,"&quot;")`, which is two patches against
+226 and the definition of ad-hoc. Separately, the tenant's LABELS rendered RAW
+at ~43 sites and, through `recipeText()`, raw into the knowledge base, so a
+relabelled Pillar of `<img onerror=…>` executed for every reader. **THE FIX IS
+THREE ONE-LINERS.** `esc()` (and `welcome.js`'s `wesc()`) now escape `>`, `"`
+and `'` as well &mdash; INERT in a text node, so nothing displayed normally
+changes, verified that `esc()` output is only ever concatenated into innerHTML
+(never compared, keyed, or read back), so the two hand-patches become harmless
+no-ops. `L()` now returns its result through `esc()`, closing the 43 raw label
+sites AND the knowledge-base substitution in one place because every reader
+goes through `L()`; the KB's deliberate `<b>` markup is untouched (the answer
+template is trusted, only the spliced label was not). The KB raw-`<p>` render
+is deliberately NOT changed, preserving formatting. Cost stated: a label
+CONTAINING `& < > " '` (none of the 8 real labels do) would render as an entity
+in a couple of double-cleaned spots &mdash; cosmetic, never a broken flow.
+Proved not to damage anything: `qa.py` clean, and `report-saves`, `gap-fill`,
+`submit-gate`, `knowledge-base`, `fn-ko-edit` all green &mdash; reporting,
+filling, submitting and editing all reach the stored plan exactly as before.
+Still open and NOT done here (recorded): the `'unsafe-inline'` &rarr; hashed-CSP
+backstop that would stop any future gap executing, and a `.vercelignore` so
+`db/`, `lib/`, `scripts/` are not served as static files (no secrets are
+exposed today).*
 
 *Earlier: 2026-09-01 &mdash; **&sect;234: one function's submit must not
 carry everybody's report state.** Islam, from a live client session:

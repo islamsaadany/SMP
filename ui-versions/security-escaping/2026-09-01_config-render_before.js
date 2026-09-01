@@ -2,18 +2,10 @@
    Labels · Roles & access · and the factor editor that extends Weighting.
    ─────────────────────────────────────────────────────────────────────── */
 
-/* ── THE TENANT'S LABEL COMES OUT CLEANED (2026-09-01 security sweep) ────
-   A label (the word for Pillar / Measure / Aspiration …) is editable text and
-   was rendered RAW at ~43 sites — and, through recipeText(), spliced raw into
-   the knowledge base. A label of `<img src=x onerror=…>` therefore ran as code
-   for every reader in the tenant. Escaping HERE fixes both at once, because
-   every reader goes through L(). Safe: L()'s 88 uses are all display-only
-   (verified — no comparison, key, or data-attribute read back), and a normal
-   label has no special characters, so cleaning it changes nothing on screen. */
 function L(key, scope){
   var e = LABELS.entries.filter(function(x){ return x.key === key; })[0];
-  if (!e) return esc(key);
-  return esc((scope === "group" ? e.group : e.bu) || e.internal);
+  if (!e) return key;
+  return (scope === "group" ? e.group : e.bu) || e.internal;
 }
 
 /* ── Labels ─────────────────────────────────────────────────────────── */
@@ -5304,23 +5296,6 @@ function renderCycle(){
     '<div class="fstrip" style="margin-bottom:20px"><div class="fstrip-head">' +
       '<span class="fstrip-t">' + esc(REVIEW.name) + '</span>' +
       '<span class="fstrip-meta">' + esc(cycleMeta()) + '</span>' +
-      /* ── THE REVIEW POINT, EDITABLE WHILE THE CYCLE RUNS (§239) ──────
-         Islam: "if I will set the cycle dates you need to give me the ability
-         to set this on opening the cycle and ability to edit this in an open
-         cycle." Before this there was NO control anywhere -- the value could
-         only ever be whatever the seed left, which is how a tenant came to be
-         reporting in Q2 against a platform that thought the year was over.
-
-         It is a MONTH because a quarter cannot say "eight months in", and it
-         is the platform's own month picker rather than a box, for §177's own
-         reason: with no box there is nothing to mistype and the picker can
-         only produce a shape `monthsOf()` already reads. */
-      '<span class="fstrip-meta asof">reported as of ' +
-        (can && open
-          ? monthBtnHtml(REVIEW.asOfMonth || "", "asofbtn", function(v){
-              if (v) REVIEW.asOfMonth = v; else delete REVIEW.asOfMonth;
-            })
-          : esc(REVIEW.asOfMonth || reviewAsOfLabel())) + '</span>' +
       '<span class="badge b-' + (open ? "open" : "none") + '">' + (open ? "Open" : "Closed") + '</span>' +
       (can
         ? (open
@@ -5352,14 +5327,14 @@ function renderCycle(){
             esc(NEWCYCLE.to) + '" placeholder="Jun 2027"></label>' +
           '<label><span>Reports due</span><input class="fld" id="nc-due" value="' +
             esc(NEWCYCLE.due) + '" placeholder="15 Jul 2027"></label>' +
-          '<label><span>Reporting as of</span>' +
-            monthBtnHtml(NEWCYCLE.asOfMonth || "", "asofbtn", function(v){
-              if (v) NEWCYCLE.asOfMonth = v; else delete NEWCYCLE.asOfMonth;
-            }) + '</label>' +
+          '<label><span>Ends in quarter</span><select class="fld" id="nc-q">' +
+            [1,2,3,4].map(function(q){
+              return '<option value="' + q + '"' +
+                (Number(NEWCYCLE.endsQuarter) === q ? " selected" : "") + '>Q' + q + '</option>';
+            }).join("") + '</select></label>' +
         '</div>' +
-        '<div class="nc-why"><b>The month decides what every figure is measured against.</b> ' +
-          'A target that adds up across the year is compared with the share of it due by then, ' +
-          'and a tactic whose span has not started yet is not asked for.</div>' +
+        '<div class="nc-why"><b>The quarter decides which tactics are asked for.</b> ' +
+          'A tactic whose span has not started yet is not counted as unreported.</div>' +
         '<div class="nc-act">' +
           '<button class="editbtn" data-nc-go="1">Open this cycle</button>' +
           '<button class="linkbu" data-nc-cancel="1">Cancel</button></div></div>'

@@ -4726,7 +4726,7 @@ function reportedCount(u){
 function rowReads(x){
   if (x.kind === "tactic") return tacticRatio(x.obj);
   if (x.kind === "deliverable" || x.kind === "milestone") return statusReads(x.obj);
-  /* §235: the prorated score, so a unit is asked to explain a figure that is
+  /* §239: the prorated score, so a unit is asked to explain a figure that is
      actually behind rather than one that only looks behind against a whole
      year. The note rule and the Submit gate both hang off this. */
   return measureScore(x.obj);
@@ -4921,7 +4921,7 @@ function cycleMeta(){
   else if (to)    bits.push("until " + to);
   if (due) bits.push("due " + due);
   if (!bits.length) bits.push("Dates not set");
-  /* §235: THE REVIEW POINT IS NOT PRINTED HERE ANY MORE. It used to read
+  /* §239: THE REVIEW POINT IS NOT PRINTED HERE ANY MORE. It used to read
      "as of Q" + endsQuarter -- the words of `GROUP.asOfQuarter` over the value
      of a different field -- and it is now a control on the strip beside this,
      so printing it here as well would say one thing twice and let the two
@@ -5172,7 +5172,7 @@ function koScore(list, weights){
   /* §218: an objective counts as soon as it has a figure — nothing waits
      on the office any more. */
   /* §233: hidden is not counted, weighted or not. */
-  /* §235: THE SCORE IS `measureScore()`, NOT THE STORED `progress`. One
+  /* §239: THE SCORE IS `measureScore()`, NOT THE STORED `progress`. One
      reader for every average in the product, or the headline and the row it
      expands to would disagree about the same measure. */
   var vals = list.filter(function(m){
@@ -5336,7 +5336,7 @@ function quartersOf(t){
   return [t.q1, t.q2, t.q3, t.q4].map(function(x){ return x ? 1 : 0; });
 }
 
-/* ── THE REVIEW POINT (§235) ──────────────────────────────────────────────
+/* ── THE REVIEW POINT (§239) ──────────────────────────────────────────────
    HOW FAR THROUGH THE PLAN YEAR ARE WE. One answer, asked by everything that
    compares a figure with a benchmark: a measure's prorated target, a tactic's
    expected delivery, and the quarter pips.
@@ -5422,7 +5422,7 @@ function measureDue(m){
 /* WHAT THE ROW SCORES. Derived, never stored -- `m.progress` goes on holding
    the raw actual-against-the-ANNUAL-target ratio exactly as it always has, so
    every archive and every closed cycle still reads as it did and nothing is
-   migrated. The Focus board reads that raw figure on purpose (§235: reward
+   migrated. The Focus board reads that raw figure on purpose (§239: reward
    stays a year-end judgement); everything else reads this. */
 function measureScore(m){
   if (!m) return null;
@@ -5452,7 +5452,7 @@ function tacticPlanned(t){
      been filled in read as NOT DUE, vanished from the report under "Not asked
      -- outside this cycle", and could never be reported on.
 
-     §235: AND IT COUNTS MONTHS, NOT WHOLE QUARTERS. The review point is a
+     §239: AND IT COUNTS MONTHS, NOT WHOLE QUARTERS. The review point is a
      month, so a tactic standing in a half-finished quarter gets credit for the
      part that has actually happened (Islam, asked outright). A tactic running
      Q2-Q4 reviewed at August has had 5 of its 9 months. Whole quarters would

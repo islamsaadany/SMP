@@ -103,7 +103,7 @@ function picStyle(p){
 }
 /* `blank` is the EDITOR's flag and nothing else's. A slide with no picture in
    it is not a slide and must never reach a projector (§50.2) — but the moment
-   after you press Add slide after it is exactly that, and a rail that does not show
+   after you press Add a slide it is exactly that, and a rail that does not show
    the thing you just made is a rail that swallowed it. So the deck asks
    without the flag and the editor asks with it. */
 function pslideHtml(sl, blank){
@@ -345,9 +345,9 @@ function slidesPaint(){
      that is not there. */
   var list = document.getElementById("slidelist");
   list.innerHTML = '<div class="sl-add"><button class="editbtn" data-sladd="1">' +
-      '+ Add slide after</button>' +
+      '+ Add a slide</button>' +
       '<span class="picsub">' + (SLED.sel && SLED.sel.indexOf("ps:") === 0
-        ? "the one selected" : "the slide selected below") + '</span></div>' +
+        ? "after the one selected" : "after the slide selected below") + '</span></div>' +
     all.map(function(el, i){
     var mine = !!el.dataset.ps;
     return '<div class="slrow' + (el.dataset.ed === SLED.sel ? " on" : "") +
@@ -394,7 +394,7 @@ function slidesPaneHtml(cur, sl){
       '<div class="sstage"><div class="sstage-in"></div></div>' +
       '<div class="slctl slctl-read"><p class="picsub">This slide is built by the ' +
       'platform from what the unit has reported, and is refreshed every time the ' +
-      'deck opens. <b>Add slide after</b> puts your own pictures after it.</p></div>';
+      'deck opens. <b>Add a slide</b> puts your own pictures after it.</p></div>';
   }
   var pics = sl.pics || [];
   var across = Math.max(1, Math.min(PIC_PER_SLIDE, +sl.layout || 1));
@@ -542,18 +542,11 @@ function slidesAdd(){
   slidesPaint();
 }
 
-/* UP AND DOWN (§51.10; the walk re-cut in §236.2). Only picture slides move:
-   the generated ones are the deck's own order and are not ours to shuffle.
-
-   A PRESS MUST LAND SOMEWHERE A SLIDE CAN ACTUALLY LIVE. A stored position is
-   an anchor plus a place among that anchor's own slides (§50.3), so stepping
-   blindly one row recomputed the SAME position wherever the next row carries
-   no anchor — the button repainted in place and did nothing, silently
-   (measured: 25 dead presses of 28 walking Mobile's deck, §236.2). So the walk
-   goes to the nearest row that IS a place: an anchored slide, or another
-   picture slide (which keeps sibling reordering one step at a time). A slide
-   whose NEXT row carries the same anchor is a fit-pass continuation's parent
-   — the place is after the last of them, so the walk passes the clones. */
+/* UP AND DOWN (§51.10, Islam). A picture slide steps over its neighbour,
+   whatever kind of slide that is — stepping over a generated one is how a
+   picture gets from the end of the pillars to the end of the SWOT without
+   anybody naming an anchor. Only picture slides move: the generated ones are
+   the deck's own order and are not ours to shuffle. */
 function slidesMove(dir){
   if (!SLED.sel || SLED.sel.indexOf("ps:") !== 0) return;
   var sl = pslideById(SLED.target, SLED.sel.slice(3));
@@ -561,18 +554,11 @@ function slidesMove(dir){
   var all = [].slice.call(slidesAssemble().querySelectorAll(".dslide"));
   var at = all.map(function(el){ return el.dataset.ed; }).indexOf(SLED.sel);
   if (at < 0) return;
-  var slot = function(j){
-    if (all[j].getAttribute("data-ps")) return true;
-    var a = all[j].dataset.anchor;
-    return !!a && !(all[j + 1] && all[j + 1].dataset.anchor === a);
-  };
-  /* "after" is measured in the deck as it stands with this slide still in
-     it: down starts one below, up starts two above (the row directly above
-     is the one this slide already follows). */
-  var after = null, j;
-  if (dir > 0) { for (j = at + 1; j < all.length; j++) if (slot(j)) { after = j; break; } }
-  else         { for (j = at - 2; j >= 0;         j--) if (slot(j)) { after = j; break; } }
-  if (after == null) return;   /* the ceiling or the floor: nowhere further */
+  /* Down means after the slide below; up means after the one two above, since
+     "after" is measured in the deck as it stands with this slide still in it. */
+  var after = dir > 0 ? at + 1 : at - 2;
+  if (dir > 0 && at >= all.length - 1) return;
+  if (dir < 0 && at <= 0) return;
   slidesPlace(sl, all, after);
   slidesMark();
   slidesPaint();

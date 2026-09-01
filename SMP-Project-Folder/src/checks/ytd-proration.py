@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""§235 — YTD figures are measured against the part of the year that has passed.
+"""§239 — YTD figures are measured against the part of the year that has passed.
 
 Islam, of the reporting screen: *"the reporting of YTD is being compared with
 the full year target without proration which is the wrong practice"*, and later,
@@ -25,7 +25,7 @@ WHAT THIS GUARDS, and why each half needs its own assertion:
 
   · THE STORED FIGURE DOES NOT MOVE. `progress` goes on holding the raw
     actual-against-the-annual-target ratio, because archives and closed cycles
-    read it and because reward stays a year-end judgement (§235). A build that
+    read it and because reward stays a year-end judgement (§239). A build that
     "fixed" this by overwriting `progress` would break every past cycle
     silently, so the raw value is asserted UNCHANGED beside the new score.
 
@@ -66,7 +66,7 @@ def main():
            r["stored"] is None and r["lab"] == "Jun 26", r)
         ck("...which is six months of twelve", r["months"] == 6 and r["share"] == 0.5, r)
         # THE AGREEMENT, not the number: the pips and the figures must answer
-        # from one place, which is the whole of what §235 repaired.
+        # from one place, which is the whole of what §239 repaired.
         ck("the quarter pips agree with it", r["pips"] == [True, True, False, False], r["pips"])
 
         print("\n── 2 · what prorates, and what must not ──")

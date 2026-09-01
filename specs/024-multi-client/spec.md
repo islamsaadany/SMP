@@ -241,6 +241,45 @@ name is the one thing a demo must not be.
 The invented names are content, not code: I draft them and Islam approves the
 list before it is seeded. Nothing is shown to anyone until he has.
 
+## 7.0a · A role is a seat on a client (revision 3, Islam 2026-08-29)
+
+Islam: *"the consultants roles are not general across the multitenants — the
+roles are on the client level."* This **reverses the four platform roles**
+(Admin · Lead · Consultant · Observer) agreed on 28 August and built in US3.
+Recorded as a reversal, not overwritten: those roles were a reasonable reading
+of "we need an accessibility table", and they are wrong about the thing that
+matters — what somebody may do depends on the client, not on a rank they carry
+everywhere.
+
+**Two levels, each answering its own question:**
+
+| | Where it lives | What it decides |
+|---|---|---|
+| **Platform admin** | `accounts.is_admin` — one flag, Islam today | Adding clients, adding consultants, and the table below |
+| **The seat on a client** | `account_clients.seat` — `super` or `smoteam`, set on that client's configuration | Everything that person may do inside that client |
+
+- **The seats are the client's own two** (§89), so nothing new is learnt and
+  the mapping into the client's register is exact: the row written there
+  carries that seat.
+- **Set on the client's configuration**, read-only on the consultant's row —
+  one place writes it (§53.5).
+- **One super user per client** stays a unique index; picking a second moves
+  the seat rather than adding one.
+- **Somebody on no client signs in and has nothing to open**, which is what a
+  new joiner looks like before anybody puts them on one — so the Observer role
+  is not needed to express it.
+
+**What "Who sees what" becomes.** The matrix loses `my_clients` (that is the
+seat now) and keeps only what is about the platform, asked of everybody who is
+not the admin: **clients they hold no seat on** (hidden · listed · open),
+**consultants list**, **add a client**, **demo**. Islam's own answer put the
+first of these here: *"this is a configuration in who sees what."*
+
+**The cost, stated rather than discovered:** US3's four roles, their defaults,
+their rules and their tests are built and working; this replaces them with a
+seat that is already stored beside each team member. Better now than after a
+client is using it.
+
 ## 7.0 · The door is a door (revision 2, Islam 2026-08-29)
 
 Islam, seeing the first build: *"the page you are showing should be just for

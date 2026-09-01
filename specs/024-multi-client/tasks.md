@@ -140,6 +140,28 @@ person still goes straight into their client.
   table and no cards, and that every office page is reachable from the shell —
   proved by putting the pages back on the door and watching it fail
 
+## Phase 6c · US3b · A role is a seat on a client (revision 3, 2026-08-29)
+
+**Goal**: the platform has one admin; everything else about a person is the
+seat they hold on a particular client.
+**Independently testable**: somebody can be one client's Super user and another's
+SMO team; a consultant on no client signs in and sees nothing to open; the
+platform admin alone adds clients and consultants.
+
+- [ ] T064 [US3b] `accounts.role` becomes `is_admin`; `account_clients` gains
+  `seat` (`super` / `smoteam`), replacing `is_super` — one platform migration,
+  and the existing rows carry across (`is_super` → `super`, else `smoteam`)
+- [ ] T065 [US3b] `lib/platform-rules.js`: the four roles go; `mayOpenClient`
+  answers from the seat, and the platform questions from `is_admin` plus the
+  stored table
+- [ ] T066 [US3b] The matrix becomes four platform columns asked of everybody
+  who is not the admin, with **hidden · listed · open** on the first
+- [ ] T067 [US3b] The seat is set on the client's configuration and shown
+  read-only on the consultant's row
+- [ ] T068 [US3b] `test-platform-rules.js` and `checks/multi-client.py` rewritten
+  around seats — proved by putting the platform-wide role back and watching them
+  fail
+
 ## Phase 7 · Polish and cross-cutting
 
 - [ ] T053 Rebuild with `python3 build.py` and confirm the shipped file is reproduced byte-identically (Principle III)

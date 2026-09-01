@@ -139,6 +139,12 @@
   thead th:first-child{ border-top-left-radius:8px } thead th:last-child{ border-top-right-radius:8px }
   tbody tr:nth-child(even) td{ background:var(--surface-2) }
   .tscroll{ overflow-x:auto }
+  /* THE SEATS CELL IS THE ONE THAT WRAPS. Every other cell in a setup table is
+     one line (§88) — this one holds a list that grows with the number of
+     clients somebody is on, and clipping it would hide the very fact the
+     column exists to show. */
+  td.seats{ white-space:normal; min-width:260px }
+  td.seats .tag{ display:inline-block; margin:2px 3px 2px 0 }
   .mono{ font:400 13px/1.5 "IBM Plex Mono", ui-monospace, monospace; color:var(--ink-2) }
   .muted{ color:var(--ink-3) }
 
@@ -173,12 +179,13 @@
 <div class="wrap">
 
 <header class="mast">
-  <div class="kicker">Spec 024 · revision 2 · for sign-off</div>
+  <div class="kicker">Spec 024 · revision 3 · for sign-off</div>
   <h1>The Forefront platform</h1>
-  <p>Corrected after Islam saw the first build: <b>the login page is only a login
-  page</b>, exactly as a client's is. Everything else — the clients, Forefront's
-  own people, and who sees what — lives inside a platform with its own chrome,
-  the way SMP does.</p>
+  <p>Two corrections from Islam. <b>The login page is only a login page</b>,
+  exactly as a client's is — everything else lives inside a platform with its
+  own chrome. And <b>a consultant's role is not a platform-wide thing: it is
+  the seat they hold on a particular client</b>, set on that client's
+  configuration.</p>
   <div class="standing"><b>Proposed</b> <span>Not built · the current build puts these on the door</span></div>
 </header>
 
@@ -198,6 +205,20 @@
     its own, and pages under it — <b>Clients · Consultants · Who sees what</b>.
     Opening a client leaves it for that client's SMP, and the client's name in
     that chrome brings you back.</p>
+  </div>
+  <div class="flag was">
+    <p><b>Also built, and also wrong:</b> a consultant carried ONE role across
+    the whole platform — Admin, Lead, Consultant, Observer — and that role
+    decided what they could do everywhere. It does not survive Islam's
+    correction: <i>"the roles are on the client level."</i></p>
+  </div>
+  <div class="flag">
+    <p><b>Proposed:</b> two levels, each answering its own question.
+    <b>The platform has one admin</b> — adding clients, adding consultants and
+    setting the table below. <b>Everything else is a seat on a client</b>:
+    <b>Super user</b> or <b>SMO team</b>, the client's own two, set on that
+    client's configuration. Somebody can be Raya's Super user and on RHI's SMO
+    team and nothing at all on El Abd.</p>
   </div>
 </section>
 
@@ -323,18 +344,22 @@
         <div>
           <span class="lab">Strategy office for this client</span>
           <div class="teamrow"><div><div class="nm">Islam Saadany</div><div class="em">islam.saadany@forefront.consulting</div></div>
-            <div class="sp"><span class="tag demo">Super user</span><button class="btn">Remove</button></div></div>
+            <div class="sp"><span class="cellwrap"><span class="on">Super user</span><span>SMO team</span></span><button class="btn">Remove</button></div></div>
           <div class="teamrow"><div><div class="nm">Mohamed Essam</div><div class="em">mohamed.essam@forefront.consulting</div></div>
-            <div class="sp"><button class="btn">Make super user</button><button class="btn">Remove</button></div></div>
+            <div class="sp"><span class="cellwrap"><span>Super user</span><span class="on">SMO team</span></span><button class="btn">Remove</button></div></div>
           <div class="teamrow"><div><div class="nm">Omar Alaa</div><div class="em">omar.alaa@forefront.consulting</div></div>
-            <div class="sp"><button class="btn">Make super user</button><button class="btn">Remove</button></div></div>
+            <div class="sp"><span class="cellwrap"><span>Super user</span><span class="on">SMO team</span></span><button class="btn">Remove</button></div></div>
           <div style="display:flex;gap:8px;margin-top:13px">
             <select class="field" style="flex:1"><option>Add somebody from Forefront</option></select>
             <button class="btn">Add</button></div>
-          <p class="muted" style="font-size:13px;margin:15px 0 0">Everyone on this list holds
-          <b>SMO team</b> inside Raya Trade; the super user also holds the access
-          matrix, retiring people and issuing passwords. Removing somebody
-          retires their row on that client's register rather than deleting it.</p>
+          <p class="muted" style="font-size:13px;margin:15px 0 0"><b>This is where a
+          consultant's role is set</b>, and it is set per client: the seat they
+          hold <i>here</i>. <b>Super user</b> holds this client's access matrix,
+          retiring people and issuing passwords; <b>SMO team</b> runs cycles and
+          corrects plans. One person can be Raya's Super user and on RHI's SMO
+          team. Removing somebody retires their row on this client's register
+          rather than deleting it. <b>One super user per client</b> — picking a
+          second moves the seat rather than adding one.</p>
         </div>
       </div>
     </div>
@@ -356,18 +381,30 @@
         <div class="right"><input class="field" style="width:170px" value="Search" readonly>
           <button class="btn amber">Add a consultant</button></div></div>
       <div class="tscroll"><table>
-        <thead><tr><th>Name</th><th>Email</th><th>Role</th><th>Clients</th><th>Password</th><th></th></tr></thead>
+        <thead><tr><th>Name</th><th>Email</th><th>Platform admin</th><th>Clients and seats</th><th>Password</th><th></th></tr></thead>
         <tbody>
           <tr><td><b>Islam Saadany</b></td><td class="mono">islam.saadany@forefront.consulting</td>
-            <td>Admin</td><td>3</td><td><span class="tag open">Set</span></td><td></td></tr>
+            <td><span class="cellwrap locked"><span class="on edit">Yes</span></span></td>
+            <td class="seats"><span class="tag">Raya Trade · Super user</span> <span class="tag">RHI · SMO team</span> <span class="tag">Demo · Super user</span></td>
+            <td><span class="tag open">Set</span></td><td></td></tr>
           <tr><td><b>Mohamed Essam</b></td><td class="mono">mohamed.essam@forefront.consulting</td>
-            <td>Lead</td><td>2</td><td><span class="tag none">Temporary</span></td><td><button class="btn">Issue password</button></td></tr>
+            <td><span class="cellwrap"><span>Yes</span></span></td>
+            <td class="seats"><span class="tag">Raya Trade · SMO team</span> <span class="tag">RHI · Super user</span></td>
+            <td><span class="tag none">Temporary</span></td><td><button class="btn">Issue password</button></td></tr>
           <tr><td><b>Omar Alaa</b></td><td class="mono">omar.alaa@forefront.consulting</td>
-            <td>Consultant</td><td>1</td><td><span class="tag open">Set</span></td><td><button class="btn">Issue password</button></td></tr>
+            <td><span class="cellwrap"><span>Yes</span></span></td>
+            <td class="seats"><span class="tag">Raya Trade · SMO team</span></td>
+            <td><span class="tag open">Set</span></td><td><button class="btn">Issue password</button></td></tr>
           <tr><td><b>Nadia Fahmy</b></td><td class="mono">nadia.fahmy@forefront.consulting</td>
-            <td>Observer</td><td>0</td><td><span class="tag">—</span></td><td><button class="btn">Issue password</button></td></tr>
+            <td><span class="cellwrap"><span>Yes</span></span></td>
+            <td class="seats"><span class="muted">On no client yet</span></td>
+            <td><span class="tag">—</span></td><td><button class="btn">Issue password</button></td></tr>
         </tbody></table></div>
-      <p class="muted" style="font-size:13px;margin:14px 0 0">A password is said once, here, and stored nowhere in the clear.</p>
+      <p class="muted" style="font-size:13px;margin:14px 0 0">The seats are READ here
+      and set on each client's own configuration — one place writes them. A
+      password is said once, here, and stored nowhere in the clear. Somebody on
+      no client can sign in and has nothing to open, which is what a new joiner
+      looks like before you put them on one.</p>
     </div>
   </div>
 </section>
@@ -375,8 +412,10 @@
 <!-- 6 · WHO SEES WHAT -->
 <section class="step">
   <div class="stephead"><div class="stepno">06</div><h2>Inside: who sees what</h2></div>
-  <p class="lede">Your table, unchanged from the one you approved — it simply
-  sits on a page now instead of on the door.</p>
+  <p class="lede">Smaller than it was, because most of what it used to decide is
+  now decided by the seat somebody holds on a client. What is left is the
+  handful of questions that are about the <b>platform</b> rather than about one
+  client — and they are asked of everybody who is not the admin.</p>
   <div class="screen">
     <div class="ftop"><span class="mk">FOREFRONT</span><span class="nm">Platform</span>
       <span class="right">Islam Saadany · Admin <span class="chip">Sign out</span></span></div>
@@ -384,41 +423,36 @@
     <div class="fbody">
       <div class="ptitle"><h3>Who sees what</h3></div>
       <div class="tscroll"><table>
-        <thead><tr><th>Role</th><th>My clients</th><th>Other clients</th><th>Client configuration</th>
-          <th>Consultants</th><th>Add a client</th><th>Demo</th></tr></thead>
+        <thead><tr><th></th><th>Clients they hold no seat on</th><th>Consultants list</th>
+          <th>Add a client</th><th>Demo</th></tr></thead>
         <tbody>
-          <tr><td><b>Admin</b><div class="muted" style="font-size:12px">Islam</div></td>
-            <td><span class="cellwrap locked"><span>View</span><span class="on edit">Edit</span></span></td>
-            <td><span class="cellwrap locked"><span>View</span><span class="on edit">Edit</span></span></td>
-            <td><span class="cellwrap locked"><span>View</span><span class="on edit">Edit</span></span></td>
+          <tr><td><b>Platform admin</b><div class="muted" style="font-size:12px">Islam</div></td>
+            <td><span class="cellwrap locked"><span>Hidden</span><span>Listed</span><span class="on edit">Open</span></span></td>
             <td><span class="cellwrap locked"><span>View</span><span class="on edit">Edit</span></span></td>
             <td><span class="cellwrap locked"><span class="on edit">Yes</span></span></td>
             <td><span class="cellwrap locked"><span>View</span><span class="on edit">Edit</span></span></td></tr>
-          <tr><td><b>Lead</b></td>
-            <td><span class="cellwrap"><span>View</span><span class="on edit">Edit</span></span></td>
-            <td><span class="cellwrap"><span class="on">View</span><span>Edit</span></span></td>
-            <td><span class="cellwrap"><span>View</span><span class="on edit">Edit</span></span></td>
+          <tr><td><b>Everyone else</b><div class="muted" style="font-size:12px">Every consultant, whatever seats they hold</div></td>
+            <td><span class="cellwrap"><span>Hidden</span><span class="on">Listed</span><span>Open</span></span></td>
             <td><span class="cellwrap"><span class="on">View</span><span>Edit</span></span></td>
             <td><span class="cellwrap"><span>Yes</span></span></td>
             <td><span class="cellwrap"><span>View</span><span class="on edit">Edit</span></span></td></tr>
-          <tr><td><b>Consultant</b></td>
-            <td><span class="cellwrap"><span>View</span><span class="on edit">Edit</span></span></td>
-            <td><span class="cellwrap"><span>View</span><span>Edit</span></span></td>
-            <td><span class="cellwrap"><span class="on">View</span><span>Edit</span></span></td>
-            <td><span class="cellwrap"><span>View</span><span>Edit</span></span></td>
-            <td><span class="cellwrap"><span>Yes</span></span></td>
-            <td><span class="cellwrap"><span class="on">View</span><span>Edit</span></span></td></tr>
-          <tr><td><b>Observer</b></td>
-            <td><span class="cellwrap"><span class="on">View</span><span>Edit</span></span></td>
-            <td><span class="cellwrap"><span>View</span><span>Edit</span></span></td>
-            <td><span class="cellwrap"><span>View</span><span>Edit</span></span></td>
-            <td><span class="cellwrap"><span>View</span><span>Edit</span></span></td>
-            <td><span class="cellwrap"><span>Yes</span></span></td>
-            <td><span class="cellwrap"><span class="on">View</span><span>Edit</span></span></td></tr>
         </tbody></table></div>
-      <p class="muted" style="font-size:13px;margin:13px 0 0">Nothing lit means nothing at all. Somebody with no role sees an empty platform.</p>
+      <p class="muted" style="font-size:13px;margin:13px 0 0">Nothing lit means nothing at all.
+      <b>What somebody may do INSIDE a client is not here</b> — it is the seat
+      they hold on that client, set on its configuration, and the client's own
+      Roles &amp; access decides the rest exactly as it does today.</p>
     </div>
   </div>
+  <ul class="notes">
+    <li><b>Three states in the first column, not two:</b> a client you hold no
+    seat on can be <i>hidden</i>, <i>listed</i> (so the office knows what
+    Forefront runs) or <i>open</i> to read. This is the setting Islam asked
+    for when he said whether a consultant sees other clients belongs here.</li>
+    <li><b>The old four roles are gone.</b> Admin · Lead · Consultant · Observer
+    made sense only while a role was platform-wide; with seats on clients, a
+    new joiner on no client already sees nothing, and a partner's standing is
+    the seats they hold.</li>
+  </ul>
 </section>
 
 <!-- 7 · THE TWO PLATFORMS -->

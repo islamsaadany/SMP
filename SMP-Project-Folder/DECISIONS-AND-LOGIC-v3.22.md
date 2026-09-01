@@ -19608,3 +19608,34 @@ good one-line chip a wrapped one. §88's own lesson, already written down twice
 — *a cell's height is the row's height*, and *`getClientRects().length` is not
 the number of lines*. It counts the distinct tops of a `Range` over the text
 now.
+
+### 147.17 · An explicit reset, once
+
+Islam: *"please reset my password to 1234"*. **§43.8's own answer, one level
+out**, and written in full rather than done quietly for §43.8's own reason:
+1234 is four digits on a public URL, and the whole of §43 exists because that
+is not a password.
+
+**ONCE, AND RECORDED.** A reset that ran on every deploy would put the password
+back to 1234 **every time a real one was chosen** — a permanent backdoor
+wearing a one-off's clothes, and the exact thing §43.1 removed. It runs on the
+next deploy and never again; changing the password inside the product from then
+on is what it is for, and this step will not fight it.
+
+**IT RUNS AFTER `bootstrapOffice()`**, deliberately — that step creates the
+account when there is none and this resets it when there is, so there is
+exactly one account to reset by the time this is asked and neither can undo the
+other in the same request. §43.8's ordering, which was the whole of its
+correctness.
+
+**`must_change` IS TRUE, which is the one place this differs from §43.8.** That
+one cleared the flag because Islam asked for a working password on a prototype;
+this is the door to **every client Forefront runs**, so 1234 gets somebody in
+and nowhere else until they have chosen their own — §147.14's trade, in the
+same words: one screen, once.
+
+**IT NAMES ONE ADDRESS.** Every other account is untouched, or an explicit
+favour to one person hands a known password to everybody. Asserted, along with
+the one that actually matters: **a chosen password is not replaced on the next
+deploy.** Both watched to fail — the registry row removed so it runs every
+time → 2, the WHERE widened → 1.

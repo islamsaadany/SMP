@@ -329,6 +329,55 @@ async function main() {
     check("…and never re-made once any account exists", again && again.must_change === false, again);
   });
 
+  /* ── 11 · an explicit reset, once (§147.17) ───────────────────
+     Islam asked for 1234 back. The whole risk in granting that is a step that
+     runs on EVERY deploy, which would put the password back to 1234 every time
+     a real one was chosen — a permanent backdoor wearing a one-off's clothes,
+     and the exact thing §43.1 removed. So the assertion that matters is the
+     SECOND one: it does not come back. */
+  await P.withPlatform(pg, async function (c) {
+    const auth3 = require("../lib/auth.js");
+    const EMAIL = P.bootstrapEmail();
+    /* A platform already in use: a real password chosen, and a second
+       consultant who has chosen their own. */
+    await c.query("UPDATE accounts SET password_hash = $1, must_change = false WHERE email = $2",
+      [auth3.hashPassword("MyRealPassw0rd!"), EMAIL]);
+    await c.query(
+      "INSERT INTO accounts (email, name, kind, is_admin, password_hash, must_change, status) " +
+      "VALUES ($1,$2,'office',false,$3,false,'active') ON CONFLICT (email) DO UPDATE " +
+      "SET password_hash = EXCLUDED.password_hash, must_change = false",
+      ["someone.else@forefront.consulting", "Someone Else", auth3.hashPassword("TheirOwnPass!9")]);
+    await c.query("DELETE FROM _platform_migrations WHERE name = $1", ["002-reset-super-user-password.js"]);
+
+    const first = await P.resetTheSuperUserPassword(c);
+    check("the explicit reset runs", first.reset === true, first);
+    const me = (await c.query("SELECT password_hash, must_change FROM accounts WHERE email = $1",
+      [EMAIL])).rows[0];
+    check("…putting 1234 back over a real password", auth3.verifyPassword("1234", me.password_hash));
+    /* AND IT IS TEMPORARY. §43.8 cleared the flag on a prototype; this is the
+       door to every client Forefront runs, so 1234 gets somebody in and
+       nowhere else until they have chosen their own. */
+    check("…as a temporary one", me.must_change === true, me);
+    /* IT NAMES ONE ADDRESS: nobody else's password is touched, or an explicit
+       favour to one person hands a known password to everybody. */
+    const other = (await c.query("SELECT password_hash FROM accounts WHERE email = $1",
+      ["someone.else@forefront.consulting"])).rows[0];
+    check("…and nobody else's password moves",
+      auth3.verifyPassword("TheirOwnPass!9", other.password_hash) &&
+      !auth3.verifyPassword("1234", other.password_hash));
+
+    /* THE ONE THAT MATTERS. */
+    await c.query("UPDATE accounts SET password_hash = $1, must_change = false WHERE email = $2",
+      [auth3.hashPassword("Chosen4Real!"), EMAIL]);
+    const again = await P.resetTheSuperUserPassword(c);
+    check("…and never runs a second time", again.reset === false, again);
+    const now = (await c.query("SELECT password_hash FROM accounts WHERE email = $1",
+      [EMAIL])).rows[0];
+    check("…so a chosen password is not replaced on the next deploy",
+      auth3.verifyPassword("Chosen4Real!", now.password_hash) &&
+      !auth3.verifyPassword("1234", now.password_hash));
+  });
+
   console.log("\n" + pass + " passed, " + fail + " failed");
   await pool.end();
   process.exit(fail ? 1 : 0);

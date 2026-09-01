@@ -19565,3 +19565,46 @@ a later reader takes for load-bearing.
 "raya-trade"` sent anybody the server had not given a client to one particular
 client's address. Nobody to open means **Forefront's own platform**, which is
 where the cards are and where a person with no client is told so.
+
+### 147.16 · The platform's role is Super user, in a column that says where
+
+Islam: *"I'm the super user of the platform, I need to have this role in the
+consultants."* **The role was already on that row** — as a lit *Yes* under a
+column called **Platform admin**, which is not the word he uses for it.
+
+**AND THE WORD ALONE WOULD HAVE COLLIDED.** *Super user* already means the top
+seat held **on a client** (§89), and the column immediately to the right of
+this one reads *Raya Trade · Super user*. Renaming the chip and stopping there
+would have put two meanings for one word on one screen — §87's twins. So the
+**column carries the WHERE and the chip carries the WHAT**, and the row reads
+across as *Platform · Super user, Raya Trade · Super user*.
+
+Settled from a mockup drawn in `platform.html`'s **own stylesheet** (§41.9,
+rule 1c) with three options and the cost of each stated. Islam picked **B**.
+The one it beat is worth recording: putting the role into the read-only *Roles
+and seats* list is tersest and puts a **settable** thing inside the one column
+that is read-only by design, so either §147.4's *one place writes a seat* rule
+breaks or the platform role becomes visible where it cannot be changed.
+
+**THE KEY DOES NOT MOVE**: `is_admin`, `canSetAdmin` and `saveConsultant` keep
+their spelling, because renaming a stored field is a migration for a word
+nobody reads (§30.2, §58). **And the chrome says the same word** — leaving
+*Admin* in the top line after renaming the column is exactly the twins this
+rename avoided.
+
+**THE NAME IS READ OFF THE ADDRESS, NOT WRITTEN INTO THE CODE.** §147.14's
+bootstrap called its account *"Forefront"*, which is the company rather than
+the person and reads on the consultants list as a row belonging to nobody.
+`islam.saadany@…` gives *Islam Saadany*, and no person is named in a source
+file — the address is already the only thing that function is told. It is a
+**guess and meant to be one** (§93.8's shape): the register lets anybody
+correct their own name.
+
+**AND BOTH OF THE NEW CHECK'S FIRST FAILURES WERE THE CHECK.** `lit` tested a
+regex against `className` where `classList.contains` is the honest question;
+and **`lines` divided the chip's BOX height by its line-height**, so 25px of
+text-plus-padding over a 14.7px line rounded to **two** and called a perfectly
+good one-line chip a wrapped one. §88's own lesson, already written down twice
+— *a cell's height is the row's height*, and *`getClientRects().length` is not
+the number of lines*. It counts the distinct tops of a `Range` over the text
+now.

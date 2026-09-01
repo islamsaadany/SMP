@@ -301,7 +301,7 @@
       grid.textContent = "";
       if (!j.ok) { say(j.error || "Could not read your clients.", true); return; }
       if (!j.cards.length) {
-        say("No client has been given to this account yet. Ask the platform's admin.");
+        say("No client has been given to this account yet. Ask the platform's super user.");
         return;
       }
       j.cards.forEach(function (c) { grid.appendChild(cardFor(c)); });
@@ -542,7 +542,7 @@
       var box = el("div", "tscroll");
       var t = el("table");
       var head = el("tr");
-      ["Name", "Email", "Platform admin", "Clients and seats", "Password", ""].forEach(function (h) {
+      ["Name", "Email", "Platform", "Clients and seats", "Password", ""].forEach(function (h) {
         head.appendChild(el("th", null, h));
       });
       var thead = el("thead"); thead.appendChild(head); t.appendChild(thead);
@@ -589,9 +589,24 @@
     tr.appendChild(el("td", null, p.name || "—"));
     tr.appendChild(el("td", "mono", p.email));
 
+    /* ── SUPER USER, IN A COLUMN THAT SAYS WHERE (Islam, option B) ──
+       The role was always here and read "Platform admin: Yes", which is not
+       the word Islam uses for it: "I'm the super user of the platform."
+
+       AND THE WORD ALONE WOULD HAVE COLLIDED. `Super user` already means the
+       top seat on a CLIENT (§89), and the column immediately to the right of
+       this one reads "Raya Trade · Super user" — so the column carries the
+       WHERE and the chip carries the WHAT, and the row reads across as
+       Platform · Super user, Raya Trade · Super user. One word for one
+       standing, qualified by where it is held (§87's twins, avoided rather
+       than discovered).
+
+       THE KEY DOES NOT MOVE: `is_admin`, `canSetAdmin` and `saveConsultant`
+       keep their spelling, because renaming a stored field is a migration for
+       a word nobody reads (§30.2, §58). */
     var adminTd = el("td");
     var cell = el("span", "cell" + (j.canSetAdmin && p.email !== j.me ? "" : " locked"));
-    var yes = el("button", null, "Yes");
+    var yes = el("button", null, "Super user");
     yes.type = "button";
     if (p.isAdmin) yes.className = "on hi";
     if (j.canSetAdmin && p.email !== j.me) {
@@ -601,7 +616,9 @@
           .then(function (r) { r.ok ? drawConsultants() : say(r.error || "Not changed.", true); });
       });
     } else if (p.email === j.me) {
-      yes.title = "You cannot change your own admin rights.";
+      /* NOBODY CHANGES THEIR OWN STANDING, which is also what stops the
+         platform's last super user locking themselves out of it. */
+      yes.title = "You cannot change your own standing — somebody else with this role does it.";
     }
     cell.appendChild(yes);
     adminTd.appendChild(cell);
@@ -649,12 +666,12 @@
       page.appendChild(el("p", "note",
         "What somebody may do INSIDE a client is the seat they hold on it, set " +
         "on that client's configuration. What is here is the rest — and it is " +
-        "asked of everybody who is not the platform admin."));
+        "asked of everybody who is not the platform's super user."));
 
       var box = el("div", "tscroll");
       var t = el("table");
       var thead = el("thead"), head = el("tr");
-      head.appendChild(el("th", null, "Everybody who is not the admin"));
+      head.appendChild(el("th", null, "Everybody who is not the super user"));
       j.areas.forEach(function (a) { head.appendChild(el("th", null, a.name)); });
       thead.appendChild(head); t.appendChild(thead);
 
@@ -712,8 +729,10 @@
         ME.canConsultants = !!c.canConsultants;
         ME.canAccess = !!c.canAccess;
       }
+      /* THE CHROME SAYS THE SAME WORD THE TABLE DOES. Leaving "Admin" here
+         after renaming the column is exactly the twins this rename avoided. */
       document.getElementById("who").textContent =
-        ME.name + (ME.isAdmin ? " · Admin" : "");
+        ME.name + (ME.isAdmin ? " · Super user" : "");
       document.body.classList.add("ready");
       go("clients");
     });

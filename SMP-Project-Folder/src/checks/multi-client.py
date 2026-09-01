@@ -273,6 +273,58 @@ def main():
                 check("…and a temporary password is said once, on the page",
                       "said once" in said, said)
 
+            # THE PLATFORM'S ROLE IS SUPER USER, IN A COLUMN THAT SAYS WHERE
+            # (Islam's option B, 2026-09-01). The word alone would collide with
+            # the seat of the same name held on a CLIENT, so the assertion is
+            # about the PAIR: the column carries the where, the chip the what,
+            # and the row reads Platform · Super user beside Raya Trade · Super
+            # user. Asked at both ends — the old wording gone AND the new one
+            # drawn — because a build that lost the column entirely would
+            # satisfy half of it (§113.8).
+            role = pg.evaluate("""() => {
+              const heads = Array.from(document.querySelectorAll('table thead th'))
+                .map(e => e.textContent.trim());
+              const mine = Array.from(document.querySelectorAll('table tbody tr'))
+                .filter(tr => tr.innerText.indexOf('islam.saadany@') > -1)[0];
+              const cells = mine ? Array.from(mine.querySelectorAll('td')).map(td => td.innerText.trim()) : [];
+              const chip = mine ? mine.querySelector('td .cell button') : null;
+              const box = chip ? chip.getBoundingClientRect() : null;
+              return { heads, cells,
+                       chip: chip ? chip.textContent.trim() : null,
+                       cls: chip ? String(chip.className) : null,
+                       lit: chip ? chip.classList.contains('on') : false,
+                       locked: mine ? !!mine.querySelector('td .cell.locked') : false,
+                       /* A RANGE OVER THE TEXT, NEVER THE BOX'S HEIGHT
+                          DIVIDED BY A LINE (§88, §105.2). The chip has 5px of
+                          padding top and bottom, so 25px over a 14.7px line
+                          rounds to TWO and called a perfectly good one-line
+                          chip a wrapped one. Count the DISTINCT TOPS among the
+                          rects the text actually occupies. */
+                       lines: (function () {
+                         if (!chip || !chip.firstChild) return 0;
+                         const r = document.createRange();
+                         r.selectNodeContents(chip);
+                         const tops = new Set(Array.from(r.getClientRects())
+                           .filter(x => x.width > 0).map(x => Math.round(x.top)));
+                         return tops.size;
+                       })(),
+                       who: (document.getElementById('who') || {}).textContent || '' }; }""")
+            check("the platform's role sits in a column that says where",
+                  "Platform" in role["heads"] and "Platform admin" not in role["heads"], role["heads"])
+            check("…and the chip says what it is", role["chip"] == "Super user", role)
+            check("…lit on the person who holds it", role["lit"] is True, role)
+            # NOBODY CHANGES THEIR OWN STANDING — which is also what stops the
+            # platform's last super user locking themselves out of it.
+            check("…and drawn quiet on their own row", role["locked"] is True, role)
+            check("…and the chrome says the same word", "Super user" in role["who"], role["who"])
+            # A SETUP TABLE ROW IS ONE LINE (§88): "Super user" is longer than
+            # the "Yes" it replaced, so the cell is measured rather than assumed.
+            check("…on one line", role["lines"] <= 1, role)
+            # AND THE NAME IS READ OFF THE ADDRESS, not written into the code.
+            check("the bootstrap account carries a name, not the company",
+                  role["cells"] and role["cells"][0] and role["cells"][0] != "Forefront",
+                  role["cells"][:2])
+
             # THE ADMIN CANNOT CHANGE THEIR OWN ADMIN RIGHTS — asked of the
             # server, not of the disabled-looking cell (§42).
             own = api(pg, {"action": "saveConsultant", "email": OFFICE[0], "isAdmin": False})

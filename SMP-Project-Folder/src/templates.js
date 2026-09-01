@@ -56,7 +56,7 @@ function joinTarget(original, value, unit){
   value = (value == null ? "" : String(value)).trim();
   unit  = (unit  == null ? "" : String(unit)).trim();
   if (!value) return "";
-  /* ── THE UNIT IS NEVER WRITTEN TWICE (§237) ──────────────────────────
+  /* ── THE UNIT IS NEVER WRITTEN TWICE (§241) ──────────────────────────
      Islam, from a reported figure: *"an actual number is showing the measure
      twice — M EGP M EGP — despite being reported 8 only."* Reproduced exactly:
      `joinTarget("", "8 M EGP", "M EGP")` returned **"8 M EGP M EGP"**.

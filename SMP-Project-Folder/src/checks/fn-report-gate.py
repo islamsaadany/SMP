@@ -1,5 +1,5 @@
 """A SUPPORTING FUNCTION'S REPORT IS ASKED FOR, AND ITS OBJECTIVES CAN BE
-   ANSWERED (§236).
+   ANSWERED (§240).
 
    Islam, from a live client session: *"for the functions planning in pillars
    the key objectives reporting wasn't done and the button of submit to smo
@@ -10,7 +10,7 @@
          by PREFIX — every `fn:` target went to the capability counters — and
          a function that plans in pillars has no capabilities, so the gate
          looked at an empty list, found nothing owed, and opened the button.
-         Measured on the pre-§236 build with every figure stripped:
+         Measured on the pre-§240 build with every figure stripped:
 
              the reporting page   0 of 10 entered
              the submit gate      0 of  0 — nothing in the way

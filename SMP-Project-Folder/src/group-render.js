@@ -1774,7 +1774,7 @@ function renderUnitPerformance(u){
                            .map(function(m){ return m.progress; });
   var koHi = kps.length ? Math.max.apply(null, kps) : null;
   var koLo = kps.length ? Math.min.apply(null, kps) : null;
-  /* §237: THE RESOLVED WEIGHTS, never the raw array. A row's own `weight`
+  /* §241: THE RESOLVED WEIGHTS, never the raw array. A row's own `weight`
      wins, a blank takes the average of the ones that were set, and a list
      nobody has weighted answers null — so this table shows the two extra
      columns exactly when the score is actually weighted, and the number in
@@ -2999,7 +2999,7 @@ function koView(list, isGroup, acKey){
   var chips = function(m){
     return "";
   };
-  /* §237: THE OBJECTIVES READ AS A TABLE, AND THE LAYOUT SWITCH IS GONE.
+  /* §241: THE OBJECTIVES READ AS A TABLE, AND THE LAYOUT SWITCH IS GONE.
      Islam: *"the other toggle that shows the objective in table or cards —
      remove it and make the view in table only."*
 
@@ -3096,7 +3096,7 @@ function koEdit(list, page, acKey, owner){
      hand in two different arrays (the group's and a unit's) — so the table
      registers its own, exactly as a field registers its own setter. */
   var li = KOLISTS.push({ list: list, owner: owner }) - 1;
-  /* §237: A UNIT'S OBJECTIVES GET A WEIGHT COLUMN, which reverses §226's
+  /* §241: A UNIT'S OBJECTIVES GET A WEIGHT COLUMN, which reverses §226's
      "the unit side is untouched" at Islam's own instruction: *"there is no
      weighting on the objectives in units it needs to be added."* Recorded as
      a reversal rather than overwritten — that earlier note is why this table
@@ -3140,7 +3140,7 @@ function koEdit(list, page, acKey, owner){
           { kind:"input", cls:"mono", parse: unitInherit(m) }) + '</td>' +
         '<td class="cc">' + gapCell(page, acKey, m, "compile",
           { kind:"select", opts:["Sum", "Latest", "Average"] }) + '</td>' +
-        /* §237: the same cell the capability's table already draws — one
+        /* §241: the same cell the capability's table already draws — one
            column, one field, one answer on all three surfaces (§53.5). Left
            blank it is not nought: koWeights() gives it the average of the
            weights that were set. */
@@ -5541,7 +5541,7 @@ function renderFnFoundation(fnKey){
    the whole reason §211 cost a day. The empty line is the caller's, because
    what an empty list MEANS differs: a capability with none is judged by its
    projects; a function with none is judged by its pillars. */
-/* ONE CELL, EVERYWHERE A FIGURE IS READ AGAINST ITS TARGET (§237). The
+/* ONE CELL, EVERYWHERE A FIGURE IS READ AGAINST ITS TARGET (§241). The
    shortened form is what is shown and the full one is on the hover, so nothing
    a unit reported is ever out of reach — and the decision about WHETHER to
    shorten is made once, in `figureScaled()`, rather than at nine call sites
@@ -5553,9 +5553,9 @@ function figShown(m){
 function koReadBlock(list, emptyLine){
   if (!(list || []).length)
     return '<p class="sub" style="margin:0">' + emptyLine + '</p>';
-  /* §237, Islam: *"in the functions overview if there is no weights submitted
+  /* §241, Islam: *"in the functions overview if there is no weights submitted
      the table shouldn't show weights."* A column of em-dashes says nothing
-     except that a question was asked and not answered — and since §237 a blank
+     except that a question was asked and not answered — and since §241 a blank
      weight is not nought but an equal share, so the column would also be
      stating a value nobody set. `.one` is the two-column shape `koView()`
      already uses when it drops a column; there is no second layout here. */

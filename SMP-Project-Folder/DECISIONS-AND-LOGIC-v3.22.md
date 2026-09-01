@@ -26023,7 +26023,7 @@ this is attack-surface hygiene).
 
 ---
 
-## §236 — A SUPPORTING FUNCTION'S REPORT IS ASKED FOR, AND ITS OBJECTIVES CAN BE ANSWERED (2026-09-01)
+## §240 — A SUPPORTING FUNCTION'S REPORT IS ASKED FOR, AND ITS OBJECTIVES CAN BE ANSWERED (2026-09-01)
 
 Islam, from a live client session: *"for the functions planning in pillars the
 key objectives reporting wasn't done and the button of submit to smo was allowed
@@ -26108,7 +26108,7 @@ nearly shipped.
 
 ### Proved able to fail
 
-- `checks/fn-report-gate.py`: **16 red** against the shipped pre-§236 build,
+- `checks/fn-report-gate.py`: **16 red** against the shipped pre-§240 build,
   among them `boxId: 'undefined'` — the reported fault verbatim. 0 after.
 - **Two of its own assertions could not fail when first written** and were
   tightened: the id-uniqueness check counted one row holding `undefined` and
@@ -26138,7 +26138,7 @@ own decision.
 
 ---
 
-## §237 — THE REVIEW DECK, AND THE WEIGHTS ITS OBJECTIVES ARE SCORED BY (2026-09-01)
+## §241 — THE REVIEW DECK, AND THE WEIGHTS ITS OBJECTIVES ARE SCORED BY (2026-09-01)
 
 Islam, going through a client's decks and screens. Settled from a mockup built
 out of the real platform (`design-mockups/functions-planning-presentations/`)
@@ -26294,7 +26294,7 @@ its target would be a performance of 100,000%, which no report contains.
 
 ### Proved able to fail
 
-`checks/deck-and-weights.py`: **22 red** against the pre-§237 build, 0 after.
+`checks/deck-and-weights.py`: **22 red** against the pre-§241 build, 0 after.
 `test-authorize` 451/0 · `test-graph-diff` 126/0 · `fn-report-gate`,
 `fn-pillars`, `fn-ko-edit`, `foundation-objectives`, `submit-gate`, `gap-fill`,
 `plan-fields`, `no-wrap`, `table-fit`, `objective-unit`, `hide-element` green ·

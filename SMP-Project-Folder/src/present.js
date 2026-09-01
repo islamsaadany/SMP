@@ -112,7 +112,7 @@ function deckSlides(u){
       '</tr></thead><tbody>' + aimRows + '</tbody></table>' +
     '</div></section>');
 
-  /* ── 3 · THE THREE READINGS, AT THE SIZE THEY DESERVE (§237) ───────
+  /* ── 3 · THE THREE READINGS, AT THE SIZE THEY DESERVE (§241) ───────
      Islam: *"where the units stands needs to show the 3 main numbers not only
      2"* — and, of the same slide on a function, *"where merchandizing
      stands."*
@@ -165,7 +165,7 @@ function deckSlides(u){
     '<th class="num">Dir.</th><th class="num">This year</th><th class="num">Actual</th>' +
     '<th class="num">Progress</th></tr></thead><tbody>' + oRows + '</tbody></table></section>');
 
-  /* ── 5 · SWOT, AND A SUPPORTING FUNCTION HAS NONE (§237) ──────────────
+  /* ── 5 · SWOT, AND A SUPPORTING FUNCTION HAS NONE (§241) ──────────────
      Islam: *"the functions has no swot, remove from the slides."* Measured on
      the demo's own pillars function: a section cover reading **0 · 0 · 0 · 0**
      and four empty category slides — five of twenty-one, for something the
@@ -273,7 +273,7 @@ function deckSlides(u){
       '<th>Note</th></tr></thead><tbody>' + tRows + '</tbody></table></section>');
   });
 
-  /* ── 7 · THE NOTE, DRAWN ONLY WHEN THERE IS ONE (§237) ────────────────
+  /* ── 7 · THE NOTE, DRAWN ONLY WHEN THERE IS ONE (§241) ────────────────
      Islam: *"make the notes and achievements slide optional and they can add
      it when they need"*, and of this shape: *"ok clear accepted."*
 
@@ -465,7 +465,7 @@ function deckSlidesFn(fk){
      tactics — and removed for the same reason, on both sides of the switch
      rather than on one (A15). */
 
-  /* §237: the same rule as a unit's deck — drawn only when a note is written.
+  /* §241: the same rule as a unit's deck — drawn only when a note is written.
      One question, one answer on both decks (§53.5). */
   var fnote = REVIEW.note["fn:" + fk] || "";
   if (fnote) S.push('<section class="dslide"' + anch("notes", "After \u201cNotes and achievements\u201d") +

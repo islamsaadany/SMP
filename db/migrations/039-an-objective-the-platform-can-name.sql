@@ -1,4 +1,4 @@
--- 039 · AN OBJECTIVE THE PLATFORM CAN NAME (§236)
+-- 039 · AN OBJECTIVE THE PLATFORM CAN NAME (§240)
 --
 -- Islam, from a live client session: *"for the functions planning in pillars
 -- the key objectives reporting wasn't done … and the input there wasn't

@@ -384,6 +384,22 @@ console errors (in this cloud environment, run it via a wrapper that points Play
   remove × onto a second line — `inline-block` restores it, and it was found
   by `checks/plan-fields.py` GOING RED, not by reading the cascade, which is
   the argument for that check existing.
+- **A DEPENDENCY MUST NOT BE ABLE TO TAKE THE FEATURE IT SERVES DOWN (§231.3):**
+  Islam, minutes after the §231 merge — *"the chat bubble disappeared!"*
+  `lib/push.js` required `web-push` at its TOP level and `api/chat.js` requires
+  `lib/push.js` at ITS top level, so anything stopping the library loading
+  stopped **the whole chat endpoint** loading — reproduced: with the package
+  moved aside the dev-server will not start. And §197 is explicit that **the
+  corner is created hidden and only a SUCCESSFUL answer reveals it**, so a 500
+  matches no branch and the bubble is simply never drawn. **§104's rule one
+  module out**: no key, a refusal, a timeout and the switch off all land on the
+  chat as it worked before, and *"the package did not load"* belongs on that
+  list — a notification helper degrades to **no push**, never to **no
+  conversation**. Loaded inside a `try` now, remembered so it is attempted once.
+  **Why it was missing in production is NOT claimed** (the lockfile carries it);
+  the endpoint must not depend on it either way. **Asserted as the SHAPE** — a
+  top-level require is what cannot be caught, so its absence is the assertion,
+  and a test that moved the package aside could not run twice.
 - **A BOX THAT ARRIVES WITH NO TAB OPEN (§231):** Islam, having turned §225 on
   — *"I didn't get any notifications despite enabling the notifications"* — and
   then, correcting two wrong diagnoses, *"stop assuming wrong things, the bell

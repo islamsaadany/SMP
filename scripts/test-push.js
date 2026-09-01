@@ -181,6 +181,34 @@ function makeCert() {
     const keysLeft = (await client.query("SELECT count(*)::int n FROM push_keys")).rows[0].n;
     ok(keysLeft === 1, "and so does the key pair", keysLeft);
 
+    /* ── AND ITS ABSENCE IS NOT AN OUTAGE (§231.3) ──────────────────
+       This module was required at the top of `lib/push.js`, and `api/chat.js`
+       requires THAT at its own top level — so anything stopping the library
+       loading took the whole chat endpoint down, and §197's corner is revealed
+       only by a SUCCESSFUL answer: the bubble simply never appeared. Islam:
+       "the chat bubble disappeared!"
+
+       Reproduced before it was fixed — with the package moved aside the
+       dev-server would not start at all — so what is asserted here is that
+       LOADING THIS FILE CANNOT THROW, whatever the library does. A require
+       that cannot fail is the whole of the fix. */
+    console.log("\nTHE LIBRARY'S ABSENCE IS NOT AN OUTAGE (§231.3).");
+    const src = require("fs").readFileSync(require("path").join(__dirname, "../lib/push.js"), "utf8");
+    /* THE SHAPE, not a behaviour that needs the package gone: a top-level
+       require is exactly what could not be caught, so its absence is the
+       assertion. Anything indented is inside a function and therefore inside
+       something that can catch. */
+    ok(!/^const .*= *require\("web-push"\)/m.test(src) &&
+       !/^\s*var .*= *require\("web-push"\)/m.test(src),
+       "web-push is never required at the top level of lib/push.js");
+    ok(/try *\{ *webpush = require\("web-push"\); *\}/.test(src),
+       "...it is loaded inside a try, so a missing package is a caught error");
+    /* AND api/chat.js MUST GO ON LOADING. The endpoint is what carries the
+       conversation; the notification is a passenger on it. */
+    ok(/require\("\.\.\/lib\/push\.js"\)/.test(
+         require("fs").readFileSync(require("path").join(__dirname, "../api/chat.js"), "utf8")),
+       "and api/chat.js still requires it, which is why the above matters");
+
   } finally {
     await client.query("DELETE FROM push_subscriptions").catch(function () {});
     await client.end().catch(function () {});

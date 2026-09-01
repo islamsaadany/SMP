@@ -25631,3 +25631,35 @@ that service can only hand it over while the browser is still running
 somewhere; quit Chrome entirely and it arrives next time it opens. A sleeping
 machine gets it on waking. **iPhone and iPad still need the platform added to
 the home screen** — Apple's rule, and the setting says so.
+
+### §231.3 — THE LIBRARY'S ABSENCE MUST NOT BE AN OUTAGE
+
+Islam, minutes after the §231 merge: *"the chat bubble disappeared!"*
+
+**REPRODUCED, NOT GUESSED.** `lib/push.js` required `web-push` at its top
+level, and `api/chat.js` requires `lib/push.js` at ITS top level — so anything
+that stopped the library loading stopped the **whole chat endpoint** loading.
+With the package moved aside the dev-server would not start at all; in a
+serverless function that is a 500 on every `/api/chat` request. And §197 is
+explicit that **the corner is created hidden and only a SUCCESSFUL answer ever
+reveals it**: a 500 matches neither that branch nor the 401/403 one, so nothing
+shows it. The bubble does not break — it is simply never drawn.
+
+**§104's RULE, ONE MODULE OUT.** No key, a refusal, a timeout and the switch
+off all land on the chat exactly as it worked before the assistant existed, and
+*"the package did not load"* belongs on that list. A notification helper must
+degrade to **no push**, never to **no conversation**. The require is inside a
+`try` now, remembered so it is attempted once, and every path through the module
+returns a failure instead of throwing.
+
+**WHY THE PACKAGE WAS MISSING IN PRODUCTION IS NOT CLAIMED.** `package.json` and
+`package-lock.json` both carry it and `node_modules` is not committed, so the
+deployment should install it; whatever the reason, the endpoint must not depend
+on it. *A dependency that can take a working feature down is a dependency that
+will.*
+
+**ASSERTED AS THE SHAPE, NOT A BEHAVIOUR.** A top-level require is precisely
+what could not be caught, so its **absence** is what `scripts/test-push.js`
+checks — along with the require sitting inside a `try`, and `api/chat.js` still
+requiring this module, which is why the first two matter at all. A test that
+moved the package aside would prove the same thing and could not run twice.

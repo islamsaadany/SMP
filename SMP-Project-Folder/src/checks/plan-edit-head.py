@@ -152,6 +152,33 @@ def run(pg):
     ck("...and reading's band is back",
        pg.evaluate("()=>!!document.querySelector('.pane > .pband')"))
 
+    print("\n5 · a project's band — the name gets the line there too (§225)")
+    # The other side of the switch (A15): §194 fixed the pillar's head and
+    # the project BAND kept the fault — Islam's FIN01 screenshot, a title on
+    # three lines in a shrunk box beside an empty band. Same assertion shape:
+    # a RATIO of the band, never a pixel count (§94.8), and ONE line.
+    pg.evaluate("()=>{const s=document.querySelector('#units .navswitch .nsw:not(.on)');"
+                "if(s) s.click();}")
+    pg.wait_for_timeout(500)
+    pg.evaluate("()=>{const b=document.querySelector('[data-u=\"fn:finance\"]'); if(b) b.click();}")
+    pg.wait_for_timeout(900)
+    pg.evaluate("()=>{const b=document.querySelector('#secrow-in [data-sub2=\"proj\"]'); if(b) b.click();}")
+    pg.wait_for_timeout(700)
+    pg.evaluate("()=>{const b=document.querySelector('.pane .penbtn'); if(b) b.click();}")
+    pg.wait_for_timeout(1400)
+    e = pg.evaluate("""()=>{
+      const band = document.querySelector('.pane .pband.edband');
+      const box = band && band.querySelector('.pband-name textarea.fld.grow');
+      const lh = box ? (parseFloat(getComputedStyle(box).lineHeight) || 20) : 1;
+      return { band: band ? Math.round(band.getBoundingClientRect().width) : 0,
+               boxW: box ? Math.round(box.getBoundingClientRect().width) : 0,
+               lines: box ? Math.round((box.getBoundingClientRect().height - 4) / lh) : 0 };}""")
+    ck("the project band is in edit mode", e["band"] > 0, e)
+    share2 = (e["boxW"] / e["band"]) if e["band"] else 0
+    ck("the band's name box takes most of the band (%d%%)" % round(share2 * 100),
+       share2 > 0.6, "%d of %d" % (e["boxW"], e["band"]))
+    ck("...and the title sits on ONE line", e["lines"] == 1, e["lines"])
+
 errs = []
 with sync_playwright() as pw:
     br = pw.chromium.launch(executable_path=os.environ.get("SMP_CHROME") or None)

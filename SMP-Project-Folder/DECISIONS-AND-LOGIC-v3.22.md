@@ -25140,3 +25140,27 @@ looking — and the tactic column already wears the short form on every surface
 is Islam's to decorate), the plan BUILDER's add-milestone form does not ask for
 them (the tactic's form does not either — they are added in the pen), and the
 hidden .pptx plan deck (§145.9) was left untouched.
+
+## §225 — THE PROJECT'S NAME GETS THE LINE
+
+Islam, with a screenshot of FIN01's editing band: *"the project box is
+squeezed for no need we have space to make it one line."* A three-word title
+on three lines in a 181px box beside 1,040px of empty band.
+
+**§194'S FAULT EXACTLY, ON THE BAND ITS FIX DID NOT REACH.** §189's growing
+box is `width:100%` of its container; §194 diagnosed that *a growing field in
+a container that does not grow is a fixed field* and gave the pillar head's
+column `flex:1` — and a project's pane builds a different head, the
+`.pband.edband`, whose `.pband-name` was never given a flex. A flex item with
+no flex shrinks to fit content that is sized BY it — circular, so the
+textarea fell back to its intrinsic width. One line of CSS on the band's own
+class: `.pane .pband.edband .pband-name { flex:1; min-width:0 }`. Reading is
+untouched — a read band's name is a span and never had the fault.
+
+**Measured, falsified, guarded**: 181px of 1223 (15%) and three lines before;
+1,037px (85%) and one line after, on the exact title from the screenshot.
+`plan-edit-head.py` gains a fifth section asserting the band's box as a RATIO
+and the title as ONE line (§94.8 — never a pixel count), on the function side
+of the switch (A15: §194's check only ever measured the pillar head, which is
+how this band stayed broken through it). Reverting the line fails exactly
+those two assertions — 15%, 3 lines — before the green was believed.

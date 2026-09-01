@@ -4020,7 +4020,37 @@ prior sessions (on HR_ERP) accidentally reverted agreed-upon designs.
 
 ---
 
-*Last Updated: 2026-09-01 &mdash; **&sect;239: YTD is measured against the
+*Last Updated: 2026-09-01 &mdash; **&sect;240: saves take turns, so two at
+once cannot lose data.** Islam, on the performance sweep: *"what if people
+submit saves together &mdash; would that lose data?"* Measured, and yes: a save
+is read-modify-write (read the stored graph, lay this client's changes over it
+per &sect;210, write the result), and there was NO lock around those three
+steps. Two saves that OVERLAP both read the same starting state before either
+writes, so the later writer overwrote the earlier's change &mdash; silently,
+and most likely at a reporting deadline when many people save at once.
+&sect;210's diff shrank the envelope and made refusals accurate; it did NOT
+close this, because the server still writes the whole applied graph.
+**THE FIX: ONE TRANSACTION, ONE TRANSACTION-SCOPED LOCK.** The whole
+read-modify-write now runs in a single transaction with `pg_advisory_xact_lock`
+at the top; the second save blocks until the first COMMITs, then reads the
+first's result and merges onto it. **It MUST be transaction-scoped, not
+session-scoped** &mdash; production is Neon behind PgBouncer transaction
+pooling, where a session lock can sit on a backend the next statement never
+sees; an xact lock lives and dies with the transaction on its pinned backend.
+`writeState` gained an `{ inTransaction: true }` so it runs in the caller's
+transaction instead of opening its own (every other caller &mdash; the seed,
+the tests &mdash; is unchanged). **Only the write path locks**; a GET needs
+none. **Proved and proved able to fail** on a real Postgres 16
+(`scripts/test-concurrent-saves.js`, driving the REAL handler with 8 genuinely
+concurrent saves): with the lock, 8 of 8 survive; with `SMP_NO_SAVE_LOCK=1`, 6
+of 8 are lost. `test-roundtrip` (writer lossless) and `test-two-tabs`
+(sequential &sect;210/&sect;215) both stay green. **AND THE TWO SECURITY
+FOLLOW-UPS ARE DONE**: the hashed-CSP net (&sect;235) and a `.vercelignore` that
+stops serving `scripts/`, sources, mockups and a separate app skeleton (no
+secrets were ever exposed; `lib/` and `db/` stay, the functions need them) are
+both live and verified on production.*
+
+*Earlier: 2026-09-01 &mdash; **&sect;239: YTD is measured against the
 part of the year that has passed.** Islam, from a live round: the reporting of
 YTD was compared with the full-year target without proration. Measured before
 building: of 26 Sum measures with an actual the median read 45 points low, and

@@ -326,6 +326,90 @@
   .banner.refused ul { margin:4px 0 0; padding-left:18px; }
   .banner.refused li { margin:2px 0; }
 
+  /* ── THE REFUSAL'S TWO DOORS (§231) ────────────────────────────────────
+     Drawn inside the dialog, so these are on the card's own ground rather
+     than the banner's tint — the sentences above them keep the bad-news
+     colour, and the way out of a problem should not look like more of it.
+     `Ask` is the ordinary next step and wears the fill; `Report a problem` is
+     the rarer errand and wears a border. Two volumes, one row (§94.8). */
+  #modal-b .refused-doors { display:flex; gap:9px; flex-wrap:wrap;
+                            margin-top:14px; }
+  #modal-b .refused-ask, #modal-b .refused-bug {
+    font:inherit; font-size:var(--fs-small); font-weight:700;
+    border-radius:var(--r-sm, 6px); padding:9px 14px; cursor:pointer; }
+  #modal-b .refused-ask { background:var(--panel); color:var(--panel-ink);
+                          border:1.5px solid var(--panel); }
+  #modal-b .refused-bug { background:var(--surface); color:var(--ink);
+                          border:1.5px solid var(--line); }
+  #modal-b .refused-bug:hover { border-color:var(--gold); }
+  #modal-b .refused-ask:focus-visible,
+  #modal-b .refused-bug:focus-visible { outline:2px solid var(--gold);
+                                        outline-offset:2px; }
+  #modal-b .refused-doorsnote { display:block; margin-top:10px;
+    padding-top:10px; border-top:1px solid var(--line);
+    font-size:var(--fs-micro); color:var(--ink-3); }
+  /* The sentences the server sent keep their own colour inside the dialog —
+     they are the bad news, and the card around them is not. */
+  #modal-b > span, #modal-b > ul { display:block; margin:0 0 8px; }
+  #modal-b strong { color:var(--bad-tx); }
+
+  /* ── THE SAVE SAYS SO, IN THE CORNER (§231) ───────────────────────────
+     Islam, choosing the placement: *"should this appear as a small message in
+     the bottom left of the page that comes out and then goes back in?"*
+
+     THE GOOD NEWS LEAVES AND THE BAD NEWS STAYS, and that asymmetry is the
+     whole design. A message that slides away is right for *it is safe* — it
+     is wanted for a second and is furniture after that — and wrong for *it is
+     not*, which is the case §171 exists for and the one every reported
+     incident was. So `.savetoast.ok` is dismissed on a timer and
+     `.savetoast.bad` has no timer at all.
+
+     BOTTOM-LEFT BECAUSE THE CORNER IS FREE: `.chatdock` is `right:18px`
+     (§97), so the two never meet, at any width. Above the fold on every
+     window, over nothing that is ever the only copy of anything — a red one
+     covers the tail of a table and is meant to.
+
+     NOT DRAWN ON A PROJECTOR, the same silence the chat corner keeps
+     (`body.presenting`): an audience is not being asked whether a save
+     landed. */
+  .savetoast { position:fixed; left:18px; bottom:18px; z-index:46;
+               max-width:min(390px, calc(100vw - 36px));
+               font-size:var(--fs-small); line-height:1.45;
+               border-radius:var(--r-md, 10px);
+               box-shadow:0 10px 28px rgba(10,20,35,.30);
+               animation:savetoast-in .22s ease-out; }
+  body.presenting .savetoast { display:none; }
+  @keyframes savetoast-in { from { opacity:0; transform:translateY(10px); }
+                            to   { opacity:1; transform:none; } }
+  .savetoast.leaving { animation:savetoast-out .22s ease-in forwards; }
+  @keyframes savetoast-out { to { opacity:0; transform:translateY(10px); } }
+  @media (prefers-reduced-motion: reduce) {
+    .savetoast, .savetoast.leaving { animation:none; }
+  }
+  /* Saved: the quietest thing that can still be seen — the panel's own
+     ground, one line, a dot in the good colour. Nothing to read, nothing to
+     do. */
+  .savetoast.ok { display:inline-flex; align-items:center; gap:9px;
+                  background:var(--panel); color:var(--panel-ink);
+                  padding:11px 16px; font-weight:600; }
+  .savetoast.ok i { width:9px; height:9px; border-radius:50%;
+                    background:var(--good); flex:none; }
+  /* Not saved: a card, because it has something to say and something to
+     press. The tint and its TEXT twin, never the solid fill (§38.4). */
+  .savetoast.bad { display:block; background:var(--surface); color:var(--ink);
+                   border:1px solid var(--line);
+                   border-left:4px solid var(--bad); padding:13px 16px; }
+  .savetoast.bad b { display:block; color:var(--bad-tx); margin-bottom:3px;
+                     font-size:var(--fs-note, 14px); }
+  .savetoast-why { font:inherit; font-weight:600; margin-top:9px;
+                   background:var(--panel); color:var(--panel-ink);
+                   border:0; border-radius:var(--r-sm, 6px);
+                   padding:7px 12px; cursor:pointer; }
+  .savetoast-why:focus-visible { outline:2px solid var(--panel-accent);
+                                 outline-offset:2px; }
+  .savetoast-detail { margin-top:9px; font-size:var(--fs-micro);
+                      color:var(--ink-3); word-break:break-word; }
+
   /* ── A PROSE FIELD IN A PLAN (§189) ─────────────────────────────────
      A title is one line of prose however long it is, so this must read as a
      field that happens to be tall rather than as a notes box: no resize grip,

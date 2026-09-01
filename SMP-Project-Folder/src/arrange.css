@@ -1563,6 +1563,48 @@
   .ustrip .un { font-size:13px; color:var(--ink); }
   .ustrip .uv { font-family:var(--mono); font-size:13px; font-weight:700;
     font-variant-numeric:tabular-nums; }
+
+  /* ── HOW THE UNITS SPREAD (§231) ────────────────────────────────────────
+     A stacked bar inside the card, under the track: width is the count, so
+     the strip is read the way the number above it is read and not as
+     decoration. The colours are the BANDS' own, set inline from the tenant's
+     scale — nothing here names a band, or the tenant's scoring page would
+     stop reaching it (§168).
+
+     THE PANEL IS A CHILD OF THE SEGMENT so the pointer can travel into it
+     without closing it, and it opens on `:focus-within` too — a name that can
+     be tabbed to and not seen is worse than one that cannot be tabbed to at
+     all (§163). `position:relative` on the strip and `left:0` on the panel
+     keep it inside the card at every width, by construction rather than by
+     arithmetic (§127). */
+  .uspread { display:flex; gap:4px; margin:10px 0 0; position:relative; }
+  .uspread-seg { position:relative; min-width:26px; }
+  .uspread-bar { height:26px; border-radius:5px; display:flex;
+    align-items:center; justify-content:center; cursor:default;
+    color:var(--on-accent, #fff); font-size:11px; font-weight:700;
+    font-variant-numeric:tabular-nums; }
+  .uspread-bar:focus-visible { outline:2px solid var(--gold); outline-offset:2px; }
+  .uspread-pop { display:none; position:absolute; bottom:calc(100% + 8px);
+    left:0; min-width:210px; z-index:12; background:var(--panel);
+    color:var(--panel-ink); border-radius:9px; padding:10px 12px;
+    box-shadow:0 10px 26px rgba(10,20,35,.35); }
+  .uspread-seg:hover .uspread-pop,
+  .uspread-seg:focus-within .uspread-pop { display:block; }
+  .uspread-h { font-size:10.5px; letter-spacing:.06em; text-transform:uppercase;
+    font-weight:700; color:var(--panel-accent); margin-bottom:6px; }
+  .uspread-pop button { display:flex; width:100%; align-items:center;
+    justify-content:space-between; gap:14px; font:inherit; font-size:12.5px;
+    background:none; border:0; color:inherit; padding:4px 0; cursor:pointer;
+    text-align:left; }
+  .uspread-pop button:hover { color:var(--panel-accent); }
+  .uspread-pop button:focus-visible { outline:2px solid var(--panel-accent);
+    outline-offset:1px; }
+  .uspread-pop b { font-variant-numeric:tabular-nums; }
+  .uspread-f { font-size:10.5px; color:var(--panel-quiet, var(--panel-ink));
+    opacity:.75; margin-top:6px; }
+  /* The last segment's panel would run past the card's right edge; anchoring
+     it to the right keeps it in, and only that one needs it. */
+  .uspread-seg:last-child .uspread-pop { left:auto; right:0; }
 /* ── THE KNOWLEDGE BASE'S PEN (§140) ──────────────────────────────────
    In arrange.css, concatenated last, because config.css has eaten three
    silently-duplicated rules already (§29.2, §51.5, §53.6) and one comment

@@ -219,9 +219,16 @@ with sync_playwright() as pw:
     pg.wait_for_timeout(2600)
     ck("the save went and was refused", POSTS and POSTS[0] == 403, POSTS)
 
-    banner = pg.evaluate("""()=>{const el=document.getElementById('refused');
-        return el && !el.hidden ? el.innerText : null;}""")
-    ck("the banner is on screen", bool(banner), banner)
+    # ── §231: THE REFUSAL IS A DIALOG NOW, NOT A BANNER.
+    # The sentences, the per-line list and both buttons are unchanged and keep
+    # their ids — only the box moved, because a banner at the top of a page
+    # somebody has scrolled is a control that does nothing (§90). So this reads
+    # the dialog, and asserts it is actually OPEN rather than merely present:
+    # `#modal-b` holds the markup whether or not the overlay is on.
+    banner = pg.evaluate("""()=>{const ov=document.querySelector('.overlay.on');
+        const el=document.getElementById('modal-b');
+        return ov && el ? el.innerText : null;}""")
+    ck("the dialog is on screen", bool(banner), banner)
     if banner:
         ck("...it names the refused ROW, not only the table",
            FIX["refusedName"] in banner, banner[:300])
@@ -280,9 +287,10 @@ with sync_playwright() as pw:
       SYNC.afterPaint();}""", FIX)
     pg.wait_for_timeout(2600)
     ck("removing a project is refused", 403 in POSTS, POSTS)
-    ck("...the banner still says why",
-       pg.evaluate("""()=>{const el=document.getElementById('refused');
-           return !!(el && !el.hidden && el.innerText.trim());}"""))
+    ck("...the dialog still says why",
+       pg.evaluate("""()=>{const ov=document.querySelector('.overlay.on');
+           const el=document.getElementById('modal-b');
+           return !!(ov && el && el.innerText.trim());}"""))
     ck("...and NO put-back is offered, because there is no row to put back",
        pg.evaluate("!document.getElementById('refused-keep')"))
     ck("...while Discard still is", pg.evaluate("!!document.getElementById('refused-undo')"))

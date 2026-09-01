@@ -111,9 +111,23 @@ FILE_URL = "file://" + str(ROOT / "SMP-Project-Folder/src/strategy-management-pl
 
 
 def banner(pg):
+    """§231: THREE PLACES SAY IT NOW, AND THIS ASKS ALL THREE.
+
+       A failure is a corner toast, a refusal is the platform's own dialog,
+       and the banner survives for demo data and for the put-back's own
+       fallback. What is under test is that the product SAYS SOMETHING and
+       says the right thing — never which box it chose — so a later change
+       of container keeps this green and a silence still fails it (§94.8)."""
     return pg.evaluate("""() => {
+      const parts = [];
       const e = document.getElementById('refused');
-      return (e && !e.hidden) ? e.textContent.replace(/\\s+/g,' ').trim() : ""; }""")
+      if (e && !e.hidden) parts.push(e.textContent);
+      const t = document.getElementById('savetoast');
+      if (t && !t.hidden) parts.push(t.textContent);
+      const ov = document.querySelector('.overlay.on');
+      const m = document.getElementById('modal-b');
+      if (ov && m) parts.push((document.getElementById('modal-t')||{}).textContent + ' ' + m.textContent);
+      return parts.join(' ').replace(/\\s+/g,' ').trim(); }""")
 
 
 def change(pg, mark):
@@ -135,10 +149,20 @@ with sync_playwright() as p:
     pg.wait_for_timeout(1800)
     ck("the platform hydrated", pg.evaluate("()=>SYNC.isLive()") is True)
 
-    # ── 1 · A SAVE THAT WORKS SAYS NOTHING ───────────────────────────────
+    # ── 1 · A SAVE THAT WORKS SAYS SO, AND THEN LEAVES (§231) ────────────
+    # REVERSED FROM "says nothing", and written down rather than edited away:
+    # §171 left a working save silent, which is right only while a FAILING one
+    # is loud — and every reported incident was somebody who could not tell the
+    # two apart. So the word is asserted here, and the fact that it goes by
+    # itself is asserted below: a green message that stayed would be furniture
+    # on every page in the product.
     print("\n1 · a save that works")
     change(pg, "quiet-1")
-    ck("nothing on the page when the save lands", banner(pg) == "", banner(pg))
+    said = banner(pg)
+    ck("the save says it landed", "Saved" in said, said or "(nothing)")
+    ck("...and does not claim anything went wrong", "Not saved" not in said, said)
+    pg.wait_for_timeout(2800)
+    ck("...and it takes itself away", banner(pg) == "", banner(pg))
 
     # ── 2 · A SERVER ERROR ───────────────────────────────────────────────
     print("\n2 · the server answers 500")
@@ -146,15 +170,21 @@ with sync_playwright() as p:
     change(pg, "boom-1")
     said = banner(pg)
     ck("the page says it did not save", "Not saved" in said, said or "(nothing)")
-    # THE STATUS IS THE HALF THAT SENDS SOMEBODY SOMEWHERE (§123).
-    ck("...and names the status", "500" in said, said)
+    # THE STATUS IS THE HALF THAT SENDS SOMEBODY SOMEWHERE (§123) — behind
+    # the press since §231, because the sentence somebody needs FIRST is "your
+    # work is still here". Pressed, not read off the markup: a detail nobody
+    # can reach is the same as one that was never written.
+    ck("...and the work is not claimed to be lost", "still on this page" in said, said)
+    pg.evaluate("()=>{const b=document.querySelector('[data-toast-why]'); if(b) b.click();}")
+    pg.wait_for_timeout(300)
+    ck("...and pressing it names the status", "500" in banner(pg), banner(pg))
 
     # ── 3 · IT CLEARS WHEN A SAVE LANDS ──────────────────────────────────
     # A WARNING THAT OUTLIVES ITS CAUSE IS WORSE THAN NONE (§35).
     print("\n3 · and it clears")
     POST["status"] = 200
     change(pg, "quiet-2")
-    ck("the banner goes when a save succeeds", banner(pg) == "", banner(pg))
+    ck("the failure goes when a save succeeds", "Not saved" not in banner(pg), banner(pg))
 
     # ── 4 · NO SERVER AT ALL IS A DIFFERENT ERRAND ───────────────────────
     print("\n4 · the server cannot be reached")
@@ -163,6 +193,9 @@ with sync_playwright() as p:
     pg.wait_for_timeout(1500)
     said = banner(pg)
     ck("the page says it did not save", "Not saved" in said, said or "(nothing)")
+    pg.evaluate("()=>{const b=document.querySelector('[data-toast-why]'); if(b) b.click();}")
+    pg.wait_for_timeout(300)
+    said = banner(pg)
     ck("...and it is not reported as a server answer",
        "reach" in said.lower() and "HTTP" not in said, said)
 

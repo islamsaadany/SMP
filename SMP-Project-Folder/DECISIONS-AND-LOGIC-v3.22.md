@@ -25494,3 +25494,107 @@ that quietly brought the link back would pass.
 (server / data / example — asserted as a regex over the whole card), keep Try
 again reachable by a real press, and keep the way past removed. ALL GREEN on
 the build; full `qa.py` clean.
+
+---
+
+## §231 — THE SAVE SAYS SO, A REFUSAL STOPS THE WORK, AND THE GROUP'S CARD
+## SAYS HOW THE UNITS SPREAD (2026-09-01)
+
+Four changes agreed from mockups drawn on the real pages, after a first design
+audit Islam rejected outright — *"that's a very poor evaluation"* — for having
+been measured on the baked demo as the super user, on an iPad premise the
+product does not have (§1d records that lesson; four of its six findings were
+dropped). The evaluation was redone from the project's own record of REAL
+incidents on the live deployment, and three patterns carry eleven of the
+fourteen. What follows is those patterns turned from patches into guarantees,
+plus the one idea from the first pass Islam kept.
+
+**THE PLACEMENT AND THE SHAPE ARE BOTH HIS, AND BOTH ARE BETTER THAN MINE.**
+I proposed a small word pinned in the page header; he asked *"should this
+appear as a small message in the bottom left of the page that comes out and
+then goes back in?"* — right, because the case it is mostly in is *nothing is
+wrong*, and a line across the top of every page is furniture. I proposed a
+banner for a refusal; he asked for a dialog with a button that sends the
+trouble to the office and *"grabs the console error as well … under technical
+issues tag"* — right, because §90's own rule is that a control below the fold
+is a control that does nothing, and a refusal is the one moment where stopping
+the work is honest.
+
+**THE GOOD NEWS LEAVES AND THE BAD NEWS STAYS.** `.savetoast.ok` is dismissed
+on a timer, `.savetoast.bad` has no timer at all. That asymmetry is the whole
+design: §171's finding was that a failure looking like a success is the worst
+thing this platform can do, and a red message that tidied itself away would be
+exactly that with a longer fuse. Bottom-left because `.chatdock` is
+`right:18px` (§97), so the two can never meet at any width; not drawn on a
+projector, the same silence the corner keeps. **THE STATUS IS ONE PRESS AWAY**
+— the sentence somebody needs first is *your work is still here*, not an HTTP
+code (§123 one surface out) — and it is written into the node rather than
+repainted, because a paint would replace the button mid-press (§63).
+
+**THE REFUSAL MOVES BOX AND NOTHING ELSE.** Every sentence, the per-line list,
+Put back and Discard are §184's, wired to the same ids; only the container
+changes, which is why the behaviour under test is untouched and it was the
+CHECKS that had to learn the new home (§51.11 — `refusal-keeps-work.py` and
+`save-said.py` both edited, the second's four assertions REWRITTEN against the
+new design rather than deleted, so a later build cannot drift back through
+them). **TWO DOORS, BECAUSE TWO DIFFERENT THINGS GO WRONG**: a refusal is
+usually a permission question and belongs to the office as an ordinary message,
+while one nobody can explain is a fault and wants what the browser recorded.
+Answering both with one button would put bug reports in the queue that holds
+plan requests.
+
+**THE MESSAGE IS LOADED, NEVER SENT.** `CHAT.compose()` opens the corner with
+the text written and the caret at the end; the person presses Send. A button
+that posted on somebody's behalf would write in their name without their
+reading it, which is how a person ends up having asked for something they did
+not mean — and loading the composer keeps every existing rule intact: the same
+`send()`, the same echo, the same waiting state. It APPENDS to a half-typed
+sentence rather than assigning over it (§35), returns whether it landed so the
+caller can say something else when there is no corner to open (§61), and calls
+`chGrow` ON the element the way its own listener does (§188).
+
+**ONLY THE LAST FAULT, AND ONLY ITS MESSAGE.** A console is a stream and a
+report is a sentence; shipping the stream would carry whatever else the page
+logged. Nothing is stored and nothing travels by itself — it sits in a variable
+until somebody presses Report a problem — and **no numbers from the plan are
+in either message**, which is stated on the dialog rather than merely true.
+`whereWeAre()` reads the navigation's own words off `[aria-selected]` (§97.4's
+rule, kept where it still serves) and strips the FURNITURE: a dropdown's caret
+is part of the control, not part of its name, and *"Group▾"* in somebody's
+inbox reads as a typo — found by reading the composed message, not the code.
+
+**THE SPREAD IS BUILT FROM THE TENANT'S OWN BANDS.** `bandSpread()` reads
+`BANDS.bands` and `unitObjectives()` — the same figure the gauges and
+`whereNext()` draw, so the three cannot disagree (§53.5) — and a strip with
+four hardcoded segments would have been a second, quieter copy of a scale the
+tenant edits on Setup › Scoring bands (§168). **WIDTH IS THE COUNT**, so it is
+a real encoding rather than decoration, and **a band holding nobody is not
+drawn at all**: an empty segment would need a width it has no claim to and its
+hover would name nobody. **THE HOVER IS THE POINT** — a count somebody cannot
+act on makes work (§16.7) — so every name carries `data-go`, the attribute
+wired document-wide, never `data-u`, which is scoped to the chrome and would
+look navigable and do nothing (§155.1). The panel is a CHILD of its segment so
+the pointer can travel into it, and `:focus-within` opens the same panel for a
+keyboard, or the names would be reachable by tabbing and invisible while
+reached (§163).
+
+**AND ISLAM REMOVED THE LINE I ADDED UNDER IT** — *"just keep all 10 business
+units …"* — which is 1b-ii applied to my own work: the card already says what
+the number is, and a second sentence explaining the picture above it is a
+description, not information.
+
+**THE WELCOME SCREEN NEEDED NOTHING.** §148 already gives every waiting row a
+button that presses the platform's own controls; the third guarantee is that
+nothing may wait on somebody WITHOUT such a door, and today it holds. Said
+plainly rather than built again.
+
+`checks/save-and-spread.py` asserts the three claims and was watched to fail
+first: **9 failures** against the pre-§231 build. It asserts the AGREEMENT
+between the strip and `unitObjectives()` band by band, never a number (§94.8),
+PRESSES every control rather than reading it (§96), and proves the panel
+REACHABLE with `elementFromPoint` rather than merely present (§93.4). One of
+its own first-run failures was the check: after clicking through to a unit,
+§173 remembers that destination, so the reload for the width sweep landed on a
+page the card is not on — the state is put back before measuring (§94.2). Full
+`qa.py` clean; `refusal-keeps-work`, `save-said`, `office-chat`, `welcome`,
+`table-fit`, `perf-line` and `page-width` all green.

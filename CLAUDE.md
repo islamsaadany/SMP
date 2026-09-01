@@ -428,6 +428,45 @@ console errors (in this cloud environment, run it via a wrapper that points Play
   stated**: while the server is truly down there is no way past — element,
   handler and `.nosrv-link` deleted, not hidden (§24), and the check asserts
   the absence.
+- **THE SAVE SAYS SO IN THE CORNER, AND THE GOOD NEWS LEAVES (§231):**
+  Islam picked the placement — *"a small message in the bottom left … that comes
+  out and then goes back in"* — and it is better than the header word I
+  proposed, because the case it is mostly in is *nothing is wrong* and a line
+  across every page is furniture. **`.savetoast.ok` is dismissed on a timer and
+  `.savetoast.bad` has none**: §171's finding was that a failure looking like a
+  success is the worst thing this platform can do, so a red message that tidied
+  itself away would be that with a longer fuse. Bottom-left because `.chatdock`
+  is `right:18px` (§97) — the two can never meet; not drawn on a projector. The
+  **status is one press away** (§123 one surface out) and is written into the
+  node, never repainted (§63).
+- **A REFUSAL STOPS THE WORK AND CARRIES TWO DOORS (§231):** Islam's shape.
+  §184's sentences, per-line list, Put back and Discard are UNCHANGED and keep
+  their ids — **only the box moves**, because a banner at the top of a page
+  somebody scrolled is a control that does nothing (§90), so it was the CHECKS
+  that had to learn the new container (§51.11; `save-said.py`'s four assertions
+  REWRITTEN against the new design, never deleted). **Two doors because two
+  different things go wrong**: a permission question is an ordinary message to
+  the office, a fault is a technical report carrying the browser's LAST error
+  message only — a console is a stream and a report is a sentence, and **no
+  numbers from the plan travel in either**, said on the dialog rather than
+  merely true. **`CHAT.compose()` LOADS THE CORNER AND DOES NOT SEND** — a
+  button that posted on somebody's behalf writes in their name without their
+  reading it — appending to a half-typed sentence rather than assigning over it
+  (§35), returning whether it landed (§61), and calling `chGrow` ON the element
+  (§188). `whereWeAre()` strips the navigation's FURNITURE: a dropdown's caret
+  is part of the control, not its name, and *"Group▾"* in an inbox reads as a
+  typo — found by reading the composed message, not the code.
+- **THE SPREAD IS THE TENANT'S OWN BANDS (§231):** `bandSpread()` reads
+  `BANDS.bands` and `unitObjectives()` — the figure the gauges and `whereNext()`
+  already draw, so the three cannot disagree (§53.5) — and four hardcoded
+  segments would be a second copy of a scale the tenant edits (§168). **Width is
+  the count**, a band holding nobody is **not drawn** (an empty segment needs a
+  width it has no claim to and its hover names nobody), and every name carries
+  **`data-go`**, never `data-u`, which is scoped to the chrome and would look
+  navigable and do nothing (§155.1). The panel is a CHILD of its segment so the
+  pointer can travel into it, and `:focus-within` opens it for a keyboard (§163).
+  **Islam removed the caption I added under it** — 1b-ii applied to my own work.
+  `checks/save-and-spread.py`: **9 red** on the build before.
 - **A LATE ANSWER STILL LANDS (§230):** Islam, hard-refreshing after a
   deployment — §201's wall, every time, clearing itself later. **The server was
   healthy and the landing was wrong**: a cold function's first answer routinely

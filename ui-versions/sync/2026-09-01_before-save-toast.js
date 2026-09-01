@@ -333,69 +333,14 @@ var SYNC = (function () {
     el.hidden = false;
   }
 
-  /* \u2500\u2500 THE SAVE'S OWN WORD, IN THE CORNER (\u00a7231) \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500
-     Islam: *"should this appear as a small message in the bottom left of the
-     page that comes out and then goes back in?"* \u2014 better than the banner it
-     replaces for the case it is mostly in, which is *nothing is wrong*: a
-     line across the top of every page is furniture, and a corner that speaks
-     and leaves is not.
-
-     THE ASYMMETRY IS THE DESIGN. `ok` is dismissed on a timer; `bad` has no
-     timer, because \u00a7171's whole finding was that a failure which looks like a
-     success is the worst thing this platform can do, and a red message that
-     tidied itself away would be exactly that with a longer fuse.
-
-     ONE TIMER, CLEARED ON EVERY CALL: two saves a second apart must not leave
-     the first one's timer to hide the second one's word, and a `bad` arriving
-     while an `ok` is on screen must not inherit its dismissal.
-
-     THE ELEMENT IS EMPTIED, NEVER LEFT HIDDEN WITH ITS CONTENT (\u00a73.2): the
-     detail button inside it is bound on every draw, so a hidden copy would
-     collect a second handler on the next failure. */
-  var toastEl = null, toastTimer = null;
-  function saveToast(kind, html, detail) {
-    if (toastEl === null) toastEl = document.getElementById("savetoast") || false;
-    if (!toastEl) return;
-    if (toastTimer) { clearTimeout(toastTimer); toastTimer = null; }
-    if (!kind) { toastEl.hidden = true; toastEl.className = "savetoast";
-                 toastEl.innerHTML = ""; return; }
-    toastEl.className = "savetoast " + kind;
-    toastEl.innerHTML = html;
-    toastEl.hidden = false;
-    /* WHAT HAPPENED, on the press and not before: the status is the one thing
-       here worth calling technical, and it is what the person who can act on
-       it needs (\u00a7123). Written into the node rather than repainted \u2014 the
-       toast is outside the page and a paint would replace the button
-       mid-press (\u00a763). */
-    if (detail) {
-      var btn = toastEl.querySelector("[data-toast-why]");
-      if (btn) btn.onclick = function () {
-        btn.remove();
-        var d = document.createElement("div");
-        d.className = "savetoast-detail";
-        d.textContent = detail;
-        toastEl.appendChild(d);
-      };
-    }
-    if (kind === "ok") {
-      toastTimer = setTimeout(function () {
-        toastEl.classList.add("leaving");
-        toastTimer = setTimeout(function () { saveToast(null); }, 240);
-      }, 2200);
-    }
-  }
-
   /* WHY IT DID NOT GO, in the words that name where to look. The status is
      shown deliberately: a number is not jargon to the one person who can act
-     on it, and without it every failure reads the same \u2014 but it is behind the
-     press now (\u00a7231), because the sentence somebody needs first is *your work
-     is still here*, not an HTTP code. */
+     on it, and without it every failure reads the same. */
   function showFailed(why) {
-    saveToast("bad",
-      "<b>Not saved</b>Your work is still on this page \u2014 keep it open, " +
-      "the platform is trying again." +
-      "<button type=\"button\" class=\"savetoast-why\" data-toast-why>" +
-      "What happened?</button>", why);
+    notSaved("<span><strong>Not saved.</strong> " + esc(why) + "</span>" +
+      "<span>Your change is still on screen and the platform keeps trying. " +
+      "If it does not clear, reload before typing anything else \u2014 what is " +
+      "on screen has not reached the database.</span>");
   }
 
   function showDemoBlocked() {
@@ -485,127 +430,10 @@ var SYNC = (function () {
     return missed;
   }
 
-  /* ── A REFUSAL STOPS THE WORK, AND CARRIES TWO DOORS (§231) ───────────
-     Islam: *"can it be a modal pop up and it has a button to send to the
-     office … under technical issues tag? similar to … ask the strategy office
-     to add it under the normal messages?"*
-
-     THE DIALOG IS THE RIGHT CONTAINER FOR EXACTLY THIS ONE THING. §90's rule
-     is that a control below the fold is a control that does nothing, and the
-     banner sat at the top of a page somebody had scrolled — so the sentence
-     naming what was refused, and the button that puts it back, were reached
-     only by scrolling up to look for them. A refusal is also the one moment
-     where stopping the work is honest: something the person believes is saved
-     is not.
-
-     NOTHING ABOUT §184 CHANGES. The same sentences, the same per-line list,
-     the same Put back and Discard, wired to the same ids — only the box they
-     are drawn in moves, so the behaviour under test is untouched and it is
-     the CHECK that has to learn the new container (§51.11).
-
-     TWO DOORS, BECAUSE TWO DIFFERENT THINGS GO WRONG. A refusal is usually a
-     permission question and belongs to the office as an ordinary message; a
-     refusal nobody can explain is a fault, and that one wants what the
-     browser recorded. They are separate buttons because they reach different
-     desks, and answering them with one would put bug reports in the same
-     queue as plan requests.
-
-     THE MESSAGE IS LOADED, NEVER SENT (see `CHAT.compose`), and it carries
-     the platform's own sentence and the page — never the plan's numbers,
-     which are the client's and have no business travelling with a bug
-     report. */
-  var refusalOpen = false;
-  /* Asked of the CHAT, never of the protocol: whether there is a corner to
-     open is that module's question and it already answers it (`servable`),
-     and a second test here is how the two come to disagree (§53.5). */
-  function canAskOffice() {
-    return typeof CHAT !== "undefined" && CHAT && typeof CHAT.compose === "function"
-      && typeof CHAT.servable === "function" && CHAT.servable();
-  }
-
-  /* The message the corner is loaded with. TECHNICAL ONLY WHEN ASKED: the
-     browser's own words help nobody with a permission question and are the
-     whole point of a fault report, so the two wordings differ by exactly
-     that. Nothing from the plan travels in either. */
-  function askOffice(list, lines, technical) {
-    var where = whereWeAre();
-    var text = technical
-      ? "Technical issue — a change was refused and I do not think it should have been.\n\n" +
-        "Page: " + (where || "(not known)") + "\n" +
-        "What the platform said: " + (list && list[0] ? list[0] : "(no reason given)") +
-        (lines && lines.length
-          ? "\nLines: " + lines.map(stripTags).join("; ") : "") +
-        (lastFault ? "\nBrowser: " + lastFault : "")
-      : "Could you make this change for me? The platform says it is the " +
-        "Strategy Office's to do.\n\n" +
-        "Page: " + (where || "(not known)") + "\n" +
-        "What I was changing: " +
-        (lines && lines.length ? lines.map(stripTags).join("; ") : "(see below)") +
-        "\nWhat the platform said: " + (list && list[0] ? list[0] : "");
-    if (typeof closeModal === "function") closeModal();
-    refusalOpen = false;
-    if (!CHAT.compose(text)) {
-      /* Said, never swallowed: the corner refusing to open is the one case
-         where this button does nothing, and silence there is §96 exactly. */
-      showFailed("The message could not be opened — the chat is not available here.");
-    }
-  }
-
-  /* The per-line list is built as markup for the banner; a message is not
-     markup, and an entity in an inbox reads as a mistake. */
-  function stripTags(s) {
-    var d = document.createElement("div");
-    d.innerHTML = s;
-    return (d.textContent || "").trim();
-  }
-
-  /* ── WHAT THE BROWSER RECORDED (§231) ─────────────────────────────────
-     Islam: *"the chat grabs the console error as well from the user
-     browser."* The LAST one only, and only its message — a console is a
-     stream and a report is a sentence, and shipping the whole stream would
-     carry whatever else the page happened to log. Nothing is stored and
-     nothing is sent by itself: it sits in a variable until somebody presses
-     Report a problem. */
-  var lastFault = "";
-  try {
-    window.addEventListener("error", function (e) {
-      lastFault = String((e && e.message) || "").slice(0, 300);
-    });
-    window.addEventListener("unhandledrejection", function (e) {
-      var r = e && e.reason;
-      lastFault = String((r && r.message) || r || "").slice(0, 300);
-    });
-  } catch (e) {}
-
-  function whereWeAre() {
-    /* The navigation's own words, read off what is selected — never
-       `currentSub`, which is a key (§97.4's rule, kept where it still
-       serves: a message that names a page has to name it the way the person
-       reading it saw it). */
-    var bits = [];
-    try {
-      document.querySelectorAll('[aria-selected="true"]').forEach(function (b) {
-        /* The navigation's own words and NOT its furniture: a dropdown's
-           caret and a tab's status dot are part of the control, not part of
-           its name, and "Group▾" in somebody's inbox reads as a typo. */
-        var t = (b.textContent || "").replace(/[▸▾▼▴‣●·]/g, "").trim();
-        if (t) bits.push(t.split("\n")[0].trim());
-      });
-    } catch (e) {}
-    return bits.slice(0, 3).join(" › ");
-  }
-
   function showRefusal(list, changes, undoable, judged) {
     var el = document.getElementById("refused");
     if (!el) return;
-    if (!list || !list.length) {
-      el.hidden = true; el.innerHTML = "";
-      /* Closed only if OURS is the dialog on screen: a save landing while
-         somebody is reading something else must not shut it under them. */
-      if (refusalOpen && typeof closeModal === "function") closeModal();
-      refusalOpen = false;
-      return;
-    }
+    if (!list || !list.length) { el.hidden = true; el.innerHTML = ""; return; }
     /* One line per row, so "which line was it?" is answered on the banner
        rather than by hunting the page. Deduplicated by row and field: a
        milestone whose date and pending mark both moved is ONE line to a
@@ -646,37 +474,8 @@ var SYNC = (function () {
           " and save the rest</button> "
         : "") +
       '<button type="button" class="refused-undo" id="refused-undo">' +
-      "Discard everything and reload</button></span>" +
-      /* The two doors. Drawn only where there is a corner to open them in:
-         over `file://` and on a projector there is no chat at all, and a
-         button that cannot work is worse than no button (§61). */
-      (canAskOffice()
-        ? '<span class="refused-doors">' +
-          '<button type="button" class="refused-ask" id="refused-ask">' +
-          "Ask the Strategy Office to change it</button> " +
-          '<button type="button" class="refused-bug" id="refused-bug">' +
-          "Report a problem</button></span>" +
-          '<span class="refused-doorsnote"><b>Ask</b> sends them your change ' +
-          "as an ordinary message. <b>Report a problem</b> files it as a " +
-          "technical issue with what the browser recorded — the error " +
-          "itself, never numbers from your plan.</span>"
-        : "");
-    /* THE DIALOG, NOT THE BANNER (§231). The element is still filled, because
-       the put-back's own fallback writes into it (`notSaved`) and because a
-       build with no dialog function must still say something — the honest
-       degradation, not a second design. */
-    if (typeof openModalHtml === "function") {
-      el.hidden = true;
-      openModalHtml("This change was not saved", "", el.innerHTML);
-      refusalOpen = true;
-      /* The handlers are wired below by id, and the dialog now holds those
-         ids — so the queries have to find the ones on screen, not the copies
-         left in the hidden banner. Emptied for exactly that reason (§56.7: two
-         elements sharing an id is one of them silently never being wired). */
-      el.innerHTML = "";
-    } else {
-      el.hidden = false;
-    }
+      "Discard everything and reload</button></span>";
+    el.hidden = false;
     /* THE OFFERED ONE IS THE ONE THAT KEEPS THE WORK. Discard stays — it is
        the only way out when the refusal names no rows — but it is never the
        only control again when the platform knows what to put back. */
@@ -710,18 +509,6 @@ var SYNC = (function () {
                    "and load the stored version again?\n\nAnything you have typed " +
                    "that was not saved will be lost.")) return;
       location.reload();
-    });
-    /* ── THE TWO DOORS (§231) ────────────────────────────────────────────
-       Both close the dialog first: the corner opens over the page, and a
-       panel behind an inert overlay is a composer nobody can type in
-       (§116.6's own trap, from the other side). */
-    var ask = document.getElementById("refused-ask");
-    if (ask) ask.addEventListener("click", function () {
-      askOffice(list, lines, false);
-    });
-    var bug = document.getElementById("refused-bug");
-    if (bug) bug.addEventListener("click", function () {
-      askOffice(list, lines, true);
     });
   }
 
@@ -841,10 +628,6 @@ var SYNC = (function () {
            paint ask again, which is the first moment the answer can be right.
            Guarded on the symbol existing so sync.js stays independent of which
            pages happen to be built into the file. */
-        /* AND IT SAYS SO (§231). Here and nowhere else: this is the one place
-           the server has confirmed the write, so a word drawn anywhere
-           earlier would be a promise the platform has not yet been given. */
-        saveToast("ok", "<i></i>Saved");
         if (typeof SAIDWHERE !== "undefined" && SAIDWHERE !== null) SAIDWHERE = null;
         if (typeof PWSTATES !== "undefined" && PWSTATES !== null) {
           PWSTATES = null;

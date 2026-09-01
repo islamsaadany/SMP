@@ -1901,6 +1901,40 @@ var CHAT = (function(){
     renderInbox: renderInbox,
     wireInbox: wireInbox,
     open: function(){ setOpen(true); },
+    /* ── A REFUSAL'S WAY OUT, LOADED BUT NOT SENT (§231) ────────────────
+       Islam, on the refusal dialog: *"a button to send to the office … and in
+       this case the chat grabs the console error as well."*
+
+       IT OPENS THE PANEL WITH THE MESSAGE WRITTEN AND DOES NOT SEND IT. The
+       corner is a conversation with a colleague (§97), and a button that
+       posts into it on somebody's behalf writes in their name without their
+       reading it — which is how a person ends up having asked for something
+       they did not mean. Loading the composer keeps every existing rule
+       intact: the same `send()`, the same echo, the same waiting state, and
+       the office receives an ordinary message.
+
+       RETURNS WHETHER IT LANDED, because the caller's own control has to say
+       something else when there is no corner to open — over `file://`, on a
+       projector, or for somebody the server refused (§61: a button that
+       cannot work is worse than no button). */
+    compose: function(text){
+      if (!servable() || !mounted) return false;
+      setOpen(true);
+      var t = el("chatsay");
+      if (!t) return false;
+      /* Appended, never assigned over: a half-typed sentence in there is
+         somebody's and this is not the moment to throw it away (§35). */
+      t.value = t.value.trim() ? t.value.replace(/\s*$/, "\n\n") + text : text;
+      /* The grower is called ON the element, the way its own listener does
+         (§188): it reads `this`, so passing the node as an argument would
+         size whatever the composer happened to be last. */
+      chGrow.call(t);
+      t.focus();
+      /* The caret at the end, so typing continues the message rather than
+         landing in front of it. */
+      try { t.setSelectionRange(t.value.length, t.value.length); } catch(e){}
+      return true;
+    },
     unread: function(){ return state.unread; },
     /* ── HOW MANY ARE WAITING, FOR THE OVERVIEW (§108.10) ──────────────
        The same `queue` action the inbox already calls, whose answer already

@@ -338,6 +338,90 @@
   .banner.refused ul { margin:4px 0 0; padding-left:18px; }
   .banner.refused li { margin:2px 0; }
 
+  /* ── THE REFUSAL'S TWO DOORS (§231) ────────────────────────────────────
+     Drawn inside the dialog, so these are on the card's own ground rather
+     than the banner's tint — the sentences above them keep the bad-news
+     colour, and the way out of a problem should not look like more of it.
+     `Ask` is the ordinary next step and wears the fill; `Report a problem` is
+     the rarer errand and wears a border. Two volumes, one row (§94.8). */
+  #modal-b .refused-doors { display:flex; gap:9px; flex-wrap:wrap;
+                            margin-top:14px; }
+  #modal-b .refused-ask, #modal-b .refused-bug {
+    font:inherit; font-size:var(--fs-small); font-weight:700;
+    border-radius:var(--r-sm, 6px); padding:9px 14px; cursor:pointer; }
+  #modal-b .refused-ask { background:var(--panel); color:var(--panel-ink);
+                          border:1.5px solid var(--panel); }
+  #modal-b .refused-bug { background:var(--surface); color:var(--ink);
+                          border:1.5px solid var(--line); }
+  #modal-b .refused-bug:hover { border-color:var(--gold); }
+  #modal-b .refused-ask:focus-visible,
+  #modal-b .refused-bug:focus-visible { outline:2px solid var(--gold);
+                                        outline-offset:2px; }
+  #modal-b .refused-doorsnote { display:block; margin-top:10px;
+    padding-top:10px; border-top:1px solid var(--line);
+    font-size:var(--fs-micro); color:var(--ink-3); }
+  /* The sentences the server sent keep their own colour inside the dialog —
+     they are the bad news, and the card around them is not. */
+  #modal-b > span, #modal-b > ul { display:block; margin:0 0 8px; }
+  #modal-b strong { color:var(--bad-tx); }
+
+  /* ── THE SAVE SAYS SO, IN THE CORNER (§231) ───────────────────────────
+     Islam, choosing the placement: *"should this appear as a small message in
+     the bottom left of the page that comes out and then goes back in?"*
+
+     THE GOOD NEWS LEAVES AND THE BAD NEWS STAYS, and that asymmetry is the
+     whole design. A message that slides away is right for *it is safe* — it
+     is wanted for a second and is furniture after that — and wrong for *it is
+     not*, which is the case §171 exists for and the one every reported
+     incident was. So `.savetoast.ok` is dismissed on a timer and
+     `.savetoast.bad` has no timer at all.
+
+     BOTTOM-LEFT BECAUSE THE CORNER IS FREE: `.chatdock` is `right:18px`
+     (§97), so the two never meet, at any width. Above the fold on every
+     window, over nothing that is ever the only copy of anything — a red one
+     covers the tail of a table and is meant to.
+
+     NOT DRAWN ON A PROJECTOR, the same silence the chat corner keeps
+     (`body.presenting`): an audience is not being asked whether a save
+     landed. */
+  .savetoast { position:fixed; left:18px; bottom:18px; z-index:46;
+               max-width:min(390px, calc(100vw - 36px));
+               font-size:var(--fs-small); line-height:1.45;
+               border-radius:var(--r-md, 10px);
+               box-shadow:0 10px 28px rgba(10,20,35,.30);
+               animation:savetoast-in .22s ease-out; }
+  body.presenting .savetoast { display:none; }
+  @keyframes savetoast-in { from { opacity:0; transform:translateY(10px); }
+                            to   { opacity:1; transform:none; } }
+  .savetoast.leaving { animation:savetoast-out .22s ease-in forwards; }
+  @keyframes savetoast-out { to { opacity:0; transform:translateY(10px); } }
+  @media (prefers-reduced-motion: reduce) {
+    .savetoast, .savetoast.leaving { animation:none; }
+  }
+  /* Saved: the quietest thing that can still be seen — the panel's own
+     ground, one line, a dot in the good colour. Nothing to read, nothing to
+     do. */
+  .savetoast.ok { display:inline-flex; align-items:center; gap:9px;
+                  background:var(--panel); color:var(--panel-ink);
+                  padding:11px 16px; font-weight:600; }
+  .savetoast.ok i { width:9px; height:9px; border-radius:50%;
+                    background:var(--good); flex:none; }
+  /* Not saved: a card, because it has something to say and something to
+     press. The tint and its TEXT twin, never the solid fill (§38.4). */
+  .savetoast.bad { display:block; background:var(--surface); color:var(--ink);
+                   border:1px solid var(--line);
+                   border-left:4px solid var(--bad); padding:13px 16px; }
+  .savetoast.bad b { display:block; color:var(--bad-tx); margin-bottom:3px;
+                     font-size:var(--fs-note, 14px); }
+  .savetoast-why { font:inherit; font-weight:600; margin-top:9px;
+                   background:var(--panel); color:var(--panel-ink);
+                   border:0; border-radius:var(--r-sm, 6px);
+                   padding:7px 12px; cursor:pointer; }
+  .savetoast-why:focus-visible { outline:2px solid var(--panel-accent);
+                                 outline-offset:2px; }
+  .savetoast-detail { margin-top:9px; font-size:var(--fs-micro);
+                      color:var(--ink-3); word-break:break-word; }
+
   /* ── A PROSE FIELD IN A PLAN (§189) ─────────────────────────────────
      A title is one line of prose however long it is, so this must read as a
      field that happens to be tall rather than as a notes box: no resize grip,
@@ -6010,6 +6094,48 @@
   .ustrip .un { font-size:13px; color:var(--ink); }
   .ustrip .uv { font-family:var(--mono); font-size:13px; font-weight:700;
     font-variant-numeric:tabular-nums; }
+
+  /* ── HOW THE UNITS SPREAD (§231) ────────────────────────────────────────
+     A stacked bar inside the card, under the track: width is the count, so
+     the strip is read the way the number above it is read and not as
+     decoration. The colours are the BANDS' own, set inline from the tenant's
+     scale — nothing here names a band, or the tenant's scoring page would
+     stop reaching it (§168).
+
+     THE PANEL IS A CHILD OF THE SEGMENT so the pointer can travel into it
+     without closing it, and it opens on `:focus-within` too — a name that can
+     be tabbed to and not seen is worse than one that cannot be tabbed to at
+     all (§163). `position:relative` on the strip and `left:0` on the panel
+     keep it inside the card at every width, by construction rather than by
+     arithmetic (§127). */
+  .uspread { display:flex; gap:4px; margin:10px 0 0; position:relative; }
+  .uspread-seg { position:relative; min-width:26px; }
+  .uspread-bar { height:26px; border-radius:5px; display:flex;
+    align-items:center; justify-content:center; cursor:default;
+    color:var(--on-accent, #fff); font-size:11px; font-weight:700;
+    font-variant-numeric:tabular-nums; }
+  .uspread-bar:focus-visible { outline:2px solid var(--gold); outline-offset:2px; }
+  .uspread-pop { display:none; position:absolute; bottom:calc(100% + 8px);
+    left:0; min-width:210px; z-index:12; background:var(--panel);
+    color:var(--panel-ink); border-radius:9px; padding:10px 12px;
+    box-shadow:0 10px 26px rgba(10,20,35,.35); }
+  .uspread-seg:hover .uspread-pop,
+  .uspread-seg:focus-within .uspread-pop { display:block; }
+  .uspread-h { font-size:10.5px; letter-spacing:.06em; text-transform:uppercase;
+    font-weight:700; color:var(--panel-accent); margin-bottom:6px; }
+  .uspread-pop button { display:flex; width:100%; align-items:center;
+    justify-content:space-between; gap:14px; font:inherit; font-size:12.5px;
+    background:none; border:0; color:inherit; padding:4px 0; cursor:pointer;
+    text-align:left; }
+  .uspread-pop button:hover { color:var(--panel-accent); }
+  .uspread-pop button:focus-visible { outline:2px solid var(--panel-accent);
+    outline-offset:1px; }
+  .uspread-pop b { font-variant-numeric:tabular-nums; }
+  .uspread-f { font-size:10.5px; color:var(--panel-quiet, var(--panel-ink));
+    opacity:.75; margin-top:6px; }
+  /* The last segment's panel would run past the card's right edge; anchoring
+     it to the right keeps it in, and only that one needs it. */
+  .uspread-seg:last-child .uspread-pop { left:auto; right:0; }
 /* ── THE KNOWLEDGE BASE'S PEN (§140) ──────────────────────────────────
    In arrange.css, concatenated last, because config.css has eaten three
    silently-duplicated rules already (§29.2, §51.5, §53.6) and one comment
@@ -7832,6 +7958,11 @@ THEME.apply();
 <a class="skip" href="#panel">Skip to the page</a>
 
 <div class="banner refused" id="refused" hidden></div>
+
+<!-- The save's own word (§231). Bottom-left, out of the chat corner's way,
+     and the ONLY thing on the page that answers "did that reach the server".
+     Green leaves by itself; red stays until the save lands. -->
+<div class="savetoast" id="savetoast" hidden></div>
 
 <div class="chrome">
 <!-- Three things on the first line and nothing else: who the product is, who
@@ -23829,7 +23960,11 @@ function drillCard(title, val, opts){
   var body = val == null
     ? '<div class="big nodata">' + (opts.empty || "Not yet measurable") + '</div><div class="track empty"></div>'
     : '<div class="big">' + val + '<small>%</small>' + vs + delta + '</div>' +
-      '<div class="track"><div class="fill" style="width:' + val + '%;background:var(--' + b + ')"></div>' + mark + '</div>';
+      '<div class="track"><div class="fill" style="width:' + val + '%;background:var(--' + b + ')"></div>' + mark + '</div>' +
+      /* Under the track it qualifies, above the sentence that names what the
+         number is: the strip is a second reading of the SAME figure, so it
+         belongs with it rather than below the prose (§231). */
+      (opts.spread || "");
   return '<div class="card' + (opts.primary ? ' primary-card' : '') + '">' +
     '<div class="score-h"><h3>' + title + (opts.primary ? ' <span class="rank">primary</span>' : '') + '</h3>' +
     '<span class="pill ' + (opts.plain ? "kind" : b) + '">' +
@@ -25080,6 +25215,62 @@ function renderGroupPerformance(){
    looked like a link and went nowhere would be worse than no chip.
 
    The score wears its band's TEXT twin, never the fill (§154). */
+/* ── HOW THE UNITS SPREAD (§231) ────────────────────────────────────────
+   Islam, on the group's front page: it says where the portfolio stands today
+   and never how it is shaped — one weighted number for ten units, which is
+   the same 67% whether nine are fine and one is broken or all ten are middling.
+
+   NOTHING NEW IS COMPUTED, twice over: the figure per unit is
+   `unitObjectives(u)` — the same one the gauges and `whereNext()` draw, so
+   the three cannot disagree (§53.5) — and the bands are `BANDS.bands`, the
+   tenant's own (§168). A strip with four hardcoded segments would be a
+   second, quieter copy of the scale that a tenant editing Setup › Scoring
+   bands could never change.
+
+   WIDTH IS THE COUNT, so the strip is a real encoding and not a decoration:
+   a band holding half the units is half the bar. A band holding NONE is not
+   drawn at all — an empty segment would have to be given a width it has no
+   claim to, and the hover behind it would name nobody (§45.2 from the other
+   side: this is not a feature rendering nothing, it is a fact that is absent).
+
+   THE HOVER IS THE POINT, not a garnish. A count somebody cannot act on makes
+   work (§16.7), so each segment names its units with their scores and every
+   name is a real destination carrying `data-go` — the attribute wired
+   document-wide, never `data-u`, which is scoped to the chrome and would look
+   navigable and do nothing (§155.1, found by pressing it). The panel is a
+   CHILD of the segment, so the pointer travelling into it keeps it open;
+   `:focus-within` opens the same panel for a keyboard, or the names would be
+   reachable by tabbing and invisible while reached (§163). */
+function bandSpread(keys){
+  var rows = keys.map(function(k){
+    var u = UNITS[k];
+    return u ? { k: k, name: navName(u), v: unitObjectives(u) } : null;
+  }).filter(function(r){ return r && r.v != null; });
+  if (rows.length < 2) return "";
+  /* Worst first, the order `whereNext()` already reads in and the order the
+     bands are stored in reversed — one direction for both, or the strip and
+     the strip of chips under it disagree about which end is bad. */
+  var out = [], bands = BANDS.bands;
+  for (var i = bands.length - 1; i >= 0; i--) {
+    var b = bands[i];
+    var mine = rows.filter(function(r){ return band(r.v) === b.key; });
+    if (!mine.length) continue;
+    mine.sort(function(a, c){ return a.v - c.v; });
+    out.push('<div class="uspread-seg" style="flex:' + mine.length + ' 1 0">' +
+      '<div class="uspread-bar" style="background:var(--' + esc(b.key) + ')" ' +
+        'tabindex="0" role="button" aria-label="' + esc(b.label) + ' — ' +
+        mine.length + '">' + mine.length + '</div>' +
+      '<div class="uspread-pop"><div class="uspread-h">' + esc(b.label) +
+        ' — ' + plural(mine.length, "unit") + '</div>' +
+        mine.map(function(r){
+          return '<button type="button" data-go="' + esc(r.k) + '">' +
+            '<span>' + esc(r.name) + '</span><b>' + r.v + '%</b></button>';
+        }).join("") +
+      '<div class="uspread-f">Click a name to open the unit</div></div></div>');
+  }
+  return out.length > 1 ? '<div class="uspread">' + out.join("") + '</div>' : "";
+}
+
 function whereNext(keys){
   var rows = keys.map(function(k){
     var u = UNITS[k];
@@ -25116,6 +25307,7 @@ function whereNext(keys){
         }) +
         drillCard("Business units &mdash; performance" + tip(TIP_PERF), groupUnitsObjectives(), {
           delta: deltaTag("group"),
+          spread: bandSpread(UNIT_KEYS),
           /* THE LINE SAYS WHAT THE NUMBER IS, NOT HOW IT WAS MADE (§156).
              It used to print all ten unit weights — "21 / 14 / 10 / 15 / 8 /
              6 / 6 / 7 / 8 / 5" — which is a derivation nobody can use at a
@@ -40680,6 +40872,40 @@ var CHAT = (function(){
     renderInbox: renderInbox,
     wireInbox: wireInbox,
     open: function(){ setOpen(true); },
+    /* ── A REFUSAL'S WAY OUT, LOADED BUT NOT SENT (§231) ────────────────
+       Islam, on the refusal dialog: *"a button to send to the office … and in
+       this case the chat grabs the console error as well."*
+
+       IT OPENS THE PANEL WITH THE MESSAGE WRITTEN AND DOES NOT SEND IT. The
+       corner is a conversation with a colleague (§97), and a button that
+       posts into it on somebody's behalf writes in their name without their
+       reading it — which is how a person ends up having asked for something
+       they did not mean. Loading the composer keeps every existing rule
+       intact: the same `send()`, the same echo, the same waiting state, and
+       the office receives an ordinary message.
+
+       RETURNS WHETHER IT LANDED, because the caller's own control has to say
+       something else when there is no corner to open — over `file://`, on a
+       projector, or for somebody the server refused (§61: a button that
+       cannot work is worse than no button). */
+    compose: function(text){
+      if (!servable() || !mounted) return false;
+      setOpen(true);
+      var t = el("chatsay");
+      if (!t) return false;
+      /* Appended, never assigned over: a half-typed sentence in there is
+         somebody's and this is not the moment to throw it away (§35). */
+      t.value = t.value.trim() ? t.value.replace(/\s*$/, "\n\n") + text : text;
+      /* The grower is called ON the element, the way its own listener does
+         (§188): it reads `this`, so passing the node as an argument would
+         size whatever the composer happened to be last. */
+      chGrow.call(t);
+      t.focus();
+      /* The caret at the end, so typing continues the message rather than
+         landing in front of it. */
+      try { t.setSelectionRange(t.value.length, t.value.length); } catch(e){}
+      return true;
+    },
     unread: function(){ return state.unread; },
     /* ── HOW MANY ARE WAITING, FOR THE OVERVIEW (§108.10) ──────────────
        The same `queue` action the inbox already calls, whose answer already
@@ -42577,14 +42803,69 @@ var SYNC = (function () {
     el.hidden = false;
   }
 
+  /* \u2500\u2500 THE SAVE'S OWN WORD, IN THE CORNER (\u00a7231) \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500
+     Islam: *"should this appear as a small message in the bottom left of the
+     page that comes out and then goes back in?"* \u2014 better than the banner it
+     replaces for the case it is mostly in, which is *nothing is wrong*: a
+     line across the top of every page is furniture, and a corner that speaks
+     and leaves is not.
+
+     THE ASYMMETRY IS THE DESIGN. `ok` is dismissed on a timer; `bad` has no
+     timer, because \u00a7171's whole finding was that a failure which looks like a
+     success is the worst thing this platform can do, and a red message that
+     tidied itself away would be exactly that with a longer fuse.
+
+     ONE TIMER, CLEARED ON EVERY CALL: two saves a second apart must not leave
+     the first one's timer to hide the second one's word, and a `bad` arriving
+     while an `ok` is on screen must not inherit its dismissal.
+
+     THE ELEMENT IS EMPTIED, NEVER LEFT HIDDEN WITH ITS CONTENT (\u00a73.2): the
+     detail button inside it is bound on every draw, so a hidden copy would
+     collect a second handler on the next failure. */
+  var toastEl = null, toastTimer = null;
+  function saveToast(kind, html, detail) {
+    if (toastEl === null) toastEl = document.getElementById("savetoast") || false;
+    if (!toastEl) return;
+    if (toastTimer) { clearTimeout(toastTimer); toastTimer = null; }
+    if (!kind) { toastEl.hidden = true; toastEl.className = "savetoast";
+                 toastEl.innerHTML = ""; return; }
+    toastEl.className = "savetoast " + kind;
+    toastEl.innerHTML = html;
+    toastEl.hidden = false;
+    /* WHAT HAPPENED, on the press and not before: the status is the one thing
+       here worth calling technical, and it is what the person who can act on
+       it needs (\u00a7123). Written into the node rather than repainted \u2014 the
+       toast is outside the page and a paint would replace the button
+       mid-press (\u00a763). */
+    if (detail) {
+      var btn = toastEl.querySelector("[data-toast-why]");
+      if (btn) btn.onclick = function () {
+        btn.remove();
+        var d = document.createElement("div");
+        d.className = "savetoast-detail";
+        d.textContent = detail;
+        toastEl.appendChild(d);
+      };
+    }
+    if (kind === "ok") {
+      toastTimer = setTimeout(function () {
+        toastEl.classList.add("leaving");
+        toastTimer = setTimeout(function () { saveToast(null); }, 240);
+      }, 2200);
+    }
+  }
+
   /* WHY IT DID NOT GO, in the words that name where to look. The status is
      shown deliberately: a number is not jargon to the one person who can act
-     on it, and without it every failure reads the same. */
+     on it, and without it every failure reads the same \u2014 but it is behind the
+     press now (\u00a7231), because the sentence somebody needs first is *your work
+     is still here*, not an HTTP code. */
   function showFailed(why) {
-    notSaved("<span><strong>Not saved.</strong> " + esc(why) + "</span>" +
-      "<span>Your change is still on screen and the platform keeps trying. " +
-      "If it does not clear, reload before typing anything else \u2014 what is " +
-      "on screen has not reached the database.</span>");
+    saveToast("bad",
+      "<b>Not saved</b>Your work is still on this page \u2014 keep it open, " +
+      "the platform is trying again." +
+      "<button type=\"button\" class=\"savetoast-why\" data-toast-why>" +
+      "What happened?</button>", why);
   }
 
   function showDemoBlocked() {
@@ -42674,10 +42955,127 @@ var SYNC = (function () {
     return missed;
   }
 
+  /* ── A REFUSAL STOPS THE WORK, AND CARRIES TWO DOORS (§231) ───────────
+     Islam: *"can it be a modal pop up and it has a button to send to the
+     office … under technical issues tag? similar to … ask the strategy office
+     to add it under the normal messages?"*
+
+     THE DIALOG IS THE RIGHT CONTAINER FOR EXACTLY THIS ONE THING. §90's rule
+     is that a control below the fold is a control that does nothing, and the
+     banner sat at the top of a page somebody had scrolled — so the sentence
+     naming what was refused, and the button that puts it back, were reached
+     only by scrolling up to look for them. A refusal is also the one moment
+     where stopping the work is honest: something the person believes is saved
+     is not.
+
+     NOTHING ABOUT §184 CHANGES. The same sentences, the same per-line list,
+     the same Put back and Discard, wired to the same ids — only the box they
+     are drawn in moves, so the behaviour under test is untouched and it is
+     the CHECK that has to learn the new container (§51.11).
+
+     TWO DOORS, BECAUSE TWO DIFFERENT THINGS GO WRONG. A refusal is usually a
+     permission question and belongs to the office as an ordinary message; a
+     refusal nobody can explain is a fault, and that one wants what the
+     browser recorded. They are separate buttons because they reach different
+     desks, and answering them with one would put bug reports in the same
+     queue as plan requests.
+
+     THE MESSAGE IS LOADED, NEVER SENT (see `CHAT.compose`), and it carries
+     the platform's own sentence and the page — never the plan's numbers,
+     which are the client's and have no business travelling with a bug
+     report. */
+  var refusalOpen = false;
+  /* Asked of the CHAT, never of the protocol: whether there is a corner to
+     open is that module's question and it already answers it (`servable`),
+     and a second test here is how the two come to disagree (§53.5). */
+  function canAskOffice() {
+    return typeof CHAT !== "undefined" && CHAT && typeof CHAT.compose === "function"
+      && typeof CHAT.servable === "function" && CHAT.servable();
+  }
+
+  /* The message the corner is loaded with. TECHNICAL ONLY WHEN ASKED: the
+     browser's own words help nobody with a permission question and are the
+     whole point of a fault report, so the two wordings differ by exactly
+     that. Nothing from the plan travels in either. */
+  function askOffice(list, lines, technical) {
+    var where = whereWeAre();
+    var text = technical
+      ? "Technical issue — a change was refused and I do not think it should have been.\n\n" +
+        "Page: " + (where || "(not known)") + "\n" +
+        "What the platform said: " + (list && list[0] ? list[0] : "(no reason given)") +
+        (lines && lines.length
+          ? "\nLines: " + lines.map(stripTags).join("; ") : "") +
+        (lastFault ? "\nBrowser: " + lastFault : "")
+      : "Could you make this change for me? The platform says it is the " +
+        "Strategy Office's to do.\n\n" +
+        "Page: " + (where || "(not known)") + "\n" +
+        "What I was changing: " +
+        (lines && lines.length ? lines.map(stripTags).join("; ") : "(see below)") +
+        "\nWhat the platform said: " + (list && list[0] ? list[0] : "");
+    if (typeof closeModal === "function") closeModal();
+    refusalOpen = false;
+    if (!CHAT.compose(text)) {
+      /* Said, never swallowed: the corner refusing to open is the one case
+         where this button does nothing, and silence there is §96 exactly. */
+      showFailed("The message could not be opened — the chat is not available here.");
+    }
+  }
+
+  /* The per-line list is built as markup for the banner; a message is not
+     markup, and an entity in an inbox reads as a mistake. */
+  function stripTags(s) {
+    var d = document.createElement("div");
+    d.innerHTML = s;
+    return (d.textContent || "").trim();
+  }
+
+  /* ── WHAT THE BROWSER RECORDED (§231) ─────────────────────────────────
+     Islam: *"the chat grabs the console error as well from the user
+     browser."* The LAST one only, and only its message — a console is a
+     stream and a report is a sentence, and shipping the whole stream would
+     carry whatever else the page happened to log. Nothing is stored and
+     nothing is sent by itself: it sits in a variable until somebody presses
+     Report a problem. */
+  var lastFault = "";
+  try {
+    window.addEventListener("error", function (e) {
+      lastFault = String((e && e.message) || "").slice(0, 300);
+    });
+    window.addEventListener("unhandledrejection", function (e) {
+      var r = e && e.reason;
+      lastFault = String((r && r.message) || r || "").slice(0, 300);
+    });
+  } catch (e) {}
+
+  function whereWeAre() {
+    /* The navigation's own words, read off what is selected — never
+       `currentSub`, which is a key (§97.4's rule, kept where it still
+       serves: a message that names a page has to name it the way the person
+       reading it saw it). */
+    var bits = [];
+    try {
+      document.querySelectorAll('[aria-selected="true"]').forEach(function (b) {
+        /* The navigation's own words and NOT its furniture: a dropdown's
+           caret and a tab's status dot are part of the control, not part of
+           its name, and "Group▾" in somebody's inbox reads as a typo. */
+        var t = (b.textContent || "").replace(/[▸▾▼▴‣●·]/g, "").trim();
+        if (t) bits.push(t.split("\n")[0].trim());
+      });
+    } catch (e) {}
+    return bits.slice(0, 3).join(" › ");
+  }
+
   function showRefusal(list, changes, undoable, judged) {
     var el = document.getElementById("refused");
     if (!el) return;
-    if (!list || !list.length) { el.hidden = true; el.innerHTML = ""; return; }
+    if (!list || !list.length) {
+      el.hidden = true; el.innerHTML = "";
+      /* Closed only if OURS is the dialog on screen: a save landing while
+         somebody is reading something else must not shut it under them. */
+      if (refusalOpen && typeof closeModal === "function") closeModal();
+      refusalOpen = false;
+      return;
+    }
     /* One line per row, so "which line was it?" is answered on the banner
        rather than by hunting the page. Deduplicated by row and field: a
        milestone whose date and pending mark both moved is ONE line to a
@@ -42718,8 +43116,37 @@ var SYNC = (function () {
           " and save the rest</button> "
         : "") +
       '<button type="button" class="refused-undo" id="refused-undo">' +
-      "Discard everything and reload</button></span>";
-    el.hidden = false;
+      "Discard everything and reload</button></span>" +
+      /* The two doors. Drawn only where there is a corner to open them in:
+         over `file://` and on a projector there is no chat at all, and a
+         button that cannot work is worse than no button (§61). */
+      (canAskOffice()
+        ? '<span class="refused-doors">' +
+          '<button type="button" class="refused-ask" id="refused-ask">' +
+          "Ask the Strategy Office to change it</button> " +
+          '<button type="button" class="refused-bug" id="refused-bug">' +
+          "Report a problem</button></span>" +
+          '<span class="refused-doorsnote"><b>Ask</b> sends them your change ' +
+          "as an ordinary message. <b>Report a problem</b> files it as a " +
+          "technical issue with what the browser recorded — the error " +
+          "itself, never numbers from your plan.</span>"
+        : "");
+    /* THE DIALOG, NOT THE BANNER (§231). The element is still filled, because
+       the put-back's own fallback writes into it (`notSaved`) and because a
+       build with no dialog function must still say something — the honest
+       degradation, not a second design. */
+    if (typeof openModalHtml === "function") {
+      el.hidden = true;
+      openModalHtml("This change was not saved", "", el.innerHTML);
+      refusalOpen = true;
+      /* The handlers are wired below by id, and the dialog now holds those
+         ids — so the queries have to find the ones on screen, not the copies
+         left in the hidden banner. Emptied for exactly that reason (§56.7: two
+         elements sharing an id is one of them silently never being wired). */
+      el.innerHTML = "";
+    } else {
+      el.hidden = false;
+    }
     /* THE OFFERED ONE IS THE ONE THAT KEEPS THE WORK. Discard stays — it is
        the only way out when the refusal names no rows — but it is never the
        only control again when the platform knows what to put back. */
@@ -42753,6 +43180,18 @@ var SYNC = (function () {
                    "and load the stored version again?\n\nAnything you have typed " +
                    "that was not saved will be lost.")) return;
       location.reload();
+    });
+    /* ── THE TWO DOORS (§231) ────────────────────────────────────────────
+       Both close the dialog first: the corner opens over the page, and a
+       panel behind an inert overlay is a composer nobody can type in
+       (§116.6's own trap, from the other side). */
+    var ask = document.getElementById("refused-ask");
+    if (ask) ask.addEventListener("click", function () {
+      askOffice(list, lines, false);
+    });
+    var bug = document.getElementById("refused-bug");
+    if (bug) bug.addEventListener("click", function () {
+      askOffice(list, lines, true);
     });
   }
 
@@ -42872,6 +43311,10 @@ var SYNC = (function () {
            paint ask again, which is the first moment the answer can be right.
            Guarded on the symbol existing so sync.js stays independent of which
            pages happen to be built into the file. */
+        /* AND IT SAYS SO (§231). Here and nowhere else: this is the one place
+           the server has confirmed the write, so a word drawn anywhere
+           earlier would be a promise the platform has not yet been given. */
+        saveToast("ok", "<i></i>Saved");
         if (typeof SAIDWHERE !== "undefined" && SAIDWHERE !== null) SAIDWHERE = null;
         if (typeof PWSTATES !== "undefined" && PWSTATES !== null) {
           PWSTATES = null;

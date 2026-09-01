@@ -25877,3 +25877,73 @@ neighbourhood — plan-fields, gap-fill, gap-walk, owner-picker,
 milestone-fill, submit-gate, objective-unit, fn-ko-edit, enter-commits,
 foundation-objectives, plan-builder, repeat-project, table-fit,
 pillar-project-remove — and the full `qa.py` sweep green.
+
+### §231.5 — THE PLATFORM REGISTERS ITS OWN WORKER, AND A HANG IS NOT A SILENCE
+
+Islam, testing §231 on a second account: *"the notifications are not working
+despite I accepted it."* Asked to run one line in the console, his main account
+answered **REGISTERED** and the test account's promise **never settled at all**.
+
+**THAT PENDING PROMISE IS THE WHOLE FAULT.** `sw.js` is registered from the
+GATE only (§26: *one origin-wide scope covers both pages*) — true, and
+sufficient while the worker merely cached the shell, because the gate is the way
+in. It stopped being sufficient the moment a feature on the PLATFORM needed the
+worker to EXIST. A browser that has never completed a gate load — a fresh
+profile, a private window, a session that opened the platform directly (§32) —
+has no registration, and `navigator.serviceWorker.ready` on such a browser
+**never resolves**. Measured: **0 registrations, still pending after three
+seconds, and the bell reading ON the whole time.**
+
+**A HANG IS NOT A FAILURE, WHICH IS WHY IT WAS SILENT.** It does not reject, so
+the `.catch` never runs, and every caller believes it succeeded. §171's rule
+one layer down: a save that fails and says nothing is indistinguishable from one
+that worked, and so is a promise that never settles.
+
+Three things follow. The platform **registers the worker itself** — harmless
+twice, since the browser returns the existing registration, so it never needs to
+know whether the gate got there first. The wait is **raced against a clock**,
+because a promise that may never settle must never be the only thing an outcome
+depends on. And the bell gains a **fifth state**: allowed-but-not-registered,
+which said nothing before and now says what happened and offers to try again
+rather than switching off something that never came on (§61, §226.2's shape).
+
+**AND THE FIX'S OWN FIRST BUILD REPEATED THE FAULT IT WAS FIXING.** The
+`subscribe()` call had its own `.catch` that set a flag and said nothing, so the
+outer handler never saw the rejection and the bell went on reading ON and
+promising a box — measured, with the subscribe genuinely failing. §124 inside
+§231.5, found by driving it rather than by reading it.
+
+**TWO OF THE CHECK'S OWN FAILURES WERE THE CHECK** (§100.3, twice in one run):
+the stub did not serve `sw.js` at all, so `register()` rejected on a content
+type and a correct build reported as a browser that refused; and section 15's
+stand-in supplied only `ready`, not `getRegistration` — *a stand-in that models
+less than the thing it stands in for reports a working build as broken.* A
+third was a real assertion that had become wrong: *"pressing it again turns them
+back on"* read the bell's composite state and so conflated the PERSON'S switch
+with whether this DEVICE is registered, which are exactly the two facts this
+section separated.
+
+### §231.6 — IS IT WORKING?
+
+§123 built this for the assistant and gave the reason: *"it is not working"
+sends somebody to look at everything, and naming the step sends them to one
+page.* Notifications are the same shape and worse — four links, and **every one
+of them fails invisibly by design**: a device that never registered, a key never
+minted, a library that did not load (§231.3 made that quiet on purpose), a push
+service that refused. Until this existed neither the office nor I could tell
+them apart, and the only way to find out was a console command.
+
+**Test on this device** walks the chain and reports where it stops, in the panel
+that already holds *Test the assistant*, drawn by that button's own renderer
+(§53.5) and only while the switch is on (§61). **It makes a REAL send**, because
+a chain that is only inspected is a chain nobody has walked — a key can be
+present and refused, a device registered and long gone — and it goes to the
+asker's own devices and nobody else's: a diagnostic that could reach somebody
+else's screen is one nobody should press. **It stores nothing** (§35), and **it
+reads without repairing**, asserted: changing things from a diagnostic is how a
+diagnostic becomes the thing that broke it.
+
+**IT RE-REGISTERS THIS DEVICE BEFORE ASKING.** The server can only report what
+it HOLDS, so a browser that allowed notifications and never registered would
+otherwise be told *none of your devices is registered* without the platform
+having tried.

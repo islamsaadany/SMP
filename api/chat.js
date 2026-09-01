@@ -364,6 +364,101 @@ module.exports = async function handler(req, res) {
        to somebody else's conversation and read every reply that person is
        sent — the same rule that makes `/api/state` read the person off the
        session and never off the payload (§185). */
+    /* ── IS IT WORKING? (§231.6) ──────────────────────────────────────
+       §123 built exactly this for the assistant and gave the reason: "it is
+       not working" sends somebody to look at everything, and naming the step
+       sends them to one page. Notifications are the same shape and worse —
+       four links, every one of them failing invisibly by design.
+
+       IT MAKES A REAL SEND, because a chain that is only inspected is a chain
+       nobody has walked: a key can be present and refused, a device
+       registered and long gone. And it STORES NOTHING — it answers about this
+       moment, and a stored answer goes stale where nobody can see it (§35). */
+    if (action === "pushTest") {
+      const steps = [];
+      /* THE WORD IS THE STEP'S TO CHOOSE (§124): "present" is not "working",
+         and a row that says the second about the first is the fault that
+         section exists to record. */
+      const step = function (name, state, detail, word) {
+        steps.push({ name: name, state: state, detail: detail || null, word: word || null });
+      };
+
+      if (!cfg.on) {
+        step("The chat", "off", "The whole chat is switched off, so nothing is sent.");
+        return send(res, 200, { ok: true, steps: steps });
+      }
+      step("The chat", "ok", null, "on");
+
+      if (!cfg.popup) {
+        step("Notifications", "off",
+             "Switched off for the company on this page. Nobody is notified.");
+        return send(res, 200, { ok: true, steps: steps });
+      }
+      step("Notifications", "ok", "Switched on for the company.", "on");
+
+      const h = await push.health(client, me.key);
+
+      /* THE LIBRARY. It is loaded lazily precisely so its absence cannot take
+         the chat down (§231.3) — which means its absence is now silent, and
+         this is where it stops being silent. */
+      if (!h.library) {
+        step("The sending library", "fail",
+             (h.libraryWhy || "It did not load.") +
+             " Notifications cannot be sent until the deployment carries it.");
+        return send(res, 200, { ok: true, steps: steps });
+      }
+      step("The sending library", "ok", null, "loaded");
+
+      if (!h.key) {
+        step("This platform's key", "fail",
+             h.keyWhy || "No key pair could be made or read.");
+        return send(res, 200, { ok: true, steps: steps });
+      }
+      step("This platform's key", "ok",
+           (h.keyFrom === "env" ? "Set in the environment." : "Made by the platform itself.") +
+           " Sending as " + h.subject + ".", "present");
+
+      /* THIS DEVICE. A browser can allow notifications and still never have
+         registered — a hang rather than a refusal, which is what §231.5 was
+         about — so what is counted is what the SERVER holds, not what the
+         browser believes. */
+      if (!h.devices) {
+        step("Your devices", "fail",
+             (h.devicesWhy ? h.devicesWhy + " " : "") +
+             "None of your devices is registered here. Open the conversation " +
+             "in the corner and allow notifications, then press this again.");
+        return send(res, 200, { ok: true, steps: steps });
+      }
+      step("Your devices", "ok",
+           h.devices + (h.devices === 1 ? " device is registered." : " devices are registered."),
+           String(h.devices));
+
+      /* AND THE SEND ITSELF, to this person and nobody else — a diagnostic
+         that could reach somebody else's screen is a diagnostic nobody should
+         press. */
+      const out = await push.sendTo(client, await push.subsOf(client, me.key), {
+        title: "Strategy Office",
+        body: "This is a test. Notifications are working on this device.",
+        tag: "reply"
+      });
+      if (out.sent) {
+        step("A box on your screen", "ok",
+             "Sent to " + out.sent + (out.sent === 1 ? " device" : " devices") +
+             (out.dropped ? ", and " + out.dropped + " that no longer exists was forgotten." : ".") +
+             " If nothing appeared, the last step is your operating system: " +
+             "check that this browser is allowed to show notifications there.",
+             "sent");
+      } else {
+        step("A box on your screen", "fail",
+             (out.why ? out.why + " " : "") +
+             (out.dropped ? "Every registered device turned out to be gone and has been " +
+                            "forgotten — allow notifications again in the corner. "
+                          : "The push service would not take it. ") +
+             "Nothing reached you.");
+      }
+      return send(res, 200, { ok: true, steps: steps });
+    }
+
     if (action === "pushOn") {
       if (!cfg.on || !cfg.popup) {
         return send(res, 403, { ok: false, error: "Notifications are off for this platform." });

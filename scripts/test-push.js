@@ -181,6 +181,35 @@ function makeCert() {
     const keysLeft = (await client.query("SELECT count(*)::int n FROM push_keys")).rows[0].n;
     ok(keysLeft === 1, "and so does the key pair", keysLeft);
 
+    /* ── WHERE THE CHAIN STOPS (§231.6) ─────────────────────────────
+       §123's argument for the other silent feature. What is asserted is that
+       each link is REPORTED, at both ends — a diagnostic that only ever says
+       "working" is worth less than none, because it sends somebody away from
+       the thing that is wrong. */
+    console.log("\nTHE DIAGNOSTIC SAYS WHERE THE CHAIN STOPS (§231.6).");
+    await client.query("DELETE FROM push_subscriptions");
+    let h = await push.health(client, "smo");
+    ok(h.library === true, "it can see whether the library loaded", h.library);
+    ok(!!h.key && h.keyFrom, "...and whether this platform has a key",
+       { keyFrom: h.keyFrom, len: (h.key || "").length });
+    ok(h.devices === 0, "...and that no device is registered", h.devices);
+    ok(/^(https?:|mailto:)/.test(h.subject),
+       "...and the address a push service could reach us at", h.subject);
+    await client.query(
+      "INSERT INTO push_subscriptions (endpoint, person_key, p256dh, auth) VALUES ($1,$2,$3,$4)",
+      [EP("desk"), "smo", FAKE_P256, FAKE_AUTH]);
+    h = await push.health(client, "smo");
+    ok(h.devices === 1, "a registered device is counted", h.devices);
+    /* AND IT IS THE ASKER'S OWN DEVICES, never everybody's — a count that
+       included somebody else's would tell the office it is set up when their
+       own screen is not. */
+    h = await push.health(client, "ceo");
+    ok(h.devices === 0, "...and only that person's", h.devices);
+    /* IT READS, IT NEVER REPAIRS: nothing above has changed anything. */
+    ok(((await client.query("SELECT count(*)::int n FROM push_subscriptions")).rows[0]).n === 1,
+       "and asking changed nothing");
+    await client.query("DELETE FROM push_subscriptions");
+
     /* ── AND ITS ABSENCE IS NOT AN OUTAGE (§231.3) ──────────────────
        This module was required at the top of `lib/push.js`, and `api/chat.js`
        requires THAT at its own top level — so anything stopping the library

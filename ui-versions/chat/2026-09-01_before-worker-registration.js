@@ -625,9 +625,8 @@ var CHAT = (function(){
       return "<b>This browser has not been asked yet</b> \u2014 open your own " +
              "conversation in the corner and allow them.";
     }
-    if (PUSHWHY) return "<b>" + esc2(PUSHWHY) + "</b>";
     return PUSHED ? "Arriving on this device, with or without a tab open."
-                  : "Allowed on this device, and registering\u2026";
+                  : "Allowed on this device.";
   }
 
   /* ── A BOX THAT ARRIVES WITH NO TAB OPEN (§231) ───────────────────────
@@ -656,58 +655,10 @@ var CHAT = (function(){
     for (var i = 0; i < raw.length; i++) out[i] = raw.charCodeAt(i);
     return out;
   }
-  /* ── THE PLATFORM REGISTERS ITS OWN WORKER (§231.5) ──────────────────
-     §26 registered `sw.js` from the GATE ONLY, on the reasoning that one
-     origin-wide scope covers both pages — true, and sufficient for as long as
-     the worker only cached the shell, because the gate is the way in. It
-     stopped being sufficient the moment a feature on the PLATFORM needed the
-     worker to EXIST: a browser that has never completed a gate load (a fresh
-     profile, a private window, a session that opened the platform directly,
-     §32) has no registration, and `navigator.serviceWorker.ready` on such a
-     browser NEVER RESOLVES.
-
-     Islam, on a test account: the promise came back pending and stayed that
-     way. Measured: 0 registrations, still pending after three seconds, and
-     the bell reading ON the whole time.
-
-     A HANG IS NOT A FAILURE, WHICH IS WHY IT WAS SILENT. It does not reject,
-     so the `.catch` never runs and every caller believes it succeeded (§171's
-     rule — a failed save that says nothing is the same fault). So this
-     registers if nobody has, and RACES the wait against a clock, because a
-     promise that may never settle must never be the only thing an outcome
-     depends on. */
-  var PUSHWHY = "";                 /* why this device is not set up, if it is not */
-  function swReady(){
-    if (!pushCan()) return Promise.resolve(null);
-    var mine = navigator.serviceWorker.getRegistration()
-      .then(function(reg){
-        /* Registering twice is harmless — the browser returns the existing
-           registration — so this never needs to know whether the gate got
-           there first. */
-        return reg || navigator.serviceWorker.register("/sw.js");
-      })
-      .then(function(){ return navigator.serviceWorker.ready; })
-      .then(function(reg){ PUSHWHY = ""; return reg; });
-    var clock = new Promise(function(done){
-      setTimeout(function(){ done("slow"); }, 8000);
-    });
-    return Promise.race([mine, clock]).then(function(r){
-      if (r === "slow") {
-        PUSHWHY = "This browser has not finished setting up notifications.";
-        return null;
-      }
-      return r;
-    }).catch(function(e){
-      PUSHWHY = "This browser refused to set up notifications.";
-      return null;
-    });
-  }
-
   function pushSync(){
     if (!pushCan()) return;
     var want = !!(cfg.popup && popMine() && popState() === "granted");
-    swReady().then(function(reg){
-      if (!reg) { PUSHED = false; drawBell(); return; }
+    navigator.serviceWorker.ready.then(function(reg){
       return reg.pushManager.getSubscription().then(function(sub){
         if (!want) {
           if (!sub) { PUSHED = false; return; }
@@ -728,15 +679,7 @@ var CHAT = (function(){
           PUSHED = true;
           return post({ action:"pushOn", sub: sub.toJSON() }, function(){});
         }
-        if (!cfg.vapid) {
-          /* The platform could not make its own key, so there is nothing to
-             subscribe to — not this browser's doing, and it must not read as
-             this browser being set up. */
-          PUSHED = false;
-          PUSHWHY = "This platform has no notification key yet.";
-          drawBell();
-          return;
-        }
+        if (!cfg.vapid) return;       /* no key here — nothing to subscribe to */
         return reg.pushManager.subscribe({
           /* NOT OPTIONAL, AND NOT A PREFERENCE: every browser that supports
              push requires a visible notification for each one delivered, and
@@ -745,30 +688,10 @@ var CHAT = (function(){
           applicationServerKey: b64(cfg.vapid)
         }).then(function(made){
           PUSHED = true;
-          PUSHWHY = "";
           post({ action:"pushOn", sub: made.toJSON() }, function(){});
-          drawBell();
-        }).catch(function(){
-          /* THIS SWALLOWED IT, AND THAT WAS THE WHOLE FAULT AGAIN. The catch
-             set the flag and said nothing, so the outer handler never saw the
-             rejection and the bell went on reading ON and promising a box —
-             measured, with `subscribe()` genuinely failing. §124's fault
-             inside §231.5's own fix, found by driving it rather than by
-             reading it. */
-          PUSHED = false;
-          PUSHWHY = "This browser could not register for notifications.";
-          drawBell();
-        });
+        }).catch(function(){ PUSHED = false; });
       });
-    }).catch(function(){
-      /* Anything the push manager itself refused — a browser with the feature
-         behind a flag, a private window that will not subscribe. Recorded so
-         the bell and the settings row can say it rather than reading as on
-         (§231.5, §124). */
-      PUSHED = false;
-      if (!PUSHWHY) PUSHWHY = "This browser would not register for notifications.";
-      drawBell();
-    });
+    }).catch(function(){ /* no worker registered yet; the next call catches it */ });
   }
   /* WHO WROTE, AND THE FIRST LINE (Islam's wording B). The newest message is
      the one that just arrived; its author is resolved through the same
@@ -834,13 +757,9 @@ var CHAT = (function(){
        on a device that never answered the permission question. The bell says
        what will actually HAPPEN on this device, which is the only thing
        anybody is reading it for. */
-    /* FIVE STATES. §231.5 adds the one that was reading as ON while doing
-       nothing: the browser allowed them and never registered, which is a
-       hang rather than a refusal and so said nothing at all. */
     var state = !mine        ? "off"
               : st === "denied"  ? "blocked"
               : st === "default" ? "ask"
-              : PUSHWHY          ? "stuck"
                                  : "on";
     var on = (state === "on");
     b.innerHTML = on ? BELL_ON : BELL_OFF;
@@ -855,12 +774,6 @@ var CHAT = (function(){
       b.title = "Your browser is blocking these boxes on this device. " +
                 "Turn them back on in its site settings.";
       b.setAttribute("aria-label", "Notifications are blocked by this browser");
-    } else if (state === "stuck") {
-      /* Not their doing and not ours to switch — so it is said, and pressing
-         it tries again rather than turning off something that never came on
-         (§61, the same shape as "ask"). */
-      b.title = PUSHWHY + " Press to try again.";
-      b.setAttribute("aria-label", "Notifications are not set up on this device");
     } else if (state === "ask") {
       /* AND PRESSING IT ASKS, rather than switching off the thing that is not
          on yet — which is what the first build did, so the only control on
@@ -1040,9 +953,6 @@ var CHAT = (function(){
          Their switch is already on — this bell reads "ask" precisely because
          `popMine()` is true — so there is nothing to store. */
       if (popMine() && popState() === "default") { popAsk(); drawBell(); return; }
-      /* Allowed, but this browser never registered (§231.5): try again rather
-         than switch off the thing that never came on. */
-      if (popMine() && PUSHWHY) { PUSHWHY = ""; drawBell(); pushSync(); return; }
       var on = !popMine();
       popMineSet(on);
       /* THE SERVER IS TOLD IN THE SAME BREATH (§231). The subscription IS
@@ -1191,10 +1101,6 @@ var CHAT = (function(){
      about this moment ("is it working now"), and a stored answer would go
      stale in a way nobody could see (§35 — absent is not "none"). */
   var BOXTEST = { busy: false, steps: null };
-  /* §231.6: the same shape for notifications. Its own object, not a second
-     mode of the assistant's — two diagnostics on one panel, and a shared one
-     would make pressing either wipe the other's answer. */
-  var POPTEST = { busy: false, steps: null };
 
   var TESTMARK = {
     ok:   '<span class="tdot ok" aria-hidden="true"></span>',
@@ -1358,20 +1264,7 @@ var CHAT = (function(){
              turns it on, their own browser never allows it, and nothing ever
              says so. It is about THIS browser, because that is the only one
              this screen can honestly speak for. */
-          '<div class="chset-hint">' + popStatusLine(c.popup) + '</div>' +
-          /* IS IT WORKING? (§231.6, §123's shape). Every link in this chain
-             fails invisibly, so "it does not work" was an errand with no
-             address — this one presses the whole thing and says where it
-             stopped. Only while the switch is on: a test of something
-             switched off has one possible answer and it is on the row above
-             (§61). */
-          (c.popup
-            ? '<div class="chset-test">' +
-                '<button class="editbtn" data-chpoptest="1">' +
-                (POPTEST.busy ? "Testing\u2026" : "Test on this device") + '</button>' +
-                (POPTEST.steps ? testHtml(POPTEST.steps) : "") +
-              "</div>"
-            : "")) +
+          '<div class="chset-hint">' + popStatusLine(c.popup) + '</div>') +
 
         /* ── 6 · TOLD WHEN THE ASSISTANT GIVES UP. Only while the assistant is
            on, as before: a handover that cannot happen has nobody to tell. */
@@ -2018,28 +1911,6 @@ var CHAT = (function(){
          perfectly, it was pressable, and pressing it did nothing at all. The
          anchor was the rep `<select>`, which genuinely does belong there.
          §96's family, and found the same way — by pressing the thing. */
-      /* Pressed, not changed — a <button> never fires `change`, which is the
-         fault §123.4 recorded about the assistant's own test button. */
-      if (e.target.closest("[data-chpoptest]")) {
-        if (POPTEST.busy) return;
-        POPTEST.busy = true; POPTEST.steps = null; setMenuPaint();
-        /* THIS DEVICE FIRST. The server can only report what it HOLDS, and a
-           browser that has allowed notifications and never registered would
-           otherwise be told "none of your devices is registered" without the
-           platform having tried — so the registration is re-attempted, and
-           the ask goes after it. */
-        pushSync();
-        setTimeout(function(){
-          post({ action:"pushTest" }, function(err, j){
-            POPTEST.busy = false;
-            POPTEST.steps = (j && j.steps) || [{ name:"The platform", state:"fail",
-              detail: err === "failed" ? "Could not reach the server."
-                                       : String(err || "No answer.") }];
-            setMenuPaint();
-          });
-        }, 1200);
-        return;
-      }
       var test = e.target.closest("[data-chtest]");
       if (test) {
         if (BOXTEST.busy) return;

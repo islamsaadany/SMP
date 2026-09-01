@@ -384,6 +384,41 @@ console errors (in this cloud environment, run it via a wrapper that points Play
   remove × onto a second line — `inline-block` restores it, and it was found
   by `checks/plan-fields.py` GOING RED, not by reading the cascade, which is
   the argument for that check existing.
+- **THE PLATFORM REGISTERS ITS OWN WORKER, AND A HANG IS NOT A SILENCE
+  (§231.5):** Islam, testing on a second account — *"the notifications are not
+  working despite I accepted it."* One console line settled it: his main account
+  answered REGISTERED, the test account's promise **never settled at all**.
+  **`sw.js` IS REGISTERED FROM THE GATE ONLY (§26)** — true and sufficient while
+  the worker merely cached the shell, and not for a moment longer than that: a
+  browser that never completed a gate load (fresh profile, private window, a
+  session opening the platform directly, §32) has no registration, and
+  `navigator.serviceWorker.ready` there **never resolves**. Measured: 0
+  registrations, pending after 3s, bell reading ON throughout. **A HANG IS NOT A
+  FAILURE, WHICH IS WHY IT WAS SILENT** — it does not reject, so no catch runs
+  (§171 one layer down). The platform registers it ITSELF (harmless twice), the
+  wait is RACED AGAINST A CLOCK, and the bell gains a fifth state —
+  allowed-but-not-registered — which says what happened and offers to try again
+  rather than switching off what never came on (§61, §226.2's shape). **AND THE
+  FIX'S FIRST BUILD REPEATED THE FAULT**: `subscribe()`'s own `.catch` set a
+  flag and said nothing, so the bell went on promising a box with the subscribe
+  genuinely failing (§124 inside its own fix, found by driving it). **TWO OF THE
+  CHECK'S FAILURES WERE THE CHECK** (§100.3, twice in one run): the stub never
+  served `sw.js`, so `register()` rejected on a content type; and the stand-in
+  supplied `ready` but not `getRegistration` — *a stand-in that models less than
+  the thing it stands in for reports a working build as broken.*
+- **IS IT WORKING? (§231.6):** §123's argument for the other silent feature —
+  *"it is not working" sends somebody to look at everything, naming the step
+  sends them to one page.* Notifications have FOUR links and **every one fails
+  invisibly by design** (a device that never registered, a key never minted, a
+  library that did not load — §231.3 made that quiet on purpose — a push service
+  that refused). **Test on this device** walks the chain in the panel that
+  already holds *Test the assistant*, drawn by that button's own renderer
+  (§53.5), only while the switch is on (§61). **A REAL SEND**, because an
+  inspected chain is one nobody walked — to the asker's own devices and nobody
+  else's. **Stores nothing** (§35) and **reads without repairing**, asserted.
+  **It re-registers this device before asking**, or a browser that allowed
+  notifications and never registered is told *none of your devices is
+  registered* without the platform having tried.
 - **A FAILED ASK IS NOT AN ANSWER, AND THE INBOX SAID IT WAS (§231.4):** Islam,
   on the Platform Inbox with §231.3's endpoint down — *"all conversations are
   gone!! what happened?"* **NOTHING HAD.** `boxLoadQueue` opened

@@ -271,6 +271,15 @@ A drift between specs and code is a documentation bug — report it before silen
   cannot be checked from a screen is named as such rather than left off.
 
 ### 5. Communication
+- **EVERY SESSION STARTS WITH ALL THE SKILLS ON (2026-09-01).** Everything
+  under `.claude/skills/` loads by itself in every session — nothing to
+  install or invoke. Islam should never need to call a skill by name: use
+  the relevant one unprompted (ponytail while coding, ui-ux-pro-max for
+  anything visual, superpowers' verification before claiming done).
+  **Chat replies start in caveman style, full level** — terse, plain words,
+  all substance kept, fluff dropped; "normal mode" turns it off for that
+  session. Caveman never touches what is written for others: code, comments,
+  commits, docs and decisions entries stay normal prose.
 - **NO TECHNICAL TALK, AND DESIGN IS SHOWN, NEVER DESCRIBED (2026-09-01).**
   Islam: *"I don't understand anything of what you explained. you are talking
   too technical with no visuals."* Everything said to Islam is in plain,

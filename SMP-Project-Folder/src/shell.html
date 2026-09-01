@@ -831,10 +831,8 @@
          that mattered). A rebase that cannot fetch answers false and the
          switch still happens on the old baseline — judged correctly either
          way (§185), and never a blocked way home (§209). */
-      if (how === "saved" || how === "clean") {
-        if (typeof SYNC.rebase === "function") return SYNC.rebase(function () { go(); });
-        return go();
-      }
+      if (how === "saved" || how === "clean")
+        return SYNC.rebase(function () { go(); });
       if (me && key === me) return go();
       /* Refused or failed, and not the way home: the banner sync.js already
          drew says what happened, and the view stays where it is so the work

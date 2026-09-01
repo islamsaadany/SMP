@@ -25378,9 +25378,39 @@ measurement; finance ships without one, so the state is made and unmade,
 §94.2), on both formats. Falsified: dropping `fillKind` from the projects
 call site fails exactly that assertion.
 
-## §229 — A LATE ANSWER STILL LANDS
+## §229 — ENTER COMMITS A ONE-LINE PROSE BOX (2026-09-01)
 
-*(Numbered §229 because another session's §226–§228.2 reached `main` first — §94's precedent.)*
+Found during §226's accessibility audit, reported to Islam with the
+recommendation, and built on his word. **§189's own decision text promised it
+from the day it was written** — *"Enter is not a newline here … Enter blurs,
+which is what commits the value (§35)"* — **and no code ever carried it out**:
+measured on the shipped build, pressing Enter in a growing box inserted a line
+break, on a unit plan's titles and the function Overview's objectives alike,
+with focus staying in the box. §104.8's family — a recorded intention the code
+never had, invisible because nothing compares the two — and it means a stray
+newline could ride a title into the stored plan, the workbook and the deck.
+
+**THE FIX IS ONE LISTENER IN THE ONE BRANCH EVERY BOUND TEXTAREA PASSES
+THROUGH** (the shell's `data-fld` wiring), gated on `.grow` — so a box added
+tomorrow is covered without a list to forget (§104.7), and a `rows="2"` area (a
+definition, a note) keeps Enter as a paragraph key, because a definition IS a
+paragraph. **Blur, never a synthesised change** (§219's rule): blur is what the
+browser does when focus moves, so a box already committed fires nothing and the
+commit path is §35's own, not a second one.
+
+**Nothing stored is touched**: a newline already inside a name stays until
+somebody edits that name — scrubbing data on the way past would be a change
+nobody asked for.
+
+`checks/enter-commits.py` asserts both ends — no newline, focus moved, value
+committed clean on a plan title AND a function objective; a definition still
+takes its paragraph break — and was run against the pre-§229 build first:
+**4 red**, exactly the four grow-box assertions. `fn-ko-edit`, `plan-fields`,
+`plan-edit-head` and the full `qa.py` sweep green after.
+
+## §230 — A LATE ANSWER STILL LANDS
+
+*(Numbered §230 because other sessions' §226–§229 reached `main` first — §94's precedent, twice in one day.)*
 
 Islam, with a screenshot of §201's wall over the live deployment: *"when I hard
 refresh my deployment tab I get thie mssages"* — and, asked the two questions
@@ -25429,12 +25459,12 @@ itself.
 give-up (§201 still working), comes down BY ITSELF, the tenant's bar colour is
 painted, and a flag set before the wait survives, so an in-place paint can never
 be the probe's reload wearing the fix's clothes. Proved able to fail (§94.5):
-**2 red on the pre-§229 build** — the wall stands and the baked navy is painted
+**2 red on the pre-§230 build** — the wall stands and the baked navy is painted
 — while *"as the server's own data"* passes there too, because `hydrate()` had
 run: the check reproducing the diagnosis, not just the symptom. Full `qa.py`
 clean.
 
-## §229.2 — THE NOTICE SPEAKS THE USER'S LANGUAGE (reshaping §201's wall, removing its way past)
+## §230.2 — THE NOTICE SPEAKS THE USER'S LANGUAGE (reshaping §201's wall, removing its way past)
 
 Islam, on §201's card: *"the message after 8 seconds it too tehcnical for the
 users"* — then, on the first plain draft, *"TOO MUCH make a very simple user
@@ -25444,7 +25474,7 @@ rounds of the real card (§41.9), each round cutting further.
 **FOUR SHORT LINES, NONE OF THEM OURS**: *Just a moment…* · *Your page is
 taking a little longer to open. Your work is safe.* · *It will open by itself —
 no need to do anything.* · **Try again**. No "server", no "data", no
-"example" — and with §229 in place, *just a moment* is usually literally true,
+"example" — and with §230 in place, *just a moment* is usually literally true,
 because the page lands by itself seconds later. The three facts §201 existed to
 say survive in the user's words: something is late, nothing saved is touched,
 nothing is asked of you.
@@ -25452,7 +25482,7 @@ nothing is asked of you.
 **"LOOK AT THE EXAMPLE ANYWAY" IS REMOVED, AND IT IS HIS DECISION WITH THE COST
 STATED**: while the server is genuinely down there is now no way past the
 notice — it stands, retrying on its own. §201 kept that link as the old
-behaviour's one virtue; §229.2 records that the example behind the blur was
+behaviour's one virtue; §230.2 records that the example behind the blur was
 the confusing thing the wall exists to fence off, and its remaining audience —
 somebody whose server is truly dead — is better served by the retry than by a
 worked example wearing their chrome. The element, its handler and `.nosrv-link`

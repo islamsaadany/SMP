@@ -68,13 +68,13 @@ Nothing proceeds past this line without an answer.
 
 ## Built and verified
 
-### §229 / §229.2 — the hard-refresh notice (on `claude/hard-refresh-deployment-errors-jm0yin`, not merged)
+### §230 / §230.2 — the hard-refresh notice (on `claude/hard-refresh-deployment-errors-jm0yin`, not merged)
 
-- **§229:** when the server's answer arrives after the page's 8-second
+- **§230:** when the server's answer arrives after the page's 8-second
   give-up (cold start after a deployment), the real page now appears by
   itself and the notice comes down — no reload, nothing pressed. Measured
   first: the server is healthy; only the cold first answer exceeds 8s.
-- **§229.2:** the notice's words are the user's — *Just a moment… / Your
+- **§230.2:** the notice's words are the user's — *Just a moment… / Your
   page is taking a little longer to open. Your work is safe. / It will open
   by itself — no need to do anything. / Try again* — and the "look at the
   example" link is removed at Islam's direction (cost stated: while the

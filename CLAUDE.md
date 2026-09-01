@@ -384,7 +384,7 @@ console errors (in this cloud environment, run it via a wrapper that points Play
   remove × onto a second line — `inline-block` restores it, and it was found
   by `checks/plan-fields.py` GOING RED, not by reading the cascade, which is
   the argument for that check existing.
-- **THE NOTICE SPEAKS THE USER'S LANGUAGE (§229.2):** Islam, on §201's wall —
+- **THE NOTICE SPEAKS THE USER'S LANGUAGE (§230.2):** Islam, on §201's wall —
   *"too technical for the users"*, then *"make a very simple user message"*,
   then *"no need for examples to look at."* Four short lines (*Just a moment…*
   · *Your page is taking a little longer to open. Your work is safe.* · *It
@@ -394,7 +394,7 @@ console errors (in this cloud environment, run it via a wrapper that points Play
   stated**: while the server is truly down there is no way past — element,
   handler and `.nosrv-link` deleted, not hidden (§24), and the check asserts
   the absence.
-- **A LATE ANSWER STILL LANDS (§229):** Islam, hard-refreshing after a
+- **A LATE ANSWER STILL LANDS (§230):** Islam, hard-refreshing after a
   deployment — §201's wall, every time, clearing itself later. **The server was
   healthy and the landing was wrong**: a cold function's first answer routinely
   arrives after the 8s `BOOT_GIVEUP`, and the one-shot `land()` swallowed it —
@@ -406,6 +406,14 @@ console errors (in this cloud environment, run it via a wrapper that points Play
   warm, a signed-in GET 11–54ms against a real Postgres — the 8s is eaten by
   the environment's cold start. `checks/boot-skeleton.py` §6: 2 red on the
   build before.
+- **ENTER COMMITS A ONE-LINE PROSE BOX (§229):** found during §226's audit —
+  §189's own text promised *"Enter blurs, which is what commits"* and no code
+  ever carried it out, so Enter inserted a newline into every growing title
+  box (§104.8's family: a recorded intention nothing compares with the code).
+  One listener in the shell's `data-fld` textarea branch, gated on `.grow`
+  (§104.7 — no list to forget); a `rows="2"` area keeps Enter as a paragraph
+  key; **blur, never a synthesised change** (§219). Nothing stored is
+  scrubbed. `checks/enter-commits.py`: 4 red on the pre-§229 build.
 - **A FUNCTION'S OBJECTIVES ARE WRITTEN AT THE PAGE'S WIDTH (§226):** Islam —
   *"the keyobjectives table is tight I can't see the direction and I can't find
   the unit and the ibjectives cell is not wrapping"*, and *"led by is not open
@@ -3748,6 +3756,9 @@ node scripts/test-graph-diff.js # the change list on its own: only what changed
                                 # travels, applying it to a DIFFERENT target leaves
                                 # that target's other work alone, a removal is not a
                                 # null, and an unknown path is refused (§210)
+python3 checks/enter-commits.py # Enter commits a growing one-line box instead of
+                                # inserting a newline, and a rows-2 area keeps its
+                                # paragraph key — both ends (§229)
 python3 checks/fn-ko-edit.py    # a function's objectives are written at the page's
                                 # width (§226): the editing table in a band on BOTH
                                 # formats, the Unit column writing the stored target,
@@ -3816,7 +3827,15 @@ prior sessions (on HR_ERP) accidentally reverted agreed-upon designs.
 
 ---
 
-*Last Updated: 2026-09-01 &mdash; **&sect;226: a function's objectives are
+*Last Updated: 2026-09-01 &mdash; **&sect;229: Enter commits a one-line
+prose box.** Found during &sect;226's accessibility audit and built on Islam's
+word: &sect;189 promised *"Enter blurs, which is what commits"* and no code
+ever carried it out, so Enter inserted a newline into every growing title box.
+One listener in the shell's bound-textarea branch, gated on `.grow`; a
+definition keeps its paragraph key; nothing stored is scrubbed. The check is
+`checks/enter-commits.py`, run red-first (4 failures pre-&sect;229).*
+
+*Earlier: 2026-09-01 &mdash; **&sect;226: a function's objectives are
 written at the page's width.** Islam, from Consumer Finance's Overview: the
 table tight, the direction invisible, no unit, the objective not wrapping, and
 Led by not open to edit. Three of the four were ONE omission &mdash; the

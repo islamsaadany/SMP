@@ -52,7 +52,7 @@ var SYNC = (function () {
      that will route to the gate) reloads; a 500 keeps waiting rather than
      reload-looping a broken deployment.
 
-     The probe's handle lives at module scope because §229's late answer
+     The probe's handle lives at module scope because §230's late answer
      takes the wall down from outside this function — and that takedown must
      stop the probe too, or a reload fires ten seconds after the real page
      is already up. */
@@ -68,8 +68,8 @@ var SYNC = (function () {
     d.id = "noserver";
     d.setAttribute("role", "alertdialog");
     d.setAttribute("aria-label", "Just a moment");
-    /* Plain words at Islam's direction (\u00a7229.2): four short lines, no
-       "server"/"data"/"example" \u2014 and \u00a7201's "Look at the example anyway"
+    /* Plain words at Islam's direction (§230.2): four short lines, no
+       "server"/"data"/"example" — and §201's "Look at the example anyway"
        way past is REMOVED, cost stated: while the server is truly down
        the notice stands, retrying on its own. */
     d.innerHTML =
@@ -1130,7 +1130,7 @@ var SYNC = (function () {
          backstop and the answer racing each other is harmless. */
       var landed = false, landedLive = false, t0 = bootNow();
       function land(then) {
-        /* ── A LATE ANSWER STILL LANDS (§229) ─────────────────────────
+        /* ── A LATE ANSWER STILL LANDS (§230) ─────────────────────────
            A cold function's first answer often arrives AFTER the 8s
            give-up and used to be dropped here, leaving the person behind
            the wall with their real data already hydrated. A second landing
@@ -1168,7 +1168,7 @@ var SYNC = (function () {
              the wall makes the refusal VISIBLE instead of silent), Try again
              reloads, and it retries by itself so a server that wakes up
              brings the real page back with nobody pressing anything.
-             §229.2 removed the "look at the example anyway" way past, at
+             §230.2 removed the "look at the example anyway" way past, at
              Islam's direction — the wall now stands until the server
              answers, and the words on it are the user's (see noServerWall). */
           if (enabled && !live) noServerWall();

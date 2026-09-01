@@ -7676,6 +7676,17 @@ body{ background:var(--mk-ground); color:var(--mk-ink); margin:0; }
    right-aligned on both lines (§53.5: one question, one answer — and the
    question here is "a second line inside a data cell", not "a note under a
    name"). */
+/* The tactic's description, written under its own name in the same cell —
+   the place it is READ on all three pages, so the pen does not move it. */
+/* A SELECT TOO NARROW TO SHOW ITS OWN VALUE. At ten columns the browser hands
+   the direction picker 40px, of which the native arrow takes most, and Chrome
+   renders the value as an overflow mark — so the control that says whether the
+   outcome is reached or kept below shows neither. The measures table never hits
+   this because it has five columns to spend, not ten. The floor is measured
+   from what that table's own picker gets (67px at 1600), not chosen: below
+   ~52px the glyph goes. */
+.mk-panel td.cc select.fld.mono{ min-width:52px; }
+.mk-panel .tacdesc{ margin-top:5px; font-size:12.5px; color:var(--ink-2); }
 .mk-panel .mk-sub{
   display:block; font-size:.82em; font-weight:400; color:var(--ink-3);
   line-height:1.35; margin-top:1px; white-space:nowrap;
@@ -7699,6 +7710,31 @@ body{ background:var(--mk-ground); color:var(--mk-ink); margin:0; }
   if (window.matchMedia){
     try { window.matchMedia("(prefers-color-scheme: dark)").addEventListener("change", sync); } catch(e){}
   }
+})();
+</script>
+
+<script>
+/* The product sizes every growing box at the end of paint() — `growFields()`,
+   §189 — so a mockup that only copies the markup renders every textarea at its
+   inline 34px and clips the wrapped text. This is that function, verbatim, run
+   once: the mockup has to grow them the way the page does or it argues against
+   the very fields it is proposing. */
+(function(){
+  function grow(){
+    document.querySelectorAll("textarea.fld.grow").forEach(function(t){
+      t.style.height = "auto";
+      t.style.height = (t.scrollHeight + 2) + "px";
+    });
+  }
+  if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", grow);
+  else grow();
+  window.addEventListener("resize", grow);
+  document.addEventListener("input", function(e){
+    if (e.target.matches && e.target.matches("textarea.fld.grow")) {
+      e.target.style.height = "auto";
+      e.target.style.height = (e.target.scrollHeight + 2) + "px";
+    }
+  });
 })();
 </script>
 
@@ -7757,10 +7793,10 @@ body{ background:var(--mk-ground); color:var(--mk-ink); margin:0; }
   <!-- ── PLAN ─────────────────────────────────────────────────────── -->
   <article class="mk-panel">
     <div class="mk-panel-h">
-      <h2>1 &middot; Strategy &rsaquo; Plan</h2>
-      <p>The target stays one column and carries all three facts &mdash; direction, target with its unit,
-        and how it compiles. Ten columns laid out the way the measures table does overrun a 1000px window
-        by 112px; this fits.</p>
+      <h2>1 &middot; Strategy &rsaquo; Plan &mdash; reading</h2>
+      <p>The description sits under the tactic&rsquo;s name, where the reporter&rsquo;s note already goes on
+        the other two pages. The target is one cell carrying all three facts: direction, target with its
+        unit, and how it compiles.</p>
     </div>
     <div class="mk-panel-b">
 
@@ -7770,8 +7806,7 @@ body{ background:var(--mk-ground); color:var(--mk-ink); margin:0; }
         <tbody>
           <tr><td class="idx"><span class="idx-n">1</span></td><td>Clean and standardize existing customer and SKU base</td><td>Ramy Behairy</td><td class="collabs">Hassan Sayed</td><td><span class="qs"><i class="">1</i><i class="on past">2</i><i class="on">3</i><i class="">4</i></span></td></tr>
           <tr><td class="idx"><span class="idx-n">2</span></td><td>End-to-End Order-to-Cash Digitization</td><td>Mohamed Rizk</td><td class="collabs">Hassan, Hala</td><td><span class="qs"><i class="">1</i><i class="on past">2</i><i class="on">3</i><i class="">4</i></span></td></tr>
-          <tr><td class="idx"><span class="idx-n">3</span></td><td>Scale Mobile Digital App across all active merchants</td><td>Ashraf Abdelaty</td><td class="collabs">Ashraf Laithy, Karim</td><td><span class="qs"><i class="">1</i><i class="on past">2</i><i class="on">3</i><i class="on">4</i></span></td></tr>
-          <tr><td class="idx"><span class="idx-n">4</span></td><td>Roll out the mega-store format across key governorates</td><td>Sherif Kamel</td><td class="collabs">Ramy Behairy</td><td><span class="qs"><i class="on past">1</i><i class="on past">2</i><i class="on">3</i><i class="on">4</i></span></td></tr>
+          <tr><td class="idx"><span class="idx-n">3</span></td><td>Roll out the mega-store format across key governorates</td><td>Sherif Kamel</td><td class="collabs">Ramy Behairy</td><td><span class="qs"><i class="on past">1</i><i class="on past">2</i><i class="on">3</i><i class="on">4</i></span></td></tr>
         </tbody>
       </table></div>
 
@@ -7779,12 +7814,11 @@ body{ background:var(--mk-ground); color:var(--mk-ink); margin:0; }
 
       <p class="mk-cap new"></p>
       <div class="mk-real"><table>
-        <thead><tr><th>#</th><th>Tactic</th><th>Description</th><th>Outcome</th><th class="cc">Target</th><th>Owner</th><th>Collabs.</th><th>Quarters</th></tr></thead>
+        <thead><tr><th>#</th><th>Tactic</th><th>Outcome</th><th class="cc">Target</th><th>Owner</th><th>Collabs.</th><th>Quarters</th></tr></thead>
         <tbody>
-          <tr><td class="idx"><span class="idx-n">1</span></td><td>Clean and standardize existing customer and SKU base</td><td class="mk-prose">Create a reliable, unified data foundation across different systems</td><td class="mk-prose"><span class="missing">Missing</span></td><td class="num"><span class="missing">Missing</span></td><td>Ramy Behairy</td><td class="collabs">Hassan Sayed</td><td><span class="qs"><i class="">1</i><i class="on past">2</i><i class="on">3</i><i class="">4</i></span></td></tr>
-          <tr><td class="idx"><span class="idx-n">2</span></td><td>End-to-End Order-to-Cash Digitization</td><td class="mk-prose">Automate the full sales and payment cycle</td><td class="mk-prose"><b>Orders processed end-to-end digitally</b></td><td class="num">&ge; 90%<span class="mk-sub">Latest</span></td><td>Mohamed Rizk</td><td class="collabs">Hassan, Hala</td><td><span class="qs"><i class="">1</i><i class="on past">2</i><i class="on">3</i><i class="">4</i></span></td></tr>
-          <tr><td class="idx"><span class="idx-n">3</span></td><td>Scale Mobile Digital App across all active merchants</td><td class="mk-prose">Drive digital ordering, engagement, communication channel and coverage enhancement</td><td class="mk-prose"><b>App coverage rate</b></td><td class="num">&ge; 50%<span class="mk-sub">Latest</span></td><td>Ashraf Abdelaty</td><td class="collabs">Ashraf Laithy, Karim</td><td><span class="qs"><i class="">1</i><i class="on past">2</i><i class="on">3</i><i class="on">4</i></span></td></tr>
-          <tr><td class="idx"><span class="idx-n">4</span></td><td>Roll out the mega-store format across key governorates</td><td class="mk-prose">Take the format to the governorates where footfall justifies it</td><td class="mk-prose"><b>Mega stores opened</b></td><td class="num">&ge; 6 #<span class="mk-sub">Sum</span></td><td>Sherif Kamel</td><td class="collabs">Ramy Behairy</td><td><span class="qs"><i class="on past">1</i><i class="on past">2</i><i class="on">3</i><i class="on">4</i></span></td></tr>
+          <tr><td class="idx"><span class="idx-n">1</span></td><td>Clean and standardize existing customer and SKU base<span class="why">Create a reliable, unified data foundation across different systems</span></td><td class="mk-prose"><span class="missing">Missing</span></td><td class="num"><span class="missing">Missing</span></td><td>Ramy Behairy</td><td class="collabs">Hassan Sayed</td><td><span class="qs"><i class="">1</i><i class="on past">2</i><i class="on">3</i><i class="">4</i></span></td></tr>
+          <tr><td class="idx"><span class="idx-n">2</span></td><td>End-to-End Order-to-Cash Digitization<span class="why">Automate the full sales and payment cycle</span></td><td class="mk-prose"><b>Orders processed end-to-end digitally</b></td><td class="num">&ge; 90%<span class="mk-sub">Latest</span></td><td>Mohamed Rizk</td><td class="collabs">Hassan, Hala</td><td><span class="qs"><i class="">1</i><i class="on past">2</i><i class="on">3</i><i class="">4</i></span></td></tr>
+          <tr><td class="idx"><span class="idx-n">3</span></td><td>Roll out the mega-store format across key governorates<span class="why">Take the format to the governorates where footfall justifies it</span></td><td class="mk-prose"><b>Mega stores opened</b></td><td class="num">&ge; 6 #<span class="mk-sub">Sum</span></td><td>Sherif Kamel</td><td class="collabs">Ramy Behairy</td><td><span class="qs"><i class="on past">1</i><i class="on past">2</i><i class="on">3</i><i class="on">4</i></span></td></tr>
         </tbody>
       </table></div>
 
@@ -7794,8 +7828,82 @@ body{ background:var(--mk-ground); color:var(--mk-ink); margin:0; }
           being measured, exactly as a key measure is named without its target in it. Leave the number in
           the sentence and the page says 90 twice, and only one of them moves.</p></div>
         <div><em>Row 1 is a gap, not an exception</em><p>Red <b>Missing</b>, counted on the bar above the
-          table, reachable from <em>Fill in what is empty</em>. Somebody writes <b>Raya &amp; I2 unified
-          customer base</b>, sets <b>&ge; 1 #</b>, and it stops being missing.</p></div>
+          table and reachable from <em>Fill in what is empty</em>. Somebody writes <b>Raya &amp; I2
+          unified customer base</b>, sets <b>&ge; 1 #</b>, and it stops being missing.</p></div>
+        <div><em>Seven columns, measured</em><p>Fits at 1500, 1180 and 1000 with nothing clipped. Putting
+          the description in a column of its own instead would be eight, which also fits &mdash; but then
+          it would sit in a different place on this page than on the other two.</p></div>
+      </div>
+    </div>
+  </article>
+
+  <!-- ── PLAN, EDITING ────────────────────────────────────────────── -->
+  <article class="mk-panel">
+    <div class="mk-panel-h">
+      <h2>2 &middot; Strategy &rsaquo; Plan &mdash; with the pen open</h2>
+      <p>Reading compresses the three facts into one cell; writing gives each its own control, in the same
+        columns and the same order the key measures table already uses &mdash; <b>Dir. &middot; Unit
+        &middot; Target &middot; Compiled</b>. Nothing here is a new kind of control.</p>
+    </div>
+    <div class="mk-panel-b">
+
+      <p class="mk-cap new"></p>
+      <div class="mk-real"><table>
+        <thead><tr><th>#</th><th>Tactic</th><th>Outcome</th><th class="cc">Dir.</th><th class="cc">Unit</th><th class="num">Target</th><th class="cc">Compiled</th><th>Owner</th><th>Collabs.</th><th>Quarters</th></tr></thead>
+        <tbody class="sortable">
+          <tr>
+            <td class="idx"><span class="grip" role="button" tabindex="0" title="Drag to reorder"><i></i><i></i><i></i></span><span class="idx-n">1</span></td>
+            <td><textarea class="fld grow" rows="1" style="height:34px">Clean and standardize existing customer and SKU base</textarea><button class="eyebtn" aria-pressed="false" title="Hide from the presentation" aria-label="Hide from the presentation"><svg viewBox="0 0 24 20" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M2 10s3.5-6 10-6 10 6 10 6-3.5 6-10 6S2 10 2 10z"></path><circle cx="12" cy="10" r="2.6"></circle></svg></button><button class="xbtn" title="Remove this row" aria-label="Remove this row">&times;</button><textarea class="fld grow tacdesc" rows="1" style="height:34px" placeholder="What it is for">Create a reliable, unified data foundation across different systems</textarea></td>
+            <td><textarea class="fld grow gapwalk" rows="1" style="height:34px" placeholder="What it should produce"></textarea></td>
+            <td class="cc"><select class="fld mono"><option selected>&ge;</option><option>&le;</option></select></td>
+            <td class="cc"><button type="button" class="ssbtn" aria-haspopup="listbox" aria-expanded="false" title="Unit"><span class="sslabel">&mdash;</span><span class="sscar" aria-hidden="true">&#9662;</span></button></td>
+            <td class="num"><input class="fld mono" value="" placeholder="Target"></td>
+            <td class="cc"><select class="fld"><option selected></option><option>Sum</option><option>Latest</option><option>Average</option></select></td>
+            <td><button type="button" class="ssbtn" aria-haspopup="listbox" aria-expanded="false" title="Ramy Behairy"><span class="sslabel">Ramy Behairy</span><span class="sscar" aria-hidden="true">&#9662;</span></button></td>
+            <td class="collabs"><button type="button" class="ssbtn" aria-haspopup="listbox" aria-expanded="false" title="Hassan Sayed"><span class="sslabel">Hassan Sayed</span><span class="sscar" aria-hidden="true">&#9662;</span></button></td>
+            <td><span class="qs qs-edit"><button class="qtog" title="Quarter 1 — press to plan">1</button><button class="qtog on" title="Quarter 2 — planned; press to clear">2</button><button class="qtog on" title="Quarter 3 — planned; press to clear">3</button><button class="qtog" title="Quarter 4 — press to plan">4</button></span></td>
+          </tr>
+          <tr>
+            <td class="idx"><span class="grip" role="button" tabindex="0" title="Drag to reorder"><i></i><i></i><i></i></span><span class="idx-n">2</span></td>
+            <td><textarea class="fld grow" rows="1" style="height:34px">End-to-End Order-to-Cash Digitization</textarea><button class="eyebtn" aria-pressed="false" title="Hide from the presentation" aria-label="Hide from the presentation"><svg viewBox="0 0 24 20" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M2 10s3.5-6 10-6 10 6 10 6-3.5 6-10 6S2 10 2 10z"></path><circle cx="12" cy="10" r="2.6"></circle></svg></button><button class="xbtn" title="Remove this row" aria-label="Remove this row">&times;</button><textarea class="fld grow tacdesc" rows="1" style="height:34px" placeholder="What it is for">Automate the full sales and payment cycle</textarea></td>
+            <td><textarea class="fld grow" rows="1" style="height:34px" placeholder="What it should produce">Orders processed end-to-end digitally</textarea></td>
+            <td class="cc"><select class="fld mono"><option selected>&ge;</option><option>&le;</option></select></td>
+            <td class="cc"><button type="button" class="ssbtn" aria-haspopup="listbox" aria-expanded="false" title="%"><span class="sslabel">%</span><span class="sscar" aria-hidden="true">&#9662;</span></button></td>
+            <td class="num"><input class="fld mono" value="90" placeholder="Target"></td>
+            <td class="cc"><select class="fld"><option>Sum</option><option selected>Latest</option><option>Average</option></select></td>
+            <td><button type="button" class="ssbtn" aria-haspopup="listbox" aria-expanded="false" title="Mohamed Rizk"><span class="sslabel">Mohamed Rizk</span><span class="sscar" aria-hidden="true">&#9662;</span></button></td>
+            <td class="collabs"><button type="button" class="ssbtn" aria-haspopup="listbox" aria-expanded="false" title="Hassan, Hala"><span class="sslabel">Hassan, Hala</span><span class="sscar" aria-hidden="true">&#9662;</span></button></td>
+            <td><span class="qs qs-edit"><button class="qtog" title="Quarter 1 — press to plan">1</button><button class="qtog on" title="Quarter 2 — planned; press to clear">2</button><button class="qtog on" title="Quarter 3 — planned; press to clear">3</button><button class="qtog" title="Quarter 4 — press to plan">4</button></span></td>
+          </tr>
+          <tr>
+            <td class="idx"><span class="grip" role="button" tabindex="0" title="Drag to reorder"><i></i><i></i><i></i></span><span class="idx-n">3</span></td>
+            <td><textarea class="fld grow" rows="1" style="height:34px">Roll out the mega-store format across key governorates</textarea><button class="eyebtn" aria-pressed="false" title="Hide from the presentation" aria-label="Hide from the presentation"><svg viewBox="0 0 24 20" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M2 10s3.5-6 10-6 10 6 10 6-3.5 6-10 6S2 10 2 10z"></path><circle cx="12" cy="10" r="2.6"></circle></svg></button><button class="xbtn" title="Remove this row" aria-label="Remove this row">&times;</button><textarea class="fld grow tacdesc" rows="1" style="height:34px" placeholder="What it is for">Take the format to the governorates where footfall justifies it</textarea></td>
+            <td><textarea class="fld grow" rows="1" style="height:34px" placeholder="What it should produce">Mega stores opened</textarea></td>
+            <td class="cc"><select class="fld mono"><option selected>&ge;</option><option>&le;</option></select></td>
+            <td class="cc"><button type="button" class="ssbtn" aria-haspopup="listbox" aria-expanded="false" title="#"><span class="sslabel">#</span><span class="sscar" aria-hidden="true">&#9662;</span></button></td>
+            <td class="num"><input class="fld mono" value="6" placeholder="Target"></td>
+            <td class="cc"><select class="fld"><option selected>Sum</option><option>Latest</option><option>Average</option></select></td>
+            <td><button type="button" class="ssbtn" aria-haspopup="listbox" aria-expanded="false" title="Sherif Kamel"><span class="sslabel">Sherif Kamel</span><span class="sscar" aria-hidden="true">&#9662;</span></button></td>
+            <td class="collabs"><button type="button" class="ssbtn" aria-haspopup="listbox" aria-expanded="false" title="Ramy Behairy"><span class="sslabel">Ramy Behairy</span><span class="sscar" aria-hidden="true">&#9662;</span></button></td>
+            <td><span class="qs qs-edit"><button class="qtog on" title="Quarter 1 — planned; press to clear">1</button><button class="qtog on" title="Quarter 2 — planned; press to clear">2</button><button class="qtog on" title="Quarter 3 — planned; press to clear">3</button><button class="qtog on" title="Quarter 4 — planned; press to clear">4</button></span></td>
+          </tr>
+          <tr class="newrow"><td class="idx">+</td><td colspan="9"><button class="linkbu">Add a tactic</button></td></tr>
+        </tbody>
+      </table></div>
+
+      <div class="mk-foot">
+        <div><em>Row 1 is what a gap looks like from this side</em><p>Empty outcome, no unit, no target, no
+          compile rule &mdash; and the boxes are simply waiting. <b>Fill in what is empty</b> walks
+          straight to this cell, the same way it already walks to a blank target on a key measure.</p></div>
+        <div><em>One thing the drawing caught</em><p>At ten columns the browser gave the direction
+          picker <b>40px</b> and it stopped showing its own <b>&ge;</b> &mdash; the control that says
+          whether the outcome is reached or kept below, showing neither. It has a floor now, measured from
+          what the key measures table&rsquo;s own picker gets. Found by looking at the render, not at the
+          markup.</p></div>
+        <div><em>The width, honestly</em><p>Ten columns fit at <b>1400px and up</b>. At 1180 the table is
+          45px wider than the pane and at 1000 it is 125px wider, so it scrolls sideways inside its own
+          box &mdash; which is what that box is for, and what the key measures table already does when it
+          is opened on a narrow screen.</p></div>
       </div>
     </div>
   </article>
@@ -7803,7 +7911,7 @@ body{ background:var(--mk-ground); color:var(--mk-ink); margin:0; }
   <!-- ── REPORTING ────────────────────────────────────────────────── -->
   <article class="mk-panel">
     <div class="mk-panel-h">
-      <h2>2 &middot; Reporting</h2>
+      <h2>3 &middot; Reporting</h2>
       <p>The reporter is asked for the outcome&rsquo;s actual, in the outcome&rsquo;s own unit, with the
         target for this point in the year on the same line.</p>
     </div>
@@ -7815,7 +7923,7 @@ body{ background:var(--mk-ground); color:var(--mk-ink); margin:0; }
         <tbody>
           <tr><td class="idx">1</td><td>Clean and standardize existing customer and SKU base<span class="why">Create a reliable, unified data foundation across different systems</span></td><td class="mk-prose"><span class="missing">Missing</span><span class="why">Still asked how far it has got, until an outcome is written</span></td><td>Ramy Behairy</td><td><span class="qs"><i class="">1</i><i class="on past">2</i><i class="on">3</i><i class="">4</i></span></td><td class="num">50%</td><td class="cc"><span class="entry filled"><input class="field" value="45" aria-label="Report"><span class="unitsuf">%</span></span></td><td class="notecol"><input class="fld notefld" value="" placeholder="Note, if there is one"></td></tr>
           <tr><td class="idx">2</td><td>End-to-End Order-to-Cash Digitization<span class="why">Automate the full sales and payment cycle</span></td><td class="mk-prose"><b>Orders processed end-to-end digitally</b></td><td>Mohamed Rizk</td><td><span class="qs"><i class="">1</i><i class="on past">2</i><i class="on">3</i><i class="">4</i></span></td><td class="num">90%</td><td class="cc"><span class="entry filled"><input class="field" value="62" aria-label="Report"><span class="unitsuf">%</span></span></td><td class="notecol"><input class="fld notefld" value="" placeholder="Note, if there is one"></td></tr>
-          <tr><td class="idx">3</td><td>Scale Mobile Digital App across all active merchants<span class="why">Drive digital ordering, engagement, communication channel and coverage enhancement</span></td><td class="mk-prose"><b>App coverage rate</b></td><td>Ashraf Abdelaty</td><td><span class="qs"><i class="">1</i><i class="on past">2</i><i class="on">3</i><i class="on">4</i></span></td><td class="num">50%</td><td class="cc"><span class="entry filled"><input class="field" value="38" aria-label="Report"><span class="unitsuf">%</span></span></td><td class="notecol"><input class="fld notefld" value="" placeholder="Note, if there is one"></td></tr>
+          
           <tr><td class="idx">4</td><td>Roll out the mega-store format across key governorates<span class="why">Take the format to the governorates where footfall justifies it</span></td><td class="mk-prose"><b>Mega stores opened</b></td><td>Sherif Kamel</td><td><span class="qs"><i class="on past">1</i><i class="on past">2</i><i class="on">3</i><i class="on">4</i></span></td><td class="num">4 #<span class="mk-sub">of 6 # &middot; 8 of 12 months</span></td><td class="cc"><span class="entry filled"><input class="field" value="3" aria-label="Report"><span class="unitsuf">#</span></span></td><td class="notecol"><input class="fld notefld" value="" placeholder="Note, if there is one"></td></tr>
         </tbody>
       </table></div>
@@ -7835,7 +7943,7 @@ body{ background:var(--mk-ground); color:var(--mk-ink); margin:0; }
   <!-- ── PERFORMANCE ──────────────────────────────────────────────── -->
   <article class="mk-panel">
     <div class="mk-panel-h">
-      <h2>3 &middot; Performance</h2>
+      <h2>4 &middot; Performance</h2>
       <p>The outcome takes a column beside the figure that judges it; the description moves under the
         tactic&rsquo;s name, where the reporter&rsquo;s note already sits.</p>
     </div>
@@ -7847,7 +7955,7 @@ body{ background:var(--mk-ground); color:var(--mk-ink); margin:0; }
         <tbody>
           <tr><td class="idx"><span class="idx-n">1</span></td><td>Clean and standardize existing customer and SKU base<span class="why">Create a reliable, unified data foundation across different systems</span></td><td class="mk-prose"><span class="missing">Missing</span></td><td>Ramy Behairy</td><td class="collabs">Hassan Sayed</td><td><span class="qs"><i class="">1</i><i class="on past">2</i><i class="on">3</i><i class="">4</i></span></td><td class="cc"><span class="pill warn">WIP</span></td><td class="num"><span class="pair"><b>45%</b> <i>/ 50%</i></span></td><td class="num final" style="color:var(--good-tx)">90%</td></tr>
           <tr><td class="idx"><span class="idx-n">2</span></td><td>End-to-End Order-to-Cash Digitization<span class="why">Automate the full sales and payment cycle</span></td><td class="mk-prose"><b>Orders processed end-to-end digitally</b></td><td>Mohamed Rizk</td><td class="collabs">Hassan, Hala</td><td><span class="qs"><i class="">1</i><i class="on past">2</i><i class="on">3</i><i class="">4</i></span></td><td class="cc"><span class="pill warn">WIP</span></td><td class="num"><span class="pair"><b>62%</b> <i>/ 90%</i></span></td><td class="num final" style="color:var(--warn-tx)">69%</td></tr>
-          <tr><td class="idx"><span class="idx-n">3</span></td><td>Scale Mobile Digital App across all active merchants<span class="why">Drive digital ordering, engagement, communication channel and coverage enhancement</span></td><td class="mk-prose"><b>App coverage rate</b></td><td>Ashraf Abdelaty</td><td class="collabs">Ashraf Laithy, Karim</td><td><span class="qs"><i class="">1</i><i class="on past">2</i><i class="on">3</i><i class="on">4</i></span></td><td class="cc"><span class="pill warn">WIP</span></td><td class="num"><span class="pair"><b>38%</b> <i>/ 50%</i></span></td><td class="num final" style="color:var(--attn-tx)">76%</td></tr>
+          
           <tr><td class="idx"><span class="idx-n">4</span></td><td>Roll out the mega-store format across key governorates<span class="why">Take the format to the governorates where footfall justifies it</span></td><td class="mk-prose"><b>Mega stores opened</b></td><td>Sherif Kamel</td><td class="collabs">Ramy Behairy</td><td><span class="qs"><i class="on past">1</i><i class="on past">2</i><i class="on">3</i><i class="on">4</i></span></td><td class="cc"><span class="pill warn">WIP</span></td><td class="num"><span class="pair"><b>3 #</b> <i>/ 4 #</i></span></td><td class="num final" style="color:var(--attn-tx)">75%</td></tr>
         </tbody>
       </table></div>

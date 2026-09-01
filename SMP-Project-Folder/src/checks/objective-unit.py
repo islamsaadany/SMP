@@ -144,7 +144,7 @@ with sync_playwright() as pw:
     pg.click('[data-u="logistics"]'); pg.wait_for_timeout(400)
     pg.click('[data-s="strategy"]'); pg.wait_for_timeout(300)
     pg.click('[data-sub2="found"]'); pg.wait_for_timeout(600)
-    # §241: there is one layout now, so nothing selects it.
+    # §243: there is one layout now, so nothing selects it.
     pg.evaluate("() => { SHOW_KO_THIS_YEAR = true; paint(); }")
     pg.wait_for_timeout(500)
     v = pg.evaluate("""() => {
@@ -162,7 +162,7 @@ with sync_playwright() as pw:
     ck("...and so is a percentage",
        any(c.endswith("%") for r in v["rows"] for c in r), v["rows"])
 
-    # §241 DELETED THE CHIP LAYOUT at Islam's instruction: *"the other toggle
+    # §243 DELETED THE CHIP LAYOUT at Islam's instruction: *"the other toggle
     # that shows the objective in table or cards — remove it and make the view
     # in table only."* This asserted that the chips still carried the whole
     # figure; what it was protecting — that the unit stays ON the figure and is
@@ -170,7 +170,7 @@ with sync_playwright() as pw:
     # asserted of the only layout there is. §51.11 in the other direction: a
     # check keyed on markup that has gone must be REWRITTEN, not deleted, or
     # nothing guards what it was guarding.
-    print("\n── 6 · one layout, and it carries the whole figure (§241)")
+    print("\n── 6 · one layout, and it carries the whole figure (§243)")
     lay = pg.evaluate("""() => { paint();
       return { chipsGone: !document.querySelector('.ochip'),
                switchGone: !document.querySelector('[data-kov]'),

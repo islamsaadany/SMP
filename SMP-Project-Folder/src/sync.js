@@ -169,7 +169,7 @@ var SYNC = (function () {
     if (typeof fnPruneNulls === "function") {
       (window.FUNCTION_KEYS || []).forEach(function (k) { fnPruneNulls(window.FUNCTIONS[k]); });
     }
-    /* §240: A KEY OBJECTIVE STORED WITH NO ID IS **NOT** HEALED HERE, AND THE
+    /* §242: A KEY OBJECTIVE STORED WITH NO ID IS **NOT** HEALED HERE, AND THE
        REASON IS WORTH THE LINES. The obvious fix — mint the missing ones on
        arrival, as fnPruneNulls heals above — is a trap: `lastSaved` is taken
        after this, so a minted id joins the BASELINE and never travels, while

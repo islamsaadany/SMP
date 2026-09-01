@@ -4809,7 +4809,7 @@ function reportClosed(target){
   return reportParked(target) ||
          !!((REVIEW.submitted || {})[String(target || "")]);
 }
-/* ── WHAT A SUBJECT IS ASKED FOR, BY ITS SHAPE (§240) ────────────────────
+/* ── WHAT A SUBJECT IS ASKED FOR, BY ITS SHAPE (§242) ────────────────────
    Islam, from a live client: *"the key objectives reporting wasn't done and
    the button of submit to smo was allowed."* Both halves of that were true and
    the second is this function. It asked by PREFIX — every `fn:` target went to
@@ -5207,7 +5207,7 @@ function mayMarkFocus(){
    equal-weighted, which is the default nobody has to defend. */
 var KO_WEIGHTS = { mobile: [40, 25, 20, 15] };
 
-/* ── A FIGURE READ AT ITS TARGET'S SCALE (§241) ─────────────────────────
+/* ── A FIGURE READ AT ITS TARGET'S SCALE (§243) ─────────────────────────
    Islam, of a unit's objectives table: *"actual revenue is reported in details
    by the unit — it needs to be squeezed to follow the target format like 3.59,
    not the full number."* His row reads target **3.59B EGP** against actual
@@ -5257,7 +5257,7 @@ function figureFull(target, actual){
   return figureScaled(target, raw) === raw ? "" : raw;
 }
 
-/* ── WHAT EACH OBJECTIVE WEIGHS (§241) ──────────────────────────────────
+/* ── WHAT EACH OBJECTIVE WEIGHS (§243) ──────────────────────────────────
    Islam: *"there is no weighting on the objectives in units it needs to be
    added, and in the functions planning as pillars it's there but if it's
    missing it should be considered equally weighted objectives not 0."*
@@ -5294,14 +5294,14 @@ function koWeights(list, legacy){
   return raw.map(function(w){ return w == null ? mean : w; });
 }
 /* Whether this list is weighted at all — what a table asks before drawing a
-   Weight column nobody has filled in (§241, Islam: *"if there is no weights
+   Weight column nobody has filled in (§243, Islam: *"if there is no weights
    submitted the table shouldn't show weights"*). */
 function koWeighted(list, legacy){ return !!koWeights(list, legacy); }
 function koScore(list, weights){
   /* §218: an objective counts as soon as it has a figure — nothing waits
      on the office any more. */
   /* §233: hidden is not counted, weighted or not. */
-  /* §239 + §241, and NEITHER SIDE ALONE IS RIGHT. main replaced the stored
+  /* §239 + §243, and NEITHER SIDE ALONE IS RIGHT. main replaced the stored
      `progress` with `measureScore()` — one reader for every average in the
      product, so a headline and the row it expands to cannot disagree — and
      still read `weights[i] == null ? 0`, which is the very fault Islam asked
@@ -5325,7 +5325,7 @@ function koScore(list, weights){
   });
   /* Every weight that was set is a literal zero — an answer, but not one a
      score can be divided by. Equal weighting rather than a dash: a figure that
-     is in must be seen (§241). */
+     is in must be seen (§243). */
   return tot ? Math.round(acc / tot) : flat();
 }
 

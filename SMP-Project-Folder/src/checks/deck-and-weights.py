@@ -1,4 +1,4 @@
-"""THE REVIEW DECK, AND THE WEIGHTS THE OBJECTIVES ARE SCORED BY (§241).
+"""THE REVIEW DECK, AND THE WEIGHTS THE OBJECTIVES ARE SCORED BY (§243).
 
 Islam, from a client's decks and his own screens. Every item here is his, and
 every one is asserted as the PROBLEM rather than as the layout (§94.8), so a

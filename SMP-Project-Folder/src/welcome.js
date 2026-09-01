@@ -174,7 +174,7 @@ var WELCOME = (function(){
       if (!pending) return;
       var parts = [], c, b;
       try {
-        /* §240: asked by SHAPE, not by prefix — the same one reader the
+        /* §242: asked by SHAPE, not by prefix — the same one reader the
            submit gate two lines below already uses. Asking differently here
            is what let this row say "every figure is entered" over a pillars
            function that had entered none. */

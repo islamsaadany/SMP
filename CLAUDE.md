@@ -4020,8 +4020,8 @@ prior sessions (on HR_ERP) accidentally reverted agreed-upon designs.
 
 ---
 
-*Last Updated: 2026-09-01 &mdash; **&sect;240: a supporting function's report
-is asked for, and its objectives can be answered; &sect;241: the review deck,
+*Last Updated: 2026-09-01 &mdash; **&sect;242: a supporting function's report
+is asked for, and its objectives can be answered; &sect;243: the review deck,
 and the weights its objectives are scored by.** Islam, from a live client
 session: *"for the functions planning in pillars the key objectives reporting
 wasn't done and the button of submit to smo was allowed and the input there
@@ -4042,7 +4042,7 @@ deliberately NOT in the browser**: `lastSaved` is taken after hydration, so a
 client-minted id joins the baseline and never travels while every row edit is
 addressed AT it, and `applyChanges()` refuses a row id the stored graph does
 not hold &mdash; failing the whole save. &sect;191's own answer.
-**THEN &sect;241, from his decks and screens, signed off from a mockup built
+**THEN &sect;243, from his decks and screens, signed off from a mockup built
 out of the real platform.** A supporting function's aim slide loses the
 aspiration heading it never had and the direction and 3-year columns it cannot
 fill (&sect;213), with the this-year column **unconditional** there because it

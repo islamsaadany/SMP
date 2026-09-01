@@ -5239,18 +5239,28 @@ function renderCycle(){
   };
   var rows = boardUnitTargets().map(boardRow).join("");
 
-  /* ── THE FUNCTIONS ARE ON THE BOARD TOO (§105) ────────────────────
+  /* ── THE FUNCTIONS ARE ON THE BOARD TOO (§105), ALL OF THEM (§245) ──
      A submission the SMO cannot see anywhere is half a feature. They go in the
      SAME table rather than a second one, because "who has reported" is one
-     question -- but a function's three counts are its own vocabulary (key
-     objectives, deliverables and outcomes, milestones) and a unit's are not,
-     so the half opens with a band and a quiet column strip. §99's answer to
-     exactly this problem, and the reason nothing about the unit half changes:
-     the two vocabularies never share a heading. */
-  var fnKeys = Object.keys(FUNCTIONS).filter(function(fk){
-    return fnShows(fk) && !fnPlansInPillars(FUNCTIONS[fk]) && capsOfFunction(fk).length;
-  });
+     question -- under a band, because a function planning in projects counts
+     its own vocabulary (key objectives, outcomes, deliverables and milestones)
+     where a unit counts objectives, measures and tactics, and the two must
+     never share a heading unannounced (§99, §105.2).
+
+     §245: ONE BAND FOR BOTH FORMATS. Islam, of the two bands drawn for
+     sign-off: *"don't split functions planning in pillars from functions
+     planning in projects -- they are functions reporting."* So the list is the
+     register's own order and the shape decides only which builder draws the
+     row. The band therefore stops naming ONE vocabulary: it cannot, with both
+     under it, and a sentence that is true of some of the rows beneath it is
+     worse than none (§35). What it names is the count -- and the mapped
+     columns keep the per-cell hovers that already explained them (§124). */
+  var fnKeys = boardFunctionKeys();
   var fnRows = fnKeys.map(function(fk){
+    /* §245: a function that plans in pillars is READ like a unit and LISTED
+       like a function -- `boardRow()` is that reading, already written and
+       already agreeing with its own Reporting page (§53.5, §59). */
+    if (fnPlansInPillars(FUNCTIONS[fk] || {})) return boardRow("fn:" + fk);
     var c = fnReportedCount(fk), st = fnState(fk);
     var f = FUNCTIONS[fk] || {};
     /* Custodian first, head second -- the same order the unit row asks in, so
@@ -5307,11 +5317,18 @@ function renderCycle(){
   if (fnRows) {
     /* `dxband` is §99's own rule, orphaned when §99.7 removed the split that
        used it (§24 would have had it deleted). It is the right shape for
-       exactly this and it is used again. Its `em` slot carries the vocabulary,
-       which is the one place in this table wide enough to hold it. */
+       exactly this and it is used again.
+
+       §245: THE `em` SLOT SAYS HOW MANY, AND NOTHING ELSE. It used to name one
+       vocabulary -- "reporting in capabilities -- key objectives, outcomes,
+       and deliverables and milestones" -- which was true of every row beneath
+       it until a function planning in pillars joined the list, and a sentence
+       true of only some of the rows under it is worse than no sentence (§35,
+       and 1b-ii: a line that merely describes what the reader can see is
+       furniture). The mapped columns still explain themselves where the
+       mapping is not obvious, on the cells' own hovers (§124). */
     fnRows = '<tr class="dxband"><th colspan="8">Supporting functions' +
-        '<em>' + plural(fnKeys.length, "function") + ' reporting in capabilities \u2014 ' +
-        'key objectives, outcomes, and deliverables and milestones</em></th></tr>' + fnRows;
+        '<em>' + plural(fnKeys.length, "function") + ' reporting</em></th></tr>' + fnRows;
   }
 
   /* ONE ANSWER, TWO PAGES (§108.1). The totals were computed inline here and

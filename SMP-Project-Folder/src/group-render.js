@@ -3689,8 +3689,8 @@ function renderReport(u){
     '<div class="card" style="padding:14px 16px">' + (mayAll
       ? '<textarea class="fld" data-unote="' + u.ukey + '" rows="3" style="width:100%;max-width:none" ' +
         'placeholder="What the numbers do not say \u2014 what happened, what is being done, what to expect next.">' +
-        esc(REVIEW.note[u.ukey] || "") + '</textarea>'
-      : '<span class="why" style="margin:0">' + (REVIEW.note[u.ukey] ? esc(REVIEW.note[u.ukey]) : "None.") + '</span>') +
+        esc(cycleNote(u.ukey)) + '</textarea>'
+      : '<span class="why" style="margin:0">' + (cycleNote(u.ukey) ? esc(cycleNote(u.ukey)) : "None.") + '</span>') +
     '</div>';
 
   /* A blocked Submit with no explanation is hostile. If the unit is waiting on

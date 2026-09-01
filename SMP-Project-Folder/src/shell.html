@@ -3491,7 +3491,7 @@
       });
     });
     document.querySelectorAll("[data-unote]").forEach(function(el){
-      el.addEventListener("change", function(){ REVIEW.note[el.dataset.unote] = el.value; });
+      el.addEventListener("change", function(){ setCycleNote(el.dataset.unote, el.value); });
     });
     /* ONE HANDLER FOR BOTH SUBMITS (§105). The attribute carries the TARGET --
        a unit key, or `fn:<key>` for a supporting function -- which is the same

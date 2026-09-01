@@ -4267,12 +4267,43 @@ function fnDeleteBlockers(fk){
     "it instead of deleting it"));
   return out;
 }
+/* ── THE CYCLE NOTE IS A LINE SOMEBODY WROTE, OR IT IS NOT THERE (§246) ──
+   Islam: *"for functions who already didn't fill the notes an achievments
+   slide it's still appearing."*
+
+   §243 MADE THAT SLIDE CONDITIONAL AND THE CONDITION IS RIGHT; what it read
+   was not. The deck's own note box is `contenteditable` and wrote
+   `box.textContent` straight into `REVIEW.note` on every keystroke — and until
+   §243 that box was drawn on EVERY deck — so anybody who clicked into it and
+   pressed space, or typed a word and deleted it, left a note made of
+   whitespace. Whitespace is truthy, so the slide came back for a note nobody
+   had written. §104.10's trap in a third place: the falsy test is not the
+   same question as "did somebody say something".
+
+   ONE READER AND ONE WRITER. Five places read this value and two wrote it, and
+   a definition of *there is a note* that lives in five places is one that
+   disagrees with itself the first time somebody tightens one of them (§53.5).
+
+   TRIMMED ON READ AS WELL AS ON WRITE, so the notes already sitting in a
+   client's database behave correctly today and nothing is migrated — and the
+   emptied key is DELETED (§50.6), so a note never written and one written and
+   cleared are the same absence rather than two states nothing distinguishes. */
+function cycleNote(target){
+  var v = (REVIEW.note || {})[target];
+  return typeof v === "string" ? v.trim() : "";
+}
+function setCycleNote(target, text){
+  if (!REVIEW.note) REVIEW.note = {};
+  var v = String(text == null ? "" : text).trim();
+  if (v) REVIEW.note[target] = v;
+  else delete REVIEW.note[target];
+}
 /* Has this function ever been part of a cycle. Submitted, noted, snapshotted
    or archived — any one of them makes it history. */
 function fnEverReported(fk){
   var t = "fn:" + fk;
   if (REVIEW.submitted && REVIEW.submitted[t]) return true;
-  if (REVIEW.note && REVIEW.note[t]) return true;
+  if (cycleNote(t)) return true;
   if (REVIEW.slides && REVIEW.slides[t]) return true;
   if ((ARCHIVES || []).some(function(a){ return a.key === t; })) return true;
   /* A closed cycle carries a score per subject, and a score whose subject has
@@ -4924,30 +4955,44 @@ function reportState(c, key){
    The filter was written inline in renderCycle(); the totals need exactly the
    same list, and two copies of it is how a board and its own summary come to
    disagree about how many things were asked for. */
-/* ── WHO IS ON THE UNIT HALF OF THE CYCLE BOARD (§244) ───────────────────
+/* ── WHO IS ON THE CYCLE BOARD (§244, placed by §245) ────────────
    Islam, told that a function planning in pillars appears nowhere on the
-   board: *"put them on the unit half."*
+   board: *"put them on the unit half."* Then, having looked at it:
+   *"merch and marketing and cf should be with functions not units"*, and
+   *"don't split functions planning in pillars from functions planning in
+   projects — they are functions reporting."*
 
-   It was filtered off BOTH halves. The function half asks for capabilities
+   §244 FOUND THE HOLE AND PUT THE ROWS IN THE WRONG PLACE. They were filtered
+   off BOTH halves: the function half asks for capabilities
    (`capsOfFunction(fk).length`), which a pillars function has none of by
-   construction (§59); the unit half read `activeKeys()`, which is units. So
-   Consumer Finance could be a week late and the page the office watches would
-   not have a row for it — §105's own argument ("a submission the SMO cannot
-   see anywhere is half a feature") with one format left out.
+   construction (§59), and the unit half read `activeKeys()`, which is units —
+   so Consumer Finance could be a week late and the page the office watches
+   would carry no row for it. That much was right and is unchanged.
 
-   THE UNIT HALF IS WHERE IT BELONGS BECAUSE OF THE COLUMNS. §105.2 settled
-   that the two halves may not share a heading when they name different things
-   — and a pillars function names the SAME things a unit does: key objectives,
-   measures, tactics. It is drawn by the unit's own pages for exactly that
-   reason (§59). So this needs no new column, no second vocabulary and no band.
+   THE PLACEMENT IS HIS, AND THE COLUMN HEADING IS THE ARGUMENT: that block
+   sits under **Business unit**, which a supporting function is not. §244
+   reasoned from the three COUNT columns and answered a question nobody was
+   asking — this board is scanned for *who owes a report*, and a function owes
+   one as a function whatever shape its plan takes.
 
-   The order is units first, then functions: the board is scanned down the
-   business, and a function that plans like a unit is still not one. */
+   AND THE FORMAT IS NOT A GROUPING. Two bands were drawn and he refused them:
+   how a function plans is a fact about its own pages, not about its place on
+   this board, and splitting the list by it makes somebody looking for
+   Marketing decide which half to look in first. ONE band, one list, in the
+   register's own order — the shape decides only which counters a row is read
+   with, inside the builder, where nobody scanning the page has to know.
+
+   TWO LISTS, because the totals must have exactly the membership the rows
+   have: §108.1's miscount is the parts growing while the divisor did not. */
 function boardUnitTargets(){
-  return activeKeys().concat(
-    Object.keys(FUNCTIONS).filter(function(fk){
-      return fnShows(fk) && fnPlansInPillars(FUNCTIONS[fk]);
-    }).map(function(fk){ return "fn:" + fk; }));
+  return activeKeys();
+}
+/* Every supporting function that can be asked for a report, in ONE list and in
+   the register's own order. A pillars function has no capabilities to count, so
+   what it must have instead is a plan of its own -- a row for a subject nobody
+   can report on is a row nobody can clear (§61). */
+function boardFunctionTargets(){
+  return boardFunctionKeys().map(function(fk){ return "fn:" + fk; });
 }
 /* Who the board names against a subject: the custodian, then the head — the
    same order and the same two roles on a unit and on a function (§53.5). */
@@ -4958,8 +5003,17 @@ function boardWho(target){
 }
 function boardFunctionKeys(){
   return Object.keys(FUNCTIONS).filter(function(fk){
-    return fnShows(fk) && !fnPlansInPillars(FUNCTIONS[fk]) && capsOfFunction(fk).length;
+    if (!fnShows(fk)) return false;
+    return fnPlansInPillars(FUNCTIONS[fk]) ? true : !!capsOfFunction(fk).length;
   });
+}
+/* Which counters a board row is read with: the FORMAT decides, never the `fn:`
+   prefix (§59, and §224's own fault on the Present button). This is the only
+   place the shape matters -- the list above and the band below know nothing
+   about it, which is what lets the two formats sit in one list (§245). */
+function boardPlansLikeUnit(target){
+  var fk = fnKeyOfTarget(target);
+  return !fk || fnPlansInPillars(FUNCTIONS[fk] || {});
 }
 
 /* ── WHAT A CYCLE SAYS ABOUT ITSELF (§120.1) ──────────────────────────
@@ -5008,18 +5062,20 @@ function cycleTotals(){
     if (st.key === "late") t.none++;
     t.units++;
   }
-  /* §244: THE UNIT HALF IS `boardUnitTargets()` NOW, so a pillars function is
-     counted in the headline exactly once and through the readers its own row
-     uses — leaving it out would say "10 of 11" on a page listing eleven rows,
-     which is §108.1's miscount by another road. */
-  boardUnitTargets().forEach(function(t){
-    var u = unitLike(t);
-    if (u) add(reportedCount(u), unitState(u));
+  /* ONE WALK OVER EXACTLY WHAT THE BOARD DRAWS (§244, §245). Both lists, and
+     each subject read with the counters its own row is read with -- the FORMAT
+     decides that, never the `fn:` prefix (§59). Leaving a pillars function out
+     would say "14 of 15" on a page listing fifteen rows, which is §108.1's
+     miscount by another road; counting it twice is the same fault mirrored. */
+  boardUnitTargets().concat(boardFunctionTargets()).forEach(function(target){
+    if (boardPlansLikeUnit(target)) {
+      var u = unitLike(target);
+      if (u) add(reportedCount(u), unitState(u));
+    } else {
+      var fk = fnKeyOfTarget(target);
+      if (fk) add(fnReportedCount(fk), fnState(fk));
+    }
   });
-  /* THE FUNCTIONS COUNT TOO (§105). They report, they submit, and they are on
-     the board — so leaving them out of the headline would say 6 of 10 on a
-     page listing fifteen rows. */
-  boardFunctionKeys().forEach(function(fk){ add(fnReportedCount(fk), fnState(fk)); });
   /* DERIVED, NEVER COUNTED: in progress is whatever is neither submitted nor
      untouched, so it cannot disagree with the other two. It also FIXES a real
      miscount — the inline version divided by `activeKeys().length` while

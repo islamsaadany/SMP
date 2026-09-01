@@ -3924,6 +3924,11 @@ python3 checks/welcome.py       # the welcome screen (§148): three viewers over
 python3 checks/setup-rail.py    # the Setup rail fits the window, every entry is reachable
                                 # by scrolling the LIST, and the cap does not move --chrome-h
                                 # (§101.5 — that last one is what licenses the cap at all)
+python3 checks/cycle-board.py    # every subject that reports has a row, the functions are
+                                # in ONE list under one band, and the headline counts each
+                                # exactly once (§244, §245)
+python3 checks/notes-slide.py   # the notes slide appears when somebody wrote a note — and
+                                # whitespace is not a note, on all three deck shapes (§246)
 python3 checks/setup-overview.py      # the Overview agrees with the pages it summarises; it
                                       # MAKES the state, because the demo tenant is all-clear
 python3 checks/setup-overview-live.py # ...and its three server-backed rows, over HTTP, where
@@ -4031,7 +4036,52 @@ prior sessions (on HR_ERP) accidentally reverted agreed-upon designs.
 
 ---
 
-*Last Updated: 2026-09-01 &mdash; **&sect;244: every subject that reports is on
+*Last Updated: 2026-09-01 &mdash; **&sect;245: the functions are on the
+function half, in one list; &sect;246: the cycle note is a line somebody
+wrote.** Islam, looking at what &sect;244 shipped &mdash; *"merch and marketing
+and cf should be with functions not units"* &mdash; and, of the two bands drawn
+for sign-off, *"don't split functions planning in pillars from functions
+planning in projects they are functions reporting."* **&sect;244 FOUND THE HOLE
+AND PUT THE ROWS IN THE WRONG PLACE**: that such a function had no row at all
+stands, and the placement was argued from the three COUNT columns &mdash; true,
+and an answer to a question nobody was asking. The board is scanned for *who
+owes a report*, that block sits under **Business unit**, and a function owes one
+as a function whatever shape its plan takes. **THE FORMAT IS NOT A GROUPING**:
+how a function plans is a fact about its own pages, and splitting the list by it
+makes somebody looking for Marketing decide which half to look in first &mdash;
+one band, one list, the register's own order, with the shape deciding only which
+builder draws the row (&sect;59). **So the band stopped naming one vocabulary**
+(*"reporting in capabilities &mdash; key objectives, outcomes, and deliverables
+and milestones"* was true of every row beneath it until a pillars function
+joined): it says *"N functions reporting"*, and the mapped columns keep the
+per-cell hovers that always explained them (&sect;35, &sect;124, 1b-ii).
+**Two lists behind it**, because the totals must have exactly the membership the
+rows have (&sect;108.1). **AND THE MOCKUP WAS DRAWN FROM THE PROTOTYPE, WHICH HE
+COULD NOT READ** &mdash; it carried a *Care (function)* row and his tenant has no
+such function, so the screen he was asked to sign off was populated with names
+that mean nothing to him: *"stop showing mockups in the prototupe work on the
+client."* `checks/cycle-board.py` asserts the placement AND that there is exactly
+ONE band (a build that grouped the formats passes every "it is with the
+functions" assertion on its own): **8 red** on &sect;244's build.
+**AND &sect;246, from the same session** &mdash; *"for functions who already
+didn't fill the notes an achievments slide it's still appearing."* &sect;243's
+gate is right and what it READ was not: the deck's note box is
+`contenteditable` and wrote `box.textContent` into `REVIEW.note` on every
+keystroke, untrimmed and never deleted, and until &sect;243 that box was drawn
+on EVERY deck &mdash; so a click and a space, or a word typed and deleted, left
+a note made of whitespace, **and whitespace is truthy** (&sect;104.10's trap in a
+third place: the falsy test is not the question *did somebody say something*).
+**ONE READER AND ONE WRITER** &mdash; `cycleNote()` / `setCycleNote()`, where
+five places read and two wrote (&sect;53.5) &mdash; **trimmed on READ as well as
+on write**, so what is already in a client's database behaves today and nothing
+is migrated, and **the emptied key is DELETED** (&sect;50.6). **No hide button**:
+a control to hide a slide only drawn when it has content is a switch for a state
+that cannot occur (&sect;61 from the other side); what is genuinely missing is
+named instead &mdash; &sect;233 hides ROWS and nothing hides a generated SLIDE,
+which is a feature with a real question inside it. `checks/notes-slide.py`:
+**10 red** on the build before.*
+
+*Earlier the same day: **&sect;244: every subject that reports is on
 the cycle board.** Told that a function planning in pillars appears nowhere on
 the page the office watches, Islam: *"put them on the unit half."* It was
 filtered off BOTH halves &mdash; the function half asks for capabilities, which

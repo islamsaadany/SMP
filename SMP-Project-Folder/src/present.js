@@ -307,7 +307,7 @@ function deckSlides(u){
      projector. One that already exists can still be corrected there; one that
      does not has no box to start it in, and is written where every other
      figure in the review is written. */
-  var unote = REVIEW.note[u.ukey] || "";
+  var unote = cycleNote(u.ukey);
   if (unote) S.push('<section class="dslide"' + anch("notes", "After \u201cNotes and achievements\u201d") +
     '><h2>Notes and achievements</h2>' +
     '<div class="dnotebox" contenteditable="true" data-deckunote="' + u.ukey + '">' +
@@ -497,7 +497,7 @@ function deckSlidesFn(fk){
 
   /* §243: the same rule as a unit's deck — drawn only when a note is written.
      One question, one answer on both decks (§53.5). */
-  var fnote = REVIEW.note["fn:" + fk] || "";
+  var fnote = cycleNote("fn:" + fk);
   if (fnote) S.push('<section class="dslide"' + anch("notes", "After \u201cNotes and achievements\u201d") +
     '><h2>Notes and achievements</h2>' +
     '<div class="dnotebox" contenteditable="true" data-deckunote="fn:' + fk + '">' +
@@ -743,7 +743,7 @@ function wireDeck(){
   });
   root.addEventListener("input", function(ev){
     var box = ev.target.closest("[data-deckunote]");
-    if (box) REVIEW.note[box.dataset.deckunote] = box.textContent;
+    if (box) setCycleNote(box.dataset.deckunote, box.textContent);
   });
   /* Any of the three ways somebody reaches for the controls. `pointermove`
      covers mouse and pen; a touch is a `pointerdown` that never moves; and the

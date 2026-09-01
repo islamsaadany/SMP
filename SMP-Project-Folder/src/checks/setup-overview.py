@@ -102,8 +102,13 @@ with sync_playwright() as p:
     ck("and the board counts every subject on it, functions of both shapes too",
        src["units"] == pg.evaluate("boardUnitTargets().length + boardFunctionKeys().length")
        and src["units"] > pg.evaluate("activeKeys().length"), src)
-    ck("...including a function that plans in pillars, which §244 put on the unit half",
-       pg.evaluate("boardUnitTargets().filter(t=>String(t).indexOf('fn:')===0).length") > 0)
+    # §245 moved those rows to the function list; the ASSERTION is unchanged in
+    # substance — a function that plans in pillars is counted — and asks the
+    # product where it lives rather than naming a half (§94.8).
+    ck("...including a function that plans in pillars, wherever the board lists it",
+       pg.evaluate("boardUnitTargets().concat(boardFunctionTargets())"
+                   ".filter(t=>{const k=fnKeyOfTarget(t);"
+                   "return k && fnPlansInPillars(FUNCTIONS[k]||{});}).length") > 0)
     ck("the strip is a way through, not a control",
        pg.eval_on_selector(".ovcyc-go", "e=>e.dataset.setupgo") == "cycle")
 

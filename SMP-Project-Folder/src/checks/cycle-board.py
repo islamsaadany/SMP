@@ -17,10 +17,12 @@ WHAT IS ASSERTED, AND WHY IT IS THE PROBLEM RATHER THAN THE LAYOUT (§94.8):
       never as a row count — so adding a unit or a function tomorrow keeps
       this green and losing one does not.
 
-  2 · A PILLARS FUNCTION IS ON THE UNIT HALF, above the band, because its
-      three counts ARE a unit's three counts (§105.2: the two halves may not
-      share a heading when they name different things — and here they name
-      the same things).
+  2 · A PILLARS FUNCTION IS WITH THE FUNCTIONS, below the band (§245, Islam:
+      *"merch and marketing and cf should be with functions not units"*), and
+      the two formats are NOT split into two groups (*"they are functions
+      reporting"*) — asserted as ONE band with both kinds under it, because a
+      build that grouped them would satisfy every "it is on the function half"
+      assertion on its own.
 
   3 · ITS COUNTS ARE ITS OWN REPORTING PAGE'S. Asserted as agreement with
       `reportedCount(unitLike(t))`, which is what its Reporting page draws
@@ -32,13 +34,18 @@ WHAT IS ASSERTED, AND WHY IT IS THE PROBLEM RATHER THAN THE LAYOUT (§94.8):
       the function half) and not never (§108.1's miscount, where `sub` and
       `none` had grown and the divisor had not).
 
-  5 · THE NAME DISAMBIGUATES WHERE IT MUST. This tenant has a unit called Care
+  5 · THE BAND CLAIMS NOTHING THAT IS TRUE OF ONLY SOME ROWS. With both
+      formats under it, the old *"reporting in capabilities — key objectives,
+      outcomes, and deliverables and milestones"* would be false of the rows
+      that plan in pillars (§35).
+
+  6 · THE NAME DISAMBIGUATES WHERE IT MUST. This tenant has a unit called Care
       AND a function called Care; `placeLabel()` already answers that and
       nothing new is invented here (§65, §93.12). Asserted on the CLASH rather
       than on a literal, so a tenant without one is not forced to carry a
       suffix nobody needs.
 
-  6 · AND THE ROWS STAY ONE LINE (§88).
+  7 · AND THE ROWS STAY ONE LINE (§88).
 """
 import os, sys
 from playwright.sync_api import sync_playwright
@@ -91,6 +98,9 @@ BOARD = """() => {
     unitHalf: rows.slice(0, cut).filter(r => r.children.length > 3).map(read),
     fnHalf:   rows.slice(cut).filter(r => r.children.length > 3).map(read),
     tallest:  Math.max.apply(null, body.map(r => r.getBoundingClientRect().height)),
+    bands:    rows.filter(r => r.className.indexOf("dxband") > -1).length,
+    bandText: rows.filter(r => r.className.indexOf("dxband") > -1)
+                  .map(r => r.textContent.trim()),
     totals:   cycleTotals()
   };
   box.remove();
@@ -146,12 +156,27 @@ with sync_playwright() as p:
     ok("...and there are enough rows for that to mean something (§113.8)",
        len(unit_names + fn_names) >= len(want or []) > 3, len(unit_names + fn_names))
 
-    # ── 2 · on the UNIT half ────────────────────────────────────────────────
-    print("\n── 2 · a pillars function sits on the unit half, not the function one")
+    # ── 2 · with the FUNCTIONS, and one band ────────────────────────────────
+    print("\n── 2 · a pillars function sits with the functions, in one list")
     for t in fx["pillarsFns"]:
         lab = js(pg, "(t)=>placeLabel(t)", t)
-        ok(lab + " is on the unit half", lab in unit_names, unit_names)
-        ok("...and NOT on the function half as well", lab not in fn_names, fn_names)
+        ok(lab + " is below the band, with the functions", lab in fn_names, fn_names)
+        ok("...and NOT in the business-unit block above it", lab not in unit_names, unit_names)
+    ok("the unit block is business units and nothing else",
+       sorted(unit_names) == sorted(js(pg, "()=>activeKeys().map(k=>placeLabel(k))") or []),
+       unit_names)
+    ok("...and there is exactly ONE band, so the formats are not grouped (§245)",
+       (board.get("bands") or 0) == 1, board.get("bands"))
+    both = js(pg, """(l)=>{
+      const want = boardFunctionKeys().map(k => placeLabel("fn:" + k));
+      return { want: want, mixed: boardFunctionKeys()
+        .map(k => !!fnPlansInPillars(FUNCTIONS[k])).join(",") };
+    }""", 1)
+    ok("...and the function list is the register's own order, both shapes mixed",
+       fn_names == (both.get("want") or []), {"drawn": fn_names, "want": both.get("want")})
+    ok("...with both shapes genuinely present, or the mixing is untested (§113.8)",
+       "true" in (both.get("mixed") or "") and "false" in (both.get("mixed") or ""),
+       both.get("mixed"))
 
     # ── 3 · its counts are its own reporting page's ─────────────────────────
     print("\n── 3 · the row agrees with the page it summarises (§53.5)")
@@ -159,7 +184,7 @@ with sync_playwright() as p:
         lab = js(pg, "(t)=>placeLabel(t)", t)
         page = js(pg, """(t)=>{ const u = unitLike(t); const c = reportedCount(u);
           return { done: c.done + "/" + c.total, state: unitState(u).label }; }""", t)
-        row = [r for r in board["unitHalf"] if r["name"] == lab]
+        row = [r for r in board["fnHalf"] if r["name"] == lab]
         ok(lab + " — the board's figure is the page's",
            bool(row) and row[0]["done"] == page.get("done"),
            {"board": row[0]["done"] if row else None, "page": page.get("done")})
@@ -179,8 +204,15 @@ with sync_playwright() as p:
        board["totals"]["sub"] + board["totals"]["none"] + board["totals"]["progress"]
        == board["totals"]["units"], board["totals"])
 
-    # ── 5 · the name says which is which where it must ──────────────────────
-    print("\n── 5 · a name shared by a unit and a function is disambiguated")
+    # ── 5 · the band claims only what is true of every row under it ─────────
+    print("\n── 5 · the band says how many, not what one of the two shapes counts")
+    bt = " ".join(board.get("bandText") or [])
+    ok("the band names the functions and their number", "Supporting functions" in bt, bt)
+    ok("...and claims no single vocabulary over rows of two shapes (§35)",
+       "capabilit" not in bt.lower() and "deliverable" not in bt.lower(), bt)
+
+    # ── 6 · the name says which is which where it must ──────────────────────
+    print("\n── 6 · a name shared by a unit and a function is disambiguated")
     if fx.get("clash"):
         for nm in fx["clash"]:
             ok("'" + nm + "' is a unit AND a function in this tenant, so it is the real case",
@@ -191,8 +223,8 @@ with sync_playwright() as p:
     else:
         ok("no unit and function share a name here — nothing to disambiguate", True)
 
-    # ── 6 · §88 ─────────────────────────────────────────────────────────────
-    print("\n── 6 · and the rows are still one line each (§88)")
+    # ── 7 · §88 ─────────────────────────────────────────────────────────────
+    print("\n── 7 · and the rows are still one line each (§88)")
     ok("no row on the board is taller than a single line",
        (board.get("tallest") or 99) < 56, board.get("tallest"))
 

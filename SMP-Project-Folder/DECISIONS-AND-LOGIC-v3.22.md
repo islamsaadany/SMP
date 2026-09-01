@@ -26930,3 +26930,112 @@ the same line carrying a stale assumption once before (§108.16). It asks
 
 `test-authorize` 454/0; `deck-and-weights`, `fn-report-gate`, `setup-header`
 and `no-wrap` green.
+
+---
+
+## §245 — THE FUNCTIONS ARE ON THE FUNCTION HALF, IN ONE LIST (2026-09-01)
+
+Islam, looking at what §244 shipped: ***"merch and marketing and cf should be
+with functions not units"***, and, of the two bands drawn for sign-off:
+***"don't split functions planning in pillars from functions planning in
+projects they are functions reporting."***
+
+**§244 FOUND THE HOLE AND PUT THE ROWS IN THE WRONG PLACE.** That a supporting
+function planning in pillars had no row at all is unchanged and was real: the
+function half asks for capabilities, which such a function has none of by
+construction (§59), and the unit half read `activeKeys()`, which is units — so
+Consumer Finance could be a week late and the page the office watches would
+carry no row for it.
+
+**THE PLACEMENT IS HIS AND THE COLUMN HEADING IS THE ARGUMENT.** That block
+sits under **Business unit**, which a supporting function is not. §244 reasoned
+from the three COUNT columns — a pillars function counts objectives, measures
+and tactics exactly as a unit does, so no new column, no second vocabulary, no
+band — and every word of that is true and answers a question nobody was asking.
+**This board is scanned for *who owes a report*, and a function owes one as a
+function whatever shape its plan takes.** *A correct argument about the columns
+is not an argument about the place.*
+
+**AND THE FORMAT IS NOT A GROUPING.** Two bands were drawn — *planning in
+pillars* and *planning in projects*, each naming its own vocabulary — and he
+refused them. He is right: how a function plans is a fact about its own pages,
+not about its place on this board, and splitting the list by it makes somebody
+looking for Marketing decide which half to look in first. **ONE band, one list,
+in the register's own order.** The shape decides only which builder draws the
+row — `boardRow()` for a pillars function, the capability row for the rest —
+inside the builder, where nobody scanning the page has to know about it (§59:
+the FORMAT decides, never the `fn:` prefix).
+
+**SO THE BAND STOPPED NAMING ONE VOCABULARY.** It read *"N functions reporting
+in capabilities — key objectives, outcomes, and deliverables and milestones"*,
+which was true of every row beneath it until a pillars function joined the
+list. **A sentence true of only some of the rows under it is worse than no
+sentence** (§35), and describing what the reader can already see is furniture
+(1b-ii). It says **"N functions reporting"** — his own words. The mapped
+columns keep the per-cell hovers that already explained them (§124), which is
+where that explanation belonged in the first place.
+
+**TWO LISTS BEHIND IT, because the totals must have exactly the membership the
+rows have** — §108.1's miscount is the parts growing while the divisor did not.
+`boardUnitTargets()` is units; `boardFunctionTargets()` is every function that
+can be asked; `cycleTotals()` walks both and reads each subject with its own
+counters through `boardPlansLikeUnit()`.
+
+**AND THE MOCKUP WAS DRAWN FROM THE PROTOTYPE, WHICH HE COULD NOT READ.** It
+carried a `Care (function)` row, and his tenant has no such function — so the
+one screen he was being asked to sign off was populated with names that mean
+nothing to him. Recorded because the instruction that followed is general:
+***"stop showing mockups in the prototupe work on the client."***
+
+`checks/cycle-board.py` asserts the placement AND that there is exactly ONE
+band — a build that grouped the two formats satisfies every "it is with the
+functions" assertion on its own — plus that the function list is the register's
+own order with both shapes genuinely present (§113.8). **8 red** on §244's
+build. `setup-overview.py`'s board-size assertion moved with it, asking where
+the product lists a pillars function rather than naming a half (§94.8).
+
+---
+
+## §246 — THE CYCLE NOTE IS A LINE SOMEBODY WROTE, OR IT IS NOT THERE (2026-09-01)
+
+Islam, having had §243's optional notes slide: ***"for functions who already
+didn't fill the notes an achievments slide it's still appearing. should we add
+a hide button there for this slide as an extra fix?"***
+
+**THE GATE WAS RIGHT AND WHAT IT READ WAS NOT.** §243 draws that slide only
+`if (unote)`, and measured on the demo it behaves perfectly: delete the note,
+15 slides and no notes slide; write one, 16 and one. What it reads is
+`REVIEW.note[key]`, and **the deck's own note box is `contenteditable` and
+wrote `box.textContent` into that map on every keystroke** — with no trim and
+no delete. Until §243 that box was drawn on **every** deck, so anybody who
+clicked into it and pressed space, or typed a word and deleted it, left a note
+made of whitespace. **Whitespace is truthy.** §104.10's trap in a third place:
+*the falsy test is not the same question as "did somebody say something".*
+
+**ONE READER AND ONE WRITER.** Five places read this value and two wrote it,
+and a definition of *there is a note* living in five places is one that
+disagrees with itself the first time somebody tightens one of them (§53.5).
+`cycleNote()` and `setCycleNote()` in `lib`-side `config-data.js`; the deck
+box, the reporting page's textarea, the Performance card, both deck builders
+and `fnEverReported()` all go through them.
+
+**TRIMMED ON READ AS WELL AS ON WRITE**, so the notes already sitting in a
+client's database behave correctly today and **nothing is migrated** — this is
+a value that is only ever displayed. **And the emptied key is DELETED** (§50.6),
+so a note never written and one written and cleared are the same absence rather
+than two states nothing distinguishes.
+
+**NO HIDE BUTTON, AND THE REASON IS THAT IT WOULD BE A SECOND ANSWER.** The
+slide already appears only when there is something on it; a control to hide a
+slide that is only drawn when it has content is a switch for a state that
+cannot occur (§61 from the other side). What is genuinely missing is named
+rather than built: **§233 hides ROWS from the presentation and nothing hides a
+generated SLIDE.** That is a feature with a real question inside it — which
+slides may be hidden, and whether hiding one hides what it counts — and it is
+not this fix.
+
+`checks/notes-slide.py` measures all three deck shapes (a unit, a function
+planning in pillars, a function planning in projects) with the note absent,
+with a space, a newline and tabs-and-spaces, and with a real note — the last so
+a build that never drew the slide at all cannot pass (§113.8). **10 red** on
+the build before.

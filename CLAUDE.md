@@ -484,6 +484,20 @@ console errors (in this cloud environment, run it via a wrapper that points Play
   name**, which `capKOTable()` has done all along, costing no width (§158).
   **`Compile` was never on a slide** and the .pptx is unreachable (§145.9), so
   that half of "remove them from slides" was checked and not done.
+  **AND THE REVIEW POINT HAD TO KNOW ITS OWN YEAR (§239.3):** shipped, and
+  within the hour — *"I adjusted the reporting cycle to august but the ytd is
+  calculating against the full year target"*. §239.1's own fault by §239.1's own
+  fix: `reviewAsOf()` reads `"Aug 26"`, which CARRIES ITS YEAR, and
+  `elapsedMonths()`/`tacticPlanned()` threw it away and asked `cycleYear()`,
+  which scrapes a four-digit year out of `to`/`name`/`due` — a cycle written
+  *"Annual Plan / Jan / Dec"* has none, so the share was null and EVERYTHING
+  fell back to the whole year with the month plainly set. Reproduced across
+  four cycle shapes first. **One of his three screenshots was not a bug**: all
+  four of those measures compile by `Latest`, which by decision does not
+  prorate. **And the strip now says what the month MEANS** — *"· 8 of 12
+  months"* — because he could not tell whether it had taken; unset it says
+  *"taken from the cycle's end"* and shows the month IN USE rather than crying
+  *Missing* over a working fallback (§177, §214.4).
   **The server needed nothing** and it is asserted both ways: `asOfMonth` is
   not in `REVIEW_PER_TARGET`, so it classifies as `cycle` — the office's.
   Proved able to fail three ways (4 / 2 / 3 red). **AND `qa.py`'s OWN METHOD
@@ -4086,8 +4100,11 @@ the way, the finding that reshaped it: **the review point was two fields that
 disagreed**, and prorating by the cycle's end quarter would have done nothing
 at all on the tenant that reported the bug. It is a month now, set by the
 office and editable mid-cycle, riding `review.extra` with no migration and
-falling back so nothing moves until they set one. 24/24 on
-`checks/ytd-proration.py`, proved able to fail three ways &middot; 454/0
+falling back so nothing moves until they set one. &sect;239.3 then fixed the
+half that shipped broken: the review point now knows its own year, because
+asking `cycleYear()` for it made every cycle without a four-digit year fall
+back silently. 30/30 on `checks/ytd-proration.py`, proved able to fail four
+ways &middot; 454/0
 authoriser (3 new, both ways) &middot; 126/0 differ &middot; full `qa.py` sweep
 green &middot; `setup-overview`, `repeat-project`, `table-fit`,
 `project-tables`, `submit-gate`, `fn-pillars` green.*

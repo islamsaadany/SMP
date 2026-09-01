@@ -5515,10 +5515,35 @@ function reviewAsOfLabel(){
   if (t == null) return "\u2014";
   return monthValue(((t % 12) + 12) % 12, Math.floor(t / 12));
 }
+/* WHICH YEAR THE REVIEW POINT IS IN (§239.3).
+
+   Islam, from the deployment after §239 shipped: *"I adjusted the reporting
+   cycle to august but the ytd is calculating against the full year target ..
+   the ytd target in the tactics the target is still the 100%."*
+
+   REPRODUCED, AND IT IS §239.1's OWN FAULT COMMITTED BY §239.1's OWN FIX.
+   `reviewAsOf()` reads "Aug 26", which CARRIES ITS OWN YEAR -- and then
+   `elapsedMonths()` and `tacticPlanned()` threw that away and asked
+   `cycleYear()` instead, which scrapes a four-digit year out of the cycle's
+   `to`, `name` and `due`. A cycle written "Annual Plan / Jan / Dec" has none,
+   so `cycleYear()` is null, elapsed is null, the share is null, and EVERYTHING
+   FALLS BACK: measures stop prorating and every tactic reads 100% again. Two
+   fields answering one question, which is the exact fault §239.1 exists to
+   have removed.
+
+   The review point is now the authority on its own year and `cycleYear()` is
+   only the fallback for a cycle where nobody has picked a month yet. */
+function reviewYear(){
+  if (REVIEW.asOfMonth) {
+    var t = monthsOf(REVIEW.asOfMonth);
+    if (t != null) return Math.floor(t / 12);
+  }
+  return cycleYear();
+}
 /* Months of the plan year already passed, 1 to 12. The plan year runs January
    to December (Islam, asked outright), so the count is from the cycle's year. */
 function elapsedMonths(){
-  var a = reviewAsOf(), y = cycleYear();
+  var a = reviewAsOf(), y = reviewYear();
   if (a == null || y == null) return null;
   return Math.max(0, Math.min(12, a - y * 12 + 1));
 }
@@ -5527,7 +5552,7 @@ function elapsedMonths(){
    and Q2 have passed). The quarter fallback is kept for a cycle whose year
    cannot be read, exactly as tacticPlanned() keeps it. */
 function quarterPast(i){
-  var a = reviewAsOf(), y = cycleYear();
+  var a = reviewAsOf(), y = reviewYear();
   if (a == null || y == null) return (i + 1) <= (Number(REVIEW.endsQuarter) || 4);
   return y * 12 + i * 3 + 2 <= a;
 }
@@ -5599,7 +5624,7 @@ function tacticPlanned(t){
      cannot be read: returning null there would make every tactic "not asked"
      and empty the reporting page, which is a far worse failure than a coarse
      answer. */
-  var q = quartersOf(t), y = cycleYear(), a = reviewAsOf();
+  var q = quartersOf(t), y = reviewYear(), a = reviewAsOf();
   if (y == null || a == null) {
     var tot = 0, el = 0;
     for (var j = 0; j < 4; j++) {

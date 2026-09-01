@@ -5316,11 +5316,30 @@ function renderCycle(){
          reason: with no box there is nothing to mistype and the picker can
          only produce a shape `monthsOf()` already reads. */
       '<span class="fstrip-meta asof">reported as of ' +
+        /* THE BUTTON SHOWS WHAT IS ACTUALLY IN USE, not what is stored. With
+           no month picked the platform still has an answer -- the cycle's own
+           quarter end -- so showing the picker's "Missing" would print an
+           alarm over something that is not owed (§177, §214.4) while the note
+           beside it reported a real number. The note says whether it was
+           chosen or inherited. */
         (can && open
-          ? monthBtnHtml(REVIEW.asOfMonth || "", "asofbtn", function(v){
+          ? monthBtnHtml(REVIEW.asOfMonth || reviewAsOfLabel(), "asofbtn", function(v){
               if (v) REVIEW.asOfMonth = v; else delete REVIEW.asOfMonth;
             })
-          : esc(REVIEW.asOfMonth || reviewAsOfLabel())) + '</span>' +
+          : esc(REVIEW.asOfMonth || reviewAsOfLabel())) +
+        /* §239.3: AND IT SAYS WHAT THE MONTH MEANS. Islam could not tell
+           whether the month he picked had taken -- "can you check if the cycle
+           adjustment is saved" -- because the strip showed the value and
+           nothing showed the consequence. `8 of 12 months` is the number every
+           figure on the platform is actually prorated by, so a review point
+           that is not working says so on the page rather than being inferred
+           from a table reading 100%. */
+        (elapsedMonths() != null
+          ? ' <span class="why" style="margin:0">&middot; ' + elapsedMonths() +
+            ' of 12 months' + (REVIEW.asOfMonth ? '' : ', taken from the cycle\u2019s end') +
+            '</span>'
+          : ' <span class="why" style="margin:0">&middot; the year is not set, so every ' +
+            'figure is measured against a whole one</span>') + '</span>' +
       '<span class="badge b-' + (open ? "open" : "none") + '">' + (open ? "Open" : "Closed") + '</span>' +
       (can
         ? (open

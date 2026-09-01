@@ -26436,6 +26436,55 @@ a company's and a unit's drill tables still say `Of plan`, `H1 actual`,
 prorated score. And the two he has not yet answered: whether the quiet figure
 should be drawn on a rate row at all, where it repeats the annual target
 exactly; and whether `Of plan` should become `Progress` everywhere.
+
+### §239.3 — the review point had to know its own year
+
+Islam, from the deployment within an hour of §239 shipping: *"I adjusted the
+reporting cycle to august but the ytd is calculating against the full year
+target .. and the case is the same in the ytd target in the tactics the target
+is still the 100%."*
+
+**HE IS RIGHT, AND IT IS §239.1's OWN FAULT COMMITTED BY §239.1's OWN FIX.**
+`reviewAsOf()` reads the month the office picked — **"Aug 26", which carries
+its own year** — and then `elapsedMonths()`, `quarterPast()` and
+`tacticPlanned()` all threw that away and asked `cycleYear()` instead, which
+scrapes a four-digit year out of the cycle's `to`, `name` and `due`. A cycle
+written *"Annual Plan / Jan / Dec"* has none. So `cycleYear()` answered null,
+the elapsed share answered null, and **everything fell back**: measures stopped
+prorating and every tactic read 100% again — with the month sitting there,
+plainly set, on the strip above them. Two fields answering one question, which
+is precisely the fault §239.1 exists to have removed.
+
+**REPRODUCED BEFORE ANYTHING WAS CHANGED**, across four cycle shapes: with a
+year in the name, 8 of 12 months and a tactic at 83%; with no year anywhere,
+**null, null, and 100%** — his three symptoms exactly, including the measure
+still measured against 18B EGP. The review point is the authority on its own
+year now, and `cycleYear()` is only the fallback for a cycle where nobody has
+picked a month yet.
+
+**ONE OF HIS THREE SCREENSHOTS WAS NOT A BUG AND IS SAID SO.** The Key
+measures table he sent carries four rows and **all four compile by `Latest`** —
+a rate or a share at a point in time, which by decision does not prorate (§239).
+`0% / 1%`, `20% / 90%`, `30% / 50%` are correct: the benchmark for a Latest row
+IS the annual target, and the quiet grey figure repeating it is the thing put
+to him as an open question and not yet answered.
+
+**AND HE COULD NOT TELL WHETHER THE MONTH HAD TAKEN** — *"can you check if the
+cycle adjustment is saved"* — because the strip showed the VALUE and nothing
+showed the CONSEQUENCE. It reads **"reported as of Aug 26 · 8 of 12 months"**
+now: the number every figure is actually prorated by, so a review point that is
+not working says so on the page instead of being inferred from a table reading
+100%. With none picked it says **"· 6 of 12 months, taken from the cycle's
+end"**, and the button shows the month **actually in use** rather than the
+picker's word *Missing* — an alarm over something that is not owed is §177 and
+§214.4's fault, and the fallback is working.
+
+**PROVED ABLE TO FAIL**: putting the year back on `cycleYear()` — the shipped
+bug — turns the new "a cycle with NO year anywhere answers exactly the same"
+assertion red. The check MAKES both cycle shapes, because the demo carries a
+year and cannot produce his (§94.2), and asserts the two as an **agreement**
+rather than as numbers. Full `qa.py` sweep, `setup-overview`,
+`repeat-project`, `submit-gate`, 454/0 and 126/0 all green.
 ---
 
 ## §240 — A SUPPORTING FUNCTION'S REPORT IS ASKED FOR, AND ITS OBJECTIVES CAN BE ANSWERED (2026-09-01)

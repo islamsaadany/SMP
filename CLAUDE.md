@@ -271,6 +271,15 @@ A drift between specs and code is a documentation bug — report it before silen
   cannot be checked from a screen is named as such rather than left off.
 
 ### 5. Communication
+- **NO TECHNICAL TALK, AND DESIGN IS SHOWN, NEVER DESCRIBED (2026-09-01).**
+  Islam: *"I don't understand anything of what you explained. you are talking
+  too technical with no visuals."* Everything said to Islam is in plain,
+  everyday words — no jargon, no code names, no token/selector/section-number
+  vocabulary in explanations (those belong in the decisions document, not in
+  chat). Anything about design, layout or flow is SHOWN as a picture — a
+  screenshot, a before/after sketch, a mockup published as an artifact —
+  never argued in prose alone. One idea per sentence; if a term has an
+  everyday word, use the everyday word.
 - **Be proactive about issues** — flag concerns early.
 - **Explain reasoning** — give the rationale behind suggestions.
 - **Ask clarifying questions** — better to ask than assume.

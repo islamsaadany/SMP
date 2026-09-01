@@ -3452,11 +3452,22 @@ function renderReport(u){
      inside an open body. The selection belongs to the unit and is shared with
      Performance and Strategy. No reordering here: entry, not arrangement. */
   var reportPillarPane = function(p, pi){
+    /* CARRY THE OWNER CONTEXT, exactly as reportItems() does. A bounded role
+       (a pillar or project owner) may report only its own rows, and
+       canReportRow()/mayReportRow() answer that from the row's owner,
+       collaborators and its pillar's own Owner (`pown`). This pane built its
+       rows without them, so a legitimate owner's own rows read as "not yours"
+       and their figure box was withheld — the reporting page dimmed for the
+       one person it is for. `owner`/`pown`/`collaborators` here mirror
+       reportItems() so the pane and the flat list cannot disagree (§147.7). */
     var ms = [];
-    p.measures.forEach(function(m){ ms.push({ id:m.id, obj:m, kind:"measure" }); });
+    p.measures.forEach(function(m){
+      ms.push({ id:m.id, obj:m, kind:"measure", owner:p.owner, pown:p.owner });
+    });
     var ts = [];
     p.tactics.forEach(function(t){
-      ts.push({ id:t.id, obj:t, kind:"tactic", sub:spanLabel(t), asked:tacticDue(t) });
+      ts.push({ id:t.id, obj:t, kind:"tactic", sub:spanLabel(t), asked:tacticDue(t),
+                owner:t.owner, collaborators:t.collaborators, pown:p.owner });
     });
     var askedT = ts.filter(function(x){ return x.asked; });
     var done = doneOf(ms) + doneOf(askedT), total = ms.length + askedT.length;

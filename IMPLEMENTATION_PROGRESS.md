@@ -27,6 +27,7 @@ Nothing proceeds past this line without an answer.
 |---|---|---|---|
 | **D5** | **Go-ahead for R2** — sign-in and the shell on the new stack. | R1 proved the stack; R2 is the first thing anyone would see change. Nothing starts without the word (A1). | §20 |
 | **D8** | **What each of the ten BU names points at.** The page and the ten rows are built; the targets are empty. | Until a name points somewhere, everyone carrying it is on the register with nothing to open — and a role cannot be given from the employee file, because a role is held over the person's own BU. **IT is the one to think about: a unit and a supporting function share the name.** | §54.1 |
+| **D9** | **Sign-off on the hide-from-presentation mockup** (`design-mockups/hide-from-presentation/2026-09-01_hide-element.html`). His three decisions are already taken — hidden is NOT counted, rows only (never a pillar, capability or project), the workbook carries the mark — the mockup draws them. | Mockup-first (rule 1c): no source is touched until the drawn look is approved. | 2026-09-01 |
 
 **Answered:**
 
@@ -67,6 +68,21 @@ Nothing proceeds past this line without an answer.
   is a true signal — do not silence it.
 
 ## Built and verified
+
+### §230 — removing a pillar or a project (2026-09-01, on `claude/smo-hide-element-ppt-s3rodi`)
+
+The mockup an earlier session published for sign-off, signed off by Islam and
+built: a worded quiet-red Remove control in the pinned editing head (a
+pillar's edhead, a project's edband), drawn only while the pen is open,
+opening the platform's own confirmation — what the thing holds, what has been
+reported this cycle, and the archive-first way back. Never renumbers (ids are
+what figures and snapshots key on); the server needed nothing. **And the way
+back was broken for every pillars function** — `restoreArchive()` could not
+resolve an `fn:` archive — fixed at both ends, because §230's confirmation
+promises it. `checks/pillar-project-remove.py`: 13 red on the pre-§230 build,
+27 green after; neighbours and the full sweep green. *(The "Latest version"
+line above is stale — main has run to §229 while it says v3.65; noted rather
+than silently realigned, it needs its own pass.)*
 
 ### v3.80 — the pending count says where, and walks you there (§192)
 

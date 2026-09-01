@@ -4516,11 +4516,6 @@ function projPlanBody(p, fk){
     ? '<div class="pband edband"><span class="pband-code">' + esc(projCode(fk, p)) + '</span>' +
         '<span class="pband-name">' +
           textOr("plan", p.name, "", function(v){ p.name = v; }) + '</span>' +
-        /* The pillar head's own control on the project's band (§230, §53.5:
-           a unit and a function are the same product). The id alone is the
-           address — capOfProjectId() resolves the holder at press time. */
-        '<button class="rmplan" data-rmrow="project|' + esc(p.id) +
-          '">Remove this project</button>' +
         (acts ? '<span class="pband-r">' + acts + '</span>' : '') + '</div>'
     /* §192: the pending count left this slot for the totals row above — it
        was the SUBJECT's number on one pillar's band, printing under the fill
@@ -5134,18 +5129,6 @@ function unitPlanBody(it, u, railed){
             : '&nbsp; ' + esc(it.name)) + '</h3>' +
         (meta ? '<div class="pmeta">' + meta + '</div>' : '') + '</div>' +
         kindPill(it) +
-        /* ── REMOVE, WORDED, IN THE HEAD THAT PINS (§230) ──────────────
-           The × removes a ROW; removing the whole pillar had no control at
-           all, so the only way to take one out was re-uploading the plan.
-           Beside Done because reading order is "remove, or finish", and in
-           the pinned head (§194) so it is reachable from anywhere in a long
-           pillar. Only while the pen is open — it follows the Strategy
-           grant exactly as the pen does. The confirmation carries the
-           weight; these are quiet words (mockup, signed off 2026-09-01). */
-        (ed ? '<button class="rmplan" data-rmrow="pillar|' + esc(u.ukey) +
-              '|' + esc(it.id) + '">Remove this ' +
-              esc(L("pillar", "bu").toLowerCase().replace(/s$/, "")) +
-              '</button>' : '') +
         (mayEditPlan() ? penBtn("plan", "u_plan") : '') + '</div>'
     : pillarBand(code, it.name) + paneActs("plan", "u_plan");
   return head +

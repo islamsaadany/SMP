@@ -6472,22 +6472,13 @@ function restoreArchive(id){
     applyFiguresSnapshot(a.figures);
   }
   else if (a.kind === "unit") {
-    /* unitLikeWritable, never UNITS[] (§230): a pillars FUNCTION archives
-       through this same path — the import's replace, Start fresh, and now
-       removing a pillar — and its archive is keyed `fn:<key>`, which UNITS
-       cannot resolve. Every one of those archives was un-restorable: the
-       row said "cannot be restored" for a function still on the platform.
-       The view's arrays are ASSIGNED here, so the fn side needs the write
-       back — builderStartFresh()'s own pair (§129). */
-    var u = unitLikeWritable(a.key);
+    var u = UNITS[a.key];
     if (!u) return false;
     archiveUnitPlan(u, "replaced by restoring the " + a.at + " archive");
     var s = a.plan;
     u.clauses = clone(s.clauses); u.aspiration = s.aspiration; u.endInMind = s.endInMind;
     u.keyObjectives = clone(s.keyObjectives); u.swot = clone(s.swot); u.items = clone(s.items);
     renumberUnit(u);
-    var restFk = fnKeyOfTarget(a.key);
-    if (restFk) fnWriteBack(restFk, u);
   } else {
     var c = capById(a.key);
     if (!c) return false;

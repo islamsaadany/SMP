@@ -1111,6 +1111,26 @@
   .modal-b h4.mini:first-child { margin-top:0; }
   @media (max-width:640px) { .overlay { padding:0; } .modal { max-height:100vh; border-radius:0; } }
 
+  /* ── REMOVING A PILLAR OR A PROJECT: the confirmation (§230) ──────────
+     The dialog carries the weight the quiet words in the head do not: what
+     the thing holds, what has been reported against it this cycle (the warn
+     ground — outstanding, not broken, §168), and the way back. */
+  .rmconfirm p { font-size:13.5px; color:var(--ink-2); margin:0 0 10px; }
+  .rmconfirm .repline { background:var(--warn-bg); color:var(--warn-tx);
+    border-radius:8px; padding:9px 12px; font-size:13px; margin:0 0 10px; }
+  .rmconfirm .archline { font-size:12.5px; color:var(--ink-3); margin:0 0 16px; }
+  .rmconfirm .mrow { display:flex; justify-content:flex-end; gap:10px; }
+  .rmconfirm .mrow button { font:600 13px/1 var(--sans); border-radius:8px;
+    padding:10px 14px; cursor:pointer; }
+  .rmconfirm .mrow .quiet { background:none; border:1px solid var(--line);
+    color:var(--ink-2); }
+  .rmconfirm .mrow .quiet:hover { background:var(--surface-2); color:var(--ink); }
+  /* The fill is --bad and the ink --surface: red as a FILL carries the
+     page's lightest surface, never white literal (§25, §38.4). */
+  .rmconfirm .mrow .danger { background:var(--bad); border:1px solid var(--bad);
+    color:var(--surface); }
+  .rmconfirm .mrow .danger:hover { filter:brightness(1.08); }
+
   /* ── Split metric boxes inside a card ─────────────────── */
   .gcard { padding:0; }
   .card-head { padding:15px 16px 13px; border-bottom:1px solid var(--line-soft); text-align:center; width:100%; }
@@ -1730,6 +1750,19 @@
      is the same answer on the band's own class. Reading is untouched: a read
      band's name is a span and sits where it always sat. */
   .pane .pband.edband .pband-name { flex:1; min-width:0; }
+  /* ── THE REMOVE CONTROL (§230) ───────────────────────────────────────
+     Quiet red WORDS, no fill — a destructive act says its name and the
+     confirmation is where the weight lives (mockup, signed off 2026-09-01).
+     Named .rmplan, never .rmbtn — that word is taken by the Setup tables'
+     uppercase Remove button and a bare match would dress this in its
+     letterspacing (§65.9: a class name is one global namespace). --bad-tx, not --bad: red as TYPE
+     is the deeper token or it measures under 4.5 (§38.5). */
+  .pane .ptitle.edhead .rmplan, .pane .pband.edband .rmplan {
+    flex:none; font:600 12px/1 var(--sans); color:var(--bad-tx);
+    background:none; border:1px solid transparent; border-radius:7px;
+    padding:8px 10px; cursor:pointer; letter-spacing:.01em; }
+  .pane .ptitle.edhead .rmplan:hover, .pane .pband.edband .rmplan:hover {
+    background:var(--bad-bg); border-color:var(--bad-bg); }
   .pane .ptitle .pmeta { color:var(--ink-3); font-size:12.5px; margin-top:3px; }
   .planonly { font-size:12.5px; color:var(--ink-3); margin:10px 0 0; }
   .planonly b { color:var(--gold-deep); letter-spacing:.09em; text-transform:uppercase;
@@ -18357,13 +18390,22 @@ function restoreArchive(id){
     applyFiguresSnapshot(a.figures);
   }
   else if (a.kind === "unit") {
-    var u = UNITS[a.key];
+    /* unitLikeWritable, never UNITS[] (§230): a pillars FUNCTION archives
+       through this same path — the import's replace, Start fresh, and now
+       removing a pillar — and its archive is keyed `fn:<key>`, which UNITS
+       cannot resolve. Every one of those archives was un-restorable: the
+       row said "cannot be restored" for a function still on the platform.
+       The view's arrays are ASSIGNED here, so the fn side needs the write
+       back — builderStartFresh()'s own pair (§129). */
+    var u = unitLikeWritable(a.key);
     if (!u) return false;
     archiveUnitPlan(u, "replaced by restoring the " + a.at + " archive");
     var s = a.plan;
     u.clauses = clone(s.clauses); u.aspiration = s.aspiration; u.endInMind = s.endInMind;
     u.keyObjectives = clone(s.keyObjectives); u.swot = clone(s.swot); u.items = clone(s.items);
     renumberUnit(u);
+    var restFk = fnKeyOfTarget(a.key);
+    if (restFk) fnWriteBack(restFk, u);
   } else {
     var c = capById(a.key);
     if (!c) return false;
@@ -28166,6 +28208,11 @@ function projPlanBody(p, fk){
     ? '<div class="pband edband"><span class="pband-code">' + esc(projCode(fk, p)) + '</span>' +
         '<span class="pband-name">' +
           textOr("plan", p.name, "", function(v){ p.name = v; }) + '</span>' +
+        /* The pillar head's own control on the project's band (§230, §53.5:
+           a unit and a function are the same product). The id alone is the
+           address — capOfProjectId() resolves the holder at press time. */
+        '<button class="rmplan" data-rmrow="project|' + esc(p.id) +
+          '">Remove this project</button>' +
         (acts ? '<span class="pband-r">' + acts + '</span>' : '') + '</div>'
     /* §192: the pending count left this slot for the totals row above — it
        was the SUBJECT's number on one pillar's band, printing under the fill
@@ -28779,6 +28826,18 @@ function unitPlanBody(it, u, railed){
             : '&nbsp; ' + esc(it.name)) + '</h3>' +
         (meta ? '<div class="pmeta">' + meta + '</div>' : '') + '</div>' +
         kindPill(it) +
+        /* ── REMOVE, WORDED, IN THE HEAD THAT PINS (§230) ──────────────
+           The × removes a ROW; removing the whole pillar had no control at
+           all, so the only way to take one out was re-uploading the plan.
+           Beside Done because reading order is "remove, or finish", and in
+           the pinned head (§194) so it is reachable from anywhere in a long
+           pillar. Only while the pen is open — it follows the Strategy
+           grant exactly as the pen does. The confirmation carries the
+           weight; these are quiet words (mockup, signed off 2026-09-01). */
+        (ed ? '<button class="rmplan" data-rmrow="pillar|' + esc(u.ukey) +
+              '|' + esc(it.id) + '">Remove this ' +
+              esc(L("pillar", "bu").toLowerCase().replace(/s$/, "")) +
+              '</button>' : '') +
         (mayEditPlan() ? penBtn("plan", "u_plan") : '') + '</div>'
     : pillarBand(code, it.name) + paneActs("plan", "u_plan");
   return head +
@@ -34218,7 +34277,11 @@ function renderArchives(){
          c.objectives + " objectives"].join(" &middot; ")
       : [c.projects + " projects", c.deliverables + " deliverables",
          c.outcomes + " outcomes", c.milestones + " milestones"].join(" &middot; ");
-    var live = a.kind === "figures" ? true : a.kind === "unit" ? UNITS[a.key] : capById(a.key);
+    /* unitLike, never UNITS[] (§230): a pillars function's archive is keyed
+       `fn:<key>`, and asking UNITS printed "cannot be restored" for a
+       function still on the platform — the same one-line fault as the
+       restore itself. */
+    var live = a.kind === "figures" ? true : a.kind === "unit" ? unitLike(a.key) : capById(a.key);
     return '<tr><td><b>' + esc(a.name) + '</b>' +
         (a.kind === "figures"
           ? '<span class="why">the cycle\u2019s figures</span>'
@@ -49801,6 +49864,17 @@ var SYNC = (function () {
         paint();
       });
     });
+    /* The whole pillar and the whole project (§230): the worded control in
+       the editing head opens the platform's own confirmation — never
+       confirm(), which can be silenced for good on some other site (§95). */
+    document.querySelectorAll("[data-rmrow]").forEach(function(b){
+      b.addEventListener("click", function(){
+        if (!mayEditPlan()) return;
+        var a = this.dataset.rmrow.split("|");
+        if (a[0] === "pillar") confirmRemovePillar(a[1], a[2]);
+        else confirmRemoveProject(a[1]);
+      });
+    });
     /* ── FIRST ROWS FOR THE SURFACES THAT NEVER HAD ONE (§129's audit) ──
        The SWOT, the “Who we are” lines and a capability's objectives could
        be EDITED and never STARTED — the editors were built for correcting an
@@ -50952,6 +51026,117 @@ var SYNC = (function () {
       return true;
     }
     return false;
+  }
+  /* ── REMOVING A PILLAR OR A PROJECT (§230) ─────────────────────────────
+     The × removes a ROW; the whole pillar and the whole project had no
+     control at all, so taking one out meant re-uploading the plan. The
+     worded control sits in the pinned editing head (mockup signed off
+     2026-09-01), and the CONFIRMATION carries the weight: what the thing
+     holds, what has been reported against it this cycle, and the way back.
+
+     ARCHIVE FIRST, ALWAYS (§49.2's rule with a third caller): the removal
+     is exactly as destructive as Clear plan, so it goes through the same
+     archive the import and the clear already take, and the dialog says so.
+
+     NEVER renumber. `renumberUnit()` rewrites every id from POSITION, and
+     ids are what a reported figure, a focus mark and a cycle snapshot key
+     on (§69.13's own warning) — removing pillar 2 of 3 must not hand
+     pillar 3's history to a row that is not there any more. The survivors
+     keep their ids; positional CODES (a function's project codes) derive
+     at render time and close up on their own.
+
+     RESOLVED AT PRESS TIME, both times (§48.2): the row the button was
+     drawn for and the row being spliced are a dialog apart, so the Yes
+     handler looks the id up again rather than trusting a closure. */
+  function rmReportedInPillar(it){
+    var n = 0;
+    (it.measures || []).forEach(function(m){ if (m.actual != null && m.actual !== "") n++; });
+    (it.tactics  || []).forEach(function(t){ if (t.actual != null && t.actual !== "") n++; });
+    return n;
+  }
+  function rmReportedInProject(p){
+    var n = 0;
+    (p.deliverables || []).forEach(function(d){ if (d.status) n++; });
+    (p.outcomes    || []).forEach(function(o){ if (o.actual != null && o.actual !== "") n++; });
+    (p.milestones  || []).forEach(function(m){ if (m.status || (m.pct != null && m.pct !== "")) n++; });
+    return n;
+  }
+  /* One body for both kinds — the counts differ, the shape must not (§53.5).
+     A clean subject SAYS it is clean rather than merely not warning: the
+     absence of the amber line is not a sentence anybody can read (§45.2). */
+  function rmConfirmOpen(title, sub, holds, rep, scoresOf, yesWord, onYes){
+    openModalHtml(esc(title), esc(sub),
+      '<div class="rmconfirm">' +
+        '<p>' + holds + (rep ? '' :
+          ' Nothing has been reported against it this cycle.') + '</p>' +
+        (rep ? '<div class="repline">' +
+          plural(rep, "of its figures has been", "of its figures have been") +
+          ' reported this cycle — removing it moves ' + esc(scoresOf) +
+          '.</div>' : '') +
+        '<p class="archline">The plan as it stands is archived first. ' +
+          '<b>Setup › Import &amp; archives</b> holds the way back.</p>' +
+        '<div class="mrow"><button class="quiet" data-rmno="1">Cancel</button>' +
+        '<button class="danger" data-rmyes="1">' + esc(yesWord) + '</button></div>' +
+      '</div>');
+    var box = document.getElementById("modal-b");
+    if (!box) return;
+    var no = box.querySelector("[data-rmno]");
+    if (no) no.addEventListener("click", function(){ closeModal(); });
+    var yes = box.querySelector("[data-rmyes]");
+    if (yes) yes.addEventListener("click", function(){ closeModal(); onYes(); });
+  }
+  function confirmRemovePillar(ukey, id){
+    var u = unitLikeWritable(ukey);
+    var it = u && (u.items || []).filter(function(x){ return x && x.id === id; })[0];
+    if (!it) return;
+    var word = L("pillar", "bu").toLowerCase().replace(/s$/, "");
+    var code = pillarCode(u, u.items.indexOf(it));
+    var scoresOf = String(ukey).indexOf("fn:") === 0
+      ? "the function's scores" : "the unit's scores";
+    rmConfirmOpen("Remove this " + word + "?",
+      (code ? code + " — " : "") + (it.name || "Untitled"),
+      '<b>' + esc(it.name || "This " + word) + '</b> holds ' +
+        plural((it.measures || []).length, "measure") + ' and ' +
+        plural((it.tactics  || []).length, "tactic") + '.',
+      rmReportedInPillar(it), scoresOf, "Remove the " + word,
+      function(){
+        var u2 = unitLikeWritable(ukey);
+        if (!u2 || !Array.isArray(u2.items)) return;
+        var i = -1;
+        u2.items.forEach(function(x, xi){ if (x && x.id === id) i = xi; });
+        if (i < 0) return;
+        archiveUnitPlan(u2, "before " + (code || it.name || "a " + word) +
+          " was removed");
+        u2.items.splice(i, 1);
+        paint();
+      });
+  }
+  function confirmRemoveProject(id){
+    var c = capOfProjectId(id), p = projById(id);
+    if (!c || !p) return;
+    var code = projCode(c.fn, p);
+    rmConfirmOpen("Remove this project?",
+      (code ? code + " — " : "") + (p.name || "Untitled"),
+      '<b>' + esc(p.name || "This project") + '</b> holds ' +
+        plural((p.deliverables || []).length, "deliverable") + ', ' +
+        plural((p.outcomes    || []).length, "outcome") + ' and ' +
+        plural((p.milestones  || []).length, "milestone") + '.',
+      rmReportedInProject(p), "the function's scores", "Remove the project",
+      function(){
+        var c2 = capOfProjectId(id);
+        if (!c2 || !Array.isArray(c2.projects)) return;
+        var i = -1;
+        c2.projects.forEach(function(x, xi){ if (x && x.id === id) i = xi; });
+        if (i < 0) return;
+        archiveCapPlan(c2, "before " + (code || p.name || "a project") +
+          " was removed");
+        c2.projects.splice(i, 1);
+        /* The rail may be holding the removed project (§48.2's stale
+           pointer): dropped rather than repointed — the rail pick already
+           falls back to the first project on its own. */
+        if (RAIL[railKeyFor(c2)] === id) delete RAIL[railKeyFor(c2)];
+        paint();
+      });
   }
   /* The band's own paint, called from paint() once the navigation has
      settled — the chips read currentSub/CURSEC, so earlier would read the

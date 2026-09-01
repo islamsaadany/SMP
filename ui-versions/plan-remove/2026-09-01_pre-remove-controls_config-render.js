@@ -4979,11 +4979,7 @@ function renderArchives(){
          c.objectives + " objectives"].join(" &middot; ")
       : [c.projects + " projects", c.deliverables + " deliverables",
          c.outcomes + " outcomes", c.milestones + " milestones"].join(" &middot; ");
-    /* unitLike, never UNITS[] (§230): a pillars function's archive is keyed
-       `fn:<key>`, and asking UNITS printed "cannot be restored" for a
-       function still on the platform — the same one-line fault as the
-       restore itself. */
-    var live = a.kind === "figures" ? true : a.kind === "unit" ? unitLike(a.key) : capById(a.key);
+    var live = a.kind === "figures" ? true : a.kind === "unit" ? UNITS[a.key] : capById(a.key);
     return '<tr><td><b>' + esc(a.name) + '</b>' +
         (a.kind === "figures"
           ? '<span class="why">the cycle\u2019s figures</span>'

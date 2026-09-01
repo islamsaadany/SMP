@@ -3805,7 +3805,32 @@ prior sessions (on HR_ERP) accidentally reverted agreed-upon designs.
 
 ---
 
-*Last Updated: 2026-09-01 &mdash; **&sect;229: Enter commits a one-line
+*Last Updated: 2026-09-01 &mdash; **&sect;230: removing a pillar or a
+project.** The mockup an earlier session published for sign-off
+(`design-mockups/pillar-project-remove/`), signed off by Islam and built: a
+worded quiet-red control in the pinned editing head (&sect;194's edhead on a
+pillar, &sect;194.2's edband on a project), drawn only while the pen is open,
+opening the platform's own confirmation &mdash; what the thing holds, what has
+been reported against it this cycle, and the way back. **Archive first,
+always** (&sect;49.2's rule with a third caller, through the same
+`archiveUnitPlan()`/`archiveCapPlan()` the import and Clear plan take), and
+**never renumber** &mdash; ids are what figures, focus marks and snapshots key
+on, so the survivors keep theirs. The server needed nothing (&sect;42's
+fall-through already makes a structural plan change the office's). **And the
+way back was broken for every pillars FUNCTION**: `restoreArchive()` resolved
+a "unit" archive through `UNITS[a.key]`, and a pillars function's archives are
+keyed `fn:<key>` &mdash; un-restorable since spec 010, found because &sect;230's
+confirmation promises the way back; fixed at both ends
+(`unitLikeWritable`/`unitLike` + `fnWriteBack`). The new control is `.rmplan`,
+never `.rmbtn` &mdash; that word is taken (&sect;65.9).
+`checks/pillar-project-remove.py` presses everything and asks the DATA: **13
+red** on the pre-&sect;230 build, all green after. **The hide-from-presentation
+feature is mocked up and NOT built** (&sect;231 when it lands): Islam's three
+decisions are taken &mdash; hidden is NOT counted, rows only (never a pillar,
+capability or project), the workbook carries the mark &mdash;
+`design-mockups/hide-from-presentation/` awaits his sign-off.*
+
+*Earlier: 2026-09-01 &mdash; **&sect;229: Enter commits a one-line
 prose box.** Found during &sect;226's accessibility audit and built on Islam's
 word: &sect;189 promised *"Enter blurs, which is what commits"* and no code
 ever carried it out, so Enter inserted a newline into every growing title box.

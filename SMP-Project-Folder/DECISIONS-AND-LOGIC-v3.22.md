@@ -25407,3 +25407,74 @@ committed clean on a plan title AND a function objective; a definition still
 takes its paragraph break — and was run against the pre-§229 build first:
 **4 red**, exactly the four grow-box assertions. `fn-ko-edit`, `plan-fields`,
 `plan-edit-head` and the full `qa.py` sweep green after.
+
+## §230 — REMOVING A PILLAR OR A PROJECT (2026-09-01)
+
+Islam asked for it in an earlier session, which stopped where the mockup-first
+rule stops: `design-mockups/pillar-project-remove/2026-09-01_remove-controls.html`
+was published for sign-off and no source was touched. He signed off on the
+mockup today (*"ok for the delete pillar or project mockup"*), and this is
+that mockup built.
+
+**THE ROW HAD A ×; THE WHOLE THING HAD NOTHING.** Every list row could be
+removed since §69.13, and the pillar and the project those rows live in could
+not — so taking one out meant re-uploading the plan, §53.3's complaint at the
+largest size it comes in. The control is **worded, quiet red, in the pinned
+editing head** (§194's edhead on a pillar, §194.2's edband on a project),
+beside Done because reading order is *remove, or finish* — drawn only while
+the pen is open, so it follows the Strategy grant exactly as the pen does, and
+reachable from anywhere in a long pillar because the head pins.
+
+**THE CONFIRMATION CARRIES THE WEIGHT** — the platform's own modal, never
+`confirm()` (§95): what the thing holds (measures and tactics; deliverables,
+outcomes and milestones), **what has been reported against it this cycle** on
+the warn ground — outstanding, not broken (§168) — and the way back. A clean
+subject SAYS nothing has been reported, because the absence of a warning is
+not a sentence anybody can read (§45.2). Both rows are resolved again at
+press time (§48.2): the row the button was drawn for and the row being
+spliced are a dialog apart.
+
+**ARCHIVE FIRST, ALWAYS** — §49.2's rule with a third caller. The removal is
+exactly as destructive as Clear plan, so it goes through the same
+`archiveUnitPlan()`/`archiveCapPlan()` the import and the clear already take,
+and the dialog says so: *"The plan as it stands is archived first. Setup ›
+Import & archives holds the way back."*
+
+**NEVER RENUMBER.** `renumberUnit()` rewrites every id from POSITION, and ids
+are what a reported figure, a focus mark and a cycle snapshot key on
+(§69.13's own warning) — removing pillar 2 of 3 must not hand pillar 3's
+history to a row that is not there any more. The survivors keep their ids,
+asserted; positional CODES (a function's project codes) derive at render time
+and close up on their own. **The server needed nothing**: a removed row is a
+structural plan change the authoriser already classifies as the office's
+(§42's fall-through, §215's whole-part travel), and `test-authorize.js` still
+passes 451.
+
+**AND THE WAY BACK WAS BROKEN FOR EVERY PILLARS FUNCTION, SO THE PROMISE
+FORCED THE FIX.** `restoreArchive()` resolved a "unit" archive through
+`UNITS[a.key]` and a pillars function's archives are keyed `fn:<key>` — so
+every archive that path has ever written for one (the import's replace,
+builder Start fresh, and now this) was un-restorable, with the row reading
+*"no longer in the platform — cannot be restored"* for a function still on
+the platform. Pre-existing, found because §230's confirmation promises the
+way back and a promise has to be true. Both ends fixed with the resolver the
+rest of the product uses (`unitLikeWritable`, `unitLike`), plus
+`fnWriteBack()` after the assignments — `builderStartFresh()`'s own pair,
+because the writable view's arrays are ASSIGNED there (§212).
+
+**`.rmplan`, never `.rmbtn`** — that word is taken by the Setup tables'
+uppercase Remove button, and a bare match would have dressed the new control
+in its letterspacing (§65.9, checked before it bit this time). The danger
+button wears the fillcta's own idiom — `--bad` fill, `--surface` ink (§145.14)
+— and the amber line the warn tokens, so both themes are answered without a
+literal (§25).
+
+`checks/pillar-project-remove.py` presses everything and asks the DATA
+(§94.2, both ends): no control in read mode or for a unit head; hittable at
+its own centre (§93.4); Cancel costs nothing; Confirm archives first, removes,
+keeps the survivors' ids; the archive restores through the real Setup control
+on a UNIT and on a PILLARS FUNCTION — the §230 fix — and the project side on
+fn:finance with the rail no longer holding the removed id. Proved able to
+fail first: **13 red** against the pre-§230 build. `plan-fields`,
+`plan-edit-head`, `project-tables`, `table-fit`, `repeat-project`,
+`plan-builder` and the full `qa.py` sweep green after.

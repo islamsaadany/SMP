@@ -120,6 +120,26 @@ serverless functions `api/`; SQL `db/`; checks `SMP-Project-Folder/src/checks/`;
 
 ---
 
+## Phase 6b · US2b · The door is a door (revision 2, 2026-08-29)
+
+**Goal**: the login page does nothing but sign you in; the office's pages live
+inside a Forefront platform with its own chrome.
+**Independently testable**: the door holds no tab, table or card; signing in
+lands on a platform whose navigation carries the three pages; a client's own
+person still goes straight into their client.
+
+- [ ] T060 [US2b] A Forefront platform shell — its own top line and navigation
+  (`Clients · Consultants · Who sees what`) — served at `/platform`, in
+  Forefront's colours, matching the two-line chrome a client's platform has
+- [ ] T061 [US2b] Move the cards, the consultants page, the access table and a
+  client's configuration off `index.html` and onto that shell; the door keeps
+  only sign-in and the forced password change
+- [ ] T062 [US2b] The door hands over: a client's own person and anybody
+  holding one client go straight to that client; everybody else to `/platform`
+- [ ] T063 [US2b] `checks/multi-client.py` asserts the door holds no tabs, no
+  table and no cards, and that every office page is reachable from the shell —
+  proved by putting the pages back on the door and watching it fail
+
 ## Phase 7 · Polish and cross-cutting
 
 - [ ] T053 Rebuild with `python3 build.py` and confirm the shipped file is reproduced byte-identically (Principle III)

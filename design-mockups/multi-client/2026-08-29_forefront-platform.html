@@ -1,0 +1,477 @@
+<title>Forefront Platform Shell</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Newsreader:opsz,wght@6..72,400;6..72,600&family=Public+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;600&display=swap">
+<style>
+  :root{
+    --ground:#F5F6F9; --surface:#FFFFFF; --surface-2:#EDF0F5;
+    --line:#D8DEE8; --line-soft:#E6EAF1;
+    --ink:#141C2B; --ink-2:#465268; --ink-3:#6E7A90;
+    /* Forefront's own, measured before use (constitution XIII):
+       #0F2C69 carries white at 13.25:1 · #F5A623 carries #231500 at 9.04:1
+       and is 2.03:1 as TYPE on white, so words take #9C5D08 (5.27:1). */
+    --ff:#0F2C69; --ff-2:#1b3f86; --ff-ink:#FFFFFF; --ff-quiet:#A9BAD8;
+    --amber:#F5A623; --amber-ink:#231500; --amber-tx:#9C5D08; --amber-wash:#FEF4E2;
+    --good:#1B6E4E; --good-bg:#E9F4EF; --warn:#8A6410; --warn-bg:#FBF2DC;
+    --shadow:0 1px 2px rgba(20,28,43,.06), 0 8px 28px rgba(20,28,43,.06);
+    --measure:44rem;
+  }
+  @media (prefers-color-scheme: dark){
+    :root:not([data-theme="light"]){
+      --ground:#12151C; --surface:#1A1F29; --surface-2:#222834;
+      --line:#333B4A; --line-soft:#2A313E;
+      --ink:#E7EBF2; --ink-2:#AAB4C6; --ink-3:#8590A3;
+      --ff:#0D2350; --ff-2:#17356e; --ff-ink:#F0F4FB; --ff-quiet:#95A9CC;
+      --amber:#F5A623; --amber-ink:#231500; --amber-tx:#F5A623; --amber-wash:#2B2210;
+      --good:#63BE96; --good-bg:#1B2C26; --warn:#D7B04A; --warn-bg:#2A2515;
+      --shadow:0 1px 2px rgba(0,0,0,.4), 0 10px 30px rgba(0,0,0,.35);
+    }
+  }
+  :root[data-theme="dark"]{
+    --ground:#12151C; --surface:#1A1F29; --surface-2:#222834;
+    --line:#333B4A; --line-soft:#2A313E;
+    --ink:#E7EBF2; --ink-2:#AAB4C6; --ink-3:#8590A3;
+    --ff:#0D2350; --ff-2:#17356e; --ff-ink:#F0F4FB; --ff-quiet:#95A9CC;
+    --amber:#F5A623; --amber-ink:#231500; --amber-tx:#F5A623; --amber-wash:#2B2210;
+    --good:#63BE96; --good-bg:#1B2C26; --warn:#D7B04A; --warn-bg:#2A2515;
+    --shadow:0 1px 2px rgba(0,0,0,.4), 0 10px 30px rgba(0,0,0,.35);
+  }
+  *{box-sizing:border-box}
+  body{ background:var(--ground); color:var(--ink); margin:0; padding:0 20px 90px;
+    font:400 16.5px/1.62 "Public Sans", ui-sans-serif, system-ui, -apple-system, sans-serif;
+    -webkit-font-smoothing:antialiased }
+  .wrap{ max-width:74rem; margin:0 auto }
+  h1,h2,h3{ font-family:"Newsreader", Georgia, serif; font-weight:600; text-wrap:balance; margin:0 }
+  .kicker{ font:600 11px/1 "IBM Plex Mono", ui-monospace, monospace; letter-spacing:.16em;
+    text-transform:uppercase; color:var(--amber-tx) }
+
+  header.mast{ padding:58px 0 28px; border-bottom:1px solid var(--line) }
+  header.mast h1{ font-size:clamp(31px,5vw,48px); line-height:1.08; margin:13px 0 15px }
+  header.mast p{ max-width:var(--measure); color:var(--ink-2); font-size:18px; margin:0 }
+  .standing{ display:flex; flex-wrap:wrap; gap:10px; align-items:center; margin-top:22px;
+    font:600 12px/1 "IBM Plex Mono", ui-monospace, monospace; letter-spacing:.08em;
+    text-transform:uppercase; color:var(--ink-3) }
+  .standing b{ background:var(--amber); color:var(--amber-ink); padding:5px 10px; border-radius:999px }
+
+  section.step{ padding:48px 0 6px; border-bottom:1px solid var(--line-soft) }
+  section.step:last-of-type{ border-bottom:0 }
+  .stephead{ display:flex; gap:15px; align-items:baseline }
+  .stepno{ font:600 12px/1 "IBM Plex Mono", ui-monospace, monospace; color:var(--amber-tx);
+    letter-spacing:.1em; padding-top:6px }
+  section.step h2{ font-size:clamp(22px,3vw,29px); line-height:1.2 }
+  .lede{ color:var(--ink-2); max-width:var(--measure); margin:10px 0 24px }
+  .caption{ font:600 11px/1 "IBM Plex Mono", ui-monospace, monospace; letter-spacing:.12em;
+    text-transform:uppercase; color:var(--ink-3); margin:0 0 10px }
+
+  /* ── the fake product ─────────────────────────────────────────── */
+  .screen{ background:var(--surface); border:1px solid var(--line); border-radius:12px;
+    box-shadow:var(--shadow); overflow:hidden }
+
+  /* the platform's own chrome: two lines, exactly as SMP's is (§2.9) */
+  .ftop{ background:var(--surface); border-bottom:1px solid var(--line);
+    display:flex; align-items:center; gap:12px; padding:9px 16px; font-size:13.5px }
+  .ftop .mk{ font:700 12px/1 "IBM Plex Mono", ui-monospace, monospace; letter-spacing:.16em;
+    color:var(--ff) }
+  .ftop .nm{ font-weight:600 }
+  .ftop .right{ margin-left:auto; display:flex; align-items:center; gap:8px; color:var(--ink-3);
+    font-size:12.5px }
+  .chip{ border:1px solid var(--line); border-radius:6px; padding:3px 8px;
+    font:600 10.5px/1.5 "IBM Plex Mono", ui-monospace, monospace; letter-spacing:.06em;
+    text-transform:uppercase; color:var(--ink-2) }
+  .fnav{ background:var(--ff); color:var(--ff-ink); display:flex; align-items:stretch; gap:2px;
+    padding:0 10px }
+  .fnav button{ background:transparent; border:0; color:var(--ff-quiet); font:600 13.5px/1 inherit;
+    padding:13px 14px; cursor:pointer; border-bottom:3px solid transparent }
+  .fnav button.on{ color:var(--ff-ink); border-bottom-color:var(--amber) }
+  .fbody{ padding:20px }
+  .ptitle{ display:flex; align-items:center; gap:12px; flex-wrap:wrap; padding-bottom:12px;
+    border-bottom:1px solid var(--line); margin-bottom:16px }
+  .ptitle h3{ font-size:19px }
+  .ptitle .right{ margin-left:auto; display:flex; gap:8px; align-items:center }
+
+  .btn{ border:1px solid var(--line); background:var(--surface); color:var(--ink);
+    border-radius:8px; padding:6px 12px; font:600 13px/1.5 inherit }
+  .btn.solid{ background:var(--ff); border-color:var(--ff); color:var(--ff-ink) }
+  .btn.amber{ background:var(--amber); border-color:var(--amber); color:var(--amber-ink) }
+  .field{ width:100%; border:1px solid var(--line); background:var(--surface); color:var(--ink);
+    border-radius:8px; padding:8px 11px; font:400 14px/1.5 inherit }
+  .lab{ font:600 11px/1 "IBM Plex Mono", ui-monospace, monospace; letter-spacing:.12em;
+    text-transform:uppercase; color:var(--ink-3); display:block; margin-bottom:6px }
+
+  /* the door, and only the door */
+  .door{ display:grid; grid-template-columns:1.1fr .9fr; min-height:320px }
+  .door .wall{ background:var(--ff); color:var(--ff-ink); padding:34px 30px; display:flex;
+    flex-direction:column; justify-content:center; gap:12px }
+  .door .wall .k{ font:600 11px/1 "IBM Plex Mono", ui-monospace, monospace; letter-spacing:.2em;
+    text-transform:uppercase; color:var(--amber) }
+  .door .wall h3{ font-size:26px; line-height:1.2; color:var(--ff-ink) }
+  .door .wall p{ margin:0; color:var(--ff-quiet); font-size:14.5px; max-width:25rem }
+  .door .card{ padding:32px 28px; display:flex; flex-direction:column; justify-content:center; gap:13px }
+  .door .card h4{ margin:0; font:600 17px/1.3 "Newsreader", Georgia, serif }
+  .door .card .why{ margin:0; color:var(--ink-3); font-size:13px }
+
+  /* cards */
+  .cards{ display:grid; grid-template-columns:repeat(auto-fill,minmax(226px,1fr)); gap:13px }
+  .ccard{ border:1px solid var(--line); border-radius:11px; background:var(--surface); padding:15px;
+    display:flex; flex-direction:column; gap:8px; min-height:150px; position:relative }
+  .ccard .cmark{ width:36px; height:36px; border-radius:9px; background:var(--ff); color:var(--amber);
+    font:700 12px/36px "IBM Plex Mono", ui-monospace, monospace; text-align:center; letter-spacing:.05em }
+  .ccard h4{ margin:0; font:600 17px/1.25 "Newsreader", Georgia, serif }
+  .ccard .ind{ margin:-2px 0 0; color:var(--ink-3); font-size:12.5px }
+  .ccard .foot{ margin-top:auto; display:flex; gap:6px; flex-wrap:wrap }
+  .ccard .cog{ position:absolute; top:12px; right:12px; font:600 10px/1.6 "IBM Plex Mono", monospace;
+    letter-spacing:.06em; text-transform:uppercase; color:var(--amber-tx);
+    border:1px solid var(--line); border-radius:6px; padding:2px 7px }
+  .ccard.demo{ background:var(--amber-wash); border-color:var(--amber) }
+  .ccard.add{ border-style:dashed; align-items:center; justify-content:center; color:var(--ink-3);
+    font-weight:600 }
+  .tag{ font:600 10.5px/1.5 "IBM Plex Mono", ui-monospace, monospace; letter-spacing:.06em;
+    text-transform:uppercase; border:1px solid var(--line); border-radius:5px; padding:2px 6px;
+    color:var(--ink-2); background:var(--surface-2) }
+  .tag.open{ color:var(--good); background:var(--good-bg); border-color:var(--good) }
+  .tag.none{ color:var(--warn); background:var(--warn-bg); border-color:var(--warn) }
+  .tag.demo{ color:var(--amber-tx); border-color:var(--amber); background:var(--surface) }
+
+  table{ border-collapse:collapse; width:100%; font-size:14px }
+  th,td{ text-align:left; padding:8px 10px; border-bottom:1px solid var(--line-soft); white-space:nowrap }
+  thead th{ background:var(--ff); color:var(--ff-ink); font:600 11px/1.4 "IBM Plex Mono", monospace;
+    letter-spacing:.09em; text-transform:uppercase; border-bottom:0 }
+  thead th:first-child{ border-top-left-radius:8px } thead th:last-child{ border-top-right-radius:8px }
+  tbody tr:nth-child(even) td{ background:var(--surface-2) }
+  .tscroll{ overflow-x:auto }
+  .mono{ font:400 13px/1.5 "IBM Plex Mono", ui-monospace, monospace; color:var(--ink-2) }
+  .muted{ color:var(--ink-3) }
+
+  .cellwrap{ display:inline-flex; border:1px solid var(--line); border-radius:7px; overflow:hidden }
+  .cellwrap span{ padding:4px 9px; font:600 10.5px/1.4 "IBM Plex Mono", monospace; letter-spacing:.06em;
+    text-transform:uppercase; color:var(--ink-3); background:var(--surface);
+    border-right:1px solid var(--line) }
+  .cellwrap span:last-child{ border-right:0 }
+  .cellwrap span.on{ background:var(--ff); color:var(--ff-ink) }
+  .cellwrap span.on.edit{ background:var(--amber); color:var(--amber-ink) }
+  .cellwrap.locked{ opacity:.75 }
+
+  .cfg{ display:grid; grid-template-columns:1.05fr .95fr; gap:24px }
+  .rowset{ display:grid; gap:12px }
+  .teamrow{ display:flex; align-items:center; gap:10px; padding:8px 0; border-bottom:1px solid var(--line-soft) }
+  .teamrow .nm{ font-weight:600; font-size:14px }
+  .teamrow .em{ color:var(--ink-3); font-size:12.5px }
+  .teamrow .sp{ margin-left:auto; display:flex; gap:6px }
+
+  .notes{ margin:18px 0 0; padding:0; list-style:none; display:grid; gap:9px }
+  .notes li{ position:relative; padding-left:17px; color:var(--ink-2); font-size:15px; max-width:var(--measure) }
+  .notes li::before{ content:"—"; position:absolute; left:0; color:var(--amber-tx) }
+  .notes li b{ color:var(--ink) }
+  .flag{ border-left:3px solid var(--amber); background:var(--amber-wash); padding:13px 15px;
+    border-radius:0 9px 9px 0; margin-top:18px; max-width:var(--measure) }
+  .flag p{ margin:0; font-size:15px; color:var(--ink-2) } .flag p b{ color:var(--ink) }
+  .was{ border-left:3px solid var(--line); background:var(--surface-2) }
+  footer{ padding:40px 0 0; border-top:1px solid var(--line); margin-top:36px; color:var(--ink-3); font-size:14px }
+  @media (max-width:860px){ .door,.cfg{ grid-template-columns:1fr } }
+</style>
+
+<div class="wrap">
+
+<header class="mast">
+  <div class="kicker">Spec 024 · revision 2 · for sign-off</div>
+  <h1>The Forefront platform</h1>
+  <p>Corrected after Islam saw the first build: <b>the login page is only a login
+  page</b>, exactly as a client's is. Everything else — the clients, Forefront's
+  own people, and who sees what — lives inside a platform with its own chrome,
+  the way SMP does.</p>
+  <div class="standing"><b>Proposed</b> <span>Not built · the current build puts these on the door</span></div>
+</header>
+
+<!-- 1 · WHAT CHANGES -->
+<section class="step">
+  <div class="stephead"><div class="stepno">01</div><h2>What changes</h2></div>
+  <p class="lede">One screen moves, and everything on it moves with it.</p>
+  <div class="flag was">
+    <p><b>Built today, and wrong:</b> after signing in, the door itself grew the
+    client cards, then the consultants table, then the access table. The page
+    that should do one thing was carrying the whole product — and a login page
+    with tabs is not a login page.</p>
+  </div>
+  <div class="flag">
+    <p><b>Proposed:</b> the door signs you in and hands you over. The Forefront
+    platform is a platform: a top line saying who you are, a navigation row of
+    its own, and pages under it — <b>Clients · Consultants · Who sees what</b>.
+    Opening a client leaves it for that client's SMP, and the client's name in
+    that chrome brings you back.</p>
+  </div>
+</section>
+
+<!-- 2 · THE DOOR -->
+<section class="step">
+  <div class="stephead"><div class="stepno">02</div><h2>The door, and nothing else</h2></div>
+  <p class="lede">The same wall-and-card the client's sign-in already uses. It
+  asks for an email and a password, and then it is finished.</p>
+  <p class="caption">smp.forefront.consulting</p>
+  <div class="screen">
+    <div class="door">
+      <div class="wall">
+        <div class="k">Forefront Consulting</div>
+        <h3>Strategy Management Platform</h3>
+        <p>Group and business-unit plans, reporting cycles, and the evidence
+        behind every figure — run for each client in their own platform.</p>
+      </div>
+      <div class="card">
+        <div><h4>Sign in</h4>
+          <p class="why">Use the email address your platform is registered against.</p></div>
+        <div><span class="lab">Email</span>
+          <input class="field" value="islam.saadany@forefront.consulting" readonly></div>
+        <div><span class="lab">Password</span>
+          <input class="field" type="password" value="............" readonly></div>
+        <button class="btn solid" style="width:100%">Sign in</button>
+        <p class="why">You stay signed in on this device for 30 days.</p>
+      </div>
+    </div>
+  </div>
+  <ul class="notes">
+    <li><b>No tabs, no lists, no table.</b> Whatever it carried before is on the
+    other side of it now.</li>
+    <li><b>A client's own person never sees the platform behind it</b> — they
+    are handed straight to their client, as they are today.</li>
+  </ul>
+</section>
+
+<!-- 3 · CLIENTS -->
+<section class="step">
+  <div class="stephead"><div class="stepno">03</div><h2>Inside: the clients</h2></div>
+  <p class="lede">Where you land. The platform's own chrome above it, and the
+  same cards you have already signed off — now on a page rather than on the door.</p>
+  <div class="screen">
+    <div class="ftop">
+      <span class="mk">FOREFRONT</span>
+      <span class="nm">Platform</span>
+      <span class="right"><span class="chip">Light</span>Islam Saadany · Admin
+        <span class="chip">Sign out</span></span>
+    </div>
+    <div class="fnav">
+      <button class="on">Clients</button>
+      <button>Consultants</button>
+      <button>Who sees what</button>
+    </div>
+    <div class="fbody">
+      <div class="ptitle">
+        <h3>Clients</h3>
+        <div class="right">
+          <input class="field" style="width:190px" value="Search clients" readonly>
+          <button class="btn amber">Add a client</button>
+        </div>
+      </div>
+      <div class="cards">
+        <div class="ccard"><span class="cog">Settings</span>
+          <div class="cmark">RT</div><h4>Raya Trade</h4>
+          <p class="ind">Distribution &amp; retail</p>
+          <div class="foot"><span class="tag open">Cycle open</span><span class="tag">Mine</span><span class="tag">10 units</span></div></div>
+        <div class="ccard"><span class="cog">Settings</span>
+          <div class="cmark">RH</div><h4>RHI</h4>
+          <p class="ind">Industrial</p>
+          <div class="foot"><span class="tag none">No plan yet</span><span class="tag">Mine</span></div></div>
+        <div class="ccard"><span class="cog">Settings</span>
+          <div class="cmark">EA</div><h4>El Abd</h4>
+          <p class="ind">Food &amp; beverage</p>
+          <div class="foot"><span class="tag none">No plan yet</span></div></div>
+        <div class="ccard demo"><span class="cog">Settings</span>
+          <div class="cmark">DM</div><h4>Demo</h4>
+          <p class="ind">Meridian Group — a worked example</p>
+          <div class="foot"><span class="tag demo">Demo</span><span class="tag">Yours to edit</span></div></div>
+        <div class="ccard add">+ Add a client</div>
+      </div>
+    </div>
+  </div>
+  <ul class="notes">
+    <li><b>The card opens the client; Settings opens its configuration.</b> Two
+    acts, one place — and the client stays one thing on the page.</li>
+    <li><b>Only what your row reaches is drawn</b>, and the same rule answers the
+    request behind it, so a card can never offer what the next click refuses.</li>
+  </ul>
+</section>
+
+<!-- 4 · A CLIENT'S CONFIGURATION -->
+<section class="step">
+  <div class="stephead"><div class="stepno">04</div><h2>Inside: a client's configuration</h2></div>
+  <p class="lede">Reached from that client's card. Its name, industry, notes,
+  mark — and the one list that says who from Forefront works on it.</p>
+  <div class="screen">
+    <div class="ftop">
+      <span class="mk">FOREFRONT</span><span class="nm">Platform</span>
+      <span class="right">Islam Saadany · Admin <span class="chip">Sign out</span></span>
+    </div>
+    <div class="fnav"><button class="on">Clients</button><button>Consultants</button><button>Who sees what</button></div>
+    <div class="fbody">
+      <div class="ptitle">
+        <h3>Raya Trade</h3>
+        <div class="right"><span class="tag open">Cycle open</span>
+          <button class="btn">Open the platform</button>
+          <button class="btn">Back to clients</button>
+          <button class="btn solid">Save</button></div>
+      </div>
+      <div class="cfg">
+        <div class="rowset">
+          <div><span class="lab">Client name</span><input class="field" value="Raya Trade" readonly></div>
+          <div><span class="lab">Address</span><input class="field" value="smp.forefront.consulting/raya-trade" readonly>
+            <p class="muted" style="font-size:12.5px;margin:6px 0 0">Set once from the name. A link that has been sent should keep working.</p></div>
+          <div><span class="lab">Industry</span><input class="field" value="Distribution &amp; retail" readonly></div>
+          <div><span class="lab">Notes</span><textarea class="field" rows="3" readonly>Ten business units under two companies. Cycle 1 opened July 2026.</textarea></div>
+          <div><span class="lab">Mark and colours</span>
+            <div style="display:flex;gap:10px;align-items:center">
+              <span class="cmark" style="width:36px;height:36px;border-radius:9px;background:var(--ff);color:var(--amber);font:700 12px/36px 'IBM Plex Mono',monospace;text-align:center">RT</span>
+              <button class="btn">Replace</button><span class="mono">#173156 · #C29B2A</span></div></div>
+        </div>
+        <div>
+          <span class="lab">Strategy office for this client</span>
+          <div class="teamrow"><div><div class="nm">Islam Saadany</div><div class="em">islam.saadany@forefront.consulting</div></div>
+            <div class="sp"><span class="tag demo">Super user</span><button class="btn">Remove</button></div></div>
+          <div class="teamrow"><div><div class="nm">Mohamed Essam</div><div class="em">mohamed.essam@forefront.consulting</div></div>
+            <div class="sp"><button class="btn">Make super user</button><button class="btn">Remove</button></div></div>
+          <div class="teamrow"><div><div class="nm">Omar Alaa</div><div class="em">omar.alaa@forefront.consulting</div></div>
+            <div class="sp"><button class="btn">Make super user</button><button class="btn">Remove</button></div></div>
+          <div style="display:flex;gap:8px;margin-top:13px">
+            <select class="field" style="flex:1"><option>Add somebody from Forefront</option></select>
+            <button class="btn">Add</button></div>
+          <p class="muted" style="font-size:13px;margin:15px 0 0">Everyone on this list holds
+          <b>SMO team</b> inside Raya Trade; the super user also holds the access
+          matrix, retiring people and issuing passwords. Removing somebody
+          retires their row on that client's register rather than deleting it.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- 5 · CONSULTANTS -->
+<section class="step">
+  <div class="stephead"><div class="stepno">05</div><h2>Inside: Forefront's own people</h2></div>
+  <p class="lede">The register's own machinery, one level up — a temporary
+  password issued from the platform, forced change on first use, retire rather
+  than delete.</p>
+  <div class="screen">
+    <div class="ftop"><span class="mk">FOREFRONT</span><span class="nm">Platform</span>
+      <span class="right">Islam Saadany · Admin <span class="chip">Sign out</span></span></div>
+    <div class="fnav"><button>Clients</button><button class="on">Consultants</button><button>Who sees what</button></div>
+    <div class="fbody">
+      <div class="ptitle"><h3>Consultants</h3>
+        <div class="right"><input class="field" style="width:170px" value="Search" readonly>
+          <button class="btn amber">Add a consultant</button></div></div>
+      <div class="tscroll"><table>
+        <thead><tr><th>Name</th><th>Email</th><th>Role</th><th>Clients</th><th>Password</th><th></th></tr></thead>
+        <tbody>
+          <tr><td><b>Islam Saadany</b></td><td class="mono">islam.saadany@forefront.consulting</td>
+            <td>Admin</td><td>3</td><td><span class="tag open">Set</span></td><td></td></tr>
+          <tr><td><b>Mohamed Essam</b></td><td class="mono">mohamed.essam@forefront.consulting</td>
+            <td>Lead</td><td>2</td><td><span class="tag none">Temporary</span></td><td><button class="btn">Issue password</button></td></tr>
+          <tr><td><b>Omar Alaa</b></td><td class="mono">omar.alaa@forefront.consulting</td>
+            <td>Consultant</td><td>1</td><td><span class="tag open">Set</span></td><td><button class="btn">Issue password</button></td></tr>
+          <tr><td><b>Nadia Fahmy</b></td><td class="mono">nadia.fahmy@forefront.consulting</td>
+            <td>Observer</td><td>0</td><td><span class="tag">—</span></td><td><button class="btn">Issue password</button></td></tr>
+        </tbody></table></div>
+      <p class="muted" style="font-size:13px;margin:14px 0 0">A password is said once, here, and stored nowhere in the clear.</p>
+    </div>
+  </div>
+</section>
+
+<!-- 6 · WHO SEES WHAT -->
+<section class="step">
+  <div class="stephead"><div class="stepno">06</div><h2>Inside: who sees what</h2></div>
+  <p class="lede">Your table, unchanged from the one you approved — it simply
+  sits on a page now instead of on the door.</p>
+  <div class="screen">
+    <div class="ftop"><span class="mk">FOREFRONT</span><span class="nm">Platform</span>
+      <span class="right">Islam Saadany · Admin <span class="chip">Sign out</span></span></div>
+    <div class="fnav"><button>Clients</button><button>Consultants</button><button class="on">Who sees what</button></div>
+    <div class="fbody">
+      <div class="ptitle"><h3>Who sees what</h3></div>
+      <div class="tscroll"><table>
+        <thead><tr><th>Role</th><th>My clients</th><th>Other clients</th><th>Client configuration</th>
+          <th>Consultants</th><th>Add a client</th><th>Demo</th></tr></thead>
+        <tbody>
+          <tr><td><b>Admin</b><div class="muted" style="font-size:12px">Islam</div></td>
+            <td><span class="cellwrap locked"><span>View</span><span class="on edit">Edit</span></span></td>
+            <td><span class="cellwrap locked"><span>View</span><span class="on edit">Edit</span></span></td>
+            <td><span class="cellwrap locked"><span>View</span><span class="on edit">Edit</span></span></td>
+            <td><span class="cellwrap locked"><span>View</span><span class="on edit">Edit</span></span></td>
+            <td><span class="cellwrap locked"><span class="on edit">Yes</span></span></td>
+            <td><span class="cellwrap locked"><span>View</span><span class="on edit">Edit</span></span></td></tr>
+          <tr><td><b>Lead</b></td>
+            <td><span class="cellwrap"><span>View</span><span class="on edit">Edit</span></span></td>
+            <td><span class="cellwrap"><span class="on">View</span><span>Edit</span></span></td>
+            <td><span class="cellwrap"><span>View</span><span class="on edit">Edit</span></span></td>
+            <td><span class="cellwrap"><span class="on">View</span><span>Edit</span></span></td>
+            <td><span class="cellwrap"><span>Yes</span></span></td>
+            <td><span class="cellwrap"><span>View</span><span class="on edit">Edit</span></span></td></tr>
+          <tr><td><b>Consultant</b></td>
+            <td><span class="cellwrap"><span>View</span><span class="on edit">Edit</span></span></td>
+            <td><span class="cellwrap"><span>View</span><span>Edit</span></span></td>
+            <td><span class="cellwrap"><span class="on">View</span><span>Edit</span></span></td>
+            <td><span class="cellwrap"><span>View</span><span>Edit</span></span></td>
+            <td><span class="cellwrap"><span>Yes</span></span></td>
+            <td><span class="cellwrap"><span class="on">View</span><span>Edit</span></span></td></tr>
+          <tr><td><b>Observer</b></td>
+            <td><span class="cellwrap"><span class="on">View</span><span>Edit</span></span></td>
+            <td><span class="cellwrap"><span>View</span><span>Edit</span></span></td>
+            <td><span class="cellwrap"><span>View</span><span>Edit</span></span></td>
+            <td><span class="cellwrap"><span>View</span><span>Edit</span></span></td>
+            <td><span class="cellwrap"><span>Yes</span></span></td>
+            <td><span class="cellwrap"><span class="on">View</span><span>Edit</span></span></td></tr>
+        </tbody></table></div>
+      <p class="muted" style="font-size:13px;margin:13px 0 0">Nothing lit means nothing at all. Somebody with no role sees an empty platform.</p>
+    </div>
+  </div>
+</section>
+
+<!-- 7 · THE TWO PLATFORMS -->
+<section class="step">
+  <div class="stephead"><div class="stepno">07</div><h2>Two platforms, one door</h2></div>
+  <p class="lede">Forefront's platform is navy and amber; a client's platform is
+  the client's own colours. The chrome tells you which one you are in without
+  reading a word.</p>
+  <div class="screen">
+    <div class="ftop"><span class="mk">FOREFRONT</span><span class="nm">Platform</span>
+      <span class="right">Islam Saadany · Admin <span class="chip">Sign out</span></span></div>
+    <div class="fnav"><button class="on">Clients</button><button>Consultants</button><button>Who sees what</button></div>
+    <div class="fbody" style="padding:14px 16px"><p class="muted" style="margin:0;font-size:13.5px">
+      Pressing <b>Raya Trade</b> leaves this platform for theirs ↓</p></div>
+    <div style="background:#16325C;color:#fff;display:flex;align-items:center;gap:12px;padding:9px 16px;font-size:13.5px">
+      <b style="font-weight:700">Strategy Management Platform</b>
+      <span style="background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.22);border-radius:7px;padding:3px 9px;font-size:12.5px">Raya Trade <span style="opacity:.7">change</span></span>
+      <span style="margin-left:auto;color:#B9C7DE;font-size:12.5px">Viewing as Islam Saadany · Super user</span>
+    </div>
+    <div style="background:#16325C;color:#B9C7DE;padding:0 16px 11px;font-size:13px">
+      Group ▾ · Units · Mobile · Retail Stores · B2B Ecomm · …
+    </div>
+  </div>
+  <ul class="notes">
+    <li><b>The way back is already built</b> — the client's name in their chrome,
+    which returns to the cards.</li>
+    <li><b>Nothing about a client's platform changes</b>: same pages, same rules,
+    same colours as today.</li>
+  </ul>
+</section>
+
+<!-- 8 · WHAT I NEED -->
+<section class="step">
+  <div class="stephead"><div class="stepno">08</div><h2>What I need from you</h2></div>
+  <div class="flag">
+    <p><b>Sign off, or mark up.</b> The pages themselves are the ones you have
+    already approved — what is new here is that they sit inside a platform with
+    its own chrome and navigation, and that the door does nothing but sign you
+    in. Nothing moves in the code until you say.</p>
+  </div>
+  <ul class="notes">
+    <li><b>The navigation:</b> Clients · Consultants · Who sees what. Is that the
+    right three, in that order?</li>
+    <li><b>The chrome:</b> a light top line with the Forefront mark, and the navy
+    navigation row under it — the same two-line shape a client's platform has.</li>
+    <li><b>A client's configuration</b> opens from its own card. The alternative
+    is a fourth entry in the navigation; I think the card is the better place,
+    because the configuration is about one client rather than about all of them.</li>
+  </ul>
+</section>
+
+<footer>
+  Mockup for spec 024, revision 2 · 29 August 2026 · nothing moved in the code ·
+  <span class="mono">design-mockups/multi-client/2026-08-29_forefront-platform.html</span>
+</footer>
+</div>

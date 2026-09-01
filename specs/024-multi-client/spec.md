@@ -241,6 +241,31 @@ name is the one thing a demo must not be.
 The invented names are content, not code: I draft them and Islam approves the
 list before it is seeded. Nothing is shown to anyone until he has.
 
+## 7.0 · The door is a door (revision 2, Islam 2026-08-29)
+
+Islam, seeing the first build: *"the page you are showing should be just for
+login like the main login page of Raya Trade, and the rest should be inside
+the platform."* Right, and the fault is exactly what §7 describes if it is read
+carelessly: the pages below are the OUTER PLATFORM's, and the first build put
+them on the **door**, which grew tabs, a table and a matrix.
+
+- **The door signs you in and stops.** The same wall-and-card a client's
+  sign-in uses — email, password, and nothing else.
+- **The Forefront platform has its own chrome**: a light top line (mark,
+  who you are, sign out) and a navigation row of its own —
+  **Clients · Consultants · Who sees what** — with the pages under it. The
+  same two-line shape a client's platform has had since §2.9, so the two read
+  as one product without pretending to be one client.
+- **A client's configuration opens from that client's own card**, not from a
+  fourth navigation entry: it is about one client rather than about all of
+  them.
+- **The colours say which platform you are in** — Forefront's navy and amber
+  out here, the client's own colours inside theirs.
+
+Mockup: `design-mockups/multi-client/2026-08-29_forefront-platform.html`.
+**The pages themselves are unchanged from the ones signed off on 28 August**;
+what moves is where they live.
+
 ## 7 · The outer platform — what it holds
 
 Four things, and nothing else. It is the office's platform, not a second copy

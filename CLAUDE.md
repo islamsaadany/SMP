@@ -3929,7 +3929,37 @@ prior sessions (on HR_ERP) accidentally reverted agreed-upon designs.
 
 ---
 
-*Last Updated: 2026-09-01 &mdash; **&sect;234: one function's submit must not
+*Last Updated: 2026-09-01 &mdash; **&sect;235: one escaper, safe in an
+attribute.** A security sweep found the platform's main text-cleaner `esc()`
+escaped only `&` and `<` &mdash; a text-node escaper &mdash; while being used
+inside double-quoted HTML attributes ~226 times. A literal `"` in tenant data
+(a name, a plan note, an uploaded workbook cell) broke out of the attribute,
+and because the CSP allows `'unsafe-inline'` an injected `onfocus=`/`onerror=`
+ran in the reader's browser &mdash; the SMO's, with full SMO authority. Two
+sites had hand-patched `.replace(/"/g,"&quot;")`, which is two patches against
+226 and the definition of ad-hoc. Separately, the tenant's LABELS rendered RAW
+at ~43 sites and, through `recipeText()`, raw into the knowledge base, so a
+relabelled Pillar of `<img onerror=…>` executed for every reader. **THE FIX IS
+THREE ONE-LINERS.** `esc()` (and `welcome.js`'s `wesc()`) now escape `>`, `"`
+and `'` as well &mdash; INERT in a text node, so nothing displayed normally
+changes, verified that `esc()` output is only ever concatenated into innerHTML
+(never compared, keyed, or read back), so the two hand-patches become harmless
+no-ops. `L()` now returns its result through `esc()`, closing the 43 raw label
+sites AND the knowledge-base substitution in one place because every reader
+goes through `L()`; the KB's deliberate `<b>` markup is untouched (the answer
+template is trusted, only the spliced label was not). The KB raw-`<p>` render
+is deliberately NOT changed, preserving formatting. Cost stated: a label
+CONTAINING `& < > " '` (none of the 8 real labels do) would render as an entity
+in a couple of double-cleaned spots &mdash; cosmetic, never a broken flow.
+Proved not to damage anything: `qa.py` clean, and `report-saves`, `gap-fill`,
+`submit-gate`, `knowledge-base`, `fn-ko-edit` all green &mdash; reporting,
+filling, submitting and editing all reach the stored plan exactly as before.
+Still open and NOT done here (recorded): the `'unsafe-inline'` &rarr; hashed-CSP
+backstop that would stop any future gap executing, and a `.vercelignore` so
+`db/`, `lib/`, `scripts/` are not served as static files (no secrets are
+exposed today).*
+
+*Earlier: 2026-09-01 &mdash; **&sect;234: one function's submit must not
 carry everybody's report state.** Islam, from a live client session:
 *"emergency error that we fixed 100 times before"* &mdash; a CF custodian
 refused with **"You cannot report for admin."** four times over, and slides

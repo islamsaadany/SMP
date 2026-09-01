@@ -47,10 +47,7 @@
 var WELCOME = (function(){
   var box = null;
 
-  /* Escapes >, " and ' as well, matching esc() — inert for the text this
-     currently renders, and safe the moment any of it moves into an attribute
-     (2026-09-01 security sweep). */
-  function wesc(s){ return String(s).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;").replace(/'/g,"&#39;"); }
+  function wesc(s){ return String(s).replace(/&/g,"&amp;").replace(/</g,"&lt;"); }
 
   function seenThisSession(){
     try { return sessionStorage.getItem("smp.welcome.done") === "1"; }

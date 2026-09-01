@@ -25976,3 +25976,47 @@ fault — the slides case fits it and was not separately reproduced from his
 account. **The way out for tabs already open**: a tab running the previous
 build still posts what it posts; the refusal machinery already answers it,
 and a reload picks up the split.
+
+---
+
+## §235 — One escaper, safe in an attribute (2026-09-01 security sweep)
+
+A security review found the platform's main text-cleaner `esc()` escaped only
+`&` and `<` — correct for text between tags, unsafe inside an HTML attribute,
+where a literal `"` in tenant data breaks out of the quotes. It is used inside
+double-quoted attributes ~226 times, and because the CSP allows
+`'unsafe-inline'`, an injected `onfocus=`/`onerror=` **executes** in the
+reader's browser — the SMO's, with full SMO authority (role changes, password
+resets). The attacker input is anything editable: a person's name, a plan
+note, a renamed label, a cell in an uploaded `.xlsx`. Two sites had
+hand-patched `.replace(/"/g,"&quot;")`, which is the gap being noticed and
+never generalised. Separately, the tenant's LABELS were rendered RAW at ~43
+sites and, via `recipeText()`, spliced raw into the knowledge base, so a
+relabelled Pillar of `<img onerror=…>` ran for every reader.
+
+**THE FIX IS THREE ONE-LINERS, AND IT IS INERT FOR NORMAL CONTENT.** `esc()`
+(and `welcome.js`'s `wesc()`) now also escape `>`, `"` and `'`; an entity
+renders as its character, so nothing displayed normally changes — verified
+that `esc()`'s output is only ever concatenated into innerHTML (never compared,
+keyed, or read back), and the two hand-patches become harmless no-ops. `L()`
+now returns through `esc()`, which closes the 43 raw label sites AND the
+knowledge-base substitution in one place because every reader goes through
+`L()`; its 88 uses are all display-only. The KB's deliberate `<b>` markup is
+untouched (the answer template is trusted; only the spliced label was not), and
+the raw-`<p>` render is deliberately left alone to preserve formatting.
+
+**COST, STATED NOT HIDDEN:** a label CONTAINING `& < > " '` (none of the 8
+real labels do) would show as an entity in a couple of double-cleaned spots —
+cosmetic, never a broken flow, access, or figure.
+
+**PROVED NOT TO DAMAGE ANYTHING:** `qa.py` clean (every page, every viewer),
+and `report-saves`, `gap-fill`, `submit-gate`, `knowledge-base` and
+`fn-ko-edit` all green — reporting a figure and a note reaches the stored plan,
+filling and submitting and editing all behave exactly as before. Numbers
+contain none of these characters, so reporting is byte-for-byte unchanged.
+
+**STILL OPEN, recorded rather than done here:** the `'unsafe-inline'` → hashed
+CSP backstop that would neutralise any future escaping gap (the page has no
+inline handlers, so it is achievable), and a `.vercelignore` so `db/`, `lib/`
+and `scripts/` are not served as static files (no secrets are exposed today —
+this is attack-surface hygiene).

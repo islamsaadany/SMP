@@ -3950,7 +3950,40 @@ prior sessions (on HR_ERP) accidentally reverted agreed-upon designs.
 ---
 
 <<<<<<< HEAD
-*Last Updated: 2026-09-01 &mdash; **&sect;237: a view-as session starts where
+*Last Updated: 2026-09-01 &mdash; **&sect;238: the security follow-ups &mdash;
+a CSP net and no dev files served.** The two items &sect;235 recorded as open,
+both done and verified live. **(1) A build-time hashed CSP** as defence behind
+the escaping fix: `build.py` injects a `<meta http-equiv="Content-Security-Policy">`
+into the built platform whose `script-src` allow-lists every inline `<script>`
+by the SHA-256 of its exact bytes and permits nothing else inline &mdash; so an
+injected `onerror=`/`onfocus=` cannot RUN even if an escaping gap is ever
+reintroduced. Hashed in the same build that emits the scripts, so it can never
+go stale (the one failure mode a hashed CSP otherwise risks &mdash; &sect;91's
+"a stale hash is a page that does not load"). The `vercel.json` header keeps
+`'unsafe-inline'` for the GATE (`index.html`, not built here); the meta is a
+second, stricter policy scoped to the platform, and the browser enforces both,
+so a script must pass both &mdash; real blocks pass (hash), an injected handler
+is blocked (no hash, no unsafe-inline). Only `script-src` is set, so nothing
+else about the policy changes. Proved by `checks/csp-net.py` over HTTP (real
+scripts run, an injected `onerror=` does NOT fire) and by a full `qa.py` walk
+(every page, every viewer, ERRORS none) &mdash; the app adds all handlers with
+`addEventListener` and injects no `<script>` at runtime, so nothing legitimate
+relies on inline execution. **(2) A `.vercelignore`** so the deployment stops
+serving internal files: sources, in-repo checks, mockups, snapshots, docs and a
+separate app skeleton were all publicly fetchable (no secrets &mdash; keys are
+server env vars, and the client rules already ship inline). None are needed by
+the running site, so excluding them touches no runtime dependency; `lib/` and
+`db/` are deliberately KEPT because the `api/*` functions require them (the
+documented low-severity residual &mdash; server source, still no secrets). Live
+after deploy: `scripts/`, `smp-app/` &c. now 404, the gate, platform and API
+all 200. **STILL OPEN &mdash; the server-side DB write** ("every save wipes and
+rewrites all 31 tables"): the acute cost was already removed by &sect;195
+(batched reads and writes), and closing the rest means an incremental writer or
+a read-authorise-write lock on the LIVE database write path &mdash; the one
+change that could corrupt production data, so it is recorded for a dedicated,
+staged pass rather than rushed.*
+
+*Earlier: 2026-09-01 &mdash; **&sect;237: a view-as session starts where
 their session would start.** Islam, closing &sect;234.2's finding: *"viewing
 as needs to have the same server connection and relation and not inherit my
 SMO abilities &hellip; so I get the errors."* The judging half has been the

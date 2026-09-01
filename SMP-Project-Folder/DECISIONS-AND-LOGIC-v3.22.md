@@ -25253,3 +25253,34 @@ be the probe's reload wearing the fix's clothes. Proved able to fail (§94.5):
 — while *"as the server's own data"* passes there too, because `hydrate()` had
 run: the check reproducing the diagnosis, not just the symptom. Full `qa.py`
 clean.
+
+## §226.2 — THE NOTICE SPEAKS THE USER'S LANGUAGE (reshaping §201's wall, removing its way past)
+
+Islam, on §201's card: *"the message after 8 seconds it too tehcnical for the
+users"* — then, on the first plain draft, *"TOO MUCH make a very simple user
+message"* — then *"no need fo examples. to look at."* Settled over two mockup
+rounds of the real card (§41.9), each round cutting further.
+
+**FOUR SHORT LINES, NONE OF THEM OURS**: *Just a moment…* · *Your page is
+taking a little longer to open. Your work is safe.* · *It will open by itself —
+no need to do anything.* · **Try again**. No "server", no "data", no
+"example" — and with §226 in place, *just a moment* is usually literally true,
+because the page lands by itself seconds later. The three facts §201 existed to
+say survive in the user's words: something is late, nothing saved is touched,
+nothing is asked of you.
+
+**"LOOK AT THE EXAMPLE ANYWAY" IS REMOVED, AND IT IS HIS DECISION WITH THE COST
+STATED**: while the server is genuinely down there is now no way past the
+notice — it stands, retrying on its own. §201 kept that link as the old
+behaviour's one virtue; §226.2 records that the example behind the blur was
+the confusing thing the wall exists to fence off, and its remaining audience —
+somebody whose server is truly dead — is better served by the retry than by a
+worked example wearing their chrome. The element, its handler and `.nosrv-link`
+are DELETED, not hidden (§24), and the check asserts the ABSENCE, or a build
+that quietly brought the link back would pass.
+
+`checks/boot-skeleton.py` §4 rewritten against the problem, not the old copy
+(§94.8): the card must say the three plain facts, carry **no technical word**
+(server / data / example — asserted as a regex over the whole card), keep Try
+again reachable by a real press, and keep the way past removed. ALL GREEN on
+the build; full `qa.py` clean.

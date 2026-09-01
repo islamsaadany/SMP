@@ -384,6 +384,16 @@ console errors (in this cloud environment, run it via a wrapper that points Play
   remove × onto a second line — `inline-block` restores it, and it was found
   by `checks/plan-fields.py` GOING RED, not by reading the cascade, which is
   the argument for that check existing.
+- **THE NOTICE SPEAKS THE USER'S LANGUAGE (§226.2):** Islam, on §201's wall —
+  *"too technical for the users"*, then *"make a very simple user message"*,
+  then *"no need for examples to look at."* Four short lines (*Just a moment…*
+  · *Your page is taking a little longer to open. Your work is safe.* · *It
+  will open by itself — no need to do anything.* · **Try again**), no "server",
+  no "data", no "example" — asserted as a regex over the whole card. **The
+  "Look at the example anyway" way past is REMOVED at his direction, cost
+  stated**: while the server is truly down there is no way past — element,
+  handler and `.nosrv-link` deleted, not hidden (§24), and the check asserts
+  the absence.
 - **A LATE ANSWER STILL LANDS (§226):** Islam, hard-refreshing after a
   deployment — §201's wall, every time, clearing itself later. **The server was
   healthy and the landing was wrong**: a cold function's first answer routinely

@@ -86,6 +86,12 @@ Nothing proceeds past this line without an answer.
 - Proof: `checks/boot-skeleton.py` §6 is new — 2 red on the build before
   (the notice stands, the baked navy is painted); ALL GREEN after; full
   `qa.py` clean.
+- **§226.2, same branch:** the notice's words are the user's now — *Just a
+  moment… Your page is taking a little longer to open. Your work is safe. It
+  will open by itself — no need to do anything. Try again* — settled over two
+  mockup rounds with Islam, and the "look at the example" link removed at his
+  direction (cost stated: while the server is truly down there is no way
+  past). The check asserts the plain words and the removed link.
 
 ### v3.80 — the pending count says where, and walks you there (§192)
 

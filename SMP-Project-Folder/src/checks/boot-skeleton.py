@@ -237,8 +237,14 @@ with sync_playwright() as p:
     # opened on the prototype page with no way to exit it!!" — the baked
     # example painted SILENTLY, wearing Raya Trade's data as though it were
     # his. The example may paint (that is the fallback working); what may
-    # not happen is nobody being told. The wall says whose data it is not,
-    # offers the retry, and can be stepped past deliberately.
+    # not happen is nobody being told.
+    #
+    # §226.2 RESHAPED THE CARD AT ISLAM'S DIRECTION: "the message after 8
+    # seconds is too technical for the users" — then "make a very simple
+    # user message", then "no need for examples to look at". Four short
+    # lines in the user's language (no "server", no "data", no "example"),
+    # and the "look at the example anyway" way past is REMOVED — asserted
+    # as an ABSENCE, or a build that quietly brought it back would pass.
     # a build that lost the wall must FAIL here, not crash the check (§192)
     try:
         pg.wait_for_selector("#noserver", timeout=8000)
@@ -246,9 +252,9 @@ with sync_playwright() as p:
         pass
     w = pg.evaluate("""() => {
       const d = document.getElementById("noserver");
-      if (!d) return { covers: false, atMid: false, saysExample: false,
-                       saysNotYours: false, saysSafe: false,
-                       retryHits: false, dismiss: false, missing: "no #noserver" };
+      if (!d) return { covers: false, atMid: false, saysMoment: false,
+                       saysSafe: false, saysSelf: false, plainWords: false,
+                       retryHits: false, noWayPast: false, missing: "no #noserver" };
       const card = d.querySelector(".nosrv-card");
       const txt = card ? card.textContent : "";
       const r = d.getBoundingClientRect();
@@ -262,26 +268,27 @@ with sync_playwright() as p:
          separately: the point in the MIDDLE lands on the wall */
       return { covers: r.width >= innerWidth - 30 && r.height >= innerHeight - 30,
                atMid: !!(mid && mid.closest("#noserver")),
-               saysExample: txt.indexOf("built-in example") >= 0,
-               saysNotYours: txt.indexOf("not your organisation") >= 0 ||
-                             txt.indexOf("not your organisation".replace("organisation","organization")) >= 0,
-               saysSafe: txt.indexOf("safe on the server") >= 0,
+               saysMoment: txt.indexOf("Just a moment") >= 0,
+               saysSafe: txt.indexOf("Your work is safe") >= 0,
+               saysSelf: txt.indexOf("open by itself") >= 0,
+               plainWords: !/server|data|example/i.test(txt),
                retryHits: hit === btn,
-               dismiss: !!d.querySelector("[data-nosrv-view]") };
+               noWayPast: !d.querySelector("[data-nosrv-view]") };
     }""")
     ck("the wall is up and covers the page", w["covers"] and w["atMid"], w)
-    ck("...it names the example as not this tenant's data",
-       w["saysExample"] and w["saysNotYours"] and w["saysSafe"], w)
+    ck("...it speaks the user's language: a moment, work safe, opens by itself",
+       w["saysMoment"] and w["saysSafe"] and w["saysSelf"], w)
+    ck("...with no technical word on it (server, data, example)",
+       w["plainWords"], w)
     ck("...Try again is really reachable (a press lands on it)", w["retryHits"], w)
-    ck("...and a deliberate way past exists", w["dismiss"], w)
+    ck("...and the removed way past stays removed (§226.2)", w["noWayPast"], w)
 
     # The retry is a reload: with the server answering again it must land
-    # LIVE and wall-free — the way out Islam did not have. On a build with
-    # no wall there is nothing to press, and that is already four failures
-    # above; report these two rather than hanging on a click (§192).
+    # LIVE and wall-free. On a build with no wall there is nothing to
+    # press, and that is already five failures above; report this one
+    # rather than hanging on a click (§192).
     if w.get("missing"):
         ck("Try again reloads into the live tenant, no wall", False, w)
-        ck("'Look at the example anyway' takes the wall down", False, w)
     else:
         MODE["status"] = 200
         pg.click("[data-nosrv-retry]")
@@ -291,21 +298,6 @@ with sync_playwright() as p:
         ck("Try again reloads into the live tenant, no wall",
            pg.query_selector("#noserver") is None
            and pg.evaluate("() => !!document.querySelector('nav.units')"))
-
-        # And the dismiss is a choice that sticks for the session's look-around.
-        MODE["status"] = 500
-        pg2 = page()
-        pg2.goto(URL, wait_until="domcontentloaded")
-        pg2.wait_for_selector("#noserver", timeout=15000)
-        pg2.click("[data-nosrv-view]")
-        pg2.wait_for_timeout(200)
-        ck("'Look at the example anyway' takes the wall down",
-           pg2.query_selector("#noserver") is None)
-        ck("...and the example is then usable",
-           pg2.evaluate("""() => {
-             const el = document.elementFromPoint(innerWidth / 2, 120);
-             return !!el && !el.closest('#noserver'); }"""))
-        pg2.close()
     pg.close()
 
     # ── 5 · REFUSED IS NOT A PAINT ──────────────────────────────────

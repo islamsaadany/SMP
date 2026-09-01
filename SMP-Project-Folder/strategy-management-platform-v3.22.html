@@ -6173,11 +6173,8 @@
   .nosrv-try { color:var(--ink-3); font-size:12px; }
   .nosrv-btn { display:block; width:100%; background:var(--panel); color:var(--panel-ink);
     border:1px solid var(--panel); border-radius:8px; padding:10px 16px;
-    font:700 13.5px var(--sans); cursor:pointer; margin:4px 0 10px; }
+    font:700 13.5px var(--sans); cursor:pointer; margin:4px 0 0; }
   .nosrv-btn:hover { filter:brightness(1.12); }
-  .nosrv-link { display:block; width:100%; background:none; border:0;
-    color:var(--ink-3); font:600 12px var(--sans); cursor:pointer;
-    text-decoration:underline; padding:2px; }
 
   /* ── Presentation mode ────────────────────────────────────────────
      A mode, not a page: it takes the whole window, the app chrome disappears,
@@ -42177,10 +42174,10 @@ var SYNC = (function () {
      that will route to the gate) reloads; a 500 keeps waiting rather than
      reload-looping a broken deployment.
 
-     The probe's handle lives at module scope because there are TWO ways the
-     wall comes down now — the person stepping past it, and §226's late
-     answer landing — and both must stop the probe, or a reload fires ten
-     seconds after the real page is already up. */
+     The probe's handle lives at module scope because §226's late answer
+     takes the wall down from outside this function — and that takedown must
+     stop the probe too, or a reload fires ten seconds after the real page
+     is already up. */
   var wallProbe = null;
   function noServerDown() {
     var d = document.getElementById("noserver");
@@ -42192,24 +42189,31 @@ var SYNC = (function () {
     var d = document.createElement("div");
     d.id = "noserver";
     d.setAttribute("role", "alertdialog");
-    d.setAttribute("aria-label", "The server did not answer");
+    d.setAttribute("aria-label", "Just a moment");
+    /* \u2500\u2500 THE WORDS ARE THE USER'S, NOT OURS (\u00a7226.2) \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500
+       Islam: "the message after 8 seconds is too technical for the users",
+       then "TOO MUCH make a very simple user message", then "no need for
+       examples to look at." Settled from a mockup of this very card: no
+       "server", no "data", four short lines \u2014 and NO way past the wall,
+       at his direction. \u00a7201's "Look at the example anyway" is REMOVED:
+       the example behind the blur was the confusing thing this whole
+       notice exists to fence off, and with \u00a7226 the wall clears itself
+       the moment the answer lands, so the escape hatch's audience is
+       somebody whose server is genuinely down \u2014 who is better served by
+       the retry than by a worked example wearing their chrome. The cost
+       is stated: while the server is truly down there is no way past. */
     d.innerHTML =
       '<div class="nosrv-card">' +
-        '<h2>The server did not answer</h2>' +
-        '<p>What is behind this notice is the built-in example \u2014 not ' +
-          'your organisation\u2019s data \u2014 and nothing entered here is ' +
-          'saved. Your data is safe on the server.</p>' +
-        '<p class="nosrv-try" data-nosrv-note>Trying again automatically\u2026</p>' +
+        '<h2>Just a moment\u2026</h2>' +
+        '<p>Your page is taking a little longer to open. ' +
+          'Your work is safe.</p>' +
+        '<p class="nosrv-try" data-nosrv-note>It will open by itself ' +
+          '\u2014 no need to do anything.</p>' +
         '<button type="button" class="nosrv-btn" data-nosrv-retry>Try again</button>' +
-        '<button type="button" class="nosrv-link" data-nosrv-view>' +
-          'Look at the example anyway</button>' +
       '</div>';
     document.body.appendChild(d);
     d.querySelector("[data-nosrv-retry]").addEventListener("click", function () {
       location.reload();
-    });
-    d.querySelector("[data-nosrv-view]").addEventListener("click", function () {
-      noServerDown();
     });
     wallProbe = setInterval(function () {
       fetch("/api/state", { cache: "no-store" }).then(function (r) {
@@ -43305,9 +43309,9 @@ var SYNC = (function () {
              the wall makes the refusal VISIBLE instead of silent), Try again
              reloads, and it retries by itself so a server that wakes up
              brings the real page back with nobody pressing anything.
-             Looking at the example anyway stays possible — that was the old
-             behaviour's one virtue — but as a stated choice, never a
-             default. */
+             §226.2 removed the "look at the example anyway" way past, at
+             Islam's direction — the wall now stands until the server
+             answers, and the words on it are the user's (see noServerWall). */
           if (enabled && !live) noServerWall();
         }, wait);
       }

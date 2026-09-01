@@ -398,19 +398,14 @@ console errors (in this cloud environment, run it via a wrapper that points Play
   deployment — §201's wall, every time, clearing itself later. **The server was
   healthy and the landing was wrong**: a cold function's first answer routinely
   arrives after the 8s `BOOT_GIVEUP`, and the one-shot `land()` swallowed it —
-  `hydrate()` had run, `live` was true, the real data sat in memory behind a
-  wall promising *"nothing entered here is saved"* that had quietly stopped
-  being true. A second landing is allowed for exactly one case (first landing
-  the backstop's, this one carrying the live tenant): it paints in place and
-  takes the wall down — no reload; a late FAILURE still leaves §201 standing,
-  probe and all (`wallProbe` at module scope, `noServerDown()` the one takedown
-  both exits share). **Deliberately not a longer give-up** — 20s of grey buys
-  nothing the late landing does not. Measured first: production 0.3–0.6s warm,
-  a signed-in GET 11–54ms against a real Postgres, first contact on an empty
-  database 0.66s — the 8s is eaten by the environment's cold start, §195's 504
-  from the read side. `checks/boot-skeleton.py` §6: 2 red on the build before,
-  and *"as the server's own data"* passes there too, because `hydrate()` had
-  run — the check reproduces the diagnosis, not only the symptom.
+  real data hydrated in memory behind a wall promising nothing is saved. A
+  second landing is allowed for exactly one case (first landing the backstop's,
+  this one carrying the live tenant): it paints in place and takes the wall
+  down — no reload; a late FAILURE still leaves §201 standing, probe and all.
+  **Deliberately not a longer give-up.** Measured first: production 0.3–0.6s
+  warm, a signed-in GET 11–54ms against a real Postgres — the 8s is eaten by
+  the environment's cold start. `checks/boot-skeleton.py` §6: 2 red on the
+  build before.
 - **A FUNCTION'S OBJECTIVES ARE WRITTEN AT THE PAGE'S WIDTH (§226):** Islam —
   *"the keyobjectives table is tight I can't see the direction and I can't find
   the unit and the ibjectives cell is not wrapping"*, and *"led by is not open

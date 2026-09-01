@@ -68,18 +68,10 @@ var SYNC = (function () {
     d.id = "noserver";
     d.setAttribute("role", "alertdialog");
     d.setAttribute("aria-label", "Just a moment");
-    /* \u2500\u2500 THE WORDS ARE THE USER'S, NOT OURS (\u00a7226.2) \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500
-       Islam: "the message after 8 seconds is too technical for the users",
-       then "TOO MUCH make a very simple user message", then "no need for
-       examples to look at." Settled from a mockup of this very card: no
-       "server", no "data", four short lines \u2014 and NO way past the wall,
-       at his direction. \u00a7201's "Look at the example anyway" is REMOVED:
-       the example behind the blur was the confusing thing this whole
-       notice exists to fence off, and with \u00a7226 the wall clears itself
-       the moment the answer lands, so the escape hatch's audience is
-       somebody whose server is genuinely down \u2014 who is better served by
-       the retry than by a worked example wearing their chrome. The cost
-       is stated: while the server is truly down there is no way past. */
+    /* Plain words at Islam's direction (\u00a7229.2): four short lines, no
+       "server"/"data"/"example" \u2014 and \u00a7201's "Look at the example anyway"
+       way past is REMOVED, cost stated: while the server is truly down
+       the notice stands, retrying on its own. */
     d.innerHTML =
       '<div class="nosrv-card">' +
         '<h2>Just a moment\u2026</h2>' +
@@ -1139,23 +1131,12 @@ var SYNC = (function () {
       var landed = false, landedLive = false, t0 = bootNow();
       function land(then) {
         /* ── A LATE ANSWER STILL LANDS (§229) ─────────────────────────
-           Islam, hard-refreshing after a deployment: the wall, every time.
-           A freshly deployed function answers its first request slowly —
-           cold start, and a database that may itself be waking — so the
-           answer routinely arrives a few seconds AFTER the 8s give-up. It
-           was being dropped here: hydrate() had already rebound the globals
-           and `live` was true, but the one-shot guard swallowed the paint,
-           so the person sat behind the wall over the baked example while
-           their real data was in memory, waiting for the probe's reload.
-           Worse, the wall's "nothing entered here is saved" had quietly
-           stopped being true, because save() flows once `live` is.
-
-           So a second landing is allowed for exactly one case: the first
-           landing was the backstop's (demo painted, `landedLive` false) and
-           this one carries the live tenant. It paints the real page in
-           place and takes the wall down — no reload, nothing pressed. A
-           late FAILURE still returns here, and the wall and its probe stay,
-           which is §201 unchanged. */
+           A cold function's first answer often arrives AFTER the 8s
+           give-up and used to be dropped here, leaving the person behind
+           the wall with their real data already hydrated. A second landing
+           is allowed for exactly one case — the first was the backstop's,
+           this one carries the live tenant: paint in place, wall down, no
+           reload. A late FAILURE still returns, wall and probe standing. */
         if (landed) {
           if (!live || landedLive) return;
           landedLive = true;

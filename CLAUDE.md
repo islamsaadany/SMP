@@ -498,6 +498,17 @@ console errors (in this cloud environment, run it via a wrapper that points Play
   months"* — because he could not tell whether it had taken; unset it says
   *"taken from the cycle's end"* and shows the month IN USE rather than crying
   *Missing* over a working fallback (§177, §214.4).
+  **AND NOUGHT ON A ≤ MEASURE IS THE BEST ANSWER (§239.4):** his own row,
+  *Data duplicate rate ≤ 1%, 0%*, read **Not scored** — a regression §239
+  introduced, because the arithmetic divides BY the actual and the guard
+  against dividing by zero swallowed the best result in the table (the old
+  expression landed on the cap by accident: 1/0 is Infinity, clamped). It
+  returns the cap deliberately now, asserted with a real overshoot beside it so
+  a build returning 150 for everything fails. **The rest of that table is the
+  rule working**: all four rows compile by `Latest`. What it exposes is the
+  rule's COST on his plan — his measures are adoption rates almost throughout,
+  so "Sum only" moves very little for him, and that is a decision put to him
+  with the arithmetic rather than assumed.
   **The server needed nothing** and it is asserted both ways: `asOfMonth` is
   not in `REVIEW_PER_TARGET`, so it classifies as `cycle` — the office's.
   Proved able to fail three ways (4 / 2 / 3 red). **AND `qa.py`'s OWN METHOD
@@ -4133,7 +4144,7 @@ office and editable mid-cycle, riding `review.extra` with no migration and
 falling back so nothing moves until they set one. &sect;239.3 then fixed the
 half that shipped broken: the review point now knows its own year, because
 asking `cycleYear()` for it made every cycle without a four-digit year fall
-back silently. 30/30 on `checks/ytd-proration.py`, proved able to fail four
+back silently. 33/33 on `checks/ytd-proration.py`, proved able to fail five
 ways &middot; 454/0
 authoriser (3 new, both ways) &middot; 126/0 differ &middot; full `qa.py` sweep
 green &middot; `setup-overview`, `repeat-project`, `table-fit`,

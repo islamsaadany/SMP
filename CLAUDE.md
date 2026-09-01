@@ -94,8 +94,20 @@ A drift between specs and code is a documentation bug — report it before silen
   do not propose touch-target or hover-affordance work on that premise.
 - **The small-caps label style is the chosen voice** of the product, not a
   fault to correct.
+- **AND A SCREENSHOT OF THE PROTOTYPE FILE IS THE SAME MISTAKE.** Islam,
+  after four rounds of them: *"STOP SHOWING ME THE MOCKUP ON THE PROTOTYPE
+  IT'S IRRELEVANT. only on a client like raya."* Opening
+  `strategy-management-platform-vX.Y.html` locally IS the demo — invented
+  numbers, no tenant, no session — so a picture taken there shows the
+  prototype however carefully it is drawn. **Anything shown to Islam for a
+  design decision comes from the real deployment**, signed in, on real data.
+  Where that cannot be reached from here (the client view is behind a
+  password nobody should paste into chat), the honest move is to BUILD, push,
+  and let him look at it himself — never to substitute a prototype picture
+  and call it a mockup.
 - Recorded after four of six audit findings were rejected on exactly these
-  misreadings (2026-09-01, *"that's a very poor evaluation"*).
+  misreadings (2026-09-01, *"that's a very poor evaluation"*), and again the
+  same day over the screenshots.
 
 ### 2. Think Before Acting
 - **Don't follow commands blindly** — analyze requests and challenge if something seems incorrect or risky.

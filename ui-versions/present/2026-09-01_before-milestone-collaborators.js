@@ -370,8 +370,6 @@ function deckSlidesFn(fk){
           '<td class="lead">' + esc(m.name) +
           (m.covers ? '<span class="dsub">' + esc(m.covers) + '</span>' : '') + '</td>' +
           '<td>' + esc(m.owner || "—") + '</td>' +
-          /* §227: the same cell the deck's tactic tables carry (§50). */
-          '<td class="collabs">' + collabCell(m) + '</td>' +
           '<td class="num' + (over.indexOf(m.id) > -1 ? ' warn' : '') + '">' + esc(m.finish) +
           (over.indexOf(m.id) > -1 ? ' <span class="dsub">after the project ends</span>' : '') + '</td>' +
           '<td class="num final ' + (m.status === "done" ? "good" : m.status === "wip" ? "attn" : "") + '">' + word + '</td>' +
@@ -381,7 +379,7 @@ function deckSlidesFn(fk){
       S.push('<section class="dslide" data-split="' + esc(p.id) + 'M">' +
         '<h2>' + esc(p.name) + '<span class="dwhich">Milestones &middot; ' + mst.done + ' of ' + mst.total + ' completed</span></h2>' +
         '<table class="zebra withnote"><thead><tr><th class="idx">#</th><th>Milestone</th>' +
-        '<th>Owner</th><th>Collabs.</th><th class="num">Due date</th><th class="num">Status</th><th class="num">' + MS_PCT + '</th>' +
+        '<th>Owner</th><th class="num">Due date</th><th class="num">Status</th><th class="num">' + MS_PCT + '</th>' +
         '<th>Note</th></tr></thead><tbody>' + mRows + '</tbody></table></section>');
     });
   });

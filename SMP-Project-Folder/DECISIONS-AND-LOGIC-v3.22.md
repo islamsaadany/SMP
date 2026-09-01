@@ -25200,7 +25200,187 @@ which is most of what wording B claims. It asserts both ends of all three
 switches (§94.2), and **the refused press is forced**, because Playwright treats
 `aria-disabled` as disabled and that path is exactly what is under test (§222).
 
-## §226 — A LATE ANSWER STILL LANDS
+## §226 — A FUNCTION'S OBJECTIVES ARE WRITTEN AT THE PAGE'S WIDTH (2026-09-01)
+
+Islam, from Consumer Finance's Overview: *"the keyobjectives table is tight I
+can't see the direction and I can't find the unit and the ibjectives cell is not
+wrapping"*, and minutes later, *"led by is not open to edit"*. Settled from a
+mockup drawn out of the REAL page (1c) and both open decisions were his:
+**"don't touch the unit side"**, and **Led by opens for the office**.
+
+**FOUR SYMPTOMS, AND THREE OF THEM ARE ONE OMISSION.** The function Overview's
+objectives table (`capKoEdit`, both formats since §213) edits INSIDE the
+half-width `fgrid` card — measured at a 1500px window: the card 691px, the table
+647px against the 620px floor (§158's other side), the Objective input **101px**
+and the Dir. select **34px**, which is a select whose value cannot be drawn.
+§96.6 fixed exactly this squeeze on a unit's Foundation — *the table gets the
+window while it is being written* — and that fix never reached the function's
+Overview; §199's Unit column and §189's wrapping prose never reached `capKoEdit`
+either. A page assembled from the unit's parts, three parts behind.
+
+**WHILE IT IS WRITTEN, THE TABLE TAKES A BAND** under the two cards — `.koband`,
+the unit's own expression — **on BOTH formats**, because the two draw ONE page
+(§53.5) and a squeeze fixed on one side of it is §211's drift straight back.
+Reading mode keeps the card on both, for §96.6's own reason: the objectives
+belong beside what the function is when you are READING it. Measured after:
+647px → 1393px, every column readable.
+
+**THE UNIT COLUMN IS §199's, NOT A COUSIN OF IT**: the same
+`targetUnitOf`/`setTargetUnit`/`targetUnitOpts` trio, the same
+`parse: unitInherit(m)` on This year (§199.6 — a bare number inherits the row's
+unit), the same `fillUnitCell` for a filler setting a MISSING one (§201.2), and
+the same why-dash on a row with no target to hold one. Nothing is stored — the
+unit rides the target string here exactly as it does everywhere else — and the
+server needed NOTHING: `gapFieldPass` already runs `unitAddedOnly` for every row
+kind, so a function's row was accepted before the screen could offer it.
+
+**THE NAME IS PROSE** — §189's `textOr`, a growing box that wraps — in
+`capKoEdit` only. The unit's `koEdit` keeps its one-line input **at Islam's
+instruction**, recorded as his and asserted as a measurement (§8 of the check),
+not assumed: the two sides of the switch now deliberately differ on this one
+cell, and the check is what will say so if anybody "fixes" it.
+
+**LED BY OPENS, FOR THE OFFICE, THROUGH THE REGISTER'S OWN DOOR.** The row is a
+read-only mirror of `FUNCTIONS[k].head` — the fnhead ROLE pointer, §33's
+one-fact-one-door — so the control is Setup's own `assignPicker` writing through
+`grantPersonRole`, and this row and Setup › Supporting functions' Head column
+can never disagree. **Office-only, and that is the server talking**: a head
+change classifies as Setup (`FN_SETUP`), so drawing the picker for a custodian
+holding an opened strategy cell would be the screen offering what the save
+refuses (§42's drift, the named fault of §94's three). Asserted at BOTH ENDS: the
+office picks and the head + attachment are read back; a non-office author gets
+their fields AND no picker. The sentence explaining the control is a hover, never
+a printed line (1b-ii) — the approved mockup drew it as a line and the standing
+rule outranks the drawing; recorded rather than slipped past.
+
+**THE CHECK GUESSED AND THE PRODUCT WAS RIGHT**: `checks/fn-ko-edit.py` first
+asserted `"1.6 B EGP"` and the platform wrote `"1.6B EGP"` — §199.4's own
+convention, the money units are TIGHT. The expectation moved to the platform's
+rule, not the other way round. Proved able to fail: **5 red against the
+pre-§226 build** before the run even completes (the band selectors find
+nothing). `fn-pillars`, `foundation-objectives`, `objective-unit`, `gap-fill`
+and the full `qa.py` sweep all green after.
+*(Built as §224/§225 in a parallel session; renumbered here because main took those numbers first — §94's own precedent, recorded rather than overwritten.)*
+
+## §227 — A MILESTONE'S COLLABORATORS, THE TACTIC'S RULE MOVED OVER
+
+Islam: *"for the projects milestones please add collaborators beside the owner
+column similar to the collabroators in the tactics in the units. align with me
+to make the addition correctly."*
+
+Aligned first, and both decisions are his, each taken with its cost stated:
+**being named a collaborator on a milestone is a reporting right** — the same
+meaning the word carries on a tactic, where being named is what lets somebody
+report the line — and **the column shows everywhere the tactics show theirs**:
+editable on the Plan pane beside the Owner, read-only on the Performance pane
+and the deck's milestone slide. The Reporting pane is untouched, because it
+shows no owner either.
+
+**"SIMILAR TO THE TACTICS" MEANS THE RULES, NOT ONLY THE COLUMN.** Every
+decision the tactic's collaborators have accumulated moves over rather than
+being re-decided:
+
+- **Ticked from the register's list, never typed** (§130.1) — the same
+  `selectManyOr` through `gapCell`, committing per tick, staying open.
+- **Fillable while EMPTY, never counted as missing** (§187, §205): the field
+  joins `GAP_OPTIONAL.milestone`, so the fill grant opens an empty list AND the
+  server accepts the save — §205's fault, paid once, not repeated — while the
+  band, the chips and the deck's Missing never count it. An existing list stays
+  the office's alone.
+- **Emptied, the key is DELETED** (§50.6) — a milestone nobody supports and one
+  never asked are byte-identical.
+- **An em-dash when nobody** (§15.1) — nobody supporting is an ordinary answer.
+  Which met `project-tables.py`'s dead-cell probe head-on: §99 reads a bare
+  em-dash as the table asking a question the row cannot answer, and this dash
+  is the answer itself. The probe now exempts exactly the `.collabs` column —
+  one column, asserted, or a build classing every cell `collabs` would blind
+  it (§113.8).
+
+**THE REPORTING RIGHT IS ONE RULE, NOT A SECOND ONE.** `namedOn()` has always
+read a row's owner AND collaborators; the Contributor derivation for a
+function's projects (§147.8) was passing a milestone stripped to
+`{ owner: m.owner }`, so the row now travels whole and a named collaborator
+derives Contributor exactly as a milestone's owner does — reporting nothing
+until the tenant opens the Contributor row, and then only the milestone that
+names them (`boundedReach` already read the row whole; only the derivation
+lagged). Falsified both ways: the derivation reverted fails 2, the fill rule
+reverted fails 1, of 451.
+
+**THE WORKBOOK CARRIES THE COLUMN OR THE ROUND TRIP DROPS THE NAMES.** An
+upload AUTHORS a plan (§22), so an export without the column would lose every
+collaborator on the next download-and-re-upload. The Milestones sheet gains
+*Collaborators* ("A, B", the tactics sheet's own shape), the reader normalises
+either comma or pipe and takes a file written before the column (§58), the CSV
+pipeline compares pipe-joined exactly as the project's stakeholders do, and a
+file adds and amends, never removes (§54: `cmp` never fires on an emptied
+value). Proved as a fixed point: an untouched round trip changes nothing, and
+the names land on a fresh capability with no empty arrays written.
+
+**NO MIGRATION.** `milestones` files unrecognised keys into `extra` JSONB and
+reads them back — the road §177's pending marks already travel.
+
+**THE HEADER IS "Collabs." BECAUSE THE TACTICS' IS.** The full word cost a
+515px pane 11px at an 830px window — found by `table-fit.py` going red, not by
+looking — and the tactic column already wears the short form on every surface
+(§53.5): the fix and the consistency are the same edit.
+
+**Deliberately not done**: no demo milestone was given collaborators (the demo
+is Islam's to decorate), the plan BUILDER's add-milestone form does not ask for
+them (the tactic's form does not either — they are added in the pen), and the
+hidden .pptx plan deck (§145.9) was left untouched.
+
+## §228 — THE PROJECT'S NAME GETS THE LINE
+
+Islam, with a screenshot of FIN01's editing band: *"the project box is
+squeezed for no need we have space to make it one line."* A three-word title
+on three lines in a 181px box beside 1,040px of empty band.
+
+**§194'S FAULT EXACTLY, ON THE BAND ITS FIX DID NOT REACH.** §189's growing
+box is `width:100%` of its container; §194 diagnosed that *a growing field in
+a container that does not grow is a fixed field* and gave the pillar head's
+column `flex:1` — and a project's pane builds a different head, the
+`.pband.edband`, whose `.pband-name` was never given a flex. A flex item with
+no flex shrinks to fit content that is sized BY it — circular, so the
+textarea fell back to its intrinsic width. One line of CSS on the band's own
+class: `.pane .pband.edband .pband-name { flex:1; min-width:0 }`. Reading is
+untouched — a read band's name is a span and never had the fault.
+
+**Measured, falsified, guarded**: 181px of 1223 (15%) and three lines before;
+1,037px (85%) and one line after, on the exact title from the screenshot.
+`plan-edit-head.py` gains a fifth section asserting the band's box as a RATIO
+and the title as ONE line (§94.8 — never a pixel count), on the function side
+of the switch (A15: §194's check only ever measured the pillar head, which is
+how this band stayed broken through it). Reverting the line fails exactly
+those two assertions — 15%, 3 lines — before the green was believed.
+
+## §228.2 — A CELL THE FILLABLE LIST HAS CLOSED NEVER OPENS TO A FILLER
+
+Found by the §227 merge, in main's own §224.2. That section took `def` out of
+`GAP_FILLABLE` and asserted that fill mode opens no control over the
+definition — and the assertion passed **because the check's projects function
+had nothing fillable at all**: no door, no fill mode, a pass by
+unreachability. §227 made the milestones' collaborators fillable, the door
+appeared for the first time on that page, and behind it the definition opened
+a box whose save the server refuses — §205's drift exactly, latent on any
+page holding a genuine gap beside the definition, on main too.
+
+**THE GATE READS THE ONE LIST THE SERVER READS**: `gapCell` takes a
+`fillKind` naming the row's GAP kind and its fill branch asks
+`GAP_FILLABLE[fillKind]`, so a later decision about what is fillable reaches
+the cell without anybody coming back to it; a call site naming no kind keeps
+today's behaviour. Both `def` call sites name `cap`.
+
+**AND THE CHECK WAS ASKING THE WRONG PERSON.** It pressed the door as the
+SMO, for whom the door opens their own pen — a control over the definition
+there is §224.2 working (*"the SMO will do it"*), not failing. The assertion
+now runs as a FILLER (the function's custodian, granted fill for the
+measurement; finance ships without one, so the state is made and unmade,
+§94.2), on both formats. Falsified: dropping `fillKind` from the projects
+call site fails exactly that assertion.
+
+## §229 — A LATE ANSWER STILL LANDS
+
+*(Numbered §229 because another session's §226–§228.2 reached `main` first — §94's precedent.)*
 
 Islam, with a screenshot of §201's wall over the live deployment: *"when I hard
 refresh my deployment tab I get thie mssages"* — and, asked the two questions
@@ -25249,12 +25429,12 @@ itself.
 give-up (§201 still working), comes down BY ITSELF, the tenant's bar colour is
 painted, and a flag set before the wait survives, so an in-place paint can never
 be the probe's reload wearing the fix's clothes. Proved able to fail (§94.5):
-**2 red on the pre-§226 build** — the wall stands and the baked navy is painted
+**2 red on the pre-§229 build** — the wall stands and the baked navy is painted
 — while *"as the server's own data"* passes there too, because `hydrate()` had
 run: the check reproducing the diagnosis, not just the symptom. Full `qa.py`
 clean.
 
-## §226.2 — THE NOTICE SPEAKS THE USER'S LANGUAGE (reshaping §201's wall, removing its way past)
+## §229.2 — THE NOTICE SPEAKS THE USER'S LANGUAGE (reshaping §201's wall, removing its way past)
 
 Islam, on §201's card: *"the message after 8 seconds it too tehcnical for the
 users"* — then, on the first plain draft, *"TOO MUCH make a very simple user
@@ -25264,7 +25444,7 @@ rounds of the real card (§41.9), each round cutting further.
 **FOUR SHORT LINES, NONE OF THEM OURS**: *Just a moment…* · *Your page is
 taking a little longer to open. Your work is safe.* · *It will open by itself —
 no need to do anything.* · **Try again**. No "server", no "data", no
-"example" — and with §226 in place, *just a moment* is usually literally true,
+"example" — and with §229 in place, *just a moment* is usually literally true,
 because the page lands by itself seconds later. The three facts §201 existed to
 say survive in the user's words: something is late, nothing saved is touched,
 nothing is asked of you.
@@ -25272,7 +25452,7 @@ nothing is asked of you.
 **"LOOK AT THE EXAMPLE ANYWAY" IS REMOVED, AND IT IS HIS DECISION WITH THE COST
 STATED**: while the server is genuinely down there is now no way past the
 notice — it stands, retrying on its own. §201 kept that link as the old
-behaviour's one virtue; §226.2 records that the example behind the blur was
+behaviour's one virtue; §229.2 records that the example behind the blur was
 the confusing thing the wall exists to fence off, and its remaining audience —
 somebody whose server is truly dead — is better served by the retry than by a
 worked example wearing their chrome. The element, its handler and `.nosrv-link`

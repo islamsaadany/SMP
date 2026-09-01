@@ -68,7 +68,7 @@ Nothing proceeds past this line without an answer.
 
 ## Built and verified
 
-### §226 — a late answer still lands (on `claude/hard-refresh-deployment-errors-jm0yin`, not merged)
+### §229 — a late answer still lands (on `claude/hard-refresh-deployment-errors-jm0yin`, not merged)
 
 - **Islam's report:** hard-refreshing the deployment shows the "server did not
   answer" notice, mostly after new deployments; it clears itself after a while.
@@ -86,7 +86,7 @@ Nothing proceeds past this line without an answer.
 - Proof: `checks/boot-skeleton.py` §6 is new — 2 red on the build before
   (the notice stands, the baked navy is painted); ALL GREEN after; full
   `qa.py` clean.
-- **§226.2, same branch:** the notice's words are the user's now — *Just a
+- **§229.2, same branch:** the notice's words are the user's now — *Just a
   moment… Your page is taking a little longer to open. Your work is safe. It
   will open by itself — no need to do anything. Try again* — settled over two
   mockup rounds with Islam, and the "look at the example" link removed at his

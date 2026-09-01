@@ -52,7 +52,7 @@ var SYNC = (function () {
      that will route to the gate) reloads; a 500 keeps waiting rather than
      reload-looping a broken deployment.
 
-     The probe's handle lives at module scope because §226's late answer
+     The probe's handle lives at module scope because §229's late answer
      takes the wall down from outside this function — and that takedown must
      stop the probe too, or a reload fires ten seconds after the real page
      is already up. */
@@ -1138,7 +1138,7 @@ var SYNC = (function () {
          backstop and the answer racing each other is harmless. */
       var landed = false, landedLive = false, t0 = bootNow();
       function land(then) {
-        /* ── A LATE ANSWER STILL LANDS (§226) ─────────────────────────
+        /* ── A LATE ANSWER STILL LANDS (§229) ─────────────────────────
            Islam, hard-refreshing after a deployment: the wall, every time.
            A freshly deployed function answers its first request slowly —
            cold start, and a database that may itself be waking — so the
@@ -1187,7 +1187,7 @@ var SYNC = (function () {
              the wall makes the refusal VISIBLE instead of silent), Try again
              reloads, and it retries by itself so a server that wakes up
              brings the real page back with nobody pressing anything.
-             §226.2 removed the "look at the example anyway" way past, at
+             §229.2 removed the "look at the example anyway" way past, at
              Islam's direction — the wall now stands until the server
              answers, and the words on it are the user's (see noServerWall). */
           if (enabled && !live) noServerWall();

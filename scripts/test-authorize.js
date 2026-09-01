@@ -1888,6 +1888,100 @@ console.log("\n18 · a bounded role fills only what it holds (§177)");
   }
 })();
 
+console.log("\n18b · a milestone's collaborators, the tactic's rule moved over (§227)");
+/* Islam: "for the projects milestones please add collaborators beside the
+   owner column similar to the collaborators in the tactics in the units."
+   Similar means the RULES too: fillable while empty and never counted
+   (§187/§205), an existing list the office's alone, and being named on the
+   milestone a reporting right once the Contributor row is opened (§147). */
+(function () {
+  const FN = "it";
+  const T = "fn:" + FN;
+  const MARK = { by: "t224_fill", at: "2026-09-01" };
+  const capOf = function (st) {
+    return st.group.capabilities.filter(function (c) { return c.fn === FN; })[0];
+  };
+  const fromStored = function (stored, who, mutate) {
+    const inc = clone(stored); mutate(inc);
+    return A.authorize(stored, inc, personOf(stored, who));
+  };
+
+  /* The fill half: §177's bounded filler, on a milestone's collaborators. */
+  const base = clone(SEED);
+  base.access.powner = Object.assign({}, base.access.powner,
+    { a_fn_own_strat: "fill", a_fn_own: "edit" });
+  base.people.push({ key: "t224_fill", name: "Bounded Filler 224", active: true });
+  const cap = capOf(base);
+  if (!cap || (cap.projects || []).length < 2) {
+    check("§227: the fixture needs a function with two projects", false, FN);
+  } else {
+    capOf(base).projects[0].owner = "Bounded Filler 224";
+
+    let v = fromStored(base, "t224_fill", function (i) {
+      const m = capOf(i).projects[0].milestones[0];
+      m.collaborators = ["Somebody Supporting"]; m.pend = { collaborators: MARK };
+    });
+    check("FILL: an empty milestone collaborators list IS fillable", v.ok,
+          (v.refusals || []).join(" / "));
+    check("...and is still NOT counted as missing",
+          R.GAP_FIELDS.milestone.indexOf("collaborators") < 0,
+          JSON.stringify(R.GAP_FIELDS.milestone));
+    check("...so a milestone owing nothing else counts 0",
+          R.gapMissing("milestone", { owner: "A", finish: "Jul 26" }).length === 0,
+          JSON.stringify(R.gapMissing("milestone", { owner: "A", finish: "Jul 26" })));
+
+    v = fromStored(base, "t224_fill", function (i) {
+      const m = capOf(i).projects[1].milestones[0];
+      m.collaborators = ["Somebody Supporting"]; m.pend = { collaborators: MARK };
+    });
+    check("REFUSED: the same fill on the project beside it", !v.ok,
+          "was ALLOWED — " + JSON.stringify(v.changes.map(function (c) { return c.kind; })));
+
+    const held = clone(base);
+    capOf(held).projects[0].milestones[0].collaborators = ["Already There"];
+    v = fromStored(held, "t224_fill", function (i) {
+      const m = capOf(i).projects[0].milestones[0];
+      m.collaborators = ["Already There", "Sneaked In"];
+      m.pend = { collaborators: MARK };
+    });
+    check("REFUSED: adding to a list that already has somebody", !v.ok, "was ALLOWED");
+
+    v = fromStored(base, "smo", function (i) {
+      capOf(i).projects[0].milestones[0].collaborators = ["Named By The Office"];
+    });
+    check("the office writes collaborators with no mark and it settles", v.ok,
+          (v.refusals || []).join(" / "));
+  }
+
+  /* The reporting half: being named is what the word MEANS on a tactic, and
+     now on a milestone — through the same namedOn(), so it cannot drift. */
+  const named = clone(SEED);
+  named.people.push({ key: "t224_col", name: "Milestone Collaborator 224", active: true });
+  const nc = capOf(named);
+  nc.projects[0].milestones[0].collaborators = ["Milestone Collaborator 224"];
+  const w = R.worldOf(named);
+  check("a milestone COLLABORATOR derives Contributor",
+        R.personRoleKeys(w, personOf(named, "t224_col")).join() === "contrib",
+        R.personRoleKeys(w, personOf(named, "t224_col")).join());
+  let v2 = fromStored(named, "t224_col", function (i) {
+    const m = capOf(i).projects[0].milestones[0]; m.status = "todo";
+  });
+  check("with the shipped default the collaborator reports nothing", !v2.ok,
+        "was ALLOWED — " + JSON.stringify((v2.changes || []).map(function (c) { return c.kind; })));
+  const cOpen = clone(named);
+  cOpen.access.contrib = Object.assign({}, cOpen.access.contrib, { a_fn_own: "edit" });
+  v2 = fromStored(cOpen, "t224_col", function (i) {
+    const m = capOf(i).projects[0].milestones[0]; m.status = "wip"; m.pct = 20;
+  });
+  check("contrib opened: the collaborator reports THEIR milestone", v2.ok,
+        (v2.refusals || []).join(" / "));
+  v2 = fromStored(cOpen, "t224_col", function (i) {
+    capOf(i).projects[0].deliverables[0].status = "todo";
+  });
+  check("...and still not the deliverable beside it", !v2.ok,
+        "was ALLOWED — " + JSON.stringify((v2.changes || []).map(function (c) { return c.kind; })));
+})();
+
 console.log("\n19 · a date the platform cannot read is a gap (§184)");
 /* Islam, on the CX strategy custodian: "they lost all data they inputed and
    the dates showed waiting confirmation and I didn't get them as the SMO."

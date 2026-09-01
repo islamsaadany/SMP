@@ -239,7 +239,7 @@ with sync_playwright() as p:
     # his. The example may paint (that is the fallback working); what may
     # not happen is nobody being told.
     #
-    # §226.2 RESHAPED THE CARD AT ISLAM'S DIRECTION: "the message after 8
+    # §229.2 RESHAPED THE CARD AT ISLAM'S DIRECTION: "the message after 8
     # seconds is too technical for the users" — then "make a very simple
     # user message", then "no need for examples to look at". Four short
     # lines in the user's language (no "server", no "data", no "example"),
@@ -281,7 +281,7 @@ with sync_playwright() as p:
     ck("...with no technical word on it (server, data, example)",
        w["plainWords"], w)
     ck("...Try again is really reachable (a press lands on it)", w["retryHits"], w)
-    ck("...and the removed way past stays removed (§226.2)", w["noWayPast"], w)
+    ck("...and the removed way past stays removed (§229.2)", w["noWayPast"], w)
 
     # The retry is a reload: with the server answering again it must land
     # LIVE and wall-free. On a build with no wall there is nothing to
@@ -315,7 +315,7 @@ with sync_playwright() as p:
        pg.evaluate("() => !document.querySelector('#panel')"), pg.url)
     pg.close()
 
-    # ── 6 · A LATE ANSWER STILL LANDS (§226) ────────────────────────
+    # ── 6 · A LATE ANSWER STILL LANDS (§229) ────────────────────────
     # Islam, hard-refreshing after every deployment: the wall, every time —
     # a cold function's first answer routinely arrives a few seconds AFTER
     # the 8s give-up. The answer was being dropped: hydrate() had run and
@@ -323,7 +323,7 @@ with sync_playwright() as p:
     # person sat behind the wall while their real data was in memory,
     # waiting for the probe's reload. The wall must go up (that is §201
     # unchanged) and then come down BY ITSELF — no click, no reload — with
-    # the live tenant painted in place. On the pre-§226 build the wall
+    # the live tenant painted in place. On the pre-§229 build the wall
     # stands until the probe reloads, so both halves below fail there.
     print("\n6 · when the answer arrives after the give-up")
     MODE["delay"], MODE["status"] = 10.5, 200

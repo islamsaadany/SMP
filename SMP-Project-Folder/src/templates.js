@@ -450,7 +450,7 @@ function createFromPlan(u, d){
       var mRow = { id:x.id, name:x.name, dir:x.direction || "\u2265", target:t1,
         compile:x.compile || "Latest", actual:"", progress:null,
         slide:x.source_slide, horizon:x.horizon, notes:x.notes };
-      /* §231: set only when the file says Yes — an absent key and a shown
+      /* §233: set only when the file says Yes — an absent key and a shown
          row must stay byte-identical (§50.6). */
       if (+x.hidden) mRow.hide = true;
       p.measures.push(mRow);
@@ -525,7 +525,7 @@ function applyPlan(u, d){
       if (c.f === "kind")       o.kind = c.now;
       if (c.f === "theme")      o.theme = c.now;
       if (c.f === "owner")      o.owner = c.now;
-      /* §231: "Yes" hides, "No" shows again; the shown state is the ABSENT
+      /* §233: "Yes" hides, "No" shows again; the shown state is the ABSENT
          key (§50.6). cmp never fires on a blank cell, so a file that says
          nothing changes nothing (§54's adds-and-amends). */
       if (c.f === "hidden")     { if (+c.now) o.hide = true; else delete o.hide; }

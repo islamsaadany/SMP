@@ -35,6 +35,7 @@ const Rules = require("../lib/rules.js");
 const Audience = require("../lib/audience.js");
 const mailer = require("../lib/mailer.js");
 const assistant = require("../lib/assistant.js");
+const push = require("../lib/push.js");
 
 /* THE CORPUS IS READ ONCE PER PROCESS. It is a 70KB file that never changes
    between deploys, and §98.1's lesson was that per-request work nobody thinks
@@ -96,6 +97,15 @@ function send(res, code, obj) {
   res.setHeader("Cache-Control", "no-store");
   res.end(JSON.stringify(obj));
 }
+/* THE FIRST LINE, for a notification (§225's wording B). One place, so the
+   box the office gets and the box a person gets are trimmed identically
+   (§53.5) — and it collapses whitespace, because a message typed with a
+   blank line in it would otherwise arrive as a title with a gap under it. */
+const firstLine = function (v) {
+  const t = String(v == null ? "" : v).replace(/\s+/g, " ").trim();
+  return t.length > 120 ? t.slice(0, 119) + "\u2026" : t;
+};
+
 const str = function (v, max) {
   return String(v == null ? "" : v).trim().slice(0, max || MAX_TEXT);
 };
@@ -295,6 +305,13 @@ module.exports = async function handler(req, res) {
                       missing from the posted body and every stored row would
                       have said no message ever greeted anybody. */
                    popup: cfg.popup,
+                   /* §231: THE PUBLIC HALF OF THE KEY TRAVELS WITH THE POLL,
+                      like every other setting — the browser needs it to
+                      subscribe and it is public by construction (it is handed
+                      to every push service). Empty where none could be made,
+                      which is what the corner reads to know push is not
+                      available here rather than guessing. */
+                   vapid: cfg.popup ? await push.publicKey(client) : "",
                    beat: Rules.chatBeat({ fast: cfg.fast }) };
       /* AND THE OFFICE IS TOLD HOW MANY ARE WAITING (§225). Their corner is
          the only thing that polls on EVERY page — the Platform Inbox's own
@@ -332,6 +349,59 @@ module.exports = async function handler(req, res) {
       await client.query(
         "UPDATE chat_threads SET seen_by_them = now(), here_at = now() WHERE person_key = $1",
         [me.key]);
+      return send(res, 200, { ok: true });
+    }
+
+    /* ── THIS DEVICE SAYS YES, OR STOPS (§231) ───────────────────────
+       THE ROW IS THE SWITCH. There is no `on` column beside it to disagree
+       with: a device that has said yes has a row, one that has not does not,
+       and turning the bell off deletes it (§104.7, §50.6). That is also what
+       makes the person's switch genuinely per device without anything having
+       to remember which device is which.
+
+       AND IT IS THE SIGNED-IN PERSON'S, never a key from the body. Taking
+       `person` from the browser would let anybody subscribe their own phone
+       to somebody else's conversation and read every reply that person is
+       sent — the same rule that makes `/api/state` read the person off the
+       session and never off the payload (§185). */
+    if (action === "pushOn") {
+      if (!cfg.on || !cfg.popup) {
+        return send(res, 403, { ok: false, error: "Notifications are off for this platform." });
+      }
+      const sub = body.sub || {};
+      const endpoint = str(sub.endpoint, 2000);
+      const p256dh = str((sub.keys || {}).p256dh, 300);
+      const auth2 = str((sub.keys || {}).auth, 300);
+      if (!endpoint || !p256dh || !auth2) {
+        return send(res, 400, { ok: false, error: "That is not a subscription this can store." });
+      }
+      /* A subscription must be a URL, and an https one: the endpoint is
+         fetched by our own server, so anything else is somebody pointing it
+         at a host of their choosing (§71's argument about a screenshot URL,
+         one endpoint out). */
+      if (!/^https:\/\//i.test(endpoint)) {
+        return send(res, 400, { ok: false, error: "That is not a subscription this can store." });
+      }
+      /* THE SAME DEVICE RE-SUBSCRIBING REPLACES ITS ROW rather than adding a
+         second — a browser re-issues the endpoint after clearing site data or
+         a long absence, and two rows for one device is two boxes. */
+      await client.query(
+        "INSERT INTO push_subscriptions (endpoint, person_key, p256dh, auth) VALUES ($1,$2,$3,$4) " +
+        "ON CONFLICT (endpoint) DO UPDATE SET person_key = EXCLUDED.person_key, " +
+        "  p256dh = EXCLUDED.p256dh, auth = EXCLUDED.auth, seen_at = now()",
+        [endpoint, me.key, p256dh, auth2]);
+      return send(res, 200, { ok: true });
+    }
+
+    if (action === "pushOff") {
+      const endpoint = str((body.sub || {}).endpoint || body.endpoint, 2000);
+      /* SCOPED TO THE SIGNED-IN PERSON, so a stale or guessed endpoint can
+         only ever silence a device of their own. */
+      if (endpoint) {
+        await client.query(
+          "DELETE FROM push_subscriptions WHERE endpoint = $1 AND person_key = $2",
+          [endpoint, me.key]);
+      }
       return send(res, 200, { ok: true });
     }
 
@@ -449,6 +519,26 @@ module.exports = async function handler(req, res) {
       const stillWaiting = (await client.query(
         "SELECT waiting FROM chat_threads WHERE person_key = $1", [me.key])).rows[0];
       if (stillWaiting && stillWaiting.waiting) await tellTheOffice(client, me, text, cfg);
+
+      /* AND A BOX ON THE OFFICE'S OWN SCREENS, WITH NO TAB OPEN (§231).
+         Only while the conversation is still waiting — the same condition the
+         email chase already uses, so an assistant answer that settled it does
+         not also go and interrupt somebody. Never back to the sender's own
+         devices: they are the one person who knows this message exists.
+
+         IT NEVER COSTS THE MESSAGE. The message is stored and the thread is
+         already waiting before this runs (§104's ordering); a push service
+         that is slow, unreachable or refusing leaves all of that exactly as
+         it is, which is the correct state. */
+      if (cfg.popup && stillWaiting && stillWaiting.waiting) {
+        try {
+          await push.sendTo(client, await push.officeSubs(client, me.key), {
+            title: me.name || me.key,
+            body: firstLine(text || "(a screenshot)"),
+            tag: "office"
+          });
+        } catch (e) { /* a notification never costs the message it is about */ }
+      }
 
       return send(res, 200, await mine(client, me));
     }
@@ -698,6 +788,25 @@ module.exports = async function handler(req, res) {
          never taken from the browser (§74.2). The browser sends the HTML it
          built with the one builder every other message uses (§72.3) — content,
          never a recipient. */
+      /* AND A BOX ON THEIR OWN DEVICES, WITH NO TAB OPEN (§231). Sent
+         WHATEVER the email decides below: the two answer different questions —
+         a notification reaches the phone in their pocket now, an email reaches
+         them tomorrow — and gating one on the other would mean somebody
+         sitting in the platform with the panel shut is told nothing at all,
+         which is §225's whole fault by another road.
+
+         The page suppresses its own box on any device that is subscribed, so
+         nobody ever gets two (§53.5, and it is asserted). */
+      if (cfg.popup) {
+        try {
+          await push.sendTo(client, await push.subsOf(client, who), {
+            title: me.name || "Strategy Office",
+            body: firstLine(text),
+            tag: "reply"
+          });
+        } catch (e) { /* a notification never costs the reply it is about */ }
+      }
+
       const here = t.here_at && (Date.now() - new Date(t.here_at).getTime()) < cfg.away * 60000;
       let mailed = null;
       if (!here && !cfg.mail) {

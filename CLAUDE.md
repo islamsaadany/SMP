@@ -384,7 +384,68 @@ console errors (in this cloud environment, run it via a wrapper that points Play
   remove × onto a second line — `inline-block` restores it, and it was found
   by `checks/plan-fields.py` GOING RED, not by reading the cascade, which is
   the argument for that check existing.
-- **ENTER COMMITS A ONE-LINE PROSE BOX (§229):** found during §226's audit —
+- **A BOX THAT ARRIVES WITH NO TAB OPEN (§231):** Islam, having turned §225 on
+  — *"I didn't get any notifications despite enabling the notifications"* — and
+  then, correcting two wrong diagnoses, *"stop assuming wrong things, the bell
+  is allowed and in the chat box is on."* **HE WAS RIGHT AND I WAS READING
+  RATHER THAN MEASURING.** Measured: with the tab in the background, **0
+  requests and 0 boxes across 45 seconds**, then **both boxes at once** on
+  coming back — the one moment they are worth nothing. **THE CAUSE PREDATES
+  §225**: §98.1 stops the chat's clock dead while `document.hidden` so the
+  database can sleep, which is right for a badge you see next time you look and
+  exactly wrong for a notification, whose job is to reach somebody NOT looking.
+  *A feature can be correct in every line and still sit on a decision that makes
+  it pointless.* **SO THE BROWSER STOPS ASKING AND THE SERVER SENDS**:
+  `lib/push.js` is the one place a notification leaves the platform (`mailer.js`
+  mirrored — only place the credential is read, nothing it returns contains it,
+  knows nothing about who anybody is), and `sw.js` receives. **A DEPENDENCY,
+  AND §72's REFUSAL STILL STANDS**: Gemini is one POST, web push is RFC 8291 +
+  8292 and this sandbox cannot reach a push service, so hand-rolled crypto could
+  never be tested against what it must satisfy — 17 packages, stated not hidden.
+  **THE KEY PAIR IS MINTED ON FIRST USE INTO THE DATABASE** (env override), or
+  the feature is off on every deployment until an engineer pastes two strings
+  into Vercel; the cost is said — a dump now holds a key that could send a box
+  to a subscribed device, smaller than the password hashes already there.
+  **THE SUBSCRIPTION IS THE SWITCH** — no `on` column to disagree with it
+  (§104.7, §50.6) — and it is written against the **signed-in person, never a
+  key from the body** (§185), with an **https** endpoint only, because our own
+  server fetches it (§71). **ONE BOX, ONE SOURCE** (§53.5): on a subscribed
+  device the page stands its own box down, or one message draws two. **A 410
+  DROPS THAT DEVICE AND A 500 DROPS NOTHING**, and a notification never costs
+  the message it is about. **§231.2 — THE BELL HAD TO SAY WHAT WOULD HAPPEN**:
+  §225 read the person's switch alone, so a browser never asked showed ON with
+  a hover promising a box that could not appear (§124), and the only control
+  switched OFF the thing that was not on (§61) — four states now, and the press
+  ASKS in the third. **AND THE REPLY PUSH LANDED IN THE WRONG BRANCH** — both
+  `thread` and `reply` contain a line starting `const here = t.here_at` and a
+  first-occurrence replace took `thread`, so READING a conversation notified and
+  ANSWERING one did not; found by the endpoint test, not by reading (§96).
+  **NOT CLAIMED**: "browser closed" is true on a phone and partly true on a
+  laptop (the service can only hand it over while the browser runs somewhere),
+  and iOS still needs the platform on the home screen.
+- **THE NOTICE SPEAKS THE USER'S LANGUAGE (§230.2):** Islam, on §201's wall —
+  *"too technical for the users"*, then *"make a very simple user message"*,
+  then *"no need for examples to look at."* Four short lines (*Just a moment…*
+  · *Your page is taking a little longer to open. Your work is safe.* · *It
+  will open by itself — no need to do anything.* · **Try again**), no "server",
+  no "data", no "example" — asserted as a regex over the whole card. **The
+  "Look at the example anyway" way past is REMOVED at his direction, cost
+  stated**: while the server is truly down there is no way past — element,
+  handler and `.nosrv-link` deleted, not hidden (§24), and the check asserts
+  the absence.
+- **A LATE ANSWER STILL LANDS (§230):** Islam, hard-refreshing after a
+  deployment — §201's wall, every time, clearing itself later. **The server was
+  healthy and the landing was wrong**: a cold function's first answer routinely
+  arrives after the 8s `BOOT_GIVEUP`, and the one-shot `land()` swallowed it —
+  real data hydrated in memory behind a wall promising nothing is saved. A
+  second landing is allowed for exactly one case (first landing the backstop's,
+  this one carrying the live tenant): it paints in place and takes the wall
+  down — no reload; a late FAILURE still leaves §201 standing, probe and all.
+  **Deliberately not a longer give-up.** Measured first: production 0.3–0.6s
+  warm, a signed-in GET 11–54ms against a real Postgres — the 8s is eaten by
+  the environment's cold start. `checks/boot-skeleton.py` §6: 2 red on the
+  build before.
+- **ENTER COMMITS A ONE-LINE PROSE BOX (§229):** found during §231's audit —
   §189's own text promised *"Enter blurs, which is what commits"* and no code
   ever carried it out, so Enter inserted a newline into every growing title
   box (§104.8's family: a recorded intention nothing compares with the code).
@@ -392,7 +453,7 @@ console errors (in this cloud environment, run it via a wrapper that points Play
   (§104.7 — no list to forget); a `rows="2"` area keeps Enter as a paragraph
   key; **blur, never a synthesised change** (§219). Nothing stored is
   scrubbed. `checks/enter-commits.py`: 4 red on the pre-§229 build.
-- **A FUNCTION'S OBJECTIVES ARE WRITTEN AT THE PAGE'S WIDTH (§226):** Islam —
+- **A FUNCTION'S OBJECTIVES ARE WRITTEN AT THE PAGE'S WIDTH (§231):** Islam —
   *"the keyobjectives table is tight I can't see the direction and I can't find
   the unit and the ibjectives cell is not wrapping"*, and *"led by is not open
   to edit"*. Three of the four are ONE omission: the function Overview's
@@ -412,7 +473,7 @@ console errors (in this cloud environment, run it via a wrapper that points Play
   not the mockup's printed line. **The check guessed and the product was
   right**: it asserted `"1.6 B EGP"` where §199.4's convention writes
   `"1.6B EGP"` — the expectation moved to the platform's rule. 5 red on the
-  pre-§226 build; `fn-pillars`, `foundation-objectives`, `objective-unit`,
+  pre-§231 build; `fn-pillars`, `foundation-objectives`, `objective-unit`,
   `gap-fill` and the full sweep green after.
 - **A BOX FROM THE COMPUTER WHEN A MESSAGE LANDS (§225):** Islam — a browser
   notification for platform messages, *"for the SMO when someone replies, and
@@ -3688,6 +3749,10 @@ python3 checks/email-link.py    # the link that LEAVES, read out of the html pos
                                 # /api/mail — never the value in the box, which looked
                                 # right the whole time; both send buttons, both ends of
                                 # the refusal, and both emails' destination (§176)
+node scripts/test-push.js       # a box with no tab open (§231): a throwaway HTTPS
+                                # server stands IN FRONT of the real push service, so
+                                # the encrypted body and the VAPID header are read off
+                                # the wire — needs a real Postgres, no network
 python3 checks/office-chat.py   # the chat's client half — serves the built file over HTTP,
                                 # because the whole feature is invisible over file:// (§97.9)
 python3 checks/welcome.py       # the welcome screen (§148): three viewers over HTTP, every
@@ -3805,7 +3870,7 @@ prior sessions (on HR_ERP) accidentally reverted agreed-upon designs.
 
 ---
 
-*Last Updated: 2026-09-01 &mdash; **&sect;230: removing a pillar or a
+*Last Updated: 2026-09-01 &mdash; **&sect;232: removing a pillar or a
 project.** The mockup an earlier session published for sign-off
 (`design-mockups/pillar-project-remove/`), signed off by Islam and built: a
 worded quiet-red control in the pinned editing head (&sect;194's edhead on a
@@ -3819,12 +3884,12 @@ on, so the survivors keep theirs. The server needed nothing (&sect;42's
 fall-through already makes a structural plan change the office's). **And the
 way back was broken for every pillars FUNCTION**: `restoreArchive()` resolved
 a "unit" archive through `UNITS[a.key]`, and a pillars function's archives are
-keyed `fn:<key>` &mdash; un-restorable since spec 010, found because &sect;230's
+keyed `fn:<key>` &mdash; un-restorable since spec 010, found because &sect;232's
 confirmation promises the way back; fixed at both ends
 (`unitLikeWritable`/`unitLike` + `fnWriteBack`). The new control is `.rmplan`,
 never `.rmbtn` &mdash; that word is taken (&sect;65.9).
 `checks/pillar-project-remove.py` presses everything and asks the DATA: **13
-red** on the pre-&sect;230 build, all green after. **And &sect;231, built the
+red** on the pre-&sect;232 build, all green after. **And &sect;233, built the
 same day on his sign-off of `design-mockups/hide-from-presentation/`: hiding
 an element from the presentation.** His three decisions verbatim: **hidden is
 NOT counted** in any score; **rows only** (an objective, a measure, a tactic,
@@ -3841,7 +3906,7 @@ read mode wears **"Hidden &mdash; not counted"** for everyone, and every row
 sheet gains a **Hidden** column at the END (a validation range is a POSITION,
 &sect;65) with blank saying nothing (&sect;54's adds-and-amends). The server
 needed nothing (&sect;42's fall-through). `checks/hide-element.py`: **17 red**
-pre-&sect;231, 21 green after; two literals in `fn-pillars.py` and
+pre-&sect;233, 21 green after; two literals in `fn-pillars.py` and
 `project-tables.py` moved with the deliberate workbook change
 (&sect;214.3's lesson).*
 

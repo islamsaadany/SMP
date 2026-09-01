@@ -4680,7 +4680,7 @@ function outstandingSources(u){
    outside it is not an empty box somebody forgot \u2014 it is not asked. */
 function reportItems(u){
   var out = [];
-  /* §231: a hidden row is not asked — not counted means not owed, so it
+  /* §233: a hidden row is not asked — not counted means not owed, so it
      leaves the ask list, the note rule and the submit gate in one skip. */
   SMPRules.shown(u.keyObjectives).forEach(function(m){
     out.push({ id:m.id, obj:m, kind:"objective", group:L("keyobj","bu"), sub:"" });
@@ -4754,7 +4754,7 @@ function missingNotes(u){ return askedItems(u).filter(needsNote); }
 function fnReportItems(fk){
   var out = [];
   capsOfFunction(fk).forEach(function(c){
-    /* §231: hidden rows are not asked, exactly as reportItems() skips them. */
+    /* §233: hidden rows are not asked, exactly as reportItems() skips them. */
     SMPRules.shown(c.keyObjectives).forEach(function(m){
       out.push({ id:m.id, obj:m, kind:"objective", group:c.name, sub:"", asked:true });
     });
@@ -5165,7 +5165,7 @@ var KO_WEIGHTS = { mobile: [40, 25, 20, 15] };
 function koScore(list, weights){
   /* §218: an objective counts as soon as it has a figure — nothing waits
      on the office any more. */
-  /* §231: hidden is not counted, weighted or not. */
+  /* §233: hidden is not counted, weighted or not. */
   var vals = list.filter(function(m){ return !SMPRules.isHidden(m) && !m.milestone && m.progress != null; });
   if (!vals.length) return null;
   if (!weights) {
@@ -5385,7 +5385,7 @@ function gapMap(target, all, fillable){
     return canAuthor[acKey] || mayFillRow(acKey, ctx, target);
   };
   var G = function(acKey, ctx, kind, row){
-    /* §231: a hidden row's blanks are not gaps — it is not counted, not
+    /* §233: a hidden row's blanks are not gaps — it is not counted, not
        asked, and not walked; gapCell() closes the same row's controls, so
        the count and the walk stay one list (§192.4). */
     if (SMPRules.isHidden(row)) return 0;
@@ -5830,7 +5830,7 @@ function viaCarrier(p, own, roll){
    office's confirmation is not scored (§145): the comparison is not ready,
    so it leaves the average the way an unmeasured outcome already does
    (§104.10) — the reported actual is kept and shown, only the score waits. */
-/* §231: a hidden row leaves every average — the same skip on every reader,
+/* §233: a hidden row leaves every average — the same skip on every reader,
    through the one shared predicate (SMPRules.isHidden), or the deck and the
    page would disagree about one number. */
 function scorableMeasures(p){ return (p.measures || []).filter(function(m){ return !SMPRules.isHidden(m) && m.target && m.progress != null; }); }
@@ -6058,7 +6058,7 @@ function projById(id){
    minted person key cannot but a unit key set by hand certainly can. Scanning
    is O(the plan) and the plan is small; a wrong answer here splices the wrong
    row out of somebody's strategy. */
-/* ── THE SIX HIDEABLE KINDS, RESOLVED BY ID (§231) ────────────────────────
+/* ── THE SIX HIDEABLE KINDS, RESOLVED BY ID (§233) ────────────────────────
    An objective (a unit's, the group's, a capability's), a measure, a tactic,
    a deliverable, an outcome, a milestone — every id is unique across the
    graph (§191), so one resolver serves the one toggle. A pillar, a
@@ -6507,7 +6507,7 @@ function restoreArchive(id){
     applyFiguresSnapshot(a.figures);
   }
   else if (a.kind === "unit") {
-    /* unitLikeWritable, never UNITS[] (§230): a pillars FUNCTION archives
+    /* unitLikeWritable, never UNITS[] (§232): a pillars FUNCTION archives
        through this same path — the import's replace, Start fresh, and now
        removing a pillar — and its archive is keyed `fn:<key>`, which UNITS
        cannot resolve. Every one of those archives was un-restorable: the

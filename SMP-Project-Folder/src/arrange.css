@@ -1282,7 +1282,7 @@
      it reaches every table using the pattern and nothing else. */
   td:has(> .fld + .xbtn) > .fld { width: calc(100% - 30px); vertical-align: middle; }
   td:has(> .fld + .xbtn) > .xbtn { vertical-align: middle; margin-left: 5px; }
-  /* ── HIDDEN FROM THE PRESENTATION (§231) ────────────────────────────
+  /* ── HIDDEN FROM THE PRESENTATION (§233) ────────────────────────────
      The eye sits between the field and the × (the mockup's order), which
      the seat rule above cannot see — its `.fld + .xbtn` adjacency breaks —
      so the trio gets its own seat: the field gives up the width of BOTH
@@ -1761,8 +1761,5 @@
   .nosrv-try { color:var(--ink-3); font-size:12px; }
   .nosrv-btn { display:block; width:100%; background:var(--panel); color:var(--panel-ink);
     border:1px solid var(--panel); border-radius:8px; padding:10px 16px;
-    font:700 13.5px var(--sans); cursor:pointer; margin:4px 0 10px; }
+    font:700 13.5px var(--sans); cursor:pointer; margin:4px 0 0; }
   .nosrv-btn:hover { filter:brightness(1.12); }
-  .nosrv-link { display:block; width:100%; background:none; border:0;
-    color:var(--ink-3); font:600 12px var(--sans); cursor:pointer;
-    text-decoration:underline; padding:2px; }

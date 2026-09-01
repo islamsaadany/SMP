@@ -1,8 +1,17 @@
 /* ── WHAT THE CHAT ENDPOINT REFUSES (§97) ─────────────────────────────────
    Run against a dev-server with a database behind it:
 
-     DATABASE_URL=postgres://… node scripts/dev-server.js 3999 &
+     DATABASE_URL=postgres://… NODE_TLS_REJECT_UNAUTHORIZED=0 \
+       node scripts/dev-server.js 3999 &
      DATABASE_URL=postgres://… node scripts/test-chat.js <smo-password>
+
+   THE TLS VARIABLE IS FOR §231 AND FOR NOTHING ELSE. The push section below
+   stands a throwaway HTTPS server in front of the real push service — an
+   endpoint is just a URL a browser hands over, so a test can hand over one of
+   its own (§100.3) — and it carries a self-signed certificate the dev-server
+   would otherwise refuse. Without the variable that section fails loudly
+   rather than skipping: a check that asks whether it can run is a check that
+   passes (§54.5).
 
    THE REFUSALS ARE THE POINT, and they are what a browser drive cannot reach:
    driving the product as the SMO proves the office's own path and proves
@@ -21,6 +30,53 @@ const io = require("../lib/state-io.js");
 const auth = require("../lib/auth.js");
 
 const BASE = process.env.SMP_BASE || "http://127.0.0.1:3999";
+
+/* ── A STAND-IN PUSH SERVICE (§231, §100.3) ───────────────────────────
+   An endpoint is only a URL a browser hands over, so a test can hand over one
+   of its own — which means what leaves the platform is read off the wire by
+   the real `web-push` doing the real thing, and nothing in `lib/push.js`
+   branches for a test. HTTPS because the endpoint guard requires it, and the
+   guard requires it because our own server fetches the address. */
+const https = require("https");
+const crypto = require("crypto");
+const { execFileSync } = require("child_process");
+const fs = require("fs");
+const os = require("os");
+const path = require("path");
+
+const PUSH_GOT = [];
+let PUSH_PORT = 0;
+let PUSH_SRV = null;
+const PUSH_EP = function (n) { return "https://127.0.0.1:" + PUSH_PORT + "/dev/" + n; };
+/* A browser's own public values, which is exactly what a subscription
+   carries — so they are safe to make here and safe to write down. */
+const PUSH_ECDH = crypto.createECDH("prime256v1"); PUSH_ECDH.generateKeys();
+const PUSH_P256 = PUSH_ECDH.getPublicKey().toString("base64url");
+const PUSH_AUTH = crypto.randomBytes(16).toString("base64url");
+
+function pushStandIn() {
+  const dir = fs.mkdtempSync(path.join(os.tmpdir(), "smp-push-"));
+  const key = path.join(dir, "k.pem"), crt = path.join(dir, "c.pem");
+  execFileSync("openssl", ["req", "-x509", "-newkey", "rsa:2048", "-nodes",
+    "-keyout", key, "-out", crt, "-days", "1", "-subj", "/CN=127.0.0.1",
+    "-addext", "subjectAltName=IP:127.0.0.1"], { stdio: "ignore" });
+  PUSH_SRV = https.createServer(
+    { key: fs.readFileSync(key), cert: fs.readFileSync(crt) },
+    function (req, res) {
+      let n = 0;
+      req.on("data", function (c) { n += c.length; });
+      req.on("end", function () {
+        PUSH_GOT.push({ path: req.url, bytes: n,
+                        auth: req.headers.authorization || "" });
+        res.writeHead(201); res.end();
+      });
+    });
+  return new Promise(function (r) {
+    PUSH_SRV.listen(0, "127.0.0.1", function () {
+      PUSH_PORT = PUSH_SRV.address().port; r();
+    });
+  });
+}
 const SMO_PW = process.argv[2];
 if (!SMO_PW) { console.error("usage: node scripts/test-chat.js <smo-password>"); process.exit(2); }
 
@@ -55,6 +111,7 @@ async function signIn(who, password) {
   let hadSmo = false, hadChat = null;
   try {
     await io.ensureReady(client);
+    await pushStandIn();
 
     /* ── a second person, with a password and no role at all ───────────── */
     await client.query("DELETE FROM chat_threads WHERE person_key = $1", [OTHER.key]);
@@ -223,6 +280,121 @@ async function signIn(who, password) {
        Postgres, because it is a query and a query nothing has run is a guess
        (§172, §100.3), and asked at BOTH ENDS: everybody else's poll must carry
        none of it. */
+    /* ── A BOX THAT ARRIVES WITH NO TAB OPEN (§231) ─────────────────
+       The MODULE is proved end to end in scripts/test-push.js; what is proved
+       here is the endpoint around it — who may subscribe, whose device a row
+       is written against, and that the two write paths actually SEND, which
+       is the half §71 built and never wired up. */
+    console.log("\nA DEVICE SUBSCRIBES, AND ONLY EVER ITS OWNER'S (§231).");
+    await setChat({ popup: true });
+    r = await call(her.cookie, { action: "mine" });
+    ok(!!(r.body.chat && r.body.chat.vapid), "the public key travels with the poll",
+       r.body.chat && (r.body.chat.vapid || "").slice(0, 12));
+    await setChat({});                        /* popup off is the shipped default */
+    r = await call(her.cookie, { action: "mine" });
+    ok(r.body.chat.vapid === "", "...and not while notifications are off for the company",
+       r.body.chat.vapid);
+
+    const SUB = function (n) {
+      return { endpoint: "https://push.example.test/dev/" + n,
+               keys: { p256dh: PUSH_P256, auth: PUSH_AUTH } };
+    };
+    /* WITH THE COMPANY SWITCH OFF, THE SERVER REFUSES — the browser is not
+       the thing being guarded against (§42, §98.2). */
+    r = await call(her.cookie, { action: "pushOn", sub: SUB("a") });
+    ok(r.status === 403, "with notifications off for the company, subscribing is refused", r.status);
+
+    await setChat({ popup: true });
+    r = await call(her.cookie, { action: "pushOn", sub: SUB("a") });
+    ok(r.status === 200 && r.body.ok, "with it on, a device subscribes", r.status);
+    let row = (await client.query(
+      "SELECT person_key FROM push_subscriptions WHERE endpoint = $1",
+      ["https://push.example.test/dev/a"])).rows[0];
+    ok(row && row.person_key === OTHER.key,
+       "...against the signed-in person, never a key from the body", row);
+
+    /* AND A KEY IN THE BODY CHANGES NOTHING. Taking `person` from the browser
+       would let anybody subscribe their own phone to somebody else's
+       conversation and read every reply that person is sent (§185). */
+    r = await call(her.cookie, { action: "pushOn", sub: SUB("b"), person: "smo" });
+    row = (await client.query(
+      "SELECT person_key FROM push_subscriptions WHERE endpoint = $1",
+      ["https://push.example.test/dev/b"])).rows[0];
+    ok(row && row.person_key === OTHER.key,
+       "a person named in the body is ignored", row);
+
+    /* THE SAME DEVICE AGAIN REPLACES ITS ROW, never adds a second: a browser
+       re-issues its endpoint, and two rows for one device is two boxes. */
+    await call(her.cookie, { action: "pushOn", sub: SUB("a") });
+    let n = (await client.query(
+      "SELECT count(*)::int n FROM push_subscriptions WHERE person_key = $1",
+      [OTHER.key])).rows[0].n;
+    ok(n === 2, "re-subscribing the same device replaces its row", n);
+
+    /* AN ENDPOINT THAT IS NOT AN HTTPS URL IS REFUSED — our own server
+       fetches it, so anything else is somebody choosing the host (§71). */
+    for (const bad of ["http://push.example.test/x", "file:///etc/passwd", "not a url"]) {
+      r = await call(her.cookie, { action: "pushOn",
+        sub: { endpoint: bad, keys: { p256dh: PUSH_P256, auth: PUSH_AUTH } } });
+      ok(r.status === 400, "refused: " + bad, r.status);
+    }
+
+    /* TURNING THE BELL OFF FORGETS THE DEVICE, and only her own. */
+    await client.query(
+      "INSERT INTO push_subscriptions (endpoint, person_key, p256dh, auth) VALUES ($1,$2,$3,$4) " +
+      "ON CONFLICT (endpoint) DO NOTHING",
+      ["https://push.example.test/dev/smo", "smo", PUSH_P256, PUSH_AUTH]);
+    r = await call(her.cookie, { action: "pushOff", endpoint: "https://push.example.test/dev/a" });
+    ok(r.status === 200, "a device unsubscribes", r.status);
+    n = (await client.query("SELECT count(*)::int n FROM push_subscriptions WHERE endpoint = $1",
+      ["https://push.example.test/dev/a"])).rows[0].n;
+    ok(n === 0, "...and its row is gone", n);
+    /* SCOPED TO THE SIGNED-IN PERSON, so a guessed endpoint silences nobody. */
+    r = await call(her.cookie, { action: "pushOff", endpoint: "https://push.example.test/dev/smo" });
+    n = (await client.query("SELECT count(*)::int n FROM push_subscriptions WHERE endpoint = $1",
+      ["https://push.example.test/dev/smo"])).rows[0].n;
+    ok(n === 1, "somebody else's device cannot be unsubscribed", n);
+
+    /* ── AND THE TWO WRITE PATHS ACTUALLY SEND ──────────────────────
+       §71's fault is the one to guard against here: the back half built and
+       the control never wired to it. A stand-in HTTPS server in front of the
+       real push service is the only place that claim is true or false. */
+    console.log("\nAND A MESSAGE ACTUALLY SENDS ONE (§231).");
+    await client.query("DELETE FROM push_subscriptions");
+    await client.query(
+      "INSERT INTO push_subscriptions (endpoint, person_key, p256dh, auth) VALUES ($1,$2,$3,$4)",
+      [PUSH_EP("smo"), "smo", PUSH_P256, PUSH_AUTH]);
+    await client.query(
+      "INSERT INTO push_subscriptions (endpoint, person_key, p256dh, auth) VALUES ($1,$2,$3,$4)",
+      [PUSH_EP("her"), OTHER.key, PUSH_P256, PUSH_AUTH]);
+
+    PUSH_GOT.length = 0;
+    await call(her.cookie, { action: "say", body: "My plan will not open." });
+    await new Promise(function (r2) { setTimeout(r2, 400); });
+    ok(PUSH_GOT.length === 1,
+       "a question sends one box, to the office", PUSH_GOT.map(function (g) { return g.path; }));
+    ok(PUSH_GOT.length === 1 && PUSH_GOT[0].path.indexOf("/smo") > 0,
+       "...to the office's device and not the sender's own",
+       PUSH_GOT.map(function (g) { return g.path; }));
+
+    PUSH_GOT.length = 0;
+    await call(smo.cookie, { action: "reply", person: OTHER.key, body: "Looking now." });
+    await new Promise(function (r2) { setTimeout(r2, 400); });
+    ok(PUSH_GOT.length === 1,
+       "a reply sends one box, to the person", PUSH_GOT.map(function (g) { return g.path; }));
+    ok(PUSH_GOT.length === 1 && PUSH_GOT[0].path.indexOf("/her") > 0,
+       "...to their device and not the office's",
+       PUSH_GOT.map(function (g) { return g.path; }));
+
+    /* BOTH ENDS (§94.2): with the company switch off, nothing is sent at all. */
+    await setChat({});
+    PUSH_GOT.length = 0;
+    await call(smo.cookie, { action: "reply", person: OTHER.key, body: "And again." });
+    await new Promise(function (r2) { setTimeout(r2, 400); });
+    ok(PUSH_GOT.length === 0, "with notifications off, nothing is sent", PUSH_GOT.length);
+    await client.query("DELETE FROM push_subscriptions");
+    await setChat({});
+
     console.log("\nAND THE OFFICE'S POLL CARRIES WHAT IS WAITING (§225).");
     await setChat({});
     r = await call(smo.cookie, { action: "mine" });
@@ -323,6 +495,7 @@ async function signIn(who, password) {
         "DELETE FROM chat_messages WHERE person_key = 'smo' AND body = $1",
         ["A note the office wrote to itself."]).catch(function(){});
     }
+    if (PUSH_SRV) { try { PUSH_SRV.close(); } catch (e) {} }
     await client.query("DELETE FROM credentials WHERE person_key = $1", [OTHER.key]).catch(function(){});
     await client.query("DELETE FROM people WHERE key = $1", [OTHER.key]).catch(function(){});
     await client.query("DELETE FROM login_attempts").catch(function(){});

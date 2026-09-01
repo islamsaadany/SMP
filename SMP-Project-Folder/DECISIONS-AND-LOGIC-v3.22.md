@@ -25408,7 +25408,231 @@ takes its paragraph break — and was run against the pre-§229 build first:
 **4 red**, exactly the four grow-box assertions. `fn-ko-edit`, `plan-fields`,
 `plan-edit-head` and the full `qa.py` sweep green after.
 
-## §230 — REMOVING A PILLAR OR A PROJECT (2026-09-01)
+## §230 — A LATE ANSWER STILL LANDS
+
+*(Numbered §230 because other sessions' §226–§229 reached `main` first — §94's precedent, twice in one day.)*
+
+Islam, with a screenshot of §201's wall over the live deployment: *"when I hard
+refresh my deployment tab I get thie mssages"* — and, asked the two questions
+that separate the causes, the wall clears by itself and it appears **mostly
+after new deployments**.
+
+**MEASURED BEFORE ANYTHING WAS TOUCHED.** Production is current (the served
+platform file and `sw.js` are byte-identical to the repo's build) and healthy —
+`/api/state` answered 0.3–0.6s from here, `connect()` + `ensureReady()` + the
+session check included. The code path is nowhere near the budget: against a real
+Postgres 16, a signed-in GET is **11–17ms warm, 54ms on a cold Node process**,
+and first-ever contact with an empty database (schema, both migration phases,
+seed) is **0.66s**. What exceeds 8 seconds is the environment's cold path — a
+freshly deployed function's first answer (cold start, plus a Neon compute that
+may itself be waking), which is exactly when somebody hard-refreshes to see the
+new version. §195's 504 on a save was this same cold path on the write side.
+
+**THE WALL WAS RIGHT AND THE LANDING WAS WRONG.** `BOOT_GIVEUP` fires at 8s,
+`land()` paints the baked example and raises the wall — §201 working as
+designed. But `land()` was ONE-SHOT, and the boot fetch was still in flight: when
+the answer arrived at ten or twelve seconds, `hydrate()` had already rebound the
+globals and `live` was true, **and the paint was swallowed** — the person sat
+behind the wall over the baked example with their real data in memory, waiting
+for the probe's 10-second reload. Worse, the wall's *"nothing entered here is
+saved"* had quietly stopped being true the moment `live` flipped, because
+`save()` flows once it is — and any repaint (any click) would have drawn the
+live tenant behind a wall calling it the example.
+
+**SO A SECOND LANDING IS ALLOWED, FOR EXACTLY ONE CASE**: the first landing was
+the backstop's (`landedLive` false) and this one carries the live tenant. It
+runs the success path's own callback — chrome, paint, the welcome screen and
+tour offering themselves as normal — and takes the wall down, **in place: no
+reload, nothing pressed**. A late FAILURE still returns at the guard, so the
+wall and its probe stand, which is §201 unchanged. The probe's handle moved to
+module scope (`wallProbe`, with `noServerDown()` the one takedown both exits
+share), or a reload would fire ten seconds after the real page was already up.
+
+**DELIBERATELY NOT a longer `BOOT_GIVEUP`**: raising 8s to 20s would leave
+somebody staring at the grey skeleton for 20 seconds when the server is
+genuinely down, to buy nothing the late landing does not already buy — at 8s you
+are told what is happening, and seconds later the real page replaces it by
+itself.
+
+`checks/boot-skeleton.py` §6 — the one file that can see the boot path at all
+(§94.11) — serves the state 10.5s late and asserts the wall goes UP at the
+give-up (§201 still working), comes down BY ITSELF, the tenant's bar colour is
+painted, and a flag set before the wait survives, so an in-place paint can never
+be the probe's reload wearing the fix's clothes. Proved able to fail (§94.5):
+**2 red on the pre-§230 build** — the wall stands and the baked navy is painted
+— while *"as the server's own data"* passes there too, because `hydrate()` had
+run: the check reproducing the diagnosis, not just the symptom. Full `qa.py`
+clean.
+
+## §230.2 — THE NOTICE SPEAKS THE USER'S LANGUAGE (reshaping §201's wall, removing its way past)
+
+Islam, on §201's card: *"the message after 8 seconds it too tehcnical for the
+users"* — then, on the first plain draft, *"TOO MUCH make a very simple user
+message"* — then *"no need fo examples. to look at."* Settled over two mockup
+rounds of the real card (§41.9), each round cutting further.
+
+**FOUR SHORT LINES, NONE OF THEM OURS**: *Just a moment…* · *Your page is
+taking a little longer to open. Your work is safe.* · *It will open by itself —
+no need to do anything.* · **Try again**. No "server", no "data", no
+"example" — and with §230 in place, *just a moment* is usually literally true,
+because the page lands by itself seconds later. The three facts §201 existed to
+say survive in the user's words: something is late, nothing saved is touched,
+nothing is asked of you.
+
+**"LOOK AT THE EXAMPLE ANYWAY" IS REMOVED, AND IT IS HIS DECISION WITH THE COST
+STATED**: while the server is genuinely down there is now no way past the
+notice — it stands, retrying on its own. §201 kept that link as the old
+behaviour's one virtue; §230.2 records that the example behind the blur was
+the confusing thing the wall exists to fence off, and its remaining audience —
+somebody whose server is truly dead — is better served by the retry than by a
+worked example wearing their chrome. The element, its handler and `.nosrv-link`
+are DELETED, not hidden (§24), and the check asserts the ABSENCE, or a build
+that quietly brought the link back would pass.
+
+`checks/boot-skeleton.py` §4 rewritten against the problem, not the old copy
+(§94.8): the card must say the three plain facts, carry **no technical word**
+(server / data / example — asserted as a regex over the whole card), keep Try
+again reachable by a real press, and keep the way past removed. ALL GREEN on
+the build; full `qa.py` clean.
+---
+
+## §231 — A BOX THAT ARRIVES WITH NO TAB OPEN
+
+Islam, having turned §225's notifications on: *"I didn't get any notifications
+despite enabling the notifications."* And, correcting my first two diagnoses:
+*"stop assuming wrong things, the bell is allowed and in the chat box is on."*
+
+**HE WAS RIGHT AND I WAS GUESSING.** The first answer blamed the browser's
+permission, which he had already granted; the second blamed his being on the
+Inbox page. Both were states he was not in, and both were reached by reading
+rather than measuring — the exact fault this file exists to record.
+
+**MEASURED, AND IT IS A HOLE IN THE FEATURE ITSELF.** With the tab in the
+background: **zero requests to the server across 45 seconds, and zero boxes.**
+The instant the tab came back, **both boxes appeared at once** — the one moment
+they are worth nothing, because the person is already looking at the screen
+that shows them.
+
+**THE CAUSE PREDATES §225 BY MONTHS.** §98.1 stops the chat's clock dead while
+`document.hidden`, so the database can sleep overnight instead of being kept
+awake by a tab somebody left open on Friday. That was right for a badge you see
+next time you look. It is exactly wrong for a notification, whose whole job is
+to reach somebody who is **not** looking — and §225 was built on top of it and
+never asked. *A feature can be correct in every line and still be sitting on a
+decision that makes it pointless.*
+
+**SO THE BROWSER STOPS ASKING AND THE SERVER SENDS.** `lib/push.js` is the one
+place a notification leaves the platform, mirroring `lib/mailer.js`
+deliberately (§72, §97.5): the only place the credential is read, nothing it
+returns or throws contains it, and it knows nothing about who anybody is. The
+service worker receives, which is why it works with no tab open at all.
+
+**WHY A DEPENDENCY, WHEN §72 REFUSED ONE.** That refusal was right: talking to
+Gemini is one POST and an SDK would have been a hundred files spelling `fetch`.
+Web push is not one POST — RFC 8291 is an ECDH agreement, an HKDF and an
+AES-128-GCM record, RFC 8292 an ES256 JWT beside it, and every one of them is
+wrong the same way, which is that nothing arrives and nothing says why. The
+deciding fact is that **this sandbox cannot reach a push service**, so
+hand-rolled crypto could never be tested against the thing it has to satisfy.
+`web-push` is the reference implementation of both; what is left to test is our
+own plumbing, and that is testable. Stated rather than hidden: 17 packages.
+
+**THE KEY PAIR IS MINTED ON FIRST USE AND KEPT IN THE DATABASE**, with an
+environment override. The alternative is a setup step nobody can perform: this
+platform already applies its own schema, migrations and seed on first contact
+with an empty database, and a feature that instead needed somebody to generate
+a pair on a laptop and paste two strings into Vercel would be **off on every
+deployment until an engineer visits**. The cost is said rather than glossed: a
+database dump now contains a key that could send a notification to a subscribed
+device — smaller than the password hashes and live session tokens already in
+there, and the same trust boundary rather than a new one.
+
+**THE SUBSCRIPTION IS THE SWITCH.** There is no `on` column beside it to
+disagree with: a device that said yes has a row, one that has not does not, and
+turning the bell off deletes it (§104.7, §50.6). That is also what makes the
+person's switch genuinely per device without anything having to remember which
+device is which — and it makes `pushSync()` the one function called wherever
+any of the three switches might have moved.
+
+**THE ROW IS WRITTEN AGAINST THE SIGNED-IN PERSON, NEVER A KEY FROM THE BODY.**
+Taking `person` from the browser would let anybody subscribe their own phone to
+somebody else's conversation and read every reply that person is sent — §185's
+rule, one endpoint out. The endpoint must be an **https URL**, because our own
+server fetches it and anything else is somebody choosing the host (§71).
+
+**ONE BOX, ONE SOURCE (§53.5).** On a subscribed device the server sends and the
+worker draws; the page must not draw one too, or a single message produces two
+boxes. §225's own in-page path survives for a browser where push could not be
+set up — still bounded by the tab being visible, which is the whole reason this
+section exists.
+
+**A DEAD SUBSCRIPTION IS DROPPED, NOT RETRIED.** A 404 or 410 is the push
+service saying the device is gone; any other failure leaves the row alone,
+because a 500 from Apple is about Apple. And a notification **never costs the
+message it is about**: it runs after the message is stored and the thread is
+already waiting (§104's ordering), inside a try that swallows.
+
+### §231.2 — THE BELL HAD TO SAY WHAT WOULD ACTUALLY HAPPEN
+
+§225's bell read the person's own switch alone, so a browser that had not yet
+answered the permission question showed it **ON**, with a hover promising *"A
+box appears on this device when a reply lands"* — measured, with no box
+appearing. §124 exactly: presence reported as proof. **And the only control on
+the screen made it worse** — pressing it switched the notifications OFF, which
+is not the thing that was wrong (§61).
+
+Four states now — off · blocked · not yet asked · on — and in the third the
+press **asks** rather than switching off something that was never on. The
+settings row gained a live status line in the same breath, the shape §127
+settled for *"No one is set"*: a status is a fact about right now, not a
+description, and behind a hover somebody turns notifications on, their own
+browser never allows it, and nothing ever says so.
+
+**AND ONE ASSERTION HAD TO BE REWRITTEN RATHER THAN SATISFIED.** §127's check
+read `len(left) <= 1` — one live status line on the whole panel — which was a
+literal standing in for *"the prose is gone"* and true only while exactly one
+row had a status. A deliberate addition turned it red. It measures the
+difference §127 actually settled now: an explanation goes behind a mark, a
+status stays on the page, and what separates them is length (§94.8, for the
+second time in two sections).
+
+### PROOF
+
+`scripts/test-push.js` (23 assertions) stands a throwaway HTTPS server **in
+front of the real push service** — an endpoint is only a URL a browser hands
+over, so a test can hand over one of its own (§100.3) — and reads the encrypted
+body and the VAPID header **off the wire**, which is the only place those
+claims are true or false. It covers the key pair being minted exactly once, a
+410 dropping one device and only that one, a 500 dropping nothing, the office's
+devices being chosen and nobody else's, the sender never being told about their
+own message, a retired person's device being skipped, and **a whole-graph save
+not reaching any of it** (§56).
+
+`scripts/test-chat.js` §231 (18 more) covers the endpoint: who may subscribe,
+whose device the row is written against, the three refused endpoint shapes, and
+**that the two write paths actually send** — which is where it caught a real
+mistake. My reply-side push had landed in the **`thread`** action rather than
+**`reply`**, because both branches contain a line beginning `const here =
+t.here_at` and a first-occurrence replace took the wrong one. It rendered
+perfectly and reading a conversation sent a notification while answering one
+sent none. *§96's family: the back half built and wired to the wrong control.*
+
+`checks/office-chat.py` §15 measures the browser's half against a stand-in
+push manager, and `/tmp` falsification runs confirm both new guards are
+load-bearing: with the one-box-one-source guard removed the page draws a second
+box over the worker's, and with the bell's not-yet-asked state removed it reads
+as ON while promising a box that cannot appear.
+
+### WHAT IS NOT CLAIMED
+
+**"With the browser closed" is true on a phone and partly true on a laptop.**
+The message is delivered by Apple's or Google's own service, and on a desktop
+that service can only hand it over while the browser is still running
+somewhere; quit Chrome entirely and it arrives next time it opens. A sleeping
+machine gets it on waking. **iPhone and iPad still need the platform added to
+the home screen** — Apple's rule, and the setting says so.
+
+## §232 — REMOVING A PILLAR OR A PROJECT (2026-09-01)
 
 Islam asked for it in an earlier session, which stopped where the mockup-first
 rule stops: `design-mockups/pillar-project-remove/2026-09-01_remove-controls.html`
@@ -25456,7 +25680,7 @@ FORCED THE FIX.** `restoreArchive()` resolved a "unit" archive through
 every archive that path has ever written for one (the import's replace,
 builder Start fresh, and now this) was un-restorable, with the row reading
 *"no longer in the platform — cannot be restored"* for a function still on
-the platform. Pre-existing, found because §230's confirmation promises the
+the platform. Pre-existing, found because §232's confirmation promises the
 way back and a promise has to be true. Both ends fixed with the resolver the
 rest of the product uses (`unitLikeWritable`, `unitLike`), plus
 `fnWriteBack()` after the assignments — `builderStartFresh()`'s own pair,
@@ -25473,13 +25697,13 @@ literal (§25).
 (§94.2, both ends): no control in read mode or for a unit head; hittable at
 its own centre (§93.4); Cancel costs nothing; Confirm archives first, removes,
 keeps the survivors' ids; the archive restores through the real Setup control
-on a UNIT and on a PILLARS FUNCTION — the §230 fix — and the project side on
+on a UNIT and on a PILLARS FUNCTION — the §232 fix — and the project side on
 fn:finance with the rail no longer holding the removed id. Proved able to
-fail first: **13 red** against the pre-§230 build. `plan-fields`,
+fail first: **13 red** against the pre-§232 build. `plan-fields`,
 `plan-edit-head`, `project-tables`, `table-fit`, `repeat-project`,
 `plan-builder` and the full `qa.py` sweep green after.
 
-## §231 — HIDING AN ELEMENT FROM THE PRESENTATION (2026-09-01)
+## §233 — HIDING AN ELEMENT FROM THE PRESENTATION (2026-09-01)
 
 Islam: *"we need to allow the SMO to hide an element. the hide approach is
 about hiding it from the presnetation. this applies to a mesure or an
@@ -25569,7 +25793,7 @@ is missing).
 deck by the row's absence AND its sibling's presence (§113.8), the workbook
 round trip through the real writer and reader, the closed ends (read mode,
 a unit head, the pillar head, the project band), and the key deleted on
-show-again. Proved able to fail first: **17 red** on the pre-§231 build —
+show-again. Proved able to fail first: **17 red** on the pre-§233 build —
 after the check itself was taught not to lean on the API under test
 existing, and that the OPEN pen lives in the pinned head, not the corner.
 Two literals in `fn-pillars.py` and `project-tables.py` moved with the

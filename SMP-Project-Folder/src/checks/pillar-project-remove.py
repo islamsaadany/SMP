@@ -1,4 +1,4 @@
-"""REMOVING A PILLAR OR A PROJECT (§230).
+"""REMOVING A PILLAR OR A PROJECT (§232).
 
 Islam asked for an option for the SMO to delete a pillar or a project; the
 mockup (design-mockups/pillar-project-remove/) was signed off 2026-09-01.
@@ -16,7 +16,7 @@ for something present cannot see a control that should not be drawn):
     archive holding it, and the surviving rows keeping their ids, because
     renumbering would hand one pillar's history to another (§69.13);
   - the archive restores from the real Setup control — including for a
-    pillars FUNCTION, whose `fn:` archives §230 found un-restorable
+    pillars FUNCTION, whose `fn:` archives §232 found un-restorable
     (UNITS[] cannot resolve them), which mattered the moment removal
     started writing them.
 """
@@ -204,7 +204,7 @@ with sync_playwright() as p:
     ck("...and the rail is not holding the removed project",
        pafter["rail"] != pb["id"], pafter)
 
-    # ── 7 · a pillars FUNCTION: the archive §230 made restorable ────────
+    # ── 7 · a pillars FUNCTION: the archive §232 made restorable ────────
     pk = pg.evaluate("""() => FUNCTION_KEYS.filter(k =>
       fnPlansInPillars(FUNCTIONS[k]) && (fnAsUnit(k).items || []).length)[0] || null""")
     ck("the demo holds a pillars function with a plan", bool(pk), pk)
@@ -224,7 +224,7 @@ with sync_playwright() as p:
         ck("the pillar is gone and the archive is keyed fn:",
            fnr["n"] == fn_before - 1 and fnr["top"]
            and fnr["top"]["key"] == "fn:" + pk, fnr)
-        # The restore road — broken for every fn: archive before §230.
+        # The restore road — broken for every fn: archive before §232.
         pg.evaluate("()=>document.querySelector('[data-md=\"setup\"]').click()")
         pg.wait_for_timeout(400)
         pg.evaluate("()=>document.querySelector('[data-setupgo=\"import\"]').click()")
@@ -233,7 +233,7 @@ with sync_playwright() as p:
           .find(x=>x.textContent.includes('Archived')); if (b) b.click(); }""")
         pg.wait_for_timeout(400)
         rbtn = pg.query_selector('[data-restore="%s"]' % fnr["top"]["id"])
-        ck("a pillars function's archive offers Restore (the §230 fix)",
+        ck("a pillars function's archive offers Restore (the §232 fix)",
            bool(rbtn))
         if rbtn:
             rbtn.click(); pg.wait_for_timeout(500)

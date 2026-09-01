@@ -298,7 +298,7 @@ with sync_playwright() as p:
     }""")
     # §104.8: the template asks for neither a Kind nor a Due date. The OUTCOME
     # sheet keeps its date, deliberately -- see the note in the section.
-    # §231: the Hidden column joined every row sheet; what §104.8 guards is
+    # §233: the Hidden column joined every row sheet; what §104.8 guards is
     # still guarded — no Kind, no date.
     ck("the plan's Deliverables sheet asks for neither a Kind nor a date",
        wb["planDeliv"] == ["Project", "Deliverable", "Hidden"] and

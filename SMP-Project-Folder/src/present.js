@@ -355,7 +355,7 @@ function deckSlidesFn(fk){
           (o.note ? '<td class="dnote">' + esc(o.note) + '</td>' : '<td class="dnote empty">&mdash;</td>') +
           '</tr>';
       };
-      /* §231: filtered HERE, never inside dxRows() — the pane's pen
+      /* §233: filtered HERE, never inside dxRows() — the pane's pen
          shares that builder and the pen shows everything. */
       var dxRowsHtml = dxRows(p).filter(function(r){
         return !SMPRules.isHidden(r.obj); }).map(dxRow).join("");

@@ -260,7 +260,7 @@
    saved work, and a refusal can only name what actually travelled. Name checked
    against origin/main serving "smp-shell-v3.96-home-is-never-blocked"; confirm
    again immediately before the push (§94.16). */
-const SHELL = "smp-shell-v4.04-entercommits";
+const SHELL = "smp-shell-v4.06-push-notifications";
 const ASSETS = [
   "/",
   "/index.html",
@@ -318,5 +318,63 @@ self.addEventListener("fetch", (e) => {
       .catch(() => caches.match(req).then((hit) =>
         hit || (req.mode === "navigate" ? caches.match("/index.html") : undefined)
       ))
+  );
+});
+
+/* ══ A BOX THAT ARRIVES WITH NO TAB OPEN (§231) ═══════════════════════════
+
+   §225 drew the box from the PAGE, and measured across 45 seconds with the
+   tab in the background it produced nothing at all: the chat stops asking
+   the server the moment `document.hidden` (§98.1), so the only notification
+   the product could deliver was one for somebody already looking at the
+   screen that shows it. This is that fixed at the root — the server sends,
+   and this worker is what receives, which is why it works with no tab open
+   at all.
+
+   THE PAYLOAD IS THE SAME TWO FACTS EVERY OTHER BOX CARRIES: who wrote, and
+   the first line (Islam's wording B). Nothing is composed here; the server
+   sends exactly what is shown, so a notification can never say something the
+   conversation does not (§53.5).
+
+   A PUSH WITH NO BODY IS STILL SHOWN. Every browser that supports push
+   requires a visible notification for each one delivered — `userVisibleOnly`
+   is not optional — and a worker that decided to stay quiet would have its
+   permission revoked after a few. So a payload that fails to parse still
+   draws something honest rather than nothing. */
+self.addEventListener("push", (e) => {
+  let d = {};
+  try { d = e.data ? e.data.json() : {}; } catch (x) { d = {}; }
+  const title = d.title || "Strategy Office";
+  const body = d.body || "You have a new message.";
+  /* ONE TAG PER SIDE, as in the page (§225): a second reply REPLACES the
+     first rather than stacking a column of boxes on somebody who has been
+     away, and a question waiting for the office never replaces a reply on
+     their own conversation. */
+  const tag = d.tag === "office" ? "smp-chat-office" : "smp-chat";
+  e.waitUntil(self.registration.showNotification(title, {
+    body: body,
+    tag: tag,
+    icon: "/icons/icon-192.png",
+    badge: "/icons/icon-192.png",
+    data: { open: d.open || "/raya-trade" }
+  }));
+});
+
+/* PRESSING IT GOES TO THE PLATFORM, and to a tab that is already open where
+   there is one — opening a second copy of a single-page app beside the one
+   somebody was working in is how unsaved work gets left behind in the first
+   (§170: the last change of a burst is not durable until the save lands). */
+self.addEventListener("notificationclick", (e) => {
+  e.notification.close();
+  const go = (e.notification.data && e.notification.data.open) || "/raya-trade";
+  e.waitUntil(
+    self.clients.matchAll({ type: "window", includeUncontrolled: true }).then((cs) => {
+      for (const c of cs) {
+        /* Any tab on this origin will do — the platform is one page, and
+           `focus()` on the one they already have beats a new one. */
+        if ("focus" in c) return c.focus();
+      }
+      return self.clients.openWindow ? self.clients.openWindow(go) : undefined;
+    })
   );
 });

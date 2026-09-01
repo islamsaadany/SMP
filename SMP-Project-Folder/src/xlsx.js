@@ -956,7 +956,7 @@ function capPlanWorkbook(c){
          date off the templates "for now" -- the field survives in the model
          and nothing asks for it, so every deliverable is simply always asked,
          which is what the product did before §104 put the date back. */
-      /* §231: the old C2:C400 DELIV_KINDS validation was aimed at the Kind
+      /* §233: the old C2:C400 DELIV_KINDS validation was aimed at the Kind
          column that sheet no longer has — Hidden takes the position, so the
          stale list goes with it rather than dressing the new column. */
       head:["Project", "Deliverable", "Hidden"],

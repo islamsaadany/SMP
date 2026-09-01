@@ -4979,7 +4979,7 @@ function renderArchives(){
          c.objectives + " objectives"].join(" &middot; ")
       : [c.projects + " projects", c.deliverables + " deliverables",
          c.outcomes + " outcomes", c.milestones + " milestones"].join(" &middot; ");
-    /* unitLike, never UNITS[] (§230): a pillars function's archive is keyed
+    /* unitLike, never UNITS[] (§232): a pillars function's archive is keyed
        `fn:<key>`, and asking UNITS printed "cannot be restored" for a
        function still on the platform — the same one-line fault as the
        restore itself. */

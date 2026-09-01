@@ -2729,7 +2729,7 @@ function gapCell(page, acKey, row, field, opts){
      a call site that names no kind keeps today's behaviour. */
   var fillable = !opts.fillKind ||
     (SMPRules.GAP_FILLABLE[opts.fillKind] || []).indexOf(field) > -1;
-  /* §231: a hidden row never opens to a filler — its blanks are not gaps
+  /* §233: a hidden row never opens to a filler — its blanks are not gaps
      (gapMap skips it), so a control here would be a door the count denies
      (§192.4: the count and the walk are one list). The office's pen above
      is untouched: hiding is the office's own mark and their edit settles. */
@@ -3047,7 +3047,7 @@ function horizonColLabel(){
 
    Every field goes through `fieldOr`/`inputOr`/`selectOr` now, so there is no
    second way to draw one of these cells and no second place to forget. */
-/* ── HIDDEN FROM THE PRESENTATION (§231) ──────────────────────────────
+/* ── HIDDEN FROM THE PRESENTATION (§233) ──────────────────────────────
    The eye beside a row's × in the pen; the chip in read mode. An SVG taking
    currentColor, never a colour emoji (§45); lit on the attention ground
    while hidden — a decision, not a warning (§168). The chip is drawn for
@@ -3504,7 +3504,7 @@ function renderReport(u){
      inside an open body. The selection belongs to the unit and is shared with
      Performance and Strategy. No reordering here: entry, not arrangement. */
   var reportPillarPane = function(p, pi){
-    /* §231: a hidden row is not asked, so it is not drawn here — the same
+    /* §233: a hidden row is not asked, so it is not drawn here — the same
        skip reportItems() makes, or the pane would collect a figure the
        submit gate no longer waits on. */
     var ms = [];
@@ -4560,7 +4560,7 @@ function projPlanBody(p, fk){
     ? '<div class="pband edband"><span class="pband-code">' + esc(projCode(fk, p)) + '</span>' +
         '<span class="pband-name">' +
           textOr("plan", p.name, "", function(v){ p.name = v; }) + '</span>' +
-        /* The pillar head's own control on the project's band (§230, §53.5:
+        /* The pillar head's own control on the project's band (§232, §53.5:
            a unit and a function are the same product). The id alone is the
            address — capOfProjectId() resolves the holder at press time. */
         '<button class="rmplan" data-rmrow="project|' + esc(p.id) +
@@ -5180,7 +5180,7 @@ function unitPlanBody(it, u, railed){
             : '&nbsp; ' + esc(it.name)) + '</h3>' +
         (meta ? '<div class="pmeta">' + meta + '</div>' : '') + '</div>' +
         kindPill(it) +
-        /* ── REMOVE, WORDED, IN THE HEAD THAT PINS (§230) ──────────────
+        /* ── REMOVE, WORDED, IN THE HEAD THAT PINS (§232) ──────────────
            The × removes a ROW; removing the whole pillar had no control at
            all, so the only way to take one out was re-uploading the plan.
            Beside Done because reading order is "remove, or finish", and in

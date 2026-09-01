@@ -1,4 +1,4 @@
-"""HIDING AN ELEMENT FROM THE PRESENTATION (§231).
+"""HIDING AN ELEMENT FROM THE PRESENTATION (§233).
 
 Islam: *"the hide approach is about hiding it from the presnetation. this
 applies to a mesure or an objective or a tactic. etc. something we need to

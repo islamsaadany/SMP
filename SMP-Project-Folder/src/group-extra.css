@@ -413,7 +413,7 @@
   .modal-b h4.mini:first-child { margin-top:0; }
   @media (max-width:640px) { .overlay { padding:0; } .modal { max-height:100vh; border-radius:0; } }
 
-  /* ── REMOVING A PILLAR OR A PROJECT: the confirmation (§230) ──────────
+  /* ── REMOVING A PILLAR OR A PROJECT: the confirmation (§232) ──────────
      The dialog carries the weight the quiet words in the head do not: what
      the thing holds, what has been reported against it this cycle (the warn
      ground — outstanding, not broken, §168), and the way back. */
@@ -1052,7 +1052,7 @@
      is the same answer on the band's own class. Reading is untouched: a read
      band's name is a span and sits where it always sat. */
   .pane .pband.edband .pband-name { flex:1; min-width:0; }
-  /* ── THE REMOVE CONTROL (§230) ───────────────────────────────────────
+  /* ── THE REMOVE CONTROL (§232) ───────────────────────────────────────
      Quiet red WORDS, no fill — a destructive act says its name and the
      confirmation is where the weight lives (mockup, signed off 2026-09-01).
      Named .rmplan, never .rmbtn — that word is taken by the Setup tables'

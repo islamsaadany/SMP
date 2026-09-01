@@ -7686,6 +7686,26 @@ body{ background:var(--mk-ground); color:var(--mk-ink); margin:0; }
    from what that table's own picker gets (67px at 1600), not chosen: below
    ~52px the glyph goes. */
 .mk-panel td.cc select.fld.mono{ min-width:52px; }
+/* Where the description has to share the tactic's cell — Reporting and
+   Performance, which have no width for a column of its own — the NAME carries
+   the weight, or the two run together as one block of grey (Islam). The Plan
+   splits them into columns instead, so nothing there needs this. */
+/* THE NAME BOX GOES BACK TO 77px AT ELEVEN COLUMNS, and that is §194's
+   complaint returning by another road: the tactic's own name, the description
+   and the outcome are three prose fields competing with seven narrow ones, and
+   an auto-layout table simply divides what is left. The buttons in the name
+   cell are inline (§114.4), so they take ~55px off whatever the column gets.
+   The floor is measured against the product as it stands: at 1500 today the
+   Tactic column is 202px and the box inside it ~147px, and a 230px floor
+   returns 141px. The table then asks for 1517px and SCROLLS inside .tblscroll
+   rather than crushing — which is the choice a floor makes (§158): a column
+   that cannot shrink pushes the table wider instead of squeezing the words. */
+.mk-panel table.planedit th:nth-child(2), .mk-panel table.planedit td:nth-child(2),
+.mk-panel table.planedit th:nth-child(3), .mk-panel table.planedit td:nth-child(3),
+.mk-panel table.planedit th:nth-child(4), .mk-panel table.planedit td:nth-child(4){
+  min-width:230px;
+}
+.mk-panel b.tacname{ font-weight:650; display:block; }
 .mk-panel .tacdesc{ margin-top:5px; font-size:12.5px; color:var(--ink-2); }
 .mk-panel .mk-sub{
   display:block; font-size:.82em; font-weight:400; color:var(--ink-3);
@@ -7794,9 +7814,9 @@ body{ background:var(--mk-ground); color:var(--mk-ink); margin:0; }
   <article class="mk-panel">
     <div class="mk-panel-h">
       <h2>1 &middot; Strategy &rsaquo; Plan &mdash; reading</h2>
-      <p>The description sits under the tactic&rsquo;s name, where the reporter&rsquo;s note already goes on
-        the other two pages. The target is one cell carrying all three facts: direction, target with its
-        unit, and how it compiles.</p>
+      <p>The description takes a column of its own, because this is the page where it is written. The
+        target says the target &mdash; the direction and the compile rule are set with the pen and show
+        later, beside the score they govern.</p>
     </div>
     <div class="mk-panel-b">
 
@@ -7814,11 +7834,11 @@ body{ background:var(--mk-ground); color:var(--mk-ink); margin:0; }
 
       <p class="mk-cap new"></p>
       <div class="mk-real"><table>
-        <thead><tr><th>#</th><th>Tactic</th><th>Outcome</th><th class="cc">Target</th><th>Owner</th><th>Collabs.</th><th>Quarters</th></tr></thead>
+        <thead><tr><th>#</th><th>Tactic</th><th>Description</th><th>Outcome</th><th class="cc">Target</th><th>Owner</th><th>Collabs.</th><th>Quarters</th></tr></thead>
         <tbody>
-          <tr><td class="idx"><span class="idx-n">1</span></td><td>Clean and standardize existing customer and SKU base<span class="why">Create a reliable, unified data foundation across different systems</span></td><td class="mk-prose"><span class="missing">Missing</span></td><td class="num"><span class="missing">Missing</span></td><td>Ramy Behairy</td><td class="collabs">Hassan Sayed</td><td><span class="qs"><i class="">1</i><i class="on past">2</i><i class="on">3</i><i class="">4</i></span></td></tr>
-          <tr><td class="idx"><span class="idx-n">2</span></td><td>End-to-End Order-to-Cash Digitization<span class="why">Automate the full sales and payment cycle</span></td><td class="mk-prose"><b>Orders processed end-to-end digitally</b></td><td class="num">&ge; 90%<span class="mk-sub">Latest</span></td><td>Mohamed Rizk</td><td class="collabs">Hassan, Hala</td><td><span class="qs"><i class="">1</i><i class="on past">2</i><i class="on">3</i><i class="">4</i></span></td></tr>
-          <tr><td class="idx"><span class="idx-n">3</span></td><td>Roll out the mega-store format across key governorates<span class="why">Take the format to the governorates where footfall justifies it</span></td><td class="mk-prose"><b>Mega stores opened</b></td><td class="num">&ge; 6 #<span class="mk-sub">Sum</span></td><td>Sherif Kamel</td><td class="collabs">Ramy Behairy</td><td><span class="qs"><i class="on past">1</i><i class="on past">2</i><i class="on">3</i><i class="on">4</i></span></td></tr>
+          <tr><td class="idx"><span class="idx-n">1</span></td><td>Clean and standardize existing customer and SKU base</td><td class="mk-prose">Create a reliable, unified data foundation across different systems</td><td class="mk-prose"><span class="missing">Missing</span></td><td class="num"><span class="missing">Missing</span></td><td>Ramy Behairy</td><td class="collabs">Hassan Sayed</td><td><span class="qs"><i class="">1</i><i class="on past">2</i><i class="on">3</i><i class="">4</i></span></td></tr>
+          <tr><td class="idx"><span class="idx-n">2</span></td><td>End-to-End Order-to-Cash Digitization</td><td class="mk-prose">Automate the full sales and payment cycle</td><td class="mk-prose"><b>Orders processed end-to-end digitally</b></td><td class="num">90%</td><td>Mohamed Rizk</td><td class="collabs">Hassan, Hala</td><td><span class="qs"><i class="">1</i><i class="on past">2</i><i class="on">3</i><i class="">4</i></span></td></tr>
+          <tr><td class="idx"><span class="idx-n">3</span></td><td>Roll out the mega-store format across key governorates</td><td class="mk-prose">Take the format to the governorates where footfall justifies it</td><td class="mk-prose"><b>Mega stores opened</b></td><td class="num">6 #</td><td>Sherif Kamel</td><td class="collabs">Ramy Behairy</td><td><span class="qs"><i class="on past">1</i><i class="on past">2</i><i class="on">3</i><i class="on">4</i></span></td></tr>
         </tbody>
       </table></div>
 
@@ -7830,9 +7850,9 @@ body{ background:var(--mk-ground); color:var(--mk-ink); margin:0; }
         <div><em>Row 1 is a gap, not an exception</em><p>Red <b>Missing</b>, counted on the bar above the
           table and reachable from <em>Fill in what is empty</em>. Somebody writes <b>Raya &amp; I2
           unified customer base</b>, sets <b>&ge; 1 #</b>, and it stops being missing.</p></div>
-        <div><em>Seven columns, measured</em><p>Fits at 1500, 1180 and 1000 with nothing clipped. Putting
-          the description in a column of its own instead would be eight, which also fits &mdash; but then
-          it would sit in a different place on this page than on the other two.</p></div>
+        <div><em>Reading says the target and nothing else</em><p>No direction, no compile rule
+          &mdash; both are set with the pen and both show later, beside the score they govern. Eight
+          columns, measured at 1500, 1180 and 1000 with nothing clipped.</p></div>
       </div>
     </div>
   </article>
@@ -7848,12 +7868,13 @@ body{ background:var(--mk-ground); color:var(--mk-ink); margin:0; }
     <div class="mk-panel-b">
 
       <p class="mk-cap new"></p>
-      <div class="mk-real"><table>
-        <thead><tr><th>#</th><th>Tactic</th><th>Outcome</th><th class="cc">Dir.</th><th class="cc">Unit</th><th class="num">Target</th><th class="cc">Compiled</th><th>Owner</th><th>Collabs.</th><th>Quarters</th></tr></thead>
+      <div class="mk-real"><table class="planedit">
+        <thead><tr><th>#</th><th>Tactic</th><th>Description</th><th>Outcome</th><th class="cc">Dir.</th><th class="cc">Unit</th><th class="num">Target</th><th class="cc">Compiled</th><th>Owner</th><th>Collabs.</th><th>Quarters</th></tr></thead>
         <tbody class="sortable">
           <tr>
             <td class="idx"><span class="grip" role="button" tabindex="0" title="Drag to reorder"><i></i><i></i><i></i></span><span class="idx-n">1</span></td>
-            <td><textarea class="fld grow" rows="1" style="height:34px">Clean and standardize existing customer and SKU base</textarea><button class="eyebtn" aria-pressed="false" title="Hide from the presentation" aria-label="Hide from the presentation"><svg viewBox="0 0 24 20" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M2 10s3.5-6 10-6 10 6 10 6-3.5 6-10 6S2 10 2 10z"></path><circle cx="12" cy="10" r="2.6"></circle></svg></button><button class="xbtn" title="Remove this row" aria-label="Remove this row">&times;</button><textarea class="fld grow tacdesc" rows="1" style="height:34px" placeholder="What it is for">Create a reliable, unified data foundation across different systems</textarea></td>
+            <td><textarea class="fld grow" rows="1" style="height:34px">Clean and standardize existing customer and SKU base</textarea><button class="eyebtn" aria-pressed="false" title="Hide from the presentation" aria-label="Hide from the presentation"><svg viewBox="0 0 24 20" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M2 10s3.5-6 10-6 10 6 10 6-3.5 6-10 6S2 10 2 10z"></path><circle cx="12" cy="10" r="2.6"></circle></svg></button><button class="xbtn" title="Remove this row" aria-label="Remove this row">&times;</button></td>
+            <td><textarea class="fld grow" rows="1" style="height:34px" placeholder="What it is for">Create a reliable, unified data foundation across different systems</textarea></td>
             <td><textarea class="fld grow gapwalk" rows="1" style="height:34px" placeholder="What it should produce"></textarea></td>
             <td class="cc"><select class="fld mono"><option selected>&ge;</option><option>&le;</option></select></td>
             <td class="cc"><button type="button" class="ssbtn" aria-haspopup="listbox" aria-expanded="false" title="Unit"><span class="sslabel">&mdash;</span><span class="sscar" aria-hidden="true">&#9662;</span></button></td>
@@ -7865,7 +7886,8 @@ body{ background:var(--mk-ground); color:var(--mk-ink); margin:0; }
           </tr>
           <tr>
             <td class="idx"><span class="grip" role="button" tabindex="0" title="Drag to reorder"><i></i><i></i><i></i></span><span class="idx-n">2</span></td>
-            <td><textarea class="fld grow" rows="1" style="height:34px">End-to-End Order-to-Cash Digitization</textarea><button class="eyebtn" aria-pressed="false" title="Hide from the presentation" aria-label="Hide from the presentation"><svg viewBox="0 0 24 20" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M2 10s3.5-6 10-6 10 6 10 6-3.5 6-10 6S2 10 2 10z"></path><circle cx="12" cy="10" r="2.6"></circle></svg></button><button class="xbtn" title="Remove this row" aria-label="Remove this row">&times;</button><textarea class="fld grow tacdesc" rows="1" style="height:34px" placeholder="What it is for">Automate the full sales and payment cycle</textarea></td>
+            <td><textarea class="fld grow" rows="1" style="height:34px">End-to-End Order-to-Cash Digitization</textarea><button class="eyebtn" aria-pressed="false" title="Hide from the presentation" aria-label="Hide from the presentation"><svg viewBox="0 0 24 20" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M2 10s3.5-6 10-6 10 6 10 6-3.5 6-10 6S2 10 2 10z"></path><circle cx="12" cy="10" r="2.6"></circle></svg></button><button class="xbtn" title="Remove this row" aria-label="Remove this row">&times;</button></td>
+            <td><textarea class="fld grow" rows="1" style="height:34px" placeholder="What it is for">Automate the full sales and payment cycle</textarea></td>
             <td><textarea class="fld grow" rows="1" style="height:34px" placeholder="What it should produce">Orders processed end-to-end digitally</textarea></td>
             <td class="cc"><select class="fld mono"><option selected>&ge;</option><option>&le;</option></select></td>
             <td class="cc"><button type="button" class="ssbtn" aria-haspopup="listbox" aria-expanded="false" title="%"><span class="sslabel">%</span><span class="sscar" aria-hidden="true">&#9662;</span></button></td>
@@ -7877,7 +7899,8 @@ body{ background:var(--mk-ground); color:var(--mk-ink); margin:0; }
           </tr>
           <tr>
             <td class="idx"><span class="grip" role="button" tabindex="0" title="Drag to reorder"><i></i><i></i><i></i></span><span class="idx-n">3</span></td>
-            <td><textarea class="fld grow" rows="1" style="height:34px">Roll out the mega-store format across key governorates</textarea><button class="eyebtn" aria-pressed="false" title="Hide from the presentation" aria-label="Hide from the presentation"><svg viewBox="0 0 24 20" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M2 10s3.5-6 10-6 10 6 10 6-3.5 6-10 6S2 10 2 10z"></path><circle cx="12" cy="10" r="2.6"></circle></svg></button><button class="xbtn" title="Remove this row" aria-label="Remove this row">&times;</button><textarea class="fld grow tacdesc" rows="1" style="height:34px" placeholder="What it is for">Take the format to the governorates where footfall justifies it</textarea></td>
+            <td><textarea class="fld grow" rows="1" style="height:34px">Roll out the mega-store format across key governorates</textarea><button class="eyebtn" aria-pressed="false" title="Hide from the presentation" aria-label="Hide from the presentation"><svg viewBox="0 0 24 20" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M2 10s3.5-6 10-6 10 6 10 6-3.5 6-10 6S2 10 2 10z"></path><circle cx="12" cy="10" r="2.6"></circle></svg></button><button class="xbtn" title="Remove this row" aria-label="Remove this row">&times;</button></td>
+            <td><textarea class="fld grow" rows="1" style="height:34px" placeholder="What it is for">Take the format to the governorates where footfall justifies it</textarea></td>
             <td><textarea class="fld grow" rows="1" style="height:34px" placeholder="What it should produce">Mega stores opened</textarea></td>
             <td class="cc"><select class="fld mono"><option selected>&ge;</option><option>&le;</option></select></td>
             <td class="cc"><button type="button" class="ssbtn" aria-haspopup="listbox" aria-expanded="false" title="#"><span class="sslabel">#</span><span class="sscar" aria-hidden="true">&#9662;</span></button></td>
@@ -7887,7 +7910,7 @@ body{ background:var(--mk-ground); color:var(--mk-ink); margin:0; }
             <td class="collabs"><button type="button" class="ssbtn" aria-haspopup="listbox" aria-expanded="false" title="Ramy Behairy"><span class="sslabel">Ramy Behairy</span><span class="sscar" aria-hidden="true">&#9662;</span></button></td>
             <td><span class="qs qs-edit"><button class="qtog on" title="Quarter 1 — planned; press to clear">1</button><button class="qtog on" title="Quarter 2 — planned; press to clear">2</button><button class="qtog on" title="Quarter 3 — planned; press to clear">3</button><button class="qtog on" title="Quarter 4 — planned; press to clear">4</button></span></td>
           </tr>
-          <tr class="newrow"><td class="idx">+</td><td colspan="9"><button class="linkbu">Add a tactic</button></td></tr>
+          <tr class="newrow"><td class="idx">+</td><td colspan="10"><button class="linkbu">Add a tactic</button></td></tr>
         </tbody>
       </table></div>
 
@@ -7895,15 +7918,17 @@ body{ background:var(--mk-ground); color:var(--mk-ink); margin:0; }
         <div><em>Row 1 is what a gap looks like from this side</em><p>Empty outcome, no unit, no target, no
           compile rule &mdash; and the boxes are simply waiting. <b>Fill in what is empty</b> walks
           straight to this cell, the same way it already walks to a blank target on a key measure.</p></div>
-        <div><em>One thing the drawing caught</em><p>At ten columns the browser gave the direction
-          picker <b>40px</b> and it stopped showing its own <b>&ge;</b> &mdash; the control that says
-          whether the outcome is reached or kept below, showing neither. It has a floor now, measured from
-          what the key measures table&rsquo;s own picker gets. Found by looking at the render, not at the
-          markup.</p></div>
-        <div><em>The width, honestly</em><p>Ten columns fit at <b>1400px and up</b>. At 1180 the table is
-          45px wider than the pane and at 1000 it is 125px wider, so it scrolls sideways inside its own
-          box &mdash; which is what that box is for, and what the key measures table already does when it
-          is opened on a narrow screen.</p></div>
+        <div><em>Two things the drawing caught</em><p>The direction picker was squeezed to
+          <b>40px</b> and stopped showing its own <b>&ge;</b>. And the tactic&rsquo;s own name box fell
+          to <b>77px</b>, breaking words mid-letter &mdash; the fault we fixed on the pillar head in
+          August, back by another road. Both have floors now, measured against what the product gives
+          them today. Found by looking at the render; every check passed while both were true.</p></div>
+        <div><em>The width, honestly &mdash; this is the cost</em><p>Three prose columns and seven
+          narrow ones need <b>1517px</b>, so the editing table <b>scrolls sideways at every window</b>
+          &mdash; 187px at 1500, 442px at 1180. That is the price of the description having a column of
+          its own here. Putting it back under the tactic&rsquo;s name is ten columns and 1400px, no
+          scroll from 1400 up. <b>Reading is unaffected either way</b>: eight columns, fits
+          everywhere.</p></div>
       </div>
     </div>
   </article>
@@ -7921,10 +7946,10 @@ body{ background:var(--mk-ground); color:var(--mk-ink); margin:0; }
       <div class="mk-real"><table>
         <thead><tr><th>#</th><th>Tactic</th><th>Outcome</th><th>Owner</th><th>Quarters</th><th class="cc">YTD Target</th><th class="cc">Reported</th><th>Note</th></tr></thead>
         <tbody>
-          <tr><td class="idx">1</td><td>Clean and standardize existing customer and SKU base<span class="why">Create a reliable, unified data foundation across different systems</span></td><td class="mk-prose"><span class="missing">Missing</span><span class="why">Still asked how far it has got, until an outcome is written</span></td><td>Ramy Behairy</td><td><span class="qs"><i class="">1</i><i class="on past">2</i><i class="on">3</i><i class="">4</i></span></td><td class="num">50%</td><td class="cc"><span class="entry filled"><input class="field" value="45" aria-label="Report"><span class="unitsuf">%</span></span></td><td class="notecol"><input class="fld notefld" value="" placeholder="Note, if there is one"></td></tr>
-          <tr><td class="idx">2</td><td>End-to-End Order-to-Cash Digitization<span class="why">Automate the full sales and payment cycle</span></td><td class="mk-prose"><b>Orders processed end-to-end digitally</b></td><td>Mohamed Rizk</td><td><span class="qs"><i class="">1</i><i class="on past">2</i><i class="on">3</i><i class="">4</i></span></td><td class="num">90%</td><td class="cc"><span class="entry filled"><input class="field" value="62" aria-label="Report"><span class="unitsuf">%</span></span></td><td class="notecol"><input class="fld notefld" value="" placeholder="Note, if there is one"></td></tr>
+          <tr><td class="idx">1</td><td><b class="tacname">Clean and standardize existing customer and SKU base</b><span class="why">Create a reliable, unified data foundation across different systems</span></td><td class="mk-prose"><span class="missing">Missing</span><span class="why">Still asked how far it has got, until an outcome is written</span></td><td>Ramy Behairy</td><td><span class="qs"><i class="">1</i><i class="on past">2</i><i class="on">3</i><i class="">4</i></span></td><td class="num">50%</td><td class="cc"><span class="entry filled"><input class="field" value="45" aria-label="Report"><span class="unitsuf">%</span></span></td><td class="notecol"><input class="fld notefld" value="" placeholder="Note, if there is one"></td></tr>
+          <tr><td class="idx">2</td><td><b class="tacname">End-to-End Order-to-Cash Digitization</b><span class="why">Automate the full sales and payment cycle</span></td><td class="mk-prose"><b>Orders processed end-to-end digitally</b></td><td>Mohamed Rizk</td><td><span class="qs"><i class="">1</i><i class="on past">2</i><i class="on">3</i><i class="">4</i></span></td><td class="num">90%</td><td class="cc"><span class="entry filled"><input class="field" value="62" aria-label="Report"><span class="unitsuf">%</span></span></td><td class="notecol"><input class="fld notefld" value="" placeholder="Note, if there is one"></td></tr>
           
-          <tr><td class="idx">4</td><td>Roll out the mega-store format across key governorates<span class="why">Take the format to the governorates where footfall justifies it</span></td><td class="mk-prose"><b>Mega stores opened</b></td><td>Sherif Kamel</td><td><span class="qs"><i class="on past">1</i><i class="on past">2</i><i class="on">3</i><i class="on">4</i></span></td><td class="num">4 #<span class="mk-sub">of 6 # &middot; 8 of 12 months</span></td><td class="cc"><span class="entry filled"><input class="field" value="3" aria-label="Report"><span class="unitsuf">#</span></span></td><td class="notecol"><input class="fld notefld" value="" placeholder="Note, if there is one"></td></tr>
+          <tr><td class="idx">4</td><td><b class="tacname">Roll out the mega-store format across key governorates</b><span class="why">Take the format to the governorates where footfall justifies it</span></td><td class="mk-prose"><b>Mega stores opened</b></td><td>Sherif Kamel</td><td><span class="qs"><i class="on past">1</i><i class="on past">2</i><i class="on">3</i><i class="on">4</i></span></td><td class="num">4 #<span class="mk-sub">of 6 # &middot; 8 of 12 months</span></td><td class="cc"><span class="entry filled"><input class="field" value="3" aria-label="Report"><span class="unitsuf">#</span></span></td><td class="notecol"><input class="fld notefld" value="" placeholder="Note, if there is one"></td></tr>
         </tbody>
       </table></div>
 
@@ -7953,10 +7978,10 @@ body{ background:var(--mk-ground); color:var(--mk-ink); margin:0; }
       <div class="mk-real"><table>
         <thead><tr><th class="idx">#</th><th>Tactic</th><th>Outcome</th><th>Owner</th><th>Collabs.</th><th>Quarters</th><th class="cc">Status</th><th class="cc">YTD actual</th><th class="cc">Progress</th></tr></thead>
         <tbody>
-          <tr><td class="idx"><span class="idx-n">1</span></td><td>Clean and standardize existing customer and SKU base<span class="why">Create a reliable, unified data foundation across different systems</span></td><td class="mk-prose"><span class="missing">Missing</span></td><td>Ramy Behairy</td><td class="collabs">Hassan Sayed</td><td><span class="qs"><i class="">1</i><i class="on past">2</i><i class="on">3</i><i class="">4</i></span></td><td class="cc"><span class="pill warn">WIP</span></td><td class="num"><span class="pair"><b>45%</b> <i>/ 50%</i></span></td><td class="num final" style="color:var(--good-tx)">90%</td></tr>
-          <tr><td class="idx"><span class="idx-n">2</span></td><td>End-to-End Order-to-Cash Digitization<span class="why">Automate the full sales and payment cycle</span></td><td class="mk-prose"><b>Orders processed end-to-end digitally</b></td><td>Mohamed Rizk</td><td class="collabs">Hassan, Hala</td><td><span class="qs"><i class="">1</i><i class="on past">2</i><i class="on">3</i><i class="">4</i></span></td><td class="cc"><span class="pill warn">WIP</span></td><td class="num"><span class="pair"><b>62%</b> <i>/ 90%</i></span></td><td class="num final" style="color:var(--warn-tx)">69%</td></tr>
+          <tr><td class="idx"><span class="idx-n">1</span></td><td><b class="tacname">Clean and standardize existing customer and SKU base</b><span class="why">Create a reliable, unified data foundation across different systems</span></td><td class="mk-prose"><span class="missing">Missing</span></td><td>Ramy Behairy</td><td class="collabs">Hassan Sayed</td><td><span class="qs"><i class="">1</i><i class="on past">2</i><i class="on">3</i><i class="">4</i></span></td><td class="cc"><span class="pill warn">WIP</span></td><td class="num"><span class="pair"><b>45%</b> <i>/ 50%</i></span></td><td class="num final" style="color:var(--good-tx)">90%</td></tr>
+          <tr><td class="idx"><span class="idx-n">2</span></td><td><b class="tacname">End-to-End Order-to-Cash Digitization</b><span class="why">Automate the full sales and payment cycle</span></td><td class="mk-prose"><b>Orders processed end-to-end digitally</b></td><td>Mohamed Rizk</td><td class="collabs">Hassan, Hala</td><td><span class="qs"><i class="">1</i><i class="on past">2</i><i class="on">3</i><i class="">4</i></span></td><td class="cc"><span class="pill warn">WIP</span></td><td class="num"><span class="pair"><b>62%</b> <i>/ 90%</i></span></td><td class="num final" style="color:var(--warn-tx)">69%</td></tr>
           
-          <tr><td class="idx"><span class="idx-n">4</span></td><td>Roll out the mega-store format across key governorates<span class="why">Take the format to the governorates where footfall justifies it</span></td><td class="mk-prose"><b>Mega stores opened</b></td><td>Sherif Kamel</td><td class="collabs">Ramy Behairy</td><td><span class="qs"><i class="on past">1</i><i class="on past">2</i><i class="on">3</i><i class="on">4</i></span></td><td class="cc"><span class="pill warn">WIP</span></td><td class="num"><span class="pair"><b>3 #</b> <i>/ 4 #</i></span></td><td class="num final" style="color:var(--attn-tx)">75%</td></tr>
+          <tr><td class="idx"><span class="idx-n">4</span></td><td><b class="tacname">Roll out the mega-store format across key governorates</b><span class="why">Take the format to the governorates where footfall justifies it</span></td><td class="mk-prose"><b>Mega stores opened</b></td><td>Sherif Kamel</td><td class="collabs">Ramy Behairy</td><td><span class="qs"><i class="on past">1</i><i class="on past">2</i><i class="on">3</i><i class="on">4</i></span></td><td class="cc"><span class="pill warn">WIP</span></td><td class="num"><span class="pair"><b>3 #</b> <i>/ 4 #</i></span></td><td class="num final" style="color:var(--attn-tx)">75%</td></tr>
         </tbody>
       </table></div>
 

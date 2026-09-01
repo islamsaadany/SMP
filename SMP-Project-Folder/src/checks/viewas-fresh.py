@@ -1,4 +1,4 @@
-"""A VIEW-AS SESSION STARTS WHERE THEIR SESSION WOULD START (§235).
+"""A VIEW-AS SESSION STARTS WHERE THEIR SESSION WOULD START (§237).
 
 Islam: *"viewing as needs to have the same server connection and relation and
 not inherit my SMO abilities … so I get the errors."* The judging half has

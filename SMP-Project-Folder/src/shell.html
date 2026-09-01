@@ -823,7 +823,7 @@
     try { me = SYNC.person() && SYNC.person().key; } catch(e){}
     SYNC.saveNow(function(how){
       if (how === "offline") return go();
-      /* §235: A VIEW-AS SESSION STARTS WHERE THEIR SESSION WOULD START.
+      /* §237: A VIEW-AS SESSION STARTS WHERE THEIR SESSION WOULD START.
          With the SMO's own work flushed clean (the two answers above this
          line), the tab takes the SERVER's current graph as its new truth —
          exactly a fresh sign-in by the viewed person, so nothing of this

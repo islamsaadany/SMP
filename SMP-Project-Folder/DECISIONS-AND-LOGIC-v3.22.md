@@ -26018,7 +26018,7 @@ the posting — a bug that lives in somebody else's timeline needs two real
 sessions, which is what `test-two-tabs.js` automates against a real
 Postgres, the §234 incident verbatim among its cases.
 
-## §235 — A VIEW-AS SESSION STARTS WHERE THEIR SESSION WOULD START (2026-09-01)
+## §237 — A VIEW-AS SESSION STARTS WHERE THEIR SESSION WOULD START (2026-09-01)
 
 Islam, closing §234.2's finding with a requirement: *"viewing as needs to
 have the same server connection and relation and not inherit my SMO
@@ -26065,7 +26065,7 @@ asserts the property, never the mechanism: the switch fetches and the
 screen holds work saved after the tab loaded; the first save under the view
 carries ONLY the view's own act (`review.submitted.mobile` and nothing
 else); the refused way home keeps the work on screen with zero fetches.
-Proved able to fail: **4 red** on the pre-§235 build. `viewer-switch.py`
+Proved able to fail: **4 red** on the pre-§237 build. `viewer-switch.py`
 (§204/§209's own check), `welcome`, `refusal-keeps-work`, `save-flush`,
 `boot-skeleton`, `save-fidelity`, `report-saves`, `gap-fill`, `submit-gate`,
 the differ (126/0), the authoriser (451/0) and the full `qa.py` sweep green

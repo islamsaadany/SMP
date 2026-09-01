@@ -406,7 +406,7 @@ console errors (in this cloud environment, run it via a wrapper that points Play
   connection is not. **And the good path is asserted in the same breath**
   (§94.2), because a failure-reported assertion passes on a build that reports
   one always.
-- **A VIEW-AS SESSION STARTS WHERE THEIR SESSION WOULD START (§235):** Islam,
+- **A VIEW-AS SESSION STARTS WHERE THEIR SESSION WOULD START (§237):** Islam,
   closing §234.2's finding — *"viewing as needs to have the same server
   connection and relation and not inherit my SMO abilities … so I get the
   errors."* The judging half has been the viewed person's since §185; what
@@ -420,7 +420,7 @@ console errors (in this cloud environment, run it via a wrapper that points Play
   the refused way home, where taking the server's copy would silently destroy
   the work §184's banner offers to put back. Time is the stated limit — no
   switch can wear a tab that was open for hours; `test-two-tabs.js` guards
-  that class. `checks/viewas-fresh.py`: 4 red on the pre-§235 build.
+  that class. `checks/viewas-fresh.py`: 4 red on the pre-§237 build.
 - **ONE FUNCTION'S SUBMIT MUST NOT CARRY EVERYBODY'S REPORT STATE (§234):**
   Islam, from a live client session — *"emergency error that we fixed 100
   times before"*: a CF custodian refused with **"You cannot report for
@@ -3770,7 +3770,7 @@ python3 checks/viewer-line.py   # the Viewing-as line: the roles and where each 
                                 # held, of EVERY person — no em-dashes, the seat never
                                 # repeated, and the whole line on a hover (§178)
 python3 checks/viewas-fresh.py  # a view-as session starts where their session would
-                                # start (§235): the switch rebases on the server's
+                                # start (§237): the switch rebases on the server's
                                 # graph, the first save under the view carries only the
                                 # view's own act, and the refused way home keeps the
                                 # work — against a stub whose dataset MOVES mid-run

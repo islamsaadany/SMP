@@ -972,7 +972,7 @@ var SYNC = (function () {
   });
   window.addEventListener("pagehide", flushLeave);
 
-  /* ── A VIEW-AS SESSION STARTS WHERE THEIR SESSION WOULD START (§235) ──
+  /* ── A VIEW-AS SESSION STARTS WHERE THEIR SESSION WOULD START (§237) ──
      Islam: *"viewing as needs to have the same server connection and
      relation and not inherit my SMO abilities … so I get the errors."*
      The JUDGING half has been the viewed person's since §185, and §234.2
@@ -1016,7 +1016,7 @@ var SYNC = (function () {
     /* Flush now rather than on the next 800ms tick, and say what happened.
        The ONLY caller is a button somebody pressed; nothing schedules it. */
     saveNow: function (done) { save(done); },
-    /* Take the server's current graph as the tab's new truth (§235). The
+    /* Take the server's current graph as the tab's new truth (§237). The
        caller is the viewer switch and nothing else schedules it. */
     rebase: function (done) { rebase(done); },
     isDemo: function () { return isDemoMode(); },

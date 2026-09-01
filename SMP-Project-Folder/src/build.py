@@ -116,6 +116,40 @@ def check_scripts(html):
         sys.stderr.write("BUILD REFUSED — the built page does not parse:\n" + r.stderr)
         sys.exit(1)
 
+# ── A CSP SAFETY-NET, HASHED AT BUILD TIME (2026-09-01 security sweep) ───────
+# The XSS holes are closed by escaping (§235), but this is defence in depth: if
+# an escaping gap is ever reintroduced, an injected inline handler (onerror=,
+# onfocus=) must still not RUN. The vercel.json header keeps script-src
+# 'unsafe-inline' (the gate needs it, and it is not built here); this meta adds
+# a SECOND, stricter policy scoped to the platform page — every legitimate
+# inline <script> is allow-listed by the SHA-256 of its exact contents, and
+# nothing else inline can execute. The browser enforces both policies, so a
+# script must pass both: the real blocks pass (hash + unsafe-inline), an
+# injected handler is blocked by this one (no hash, no unsafe-inline).
+#
+# HASHED HERE, SO IT CAN NEVER GO STALE. The whole danger of a hashed CSP is a
+# hash that no longer matches the page (§91's "a stale hash is a page that does
+# not load"). Computing it in the same build that emits the scripts makes drift
+# impossible by construction — the hashes are of exactly the bytes shipped.
+#
+# ONLY script-src is set, so styles/images/etc. stay governed by the header and
+# nothing else about the page's policy changes. The meta is placed immediately
+# after <meta charset> so it precedes every <script> it must govern. The app
+# adds all its handlers with addEventListener and injects no <script> at
+# runtime (verified), so nothing legitimate relies on inline execution.
+import hashlib
+def csp_meta(html):
+    blocks = re.findall(r"<script>([\s\S]*?)</script>", html)
+    hashes = ["'sha256-" + base64.b64encode(
+        hashlib.sha256(b.encode("utf-8")).digest()).decode() + "'" for b in blocks]
+    return ('<meta http-equiv="Content-Security-Policy" '
+            'content="script-src \'self\' ' + " ".join(hashes) + '">')
+
+_meta = csp_meta(out)
+_anchor = "<meta charset='utf-8'>\n"
+assert out.count(_anchor) == 1, "charset meta anchor not found exactly once"
+out = out.replace(_anchor, _anchor + _meta + "\n", 1)
+
 check_scripts(out)
 open('strategy-management-platform.html','w').write(out)
 print("built", len(out))

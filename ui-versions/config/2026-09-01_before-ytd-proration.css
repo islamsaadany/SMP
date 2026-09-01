@@ -342,14 +342,6 @@
   td.final { font-weight:700; font-size:14px; }
   .pair { font-family:var(--mono); font-variant-numeric:tabular-nums; white-space:nowrap; }
   .pair b { font-weight:700; }
-  /* §239: THE BENCHMARK STEPS BACK. `.pair` shows a figure against what it is
-     measured by -- delivered against due, YTD actual against the share of the
-     target owed by now -- and the second half is the benchmark, not the
-     answer. Smaller and in the quiet ink, the way a repeated Compile rule
-     already recedes (§149). Measured: 10.9px at weight 400 against 13px at
-     700, 5.31:1 light and 6.37:1 dark, so it is quiet without falling under
-     the readable floor (§38.5). */
-  .pair i { font-style:normal; font-weight:400; font-size:.84em; color:var(--ink-3); }
   .pbody .qs { justify-content:flex-start; }
 
   @media (max-width:900px) {

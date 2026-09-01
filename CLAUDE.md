@@ -406,6 +406,21 @@ console errors (in this cloud environment, run it via a wrapper that points Play
   connection is not. **And the good path is asserted in the same breath**
   (§94.2), because a failure-reported assertion passes on a build that reports
   one always.
+- **A VIEW-AS SESSION STARTS WHERE THEIR SESSION WOULD START (§237):** Islam,
+  closing §234.2's finding — *"viewing as needs to have the same server
+  connection and relation and not inherit my SMO abilities … so I get the
+  errors."* The judging half has been the viewed person's since §185; what
+  stayed the SMO's was the TAB (§234.2: its history made the §234 error
+  unreachable from view-as, because the switch's own §204 flush had already
+  re-aligned the server as the SMO). `switchViewer` now calls `SYNC.rebase()`
+  after a clean flush: one GET, the boot's own `hydrate()` (§53.5), `LIVE`
+  refreshed, `lastSaved` reset — a fresh sign-in by that person. **Three
+  paths deliberately do not rebase**: file://‌/demo (nothing of the server's
+  to take), a failed fetch (old baseline, never a blocked way — §209), and
+  the refused way home, where taking the server's copy would silently destroy
+  the work §184's banner offers to put back. Time is the stated limit — no
+  switch can wear a tab that was open for hours; `test-two-tabs.js` guards
+  that class. `checks/viewas-fresh.py`: 4 red on the pre-§237 build.
 - **ONE FUNCTION'S SUBMIT MUST NOT CARRY EVERYBODY'S REPORT STATE (§234):**
   Islam, from a live client session — *"emergency error that we fixed 100
   times before"*: a CF custodian refused with **"You cannot report for
@@ -427,6 +442,54 @@ console errors (in this cloud environment, run it via a wrapper that points Play
   different targets never touch. Proved able to fail: 11 red on the differ's
   pre-build, and end-to-end on a real Postgres the whole-graph flag fails
   with the reported sentence to the word.
+- **YTD IS MEASURED AGAINST THE PART OF THE YEAR THAT HAS PASSED (§239):**
+  Islam — *"the reporting of YTD is being compared with the full year target
+  without proration which is the wrong practice."* Three answers to one
+  question: a tactic was compared with its own elapsed quarters, a milestone
+  with its date, a measure with the **whole year**, flat. Measured: of 26 Sum
+  measures with an actual, the median read **45 points low** and **18 crossed
+  out of Off track**; group revenue read 43% for a half year that is 87%.
+  **THE PLAN ALREADY SAID WHICH ROWS PRORATE** — `compile`: *Sum* adds up so it
+  prorates, *Latest* is a rate at a point in time and *Average* is normalised,
+  and with no baseline stored, prorating those would invent a glide path.
+  **PRORATE THE TARGET, THEN COMPARE, NEVER THE RATIO**: dividing a score by the
+  elapsed share is backwards for a ≤ measure, so the demo having none, the
+  check MAKES one and asserts the 125% only the right arithmetic gives.
+  **THE STORED FIGURE DOES NOT MOVE** — `progress` keeps the raw
+  actual-against-annual ratio and the score is DERIVED (`measureScore()`, the
+  tactic's own shape moved over), so archives and closed cycles read as they
+  did, nothing is migrated, and the Focus board keeps the raw figure because
+  **reward stays a year-end judgement** (his call).
+  **AND THE REVIEW POINT WAS TWO FIELDS THAT DISAGREED (§239.1):**
+  `tacticPlanned()` read `REVIEW.endsQuarter` (the CYCLE's end) while the
+  quarter pips read `GROUP.asOfQuarter` (*"the review point"*) — identical in
+  the demo, divergent on any cycle reported in-year: over 84 demo tactics a
+  Q4 cycle makes **every one read 100%**, one distinct value, while the pips
+  on the same row say Q2. It **nearly cost the whole fix**: prorating by
+  `endsQuarter/4` is 4/4 on his tenant, so the change would have done nothing
+  on the deployment that reported the bug. **IT IS A MONTH** (*"we might be
+  reporting till month 8"*), `REVIEW.asOfMonth` riding `review.extra` so
+  **no migration**, picked not typed (§177), set at cycle open AND editable
+  mid-cycle — there was no editor at all before. **THE FALLBACK IS WHAT MAKES
+  IT SAFE**: unset falls back to the cycle's quarter end, so nothing moves
+  until the office sets a month, and it **never writes** (§42, §50.6).
+  **Tactics count MONTHS**, so a half-finished quarter counts for its part.
+  **AND THE `Not asked` GATE COMES BACK** — rows that had not started were
+  being asked for figures. §239.2 carries the table wording, all his:
+  *Annual target* · *YTD actual* · *YTD delivery* with the per cent sign on
+  both halves (*"what is 45/50?"* — and the same cell already printed
+  *"due at 50%"* WITH the sign) · Variance gone · *Of plan* → *Progress* ·
+  *Due at* → *YTD Target*, KEPT, **reversing his own previous round** and
+  recorded as a reversal · the reporter's note on Performance **under the
+  name**, which `capKOTable()` has done all along, costing no width (§158).
+  **`Compile` was never on a slide** and the .pptx is unreachable (§145.9), so
+  that half of "remove them from slides" was checked and not done.
+  **The server needed nothing** and it is asserted both ways: `asOfMonth` is
+  not in `REVIEW_PER_TARGET`, so it classifies as `cycle` — the office's.
+  Proved able to fail three ways (4 / 2 / 3 red). **AND `qa.py`'s OWN METHOD
+  MOVED**: it modelled "nothing reported" by blanking `progress`, which
+  asserts nothing once the score is derived from the actual — §51.11 in a
+  check's machinery rather than its selectors.
 - **A DEPENDENCY MUST NOT BE ABLE TO TAKE THE FEATURE IT SERVES DOWN (§231.3):**
   Islam, minutes after the §231 merge — *"the chat bubble disappeared!"*
   `lib/push.js` required `web-push` at its TOP level and `api/chat.js` requires
@@ -3748,12 +3811,26 @@ python3 checks/submit-gate.py  # Submit is shut until the report is complete and
                                 # draft and Submit both LOCK the report (controls
                                 # actually disabled, never a class) and one Reopen
                                 # unlocks either (§220, §221)
+python3 checks/ytd-proration.py # YTD is measured against the part of the year that has
+                                # PASSED (§239): the review point is a month and the
+                                # office picks it; Sum prorates and Latest must not; the
+                                # TARGET is prorated, never the ratio (a made-up ≤ row
+                                # reads 125%, where a divided ratio reads 150%); the
+                                # stored `progress` is asserted UNCHANGED beside the new
+                                # score; and every deck row is counted against its own
+                                # header, because dropping a column from a header and not
+                                # from the row is this change's easiest mistake
 python3 checks/gap-walk.py      # the band's chips and Next gap actually go somewhere:
                                 # a unit AND a function, as the filler AND the office,
                                 # every place the band names reached (§177.2)
 python3 checks/viewer-line.py   # the Viewing-as line: the roles and where each is
                                 # held, of EVERY person — no em-dashes, the seat never
                                 # repeated, and the whole line on a hover (§178)
+python3 checks/viewas-fresh.py  # a view-as session starts where their session would
+                                # start (§237): the switch rebases on the server's
+                                # graph, the first save under the view carries only the
+                                # view's own act, and the refused way home keeps the
+                                # work — against a stub whose dataset MOVES mid-run
 python3 checks/milestone-fill.py # a milestone is filled, and a bounded role fills only
                                 # its own (§177): every red Missing the page prints is one
                                 # the count knows about, the month panel escapes the table's
@@ -3997,6 +4074,106 @@ functions off entirely, so the office cannot see whether one has reported; and
 usable number, so an uploaded figure against an unusable target is stored and
 silently unscored &mdash; deriving it would MOVE existing scores, so it was put
 to Islam separately.*
+
+*Earlier: 2026-09-01 &mdash; **&sect;239: YTD is measured against the
+part of the year that has passed.** Islam, from a live round: the reporting of
+YTD was compared with the full-year target without proration. Measured before
+building: of 26 Sum measures with an actual the median read 45 points low, and
+18 of 26 crossed out of Off track. The plan already said which rows prorate
+(`compile`), the target is prorated and never the ratio, the stored `progress`
+is untouched so archives still read, and reward stays a year-end judgement. On
+the way, the finding that reshaped it: **the review point was two fields that
+disagreed**, and prorating by the cycle's end quarter would have done nothing
+at all on the tenant that reported the bug. It is a month now, set by the
+office and editable mid-cycle, riding `review.extra` with no migration and
+falling back so nothing moves until they set one. 24/24 on
+`checks/ytd-proration.py`, proved able to fail three ways &middot; 454/0
+authoriser (3 new, both ways) &middot; 126/0 differ &middot; full `qa.py` sweep
+green &middot; `setup-overview`, `repeat-project`, `table-fit`,
+`project-tables`, `submit-gate`, `fn-pillars` green.*
+
+*Earlier: 2026-09-01 &mdash; **&sect;238: the security follow-ups &mdash;
+a CSP net and no dev files served.** The two items &sect;235 recorded as open,
+both done and verified live. **(1) A build-time hashed CSP** as defence behind
+the escaping fix: `build.py` injects a `<meta http-equiv="Content-Security-Policy">`
+into the built platform whose `script-src` allow-lists every inline `<script>`
+by the SHA-256 of its exact bytes and permits nothing else inline &mdash; so an
+injected `onerror=`/`onfocus=` cannot RUN even if an escaping gap is ever
+reintroduced. Hashed in the same build that emits the scripts, so it can never
+go stale (the one failure mode a hashed CSP otherwise risks &mdash; &sect;91's
+"a stale hash is a page that does not load"). The `vercel.json` header keeps
+`'unsafe-inline'` for the GATE (`index.html`, not built here); the meta is a
+second, stricter policy scoped to the platform, and the browser enforces both,
+so a script must pass both &mdash; real blocks pass (hash), an injected handler
+is blocked (no hash, no unsafe-inline). Only `script-src` is set, so nothing
+else about the policy changes. Proved by `checks/csp-net.py` over HTTP (real
+scripts run, an injected `onerror=` does NOT fire) and by a full `qa.py` walk
+(every page, every viewer, ERRORS none) &mdash; the app adds all handlers with
+`addEventListener` and injects no `<script>` at runtime, so nothing legitimate
+relies on inline execution. **(2) A `.vercelignore`** so the deployment stops
+serving internal files: sources, in-repo checks, mockups, snapshots, docs and a
+separate app skeleton were all publicly fetchable (no secrets &mdash; keys are
+server env vars, and the client rules already ship inline). None are needed by
+the running site, so excluding them touches no runtime dependency; `lib/` and
+`db/` are deliberately KEPT because the `api/*` functions require them (the
+documented low-severity residual &mdash; server source, still no secrets). Live
+after deploy: `scripts/`, `smp-app/` &c. now 404, the gate, platform and API
+all 200. **STILL OPEN &mdash; the server-side DB write** ("every save wipes and
+rewrites all 31 tables"): the acute cost was already removed by &sect;195
+(batched reads and writes), and closing the rest means an incremental writer or
+a read-authorise-write lock on the LIVE database write path &mdash; the one
+change that could corrupt production data, so it is recorded for a dedicated,
+staged pass rather than rushed.*
+
+*Earlier: 2026-09-01 &mdash; **&sect;237: a view-as session starts where
+their session would start.** Islam, closing &sect;234.2's finding: *"viewing
+as needs to have the same server connection and relation and not inherit my
+SMO abilities &hellip; so I get the errors."* The judging half has been the
+viewed person's since &sect;185; what stayed the SMO's was the TAB, and
+&sect;234.2 records how its history made the &sect;234 error unreachable from
+view-as. `switchViewer` now rebases on the server's graph after a clean
+&sect;204 flush &mdash; one GET, the boot's own `hydrate()`, `LIVE` and
+`lastSaved` reset &mdash; a fresh sign-in by that person. The refused way
+home deliberately does NOT rebase (&sect;184's put-back would be silently
+destroyed), nor file://, demo, or a failed fetch. `checks/viewas-fresh.py`
+against a stub whose dataset moves mid-run: **4 red** on the pre-&sect;237
+build; viewer-switch, welcome, refusal-keeps-work, save-flush,
+boot-skeleton, save-fidelity, report-saves, gap-fill, submit-gate, 126/0,
+451/0 and the full sweep green.*
+
+*Earlier: 2026-09-01 &mdash; **&sect;236 / &sect;236.2 / &sect;236.3:
+the added slide moves slide by slide.** Islam, on Manage slides: the Add
+button becomes **"+ Add slide after"** in his words, so it says where the empty
+slide lands (&sect;236); then, of the arrows, *"the rearrange of slides doesn't
+move around the fixed slides of the main flow"* &mdash; measured, **25 dead
+presses of 28** walking Mobile's deck and a function's slide never moving at
+all, because a stored position is an ANCHOR (&sect;50.3) and the arrows stepped
+blindly one row, so a press into an unanchored run recomputed the same position
+and repainted in place. &sect;236.2 made the press land on the nearest real
+place and, on his ruling, made **between a pillar's measures and tactics** a
+place (mirrored on a function: between a project's deliverables and its
+milestones). He tested again &mdash; *"the slides jump from slide 9 to 13 one
+jump .. the added slides can move slide by slide the prohipted slides from the
+movement are the original slides"* &mdash; and he was right: &sect;236.2 removed
+the lie and drew its landing places from the anchors that happened to exist, so
+its own "deliberately NOT anchored" list (the SWOT run, the section dividers)
+was still hopped four at a time. **&sect;236.3 is the rule in one sentence:
+every ORIGINAL slide is a landing place, and what is pinned is the originals'
+own order.** Every fixed slide carries an anchor now; **the existing keys do
+not move** (&sect;30.2 applied to anchors &mdash; `swot`, `p<CODE>`, `cap<id>`
+are untouched), so every picture already placed in a live tenant stays exactly
+where it sits, and there is no migration. One grouping survives and is not a
+gap: the parts of a table split by `deckFitPass()` share their parent's anchor
+and are ONE stop, after the last part &mdash; a picture cannot live between a
+table and its own continuation. `checks/slide-move.py` asserts the problem and
+never a layout (&sect;94.8): every fixed slide a landing place, every place its
+OWN key (a non-adjacent repeat would silently merge two gaps into one
+position), and the walk's stops equal the deck's own slide list, down and back
+up, on a unit AND a function. **5 red then 6 red** on the two builds before,
+each printing his report verbatim. **AND THE LESSON IS MINE**: &sect;236's
+one-step probe landed on a spot that happened to work and I generalised from
+it &mdash; a probe that samples one position proves that position (&sect;94.2
+wearing a green tick).*
 
 *Earlier: 2026-09-01 &mdash; **&sect;235: one escaper, safe in an
 attribute.** A security sweep found the platform's main text-cleaner `esc()`

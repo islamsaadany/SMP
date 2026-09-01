@@ -431,17 +431,27 @@ with sync_playwright() as p:
           const cards = [...el.querySelector(".scores").querySelectorAll(":scope > .card")]
             .map(c => ({ h:c.querySelector("h4").textContent.trim(),
                          big:c.querySelector(".big").textContent.trim() }));
-          /* Nothing scored anywhere: the middle number must be a dash. */
-          const keep = u.items.map(p => (p.measures || []).map(m => m.progress));
+          /* Nothing scored anywhere: the middle number must be a dash.
+
+             §235: IT IS THE ACTUAL THAT IS BLANKED NOW, not `progress`. The
+             score used to BE the stored `progress`, so clearing it modelled
+             "nobody reported"; it is derived from the actual against a
+             prorated target since §235, so clearing `progress` alone leaves
+             every measure perfectly scoreable and this asserted nothing. The
+             method depended on where the number came from -- §51.11's fault
+             one layer in, the check's own machinery rather than its
+             selectors. Both are cleared, because a row with a stored progress
+             and no actual is not a state the product can produce. */
+          const keep = u.items.map(p => (p.measures || []).map(m => ({ p:m.progress, a:m.actual })));
           const by = u.items.map(p => p.by);
           u.items.forEach(p => { delete p.by;
-            (p.measures || []).forEach(m => { m.progress = null; }); });
+            (p.measures || []).forEach(m => { m.progress = null; m.actual = ""; }); });
           const bare = document.createElement("div");
           bare.innerHTML = renderUnitPerformance(u);
           const blank = [...bare.querySelector(".scores").querySelectorAll(":scope > .card")][1]
             .querySelector(".big").textContent.trim();
           u.items.forEach((p, i) => { if (by[i]) p.by = by[i];
-            (p.measures || []).forEach((m, j) => { m.progress = keep[i][j]; }); });
+            (p.measures || []).forEach((m, j) => { m.progress = keep[i][j].p; m.actual = keep[i][j].a; }); });
           return { cards:cards, computed:unitPillars(u), blank:blank };
         }""", dest)
         if len(three["cards"]) != 3:

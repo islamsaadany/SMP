@@ -822,23 +822,11 @@
     var me = null;
     try { me = SYNC.person() && SYNC.person().key; } catch(e){}
     SYNC.saveNow(function(how){
-      if (how === "offline") return go();
-      /* §237: A VIEW-AS SESSION STARTS WHERE THEIR SESSION WOULD START.
-         With the SMO's own work flushed clean (the two answers above this
-         line), the tab takes the SERVER's current graph as its new truth —
-         exactly a fresh sign-in by the viewed person, so nothing of this
-         tab's past rides into a save judged as them (§234.2 records why
-         that mattered). A rebase that cannot fetch answers false and the
-         switch still happens on the old baseline — judged correctly either
-         way (§185), and never a blocked way home (§209). */
-      if (how === "saved" || how === "clean")
-        return SYNC.rebase(function () { go(); });
+      if (how === "saved" || how === "clean" || how === "offline") return go();
       if (me && key === me) return go();
       /* Refused or failed, and not the way home: the banner sync.js already
          drew says what happened, and the view stays where it is so the work
-         keeps the identity that made it. NO REBASE on this path either way —
-         taking the server's copy here would silently destroy the refused
-         work §184's banner is offering to put back. */
+         keeps the identity that made it. */
       var sel2 = document.getElementById("asWho");
       if (sel2) sel2.value = VIEWER;   /* a select shows the refused value (§110) */
     });
@@ -3344,25 +3332,21 @@
        one ended — and asks for the rest. Nothing touches REVIEW until Open. */
     var oc = document.querySelector("[data-opencycle]");
     if (oc) oc.addEventListener("click", function(){
-      /* §239: the draft carries the REVIEW POINT forward, not a quarter. It
-         is left EMPTY rather than guessed -- the whole fault this replaces was
-         a review point nobody had chosen, and a guess here would put one back. */
-      NEWCYCLE = { name:"", from:REVIEW.to || "", to:"", due:"" };
+      NEWCYCLE = { name:"", from:REVIEW.to || "", to:"", due:"",
+                   endsQuarter:REVIEW.endsQuarter || 4 };
       paint();
       var f = document.getElementById("nc-name");
       if (f) f.focus();
     });
-    /* `nc-q` is GONE with its select (§239): the review point is a month now
-       and is picked, not typed, so it writes through FIELDS like every other
-       month in the product rather than through an id read here. */
-    ["nc-name","nc-from","nc-to","nc-due"].forEach(function(id){
+    ["nc-name","nc-from","nc-to","nc-due","nc-q"].forEach(function(id){
       var el = document.getElementById(id);
       if (!el) return;
       /* `input`, not `change`: the draft has to be current when Open is
          pressed, and a change event does not fire until blur — pressing Open
          directly from a field would read the value before the last one typed. */
       el.addEventListener("input", function(){
-        NEWCYCLE[id.slice(3)] = el.value;
+        var k = id === "nc-q" ? "endsQuarter" : id.slice(3);
+        NEWCYCLE[k] = el.value;
       });
     });
     var ncc = document.querySelector("[data-nc-cancel]");
@@ -3376,18 +3360,6 @@
         alert("Give the cycle a name — it is what its figures are filed under " +
               "once it closes, and what the next cycle compares against.");
         var f = document.getElementById("nc-name"); if (f) f.focus();
-        return;
-      }
-      /* §239: AND THE REVIEW POINT IS ASKED FOR, for a stronger reason than
-         the name. It decides what every figure in the cycle is measured
-         against -- a target that adds up is compared with the share of it due
-         by then, and a tactic whose span has not started is not asked at all.
-         §47.8 removed a hard-coded end quarter because "a wrong guess silently
-         changes every unit's execution score"; defaulting this would put that
-         guess straight back. */
-      if (!String(d.asOfMonth || "").trim()) {
-        alert("Pick the month this cycle reports as of \u2014 it decides what every " +
-              "figure is measured against.");
         return;
       }
       /* ── A NEW CYCLE ASKS AGAIN (§49.1) ──────────────────────────
@@ -3414,12 +3386,8 @@
       }
       clearForNewCycle();
       REVIEW = { name:String(d.name).trim(), from:d.from || "", to:d.to || "",
-                 due:d.due || "", state:"open", note:{}, submitted:{},
-                 cadence:REVIEW.cadence };
-      /* Stored as an ABSENCE when it was not picked (§50.6), so an unasked
-         cycle and one whose month was cleared are byte-identical and neither
-         puts a phantom change into the next save. */
-      if (d.asOfMonth) REVIEW.asOfMonth = d.asOfMonth;
+                 due:d.due || "", endsQuarter:Number(d.endsQuarter) || 4,
+                 state:"open", note:{}, submitted:{}, cadence:REVIEW.cadence };
       NEWCYCLE = null;
       paint();
     });
@@ -3766,6 +3734,9 @@
         syncWeights();
         paint();
       });
+    });
+    document.querySelectorAll("[data-kov]").forEach(function(b){
+      b.addEventListener("click", function(){ KO_VIEW = b.dataset.kov; paint(); });
     });
     document.querySelectorAll("[data-tadd]").forEach(function(b){
       b.addEventListener("click", function(){
@@ -6612,27 +6583,7 @@
         if (!mayAuthor("k_found", t)) return;
         if (BUILDER && BUILDER.target === t && h.cap) {
           openBuilderForm("capko", { capId:h.cap.id }); return; }
-        /* §240: IT MINTS AN ID, AS EVERY OTHER ADD IN THE PRODUCT DOES.
-           Islam: *"the input there wasn't saved."* This pushed a row with no
-           id, so the reporting page drew its box carrying the string
-           "undefined", `findById()` matched nothing, and the handler returned
-           without writing — no error, no console, the figure gone. A line the
-           platform cannot name is also nobody's to change (§191), so the save
-           would have refused it even had the box worked.
-
-           The unit's own Add has minted one since §96.4 (`koSettle`); this
-           one, which serves a capability AND a pillars function's Overview,
-           never did. §51.10 exactly: the code that CREATES a field has to be
-           found as well as the code that reads it.
-
-           FROM THE MAXIMUM, never from the count (§96.2) — remove the middle
-           of KO1·KO2·KO3 and add, and a count-derived id collides with the
-           KO3 still on screen. `mintRowId` is the same helper `addMeasure`
-           and `addTactic` already use, and the prefix is the one the two
-           renumberers write: the capability's own id, or the function's
-           `fn:<key>`, which is what `h.target` already holds. */
-        h.list.push({ id: mintRowId(h.list, (h.cap ? h.cap.id : h.target) + "-KO"),
-          name:"", dir:"≥", target:"", compile:"Latest",
+        h.list.push({ name:"", dir:"≥", target:"", compile:"Latest",
           weight:null, actual:"", progress:null });
         fieldSaved(); paint();
       });

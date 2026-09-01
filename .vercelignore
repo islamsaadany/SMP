@@ -1,0 +1,29 @@
+# Keep internal / dev-only files out of the public deployment (2026-09-01
+# security sweep). None of these are needed by the running site: the platform
+# is the single built HTML plus the api/* serverless functions, and those
+# functions read only lib/*.js and db/** — which are deliberately NOT listed
+# here so they keep working. Everything below is source, tests, docs, mockups
+# or a separate app skeleton, and only ever leaked implementation detail when
+# served. (Excluding a file removes it from BOTH static serving and the
+# function bundle, so nothing the runtime requires may appear here.)
+
+# Sources and in-repo test/checks (the built HTML is committed separately and
+# is what production serves — src/ is not needed at runtime).
+SMP-Project-Folder/src/
+SMP-Project-Folder/mockups/
+
+# Dev tooling, snapshots, mockups, specs, brand references.
+scripts/
+design-mockups/
+ui-versions/
+specs/
+.specify/
+clients/
+
+# A separate Next.js app skeleton, not part of the live platform.
+smp-app/
+
+# Documentation.
+*.md
+SMP-Project-Folder/*.md
+.github/

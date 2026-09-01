@@ -206,6 +206,64 @@ def main():
            pg.evaluate("()=>!('asOfMonth' in REVIEW)"),
            pg.evaluate("()=>REVIEW.asOfMonth"))
 
+        print("\n── 9 · the review point knows its own year (§239.3) ──")
+        # THE STATE THE DEMO CANNOT PRODUCE, so it is MADE (§94.2). Islam's own
+        # cycle carries no four-digit year in its name or its dates, and
+        # `cycleYear()` scrapes one out of exactly those — so it answered null,
+        # the elapsed share answered null, and EVERYTHING fell back: measures
+        # stopped prorating and every tactic read 100% again, with the month
+        # sitting there plainly set. Two fields answering one question, which is
+        # the fault §239.1 exists to have removed, committed by its own fix.
+        shapes = pg.evaluate("""()=>{
+          var keep = {name:REVIEW.name, from:REVIEW.from, to:REVIEW.to,
+                      due:REVIEW.due, asOfMonth:REVIEW.asOfMonth};
+          var out = {};
+          var probe = function(rv){
+            Object.keys(rv).forEach(function(k){ REVIEW[k] = rv[k]; });
+            REVIEW.asOfMonth = "Aug 26";
+            return { year: cycleYear(), months: elapsedMonths(),
+                     tactic: tacticPlanned(UNITS.mobile.items[0].tactics[0]),
+                     rev: measureScore(GROUP.keyObjectives[0]) };
+          };
+          out.withYear = probe({name:"2026", from:"Jan 2026", to:"Dec 2026", due:"15 Jan 2027"});
+          out.noYear   = probe({name:"Annual Plan", from:"Jan", to:"Dec", due:""});
+          Object.keys(keep).forEach(function(k){
+            if (keep[k] === undefined) delete REVIEW[k]; else REVIEW[k] = keep[k]; });
+          paint();
+          return out;
+        }""")
+        w, n = shapes["withYear"], shapes["noYear"]
+        ck("a cycle whose name carries a year prorates", w["months"] == 8 and w["tactic"] == 83, w)
+        ck("...and the year really is absent from the other one", n["year"] is None, n)
+        # ASSERTED AS THE AGREEMENT, never as a number: the two shapes must
+        # answer identically, because the month is the same month.
+        ck("a cycle with NO year anywhere answers exactly the same", n == dict(w, year=None), (w, n))
+
+        print("\n── 10 · the strip says what the month MEANS ──")
+        # Islam could not tell whether the month he picked had taken effect.
+        # The consequence is on the page now, so a review point that is not
+        # working says so rather than being inferred from a table reading 100%.
+        pg.evaluate("()=>{current='setup'; currentSub='cycle'; paint();}")
+        pg.wait_for_timeout(300)
+        said = pg.evaluate("""()=>{
+          var read = function(){ var e=document.querySelector('.fstrip-meta.asof');
+            return e ? e.textContent.replace(/\\s+/g,' ').trim() : null; };
+          var keep = REVIEW.asOfMonth;
+          delete REVIEW.asOfMonth; paint(); var unset = read();
+          REVIEW.asOfMonth = "Aug 26"; paint(); var set = read();
+          if (keep === undefined) delete REVIEW.asOfMonth; else REVIEW.asOfMonth = keep;
+          paint();
+          return {unset:unset, set:set};
+        }""")
+        ck("with a month picked it says how much of the year has passed",
+           "8 of 12 months" in said["set"], said["set"])
+        ck("...and with none it says so, and where the number came from",
+           "6 of 12 months" in said["unset"] and "cycle" in said["unset"], said["unset"])
+        # AND IT NEVER PRINTS "Missing" over something that is not owed
+        # (§177, §214.4): with no month picked the platform still has an answer.
+        ck("...without crying Missing over a working fallback",
+           "Missing" not in said["unset"], said["unset"])
+
         print("\n── 9 · nothing threw ──")
         ck("no page errors at any point", not errs, errs[:3])
         b.close()

@@ -7586,6 +7586,7 @@ body{ background:var(--mk-ground); color:var(--mk-ink); margin:0; }
 .mk-panel-h h2{ margin:0 0 3px; font-size:16.5px; font-weight:650; letter-spacing:-.01em; }
 .mk-panel-h p{ margin:0; font-size:13px; line-height:1.5; color:#C6D2E4; max-width:74ch; }
 .mk-panel-b{ padding:18px 20px 6px; }
+.mk-panel-b .mk-foot{ margin:16px -20px 0; }
 .mk-real{ overflow-x:auto; }
 .mk-cap{ font-size:10.5px; letter-spacing:.13em; text-transform:uppercase;
   color:var(--mk-ink-3); margin:0 0 9px; display:flex; align-items:center; gap:8px; }
@@ -7594,6 +7595,16 @@ body{ background:var(--mk-ground); color:var(--mk-ink); margin:0; }
 .mk-cap.new::before{ content:"PROPOSED"; background:var(--mk-gold); color:#16325C;
   padding:2px 7px; border-radius:4px; letter-spacing:.1em; font-weight:700; }
 .mk-gap{ height:22px; }
+
+.mk-foot{ display:grid; grid-template-columns:repeat(auto-fit,minmax(280px,1fr)); gap:0;
+  border-top:1px solid var(--mk-line); margin-top:16px; }
+.mk-foot > div{ padding:14px 20px 15px; }
+.mk-foot > div + div{ border-left:1px solid var(--mk-line); }
+.mk-foot em{ display:block; font-style:normal; font-size:10.5px; letter-spacing:.13em;
+  text-transform:uppercase; color:var(--mk-ink-3); margin-bottom:6px; }
+.mk-foot p{ margin:0; font-size:13px; line-height:1.55; color:var(--mk-ink-2); }
+.mk-foot p b{ color:var(--mk-ink); font-weight:650; }
+@media (max-width:720px){ .mk-foot > div + div{ border-left:0; border-top:1px solid var(--mk-line); } }
 
 .mk-note{ background:var(--mk-card); border:1px solid var(--mk-line);
   border-left:3px solid var(--mk-gold); border-radius:0 10px 10px 0; padding:17px 21px; }
@@ -7645,57 +7656,80 @@ body{ background:var(--mk-ground); color:var(--mk-ink); margin:0; }
 <div class="mk">
 
   <header>
-    <p class="mk-eyebrow">Design review &middot; revision 2 &middot; for sign-off</p>
+    <p class="mk-eyebrow">Design review &middot; revision 4 &middot; for sign-off</p>
     <div class="mk-hr"></div>
     <h1 class="mk-h1">Prorating the YTD score</h1>
-    <p class="mk-lede">Shape <b>B</b> as you asked for it: the annual target keeps its own column, the
-      figure column says <b>YTD</b>, the benchmark rides quietly inside it, and the variance column goes
-      because the pair already shows it. Both tables are the product's own, lifted out of the running page.</p>
+    <p class="mk-lede">A measure is scored against its <b>whole-year target</b> however far into the year we
+      are, so a unit eight months in reads two-thirds low and paints red. This is the whole fix as settled:
+      the office says <b>which month we are reporting as of</b>, and that one setting drives every
+      comparison on the platform. Every table below is the product's own, lifted out of the running page.</p>
     <div class="mk-settled">
-      <span class="mk-chip">Settled: shape <b>B</b>, the pair and the score</span>
-      <span class="mk-chip">Settled: <b>Sum rows only</b> &mdash; Latest and Average keep the full-year target</span>
-      <span class="mk-chip">Settled: <b>reward standing stays a year-end judgement</b></span>
-      <span class="mk-chip">Shown at <b>H1 2026</b>, ends Q2 &mdash; half the plan year elapsed</span>
+      <span class="mk-chip">The review point is a <b>month</b>, set each round</span>
+      <span class="mk-chip">Plan year runs <b>January to December</b></span>
+      <span class="mk-chip">Prorated: <b>measures and key objectives that add up</b> &mdash; a rate or a share is not</span>
+      <span class="mk-chip">Tactics <b>count months</b>, so a part-finished quarter counts for its part</span>
+      <span class="mk-chip"><b>Reward stays a year-end judgement</b></span>
     </div>
   </header>
 
   <section class="mk-changes">
+    <div class="mk-change"><em>The review point</em>
+      <p><span class="mk-was">as of Q4</span> &rarr; <b>reported as of Aug 26</b>. A month, because a
+        quarter cannot say &ldquo;eight months in&rdquo;. One setting, and everything reads it.</p></div>
     <div class="mk-change"><em>Target column</em>
-      <p><span class="mk-was">Target</span> &rarr; <b>Annual target</b>. Says outright that it is the
-        year's number, which is what makes the smaller figure beside the actual make sense.</p></div>
+      <p><span class="mk-was">Target</span> &rarr; <b>Annual target</b>, so the column says outright that it
+        is the year's number.</p></div>
     <div class="mk-change"><em>Figure column</em>
-      <p><span class="mk-was">H1 actual</span> &rarr; <b>YTD actual</b>, and <span class="mk-was">Deliv. /
-        plan</span> &rarr; <b>YTD delivery</b>. The benchmark sits inside the cell, small and quiet.</p></div>
-    <div class="mk-change"><em>Variance</em>
-      <p><b>Removed</b> from both tables. The pair already shows it, and the column was spending width to
-        restate a subtraction the reader can see.</p></div>
-    <div class="mk-change"><em>The tactic's per cent sign</em>
-      <p><span class="mk-was">45 / 50</span> &rarr; <b>45% / 50%</b>. Both halves have always been per cents
-        of the tactic's own plan. The sign was missing, so the cell read as a count.</p></div>
-    <div class="mk-change"><em>Score column</em>
-      <p><b>Unchanged.</b> The measures table keeps <b>Progress</b>; the tactics table keeps <b>Of
-        plan</b>, which is what it says today.</p></div>
+      <p><span class="mk-was">H1 actual</span> &rarr; <b>YTD actual</b>, carrying what is due by now
+        beside it, small and quiet.</p></div>
+    <div class="mk-change"><em>Two columns go</em>
+      <p><b>Variance</b> from both Performance tables &mdash; the pair already shows it &mdash; and
+        <b>Due&nbsp;at</b> from the reporting screen entirely.</p></div>
   </section>
 
-  <div class="mk-note ask">
-    <h3>One correction, and one thing I need you to look at</h3>
-    <p><b>The tactics table's last column is called &ldquo;Of plan&rdquo;, not &ldquo;Performance&rdquo;.</b>
-      You said to keep the current title, so I have kept &ldquo;Of plan&rdquo;. <em>Performance</em> is the
-      word used on a project's deliverables and outcomes; the unit's tactic table has always said
-      <em>Of plan</em>. Say the word if you would rather they matched.</p>
-    <p><b>On a Latest row the small grey figure repeats the Annual target exactly</b> &mdash; look at EBITDA
-      and market share below. That is what you asked for and it keeps the column honest and consistent, and
-      it is the one thing on this sheet I would question: showing it only where it differs would make the
-      grey number a signal that says &ldquo;this row is prorated&rdquo;. Your call, and I have not made
-      it for you.</p>
-  </div>
+  <!-- ── THE REVIEW POINT ─────────────────────────────────────────── -->
+  <article class="mk-panel">
+    <div class="mk-panel-h">
+      <h2>The review point</h2>
+      <p>Set once each round, on the cycle, by the office. It is the only new thing anybody has to fill in,
+        and it is what every comparison on this sheet is measured from.</p>
+    </div>
+    <div class="mk-panel-b">
+
+      <p class="mk-cap now"></p>
+      <div class="mk-real">
+        <p style="margin:0 0 4px"><span class="pill kind">Half-yearly</span>
+          <span class="why" style="margin-left:8px">Jan 2026 to Jun 2026 &middot; due 15 Jul 2026 &middot;
+          <b>as of Q2</b></span></p>
+      </div>
+
+      <div class="mk-gap"></div>
+
+      <p class="mk-cap new"></p>
+      <div class="mk-real">
+        <p style="margin:0 0 4px"><span class="pill kind">Half-yearly</span>
+          <span class="why" style="margin-left:8px">Jan 2026 to Jun 2026 &middot; due 15 Jul 2026 &middot;
+          reported as of <button class="editbtn" style="padding:2px 9px">Jun 26 &#9662;</button></span></p>
+      </div>
+
+      <div class="mk-foot">
+        <div><em>Why a month</em><p>An eight-month round cannot be said in quarters. <b>Aug 26</b> is eight
+          months of twelve, so a target of 18B EGP is measured against <b>12B</b>. At <b>Jun 26</b> it is
+          measured against <b>9B</b>, which is what the tables below show.</p></div>
+        <div><em>Nothing new to learn</em><p>It is the platform's own month picker &mdash; the same
+          <b>Jul 26</b> control a milestone's due date already uses, in the same words, for the same reason:
+          every comparison the platform makes is monthly.</p></div>
+      </div>
+    </div>
+  </article>
 
   <!-- ── MEASURES ─────────────────────────────────────────────────── -->
   <article class="mk-panel">
     <div class="mk-panel-h">
-      <h2>Key measures</h2>
-      <p>Unit &rsaquo; Performance, and the same table on a supporting function, the group and a company.
-        Three of these six compile by Sum and prorate; three compile by Latest and do not.</p>
+      <h2>Key measures and key objectives &mdash; Performance</h2>
+      <p>One table serves a unit's, a function's, the group's and a capability's, so this is one change in
+        one place. Three of these six add up across the year and prorate; three are a rate or a share and
+        do not.</p>
     </div>
     <div class="mk-panel-b">
 
@@ -7730,23 +7764,22 @@ body{ background:var(--mk-ground); color:var(--mk-ink); margin:0; }
     </div>
   </article>
 
-  <!-- ── TACTICS ──────────────────────────────────────────────────── -->
+  <!-- ── TACTICS · PERFORMANCE ────────────────────────────────────── -->
   <article class="mk-panel">
     <div class="mk-panel-h">
-      <h2>Tactics</h2>
-      <p>Already prorated against its own active quarters &mdash; nothing about its arithmetic changes. Both
-        figures here are <b>per cents of this tactic's own plan</b>, and the per cent sign is added, because
-        without it the cell reads as a count of things.</p>
+      <h2>Tactics &mdash; Performance</h2>
+      <p>Both figures are per cents of that tactic's own plan, so the sign is added. What is expected by now
+        is worked out in months, so a tactic standing in a half-finished quarter gets credit for the part
+        that has happened.</p>
     </div>
     <div class="mk-panel-b">
 
       <p class="mk-cap now"></p>
       <div class="mk-real"><table>
-        <thead><tr><th class="idx">#</th><th>Tactic</th><th>Owner</th><th>Collabs.</th><th>Quarters</th><th class="cc">Status</th><th class="cc">Deliv. / plan</th><th class="cc">Var.</th><th class="cc">Of plan</th></tr></thead>
+        <thead><tr><th class="idx">#</th><th>Tactic</th><th>Owner</th><th>Quarters</th><th class="cc">Status</th><th class="cc">Deliv. / plan</th><th class="cc">Var.</th><th class="cc">Of plan</th></tr></thead>
         <tbody>
-          <tr><td class="idx"><span class="idx-n">1</span></td><td>Clean and standardize customer and SKU base</td><td>Ramy Behairy</td><td class="collabs"><span class="nobody">&mdash;</span></td><td><span class="qs"><i class="">1</i><i class="on past">2</i><i class="on">3</i><i class="">4</i></span></td><td class="cc"><span class="pill warn">WIP</span></td><td class="num"><span class="pair"><b>45</b> / 50</span></td><td class="num"><span style="color:var(--warn-tx)">&minus;5</span></td><td class="num final" style="color:var(--good-tx, var(--good))">90%</td></tr>
-          <tr><td class="idx"><span class="idx-n">2</span></td><td>End-to-end order-to-cash digitization</td><td>Mohamed Rizk</td><td class="collabs"><span class="nobody">&mdash;</span></td><td><span class="qs"><i class="">1</i><i class="on past">2</i><i class="on">3</i><i class="">4</i></span></td><td class="cc"><span class="pill warn">WIP</span></td><td class="num"><span class="pair"><b>35</b> / 50</span></td><td class="num"><span style="color:var(--bad-tx)">&minus;15</span></td><td class="num final" style="color:var(--attn-tx, var(--attn))">70%</td></tr>
-          <tr><td class="idx"><span class="idx-n">3</span></td><td>Digitize sales reporting via Power BI</td><td>Ramy Behairy</td><td class="collabs"><span class="nobody">&mdash;</span></td><td><span class="qs"><i class="">1</i><i class="on past">2</i><i class="on">3</i><i class="">4</i></span></td><td class="cc"><span class="pill warn">WIP</span></td><td class="num"><span class="pair"><b>40</b> / 50</span></td><td class="num"><span style="color:var(--bad-tx)">&minus;10</span></td><td class="num final" style="color:var(--attn-tx, var(--attn))">80%</td></tr>
+          <tr><td class="idx"><span class="idx-n">1</span></td><td>Clean and standardize customer and SKU base</td><td>Ramy Behairy</td><td><span class="qs"><i class="">1</i><i class="on past">2</i><i class="on">3</i><i class="">4</i></span></td><td class="cc"><span class="pill warn">WIP</span></td><td class="num"><span class="pair"><b>45</b> / 50</span></td><td class="num"><span style="color:var(--warn-tx)">&minus;5</span></td><td class="num final" style="color:var(--good-tx, var(--good))">90%</td></tr>
+          <tr><td class="idx"><span class="idx-n">2</span></td><td>End-to-end order-to-cash digitization</td><td>Mohamed Rizk</td><td><span class="qs"><i class="">1</i><i class="on past">2</i><i class="on">3</i><i class="">4</i></span></td><td class="cc"><span class="pill warn">WIP</span></td><td class="num"><span class="pair"><b>35</b> / 50</span></td><td class="num"><span style="color:var(--bad-tx)">&minus;15</span></td><td class="num final" style="color:var(--attn-tx, var(--attn))">70%</td></tr>
         </tbody>
       </table></div>
 
@@ -7754,47 +7787,76 @@ body{ background:var(--mk-ground); color:var(--mk-ink); margin:0; }
 
       <p class="mk-cap new"></p>
       <div class="mk-real"><table>
-        <thead><tr><th class="idx">#</th><th>Tactic</th><th>Owner</th><th>Collabs.</th><th>Quarters</th><th class="cc">Status</th><th class="cc">YTD delivery</th><th class="cc">Of plan</th></tr></thead>
+        <thead><tr><th class="idx">#</th><th>Tactic</th><th>Owner</th><th>Quarters</th><th class="cc">Status</th><th class="cc">YTD delivery</th><th class="cc">Of plan</th></tr></thead>
         <tbody>
-          <tr><td class="idx"><span class="idx-n">1</span></td><td>Clean and standardize customer and SKU base</td><td>Ramy Behairy</td><td class="collabs"><span class="nobody">&mdash;</span></td><td><span class="qs"><i class="">1</i><i class="on past">2</i><i class="on">3</i><i class="">4</i></span></td><td class="cc"><span class="pill warn">WIP</span></td><td class="num"><span class="pair"><b>45%</b> <i>/ 50%</i></span></td><td class="num final" style="color:var(--good-tx, var(--good))">90%</td></tr>
-          <tr><td class="idx"><span class="idx-n">2</span></td><td>End-to-end order-to-cash digitization</td><td>Mohamed Rizk</td><td class="collabs"><span class="nobody">&mdash;</span></td><td><span class="qs"><i class="">1</i><i class="on past">2</i><i class="on">3</i><i class="">4</i></span></td><td class="cc"><span class="pill warn">WIP</span></td><td class="num"><span class="pair"><b>35%</b> <i>/ 50%</i></span></td><td class="num final" style="color:var(--attn-tx, var(--attn))">70%</td></tr>
-          <tr><td class="idx"><span class="idx-n">3</span></td><td>Digitize sales reporting via Power BI</td><td>Ramy Behairy</td><td class="collabs"><span class="nobody">&mdash;</span></td><td><span class="qs"><i class="">1</i><i class="on past">2</i><i class="on">3</i><i class="">4</i></span></td><td class="cc"><span class="pill warn">WIP</span></td><td class="num"><span class="pair"><b>40%</b> <i>/ 50%</i></span></td><td class="num final" style="color:var(--attn-tx, var(--attn))">80%</td></tr>
+          <tr><td class="idx"><span class="idx-n">1</span></td><td>Clean and standardize customer and SKU base</td><td>Ramy Behairy</td><td><span class="qs"><i class="">1</i><i class="on past">2</i><i class="on">3</i><i class="">4</i></span></td><td class="cc"><span class="pill warn">WIP</span></td><td class="num"><span class="pair"><b>45%</b> <i>/ 50%</i></span></td><td class="num final" style="color:var(--good-tx, var(--good))">90%</td></tr>
+          <tr><td class="idx"><span class="idx-n">2</span></td><td>End-to-end order-to-cash digitization</td><td>Mohamed Rizk</td><td><span class="qs"><i class="">1</i><i class="on past">2</i><i class="on">3</i><i class="">4</i></span></td><td class="cc"><span class="pill warn">WIP</span></td><td class="num"><span class="pair"><b>35%</b> <i>/ 50%</i></span></td><td class="num final" style="color:var(--attn-tx, var(--attn))">70%</td></tr>
         </tbody>
       </table></div>
 
     </div>
   </article>
 
+  <!-- ── TACTICS · REPORTING ──────────────────────────────────────── -->
+  <article class="mk-panel">
+    <div class="mk-panel-h">
+      <h2>Tactics &mdash; Reporting</h2>
+      <p>This is the screen from your screenshot. The comparison comes off it entirely: the person filling
+        it in says how far along they are, and the judgement is read on Performance.</p>
+    </div>
+    <div class="mk-panel-b">
+
+      <p class="mk-cap now"></p>
+      <div class="mk-real"><table>
+        <thead><tr><th>#</th><th>Tactic</th><th>Owner</th><th>Quarters</th><th>Due at</th><th>Reported</th><th>Note</th></tr></thead>
+        <tbody>
+          <tr><td class="idx">1</td><td>Clean and standardize customer and SKU base</td><td>Ramy Behairy</td><td><span class="qs"><i class="">1</i><i class="on past">2</i><i class="on">3</i><i class="">4</i></span></td><td class="num">50%</td><td class="cc"><span class="entry filled"><input class="field" value="45" aria-label="Report"><span class="unitsuf">%</span></span></td><td class="notecol"><input class="fld notefld" value="" placeholder="Note, if there is one"></td></tr>
+          <tr><td class="idx">2</td><td>End-to-end order-to-cash digitization</td><td>Mohamed Rizk</td><td><span class="qs"><i class="">1</i><i class="on past">2</i><i class="on">3</i><i class="">4</i></span></td><td class="num">50%</td><td class="cc"><span class="entry filled"><input class="field" value="35" aria-label="Report"><span class="unitsuf">%</span></span></td><td class="notecol"><input class="fld notefld" value="" placeholder="Note, if there is one"></td></tr>
+          <tr class="notdue"><td class="idx">3</td><td>Retire the legacy dealer portal</td><td>Ashraf Laithy</td><td><span class="qs"><i class="">1</i><i class="">2</i><i class="">3</i><i class="on">4</i></span></td><td colspan="3" class="cc"><span class="pill kind">Not asked &mdash; outside this cycle</span></td></tr>
+        </tbody>
+      </table></div>
+
+      <div class="mk-gap"></div>
+
+      <p class="mk-cap new"></p>
+      <div class="mk-real"><table>
+        <thead><tr><th>#</th><th>Tactic</th><th>Owner</th><th>Quarters</th><th>Reported</th><th>Note</th></tr></thead>
+        <tbody>
+          <tr><td class="idx">1</td><td>Clean and standardize customer and SKU base</td><td>Ramy Behairy</td><td><span class="qs"><i class="">1</i><i class="on past">2</i><i class="on">3</i><i class="">4</i></span></td><td class="cc"><span class="entry filled"><input class="field" value="45" aria-label="Report"><span class="unitsuf">%</span></span></td><td class="notecol"><input class="fld notefld" value="" placeholder="Note, if there is one"></td></tr>
+          <tr><td class="idx">2</td><td>End-to-end order-to-cash digitization</td><td>Mohamed Rizk</td><td><span class="qs"><i class="">1</i><i class="on past">2</i><i class="on">3</i><i class="">4</i></span></td><td class="cc"><span class="entry filled"><input class="field" value="35" aria-label="Report"><span class="unitsuf">%</span></span></td><td class="notecol"><input class="fld notefld" value="" placeholder="Note, if there is one"></td></tr>
+          <tr class="notdue"><td class="idx">3</td><td>Retire the legacy dealer portal</td><td>Ashraf Laithy</td><td><span class="qs"><i class="">1</i><i class="">2</i><i class="">3</i><i class="on">4</i></span></td><td colspan="2" class="cc"><span class="pill kind">Not asked &mdash; outside this cycle</span></td></tr>
+        </tbody>
+      </table></div>
+
+      <div class="mk-foot">
+        <div><em>What it buys</em><p>The number that read like a target is gone, and the quarter boxes are
+          left to say where we are &mdash; which they already did correctly.</p></div>
+        <div><em>What it costs</em><p>The person filling it in cannot see whether they are ahead or behind
+          while they type. That was your call, and it is worth naming.</p></div>
+      </div>
+    </div>
+  </article>
+
   <section class="mk-note">
-    <h3>What the rename quietly fixes, and what it does not reach</h3>
-    <ul>
-      <li><b>&ldquo;H1 actual&rdquo; is a hardcoded literal.</b> It reads &ldquo;H1 actual&rdquo; whatever
-        the cycle is &mdash; open Q3 and the column still says H1. <b>YTD actual</b> is true in every cycle,
-        so the rename removes a wrong word rather than only changing one.</li>
-      <li><b>The same cell already prints the sign in its other state.</b> A tactic that is due and
-        unreported reads <em>&ldquo;due at 50%&rdquo;</em> &mdash; with the per cent &mdash; and the moment a
-        figure arrives the same cell drops it and shows <em>45 / 50</em>. One cell, two spellings of one
-        unit, which is why the reported state reads as a count of something.</li>
-      <li><b>Var. survives on four other tables</b> &mdash; the group's and a company's execution drills, and
-        the unit's pillar summary. Those are drill-downs rather than the tactics table, and you named the
-        tactics, so I have left them. Say if they should go too.</li>
-      <li><b>The review deck already agrees.</b> Its tactic table says <em>Deliv. / due &middot; Of plan</em>
-        with no variance column, so the deck moves to <em>YTD delivery</em> and is otherwise already
-        where this lands.</li>
-    </ul>
+    <h3>Row 3 is the bug, and it is why this matters beyond a column</h3>
+    <p>A tactic planned for Q4 alone has <b>not started</b>, so it says <em>&ldquo;Not asked &mdash; outside
+      this cycle&rdquo;</em> and nobody is chased for a number. That already exists in the product. On your
+      live site it is <b>defeated</b>: because the platform thinks the whole year has passed, every tactic
+      counts as fully due, so rows that have not begun are being asked for figures and told 100% is
+      expected. Setting the review point puts that gate back.</p>
   </section>
 
   <section class="mk-note">
-    <h3>What I build once you sign this off</h3>
-    <p>One shared rule in <b>lib/rules.js</b> so the screen, the server and the deck answer identically. The
-      arithmetic prorates <b>the target</b> and then compares &mdash; never the ratio, or a &ldquo;less is
-      better&rdquo; measure moves the wrong way. The elapsed share is the cycle's own <b>ends&nbsp;Q</b>,
-      already stored and already what a tactic uses, so nothing is migrated and no field is added.</p>
-    <p><b>.pair has exactly one caller today</b>, so it changes in place rather than forking &mdash; one
-      vocabulary for a figure against its benchmark, used by both tables.</p>
-    <p>And, if you say so in the same breath: a capability's Reporting page <b>never recomputes the score at
-      all</b>, so an actual typed there leaves a stale percentage while the same row uploaded by workbook is
-      recomputed. I would drive it in the browser to confirm before touching it.</p>
+    <h3>Two small ones I have not decided for you</h3>
+    <ul>
+      <li><b>On a rate or a share, the small grey figure repeats the annual target exactly</b> &mdash; look
+        at EBITDA and market share. Nothing is prorated there, so the two are the same number. Keeping it
+        makes the column consistent; showing it only where it differs would make the grey figure mean
+        &ldquo;this one is prorated&rdquo;.</li>
+      <li><b>The tactics score column is called &ldquo;Of plan&rdquo;</b>, where the projects call the same
+        kind of number &ldquo;Performance&rdquo;. I have left it as it is. Say if you want them to
+        match.</li>
+    </ul>
   </section>
 
 </div>

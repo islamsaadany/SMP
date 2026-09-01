@@ -19771,3 +19771,30 @@ purpose. The two answers differ because the questions do.
 control as the admin, who can open several clients, so the door sent them to
 the cards anyway and the loop never showed. It is pressed as the **consultant
 with one client** now, which is the only viewer the fault was ever visible on.
+
+### 147.24 · Forefront's people land on Forefront's platform
+
+Islam, signing in: *"the access opens directly in raya trade! what are you
+doing?"* — and he is right. Landing sent anybody with exactly **one** openable
+client straight into it, on §32's rule that one destination is not a question.
+
+**§32 IS ABOUT A DOOR IN FRONT OF A DESTINATION, AND THAT IS THE WRONG READING
+OF THIS SCREEN.** The platform is not a chooser standing in front of a client —
+it **is** where Forefront's work lives: the clients they run, Consultants, Who
+sees what. Somebody at Forefront does not sign in to open a client; they sign
+in to run the practice, and which client is a decision they make afterwards, if
+at all.
+
+**AND THE COUNTING IS WHAT MADE IT LOOK REASONABLE.** With one client today the
+office was dropped into it, and the day a second is created the same sign-in
+would start behaving differently. **A landing that changes with the number of
+rows in a table is not a design** — it is an accident that happens to read
+correctly on the data you have.
+
+**A CLIENT'S OWN PERSON IS UNCHANGED**, and is the case §32 really covers: they
+hold one client, they have no platform at all, and a card page in front of them
+would be a door to a room with one door.
+
+**This also removes §147.23's fault at its root** rather than only at the
+control: the way back could loop because the door disagreed with it about where
+somebody belongs. Both now say the same thing.

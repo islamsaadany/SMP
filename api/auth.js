@@ -91,15 +91,28 @@ async function landingFor(client, account) {
   const world = { mine: mine, access: access };
   const all = (await client.query(
     "SELECT key, kind, status FROM platform.clients ORDER BY kind, name")).rows;
-  /* LANDING COUNTS WHAT THEY CAN OPEN, not what they can see. With the
-     default setting a consultant is shown every client by name — that is the
-     office knowing what Forefront runs — while holding a seat on one. Counting
-     the LISTED ones would put a card page in front of somebody with exactly
-     one destination, which is the door behind a door §32 removed. */
+  /* ── FOREFRONT'S PEOPLE LAND ON FOREFRONT'S PLATFORM (§147.24) ──
+     This used to send anybody with exactly ONE openable client straight into
+     it, on §32's rule that one destination is not a question. Islam, signing
+     in: *"the access opens directly in raya trade! what are you doing?"*
+
+     §32 IS ABOUT A DOOR IN FRONT OF A DESTINATION, and that is the wrong
+     reading of this screen. The platform is not a chooser standing in front of
+     a client — it IS where Forefront's work lives: the clients they run,
+     Consultants, Who sees what. Somebody at Forefront does not sign in to open
+     a client; they sign in to run the practice, and which client is a decision
+     they make afterwards, if at all.
+
+     The rule that made it look reasonable is the counting: with one client
+     today, the office would have been dropped into it — and the day a second
+     client is created, the same sign-in would start behaving differently. A
+     landing that changes with the number of rows in a table is not a design.
+
+     A CLIENT'S OWN PERSON IS UNCHANGED, and is the case §32 really covers:
+     they hold one client, they have no platform at all, and a card page would
+     be a door to a room with one door. */
   const listed = FF.visibleClients(world, account, all).map(function (c) { return c.key; });
-  const openable = all.filter(function (c) { return FF.mayOpenClient(world, account, c); })
-                      .map(function (c) { return c.key; });
-  return { land: openable.length === 1 ? openable[0] : null, list: listed };
+  return { land: null, list: listed };
 }
 
 module.exports = async function handler(req, res) {

@@ -207,8 +207,25 @@ def main():
             pg2 = b.new_page(viewport={"width": 1200, "height": 800})
             sign_in(pg2, CONSULT)
             pg2.wait_for_load_state("networkidle"); pg2.wait_for_timeout(1500)
-            check("somebody with one client opens it, with no card in the way",
-                  pg2.url.endswith("/raya-trade"), pg2.url)
+            # ── FOREFRONT'S PEOPLE LAND ON FOREFRONT'S PLATFORM (§147.24) ──
+            # This asserted the opposite until Islam signed in: "the access
+            # opens directly in raya trade! what are you doing?" §32's rule —
+            # one destination is not a question — is about a door in front of a
+            # destination, and the platform is not that: it IS where the
+            # office's work lives. And a landing that changes with the number
+            # of rows in a table is not a design.
+            landed = pg2.url.rstrip("/").endswith("/platform")
+            check("somebody at Forefront lands on Forefront's platform", landed, pg2.url)
+            # REPORTED, NOT CRASHED — the rule this file already carries. On a
+            # build with the old landing there is no card to wait for, and a
+            # test that dies says only that something went wrong.
+            if landed:
+                pg2.wait_for_selector(".ccard[data-client]", timeout=9000)
+                check("…with the client they hold on it",
+                      "Raya Trade" in pg2.inner_text("#page"), pg2.inner_text("#page")[:120])
+                pg2.click(".ccard[data-client='raya-trade']")
+                pg2.wait_for_load_state("networkidle"); pg2.wait_for_timeout(2500)
+                check("…and pressing it opens the client", pg2.url.endswith("/raya-trade"), pg2.url)
             # AND THE WAY BACK IS NOT A LOOP (§147.23). It went to "/", and the
             # door hands somebody over to what they can OPEN — so for exactly
             # this person, holding one client, the way back walked out of the

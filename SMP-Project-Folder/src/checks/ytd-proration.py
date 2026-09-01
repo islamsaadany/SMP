@@ -104,6 +104,21 @@ def main():
         ck("...because its target, not its score, is what was halved",
            made["due"] == "50", made)
 
+        print("\n── 3b · nought on a \u2264 measure is the best answer, not an unscorable one ──")
+        # §239.4: the arithmetic divides BY the actual on a "less is better"
+        # row, so a guard against dividing by zero turned the BEST result in
+        # the table into "Not scored" -- Islam's own "Data duplicate rate
+        # \u2264 1%, 0%", which read 150% before §239 and stopped being scored
+        # after it. Asserted for a prorating row and a rate alike.
+        zero = pg.evaluate("""()=>({
+          rate: measureScore({dir:"\u2264", target:"1%",  compile:"Latest", actual:"0%"}),
+          sum:  measureScore({dir:"\u2264", target:"100", compile:"Sum",    actual:"0"}),
+          overshot: measureScore({dir:"\u2264", target:"1%", compile:"Latest", actual:"4%"})
+        })""")
+        ck("zero against a \u2264 target reads the cap, on a rate", zero["rate"] == 150, zero)
+        ck("...and on a row that prorates", zero["sum"] == 150, zero)
+        ck("...while a real overshoot still scores badly", zero["overshot"] == 25, zero)
+
         print("\n── 4 · the tables say what they measure ──")
         pg.click('#units [data-u="mobile"]'); pg.wait_for_timeout(300)
         pg.click('[data-s="performance"]'); pg.wait_for_timeout(500)

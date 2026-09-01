@@ -26540,3 +26540,30 @@ they were already partly serialised by `writeState`'s TRUNCATE, so the throughpu
 change is negligible. The larger "write only the changed rows instead of
 rewriting every table" optimisation is a separate, riskier piece and is NOT
 done here; the acute cost it targeted was already removed by §195's batching.
+
+### §239.4 — nought on a "less is better" measure is the best answer
+
+Islam's own row, in the screenshot that followed §239.3: **Data duplicate rate,
+≤ 1%, actual 0%** — reading **"Not scored"**.
+
+**A REGRESSION §239 INTRODUCED, and it is the best result in the table.** Zero
+duplicates against a target of *at most 1%* is perfect. The arithmetic divides
+**by** the actual on a "less is better" row, so `measureScore()` carried a
+guard against dividing by zero and returned null — while the expression it
+replaced landed on the cap by accident (`1/0` is `Infinity`, clamped to 150).
+So the row read **150%** before §239 and stopped being scored after it.
+
+It returns the cap, deliberately rather than by arithmetic accident. Asserted
+for a rate and for a row that prorates, with a real overshoot beside them
+(4% against ≤ 1% → 25%) so a build returning 150 for everything fails.
+
+**AND THE REST OF THAT TABLE IS THE RULE WORKING, NOT A FAULT.** All four of
+his measures compile by `Latest`, which by §239's decision does not prorate:
+`20% / 90%` and `30% / 50%` are correct, and the strip above them reading
+*"reported as of Aug 26 · 8 of 12 months"* is the evidence §239.3 landed.
+**What that exposes is the COST of the rule on his plan** — his measures are
+adoption and coverage rates almost throughout, so "Sum only" moves very little
+for him. Put to him as a decision with the arithmetic attached rather than
+answered here: prorating a rate assumes a straight line from zero, which is
+reasonable for *App coverage rate* and meaningless for *Data duplicate rate*,
+and the platform stores no baseline to ramp from.

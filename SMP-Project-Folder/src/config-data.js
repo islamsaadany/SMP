@@ -5455,7 +5455,14 @@ function measureScore(m){
   if (due == null || !due) return null;
   var a = parseFloat(String(m.actual == null ? "" : m.actual).replace(/[^0-9.]/g, ""));
   if (isNaN(a)) return null;
-  if (m.dir === "\u2264" && !a) return null;
+  /* NOUGHT ON A "LESS IS BETTER" MEASURE IS THE BEST POSSIBLE ANSWER, NOT AN
+     UNSCORABLE ONE (§239.4). Zero duplicates against a target of "at most 1%"
+     is perfect, and the arithmetic divides BY the actual -- so a guard written
+     to avoid dividing by zero turned the best result in the table into "Not
+     scored". Islam's own row: `Data duplicate rate ≤ 1%, 0%` read 150% before
+     §239 and stopped being scored after it. It is the cap, which is where the
+     old expression landed anyway (1/0 is Infinity, clamped to 150). */
+  if (m.dir === "\u2264" && !a) return 150;
   return Math.max(0, Math.min(150, Math.round((m.dir === "\u2264" ? due / a : a / due) * 100)));
 }
 /* What a prorated row is measured against, written the way the target is --

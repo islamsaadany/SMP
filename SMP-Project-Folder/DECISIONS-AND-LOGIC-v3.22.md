@@ -26485,6 +26485,61 @@ assertion red. The check MAKES both cycle shapes, because the demo carries a
 year and cannot produce his (§94.2), and asserts the two as an **agreement**
 rather than as numbers. Full `qa.py` sweep, `setup-overview`,
 `repeat-project`, `submit-gate`, 454/0 and 126/0 all green.
+
+---
+
+## §240 — Saves take turns, so two at once cannot lose data (2026-09-01)
+
+Islam, on the performance sweep: *"what if people submit saves together —
+would that lose data?"* Right to ask. A save is a read-modify-write — read the
+stored graph, lay this client's changes over it (§210), authorise, write — and
+there was NO lock around those three steps. Two saves that OVERLAP both read
+the same starting state before either writes, so the later writer overwrote the
+earlier one's change. Silent, and most likely at a reporting deadline when many
+people save at once. §210's diff shrank the envelope and made refusals
+accurate; it did NOT close this, because the server still writes the whole
+applied graph, so the later write clobbers the earlier one's row.
+
+**Sequential saves were already safe** (a stale tab saving after another save
+completed reads the fresh state and merges — proved by `test-two-tabs`); only
+TRULY CONCURRENT saves lost data.
+
+**THE FIX: ONE TRANSACTION, ONE TRANSACTION-SCOPED LOCK.** The whole
+read-modify-write runs in a single transaction with `pg_advisory_xact_lock` at
+the top of it. The second concurrent save blocks there until the first COMMITs,
+then reads the first's committed result and merges onto it. Nobody is
+overwritten.
+
+**IT MUST BE TRANSACTION-SCOPED, NOT SESSION-SCOPED.** Production is Neon behind
+PgBouncer transaction pooling, where a session-level advisory lock can sit on a
+backend the next statement is never routed to — so it would not serialise
+anything. A transaction-scoped lock lives and dies with the transaction, on the
+one backend the transaction is pinned to, which is exactly the guarantee
+pooling gives. (The first draft used a session lock; it passed on a direct
+local Postgres and would have been a no-op on production — §100.3, a test must
+model the server.)
+
+`writeState` gained an `{ inTransaction: true }` option so it runs inside the
+caller's transaction instead of opening its own — a nested BEGIN warns and the
+inner COMMIT would end the caller's transaction early, releasing the lock
+mid-write. Every other caller (the seed, the tests) passes nothing and keeps
+the self-contained transaction it always had.
+
+**Only the write path locks.** A GET needs none: `writeState`'s transaction
+makes a concurrent read see all-old or all-new, never a torn half.
+
+**PROVED, AND PROVED ABLE TO FAIL** on a real Postgres 16.
+`scripts/test-concurrent-saves.js` drives the REAL handler (real connections,
+real lock) with 8 genuinely concurrent saves, each changing a different unit
+from one shared baseline: with the lock, 8 of 8 survive; with
+`SMP_NO_SAVE_LOCK=1`, 6 of 8 are lost. `test-roundtrip` (writer still lossless)
+and `test-two-tabs` (sequential §210/§215 intact) both stay green.
+
+**The cost, stated:** concurrent saves queue for well under a second each —
+they were already partly serialised by `writeState`'s TRUNCATE, so the throughput
+change is negligible. The larger "write only the changed rows instead of
+rewriting every table" optimisation is a separate, riskier piece and is NOT
+done here; the acute cost it targeted was already removed by §195's batching.
 ---
 
 ## §242 — A SUPPORTING FUNCTION'S REPORT IS ASKED FOR, AND ITS OBJECTIVES CAN BE ANSWERED (2026-09-01)

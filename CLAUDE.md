@@ -4031,7 +4031,76 @@ prior sessions (on HR_ERP) accidentally reverted agreed-upon designs.
 
 ---
 
-*Last Updated: 2026-09-01 &mdash; **&sect;240: saves take turns, so two at
+*Last Updated: 2026-09-01 &mdash; **&sect;242: a supporting function's report
+is asked for, and its objectives can be answered; &sect;243: the review deck,
+and the weights its objectives are scored by.** Islam, from a live client
+session: *"for the functions planning in pillars the key objectives reporting
+wasn't done and the button of submit to smo was allowed and the input there
+wasn't saved."* **THREE FAULTS IN ONE COAT.** `submitBlockers()` asked by
+PREFIX, so every `fn:` target went to the CAPABILITY counters and a function
+that plans in pillars has none &mdash; the gate looked at an empty list, found
+nothing owed, and opened the button (measured: the page 0 of 10, the gate 0 of
+0, a unit in the same state refusing with *"41 figures still to enter"*).
+&sect;59's rule in the last place still asking by prefix, and &sect;224's fault
+on the Present button one surface over. **It was never only the count**: the
+rows come from the same list, so the note rule and the In-progress rule had
+never once run on this format either. **A key objective added to a function had
+no id**, so the reporting box carried the string `"undefined"`, `findById()`
+matched nothing, and the figure was discarded in silence (&sect;51.10) &mdash;
+worse on a capability, where `cap_key_objectives.id` is a PRIMARY KEY and the
+save failed outright. **The rows already stored are healed by migration 039 and
+deliberately NOT in the browser**: `lastSaved` is taken after hydration, so a
+client-minted id joins the baseline and never travels while every row edit is
+addressed AT it, and `applyChanges()` refuses a row id the stored graph does
+not hold &mdash; failing the whole save. &sect;191's own answer.
+**THEN &sect;243, from his decks and screens, signed off from a mockup built
+out of the real platform.** A supporting function's aim slide loses the
+aspiration heading it never had and the direction and 3-year columns it cannot
+fill (&sect;213), with the this-year column **unconditional** there because it
+is the only target a function has &mdash; his own reason: *"the functions has
+no 3 years objectives."* Its five empty SWOT slides go, while **a unit with an
+empty SWOT still draws its section** (&sect;45.2: the test is whether the
+subject AUTHORS one). **Three headline numbers, not two** &mdash; &sect;64 gave
+the Performance page three and only the SLIDE was left behind, so it is
+asserted as AGREEMENT with what that page computes. The quarters read as the
+four boxes every screen draws (the text form arrived through a merge with no
+decision behind it). **The notes slide follows the note**, with the cost stated
+and accepted: one that exists can still be corrected on the projector, one that
+does not has no box to start it in. **A BLANK WEIGHT IS NEVER NOUGHT** &mdash;
+`koScore()` read `weights[i] == null ? 0`, so where every reported row was
+blank the total came to nothing and the headline returned null (measured: 90%
+equally weighted, a dash on that weighting). The rule in one sentence: *a blank
+counts as the average of the weights that were set; if none were set every
+objective counts equally; and every set weight being zero falls back to equal
+rather than to a dash.* **A unit's objectives gain a Weight column**, reversing
+&sect;226's *"the unit side is untouched"* at Islam's instruction &mdash; and
+it writes the ROW, because `KO_WEIGHTS` is positional (&sect;48) while a
+capability's and a function's weights have always lived on the row; nothing is
+migrated and the stored array is still read. **A function's read table drops
+the Weight column when nothing is weighted**, the objectives read as a TABLE
+with the cards/table switch DELETED (&sect;24), **the unit is never written
+twice** (`joinTarget("", "8 M EGP", "M EGP")` returned *"8 M EGP M EGP"*; a
+DIFFERENT unit is left exactly as typed, never rewritten), and **a long figure
+is read at its target's scale** &mdash; display only, full number on the hover,
+gated at **1000x** because &sect;199.6 makes a bare number inherit its row's
+unit and one whole magnitude step is the only line at which "they wrote it out
+in full" is the sole reading; **not one figure in the shipped plan moves**.
+Proved able to fail: `checks/fn-report-gate.py` **16 red**, including
+`boxId: 'undefined'` verbatim; `checks/deck-and-weights.py` **22 red**;
+`scripts/test-ko-ids.js` 15 assertions against a real Postgres 16; round trip
+on a virgin database PASS; `test-authorize` 451/0; `test-graph-diff` 126/0;
+full `qa.py` sweep clean. **Two checks held assertions Islam had deliberately
+reversed and both were REWRITTEN rather than deleted** (&sect;218) &mdash; and
+one was failing because two check files still set `KO_VIEW`, which in sloppy
+mode CREATED the global they asserted the absence of (&sect;51.11 from the
+other side). **RECORDED, NOT DONE**: the SMO's cycle board leaves pillars
+functions off entirely, so the office cannot see whether one has reported; and
+`applyProgress()` still leaves `progress` unchanged where a target holds no
+usable number, so an uploaded figure against an unusable target is stored and
+silently unscored &mdash; deriving it would MOVE existing scores, so it was put
+to Islam separately.*
+
+*Earlier: 2026-09-01 &mdash; **&sect;240: saves take turns, so two at
 once cannot lose data.** Islam, on the performance sweep: *"what if people
 submit saves together &mdash; would that lose data?"* Measured, and yes: a save
 is read-modify-write (read the stored graph, lay this client's changes over it

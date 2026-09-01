@@ -144,7 +144,8 @@ with sync_playwright() as pw:
     pg.click('[data-u="logistics"]'); pg.wait_for_timeout(400)
     pg.click('[data-s="strategy"]'); pg.wait_for_timeout(300)
     pg.click('[data-sub2="found"]'); pg.wait_for_timeout(600)
-    pg.evaluate("() => { KO_VIEW='cols'; SHOW_KO_THIS_YEAR = true; paint(); }")
+    # §243: there is one layout now, so nothing selects it.
+    pg.evaluate("() => { SHOW_KO_THIS_YEAR = true; paint(); }")
     pg.wait_for_timeout(500)
     v = pg.evaluate("""() => {
       const h = document.querySelector('.ohead');
@@ -161,12 +162,26 @@ with sync_playwright() as pw:
     ck("...and so is a percentage",
        any(c.endswith("%") for r in v["rows"] for c in r), v["rows"])
 
-    print("\n── 6 · the chip layout is deliberately untouched")
-    chips = pg.evaluate("""() => { KO_VIEW='chips'; paint();
-      const c = document.querySelector('.ochip .v');
-      return c ? c.textContent.trim() : null; }""")
-    ck("a chip still carries the whole figure", chips and "EGP" in chips, chips)
-    pg.evaluate("() => { KO_VIEW='cols'; paint(); }"); pg.wait_for_timeout(300)
+    # §243 DELETED THE CHIP LAYOUT at Islam's instruction: *"the other toggle
+    # that shows the objective in table or cards — remove it and make the view
+    # in table only."* This asserted that the chips still carried the whole
+    # figure; what it was protecting — that the unit stays ON the figure and is
+    # not split into a column of its own (§199.4) — is still true and is now
+    # asserted of the only layout there is. §51.11 in the other direction: a
+    # check keyed on markup that has gone must be REWRITTEN, not deleted, or
+    # nothing guards what it was guarding.
+    print("\n── 6 · one layout, and it carries the whole figure (§243)")
+    lay = pg.evaluate("""() => { paint();
+      return { chipsGone: !document.querySelector('.ochip'),
+               switchGone: !document.querySelector('[data-kov]'),
+               noGlobal: typeof KO_VIEW === 'undefined',
+               figure: (()=>{ const c=document.querySelector('.orow .ot');
+                              return c ? c.textContent.trim() : null; })() }; }""")
+    ck("the chip layout is gone", lay["chipsGone"], lay)
+    ck("...and so is the switch that chose it", lay["switchGone"] and lay["noGlobal"], lay)
+    ck("the table's figure still carries its unit (§199.4)",
+       lay["figure"] and "EGP" in lay["figure"], lay)
+    pg.wait_for_timeout(300)
 
     print("\n── 7 · the editor writes the plan, and only the office's pen has it")
     pg.evaluate("() => { EDIT_PAGE['foundation'] = true; paint(); }")

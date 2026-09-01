@@ -174,8 +174,11 @@ var WELCOME = (function(){
       if (!pending) return;
       var parts = [], c, b;
       try {
-        c = String(t).indexOf("fn:") === 0
-          ? fnReportedCount(String(t).slice(3)) : reportedCount(UNITS[t]);
+        /* §242: asked by SHAPE, not by prefix — the same one reader the
+           submit gate two lines below already uses. Asking differently here
+           is what let this row say "every figure is entered" over a pillars
+           function that had entered none. */
+        c = subjectReported(t);
         var open = Math.max(0, (c.total | 0) - (c.done | 0));
         if (open) parts.push("<i>" + wesc(plural(open, "figure")) + "</i> still open");
         else parts.push("Every figure is entered");

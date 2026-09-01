@@ -56,6 +56,30 @@ function joinTarget(original, value, unit){
   value = (value == null ? "" : String(value)).trim();
   unit  = (unit  == null ? "" : String(unit)).trim();
   if (!value) return "";
+  /* ── THE UNIT IS NEVER WRITTEN TWICE (§243) ──────────────────────────
+     Islam, from a reported figure: *"an actual number is showing the measure
+     twice — M EGP M EGP — despite being reported 8 only."* Reproduced exactly:
+     `joinTarget("", "8 M EGP", "M EGP")` returned **"8 M EGP M EGP"**.
+
+     The reporting box holds the BARE number and shows the unit beside it as a
+     suffix, and the unit is rejoined on save — which is right, and assumes
+     nobody types the unit in. Into an EMPTY box, typing "8 M EGP" is the
+     natural thing to do, and it was added a second time.
+
+     So a unit already on the value is not added again. It is compared
+     case-insensitively and with spacing ignored, because "8 m egp" and
+     "8  M EGP" are the same answer typed by a person.
+
+     A DIFFERENT unit is LEFT EXACTLY AS TYPED rather than replaced: somebody
+     entering "8 B EGP" against a target in M EGP has said something specific,
+     and quietly rewriting it as M EGP would change a figure by a thousandfold
+     without saying so. Doubling is a display fault; that would be a data one. */
+  if (unit) {
+    var got = splitTarget(value);
+    var flat = function(x){ return String(x).replace(/\s+/g, "").toLowerCase(); };
+    if (got.unit && flat(got.unit) === flat(unit)) value = got.value;
+    else if (got.unit) return value;
+  }
   var m = String(original == null ? "" : original).match(/^(-?[\d.,]+)(\s*)(.*)$/);
   var sep = m ? m[2] : (unit && unit.length > 1 && /^[A-Za-z]/.test(unit) ? " " : "");
   return unit ? value + sep + unit : value;

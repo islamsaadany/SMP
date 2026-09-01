@@ -3767,9 +3767,6 @@
         paint();
       });
     });
-    document.querySelectorAll("[data-kov]").forEach(function(b){
-      b.addEventListener("click", function(){ KO_VIEW = b.dataset.kov; paint(); });
-    });
     document.querySelectorAll("[data-tadd]").forEach(function(b){
       b.addEventListener("click", function(){
         var k = b.dataset.tadd;
@@ -6615,7 +6612,27 @@
         if (!mayAuthor("k_found", t)) return;
         if (BUILDER && BUILDER.target === t && h.cap) {
           openBuilderForm("capko", { capId:h.cap.id }); return; }
-        h.list.push({ name:"", dir:"≥", target:"", compile:"Latest",
+        /* §242: IT MINTS AN ID, AS EVERY OTHER ADD IN THE PRODUCT DOES.
+           Islam: *"the input there wasn't saved."* This pushed a row with no
+           id, so the reporting page drew its box carrying the string
+           "undefined", `findById()` matched nothing, and the handler returned
+           without writing — no error, no console, the figure gone. A line the
+           platform cannot name is also nobody's to change (§191), so the save
+           would have refused it even had the box worked.
+
+           The unit's own Add has minted one since §96.4 (`koSettle`); this
+           one, which serves a capability AND a pillars function's Overview,
+           never did. §51.10 exactly: the code that CREATES a field has to be
+           found as well as the code that reads it.
+
+           FROM THE MAXIMUM, never from the count (§96.2) — remove the middle
+           of KO1·KO2·KO3 and add, and a count-derived id collides with the
+           KO3 still on screen. `mintRowId` is the same helper `addMeasure`
+           and `addTactic` already use, and the prefix is the one the two
+           renumberers write: the capability's own id, or the function's
+           `fn:<key>`, which is what `h.target` already holds. */
+        h.list.push({ id: mintRowId(h.list, (h.cap ? h.cap.id : h.target) + "-KO"),
+          name:"", dir:"≥", target:"", compile:"Latest",
           weight:null, actual:"", progress:null });
         fieldSaved(); paint();
       });

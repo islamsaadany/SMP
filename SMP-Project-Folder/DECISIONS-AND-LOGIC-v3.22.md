@@ -26540,7 +26540,302 @@ they were already partly serialised by `writeState`'s TRUNCATE, so the throughpu
 change is negligible. The larger "write only the changed rows instead of
 rewriting every table" optimisation is a separate, riskier piece and is NOT
 done here; the acute cost it targeted was already removed by §195's batching.
+---
 
+## §242 — A SUPPORTING FUNCTION'S REPORT IS ASKED FOR, AND ITS OBJECTIVES CAN BE ANSWERED (2026-09-01)
+
+Islam, from a live client session: *"for the functions planning in pillars the
+key objectives reporting wasn't done and the button of submit to smo was allowed
+and the input there wasn't saved."*
+
+**THREE FAULTS WEARING ONE COAT**, and each needed a different fix. All three
+were reproduced on the shipped build before a line was changed.
+
+### 1 · The submit gate was blind to the whole plan
+
+`submitBlockers()` asked **by prefix**: every `fn:` target went to
+`fnAskedItems()` / `fnReportedCount()`, which walk **capabilities**. A function
+that plans in pillars has none, so the gate looked at an empty list, found
+nothing owed, and opened the button. Measured on Merchandising with every
+figure stripped:
+
+| | the reporting page says | the submit gate says | the refusal |
+|---|---|---|---|
+| the pillars function | 0 of **10** entered | 0 of **0** | *(nothing in the way)* |
+| a business unit, same state | 0 of 41 | 0 of 41 | "41 figures still to enter." |
+
+**§59's rule in the last place still asking by prefix**, and the same fault
+§224 fixed on the Present button: *the format decides the deck, not the
+prefix*. A pillars function's plan is unit-shaped, so it is asked the unit's
+question through `unitLike()` — exactly as its Report page already draws it.
+
+**IT WAS NEVER ONLY THE COUNT.** `submitBlockers` reads its *rows* from the
+same list, so the note rule (§105) and the In-progress rule (§104.10) had
+**never once run** on this format either. With the fix, Merchandising's own
+demo data immediately produces a real blocker it had never shown: *"2 figures
+are at risk or off track with no note."*
+
+**ONE READER, `subjectAsked()` / `subjectReported()`**, because the welcome
+screen asks the same question one line before it asks this one and had the
+identical prefix test (§53.5: two answers to *what does this subject owe* is
+how a screen comes to disagree with the button on it).
+
+**A pillars function is never also asked for capabilities**, and that is by
+construction rather than by a rule here: the format cannot be switched while
+the other side holds anything (§59), so the two lists are exclusive.
+
+### 2 · A key objective added to a function had no id
+
+Every "add a row" control in the product mints one — `addMeasure()`,
+`addTactic()`, `addProject()`, and for a **unit's** objectives `koSettle()`
+since §96.4. The one behind `data-capkoadd`, which serves a **capability** and
+a **pillars function's Overview**, pushed `{name, dir, target, compile, weight,
+actual, progress}` and no id at all.
+
+So the reporting page drew that row's box carrying the string `"undefined"`,
+`findById()` matched nothing, and the handler returned without writing — **no
+error, no console, the figure gone.** §51.10 exactly: *the code that CREATES a
+field has to be found as well as the code that reads it.*
+
+**IT IS WORSE ON A CAPABILITY, AND THE SCHEMA IS WHAT SAYS SO.**
+`cap_key_objectives.id` is a PRIMARY KEY, so a capability's id-less objective
+could never be stored at all — that save failed outright, which is §172's shape
+where one refused value then poisons every later save. A pillars function keeps
+its objectives in `functions.extra`, which is jsonb and holds anything, which
+is precisely why these survived to be reported against and could not be.
+
+Fixed with `mintRowId(h.list, (h.cap ? h.cap.id : h.target) + "-KO")` — the
+same helper and the same **from the maximum, never from the count** rule
+(§96.2) the other minters use.
+
+### 3 · The rows already in a client's database — and why the heal is NOT in the browser
+
+**The first build healed them at the hydration door**, beside `fnPruneNulls`
+(§118), and it was reverted. `lastSaved` is taken *after* hydration, so a
+minted id joins the save **baseline** and never travels — while every later row
+edit is addressed **at** that id, and `applyChanges()` resolves a row edit
+against the **stored** graph and refuses one it cannot find (*"a row edit names
+a row that is not here"*), which fails the **whole** save and takes unrelated
+work with it (§215).
+
+So the heal is **migration 039**, which is §191's own answer to the same fault
+on the group's six objectives. It fills only blanks, never rewrites an id
+already written (that is what a reported figure, a focus mark and a cycle
+snapshot are keyed on — §48.1), and **continues past the highest already
+present** rather than counting from position, which is the duplicate §191
+nearly shipped.
+
+### Proved able to fail
+
+- `checks/fn-report-gate.py`: **16 red** against the shipped pre-§242 build,
+  among them `boxId: 'undefined'` — the reported fault verbatim. 0 after.
+- **Two of its own assertions could not fail when first written** and were
+  tightened: the id-uniqueness check counted one row holding `undefined` and
+  passed (§113.8), and the gate/page agreement was measured on the demo's
+  *fully reported* function, where a gate counting nothing agrees with a page
+  counting ten (§94.2 — the state is stripped first now).
+- **And the check crashed rather than failing**, which read as zero failures
+  until it was guarded — §215's lesson, paid again: *a throw is a failure.*
+- `scripts/test-ko-ids.js`: **15 assertions** against a real Postgres 16 —
+  every blank named, an existing id and its figure untouched, `""` treated as
+  an absence, the numbering clearing an existing `KO7`, other keys in `extra`
+  surviving, a second run byte-identical, and the fault itself reproduced.
+- Round trip on a **virgin** database with 039 in place: PASS.
+- `test-authorize` 451/0 · `test-graph-diff` 126/0 · `submit-gate`,
+  `fn-pillars`, `fn-ko-edit`, `gap-fill`, `objective-unit`, `welcome`,
+  `report-saves` all green · full `qa.py` sweep clean.
+
+### Recorded, not fixed
+
+**The SMO's cycle board leaves pillars functions off entirely** —
+`boardFunctionKeys()` filters on `!fnPlansInPillars(...) && capsOfFunction(k).length`
+— so the office cannot see whether such a function has reported. Their
+vocabulary is a *unit's* (key objectives, measures, tactics), so they belong on
+the board's unit half rather than its function half (§105.2: the two
+vocabularies must never share a heading). That is a visible change and is its
+own decision.
+
+---
+
+## §243 — THE REVIEW DECK, AND THE WEIGHTS ITS OBJECTIVES ARE SCORED BY (2026-09-01)
+
+Islam, going through a client's decks and screens. Settled from a mockup built
+out of the real platform (`design-mockups/functions-planning-presentations/`)
+and signed off item by item; every decision below is his.
+
+### A supporting function aims at its objectives, and nothing else
+
+*"There is a slide named what we are aiming at which is ok as a start, but it
+has a title of winning aspiration and it shouldn't show this as they don't have
+it … remove the by 2027 and the direction."*
+
+Measured on the demo's pillars function before anything was written: the slide
+printed **Winning Aspiration** over an empty paragraph, then a table headed
+`# · Objective · Dir. · By 2027 · This year` in which two columns held nothing
+but em-dashes. Both are §213 working exactly as designed — a supporting
+function inherits its aspiration and its SWOT from the unit it plans under and
+never authors either, and its objectives carry a **weight** and no 3-year
+target — and nobody had asked what that leaves on the slide.
+
+**THE THIS-YEAR COLUMN IS UNCONDITIONAL HERE**, which is not a detail:
+`SHOW_KO_THIS_YEAR` is a per-viewer setting (§66), so on a function — whose
+only target this is — a viewer who had turned it off would get a table of
+objectives with no target at all. Islam settled the reason himself: *"the
+functions has no 3 years objectives."*
+
+**A BUSINESS UNIT'S SLIDE IS UNTOUCHED AND IT IS ASSERTED.** A unit authors an
+aspiration and carries a 3-year target, so nothing there is redundant.
+
+### No SWOT slides on a function
+
+*"The functions has no swot, remove from the slides."* Five slides of
+twenty-one — a section cover reading **0 · 0 · 0 · 0** and four empty
+categories.
+
+**A UNIT WITH AN EMPTY SWOT STILL DRAWS ITS SECTION**, deliberately: there it is
+a plan that has not been analysed yet, which is worth saying out loud (§45.2).
+The test is whether the subject **authors** a SWOT, never whether this one
+happens to be empty — and both ends are asserted, or a build that dropped the
+section for everybody would pass (§113.8).
+
+### Three headline numbers, and the heading names its subject
+
+*"Where the units stands needs to show the 3 main numbers not only 2"* — and,
+of the same slide on a function, *"where merchandizing stands."*
+
+**THE MIDDLE NUMBER IS NOT NEW.** §64 gave a unit's Performance page three
+headline figures and `unitPillars()` has existed since the scoring model did.
+Only the SLIDE was left at two, so every review deck since has shown two thirds
+of a reading the screen behind it shows in full. Asserted as **agreement with
+what that page computes**, never as a figure (§53.5, §94.8).
+
+The heading names the function on a function and still says *the unit* on a
+unit, which is right as it stands and is not changed for tidiness.
+
+### The quarters are the four boxes
+
+*"The quarters view in the slides changed — why isn't the boxes that we have in
+the performance there?"* He is right and there was **no decision behind the
+difference**: the text form arrived through a merge. The deck draws `qs()` now,
+at a size a projector can read — the page's 18px mark sits beside 13px type and
+a slide's type is far larger, so the same box would read as decoration.
+
+### The notes slide follows the note
+
+*"Make the notes and achievements slide optional and they can add it when they
+need."* Drawn only when a note is written — no switch to remember and nothing
+new stored, on **both** decks (§53.5). **The cost was stated before it was
+accepted** and he accepted it: the box is editable in the room, so a note that
+already exists can still be corrected on the projector, and one that does not
+has no box to start it in.
+
+### A blank weight is never nought — and it is one of the two dash mechanisms
+
+*"There is no weighting on the objectives in units, it needs to be added; and
+in the functions planning as pillars it's there, but if it's missing it should
+be considered equally weighted objectives not 0."*
+
+`koScore()` read `weights[i] == null ? 0 : weights[i]`, so a blank weight
+counted at **nothing** — and where every reported row was blank the total came
+to nought and the whole headline returned null. Measured: the same objectives
+read **90%** equally weighted and **a dash** on that weighting. That is one of
+the two mechanisms behind his *"the objectives already are reported but not
+showing the performance"*.
+
+**THE RULE, IN ONE SENTENCE**: a blank weight counts as the average of the
+weights that WERE set; if none were set at all, every objective counts equally;
+and if every weight that was set is a literal zero, the score falls back to
+equal rather than to a dash. So a blank can never be worth nothing, never
+dominate, and a figure that is in is always seen.
+
+**TWO PLACES HOLD A WEIGHT, WHICH IS WHY THIS TOOK BOTH.** A capability's and a
+function's objectives carry `weight` ON THE ROW; a unit's have lived in
+`KO_WEIGHTS[ukey]` as an array BY POSITION since before rows had ids — §48's
+own hazard, since removing a row from the middle shifts every weight below it
+onto the wrong objective. The unit's new column writes the **row**, the stored
+array stays readable for a tenant that has one, and the row wins where both
+exist. **Nothing is migrated and nothing is rewritten.**
+
+**§226's "the unit side is untouched" IS REVERSED HERE, at Islam's own
+instruction**, and recorded as a reversal rather than overwritten — that note is
+precisely why this table was left behind when the function's gained the column.
+Its check assertion was **rewritten rather than deleted** (§218's rule): what it
+was protecting is still worth protecting, so it now asserts that the unit keeps
+the 3-year column a function has no equivalent of AND carries the new one.
+
+### A function's read table drops a column nobody filled
+
+*"In the functions overview, if there is no weights submitted the table
+shouldn't show weights."* A column of em-dashes says only that a question was
+asked and not answered — and since this section a blank weight is an equal
+share rather than nought, so the column would also be stating a value nobody
+set. `.one` is the two-column shape `koView()` already uses.
+
+### One layout for the objectives, and the switch goes
+
+*"The other toggle that shows the objective in table or cards — remove it and
+make the view in table only."* The chips branch, `koToggle()`, `KO_VIEW`, its
+click handler and the `.ochips` / `.ochip` rules are **DELETED rather than left
+unreachable** (§24): CSS left behind is what a later reader takes for
+load-bearing, and a mockup drawn from the stylesheet then draws something the
+product does not have — §41.9's own scar.
+
+### The unit is never written twice
+
+*"An actual number is showing the measure twice — M EGP M EGP — despite being
+reported 8 only."* Reproduced exactly: `joinTarget("", "8 M EGP", "M EGP")`
+returned `"8 M EGP M EGP"`. The reporting box holds the bare number and shows
+the unit beside it as a suffix, and the unit is rejoined on save — which is
+right, and assumes nobody types it in. Into an EMPTY box, typing "8 M EGP" is
+the natural thing to do.
+
+**A DIFFERENT unit is LEFT EXACTLY AS TYPED rather than replaced.** Somebody
+entering "8 B EGP" against a target in M EGP has said something specific, and
+quietly rewriting it would change a figure by a thousandfold without saying so.
+Doubling is a display fault; that would be a data one.
+
+### A long figure is read at its target's scale
+
+*"Actual revenue is reported in details by the unit — it needs to be squeezed to
+follow the target format like 3.59, not the full number."* His row: target
+**3.59B EGP** against actual **3,590,800,500**.
+
+**DISPLAY ONLY** — what was reported is stored exactly as entered, the full
+figure is on the hover, and nothing is rounded away.
+
+**THE GATE IS 1000x, AND IT IS NOT A TASTE.** §199.6 says a bare number inherits
+its row's unit, so "8" against a target of "6 M EGP" means eight MILLION and
+must be left alone; the only reading under which a bare number is a full figure
+is when it is absurdly larger than its target. One whole magnitude step (K, M
+and B are each 1000 apart) is that line, and a figure genuinely a thousand times
+its target would be a performance of 100,000%, which no report contains.
+**Not one figure in the shipped plan moves, and that is asserted.**
+
+### Proved able to fail
+
+`checks/deck-and-weights.py`: **22 red** against the pre-§243 build, 0 after.
+`test-authorize` 451/0 · `test-graph-diff` 126/0 · `fn-report-gate`,
+`fn-pillars`, `fn-ko-edit`, `foundation-objectives`, `submit-gate`, `gap-fill`,
+`plan-fields`, `no-wrap`, `table-fit`, `objective-unit`, `hide-element` green ·
+full `qa.py` sweep clean.
+
+**TWO CHECKS HELD ASSERTIONS THAT ISLAM HAD DELIBERATELY REVERSED**, and both
+were rewritten rather than deleted (§218): `fn-ko-edit`'s "the unit side is
+untouched", and `objective-unit`'s "the chip layout is deliberately untouched",
+which now asserts that the chip layout is GONE and that the one remaining
+layout still keeps the unit on the figure (§199.4) — the thing that assertion
+was really guarding. **And one of them was failing because of the check
+itself**: two files still set `KO_VIEW`, which in sloppy mode CREATED the global
+they were asserting the absence of (§51.11 from the other side).
+
+### Recorded, not done
+
+The **second** mechanism behind a reported-but-unscored figure is untouched:
+`applyProgress()` leaves `progress` unchanged where the target holds no usable
+number, so an uploaded figure against a target like "no target" is stored and
+silently left unscored. Deriving it wherever it is missing but computable would
+**move existing scores**, which is why it was put to Islam separately and is not
+in this section.
 ### §239.4 — nought on a "less is better" measure is the best answer
 
 Islam's own row, in the screenshot that followed §239.3: **Data duplicate rate,

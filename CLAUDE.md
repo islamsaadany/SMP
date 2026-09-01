@@ -384,6 +384,28 @@ console errors (in this cloud environment, run it via a wrapper that points Play
   remove × onto a second line — `inline-block` restores it, and it was found
   by `checks/plan-fields.py` GOING RED, not by reading the cascade, which is
   the argument for that check existing.
+- **A FUNCTION'S OBJECTIVES ARE WRITTEN AT THE PAGE'S WIDTH (§226):** Islam —
+  *"the keyobjectives table is tight I can't see the direction and I can't find
+  the unit and the ibjectives cell is not wrapping"*, and *"led by is not open
+  to edit"*. Three of the four are ONE omission: the function Overview's
+  `capKoEdit` (both formats, §213) edited inside the half-width fgrid card —
+  Objective input **101px**, Dir. select **34px** at 1500px — and §96.6's band,
+  §199's Unit column and §189's wrapping prose had each reached the unit's
+  table and never this one. **In edit/fill mode the table takes a `.koband`
+  under the cards, on BOTH formats** (§53.5 — one page), reading mode keeps the
+  card; the Unit column is §199's own trio plus `unitInherit` and
+  `fillUnitCell`, nothing stored, **no server change** (`gapFieldPass` already
+  runs `unitAddedOnly` per row kind); the name is `textOr` in `capKoEdit`
+  ONLY — **the unit side is untouched at Islam's instruction**, asserted as a
+  measurement. **Led by opens for the office through the register's own door**:
+  Setup's `assignPicker` writing `FUNCTIONS[k].head` via `grantPersonRole`
+  (§33, one fact one door), office-only because a head change classifies as
+  Setup — both ends asserted, and the explanatory sentence is a hover (1b-ii),
+  not the mockup's printed line. **The check guessed and the product was
+  right**: it asserted `"1.6 B EGP"` where §199.4's convention writes
+  `"1.6B EGP"` — the expectation moved to the platform's rule. 5 red on the
+  pre-§226 build; `fn-pillars`, `foundation-objectives`, `objective-unit`,
+  `gap-fill` and the full sweep green after.
 - **A BOX FROM THE COMPUTER WHEN A MESSAGE LANDS (§225):** Islam — a browser
   notification for platform messages, *"for the SMO when someone replies, and
   for the users when the SMO replies to them"*, wording **B** (who wrote, and
@@ -3681,6 +3703,12 @@ node scripts/test-graph-diff.js # the change list on its own: only what changed
                                 # travels, applying it to a DIFFERENT target leaves
                                 # that target's other work alone, a removal is not a
                                 # null, and an unknown path is refused (§210)
+python3 checks/fn-ko-edit.py    # a function's objectives are written at the page's
+                                # width (§226): the editing table in a band on BOTH
+                                # formats, the Unit column writing the stored target,
+                                # a wrapping name that writes the DATA, Led by opened
+                                # for the office and refused to everybody else — both
+                                # ends — and the unit side untouched, measured
 python3 checks/fn-pillars.py     # the two supporting-function formats draw ONE Overview:
                                 # asserted as their AGREEMENT, never as a list of headings;
                                 # every press read back from the STORED function; the
@@ -3743,7 +3771,18 @@ prior sessions (on HR_ERP) accidentally reverted agreed-upon designs.
 
 ---
 
-*Last Updated: 2026-08-31 &mdash; **v3.99: a plan travels row by row, and a
+*Last Updated: 2026-09-01 &mdash; **&sect;226: a function's objectives are
+written at the page's width.** Islam, from Consumer Finance's Overview: the
+table tight, the direction invisible, no unit, the objective not wrapping, and
+Led by not open to edit. Three of the four were ONE omission &mdash; the
+function Overview's editor had been left three unit-side fixes behind
+(&sect;96.6's band, &sect;199's Unit column, &sect;189's wrapping prose).
+Settled from a mockup drawn out of the real page; his two decisions recorded:
+the unit side untouched, Led by opened for the office through the register's
+own door. The full account is &sect;226 in the decisions log; the check is
+`checks/fn-ko-edit.py`, proved able to fail (5 red pre-&sect;226).*
+
+*Earlier: 2026-08-31 &mdash; **v3.99: a plan travels row by row, and a
 capability travels on its own (&sect;215, &sect;216).** Islam, on the
 deployment: *"the CX is still getting errors on filling"* &mdash; Hala, working
 on **CX**, refused by *"a project's milestones (**admin**) cannot be changed

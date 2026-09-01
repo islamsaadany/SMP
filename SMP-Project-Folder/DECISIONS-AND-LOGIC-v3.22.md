@@ -25199,3 +25199,64 @@ runtime needs no reload and is the only way to read back **what** was shown,
 which is most of what wording B claims. It asserts both ends of all three
 switches (§94.2), and **the refused press is forced**, because Playwright treats
 `aria-disabled` as disabled and that path is exactly what is under test (§222).
+
+## §226 — A FUNCTION'S OBJECTIVES ARE WRITTEN AT THE PAGE'S WIDTH (2026-09-01)
+
+Islam, from Consumer Finance's Overview: *"the keyobjectives table is tight I
+can't see the direction and I can't find the unit and the ibjectives cell is not
+wrapping"*, and minutes later, *"led by is not open to edit"*. Settled from a
+mockup drawn out of the REAL page (1c) and both open decisions were his:
+**"don't touch the unit side"**, and **Led by opens for the office**.
+
+**FOUR SYMPTOMS, AND THREE OF THEM ARE ONE OMISSION.** The function Overview's
+objectives table (`capKoEdit`, both formats since §213) edits INSIDE the
+half-width `fgrid` card — measured at a 1500px window: the card 691px, the table
+647px against the 620px floor (§158's other side), the Objective input **101px**
+and the Dir. select **34px**, which is a select whose value cannot be drawn.
+§96.6 fixed exactly this squeeze on a unit's Foundation — *the table gets the
+window while it is being written* — and that fix never reached the function's
+Overview; §199's Unit column and §189's wrapping prose never reached `capKoEdit`
+either. A page assembled from the unit's parts, three parts behind.
+
+**WHILE IT IS WRITTEN, THE TABLE TAKES A BAND** under the two cards — `.koband`,
+the unit's own expression — **on BOTH formats**, because the two draw ONE page
+(§53.5) and a squeeze fixed on one side of it is §211's drift straight back.
+Reading mode keeps the card on both, for §96.6's own reason: the objectives
+belong beside what the function is when you are READING it. Measured after:
+647px → 1393px, every column readable.
+
+**THE UNIT COLUMN IS §199's, NOT A COUSIN OF IT**: the same
+`targetUnitOf`/`setTargetUnit`/`targetUnitOpts` trio, the same
+`parse: unitInherit(m)` on This year (§199.6 — a bare number inherits the row's
+unit), the same `fillUnitCell` for a filler setting a MISSING one (§201.2), and
+the same why-dash on a row with no target to hold one. Nothing is stored — the
+unit rides the target string here exactly as it does everywhere else — and the
+server needed NOTHING: `gapFieldPass` already runs `unitAddedOnly` for every row
+kind, so a function's row was accepted before the screen could offer it.
+
+**THE NAME IS PROSE** — §189's `textOr`, a growing box that wraps — in
+`capKoEdit` only. The unit's `koEdit` keeps its one-line input **at Islam's
+instruction**, recorded as his and asserted as a measurement (§8 of the check),
+not assumed: the two sides of the switch now deliberately differ on this one
+cell, and the check is what will say so if anybody "fixes" it.
+
+**LED BY OPENS, FOR THE OFFICE, THROUGH THE REGISTER'S OWN DOOR.** The row is a
+read-only mirror of `FUNCTIONS[k].head` — the fnhead ROLE pointer, §33's
+one-fact-one-door — so the control is Setup's own `assignPicker` writing through
+`grantPersonRole`, and this row and Setup › Supporting functions' Head column
+can never disagree. **Office-only, and that is the server talking**: a head
+change classifies as Setup (`FN_SETUP`), so drawing the picker for a custodian
+holding an opened strategy cell would be the screen offering what the save
+refuses (§42's drift, the named fault of §94's three). Asserted at BOTH ENDS: the
+office picks and the head + attachment are read back; a non-office author gets
+their fields AND no picker. The sentence explaining the control is a hover, never
+a printed line (1b-ii) — the approved mockup drew it as a line and the standing
+rule outranks the drawing; recorded rather than slipped past.
+
+**THE CHECK GUESSED AND THE PRODUCT WAS RIGHT**: `checks/fn-ko-edit.py` first
+asserted `"1.6 B EGP"` and the platform wrote `"1.6B EGP"` — §199.4's own
+convention, the money units are TIGHT. The expectation moved to the platform's
+rule, not the other way round. Proved able to fail: **5 red against the
+pre-§226 build** before the run even completes (the band selectors find
+nothing). `fn-pillars`, `foundation-objectives`, `objective-unit`, `gap-fill`
+and the full `qa.py` sweep all green after.

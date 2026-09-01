@@ -19898,3 +19898,56 @@ because then there is nothing to keep.
 time in this product). Said before, the sentence is appended to a page the swap
 is about to replace — so the rename lands, the outcome is written, and a moment
 later it is gone, **which reads exactly like nothing happened.**
+
+### 147.29 · Who they already are on this register
+
+Islam: *"in case of raya trade our consultants names are already on the
+register. should they match? or what?"* — and measured, they do: **Mohamed
+Essam is Raya's `smo`**, under `smo@rayatrade.com`. Adding him to the team
+mints `ff_essam` and he becomes **two rows for one human**, which is the fault
+§87 exists for and which caused a real bug there.
+
+**AN EXCEPTIONAL CASE, AND TREATED AS ONE** (Islam: *"it's an exceptional case
+as we have the client platform before the multitenant … later the entry point
+will be the multitenant anyway"*). A general matching system would be building
+machinery for a situation that stops arising the day the platform is the front
+door. So the configuration simply **offers that client's register** and a
+person points the account at the row that is already there.
+
+**A LIST, NOT A MATCH.** Matching by address fails — his Raya address is not his
+Forefront one — and matching by name is what §87 forbids outright. A person
+answers it, exactly as the role picker suggests before it creates (§87.3). The
+control is drawn only where the register has somebody it could be, so once the
+platform is the entry point it quietly stops appearing rather than having to be
+removed.
+
+**TWO MARKS, BECAUSE THEY ARE TWO FACTS.** `forefront` says whose PERSON this
+is — true of Mohamed Essam whether or not the platform wrote his row, and what
+the register draws. `ffrow` says the platform MINTED this row and may keep it
+in step. Conflating them puts the hole straight back: mark an adopted row as
+ours and the next seat press demotes the client's own SMO **on the client's own
+register**. A row the client wrote keeps its name, its address and its role;
+the seat says what the ACCOUNT may do on the platform, and the register says
+what the person is inside the client.
+
+**THREE FAULTS FOUND BY DRIVING IT, EACH SILENT:**
+
+- **The guard refused the case it existed for.** Written as *no other account
+  may point here*, it turned down `smo` — because Raya's own
+  `smo@rayatrade.com` account already points at it, and that is the same human.
+  It asks of **office accounts** only: what must not happen is two of
+  Forefront's people claiming one row.
+- **The upsert answered `ok` and changed nothing.** `ON CONFLICT … DO UPDATE SET
+  seat` left `person_key` alone, so pointing an account at a row succeeded and
+  did nothing. And it could not simply be added: `personKey` falls back to the
+  minted one, so every later **seat** press would have undone the mapping. The
+  explicit answer or nothing, and nothing keeps what is there.
+- **THE SEAT NEVER REACHED THE REGISTER FOR HALF THE TEAM.** It wrote using a
+  key **re-minted from the address**, and where the stored one differs that
+  names nobody — Raya's own team is exactly that: the migration wrote `ff_omar`
+  and the minter produces `ff_omar_alaa`. So the configuration and the client
+  disagreed for ever, silently. The key is read back now.
+
+**AND §63 A FOURTH TIME, IN CODE WRITTEN THE SAME HOUR**: the refusal was said
+before the redraw that reports it, so it was wiped a moment later and the
+control simply sprang back with no explanation.

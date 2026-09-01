@@ -189,6 +189,11 @@
     border-bottom:1px solid var(--line-soft) }
   .teamrow .who .nm{ font-weight:600; font-size:14px }
   .teamrow .who .em{ color:var(--ink-3); font-size:12.5px }
+  .teamrow .sp{ flex-wrap:wrap; justify-content:flex-end }
+  .asrow{ display:inline-flex; align-items:center; gap:6px }
+  .asrow .aslab{ font:600 9.5px/1.4 ui-monospace, SFMono-Regular, monospace;
+    letter-spacing:.07em; text-transform:uppercase; color:var(--ink-3); white-space:nowrap }
+  .asrow .fld{ width:auto; max-width:230px; padding:4px 6px; font-size:12px }
   .teamrow .sp{ margin-left:auto; display:flex; gap:7px; align-items:center }
   .said{ margin:12px 0 0; font-size:13.5px; background:var(--surface-2); border:1px solid var(--line);
     border-radius:8px; padding:9px 11px }
@@ -457,7 +462,7 @@
   /* ── A client's configuration ────────────────────────────────── */
   function drawClient(key, quiet) {
     lead(quiet, "Reading…");
-    post({ action: "client", key: key }).then(function (j) {
+    return post({ action: "client", key: key }).then(function (j) {
       if (!j.ok) { clear(); say(j.error || "Could not open that client.", true); return; }
       settle(function () {
       var c = j.client;
@@ -513,6 +518,13 @@
         who.appendChild(el("div", "em", m.email));
         tr.appendChild(who);
         var sp = el("div", "sp");
+        /* ── WHO THEY ALREADY ARE ON THIS REGISTER (§147.29) ──────────
+           Drawn only where the client's register has somebody it could be —
+           which after the platform becomes the entry point is nobody, and this
+           control quietly stops appearing rather than having to be removed. */
+        if (j.canEdit && (j.register || []).length) {
+          sp.appendChild(registerCell(c.key, m, j.register));
+        }
         /* THE SEAT IS SET HERE — this is the one place it is written (§53.5),
            and the consultants page reads it. */
         sp.appendChild(seatCell(c.key, m, j.seats, j.canEdit));
@@ -553,8 +565,10 @@
       rightCol.appendChild(el("p", "note",
         "A seat is held on THIS client: Super user holds its access matrix, " +
         "retiring people and issuing passwords; SMO team runs cycles and " +
-        "corrects plans. A client may have more than one super user. Removing " +
-        "somebody retires " +
+        "corrects plans. A client may have more than one super user. Where this " +
+        "client's register already holds somebody — it was built before the " +
+        "platform was — point their account at that row rather than making a " +
+        "second one. Removing somebody retires " +
         "their row on this client's register rather than deleting it."));
       grid.appendChild(rightCol);
       page.appendChild(grid);
@@ -571,6 +585,40 @@
       if (String(e.message) === "sign in") return;
       clear(); say("Could not reach the server.", true);
     });
+  }
+
+  /* A LIST, NOT A MATCH (§87: a name is never an identifier). The register is
+     offered and a person answers — the same shape as the role picker, which
+     suggests before it creates. The option a row is ALREADY on is shown as it
+     is, so this reads as a fact about them rather than a question every time. */
+  function registerCell(clientKey, member, register) {
+    var wrap = el("span", "asrow");
+    wrap.appendChild(el("span", "aslab", "on this register as"));
+    var sel = el("select", "fld");
+    var own = el("option", null, "a row of their own");
+    own.value = "";
+    sel.appendChild(own);
+    register.forEach(function (r) {
+      var o = el("option", null, r.name + (r.email ? " · " + r.email : ""));
+      o.value = r.key;
+      if (r.key === member.person_key) o.selected = true;
+      sel.appendChild(o);
+    });
+    sel.addEventListener("change", function () {
+      post({ action: "setTeam", key: clientKey, email: member.email,
+             seat: member.seat, personKey: sel.value })
+        .then(function (r) {
+          /* SAID AFTER THE REDRAW THAT REPORTS IT (§63, and I wrote it the
+             wrong way round again in the same file): `settle()` replaces the
+             page, so a refusal said before it is wiped a moment later and the
+             control simply springs back with no explanation. */
+          drawClient(clientKey, true).then(function () {
+            if (!r.ok) say(r.error || "Not changed.", true);
+          });
+        });
+    });
+    wrap.appendChild(sel);
+    return wrap;
   }
 
   function seatCell(clientKey, member, seats, editable) {

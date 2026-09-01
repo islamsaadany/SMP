@@ -290,9 +290,35 @@ module.exports = async function handler(req, res) {
       if (action === "client") {
         const row = await P.clientByKey(c, body.key);
         if (!row.key || !FF.mayReadConfig(world, account, row)) throw P.noSuchClient();
+        /* ── WHO THEY ALREADY ARE ON THIS REGISTER (§147.29) ─────────
+           Raya Trade's register was built before the platform existed, so
+           Forefront's own people are already on it — Mohamed Essam is `smo`,
+           under a Raya address. Adding him to the team mints `ff_essam` and he
+           becomes TWO rows for one human, which is the fault §87 exists for.
+
+           From now on the platform is the entry point and this cannot arise;
+           what is needed is a way to say it ONCE for the clients that predate
+           it. So the configuration offers the register, and the SMO points the
+           account at the row that is already there.
+
+           A LIST, NOT A MATCH. §87 is explicit that a name is never an
+           identifier, and these two rows share no identifier at all — his Raya
+           address is not his Forefront one. A person answers it, exactly as
+           the role picker suggests before it creates (§87.3). Read
+           best-effort: a client whose schema is unreachable must not stop its
+           configuration opening. */
+        let register = [];
+        try {
+          register = await P.withSchema(pg, row.schema_name, async function (sc) {
+            return (await sc.query(
+              "SELECT key, name, role, extra->>'email' AS email, extra->>'forefront' AS ff " +
+              "FROM people WHERE COALESCE(extra->>'active','true') <> 'false' ORDER BY idx")).rows;
+          });
+        } catch (e) { console.error("reading " + row.key + "'s register:", e.message); }
         return send(res, 200, { ok: true, client: row, team: await P.teamOf(c, row.key),
           seats: FF.SEATS,
           canEdit: FF.mayConfigureClient(world, account, row),
+          register: register,
           office: (await c.query("SELECT email, name, is_admin FROM accounts " +
                                  "WHERE kind='office' AND status='active' ORDER BY name")).rows });
       }
@@ -382,7 +408,45 @@ module.exports = async function handler(req, res) {
         }
         /* The person key this account IS inside that client — minted once from
            the address, and never from the name, which changes. */
-        const personKey = P.officePersonKey(email);
+        /* THE ROW THEY ALREADY ARE, if the configuration says so (§147.29);
+           otherwise minted from the address, which is what a client created
+           since the platform always gets.
+
+           VALIDATED AGAINST THAT CLIENT'S OWN REGISTER, and refused if another
+           account already holds it — two accounts pointing at one register row
+           is the same duplicate seen from the other side. */
+        let personKey = P.officePersonKey(email);
+        const asKey = String(body.personKey || "").trim();
+        if (asKey && asKey !== personKey) {
+          /* THE GUARD IS ABOUT THE TEAM, NOT ABOUT THE REGISTER ROW. Written
+             first as "no other account may point here", it refused the exact
+             case it exists to serve: Raya's own `smo@rayatrade.com` account
+             already points at `smo`, and that is the same human — signing in
+             either way should be the same person on that client, which is what
+             the row says.
+
+             What must not happen is TWO OF FOREFRONT'S people claiming one
+             row, because then the platform cannot say which of them a seat
+             belongs to. So it asks of office accounts only. */
+          const held = await c.query(
+            "SELECT ac.email FROM account_clients ac JOIN accounts a ON a.email = ac.email " +
+            "WHERE ac.client_key = $1 AND ac.person_key = $2 AND ac.email <> $3 AND a.kind = 'office'",
+            [row.key, asKey, email]);
+          if (held.rowCount) {
+            return send(res, 409, { ok: false, error:
+              "Somebody else at Forefront is already that person on this register." });
+          }
+          let there = false;
+          try {
+            there = await P.withSchema(pg, row.schema_name, async function (sc) {
+              return (await sc.query("SELECT 1 FROM people WHERE key = $1", [asKey])).rowCount > 0;
+            });
+          } catch (e) { console.error("checking " + asKey + " in " + row.key + ":", e.message); }
+          if (!there) {
+            return send(res, 400, { ok: false, error: "That person is not on this client's register." });
+          }
+          personKey = asKey;
+        }
         const seat = FF.SEAT_KEYS.indexOf(String(body.seat)) > -1 ? String(body.seat) : "smoteam";
         /* A CLIENT MAY HAVE MORE THAN ONE SUPER USER (§147.26). This MOVED
            the seat — demote whoever held it, then write the new one — because
@@ -395,10 +459,20 @@ module.exports = async function handler(req, res) {
            next thing added here inherits it rather than having to remember. */
         await c.query("BEGIN");
         try {
+          /* THE PERSON KEY MOVES ONLY WHEN IT WAS ASKED FOR. The upsert set
+             `seat` alone, so pointing an account at an existing register row
+             answered `ok` and changed nothing — silent, and in the direction
+             that looks like the control is broken.
+
+             AND IT CANNOT SIMPLY BE ADDED TO THE UPDATE: `personKey` falls
+             back to the one minted from the address, so every later press of
+             a SEAT would quietly undo the mapping. `$5` is the explicit
+             answer or nothing, and nothing keeps what is there. */
           await c.query(
             "INSERT INTO account_clients (email, client_key, person_key, seat) VALUES ($1,$2,$3,$4) " +
-            "ON CONFLICT (email, client_key) DO UPDATE SET seat = EXCLUDED.seat",
-            [email, row.key, personKey, seat]);
+            "ON CONFLICT (email, client_key) DO UPDATE SET seat = EXCLUDED.seat, " +
+            "  person_key = COALESCE($5, account_clients.person_key)",
+            [email, row.key, personKey, seat, asKey || null]);
           await c.query("COMMIT");
         } catch (e) {
           await c.query("ROLLBACK");
@@ -406,10 +480,35 @@ module.exports = async function handler(req, res) {
         }
         /* AND THE SEAT REACHES THE CLIENT'S OWN REGISTER, where every rule in
            lib/rules.js reads it. Without this the configuration would say one
-           thing and the client's platform another until their next visit. */
+           thing and the client's platform another until their next visit.
+
+           ONLY ON A ROW THE PLATFORM CREATED (§147.29). This wrote the role
+           unconditionally and went straight past `ensureOfficeRow`'s adoption
+           rule — so pointing an account at a row that was already there, and
+           then touching the seat, DEMOTED Raya's own SMO from `super` to
+           `smoteam` on their own register. A row the client wrote is the
+           client's: the seat says what the ACCOUNT may do on the platform, and
+           the register says what the person is inside it.
+
+           Asked of `ffrow` — the platform minted this row — and never of
+           `forefront`, which says whose PERSON it is and is true of Mohamed
+           Essam whether or not the platform wrote his row. Two different
+           facts, and conflating them puts the hole straight back. */
+        /* THE KEY THE ROW ACTUALLY HOLDS, read back rather than re-minted.
+           This used `personKey`, which for an existing member is the key
+           MINTED FROM THE ADDRESS — and where the stored one differs it names
+           nobody, so the seat never reached the register and nothing said so.
+           Raya's own team is exactly that case: the migration wrote `ff_omar`
+           and the minter produces `ff_omar_alaa`. Silent, and in the direction
+           where the configuration and the client disagree for ever. */
+        const landed = (await c.query(
+          "SELECT person_key FROM account_clients WHERE email = $1 AND client_key = $2",
+          [email, row.key])).rows[0];
         try {
           await P.withSchema(pg, row.schema_name, async function (sc) {
-            await sc.query("UPDATE people SET role = $2 WHERE key = $1", [personKey, seat]);
+            await sc.query(
+              "UPDATE people SET role = $2 WHERE key = $1 AND extra->>'ffrow' = 'true'",
+              [landed ? landed.person_key : personKey, seat]);
           });
         } catch (e) { console.error("seat into " + row.key + ":", e.message); }
         return send(res, 200, { ok: true });

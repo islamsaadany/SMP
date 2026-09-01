@@ -544,6 +544,58 @@ def main():
                       who and who[0]["name"] == "Omar A. Alaa", who[:1])
                 api(pg, {"action": "saveConsultant", "email": CONSULT[0], "name": "Omar Alaa"})
 
+            # ── 15 · who they already are on this register (§147.29) ──
+            # Raya's register was built before the platform, so Forefront's own
+            # people are on it under Raya addresses — Mohamed Essam is `smo`.
+            # Adding him mints a second row for one human (§87). The
+            # configuration points the account at the row that is there.
+            cfg = api(pg, {"action": "client", "key": "raya-trade"})
+            check("a client's configuration offers its own register",
+                  isinstance(cfg.get("register"), list) and len(cfg["register"]) > 0,
+                  len(cfg.get("register") or []))
+            already = [r for r in (cfg.get("register") or []) if r["key"] == "smo"]
+            check("…including the row that predates the platform", bool(already), already)
+            if already:
+                sent = api(pg, {"action": "setTeam", "key": "raya-trade",
+                                "email": "mohamed.essam@forefront.consulting",
+                                "seat": "smoteam", "personKey": "smo"})
+                check("…and an account can be pointed at it", sent.get("ok") is True, sent)
+                back = api(pg, {"action": "client", "key": "raya-trade"})
+                him = [m for m in back["team"]
+                       if m["email"] == "mohamed.essam@forefront.consulting"][0]
+                check("…which is what the team then says", him["person_key"] == "smo", him)
+                # THE ROW IS THE CLIENT'S, AND A SEAT PRESS MUST NOT REWRITE IT:
+                # the seat says what the ACCOUNT may do on the platform; the
+                # register says what the person is inside the client.
+                was = pg.evaluate("""async () => {
+                  const r = await fetch('/api/state?client=raya-trade', { cache: 'no-store' });
+                  const j = await r.json();
+                  const p = (j.state.people || []).filter(x => x.key === 'smo')[0];
+                  return p ? { name: p.name, role: p.role } : null; }""")
+                api(pg, {"action": "setTeam", "key": "raya-trade",
+                         "email": "mohamed.essam@forefront.consulting", "seat": "super"})
+                now = pg.evaluate("""async () => {
+                  const r = await fetch('/api/state?client=raya-trade', { cache: 'no-store' });
+                  const j = await r.json();
+                  const p = (j.state.people || []).filter(x => x.key === 'smo')[0];
+                  return p ? { name: p.name, role: p.role } : null; }""")
+                check("…and pressing a seat does not rewrite the client's own row",
+                      was and now and was["role"] == now["role"] and was["name"] == now["name"],
+                      {"was": was, "now": now})
+                # AND A ROW THE PLATFORM MINTED STILL FOLLOWS ITS SEAT — asserted
+                # of the key the TEAM holds, because setTeam re-minted one from
+                # the address and for Raya's own team that names nobody.
+                api(pg, {"action": "setTeam", "key": "raya-trade",
+                         "email": CONSULT[0], "seat": "super"})
+                mine = pg.evaluate("""async (k) => {
+                  const r = await fetch('/api/state?client=raya-trade', { cache: 'no-store' });
+                  const j = await r.json();
+                  const p = (j.state.people || []).filter(x => x.key === k)[0];
+                  return p ? p.role : null; }""",
+                  [m for m in back["team"] if m["email"] == CONSULT[0]][0]["person_key"])
+                check("…while a row the platform minted does follow it", mine == "super", mine)
+                api(pg, {"action": "setTeam", "key": "raya-trade", "email": CONSULT[0], "seat": "smoteam"})
+
             check("no page errors anywhere", not errs, errs)
             b.close()
     finally:

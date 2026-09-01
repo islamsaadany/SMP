@@ -16863,11 +16863,51 @@ function reportClosed(target){
   return reportParked(target) ||
          !!((REVIEW.submitted || {})[String(target || "")]);
 }
+/* ── WHAT A SUBJECT IS ASKED FOR, BY ITS SHAPE (§236) ────────────────────
+   Islam, from a live client: *"the key objectives reporting wasn't done and
+   the button of submit to smo was allowed."* Both halves of that were true and
+   the second is this function. It asked by PREFIX — every `fn:` target went to
+   `fnAskedItems()`, which walks CAPABILITIES — and a function that plans in
+   pillars has none. So the submit gate looked at an empty list, found nothing
+   owed, and opened the button.
+
+   Measured on Merchandising with every figure stripped:
+
+       the reporting page   0 of 10 entered
+       the submit gate      0 of  0  — nothing in the way
+       a unit, same state   0 of 41  — "41 figures still to enter"
+
+   §59's rule in the last place still asking by prefix, and the same fault
+   §224 fixed on the Present button: THE FORMAT DECIDES, NOT THE PREFIX. A
+   pillars function's plan is unit-shaped, so it is asked the unit's question
+   through `unitLike()`, exactly as its Report page already draws it.
+
+   It was never only the count. `submitBlockers` reads its ROWS from the same
+   list, so the note rule (§105) and the In-progress rule (§104.10) had never
+   once run on a function that plans in pillars either.
+
+   ONE READER, because the welcome screen asks the same question one line
+   before it asks this one, and two answers to "what does this subject owe"
+   is how a screen comes to disagree with the button on it (§53.5).
+
+   A pillars function is never ALSO asked for capabilities: the format cannot
+   be switched while the other side holds anything (§59), so the two lists are
+   exclusive by construction rather than by a rule here. */
+function subjectAsked(target){
+  var t = String(target || ""), u = plansInPillars(t) ? unitLike(t) : null;
+  if (u) return askedItems(u);
+  var fk = fnKeyOfTarget(t);
+  return fk && FUNCTIONS[fk] ? fnAskedItems(fk) : [];
+}
+function subjectReported(target){
+  var t = String(target || ""), u = plansInPillars(t) ? unitLike(t) : null;
+  if (u) return reportedCount(u);
+  var fk = fnKeyOfTarget(t);
+  return fk && FUNCTIONS[fk] ? fnReportedCount(fk) : { done:0, total:0 };
+}
 function submitBlockers(target){
-  var t = String(target || ""), fn = t.indexOf("fn:") === 0;
-  var rows = fn ? fnAskedItems(t.slice(3)) : askedItems(UNITS[t] || { keyObjectives:[], items:[] });
-  var counted = fn ? fnReportedCount(t.slice(3))
-                   : reportedCount(UNITS[t] || { keyObjectives:[], items:[] });
+  var t = String(target || "");
+  var rows = subjectAsked(t), counted = subjectReported(t);
   return { notes: rows.filter(needsNote),
            pending: rows.filter(function(x){ return statusPending(x.obj); }),
            /* §221, Islam: *"remove the ability of people to submit a report
@@ -42253,8 +42293,11 @@ var WELCOME = (function(){
       if (!pending) return;
       var parts = [], c, b;
       try {
-        c = String(t).indexOf("fn:") === 0
-          ? fnReportedCount(String(t).slice(3)) : reportedCount(UNITS[t]);
+        /* §236: asked by SHAPE, not by prefix — the same one reader the
+           submit gate two lines below already uses. Asking differently here
+           is what let this row say "every figure is entered" over a pillars
+           function that had entered none. */
+        c = subjectReported(t);
         var open = Math.max(0, (c.total | 0) - (c.done | 0));
         if (open) parts.push("<i>" + wesc(plural(open, "figure")) + "</i> still open");
         else parts.push("Every figure is entered");
@@ -42999,6 +43042,18 @@ var SYNC = (function () {
     if (typeof fnPruneNulls === "function") {
       (window.FUNCTION_KEYS || []).forEach(function (k) { fnPruneNulls(window.FUNCTIONS[k]); });
     }
+    /* §236: A KEY OBJECTIVE STORED WITH NO ID IS **NOT** HEALED HERE, AND THE
+       REASON IS WORTH THE LINES. The obvious fix — mint the missing ones on
+       arrival, as fnPruneNulls heals above — is a trap: `lastSaved` is taken
+       after this, so a minted id joins the BASELINE and never travels, while
+       every later row edit is addressed AT that id. `applyChanges()` resolves
+       a row edit against the STORED graph by id and refuses one it cannot
+       find ("a row edit names a row that is not here") — and a refused path
+       fails the WHOLE save, taking unrelated work with it (§215).
+
+       So the heal is a MIGRATION (039), where the id lands in the database
+       and both sides agree about it. §191's own answer to the same fault on
+       the group's six objectives, for the same reason. */
     /* A tenant that predates the company level has neither, and an empty
        company list is a valid answer: every unit is then its own. */
     window.COMPANY_KEYS = state.companyKeys || [];
@@ -50505,7 +50560,27 @@ var SYNC = (function () {
         if (!mayAuthor("k_found", t)) return;
         if (BUILDER && BUILDER.target === t && h.cap) {
           openBuilderForm("capko", { capId:h.cap.id }); return; }
-        h.list.push({ name:"", dir:"≥", target:"", compile:"Latest",
+        /* §236: IT MINTS AN ID, AS EVERY OTHER ADD IN THE PRODUCT DOES.
+           Islam: *"the input there wasn't saved."* This pushed a row with no
+           id, so the reporting page drew its box carrying the string
+           "undefined", `findById()` matched nothing, and the handler returned
+           without writing — no error, no console, the figure gone. A line the
+           platform cannot name is also nobody's to change (§191), so the save
+           would have refused it even had the box worked.
+
+           The unit's own Add has minted one since §96.4 (`koSettle`); this
+           one, which serves a capability AND a pillars function's Overview,
+           never did. §51.10 exactly: the code that CREATES a field has to be
+           found as well as the code that reads it.
+
+           FROM THE MAXIMUM, never from the count (§96.2) — remove the middle
+           of KO1·KO2·KO3 and add, and a count-derived id collides with the
+           KO3 still on screen. `mintRowId` is the same helper `addMeasure`
+           and `addTactic` already use, and the prefix is the one the two
+           renumberers write: the capability's own id, or the function's
+           `fn:<key>`, which is what `h.target` already holds. */
+        h.list.push({ id: mintRowId(h.list, (h.cap ? h.cap.id : h.target) + "-KO"),
+          name:"", dir:"≥", target:"", compile:"Latest",
           weight:null, actual:"", progress:null });
         fieldSaved(); paint();
       });

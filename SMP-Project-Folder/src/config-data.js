@@ -4807,11 +4807,51 @@ function reportClosed(target){
   return reportParked(target) ||
          !!((REVIEW.submitted || {})[String(target || "")]);
 }
+/* ── WHAT A SUBJECT IS ASKED FOR, BY ITS SHAPE (§236) ────────────────────
+   Islam, from a live client: *"the key objectives reporting wasn't done and
+   the button of submit to smo was allowed."* Both halves of that were true and
+   the second is this function. It asked by PREFIX — every `fn:` target went to
+   `fnAskedItems()`, which walks CAPABILITIES — and a function that plans in
+   pillars has none. So the submit gate looked at an empty list, found nothing
+   owed, and opened the button.
+
+   Measured on Merchandising with every figure stripped:
+
+       the reporting page   0 of 10 entered
+       the submit gate      0 of  0  — nothing in the way
+       a unit, same state   0 of 41  — "41 figures still to enter"
+
+   §59's rule in the last place still asking by prefix, and the same fault
+   §224 fixed on the Present button: THE FORMAT DECIDES, NOT THE PREFIX. A
+   pillars function's plan is unit-shaped, so it is asked the unit's question
+   through `unitLike()`, exactly as its Report page already draws it.
+
+   It was never only the count. `submitBlockers` reads its ROWS from the same
+   list, so the note rule (§105) and the In-progress rule (§104.10) had never
+   once run on a function that plans in pillars either.
+
+   ONE READER, because the welcome screen asks the same question one line
+   before it asks this one, and two answers to "what does this subject owe"
+   is how a screen comes to disagree with the button on it (§53.5).
+
+   A pillars function is never ALSO asked for capabilities: the format cannot
+   be switched while the other side holds anything (§59), so the two lists are
+   exclusive by construction rather than by a rule here. */
+function subjectAsked(target){
+  var t = String(target || ""), u = plansInPillars(t) ? unitLike(t) : null;
+  if (u) return askedItems(u);
+  var fk = fnKeyOfTarget(t);
+  return fk && FUNCTIONS[fk] ? fnAskedItems(fk) : [];
+}
+function subjectReported(target){
+  var t = String(target || ""), u = plansInPillars(t) ? unitLike(t) : null;
+  if (u) return reportedCount(u);
+  var fk = fnKeyOfTarget(t);
+  return fk && FUNCTIONS[fk] ? fnReportedCount(fk) : { done:0, total:0 };
+}
 function submitBlockers(target){
-  var t = String(target || ""), fn = t.indexOf("fn:") === 0;
-  var rows = fn ? fnAskedItems(t.slice(3)) : askedItems(UNITS[t] || { keyObjectives:[], items:[] });
-  var counted = fn ? fnReportedCount(t.slice(3))
-                   : reportedCount(UNITS[t] || { keyObjectives:[], items:[] });
+  var t = String(target || "");
+  var rows = subjectAsked(t), counted = subjectReported(t);
   return { notes: rows.filter(needsNote),
            pending: rows.filter(function(x){ return statusPending(x.obj); }),
            /* §221, Islam: *"remove the ability of people to submit a report

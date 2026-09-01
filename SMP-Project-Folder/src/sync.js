@@ -169,6 +169,18 @@ var SYNC = (function () {
     if (typeof fnPruneNulls === "function") {
       (window.FUNCTION_KEYS || []).forEach(function (k) { fnPruneNulls(window.FUNCTIONS[k]); });
     }
+    /* §236: A KEY OBJECTIVE STORED WITH NO ID IS **NOT** HEALED HERE, AND THE
+       REASON IS WORTH THE LINES. The obvious fix — mint the missing ones on
+       arrival, as fnPruneNulls heals above — is a trap: `lastSaved` is taken
+       after this, so a minted id joins the BASELINE and never travels, while
+       every later row edit is addressed AT that id. `applyChanges()` resolves
+       a row edit against the STORED graph by id and refuses one it cannot
+       find ("a row edit names a row that is not here") — and a refused path
+       fails the WHOLE save, taking unrelated work with it (§215).
+
+       So the heal is a MIGRATION (039), where the id lands in the database
+       and both sides agree about it. §191's own answer to the same fault on
+       the group's six objectives, for the same reason. */
     /* A tenant that predates the company level has neither, and an empty
        company list is a valid answer: every unit is then its own. */
     window.COMPANY_KEYS = state.companyKeys || [];

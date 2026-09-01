@@ -26020,3 +26020,118 @@ CSP backstop that would neutralise any future escaping gap (the page has no
 inline handlers, so it is achievable), and a `.vercelignore` so `db/`, `lib/`
 and `scripts/` are not served as static files (no secrets are exposed today —
 this is attack-surface hygiene).
+
+---
+
+## §236 — A SUPPORTING FUNCTION'S REPORT IS ASKED FOR, AND ITS OBJECTIVES CAN BE ANSWERED (2026-09-01)
+
+Islam, from a live client session: *"for the functions planning in pillars the
+key objectives reporting wasn't done and the button of submit to smo was allowed
+and the input there wasn't saved."*
+
+**THREE FAULTS WEARING ONE COAT**, and each needed a different fix. All three
+were reproduced on the shipped build before a line was changed.
+
+### 1 · The submit gate was blind to the whole plan
+
+`submitBlockers()` asked **by prefix**: every `fn:` target went to
+`fnAskedItems()` / `fnReportedCount()`, which walk **capabilities**. A function
+that plans in pillars has none, so the gate looked at an empty list, found
+nothing owed, and opened the button. Measured on Merchandising with every
+figure stripped:
+
+| | the reporting page says | the submit gate says | the refusal |
+|---|---|---|---|
+| the pillars function | 0 of **10** entered | 0 of **0** | *(nothing in the way)* |
+| a business unit, same state | 0 of 41 | 0 of 41 | "41 figures still to enter." |
+
+**§59's rule in the last place still asking by prefix**, and the same fault
+§224 fixed on the Present button: *the format decides the deck, not the
+prefix*. A pillars function's plan is unit-shaped, so it is asked the unit's
+question through `unitLike()` — exactly as its Report page already draws it.
+
+**IT WAS NEVER ONLY THE COUNT.** `submitBlockers` reads its *rows* from the
+same list, so the note rule (§105) and the In-progress rule (§104.10) had
+**never once run** on this format either. With the fix, Merchandising's own
+demo data immediately produces a real blocker it had never shown: *"2 figures
+are at risk or off track with no note."*
+
+**ONE READER, `subjectAsked()` / `subjectReported()`**, because the welcome
+screen asks the same question one line before it asks this one and had the
+identical prefix test (§53.5: two answers to *what does this subject owe* is
+how a screen comes to disagree with the button on it).
+
+**A pillars function is never also asked for capabilities**, and that is by
+construction rather than by a rule here: the format cannot be switched while
+the other side holds anything (§59), so the two lists are exclusive.
+
+### 2 · A key objective added to a function had no id
+
+Every "add a row" control in the product mints one — `addMeasure()`,
+`addTactic()`, `addProject()`, and for a **unit's** objectives `koSettle()`
+since §96.4. The one behind `data-capkoadd`, which serves a **capability** and
+a **pillars function's Overview**, pushed `{name, dir, target, compile, weight,
+actual, progress}` and no id at all.
+
+So the reporting page drew that row's box carrying the string `"undefined"`,
+`findById()` matched nothing, and the handler returned without writing — **no
+error, no console, the figure gone.** §51.10 exactly: *the code that CREATES a
+field has to be found as well as the code that reads it.*
+
+**IT IS WORSE ON A CAPABILITY, AND THE SCHEMA IS WHAT SAYS SO.**
+`cap_key_objectives.id` is a PRIMARY KEY, so a capability's id-less objective
+could never be stored at all — that save failed outright, which is §172's shape
+where one refused value then poisons every later save. A pillars function keeps
+its objectives in `functions.extra`, which is jsonb and holds anything, which
+is precisely why these survived to be reported against and could not be.
+
+Fixed with `mintRowId(h.list, (h.cap ? h.cap.id : h.target) + "-KO")` — the
+same helper and the same **from the maximum, never from the count** rule
+(§96.2) the other minters use.
+
+### 3 · The rows already in a client's database — and why the heal is NOT in the browser
+
+**The first build healed them at the hydration door**, beside `fnPruneNulls`
+(§118), and it was reverted. `lastSaved` is taken *after* hydration, so a
+minted id joins the save **baseline** and never travels — while every later row
+edit is addressed **at** that id, and `applyChanges()` resolves a row edit
+against the **stored** graph and refuses one it cannot find (*"a row edit names
+a row that is not here"*), which fails the **whole** save and takes unrelated
+work with it (§215).
+
+So the heal is **migration 039**, which is §191's own answer to the same fault
+on the group's six objectives. It fills only blanks, never rewrites an id
+already written (that is what a reported figure, a focus mark and a cycle
+snapshot are keyed on — §48.1), and **continues past the highest already
+present** rather than counting from position, which is the duplicate §191
+nearly shipped.
+
+### Proved able to fail
+
+- `checks/fn-report-gate.py`: **16 red** against the shipped pre-§236 build,
+  among them `boxId: 'undefined'` — the reported fault verbatim. 0 after.
+- **Two of its own assertions could not fail when first written** and were
+  tightened: the id-uniqueness check counted one row holding `undefined` and
+  passed (§113.8), and the gate/page agreement was measured on the demo's
+  *fully reported* function, where a gate counting nothing agrees with a page
+  counting ten (§94.2 — the state is stripped first now).
+- **And the check crashed rather than failing**, which read as zero failures
+  until it was guarded — §215's lesson, paid again: *a throw is a failure.*
+- `scripts/test-ko-ids.js`: **15 assertions** against a real Postgres 16 —
+  every blank named, an existing id and its figure untouched, `""` treated as
+  an absence, the numbering clearing an existing `KO7`, other keys in `extra`
+  surviving, a second run byte-identical, and the fault itself reproduced.
+- Round trip on a **virgin** database with 039 in place: PASS.
+- `test-authorize` 451/0 · `test-graph-diff` 126/0 · `submit-gate`,
+  `fn-pillars`, `fn-ko-edit`, `gap-fill`, `objective-unit`, `welcome`,
+  `report-saves` all green · full `qa.py` sweep clean.
+
+### Recorded, not fixed
+
+**The SMO's cycle board leaves pillars functions off entirely** —
+`boardFunctionKeys()` filters on `!fnPlansInPillars(...) && capsOfFunction(k).length`
+— so the office cannot see whether such a function has reported. Their
+vocabulary is a *unit's* (key objectives, measures, tactics), so they belong on
+the board's unit half rather than its function half (§105.2: the two
+vocabularies must never share a heading). That is a visible change and is its
+own decision.

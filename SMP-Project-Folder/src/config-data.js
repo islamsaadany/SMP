@@ -4924,6 +4924,38 @@ function reportState(c, key){
    The filter was written inline in renderCycle(); the totals need exactly the
    same list, and two copies of it is how a board and its own summary come to
    disagree about how many things were asked for. */
+/* ── WHO IS ON THE UNIT HALF OF THE CYCLE BOARD (§244) ───────────────────
+   Islam, told that a function planning in pillars appears nowhere on the
+   board: *"put them on the unit half."*
+
+   It was filtered off BOTH halves. The function half asks for capabilities
+   (`capsOfFunction(fk).length`), which a pillars function has none of by
+   construction (§59); the unit half read `activeKeys()`, which is units. So
+   Consumer Finance could be a week late and the page the office watches would
+   not have a row for it — §105's own argument ("a submission the SMO cannot
+   see anywhere is half a feature") with one format left out.
+
+   THE UNIT HALF IS WHERE IT BELONGS BECAUSE OF THE COLUMNS. §105.2 settled
+   that the two halves may not share a heading when they name different things
+   — and a pillars function names the SAME things a unit does: key objectives,
+   measures, tactics. It is drawn by the unit's own pages for exactly that
+   reason (§59). So this needs no new column, no second vocabulary and no band.
+
+   The order is units first, then functions: the board is scanned down the
+   business, and a function that plans like a unit is still not one. */
+function boardUnitTargets(){
+  return activeKeys().concat(
+    Object.keys(FUNCTIONS).filter(function(fk){
+      return fnShows(fk) && fnPlansInPillars(FUNCTIONS[fk]);
+    }).map(function(fk){ return "fn:" + fk; }));
+}
+/* Who the board names against a subject: the custodian, then the head — the
+   same order and the same two roles on a unit and on a function (§53.5). */
+function boardWho(target){
+  var fk = fnKeyOfTarget(target);
+  var r = fk ? (FUNCTIONS[fk] || {}) : (UNIT_ROLES[target] || {});
+  return personName(r.custodian) || personName(r.head) || "\u2014";
+}
 function boardFunctionKeys(){
   return Object.keys(FUNCTIONS).filter(function(fk){
     return fnShows(fk) && !fnPlansInPillars(FUNCTIONS[fk]) && capsOfFunction(fk).length;
@@ -4976,7 +5008,14 @@ function cycleTotals(){
     if (st.key === "late") t.none++;
     t.units++;
   }
-  activeKeys().forEach(function(k){ add(reportedCount(UNITS[k]), unitState(UNITS[k])); });
+  /* §244: THE UNIT HALF IS `boardUnitTargets()` NOW, so a pillars function is
+     counted in the headline exactly once and through the readers its own row
+     uses — leaving it out would say "10 of 11" on a page listing eleven rows,
+     which is §108.1's miscount by another road. */
+  boardUnitTargets().forEach(function(t){
+    var u = unitLike(t);
+    if (u) add(reportedCount(u), unitState(u));
+  });
   /* THE FUNCTIONS COUNT TOO (§105). They report, they submit, and they are on
      the board — so leaving them out of the headline would say 6 of 10 on a
      page listing fifteen rows. */

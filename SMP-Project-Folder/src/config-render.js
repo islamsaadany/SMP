@@ -5201,10 +5201,23 @@ function renderCycle(){
   var can = grant("c_cycle") === "edit";
   var open = REVIEW.state === "open";
 
-  var rows = activeKeys().map(function(k){
-    var u = UNITS[k], c = reportedCount(u), st = unitState(u);
-    var r = UNIT_ROLES[k] || {};
-    var who = personName(r.custodian) || personName(r.head) || "\u2014";
+  /* §244: THE UNIT HALF CARRIES A PILLARS FUNCTION TOO (Islam: "put them on
+     the unit half"). One builder over a TARGET rather than a second copy of
+     the row — the two halves of this board already drifted once (§105.4's
+     "1 need notes", right on one half and wrong on the other for as long as
+     the column existed), and a third near-identical row builder is how that
+     happens again (§53.5).
+
+     THE NAME COMES FROM `placeLabel()`, which is the navigation's own
+     vocabulary and already answers the one real collision: this tenant has a
+     unit called Care AND a function called Care, and that function alone reads
+     "Care (function)" (§65, §93.12). Inventing a tag here would be a second
+     naming for a question the product has already answered. */
+  var boardRow = function(t){
+    var u = unitLike(t);
+    if (!u) return "";
+    var c = reportedCount(u), st = unitState(u);
+    var who = boardWho(t);
     var pctD = c.total ? Math.round(c.done / c.total * 100) : 0;
     var miss = missingNotes(u).length;
     var by = { obj:[0,0], mea:[0,0], tac:[0,0] };
@@ -5213,7 +5226,7 @@ function renderCycle(){
       by[slot][1]++;
       if (x.obj.actual != null && x.obj.actual !== "") by[slot][0]++;
     });
-    return '<tr><td><b>' + esc(u.name) + '</b></td>' +
+    return '<tr><td><b>' + esc(placeLabel(t)) + '</b></td>' +
       '<td class="why" style="margin:0">' + esc(who) + '</td>' +
       '<td><div class="repcell"><span class="repbar' + (pctD < 100 ? " part" : "") + '">' +
         '<i style="width:' + pctD + '%"></i></span>' +
@@ -5223,7 +5236,8 @@ function renderCycle(){
       '<td class="num">' + by.tac[0] + '/' + by.tac[1] + '</td>' +
       '<td class="cc">' + (miss ? '<span class="badge b-late">' + notesOwed(miss) + '</span>' : '') + '</td>' +
       '<td class="cc"><span class="badge b-' + st.key + '">' + st.label + '</span></td></tr>';
-  }).join("");
+  };
+  var rows = boardUnitTargets().map(boardRow).join("");
 
   /* ── THE FUNCTIONS ARE ON THE BOARD TOO (§105) ────────────────────
      A submission the SMO cannot see anywhere is half a feature. They go in the
@@ -5273,7 +5287,13 @@ function renderCycle(){
     });
     var tacTitle = plural(deliv, "deliverable") + " \u00b7 " + plural(mile, "milestone") +
       ", asked this cycle";
-    return '<tr><td><b>' + esc(f.name) + '</b></td>' +
+    /* §244: `placeLabel()`, NOT `f.name` — found by the new board check and
+       older than the change that found it. This tenant has a unit called Care
+       AND a function called Care, so the board printed "Care" twice with
+       nothing to tell the two rows apart, on the page the office uses to chase
+       people. `placeLabel()` adds the suffix only where the clash is real
+       (§65, §93.12) and is what the unit half beside it now uses (§53.5). */
+    return '<tr><td><b>' + esc(placeLabel("fn:" + fk)) + '</b></td>' +
       '<td class="why" style="margin:0">' + esc(who) + '</td>' +
       '<td><div class="repcell"><span class="repbar' + (pctD < 100 ? " part" : "") + '">' +
         '<i style="width:' + pctD + '%"></i></span>' +

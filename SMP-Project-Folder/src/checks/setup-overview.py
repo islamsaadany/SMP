@@ -94,9 +94,16 @@ with sync_playwright() as p:
     # false: the CHECK carried the old assumption, not the product (§108.16).
     ck("in progress is the remainder, not a third count",
        src["prog"] == src["units"] - src["sub"] - src["none"], src)
-    ck("and the board counts the supporting functions too (§105)",
-       src["units"] == pg.evaluate("activeKeys().length + boardFunctionKeys().length")
+    # §244 WIDENED THE UNIT HALF and this assertion carried the old formula —
+    # the second time this line has held a stale copy of the board's own
+    # membership (the comment above records the first). It asks the PRODUCT
+    # which subjects are on the board now, rather than rebuilding the answer
+    # from a list of parts that keeps changing.
+    ck("and the board counts every subject on it, functions of both shapes too",
+       src["units"] == pg.evaluate("boardUnitTargets().length + boardFunctionKeys().length")
        and src["units"] > pg.evaluate("activeKeys().length"), src)
+    ck("...including a function that plans in pillars, which §244 put on the unit half",
+       pg.evaluate("boardUnitTargets().filter(t=>String(t).indexOf('fn:')===0).length") > 0)
     ck("the strip is a way through, not a control",
        pg.eval_on_selector(".ovcyc-go", "e=>e.dataset.setupgo") == "cycle")
 

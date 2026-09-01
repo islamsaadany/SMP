@@ -26836,3 +26836,71 @@ number, so an uploaded figure against a target like "no target" is stored and
 silently left unscored. Deriving it wherever it is missing but computable would
 **move existing scores**, which is why it was put to Islam separately and is not
 in this section.
+
+---
+
+## §244 — EVERY SUBJECT THAT REPORTS IS ON THE CYCLE BOARD (2026-09-01)
+
+Islam, told that a function planning in pillars appears nowhere on the SMO's
+board: *"put them on the unit half."*
+
+**IT WAS FILTERED OFF BOTH HALVES**, and neither filter was wrong on its own.
+The function half asks for capabilities (`capsOfFunction(fk).length`), which a
+pillars function has none of *by construction* (§59); the unit half read
+`activeKeys()`, which is units. Two correct tests, and the subject that
+satisfies neither falls through the gap between them. So Consumer Finance
+could be a week late and the page the office watches to chase people would not
+have a row for it — §105's own argument, *"a submission the SMO cannot see
+anywhere is half a feature"*, with one format left out of the feature that
+answered it.
+
+**THE UNIT HALF IS WHERE IT BELONGS, AND THE COLUMNS ARE WHY.** §105.2 settled
+that the two halves may not share a heading when they name different things —
+and a pillars function names the SAME three things a unit does: key
+objectives, measures, tactics. It is drawn by the unit's own pages for exactly
+that reason (§59). So this needed no new column, no second vocabulary and no
+band: the counts line up down the page and are comparable, which is the whole
+point of a board.
+
+**ONE ROW BUILDER, OVER A TARGET.** The two halves of this board have already
+drifted once — §105.4's *"1 need notes"* was right on one half and wrong on
+the other for as long as that column existed — and a third near-identical row
+builder is how that happens again (§53.5). The unit half's row is now one
+function taking a target, resolved through `unitLike()`.
+
+**COUNTED ONCE IN THE HEADLINE.** `cycleTotals()` walks `boardUnitTargets()`
+rather than `activeKeys()`, so a pillars function is added exactly once and
+through the same readers its own row uses. Leaving it out would say *"10 of
+11"* on a page listing eleven rows, which is §108.1's miscount by another
+road.
+
+### And the check found a fault older than the change
+
+**THE BOARD PRINTED "CARE" TWICE.** This tenant has a unit called Care AND a
+supporting function called Care, and the function half rendered `f.name`
+directly — so two rows carried the same word with nothing to tell them apart,
+on the page the office uses to decide who to chase. `placeLabel()` has
+answered that question since §65 and adds the suffix ONLY where the clash is
+real (§93.12), so nothing new was invented and no tenant without a clash is
+made to carry one. Both halves ask it now.
+
+It was found because the new check asserts the board against *who may be asked
+to report* rather than against a row count — the form that notices a subject
+that is present but unidentifiable, as well as one that is missing.
+
+### Proved able to fail
+
+`checks/cycle-board.py`: **7 red** on the build before, 0 after. It asserts the
+AGREEMENT between who can be asked and who has a row, that a pillars function
+is on the unit half and not also on the function half, that its figure and its
+state are its own reporting page's, that the headline counts it once, and
+§88's one line per row.
+
+**AND `setup-overview.py` WENT RED AND WAS RIGHT TO**: it asserted the board's
+size as `activeKeys().length + boardFunctionKeys().length`, a copy of the
+board's membership that this section made incomplete. Its own comment records
+the same line carrying a stale assumption once before (§108.16). It asks
+`boardUnitTargets()` now — the product's answer rather than a rebuilt one.
+
+`test-authorize` 454/0; `deck-and-weights`, `fn-report-gate`, `setup-header`
+and `no-wrap` green.

@@ -822,23 +822,11 @@
     var me = null;
     try { me = SYNC.person() && SYNC.person().key; } catch(e){}
     SYNC.saveNow(function(how){
-      if (how === "offline") return go();
-      /* §237: A VIEW-AS SESSION STARTS WHERE THEIR SESSION WOULD START.
-         With the SMO's own work flushed clean (the two answers above this
-         line), the tab takes the SERVER's current graph as its new truth —
-         exactly a fresh sign-in by the viewed person, so nothing of this
-         tab's past rides into a save judged as them (§234.2 records why
-         that mattered). A rebase that cannot fetch answers false and the
-         switch still happens on the old baseline — judged correctly either
-         way (§185), and never a blocked way home (§209). */
-      if (how === "saved" || how === "clean")
-        return SYNC.rebase(function () { go(); });
+      if (how === "saved" || how === "clean" || how === "offline") return go();
       if (me && key === me) return go();
       /* Refused or failed, and not the way home: the banner sync.js already
          drew says what happened, and the view stays where it is so the work
-         keeps the identity that made it. NO REBASE on this path either way —
-         taking the server's copy here would silently destroy the refused
-         work §184's banner is offering to put back. */
+         keeps the identity that made it. */
       var sel2 = document.getElementById("asWho");
       if (sel2) sel2.value = VIEWER;   /* a select shows the refused value (§110) */
     });

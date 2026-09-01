@@ -26179,3 +26179,99 @@ stops equal the deck's own slide list — down and back up, on a unit AND a
 function (§53.5). **Proved able to fail first: 6 red on the pre-§236.3 build**,
 printing his jump verbatim. hide-element, project-tables, repeat-project and
 the full qa.py sweep green after.
+
+---
+
+### §234.2 — WHY VIEW-AS COULD NEVER SHOW THE SMO THIS ERROR (2026-09-01)
+
+Islam, after §234 shipped: *"THE ERROR THAT ABDEL MONEM GOT I NEVER GOT IN
+THE VIEW AS."* He is right, and it is structural, not timing luck — the
+first two explanations offered (tab age, figures-not-submit) were true and
+incomplete, and the complete one was found in `shell.html`'s own §204
+machinery.
+
+**THE PRE-§234 BUG HAD TWO FACES, AND THE SMO ONLY EVER MET THE SILENT
+ONE.** The stale review envelope riding a save was REFUSED when the acting
+person's rights were narrow (the custodian's wall) and **ACCEPTED when they
+were not** — the SMO may change anything, so the same collision landed as a
+silent overwrite of everyone else's submissions, parks, notes and slides.
+Same fault, no alarm. That silent face IS the lost slides.
+
+**AND VIEW-AS POSTS FROM THE SMO'S OWN TAB.** Every autosave the SMO made
+as themselves — and above all the flush `switchViewer()` runs AT THE MOMENT
+OF SWITCHING into a view (§204: work done as yourself is saved as yourself,
+which is correct and stays) — was judged as the SMO and accepted, forcing
+the server to match the SMO's tab. By the time any save was judged as the
+simulated person, the staleness the refusal needed had been erased **by the
+act of entering view-as**. The error was unreachable from the SMO's testing
+method by construction: the identity that tests is the identity that was
+allowed to commit the crime silently.
+
+**MEASURED, NOT ARGUED**: (1) direct-vs-view-as verdicts are IDENTICAL on
+allowed and refused acts, sentence for sentence (§185 holds); (2) on the
+pre-§234 module, the same stale tab + Submit under view-as DOES produce the
+four refusals — identity was never the missing variable; (3) driven in a
+real browser through the real switcher, a 403 under view-as draws the
+banner, names the functions and says who it was judged as — the screen
+hides nothing.
+
+**NOTHING MORE TO FIX**: §234's split closes both faces at once — nothing
+stale travels for anybody, so the refusal face cannot fire and the silent
+face cannot overwrite. What remains true and is stated as the method's
+honest limit: view-as changes who is JUDGED, never which tab's history does
+the posting — a bug that lives in somebody else's timeline needs two real
+sessions, which is what `test-two-tabs.js` automates against a real
+Postgres, the §234 incident verbatim among its cases.
+
+## §237 — A VIEW-AS SESSION STARTS WHERE THEIR SESSION WOULD START (2026-09-01)
+
+Islam, closing §234.2's finding with a requirement: *"viewing as needs to
+have the same server connection and relation and not inherit my SMO
+abilities to be honest and show me errors … it should forget my smo role and
+just act like abodul menem permissions and abilities so I get the errors."*
+
+**HALF OF THAT HAS BEEN TRUE SINCE §185 AND IS NOT TOUCHED**: every save
+under view-as is judged with the viewed person's rights only — measured
+again for §234.2, verdicts identical sentence for sentence. What §234.2
+found still the SMO's was the TAB: its baseline, its history, its unsaved
+leftovers flushed as the SMO by the switch's own §204 flush — so the
+simulated person was being judged fairly on a tab whose past was somebody
+else's.
+
+**THE SWITCH REBASES NOW.** After §204's flush lands clean, `switchViewer`
+calls `SYNC.rebase()`: one GET of `/api/state`, the boot's own `hydrate()`
+(§53.5 — never a second way of applying a fetched graph), `LIVE` refreshed
+(or leaving demo data after a rebase would put the boot-time snapshot back),
+and `lastSaved` reset to the server's copy. From that moment the simulated
+session is what a fresh sign-in by that person would be: the server's
+current truth on screen, their rights on every save, and nothing of the SMO
+tab's past able to ride into a save judged as them.
+
+**THREE PATHS DELIBERATELY DO NOT REBASE**, each with §-numbered reasons:
+`file://` and demo mode (nothing of the server's to take — `rebase` answers
+false and the switch proceeds); a fetch that fails (the honest fallback is
+the old baseline, judged correctly either way, never a blocked way — §209);
+and **the refused-or-failed way home** (§209's path): taking the server's
+copy there would silently destroy the refused work §184's banner is offering
+to put back — measured in the check, because that is the path a careless
+rebase turns into data loss.
+
+**WHAT THIS STILL CANNOT DO IS STATED**: time. A view-as session opened now
+cannot wear a tab that had been open for three hours — to feel a staleness
+bug by hand you leave the view-as window open the way its person would, and
+that class is guarded automatically by `test-two-tabs.js` either way.
+Messages and chat still leave as the real signed-in person (§185's three
+deliberate real-session reads stand — view-as must never put words in a
+colleague's mouth), and the change log still names who signed in.
+
+`checks/viewas-fresh.py` drives the real switcher over HTTP against a stub
+whose dataset MOVES mid-run — the only way staleness can exist — and
+asserts the property, never the mechanism: the switch fetches and the
+screen holds work saved after the tab loaded; the first save under the view
+carries ONLY the view's own act (`review.submitted.mobile` and nothing
+else); the refused way home keeps the work on screen with zero fetches.
+Proved able to fail: **4 red** on the pre-§237 build. `viewer-switch.py`
+(§204/§209's own check), `welcome`, `refusal-keeps-work`, `save-flush`,
+`boot-skeleton`, `save-fidelity`, `report-saves`, `gap-fill`, `submit-gate`,
+the differ (126/0), the authoriser (451/0) and the full `qa.py` sweep green
+on the same build.

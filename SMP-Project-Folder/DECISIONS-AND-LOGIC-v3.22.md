@@ -25982,3 +25982,56 @@ and the store emptied on remove (§50.6). **Proved able to fail first: 5 red
 on the pre-§235 build** — the unit stuck at 4, the function stuck at 1,
 reproducing his report before a source was touched. Neighbourhood green:
 hide-element, project-tables, repeat-project, and the full qa.py sweep.
+
+## §235.2 — SLIDE BY SLIDE, AND ONLY THE ORIGINALS ARE PINNED (2026-09-01)
+
+Islam, testing §235: *"I tested but the slides jump from slide 9 to 13 one jump
+.. the added slides can move slide by slide the prohipted slides from the
+movement are the original slides form the ferformance as is now."*
+
+**HE IS RIGHT AND §235 HALF-SOLVED IT.** That section replaced the silent dead
+press with an honest jump and drew its list of landing places from the anchors
+that happened to exist — the SWOT run, the section dividers and the pillar
+title pages had none, so a press hopped four slides at once. Reproduced on his
+numbers before anything was written: the walk read **1, 2, 3, 4, 9, 10, 12, 13,
+15, 16, 18…**, and the 4→9 hop is the SWOT run, the 10→12 the pillar divider.
+*A fix that removes the lie is not the same as a fix that grants the ability* —
+§235's own "deliberately NOT anchored" list is what he is objecting to, and it
+was mine to propose, not to keep.
+
+**THE RULE IS NOW ONE SENTENCE**: every ORIGINAL slide is a landing place;
+what is pinned is the originals' own order. So an added slide moves one slide
+per press, top to bottom, and nothing in the generated flow can be reordered —
+which is the shape he asked for in §234 and has now had to ask for twice.
+
+**EVERY FIXED SLIDE CARRIES AN ANCHOR.** Added on the unit's deck: the SWOT
+title page, the first three SWOT categories, and each pillar's title page;
+on the function's: a capability's cover, its key-objectives table, a project's
+title page and its milestones table. **THE EXISTING KEYS DO NOT MOVE** (§30.2's
+rule, applied to anchors): the last SWOT category keeps `swot`, a pillar's
+tactics slide keeps `p<CODE>`, a capability keeps `cap<id>` — so every picture
+slide already placed in a live tenant sits exactly where it sat. The new keys
+are derived from the pillar code and the capability's or project's id, the same
+stability class as the ones beside them; nothing stored moves and there is no
+migration.
+
+**ONE GROUPING SURVIVES, AND IT IS NOT A GAP**: the parts of a table split by
+`deckFitPass()` share their parent's anchor, so a run of them is ONE stop, after
+the last part — a picture cannot live between a table and its own continuation,
+which is not a place. The check asserts that too, by requiring a repeated
+anchor to be adjacent: **a repeat anywhere else would silently merge two gaps
+into one position**.
+
+**§50.3's "after SWOT means after all four" is REVERSED for the arrows and kept
+for the KEY** — the label on `swot` still reads *After the SWOT section*, and it
+is now the last of five places rather than the only one. Recorded as a reversal
+rather than overwritten: that sentence was right when the only way to name a
+position was to pick it from a list of a dozen, and it is wrong now that the
+arrows walk.
+
+`checks/slide-move.py` gains the assertions that make this falsifiable: every
+fixed slide is a landing place, every place has its OWN key, and the walk's
+stops equal the deck's own slide list — down and back up, on a unit AND a
+function (§53.5). **Proved able to fail first: 6 red on the pre-§235.2 build**,
+printing his jump verbatim. hide-element, project-tables, repeat-project and
+the full qa.py sweep green after.

@@ -70,6 +70,20 @@ Nothing proceeds past this line without an answer.
 
 ## Built and verified
 
+### §235.2 — slide by slide, only the originals pinned (2026-09-01, same branch)
+
+Islam, testing §235: "the slides jump from slide 9 to 13 one jump .. the added
+slides can move slide by slide the prohipted slides from the movement are the
+original slides." Right — §235 stopped the dead presses and drew its landing
+places from the anchors that already existed, so the SWOT run and the pillar
+dividers were still hopped four at a time. Every ORIGINAL slide is a landing
+place now (unit: SWOT title, three categories, each pillar title; function:
+capability cover, key objectives, project title, milestones), existing keys
+unmoved so placed pictures stay put, no migration. A split table's parts stay
+ONE stop — a picture cannot sit between a table and its own continuation.
+`checks/slide-move.py`: 6 red pre-§235.2 (printing his jump), 20 green after;
+deck-adjacent checks and full qa.py green.
+
 ### §235 — a picture slide can travel the whole deck (2026-09-01, same branch)
 
 Islam, using §234's arrows: "the rearrange of slides doesn't move around the

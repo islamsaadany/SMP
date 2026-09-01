@@ -123,13 +123,7 @@ function deckSlides(u){
   /* 5 — SWOT opens with its own page, then one category per slide. */
   var sw = [["s","Strengths","good"],["w","Weaknesses","bad"],
             ["o","Opportunities","stone"],["t","Threats","warn"]];
-  /* §235.2 (Islam: "the added slides can move slide by slide — the prohibited
-     slides are the original slides"): EVERY fixed slide carries an anchor now,
-     so every gap between two originals is a place a picture can live. This
-     reverses §50.3's after-SWOT-means-after-all-four for the arrows; the LAST
-     category keeps the old key "swot", which stored slides already name. */
-  S.push('<section class="dslide d-cover"' + anch("swothead", "After the SWOT title page") +
-    '><span class="seclab">Section</span>' +
+  S.push('<section class="dslide d-cover"><span class="seclab">Section</span>' +
     '<h1 class="cover">SWOT</h1><div class="coverrule"></div>' +
     '<p class="coversub">Where this unit is strong, exposed, and what the market is offering it.</p>' +
     '<div class="secgrid">' + sw.map(function(x){
@@ -143,8 +137,7 @@ function deckSlides(u){
     /* The anchor sits on the LAST category, so "after SWOT" means after all
        four rather than in the middle of them. */
     S.push('<section class="dslide d-swot t-' + x[2] + '"' +
-      (xi === sw.length - 1 ? anch("swot", "After the SWOT section")
-                            : anch("swot" + x[0], "After " + x[1])) +
+      (xi === sw.length - 1 ? anch("swot", "After the SWOT section") : "") +
       '><h2>' + x[1] + '</h2>' +
       '<ol class="dswot">' + items + '</ol></section>');
   });
@@ -166,9 +159,7 @@ function deckSlides(u){
 
   u.items.forEach(function(p, pi){
     var r = pillarExec(p) && pillarPlan(p) ? Math.round(pillarExec(p) / pillarPlan(p) * 100) : null;
-    S.push('<section class="dslide d-cover"' +
-      anch("p" + pillarCode(u, pi) + "d", "After the " + pillarCode(u, pi) + " title page") +
-      '><span class="seclab">' + esc(p.kind) +
+    S.push('<section class="dslide d-cover"><span class="seclab">' + esc(p.kind) +
       ' &middot; theme ' + esc(p.theme) + ' &middot; ' + esc(p.owner) + '</span>' +
       '<h1 class="pillarname"><span class="dcode huge">' + pillarCode(u, pi) + '</span> ' +
         esc(p.name) + '</h1>' +
@@ -284,11 +275,7 @@ function deckSlidesFn(fk){
 
     /* The capability's cover carries its definition and its readings — key
        objectives only where it has any (§15.1: absent, never zero). */
-    /* §235.2's anchors, mirrored on the function's deck (§53.5): keyed on the
-       capability's and the project's ids, the same stability class as the
-       "cap"+id and "dx"+id anchors beside them. */
-    S.push('<section class="dslide d-cover"' + anch("cap" + c.id + "c", "After " + c.name + " — cover") +
-      '><span class="seclab">Capability &middot; ' +
+    S.push('<section class="dslide d-cover"><span class="seclab">Capability &middot; ' +
         esc(f.name) + '</span>' +
       '<h1 class="cover">' + esc(c.name) + '</h1>' +
       '<p class="coversub">' + esc(c.def) + '</p>' +
@@ -311,8 +298,7 @@ function deckSlidesFn(fk){
           '<td class="num final ' + dBand(m.progress) + '">' + dPct(m.progress) + '</td>' +
           (m.note ? '<td class="dnote">' + esc(m.note) + '</td>' : '<td class="dnote empty">&mdash;</td>') + '</tr>';
       }).join("");
-      S.push('<section class="dslide"' + anch("cap" + c.id + "k", "After " + c.name + " — key objectives") +
-        '><h2>Key objectives &mdash; where we stand' +
+      S.push('<section class="dslide"><h2>Key objectives &mdash; where we stand' +
         '<span class="dwhich">' + esc(c.name) + '</span></h2>' +
         '<table class="zebra withnote"><thead><tr><th class="idx">#</th><th>Objective</th>' +
         '<th class="num">Weight</th><th class="num">Dir.</th><th class="num">Target</th>' +
@@ -340,8 +326,7 @@ function deckSlidesFn(fk){
 
     c.projects.forEach(function(p){
       var mst = projMilestones(p);
-      S.push('<section class="dslide d-cover"' + anch("prj" + p.id, "After " + p.name + " — title page") +
-        '><span class="seclab">' + esc(c.name) +
+      S.push('<section class="dslide d-cover"><span class="seclab">' + esc(c.name) +
           ' &middot; ' + esc(p.owner || "") + ' &middot; ' + esc(p.start) + ' &rarr; ' + esc(p.end) + '</span>' +
         '<h1 class="pillarname">' + esc(p.name) + '</h1>' +
         '<p class="coversub">' + esc(p.brief || "") + '</p>' +
@@ -404,8 +389,7 @@ function deckSlidesFn(fk){
           '<td class="num">' + (msReads(m) == null ? "&mdash;" : msReads(m) + "%") + '</td>' +
           (m.note ? '<td class="dnote">' + esc(m.note) + '</td>' : '<td class="dnote empty">&mdash;</td>') + '</tr>';
       }).join("");
-      S.push('<section class="dslide" data-split="' + esc(p.id) + 'M"' +
-        anch("ms" + p.id, "After " + p.name + " — milestones") + '>' +
+      S.push('<section class="dslide" data-split="' + esc(p.id) + 'M">' +
         '<h2>' + esc(p.name) + '<span class="dwhich">Milestones &middot; ' + mst.done + ' of ' + mst.total + ' completed</span></h2>' +
         '<table class="zebra withnote"><thead><tr><th class="idx">#</th><th>Milestone</th>' +
         '<th>Owner</th><th>Collabs.</th><th class="num">Due date</th><th class="num">Status</th><th class="num">' + MS_PCT + '</th>' +

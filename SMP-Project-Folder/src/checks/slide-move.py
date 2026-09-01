@@ -64,16 +64,36 @@ def walk(pg, side):
         p = pos(pg)
         if p == trail[-1]: break          # the floor — or a dead press
         trail.append(p)
-    ok(side + ": every press until the floor moved the slide",
-       all(b > a for a, b in zip(trail, trail[1:])) and len(trail) > 3, trail)
+    # §235.2 (Islam: "the slides jump from slide 9 to 13 one jump .. the added
+    # slides can move slide by slide"): EVERY fixed slide is a landing place,
+    # so a press moves the slide by exactly one — the only permitted grouping
+    # is a run of fixed slides SHARING an anchor (a split table's parts: a
+    # picture cannot live between a table and its own continuation), which is
+    # one stop, after its last part. The Thank-you group is the floor itself.
+    fixed = [s for s in shape(pg) if not s["ps"]]
+    ok(side + ": every fixed slide is a landing place (no anchor gaps)",
+       all(s["anchor"] for s in fixed),
+       [s["ed"] for s in fixed if not s["anchor"]][:6])
+    # ...and no two places share a key, or two gaps become one position — a
+    # repeat is legal only ADJACENT (a split table's parts share their parent's)
+    aa = [s["anchor"] for s in fixed]
+    dup = [a for i, a in enumerate(aa) if a in aa[:i] and aa[i - 1] != a]
+    ok(side + ": every landing place has its own key", not dup, dup[:6])
+    ends, prev = [], None
+    for i, s in enumerate(fixed):
+        if prev is not None and s["anchor"] == prev: ends[-1] = i
+        else: ends.append(i)
+        prev = s["anchor"]
+    expected = [e + 1 for e in ends[:-1]]
+    ok(side + ": the walk down stops after every fixed slide, one per press",
+       trail == expected, (trail, expected))
     ok(side + ": the walk reaches the slide before Thank you",
        trail[-1] == len(rail(pg)) - 2, (trail[-1], len(rail(pg)) - 2))
 
-    # the ruling: somewhere on the way it parked INSIDE a subject's pair —
+    # the §235 ruling: somewhere on the way it parked INSIDE a subject's pair —
     # after the …M/…D half, before the …T/…M half of the same code. With the
     # ps slide at rail index p, the fixed slides (whose order never changes)
     # sit at every other index in order: fixed[p-1] above it, fixed[p] below.
-    fixed = [s for s in shape(pg) if not s["ps"]]
     def half(s): return s["split"][:-1] if s["split"] else None
     inside = False
     for p in trail:
@@ -103,8 +123,8 @@ def walk(pg, side):
         p = pos(pg)
         if p == up[-1]: break
         up.append(p)
-    ok(side + ": the walk climbs back to just after the cover",
-       up[-1] == 1 and all(b < a for a, b in zip(up, up[1:])), up)
+    ok(side + ": the walk climbs back the same way, one slide per press",
+       up == expected[::-1], (up, expected[::-1]))
 
     # tidy: remove it, and the store forgets the container (§50.6)
     pg.click("[data-picdel]"); pg.wait_for_timeout(250)

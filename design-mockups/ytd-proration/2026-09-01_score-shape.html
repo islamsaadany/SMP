@@ -7669,6 +7669,9 @@ body{ background:var(--mk-ground); color:var(--mk-ink); margin:0; }
     <div class="mk-change"><em>Variance</em>
       <p><b>Removed</b> from both tables. The pair already shows it, and the column was spending width to
         restate a subtraction the reader can see.</p></div>
+    <div class="mk-change"><em>The tactic's per cent sign</em>
+      <p><span class="mk-was">45 / 50</span> &rarr; <b>45% / 50%</b>. Both halves have always been per cents
+        of the tactic's own plan. The sign was missing, so the cell read as a count.</p></div>
     <div class="mk-change"><em>Score column</em>
       <p><b>Unchanged.</b> The measures table keeps <b>Progress</b>; the tactics table keeps <b>Of
         plan</b>, which is what it says today.</p></div>
@@ -7731,8 +7734,9 @@ body{ background:var(--mk-ground); color:var(--mk-ink); margin:0; }
   <article class="mk-panel">
     <div class="mk-panel-h">
       <h2>Tactics</h2>
-      <p>Already prorated against its own active quarters &mdash; nothing about its arithmetic changes.
-        This is the wording and the variance column only, so the two tables on one page read alike.</p>
+      <p>Already prorated against its own active quarters &mdash; nothing about its arithmetic changes. Both
+        figures here are <b>per cents of this tactic's own plan</b>, and the per cent sign is added, because
+        without it the cell reads as a count of things.</p>
     </div>
     <div class="mk-panel-b">
 
@@ -7752,9 +7756,9 @@ body{ background:var(--mk-ground); color:var(--mk-ink); margin:0; }
       <div class="mk-real"><table>
         <thead><tr><th class="idx">#</th><th>Tactic</th><th>Owner</th><th>Collabs.</th><th>Quarters</th><th class="cc">Status</th><th class="cc">YTD delivery</th><th class="cc">Of plan</th></tr></thead>
         <tbody>
-          <tr><td class="idx"><span class="idx-n">1</span></td><td>Clean and standardize customer and SKU base</td><td>Ramy Behairy</td><td class="collabs"><span class="nobody">&mdash;</span></td><td><span class="qs"><i class="">1</i><i class="on past">2</i><i class="on">3</i><i class="">4</i></span></td><td class="cc"><span class="pill warn">WIP</span></td><td class="num"><span class="pair"><b>45</b> <i>/ 50</i></span></td><td class="num final" style="color:var(--good-tx, var(--good))">90%</td></tr>
-          <tr><td class="idx"><span class="idx-n">2</span></td><td>End-to-end order-to-cash digitization</td><td>Mohamed Rizk</td><td class="collabs"><span class="nobody">&mdash;</span></td><td><span class="qs"><i class="">1</i><i class="on past">2</i><i class="on">3</i><i class="">4</i></span></td><td class="cc"><span class="pill warn">WIP</span></td><td class="num"><span class="pair"><b>35</b> <i>/ 50</i></span></td><td class="num final" style="color:var(--attn-tx, var(--attn))">70%</td></tr>
-          <tr><td class="idx"><span class="idx-n">3</span></td><td>Digitize sales reporting via Power BI</td><td>Ramy Behairy</td><td class="collabs"><span class="nobody">&mdash;</span></td><td><span class="qs"><i class="">1</i><i class="on past">2</i><i class="on">3</i><i class="">4</i></span></td><td class="cc"><span class="pill warn">WIP</span></td><td class="num"><span class="pair"><b>40</b> <i>/ 50</i></span></td><td class="num final" style="color:var(--attn-tx, var(--attn))">80%</td></tr>
+          <tr><td class="idx"><span class="idx-n">1</span></td><td>Clean and standardize customer and SKU base</td><td>Ramy Behairy</td><td class="collabs"><span class="nobody">&mdash;</span></td><td><span class="qs"><i class="">1</i><i class="on past">2</i><i class="on">3</i><i class="">4</i></span></td><td class="cc"><span class="pill warn">WIP</span></td><td class="num"><span class="pair"><b>45%</b> <i>/ 50%</i></span></td><td class="num final" style="color:var(--good-tx, var(--good))">90%</td></tr>
+          <tr><td class="idx"><span class="idx-n">2</span></td><td>End-to-end order-to-cash digitization</td><td>Mohamed Rizk</td><td class="collabs"><span class="nobody">&mdash;</span></td><td><span class="qs"><i class="">1</i><i class="on past">2</i><i class="on">3</i><i class="">4</i></span></td><td class="cc"><span class="pill warn">WIP</span></td><td class="num"><span class="pair"><b>35%</b> <i>/ 50%</i></span></td><td class="num final" style="color:var(--attn-tx, var(--attn))">70%</td></tr>
+          <tr><td class="idx"><span class="idx-n">3</span></td><td>Digitize sales reporting via Power BI</td><td>Ramy Behairy</td><td class="collabs"><span class="nobody">&mdash;</span></td><td><span class="qs"><i class="">1</i><i class="on past">2</i><i class="on">3</i><i class="">4</i></span></td><td class="cc"><span class="pill warn">WIP</span></td><td class="num"><span class="pair"><b>40%</b> <i>/ 50%</i></span></td><td class="num final" style="color:var(--attn-tx, var(--attn))">80%</td></tr>
         </tbody>
       </table></div>
 
@@ -7767,6 +7771,10 @@ body{ background:var(--mk-ground); color:var(--mk-ink); margin:0; }
       <li><b>&ldquo;H1 actual&rdquo; is a hardcoded literal.</b> It reads &ldquo;H1 actual&rdquo; whatever
         the cycle is &mdash; open Q3 and the column still says H1. <b>YTD actual</b> is true in every cycle,
         so the rename removes a wrong word rather than only changing one.</li>
+      <li><b>The same cell already prints the sign in its other state.</b> A tactic that is due and
+        unreported reads <em>&ldquo;due at 50%&rdquo;</em> &mdash; with the per cent &mdash; and the moment a
+        figure arrives the same cell drops it and shows <em>45 / 50</em>. One cell, two spellings of one
+        unit, which is why the reported state reads as a count of something.</li>
       <li><b>Var. survives on four other tables</b> &mdash; the group's and a company's execution drills, and
         the unit's pillar summary. Those are drill-downs rather than the tactics table, and you named the
         tactics, so I have left them. Say if they should go too.</li>

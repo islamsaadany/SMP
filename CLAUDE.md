@@ -2383,10 +2383,56 @@ console errors (in this cloud environment, run it via a wrapper that points Play
   `scripts/dev-server.js` and `sw.js` (which caches the **tenant path**, since a
   worker caches by request URL). From `file://` there is no server to rewrite,
   so the gate uses the real relative path there.
-- **Multi-tenant (§36):** not built, and deliberately not scaffolded. When it
-  comes, use **one Postgres schema per tenant** (`SET search_path`) rather than
-  a tenant column — person keys are short and global (`smo`, `ceo`), so a column
-  forces composite keys through `credentials` and `sessions`. Read §36 first.
+- **MULTI-CLIENT (since v3.60, §147, spec 024): ONE PLATFORM, MANY CLIENTS.**
+  §36's recommendation, built: **one Postgres schema per client**, resolved from
+  the `platform.clients` registry off the slug the browser was **served at**,
+  never from the request. `lib/platform-io.js` does it once for all four
+  endpoints; a schema name typed into the address bar is refused **identically**
+  to a client that does not exist (one constant — `noSuchClient()` — because a
+  refusal that differs by a word tells the two cases apart). `sync.js` and
+  `chat.js` send the slug read from `location.pathname` and never store it.
+  **The addresses:** `/` is the door, `/platform` is Forefront's own shell, and
+  `/raya-trade` · `/rhi` · `/el-abd` · `/demo` are the clients — carried by
+  `vercel.json`, `scripts/dev-server.js` (which READS that list) and `sw.js`.
+- **THE DOOR IS A DOOR (§147.3):** the front page signs you in and stops — no
+  cards, no tabs, no tables. `platform.html` holds Clients · Consultants · Who
+  sees what, and a client's configuration opens from **that client's own card**.
+- **A ROLE IS A SEAT ON A CLIENT (§147.4, reversing the four platform roles):**
+  `accounts.is_admin` is the platform (adding clients, adding consultants, the
+  table); `account_clients.seat` — `super` or `smoteam`, **the client's own two
+  seats** — is everything inside one. Set on the client's configuration,
+  **read-only** on the consultant's row. One super user per client is a unique
+  index, so naming a second **moves** the seat: demote first, insert second, in
+  a transaction. `lib/platform-rules.js` is the shared rules module (the
+  platform's `lib/rules.js`); run `node scripts/test-platform-rules.js` after
+  touching it.
+- **IDENTITY IS AN EMAIL (§147.2):** `platform.accounts` is keyed by address;
+  §43's scrypt, `must_change`, the httpOnly cookie and the 30-day life are
+  unchanged. A register row with no email stays and cannot sign in. **Where
+  somebody lands is decided by what they can OPEN**, never by the team they are
+  on. Every statement names its schema explicitly, because each client still
+  carries its own `sessions` and `credentials`.
+- **THE PLATFORM'S PRE-PHASE RUNS BEFORE ITS SCHEMA FILE (§147.4):** unlike a
+  client's, where `schema.sql` has already run — so on a fresh database the
+  tables do not exist at all and every step of a `db/platform-migrations/*.sql`
+  pre-migration is guarded on `to_regclass`.
+- **THE DEMO CLIENT, AND WHAT IT RETIRES (§147.8):** the worked example is a
+  CLIENT now — its own schema, its own address, and **it saves**. This
+  **reverses §21's "never put invented content in the database"**, for one
+  client and deliberately; what replaces §21's guard is the boundary above.
+  `scripts/seed-demo-client.js` renames the company, the units, the people and
+  every mention of them, drops every unit's mark (a picture cannot be renamed),
+  and **THROWS rather than reports** if any real name or forbidden word
+  survives — its own or the substitution's. **The Demo data button, demo mode
+  and §67's Filled/Clear pair are gone**; the baked dataset stays as what the
+  offline `file://` build runs on.
+- **THE TOUR RUNS ON THE PERSON'S OWN PLAN (§147.9):** `SMPRules.tourReady(w,
+  target)` — at least one pillar or capability and one key objective — and it is
+  not offered until there is one. The Knowledge base's replay button is
+  **absent** for a viewer whose roles fit no story and **explained** for one
+  whose plan is empty.
+- **Multi-tenant (§36) — the reasoning behind all of the above.** Read §36 and
+  §147 together before changing how a client is resolved.
 - **WHEN A FIELD IS RENAMED, FIND THE CODE THAT CREATES IT** — not only the
   code that reads it (§51.10). §15 renamed a capability's `measures`/`tactics`
   to `keyObjectives`/`projects`; the ADD button kept minting the old shape for
@@ -2564,6 +2610,22 @@ python3 checks/email-greeting.py # the greeting row is ONE line with no prose, t
 python3 checks/setup-pages.py   # every Setup page is named ONCE and in the rail's own word,
                                 # and the name and the table head stay on screen (§121)
 ```
+The multi-client half needs a database (spec 024, §147). Its fixture is its
+own — `checks/fixture-platform.js` makes the three accounts through the
+product's own hasher, so no check assumes a database somebody prepared by hand:
+```bash
+DATABASE_URL=… node scripts/test-platform.js          # the boundary, on the server
+DATABASE_URL=… node scripts/test-platform-rules.js    # the seats and the admin flag
+DATABASE_URL=… SMP_CHROME=… python3 SMP-Project-Folder/src/checks/multi-client.py
+                                # the door holds nothing but sign-in; the cards, the
+                                # seats read-only, the Demo button gone for everyone
+DATABASE_URL=… SMP_CHROME=… python3 SMP-Project-Folder/src/checks/platform-look.py
+                                # Forefront's own two pages: contrast in both themes
+                                # and no sideways scroll at four widths — neither of
+                                # the two product sweeps ever reaches them (§147.11)
+DATABASE_URL=… node scripts/seed-demo-client.js --dry-run   # what the Demo client would hold
+DATABASE_URL=… node scripts/migrate-to-multi-client.js --dry-run
+```
 The mail half needs a database and a password (it spawns its own dev-server):
 `DATABASE_URL=… node scripts/test-email-greeting.js <smo-password>` (§142.6), and
 `DATABASE_URL=… node scripts/test-test-copies.js <smo-password>` (§146).
@@ -2600,34 +2662,52 @@ prior sessions (on HR_ERP) accidentally reverted agreed-upon designs.
 
 ---
 
-*Last Updated: 2026-08-28 &mdash; **v3.56: a test copy is a send, and it says
-so (&sect;146)**. Islam, using the product: *"there have been multiple sent
-emails earlier. weren't they saved? I can't see them in the overview."*
-**NOTHING WAS LOST, AND ESTABLISHING THAT FIRST WAS MOST OF THE WORK** &mdash;
-`messages` sits outside the state graph with no foreign key, so the
-`TRUNCATE &hellip; CASCADE` on every save cannot reach it, and there is no
-`DELETE FROM messages` anywhere in the product; driven end to end against a real
-Postgres, a send writes its row BEFORE the emails go out and appears on the
-Overview at once. **The fault is that TWO KINDS OF EMAIL LEAVE THIS PLATFORM
-AND ONLY ONE WAS RECORDED**: `test` &mdash; *Send me a copy*, and the test send
-on Email settings &mdash; sends a REAL email through the same builder and wrote
-nothing at all, so from the record those emails had never happened. From the
-screen they are one act. **THE MOCKUP CAUGHT THE FIRST DRAWING**: a mark beside
-the heading pushed the frozen first column onto a second line, which is the one
-thing a setup table may never do (&sect;88) and &sect;116.4's fault exactly
-&mdash; it lives in the column that already answers *who got it*, where it costs
-no height and is the honest answer for a row that has no audience. **DELETE
-REACHES TEST COPIES AND NOTHING ELSE**, Islam's B from two scopes drawn with the
-cost of each stated: the record of what the business was sent stays whole.
-**The guard is asked twice on purpose** &mdash; the endpoint's own gate means
-*"Communication is the SMO's"* and this one means *"destruction is the Super
-user's"*, two questions with the same answer this week and &sect;94's drift the
-day the first is widened. **AND ONE ASSERTION COULD NOT FAIL FOR THE REASON IT
-EXISTED**: the line count was taken per text node, and the mark that wraps is
-its own text node sitting happily on one line &mdash; the deliberate break
-reproduced the exact fault while that assertion stayed green, and four others
-caught it. Counted across the whole cell it reads `[1,1,1,1,2]`. Both halves
-watched to fail first: **5 / 1 / 2** on the client, **3 / 11** on the server.*
+*Last Updated: 2026-09-01 &mdash; **v3.60: one platform, many clients
+(&sect;147, spec 024)**. Islam: *"Let's work together on splitting this platform
+to be multitenant. We have an external access for the SMO office and then they
+pick the client from different cards."* **ONE POSTGRES SCHEMA PER CLIENT**
+&mdash; &sect;36's own recommendation, four versions old and now built &mdash;
+resolved from a registry row off the slug the browser was SERVED at, never from
+the request, and **a schema name typed into the address bar is refused
+identically to a client that does not exist**. Rehearsed rather than reasoned
+about: 44 tables moved out of `public` with `ALTER TABLE SET SCHEMA` on a
+database seeded exactly as a v2.0 deployment was.
+**TWO CORRECTIONS FROM ISLAM, ABSORBED AS RECORDED REVERSALS.** The first build
+put the office's pages on the DOOR &mdash; *"the page you are showing should be
+just for login"* &mdash; so `platform.html` is Forefront's own shell now and the
+front page signs you in and stops. And *"the consultants roles are not general
+across the multitenants, the roles are on the client level"* retired the four
+platform roles a day after they were built: **one admin flag, and a SEAT on
+each client**, which is the client's own pair (&sect;89) so nothing new is
+learnt and the row written into the client's register carries that seat exactly.
+**THE DEMO CLIENT REVERSES &sect;21 ON PURPOSE** &mdash; invented content, in a
+database, saved deliberately &mdash; because what replaces &sect;21's guard is
+the boundary this spec builds; the in-product Demo data button, demo mode and
+&sect;67's Filled/Clear pair go with it, and **the tour walks the person's own
+plan and is not offered until there is one**.
+**THE BUGS WORTH READING.** The seat move **shipped backwards with a comment
+saying it did not**: one super user per client is a unique index, so naming a
+second must MOVE the seat &mdash; and the handler wrote the new one first, so
+for the length of one statement the client had two, the index refused, and the
+person pressing it was told *"Something went wrong"* (&sect;104.8 exactly). An
+`indexOf` compared against an arithmetic position **matched by accident**
+wherever the arithmetic landed on -1, so a real employee's name went through
+the whole demo rename untouched. A substitution pass applied as a SEQUENCE
+rewrote what the rule before it produced (*"Customer Customer Care"*), and
+without word boundaries turned the department *Maintenance* into
+*"Zeinantenance"* &mdash; nonsense that renders perfectly. And **Forefront's
+name was invisible on Forefront's own platform**: `.top .mk` wore `--ff`, which
+in dark is the navy the navigation bar is painted in, 1.08:1 &mdash;
+&sect;38.4's seventh time, and adding the new token to two of the three palette
+blocks was not enough, because the third is what applies the moment somebody
+chooses a theme explicitly.
+**AND TWO CHECKS WERE WRONG IN THE EXPENSIVE DIRECTION** &mdash; reporting a
+correct build broken: the round trip asserted `public`'s clean slate of a client
+schema that is created with `seed:false` and never had any of it, and the
+contrast sweep read the door's `background-clip:text` heading as the worst
+possible ratio. Both now say which case they are looking at, and the second
+asks the PAGE which elements are painted that way rather than excusing a tag
+name.*
 
 *Earlier, from another session: 2026-08-28 &mdash; **v3.55: fill the gaps (&sect;145, spec
 023)**. Islam: *"a special type of editing which is just filling the missing

@@ -19466,3 +19466,29 @@ on excusing that element the day somebody removed the gradient and left it
 genuinely invisible. The PAGE is asked which elements are painted that way, and
 a second assertion says at least one is: one guards the relationship, another
 guards that there is anything to relate (§113.8).
+
+### 147.12 · The migration, and the way back
+
+`scripts/migrate-to-multi-client.js` has been run end to end against copies of
+a production-shaped database — a v2.0 deployment, and one filled with the
+worked example — and it has **not** been run against production. Nothing
+merges to `main` without Islam's word on that merge.
+
+**STEP 2 IS THE WHOLE SCRIPT AND IT COPIES NOTHING.** `ALTER TABLE … SET
+SCHEMA` is a catalogue update, so no row is copied and **nothing can be
+half-copied** — which is why the move is a single statement per table rather
+than a dump and a load.
+
+**THE WAY BACK IS THE SAME MECHANISM POINTED THE OTHER WAY**, and it was
+exercised rather than only written down (`specs/024-multi-client/rollback.md`):
+44 tables back into `public`, all five schemas dropped, and the platform reads
+it as a v2.0 deployment again — Raya Trade, ten units, thirty-three people,
+Mobile's four pillars. **A rollback nobody has run is a paragraph, not a plan.**
+The code has to go back with it: a rolled-back database under the new code is
+the one state neither side is written for. And a Neon branch taken first is
+cheaper than any of it.
+
+**THE REHEARSAL IS WHAT FOUND THE SCRIPT'S OWN BUG** — it still wrote
+`accounts.role` and `account_clients.is_super`, the two columns revision 3
+removed, so the one script that sets a deployment up would have failed on the
+shape it was setting up. Reading it would not have shown that.

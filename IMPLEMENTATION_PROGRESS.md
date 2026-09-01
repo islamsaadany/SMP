@@ -6,14 +6,14 @@ version (rules A2 / A11, changed 2026-08-20) — those go only when asked for.
 
 **Where it runs:** Vercel, production tracks `main`. Static files plus two
 serverless functions (`/api/state`, `/api/auth`) against Neon Postgres.
-**Latest version:** v3.55 — §145 (fill the gaps) merged over v3.54. Built as
-§132 / v3.50 / spec 021 and renumbered on the way in: four sessions took
-§132–§144, v3.50–v3.54 and specs 021–022 while this one worked, and the
-merge is the only moment a sequential number is real.
-**Last updated:** 2026-08-28
+**Latest version:** v3.60 — §147 (one platform, many clients) on the
+multi-client branch, over v3.56. Not merged to `main` yet.
+**Last updated:** 2026-09-01
 
-**Sign in as:** `SMO` / `1234` — a password change is forced at once (§43.1,
-reversing §19.4).
+**Sign in with your EMAIL** (§147.2, spec 024): the person-key path is gone.
+The first office accounts are `islam.saadany@`, `mohamed.essam@` and
+`omar.alaa@forefront.consulting`, with temporary passwords the migration says
+once — a change is forced at first use (§43.1, reversing §19.4).
 **Direction:** rebuilding on the HR_ERP stack (§20, decided 2026-08-20).
 
 ---
@@ -2349,5 +2349,31 @@ taking it wholesale would have deleted four shipped features and everything from
 **The verification loop before any handover:** rebuild byte-identical → `qa.py`
 walk → `DATABASE_URL=… node scripts/test-roundtrip.js` (clean slate, round trip,
 fixed point and the archived-plan round trip must all print PASS) →
-`node scripts/dev-server.js` and drive it in a browser, **in both live and demo
-mode**.
+`node scripts/dev-server.js` and drive it in a browser.
+
+**Since §147 there are TWO more halves to that loop**, because neither of the
+product's sweeps reaches them: the boundary and the seats on the server
+(`node scripts/test-platform.js`, `node scripts/test-platform-rules.js`) and
+Forefront's own two pages on screen (`checks/multi-client.py`,
+`checks/platform-look.py`). And "in both live and demo mode" is gone with the
+demo switch — the worked example is a CLIENT now, at `/demo`.
+
+---
+
+## Multi-client (§147, spec 024) — where it stands
+
+| Slice | What it is | State |
+|---|---|---|
+| US1 | The boundary: every request names its client; Raya moves into its own schema | **Built**, rehearsed on a v2.0-shaped copy |
+| US2 | One door, the client cards, the client's name in the chrome | **Built** |
+| US3 | The office's own pages: consultants, a client's configuration, who sees what | **Built** |
+| US2b | The door is a door — Forefront's shell at `/platform` (Islam's correction) | **Built** |
+| US3b | A role is a seat on a client (Islam's correction; retires the four platform roles) | **Built** |
+| US4 | The Demo client, and the retirement of the Demo-data button and demo mode | **Built** |
+| Phase 7 | Byte-identical rebuild, the two sweeps, §147, the steering files | **Built** |
+| — | **The live migration** | **Not run.** Rehearsed only. |
+
+**The one thing left, and it is Islam's call:** `scripts/migrate-to-multi-client.js`
+has been run end to end against a copy of a v2.0-shaped deployment and against a
+seeded one, twice each, and is idempotent — but it has **not** been run against
+production, and nothing merges to `main` without the word (rule 4).

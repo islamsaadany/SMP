@@ -596,6 +596,43 @@ def main():
                 check("…while a row the platform minted does follow it", mine == "super", mine)
                 api(pg, {"action": "setTeam", "key": "raya-trade", "email": CONSULT[0], "seat": "smoteam"})
 
+            # ── 16 · nobody is created on a client that has a register ──
+            #        (§147.30, Islam: "make the access from the platform match
+            #        the raya registry without creating new people")
+            before = pg.evaluate("""async () => {
+              const r = await fetch('/api/state?client=raya-trade', { cache: 'no-store' });
+              const j = await r.json();
+              return (j.state.people || []).length; }""")
+            # SAYING WHO THEY ARE IS REQUIRED where the register holds anybody,
+            # because nothing is created there: a seat with no row is a team
+            # member who opens the client and is shown nothing (§61).
+            bare = api(pg, {"action": "setTeam", "key": "raya-trade",
+                            "email": "nadia.fahmy@forefront.consulting", "seat": "smoteam"})
+            check("adding somebody without saying who they are is refused",
+                  bare.get("ok") is not True and "register" in (bare.get("error") or ""), bare)
+            # AND SEVERAL MAY BE THE SAME PERSON — the point of the whole
+            # change: on Raya, Forefront works as `smo`.
+            both = [api(pg, {"action": "setTeam", "key": "raya-trade", "email": e,
+                             "seat": "smoteam", "personKey": "smo"})
+                    for e in (OFFICE[0], CONSULT[0])]
+            check("two accounts may be one row", all(r.get("ok") for r in both), both)
+            team = api(pg, {"action": "client", "key": "raya-trade"})["team"]
+            on = [m["email"] for m in team if m["person_key"] == "smo"]
+            check("…and the team says so", len(on) >= 2, on)
+            after = pg.evaluate("""async () => {
+              const r = await fetch('/api/state?client=raya-trade', { cache: 'no-store' });
+              const j = await r.json();
+              return { n: (j.state.people || []).length,
+                       as: j.person && j.person.key,
+                       mail: j.person && j.person.email }; }""")
+            check("…and NOT ONE person was created", after["n"] == before, {"was": before, "now": after})
+            check("…and they open the client as that row", after["as"] == "smo", after)
+            # THE ROW SAYS WHAT MAY BE DONE, THE ADDRESS SAYS WHO DID IT.
+            check("…while the session still carries their own address",
+                  after["mail"] == OFFICE[0], after)
+            api(pg, {"action": "setTeam", "key": "raya-trade", "email": OFFICE[0],
+                     "seat": "super", "personKey": "smo"})
+
             check("no page errors anywhere", not errs, errs)
             b.close()
     finally:

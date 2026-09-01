@@ -60,7 +60,14 @@ function send(res, code, obj) {
    count stays exact, the itemised before-and-after stops at the cap. */
 const LOG_ROW_CAP = 200;
 
-async function logChanges(client, person, changes) {
+/* `person` is the REGISTER ROW — what the stored graph knows, which is what
+   decides authorisation — and `email` is who actually signed in. On a client
+   whose register predates the platform those are deliberately different
+   things: several of Forefront's people act as one row (§147.30), so the row
+   says what may be done and the address says who did it. Written first as
+   `person.email`, which is the register's own address and empty for a row the
+   client wrote — so the column landed and stayed blank. */
+async function logChanges(client, person, changes, email) {
   if (!changes || !changes.length) return;
   try {
     for (const ch of changes) {
@@ -68,9 +75,14 @@ async function logChanges(client, person, changes) {
         ? { count: ch.rows.length, moved: ch.rows.slice(0, LOG_ROW_CAP) }
         : null;
       await client.query(
-        "INSERT INTO change_log (person_key, person_name, kind, target, what, rows_) " +
-        "VALUES ($1,$2,$3,$4,$5,$6)",
-        [person.key, person.name || null, ch.kind, ch.target, ch.what,
+        /* AND THE ADDRESS THEY SIGNED IN WITH (§147.30). Several of
+           Forefront's people may act as one row on a client's register, so the
+           row alone no longer says who did it — the session has always known
+           the address and it simply was not written down. */
+        "INSERT INTO change_log (person_key, person_name, email, kind, target, what, rows_) " +
+        "VALUES ($1,$2,$3,$4,$5,$6,$7)",
+        [person.key, person.name || null, email || person.email || null,
+         ch.kind, ch.target, ch.what,
          rows ? JSON.stringify(rows) : null]);
     }
   } catch (e) {
@@ -168,7 +180,7 @@ module.exports = async function handler(req, res) {
       await writeState(client, state);
       /* Logged AFTER the write and outside its transaction on purpose: a log
          entry for a save that did not land is worse than a missing one. */
-      await logChanges(client, me, verdict.changes);
+      await logChanges(client, me, verdict.changes, person.email);
       return send(res, 200, { ok: true });
     }
     res.setHeader("Allow", "GET, POST");

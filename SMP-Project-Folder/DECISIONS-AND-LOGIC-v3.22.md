@@ -19951,3 +19951,53 @@ what the person is inside the client.
 **AND §63 A FOURTH TIME, IN CODE WRITTEN THE SAME HOUR**: the refusal was said
 before the redraw that reports it, so it was wiped a moment later and the
 control simply sprang back with no explanation.
+
+### 147.30 · The platform matches the client's register and creates nobody
+
+Islam: *"make the access from the platform to match the raya registry without
+creating new people."* Measured first, because it decides everything: on Raya's
+register of 33 people **only Mohamed Essam is there**, as `smo`. Islam Saadany
+and Omar Alaa are not on it at all.
+
+So three answers were put to him — map only real matches (and be locked out
+until Raya adds you), **let several accounts point at one row**, or teach the
+client's platform to render for somebody with no row at all. He chose the
+second.
+
+**AND HE CORRECTED THE COST I STATED FOR IT.** I said the client could no
+longer tell which consultant did what. *"Isn't the action on raya's can be
+recorded by the email the account connect to the person?"* — it can, and it
+was simply never written down: `change_log` stored the person key and the name
+and no address, while the session had known the address all along. Migration
+029 adds the column. **The row says what may be done; the address says who did
+it**, and neither replaces the other.
+
+**WHAT THIS CHANGES:**
+
+- **Adding somebody to a client's team requires saying who they are on that
+  client's register**, because nothing is created there any more — a seat with
+  no row is a team member who opens the client and is shown nothing (§61).
+- **Several accounts may be one row.** The guard that refused it is gone; what
+  made it look necessary was the log, and the log is fixed.
+- **`ensureOfficeRow` resolves and never inserts** where the register holds
+  anybody. The one exception is a register with **nobody in it** — a client
+  created from the cards has nobody to match and somebody must be able to open
+  it in order to build one; that first row is marked `ffrow` and every later
+  one comes from the client's own People page.
+- **A row this orphans is RETIRED, never deleted** (Islam: *"retired for now
+  until we verify the other flow working and I will delete them myself"*).
+  Only rows the platform created are touched — `ffrow`, never `forefront`.
+
+**AND THE ASSERTION THAT COULD NOT FAIL IS THE LESSON.** The browser check
+asserted that no person is created, and stayed green with the guard removed:
+with the mapping required, **the create path is unreachable from the product**,
+so nothing the screen can do distinguishes the two builds. §94.5 in a check I
+had just written. It is asked of `ensureOfficeRow` itself now, where it fails
+two ways the moment the guard goes.
+
+**Two more faults, both mine and both silent:** the log column landed and
+stayed blank, because the first build wrote `person.email` — the REGISTER row's
+address, which is empty for a row the client wrote — where it had to be the
+session's; and a hand-made unit row round-tripped into a graph `writeState`
+could not write back, so the endpoint answered its generic 500 and my fixture's
+failure wore the product's clothes.

@@ -236,6 +236,82 @@ async function main() {
        the live client down. */
     const noSlug = await (await get("")).json();
     eq("a request naming no client lands on the default", noSlug.state && noSlug.state.group.org, "HTTP Client");
+
+    /* THE FIXTURE NEEDS SOMETHING TO SAVE. `/api/state` refuses a graph with
+       no units — the shape guard that stops a malformed save wiping a tenant —
+       and this client was created empty, so it is given one unit and its
+       register row is given the office seat. */
+    await P.withSchema(pg, "t_http", async function (sc) {
+      /* THE SEED, not a hand-made row. A unit inserted by hand round-tripped
+         into a graph `writeState` could not write back, and the endpoint
+         answered its generic 500 — my fixture failing, dressed as the product
+         failing. A known-good graph is the only honest thing to save. */
+      const seed = JSON.parse(require("fs").readFileSync(
+        path.join(__dirname, "..", "db", "seed-state.json"), "utf8"));
+      seed.group.org = "HTTP Client";
+      await io.writeState(sc, seed);
+      await sc.query("UPDATE people SET role = 'super' WHERE key = 'smo'");
+    });
+
+    /* ── NOBODY IS CREATED ON A CLIENT THAT HAS A REGISTER (§147.30) ──
+       Islam: "make the access from the platform match the raya registry
+       without creating new people." Asserted HERE rather than through the
+       screen, and that is the finding: with the mapping REQUIRED, the create
+       path cannot be reached from the product at all — so a browser check
+       removing the guard stays green and proves nothing (§94.5, in my own
+       check). The rule is asked of the function that carries it. */
+    await P.withSchema(pg, "t_http", async function (sc) {
+      const was = (await sc.query("SELECT count(*)::int AS n FROM people")).rows[0].n;
+      const got = await P.ensureOfficeRow(sc,
+        { person_key: "ff_nobody_here", seat: "smoteam" },
+        { name: "Nobody", email: "nobody@ff.example", kind: "office" });
+      const now = (await sc.query("SELECT count(*)::int AS n FROM people")).rows[0].n;
+      check("a client with a register gains nobody", now === was, { was: was, now: now });
+      check("…and the platform says it placed nobody", got === null, got);
+      /* AND AN EMPTY REGISTER IS THE ONE CASE THAT DOES GET A ROW — a client
+         created from the cards has nobody to match, and somebody has to be
+         able to open it in order to build one. */
+      await sc.query("CREATE TEMP TABLE kept AS SELECT * FROM people");
+      await sc.query("DELETE FROM people");
+      const first = await P.ensureOfficeRow(sc,
+        { person_key: "ff_first", seat: "super" },
+        { name: "First In", email: "first@ff.example", kind: "office" });
+      const after = (await sc.query(
+        "SELECT count(*)::int AS n, MAX(extra->>'ffrow') AS mine FROM people")).rows[0];
+      check("…while an empty register gets its first row", first === "ff_first" && after.n === 1, after);
+      check("…marked as the platform's own", after.mine === "true", after);
+      await sc.query("DELETE FROM people");
+      await sc.query("INSERT INTO people SELECT * FROM kept");
+    });
+
+    /* ── THE LOG SAYS WHO SIGNED IN, NOT ONLY WHICH ROW (§147.30) ──
+       Several of Forefront's people may act as ONE row on a client whose
+       register predates the platform, so the row alone no longer says who did
+       something. Islam saw that the address was already known and simply not
+       written down — this asserts it lands.
+
+       IT IS ASKED OF A SAVE, not of the column: the first build passed
+       `person.email`, which is the REGISTER row's address and empty for a row
+       the client wrote, so the column existed and stayed blank. */
+    const fresh = await (await get("?client=t-http")).json();
+    const state = fresh.state;
+    state.group.aspiration = "Changed while the log was being watched";
+    const saved = await fetch(BASE + "/api/state", { method: "POST",
+      headers: { "Content-Type": "application/json", cookie: cookie },
+      body: JSON.stringify({ client: "t-http", state: state }) });
+    const sj = await saved.json();
+    check("a save lands", sj.ok === true, JSON.stringify(sj).slice(0, 160));
+    await P.withSchema(pg, "t_http", async function (sc) {
+      const r = await sc.query(
+        "SELECT person_key, email FROM change_log ORDER BY at DESC LIMIT 1");
+      check("…and the change log records the address that signed in",
+        r.rowCount > 0 && r.rows[0].email === "desk@t-http.example",
+        r.rows[0] || "no log row");
+      /* AND THE ROW IS STILL THE REGISTER'S. The two answer different
+         questions and neither replaces the other. */
+      check("…beside the register row it was done as",
+        r.rowCount > 0 && !!r.rows[0].person_key, r.rows[0]);
+    });
   } finally {
     dev.kill();
   }

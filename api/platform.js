@@ -417,25 +417,39 @@ module.exports = async function handler(req, res) {
            is the same duplicate seen from the other side. */
         let personKey = P.officePersonKey(email);
         const asKey = String(body.personKey || "").trim();
-        if (asKey && asKey !== personKey) {
-          /* THE GUARD IS ABOUT THE TEAM, NOT ABOUT THE REGISTER ROW. Written
-             first as "no other account may point here", it refused the exact
-             case it exists to serve: Raya's own `smo@rayatrade.com` account
-             already points at `smo`, and that is the same human — signing in
-             either way should be the same person on that client, which is what
-             the row says.
-
-             What must not happen is TWO OF FOREFRONT'S people claiming one
-             row, because then the platform cannot say which of them a seat
-             belongs to. So it asks of office accounts only. */
-          const held = await c.query(
-            "SELECT ac.email FROM account_clients ac JOIN accounts a ON a.email = ac.email " +
-            "WHERE ac.client_key = $1 AND ac.person_key = $2 AND ac.email <> $3 AND a.kind = 'office'",
-            [row.key, asKey, email]);
-          if (held.rowCount) {
-            return send(res, 409, { ok: false, error:
-              "Somebody else at Forefront is already that person on this register." });
+        /* AND ON A CLIENT THAT HAS A REGISTER, SAYING WHO THEY ARE IS
+           REQUIRED (§147.30). Nothing is created there any more, so an account
+           added without an answer would hold a seat and be nobody — a team row
+           that opens a client showing nothing. A register with nobody in it is
+           the one case that needs no answer, because there is nobody to be. */
+        if (body.on !== false && !asKey) {
+          let peopled = false;
+          try {
+            peopled = await P.withSchema(pg, row.schema_name, async function (sc) {
+              return (await sc.query("SELECT 1 FROM people LIMIT 1")).rowCount > 0;
+            });
+          } catch (e) { console.error("reading " + row.key + "'s register:", e.message); }
+          const has = (await c.query(
+            "SELECT person_key FROM account_clients WHERE email = $1 AND client_key = $2",
+            [email, row.key])).rows[0];
+          if (peopled && !has) {
+            return send(res, 400, { ok: false, error:
+              "Say who they are on this client's register — nobody is created there." });
           }
+        }
+        if (asKey && asKey !== personKey) {
+          /* SEVERAL ACCOUNTS MAY BE ONE ROW (§147.30, Islam's option B). On a
+             client whose register predates this platform there is nobody for
+             most of Forefront to be — Raya's register holds Mohamed Essam and
+             not the others — so the honest answer is that they ACT AS that
+             person rather than being added to the client's register as new
+             people.
+
+             The guard that refused this is gone. What made it look necessary
+             was the change log saying `smo` for all of them, and Islam saw
+             that for what it was: the session knows the address, it simply was
+             not written down. Migration 029 records it, so the client can tell
+             two consultants apart on one row. */
           let there = false;
           try {
             there = await P.withSchema(pg, row.schema_name, async function (sc) {
@@ -504,6 +518,24 @@ module.exports = async function handler(req, res) {
         const landed = (await c.query(
           "SELECT person_key FROM account_clients WHERE email = $1 AND client_key = $2",
           [email, row.key])).rows[0];
+        /* ── AND A ROW THIS LEAVES BEHIND IS RETIRED, NEVER DELETED
+              (§147.30, Islam: "should be retired for now until we verify the
+              other flow working and I will delete them myself") ──────────
+           Pointing an account at somebody who is already on the register
+           orphans the row the platform minted for them. Retiring says the true
+           thing — nobody works here as that person any more — and leaves
+           anything that ever pointed at it intact (§35, §62). Only rows the
+           PLATFORM created are touched: `ffrow` is the mark, never
+           `forefront`, which is a fact about the person (§147.29). */
+        try {
+          await P.withSchema(pg, row.schema_name, async function (sc) {
+            await sc.query(
+              "UPDATE people SET extra = jsonb_set(COALESCE(extra,'{}'::jsonb), '{active}', 'false'::jsonb) " +
+              "WHERE extra->>'ffrow' = 'true' AND key <> ALL($1::text[])",
+              [(await c.query("SELECT person_key FROM account_clients WHERE client_key = $1",
+                              [row.key])).rows.map(function (x) { return x.person_key; })]);
+          });
+        } catch (e) { console.error("retiring in " + row.key + ":", e.message); }
         try {
           await P.withSchema(pg, row.schema_name, async function (sc) {
             await sc.query(

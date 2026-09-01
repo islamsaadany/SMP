@@ -552,23 +552,46 @@
           op.value = o.email;
           pick.appendChild(op);
         });
+        /* ── AND WHO THEY ARE ON THIS REGISTER (§147.30) ─────────────
+           Nothing is created on a client that already has a register, so
+           adding somebody without saying who they are would give them a seat
+           and no row — a team member who opens the client and is shown
+           nothing. The second list is the answer, and several people may give
+           the same one: on Raya, Forefront works as `smo`. */
+        var asWho = el("select", "fld");
+        var a0 = el("option", null, "…as who on this client's register?");
+        a0.value = "";
+        asWho.appendChild(a0);
+        (j.register || []).forEach(function (r) {
+          var o = el("option", null, r.name + (r.email ? " · " + r.email : ""));
+          o.value = r.key;
+          asWho.appendChild(o);
+        });
         var add = el("button", "btn", "Add");
         add.type = "button";
         add.addEventListener("click", function () {
           if (!pick.value) return;
-          post({ action: "setTeam", key: c.key, email: pick.value, seat: "smoteam" })
-            .then(function (r) { r.ok ? drawClient(c.key, true) : say(r.error || "Not added.", true); });
+          post({ action: "setTeam", key: c.key, email: pick.value, seat: "smoteam",
+                 personKey: asWho.value })
+            .then(function (r) {
+              drawClient(c.key, true).then(function () {
+                if (!r.ok) say(r.error || "Not added.", true);
+              });
+            });
         });
-        addRow.appendChild(pick); addRow.appendChild(add);
+        addRow.appendChild(pick);
+        if ((j.register || []).length) addRow.appendChild(asWho);
+        addRow.appendChild(add);
         rightCol.appendChild(addRow);
       }
       rightCol.appendChild(el("p", "note",
         "A seat is held on THIS client: Super user holds its access matrix, " +
         "retiring people and issuing passwords; SMO team runs cycles and " +
         "corrects plans. A client may have more than one super user. Where this " +
-        "client's register already holds somebody — it was built before the " +
-        "platform was — point their account at that row rather than making a " +
-        "second one. Removing somebody retires " +
+        "client's register already holds people, each account says WHO THEY ARE on " +
+        "it and nobody new is created — several may be the same person, and the " +
+        "change log records the address they signed in with. Removing somebody " +
+        "retires " +
         "their row on this client's register rather than deleting it."));
       grid.appendChild(rightCol);
       page.appendChild(grid);

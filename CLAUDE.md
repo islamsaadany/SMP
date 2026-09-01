@@ -3929,7 +3929,41 @@ prior sessions (on HR_ERP) accidentally reverted agreed-upon designs.
 
 ---
 
-*Last Updated: 2026-09-01 &mdash; **&sect;235: one escaper, safe in an
+*Last Updated: 2026-09-01 &mdash; **&sect;236 / &sect;236.2 / &sect;236.3:
+the added slide moves slide by slide.** Islam, on Manage slides: the Add
+button becomes **"+ Add slide after"** in his words, so it says where the empty
+slide lands (&sect;236); then, of the arrows, *"the rearrange of slides doesn't
+move around the fixed slides of the main flow"* &mdash; measured, **25 dead
+presses of 28** walking Mobile's deck and a function's slide never moving at
+all, because a stored position is an ANCHOR (&sect;50.3) and the arrows stepped
+blindly one row, so a press into an unanchored run recomputed the same position
+and repainted in place. &sect;236.2 made the press land on the nearest real
+place and, on his ruling, made **between a pillar's measures and tactics** a
+place (mirrored on a function: between a project's deliverables and its
+milestones). He tested again &mdash; *"the slides jump from slide 9 to 13 one
+jump .. the added slides can move slide by slide the prohipted slides from the
+movement are the original slides"* &mdash; and he was right: &sect;236.2 removed
+the lie and drew its landing places from the anchors that happened to exist, so
+its own "deliberately NOT anchored" list (the SWOT run, the section dividers)
+was still hopped four at a time. **&sect;236.3 is the rule in one sentence:
+every ORIGINAL slide is a landing place, and what is pinned is the originals'
+own order.** Every fixed slide carries an anchor now; **the existing keys do
+not move** (&sect;30.2 applied to anchors &mdash; `swot`, `p<CODE>`, `cap<id>`
+are untouched), so every picture already placed in a live tenant stays exactly
+where it sits, and there is no migration. One grouping survives and is not a
+gap: the parts of a table split by `deckFitPass()` share their parent's anchor
+and are ONE stop, after the last part &mdash; a picture cannot live between a
+table and its own continuation. `checks/slide-move.py` asserts the problem and
+never a layout (&sect;94.8): every fixed slide a landing place, every place its
+OWN key (a non-adjacent repeat would silently merge two gaps into one
+position), and the walk's stops equal the deck's own slide list, down and back
+up, on a unit AND a function. **5 red then 6 red** on the two builds before,
+each printing his report verbatim. **AND THE LESSON IS MINE**: &sect;236's
+one-step probe landed on a spot that happened to work and I generalised from
+it &mdash; a probe that samples one position proves that position (&sect;94.2
+wearing a green tick).*
+
+*Earlier: 2026-09-01 &mdash; **&sect;235: one escaper, safe in an
 attribute.** A security sweep found the platform's main text-cleaner `esc()`
 escaped only `&` and `<` &mdash; a text-node escaper &mdash; while being used
 inside double-quoted HTML attributes ~226 times. A literal `"` in tenant data

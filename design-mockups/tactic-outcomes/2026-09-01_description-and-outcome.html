@@ -7700,6 +7700,13 @@ body{ background:var(--mk-ground); color:var(--mk-ink); margin:0; }
    returns 141px. The table then asks for 1517px and SCROLLS inside .tblscroll
    rather than crushing — which is the choice a floor makes (§158): a column
    that cannot shrink pushes the table wider instead of squeezing the words. */
+/* Option B has two prose columns where A has three, so the same floor would
+   push it wider than it needs to be. Measured separately rather than shared:
+   the point of drawing both is that they are not the same table. */
+.mk-panel table.planedit2 th:nth-child(2), .mk-panel table.planedit2 td:nth-child(2),
+.mk-panel table.planedit2 th:nth-child(3), .mk-panel table.planedit2 td:nth-child(3){
+  min-width:230px;
+}
 .mk-panel table.planedit th:nth-child(2), .mk-panel table.planedit td:nth-child(2),
 .mk-panel table.planedit th:nth-child(3), .mk-panel table.planedit td:nth-child(3),
 .mk-panel table.planedit th:nth-child(4), .mk-panel table.planedit td:nth-child(4){
@@ -7810,133 +7817,53 @@ body{ background:var(--mk-ground); color:var(--mk-ink); margin:0; }
       second way of scoring.</p>
   </section>
 
-  <!-- ── PLAN ─────────────────────────────────────────────────────── -->
   <article class="mk-panel">
     <div class="mk-panel-h">
-      <h2>1 &middot; Strategy &rsaquo; Plan &mdash; reading</h2>
-      <p>The description takes a column of its own, because this is the page where it is written. The
-        target says the target &mdash; the direction and the compile rule are set with the pen and show
-        later, beside the score they govern.</p>
+      <h2>Option A &mdash; the description takes a column</h2>
+      <p>Its own column on the Plan, in both modes. Reporting and Performance have no room for it, so there it still sits under the tactic&rsquo;s name.</p>
     </div>
     <div class="mk-panel-b">
-
-      <p class="mk-cap now"></p>
-      <div class="mk-real"><table>
-        <thead><tr><th>#</th><th>Tactic</th><th>Owner</th><th>Collabs.</th><th>Quarters</th></tr></thead>
-        <tbody>
-          <tr><td class="idx"><span class="idx-n">1</span></td><td>Clean and standardize existing customer and SKU base</td><td>Ramy Behairy</td><td class="collabs">Hassan Sayed</td><td><span class="qs"><i class="">1</i><i class="on past">2</i><i class="on">3</i><i class="">4</i></span></td></tr>
-          <tr><td class="idx"><span class="idx-n">2</span></td><td>End-to-End Order-to-Cash Digitization</td><td>Mohamed Rizk</td><td class="collabs">Hassan, Hala</td><td><span class="qs"><i class="">1</i><i class="on past">2</i><i class="on">3</i><i class="">4</i></span></td></tr>
-          <tr><td class="idx"><span class="idx-n">3</span></td><td>Roll out the mega-store format across key governorates</td><td>Sherif Kamel</td><td class="collabs">Ramy Behairy</td><td><span class="qs"><i class="on past">1</i><i class="on past">2</i><i class="on">3</i><i class="on">4</i></span></td></tr>
-        </tbody>
-      </table></div>
-
+      <p class="mk-cap">Reading</p>
+      <div class="mk-real"><table><thead><tr><th>#</th><th>Tactic</th><th>Description</th><th>Outcome</th><th class="cc">Target</th><th>Owner</th><th>Collabs.</th><th>Quarters</th></tr></thead><tbody><tr><td class="idx"><span class="idx-n">1</span></td><td>Clean and standardize existing customer and SKU base</td><td class="mk-prose">Create a reliable, unified data foundation across different systems</td><td class="mk-prose"><span class="missing">Missing</span></td><td class="num"><span class="missing">Missing</span></td><td>Ramy Behairy</td><td class="collabs">Hassan Sayed</td><td><span class="qs"><i class="">1</i><i class="on past">2</i><i class="on">3</i><i class="">4</i></span></td></tr><tr><td class="idx"><span class="idx-n">2</span></td><td>End-to-End Order-to-Cash Digitization</td><td class="mk-prose">Automate the full sales and payment cycle</td><td class="mk-prose"><b>Orders processed end-to-end digitally</b></td><td class="num">90%</td><td>Mohamed Rizk</td><td class="collabs">Hassan, Hala</td><td><span class="qs"><i class="">1</i><i class="on past">2</i><i class="on">3</i><i class="">4</i></span></td></tr><tr><td class="idx"><span class="idx-n">3</span></td><td>Roll out the mega-store format across key governorates</td><td class="mk-prose">Take the format to the governorates where footfall justifies it</td><td class="mk-prose"><b>Mega stores opened</b></td><td class="num">6 #</td><td>Sherif Kamel</td><td class="collabs">Ramy Behairy</td><td><span class="qs"><i class="on past">1</i><i class="on past">2</i><i class="on">3</i><i class="on">4</i></span></td></tr></tbody></table></div>
       <div class="mk-gap"></div>
-
-      <p class="mk-cap new"></p>
-      <div class="mk-real"><table>
-        <thead><tr><th>#</th><th>Tactic</th><th>Description</th><th>Outcome</th><th class="cc">Target</th><th>Owner</th><th>Collabs.</th><th>Quarters</th></tr></thead>
-        <tbody>
-          <tr><td class="idx"><span class="idx-n">1</span></td><td>Clean and standardize existing customer and SKU base</td><td class="mk-prose">Create a reliable, unified data foundation across different systems</td><td class="mk-prose"><span class="missing">Missing</span></td><td class="num"><span class="missing">Missing</span></td><td>Ramy Behairy</td><td class="collabs">Hassan Sayed</td><td><span class="qs"><i class="">1</i><i class="on past">2</i><i class="on">3</i><i class="">4</i></span></td></tr>
-          <tr><td class="idx"><span class="idx-n">2</span></td><td>End-to-End Order-to-Cash Digitization</td><td class="mk-prose">Automate the full sales and payment cycle</td><td class="mk-prose"><b>Orders processed end-to-end digitally</b></td><td class="num">90%</td><td>Mohamed Rizk</td><td class="collabs">Hassan, Hala</td><td><span class="qs"><i class="">1</i><i class="on past">2</i><i class="on">3</i><i class="">4</i></span></td></tr>
-          <tr><td class="idx"><span class="idx-n">3</span></td><td>Roll out the mega-store format across key governorates</td><td class="mk-prose">Take the format to the governorates where footfall justifies it</td><td class="mk-prose"><b>Mega stores opened</b></td><td class="num">6 #</td><td>Sherif Kamel</td><td class="collabs">Ramy Behairy</td><td><span class="qs"><i class="on past">1</i><i class="on past">2</i><i class="on">3</i><i class="on">4</i></span></td></tr>
-        </tbody>
-      </table></div>
-
-      <div class="mk-foot">
-        <div><em>The number leaves the sentence</em><p>Your sheet writes &ldquo;<b>90% of orders processed
-          end-to-end digitally</b>&rdquo;. With the target in its own cell the outcome is just the thing
-          being measured, exactly as a key measure is named without its target in it. Leave the number in
-          the sentence and the page says 90 twice, and only one of them moves.</p></div>
-        <div><em>Row 1 is a gap, not an exception</em><p>Red <b>Missing</b>, counted on the bar above the
-          table and reachable from <em>Fill in what is empty</em>. Somebody writes <b>Raya &amp; I2
-          unified customer base</b>, sets <b>&ge; 1 #</b>, and it stops being missing.</p></div>
-        <div><em>Reading says the target and nothing else</em><p>No direction, no compile rule
-          &mdash; both are set with the pen and both show later, beside the score they govern. Eight
-          columns, measured at 1500, 1180 and 1000 with nothing clipped.</p></div>
-      </div>
+      <p class="mk-cap">Writing &mdash; the pen open</p>
+      <div class="mk-real"><table class="planedit"><thead><tr><th>#</th><th>Tactic</th><th>Description</th><th>Outcome</th><th class="cc">Dir.</th><th class="cc">Unit</th><th class="num">Target</th><th class="cc">Compiled</th><th>Owner</th><th>Collabs.</th><th>Quarters</th></tr></thead><tbody class="sortable"><tr><td class="idx"><span class="grip" role="button" tabindex="0" title="Drag to reorder"><i></i><i></i><i></i></span><span class="idx-n">1</span></td><td><textarea class="fld grow " rows="1" style="height:34px" placeholder="Tactic">Clean and standardize existing customer and SKU base</textarea><button class="eyebtn" aria-pressed="false" title="Hide from the presentation" aria-label="Hide from the presentation"><svg viewBox="0 0 24 20" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M2 10s3.5-6 10-6 10 6 10 6-3.5 6-10 6S2 10 2 10z"></path><circle cx="12" cy="10" r="2.6"></circle></svg></button><button class="xbtn" title="Remove this row" aria-label="Remove this row">&times;</button></td><td><textarea class="fld grow " rows="1" style="height:34px" placeholder="What it is for">Create a reliable, unified data foundation across different systems</textarea></td><td><textarea class="fld grow " rows="1" style="height:34px" placeholder="What it should produce"></textarea></td><td class="cc"><select class="fld mono"><option selected>&ge;</option><option>&le;</option></select></td><td class="cc"><button type="button" class="ssbtn" aria-haspopup="listbox" aria-expanded="false" title="&mdash;"><span class="sslabel">&mdash;</span><span class="sscar" aria-hidden="true">&#9662;</span></button></td><td class="num"><input class="fld mono" value="" placeholder="Target"></td><td class="cc"><select class="fld"><option selected></option><option>Sum</option><option>Latest</option><option>Average</option></select></td><td><button type="button" class="ssbtn" aria-haspopup="listbox" aria-expanded="false" title="Ramy Behairy"><span class="sslabel">Ramy Behairy</span><span class="sscar" aria-hidden="true">&#9662;</span></button></td><td class="collabs"><button type="button" class="ssbtn" aria-haspopup="listbox" aria-expanded="false" title="Hassan Sayed"><span class="sslabel">Hassan Sayed</span><span class="sscar" aria-hidden="true">&#9662;</span></button></td><td><span class="qs qs-edit"><button class="qtog" title="Quarter 1">1</button><button class="qtog on" title="Quarter 2">2</button><button class="qtog on" title="Quarter 3">3</button><button class="qtog" title="Quarter 4">4</button></span></td></tr><tr><td class="idx"><span class="grip" role="button" tabindex="0" title="Drag to reorder"><i></i><i></i><i></i></span><span class="idx-n">2</span></td><td><textarea class="fld grow " rows="1" style="height:34px" placeholder="Tactic">End-to-End Order-to-Cash Digitization</textarea><button class="eyebtn" aria-pressed="false" title="Hide from the presentation" aria-label="Hide from the presentation"><svg viewBox="0 0 24 20" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M2 10s3.5-6 10-6 10 6 10 6-3.5 6-10 6S2 10 2 10z"></path><circle cx="12" cy="10" r="2.6"></circle></svg></button><button class="xbtn" title="Remove this row" aria-label="Remove this row">&times;</button></td><td><textarea class="fld grow " rows="1" style="height:34px" placeholder="What it is for">Automate the full sales and payment cycle</textarea></td><td><textarea class="fld grow " rows="1" style="height:34px" placeholder="What it should produce">Orders processed end-to-end digitally</textarea></td><td class="cc"><select class="fld mono"><option selected>&ge;</option><option>&le;</option></select></td><td class="cc"><button type="button" class="ssbtn" aria-haspopup="listbox" aria-expanded="false" title="%"><span class="sslabel">%</span><span class="sscar" aria-hidden="true">&#9662;</span></button></td><td class="num"><input class="fld mono" value="90" placeholder="Target"></td><td class="cc"><select class="fld"><option></option><option>Sum</option><option selected>Latest</option><option>Average</option></select></td><td><button type="button" class="ssbtn" aria-haspopup="listbox" aria-expanded="false" title="Mohamed Rizk"><span class="sslabel">Mohamed Rizk</span><span class="sscar" aria-hidden="true">&#9662;</span></button></td><td class="collabs"><button type="button" class="ssbtn" aria-haspopup="listbox" aria-expanded="false" title="Hassan, Hala"><span class="sslabel">Hassan, Hala</span><span class="sscar" aria-hidden="true">&#9662;</span></button></td><td><span class="qs qs-edit"><button class="qtog" title="Quarter 1">1</button><button class="qtog on" title="Quarter 2">2</button><button class="qtog on" title="Quarter 3">3</button><button class="qtog" title="Quarter 4">4</button></span></td></tr><tr><td class="idx"><span class="grip" role="button" tabindex="0" title="Drag to reorder"><i></i><i></i><i></i></span><span class="idx-n">3</span></td><td><textarea class="fld grow " rows="1" style="height:34px" placeholder="Tactic">Roll out the mega-store format across key governorates</textarea><button class="eyebtn" aria-pressed="false" title="Hide from the presentation" aria-label="Hide from the presentation"><svg viewBox="0 0 24 20" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M2 10s3.5-6 10-6 10 6 10 6-3.5 6-10 6S2 10 2 10z"></path><circle cx="12" cy="10" r="2.6"></circle></svg></button><button class="xbtn" title="Remove this row" aria-label="Remove this row">&times;</button></td><td><textarea class="fld grow " rows="1" style="height:34px" placeholder="What it is for">Take the format to the governorates where footfall justifies it</textarea></td><td><textarea class="fld grow " rows="1" style="height:34px" placeholder="What it should produce">Mega stores opened</textarea></td><td class="cc"><select class="fld mono"><option selected>&ge;</option><option>&le;</option></select></td><td class="cc"><button type="button" class="ssbtn" aria-haspopup="listbox" aria-expanded="false" title="#"><span class="sslabel">#</span><span class="sscar" aria-hidden="true">&#9662;</span></button></td><td class="num"><input class="fld mono" value="6" placeholder="Target"></td><td class="cc"><select class="fld"><option></option><option selected>Sum</option><option>Latest</option><option>Average</option></select></td><td><button type="button" class="ssbtn" aria-haspopup="listbox" aria-expanded="false" title="Sherif Kamel"><span class="sslabel">Sherif Kamel</span><span class="sscar" aria-hidden="true">&#9662;</span></button></td><td class="collabs"><button type="button" class="ssbtn" aria-haspopup="listbox" aria-expanded="false" title="Ramy Behairy"><span class="sslabel">Ramy Behairy</span><span class="sscar" aria-hidden="true">&#9662;</span></button></td><td><span class="qs qs-edit"><button class="qtog on" title="Quarter 1">1</button><button class="qtog on" title="Quarter 2">2</button><button class="qtog on" title="Quarter 3">3</button><button class="qtog on" title="Quarter 4">4</button></span></td></tr><tr class="newrow"><td class="idx">+</td><td colspan="10"><button class="linkbu">Add a tactic</button></td></tr></tbody></table></div>
+      <div class="mk-foot"><div><em>What it costs</em><p>Reading is <b>eight columns</b> and fits at 1500, 1180 and 1000.
+  Writing is <b>eleven</b>, needs <b>1517px</b>, and scrolls sideways at every window &mdash; 187px at
+  1500, 442px at 1180. With the cursor in the name box, <b>Quarters is off the screen at 1500</b>, and
+  Owner, Collabs. and Quarters are all off it at 1180.</p></div>
+<div><em>What it buys</em><p>A column you can run your eye down, and the same shape as the spreadsheet the
+  plan came from. It is also the only version where the description keeps a heading of its own.</p></div></div>
     </div>
   </article>
 
-  <!-- ── PLAN, EDITING ────────────────────────────────────────────── -->
   <article class="mk-panel">
     <div class="mk-panel-h">
-      <h2>2 &middot; Strategy &rsaquo; Plan &mdash; with the pen open</h2>
-      <p>Reading compresses the three facts into one cell; writing gives each its own control, in the same
-        columns and the same order the key measures table already uses &mdash; <b>Dir. &middot; Unit
-        &middot; Target &middot; Compiled</b>. Nothing here is a new kind of control.</p>
+      <h2>Option B &mdash; the description sits under the tactic&rsquo;s name</h2>
+      <p>In the same cell as the tactic it describes, with the name in bold so the two read apart. The same place it sits on Reporting and Performance.</p>
     </div>
     <div class="mk-panel-b">
-
-      <p class="mk-cap new"></p>
-      <div class="mk-real"><table class="planedit">
-        <thead><tr><th>#</th><th>Tactic</th><th>Description</th><th>Outcome</th><th class="cc">Dir.</th><th class="cc">Unit</th><th class="num">Target</th><th class="cc">Compiled</th><th>Owner</th><th>Collabs.</th><th>Quarters</th></tr></thead>
-        <tbody class="sortable">
-          <tr>
-            <td class="idx"><span class="grip" role="button" tabindex="0" title="Drag to reorder"><i></i><i></i><i></i></span><span class="idx-n">1</span></td>
-            <td><textarea class="fld grow" rows="1" style="height:34px">Clean and standardize existing customer and SKU base</textarea><button class="eyebtn" aria-pressed="false" title="Hide from the presentation" aria-label="Hide from the presentation"><svg viewBox="0 0 24 20" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M2 10s3.5-6 10-6 10 6 10 6-3.5 6-10 6S2 10 2 10z"></path><circle cx="12" cy="10" r="2.6"></circle></svg></button><button class="xbtn" title="Remove this row" aria-label="Remove this row">&times;</button></td>
-            <td><textarea class="fld grow" rows="1" style="height:34px" placeholder="What it is for">Create a reliable, unified data foundation across different systems</textarea></td>
-            <td><textarea class="fld grow gapwalk" rows="1" style="height:34px" placeholder="What it should produce"></textarea></td>
-            <td class="cc"><select class="fld mono"><option selected>&ge;</option><option>&le;</option></select></td>
-            <td class="cc"><button type="button" class="ssbtn" aria-haspopup="listbox" aria-expanded="false" title="Unit"><span class="sslabel">&mdash;</span><span class="sscar" aria-hidden="true">&#9662;</span></button></td>
-            <td class="num"><input class="fld mono" value="" placeholder="Target"></td>
-            <td class="cc"><select class="fld"><option selected></option><option>Sum</option><option>Latest</option><option>Average</option></select></td>
-            <td><button type="button" class="ssbtn" aria-haspopup="listbox" aria-expanded="false" title="Ramy Behairy"><span class="sslabel">Ramy Behairy</span><span class="sscar" aria-hidden="true">&#9662;</span></button></td>
-            <td class="collabs"><button type="button" class="ssbtn" aria-haspopup="listbox" aria-expanded="false" title="Hassan Sayed"><span class="sslabel">Hassan Sayed</span><span class="sscar" aria-hidden="true">&#9662;</span></button></td>
-            <td><span class="qs qs-edit"><button class="qtog" title="Quarter 1 — press to plan">1</button><button class="qtog on" title="Quarter 2 — planned; press to clear">2</button><button class="qtog on" title="Quarter 3 — planned; press to clear">3</button><button class="qtog" title="Quarter 4 — press to plan">4</button></span></td>
-          </tr>
-          <tr>
-            <td class="idx"><span class="grip" role="button" tabindex="0" title="Drag to reorder"><i></i><i></i><i></i></span><span class="idx-n">2</span></td>
-            <td><textarea class="fld grow" rows="1" style="height:34px">End-to-End Order-to-Cash Digitization</textarea><button class="eyebtn" aria-pressed="false" title="Hide from the presentation" aria-label="Hide from the presentation"><svg viewBox="0 0 24 20" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M2 10s3.5-6 10-6 10 6 10 6-3.5 6-10 6S2 10 2 10z"></path><circle cx="12" cy="10" r="2.6"></circle></svg></button><button class="xbtn" title="Remove this row" aria-label="Remove this row">&times;</button></td>
-            <td><textarea class="fld grow" rows="1" style="height:34px" placeholder="What it is for">Automate the full sales and payment cycle</textarea></td>
-            <td><textarea class="fld grow" rows="1" style="height:34px" placeholder="What it should produce">Orders processed end-to-end digitally</textarea></td>
-            <td class="cc"><select class="fld mono"><option selected>&ge;</option><option>&le;</option></select></td>
-            <td class="cc"><button type="button" class="ssbtn" aria-haspopup="listbox" aria-expanded="false" title="%"><span class="sslabel">%</span><span class="sscar" aria-hidden="true">&#9662;</span></button></td>
-            <td class="num"><input class="fld mono" value="90" placeholder="Target"></td>
-            <td class="cc"><select class="fld"><option>Sum</option><option selected>Latest</option><option>Average</option></select></td>
-            <td><button type="button" class="ssbtn" aria-haspopup="listbox" aria-expanded="false" title="Mohamed Rizk"><span class="sslabel">Mohamed Rizk</span><span class="sscar" aria-hidden="true">&#9662;</span></button></td>
-            <td class="collabs"><button type="button" class="ssbtn" aria-haspopup="listbox" aria-expanded="false" title="Hassan, Hala"><span class="sslabel">Hassan, Hala</span><span class="sscar" aria-hidden="true">&#9662;</span></button></td>
-            <td><span class="qs qs-edit"><button class="qtog" title="Quarter 1 — press to plan">1</button><button class="qtog on" title="Quarter 2 — planned; press to clear">2</button><button class="qtog on" title="Quarter 3 — planned; press to clear">3</button><button class="qtog" title="Quarter 4 — press to plan">4</button></span></td>
-          </tr>
-          <tr>
-            <td class="idx"><span class="grip" role="button" tabindex="0" title="Drag to reorder"><i></i><i></i><i></i></span><span class="idx-n">3</span></td>
-            <td><textarea class="fld grow" rows="1" style="height:34px">Roll out the mega-store format across key governorates</textarea><button class="eyebtn" aria-pressed="false" title="Hide from the presentation" aria-label="Hide from the presentation"><svg viewBox="0 0 24 20" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M2 10s3.5-6 10-6 10 6 10 6-3.5 6-10 6S2 10 2 10z"></path><circle cx="12" cy="10" r="2.6"></circle></svg></button><button class="xbtn" title="Remove this row" aria-label="Remove this row">&times;</button></td>
-            <td><textarea class="fld grow" rows="1" style="height:34px" placeholder="What it is for">Take the format to the governorates where footfall justifies it</textarea></td>
-            <td><textarea class="fld grow" rows="1" style="height:34px" placeholder="What it should produce">Mega stores opened</textarea></td>
-            <td class="cc"><select class="fld mono"><option selected>&ge;</option><option>&le;</option></select></td>
-            <td class="cc"><button type="button" class="ssbtn" aria-haspopup="listbox" aria-expanded="false" title="#"><span class="sslabel">#</span><span class="sscar" aria-hidden="true">&#9662;</span></button></td>
-            <td class="num"><input class="fld mono" value="6" placeholder="Target"></td>
-            <td class="cc"><select class="fld"><option selected>Sum</option><option>Latest</option><option>Average</option></select></td>
-            <td><button type="button" class="ssbtn" aria-haspopup="listbox" aria-expanded="false" title="Sherif Kamel"><span class="sslabel">Sherif Kamel</span><span class="sscar" aria-hidden="true">&#9662;</span></button></td>
-            <td class="collabs"><button type="button" class="ssbtn" aria-haspopup="listbox" aria-expanded="false" title="Ramy Behairy"><span class="sslabel">Ramy Behairy</span><span class="sscar" aria-hidden="true">&#9662;</span></button></td>
-            <td><span class="qs qs-edit"><button class="qtog on" title="Quarter 1 — planned; press to clear">1</button><button class="qtog on" title="Quarter 2 — planned; press to clear">2</button><button class="qtog on" title="Quarter 3 — planned; press to clear">3</button><button class="qtog on" title="Quarter 4 — planned; press to clear">4</button></span></td>
-          </tr>
-          <tr class="newrow"><td class="idx">+</td><td colspan="10"><button class="linkbu">Add a tactic</button></td></tr>
-        </tbody>
-      </table></div>
-
-      <div class="mk-foot">
-        <div><em>Row 1 is what a gap looks like from this side</em><p>Empty outcome, no unit, no target, no
-          compile rule &mdash; and the boxes are simply waiting. <b>Fill in what is empty</b> walks
-          straight to this cell, the same way it already walks to a blank target on a key measure.</p></div>
-        <div><em>Two things the drawing caught</em><p>The direction picker was squeezed to
-          <b>40px</b> and stopped showing its own <b>&ge;</b>. And the tactic&rsquo;s own name box fell
-          to <b>77px</b>, breaking words mid-letter &mdash; the fault we fixed on the pillar head in
-          August, back by another road. Both have floors now, measured against what the product gives
-          them today. Found by looking at the render; every check passed while both were true.</p></div>
-        <div><em>The width, honestly &mdash; this is the cost</em><p>Three prose columns and seven
-          narrow ones need <b>1517px</b>, so the editing table <b>scrolls sideways at every window</b>
-          &mdash; 187px at 1500, 442px at 1180. That is the price of the description having a column of
-          its own here. Putting it back under the tactic&rsquo;s name is ten columns and 1400px, no
-          scroll from 1400 up. <b>Reading is unaffected either way</b>: eight columns, fits
-          everywhere.</p></div>
-      </div>
+      <p class="mk-cap">Reading</p>
+      <div class="mk-real"><table><thead><tr><th>#</th><th>Tactic</th><th>Outcome</th><th class="cc">Target</th><th>Owner</th><th>Collabs.</th><th>Quarters</th></tr></thead><tbody><tr><td class="idx"><span class="idx-n">1</span></td><td><b class="tacname">Clean and standardize existing customer and SKU base</b><span class="why">Create a reliable, unified data foundation across different systems</span></td><td class="mk-prose"><span class="missing">Missing</span></td><td class="num"><span class="missing">Missing</span></td><td>Ramy Behairy</td><td class="collabs">Hassan Sayed</td><td><span class="qs"><i class="">1</i><i class="on past">2</i><i class="on">3</i><i class="">4</i></span></td></tr><tr><td class="idx"><span class="idx-n">2</span></td><td><b class="tacname">End-to-End Order-to-Cash Digitization</b><span class="why">Automate the full sales and payment cycle</span></td><td class="mk-prose"><b>Orders processed end-to-end digitally</b></td><td class="num">90%</td><td>Mohamed Rizk</td><td class="collabs">Hassan, Hala</td><td><span class="qs"><i class="">1</i><i class="on past">2</i><i class="on">3</i><i class="">4</i></span></td></tr><tr><td class="idx"><span class="idx-n">3</span></td><td><b class="tacname">Roll out the mega-store format across key governorates</b><span class="why">Take the format to the governorates where footfall justifies it</span></td><td class="mk-prose"><b>Mega stores opened</b></td><td class="num">6 #</td><td>Sherif Kamel</td><td class="collabs">Ramy Behairy</td><td><span class="qs"><i class="on past">1</i><i class="on past">2</i><i class="on">3</i><i class="on">4</i></span></td></tr></tbody></table></div>
+      <div class="mk-gap"></div>
+      <p class="mk-cap">Writing &mdash; the pen open</p>
+      <div class="mk-real"><table class="planedit2"><thead><tr><th>#</th><th>Tactic</th><th>Outcome</th><th class="cc">Dir.</th><th class="cc">Unit</th><th class="num">Target</th><th class="cc">Compiled</th><th>Owner</th><th>Collabs.</th><th>Quarters</th></tr></thead><tbody class="sortable"><tr><td class="idx"><span class="grip" role="button" tabindex="0" title="Drag to reorder"><i></i><i></i><i></i></span><span class="idx-n">1</span></td><td><textarea class="fld grow " rows="1" style="height:34px" placeholder="Tactic">Clean and standardize existing customer and SKU base</textarea><button class="eyebtn" aria-pressed="false" title="Hide from the presentation" aria-label="Hide from the presentation"><svg viewBox="0 0 24 20" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M2 10s3.5-6 10-6 10 6 10 6-3.5 6-10 6S2 10 2 10z"></path><circle cx="12" cy="10" r="2.6"></circle></svg></button><button class="xbtn" title="Remove this row" aria-label="Remove this row">&times;</button><textarea class="fld grow tacdesc" rows="1" style="height:34px" placeholder="What it is for">Create a reliable, unified data foundation across different systems</textarea></td><td><textarea class="fld grow " rows="1" style="height:34px" placeholder="What it should produce"></textarea></td><td class="cc"><select class="fld mono"><option selected>&ge;</option><option>&le;</option></select></td><td class="cc"><button type="button" class="ssbtn" aria-haspopup="listbox" aria-expanded="false" title="&mdash;"><span class="sslabel">&mdash;</span><span class="sscar" aria-hidden="true">&#9662;</span></button></td><td class="num"><input class="fld mono" value="" placeholder="Target"></td><td class="cc"><select class="fld"><option selected></option><option>Sum</option><option>Latest</option><option>Average</option></select></td><td><button type="button" class="ssbtn" aria-haspopup="listbox" aria-expanded="false" title="Ramy Behairy"><span class="sslabel">Ramy Behairy</span><span class="sscar" aria-hidden="true">&#9662;</span></button></td><td class="collabs"><button type="button" class="ssbtn" aria-haspopup="listbox" aria-expanded="false" title="Hassan Sayed"><span class="sslabel">Hassan Sayed</span><span class="sscar" aria-hidden="true">&#9662;</span></button></td><td><span class="qs qs-edit"><button class="qtog" title="Quarter 1">1</button><button class="qtog on" title="Quarter 2">2</button><button class="qtog on" title="Quarter 3">3</button><button class="qtog" title="Quarter 4">4</button></span></td></tr><tr><td class="idx"><span class="grip" role="button" tabindex="0" title="Drag to reorder"><i></i><i></i><i></i></span><span class="idx-n">2</span></td><td><textarea class="fld grow " rows="1" style="height:34px" placeholder="Tactic">End-to-End Order-to-Cash Digitization</textarea><button class="eyebtn" aria-pressed="false" title="Hide from the presentation" aria-label="Hide from the presentation"><svg viewBox="0 0 24 20" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M2 10s3.5-6 10-6 10 6 10 6-3.5 6-10 6S2 10 2 10z"></path><circle cx="12" cy="10" r="2.6"></circle></svg></button><button class="xbtn" title="Remove this row" aria-label="Remove this row">&times;</button><textarea class="fld grow tacdesc" rows="1" style="height:34px" placeholder="What it is for">Automate the full sales and payment cycle</textarea></td><td><textarea class="fld grow " rows="1" style="height:34px" placeholder="What it should produce">Orders processed end-to-end digitally</textarea></td><td class="cc"><select class="fld mono"><option selected>&ge;</option><option>&le;</option></select></td><td class="cc"><button type="button" class="ssbtn" aria-haspopup="listbox" aria-expanded="false" title="%"><span class="sslabel">%</span><span class="sscar" aria-hidden="true">&#9662;</span></button></td><td class="num"><input class="fld mono" value="90" placeholder="Target"></td><td class="cc"><select class="fld"><option></option><option>Sum</option><option selected>Latest</option><option>Average</option></select></td><td><button type="button" class="ssbtn" aria-haspopup="listbox" aria-expanded="false" title="Mohamed Rizk"><span class="sslabel">Mohamed Rizk</span><span class="sscar" aria-hidden="true">&#9662;</span></button></td><td class="collabs"><button type="button" class="ssbtn" aria-haspopup="listbox" aria-expanded="false" title="Hassan, Hala"><span class="sslabel">Hassan, Hala</span><span class="sscar" aria-hidden="true">&#9662;</span></button></td><td><span class="qs qs-edit"><button class="qtog" title="Quarter 1">1</button><button class="qtog on" title="Quarter 2">2</button><button class="qtog on" title="Quarter 3">3</button><button class="qtog" title="Quarter 4">4</button></span></td></tr><tr><td class="idx"><span class="grip" role="button" tabindex="0" title="Drag to reorder"><i></i><i></i><i></i></span><span class="idx-n">3</span></td><td><textarea class="fld grow " rows="1" style="height:34px" placeholder="Tactic">Roll out the mega-store format across key governorates</textarea><button class="eyebtn" aria-pressed="false" title="Hide from the presentation" aria-label="Hide from the presentation"><svg viewBox="0 0 24 20" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M2 10s3.5-6 10-6 10 6 10 6-3.5 6-10 6S2 10 2 10z"></path><circle cx="12" cy="10" r="2.6"></circle></svg></button><button class="xbtn" title="Remove this row" aria-label="Remove this row">&times;</button><textarea class="fld grow tacdesc" rows="1" style="height:34px" placeholder="What it is for">Take the format to the governorates where footfall justifies it</textarea></td><td><textarea class="fld grow " rows="1" style="height:34px" placeholder="What it should produce">Mega stores opened</textarea></td><td class="cc"><select class="fld mono"><option selected>&ge;</option><option>&le;</option></select></td><td class="cc"><button type="button" class="ssbtn" aria-haspopup="listbox" aria-expanded="false" title="#"><span class="sslabel">#</span><span class="sscar" aria-hidden="true">&#9662;</span></button></td><td class="num"><input class="fld mono" value="6" placeholder="Target"></td><td class="cc"><select class="fld"><option></option><option selected>Sum</option><option>Latest</option><option>Average</option></select></td><td><button type="button" class="ssbtn" aria-haspopup="listbox" aria-expanded="false" title="Sherif Kamel"><span class="sslabel">Sherif Kamel</span><span class="sscar" aria-hidden="true">&#9662;</span></button></td><td class="collabs"><button type="button" class="ssbtn" aria-haspopup="listbox" aria-expanded="false" title="Ramy Behairy"><span class="sslabel">Ramy Behairy</span><span class="sscar" aria-hidden="true">&#9662;</span></button></td><td><span class="qs qs-edit"><button class="qtog on" title="Quarter 1">1</button><button class="qtog on" title="Quarter 2">2</button><button class="qtog on" title="Quarter 3">3</button><button class="qtog on" title="Quarter 4">4</button></span></td></tr><tr class="newrow"><td class="idx">+</td><td colspan="9"><button class="linkbu">Add a tactic</button></td></tr></tbody></table></div>
+      <div class="mk-foot"><div><em>What it costs</em><p>The description is not a column, so you cannot scan it on its own
+  &mdash; you read it under the tactic it belongs to. On this page only; it already sits there on
+  Reporting and Performance.</p></div>
+<div><em>What it buys</em><p>Reading is <b>seven columns</b>; writing is <b>ten</b> and needs
+  <b>1330px</b>, so at a 1500 window it <b>does not scroll at all</b> and every control stays on screen
+  while you type. The description also sits in the same place on all three pages.</p></div>
+<div><em>And what it costs in height</em><p>Stacking the name over the description makes the rows
+  <b>208px against A&rsquo;s 136px</b> &mdash; half as tall again, so fewer tactics fit on a screen.
+  That is the real trade: A is shorter and scrolls sideways, B is taller and does not.</p></div></div>
     </div>
   </article>
 
   <!-- ── REPORTING ────────────────────────────────────────────────── -->
   <article class="mk-panel">
     <div class="mk-panel-h">
-      <h2>3 &middot; Reporting</h2>
+      <h2>Reporting</h2>
       <p>The reporter is asked for the outcome&rsquo;s actual, in the outcome&rsquo;s own unit, with the
         target for this point in the year on the same line.</p>
     </div>
@@ -7968,7 +7895,7 @@ body{ background:var(--mk-ground); color:var(--mk-ink); margin:0; }
   <!-- ── PERFORMANCE ──────────────────────────────────────────────── -->
   <article class="mk-panel">
     <div class="mk-panel-h">
-      <h2>4 &middot; Performance</h2>
+      <h2>Performance</h2>
       <p>The outcome takes a column beside the figure that judges it; the description moves under the
         tactic&rsquo;s name, where the reporter&rsquo;s note already sits.</p>
     </div>

@@ -19798,3 +19798,34 @@ would be a door to a room with one door.
 **This also removes §147.23's fault at its root** rather than only at the
 control: the way back could loop because the door disagreed with it about where
 somebody belongs. Both now say the same thing.
+
+### 147.25 · 1234, and no prompt
+
+Islam: *"keep my password islam.saadany@forefront.consulting and 1234 without
+changing passwords."* §147.14 and §147.17 both set `must_change`, so 1234 got
+him in and nowhere else; he asked for the **password**, not for a way in to
+choose another. **§43.8 cleared the flag for the same reason** and this is the
+same answer.
+
+**THE COST, STATED ONCE AND NOT ARGUED AGAIN**: 1234 is four digits on a public
+URL, and this account is the platform admin — anybody who guesses it holds
+every client Forefront runs. It was raised, and reaffirmed, so it is his
+decision and it is written down rather than re-litigated.
+
+**THE FORCED CHANGE ITSELF IS UNTOUCHED.** `must_change` still means what it
+meant for everybody else: a password issued to a consultant still has to be
+replaced before they can go anywhere, and `/api/state` still refuses a session
+holding a temporary one. What changed is this one account, on purpose.
+
+**THE NAME CHANGED WITH THE MEANING.** A step is recorded by name and never
+runs twice, so leaving it as `002-reset-super-user-password.js` would have meant
+**nothing happening** on a deployment that had already applied the old one —
+the flag would still be set and he would still be asked. `004-keep-the-simple-
+password.js` is the only honest way to say *this is a different act*, and both
+rows stay in the registry so the history reads straight.
+
+**Still once.** Proved in three states: a fresh platform (1234, straight in,
+twice); a deployment that had already applied the old step (the prompt cleared
+on the next deploy, 1234 still opening it); and one where another password had
+since been chosen (**1234 does not come back**) — which is the assertion that
+keeps this a one-off rather than a standing backdoor.

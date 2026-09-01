@@ -312,7 +312,11 @@ async function main() {
       /* THE FIRST THING IT CAN DO IS STOP BEING THIS. A known password that
          did not force a change is a back door, which is §43.1's whole
          reversal of §19.4. */
-      check("…which must be changed at once", first.must_change === true, first);
+      /* NOT FORCED, at Islam's explicit direction (§147.25) — and the
+         machinery is untouched: a password ISSUED to a consultant still has
+         to be replaced before they can go anywhere, which section 9 above
+         exercises. */
+      check("…and is usable as it stands", first.must_change === false, first);
       const auth2 = require("../lib/auth.js");
       check("…and the known password is the one said in the open",
             auth2.verifyPassword("1234", (await c.query(
@@ -347,17 +351,18 @@ async function main() {
       "VALUES ($1,$2,'office',false,$3,false,'active') ON CONFLICT (email) DO UPDATE " +
       "SET password_hash = EXCLUDED.password_hash, must_change = false",
       ["someone.else@forefront.consulting", "Someone Else", auth3.hashPassword("TheirOwnPass!9")]);
-    await c.query("DELETE FROM _platform_migrations WHERE name = $1", ["002-reset-super-user-password.js"]);
+    await c.query("DELETE FROM _platform_migrations WHERE name = $1", ["004-keep-the-simple-password.js"]);
 
     const first = await P.resetTheSuperUserPassword(c);
     check("the explicit reset runs", first.reset === true, first);
     const me = (await c.query("SELECT password_hash, must_change FROM accounts WHERE email = $1",
       [EMAIL])).rows[0];
     check("…putting 1234 back over a real password", auth3.verifyPassword("1234", me.password_hash));
-    /* AND IT IS TEMPORARY. §43.8 cleared the flag on a prototype; this is the
-       door to every client Forefront runs, so 1234 gets somebody in and
-       nowhere else until they have chosen their own. */
-    check("…as a temporary one", me.must_change === true, me);
+    /* AND IT IS NOT TEMPORARY (§147.25). Islam asked for the PASSWORD, not
+       for a way in to choose another, and reaffirmed it after the cost was
+       stated. The forced change still means what it means for everybody else,
+       which is what the next assertion is really about. */
+    check("…and does not ask for it to be changed", me.must_change === false, me);
     /* IT NAMES ONE ADDRESS: nobody else's password is touched, or an explicit
        favour to one person hands a known password to everybody. */
     const other = (await c.query("SELECT password_hash FROM accounts WHERE email = $1",

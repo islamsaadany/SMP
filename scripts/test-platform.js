@@ -171,15 +171,25 @@ async function main() {
     await pc.query("INSERT INTO clients (key, name, schema_name) VALUES ('t-http','HTTP Client','t_http') " +
                    "ON CONFLICT (key) DO NOTHING");
   });
-  /* Somebody to sign in as, inside the client — in this slice credentials
-     still live per client, which is what US2 changes. */
+  /* Somebody to sign in as. SINCE US2 THE ACCOUNT IS THE PLATFORM'S, keyed by
+     email, and the row inside the client says who that account is there — the
+     two halves this file exists to keep apart. (Written first against the
+     client's own `credentials` table, which is what the door used to read: the
+     check went red the day the door moved, which is the right way round.) */
   await P.withSchema(pg, "t_http", async function (c) {
     await c.query("INSERT INTO people (key, idx, name) VALUES ('smo', 1, 'Test SMO') " +
                   "ON CONFLICT (key) DO NOTHING");
-    await c.query("INSERT INTO credentials (person_key, password_hash, must_change) VALUES ('smo',$1,false) " +
-                  "ON CONFLICT (person_key) DO UPDATE SET password_hash = $1, must_change = false",
-                  [auth.hashPassword("testpw123")]);
     await c.query("UPDATE org SET org_name = 'HTTP Client' WHERE id = 1");
+  });
+  await P.withPlatform(pg, async function (c) {
+    await c.query(
+      "INSERT INTO accounts (email, name, kind, password_hash, must_change) " +
+      "VALUES ('desk@t-http.example','Test SMO','client',$1,false) " +
+      "ON CONFLICT (email) DO UPDATE SET password_hash = EXCLUDED.password_hash, must_change = false",
+      [auth.hashPassword("testpw123")]);
+    await c.query(
+      "INSERT INTO account_clients (email, client_key, person_key) " +
+      "VALUES ('desk@t-http.example','t-http','smo') ON CONFLICT (email, client_key) DO NOTHING");
   });
 
   const dev = spawn(process.execPath, [path.join(__dirname, "dev-server.js"), String(PORT)], {
@@ -189,9 +199,9 @@ async function main() {
     const post = (body) => fetch(BASE + "/api/auth", { method:"POST",
       headers:{ "Content-Type":"application/json" }, body: JSON.stringify(body) });
 
-    const login = await post({ action:"login", user:"smo", password:"testpw123", client:"t-http" });
+    const login = await post({ action:"login", user:"desk@t-http.example", password:"testpw123", client:"t-http" });
     const cookie = (login.headers.get("set-cookie") || "").split(";")[0];
-    check("a person signs in against the client named in the request", (await login.json()).ok === true);
+    check("a person signs in by email, against the platform's accounts", (await login.json()).ok === true);
 
     const get = (q) => fetch(BASE + "/api/state" + q, { headers: cookie ? { cookie: cookie } : {} });
 
@@ -212,6 +222,11 @@ async function main() {
        very assertion and watching it stay green. Asked against the shared
        constant, so a hand-written refusal anywhere fails here. */
     eq("…and both are the platform's single refusal", uBody.error, P.noSuchClient().message);
+    /* TWO FILES DECLARE THAT SENTENCE — platform-io for a slug that is not in
+       the registry, auth for a session that may not open the client — and a
+       refusal that differs by a word tells the two cases apart. */
+    eq("…and the door's copy of it says exactly the same thing",
+       auth.notThisClient().message, P.noSuchClient().message);
     check("…which mentions neither a schema nor what was tried",
       !/schema/i.test(uBody.error || "") && !/nobody-here|t_http/.test(uBody.error || ""), uBody.error);
 

@@ -71,10 +71,22 @@
      ------------------------------------------------------------------ */
   :root {
     color-scheme: light;
-    --navy: #0f2544;
-    --navy-light: #1b3a63;
-    --gold: #c9a227;
-    --gold-light: #e6c65c;
+    /* FOREFRONT'S OWN COLOURS (Islam, 2026-08-28). This door is Forefront's
+       surface, not a client's — inside a client the colours are the client's,
+       from Setup › Branding. #F5A623 carries near-black at 9.04:1 and is a
+       FILL: as type on white it measures 2.03:1, so words take --gold-deep
+       (#9C5D08, 5.27:1). Constitution XIII, measured before use. */
+    --navy: #0F2C69;
+    --navy-light: #1b3f86;
+    --gold: #F5A623;
+    --gold-light: #ffc25c;
+    --gold-deep: #9C5D08;
+    /* The cards sit on the WHITE card, not on the navy wall — written first
+       in white-alpha, which is invisible on white and was only visible in a
+       screenshot. Constitution XIII's neighbour: a colour is measured against
+       the ground it actually sits on. */
+    --cardline: rgba(15,44,105,.18);
+    --cardfill: rgba(15,44,105,.03);
     --bg: #f4f6f9;
     --danger: #b3261e;
     --card: #ffffff;
@@ -121,10 +133,15 @@
   @media (prefers-color-scheme: dark) {
     :root:not([data-theme="light"]) {
       color-scheme: dark;
-      --navy: #24487a;
-      --navy-light: #2e5794;
-      --gold: #d9b665;
-      --gold-light: #e6c65c;
+      --navy: #1B4183;
+      --navy-light: #25529f;
+      --gold: #F5A623;
+      --gold-light: #ffc25c;
+      --gold-deep: #F5A623;   /* on a dark ground the bright one reads at 8.15:1 */
+    --cardline: rgba(255,255,255,.16);
+    --cardfill: rgba(255,255,255,.04);
+      --cardline: rgba(255,255,255,.16);
+      --cardfill: rgba(255,255,255,.04);
       --bg: #14161a;
       --danger: #d97066;
       --card: #1c2027;
@@ -165,12 +182,46 @@
       --client-flag: #ffffff;
     }
   }
+  /* The cards. Every class here is prefixed or compound (constitution XIV):
+     `.card` is this file's own, and `.clientgrid`/`.ccard` are new. */
+  /* THE FRAME IS THE THING THAT IS 420px WIDE, NOT THE CARD. Widening
+     `.card` alone changed nothing on screen, which is what a screenshot said
+     and the stylesheet did not: the card already fills its frame. The frame
+     widens only while the cards are up, so the sign-in card keeps the measure
+     §34 settled for it. */
+  body.showing-cards .frame { max-width: 760px; }
+  .card.wide { text-align: left; }
+  .card.wide h2, .card.wide > p { text-align: center; }
+  .clientgrid { display: grid; gap: 12px; margin: 18px 0 6px;
+                grid-template-columns: repeat(auto-fill, minmax(210px, 1fr)); }
+  .ccard { text-align: left; border: 1px solid var(--cardline); border-radius: 12px;
+           padding: 14px; background: var(--cardfill); cursor: pointer;
+           display: flex; flex-direction: column; gap: 6px; min-height: 128px;
+           font: inherit; color: inherit; }
+  .ccard:hover, .ccard:focus-visible { border-color: var(--gold-deep); outline: none;
+                                      box-shadow: 0 6px 20px rgba(15,44,105,.10); }
+  .ccard .cmark { width: 34px; height: 34px; border-radius: 8px; background: var(--navy-light);
+                  color: var(--gold); font: 700 12px/34px "SFMono-Regular", ui-monospace, monospace;
+                  text-align: center; letter-spacing: .05em; }
+  .ccard h3 { margin: 2px 0 0; font-size: 17px; }
+  .ccard .ind { margin: 0; font-size: 12.5px; opacity: .72; }
+  .ccard .facts { margin-top: auto; display: flex; flex-wrap: wrap; gap: 6px;
+                  font-size: 11px; letter-spacing: .04em; text-transform: uppercase; opacity: .8; }
+  .ccard .tag { border: 1px solid var(--cardline); border-radius: 5px; padding: 3px 6px; }
+  .ccard.isdemo { border-color: var(--gold); }
+  /* The demo client's tag is the one amber WORD on this screen, so it takes
+     the type token and never the fill (2.03:1 as type, measured). */
+  .ccard .tag.demo { border-color: var(--gold); color: var(--gold-deep); }
+
   :root[data-theme="dark"] {
     color-scheme: dark;
-    --navy: #24487a;
-    --navy-light: #2e5794;
-    --gold: #d9b665;
-    --gold-light: #e6c65c;
+    --navy: #1B4183;
+    --navy-light: #25529f;
+    --gold: #F5A623;
+    --gold-light: #ffc25c;
+    --gold-deep: #F5A623;   /* on a dark ground the bright one reads at 8.15:1 */
+    --cardline: rgba(255,255,255,.16);
+    --cardfill: rgba(255,255,255,.04);
     --bg: #14161a;
     --danger: #d97066;
     --card: #1c2027;
@@ -748,6 +799,17 @@
         <p class="foot">You will stay signed in on this device for 30 days.</p>
       </div>
 
+      <!-- The clients (spec 024). Drawn only for somebody at Forefront: a
+           client's own person is sent straight into their client and never
+           learns another exists. -->
+      <div class="card wide" id="cards">
+        <h2>Your clients</h2>
+        <p id="cardsWho">Pick one to open</p>
+        <div class="clientgrid" id="clientGrid"></div>
+        <div class="error" id="cardsError"></div>
+        <p class="foot"><a href="#" id="signOut">Sign out</a></p>
+      </div>
+
       <!-- First sign-in: the issued password is temporary -->
       <div class="card" id="change">
         <svg class="clientmark" role="img" aria-label="Raya Trade"><use href="#raya-trade"/></svg>
@@ -846,6 +908,7 @@
 
   var loginCard = document.getElementById("login");
   var changeCard = document.getElementById("change");
+  var cardsCard = document.getElementById("cards");
   var errorEl = document.getElementById("error");
   var changeErrorEl = document.getElementById("changeError");
   var userEl = document.getElementById("user");
@@ -863,8 +926,10 @@
      nothing. The gate is hidden until the session check resolves; if a session
      is live the platform is opened and the gate is never seen at all. */
   function show(which) {
+    document.body.classList.toggle("showing-cards", which === "cards");
     loginCard.style.display = which === "login" ? "block" : "none";
     changeCard.style.display = which === "change" ? "block" : "none";
+    cardsCard.style.display = which === "cards" ? "block" : "none";
     document.body.classList.add("ready");
     /* THE FIRST FIELD THAT IS ACTUALLY THERE (§69.11). This focused the
        password unconditionally, which was right while the only thing above it
@@ -895,12 +960,15 @@
 
      When the platform becomes multi-tenant (§36) this is the seam: the slug is
      already the tenant's, and it is already in the URL. */
-  var TENANT = "raya-trade";
+  /* SINCE SPEC 024 THE SLUG IS THE CLIENT'S, and the seam §36 predicted is
+     the one this uses: one path per client, and the door itself carries no
+     client's name. Offline there is no server to rewrite anything, so the
+     real relative path stands and there is only ever the one file. */
   var HOSTED = location.protocol === "http:" || location.protocol === "https:";
-  var PLATFORM = HOSTED
-    ? "/" + TENANT
-    : "SMP-Project-Folder/strategy-management-platform-v3.22.html";
-  function openPlatform() { location.replace(PLATFORM); }
+  var OFFLINE_FILE = "SMP-Project-Folder/strategy-management-platform-v3.22.html";
+  function openPlatform(clientKey) {
+    location.replace(HOSTED ? "/" + (clientKey || "raya-trade") : OFFLINE_FILE);
+  }
   function fail(el, msg) { el.textContent = msg; el.style.display = "block"; }
   function clearFail(el) { el.style.display = "none"; }
 
@@ -939,14 +1007,102 @@
     lab.setAttribute("for", "user");
     lab.textContent = "Email";
   }
-  function signedIn(person) {
+  function signedIn(person, landing) {
     PERSON = person;
+    LANDING = landing || null;
     /* A temporary password is the one thing that stands between signing in and
-       being in: it has to be replaced before the session is any use. Anything
-       else goes straight through. */
-    if (person && person.mustChange) show("change");
-    else openPlatform();
+       being in: it has to be replaced before the session is any use. */
+    if (person && person.mustChange) { show("change"); return; }
+    goOn();
   }
+
+  /* WHERE SOMEBODY GOES AFTER THE DOOR — decided by the SERVER (spec 024).
+     A client's own person, and anybody at Forefront who holds exactly one
+     client, opens it directly: a page whose only content is a button to the
+     page you just asked for is a door behind a door (§32). Everyone else gets
+     the cards. */
+  var LANDING = null;
+  function goOn() {
+    if (LANDING) { openPlatform(LANDING); return; }
+    if (!HOSTED) { openPlatform(); return; }
+    loadCards();
+  }
+
+  /* THE CARDS ARE WHAT THE SERVER WILL OPEN. The list comes from
+     /api/platform, which asks the same rules the endpoints ask — so a card is
+     never drawn for a client the next request would refuse. */
+  function loadCards() {
+    show("cards");
+    var grid = document.getElementById("clientGrid");
+    var err = document.getElementById("cardsError");
+    clearFail(err);
+    grid.innerHTML = "<p class=\"foot\">Reading your clients…</p>";
+    fetch("/api/platform", { method: "POST", cache: "no-store",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ action: "cards" }) })
+      .then(function (r) { return r.json(); })
+      .then(function (j) {
+        if (!j.ok) { grid.innerHTML = ""; fail(err, j.error || "Could not read your clients."); return; }
+        if (!j.cards.length) {
+          /* AN EMPTY LIST SAYS WHY, and does not read as a broken page
+             (§45.2, §113): nothing has been given to this account yet. */
+          grid.innerHTML = "";
+          fail(err, "No client has been given to this account yet. Ask the platform's admin.");
+          return;
+        }
+        var who = document.getElementById("cardsWho");
+        who.textContent = j.cards.length === 1 ? "One client" : "Pick one to open";
+        grid.innerHTML = "";
+        j.cards.forEach(function (c) { grid.appendChild(cardFor(c)); });
+      })
+      .catch(function () { grid.innerHTML = ""; fail(err, "Could not reach the server."); });
+  }
+
+  /* TWO LETTERS, FROM TWO WORDS OR FROM ONE. "Raya Trade" is RT and "RHI" is
+     RH — taking the first letter of each word gives a lonely "R" for every
+     client whose name is a single word, which is most acronyms. */
+  function initials(name) {
+    var words = String(name || "?").trim().split(/\s+/);
+    if (words.length > 1) return (words[0].charAt(0) + words[1].charAt(0)).toUpperCase();
+    return words[0].slice(0, 2).toUpperCase();
+  }
+
+  function cardFor(c) {
+    var b = document.createElement("button");
+    b.type = "button";
+    b.className = "ccard" + (c.kind === "demo" ? " isdemo" : "");
+    b.setAttribute("data-client", c.key);
+    var mark = document.createElement("div");
+    mark.className = "cmark"; mark.textContent = initials(c.name);
+    var h = document.createElement("h3"); h.textContent = c.name;
+    var ind = document.createElement("p"); ind.className = "ind";
+    ind.textContent = c.industry || "";
+    var facts = document.createElement("div"); facts.className = "facts";
+    var tag = function (text, cls) {
+      var t = document.createElement("span"); t.className = "tag" + (cls ? " " + cls : "");
+      t.textContent = text; facts.appendChild(t);
+    };
+    if (c.kind === "demo") tag("Demo", "demo");
+    /* WHAT A CARD SAYS IS READ, NEVER REMEMBERED. `unreadable` is its own
+       state rather than a zero: a client whose database did not answer has
+       not got no units (§35 — absent is not none). */
+    if (c.unreadable) tag("Not answering");
+    else if (c.cycleOpen) tag("Cycle open");
+    else if (!c.planned) tag("No plan yet");
+    if (c.mine) tag("Mine");
+    if (c.units != null && c.units > 0) tag(c.units + (c.units === 1 ? " unit" : " units"));
+    b.appendChild(mark); b.appendChild(h);
+    if (c.industry) b.appendChild(ind);
+    b.appendChild(facts);
+    b.addEventListener("click", function () { openPlatform(c.key); });
+    return b;
+  }
+
+  document.getElementById("signOut").addEventListener("click", function (e) {
+    e.preventDefault();
+    api({ action: "logout" }).then(function () { location.reload(); })
+      .catch(function () { location.reload(); });
+  });
 
   document.getElementById("loginForm").addEventListener("submit", function (e) {
     e.preventDefault();
@@ -955,7 +1111,7 @@
       api({ action: "login", user: userEl.value.trim(), password: passwordEl.value })
         .then(function (j) {
           passwordEl.value = "";
-          if (j.ok) signedIn(j.person);
+          if (j.ok) signedIn(j.person, j.client);
           else fail(errorEl, j.error || "Sign-in failed.");
         })
         .catch(function () { fail(errorEl, "Could not reach the server."); });
@@ -1054,7 +1210,10 @@
          somebody their first sign-in. */
       var wrap = document.getElementById("whereWrap");
       var at = wrap && !wrap.hidden ? document.getElementById("whereSel").value : "";
-      var go = function () { openPlatform(); };
+      /* THE SAME ROUTING AS THE DOOR (spec 024): whoever holds one client
+         opens it, and everybody else gets the cards. Choosing a password must
+         not land somebody somewhere the sign-in would not have. */
+      var go = function () { goOn(); };
       if (!at) return go();
       api({ action: "declareWhere", at: at }).then(go).catch(go);
     }).catch(function () { fail(changeErrorEl, "Could not reach the server."); });
@@ -1079,7 +1238,7 @@
       })
       .then(function (j) {
         enterServerMode();
-        if (j.ok && j.person) signedIn(j.person);
+        if (j.ok && j.person) signedIn(j.person, j.client);
         else show("login");
       })
       .catch(legacyStart);

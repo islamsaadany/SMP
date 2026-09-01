@@ -283,6 +283,31 @@ var SYNC = (function () {
        not a reason to leave a blank page when it does — the same sentence the
        note below this one already makes. */
     if (!box || !sel) { paint(); return; }
+    /* ── THE WAY BACK TO THE CARDS (spec 024) ─────────────────────
+       Drawn only for somebody who HAS cards. The server says so — it is the
+       only side that knows — and a client's own person never sees it, because
+       for them there is nothing behind it (§32: a door to one place is not a
+       choice, and a door to none is a dead end). */
+    var back = document.getElementById("clientback");
+    if (back && person && person.cards) {
+      var nameEl = document.getElementById("clientbackname");
+      /* textContent, never innerHTML: a client's name is typed by a person. */
+      if (nameEl) nameEl.textContent = person.clientName || clientSlug();
+      back.hidden = false;
+      back.title = "Back to your clients";
+      /* AND THE ORG NAME BESIDE IT GOES. Both say "Raya Trade" — one as a
+         label, one as a door — and two copies of a fact on one line is what
+         §120 took off the register's header. The control is the one that also
+         does something, so it is the one that stays. Where there is no way
+         back (a client's own person) the label is untouched. */
+      var org = document.getElementById("orgname");
+      if (org) org.hidden = true;
+      back.addEventListener("click", function () { location.assign("/"); });
+    }
+    /* DRAWN BEFORE ANYTHING CAN RETURN. The branch below stops the whole
+       chrome when the signed-in person is not on this client's register — and
+       that is exactly the screen somebody most needs a way off (§61). */
+
     var known = PEOPLE.some(function (p) { return p.key === person.key; });
     if (known) {
       window.VIEWER = person.key;

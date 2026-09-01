@@ -123,7 +123,7 @@ module.exports = async function handler(req, res) {
     await ensureReady(client, client._smpClient.schema_name);
 
     const action = body.action || (req.method === "GET" ? "status" : "");
-    const me = await auth.getSession(client, req);
+    const me = await auth.getSession(client, req, client._smpClient.key);
     if (!me) return send(res, 401, { ok: false, error: "sign in first" });
     /* Mail goes out over the organisation's name. That is the SMO's. */
     if (me.role !== "super") {

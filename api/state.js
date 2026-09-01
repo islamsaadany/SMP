@@ -94,7 +94,7 @@ module.exports = async function handler(req, res) {
     /* Since v2.1 the state is for signed-in people only (§19). Phase 1
        enforces WHO at the door; per-action WHAT enforcement is Phase 2 and
        recorded as such. */
-    const person = await auth.getSession(client, req);
+    const person = await auth.getSession(client, req, client._smpClient.key);
     if (!person) return send(res, 401, { ok: false, auth: true, error: "sign in required" });
     /* A TEMPORARY password is not a password yet. The gate has always sent
        people to the change screen, but the SERVER did not care whether they
@@ -107,8 +107,24 @@ module.exports = async function handler(req, res) {
     }
 
     if (req.method === "GET") {
+      /* THE OFFICE ARRIVES ON THE REGISTER (spec 024 §6). Done on the way in
+         rather than when somebody is added to a team, because a client created
+         later, or a team changed while nobody was looking, would otherwise
+         leave a person signed in and holding nothing. */
+      if (person.kind !== "client") {
+        const seat = await auth.seatIn(client, client._smpClient.key, person.email);
+        await P.ensureOfficeRow(client, seat, { name: person.name, email: person.email, kind: person.kind });
+      }
       const state = await readState(client);
-      return send(res, 200, { ok: true, seeded: ready.seeded, person: person, state: state });
+      /* WHAT THE CHROME NEEDS TO DRAW THE WAY BACK (spec 024): the client's
+         own name, and whether this person has cards to go back TO. Only the
+         server knows the second — a client's own person holds one client and
+         has no outer platform at all. */
+      const who = Object.assign({}, person, {
+        clientName: client._smpClient.name,
+        cards: person.kind !== "client"
+      });
+      return send(res, 200, { ok: true, seeded: ready.seeded, person: who, state: state });
     }
     if (req.method === "POST") {
       const state = body && body.state;

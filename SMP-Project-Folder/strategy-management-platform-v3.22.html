@@ -572,6 +572,24 @@
   .kv { display:flex; gap:8px; flex-wrap:wrap; align-items:center; margin-bottom:14px; }
   footer.end { margin-top:44px; padding-top:18px; border-top:1px solid var(--line); font-size:12.5px; color:var(--ink-3); }
 
+/* ── THE CLIENT'S NAME IN THE CHROME (spec 024) ──────────────────────
+   Its own class, compound with nothing (constitution XIV): `.clientback` is
+   this control and nothing else. It sits in the brand row, quiet, because it
+   says where you ARE and only incidentally offers to move. */
+.clientback{
+  display:inline-flex; align-items:center; gap:8px; margin-left:14px;
+  /* THE FIRST LINE OF THE CHROME IS THE PAGE'S OWN SURFACE, NOT THE NAVY BAR.
+     Written first in white-alpha on --panel-ink, this rendered white on white
+     and was invisible in a screenshot while every DOM probe called it drawn
+     (§70's family). It takes the page's tokens, which is what everything else
+     on that line takes. */
+  background:var(--surface-2); border:1px solid var(--line);
+  color:var(--ink); border-radius:8px; padding:4px 10px;
+  font:600 13px/1.4 inherit; cursor:pointer;
+}
+.clientback:hover,.clientback:focus-visible{ border-color:var(--gold-deep); outline:none }
+.clientback i{ font-style:normal; font-weight:400; color:var(--ink-3); font-size:12px }
+
   /* Sub-nav: Performance is the regular view and is marked as such */
   .tabs button.primary { color:var(--gold-deep); font-weight:700; }
   .tabs button.primary[aria-selected="true"] { color:var(--ink); }
@@ -6778,6 +6796,16 @@ THEME.apply();
            never innerHTML - the org name is typed in Labels. -->
       <span class="orgname" id="orgname"></span>
     </div>
+    <!-- THE WAY BACK TO THE CARDS (spec 024). The client's name, pressed,
+         returns to the door — Islam's own choice over a dropdown, and the
+         reason is worth keeping: a list of every client on every page of a
+         client's own platform is one mis-gate away from being read by that
+         client. Drawn only where there is a door to go back to: hidden from
+         file://, and hidden for a client's own person, who has no cards
+         (SYNC decides, since only the server knows which). -->
+    <button class="clientback" id="clientback" type="button" hidden>
+      <span id="clientbackname"></span><i>change</i>
+    </button>
     <div class="viewer">
       <label for="asWho">Viewing as</label>
       <select id="asWho"></select>
@@ -36116,6 +36144,31 @@ var SYNC = (function () {
        not a reason to leave a blank page when it does — the same sentence the
        note below this one already makes. */
     if (!box || !sel) { paint(); return; }
+    /* ── THE WAY BACK TO THE CARDS (spec 024) ─────────────────────
+       Drawn only for somebody who HAS cards. The server says so — it is the
+       only side that knows — and a client's own person never sees it, because
+       for them there is nothing behind it (§32: a door to one place is not a
+       choice, and a door to none is a dead end). */
+    var back = document.getElementById("clientback");
+    if (back && person && person.cards) {
+      var nameEl = document.getElementById("clientbackname");
+      /* textContent, never innerHTML: a client's name is typed by a person. */
+      if (nameEl) nameEl.textContent = person.clientName || clientSlug();
+      back.hidden = false;
+      back.title = "Back to your clients";
+      /* AND THE ORG NAME BESIDE IT GOES. Both say "Raya Trade" — one as a
+         label, one as a door — and two copies of a fact on one line is what
+         §120 took off the register's header. The control is the one that also
+         does something, so it is the one that stays. Where there is no way
+         back (a client's own person) the label is untouched. */
+      var org = document.getElementById("orgname");
+      if (org) org.hidden = true;
+      back.addEventListener("click", function () { location.assign("/"); });
+    }
+    /* DRAWN BEFORE ANYTHING CAN RETURN. The branch below stops the whole
+       chrome when the signed-in person is not on this client's register — and
+       that is exactly the screen somebody most needs a way off (§61). */
+
     var known = PEOPLE.some(function (p) { return p.key === person.key; });
     if (known) {
       window.VIEWER = person.key;
@@ -43002,7 +43055,13 @@ var SYNC = (function () {
     if (sig !== viewerSig) {
       viewerSig = sig;
       sel.innerHTML = PEOPLE.map(function(p){
-        return '<option value="' + p.key + '">' + p.name + " \u2014 " + p.title + '</option>';
+        /* A TITLE IS OPTIONAL, AND `undefined` IS NOT A JOB (spec 024). Every
+           person on this register carried one until the office's own row
+           arrived from the client's configuration with none, and the option
+           read "Islam Saadany — und…". The dash belongs to the title, so it
+           goes with it. */
+        var t = (p.title || "").trim();
+        return '<option value="' + p.key + '">' + p.name + (t ? " \u2014 " + t : "") + '</option>';
       }).join("");
     }
     viewer();               /* corrects VIEWER if the person selected has gone */

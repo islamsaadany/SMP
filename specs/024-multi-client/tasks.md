@@ -64,16 +64,16 @@ serverless functions `api/`; SQL `db/`; checks `SMP-Project-Folder/src/checks/`;
 **Goal**: a consultant signs in by email and opens a client; a client's own person lands straight in theirs.
 **Independently testable**: sign in as each of the three office accounts and as a Raya person; the cards show only what the row reaches; `SMO` is refused.
 
-- [ ] T023 [US2] Move sign-in in `api/auth.js` to `platform.accounts`: **email only**, the person-key path removed, `SMO`/`1234` gone
-- [ ] T024 [US2] Move `sessions` and `login_attempts` reads/writes in `lib/auth.js` to the platform schema, keyed on email, thresholds and check-before-verify order unchanged (§43.2)
-- [ ] T025 [US2] Route a signed-in person after sign-in: office → the cards; a client's own person → their client, no card (`account_clients` has exactly one row)
-- [ ] T026 [P] [US2] New browser sources `SMP-Project-Folder/src/ff-shell.html`, `ff.css`, `ff.js` — the door and the cards, classes prefixed `ff-` (Principle XIV), Forefront's palette with `--ff-amber` (fill) and `--ff-amber-tx` (words) declared together (Principle XIII)
-- [ ] T027 [US2] Build the outer platform in `build.py` into its own file served at `/`, and point `vercel.json`'s rewrites at it plus one rewrite per client slug
-- [ ] T028 [US2] Bump `SHELL` in `sw.js`, add the client paths to its precache list, and `node --check sw.js` after every merge (§91, §146.2)
-- [ ] T029 [US2] Put the client's name in the platform's chrome in `SMP-Project-Folder/src/shell.html`, pressing it returns to the cards — no dropdown (spec §5)
-- [ ] T030 [P] [US2] `cards` and `me` actions in the new `api/platform.js`, answering only what the row reaches
-- [ ] T031 [US2] Write `SMP-Project-Folder/src/checks/multi-client.py` §1–2: the door refuses a person key, the cards show what the row allows and nothing more, the chrome's client name returns to the cards
-- [ ] T032 [US2] Prove T031 by running it against the pre-split build and counting its failures before believing its green run (Principle XVI)
+- [x] T023 [US2] Move sign-in in `api/auth.js` to `platform.accounts`: **email only**, the person-key path removed, `SMO`/`1234` gone
+- [x] T024 [US2] Move `sessions` and `login_attempts` reads/writes in `lib/auth.js` to the platform schema, keyed on email, thresholds and check-before-verify order unchanged (§43.2)
+- [x] T025 [US2] Route a signed-in person after sign-in: office → the cards; a client's own person → their client, no card (`account_clients` has exactly one row)
+- [x] T026 [P] [US2] **Landed in `index.html` instead of new `src/ff-*` files** — it already IS the door (the wall-and-card §34 settled), it is not built from `src/`, and a second build output for one page duplicates machinery for nothing. Forefront's palette added there, with the amber as a fill and `--gold-deep` for words (Principle XIII, measured)
+- [x] T027 [US2] **Not needed** — `index.html` is already served at `/`; `vercel.json` gained one rewrite per client in US1 and `dev-server.js` reads that list
+- [x] T028 [US2] Bump `SHELL` in `sw.js`, add the client paths to its precache list, and `node --check sw.js` after every merge (§91, §146.2)
+- [x] T029 [US2] Put the client's name in the platform's chrome in `SMP-Project-Folder/src/shell.html`, pressing it returns to the cards — no dropdown (spec §5)
+- [x] T030 [P] [US2] `cards` and `me` actions in the new `api/platform.js`, answering only what the row reaches
+- [x] T031 [US2] Write `SMP-Project-Folder/src/checks/multi-client.py` §1–2: the door refuses a person key, the cards show what the row allows and nothing more, the chrome's client name returns to the cards
+- [x] T032 [US2] Prove T031 by running it against the pre-split build and counting its failures before believing its green run (Principle XVI)
 
 **Checkpoint**: one door, four clients, and nobody sees a card they cannot open.
 
@@ -84,6 +84,7 @@ serverless functions `api/`; SQL `db/`; checks `SMP-Project-Folder/src/checks/`;
 **Goal**: Forefront's own people, each client's configuration, and the table that decides who sees what.
 **Independently testable**: as Admin, add a consultant, put them on a client, watch the row appear in that client's register read-only; as Observer, watch every edit refused on screen and by the server.
 
+- [x] T033a [US2] *(found while building)* An office account APPEARS on the client's register the first time it opens one (`P.ensureOfficeRow`) — without it the platform correctly says "signed in but not on this register" and draws nothing. Spec §6's own wording, needed a slice earlier than planned
 - [ ] T033 [P] [US3] `consultants`, `saveConsultant`, `issuePassword` actions in `api/platform.js` — §35's password states and §89's rule that the test is the **target** (never issue to an admin)
 - [ ] T034 [P] [US3] `client`, `saveClient`, `createClient`, `setTeam` actions in `api/platform.js`
 - [ ] T035 [P] [US3] `access` and `saveAccess` actions in `api/platform.js`, defaults merged with stored (§30.2), the admin row refused

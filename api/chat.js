@@ -261,7 +261,7 @@ module.exports = async function handler(req, res) {
     await ensureReady(client, client._smpClient.schema_name);
 
     const action = body.action || (req.method === "GET" ? "mine" : "");
-    const me = await auth.getSession(client, req);
+    const me = await auth.getSession(client, req, client._smpClient.key);
     if (!me) return send(res, 401, { ok: false, error: "sign in first" });
     /* IDENTITY BEFORE ANYTHING ELSE (§43.2). A temporary password buys a
        session and nothing a session is for; the chat is no exception. */

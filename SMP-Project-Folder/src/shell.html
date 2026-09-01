@@ -69,6 +69,16 @@
            never innerHTML - the org name is typed in Labels. -->
       <span class="orgname" id="orgname"></span>
     </div>
+    <!-- THE WAY BACK TO THE CARDS (spec 024). The client's name, pressed,
+         returns to the door — Islam's own choice over a dropdown, and the
+         reason is worth keeping: a list of every client on every page of a
+         client's own platform is one mis-gate away from being read by that
+         client. Drawn only where there is a door to go back to: hidden from
+         file://, and hidden for a client's own person, who has no cards
+         (SYNC decides, since only the server knows which). -->
+    <button class="clientback" id="clientback" type="button" hidden>
+      <span id="clientbackname"></span><i>change</i>
+    </button>
     <div class="viewer">
       <label for="asWho">Viewing as</label>
       <select id="asWho"></select>
@@ -6614,7 +6624,13 @@
     if (sig !== viewerSig) {
       viewerSig = sig;
       sel.innerHTML = PEOPLE.map(function(p){
-        return '<option value="' + p.key + '">' + p.name + " \u2014 " + p.title + '</option>';
+        /* A TITLE IS OPTIONAL, AND `undefined` IS NOT A JOB (spec 024). Every
+           person on this register carried one until the office's own row
+           arrived from the client's configuration with none, and the option
+           read "Islam Saadany — und…". The dash belongs to the title, so it
+           goes with it. */
+        var t = (p.title || "").trim();
+        return '<option value="' + p.key + '">' + p.name + (t ? " \u2014 " + t : "") + '</option>';
       }).join("");
     }
     viewer();               /* corrects VIEWER if the person selected has gone */

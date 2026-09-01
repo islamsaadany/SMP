@@ -147,6 +147,51 @@ async function main() {
     say("created " + cl.schema + " — schema, migrations, and its own name.");
   }
 
+  /* ── 4b · the client's own people become accounts ─────────────
+     Their PASSWORD comes across as it is — the stored scrypt hash is copied,
+     never re-hashed and never seen — so nobody has to be issued a new one.
+     What does not survive is their SESSION, because sessions move schema:
+     everyone signs in again once, which is spec §4.1's stated cost.
+
+     TWO PEOPLE IN TWO CLIENTS SHARING AN ADDRESS cannot both become one
+     account, and this refuses to guess which (§87): it names them and moves
+     on, leaving the second one to be sorted out by a person. */
+  const clash = [];
+  for (const cl of [LIVE]) {
+    const people = await P.withSchema(pg, cl.schema, async function (sc) {
+      return (await sc.query(
+        "SELECT p.key, p.name, lower(trim(COALESCE(p.extra->>'email',''))) AS email, " +
+        "       c.password_hash, c.must_change " +
+        "FROM people p LEFT JOIN credentials c ON c.person_key = p.key " +
+        "WHERE COALESCE(p.extra->>'active','true') <> 'false'")).rows;
+    });
+    let moved = 0, noAddress = 0, noPassword = 0;
+    await P.withPlatform(pg, async function (pc) {
+      for (const person of people) {
+        if (!person.email) { noAddress++; continue; }
+        if (!person.password_hash) { noPassword++; continue; }
+        const taken = await pc.query(
+          "SELECT email FROM account_clients ac WHERE ac.email = $1 AND ac.client_key <> $2",
+          [person.email, cl.key]);
+        if (taken.rowCount) { clash.push(person.email); continue; }
+        await pc.query(
+          "INSERT INTO accounts (email, name, kind, password_hash, must_change) " +
+          "VALUES ($1,$2,'client',$3,$4) ON CONFLICT (email) DO NOTHING",
+          [person.email, person.name || "", person.password_hash, person.must_change !== false]);
+        await pc.query(
+          "INSERT INTO account_clients (email, client_key, person_key) VALUES ($1,$2,$3) " +
+          "ON CONFLICT (email, client_key) DO NOTHING", [person.email, cl.key, person.key]);
+        moved++;
+      }
+    });
+    say(cl.key + ": " + moved + " people became accounts · " + noAddress +
+        " have no address · " + noPassword + " never had a password");
+  }
+  if (clash.length) {
+    say("NOT MOVED — the same address is already an account on another client:");
+    clash.forEach(function (e) { say("  " + e); });
+  }
+
   /* ── 5 · read the result back, and say what is there ──────────── */
   say("\n── verification ──");
   for (const cl of [LIVE].concat(NEW_CLIENTS)) {

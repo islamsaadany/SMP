@@ -344,7 +344,7 @@
   /* THE REAL CHROME IS HIDDEN, NOT COVERED. Left in the flow it would paint
      the tenant's bar colour behind this for the whole wait, which is the
      thing being removed. */
-  html.booting #banner, html.booting .chrome { display:none; }
+  html.booting .chrome { display:none; }
   .bootsk-in { margin:0 auto; padding:0 24px; }
   .bootsk-top { display:flex; align-items:center; gap:10px; padding:18px 0 16px; }
   .bootsk-nav { display:flex; gap:8px; padding:0 0 12px; }
@@ -6771,10 +6771,11 @@ THEME.apply();
   </div>
 </div>
 
-<div class="banner" id="banner">
-  <span><strong>Prototype &middot; group shape.</strong> Mobile's plan is transcribed from the Raya 2026 decks.</span>
-  <span><strong>Every other unit and every reported actual are invented</strong> so the structure can be judged.</span>
-</div>
+<!-- THE DEMO BANNER IS GONE WITH THE BUTTON IT LABELLED (spec 024 §6.1).
+     It said "nothing here is saved" over a dataset nobody can switch into any
+     more: the worked example is a CLIENT now, on Forefront's own cards, with
+     its own schema and its own address — and it saves. `.banner` itself stays,
+     because #refused below wears it. -->
 
 <!-- A REFUSED SAVE HAS TO SAY SO, WHERE THE SAVE IS (spec 006 §4, and the
      rule §32 set for the Labels page). The server now decides who may change
@@ -6799,8 +6800,8 @@ THEME.apply();
       <h1>Strategy Management Platform</h1>
       <!-- Whose strategy this is. The product name alone never said it, and a
            consulting product shown to a client should. Set in paint() from
-           GROUP.org, so it follows the demo switch: the worked example says
-           Raya Trade, the client's own tenant says the client. textContent,
+           GROUP.org, so it says whichever client this address opened.
+           textContent,
            never innerHTML - the org name is typed in Labels. -->
       <span class="orgname" id="orgname"></span>
     </div>
@@ -6819,10 +6820,7 @@ THEME.apply();
       <select id="asWho"></select>
       <span class="viewer-note" id="viewerNote"></span>
     </div>
-    <!-- Far right, together: Demo data, then Sign out (appended by SYNC).
-         Switches the whole product between the client's own data and the
-         full worked example, for explaining how it works. Appears only
-         where there is a live dataset to tell the example apart from. -->
+    <!-- Far right: Sign out (appended by SYNC). -->
     <div class="topacts" id="topacts">
       <!-- Light and Dark. First of the three because it changes how the
            product LOOKS; the two beside it change what it shows or end the
@@ -6838,22 +6836,6 @@ THEME.apply();
            its own name in the face it names, so you can see one without
            pressing it. It goes when the choice is settled. -->
       <button class="infobtn fontbtn" id="fontbtn" type="button" hidden></button>
-      <!-- TWO DEMOS, SO A MENU (§67). "Filled Project" is the full worked
-           example; "Clear Project" is the same organisation with nothing
-           filled in, for explaining the cycle from the beginning. A <details>
-           for the same reason every other menu here is one: the action fires
-           before the menu closes, and closing a <details> from inside its own
-           click hides the button rather than unmounting it (§47.2).
-           Both hidden until SYNC finds a live dataset to tell them apart
-           from — opened as a file the whole product IS the example. -->
-      <details class="dlmenu right demomenu" id="demomenu" hidden>
-        <summary class="infobtn">Demo data<span class="dlcar" aria-hidden="true">&#9662;</span></summary>
-        <div class="menu" role="menu">
-          <button role="menuitem" data-demomode="demo">Filled project<span class="dlsub">The full worked example, every page populated</span></button>
-          <button role="menuitem" data-demomode="demoClear">Clear project<span class="dlsub">The same organisation with nothing filled in yet</span></button>
-        </div>
-      </details>
-      <button class="infobtn" id="demobtn" hidden>Exit demo</button>
     </div>
   </div>
 </header>
@@ -6931,7 +6913,7 @@ THEME.apply();
 <!-- No footer. It carried one sentence - the product's name, a spec number
      and a shape - none of which anyone was reading and all of which the chrome
      already says. Its last real content (the invented-data notice) moved to
-     the demo banner in 2.2, where it is true; what was left was a signature. -->
+     the demo banner in 2.2, and left the product with that banner in 024. -->
 </main>
 
 <script>
@@ -7663,6 +7645,42 @@ THEME.apply();
      off for the tenant, and a switch anybody could flip would be no switch. */
   function focusOn(w) { return !w || w.focusOff !== true; }
 
+  /* ── IS THERE ANYTHING TO TOUR (spec 024 §6.2) ───────────────────
+     §107's onboarding tour walked a FILLED platform by switching the page to
+     the baked worked example. That switch is gone with the Demo-data button
+     (spec 024 §6.1): the example is a client of its own now, so the tour runs
+     on the person's own plan — and a tour of an empty screen teaches nothing,
+     so it is not offered until there is one.
+
+     THE TEST IS THE SAME ONE THE STORIES NEED: a place to tell it on that
+     holds at least one pillar or capability AND one key objective, which is
+     exactly what the steps point at. Asked of a TARGET rather than of the
+     tenant, because the story is told on a unit or a function — a group with
+     ten filled units and an empty one still has nothing to show somebody who
+     works in the empty one (§61's trap, one surface out).
+
+     Here rather than in tour.js because a rule with one caller today is still
+     a rule, and the deck, the check and any later "is this client ready"
+     question must not each answer it their own way (constitution IX). */
+  function tourReady(w, target) {
+    if (!w || !target) return false;
+    var u = unitLikeOf(w, target);
+    if (!u) return false;
+    var items = (u.items || []).length > 0;
+    var kos = (u.keyObjectives || []).length > 0;
+    return items && kos;
+  }
+
+  /* A unit key or `fn:<key>`, resolved in ONE place (§59's rule). */
+  function unitLikeOf(w, target) {
+    if (!w || !target || target === "group") return null;
+    if (String(target).indexOf("fn:") === 0) {
+      var f = (w.functions || {})[String(target).slice(3)];
+      return f || null;
+    }
+    return (w.units || {})[target] || null;
+  }
+
   var ARRANGE_ROLES = ["owner", "custodian", "fnhead"];
 
   function mayArrange(w, person, target) {
@@ -8245,7 +8263,7 @@ THEME.apply();
     STRATEGY_PAGES: STRATEGY_PAGES, isStrategyPage: isStrategyPage,
     ARRANGE_ROLES: ARRANGE_ROLES, mayArrange: mayArrange, planPageOf: planPageOf,
     reportPageOf: reportPageOf, mayDownloadPlan: mayDownloadPlan,
-    focusOn: focusOn,
+    focusOn: focusOn, tourReady: tourReady, unitLikeOf: unitLikeOf,
     mayAuthorPage: mayAuthorPage,
     GAP_FIELDS: GAP_FIELDS, GAP_SCORE_FIELDS: GAP_SCORE_FIELDS,
     gapBlank: gapBlank, quartersBlank: quartersBlank,
@@ -15451,7 +15469,16 @@ function clearUnitPlan(u, why){
 
    Operates on a GRAPH — the same shape sync.js hydrates from — rather than on
    the globals, so it is a pure function and the test can call it with nothing
-   loaded. */
+   loaded.
+
+   IT HAD TWO JOBS AND HAS ONE (spec 024 §6.1). It drew §67's "Clear project"
+   demo — what a client's deployment looks like on day one — and that button is
+   gone with the whole Demo-data switch, because the worked example is a CLIENT
+   now. What remains is the job it was written for: being the thing
+   `scripts/test-clean-parity.js` holds migration 004 to. §24 would have this
+   deleted for having no caller in the product, and the caller that matters
+   here is a test — so this is said rather than left for the next reader to
+   work out, which is what §24 is actually against. */
 function clearedGraph(g){
   var out = clone(g);
 
@@ -16908,11 +16935,6 @@ var RECIPES = [
   { id: "branding", q: "How do I set the colours and the logo?",
     a: "<b>Setup › Branding</b>. The mark must be a PNG — an uploaded SVG can carry code, " +
        "which is not a risk worth taking for a logo." },
-  { id: "demo-data", q: "What does Demo data do, and why can't I save in it?",
-    a: "It shows the full worked example — an invented tenant, so you can see a filled platform " +
-       "without touching yours. It refuses to save on purpose." +
-       "|<b>Clear project</b> shows the opposite: exactly what a new deployment looks like on " +
-       "day one." },
   { id: "focus-switch", q: "How do I turn focus measures off?",
     a: "<b>Setup › Focus measures</b>, on the button in the page header. Off hides them " +
        "everywhere and keeps every mark, so turning it back on restores them." }
@@ -28020,10 +28042,6 @@ function renderKB(){
     kbSection("data", "Where the data lives", [
       { p: 'The platform holds <b>your own tenant</b>. Everything you enter is saved to the ' +
            'database as you work.' },
-      { h: "Demo data is separate, and never saved",
-        p: 'The <b>Demo data</b> button swaps the whole platform to a full worked example ' +
-           'for explaining how it works. It is labelled while you are in it and it ' +
-           '<b>refuses to save</b>. Nothing invented ever reaches your database.' },
       { h: "It works offline",
         p: 'Installed, the platform opens with no network on the data baked into the file, ' +
            'and says so. Live figures are never cached — a stale actual shown as current ' +
@@ -28080,15 +28098,27 @@ function renderKB(){
      ABSENT, NEVER DISABLED, when this viewer's roles match no story: a
      button that explains it cannot help you is worse than no button, and
      there is nothing the person could do to earn it. */
+  /* AND SAYING WHY IS NOT THE SAME AS BEING ABSENT (spec 024 §6.2, §61).
+     The tour walks the person's OWN plan now — the worked example it used to
+     borrow is a client of its own — so there is a second reason it may not
+     run: the plan is not written yet. That is a state somebody can LEAVE, and
+     it is the difference from the paragraph above: a viewer whose roles match
+     no story can do nothing about it and is shown nothing, while a custodian
+     of an empty unit is one plan away and is told so. A button that started
+     something lighting nothing would be the worse answer to both. */
   var tourStory = (typeof TOUR !== "undefined") ? TOUR.storyFor(viewer()) : null;
+  var tourCan = tourStory && (typeof TOUR === "undefined" || !TOUR.ready || TOUR.ready(viewer()));
   var tourBlock = tourStory
     ? '<div class="kb-sec" id="kb-tour"><h3>The guided tour</h3>' +
-      '<p class="kb-p">A short walk through the platform on the worked example — ' +
-      'the demo data, labelled the whole time, so nothing you see belongs to your ' +
-      'own tenant and nothing can be saved. It opens by itself the first time you ' +
-      'sign in; this is how you see it again.</p>' +
-      '<p><button type="button" class="editbtn" data-tour-replay="' + esc(tourStory) +
-      '">Start the tour</button></p></div>'
+      '<p class="kb-p">A short walk through the platform, on your own plan. It opens ' +
+      'by itself the first time you sign in; this is how you see it again.</p>' +
+      (tourCan
+        ? '<p><button type="button" class="editbtn" data-tour-replay="' + esc(tourStory) +
+          '">Start the tour</button></p>'
+        : '<p class="kb-p missing">There is nothing to walk through yet — the tour ' +
+          'points at pillars and key objectives, and this plan has none. It becomes ' +
+          'available as soon as the plan has been built or imported.</p>') +
+      '</div>'
     : '';
 
   /* THE TOUR IS A SECTION, SO IT GOES IN THE ARRAY (merge, §113.8). It
@@ -35509,10 +35539,11 @@ var TOUR = (function(){
 
   /* ── RUNTIME STATE ────────────────────────────────────────────────────
      Private. `at` is -1 when nothing is running, which is what every guard
-     asks. `prevMode` is the platform's mode before Start and is what every
-     exit path puts back — there is no other way out of demo. */
+     asks. `prevMode` was here until spec 024: it held the platform's dataset
+     before Start so every exit could put it back, and with the tour walking
+     the person's own plan there is nothing to put back. */
   var story = null, steps = [], at = -1, asking = false,
-      prevMode = null, own = null, navigating = false, dock = null,
+      own = null, navigating = false, dock = null,
       docked = false;
 
   function el(id){ return document.getElementById(id); }
@@ -35763,17 +35794,15 @@ var TOUR = (function(){
     if (card) card.focus && card.focus();
   }
 
-  /* EVERY EXIT PUTS THE WORLD BACK. Finish, both answers to the ×, and the
-     Escape that leads to them all come through here — one door, because a
-     tour that left somebody in demo mode would leave them looking at a
-     worked example wearing their own tenant's name. */
+  /* EVERY EXIT COMES THROUGH HERE — Finish, both answers to the ×, and the
+     Escape that leads to them. It used to have a second job, putting the
+     platform back into the client's own data after the tour had switched it
+     to the baked worked example; there is nothing to put back now, because
+     the tour walks the person's OWN plan (spec 024 §6.2). */
   function end(){
     at = -1; asking = false; docked = false;
     if (dock) dock.hidden = true;
-    if (prevMode && window.SYNC && SYNC.setMode) {
-      try { SYNC.setMode(prevMode); } catch(e){}
-    }
-    prevMode = null; story = null; steps = [];
+    story = null; steps = [];
   }
 
   function start(key){
@@ -35782,37 +35811,19 @@ var TOUR = (function(){
     if (!dock) return;
     story = key;
 
-    /* ── THE ORDER OF THESE FOUR LINES IS THE WHOLE FIX ───────────────
-       Islam, replaying from the Knowledge base: "make it take me by
-       default to the main page rather than in the knowledge base so the
-       tour can actually happen."
+    /* ── THE TOUR WALKS THE PERSON'S OWN PLAN (spec 024 §6.2) ────────
+       It used to switch the platform to the baked worked example first, and
+       §107.14's fix was about the ORDER of that switch — swap the dataset,
+       THEN read who and where, because `setMode("demo")` replaces PEOPLE,
+       UNITS and the whole register, so a key from the client's own tenant was
+       being looked up in the demo's navigation.
 
-       TWO FAULTS, ONE ROOT — the tour used to decide WHERE it was touring
-       before the world it would tour had arrived.
-
-       1. The mode was swapped AFTER `own` was resolved. `setMode("demo")`
-          replaces PEOPLE, UNITS and the whole register, so `own` was a key
-          from the CLIENT'S OWN tenant being looked up in the DEMO tenant's
-          navigation. On this deployment the two happen to match, because
-          the client IS the worked example — on any real client they share
-          no keys at all, `destBtn()` would find nothing, and the tour would
-          light nothing while cheerfully reporting nine steps. Invisible to
-          a file:// check, where there is no live dataset to swap away from
-          (§94.11's trap, exactly).
-
-       2. Nothing moved the platform off the page you replayed FROM. The
-          welcome card was drawn over Setup › Knowledge base, and only the
-          first Next left it — so the tour opened by explaining "this row is
-          the business" over a page that has no business row in view.
-
-       So: switch first, then read who and where from the world that is now
-       on screen, then CHECK that place is actually reachable, and only then
-       walk — the welcome step carries the same destination as step one, so
-       the platform is on the main page before the first card is read. */
-    prevMode = (window.SYNC && SYNC.demoMode) ? (SYNC.demoMode() || "live") : null;
-    if (prevMode && prevMode !== "demo" && SYNC.setMode) {
-      try { SYNC.setMode("demo"); } catch(e){}
-    }
+       The switch is gone with the Demo-data button, so that ordering trap goes
+       with it — and the half of §107.14 that was never about the demo STAYS:
+       the welcome step carries the same destination as step one, so the
+       platform is on the main page before the first card is read, rather
+       than drawing "this row is the business" over the Knowledge base you
+       replayed from. */
     /* `viewer()` is the platform's own answer to "who is this", and it
        RESOLVES rather than returning a maybe — including after the swap
        above has just moved the register under us. */
@@ -35843,12 +35854,26 @@ var TOUR = (function(){
 
      Six conditions, and every one of them is a reason somebody should not be
      interrupted. It declines in silence: declining is the common case. */
+  /* IS THERE ANYTHING TO TOUR (spec 024 §6.2). Asked of the place the story
+     would be told on, through the shared rule — never a second reading of
+     "does this client have a plan" (constitution IX). A tour of an empty
+     screen teaches nothing, and it is worse than that: every step lights a
+     selector, so on a blank plan the spotlight has nothing to sit on and the
+     dock covers the page while pointing at nothing (§61). */
+  function ready(person){
+    var at = ownPlace(person) || firstDest();
+    if (!at) return false;
+    if (typeof SMPRules === "undefined" || !SMPRules.tourReady) return true;
+    try { return SMPRules.tourReady(world(), at); } catch(e){ return false; }
+  }
+
   function offer(person){
     if (!person) return;                                   /* no session: no "first sign-in" */
     if (location.protocol === "file:") return;             /* nothing to sign into */
     if (document.body && document.body.classList.contains("presenting")) return;
     var key = storyFor(person);
     if (!key) return;                                      /* no story fits their roles */
+    if (!ready(person)) return;                            /* nothing to tour yet */
     if (seen(key) || skippedThisSession()) return;
     start(key);
   }
@@ -35864,6 +35889,9 @@ var TOUR = (function(){
   return {
     onPaint: onPaint,
     offer: offer,
+    /* For the Knowledge base's replay button, which must say WHY rather
+       than starting something that lights nothing (§61). */
+    ready: ready,
     start: start,
     storyFor: storyFor,
     /* Read-only, for checks/tour.py. A check that had to read the card's
@@ -35948,19 +35976,24 @@ var SYNC = (function () {
      cannot be right until the save that created the person has landed. */
   var repaint = null;
 
-  /* Two datasets, one product.
+  /* ONE DATASET NOW (spec 024 §6.1, retiring §21 and §67).
 
-     DEMO is the full worked example baked into this file — Raya Trade with
-     every unit, capability, figure and person. LIVE is what the database
-     holds, which after a clean slate is the client's own and mostly empty.
+     The Demo data button switched this page between the database's content
+     and the worked example baked into the file. With a DEMO CLIENT on the
+     cards — its own schema, its own address, and editable — that button is a
+     second and weaker home for the same material: it cannot be added to,
+     which is the whole reason Islam asked for the Demo client.
 
-     The Demo button switches between them so the platform can be EXPLAINED
-     with a complete example without that example ever being mistaken for, or
-     written into, the real thing. Demo mode never saves (§B3: invented data
-     is labelled every time, and it must not leak into a client's tenant). */
-  var DEMO = null;
-  var LIVE = null;
-  var mode = "live";
+     THE BAKED DATASET ITSELF STAYS. Opened as a file with no server the
+     platform IS the example — that is where the offline handover file gets
+     its content — so the bake is data of last resort rather than a mode
+     anybody switches into, and nothing here has to tell the two apart.
+
+     What went with the button: `DEMO`, `LIVE`, `mode`, `isDemoMode()`,
+     `datasetFor`, `setMode`, `markMode`, the banner and §67's Filled/Clear
+     pair. `LIVE` held a copy of the client's own data to restore on the way
+     BACK from the demo, and with nowhere to come back from it was a second
+     copy of the graph kept in step with nothing. */
   /* `clone` is the platform's own, defined once beside the archive model. */
 
   function graph() {
@@ -36079,8 +36112,7 @@ var SYNC = (function () {
      behaves exactly as it did. */
   function save(done) {
     var say = function (state) { if (done) done(state); };
-    /* The guard that matters: demo data must never reach the database. */
-    if (!live || isDemoMode()) return say("offline");
+    if (!live) return say("offline");
     if (saving) return say("busy");
     var now = serialize();
     if (now === lastSaved) return say("clean");
@@ -36276,85 +36308,6 @@ var SYNC = (function () {
     paint();
   }
 
-  /* Switching datasets. Leaving live remembers where the client's data was,
-     so returning restores it exactly rather than the snapshot taken at boot —
-     otherwise an edit made before opening the demo would vanish from the
-     screen. Anything typed while in demo is discarded, by design. */
-  /* THREE DATASETS, NOT TWO (§67). Islam: "Filled Project & Clear Project …
-     the new clear project is a project with the same setup but with no
-     uploaded data at all." So "demo" became two modes, and everything that
-     asked `mode === "demo"` has to ask `isDemoMode()` instead — the save guard
-     above most of all, because a Clear Project that could be saved would write
-     an EMPTY tenant over a real one, which is worse than writing an invented
-     one over it.
-
-     The cleared graph is derived on switch rather than baked at boot: it costs
-     a clone of a graph the browser already holds, and a second stored copy is
-     a second thing to keep in step. */
-  function isDemoMode() { return mode === "demo" || mode === "demoClear"; }
-  function datasetFor(m) {
-    if (m === "demo") return clone(DEMO);
-    if (m === "demoClear") return clearedGraph(DEMO);
-    return clone(LIVE);
-  }
-  function setMode(next, paint) {
-    if (!DEMO || next === mode) return;
-    if (mode === "live") LIVE = clone(graph());
-    mode = next;
-    hydrate(datasetFor(mode));
-    markMode();
-    paint();
-    if (mode === "live") lastSaved = serialize();
-  }
-
-  /* Demo data is labelled the whole time it is on screen. The banner is the
-     platform's own — it carries the invented-data notice, which is true of the
-     example and NOT true of the client's own tenant, so it shows in demo mode
-     and is hidden in live. */
-  function markMode() {
-    var btn = document.getElementById("demobtn");
-    if (btn) btn.textContent = mode === "demoClear" ? "Exit clear project" : "Exit demo";
-    /* One or the other, never both and never neither — and only once boot()
-       has found a live dataset, which is what `live` says.
-
-       AND ONLY FOR THE SMO (Islam, 2026-08-24: "the demo data button shouldn't
-       appear to anyone but the SMO"). It is not decoration: pressing it
-       replaces every page with invented content (§21), and the person most
-       likely to press it by accident is the one who has never seen it before.
-       Asked through isSMOSession() so the switcher and this cannot disagree
-       about who the SMO is.
-
-       Served from a FILE there is no session and no `live`, so both are hidden
-       by the first clause anyway — the whole product is the example there and
-       there is nothing to switch to. */
-    var menu = document.getElementById("demomenu");
-    if (menu) menu.hidden = !live || !isSMOSession() || isDemoMode();
-    if (btn) btn.hidden = !live || !isSMOSession() || !isDemoMode();
-    var ban = document.getElementById("banner");
-    if (ban) {
-      ban.hidden = !isDemoMode();
-      /* THE BANNER SAYS WHICH ONE IS ON SCREEN. Both are demo data and neither
-         is saved, but the second sentence is only true of the filled one —
-         a Clear Project has no invented content in it to warn about, and
-         warning about it anyway would teach people to stop reading the
-         banner. */
-      if (mode === "demo") {
-        ban.innerHTML =
-          '<span><strong>Demo data \u00b7 nothing here is saved.</strong> The full worked ' +
-          'example, for explaining how the platform works.</span>' +
-          '<span><strong>Only Mobile\u2019s plan is real</strong> \u2014 every other unit, every ' +
-          'capability\u2019s content and every reported figure is invented.</span>';
-      } else if (mode === "demoClear") {
-        ban.innerHTML =
-          '<span><strong>Clear project \u00b7 nothing here is saved.</strong> The same ' +
-          'organisation with nothing filled in \u2014 what a new deployment looks like on ' +
-          'day one.</span>' +
-          '<span>Every plan, figure and reported number is gone; the companies, business ' +
-          'units, supporting functions and settings stay.</span>';
-      }
-    }
-  }
-
   /* One shape for every /api/auth call this object makes: post JSON, hand
      back (error, body). Three callers with the same six lines is where a typo
      lives in exactly one of them. */
@@ -36430,7 +36383,7 @@ var SYNC = (function () {
      settles) is the small corner of a small corner, and the 5s interval owns
      it whenever the tab survives. */
   function flushLeave() {
-    if (!live || isDemoMode() || saving) return;
+    if (!live || saving) return;
     if (timer) { clearTimeout(timer); timer = null; }
     var now = serialize();
     if (now === lastSaved || now === refusedBody) return;
@@ -36454,12 +36407,6 @@ var SYNC = (function () {
     /* Flush now rather than on the next 800ms tick, and say what happened.
        The ONLY caller is a button somebody pressed; nothing schedules it. */
     saveNow: function (done) { save(done); },
-    isDemo: function () { return isDemoMode(); },
-    /* Which of the two, for anything that needs to tell them apart. */
-    demoMode: function () { return isDemoMode() ? mode : null; },
-    /* `repaint` is the paint function boot() kept — the same one every other
-       caller in here uses, so a menu item does not have to be handed one. */
-    setMode: function (next) { setMode(next, repaint || function(){}); },
     person: function () { return person; },
     /* The three password operations, all SMO-only and all checked again on
        the server — this object is the convenience, never the enforcement. */
@@ -36574,9 +36521,6 @@ var SYNC = (function () {
          skeleton to cover. theme.js does not stamp `booting` here either;
          bootLand() is called anyway so the two can never disagree. */
       if (!enabled) { bootLand(); paint(); return; }
-      /* Taken before hydration, while the globals still hold the baked-in
-         example — after hydration it is gone from memory. */
-      DEMO = clone(graph());
       /* ── THE PAINT THAT USED TO BE HERE (§94.10) ─────────────────
          `paint()` ran first, unconditionally, and that single line was the
          whole of the fault: it drew the page from the BAKED file — the wrong
@@ -36625,7 +36569,6 @@ var SYNC = (function () {
              is where this person is going. */
           if (data.person && data.person.mustChange) { clearTimeout(backstop); location.replace("/"); return; }
           hydrate(data.state);
-          LIVE = clone(data.state);
           live = true;
           person = data.person || null;
           land(function () {
@@ -36642,27 +36585,6 @@ var SYNC = (function () {
           lastSaved = serialize();
           setInterval(save, 5000);
 
-          /* The Demo controls exist only where there is a live dataset to
-             tell the example apart from. Opened as a file the whole product IS
-             the example, so they would mean nothing.
-
-             Wired ONCE, here, and never repainted — they live in the chrome
-             rather than in the page, so paint() does not replace them and
-             markMode() only has to show and hide the right one (§67). */
-          var menu = document.getElementById("demomenu");
-          if (menu) {
-            menu.querySelectorAll("[data-demomode]").forEach(function (b) {
-              b.addEventListener("click", function () {
-                menu.open = false;
-                setMode(this.dataset.demomode, paint);
-              });
-            });
-          }
-          var btn = document.getElementById("demobtn");
-          if (btn) {
-            btn.addEventListener("click", function () { setMode("live", paint); });
-          }
-          markMode();
         })
         .catch(function (e) {
           /* "sign in" is the 401/403 above, which has already sent the
@@ -38095,8 +38017,8 @@ var SYNC = (function () {
        paintUnits() reads no grant of its own (every call inside it passes an
        explicit target, by the note above), so nothing needs the old value. */
     TARGET = (!current || current === "setup" || current === "manage") ? "group" : current;
-    /* Repainted rather than set once: the demo switch swaps the whole graph,
-       and Labels can rename the tenant while you are looking at it. The
+    /* Repainted rather than set once: Labels can rename the tenant while you
+       are looking at it. The
        separator lives with the name so an unnamed tenant shows nothing at all
        rather than a stranded middot. */
     document.getElementById("orgname").textContent =

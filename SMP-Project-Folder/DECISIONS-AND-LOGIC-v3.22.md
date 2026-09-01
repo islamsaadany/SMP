@@ -19348,3 +19348,74 @@ none**.
 the worked example under invented names, the retirement of the in-product Demo
 data button, and the live migration — **rehearsed on a copy of production and
 reported before it is run for real**.
+
+### 147.8 · The Demo client, and what its arrival retires
+
+Islam asked for a **Demo client on the cards**: somewhere real to practise,
+and somewhere to build a plan for a prospect. It is the worked example the
+product already carries, seeded into its own schema with the company, the
+units, the people and every mention of them renamed to invented ones —
+**Meridian Group**, and a register of thirty-three people who do not exist.
+
+**THIS REVERSES §21's "never put invented content in the database", for one
+client and deliberately.** What replaces §21's guard is the boundary §147.1
+builds: Demo is its own schema, on Forefront's cards only, and no client can
+reach it. It is a client in every other respect and **it saves**, which is the
+whole reason it exists — the button it replaces could not be added to.
+
+**THE DEMO DATA BUTTON, DEMO MODE AND §67'S FILLED/CLEAR PAIR LEAVE THE
+PRODUCT** — the controls, the switch, the banner and their CSS (§24). The
+baked dataset itself **stays**: opened as a file with no server the platform
+*is* the example, which is where the offline handover file gets its content,
+so the bake is data of last resort rather than a mode anybody switches into.
+
+**`clearedGraph()` HAD TWO JOBS AND KEEPS ONE.** It drew the Clear Project
+demo, and it is what `scripts/test-clean-parity.js` holds migration 004 to.
+§24 would have it deleted for having no caller in the product; the caller that
+matters is a test, so that is written at the function rather than left for the
+next reader to work out.
+
+### 147.9 · The tour runs on the person's own plan
+
+§107's tour walked a filled platform by switching the page to the baked
+example. With the switch gone it walks the person's **own** plan — and **is not
+offered until there is one**, because a tour of an empty screen teaches
+nothing: every step lights a selector, so on a blank plan the dock covers the
+page while pointing at nothing (§61).
+
+`tourReady(world, target)` lives in `lib/rules.js` — one definition for the
+screen and the check — and asks of a **target**, not of the tenant: a group with
+nine filled units and one empty one still has nothing to show somebody who
+works in the empty one.
+
+**SAYING WHY IS NOT THE SAME AS BEING ABSENT.** The Knowledge base's replay
+button is *absent* for a viewer whose roles match no story — they can do
+nothing about it — and *explained* for a custodian whose plan is empty, who is
+one plan away. A button that started something lighting nothing would be the
+worse answer to both.
+
+**AND §107.14's FIX SURVIVES ITS OWN CAUSE.** That section was about the ORDER
+of the dataset switch; with no switch left, what remains is the half that was
+never about the demo — the welcome step carries the same destination as step
+one, so the platform is on the main page before the first card is read.
+
+**The tour's own check got stronger by losing something.** `writes_nothing`
+allowed exactly two calls into SYNC, `demoMode` and `setMode`; both went with
+the switch, so the allow-list is now **empty** — and it is carrying more
+weight than before, because demo mode refusing every save used to be the
+backstop and the tour now walks real data.
+
+### 147.10 · Three faults the migration script and the round trip were hiding
+
+**THE ONE SCRIPT THAT SETS A DEPLOYMENT UP STILL WROTE THE COLUMNS REVISION 3
+REMOVED** — `role` on the account and `is_super` on the team row — so it would
+have failed on the very shape it was setting up. Found by running it, not by
+reading it.
+
+**AND THE ROUND TRIP CALLED A CORRECT EMPTY CLIENT BROKEN.** `public` is
+seeded and then cleared by migration 004, so its clean slate keeps the setup
+and loses the figures; a client created since the split is made with
+`seed:false` and never had any of it, so the right expectation there is
+**nothing at all**, and a client somebody has filled in (Demo) is neither. It
+says which of the three it is looking at now — *a check that cries wolf on the
+ordinary case is one somebody learns to scroll past.*

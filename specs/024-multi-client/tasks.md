@@ -109,12 +109,12 @@ serverless functions `api/`; SQL `db/`; checks `SMP-Project-Folder/src/checks/`;
 
 - [x] T045 [US4] Add `scripts/seed-demo-client.js` — `db/seed-state.json` renamed per the approved list (Meridian Group; Devices; B2B Online; Home Electronics; Customer Care; IT Distribution; every person invented, addresses at `meridian.example`) into the `demo` schema
 - [x] T046 [US4] Mark the Demo client `kind = 'demo'` and draw it as such on the cards; it is a client in every other respect and it **saves**
-- [ ] T047 [US4] Remove the Demo data button, demo mode and §67's Filled/Clear pair from `SMP-Project-Folder/src/sync.js`, `group-render.js` and the shell — controls, switch and banner, with the CSS deleted beside them (§24)
-- [ ] T048 [US4] Keep the baked dataset as what the offline `file://` build runs on, and assert it still opens with the full example
-- [ ] T049 [US4] Add `tourReady(target)` to `lib/rules.js` — at least one pillar or capability and one key objective — and switch `SMP-Project-Folder/src/tour.js` off demo mode onto the client's own plan
-- [ ] T050 [US4] Say why rather than starting nothing: the Knowledge base replay button explains when the tour is not available (§61)
-- [ ] T051 [P] [US4] Update `SMP-Project-Folder/src/checks/tour.py` for the new rule, both ends (offered with a plan, absent without, never for the office — §118)
-- [ ] T052 [US4] Extend `multi-client.py` §6: the Demo button absent for every viewer, the Demo client editable, the offline file still showing the example
+- [x] T047 [US4] Remove the Demo data button, demo mode and §67's Filled/Clear pair from `SMP-Project-Folder/src/sync.js`, `group-render.js` and the shell — controls, switch and banner, with the CSS deleted beside them (§24)
+- [x] T048 [US4] Keep the baked dataset as what the offline `file://` build runs on, and assert it still opens with the full example
+- [x] T049 [US4] Add `tourReady(target)` to `lib/rules.js` — at least one pillar or capability and one key objective — and switch `SMP-Project-Folder/src/tour.js` off demo mode onto the client's own plan
+- [x] T050 [US4] Say why rather than starting nothing: the Knowledge base replay button explains when the tour is not available (§61)
+- [x] T051 [P] [US4] Update `SMP-Project-Folder/src/checks/tour.py` for the new rule, both ends (offered with a plan, absent without, never for the office — §118)
+- [x] T052 [US4] Extend `multi-client.py` §6: the Demo button absent for every viewer, the Demo client editable, the offline file still showing the example
 
 **Checkpoint**: one home for demo material, and it is the one that can be added to.
 

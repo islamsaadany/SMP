@@ -424,9 +424,11 @@ def contrast(pg):
 
 def writes_nothing(pg):
     """THE TOUR HAS NO WRITE PATH AT ALL, which is a stronger thing to know
-    than that one round trip happened to leave the state alone. Demo mode
-    refusing every save (§21, §67) is the backstop; this asserts the tour
-    never even reaches for one.
+    than that one round trip happened to leave the state alone — and since
+    spec 024 it is the ONLY thing standing between the tour and the client's
+    own data. It used to walk the baked worked example, which refused every
+    save (§21, §67); it walks the person's own plan now, so the backstop is
+    gone and this assertion is carrying the whole weight.
 
     Read out of the SHIPPED source rather than off the disk, so what is
     measured is what a client would actually run."""
@@ -437,15 +439,16 @@ def writes_nothing(pg):
     }""")
     if not check(src is not None, "the tour's source is not in the built file"):
         return
-    # `setMode` is the ONE call it makes into SYNC, and setMode itself writes
-    # nothing — it swaps which dataset is hydrated. Anything else that could
-    # reach the server or the state graph is a fault.
+    # Anything that could reach the server or the state graph is a fault.
     for banned in ["fetch(", "saveNow", "afterPaint", "XMLHttpRequest",
                    "navigator.sendBeacon"]:
         check(banned not in src, f"the tour reaches for {banned!r} — it must write nothing")
+    # AND IT CALLS NOTHING IN SYNC AT ALL NOW. `demoMode` and `setMode` were
+    # the two it was allowed, and both went with the dataset switch (spec 024
+    # §6.1) — so the allow-list is empty, which is the strongest form this
+    # assertion has ever had.
     calls = sorted(set(re.findall(r"SYNC\.([A-Za-z]+)", src)))
-    check(calls == ["demoMode", "setMode"],
-          f"the tour calls SYNC.{calls} — only demoMode and setMode are allowed")
+    check(calls == [], f"the tour calls SYNC.{calls} — it must call nothing")
 
 
 def not_on_a_projector(pg):
@@ -478,11 +481,49 @@ def not_on_a_projector(pg):
     pg.evaluate("localStorage.clear(); sessionStorage.clear()")
 
 
+def nothing_to_tour(pg):
+    """AND A TOUR OF AN EMPTY SCREEN TEACHES NOTHING (spec 024 §6.2). With the
+    demo dataset no longer borrowed, the tour walks the person's OWN plan — so
+    it is not offered until there is one, and the Knowledge base says WHY
+    rather than drawing a button that lights nothing (§61).
+
+    BOTH ENDS, because a build that never offered the tour at all would pass
+    half of this: the filled plan must still offer it."""
+    pg.evaluate("localStorage.clear(); sessionStorage.clear()")
+    # The rule itself, asked of the shared module — one definition for the
+    # screen and the check (constitution IX).
+    ready = pg.evaluate("""() => {
+      const w = world();
+      const filled = SMPRules.tourReady(w, 'mobile');
+      const kept = JSON.parse(JSON.stringify(UNITS.mobile.items || []));
+      UNITS.mobile.items = [];
+      const empty = SMPRules.tourReady(w, 'mobile');
+      UNITS.mobile.items = kept;
+      return { filled, empty, missing: SMPRules.tourReady(w, 'no_such_unit') }; }""")
+    check(ready["filled"] is True, "a filled unit is not tour-ready")
+    check(ready["empty"] is False, "a unit with no pillars is still called tour-ready")
+    check(ready["missing"] is False, "a place that does not exist is called tour-ready")
+
+    # And the offer follows it — the same person, the same story, the plan
+    # emptied under them.
+    ran = pg.evaluate("""() => {
+      const p = PEOPLE.filter(x => TOUR.storyFor(x) === 'custodian')[0];
+      const at = p && (p.unit || 'mobile');
+      const kept = JSON.parse(JSON.stringify((UNITS[at] || {}).items || []));
+      if (UNITS[at]) UNITS[at].items = [];
+      const before = TOUR.ready(p);
+      if (UNITS[at]) UNITS[at].items = kept;
+      const after = TOUR.ready(p);
+      return { before, after }; }""")
+    check(ran["before"] is False, "the tour offers itself on a plan with nothing in it")
+    check(ran["after"] is True, "the tour refuses a plan that IS filled in")
+
+
 def no_offer_from_file(pg):
     """Over file:// there is no sign-in, so there is no 'first sign-in' and
     the tour must never offer itself — while the Knowledge base entry still
-    works, because the demo dataset is baked into the file. BOTH ENDS (§90):
-    knowledge_base() above is the other half of this assertion."""
+    works, because the file's own baked dataset is the worked example. BOTH
+    ENDS (§90): knowledge_base() above is the other half of this assertion."""
     pg.evaluate("localStorage.clear(); sessionStorage.clear()")
     ran = pg.evaluate("""() => {
       const p = PEOPLE.filter(x => TOUR.storyFor(x) === 'custodian')[0];
@@ -532,6 +573,7 @@ def run(page_break_sec=None, break_target=False):
         contrast(pg)
         writes_nothing(pg)
         not_on_a_projector(pg)
+        nothing_to_tour(pg)
         no_offer_from_file(pg)
 
         # THE TOUR NEVER OPENS THE PRESENTATION MENU (rev 4). The step

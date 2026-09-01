@@ -184,10 +184,6 @@
      "p": "The platform holds <b>your own tenant</b>. Everything you enter is saved to the database as you work."
     },
     {
-     "h": "Demo data is separate, and never saved",
-     "p": "The <b>Demo data</b> button swaps the whole platform to a full worked example for explaining how it works. It is labelled while you are in it and it <b>refuses to save</b>. Nothing invented ever reaches your database."
-    },
-    {
      "h": "It works offline",
      "p": "Installed, the platform opens with no network on the data baked into the file, and says so. Live figures are never cached — a stale actual shown as current is worse than one that will not load."
     }
@@ -1178,13 +1174,6 @@
    "group": "The office's own work",
    "q": "How do I set the colours and the logo?",
    "a": "<b>Setup › Branding</b>. The mark must be a PNG — an uploaded SVG can carry code, which is not a risk worth taking for a logo.",
-   "who": "office"
-  },
-  {
-   "id": "demo-data",
-   "group": "The office's own work",
-   "q": "What does Demo data do, and why can't I save in it?",
-   "a": "It shows the full worked example — an invented tenant, so you can see a filled platform without touching yours. It refuses to save on purpose.|<b>Clear project</b> shows the opposite: exactly what a new deployment looks like on day one.",
    "who": "office"
   },
   {

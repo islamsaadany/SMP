@@ -313,6 +313,27 @@ def main():
             check("…holding the seat its configuration gives them",
                   all(p["role"] in ("super", "smoteam") for p in reg), reg)
 
+            # ── 11 · the Demo client, and the button that went ──────
+            # THE DEMO DATA BUTTON IS GONE FOR EVERY VIEWER (spec 024 §6.1):
+            # the worked example is a CLIENT now, with its own schema and its
+            # own address, and it saves — which is the whole reason Islam
+            # asked for it. Asserted as an ABSENCE on the client's own
+            # platform, for every one of the three viewers, because a control
+            # left drawn for one of them is exactly what nobody would notice.
+            for who, p in (("the admin", pg), ("a consultant", pg2), ("a client's own person", pg3)):
+                p.goto(BASE + "/raya-trade", wait_until="networkidle")
+                p.wait_for_timeout(2400)
+                gone = p.evaluate("""() => ({
+                  menu: !!document.getElementById('demomenu'),
+                  btn:  !!document.getElementById('demobtn'),
+                  ban:  !!document.getElementById('banner'),
+                  mode: !!(window.SYNC && SYNC.setMode) })""")
+                check("the Demo data control is gone for " + who,
+                      not gone["menu"] and not gone["btn"], gone)
+                check("…and its banner with it, for " + who, not gone["ban"], gone)
+                check("…and there is no way to switch datasets at all, for " + who,
+                      not gone["mode"], gone)
+
             check("no page errors anywhere", not errs, errs)
             b.close()
     finally:

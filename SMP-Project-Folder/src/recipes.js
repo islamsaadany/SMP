@@ -194,11 +194,6 @@ var RECIPES = [
   { id: "branding", q: "How do I set the colours and the logo?",
     a: "<b>Setup › Branding</b>. The mark must be a PNG — an uploaded SVG can carry code, " +
        "which is not a risk worth taking for a logo." },
-  { id: "demo-data", q: "What does Demo data do, and why can't I save in it?",
-    a: "It shows the full worked example — an invented tenant, so you can see a filled platform " +
-       "without touching yours. It refuses to save on purpose." +
-       "|<b>Clear project</b> shows the opposite: exactly what a new deployment looks like on " +
-       "day one." },
   { id: "focus-switch", q: "How do I turn focus measures off?",
     a: "<b>Setup › Focus measures</b>, on the button in the page header. Off hides them " +
        "everywhere and keeps every mark, so turning it back on restores them." }

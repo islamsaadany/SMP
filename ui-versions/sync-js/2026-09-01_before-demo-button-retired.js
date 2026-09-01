@@ -55,24 +55,19 @@ var SYNC = (function () {
      cannot be right until the save that created the person has landed. */
   var repaint = null;
 
-  /* ONE DATASET NOW (spec 024 §6.1, retiring §21 and §67).
+  /* Two datasets, one product.
 
-     The Demo data button switched this page between the database's content
-     and the worked example baked into the file. With a DEMO CLIENT on the
-     cards — its own schema, its own address, and editable — that button is a
-     second and weaker home for the same material: it cannot be added to,
-     which is the whole reason Islam asked for the Demo client.
+     DEMO is the full worked example baked into this file — Raya Trade with
+     every unit, capability, figure and person. LIVE is what the database
+     holds, which after a clean slate is the client's own and mostly empty.
 
-     THE BAKED DATASET ITSELF STAYS. Opened as a file with no server the
-     platform IS the example — that is where the offline handover file gets
-     its content — so the bake is data of last resort rather than a mode
-     anybody switches into, and nothing here has to tell the two apart.
-
-     What went with the button: `DEMO`, `LIVE`, `mode`, `isDemoMode()`,
-     `datasetFor`, `setMode`, `markMode`, the banner and §67's Filled/Clear
-     pair. `LIVE` held a copy of the client's own data to restore on the way
-     BACK from the demo, and with nowhere to come back from it was a second
-     copy of the graph kept in step with nothing. */
+     The Demo button switches between them so the platform can be EXPLAINED
+     with a complete example without that example ever being mistaken for, or
+     written into, the real thing. Demo mode never saves (§B3: invented data
+     is labelled every time, and it must not leak into a client's tenant). */
+  var DEMO = null;
+  var LIVE = null;
+  var mode = "live";
   /* `clone` is the platform's own, defined once beside the archive model. */
 
   function graph() {
@@ -191,7 +186,8 @@ var SYNC = (function () {
      behaves exactly as it did. */
   function save(done) {
     var say = function (state) { if (done) done(state); };
-    if (!live) return say("offline");
+    /* The guard that matters: demo data must never reach the database. */
+    if (!live || isDemoMode()) return say("offline");
     if (saving) return say("busy");
     var now = serialize();
     if (now === lastSaved) return say("clean");
@@ -387,6 +383,85 @@ var SYNC = (function () {
     paint();
   }
 
+  /* Switching datasets. Leaving live remembers where the client's data was,
+     so returning restores it exactly rather than the snapshot taken at boot —
+     otherwise an edit made before opening the demo would vanish from the
+     screen. Anything typed while in demo is discarded, by design. */
+  /* THREE DATASETS, NOT TWO (§67). Islam: "Filled Project & Clear Project …
+     the new clear project is a project with the same setup but with no
+     uploaded data at all." So "demo" became two modes, and everything that
+     asked `mode === "demo"` has to ask `isDemoMode()` instead — the save guard
+     above most of all, because a Clear Project that could be saved would write
+     an EMPTY tenant over a real one, which is worse than writing an invented
+     one over it.
+
+     The cleared graph is derived on switch rather than baked at boot: it costs
+     a clone of a graph the browser already holds, and a second stored copy is
+     a second thing to keep in step. */
+  function isDemoMode() { return mode === "demo" || mode === "demoClear"; }
+  function datasetFor(m) {
+    if (m === "demo") return clone(DEMO);
+    if (m === "demoClear") return clearedGraph(DEMO);
+    return clone(LIVE);
+  }
+  function setMode(next, paint) {
+    if (!DEMO || next === mode) return;
+    if (mode === "live") LIVE = clone(graph());
+    mode = next;
+    hydrate(datasetFor(mode));
+    markMode();
+    paint();
+    if (mode === "live") lastSaved = serialize();
+  }
+
+  /* Demo data is labelled the whole time it is on screen. The banner is the
+     platform's own — it carries the invented-data notice, which is true of the
+     example and NOT true of the client's own tenant, so it shows in demo mode
+     and is hidden in live. */
+  function markMode() {
+    var btn = document.getElementById("demobtn");
+    if (btn) btn.textContent = mode === "demoClear" ? "Exit clear project" : "Exit demo";
+    /* One or the other, never both and never neither — and only once boot()
+       has found a live dataset, which is what `live` says.
+
+       AND ONLY FOR THE SMO (Islam, 2026-08-24: "the demo data button shouldn't
+       appear to anyone but the SMO"). It is not decoration: pressing it
+       replaces every page with invented content (§21), and the person most
+       likely to press it by accident is the one who has never seen it before.
+       Asked through isSMOSession() so the switcher and this cannot disagree
+       about who the SMO is.
+
+       Served from a FILE there is no session and no `live`, so both are hidden
+       by the first clause anyway — the whole product is the example there and
+       there is nothing to switch to. */
+    var menu = document.getElementById("demomenu");
+    if (menu) menu.hidden = !live || !isSMOSession() || isDemoMode();
+    if (btn) btn.hidden = !live || !isSMOSession() || !isDemoMode();
+    var ban = document.getElementById("banner");
+    if (ban) {
+      ban.hidden = !isDemoMode();
+      /* THE BANNER SAYS WHICH ONE IS ON SCREEN. Both are demo data and neither
+         is saved, but the second sentence is only true of the filled one —
+         a Clear Project has no invented content in it to warn about, and
+         warning about it anyway would teach people to stop reading the
+         banner. */
+      if (mode === "demo") {
+        ban.innerHTML =
+          '<span><strong>Demo data \u00b7 nothing here is saved.</strong> The full worked ' +
+          'example, for explaining how the platform works.</span>' +
+          '<span><strong>Only Mobile\u2019s plan is real</strong> \u2014 every other unit, every ' +
+          'capability\u2019s content and every reported figure is invented.</span>';
+      } else if (mode === "demoClear") {
+        ban.innerHTML =
+          '<span><strong>Clear project \u00b7 nothing here is saved.</strong> The same ' +
+          'organisation with nothing filled in \u2014 what a new deployment looks like on ' +
+          'day one.</span>' +
+          '<span>Every plan, figure and reported number is gone; the companies, business ' +
+          'units, supporting functions and settings stay.</span>';
+      }
+    }
+  }
+
   /* One shape for every /api/auth call this object makes: post JSON, hand
      back (error, body). Three callers with the same six lines is where a typo
      lives in exactly one of them. */
@@ -462,7 +537,7 @@ var SYNC = (function () {
      settles) is the small corner of a small corner, and the 5s interval owns
      it whenever the tab survives. */
   function flushLeave() {
-    if (!live || saving) return;
+    if (!live || isDemoMode() || saving) return;
     if (timer) { clearTimeout(timer); timer = null; }
     var now = serialize();
     if (now === lastSaved || now === refusedBody) return;
@@ -486,6 +561,12 @@ var SYNC = (function () {
     /* Flush now rather than on the next 800ms tick, and say what happened.
        The ONLY caller is a button somebody pressed; nothing schedules it. */
     saveNow: function (done) { save(done); },
+    isDemo: function () { return isDemoMode(); },
+    /* Which of the two, for anything that needs to tell them apart. */
+    demoMode: function () { return isDemoMode() ? mode : null; },
+    /* `repaint` is the paint function boot() kept — the same one every other
+       caller in here uses, so a menu item does not have to be handed one. */
+    setMode: function (next) { setMode(next, repaint || function(){}); },
     person: function () { return person; },
     /* The three password operations, all SMO-only and all checked again on
        the server — this object is the convenience, never the enforcement. */
@@ -600,6 +681,9 @@ var SYNC = (function () {
          skeleton to cover. theme.js does not stamp `booting` here either;
          bootLand() is called anyway so the two can never disagree. */
       if (!enabled) { bootLand(); paint(); return; }
+      /* Taken before hydration, while the globals still hold the baked-in
+         example — after hydration it is gone from memory. */
+      DEMO = clone(graph());
       /* ── THE PAINT THAT USED TO BE HERE (§94.10) ─────────────────
          `paint()` ran first, unconditionally, and that single line was the
          whole of the fault: it drew the page from the BAKED file — the wrong
@@ -648,6 +732,7 @@ var SYNC = (function () {
              is where this person is going. */
           if (data.person && data.person.mustChange) { clearTimeout(backstop); location.replace("/"); return; }
           hydrate(data.state);
+          LIVE = clone(data.state);
           live = true;
           person = data.person || null;
           land(function () {
@@ -664,6 +749,27 @@ var SYNC = (function () {
           lastSaved = serialize();
           setInterval(save, 5000);
 
+          /* The Demo controls exist only where there is a live dataset to
+             tell the example apart from. Opened as a file the whole product IS
+             the example, so they would mean nothing.
+
+             Wired ONCE, here, and never repainted — they live in the chrome
+             rather than in the page, so paint() does not replace them and
+             markMode() only has to show and hide the right one (§67). */
+          var menu = document.getElementById("demomenu");
+          if (menu) {
+            menu.querySelectorAll("[data-demomode]").forEach(function (b) {
+              b.addEventListener("click", function () {
+                menu.open = false;
+                setMode(this.dataset.demomode, paint);
+              });
+            });
+          }
+          var btn = document.getElementById("demobtn");
+          if (btn) {
+            btn.addEventListener("click", function () { setMode("live", paint); });
+          }
+          markMode();
         })
         .catch(function (e) {
           /* "sign in" is the 401/403 above, which has already sent the

@@ -3331,10 +3331,6 @@ function renderKB(){
     kbSection("data", "Where the data lives", [
       { p: 'The platform holds <b>your own tenant</b>. Everything you enter is saved to the ' +
            'database as you work.' },
-      { h: "Demo data is separate, and never saved",
-        p: 'The <b>Demo data</b> button swaps the whole platform to a full worked example ' +
-           'for explaining how it works. It is labelled while you are in it and it ' +
-           '<b>refuses to save</b>. Nothing invented ever reaches your database.' },
       { h: "It works offline",
         p: 'Installed, the platform opens with no network on the data baked into the file, ' +
            'and says so. Live figures are never cached — a stale actual shown as current ' +
@@ -3391,15 +3387,27 @@ function renderKB(){
      ABSENT, NEVER DISABLED, when this viewer's roles match no story: a
      button that explains it cannot help you is worse than no button, and
      there is nothing the person could do to earn it. */
+  /* AND SAYING WHY IS NOT THE SAME AS BEING ABSENT (spec 024 §6.2, §61).
+     The tour walks the person's OWN plan now — the worked example it used to
+     borrow is a client of its own — so there is a second reason it may not
+     run: the plan is not written yet. That is a state somebody can LEAVE, and
+     it is the difference from the paragraph above: a viewer whose roles match
+     no story can do nothing about it and is shown nothing, while a custodian
+     of an empty unit is one plan away and is told so. A button that started
+     something lighting nothing would be the worse answer to both. */
   var tourStory = (typeof TOUR !== "undefined") ? TOUR.storyFor(viewer()) : null;
+  var tourCan = tourStory && (typeof TOUR === "undefined" || !TOUR.ready || TOUR.ready(viewer()));
   var tourBlock = tourStory
     ? '<div class="kb-sec" id="kb-tour"><h3>The guided tour</h3>' +
-      '<p class="kb-p">A short walk through the platform on the worked example — ' +
-      'the demo data, labelled the whole time, so nothing you see belongs to your ' +
-      'own tenant and nothing can be saved. It opens by itself the first time you ' +
-      'sign in; this is how you see it again.</p>' +
-      '<p><button type="button" class="editbtn" data-tour-replay="' + esc(tourStory) +
-      '">Start the tour</button></p></div>'
+      '<p class="kb-p">A short walk through the platform, on your own plan. It opens ' +
+      'by itself the first time you sign in; this is how you see it again.</p>' +
+      (tourCan
+        ? '<p><button type="button" class="editbtn" data-tour-replay="' + esc(tourStory) +
+          '">Start the tour</button></p>'
+        : '<p class="kb-p missing">There is nothing to walk through yet — the tour ' +
+          'points at pillars and key objectives, and this plan has none. It becomes ' +
+          'available as soon as the plan has been built or imported.</p>') +
+      '</div>'
     : '';
 
   /* THE TOUR IS A SECTION, SO IT GOES IN THE ARRAY (merge, §113.8). It

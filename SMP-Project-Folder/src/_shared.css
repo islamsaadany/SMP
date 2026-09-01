@@ -329,7 +329,7 @@
   /* THE REAL CHROME IS HIDDEN, NOT COVERED. Left in the flow it would paint
      the tenant's bar colour behind this for the whole wait, which is the
      thing being removed. */
-  html.booting #banner, html.booting .chrome { display:none; }
+  html.booting .chrome { display:none; }
   .bootsk-in { margin:0 auto; padding:0 24px; }
   .bootsk-top { display:flex; align-items:center; gap:10px; padding:18px 0 16px; }
   .bootsk-nav { display:flex; gap:8px; padding:0 0 12px; }

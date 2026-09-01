@@ -19419,3 +19419,50 @@ and loses the figures; a client created since the split is made with
 **nothing at all**, and a client somebody has filled in (Demo) is neither. It
 says which of the three it is looking at now — *a check that cries wolf on the
 ordinary case is one somebody learns to scroll past.*
+
+### 147.11 · The door and the platform had never been measured
+
+The contrast sweep and the width sweep both walk the CLIENT's platform — a
+different file at a different address — so Forefront's own two pages were
+**unmeasured**, and a page failing either would have gone green every time
+(§94.11's shape). `checks/platform-look.py` measures them, with the sweep's own
+function lifted out of `scripts/contrast-sweep.py` rather than reimplemented
+(§67): two contrast rules would drift, and the one that drifts is the one
+nobody is looking at.
+
+**THE WIDTH SWEEP PASSED AT ALL FOUR WIDTHS** (1920 / 1500 / 1280 / 1000, no
+sideways scroll — §27.2, because a page that scrolls sideways drags every
+sticky element with it). **Contrast found three real faults.**
+
+**`--ink-3` CLEARED NOTHING** — #6E7A90 is 4.33 on white, 4.01 on the page's
+own ground and 3.79 on `--surface-2`, and it is the colour of a card's industry
+line, the name in the top row, every note and every unlit chip. It takes the
+client platform's own value, #5E6E85, so this is one vocabulary rather than two
+greys a shade apart (§53.5): 5.19 / 4.80 / 4.54. §38.5, and the rule is the one
+`_shared.css` already records — **set a quiet ink against the quietest ground it
+sits on, not the whitest.**
+
+**AND FOREFRONT'S NAME WAS INVISIBLE ON FOREFRONT'S PLATFORM.** `.top .mk` was
+`color:var(--ff)`, which is right in light (13.25 on white) and in dark becomes
+the navy the navigation bar is painted in: **1.08:1**. §38.4 for the seventh
+time — a fill and a word need two tokens, declared together — so `--ff-tx`
+joins it, 6.94 dark.
+
+**AND ADDING IT TWICE WAS NOT ENOUGH.** It went into `:root` and into the
+`prefers-color-scheme` block, and the check still read 1.25: the third block,
+`:root[data-theme="dark"]`, is what applies the moment somebody chooses a theme
+explicitly, which is exactly what the check does. **A token defined only inside
+a media block is absent from the explicit choice** — complete blocks, never a
+base plus overrides, which is the rule `_shared.css` states and v3.0's zebra
+stripe is what happens without it.
+
+**AND ONE FAILURE WAS THE CHECK, TWICE OVER.** The door's hero line is painted
+by `background-clip:text`, so its `color` is transparent and the sweep reports
+the worst possible ratio — exactly 1 — on a heading that measures 6.54 and 8.28
+against the navy behind it. §68.10's fault: a correct build reported broken,
+which costs as much as the other direction. The first exclusion keyed on an
+`<em>` reading 1, **which is the words wearing a selector** — it would have gone
+on excusing that element the day somebody removed the gradient and left it
+genuinely invisible. The PAGE is asked which elements are painted that way, and
+a second assertion says at least one is: one guards the relationship, another
+guards that there is anything to relate (§113.8).

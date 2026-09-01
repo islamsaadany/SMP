@@ -26,11 +26,18 @@
   :root{
     --ground:#F5F6F9; --surface:#FFFFFF; --surface-2:#EDF0F5;
     --line:#D8DEE8; --line-soft:#E6EAF1;
-    --ink:#141C2B; --ink-2:#465268; --ink-3:#6E7A90;
+    /* --ink-3 IS SET AGAINST THE QUIETEST GROUND IT SITS ON, not the whitest
+       (§38.5, and _shared.css records the same lesson): #6E7A90 cleared
+       nothing — 4.33 on white, 4.01 on the page's own ground and 3.79 on
+       --surface-2 — and it is the colour of the card's industry line, the
+       name in the top row, every note and every unlit chip. #5E6E85 is the
+       client platform's own value, so this is one vocabulary rather than two
+       greys a shade apart (§53.5): 5.19 / 4.80 / 4.54. */
+    --ink:#141C2B; --ink-2:#465268; --ink-3:#5E6E85;
     /* Forefront's own, measured before use (constitution XIII):
        #0F2C69 carries white at 13.25:1 · #F5A623 carries #231500 at 9.04:1
        and is 2.03:1 as TYPE on white, so words take #9C5D08 (5.27:1). */
-    --ff:#0F2C69; --ff-ink:#FFFFFF; --ff-quiet:#A9BAD8;
+    --ff:#0F2C69; --ff-ink:#FFFFFF; --ff-quiet:#A9BAD8; --ff-tx:#0F2C69;
     --amber:#F5A623; --amber-ink:#231500; --amber-tx:#9C5D08; --amber-wash:#FEF4E2;
     --good:#1B6E4E; --good-bg:#E9F4EF; --warn:#8A6410; --warn-bg:#FBF2DC;
     --bad:#B23025; --bad-bg:#FBEDEB;
@@ -41,18 +48,24 @@
       --ground:#12151C; --surface:#1A1F29; --surface-2:#222834;
       --line:#333B4A; --line-soft:#2A313E;
       --ink:#E7EBF2; --ink-2:#AAB4C6; --ink-3:#8590A3;
-      --ff:#0D2350; --ff-ink:#F0F4FB; --ff-quiet:#95A9CC;
+      --ff:#0D2350; --ff-ink:#F0F4FB; --ff-quiet:#95A9CC; --ff-tx:#95A9CC;
       --amber:#F5A623; --amber-ink:#231500; --amber-tx:#F5A623; --amber-wash:#2B2210;
       --good:#63BE96; --good-bg:#1B2C26; --warn:#D7B04A; --warn-bg:#2A2515;
       --bad:#E8776B; --bad-bg:#33211F;
       --shadow:0 1px 2px rgba(0,0,0,.4), 0 10px 30px rgba(0,0,0,.35);
     }
   }
+  /* THE SAME BLOCK AGAIN, DELIBERATELY, AND IT IS WHY --ff-tx WAS ADDED
+     TWICE AND STILL DID NOTHING HERE: a token defined only in the media query
+     is absent the moment somebody chooses a theme explicitly, which is exactly
+     what this check does. Complete blocks, never a base plus overrides —
+     _shared.css records the same rule, and v3.0's zebra stripe is what
+     happens without it. */
   :root[data-theme="dark"]{
     --ground:#12151C; --surface:#1A1F29; --surface-2:#222834;
     --line:#333B4A; --line-soft:#2A313E;
     --ink:#E7EBF2; --ink-2:#AAB4C6; --ink-3:#8590A3;
-    --ff:#0D2350; --ff-ink:#F0F4FB; --ff-quiet:#95A9CC;
+    --ff:#0D2350; --ff-ink:#F0F4FB; --ff-quiet:#95A9CC; --ff-tx:#95A9CC;
     --amber:#F5A623; --amber-ink:#231500; --amber-tx:#F5A623; --amber-wash:#2B2210;
     --good:#63BE96; --good-bg:#1B2C26; --warn:#D7B04A; --warn-bg:#2A2515;
     --bad:#E8776B; --bad-bg:#33211F;
@@ -70,8 +83,14 @@
   /* ── the chrome: two lines, as a client's platform has (§2.9) ── */
   .top{ background:var(--surface); border-bottom:1px solid var(--line);
     display:flex; align-items:center; gap:12px; padding:9px 18px }
+  /* THE MARK IS TYPE, AND --ff IS A FILL (§38.4, the seventh time). It was
+     `color:var(--ff)`, which is right in light — #0F2C69 on white is 13.25 —
+     and in dark that token becomes the navy the NAVIGATION BAR is painted in:
+     #0D2350 on #1A1F29 is 1.08, so Forefront's own name was invisible on
+     Forefront's own platform. A fill and a word need two tokens, declared
+     together (§94.8's --cta/--cta-ink). --ff-tx is 6.94 dark. */
   .top .mk{ font:700 12px/1 ui-monospace, SFMono-Regular, Menlo, monospace;
-    letter-spacing:.16em; color:var(--ff) }
+    letter-spacing:.16em; color:var(--ff-tx) }
   .top .nm{ font-weight:600; font-size:14px }
   .top .right{ margin-left:auto; display:flex; align-items:center; gap:10px;
     color:var(--ink-3); font-size:12.5px }

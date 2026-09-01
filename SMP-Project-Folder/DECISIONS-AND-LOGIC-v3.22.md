@@ -26930,3 +26930,52 @@ the same line carrying a stale assumption once before (§108.16). It asks
 
 `test-authorize` 454/0; `deck-and-weights`, `fn-report-gate`, `setup-header`
 and `no-wrap` green.
+
+### §239.5 — dollars join the unit list
+
+Islam: *"please add to the units M USD and K USD."*
+
+`TARGET_UNITS` carried Egyptian pounds only (`EGP`, `M EGP`, `B EGP`), so a
+plan holding a figure in dollars — a regional hub's revenue among them — could
+be **kept and displayed** by §96.2's rule but never **chosen** for a new row.
+The pen offered no way to say USD at all.
+
+`K USD` and `M USD`, and deliberately not `B USD` or `K EGP` alongside them:
+§199.4's whole argument for a fixed list is that it is a vocabulary somebody
+agreed rather than one that grows by inference, and inventing two more because
+they would be symmetrical is exactly that growth.
+
+They join `TIGHT_UNITS`, so a scaled currency is one token whichever currency
+it is — **`6.2M USD`**, the same shape as `6.2B EGP`, read off the plan's own
+habit rather than invented. Proved as a **fixed point**: what the pen writes
+splits and rejoins to itself for every unit on the list, which is the property
+the whole feature rests on.
+
+**AND THE CHECK'S EXAMPLE HAD TO MOVE.** `objective-unit.py` §7b asserted that
+`"M USD"` — the shipped plan's own outsider — is offered even though the list
+does not carry it. Dollars are on the list now, so that assertion would have
+gone on passing while guarding nothing (§51.11). It asks about `B USD`, which
+is genuinely outside, and asserts the dollars are offered **outright**.
+
+### §239.6 — the doubled unit was already fixed, and the question it leaves
+
+Islam, of `8 M EGP M EGP` on a reported figure: *"the unit is already covered
+so the measure should be a clean number and if added by mistake the system
+should only grab the number and follow the unit."*
+
+**ALREADY DONE, by §243 from another session, and merged in before he asked.**
+The reporting box holds the bare number and rejoins the unit on save; typing
+the unit in as well added it twice. A unit already on the value is no longer
+added again, compared case-insensitively and with spacing ignored, because
+`8 m egp` and `8  M EGP` are the same answer typed by a person.
+
+**ONE CASE IT DELIBERATELY DOES NOT DO, and it is worth him knowing.** A
+*different* unit is left exactly as typed rather than rewritten: somebody
+entering `8 B EGP` against a target in `M EGP` has said something specific, and
+quietly restating it as `M EGP` would change the figure a thousandfold without
+saying so. Doubling is a display fault; that would be a data one.
+
+**AND A VALUE ALREADY STORED DOUBLED STAYS DOUBLED** — the fix stops new ones
+and cleans nothing, so the row in his screenshot reads `8 M EGP M EGP` until
+the figure is entered again. Said rather than swept up: a migration over
+reported figures is not something to do on the way past.

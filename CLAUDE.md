@@ -509,6 +509,21 @@ console errors (in this cloud environment, run it via a wrapper that points Play
   rule's COST on his plan — his measures are adoption rates almost throughout,
   so "Sum only" moves very little for him, and that is a decision put to him
   with the arithmetic rather than assumed.
+  **AND THE UNITS GAIN DOLLARS (§239.5):** `K USD` and `M USD`, at his
+  instruction — the list carried Egyptian pounds only, so a stored `M USD` was
+  KEPT by §96.2's rule and could never be CHOSEN. `B USD` and `K EGP` are
+  deliberately not invented alongside them (§199.4: a fixed list is a
+  vocabulary somebody agreed). They join `TIGHT_UNITS`, so a scaled currency is
+  one token whichever currency it is — `6.2M USD`, like `6.2B EGP` — and it is
+  proved a FIXED POINT: what the pen writes splits and rejoins to itself.
+  **The check's own example had to move** (§51.11): §7b asserted `M USD` is
+  offered though the list does not carry it, which would now pass while
+  guarding nothing, so it asks about `B USD`. **And the doubled unit
+  (§239.6) was already fixed** by §243 from another session, merged in before
+  he asked — with one case it deliberately does not do (a DIFFERENT unit is
+  left as typed, because rewriting `8 B EGP` as `M EGP` is a data fault where
+  doubling is only a display one) and one it cannot (a value already stored
+  doubled stays so until re-entered).
   **The server needed nothing** and it is asserted both ways: `asOfMonth` is
   not in `REVIEW_PER_TARGET`, so it classifies as `cycle` — the office's.
   Proved able to fail three ways (4 / 2 / 3 red). **AND `qa.py`'s OWN METHOD

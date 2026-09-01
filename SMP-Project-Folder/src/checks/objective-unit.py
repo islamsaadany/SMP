@@ -116,7 +116,7 @@ with sync_playwright() as pw:
     # reader could not take apart again would be a plan the pen had broken.
     rt = pg.evaluate("""() => {
       const bad = [];
-      TARGET_UNITS.concat(["M USD"]).forEach(u => {
+      TARGET_UNITS.concat(["B USD"]).forEach(u => {
         const m = {target:"6.2B EGP"}; setTargetUnit(m, u);
         const s = splitTarget(m.target);
         if (joinTarget(m.target, s.value, s.unit) !== m.target) bad.push(["rejoin", u, m.target]);
@@ -215,11 +215,22 @@ with sync_playwright() as pw:
        w.get("now") == ["1.6 SQM", "2.4 SQM"], w)
 
     print("\n── 7b · a unit the list does not offer is kept (§96.2, §114)")
-    keep = pg.evaluate("() => targetUnitOpts('M USD')")
-    ck("'M USD' is offered because a row holds it",
-       "M USD" in keep and keep.index("M USD") == 1, keep)
+    # §239.5 MOVED THIS ASSERTION'S EXAMPLE. It was keyed on "M USD", which
+    # was the shipped plan's own outsider -- and dollars are now ON the list at
+    # Islam's instruction, so the assertion would have gone on passing while
+    # guarding nothing (§51.11). It asks about a unit that is genuinely outside
+    # now, and asserts the dollars are offered outright.
+    keep = pg.evaluate("() => targetUnitOpts('B USD')")
+    ck("a stored unit the list does not carry is still offered",
+       "B USD" in keep and keep.index("B USD") == 1, keep)
     ck("...and the standard list is still all there",
        all(u in keep for u in ["%", "#", "EGP", "M EGP", "B EGP"]), keep)
+    offered = pg.evaluate("() => targetUnitOpts('')")
+    ck("the dollars are on the list to be CHOSEN, not merely kept (§239.5)",
+       "K USD" in offered and "M USD" in offered, offered)
+    ck("...and read as one token, like their Egyptian twins",
+       pg.evaluate("""() => { const m = {target:"6.2B EGP"};
+         setTargetUnit(m, "M USD"); return m.target; }""") == "6.2M USD")
 
     print("\n── 7d · a number typed into a row INHERITS its unit (§199.6)")
     # Islam, from a group objective reading `3-year 30` with no unit at all:

@@ -3007,7 +3007,14 @@ function fillUnitCell(page, acKey, m, ctx){
    dropdown that could not show them would either display the row wrong or
    drop the unit on the first repaint, and both are worse than one extra
    entry. Nothing is rewritten by this list — only what the pen writes next. */
-var TARGET_UNITS = ["", "%", "#", "EGP", "M EGP", "B EGP", "SQM", "d", "h"];
+/* §239.5: DOLLARS JOIN THE LIST, at Islam's instruction — the plan holds
+   figures in USD as well as EGP (a regional hub's revenue among them) and the
+   pen could only offer Egyptian pounds, so a stored `M USD` was kept and
+   offered by the rule below and could never be CHOSEN for a new row. K and M
+   only, which is what he asked for; `B USD` and `K EGP` are deliberately not
+   invented alongside them. */
+var TARGET_UNITS = ["", "%", "#", "EGP", "M EGP", "B EGP",
+                    "K USD", "M USD", "SQM", "d", "h"];
 /* WRITTEN AGAINST THE NUMBER, OR AFTER A SPACE — and it is the PLAN's own
    habit, read off the shipped data rather than invented: `30%`, `100#` and
    `6.2B EGP` are written tight, while `28 EGP`, `4 d` and `24 h` take a space.
@@ -3017,7 +3024,10 @@ var TARGET_UNITS = ["", "%", "#", "EGP", "M EGP", "B EGP", "SQM", "d", "h"];
    tight, a word takes a space" gets `EGP` right and `B EGP` wrong, and the
    difference is convention, not grammar. Nine entries is cheaper to read than
    a predicate nobody can quite state. */
-var TIGHT_UNITS = { "%":1, "#":1, "M EGP":1, "B EGP":1 };
+/* A SCALED CURRENCY IS ONE TOKEN whichever currency it is, so the dollars
+   join their Egyptian twins here and read `8M USD`, not `8 M USD` — the same
+   convention the plan already uses for `6.2B EGP`. */
+var TIGHT_UNITS = { "%":1, "#":1, "M EGP":1, "B EGP":1, "K USD":1, "M USD":1 };
 function targetUnitOpts(cur){
   var opts = TARGET_UNITS.slice();
   if (cur && opts.indexOf(cur) < 0) opts.splice(1, 0, cur);

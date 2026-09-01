@@ -384,6 +384,14 @@ console errors (in this cloud environment, run it via a wrapper that points Play
   remove × onto a second line — `inline-block` restores it, and it was found
   by `checks/plan-fields.py` GOING RED, not by reading the cascade, which is
   the argument for that check existing.
+- **ENTER COMMITS A ONE-LINE PROSE BOX (§229):** found during §226's audit —
+  §189's own text promised *"Enter blurs, which is what commits"* and no code
+  ever carried it out, so Enter inserted a newline into every growing title
+  box (§104.8's family: a recorded intention nothing compares with the code).
+  One listener in the shell's `data-fld` textarea branch, gated on `.grow`
+  (§104.7 — no list to forget); a `rows="2"` area keeps Enter as a paragraph
+  key; **blur, never a synthesised change** (§219). Nothing stored is
+  scrubbed. `checks/enter-commits.py`: 4 red on the pre-§229 build.
 - **A FUNCTION'S OBJECTIVES ARE WRITTEN AT THE PAGE'S WIDTH (§226):** Islam —
   *"the keyobjectives table is tight I can't see the direction and I can't find
   the unit and the ibjectives cell is not wrapping"*, and *"led by is not open
@@ -3726,6 +3734,9 @@ node scripts/test-graph-diff.js # the change list on its own: only what changed
                                 # travels, applying it to a DIFFERENT target leaves
                                 # that target's other work alone, a removal is not a
                                 # null, and an unknown path is refused (§210)
+python3 checks/enter-commits.py # Enter commits a growing one-line box instead of
+                                # inserting a newline, and a rows-2 area keeps its
+                                # paragraph key — both ends (§229)
 python3 checks/fn-ko-edit.py    # a function's objectives are written at the page's
                                 # width (§226): the editing table in a band on BOTH
                                 # formats, the Unit column writing the stored target,
@@ -3794,7 +3805,15 @@ prior sessions (on HR_ERP) accidentally reverted agreed-upon designs.
 
 ---
 
-*Last Updated: 2026-09-01 &mdash; **&sect;226: a function's objectives are
+*Last Updated: 2026-09-01 &mdash; **&sect;229: Enter commits a one-line
+prose box.** Found during &sect;226's accessibility audit and built on Islam's
+word: &sect;189 promised *"Enter blurs, which is what commits"* and no code
+ever carried it out, so Enter inserted a newline into every growing title box.
+One listener in the shell's bound-textarea branch, gated on `.grow`; a
+definition keeps its paragraph key; nothing stored is scrubbed. The check is
+`checks/enter-commits.py`, run red-first (4 failures pre-&sect;229).*
+
+*Earlier: 2026-09-01 &mdash; **&sect;226: a function's objectives are
 written at the page's width.** Islam, from Consumer Finance's Overview: the
 table tight, the direction invisible, no unit, the objective not wrapping, and
 Led by not open to edit. Three of the four were ONE omission &mdash; the

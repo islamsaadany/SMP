@@ -25377,3 +25377,33 @@ now runs as a FILLER (the function's custodian, granted fill for the
 measurement; finance ships without one, so the state is made and unmade,
 §94.2), on both formats. Falsified: dropping `fillKind` from the projects
 call site fails exactly that assertion.
+
+## §229 — ENTER COMMITS A ONE-LINE PROSE BOX (2026-09-01)
+
+Found during §226's accessibility audit, reported to Islam with the
+recommendation, and built on his word. **§189's own decision text promised it
+from the day it was written** — *"Enter is not a newline here … Enter blurs,
+which is what commits the value (§35)"* — **and no code ever carried it out**:
+measured on the shipped build, pressing Enter in a growing box inserted a line
+break, on a unit plan's titles and the function Overview's objectives alike,
+with focus staying in the box. §104.8's family — a recorded intention the code
+never had, invisible because nothing compares the two — and it means a stray
+newline could ride a title into the stored plan, the workbook and the deck.
+
+**THE FIX IS ONE LISTENER IN THE ONE BRANCH EVERY BOUND TEXTAREA PASSES
+THROUGH** (the shell's `data-fld` wiring), gated on `.grow` — so a box added
+tomorrow is covered without a list to forget (§104.7), and a `rows="2"` area (a
+definition, a note) keeps Enter as a paragraph key, because a definition IS a
+paragraph. **Blur, never a synthesised change** (§219's rule): blur is what the
+browser does when focus moves, so a box already committed fires nothing and the
+commit path is §35's own, not a second one.
+
+**Nothing stored is touched**: a newline already inside a name stays until
+somebody edits that name — scrubbing data on the way past would be a change
+nobody asked for.
+
+`checks/enter-commits.py` asserts both ends — no newline, focus moved, value
+committed clean on a plan title AND a function objective; a definition still
+takes its paragraph break — and was run against the pre-§229 build first:
+**4 red**, exactly the four grow-box assertions. `fn-ko-edit`, `plan-fields`,
+`plan-edit-head` and the full `qa.py` sweep green after.

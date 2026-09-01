@@ -357,7 +357,11 @@ module.exports = async function handler(req, res) {
            invisible and harmless. */
         await P.createClientSchema(pg, schema, name);
         await c.query(
-          "INSERT INTO clients (key, name, schema_name, industry, notes) VALUES ($1,$2,$3,$4,$5)",
+          /* MADE HERE, so its register is the platform's to write into
+             (§147.31): putting somebody on this client's team adds them to it,
+             seat and all. */
+          "INSERT INTO clients (key, name, schema_name, industry, notes, made_here) " +
+          "VALUES ($1,$2,$3,$4,$5,true)",
           [key, name, schema, String(body.industry || ""), String(body.notes || "")]);
         return send(res, 200, { ok: true, key: key });
       }
@@ -422,7 +426,13 @@ module.exports = async function handler(req, res) {
            added without an answer would hold a seat and be nobody — a team row
            that opens a client showing nothing. A register with nobody in it is
            the one case that needs no answer, because there is nobody to be. */
-        if (body.on !== false && !asKey) {
+        if (body.on !== false && !asKey && !row.made_here) {
+          /* ASKED ONLY OF A REGISTER THE PLATFORM DID NOT BUILD (§147.31).
+             On a client created here the answer is the act itself — adding
+             somebody to the team adds them to the register — so asking would
+             be asking a question the platform has already answered (§93.13).
+             On a client that brought its own, nothing is created and an
+             account with no answer would hold a seat and be nobody. */
           let peopled = false;
           try {
             peopled = await P.withSchema(pg, row.schema_name, async function (sc) {
@@ -536,11 +546,27 @@ module.exports = async function handler(req, res) {
                               [row.key])).rows.map(function (x) { return x.person_key; })]);
           });
         } catch (e) { console.error("retiring in " + row.key + ":", e.message); }
+        /* ── AND ON A CLIENT MADE HERE, THE TEAM IS THE REGISTER (§147.31) ──
+           Islam: "a client created from the multitenant platform will have its
+           own registry, and on the settings of this client we will add the
+           consultants and roles and accordingly they will be added to the
+           registry automatically."
+
+           So the row is written HERE, when somebody is added, rather than
+           waiting for them to open the client — the register is right the
+           moment the team is, which is what "accordingly" means. Opening it
+           still writes one as a safety net, for a team changed while nobody
+           was looking. */
+        const key2 = landed ? landed.person_key : personKey;
         try {
           await P.withSchema(pg, row.schema_name, async function (sc) {
+            if (row.made_here) {
+              await P.ensureOfficeRow(sc, { person_key: key2, seat: seat },
+                { name: who.name, email: who.email, kind: who.kind }, true);
+            }
             await sc.query(
               "UPDATE people SET role = $2 WHERE key = $1 AND extra->>'ffrow' = 'true'",
-              [landed ? landed.person_key : personKey, seat]);
+              [key2, seat]);
           });
         } catch (e) { console.error("seat into " + row.key + ":", e.message); }
         return send(res, 200, { ok: true });

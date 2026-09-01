@@ -522,7 +522,7 @@
            Drawn only where the client's register has somebody it could be —
            which after the platform becomes the entry point is nobody, and this
            control quietly stops appearing rather than having to be removed. */
-        if (j.canEdit && (j.register || []).length) {
+        if (j.canEdit && !c.made_here && (j.register || []).length) {
           sp.appendChild(registerCell(c.key, m, j.register));
         }
         /* THE SEAT IS SET HERE — this is the one place it is written (§53.5),
@@ -580,19 +580,26 @@
             });
         });
         addRow.appendChild(pick);
-        if ((j.register || []).length) addRow.appendChild(asWho);
+        /* NOT ASKED ON A CLIENT MADE HERE (§147.31): adding somebody to the
+           team IS adding them to its register, so the question has already
+           been answered by the act (§93.13). */
+        if (!c.made_here && (j.register || []).length) addRow.appendChild(asWho);
         addRow.appendChild(add);
         rightCol.appendChild(addRow);
       }
       rightCol.appendChild(el("p", "note",
+        (c.made_here
+          ? "This client's register is built here: adding somebody to the team " +
+            "adds them to it, with their seat. "
+          : "This client brought its own register, so nobody is created on it — " +
+            "each account says which person on it they are, and several may say " +
+            "the same one. The change log records the address they signed in " +
+            "with. ") +
         "A seat is held on THIS client: Super user holds its access matrix, " +
         "retiring people and issuing passwords; SMO team runs cycles and " +
-        "corrects plans. A client may have more than one super user. Where this " +
-        "client's register already holds people, each account says WHO THEY ARE on " +
-        "it and nobody new is created — several may be the same person, and the " +
-        "change log records the address they signed in with. Removing somebody " +
-        "retires " +
-        "their row on this client's register rather than deleting it."));
+        "corrects plans. A client may have more than one super user. Removing " +
+        "somebody retires their row on this client's register rather than " +
+        "deleting it."));
       grid.appendChild(rightCol);
       page.appendChild(grid);
 

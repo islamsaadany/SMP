@@ -126,11 +126,15 @@ async function main() {
            client would go dark at the exact moment its tables arrived safely.
            The name and industry are only filled where the row has none, so an
            office that has renamed a client keeps its own words. */
-        "INSERT INTO clients (key, name, schema_name, industry, kind) VALUES ($1,$2,$3,$4,$5) " +
+        /* `made_here` is FALSE for the live client — it brought its own
+           register of 33 people and the platform adds nobody to it — and TRUE
+           for the empty ones this script creates, whose registers are the
+           platform's to build (§147.31). */
+        "INSERT INTO clients (key, name, schema_name, industry, kind, made_here) VALUES ($1,$2,$3,$4,$5,$6) " +
         "ON CONFLICT (key) DO UPDATE SET schema_name = EXCLUDED.schema_name, " +
         "  name = CASE WHEN clients.name = '' THEN EXCLUDED.name ELSE clients.name END, " +
         "  industry = CASE WHEN clients.industry = '' THEN EXCLUDED.industry ELSE clients.industry END",
-        [cl.key, cl.name, cl.schema, cl.industry, cl.kind || "client"]);
+        [cl.key, cl.name, cl.schema, cl.industry, cl.kind || "client", cl.key !== LIVE.key]);
     }
     say("registry: " + (await pc.query("SELECT count(*)::int AS n FROM clients")).rows[0].n + " clients.");
 

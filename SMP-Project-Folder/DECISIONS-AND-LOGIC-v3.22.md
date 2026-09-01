@@ -20001,3 +20001,37 @@ address, which is empty for a row the client wrote — where it had to be the
 session's; and a hand-made unit row round-tripped into a graph `writeState`
 could not write back, so the endpoint answered its generic 500 and my fixture's
 failure wore the product's clothes.
+
+### 147.31 · Whose register is it
+
+Islam: *"a client created from the multitenant platform will have its own
+registry, and on the settings of this client we will add the consultants and
+roles and accordingly they will be added to the registry automatically."*
+
+The mirror of §147.30, and together they are one rule with two sides:
+
+| | Its register | Adding somebody to its team |
+|---|---|---|
+| **Created here** | built by the platform | **adds them to it**, with their seat as their role |
+| **Brought its own** (Raya Trade) | 33 people, written before the platform existed | **adds nobody** — each account says which existing row it is |
+
+**IT IS A FACT ABOUT THE CLIENT, NOT ABOUT THE REGISTER'S SIZE**, and that is
+the correction §147.30 needed. Asked as *is the register empty*, it was right
+for the first consultant and wrong for the second, who would arrive to find the
+register no longer empty and get **no row at all**. `clients.made_here` is set
+when the platform creates the schema and false for a tenant it adopted;
+migration 006 adds it and **existing rows default to false**, which is the safe
+reading — the worst it can do is ask who somebody is on a register the platform
+did build, a question with an answer, where the other way round writes rows
+into a client's own register without being asked.
+
+**THE ROW IS WRITTEN WHEN SOMEBODY IS ADDED**, not when they first open the
+client — *"accordingly"* means the register is right the moment the team is.
+Opening still writes one as a safety net, for a team changed while nobody was
+looking.
+
+**AND THE QUESTION IS NOT ASKED WHERE THE ACT ANSWERS IT** (§93.13): on a
+client made here, adding somebody to the team *is* adding them to the register,
+so the "who are they" list is not drawn at all — it belongs to a register the
+platform did not build, and disappears on its own as those clients stop being
+the common case.

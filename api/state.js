@@ -136,7 +136,10 @@ module.exports = async function handler(req, res) {
            arriving without one, so asking the database a second way could only
            ever disagree with it. */
         await P.ensureOfficeRow(client, { person_key: person.key, seat: person.seat },
-          { name: person.name, email: person.email, kind: person.kind });
+          { name: person.name, email: person.email, kind: person.kind },
+          /* WHOSE REGISTER IT IS (§147.31) — the registry row says, and the
+             endpoint has it already. */
+          !!client._smpClient.made_here);
       }
       const state = await readState(client);
       /* WHAT THE CHROME NEEDS TO DRAW THE WAY BACK (spec 024): the client's

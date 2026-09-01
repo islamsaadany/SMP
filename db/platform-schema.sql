@@ -40,6 +40,17 @@ CREATE TABLE IF NOT EXISTS clients (
   -- kind of client later is a new value, not a second column and a rule about
   -- which of them wins.
   kind        text NOT NULL DEFAULT 'client',
+  -- WHOSE REGISTER IS IT (§147.31). A client CREATED HERE has its register
+  -- built by the platform, so putting somebody on its team adds them to that
+  -- register automatically, seat and all. A client that predates the platform
+  -- — Raya Trade — brought its own register of 33 people, and the platform
+  -- adds nobody to it: each account says which existing row it is (§147.30).
+  --
+  -- IT IS A FACT ABOUT THE CLIENT, NOT ABOUT THE REGISTER'S SIZE. Asked as
+  -- "is the register empty" it was right for the first consultant and wrong
+  -- for the second, who would arrive to find the register no longer empty and
+  -- get no row at all.
+  made_here   boolean NOT NULL DEFAULT false,
   status      text NOT NULL DEFAULT 'active',
   created_at  timestamptz NOT NULL DEFAULT now(),
   CONSTRAINT clients_kind CHECK (kind IN ('client','demo')),

@@ -284,6 +284,24 @@ async function main() {
       await sc.query("INSERT INTO people SELECT * FROM kept");
     });
 
+    /* ── AND A CLIENT MADE HERE HAS ITS TEAM ON ITS REGISTER (§147.31) ──
+       Islam: "a client created from the multitenant platform will have its own
+       registry, and on the settings of this client we will add the consultants
+       and roles and accordingly they will be added to the registry
+       automatically." The mirror of the rule above, and the two are told apart
+       by a fact about the CLIENT rather than by the register's size — which was
+       right for the first consultant and wrong for the second. */
+    await P.withSchema(pg, "t_http", async function (sc) {
+      const was = (await sc.query("SELECT count(*)::int AS n FROM people")).rows[0].n;
+      const made = await P.ensureOfficeRow(sc,
+        { person_key: "ff_made_here", seat: "smoteam" },
+        { name: "Made Here", email: "made@ff.example", kind: "office" }, true);
+      const now = (await sc.query("SELECT count(*)::int AS n FROM people")).rows[0].n;
+      check("a register the platform built takes the team, however full it is",
+        made === "ff_made_here" && now === was + 1, { was: was, now: now, got: made });
+      await sc.query("DELETE FROM people WHERE key = 'ff_made_here'");
+    });
+
     /* ── THE LOG SAYS WHO SIGNED IN, NOT ONLY WHICH ROW (§147.30) ──
        Several of Forefront's people may act as ONE row on a client whose
        register predates the platform, so the row alone no longer says who did

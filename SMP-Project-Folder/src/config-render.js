@@ -1251,6 +1251,30 @@ function renderPeople(){
      a parameter again — passed false by the row, true by the dialog — and there
      are exactly two callers, both in this file, both named. */
   function roleCell(p, editable){
+    /* ── A FOREFRONT ROW IS SET SOMEWHERE ELSE (spec 024 §6) ──────
+       Their seat comes from this client's configuration on the Forefront
+       platform, and the next time they open the client it is written again —
+       so a picker here would accept a change and silently un-make it, which
+       is worse than not offering one. The cell says WHERE it is set rather
+       than only refusing (§16.7), and the server refuses it too
+       (lib/authorize.js, kind `officeRow`) — a control that only hides itself
+       is decoration (constitution X). */
+    /* `extra` IS FLATTENED ON READ. state-io's mergeRow spreads the extra
+       blob over the row, so what the platform holds is `p.forefront` — the
+       same way `p.email` and `p.known` reach the register (§52). Written as
+       `p.extra.forefront` first, which is the shape in the DATABASE and is
+       never the shape in the graph: the mark would simply never have drawn,
+       and the check that asked for it is what said so. */
+    if (p && p.forefront) {
+      /* The role's NAME from the one list that defines them (§53.5) — L() is
+         the tenant's labels lookup and would have printed a key. */
+      var seatDef = (SMPRules.ROLES || []).filter(function (r) { return r.key === p.role; })[0];
+      var seat = seatDef ? seatDef.name : "";
+      return '<span class="ffrow" title="' +
+        esc("Set on this client\u2019s configuration in the Forefront platform.") + '">' +
+        '<span class="chip">' + esc(seat || "Forefront") + '</span>' +
+        '<i>Forefront</i></span>';
+    }
     var rs = personRoles(p);
     var home = belongsKey(p);
     /* ONE ROLE WIDE, AND THE REST BEHIND A "…" (Islam, 2026-08-22). Most people

@@ -240,6 +240,49 @@ async function main() {
     dev.kill();
   }
 
+  /* ── 9 · the office's own rules, on the server (US3) ────────────
+     The screen is checked by checks/multi-client.py; this is the half that
+     has to hold when nothing is drawing anything (constitution X). */
+  const FF = require("../lib/platform-rules.js");
+  await P.withPlatform(pg, async function (c) {
+    await c.query(
+      "INSERT INTO accounts (email, name, kind, role, password_hash) VALUES " +
+      "('a@ff.example','A','office','admin','x'), ('o@ff.example','O','office','observer','x') " +
+      "ON CONFLICT (email) DO UPDATE SET role = EXCLUDED.role");
+    const world = await P.worldFor(c, "o@ff.example");
+    const admin = { email:"a@ff.example", role:"admin", kind:"office", status:"active" };
+    const obs = { email:"o@ff.example", role:"observer", kind:"office", status:"active" };
+
+    check("an Observer may not manage consultants", !FF.mayManageConsultants(world, obs));
+    check("an Observer may not add a client", !FF.mayCreateClient(world, obs));
+    check("an Observer may not edit the table", !FF.mayEditAccess(world, obs));
+    check("the admin's own row is not editable, by the admin",
+      FF.mayEditAccessRow(world, admin, "lead") && !FF.mayEditAccessRow(world, admin, "admin"));
+    check("an admin does not issue a password to another admin",
+      !FF.mayIssuePasswordTo(world, admin, { email:"b@ff.example", role:"admin" }) &&
+      FF.mayIssuePasswordTo(world, admin, { email:"o@ff.example", role:"observer" }));
+
+    /* THE TEAM IS FOREFRONT'S. account_clients maps a client's own people
+       too — that is how their account knows which client it is — so a team
+       read without `kind = 'office'` offers a client's own staff as
+       consultants. Found on screen; asserted here so it stays found. */
+    /* ITS OWN SCHEMA. Written first pointing at t_alpha, which the UNIQUE on
+       schema_name refused — two clients sharing a schema is exactly what that
+       index exists to stop, so the test was wrong and the database was right. */
+    await c.query("INSERT INTO clients (key, name, schema_name) VALUES ('t-team','T','t_team') " +
+                  "ON CONFLICT (key) DO NOTHING");
+    await c.query(
+      "INSERT INTO accounts (email, name, kind, password_hash) VALUES ('desk@client.example','Desk','client','x') " +
+      "ON CONFLICT (email) DO NOTHING");
+    await c.query(
+      "INSERT INTO account_clients (email, client_key, person_key) VALUES " +
+      "('o@ff.example','t-team','ff_o'), ('desk@client.example','t-team','desk') " +
+      "ON CONFLICT (email, client_key) DO NOTHING");
+    const team = await P.teamOf(c, "t-team");
+    eq("a client's team is Forefront's people only", team.length, 1);
+    eq("…and it is the office one", team[0] && team[0].email, "o@ff.example");
+  });
+
   console.log("\n" + pass + " passed, " + fail + " failed");
   await pool.end();
   process.exit(fail ? 1 : 0);

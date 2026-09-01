@@ -2500,3 +2500,11 @@
     cursor:help; letter-spacing:0; text-transform:none; }
   .peoplecfg .dupemark.soft { color:var(--warn-tx); }
   .driftmark { margin-left:6px; color:var(--ink-3); font-size:11.5px; cursor:help; }
+
+/* ── A FOREFRONT ROW ON THE CLIENT'S REGISTER (spec 024) ─────────────
+   The seat is set on that client's configuration in the Forefront platform,
+   so this cell states it rather than offering a control that would be
+   overwritten on the next visit. One line, like every other cell here (§88). */
+.ffrow{ display:inline-flex; align-items:center; gap:6px; white-space:nowrap }
+.ffrow i{ font-style:normal; font-size:10.5px; letter-spacing:.06em; text-transform:uppercase;
+          color:var(--ink-3); border:1px solid var(--line); border-radius:5px; padding:2px 5px }

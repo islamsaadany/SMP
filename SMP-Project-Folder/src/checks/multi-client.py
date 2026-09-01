@@ -149,6 +149,72 @@ def main():
             check("…in the platform's own words, naming nothing",
                   other["error"] == "That client is not available.", other)
 
+            # ── 7 · the office's own pages (US3) ────────────────────
+            pg.goto(BASE + "/", wait_until="networkidle")
+            pg.wait_for_selector(".ccard", timeout=9000)
+            tabs = pg.eval_on_selector_all("#cardTabs button", "els => els.map(e => e.textContent)")
+            check("the Admin is offered the office's pages", "Consultants" in tabs and "Who sees what" in tabs, tabs)
+
+            pg.click("#cardTabs button:has-text('Consultants')")
+            pg.wait_for_selector("table.ot", timeout=8000)
+            rows = pg.eval_on_selector_all("table.ot tr td:first-child", "els => els.map(e => e.textContent)")
+            check("the consultants list draws Forefront's people", len(rows) >= 3, rows)
+
+            # ISSUING A PASSWORD IS PRESSED, and the outcome read from the page
+            # (§70: a control nothing can hit is a control that does not exist).
+            pg.click("table.ot tr:nth-child(4) .otbtn")
+            pg.wait_for_selector(".otsaid", timeout=8000)
+            said = pg.inner_text(".otsaid")
+            check("…and a temporary password is said once, on the page",
+                  "must change it on first use" in said, said)
+
+            # ── 8 · the access table has teeth on the server ────────
+            pg.click(".offtabs button[data-off='access']")
+            pg.wait_for_selector("table.ot .otcell", timeout=8000)
+            locked = pg.eval_on_selector_all("table.ot tr:nth-child(2) .otcell",
+                                             "els => els.map(e => e.className)")
+            check("the admin's row is drawn locked", all("locked" in c for c in locked), locked)
+            refusal = pg.evaluate("""async () => {
+              const r = await fetch('/api/platform', {method:'POST', headers:{'Content-Type':'application/json'},
+                body: JSON.stringify({action:'saveAccess', role:'admin', area:'consultants', grant:'none'})});
+              const j = await r.json();
+              return { status: r.status, error: j.error }; }""")
+            check("…and the server refuses it too, not only the screen",
+                  refusal["status"] == 403 and "editing who may edit" in (refusal["error"] or ""), refusal)
+
+            # A CELL PUT BACK TO ITS DEFAULT LEAVES NOTHING STORED (§50.6).
+            back = pg.evaluate("""async () => {
+              const set = (g) => fetch('/api/platform', {method:'POST', headers:{'Content-Type':'application/json'},
+                body: JSON.stringify({action:'saveAccess', role:'consultant', area:'other_clients', grant:g})});
+              await set('view');
+              await set('none');
+              const r = await fetch('/api/platform', {method:'POST', headers:{'Content-Type':'application/json'},
+                body: JSON.stringify({action:'access'})});
+              const j = await r.json();
+              return (j.stored.consultant || {}).other_clients; }""")
+            check("a cell put back to its default stores nothing", back is None, back)
+
+            # ── 9 · a client's configuration ────────────────────────
+            pg.click(".offtabs button[data-off='cards']")
+            pg.wait_for_selector(".ccard .ccfg", timeout=8000)
+            pg.click(".ccard[data-client='raya-trade'] .ccfg")
+            pg.wait_for_selector("#officeBody table.ot", timeout=8000)
+            team = pg.eval_on_selector_all("#officeBody table.ot tr", "els => els.map(e => e.innerText)")
+            check("the team is Forefront's people and nobody else's",
+                  all("@forefront.consulting" in t for t in team), team)
+
+            # ── 10 · the office's row on the client's register ──────
+            pg.goto(BASE + "/raya-trade", wait_until="networkidle")
+            pg.wait_for_timeout(2800)
+            reg = pg.evaluate("""async () => {
+              const r = await fetch('/api/state?client=raya-trade', {cache:'no-store'});
+              const j = await r.json();
+              const ff = (j.state.people || []).filter(p => p.forefront);
+              return ff.map(p => ({ key: p.key, role: p.role })); }""")
+            check("the office appears on the client's own register", len(reg) >= 1, reg)
+            check("…holding the seat its configuration gives them",
+                  all(p["role"] in ("super", "smoteam") for p in reg), reg)
+
             check("no page errors anywhere", not errs, errs)
             b.close()
     finally:

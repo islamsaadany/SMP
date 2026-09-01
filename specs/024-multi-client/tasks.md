@@ -85,18 +85,18 @@ serverless functions `api/`; SQL `db/`; checks `SMP-Project-Folder/src/checks/`;
 **Independently testable**: as Admin, add a consultant, put them on a client, watch the row appear in that client's register read-only; as Observer, watch every edit refused on screen and by the server.
 
 - [x] T033a [US2] *(found while building)* An office account APPEARS on the client's register the first time it opens one (`P.ensureOfficeRow`) — without it the platform correctly says "signed in but not on this register" and draws nothing. Spec §6's own wording, needed a slice earlier than planned
-- [ ] T033 [P] [US3] `consultants`, `saveConsultant`, `issuePassword` actions in `api/platform.js` — §35's password states and §89's rule that the test is the **target** (never issue to an admin)
-- [ ] T034 [P] [US3] `client`, `saveClient`, `createClient`, `setTeam` actions in `api/platform.js`
-- [ ] T035 [P] [US3] `access` and `saveAccess` actions in `api/platform.js`, defaults merged with stored (§30.2), the admin row refused
-- [ ] T036 [US3] `createClient` creates the schema, applies `db/schema.sql` and every migration, writes the org name, and **stops** — no seed, no invented content (spec §7.2)
-- [ ] T037 [US3] The consultants page in `ff.js` — the register's own table, statuses and dialog shapes (§35, §116), typing filters in place (Principle XV)
-- [ ] T038 [US3] The client configuration page in `ff.js` — name, address name, industry, notes, mark (PNG only, §52), colours, and the team with its super user
-- [ ] T039 [US3] The access table in `ff.js` — §37's two-toggle cell, the admin row visibly locked
-- [ ] T040 [US3] `setTeam` writes the office row into that client's `people` with `extra.forefront = true` and the seat (`smoteam`, or `super` for the client's super user); removing from the team removes the row (or retires it where it holds anything)
-- [ ] T041 [US3] Show office rows read-only on the client's register in `SMP-Project-Folder/src/config-render.js`, saying where the seat is set — step one of spec §6.0.1
-- [ ] T042 [US3] Refuse an office-seat edit from inside a client in `lib/authorize.js`'s people classification, so the screen and the server agree (§94's drift)
-- [ ] T043 [US3] Extend `SMP-Project-Folder/src/checks/multi-client.py` §3–5: every control **pressed** (§70), both ends asked of each refusal, the seats read-only, the admin row unwritable
-- [ ] T044 [US3] Extend `scripts/test-platform.js`: the matrix has teeth on the server for all four roles; `issuePassword` refuses an admin target; `setTeam` writes and removes the client-side row
+- [x] T033 [P] [US3] `consultants`, `saveConsultant`, `issuePassword` actions in `api/platform.js` — §35's password states and §89's rule that the test is the **target** (never issue to an admin)
+- [x] T034 [P] [US3] `client`, `saveClient`, `createClient`, `setTeam` actions in `api/platform.js`
+- [x] T035 [P] [US3] `access` and `saveAccess` actions in `api/platform.js`, defaults merged with stored (§30.2), the admin row refused
+- [x] T036 [US3] `createClient` creates the schema, applies `db/schema.sql` and every migration, writes the org name, and **stops** — no seed, no invented content (spec §7.2)
+- [x] T037 [US3] The consultants page (in `index.html`, per T026's note) — the register's own table, statuses and dialog shapes (§35, §116), typing filters in place (Principle XV)
+- [x] T038 [US3] The client configuration page (reached from the client's own card) — name, address name, industry, notes, mark (PNG only, §52), colours, and the team with its super user
+- [x] T039 [US3] The access table (same page, same palette) — §37's two-toggle cell, the admin row visibly locked
+- [x] T040 [US3] `setTeam` writes the office row into that client's `people` with `extra.forefront = true` and the seat (`smoteam`, or `super` for the client's super user); removing from the team removes the row (or retires it where it holds anything)
+- [x] T041 [US3] Show office rows read-only on the client's register in `SMP-Project-Folder/src/config-render.js`, saying where the seat is set — step one of spec §6.0.1
+- [x] T042 [US3] Refuse an office-seat edit from inside a client in `lib/authorize.js`'s people classification, so the screen and the server agree (§94's drift)
+- [x] T043 [US3] Extend `SMP-Project-Folder/src/checks/multi-client.py` §3–5: every control **pressed** (§70), both ends asked of each refusal, the seats read-only, the admin row unwritable
+- [x] T044 [US3] Extend `scripts/test-platform.js`: the matrix has teeth on the server for all four roles; `issuePassword` refuses an admin target; `setTeam` writes and removes the client-side row
 
 **Checkpoint**: the office runs itself, and the seats are set in one place.
 

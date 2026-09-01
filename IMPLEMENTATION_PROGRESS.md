@@ -6,8 +6,8 @@ version (rules A2 / A11, changed 2026-08-20) — those go only when asked for.
 
 **Where it runs:** Vercel, production tracks `main`. Static files plus two
 serverless functions (`/api/state`, `/api/auth`) against Neon Postgres.
-**Latest version:** §230/§230.2 on `main` (the hard-refresh notice: a late
-answer lands in place, and the notice speaks the user's language).
+**Latest version:** §232/§233 on `main` (removing a pillar or a project,
+and hiding an element from the presentation).
 
 *(This line read v3.58 while the section below it ran to v3.65: a documentation
 drift, flagged before it was corrected rather than quietly realigned.)*
@@ -28,6 +28,9 @@ Nothing proceeds past this line without an answer.
 | **D8** | **What each of the ten BU names points at.** The page and the ten rows are built; the targets are empty. | Until a name points somewhere, everyone carrying it is on the register with nothing to open — and a role cannot be given from the employee file, because a role is held over the person's own BU. **IT is the one to think about: a unit and a supporting function share the name.** | §54.1 |
 
 **Answered:**
+
+- **D9 · The hide-from-presentation mockup — ANSWERED 2026-09-01: approved**,
+  and built the same day as §233.
 
 - **D7 · The companies — ANSWERED 2026-08-20: Distribution and B2C are real**,
   with Mobile / Consumer Electronics / IT and Retail Stores / Online Shop / Care
@@ -80,6 +83,33 @@ Nothing proceeds past this line without an answer.
   server is truly down there is no way past).
 - Proof: `checks/boot-skeleton.py` §6 new, §4 rewritten — 2 red on the
   build before; ALL GREEN after; full `qa.py` clean.
+
+### §233 — hiding an element from the presentation (2026-09-01, on `claude/smo-hide-element-ppt-s3rodi`)
+
+Islam's three decisions, mockup signed off the same day: hidden is NOT
+counted, rows only (never a pillar, capability or project), the workbook
+carries the mark. One predicate (`SMPRules.isHidden`/`shown`) runs every
+reader — scores, reporting asks, the note rule, Submit, the gap count and
+walk, the reporting pane, the deck, the .pptx builder — because not counted
+means not asked and not owed. The pen's eye toggles `row.hide` (an absence,
+riding extra, no migration); read mode wears "Hidden — not counted" for
+everyone; every row sheet gains a Hidden column read both ways.
+`checks/hide-element.py`: 17 red pre-§233, 21 green after; the
+neighbourhood and the full sweep green; the server suites untouched
+(451/106).
+
+### §232 — removing a pillar or a project (2026-09-01, on `claude/smo-hide-element-ppt-s3rodi`)
+
+The mockup an earlier session published for sign-off, signed off by Islam and
+built: a worded quiet-red Remove control in the pinned editing head (a
+pillar's edhead, a project's edband), drawn only while the pen is open,
+opening the platform's own confirmation — what the thing holds, what has been
+reported this cycle, and the archive-first way back. Never renumbers (ids are
+what figures and snapshots key on); the server needed nothing. **And the way
+back was broken for every pillars function** — `restoreArchive()` could not
+resolve an `fn:` archive — fixed at both ends, because §232's confirmation
+promises it. `checks/pillar-project-remove.py`: 13 red on the pre-§232 build,
+27 green after; neighbours and the full sweep green.
 
 ### v3.80 — the pending count says where, and walks you there (§192)
 

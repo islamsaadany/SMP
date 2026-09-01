@@ -25494,8 +25494,6 @@ that quietly brought the link back would pass.
 (server / data / example — asserted as a regex over the whole card), keep Try
 again reachable by a real press, and keep the way past removed. ALL GREEN on
 the build; full `qa.py` clean.
----
-
 ## §231 — A BOX THAT ARRIVES WITH NO TAB OPEN
 
 Islam, having turned §225's notifications on: *"I didn't get any notifications
@@ -25706,3 +25704,176 @@ connection is not, and red would say the opposite.
 a failure is reported passes on a build that reports one always, so the check
 brings the server back, presses Try again, and requires the conversations to
 draw and the counts to be numbers again.
+---
+
+
+## §232 — REMOVING A PILLAR OR A PROJECT (2026-09-01)
+
+Islam asked for it in an earlier session, which stopped where the mockup-first
+rule stops: `design-mockups/pillar-project-remove/2026-09-01_remove-controls.html`
+was published for sign-off and no source was touched. He signed off on the
+mockup today (*"ok for the delete pillar or project mockup"*), and this is
+that mockup built.
+
+**THE ROW HAD A ×; THE WHOLE THING HAD NOTHING.** Every list row could be
+removed since §69.13, and the pillar and the project those rows live in could
+not — so taking one out meant re-uploading the plan, §53.3's complaint at the
+largest size it comes in. The control is **worded, quiet red, in the pinned
+editing head** (§194's edhead on a pillar, §194.2's edband on a project),
+beside Done because reading order is *remove, or finish* — drawn only while
+the pen is open, so it follows the Strategy grant exactly as the pen does, and
+reachable from anywhere in a long pillar because the head pins.
+
+**THE CONFIRMATION CARRIES THE WEIGHT** — the platform's own modal, never
+`confirm()` (§95): what the thing holds (measures and tactics; deliverables,
+outcomes and milestones), **what has been reported against it this cycle** on
+the warn ground — outstanding, not broken (§168) — and the way back. A clean
+subject SAYS nothing has been reported, because the absence of a warning is
+not a sentence anybody can read (§45.2). Both rows are resolved again at
+press time (§48.2): the row the button was drawn for and the row being
+spliced are a dialog apart.
+
+**ARCHIVE FIRST, ALWAYS** — §49.2's rule with a third caller. The removal is
+exactly as destructive as Clear plan, so it goes through the same
+`archiveUnitPlan()`/`archiveCapPlan()` the import and the clear already take,
+and the dialog says so: *"The plan as it stands is archived first. Setup ›
+Import & archives holds the way back."*
+
+**NEVER RENUMBER.** `renumberUnit()` rewrites every id from POSITION, and ids
+are what a reported figure, a focus mark and a cycle snapshot key on
+(§69.13's own warning) — removing pillar 2 of 3 must not hand pillar 3's
+history to a row that is not there any more. The survivors keep their ids,
+asserted; positional CODES (a function's project codes) derive at render time
+and close up on their own. **The server needed nothing**: a removed row is a
+structural plan change the authoriser already classifies as the office's
+(§42's fall-through, §215's whole-part travel), and `test-authorize.js` still
+passes 451.
+
+**AND THE WAY BACK WAS BROKEN FOR EVERY PILLARS FUNCTION, SO THE PROMISE
+FORCED THE FIX.** `restoreArchive()` resolved a "unit" archive through
+`UNITS[a.key]` and a pillars function's archives are keyed `fn:<key>` — so
+every archive that path has ever written for one (the import's replace,
+builder Start fresh, and now this) was un-restorable, with the row reading
+*"no longer in the platform — cannot be restored"* for a function still on
+the platform. Pre-existing, found because §232's confirmation promises the
+way back and a promise has to be true. Both ends fixed with the resolver the
+rest of the product uses (`unitLikeWritable`, `unitLike`), plus
+`fnWriteBack()` after the assignments — `builderStartFresh()`'s own pair,
+because the writable view's arrays are ASSIGNED there (§212).
+
+**`.rmplan`, never `.rmbtn`** — that word is taken by the Setup tables'
+uppercase Remove button, and a bare match would have dressed the new control
+in its letterspacing (§65.9, checked before it bit this time). The danger
+button wears the fillcta's own idiom — `--bad` fill, `--surface` ink (§145.14)
+— and the amber line the warn tokens, so both themes are answered without a
+literal (§25).
+
+`checks/pillar-project-remove.py` presses everything and asks the DATA
+(§94.2, both ends): no control in read mode or for a unit head; hittable at
+its own centre (§93.4); Cancel costs nothing; Confirm archives first, removes,
+keeps the survivors' ids; the archive restores through the real Setup control
+on a UNIT and on a PILLARS FUNCTION — the §232 fix — and the project side on
+fn:finance with the rail no longer holding the removed id. Proved able to
+fail first: **13 red** against the pre-§232 build. `plan-fields`,
+`plan-edit-head`, `project-tables`, `table-fit`, `repeat-project`,
+`plan-builder` and the full `qa.py` sweep green after.
+
+## §233 — HIDING AN ELEMENT FROM THE PRESENTATION (2026-09-01)
+
+Islam: *"we need to allow the SMO to hide an element. the hide approach is
+about hiding it from the presnetation. this applies to a mesure or an
+objective or a tactic. etc. something we need to keep but hide from the
+ppt."* Three decisions put to him and taken before the mockup, the mockup
+signed off the same day: **hidden is NOT counted** in any score; **rows
+only** — never a pillar, a capability or a project, so a whole slide can
+never disappear; and **the workbook carries the mark**.
+
+**ONE PREDICATE, EVERY SURFACE** (§42, §53.5). `SMPRules.isHidden(row)` and
+`SMPRules.shown(list)` are the whole vocabulary, because the day the deck
+and the page disagree about one number is the day the score cannot be
+defended. The mark is `row.hide === true`, riding each row's `extra` JSONB
+(§177's road — all six row tables already split unknown keys there, so
+**no migration**, proved rather than claimed: one row of each of the seven
+kinds written against a real Postgres 16 and read back carrying the mark,
+then written clean and read back with the key ABSENT), stored as an
+ABSENCE (§50.6): the same press hides and
+shows again, and shown-again is byte-identical to never-hidden, so no save
+carries a phantom change.
+
+**NOT COUNTED MEANS NOT ASKED AND NOT OWED, OR THE PRODUCT ARGUES WITH
+ITSELF.** The skip runs through every reader that averages, asks or counts:
+`scorableMeasures`, `dueTactics`, `koScore` (both branches — filtering the
+weighted list beforehand would misalign the weights), `projDeliverySide`,
+`projOutcomeSide`, `projMilestones`, `capExec`, `reportItems`,
+`fnReportItems`, and `gapMap`'s per-row gate. It follows that reporting
+stops asking for the figure, the note rule stops owing a note, Submit stops
+waiting, and a hidden row's blanks stop counting as Missing — `gapCell`
+closes the fill controls on the same rows, so the count and the walk stay
+one list (§192.4). **The reporting pane stops DRAWING the row** for the
+same reason: collecting a figure the submit gate no longer waits on is the
+drift §205 records from the other side.
+
+**THE ROW STAYS, AND SAYS SO.** The pen draws an eye beside each row's ×
+(an SVG taking currentColor — a colour emoji cannot be coloured, §45), lit
+on the attention ground while hidden, because a decision is not a warning
+(§168). Read mode wears **"Hidden — not counted"** — for EVERYONE, not only
+the office, because an average over rows the page shows has to be
+explicable to whoever reads it. The Performance tables keep the row too,
+chipped and quiet; only the presentation and the asks lose it. The eye sits
+between the field and the × (the mockup's order), which broke §114.4's
+`.fld + .xbtn` seat selector — the trio takes its own `:has` seat.
+
+**THE HANDLER RE-ASKS AT THE CLICK** (§48.2): the button carries its
+page/acKey pair and the press asks `authoring()` again, so the eye follows
+the Strategy grant exactly as the pen that drew it. The six kinds resolve
+through one `hideableById()`; a pillar, capability or project never reaches
+it because the control is never drawn there — both ends of Islam's second
+decision, asserted. **The server needed nothing**: a `hide` change rides
+the row through §215's differ (measured: `rows:[{id:"mobile-P1-M1",
+set:{hide:true}}]`) and classifies as a plan edit — the office's by
+fall-through (§42), probed directly: the SMO's hide ACCEPTED, the unit
+head's and the custodian's REFUSED — and `test-authorize.js` (451) and
+`test-graph-diff.js` (106) pass untouched.
+
+**THE WORKBOOK CARRIES IT, BOTH WAYS** (his third decision, §22's reason:
+an upload AUTHORS, so a re-upload without the column would silently show
+everything again). Every row sheet — a unit's Objectives, Measures and
+Tactics; a function's Objectives, Deliverables, Outcomes and Milestones —
+gains a **Hidden** column at the END, so no validation range moves (§65: a
+range is a POSITION); "Yes" or empty, with a YESNO dropdown. The readers
+take an absent column as absent (§58: old files read fine); the differs
+compare it canonically and a **blank cell says nothing** (§54's
+adds-and-amends — "No" un-hides, "" leaves the stored answer standing);
+both apply paths and both creators carry it; the CSV pipeline's
+`CAPP_COLS` gains the column in the same edit as the writers (§102.4's
+lesson: two allow-lists, one behind the other). The Deliverables sheet's
+stale `C2:C400` DELIV_KINDS validation — aimed at the Kind column §104.8
+removed — was sitting on exactly the position Hidden takes, and goes with
+it rather than dressing the new column in a dead vocabulary.
+
+**DELIBERATELY INCLUDED: the group's own objectives.** They edit through
+the same `koEdit` table a unit's do, and giving one table two behaviours is
+§53.5's drift — so the group's six can be hidden too, with the same
+consequence for the group's own reading. **Deliberately NOT séparate:** no
+per-viewer setting, no second state — one mark, the office's.
+
+**Costs stated**: the Performance counts line ("N measures · M measured")
+still counts hidden rows among the N — the chip on the row is what explains
+the difference; and a slide whose every row is hidden still draws, saying
+nothing is there, which is §119.1's own rule (skipping it would say nothing
+is missing).
+
+`checks/hide-element.py` presses the eye and asks the DATA at every step
+(§96), asserts the score as AGREEMENT with the shown rows (§94.8), the
+deck by the row's absence AND its sibling's presence (§113.8), the workbook
+round trip through the real writer and reader, the closed ends (read mode,
+a unit head, the pillar head, the project band), and the key deleted on
+show-again. Proved able to fail first: **17 red** on the pre-§233 build —
+after the check itself was taught not to lean on the API under test
+existing, and that the OPEN pen lives in the pinned head, not the corner.
+Two literals in `fn-pillars.py` and `project-tables.py` moved with the
+deliberate workbook change (§214.3's lesson, again); the rest of the
+neighbourhood — plan-fields, gap-fill, gap-walk, owner-picker,
+milestone-fill, submit-gate, objective-unit, fn-ko-edit, enter-commits,
+foundation-objectives, plan-builder, repeat-project, table-fit,
+pillar-project-remove — and the full `qa.py` sweep green.

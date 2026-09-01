@@ -3830,10 +3830,10 @@ function sideAvg(vals){
   return Math.round(v.reduce(function(a, b){ return a + b; }, 0) / v.length);
 }
 function projDeliverySide(p){
-  return sideAvg(SMPRules.shown(p.deliverables).map(delivReads));
+  return sideAvg((p.deliverables || []).map(delivReads));
 }
 function projOutcomeSide(p){
-  return sideAvg(SMPRules.shown(p.outcomes).map(function(o){ return o.progress; }));
+  return sideAvg((p.outcomes || []).map(function(o){ return o.progress; }));
 }
 function projPerf(p){
   var d = projDeliverySide(p), o = projOutcomeSide(p);
@@ -3843,7 +3843,7 @@ function projPerf(p){
   return Math.round(d * 0.5 + o * 0.5);
 }
 function projMilestones(p){
-  var ms = SMPRules.shown(p.milestones), done = 0, wip = 0, todo = 0;
+  var ms = p.milestones || [], done = 0, wip = 0, todo = 0;
   ms.forEach(function(m){
     if (m.status === "done") done++;
     else if (m.status === "wip") wip++;
@@ -3900,7 +3900,7 @@ function capExec(c){
   (c.projects || []).forEach(function(p){
     var m = projMilestones(p);
     done += m.done; wip += m.wip; todo += m.todo; total += m.total;
-    SMPRules.shown(p.milestones).forEach(function(x){
+    (p.milestones || []).forEach(function(x){
       /* §104.10: a milestone halfway through a sentence leaves the average
          rather than dragging it down. `|| 0` still stands for a milestone
          NOBODY has touched -- projMilestones() counts that one as Not started,
@@ -4680,9 +4680,7 @@ function outstandingSources(u){
    outside it is not an empty box somebody forgot \u2014 it is not asked. */
 function reportItems(u){
   var out = [];
-  /* §233: a hidden row is not asked — not counted means not owed, so it
-     leaves the ask list, the note rule and the submit gate in one skip. */
-  SMPRules.shown(u.keyObjectives).forEach(function(m){
+  u.keyObjectives.forEach(function(m){
     out.push({ id:m.id, obj:m, kind:"objective", group:L("keyobj","bu"), sub:"" });
   });
   u.items.forEach(function(p, pi){
@@ -4694,11 +4692,11 @@ function reportItems(u){
     /* `pown` is the pillar's own Owner, for the pillar-owner role's reach
        (§147.7) — carried beside §55's `owner` lean rather than replacing it,
        so nothing a contributor could reach before the role existed moves. */
-    SMPRules.shown(p.measures).forEach(function(m){
+    p.measures.forEach(function(m){
       out.push({ id:m.id, obj:m, kind:"measure", group:head, sub:"",
                  owner:p.owner, pown:p.owner });
     });
-    SMPRules.shown(p.tactics).forEach(function(t){
+    p.tactics.forEach(function(t){
       out.push({ id:t.id, obj:t, kind:"tactic", group:head,
                  sub:spanLabel(t), asked:tacticDue(t),
                  owner:t.owner, collaborators:t.collaborators, pown:p.owner });
@@ -4754,21 +4752,20 @@ function missingNotes(u){ return askedItems(u).filter(needsNote); }
 function fnReportItems(fk){
   var out = [];
   capsOfFunction(fk).forEach(function(c){
-    /* §233: hidden rows are not asked, exactly as reportItems() skips them. */
-    SMPRules.shown(c.keyObjectives).forEach(function(m){
+    (c.keyObjectives || []).forEach(function(m){
       out.push({ id:m.id, obj:m, kind:"objective", group:c.name, sub:"", asked:true });
     });
     (c.projects || []).forEach(function(p){
       var head = c.name + " \u00b7 " + (p.code || p.name);
-      SMPRules.shown(p.deliverables).forEach(function(d){
+      (p.deliverables || []).forEach(function(d){
         out.push({ id:d.id, obj:d, kind:"deliverable", group:head, sub:"",
                    asked:dueThisCycle(d.due), owner:p.owner });
       });
-      SMPRules.shown(p.outcomes).forEach(function(o){
+      (p.outcomes || []).forEach(function(o){
         out.push({ id:o.id, obj:o, kind:"outcome", group:head, sub:"",
                    asked:outcomeDue(o), owner:p.owner });
       });
-      SMPRules.shown(p.milestones).forEach(function(m){
+      (p.milestones || []).forEach(function(m){
         out.push({ id:m.id, obj:m, kind:"milestone", group:head, sub:"",
                    asked:dueThisCycle(m.finish), owner:m.owner || p.owner });
       });
@@ -5165,15 +5162,14 @@ var KO_WEIGHTS = { mobile: [40, 25, 20, 15] };
 function koScore(list, weights){
   /* §218: an objective counts as soon as it has a figure — nothing waits
      on the office any more. */
-  /* §233: hidden is not counted, weighted or not. */
-  var vals = list.filter(function(m){ return !SMPRules.isHidden(m) && !m.milestone && m.progress != null; });
+  var vals = list.filter(function(m){ return !m.milestone && m.progress != null; });
   if (!vals.length) return null;
   if (!weights) {
     return Math.round(vals.reduce(function(a, m){ return a + m.progress; }, 0) / vals.length);
   }
   var tot = 0, acc = 0;
   list.forEach(function(m, i){
-    if (SMPRules.isHidden(m) || m.milestone || m.progress == null) return;
+    if (m.milestone || m.progress == null) return;
     var w = weights[i] == null ? 0 : weights[i];
     acc += m.progress * w; tot += w;
   });
@@ -5385,10 +5381,6 @@ function gapMap(target, all, fillable){
     return canAuthor[acKey] || mayFillRow(acKey, ctx, target);
   };
   var G = function(acKey, ctx, kind, row){
-    /* §233: a hidden row's blanks are not gaps — it is not counted, not
-       asked, and not walked; gapCell() closes the same row's controls, so
-       the count and the walk stay one list (§192.4). */
-    if (SMPRules.isHidden(row)) return 0;
     if (!reach(acKey, ctx)) return 0;
     /* §223: COUNTED AND FILLABLE ARE TWO QUESTIONS, AND THE DOOR ASKS THE
        SECOND. §214.2 and §214.4 took a function's key objectives and its
@@ -5830,16 +5822,13 @@ function viaCarrier(p, own, roll){
    office's confirmation is not scored (§145): the comparison is not ready,
    so it leaves the average the way an unmeasured outcome already does
    (§104.10) — the reported actual is kept and shown, only the score waits. */
-/* §233: a hidden row leaves every average — the same skip on every reader,
-   through the one shared predicate (SMPRules.isHidden), or the deck and the
-   page would disagree about one number. */
-function scorableMeasures(p){ return (p.measures || []).filter(function(m){ return !SMPRules.isHidden(m) && m.target && m.progress != null; }); }
+function scorableMeasures(p){ return (p.measures || []).filter(function(m){ return m.target && m.progress != null; }); }
 function pillarPerf(p){
   return viaCarrier(p,
     function(){ return avg(scorableMeasures(p).map(function(m){ return m.progress; })); },
     function(f){ return avg(fnItems(f).map(pillarPerf)); });
 }
-function dueTactics(p){ return SMPRules.shown(p.tactics).filter(tacticDue); }
+function dueTactics(p){ return (p.tactics || []).filter(tacticDue); }
 /* A tactic that is due but has nothing reported is not delivering zero \u2014 it is
    unreported, and averaging a zero would say the plan is failing. */
 function reportedTactics(p){ return dueTactics(p).filter(function(t){ return t.actual != null; }); }
@@ -6058,30 +6047,6 @@ function projById(id){
    minted person key cannot but a unit key set by hand certainly can. Scanning
    is O(the plan) and the plan is small; a wrong answer here splices the wrong
    row out of somebody's strategy. */
-/* ── THE SIX HIDEABLE KINDS, RESOLVED BY ID (§233) ────────────────────────
-   An objective (a unit's, the group's, a capability's), a measure, a tactic,
-   a deliverable, an outcome, a milestone — every id is unique across the
-   graph (§191), so one resolver serves the one toggle. A pillar, a
-   capability and a project are deliberately NOT here: Islam ruled a whole
-   slide can never disappear, so the control is never drawn for them and the
-   handler cannot reach them either — both ends of the same door. */
-function hideableById(id){
-  var hit = null;
-  var scan = function(list){
-    (list || []).forEach(function(x){ if (!hit && x && x.id === id) hit = x; });
-  };
-  scan(GROUP.keyObjectives);
-  GROUP.capabilities.forEach(function(c){ scan(c.keyObjectives); });
-  UNIT_KEYS.concat(FUNCTION_KEYS.map(function(f){ return "fn:" + f; })).forEach(function(t){
-    var u = unitLike(t);
-    if (!u) return;
-    scan(u.keyObjectives);
-    (u.items || []).forEach(function(p){ scan(p.measures); scan(p.tactics); });
-  });
-  eachProject(function(p){ scan(p.deliverables); scan(p.outcomes); scan(p.milestones); });
-  return hit;
-}
-
 function listById(kind, id){
   var out = null;
   var look = function(list){
@@ -6507,7 +6472,7 @@ function restoreArchive(id){
     applyFiguresSnapshot(a.figures);
   }
   else if (a.kind === "unit") {
-    /* unitLikeWritable, never UNITS[] (§232): a pillars FUNCTION archives
+    /* unitLikeWritable, never UNITS[] (§230): a pillars FUNCTION archives
        through this same path — the import's replace, Start fresh, and now
        removing a pillar — and its archive is keyed `fn:<key>`, which UNITS
        cannot resolve. Every one of those archives was un-restorable: the

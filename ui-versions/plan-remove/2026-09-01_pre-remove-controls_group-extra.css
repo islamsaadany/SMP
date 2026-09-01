@@ -413,26 +413,6 @@
   .modal-b h4.mini:first-child { margin-top:0; }
   @media (max-width:640px) { .overlay { padding:0; } .modal { max-height:100vh; border-radius:0; } }
 
-  /* ── REMOVING A PILLAR OR A PROJECT: the confirmation (§232) ──────────
-     The dialog carries the weight the quiet words in the head do not: what
-     the thing holds, what has been reported against it this cycle (the warn
-     ground — outstanding, not broken, §168), and the way back. */
-  .rmconfirm p { font-size:13.5px; color:var(--ink-2); margin:0 0 10px; }
-  .rmconfirm .repline { background:var(--warn-bg); color:var(--warn-tx);
-    border-radius:8px; padding:9px 12px; font-size:13px; margin:0 0 10px; }
-  .rmconfirm .archline { font-size:12.5px; color:var(--ink-3); margin:0 0 16px; }
-  .rmconfirm .mrow { display:flex; justify-content:flex-end; gap:10px; }
-  .rmconfirm .mrow button { font:600 13px/1 var(--sans); border-radius:8px;
-    padding:10px 14px; cursor:pointer; }
-  .rmconfirm .mrow .quiet { background:none; border:1px solid var(--line);
-    color:var(--ink-2); }
-  .rmconfirm .mrow .quiet:hover { background:var(--surface-2); color:var(--ink); }
-  /* The fill is --bad and the ink --surface: red as a FILL carries the
-     page's lightest surface, never white literal (§25, §38.4). */
-  .rmconfirm .mrow .danger { background:var(--bad); border:1px solid var(--bad);
-    color:var(--surface); }
-  .rmconfirm .mrow .danger:hover { filter:brightness(1.08); }
-
   /* ── Split metric boxes inside a card ─────────────────── */
   .gcard { padding:0; }
   .card-head { padding:15px 16px 13px; border-bottom:1px solid var(--line-soft); text-align:center; width:100%; }
@@ -1052,19 +1032,6 @@
      is the same answer on the band's own class. Reading is untouched: a read
      band's name is a span and sits where it always sat. */
   .pane .pband.edband .pband-name { flex:1; min-width:0; }
-  /* ── THE REMOVE CONTROL (§232) ───────────────────────────────────────
-     Quiet red WORDS, no fill — a destructive act says its name and the
-     confirmation is where the weight lives (mockup, signed off 2026-09-01).
-     Named .rmplan, never .rmbtn — that word is taken by the Setup tables'
-     uppercase Remove button and a bare match would dress this in its
-     letterspacing (§65.9: a class name is one global namespace). --bad-tx, not --bad: red as TYPE
-     is the deeper token or it measures under 4.5 (§38.5). */
-  .pane .ptitle.edhead .rmplan, .pane .pband.edband .rmplan {
-    flex:none; font:600 12px/1 var(--sans); color:var(--bad-tx);
-    background:none; border:1px solid transparent; border-radius:7px;
-    padding:8px 10px; cursor:pointer; letter-spacing:.01em; }
-  .pane .ptitle.edhead .rmplan:hover, .pane .pband.edband .rmplan:hover {
-    background:var(--bad-bg); border-color:var(--bad-bg); }
   .pane .ptitle .pmeta { color:var(--ink-3); font-size:12.5px; margin-top:3px; }
   .planonly { font-size:12.5px; color:var(--ink-3); margin:10px 0 0; }
   .planonly b { color:var(--gold-deep); letter-spacing:.09em; text-transform:uppercase;

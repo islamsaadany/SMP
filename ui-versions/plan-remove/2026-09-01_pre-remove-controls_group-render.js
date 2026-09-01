@@ -391,11 +391,9 @@ function measureRows(ms, opts){
        or direction is live, so a measure is scored the moment it has a
        figure to score. */
     var scored = m.target && m.progress != null;
-    var head = '<tr data-oi="' + i + '"' +
-               (SMPRules.isHidden(m) ? ' class="hiddenrow"'
-                : isFocus(m.id) ? ' class="focusrow"' : '') + '><td class="idx">' +
+    var head = '<tr data-oi="' + i + '"' + (isFocus(m.id) ? ' class="focusrow"' : '') + '><td class="idx">' +
                (on ? handle("Reorder " + m.name) : '') +
-               '<span class="idx-n">' + (i+1) + '</span></td><td>' + esc(m.name) + hidChip(m) + fmark(m.id) +
+               '<span class="idx-n">' + (i+1) + '</span></td><td>' + esc(m.name) + fmark(m.id) +
                (m.horizon ? '<span class="why">measured at ' + esc(m.horizon) + '</span>' : '') +
                '</td><td class="num">' + dirCell(m.dir) + '</td><td class="num">' + esc(m.target) +
                '</td><td class="cc">' + compileCell(m.compile) + '</td>';
@@ -468,11 +466,9 @@ function tacticRows(ts, unitKey){
       : '<td class="num"><span class="pair"><b>' + t.actual + '</b> / ' + pl + '</span></td>' +
         '<td class="num">' + varCell(t.actual, pl) + '</td>' +
         '<td class="num final" style="color:' + bandInk(r) + '">' + pct(r) + '</td>';
-    return '<tr data-oi="' + i + '"' +
-      (SMPRules.isHidden(t) ? ' class="hiddenrow"'
-        : due && t.actual != null ? '' : ' class="notdue"') + '><td class="idx">' +
+    return '<tr data-oi="' + i + '"' + (due && t.actual != null ? '' : ' class="notdue"') + '><td class="idx">' +
       (on ? handle("Reorder " + t.name) : '') +
-      '<span class="idx-n">' + (i+1) + '</span></td><td>' + esc(t.name) + hidChip(t) +
+      '<span class="idx-n">' + (i+1) + '</span></td><td>' + esc(t.name) +
       (t.outcome ? '<span class="why">' + esc(t.outcome) + '</span>' : '') + '</td>' +
       '<td>' + esc(t.owner) + '</td><td class="collabs">' + collabCell(t) + '</td>' +
       '<td>' + qs(t) + '</td><td class="cc">' + status + '</td>' + tail + '</tr>';
@@ -2714,7 +2710,7 @@ function gapCell(page, acKey, row, field, opts){
       if (opts.del && SMPRules.gapBlank(nv)) delete row[field];
       else row[field] = nv;
       gapLift(row, field); gapBandRefresh();
-    }, open && !SMPRules.isHidden(row) && SMPRules.isGapField(field) ? "gapwalk" : "");
+    }, open && SMPRules.isGapField(field) ? "gapwalk" : "");
   }
   /* ── A CELL THE FILLABLE LIST HAS CLOSED NEVER OPENS TO A FILLER ────
      (§228.2, found by the §227 merge.) §224.2 took `def` out of
@@ -2729,11 +2725,7 @@ function gapCell(page, acKey, row, field, opts){
      a call site that names no kind keeps today's behaviour. */
   var fillable = !opts.fillKind ||
     (SMPRules.GAP_FILLABLE[opts.fillKind] || []).indexOf(field) > -1;
-  /* §233: a hidden row never opens to a filler — its blanks are not gaps
-     (gapMap skips it), so a control here would be a door the count denies
-     (§192.4: the count and the walk are one list). The office's pen above
-     is untouched: hiding is the office's own mark and their edit settles. */
-  if (fl && fillable && !SMPRules.isHidden(row) && (open || mark)) {
+  if (fl && fillable && (open || mark)) {
     return draw(function(v){
       var nv = put(v);
       if (SMPRules.gapBlank(nv)) {
@@ -2989,8 +2981,7 @@ function koView(list, isGroup, acKey){
   if (KO_VIEW === "chips") {
     return '<div class="ochips">' + list.map(function(m){
       var far = m.target3y ? esc(m.target3y) : miss;
-      return '<div class="ochip' + (SMPRules.isHidden(m) ? ' hiddenrow' : '') +
-        '"><b>' + esc(m.name) + '</b>' + hidChip(m) +
+      return '<div class="ochip"><b>' + esc(m.name) + '</b>' +
         (near ? '<div class="v">' + (m.target ? esc(m.target) : miss) + '</div>' +
                 '<div class="h">3-year ' + far + '</div>'
               : '<div class="v">' + far + '</div>') + chips(m) + '</div>';
@@ -3011,9 +3002,8 @@ function koView(list, isGroup, acKey){
       '<span>' + horizonColLabel() + '</span>' +
       (near ? '<span>This year</span>' : '') + '</div>' +
     list.map(function(m){
-      return '<div class="orow' + (near ? '' : ' one') +
-        (SMPRules.isHidden(m) ? ' hiddenrow' : '') + '"><span class="on">' + esc(m.name) +
-        hidChip(m) + chips(m) + '</span>' +
+      return '<div class="orow' + (near ? '' : ' one') + '"><span class="on">' + esc(m.name) +
+        chips(m) + '</span>' +
         '<span class="ot h">' + (m.target3y ? esc(m.target3y) : miss) + '</span>' +
         (near ? '<span class="ot">' + (m.target ? esc(m.target) : miss) + '</span>' : '') + '</div>';
     }).join("");
@@ -3047,33 +3037,6 @@ function horizonColLabel(){
 
    Every field goes through `fieldOr`/`inputOr`/`selectOr` now, so there is no
    second way to draw one of these cells and no second place to forget. */
-/* ── HIDDEN FROM THE PRESENTATION (§233) ──────────────────────────────
-   The eye beside a row's × in the pen; the chip in read mode. An SVG taking
-   currentColor, never a colour emoji (§45); lit on the attention ground
-   while hidden — a decision, not a warning (§168). The chip is drawn for
-   EVERYONE, because a row that does not count has to say so or the average
-   above it cannot be explained. The handler re-asks authoring at the click
-   through the page/acKey the button carries (§48.2). */
-function eyeSvg(off){
-  return '<svg viewBox="0 0 24 20" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">' +
-    '<path d="M2 10s3.5-6 10-6 10 6 10 6-3.5 6-10 6S2 10 2 10z"/><circle cx="12" cy="10" r="2.6"/>' +
-    (off ? '<line x1="4" y1="18" x2="20" y2="2"/>' : '') + '</svg>';
-}
-function eyeBtn(row, page, acKey){
-  if (!row || !row.id) return '';
-  var on = SMPRules.isHidden(row);
-  var word = on ? 'Hidden from the presentation \u2014 press to show it again'
-               : 'Hide from the presentation';
-  return '<button class="eyebtn' + (on ? ' on' : '') + '" data-hiderow="' + esc(row.id) +
-    '" data-hideac="' + esc(page) + '|' + esc(acKey) + '" aria-pressed="' + (on ? 'true' : 'false') +
-    '" title="' + word + '" aria-label="' + word + '">' + eyeSvg(on) + '</button>';
-}
-function hidChip(row){
-  return SMPRules.isHidden(row)
-    ? '<span class="hidchip">Hidden \u2014 not counted</span>' : '';
-}
-function hidCls(row){ return SMPRules.isHidden(row) ? ' class="hiddenrow"' : ''; }
-
 function koEdit(list, page, acKey, owner){
   var editing = authoring(page, acKey), pg = editing ? page : null;
   /* WHICH LIST THIS IS. Add and Remove act on an array, and the two callers
@@ -3089,8 +3052,7 @@ function koEdit(list, page, acKey, owner){
          setter lifting a pending mark, since correcting confirms); in fill
          mode only a blank or still-pending one opens. The NAME never does:
          a row that exists is named, and renaming is authoring. */
-      return '<tr' + hidCls(m) + '><td>' + inputOr(pg, m.name, "", function(v){ m.name = v; }) +
-        (pg ? '' : hidChip(m)) + '</td>' +
+      return '<tr><td>' + inputOr(pg, m.name, "", function(v){ m.name = v; }) + '</td>' +
         '<td class="cc">' + gapCell(page, acKey, m, "dir",
           { kind:"select", opts:["\u2265", "\u2264"] }) + '</td>' +
         /* §199: THE OFFICE'S, NOT THE FILLER'S. A unit is not a gap — 46 of
@@ -3112,8 +3074,7 @@ function koEdit(list, page, acKey, owner){
         '<td class="cc">' + gapCell(page, acKey, m, "compile",
           { kind:"select", opts:["Sum", "Latest", "Average"] }) + '</td>' +
         '<td class="cc">' + (editing
-          ? eyeBtn(m, page, acKey) +
-            ' <button class="rmbtn" data-korm="' + li + '|' + i + '">Remove</button>' : '') +
+          ? '<button class="rmbtn" data-korm="' + li + '|' + i + '">Remove</button>' : '') +
         '</td></tr>';
     }).join("") + '</tbody></table></div>' +
     (editing ? '<div class="addrow"><button class="editbtn" data-koadd="' + li +
@@ -3504,13 +3465,10 @@ function renderReport(u){
      inside an open body. The selection belongs to the unit and is shared with
      Performance and Strategy. No reordering here: entry, not arrangement. */
   var reportPillarPane = function(p, pi){
-    /* §233: a hidden row is not asked, so it is not drawn here — the same
-       skip reportItems() makes, or the pane would collect a figure the
-       submit gate no longer waits on. */
     var ms = [];
-    SMPRules.shown(p.measures).forEach(function(m){ ms.push({ id:m.id, obj:m, kind:"measure" }); });
+    p.measures.forEach(function(m){ ms.push({ id:m.id, obj:m, kind:"measure" }); });
     var ts = [];
-    SMPRules.shown(p.tactics).forEach(function(t){
+    p.tactics.forEach(function(t){
       ts.push({ id:t.id, obj:t, kind:"tactic", sub:spanLabel(t), asked:tacticDue(t) });
     });
     var askedT = ts.filter(function(x){ return x.asked; });
@@ -3570,11 +3528,11 @@ function renderReport(u){
      both read, so they can never disagree. */
   var pillarTally = function(p){
     var done = 0, total = 0;
-    SMPRules.shown(p.measures).forEach(function(m){
+    p.measures.forEach(function(m){
       total++;
       if (m.actual != null && m.actual !== "") done++;
     });
-    SMPRules.shown(p.tactics).forEach(function(t){
+    p.tactics.forEach(function(t){
       if (!tacticDue(t)) return;
       total++;
       if (t.actual != null && t.actual !== "") done++;
@@ -4452,10 +4410,9 @@ function projPlanBody(p, fk){
      three. Every cell answered, and no band to keep two halves aligned. */
   var dxr = dxRows(p).map(function(row, i){
     var o = row.obj, d = dxIsDeliv(row);
-    return '<tr data-oi="' + i + '"' + hidCls(o) + '><td class="idx">' +
+    return '<tr data-oi="' + i + '"><td class="idx">' +
       (on ? handle("Reorder " + o.name) : '') + '<span class="idx-n">' + (i+1) + '</span></td>' +
       '<td>' + (ed ? textOr("plan", o.name, "", function(v){ o.name = v; }) : esc(o.name)) +
-        (ed ? eyeBtn(o, "plan", "k_proj") : hidChip(o)) +
         xb(d ? "deliverables" : "outcomes", o.id) + '</td>' +
       '<td class="cc">' + dxType(row) + '</td>' +
       '<td class="cc">' + dxDir(row) + '</td>' +
@@ -4475,10 +4432,9 @@ function projPlanBody(p, fk){
       '<button class="linkbu" data-rowadd="outcome|' + esc(p.id) + '">Add an outcome</button>' +
     '</td></tr>' : '');
   var mRows = p.milestones.map(function(m, i){
-    return '<tr data-oi="' + i + '"' + hidCls(m) + '><td class="idx">' +
+    return '<tr data-oi="' + i + '"><td class="idx">' +
       (on ? handle("Reorder " + m.name) : '') + '<span class="idx-n">' + (i+1) + '</span></td>' +
       '<td>' + (ed ? textOr("plan", m.name, "", function(v){ m.name = v; }) : esc(m.name)) +
-        (ed ? eyeBtn(m, "plan", "k_proj") : hidChip(m)) +
         xb("milestones", m.id) + '</td>' +
       '<td>' + (ed ? textOr("plan", m.covers || "", "", function(v){ m.covers = v; })
                    : esc(m.covers || "")) + '</td>' +
@@ -4560,11 +4516,6 @@ function projPlanBody(p, fk){
     ? '<div class="pband edband"><span class="pband-code">' + esc(projCode(fk, p)) + '</span>' +
         '<span class="pband-name">' +
           textOr("plan", p.name, "", function(v){ p.name = v; }) + '</span>' +
-        /* The pillar head's own control on the project's band (§232, §53.5:
-           a unit and a function are the same product). The id alone is the
-           address — capOfProjectId() resolves the holder at press time. */
-        '<button class="rmplan" data-rmrow="project|' + esc(p.id) +
-          '">Remove this project</button>' +
         (acts ? '<span class="pband-r">' + acts + '</span>' : '') + '</div>'
     /* §192: the pending count left this slot for the totals row above — it
        was the SUBJECT's number on one pillar's band, printing under the fill
@@ -5034,11 +4985,10 @@ function unitPlanBody(it, u, railed){
   var unitCol = !ed && it.measures.some(function(m){
     return fillUnitOffered("plan", "u_plan", m, pctx(m)); });
   var mRows = it.measures.map(function(m, i){
-    return '<tr data-oi="' + i + '"' + hidCls(m) + '><td class="idx">' +
+    return '<tr data-oi="' + i + '"><td class="idx">' +
       (on ? handle("Reorder " + m.name) : '') +
       '<span class="idx-n">' + (i+1) + '</span></td>' +
       '<td>' + (ed ? textOr("plan", m.name, "", function(v){ m.name = v; }) : esc(m.name)) +
-        (ed ? eyeBtn(m, "plan", "u_plan") : hidChip(m)) +
         xb("measures", m.id) + '</td>' +
       /* EDITABLE SINCE §114, reversing §31's read-only. That section closed the
          direction and the compile rule because "they change what a figure
@@ -5098,11 +5048,10 @@ function unitPlanBody(it, u, railed){
           readEmpty:"\u2014", read:compileCell }) + '</td></tr>';
   }).join("");
   var tRows = it.tactics.map(function(t, i){
-    return '<tr data-oi="' + i + '"' + hidCls(t) + '><td class="idx">' +
+    return '<tr data-oi="' + i + '"><td class="idx">' +
       (on ? handle("Reorder " + t.name) : '') +
       '<span class="idx-n">' + (i+1) + '</span></td>' +
       '<td>' + (ed ? textOr("plan", t.name, "", function(v){ t.name = v; }) : esc(t.name)) +
-        (ed ? eyeBtn(t, "plan", "u_plan") : hidChip(t)) +
         xb("tactics", t.id) + '</td>' +
       /* §145 MERGED WITH §130.1: gapCell keeps the pending lifecycle and
          the read-mode Missing word; the control hook renders the register-
@@ -5180,18 +5129,6 @@ function unitPlanBody(it, u, railed){
             : '&nbsp; ' + esc(it.name)) + '</h3>' +
         (meta ? '<div class="pmeta">' + meta + '</div>' : '') + '</div>' +
         kindPill(it) +
-        /* ── REMOVE, WORDED, IN THE HEAD THAT PINS (§232) ──────────────
-           The × removes a ROW; removing the whole pillar had no control at
-           all, so the only way to take one out was re-uploading the plan.
-           Beside Done because reading order is "remove, or finish", and in
-           the pinned head (§194) so it is reachable from anywhere in a long
-           pillar. Only while the pen is open — it follows the Strategy
-           grant exactly as the pen does. The confirmation carries the
-           weight; these are quiet words (mockup, signed off 2026-09-01). */
-        (ed ? '<button class="rmplan" data-rmrow="pillar|' + esc(u.ukey) +
-              '|' + esc(it.id) + '">Remove this ' +
-              esc(L("pillar", "bu").toLowerCase().replace(/s$/, "")) +
-              '</button>' : '') +
         (mayEditPlan() ? penBtn("plan", "u_plan") : '') + '</div>'
     : pillarBand(code, it.name) + paneActs("plan", "u_plan");
   return head +
@@ -5519,8 +5456,7 @@ function koReadBlock(list, emptyLine){
          own fault with the sign reversed (there the page said missing and the
          count said nothing was). The em-dash is what the Weight column beside
          it has always drawn for an absent optional value. */
-      return '<div class="orow' + (SMPRules.isHidden(m) ? ' hiddenrow' : '') +
-          '"><span class="on">' + esc(m.name) + hidChip(m) +
+      return '<div class="orow"><span class="on">' + esc(m.name) +
           '</span>' +
         '<span class="ot">' + (m.target ? esc(m.target) : '&mdash;') +
           '</span>' +
@@ -5553,8 +5489,7 @@ function capKoEdit(c){
     '<th class="cc">Unit</th>' +
     '<th class="cc">This year</th><th class="cc">Compile</th><th class="cc">Weight %</th><th></th></tr></thead><tbody>' +
     c.keyObjectives.map(function(m, i){
-      return '<tr' + hidCls(m) + '><td>' + textOr(ed ? pg : null, m.name, "", function(v){ m.name = v; }) +
-        (ed ? '' : hidChip(m)) + '</td>' +
+      return '<tr><td>' + textOr(ed ? pg : null, m.name, "", function(v){ m.name = v; }) + '</td>' +
         '<td class="cc">' + gapCell(pg, "k_found", m, "dir",
           { kind:"select", opts:["≥", "≤"] }) + '</td>' +
         '<td class="cc">' + (ed
@@ -5570,8 +5505,7 @@ function capKoEdit(c){
           { kind:"select", opts:["Sum", "Latest", "Average"] }) + '</td>' +
         '<td class="cc">' + gapCell(pg, "k_found", m, "weight",
           { kind:"input", cls:"mono", num:true }) + '</td>' +
-        '<td class="cc">' + (ed ? eyeBtn(m, pg, "k_found") +
-          ' <button class="rmbtn" data-capkorm="' + esc(c.id) + '|' + i +
+        '<td class="cc">' + (ed ? '<button class="rmbtn" data-capkorm="' + esc(c.id) + '|' + i +
           '">Remove</button>' : '') + '</td></tr>';
     }).join("") + '</tbody></table></div>' +
     (ed ? '<div class="addrow"><button class="editbtn" data-capkoadd="' + esc(c.id) +

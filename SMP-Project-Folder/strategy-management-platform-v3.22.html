@@ -1111,6 +1111,26 @@
   .modal-b h4.mini:first-child { margin-top:0; }
   @media (max-width:640px) { .overlay { padding:0; } .modal { max-height:100vh; border-radius:0; } }
 
+  /* ── REMOVING A PILLAR OR A PROJECT: the confirmation (§232) ──────────
+     The dialog carries the weight the quiet words in the head do not: what
+     the thing holds, what has been reported against it this cycle (the warn
+     ground — outstanding, not broken, §168), and the way back. */
+  .rmconfirm p { font-size:13.5px; color:var(--ink-2); margin:0 0 10px; }
+  .rmconfirm .repline { background:var(--warn-bg); color:var(--warn-tx);
+    border-radius:8px; padding:9px 12px; font-size:13px; margin:0 0 10px; }
+  .rmconfirm .archline { font-size:12.5px; color:var(--ink-3); margin:0 0 16px; }
+  .rmconfirm .mrow { display:flex; justify-content:flex-end; gap:10px; }
+  .rmconfirm .mrow button { font:600 13px/1 var(--sans); border-radius:8px;
+    padding:10px 14px; cursor:pointer; }
+  .rmconfirm .mrow .quiet { background:none; border:1px solid var(--line);
+    color:var(--ink-2); }
+  .rmconfirm .mrow .quiet:hover { background:var(--surface-2); color:var(--ink); }
+  /* The fill is --bad and the ink --surface: red as a FILL carries the
+     page's lightest surface, never white literal (§25, §38.4). */
+  .rmconfirm .mrow .danger { background:var(--bad); border:1px solid var(--bad);
+    color:var(--surface); }
+  .rmconfirm .mrow .danger:hover { filter:brightness(1.08); }
+
   /* ── Split metric boxes inside a card ─────────────────── */
   .gcard { padding:0; }
   .card-head { padding:15px 16px 13px; border-bottom:1px solid var(--line-soft); text-align:center; width:100%; }
@@ -1730,6 +1750,19 @@
      is the same answer on the band's own class. Reading is untouched: a read
      band's name is a span and sits where it always sat. */
   .pane .pband.edband .pband-name { flex:1; min-width:0; }
+  /* ── THE REMOVE CONTROL (§232) ───────────────────────────────────────
+     Quiet red WORDS, no fill — a destructive act says its name and the
+     confirmation is where the weight lives (mockup, signed off 2026-09-01).
+     Named .rmplan, never .rmbtn — that word is taken by the Setup tables'
+     uppercase Remove button and a bare match would dress this in its
+     letterspacing (§65.9: a class name is one global namespace). --bad-tx, not --bad: red as TYPE
+     is the deeper token or it measures under 4.5 (§38.5). */
+  .pane .ptitle.edhead .rmplan, .pane .pband.edband .rmplan {
+    flex:none; font:600 12px/1 var(--sans); color:var(--bad-tx);
+    background:none; border:1px solid transparent; border-radius:7px;
+    padding:8px 10px; cursor:pointer; letter-spacing:.01em; }
+  .pane .ptitle.edhead .rmplan:hover, .pane .pband.edband .rmplan:hover {
+    background:var(--bad-bg); border-color:var(--bad-bg); }
   .pane .ptitle .pmeta { color:var(--ink-3); font-size:12.5px; margin-top:3px; }
   .planonly { font-size:12.5px; color:var(--ink-3); margin:10px 0 0; }
   .planonly b { color:var(--gold-deep); letter-spacing:.09em; text-transform:uppercase;
@@ -5729,6 +5762,30 @@
      it reaches every table using the pattern and nothing else. */
   td:has(> .fld + .xbtn) > .fld { width: calc(100% - 30px); vertical-align: middle; }
   td:has(> .fld + .xbtn) > .xbtn { vertical-align: middle; margin-left: 5px; }
+  /* ── HIDDEN FROM THE PRESENTATION (§233) ────────────────────────────
+     The eye sits between the field and the × (the mockup's order), which
+     the seat rule above cannot see — its `.fld + .xbtn` adjacency breaks —
+     so the trio gets its own seat: the field gives up the width of BOTH
+     buttons, and all three share the line (§114.4's rule, one control
+     wider). */
+  td:has(> .fld + .eyebtn) > .fld { width: calc(100% - 62px); vertical-align: middle; }
+  td:has(> .fld + .eyebtn) > .eyebtn,
+  td:has(> .fld + .eyebtn) > .xbtn { vertical-align: middle; margin-left: 4px; }
+  .eyebtn { width: 24px; height: 22px; border: 1px solid transparent; border-radius: 6px;
+    background: none; color: var(--ink-3); cursor: pointer; padding: 2px 3px;
+    display: inline-block; }
+  .eyebtn:hover { background: var(--surface-2); color: var(--ink); }
+  /* Lit on the attention ground while hidden — a decision, not a warning
+     (§168): the warn family is for something owed, and nothing is. */
+  .eyebtn.on { background: var(--attn-bg); border-color: var(--attn-bg); color: var(--attn-tx); }
+  .eyebtn svg { width: 16px; height: 14px; display: block; }
+  .hidchip { display: inline-block; font: 600 10px/1 var(--sans); letter-spacing: .07em;
+    text-transform: uppercase; color: var(--attn-tx); background: var(--attn-bg);
+    border-radius: 99px; padding: 4px 8px; margin-left: 8px; white-space: nowrap;
+    vertical-align: middle; }
+  /* The row reads quiet — kept, not gone. Ink only, never display:none:
+     hiding the row from the PAGE is exactly what this feature is not. */
+  tr.hiddenrow > td, .orow.hiddenrow, .ochip.hiddenrow { color: var(--ink-3); }
 
   /* ── FILL THE GAPS (§145, spec 023) ──────────────────────────────────
      Three states, one colour family: a GAP is the product's own red (the
@@ -9887,6 +9944,22 @@ var GAP_OPTIONAL = { tactic: ["collaborators"],
     return !!out && out !== String(raw == null ? "" : raw).trim();
   }
 
+  /* ── HIDDEN FROM THE PRESENTATION (§233) ──────────────────────────────
+     A row the office keeps and does not present: left out of the deck and
+     NOT counted in any score, on every surface at once — Islam's decision,
+     2026-09-01. The mark is `row.hide === true`, riding each row's `extra`
+     JSONB (§177's road, no migration), stored as an ABSENCE (§50.6): a row
+     never hidden and one hidden-and-shown-again are byte-identical.
+
+     ONE PREDICATE, because the screen's scores, the deck and the counts must
+     answer together (§42, §53.5) — a score that includes a row the slide
+     does not show is a number nobody can defend. `shown()` is the list-side
+     spelling of the same answer, for the readers that draw or average. */
+  function isHidden(row) { return !!(row && row.hide === true); }
+  function shown(list) {
+    return (list || []).filter(function (r) { return !isHidden(r); });
+  }
+
   function namedOn(row, person) {
     if (!row || !person) return false;
     /* THE NAME THE REGISTER SHOWS COUNTS TOO (§130.7). The plan's owner and
@@ -10142,6 +10215,7 @@ var GAP_OPTIONAL = { tactic: ["collaborators"],
     firstName: firstName,
     GREET_OPEN: GREET_OPEN, GREET_CLOSE: GREET_CLOSE, GREET_NAME: GREET_NAME,
     webUrl: webUrl, webUrlFixed: webUrlFixed,
+    isHidden: isHidden, shown: shown,
     greetFill: greetFill,
     editingRoles: editingRoles, onlyVia: onlyVia, rolesOrFloor: rolesOrFloor,
     OWN_LINES_ONLY: OWN_LINES_ONLY, onlyOwnLines: onlyOwnLines,
@@ -15721,10 +15795,10 @@ function sideAvg(vals){
   return Math.round(v.reduce(function(a, b){ return a + b; }, 0) / v.length);
 }
 function projDeliverySide(p){
-  return sideAvg((p.deliverables || []).map(delivReads));
+  return sideAvg(SMPRules.shown(p.deliverables).map(delivReads));
 }
 function projOutcomeSide(p){
-  return sideAvg((p.outcomes || []).map(function(o){ return o.progress; }));
+  return sideAvg(SMPRules.shown(p.outcomes).map(function(o){ return o.progress; }));
 }
 function projPerf(p){
   var d = projDeliverySide(p), o = projOutcomeSide(p);
@@ -15734,7 +15808,7 @@ function projPerf(p){
   return Math.round(d * 0.5 + o * 0.5);
 }
 function projMilestones(p){
-  var ms = p.milestones || [], done = 0, wip = 0, todo = 0;
+  var ms = SMPRules.shown(p.milestones), done = 0, wip = 0, todo = 0;
   ms.forEach(function(m){
     if (m.status === "done") done++;
     else if (m.status === "wip") wip++;
@@ -15791,7 +15865,7 @@ function capExec(c){
   (c.projects || []).forEach(function(p){
     var m = projMilestones(p);
     done += m.done; wip += m.wip; todo += m.todo; total += m.total;
-    (p.milestones || []).forEach(function(x){
+    SMPRules.shown(p.milestones).forEach(function(x){
       /* §104.10: a milestone halfway through a sentence leaves the average
          rather than dragging it down. `|| 0` still stands for a milestone
          NOBODY has touched -- projMilestones() counts that one as Not started,
@@ -16571,7 +16645,9 @@ function outstandingSources(u){
    outside it is not an empty box somebody forgot \u2014 it is not asked. */
 function reportItems(u){
   var out = [];
-  u.keyObjectives.forEach(function(m){
+  /* §233: a hidden row is not asked — not counted means not owed, so it
+     leaves the ask list, the note rule and the submit gate in one skip. */
+  SMPRules.shown(u.keyObjectives).forEach(function(m){
     out.push({ id:m.id, obj:m, kind:"objective", group:L("keyobj","bu"), sub:"" });
   });
   u.items.forEach(function(p, pi){
@@ -16583,11 +16659,11 @@ function reportItems(u){
     /* `pown` is the pillar's own Owner, for the pillar-owner role's reach
        (§147.7) — carried beside §55's `owner` lean rather than replacing it,
        so nothing a contributor could reach before the role existed moves. */
-    p.measures.forEach(function(m){
+    SMPRules.shown(p.measures).forEach(function(m){
       out.push({ id:m.id, obj:m, kind:"measure", group:head, sub:"",
                  owner:p.owner, pown:p.owner });
     });
-    p.tactics.forEach(function(t){
+    SMPRules.shown(p.tactics).forEach(function(t){
       out.push({ id:t.id, obj:t, kind:"tactic", group:head,
                  sub:spanLabel(t), asked:tacticDue(t),
                  owner:t.owner, collaborators:t.collaborators, pown:p.owner });
@@ -16643,20 +16719,21 @@ function missingNotes(u){ return askedItems(u).filter(needsNote); }
 function fnReportItems(fk){
   var out = [];
   capsOfFunction(fk).forEach(function(c){
-    (c.keyObjectives || []).forEach(function(m){
+    /* §233: hidden rows are not asked, exactly as reportItems() skips them. */
+    SMPRules.shown(c.keyObjectives).forEach(function(m){
       out.push({ id:m.id, obj:m, kind:"objective", group:c.name, sub:"", asked:true });
     });
     (c.projects || []).forEach(function(p){
       var head = c.name + " \u00b7 " + (p.code || p.name);
-      (p.deliverables || []).forEach(function(d){
+      SMPRules.shown(p.deliverables).forEach(function(d){
         out.push({ id:d.id, obj:d, kind:"deliverable", group:head, sub:"",
                    asked:dueThisCycle(d.due), owner:p.owner });
       });
-      (p.outcomes || []).forEach(function(o){
+      SMPRules.shown(p.outcomes).forEach(function(o){
         out.push({ id:o.id, obj:o, kind:"outcome", group:head, sub:"",
                    asked:outcomeDue(o), owner:p.owner });
       });
-      (p.milestones || []).forEach(function(m){
+      SMPRules.shown(p.milestones).forEach(function(m){
         out.push({ id:m.id, obj:m, kind:"milestone", group:head, sub:"",
                    asked:dueThisCycle(m.finish), owner:m.owner || p.owner });
       });
@@ -17053,14 +17130,15 @@ var KO_WEIGHTS = { mobile: [40, 25, 20, 15] };
 function koScore(list, weights){
   /* §218: an objective counts as soon as it has a figure — nothing waits
      on the office any more. */
-  var vals = list.filter(function(m){ return !m.milestone && m.progress != null; });
+  /* §233: hidden is not counted, weighted or not. */
+  var vals = list.filter(function(m){ return !SMPRules.isHidden(m) && !m.milestone && m.progress != null; });
   if (!vals.length) return null;
   if (!weights) {
     return Math.round(vals.reduce(function(a, m){ return a + m.progress; }, 0) / vals.length);
   }
   var tot = 0, acc = 0;
   list.forEach(function(m, i){
-    if (m.milestone || m.progress == null) return;
+    if (SMPRules.isHidden(m) || m.milestone || m.progress == null) return;
     var w = weights[i] == null ? 0 : weights[i];
     acc += m.progress * w; tot += w;
   });
@@ -17272,6 +17350,10 @@ function gapMap(target, all, fillable){
     return canAuthor[acKey] || mayFillRow(acKey, ctx, target);
   };
   var G = function(acKey, ctx, kind, row){
+    /* §233: a hidden row's blanks are not gaps — it is not counted, not
+       asked, and not walked; gapCell() closes the same row's controls, so
+       the count and the walk stay one list (§192.4). */
+    if (SMPRules.isHidden(row)) return 0;
     if (!reach(acKey, ctx)) return 0;
     /* §223: COUNTED AND FILLABLE ARE TWO QUESTIONS, AND THE DOOR ASKS THE
        SECOND. §214.2 and §214.4 took a function's key objectives and its
@@ -17713,13 +17795,16 @@ function viaCarrier(p, own, roll){
    office's confirmation is not scored (§145): the comparison is not ready,
    so it leaves the average the way an unmeasured outcome already does
    (§104.10) — the reported actual is kept and shown, only the score waits. */
-function scorableMeasures(p){ return (p.measures || []).filter(function(m){ return m.target && m.progress != null; }); }
+/* §233: a hidden row leaves every average — the same skip on every reader,
+   through the one shared predicate (SMPRules.isHidden), or the deck and the
+   page would disagree about one number. */
+function scorableMeasures(p){ return (p.measures || []).filter(function(m){ return !SMPRules.isHidden(m) && m.target && m.progress != null; }); }
 function pillarPerf(p){
   return viaCarrier(p,
     function(){ return avg(scorableMeasures(p).map(function(m){ return m.progress; })); },
     function(f){ return avg(fnItems(f).map(pillarPerf)); });
 }
-function dueTactics(p){ return (p.tactics || []).filter(tacticDue); }
+function dueTactics(p){ return SMPRules.shown(p.tactics).filter(tacticDue); }
 /* A tactic that is due but has nothing reported is not delivering zero \u2014 it is
    unreported, and averaging a zero would say the plan is failing. */
 function reportedTactics(p){ return dueTactics(p).filter(function(t){ return t.actual != null; }); }
@@ -17938,6 +18023,30 @@ function projById(id){
    minted person key cannot but a unit key set by hand certainly can. Scanning
    is O(the plan) and the plan is small; a wrong answer here splices the wrong
    row out of somebody's strategy. */
+/* ── THE SIX HIDEABLE KINDS, RESOLVED BY ID (§233) ────────────────────────
+   An objective (a unit's, the group's, a capability's), a measure, a tactic,
+   a deliverable, an outcome, a milestone — every id is unique across the
+   graph (§191), so one resolver serves the one toggle. A pillar, a
+   capability and a project are deliberately NOT here: Islam ruled a whole
+   slide can never disappear, so the control is never drawn for them and the
+   handler cannot reach them either — both ends of the same door. */
+function hideableById(id){
+  var hit = null;
+  var scan = function(list){
+    (list || []).forEach(function(x){ if (!hit && x && x.id === id) hit = x; });
+  };
+  scan(GROUP.keyObjectives);
+  GROUP.capabilities.forEach(function(c){ scan(c.keyObjectives); });
+  UNIT_KEYS.concat(FUNCTION_KEYS.map(function(f){ return "fn:" + f; })).forEach(function(t){
+    var u = unitLike(t);
+    if (!u) return;
+    scan(u.keyObjectives);
+    (u.items || []).forEach(function(p){ scan(p.measures); scan(p.tactics); });
+  });
+  eachProject(function(p){ scan(p.deliverables); scan(p.outcomes); scan(p.milestones); });
+  return hit;
+}
+
 function listById(kind, id){
   var out = null;
   var look = function(list){
@@ -18363,13 +18472,22 @@ function restoreArchive(id){
     applyFiguresSnapshot(a.figures);
   }
   else if (a.kind === "unit") {
-    var u = UNITS[a.key];
+    /* unitLikeWritable, never UNITS[] (§232): a pillars FUNCTION archives
+       through this same path — the import's replace, Start fresh, and now
+       removing a pillar — and its archive is keyed `fn:<key>`, which UNITS
+       cannot resolve. Every one of those archives was un-restorable: the
+       row said "cannot be restored" for a function still on the platform.
+       The view's arrays are ASSIGNED here, so the fn side needs the write
+       back — builderStartFresh()'s own pair (§129). */
+    var u = unitLikeWritable(a.key);
     if (!u) return false;
     archiveUnitPlan(u, "replaced by restoring the " + a.at + " archive");
     var s = a.plan;
     u.clauses = clone(s.clauses); u.aspiration = s.aspiration; u.endInMind = s.endInMind;
     u.keyObjectives = clone(s.keyObjectives); u.swot = clone(s.swot); u.items = clone(s.items);
     renumberUnit(u);
+    var restFk = fnKeyOfTarget(a.key);
+    if (restFk) fnWriteBack(restFk, u);
   } else {
     var c = capById(a.key);
     if (!c) return false;
@@ -20577,6 +20695,7 @@ function diffPlan(u, rows){
         changes.push({ f:"3-year", was:hit.obj.target3y || "", now:joinTarget(hit.obj.target3y, r.value_3y, r.unit) });
       if (r.value !== "" && targetChanged(hit.obj.target, r.value, r.unit))
         changes.push({ f:"this year", was:hit.obj.target || "", now:joinTarget(hit.obj.target, r.value, r.unit) });
+      cmp("hidden", SMPRules.isHidden(hit.obj) ? "1" : "", r.hidden);
       cmp("compile", hit.obj.compile, r.compile);
     } else if (hit.kind === "PILLAR") {
       cmp("name", hit.obj.name, r.name);
@@ -20590,6 +20709,7 @@ function diffPlan(u, rows){
       if (r.value !== "" && targetChanged(hit.obj.target, r.value, r.unit))
         changes.push({ f:"target", was:hit.obj.target || "", now:joinTarget(hit.obj.target, r.value, r.unit) });
       cmp("compile", hit.obj.compile, r.compile);
+      cmp("hidden", SMPRules.isHidden(hit.obj) ? "1" : "", r.hidden);
     } else if (hit.kind === "TACTIC") {
       cmp("name", hit.obj.name, r.name); cmp("owner", hit.obj.owner, r.owner);
       cmp("collaborators", (hit.obj.collaborators || []).join("|"), r.collaborators);
@@ -20598,6 +20718,7 @@ function diffPlan(u, rows){
       ["q1","q2","q3","q4"].forEach(function(q){
         if (r[q] !== "") cmp(q.toUpperCase(), hit.obj[q] ? 1 : 0, r[q]);
       });
+      cmp("hidden", SMPRules.isHidden(hit.obj) ? "1" : "", r.hidden);
     }
     out.push({ id:r.id, type:hit.kind,
                name:hit.kind === "ASPIRATION" ? (hit.which === "end" ? "End in mind" : "Winning Aspiration")
@@ -20657,21 +20778,27 @@ function createFromPlan(u, d){
     } else if (x.type === "MEASURE") {
       var p = u.items.filter(function(y){ return y.id === x.parent_id; })[0];
       if (!p) return;
-      p.measures.push({ id:x.id, name:x.name, dir:x.direction || "\u2265", target:t1,
+      var mRow = { id:x.id, name:x.name, dir:x.direction || "\u2265", target:t1,
         compile:x.compile || "Latest", actual:"", progress:null,
-        slide:x.source_slide, horizon:x.horizon, notes:x.notes });
+        slide:x.source_slide, horizon:x.horizon, notes:x.notes };
+      /* §233: set only when the file says Yes — an absent key and a shown
+         row must stay byte-identical (§50.6). */
+      if (+x.hidden) mRow.hide = true;
+      p.measures.push(mRow);
       made++;
     } else if (x.type === "TACTIC") {
       var p2 = u.items.filter(function(y){ return y.id === x.parent_id; })[0];
       if (!p2) return;
       var col = (x.collaborators || "").split("|").map(function(s){ return s.trim(); }).filter(Boolean);
-      p2.tactics.push({ id:x.id, name:x.name, description:x.description, outcome:x.outcome,
+      var tRow = { id:x.id, name:x.name, description:x.description, outcome:x.outcome,
         owner:x.owner || "", collaborators:col,
         q1:+x.q1 ? 1 : 0, q2:+x.q2 ? 1 : 0, q3:+x.q3 ? 1 : 0, q4:+x.q4 ? 1 : 0,
         /* A plan that has just been loaded has no progress against it. Zero
            would read as started-and-delivered-nothing, which is a false
            failure on the day a plan arrives \u2014 the same trap as clearing. */
-        status:"Not started", actual:null, slide:x.source_slide, notes:x.notes });
+        status:"Not started", actual:null, slide:x.source_slide, notes:x.notes };
+      if (+x.hidden) tRow.hide = true;
+      p2.tactics.push(tRow);
       made++;
     } else if (x.type === "NORTHSTAR") {
       /* §213: a supporting function's objectives carry a WEIGHT and no 3-year
@@ -20683,6 +20810,7 @@ function createFromPlan(u, d){
         slide:x.source_slide };
       if (x.weight != null && String(x.weight).trim() !== "")
         ko.weight = Number(x.weight);
+      if (+x.hidden) ko.hide = true;
       u.keyObjectives.push(ko);
       made++;
     } else if (["STRENGTH","WEAKNESS","OPPORTUNITY","THREAT"].indexOf(x.type) > -1) {
@@ -20728,7 +20856,10 @@ function applyPlan(u, d){
       if (c.f === "kind")       o.kind = c.now;
       if (c.f === "theme")      o.theme = c.now;
       if (c.f === "owner")      o.owner = c.now;
-
+      /* §233: "Yes" hides, "No" shows again; the shown state is the ABSENT
+         key (§50.6). cmp never fires on a blank cell, so a file that says
+         nothing changes nothing (§54's adds-and-amends). */
+      if (c.f === "hidden")     { if (+c.now) o.hide = true; else delete o.hide; }
     });
   });
 }
@@ -20890,7 +21021,7 @@ function dueFits(v){
 var CAPP_COLS = ["id","type","parent_id","name","description","owner","stakeholders",
                  "collaborators",
                  "direction","value","unit","kind","measure_at","start","end",
-                 "finish","covers","weight","compile","timeline","notes"];
+                 "finish","covers","weight","compile","timeline","notes","hidden"];
 var CAPPROG_COLS = ["id","type","parent_id","parent_name","name","kind","target",
                     "measure_at","finish","current","new_value","notes"];
 
@@ -20918,7 +21049,7 @@ function capPlanTemplate(c){
     var a = splitTarget(m.target);
     rows.push(csvRow(CAPP_COLS, { id:m.id, type:"CAPOBJECTIVE", name:m.name, direction:m.dir,
       value:a.value, unit:a.unit, weight:(m.weight == null ? "" : m.weight),
-      compile:m.compile, notes:m.notes }));
+      compile:m.compile, notes:m.notes, hidden:SMPRules.isHidden(m) ? "1" : "" }));
   });
   (c.projects || []).forEach(function(p){
     rows.push(csvRow(CAPP_COLS, { id:p.id, type:"PROJECT", name:p.name, description:p.brief,
@@ -20926,17 +21057,19 @@ function capPlanTemplate(c){
       timeline:p.timeline || "quarter", start:p.start, end:p.end, notes:p.notes }));
     (p.deliverables || []).forEach(function(d){
       rows.push(csvRow(CAPP_COLS, { id:d.id, type:"DELIVERABLE", parent_id:p.id, name:d.name,
-        finish:d.due }));
+        finish:d.due, hidden:SMPRules.isHidden(d) ? "1" : "" }));
     });
     (p.outcomes || []).forEach(function(o){
       var a = splitTarget(o.target);
       rows.push(csvRow(CAPP_COLS, { id:o.id, type:"OUTCOME", parent_id:p.id, name:o.name,
-        direction:o.dir, value:a.value, unit:a.unit, measure_at:o.measureAt }));
+        direction:o.dir, value:a.value, unit:a.unit, measure_at:o.measureAt,
+        hidden:SMPRules.isHidden(o) ? "1" : "" }));
     });
     (p.milestones || []).forEach(function(m){
       rows.push(csvRow(CAPP_COLS, { id:m.id, type:"MILESTONE", parent_id:p.id, name:m.name,
         covers:m.covers, owner:m.owner,
-        collaborators:(m.collaborators || []).join("|"), finish:m.finish }));
+        collaborators:(m.collaborators || []).join("|"), finish:m.finish,
+        hidden:SMPRules.isHidden(m) ? "1" : "" }));
     });
   });
   return rows.join("\n");
@@ -21197,6 +21330,7 @@ function diffCapPlan(c, rows){
         changes.push({ f:"target", was:hit.obj.target || "", now:joinTarget(hit.obj.target, r.value, r.unit) });
       cmp("weight", hit.obj.weight == null ? "" : hit.obj.weight, r.weight);
       cmp("compile", hit.obj.compile, r.compile);
+      cmp("hidden", SMPRules.isHidden(hit.obj) ? "1" : "", r.hidden);
     } else if (hit.kind === "PROJECT") {
       cmp("name", hit.obj.name, r.name);
       cmp("brief", hit.obj.brief, r.description);
@@ -21208,11 +21342,13 @@ function diffCapPlan(c, rows){
     } else if (hit.kind === "DELIVERABLE") {
       cmp("name", hit.obj.name, r.name);
       cmp("due", hit.obj.due, r.finish || "");
+      cmp("hidden", SMPRules.isHidden(hit.obj) ? "1" : "", r.hidden);
     } else if (hit.kind === "OUTCOME") {
       cmp("name", hit.obj.name, r.name); cmp("direction", hit.obj.dir, r.direction);
       if (r.value !== "" && targetChanged(hit.obj.target, r.value, r.unit))
         changes.push({ f:"target", was:hit.obj.target || "", now:joinTarget(hit.obj.target, r.value, r.unit) });
       cmp("measured at", hit.obj.measureAt, r.measure_at);
+      cmp("hidden", SMPRules.isHidden(hit.obj) ? "1" : "", r.hidden);
     } else if (hit.kind === "MILESTONE") {
       cmp("name", hit.obj.name, r.name);
       cmp("what it covers", hit.obj.covers, r.covers);
@@ -21221,6 +21357,7 @@ function diffCapPlan(c, rows){
          the same contract the project's stakeholders keep above. */
       cmp("collaborators", (hit.obj.collaborators || []).join("|"), r.collaborators);
       cmp("finish", hit.obj.finish, r.finish);
+      cmp("hidden", SMPRules.isHidden(hit.obj) ? "1" : "", r.hidden);
     }
     out.push({ id:r.id, type:hit.kind, name:hit.obj.name || c.name,
                status:changes.length ? "changed" : "same", changes:changes, hit:hit, raw:r });
@@ -21260,20 +21397,25 @@ function createFromCapPlan(c, d){
       made++;
     } else if (x.type === "CAPOBJECTIVE") {
       var w = parseFloat(x.weight);
-      c.keyObjectives.push({ id:x.id, name:x.name, dir:x.direction || "≥",
+      var cko = { id:x.id, name:x.name, dir:x.direction || "≥",
         target:joinTarget("", x.value, x.unit), compile:x.compile || "Latest",
-        weight:isNaN(w) ? null : w, actual:null, progress:null });
+        weight:isNaN(w) ? null : w, actual:null, progress:null };
+      if (+x.hidden) cko.hide = true;
+      c.keyObjectives.push(cko);
       made++;
     } else if (x.type === "DELIVERABLE") {
       var p = projectById(x.parent_id); if (!p) return;
-      p.deliverables.push({ id:x.id, name:x.name, due:x.finish || "",
-        actual:null });
+      var dRow = { id:x.id, name:x.name, due:x.finish || "", actual:null };
+      if (+x.hidden) dRow.hide = true;
+      p.deliverables.push(dRow);
       made++;
     } else if (x.type === "OUTCOME") {
       var p2 = projectById(x.parent_id); if (!p2) return;
-      p2.outcomes.push({ id:x.id, name:x.name, dir:x.direction || "≥",
+      var oRow = { id:x.id, name:x.name, dir:x.direction || "≥",
         target:joinTarget("", x.value, x.unit), measureAt:x.measure_at || "",
-        actual:null, progress:null });
+        actual:null, progress:null };
+      if (+x.hidden) oRow.hide = true;
+      p2.outcomes.push(oRow);
       made++;
     } else if (x.type === "MILESTONE") {
       var p3 = projectById(x.parent_id); if (!p3) return;
@@ -21284,6 +21426,7 @@ function createFromCapPlan(c, d){
       var col = (x.collaborators || "").split(/[,|]/)
         .map(function(s){ return s.trim(); }).filter(Boolean);
       if (col.length) m3.collaborators = col;
+      if (+x.hidden) m3.hide = true;
       p3.milestones.push(m3);
       made++;
     }
@@ -21309,6 +21452,7 @@ function applyCapPlan(c, d){
       /* §227: cmp never fires on an emptied value, so `ch.now` is always a
          real list here — a file adds and amends, it never removes (§54). */
       if (ch.f === "collaborators")  o.collaborators = ch.now.split("|").map(function(s){ return s.trim(); }).filter(Boolean);
+      if (ch.f === "hidden")         { if (+ch.now) o.hide = true; else delete o.hide; }
       if (ch.f === "timeline")       o.timeline = timelineKey(ch.now) || o.timeline;
       if (ch.f === "start")          o.start = ch.now;
       if (ch.f === "end")            o.end = ch.now;
@@ -21835,27 +21979,31 @@ function planWorkbook(u){
        every validation range move with the columns — a range is a POSITION
        (§65), and leaving them where a unit's are would validate the wrong
        cells in silence. */
-    { name:"Objectives", widths:[36, 11, 16, 10, 12, 10],
-      head:["Objective", "Direction", "This year target", "Unit", "Compile", "Weight %"],
+    { name:"Objectives", widths:[36, 11, 16, 10, 12, 10, 9],
+      head:["Objective", "Direction", "This year target", "Unit", "Compile", "Weight %", "Hidden"],
       numCols:[2, 5],
       validations:[{ range:"B2:B60", list:DIRS },
                    { range:"D2:D60", list:units, soft:true },
-                   { range:"E2:E60", list:COMPILES }],
+                   { range:"E2:E60", list:COMPILES },
+                   { range:"G2:G60", list:YESNO, soft:true }],
       rows:u.keyObjectives.map(function(m){
         var a = splitTarget(m.target);
         return [m.name, m.dir, a.value, a.unit, m.compile,
-                m.weight == null ? "" : m.weight];
+                m.weight == null ? "" : m.weight,
+                SMPRules.isHidden(m) ? "Yes" : ""];
       }) }
   ] : [
-    { name:"Objectives", widths:[36, 18, 11, 16, 16, 10, 12],
-      head:["Objective", "Group", "Direction", "3-year target", "This year target", "Unit", "Compile"],
+    { name:"Objectives", widths:[36, 18, 11, 16, 16, 10, 12, 9],
+      head:["Objective", "Group", "Direction", "3-year target", "This year target", "Unit", "Compile", "Hidden"],
       numCols:[3, 4],
       validations:[{ range:"C2:C60", list:DIRS },
                    { range:"F2:F60", list:units, soft:true },
-                   { range:"G2:G60", list:COMPILES }],
+                   { range:"G2:G60", list:COMPILES },
+                   { range:"H2:H60", list:YESNO, soft:true }],
       rows:u.keyObjectives.map(function(m){
         var a = splitTarget(m.target), b = splitTarget(m.target3y);
-        return [m.name, m.group || "", m.dir, b.value, a.value, a.unit, m.compile];
+        return [m.name, m.group || "", m.dir, b.value, a.value, a.unit, m.compile,
+                SMPRules.isHidden(m) ? "Yes" : ""];
       }) },
 
     { name:"SWOT", widths:[16, 78],
@@ -21875,33 +22023,37 @@ function planWorkbook(u){
                      error:"Choose a theme name, or \u2014 none \u2014 for a cross-cutting pillar." }],
       rows:u.items.map(function(p){ return [p.name, p.kind, themeNameOf(p.theme), p.owner]; }) },
 
-    { name:"Measures", widths:[34, 40, 11, 14, 12, 12],
-      head:["Pillar", "Measure", "Direction", "Target", "Unit", "Compile"],
+    { name:"Measures", widths:[34, 40, 11, 14, 12, 12, 9],
+      head:["Pillar", "Measure", "Direction", "Target", "Unit", "Compile", "Hidden"],
       numCols:[3],
       validations:[{ range:"A2:A400", from:PILLAR_RANGE,
                      error:"Choose a pillar from the Pillars sheet." },
                    { range:"C2:C400", list:DIRS },
                    { range:"E2:E400", list:units, soft:true },
-                   { range:"F2:F400", list:COMPILES }],
+                   { range:"F2:F400", list:COMPILES },
+                   { range:"G2:G400", list:YESNO, soft:true }],
       rows:u.items.reduce(function(acc, p){
         p.measures.forEach(function(m){
           var a = splitTarget(m.target);
-          acc.push([p.name, m.name, m.dir, a.value, a.unit, m.compile]);
+          acc.push([p.name, m.name, m.dir, a.value, a.unit, m.compile,
+                    SMPRules.isHidden(m) ? "Yes" : ""]);
         });
         return acc;
       }, []) },
 
-    { name:"Tactics", widths:[30, 40, 40, 34, 20, 24, 7, 7, 7, 7],
+    { name:"Tactics", widths:[30, 40, 40, 34, 20, 24, 7, 7, 7, 7, 9],
       head:["Pillar", "Tactic", "Description", "Outcome", "Owner", "Collaborators",
-            "Q1", "Q2", "Q3", "Q4"],
+            "Q1", "Q2", "Q3", "Q4", "Hidden"],
       validations:[{ range:"A2:A400", from:PILLAR_RANGE,
                      error:"Choose a pillar from the Pillars sheet." },
-                   { range:"G2:J400", list:YESNO }],
+                   { range:"G2:J400", list:YESNO },
+                   { range:"K2:K400", list:YESNO, soft:true }],
       rows:u.items.reduce(function(acc, p){
         p.tactics.forEach(function(t){
           acc.push([p.name, t.name, t.description || "", t.outcome || "", t.owner,
             (t.collaborators || []).join(", "),
-            t.q1 ? "Yes" : "No", t.q2 ? "Yes" : "No", t.q3 ? "Yes" : "No", t.q4 ? "Yes" : "No"]);
+            t.q1 ? "Yes" : "No", t.q2 ? "Yes" : "No", t.q3 ? "Yes" : "No", t.q4 ? "Yes" : "No",
+            SMPRules.isHidden(t) ? "Yes" : ""]);
         });
         return acc;
       }, []) }
@@ -22159,7 +22311,8 @@ function planFromWorkbook(u, sheets){
     rows.push({ id:mint("KO" + (++kN)), type:"NORTHSTAR", name:r["Objective"],
       group:r["Group"], direction:r["Direction"], value:r["This year target"],
       value_3y:r["3-year target"], unit:r["Unit"], compile:r["Compile"],
-      weight:r["Weight %"] });
+      weight:r["Weight %"],
+      hidden:yes(r["Hidden"]) ? "1" : "" });
   });
 
   var swotN = { Strength:0, Weakness:0, Opportunity:0, Threat:0 };
@@ -22177,7 +22330,8 @@ function planFromWorkbook(u, sheets){
     mN[pid] = (mN[pid] || 0) + 1;
     rows.push({ id:pid ? pid + "-M" + mN[pid] : "", type:"MEASURE",
       parent_id:pid, name:r["Measure"], direction:r["Direction"],
-      value:r["Target"], unit:r["Unit"], compile:r["Compile"] });
+      value:r["Target"], unit:r["Unit"], compile:r["Compile"],
+      hidden:yes(r["Hidden"]) ? "1" : "" });
   });
   sheetObjects(sheets["Tactics"]).forEach(function(r){
     if (!r["Tactic"]) return;
@@ -22189,13 +22343,14 @@ function planFromWorkbook(u, sheets){
       collaborators:(r["Collaborators"] || "").split(/[,|]/).map(function(x){ return x.trim(); })
         .filter(Boolean).join("|"),
       q1:yes(r["Q1"]) ? "1" : "0", q2:yes(r["Q2"]) ? "1" : "0",
-      q3:yes(r["Q3"]) ? "1" : "0", q4:yes(r["Q4"]) ? "1" : "0" });
+      q3:yes(r["Q3"]) ? "1" : "0", q4:yes(r["Q4"]) ? "1" : "0",
+      hidden:yes(r["Hidden"]) ? "1" : "" });
   });
 
   return rows.map(function(r){
     ["parent_id","source_slide","name","description","outcome","owner","collaborators",
      "direction","value","value_3y","unit","horizon","compile","q1","q2","q3","q4",
-     "theme","kind","notes","group"].forEach(function(k){ if (r[k] == null) r[k] = ""; });
+     "theme","kind","notes","group","hidden"].forEach(function(k){ if (r[k] == null) r[k] = ""; });
     return r;
   });
 }
@@ -22293,15 +22448,17 @@ function capPlanWorkbook(c){
   return [
     capReadme("plan", names, c ? c.name : ""),
 
-    { name:"Objectives", widths:[40, 11, 14, 12, 10, 12],
-      head:["Objective", "Direction", "Target", "Unit", "Weight", "Compile"],
+    { name:"Objectives", widths:[40, 11, 14, 12, 10, 12, 9],
+      head:["Objective", "Direction", "Target", "Unit", "Weight", "Compile", "Hidden"],
       numCols:[2, 4],
       validations:[{ range:"B2:B60", list:DIRS },
                    { range:"D2:D60", list:units, soft:true },
-                   { range:"F2:F60", list:COMPILES }],
+                   { range:"F2:F60", list:COMPILES },
+                   { range:"G2:G60", list:YESNO, soft:true }],
       rows:(c.keyObjectives || []).map(function(m){
         var a = splitTarget(m.target);
-        return [m.name, m.dir, a.value, a.unit, m.weight == null ? "" : String(m.weight), m.compile];
+        return [m.name, m.dir, a.value, a.unit, m.weight == null ? "" : String(m.weight), m.compile,
+                SMPRules.isHidden(m) ? "Yes" : ""];
       }) },
 
     { name:"Projects", widths:[38, 70, 20, 30, 12, 14, 14],
@@ -22316,32 +22473,38 @@ function capPlanWorkbook(c){
        deliverable is delivered when the project ends, and the project's owner
        is the project's. A column the platform no longer reads is worse than
        no column — somebody fills it in and nothing happens. */
-    { name:"Deliverables", widths:[34, 60],
+    { name:"Deliverables", widths:[34, 60, 9],
       /* §104.8: NO DUE DATE COLUMN, and no Kind either. A deliverable's
          direction and target are written by the platform, and Islam took the
          date off the templates "for now" -- the field survives in the model
          and nothing asks for it, so every deliverable is simply always asked,
          which is what the product did before §104 put the date back. */
-      head:["Project", "Deliverable"],
+      /* §233: the old C2:C400 DELIV_KINDS validation was aimed at the Kind
+         column that sheet no longer has — Hidden takes the position, so the
+         stale list goes with it rather than dressing the new column. */
+      head:["Project", "Deliverable", "Hidden"],
       validations:[{ range:"A2:A400", from:PROJECT_RANGE,
                      error:"Choose a project from the Projects sheet." },
-                   { range:"C2:C400", list:DELIV_KINDS }],
+                   { range:"C2:C400", list:YESNO, soft:true }],
       rows:(c.projects || []).reduce(function(acc, p){
-        (p.deliverables || []).forEach(function(d){ acc.push([p.name, d.name]); });
+        (p.deliverables || []).forEach(function(d){
+          acc.push([p.name, d.name, SMPRules.isHidden(d) ? "Yes" : ""]); });
         return acc;
       }, []) },
 
-    { name:"Outcomes", widths:[34, 44, 11, 12, 12, 14],
-      head:["Project", "Outcome", "Direction", "Target", "Unit", "Due date"],
+    { name:"Outcomes", widths:[34, 44, 11, 12, 12, 14, 9],
+      head:["Project", "Outcome", "Direction", "Target", "Unit", "Due date", "Hidden"],
       numCols:[3],
       validations:[{ range:"A2:A400", from:PROJECT_RANGE,
                      error:"Choose a project from the Projects sheet." },
                    { range:"C2:C400", list:DIRS },
-                   { range:"E2:E400", list:units, soft:true }],
+                   { range:"E2:E400", list:units, soft:true },
+                   { range:"G2:G400", list:YESNO, soft:true }],
       rows:(c.projects || []).reduce(function(acc, p){
         (p.outcomes || []).forEach(function(o){
           var a = splitTarget(o.target);
-          acc.push([p.name, o.name, o.dir, a.value, a.unit, o.measureAt || ""]);
+          acc.push([p.name, o.name, o.dir, a.value, a.unit, o.measureAt || "",
+                    SMPRules.isHidden(o) ? "Yes" : ""]);
         });
         return acc;
       }, []) },
@@ -22349,14 +22512,16 @@ function capPlanWorkbook(c){
     /* §227: Collaborators beside the Owner, the tactics sheet's own column —
        comma-separated names, and the export carries them or a download-and-
        re-upload would silently drop every one (§22: an upload AUTHORS). */
-    { name:"Milestones", widths:[34, 38, 52, 16, 26, 14],
-      head:["Project", "Milestone", "Description", "Owner", "Collaborators", "Due date"],
+    { name:"Milestones", widths:[34, 38, 52, 16, 26, 14, 9],
+      head:["Project", "Milestone", "Description", "Owner", "Collaborators", "Due date", "Hidden"],
       validations:[{ range:"A2:A400", from:PROJECT_RANGE,
-                     error:"Choose a project from the Projects sheet." }],
+                     error:"Choose a project from the Projects sheet." },
+                   { range:"G2:G400", list:YESNO, soft:true }],
       rows:(c.projects || []).reduce(function(acc, p){
         (p.milestones || []).forEach(function(m){
           acc.push([p.name, m.name, m.covers || "", m.owner || "",
-                    (m.collaborators || []).join(", "), m.finish || ""]);
+                    (m.collaborators || []).join(", "), m.finish || "",
+                    SMPRules.isHidden(m) ? "Yes" : ""]);
         });
         return acc;
       }, []) }
@@ -22455,6 +22620,7 @@ function capPlanFromWorkbook(c, sheets){
        instead, which is read and ignored (§58: write the new label, read
        whatever arrives). */
     row.finish = r["Due date"] != null ? r["Due date"] : "";
+    row.hidden = yes(r["Hidden"]) ? "1" : "";
   });
   child("Outcomes", "OUTCOME", "Outcome", "O", function(row, r){
     row.direction = r["Direction"]; row.value = r["Target"];
@@ -22463,6 +22629,7 @@ function capPlanFromWorkbook(c, sheets){
        column keeps below, and for the same reason. */
     row.measure_at = r["Due date"] != null ? r["Due date"]
                    : r["Measure date"] != null ? r["Measure date"] : r["Measured at"];
+    row.hidden = yes(r["Hidden"]) ? "1" : "";
   });
   child("Milestones", "MILESTONE", "Milestone", "M", function(row, r){
     /* Description since §103, read as either (§58). The STORED field keeps its
@@ -22479,6 +22646,7 @@ function capPlanFromWorkbook(c, sheets){
        and a header is a contract. The STORED field keeps its own spelling —
        renaming `finish` would be a migration for a word nobody reads. */
     row.finish = r["Due date"] != null ? r["Due date"] : r["Finish"];
+    row.hidden = yes(r["Hidden"]) ? "1" : "";
   });
 
   return rows.map(function(r){
@@ -23152,7 +23320,7 @@ function pptxUnitSlides(u, kicker){
     { x:PPTX_MX, y:2705100, cx:PPTX_CW, cy:2971800 }, found));
   slides.push(pptxSlideXml(fShapes));
 
-  var kos = u.keyObjectives || [];
+  var kos = SMPRules.shown(u.keyObjectives);
   if (kos.length) slides = slides.concat(pptxTableSlides(kicker, "Key objectives",
     [4754880, 914400, 2621280, 2621280],
     ["Objective", "Dir.", "This year's target", "3-year target"],
@@ -23189,13 +23357,13 @@ function pptxUnitSlides(u, kicker){
     slides = slides.concat(pptxTableSlides(pk, p.name + " — Key measures",
       [5303520, 914400, 2346960, 2346960],
       ["Measure", "Dir.", "Target", "Compiles"],
-      (p.measures || []).map(function(m){
+      SMPRules.shown(p.measures).map(function(m){
         return [m.name, orPend(m, "dir"), orPend(m, "target"), orPend(m, "compile")];
       })));
     slides = slides.concat(pptxTableSlides(pk, p.name + " — Tactics",
       [4571760, 2103120, 1676400, 640140, 640140, 640140, 640140],
       ["Tactic", "Owner", "Collaborators", "Q1", "Q2", "Q3", "Q4"],
-      (p.tactics || []).map(function(t){
+      SMPRules.shown(p.tactics).map(function(t){
         return [t.name, orPend(t, "owner"),
                 (t.collaborators || []).join(", ") || "—"].concat(pptxQCells(t));
       })));
@@ -23222,7 +23390,7 @@ function pptxFnSlides(fk){
          ? pptxPara(pptxRun(c.def, { sz:1300, i:true, color:C.bar }), { before:600 })
          : pptxPara(pptxRun("Missing", { sz:1300, b:true, color:C.bad }), { before:600 })],
       { fill:C.zebra }));
-    var kos = c.keyObjectives || [];
+    var kos = SMPRules.shown(c.keyObjectives);
     if (kos.length) shapes.push(pptxTable(7,
       { x:PPTX_MX, y:2529840, cx:PPTX_CW },
       [5760720, 914400, 2118360, 2118360],
@@ -23239,9 +23407,9 @@ function pptxFnSlides(fk){
       ["Project", "Owner", "Start", "End", "Carries"],
       (c.projects || []).map(function(p){
         return [p.name, orPend(p, "owner"), orPend(p, "start"), orPend(p, "end"),
-          plural((p.deliverables || []).length, "deliverable") + " · " +
-          plural((p.outcomes || []).length, "outcome") + " · " +
-          plural((p.milestones || []).length, "milestone")];
+          plural(SMPRules.shown(p.deliverables).length, "deliverable") + " · " +
+          plural(SMPRules.shown(p.outcomes).length, "outcome") + " · " +
+          plural(SMPRules.shown(p.milestones).length, "milestone")];
       })));
   });
   slides.push(pptxThanks(f.name, (GROUP.org || "") + " \u00b7 Strategy plan"));
@@ -24047,9 +24215,11 @@ function measureRows(ms, opts){
        or direction is live, so a measure is scored the moment it has a
        figure to score. */
     var scored = m.target && m.progress != null;
-    var head = '<tr data-oi="' + i + '"' + (isFocus(m.id) ? ' class="focusrow"' : '') + '><td class="idx">' +
+    var head = '<tr data-oi="' + i + '"' +
+               (SMPRules.isHidden(m) ? ' class="hiddenrow"'
+                : isFocus(m.id) ? ' class="focusrow"' : '') + '><td class="idx">' +
                (on ? handle("Reorder " + m.name) : '') +
-               '<span class="idx-n">' + (i+1) + '</span></td><td>' + esc(m.name) + fmark(m.id) +
+               '<span class="idx-n">' + (i+1) + '</span></td><td>' + esc(m.name) + hidChip(m) + fmark(m.id) +
                (m.horizon ? '<span class="why">measured at ' + esc(m.horizon) + '</span>' : '') +
                '</td><td class="num">' + dirCell(m.dir) + '</td><td class="num">' + esc(m.target) +
                '</td><td class="cc">' + compileCell(m.compile) + '</td>';
@@ -24122,9 +24292,11 @@ function tacticRows(ts, unitKey){
       : '<td class="num"><span class="pair"><b>' + t.actual + '</b> / ' + pl + '</span></td>' +
         '<td class="num">' + varCell(t.actual, pl) + '</td>' +
         '<td class="num final" style="color:' + bandInk(r) + '">' + pct(r) + '</td>';
-    return '<tr data-oi="' + i + '"' + (due && t.actual != null ? '' : ' class="notdue"') + '><td class="idx">' +
+    return '<tr data-oi="' + i + '"' +
+      (SMPRules.isHidden(t) ? ' class="hiddenrow"'
+        : due && t.actual != null ? '' : ' class="notdue"') + '><td class="idx">' +
       (on ? handle("Reorder " + t.name) : '') +
-      '<span class="idx-n">' + (i+1) + '</span></td><td>' + esc(t.name) +
+      '<span class="idx-n">' + (i+1) + '</span></td><td>' + esc(t.name) + hidChip(t) +
       (t.outcome ? '<span class="why">' + esc(t.outcome) + '</span>' : '') + '</td>' +
       '<td>' + esc(t.owner) + '</td><td class="collabs">' + collabCell(t) + '</td>' +
       '<td>' + qs(t) + '</td><td class="cc">' + status + '</td>' + tail + '</tr>';
@@ -26366,7 +26538,7 @@ function gapCell(page, acKey, row, field, opts){
       if (opts.del && SMPRules.gapBlank(nv)) delete row[field];
       else row[field] = nv;
       gapLift(row, field); gapBandRefresh();
-    }, open && SMPRules.isGapField(field) ? "gapwalk" : "");
+    }, open && !SMPRules.isHidden(row) && SMPRules.isGapField(field) ? "gapwalk" : "");
   }
   /* ── A CELL THE FILLABLE LIST HAS CLOSED NEVER OPENS TO A FILLER ────
      (§228.2, found by the §227 merge.) §224.2 took `def` out of
@@ -26381,7 +26553,11 @@ function gapCell(page, acKey, row, field, opts){
      a call site that names no kind keeps today's behaviour. */
   var fillable = !opts.fillKind ||
     (SMPRules.GAP_FILLABLE[opts.fillKind] || []).indexOf(field) > -1;
-  if (fl && fillable && (open || mark)) {
+  /* §233: a hidden row never opens to a filler — its blanks are not gaps
+     (gapMap skips it), so a control here would be a door the count denies
+     (§192.4: the count and the walk are one list). The office's pen above
+     is untouched: hiding is the office's own mark and their edit settles. */
+  if (fl && fillable && !SMPRules.isHidden(row) && (open || mark)) {
     return draw(function(v){
       var nv = put(v);
       if (SMPRules.gapBlank(nv)) {
@@ -26637,7 +26813,8 @@ function koView(list, isGroup, acKey){
   if (KO_VIEW === "chips") {
     return '<div class="ochips">' + list.map(function(m){
       var far = m.target3y ? esc(m.target3y) : miss;
-      return '<div class="ochip"><b>' + esc(m.name) + '</b>' +
+      return '<div class="ochip' + (SMPRules.isHidden(m) ? ' hiddenrow' : '') +
+        '"><b>' + esc(m.name) + '</b>' + hidChip(m) +
         (near ? '<div class="v">' + (m.target ? esc(m.target) : miss) + '</div>' +
                 '<div class="h">3-year ' + far + '</div>'
               : '<div class="v">' + far + '</div>') + chips(m) + '</div>';
@@ -26658,8 +26835,9 @@ function koView(list, isGroup, acKey){
       '<span>' + horizonColLabel() + '</span>' +
       (near ? '<span>This year</span>' : '') + '</div>' +
     list.map(function(m){
-      return '<div class="orow' + (near ? '' : ' one') + '"><span class="on">' + esc(m.name) +
-        chips(m) + '</span>' +
+      return '<div class="orow' + (near ? '' : ' one') +
+        (SMPRules.isHidden(m) ? ' hiddenrow' : '') + '"><span class="on">' + esc(m.name) +
+        hidChip(m) + chips(m) + '</span>' +
         '<span class="ot h">' + (m.target3y ? esc(m.target3y) : miss) + '</span>' +
         (near ? '<span class="ot">' + (m.target ? esc(m.target) : miss) + '</span>' : '') + '</div>';
     }).join("");
@@ -26693,6 +26871,33 @@ function horizonColLabel(){
 
    Every field goes through `fieldOr`/`inputOr`/`selectOr` now, so there is no
    second way to draw one of these cells and no second place to forget. */
+/* ── HIDDEN FROM THE PRESENTATION (§233) ──────────────────────────────
+   The eye beside a row's × in the pen; the chip in read mode. An SVG taking
+   currentColor, never a colour emoji (§45); lit on the attention ground
+   while hidden — a decision, not a warning (§168). The chip is drawn for
+   EVERYONE, because a row that does not count has to say so or the average
+   above it cannot be explained. The handler re-asks authoring at the click
+   through the page/acKey the button carries (§48.2). */
+function eyeSvg(off){
+  return '<svg viewBox="0 0 24 20" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">' +
+    '<path d="M2 10s3.5-6 10-6 10 6 10 6-3.5 6-10 6S2 10 2 10z"/><circle cx="12" cy="10" r="2.6"/>' +
+    (off ? '<line x1="4" y1="18" x2="20" y2="2"/>' : '') + '</svg>';
+}
+function eyeBtn(row, page, acKey){
+  if (!row || !row.id) return '';
+  var on = SMPRules.isHidden(row);
+  var word = on ? 'Hidden from the presentation \u2014 press to show it again'
+               : 'Hide from the presentation';
+  return '<button class="eyebtn' + (on ? ' on' : '') + '" data-hiderow="' + esc(row.id) +
+    '" data-hideac="' + esc(page) + '|' + esc(acKey) + '" aria-pressed="' + (on ? 'true' : 'false') +
+    '" title="' + word + '" aria-label="' + word + '">' + eyeSvg(on) + '</button>';
+}
+function hidChip(row){
+  return SMPRules.isHidden(row)
+    ? '<span class="hidchip">Hidden \u2014 not counted</span>' : '';
+}
+function hidCls(row){ return SMPRules.isHidden(row) ? ' class="hiddenrow"' : ''; }
+
 function koEdit(list, page, acKey, owner){
   var editing = authoring(page, acKey), pg = editing ? page : null;
   /* WHICH LIST THIS IS. Add and Remove act on an array, and the two callers
@@ -26708,7 +26913,8 @@ function koEdit(list, page, acKey, owner){
          setter lifting a pending mark, since correcting confirms); in fill
          mode only a blank or still-pending one opens. The NAME never does:
          a row that exists is named, and renaming is authoring. */
-      return '<tr><td>' + inputOr(pg, m.name, "", function(v){ m.name = v; }) + '</td>' +
+      return '<tr' + hidCls(m) + '><td>' + inputOr(pg, m.name, "", function(v){ m.name = v; }) +
+        (pg ? '' : hidChip(m)) + '</td>' +
         '<td class="cc">' + gapCell(page, acKey, m, "dir",
           { kind:"select", opts:["\u2265", "\u2264"] }) + '</td>' +
         /* §199: THE OFFICE'S, NOT THE FILLER'S. A unit is not a gap — 46 of
@@ -26730,7 +26936,8 @@ function koEdit(list, page, acKey, owner){
         '<td class="cc">' + gapCell(page, acKey, m, "compile",
           { kind:"select", opts:["Sum", "Latest", "Average"] }) + '</td>' +
         '<td class="cc">' + (editing
-          ? '<button class="rmbtn" data-korm="' + li + '|' + i + '">Remove</button>' : '') +
+          ? eyeBtn(m, page, acKey) +
+            ' <button class="rmbtn" data-korm="' + li + '|' + i + '">Remove</button>' : '') +
         '</td></tr>';
     }).join("") + '</tbody></table></div>' +
     (editing ? '<div class="addrow"><button class="editbtn" data-koadd="' + li +
@@ -27121,10 +27328,13 @@ function renderReport(u){
      inside an open body. The selection belongs to the unit and is shared with
      Performance and Strategy. No reordering here: entry, not arrangement. */
   var reportPillarPane = function(p, pi){
+    /* §233: a hidden row is not asked, so it is not drawn here — the same
+       skip reportItems() makes, or the pane would collect a figure the
+       submit gate no longer waits on. */
     var ms = [];
-    p.measures.forEach(function(m){ ms.push({ id:m.id, obj:m, kind:"measure" }); });
+    SMPRules.shown(p.measures).forEach(function(m){ ms.push({ id:m.id, obj:m, kind:"measure" }); });
     var ts = [];
-    p.tactics.forEach(function(t){
+    SMPRules.shown(p.tactics).forEach(function(t){
       ts.push({ id:t.id, obj:t, kind:"tactic", sub:spanLabel(t), asked:tacticDue(t) });
     });
     var askedT = ts.filter(function(x){ return x.asked; });
@@ -27184,11 +27394,11 @@ function renderReport(u){
      both read, so they can never disagree. */
   var pillarTally = function(p){
     var done = 0, total = 0;
-    p.measures.forEach(function(m){
+    SMPRules.shown(p.measures).forEach(function(m){
       total++;
       if (m.actual != null && m.actual !== "") done++;
     });
-    p.tactics.forEach(function(t){
+    SMPRules.shown(p.tactics).forEach(function(t){
       if (!tacticDue(t)) return;
       total++;
       if (t.actual != null && t.actual !== "") done++;
@@ -28066,9 +28276,10 @@ function projPlanBody(p, fk){
      three. Every cell answered, and no band to keep two halves aligned. */
   var dxr = dxRows(p).map(function(row, i){
     var o = row.obj, d = dxIsDeliv(row);
-    return '<tr data-oi="' + i + '"><td class="idx">' +
+    return '<tr data-oi="' + i + '"' + hidCls(o) + '><td class="idx">' +
       (on ? handle("Reorder " + o.name) : '') + '<span class="idx-n">' + (i+1) + '</span></td>' +
       '<td>' + (ed ? textOr("plan", o.name, "", function(v){ o.name = v; }) : esc(o.name)) +
+        (ed ? eyeBtn(o, "plan", "k_proj") : hidChip(o)) +
         xb(d ? "deliverables" : "outcomes", o.id) + '</td>' +
       '<td class="cc">' + dxType(row) + '</td>' +
       '<td class="cc">' + dxDir(row) + '</td>' +
@@ -28088,9 +28299,10 @@ function projPlanBody(p, fk){
       '<button class="linkbu" data-rowadd="outcome|' + esc(p.id) + '">Add an outcome</button>' +
     '</td></tr>' : '');
   var mRows = p.milestones.map(function(m, i){
-    return '<tr data-oi="' + i + '"><td class="idx">' +
+    return '<tr data-oi="' + i + '"' + hidCls(m) + '><td class="idx">' +
       (on ? handle("Reorder " + m.name) : '') + '<span class="idx-n">' + (i+1) + '</span></td>' +
       '<td>' + (ed ? textOr("plan", m.name, "", function(v){ m.name = v; }) : esc(m.name)) +
+        (ed ? eyeBtn(m, "plan", "k_proj") : hidChip(m)) +
         xb("milestones", m.id) + '</td>' +
       '<td>' + (ed ? textOr("plan", m.covers || "", "", function(v){ m.covers = v; })
                    : esc(m.covers || "")) + '</td>' +
@@ -28172,6 +28384,11 @@ function projPlanBody(p, fk){
     ? '<div class="pband edband"><span class="pband-code">' + esc(projCode(fk, p)) + '</span>' +
         '<span class="pband-name">' +
           textOr("plan", p.name, "", function(v){ p.name = v; }) + '</span>' +
+        /* The pillar head's own control on the project's band (§232, §53.5:
+           a unit and a function are the same product). The id alone is the
+           address — capOfProjectId() resolves the holder at press time. */
+        '<button class="rmplan" data-rmrow="project|' + esc(p.id) +
+          '">Remove this project</button>' +
         (acts ? '<span class="pband-r">' + acts + '</span>' : '') + '</div>'
     /* §192: the pending count left this slot for the totals row above — it
        was the SUBJECT's number on one pillar's band, printing under the fill
@@ -28641,10 +28858,11 @@ function unitPlanBody(it, u, railed){
   var unitCol = !ed && it.measures.some(function(m){
     return fillUnitOffered("plan", "u_plan", m, pctx(m)); });
   var mRows = it.measures.map(function(m, i){
-    return '<tr data-oi="' + i + '"><td class="idx">' +
+    return '<tr data-oi="' + i + '"' + hidCls(m) + '><td class="idx">' +
       (on ? handle("Reorder " + m.name) : '') +
       '<span class="idx-n">' + (i+1) + '</span></td>' +
       '<td>' + (ed ? textOr("plan", m.name, "", function(v){ m.name = v; }) : esc(m.name)) +
+        (ed ? eyeBtn(m, "plan", "u_plan") : hidChip(m)) +
         xb("measures", m.id) + '</td>' +
       /* EDITABLE SINCE §114, reversing §31's read-only. That section closed the
          direction and the compile rule because "they change what a figure
@@ -28704,10 +28922,11 @@ function unitPlanBody(it, u, railed){
           readEmpty:"\u2014", read:compileCell }) + '</td></tr>';
   }).join("");
   var tRows = it.tactics.map(function(t, i){
-    return '<tr data-oi="' + i + '"><td class="idx">' +
+    return '<tr data-oi="' + i + '"' + hidCls(t) + '><td class="idx">' +
       (on ? handle("Reorder " + t.name) : '') +
       '<span class="idx-n">' + (i+1) + '</span></td>' +
       '<td>' + (ed ? textOr("plan", t.name, "", function(v){ t.name = v; }) : esc(t.name)) +
+        (ed ? eyeBtn(t, "plan", "u_plan") : hidChip(t)) +
         xb("tactics", t.id) + '</td>' +
       /* §145 MERGED WITH §130.1: gapCell keeps the pending lifecycle and
          the read-mode Missing word; the control hook renders the register-
@@ -28785,6 +29004,18 @@ function unitPlanBody(it, u, railed){
             : '&nbsp; ' + esc(it.name)) + '</h3>' +
         (meta ? '<div class="pmeta">' + meta + '</div>' : '') + '</div>' +
         kindPill(it) +
+        /* ── REMOVE, WORDED, IN THE HEAD THAT PINS (§232) ──────────────
+           The × removes a ROW; removing the whole pillar had no control at
+           all, so the only way to take one out was re-uploading the plan.
+           Beside Done because reading order is "remove, or finish", and in
+           the pinned head (§194) so it is reachable from anywhere in a long
+           pillar. Only while the pen is open — it follows the Strategy
+           grant exactly as the pen does. The confirmation carries the
+           weight; these are quiet words (mockup, signed off 2026-09-01). */
+        (ed ? '<button class="rmplan" data-rmrow="pillar|' + esc(u.ukey) +
+              '|' + esc(it.id) + '">Remove this ' +
+              esc(L("pillar", "bu").toLowerCase().replace(/s$/, "")) +
+              '</button>' : '') +
         (mayEditPlan() ? penBtn("plan", "u_plan") : '') + '</div>'
     : pillarBand(code, it.name) + paneActs("plan", "u_plan");
   return head +
@@ -29112,7 +29343,8 @@ function koReadBlock(list, emptyLine){
          own fault with the sign reversed (there the page said missing and the
          count said nothing was). The em-dash is what the Weight column beside
          it has always drawn for an absent optional value. */
-      return '<div class="orow"><span class="on">' + esc(m.name) +
+      return '<div class="orow' + (SMPRules.isHidden(m) ? ' hiddenrow' : '') +
+          '"><span class="on">' + esc(m.name) + hidChip(m) +
           '</span>' +
         '<span class="ot">' + (m.target ? esc(m.target) : '&mdash;') +
           '</span>' +
@@ -29145,7 +29377,8 @@ function capKoEdit(c){
     '<th class="cc">Unit</th>' +
     '<th class="cc">This year</th><th class="cc">Compile</th><th class="cc">Weight %</th><th></th></tr></thead><tbody>' +
     c.keyObjectives.map(function(m, i){
-      return '<tr><td>' + textOr(ed ? pg : null, m.name, "", function(v){ m.name = v; }) + '</td>' +
+      return '<tr' + hidCls(m) + '><td>' + textOr(ed ? pg : null, m.name, "", function(v){ m.name = v; }) +
+        (ed ? '' : hidChip(m)) + '</td>' +
         '<td class="cc">' + gapCell(pg, "k_found", m, "dir",
           { kind:"select", opts:["≥", "≤"] }) + '</td>' +
         '<td class="cc">' + (ed
@@ -29161,7 +29394,8 @@ function capKoEdit(c){
           { kind:"select", opts:["Sum", "Latest", "Average"] }) + '</td>' +
         '<td class="cc">' + gapCell(pg, "k_found", m, "weight",
           { kind:"input", cls:"mono", num:true }) + '</td>' +
-        '<td class="cc">' + (ed ? '<button class="rmbtn" data-capkorm="' + esc(c.id) + '|' + i +
+        '<td class="cc">' + (ed ? eyeBtn(m, pg, "k_found") +
+          ' <button class="rmbtn" data-capkorm="' + esc(c.id) + '|' + i +
           '">Remove</button>' : '') + '</td></tr>';
     }).join("") + '</tbody></table></div>' +
     (ed ? '<div class="addrow"><button class="editbtn" data-capkoadd="' + esc(c.id) +
@@ -34224,7 +34458,11 @@ function renderArchives(){
          c.objectives + " objectives"].join(" &middot; ")
       : [c.projects + " projects", c.deliverables + " deliverables",
          c.outcomes + " outcomes", c.milestones + " milestones"].join(" &middot; ");
-    var live = a.kind === "figures" ? true : a.kind === "unit" ? UNITS[a.key] : capById(a.key);
+    /* unitLike, never UNITS[] (§232): a pillars function's archive is keyed
+       `fn:<key>`, and asking UNITS printed "cannot be restored" for a
+       function still on the platform — the same one-line fault as the
+       restore itself. */
+    var live = a.kind === "figures" ? true : a.kind === "unit" ? unitLike(a.key) : capById(a.key);
     return '<tr><td><b>' + esc(a.name) + '</b>' +
         (a.kind === "figures"
           ? '<span class="why">the cycle\u2019s figures</span>'
@@ -36955,7 +37193,7 @@ function deckSlides(u){
      Foundation page does — and the scoring slide further on keeps it, because
      that is where an actual is read against a target. */
   var aimNear = SHOW_KO_THIS_YEAR;
-  var aimRows = u.keyObjectives.map(function(m, i){
+  var aimRows = SMPRules.shown(u.keyObjectives).map(function(m, i){
     return '<tr><td class="idx">' + (i+1) + '</td>' +
       '<td class="lead">' + esc(m.name) + fmark(m.id) + '</td>' +
       '<td class="num">' + esc(m.dir) + '</td>' +
@@ -36995,7 +37233,7 @@ function deckSlides(u){
     'Execution measures whether the work behind it is landing on time.</p></section>');
 
   /* 4 — the objectives in detail. */
-  var oRows = u.keyObjectives.map(function(m, i){
+  var oRows = SMPRules.shown(u.keyObjectives).map(function(m, i){
     return '<tr><td class="idx">' + (i+1) + '</td>' +
       '<td class="lead">' + esc(m.name) + fmark(m.id) + '</td>' +
       '<td class="num">' + esc(m.dir) + '</td>' +
@@ -37061,7 +37299,7 @@ function deckSlides(u){
           dPct(pillarExec(p)) + ' / ' + dPct(pillarPlan(p)) + '</b></div>' +
       '</div></section>');
 
-    var mRows = p.measures.map(function(m, i){
+    var mRows = SMPRules.shown(p.measures).map(function(m, i){
       return '<tr><td class="idx">' + (i+1) + '</td>' +
         '<td class="lead">' + esc(m.name) + fmark(m.id) + '</td>' +
         '<td class="num">' + esc(m.dir) + '</td>' +
@@ -37077,7 +37315,7 @@ function deckSlides(u){
       '<th class="num">Dir.</th><th class="num">Target</th><th class="num">Actual</th>' +
       '<th class="num">Progress</th><th>Note</th></tr></thead><tbody>' + mRows + '</tbody></table></section>');
 
-    var tRows = p.tactics.map(function(t, i){
+    var tRows = SMPRules.shown(p.tactics).map(function(t, i){
       if (!tacticDue(t)) {
         return '<tr class="dim"><td class="idx">' + (i+1) + '</td>' +
           '<td class="lead">' + esc(t.name) + '</td><td>' + esc(t.owner) + '</td>' +
@@ -37164,15 +37402,15 @@ function deckSlidesFn(fk){
       '<h1 class="cover">' + esc(c.name) + '</h1>' +
       '<p class="coversub">' + esc(c.def) + '</p>' +
       '<div class="coverrule"></div><div class="leadstats">' +
-        (c.keyObjectives.length
+        (SMPRules.shown(c.keyObjectives).length
           ? '<div><span class="dlab">Key objectives</span><b class="' + dBand(ko) + '">' + dPct(ko) + '</b></div>'
           : '') +
         '<div><span class="dlab">Project performance</span><b class="' + dBand(perf) + '">' + dPct(perf) + '</b></div>' +
         '<div><span class="dlab">Milestones</span><b class="plain">' + ce.done + ' of ' + ce.total + '</b></div>' +
       '</div></section>');
 
-    if (c.keyObjectives.length) {
-      var kRows = c.keyObjectives.map(function(m, i){
+    if (SMPRules.shown(c.keyObjectives).length) {
+      var kRows = SMPRules.shown(c.keyObjectives).map(function(m, i){
         return '<tr><td class="idx">' + (i+1) + '</td>' +
           '<td class="lead">' + esc(m.name) + '</td>' +
           '<td class="num">' + (m.weight == null ? "&mdash;" : m.weight + "%") + '</td>' +
@@ -37244,7 +37482,10 @@ function deckSlidesFn(fk){
           (o.note ? '<td class="dnote">' + esc(o.note) + '</td>' : '<td class="dnote empty">&mdash;</td>') +
           '</tr>';
       };
-      var dxRowsHtml = dxRows(p).map(dxRow).join("");
+      /* §233: filtered HERE, never inside dxRows() — the pane's pen
+         shares that builder and the pen shows everything. */
+      var dxRowsHtml = dxRows(p).filter(function(r){
+        return !SMPRules.isHidden(r.obj); }).map(dxRow).join("");
       S.push('<section class="dslide" data-split="' + esc(p.id) + 'D">' +
         '<h2>' + esc(p.name) + '<span class="dwhich">Deliverables and outcomes</span></h2>' +
         '<table class="zebra withnote"><thead><tr><th class="idx">#</th>' +
@@ -37253,7 +37494,7 @@ function deckSlidesFn(fk){
         '<th>Note</th></tr></thead><tbody>' + dxRowsHtml + '</tbody></table></section>');
 
       var over = projOverruns(p).map(function(m){ return m.id; });
-      var mRows = p.milestones.map(function(m, i){
+      var mRows = SMPRules.shown(p.milestones).map(function(m, i){
         var word = m.status === "done" ? "Completed" : m.status === "wip" ? "In progress" : "Not started";
         return '<tr><td class="idx">' + (i+1) + '</td>' +
           '<td class="lead">' + esc(m.name) +
@@ -50053,6 +50294,35 @@ var SYNC = (function () {
         paint();
       });
     });
+    /* ── HIDDEN FROM THE PRESENTATION (§233) ───────────────────────────
+       One press hides, the same press shows again — the mark is stored as
+       an ABSENCE (§50.6), so a row never hidden and one hidden-and-shown
+       are byte-identical and no save carries a phantom change. The gate is
+       re-asked at the click through the page/acKey the button carries
+       (§48.2): the eye is drawn only under an authoring pen, and authoring
+       is what the press must still hold. */
+    document.querySelectorAll("[data-hiderow]").forEach(function(b){
+      b.addEventListener("click", function(){
+        var ac = String(this.dataset.hideac || "").split("|");
+        if (!authoring(ac[0], ac[1])) return;
+        var row = hideableById(this.dataset.hiderow);
+        if (!row) return;
+        if (SMPRules.isHidden(row)) delete row.hide;
+        else row.hide = true;
+        paint();
+      });
+    });
+    /* The whole pillar and the whole project (§232): the worded control in
+       the editing head opens the platform's own confirmation — never
+       confirm(), which can be silenced for good on some other site (§95). */
+    document.querySelectorAll("[data-rmrow]").forEach(function(b){
+      b.addEventListener("click", function(){
+        if (!mayEditPlan()) return;
+        var a = this.dataset.rmrow.split("|");
+        if (a[0] === "pillar") confirmRemovePillar(a[1], a[2]);
+        else confirmRemoveProject(a[1]);
+      });
+    });
     /* ── FIRST ROWS FOR THE SURFACES THAT NEVER HAD ONE (§129's audit) ──
        The SWOT, the “Who we are” lines and a capability's objectives could
        be EDITED and never STARTED — the editors were built for correcting an
@@ -51204,6 +51474,117 @@ var SYNC = (function () {
       return true;
     }
     return false;
+  }
+  /* ── REMOVING A PILLAR OR A PROJECT (§232) ─────────────────────────────
+     The × removes a ROW; the whole pillar and the whole project had no
+     control at all, so taking one out meant re-uploading the plan. The
+     worded control sits in the pinned editing head (mockup signed off
+     2026-09-01), and the CONFIRMATION carries the weight: what the thing
+     holds, what has been reported against it this cycle, and the way back.
+
+     ARCHIVE FIRST, ALWAYS (§49.2's rule with a third caller): the removal
+     is exactly as destructive as Clear plan, so it goes through the same
+     archive the import and the clear already take, and the dialog says so.
+
+     NEVER renumber. `renumberUnit()` rewrites every id from POSITION, and
+     ids are what a reported figure, a focus mark and a cycle snapshot key
+     on (§69.13's own warning) — removing pillar 2 of 3 must not hand
+     pillar 3's history to a row that is not there any more. The survivors
+     keep their ids; positional CODES (a function's project codes) derive
+     at render time and close up on their own.
+
+     RESOLVED AT PRESS TIME, both times (§48.2): the row the button was
+     drawn for and the row being spliced are a dialog apart, so the Yes
+     handler looks the id up again rather than trusting a closure. */
+  function rmReportedInPillar(it){
+    var n = 0;
+    (it.measures || []).forEach(function(m){ if (m.actual != null && m.actual !== "") n++; });
+    (it.tactics  || []).forEach(function(t){ if (t.actual != null && t.actual !== "") n++; });
+    return n;
+  }
+  function rmReportedInProject(p){
+    var n = 0;
+    (p.deliverables || []).forEach(function(d){ if (d.status) n++; });
+    (p.outcomes    || []).forEach(function(o){ if (o.actual != null && o.actual !== "") n++; });
+    (p.milestones  || []).forEach(function(m){ if (m.status || (m.pct != null && m.pct !== "")) n++; });
+    return n;
+  }
+  /* One body for both kinds — the counts differ, the shape must not (§53.5).
+     A clean subject SAYS it is clean rather than merely not warning: the
+     absence of the amber line is not a sentence anybody can read (§45.2). */
+  function rmConfirmOpen(title, sub, holds, rep, scoresOf, yesWord, onYes){
+    openModalHtml(esc(title), esc(sub),
+      '<div class="rmconfirm">' +
+        '<p>' + holds + (rep ? '' :
+          ' Nothing has been reported against it this cycle.') + '</p>' +
+        (rep ? '<div class="repline">' +
+          plural(rep, "of its figures has been", "of its figures have been") +
+          ' reported this cycle — removing it moves ' + esc(scoresOf) +
+          '.</div>' : '') +
+        '<p class="archline">The plan as it stands is archived first. ' +
+          '<b>Setup › Import &amp; archives</b> holds the way back.</p>' +
+        '<div class="mrow"><button class="quiet" data-rmno="1">Cancel</button>' +
+        '<button class="danger" data-rmyes="1">' + esc(yesWord) + '</button></div>' +
+      '</div>');
+    var box = document.getElementById("modal-b");
+    if (!box) return;
+    var no = box.querySelector("[data-rmno]");
+    if (no) no.addEventListener("click", function(){ closeModal(); });
+    var yes = box.querySelector("[data-rmyes]");
+    if (yes) yes.addEventListener("click", function(){ closeModal(); onYes(); });
+  }
+  function confirmRemovePillar(ukey, id){
+    var u = unitLikeWritable(ukey);
+    var it = u && (u.items || []).filter(function(x){ return x && x.id === id; })[0];
+    if (!it) return;
+    var word = L("pillar", "bu").toLowerCase().replace(/s$/, "");
+    var code = pillarCode(u, u.items.indexOf(it));
+    var scoresOf = String(ukey).indexOf("fn:") === 0
+      ? "the function's scores" : "the unit's scores";
+    rmConfirmOpen("Remove this " + word + "?",
+      (code ? code + " — " : "") + (it.name || "Untitled"),
+      '<b>' + esc(it.name || "This " + word) + '</b> holds ' +
+        plural((it.measures || []).length, "measure") + ' and ' +
+        plural((it.tactics  || []).length, "tactic") + '.',
+      rmReportedInPillar(it), scoresOf, "Remove the " + word,
+      function(){
+        var u2 = unitLikeWritable(ukey);
+        if (!u2 || !Array.isArray(u2.items)) return;
+        var i = -1;
+        u2.items.forEach(function(x, xi){ if (x && x.id === id) i = xi; });
+        if (i < 0) return;
+        archiveUnitPlan(u2, "before " + (code || it.name || "a " + word) +
+          " was removed");
+        u2.items.splice(i, 1);
+        paint();
+      });
+  }
+  function confirmRemoveProject(id){
+    var c = capOfProjectId(id), p = projById(id);
+    if (!c || !p) return;
+    var code = projCode(c.fn, p);
+    rmConfirmOpen("Remove this project?",
+      (code ? code + " — " : "") + (p.name || "Untitled"),
+      '<b>' + esc(p.name || "This project") + '</b> holds ' +
+        plural((p.deliverables || []).length, "deliverable") + ', ' +
+        plural((p.outcomes    || []).length, "outcome") + ' and ' +
+        plural((p.milestones  || []).length, "milestone") + '.',
+      rmReportedInProject(p), "the function's scores", "Remove the project",
+      function(){
+        var c2 = capOfProjectId(id);
+        if (!c2 || !Array.isArray(c2.projects)) return;
+        var i = -1;
+        c2.projects.forEach(function(x, xi){ if (x && x.id === id) i = xi; });
+        if (i < 0) return;
+        archiveCapPlan(c2, "before " + (code || p.name || "a project") +
+          " was removed");
+        c2.projects.splice(i, 1);
+        /* The rail may be holding the removed project (§48.2's stale
+           pointer): dropped rather than repointed — the rail pick already
+           falls back to the first project on its own. */
+        if (RAIL[railKeyFor(c2)] === id) delete RAIL[railKeyFor(c2)];
+        paint();
+      });
   }
   /* The band's own paint, called from paint() once the navigation has
      settled — the chips read currentSub/CURSEC, so earlier would read the

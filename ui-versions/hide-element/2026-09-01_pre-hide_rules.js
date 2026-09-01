@@ -1906,22 +1906,6 @@ var GAP_OPTIONAL = { tactic: ["collaborators"],
     return !!out && out !== String(raw == null ? "" : raw).trim();
   }
 
-  /* ── HIDDEN FROM THE PRESENTATION (§233) ──────────────────────────────
-     A row the office keeps and does not present: left out of the deck and
-     NOT counted in any score, on every surface at once — Islam's decision,
-     2026-09-01. The mark is `row.hide === true`, riding each row's `extra`
-     JSONB (§177's road, no migration), stored as an ABSENCE (§50.6): a row
-     never hidden and one hidden-and-shown-again are byte-identical.
-
-     ONE PREDICATE, because the screen's scores, the deck and the counts must
-     answer together (§42, §53.5) — a score that includes a row the slide
-     does not show is a number nobody can defend. `shown()` is the list-side
-     spelling of the same answer, for the readers that draw or average. */
-  function isHidden(row) { return !!(row && row.hide === true); }
-  function shown(list) {
-    return (list || []).filter(function (r) { return !isHidden(r); });
-  }
-
   function namedOn(row, person) {
     if (!row || !person) return false;
     /* THE NAME THE REGISTER SHOWS COUNTS TOO (§130.7). The plan's owner and
@@ -2177,7 +2161,6 @@ var GAP_OPTIONAL = { tactic: ["collaborators"],
     firstName: firstName,
     GREET_OPEN: GREET_OPEN, GREET_CLOSE: GREET_CLOSE, GREET_NAME: GREET_NAME,
     webUrl: webUrl, webUrlFixed: webUrlFixed,
-    isHidden: isHidden, shown: shown,
     greetFill: greetFill,
     editingRoles: editingRoles, onlyVia: onlyVia, rolesOrFloor: rolesOrFloor,
     OWN_LINES_ONLY: OWN_LINES_ONLY, onlyOwnLines: onlyOwnLines,

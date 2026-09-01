@@ -357,9 +357,6 @@
   #modal-b .refused-ask:focus-visible,
   #modal-b .refused-bug:focus-visible { outline:2px solid var(--gold);
                                         outline-offset:2px; }
-  #modal-b .refused-doorsnote { display:block; margin-top:10px;
-    padding-top:10px; border-top:1px solid var(--line);
-    font-size:var(--fs-micro); color:var(--ink-3); }
   /* The sentences the server sent keep their own colour inside the dialog —
      they are the bad news, and the card around them is not. */
   #modal-b > span, #modal-b > ul { display:block; margin:0 0 8px; }
@@ -6095,47 +6092,6 @@
   .ustrip .uv { font-family:var(--mono); font-size:13px; font-weight:700;
     font-variant-numeric:tabular-nums; }
 
-  /* ── HOW THE UNITS SPREAD (§231) ────────────────────────────────────────
-     A stacked bar inside the card, under the track: width is the count, so
-     the strip is read the way the number above it is read and not as
-     decoration. The colours are the BANDS' own, set inline from the tenant's
-     scale — nothing here names a band, or the tenant's scoring page would
-     stop reaching it (§168).
-
-     THE PANEL IS A CHILD OF THE SEGMENT so the pointer can travel into it
-     without closing it, and it opens on `:focus-within` too — a name that can
-     be tabbed to and not seen is worse than one that cannot be tabbed to at
-     all (§163). `position:relative` on the strip and `left:0` on the panel
-     keep it inside the card at every width, by construction rather than by
-     arithmetic (§127). */
-  .uspread { display:flex; gap:4px; margin:10px 0 0; position:relative; }
-  .uspread-seg { position:relative; min-width:26px; }
-  .uspread-bar { height:26px; border-radius:5px; display:flex;
-    align-items:center; justify-content:center; cursor:default;
-    color:var(--on-accent, #fff); font-size:11px; font-weight:700;
-    font-variant-numeric:tabular-nums; }
-  .uspread-bar:focus-visible { outline:2px solid var(--gold); outline-offset:2px; }
-  .uspread-pop { display:none; position:absolute; bottom:calc(100% + 8px);
-    left:0; min-width:210px; z-index:12; background:var(--panel);
-    color:var(--panel-ink); border-radius:9px; padding:10px 12px;
-    box-shadow:0 10px 26px rgba(10,20,35,.35); }
-  .uspread-seg:hover .uspread-pop,
-  .uspread-seg:focus-within .uspread-pop { display:block; }
-  .uspread-h { font-size:10.5px; letter-spacing:.06em; text-transform:uppercase;
-    font-weight:700; color:var(--panel-accent); margin-bottom:6px; }
-  .uspread-pop button { display:flex; width:100%; align-items:center;
-    justify-content:space-between; gap:14px; font:inherit; font-size:12.5px;
-    background:none; border:0; color:inherit; padding:4px 0; cursor:pointer;
-    text-align:left; }
-  .uspread-pop button:hover { color:var(--panel-accent); }
-  .uspread-pop button:focus-visible { outline:2px solid var(--panel-accent);
-    outline-offset:1px; }
-  .uspread-pop b { font-variant-numeric:tabular-nums; }
-  .uspread-f { font-size:10.5px; color:var(--panel-quiet, var(--panel-ink));
-    opacity:.75; margin-top:6px; }
-  /* The last segment's panel would run past the card's right edge; anchoring
-     it to the right keeps it in, and only that one needs it. */
-  .uspread-seg:last-child .uspread-pop { left:auto; right:0; }
 /* ── THE KNOWLEDGE BASE'S PEN (§140) ──────────────────────────────────
    In arrange.css, concatenated last, because config.css has eaten three
    silently-duplicated rules already (§29.2, §51.5, §53.6) and one comment
@@ -25215,62 +25171,6 @@ function renderGroupPerformance(){
    looked like a link and went nowhere would be worse than no chip.
 
    The score wears its band's TEXT twin, never the fill (§154). */
-/* ── HOW THE UNITS SPREAD (§231) ────────────────────────────────────────
-   Islam, on the group's front page: it says where the portfolio stands today
-   and never how it is shaped — one weighted number for ten units, which is
-   the same 67% whether nine are fine and one is broken or all ten are middling.
-
-   NOTHING NEW IS COMPUTED, twice over: the figure per unit is
-   `unitObjectives(u)` — the same one the gauges and `whereNext()` draw, so
-   the three cannot disagree (§53.5) — and the bands are `BANDS.bands`, the
-   tenant's own (§168). A strip with four hardcoded segments would be a
-   second, quieter copy of the scale that a tenant editing Setup › Scoring
-   bands could never change.
-
-   WIDTH IS THE COUNT, so the strip is a real encoding and not a decoration:
-   a band holding half the units is half the bar. A band holding NONE is not
-   drawn at all — an empty segment would have to be given a width it has no
-   claim to, and the hover behind it would name nobody (§45.2 from the other
-   side: this is not a feature rendering nothing, it is a fact that is absent).
-
-   THE HOVER IS THE POINT, not a garnish. A count somebody cannot act on makes
-   work (§16.7), so each segment names its units with their scores and every
-   name is a real destination carrying `data-go` — the attribute wired
-   document-wide, never `data-u`, which is scoped to the chrome and would look
-   navigable and do nothing (§155.1, found by pressing it). The panel is a
-   CHILD of the segment, so the pointer travelling into it keeps it open;
-   `:focus-within` opens the same panel for a keyboard, or the names would be
-   reachable by tabbing and invisible while reached (§163). */
-function bandSpread(keys){
-  var rows = keys.map(function(k){
-    var u = UNITS[k];
-    return u ? { k: k, name: navName(u), v: unitObjectives(u) } : null;
-  }).filter(function(r){ return r && r.v != null; });
-  if (rows.length < 2) return "";
-  /* Worst first, the order `whereNext()` already reads in and the order the
-     bands are stored in reversed — one direction for both, or the strip and
-     the strip of chips under it disagree about which end is bad. */
-  var out = [], bands = BANDS.bands;
-  for (var i = bands.length - 1; i >= 0; i--) {
-    var b = bands[i];
-    var mine = rows.filter(function(r){ return band(r.v) === b.key; });
-    if (!mine.length) continue;
-    mine.sort(function(a, c){ return a.v - c.v; });
-    out.push('<div class="uspread-seg" style="flex:' + mine.length + ' 1 0">' +
-      '<div class="uspread-bar" style="background:var(--' + esc(b.key) + ')" ' +
-        'tabindex="0" role="button" aria-label="' + esc(b.label) + ' — ' +
-        mine.length + '">' + mine.length + '</div>' +
-      '<div class="uspread-pop"><div class="uspread-h">' + esc(b.label) +
-        ' — ' + plural(mine.length, "unit") + '</div>' +
-        mine.map(function(r){
-          return '<button type="button" data-go="' + esc(r.k) + '">' +
-            '<span>' + esc(r.name) + '</span><b>' + r.v + '%</b></button>';
-        }).join("") +
-      '<div class="uspread-f">Click a name to open the unit</div></div></div>');
-  }
-  return out.length > 1 ? '<div class="uspread">' + out.join("") + '</div>' : "";
-}
-
 function whereNext(keys){
   var rows = keys.map(function(k){
     var u = UNITS[k];
@@ -25307,7 +25207,14 @@ function whereNext(keys){
         }) +
         drillCard("Business units &mdash; performance" + tip(TIP_PERF), groupUnitsObjectives(), {
           delta: deltaTag("group"),
-          spread: bandSpread(UNIT_KEYS),
+          /* NO SPREAD STRIP, AT ISLAM'S DIRECTION (§231.2): *"for the
+             performance view remove it for now"*. §145.9's keep-the-machinery
+             shape was tried first and DOES NOT APPLY here: this file's
+             functions are not reachable from the page, so a dormant
+             `bandSpread()` could never be called by a check and would be dead
+             code nothing could prove still worked — §24 exactly. Deleted, and
+             the design is written up in full in §231 of the decisions log, so
+             giving it back is a `git show` and not a rediscovery. */
           /* THE LINE SAYS WHAT THE NUMBER IS, NOT HOW IT WAS MADE (§156).
              It used to print all ten unit weights — "21 / 14 / 10 / 15 / 8 /
              6 / 6 / 7 / 8 / 5" — which is a derivation nobody can use at a
@@ -43124,12 +43031,17 @@ var SYNC = (function () {
         ? '<span class="refused-doors">' +
           '<button type="button" class="refused-ask" id="refused-ask">' +
           "Ask the Strategy Office to change it</button> " +
-          '<button type="button" class="refused-bug" id="refused-bug">' +
-          "Report a problem</button></span>" +
-          '<span class="refused-doorsnote"><b>Ask</b> sends them your change ' +
-          "as an ordinary message. <b>Report a problem</b> files it as a " +
-          "technical issue with what the browser recorded — the error " +
-          "itself, never numbers from your plan.</span>"
+          /* THE PROMISE IS A HOVER, NOT A PARAGRAPH (§231.2, 1b-ii). Islam:
+             *"remove the description in the bottom"* — and it WAS one: two
+             buttons that already say what they do, described underneath. The
+             one clause that was not a description is what travels with a
+             fault report, which is a fact about the person's own data that
+             the screen states nowhere else, so it moves to the hover rather
+             than being deleted with the prose around it. */
+          '<button type="button" class="refused-bug" id="refused-bug" ' +
+          'title="Sends the platform\u2019s own error message. No numbers ' +
+          'from your plan travel with it.">' +
+          "Report a problem</button></span>"
         : "");
     /* THE DIALOG, NOT THE BANNER (§231). The element is still filled, because
        the put-back's own fallback writes into it (`notSaved`) and because a

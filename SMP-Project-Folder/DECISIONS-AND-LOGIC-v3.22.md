@@ -25598,3 +25598,40 @@ its own first-run failures was the check: after clicking through to a unit,
 page the card is not on — the state is put back before measuring (§94.2). Full
 `qa.py` clean; `refusal-keeps-work`, `save-said`, `office-chat`, `welcome`,
 `table-fit`, `perf-line` and `page-width` all green.
+
+
+### §231.2 — TWO CORRECTIONS FROM ISLAM, AND WHAT THE SECOND ONE COST (2026-09-01)
+
+**THE SPREAD STRIP COMES OFF THE PERFORMANCE CARD** — *"for the performance
+view remove it for now"*. His call, taken whole.
+
+**§145.9's KEEP-THE-MACHINERY SHAPE WAS TRIED FIRST AND DOES NOT APPLY HERE,
+which is the part worth recording.** That section hid the .pptx download and
+kept the builder, because "one line to give it back" is cheap and the builder
+could still be proved by a direct call. Here it cannot: `group-render.js`'s
+functions are not reachable from the page — measured, `typeof bandSpread` and
+`typeof whereNext` are both `undefined` in the built file — so a dormant
+builder is code no check can exercise, which is §24's own definition of what
+the next reader will take for load-bearing. Deleted, with the design written up
+in §231 above, so giving it back is a `git show` and not a rediscovery. *The
+check asking for it is what found this: it went red on "the builder is still
+there", and the honest reading was that the plan was wrong rather than the
+assertion.*
+
+**THE ABSENCE IS ASSERTED BESIDE WHAT MUST SURVIVE.** An absence test alone
+passes on a build that removed the whole card, so `save-and-spread.py` §3 also
+asserts the card still reads what it read before — §113.8's blind spot, from
+the side where a removal is the thing under test.
+
+**THE DIALOG'S CLOSING PARAGRAPH GOES** — *"remove the description in the
+bottom"*. It was 1b-ii exactly: two buttons that already say what they do,
+described underneath. **ONE CLAUSE IN IT WAS NOT A DESCRIPTION** — what travels
+with a fault report is a fact about the person's own data that the screen
+states nowhere else — so that moves to the hover on *Report a problem* rather
+than being deleted with the prose around it, which is the rule's own answer for
+a sentence carrying information.
+
+`sw.js` is bumped to `smp-shell-v4.07-save-word` rather than editing the bytes
+under v4.06: that name may already have been served to a browser from a preview
+deployment, and a worker caches by NAME (§91, §94.12). Full `qa.py` clean;
+`save-and-spread`, `save-said` and `refusal-keeps-work` green.

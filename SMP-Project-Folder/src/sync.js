@@ -654,12 +654,17 @@ var SYNC = (function () {
         ? '<span class="refused-doors">' +
           '<button type="button" class="refused-ask" id="refused-ask">' +
           "Ask the Strategy Office to change it</button> " +
-          '<button type="button" class="refused-bug" id="refused-bug">' +
-          "Report a problem</button></span>" +
-          '<span class="refused-doorsnote"><b>Ask</b> sends them your change ' +
-          "as an ordinary message. <b>Report a problem</b> files it as a " +
-          "technical issue with what the browser recorded — the error " +
-          "itself, never numbers from your plan.</span>"
+          /* THE PROMISE IS A HOVER, NOT A PARAGRAPH (§231.2, 1b-ii). Islam:
+             *"remove the description in the bottom"* — and it WAS one: two
+             buttons that already say what they do, described underneath. The
+             one clause that was not a description is what travels with a
+             fault report, which is a fact about the person's own data that
+             the screen states nowhere else, so it moves to the hover rather
+             than being deleted with the prose around it. */
+          '<button type="button" class="refused-bug" id="refused-bug" ' +
+          'title="Sends the platform\u2019s own error message. No numbers ' +
+          'from your plan travel with it.">' +
+          "Report a problem</button></span>"
         : "");
     /* THE DIALOG, NOT THE BANNER (§231). The element is still filled, because
        the put-back's own fallback writes into it (`notSaved`) and because a

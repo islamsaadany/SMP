@@ -11,11 +11,13 @@ WHAT IS ASSERTED, AND WHY IT IS NOT A LIST OF PIXELS (§94.8):
     away would be exactly that with a longer fuse. Both halves are measured,
     or a build that showed nothing at all would satisfy "it does not linger".
 
-  · THE STRIP AGREES WITH THE PAGE IT IS ON. The counts are asserted against
-    `unitObjectives()` band by band — never against a number — so a tenant
-    with different bands, different units or a different scale stays green and
-    a strip that starts inventing its own arithmetic does not. The same rule
-    the `whereNext()` check already follows (§155).
+  · THE STRIP IS NOT DRAWN (§231.2). Islam: *"for the performance view
+    remove it for now"*. §145.9's keep-the-machinery shape was tried and does
+    not apply — `group-render.js` is not reachable from the page, so a dormant
+    builder could never be exercised and would be dead code nothing proves
+    (§24). Deleted, and the absence is asserted BESIDE the card still reading
+    what it read before: an absence test alone passes on a build that removed
+    the whole card.
 
   · EVERY NAME IN THE PANEL IS A DOOR. A count somebody cannot act on makes
     work (§16.7), so each name carries `data-go` — the attribute wired
@@ -28,11 +30,11 @@ WHAT IS ASSERTED, AND WHY IT IS NOT A LIST OF PIXELS (§94.8):
     the one that catches a popup clipped by an overflow ancestor or covered by
     the card above it.
 
-PROVED ABLE TO FAIL (§94.5): run against the pre-§231 build it reports NINE
-failures — no `#savetoast` at all, the refusal drawn in the banner rather than
-the dialog, and no `.uspread` anywhere. Sections 1, 2 and 3 each go red, which
-is the point: three separate claims, three separate ways to notice they have
-stopped being true.
+PROVED ABLE TO FAIL (§94.5): against the pre-§231 build sections 1 and 2 go
+red — no `#savetoast` at all, and the refusal drawn in the banner rather than
+the dialog. Section 3 fails from the other side if the strip is put back on the
+card without anybody deciding to, or if the dormant builder stops agreeing with
+the page's own figures.
 """
 import json, os, sys, threading, http.server, socketserver
 from pathlib import Path
@@ -183,61 +185,27 @@ with sync_playwright() as p:
        "▾" not in msg and "▸" not in msg, msg[:120])
 
     # ── 3 · HOW THE UNITS SPREAD ─────────────────────────────────────────
-    print("\n3 · the group's card says how the units spread")
+    print("\n3 · the spread is not on the card")
     MODE["post"] = 200
     pg.evaluate("()=>{location.hash='';}")
     pg.goto(URL); pg.wait_for_timeout(2600)
     pg.evaluate("()=>{try{WELCOME.dismiss()}catch(e){}}"); pg.wait_for_timeout(400)
-    ck("the strip is drawn", pg.evaluate("()=>!!document.querySelector('.uspread')"))
-    # THE AGREEMENT, NEVER THE NUMBER. Asked of the platform's own function, so
-    # a tenant with other bands, units or a different scale stays green.
-    truth = pg.evaluate("""()=>{
-        const out = {};
-        UNIT_KEYS.forEach(function(k){
-          const u = UNITS[k]; if(!u) return;
-          const v = unitObjectives(u); if(v == null) return;
-          const b = band(v); out[b] = (out[b]||0) + 1;
-        });
-        return out;}""")
-    drawn = pg.evaluate("""()=>{
-        const out = {};
-        document.querySelectorAll('.uspread-seg').forEach(function(s){
-          const n = parseInt(s.querySelector('.uspread-bar').textContent, 10);
-          const names = s.querySelectorAll('.uspread-pop button').length;
-          out[s.querySelector('.uspread-bar').style.background] = [n, names];
-        });
-        return out;}""")
-    total_drawn = sum(v[0] for v in drawn.values())
-    total_names = sum(v[1] for v in drawn.values())
-    ck("every unit with a score is in the strip",
-       total_drawn == sum(truth.values()), (total_drawn, truth))
-    ck("...and every one of them is named in a panel",
-       total_names == total_drawn, (total_names, total_drawn))
-    ck("...and a band holding nobody is not drawn",
-       len(drawn) == len([k for k in truth if truth[k]]), (list(drawn), truth))
-
-    seg = pg.query_selector(".uspread-seg")
-    seg.hover(); pg.wait_for_timeout(350)
-    # REACHABLE, NOT MERELY PRESENT (§93.4): a panel clipped by an overflow
-    # ancestor renders perfectly and cannot be pressed.
-    ck("the panel opens on hover and is reachable",
-       pg.evaluate("""()=>{const p=document.querySelector('.uspread-pop');
-           if(!p || getComputedStyle(p).display==='none') return false;
-           const r=p.getBoundingClientRect();
-           const el=document.elementFromPoint(r.left+10, r.top+10);
-           return !!(el && p.contains(el));}"""))
-    ck("...and stays inside the window",
-       pg.evaluate("""()=>{const p=document.querySelector('.uspread-pop');
-           const r=p.getBoundingClientRect();
-           return r.left >= 0 && r.right <= innerWidth;}"""))
-    # PRESSED: `data-go` is the attribute wired document-wide; `data-u` is
-    # scoped to the chrome and would look navigable and do nothing (§155.1).
-    want = pg.evaluate("""()=>{const b=document.querySelector('.uspread-pop button');
-        return b ? b.getAttribute('data-go') : null;}""")
-    pg.evaluate("()=>{const b=document.querySelector('.uspread-pop button'); b.click();}")
-    pg.wait_for_timeout(1200)
-    ck("a name in the panel opens that unit",
-       pg.evaluate("()=>current") == want, (pg.evaluate("()=>current"), want))
+    # ── ISLAM TOOK IT OFF THE CARD (§231.2) ──────────────────────────────
+    # An absence, asserted where the card actually is rather than as a text
+    # search of the page: the strip carried real colours and real counts, and
+    # a build that half-removed it would leave the markup with nothing in it.
+    ck("no spread strip on the performance card",
+       pg.evaluate("()=>!document.querySelector('.uspread')"))
+    # One line: a newline inside a JS string literal is a syntax error, and
+    # the failure looks like a broken product rather than a broken check.
+    ck("...and no orphan segment or panel anywhere",
+       pg.evaluate("()=>!document.querySelector('.uspread-seg,.uspread-pop,.uspread-bar')"))
+    # The card itself is untouched, which is the half an absence test cannot
+    # see: a build that removed the whole card would satisfy the two above.
+    ck("...while the card still reads what it read before",
+       pg.evaluate("""()=>{const t=document.body.innerText;
+           return t.indexOf('Business units') >= 0
+               && t.indexOf('weighted by size') >= 0;}"""))
 
     # No sideways scroll at any width — a strip that pushed the page out would
     # drag every sticky element with it (§27.2).
@@ -254,18 +222,10 @@ with sync_playwright() as p:
             || document.querySelector('#units [data-u="group"]');
             if(b) b.click();}""")
         pg.wait_for_timeout(900)
-        s = pg.query_selector(".uspread-seg:last-child")
-        if s: s.hover(); pg.wait_for_timeout(250)
-        ck("%d: the strip holds, the panel stays in, nothing scrolls sideways" % w,
-           pg.evaluate("""()=>{const st=document.querySelector('.uspread');
-               if(!st) return false;
-               const pops=[...document.querySelectorAll('.uspread-pop')]
-                 .filter(p=>getComputedStyle(p).display!=='none');
-               const inside = !pops.length || pops.every(function(p){
-                 const r=p.getBoundingClientRect();
-                 return r.left >= 0 && r.right <= innerWidth; });
-               const d=document.documentElement;
-               return inside && d.scrollWidth <= d.clientWidth + 1;}"""))
+        ck("%d: the card is clean and nothing scrolls sideways" % w,
+           pg.evaluate("""()=>{const d=document.documentElement;
+               return !document.querySelector('.uspread')
+                   && d.scrollWidth <= d.clientWidth + 1;}"""))
 
     ck("nothing threw", not errs, errs[:2])
     b.close()

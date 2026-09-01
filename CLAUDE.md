@@ -478,7 +478,15 @@ console errors (in this cloud environment, run it via a wrapper that points Play
   navigable and do nothing (§155.1). The panel is a CHILD of its segment so the
   pointer can travel into it, and `:focus-within` opens it for a keyboard (§163).
   **Islam removed the caption I added under it** — 1b-ii applied to my own work.
-  `checks/save-and-spread.py`: **9 red** on the build before.
+  **AND THEN THE STRIP ITSELF (§231.2)** — *"for the performance view remove it
+  for now"*: §145.9's keep-the-machinery shape was tried and **does not apply**,
+  because `group-render.js` is not reachable from the page (`typeof bandSpread`
+  is `undefined` in the built file), so a dormant builder is code no check can
+  exercise — §24's own case. Deleted, design written up in §231, one `git show`
+  to give back. The absence is asserted BESIDE what must survive, or a build
+  that removed the whole card would pass (§113.8 from the removal side).
+  **The dialog's closing paragraph goes too**, and the one clause in it that was
+  information — what travels with a fault report — moves to a hover (1b-ii).
 - **A LATE ANSWER STILL LANDS (§230):** Islam, hard-refreshing after a
   deployment — §201's wall, every time, clearing itself later. **The server was
   healthy and the landing was wrong**: a cold function's first answer routinely

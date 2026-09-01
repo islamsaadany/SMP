@@ -1437,62 +1437,6 @@ function renderGroupPerformance(){
    looked like a link and went nowhere would be worse than no chip.
 
    The score wears its band's TEXT twin, never the fill (§154). */
-/* ── HOW THE UNITS SPREAD (§231) ────────────────────────────────────────
-   Islam, on the group's front page: it says where the portfolio stands today
-   and never how it is shaped — one weighted number for ten units, which is
-   the same 67% whether nine are fine and one is broken or all ten are middling.
-
-   NOTHING NEW IS COMPUTED, twice over: the figure per unit is
-   `unitObjectives(u)` — the same one the gauges and `whereNext()` draw, so
-   the three cannot disagree (§53.5) — and the bands are `BANDS.bands`, the
-   tenant's own (§168). A strip with four hardcoded segments would be a
-   second, quieter copy of the scale that a tenant editing Setup › Scoring
-   bands could never change.
-
-   WIDTH IS THE COUNT, so the strip is a real encoding and not a decoration:
-   a band holding half the units is half the bar. A band holding NONE is not
-   drawn at all — an empty segment would have to be given a width it has no
-   claim to, and the hover behind it would name nobody (§45.2 from the other
-   side: this is not a feature rendering nothing, it is a fact that is absent).
-
-   THE HOVER IS THE POINT, not a garnish. A count somebody cannot act on makes
-   work (§16.7), so each segment names its units with their scores and every
-   name is a real destination carrying `data-go` — the attribute wired
-   document-wide, never `data-u`, which is scoped to the chrome and would look
-   navigable and do nothing (§155.1, found by pressing it). The panel is a
-   CHILD of the segment, so the pointer travelling into it keeps it open;
-   `:focus-within` opens the same panel for a keyboard, or the names would be
-   reachable by tabbing and invisible while reached (§163). */
-function bandSpread(keys){
-  var rows = keys.map(function(k){
-    var u = UNITS[k];
-    return u ? { k: k, name: navName(u), v: unitObjectives(u) } : null;
-  }).filter(function(r){ return r && r.v != null; });
-  if (rows.length < 2) return "";
-  /* Worst first, the order `whereNext()` already reads in and the order the
-     bands are stored in reversed — one direction for both, or the strip and
-     the strip of chips under it disagree about which end is bad. */
-  var out = [], bands = BANDS.bands;
-  for (var i = bands.length - 1; i >= 0; i--) {
-    var b = bands[i];
-    var mine = rows.filter(function(r){ return band(r.v) === b.key; });
-    if (!mine.length) continue;
-    mine.sort(function(a, c){ return a.v - c.v; });
-    out.push('<div class="uspread-seg" style="flex:' + mine.length + ' 1 0">' +
-      '<div class="uspread-bar" style="background:var(--' + esc(b.key) + ')" ' +
-        'tabindex="0" role="button" aria-label="' + esc(b.label) + ' — ' +
-        mine.length + '">' + mine.length + '</div>' +
-      '<div class="uspread-pop"><div class="uspread-h">' + esc(b.label) +
-        ' — ' + plural(mine.length, "unit") + '</div>' +
-        mine.map(function(r){
-          return '<button type="button" data-go="' + esc(r.k) + '">' +
-            '<span>' + esc(r.name) + '</span><b>' + r.v + '%</b></button>';
-        }).join("") +
-      '<div class="uspread-f">Click a name to open the unit</div></div></div>');
-  }
-  return out.length > 1 ? '<div class="uspread">' + out.join("") + '</div>' : "";
-}
-
 function whereNext(keys){
   var rows = keys.map(function(k){
     var u = UNITS[k];
@@ -1529,7 +1473,14 @@ function whereNext(keys){
         }) +
         drillCard("Business units &mdash; performance" + tip(TIP_PERF), groupUnitsObjectives(), {
           delta: deltaTag("group"),
-          spread: bandSpread(UNIT_KEYS),
+          /* NO SPREAD STRIP, AT ISLAM'S DIRECTION (§231.2): *"for the
+             performance view remove it for now"*. §145.9's keep-the-machinery
+             shape was tried first and DOES NOT APPLY here: this file's
+             functions are not reachable from the page, so a dormant
+             `bandSpread()` could never be called by a check and would be dead
+             code nothing could prove still worked — §24 exactly. Deleted, and
+             the design is written up in full in §231 of the decisions log, so
+             giving it back is a `git show` and not a rediscovery. */
           /* THE LINE SAYS WHAT THE NUMBER IS, NOT HOW IT WAS MADE (§156).
              It used to print all ten unit weights — "21 / 14 / 10 / 15 / 8 /
              6 / 6 / 7 / 8 / 5" — which is a derivation nobody can use at a

@@ -345,9 +345,6 @@
   #modal-b .refused-ask:focus-visible,
   #modal-b .refused-bug:focus-visible { outline:2px solid var(--gold);
                                         outline-offset:2px; }
-  #modal-b .refused-doorsnote { display:block; margin-top:10px;
-    padding-top:10px; border-top:1px solid var(--line);
-    font-size:var(--fs-micro); color:var(--ink-3); }
   /* The sentences the server sent keep their own colour inside the dialog —
      they are the bad news, and the card around them is not. */
   #modal-b > span, #modal-b > ul { display:block; margin:0 0 8px; }

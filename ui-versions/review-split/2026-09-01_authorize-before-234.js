@@ -30,10 +30,6 @@
    database does not share, and its next save writes that picture back. */
 
 const R = require("./rules.js");
-/* §234: the differ and this file must agree about which review fields are
-   keyed by target — a field on one list and not the other travels whole and
-   reverts every other function's report state (the incident §234 records). */
-const DIFF = require("./graph-diff.js");
 
 /* ── Field families ───────────────────────────────────────────────
    What counts as REPORTING on each kind of row. Everything else on the same
@@ -278,10 +274,7 @@ function collect(stored, incoming, w) {
   /* §220: `parked` joins them. Saving a draft now CLOSES the report until
      it is reopened, so it speaks for the whole unit exactly as submitting
      does — same classification, same rule, no second answer (§53.5). */
-  /* §234: THE ONE LIST — the differ splits exactly these per target, so a
-     field added here without joining REVIEW_PER_TARGET would travel whole
-     and carry every function's copy of itself into one person's save. */
-  const perTarget = DIFF.REVIEW_PER_TARGET;
+  const perTarget = ["submitted", "parked", "note", "slides"];
   const WHAT = { submitted: "submitting the report", parked: "closing the report",
                  note: "the report's note",
                  slides: "the review's picture slides" };

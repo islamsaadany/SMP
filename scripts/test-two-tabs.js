@@ -201,6 +201,51 @@ function clientBody(baseline, screen) {
         } else check("(the seed has no second function with projects to test §216 with)", true);
       }
 
+      /* ── §234 · ONE SUBMIT MUST NOT CARRY EVERYBODY'S REPORT STATE ───
+         The live incident: a custodian pressed Submit from a tab loaded
+         before four other functions reported, the whole stale `review`
+         travelled, wiped their submissions, and the authoriser refused with
+         "You cannot report for admin." — four functions he never opened.
+         Replayed here on a unit's custodian, whose reach the seed grants:
+         the refusal, the wipe and the lost slides all ride the same part. */
+      {
+        await io.writeState(c, seed);
+        const g0 = await io.readState(c);
+        const roles = g0.unitRoles || {};
+        const cKey = (roles[U] || {}).custodian;
+        const cust = (g0.people || []).find(p => p.key === cKey);
+        if (cust) {
+          /* His tab opens NOW. */
+          const hisTab = clone(g0);
+          /* The office then submits U2's report and hangs a slide on it. */
+          const theirs = clone(await io.readState(c));
+          theirs.review.submitted = Object.assign({}, theirs.review.submitted);
+          theirs.review.submitted[U2] = true;
+          theirs.review.slides = Object.assign({}, theirs.review.slides);
+          theirs.review.slides[U2] = [{ id: "sl1", title: "THEIR SLIDE" }];
+          const rT = serverSave(await io.readState(c), clientBody(clone(g0), theirs), smo);
+          if (rT.ok) await io.writeState(c, rT.state);
+          /* He submits his OWN unit's report from the stale tab. */
+          const hisScreen = clone(hisTab);
+          hisScreen.review.submitted = Object.assign({}, hisScreen.review.submitted);
+          hisScreen.review.submitted[U] = true;
+          const rH = serverSave(await io.readState(c), clientBody(hisTab, hisScreen), cust);
+          if (rH.ok) await io.writeState(c, rH.state);
+          const end = await io.readState(c);
+          const said = JSON.stringify(rH.refusals || rH.error || "");
+          check("§234: his submit is accepted", rH.ok, said.slice(0, 140));
+          check("§234: ...and is not refused naming a unit he never opened",
+                rH.ok || said.indexOf(U2) < 0, said.slice(0, 140));
+          check("§234: his own submission landed",
+                !!(end.review.submitted || {})[U], JSON.stringify(end.review.submitted));
+          check("§234: the other unit's submission SURVIVES his stale tab",
+                (end.review.submitted || {})[U2] === true, JSON.stringify(end.review.submitted));
+          check("§234: ...and their slides survive too",
+                !!((end.review.slides || {})[U2] || []).length,
+                JSON.stringify(end.review.slides || {}).slice(0, 100));
+        } else check("(the seed names no custodian for " + U + " to test §234 with)", true);
+      }
+
       check("two people on two units: the first one's work survives",
             fin.units[U].aspiration === "FILLED BY THE FIRST", fin.units[U].aspiration);
       check("...and the second one's landed",

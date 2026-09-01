@@ -406,6 +406,27 @@ console errors (in this cloud environment, run it via a wrapper that points Play
   connection is not. **And the good path is asserted in the same breath**
   (§94.2), because a failure-reported assertion passes on a build that reports
   one always.
+- **ONE FUNCTION'S SUBMIT MUST NOT CARRY EVERYBODY'S REPORT STATE (§234):**
+  Islam, from a live client session — *"emergency error that we fixed 100
+  times before"*: a CF custodian refused with **"You cannot report for
+  admin."** four times over, functions he never opened; and the slides the
+  same morning, *"someone was adding the slides and signed out and in and
+  they lost progress."* **§216's fault one part over**: `review` holds four
+  maps keyed by TARGET for the whole tenant (`submitted` · `parked` · `note`
+  · `slides`) and travelled WHOLE, so any save touching it carried a stale
+  copy of everyone's report state — refused where the victim's rights
+  stopped it, silently wiping where they did not (the slides). The differ
+  splits it now: field by field, and the four maps entry by entry —
+  `review.submitted.fn:cf` and nothing else; a reopen is a DELETE of one key
+  (§50.6). **`REVIEW_PER_TARGET` is exported from `graph-diff.js` and the
+  authoriser's per-target loop reads it** (§53.5 — a field joining one list
+  and not the other is this fault reborn). The apply side's three-segment
+  paths are an ALLOW-LIST (`review.<one of four>.<target>` only), the
+  fallbacks stay honest (an unaddressable key sends its field whole), and
+  the residue is stated: same-target same-moment still last-write-wins,
+  different targets never touch. Proved able to fail: 11 red on the differ's
+  pre-build, and end-to-end on a real Postgres the whole-graph flag fails
+  with the reported sentence to the word.
 - **A DEPENDENCY MUST NOT BE ABLE TO TAKE THE FEATURE IT SERVES DOWN (§231.3):**
   Islam, minutes after the §231 merge — *"the chat bubble disappeared!"*
   `lib/push.js` required `web-push` at its TOP level and `api/chat.js` requires
@@ -3908,7 +3929,24 @@ prior sessions (on HR_ERP) accidentally reverted agreed-upon designs.
 
 ---
 
-*Last Updated: 2026-09-01 &mdash; **&sect;232: removing a pillar or a
+*Last Updated: 2026-09-01 &mdash; **&sect;234: one function's submit must not
+carry everybody's report state.** Islam, from a live client session:
+*"emergency error that we fixed 100 times before"* &mdash; a CF custodian
+refused with **"You cannot report for admin."** four times over, and slides
+lost across a sign-out the same morning. &sect;216's fault one part over:
+`review` (submitted &middot; parked &middot; note &middot; slides, each keyed
+by target for the whole tenant) still travelled WHOLE, so one submit carried a
+stale copy of everyone's report state &mdash; refused where the victim's
+rights stopped it, silently wiping where they did not. The differ splits it
+per field and per target now; `REVIEW_PER_TARGET` is one exported list read
+by the differ and the authoriser both; the apply side's new paths are an
+allow-list; reopen deletes one key. Reproduced red-first, falsified at both
+layers (11 red on the differ's pre-build; the reported sentence to the word
+under `SMP_WHOLE_GRAPH=1` on a real Postgres), 124/0 &middot; 451/0 &middot;
+24/0 &middot; round trip PASS on a virgin database &middot; `report-saves` and
+`save-fidelity` green over HTTP &middot; full `qa.py` sweep green.*
+
+*Earlier: 2026-09-01 &mdash; **&sect;232: removing a pillar or a
 project.** The mockup an earlier session published for sign-off
 (`design-mockups/pillar-project-remove/`), signed off by Islam and built: a
 worded quiet-red control in the pinned editing head (&sect;194's edhead on a

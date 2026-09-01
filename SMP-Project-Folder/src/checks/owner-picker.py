@@ -316,6 +316,37 @@ with sync_playwright() as p:
            pg.evaluate("(id)=>GROUP.capabilities.find(c=>c.fn==='marketing').projects.find(p=>p.id===id).owner", pid)
            == "Dina Shawky")
 
+        # §224: COLLABORATORS BESIDE THE OWNER — the tactic's ticking list on
+        # the milestone row, pressed and read back from the DATA (§96: an
+        # editor wired to nothing looks identical and discards every tick).
+        f2 = pg.evaluate("""()=>({
+          mscol:[...document.querySelectorAll('.pane table')]
+              .filter(t=>/MILESTONE/i.test(t.tHead.textContent))
+              .reduce((n,t)=>n+t.querySelectorAll('select.collabsel').length,0),
+          msrows:[...document.querySelectorAll('.pane table')]
+              .filter(t=>/MILESTONE/i.test(t.tHead.textContent))
+              .reduce((n,t)=>n+t.querySelectorAll('tbody tr:not(.newrow)').length,0)});""")
+        ck("every milestone's collaborators is a ticking list",
+           f2["mscol"] == f2["msrows"] and f2["mscol"] >= 1, f2)
+        msel = ".pane table select.collabsel"
+        press(pg, btn_for(pg, msel), "the milestone collaborators picker")
+        ck("the ticking list says so (milestone)", pg.query_selector(".sspop.ssmany") is not None)
+        mnames = pg.evaluate("""()=>{const rs=[...document.querySelectorAll('.sspop .ssrow')];
+          const nm=r=>r.childNodes[0].textContent;
+          rs[0].click(); rs[2].click(); return [nm(rs[0]), nm(rs[2])];}""")
+        pg.wait_for_timeout(300)
+        mgot = pg.evaluate("""(id)=>{const c=GROUP.capabilities.find(c=>c.fn==='marketing');
+          const p=c.projects.find(p=>p.id===id); return p.milestones[0].collaborators;}""", pid)
+        ck("two ticks write two milestone collaborators", mgot == mnames,
+           {"ticked": mnames, "stored": mgot})
+        pg.evaluate("()=>{const rs=[...document.querySelectorAll('.sspop .ssrow')];rs[0].click();rs[2].click();}")
+        pg.wait_for_timeout(300)
+        ck("unticking everything DELETES the milestone's key (§50.6)",
+           pg.evaluate("""(id)=>{const c=GROUP.capabilities.find(c=>c.fn==='marketing');
+             const p=c.projects.find(p=>p.id===id);
+             return 'collaborators' in p.milestones[0];}""", pid) is False)
+        pg.keyboard.press("Escape"); pg.wait_for_timeout(250)
+
     except Missing:
         pass
 

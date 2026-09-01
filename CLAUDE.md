@@ -404,6 +404,29 @@ console errors (in this cloud environment, run it via a wrapper that points Play
   name — the real-database test caught it (§100.3). **NOT fixed and said so**: a
   genuine refusal is still a refusal, and if they continue while naming a
   function nobody opened, this diagnosis is wrong.
+- **A MILESTONE'S COLLABORATORS, THE TACTIC'S RULE MOVED OVER (§224):** Islam —
+  *"add collaborators beside the owner column similar to the collaborators in
+  the tactics in the units. align with me."* Aligned first; both decisions his:
+  **being named is a reporting right** (the word means on a milestone what it
+  means on a tactic) and **the column shows everywhere the tactics show
+  theirs** — editable on the Plan pane, read-only on Performance and the deck;
+  the Reporting pane shows no owner and stays untouched. Every accumulated
+  tactic rule moves over rather than being re-decided: ticked from the
+  register (§130.1), fillable while EMPTY and never counted (§187/§205 — the
+  field joins `GAP_OPTIONAL.milestone` so screen and server answer together),
+  emptied key DELETED (§50.6), em-dash for nobody (§15.1). **ONE RULE, NOT
+  TWO**: `namedOn()` always read owner + collaborators; only §147.8's
+  derivation stripped the milestone to `{owner}` — the row travels whole now,
+  so a collaborator derives Contributor, reporting only the milestone that
+  names them once the Contributor row is opened. **The workbook carries the
+  column or the round trip drops the names** (§22: an upload authors) — sheet,
+  reader (either comma or pipe, old files fine, §58), CSV pipeline; proved a
+  fixed point. **No migration** — `milestones.extra`, §177's own road. **The
+  header is "Collabs."**: the full word cost a 515px pane 11px at 830, found
+  by `table-fit.py` going red, and the short form is what the tactics wear on
+  every surface (§53.5). `project-tables.py`'s dead-cell probe learned that a
+  `.collabs` em-dash is an ANSWER — exempting exactly one column, asserted, or
+  a build classing every cell would blind it (§113.8).
 - **COUNTED AND FILLABLE ARE TWO QUESTIONS, AND THE DOOR ASKS THE SECOND
   (§223):** Islam — *"Hala from CX can't fill the missing definition"*, with
   the Definition an em-dash and no control on the page. Measured:
@@ -3707,7 +3730,27 @@ prior sessions (on HR_ERP) accidentally reverted agreed-upon designs.
 
 ---
 
-*Last Updated: 2026-08-31 &mdash; **v3.99: a plan travels row by row, and a
+*Last Updated: 2026-09-01 &mdash; **v3.100: a milestone's collaborators, the
+tactic's rule moved over (&sect;224).** Islam: *"for the projects milestones
+please add collaborators beside the owner column similar to the collaborators
+in the tactics in the units. align with me to make the addition correctly."*
+Aligned before building, and both decisions are his: being named a collaborator
+on a milestone is a **reporting right** (through the same `namedOn()` the
+tactic already uses — the derivation was passing a milestone stripped to its
+owner, and the row travels whole now), and the column shows **everywhere the
+tactics show theirs** — ticked from the register on the Plan pane, read-only on
+Performance and the deck's milestone slide. Fillable while empty and never
+counted as missing (&sect;187/&sect;205, with `GAP_OPTIONAL.milestone` keeping
+screen and server in one answer), emptied key deleted (&sect;50.6), no
+migration (`milestones.extra`, &sect;177's road). The workbook's Milestones
+sheet gains the column or a download-and-re-upload would silently drop every
+name (&sect;22); the round trip is proved a fixed point. The header is
+"Collabs." — the full word cost a 515px pane 11px at 830, found by
+`table-fit.py` going red, and it is the word the tactics wear on every surface
+(&sect;53.5). Falsified before believed: the derivation reverted fails 2, the
+fill rule 1, of 451.*
+
+*Earlier: 2026-08-31 &mdash; **v3.99: a plan travels row by row, and a
 capability travels on its own (&sect;215, &sect;216).** Islam, on the
 deployment: *"the CX is still getting errors on filling"* &mdash; Hala, working
 on **CX**, refused by *"a project's milestones (**admin**) cannot be changed

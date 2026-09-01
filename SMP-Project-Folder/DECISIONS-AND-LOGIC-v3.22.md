@@ -25073,3 +25073,70 @@ left*.
 **THE CHECK'S ASSERTION WAS REWRITTEN, NOT DELETED.** `fn-pillars.py` asserted
 the bar was ABSENT — which is exactly the state Hala met — so it asserts the
 three things that are true instead: no red count, no owing chips, and a door.
+
+## §224 — A MILESTONE'S COLLABORATORS, THE TACTIC'S RULE MOVED OVER
+
+Islam: *"for the projects milestones please add collaborators beside the owner
+column similar to the collabroators in the tactics in the units. align with me
+to make the addition correctly."*
+
+Aligned first, and both decisions are his, each taken with its cost stated:
+**being named a collaborator on a milestone is a reporting right** — the same
+meaning the word carries on a tactic, where being named is what lets somebody
+report the line — and **the column shows everywhere the tactics show theirs**:
+editable on the Plan pane beside the Owner, read-only on the Performance pane
+and the deck's milestone slide. The Reporting pane is untouched, because it
+shows no owner either.
+
+**"SIMILAR TO THE TACTICS" MEANS THE RULES, NOT ONLY THE COLUMN.** Every
+decision the tactic's collaborators have accumulated moves over rather than
+being re-decided:
+
+- **Ticked from the register's list, never typed** (§130.1) — the same
+  `selectManyOr` through `gapCell`, committing per tick, staying open.
+- **Fillable while EMPTY, never counted as missing** (§187, §205): the field
+  joins `GAP_OPTIONAL.milestone`, so the fill grant opens an empty list AND the
+  server accepts the save — §205's fault, paid once, not repeated — while the
+  band, the chips and the deck's Missing never count it. An existing list stays
+  the office's alone.
+- **Emptied, the key is DELETED** (§50.6) — a milestone nobody supports and one
+  never asked are byte-identical.
+- **An em-dash when nobody** (§15.1) — nobody supporting is an ordinary answer.
+  Which met `project-tables.py`'s dead-cell probe head-on: §99 reads a bare
+  em-dash as the table asking a question the row cannot answer, and this dash
+  is the answer itself. The probe now exempts exactly the `.collabs` column —
+  one column, asserted, or a build classing every cell `collabs` would blind
+  it (§113.8).
+
+**THE REPORTING RIGHT IS ONE RULE, NOT A SECOND ONE.** `namedOn()` has always
+read a row's owner AND collaborators; the Contributor derivation for a
+function's projects (§147.8) was passing a milestone stripped to
+`{ owner: m.owner }`, so the row now travels whole and a named collaborator
+derives Contributor exactly as a milestone's owner does — reporting nothing
+until the tenant opens the Contributor row, and then only the milestone that
+names them (`boundedReach` already read the row whole; only the derivation
+lagged). Falsified both ways: the derivation reverted fails 2, the fill rule
+reverted fails 1, of 451.
+
+**THE WORKBOOK CARRIES THE COLUMN OR THE ROUND TRIP DROPS THE NAMES.** An
+upload AUTHORS a plan (§22), so an export without the column would lose every
+collaborator on the next download-and-re-upload. The Milestones sheet gains
+*Collaborators* ("A, B", the tactics sheet's own shape), the reader normalises
+either comma or pipe and takes a file written before the column (§58), the CSV
+pipeline compares pipe-joined exactly as the project's stakeholders do, and a
+file adds and amends, never removes (§54: `cmp` never fires on an emptied
+value). Proved as a fixed point: an untouched round trip changes nothing, and
+the names land on a fresh capability with no empty arrays written.
+
+**NO MIGRATION.** `milestones` files unrecognised keys into `extra` JSONB and
+reads them back — the road §177's pending marks already travel.
+
+**THE HEADER IS "Collabs." BECAUSE THE TACTICS' IS.** The full word cost a
+515px pane 11px at an 830px window — found by `table-fit.py` going red, not by
+looking — and the tactic column already wears the short form on every surface
+(§53.5): the fix and the consistency are the same edit.
+
+**Deliberately not done**: no demo milestone was given collaborators (the demo
+is Islam's to decorate), the plan BUILDER's add-milestone form does not ask for
+them (the tactic's form does not either — they are added in the pen), and the
+hidden .pptx plan deck (§145.9) was left untouched.

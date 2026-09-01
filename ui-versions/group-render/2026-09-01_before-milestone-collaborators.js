@@ -4134,9 +4134,6 @@ function projPerformanceBody(p, fk){
     return '<tr' + (quiet ? ' class="notdue"' : '') + '>' +
       '<td class="idx">' + (i+1) + '</td><td>' + esc(m.name) + '</td>' +
       '<td class="cc">' + esc(m.owner || "\u2014") + '</td>' +
-      /* \u00a7224: the same read the tactics table gives Performance \u2014 who supports
-         the row, em-dash when nobody (\u00a715.1: absent, never an alarm). */
-      '<td class="collabs">' + collabCell(m) + '</td>' +
       '<td class="cc">' + dxDate(m.finish, m.status === "done") + '</td>' +
       '<td class="cc">' + (quiet ? notDueCell() : msPill(m)) + '</td>' +
       '<td class="num final">' + (statusPending(m) ? needsPct()
@@ -4156,7 +4153,7 @@ function projPerformanceBody(p, fk){
     '<h4 class="mini">' + DX_HEADING + '</h4>' +
     miniTable(["#","Deliverables &amp; outcomes","Type","Target","Status",DX_PCT], dxr) +
     '<h4 class="mini">Milestones <em>' + mst.done + ' of ' + mst.total + ' completed</em></h4>' +
-    miniTable(["#","Milestone","Owner","Collabs.","Due date","Status",MS_PCT], mRows);
+    miniTable(["#","Milestone","Owner","Due date","Status",MS_PCT], mRows);
 }
 
 /* A FUNCTION WHOSE PLAN LIVES IN ITS CAPABILITIES AND WHICH CARRIES NONE
@@ -4437,33 +4434,13 @@ function projPlanBody(p, fk){
             return selectOr("plan", m.owner == null ? "" : m.owner,
               ownerChoices(m.owner, true), "ownersel " + (pendCls || ""), set);
           } }) + '</td>' +
-      /* §224: COLLABORATORS BESIDE THE OWNER — the tactic's cell moved over
-         (§145.10, §130.1), because "similar to the tactics" is the ask and
-         one shape for one word is the rule (§53.5). Ticked from the same
-         register list the owner is picked from, never typed; fillable only
-         while EMPTY and never counted as missing (§187 holds on both sides
-         of the switch); an emptied list DELETES its key (§50.6). Being named
-         here is a reporting right — namedOn() reads the row whole — which is
-         why the cell sits behind the same pen as the owner. */
-      '<td class="collabs">' + gapCell("plan", "k_proj", m, "collaborators", {
-          ctx: { project: p, row: m }, text: collabText,
-          parse: function(v){ return Array.isArray(v)
-            ? v.map(function(x){ return String(x).trim(); }).filter(Boolean)
-            : collabParse(v); },
-          del: true,
-          readEmpty: '<span class="nobody">&mdash;</span>',
-          control: function(set, pendCls){
-            return selectManyOr("plan", collabNames(m),
-              ownerChoices(collabNames(m), false),
-              "collabsel " + (pendCls || ""), set);
-          } }) + '</td>' +
       '<td class="cc mp-host">' + gapCell("plan", "k_proj", m, "finish", {
           ctx: { project: p, row: m },
           control: function(set, pendCls){
             return monthPickOr("plan", m.finish, pendCls || "", set);
           } }) + '</td></tr>';
   }).join("") +
-  (ed ? '<tr class="newrow"><td class="idx">+</td><td colspan="5">' +
+  (ed ? '<tr class="newrow"><td class="idx">+</td><td colspan="4">' +
       '<button class="linkbu" data-rowadd="milestone|' + esc(p.id) + '">Add a milestone</button>' +
     '</td></tr>' : '');
   /* The owner sits on the band rather than in the rail. A pillar has two
@@ -4520,9 +4497,7 @@ function projPlanBody(p, fk){
        changes: "What it covers" was a question, "Description" is the word the
        tactics sheet has always used for the same thing. The stored field keeps
        its spelling (§58, §65): `covers` is an identifier, this is a label. */
-    /* "Collabs." — the word the tactics column wears on every surface
-       (§53.5), and the whole 11px the full word cost a 515px pane at 830. */
-    miniTable(["#","Milestone","Description","Owner","Collabs.","Due date"], mRows) +
+    miniTable(["#","Milestone","Description","Owner","Due date"], mRows) +
     dueNote(p) + overrunNote(p);
 }
 

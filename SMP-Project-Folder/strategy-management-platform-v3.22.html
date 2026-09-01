@@ -8871,6 +8871,12 @@ THEME.apply();
      fillable before §187; this restores what that section removed by
      accident while keeping what it removed on purpose. */
 var GAP_OPTIONAL = { tactic: ["collaborators"],
+                     /* §224: A MILESTONE'S COLLABORATORS, THE TACTIC'S RULE
+                        MOVED OVER (Islam: "add collaborators beside the owner
+                        column similar to the collaborators in the tactics").
+                        Fillable while EMPTY, never counted as missing — §187's
+                        ruling holds on both sides of the switch (A15). */
+                     milestone: ["collaborators"],
                      capko:  ["dir", "target", "compile", "weight"],
                      cap:    ["def"] };
   var GAP_FILLABLE = (function () {
@@ -9886,14 +9892,17 @@ var GAP_OPTIONAL = { tactic: ["collaborators"],
     if (!p || !fnKey) return false;
     /* Named ANYWHERE in the function's projects (§147.8): the project's own
        rows (owner, collaborators), its stakeholder list, or a milestone's
-       Owner. A project's owner also matches here and it does not matter —
+       Owner — and since §224 a milestone's COLLABORATORS, because the row
+       travels whole through namedOn(): being named on the milestone is what
+       lets somebody report it, exactly the meaning the word carries on a
+       tactic. A project's owner also matches here and it does not matter —
        they derive powner above, so the floor is never reached for them. */
     return capsOfFn(w, fnKey).some(function (c) {
       return (c.projects || []).some(function (pr) {
         return namedOn(pr, p) ||
                namedOn({ collaborators: pr.stakeholders }, p) ||
                (pr.milestones || []).some(function (m) {
-                 return namedOn({ owner: m.owner }, p);
+                 return namedOn(m, p);
                });
       });
     });
@@ -20822,6 +20831,7 @@ function dueFits(v){
    staying behind for a value nothing writes. `owner` stays: a PROJECT and a
    MILESTONE both have one. */
 var CAPP_COLS = ["id","type","parent_id","name","description","owner","stakeholders",
+                 "collaborators",
                  "direction","value","unit","kind","measure_at","start","end",
                  "finish","covers","weight","compile","timeline","notes"];
 var CAPPROG_COLS = ["id","type","parent_id","parent_name","name","kind","target",
@@ -20868,7 +20878,8 @@ function capPlanTemplate(c){
     });
     (p.milestones || []).forEach(function(m){
       rows.push(csvRow(CAPP_COLS, { id:m.id, type:"MILESTONE", parent_id:p.id, name:m.name,
-        covers:m.covers, owner:m.owner, finish:m.finish }));
+        covers:m.covers, owner:m.owner,
+        collaborators:(m.collaborators || []).join("|"), finish:m.finish }));
     });
   });
   return rows.join("\n");
@@ -21149,6 +21160,9 @@ function diffCapPlan(c, rows){
       cmp("name", hit.obj.name, r.name);
       cmp("what it covers", hit.obj.covers, r.covers);
       cmp("owner", hit.obj.owner, r.owner);
+      /* §224: compared pipe-joined, the shape both readers normalise to —
+         the same contract the project's stakeholders keep above. */
+      cmp("collaborators", (hit.obj.collaborators || []).join("|"), r.collaborators);
       cmp("finish", hit.obj.finish, r.finish);
     }
     out.push({ id:r.id, type:hit.kind, name:hit.obj.name || c.name,
@@ -21206,8 +21220,14 @@ function createFromCapPlan(c, d){
       made++;
     } else if (x.type === "MILESTONE") {
       var p3 = projectById(x.parent_id); if (!p3) return;
-      p3.milestones.push({ id:x.id, name:x.name, covers:x.covers || "",
-        owner:x.owner || "", finish:x.finish || "", status:null });
+      var m3 = { id:x.id, name:x.name, covers:x.covers || "",
+        owner:x.owner || "", finish:x.finish || "", status:null };
+      /* §224: set only when somebody is named — an absent key and an empty
+         list must stay byte-identical (§50.6), so nothing writes []. */
+      var col = (x.collaborators || "").split(/[,|]/)
+        .map(function(s){ return s.trim(); }).filter(Boolean);
+      if (col.length) m3.collaborators = col;
+      p3.milestones.push(m3);
       made++;
     }
   });
@@ -21229,6 +21249,9 @@ function applyCapPlan(c, d){
       if (ch.f === "brief")          o.brief = ch.now;
       if (ch.f === "owner")          o.owner = ch.now;
       if (ch.f === "stakeholders")   o.stakeholders = ch.now ? ch.now.split("|").map(function(s){ return s.trim(); }).filter(Boolean) : [];
+      /* §224: cmp never fires on an emptied value, so `ch.now` is always a
+         real list here — a file adds and amends, it never removes (§54). */
+      if (ch.f === "collaborators")  o.collaborators = ch.now.split("|").map(function(s){ return s.trim(); }).filter(Boolean);
       if (ch.f === "timeline")       o.timeline = timelineKey(ch.now) || o.timeline;
       if (ch.f === "start")          o.start = ch.now;
       if (ch.f === "end")            o.end = ch.now;
@@ -22266,13 +22289,17 @@ function capPlanWorkbook(c){
         return acc;
       }, []) },
 
-    { name:"Milestones", widths:[34, 38, 52, 16, 14],
-      head:["Project", "Milestone", "Description", "Owner", "Due date"],
+    /* §224: Collaborators beside the Owner, the tactics sheet's own column —
+       comma-separated names, and the export carries them or a download-and-
+       re-upload would silently drop every one (§22: an upload AUTHORS). */
+    { name:"Milestones", widths:[34, 38, 52, 16, 26, 14],
+      head:["Project", "Milestone", "Description", "Owner", "Collaborators", "Due date"],
       validations:[{ range:"A2:A400", from:PROJECT_RANGE,
                      error:"Choose a project from the Projects sheet." }],
       rows:(c.projects || []).reduce(function(acc, p){
         (p.milestones || []).forEach(function(m){
-          acc.push([p.name, m.name, m.covers || "", m.owner || "", m.finish || ""]);
+          acc.push([p.name, m.name, m.covers || "", m.owner || "",
+                    (m.collaborators || []).join(", "), m.finish || ""]);
         });
         return acc;
       }, []) }
@@ -22385,6 +22412,11 @@ function capPlanFromWorkbook(c, sheets){
        spelling -- `covers` is an identifier, "Description" is a label. */
     row.covers = r["Description"] != null ? r["Description"] : r["What it covers"];
     row.owner = r["Owner"];
+    /* §224: normalised to the pipe-joined shape the differ compares and
+       applyCapPlan splits — the same road the Projects sheet's Stakeholders
+       already travel. A file written before the column reads "" (§58). */
+    row.collaborators = (r["Collaborators"] || "").split(/[,|]/)
+      .map(function(x){ return x.trim(); }).filter(Boolean).join("|");
     /* WRITE THE NEW LABEL, READ EITHER (§58, §65). The column is called Due
        date from §99; somebody is holding a workbook downloaded before that,
        and a header is a contract. The STORED field keeps its own spelling —
@@ -27701,6 +27733,9 @@ function projPerformanceBody(p, fk){
     return '<tr' + (quiet ? ' class="notdue"' : '') + '>' +
       '<td class="idx">' + (i+1) + '</td><td>' + esc(m.name) + '</td>' +
       '<td class="cc">' + esc(m.owner || "\u2014") + '</td>' +
+      /* \u00a7224: the same read the tactics table gives Performance \u2014 who supports
+         the row, em-dash when nobody (\u00a715.1: absent, never an alarm). */
+      '<td class="collabs">' + collabCell(m) + '</td>' +
       '<td class="cc">' + dxDate(m.finish, m.status === "done") + '</td>' +
       '<td class="cc">' + (quiet ? notDueCell() : msPill(m)) + '</td>' +
       '<td class="num final">' + (statusPending(m) ? needsPct()
@@ -27720,7 +27755,7 @@ function projPerformanceBody(p, fk){
     '<h4 class="mini">' + DX_HEADING + '</h4>' +
     miniTable(["#","Deliverables &amp; outcomes","Type","Target","Status",DX_PCT], dxr) +
     '<h4 class="mini">Milestones <em>' + mst.done + ' of ' + mst.total + ' completed</em></h4>' +
-    miniTable(["#","Milestone","Owner","Due date","Status",MS_PCT], mRows);
+    miniTable(["#","Milestone","Owner","Collabs.","Due date","Status",MS_PCT], mRows);
 }
 
 /* A FUNCTION WHOSE PLAN LIVES IN ITS CAPABILITIES AND WHICH CARRIES NONE
@@ -28001,13 +28036,33 @@ function projPlanBody(p, fk){
             return selectOr("plan", m.owner == null ? "" : m.owner,
               ownerChoices(m.owner, true), "ownersel " + (pendCls || ""), set);
           } }) + '</td>' +
+      /* §224: COLLABORATORS BESIDE THE OWNER — the tactic's cell moved over
+         (§145.10, §130.1), because "similar to the tactics" is the ask and
+         one shape for one word is the rule (§53.5). Ticked from the same
+         register list the owner is picked from, never typed; fillable only
+         while EMPTY and never counted as missing (§187 holds on both sides
+         of the switch); an emptied list DELETES its key (§50.6). Being named
+         here is a reporting right — namedOn() reads the row whole — which is
+         why the cell sits behind the same pen as the owner. */
+      '<td class="collabs">' + gapCell("plan", "k_proj", m, "collaborators", {
+          ctx: { project: p, row: m }, text: collabText,
+          parse: function(v){ return Array.isArray(v)
+            ? v.map(function(x){ return String(x).trim(); }).filter(Boolean)
+            : collabParse(v); },
+          del: true,
+          readEmpty: '<span class="nobody">&mdash;</span>',
+          control: function(set, pendCls){
+            return selectManyOr("plan", collabNames(m),
+              ownerChoices(collabNames(m), false),
+              "collabsel " + (pendCls || ""), set);
+          } }) + '</td>' +
       '<td class="cc mp-host">' + gapCell("plan", "k_proj", m, "finish", {
           ctx: { project: p, row: m },
           control: function(set, pendCls){
             return monthPickOr("plan", m.finish, pendCls || "", set);
           } }) + '</td></tr>';
   }).join("") +
-  (ed ? '<tr class="newrow"><td class="idx">+</td><td colspan="4">' +
+  (ed ? '<tr class="newrow"><td class="idx">+</td><td colspan="5">' +
       '<button class="linkbu" data-rowadd="milestone|' + esc(p.id) + '">Add a milestone</button>' +
     '</td></tr>' : '');
   /* The owner sits on the band rather than in the rail. A pillar has two
@@ -28064,7 +28119,9 @@ function projPlanBody(p, fk){
        changes: "What it covers" was a question, "Description" is the word the
        tactics sheet has always used for the same thing. The stored field keeps
        its spelling (§58, §65): `covers` is an identifier, this is a label. */
-    miniTable(["#","Milestone","Description","Owner","Due date"], mRows) +
+    /* "Collabs." — the word the tactics column wears on every surface
+       (§53.5), and the whole 11px the full word cost a 515px pane at 830. */
+    miniTable(["#","Milestone","Description","Owner","Collabs.","Due date"], mRows) +
     dueNote(p) + overrunNote(p);
 }
 
@@ -37093,6 +37150,8 @@ function deckSlidesFn(fk){
           '<td class="lead">' + esc(m.name) +
           (m.covers ? '<span class="dsub">' + esc(m.covers) + '</span>' : '') + '</td>' +
           '<td>' + esc(m.owner || "—") + '</td>' +
+          /* §224: the same cell the deck's tactic tables carry (§50). */
+          '<td class="collabs">' + collabCell(m) + '</td>' +
           '<td class="num' + (over.indexOf(m.id) > -1 ? ' warn' : '') + '">' + esc(m.finish) +
           (over.indexOf(m.id) > -1 ? ' <span class="dsub">after the project ends</span>' : '') + '</td>' +
           '<td class="num final ' + (m.status === "done" ? "good" : m.status === "wip" ? "attn" : "") + '">' + word + '</td>' +
@@ -37102,7 +37161,7 @@ function deckSlidesFn(fk){
       S.push('<section class="dslide" data-split="' + esc(p.id) + 'M">' +
         '<h2>' + esc(p.name) + '<span class="dwhich">Milestones &middot; ' + mst.done + ' of ' + mst.total + ' completed</span></h2>' +
         '<table class="zebra withnote"><thead><tr><th class="idx">#</th><th>Milestone</th>' +
-        '<th>Owner</th><th class="num">Due date</th><th class="num">Status</th><th class="num">' + MS_PCT + '</th>' +
+        '<th>Owner</th><th>Collabs.</th><th class="num">Due date</th><th class="num">Status</th><th class="num">' + MS_PCT + '</th>' +
         '<th>Note</th></tr></thead><tbody>' + mRows + '</tbody></table></section>');
     });
   });

@@ -7692,64 +7692,68 @@ body{ background:var(--mk-ground); color:var(--mk-ink); margin:0; }
   <header>
     <p class="mk-eyebrow">Design review &middot; for sign-off</p>
     <div class="mk-hr"></div>
-    <h1 class="mk-h1">A tactic&rsquo;s outcome</h1>
+    <h1 class="mk-h1">A tactic&rsquo;s outcome, with a number on it</h1>
     <p class="mk-lede">Your plan says what each tactic is <b>for</b> and what it should <b>produce</b>, and
-      the platform shows neither. Before anything is designed: <b>both fields already exist</b>, they are
-      already stored, and the plan workbook already carries both columns. What is missing is the screen.</p>
+      the platform shows neither. This adds both to the plan &mdash; and, as you decided, gives the outcome
+      <b>its own target and measuring unit</b>, so a tactic is judged by what it produced rather than by
+      somebody&rsquo;s estimate of how done it is.</p>
     <div class="mk-settled">
-      <span class="mk-chip"><b>description</b> and <b>outcome</b> &mdash; stored on every tactic today</span>
-      <span class="mk-chip">The workbook&rsquo;s Tactics sheet already has <b>both columns</b></span>
-      <span class="mk-chip">Neither can be <b>typed</b> anywhere in the product</span>
+      <span class="mk-chip"><b>description</b> and <b>outcome</b> &mdash; already stored on every tactic</span>
+      <span class="mk-chip">The outcome gains a <b>target</b> and a <b>unit</b> &mdash; your decision</span>
+      <span class="mk-chip">An outcome that is not a number keeps <b>% delivered</b></span>
     </div>
   </header>
 
   <section class="mk-stats">
     <div class="mk-stat">
-      <em>Description</em>
-      <b>Nowhere</b>
-      <span>Stored, carried by the workbook, read by the importer &mdash; and displayed on no screen at
-        all. Not the plan, not Performance, not the review deck.</span>
+      <em>Reported today</em>
+      <b>An estimate</b>
+      <span>A tactic is asked for &ldquo;% delivered&rdquo;. Nobody can check it, and two people would give
+        two answers for the same work.</span>
     </div>
     <div class="mk-stat">
-      <em>Outcome</em>
-      <b>One place</b>
-      <span>A faint grey line under the tactic&rsquo;s name, easy to miss and impossible to scan down a
-        column.</span>
+      <em>Reported after this</em>
+      <b>A fact</b>
+      <span><b>62% of orders processed digitally, against a target of 90%.</b> The same shape a key measure
+        already has, so the score is arithmetic rather than judgement.</span>
     </div>
     <div class="mk-stat">
-      <em>In the worked example</em>
-      <b class="mk-red">0 of 84</b>
-      <span>Tactics carrying either field &mdash; which is why nobody has noticed the gap in fourteen
-        versions.</span>
+      <em>In your own sheet</em>
+      <b>3 of 5</b>
+      <span>Outcomes carry a number. The other two &mdash; a unified customer base, one dashboard &mdash;
+        are things delivered, not measured, and keep the old column.</span>
     </div>
   </section>
 
   <section class="mk-note ask">
-    <h3>What the measurements decided, before any drawing</h3>
-    <p>I put both columns into the three real tables and measured the overflow at three window sizes,
-      rather than guessing which would fit:</p>
+    <h3>The rule, in one line &mdash; and the cost you already accepted</h3>
+    <p><b>A tactic with a numeric outcome is measured against it; a tactic without one is still asked how
+      far it has got.</b> That covers every row in your sheet with no second number to enter and nothing
+      left un-measurable.</p>
+    <p>The cost you signed off is real and worth restating: three of your five outcomes repeat a key
+      measure that already sits in the same pillar &mdash; <em>orders processed end-to-end digitally</em>,
+      <em>dependency on automated reports</em>, <em>app coverage rate</em>. After this, each of those
+      numbers lives in two places on the same page and is entered twice each round. The platform will not
+      be able to tell you which is right when they differ.</p>
     <table class="mk-measure">
-      <thead><tr><th>Table</th><th>Columns today</th><th>At 1500</th><th>At 1180</th><th>At 1000</th></tr></thead>
+      <thead><tr><th>Table</th><th>Columns after</th><th>At 1500</th><th>At 1180</th><th>At 1000</th></tr></thead>
       <tbody>
-        <tr><td><b>Plan</b></td><td>5</td><td>fits</td><td>fits</td><td>fits</td></tr>
-        <tr><td>Performance</td><td>8</td><td>fits</td><td class="mk-red">+117px</td><td class="mk-red">+197px</td></tr>
-        <tr><td>Reporting</td><td>7</td><td>fits</td><td class="mk-red">+28px</td><td class="mk-red">+118px</td></tr>
+        <tr><td><b>Plan</b> &mdash; description, outcome, target</td><td>8</td><td>fits</td><td>fits</td><td>fits</td></tr>
+        <tr><td><b>Performance</b> &mdash; outcome</td><td>9</td><td>fits</td><td>fits</td><td class="mk-red">+77px</td></tr>
+        <tr><td><b>Reporting</b> &mdash; outcome</td><td>8</td><td>fits</td><td>fits</td><td>fits</td></tr>
       </tbody>
     </table>
-    <p><b>The Plan table has the room and the other two do not</b> &mdash; and that turns out to match what
-      each page is for. So: both as real columns on the Plan, where the plan is written and read; on the
-      two working screens the <b>outcome</b> earns a column, because it is what the figure beside it is
-      measured against, and the <b>description</b> goes under the tactic&rsquo;s name, which is exactly
-      where the reporter&rsquo;s note already sits.</p>
+    <p>Measured on the real tables with your own wording in them, not estimated. Nothing clips and no
+      heading wraps at any of the three widths.</p>
   </section>
 
   <!-- ── PLAN ─────────────────────────────────────────────────────── -->
   <article class="mk-panel">
     <div class="mk-panel-h">
       <h2>1 &middot; Strategy &rsaquo; Plan</h2>
-      <p>Your spreadsheet&rsquo;s own shape: what the tactic is, what it is for, what it should produce, who
-        owns it, when it runs. Both new columns are editable behind the pen &mdash; today neither can be
-        typed anywhere at all.</p>
+      <p>Your spreadsheet&rsquo;s own shape, plus the target. The unit is picked from the same list a key
+        measure uses &mdash; %, #, EGP, M EGP, B EGP, K USD, M USD, SQM, days, hours &mdash; so the
+        platform reads the number the same way everywhere.</p>
     </div>
     <div class="mk-panel-b">
 
@@ -7767,61 +7771,22 @@ body{ background:var(--mk-ground); color:var(--mk-ink); margin:0; }
 
       <p class="mk-cap new"></p>
       <div class="mk-real"><table>
-        <thead><tr><th>#</th><th>Tactic</th><th>Description</th><th>Outcome</th><th>Owner</th><th>Collabs.</th><th>Quarters</th></tr></thead>
+        <thead><tr><th>#</th><th>Tactic</th><th>Description</th><th>Outcome</th><th>Target</th><th>Owner</th><th>Collabs.</th><th>Quarters</th></tr></thead>
         <tbody>
-          <tr><td class="idx"><span class="idx-n">1</span></td><td>Clean and standardize existing customer and SKU base</td><td class="mk-prose">Create a reliable, unified data foundation across different systems</td><td class="mk-prose"><b>Raya &amp; I2 Unified customer Base</b></td><td>Ramy Behairy</td><td class="collabs">Hassan Sayed</td><td><span class="qs"><i class="">1</i><i class="on past">2</i><i class="on">3</i><i class="">4</i></span></td></tr>
-          <tr><td class="idx"><span class="idx-n">2</span></td><td>End-to-End Order-to-Cash Digitization</td><td class="mk-prose">Automate the full sales and payment cycle</td><td class="mk-prose"><b>90% of orders processed end-to-end digitally</b></td><td>Mohamed Rizk</td><td class="collabs">Hassan, Hala</td><td><span class="qs"><i class="">1</i><i class="on past">2</i><i class="on">3</i><i class="">4</i></span></td></tr>
-          <tr><td class="idx"><span class="idx-n">3</span></td><td>Scale Mobile Digital App across all active merchants</td><td class="mk-prose">Drive digital ordering, engagement, communication channel and coverage enhancement</td><td class="mk-prose"><b>50% App Coverage Rate</b></td><td>Ashraf Abdelaty</td><td class="collabs">Ashraf Laithy, Karim</td><td><span class="qs"><i class="">1</i><i class="on past">2</i><i class="on">3</i><i class="on">4</i></span></td></tr>
+          <tr><td class="idx"><span class="idx-n">1</span></td><td>Clean and standardize existing customer and SKU base</td><td class="mk-prose">Create a reliable, unified data foundation across different systems</td><td class="mk-prose"><b>Raya &amp; I2 Unified customer Base</b></td><td class="num"><span style="color:var(--ink-3)">&mdash;</span></td><td>Ramy Behairy</td><td class="collabs">Hassan Sayed</td><td><span class="qs"><i class="">1</i><i class="on past">2</i><i class="on">3</i><i class="">4</i></span></td></tr>
+          <tr><td class="idx"><span class="idx-n">2</span></td><td>End-to-End Order-to-Cash Digitization</td><td class="mk-prose">Automate the full sales and payment cycle</td><td class="mk-prose"><b>Orders processed end-to-end digitally</b></td><td class="num">90%</td><td>Mohamed Rizk</td><td class="collabs">Hassan, Hala</td><td><span class="qs"><i class="">1</i><i class="on past">2</i><i class="on">3</i><i class="">4</i></span></td></tr>
+          <tr><td class="idx"><span class="idx-n">3</span></td><td>Scale Mobile Digital App across all active merchants</td><td class="mk-prose">Drive digital ordering, engagement, communication channel and coverage enhancement</td><td class="mk-prose"><b>App coverage rate</b></td><td class="num">50%</td><td>Ashraf Abdelaty</td><td class="collabs">Ashraf Laithy, Karim</td><td><span class="qs"><i class="">1</i><i class="on past">2</i><i class="on">3</i><i class="on">4</i></span></td></tr>
         </tbody>
       </table></div>
 
       <div class="mk-foot">
-        <div><em>Why here, in full</em><p>This is the page where the plan is agreed and read. Your sheet
-          puts both beside the tactic, and at <b>seven columns it still fits at 1000px</b> &mdash;
-          measured, not assumed.</p></div>
-        <div><em>The outcome reads as the commitment</em><p>Set in the ordinary ink while the description
-          sits quieter, because the outcome is the thing the plan will be held to. Same weight as the
-          tactic&rsquo;s own name.</p></div>
-      </div>
-    </div>
-  </article>
-
-  <!-- ── PERFORMANCE ──────────────────────────────────────────────── -->
-  <article class="mk-panel">
-    <div class="mk-panel-h">
-      <h2>2 &middot; Performance</h2>
-      <p>The outcome takes a column, right beside the figure it is judged by. The description moves under
-        the tactic&rsquo;s name, where the reporter&rsquo;s note already lives.</p>
-    </div>
-    <div class="mk-panel-b">
-
-      <p class="mk-cap now"></p>
-      <div class="mk-real"><table>
-        <thead><tr><th class="idx">#</th><th>Tactic</th><th>Owner</th><th>Collabs.</th><th>Quarters</th><th class="cc">Status</th><th class="cc">YTD delivery</th><th class="cc">Progress</th></tr></thead>
-        <tbody>
-          <tr><td class="idx"><span class="idx-n">1</span></td><td>Clean and standardize existing customer and SKU base</td><td>Ramy Behairy</td><td class="collabs">Hassan Sayed</td><td><span class="qs"><i class="">1</i><i class="on past">2</i><i class="on">3</i><i class="">4</i></span></td><td class="cc"><span class="pill warn">WIP</span></td><td class="num"><span class="pair"><b>45%</b> <i>/ 50%</i></span></td><td class="num final" style="color:var(--good-tx, var(--good))">90%</td></tr>
-          <tr><td class="idx"><span class="idx-n">2</span></td><td>End-to-End Order-to-Cash Digitization</td><td>Mohamed Rizk</td><td class="collabs">Hassan, Hala</td><td><span class="qs"><i class="">1</i><i class="on past">2</i><i class="on">3</i><i class="">4</i></span></td><td class="cc"><span class="pill warn">WIP</span></td><td class="num"><span class="pair"><b>35%</b> <i>/ 50%</i></span></td><td class="num final" style="color:var(--attn-tx, var(--attn))">70%</td></tr>
-        </tbody>
-      </table></div>
-
-      <div class="mk-gap"></div>
-
-      <p class="mk-cap new"></p>
-      <div class="mk-real"><table>
-        <thead><tr><th class="idx">#</th><th>Tactic</th><th>Outcome</th><th>Owner</th><th>Collabs.</th><th>Quarters</th><th class="cc">Status</th><th class="cc">YTD delivery</th><th class="cc">Progress</th></tr></thead>
-        <tbody>
-          <tr><td class="idx"><span class="idx-n">1</span></td><td>Clean and standardize existing customer and SKU base<span class="why">Create a reliable, unified data foundation across different systems</span></td><td class="mk-prose"><b>Raya &amp; I2 Unified customer Base</b></td><td>Ramy Behairy</td><td class="collabs">Hassan Sayed</td><td><span class="qs"><i class="">1</i><i class="on past">2</i><i class="on">3</i><i class="">4</i></span></td><td class="cc"><span class="pill warn">WIP</span></td><td class="num"><span class="pair"><b>45%</b> <i>/ 50%</i></span></td><td class="num final" style="color:var(--good-tx, var(--good))">90%</td></tr>
-          <tr><td class="idx"><span class="idx-n">2</span></td><td>End-to-End Order-to-Cash Digitization<span class="why">Automate the full sales and payment cycle</span></td><td class="mk-prose"><b>90% of orders processed end-to-end digitally</b></td><td>Mohamed Rizk</td><td class="collabs">Hassan, Hala</td><td><span class="qs"><i class="">1</i><i class="on past">2</i><i class="on">3</i><i class="">4</i></span></td><td class="cc"><span class="pill warn">WIP</span></td><td class="num"><span class="pair"><b>35%</b> <i>/ 50%</i></span></td><td class="num final" style="color:var(--attn-tx, var(--attn))">70%</td></tr>
-        </tbody>
-      </table></div>
-
-      <div class="mk-foot">
-        <div><em>One honest cost</em><p>Nine columns still overflow by <b>79px at a 1000px window</b>.
-          Everything above 1100 is clear. The cheapest room is <b>Collabs.</b>, which is a plan fact and is
-          already on the Plan table &mdash; I have not removed it, because you did not ask me to.</p></div>
-        <div><em>Why the outcome and not the description</em><p>The figure beside it says 90% delivered;
-          the outcome says <em>of what</em>. That belongs on the same line. The description is why the work
-          was chosen, which is a planning question.</p></div>
+        <div><em>The number leaves the sentence</em><p>Your sheet writes &ldquo;<b>90% of orders processed
+          end-to-end digitally</b>&rdquo;. Once the target is its own cell, the outcome is just the thing
+          being measured &mdash; the same way a key measure is named without its target in it. Leave the
+          number in the sentence and the page says 90 twice, and only one of them moves.</p></div>
+        <div><em>A blank target is a real answer</em><p>Row 1 has no number, so the target reads an
+          em-dash and that tactic keeps reporting how far it has got. <b>It is never counted as a gap</b>
+          &mdash; an outcome that is a thing delivered is a complete way to write the line.</p></div>
       </div>
     </div>
   </article>
@@ -7829,9 +7794,10 @@ body{ background:var(--mk-ground); color:var(--mk-ink); margin:0; }
   <!-- ── REPORTING ────────────────────────────────────────────────── -->
   <article class="mk-panel">
     <div class="mk-panel-h">
-      <h2>3 &middot; Reporting</h2>
-      <p>The same column, on the screen where somebody is asked for a number &mdash; so they can see what
-        they are reporting against without leaving the page.</p>
+      <h2>2 &middot; Reporting</h2>
+      <p>The reporter is asked for the outcome&rsquo;s actual, in the outcome&rsquo;s own unit &mdash; with
+        the target on the same line, so nobody has to leave the page to see what they are being measured
+        against.</p>
     </div>
     <div class="mk-panel-b">
 
@@ -7839,7 +7805,7 @@ body{ background:var(--mk-ground); color:var(--mk-ink); margin:0; }
       <div class="mk-real"><table>
         <thead><tr><th>#</th><th>Tactic</th><th>Owner</th><th>Quarters</th><th>YTD Target</th><th>Reported</th><th>Note</th></tr></thead>
         <tbody>
-          <tr><td class="idx">1</td><td>Clean and standardize existing customer and SKU base</td><td>Ramy Behairy</td><td><span class="qs"><i class="">1</i><i class="on past">2</i><i class="on">3</i><i class="">4</i></span></td><td class="num">50%</td><td class="cc"><span class="entry filled"><input class="field" value="45" aria-label="Report"><span class="unitsuf">%</span></span></td><td class="notecol"><input class="fld notefld" value="" placeholder="Note, if there is one"></td></tr>
+          <tr><td class="idx">2</td><td>End-to-End Order-to-Cash Digitization</td><td>Mohamed Rizk</td><td><span class="qs"><i class="">1</i><i class="on past">2</i><i class="on">3</i><i class="">4</i></span></td><td class="num">50%</td><td class="cc"><span class="entry filled"><input class="field" value="35" aria-label="Report"><span class="unitsuf">%</span></span></td><td class="notecol"><input class="fld notefld" value="" placeholder="Note, if there is one"></td></tr>
         </tbody>
       </table></div>
 
@@ -7850,33 +7816,97 @@ body{ background:var(--mk-ground); color:var(--mk-ink); margin:0; }
         <thead><tr><th>#</th><th>Tactic</th><th>Outcome</th><th>Owner</th><th>Quarters</th><th>YTD Target</th><th>Reported</th><th>Note</th></tr></thead>
         <tbody>
           <tr><td class="idx">1</td><td>Clean and standardize existing customer and SKU base<span class="why">Create a reliable, unified data foundation across different systems</span></td><td class="mk-prose"><b>Raya &amp; I2 Unified customer Base</b></td><td>Ramy Behairy</td><td><span class="qs"><i class="">1</i><i class="on past">2</i><i class="on">3</i><i class="">4</i></span></td><td class="num">50%</td><td class="cc"><span class="entry filled"><input class="field" value="45" aria-label="Report"><span class="unitsuf">%</span></span></td><td class="notecol"><input class="fld notefld" value="" placeholder="Note, if there is one"></td></tr>
-          <tr><td class="idx">2</td><td>End-to-End Order-to-Cash Digitization<span class="why">Automate the full sales and payment cycle</span></td><td class="mk-prose"><b>90% of orders processed end-to-end digitally</b></td><td>Mohamed Rizk</td><td><span class="qs"><i class="">1</i><i class="on past">2</i><i class="on">3</i><i class="">4</i></span></td><td class="num">50%</td><td class="cc"><span class="entry filled"><input class="field" value="35" aria-label="Report"><span class="unitsuf">%</span></span></td><td class="notecol"><input class="fld notefld" value="" placeholder="Note, if there is one"></td></tr>
+          <tr><td class="idx">2</td><td>End-to-End Order-to-Cash Digitization<span class="why">Automate the full sales and payment cycle</span></td><td class="mk-prose"><b>Orders processed end-to-end digitally</b></td><td>Mohamed Rizk</td><td><span class="qs"><i class="">1</i><i class="on past">2</i><i class="on">3</i><i class="">4</i></span></td><td class="num">90%</td><td class="cc"><span class="entry filled"><input class="field" value="62" aria-label="Report"><span class="unitsuf">%</span></span></td><td class="notecol"><input class="fld notefld" value="" placeholder="Note, if there is one"></td></tr>
+          <tr><td class="idx">3</td><td>Scale Mobile Digital App across all active merchants<span class="why">Drive digital ordering, engagement, communication channel and coverage enhancement</span></td><td class="mk-prose"><b>App coverage rate</b></td><td>Ashraf Abdelaty</td><td><span class="qs"><i class="">1</i><i class="on past">2</i><i class="on">3</i><i class="on">4</i></span></td><td class="num">50%</td><td class="cc"><span class="entry filled"><input class="field" value="38" aria-label="Report"><span class="unitsuf">%</span></span></td><td class="notecol"><input class="fld notefld" value="" placeholder="Note, if there is one"></td></tr>
         </tbody>
       </table></div>
 
       <div class="mk-foot">
-        <div><em>This one fits</em><p>Eight columns, clear down to a <b>1000px</b> window. Measured on the
-          real table with your own wording in it.</p></div>
-        <div><em>Read-only here</em><p>The outcome is part of the plan, so it is shown and not editable on
-          this screen &mdash; the same rule that already stops a target being moved from the page it is
-          reported against.</p></div>
+        <div><em>The box wears the outcome&rsquo;s unit</em><p>Row 2 asks for a per cent because that is
+          what its outcome is measured in. An outcome targeted at <b>6 stores</b> would put <b>#</b> in
+          that box, and one at <b>1.6 B EGP</b> would say so &mdash; the same control the plan already
+          uses, so a figure can never be entered in the wrong scale.</p></div>
+        <div><em>Row 1 has not changed</em><p>No target, so it is still asked how far it has got against
+          the part of the year that has passed &mdash; the same question, the same prorated 50%. Adding
+          outcomes takes nothing away from the tactics that do not have one.</p></div>
+      </div>
+    </div>
+  </article>
+
+  <!-- ── PERFORMANCE ──────────────────────────────────────────────── -->
+  <article class="mk-panel">
+    <div class="mk-panel-h">
+      <h2>3 &middot; Performance</h2>
+      <p>The outcome takes a column beside the figure that judges it, and the description moves under the
+        tactic&rsquo;s name &mdash; where the reporter&rsquo;s note already sits.</p>
+    </div>
+    <div class="mk-panel-b">
+
+      <p class="mk-cap now"></p>
+      <div class="mk-real"><table>
+        <thead><tr><th class="idx">#</th><th>Tactic</th><th>Owner</th><th>Collabs.</th><th>Quarters</th><th class="cc">Status</th><th class="cc">YTD delivery</th><th class="cc">Progress</th></tr></thead>
+        <tbody>
+          <tr><td class="idx"><span class="idx-n">2</span></td><td>End-to-End Order-to-Cash Digitization</td><td>Mohamed Rizk</td><td class="collabs">Hassan, Hala</td><td><span class="qs"><i class="">1</i><i class="on past">2</i><i class="on">3</i><i class="">4</i></span></td><td class="cc"><span class="pill warn">WIP</span></td><td class="num"><span class="pair"><b>35%</b> <i>/ 50%</i></span></td><td class="num final" style="color:var(--attn-tx)">70%</td></tr>
+        </tbody>
+      </table></div>
+
+      <div class="mk-gap"></div>
+
+      <p class="mk-cap new"></p>
+      <div class="mk-real"><table>
+        <thead><tr><th class="idx">#</th><th>Tactic</th><th>Outcome</th><th>Owner</th><th>Collabs.</th><th>Quarters</th><th class="cc">Status</th><th class="cc">YTD actual</th><th class="cc">Progress</th></tr></thead>
+        <tbody>
+          <tr><td class="idx"><span class="idx-n">1</span></td><td>Clean and standardize existing customer and SKU base<span class="why">Create a reliable, unified data foundation across different systems</span></td><td class="mk-prose"><b>Raya &amp; I2 Unified customer Base</b></td><td>Ramy Behairy</td><td class="collabs">Hassan Sayed</td><td><span class="qs"><i class="">1</i><i class="on past">2</i><i class="on">3</i><i class="">4</i></span></td><td class="cc"><span class="pill warn">WIP</span></td><td class="num"><span class="pair"><b>45%</b> <i>/ 50%</i></span></td><td class="num final" style="color:var(--good-tx)">90%</td></tr>
+          <tr><td class="idx"><span class="idx-n">2</span></td><td>End-to-End Order-to-Cash Digitization<span class="why">Automate the full sales and payment cycle</span></td><td class="mk-prose"><b>Orders processed end-to-end digitally</b></td><td>Mohamed Rizk</td><td class="collabs">Hassan, Hala</td><td><span class="qs"><i class="">1</i><i class="on past">2</i><i class="on">3</i><i class="">4</i></span></td><td class="cc"><span class="pill warn">WIP</span></td><td class="num"><span class="pair"><b>62%</b> <i>/ 90%</i></span></td><td class="num final" style="color:var(--warn-tx)">69%</td></tr>
+          <tr><td class="idx"><span class="idx-n">3</span></td><td>Scale Mobile Digital App across all active merchants<span class="why">Drive digital ordering, engagement, communication channel and coverage enhancement</span></td><td class="mk-prose"><b>App coverage rate</b></td><td>Ashraf Abdelaty</td><td class="collabs">Ashraf Laithy, Karim</td><td><span class="qs"><i class="">1</i><i class="on past">2</i><i class="on">3</i><i class="on">4</i></span></td><td class="cc"><span class="pill warn">WIP</span></td><td class="num"><span class="pair"><b>38%</b> <i>/ 50%</i></span></td><td class="num final" style="color:var(--attn-tx)">76%</td></tr>
+        </tbody>
+      </table></div>
+
+      <div class="mk-foot">
+        <div><em>One column, two readings, and it says which</em><p>The quiet figure after the slash is the
+          <b>outcome&rsquo;s target</b> where there is one, and the <b>part of the plan that is due</b>
+          where there is not. Row 1 reads 45 of 50 delivered; rows 2 and 3 read 62 of 90 and 38 of 50
+          achieved. The Outcome cell beside it is what tells you which question was asked.</p></div>
+        <div><em>The heading changes with the meaning</em><p><b>YTD delivery</b> becomes <b>YTD actual</b>
+          &mdash; the same word the key measures table beside it already uses, so one page stops having
+          two names for the same kind of number.</p></div>
+        <div><em>One honest cost</em><p>Nine columns overrun by <b>77px at a 1000px window</b>; everything
+          from 1100 up is clear. The cheapest thing to drop is <b>Collabs.</b>, which is a plan fact and is
+          already on the Plan table. <b>I have not removed it</b> &mdash; say the word.</p></div>
       </div>
     </div>
   </article>
 
   <section class="mk-note">
-    <h3>What building this actually involves</h3>
+    <h3>Two things I have assumed &mdash; say if either is wrong</h3>
     <ul>
-      <li><b>No new fields, no migration, no workbook change.</b> Both are stored today and the Tactics
-        sheet already carries <em>Pillar &middot; Tactic &middot; Description &middot; Outcome &middot;
-        Owner &middot; Collaborators &middot; Q1&ndash;Q4</em>. Uploading your sheet would land them now.</li>
-      <li><b>Two columns, and a pen that can write them.</b> Neither field has an editor anywhere, so the
-        plan can hold them and nobody in the product can put them there.</li>
-      <li><b>The review deck shows neither.</b> Your slides say what each tactic delivered without ever
-        saying what it was meant to produce. I would put the outcome on the tactic slide in the same
-        pass &mdash; say if you would rather it stayed off.</li>
-      <li><b>All ten units and every supporting function</b>, from one table builder &mdash; the tactics
-        table is one piece of code, so this reaches everywhere at once.</li>
+      <li><b>An outcome is reached or beaten, never kept below.</b> Every outcome in your sheet is
+        something to raise, so the score is actual &divide; target. If you have outcomes that are targets
+        to come <em>under</em> &mdash; a cycle time, an error rate &mdash; they need the same
+        &ldquo;&ge; or &le;&rdquo; switch a key measure has, and I will add it.</li>
+      <li><b>An outcome does not prorate.</b> &ldquo;90% of orders processed digitally&rdquo; is a rate at
+        a point in time, so at month 8 it is still measured against 90 and not against 60 &mdash; the
+        same rule we just settled for <em>Latest</em> measures. An outcome that <em>adds up</em> over the
+        year (six stores opened, a revenue figure) should prorate, and would need the same
+        <em>Sum / Latest</em> choice the measures have.</li>
+    </ul>
+  </section>
+
+  <section class="mk-note">
+    <h3>What building this involves</h3>
+    <ul>
+      <li><b>Description and outcome need no migration.</b> Both are stored on every tactic today and the
+        plan workbook already carries both columns. What is missing is the screen &mdash; and a pen,
+        because neither can be typed anywhere in the product.</li>
+      <li><b>The outcome&rsquo;s target is new</b> and rides in the same place a milestone&rsquo;s
+        collaborators do, so it also needs no migration. The workbook gains a <b>Outcome target</b>
+        column, or downloading and re-uploading a plan would drop every target you had set.</li>
+      <li><b>The scoring changes for tactics that have one.</b> A tactic with an outcome target stops
+        being scored on the estimate and starts being scored on the number &mdash; so <b>some tactic
+        scores will move</b> the first time targets are entered. Nothing moves until they are.</li>
+      <li><b>All ten units and every supporting function</b>, from one table builder. The review deck
+        would carry the outcome on the tactic slide in the same pass &mdash; say if you would rather it
+        stayed off the slides.</li>
     </ul>
   </section>
 

@@ -42175,7 +42175,18 @@ var SYNC = (function () {
      Drawn only from land(), only when hydration failed over http. It retries
      on its own: any answer that means the server is back (ok, or a 401/403
      that will route to the gate) reloads; a 500 keeps waiting rather than
-     reload-looping a broken deployment. */
+     reload-looping a broken deployment.
+
+     The probe's handle lives at module scope because there are TWO ways the
+     wall comes down now — the person stepping past it, and §226's late
+     answer landing — and both must stop the probe, or a reload fires ten
+     seconds after the real page is already up. */
+  var wallProbe = null;
+  function noServerDown() {
+    var d = document.getElementById("noserver");
+    if (d) d.remove();
+    if (wallProbe) { clearInterval(wallProbe); wallProbe = null; }
+  }
   function noServerWall() {
     if (document.getElementById("noserver")) return;
     var d = document.createElement("div");
@@ -42198,10 +42209,9 @@ var SYNC = (function () {
       location.reload();
     });
     d.querySelector("[data-nosrv-view]").addEventListener("click", function () {
-      clearInterval(probe);
-      d.remove();
+      noServerDown();
     });
-    var probe = setInterval(function () {
+    wallProbe = setInterval(function () {
       fetch("/api/state", { cache: "no-store" }).then(function (r) {
         if (r.ok || r.status === 401 || r.status === 403) location.reload();
       }).catch(function () {});
@@ -43244,10 +43254,35 @@ var SYNC = (function () {
          paint this page: not hydration, not a refusal, not a network that
          never answers. `land()` is the one door and it is idempotent, so the
          backstop and the answer racing each other is harmless. */
-      var landed = false, t0 = bootNow();
+      var landed = false, landedLive = false, t0 = bootNow();
       function land(then) {
-        if (landed) return;
+        /* ── A LATE ANSWER STILL LANDS (§226) ─────────────────────────
+           Islam, hard-refreshing after a deployment: the wall, every time.
+           A freshly deployed function answers its first request slowly —
+           cold start, and a database that may itself be waking — so the
+           answer routinely arrives a few seconds AFTER the 8s give-up. It
+           was being dropped here: hydrate() had already rebound the globals
+           and `live` was true, but the one-shot guard swallowed the paint,
+           so the person sat behind the wall over the baked example while
+           their real data was in memory, waiting for the probe's reload.
+           Worse, the wall's "nothing entered here is saved" had quietly
+           stopped being true, because save() flows once `live` is.
+
+           So a second landing is allowed for exactly one case: the first
+           landing was the backstop's (demo painted, `landedLive` false) and
+           this one carries the live tenant. It paints the real page in
+           place and takes the wall down — no reload, nothing pressed. A
+           late FAILURE still returns here, and the wall and its probe stay,
+           which is §201 unchanged. */
+        if (landed) {
+          if (!live || landedLive) return;
+          landedLive = true;
+          (then || paint)();
+          noServerDown();
+          return;
+        }
         landed = true;
+        landedLive = live;
         clearTimeout(backstop);
         /* A FAST ANSWER WOULD FLASH THE SKELETON ON AND OFF. Held to a floor
            so it reads as one step rather than a stutter — below the threshold

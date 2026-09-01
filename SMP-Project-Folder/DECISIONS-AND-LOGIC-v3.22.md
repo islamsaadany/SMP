@@ -25199,3 +25199,57 @@ runtime needs no reload and is the only way to read back **what** was shown,
 which is most of what wording B claims. It asserts both ends of all three
 switches (§94.2), and **the refused press is forced**, because Playwright treats
 `aria-disabled` as disabled and that path is exactly what is under test (§222).
+
+## §226 — A LATE ANSWER STILL LANDS
+
+Islam, with a screenshot of §201's wall over the live deployment: *"when I hard
+refresh my deployment tab I get thie mssages"* — and, asked the two questions
+that separate the causes, the wall clears by itself and it appears **mostly
+after new deployments**.
+
+**MEASURED BEFORE ANYTHING WAS TOUCHED.** Production is current (the served
+platform file and `sw.js` are byte-identical to the repo's build) and healthy —
+`/api/state` answered 0.3–0.6s from here, `connect()` + `ensureReady()` + the
+session check included. The code path is nowhere near the budget: against a real
+Postgres 16, a signed-in GET is **11–17ms warm, 54ms on a cold Node process**,
+and first-ever contact with an empty database (schema, both migration phases,
+seed) is **0.66s**. What exceeds 8 seconds is the environment's cold path — a
+freshly deployed function's first answer (cold start, plus a Neon compute that
+may itself be waking), which is exactly when somebody hard-refreshes to see the
+new version. §195's 504 on a save was this same cold path on the write side.
+
+**THE WALL WAS RIGHT AND THE LANDING WAS WRONG.** `BOOT_GIVEUP` fires at 8s,
+`land()` paints the baked example and raises the wall — §201 working as
+designed. But `land()` was ONE-SHOT, and the boot fetch was still in flight: when
+the answer arrived at ten or twelve seconds, `hydrate()` had already rebound the
+globals and `live` was true, **and the paint was swallowed** — the person sat
+behind the wall over the baked example with their real data in memory, waiting
+for the probe's 10-second reload. Worse, the wall's *"nothing entered here is
+saved"* had quietly stopped being true the moment `live` flipped, because
+`save()` flows once it is — and any repaint (any click) would have drawn the
+live tenant behind a wall calling it the example.
+
+**SO A SECOND LANDING IS ALLOWED, FOR EXACTLY ONE CASE**: the first landing was
+the backstop's (`landedLive` false) and this one carries the live tenant. It
+runs the success path's own callback — chrome, paint, the welcome screen and
+tour offering themselves as normal — and takes the wall down, **in place: no
+reload, nothing pressed**. A late FAILURE still returns at the guard, so the
+wall and its probe stand, which is §201 unchanged. The probe's handle moved to
+module scope (`wallProbe`, with `noServerDown()` the one takedown both exits
+share), or a reload would fire ten seconds after the real page was already up.
+
+**DELIBERATELY NOT a longer `BOOT_GIVEUP`**: raising 8s to 20s would leave
+somebody staring at the grey skeleton for 20 seconds when the server is
+genuinely down, to buy nothing the late landing does not already buy — at 8s you
+are told what is happening, and seconds later the real page replaces it by
+itself.
+
+`checks/boot-skeleton.py` §6 — the one file that can see the boot path at all
+(§94.11) — serves the state 10.5s late and asserts the wall goes UP at the
+give-up (§201 still working), comes down BY ITSELF, the tenant's bar colour is
+painted, and a flag set before the wait survives, so an in-place paint can never
+be the probe's reload wearing the fix's clothes. Proved able to fail (§94.5):
+**2 red on the pre-§226 build** — the wall stands and the baked navy is painted
+— while *"as the server's own data"* passes there too, because `hydrate()` had
+run: the check reproducing the diagnosis, not just the symptom. Full `qa.py`
+clean.

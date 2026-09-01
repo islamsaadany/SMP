@@ -68,6 +68,25 @@ Nothing proceeds past this line without an answer.
 
 ## Built and verified
 
+### §226 — a late answer still lands (on `claude/hard-refresh-deployment-errors-jm0yin`, not merged)
+
+- **Islam's report:** hard-refreshing the deployment shows the "server did not
+  answer" notice, mostly after new deployments; it clears itself after a while.
+- **Nothing is lost and the server is healthy** — measured: production answers
+  in under a second warm, and the whole read path costs 11–54ms against a real
+  Postgres. What exceeds the page's 8-second patience is a freshly deployed
+  function's first, cold answer.
+- **The fault fixed:** when the answer arrived a few seconds late, the page
+  had already given up — the data was hydrated into memory and the paint was
+  swallowed, so the notice stood over the example until the automatic retry
+  reloaded. Now the late answer paints the real page in place and takes the
+  notice down by itself — no reload, nothing pressed.
+- **The notice is unchanged** for a server that genuinely fails: it stands,
+  keeps retrying, and "look at the example anyway" still works.
+- Proof: `checks/boot-skeleton.py` §6 is new — 2 red on the build before
+  (the notice stands, the baked navy is painted); ALL GREEN after; full
+  `qa.py` clean.
+
 ### v3.80 — the pending count says where, and walks you there (§192)
 
 - **The badge pointed nowhere.** As the SMO you were told three values were

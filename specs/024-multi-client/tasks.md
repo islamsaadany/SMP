@@ -24,7 +24,13 @@ serverless functions `api/`; SQL `db/`; checks `SMP-Project-Folder/src/checks/`;
 - [x] T001 Create `db/platform-schema.sql` with `clients`, `accounts`, `account_clients`, `platform_access`, `sessions`, `login_attempts`, `client_log` per specs/024-multi-client/data-model.md, idempotent (`CREATE TABLE IF NOT EXISTS`) and with the partial unique index for one super user per client
 - [x] T002 [P] Create `db/platform-migrations/` with its own `_sql_migrations` registry, mirroring the convention in `lib/state-io.js` (numbered files, `-- @phase:` honoured)
 - [x] T003 [P] Create `lib/platform-rules.js` — `OFFICE_ROLES` (admin·lead·consultant·observer), `AREAS` (my_clients·other_clients·client_config·consultants·create_client·demo), `ACCESS_DEFAULTS` from spec §7.3, `grantIn()` merging stored over defaults (§30.2), and `mayOpenClient` / `mayEditClient` / `mayConfigureClient` / `mayManageConsultants` / `mayCreateClient` / `mayEditAccess` — pure functions, no I/O
-- [ ] T004 (deferred to US2, when `ff-shell.html` exists — an inline nothing reads is dead code, §24) Add `lib/platform-rules.js` to `build.py`'s inline list beside `lib/rules.js` so the browser and the API share one copy (Principle IX)
+- [x] T004 **NOT DONE, AND THAT IS THE ANSWER.** `platform.html` asks the
+  SERVER for everything — `cards`, `consultants`, `access` and `client` each
+  come back already resolved, carrying `canOpen`, `canConfig`, `canEdit` and
+  the seat — so it holds **no copy of a rule to keep in step**: `grep -c
+  'FF\.\|SMPRules' platform.html` is 0. Inlining `lib/platform-rules.js`
+  into a page that reads none of it is dead code (§24), and the drift
+  Principle IX guards against cannot occur where there is only one side
 - [x] T005 [P] Write `scripts/test-platform-rules.js` — the four roles against the six areas, defaults merged, an unknown area answering `none`, and the admin row unwritable
 
 ## Phase 2 · Foundational (blocks every story)
@@ -170,7 +176,7 @@ platform admin alone adds clients and consultants.
 - [x] T056 Write §147 in `SMP-Project-Folder/DECISIONS-AND-LOGIC-v3.22.md` — the decisions, and the two reversals: §21's "no invented content in the database" for the Demo client, and the Demo-data button's retirement
 - [x] T057 [P] Update `CLAUDE.md` (the multi-client facts, the new commands) and `IMPLEMENTATION_PROGRESS.md` in the same commit as the work (steering currency)
 - [x] T058 Rehearse `scripts/migrate-to-multi-client.js` against a **copy of production**, with the rollback written down first, and report what it found before it is run for real
-- [ ] T059 End the merge with what to go and check — the screens, in the navigation's own words (rule A16)
+- [x] T059 End the merge with what to go and check — the screens, in the navigation's own words (rule A16) — `specs/024-multi-client/what-to-check.md`
 
 ---
 

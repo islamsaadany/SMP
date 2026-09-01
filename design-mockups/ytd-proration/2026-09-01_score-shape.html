@@ -7534,166 +7534,98 @@ body.presenting #buildband { display:none; }
 </style>
 
 <style>
-/* ── The review frame. Everything inside a .mkpanel is the PRODUCT's own
-   markup and the PRODUCT's own stylesheet, lifted out of the running page
-   (Mobile › Performance, 1500px) so the three options are compared against
-   what the platform actually draws and not against what its stylesheet
-   could be made to draw (§41.9). The frame below is the only thing here
-   that is mine, and it is scoped `mk-` so it cannot reach the tables. */
+/* ── The review frame. Every table inside a .mkpanel is the PRODUCT's own
+   markup under the PRODUCT's own stylesheet, lifted out of the running
+   page (Mobile › Performance, 1500px), so the proposal is compared with
+   what the platform actually draws rather than with what its stylesheet
+   could be made to draw (§41.9). Only the `mk-` frame and the one `.pair i`
+   rule below are new. */
 
 :root{
-  --chrome-h:0px;                 /* the tables' sticky rules read this */
-  --mk-ground:#F2F4F7;
-  --mk-card:#FFFFFF;
-  --mk-ink:#171B22;
-  --mk-ink-2:#414A58;
-  --mk-ink-3:#69727F;
-  --mk-line:#DBE0E8;
-  --mk-navy:#16325C;
-  --mk-navy-ink:#FFFFFF;
-  --mk-gold:#C9A24D;
+  --chrome-h:0px;
+  --mk-ground:#F2F4F7; --mk-card:#FFFFFF;
+  --mk-ink:#171B22; --mk-ink-2:#414A58; --mk-ink-3:#69727F;
+  --mk-line:#DBE0E8; --mk-navy:#16325C; --mk-navy-ink:#FFFFFF; --mk-gold:#C9A24D;
 }
 @media (prefers-color-scheme: dark){
   :root:not([data-theme="light"]){
-    --mk-ground:#0E1116;
-    --mk-card:#161A21;
-    --mk-ink:#EEF1F5;
-    --mk-ink-2:#B9C1CC;
-    --mk-ink-3:#8C95A2;
-    --mk-line:#2A313B;
-    --mk-navy:#122744;
-    --mk-gold:#D8B466;
+    --mk-ground:#0E1116; --mk-card:#161A21;
+    --mk-ink:#EEF1F5; --mk-ink-2:#B9C1CC; --mk-ink-3:#8C95A2;
+    --mk-line:#2A313B; --mk-navy:#122744; --mk-gold:#D8B466;
   }
 }
 :root[data-theme="dark"]{
-  --mk-ground:#0E1116;
-  --mk-card:#161A21;
-  --mk-ink:#EEF1F5;
-  --mk-ink-2:#B9C1CC;
-  --mk-ink-3:#8C95A2;
-  --mk-line:#2A313B;
-  --mk-navy:#122744;
-  --mk-gold:#D8B466;
+  --mk-ground:#0E1116; --mk-card:#161A21;
+  --mk-ink:#EEF1F5; --mk-ink-2:#B9C1CC; --mk-ink-3:#8C95A2;
+  --mk-line:#2A313B; --mk-navy:#122744; --mk-gold:#D8B466;
 }
 
 body{ background:var(--mk-ground); color:var(--mk-ink); margin:0; }
 
 .mk{
   max-width:1180px; margin:0 auto; padding:34px 24px 90px;
-  display:flex; flex-direction:column; gap:34px;
+  display:flex; flex-direction:column; gap:30px;
   font-family:var(--sans, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif);
 }
-.mk-eyebrow{
-  font-size:10.5px; letter-spacing:.16em; text-transform:uppercase;
-  color:var(--mk-gold); font-weight:700; margin:0 0 10px;
-}
-.mk-h1{
-  font-size:30px; line-height:1.15; letter-spacing:-.015em; margin:0 0 14px;
-  font-weight:700; color:var(--mk-ink); text-wrap:balance;
-}
+.mk-eyebrow{ font-size:10.5px; letter-spacing:.16em; text-transform:uppercase;
+  color:var(--mk-gold); font-weight:700; margin:0 0 10px; }
+.mk-h1{ font-size:30px; line-height:1.15; letter-spacing:-.015em; margin:0 0 14px;
+  font-weight:700; color:var(--mk-ink); text-wrap:balance; }
 .mk-lede{ font-size:15px; line-height:1.6; color:var(--mk-ink-2); margin:0; max-width:66ch; }
 .mk-lede b{ color:var(--mk-ink); font-weight:650; }
 .mk-hr{ height:2px; background:var(--mk-gold); width:52px; border-radius:2px; margin:0 0 18px; }
 
-.mk-settled{
-  display:flex; flex-wrap:wrap; gap:8px; margin-top:18px;
-}
-.mk-chip{
-  font-size:12px; color:var(--mk-ink-2); background:var(--mk-card);
-  border:1px solid var(--mk-line); border-radius:999px; padding:5px 12px;
-}
+.mk-settled{ display:flex; flex-wrap:wrap; gap:8px; margin-top:18px; }
+.mk-chip{ font-size:12px; color:var(--mk-ink-2); background:var(--mk-card);
+  border:1px solid var(--mk-line); border-radius:999px; padding:5px 12px; }
 .mk-chip b{ color:var(--mk-ink); font-weight:650; }
 
-.mk-stats{
-  display:grid; grid-template-columns:repeat(auto-fit,minmax(190px,1fr)); gap:1px;
-  background:var(--mk-line); border:1px solid var(--mk-line); border-radius:10px; overflow:hidden;
-}
-.mk-stat{ background:var(--mk-card); padding:16px 18px; }
-.mk-stat em{
-  display:block; font-style:normal; font-size:10.5px; letter-spacing:.13em;
-  text-transform:uppercase; color:var(--mk-ink-3); margin-bottom:7px;
-}
-.mk-stat b{ font-size:26px; font-weight:700; letter-spacing:-.02em; font-variant-numeric:tabular-nums; }
-.mk-stat span{ display:block; font-size:12.5px; color:var(--mk-ink-2); margin-top:5px; line-height:1.45; }
-
-.mk-panel{
-  background:var(--mk-card); border:1px solid var(--mk-line); border-radius:12px; overflow:hidden;
-}
-.mk-panel-h{
-  display:flex; align-items:flex-start; gap:14px;
-  padding:16px 20px; background:var(--mk-navy); color:var(--mk-navy-ink);
-}
-.mk-letter{
-  flex:none; width:30px; height:30px; border-radius:7px;
-  background:var(--mk-gold); color:#16325C;
-  display:grid; place-items:center; font-weight:800; font-size:15px;
-}
+.mk-panel{ background:var(--mk-card); border:1px solid var(--mk-line);
+  border-radius:12px; overflow:hidden; }
+.mk-panel-h{ padding:15px 20px; background:var(--mk-navy); color:var(--mk-navy-ink); }
 .mk-panel-h h2{ margin:0 0 3px; font-size:16.5px; font-weight:650; letter-spacing:-.01em; }
-.mk-panel-h p{ margin:0; font-size:13px; line-height:1.5; color:#C6D2E4; max-width:72ch; }
-.mk-panel-b{ padding:18px 20px 4px; }
-
-/* The product's own tables run edge to edge inside their panel and scroll
-   on their own, so the review sheet never scrolls sideways. */
+.mk-panel-h p{ margin:0; font-size:13px; line-height:1.5; color:#C6D2E4; max-width:74ch; }
+.mk-panel-b{ padding:18px 20px 6px; }
 .mk-real{ overflow-x:auto; }
-.mk-cap{
-  font-size:10.5px; letter-spacing:.13em; text-transform:uppercase;
-  color:var(--mk-ink-3); margin:0 0 9px;
-}
-.mk-foot{
-  display:grid; grid-template-columns:repeat(auto-fit,minmax(260px,1fr)); gap:0;
-  border-top:1px solid var(--mk-line); margin-top:16px;
-}
-.mk-foot div{ padding:14px 20px; }
-.mk-foot div + div{ border-left:1px solid var(--mk-line); }
-.mk-foot em{
-  display:block; font-style:normal; font-size:10.5px; letter-spacing:.13em;
-  text-transform:uppercase; color:var(--mk-ink-3); margin-bottom:6px;
-}
-.mk-foot p{ margin:0; font-size:13px; line-height:1.55; color:var(--mk-ink-2); }
-.mk-foot p b{ color:var(--mk-ink); font-weight:650; }
+.mk-cap{ font-size:10.5px; letter-spacing:.13em; text-transform:uppercase;
+  color:var(--mk-ink-3); margin:0 0 9px; display:flex; align-items:center; gap:8px; }
+.mk-cap.now::before{ content:"TODAY"; background:var(--mk-line); color:var(--mk-ink-2);
+  padding:2px 7px; border-radius:4px; letter-spacing:.1em; }
+.mk-cap.new::before{ content:"PROPOSED"; background:var(--mk-gold); color:#16325C;
+  padding:2px 7px; border-radius:4px; letter-spacing:.1em; font-weight:700; }
+.mk-gap{ height:22px; }
 
-.mk-note{
-  border-left:3px solid var(--mk-gold); background:var(--mk-card);
-  border:1px solid var(--mk-line); border-left:3px solid var(--mk-gold);
-  border-radius:0 10px 10px 0; padding:16px 20px;
-}
-.mk-note h3{ margin:0 0 8px; font-size:14px; font-weight:650; }
-.mk-note p{ margin:0 0 8px; font-size:13.5px; line-height:1.6; color:var(--mk-ink-2); max-width:70ch; }
+.mk-note{ background:var(--mk-card); border:1px solid var(--mk-line);
+  border-left:3px solid var(--mk-gold); border-radius:0 10px 10px 0; padding:17px 21px; }
+.mk-note h3{ margin:0 0 9px; font-size:14.5px; font-weight:650; }
+.mk-note p{ margin:0 0 9px; font-size:13.5px; line-height:1.6; color:var(--mk-ink-2); max-width:72ch; }
 .mk-note p:last-child{ margin-bottom:0; }
 .mk-note ul{ margin:0; padding-left:20px; font-size:13.5px; line-height:1.65; color:var(--mk-ink-2); }
-.mk-note li + li{ margin-top:5px; }
+.mk-note li + li{ margin-top:7px; }
 .mk-note b{ color:var(--mk-ink); font-weight:650; }
+.mk-note.ask{ border-left-color:#B04434; }
 
-.mk-sec-h{ font-size:20px; font-weight:700; letter-spacing:-.01em; margin:0 0 6px; }
-.mk-sec-p{ margin:0 0 4px; font-size:13.5px; line-height:1.6; color:var(--mk-ink-2); max-width:70ch; }
+.mk-changes{ display:grid; grid-template-columns:repeat(auto-fit,minmax(230px,1fr)); gap:1px;
+  background:var(--mk-line); border:1px solid var(--mk-line); border-radius:10px; overflow:hidden; }
+.mk-change{ background:var(--mk-card); padding:15px 17px; }
+.mk-change em{ display:block; font-style:normal; font-size:10.5px; letter-spacing:.13em;
+  text-transform:uppercase; color:var(--mk-ink-3); margin-bottom:7px; }
+.mk-change p{ margin:0; font-size:13px; line-height:1.55; color:var(--mk-ink-2); }
+.mk-change p b{ color:var(--mk-ink); font-weight:650; }
+.mk-was{ color:var(--mk-ink-3); text-decoration:line-through; }
 
-/* The one row everybody will look at, called out above the options. */
-.mk-hero{
-  display:grid; grid-template-columns:1fr auto 1fr; align-items:center; gap:20px;
-  background:var(--mk-card); border:1px solid var(--mk-line); border-radius:12px; padding:22px 24px;
+/* ── THE ONE NEW RULE. `.pair` has exactly one caller in the product today
+   (the tactic's Deliv./plan cell) so it is safe to change in place rather
+   than to fork — one vocabulary for "a figure against its benchmark",
+   used by both tables (§53.5). The denominator is the benchmark, not the
+   answer, so it steps back the way `.cdefault` already does for a
+   repeated Compile rule (§149). */
+.mk-panel .pair i{
+  font-style:normal; font-weight:400; font-size:.84em; color:var(--ink-3);
 }
-.mk-hero .side em{
-  display:block; font-style:normal; font-size:10.5px; letter-spacing:.13em;
-  text-transform:uppercase; color:var(--mk-ink-3); margin-bottom:8px;
-}
-.mk-hero .big{ font-size:44px; font-weight:700; letter-spacing:-.03em; font-variant-numeric:tabular-nums; line-height:1; }
-.mk-hero .big small{ font-size:22px; font-weight:650; }
-.mk-hero .why{ font-size:12.5px; color:var(--mk-ink-2); margin-top:8px; line-height:1.5; }
-.mk-hero .arrow{ font-size:24px; color:var(--mk-ink-3); }
-@media (max-width:720px){
-  .mk-hero{ grid-template-columns:1fr; }
-  .mk-hero .arrow{ display:none; }
-  .mk-foot div + div{ border-left:0; border-top:1px solid var(--mk-line); }
-}
-.mk-red{ color:var(--bad-tx,#8C3327); }
-.mk-amber{ color:var(--attn-tx,#7A5D1C); }
 </style>
 
 <script>
-/* The product's palette is chosen per tenant and its stylesheet keys on the
-   two attributes below; the artifact's own theme is what a reader has set.
-   Mirror one onto the other so the real tables render in the reader's theme
-   rather than always in light. */
 (function(){
   var h = document.documentElement;
   h.setAttribute("data-palette","forefront");
@@ -7713,195 +7645,148 @@ body{ background:var(--mk-ground); color:var(--mk-ink); margin:0; }
 <div class="mk">
 
   <header>
-    <p class="mk-eyebrow">Design review &middot; for sign-off</p>
+    <p class="mk-eyebrow">Design review &middot; revision 2 &middot; for sign-off</p>
     <div class="mk-hr"></div>
     <h1 class="mk-h1">Prorating the YTD score</h1>
-    <p class="mk-lede">A measure is scored against its <b>whole-year target</b> however far into the year we
-      are, so a unit that has banked exactly half its year reads 50% and paints red. Tactics and milestones
-      have never had this problem &mdash; they are already compared against how much of their own plan has
-      elapsed. This sheet is about <b>one decision only: what the measure row looks like once it is fixed.</b>
-      The tables below are the product's own, lifted out of the running page.</p>
+    <p class="mk-lede">Shape <b>B</b> as you asked for it: the annual target keeps its own column, the
+      figure column says <b>YTD</b>, the benchmark rides quietly inside it, and the variance column goes
+      because the pair already shows it. Both tables are the product's own, lifted out of the running page.</p>
     <div class="mk-settled">
+      <span class="mk-chip">Settled: shape <b>B</b>, the pair and the score</span>
       <span class="mk-chip">Settled: <b>Sum rows only</b> &mdash; Latest and Average keep the full-year target</span>
       <span class="mk-chip">Settled: <b>reward standing stays a year-end judgement</b></span>
       <span class="mk-chip">Shown at <b>H1 2026</b>, ends Q2 &mdash; half the plan year elapsed</span>
     </div>
   </header>
 
-  <section class="mk-stats">
-    <div class="mk-stat">
-      <em>Rows affected</em>
-      <b>26</b>
-      <span>Sum measures carrying a reported actual, of 137 in the tenant. Every Latest and Average row is untouched.</span>
-    </div>
-    <div class="mk-stat">
-      <em>Median move</em>
-      <b class="mk-amber">+45 pts</b>
-      <span>The typical revenue line reads 45 points lower than the pace it is actually running at.</span>
-    </div>
-    <div class="mk-stat">
-      <em>Change colour</em>
-      <b>18 of 26</b>
-      <span>Rows that move out of Off track once the benchmark is the target due by now.</span>
-    </div>
+  <section class="mk-changes">
+    <div class="mk-change"><em>Target column</em>
+      <p><span class="mk-was">Target</span> &rarr; <b>Annual target</b>. Says outright that it is the
+        year's number, which is what makes the smaller figure beside the actual make sense.</p></div>
+    <div class="mk-change"><em>Figure column</em>
+      <p><span class="mk-was">H1 actual</span> &rarr; <b>YTD actual</b>, and <span class="mk-was">Deliv. /
+        plan</span> &rarr; <b>YTD delivery</b>. The benchmark sits inside the cell, small and quiet.</p></div>
+    <div class="mk-change"><em>Variance</em>
+      <p><b>Removed</b> from both tables. The pair already shows it, and the column was spending width to
+        restate a subtraction the reader can see.</p></div>
+    <div class="mk-change"><em>Score column</em>
+      <p><b>Unchanged.</b> The measures table keeps <b>Progress</b>; the tactics table keeps <b>Of
+        plan</b>, which is what it says today.</p></div>
   </section>
 
-  <section class="mk-hero">
-    <div class="side">
-      <em>Group revenue, as the platform reads it today</em>
-      <div class="big mk-red">43<small>%</small></div>
-      <p class="why">7.8B EGP banked against an <b>18B EGP full-year</b> target. Off track, red, and a written
-        explanation is demanded before the unit can submit.</p>
-    </div>
-    <div class="arrow" aria-hidden="true">&rarr;</div>
-    <div class="side">
-      <em>Against the target due by half year</em>
-      <div class="big mk-amber">87<small>%</small></div>
-      <p class="why">7.8B EGP against <b>9B EGP</b>. Behind, and behind by a margin somebody can act on
-        rather than a number that says the year is lost.</p>
-    </div>
-  </section>
+  <div class="mk-note ask">
+    <h3>One correction, and one thing I need you to look at</h3>
+    <p><b>The tactics table's last column is called &ldquo;Of plan&rdquo;, not &ldquo;Performance&rdquo;.</b>
+      You said to keep the current title, so I have kept &ldquo;Of plan&rdquo;. <em>Performance</em> is the
+      word used on a project's deliverables and outcomes; the unit's tactic table has always said
+      <em>Of plan</em>. Say the word if you would rather they matched.</p>
+    <p><b>On a Latest row the small grey figure repeats the Annual target exactly</b> &mdash; look at EBITDA
+      and market share below. That is what you asked for and it keeps the column honest and consistent, and
+      it is the one thing on this sheet I would question: showing it only where it differs would make the
+      grey number a signal that says &ldquo;this row is prorated&rdquo;. Your call, and I have not made
+      it for you.</p>
+  </div>
 
-  <section>
-    <h2 class="mk-sec-h">Three shapes</h2>
-    <p class="mk-sec-p">Same six measures in all three, real values from the worked example. Three of them
-      compile by <b>Sum</b> and move; three compile by <b>Latest</b> and do not &mdash; which is the whole of
-      what the rule does, visible in one table.</p>
-  </section>
-
-  <!-- ── A ─────────────────────────────────────────────────────────── -->
+  <!-- ── MEASURES ─────────────────────────────────────────────────── -->
   <article class="mk-panel">
     <div class="mk-panel-h">
-      <span class="mk-letter">A</span>
-      <div>
-        <h2>One number</h2>
-        <p>The Progress column reads against the target due by now. No column is added, no column moves,
-          nothing else on the page changes shape.</p>
-      </div>
+      <h2>Key measures</h2>
+      <p>Unit &rsaquo; Performance, and the same table on a supporting function, the group and a company.
+        Three of these six compile by Sum and prorate; three compile by Latest and do not.</p>
     </div>
     <div class="mk-panel-b">
-      <p class="mk-cap">Unit &rsaquo; Performance &mdash; key measures</p>
+
+      <p class="mk-cap now"></p>
       <div class="mk-real"><table>
         <thead><tr><th class="idx">#</th><th>Measure</th><th class="cc">Dir.</th><th class="cc">Target</th><th class="cc">Compile</th><th class="cc">H1 actual</th><th class="cc">Progress</th></tr></thead>
         <tbody>
-          <tr><td class="idx"><span class="idx-n">1</span></td><td>Revenue</td><td class="num">&ge;</td><td class="num">18B EGP</td><td class="cc">Sum</td><td class="num">7.8B</td><td class="num final" style="color:var(--attn-tx, var(--attn))">87%</td></tr>
+          <tr><td class="idx"><span class="idx-n">1</span></td><td>Revenue</td><td class="num">&ge;</td><td class="num">18B EGP</td><td class="cc">Sum</td><td class="num">7.8B</td><td class="num final" style="color:var(--bad-tx, var(--bad))">43%</td></tr>
           <tr><td class="idx"><span class="idx-n">2</span></td><td>EBITDA</td><td class="num">&ge;</td><td class="num">6.5%</td><td class="cc"><span class="cdefault">Latest</span></td><td class="num">5.1%</td><td class="num final" style="color:var(--attn-tx, var(--attn))">78%</td></tr>
-          <tr><td class="idx"><span class="idx-n">3</span></td><td>Supplier funding secured</td><td class="num">&ge;</td><td class="num">140M EGP</td><td class="cc">Sum</td><td class="num">92M EGP</td><td class="num final" style="color:var(--good-tx, var(--good))">131%</td></tr>
+          <tr><td class="idx"><span class="idx-n">3</span></td><td>Supplier funding secured</td><td class="num">&ge;</td><td class="num">140M EGP</td><td class="cc">Sum</td><td class="num">92M EGP</td><td class="num final" style="color:var(--bad-tx, var(--bad))">66%</td></tr>
           <tr><td class="idx"><span class="idx-n">4</span></td><td>Mobile market share</td><td class="num">&ge;</td><td class="num">32%</td><td class="cc"><span class="cdefault">Latest</span></td><td class="num">28%</td><td class="num final" style="color:var(--attn-tx, var(--attn))">88%</td></tr>
           <tr><td class="idx"><span class="idx-n">5</span></td><td>Cost-to-serve</td><td class="num">&le;</td><td class="num">4.2%</td><td class="cc"><span class="cdefault">Latest</span></td><td class="num">5.6%</td><td class="num final" style="color:var(--attn-tx, var(--attn))">75%</td></tr>
-          <tr><td class="idx"><span class="idx-n">6</span></td><td>Systems consolidated</td><td class="num">&ge;</td><td class="num">6</td><td class="cc">Sum</td><td class="num">2</td><td class="num final" style="color:var(--bad-tx, var(--bad))">67%</td></tr>
+          <tr><td class="idx"><span class="idx-n">6</span></td><td>Systems consolidated</td><td class="num">&ge;</td><td class="num">6</td><td class="cc">Sum</td><td class="num">2</td><td class="num final" style="color:var(--bad-tx, var(--bad))">33%</td></tr>
         </tbody>
       </table></div>
-      <div class="mk-foot">
-        <div><em>What it buys</em><p>The smallest change in the product. Every table, the deck and both
-          workbooks keep the columns they have.</p></div>
-        <div><em>What it costs</em><p><b>The row cannot explain itself.</b> Revenue reads 87% with
-          &ldquo;7.8B against 18B&rdquo; sitting on the same line, and nothing on screen says where 87 came
-          from. Expect to be asked.</p></div>
-      </div>
+
+      <div class="mk-gap"></div>
+
+      <p class="mk-cap new"></p>
+      <div class="mk-real"><table>
+        <thead><tr><th class="idx">#</th><th>Measure</th><th class="cc">Dir.</th><th class="cc">Annual target</th><th class="cc">Compile</th><th class="cc">YTD actual</th><th class="cc">Progress</th></tr></thead>
+        <tbody>
+          <tr><td class="idx"><span class="idx-n">1</span></td><td>Revenue</td><td class="num">&ge;</td><td class="num">18B EGP</td><td class="cc">Sum</td><td class="num"><span class="pair"><b>7.8B</b> <i>/ 9B</i></span></td><td class="num final" style="color:var(--attn-tx, var(--attn))">87%</td></tr>
+          <tr><td class="idx"><span class="idx-n">2</span></td><td>EBITDA</td><td class="num">&ge;</td><td class="num">6.5%</td><td class="cc"><span class="cdefault">Latest</span></td><td class="num"><span class="pair"><b>5.1%</b> <i>/ 6.5%</i></span></td><td class="num final" style="color:var(--attn-tx, var(--attn))">78%</td></tr>
+          <tr><td class="idx"><span class="idx-n">3</span></td><td>Supplier funding secured</td><td class="num">&ge;</td><td class="num">140M EGP</td><td class="cc">Sum</td><td class="num"><span class="pair"><b>92M</b> <i>/ 70M</i></span></td><td class="num final" style="color:var(--good-tx, var(--good))">131%</td></tr>
+          <tr><td class="idx"><span class="idx-n">4</span></td><td>Mobile market share</td><td class="num">&ge;</td><td class="num">32%</td><td class="cc"><span class="cdefault">Latest</span></td><td class="num"><span class="pair"><b>28%</b> <i>/ 32%</i></span></td><td class="num final" style="color:var(--attn-tx, var(--attn))">88%</td></tr>
+          <tr><td class="idx"><span class="idx-n">5</span></td><td>Cost-to-serve</td><td class="num">&le;</td><td class="num">4.2%</td><td class="cc"><span class="cdefault">Latest</span></td><td class="num"><span class="pair"><b>5.6%</b> <i>/ 4.2%</i></span></td><td class="num final" style="color:var(--attn-tx, var(--attn))">75%</td></tr>
+          <tr><td class="idx"><span class="idx-n">6</span></td><td>Systems consolidated</td><td class="num">&ge;</td><td class="num">6</td><td class="cc">Sum</td><td class="num"><span class="pair"><b>2</b> <i>/ 3</i></span></td><td class="num final" style="color:var(--bad-tx, var(--bad))">67%</td></tr>
+        </tbody>
+      </table></div>
+
     </div>
   </article>
 
-  <!-- ── B ─────────────────────────────────────────────────────────── -->
+  <!-- ── TACTICS ──────────────────────────────────────────────────── -->
   <article class="mk-panel">
     <div class="mk-panel-h">
-      <span class="mk-letter">B</span>
-      <div>
-        <h2>The tactic's own columns, moved over</h2>
-        <p>Delivered against the benchmark as a pair, the variance, then the score &mdash; which is exactly
-          what the tactic table one block down this same page has always done.</p>
-      </div>
+      <h2>Tactics</h2>
+      <p>Already prorated against its own active quarters &mdash; nothing about its arithmetic changes.
+        This is the wording and the variance column only, so the two tables on one page read alike.</p>
     </div>
     <div class="mk-panel-b">
-      <p class="mk-cap">Unit &rsaquo; Performance &mdash; key measures</p>
-      <div class="mk-real"><table>
-        <thead><tr><th class="idx">#</th><th>Measure</th><th class="cc">Dir.</th><th class="cc">Target</th><th class="cc">Compile</th><th class="cc">Actual / due by now</th><th class="cc">Var.</th><th class="cc">Of target</th></tr></thead>
-        <tbody>
-          <tr><td class="idx"><span class="idx-n">1</span></td><td>Revenue</td><td class="num">&ge;</td><td class="num">18B EGP</td><td class="cc">Sum</td><td class="num"><span class="pair"><b>7.8B</b> / 9B</span></td><td class="num"><span style="color:var(--attn-tx)">&minus;1.2B</span></td><td class="num final" style="color:var(--attn-tx, var(--attn))">87%</td></tr>
-          <tr><td class="idx"><span class="idx-n">2</span></td><td>EBITDA</td><td class="num">&ge;</td><td class="num">6.5%</td><td class="cc"><span class="cdefault">Latest</span></td><td class="num"><span class="pair"><b>5.1%</b> / 6.5%</span></td><td class="num"><span style="color:var(--attn-tx)">&minus;1.4</span></td><td class="num final" style="color:var(--attn-tx, var(--attn))">78%</td></tr>
-          <tr><td class="idx"><span class="idx-n">3</span></td><td>Supplier funding secured</td><td class="num">&ge;</td><td class="num">140M EGP</td><td class="cc">Sum</td><td class="num"><span class="pair"><b>92M</b> / 70M</span></td><td class="num"><span style="color:var(--good-tx)">+22M</span></td><td class="num final" style="color:var(--good-tx, var(--good))">131%</td></tr>
-          <tr><td class="idx"><span class="idx-n">4</span></td><td>Mobile market share</td><td class="num">&ge;</td><td class="num">32%</td><td class="cc"><span class="cdefault">Latest</span></td><td class="num"><span class="pair"><b>28%</b> / 32%</span></td><td class="num"><span style="color:var(--attn-tx)">&minus;4</span></td><td class="num final" style="color:var(--attn-tx, var(--attn))">88%</td></tr>
-          <tr><td class="idx"><span class="idx-n">5</span></td><td>Cost-to-serve</td><td class="num">&le;</td><td class="num">4.2%</td><td class="cc"><span class="cdefault">Latest</span></td><td class="num"><span class="pair"><b>5.6%</b> / 4.2%</span></td><td class="num"><span style="color:var(--attn-tx)">+1.4</span></td><td class="num final" style="color:var(--attn-tx, var(--attn))">75%</td></tr>
-          <tr><td class="idx"><span class="idx-n">6</span></td><td>Systems consolidated</td><td class="num">&ge;</td><td class="num">6</td><td class="cc">Sum</td><td class="num"><span class="pair"><b>2</b> / 3</span></td><td class="num"><span style="color:var(--bad-tx)">&minus;1</span></td><td class="num final" style="color:var(--bad-tx, var(--bad))">67%</td></tr>
-        </tbody>
-      </table></div>
-      <p class="mk-cap" style="margin-top:22px">The tactic table on the same page today, for comparison</p>
-      <div class="mk-real"><table>
-        <thead><tr><th class="idx">#</th><th>Tactic</th><th>Owner</th><th>Quarters</th><th class="cc">Status</th><th class="cc">Deliv. / plan</th><th class="cc">Var.</th><th class="cc">Of plan</th></tr></thead>
-        <tbody>
-          <tr><td class="idx"><span class="idx-n">1</span></td><td>Clean and standardize customer and SKU base</td><td>Ramy Behairy</td><td><span class="qs"><i class="">1</i><i class="on past">2</i><i class="on">3</i><i class="">4</i></span></td><td class="cc"><span class="pill warn">WIP</span></td><td class="num"><span class="pair"><b>45</b> / 50</span></td><td class="num"><span style="color:var(--warn-tx)">&minus;5</span></td><td class="num final" style="color:var(--good-tx, var(--good))">90%</td></tr>
-          <tr><td class="idx"><span class="idx-n">2</span></td><td>End-to-end order-to-cash digitization</td><td>Mohamed Rizk</td><td><span class="qs"><i class="">1</i><i class="on past">2</i><i class="on">3</i><i class="">4</i></span></td><td class="cc"><span class="pill warn">WIP</span></td><td class="num"><span class="pair"><b>35</b> / 50</span></td><td class="num"><span style="color:var(--bad-tx)">&minus;15</span></td><td class="num final" style="color:var(--attn-tx, var(--attn))">70%</td></tr>
-        </tbody>
-      </table></div>
-      <div class="mk-foot">
-        <div><em>What it buys</em><p><b>Nothing new to learn.</b> A reader who understands the tactic table
-          already understands this one, and the benchmark is on the row, so 87% explains itself.</p></div>
-        <div><em>What it costs</em><p>Two more columns on every measure and objective table &mdash;
-          Performance, the review deck and the .pptx. On a narrow window that is where the squeeze
-          lands.</p></div>
-      </div>
-    </div>
-  </article>
 
-  <!-- ── C ─────────────────────────────────────────────────────────── -->
-  <article class="mk-panel">
-    <div class="mk-panel-h">
-      <span class="mk-letter">C</span>
-      <div>
-        <h2>Both shown, the full-year figure still scores</h2>
-        <p>The prorated reading is added as information. Colour, bands, the note rule and every compile go
-          on reading the whole-year number exactly as they do today.</p>
-      </div>
-    </div>
-    <div class="mk-panel-b">
-      <p class="mk-cap">Unit &rsaquo; Performance &mdash; key measures</p>
+      <p class="mk-cap now"></p>
       <div class="mk-real"><table>
-        <thead><tr><th class="idx">#</th><th>Measure</th><th class="cc">Dir.</th><th class="cc">Target</th><th class="cc">Compile</th><th class="cc">H1 actual</th><th class="cc">Of year</th><th class="cc">To date</th></tr></thead>
+        <thead><tr><th class="idx">#</th><th>Tactic</th><th>Owner</th><th>Collabs.</th><th>Quarters</th><th class="cc">Status</th><th class="cc">Deliv. / plan</th><th class="cc">Var.</th><th class="cc">Of plan</th></tr></thead>
         <tbody>
-          <tr><td class="idx"><span class="idx-n">1</span></td><td>Revenue</td><td class="num">&ge;</td><td class="num">18B EGP</td><td class="cc">Sum</td><td class="num">7.8B</td><td class="num final" style="color:var(--bad-tx, var(--bad))">43%</td><td class="num" style="color:var(--ink-3)">87%</td></tr>
-          <tr><td class="idx"><span class="idx-n">2</span></td><td>EBITDA</td><td class="num">&ge;</td><td class="num">6.5%</td><td class="cc"><span class="cdefault">Latest</span></td><td class="num">5.1%</td><td class="num final" style="color:var(--attn-tx, var(--attn))">78%</td><td class="num" style="color:var(--ink-3)">&mdash;</td></tr>
-          <tr><td class="idx"><span class="idx-n">3</span></td><td>Supplier funding secured</td><td class="num">&ge;</td><td class="num">140M EGP</td><td class="cc">Sum</td><td class="num">92M EGP</td><td class="num final" style="color:var(--bad-tx, var(--bad))">66%</td><td class="num" style="color:var(--ink-3)">131%</td></tr>
-          <tr><td class="idx"><span class="idx-n">4</span></td><td>Mobile market share</td><td class="num">&ge;</td><td class="num">32%</td><td class="cc"><span class="cdefault">Latest</span></td><td class="num">28%</td><td class="num final" style="color:var(--attn-tx, var(--attn))">88%</td><td class="num" style="color:var(--ink-3)">&mdash;</td></tr>
-          <tr><td class="idx"><span class="idx-n">5</span></td><td>Cost-to-serve</td><td class="num">&le;</td><td class="num">4.2%</td><td class="cc"><span class="cdefault">Latest</span></td><td class="num">5.6%</td><td class="num final" style="color:var(--attn-tx, var(--attn))">75%</td><td class="num" style="color:var(--ink-3)">&mdash;</td></tr>
-          <tr><td class="idx"><span class="idx-n">6</span></td><td>Systems consolidated</td><td class="num">&ge;</td><td class="num">6</td><td class="cc">Sum</td><td class="num">2</td><td class="num final" style="color:var(--bad-tx, var(--bad))">33%</td><td class="num" style="color:var(--ink-3)">67%</td></tr>
+          <tr><td class="idx"><span class="idx-n">1</span></td><td>Clean and standardize customer and SKU base</td><td>Ramy Behairy</td><td class="collabs"><span class="nobody">&mdash;</span></td><td><span class="qs"><i class="">1</i><i class="on past">2</i><i class="on">3</i><i class="">4</i></span></td><td class="cc"><span class="pill warn">WIP</span></td><td class="num"><span class="pair"><b>45</b> / 50</span></td><td class="num"><span style="color:var(--warn-tx)">&minus;5</span></td><td class="num final" style="color:var(--good-tx, var(--good))">90%</td></tr>
+          <tr><td class="idx"><span class="idx-n">2</span></td><td>End-to-end order-to-cash digitization</td><td>Mohamed Rizk</td><td class="collabs"><span class="nobody">&mdash;</span></td><td><span class="qs"><i class="">1</i><i class="on past">2</i><i class="on">3</i><i class="">4</i></span></td><td class="cc"><span class="pill warn">WIP</span></td><td class="num"><span class="pair"><b>35</b> / 50</span></td><td class="num"><span style="color:var(--bad-tx)">&minus;15</span></td><td class="num final" style="color:var(--attn-tx, var(--attn))">70%</td></tr>
+          <tr><td class="idx"><span class="idx-n">3</span></td><td>Digitize sales reporting via Power BI</td><td>Ramy Behairy</td><td class="collabs"><span class="nobody">&mdash;</span></td><td><span class="qs"><i class="">1</i><i class="on past">2</i><i class="on">3</i><i class="">4</i></span></td><td class="cc"><span class="pill warn">WIP</span></td><td class="num"><span class="pair"><b>40</b> / 50</span></td><td class="num"><span style="color:var(--bad-tx)">&minus;10</span></td><td class="num final" style="color:var(--attn-tx, var(--attn))">80%</td></tr>
         </tbody>
       </table></div>
-      <div class="mk-foot">
-        <div><em>What it buys</em><p>Nothing stored changes meaning, no past cycle reads differently, and
-          the compile, the bands and the submit gate are untouched.</p></div>
-        <div><em>What it costs</em><p><b>It does not fix the reported problem.</b> The number carrying the
-          colour still says a unit running at 87% of pace is Off track, and it is still the one the group
-          card, the deck and the board compile from.</p></div>
-      </div>
+
+      <div class="mk-gap"></div>
+
+      <p class="mk-cap new"></p>
+      <div class="mk-real"><table>
+        <thead><tr><th class="idx">#</th><th>Tactic</th><th>Owner</th><th>Collabs.</th><th>Quarters</th><th class="cc">Status</th><th class="cc">YTD delivery</th><th class="cc">Of plan</th></tr></thead>
+        <tbody>
+          <tr><td class="idx"><span class="idx-n">1</span></td><td>Clean and standardize customer and SKU base</td><td>Ramy Behairy</td><td class="collabs"><span class="nobody">&mdash;</span></td><td><span class="qs"><i class="">1</i><i class="on past">2</i><i class="on">3</i><i class="">4</i></span></td><td class="cc"><span class="pill warn">WIP</span></td><td class="num"><span class="pair"><b>45</b> <i>/ 50</i></span></td><td class="num final" style="color:var(--good-tx, var(--good))">90%</td></tr>
+          <tr><td class="idx"><span class="idx-n">2</span></td><td>End-to-end order-to-cash digitization</td><td>Mohamed Rizk</td><td class="collabs"><span class="nobody">&mdash;</span></td><td><span class="qs"><i class="">1</i><i class="on past">2</i><i class="on">3</i><i class="">4</i></span></td><td class="cc"><span class="pill warn">WIP</span></td><td class="num"><span class="pair"><b>35</b> <i>/ 50</i></span></td><td class="num final" style="color:var(--attn-tx, var(--attn))">70%</td></tr>
+          <tr><td class="idx"><span class="idx-n">3</span></td><td>Digitize sales reporting via Power BI</td><td>Ramy Behairy</td><td class="collabs"><span class="nobody">&mdash;</span></td><td><span class="qs"><i class="">1</i><i class="on past">2</i><i class="on">3</i><i class="">4</i></span></td><td class="cc"><span class="pill warn">WIP</span></td><td class="num"><span class="pair"><b>40</b> <i>/ 50</i></span></td><td class="num final" style="color:var(--attn-tx, var(--attn))">80%</td></tr>
+        </tbody>
+      </table></div>
+
     </div>
   </article>
 
   <section class="mk-note">
-    <h3>Two things that follow from the shape you pick</h3>
+    <h3>What the rename quietly fixes, and what it does not reach</h3>
     <ul>
-      <li><b>Reward standing needs the full-year figure either way.</b> You have settled that Earning stays a
-        year-end judgement, so the Focus board goes on comparing against the whole target. Under <b>B</b>
-        both numbers are already on the page, so the board is reading something a viewer has seen. Under
-        <b>A</b> the board is the only place a different number appears, and it will need saying on the
-        page.</li>
-      <li><b>The note rule and the submit gate move with the score.</b> A written explanation is demanded of
-        any figure in the bottom band, so under <b>A</b> or <b>B</b> those 18 rows stop owing one &mdash;
-        correctly, since they are no longer behind, but it is a real loosening of what a unit must explain
-        before submitting. Under <b>C</b> nothing changes.</li>
+      <li><b>&ldquo;H1 actual&rdquo; is a hardcoded literal.</b> It reads &ldquo;H1 actual&rdquo; whatever
+        the cycle is &mdash; open Q3 and the column still says H1. <b>YTD actual</b> is true in every cycle,
+        so the rename removes a wrong word rather than only changing one.</li>
+      <li><b>Var. survives on four other tables</b> &mdash; the group's and a company's execution drills, and
+        the unit's pillar summary. Those are drill-downs rather than the tactics table, and you named the
+        tactics, so I have left them. Say if they should go too.</li>
+      <li><b>The review deck already agrees.</b> Its tactic table says <em>Deliv. / due &middot; Of plan</em>
+        with no variance column, so the deck moves to <em>YTD delivery</em> and is otherwise already
+        where this lands.</li>
     </ul>
   </section>
 
   <section class="mk-note">
-    <h3>What happens after you pick</h3>
-    <p>One shared rule in <b>lib/rules.js</b>, so the screen, the server and the deck answer the same
-      question the same way &mdash; the arithmetic prorates <b>the target</b> and then compares, never the
-      ratio, or a &ldquo;less is better&rdquo; measure would move the wrong way. The elapsed share is the
-      cycle's own <b>ends&nbsp;Q</b>, already stored and already what tactics use, so nothing is migrated
-      and no field is added.</p>
-      <p>Two faults found next door and worth fixing in the same pass, once you have said so:
-      a capability's Reporting page <b>never recomputes the score at all</b>, so typing an actual there
-      leaves a stale percentage while the same row uploaded by workbook is recomputed; and its comment
-      claims the unit page behaves the same way, which has not been true for a long time.</p>
+    <h3>What I build once you sign this off</h3>
+    <p>One shared rule in <b>lib/rules.js</b> so the screen, the server and the deck answer identically. The
+      arithmetic prorates <b>the target</b> and then compares &mdash; never the ratio, or a &ldquo;less is
+      better&rdquo; measure moves the wrong way. The elapsed share is the cycle's own <b>ends&nbsp;Q</b>,
+      already stored and already what a tactic uses, so nothing is migrated and no field is added.</p>
+    <p><b>.pair has exactly one caller today</b>, so it changes in place rather than forking &mdash; one
+      vocabulary for a figure against its benchmark, used by both tables.</p>
+    <p>And, if you say so in the same breath: a capability's Reporting page <b>never recomputes the score at
+      all</b>, so an actual typed there leaves a stale percentage while the same row uploaded by workbook is
+      recomputed. I would drive it in the browser to confirm before touching it.</p>
   </section>
 
 </div>

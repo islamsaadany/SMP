@@ -1,0 +1,265 @@
+<title>Where the platform role sits</title>
+<style>
+
+  :root{
+    --ground:#F5F6F9; --surface:#FFFFFF; --surface-2:#EDF0F5;
+    --line:#D8DEE8; --line-soft:#E6EAF1;
+    /* --ink-3 IS SET AGAINST THE QUIETEST GROUND IT SITS ON, not the whitest
+       (§38.5, and _shared.css records the same lesson): #6E7A90 cleared
+       nothing — 4.33 on white, 4.01 on the page's own ground and 3.79 on
+       --surface-2 — and it is the colour of the card's industry line, the
+       name in the top row, every note and every unlit chip. #5E6E85 is the
+       client platform's own value, so this is one vocabulary rather than two
+       greys a shade apart (§53.5): 5.19 / 4.80 / 4.54. */
+    --ink:#141C2B; --ink-2:#465268; --ink-3:#5E6E85;
+    /* Forefront's own, measured before use (constitution XIII):
+       #0F2C69 carries white at 13.25:1 · #F5A623 carries #231500 at 9.04:1
+       and is 2.03:1 as TYPE on white, so words take #9C5D08 (5.27:1). */
+    --ff:#0F2C69; --ff-ink:#FFFFFF; --ff-quiet:#A9BAD8; --ff-tx:#0F2C69;
+    --amber:#F5A623; --amber-ink:#231500; --amber-tx:#9C5D08; --amber-wash:#FEF4E2;
+    --good:#1B6E4E; --good-bg:#E9F4EF; --warn:#8A6410; --warn-bg:#FBF2DC;
+    --bad:#B23025; --bad-bg:#FBEDEB;
+    --shadow:0 1px 2px rgba(20,28,43,.06), 0 8px 26px rgba(20,28,43,.07);
+  }
+  @media (prefers-color-scheme: dark){
+    :root:not([data-theme="light"]){
+      --ground:#12151C; --surface:#1A1F29; --surface-2:#222834;
+      --line:#333B4A; --line-soft:#2A313E;
+      --ink:#E7EBF2; --ink-2:#AAB4C6; --ink-3:#8590A3;
+      --ff:#0D2350; --ff-ink:#F0F4FB; --ff-quiet:#95A9CC; --ff-tx:#95A9CC;
+      --amber:#F5A623; --amber-ink:#231500; --amber-tx:#F5A623; --amber-wash:#2B2210;
+      --good:#63BE96; --good-bg:#1B2C26; --warn:#D7B04A; --warn-bg:#2A2515;
+      --bad:#E8776B; --bad-bg:#33211F;
+      --shadow:0 1px 2px rgba(0,0,0,.4), 0 10px 30px rgba(0,0,0,.35);
+    }
+  }
+  /* THE SAME BLOCK AGAIN, DELIBERATELY, AND IT IS WHY --ff-tx WAS ADDED
+     TWICE AND STILL DID NOTHING HERE: a token defined only in the media query
+     is absent the moment somebody chooses a theme explicitly, which is exactly
+     what this check does. Complete blocks, never a base plus overrides —
+     _shared.css records the same rule, and v3.0's zebra stripe is what
+     happens without it. */
+  :root[data-theme="dark"]{
+    --ground:#12151C; --surface:#1A1F29; --surface-2:#222834;
+    --line:#333B4A; --line-soft:#2A313E;
+    --ink:#E7EBF2; --ink-2:#AAB4C6; --ink-3:#8590A3;
+    --ff:#0D2350; --ff-ink:#F0F4FB; --ff-quiet:#95A9CC; --ff-tx:#95A9CC;
+    --amber:#F5A623; --amber-ink:#231500; --amber-tx:#F5A623; --amber-wash:#2B2210;
+    --good:#63BE96; --good-bg:#1B2C26; --warn:#D7B04A; --warn-bg:#2A2515;
+    --bad:#E8776B; --bad-bg:#33211F;
+    --shadow:0 1px 2px rgba(0,0,0,.4), 0 10px 30px rgba(0,0,0,.35);
+  }
+  *{ box-sizing:border-box }
+  body{ margin:0; background:var(--ground); color:var(--ink);
+    font:400 15px/1.55 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+    -webkit-font-smoothing:antialiased }
+  /* NOTHING IS DRAWN UNTIL THE SERVER HAS ANSWERED (§94.10's rule): a platform
+     that paints a page and then corrects it has shown somebody a screen that
+     was not theirs. */
+  body:not(.ready) .wrap{ visibility:hidden }
+
+  /* ── the chrome: two lines, as a client's platform has (§2.9) ── */
+  .top{ background:var(--surface); border-bottom:1px solid var(--line);
+    display:flex; align-items:center; gap:12px; padding:9px 18px }
+  /* THE MARK IS TYPE, AND --ff IS A FILL (§38.4, the seventh time). It was
+     `color:var(--ff)`, which is right in light — #0F2C69 on white is 13.25 —
+     and in dark that token becomes the navy the NAVIGATION BAR is painted in:
+     #0D2350 on #1A1F29 is 1.08, so Forefront's own name was invisible on
+     Forefront's own platform. A fill and a word need two tokens, declared
+     together (§94.8's --cta/--cta-ink). --ff-tx is 6.94 dark. */
+  .top .mk{ font:700 12px/1 ui-monospace, SFMono-Regular, Menlo, monospace;
+    letter-spacing:.16em; color:var(--ff-tx) }
+  .top .nm{ font-weight:600; font-size:14px }
+  .top .right{ margin-left:auto; display:flex; align-items:center; gap:10px;
+    color:var(--ink-3); font-size:12.5px }
+  .nav{ background:var(--ff); display:flex; padding:0 10px; gap:2px }
+  .nav button{ background:transparent; border:0; color:var(--ff-quiet);
+    font:600 13.5px/1 inherit; padding:13px 14px; cursor:pointer;
+    border-bottom:3px solid transparent }
+  .nav button:hover{ color:var(--ff-ink) }
+  .nav button.on{ color:var(--ff-ink); border-bottom-color:var(--amber) }
+  .wrap{ max-width:1180px; margin:0 auto; padding:22px 18px 70px }
+
+  .ptitle{ display:flex; align-items:center; gap:12px; flex-wrap:wrap;
+    padding-bottom:12px; border-bottom:1px solid var(--line); margin-bottom:18px }
+  .ptitle h1{ font-size:20px; margin:0; font-weight:600 }
+  .ptitle .right{ margin-left:auto; display:flex; gap:8px; align-items:center }
+
+  .btn{ border:1px solid var(--line); background:var(--surface); color:var(--ink);
+    border-radius:8px; padding:6px 12px; font:600 13px/1.5 inherit; cursor:pointer }
+  .btn:hover:not(:disabled){ border-color:var(--amber-tx) }
+  .btn:disabled{ opacity:.45; cursor:default }
+  .btn.solid{ background:var(--ff); border-color:var(--ff); color:var(--ff-ink) }
+  .btn.amber{ background:var(--amber); border-color:var(--amber); color:var(--amber-ink) }
+  .fld{ width:100%; border:1px solid var(--line); background:var(--surface); color:var(--ink);
+    border-radius:8px; padding:8px 11px; font:400 14px/1.5 inherit }
+  .lab{ display:block; font:600 10.5px/1 ui-monospace, SFMono-Regular, monospace;
+    letter-spacing:.12em; text-transform:uppercase; color:var(--ink-3); margin-bottom:6px }
+
+  /* ── client cards ─────────────────────────────────────────── */
+  .cards{ display:grid; gap:14px; grid-template-columns:repeat(auto-fill,minmax(232px,1fr)) }
+  .ccard{ position:relative; text-align:left; border:1px solid var(--line); border-radius:12px;
+    background:var(--surface); padding:15px; display:flex; flex-direction:column; gap:7px;
+    min-height:152px; font:inherit; color:inherit; cursor:pointer; box-shadow:var(--shadow) }
+  .ccard:hover:not(:disabled), .ccard:focus-visible{ border-color:var(--amber-tx); outline:none }
+  .ccard:disabled{ cursor:default; opacity:.72 }
+  .ccard .cmark{ width:36px; height:36px; border-radius:9px; background:var(--ff); color:var(--amber);
+    font:700 12px/36px ui-monospace, SFMono-Regular, monospace; text-align:center; letter-spacing:.05em }
+  .ccard h2{ margin:0; font-size:17px; font-weight:600 }
+  .ccard .ind{ margin:0; color:var(--ink-3); font-size:12.5px }
+  .ccard .foot{ margin-top:auto; display:flex; gap:6px; flex-wrap:wrap }
+  .ccard.demo{ background:var(--amber-wash); border-color:var(--amber) }
+  .ccard.add{ align-items:center; justify-content:center; border-style:dashed; font-weight:600;
+    color:var(--ink-3) }
+  .ccfg{ position:absolute; top:11px; right:11px; font:600 10px/1.6 ui-monospace, monospace;
+    letter-spacing:.06em; text-transform:uppercase; color:var(--amber-tx);
+    border:1px solid var(--line); border-radius:6px; padding:2px 7px; background:var(--surface) }
+  .ccfg:hover, .ccfg:focus-visible{ border-color:var(--amber-tx); outline:none }
+  .tag{ font:600 10.5px/1.5 ui-monospace, SFMono-Regular, monospace; letter-spacing:.05em;
+    text-transform:uppercase; border:1px solid var(--line); border-radius:5px; padding:2px 6px;
+    color:var(--ink-2); background:var(--surface-2) }
+  .tag.open{ color:var(--good); background:var(--good-bg); border-color:var(--good) }
+  .tag.none{ color:var(--warn); background:var(--warn-bg); border-color:var(--warn) }
+  .tag.demo{ color:var(--amber-tx); border-color:var(--amber); background:var(--surface) }
+  .tag.seat{ color:var(--ff); border-color:var(--ff) }
+  :root[data-theme="dark"] .tag.seat, :root:not([data-theme="light"]) .tag.seat{ color:var(--ff-quiet) }
+
+  /* ── tables ───────────────────────────────────────────────── */
+  table{ border-collapse:collapse; width:100%; font-size:14px }
+  th,td{ text-align:left; padding:8px 10px; border-bottom:1px solid var(--line-soft); white-space:nowrap }
+  thead th{ background:var(--ff); color:var(--ff-ink);
+    font:600 10.5px/1.4 ui-monospace, SFMono-Regular, monospace; letter-spacing:.09em;
+    text-transform:uppercase; border-bottom:0 }
+  thead th:first-child{ border-top-left-radius:8px } thead th:last-child{ border-top-right-radius:8px }
+  tbody tr:nth-child(even) td{ background:var(--surface-2) }
+  .tscroll{ overflow-x:auto }
+  /* The seats cell is the one that wraps: it holds a list that grows with the
+     clients somebody is on, and clipping it hides the fact the column is for. */
+  td.seats{ white-space:normal; min-width:250px }
+  td.seats .tag{ display:inline-block; margin:2px 3px 2px 0 }
+  .mono{ font:400 13px/1.5 ui-monospace, SFMono-Regular, monospace; color:var(--ink-2) }
+  .muted{ color:var(--ink-3) }
+
+  /* a cell of two or three states, as §37's matrix has */
+  .cell{ display:inline-flex; border:1px solid var(--line); border-radius:7px; overflow:hidden }
+  .cell button{ border:0; border-right:1px solid var(--line); background:var(--surface); color:var(--ink-3);
+    font:600 10.5px/1.4 ui-monospace, SFMono-Regular, monospace; letter-spacing:.05em;
+    text-transform:uppercase; padding:5px 9px; cursor:pointer }
+  .cell button:last-child{ border-right:0 }
+  .cell button.on{ background:var(--ff); color:var(--ff-ink) }
+  .cell button.on.hi{ background:var(--amber); color:var(--amber-ink) }
+  .cell.locked button{ cursor:default }
+
+  .row{ display:flex; gap:9px; margin-top:14px; flex-wrap:wrap; align-items:center }
+  .row .fld{ flex:1 1 170px; min-width:0 }
+  .cfg{ display:grid; grid-template-columns:1.05fr .95fr; gap:26px }
+  .rowset{ display:grid; gap:13px }
+  .teamrow{ display:flex; align-items:center; gap:10px; padding:9px 0;
+    border-bottom:1px solid var(--line-soft) }
+  .teamrow .who .nm{ font-weight:600; font-size:14px }
+  .teamrow .who .em{ color:var(--ink-3); font-size:12.5px }
+  .teamrow .sp{ margin-left:auto; display:flex; gap:7px; align-items:center }
+  .said{ margin:12px 0 0; font-size:13.5px; background:var(--surface-2); border:1px solid var(--line);
+    border-radius:8px; padding:9px 11px }
+  .said b{ font-family:ui-monospace, SFMono-Regular, monospace }
+  .err{ margin:12px 0 0; font-size:13.5px; color:var(--bad); background:var(--bad-bg);
+    border:1px solid var(--bad); border-radius:8px; padding:9px 11px }
+  .note{ margin:14px 0 0; font-size:13px; color:var(--ink-3) }
+  @media (max-width:820px){ .cfg{ grid-template-columns:1fr } }
+
+/* ── the mockup's own frame, kept out of the product's way ────────
+   Everything above this line is platform.html's stylesheet, verbatim: a
+   mockup drawn from the STYLESHEET is drawn from what the product could look
+   like, not from what it does (§41.9). */
+  .mk{ max-width:1180px; margin:0 auto; padding:34px 22px 70px }
+  .mk h1{ font-size:24px; letter-spacing:-.01em; margin:0 0 6px }
+  .mk .lede{ color:var(--ink-2); font-size:14.5px; line-height:1.6; max-width:64ch; margin:0 0 30px }
+  .opt{ margin:0 0 40px; border:1px solid var(--line); border-radius:12px;
+        background:var(--surface); overflow:hidden; box-shadow:var(--shadow) }
+  .opt > header{ display:flex; align-items:baseline; gap:12px; flex-wrap:wrap;
+        padding:15px 18px; border-bottom:1px solid var(--line-soft); background:var(--surface-2) }
+  .opt h2{ font-size:15px; margin:0 }
+  .opt .pick{ font:600 10.5px/1.6 ui-monospace, SFMono-Regular, monospace;
+        letter-spacing:.09em; text-transform:uppercase; color:var(--amber-tx);
+        border:1px solid var(--amber); border-radius:999px; padding:1px 9px }
+  .opt .why{ color:var(--ink-2); font-size:13.5px; line-height:1.6; margin:0;
+        flex:1 1 320px; min-width:0 }
+  .opt .body{ padding:16px 18px 20px }
+  .opt .cost{ margin:14px 0 0; font-size:13px; line-height:1.6; color:var(--ink-3) }
+  .opt .cost b{ color:var(--ink-2); font-weight:600 }
+  .aside{ border:1px solid var(--line); border-left:3px solid var(--amber);
+        border-radius:10px; background:var(--surface); padding:14px 18px; margin:0 0 34px }
+  .aside h3{ font-size:13px; margin:0 0 5px }
+  .aside p{ margin:0; color:var(--ink-2); font-size:13.5px; line-height:1.65 }
+  @media (max-width:700px){ .mk{ padding:22px 14px 50px } }
+</style>
+<div class="mk">
+  <h1>Where the platform role sits</h1>
+  <p class="lede">One row, three ways. Islam: <em>&ldquo;I&rsquo;m the super user of the
+    platform, I need to have this role in the consultants.&rdquo;</em> The role is
+    already on that row today &mdash; under a different word, and next to a
+    column that uses <b>your</b> word for something else.</p>
+
+  <div class="aside">
+    <h3>The collision to avoid</h3>
+    <p><b>Super user</b> already means the top seat <em>on a client</em>
+      (&sect;89), and the column beside this one says
+      &ldquo;Raya&nbsp;Trade&nbsp;&middot;&nbsp;Super&nbsp;user&rdquo;. So the
+      platform&rsquo;s role has to be qualified by <em>where</em> it is held, or
+      one screen carries two meanings for one word &mdash; &sect;87&rsquo;s
+      twins.</p>
+  </div>
+
+  <section class="opt">
+    <header>
+      <h2>A &middot; What it does today</h2>
+      <p class="why">A column called <b>Platform admin</b> with a Yes toggle. The
+        role is there; it is not the word you use for it.</p>
+    </header>
+    <div class="body"><div class="tscroll"><table><thead><tr><th>Name</th><th>Email</th><th>Platform admin</th><th>Clients and seats</th><th>Password</th><th></th></tr></thead><tbody><tr><td>Islam Saadany</td><td class="mono">islam.saadany@forefront.consulting</td><td><span class="cell locked"><button type="button" class="on hi">Yes</button></span></td><td class="seats"><span class="tag seat">Raya Trade &middot; Super user</span></td><td>Temporary</td><td></td></tr><tr><td>Mohamed Essam</td><td class="mono">mohamed.essam@forefront.consulting</td><td><span class="cell"><button type="button">Yes</button></span></td><td class="seats"><span class="tag seat">Raya Trade &middot; SMO team</span></td><td>Set</td><td><button class="btn" type="button">Issue password</button></td></tr><tr><td>Omar Alaa</td><td class="mono">omar.alaa@forefront.consulting</td><td><span class="cell"><button type="button">Yes</button></span></td><td class="seats"><span class="tag seat">Raya Trade &middot; SMO team</span><span class="tag seat">Demo &middot; SMO team</span></td><td>Set</td><td><button class="btn" type="button">Issue password</button></td></tr><tr><td>Nadia Fahmy</td><td class="mono">nadia.fahmy@forefront.consulting</td><td><span class="cell"><button type="button">Yes</button></span></td><td class="seats"><span class="muted">On no client yet</span></td><td>&mdash;</td><td><button class="btn" type="button">Issue password</button></td></tr></tbody></table></div>
+      <p class="cost"><b>Cost:</b> the platform and a client name the same
+        standing two different ways, and neither page says so.</p>
+    </div>
+  </section>
+
+  <section class="opt">
+    <header>
+      <h2>B &middot; Your word, same control</h2>
+      <span class="pick">Recommended</span>
+      <p class="why">The column becomes <b>Platform</b> and the chip reads
+        <b>Super user</b>. Read across, the row now says: Platform &middot;
+        Super user, Raya Trade &middot; Super user.</p>
+    </header>
+    <div class="body"><div class="tscroll"><table><thead><tr><th>Name</th><th>Email</th><th>Platform</th><th>Clients and seats</th><th>Password</th><th></th></tr></thead><tbody><tr><td>Islam Saadany</td><td class="mono">islam.saadany@forefront.consulting</td><td><span class="cell locked"><button type="button" class="on hi">Super user</button></span></td><td class="seats"><span class="tag seat">Raya Trade &middot; Super user</span></td><td>Temporary</td><td></td></tr><tr><td>Mohamed Essam</td><td class="mono">mohamed.essam@forefront.consulting</td><td><span class="cell"><button type="button">Super user</button></span></td><td class="seats"><span class="tag seat">Raya Trade &middot; SMO team</span></td><td>Set</td><td><button class="btn" type="button">Issue password</button></td></tr><tr><td>Omar Alaa</td><td class="mono">omar.alaa@forefront.consulting</td><td><span class="cell"><button type="button">Super user</button></span></td><td class="seats"><span class="tag seat">Raya Trade &middot; SMO team</span><span class="tag seat">Demo &middot; SMO team</span></td><td>Set</td><td><button class="btn" type="button">Issue password</button></td></tr><tr><td>Nadia Fahmy</td><td class="mono">nadia.fahmy@forefront.consulting</td><td><span class="cell"><button type="button">Super user</button></span></td><td class="seats"><span class="muted">On no client yet</span></td><td>&mdash;</td><td><button class="btn" type="button">Issue password</button></td></tr></tbody></table></div>
+      <p class="cost"><b>Cost:</b> one word changes on one page. The control
+        stays where it can be set, which matters &mdash; the seats column is
+        deliberately read-only, because seats are written on the client&rsquo;s
+        own configuration and nowhere else.</p>
+    </div>
+  </section>
+
+  <section class="opt">
+    <header>
+      <h2>C &middot; One list of what somebody holds</h2>
+      <p class="why">No separate column. The platform role becomes the first
+        chip in <b>Roles and seats</b>, ahead of each client&rsquo;s.</p>
+    </header>
+    <div class="body"><div class="tscroll"><table><thead><tr><th>Name</th><th>Email</th><th>Roles and seats</th><th>Password</th><th></th></tr></thead><tbody><tr><td>Islam Saadany</td><td class="mono">islam.saadany@forefront.consulting</td><td class="seats"><span class="tag seat">Platform &middot; Super user</span><span class="tag seat">Raya Trade &middot; Super user</span></td><td>Temporary</td><td></td></tr><tr><td>Mohamed Essam</td><td class="mono">mohamed.essam@forefront.consulting</td><td class="seats"><span class="tag seat">Raya Trade &middot; SMO team</span></td><td>Set</td><td><button class="btn" type="button">Issue password</button></td></tr><tr><td>Omar Alaa</td><td class="mono">omar.alaa@forefront.consulting</td><td class="seats"><span class="tag seat">Raya Trade &middot; SMO team</span><span class="tag seat">Demo &middot; SMO team</span></td><td>Set</td><td><button class="btn" type="button">Issue password</button></td></tr><tr><td>Nadia Fahmy</td><td class="mono">nadia.fahmy@forefront.consulting</td><td class="seats"><span class="muted">On no client yet</span></td><td>&mdash;</td><td><button class="btn" type="button">Issue password</button></td></tr></tbody></table></div>
+      <p class="cost"><b>Cost:</b> tersest to read, and it puts a
+        <em>settable</em> thing inside the one column that is read-only by
+        design &mdash; so either that rule breaks, or the platform role becomes
+        something you can see here and can only change somewhere else.</p>
+    </div>
+  </section>
+
+  <div class="aside">
+    <h3>Two things I&rsquo;d fix whichever you pick</h3>
+    <p><b>Your name.</b> The account the platform creates for itself was called
+      &ldquo;Forefront&rdquo;; it reads the name off the address instead, so
+      <em>islam.saadany@</em> becomes <em>Islam Saadany</em> and no person is
+      written into the code. <b>And your own row cannot change your own
+      standing</b> &mdash; that stays true in all three, which is why the chip on
+      your row is drawn quiet: somebody else with the platform role has to do
+      it, so nobody can lock the platform&rsquo;s last admin out of it.</p>
+  </div>
+</div>

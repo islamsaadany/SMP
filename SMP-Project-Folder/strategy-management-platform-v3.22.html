@@ -26362,7 +26362,20 @@ function gapCell(page, acKey, row, field, opts){
       gapLift(row, field); gapBandRefresh();
     }, open && SMPRules.isGapField(field) ? "gapwalk" : "");
   }
-  if (fl && (open || mark)) {
+  /* ── A CELL THE FILLABLE LIST HAS CLOSED NEVER OPENS TO A FILLER ────
+     (§228.2, found by the §227 merge.) §224.2 took `def` out of
+     GAP_FILLABLE and its assertion passed because the check's projects
+     function had NOTHING fillable — no door, no fill mode, nothing to see.
+     §227 made the milestones' collaborators fillable, the door appeared,
+     and behind it the definition opened a box whose save the server
+     refuses: §205's drift exactly, latent on any page that had a genuine
+     gap beside the definition. The gate reads the ONE list the server
+     reads (`fillKind` names the row's GAP kind), so a later decision about
+     what is fillable reaches this cell without anybody coming back here;
+     a call site that names no kind keeps today's behaviour. */
+  var fillable = !opts.fillKind ||
+    (SMPRules.GAP_FILLABLE[opts.fillKind] || []).indexOf(field) > -1;
+  if (fl && fillable && (open || mark)) {
     return draw(function(v){
       var nv = put(v);
       if (SMPRules.gapBlank(nv)) {
@@ -28991,7 +29004,7 @@ function fnPillarsOverview(fk){
              `readEmpty` is the hook gapCell already carries for exactly this.
              It stays FILLABLE — the box still opens and still saves. */
           gapCell("capfoundation", "k_found", f, "def",
-                  { kind:"area", readEmpty:"&mdash;" }) +
+                  { kind:"area", readEmpty:"&mdash;", fillKind:"cap" }) +
         '</dd></div>' +
       '</dl></div>' +
       ((ed || fl) ? '' : '<div class="card">' + koCard + '</div>') +
@@ -29060,7 +29073,7 @@ function renderFnFoundation(fnKey){
            function's definition and not a capability's. */
         '<div class="clause"><dt>Definition</dt><dd>' +
           gapCell("capfoundation", "k_found", c, "def",
-                  { kind:"area", readEmpty:"&mdash;" }) + '</dd></div>' +
+                  { kind:"area", readEmpty:"&mdash;", fillKind:"cap" }) + '</dd></div>' +
       '</dl></div>' +
       ((ed || fl) ? '' : '<div class="card">' + koCard + '</div>') +
     '</div>' +

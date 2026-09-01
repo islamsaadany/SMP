@@ -25352,3 +25352,28 @@ and the title as ONE line (§94.8 — never a pixel count), on the function side
 of the switch (A15: §194's check only ever measured the pillar head, which is
 how this band stayed broken through it). Reverting the line fails exactly
 those two assertions — 15%, 3 lines — before the green was believed.
+
+## §228.2 — A CELL THE FILLABLE LIST HAS CLOSED NEVER OPENS TO A FILLER
+
+Found by the §227 merge, in main's own §224.2. That section took `def` out of
+`GAP_FILLABLE` and asserted that fill mode opens no control over the
+definition — and the assertion passed **because the check's projects function
+had nothing fillable at all**: no door, no fill mode, a pass by
+unreachability. §227 made the milestones' collaborators fillable, the door
+appeared for the first time on that page, and behind it the definition opened
+a box whose save the server refuses — §205's drift exactly, latent on any
+page holding a genuine gap beside the definition, on main too.
+
+**THE GATE READS THE ONE LIST THE SERVER READS**: `gapCell` takes a
+`fillKind` naming the row's GAP kind and its fill branch asks
+`GAP_FILLABLE[fillKind]`, so a later decision about what is fillable reaches
+the cell without anybody coming back to it; a call site naming no kind keeps
+today's behaviour. Both `def` call sites name `cap`.
+
+**AND THE CHECK WAS ASKING THE WRONG PERSON.** It pressed the door as the
+SMO, for whom the door opens their own pen — a control over the definition
+there is §224.2 working (*"the SMO will do it"*), not failing. The assertion
+now runs as a FILLER (the function's custodian, granted fill for the
+measurement; finance ships without one, so the state is made and unmade,
+§94.2), on both formats. Falsified: dropping `fillKind` from the projects
+call site fails exactly that assertion.

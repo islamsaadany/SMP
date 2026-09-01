@@ -24,17 +24,24 @@ const auth = require("../lib/auth.js");
 const DRY = process.argv.indexOf("--dry-run") > -1;
 
 /* WHAT THE DEPLOYMENT BECOMES. Islam's clients and their industries, approved
-   2026-08-28. Demo arrives with US4 and is deliberately not created here. */
+   2026-08-28. Demo is a client like any other and is created here too — its
+   CONTENT arrives separately, from scripts/seed-demo-client.js, because an
+   empty Demo is still a correct Demo and a migration that also seeds a worked
+   example has two ways to fail. */
 const LIVE = { key: "raya-trade", name: "Raya Trade", schema: "raya_trade",
                industry: "Distribution & retail" };
 const NEW_CLIENTS = [
   { key: "rhi",    name: "RHI",     schema: "rhi",    industry: "Industrial" },
-  { key: "el-abd", name: "El Abd",  schema: "el_abd", industry: "Food & beverage" }
+  { key: "el-abd", name: "El Abd",  schema: "el_abd", industry: "Food & beverage" },
+  { key: "demo",   name: "Demo",    schema: "demo",   industry: "Worked example", kind: "demo" }
 ];
+/* ONE PLATFORM ADMIN, AND A SEAT ON EACH CLIENT (spec 024 §7.0a, revision 3).
+   The four platform roles are gone: `admin` is a flag on the account, and what
+   somebody may do about a client is the seat they hold on it. */
 const OFFICE = [
-  { email: "islam.saadany@forefront.consulting", name: "Islam Saadany",  role: "admin",      person: "ff_islam", super: true },
-  { email: "mohamed.essam@forefront.consulting", name: "Mohamed Essam",  role: "lead",       person: "ff_essam" },
-  { email: "omar.alaa@forefront.consulting",     name: "Omar Alaa",      role: "consultant", person: "ff_omar" }
+  { email: "islam.saadany@forefront.consulting", name: "Islam Saadany", admin: true, person: "ff_islam", seat: "super" },
+  { email: "mohamed.essam@forefront.consulting", name: "Mohamed Essam", person: "ff_essam", seat: "smoteam" },
+  { email: "omar.alaa@forefront.consulting",     name: "Omar Alaa",     person: "ff_omar",  seat: "smoteam" }
 ];
 
 /* A password nobody chose, said once. Not a memorable one: it exists to be
@@ -111,8 +118,8 @@ async function main() {
 
     for (const cl of [LIVE].concat(NEW_CLIENTS)) {
       await pc.query(
-        "INSERT INTO clients (key, name, schema_name, industry) VALUES ($1,$2,$3,$4) " +
-        "ON CONFLICT (key) DO NOTHING", [cl.key, cl.name, cl.schema, cl.industry]);
+        "INSERT INTO clients (key, name, schema_name, industry, kind) VALUES ($1,$2,$3,$4,$5) " +
+        "ON CONFLICT (key) DO NOTHING", [cl.key, cl.name, cl.schema, cl.industry, cl.kind || "client"]);
     }
     say("registry: " + (await pc.query("SELECT count(*)::int AS n FROM clients")).rows[0].n + " clients.");
 
@@ -121,21 +128,22 @@ async function main() {
       if (has.rowCount) { say("account " + o.email + " already exists — left alone."); continue; }
       const pw = tempPassword();
       await pc.query(
-        "INSERT INTO accounts (email, name, kind, role, password_hash, must_change) " +
+        "INSERT INTO accounts (email, name, kind, is_admin, password_hash, must_change) " +
         "VALUES ($1,$2,'office',$3,$4,true)",
-        [o.email, o.name, o.role, auth.hashPassword(pw)]);
+        [o.email, o.name, !!o.admin, auth.hashPassword(pw)]);
       /* SAID ONCE, HERE, AND STORED NOWHERE IN THE CLEAR. */
-      say("account " + o.email + "  (" + o.role + ")  temporary password: " + pw);
+      say("account " + o.email + "  (" + (o.admin ? "platform admin" : "consultant") +
+          ")  temporary password: " + pw);
     }
 
     /* Everyone at Forefront is on the live client's team to begin with, with
-       Islam as its super user — his own answer, and the only shape that lets
-       anybody open it on day one. */
+       Islam holding its super seat — his own answer, and the only shape that
+       lets anybody open it on day one. */
     for (const o of OFFICE) {
       await pc.query(
-        "INSERT INTO account_clients (email, client_key, person_key, is_super) VALUES ($1,$2,$3,$4) " +
+        "INSERT INTO account_clients (email, client_key, person_key, seat) VALUES ($1,$2,$3,$4) " +
         "ON CONFLICT (email, client_key) DO NOTHING",
-        [o.email, LIVE.key, o.person, !!o.super]);
+        [o.email, LIVE.key, o.person, o.seat]);
     }
     say("team on " + LIVE.key + ": " +
         (await pc.query("SELECT count(*)::int AS n FROM account_clients WHERE client_key=$1", [LIVE.key])).rows[0].n);

@@ -109,14 +109,29 @@ const CLIENT_ARG = (function () {
   /* EIGHT functions since spec 010 — Merchandising, which plans in pillars and
      sits under Retail. Like the ten units and the seven before it, the
      FUNCTION survives the clean slate and its invented CONTENT does not (§21). */
-  const slateOk = slate.units === 10 && slate.functions === 8 && slate.themes === 3 &&
+  /* A CLIENT SCHEMA AND `public` ARE TWO DIFFERENT CLEAN SLATES, and asserting
+     one of them of both reported FAIL on a perfectly correct empty client
+     (spec 024). `public` is seeded and then cleared by migration 004, so it
+     keeps the SETUP — ten units, eight functions, two companies — and loses
+     every invented figure. A client created since the split is made with
+     `seed: false` and never had any of it: the right expectation there is
+     NOTHING AT ALL, and a check that cries wolf on the ordinary case is one
+     somebody learns to scroll past. */
+  const empty = Object.keys(slate).every(function (k) { return slate[k] === 0; });
+  const seeded = slate.units === 10 && slate.functions === 8 && slate.themes === 3 &&
     slate.capabilities === 8 && slate.people === 1 && slate.pillars === 0 &&
     slate.measures === 0 && slate.tactics === 0 && slate.unitKOs === 0 &&
     slate.groupKOs === 0 && slate.projects === 0 && slate.history === 0 &&
     slate.wFactors === 4 && slate.wRows === 10 && slate.wValues === 0 &&
     slate.priorCycle === 0 && slate.companies === 2 && slate.inCompany === 6 &&
     slate.horizonSet === 0;
-  console.log("clean slate after first deploy:", slateOk ? "PASS" : "FAIL", JSON.stringify(slate));
+  /* AND A CLIENT SOMEBODY HAS ALREADY FILLED IN IS NEITHER — the Demo client
+     is seeded from the worked example on purpose, so this says so rather than
+     failing (it is the round trip below that has something to prove there). */
+  const slateOk = CLIENT_ARG ? (empty || (!seeded && slate.units > 0)) : seeded;
+  const word = CLIENT_ARG && !empty && slateOk ? "n/a — this client holds content"
+             : slateOk ? "PASS" : "FAIL";
+  console.log("clean slate after first deploy:", word, JSON.stringify(slate));
 
   const seed = JSON.parse(fs.readFileSync(path.join(__dirname, "..", "db", "seed-state.json"), "utf8"));
   /* Fidelity is the writer's and the reader's business, not the migration's. */

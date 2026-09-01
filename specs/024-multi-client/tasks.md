@@ -107,8 +107,8 @@ serverless functions `api/`; SQL `db/`; checks `SMP-Project-Folder/src/checks/`;
 **Goal**: a Demo client that saves, and one home for demo material.
 **Independently testable**: open Demo and edit it; confirm the Demo-data button is gone for every viewer; confirm a blank client offers no tour and a filled one does.
 
-- [ ] T045 [US4] Add `scripts/seed-demo-client.js` — `db/seed-state.json` renamed per the approved list (Meridian Group; Devices; B2B Online; Home Electronics; Customer Care; IT Distribution; every person invented, addresses at `meridian.example`) into the `demo` schema
-- [ ] T046 [US4] Mark the Demo client `kind = 'demo'` and draw it as such on the cards; it is a client in every other respect and it **saves**
+- [x] T045 [US4] Add `scripts/seed-demo-client.js` — `db/seed-state.json` renamed per the approved list (Meridian Group; Devices; B2B Online; Home Electronics; Customer Care; IT Distribution; every person invented, addresses at `meridian.example`) into the `demo` schema
+- [x] T046 [US4] Mark the Demo client `kind = 'demo'` and draw it as such on the cards; it is a client in every other respect and it **saves**
 - [ ] T047 [US4] Remove the Demo data button, demo mode and §67's Filled/Clear pair from `SMP-Project-Folder/src/sync.js`, `group-render.js` and the shell — controls, switch and banner, with the CSS deleted beside them (§24)
 - [ ] T048 [US4] Keep the baked dataset as what the offline `file://` build runs on, and assert it still opens with the full example
 - [ ] T049 [US4] Add `tourReady(target)` to `lib/rules.js` — at least one pillar or capability and one key objective — and switch `SMP-Project-Folder/src/tour.js` off demo mode onto the client's own plan

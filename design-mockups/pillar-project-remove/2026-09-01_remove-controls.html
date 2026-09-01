@@ -1,0 +1,154 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Removing a Pillar or Project</title>
+<style>
+  /* The platform's own Forefront light palette, verbatim — this mockup shows
+     the real components with ONE addition, so it wears their exact tokens. */
+  :root{
+    --gold:#C9A24D; --gold-deep:#8A6B22;
+    --stone:#16325C; --ground:#F7F8FA; --surface:#FFFFFF; --surface-2:#EFF2F6;
+    --line:#D6DCE5; --line-soft:#E6EAF0;
+    --ink:#171B22; --ink-2:#414A58; --ink-3:#636C79;
+    --bad:#B04434; --bad-tx:#8C3327; --bad-bg:#F7E3E0;
+    --warn-bg:#FBEBE0; --warn-tx:#A4512C;
+    --panel:#16325C; --panel-ink:#FFFFFF;
+    --mono:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
+    --sans:-apple-system,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;
+    --r:12px;
+  }
+  html,body{margin:0}
+  body{background:var(--ground); color:var(--ink); font:14px/1.5 var(--sans); padding:34px 26px 60px;}
+  .wrap{max-width:1080px; margin:0 auto;}
+  h1{font:650 21px/1.3 var(--sans); letter-spacing:-.012em; margin:0 0 4px;}
+  .sub{color:var(--ink-3); font-size:13px; margin:0 0 30px;}
+  h2{font:600 11px/1 var(--sans); letter-spacing:.11em; text-transform:uppercase;
+     color:var(--stone); margin:38px 0 12px;}
+  .notew{font-size:12.5px; color:var(--ink-3); margin:8px 0 0; max-width:70ch;}
+
+  /* ── the pane, as the platform draws it ─────────────────────────── */
+  .pane{background:var(--surface); border:1px solid var(--line); border-radius:var(--r);
+        padding:0 18px 18px; overflow:hidden;}
+
+  /* The pillar's pinned editing head (§194), exactly as shipped. */
+  .edhead{display:flex; align-items:center; gap:14px; background:var(--surface-2);
+          margin:0 -18px 14px; padding:11px 18px;
+          box-shadow:inset 3px 0 0 var(--gold), 0 1px 0 var(--line);}
+  .pthead{min-width:0; flex:1;}
+  .edhead h3{display:flex; align-items:center; gap:10px; font:400 17px/1.3 var(--sans); margin:0;}
+  .ptcode{flex:none; font:600 13px/1 var(--mono); color:var(--stone); letter-spacing:.05em;}
+  .ptname{flex:1; min-width:0; font:inherit; color:var(--ink);
+          background:var(--surface); border:1px solid var(--line); border-radius:7px;
+          padding:6px 10px;}
+
+  /* The project pane's band while editing (§194.2), exactly as shipped. */
+  .pband{display:flex; align-items:center; gap:12px; background:var(--surface-2);
+         margin:0 -18px 14px; padding:10px 18px; min-height:33px;
+         box-shadow:inset 3px 0 0 var(--gold), 0 1px 0 var(--line);}
+  .pband-code{font:600 13px/1 var(--mono); color:var(--stone); letter-spacing:.05em; flex:none;}
+  .pband-name{flex:1; min-width:0; font:650 16px/1.3 var(--sans); letter-spacing:-.012em;}
+  .pband-name .fld{width:100%; box-sizing:border-box; font:inherit; color:var(--ink);
+          background:var(--surface); border:1px solid var(--line); border-radius:7px; padding:6px 10px;}
+
+  /* The Done tick, as the pen draws it while open. */
+  .penbtn{flex:none; width:28px; height:28px; border-radius:7px; border:1px solid var(--gold-deep);
+          background:var(--gold); color:#fff; font-size:14px; line-height:26px; text-align:center;
+          cursor:pointer;}
+
+  /* ── THE ADDITION: the worded remove control ────────────────────────
+     Quiet red words, no fill — a destructive act says its name, and the
+     confirmation is where the weight lives. Visible only while the pen is
+     open, sitting with the acts the head already pins (§194: what you need
+     while working stays on the line that stays put). */
+  .rmbtn{flex:none; font:600 12px/1 var(--sans); color:var(--bad-tx);
+         background:none; border:1px solid transparent; border-radius:7px;
+         padding:8px 10px; cursor:pointer; letter-spacing:.01em;}
+  .rmbtn:hover{background:var(--bad-bg); border-color:var(--bad-bg);}
+
+  /* faint stand-in rows so the heads sit on a believable pane */
+  .ghost{height:12px; border-radius:5px; background:var(--surface-2); margin:12px 0;}
+  .ghost.w2{width:72%}.ghost.w3{width:56%}
+
+  /* ── the confirmation, in the platform's own dialog ─────────────── */
+  .demo-ov{background:rgba(23,27,34,.44); border-radius:var(--r); padding:36px 20px;
+           display:flex; justify-content:center;}
+  .modal{background:var(--surface); border-radius:var(--r); width:min(480px,100%);
+         box-shadow:0 18px 50px rgba(23,27,34,.28); padding:20px 22px;}
+  .modal h4{font:650 16px/1.35 var(--sans); letter-spacing:-.01em; margin:0 0 10px;}
+  .modal h4 .ptcode{font-size:12px; margin-right:8px;}
+  .modal p{font-size:13.5px; color:var(--ink-2); margin:0 0 10px;}
+  .repline{background:var(--warn-bg); color:var(--warn-tx); border-radius:8px;
+           padding:9px 12px; font-size:13px; margin:0 0 10px;}
+  .archline{font-size:12.5px; color:var(--ink-3); margin:0 0 16px;}
+  .mrow{display:flex; justify-content:flex-end; gap:10px;}
+  .mbtn{font:600 13px/1 var(--sans); border-radius:8px; padding:10px 14px; cursor:pointer;}
+  .mbtn.quiet{background:none; border:1px solid var(--line); color:var(--ink-2);}
+  .mbtn.danger{background:var(--bad); border:1px solid var(--bad); color:#fff;}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <h1>Removing a pillar or a project</h1>
+  <p class="sub">The worded control in the editing head — drawn only while the pen is open,
+    so it follows the Strategy grant exactly as the pen does. Nothing changes in read mode.</p>
+
+  <h2>1 · A unit's pillar — the pinned editing head</h2>
+  <div class="pane">
+    <div class="edhead">
+      <div class="pthead"><h3>
+        <span class="ptcode">MB02</span>
+        <span class="ptname">Grow SME lending</span>
+      </h3></div>
+      <button class="rmbtn">Remove this pillar</button>
+      <button class="penbtn" title="Done">&#10003;</button>
+    </div>
+    <div class="ghost"></div><div class="ghost w2"></div><div class="ghost w3"></div>
+  </div>
+  <p class="notew">The head already pins while you scroll (§194), so the control is reachable
+    from anywhere in a long pillar — beside Done, before it, because reading order is
+    “remove, or finish”.</p>
+
+  <h2>2 · A project — the band while editing</h2>
+  <div class="pane">
+    <div class="pband">
+      <span class="pband-code">CUS01</span>
+      <span class="pband-name"><input class="fld" value="Mystery shopping programme"></span>
+      <button class="rmbtn">Remove this project</button>
+      <button class="penbtn" title="Done">&#10003;</button>
+    </div>
+    <div class="ghost"></div><div class="ghost w3"></div><div class="ghost w2"></div>
+  </div>
+
+  <h2>3 · The confirmation — a pillar with figures already reported</h2>
+  <div class="demo-ov"><div class="modal">
+    <h4><span class="ptcode">MB02</span>Remove this pillar?</h4>
+    <p><b>Grow SME lending</b> holds 4 measures and 6 tactics.</p>
+    <div class="repline">3 of its figures have been reported this cycle — removing it moves
+      the unit's scores.</div>
+    <p class="archline">The plan as it stands is archived first.
+      Setup › Import &amp; archives holds the way back.</p>
+    <div class="mrow">
+      <button class="mbtn quiet">Cancel</button>
+      <button class="mbtn danger">Remove the pillar</button>
+    </div>
+  </div></div>
+
+  <h2>4 · The confirmation — a project nothing has been reported on</h2>
+  <div class="demo-ov"><div class="modal">
+    <h4><span class="ptcode">CUS01</span>Remove this project?</h4>
+    <p><b>Mystery shopping programme</b> holds 3 deliverables, 2 outcomes and 5 milestones.
+      Nothing has been reported against it this cycle.</p>
+    <p class="archline">The plan as it stands is archived first.
+      Setup › Import &amp; archives holds the way back.</p>
+    <div class="mrow">
+      <button class="mbtn quiet">Cancel</button>
+      <button class="mbtn danger">Remove the project</button>
+    </div>
+  </div></div>
+
+</div>
+</body>
+</html>

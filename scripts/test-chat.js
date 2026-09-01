@@ -216,6 +216,37 @@ async function signIn(who, password) {
        that offers the box and an endpoint still reading a constant is exactly
        the drift `lib/rules.js` exists to prevent, and nothing else here would
        have noticed it. */
+    /* ── THE OFFICE IS TOLD WHAT IS WAITING (§225) ──────────────────
+       Their corner is the only thing that polls on every page — the Platform
+       Inbox's own clock stops the moment they navigate away — so this is the
+       only place a notification for the office can come from. Asked of a REAL
+       Postgres, because it is a query and a query nothing has run is a guess
+       (§172, §100.3), and asked at BOTH ENDS: everybody else's poll must carry
+       none of it. */
+    console.log("\nAND THE OFFICE'S POLL CARRIES WHAT IS WAITING (§225).");
+    await setChat({});
+    r = await call(smo.cookie, { action: "mine" });
+    ok(r.body.office === true, "the office's poll says so");
+    ok("popup" in (r.body.chat || {}),
+       "and the popup setting travels with it — named there or it never arrives");
+    /* NOTHING WAITING: a count of nought and nobody to name. */
+    await client.query("UPDATE chat_threads SET waiting = false");
+    r = await call(smo.cookie, { action: "mine" });
+    ok(r.body.waiting === 0, "nought while nobody is waiting");
+    ok(!r.body.waitingWho && !r.body.waitingBody, "...and nobody to name");
+    /* SOMEBODY WRITES IN. */
+    await call(her.cookie, { action: "say", body: "Mobile's plan will not open for me." });
+    r = await call(smo.cookie, { action: "mine" });
+    ok(r.body.waiting >= 1, "a question raises the count");
+    ok(!!r.body.waitingWho && r.body.waitingWho !== OTHER.key,
+       "...naming who wrote, never the bare person key");
+    ok(r.body.waitingBody === "Mobile's plan will not open for me.",
+       "...with their first line, the same two facts everybody else's box carries");
+    /* AND NOBODY ELSE IS TOLD ANY OF IT. */
+    r = await call(her.cookie, { action: "mine" });
+    ok(r.body.waiting === undefined && r.body.waitingWho === undefined,
+       "somebody who is not the office is told none of it");
+
     console.log("\nAND THE AWAY THRESHOLD IS A SETTING, NOT A CONSTANT (§169).");
     await client.query(
       "UPDATE chat_threads SET here_at = now() - interval '7 minutes' WHERE person_key = $1",

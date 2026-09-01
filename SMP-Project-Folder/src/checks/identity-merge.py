@@ -281,7 +281,13 @@ with sync_playwright() as p:
     pg.evaluate("""(n) => { PEOPLE[0].name = n; delete PEOPLE[0].known;
       PEOPLE[1].email = "someone.with.a.long.address@rayatrade.example";
       PEOPLE[1].phone = "+20 100 555 0101";
-      PCOLS.phone = true; paint(); }""", LONG)
+      /* Full Name SHIPS OFF (`off:true` on its column def, §93.8) — the
+         frozen first column is what somebody is CALLED, and the legal name is
+         there for whoever wants it. This check turns the phone column on and
+         had never turned this one on, so it read the register as having lost
+         a column that was simply not switched on: it was measuring `Job
+         title` and calling it the full name. */
+      PCOLS.phone = true; PCOLS.fullname = true; paint(); }""", LONG)
     pg.wait_for_timeout(600)
     heads = pg.eval_on_selector_all(".peoplecfg thead th", "e=>e.map(x=>x.textContent.trim())")
     ck("the register has both columns", heads[1:3] == ["Name", "Full Name"], heads)

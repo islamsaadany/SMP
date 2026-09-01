@@ -1719,6 +1719,17 @@
   .pane .pband.edband .paneact .cornerbtn,
   .pane .pband.edband .paneact .penbtn { position:static; flex:none;
     visibility:visible; opacity:1; }
+  /* ── THE PROJECT'S NAME GETS THE LINE (§228) ─────────────────────────
+     Islam: *"the project box is squeezed for no need we have space to make
+     it one line."* §194's fault exactly, on the band its fix did not reach:
+     the growing box (§189) is `width:100%` of `.pband-name`, and a flex item
+     with no flex shrinks to fit content that is sized BY it — circular, so
+     the textarea fell back to its intrinsic width and a three-word title
+     wrapped to three lines beside an empty band (measured: 181px of a 1223px
+     band). The pillar's `.pthead` and `.ptname` took `flex:1` in §194; this
+     is the same answer on the band's own class. Reading is untouched: a read
+     band's name is a span and sits where it always sat. */
+  .pane .pband.edband .pband-name { flex:1; min-width:0; }
   .pane .ptitle .pmeta { color:var(--ink-3); font-size:12.5px; margin-top:3px; }
   .planonly { font-size:12.5px; color:var(--ink-3); margin:10px 0 0; }
   .planonly b { color:var(--gold-deep); letter-spacing:.09em; text-transform:uppercase;
@@ -6173,11 +6184,8 @@
   .nosrv-try { color:var(--ink-3); font-size:12px; }
   .nosrv-btn { display:block; width:100%; background:var(--panel); color:var(--panel-ink);
     border:1px solid var(--panel); border-radius:8px; padding:10px 16px;
-    font:700 13.5px var(--sans); cursor:pointer; margin:4px 0 10px; }
+    font:700 13.5px var(--sans); cursor:pointer; margin:4px 0 0; }
   .nosrv-btn:hover { filter:brightness(1.12); }
-  .nosrv-link { display:block; width:100%; background:none; border:0;
-    color:var(--ink-3); font:600 12px var(--sans); cursor:pointer;
-    text-decoration:underline; padding:2px; }
 
   /* ── Presentation mode ────────────────────────────────────────────
      A mode, not a page: it takes the whole window, the app chrome disappears,
@@ -6680,12 +6688,21 @@ body.presenting .chatdock { display:none; }
 .chathead .cht { font-size:var(--fs-body); font-weight:650; line-height:1.25; }
 .chathead .chs { font-size:var(--fs-micro); color:var(--panel-quiet); margin-top:2px;
                  display:flex; align-items:center; gap:5px; }
-.chathead .chx { margin-left:auto; background:none; border:none; color:var(--panel-quiet);
+/* THE MARGIN IS ON THE GROUP, NEVER ON EACH BUTTON (§225): two controls each
+   carrying `margin-left:auto` are each pushed right on their own and land a
+   gap apart with the heading squeezed between them. */
+.chathead .chbtns { margin-left:auto; display:flex; align-items:center; gap:2px; }
+.chathead .chx { background:none; border:none; color:var(--panel-quiet);
                  cursor:pointer; line-height:0; padding:4px; border-radius:5px;
                  display:grid; place-items:center; }
 .chathead .chx svg { width:16px; height:16px; }
 .chathead .chx:hover { color:var(--panel-ink); background:rgb(255 255 255/.12); }
 .chathead .chx:focus-visible { outline:2px solid var(--panel-ink); outline-offset:1px; }
+.chathead .chbell[hidden] { display:none; }
+/* OFF IS QUIETER, NOT ABSENT — the struck bell has to stay findable, because
+   it is the only way back on. */
+.chathead .chbell.belloff { opacity:.62; }
+.chathead .chbell.belloff:hover { opacity:1; }
 .chatdot { width:6px; height:6px; border-radius:50%; background:var(--good); flex:none; }
 
 .chatbody { padding:14px 13px; display:flex; flex-direction:column; gap:14px;
@@ -8870,9 +8887,28 @@ THEME.apply();
      GAP_FIELDS plus the optional blanks. Nothing is fillable that was not
      fillable before §187; this restores what that section removed by
      accident while keeping what it removed on purpose. */
+/* §224.2: THE DEFINITION IS THE OFFICE'S, and it is a fill decision rather
+   than a counting one. Islam, having seen §223 open the door on it: *"remove
+   the definition of the functions overview from the filling what's missing or
+   filling what's empty — the SMO will do it."*
+
+   `cap` therefore has NOTHING fillable, which is why the entry goes rather
+   than becoming an empty array: §223's door asks whether anything on the page
+   is fillable, so an empty list already closes it for the definition while
+   leaving the key objectives beside it open, which is what he asked for.
+
+   ONE LIST, BOTH SIDES (§205). The authoriser reads this same map, so the
+   save refuses a filler's definition exactly where the screen declines to
+   open it — the pair §205 exists to keep together, in the direction that
+   closes rather than opens. */
 var GAP_OPTIONAL = { tactic: ["collaborators"],
-                     capko:  ["dir", "target", "compile", "weight"],
-                     cap:    ["def"] };
+                     /* §227: A MILESTONE'S COLLABORATORS, THE TACTIC'S RULE
+                        MOVED OVER (Islam: "add collaborators beside the owner
+                        column similar to the collaborators in the tactics").
+                        Fillable while EMPTY, never counted as missing — §187's
+                        ruling holds on both sides of the switch (A15). */
+                     milestone: ["collaborators"],
+                     capko:  ["dir", "target", "compile", "weight"] };
   var GAP_FILLABLE = (function () {
     var out = {};
     Object.keys(GAP_FIELDS).forEach(function (k) {
@@ -9429,6 +9465,23 @@ var GAP_OPTIONAL = { tactic: ["collaborators"],
        or not the assistant is on, and tying it to the assistant would mean
        turning the assistant off silently turned the emails off too. */
     notify: false,
+    /* ── A BOX FROM THE COMPUTER WHEN A REPLY LANDS (§225) ─────────
+       Islam: *"we need to have a browser notification approach for the
+       platform messages — for the SMO so I get notified when someone
+       replies, and for the users when the SMO replies to them."*
+
+       OFF UNTIL SOMEBODY TURNS IT ON, and read the other way round with the
+       assistant and the handover email: only an explicit `true`. §104's
+       argument — the settings that ship ON describe a chat that already
+       worked, and this describes a capability that did not, so a deployment
+       that upgrades gets exactly the chat it had. A notification is also an
+       interruption, and switching one on for a whole company without being
+       asked is the wrong way round.
+
+       NOT NAMED `notify`, WHICH IS TAKEN by the handover email one line
+       above (§87: a name is never an identifier, and two settings sharing
+       one word is how the wrong switch gets flipped). */
+    popup: false,
     rep: "",
     /* ── HOW LONG SOMEBODY COUNTS AS HERE (§169) ───────────────────
        Islam: *"in the chat settings for the away email add my a small option
@@ -9468,6 +9521,7 @@ var GAP_OPTIONAL = { tactic: ["collaborators"],
          "anything but false", because their default is on. */
       assistant: !!(c && c.assistant === true),
       notify:    !!(c && c.notify === true),
+      popup:     !!(c && c.popup === true),
       rep:       (c && typeof c.rep === "string") ? c.rep.trim() : "",
       /* A NUMBER, CLAMPED AND NEVER NaN. A stored value out of range, a
          string, or nothing at all all answer the shipped default — this is
@@ -9886,14 +9940,17 @@ var GAP_OPTIONAL = { tactic: ["collaborators"],
     if (!p || !fnKey) return false;
     /* Named ANYWHERE in the function's projects (§147.8): the project's own
        rows (owner, collaborators), its stakeholder list, or a milestone's
-       Owner. A project's owner also matches here and it does not matter —
+       Owner — and since §227 a milestone's COLLABORATORS, because the row
+       travels whole through namedOn(): being named on the milestone is what
+       lets somebody report it, exactly the meaning the word carries on a
+       tactic. A project's owner also matches here and it does not matter —
        they derive powner above, so the floor is never reached for them. */
     return capsOfFn(w, fnKey).some(function (c) {
       return (c.projects || []).some(function (pr) {
         return namedOn(pr, p) ||
                namedOn({ collaborators: pr.stakeholders }, p) ||
                (pr.milestones || []).some(function (m) {
-                 return namedOn({ owner: m.owner }, p);
+                 return namedOn(m, p);
                });
       });
     });
@@ -20822,6 +20879,7 @@ function dueFits(v){
    staying behind for a value nothing writes. `owner` stays: a PROJECT and a
    MILESTONE both have one. */
 var CAPP_COLS = ["id","type","parent_id","name","description","owner","stakeholders",
+                 "collaborators",
                  "direction","value","unit","kind","measure_at","start","end",
                  "finish","covers","weight","compile","timeline","notes"];
 var CAPPROG_COLS = ["id","type","parent_id","parent_name","name","kind","target",
@@ -20868,7 +20926,8 @@ function capPlanTemplate(c){
     });
     (p.milestones || []).forEach(function(m){
       rows.push(csvRow(CAPP_COLS, { id:m.id, type:"MILESTONE", parent_id:p.id, name:m.name,
-        covers:m.covers, owner:m.owner, finish:m.finish }));
+        covers:m.covers, owner:m.owner,
+        collaborators:(m.collaborators || []).join("|"), finish:m.finish }));
     });
   });
   return rows.join("\n");
@@ -21149,6 +21208,9 @@ function diffCapPlan(c, rows){
       cmp("name", hit.obj.name, r.name);
       cmp("what it covers", hit.obj.covers, r.covers);
       cmp("owner", hit.obj.owner, r.owner);
+      /* §227: compared pipe-joined, the shape both readers normalise to —
+         the same contract the project's stakeholders keep above. */
+      cmp("collaborators", (hit.obj.collaborators || []).join("|"), r.collaborators);
       cmp("finish", hit.obj.finish, r.finish);
     }
     out.push({ id:r.id, type:hit.kind, name:hit.obj.name || c.name,
@@ -21206,8 +21268,14 @@ function createFromCapPlan(c, d){
       made++;
     } else if (x.type === "MILESTONE") {
       var p3 = projectById(x.parent_id); if (!p3) return;
-      p3.milestones.push({ id:x.id, name:x.name, covers:x.covers || "",
-        owner:x.owner || "", finish:x.finish || "", status:null });
+      var m3 = { id:x.id, name:x.name, covers:x.covers || "",
+        owner:x.owner || "", finish:x.finish || "", status:null };
+      /* §227: set only when somebody is named — an absent key and an empty
+         list must stay byte-identical (§50.6), so nothing writes []. */
+      var col = (x.collaborators || "").split(/[,|]/)
+        .map(function(s){ return s.trim(); }).filter(Boolean);
+      if (col.length) m3.collaborators = col;
+      p3.milestones.push(m3);
       made++;
     }
   });
@@ -21229,6 +21297,9 @@ function applyCapPlan(c, d){
       if (ch.f === "brief")          o.brief = ch.now;
       if (ch.f === "owner")          o.owner = ch.now;
       if (ch.f === "stakeholders")   o.stakeholders = ch.now ? ch.now.split("|").map(function(s){ return s.trim(); }).filter(Boolean) : [];
+      /* §227: cmp never fires on an emptied value, so `ch.now` is always a
+         real list here — a file adds and amends, it never removes (§54). */
+      if (ch.f === "collaborators")  o.collaborators = ch.now.split("|").map(function(s){ return s.trim(); }).filter(Boolean);
       if (ch.f === "timeline")       o.timeline = timelineKey(ch.now) || o.timeline;
       if (ch.f === "start")          o.start = ch.now;
       if (ch.f === "end")            o.end = ch.now;
@@ -22266,13 +22337,17 @@ function capPlanWorkbook(c){
         return acc;
       }, []) },
 
-    { name:"Milestones", widths:[34, 38, 52, 16, 14],
-      head:["Project", "Milestone", "Description", "Owner", "Due date"],
+    /* §227: Collaborators beside the Owner, the tactics sheet's own column —
+       comma-separated names, and the export carries them or a download-and-
+       re-upload would silently drop every one (§22: an upload AUTHORS). */
+    { name:"Milestones", widths:[34, 38, 52, 16, 26, 14],
+      head:["Project", "Milestone", "Description", "Owner", "Collaborators", "Due date"],
       validations:[{ range:"A2:A400", from:PROJECT_RANGE,
                      error:"Choose a project from the Projects sheet." }],
       rows:(c.projects || []).reduce(function(acc, p){
         (p.milestones || []).forEach(function(m){
-          acc.push([p.name, m.name, m.covers || "", m.owner || "", m.finish || ""]);
+          acc.push([p.name, m.name, m.covers || "", m.owner || "",
+                    (m.collaborators || []).join(", "), m.finish || ""]);
         });
         return acc;
       }, []) }
@@ -22385,6 +22460,11 @@ function capPlanFromWorkbook(c, sheets){
        spelling -- `covers` is an identifier, "Description" is a label. */
     row.covers = r["Description"] != null ? r["Description"] : r["What it covers"];
     row.owner = r["Owner"];
+    /* §227: normalised to the pipe-joined shape the differ compares and
+       applyCapPlan splits — the same road the Projects sheet's Stakeholders
+       already travel. A file written before the column reads "" (§58). */
+    row.collaborators = (r["Collaborators"] || "").split(/[,|]/)
+      .map(function(x){ return x.trim(); }).filter(Boolean).join("|");
     /* WRITE THE NEW LABEL, READ EITHER (§58, §65). The column is called Due
        date from §99; somebody is holding a workbook downloaded before that,
        and a header is a contract. The STORED field keeps its own spelling —
@@ -26279,7 +26359,20 @@ function gapCell(page, acKey, row, field, opts){
       gapLift(row, field); gapBandRefresh();
     }, open && SMPRules.isGapField(field) ? "gapwalk" : "");
   }
-  if (fl && (open || mark)) {
+  /* ── A CELL THE FILLABLE LIST HAS CLOSED NEVER OPENS TO A FILLER ────
+     (§228.2, found by the §227 merge.) §224.2 took `def` out of
+     GAP_FILLABLE and its assertion passed because the check's projects
+     function had NOTHING fillable — no door, no fill mode, nothing to see.
+     §227 made the milestones' collaborators fillable, the door appeared,
+     and behind it the definition opened a box whose save the server
+     refuses: §205's drift exactly, latent on any page that had a genuine
+     gap beside the definition. The gate reads the ONE list the server
+     reads (`fillKind` names the row's GAP kind), so a later decision about
+     what is fillable reaches this cell without anybody coming back here;
+     a call site that names no kind keeps today's behaviour. */
+  var fillable = !opts.fillKind ||
+    (SMPRules.GAP_FILLABLE[opts.fillKind] || []).indexOf(field) > -1;
+  if (fl && fillable && (open || mark)) {
     return draw(function(v){
       var nv = put(v);
       if (SMPRules.gapBlank(nv)) {
@@ -27701,6 +27794,9 @@ function projPerformanceBody(p, fk){
     return '<tr' + (quiet ? ' class="notdue"' : '') + '>' +
       '<td class="idx">' + (i+1) + '</td><td>' + esc(m.name) + '</td>' +
       '<td class="cc">' + esc(m.owner || "\u2014") + '</td>' +
+      /* \u00a7224: the same read the tactics table gives Performance \u2014 who supports
+         the row, em-dash when nobody (\u00a715.1: absent, never an alarm). */
+      '<td class="collabs">' + collabCell(m) + '</td>' +
       '<td class="cc">' + dxDate(m.finish, m.status === "done") + '</td>' +
       '<td class="cc">' + (quiet ? notDueCell() : msPill(m)) + '</td>' +
       '<td class="num final">' + (statusPending(m) ? needsPct()
@@ -27720,7 +27816,7 @@ function projPerformanceBody(p, fk){
     '<h4 class="mini">' + DX_HEADING + '</h4>' +
     miniTable(["#","Deliverables &amp; outcomes","Type","Target","Status",DX_PCT], dxr) +
     '<h4 class="mini">Milestones <em>' + mst.done + ' of ' + mst.total + ' completed</em></h4>' +
-    miniTable(["#","Milestone","Owner","Due date","Status",MS_PCT], mRows);
+    miniTable(["#","Milestone","Owner","Collabs.","Due date","Status",MS_PCT], mRows);
 }
 
 /* A FUNCTION WHOSE PLAN LIVES IN ITS CAPABILITIES AND WHICH CARRIES NONE
@@ -28001,13 +28097,33 @@ function projPlanBody(p, fk){
             return selectOr("plan", m.owner == null ? "" : m.owner,
               ownerChoices(m.owner, true), "ownersel " + (pendCls || ""), set);
           } }) + '</td>' +
+      /* §227: COLLABORATORS BESIDE THE OWNER — the tactic's cell moved over
+         (§145.10, §130.1), because "similar to the tactics" is the ask and
+         one shape for one word is the rule (§53.5). Ticked from the same
+         register list the owner is picked from, never typed; fillable only
+         while EMPTY and never counted as missing (§187 holds on both sides
+         of the switch); an emptied list DELETES its key (§50.6). Being named
+         here is a reporting right — namedOn() reads the row whole — which is
+         why the cell sits behind the same pen as the owner. */
+      '<td class="collabs">' + gapCell("plan", "k_proj", m, "collaborators", {
+          ctx: { project: p, row: m }, text: collabText,
+          parse: function(v){ return Array.isArray(v)
+            ? v.map(function(x){ return String(x).trim(); }).filter(Boolean)
+            : collabParse(v); },
+          del: true,
+          readEmpty: '<span class="nobody">&mdash;</span>',
+          control: function(set, pendCls){
+            return selectManyOr("plan", collabNames(m),
+              ownerChoices(collabNames(m), false),
+              "collabsel " + (pendCls || ""), set);
+          } }) + '</td>' +
       '<td class="cc mp-host">' + gapCell("plan", "k_proj", m, "finish", {
           ctx: { project: p, row: m },
           control: function(set, pendCls){
             return monthPickOr("plan", m.finish, pendCls || "", set);
           } }) + '</td></tr>';
   }).join("") +
-  (ed ? '<tr class="newrow"><td class="idx">+</td><td colspan="4">' +
+  (ed ? '<tr class="newrow"><td class="idx">+</td><td colspan="5">' +
       '<button class="linkbu" data-rowadd="milestone|' + esc(p.id) + '">Add a milestone</button>' +
     '</td></tr>' : '');
   /* The owner sits on the band rather than in the rail. A pillar has two
@@ -28064,7 +28180,9 @@ function projPlanBody(p, fk){
        changes: "What it covers" was a question, "Description" is the word the
        tactics sheet has always used for the same thing. The stored field keeps
        its spelling (§58, §65): `covers` is an identifier, this is a label. */
-    miniTable(["#","Milestone","Description","Owner","Due date"], mRows) +
+    /* "Collabs." — the word the tactics column wears on every surface
+       (§53.5), and the whole 11px the full word cost a 515px pane at 830. */
+    miniTable(["#","Milestone","Description","Owner","Collabs.","Due date"], mRows) +
     dueNote(p) + overrunNote(p);
 }
 
@@ -28832,6 +28950,20 @@ function fnPillarsOverview(fk){
      objective added against the reading view would be pushed onto an empty
      every function shares. */
   var list = (ed ? unitLikeWritable("fn:" + fk) : unitLike("fn:" + fk)).keyObjectives || [];
+  /* §226: WHILE IT IS BEING WRITTEN, THE TABLE GETS THE PAGE — §96.6's rule,
+     which fixed exactly this squeeze on a unit's Foundation and never reached
+     the function's Overview: inside the fgrid card the Objective box measured
+     101px and the Dir. select 34px at a 1500px window, which is a select whose
+     value cannot be seen. Reading mode keeps the card, because the objectives
+     belong beside what the function is when you are READING it. */
+  var fl = filling("capfoundation", "k_found");
+  var koCard = '<div class="cardhead"><h2 class="sec first">' + L("keyobj","bu") + '</h2>' +
+      '<span class="pill horizon">Horizon &middot; ' + horizonLabel() + '</span></div>' +
+      ((ed || fl)
+        ? capKoEdit({ id:"fn:" + fk, keyObjectives:list })
+        : koReadBlock(list,
+            "None. This function is judged by its " +
+            esc(L("pillar","bu").toLowerCase()) + "."));
   return editBar("capfoundation", "k_found") +
     fillBarOr("capfoundation", "k_found",
       list.reduce(function(a, m){
@@ -28840,8 +28972,18 @@ function fnPillarsOverview(fk){
     '<div class="fgrid">' +
       '<div class="card"><h2 class="sec first">What it is</h2><dl style="margin:0">' +
         '<div class="clause"><dt>Function</dt><dd>' + esc(f.name) + '</dd></div>' +
-        '<div class="clause"><dt>Led by</dt><dd>' +
-          (f.head ? esc(personName(f.head)) : "&mdash;") + '</dd></div>' +
+        /* §226: LED BY OPENS, FOR THE OFFICE (Islam: "led by by office ok").
+           The picker is Setup's own assignPicker writing the SAME head pointer
+           through grantPersonRole — one fact, one door (§33), so this and
+           Setup › Supporting functions can never disagree. Office-only because
+           the server classifies a head change as Setup (FN_SETUP), and a pen
+           held by anybody else would be the screen offering what the save
+           refuses (§42). The sentence is a hover, never a printed line (1b-ii). */
+        '<div class="clause"><dt>Led by</dt><dd' +
+          (ed && inOffice() ? ' title="Names the function’s head — the same fact the register holds"' : '') + '>' +
+          (ed && inOffice()
+            ? assignPicker("fn:" + fk, "fnhead", f.head || null, true)
+            : (f.head ? esc(personName(f.head)) : "&mdash;")) + '</dd></div>' +
         '<div class="clause"><dt>Definition</dt><dd>' +
           /* §214: THROUGH `gapCell`, NOT `fieldOr`. The definition is a gap
              now, and a counted gap has to be typable by whoever the count is
@@ -28859,18 +29001,12 @@ function fnPillarsOverview(fk){
              `readEmpty` is the hook gapCell already carries for exactly this.
              It stays FILLABLE — the box still opens and still saves. */
           gapCell("capfoundation", "k_found", f, "def",
-                  { kind:"area", readEmpty:"&mdash;" }) +
+                  { kind:"area", readEmpty:"&mdash;", fillKind:"cap" }) +
         '</dd></div>' +
       '</dl></div>' +
-      '<div class="card"><div class="cardhead"><h2 class="sec first">' + L("keyobj","bu") + '</h2>' +
-        '<span class="pill horizon">Horizon &middot; ' + horizonLabel() + '</span></div>' +
-        ((ed || filling("capfoundation", "k_found"))
-          ? capKoEdit({ id:"fn:" + fk, keyObjectives:list })
-          : koReadBlock(list,
-              "None. This function is judged by its " +
-              esc(L("pillar","bu").toLowerCase()) + ".")) +
-      '</div>' +
-    '</div>';
+      ((ed || fl) ? '' : '<div class="card">' + koCard + '</div>') +
+    '</div>' +
+    ((ed || fl) ? '<div class="card koband">' + koCard + '</div>' : '');
 }
 function renderFnFoundation(fnKey){
   var fk = fnKeyOf(fnKey), caps = capsOfFunction(fk);
@@ -28917,6 +29053,12 @@ function renderFnFoundation(fnKey){
       ? capKoEdit(c)
       : koReadBlock(c.keyObjectives,
           "None. This capability is judged by its projects.");
+    /* §226: WHILE IT IS BEING WRITTEN, THE TABLE GETS THE PAGE — the same
+       band the pillars format takes, because the two formats draw ONE page
+       (§53.5) and a squeeze fixed on one side of it is §211's drift back. */
+    var koCard = '<div class="cardhead"><h2 class="sec first">' + L("keyobj","bu") + '</h2>' +
+        '<span class="pill horizon">Horizon &middot; ' + horizonLabel() + '</span></div>' +
+        koBlock;
     return capBand(c) + '<div class="capbody"><div class="fgrid">' +
       '<div class="card"><h2 class="sec first">What it is</h2><dl style="margin:0">' +
         '<div class="clause"><dt>Capability</dt><dd>' + esc(c.name) + '</dd></div>' +
@@ -28928,12 +29070,12 @@ function renderFnFoundation(fnKey){
            function's definition and not a capability's. */
         '<div class="clause"><dt>Definition</dt><dd>' +
           gapCell("capfoundation", "k_found", c, "def",
-                  { kind:"area", readEmpty:"&mdash;" }) + '</dd></div>' +
+                  { kind:"area", readEmpty:"&mdash;", fillKind:"cap" }) + '</dd></div>' +
       '</dl></div>' +
-      '<div class="card"><div class="cardhead"><h2 class="sec first">' + L("keyobj","bu") + '</h2>' +
-        '<span class="pill horizon">Horizon &middot; ' + horizonLabel() + '</span></div>' +
-        koBlock + '</div>' +
-    '</div></div>';
+      ((ed || fl) ? '' : '<div class="card">' + koCard + '</div>') +
+    '</div>' +
+    ((ed || fl) ? '<div class="card koband">' + koCard + '</div>' : '') +
+    '</div>';
   }).join("") +
   /* A second capability for the same function, added where the first is
      described. addCapability() is the ONE minter (§51.11) — the Temple's
@@ -28983,14 +29125,29 @@ function capKoEdit(c){
      and Add stay the author's — a fill-mode render draws them read-only or
      not at all. */
   var ed = authoring(pg, "k_found");
+  /* §226: the same three answers the unit's table got and this one never did —
+     the NAME is prose and wraps (§189's textOr; a function's objective titles
+     clipped at 101px in the card this table used to edit inside), the UNIT is
+     §199's column exactly (a view of the target string, nothing stored, the
+     office picks it and a filler may set a MISSING one), and a bare number
+     typed into This year inherits the row's unit (§199.6). The unit's own
+     koEdit is deliberately untouched — Islam: "don't touch the unit side". */
   return '<div class="scroll"><table><thead><tr><th>Objective</th><th class="cc">Dir.</th>' +
+    '<th class="cc">Unit</th>' +
     '<th class="cc">This year</th><th class="cc">Compile</th><th class="cc">Weight %</th><th></th></tr></thead><tbody>' +
     c.keyObjectives.map(function(m, i){
-      return '<tr><td>' + inputOr(ed ? pg : null, m.name, "", function(v){ m.name = v; }) + '</td>' +
+      return '<tr><td>' + textOr(ed ? pg : null, m.name, "", function(v){ m.name = v; }) + '</td>' +
         '<td class="cc">' + gapCell(pg, "k_found", m, "dir",
           { kind:"select", opts:["≥", "≤"] }) + '</td>' +
+        '<td class="cc">' + (ed
+          ? (hasTargetToHoldAUnit(m)
+              ? selectOr(pg, targetUnitOf(m), targetUnitOpts(targetUnitOf(m)), "",
+                  function(v){ setTargetUnit(m, v); })
+              : '<span class="why" title="Set a target first — the unit is ' +
+                'written with it">—</span>')
+          : (fillUnitCell(pg, "k_found", m) || esc(targetUnitOf(m)))) + '</td>' +
         '<td class="cc">' + gapCell(pg, "k_found", m, "target",
-          { kind:"input", cls:"mono" }) + '</td>' +
+          { kind:"input", cls:"mono", parse: unitInherit(m) }) + '</td>' +
         '<td class="cc">' + gapCell(pg, "k_found", m, "compile",
           { kind:"select", opts:["Sum", "Latest", "Average"] }) + '</td>' +
         '<td class="cc">' + gapCell(pg, "k_found", m, "weight",
@@ -37093,6 +37250,8 @@ function deckSlidesFn(fk){
           '<td class="lead">' + esc(m.name) +
           (m.covers ? '<span class="dsub">' + esc(m.covers) + '</span>' : '') + '</td>' +
           '<td>' + esc(m.owner || "—") + '</td>' +
+          /* §227: the same cell the deck's tactic tables carry (§50). */
+          '<td class="collabs">' + collabCell(m) + '</td>' +
           '<td class="num' + (over.indexOf(m.id) > -1 ? ' warn' : '') + '">' + esc(m.finish) +
           (over.indexOf(m.id) > -1 ? ' <span class="dsub">after the project ends</span>' : '') + '</td>' +
           '<td class="num final ' + (m.status === "done" ? "good" : m.status === "wip" ? "attn" : "") + '">' + word + '</td>' +
@@ -37102,7 +37261,7 @@ function deckSlidesFn(fk){
       S.push('<section class="dslide" data-split="' + esc(p.id) + 'M">' +
         '<h2>' + esc(p.name) + '<span class="dwhich">Milestones &middot; ' + mst.done + ' of ' + mst.total + ' completed</span></h2>' +
         '<table class="zebra withnote"><thead><tr><th class="idx">#</th><th>Milestone</th>' +
-        '<th>Owner</th><th class="num">Due date</th><th class="num">Status</th><th class="num">' + MS_PCT + '</th>' +
+        '<th>Owner</th><th>Collabs.</th><th class="num">Due date</th><th class="num">Status</th><th class="num">' + MS_PCT + '</th>' +
         '<th>Note</th></tr></thead><tbody>' + mRows + '</tbody></table></section>');
     });
   });
@@ -38702,6 +38861,10 @@ var CHAT = (function(){
 
   var open = false, mounted = false, timer = null;
   var state = { messages: [], unread: 0, thread: null, office: false };
+  /* HOW MANY WERE WAITING LAST TIME WE ASKED — the office's half of §225.
+     `null` until the first answer, so the very first poll of a session can
+     never announce a queue that was already there when they signed in. */
+  var lastWaiting = null;
   var loaded = false, sending = false, shot = null, lastErr = "";
   /* The office inbox's own state, kept apart: the two surfaces poll on
      different clocks and a person in the office has both open at once. */
@@ -38933,15 +39096,28 @@ var CHAT = (function(){
         '<div class="chathead">' +
           "<div><div class=\"cht\">Strategy Office</div>" +
           '<div class="chs" id="chatsub"></div></div>' +
-          /* A MINUS, NOT A CROSS (Islam: "it need to be a minimize button as
-             there is no closing actually"). Nothing is closed by pressing it —
-             the conversation is permanent, one per person, and it is the same
-             one next time. A × promises an end to something that has none, and
-             on a chat it reads as "discard this". */
-          '<button class="chx" id="chatclose" type="button" title="Minimise" ' +
-            'aria-label="Minimise this conversation">' +
-            '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" ' +
-            'stroke-linecap="round" aria-hidden="true"><path d="M6 12h12"/></svg></button>' +
+          /* GROUPED, NEVER TWO CONTROLS EACH PUSHED RIGHT ON THEIR OWN. `.chx`
+             used to carry `margin-left:auto` itself, so a second one would be
+             pushed to the right INDEPENDENTLY and the two would land a gap
+             apart with the heading squeezed between them. The pair takes the
+             margin now and the buttons sit side by side. */
+          '<div class="chbtns">' +
+            /* THE BELL IS THIS PERSON'S SWITCH, ON THIS DEVICE (§225) — drawn
+               only where it can decide something: hidden when the office has
+               turned notifications off for the tenant and on a browser with no
+               Notification at all, because a control that changes nothing is
+               not a choice (§61). Its state is written in by drawBell(). */
+            '<button class="chx chbell" id="chatbell" type="button" hidden></button>' +
+            /* A MINUS, NOT A CROSS (Islam: "it need to be a minimize button as
+               there is no closing actually"). Nothing is closed by pressing it
+               — the conversation is permanent, one per person, and it is the
+               same one next time. A × promises an end to something that has
+               none, and on a chat it reads as "discard this". */
+            '<button class="chx" id="chatclose" type="button" title="Minimise" ' +
+              'aria-label="Minimise this conversation">' +
+              '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" ' +
+              'stroke-linecap="round" aria-hidden="true"><path d="M6 12h12"/></svg></button>' +
+          "</div>" +
         "</div>" +
         '<div class="chatbody" id="chatbody"></div>' +
         '<div class="chatfoot">' +
@@ -39008,6 +39184,8 @@ var CHAT = (function(){
         (waiting ? ' style="background:var(--attn)"' : '') + '></span> ' +
         esc2(cfg.promise);
     }
+    drawBell();
+
     var n = el("chatn");
     if (n) {
       if (state.unread > 0 && !open) { n.hidden = false; n.textContent = String(state.unread); }
@@ -39078,7 +39256,13 @@ var CHAT = (function(){
         if (dock) dock.hidden = !cfg.on;
         if (!cfg.on && open) setOpen(false);
         drawPanel();
-        if (arrived && !open) announce();
+        if (arrived && !open) { announce(); popShow(); }
+        /* AND THE OFFICE IS TOLD WHEN SOMEBODY WRITES TO THEM (§225). Their
+           corner is their OWN conversation, so nothing above this could ever
+           speak for the queue — and the Platform Inbox's own clock stops the
+           moment they navigate away (`boxBeat`), which is every page but one.
+           This poll runs everywhere, so this is the only place it can live. */
+        popOffice(j);
         /* The clock changes with the state, not only with the panel: somebody
            who has just been answered stops expecting and goes back to 180s. */
         if (firstAnswer || wasWaiting !== expecting()) beat();
@@ -39127,6 +39311,166 @@ var CHAT = (function(){
      itself too. Everything about it is in CSS, including the respect for
      `prefers-reduced-motion` — a corner that jumps at somebody who has asked
      not to be jumped at is worse than a silent badge. */
+  /* ── A BOX FROM THE COMPUTER WHEN A REPLY LANDS (§225) ──────────────────
+     Islam: *"a browser notification for the platform messages — for the SMO
+     when someone replies, and for the users when the SMO replies to them"*,
+     wording B: who wrote, and the first line.
+
+     THREE SWITCHES, AND ALL THREE MUST SAY YES. The company's (`cfg.popup`,
+     the office's row in Chat settings), the person's own, and the browser's
+     permission. They are genuinely three different decisions by three
+     different people, so none of them stands in for another.
+
+     THE PERSON'S IS PER DEVICE, in `localStorage` beside the theme and the
+     column choices (§25, §47.1) — and per device is not a shortcut, it is
+     the truth: the browser's permission is per device too, so a switch
+     claiming to follow somebody everywhere would be off on the laptop and
+     still silent on the iPad, whose Safari was never asked. The hover says
+     "on this device" rather than leaving that to be discovered.
+
+     STORED AS AN ABSENCE (§50.6): the key exists only while somebody has
+     turned it OFF, so a browser that has never been asked and one switched
+     back on are the same state, and a reader never creates what it looked
+     for. A throwing store reads as ON — the same way round as §107's tour,
+     because the failure that matters is nagging somebody who said no, and
+     that requires the key to be PRESENT. */
+  var POPKEY = "smp.chat.popup";
+  function popMine(){
+    try { return localStorage.getItem(POPKEY) !== "off"; }
+    catch (e) { return true; }
+  }
+  function popMineSet(on){
+    try { if (on) localStorage.removeItem(POPKEY);
+          else localStorage.setItem(POPKEY, "off"); }
+    catch (e) { /* a browser that will not store it simply keeps them on */ }
+  }
+  /* Whether the box could be shown at all — asked of the browser rather than
+     assumed, because `Notification` does not exist in an iOS Safari tab (it
+     is there only for a home-screen install) and reading `.permission` off
+     `undefined` would throw on the one platform this is least able to serve. */
+  function popCan(){
+    return typeof window !== "undefined" && "Notification" in window;
+  }
+  function popState(){
+    if (!popCan()) return "unsupported";
+    return Notification.permission;              /* granted · denied · default */
+  }
+  /* ASKED ON A PRESS, NEVER ON ARRIVAL. Browsers only allow the question
+     after a gesture, and a permission box thrown at somebody who has not
+     asked for anything is the one people refuse out of reflex — and a
+     refusal is theirs to undo, not ours, so it is worth spending once and
+     spending it well. Called when the panel is OPENED (§225). */
+  function popAsk(){
+    if (!popCan() || !cfg.popup || !popMine()) return;
+    if (Notification.permission !== "default") return;
+    try { Notification.requestPermission(); } catch (e) { /* older shape */ }
+  }
+  /* WHO WROTE, AND THE FIRST LINE (Islam's wording B). The newest message is
+     the one that just arrived; its author is resolved through the same
+     `nameOf()` the thread uses, so a notification cannot name somebody the
+     panel would call something else (§53.5). */
+  function popShow(){
+    if (!popCan() || !cfg.popup || !popMine()) return;
+    if (Notification.permission !== "granted") return;
+    var m = state.messages[state.messages.length - 1];
+    if (!m) return;
+    var who = m.bot ? "Strategy Office \u00b7 Assistant"
+            : (nameOf(m.by_key, m.by_name) || "Strategy Office");
+    var line = String(m.body || "").replace(/\s+/g, " ").trim();
+    if (line.length > 120) line = line.slice(0, 119) + "\u2026";
+    try {
+      /* ONE TAG, so a second reply REPLACES the first rather than stacking a
+         column of boxes on somebody who has been away from the screen. */
+      var n = new Notification(who, { body: line, tag: "smp-chat",
+                                      icon: "/icons/icon-192.png" });
+      n.onclick = function(){
+        try { window.focus(); } catch (e) {}
+        setOpen(true); drawPanel();
+        try { n.close(); } catch (e) {}
+      };
+    } catch (e) { /* never let a notification break the poll it rides on */ }
+  }
+
+  /* THE BELL SAYS WHAT IS HAPPENING, AND IT IS WRITTEN INTO THE NODE (§63,
+     §188). The head is never rebuilt while the panel is open, so this fills
+     the button that is already there rather than replacing it.
+
+     FOUR ANSWERS, THREE OF THEM DRAWN. The office off, or a browser with no
+     Notification at all, and there is nothing here to decide, so the control
+     is not drawn (§61). A browser that has REFUSED still gets a bell, struck
+     through and marked `aria-disabled` — never `disabled`, or it takes no
+     focus and the one sentence explaining the silence can never be reached
+     (§221, §163). Otherwise it is this person's own switch. */
+  var BELL_ON = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" ' +
+    'stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">' +
+    '<path d="M18 8a6 6 0 1 0-12 0c0 7-3 9-3 9h18s-3-2-3-9"/>' +
+    '<path d="M13.7 21a2 2 0 0 1-3.4 0"/></svg>';
+  var BELL_OFF = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" ' +
+    'stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">' +
+    '<path d="M18 8a6 6 0 1 0-12 0c0 7-3 9-3 9h18s-3-2-3-9"/>' +
+    '<path d="M13.7 21a2 2 0 0 1-3.4 0"/><path d="m3 3 18 18"/></svg>';
+  function drawBell(){
+    var b = el("chatbell"); if (!b) return;
+    var st = popState();
+    if (!cfg.popup || st === "unsupported") { b.hidden = true; return; }
+    b.hidden = false;
+    var mine = popMine();
+    var refused = (st === "denied");
+    var on = mine && !refused;
+    b.innerHTML = on ? BELL_ON : BELL_OFF;
+    b.classList.toggle("belloff", !on);
+    b.setAttribute("aria-pressed", on ? "true" : "false");
+    if (refused) {
+      b.setAttribute("aria-disabled", "true");
+      b.title = "Your browser is blocking these boxes on this device. " +
+                "Turn them back on in its site settings.";
+      b.setAttribute("aria-label", "Notifications are blocked by this browser");
+    } else {
+      b.removeAttribute("aria-disabled");
+      b.title = on ? "A box appears on this device when a reply lands. " +
+                     "Press to stop them here."
+                   : "No box on this device when a reply lands. " +
+                     "Press to turn them on here.";
+      b.setAttribute("aria-label", on ? "Stop notifications on this device"
+                                      : "Notify me on this device");
+    }
+  }
+
+  /* NOT WHILE THEY ARE LOOKING AT THE QUEUE. The Platform Inbox redraws every
+     ten seconds and shows the name and the line already, so a box repeating it
+     is noise — the same argument as `!open` above, one page out. */
+  function popOffice(j){
+    if (!j || !j.office) { lastWaiting = null; return; }
+    var n = j.waiting | 0;
+    var was = lastWaiting;
+    lastWaiting = n;
+    if (was === null || n <= was) return;
+    if (el("chinbox")) return;
+    if (!popCan() || !cfg.popup || !popMine()) return;
+    if (Notification.permission !== "granted") return;
+    var who = j.waitingWho || "Somebody";
+    var line = String(j.waitingBody || "").replace(/\s+/g, " ").trim();
+    if (line.length > 120) line = line.slice(0, 119) + "\u2026";
+    try {
+      /* ITS OWN TAG, so a question waiting and a reply on the office's own
+         conversation never replace one another. */
+      var b = new Notification(who, { body: line, tag: "smp-chat-office",
+                                      icon: "/icons/icon-192.png" });
+      b.onclick = function(){
+        try { window.focus(); } catch (e) {}
+        try { b.close(); } catch (e) {}
+        /* STRAIGHT TO THE QUEUE, through the platform's own control rather
+           than a second copy of the navigation (§107). */
+        var go = document.querySelector('[data-md="setup"]');
+        if (go) go.click();
+        setTimeout(function(){
+          var r = document.querySelector('[data-setupgo="chat"]');
+          if (r) r.click();
+        }, 0);
+      };
+    } catch (e) { /* never let a notification break the poll it rides on */ }
+  }
+
   function announce(){
     var b = el("chatbtn");
     if (!b) return;
@@ -39152,6 +39496,12 @@ var CHAT = (function(){
       var body = el("chatbody"); if (body) body.scrollTop = body.scrollHeight;
       var t = el("chatsay"); if (t) t.focus();
       if (state.unread > 0) post({ action:"seen" }, function(){ state.unread = 0; drawPanel(); });
+      /* THE PERMISSION IS ASKED ON A GESTURE AND NOWHERE ELSE — opening the
+         panel is the moment somebody has shown they care about this
+         conversation, and it is the only moment a browser will allow the
+         question at all. It asks once; after that the answer is the
+         browser's and ours to respect. */
+      popAsk();
       poll();
     }
     beat();
@@ -39236,6 +39586,18 @@ var CHAT = (function(){
 
     el("chatbtn").addEventListener("click", function(){ setOpen(!open); });
     el("chatclose").addEventListener("click", function(){ setOpen(false); });
+    el("chatbell").addEventListener("click", function(){
+      /* A REFUSED BROWSER IS NOT OURS TO ARGUE WITH — the hover says where to
+         undo it and the press does nothing, which is why it is `aria-disabled`
+         and not `disabled`: the sentence still has to be reachable. */
+      if (this.getAttribute("aria-disabled") === "true") return;
+      var on = !popMine();
+      popMineSet(on);
+      /* Turning them ON is the gesture the browser wants, so this is the
+         second and last place the question is asked. */
+      if (on) popAsk();
+      drawBell();
+    });
     el("chatsend").addEventListener("click", send);
     /* DELEGATED, because the message it sits on is redrawn by every poll — a
        handler bound to the button itself would be destroyed four seconds after
@@ -39503,7 +39865,34 @@ var CHAT = (function(){
             (BOXTEST.steps ? testHtml(BOXTEST.steps) : "") +
           '</div>') +
 
-        /* ── 5 · TOLD WHEN THE ASSISTANT GIVES UP. Only while the assistant is
+        /* ── 5 · TOLD WHILE THEY ARE HERE (§225). Islam, correcting my first
+           framing of it: *"the notification is when the person is opening the
+           tab already and email when he is not opening the platform — what is
+           the correlation here?"* None, and that is the point: they are
+           complementary, not alternatives, so they sit together and each says
+           which moment it covers.
+
+           THE COMPANY SWITCH IS ONE OF THREE, and the row says so rather than
+           implying this alone decides it: each person is asked by their own
+           browser, and each has a bell in the conversation itself. */
+        /* AND IT SITS ABOVE THE TWO EMAIL ROWS, NEVER BETWEEN THEM. §127's
+           whole finding about this panel was that the two email settings had
+           drifted five rows apart; the first build of this row put itself
+           straight between them, and the check said so. All three answer "how
+           is somebody told" — this one while they are here, those two when
+           they are not — so it opens that group rather than splitting it. */
+        setRow("popup", "Notifications",
+          "A box from the computer the moment a reply lands \u2014 and, for the " +
+          "office, the moment somebody writes in \u2014 while the platform is open " +
+          "in a tab; the away email is for when it is not. It shows who wrote and " +
+          "the first line. This switch turns it on for the company; " +
+          "each person is then asked once by their own browser, and each has a " +
+          "bell in their own conversation to stop it on that device. On an iPhone " +
+          "or iPad it works only where the platform has been added to the home " +
+          "screen.",
+          segHtml("popup", "Off", "On", c.popup, true)) +
+
+        /* ── 6 · TOLD WHEN THE ASSISTANT GIVES UP. Only while the assistant is
            on, as before: a handover that cannot happen has nobody to tell. */
         (c.assistant
           ? setRow("notify", "Handover email",
@@ -39522,8 +39911,8 @@ var CHAT = (function(){
               (c.notify ? '<div class="chset-ctl chset-who">' + repPicker(c.rep) + '</div>' : ''))
           : "") +
 
-        /* ── 6 · TOLD WHEN A REPLY LANDS AND THEY ARE NOT LOOKING. Beside its
-           sibling at last; the two were five rows apart. */
+        /* ── 7 · AND TOLD WHEN THEY ARE NOT LOOKING. Beside its sibling at
+           last; the two were five rows apart. */
         setRow("mail", "Away email",
           /* THE SENTENCE READS THE SETTING (§169). It said "three minutes" as
              prose while the server read a constant, so the two were one edit
@@ -39545,7 +39934,7 @@ var CHAT = (function(){
               '</div>'
             : "")) +
 
-        /* ── 7 · THE ONLY ROW THAT CHANGES NOTHING ANYBODY SEES, so it is last.
+        /* ── 8 · THE ONLY ROW THAT CHANGES NOTHING ANYBODY SEES, so it is last.
            The cost is in the tooltip because it is the whole reason this is a
            setting rather than a number in the source (§98). */
         setRow("fast", "Reply checks",
@@ -40117,6 +40506,10 @@ var CHAT = (function(){
         /* The two things on the page that this changes, written into the nodes
            they are about — never paint(), which would rebuild the queue and
            the half-typed reply behind an open menu (§30.1). */
+        /* AND THE BELL IN THEIR OWN CORNER (§225), for the same reason the
+           `on` branch below echoes locally: the office flipping this would
+           otherwise press On and see no bell until their next poll. */
+        if (seg.dataset.chset === "popup") { cfg.popup = chatCfg().popup; drawBell(); }
         if (seg.dataset.chset === "on") {
           var nowOn = chatCfg().on;
           var banner = el("chsetoff");
@@ -41901,33 +42294,42 @@ var SYNC = (function () {
      Drawn only from land(), only when hydration failed over http. It retries
      on its own: any answer that means the server is back (ok, or a 401/403
      that will route to the gate) reloads; a 500 keeps waiting rather than
-     reload-looping a broken deployment. */
+     reload-looping a broken deployment.
+
+     The probe's handle lives at module scope because §230's late answer
+     takes the wall down from outside this function — and that takedown must
+     stop the probe too, or a reload fires ten seconds after the real page
+     is already up. */
+  var wallProbe = null;
+  function noServerDown() {
+    var d = document.getElementById("noserver");
+    if (d) d.remove();
+    if (wallProbe) { clearInterval(wallProbe); wallProbe = null; }
+  }
   function noServerWall() {
     if (document.getElementById("noserver")) return;
     var d = document.createElement("div");
     d.id = "noserver";
     d.setAttribute("role", "alertdialog");
-    d.setAttribute("aria-label", "The server did not answer");
+    d.setAttribute("aria-label", "Just a moment");
+    /* Plain words at Islam's direction (§230.2): four short lines, no
+       "server"/"data"/"example" — and §201's "Look at the example anyway"
+       way past is REMOVED, cost stated: while the server is truly down
+       the notice stands, retrying on its own. */
     d.innerHTML =
       '<div class="nosrv-card">' +
-        '<h2>The server did not answer</h2>' +
-        '<p>What is behind this notice is the built-in example \u2014 not ' +
-          'your organisation\u2019s data \u2014 and nothing entered here is ' +
-          'saved. Your data is safe on the server.</p>' +
-        '<p class="nosrv-try" data-nosrv-note>Trying again automatically\u2026</p>' +
+        '<h2>Just a moment\u2026</h2>' +
+        '<p>Your page is taking a little longer to open. ' +
+          'Your work is safe.</p>' +
+        '<p class="nosrv-try" data-nosrv-note>It will open by itself ' +
+          '\u2014 no need to do anything.</p>' +
         '<button type="button" class="nosrv-btn" data-nosrv-retry>Try again</button>' +
-        '<button type="button" class="nosrv-link" data-nosrv-view>' +
-          'Look at the example anyway</button>' +
       '</div>';
     document.body.appendChild(d);
     d.querySelector("[data-nosrv-retry]").addEventListener("click", function () {
       location.reload();
     });
-    d.querySelector("[data-nosrv-view]").addEventListener("click", function () {
-      clearInterval(probe);
-      d.remove();
-    });
-    var probe = setInterval(function () {
+    wallProbe = setInterval(function () {
       fetch("/api/state", { cache: "no-store" }).then(function (r) {
         if (r.ok || r.status === 401 || r.status === 403) location.reload();
       }).catch(function () {});
@@ -42970,10 +43372,24 @@ var SYNC = (function () {
          paint this page: not hydration, not a refusal, not a network that
          never answers. `land()` is the one door and it is idempotent, so the
          backstop and the answer racing each other is harmless. */
-      var landed = false, t0 = bootNow();
+      var landed = false, landedLive = false, t0 = bootNow();
       function land(then) {
-        if (landed) return;
+        /* ── A LATE ANSWER STILL LANDS (§230) ─────────────────────────
+           A cold function's first answer often arrives AFTER the 8s
+           give-up and used to be dropped here, leaving the person behind
+           the wall with their real data already hydrated. A second landing
+           is allowed for exactly one case — the first was the backstop's,
+           this one carries the live tenant: paint in place, wall down, no
+           reload. A late FAILURE still returns, wall and probe standing. */
+        if (landed) {
+          if (!live || landedLive) return;
+          landedLive = true;
+          (then || paint)();
+          noServerDown();
+          return;
+        }
         landed = true;
+        landedLive = live;
         clearTimeout(backstop);
         /* A FAST ANSWER WOULD FLASH THE SKELETON ON AND OFF. Held to a floor
            so it reads as one step rather than a stutter — below the threshold
@@ -42996,9 +43412,9 @@ var SYNC = (function () {
              the wall makes the refusal VISIBLE instead of silent), Try again
              reloads, and it retries by itself so a server that wakes up
              brings the real page back with nobody pressing anything.
-             Looking at the example anyway stays possible — that was the old
-             behaviour's one virtue — but as a stated choice, never a
-             default. */
+             §230.2 removed the "look at the example anyway" way past, at
+             Islam's direction — the wall now stands until the server
+             answers, and the words on it are the user's (see noServerWall). */
           if (enabled && !live) noServerWall();
         }, wait);
       }
@@ -45971,9 +46387,25 @@ var SYNC = (function () {
     document.querySelectorAll("[data-present]").forEach(function(b){
       b.addEventListener("click", function(){
         closeDlMenu(this);
+        /* §224: THE FORMAT DECIDES THE DECK, NOT THE PREFIX. Islam: *"the
+           consumer finance presentation is not showing anything."* This
+           branched on `fn:` alone and sent EVERY function to the capability
+           deck — so a function that plans in PILLARS, which has no
+           capabilities at all, opened a deck reading "Capability review · 0
+           capabilities" and nothing else. Reproduced on the demo's own
+           pillars function before a line was changed.
+
+           §63.4 fixed the other half of this — the button used to carry no
+           target and a pillars function could not be presented at all — and
+           routed every `fn:` to `openDeckFn`, which is right for a capability
+           function and wrong for the other format. §59's rule in the one
+           place still asking by prefix: a pillars function's plan is
+           unit-shaped, so it takes the unit deck through `unitLike()`, which
+           resolves both kinds of key in one place. */
         var t = this.dataset.present;
-        if (t.indexOf("fn:") === 0) openDeckFn(t.slice(3));
-        else openDeck(UNITS[t]);
+        var fk = t.indexOf("fn:") === 0 ? t.slice(3) : null;
+        if (fk && !fnPlansInPillars(FUNCTIONS[fk])) openDeckFn(fk);
+        else openDeck(unitLike(t));
       });
     });
     /* Picture slides — beside Present, because it is the deck they go into
@@ -46776,6 +47208,20 @@ var SYNC = (function () {
         };
         el.addEventListener("input", fit);
         fit();
+        /* §229: ENTER COMMITS A ONE-LINE PROSE BOX. §189's own text promised
+           it ("Enter blurs, which is what commits the value") and no code
+           ever carried it out, so a stray newline could ride a title into the
+           workbook and the deck. Only `.grow` — a rows-2 area (a definition,
+           a note) is a paragraph and keeps its key. Blur, never a synthesised
+           change (§219): it is what the browser does when focus moves, so an
+           already-committed box fires nothing. Wired here, in the one branch
+           every bound textarea passes through, so a box added tomorrow is
+           covered without a list to forget (§104.7). */
+        if (el.classList.contains("grow")) {
+          el.addEventListener("keydown", function(e){
+            if (e.key === "Enter") { e.preventDefault(); el.blur(); }
+          });
+        }
       }
     });
     document.querySelectorAll("[data-page]").forEach(function(b){

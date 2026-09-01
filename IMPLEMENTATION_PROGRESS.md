@@ -6,9 +6,8 @@ version (rules A2 / A11, changed 2026-08-20) — those go only when asked for.
 
 **Where it runs:** Vercel, production tracks `main`. Static files plus two
 serverless functions (`/api/state`, `/api/auth`) against Neon Postgres.
-**Latest version:** v3.65 on `main` (§178, the Viewing-as line). §179 is on
-`claude/four-fixes-welcome-dates-types`, built and checked, **not merged** —
-`main` is Islam's call every time.
+**Latest version:** §230/§230.2 on `main` (the hard-refresh notice: a late
+answer lands in place, and the notice speaks the user's language).
 
 *(This line read v3.58 while the section below it ran to v3.65: a documentation
 drift, flagged before it was corrected rather than quietly realigned.)*
@@ -67,6 +66,20 @@ Nothing proceeds past this line without an answer.
   is a true signal — do not silence it.
 
 ## Built and verified
+
+### §230 / §230.2 — the hard-refresh notice (merged to `main` 2026-09-01)
+
+- **§230:** when the server's answer arrives after the page's 8-second
+  give-up (cold start after a deployment), the real page now appears by
+  itself and the notice comes down — no reload, nothing pressed. Measured
+  first: the server is healthy; only the cold first answer exceeds 8s.
+- **§230.2:** the notice's words are the user's — *Just a moment… / Your
+  page is taking a little longer to open. Your work is safe. / It will open
+  by itself — no need to do anything. / Try again* — and the "look at the
+  example" link is removed at Islam's direction (cost stated: while the
+  server is truly down there is no way past).
+- Proof: `checks/boot-skeleton.py` §6 new, §4 rewritten — 2 red on the
+  build before; ALL GREEN after; full `qa.py` clean.
 
 ### v3.80 — the pending count says where, and walks you there (§192)
 

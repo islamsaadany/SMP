@@ -675,7 +675,6 @@ function dueFits(v){
    staying behind for a value nothing writes. `owner` stays: a PROJECT and a
    MILESTONE both have one. */
 var CAPP_COLS = ["id","type","parent_id","name","description","owner","stakeholders",
-                 "collaborators",
                  "direction","value","unit","kind","measure_at","start","end",
                  "finish","covers","weight","compile","timeline","notes"];
 var CAPPROG_COLS = ["id","type","parent_id","parent_name","name","kind","target",
@@ -722,8 +721,7 @@ function capPlanTemplate(c){
     });
     (p.milestones || []).forEach(function(m){
       rows.push(csvRow(CAPP_COLS, { id:m.id, type:"MILESTONE", parent_id:p.id, name:m.name,
-        covers:m.covers, owner:m.owner,
-        collaborators:(m.collaborators || []).join("|"), finish:m.finish }));
+        covers:m.covers, owner:m.owner, finish:m.finish }));
     });
   });
   return rows.join("\n");
@@ -1004,9 +1002,6 @@ function diffCapPlan(c, rows){
       cmp("name", hit.obj.name, r.name);
       cmp("what it covers", hit.obj.covers, r.covers);
       cmp("owner", hit.obj.owner, r.owner);
-      /* §227: compared pipe-joined, the shape both readers normalise to —
-         the same contract the project's stakeholders keep above. */
-      cmp("collaborators", (hit.obj.collaborators || []).join("|"), r.collaborators);
       cmp("finish", hit.obj.finish, r.finish);
     }
     out.push({ id:r.id, type:hit.kind, name:hit.obj.name || c.name,
@@ -1064,14 +1059,8 @@ function createFromCapPlan(c, d){
       made++;
     } else if (x.type === "MILESTONE") {
       var p3 = projectById(x.parent_id); if (!p3) return;
-      var m3 = { id:x.id, name:x.name, covers:x.covers || "",
-        owner:x.owner || "", finish:x.finish || "", status:null };
-      /* §227: set only when somebody is named — an absent key and an empty
-         list must stay byte-identical (§50.6), so nothing writes []. */
-      var col = (x.collaborators || "").split(/[,|]/)
-        .map(function(s){ return s.trim(); }).filter(Boolean);
-      if (col.length) m3.collaborators = col;
-      p3.milestones.push(m3);
+      p3.milestones.push({ id:x.id, name:x.name, covers:x.covers || "",
+        owner:x.owner || "", finish:x.finish || "", status:null });
       made++;
     }
   });
@@ -1093,9 +1082,6 @@ function applyCapPlan(c, d){
       if (ch.f === "brief")          o.brief = ch.now;
       if (ch.f === "owner")          o.owner = ch.now;
       if (ch.f === "stakeholders")   o.stakeholders = ch.now ? ch.now.split("|").map(function(s){ return s.trim(); }).filter(Boolean) : [];
-      /* §227: cmp never fires on an emptied value, so `ch.now` is always a
-         real list here — a file adds and amends, it never removes (§54). */
-      if (ch.f === "collaborators")  o.collaborators = ch.now.split("|").map(function(s){ return s.trim(); }).filter(Boolean);
       if (ch.f === "timeline")       o.timeline = timelineKey(ch.now) || o.timeline;
       if (ch.f === "start")          o.start = ch.now;
       if (ch.f === "end")            o.end = ch.now;

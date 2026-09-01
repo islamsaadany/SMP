@@ -469,7 +469,7 @@ var CHAT = (function(){
           var wasPop = cfg.popup, wasKey = cfg.vapid;
           cfg = j.chat;
           if (cfg.beat !== wasBeat) beat();
-          /* §226: THE COMPANY'S SWITCH REACHES EVERY BROWSER THROUGH THIS
+          /* §231: THE COMPANY'S SWITCH REACHES EVERY BROWSER THROUGH THIS
              POLL, so this is where a device that must now subscribe — or must
              stop — finds out. Only when something actually moved: `pushSync`
              posts, and running it on every poll would be a request per beat
@@ -593,7 +593,7 @@ var CHAT = (function(){
     if (Notification.permission === "default") {
       try {
         var q = Notification.requestPermission();
-        /* AND SUBSCRIBE THE MOMENT THEY SAY YES (§226), not on the next
+        /* AND SUBSCRIBE THE MOMENT THEY SAY YES (§231), not on the next
            paint: `requestPermission` resolves with the answer, and the
            gesture that opened the panel is what licensed the question. */
         if (q && q.then) q.then(function(){ pushSync(); drawBell(); });
@@ -604,7 +604,7 @@ var CHAT = (function(){
   }
 
   /* What this browser will actually do, in one sentence — never what the
-     switch says, which is the difference §226.2 exists to close. */
+     switch says, which is the difference §231.2 exists to close. */
   function popStatusLine(companyOn){
     if (!companyOn) return "Nobody is notified. The away email still goes out.";
     var st = popState();
@@ -624,7 +624,7 @@ var CHAT = (function(){
                   : "Allowed on this device.";
   }
 
-  /* ── A BOX THAT ARRIVES WITH NO TAB OPEN (§226) ───────────────────────
+  /* ── A BOX THAT ARRIVES WITH NO TAB OPEN (§231) ───────────────────────
      §225 drew the box from this file, and measured across 45 seconds with the
      tab in the background it drew nothing at all: the poll stops dead while
      `document.hidden` (§98.1), so the only notification the product could
@@ -695,12 +695,12 @@ var CHAT = (function(){
   function popShow(){
     if (!popCan() || !cfg.popup || !popMine()) return;
     if (Notification.permission !== "granted") return;
-    /* NOT WHERE THE SERVICE WORKER IS ALREADY DOING IT (§226). One box, one
+    /* NOT WHERE THE SERVICE WORKER IS ALREADY DOING IT (§231). One box, one
        source: on a subscribed device the server sends and the worker draws,
        and this drawing one too would give somebody two boxes for one message.
        This path is what still serves a browser where push could not be set
        up — and it is still bounded by the tab being visible, which is the
-       whole reason §226 exists. */
+       whole reason §231 exists. */
     if (PUSHED) return;
     var m = state.messages[state.messages.length - 1];
     if (!m) return;
@@ -745,10 +745,10 @@ var CHAT = (function(){
     if (!cfg.popup || st === "unsupported") { b.hidden = true; return; }
     b.hidden = false;
     var mine = popMine();
-    /* FOUR STATES, AND THE FIRST BUILD DREW TWO (§226.2). It read `mine`
+    /* FOUR STATES, AND THE FIRST BUILD DREW TWO (§231.2). It read `mine`
        alone, so a browser that had not yet been asked showed the bell ON with
        a hover promising a box that could never appear — §124's fault exactly,
-       presence reported as proof, and it makes the whole of §226 look broken
+       presence reported as proof, and it makes the whole of §231 look broken
        on a device that never answered the permission question. The bell says
        what will actually HAPPEN on this device, which is the only thing
        anybody is reading it for. */
@@ -799,7 +799,7 @@ var CHAT = (function(){
     if (el("chinbox")) return;
     if (!popCan() || !cfg.popup || !popMine()) return;
     if (Notification.permission !== "granted") return;
-    if (PUSHED) return;                 /* the worker draws it (§226) */
+    if (PUSHED) return;                 /* the worker draws it (§231) */
     var who = j.waitingWho || "Somebody";
     var line = String(j.waitingBody || "").replace(/\s+/g, " ").trim();
     if (line.length > 120) line = line.slice(0, 119) + "\u2026";
@@ -944,13 +944,13 @@ var CHAT = (function(){
          and not `disabled`: the sentence still has to be reachable. */
       if (this.getAttribute("aria-disabled") === "true") return;
       /* NOT ASKED YET: the press IS the gesture a browser requires, so it
-         asks rather than switching off something that was never on (§226.2).
+         asks rather than switching off something that was never on (§231.2).
          Their switch is already on — this bell reads "ask" precisely because
          `popMine()` is true — so there is nothing to store. */
       if (popMine() && popState() === "default") { popAsk(); drawBell(); return; }
       var on = !popMine();
       popMineSet(on);
-      /* THE SERVER IS TOLD IN THE SAME BREATH (§226). The subscription IS
+      /* THE SERVER IS TOLD IN THE SAME BREATH (§231). The subscription IS
          this switch, so a bell pressed off that left a row behind would go on
          sending to a device whose owner has just said no. */
       pushSync();

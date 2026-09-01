@@ -1,4 +1,4 @@
-/* ══ A BOX THAT ARRIVES WITH NO TAB OPEN — THE SERVER HALF (§226) ═════════
+/* ══ A BOX THAT ARRIVES WITH NO TAB OPEN — THE SERVER HALF (§231) ═════════
 
    Needs a real Postgres:
      DATABASE_URL=… node scripts/test-push.js

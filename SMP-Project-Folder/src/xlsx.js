@@ -967,13 +967,17 @@ function capPlanWorkbook(c){
         return acc;
       }, []) },
 
-    { name:"Milestones", widths:[34, 38, 52, 16, 14],
-      head:["Project", "Milestone", "Description", "Owner", "Due date"],
+    /* §227: Collaborators beside the Owner, the tactics sheet's own column —
+       comma-separated names, and the export carries them or a download-and-
+       re-upload would silently drop every one (§22: an upload AUTHORS). */
+    { name:"Milestones", widths:[34, 38, 52, 16, 26, 14],
+      head:["Project", "Milestone", "Description", "Owner", "Collaborators", "Due date"],
       validations:[{ range:"A2:A400", from:PROJECT_RANGE,
                      error:"Choose a project from the Projects sheet." }],
       rows:(c.projects || []).reduce(function(acc, p){
         (p.milestones || []).forEach(function(m){
-          acc.push([p.name, m.name, m.covers || "", m.owner || "", m.finish || ""]);
+          acc.push([p.name, m.name, m.covers || "", m.owner || "",
+                    (m.collaborators || []).join(", "), m.finish || ""]);
         });
         return acc;
       }, []) }
@@ -1086,6 +1090,11 @@ function capPlanFromWorkbook(c, sheets){
        spelling -- `covers` is an identifier, "Description" is a label. */
     row.covers = r["Description"] != null ? r["Description"] : r["What it covers"];
     row.owner = r["Owner"];
+    /* §227: normalised to the pipe-joined shape the differ compares and
+       applyCapPlan splits — the same road the Projects sheet's Stakeholders
+       already travel. A file written before the column reads "" (§58). */
+    row.collaborators = (r["Collaborators"] || "").split(/[,|]/)
+      .map(function(x){ return x.trim(); }).filter(Boolean).join("|");
     /* WRITE THE NEW LABEL, READ EITHER (§58, §65). The column is called Due
        date from §99; somebody is holding a workbook downloaded before that,
        and a header is a contract. The STORED field keeps its own spelling —

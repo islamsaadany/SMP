@@ -1,4 +1,4 @@
--- ── A BOX THAT ARRIVES WITH NO TAB OPEN (§226) ─────────────────────────
+-- ── A BOX THAT ARRIVES WITH NO TAB OPEN (§231) ─────────────────────────
 -- Islam, having turned §225's notifications on and received nothing: "I
 -- didn't get any notifications despite enabling the notifications." His bell
 -- was on, his browser had allowed them, the company switch was on.

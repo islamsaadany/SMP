@@ -55,7 +55,7 @@ PERSON = {"key": "smo", "name": "Mohamed Essam", "role": "super"}
 VAPID = base64.urlsafe_b64encode(b"\x04" + bytes(range(64))).decode().rstrip("=")
 
 # What the stub /api/chat answers with, and whether it answers at all.
-# What the browser has told the server about this device (§226).
+# What the browser has told the server about this device (§231).
 PUSH = {"subs": [], "off": []}
 
 CHAT = {"status": 200, "messages": [], "unread": 0, "thread": None, "polls": 0, "said": [],
@@ -148,7 +148,7 @@ class H(http.server.BaseHTTPRequestHandler):
             self._send(200, json.dumps({"ok": True, "steps": CHAT.get("test") or []}).encode(),
                        "application/json")
             return
-        # §226: THE STUB MODELS THE SERVER. A device says yes and the row is
+        # §231: THE STUB MODELS THE SERVER. A device says yes and the row is
         # kept here, so the check can read back what the browser actually
         # posted rather than trusting that it meant to.
         if body.get("action") == "pushOn":
@@ -802,7 +802,7 @@ with sync_playwright() as p:
                                    "n=>n.map(x=>x.innerText)")
     # ASSERT THE PROBLEM, NOT THE NUMBER (§94.8). This read `len(left) <= 1`,
     # which was a literal standing in for "the prose is gone" and true only
-    # while exactly one row had a live status. §226 gave Notifications one too
+    # while exactly one row had a live status. §231 gave Notifications one too
     # — a fact about what THIS browser will do — and the count went red on a
     # deliberate addition. What §127 actually settled is that an EXPLANATION
     # goes behind a mark and a STATUS stays on the page, and the difference
@@ -1216,7 +1216,7 @@ with sync_playwright() as p:
     CHAT["messages"] = []; CHAT["unread"] = 0
     poll_once(25000)
 
-    # ── 15 · A BOX THAT ARRIVES WITH NO TAB OPEN (§226) ──────────────────
+    # ── 15 · A BOX THAT ARRIVES WITH NO TAB OPEN (§231) ──────────────────
     # §225 drew the box from the page, and measured across 45 seconds with the
     # tab in the background it drew NOTHING — the poll stops dead while
     # `document.hidden` (§98.1). The server sends now and the service worker
@@ -1327,7 +1327,7 @@ with sync_playwright() as p:
        {"before": was, "after": len(PUSH["subs"])})
     pg.click("#chatclose")
 
-    # ── THE BELL SAYS WHAT WILL ACTUALLY HAPPEN (§226.2) ─────────────────
+    # ── THE BELL SAYS WHAT WILL ACTUALLY HAPPEN (§231.2) ─────────────────
     # The first build read the person's own switch alone, so a browser that had
     # never been asked showed the bell ON with a hover promising a box that
     # could never appear (§124: presence reported as proof) — and the only

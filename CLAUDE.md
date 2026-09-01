@@ -384,7 +384,7 @@ console errors (in this cloud environment, run it via a wrapper that points Play
   remove × onto a second line — `inline-block` restores it, and it was found
   by `checks/plan-fields.py` GOING RED, not by reading the cascade, which is
   the argument for that check existing.
-- **A BOX THAT ARRIVES WITH NO TAB OPEN (§226):** Islam, having turned §225 on
+- **A BOX THAT ARRIVES WITH NO TAB OPEN (§231):** Islam, having turned §225 on
   — *"I didn't get any notifications despite enabling the notifications"* — and
   then, correcting two wrong diagnoses, *"stop assuming wrong things, the bell
   is allowed and in the chat box is on."* **HE WAS RIGHT AND I WAS READING
@@ -412,7 +412,7 @@ console errors (in this cloud environment, run it via a wrapper that points Play
   server fetches it (§71). **ONE BOX, ONE SOURCE** (§53.5): on a subscribed
   device the page stands its own box down, or one message draws two. **A 410
   DROPS THAT DEVICE AND A 500 DROPS NOTHING**, and a notification never costs
-  the message it is about. **§226.2 — THE BELL HAD TO SAY WHAT WOULD HAPPEN**:
+  the message it is about. **§231.2 — THE BELL HAD TO SAY WHAT WOULD HAPPEN**:
   §225 read the person's switch alone, so a browser never asked showed ON with
   a hover promising a box that could not appear (§124), and the only control
   switched OFF the thing that was not on (§61) — four states now, and the press
@@ -423,6 +423,58 @@ console errors (in this cloud environment, run it via a wrapper that points Play
   **NOT CLAIMED**: "browser closed" is true on a phone and partly true on a
   laptop (the service can only hand it over while the browser runs somewhere),
   and iOS still needs the platform on the home screen.
+- **THE NOTICE SPEAKS THE USER'S LANGUAGE (§230.2):** Islam, on §201's wall —
+  *"too technical for the users"*, then *"make a very simple user message"*,
+  then *"no need for examples to look at."* Four short lines (*Just a moment…*
+  · *Your page is taking a little longer to open. Your work is safe.* · *It
+  will open by itself — no need to do anything.* · **Try again**), no "server",
+  no "data", no "example" — asserted as a regex over the whole card. **The
+  "Look at the example anyway" way past is REMOVED at his direction, cost
+  stated**: while the server is truly down there is no way past — element,
+  handler and `.nosrv-link` deleted, not hidden (§24), and the check asserts
+  the absence.
+- **A LATE ANSWER STILL LANDS (§230):** Islam, hard-refreshing after a
+  deployment — §201's wall, every time, clearing itself later. **The server was
+  healthy and the landing was wrong**: a cold function's first answer routinely
+  arrives after the 8s `BOOT_GIVEUP`, and the one-shot `land()` swallowed it —
+  real data hydrated in memory behind a wall promising nothing is saved. A
+  second landing is allowed for exactly one case (first landing the backstop's,
+  this one carrying the live tenant): it paints in place and takes the wall
+  down — no reload; a late FAILURE still leaves §201 standing, probe and all.
+  **Deliberately not a longer give-up.** Measured first: production 0.3–0.6s
+  warm, a signed-in GET 11–54ms against a real Postgres — the 8s is eaten by
+  the environment's cold start. `checks/boot-skeleton.py` §6: 2 red on the
+  build before.
+- **ENTER COMMITS A ONE-LINE PROSE BOX (§229):** found during §231's audit —
+  §189's own text promised *"Enter blurs, which is what commits"* and no code
+  ever carried it out, so Enter inserted a newline into every growing title
+  box (§104.8's family: a recorded intention nothing compares with the code).
+  One listener in the shell's `data-fld` textarea branch, gated on `.grow`
+  (§104.7 — no list to forget); a `rows="2"` area keeps Enter as a paragraph
+  key; **blur, never a synthesised change** (§219). Nothing stored is
+  scrubbed. `checks/enter-commits.py`: 4 red on the pre-§229 build.
+- **A FUNCTION'S OBJECTIVES ARE WRITTEN AT THE PAGE'S WIDTH (§231):** Islam —
+  *"the keyobjectives table is tight I can't see the direction and I can't find
+  the unit and the ibjectives cell is not wrapping"*, and *"led by is not open
+  to edit"*. Three of the four are ONE omission: the function Overview's
+  `capKoEdit` (both formats, §213) edited inside the half-width fgrid card —
+  Objective input **101px**, Dir. select **34px** at 1500px — and §96.6's band,
+  §199's Unit column and §189's wrapping prose had each reached the unit's
+  table and never this one. **In edit/fill mode the table takes a `.koband`
+  under the cards, on BOTH formats** (§53.5 — one page), reading mode keeps the
+  card; the Unit column is §199's own trio plus `unitInherit` and
+  `fillUnitCell`, nothing stored, **no server change** (`gapFieldPass` already
+  runs `unitAddedOnly` per row kind); the name is `textOr` in `capKoEdit`
+  ONLY — **the unit side is untouched at Islam's instruction**, asserted as a
+  measurement. **Led by opens for the office through the register's own door**:
+  Setup's `assignPicker` writing `FUNCTIONS[k].head` via `grantPersonRole`
+  (§33, one fact one door), office-only because a head change classifies as
+  Setup — both ends asserted, and the explanatory sentence is a hover (1b-ii),
+  not the mockup's printed line. **The check guessed and the product was
+  right**: it asserted `"1.6 B EGP"` where §199.4's convention writes
+  `"1.6B EGP"` — the expectation moved to the platform's rule. 5 red on the
+  pre-§231 build; `fn-pillars`, `foundation-objectives`, `objective-unit`,
+  `gap-fill` and the full sweep green after.
 - **A BOX FROM THE COMPUTER WHEN A MESSAGE LANDS (§225):** Islam — a browser
   notification for platform messages, *"for the SMO when someone replies, and
   for the users when the SMO replies to them"*, wording **B** (who wrote, and
@@ -479,6 +531,29 @@ console errors (in this cloud environment, run it via a wrapper that points Play
   name — the real-database test caught it (§100.3). **NOT fixed and said so**: a
   genuine refusal is still a refusal, and if they continue while naming a
   function nobody opened, this diagnosis is wrong.
+- **A MILESTONE'S COLLABORATORS, THE TACTIC'S RULE MOVED OVER (§227):** Islam —
+  *"add collaborators beside the owner column similar to the collaborators in
+  the tactics in the units. align with me."* Aligned first; both decisions his:
+  **being named is a reporting right** (the word means on a milestone what it
+  means on a tactic) and **the column shows everywhere the tactics show
+  theirs** — editable on the Plan pane, read-only on Performance and the deck;
+  the Reporting pane shows no owner and stays untouched. Every accumulated
+  tactic rule moves over rather than being re-decided: ticked from the
+  register (§130.1), fillable while EMPTY and never counted (§187/§205 — the
+  field joins `GAP_OPTIONAL.milestone` so screen and server answer together),
+  emptied key DELETED (§50.6), em-dash for nobody (§15.1). **ONE RULE, NOT
+  TWO**: `namedOn()` always read owner + collaborators; only §147.8's
+  derivation stripped the milestone to `{owner}` — the row travels whole now,
+  so a collaborator derives Contributor, reporting only the milestone that
+  names them once the Contributor row is opened. **The workbook carries the
+  column or the round trip drops the names** (§22: an upload authors) — sheet,
+  reader (either comma or pipe, old files fine, §58), CSV pipeline; proved a
+  fixed point. **No migration** — `milestones.extra`, §177's own road. **The
+  header is "Collabs."**: the full word cost a 515px pane 11px at 830, found
+  by `table-fit.py` going red, and the short form is what the tactics wear on
+  every surface (§53.5). `project-tables.py`'s dead-cell probe learned that a
+  `.collabs` em-dash is an ANSWER — exempting exactly one column, asserted, or
+  a build classing every cell would blind it (§113.8).
 - **COUNTED AND FILLABLE ARE TWO QUESTIONS, AND THE DOOR ASKS THE SECOND
   (§223):** Islam — *"Hala from CX can't fill the missing definition"*, with
   the Definition an em-dash and no control on the page. Measured:
@@ -3674,7 +3749,7 @@ python3 checks/email-link.py    # the link that LEAVES, read out of the html pos
                                 # /api/mail — never the value in the box, which looked
                                 # right the whole time; both send buttons, both ends of
                                 # the refusal, and both emails' destination (§176)
-node scripts/test-push.js       # a box with no tab open (§226): a throwaway HTTPS
+node scripts/test-push.js       # a box with no tab open (§231): a throwaway HTTPS
                                 # server stands IN FRONT of the real push service, so
                                 # the encrypted body and the VAPID header are read off
                                 # the wire — needs a real Postgres, no network
@@ -3724,6 +3799,15 @@ node scripts/test-graph-diff.js # the change list on its own: only what changed
                                 # travels, applying it to a DIFFERENT target leaves
                                 # that target's other work alone, a removal is not a
                                 # null, and an unknown path is refused (§210)
+python3 checks/enter-commits.py # Enter commits a growing one-line box instead of
+                                # inserting a newline, and a rows-2 area keeps its
+                                # paragraph key — both ends (§229)
+python3 checks/fn-ko-edit.py    # a function's objectives are written at the page's
+                                # width (§226): the editing table in a band on BOTH
+                                # formats, the Unit column writing the stored target,
+                                # a wrapping name that writes the DATA, Led by opened
+                                # for the office and refused to everybody else — both
+                                # ends — and the unit side untouched, measured
 python3 checks/fn-pillars.py     # the two supporting-function formats draw ONE Overview:
                                 # asserted as their AGREEMENT, never as a list of headings;
                                 # every press read back from the STORED function; the
@@ -3786,7 +3870,47 @@ prior sessions (on HR_ERP) accidentally reverted agreed-upon designs.
 
 ---
 
-*Last Updated: 2026-08-31 &mdash; **v3.99: a plan travels row by row, and a
+*Last Updated: 2026-09-01 &mdash; **&sect;229: Enter commits a one-line
+prose box.** Found during &sect;226's accessibility audit and built on Islam's
+word: &sect;189 promised *"Enter blurs, which is what commits"* and no code
+ever carried it out, so Enter inserted a newline into every growing title box.
+One listener in the shell's bound-textarea branch, gated on `.grow`; a
+definition keeps its paragraph key; nothing stored is scrubbed. The check is
+`checks/enter-commits.py`, run red-first (4 failures pre-&sect;229).*
+
+*Earlier: 2026-09-01 &mdash; **&sect;226: a function's objectives are
+written at the page's width.** Islam, from Consumer Finance's Overview: the
+table tight, the direction invisible, no unit, the objective not wrapping, and
+Led by not open to edit. Three of the four were ONE omission &mdash; the
+function Overview's editor had been left three unit-side fixes behind
+(&sect;96.6's band, &sect;199's Unit column, &sect;189's wrapping prose).
+Settled from a mockup drawn out of the real page; his two decisions recorded:
+the unit side untouched, Led by opened for the office through the register's
+own door. The full account is &sect;226 in the decisions log; the check is
+`checks/fn-ko-edit.py`, proved able to fail (5 red pre-&sect;226).*
+
+*Earlier, same day: **a milestone's collaborators, the
+tactic's rule moved over (&sect;227, built as &sect;224 before main took the
+number), and the project band's name box takes the line (&sect;228 — §194's
+fix reaching the `edband`, 181px of 1223 and three lines &rarr; 85% and one).** Islam: *"for the projects milestones
+please add collaborators beside the owner column similar to the collaborators
+in the tactics in the units. align with me to make the addition correctly."*
+Aligned before building, and both decisions are his: being named a collaborator
+on a milestone is a **reporting right** (through the same `namedOn()` the
+tactic already uses — the derivation was passing a milestone stripped to its
+owner, and the row travels whole now), and the column shows **everywhere the
+tactics show theirs** — ticked from the register on the Plan pane, read-only on
+Performance and the deck's milestone slide. Fillable while empty and never
+counted as missing (&sect;187/&sect;205, with `GAP_OPTIONAL.milestone` keeping
+screen and server in one answer), emptied key deleted (&sect;50.6), no
+migration (`milestones.extra`, &sect;177's road). The workbook's Milestones
+sheet gains the column or a download-and-re-upload would silently drop every
+name (&sect;22); the round trip is proved a fixed point. The header is
+"Collabs." — the full word cost a 515px pane 11px at 830, found by
+`table-fit.py` going red, and it is the word the tactics wear on every surface
+(&sect;53.5). Falsified before believed: the derivation reverted fails 2, the
+fill rule 1, of 451.*
+*Earlier: 2026-08-31 &mdash; **v3.99: a plan travels row by row, and a
 capability travels on its own (&sect;215, &sect;216).** Islam, on the
 deployment: *"the CX is still getting errors on filling"* &mdash; Hala, working
 on **CX**, refused by *"a project's milestones (**admin**) cannot be changed

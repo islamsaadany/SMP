@@ -1021,6 +1021,17 @@
   .pane .pband.edband .paneact .cornerbtn,
   .pane .pband.edband .paneact .penbtn { position:static; flex:none;
     visibility:visible; opacity:1; }
+  /* ── THE PROJECT'S NAME GETS THE LINE (§228) ─────────────────────────
+     Islam: *"the project box is squeezed for no need we have space to make
+     it one line."* §194's fault exactly, on the band its fix did not reach:
+     the growing box (§189) is `width:100%` of `.pband-name`, and a flex item
+     with no flex shrinks to fit content that is sized BY it — circular, so
+     the textarea fell back to its intrinsic width and a three-word title
+     wrapped to three lines beside an empty band (measured: 181px of a 1223px
+     band). The pillar's `.pthead` and `.ptname` took `flex:1` in §194; this
+     is the same answer on the band's own class. Reading is untouched: a read
+     band's name is a span and sits where it always sat. */
+  .pane .pband.edband .pband-name { flex:1; min-width:0; }
   .pane .ptitle .pmeta { color:var(--ink-3); font-size:12.5px; margin-top:3px; }
   .planonly { font-size:12.5px; color:var(--ink-3); margin:10px 0 0; }
   .planonly b { color:var(--gold-deep); letter-spacing:.09em; text-transform:uppercase;

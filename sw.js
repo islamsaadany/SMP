@@ -260,7 +260,7 @@
    saved work, and a refusal can only name what actually travelled. Name checked
    against origin/main serving "smp-shell-v3.96-home-is-never-blocked"; confirm
    again immediately before the push (§94.16). */
-const SHELL = "smp-shell-v4.01-notifications";
+const SHELL = "smp-shell-v4.05-late-answer";
 const ASSETS = [
   "/",
   "/index.html",
@@ -321,7 +321,7 @@ self.addEventListener("fetch", (e) => {
   );
 });
 
-/* ══ A BOX THAT ARRIVES WITH NO TAB OPEN (§226) ═══════════════════════════
+/* ══ A BOX THAT ARRIVES WITH NO TAB OPEN (§231) ═══════════════════════════
 
    §225 drew the box from the PAGE, and measured across 45 seconds with the
    tab in the background it produced nothing at all: the chat stops asking

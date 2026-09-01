@@ -305,7 +305,7 @@ module.exports = async function handler(req, res) {
                       missing from the posted body and every stored row would
                       have said no message ever greeted anybody. */
                    popup: cfg.popup,
-                   /* §226: THE PUBLIC HALF OF THE KEY TRAVELS WITH THE POLL,
+                   /* §231: THE PUBLIC HALF OF THE KEY TRAVELS WITH THE POLL,
                       like every other setting — the browser needs it to
                       subscribe and it is public by construction (it is handed
                       to every push service). Empty where none could be made,
@@ -352,7 +352,7 @@ module.exports = async function handler(req, res) {
       return send(res, 200, { ok: true });
     }
 
-    /* ── THIS DEVICE SAYS YES, OR STOPS (§226) ───────────────────────
+    /* ── THIS DEVICE SAYS YES, OR STOPS (§231) ───────────────────────
        THE ROW IS THE SWITCH. There is no `on` column beside it to disagree
        with: a device that has said yes has a row, one that has not does not,
        and turning the bell off deletes it (§104.7, §50.6). That is also what
@@ -520,7 +520,7 @@ module.exports = async function handler(req, res) {
         "SELECT waiting FROM chat_threads WHERE person_key = $1", [me.key])).rows[0];
       if (stillWaiting && stillWaiting.waiting) await tellTheOffice(client, me, text, cfg);
 
-      /* AND A BOX ON THE OFFICE'S OWN SCREENS, WITH NO TAB OPEN (§226).
+      /* AND A BOX ON THE OFFICE'S OWN SCREENS, WITH NO TAB OPEN (§231).
          Only while the conversation is still waiting — the same condition the
          email chase already uses, so an assistant answer that settled it does
          not also go and interrupt somebody. Never back to the sender's own
@@ -788,7 +788,7 @@ module.exports = async function handler(req, res) {
          never taken from the browser (§74.2). The browser sends the HTML it
          built with the one builder every other message uses (§72.3) — content,
          never a recipient. */
-      /* AND A BOX ON THEIR OWN DEVICES, WITH NO TAB OPEN (§226). Sent
+      /* AND A BOX ON THEIR OWN DEVICES, WITH NO TAB OPEN (§231). Sent
          WHATEVER the email decides below: the two answer different questions —
          a notification reaches the phone in their pocket now, an email reaches
          them tomorrow — and gating one on the other would mean somebody

@@ -5,7 +5,7 @@
        node scripts/dev-server.js 3999 &
      DATABASE_URL=postgres://… node scripts/test-chat.js <smo-password>
 
-   THE TLS VARIABLE IS FOR §226 AND FOR NOTHING ELSE. The push section below
+   THE TLS VARIABLE IS FOR §231 AND FOR NOTHING ELSE. The push section below
    stands a throwaway HTTPS server in front of the real push service — an
    endpoint is just a URL a browser hands over, so a test can hand over one of
    its own (§100.3) — and it carries a self-signed certificate the dev-server
@@ -31,7 +31,7 @@ const auth = require("../lib/auth.js");
 
 const BASE = process.env.SMP_BASE || "http://127.0.0.1:3999";
 
-/* ── A STAND-IN PUSH SERVICE (§226, §100.3) ───────────────────────────
+/* ── A STAND-IN PUSH SERVICE (§231, §100.3) ───────────────────────────
    An endpoint is only a URL a browser hands over, so a test can hand over one
    of its own — which means what leaves the platform is read off the wire by
    the real `web-push` doing the real thing, and nothing in `lib/push.js`
@@ -280,12 +280,12 @@ async function signIn(who, password) {
        Postgres, because it is a query and a query nothing has run is a guess
        (§172, §100.3), and asked at BOTH ENDS: everybody else's poll must carry
        none of it. */
-    /* ── A BOX THAT ARRIVES WITH NO TAB OPEN (§226) ─────────────────
+    /* ── A BOX THAT ARRIVES WITH NO TAB OPEN (§231) ─────────────────
        The MODULE is proved end to end in scripts/test-push.js; what is proved
        here is the endpoint around it — who may subscribe, whose device a row
        is written against, and that the two write paths actually SEND, which
        is the half §71 built and never wired up. */
-    console.log("\nA DEVICE SUBSCRIBES, AND ONLY EVER ITS OWNER'S (§226).");
+    console.log("\nA DEVICE SUBSCRIBES, AND ONLY EVER ITS OWNER'S (§231).");
     await setChat({ popup: true });
     r = await call(her.cookie, { action: "mine" });
     ok(!!(r.body.chat && r.body.chat.vapid), "the public key travels with the poll",
@@ -359,7 +359,7 @@ async function signIn(who, password) {
        §71's fault is the one to guard against here: the back half built and
        the control never wired to it. A stand-in HTTPS server in front of the
        real push service is the only place that claim is true or false. */
-    console.log("\nAND A MESSAGE ACTUALLY SENDS ONE (§226).");
+    console.log("\nAND A MESSAGE ACTUALLY SENDS ONE (§231).");
     await client.query("DELETE FROM push_subscriptions");
     await client.query(
       "INSERT INTO push_subscriptions (endpoint, person_key, p256dh, auth) VALUES ($1,$2,$3,$4)",

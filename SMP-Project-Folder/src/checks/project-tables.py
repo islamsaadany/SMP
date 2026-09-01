@@ -110,6 +110,12 @@ READ = """
           cells: [...r.children].map(c => ({
             text: c.textContent.trim(), span: +c.colSpan,
             box: !!c.querySelector("input,select,textarea,button"),
+            /* §227: a collaborators cell's em-dash is the ANSWER — "nobody
+               supporting is a real and ordinary answer, not an omission"
+               (§15.1, §187) — where every other bare dash is the table
+               asking a question the row cannot answer (§99). The class is
+               what says which kind of dash this is. */
+            collabs: c.classList.contains("collabs"),
             late: !!c.querySelector(".lateval"),
             soon: !!c.querySelector(".soonval") })) })) });
   });
@@ -222,9 +228,16 @@ with sync_playwright() as p:
             # answers differently: a cell holding nothing but an em-dash is
             # the table asking a row a question its kind cannot answer.
             dead = [c["text"] for r in t["rows"] if not r["notDue"]
-                    for c in r["cells"] if c["text"] in ("—", "-", "") and not c["box"]]
+                    for c in r["cells"]
+                    if c["text"] in ("—", "-", "") and not c["box"]
+                    and not c.get("collabs")]
             ck("%s: no cell blank or dashed on a row being asked for" % t["head"][1],
                not dead, len(dead))
+            # ...and the exemption is exactly one column wide, or a build that
+            # classed every cell "collabs" would blind the probe (§113.8).
+            ck("%s: the collabs exemption covers one column" % t["head"][1],
+               all(sum(1 for c in r["cells"] if c.get("collabs")) <= 1
+                   for r in t["rows"]), t["head"])
 
         # THE DATE IS OFF THE TABLES (§104.8) and must not have taken its two
         # readings with it. A deliverable or outcome that is LATE says so

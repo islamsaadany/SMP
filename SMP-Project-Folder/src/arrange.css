@@ -1737,8 +1737,5 @@
   .nosrv-try { color:var(--ink-3); font-size:12px; }
   .nosrv-btn { display:block; width:100%; background:var(--panel); color:var(--panel-ink);
     border:1px solid var(--panel); border-radius:8px; padding:10px 16px;
-    font:700 13.5px var(--sans); cursor:pointer; margin:4px 0 10px; }
+    font:700 13.5px var(--sans); cursor:pointer; margin:4px 0 0; }
   .nosrv-btn:hover { filter:brightness(1.12); }
-  .nosrv-link { display:block; width:100%; background:none; border:0;
-    color:var(--ink-3); font:600 12px var(--sans); cursor:pointer;
-    text-decoration:underline; padding:2px; }

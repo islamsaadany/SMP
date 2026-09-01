@@ -50,33 +50,42 @@ var SYNC = (function () {
      Drawn only from land(), only when hydration failed over http. It retries
      on its own: any answer that means the server is back (ok, or a 401/403
      that will route to the gate) reloads; a 500 keeps waiting rather than
-     reload-looping a broken deployment. */
+     reload-looping a broken deployment.
+
+     The probe's handle lives at module scope because §230's late answer
+     takes the wall down from outside this function — and that takedown must
+     stop the probe too, or a reload fires ten seconds after the real page
+     is already up. */
+  var wallProbe = null;
+  function noServerDown() {
+    var d = document.getElementById("noserver");
+    if (d) d.remove();
+    if (wallProbe) { clearInterval(wallProbe); wallProbe = null; }
+  }
   function noServerWall() {
     if (document.getElementById("noserver")) return;
     var d = document.createElement("div");
     d.id = "noserver";
     d.setAttribute("role", "alertdialog");
-    d.setAttribute("aria-label", "The server did not answer");
+    d.setAttribute("aria-label", "Just a moment");
+    /* Plain words at Islam's direction (§230.2): four short lines, no
+       "server"/"data"/"example" — and §201's "Look at the example anyway"
+       way past is REMOVED, cost stated: while the server is truly down
+       the notice stands, retrying on its own. */
     d.innerHTML =
       '<div class="nosrv-card">' +
-        '<h2>The server did not answer</h2>' +
-        '<p>What is behind this notice is the built-in example \u2014 not ' +
-          'your organisation\u2019s data \u2014 and nothing entered here is ' +
-          'saved. Your data is safe on the server.</p>' +
-        '<p class="nosrv-try" data-nosrv-note>Trying again automatically\u2026</p>' +
+        '<h2>Just a moment\u2026</h2>' +
+        '<p>Your page is taking a little longer to open. ' +
+          'Your work is safe.</p>' +
+        '<p class="nosrv-try" data-nosrv-note>It will open by itself ' +
+          '\u2014 no need to do anything.</p>' +
         '<button type="button" class="nosrv-btn" data-nosrv-retry>Try again</button>' +
-        '<button type="button" class="nosrv-link" data-nosrv-view>' +
-          'Look at the example anyway</button>' +
       '</div>';
     document.body.appendChild(d);
     d.querySelector("[data-nosrv-retry]").addEventListener("click", function () {
       location.reload();
     });
-    d.querySelector("[data-nosrv-view]").addEventListener("click", function () {
-      clearInterval(probe);
-      d.remove();
-    });
-    var probe = setInterval(function () {
+    wallProbe = setInterval(function () {
       fetch("/api/state", { cache: "no-store" }).then(function (r) {
         if (r.ok || r.status === 401 || r.status === 403) location.reload();
       }).catch(function () {});
@@ -1119,10 +1128,24 @@ var SYNC = (function () {
          paint this page: not hydration, not a refusal, not a network that
          never answers. `land()` is the one door and it is idempotent, so the
          backstop and the answer racing each other is harmless. */
-      var landed = false, t0 = bootNow();
+      var landed = false, landedLive = false, t0 = bootNow();
       function land(then) {
-        if (landed) return;
+        /* ── A LATE ANSWER STILL LANDS (§230) ─────────────────────────
+           A cold function's first answer often arrives AFTER the 8s
+           give-up and used to be dropped here, leaving the person behind
+           the wall with their real data already hydrated. A second landing
+           is allowed for exactly one case — the first was the backstop's,
+           this one carries the live tenant: paint in place, wall down, no
+           reload. A late FAILURE still returns, wall and probe standing. */
+        if (landed) {
+          if (!live || landedLive) return;
+          landedLive = true;
+          (then || paint)();
+          noServerDown();
+          return;
+        }
         landed = true;
+        landedLive = live;
         clearTimeout(backstop);
         /* A FAST ANSWER WOULD FLASH THE SKELETON ON AND OFF. Held to a floor
            so it reads as one step rather than a stutter — below the threshold
@@ -1145,9 +1168,9 @@ var SYNC = (function () {
              the wall makes the refusal VISIBLE instead of silent), Try again
              reloads, and it retries by itself so a server that wakes up
              brings the real page back with nobody pressing anything.
-             Looking at the example anyway stays possible — that was the old
-             behaviour's one virtue — but as a stated choice, never a
-             default. */
+             §230.2 removed the "look at the example anyway" way past, at
+             Islam's direction — the wall now stands until the server
+             answers, and the words on it are the user's (see noServerWall). */
           if (enabled && !live) noServerWall();
         }, wait);
       }

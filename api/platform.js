@@ -184,6 +184,74 @@ module.exports = async function handler(req, res) {
           await c.query(
             "UPDATE accounts SET name = COALESCE($2, name), status = COALESCE($3, status), " +
             "updated_at = now() WHERE email = $1", [email, body.name || null, body.status || null]);
+
+          /* ── AND THE ADDRESS ITSELF CAN CHANGE (§147.27) ─────────────
+             Islam: "I need to edit the consultants names and emails as well."
+             The name was already editable; the address was not, because it is
+             what everything here is keyed by — the account, the seats, the
+             sessions.
+
+             A RENAME, NOT A NEW PERSON. Done as ordered statements in one
+             transaction rather than by adding ON UPDATE CASCADE, because the
+             order is the part worth reading: the new row first, then the
+             things that point at it, then the old row — so nothing is ever
+             pointing at an address that does not exist.
+
+             THE PERSON KEY DOES NOT MOVE. `ff_islam_saadany` is minted from
+             the address once and is written into the client's register, where
+             a unit's custodian and an owner point at it — changing it because
+             a label changed is §87's fault exactly. The address SHOWN on that
+             register follows, so the two do not disagree.
+
+             AND EVERY SESSION IS ENDED. They carry the old address, and a
+             signed-in tab holding a name the accounts table no longer has is
+             a session nobody can reason about — signing in again is cheap and
+             is the honest answer (§43's rule for a password change). */
+          const to = String(body.newEmail || "").trim().toLowerCase();
+          if (to && to !== email) {
+            if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(to)) {
+              return send(res, 400, { ok: false, error: "That is not an email address." });
+            }
+            const taken = await P.accountByEmail(c, to);
+            if (taken.email) {
+              return send(res, 409, { ok: false, error:
+                "That address already belongs to somebody on this platform." });
+            }
+            await c.query("BEGIN");
+            try {
+              await c.query(
+                "INSERT INTO accounts (email, name, kind, is_admin, password_hash, must_change, status, created_at) " +
+                "SELECT $2, name, kind, is_admin, password_hash, must_change, status, created_at " +
+                "FROM accounts WHERE email = $1", [email, to]);
+              await c.query("UPDATE account_clients SET email = $2 WHERE email = $1", [email, to]);
+              await c.query("DELETE FROM sessions WHERE email = $1", [email]);
+              await c.query("DELETE FROM accounts WHERE email = $1", [email]);
+              await c.query("COMMIT");
+            } catch (e) {
+              await c.query("ROLLBACK");
+              throw e;
+            }
+            /* The address on each client's register follows the account, so
+               the register and the platform say the same thing about the same
+               person. Best-effort per client: a client whose schema is
+               unreachable must not undo a rename that has already landed. */
+            const mine = (await c.query(
+              "SELECT client_key, person_key FROM account_clients WHERE email = $1", [to])).rows;
+            for (const m of mine) {
+              const cl = await P.clientByKey(c, m.client_key);
+              if (!cl.schema_name) continue;
+              try {
+                await P.withSchema(pg, cl.schema_name, function (sc) {
+                  return sc.query(
+                    "UPDATE people SET extra = jsonb_set(COALESCE(extra,'{}'::jsonb), '{email}', to_jsonb($2::text)) " +
+                    "WHERE key = $1", [m.person_key, to]);
+                });
+              } catch (e) {
+                console.error("renaming " + m.person_key + " in " + m.client_key + ":", e.message);
+              }
+            }
+            return send(res, 200, { ok: true, email: to, signedOut: true });
+          }
           return send(res, 200, { ok: true });
         }
 
@@ -316,28 +384,17 @@ module.exports = async function handler(req, res) {
            the address, and never from the name, which changes. */
         const personKey = P.officePersonKey(email);
         const seat = FF.SEAT_KEYS.indexOf(String(body.seat)) > -1 ? String(body.seat) : "smoteam";
-        /* ONE SUPER USER PER CLIENT is a unique index, so naming a second one
-           MOVES the seat: whoever held it becomes SMO team, and only then is
-           the new one written.
+        /* A CLIENT MAY HAVE MORE THAN ONE SUPER USER (§147.26). This MOVED
+           the seat — demote whoever held it, then write the new one — because
+           a unique index refused a second. Islam: "a project might have 2
+           super users", so the index is gone and so is the move: giving
+           somebody the seat gives it to them, and takes nothing from anybody.
 
-           THE ORDER IS THE WHOLE FIX, and it shipped backwards with a comment
-           saying it did not — the insert ran first, so for the length of one
-           statement the client had two super users, the index refused, and the
-           person pressing the seat was told "Something went wrong. Nothing was
-           changed". Everything about the intention was right except which line
-           came first (§104.8: a comment can describe an intention the code
-           never carries out, and nothing in a build compares the two).
-
-           IN A TRANSACTION, because the demote is a real change on its own: if
-           the insert then failed, the client would be left with no super user
-           at all, which is worse than the act simply not happening. */
+           The transaction stays. It guarded a pair of statements that had to
+           land together and now guards one, which costs nothing and means the
+           next thing added here inherits it rather than having to remember. */
         await c.query("BEGIN");
         try {
-          if (seat === "super") {
-            await c.query(
-              "UPDATE account_clients SET seat = 'smoteam' WHERE client_key = $1 AND email <> $2 AND seat = 'super'",
-              [row.key, email]);
-          }
           await c.query(
             "INSERT INTO account_clients (email, client_key, person_key, seat) VALUES ($1,$2,$3,$4) " +
             "ON CONFLICT (email, client_key) DO UPDATE SET seat = EXCLUDED.seat",

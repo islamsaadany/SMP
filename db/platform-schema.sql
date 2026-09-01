@@ -99,10 +99,17 @@ CREATE TABLE IF NOT EXISTS account_clients (
   CONSTRAINT account_clients_seat CHECK (seat IN ('super','smoteam'))
 );
 
--- A CLIENT WITH TWO SUPER USERS IS A CLIENT WHERE NOBODY CAN SAY WHO HOLDS THE
--- ACCESS MATRIX. Enforced here rather than remembered in a handler.
-CREATE UNIQUE INDEX IF NOT EXISTS account_clients_one_super
-  ON account_clients (client_key) WHERE seat = 'super';
+-- A CLIENT MAY HAVE MORE THAN ONE SUPER USER (§147.26, Islam 2026-09-01: "a
+-- project might have 2 super users"). This carried a UNIQUE INDEX enforcing
+-- one, on the reasoning that a client with two is a client where nobody can
+-- say who holds the access matrix — which is a tidy thought about a table and
+-- wrong about the work: an engagement is run by a pair often enough that the
+-- database refusing it is the database arguing with the practice.
+--
+-- WHAT THE CONSTRAINT WAS REALLY PROTECTING is that somebody holds it, and
+-- that is unaffected: a client with none is still a client nobody can
+-- configure, and the platform's own super user reaches every client by right
+-- (§147.20), so there is no client that can become unreachable.
 
 CREATE INDEX IF NOT EXISTS account_clients_client ON account_clients (client_key);
 

@@ -19829,3 +19829,72 @@ twice); a deployment that had already applied the old step (the prompt cleared
 on the next deploy, 1234 still opening it); and one where another password had
 since been chosen (**1234 does not come back**) — which is the assertion that
 keeps this a one-off rather than a standing backdoor.
+
+### 147.26 · A client may have more than one super user
+
+Islam: *"a project might have 2 super users."* §147.4 enforced one with a
+**unique index**, on the reasoning that a client with two is a client where
+nobody can say who holds the access matrix. That is a tidy thought about a
+table and wrong about the work: an engagement is run by a pair often enough
+that the database refusing it is **the database arguing with the practice**.
+
+**WHAT THE CONSTRAINT WAS REALLY PROTECTING IS UNAFFECTED** — that *somebody*
+holds it. A client with none is still a client nobody can configure, and the
+platform's own super user reaches every client by right (§147.20), so no client
+can become unreachable.
+
+The index goes, migration `005` drops it on a platform that already has it
+(pre-phase, for 001's reason: `platform-schema.sql` no longer creates it), and
+`setTeam` stops **moving** the seat — giving it to somebody now takes it from
+nobody. The transaction stays: it guarded a pair of statements that had to land
+together and now guards one, which costs nothing and means the next thing added
+there inherits it.
+
+**AND A CHECK THAT COUNTED THE FIXTURE HAD TO BECOME A CHECK THAT ASKS THE
+RULE.** `team.length === 1` is a fact about the seed rather than about the
+`kind = 'office'` filter it was written for, and a correct reading failed the
+moment a second super user sat on that client. It asks whether a client's own
+person can appear in the team — which is the actual question.
+
+### 147.27 · A consultant's name and address are editable
+
+Islam: *"I need to edit the consultants names and emails as well."* The name
+was already writable through `saveConsultant` and had no field; the **address**
+was not writable at all, because it is what everything on this platform is
+keyed by.
+
+**A RENAME, NOT A NEW PERSON**: ordered statements in one transaction rather
+than `ON UPDATE CASCADE`, because the order is the part worth reading — the new
+row first, then the things that point at it, then the old row, so nothing is
+ever pointing at an address that does not exist.
+
+**THE PERSON KEY DOES NOT MOVE.** `ff_islam_saadany` is minted from the address
+once and written into the client's register, where a unit's custodian and an
+owner point at it — changing it because a label changed is §87's fault exactly.
+The address SHOWN on that register follows, so the two do not disagree.
+
+**AND EVERY SESSION IS ENDED**, because they carry the old address: a signed-in
+tab holding a name the accounts table no longer has is a session nobody can
+reason about. Said on the page rather than left to be discovered.
+
+**TWO FIELDS ON THE ROW, NOT A DIALOG** — §116 moved the client register's
+editing into one because NINE fields in a 158px cell collided; two do not. And
+they commit on `change`, which for a text box means on blur, so there is no
+Save to forget.
+
+### 147.28 · A silent refresh
+
+Islam: *"this page needs silent refresh."* Every control here ended in a full
+redraw that **cleared the page first** and put *Reading…* in its place — so
+pressing a seat blanked the pane and rebuilt it: a flash, a scroll jump, and
+the row under the pointer gone.
+
+The page is built into a **detached node and swapped in one move**, with the
+scroll position restored, so nothing empty is ever on screen. `lead(quiet, …)`
+is what tells arriving from updating apart: arriving still says *Reading…*,
+because then there is nothing to keep.
+
+**AND THE OUTCOME HAD TO BE SAID AFTER THE REDRAW THAT REPORTS IT** (§63, third
+time in this product). Said before, the sentence is appended to a page the swap
+is about to replace — so the rename lands, the outcome is written, and a moment
+later it is gone, **which reads exactly like nothing happened.**

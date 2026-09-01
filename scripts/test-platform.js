@@ -278,24 +278,49 @@ async function main() {
       FF.mayIssuePasswordTo(world, admin, { email:"o@ff.example", is_admin:false }));
     check("nobody changes their own admin rights", !FF.maySetAdmin(world, admin, admin));
 
-    /* ONE SUPER USER PER CLIENT, enforced by the database rather than
-       remembered by a handler — proved by asking it to hold two. */
+    /* A CLIENT MAY HAVE MORE THAN ONE SUPER USER (§147.26, Islam: "a project
+       might have 2 super users"). This asserted the OPPOSITE — a unique index
+       refusing a second — and the reasoning behind it was tidy about a table
+       and wrong about the work. Asked of the database, because that is where
+       the refusal used to live. */
     await c.query("UPDATE account_clients SET seat = 'super' WHERE client_key = 't-team' AND email = 'o@ff.example'");
     let refused = false;
     try {
       await c.query(
         "INSERT INTO account_clients (email, client_key, person_key, seat) " +
-        "VALUES ('a@ff.example','t-team','ff_a','super')");
-    } catch (e) { refused = /account_clients_one_super/.test(e.message); }
-    check("a client cannot have two super users", refused);
+        "VALUES ('a@ff.example','t-team','ff_a','super') " +
+        "ON CONFLICT (email, client_key) DO UPDATE SET seat = 'super'");
+    } catch (e) { refused = true; }
+    check("a client may hold two super users", !refused);
+    const supers = (await c.query(
+      "SELECT count(*)::int AS n FROM account_clients WHERE client_key = 't-team' AND seat = 'super'"))
+      .rows[0].n;
+    check("…and both are kept, neither demoted", supers === 2, supers);
+    /* WHAT THE OLD CONSTRAINT WAS REALLY PROTECTING is that SOMEBODY holds it,
+       and that is unaffected: `isSuperOf` answers of a person, so two people
+       both answering true is the point rather than a contradiction. */
+    const w2 = await P.worldFor(c, "o@ff.example");
+    check("…and each of them reads as this client's super user",
+      FF.mayConfigureClient(w2, cons, CLIENT));
 
     /* THE TEAM IS FOREFRONT'S. account_clients maps a client's own people too
        — that is how their account knows which client it is — so a team read
        without `kind = 'office'` offers a client's own staff as consultants. */
     const team = await P.teamOf(c, "t-team");
-    eq("a client's team is Forefront's people only", team.length, 1);
-    eq("…and it is the office one", team[0] && team[0].email, "o@ff.example");
-    eq("…carrying the seat, not a boolean", team[0] && team[0].seat, "super");
+    /* ASSERTED AS THE RULE, NOT AS A COUNT. It read `team.length === 1`, which
+       is a fact about the fixture rather than about the filter — and the
+       moment §147.26 let a second super user sit on this client, a correct
+       reading of `kind = 'office'` failed. The question is whether a CLIENT'S
+       OWN person can appear here, and that is what is asked. */
+    check("a client's team holds Forefront's people", team.length > 0, team.length);
+    check("…and nobody who belongs to the client",
+      team.every(function (m) { return /@ff\.example$/.test(m.email); }),
+      team.map(function (m) { return m.email; }));
+    check("…and none of them is the client's own desk",
+      !team.some(function (m) { return m.email === "desk@client.example"; }),
+      team.map(function (m) { return m.email; }));
+    const held = team.filter(function (m) { return m.email === "o@ff.example"; })[0];
+    eq("…carrying the seat, not a boolean", held && held.seat, "super");
   });
 
   /* ── 10 · a way in (§147.14) ──────────────────────────────────

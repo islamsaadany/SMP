@@ -1,0 +1,11 @@
+-- @phase: pre
+-- 005 · A client may have more than one super user (§147.26).
+--
+-- Islam: "a project might have 2 super users." The unique index refused it,
+-- and it has to go BEFORE platform-schema.sql runs for the same reason 001's
+-- steps do: that file no longer creates this index, and a pre-phase migration
+-- is the only thing that can remove one an existing platform already has.
+--
+-- CONDITIONAL, like every step in this phase: on a fresh database the index
+-- was never created, and there is nothing to drop.
+DROP INDEX IF EXISTS account_clients_one_super;

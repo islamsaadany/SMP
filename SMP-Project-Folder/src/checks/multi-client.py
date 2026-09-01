@@ -277,8 +277,13 @@ def main():
             # AND NOBODY ELSE'S: account_clients maps a client's own people too —
             # that is how their account knows which client it is — so a list read
             # without `kind = 'office'` offers to make Raya's SMO its super user.
+            # A CELL'S WORDS MAY LIVE IN A FIELD (§147.27). The name and the
+            # address are editable now, so `textContent` on those two columns
+            # is empty — the check has to read what a person would read, which
+            # is the input's value where there is one.
             mails = pg.eval_on_selector_all("table tbody tr td:nth-child(2)",
-                                            "els => els.map(e => e.textContent)")
+                "els => els.map(e => { const i = e.querySelector('input'); "
+                "return i ? i.value : e.textContent; })")
             check("…and nobody who belongs to a client",
                   all(m.endswith("@forefront.consulting") for m in mails), mails)
 
@@ -316,9 +321,10 @@ def main():
             role = pg.evaluate("""() => {
               const heads = Array.from(document.querySelectorAll('table thead th'))
                 .map(e => e.textContent.trim());
+              const read = e => { const i = e.querySelector('input'); return i ? i.value : e.innerText.trim(); };
               const mine = Array.from(document.querySelectorAll('table tbody tr'))
-                .filter(tr => tr.innerText.indexOf('islam.saadany@') > -1)[0];
-              const cells = mine ? Array.from(mine.querySelectorAll('td')).map(td => td.innerText.trim()) : [];
+                .filter(tr => Array.from(tr.querySelectorAll('td')).some(td => read(td).indexOf('islam.saadany@') > -1))[0];
+              const cells = mine ? Array.from(mine.querySelectorAll('td')).map(read) : [];
               const chip = mine ? mine.querySelector('td .cell button') : null;
               const box = chip ? chip.getBoundingClientRect() : null;
               return { heads, cells,
@@ -408,20 +414,21 @@ def main():
             editable = pg.eval_on_selector_all(".teamrow .cell button", "els => els.length")
             check("…and the seat IS written here", editable >= 2, editable)
 
-            # ONE SUPER USER PER CLIENT, AND THE SECOND MOVES THE FIRST rather
-            # than being refused: the database's unique index is the floor, and
-            # a screen that made somebody choose who to demote first would be
-            # asking a question the answer already implies.
+            # A CLIENT MAY HOLD TWO SUPER USERS (§147.26, Islam: "a project might
+            # have 2 super users"). This asserted the opposite — a second MOVED
+            # the seat off the first, enforced by a unique index — which was
+            # tidy about a table and wrong about the work.
             moved = api(pg, {"action": "setTeam", "key": "raya-trade",
                              "email": CONSULT[0], "seat": "super"})
             check("a second super user is accepted", moved.get("ok") is True, moved)
             after = api(pg, {"action": "client", "key": "raya-trade"})
             supers = [m["email"] for m in after["team"] if m.get("seat") == "super"]
-            check("…and there is exactly one super user afterwards", len(supers) == 1, supers)
-            check("…and it is the person just given it", supers[:1] == [CONSULT[0]], supers)
+            check("…and BOTH hold it, neither demoted", len(supers) == 2, supers)
+            check("…including the one just given it", CONSULT[0] in supers, supers)
+            check("…and the one who already had it", OFFICE[0] in supers, supers)
             # PUT BACK, because a check that leaves the fixture changed is one
             # whose next run measures something else (§94.2).
-            api(pg, {"action": "setTeam", "key": "raya-trade", "email": OFFICE[0], "seat": "super"})
+            api(pg, {"action": "setTeam", "key": "raya-trade", "email": CONSULT[0], "seat": "smoteam"})
 
             # ── 10 · the office's row on the client's register ──────
             pg.goto(BASE + "/raya-trade", wait_until="networkidle")
@@ -503,6 +510,39 @@ def main():
             check("…and do not send the super user to ask themselves",
                   "Ask the platform" not in empty["words"], empty["words"][:140])
             pg.unroute("**/api/platform")
+
+            # ── 14 · editing a consultant, and a silent refresh (§147.27–28) ──
+            pg.click("#nav button[data-tab='consultants']")
+            pg.wait_for_selector("table tbody tr", timeout=9000)
+            # THE NAME AND THE ADDRESS ARE FIELDS, and they COMMIT — asked of
+            # the data afterwards, because a field that looks accepted and
+            # discards every keystroke is the fault §96 exists for.
+            idx = pg.evaluate("""(a) => Array.from(document.querySelectorAll('table tbody tr'))
+              .findIndex(r => { const i = r.querySelector('td:nth-child(2) input');
+                                return i && i.value === a; })""", CONSULT[0])
+            check("a consultant's row carries editable fields", idx >= 0, idx)
+            if idx >= 0:
+                row = "table tbody tr:nth-child(%d)" % (idx + 1)
+                # A SILENT REFRESH (§147.28): the pane must not blank or say
+                # "Reading…" while it updates — the fault Islam reported.
+                blanked = pg.evaluate("""(sel) => new Promise(resolve => {
+                  let sawEmpty = false;
+                  const el = document.getElementById('page');
+                  const ob = new MutationObserver(() => {
+                    if (!el.textContent.trim() || /Reading/.test(el.textContent)) sawEmpty = true;
+                  });
+                  ob.observe(el, { childList: true, subtree: true, characterData: true });
+                  const f = document.querySelector(sel + ' td:nth-child(1) input');
+                  f.value = 'Omar A. Alaa';
+                  f.dispatchEvent(new Event('change', { bubbles: true }));
+                  setTimeout(() => { ob.disconnect(); resolve(sawEmpty); }, 2200);
+                })""", row)
+                check("the page updates without blanking or saying Reading…", blanked is False, blanked)
+                back = api(pg, {"action": "consultants"})
+                who = [x for x in back["people"] if x["email"] == CONSULT[0]]
+                check("…and the typed name reached the data",
+                      who and who[0]["name"] == "Omar A. Alaa", who[:1])
+                api(pg, {"action": "saveConsultant", "email": CONSULT[0], "name": "Omar Alaa"})
 
             check("no page errors anywhere", not errs, errs)
             b.close()

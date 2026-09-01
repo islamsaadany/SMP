@@ -158,6 +158,15 @@
   /* The seats cell is the one that wraps: it holds a list that grows with the
      clients somebody is on, and clipping it hides the fact the column is for. */
   td.seats{ white-space:normal; min-width:250px }
+  /* A FIELD IN A TABLE CELL NEEDS A DEFINITE WIDTH AND min-width:0 (§110.8).
+     `max-width:100%` resolves against a containing block an auto-layout table
+     has not settled, so the browser treats it as none and the box grows the
+     column; a px cap does nothing either. These two are what stop the row
+     widening the moment the page is drawn. */
+  table .fld{ width:100%; min-width:0; padding:5px 7px; font-size:13px }
+  table td:first-child .fld{ min-width:120px }
+  table .fld.mono{ font-family:ui-monospace, SFMono-Regular, monospace; font-size:12.5px;
+    min-width:210px }
   td.seats .tag{ display:inline-block; margin:2px 3px 2px 0 }
   .mono{ font:400 13px/1.5 ui-monospace, SFMono-Regular, monospace; color:var(--ink-2) }
   .muted{ color:var(--ink-3) }
@@ -273,9 +282,46 @@
     TAB = tab;
     drawNav();
     clear();
-    if (tab === "clients") return drawClients();
-    if (tab === "consultants") return drawConsultants();
-    if (tab === "access") return drawAccess();
+    return redraw();
+  }
+
+  /* ── A SILENT REFRESH (§147.28) ───────────────────────────────────
+     Islam: "this page needs silent refresh." Every control here ended in a
+     full redraw that CLEARED the page first and put "Reading…" in its place,
+     so pressing a seat blanked the whole pane and rebuilt it — a flash, a
+     scroll jump, and the row you were working on gone from under the pointer.
+
+     The page is built into a DETACHED node and swapped in when it is ready,
+     so nothing empty is ever on screen; the scroll position is put back
+     because a swap is not a navigation. §71.2's rule — never a repaint under
+     a working hand — applied to the one page that had no other way to update
+     itself. */
+  function redraw() {
+    if (TAB === "clients") return drawClients();
+    if (TAB === "consultants") return drawConsultants();
+    if (TAB === "access") return drawAccess();
+  }
+
+  /* `quiet` is passed by every control that is UPDATING what is already on
+     screen, as opposed to arriving at it. Arriving still says "Reading…",
+     because then there is nothing to keep. */
+  function lead(quiet, msg) {
+    if (quiet) return;
+    clear();
+    page.appendChild(el("p", "muted", msg));
+  }
+
+  /* Built detached, swapped in one move, scroll restored — so the page never
+     holds an empty frame and the row under the pointer does not move. */
+  function settle(build) {
+    var y = window.scrollY;
+    var next = document.createElement("div");
+    var was = page;
+    page = next;
+    try { build(); } finally { page = was; }
+    page.textContent = "";
+    while (next.firstChild) page.appendChild(next.firstChild);
+    window.scrollTo(0, y);
   }
 
   /* ── Clients ─────────────────────────────────────────────────── */
@@ -409,12 +455,11 @@
   }
 
   /* ── A client's configuration ────────────────────────────────── */
-  function drawClient(key) {
-    clear();
-    page.appendChild(el("p", "muted", "Reading…"));
+  function drawClient(key, quiet) {
+    lead(quiet, "Reading…");
     post({ action: "client", key: key }).then(function (j) {
-      clear();
-      if (!j.ok) { say(j.error || "Could not open that client.", true); return; }
+      if (!j.ok) { clear(); say(j.error || "Could not open that client.", true); return; }
+      settle(function () {
       var c = j.client;
 
       var right = el("div");
@@ -476,7 +521,7 @@
           rm.type = "button";
           rm.addEventListener("click", function () {
             post({ action: "setTeam", key: c.key, email: m.email, on: false })
-              .then(function (r) { r.ok ? drawClient(c.key) : say(r.error || "Not removed.", true); });
+              .then(function (r) { r.ok ? drawClient(c.key, true) : say(r.error || "Not removed.", true); });
           });
           sp.appendChild(rm);
         }
@@ -500,7 +545,7 @@
         add.addEventListener("click", function () {
           if (!pick.value) return;
           post({ action: "setTeam", key: c.key, email: pick.value, seat: "smoteam" })
-            .then(function (r) { r.ok ? drawClient(c.key) : say(r.error || "Not added.", true); });
+            .then(function (r) { r.ok ? drawClient(c.key, true) : say(r.error || "Not added.", true); });
         });
         addRow.appendChild(pick); addRow.appendChild(add);
         rightCol.appendChild(addRow);
@@ -508,7 +553,8 @@
       rightCol.appendChild(el("p", "note",
         "A seat is held on THIS client: Super user holds its access matrix, " +
         "retiring people and issuing passwords; SMO team runs cycles and " +
-        "corrects plans. One super user per client. Removing somebody retires " +
+        "corrects plans. A client may have more than one super user. Removing " +
+        "somebody retires " +
         "their row on this client's register rather than deleting it."));
       grid.appendChild(rightCol);
       page.appendChild(grid);
@@ -520,6 +566,7 @@
             .then(function (r) { say(r.ok ? "Saved." : (r.error || "Not saved."), !r.ok); });
         });
       }
+      });
     }).catch(function (e) {
       if (String(e.message) === "sign in") return;
       clear(); say("Could not reach the server.", true);
@@ -536,7 +583,8 @@
       if (editable && member.seat !== s.key) {
         b.addEventListener("click", function () {
           post({ action: "setTeam", key: clientKey, email: member.email, seat: s.key })
-            .then(function (r) { r.ok ? drawClient(clientKey) : say(r.error || "Not changed.", true); });
+            .then(function (r) { r.ok ? drawClient(clientKey, true)
+                                      : say(r.error || "Not changed.", true); });
         });
       }
       wrap.appendChild(b);
@@ -545,11 +593,11 @@
   }
 
   /* ── Consultants ─────────────────────────────────────────────── */
-  function drawConsultants() {
-    page.appendChild(el("p", "muted", "Reading…"));
-    post({ action: "consultants" }).then(function (j) {
-      clear();
-      if (!j.ok) { say(j.error || "Could not read the list.", true); return; }
+  function drawConsultants(quiet) {
+    lead(quiet, "Reading…");
+    return post({ action: "consultants" }).then(function (j) {
+      if (!j.ok) { clear(); say(j.error || "Could not read the list.", true); return; }
+      settle(function () {
       title("Consultants");
 
       var box = el("div", "tscroll");
@@ -575,7 +623,7 @@
           post({ action: "saveConsultant", email: mail.value.trim(), name: name.value.trim() })
             .then(function (r) {
               if (!r.ok) { say(r.error || "Not added.", true); return; }
-              drawConsultants();
+              drawConsultants(true);
               if (r.password) {
                 var s = say("");
                 s.appendChild(document.createTextNode("Temporary password for " + mail.value.trim() + ": "));
@@ -591,6 +639,7 @@
         "The seats are read here and set on each client's own configuration — " +
         "one place writes them. Somebody on no client can sign in and has " +
         "nothing to open, which is what a new joiner looks like."));
+      });
     }).catch(function (e) {
       if (String(e.message) === "sign in") return;
       clear(); say("Could not reach the server.", true);
@@ -599,8 +648,65 @@
 
   function consultantRow(p, j) {
     var tr = el("tr");
-    tr.appendChild(el("td", null, p.name || "—"));
-    tr.appendChild(el("td", "mono", p.email));
+
+    /* ── THE NAME AND THE ADDRESS ARE EDITABLE (§147.27) ────────────
+       Islam: "I need to edit the consultants names and emails as well." Two
+       fields on the row rather than a dialog, because there are two of them
+       and one row is not a form (§116's argument runs the other way at this
+       size: the register moved to a dialog because NINE fields in a 158px
+       cell collided; two do not).
+
+       COMMITTED ON `change`, which for a text box means on blur — so the
+       value is written by moving away from it, and there is no Save to
+       forget. The row updates quietly afterwards, or the field being typed
+       into would be replaced under the hand (§35, §71.2).
+
+       AND THE ADDRESS IS THE SIGN-IN, so changing it ends that person's
+       sessions and is said on the page rather than left to be discovered. */
+    var edit = j.canEdit;
+    var nameTd = el("td");
+    if (edit) {
+      var nm = el("input", "fld");
+      nm.value = p.name || "";
+      nm.placeholder = "Name";
+      nm.addEventListener("change", function () {
+        var v = nm.value.trim();
+        if (v === (p.name || "")) return;
+        post({ action: "saveConsultant", email: p.email, name: v })
+          .then(function (r) { r.ok ? drawConsultants(true)
+                                    : say(r.error || "Not changed.", true); });
+      });
+      nameTd.appendChild(nm);
+    } else {
+      nameTd.textContent = p.name || "—";
+    }
+    tr.appendChild(nameTd);
+
+    var mailTd = el("td", "mono");
+    if (edit) {
+      var em = el("input", "fld mono");
+      em.value = p.email;
+      em.addEventListener("change", function () {
+        var v = em.value.trim().toLowerCase();
+        if (!v || v === p.email) { em.value = p.email; return; }
+        post({ action: "saveConsultant", email: p.email, newEmail: v })
+          .then(function (r) {
+            if (!r.ok) { em.value = p.email; say(r.error || "Not changed.", true); return; }
+            /* SAID AFTER THE REDRAW THAT REPORTS IT (§63). Said before, the
+               sentence is appended to a page `settle()` is about to replace —
+               so the rename lands, the outcome is written, and a moment later
+               it is gone, which reads exactly like nothing happened. */
+            drawConsultants(true).then(function () {
+              say(v + " signs in with that address now. Any tab they had open " +
+                  "has been signed out — the old address no longer exists.");
+            });
+          });
+      });
+      mailTd.appendChild(em);
+    } else {
+      mailTd.textContent = p.email;
+    }
+    tr.appendChild(mailTd);
 
     /* ── SUPER USER, IN A COLUMN THAT SAYS WHERE (Islam, option B) ──
        The role was always here and read "Platform admin: Yes", which is not
@@ -626,7 +732,7 @@
       yes.title = "Adding clients and consultants, and setting Who sees what";
       yes.addEventListener("click", function () {
         post({ action: "saveConsultant", email: p.email, isAdmin: !p.isAdmin })
-          .then(function (r) { r.ok ? drawConsultants() : say(r.error || "Not changed.", true); });
+          .then(function (r) { r.ok ? drawConsultants(true) : say(r.error || "Not changed.", true); });
       });
     } else if (p.email === j.me) {
       /* NOBODY CHANGES THEIR OWN STANDING, which is also what stops the

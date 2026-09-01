@@ -240,47 +240,62 @@ async function main() {
     dev.kill();
   }
 
-  /* ── 9 · the office's own rules, on the server (US3) ────────────
-     The screen is checked by checks/multi-client.py; this is the half that
-     has to hold when nothing is drawing anything (constitution X). */
+  /* ── 9 · the office's own model, on the server (US3, revision 3) ─
+     Two levels: one platform admin, and a SEAT on each client. The screen is
+     checked by checks/multi-client.py; this is the half that has to hold when
+     nothing is drawing anything (constitution X). */
   const FF = require("../lib/platform-rules.js");
   await P.withPlatform(pg, async function (c) {
     await c.query(
-      "INSERT INTO accounts (email, name, kind, role, password_hash) VALUES " +
-      "('a@ff.example','A','office','admin','x'), ('o@ff.example','O','office','observer','x') " +
-      "ON CONFLICT (email) DO UPDATE SET role = EXCLUDED.role");
-    const world = await P.worldFor(c, "o@ff.example");
-    const admin = { email:"a@ff.example", role:"admin", kind:"office", status:"active" };
-    const obs = { email:"o@ff.example", role:"observer", kind:"office", status:"active" };
-
-    check("an Observer may not manage consultants", !FF.mayManageConsultants(world, obs));
-    check("an Observer may not add a client", !FF.mayCreateClient(world, obs));
-    check("an Observer may not edit the table", !FF.mayEditAccess(world, obs));
-    check("the admin's own row is not editable, by the admin",
-      FF.mayEditAccessRow(world, admin, "lead") && !FF.mayEditAccessRow(world, admin, "admin"));
-    check("an admin does not issue a password to another admin",
-      !FF.mayIssuePasswordTo(world, admin, { email:"b@ff.example", role:"admin" }) &&
-      FF.mayIssuePasswordTo(world, admin, { email:"o@ff.example", role:"observer" }));
-
-    /* THE TEAM IS FOREFRONT'S. account_clients maps a client's own people
-       too — that is how their account knows which client it is — so a team
-       read without `kind = 'office'` offers a client's own staff as
-       consultants. Found on screen; asserted here so it stays found. */
-    /* ITS OWN SCHEMA. Written first pointing at t_alpha, which the UNIQUE on
-       schema_name refused — two clients sharing a schema is exactly what that
-       index exists to stop, so the test was wrong and the database was right. */
+      "INSERT INTO accounts (email, name, kind, is_admin, password_hash) VALUES " +
+      "('a@ff.example','A','office',true,'x'), ('o@ff.example','O','office',false,'x') " +
+      "ON CONFLICT (email) DO UPDATE SET is_admin = EXCLUDED.is_admin");
     await c.query("INSERT INTO clients (key, name, schema_name) VALUES ('t-team','T','t_team') " +
                   "ON CONFLICT (key) DO NOTHING");
     await c.query(
       "INSERT INTO accounts (email, name, kind, password_hash) VALUES ('desk@client.example','Desk','client','x') " +
       "ON CONFLICT (email) DO NOTHING");
     await c.query(
-      "INSERT INTO account_clients (email, client_key, person_key) VALUES " +
-      "('o@ff.example','t-team','ff_o'), ('desk@client.example','t-team','desk') " +
-      "ON CONFLICT (email, client_key) DO NOTHING");
+      "INSERT INTO account_clients (email, client_key, person_key, seat) VALUES " +
+      "('o@ff.example','t-team','ff_o','smoteam'), ('desk@client.example','t-team','desk','smoteam') " +
+      "ON CONFLICT (email, client_key) DO UPDATE SET seat = EXCLUDED.seat");
+
+    const world = await P.worldFor(c, "o@ff.example");
+    const admin = { email:"a@ff.example", is_admin:true, kind:"office", status:"active" };
+    const cons = { email:"o@ff.example", is_admin:false, kind:"office", status:"active" };
+    const CLIENT = { key:"t-team", kind:"client", status:"active" };
+    const OTHER = { key:"t-alpha", kind:"client", status:"active" };
+
+    eq("the seat is what the configuration gave", FF.seatOn(world, "t-team"), "smoteam");
+    check("a seat opens its client", FF.mayOpenClient(world, cons, CLIENT));
+    check("and a client they hold no seat on is listed, not opened",
+      FF.mayListClient(world, cons, OTHER) && !FF.mayOpenClient(world, cons, OTHER));
+    check("a consultant does not add clients or set the table",
+      !FF.mayCreateClient(world, cons) && !FF.mayEditAccess(world, cons));
+    check("the platform admin does both", FF.mayCreateClient(world, admin) && FF.mayEditAccess(world, admin));
+    check("an admin does not issue a password to another admin",
+      !FF.mayIssuePasswordTo(world, admin, { email:"b@ff.example", is_admin:true }) &&
+      FF.mayIssuePasswordTo(world, admin, { email:"o@ff.example", is_admin:false }));
+    check("nobody changes their own admin rights", !FF.maySetAdmin(world, admin, admin));
+
+    /* ONE SUPER USER PER CLIENT, enforced by the database rather than
+       remembered by a handler — proved by asking it to hold two. */
+    await c.query("UPDATE account_clients SET seat = 'super' WHERE client_key = 't-team' AND email = 'o@ff.example'");
+    let refused = false;
+    try {
+      await c.query(
+        "INSERT INTO account_clients (email, client_key, person_key, seat) " +
+        "VALUES ('a@ff.example','t-team','ff_a','super')");
+    } catch (e) { refused = /account_clients_one_super/.test(e.message); }
+    check("a client cannot have two super users", refused);
+
+    /* THE TEAM IS FOREFRONT'S. account_clients maps a client's own people too
+       — that is how their account knows which client it is — so a team read
+       without `kind = 'office'` offers a client's own staff as consultants. */
     const team = await P.teamOf(c, "t-team");
     eq("a client's team is Forefront's people only", team.length, 1);
     eq("…and it is the office one", team[0] && team[0].email, "o@ff.example");
+    eq("…carrying the seat, not a boolean", team[0] && team[0].seat, "super");
   });
 
   console.log("\n" + pass + " passed, " + fail + " failed");

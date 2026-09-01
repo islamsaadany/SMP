@@ -62,18 +62,19 @@ CREATE TABLE IF NOT EXISTS accounts (
   -- row, and the office's roles say nothing about them. Without this the two
   -- would share a matrix that was only ever written about consultants.
   kind          text NOT NULL DEFAULT 'office',
-  -- NOTHING UNTIL GRANTED (Islam's answer): a person with no role signs in and
-  -- sees an empty platform. That is deliberately not a floor role — there is
-  -- nothing to configure about somebody who holds nothing (§93 from the other
-  -- side), so this is nullable rather than defaulted to the weakest role.
-  role          text,
+  -- ONE PLATFORM ADMIN, AND NO OTHER RANK (Islam, 2026-08-29: "the roles are
+  -- on the client level"). What somebody may do about a CLIENT is the seat
+  -- they hold on it, in account_clients; this flag is only for the things that
+  -- are about the platform — adding clients, adding consultants, and the table.
+  -- A consultant on no client signs in and has nothing to open, which is what
+  -- a new joiner looks like and needs no role of its own to express.
+  is_admin      boolean NOT NULL DEFAULT false,
   password_hash text NOT NULL,
   must_change   boolean NOT NULL DEFAULT true,
   status        text NOT NULL DEFAULT 'active',
   created_at    timestamptz NOT NULL DEFAULT now(),
   updated_at    timestamptz NOT NULL DEFAULT now(),
   CONSTRAINT accounts_kind CHECK (kind IN ('office','client')),
-  CONSTRAINT accounts_role CHECK (role IS NULL OR role IN ('admin','lead','consultant','observer')),
   CONSTRAINT accounts_status CHECK (status IN ('active','retired'))
 );
 
@@ -89,15 +90,19 @@ CREATE TABLE IF NOT EXISTS account_clients (
   email       text NOT NULL REFERENCES accounts (email) ON DELETE CASCADE,
   client_key  text NOT NULL REFERENCES clients (key) ON DELETE CASCADE,
   person_key  text NOT NULL,
-  is_super    boolean NOT NULL DEFAULT false,
+  -- THE SEAT THIS ACCOUNT HOLDS ON THIS CLIENT — the client's own two (§89),
+  -- so the row written into that client's register carries it unchanged and
+  -- no rule in lib/rules.js has to learn anything.
+  seat        text NOT NULL DEFAULT 'smoteam',
   added_at    timestamptz NOT NULL DEFAULT now(),
-  PRIMARY KEY (email, client_key)
+  PRIMARY KEY (email, client_key),
+  CONSTRAINT account_clients_seat CHECK (seat IN ('super','smoteam'))
 );
 
 -- A CLIENT WITH TWO SUPER USERS IS A CLIENT WHERE NOBODY CAN SAY WHO HOLDS THE
 -- ACCESS MATRIX. Enforced here rather than remembered in a handler.
 CREATE UNIQUE INDEX IF NOT EXISTS account_clients_one_super
-  ON account_clients (client_key) WHERE is_super;
+  ON account_clients (client_key) WHERE seat = 'super';
 
 CREATE INDEX IF NOT EXISTS account_clients_client ON account_clients (client_key);
 
@@ -107,12 +112,16 @@ CREATE INDEX IF NOT EXISTS account_clients_client ON account_clients (client_key
 -- lib/platform-rules.js, never substituted (§30.2) — an area added later is
 -- absent from a map written before it existed, and reading absent as `none`
 -- would hide every new thing from everyone who ever touched the table.
+-- Everybody who is not the admin is ONE row (`everyone`), because there is
+-- nobody else to tell apart: a consultant on no client already sees nothing.
+-- The states differ per column — hidden/listed/open for other clients,
+-- none/view/edit for the consultants list, none/yes for adding one — so this
+-- stores the WORD and lib/platform-rules.js says which words a column takes.
 CREATE TABLE IF NOT EXISTS platform_access (
   role_key text NOT NULL,
   area_key text NOT NULL,
   grant_   text NOT NULL,
-  PRIMARY KEY (role_key, area_key),
-  CONSTRAINT platform_access_grant CHECK (grant_ IN ('none','view','edit'))
+  PRIMARY KEY (role_key, area_key)
 );
 
 -- ── The door ───────────────────────────────────────────────────────────

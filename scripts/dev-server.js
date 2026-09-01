@@ -62,6 +62,9 @@ http.createServer(function (req, res) {
      pretty URL is only ever exercised in production — which is the one
      place a broken link costs something. Keep the two in step. */
   if (CLIENTS.indexOf(url.pathname) > -1) p = path.join(ROOT, PLATFORM_FILE);
+  /* Forefront's own platform, at the clean path vercel.json rewrites — the
+     same rule the client paths follow: what is tested here is what ships. */
+  if (url.pathname === "/platform") p = path.join(ROOT, "platform.html");
   fs.readFile(p, function (err, data) {
     if (err) { res.statusCode = 404; return res.end("not found"); }
     res.setHeader("Content-Type", TYPES[path.extname(p)] || "application/octet-stream");

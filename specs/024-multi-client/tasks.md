@@ -128,15 +128,15 @@ inside a Forefront platform with its own chrome.
 lands on a platform whose navigation carries the three pages; a client's own
 person still goes straight into their client.
 
-- [ ] T060 [US2b] A Forefront platform shell — its own top line and navigation
+- [x] T060 [US2b] A Forefront platform shell — its own top line and navigation
   (`Clients · Consultants · Who sees what`) — served at `/platform`, in
   Forefront's colours, matching the two-line chrome a client's platform has
-- [ ] T061 [US2b] Move the cards, the consultants page, the access table and a
+- [x] T061 [US2b] Move the cards, the consultants page, the access table and a
   client's configuration off `index.html` and onto that shell; the door keeps
   only sign-in and the forced password change
-- [ ] T062 [US2b] The door hands over: a client's own person and anybody
+- [x] T062 [US2b] The door hands over: a client's own person and anybody
   holding one client go straight to that client; everybody else to `/platform`
-- [ ] T063 [US2b] `checks/multi-client.py` asserts the door holds no tabs, no
+- [x] T063 [US2b] `checks/multi-client.py` asserts the door holds no tabs, no
   table and no cards, and that every office page is reachable from the shell —
   proved by putting the pages back on the door and watching it fail
 
@@ -148,17 +148,17 @@ seat they hold on a particular client.
 SMO team; a consultant on no client signs in and sees nothing to open; the
 platform admin alone adds clients and consultants.
 
-- [ ] T064 [US3b] `accounts.role` becomes `is_admin`; `account_clients` gains
+- [x] T064 [US3b] `accounts.role` becomes `is_admin`; `account_clients` gains
   `seat` (`super` / `smoteam`), replacing `is_super` — one platform migration,
   and the existing rows carry across (`is_super` → `super`, else `smoteam`)
-- [ ] T065 [US3b] `lib/platform-rules.js`: the four roles go; `mayOpenClient`
+- [x] T065 [US3b] `lib/platform-rules.js`: the four roles go; `mayOpenClient`
   answers from the seat, and the platform questions from `is_admin` plus the
   stored table
-- [ ] T066 [US3b] The matrix becomes four platform columns asked of everybody
+- [x] T066 [US3b] The matrix becomes four platform columns asked of everybody
   who is not the admin, with **hidden · listed · open** on the first
-- [ ] T067 [US3b] The seat is set on the client's configuration and shown
+- [x] T067 [US3b] The seat is set on the client's configuration and shown
   read-only on the consultant's row
-- [ ] T068 [US3b] `test-platform-rules.js` and `checks/multi-client.py` rewritten
+- [x] T068 [US3b] `test-platform-rules.js` and `checks/multi-client.py` rewritten
   around seats — proved by putting the platform-wide role back and watching them
   fail
 

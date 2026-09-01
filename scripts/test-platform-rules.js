@@ -1,10 +1,10 @@
-/* Does the office's table actually decide what it claims to?
+/* Does the office's model actually decide what it claims to?
    Run: node scripts/test-platform-rules.js      (no database — pure functions)
 
-   The second half matters more than the first, for the reason
-   test-authorize.js gives: refusing an Observer is easy, and the real risk is
-   a rule written so tightly that a Lead cannot do their own job. Every role is
-   therefore also made to do the work it is FOR, and must not be refused. */
+   TWO LEVELS, so the tests come in two halves: what the PLATFORM admin may do,
+   and what a SEAT on a client means. The second half matters more, for the
+   reason test-authorize.js gives — refusing somebody is easy, and the real risk
+   is a rule so tight that a consultant cannot do the job they are on. */
 
 const F = require("../lib/platform-rules.js");
 
@@ -14,142 +14,116 @@ function check(name, cond, extra) {
   fail++;
   console.log("  FAIL  " + name + (extra ? "\n        " + extra : ""));
 }
-const eq = (name, got, want) => check(name + "  (got " + JSON.stringify(got) + ")", got === want);
+const eq = (name, got, want) =>
+  check(name + "  (got " + JSON.stringify(got) + ", wanted " + JSON.stringify(want) + ")", got === want);
 
-/* ── The world, as the server will build it ───────────────────────── */
 const RAYA = { key:"raya-trade", name:"Raya Trade", kind:"client", status:"active" };
 const RHI  = { key:"rhi",        name:"RHI",        kind:"client", status:"active" };
 const DEMO = { key:"demo",       name:"Demo",       kind:"demo",   status:"active" };
 const GONE = { key:"old",        name:"Old",        kind:"client", status:"retired" };
-const CLIENTS = [RAYA, RHI, DEMO, GONE];
+const ALL = [RAYA, RHI, DEMO, GONE];
 
-const account = (role, extra) => Object.assign({ email: role + "@forefront.consulting",
-  name: role, role: role, status: "active" }, extra || {});
-/* `mine` is account_clients read for this account — the ONE statement of what
-   "my clients" means. */
+const acct = (email, extra) => Object.assign({ email: email, name: email, kind: "office",
+  status: "active", is_admin: false }, extra || {});
 const world = (mine, access) => ({ mine: mine || [], access: access || {} });
-const on = (key, isSuper) => ({ client_key: key, person_key: "ff_x", is_super: !!isSuper });
+const on = (key, seat) => ({ client_key: key, person_key: "ff_x", seat: seat || "smoteam" });
+const setting = (map) => ({ everyone: map });
 
-const admin = account("admin");
-const lead = account("lead");
-const consultant = account("consultant");
-const observer = account("observer");
-const noRole = account(null, { email:"new@forefront.consulting", role:null });
-const retired = account("lead", { email:"gone@forefront.consulting", status:"retired" });
+const admin = acct("islam@forefront.consulting", { is_admin: true });
+const lead = acct("essam@forefront.consulting");
+const newJoiner = acct("nadia@forefront.consulting");
+const retired = acct("gone@forefront.consulting", { status: "retired" });
+const rayaCEO = { email:"ceo@rayatrade.com", name:"CEO", kind:"client", status:"active" };
 
-const wLead = world([on("raya-trade"), on("rhi", true)]);
-const wCons = world([on("raya-trade")]);
-const wObs  = world([on("raya-trade")]);
-const wAdmin = world([on("raya-trade", true)]);
+const wAdmin = world([on("raya-trade", "super")]);
+const wLead  = world([on("raya-trade", "smoteam"), on("rhi", "super")]);
+const wNew   = world([]);
+const wCEO   = world([on("raya-trade")]);
 
-console.log("── 1 · the defaults, as approved 2026-08-28 ──────────────");
-eq("admin · other clients", F.grantIn(world(), "admin", "other_clients"), "edit");
-eq("lead · other clients", F.grantIn(world(), "lead", "other_clients"), "view");
-eq("consultant · other clients", F.grantIn(world(), "consultant", "other_clients"), "none");
-eq("observer · my clients", F.grantIn(world(), "observer", "my_clients"), "view");
-eq("consultant · demo", F.grantIn(world(), "consultant", "demo"), "view");
-eq("lead · create a client", F.grantIn(world(), "lead", "create_client"), "none");
+console.log("── 1 · a seat opens a client, and nothing else does ──────");
+check("a seat on a client opens it", F.mayOpenClient(wLead, lead, RAYA));
+eq("…and says what they hold there", F.seatOn(wLead, "raya-trade"), "smoteam");
+eq("…which can differ per client", F.seatOn(wLead, "rhi"), "super");
+check("somebody's super user on one client is not on another",
+  F.isSuperOf(wLead, "rhi") && !F.isSuperOf(wLead, "raya-trade"));
+eq("no seat is no seat", F.seatOn(wLead, "el-abd"), null);
 
-console.log("── 2 · nothing until granted, and nothing when retired ───");
-eq("no role · my clients", F.grantIn(world(), null, "my_clients"), "none");
-check("no role opens nothing", !F.mayOpenClient(world([on("raya-trade")]), noRole, RAYA));
-check("no role sees no cards", F.visibleClients(world([on("raya-trade")]), noRole, CLIENTS).length === 0);
-check("a retired account opens nothing", !F.mayOpenClient(wLead, retired, RAYA));
-check("a retired account manages nobody", !F.mayManageConsultants(wLead, retired));
+console.log("── 2 · a client they hold no seat on ─────────────────────");
+/* Islam's answer: whether a consultant sees other clients is a setting in
+   Who sees what — three states, not two. */
+/* Written first as a ternary that answered itself — the shape constitution
+   XVI warns about. Asked plainly of a client they hold no seat on. */
+const OTHER = { key:"x", name:"X", kind:"client", status:"active" };
+eq("listed by default", F.clientState(wLead, lead, OTHER), "listed");
+const wHidden = world(wLead.mine, setting({ other_clients: "hidden" }));
+const wOpen   = world(wLead.mine, setting({ other_clients: "open" }));
+check("hidden means not even on the cards", !F.mayListClient(wHidden, lead, OTHER));
+check("listed means on the cards and not openable",
+  F.mayListClient(wLead, lead, OTHER) && !F.mayOpenClient(wLead, lead, OTHER));
+check("open means readable", F.mayOpenClient(wOpen, lead, OTHER));
 
-console.log("── 3 · an area nobody declared answers none ──────────────");
-eq("unknown area", F.grantIn(world(), "admin", "billing"), "none");
+console.log("── 3 · the platform admin ────────────────────────────────");
+check("opens every client", F.mayOpenClient(wAdmin, admin, RHI) && F.mayOpenClient(wAdmin, admin, DEMO));
+check("…arriving as that client's Super user where they hold no seat",
+  F.seatFor(wAdmin, admin, RHI) === "super");
+check("…and as the seat they hold where they do", F.seatFor(wLead, lead, RAYA) === "smoteam");
+check("adds clients and consultants", F.mayCreateClient(wAdmin, admin) && F.mayManageConsultants(wAdmin, admin));
+check("sets the table", F.mayEditAccess(wAdmin, admin));
 
-console.log("── 4 · stored is MERGED over the defaults, never substituted");
-const tightened = world([on("raya-trade")], { lead: { other_clients: "none" } });
-eq("stored cell wins", F.grantIn(tightened, "lead", "other_clients"), "none");
-eq("an untouched cell keeps its default", F.grantIn(tightened, "lead", "my_clients"), "edit");
-eq("an area added later keeps its default", F.grantIn(tightened, "lead", "demo"), "edit");
+console.log("── 4 · and nobody else does those things ─────────────────");
+check("a consultant does not add a client", !F.mayCreateClient(wLead, lead));
+check("a consultant does not set the table", !F.mayEditAccess(wLead, lead));
+check("…even one who is a client's Super user", !F.mayEditAccess(wLead, lead) && F.isSuperOf(wLead, "rhi"));
+check("a consultant reads the consultants list by default", F.mayReadConsultants(wLead, lead));
+check("…and does not manage it", !F.mayManageConsultants(wLead, lead));
+const wNoList = world(wLead.mine, setting({ consultants: "none" }));
+check("…which the table can close", !F.mayReadConsultants(wNoList, lead));
 
-console.log("── 5 · every role can do the work it is FOR ──────────────");
-check("admin opens any client", F.mayOpenClient(wAdmin, admin, RHI) && F.mayEditClient(wAdmin, admin, RHI));
-check("admin adds a client", F.mayCreateClient(wAdmin, admin));
-check("admin manages consultants", F.mayManageConsultants(wAdmin, admin));
-check("admin edits the table", F.mayEditAccess(wAdmin, admin));
-check("lead edits their own client", F.mayEditClient(wLead, lead, RAYA));
-check("lead reads another client", F.mayOpenClient(wLead, lead, DEMO) && F.mayOpenClient(world(), lead, RHI));
-check("lead configures their own client", F.mayConfigureClient(wLead, lead, RAYA));
-check("lead reads the consultants list", F.mayReadConsultants(wLead, lead));
-check("consultant works in their own client", F.mayEditClient(wCons, consultant, RAYA));
-check("consultant practises in Demo", F.mayOpenClient(wCons, consultant, DEMO));
-check("observer reads their own client", F.mayOpenClient(wObs, observer, RAYA));
+console.log("── 5 · a new joiner, on no client ────────────────────────");
+check("signs in and can open nothing",
+  !F.mayOpenClient(wNew, newJoiner, RAYA) && !F.mayOpenClient(wNew, newJoiner, RHI));
+check("…but reaches Demo, which is what practising is for",
+  F.mayOpenClient(wNew, newJoiner, DEMO));
+const wNoDemo = world([], setting({ demo: "none" }));
+check("…unless the table closes it", !F.mayOpenClient(wNoDemo, newJoiner, DEMO));
+check("a retired account holds nothing", !F.mayOpenClient(wLead, retired, RAYA) &&
+  !F.mayReadConsultants(wLead, retired));
 
-console.log("── 6 · and no more than that ─────────────────────────────");
-check("lead does not add clients", !F.mayCreateClient(wLead, lead));
-check("lead does not manage consultants", !F.mayManageConsultants(wLead, lead));
-/* Written once as `!x === false || …`, which passes whatever the rule does —
-   the unfalsifiable assertion constitution XVI names. Asked plainly now. */
-check("lead does not edit a client they are not on",
-  !F.mayEditClient(world([on("raya-trade")]), lead, RHI));
-check("consultant cannot open another client", !F.mayOpenClient(wCons, consultant, RHI));
-check("consultant cannot configure their own client", !F.mayConfigureClient(wCons, consultant, RAYA));
-check("consultant cannot edit Demo", !F.mayEditClient(wCons, consultant, DEMO));
-check("observer cannot edit their own client", !F.mayEditClient(wObs, observer, RAYA));
-check("observer sees no other client", !F.mayOpenClient(wObs, observer, RHI));
+console.log("── 6 · a client's configuration ──────────────────────────");
+check("the admin configures any client", F.mayConfigureClient(wAdmin, admin, RHI));
+check("a client's own Super user configures theirs", F.mayConfigureClient(wLead, lead, RHI));
+check("…and not one they are only on the team of", !F.mayConfigureClient(wLead, lead, RAYA));
+check("…nor one they hold no seat on", !F.mayConfigureClient(wLead, lead, OTHER));
 
-console.log("── 7 · configuration rides what the role can REACH ───────");
-/* A Lead's client_config is `edit`, but RHI is not theirs to open here, so the
-   configuration must not be reachable through it either. */
-const wLeadOnlyRaya = world([on("raya-trade")], { lead: { other_clients: "none" } });
-check("config follows the client, not the cell",
-  F.mayConfigureClient(wLeadOnlyRaya, lead, RAYA) && !F.mayConfigureClient(wLeadOnlyRaya, lead, RHI));
+console.log("── 7 · a client's own person is not one of us ────────────");
+check("their own client, always", F.mayOpenClient(wCEO, rayaCEO, RAYA));
+check("nobody else's, ever", !F.mayOpenClient(wCEO, rayaCEO, RHI) && !F.mayOpenClient(wCEO, rayaCEO, DEMO));
+check("no page of this platform", !F.mayReadConsultants(wCEO, rayaCEO) &&
+  !F.mayCreateClient(wCEO, rayaCEO) && !F.mayEditAccess(wCEO, rayaCEO));
+check("and a stray admin flag on them grants nothing",
+  !F.isAdmin(Object.assign({}, rayaCEO, { is_admin: true })));
 
-console.log("── 8 · the demo column is asked FIRST ────────────────────");
-/* A new joiner with nothing but Demo must reach Demo and no client. */
-const wNew = world([], { observer: { my_clients: "none", other_clients: "none", demo: "view" } });
-check("observer with nothing reaches Demo", F.mayOpenClient(wNew, observer, DEMO));
-check("...and reaches no client", !F.mayOpenClient(wNew, observer, RAYA) && !F.mayOpenClient(wNew, observer, RHI));
-eq("demo is read through its own column", F.areaFor(wNew, DEMO), "demo");
+console.log("── 8 · issuing a password, and the admin flag ────────────");
+check("the admin issues to a consultant", F.mayIssuePasswordTo(wAdmin, admin, lead));
+check("…not to another admin", !F.mayIssuePasswordTo(wAdmin, admin, acct("b@ff.example", { is_admin: true })));
+check("…and never to themselves", !F.mayIssuePasswordTo(wAdmin, admin, admin));
+check("a consultant issues to nobody", !F.mayIssuePasswordTo(wLead, lead, newJoiner));
+check("the admin may make somebody else an admin", F.maySetAdmin(wAdmin, admin, lead));
+check("…and may not change their own", !F.maySetAdmin(wAdmin, admin, admin));
 
-console.log("── 9 · the admin row is nobody's, including the admin's ──");
-check("admin may edit another row", F.mayEditAccessRow(wAdmin, admin, "lead"));
-check("admin may NOT edit the admin row", !F.mayEditAccessRow(wAdmin, admin, "admin"));
-check("a lead may not edit the table at all", !F.mayEditAccess(wLead, lead));
+console.log("── 9 · stored is merged over the defaults ────────────────");
+const tight = world(wLead.mine, setting({ other_clients: "hidden" }));
+eq("a stored cell wins", F.grantIn(tight, "other_clients"), "hidden");
+eq("an untouched cell keeps its default", F.grantIn(tight, "consultants"), "view");
+eq("a column added later keeps its default", F.grantIn(tight, "demo"), "edit");
+eq("a column nobody declared answers none", F.grantIn(tight, "billing"), "none");
 
-console.log("── 10 · issuing a password: the test is the TARGET ───────");
-check("admin issues to a consultant", F.mayIssuePasswordTo(wAdmin, admin, consultant));
-check("admin does NOT issue to another admin",
-  !F.mayIssuePasswordTo(wAdmin, admin, account("admin", { email:"other@forefront.consulting" })));
-check("nobody issues to themselves", !F.mayIssuePasswordTo(wAdmin, admin, admin));
-check("a lead issues to nobody", !F.mayIssuePasswordTo(wLead, lead, consultant));
-
-console.log("── 11 · the cards are the list the server will open ──────");
-const seen = F.visibleClients(wLead, lead, CLIENTS).map(function (c) { return c.key; });
+console.log("── 10 · the cards are the list the server will open ──────");
+const seen = F.visibleClients(wLead, lead, ALL).map(c => c.key);
 check("a retired client is on nobody's cards", seen.indexOf("old") < 0, seen.join(","));
-check("every card shown is openable",
-  seen.every(function (k) { return F.mayOpenClient(wLead, lead, CLIENTS.filter(c => c.key === k)[0]); }));
-eq("a consultant sees only their own and Demo",
-  F.visibleClients(wCons, consultant, CLIENTS).map(c => c.key).join(","), "raya-trade,demo");
-
-console.log("── 12 · a client's own person is not one of us ───────────");
-/* Raya's CEO signs in at the same door and lands in their client. The office's
-   roles say nothing about them: they hold their one client, always, and no
-   page of the outer platform ever. */
-const rayaCEO = { email:"ceo@rayatrade.com", name:"Group CEO", role:null,
-                  kind:"client", status:"active" };
-const wCEO = world([on("raya-trade")]);
-check("their own client, always", F.mayOpenClient(wCEO, rayaCEO, RAYA) && F.mayEditClient(wCEO, rayaCEO, RAYA));
-check("nobody else's client, ever", !F.mayOpenClient(wCEO, rayaCEO, RHI));
-check("…not even Demo", !F.mayOpenClient(wCEO, rayaCEO, DEMO));
-check("no configuration page", !F.mayReadConfig(wCEO, rayaCEO, RAYA));
-check("no consultants page", !F.mayReadConsultants(wCEO, rayaCEO));
-check("no adding clients", !F.mayCreateClient(wCEO, rayaCEO));
-check("no access table", !F.mayEditAccess(wCEO, rayaCEO));
-/* AND AN OFFICE ROLE ON A CLIENT ACCOUNT CHANGES NOTHING — the kind is asked
-   first, so a stray `role` value cannot promote somebody who is not one of us. */
-const strayed = Object.assign({}, rayaCEO, { role:"admin" });
-check("a stray office role on a client account grants nothing",
-  !F.mayOpenClient(wCEO, strayed, RHI) && !F.mayCreateClient(wCEO, strayed) &&
-  !F.mayEditAccess(wCEO, strayed));
-
-console.log("── 13 · the seat an office account holds inside a client ─");
-eq("their super user", F.seatIn(wLead, "rhi"), "super");
-eq("everyone else on the team", F.seatIn(wLead, "raya-trade"), "smoteam");
+eq("a consultant sees their seats and whatever the table lists", seen.join(","), "raya-trade,rhi,demo");
+eq("hidden takes the rest away",
+  F.visibleClients(wHidden, lead, ALL).map(c => c.key).join(","), "raya-trade,rhi,demo");
 
 console.log("\n" + pass + " passed, " + fail + " failed");
 process.exit(fail ? 1 : 0);

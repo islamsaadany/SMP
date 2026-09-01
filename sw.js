@@ -205,7 +205,7 @@
    Name read off origin/main at the start of this merge and again immediately
    before the push (§94.12, §94.16); "-testcopy" cannot be arrived at by
    coincidence. */
-const SHELL = "smp-shell-v3.58-cards";
+const SHELL = "smp-shell-v3.59-office";
 const ASSETS = [
   "/",
   "/index.html",
@@ -214,6 +214,7 @@ const ASSETS = [
      filename instead would fill the cache with something nobody requests
      and leave the platform unavailable offline. Both still resolve to the
      same file on the server (vercel.json rewrites). */
+  "/platform",
   "/raya-trade",
   "/rhi",
   "/el-abd",

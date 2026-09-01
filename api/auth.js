@@ -79,7 +79,7 @@ function send(res, code, obj) {
 async function landingFor(client, account) {
   if (!account || !account.email) return { land: null, list: [] };
   const mine = (await client.query(
-    "SELECT client_key, person_key, is_super FROM platform.account_clients WHERE email = $1",
+    "SELECT client_key, person_key, seat FROM platform.account_clients WHERE email = $1",
     [account.email])).rows;
   if (account.kind === "client") {
     /* Their one client, always — and never a card. */
@@ -91,8 +91,15 @@ async function landingFor(client, account) {
   const world = { mine: mine, access: access };
   const all = (await client.query(
     "SELECT key, kind, status FROM platform.clients ORDER BY kind, name")).rows;
-  const seen = FF.visibleClients(world, account, all).map(function (c) { return c.key; });
-  return { land: seen.length === 1 ? seen[0] : null, list: seen };
+  /* LANDING COUNTS WHAT THEY CAN OPEN, not what they can see. With the
+     default setting a consultant is shown every client by name — that is the
+     office knowing what Forefront runs — while holding a seat on one. Counting
+     the LISTED ones would put a card page in front of somebody with exactly
+     one destination, which is the door behind a door §32 removed. */
+  const listed = FF.visibleClients(world, account, all).map(function (c) { return c.key; });
+  const openable = all.filter(function (c) { return FF.mayOpenClient(world, account, c); })
+                      .map(function (c) { return c.key; });
+  return { land: openable.length === 1 ? openable[0] : null, list: listed };
 }
 
 module.exports = async function handler(req, res) {
@@ -119,7 +126,7 @@ module.exports = async function handler(req, res) {
       const person = await auth.getSession(client, req, null);
       if (!person) return send(res, 200, { ok: true, person: null });
       const where = await landingFor(client, { email: person.email, kind: person.kind,
-                                               role: person.officeRole, status: "active" });
+                                               is_admin: person.isAdmin, status: "active" });
       return send(res, 200, { ok: true, person: person, client: where.land, clients: where.list });
     }
 
@@ -153,7 +160,7 @@ module.exports = async function handler(req, res) {
          occur. Somebody on a register with no address simply has no account,
          which the Attention queue already names. */
       const acct = (await client.query(
-        "SELECT email, name, kind, role, password_hash, must_change, status " +
+        "SELECT email, name, kind, is_admin, password_hash, must_change, status " +
         "FROM platform.accounts WHERE email = $1", [typed])).rows[0];
 
       /* ONE MESSAGE for an address nobody has and a password that is wrong —
@@ -176,10 +183,10 @@ module.exports = async function handler(req, res) {
          Answered HERE, on the server, because the browser asking would have
          to be told the list first. */
       const where = await landingFor(client, { email: acct.email, kind: acct.kind,
-                                               role: acct.role, status: acct.status });
+                                               is_admin: acct.is_admin, status: acct.status });
       return send(res, 200, { ok: true, person: {
         key: acct.email, email: acct.email, name: acct.name, kind: acct.kind,
-        officeRole: acct.role, mustChange: acct.must_change
+        isAdmin: !!acct.is_admin, mustChange: acct.must_change
       }, client: where.land, clients: where.list });
     }
 

@@ -19184,3 +19184,167 @@ branch changes, which is what §91 already prescribes for the built file.
 **`node --check sw.js` is the two seconds that catches it**, and it belongs
 beside the name check in every merge from here.
 
+
+## 147 · One platform, many clients (v3.57–v3.59, spec 024)
+
+Islam: *"Let's work together on splitting this platform to be multitenant. We
+have an external access for the SMO office and then they pick the client from
+different cards — we can have Raya Trade and as placeholders RHI and El Abd,
+and when they access the client they see what we have today for Raya Trade …
+and for RHI and El Abd they see blank."*
+
+### 147.1 · The boundary, and why it came first
+
+**ONE POSTGRES SCHEMA PER CLIENT** (§36's own recommendation, four versions
+old and now built): `SET search_path` off a registry row, never a tenant column.
+Person keys here are short and global — `smo`, `ceo` — so a column would force a
+composite key through `credentials` and `sessions` and through every rule that
+reads them.
+
+**THE CLIENT IS RESOLVED ONCE, FOR ALL FOUR ENDPOINTS** (`lib/platform-io.js`):
+the browser sends the slug it was **served at**, the schema comes from the
+registry row, and **a schema name typed into the address bar is refused
+identically to a client that does not exist**. Both refusals come from one
+constant — `noSuchClient()` — because a refusal that differs by a word tells the
+two cases apart, which is the whole thing a shared refusal exists to prevent.
+`sync.js` and `chat.js` read the slug from `location.pathname` and never store
+it, so two tabs on two clients cannot cross; `chat.js` does it inside `post()`,
+the one place every chat request already goes through (§97).
+
+**A REQUEST NAMING NO CLIENT AT ALL IS NOT REFUSED, IT IS DEFAULTED — ONCE, BY
+NAME.** A service worker serves the previous platform file out of the client's
+own disk (§91), so on deploy day there are browsers posting saves that predate
+the field. Refusing those would take the live client down to prove a point.
+
+**THE MOVE WAS REHEARSED, NOT REASONED ABOUT** (`scripts/migrate-to-multi-client.js`,
+`--dry-run`): against a real Postgres seeded exactly as a v2.0 deployment,
+44 tables moved from `public` into `raya_trade` with `ALTER TABLE SET SCHEMA`
+— **no row is copied, so nothing can be half-copied** — and a second run is a
+no-op that says so.
+
+**AND THREE MIGRATIONS WOULD HAVE SEEDED EVERY NEW CLIENT WITH RAYA'S
+FURNITURE**: 006 (Raya's companies), 003 and §43.8's `smo`/`1234` were each
+written for the one tenant that existed and are now guarded by `WHERE EXISTS`
+on the thing they were written for. §45.3's fault, avoided rather than repeated.
+
+### 147.2 · Identity moves schema rather than being rewritten
+
+`platform.accounts` is keyed by **email**; `platform.account_clients` says which
+client each account is on and who it is inside it; `sessions` and
+`login_attempts` move beside them. §43's scrypt, `must_change`, the httpOnly
+cookie, the 30-day life and the check-the-limit-**before**-verifying order are
+all unchanged. **Every statement names its schema explicitly**, because each
+client still carries its own `sessions` and `credentials` from migration 002 and
+an unqualified name would resolve to the wrong one — silently, and in the
+direction that looks fine.
+
+**THE DOOR TAKES AN EMAIL AND NOTHING ELSE** (Islam: *"access only through
+email … no access through user name SMO in any place"*). §69.23's
+two-rows-one-address refusal goes with the person-key path: an address is the
+primary key of `accounts` now, so the ambiguity it named cannot occur. A
+register row with no email **stays and cannot sign in**, and a bulk password
+issue **counts** those people rather than passing over them in silence.
+
+**WHERE SOMEBODY LANDS IS DECIDED BY WHAT THEY CAN OPEN, NOT BY THE TEAM THEY
+ARE ON.** Written the other way first — and somebody on one team who may open
+three clients would have been dropped into one and never seen the cards their
+own row entitles them to. §32 measured against the right list.
+
+### 147.3 · The door is a door (revision 2)
+
+Islam, seeing the first build: *"the page you are showing should be just for
+login like the main login page of Raya Trade, and the rest should be inside the
+platform."* The first build had grown tabs, a table and a matrix **on the front
+page**, which is where anybody can read them.
+
+`platform.html` is Forefront's own shell — the two-line chrome a client's
+platform has had since §2.9, in Forefront's colours (#0F2C69 / #F5A623) — with
+**Clients · Consultants · Who sees what** under it. **A client's configuration
+opens from that client's own card**, never a fourth navigation entry: it is
+about one client rather than about all of them.
+
+**THE CHECK ASSERTS THE DOOR AS ABSENCES** — no cards, no tabs, no table, and
+none of the three words — because the fault this guards is the office's pages
+leaking back onto the front page, and a check that only looks for something
+present cannot see something that should not be drawn (§94.2).
+
+### 147.4 · A role is a seat on a client (revision 3)
+
+Islam: *"the consultants roles are not general across the multitenants — the
+roles are on the client level."* This **reverses the four platform roles**
+(Admin · Lead · Consultant · Observer) agreed on 28 August and built in US3.
+Recorded as a reversal, not overwritten: those roles were a reasonable reading
+of *"we need an accessibility table"*, and they are wrong about the thing that
+matters — what somebody may do depends on the **client**, not on a rank they
+carry everywhere.
+
+Two levels, each answering its own question: **`accounts.is_admin`** (adding
+clients, adding consultants, and the table) and **`account_clients.seat`** —
+`super` or `smoteam`, the client's own two seats (§89), so nothing new is learnt
+and the row written into the client's register carries that seat exactly.
+
+**SET ON THE CLIENT'S CONFIGURATION, READ-ONLY ON THE CONSULTANT'S ROW** —
+one place writes it (§53.5), and the check asserts **both ends**, because
+*"one place writes it"* is a claim about two screens.
+
+**SOMEBODY ON NO CLIENT SIGNS IN AND HAS NOTHING TO OPEN**, which is what a new
+joiner looks like — so the Observer role is not needed to express it.
+
+**AND THE MIGRATION IS CONDITIONAL FOR A REASON §33.5 DOES NOT COVER.** On a
+client, a pre-phase migration runs after `schema.sql` and finds the new shape
+already there. On the **platform** the phase runs *before* `platform-schema.sql`
+— it has to, because that file now indexes the column this migration adds — so
+on a fresh database the tables **do not exist at all**, and every step is
+guarded on `to_regclass` rather than on a column. Proved twice: 42 assertions on
+a virgin database, and an old-shape platform seeded by hand where the admin
+stayed an admin, the super seats carried across, everybody else became SMO team,
+and the rows naming roles that no longer exist were dropped.
+
+### 147.5 · The seat move shipped backwards, with a comment saying it did not
+
+One super user per client is a **unique index**, so naming a second one MOVES
+the seat. The handler wrote the new super **first** and demoted the old one
+after — so for the length of one statement the client had two, the index
+refused, and the person pressing the seat was told *"Something went wrong.
+Nothing was changed."* Everything about the intention was right except which
+line came first, and **the comment above it claimed the order was the fix**.
+§104.8 exactly: *a comment can describe an intention the code never carries
+out, and nothing in a build compares the two.* The demote goes first now, **in
+a transaction**, because the demote is a real change on its own — if the insert
+then failed, the client would be left with **no** super user, which is worse
+than the act simply not happening.
+
+### 147.6 · Two of the check's own four failures were the check
+
+**A RENDERED WORD IS NOT THE FACT.** The seat tag is uppercased in CSS, so
+asserting `"Super user"` against the screen asserts a stylesheet. Asked
+case-insensitively.
+
+**AND A DEFAULT MUST BE ASKED OF THE SERVER, NEVER WRITTEN INTO THE CHECK.**
+§50.6 says a cell put back to its default deletes its row; the check pressed
+`hidden` and called the product broken for storing it — `hidden` is a real
+setting on that column and the default is `listed`. It reads `defaults` from
+the endpoint now and presses **that**, so the assertion survives somebody
+changing what the default is (§94.8: a check written against the last value has
+to be rewritten every time it changes; one written against the *rule* does not).
+
+**AND THE FIXTURE IS THE CHECK'S OWN.** It had assumed a database somebody
+prepared by hand, which is the same fault as measuring the state you happen to
+find: `checks/fixture-platform.js` makes the three accounts it signs in as,
+through the **product's own hasher** and never a second copy of it.
+
+### 147.7 · Proved
+
+`checks/multi-client.py` **48 assertions**, watched to fail first three ways —
+the seat move put back **2**, the office's pages put back on the door **7**, the
+seat made editable on the consultants list as well **1**. `test-platform.js`
+**42** on a virgin database; `test-platform-rules.js` **45**;
+`test-authorize.js` **240**; the round trip PASS in `public` and inside a
+client schema created today (§113.7's fault is invisible on a database that
+already exists); `qa.py` walking every page as every viewer with **ERRORS:
+none**.
+
+**Still open, and deliberately not started here:** the Demo client seeded from
+the worked example under invented names, the retirement of the in-product Demo
+data button, and the live migration — **rehearsed on a copy of production and
+reported before it is run for real**.

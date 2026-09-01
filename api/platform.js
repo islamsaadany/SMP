@@ -91,13 +91,13 @@ module.exports = async function handler(req, res) {
         return send(res, 403, { ok: false, error: "That is not something this account opens." });
       }
 
-      const account = { email: me.email, name: me.name, role: me.officeRole,
+      const account = { email: me.email, name: me.name, is_admin: me.isAdmin,
                         kind: me.kind, status: "active" };
       const world = await P.worldFor(c, me.email);
 
       if (action === "me") {
         return send(res, 200, { ok: true, account: {
-          email: account.email, name: account.name, role: account.role
+          email: account.email, name: account.name, isAdmin: !!account.is_admin
         }, access: world.access, mine: FF.myClientKeys(world) });
       }
 
@@ -112,9 +112,12 @@ module.exports = async function handler(req, res) {
           cards.push({
             key: row.key, name: row.name, industry: row.industry, kind: row.kind,
             mark: row.mark, mine: FF.isMine(world, row.key),
-            grant: FF.clientGrant(world, account, row),
-            /* Said per client, because configuration rides what the role can
-               REACH: a Lead configures their own clients and not another's. */
+            /* THE SEAT IS WHAT A CARD SAYS ABOUT THIS PERSON AND THIS CLIENT
+               (revision 3): `state` is how far they may go — listed, or open —
+               and `seat` is what they hold when they arrive. */
+            seat: FF.seatOn(world, row.key),
+            state: FF.clientState(world, account, row),
+            canOpen: FF.mayOpenClient(world, account, row),
             canConfig: FF.mayReadConfig(world, account, row),
             units: facts.units, planned: facts.planned,
             cycleOpen: facts.cycleOpen, unreadable: !!facts.unreadable
@@ -131,18 +134,26 @@ module.exports = async function handler(req, res) {
         if (!FF.mayReadConsultants(world, account)) {
           return send(res, 403, { ok: false, error: "The consultants list is not yours to open." });
         }
+        /* THE SEATS ARE READ HERE AND SET ON EACH CLIENT'S CONFIGURATION —
+           one place writes them (§53.5). Gathered per person so the row can
+           say "Raya Trade · Super user", which is what somebody opening this
+           page is actually asking. */
         const rows = (await c.query(
-          "SELECT a.email, a.name, a.role, a.status, a.must_change, " +
-          "       (SELECT count(*)::int FROM account_clients ac WHERE ac.email = a.email) AS clients " +
+          "SELECT a.email, a.name, a.is_admin, a.status, a.must_change, " +
+          "  COALESCE((SELECT json_agg(json_build_object('client', cl.name, 'key', cl.key, 'seat', ac.seat) " +
+          "            ORDER BY cl.name) " +
+          "            FROM account_clients ac JOIN clients cl ON cl.key = ac.client_key " +
+          "            WHERE ac.email = a.email), '[]'::json) AS seats " +
           "FROM accounts a WHERE a.kind = 'office' ORDER BY a.name")).rows;
         return send(res, 200, { ok: true, people: rows.map(function (r) {
-          return { email: r.email, name: r.name, role: r.role, status: r.status,
+          return { email: r.email, name: r.name, isAdmin: !!r.is_admin, status: r.status,
+                   seats: r.seats,
                    /* §35's three states, unchanged: a person the platform has
                       never been asked about has NO password state, which is a
                       dash and not a "none". */
-                   password: r.must_change == null ? "none" : (r.must_change ? "temporary" : "set"),
-                   clients: r.clients };
-        }), canEdit: FF.mayManageConsultants(world, account), roles: FF.ROLES });
+                   password: r.must_change == null ? "none" : (r.must_change ? "temporary" : "set") };
+        }), canEdit: FF.mayManageConsultants(world, account),
+            canSetAdmin: FF.isAdmin(account), me: account.email });
       }
 
       if (action === "saveConsultant") {
@@ -153,37 +164,39 @@ module.exports = async function handler(req, res) {
         if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email)) {
           return send(res, 400, { ok: false, error: "That is not an email address." });
         }
-        const role = body.role === null || body.role === "" ? null : String(body.role);
-        if (role !== null && FF.ROLE_KEYS.indexOf(role) < 0) {
-          return send(res, 400, { ok: false, error: "There is no such role." });
-        }
-        /* THE ADMIN'S OWN ROW IS NOT EDITABLE FROM HERE, for §89's reason: the
-           platform must always have somebody who can run it, and the fastest
-           way to lose that is to demote yourself while tidying up. */
         const existing = await P.accountByEmail(c, email);
-        if (existing.email === account.email && role !== account.role) {
-          return send(res, 400, { ok: false, error: "You cannot change your own role." });
+
+        /* THE ADMIN FLAG IS ITS OWN ACT, and never one somebody performs on
+           themselves: a platform with no admin cannot be run, and demoting
+           yourself while tidying up is the fastest way there (§89). */
+        if (body.isAdmin !== undefined && existing.email) {
+          if (!FF.maySetAdmin(world, account, existing)) {
+            return send(res, 403, { ok: false, error:
+              existing.email === account.email
+                ? "You cannot change your own admin rights."
+                : "Only the platform admin sets that." });
+          }
+          await c.query("UPDATE accounts SET is_admin = $2, updated_at = now() WHERE email = $1",
+                        [email, !!body.isAdmin]);
         }
-        if (existing.email && existing.role === FF.ADMIN && account.role !== FF.ADMIN) {
-          return send(res, 403, { ok: false, error: "That is an admin's account." });
-        }
+
         if (existing.email) {
           await c.query(
-            "UPDATE accounts SET name = COALESCE($2, name), role = $3, status = COALESCE($4, status), " +
-            "updated_at = now() WHERE email = $1",
-            [email, body.name || null, role, body.status || null]);
-        } else {
-          /* A NEW CONSULTANT IS CREATED WITH A TEMPORARY PASSWORD, said once
-             and stored nowhere in the clear (§43.1). */
-          const pw = require("crypto").randomBytes(9).toString("base64")
-            .replace(/[^A-Za-z0-9]/g, "").slice(0, 12);
-          await c.query(
-            "INSERT INTO accounts (email, name, kind, role, password_hash, must_change) " +
-            "VALUES ($1,$2,'office',$3,$4,true)",
-            [email, body.name || "", role, auth.hashPassword(pw)]);
-          return send(res, 200, { ok: true, created: true, password: pw });
+            "UPDATE accounts SET name = COALESCE($2, name), status = COALESCE($3, status), " +
+            "updated_at = now() WHERE email = $1", [email, body.name || null, body.status || null]);
+          return send(res, 200, { ok: true });
         }
-        return send(res, 200, { ok: true });
+
+        /* A NEW CONSULTANT ARRIVES ON NO CLIENT, holding nothing — which is
+           what a new joiner is, and needs no role of its own to say. Their
+           temporary password is said once and stored nowhere in the clear. */
+        const pw = require("crypto").randomBytes(9).toString("base64")
+          .replace(/[^A-Za-z0-9]/g, "").slice(0, 12);
+        await c.query(
+          "INSERT INTO accounts (email, name, kind, is_admin, password_hash, must_change) " +
+          "VALUES ($1,$2,'office',$3,$4,true)",
+          [email, body.name || "", !!body.isAdmin && FF.isAdmin(account), auth.hashPassword(pw)]);
+        return send(res, 200, { ok: true, created: true, password: pw });
       }
 
       if (action === "issuePassword") {
@@ -192,8 +205,8 @@ module.exports = async function handler(req, res) {
         /* THE TEST IS THE TARGET (§89) — one rule, in the shared file. */
         if (!FF.mayIssuePasswordTo(world, account, target)) {
           return send(res, 403, { ok: false, error:
-            target.role === FF.ADMIN ? "That is an admin's account."
-                                     : "Issuing passwords is the platform admin's." });
+            target.is_admin ? "That is an admin's account."
+                            : "Issuing passwords is the platform admin's." });
         }
         const pw = require("crypto").randomBytes(9).toString("base64")
           .replace(/[^A-Za-z0-9]/g, "").slice(0, 12);
@@ -210,8 +223,9 @@ module.exports = async function handler(req, res) {
         const row = await P.clientByKey(c, body.key);
         if (!row.key || !FF.mayReadConfig(world, account, row)) throw P.noSuchClient();
         return send(res, 200, { ok: true, client: row, team: await P.teamOf(c, row.key),
+          seats: FF.SEATS,
           canEdit: FF.mayConfigureClient(world, account, row),
-          office: (await c.query("SELECT email, name, role FROM accounts " +
+          office: (await c.query("SELECT email, name, is_admin FROM accounts " +
                                  "WHERE kind='office' AND status='active' ORDER BY name")).rows });
       }
 
@@ -301,53 +315,82 @@ module.exports = async function handler(req, res) {
         /* The person key this account IS inside that client — minted once from
            the address, and never from the name, which changes. */
         const personKey = "ff_" + email.split("@")[0].replace(/[^a-z0-9]+/g, "_").slice(0, 24);
-        await c.query(
-          "INSERT INTO account_clients (email, client_key, person_key) VALUES ($1,$2,$3) " +
-          "ON CONFLICT (email, client_key) DO NOTHING", [email, row.key, personKey]);
-        if (body.super === true) {
-          /* ONE SUPER USER PER CLIENT is a unique index, so the seat is moved
-             rather than added — the database would refuse a second. */
-          await c.query("UPDATE account_clients SET is_super = false WHERE client_key = $1", [row.key]);
-          await c.query("UPDATE account_clients SET is_super = true WHERE client_key = $1 AND email = $2",
-                        [row.key, email]);
+        const seat = FF.SEAT_KEYS.indexOf(String(body.seat)) > -1 ? String(body.seat) : "smoteam";
+        /* ONE SUPER USER PER CLIENT is a unique index, so naming a second one
+           MOVES the seat: whoever held it becomes SMO team, and only then is
+           the new one written.
+
+           THE ORDER IS THE WHOLE FIX, and it shipped backwards with a comment
+           saying it did not — the insert ran first, so for the length of one
+           statement the client had two super users, the index refused, and the
+           person pressing the seat was told "Something went wrong. Nothing was
+           changed". Everything about the intention was right except which line
+           came first (§104.8: a comment can describe an intention the code
+           never carries out, and nothing in a build compares the two).
+
+           IN A TRANSACTION, because the demote is a real change on its own: if
+           the insert then failed, the client would be left with no super user
+           at all, which is worse than the act simply not happening. */
+        await c.query("BEGIN");
+        try {
+          if (seat === "super") {
+            await c.query(
+              "UPDATE account_clients SET seat = 'smoteam' WHERE client_key = $1 AND email <> $2 AND seat = 'super'",
+              [row.key, email]);
+          }
+          await c.query(
+            "INSERT INTO account_clients (email, client_key, person_key, seat) VALUES ($1,$2,$3,$4) " +
+            "ON CONFLICT (email, client_key) DO UPDATE SET seat = EXCLUDED.seat",
+            [email, row.key, personKey, seat]);
+          await c.query("COMMIT");
+        } catch (e) {
+          await c.query("ROLLBACK");
+          throw e;
         }
+        /* AND THE SEAT REACHES THE CLIENT'S OWN REGISTER, where every rule in
+           lib/rules.js reads it. Without this the configuration would say one
+           thing and the client's platform another until their next visit. */
+        try {
+          await P.withSchema(pg, row.schema_name, async function (sc) {
+            await sc.query("UPDATE people SET role = $2 WHERE key = $1", [personKey, seat]);
+          });
+        } catch (e) { console.error("seat into " + row.key + ":", e.message); }
         return send(res, 200, { ok: true });
       }
 
       /* ── Who sees what ──────────────────────────────────────── */
       if (action === "access") {
-        return send(res, 200, { ok: true, roles: FF.ROLES, areas: FF.AREAS,
-          defaults: FF.ACCESS_DEFAULTS, stored: world.access,
-          canEdit: FF.mayEditAccess(world, account), admin: FF.ADMIN });
+        return send(res, 200, { ok: true, areas: FF.AREAS,
+          defaults: FF.ACCESS_DEFAULTS[FF.EVERYONE], stored: world.access[FF.EVERYONE] || {},
+          canEdit: FF.mayEditAccess(world, account) });
       }
 
       if (action === "saveAccess") {
-        const roleKey = String(body.role || ""), areaKey = String(body.area || "");
-        if (!FF.mayEditAccessRow(world, account, roleKey)) {
-          return send(res, 403, { ok: false, error:
-            roleKey === FF.ADMIN
-              ? "The admin's row cannot be changed — editing this table is editing who may edit it."
-              : "This table is the platform admin's." });
+        if (!FF.mayEditAccess(world, account)) {
+          return send(res, 403, { ok: false, error: "This table is the platform admin's." });
         }
-        if (FF.AREA_KEYS.indexOf(areaKey) < 0) {
-          return send(res, 400, { ok: false, error: "There is no such column." });
+        const areaKey = String(body.area || "");
+        const area = FF.AREAS.filter(function (a) { return a.key === areaKey; })[0];
+        if (!area) return send(res, 400, { ok: false, error: "There is no such column." });
+        const state = String(body.grant || "");
+        /* EACH COLUMN TAKES ITS OWN WORDS — hidden/listed/open for the clients
+           somebody holds no seat on, none/view/edit for the consultants list,
+           none/yes for adding one. Checked against the column rather than
+           against one list for all of them, or a column would quietly accept a
+           word it does not mean. */
+        if (area.states.indexOf(state) < 0) {
+          return send(res, 400, { ok: false, error: "That is not a setting for that column." });
         }
-        const grant = String(body.grant || "none");
-        if (["none", "view", "edit"].indexOf(grant) < 0) {
-          return send(res, 400, { ok: false, error: "That is not a setting." });
-        }
-        /* A CELL PUT BACK TO ITS DEFAULT DELETES ITS ROW (§50.6): a stored map
-           holds what has been CHANGED, so a tenant that has been set and unset
-           is byte-identical to one nobody has touched. */
-        const def = (FF.ACCESS_DEFAULTS[roleKey] || {})[areaKey] || "none";
-        if (grant === def) {
+        /* A CELL PUT BACK TO ITS DEFAULT DELETES ITS ROW (§50.6). */
+        const def = FF.ACCESS_DEFAULTS[FF.EVERYONE][areaKey];
+        if (state === def) {
           await c.query("DELETE FROM platform_access WHERE role_key = $1 AND area_key = $2",
-                        [roleKey, areaKey]);
+                        [FF.EVERYONE, areaKey]);
         } else {
           await c.query(
             "INSERT INTO platform_access (role_key, area_key, grant_) VALUES ($1,$2,$3) " +
             "ON CONFLICT (role_key, area_key) DO UPDATE SET grant_ = EXCLUDED.grant_",
-            [roleKey, areaKey, grant]);
+            [FF.EVERYONE, areaKey, state]);
         }
         return send(res, 200, { ok: true });
       }

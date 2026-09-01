@@ -25478,3 +25478,103 @@ fn:finance with the rail no longer holding the removed id. Proved able to
 fail first: **13 red** against the pre-§230 build. `plan-fields`,
 `plan-edit-head`, `project-tables`, `table-fit`, `repeat-project`,
 `plan-builder` and the full `qa.py` sweep green after.
+
+## §231 — HIDING AN ELEMENT FROM THE PRESENTATION (2026-09-01)
+
+Islam: *"we need to allow the SMO to hide an element. the hide approach is
+about hiding it from the presnetation. this applies to a mesure or an
+objective or a tactic. etc. something we need to keep but hide from the
+ppt."* Three decisions put to him and taken before the mockup, the mockup
+signed off the same day: **hidden is NOT counted** in any score; **rows
+only** — never a pillar, a capability or a project, so a whole slide can
+never disappear; and **the workbook carries the mark**.
+
+**ONE PREDICATE, EVERY SURFACE** (§42, §53.5). `SMPRules.isHidden(row)` and
+`SMPRules.shown(list)` are the whole vocabulary, because the day the deck
+and the page disagree about one number is the day the score cannot be
+defended. The mark is `row.hide === true`, riding each row's `extra` JSONB
+(§177's road — all six row tables already split unknown keys there, so
+**no migration**, proved rather than claimed: one row of each of the seven
+kinds written against a real Postgres 16 and read back carrying the mark,
+then written clean and read back with the key ABSENT), stored as an
+ABSENCE (§50.6): the same press hides and
+shows again, and shown-again is byte-identical to never-hidden, so no save
+carries a phantom change.
+
+**NOT COUNTED MEANS NOT ASKED AND NOT OWED, OR THE PRODUCT ARGUES WITH
+ITSELF.** The skip runs through every reader that averages, asks or counts:
+`scorableMeasures`, `dueTactics`, `koScore` (both branches — filtering the
+weighted list beforehand would misalign the weights), `projDeliverySide`,
+`projOutcomeSide`, `projMilestones`, `capExec`, `reportItems`,
+`fnReportItems`, and `gapMap`'s per-row gate. It follows that reporting
+stops asking for the figure, the note rule stops owing a note, Submit stops
+waiting, and a hidden row's blanks stop counting as Missing — `gapCell`
+closes the fill controls on the same rows, so the count and the walk stay
+one list (§192.4). **The reporting pane stops DRAWING the row** for the
+same reason: collecting a figure the submit gate no longer waits on is the
+drift §205 records from the other side.
+
+**THE ROW STAYS, AND SAYS SO.** The pen draws an eye beside each row's ×
+(an SVG taking currentColor — a colour emoji cannot be coloured, §45), lit
+on the attention ground while hidden, because a decision is not a warning
+(§168). Read mode wears **"Hidden — not counted"** — for EVERYONE, not only
+the office, because an average over rows the page shows has to be
+explicable to whoever reads it. The Performance tables keep the row too,
+chipped and quiet; only the presentation and the asks lose it. The eye sits
+between the field and the × (the mockup's order), which broke §114.4's
+`.fld + .xbtn` seat selector — the trio takes its own `:has` seat.
+
+**THE HANDLER RE-ASKS AT THE CLICK** (§48.2): the button carries its
+page/acKey pair and the press asks `authoring()` again, so the eye follows
+the Strategy grant exactly as the pen that drew it. The six kinds resolve
+through one `hideableById()`; a pillar, capability or project never reaches
+it because the control is never drawn there — both ends of Islam's second
+decision, asserted. **The server needed nothing**: a `hide` change rides
+the row through §215's differ (measured: `rows:[{id:"mobile-P1-M1",
+set:{hide:true}}]`) and classifies as a plan edit — the office's by
+fall-through (§42), probed directly: the SMO's hide ACCEPTED, the unit
+head's and the custodian's REFUSED — and `test-authorize.js` (451) and
+`test-graph-diff.js` (106) pass untouched.
+
+**THE WORKBOOK CARRIES IT, BOTH WAYS** (his third decision, §22's reason:
+an upload AUTHORS, so a re-upload without the column would silently show
+everything again). Every row sheet — a unit's Objectives, Measures and
+Tactics; a function's Objectives, Deliverables, Outcomes and Milestones —
+gains a **Hidden** column at the END, so no validation range moves (§65: a
+range is a POSITION); "Yes" or empty, with a YESNO dropdown. The readers
+take an absent column as absent (§58: old files read fine); the differs
+compare it canonically and a **blank cell says nothing** (§54's
+adds-and-amends — "No" un-hides, "" leaves the stored answer standing);
+both apply paths and both creators carry it; the CSV pipeline's
+`CAPP_COLS` gains the column in the same edit as the writers (§102.4's
+lesson: two allow-lists, one behind the other). The Deliverables sheet's
+stale `C2:C400` DELIV_KINDS validation — aimed at the Kind column §104.8
+removed — was sitting on exactly the position Hidden takes, and goes with
+it rather than dressing the new column in a dead vocabulary.
+
+**DELIBERATELY INCLUDED: the group's own objectives.** They edit through
+the same `koEdit` table a unit's do, and giving one table two behaviours is
+§53.5's drift — so the group's six can be hidden too, with the same
+consequence for the group's own reading. **Deliberately NOT séparate:** no
+per-viewer setting, no second state — one mark, the office's.
+
+**Costs stated**: the Performance counts line ("N measures · M measured")
+still counts hidden rows among the N — the chip on the row is what explains
+the difference; and a slide whose every row is hidden still draws, saying
+nothing is there, which is §119.1's own rule (skipping it would say nothing
+is missing).
+
+`checks/hide-element.py` presses the eye and asks the DATA at every step
+(§96), asserts the score as AGREEMENT with the shown rows (§94.8), the
+deck by the row's absence AND its sibling's presence (§113.8), the workbook
+round trip through the real writer and reader, the closed ends (read mode,
+a unit head, the pillar head, the project band), and the key deleted on
+show-again. Proved able to fail first: **17 red** on the pre-§231 build —
+after the check itself was taught not to lean on the API under test
+existing, and that the OPEN pen lives in the pinned head, not the corner.
+Two literals in `fn-pillars.py` and `project-tables.py` moved with the
+deliberate workbook change (§214.3's lesson, again); the rest of the
+neighbourhood — plan-fields, gap-fill, gap-walk, owner-picker,
+milestone-fill, submit-gate, objective-unit, fn-ko-edit, enter-commits,
+foundation-objectives, plan-builder, repeat-project, table-fit,
+pillar-project-remove — and the full `qa.py` sweep green.

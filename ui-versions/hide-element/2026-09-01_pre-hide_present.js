@@ -66,7 +66,7 @@ function deckSlides(u){
      Foundation page does — and the scoring slide further on keeps it, because
      that is where an actual is read against a target. */
   var aimNear = SHOW_KO_THIS_YEAR;
-  var aimRows = SMPRules.shown(u.keyObjectives).map(function(m, i){
+  var aimRows = u.keyObjectives.map(function(m, i){
     return '<tr><td class="idx">' + (i+1) + '</td>' +
       '<td class="lead">' + esc(m.name) + fmark(m.id) + '</td>' +
       '<td class="num">' + esc(m.dir) + '</td>' +
@@ -106,7 +106,7 @@ function deckSlides(u){
     'Execution measures whether the work behind it is landing on time.</p></section>');
 
   /* 4 — the objectives in detail. */
-  var oRows = SMPRules.shown(u.keyObjectives).map(function(m, i){
+  var oRows = u.keyObjectives.map(function(m, i){
     return '<tr><td class="idx">' + (i+1) + '</td>' +
       '<td class="lead">' + esc(m.name) + fmark(m.id) + '</td>' +
       '<td class="num">' + esc(m.dir) + '</td>' +
@@ -172,7 +172,7 @@ function deckSlides(u){
           dPct(pillarExec(p)) + ' / ' + dPct(pillarPlan(p)) + '</b></div>' +
       '</div></section>');
 
-    var mRows = SMPRules.shown(p.measures).map(function(m, i){
+    var mRows = p.measures.map(function(m, i){
       return '<tr><td class="idx">' + (i+1) + '</td>' +
         '<td class="lead">' + esc(m.name) + fmark(m.id) + '</td>' +
         '<td class="num">' + esc(m.dir) + '</td>' +
@@ -188,7 +188,7 @@ function deckSlides(u){
       '<th class="num">Dir.</th><th class="num">Target</th><th class="num">Actual</th>' +
       '<th class="num">Progress</th><th>Note</th></tr></thead><tbody>' + mRows + '</tbody></table></section>');
 
-    var tRows = SMPRules.shown(p.tactics).map(function(t, i){
+    var tRows = p.tactics.map(function(t, i){
       if (!tacticDue(t)) {
         return '<tr class="dim"><td class="idx">' + (i+1) + '</td>' +
           '<td class="lead">' + esc(t.name) + '</td><td>' + esc(t.owner) + '</td>' +
@@ -275,15 +275,15 @@ function deckSlidesFn(fk){
       '<h1 class="cover">' + esc(c.name) + '</h1>' +
       '<p class="coversub">' + esc(c.def) + '</p>' +
       '<div class="coverrule"></div><div class="leadstats">' +
-        (SMPRules.shown(c.keyObjectives).length
+        (c.keyObjectives.length
           ? '<div><span class="dlab">Key objectives</span><b class="' + dBand(ko) + '">' + dPct(ko) + '</b></div>'
           : '') +
         '<div><span class="dlab">Project performance</span><b class="' + dBand(perf) + '">' + dPct(perf) + '</b></div>' +
         '<div><span class="dlab">Milestones</span><b class="plain">' + ce.done + ' of ' + ce.total + '</b></div>' +
       '</div></section>');
 
-    if (SMPRules.shown(c.keyObjectives).length) {
-      var kRows = SMPRules.shown(c.keyObjectives).map(function(m, i){
+    if (c.keyObjectives.length) {
+      var kRows = c.keyObjectives.map(function(m, i){
         return '<tr><td class="idx">' + (i+1) + '</td>' +
           '<td class="lead">' + esc(m.name) + '</td>' +
           '<td class="num">' + (m.weight == null ? "&mdash;" : m.weight + "%") + '</td>' +
@@ -355,10 +355,7 @@ function deckSlidesFn(fk){
           (o.note ? '<td class="dnote">' + esc(o.note) + '</td>' : '<td class="dnote empty">&mdash;</td>') +
           '</tr>';
       };
-      /* §231: filtered HERE, never inside dxRows() — the pane's pen
-         shares that builder and the pen shows everything. */
-      var dxRowsHtml = dxRows(p).filter(function(r){
-        return !SMPRules.isHidden(r.obj); }).map(dxRow).join("");
+      var dxRowsHtml = dxRows(p).map(dxRow).join("");
       S.push('<section class="dslide" data-split="' + esc(p.id) + 'D">' +
         '<h2>' + esc(p.name) + '<span class="dwhich">Deliverables and outcomes</span></h2>' +
         '<table class="zebra withnote"><thead><tr><th class="idx">#</th>' +
@@ -367,7 +364,7 @@ function deckSlidesFn(fk){
         '<th>Note</th></tr></thead><tbody>' + dxRowsHtml + '</tbody></table></section>');
 
       var over = projOverruns(p).map(function(m){ return m.id; });
-      var mRows = SMPRules.shown(p.milestones).map(function(m, i){
+      var mRows = p.milestones.map(function(m, i){
         var word = m.status === "done" ? "Completed" : m.status === "wip" ? "In progress" : "Not started";
         return '<tr><td class="idx">' + (i+1) + '</td>' +
           '<td class="lead">' + esc(m.name) +

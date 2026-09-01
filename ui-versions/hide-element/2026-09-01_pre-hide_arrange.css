@@ -1282,30 +1282,6 @@
      it reaches every table using the pattern and nothing else. */
   td:has(> .fld + .xbtn) > .fld { width: calc(100% - 30px); vertical-align: middle; }
   td:has(> .fld + .xbtn) > .xbtn { vertical-align: middle; margin-left: 5px; }
-  /* ── HIDDEN FROM THE PRESENTATION (§231) ────────────────────────────
-     The eye sits between the field and the × (the mockup's order), which
-     the seat rule above cannot see — its `.fld + .xbtn` adjacency breaks —
-     so the trio gets its own seat: the field gives up the width of BOTH
-     buttons, and all three share the line (§114.4's rule, one control
-     wider). */
-  td:has(> .fld + .eyebtn) > .fld { width: calc(100% - 62px); vertical-align: middle; }
-  td:has(> .fld + .eyebtn) > .eyebtn,
-  td:has(> .fld + .eyebtn) > .xbtn { vertical-align: middle; margin-left: 4px; }
-  .eyebtn { width: 24px; height: 22px; border: 1px solid transparent; border-radius: 6px;
-    background: none; color: var(--ink-3); cursor: pointer; padding: 2px 3px;
-    display: inline-block; }
-  .eyebtn:hover { background: var(--surface-2); color: var(--ink); }
-  /* Lit on the attention ground while hidden — a decision, not a warning
-     (§168): the warn family is for something owed, and nothing is. */
-  .eyebtn.on { background: var(--attn-bg); border-color: var(--attn-bg); color: var(--attn-tx); }
-  .eyebtn svg { width: 16px; height: 14px; display: block; }
-  .hidchip { display: inline-block; font: 600 10px/1 var(--sans); letter-spacing: .07em;
-    text-transform: uppercase; color: var(--attn-tx); background: var(--attn-bg);
-    border-radius: 99px; padding: 4px 8px; margin-left: 8px; white-space: nowrap;
-    vertical-align: middle; }
-  /* The row reads quiet — kept, not gone. Ink only, never display:none:
-     hiding the row from the PAGE is exactly what this feature is not. */
-  tr.hiddenrow > td, .orow.hiddenrow, .ochip.hiddenrow { color: var(--ink-3); }
 
   /* ── FILL THE GAPS (§145, spec 023) ──────────────────────────────────
      Three states, one colour family: a GAP is the product's own red (the

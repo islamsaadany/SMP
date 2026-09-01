@@ -3824,11 +3824,26 @@ confirmation promises the way back; fixed at both ends
 (`unitLikeWritable`/`unitLike` + `fnWriteBack`). The new control is `.rmplan`,
 never `.rmbtn` &mdash; that word is taken (&sect;65.9).
 `checks/pillar-project-remove.py` presses everything and asks the DATA: **13
-red** on the pre-&sect;230 build, all green after. **The hide-from-presentation
-feature is mocked up and NOT built** (&sect;231 when it lands): Islam's three
-decisions are taken &mdash; hidden is NOT counted, rows only (never a pillar,
-capability or project), the workbook carries the mark &mdash;
-`design-mockups/hide-from-presentation/` awaits his sign-off.*
+red** on the pre-&sect;230 build, all green after. **And &sect;231, built the
+same day on his sign-off of `design-mockups/hide-from-presentation/`: hiding
+an element from the presentation.** His three decisions verbatim: **hidden is
+NOT counted** in any score; **rows only** (an objective, a measure, a tactic,
+a deliverable, an outcome, a milestone &mdash; never a pillar, a capability or
+a project, so a whole slide cannot disappear); **the workbook carries the
+mark**. One predicate &mdash; `SMPRules.isHidden`/`shown` &mdash; runs every
+reader that averages, asks or counts, because not counted means not asked and
+not owed or the product argues with itself: scores, reporting asks, the note
+rule, Submit, the gap count and walk, the reporting pane, the deck and the
+.pptx builder all answer together. The mark is `row.hide === true` riding
+`extra` (no migration), stored as an ABSENCE (&sect;50.6); the pen's eye
+toggles it (lit on the attention ground &mdash; a decision, not a warning),
+read mode wears **"Hidden &mdash; not counted"** for everyone, and every row
+sheet gains a **Hidden** column at the END (a validation range is a POSITION,
+&sect;65) with blank saying nothing (&sect;54's adds-and-amends). The server
+needed nothing (&sect;42's fall-through). `checks/hide-element.py`: **17 red**
+pre-&sect;231, 21 green after; two literals in `fn-pillars.py` and
+`project-tables.py` moved with the deliberate workbook change
+(&sect;214.3's lesson).*
 
 *Earlier: 2026-09-01 &mdash; **&sect;229: Enter commits a one-line
 prose box.** Found during &sect;226's accessibility audit and built on Islam's

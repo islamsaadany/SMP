@@ -456,31 +456,27 @@ function planWorkbook(u){
        every validation range move with the columns — a range is a POSITION
        (§65), and leaving them where a unit's are would validate the wrong
        cells in silence. */
-    { name:"Objectives", widths:[36, 11, 16, 10, 12, 10, 9],
-      head:["Objective", "Direction", "This year target", "Unit", "Compile", "Weight %", "Hidden"],
+    { name:"Objectives", widths:[36, 11, 16, 10, 12, 10],
+      head:["Objective", "Direction", "This year target", "Unit", "Compile", "Weight %"],
       numCols:[2, 5],
       validations:[{ range:"B2:B60", list:DIRS },
                    { range:"D2:D60", list:units, soft:true },
-                   { range:"E2:E60", list:COMPILES },
-                   { range:"G2:G60", list:YESNO, soft:true }],
+                   { range:"E2:E60", list:COMPILES }],
       rows:u.keyObjectives.map(function(m){
         var a = splitTarget(m.target);
         return [m.name, m.dir, a.value, a.unit, m.compile,
-                m.weight == null ? "" : m.weight,
-                SMPRules.isHidden(m) ? "Yes" : ""];
+                m.weight == null ? "" : m.weight];
       }) }
   ] : [
-    { name:"Objectives", widths:[36, 18, 11, 16, 16, 10, 12, 9],
-      head:["Objective", "Group", "Direction", "3-year target", "This year target", "Unit", "Compile", "Hidden"],
+    { name:"Objectives", widths:[36, 18, 11, 16, 16, 10, 12],
+      head:["Objective", "Group", "Direction", "3-year target", "This year target", "Unit", "Compile"],
       numCols:[3, 4],
       validations:[{ range:"C2:C60", list:DIRS },
                    { range:"F2:F60", list:units, soft:true },
-                   { range:"G2:G60", list:COMPILES },
-                   { range:"H2:H60", list:YESNO, soft:true }],
+                   { range:"G2:G60", list:COMPILES }],
       rows:u.keyObjectives.map(function(m){
         var a = splitTarget(m.target), b = splitTarget(m.target3y);
-        return [m.name, m.group || "", m.dir, b.value, a.value, a.unit, m.compile,
-                SMPRules.isHidden(m) ? "Yes" : ""];
+        return [m.name, m.group || "", m.dir, b.value, a.value, a.unit, m.compile];
       }) },
 
     { name:"SWOT", widths:[16, 78],
@@ -500,37 +496,33 @@ function planWorkbook(u){
                      error:"Choose a theme name, or \u2014 none \u2014 for a cross-cutting pillar." }],
       rows:u.items.map(function(p){ return [p.name, p.kind, themeNameOf(p.theme), p.owner]; }) },
 
-    { name:"Measures", widths:[34, 40, 11, 14, 12, 12, 9],
-      head:["Pillar", "Measure", "Direction", "Target", "Unit", "Compile", "Hidden"],
+    { name:"Measures", widths:[34, 40, 11, 14, 12, 12],
+      head:["Pillar", "Measure", "Direction", "Target", "Unit", "Compile"],
       numCols:[3],
       validations:[{ range:"A2:A400", from:PILLAR_RANGE,
                      error:"Choose a pillar from the Pillars sheet." },
                    { range:"C2:C400", list:DIRS },
                    { range:"E2:E400", list:units, soft:true },
-                   { range:"F2:F400", list:COMPILES },
-                   { range:"G2:G400", list:YESNO, soft:true }],
+                   { range:"F2:F400", list:COMPILES }],
       rows:u.items.reduce(function(acc, p){
         p.measures.forEach(function(m){
           var a = splitTarget(m.target);
-          acc.push([p.name, m.name, m.dir, a.value, a.unit, m.compile,
-                    SMPRules.isHidden(m) ? "Yes" : ""]);
+          acc.push([p.name, m.name, m.dir, a.value, a.unit, m.compile]);
         });
         return acc;
       }, []) },
 
-    { name:"Tactics", widths:[30, 40, 40, 34, 20, 24, 7, 7, 7, 7, 9],
+    { name:"Tactics", widths:[30, 40, 40, 34, 20, 24, 7, 7, 7, 7],
       head:["Pillar", "Tactic", "Description", "Outcome", "Owner", "Collaborators",
-            "Q1", "Q2", "Q3", "Q4", "Hidden"],
+            "Q1", "Q2", "Q3", "Q4"],
       validations:[{ range:"A2:A400", from:PILLAR_RANGE,
                      error:"Choose a pillar from the Pillars sheet." },
-                   { range:"G2:J400", list:YESNO },
-                   { range:"K2:K400", list:YESNO, soft:true }],
+                   { range:"G2:J400", list:YESNO }],
       rows:u.items.reduce(function(acc, p){
         p.tactics.forEach(function(t){
           acc.push([p.name, t.name, t.description || "", t.outcome || "", t.owner,
             (t.collaborators || []).join(", "),
-            t.q1 ? "Yes" : "No", t.q2 ? "Yes" : "No", t.q3 ? "Yes" : "No", t.q4 ? "Yes" : "No",
-            SMPRules.isHidden(t) ? "Yes" : ""]);
+            t.q1 ? "Yes" : "No", t.q2 ? "Yes" : "No", t.q3 ? "Yes" : "No", t.q4 ? "Yes" : "No"]);
         });
         return acc;
       }, []) }
@@ -788,8 +780,7 @@ function planFromWorkbook(u, sheets){
     rows.push({ id:mint("KO" + (++kN)), type:"NORTHSTAR", name:r["Objective"],
       group:r["Group"], direction:r["Direction"], value:r["This year target"],
       value_3y:r["3-year target"], unit:r["Unit"], compile:r["Compile"],
-      weight:r["Weight %"],
-      hidden:yes(r["Hidden"]) ? "1" : "" });
+      weight:r["Weight %"] });
   });
 
   var swotN = { Strength:0, Weakness:0, Opportunity:0, Threat:0 };
@@ -807,8 +798,7 @@ function planFromWorkbook(u, sheets){
     mN[pid] = (mN[pid] || 0) + 1;
     rows.push({ id:pid ? pid + "-M" + mN[pid] : "", type:"MEASURE",
       parent_id:pid, name:r["Measure"], direction:r["Direction"],
-      value:r["Target"], unit:r["Unit"], compile:r["Compile"],
-      hidden:yes(r["Hidden"]) ? "1" : "" });
+      value:r["Target"], unit:r["Unit"], compile:r["Compile"] });
   });
   sheetObjects(sheets["Tactics"]).forEach(function(r){
     if (!r["Tactic"]) return;
@@ -820,14 +810,13 @@ function planFromWorkbook(u, sheets){
       collaborators:(r["Collaborators"] || "").split(/[,|]/).map(function(x){ return x.trim(); })
         .filter(Boolean).join("|"),
       q1:yes(r["Q1"]) ? "1" : "0", q2:yes(r["Q2"]) ? "1" : "0",
-      q3:yes(r["Q3"]) ? "1" : "0", q4:yes(r["Q4"]) ? "1" : "0",
-      hidden:yes(r["Hidden"]) ? "1" : "" });
+      q3:yes(r["Q3"]) ? "1" : "0", q4:yes(r["Q4"]) ? "1" : "0" });
   });
 
   return rows.map(function(r){
     ["parent_id","source_slide","name","description","outcome","owner","collaborators",
      "direction","value","value_3y","unit","horizon","compile","q1","q2","q3","q4",
-     "theme","kind","notes","group","hidden"].forEach(function(k){ if (r[k] == null) r[k] = ""; });
+     "theme","kind","notes","group"].forEach(function(k){ if (r[k] == null) r[k] = ""; });
     return r;
   });
 }
@@ -925,17 +914,15 @@ function capPlanWorkbook(c){
   return [
     capReadme("plan", names, c ? c.name : ""),
 
-    { name:"Objectives", widths:[40, 11, 14, 12, 10, 12, 9],
-      head:["Objective", "Direction", "Target", "Unit", "Weight", "Compile", "Hidden"],
+    { name:"Objectives", widths:[40, 11, 14, 12, 10, 12],
+      head:["Objective", "Direction", "Target", "Unit", "Weight", "Compile"],
       numCols:[2, 4],
       validations:[{ range:"B2:B60", list:DIRS },
                    { range:"D2:D60", list:units, soft:true },
-                   { range:"F2:F60", list:COMPILES },
-                   { range:"G2:G60", list:YESNO, soft:true }],
+                   { range:"F2:F60", list:COMPILES }],
       rows:(c.keyObjectives || []).map(function(m){
         var a = splitTarget(m.target);
-        return [m.name, m.dir, a.value, a.unit, m.weight == null ? "" : String(m.weight), m.compile,
-                SMPRules.isHidden(m) ? "Yes" : ""];
+        return [m.name, m.dir, a.value, a.unit, m.weight == null ? "" : String(m.weight), m.compile];
       }) },
 
     { name:"Projects", widths:[38, 70, 20, 30, 12, 14, 14],
@@ -950,38 +937,32 @@ function capPlanWorkbook(c){
        deliverable is delivered when the project ends, and the project's owner
        is the project's. A column the platform no longer reads is worse than
        no column — somebody fills it in and nothing happens. */
-    { name:"Deliverables", widths:[34, 60, 9],
+    { name:"Deliverables", widths:[34, 60],
       /* §104.8: NO DUE DATE COLUMN, and no Kind either. A deliverable's
          direction and target are written by the platform, and Islam took the
          date off the templates "for now" -- the field survives in the model
          and nothing asks for it, so every deliverable is simply always asked,
          which is what the product did before §104 put the date back. */
-      /* §231: the old C2:C400 DELIV_KINDS validation was aimed at the Kind
-         column that sheet no longer has — Hidden takes the position, so the
-         stale list goes with it rather than dressing the new column. */
-      head:["Project", "Deliverable", "Hidden"],
+      head:["Project", "Deliverable"],
       validations:[{ range:"A2:A400", from:PROJECT_RANGE,
                      error:"Choose a project from the Projects sheet." },
-                   { range:"C2:C400", list:YESNO, soft:true }],
+                   { range:"C2:C400", list:DELIV_KINDS }],
       rows:(c.projects || []).reduce(function(acc, p){
-        (p.deliverables || []).forEach(function(d){
-          acc.push([p.name, d.name, SMPRules.isHidden(d) ? "Yes" : ""]); });
+        (p.deliverables || []).forEach(function(d){ acc.push([p.name, d.name]); });
         return acc;
       }, []) },
 
-    { name:"Outcomes", widths:[34, 44, 11, 12, 12, 14, 9],
-      head:["Project", "Outcome", "Direction", "Target", "Unit", "Due date", "Hidden"],
+    { name:"Outcomes", widths:[34, 44, 11, 12, 12, 14],
+      head:["Project", "Outcome", "Direction", "Target", "Unit", "Due date"],
       numCols:[3],
       validations:[{ range:"A2:A400", from:PROJECT_RANGE,
                      error:"Choose a project from the Projects sheet." },
                    { range:"C2:C400", list:DIRS },
-                   { range:"E2:E400", list:units, soft:true },
-                   { range:"G2:G400", list:YESNO, soft:true }],
+                   { range:"E2:E400", list:units, soft:true }],
       rows:(c.projects || []).reduce(function(acc, p){
         (p.outcomes || []).forEach(function(o){
           var a = splitTarget(o.target);
-          acc.push([p.name, o.name, o.dir, a.value, a.unit, o.measureAt || "",
-                    SMPRules.isHidden(o) ? "Yes" : ""]);
+          acc.push([p.name, o.name, o.dir, a.value, a.unit, o.measureAt || ""]);
         });
         return acc;
       }, []) },
@@ -989,16 +970,14 @@ function capPlanWorkbook(c){
     /* §227: Collaborators beside the Owner, the tactics sheet's own column —
        comma-separated names, and the export carries them or a download-and-
        re-upload would silently drop every one (§22: an upload AUTHORS). */
-    { name:"Milestones", widths:[34, 38, 52, 16, 26, 14, 9],
-      head:["Project", "Milestone", "Description", "Owner", "Collaborators", "Due date", "Hidden"],
+    { name:"Milestones", widths:[34, 38, 52, 16, 26, 14],
+      head:["Project", "Milestone", "Description", "Owner", "Collaborators", "Due date"],
       validations:[{ range:"A2:A400", from:PROJECT_RANGE,
-                     error:"Choose a project from the Projects sheet." },
-                   { range:"G2:G400", list:YESNO, soft:true }],
+                     error:"Choose a project from the Projects sheet." }],
       rows:(c.projects || []).reduce(function(acc, p){
         (p.milestones || []).forEach(function(m){
           acc.push([p.name, m.name, m.covers || "", m.owner || "",
-                    (m.collaborators || []).join(", "), m.finish || "",
-                    SMPRules.isHidden(m) ? "Yes" : ""]);
+                    (m.collaborators || []).join(", "), m.finish || ""]);
         });
         return acc;
       }, []) }
@@ -1097,7 +1076,6 @@ function capPlanFromWorkbook(c, sheets){
        instead, which is read and ignored (§58: write the new label, read
        whatever arrives). */
     row.finish = r["Due date"] != null ? r["Due date"] : "";
-    row.hidden = yes(r["Hidden"]) ? "1" : "";
   });
   child("Outcomes", "OUTCOME", "Outcome", "O", function(row, r){
     row.direction = r["Direction"]; row.value = r["Target"];
@@ -1106,7 +1084,6 @@ function capPlanFromWorkbook(c, sheets){
        column keeps below, and for the same reason. */
     row.measure_at = r["Due date"] != null ? r["Due date"]
                    : r["Measure date"] != null ? r["Measure date"] : r["Measured at"];
-    row.hidden = yes(r["Hidden"]) ? "1" : "";
   });
   child("Milestones", "MILESTONE", "Milestone", "M", function(row, r){
     /* Description since §103, read as either (§58). The STORED field keeps its
@@ -1123,7 +1100,6 @@ function capPlanFromWorkbook(c, sheets){
        and a header is a contract. The STORED field keeps its own spelling —
        renaming `finish` would be a migration for a word nobody reads. */
     row.finish = r["Due date"] != null ? r["Due date"] : r["Finish"];
-    row.hidden = yes(r["Hidden"]) ? "1" : "";
   });
 
   return rows.map(function(r){

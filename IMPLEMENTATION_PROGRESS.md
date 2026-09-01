@@ -27,9 +27,11 @@ Nothing proceeds past this line without an answer.
 |---|---|---|---|
 | **D5** | **Go-ahead for R2** — sign-in and the shell on the new stack. | R1 proved the stack; R2 is the first thing anyone would see change. Nothing starts without the word (A1). | §20 |
 | **D8** | **What each of the ten BU names points at.** The page and the ten rows are built; the targets are empty. | Until a name points somewhere, everyone carrying it is on the register with nothing to open — and a role cannot be given from the employee file, because a role is held over the person's own BU. **IT is the one to think about: a unit and a supporting function share the name.** | §54.1 |
-| **D9** | **Sign-off on the hide-from-presentation mockup** (`design-mockups/hide-from-presentation/2026-09-01_hide-element.html`). His three decisions are already taken — hidden is NOT counted, rows only (never a pillar, capability or project), the workbook carries the mark — the mockup draws them. | Mockup-first (rule 1c): no source is touched until the drawn look is approved. | 2026-09-01 |
 
 **Answered:**
+
+- **D9 · The hide-from-presentation mockup — ANSWERED 2026-09-01: approved**,
+  and built the same day as §231.
 
 - **D7 · The companies — ANSWERED 2026-08-20: Distribution and B2C are real**,
   with Mobile / Consumer Electronics / IT and Retail Stores / Online Shop / Care
@@ -68,6 +70,20 @@ Nothing proceeds past this line without an answer.
   is a true signal — do not silence it.
 
 ## Built and verified
+
+### §231 — hiding an element from the presentation (2026-09-01, on `claude/smo-hide-element-ppt-s3rodi`)
+
+Islam's three decisions, mockup signed off the same day: hidden is NOT
+counted, rows only (never a pillar, capability or project), the workbook
+carries the mark. One predicate (`SMPRules.isHidden`/`shown`) runs every
+reader — scores, reporting asks, the note rule, Submit, the gap count and
+walk, the reporting pane, the deck, the .pptx builder — because not counted
+means not asked and not owed. The pen's eye toggles `row.hide` (an absence,
+riding extra, no migration); read mode wears "Hidden — not counted" for
+everyone; every row sheet gains a Hidden column read both ways.
+`checks/hide-element.py`: 17 red pre-§231, 21 green after; the
+neighbourhood and the full sweep green; the server suites untouched
+(451/106).
 
 ### §230 — removing a pillar or a project (2026-09-01, on `claude/smo-hide-element-ppt-s3rodi`)
 

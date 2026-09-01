@@ -364,7 +364,6 @@ function diffPlan(u, rows){
         changes.push({ f:"3-year", was:hit.obj.target3y || "", now:joinTarget(hit.obj.target3y, r.value_3y, r.unit) });
       if (r.value !== "" && targetChanged(hit.obj.target, r.value, r.unit))
         changes.push({ f:"this year", was:hit.obj.target || "", now:joinTarget(hit.obj.target, r.value, r.unit) });
-      cmp("hidden", SMPRules.isHidden(hit.obj) ? "1" : "", r.hidden);
       cmp("compile", hit.obj.compile, r.compile);
     } else if (hit.kind === "PILLAR") {
       cmp("name", hit.obj.name, r.name);
@@ -378,7 +377,6 @@ function diffPlan(u, rows){
       if (r.value !== "" && targetChanged(hit.obj.target, r.value, r.unit))
         changes.push({ f:"target", was:hit.obj.target || "", now:joinTarget(hit.obj.target, r.value, r.unit) });
       cmp("compile", hit.obj.compile, r.compile);
-      cmp("hidden", SMPRules.isHidden(hit.obj) ? "1" : "", r.hidden);
     } else if (hit.kind === "TACTIC") {
       cmp("name", hit.obj.name, r.name); cmp("owner", hit.obj.owner, r.owner);
       cmp("collaborators", (hit.obj.collaborators || []).join("|"), r.collaborators);
@@ -387,7 +385,6 @@ function diffPlan(u, rows){
       ["q1","q2","q3","q4"].forEach(function(q){
         if (r[q] !== "") cmp(q.toUpperCase(), hit.obj[q] ? 1 : 0, r[q]);
       });
-      cmp("hidden", SMPRules.isHidden(hit.obj) ? "1" : "", r.hidden);
     }
     out.push({ id:r.id, type:hit.kind,
                name:hit.kind === "ASPIRATION" ? (hit.which === "end" ? "End in mind" : "Winning Aspiration")
@@ -447,27 +444,21 @@ function createFromPlan(u, d){
     } else if (x.type === "MEASURE") {
       var p = u.items.filter(function(y){ return y.id === x.parent_id; })[0];
       if (!p) return;
-      var mRow = { id:x.id, name:x.name, dir:x.direction || "\u2265", target:t1,
+      p.measures.push({ id:x.id, name:x.name, dir:x.direction || "\u2265", target:t1,
         compile:x.compile || "Latest", actual:"", progress:null,
-        slide:x.source_slide, horizon:x.horizon, notes:x.notes };
-      /* §231: set only when the file says Yes — an absent key and a shown
-         row must stay byte-identical (§50.6). */
-      if (+x.hidden) mRow.hide = true;
-      p.measures.push(mRow);
+        slide:x.source_slide, horizon:x.horizon, notes:x.notes });
       made++;
     } else if (x.type === "TACTIC") {
       var p2 = u.items.filter(function(y){ return y.id === x.parent_id; })[0];
       if (!p2) return;
       var col = (x.collaborators || "").split("|").map(function(s){ return s.trim(); }).filter(Boolean);
-      var tRow = { id:x.id, name:x.name, description:x.description, outcome:x.outcome,
+      p2.tactics.push({ id:x.id, name:x.name, description:x.description, outcome:x.outcome,
         owner:x.owner || "", collaborators:col,
         q1:+x.q1 ? 1 : 0, q2:+x.q2 ? 1 : 0, q3:+x.q3 ? 1 : 0, q4:+x.q4 ? 1 : 0,
         /* A plan that has just been loaded has no progress against it. Zero
            would read as started-and-delivered-nothing, which is a false
            failure on the day a plan arrives \u2014 the same trap as clearing. */
-        status:"Not started", actual:null, slide:x.source_slide, notes:x.notes };
-      if (+x.hidden) tRow.hide = true;
-      p2.tactics.push(tRow);
+        status:"Not started", actual:null, slide:x.source_slide, notes:x.notes });
       made++;
     } else if (x.type === "NORTHSTAR") {
       /* §213: a supporting function's objectives carry a WEIGHT and no 3-year
@@ -479,7 +470,6 @@ function createFromPlan(u, d){
         slide:x.source_slide };
       if (x.weight != null && String(x.weight).trim() !== "")
         ko.weight = Number(x.weight);
-      if (+x.hidden) ko.hide = true;
       u.keyObjectives.push(ko);
       made++;
     } else if (["STRENGTH","WEAKNESS","OPPORTUNITY","THREAT"].indexOf(x.type) > -1) {
@@ -525,10 +515,7 @@ function applyPlan(u, d){
       if (c.f === "kind")       o.kind = c.now;
       if (c.f === "theme")      o.theme = c.now;
       if (c.f === "owner")      o.owner = c.now;
-      /* §231: "Yes" hides, "No" shows again; the shown state is the ABSENT
-         key (§50.6). cmp never fires on a blank cell, so a file that says
-         nothing changes nothing (§54's adds-and-amends). */
-      if (c.f === "hidden")     { if (+c.now) o.hide = true; else delete o.hide; }
+
     });
   });
 }
@@ -690,7 +677,7 @@ function dueFits(v){
 var CAPP_COLS = ["id","type","parent_id","name","description","owner","stakeholders",
                  "collaborators",
                  "direction","value","unit","kind","measure_at","start","end",
-                 "finish","covers","weight","compile","timeline","notes","hidden"];
+                 "finish","covers","weight","compile","timeline","notes"];
 var CAPPROG_COLS = ["id","type","parent_id","parent_name","name","kind","target",
                     "measure_at","finish","current","new_value","notes"];
 
@@ -718,7 +705,7 @@ function capPlanTemplate(c){
     var a = splitTarget(m.target);
     rows.push(csvRow(CAPP_COLS, { id:m.id, type:"CAPOBJECTIVE", name:m.name, direction:m.dir,
       value:a.value, unit:a.unit, weight:(m.weight == null ? "" : m.weight),
-      compile:m.compile, notes:m.notes, hidden:SMPRules.isHidden(m) ? "1" : "" }));
+      compile:m.compile, notes:m.notes }));
   });
   (c.projects || []).forEach(function(p){
     rows.push(csvRow(CAPP_COLS, { id:p.id, type:"PROJECT", name:p.name, description:p.brief,
@@ -726,19 +713,17 @@ function capPlanTemplate(c){
       timeline:p.timeline || "quarter", start:p.start, end:p.end, notes:p.notes }));
     (p.deliverables || []).forEach(function(d){
       rows.push(csvRow(CAPP_COLS, { id:d.id, type:"DELIVERABLE", parent_id:p.id, name:d.name,
-        finish:d.due, hidden:SMPRules.isHidden(d) ? "1" : "" }));
+        finish:d.due }));
     });
     (p.outcomes || []).forEach(function(o){
       var a = splitTarget(o.target);
       rows.push(csvRow(CAPP_COLS, { id:o.id, type:"OUTCOME", parent_id:p.id, name:o.name,
-        direction:o.dir, value:a.value, unit:a.unit, measure_at:o.measureAt,
-        hidden:SMPRules.isHidden(o) ? "1" : "" }));
+        direction:o.dir, value:a.value, unit:a.unit, measure_at:o.measureAt }));
     });
     (p.milestones || []).forEach(function(m){
       rows.push(csvRow(CAPP_COLS, { id:m.id, type:"MILESTONE", parent_id:p.id, name:m.name,
         covers:m.covers, owner:m.owner,
-        collaborators:(m.collaborators || []).join("|"), finish:m.finish,
-        hidden:SMPRules.isHidden(m) ? "1" : "" }));
+        collaborators:(m.collaborators || []).join("|"), finish:m.finish }));
     });
   });
   return rows.join("\n");
@@ -999,7 +984,6 @@ function diffCapPlan(c, rows){
         changes.push({ f:"target", was:hit.obj.target || "", now:joinTarget(hit.obj.target, r.value, r.unit) });
       cmp("weight", hit.obj.weight == null ? "" : hit.obj.weight, r.weight);
       cmp("compile", hit.obj.compile, r.compile);
-      cmp("hidden", SMPRules.isHidden(hit.obj) ? "1" : "", r.hidden);
     } else if (hit.kind === "PROJECT") {
       cmp("name", hit.obj.name, r.name);
       cmp("brief", hit.obj.brief, r.description);
@@ -1011,13 +995,11 @@ function diffCapPlan(c, rows){
     } else if (hit.kind === "DELIVERABLE") {
       cmp("name", hit.obj.name, r.name);
       cmp("due", hit.obj.due, r.finish || "");
-      cmp("hidden", SMPRules.isHidden(hit.obj) ? "1" : "", r.hidden);
     } else if (hit.kind === "OUTCOME") {
       cmp("name", hit.obj.name, r.name); cmp("direction", hit.obj.dir, r.direction);
       if (r.value !== "" && targetChanged(hit.obj.target, r.value, r.unit))
         changes.push({ f:"target", was:hit.obj.target || "", now:joinTarget(hit.obj.target, r.value, r.unit) });
       cmp("measured at", hit.obj.measureAt, r.measure_at);
-      cmp("hidden", SMPRules.isHidden(hit.obj) ? "1" : "", r.hidden);
     } else if (hit.kind === "MILESTONE") {
       cmp("name", hit.obj.name, r.name);
       cmp("what it covers", hit.obj.covers, r.covers);
@@ -1026,7 +1008,6 @@ function diffCapPlan(c, rows){
          the same contract the project's stakeholders keep above. */
       cmp("collaborators", (hit.obj.collaborators || []).join("|"), r.collaborators);
       cmp("finish", hit.obj.finish, r.finish);
-      cmp("hidden", SMPRules.isHidden(hit.obj) ? "1" : "", r.hidden);
     }
     out.push({ id:r.id, type:hit.kind, name:hit.obj.name || c.name,
                status:changes.length ? "changed" : "same", changes:changes, hit:hit, raw:r });
@@ -1066,25 +1047,20 @@ function createFromCapPlan(c, d){
       made++;
     } else if (x.type === "CAPOBJECTIVE") {
       var w = parseFloat(x.weight);
-      var cko = { id:x.id, name:x.name, dir:x.direction || "≥",
+      c.keyObjectives.push({ id:x.id, name:x.name, dir:x.direction || "≥",
         target:joinTarget("", x.value, x.unit), compile:x.compile || "Latest",
-        weight:isNaN(w) ? null : w, actual:null, progress:null };
-      if (+x.hidden) cko.hide = true;
-      c.keyObjectives.push(cko);
+        weight:isNaN(w) ? null : w, actual:null, progress:null });
       made++;
     } else if (x.type === "DELIVERABLE") {
       var p = projectById(x.parent_id); if (!p) return;
-      var dRow = { id:x.id, name:x.name, due:x.finish || "", actual:null };
-      if (+x.hidden) dRow.hide = true;
-      p.deliverables.push(dRow);
+      p.deliverables.push({ id:x.id, name:x.name, due:x.finish || "",
+        actual:null });
       made++;
     } else if (x.type === "OUTCOME") {
       var p2 = projectById(x.parent_id); if (!p2) return;
-      var oRow = { id:x.id, name:x.name, dir:x.direction || "≥",
+      p2.outcomes.push({ id:x.id, name:x.name, dir:x.direction || "≥",
         target:joinTarget("", x.value, x.unit), measureAt:x.measure_at || "",
-        actual:null, progress:null };
-      if (+x.hidden) oRow.hide = true;
-      p2.outcomes.push(oRow);
+        actual:null, progress:null });
       made++;
     } else if (x.type === "MILESTONE") {
       var p3 = projectById(x.parent_id); if (!p3) return;
@@ -1095,7 +1071,6 @@ function createFromCapPlan(c, d){
       var col = (x.collaborators || "").split(/[,|]/)
         .map(function(s){ return s.trim(); }).filter(Boolean);
       if (col.length) m3.collaborators = col;
-      if (+x.hidden) m3.hide = true;
       p3.milestones.push(m3);
       made++;
     }
@@ -1121,7 +1096,6 @@ function applyCapPlan(c, d){
       /* §227: cmp never fires on an emptied value, so `ch.now` is always a
          real list here — a file adds and amends, it never removes (§54). */
       if (ch.f === "collaborators")  o.collaborators = ch.now.split("|").map(function(s){ return s.trim(); }).filter(Boolean);
-      if (ch.f === "hidden")         { if (+ch.now) o.hide = true; else delete o.hide; }
       if (ch.f === "timeline")       o.timeline = timelineKey(ch.now) || o.timeline;
       if (ch.f === "start")          o.start = ch.now;
       if (ch.f === "end")            o.end = ch.now;

@@ -6485,24 +6485,6 @@
         paint();
       });
     });
-    /* ── HIDDEN FROM THE PRESENTATION (§231) ───────────────────────────
-       One press hides, the same press shows again — the mark is stored as
-       an ABSENCE (§50.6), so a row never hidden and one hidden-and-shown
-       are byte-identical and no save carries a phantom change. The gate is
-       re-asked at the click through the page/acKey the button carries
-       (§48.2): the eye is drawn only under an authoring pen, and authoring
-       is what the press must still hold. */
-    document.querySelectorAll("[data-hiderow]").forEach(function(b){
-      b.addEventListener("click", function(){
-        var ac = String(this.dataset.hideac || "").split("|");
-        if (!authoring(ac[0], ac[1])) return;
-        var row = hideableById(this.dataset.hiderow);
-        if (!row) return;
-        if (SMPRules.isHidden(row)) delete row.hide;
-        else row.hide = true;
-        paint();
-      });
-    });
     /* The whole pillar and the whole project (§230): the worded control in
        the editing head opens the platform's own confirmation — never
        confirm(), which can be silenced for good on some other site (§95). */

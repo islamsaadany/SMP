@@ -41,13 +41,7 @@ const DIFF = require("./graph-diff.js");
 const REPORT = {
   measure:   ["actual", "progress", "note"],
   unitKO:    ["actual", "progress", "note"],
-  /* §245: `outActual` is the figure a tactic measured by its OUTCOME reports.
-     It had to join this list in the same edit as the box that writes it, or
-     the screen would offer a field the save refuses — §42's drift, and the
-     exact fault §147 records for a milestone's `pct`. Its target, direction
-     and compile rule are NOT here: those are the plan, and the plan is the
-     office's (§94). */
-  tactic:    ["status", "actual", "note", "outActual"],
+  tactic:    ["status", "actual", "note"],
   capKO:     ["actual", "progress", "note"],
   outcome:   ["actual", "progress", "note"],
   /* `pct` on both since §147 — it arrived with migration 024 (§104.10: an In

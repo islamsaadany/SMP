@@ -1756,3 +1756,60 @@
     border:1px solid var(--panel); border-radius:8px; padding:10px 16px;
     font:700 13.5px var(--sans); cursor:pointer; margin:4px 0 0; }
   .nosrv-btn:hover { filter:brightness(1.12); }
+
+/* ── A TACTIC'S OUTCOME (§245) ──────────────────────────────────────────────
+   THE NAME CARRIES THE WEIGHT, because the description now sits under it in
+   the same cell on Reporting and Performance — two greys at one weight run
+   together as a single block, which is what Islam saw. The Plan splits them
+   into columns instead, so nothing there needs this. */
+.tacname { font-weight:650; display:block; }
+
+/* THE OUTCOME'S FOUR CONTROLS, ONE CELL, FOUR EQUAL BOXES (Islam: "the 4
+   boxes should be the same size and squeeze them where their hz size should
+   match the compile cell ... so we can give space for the other columns").
+   The height is already spent on the stacked name and description, so the
+   second line is free — and the width it hands back goes to the prose columns,
+   which is what makes the rows SHORTER rather than taller: measured, Target
+   275px to 220 and Tactic 324 to 380, rows 149 to 131.
+
+   `--tw` is what a select needs to show its longest word ("Average"), measured
+   rather than chosen. It is a token so one number moves all four boxes and the
+   cell that holds them; a per-box width would be four places to keep in step. */
+:root { --tw: 96px; }
+td.tgtcell { width:1px; white-space:nowrap; }
+.tgrid { display:grid; grid-template-columns:var(--tw) var(--tw); gap:5px; }
+/* `.fld` is width:100% in this stylesheet, so without this the first control
+   on a row asks for the whole line and takes it — measured at 224px with its
+   neighbour squeezed to 18. Every box says its own width instead. */
+.tgrid > * { width:var(--tw) !important; min-width:0 !important; box-sizing:border-box; }
+.tgrid > .why { display:flex; align-items:center; justify-content:center; }
+
+/* A second fact under a headline one inside a data cell — the whole-year
+   target under what is due now. Its own class rather than a reuse of `.why`,
+   which is scoped to a row's NAME cell and is left-aligned; this one has to
+   inherit the cell's alignment so a `.num` cell stays right-aligned on both
+   lines (§53.5: the question here is "a second line in a data cell", not "a
+   note under a name"). */
+.subhd { display:block; font-size:.82em; font-weight:400; color:var(--ink-3);
+         line-height:1.35; margin-top:1px; white-space:nowrap;
+         letter-spacing:0; text-transform:none; }
+th .subhd { font-weight:400; }
+
+/* THE DESCRIPTION HAS A COLUMN WHERE THERE IS ROOM AND A LINE WHERE THERE IS
+   NOT (§245, keeping §158). Measured: eight columns overflow the plan pane by
+   21px at a 960 window and 151px at 830 — and a plan table may not scroll
+   sideways. The column goes below 1000 and the same words appear under the
+   tactic's name instead, so nothing is lost at any width. */
+.narrowdesc, .narrowtgt { display:none; }
+@media (max-width: 1000px) {
+  .desccol { display:none; }
+  .narrowdesc { display:block; }
+}
+/* And one step further down: below 880 the Target column goes too and its
+   value rides under the outcome it belongs to. Never in edit mode — the four
+   controls are the only way to set it, so hiding them would leave a field
+   nobody can reach (§61). */
+@media (max-width: 880px) {
+  td.tgtcol:not(.tgtcell), th.tgtcol { display:none; }
+  .narrowtgt { display:block; }
+}

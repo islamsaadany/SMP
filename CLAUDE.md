@@ -442,6 +442,45 @@ console errors (in this cloud environment, run it via a wrapper that points Play
   different targets never touch. Proved able to fail: 11 red on the differ's
   pre-build, and end-to-end on a real Postgres the whole-graph flag fails
   with the reported sentence to the word.
+- **A TACTIC IS JUDGED BY WHAT IT PRODUCED (§245):** Islam — *"the tactics
+  have outcomes that we need to have in our tactics plan so we can measure the
+  progress against"*, and *"the outcome needs to have a target and measuring
+  unit so it can be reported in the reporting and measured in the performance
+  accordingly."* **BOTH FIELDS ALREADY EXISTED AND WERE BEING SWALLOWED** —
+  `description` and `outcome` are stored on every tactic and the workbook has
+  read both since the template existed; the outcome rendered in ONE place (a
+  grey line under the name) and the description in NONE. **THE OUTCOME IS
+  SHAPED AS A MEASURE**, so `measureDue`/`measureScore`/`measureDueLabel` serve
+  it unchanged (§239's rule, not a second copy): Sum prorates, Latest and
+  Average keep the annual target, the direction decides the division.
+  **THE FIGURE IS ITS OWN FIELD AND THAT IS THE WHOLE MIGRATION STORY** —
+  `t.actual` has always meant "% delivered" and is what `pillarExec` averages
+  and `figuresSnapshot` archives, so an outcome's number in that box would make
+  a tactic at **45** read **750%** against `≥ 6 #` the moment the target is set,
+  and the average would mix a per cent with a count. It reports into
+  **`outActual`**; the five fields ride in `extra`, so **no migration and no
+  schema change**, and every closed cycle reads as it did. **THE SWITCH IS PER
+  TACTIC, WHEN A HUMAN TYPES**: a tactic is asked and scored the old way until
+  its outcome has both a target AND a figure, so adding one mid-round changes
+  nothing. **Proved, not argued: 19 subjects read off the shipped build and
+  this one, byte-identical.** **NOT A SETTING** (put to him, and refused for
+  §44/§102/§104.7's reasons): the risk was noise, so the default is quiet — an
+  empty outcome is an em-dash, never the red word, and is not a counted gap;
+  it is deliberately not in `GAP_OPTIONAL` either, because its target is the
+  office's and a fillable name with an unfillable target is §205. **FOUR EQUAL
+  BOXES IN ONE CELL** (his): `--tw` is 96px, what a select needs for *Average*,
+  measured — the width handed back goes to the prose columns and the rows get
+  SHORTER (149 → 131). **AND §158 DOES NOT BEND**: the description is drawn
+  TWICE and CSS picks (column above 1000, a line under the name below), the
+  target folds the same way below 880, **neither folds while the pen is open**
+  (§61's trap, walked into and caught by measuring both modes at four widths),
+  and the head folds only when its cells do — decided where `ed` is known,
+  never with `:nth-child`. **The workbook carries the three new facts** or a
+  round trip drops every target (§22), with Q1–Q4 moving G:J → J:M because a
+  validation range is a POSITION (§65). **`outActual` joins `REPORT.tactic`**
+  in the same edit as the box that writes it (§42, §147). Proved able to fail:
+  **31 red** on the previous build — and its first run DIED rather than
+  reported (§215), so every evaluate degrades now.
 - **YTD IS MEASURED AGAINST THE PART OF THE YEAR THAT HAS PASSED (§239):**
   Islam — *"the reporting of YTD is being compared with the full year target
   without proration which is the wrong practice."* Three answers to one

@@ -26979,3 +26979,124 @@ saying so. Doubling is a display fault; that would be a data one.
 and cleans nothing, so the row in his screenshot reads `8 M EGP M EGP` until
 the figure is entered again. Said rather than swept up: a migration over
 reported figures is not something to do on the way past.
+
+
+## §245 — A TACTIC IS JUDGED BY WHAT IT PRODUCED (2026-09-02)
+
+Islam, from his own plan: *"in the planning the tactics have outcomes that we
+need to have in our tactics plan so we can measure the progress against ...
+adjust it in all of the units plans"*, then *"and a description as well"*, then
+*"this is an important fix"* — and, settling the shape, *"the outcome needs to
+have a target and measuring unit so it can be reported in the reporting and
+measured in the performance accordingly."*
+
+**BOTH FIELDS ALREADY EXISTED AND THE PLATFORM WAS SWALLOWING THEM.**
+`t.description` and `t.outcome` are stored on every tactic, the plan workbook
+has carried both columns since the template existed, and `xlsx.js` reads them
+on upload. The **outcome** rendered in exactly ONE place — a faint grey line
+under the tactic's name on Performance — and the **description** rendered
+**nowhere at all**. So anyone who filled those columns in the template already
+had that data in the database, invisible on every screen. This is not a new
+field arriving; it is a field being shown.
+
+**THE OUTCOME IS SHAPED AS A MEASURE, SO THERE IS ONE ARITHMETIC.**
+`outcomeOf(t)` returns `{dir, target, compile, actual}` and `measureDue`,
+`measureScore` and `measureDueLabel` serve it unchanged — §239's rule, not a
+second copy of it: **Sum prorates against the part of the year that has passed,
+Latest and Average keep the annual target, and the direction decides which way
+the division runs.** Nought on a `≤` outcome is the cap, exactly as §239.4
+settled for a measure.
+
+**THE FIGURE IS ITS OWN FIELD, AND THAT IS THE WHOLE MIGRATION STORY.**
+Islam asked the right question: *"what should we do to ship this without
+breaking what people worked on with the old approach?"* — and the danger is not
+loss, it is **one field meaning two things**. `t.actual` has always meant
+"% delivered" and is what `pillarExec` averages and what `figuresSnapshot`
+archives per cycle. Put an outcome's number in that box and a tactic sitting at
+**45** that gains an outcome of `≥ 6 #` reads **750%** the moment the target is
+set, silently — and the pillar average would be mixing 45 (a per cent) with 7
+(a count). So the outcome reports into **`outActual`**. Nothing stored moves,
+no SQL, no rewrite: **every closed cycle and every archive reads exactly as it
+did.** The five new fields ride in the tactic's `extra` (§177's road), so there
+is no schema change either.
+
+**AND THE SWITCH HAPPENS PER TACTIC, WHEN A HUMAN TYPES.** A tactic is asked
+and scored the old way until its outcome has both a target **and** a reported
+figure — so the office adding an outcome mid-round changes nothing: not the
+question on the reporting page, not the unit's execution. No cliff, and no day
+where a score jumps because somebody was tidying the plan. Removing the outcome
+puts the tactic straight back to what it had; the old figure is never deleted.
+
+**PROVED, NOT ARGUED: NOTHING MOVED.** Every unit, pillar and supporting
+function score was read off the shipped v3.22 build and off this one and
+compared — **19 subjects, byte-identical.** That is the claim the whole
+shipping decision rests on, so it is a measurement.
+
+**NOT A SETTING, AND THAT WAS PUT TO HIM.** He asked whether it should be
+optional. A tenant switch means every screen, the score, the gap count, the
+workbook and the server must ask it — the most branches at the moment there is
+least time, and this project's own record is §44 and §102 (a switch that hides
+data) and §104.7 (a list somebody forgets). What the risk actually was is
+**noise**, so the answer is a quiet default rather than a switch: **an empty
+outcome is a plain em-dash, never the red word, and is not a counted gap.** It
+is not in `GAP_FIELDS` and deliberately not in `GAP_OPTIONAL` either — the
+outcome's target, direction and compile rule are plan decisions and the plan is
+the office's (§94), so making the NAME fillable while its target was not would
+be §205's fault. Making it required later is one line, held by him.
+
+**THE FOUR CONTROLS ARE ONE CELL AND FOUR EQUAL BOXES** (his instruction:
+*"the 4 boxes should be the same size and squeeze them where their hz size
+should match the compile cell ... so we can give space for the other columns"*).
+The height is already spent on the stacked name and description, so a second
+line is free — and the width it hands back goes to the prose columns, which is
+what makes the rows **shorter**: measured, Target 275px → 220 and Tactic
+324 → 380, rows 149 → 131. `--tw` is 96px, what a select needs to show
+*Average*, measured rather than chosen. **The number and its unit above, the
+two rules below** — his grouping, over pairing the direction with the value it
+qualifies. The unit rides ON the target string exactly as a measure's does
+(§199).
+
+**AND §158 DOES NOT BEND.** Eight columns overflow a 545px pane by 151px, and a
+plan table that scrolls sideways is the fault §158 exists to stop. So the
+description is **drawn twice and CSS picks** — a column where there is room, a
+line under the name where there is not (below 1000) — and the target folds the
+same way below 880. Rendered rather than decided in JavaScript, because a paint
+that depends on the window's width needs a repaint on every resize and §28.3
+has already cost this project a day over exactly that. **Neither folds while
+the pen is open**, or the only control that writes the field is hidden (§61's
+trap, walked into once during this build and caught by measuring both modes at
+four widths). **The head folds only when its cells do**, decided where `ed` is
+known rather than guessed at with `:nth-child`.
+
+**THE WORKBOOK CARRIES THE THREE NEW FACTS**, or a download-and-re-upload would
+drop every target the office had set (§22: an upload AUTHORS). **A validation
+range is a POSITION (§65)**, so Q1–Q4 move from G:J to J:M and Hidden from K to
+N in the same edit as the head. A file written before this carries none of the
+three and its tactics arrive measured the way they always were.
+
+**THE SERVER CHANGED IN THE SAME BREATH.** `outActual` joins `REPORT.tactic`,
+or the screen would offer a box the save refuses — §42's drift, and the exact
+fault §147 records for a milestone's `pct`. Its target, direction and compile
+rule are deliberately NOT on that list: they are the plan.
+
+**PROVED ABLE TO FAIL.** `checks/tactic-outcome.py` drives every control and
+asks the DATA (§96): **31 failures against the previous build.** Its first run
+against that build **died** at the second section rather than reporting —
+§215's trap, a crash that reads like a result — so every evaluate that walks
+into a table it may not find now reports instead of throwing. Two of its own
+first failures were the CHECK: the unit picker is drawn only once there is a
+target to write it onto and a bound field writes without repainting (§130.1),
+and section 4 never set the review point, so a target of 12 was measured at six
+months and 8 read 133 — correct arithmetic, wrong question.
+
+**AND ONE CHECK HELD A WORD THIS SECTION RENAMED** (§51.11, again):
+`ytd-proration.py` found the tactics table by searching for *"YTD delivery"*.
+It asks for the head that says **Tactic** now — what the table IS, rather than
+what one of its columns currently happens to be called.
+
+**RECORDED, NOT DONE:** the review deck still shows a tactic without its
+outcome; making the outcome a counted gap is one line and is Islam's to take;
+and the *"+ Add a measure"* row on a plan with the pen open is **seven columns
+wide against a six-column header** — `addRow(cols)` emits `1 + cols` and §199.5
+passes 6 — reproduced on the untouched build, clamped by every browser, and
+outside what this was asked to touch.

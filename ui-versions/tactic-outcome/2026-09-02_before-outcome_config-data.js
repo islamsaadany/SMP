@@ -4924,7 +4924,7 @@ function reportState(c, key){
    The filter was written inline in renderCycle(); the totals need exactly the
    same list, and two copies of it is how a board and its own summary come to
    disagree about how many things were asked for. */
-/* ── WHO IS ON THE UNIT HALF OF THE CYCLE BOARD (§245) ───────────────────
+/* ── WHO IS ON THE UNIT HALF OF THE CYCLE BOARD (§244) ───────────────────
    Islam, told that a function planning in pillars appears nowhere on the
    board: *"put them on the unit half."*
 
@@ -5008,7 +5008,7 @@ function cycleTotals(){
     if (st.key === "late") t.none++;
     t.units++;
   }
-  /* §245: THE UNIT HALF IS `boardUnitTargets()` NOW, so a pillars function is
+  /* §244: THE UNIT HALF IS `boardUnitTargets()` NOW, so a pillars function is
      counted in the headline exactly once and through the readers its own row
      uses — leaving it out would say "10 of 11" on a page listing eleven rows,
      which is §108.1's miscount by another road. */
@@ -5641,59 +5641,6 @@ function measureScore(m){
   if (m.dir === "\u2264" && !a) return 150;
   return Math.max(0, Math.min(150, Math.round((m.dir === "\u2264" ? due / a : a / due) * 100)));
 }
-/* ── A TACTIC'S OUTCOME (§245) ─────────────────────────────────────
-   Islam: a tactic's outcome carries its own direction, target with its unit
-   and compile rule, "so it can be reported in the reporting and measured in
-   the performance accordingly."
-
-   IT IS SHAPED AS A MEASURE ON PURPOSE, so `measureDue`, `measureScore` and
-   `measureDueLabel` serve it unchanged -- one arithmetic for every scored row
-   in the product (§53.5). Sum prorates, Latest and Average do not, and the
-   direction decides which way the division runs: §239's rule, not a second
-   copy of it.
-
-   THE FIGURE IS ITS OWN FIELD, AND THAT IS THE WHOLE MIGRATION STORY.
-   `t.actual` has always meant "% delivered" and is what every closed cycle,
-   every archive and `figuresSnapshot` hold. Putting an outcome's number in
-   that same box would silently reinterpret it: a tactic sitting at 45 that
-   gains an outcome of "≥ 6 #" reads 750% against its target the moment the
-   target is set, and `pillarExec` would average 45 (a per cent) beside 7 (a
-   count). So the outcome reports into `outActual` and nothing stored moves --
-   no migration, and last cycle reads exactly as it did.
-
-   These five ride in the tactic's `extra` (§177's road), so there is no
-   schema change either. */
-function outcomeOf(t){
-  if (!t || !t.outTarget) return null;
-  return { dir: t.outDir || "\u2265", target: t.outTarget,
-           compile: t.outCompile, actual: t.outActual };
-}
-/* WHAT THE TACTIC SCORES, and the rule that makes this safe to ship into an
-   open cycle: a tactic is read the OLD way until its outcome has both a target
-   AND a reported figure. So the office adding an outcome mid-round changes
-   nothing -- not the question on the reporting page, not the unit's execution
-   -- until somebody actually enters the new number. The switch happens per
-   tactic, when a human types, never as a side effect of an edit. */
-function tacticOutcomeScore(t){
-  var o = outcomeOf(t);
-  if (!o || o.actual == null || o.actual === "") return null;
-  return measureScore(o);
-}
-function tacticReads(t){
-  var s = tacticOutcomeScore(t);
-  return s != null ? s : (t && t.actual != null ? t.actual : null);
-}
-/* What this tactic's figure is compared against, for the quiet half of the
-   YTD cell. An outcome answers with its own (prorated) target; everything
-   else answers with the share of its plan that is due, exactly as before. */
-function tacticBenchmark(t){
-  var o = outcomeOf(t);
-  return o ? measureDueLabel(o) : (tacticPlanned(t) == null ? null : tacticPlanned(t) + "%");
-}
-/* Is this tactic being measured by its outcome rather than by an estimate?
-   Asked by the three panes so none of them decides it separately. */
-function onOutcome(t){ return tacticOutcomeScore(t) != null; }
-
 /* What a prorated row is measured against, written the way the target is --
    drawn as the quiet half of the YTD actual cell. Null where there is nothing
    worth saying. */
@@ -6244,39 +6191,21 @@ function pillarPerf(p){
 function dueTactics(p){ return SMPRules.shown(p.tactics).filter(tacticDue); }
 /* A tactic that is due but has nothing reported is not delivering zero \u2014 it is
    unreported, and averaging a zero would say the plan is failing. */
-/* §245: a tactic measured by its OUTCOME has answered when the outcome's
-   figure is in, whichever box it came from. Written as one predicate so the
-   three panes, the score and the note rule cannot disagree about whether a
-   row has been answered (§53.5). */
-function tacticAnswered(t){ return t && (t.actual != null || tacticOutcomeScore(t) != null); }
-function reportedTactics(p){ return dueTactics(p).filter(tacticAnswered); }
+function reportedTactics(p){ return dueTactics(p).filter(function(t){ return t.actual != null; }); }
 /* THE TWO SCORES PASS UP SEPARATELY AND STAY APART (Islam, asked). The child's
    measure performance becomes the pillar's performance and its execution
    becomes the pillar's execution — nothing is blended, so the parent's two
    headline numbers stay comparable across all of its pillars, the handed-over
    one included. `plan` travels with `exec` because the ratio between them is
    what "of plan" means; averaging a ratio of ratios would say something else. */
-/* §245: THE AVERAGE READS THE SCORE, NOT THE RAW NUMBER. It averaged
-   `t.actual` directly, which is only sound while every tactic reports the same
-   0–100 "% delivered" — the moment one is measured in stores or in EGP, an
-   average of 45 and 7 means nothing. `tacticReads` returns the outcome's score
-   where there is one and the delivery figure where there is not, so on a plan
-   with no outcomes this is byte-identical to what it computed before and no
-   unit's number moves. */
 function pillarExec(p){
   return viaCarrier(p,
-    function(){ return avg(reportedTactics(p).map(tacticReads)); },
+    function(){ return avg(reportedTactics(p).map(function(t){ return t.actual; })); },
     function(f){ return avg(fnItems(f).map(pillarExec)); });
 }
-/* And its partner: `exec / plan` is what "of plan" means, so the two halves
-   must be in the same currency. An outcome's score is ALREADY a ratio against
-   the target due at this point in the year, so its plan is 100 — not the
-   share of its quarters, which would divide a ratio by a ratio and report a
-   tactic delivering exactly its target as 138% of plan. */
-function tacticPlanShare(t){ return onOutcome(t) ? 100 : tacticPlanned(t); }
 function pillarPlan(p){
   return viaCarrier(p,
-    function(){ return avg(reportedTactics(p).map(tacticPlanShare)); },
+    function(){ return avg(reportedTactics(p).map(tacticPlanned)); },
     function(f){ return avg(fnItems(f).map(pillarPlan)); });
 }
 function pillarRatio(p){ var pl = pillarPlan(p); return pl ? Math.round(pillarExec(p)/pl*100) : null; }

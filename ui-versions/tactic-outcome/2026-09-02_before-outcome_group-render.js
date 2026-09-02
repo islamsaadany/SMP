@@ -246,16 +246,9 @@ function splitCard(name, sub, perf, exec, planned, perfDrill, execDrill, ctx, ct
 
 /* `sort` is the tbody's attributes when the table can be reordered — the
    container says what it holds, so nothing outside has to know (§63.3). */
-/* A heading may carry a class as `{h, cls}` — a plain string still means what
-   it always did, so every existing caller is untouched. It exists because a
-   column that hides on a narrow window has to hide its HEAD with its cells
-   (§245), and `:nth-child` would silently point at the wrong column the day
-   somebody inserts one. */
 function miniTable(head, rows, sort){
   return '<div class="scroll"><table><thead><tr>' +
-    head.map(function(h){
-      return typeof h === "string" ? '<th>' + h + '</th>'
-                                   : '<th class="' + (h.cls || '') + '">' + h.h + '</th>'; }).join("") +
+    head.map(function(h){ return '<th>' + h + '</th>'; }).join("") +
     '</tr></thead><tbody' + (sort || "") + '>' + rows + '</tbody></table></div>';
 }
 
@@ -485,94 +478,13 @@ function collabParse(v){
     .map(function(x){ return x.trim(); }).filter(Boolean);
 }
 
-/* WRITE, OR DELETE THE KEY (§50.6). A value put back to nothing must leave
-   the row byte-identical to one that never had it, or every save carries a
-   phantom change nobody made and a non-office person is refused for it. */
-function setOr(row, field, v){
-  v = (v == null ? "" : String(v)).trim();
-  if (v) row[field] = v; else delete row[field];
-}
-/* The outcome's four controls, in ONE cell and ONE grid (Islam: "the 4 boxes
-   should be the same size ... so we can give space for the other columns").
-   Equal boxes sized by what the compile select needs for its longest word, so
-   the width the four give back goes to the prose columns beside them — Target
-   275px to 220 and Tactic 324 to 380, measured, with the rows falling from 149
-   to 131 because the prose stops wrapping so hard.
-
-   The number and its unit above, the two rules below — his grouping, chosen
-   over pairing the direction with the value it qualifies. The unit rides ON
-   the target string exactly as a measure's does (§199), so there is no second
-   convention for what a target looks like. */
-function outcomeEdit(t){
-  var unit = splitTarget(t.outTarget || "").unit;
-  return '<div class="tgrid">' +
-    inputOr("plan", splitTarget(t.outTarget || "").value, "mono", function(v){
-      var n = String(v == null ? "" : v).trim();
-      if (!n) delete t.outTarget;
-      else t.outTarget = joinTarget(t.outTarget || "", n, splitTarget(t.outTarget || "").unit);
-    }) +
-    /* The unit is a PICK from the platform's own list, and setting it on a row
-       with no number yet is meaningless — the unit is written with the target
-       (§199), so there is nothing to write it onto. */
-    (t.outTarget
-      ? selectOr("plan", unit, targetUnitOpts(unit), "", function(v){ setTargetUnit2(t, v); })
-      : '<span class="why" title="Set a target first \u2014 the unit is written with it">\u2014</span>') +
-    selectOr("plan", t.outDir || "\u2265", ["\u2265", "\u2264"], "mono",
-             function(v){ setOr(t, "outDir", v); }) +
-    selectOr("plan", t.outCompile || "", ["", "Sum", "Latest", "Average"], "",
-             function(v){ setOr(t, "outCompile", v); }) +
-    '</div>';
-}
-/* `setTargetUnit` is written against a measure's `target`/`target3y` pair; the
-   outcome has one field, so it asks the same question of that one — never a
-   second definition of how a unit joins a number (§53.5). */
-function setTargetUnit2(t, u){
-  var want = String(u == null ? "" : u).trim();
-  var cur  = splitTarget(t.outTarget || "");
-  if (want === cur.unit) return;
-  if (!cur.value) return;
-  t.outTarget = joinTarget("", cur.value, want);
-}
-
-/* ── A TACTIC'S OUTCOME, ON THE READING SURFACES (§245) ────────────
-   The outcome takes a column beside the figure it is judged by. An empty one
-   is a QUIET dash and never the red word: it is not a counted gap, so saying
-   "Missing" over a count of nought is §214.4's fault with the sign reversed —
-   and shipping it loud would put that word on every one of the 83 tactics
-   already in the demo the day this lands. */
-function outcomeCell(t){
-  return t && t.outcome
-    ? '<b>' + esc(t.outcome) + '</b>'
-    /* `.nobody` is the platform's own em-dash for "nothing here", already
-       used by the collaborators cell — not a second vocabulary (§53.5). */
-    : '<span class="nobody">&mdash;</span>';
-}
-/* The reported figure written the platform's own way, so `7` against a target
-   in `#` reads `7#` and one in `M EGP` reads `7 M EGP` — never joined by hand
-   (§199.4), and never doubled if somebody typed the unit in (§243). */
-function outcomeShown(t){
-  var o = outcomeOf(t);
-  if (!o || o.actual == null || o.actual === "") return null;
-  return joinTarget("", String(o.actual), splitTarget(o.target).unit) || String(o.actual);
-}
-/* The target as it is written on the plan — the whole year's number, unit and
-   all. `tacticBenchmark` gives what it is measured against RIGHT NOW, which
-   for a Sum row is a part of this. */
-function outcomeTargetShown(t){ return t && t.outTarget ? String(t.outTarget) : null; }
-
 /* Tactic, owner and quarters read left; the rest centres. A tactic whose
    quarters have not begun is not behind \u2014 it is not yet due, and scoring it
    would say otherwise. */
 function tacticRows(ts, unitKey){
   var on = arranging("unit", unitKey);
   return ts.map(function(t, i){
-    var pl = tacticPlanned(t), due = tacticDue(t);
-    /* §245: an outcome answers with its own score and its own benchmark; a
-       tactic without one is read exactly as it was. `tacticRatio` stays the
-       reader for the second case so nothing about it moves. */
-    var oc = onOutcome(t), bench = tacticBenchmark(t);
-    var r = oc ? tacticReads(t) : tacticRatio(t);
-    var shown = oc ? outcomeShown(t) : (t.actual == null ? null : t.actual + "%");
+    var pl = tacticPlanned(t), due = tacticDue(t), r = tacticRatio(t);
     var status = t.status === "Done" ? '<span class="pill good">Done</span>'
                                      : '<span class="pill warn">' + esc(t.status) + '</span>';
     /* Three distinct states, and they must not look alike: not yet due, due
@@ -583,41 +495,28 @@ function tacticRows(ts, unitKey){
        state, so one cell spelt one unit two ways. */
     var tail = !due
       ? '<td class="cc" colspan="2"><span class="pill kind">Not yet due</span></td>'
-      : !tacticAnswered(t)
+      : t.actual == null
       ? '<td class="cc" colspan="2"><span class="pill none">Not reported</span>' +
-        (bench ? '<span class="why" style="margin:2px 0 0">due at ' + esc(bench) + '</span>' : '') + '</td>'
-      : '<td class="num"><span class="pair"><b>' + esc(shown) + '</b>' +
-        (bench ? ' <i>/ ' + esc(bench) + '</i>' : '') + '</span></td>' +
+        '<span class="why" style="margin:2px 0 0">due at ' + pl + '%</span></td>'
+      : '<td class="num"><span class="pair"><b>' + t.actual + '%</b> <i>/ ' + pl + '%</i></span></td>' +
         '<td class="num final" style="color:' + bandInk(r) + '">' + pct(r) + '</td>';
     return '<tr data-oi="' + i + '"' +
       (SMPRules.isHidden(t) ? ' class="hiddenrow"'
         : due && t.actual != null ? '' : ' class="notdue"') + '><td class="idx">' +
       (on ? handle("Reorder " + t.name) : '') +
-      /* §245: the NAME carries the weight now, because the description sits
-         under it — two greys at one weight run together as a single block.
-         And the outcome leaves this cell for a column of its own: it is what
-         the figure beside it is measured against, so it belongs on the line,
-         not tucked under a name where it cannot be scanned. */
-      '<span class="idx-n">' + (i+1) + '</span></td><td><b class="tacname">' +
-      esc(t.name) + '</b>' + hidChip(t) +
-      (t.description ? '<span class="why">' + esc(t.description) + '</span>' : '') +
+      '<span class="idx-n">' + (i+1) + '</span></td><td>' + esc(t.name) + hidChip(t) +
+      (t.outcome ? '<span class="why">' + esc(t.outcome) + '</span>' : '') +
       (t.note ? '<span class="why">' + esc(t.note) + '</span>' : '') + '</td>' +
-      '<td>' + outcomeCell(t) + '</td>' +
       '<td>' + esc(t.owner) + '</td><td class="collabs">' + collabCell(t) + '</td>' +
       '<td>' + qs(t) + '</td><td class="cc">' + status + '</td>' + tail + '</tr>';
   }).join("");
 }
 function tacticHead(){
-  return '<thead><tr><th class="idx">#</th><th>Tactic</th><th>Outcome</th>' +
-    '<th>Owner</th><th>Collabs.</th><th>Quarters</th>' +
+  return '<thead><tr><th class="idx">#</th><th>Tactic</th><th>Owner</th><th>Collabs.</th><th>Quarters</th>' +
     /* §239: VARIANCE GOES -- the pair beside it already shows it, and the
        column was spending width to restate a subtraction. "Of plan" becomes
        "Progress" so both tables on the page end in the same word. */
-    /* §245: "YTD delivery" becomes "YTD actual" — the word the key measures
-       table on this same page already uses, so one page stops having two names
-       for the same kind of number, and "delivery" stops being wrong for a row
-       measured in stores or in EGP. */
-    '<th class="cc">Status</th><th class="cc">YTD actual</th>' +
+    '<th class="cc">Status</th><th class="cc">YTD delivery</th>' +
     '<th class="cc">Progress</th></tr></thead>';
 }
 
@@ -3628,16 +3527,9 @@ function renderReport(u){
      save so nothing downstream sees a bare number. */
   var entry = function(x){
     var isT = x.kind === "tactic";
-    /* §245: a tactic measured by its OUTCOME is asked for the outcome's
-       figure, in the outcome's own unit, and stores it in `outActual` — never
-       in `actual`, which has always meant "% delivered" and is what every
-       closed cycle and every archive hold. Same box, different field, and the
-       tactic falls back to the old question until its outcome has a target. */
-    var oc  = isT ? outcomeOf(x.obj) : null;
-    var fld = oc ? "outActual" : "actual";
-    var unit = oc ? splitTarget(oc.target).unit : (isT ? "%" : splitTarget(x.obj.target).unit);
-    var cur = x.obj[fld], has = cur != null && cur !== "";
-    var shown = !has ? "" : ((isT && !oc) ? String(cur) : splitTarget(cur).value || String(cur));
+    var unit = isT ? "%" : splitTarget(x.obj.target).unit;
+    var cur = x.obj.actual, has = cur != null && cur !== "";
+    var shown = !has ? "" : (isT ? String(cur) : splitTarget(cur).value || String(cur));
     /* Per ROW, not per page. A contributor is limited to the lines they are
        named on (spec 006 §7.2); a figure with a SOURCE is entered by that
        source and by nobody in the unit (§16.7). Both are refused by the
@@ -3645,12 +3537,11 @@ function renderReport(u){
     if (!canEnterFigure(u.ukey, x)) {
       var src = srcOf(x), lab = src ? srcLabel(x) : "";
       return '<span class="mono' + (src ? " sourced" : "") + '">' +
-        (has ? esc(cur) + ((isT && !oc) ? "%" : "") : "\u2014") + '</span>' +
+        (has ? esc(cur) + (isT ? "%" : "") : "\u2014") + '</span>' +
         (src ? ' <span class="srcby" title="Set by ' + esc(lab) + '">' + esc(lab) + '</span>' : '');
     }
     return '<span class="entry' + (has ? " filled" : "") + '">' +
-      '<input class="field" data-rep="' + x.id + '" data-fld="' + fld +
-      '" data-unit="' + esc(unit) + '" value="' + esc(shown) +
+      '<input class="field" data-rep="' + x.id + '" data-unit="' + esc(unit) + '" value="' + esc(shown) +
       '" placeholder="\u2014" aria-label="Report ' + esc(x.obj.name) + '">' +
       (unit ? '<span class="unitsuf">' + esc(unit) + '</span>' : '') + '</span>';
   };
@@ -3720,37 +3611,19 @@ function renderReport(u){
 
     var tTable = ts.length
       ? '<h4 class="mini">Tactics</h4>' +
-        /* §245: the Outcome takes a column here too, so somebody entering a
-           figure can see what they are being measured against without leaving
-           the page. It is a PLAN fact, so a row outside this cycle still shows
-           its outcome — the cycle decides what is asked for, not what the plan
-           says. */
-        miniTable(["#", "Tactic", "Outcome", "Owner", "Quarters", "YTD Target", "Reported", "Note"],
+        miniTable(["#", "Tactic", "Owner", "Quarters", "YTD Target", "Reported", "Note"],
           ts.map(function(x, i){
-            var nameCell = '<td><b class="tacname">' + esc(x.obj.name) + '</b>' +
-              (x.obj.description ? '<span class="why">' + esc(x.obj.description) + '</span>' : '') +
-              '</td><td>' + outcomeCell(x.obj) + '</td>';
             if (!x.asked) {
               return '<tr class="notdue"><td class="idx">' + (i+1) + '</td>' +
-                nameCell + '<td>' + esc(x.obj.owner) + '</td>' +
+                '<td>' + esc(x.obj.name) + '</td><td>' + esc(x.obj.owner) + '</td>' +
                 '<td>' + qs(x.obj) + '</td>' +
                 '<td colspan="3" class="cc"><span class="pill kind">Not asked \u2014 outside this cycle</span></td></tr>';
             }
-            /* WHAT THIS ROW IS MEASURED AGAINST RIGHT NOW. An outcome answers
-               with its own target — prorated where it compiles by Sum, whole
-               where it does not — and says what that is a part of; everything
-               else answers with the share of its plan that is due, exactly as
-               it did before. */
-            var bench = tacticBenchmark(x.obj);
-            var whole = onOutcome(x.obj) || outcomeOf(x.obj)
-              ? outcomeTargetShown(x.obj) : null;
             return '<tr' + (needsNote(x) ? ' class="wantnote"' : '') + '>' +
               '<td class="idx">' + (i+1) + '</td>' +
-              nameCell + '<td>' + esc(x.obj.owner) + '</td>' +
+              '<td>' + esc(x.obj.name) + '</td><td>' + esc(x.obj.owner) + '</td>' +
               '<td>' + qs(x.obj) + '</td>' +
-              '<td class="num">' + (bench ? esc(bench) : '<span class="nobody">&mdash;</span>') +
-                (whole && whole !== bench ? '<span class="subhd">of ' + esc(whole) + '</span>' : '') +
-                '</td>' +
+              '<td class="num">' + tacticPlanned(x.obj) + '%</td>' +
               '<td class="cc">' + entry(x) + '</td>' +
               '<td class="notecol">' + noteCell(x) + '</td></tr>';
           }).join(""))
@@ -5307,42 +5180,9 @@ function unitPlanBody(it, u, railed){
     return '<tr data-oi="' + i + '"' + hidCls(t) + '><td class="idx">' +
       (on ? handle("Reorder " + t.name) : '') +
       '<span class="idx-n">' + (i+1) + '</span></td>' +
-      '<td>' + (ed ? textOr("plan", t.name, "", function(v){ t.name = v; })
-                    : '<b class="tacname">' + esc(t.name) + '</b>') +
+      '<td>' + (ed ? textOr("plan", t.name, "", function(v){ t.name = v; }) : esc(t.name)) +
         (ed ? eyeBtn(t, "plan", "u_plan") : hidChip(t)) +
-        xb("tactics", t.id) +
-        /* §158 AND §245 MEETING: eight columns do not fit a 545px pane, and a
-           plan table that scrolls sideways is the fault §158 exists to stop.
-           So the description is drawn TWICE and CSS picks — a column where
-           there is room, a line under the name where there is not. Rendered
-           rather than decided in JavaScript, because a paint that depends on
-           the window's width needs a repaint on every resize and §28.3 has
-           already cost this project a day over exactly that. */
-        (!ed && t.description ? '<span class="why narrowdesc">' + esc(t.description) + '</span>' : '') +
-        '</td>' +
-      /* WHAT IT IS FOR, and WHAT IT SHOULD PRODUCE (§245). Both `textOr`,
-         because both are prose that must wrap (§189) — a title in an <input>
-         is one line by definition and runs off the end. Neither is a counted
-         gap: an empty one is quiet, so no existing plan gains 83 red words
-         overnight. */
-      '<td class="' + (ed ? '' : 'desccol') + '">' + (ed ? textOr("plan", t.description || "", "",
-                            function(v){ setOr(t, "description", v); })
-                   : (t.description ? esc(t.description) : '<span class="nobody">&mdash;</span>')) + '</td>' +
-      '<td>' + (ed ? textOr("plan", t.outcome || "", "",
-                            function(v){ setOr(t, "outcome", v); })
-                   : outcomeCell(t) +
-                     /* The same double-render as the description one column
-                        left: below 880 the Target column goes and its value
-                        appears here instead, because seven columns still run
-                        44px past a 515px pane and §158 does not bend. */
-                     (!ed && t.outTarget ? '<span class="subhd narrowtgt">' +
-                        esc(t.outDir || "\u2265") + ' ' + esc(t.outTarget) + '</span>' : '')) +
-        '</td>' +
-      /* THE OUTCOME'S TARGET: reading says the target, writing gives each of
-         its four facts a control of its own in one cell (Islam). */
-      '<td class="' + (ed ? 'tgtcell' : 'tgtcol num') + '">' +
-        (ed ? outcomeEdit(t) : (t.outTarget ? esc(t.outTarget)
-                                            : '<span class="nobody">&mdash;</span>')) + '</td>' +
+        xb("tactics", t.id) + '</td>' +
       /* §145 MERGED WITH §130.1: gapCell keeps the pending lifecycle and
          the read-mode Missing word; the control hook renders the register-
          fed picker — an owner is PICKED, not typed, in the pen and in fill
@@ -5498,23 +5338,8 @@ function unitPlanBody(it, u, railed){
                  : ["#","Measure","Dir.","Target","Compiled"],
       mRows + addRow((ed || unitCol) ? 6 : 5, "measure", "Add a measure"), sortAttr("measures")) +
     '<h4 class="mini">Tactics <em>\u2014 who carries it, who supports, and in which quarters</em></h4>' +
-    /* §245: Description and Outcome are stored on every tactic and the upload
-       has written both since the template existed — the description was
-       displayed on NO screen at all and the outcome only as a grey line under
-       the name. They are columns now, on the page where the plan is written.
-       `addRow` spans one less than the head, as it always has. */
-    /* NEITHER COLUMN FOLDS WHILE THE PEN IS OPEN. Folding one hides the
-       only control that writes it, which is a field nobody can reach (§61) —
-       the trap this project keeps walking into. Editing scrolls sideways below
-       1000 instead, which is the cost we accepted: writing a plan is a desk
-       job, reading one fits everywhere. */
-    miniTable(["#","Tactic",{h:"Description", cls: ed ? "" : "desccol"},"Outcome",
-               /* THE HEAD FOLDS ONLY WHEN ITS CELLS DO, and CSS cannot see a
-                  row's mode from a header — so the class is decided here,
-                  where `ed` is known, rather than guessed at with a selector. */
-               {h:"Target", cls: ed ? "" : "tgtcol"},
-               "Owner","Collabs.","Quarters"],
-      tRows + addRow(7, "tactic", "Add a tactic"), sortAttr("tactics"));
+    miniTable(["#","Tactic","Owner","Collabs.","Quarters"],
+      tRows + addRow(4, "tactic", "Add a tactic"), sortAttr("tactics"));
 }
 function renderUnitPlan(u){
   var sel = unitRailPick(u);

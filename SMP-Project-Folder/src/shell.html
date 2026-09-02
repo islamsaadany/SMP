@@ -3455,6 +3455,26 @@
            it. Rejoin them before storing, or every screen downstream reads a
            revenue of "2.7" where it expects "2.7B EGP". */
         var unit = el.dataset.unit || "";
+        /* ── §245: A TACTIC MEASURED BY ITS OUTCOME ───────────────────────
+           The box says which field it is for. `outActual` is a figure in the
+           outcome's OWN unit — stores, EGP, a per cent — so it is joined with
+           its unit and stored whole, exactly as a measure's actual is, and it
+           is NOT clamped to 0–100: 7 stores against a target of 6 is a real
+           answer and 700 would be nonsense. `actual` keeps meaning "% delivered"
+           and keeps every rule it had, so nothing already reported changes
+           meaning when an outcome is added beside it. */
+        if (el.dataset.fld === "outActual") {
+          if (v !== "" && unit) v = joinTarget(hit.obj.outActual || "", v, unit);
+          if (v === "") delete hit.obj.outActual; else hit.obj.outActual = v;
+          /* The status still follows the work, and an outcome that has reached
+             its target is done. `tacticOutcomeScore` is the one reader of that
+             (§53.5) rather than a second comparison written here. */
+          var sc = typeof tacticOutcomeScore === "function" ? tacticOutcomeScore(hit.obj) : null;
+          if (sc == null) hit.obj.status = "Not started";
+          else if (sc >= 100) hit.obj.status = "Done";
+          else if (hit.obj.status !== "Blocked") hit.obj.status = "WIP";
+          paint(); return;   /* paint() ends in afterPaint() (§170) */
+        }
         if (hit.kind !== "TACTIC" && v !== "" && unit)
           v = joinTarget(hit.obj.actual || hit.obj.target, v, unit);
         if (hit.kind === "TACTIC") {

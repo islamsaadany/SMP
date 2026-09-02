@@ -23,7 +23,11 @@
      end_in_mind   carried as its own ASPIRATION row, as the source file does
    ────────────────────────────────────────────────────────────────────── */
 
+/* §245: a tactic's outcome carries its own direction, target and compile rule,
+   so all three travel with the plan — an upload AUTHORS (§22), and a column the
+   file does not carry is one the plan loses on a download-and-re-upload. */
 var PLAN_COLS = ["id","type","parent_id","source_slide","name","description","outcome",
+                 "outcome_direction","outcome_target","outcome_compiled",
                  "owner","collaborators","direction","value","value_3y","unit","horizon",
                  "compile","q1","q2","q3","q4","theme","kind","notes"];
 /* The progress template mirrors the plan template's shape rather than
@@ -136,7 +140,9 @@ function planTemplate(u){
     });
     p.tactics.forEach(function(t){
       rows.push(csvRow(PLAN_COLS, { id:t.id, type:"TACTIC", parent_id:p.id, name:t.name,
-        description:t.description, outcome:t.outcome, owner:t.owner,
+        description:t.description, outcome:t.outcome,
+        outcome_direction:t.outDir, outcome_target:t.outTarget,
+        outcome_compiled:t.outCompile, owner:t.owner,
         collaborators:(t.collaborators || []).join("|"),
         q1:t.q1 ? 1 : 0, q2:t.q2 ? 1 : 0, q3:t.q3 ? 1 : 0, q4:t.q4 ? 1 : 0,
         source_slide:t.slide, notes:t.notes }));
@@ -408,6 +414,9 @@ function diffPlan(u, rows){
       cmp("collaborators", (hit.obj.collaborators || []).join("|"), r.collaborators);
       cmp("description", hit.obj.description, r.description);
       cmp("outcome", hit.obj.outcome, r.outcome);
+      cmp("outcome direction", hit.obj.outDir,     r.outDir     || r.outcome_direction);
+      cmp("outcome target",    hit.obj.outTarget,  r.outTarget  || r.outcome_target);
+      cmp("outcome compiled",  hit.obj.outCompile, r.outCompile || r.outcome_compiled);
       ["q1","q2","q3","q4"].forEach(function(q){
         if (r[q] !== "") cmp(q.toUpperCase(), hit.obj[q] ? 1 : 0, r[q]);
       });
@@ -484,6 +493,9 @@ function createFromPlan(u, d){
       if (!p2) return;
       var col = (x.collaborators || "").split("|").map(function(s){ return s.trim(); }).filter(Boolean);
       var tRow = { id:x.id, name:x.name, description:x.description, outcome:x.outcome,
+                   outDir:x.outDir || x.outcome_direction || undefined,
+                   outTarget:x.outTarget || x.outcome_target || undefined,
+                   outCompile:x.outCompile || x.outcome_compiled || undefined,
         owner:x.owner || "", collaborators:col,
         q1:+x.q1 ? 1 : 0, q2:+x.q2 ? 1 : 0, q3:+x.q3 ? 1 : 0, q4:+x.q4 ? 1 : 0,
         /* A plan that has just been loaded has no progress against it. Zero
@@ -541,6 +553,12 @@ function applyPlan(u, d){
       if (c.f === "collaborators") o.collaborators = c.now ? c.now.split("|") : [];
       if (c.f === "description")   o.description = c.now;
       if (c.f === "outcome")       o.outcome = c.now;
+      /* Emptied, the key GOES (§50.6): a tactic whose outcome was cleared must
+         be byte-identical to one that never had one, or every later save
+         carries a phantom change and a non-office person is refused for it. */
+      if (c.f === "outcome direction") { if (c.now) o.outDir = c.now; else delete o.outDir; }
+      if (c.f === "outcome target")    { if (c.now) o.outTarget = c.now; else delete o.outTarget; }
+      if (c.f === "outcome compiled")  { if (c.now) o.outCompile = c.now; else delete o.outCompile; }
       if (/^Q[1-4]$/.test(c.f))    o["q" + c.f[1]] = +c.now ? 1 : 0;
       if (c.f === "direction")  o.dir = c.now;
       if (c.f === "3-year")     o.target3y = c.now;

@@ -1622,6 +1622,102 @@ with sync_playwright() as p:
         ck("...and so does opening a conversation",
            pg.query_selector("#chnewwho") is None)
 
+    # ── 20 · A REGISTRATION MADE WITH A DIFFERENT KEY (§248.3) ───────────
+    # THE STICKY ONE. A registration is bound to the key it was made with, and
+    # this branch used to accept any existing registration without looking at
+    # it — so once the platform's key changed, the browser handed back the old
+    # registration for ever, the bell read on, the server counted the device,
+    # and every send was refused. Healthy at both ends, nothing arriving, and
+    # nothing that could ever heal it.
+    #
+    # The stand-in reports `options.applicationServerKey`, which the earlier
+    # one did not — a stand-in that models less than the thing it stands in
+    # for reports a working build as broken (§100.3), and here it would have
+    # reported a BROKEN build as working, which is worse.
+    print("\n20 · a registration made with a different key")
+    CHAT["messages"] = []; CHAT["unread"] = 0
+    CHAT["cfg"] = dict(CHAT["cfg"], on=True, beat=4000, popup=True)
+    del PUSH["subs"][:]; del PUSH["off"][:]
+    pg.evaluate("() => { try { sessionStorage.removeItem('smp.where'); } catch (e) {} }")
+    pg.goto(URL, wait_until="networkidle")
+    pg.wait_for_selector("#chatdock:not([hidden])", timeout=10000)
+
+    # A DEVICE ALREADY REGISTERED, AND WITH SOMEBODY ELSE'S KEY — the state a
+    # deployment lands in the moment its key changes.
+    pg.evaluate("""(good) => {
+        window.__subs = []; window.__unsub = [];
+        const OTHER = new Uint8Array(65); OTHER[0] = 4;
+        for (let i = 1; i < 65; i++) OTHER[i] = 200;          // NOT the platform's
+        const mk = (key, ep) => ({
+          endpoint: ep, options: { applicationServerKey: key.buffer || key },
+          toJSON: () => ({ endpoint: ep, keys: { p256dh: "P", auth: "A" } }),
+          unsubscribe: function () { window.__unsub.push(ep); held = null;
+                                     return Promise.resolve(true); } });
+        let held = mk(OTHER, "https://push.example.test/dev/stale");
+        const mgr = {
+          getSubscription: () => Promise.resolve(held),
+          subscribe: (opts) => {
+            const raw = new Uint8Array(opts.applicationServerKey);
+            window.__subs.push({ keyLen: raw.length,
+                                 matches: btoa(String.fromCharCode.apply(null, raw))
+                                            .replace(/\+/g,"-").replace(/\//g,"_")
+                                            .replace(/=+$/,"") === good });
+            held = mk(opts.applicationServerKey, "https://push.example.test/dev/fresh");
+            return Promise.resolve(held); } };
+        const reg = { pushManager: mgr };
+        Object.defineProperty(navigator, "serviceWorker", { configurable: true,
+          get: () => ({ ready: Promise.resolve(reg),
+                        getRegistration: () => Promise.resolve(reg),
+                        register: () => Promise.resolve(reg) }) });
+        window.__held = () => held; }""", VAPID)
+
+    pg.click("#chatbtn"); pg.wait_for_timeout(2500)
+
+    unsub = pg.evaluate("() => window.__unsub || []")
+    ck("a registration made with another key is thrown away",
+       unsub == ["https://push.example.test/dev/stale"], unsub)
+    ck("...and the server is told to forget it, or it is sent to for ever",
+       any((o.get("endpoint") if isinstance(o, dict) else o)
+           == "https://push.example.test/dev/stale"
+           for o in PUSH["off"]), PUSH["off"])
+    subs = pg.evaluate("() => window.__subs || []")
+    ck("...and it registers again straight away", len(subs) == 1, subs)
+    ck("...with the key the platform is actually sending with",
+       len(subs) == 1 and subs[0]["matches"] is True, subs)
+    ck("...and the new one reaches the server",
+       any((s0.get("endpoint") if isinstance(s0, dict) else s0)
+           == "https://push.example.test/dev/fresh"
+           for s0 in PUSH["subs"]), PUSH["subs"])
+    # BOTH ENDS (§94.2): a registration made with the RIGHT key is left alone.
+    # Without this, a build that threw every registration away every poll —
+    # churning the device on every beat — would pass all five above.
+    del PUSH["off"][:]
+    pg.evaluate("() => { window.__unsub = []; window.__subs = []; }")
+    pg.wait_for_timeout(5000)
+    ck("a registration made with the right key is left alone",
+       pg.evaluate("() => (window.__unsub || []).length") == 0 and
+       pg.evaluate("() => (window.__subs || []).length") == 0,
+       pg.evaluate("() => ({ un: window.__unsub, sub: window.__subs })"))
+    # AND A BROWSER THAT WILL NOT SAY which key it used is left alone too —
+    # churning on a guess is worse than keeping one that is probably right.
+    pg.evaluate("""() => {
+        window.__unsub = []; window.__subs = [];
+        const ep = "https://push.example.test/dev/silent";
+        let held = { endpoint: ep,
+          toJSON: () => ({ endpoint: ep, keys: { p256dh: "P", auth: "A" } }),
+          unsubscribe: () => { window.__unsub.push(ep); return Promise.resolve(true); } };
+        const mgr = { getSubscription: () => Promise.resolve(held),
+                      subscribe: () => { window.__subs.push(1); return Promise.resolve(held); } };
+        const reg = { pushManager: mgr };
+        Object.defineProperty(navigator, "serviceWorker", { configurable: true,
+          get: () => ({ ready: Promise.resolve(reg),
+                        getRegistration: () => Promise.resolve(reg),
+                        register: () => Promise.resolve(reg) }) }); }""")
+    pg.wait_for_timeout(5000)
+    ck("a browser that does not report its key is not churned",
+       pg.evaluate("() => (window.__unsub || []).length") == 0,
+       pg.evaluate("() => window.__unsub"))
+
     # ── 7 · AND A SESSION THE SERVER REFUSES, LAST ON PURPOSE ────────────
     # A refused session takes the corner away rather than leaving a control
     # that answers every press with a refusal. It runs AFTER the console

@@ -708,6 +708,21 @@ var CHAT = (function(){
     });
   }
 
+  /* WHICH KEY A REGISTRATION WAS MADE WITH (§248.3), in the spelling the
+     server hands out — base64url, no padding — so the two can be compared as
+     strings. Absent on a browser that does not report it, which is a
+     different answer from "a different key" and is treated as one. */
+  var REKEYING = false;
+  function subKey(sub){
+    try {
+      var k = sub && sub.options && sub.options.applicationServerKey;
+      if (!k) return null;
+      var b = new Uint8Array(k), out = "";
+      for (var i = 0; i < b.length; i++) out += String.fromCharCode(b[i]);
+      return btoa(out).replace(/\+/g, "-").replace(/\//g, "_").replace(/=+$/, "");
+    } catch (e) { return null; }
+  }
+
   function pushSync(){
     if (!pushCan()) return;
     var want = !!(cfg.popup && popMine() && popState() === "granted");
@@ -726,6 +741,48 @@ var CHAT = (function(){
           });
         }
         if (sub) {
+          /* ── AND IT MUST BE THE KEY WE ARE SENDING WITH (§248.3) ──────
+             THIS BRANCH ACCEPTED ANY EXISTING REGISTRATION WITHOUT LOOKING
+             AT IT, and that is a fault that can never heal on its own. A
+             registration is bound to the key it was made with; if the
+             platform's key has changed since — an environment variable added
+             or removed, a key minted after a device had already subscribed —
+             then the browser goes on handing back the OLD registration for
+             ever, the bell reads on, the server counts the device, and every
+             single send is refused by the push service. Everything reads
+             healthy at both ends and nothing arrives, which is exactly the
+             shape of "we tried many things and it still does not work".
+
+             So it is compared, and a registration made with a different key
+             is thrown away and made again. Costs the person nothing: the
+             browser has already granted permission, so no question is asked.
+
+             A BROWSER THAT WILL NOT SAY which key it used (no `options`) is
+             left exactly as it is — churning a registration on a guess is
+             worse than keeping one that is probably right (§35: unknown is
+             not "wrong"). */
+          /* NAMED `keyWanted`, NEVER `want` — `pushSync` already has a `want`
+             (the boolean deciding whether this device should be subscribed at
+             all), and a second `var want` in this callback HOISTS over it, so
+             the `if (!want)` above reads `undefined`, takes the unsubscribe
+             branch every time, and nothing ever subscribes. Valid on both
+             sides, silent, and it shipped past `node --check` — §56.7's `var`
+             collision, caught by `checks/office-chat.py` going red rather
+             than by reading it. */
+          var made = subKey(sub);
+          var keyWanted = String(cfg.vapid || "").replace(/=+$/, "");
+          if (made && keyWanted && made !== keyWanted && !REKEYING) {
+            REKEYING = true;
+            var stale = sub.endpoint;
+            return sub.unsubscribe().catch(function(){}).then(function(){
+              /* TOLD BOTH WAYS ROUND, as the switch-off path is: the row for
+                 a registration that can never receive anything again is not
+                 left behind to be sent to for ever. */
+              post({ action: "pushOff", endpoint: stale }, function(){});
+              REKEYING = false;
+              return pushSync();          /* now with nothing subscribed */
+            }).catch(function(){ REKEYING = false; });
+          }
           /* ALREADY SUBSCRIBED, AND IT IS STILL SENT. A push service expires
              an endpoint on its own schedule and the server may have dropped
              a row it was told was gone; re-registering the same endpoint
@@ -2170,13 +2227,41 @@ var CHAT = (function(){
            the ask goes after it. */
         pushSync();
         setTimeout(function(){
-          post({ action:"pushTest" }, function(err, j){
+          /* ── AND THIS BROWSER SAYS WHAT IT HOLDS (§248.4) ─────────────
+             THE TEST ONLY EVER ASKED THE SERVER, and the server can only
+             report what it HOLDS — so a browser subscribed to one address
+             while the server sends to another read as perfect health at both
+             ends, with nothing arriving. The two halves are now compared, and
+             the one place they can be compared is here, because only this
+             browser knows its own.
+
+             NOTHING IDENTIFYING TRAVELS THAT DOES NOT ALREADY: the endpoint
+             is what `pushOn` posts on every subscribe, and it is the row the
+             server already stores. */
+          var here = { permission: popState(), why: PUSHWHY || null,
+                       endpoint: null, key: null };
+          var askAfter = function(){
+            post({ action:"pushTest", here: here }, done);
+          };
+          var done = function(err, j){
             POPTEST.busy = false;
             POPTEST.steps = (j && j.steps) || [{ name:"The platform", state:"fail",
               detail: err === "failed" ? "Could not reach the server."
                                        : String(err || "No answer.") }];
             setMenuPaint();
-          });
+          };
+          /* Asked of the browser, then sent — and if the browser will not
+             answer, the ask still goes, because a diagnostic that refuses to
+             run when one of its own questions fails is a diagnostic that is
+             silent exactly when something is wrong (§231.5). */
+          if (!pushCan()) { askAfter(); return; }
+          navigator.serviceWorker.getRegistration()
+            .then(function(reg){ return reg && reg.pushManager.getSubscription(); })
+            .then(function(sub){
+              if (sub) { here.endpoint = sub.endpoint; here.key = subKey(sub); }
+              askAfter();
+            })
+            .catch(function(){ askAfter(); });
         }, 1200);
         return;
       }

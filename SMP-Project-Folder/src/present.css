@@ -44,6 +44,33 @@
   .dslide td { padding:20px 18px; font-size:23px; vertical-align:middle;
                border-bottom:1px solid var(--line-soft); }
   .dslide table.dbig td { font-size:26px; padding:24px 18px; }
+  /* ── THE OBJECTIVES TABLE FILLS THE ROOM THE ASPIRATION GAVE BACK (§254.9)
+     Islam: *"we have space so grow the font of the key objectives table to
+     fill the slide more."*
+
+     THE CEILING IS NOT TASTE, IT IS THE FIT PASS. `.tight` is applied to any
+     slide that overflows, and it shrinks the ASPIRATION to 31px along with
+     everything else — so a table set one step too large tips the slide over
+     and costs the very thing he wanted prominent. Measured rather than
+     guessed: 30px with 24px cells and the block's own bottom padding trimmed
+     to 16 keeps `tight` off and the aspiration at 40px, with 102px still in
+     hand for a unit whose sentence runs a line longer. 31px tips it.
+
+     Scoped to THIS slide, so the objectives table on its own slide is
+     untouched; and `.tight` still overrides it, so a plan with many
+     objectives shrinks exactly as it did (§69.5). */
+  .dslide .aimtop { padding-bottom:16px; }
+  .dslide .aimbottom table.dbig td { font-size:30px; padding:24px 18px; }
+  .dslide .aimbottom table.dbig th { font-size:15px; }
+  /* AND THE TIGHTENED SLIDE GETS ITS OWN FLOOR, which is the half that
+     mattered most: measured across all ten demo units, EVERY aim slide was
+     tight before this section and read at 19px — the generic floor, set for a
+     slide packed with figures, applied to one holding four objectives and two
+     numbers. Seven clear it now; the three whose aspiration runs longer land
+     here instead of on 19px, and none of the ten overflows even at 26px, so
+     24px is taken with room in hand for a plan carrying more objectives than
+     the demo's four. */
+  .dslide.tight .aimbottom table.dbig td { font-size:24px; padding:15px 18px; }
   .dslide tbody tr:last-child td { border-bottom:0; }
   .dslide table.zebra tbody tr:nth-child(even) td { background:var(--zebra); }
   .dslide td.num { font-family:var(--mono); font-variant-numeric:tabular-nums; white-space:nowrap; }
@@ -94,9 +121,18 @@
   .d-swot.t-stone h2 { border-left:5px solid var(--panel); }
   .d-swot.t-warn h2 { border-left:5px solid var(--warn); }
 
-  .aimtop { display:grid; grid-template-columns:1.25fr 1fr; gap:60px; padding-bottom:34px;
+/* ── THE ASPIRATION RUNS THE WIDTH OF THE SLIDE (§254.9) ───────────────
+   Islam: *"make the wining aspiration filing the width of the presentaion
+   rather than being stuck in a box on the left."*
+
+   It sat in the left column of a two-column grid whose right column holds
+   "End in mind" — so on every unit that has not written one, half the slide
+   was empty and the sentence broke across four short lines for no reason. A
+   block, with End in mind beneath it where there is one. */
+  .aimtop { display:block; padding-bottom:34px;
             border-bottom:1px solid var(--line); }
-  .asp2 { font:400 38px/1.35 var(--serif); color:var(--ink); margin:0; }
+  .aimtop > div + div { margin-top:22px; }
+  .asp2 { font:400 40px/1.32 var(--serif); color:var(--ink); margin:0; }
   .asp3 { font:400 27px/1.4 var(--serif); color:var(--ink-2); margin:0; }
   .aimbottom { margin-top:34px; }
   .big3 { color:var(--gold-deep); }
@@ -450,15 +486,45 @@
    pillars and eight both fill the line. `align-items:stretch` keeps the cards
    one height however long a name runs, and the sub-line is pushed to the foot
    so every one of them sits on the same baseline. */
-  .pcards{ display:grid; gap:22px; margin-top:34px;
+/* ── AND IT SIZES ITSELF TO HOW MANY THERE ARE (§254.8) ────────────────
+   Islam, seeing it with two pillars: *"the pillars size are great and it will
+   adjust to fit if we reach more pillars in 1 page so this needs to be dynamic
+   so 4 can form a box and 5 shall be 5 boxes centered in the page beside each
+   others."*
+
+   THE FIRST BUILD SIZED THE TYPE FOR FOUR AND NEVER RE-SIZED IT. 26px is right
+   in a card a quarter of the slide wide and lost in one half the slide wide —
+   so with two pillars the name sat small at the top of a large empty box, which
+   is what he was looking at.
+
+   THE COUNT IS ALREADY IN THE CSS, so the arithmetic can use it: `--n` is set
+   from the list on the element itself, and every size here is a function of it.
+   `calc()` inside `clamp()` gives a curve rather than a table of breakpoints —
+   two pillars land at the ceiling, eight at the floor, and every count between
+   is proportionate without anybody choosing a number for it.
+
+   THEY STAY IN ONE ROW, which is what "beside each others" asks for and what
+   the grid already did; what changes is that the type, the padding and the
+   card's own height now follow the width each card actually gets. */
+  /* CENTRED IN WHAT IS LEFT OF THE SLIDE. `.dslide` is a flex column, so the
+     row takes the space under the heading and centres itself in it — which is
+     what "centered in the page" asks for, and it is also why the cards do not
+     hang at the top on a unit with two of them. */
+  .pcards{ display:grid; gap:clamp(14px, calc(64px / var(--n,3)), 32px);
+    flex:1; align-content:center;
+    margin-top:clamp(28px, calc(120px / var(--n,3)), 56px);
     grid-template-columns:repeat(var(--n,3),1fr); align-items:stretch; }
-  .pcard{ display:flex; flex-direction:column; gap:14px; padding:26px 22px 24px;
+  .pcard{ display:flex; flex-direction:column; justify-content:center;
+    gap:clamp(10px, calc(48px / var(--n,3)), 22px);
+    padding:clamp(20px, calc(90px / var(--n,3)), 44px) clamp(18px, calc(76px / var(--n,3)), 38px);
+    min-height:clamp(180px, calc(700px / var(--n,3)), 340px);
     background:var(--surface-2); border-top:5px solid var(--gold); border-radius:2px; }
-  .pcard-c{ font-family:var(--mono); font-size:15px; letter-spacing:.1em;
-    font-weight:600; color:var(--gold-deep); }
-  .pcard-n{ font-size:26px; font-weight:700; line-height:1.2; color:var(--ink);
-    text-wrap:balance; }
-  .pcard-s{ font-size:15px; color:var(--ink-3); line-height:1.45; margin-top:auto; }
+  .pcard-c{ font-family:var(--mono); letter-spacing:.1em; font-weight:600;
+    font-size:clamp(13px, calc(40px / var(--n,3)), 19px); color:var(--gold-deep); }
+  .pcard-n{ font-weight:700; line-height:1.14; color:var(--ink); text-wrap:balance;
+    font-size:clamp(21px, calc(10px + 88px / var(--n,3)), 52px); }
+  .pcard-s{ color:var(--ink-3); line-height:1.45;
+    font-size:clamp(14px, calc(6px + 26px / var(--n,3)), 19px); }
 
 /* The quiet half of a figure cell — what it is measured against so far
    (§254). The same weight the tactics table has used since §252, so one

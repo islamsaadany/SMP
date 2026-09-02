@@ -159,14 +159,19 @@ function deckSlides(u){
      asserted, because a unit authors both. */
   var fnAim = !!u.fnKey;
   var aimNear = fnAim || SHOW_KO_THIS_YEAR;
+  /* §254.9: THIS YEAR COMES FIRST. Islam: *"flip this year column with the 2027
+     so the this year column to come after the obcejtives."* The eye meets the
+     number being worked towards this cycle before the horizon it heads for —
+     and THE HEADER AND THE ROW ARE SWAPPED TOGETHER, or every cell after them
+     shifts and the slide still renders perfectly (§243's own note). */
   var aimRows = SMPRules.shown(u.keyObjectives).map(function(m, i){
     return '<tr><td class="idx">' + (i+1) + '</td>' +
       '<td class="lead">' + esc(m.name) + fmark(m.id) + '</td>' +
-      (fnAim ? '' : '<td class="num big3">' +
-        (m.target3y ? tgtShown(m.target3y) : "&mdash;") + '</td>') +
       (aimNear
         ? '<td class="num">' + (m.target ? tgtShown(m.target) : '<span class="missing">Missing</span>') + '</td>'
-        : '') + '</tr>';
+        : '') +
+      (fnAim ? '' : '<td class="num big3">' +
+        (m.target3y ? tgtShown(m.target3y) : "&mdash;") + '</td>') + '</tr>';
   }).join("");
   if (aimRows || !fnAim) S.push('<section class="dslide"' + anch("aim", "After \u201cWhat we are aiming at\u201d") +
     '><h2>What we are aiming at</h2>' +
@@ -180,8 +185,8 @@ function deckSlides(u){
       ? '<div class="aimbottom">' +
           (fnAim ? '' : '<span class="dlab">' + L("keyobj","bu") + horizonBy() + '</span>') +
           '<table class="zebra dbig"><thead><tr><th class="idx">#</th><th>Objective</th>' +
-          (fnAim ? '' : '<th class="num">' + horizonColLabel() + '</th>') +
           (aimNear ? '<th class="num">This year</th>' : '') +
+          (fnAim ? '' : '<th class="num">' + horizonColLabel() + '</th>') +
           '</tr></thead><tbody>' + aimRows + '</tbody></table>' +
         '</div>'
       : '') +
@@ -386,8 +391,6 @@ function deckSlides(u){
         '<div><span class="dlab">Key measures</span><b class="' + dBand(pillarPerf(p)) + '">' +
           dPct(pillarPerf(p)) + '</b></div>' +
         '<div><span class="dlab">Execution</span><b class="' + dBand(r) + '">' + dPct(r) + '</b></div>' +
-        '<div><span class="dlab">Delivered / planned</span><b class="plain">' +
-          dPct(pillarExec(p)) + ' / ' + dPct(pillarPlan(p)) + '</b></div>' +
       '</div></section>');
 
     var mRows = SMPRules.shown(p.measures).map(function(m, i){
@@ -536,10 +539,25 @@ function deckPillarHead(u, p, pi, which){
   var r = pillarExec(p) && pillarPlan(p) ? Math.round(pillarExec(p) / pillarPlan(p) * 100) : null;
   return '<div class="dphdr"><h2><span class="dcode">' + pillarCode(u, pi) + '</span> ' +
     esc(p.name) + '<span class="dwhich">' + which + '</span></h2>' +
+    /* ── TWO NUMBERS, NOT FOUR (§254.10) ──────────────────────────────
+       Islam: *"remove the deliverd /planned from the slides maintain just the
+       2 numbers of measurs and execution"*, and of the reading put back to
+       him, *"yes drop for both keep the 2 measures only across."*
+
+       DELIVERED AND PLANNED APPEARED IN TWO PLACES, SPELLED DIFFERENTLY, which
+       is why the instruction was read back before it was obeyed: the pillar's
+       title slide carried Key measures · Execution · Delivered / planned, so
+       dropping the third leaves the two he named — while THIS head carried
+       Measures · Delivered · Planned and had no Execution on it at all.
+       Dropping two here would have left one number, so Execution takes their
+       place and both surfaces end up saying the same two things.
+
+       The figures are unchanged: `pillarExec` and `pillarPlan` are still what
+       Execution is computed from, and are still explained in words on "Where
+       the unit stands", which he looked at and kept. */
     '<div class="dstats"><span><i>Measures</i><b class="' + dBand(pillarPerf(p)) + '">' +
       dPct(pillarPerf(p)) + '</b></span>' +
-    '<span><i>Delivered</i><b>' + dPct(pillarExec(p)) + '</b></span>' +
-    '<span><i>Planned</i><b>' + dPct(pillarPlan(p)) + '</b></span></div></div>';
+    '<span><i>Execution</i><b class="' + dBand(r) + '">' + dPct(r) + '</b></span></div></div>';
 }
 
 /* ── A supporting function's review (§15.12) ──────────────────────────────

@@ -28368,6 +28368,83 @@ line to swap them back.
 subject with no note draws no such slide at all (§246) — an index-based
 assertion would be true of exactly half the decks in the product.
 
+### §254.8 — the pillar cards size themselves to how many there are
+
+Islam, seeing the roll-call with two pillars: *"the pillars size are great and
+it will adjust to fit if we reach more pillars in 1 page so this needs to be
+dynamic so 4 can form a box and 5 shall be 5 boxes centered in the page beside
+each others."*
+
+**THE FIRST BUILD SIZED THE TYPE FOR FOUR AND NEVER RE-SIZED IT.** 26px is
+right in a card a quarter of the slide wide and lost in one half the slide
+wide, so with two pillars the name sat small at the top of a large empty box.
+
+**THE COUNT WAS ALREADY IN THE CSS**, so the arithmetic can use it: `--n` is
+set from the list on the element, and the type, the padding, the gap and the
+card's own height are all functions of it. `calc()` inside `clamp()` gives a
+curve rather than a table of breakpoints — measured, **2 &rarr; 52px, 4 &rarr;
+32px, 5 &rarr; 27.6px, 6 &rarr; 24.7px, 8 &rarr; 21px** — so no count needs a
+rule of its own. They stay in **one row** at every count, which is what *beside
+each others* asks, and the row centres itself in what is left of the slide.
+
+### §254.9 — the aspiration runs the width, This year comes first, and the table fills the room
+
+*"make the wining aspiration filing the width of the presentaion rather than
+being stuck in a box on the left"*, *"flip this year column with the 2027"*, and
+*"we have space so grow the font of the key objectives table to fill the slide
+more."*
+
+The aspiration sat in the left column of a two-column grid whose right column
+holds *End in mind* — so on every unit that has not written one, half the slide
+was empty and the sentence broke across four short lines for no reason.
+
+**THE HEADER AND THE ROW ARE SWAPPED TOGETHER**, or every cell after them shifts
+and the slide still renders perfectly (§243's own note about dropping a `<th>`).
+
+**AND THE CEILING ON THE TABLE IS NOT TASTE, IT IS THE FIT PASS.** `.tight` is
+applied to any slide that overflows and it shrinks the **aspiration** to 31px
+along with everything else — so a table one step too large tips the slide over
+and costs the very thing he asked to make prominent. Measured across all ten
+units rather than judged on one:
+
+| | before | after |
+|---|---|---|
+| aim slides on the generic 19px floor | **10 of 10** | **0 of 10** |
+| aim slides at full size | 0 | **7** (30px table, 40px aspiration) |
+| the three whose prose runs longer | 19px | **24px** |
+| aim slides overflowing | 0 | **0** |
+
+**THE FLOOR WAS THE REAL FAULT.** Every aim slide in the product was tight, and
+`.tight`'s 19px is a floor set for a slide packed with figures — applied to one
+holding four objectives and two columns. Its own floor for this table is 24px
+now, with none of the ten overflowing even at 26px, so there is room in hand for
+a plan carrying more objectives than the demo's four.
+
+### §254.10 — two numbers, not four
+
+*"remove the deliverd /planned from the slides maintain just the 2 numbers of
+measurs and execution (align with me your understanding)"*, and of the reading
+put back to him, *"yes drop for both keep the 2 measures only across."*
+
+**THE READING WAS PUT BACK BEFORE IT WAS OBEYED, AND IT NEEDED TO BE**, because
+Delivered and Planned appeared in two places spelled differently: the pillar's
+title slide carried *Key measures · Execution · Delivered / planned*, so
+dropping the third leaves the two he named — while the head on the measures and
+tactics slides carried *Measures · Delivered · Planned* **with no Execution on
+it at all**, so dropping two there would have left one number. Execution takes
+their place, and both surfaces end up saying the same two things.
+
+**Nothing computed changes**: `pillarExec` and `pillarPlan` are still what
+Execution is made of, and are still explained in words on *Where the unit
+stands* — which he looked at and kept.
+
+### §254.11 — the sentence under Execution stays
+
+Put to him as the one thing I would leave alone: the grey line reading
+*"60% delivered against 61% planned"* is not a third figure in a row, it is the
+sentence that explains what Execution means on the one slide where that reading
+is introduced. *"for where the units stands ok."*
+
 ### Recorded, not done
 
 - **`K EGP` STAYS OFF THE LIST** — put to Islam, and *"K EGP is not to be

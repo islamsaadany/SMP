@@ -1000,31 +1000,9 @@ function presentMenu(kind, key){
   var present = '<button role="menuitem" data-present="' + esc(target) + '">Present' +
     '<span class="dlsub">Open the review deck for this ' +
     (String(target).indexOf("fn:") === 0 ? "function" : "unit") + '</span></button>';
-  /* \u2500\u2500 THE PLAN AS SLIDES, BACK AS AN ENTRY HERE (\u00a7252.2) \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500
-     Islam: *"the ppt download leave it as an option in the drop down for the
-     smo only."* \u00a7145.9 hid the pane-corner button for everyone and kept the
-     machinery; this is the machinery given back somewhere else.
-
-     THIS MENU, because it is where the decks already are: Present opens the
-     review on screen, Manage slides arranges it, and this takes the PLAN away
-     as a file. A second control in a pane corner would have been a third place
-     to look for one kind of thing (\u00a732).
-
-     THE CORNER BUTTON IS DELETED RATHER THAN LEFT HIDDEN (\u00a724, \u00a794.15): with
-     the entry here it has no audience of its own, and a builder nobody calls
-     is one the next reader takes for load-bearing. `DL_PAGES` goes with it.
-
-     SMO ONLY, and the narrowing is in `mayDownloadPlan` rather than here, so
-     the entry and `sendPlanPptx`'s own press-time check cannot answer
-     differently (\u00a742, \u00a748.2). */
-  var dl = SMPRules.mayDownloadPlan(world(), viewer(), target)
-    ? '<button role="menuitem" data-dlpptx="' + esc(target) + '">Download the plan' +
-      '<span class="dlsub">The plan as editable slides (.pptx) &mdash; ' +
-      'no reported figures</span></button>'
-    : "";
   return '<details class="dlmenu right"><summary class="editbtn">Presentation' +
     '<span class="dlcar" aria-hidden="true">\u25be</span></summary>' +
-    '<div class="menu" role="menu">' + present + slides + dl + '</div></details>';
+    '<div class="menu" role="menu">' + present + slides + '</div></details>';
 }
 
 /* ── Cards or a table (§16.6) ────────────────────────────────────────
@@ -2206,11 +2184,10 @@ function filling(page, acKey, ctx){
    pen that is open to somebody the rule closes it to — the gate is on the
    control, not on each of the eleven call sites that draw one. */
 function editBar(page, acKey){
-  /* §252.2: the download left this bar for the Presentation menu, so the
-     bar is the pen's again — `dl` and `dlPlanBtn()` are deleted rather than
-     left answering "" (§24). §119.9's argument (a custodian who cannot author
-     may still take the plan away) expired with §252.2's own narrowing: the
-     file is the office's now. */
+  /* THE DOWNLOAD IS NOT AN AUTHORING CONTROL (§119.9), so it is asked for
+     BEFORE the pen's gate and the bar is drawn when either is answered — a
+     custodian who may not author the overview may still take it away. */
+  var dl = dlPlanBtn(page);
   /* §145.14: the worded bar takes the corner button's three states — red
      while something is missing, quiet amber while only pending remains,
      nothing after; Done while the mode is open. */
@@ -2228,11 +2205,11 @@ function editBar(page, acKey){
       else if (gapOpenable(TARGET))
         inner = '<button class="fillcta" data-fillcta="' + page + '">Fill in what is empty</button>';
       else inner = '';
-      return inner ? '<div class="pageact">' + inner + '</div>' : '';
+      return (dl || inner) ? '<div class="pageact">' + dl + inner + '</div>' : '';
     }
-    return '';
+    return dl ? '<div class="pageact">' + dl + '</div>' : '';
   }
-  return '<div class="pageact"><button class="editbtn" data-page="' + page + '">' +
+  return '<div class="pageact">' + dl + '<button class="editbtn" data-page="' + page + '">' +
     (EDIT_PAGE[page] ? "Done" : "Edit") + '</button></div>';
 }
 
@@ -2267,13 +2244,47 @@ function editBar(page, acKey){
    somebody added a pane, and §53.5's whole rule is that a unit and a function
    must not drift apart in silence. */
 function paneActs(page, acKey){
-  var inner = penBtn(page, acKey) + arrangePaneBtn();
+  var inner = penBtn(page, acKey) + arrangePaneBtn() + dlPlanBtn(page);
   return inner ? '<div class="paneact">' + inner + '</div>' : '';
 }
 
-/* §252.2: the block that stood here described `dlPlanBtn()` and went with it.
-   Where the plan download lives, and who gets it, is written once in
-   `presentMenu()` above and once in `SMPRules.mayDownloadPlan()`. */
+/* ── THE PLAN LEAVES AS SLIDES (§117) ─────────────────────────────
+   Islam: "add the access of downloading a presentation for the plan for the
+   custodian and the business unit owner through a button in the strategy
+   panel." Drawn ONLY on the plan pane — the page the ask names — and gated by
+   the shared rule, so the office, the unit's owner and custodian and a
+   function's head see it and a CEO passing through does not (§37: reaching is
+   not holding). The press asks the rule AGAIN (§48.2, in pptx.js), because
+   the viewer switcher can change who this is between paint and click. */
+/* THE WHOLE STRATEGY TAB CARRIES IT, NOT ONLY THE PLAN PANE (§119.9).
+   Islam: "the functional projects has no download button we need a download
+   button." A capability function's strategy tab is TWO sections — Function
+   overview (what each capability is) and Projects — and only the second had
+   a `.paneact` to hang the button on, so from the first half of the same tab
+   there was no way to take the plan away. One deck comes out either way, so
+   the button belongs on both: `"capfoundation"` is the overview's page key,
+   drawn in its Edit bar rather than a pane corner because that section is
+   cards and has no pane (§30's rule about which control suits which shape). */
+var DL_PAGES = { plan:1, capfoundation:1 };
+function dlPlanBtn(page){
+  /* ── HIDDEN AT ISLAM'S DIRECTION (2026-08-27, §145.9) ────────────────
+     "hide the download button of the plans and the capabilities in the ppt
+     format that we created earlier." HIDDEN, not deleted: pptx.js,
+     mayDownloadPlan and sendPlanPptx all stand, so giving it back is one
+     line here — and §119.1's Missing marks (now §145's "(pending)" too)
+     keep the deck honest for that day. The early return is above the gate
+     on purpose: the feature is off for EVERYONE, office included. */
+  return '';
+  if (!DL_PAGES[page]) return '';
+  if (!SMPRules.mayDownloadPlan(world(), viewer(), TARGET)) return '';
+  return '<button class="penbtn dlpen" data-dlpptx="' + esc(TARGET) + '"' +
+    ' title="Download the plan as slides (.pptx)"' +
+    ' aria-label="Download the plan as slides (.pptx)">' +
+    '<svg viewBox="0 0 20 20" aria-hidden="true" fill="none" stroke="currentColor"' +
+    ' stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">' +
+    '<path d="M10 3.5v8M6.8 8.7L10 11.9l3.2-3.2M4.5 15h11"/></svg></button>';
+}
+
 function arrangePaneBtn(target){
   if (mayEditPlan() || !mayArrangeHere(target)) return '';
   var on = !!ARRANGE;

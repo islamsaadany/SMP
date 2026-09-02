@@ -27981,3 +27981,84 @@ records the same for the plan slides). And a deck **already open on a
 projector** still does not redraw while somebody saves in another tab: put to
 Islam and deliberately left, because slides changing under a presenter
 mid-sentence is worse than a deck that is right as of when it opened.
+
+---
+
+## §252.2 — THE PLAN DOWNLOAD COMES BACK, IN THE MENU AND FOR THE OFFICE (2026-09-02)
+
+Islam, in the same breath as the merge: *"the ppt download leave it as an
+option in the drop down for the smo only."*
+
+**§145.9 HID IT FOR EVERYONE AND KEPT THE MACHINERY**, saying in as many words
+that giving it back was one line. This is that line, spent somewhere else: the
+pane-corner icon does not come back, and the plan leaves as an entry in the
+**Presentation** menu, beside *Present* and *Manage slides*.
+
+**THAT MENU, BECAUSE IT IS WHERE THE DECKS ALREADY ARE.** Present opens the
+review on screen, Manage slides arranges it, and this takes the plan away as a
+file — three things of one kind, in one place. A second control in a pane
+corner would have been a third place to look for a deck (§32's rule about a
+door behind a door, applied to a control rather than a page), and the corner is
+also the busiest slot in the product: the pen, the arrows and §145's fill button
+already share it, and §145's own note records the arrows and the pen colliding
+there.
+
+**THE CORNER BUTTON IS DELETED, NOT LEFT HIDDEN** (§24, §94.15). With the entry
+in the menu it has no audience of its own, and a builder returning `""` above
+its own gate is exactly what the next reader takes for load-bearing.
+`dlPlanBtn()`, `DL_PAGES` and the `dl` term in `editBar()` all go — and the
+comment block that described it went with it, which is §214's lesson paid
+rather than repeated: the first deletion sliced a RANGE and left that comment
+stranded above `arrangePaneBtn()`, describing a function that no longer existed.
+
+**"FOR THE SMO ONLY" IS A REVERSAL OF §117'S AUDIENCE, AND IT IS RECORDED AS
+ONE.** That section gave the download to the office AND to the roles that HOLD
+the thing — a unit's owner and custodian, a function's head — and its reasoning
+was sound while the button sat in the pane those people work in. Islam has
+decided that a file leaving the platform is the office's act. So the two lines
+that read `ARRANGE_ROLES` come out of `mayDownloadPlan()` and nothing else
+moves: **`ARRANGE_ROLES` itself is untouched**, because reordering a plan is
+still the custodian's and the owner's (§101) — the two questions merely stopped
+sharing an answer.
+
+**THE NARROWING IS IN THE RULE, NEVER IN THE MENU** (§42, §48.2): the entry is
+drawn from `SMPRules.mayDownloadPlan()` and `sendPlanPptx()` asks the same
+function again at press time, so the screen and the press cannot answer
+differently — the drift §94 spent three findings on.
+
+**THE STRATEGY TAB LOSES ITS TWO BUTTONS AND GAINS NOTHING TO KEEP IN STEP.**
+§119.9 had to put the download on BOTH halves of a capability function's
+strategy tab, because only one of them had a pane to hang a button on. With one
+entry in the menu that whole problem is gone, and the check asserts it from the
+overview — the half that needed its own button before.
+
+**PROVED AT BOTH ENDS, AND THE THREE REVERSED ASSERTIONS WERE REWRITTEN RATHER
+THAN DELETED** (§218). `test-authorize.js` said *"the unit's custodian may"*,
+*"the unit's owner may"* and *"a function's head may"*; it says **may NOT** now,
+with the office's own yes beside each, so a build that quietly widened this
+again fails rather than passing through a gap where a test used to be — and
+`mayArrange` is asserted in the same breath, or the narrowing could take
+reordering with it unnoticed. 474 passed, 0 failed.
+`checks/strategy-split.py` §3 drives it: the office's menu carries the entry and
+a click at its centre reaches it (§93.4), the plan pane draws none, and the
+custodian, the owner, a function's head and a bystander are refused on the
+screen AND by the rule. **One of its own first-run failures was the check** — a
+function's Performance tab is keyed `fnperf`, not `performance`, so the
+assertion navigated nowhere and reported a correct build as broken (§51.11's
+family).
+
+**AND THE DELETION BROKE A PAGE, WHICH IS §214's LESSON TWICE IN ONE
+SECTION.** Removing `dlPlanBtn()` left `editBar()` still USING the `dl` it no
+longer computed, so every supporting function's **Overview** threw inside
+`paint()` and left §137's failcard in its place — measured, 45 page errors
+across the sweep. Two things about how it was found are worth keeping:
+
+  · **the targeted checks all passed.** `strategy-split`, `plan-fields`,
+    `perf-line` and `deck-outcome` were green while that page was a failcard,
+    because the assertions on that surface are ABSENCES — *no download here* —
+    and a page that did not render satisfies every one of them (§113.8's blind
+    spot, met for real rather than in principle). `drew()` is asked beside each
+    absence now: the failcard's absence, before the control's.
+  · **the full sweep is what caught it**, which is the argument for running it
+    rather than the file just edited (§214 said exactly this, about a deletion
+    that took a live function with it).

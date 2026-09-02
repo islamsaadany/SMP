@@ -79,6 +79,28 @@ Nothing proceeds past this line without an answer.
 
 ## Built and verified
 
+### §252.2 — the plan download, in the menu and the office's (2026-09-02, same branch)
+
+Islam, in the same breath as the merge: *"the ppt download leave it as an
+option in the drop down for the smo only."*
+
+§145.9 hid the pane-corner button for everyone in August and kept the machinery,
+saying giving it back was one line. It comes back **somewhere else**: an entry
+in the **Presentation** menu, beside *Present* and *Manage slides* — three
+deck-shaped things in one place, rather than a fourth control in a pane corner
+that already holds the pen, the arrows and the fill button.
+
+**For the office alone**, which reverses §117's audience (the office plus a
+unit's owner and custodian and a function's head) at his instruction, and is
+recorded as a reversal rather than written over. Reordering is untouched — still
+the custodian's and the owner's (§101). The corner button, its page map and the
+`editBar` term are **deleted rather than left returning ""** (§24).
+
+Green: `strategy-split` ALL OK (rewritten around the new placement, both ends
+per person), `test-authorize` 474/0 with the three reversed assertions
+**rewritten, not deleted** (§218), `deck-outcome` 0 failed, `plan-fields`,
+`perf-line`, and the full `qa.py` sweep.
+
 ### §252 — the presentation reads what was reported (2026-09-02, branch `claude/presentations-plan-performance-update-7a94p2`)
 
 Islam: *"presentations doesn't change when the plan performance is done"*, and

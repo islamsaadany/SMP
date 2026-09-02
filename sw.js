@@ -286,8 +286,13 @@
    bytes behind the name differ — caught by §94.16's confirmation immediately
    before the push, never by the merge. Checked against origin/main serving
    "smp-shell-v4.26-unit-before-number"; confirm again immediately before the
-   push. */
-const SHELL = "smp-shell-v4.27-outcome-on-the-deck";
+   push.
+
+   §252.2: the plan download comes back as an entry in the Presentation menu
+   and the corner button is deleted, so the built file's bytes changed again.
+   Checked against origin/main serving "smp-shell-v4.27-outcome-on-the-deck";
+   confirm again immediately before the push (§94.16). */
+const SHELL = "smp-shell-v4.28-plan-download-in-the-menu";
 const ASSETS = [
   "/",
   "/index.html",

@@ -365,6 +365,25 @@ console errors (in this cloud environment, run it via a wrapper that points Play
   `node scripts/test-door.js <smo-password>` against a running dev-server
   after touching `api/auth.js` or `lib/auth.js` (it ends by rate-limiting the
   SMO on purpose — `DELETE FROM login_attempts;` clears it).
+- **THE PLAN DOWNLOAD IS AN ENTRY IN THE PRESENTATION MENU, AND THE OFFICE'S
+  (§252.2, reversing §117's audience):** Islam — *"the ppt download leave it as
+  an option in the drop down for the smo only."* §145.9 hid the pane-corner
+  button for everyone and kept the machinery; this is that machinery given back
+  **somewhere else** — beside *Present* and *Manage slides*, because that menu
+  is where the decks already are and the pane corner already holds the pen, the
+  arrows and §145's fill button. **THE CORNER BUTTON IS DELETED, NOT LEFT
+  HIDDEN** (§24, §94.15) — `dlPlanBtn()`, `DL_PAGES` and `editBar()`'s `dl`
+  term go with it, and **the first deletion sliced a RANGE** and left that
+  function's comment stranded above `arrangePaneBtn()` (§214's own lesson,
+  again). **THE NARROWING IS IN THE RULE, NEVER IN THE MENU** (§42, §48.2): the
+  entry is drawn from `mayDownloadPlan()` and `sendPlanPptx()` asks it again at
+  press time. **`ARRANGE_ROLES` IS UNTOUCHED** — reordering is still the
+  custodian's and the owner's (§101); the two questions merely stopped sharing
+  an answer. §119.9's two-buttons-per-tab problem disappears with the move.
+  **Three assertions REVERSED and REWRITTEN, never deleted** (§218): *the
+  custodian may* → *may NOT*, with the office's yes beside each and `mayArrange`
+  asserted in the same breath. 474/0; and one of the check's own first failures
+  was the CHECK — a function's Performance tab is keyed `fnperf`.
 - **THE PRESENTATION READS WHAT WAS REPORTED (§252):** Islam — *"presentations
   doesn't change when the plan performance is done"*, and then *"the
   presentation should update on either save draft or submit."* **THE PROPOSED
@@ -4406,7 +4425,21 @@ prior sessions (on HR_ERP) accidentally reverted agreed-upon designs.
 
 ---
 
-*Last Updated: 2026-09-02 &mdash; **&sect;252: the presentation reads what was
+*Last Updated: 2026-09-02 &mdash; **&sect;252.2: the plan download comes back,
+in the menu and for the office.** Islam, in the same breath as the merge:
+*"the ppt download leave it as an option in the drop down for the smo only."*
+&sect;145.9 hid the pane-corner button for everyone and kept the machinery;
+this is that machinery given back **somewhere else** &mdash; an entry beside
+*Present* and *Manage slides*, because that menu is where the decks already
+are. The corner button is **deleted, not left hidden** (&sect;24), and the
+narrowing lives in `mayDownloadPlan()` rather than in the menu, so the entry
+and the press cannot answer differently (&sect;42, &sect;48.2). It **reverses
+&sect;117's audience** at his instruction and is recorded as a reversal:
+`ARRANGE_ROLES` is untouched, because reordering is still the custodian's and
+the owner's (&sect;101). Three assertions rewritten rather than deleted
+(&sect;218), 474/0, and one of the check's own first failures was the check.*
+
+*Earlier the same day: **&sect;252: the presentation reads what was
 reported.** Islam: *"presentations doesn't change when the plan performance is
 done"*, then *"the presentation should update on either save draft or submit."*
 **THE PROPOSED FIX WOULD HAVE CHANGED NOTHING** &mdash; the deck is assembled

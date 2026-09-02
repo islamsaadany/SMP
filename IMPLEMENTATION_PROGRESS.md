@@ -6,8 +6,9 @@ version (rules A2 / A11, changed 2026-08-20) — those go only when asked for.
 
 **Where it runs:** Vercel, production tracks `main`. Static files plus two
 serverless functions (`/api/state`, `/api/auth`) against Neon Postgres.
-**Latest version:** §250 on `main` (a tactic's outcome measured against its
-own window); §252 on this branch (the presentation reads what was reported).
+**Latest version:** §256 on `main` (§253–§256: the deck round, a reported note,
+and a slide the office does not present — §255 and §256 from another session);
+§254.7–.12 on this branch, going to `main` with this merge.
 
 *(This line read v3.58 while the section below it ran to v3.65: a documentation
 drift, flagged before it was corrected rather than quietly realigned.)*
@@ -100,6 +101,106 @@ Green: `strategy-split` ALL OK (rewritten around the new placement, both ends
 per person), `test-authorize` 474/0 with the three reversed assertions
 **rewritten, not deleted** (§218), `deck-outcome` 0 failed, `plan-fields`,
 `perf-line`, and the full `qa.py` sweep.
+
+### §254.7–.12 — the deck round, finished (2026-09-02, same branch)
+
+Four more from the running deck, on top of the eight before them.
+
+- **§254.7** — a unit written twice *with or without a gap*. His `40 %%`
+  survived §254.1's collapse, which split the unit on whitespace. **And it
+  caught a regression of my own**: §254.1 added a space to any unit it did not
+  recognise, so `40%%` became `40 %%` — made worse by the tidier.
+- **§254.8 / §254.12** — the pillar cards size themselves AND fill the slide
+  rather than one row of it. Up to three in a row, above that `ceil(sqrt(n))`,
+  so *"4 can form a box"* is 2×2 and five goes 264px → 445px. Vertical sizes
+  follow the rows, horizontal ones the columns; swept 1 to 10, nothing
+  overflows.
+- **§254.9** — the aspiration runs the width, *This year* comes first, and the
+  objectives table grows. **10 of 10 aim slides were on the generic 19px floor;
+  none are now.**
+- **§254.10 / .11** — two numbers not four, with the reading put back before it
+  was obeyed; the sentence explaining Execution stays.
+
+**Verified:** `deck-figures` **11 red** on the build before; that check plus
+`deck-blank-slides`, `notes-slide`, `slide-move`, `deck-outcome`,
+`deck-and-weights`, `ytd-proration`, `tactic-proration`, `table-fit`,
+`submit-gate` green, **and main's own three new checks** (`hide-slide` 42/0,
+`reported-note` 0 failed, `hide-slide-mockup`) green on the merged build.
+
+### §254 — a figure is read against what it is measured by (2026-09-02, same branch)
+
+Eight things Islam sent from the live deck in one afternoon, all mocked up from
+the running deck first (`design-mockups/deck-review-round/`) and six built.
+
+- **The benchmark, and the column that names it** — *Annual target*, and what
+  is due so far beside every figure, on a unit's objectives, a pillar's
+  measures and a capability's objectives. Nothing new computed; one builder.
+- **§254.1** — a scaled currency reads as one token wherever it is drawn
+  (`8M EGP`), display only, and the doubled unit healed on reporting and save.
+- **§254.2** — one question decides the whole row, narrowing §248 at his
+  direction: a tactic whose outcome has a target says it is owed a figure.
+  0 of 78 demo tactics are in that state, so nothing in the demo moves.
+- **§254.3** — a not-due tactic is not dimmed.
+- **§254.4 / §254.5** — the pillars are named before they are scored, and the
+  deck ends on the score table then the three readings.
+
+**Verified:** `checks/deck-figures.py` **33 red** on the build before, green
+after; `deck-blank-slides`, `notes-slide`, `deck-outcome`, `deck-and-weights`,
+`ytd-proration`, `tactic-proration`, `slide-move`, `cycle-board`, `table-fit`,
+`project-tables`, `submit-gate`, `gap-fill`, `fn-pillars`, `fn-report-gate`,
+`hide-element` green. Three checks held literals these decisions moved and were
+rewritten rather than loosened. `report-saves` is the known-red-on-main stub
+fault (§250.2).
+
+**Waiting on Islam:** `K EGP` on the offered unit list; the deck marks (a
+supporting function can never have one, and there is no group mark to fall back
+on); whether the notes slide keeps the last word before Thank you.
+
+### §253 — a table with no rows is not a slide (2026-09-02, branch `claude/merchandizing-slides-blank-mxcjfj`)
+
+Islam: *"slides are showing blank pages for the merchandizing."* Measured
+before anything was proposed: **four** slides in the whole product draw a
+heading, a column strip and a whole empty page, and **all four are
+Merchandising** — its own deck's two objectives slides (a function judged by
+its pillars legitimately carries none, §214.2) and Retail's **RS04**, the
+pillar carried by that function, which printed **93% / 60% / 61%** over
+nothing at all.
+
+`deckSlidesFn` has guarded its objectives slide since it was written, which is
+why **Marketing** has always been right; the unit deck, which a pillars
+function goes through since §224, had no such guard (§53.5). Islam ruled it
+for **any** subject, reversing the narrower rule recommended to him.
+
+- **§253.1** — the headline slide drops the objectives cell for any subject
+  with none. No new CSS: `.headgrid` without `.three` is the shape it wore
+  before §243. Settled from a mockup made of the real deck, which earned its
+  place by exposing a footnote that would have gone on explaining a number no
+  longer on the slide.
+- **§253.2** — the Retail → Merchandising pointer is cut at his instruction.
+  The **feature** is untouched; the demo no longer *shows* a carried pillar, so
+  spec 010 is described and not visible. Measured across every unit: Retail
+  execution 102→104, planned 57→56, RS04's three figures to three dashes,
+  nothing else moves.
+- **§253.3** — *"the manage presentation show this"*: Manage slides on a
+  pillars function, bar drawn, rail and stage empty. §224's fault on two more
+  surfaces. `deckHtmlFor()` is the one reader now, asked by Present, Manage
+  slides and the anchors; `openDeckFn()` on a pillars function goes **2 → 13**,
+  and the capability deck is asserted unchanged. The editor's silent failure
+  was given a voice in the same change. **Not claimed**: the demo's pre-fix
+  editor draws two slides and his screenshot shows none, so whether the prefix
+  branch is exactly what emptied his rail cannot be proved from here.
+
+**Verified:** `checks/deck-blank-slides.py` **14 red** on the build before, all
+green after; `notes-slide`, `deck-outcome`, `deck-and-weights`,
+`ytd-proration`, `cycle-board`, `table-fit`, `project-tables`, `slide-move`,
+`gap-fill`, `submit-gate`, `fn-pillars` green; every unit's five scores read
+before and after. `report-saves` is the known-red-on-main stub fault (§250.2),
+reproduced on the pre-change build.
+
+**Open, and next:** three from the live deck, taken as their own piece — the
+deck's measures table shows no prorated benchmark where Performance does, a
+doubled unit (`8 M EGP M EGP`), and a not-due tactic row that is dimmed as
+well as labelled.
 
 ### §252 — the presentation reads what was reported (2026-09-02, branch `claude/presentations-plan-performance-update-7a94p2`)
 

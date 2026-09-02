@@ -3464,7 +3464,7 @@
            and keeps every rule it had, so nothing already reported changes
            meaning when an outcome is added beside it. */
         if (el.dataset.fld === "outActual") {
-          if (v !== "" && unit) v = joinTarget(unitTight(hit.obj.outActual || ""), v, unit);
+          if (v !== "" && unit) v = joinTarget(hit.obj.outActual || "", v, unit);
           if (v === "") delete hit.obj.outActual; else hit.obj.outActual = v;
           /* The status still follows the work, and an outcome that has reached
              its target is done. `tacticOutcomeScore` is the one reader of that
@@ -3475,13 +3475,8 @@
           else if (hit.obj.status !== "Blocked") hit.obj.status = "WIP";
           paint(); return;   /* paint() ends in afterPaint() (§170) */
         }
-        /* §254.1: JOINED AGAINST THE HEALED STRING. `joinTarget` takes its
-           separator from the value it is replacing, so a stored
-           "8 M EGP M EGP" would hand its own doubling back to the next save.
-           Healing the value it reads from is what makes "heal on save" true
-           rather than merely "heal on screen". */
         if (hit.kind !== "TACTIC" && v !== "" && unit)
-          v = joinTarget(unitTight(hit.obj.actual || hit.obj.target), v, unit);
+          v = joinTarget(hit.obj.actual || hit.obj.target, v, unit);
         if (hit.kind === "TACTIC") {
           var n = parseInt(v.replace("%",""), 10);
           hit.obj.actual = v === "" ? null : Math.max(0, Math.min(100, isNaN(n) ? 0 : n));

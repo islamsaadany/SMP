@@ -236,18 +236,6 @@ var SLED = { target:null, kind:null, key:null, sel:null, err:"" };
    the one that is unambiguously measurable (§3.2's lesson from the other end).
    `inert` and `aria-hidden`, because a full deck of slides in the accessibility
    tree behind the editor is a screen reader walking the whole review twice. */
-/* A DECK THAT CANNOT BE BUILT SAYS SO (§253.3). `slidesAssemble()` had a
-   `try/finally` and no catch, and `slidesPaint()` opened `if (!all.length)
-   return;` — so a throw anywhere in the builder, or a deck that came back
-   empty, left the editor's bar drawn over a blank rail and a blank stage with
-   nothing said and nothing in the console the person could see. That is the
-   screen Islam sent. §32's rule (a refusal must be visible where the act was)
-   and §171's (a failure that is silent is indistinguishable from a success),
-   on the one surface that had neither.
-
-   THE CAUSE IS FIXED ABOVE and this is the net under it, said as such: it
-   makes an invisible failure visible, it does not claim to have found the
-   cause of any particular one. */
 function slidesAssemble(){
   var host = document.createElement("div");
   host.className = "slmeasure";
@@ -258,9 +246,7 @@ function slidesAssemble(){
   host.appendChild(box);
   document.body.appendChild(host);
   try {
-    /* §253.3: the FORMAT decides the deck, never the `fn:` prefix — asked
-       through the one reader Present and the anchors also ask. */
-    box.innerHTML = deckHtmlFor(SLED.target);
+    box.innerHTML = SLED.kind === "fn" ? deckSlidesFn(SLED.key) : deckSlides(UNITS[SLED.key]);
     insertPictureSlides(box, SLED.target, true);
     /* The same order openDeckWith() uses, and the order matters both ways:
        AFTER the picture slides so a custodian's own slide is footed too, and
@@ -278,31 +264,6 @@ function slidesAssemble(){
       var id = el.getAttribute("data-ps");
       el.dataset.ed = id ? "ps:" + id : "gen:" + (g++);
     });
-    /* ── THE EDITOR MARKS WHAT THE PROJECTOR REMOVES (§256) ────────────
-       `deckHidePass()` is deliberately NOT called here. This mode exists to
-       show the whole deck, and a hidden slide that vanished from the rail
-       could never be brought back (§61) — so it is stamped instead, and the
-       rail dims it and says so.
-
-       Stamped after the fit pass, so a hidden table long enough to continue
-       marks BOTH its parts: on this side they are two rows, and a row wearing
-       the state while its own continuation does not is the row disagreeing
-       with itself. On the projector the question never arises, because the
-       parent is removed before it can be split.
-
-       INSIDE THE TRY, with §253.3's catch below it: a subject whose stored
-       list cannot be read is a deck that could not be built, and the person
-       gets that sentence rather than a blank rail. */
-    var subj = deckSubject(SLED.target);
-    [].forEach.call(box.querySelectorAll(".dslide[data-anchor]"), function(el){
-      if (SMPRules.slideHidden(subj, el.dataset.anchor)) el.dataset.off = "1";
-    });
-  } catch (e) {
-    /* Kept, not rethrown: the editor is already open, and the person needs a
-       sentence rather than a blank screen. `slidesPaint()` reads it. */
-    SLED.err = "This deck could not be built. Nothing has been lost — your "
-             + "pictures are saved with the cycle. " + (e && e.message ? e.message : "");
-    box.innerHTML = "";
   } finally {
     /* Detached before it is read from, so a failure anywhere above cannot
        leave a full deck parked in the document for the rest of the session. */
@@ -368,18 +329,7 @@ var SL_THUMB = 0.105;
 function slidesPaint(){
   var box = slidesAssemble();
   var all = [].slice.call(box.querySelectorAll(".dslide"));
-  if (!all.length) {
-    /* NEVER A SILENT RETURN (§253.3). This left the bar over an empty rail and
-       an empty stage — the screen Islam reported — so an empty deck now says
-       what happened where the act was. */
-    document.getElementById("slidelist").innerHTML =
-      '<p class="picsub">Nothing to show here yet.</p>';
-    document.getElementById("slidepane").innerHTML =
-      '<p class="picerr" role="alert">' + esc(SLED.err ||
-        "This review has no slides to manage yet. A plan with nothing in it "
-        + "produces no deck, so there is nowhere to put a picture.") + '</p>';
-    return;
-  }
+  if (!all.length) return;
   /* Keep the selection if it still exists; otherwise take the first picture
      slide, and failing that the first slide. */
   var keys = all.map(function(el){ return el.dataset.ed; });
@@ -394,23 +344,18 @@ function slidesPaint(){
      had a reason to scroll. A control you have to go looking for is a control
      that is not there. */
   var list = document.getElementById("slidelist");
-  var off = all.filter(function(el){ return el.dataset.off; });
   list.innerHTML = '<div class="sl-add"><button class="editbtn" data-sladd="1">' +
       '+ Add slide after</button>' +
       '<span class="picsub">' + (SLED.sel && SLED.sel.indexOf("ps:") === 0
         ? "the one selected" : "the slide selected below") + '</span></div>' +
-    slidesHiddenLine(off.length) +
     all.map(function(el, i){
     var mine = !!el.dataset.ps;
     return '<div class="slrow' + (el.dataset.ed === SLED.sel ? " on" : "") +
-        (mine ? " mine" : "") + (el.dataset.off ? " off" : "") +
-        '" data-slgo="' + esc(el.dataset.ed) + '">' +
+        (mine ? " mine" : "") + '" data-slgo="' + esc(el.dataset.ed) + '">' +
       '<span class="sl-n">' + (i + 1) + '</span>' +
       '<span class="sthumb"><span class="sthumb-in"></span></span>' +
       '<span class="sl-lab">' + esc(slidesLabel(el)) +
-        (mine ? '<em>your pictures</em>' : '') + '</span>' +
-      (el.dataset.off ? '<span class="sl-off">Hidden</span>' : '') +
-      slidesEye(el, all) + '</div>';
+        (mine ? '<em>your pictures</em>' : '') + '</span></div>';
   }).join("");
 
   /* The clones go in after the innerHTML, or writing the rail would discard
@@ -442,96 +387,14 @@ function slidesPaint(){
   SLED.err = "";
 }
 
-/* ── HIDING A SLIDE (§256) ───────────────────────────────────────────────
-   The office's alone (Islam). `inOffice()` is the platform's wrapper around
-   the same `SMPRules.isOffice()` the server asks before it accepts the save
-   (§42) — a screen that offers what the save refuses is the drift that whole
-   module exists to prevent. A custodian or an owner opening this mode for
-   their pictures still SEES what is hidden; they get no control.
-
-   THE EYE IS THE ONLY CONTROL, and it is drawn on every row rather than on
-   hidden ones alone: a switch you can only find once it is on is a switch
-   nobody turns on. It is `aria-disabled`, never `disabled`, on the one row
-   it refuses, or the sentence explaining the refusal cannot be reached by
-   hover or by focus (§163, §221). */
-var EYE_ON = '<svg viewBox="0 0 20 20" width="14" height="14" fill="none" ' +
-  'stroke="currentColor" stroke-width="1.6" aria-hidden="true">' +
-  '<path d="M2 10s3-5 8-5 8 5 8 5-3 5-8 5-8-5-8-5Z"/><circle cx="10" cy="10" r="2.2"/></svg>';
-var EYE_OFF = EYE_ON.replace("</svg>", '<path d="M3 3l14 14"/></svg>');
-
-/* A deck presented with nothing in it is not a presentation, so the last
-   slide standing cannot be hidden — refused HERE, on the press, rather than
-   in `deckHidePass()`: a pass that quietly declined to remove what it was
-   told to remove would be a second answer to the same question (§53.5), and
-   the person pressing would never learn why. Showing one again is always
-   allowed, whatever the count. */
-function slidesCanHide(el, all){
-  if (el.dataset.off) return true;
-  return all.filter(function(s){ return !s.dataset.off; }).length > 1;
-}
-function slidesEye(el, all){
-  /* A picture slide has no anchor and is not hidden — it is REMOVED, by the
-     control the pane already carries (§24: not a second way to do one act). */
-  if (!el.dataset.anchor || !inOffice()) return "";
-  var hid = !!el.dataset.off, can = slidesCanHide(el, all);
-  return '<button class="slhide" data-slhide="' + esc(el.dataset.anchor) + '"' +
-    (can ? "" : ' aria-disabled="true"') +
-    ' title="' + (hid ? "Show this slide in the review again"
-                      : can ? "Hide this slide from the review"
-                            : "This is the only slide left to show") + '"' +
-    ' aria-label="' + (hid ? "Show this slide again" : "Hide this slide") + '">' +
-    (hid ? EYE_OFF : EYE_ON) + '</button>';
-}
-/* Quiet, never amber (§187, §168). Hidden slides are a decision somebody made
-   on purpose, not something outstanding, and an alarm ground over a healthy
-   state is how a product teaches people to stop reading its colours. Drawn
-   only when there is something to say (§41's budget) — and drawn for EVERYONE,
-   because the state is the deck's and seeing it is not the same act as
-   setting it. `Show all` is the office's. */
-function slidesHiddenLine(n){
-  if (!n) return "";
-  return '<div class="sl-hidden"><span>' + plural(n, "slide") + ' hidden</span>' +
-    (inOffice() ? '<button class="lnk" data-slshowall="1">Show all</button>' : '') +
-    '</div>';
-}
-/* Sorted, so hiding A then B and hiding B then A leave the same bytes — an
-   array that remembers the order it was written in reports a change to the
-   server every time somebody hides two slides in the other sequence.
-   The emptied key is DELETED (§50.6). */
-function slidesSetHidden(anchor, on){
-  var subj = deckSubject(SLED.target);
-  if (!subj || !anchor) return;
-  var list = SMPRules.hiddenSlides(subj).slice(), i = list.indexOf(anchor);
-  if (on && i < 0) list.push(anchor);
-  if (!on && i >= 0) list.splice(i, 1);
-  list.sort();
-  if (list.length) subj[SMPRules.HIDE_SLIDES] = list;
-  else delete subj[SMPRules.HIDE_SLIDES];
-  slidesMark(); slidesPaint();
-}
-
 function slidesPaneHtml(cur, sl){
   var head = SLED.err ? '<p class="picerr" role="alert">' + esc(SLED.err) + '</p>' : '';
   if (!sl) {
-    var hid = !!(cur && cur.dataset.off);
-    /* WHAT HIDING COSTS IS SAID WHERE IT IS DONE, and it is the sentence that
-       keeps this apart from §233: that switch takes a row out of every score,
-       this one takes a slide out of the projector and out of nothing else.
-       Somebody who has just hidden a slide should not have to go and find out
-       whether they have moved a number. */
     return head +
-      '<div class="sstage' + (hid ? " sstage-off" : "") + '"><div class="sstage-in"></div></div>' +
-      (hid
-        ? '<div class="slctl slctl-read"><div class="slctl-h slctl-off">' +
-          '<b>Hidden from the review</b>' +
-          (inOffice() ? '<button class="editbtn" data-slshow="' +
-            esc(cur.dataset.anchor || "") + '">Show this slide</button>' : '') +
-          '</div><p class="picsub">It is skipped when the deck is presented. Nothing ' +
-          'else changes &mdash; the figures on it are still reported, still scored and ' +
-          'still on the page.</p></div>'
-        : '<div class="slctl slctl-read"><p class="picsub">This slide is built by the ' +
-          'platform from what the unit has reported, and is refreshed every time the ' +
-          'deck opens. <b>Add slide after</b> puts your own pictures after it.</p></div>');
+      '<div class="sstage"><div class="sstage-in"></div></div>' +
+      '<div class="slctl slctl-read"><p class="picsub">This slide is built by the ' +
+      'platform from what the unit has reported, and is refreshed every time the ' +
+      'deck opens. <b>Add slide after</b> puts your own pictures after it.</p></div>';
   }
   var pics = sl.pics || [];
   var across = Math.max(1, Math.min(PIC_PER_SLIDE, +sl.layout || 1));
@@ -764,40 +627,6 @@ function slidesWire(){
   });
   root.querySelectorAll("[data-sladd]").forEach(function(b){
     b.addEventListener("click", slidesAdd);
-  });
-
-  /* §256. The eye sits INSIDE the row, and the row's own handler selects it —
-     so the press has to be stopped from also walking the selection, or hiding
-     a slide would move you to it. A refused press still explains itself
-     rather than doing nothing (§221): `aria-disabled` takes focus and fires
-     click, which is the whole reason it is not `disabled`. */
-  root.querySelectorAll("[data-slhide]").forEach(function(b){
-    b.addEventListener("click", function(e){
-      e.stopPropagation();
-      if (b.getAttribute("aria-disabled") === "true") {
-        SLED.err = "Every other slide is hidden, so this one has to stay — " +
-                   "a review with no slides in it cannot be presented.";
-        slidesPaint();
-        return;
-      }
-      var subj = deckSubject(SLED.target);
-      slidesSetHidden(b.dataset.slhide, !SMPRules.slideHidden(subj, b.dataset.slhide));
-    });
-  });
-  root.querySelectorAll("[data-slshow]").forEach(function(b){
-    b.addEventListener("click", function(){ slidesSetHidden(b.dataset.slshow, false); });
-  });
-  /* The way back for all of them at once. It DELETES the field rather than
-     writing an empty array (§50.6), which `slidesSetHidden` also does — but
-     going through it one anchor at a time would repaint per slide, so this
-     writes once. */
-  root.querySelectorAll("[data-slshowall]").forEach(function(b){
-    b.addEventListener("click", function(){
-      var subj = deckSubject(SLED.target);
-      if (!subj) return;
-      delete subj[SMPRules.HIDE_SLIDES];
-      slidesMark(); slidesPaint();
-    });
   });
   root.querySelectorAll("[data-slmove]").forEach(function(b){
     b.addEventListener("click", function(){ slidesMove(+b.dataset.slmove); });

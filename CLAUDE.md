@@ -365,6 +365,40 @@ console errors (in this cloud environment, run it via a wrapper that points Play
   `node scripts/test-door.js <smo-password>` against a running dev-server
   after touching `api/auth.js` or `lib/auth.js` (it ends by rate-limiting the
   SMO on purpose — `DELETE FROM login_attempts;` clears it).
+- **OFFLINE IS SAID IN THE MIDDLE OF THE PAGE (§253):** Islam — *"the error
+  should be honest telling me that I'm offline"*, then *"make it a pop up not a
+  top page error"*, then *"in the middle of the page like the error popup. it's
+  very critical."* §171's banner printed the BROWSER's `Failed to fetch`, talked
+  about a server that is working perfectly, and told somebody offline to
+  **reload**, which is the one act that destroys the work (`lastSaved` lives in
+  the tab; §170's retry runs only while it is open).
+  **`navigator.onLine === false` IS THE WHOLE TEST, WRITTEN THAT WAY ROUND** —
+  the browser answers TRUE whenever an interface is up, which says nothing about
+  our server, so a false *"you are offline"* is impossible and everything else
+  falls to the sentence that does not claim to know. **IT IS THE PLATFORM'S OWN
+  DIALOG** (`.overlay` + `.modal`), narrowed on the OVERLAY and never on
+  `.modal`, which every dialog shares (§122); the rules live beside the banner
+  they replace and **win on SPECIFICITY, never source order** (§93.11).
+  **THE ONE REAL COST OF THE CENTRE**: `openModalHtml()` reuses THE overlay, so
+  raising this in it would DESTROY the dialog somebody was working in — its own
+  element above the shared one, and **the page is released only if this was what
+  inerted it** (§116.6 from the other side). **CLOSING IT IS NOT SILENCE**: a
+  dialog nobody could dismiss would lock the platform for as long as the wifi is
+  out, so the corner card (the chat panel's box, bottom-left — `.chatdock` owns
+  the other corner) stays until the save lands, or §171's fault is put back
+  inside its own fix. **Once per EPISODE, not per attempt**; a DIFFERENT failure
+  earns a new dialog; **focus returns only if focus is in the dialog**, because
+  the same path runs when a save lands while somebody types elsewhere (§110.7).
+  **AND THE TWO SENTENCES HAD RUN TOGETHER SINCE §171** — `.banner.refused` is
+  `display:block`, killing `.banner`'s flex gap — found by SHOOTING the banner
+  for the mockup, not by reading it. The refusal banner, demo data and the chat
+  corner's own sentence are untouched, and **nothing about saving changed**.
+  **AND A HOLE THE MOCKUP COULD NOT SHOW**, found by re-reading the diff: on a
+  projector the CSS hides the dialog and opening it still made the page INERT —
+  a save failing mid-presentation would have FROZEN the deck with nothing on
+  screen saying why, and no check does both at once. `body.presenting` is asked
+  in JS too, and the failure is treated as already dismissed so the card is
+  there the moment the deck closes. Proved able to fail 4 / 1 / 2 / 3.
 - **THE PRESENTATION READS WHAT WAS REPORTED (§252):** Islam — *"presentations
   doesn't change when the plan performance is done"*, and then *"the
   presentation should update on either save draft or submit."* **THE PROPOSED
@@ -4259,8 +4293,15 @@ python3 checks/stay-put.py      # a refresh stays where you are, and a NEW sessi
                                 # opens where §94.6 says (§173)
 python3 checks/save-said.py     # a save that FAILS says so on the page: a server
                                 # error naming its status, an unreachable server, a
-                                # remembered refusal, and demo data — seven states
-                                # through a stub that can be told to fail (§171)
+                                # remembered refusal, and demo data — through a stub
+                                # that can be told to fail (§171) — and since §253 it
+                                # goes GENUINELY offline (context.set_offline, which
+                                # rejects fetch AND turns navigator.onLine false), so
+                                # the dialog is proved to say "offline" rather than
+                                # "the server", closing it is proved to leave the
+                                # card, the five-second retry is proved NOT to throw
+                                # the dialog back, and coming back online is proved
+                                # to clear both AND land the work on the server
 python3 checks/setup-sticky.py  # a Setup page that FITS does not scroll, and nothing
                                 # pinned ends up behind the chrome — over HTTP with a
                                 # conversation open, because the Inbox's own two headers
@@ -4406,7 +4447,46 @@ prior sessions (on HR_ERP) accidentally reverted agreed-upon designs.
 
 ---
 
-*Last Updated: 2026-09-02 &mdash; **&sect;252: the presentation reads what was
+*Last Updated: 2026-09-02 &mdash; **&sect;253: offline, said in the middle of
+the page.** Islam, quoting the banner back: *"this comes when I get offline,
+the error should be honest telling me that I'm offline once I get offline to
+make sure that the error is clear"*, then ***"make it a pop up not a top page
+error"***, then ***"I want the location to be in the middle of the page like
+the error popup. it's very critical."*** **THREE THINGS WERE WRONG AND ONLY ONE
+WAS THE WORDING**: it talked about the server, which is working perfectly; it
+printed the BROWSER's own `Failed to fetch`, which nobody can act on (&sect;171
+shows the HTTP status deliberately, and that argument does not reach an
+internal string &mdash; it goes to the console, &sect;123); and its advice was
+BACKWARDS, telling somebody offline to reload, which is the one act that
+destroys the work. `navigator.onLine === false` is the whole test, written that
+way round on purpose: the browser answers TRUE whenever an interface is up, so
+a false *"you are offline"* is impossible. **AND THE TWO SENTENCES HAD BEEN
+RUNNING TOGETHER SINCE &sect;171** &mdash; `.banner.refused` is `display:block`,
+which overrides `.banner`'s flex AND its gap &mdash; found by SHOOTING the real
+banner for the mockup, not by reading the source, and visible in his own
+screenshot. **THE SHAPE IS HIS IN TWO CORRECTIONS, EACH COST DRAWN**: three
+mockup rounds, all made of the real platform (&sect;41.9); it is the
+platform's OWN dialog (`.overlay` + `.modal`, the box the merge wizard and the
+person dialog open in), narrowed on the OVERLAY and never on `.modal`
+(&sect;122), and the CSS wins on SPECIFICITY rather than source order
+(&sect;93.11, four rules already lost that way). **THE ONE REAL COST OF THE
+CENTRE**: `openModalHtml()` reuses THE overlay, so raising this in it would
+DESTROY a dialog somebody was working in &mdash; its own element above the
+shared one, and the page released only if this was what inerted it. **IT CAN BE
+CLOSED AND CLOSING IT IS NOT SILENCE**: being offline lasts as long as it
+lasts, so a dialog nobody could dismiss would cost real work to say what the
+screen has already said &mdash; the corner card stays until the save lands, or
+&sect;171's fault is put back inside its own fix. **Raised once per EPISODE**,
+not per attempt (&sect;170 retries every five seconds), and **focus is restored
+only if focus is in the dialog**, because the same path runs when a save lands
+while somebody is typing elsewhere (&sect;110.7). The refusal banner, demo
+data and the chat corner's own sentence are deliberately untouched, and nothing
+about saving changed. `checks/save-said.py`'s failure sections were REWRITTEN
+not deleted (&sect;218) and now go GENUINELY offline; proved able to fail three
+ways (**4 / 1 / 2 red**), with `refusal-keeps-work`'s one failure reproduced
+identically on the untouched build (&sect;250.2's stub, not this change).*
+
+*Earlier the same day: **&sect;252: the presentation reads what was
 reported.** Islam: *"presentations doesn't change when the plan performance is
 done"*, then *"the presentation should update on either save draft or submit."*
 **THE PROPOSED FIX WOULD HAVE CHANGED NOTHING** &mdash; the deck is assembled

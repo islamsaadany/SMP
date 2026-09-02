@@ -27981,3 +27981,175 @@ records the same for the plan slides). And a deck **already open on a
 projector** still does not redraw while somebody saves in another tab: put to
 Islam and deliberately left, because slides changing under a presenter
 mid-sentence is worse than a deck that is right as of when it opened.
+
+---
+
+## §253 — OFFLINE, SAID IN THE MIDDLE OF THE PAGE (2026-09-02)
+
+Islam, from the running platform, quoting the banner back at me:
+
+> *"Not saved. The platform could not reach the server (Failed to fetch). Your
+> change is still on screen and the platform keeps trying… — this comes when I
+> get offline, the error should be honest telling me that I'm offline once I
+> get offline to make sure that the error is clear."*
+
+Then, having seen the first mockup: ***"make it a pop up not a top page
+error"***, and then ***"I want the location to be in the middle of the page
+like the error popup. it's very critical."***
+
+### THREE THINGS WERE WRONG WITH THAT SENTENCE AND ONLY ONE WAS THE WORDING
+
+§171 built two branches — a server that answers badly, and a fetch that
+rejects — and put the BROWSER's own words in the second: `Failed to fetch`.
+
+1. **It talks about the server, which is working perfectly.** Being offline is
+   not a fact about the server, and the sentence sends somebody to look at the
+   one thing that is certainly fine.
+2. **`Failed to fetch` names nothing.** §171 shows the HTTP status
+   deliberately — *a number is not jargon to the one person who can act on
+   it* — and that argument does not reach a browser's internal string, which
+   nobody can act on at all. It goes to the console, where the person who can
+   look, looks (§123).
+3. **The advice was backwards.** *"If it does not clear, reload"* — and
+   reloading while offline is the one act that destroys the work, because
+   `lastSaved` and the graph live in the tab and §170's retry runs only for as
+   long as that tab stays open.
+
+**The platform can simply ask.** `navigator.onLine === false` is the whole
+test, and it is written that way round on purpose: the browser answers TRUE
+whenever an interface is up, which says nothing about whether OUR server can
+be reached — so a false *"you are offline"* is impossible, and everything else
+falls through to the sentence that does not claim to know.
+
+### AND THE TWO SENTENCES HAD BEEN RUNNING TOGETHER SINCE §171
+
+Found by shooting the real banner for the mockup, not by reading the source —
+it is in Islam's own screenshot and I had read past it twice.
+`.banner.refused` is `display:block`, which overrides `.banner`'s flex **and
+the 10px gap that came with it**, and `showFailed()` concatenates
+`</span><span>` with no whitespace. So every failure the platform has ever
+reported read *"(Failed to fetch).Your change is still on screen"*. Gone with
+the banner for these three messages; still true of the refusal banner, which
+is one line plus a list and does not collide.
+
+### THE SHAPE IS HIS, IN TWO CORRECTIONS, AND EACH COST WAS DRAWN
+
+Three rounds of mockup, every one made of the real platform (§41.9) — the
+built file opened, the message mounted on the live page, both palettes:
+
+* **Round one** kept the banner and fixed the words. He rejected the placement.
+* **Round two** was a corner card built from the chat panel's own box. Three
+  placements were drawn IN the window with the real bubble in shot, because
+  `.chatdock` is `right:18px; bottom:18px` and the obvious corner is taken.
+* **Round three** is what shipped: **the platform's own dialog**, centred, page
+  dimmed. Not a centred copy of the card — `.overlay` + `.modal` is the box the
+  merge wizard, the person dialog and the screenshot viewer already open in, so
+  it inherits every decision ever made about a dialog here (§53.5).
+
+**THE WIDTH IS MARKED ON THE OVERLAY, NEVER LOOSENED ON `.modal`** (§122's
+rule): the shared class is `min(940px,100%)`, and 940px for three sentences is
+a wall — widening the shared class to narrow one dialog would reshape the
+register's.
+
+**THE CSS WINS ON SPECIFICITY, NOT ON SOURCE ORDER.** `_shared.css` is
+concatenated FIRST and `.overlay`/`.modal` are declared later in
+`group-extra.css`; `.overlay.savealert` is (0,2,0) against (0,1,0), so it holds
+wherever it lands. That is what makes it safe to keep beside the banner it
+replaces rather than in whichever file happens to be last — four rules in this
+project have already been lost to order (§93.11, §29.2, §51.5, §53.6).
+
+### THE ONE REAL COST OF THE MIDDLE OF THE PAGE
+
+**`openModalHtml()` reuses THE overlay** — one element, whose body it
+overwrites. Raising this message in it while somebody is halfway through the
+person dialog or the merge wizard would **destroy the dialog they were working
+in**. So it gets an overlay of its own, stacked above (z-index 120 against
+100), and **the page is released only if this was what inerted it** — a shared
+dialog open behind has already done it and is entitled to undo it (§116.6's
+rule, arriving from the other side). Stated to Islam on the mockup before he
+chose, because it is the one thing about the centre that is not free.
+
+### IT CAN BE CLOSED, AND CLOSING IT IS NOT SILENCE
+
+Being offline lasts as long as it lasts — a tunnel, a lift, hotel wifi. The
+work is safe on screen and typing more of it is safe too, so **a dialog nobody
+could dismiss would cost real work in order to say something the screen has
+already said.** *Keep working*, the ×, and Escape all close it.
+
+What must not happen is the screen going quiet while the work is still
+unstored — that is §171's entire reason for existing, and a dismissal that
+removed everything would put the fault back inside its own fix. So **round
+two's card stays**, bottom-left, in the one bottom corner the Strategy Office
+bubble does not occupy, until the save lands.
+
+**RAISED ONCE PER EPISODE, NOT ONCE PER ATTEMPT.** §170's retry fires every
+five seconds and a dialog returning each time would make closing it
+meaningless. A DIFFERENT kind of failure earns a new one, because it is a
+different errand.
+
+**ONE BOX, ONE SOURCE** (§231): the card is what the dialog LEAVES BEHIND,
+never what stands beside it.
+
+**FOCUS IS RESTORED ONLY IF FOCUS IS IN THE DIALOG.** The same close path runs
+when a save finally lands, which can be while somebody is typing somewhere else
+entirely — and pulling the cursor out of their field to "give it back" is
+§110.7's fault on the register, by another road.
+
+### WHAT DID NOT MOVE, AND WHY
+
+* **The refusal banner (§184) stays a banner.** Its list grows with the number
+  of rows and both buttons have to be read before either is pressed; a 460px
+  dialog is the wrong shape for it, and a decision you must take should not
+  sit where a passing notice sits. Put to Islam rather than assumed.
+* **A refusal is not a failure**, so it raises no dialog and clears any
+  standing one — the save reached the server and the server said no.
+* **Demo data keeps its banner**, because it is a standing state and not an
+  event.
+* **The chat corner's own *"We could not reach the server"* is untouched.** It
+  has the same blind spot; he named the save error, so it is recorded here
+  rather than widened quietly.
+* **Nothing about saving changed** — no data, no server, no schema, and the
+  retry behaves exactly as it did.
+
+### WHAT WAS ASKED AND IS STILL OPEN
+
+Wording **A** is his (the plain voice §230.2 settled for the boot wall). Three
+questions were put on the mockup and are built to the recommendation, each
+reversible in a line: what remains after the dialog is closed (**the card**),
+when it opens (**at once**, on his *"very critical"*), and the refusal
+(**stays a banner**).
+
+### AND A HOLE THE MOCKUP COULD NOT HAVE SHOWN
+
+Found by re-reading the diff adversarially, not by a check: **on a projector
+the CSS hides the dialog and opening it still makes the page INERT.** A save
+failing mid-presentation would therefore have frozen the deck with nothing on
+screen to say why — the worst version of §171's silence, because the platform
+would look broken rather than quiet. Nothing in the suite would have caught it:
+the state needs a save to fail WHILE somebody is presenting, and no check does
+both.
+
+`body.presenting` is now asked in JavaScript as well, and the failure is
+treated as ALREADY DISMISSED rather than skipped — so the card is drawn behind
+the deck and is simply there, saying the work did not save, the moment the
+presentation ends. Asserted in `checks/save-said.py` §4e, and the falsification
+prints the freeze itself: with the guard removed, *"the page is NOT left inert
+behind a hidden one"* goes red.
+
+### PROVED ABLE TO FAIL
+
+`checks/save-said.py`'s failure sections were **rewritten, not deleted**
+(§218) — a check left reading `#refused` for a failure would have gone green
+while asserting nothing, and this file is exactly where that happens next
+(§51.11). The trial now goes **genuinely offline** (`context.set_offline`,
+which rejects fetch AND turns `navigator.onLine` false), so the branch the
+whole section exists for is measured rather than simulated.
+
+Three falsifications, each watched to fail before the green run was believed
+(§94.5): the offline branch removed → **4 red**; a dismissal that leaves
+nothing behind → **1 red**; the dialog raised on every retry → **2 red**; and
+the projector guard removed → **3 red**.
+`save-flush` and `boot-skeleton` green; `refusal-keeps-work` fails one
+assertion — *"nothing threw"*, an unsupported MIME type for `sw.js` — and it
+**reproduces identically on the untouched build**, so it is §250.2's recorded
+stub fault and not this change (§100.3).

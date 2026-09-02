@@ -345,234 +345,15 @@ var SYNC = (function () {
     el.hidden = false;
   }
 
-  /* \u2550\u2550 A FAILED SAVE IS SAID IN THE MIDDLE OF THE PAGE (\u00a7253) \u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550
-     Islam, from the running platform: *"this comes when I get offline, the
-     error should be honest telling me that I'm offline once I get offline to
-     make sure that the error is clear."* Then, of the shape: *"make it a pop
-     up not a top page error"*, and *"I want the location to be in the middle
-     of the page like the error popup. it's very critical."*
-
-     THREE THINGS WERE WRONG WITH THE SENTENCE AND ONLY ONE WAS THE WORDING.
-     \u00a7171 built one branch for a fetch that rejects and printed the BROWSER's
-     own words in it \u2014 `Failed to fetch`, which is not a status anybody can
-     act on and names nothing \u2014 while the platform can simply ask whether
-     there is a connection at all. It talked about the server, which is
-     working perfectly. And its advice was BACKWARDS: it said reload, and
-     reloading while offline is the one act that throws the work away
-     (`lastSaved` and the graph live in the tab; \u00a7170's retry runs for as long
-     as the tab stays open and no longer).
-
-     `navigator.onLine === false` IS THE ONLY THING IT IS ASKED, and the test
-     is written that way round on purpose: the browser answers TRUE whenever
-     an interface is up, which says nothing about whether our server can be
-     reached \u2014 so a false claim of "you are offline" is impossible, and
-     everything else falls to the sentence that does not claim to know.
-
-     THE DIALOG IS THE PLATFORM'S OWN and never a centred version of something
-     new, but it needs an OVERLAY OF ITS OWN, and that is the one real cost of
-     the middle of the page: `openModalHtml()` reuses THE overlay \u2014 one
-     element whose body it overwrites \u2014 so raising this in it while somebody
-     is halfway through the person dialog or the merge wizard would destroy
-     the dialog they were working in (\u00a7116.6 from the other side). Its own
-     element, above the shared one, and the page is released only if this was
-     what inerted it.
-
-     IT CAN BE CLOSED, AND CLOSING IT IS NOT SILENCE. Being offline lasts as
-     long as it lasts \u2014 a tunnel, a lift, hotel wifi \u2014 and the work is safe on
-     screen and typing more of it is safe too, so a dialog nobody could
-     dismiss would cost real work to say something the screen has already
-     said. What must not happen is the screen going quiet while the work is
-     still unstored, which is \u00a7171's whole reason for existing: the corner
-     card stays until the save lands.
-
-     RAISED ONCE PER EPISODE, not once per attempt. \u00a7170's retry fires every
-     five seconds, and a dialog that came back each time would make closing it
-     meaningless. A DIFFERENT kind of failure earns a new one, because it is a
-     different errand. */
-  var FAIL = (function () {
-    var kind = null, detail = "", dismissed = false, returnTo = null,
-        inerted = false;
-
-    /* One place, so the dialog and the card can never disagree about what
-       happened (\u00a753.5). The card is the short form of the same sentence, not
-       a second message. */
-    function words(k, d) {
-      if (k === "offline") return {
-        title: "You are offline",
-        body: "<p>Your work is safe on screen. It will save by itself the " +
-              "moment you are back online.</p>" +
-              "<p><strong>Do not reload while you are offline.</strong></p>",
-        wait: "Waiting to reconnect \u2014 checking every few seconds",
-        card: "<b>You are offline \u2014 not saved yet.</b>" +
-              "<p>Your work is safe on screen. It will save by itself the " +
-              "moment you are back online. Do not reload while you are " +
-              "offline.</p>"
-      };
-      if (k === "server") return {
-        title: "Not saved \u2014 the server answered HTTP " + esc(d),
-        body: "<p>Your change is still on screen and the platform keeps " +
-              "trying.</p>" +
-              "<p>If it does not clear, tell the Strategy Office that " +
-              "number.</p>",
-        wait: "Trying again \u2014 every few seconds",
-        card: "<b>Not saved \u2014 the server answered HTTP " + esc(d) +
-              ".</b><p>Your change is still on screen and the platform keeps " +
-              "trying.</p>"
-      };
-      return {
-        title: "Not saved \u2014 the server did not answer",
-        body: "<p>You are online, so this is the platform and not your " +
-              "connection. Your change is still on screen and it keeps " +
-              "trying.</p>",
-        wait: "Trying again \u2014 every few seconds",
-        card: "<b>Not saved \u2014 the server did not answer.</b>" +
-              "<p>Your change is still on screen and the platform keeps " +
-              "trying.</p>"
-      };
-    }
-
-    function onKey(e) {
-      /* Capture, and it stops there: Escape must close THIS dialog and not
-         also the one it may be standing in front of. */
-      if (e.key === "Escape") { e.stopPropagation(); dismiss(); }
-    }
-
-    function shut() {
-      var d = document.getElementById("savealert");
-      /* RESTORE FOCUS ONLY IF FOCUS IS IN HERE. This also runs when a save
-         finally lands, which can be while somebody is typing somewhere else
-         entirely \u2014 and pulling the cursor out of their field to "give it
-         back" is the fault \u00a7110.7 records about the register. */
-      var inside = !!(d && d.contains(document.activeElement));
-      if (d) d.remove();
-      if (inerted) {
-        var w = document.getElementById("mainwrap");
-        if (w) { w.inert = false; w.removeAttribute("aria-hidden"); }
-        inerted = false;
-      }
-      document.removeEventListener("keydown", onKey, true);
-      if (inside && returnTo && document.contains(returnTo)) {
-        try { returnTo.focus(); } catch (e) {}
-      }
-      returnTo = null;
-    }
-
-    function dismiss() { dismissed = true; shut(); drawCard(words(kind, detail)); }
-
-    function open(w) {
-      var d = document.getElementById("savealert"), fresh = false;
-      if (!d) {
-        fresh = true;
-        d = document.createElement("div");
-        d.id = "savealert";
-        d.className = "overlay on savealert";
-        d.setAttribute("role", "alertdialog");
-        d.setAttribute("aria-modal", "true");
-        d.setAttribute("aria-labelledby", "savealert-t");
-        returnTo = document.activeElement;
-        document.body.appendChild(d);
-        /* ONLY IF IT WAS NOT ALREADY INERT. A shared dialog open behind this
-           one has already done it and is entitled to undo it. */
-        var wr = document.getElementById("mainwrap");
-        if (wr && !wr.inert) {
-          wr.inert = true; wr.setAttribute("aria-hidden", "true");
-          inerted = true;
-        }
-        document.addEventListener("keydown", onKey, true);
-      }
-      d.innerHTML =
-        '<div class="modal">' +
-          '<div class="modal-h">' +
-            '<div><h3 id="savealert-t">' + w.title + "</h3></div>" +
-            '<button class="modal-x" type="button" data-savealert-x ' +
-              'aria-label="Close">\u00d7</button>' +
-          "</div>" +
-          '<div class="modal-b">' + w.body +
-            '<div class="savealert-wait"><span class="savealert-dot"></span>' +
-              w.wait + "</div>" +
-            '<div class="savealert-foot">' +
-              '<button class="editbtn" type="button" data-savealert-ok>' +
-                "Keep working</button>" +
-            "</div>" +
-          "</div>" +
-        "</div>";
-      d.querySelector("[data-savealert-x]").addEventListener("click", dismiss);
-      d.querySelector("[data-savealert-ok]").addEventListener("click", dismiss);
-      /* Focus moves on the way IN and never on a redraw: the words can change
-         under somebody reading them (a 500 following a dropped connection),
-         and moving the cursor for that would be a second interruption. */
-      if (fresh) { try { d.querySelector("[data-savealert-ok]").focus(); } catch (e) {} }
-    }
-
-    function drawCard(w) {
-      var c = document.getElementById("savecard");
-      if (!c) {
-        c = document.createElement("div");
-        c.id = "savecard";
-        c.className = "savecard";
-        /* Polite, not assertive: the dialog has already interrupted once and
-           this is what is LEFT of it. */
-        c.setAttribute("role", "status");
-        document.body.appendChild(c);
-      }
-      c.innerHTML = w.card;
-    }
-
-    function dropCard() {
-      var c = document.getElementById("savecard");
-      if (c) c.remove();
-    }
-
-    return {
-      show: function (k, d) {
-        d = d == null ? "" : String(d);
-        /* A DIFFERENT FAILURE IS A DIFFERENT ERRAND, so it earns a dialog of
-           its own even if the last one was dismissed. The same one repeating
-           every five seconds does not. */
-        if (k !== kind) dismissed = false;
-        kind = k; detail = d;
-        var w = words(kind, detail);
-        /* ── AND A PROJECTOR NEVER GETS THE DIALOG (§253) ─────────────
-           The CSS drops both of these while presenting, the way the chat
-           corner already leaves — but hiding this one is NOT enough, and
-           that is the whole reason this test is here as well: opening it
-           also makes the page INERT, so a save failing mid-presentation
-           would freeze the deck with nothing on screen to say why. Found by
-           re-reading the diff, not by a check: the state needs a save to fail
-           while somebody is presenting, and nothing in the suite presents and
-           fails at once.
-
-           It is treated as ALREADY DISMISSED rather than skipped, so the card
-           is drawn behind the deck and is simply there — saying the work did
-           not save — the moment the presentation ends. */
-        if (document.body.classList.contains("presenting")) {
-          dismissed = true;
-          shut();
-          drawCard(w);
-          return;
-        }
-        if (dismissed) { drawCard(w); return; }
-        /* ONE BOX, ONE SOURCE (\u00a7231): the card is what the dialog leaves
-           behind, never what stands beside it. */
-        dropCard();
-        open(w);
-      },
-      clear: function () {
-        if (!kind && !document.getElementById("savealert") &&
-            !document.getElementById("savecard")) return;
-        kind = null; detail = ""; dismissed = false;
-        shut();
-        dropCard();
-      },
-      /* For the check, and for anybody debugging a deployment from the
-         console: what the platform currently believes about the last save. */
-      state: function () {
-        return { kind: kind, dismissed: dismissed,
-                 dialog: !!document.getElementById("savealert"),
-                 card: !!document.getElementById("savecard") };
-      }
-    };
-  })();
+  /* WHY IT DID NOT GO, in the words that name where to look. The status is
+     shown deliberately: a number is not jargon to the one person who can act
+     on it, and without it every failure reads the same. */
+  function showFailed(why) {
+    notSaved("<span><strong>Not saved.</strong> " + esc(why) + "</span>" +
+      "<span>Your change is still on screen and the platform keeps trying. " +
+      "If it does not clear, reload before typing anything else \u2014 what is " +
+      "on screen has not reached the database.</span>");
+  }
 
   function showDemoBlocked() {
     notSaved("<span><strong>Not saved \u2014 this is demo data.</strong></span>" +
@@ -831,11 +612,6 @@ var SYNC = (function () {
       if (r.status === 401) { location.replace("/"); return; }
       if (r.status === 403) {
         refusedBody = now; refusedAs = actingAs();
-        /* A refusal is not a failure and must not be reported as one: the
-           save reached the server and the server said no. Anything standing
-           from an earlier failure goes, or the screen carries two accounts of
-           the same post. */
-        FAIL.clear();
         say("refused");
         return r.json().then(function (j) {
           if (j && j.mustChange) { location.replace("/"); return; }
@@ -856,10 +632,6 @@ var SYNC = (function () {
         refusedWhy = null; refusedRows = null; refusedUndoable = false;
         refusedJudged = null;
         showRefusal(null);
-        /* THE WARNING GOES WITH ITS CAUSE (§35). One landed save takes the
-           dialog AND the card, so coming back online clears the screen inside
-           one retry with nothing to press. */
-        FAIL.clear();
         lastSaved = now;
         /* A person created in the register does not exist to the SERVER until
            this save lands — and credentials are keyed on people, so until then
@@ -880,18 +652,16 @@ var SYNC = (function () {
       }
       else {
         say("failed");
-        FAIL.show("server", r.status);
+        showFailed("The server answered HTTP " + r.status + ".");
         console.warn("SMP: save failed (HTTP " + r.status + ")");
       }
     }).catch(function (e) {
       saving = false;
       say("failed");
       /* A fetch that rejects is the network, not the server — a different
-         errand, so a different sentence — and the browser can say WHICH: with
-         no connection at all this is not about the server, and saying so is
-         the whole of §253. The browser's own words go to the console, where
-         the one person who can act on them looks (§123). */
-      FAIL.show(navigator.onLine === false ? "offline" : "unreached");
+         errand, so a different sentence. */
+      showFailed("The platform could not reach the server (" +
+                 (e && e.message ? e.message : "no answer") + ").");
       console.warn("SMP: save failed (" + (e && e.message) + ")");
     });
   }

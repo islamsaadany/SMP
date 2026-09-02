@@ -403,39 +403,6 @@ function compileCell(c){
   return noteSpan(c, note, c === "Latest" ? "cdefault" : "");
 }
 
-/* ── A REPORTED NOTE IS NAMED AS ONE (§255) ───────────────────────────────
-   Islam, from his own Performance page: *"the perofmrance is showing hte
-   notes under the tactic name. what is this issue?"* — and, correcting the
-   first reading, *"notes is not in the desciption, notes is something
-   relevant to the reporting and appears in performance as a separate
-   element."*
-
-   NEITHER PLACEMENT WAS A MISTAKE. §239.2 put the reporter's note under the
-   name ("costing no width") and §248 later put the plan's DESCRIPTION in the
-   same cell. Both were right on their own; what nobody asked is what they do
-   to each other. Both were drawn as `.why` — 12px, `--ink-3` — so a
-   permanent statement and a this-cycle statement rendered identically, one
-   under the other, with nothing saying which is which. §248's own comment
-   beside that line saw the risk ("two greys at one weight run together as a
-   single block") and answered it only for the NAME, by bolding it.
-
-   ONE BUILDER, ASKED BY BOTH TABLES ON THE PAGE (§53.5). A note labelled in
-   the tactics table and unlabelled in the key measures table directly above
-   it is the drift, and the measures cell stacks the same two greys the
-   moment a measure carries a horizon ("measured at Q4 2026") as well as a
-   note — nought in the demo today, so it is latent rather than absent.
-
-   THE RULE IS `--line`, NEVER THE ACCENT: this page already spends its gold
-   on Report and the scoring colours (§41's budget). And the key carries NO
-   opacity — the mockup's `.85` took `--ink-3` from 5.1:1 to about 4.4 at
-   10px, which is §38.5 walked into while quoting it. */
-function repNote(row){
-  return row && row.note
-    ? '<span class="repnote"><span class="repkey">Reported</span>' +
-      esc(row.note) + '</span>'
-    : '';
-}
-
 /* Measure name reads left; every figure centres under its column. Progress
    carries the band colour, since it is the row's conclusion. */
 function measureRows(ms, opts){
@@ -455,13 +422,8 @@ function measureRows(ms, opts){
                (on ? handle("Reorder " + m.name) : '') +
                '<span class="idx-n">' + (i+1) + '</span></td><td>' + esc(m.name) + hidChip(m) + fmark(m.id) +
                (m.horizon ? '<span class="why">measured at ' + esc(m.horizon) + '</span>' : '') +
-               /* THE MERGE NEEDED BOTH SIDES, and git could not know it: this
-                  branch names the reported note (§255) and main reads the
-                  target at its own scale (§254's `tgtShown`). Taking either
-                  alone loses a shipped feature silently — §56.7's rule, with
-                  the conflict marker doing its job for once. */
-               repNote(m) +
-               '</td><td class="num">' + dirCell(m.dir) + '</td><td class="num">' + tgtShown(m.target) +
+               (m.note ? '<span class="why">' + esc(m.note) + '</span>' : '') +
+               '</td><td class="num">' + dirCell(m.dir) + '</td><td class="num">' + esc(m.target) +
                '</td><td class="cc">' + compileCell(m.compile) + '</td>';
     if (opts.unscored) return head + '</tr>';
     /* §239 + §243: main's benchmark rides inside the figure's cell, and this
@@ -717,10 +679,7 @@ function tacticRows(ts, unitKey){
       '<span class="idx-n">' + (i+1) + '</span></td><td><b class="tacname">' +
       esc(t.name) + '</b>' + hidChip(t) +
       (t.description ? '<span class="why">' + esc(t.description) + '</span>' : '') +
-      /* §255: the description stays a plain grey — it is the plan's, and the
-         name above it is what it belongs to. The NOTE is the one line in this
-         cell that was written this cycle, so it is the one that says so. */
-      repNote(t) + '</td>' +
+      (t.note ? '<span class="why">' + esc(t.note) + '</span>' : '') + '</td>' +
       '<td>' + outcomeCell(t) + '</td>' +
       '<td>' + esc(t.owner) + '</td><td class="collabs">' + collabCell(t) + '</td>' +
       '<td>' + qs(t) + '</td><td class="cc">' + status + '</td>' + tail + '</tr>';
@@ -1396,7 +1355,7 @@ function unitCards(keys){
     var pd = miniTable(["Key objective","Direction","Target","H1 actual","Progress"],
       u.keyObjectives.map(function(m){
         return '<tr><td>' + esc(m.name) + '</td><td class="num">' + dirCell(m.dir) + '</td>' +
-          '<td class="num">' + tgtShown(m.target) + '</td><td class="num">' + figShown(m) +
+          '<td class="num">' + esc(m.target) + '</td><td class="num">' + figShown(m) +
           '</td><td class="num">' + m.progress + '%</td></tr>';
       }).join("")) +
       '<p class="sub">Headline: <b>' + unitObjectives(u) + '%</b> &mdash; ' + (KO_WEIGHTS[u.ukey] ? 'weighted' : 'equal weight') + ' across its Key Objectives. Contributes at <b>' +
@@ -1534,7 +1493,7 @@ function renderGroupPerformance(){
   var koDrill = miniTable(["Objective","Direction","Target","Compile","H1 actual","Progress"],
     GROUP.keyObjectives.map(function(m){
       return '<tr><td>' + (m.group ? esc(m.group) + " &mdash; " : "") + esc(m.name) + '</td>' +
-        '<td class="num">' + dirCell(m.dir) + '</td><td class="num">' + tgtShown(m.target) + '</td>' +
+        '<td class="num">' + dirCell(m.dir) + '</td><td class="num">' + esc(m.target) + '</td>' +
         '<td>' + compileCell(m.compile) + '</td><td class="num">' + figShown(m) + '</td>' +
         '<td class="num">' + m.progress + '%</td></tr>';
     }).join("")) +
@@ -1615,7 +1574,7 @@ function renderGroupPerformance(){
             c.keyObjectives.map(function(m, i){
               return '<tr><td class="idx">' + (i+1) + '</td><td>' + esc(m.name) + '</td>' +
                 '<td class="num">' + dirCell(m.dir) + '</td>' +
-                '<td class="num">' + (m.target ? tgtShown(m.target) : '<span class="missing">Missing</span>') + '</td>' +
+                '<td class="num">' + (m.target ? esc(m.target) : '<span class="missing">Missing</span>') + '</td>' +
                 '<td class="num">' + figShown(m) + '</td>' +
                 '<td class="num final" style="color:' + bandInk(m.progress) + '">' + pct(m.progress) + '</td></tr>';
             }).join("")) +
@@ -1875,7 +1834,7 @@ function renderTemple(){
 
   var cell = function(m){
     return '<div class="ns-item"><span class="ns-label">' + esc(m.name) + '</span>' +
-           '<span class="ns-target">' + (m.target ? tgtShown(m.target) : '<span class="missing">Missing</span>') + '</span>' +
+           '<span class="ns-target">' + (m.target ? esc(m.target) : '<span class="missing">Missing</span>') + '</span>' +
            /* A SENTENCE, NOT A COLUMN (§149, §99.8's rule). The hover words
               belong on the table cells somebody runs an eye down; this line
               already reads "≥ · latest" as prose, and half of it wearing a
@@ -2037,7 +1996,7 @@ function renderUnitPerformance(u){
         var w = ws ? Math.round(ws[i] * 10) / 10 : null;
         return '<tr' + (isFocus(m.id) ? ' class="focusrow"' : '') + '><td class="idx">' + (i+1) + '</td>' +
           '<td>' + esc(m.name) + fmark(m.id) + '</td>' +
-          '<td class="num">' + dirCell(m.dir) + '</td><td class="num">' + tgtShown(m.target) + '</td>' +
+          '<td class="num">' + dirCell(m.dir) + '</td><td class="num">' + esc(m.target) + '</td>' +
           '<td class="num">' + figShown(m) + '</td>' +
           '<td class="num final" style="color:' + bandInk(m.progress) + '">' + pct(m.progress) + '</td>' +
           (ws ? '<td class="num">' + w + '%</td><td class="num">' +
@@ -3367,8 +3326,8 @@ function koView(list, isGroup, acKey){
       return '<div class="orow' + (near ? '' : ' one') +
         (SMPRules.isHidden(m) ? ' hiddenrow' : '') + '"><span class="on">' + esc(m.name) +
         hidChip(m) + chips(m) + '</span>' +
-        '<span class="ot h">' + (m.target3y ? tgtShown(m.target3y) : miss) + '</span>' +
-        (near ? '<span class="ot">' + (m.target ? tgtShown(m.target) : miss) + '</span>' : '') + '</div>';
+        '<span class="ot h">' + (m.target3y ? esc(m.target3y) : miss) + '</span>' +
+        (near ? '<span class="ot">' + (m.target ? esc(m.target) : miss) + '</span>' : '') + '</div>';
     }).join("");
 }
 /* The far column says WHICH year when the tenant has set one — "By 2028" reads
@@ -3828,15 +3787,8 @@ function renderReport(u){
     var oc  = isT ? outcomeOf(x.obj) : null;
     var fld = oc ? "outActual" : "actual";
     var unit = oc ? splitTarget(oc.target).unit : (isT ? "%" : splitTarget(x.obj.target).unit);
-    /* §254.1: THE BOX IS FILLED FROM THE HEALED VALUE. Islam chose to heal a
-       doubled unit "on reporting and save", so what the reporter sees is the
-       number without the repetition — and because the box holds the number
-       alone and the unit is rejoined on save, touching the row writes the
-       clean string back. A row nobody re-enters keeps its stored spelling,
-       which was stated and accepted. */
     var cur = x.obj[fld], has = cur != null && cur !== "";
-    var heal = has ? unitTight(cur) : cur;
-    var shown = !has ? "" : ((isT && !oc) ? String(cur) : splitTarget(heal).value || String(heal));
+    var shown = !has ? "" : ((isT && !oc) ? String(cur) : splitTarget(cur).value || String(cur));
     /* Per ROW, not per page. A contributor is limited to the lines they are
        named on (spec 006 §7.2); a figure with a SOURCE is entered by that
        source and by nobody in the unit (§16.7). Both are refused by the
@@ -3844,7 +3796,7 @@ function renderReport(u){
     if (!canEnterFigure(u.ukey, x)) {
       var src = srcOf(x), lab = src ? srcLabel(x) : "";
       return '<span class="mono' + (src ? " sourced" : "") + '">' +
-        (has ? esc(unitTight(cur)) + ((isT && !oc) ? "%" : "") : "\u2014") + '</span>' +
+        (has ? esc(cur) + ((isT && !oc) ? "%" : "") : "\u2014") + '</span>' +
         (src ? ' <span class="srcby" title="Set by ' + esc(lab) + '">' + esc(lab) + '</span>' : '');
     }
     return '<span class="entry' + (has ? " filled" : "") + '">' +
@@ -3879,7 +3831,7 @@ function renderReport(u){
         '<td class="idx">' + (i+1) + '</td>' +
         '<td>' + esc(x.obj.name) + fmark(x.id) + '</td>' +
         '<td class="num">' + esc(x.obj.dir) + '</td>' +
-        '<td class="num">' + (x.obj.target ? tgtShown(x.obj.target) : '<span class="missing">Missing</span>') + '</td>' +
+        '<td class="num">' + (x.obj.target ? esc(x.obj.target) : '<span class="missing">Missing</span>') + '</td>' +
         '<td class="cc">' + entry(x) + '</td>' +
         '<td class="notecol">' + noteCell(x) + '</td></tr>';
     }).join(""));
@@ -3911,7 +3863,7 @@ function renderReport(u){
               '<td class="idx">' + (i+1) + '</td>' +
               '<td>' + esc(x.obj.name) + fmark(x.id) + '</td>' +
               '<td class="num">' + esc(x.obj.dir) + '</td>' +
-              '<td class="num">' + (x.obj.target ? tgtShown(x.obj.target) : '<span class="missing">Missing</span>') + '</td>' +
+              '<td class="num">' + (x.obj.target ? esc(x.obj.target) : '<span class="missing">Missing</span>') + '</td>' +
               '<td class="cc">' + entry(x) + '</td>' +
               '<td class="notecol">' + noteCell(x) + '</td></tr>';
           }).join(""))
@@ -4557,7 +4509,7 @@ function capKOTable(c){
           (m.note ? '<span class="why">' + esc(m.note) + '</span>' : '') + '</td>' +
           '<td class="cc">' + (m.weight == null ? "&mdash;" : m.weight + "%") + '</td>' +
           '<td class="cc">' + dirCell(m.dir) + '</td>' +
-          '<td class="num">' + (m.target ? tgtShown(m.target) : '<span class="missing">Missing</span>') + '</td>' +
+          '<td class="num">' + (m.target ? esc(m.target) : '<span class="missing">Missing</span>') + '</td>' +
           '<td class="num">' + (m.actual == null || m.actual === "" ? "&mdash;" : figShown(m)) + '</td>' +
           '<td class="num final" style="color:' + bandInk(m.progress) + '">' + pct(m.progress) + '</td></tr>';
       }).join(""));
@@ -5196,7 +5148,7 @@ function capReportBody(c){
   var kRows = c.keyObjectives.map(function(m, i){
     return '<tr><td class="idx">' + (i+1) + '</td><td>' + esc(m.name) + '</td>' +
       '<td class="cc">' + dirCell(m.dir) + '</td>' +
-      '<td class="num">' + (m.target ? tgtShown(m.target) : '<span class="missing">Missing</span>') + '</td>' +
+      '<td class="num">' + (m.target ? esc(m.target) : '<span class="missing">Missing</span>') + '</td>' +
       '<td class="cc">' + capEntryBox(m, splitTarget(String(m.target)).unit, may, m.name) + '</td>' +
       '<td class="notecol">' + capNoteBox(m, may) + '</td></tr>';
   }).join("");
@@ -5473,7 +5425,7 @@ function unitPlanBody(it, u, railed){
 
          THE PEN ONLY, exactly as on a key objective: a unit is not a gap, so
          it does not go through gapCell and does not join the count. The
-         READING table (measureRows) is untouched — it prints `tgtShown(m.target)`,
+         READING table (measureRows) is untouched — it prints `esc(m.target)`,
          the whole string, which is where §199.4 put the unit back. */
       /* \u00a7250: ALWAYS DRAWN. This is the table Islam was looking at \u2014 two of
          his four measures had no target yet, so the only two rows that needed
@@ -5996,100 +5948,8 @@ function renderFnFoundation(fnKey){
    a unit reported is ever out of reach — and the decision about WHETHER to
    shorten is made once, in `figureScaled()`, rather than at nine call sites
    that would drift (§53.5). */
-/* ── A SCALED CURRENCY IS ONE TOKEN WHEREVER IT IS DRAWN (§254) ────────
-   Islam, of the review deck: *"the number should be written 8M EGP the M is
-   besie the number and this applies to the financial numbers in general like
-   K EGP. or M USD etc."*
-
-   THE CONVENTION ALREADY EXISTS AND WAS ONLY EVER APPLIED ON THE WAY IN.
-   `TIGHT_UNITS` is what the unit picker writes with (§239.5: `6.2M USD`, like
-   `6.2B EGP`), so anything set through the platform is already tight. What was
-   never tightened is a value that ARRIVED with a space — typed, uploaded, or
-   written before the convention existed — because §96.2's rule is never to
-   rewrite what somebody wrote.
-
-   THAT RULE IS ABOUT WHAT IS STORED, AND IT STANDS. This is display only:
-   nothing is written back, the workbook still carries the spelling it was
-   given, and a value typed as `8 M EGP` is stored as `8 M EGP` for ever. What
-   changes is that a projector never shows two spellings of one unit in one
-   column.
-
-   THE TEST IS A MAGNITUDE LETTER, NOT A LIST (§53.5's other half: a list is
-   what somebody forgets to add to, and Islam has just named `K EGP`, which the
-   picker does not offer). `K`, `M` or `B` followed by a space and a currency is
-   a scaled currency whatever the currency is, so a tenant on rupees reads
-   right on the day it arrives.
-
-   AND A UNIT WRITTEN TWICE IS COLLAPSED IN THE SAME PASS (§254.1). Islam:
-   *"8MEGP is again is showing a gltich."* Nothing doubles it now — every
-   combination through `joinTarget` produces one unit — but a value stored
-   doubled before that fix stays so until it is re-entered, which §239.6
-   recorded at the time as the case it could not reach. The pair is collapsed
-   only where the two halves are IDENTICAL: `M EGP M EGP` is a repetition,
-   `M EGP B EGP` is somebody's typing and is left exactly as it is (§96.2). */
-function unitTight(v){
-  var s = String(v == null ? "" : v).trim();
-  if (!s) return s;
-  var sp = splitTarget(s);
-  if (!sp.unit) return s;
-  var u = sp.unit;
-  /* ── A UNIT WRITTEN TWICE, WITH OR WITHOUT A GAP (§254.7) ───────────
-     Islam, of a per-cent row: *"same error of duplicated unit despite being
-     reported correctly in the reporting."* His stored figure is `40 %%` — the
-     same residue as `8 M EGP M EGP`, and §254.1's collapse could not see it,
-     because it split the unit on WHITESPACE and `%%` is one word. A rule that
-     only catches the spaced spelling catches half the fault.
-
-     THE HALVES MUST BE A UNIT THE PLATFORM KNOWS, and that guard is the whole
-     safety of it: `^(.+?)\s*\1$` alone reads `mm` as a doubled `m` and would
-     silently turn five millimetres into five metres. Only a repetition of
-     something on the offered list — or of a scaled currency, which is the one
-     shape the list deliberately does not enumerate — collapses. */
-  var rep = u.match(/^(.+?)\s*\1$/);
-  if (rep && (TARGET_UNITS.indexOf(rep[1]) > -1 || /^[KMB]\s+\S+$/.test(rep[1])))
-    u = rep[1];
-  /* THE UNIT IS NEVER TOUCHED — only the gap between it and the number.
-     The first draft closed the space INSIDE the unit and produced `8MEGP`,
-     which is a fourth spelling rather than the one Islam asked for. The check
-     caught it, and the lesson is that "tight" is a fact about the SEPARATOR.
-
-     A recognised scaled form is `K`, `M` or `B` and exactly one more word, so
-     `K EGP` reads tight the day a tenant types it even though the picker does
-     not offer it — while `M EGP B EGP`, which is somebody's typing rather than
-     a unit, keeps its space and is left alone (§96.2). */
-  /* ── AND IT NEVER ADDS A SEPARATOR THAT WAS NOT THERE (§254.7) ──────
-     §254.1 rebuilt the string with a space for anything it did not recognise,
-     so `40%%` came out as `40 %%` — a value made WORSE by the function that
-     exists to tidy it. This reads a figure; it does not get to rewrite the
-     spelling of a unit it does not know. The gap it puts back is the gap it
-     found, and the only thing it ever does on its own is CLOSE one. */
-  var gap = /^-?[\d.,]+\s/.test(s) ? " " : "";
-  var scaled = TIGHT_UNITS[u] || /^[KMB]\s+\S+$/.test(u);
-  return sp.value + (scaled ? "" : gap) + u;
-}
-/* A target as it should be READ. Every read-only cell that prints a target
-   goes through this, or the deck and the page behind it spell one unit two
-   ways (§53.5). An editable field is untouched: what somebody is correcting
-   must be what they typed. */
-function tgtShown(v){ return esc(unitTight(v)); }
-
-/* ── WHAT A FIGURE IS MEASURED AGAINST, BESIDE IT (§254) ───────────────
-   Islam, of the deck's key measures: *"the actual should show the proration
-   like the performance"*, and of the objectives: *"key objectives actual
-   should show the proration as well."*
-
-   His row read `6#` against `4#` at 133% and nothing on the slide said why.
-   The missing number is the one Performance has shown since §239.2 and the
-   deck never did: what is due SO FAR. It is already computed — nothing new is
-   worked out here — and the shape is the one the tactics table has worn since
-   §252, so the deck gains no new vocabulary. */
-function figVsDue(m, share){
-  var due = measureDueLabel(m, share);
-  return figShown(m) + (due ? ' <i class="duehalf">/ ' + tgtShown(due) + '</i>' : '');
-}
-
 function figShown(m){
-  var s = unitTight(figureScaled(m.target, m.actual)), full = figureFull(m.target, m.actual);
+  var s = figureScaled(m.target, m.actual), full = figureFull(m.target, m.actual);
   return full ? '<span title="' + esc(full) + '">' + esc(s) + '</span>' : esc(s);
 }
 function koReadBlock(list, emptyLine){
@@ -6117,7 +5977,7 @@ function koReadBlock(list, emptyLine){
           (SMPRules.isHidden(m) ? ' hiddenrow' : '') +
           '"><span class="on">' + esc(m.name) + hidChip(m) +
           '</span>' +
-        '<span class="ot">' + (m.target ? tgtShown(m.target) : '&mdash;') +
+        '<span class="ot">' + (m.target ? esc(m.target) : '&mdash;') +
           '</span>' +
         (wtd ? '<span class="ot h">' + (m.weight == null ? "&mdash;" : m.weight + "%") +
           '</span>' : '') + '</div>';

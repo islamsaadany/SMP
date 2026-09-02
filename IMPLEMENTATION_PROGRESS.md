@@ -6,8 +6,9 @@ version (rules A2 / A11, changed 2026-08-20) — those go only when asked for.
 
 **Where it runs:** Vercel, production tracks `main`. Static files plus two
 serverless functions (`/api/state`, `/api/auth`) against Neon Postgres.
-**Latest version:** §250 on `main` (a tactic's outcome measured against its
-own window); §254 on this branch (a figure is read against what it is measured by).
+**Latest version:** §256 on `main` (§253–§256: the deck round, a reported note,
+and a slide the office does not present — §255 and §256 from another session);
+§254.7–.12 on this branch, going to `main` with this merge.
 
 *(This line read v3.58 while the section below it ran to v3.65: a documentation
 drift, flagged before it was corrected rather than quietly realigned.)*
@@ -78,6 +79,31 @@ Nothing proceeds past this line without an answer.
   is a true signal — do not silence it.
 
 ## Built and verified
+
+### §254.7–.12 — the deck round, finished (2026-09-02, same branch)
+
+Four more from the running deck, on top of the eight before them.
+
+- **§254.7** — a unit written twice *with or without a gap*. His `40 %%`
+  survived §254.1's collapse, which split the unit on whitespace. **And it
+  caught a regression of my own**: §254.1 added a space to any unit it did not
+  recognise, so `40%%` became `40 %%` — made worse by the tidier.
+- **§254.8 / §254.12** — the pillar cards size themselves AND fill the slide
+  rather than one row of it. Up to three in a row, above that `ceil(sqrt(n))`,
+  so *"4 can form a box"* is 2×2 and five goes 264px → 445px. Vertical sizes
+  follow the rows, horizontal ones the columns; swept 1 to 10, nothing
+  overflows.
+- **§254.9** — the aspiration runs the width, *This year* comes first, and the
+  objectives table grows. **10 of 10 aim slides were on the generic 19px floor;
+  none are now.**
+- **§254.10 / .11** — two numbers not four, with the reading put back before it
+  was obeyed; the sentence explaining Execution stays.
+
+**Verified:** `deck-figures` **11 red** on the build before; that check plus
+`deck-blank-slides`, `notes-slide`, `slide-move`, `deck-outcome`,
+`deck-and-weights`, `ytd-proration`, `tactic-proration`, `table-fit`,
+`submit-gate` green, **and main's own three new checks** (`hide-slide` 42/0,
+`reported-note` 0 failed, `hide-slide-mockup`) green on the merged build.
 
 ### §254 — a figure is read against what it is measured by (2026-09-02, same branch)
 

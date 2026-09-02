@@ -365,6 +365,43 @@ console errors (in this cloud environment, run it via a wrapper that points Play
   `node scripts/test-door.js <smo-password>` against a running dev-server
   after touching `api/auth.js` or `lib/auth.js` (it ends by rate-limiting the
   SMO on purpose — `DELETE FROM login_attempts;` clears it).
+- **A REPORTED NOTE IS NAMED AS ONE (§255):** Islam — *"the perofmrance is
+  showing hte notes under the tactic name. what is this issue?"*, then the
+  correction that set the scope: *"notes is not in the desciption, notes is
+  something relevant to the reporting and appears in performance as a separate
+  element. so it needs to be there so we can't drop."* **NEITHER PLACEMENT WAS
+  A MISTAKE** — §239.2 put the reporter's note under the name and §248 later put
+  the plan's DESCRIPTION in the same cell; both right on their own, and both
+  drawn as `.why` (12px, `--ink-3`), so a permanent statement and a this-cycle
+  statement render identically with nothing saying which is which. §248's own
+  comment saw the risk (*"two greys at one weight run together as a single
+  block"*) and answered it **only for the NAME**, by bolding it. **THE COST
+  DECIDED IT AND WAS MEASURED BEFORE HE CHOSE** (`design-mockups/
+  tactic-note-placement/`, drawn out of the running platform with his own two
+  tactics, §41.9/§245): a Note column of its own — what the deck has always had
+  — takes the Tactic column **790 → 209px at 1920** and starts running past the
+  pane at **1280px**, an ordinary laptop, where it fits today (§158: *fit, never
+  "and it scrolls"*); naming it in place costs **no width at any width the table
+  fits today**. **A RULE, NOT A SECOND SIZE OR COLOUR**: smaller or paler would
+  rank the note UNDER the description and it is the newer of the two, so it
+  keeps `.why`'s size and ink and is set apart sideways — 2px in `--line` (never
+  the accent, §41's budget) and one uppercase key. **ONE BUILDER, BOTH TABLES ON
+  THE PAGE** (§53.5): the tactics table he reported AND the key measures table
+  above it, which stacks the same two greys the moment a row has a horizon as
+  well as a note — nought in the demo, so latent rather than absent. **AND THE
+  MOCKUP'S `.85` OPACITY WAS DROPPED IN THE BUILD** — about 4.2:1 at 10px, §38.5
+  walked into while quoting it; without it **4.95 light / 5.53 dark**, measured
+  with the sweep's own arithmetic (§95). **THE DEMO CANNOT SHOW THIS FAULT** (0
+  of 84 tactics carry a note), so the check MAKES the state, including a row
+  reporting nothing (§61). Proved able to fail: **16 red** — and **two of that
+  count were the CHECK**, both found by falsifying rather than reading:
+  `all([])` is true, so three assertions went green over an empty list
+  (§113.8), and it **died rather than reported** on an empty list index (§215),
+  printing four failures where there are sixteen. **RECORDED, NOT DONE, AND A
+  DECISION**: four other surfaces draw a note as a plain grey and none stacks a
+  second one, so none has the collision — and `capKOTable` already carries a
+  column headed *Reported*, where a key under the name would say the word twice
+  (§87's twins).
 - **A FIGURE IS READ AGAINST WHAT IT IS MEASURED BY (§254):** eight things
   Islam sent from the live deck in one afternoon, all mocked up first
   (`design-mockups/deck-review-round/`). **THE BENCHMARK, AND THE COLUMN THAT
@@ -532,6 +569,63 @@ console errors (in this cloud environment, run it via a wrapper that points Play
   `.pptx` plan download has no outcome column (its own mockup), and a deck
   already open on a projector still does not redraw mid-presentation, put to
   Islam and deliberately left.
+- **A SLIDE THE OFFICE DOES NOT PRESENT (§256):** Islam — *"allow the smo to
+  hide presentation slides of any unit or function."* §246 named this and left
+  it, with the question inside it: *which slides may be hidden, and whether
+  hiding one hides what it counts.* **IT CHANGES NO NUMBER, AND THAT IS THE
+  ANSWER** — §233 hides a ROW and takes it out of every score; this hides a
+  generated SLIDE and takes it out of **nothing** (still reported, still asked
+  for, still scored, still on the page). Two switches, two jobs: one that did
+  both would mean tidying a deck before a board meeting silently moved a unit's
+  figures. Asserted FIRST, off the platform's own functions, byte-identical
+  either side of the press. **IT LASTS** (so not in `REVIEW`, which the cycle
+  clears — §50), the cost stated before he chose and guarded by the rail always
+  saying **"N slides hidden"** with one press back. **THE OFFICE'S ALONE**, and
+  a custodian SEES the marks and the count and gets no eye — seeing a state is
+  not setting it, asserted at both ends (§94.2). **NAMED BY ITS ANCHOR, NEVER
+  BY ITS POSITION** (§48, §236.3): every generated slide has carried one since
+  the picture placer needed somewhere to land, so the nameable slides ARE the
+  deck; it rides `units[k].extra`/`functions[k].extra` (§52, §213) so **no
+  migration**, is stored as an ABSENCE (§50.6) and is **sorted**, or two
+  spellings of one fact report a change that is not one. **THE ORDER OF THE
+  PASS IS ITS CORRECTNESS** — after the pictures (a picture anchored to a
+  hidden slide is still evidence) and before the fit pass (a continuation
+  carries its parent's anchor, so removing the parent first takes a long table
+  whole). **THE EDITOR MARKS WHAT THE PROJECTOR REMOVES**, or a hidden slide
+  could never be brought back (§61). **A DECK CANNOT BE EMPTIED**, refused on
+  the PRESS rather than in the pass (§53.5) and `aria-disabled`, never
+  `disabled` (§163, §221). **Quiet, never amber** (§187). The server's
+  `deckHide` is its own kind so the refusal names Manage slides and not Setup
+  (§16.7), reads its field name from `lib/rules.js` (§234), and is deliberately
+  **not** gated on the cycle lock — pruning the deck the morning of the meeting
+  is when this is used. Drawn in the real page first (rule 1c, §41.9): Islam
+  picked the dimmed treatment; **struck-through lost because a slide's name
+  wraps and the rule runs through the gap**, and the camera found that
+  **`.sl-lab` is `-webkit-line-clamp:2`**, which ATE the first draft's tag on
+  exactly the rows whose names are longest. Proved able to fail: **33 red** on
+  the build before, five falsifications on the server.
+  **§256.1 — AND THE FIRST RUN DIED RATHER THAN REPORTING** (§215, §252 one
+  section earlier): with no `hiddenSlides` and no `deckHidePass` the first probe
+  threw and `grep -c FAIL` read ZERO, on precisely the build the file exists to
+  see. Every probe degrades now.
+  **§256.2 — TWO SESSIONS FOUND THE SAME FAULT ON THE SAME DAY, AND GIT MERGED
+  BOTH FIXES SILENTLY.** Building this found that a pillars function's Manage
+  slides assembled a deck nobody would project (measured: **editor 2 slides,
+  projector 15**) because `slidesAssemble()` asked `kind === "fn"` while Present
+  asked the FORMAT — §69.5's fault, one branch two files apart. **§253.3 had
+  already fixed it from Islam's own report of that screen**, and better: it also
+  routes `deckAnchors()`. That one stands. **The removal was not optional** —
+  both sessions wrote a function named `deckHtmlFor` in the same file four
+  hundred lines apart, and **git merged them with NO CONFLICT**: two
+  declarations of one name, the later winning by hoisting, so the product would
+  have run this branch's copy while main's sat dead under comments still
+  describing it as live (§146.2, §56.7). `node --check` passes on that file.
+  **After any merge touching a file both sides changed, grep the result for its
+  own declarations** — §147.4's precedent, same conclusion: ride main's model
+  whole rather than carry a second one. **§256.3 — A CORRECTION TO THE RECORD:**
+  this branch had named `deckAnchors()` as callerless dead code, true of the
+  build it was written against and **no longer true** — §253.3 gave it a caller
+  in the same hours.
 - **THE PLAN'S TITLES COULD NOT WRAP AT ALL (§189):** Islam — *"wrap the
   content of the plans edit boxes across pillars and functions, specially for
   the titles and descriptions."* Not a bad wrap: every title and description
@@ -4358,6 +4452,17 @@ python3 checks/deck-outcome.py  # the presentation reads what was reported (§25
                                 # 19 red against the shipped pre-§252 file, and it asks
                                 # for the two shared readers BY NAME first, or a build
                                 # without them dies and reports zero failures (§215)
+python3 checks/reported-note.py # a reported note is NAMED as one (§255): the note
+                                # keyed and the description left plain — a build that
+                                # named both closes nothing and passes every "the note
+                                # is named" assertion — the row reporting NOTHING drawing
+                                # no key, the key DRAWN rather than merely present, the
+                                # width unchanged at every width the table fits today
+                                # (the promise Islam chose this on), the contrast read
+                                # with the sweep's OWN arithmetic, and a pillars FUNCTION
+                                # asserted to use the same word. It MAKES the state: 0 of
+                                # 84 demo tactics carry a note, so every assertion here
+                                # passes on a build that lost the feature. 16 red before
 python3 checks/gap-walk.py      # the band's chips and Next gap actually go somewhere:
                                 # a unit AND a function, as the filler AND the office,
                                 # every place the band names reached (§177.2)
@@ -4447,6 +4552,15 @@ python3 checks/setup-rail.py    # the Setup rail fits the window, every entry is
 python3 checks/cycle-board.py    # every subject that reports has a row, the functions are
                                 # in ONE list under one band, and the headline counts each
                                 # exactly once (§244, §245)
+python3 checks/hide-slide.py    # the office hides a slide and the projector skips it (§256):
+                                # every headline number byte-identical either side of the
+                                # press (§246's question, answered), the eye HOVERED and
+                                # pressed, a picture anchored to a hidden slide still there,
+                                # a hidden table taking its continuations, the emptied key
+                                # DELETED, the last slide standing refused, the custodian
+                                # seeing the marks and getting no control — and the editor
+                                # and the projector proved to build ONE deck (§256.2).
+                                # 33 red on the build before; every probe degrades (§215)
 python3 checks/notes-slide.py   # the notes slide appears when somebody wrote a note — and
                                 # whitespace is not a note, on all three deck shapes (§246)
 python3 checks/setup-overview.py      # the Overview agrees with the pages it summarises; it
@@ -4556,7 +4670,66 @@ prior sessions (on HR_ERP) accidentally reverted agreed-upon designs.
 
 ---
 
-*Last Updated: 2026-09-02 &mdash; **&sect;254: a figure is read against what it
+*Last Updated: 2026-09-02 &mdash; **&sect;254.7&ndash;.12: the deck round,
+finished.** Islam's four from the running deck, on top of the eight before them.
+**&sect;254.7** &mdash; a unit written twice *with or without a gap*: his stored
+`40 %%` survived &sect;254.1's collapse, which split the unit on WHITESPACE, and
+`%%` is one word. Guarded so `mm` is not read as a doubled `m`. **And it caught a
+regression of my own**: &sect;254.1 rebuilt the string with a space for any unit
+it did not recognise, so `40%%` came out as `40 %%` &mdash; made WORSE by the
+function that exists to tidy it. It never adds a separator now; the only thing it
+does on its own is close one. **&sect;254.8 / &sect;254.12** &mdash; the pillar
+cards size themselves and fill the slide rather than one row of it: `--c` and
+`--r` carry the shape, up to three stay in a row and above that it is
+`ceil(sqrt(n))`, so **his own "4 can form a box" reads as 2&times;2**, and five
+goes 264px/27.6px &rarr; 445px/34.7px. **Flex-wrap, never a grid**, because a
+ragged last row has to be CENTRED. **The vertical sizes follow the ROWS and the
+horizontal ones the COLUMNS** &mdash; getting that wrong ran three rows 84px off
+the slide; swept 1 to 10, nothing overflows. **&sect;254.9** &mdash; the
+aspiration runs the width, *This year* comes before the horizon (header and row
+moved TOGETHER), and the table grows: **the ceiling is the fit pass, not taste**,
+because `.tight` shrinks the ASPIRATION too. Measured across all ten units:
+**10 of 10 aim slides were on the generic 19px floor and none are now.**
+**&sect;254.10** &mdash; two numbers, not four, with the reading PUT BACK before
+it was obeyed: Delivered and Planned sat in two places spelled differently, and
+the measures head had no Execution on it at all. **&sect;254.11** &mdash; the
+sentence explaining Execution stays. `checks/deck-figures.py` **11 red** on the
+build before; two of its own first failures were the CHECK (computed style does
+not resolve on a detached render, and the aim table had to be asserted across
+EVERY unit, since whether a slide tightens depends on its own prose). Three
+assertions elsewhere were REWRITTEN, not deleted (&sect;218).*
+
+*Earlier: 2026-09-02 &mdash; **&sect;255: a reported note is named as one.**
+Islam, from his own Performance page: *"the perofmrance is showing hte notes
+under the tactic name. what is this issue?"* &mdash; then, correcting the first
+reading and setting the scope with it: *"notes is not in the desciption, notes
+is something relevant to the reporting and appears in performance as a separate
+element. so it needs to be there so we can't drop."* **NEITHER PLACEMENT WAS A
+MISTAKE**: &sect;239.2 put the reporter's note under the name and &sect;248
+later put the plan's DESCRIPTION in the same cell &mdash; both right on their
+own, both drawn as `.why`, so a permanent statement and a this-cycle statement
+render identically with nothing saying which is which. &sect;248's own comment
+saw the risk in the abstract and answered it **only for the NAME**, by bolding
+it. **THE COST WAS MEASURED BEFORE HE CHOSE**, out of the running platform with
+his own two tactics in it: a Note column of its own &mdash; what the deck has
+always had &mdash; takes the Tactic column **790 &rarr; 209px at 1920** and
+starts running past the pane at **1280px**, where it fits today; naming it in
+place costs no width at any width that fits. **A RULE, NOT A SECOND SIZE OR
+COLOUR**, because smaller or paler would rank the newer fact under the older
+one. **ONE BUILDER, BOTH TABLES ON THE PAGE** (&sect;53.5) &mdash; the key
+measures table stacks the same two greys the moment a row has a horizon, nought
+in the demo and therefore latent rather than absent. **THE MOCKUP'S OWN `.85`
+OPACITY WAS DROPPED IN THE BUILD** (about 4.2:1 at 10px &mdash; &sect;38.5
+walked into while quoting it; 4.95 / 5.53 without it). **THE DEMO CANNOT SHOW
+THIS FAULT** &mdash; 0 of 84 tactics carry a note &mdash; so the check MAKES the
+state, a row reporting nothing included. **16 red** on the build before, and
+**two of that count were the CHECK**: `all([])` is true, so three assertions
+went green over an empty list (&sect;113.8), and it **died rather than
+reported** (&sect;215), printing four failures where there are sixteen.
+**RECORDED, NOT DONE**: four other surfaces draw a note as a plain grey, none
+of them stacks a second one, and `capKOTable` already has a column headed
+*Reported*.*
+*Earlier the same day: **&sect;254: a figure is read against what it
 is measured by.** Eight things Islam sent from the live deck in one afternoon,
 every one mocked up from the running deck before anything was built. **The
 benchmark and the column that names it**: his row read `6#` against `4#` at 133%

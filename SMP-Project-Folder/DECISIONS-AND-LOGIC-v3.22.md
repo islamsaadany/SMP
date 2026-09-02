@@ -27215,3 +27215,198 @@ does, and it means starting a conversation is not a quiet act.
 and the button on two lines by comparing their `top` values — two controls of
 two heights on one line have two tops (§122.4, already written down once). The
 middles are what agree, and the check asserts those.
+
+---
+
+## §248 — THE CHAT DOES NOT WAIT ON A SAVE, AND THE NOTIFICATIONS SAY WHERE THEY STOP (2026-09-02)
+
+Two reports on one morning, and they are two different faults. Islam, twice in
+two days: *"all conversations are gone!!"*, and then *"before the fix all the
+chats disappeared … We could not load the conversations. The server did not
+answer (no answer)"* — and, separately, *"the notification system is still not
+working. that needs a deep dig as we tried many things and still it's still not
+functioning."*
+
+He was right on both counts, and about the second he was right that we had been
+guessing. The whole of §248 is the consequence of stopping guessing.
+
+### §248.1 — NOTHING WAS LOST, AND ESTABLISHING THAT CAME FIRST
+
+`chat_threads`, `chat_messages`, `credentials`, `messages` and `push_*` all sit
+OUTSIDE the state graph, so the `TRUNCATE … CASCADE` a save runs across 33
+tables cannot reach them — asserted, not asserted from memory. §231.4's card
+was telling the truth to the word: *nothing has been lost — this is about the
+connection, not your conversations.*
+
+**AND THE SENTENCE UNDER IT WAS THE DIAGNOSIS.** *"No answer"* is `post()`'s own
+25-second clock giving up (`AbortError`), which is neither a crash nor a 500 —
+so the endpoint was neither down nor erroring. It was **waiting**.
+
+### THE LOCK, MEASURED ON A REAL POSTGRES
+
+A save clears and rewrites the graph with `TRUNCATE … CASCADE`, which takes an
+**ACCESS EXCLUSIVE** lock on `people` for the whole of §240's transaction — and
+§240 is what made that transaction long, because it now wraps the read, the
+authorise AND the write so two saves cannot lose each other's work. Right, and
+this is its cost. The chat's queue `LEFT JOIN`ed `people` for a live name.
+
+    a save in flight, the queue as it was  : STILL FROZEN after 8s
+    the same queue reading its stored name : 2ms
+    the messages in a conversation         : 1ms
+    the register itself                    : frozen (correctly — it is locked)
+
+**ONLY THE JOIN WAS EVER BLOCKED**, and `chat_threads` has carried
+`person_name` since §97, so the list could always have been drawn.
+
+**AND IT IS WORST EXACTLY WHEN SOMEBODY IS LOOKING.** A new build reloads every
+browser, the platform hydrates and autosaves, and Neon has usually gone to
+sleep — so the slowest save of the day lands the moment the person opens the
+corner. That is the whole of *"every time you make something new I can't find
+the chats"*: not a coincidence, and not the new thing being at fault.
+
+### THE READER IS FIXED, AND THE WRITER IS DELIBERATELY NOT
+
+`DELETE` was measured too, and it is better on every axis at this size: it does
+not block readers at all (2ms during the same save), all 14 foreign keys
+already cascade, nothing outside the wiped set points into it, and it is
+**faster** — 3ms against 72ms to clear all 33 tables.
+
+**IT IS STILL NOT DONE, and Islam is the reason it was reconsidered**: *"the
+product is already live … anything that you are proposing might cause any
+issues or loss of data or reporting issues?"* Three answers, all of them
+honest. It was verified against a database built HERE, not against production,
+and if production has drifted a `DELETE` would **fail a save** rather than
+merely be slower. It is the one file where a mistake costs real data. And
+§238 already records the write path as needing its own staged pass. *A fix for
+a chat display is not worth a risk to somebody's work* — and it turned out not
+to be needed at all, which is the better argument.
+
+**§241, merged to main the same day, converges on this from the other side**:
+with `SMP_INCREMENTAL_WRITE` on there is no full TRUNCATE, so the freeze goes
+by that route too. It is OFF by default, so it changes nothing today, and the
+two fixes are independent — neither waits on the other.
+
+### WHAT WAS ACTUALLY CHANGED
+
+The queue reads `chat_threads` ALONE and asks the register **separately**,
+allowed to fail. The office's own poll and opening a conversation are made
+survivable the same way — that poll is what keeps their corner alive, so a
+locked `people` must never be able to fail it. Under all three, a
+`lock_timeout` of 2s on the chat's connection: **a lock this endpoint cannot
+get is an error in two seconds rather than a hang until the browser gives up.**
+
+**SAFE BECAUSE THE CHAT'S TABLES ARE OUTSIDE THE GRAPH** — a chat WRITE can
+never collide with a save, so the timeout can only ever fire on a read of
+`people`, which is precisely the read that must not hang.
+
+**AND THE BACKSTOP ALONE IS NOT ENOUGH, WHICH THE RED RUN SHOWS**: with only
+the timeout, the old query still fails — it just fails faster. Both halves are
+needed and the check proves it.
+
+**THE COST IS STATED, NOT GLOSSED.** For the second or two a save is in flight,
+somebody RENAMED since they last wrote shows their previous name, and their
+title and unit are absent. It corrects itself on the next poll. **`gone` reads
+NULL rather than true** — saying somebody has left the register because the
+register could not be READ is §93's fault exactly, and the page already treats
+null as *say nothing*, so no page change was needed. *That is the design
+working rather than a happy accident.*
+
+### §248.2 — THE PUSH SERVICE'S REFUSAL NAMES ITSELF
+
+Measured against a stand-in push service, three completely different causes:
+
+    403 "VAPID credentials do not match"  ->  {sent:0, dropped:0, failed:1}
+    400 "UnauthorizedRegistration"        ->  {sent:0, dropped:0, failed:1}
+    413 "payload too large"               ->  {sent:0, dropped:0, failed:1}
+
+Three errands, one shrug — and *Test on this device* printed the same sentence
+for all three: *"The push service would not take it."* **THAT IS WHY FOUR
+ROUNDS OF FIXES CONVERGED ON NOTHING: nothing ever named one thing.** §124's
+fault at the far end of the chain (that section is presence reported as proof;
+this is failure reported without its cause, and both send somebody to look at
+everything).
+
+The service's words are carried back now — bounded, and containing no secret,
+because it is the service's answer to us and the private key never appears in
+it (§72's rule for the mailer). **The one cause worth naming in OUR words is
+the mismatched key**, because it is the one the office can act on and the one
+the service describes in terms nobody outside `lib/push.js` would recognise.
+**And the service itself is named** — Google, Apple, Mozilla — from the
+endpoint's HOST and nothing else of it, because silence on an iPhone and
+silence on a laptop are different errands (Apple will not deliver at all until
+the platform is on the home screen) and the rest of an endpoint IS the address
+of somebody's device.
+
+### §248.3 — A REGISTRATION MADE WITH A DIFFERENT KEY
+
+**THE STICKY ONE, AND IT COULD NEVER HEAL.** `pushSync` accepted any existing
+registration without looking at it. A registration is bound to the key it was
+made with — so once the platform's key changed (an environment variable added
+or removed, a key minted after a device had already subscribed), the browser
+handed the old registration back for ever: the bell read ON, the server counted
+the device, and every send was refused. **Healthy at both ends, nothing
+arriving, and nothing in the product able to notice.**
+
+It is compared now and re-made when it differs. It costs the person nothing —
+permission is already granted, so no question is asked — and the stale row is
+posted OFF as well, or the server sends to it for ever. **A browser that will
+not report its key is left exactly as it is**: churning a registration on a
+guess is worse than keeping one that is probably right (§35 — unknown is not
+*wrong*), and that is asserted.
+
+**AND THE FIRST BUILD OF IT STOPPED SUBSCRIBING ENTIRELY.** `pushSync` already
+had a `want` — the boolean deciding whether this device should be subscribed at
+all — and a second `var want` inside the same callback **hoists over it**, so
+`if (!want)` read `undefined`, took the unsubscribe branch every time, and
+nothing ever subscribed. Valid JavaScript on both sides, no error, past
+`node --check` and past the build's own parse. **§56.7's `var` collision, and
+it was found by `checks/office-chat.py` going red — not by reading the diff,
+and not by any amount of care while writing it.** The variable is `keyWanted`
+now and the comment says why.
+
+### §248.4 — THE TEST ASKS THIS BROWSER TOO
+
+It only ever asked the SERVER, and the server can only report what it HOLDS —
+so a browser registered at one address while the server sends to another read
+as **perfect health at both ends**. The two halves are compared now, in the one
+place they can be, and each way of being wrong produces its own sentence:
+blocked · not registered · registered but the server never received it ·
+registered but not the device the server is sending to · registered with a
+different key. **A tab that sends no browser half still gets a report**,
+because the diagnostic is most needed by whoever has not reloaded (§231.5).
+
+### PROVED ABLE TO FAIL, THEN PROVED
+
+- **`scripts/test-chat-during-save.js`** (NEW) holds a save open against a real
+  Postgres and asks the chat its three questions. A lock cannot be modelled by
+  a stub (§100.3), so this drives real connections. **RED on the old query**
+  (the conversation list refused), **8/8 green** on this one.
+  `SMP_CHAT_JOIN_PEOPLE=1` is **not a branch in the product** — there is no
+  such switch in `api/chat.js`; it makes the FILE ask the pre-§248 question, so
+  the red run is the shape the product actually had rather than a fiction
+  about it.
+- **`scripts/test-chat.js`** 103/0, nine new on the diagnostic. Falsified:
+  disabling the mismatch check gives **102/1**.
+- **`checks/office-chat.py`** ALL CLEAR, section 20 new (7 assertions).
+  Falsified: disabling the rekey gives **6 failures**, the last printing the
+  stale registration reaching the server — the production fault verbatim.
+  **The stand-in had to grow `options.applicationServerKey`**, which the
+  earlier one did not report: a stand-in that models less than the thing it
+  stands in for reports a working build as broken (§100.3) — and here it would
+  have reported a BROKEN build as working, which is worse.
+- `test-push` 33/0 · `test-authorize` 454/0 · `test-graph-diff` 126/0 ·
+  `test-two-tabs` 24/0 · `test-concurrent-saves` no save lost · round trip
+  PASS · `test-incremental-write` byte-identical · `qa.py` ERRORS: none ·
+  built == shipped.
+
+### WHAT IS NOT CLAIMED
+
+**That the notifications now work in production.** §248.2–4 make the chain
+SAY where it stops; they do not assert where it stops. §231's own open item
+stands — why `web-push` was once missing from the deployment was never
+established — and the first step is now one press of *Test on this device*,
+which will name the step rather than shrug. *A diagnostic is not a fix, and
+saying which it is matters.*
+
+**That the save path is safe to change.** It probably is, and it was measured,
+and it is still not done here. See above.

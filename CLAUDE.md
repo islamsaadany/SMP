@@ -384,6 +384,52 @@ console errors (in this cloud environment, run it via a wrapper that points Play
   remove × onto a second line — `inline-block` restores it, and it was found
   by `checks/plan-fields.py` GOING RED, not by reading the cascade, which is
   the argument for that check existing.
+- **THE CHAT MUST NOT WAIT ON A SAVE (§248):** Islam, twice in two days —
+  *"all conversations are gone!!"*, then *"before the fix all the chats
+  disappeared"*, with §231.4's card reading *"The server did not answer (no
+  answer)"*. **NOTHING WAS LOST AND THE CARD WAS TRUE**: the chat's tables sit
+  outside the state graph, so a save cannot reach them (asserted). *"No answer"*
+  is `post()`'s 25-second clock, so the endpoint was neither down nor erroring —
+  it was **waiting**. A save clears the graph with `TRUNCATE … CASCADE`, which
+  takes ACCESS EXCLUSIVE on `people` for the whole of §240's (correctly) long
+  transaction, and the queue `LEFT JOIN`ed `people` for a live name: **frozen at
+  8s, against 2ms reading its own stored `person_name` and 1ms for the
+  messages** — only the join was ever blocked. **Worst exactly when somebody is
+  looking**: a new build reloads every browser, the platform autosaves, Neon has
+  slept, so the slowest save of the day lands as the corner opens. **THE READER
+  IS FIXED AND THE WRITER DELIBERATELY IS NOT** — `DELETE` was measured and is
+  better on every axis (3ms against 72ms, all 14 FKs already cascade, readers
+  never block), and it is still not done, because it was verified HERE and not
+  against production, where drift would make a save FAIL rather than merely be
+  slower (§238 already records the write path as its own staged pass, and §241
+  removes the TRUNCATE from the other side when its flag is switched on). The
+  register is asked **separately and allowed to fail**, with a 2s `lock_timeout`
+  under it — safe because a chat WRITE can never collide with a save, so it can
+  only fire on the read that must not hang; **and the backstop alone is not
+  enough, which the red run shows** (the old query still fails, just faster).
+  Cost stated: for a second or two a RENAMED person shows their previous name,
+  and **`gone` reads NULL, never true** — an unread register is not somebody
+  leaving it (§93), and the page already treats null as *say nothing*.
+- **A REFUSAL WITHOUT ITS CAUSE IS WHY NOTHING CONVERGES (§248.2–4):** measured
+  against a stand-in push service, a mismatched key (403), a dead registration
+  (400) and an oversized payload (413) all returned `failed: 1` and printed one
+  sentence — *"The push service would not take it."* **Four rounds of fixes
+  converged on nothing because nothing ever named one thing** (§124 at the far
+  end of the chain). The service's words are carried back, the service is NAMED
+  from the endpoint's host alone (Apple will not deliver until the platform is
+  on the home screen — a different errand from Chrome), and the diagnostic asks
+  **this browser** as well as the server, because a browser registered at one
+  address while the server sends to another read as perfect health at both ends.
+  **AND A REGISTRATION IS BOUND TO THE KEY IT WAS MADE WITH**: accepting an
+  existing one without looking at it means that once the key changes the browser
+  hands the old one back FOR EVER — bell on, device counted, every send refused,
+  and nothing able to notice. Compared and re-made now; **a browser that will
+  not report its key is left alone**, because churning on a guess is worse.
+  **AND THE FIRST BUILD OF THAT STOPPED SUBSCRIBING ENTIRELY** — `pushSync`
+  already had a `want`, a second `var want` in the same callback HOISTED over
+  it, `if (!want)` read `undefined` and took the unsubscribe branch every time:
+  §56.7's collision, valid on both sides, past `node --check`, **found by the
+  check going red and not by reading it**.
 - **THE OFFICE STARTS A CONVERSATION (§247):** Islam — *"from the platform
   inbox allow the smo to initiate a message with someone."* Until now the office
   could only ever ANSWER: with nobody having written in there was no way to
@@ -3986,6 +4032,13 @@ node scripts/test-push.js       # a box with no tab open (§231): a throwaway HT
                                 # server stands IN FRONT of the real push service, so
                                 # the encrypted body and the VAPID header are read off
                                 # the wire — needs a real Postgres, no network
+DATABASE_URL=… node scripts/test-chat-during-save.js
+                                # the chat does not wait on a save (§248): holds a
+                                # save open against a real Postgres and asks the chat
+                                # its three questions — a lock cannot be modelled by a
+                                # stub, and SMP_CHAT_JOIN_PEOPLE=1 makes the FILE ask
+                                # the pre-§248 question so the red run is the shape
+                                # the product actually had
 python3 checks/office-chat.py   # the chat's client half — serves the built file over HTTP,
                                 # because the whole feature is invisible over file:// (§97.9)
 python3 checks/welcome.py       # the welcome screen (§148): three viewers over HTTP, every
@@ -4108,7 +4161,32 @@ prior sessions (on HR_ERP) accidentally reverted agreed-upon designs.
 
 ---
 
-*Last Updated: 2026-09-01 &mdash; **&sect;245: the functions are on the
+*Last Updated: 2026-09-02 &mdash; **&sect;248: the chat does not wait on a
+save, and the notifications say where they stop.** Islam, twice in two days
+&mdash; *"all conversations are gone!!"* and *"before the fix all the chats
+disappeared"* &mdash; and, separately, *"the notification system is still not
+working &hellip; we tried many things."* **NOTHING WAS EVER LOST**, established
+first: the chat's tables sit outside the state graph. *"No answer"* was the
+corner's own 25-second clock, so the endpoint was neither down nor erroring
+&mdash; it was WAITING on the ACCESS EXCLUSIVE lock a save's `TRUNCATE` takes on
+`people`, which the queue joined for a live name (**frozen at 8s against 2ms
+without the join**). Worst exactly when somebody is looking, because a new build
+reloads every browser and the platform autosaves onto a sleeping database.
+**The reader is fixed and the writer deliberately is not** &mdash; `DELETE` was
+measured and is better on every axis, and it is the one file where a mistake
+costs real data, so it stays a staged piece (&sect;238; and &sect;241 removes
+the TRUNCATE from the other side when its flag is turned on). **And the
+notifications stopped shrugging**: a mismatched key, a dead registration and an
+oversized payload all reported as `failed: 1` under one sentence, which is why
+four rounds converged on nothing; the service's own words are carried back, the
+service is named, the diagnostic asks this browser as well as the server, and a
+registration made with a superseded key &mdash; which could never heal &mdash;
+is caught and re-made. **The first build of that stopped subscribing entirely**
+on a `var` collision valid on both sides, found by the check going red.
+`test-chat-during-save` RED on the old query and 8/8 green; `test-chat` 103/0
+(falsified 102/1); `office-chat` all clear (falsified, 6 red); sweep clean.*
+
+*Earlier: 2026-09-01 &mdash; **&sect;245: the functions are on the
 function half, in one list; &sect;246: the cycle note is a line somebody
 wrote.** Islam, looking at what &sect;244 shipped &mdash; *"merch and marketing
 and cf should be with functions not units"* &mdash; and, of the two bands drawn

@@ -2271,26 +2271,8 @@
        bar with that button is what goes up beside the plan, not to waste
        lines") — the total, one red chip per place that owes, and the red
        button, on the strategy tabs only, read mode too. */
-    var stratTab = (currentSub === "strategy" || currentSub === "fnstrat");
-    var missHTML = (stratTab && typeof missBar === "function") ? missBar() : "";
-    /* ── AND THE SECTION'S OWN PEN, ON THE SAME LINE (§248) ────────────
-       Islam: *"the edit button of the plans can you make it in the same line
-       of the foundation sowt and plan? as it's a better placement for opening
-       and savng?"* — and the line was already carrying half of it: with the
-       plan open it rendered *Done filling*, the wrong word for the office and
-       stripped of its button dress by `.tabs button` (§145.14's own trap, on
-       the one control that section missed). What was missing was the way IN.
-
-       ONE TAIL, NOT TWO. `.missbar` carries `margin-left:auto` itself, so a
-       second right-aligned group leaves the red button stranded in the middle
-       of the row with the pen at the end — drawn, looked at, and thrown away
-       (§41.9). The tail takes the auto and the bar gives its up. */
-    var penHTML = (stratTab && typeof secActs === "function") ? secActs() : "";
-    var tailHTML = (missHTML || penHTML)
-      ? '<span class="secttail">' + missHTML +
-          ((missHTML && penHTML) ? '<span class="sectsep" aria-hidden="true"></span>' : '') +
-          penHTML + '</span>'
-      : "";
+    var missHTML = ((currentSub === "strategy" || currentSub === "fnstrat") &&
+      typeof missBar === "function") ? missBar() : "";
     /* THE ROW IS NOT ONLY FOR SECTIONS, AND §211.2 IS WHAT PROVED IT. That
        section left a pillars function with ONE section — and `> 1` took the
        whole row away, the missing bar with it, so a function that genuinely
@@ -2304,7 +2286,7 @@
        Plan rather than showing a lone tab above it. */
     /* `!railed`: a Setup page's sections were drawn into its own pane above, so
        drawing them here as well would be the same two buttons in two places. */
-    if (!railed && secs && secs.length && (secs.length > 1 || tailHTML)) {
+    if (!railed && secs && secs.length && (secs.length > 1 || missHTML)) {
       /* The same third row the group's Performance sections already use. One
          row that means "sections of the tab above", wherever it appears. */
       secrow.hidden = false;
@@ -2312,7 +2294,7 @@
         (secs.length > 1 ? secs.map(function(s){
           return '<button role="tab" data-sub2="' + s.k + '"' + (s.cls ? ' class="' + s.cls + '"' : '') +
             ' aria-selected="' + (s.k === def.k) + '">' + s.label + '</button>';
-        }).join("") : "") + tailHTML;
+        }).join("") : "") + missHTML;
     } else {
       secrow.hidden = !onSecPage;
       /* HIDDEN IS NOT EMPTY, AND IT HAS TO BE BOTH (§63.6). The row kept the

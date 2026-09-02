@@ -101,7 +101,7 @@ def run(pg):
        pg.evaluate("()=>document.querySelectorAll('.pane .ptitle.edhead').length") == 0)
 
     print("\n2 · the pen opens, and the name takes the line")
-    pg.evaluate("()=>{const b=document.querySelector('.penbtn'); if(b) b.click();}")
+    pg.evaluate("()=>{const b=document.querySelector('#secrow-in .secpen'); if(b) b.click();}")
     pg.wait_for_timeout(1400)
     ck("the pen is open", pg.evaluate("()=>!!EDIT_PAGE.plan"))
     d = pg.evaluate("""()=>{
@@ -126,10 +126,17 @@ def run(pg):
     pg.wait_for_timeout(400)
     scrolled = pg.evaluate("()=>Math.round(window.scrollY)")
     ck("the page really scrolled (%dpx)" % scrolled, scrolled > 200, scrolled)
+    # §248: THE WAY TO SAVE MOVED AND THE REQUIREMENT DID NOT. Islam's ask
+    # was *"so on scrolling down I can still see that save button"* — the
+    # button is `Done editing` on the section line now, which pins HIGHER than
+    # this head and does not move when the section changes. So the assertion
+    # is the same assertion, pointed at where the control lives; the head is
+    # still asserted to pin, because it carries the code, the name field and
+    # Remove (§232).
     for what, sel in (("the head", ".pane .ptitle.edhead"),
                       ("the code", ".pane .ptitle.edhead .ptcode"),
                       ("the name", ".pane .ptitle.edhead .ptname"),
-                      ("the Done tick", ".pane .ptitle.edhead .penbtn")):
+                      ("the way to save", "#secrow-in .secpen.on")):
         r = pg.evaluate(SEEN, sel)
         ck("%s is on screen" % what, r.get("onScreen") is True, r)
     ck("...and the head pins at the same line reading does",
@@ -144,7 +151,7 @@ def run(pg):
 
     print("\n4 · both ends — closing the pen puts it back")
     pg.evaluate("()=>window.scrollTo(0,0)")
-    pg.evaluate("()=>{const b=document.querySelector('.penbtn'); if(b) b.click();}")
+    pg.evaluate("()=>{const b=document.querySelector('#secrow-in .secpen'); if(b) b.click();}")
     pg.wait_for_timeout(1200)
     ck("the pen is closed", not pg.evaluate("()=>!!EDIT_PAGE.plan"))
     ck("...and nothing is pinned that was not before",
@@ -164,7 +171,7 @@ def run(pg):
     pg.wait_for_timeout(900)
     pg.evaluate("()=>{const b=document.querySelector('#secrow-in [data-sub2=\"proj\"]'); if(b) b.click();}")
     pg.wait_for_timeout(700)
-    pg.evaluate("()=>{const b=document.querySelector('.pane .penbtn'); if(b) b.click();}")
+    pg.evaluate("()=>{const b=document.querySelector('#secrow-in .secpen'); if(b) b.click();}")
     pg.wait_for_timeout(1400)
     e = pg.evaluate("""()=>{
       const band = document.querySelector('.pane .pband.edband');

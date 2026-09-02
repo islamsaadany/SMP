@@ -71,7 +71,7 @@ with sync_playwright() as p:
        pg.evaluate("() => document.querySelectorAll('.rmplan').length") == 0)
 
     # ── 2 · the pen draws it, in the head that pins, and it is hittable ─
-    pen = pg.query_selector('.pane .paneact .penbtn[data-page="plan"]')
+    pen = pg.query_selector('#secrow-in .secpen[data-page="plan"]')
     ck("the plan pen is there", bool(pen))
     pen.click(); pg.wait_for_timeout(500)
     seat = pg.evaluate("""() => {
@@ -162,7 +162,7 @@ with sync_playwright() as p:
     # ── 6 · a project, on a function ────────────────────────────────────
     to_functions(pg)
     pg.click('#units button[data-u="fn:finance"]'); pg.wait_for_timeout(500)
-    pen = pg.query_selector('.pane .paneact .penbtn[data-page="plan"]')
+    pen = pg.query_selector('#secrow-in .secpen[data-page="plan"]')
     ck("the projects pen is there", bool(pen))
     pen.click(); pg.wait_for_timeout(500)
     pb = pg.evaluate("""() => {
@@ -210,7 +210,7 @@ with sync_playwright() as p:
     ck("the demo holds a pillars function with a plan", bool(pk), pk)
     if pk:
         pg.click('#units button[data-u="fn:%s"]' % pk); pg.wait_for_timeout(500)
-        pen = pg.query_selector('.pane .paneact .penbtn[data-page="plan"]')
+        pen = pg.query_selector('#secrow-in .secpen[data-page="plan"]')
         if pen: pen.click(); pg.wait_for_timeout(500)
         fn_before = pg.evaluate("(k) => fnAsUnit(k).items.length", pk)
         ck("the pillars function draws the control too",

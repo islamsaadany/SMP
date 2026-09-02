@@ -96,7 +96,9 @@ with sync_playwright() as p:
     pg.goto(URL); pg.wait_for_timeout(1200)
     pg.evaluate(SEED); pg.wait_for_timeout(250)
     open_cfx(pg)
-    pg.evaluate("document.querySelector('.penbtn').click()"); pg.wait_for_timeout(400)
+    # §248: the strategy pen moved to the section line; `.penbtn` on this page
+    # is now only §101's arrows, which open no fields.
+    pg.evaluate("document.querySelector('#secrow-in .secpen').click()"); pg.wait_for_timeout(400)
 
     for kind in ("tactics", "measures"):
         before = pg.evaluate(LIST, kind)

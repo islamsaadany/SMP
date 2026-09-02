@@ -304,10 +304,10 @@
   .penbtn.on { background:var(--gold); border-color:var(--gold); color:var(--panel); }
   /* The card head has to leave room for it, or a long label runs underneath. */
   .hoverpen .cardhead { padding-right:34px; }
-  /* §248: THE PLAN'S TITLE ROW HELD 34px OPEN FOR A PEN THAT HAS MOVED to the
-     section line, so the room goes with it (§24) — a gap kept for a control
-     that is not there is the next reader's puzzle. `.ptitle` keeps its own
-     flex rules below; only the pen's two lines are gone. */
+  /* The plan's title row is a flex header, not a card head; the pen sits in the
+     same corner and the row leaves it room. */
+  .ptitle.hoverpen { padding-right:34px; }
+  .ptitle.hoverpen .penbtn { top:0; right:0; }
 
   /* HALF THE HEIGHT. 47px -> 26px, and it is the CONTENT that had to shrink:
      the padding was 8px a side and the controls 31px, so squeezing the padding
@@ -1344,35 +1344,6 @@
      the section tabs: the total, one red chip per owing place, the red
      button. Nothing in the page body, no number on the Strategy tab. */
   .sectionrow .tabs-in { flex-wrap:wrap; align-items:center; }
-  /* ── ONE TAIL AT THE END OF THE SECTION LINE (§248) ────────────────
-     The missing bar and the section's own pen, grouped. `.secttail` carries
-     the `margin-left:auto` and `.missbar` gives its up, or the two right-align
-     independently and the red button is stranded mid-row with the pen at the
-     end (drawn, looked at, thrown away — §41.9). */
-  .secttail { margin-left:auto; display:flex; gap:10px; align-items:center;
-    flex-wrap:wrap; }
-  .secttail .missbar { margin-left:0; }
-  .sectsep { width:1px; height:18px; background:var(--line); flex:none; }
-  /* THE SECOND SELECTOR IS NOT A DUPLICATE — §145.14 wrote that three times in
-     one rule block and this is the fourth: inside `nav.tabs`, `.tabs button`
-     (0,1,1) outranks a bare class (0,1,0) and strips the control to a plain
-     word. That is precisely what `Done filling` has been wearing on this line
-     all along, measured: background `rgba(0,0,0,0)`, `border: 0px`, the quiet
-     ink — an unselected tab. */
-  .secpen, .tabs .secttail button.secpen {
-    border:1px solid var(--line); background:var(--surface); color:var(--ink-2);
-    border-radius:8px; font-size:12px; font-weight:700; padding:4px 13px;
-    cursor:pointer; font-family:inherit; white-space:nowrap; }
-  .tabs .secttail button.secpen:hover { border-color:var(--gold);
-    color:var(--gold-deep); background:var(--surface); }
-  /* Lit while the mode is open — the pen's own pair (`--gold` under
-     `--panel`), which is a measured 5.28:1 light and 9.75:1 dark. The GROUND
-     is `--surface` at rest and not `--surface-2`, because `--gold-deep` on
-     `--surface-2` is 4.45 and §38.5 has been paid for five times. */
-  .secpen.on, .tabs .secttail button.secpen.on {
-    border-color:var(--gold); background:var(--gold); color:var(--panel); }
-  .tabs .secttail button.secpen:focus-visible {
-    outline:2px solid var(--gold); outline-offset:2px; }
   .missbar { margin-left:auto; display:flex; gap:6px; align-items:center;
     flex-wrap:wrap; }
   .missbar .secmiss { color:var(--bad-tx); font-weight:800; font-size:12.5px;

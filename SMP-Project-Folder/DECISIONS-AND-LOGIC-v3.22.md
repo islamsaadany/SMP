@@ -27215,3 +27215,188 @@ does, and it means starting a conversation is not a quiet act.
 and the button on two lines by comparing their `top` values — two controls of
 two heights on one line have two tops (§122.4, already written down once). The
 middles are what agree, and the check asserts those.
+
+---
+
+## §248 — THE STRATEGY PEN LIVES ON THE SECTION LINE (2026-09-02)
+
+Islam: *"the edit button of the plans can you make it in the same line of the
+foundation sowt and plan? as it's a better placement for opening and savng?
+verifying that it's only in the startegy anyway and not anywhere else. please
+check and get back to me."*
+
+Checked before anything was drawn, and the check said more than the ask did.
+
+**HALF OF IT WAS ALREADY THERE, WEARING THE WRONG WORD AND NO DRESS.** With the
+plan open for editing the section line already rendered a control at x 1341 —
+`Done filling`, class `editbtn fdone`, `data-page="plan"`. Two faults in one
+control. The word is wrong: the office is **editing**, not filling, and *filling*
+is §145's narrower thing that belongs to somebody else. And it was **undressed**
+— measured `background: rgba(0, 0, 0, 0)`, `border: 0px`, ink `#414A58`, which is
+byte for byte an unselected tab — because inside `nav.tabs` the rule
+`.tabs button` (0,1,1) outranks `.editbtn` (0,1,0). §145.14 wrote that trap down
+three times in one CSS block and gave `.mchip`, `.fillcta` and `.pendcta` a
+second selector each; this control was the one it missed. So the ask is less a
+move than a correction plus the way **in**, which the line genuinely lacked.
+
+**THE PEN WAS NEVER IN ONE PLACE.** Measured at 1500×900 as the office:
+Foundation 1422,234 · SWOT 1423,233 · a unit's Plan 1420,236 · a supporting
+function's Projects 1420,308 — four heights for one control, changing under you
+as you move between sections. And **Marketing drew TWO of them**, at y 308 and
+y 1004, the second below the fold, both throwing the same `EDIT_PAGE.plan`:
+§94.15's rule exactly — *a control with no audience of its own is not a choice,
+it is a duplicate.*
+
+**AND FOR THE OFFICE THE RED BUTTON ON THAT LINE ALREADY OPENED THE PEN'S MODE.**
+*Fill in what is empty* calls `enterFillMode()`, which sets `EDIT_PAGE[page] =
+true` — the same switch the pen throws — and then walks to the first blank. For a
+fill-grant holder that mode means something narrower; for an author it is the pen
+under another name.
+
+**FOUNDATION AND SWOT COULD NOT BE EDITED FROM A TABLET WITHOUT GUESSING.** Both
+pens are `visibility:hidden` until their card is hovered; on a 1024×1366 touch
+viewport they measured hidden until the card ITSELF was tapped, so the first tap
+does nothing visible and nothing says where to tap. **§70 found this and fixed
+it for the plan PANE in August** — *"on a touch screen there is no hover at all,
+so it could not be reached from a tablet in a meeting, which is where a plan gets
+corrected"* — and deliberately left `.hoverpen` alone for a CARD, on the sound
+argument that a card is small and the hover target is the thing being edited.
+That argument survives for the group's Foundation, which keeps its pen. It does
+not survive for a card that is one of three sections sharing a line.
+
+### What was decided, and by whom
+
+Three placements were drawn **into the real platform** — the control moved in the
+live DOM, both sides the same build (§41.9) — and published as an artifact.
+Islam picked **A** (the red fill button stays beside the pen for the office) and
+**the whole Strategy tab** rather than the Plan alone. The scope is his: the ask
+named the plan, the line is shared, and one slot meaning *this section's pen*
+everywhere is what makes the placement predictable. Both are recorded as his
+rather than re-argued.
+
+**C WAS REJECTED AND THE PICTURE IS THE ARGUMENT.** Moving the pen GLYPH costs
+nothing and does not work: a 28px hollow circle is built for the corner of a
+card, where the card frames it, and in a wide tab row there is nothing to frame
+it — it all but disappears. A glyph also cannot read *Done editing*, which is the
+half of the ask that was about saving.
+
+**NOT `Save`.** Islam asked *"edit and save would work better right?"*. Put to
+him with the reason and it is recorded rather than assumed: the platform writes
+as you type, so a button promising to save says the work is lost until it is
+pressed — §124's fault, a word claiming more than the state — and *Save draft*
+already means something specific and different on Reporting (§87's twins). The
+words are **Edit** and **Done editing**, which is what the pen's own `title` has
+said all along.
+
+### The shape
+
+**ONE MAP, READ BY THE PEN AND BY THE FILL BAR.** `secPagePair(sec)` answers
+which page and which access key a section's pen is. The pairs are the ones the
+old controls already asked, to the letter, so **nobody's rights move**: a unit's
+Foundation `u_found`, its SWOT `u_anal`, its Plan `u_plan`; a supporting
+function's Overview `k_found`, and its Projects `u_plan` — which reads odd and is
+deliberate, because `projEditing()` has asked `mayEditPlan()` since spec 010 and
+giving a function's plan a looser gate than a unit's would be inventing a
+decision here, on the quiet.
+
+**AND THE MAP IS WHAT FIXED A BUG NOBODY HAD REPORTED.** `fillPageForSec()` was
+the second answer to that question and it disagreed: for a function that plans in
+**pillars** it returned `foundation`, while §213 made that page read
+`EDIT_PAGE.capfoundation`. So the red button on that Overview set a flag nothing
+acts on and opened **0 editable fields** — measured, on Merchandising, before a
+line was written. It rendered perfectly the whole time (§96's family). Fixed by
+there being one map, not by correcting a second copy.
+
+**WHICH PEN A SECTION HAS AND WHICH GAPS IT CAN BE ASKED TO FILL ARE TWO
+QUESTIONS**, and the first build of this collapsed them. It handed the bar
+`analysis` for the SWOT section — a page no fill grant reaches, `u_anal` not
+being in `FILL_PAGES` — so the red button would have thrown a flag nothing acts
+on, which is the very fault the map had just removed. The second question is
+asked of the shared rule (`SMPRules.FILL_PAGES`) rather than of a second list.
+**Found by driving it, not by reading it.**
+
+**THE TAIL IS ONE TAIL.** `.missbar` has carried `margin-left:auto` since
+§145.14, so a second right-aligned group leaves the red button stranded in the
+middle of the row with the pen at the end. `.secttail` takes the auto and the bar
+gives its up. Drawn the wrong way first, looked at, and thrown away — which is
+what a mockup is for.
+
+**ONE WAY OUT, NOT TWO.** With the mode open the bar no longer draws
+`Done filling` where the line already says `Done editing`; a fill-grant holder
+authors nothing, so `secPenPair()` is null for them and it stays their only way
+out and their only wording.
+
+**WHAT STAYS IN THE PANE'S CORNER IS ARRANGE**, and that is not an oversight.
+§101 gave the arrows to somebody who may reorder and may **not** author, so they
+are never the same person as the pen's holder, the slot is never shared, and the
+arrows belong beside the rail they reorder rather than on a line that names the
+page.
+
+**THE PILLAR'S HEAD KEEPS WHAT IS THE PILLAR'S** — its code, its growing name
+field (§189, §194) and Remove (§232) — and goes on pinning. §194's requirement
+is *better* served, not dropped: the ask there was *"so on scrolling down I can
+still see that save button"*, and the section line pins higher, holds one
+control, and does not move when the section changes.
+
+**THE GROUP IS UNTOUCHED, AND THAT ANSWERS THE SECOND HALF OF THE ASK.** Within a
+business unit and a supporting function the pen is only on the Strategy tab —
+Performance and Reporting carry no edit control at all, measured. Two edit
+surfaces sit outside it, the group's own **Foundation** and **Temple**, and
+neither has a section line to move onto, so both keep their controls exactly as
+they are. `aspirationCard()` is shared by the group's Foundation and a unit's, so
+the pen is drawn there on `isGroup` — which says *why* rather than merely
+*which*. The cost is stated rather than discovered: until those two pages are
+looked at separately the platform has two homes for an edit control.
+
+**`editBar()` IS DELETED, NOT LEFT UNCALLED** (§24). It drew the worded Edit bar
+on a supporting function's Overview — the only worded strategy edit control in
+the product while a unit's three were glyphs, which is §53.5's drift in the
+navigation switch's own vocabulary — and `secActs()` draws that now. Removed **by
+name and by brace depth**, never by line range: §214 paid for that twice in a day
+by slicing between two anchors and taking a live function with it.
+
+### Proof
+
+`checks/plan-edit-line.py`, run against the previous build first: **48 red**,
+including the pillars-function bug. It asserts the problem rather than the
+layout — every strategy section on both sides of the switch opened and closed
+from the line and read back from `EDIT_PAGE` and the fields on the page, never
+from the button's own word; no pen left in the page body for the same page;
+**both ends** (drawn for an author, absent for a unit head and for a CEO, and
+agreeing with `SMPRules.mayAuthorPage` each time); the group's two pens still
+present; one way out; the map's answer on a pillars function; a real border and
+a real ground; and one line with no sideways scroll at 1500 · 1280 · 1100 · 1000
+· 900 · 820.
+
+Contrast measured in both themes: **8.95** at rest and **5.32** lit in light,
+**8.53** and **9.82** in dark — the ground at rest is `--surface`, never
+`--surface-2`, because `--gold-deep` on `--surface-2` is 4.45 and §38.5 has now
+been paid five times.
+
+**AND THE CHECKS WERE SWEPT, WHICH IS MOST OF THE WORK** (§51.11). Fourteen check
+files and `qa.py` pressed `.pane .paneact .penbtn[data-page="plan"]` or a
+relative; every one would have gone silently green or hung for thirty seconds on
+a control that had moved. Grep'd for `.penbtn` across the whole suite rather than
+for the one spelling that failed first — `checks/plan-edit-head.py` carried a
+bare `.pane .penbtn` that the narrower grep missed, and it took a run to find.
+**Two assertions changed meaning rather than selector**: `plan-edit-head`'s *"the
+Done tick is on screen"* became *"the way to save is on screen"*, pointed at the
+line, because §194's requirement moved with the control and did not lapse; and
+`band-corner`'s guard against the corner fill covering the pen beside it now
+**says out loud** when there is no control in that corner rather than skipping in
+silence, which is how a check goes green while measuring nothing.
+
+**AND ONE OF MY OWN FIXES BROKE AN ASSERTION IN THE SAFE-LOOKING DIRECTION.**
+`fn-pillars` scoped a unit's Foundation edit probe to `.hoverpen`; widened to
+`.card` it still passed the *count* and then wrote to the first clause of *Who we
+are* while asserting the **aspiration** had changed. It names the field outright
+now (§94.8: assert the thing, not a position).
+
+Full `qa.py` sweep clean, **ERRORS: none**. `strategy-office.py` §4 and
+`report-saves.py` fail identically on the build before this one — both
+pre-existing, both left alone rather than quietly widened into this change.
+
+**RECORDED AND NOT DONE**: the SWOT section still shows the bar's red button
+while its own mode is open, because `missBarCta`'s `inFill` does not name
+`analysis` — true before this change and after it, and harmless, since the SWOT
+is not a fillable page and the button walks to gaps that are genuinely elsewhere.

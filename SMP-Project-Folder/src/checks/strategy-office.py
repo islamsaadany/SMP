@@ -124,8 +124,11 @@ with sync_playwright() as p:
     def pens(pg, key, dest, tab, sec):
         be(pg, key, dest, tab, sec)
         return pg.evaluate("""() => ({
-          pens: document.querySelectorAll(".pane .penbtn, .hoverpen > .penbtn, "
-                                          + ".paneact .penbtn, .ptitle .penbtn").length,
+          /* §248: the strategy pen is `#secrow-in .secpen` now; the old
+             homes stay in the list so a build that put one back is seen. */
+          pens: document.querySelectorAll("#secrow-in .secpen, .pane .penbtn, "
+                                          + ".hoverpen > .penbtn, .paneact .penbtn, "
+                                          + ".ptitle .penbtn").length,
           anyPen: document.querySelectorAll("[data-page]").length,
           arrange: document.querySelectorAll("[data-arrange]").length,
           grips: document.querySelectorAll(".grip").length

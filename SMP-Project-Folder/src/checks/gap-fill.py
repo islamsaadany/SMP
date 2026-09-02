@@ -183,7 +183,7 @@ with sync_playwright() as p:
 
     # ── 4 · §218: THE APPROVAL IS GONE, AND IT IS ASSERTED AS AN ABSENCE ──
     print("\n4 · a filled value is live at once (§218)")
-    pg.click('.pane .paneact .fdone[data-page="plan"]'); pg.wait_for_timeout(400)
+    pg.click('#secrow-in .fdone[data-page="plan"]'); pg.wait_for_timeout(400)
     r = pg.evaluate("""() => ({
       chips: document.querySelectorAll('.pane .pchip').length,
       ticks: document.querySelectorAll('.pane .gapok').length,
@@ -296,7 +296,7 @@ with sync_playwright() as p:
       return SMPRules.namedOn(t, { key: "nh", name: name });
     }""", who)
     ck("...and counts the moment the mark lifts", r is True)
-    pg.click('.pane .paneact .fdone[data-page="plan"]'); pg.wait_for_timeout(300)
+    pg.click('#secrow-in .fdone[data-page="plan"]'); pg.wait_for_timeout(300)
 
     # ── 9 · THE COUNTS THAT FIND YOU (§145.14) ──────────────────────────
     print("\n9 · the missing bar beside the sections, the rail words, the walker")

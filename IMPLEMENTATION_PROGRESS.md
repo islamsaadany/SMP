@@ -6,8 +6,11 @@ version (rules A2 / A11, changed 2026-08-20) — those go only when asked for.
 
 **Where it runs:** Vercel, production tracks `main`. Static files plus two
 serverless functions (`/api/state`, `/api/auth`) against Neon Postgres.
-**Latest version:** §232/§233 on `main` (removing a pillar or a project,
-and hiding an element from the presentation).
+**Latest version:** §232/§233 on `main` (removing a pillar or a project, and
+hiding an element from the presentation). **§248 — the strategy pen on the
+section line — is built and pushed on
+`claude/plans-edit-button-placement-jxw8or`, not merged: `main` is Islam's call
+every time.**
 
 *(This line read v3.58 while the section below it ran to v3.65: a documentation
 drift, flagged before it was corrected rather than quietly realigned.)*
@@ -69,6 +72,52 @@ Nothing proceeds past this line without an answer.
   is a true signal — do not silence it.
 
 ## Built and verified
+
+### §248 — the strategy pen lives on the section line (2026-09-02, this branch)
+
+Islam: *"the edit button of the plans can you make it in the same line of the
+foundation sowt and plan? as it's a better placement for opening and savng?
+verifying that it's only in the startegy anyway and not anywhere else."*
+
+**Checked first, and the check said more than the ask did.** With the plan open
+the line ALREADY carried a control — `Done filling`, the wrong word for the
+office (who are editing, not filling) and stripped of its button dress by
+`.tabs button`, which is §145.14's own recorded trap on the one control it
+missed. What was genuinely absent was the way IN. The pen sat at four different
+heights depending on the section (234 · 233 · 236 · 308) and **twice** on a
+two-project function, the second copy below the fold, both throwing one flag.
+Foundation and SWOT were hover-only, so on a tablet the pen measured hidden
+until the card itself was tapped — §70's own finding, fixed for the pane in
+August and left on the cards.
+
+**Islam picked A** (the red fill button stays beside the pen for the office) and
+**the whole Strategy tab** from three placements drawn into the real page and
+published as a mockup; the pen glyph was rejected because a 28px hollow circle
+built for a card corner all but disappears in a wide tab row. **Not `Save`** —
+asked, answered and recorded: the platform writes as you type, so the word would
+say the work is lost until it is pressed.
+
+**One map now answers which page a section's pen is**, read by the pen and by
+the fill bar — which fixed a bug nobody had reported: a pillars function's
+Overview button named `foundation` while that page has read `capfoundation`
+since §213, so it set a flag nothing acts on and opened **0 editable fields**,
+rendering perfectly the whole time.
+
+**The group is untouched**, which answers the second half of the ask: within a
+unit and a supporting function the pen is only on the Strategy tab, and the
+group's own Foundation and Temple are tabs with no section line, so both keep
+their controls. Arrange stays in the pane's corner (§101's arrows go to somebody
+who may reorder and not author, so the slot is never shared), and the pillar's
+pinned head keeps its code, name field and Remove.
+
+`checks/plan-edit-line.py`: **48 red** on the build before, all green after.
+Contrast 8.95/5.32 light and 8.53/9.82 dark. Full `qa.py` sweep clean, ERRORS
+none. **The check sweep was most of the work** — fourteen check files and
+`qa.py` pressed the moved pen and would have gone silently green (§51.11).
+
+*Two pre-existing failures were left alone rather than quietly folded in:
+`strategy-office.py` §4 and `report-saves.py` fail identically on the previous
+build.*
 
 ### §236.3 — slide by slide, only the originals pinned (2026-09-01, same branch)
 

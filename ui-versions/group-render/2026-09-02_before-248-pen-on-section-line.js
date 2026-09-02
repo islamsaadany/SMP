@@ -2000,12 +2000,40 @@ function filling(page, acKey, ctx){
   return ctx ? mayFillRow(acKey, ctx) : mayFill(acKey);
 }
 
-/* §248: `editBar()` IS GONE, NOT LEFT UNCALLED (§24). It drew the worded Edit
-   bar on a supporting function's Overview, and that control is `secActs()`'s
-   now — on the section line, beside Foundation · SWOT · Plan. A builder with
-   no caller is one the next reader takes for load-bearing; §214 paid for that
-   twice in a day, once by deleting a RANGE and taking a live function with it,
-   which is why this went by name and by brace depth. */
+/* mayAuthor(), NOT the raw grant (§94). Every "Edit" bar and every pen in
+   the platform asks this one question, so a strategy page cannot acquire a
+   pen that is open to somebody the rule closes it to — the gate is on the
+   control, not on each of the eleven call sites that draw one. */
+function editBar(page, acKey){
+  /* THE DOWNLOAD IS NOT AN AUTHORING CONTROL (§119.9), so it is asked for
+     BEFORE the pen's gate and the bar is drawn when either is answered — a
+     custodian who may not author the overview may still take it away. */
+  var dl = dlPlanBtn(page);
+  /* §145.14: the worded bar takes the corner button's three states — red
+     while something is missing, quiet amber while only pending remains,
+     nothing after; Done while the mode is open. */
+  if (!mayAuthor(acKey || "u_found")) {
+    if (mayFill(acKey || "u_found")) {
+      var inner;
+      if (EDIT_PAGE[page])
+        inner = '<button class="editbtn fdone" data-page="' + page + '">Done filling</button>';
+      /* §223: THE DOOR ASKS WHAT IS FILLABLE, THE WORDS ASK WHAT IS COUNTED.
+         A page whose only blanks are optional (§214.2, §214.4) counts nought
+         and still has something to fill in — offering no way in was how Hala
+         met a Definition she could edit and no control to edit it with. */
+      else if (gapTotal(TARGET))
+        inner = '<button class="fillcta" data-fillcta="' + page + '">Fill in missing elements</button>';
+      else if (gapOpenable(TARGET))
+        inner = '<button class="fillcta" data-fillcta="' + page + '">Fill in what is empty</button>';
+      else inner = '';
+      return (dl || inner) ? '<div class="pageact">' + dl + inner + '</div>' : '';
+    }
+    return dl ? '<div class="pageact">' + dl + '</div>' : '';
+  }
+  return '<div class="pageact">' + dl + '<button class="editbtn" data-page="' + page + '">' +
+    (EDIT_PAGE[page] ? "Done" : "Edit") + '</button></div>';
+}
+
 /* The pen, in the corner of the box it edits.
 
    A bare "Edit" bar floating above a page says a page is editable; a pen in
@@ -2036,81 +2064,9 @@ function filling(page, acKey, ctx){
    had the same line written twice; a third would have been written the day
    somebody added a pane, and §53.5's whole rule is that a unit and a function
    must not drift apart in silence. */
-/* ── THE PEN LEFT THIS SLOT FOR THE SECTION LINE (§248) ─────────────
-   Islam: *"the edit button of the plans can you make it in the same line of
-   the foundation sowt and plan? as it's a better placement for opening and
-   savng?"* — and the measuring said more than the ask did: the pen landed at
-   four different heights depending on which section was open (234 Foundation,
-   233 SWOT, 236 a unit's Plan, 308 a function's Projects), and a function with
-   two projects drew TWO of them — one below the fold — both throwing the same
-   `EDIT_PAGE.plan`. §94.15's rule: a control with no audience of its own is not
-   a choice, it is a duplicate. `secActs()` draws the one control now.
-
-   WHAT STAYS HERE IS ARRANGE, and that is not an oversight. §101 gave the
-   arrows to somebody who may reorder and may NOT author — so they are never
-   the same person as the pen's holder, the slot is never shared, and the
-   arrows belong beside the rail they reorder rather than on a line that names
-   the page. `dlPlanBtn` returns '' for everyone (§145.9) and is left where it
-   was, so giving it back stays the one line that section promises. */
 function paneActs(page, acKey){
-  var inner = arrangePaneBtn() + dlPlanBtn(page);
+  var inner = penBtn(page, acKey) + arrangePaneBtn() + dlPlanBtn(page);
   return inner ? '<div class="paneact">' + inner + '</div>' : '';
-}
-
-/* ── WHICH PEN THE OPEN SECTION HAS (§248) ──────────────────────────
-   ONE MAP, and it is read by the pen AND by the fill bar's button, because
-   two answers to "which page is this section" is exactly how the two came to
-   disagree: `fillPageForSec()` answered `foundation` for a PILLARS function's
-   Overview while the page has read `EDIT_PAGE.capfoundation` since §213 made
-   the two formats one page — so its red button set a flag nothing reads and
-   opened **0 editable fields**, rendering perfectly the whole time (§96's
-   family). Fixed by there being one map rather than by correcting a second.
-
-   THE PAIRS ARE THE ONES THE CONTROLS ALREADY ASKED, to the letter, so
-   nobody's rights move: a unit's Foundation `u_found`, its SWOT `u_anal`,
-   its Plan `u_plan`; a function's Overview `k_found`, and its Projects
-   `u_plan` — which reads odd and is deliberate, because `projEditing()` has
-   asked `mayEditPlan()` since spec 010 and giving a function's plan a looser
-   gate than a unit's would be inventing a decision here, on the quiet.
-
-   `who` (Strategy › Who enters) answers null: it has no edit mode at all, it
-   has `canName()`, so the slot is empty there rather than holding a control
-   that opens nothing (§61). */
-function secPagePair(sec){
-  var t = String(TARGET || ""), fn = t.indexOf("fn:") === 0;
-  if (sec === "found") return fn ? ["capfoundation", "k_found"] : ["foundation", "u_found"];
-  if (sec === "swot")  return fn ? null : ["analysis", "u_anal"];
-  if (sec === "plan" || sec === "proj") return ["plan", "u_plan"];
-  return null;
-}
-function curSec(){
-  return (typeof CURSEC !== "undefined" && typeof currentSub !== "undefined")
-    ? (CURSEC[currentSub] || "") : "";
-}
-/* The pair, only where this person may AUTHOR it. A fill-grant holder's
-   control is the missing bar's, in the same tail, and has been since §145.14 —
-   drawing a second copy of it here is the duplication this section removes,
-   not a second instance of it. */
-function secPenPair(){
-  var p = secPagePair(curSec());
-  return (p && mayAuthor(p[1])) ? p : null;
-}
-/* WORDED, NEVER THE PEN GLYPH. The 28px hollow circle is built for the corner
-   of a card, where the card frames it; in a wide tab row there is nothing to
-   frame it and it all but disappears — drawn into the real row and looked at,
-   which is what settled it. And a glyph cannot read *Done editing*, which is
-   the half of the ask that was about saving.
-
-   NOT `Save` (put to Islam, 2026-09-02): the platform writes as you type, so a
-   button promising to save says the work is lost until it is pressed — §124's
-   fault, a word claiming more than the state — and *Save draft* already means
-   something else on Reporting (§87's twins). */
-function secActs(){
-  var p = secPenPair();
-  if (!p) return '';
-  var on = !!EDIT_PAGE[p[0]];
-  return '<button class="secpen' + (on ? ' on' : '') + '" data-page="' +
-    esc(p[0]) + '">' + (on ? 'Done editing' : 'Edit') + '</button>';
 }
 
 /* ── THE PLAN LEAVES AS SLIDES (§117) ─────────────────────────────
@@ -2611,20 +2567,14 @@ function missChipInner(e){
   return e.count ? esc(e.label) + ' <b>' + e.count + '</b>'
                  : '&#10003; ' + esc(e.label);
 }
-/* Which page a section's fill pen is (the bar's button opens it) — asked of
-   the ONE map (§248), which is what corrects the pillars function's Overview:
-   this used to answer `foundation` there, and the page reads `capfoundation`.
-
-   AND WHETHER THAT PAGE IS FILLABLE IS A SECOND QUESTION, asked of the shared
-   rule rather than of a second list. The first build of this collapsed the two
-   and handed the bar `analysis` for the SWOT section, which is a page no fill
-   grant reaches (`u_anal` is not in FILL_PAGES) — so the red button would have
-   thrown a flag nothing acts on. §223's distinction, one surface out: which
-   pen a section HAS and which gaps it can be asked to fill are not the same
-   question. Found by driving it, not by reading it. */
+/* Which page a section's fill pen is (the bar's button opens it). */
 function fillPageForSec(sec){
-  var p = secPagePair(sec);
-  return (p && SMPRules.FILL_PAGES.indexOf(p[1]) > -1) ? p[0] : "";
+  var t = String(TARGET || "");
+  if (sec === "found")
+    return t.indexOf("fn:") === 0 && !fnPlansInPillars(FUNCTIONS[t.slice(3)])
+      ? "capfoundation" : "foundation";
+  if (sec === "plan" || sec === "proj") return "plan";
+  return "";
 }
 function missBarCta(total){
   var inFill = EDIT_PAGE.plan || EDIT_PAGE.foundation || EDIT_PAGE.capfoundation;
@@ -2632,15 +2582,10 @@ function missBarCta(total){
      a door and does not offer to take you to a next gap that is not there. */
   if (inFill && total) return '<button type="button" class="fillcta" data-nextgap="1">' +
     'Next gap &rarr;&nbsp;<span class="ngleft">' + total + ' left</span></button>';
-  /* §248: NOT A SECOND WAY OUT. The section line now carries *Done editing*
-     for whoever may author this page, so drawing *Done filling* beside it is
-     two close controls on one line — and the wrong word for the office, who
-     are editing rather than filling. A fill-grant holder authors nothing, so
-     `secPenPair()` is null for them and this stays their only way out. */
-  if (inFill) return secPenPair() ? '' :
-    '<button class="editbtn fdone" data-page="' +
-    esc(fillPageForSec(curSec())) + '">Done filling</button>';
-  var sec = curSec();
+  if (inFill) return '<button class="editbtn fdone" data-page="' +
+    esc(fillPageForSec((typeof CURSEC !== "undefined" && CURSEC[currentSub]) || "")) +
+    '">Done filling</button>';
+  var sec = (typeof CURSEC !== "undefined" && CURSEC[currentSub]) || "";
   return '<button type="button" class="fillcta" data-fillcta="' +
     esc(fillPageForSec(sec)) + '">' +
     (total ? 'Fill in missing elements' : 'Fill in what is empty') + '</button>';
@@ -3329,16 +3274,8 @@ function koSettle(entry){
    (§96). */
 function aspirationCard(label, statement, endInMind, objectives, page, setAsp, setEnd, acKey, isGroup, owner){
   var editing = authoring(page, acKey), pg = editing ? page : null;
-  /* §248: THE PEN STAYS FOR THE GROUP AND GOES FOR A UNIT, and `isGroup` says
-     exactly why rather than merely which: the group's Foundation is a TAB of
-     its own with no section line to move onto, and a unit's is a SECTION of
-     Strategy, where the line now carries the control. The `hoverpen` class
-     goes with it — it is `position:relative` plus 34px of right padding held
-     open for a pen, and holding that gap for a control that is not there is
-     what §24 is about. */
-  return '<div class="card' + (isGroup ? ' hoverpen' : '') +
-    '"><div class="cardhead"><h2 class="sec first">' + label + '</h2>' +
-    (isGroup ? penBtn(page, acKey) : '') +
+  return '<div class="card hoverpen"><div class="cardhead"><h2 class="sec first">' + label + '</h2>' +
+    penBtn(page, acKey) +
       (editing && isGroup
         ? '<label class="horizon-f">Horizon ' +
           inputOr(pg, GROUP.horizon, "mono yr", function(v){ GROUP.horizon = v; }) + '</label>'
@@ -3462,11 +3399,7 @@ function renderUnitAnalysis(u){
       (ed ? '<div class="addrow"><button class="editbtn" data-swadd="' + esc(u.ukey) + '|' + key +
         '">+ Add</button></div>' : '') + '</section>';
   };
-  /* §248: the pen is on the section line. It was hover-only here, which on a
-     tablet meant `visibility:hidden` until the box itself happened to be
-     tapped — §70's own finding, fixed for the plan PANE in August and left on
-     the cards. */
-  return '<div class="swot">' +
+  return '<div class="swot hoverpen">' + penBtn("analysis", "u_anal") +
     box("s","s","Strengths") + box("w","w","Weaknesses") +
     box("o","o","Opportunities") + box("t","t","Threats") + '</div>';
 }
@@ -5320,7 +5253,7 @@ function unitPlanBody(it, u, railed){
      `flex:1` so the growing box (§189) fills the line instead of taking a
      slice of it. */
   var head = showHead
-    ? '<div class="ptitle' + (ed ? ' edhead' : '') + '"><div class="pthead"><h3>' +
+    ? '<div class="ptitle hoverpen' + (ed ? ' edhead' : '') + '"><div class="pthead"><h3>' +
         '<span class="ptcode">' + code + '</span>' +
         (ed ? textOr("plan", it.name, "ptname", function(v){ it.name = v; })
             : '&nbsp; ' + esc(it.name)) + '</h3>' +
@@ -5338,12 +5271,7 @@ function unitPlanBody(it, u, railed){
               '|' + esc(it.id) + '">Remove this ' +
               esc(L("pillar", "bu").toLowerCase().replace(/s$/, "")) +
               '</button>' : '') +
-        /* §248: THE PEN IS ON THE SECTION LINE, WHICH PINS HIGHER THAN THIS
-           HEAD DOES. §194 put it here so the way to save survived scrolling;
-           the line answers that better, because it does not move when the
-           section changes and there is only ever one of it. The head keeps
-           what is the PILLAR'S — its code, its name field and Remove. */
-        '</div>'
+        (mayEditPlan() ? penBtn("plan", "u_plan") : '') + '</div>'
     : pillarBand(code, it.name) + paneActs("plan", "u_plan");
   return head +
     /* ── THE PILLAR'S OWNER, CORRECTABLE AT LAST (§130.1) ────────────────
@@ -5531,11 +5459,8 @@ function fnPillarsOverview(fk){
         : koReadBlock(list,
             "None. This function is judged by its " +
             esc(L("pillar","bu").toLowerCase()) + "."));
-  /* §248: THE EDIT BAR IS ON THE SECTION LINE. It was the only WORDED edit
-     control in the product's strategy pages while a unit's three were pen
-     glyphs, so the two sides of the navigation switch said the same thing two
-     ways (§53.5); one slot answers for both now. */
-  return fillBarOr("capfoundation", "k_found",
+  return editBar("capfoundation", "k_found") +
+    fillBarOr("capfoundation", "k_found",
       list.reduce(function(a, m){
         return a + SMPRules.gapMissing("capko", m).length; }, 0),
       "the overview") +
@@ -5606,11 +5531,8 @@ function renderFnFoundation(fnKey){
   /* §145: the fill grant opens the same editor, whose gap cells then draw
      only the blanks — Add and Remove stay the author's. */
   var fl = filling("capfoundation", "k_found");
-  /* §248: THE EDIT BAR IS ON THE SECTION LINE. It was the only WORDED edit
-     control in the product's strategy pages while a unit's three were pen
-     glyphs, so the two sides of the navigation switch said the same thing two
-     ways (§53.5); one slot answers for both now. */
-  return fillBarOr("capfoundation", "k_found",
+  return editBar("capfoundation", "k_found") +
+    fillBarOr("capfoundation", "k_found",
       caps.reduce(function(a, c){
         return a + (c.keyObjectives || []).reduce(function(b, m){
           return b + SMPRules.gapMissing("capko", m).length; }, 0); }, 0),

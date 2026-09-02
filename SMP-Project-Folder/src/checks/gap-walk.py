@@ -108,8 +108,9 @@ with sync_playwright() as p:
         # open the mode the way somebody actually would
         if pg.locator("[data-fillcta]").count():
             pg.locator("[data-fillcta]").first.click()
-        elif pg.locator(".penbtn[data-page='plan']").count():
-            pg.locator(".penbtn[data-page='plan']").first.click()
+        elif pg.locator("#secrow-in .secpen[data-page='plan']").count():
+            # §248: the pen is on the section line now, not in the pane corner.
+            pg.locator("#secrow-in .secpen[data-page='plan']").first.click()
         pg.wait_for_timeout(700)
         ck("%s: Next gap is on the bar" % tag,
            pg.locator("[data-nextgap]").count() > 0)

@@ -365,6 +365,49 @@ console errors (in this cloud environment, run it via a wrapper that points Play
   `node scripts/test-door.js <smo-password>` against a running dev-server
   after touching `api/auth.js` or `lib/auth.js` (it ends by rate-limiting the
   SMO on purpose — `DELETE FROM login_attempts;` clears it).
+- **THE STRATEGY PEN LIVES ON THE SECTION LINE (§248):** Islam — *"the edit
+  button of the plans can you make it in the same line of the foundation sowt
+  and plan? … verifying that it's only in the startegy anyway."* **HALF OF IT
+  WAS ALREADY THERE**: with the plan open the line rendered `Done filling`
+  (`editbtn fdone`) — the wrong word for the office, who are EDITING, and
+  **undressed**, `background: rgba(0,0,0,0)` and `border: 0px`, because
+  `.tabs button` (0,1,1) outranks `.editbtn` (0,1,0); §145.14's own trap on the
+  one control it missed. What was missing was the way IN. **THE PEN WAS NEVER
+  IN ONE PLACE** — 234 · 233 · 236 · 308 by section, and Marketing drew TWO
+  (y=308 and y=1004, one below the fold) throwing one flag (§94.15). **ONE MAP,
+  read by the pen AND by the fill bar**, and it fixed a bug nobody had reported:
+  `fillPageForSec()` answered `foundation` for a PILLARS function's Overview
+  while §213 made that page read `capfoundation`, so its red button set a flag
+  nothing acts on and opened **0 fields** — rendering perfectly (§96).
+  **WHICH PEN A SECTION HAS AND WHICH GAPS IT CAN FILL ARE TWO QUESTIONS** —
+  collapsing them handed the bar `analysis` for the SWOT, a page no fill grant
+  reaches; the second is asked of `SMPRules.FILL_PAGES`, never a second list.
+  **THE PAIRS ARE THE ONES THE OLD CONTROLS ASKED, to the letter**, so nobody's
+  rights move — a function's Projects keeps `u_plan` because `projEditing()` has
+  asked `mayEditPlan()` since spec 010. **ONE TAIL** (`.missbar` already carries
+  `margin-left:auto`, so a second right-aligned group strands the red button
+  mid-row — drawn, looked at, thrown away). **ONE WAY OUT**: the bar drops
+  `Done filling` where the line says `Done editing`, and a fill holder, who
+  authors nothing, keeps it. **ARRANGE STAYS IN THE PANE** — §101's arrows go to
+  somebody who may reorder and NOT author, so the slot is never shared.
+  **§194 IS BETTER SERVED, NOT DROPPED**: the line pins higher than the pillar's
+  head, holds one control, and does not move between sections; the head keeps
+  the code, the name field and Remove. **THE GROUP IS UNTOUCHED** — its
+  Foundation and Temple are TABS with no section line, so `aspirationCard()`
+  draws the pen on `isGroup`, which says why rather than which; cost stated: two
+  homes for an edit control until those pages are looked at. **NOT `Save`**
+  (asked, answered, recorded): the platform writes as you type, so the word
+  would say the work is lost until pressed (§124), and *Save draft* is taken
+  (§87). **`editBar()` DELETED, by name and brace depth** (§24, §214).
+  Islam picked **A** (the red button stays beside the pen) and the **whole
+  Strategy tab** from three placements drawn into the real page (§41.9); the
+  glyph was rejected and the picture is the argument. 48 red before; contrast
+  8.95/5.32 light, 8.53/9.82 dark. **AND THE SWEEP WAS MOST OF THE WORK**:
+  fourteen checks and `qa.py` pressed the moved pen and would have gone
+  silently green (§51.11) — grep `.penbtn`, not the one spelling that failed
+  first; two assertions changed MEANING rather than selector; and my own widened
+  selector in `fn-pillars` then wrote to the wrong field while asserting the
+  right one (§94.8).
 - **THE PLAN'S TITLES COULD NOT WRAP AT ALL (§189):** Islam — *"wrap the
   content of the plans edit boxes across pillars and functions, specially for
   the titles and descriptions."* Not a bad wrap: every title and description
@@ -3946,6 +3989,13 @@ python3 checks/band-corner.py   # the pinned title's corners, measured in PIXELS
                                 # DOM probe calls the broken build clean (§130.3, §53.7)
 python3 checks/no-jump.py       # nothing moves the register under you — the act of
                                 # OPENING a row included, since §110.7
+python3 checks/plan-edit-line.py # the strategy pen is ON the section line (§248): every
+                                # section on both sides of the switch opened and closed from
+                                # it and read back from the DATA; no pen left in the page
+                                # body; both ends (an author has it, a unit head and a CEO
+                                # do not, agreeing with the shared rule); the GROUP's own
+                                # Foundation and Temple untouched; one way out, not two; and
+                                # one line at six widths. 48 red on the build before
 python3 checks/plan-builder.py  # building a plan ON the platform: the door, the chooser,
                                 # the band's map, every row form asked of the DATA, and the
                                 # empty-state fixes — proved able to fail twice (§129)
@@ -4108,7 +4158,28 @@ prior sessions (on HR_ERP) accidentally reverted agreed-upon designs.
 
 ---
 
-*Last Updated: 2026-09-01 &mdash; **&sect;245: the functions are on the
+*Last Updated: 2026-09-02 &mdash; **&sect;248: the strategy pen lives on the
+section line.** Islam &mdash; *"the edit button of the plans can you make it in
+the same line of the foundation sowt and plan? as it's a better placement for
+opening and savng? verifying that it's only in the startegy anyway and not
+anywhere else."* Checked first, and the check said more than the ask did: with
+the plan open the line ALREADY rendered a control &mdash; `Done filling`, the
+wrong word for the office and stripped of its button dress by `.tabs button`
+(&sect;145.14's own trap, on the one control it missed) &mdash; while the way IN
+was genuinely absent. The pen sat at four different heights by section and TWICE
+on a two-project function, one copy below the fold, both throwing one flag
+(&sect;94.15). Islam picked **A** and the **whole Strategy tab** from three
+placements drawn into the real page. One map now answers which page a section's
+pen is, which corrected a bug nobody had reported: a pillars function's Overview
+button named `foundation` while the page reads `capfoundation` since &sect;213,
+so it opened **0 fields**, rendering perfectly (&sect;96). The GROUP's Foundation
+and Temple are untouched &mdash; tabs with no section line &mdash; which is the
+second half of the ask answered. **NOT `Save`**, asked and answered: the platform
+writes as you type. `checks/plan-edit-line.py`: **48 red** on the build before;
+full `qa.py` sweep clean. **And the check sweep was most of the work**
+(&sect;51.11): fourteen files and `qa.py` pressed the moved pen.*
+
+*Earlier: 2026-09-01 &mdash; **&sect;245: the functions are on the
 function half, in one list; &sect;246: the cycle note is a line somebody
 wrote.** Islam, looking at what &sect;244 shipped &mdash; *"merch and marketing
 and cf should be with functions not units"* &mdash; and, of the two bands drawn

@@ -267,8 +267,15 @@
    v4.21, which git merges without a word while the bytes differ — so v4.22.
    Name checked against origin/main serving
    "smp-shell-v4.21-office-starts-a-conversation"; confirm again immediately
-   before the push (§94.16). */
-const SHELL = "smp-shell-v4.24-outcome-missing-audit";
+   before the push (§94.16).
+
+   §250: a tactic's outcome is measured against its own window rather than the
+   year, so the built file's bytes changed and the name must too — a returning
+   browser caches by NAME and would go on serving itself the old platform out of
+   its own disk (§91). Checked against origin/main serving
+   "smp-shell-v4.24-outcome-missing-audit"; confirmed again immediately before
+   the push (§94.16). */
+const SHELL = "smp-shell-v4.25-tactic-window-proration";
 const ASSETS = [
   "/",
   "/index.html",

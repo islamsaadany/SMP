@@ -365,6 +365,42 @@ console errors (in this cloud environment, run it via a wrapper that points Play
   `node scripts/test-door.js <smo-password>` against a running dev-server
   after touching `api/auth.js` or `lib/auth.js` (it ends by rate-limiting the
   SMO on purpose — `DELETE FROM login_attempts;` clears it).
+- **THE REPORTING NOTE IS PROSE, AND HAD ONE LINE TO SAY IT IN (§253):** Islam
+  — *"in the reporting the notes table needs to wrap around the text and enable
+  multiple lines."* **§189's fault on the one field the platform REQUIRES**
+  (§105: anything at risk carries an explanation before it can be submitted):
+  the box was an `<input>`, which is ONE LINE by definition, so there was no
+  wrap available to it at all. Measured with a real off-track sentence in it —
+  **404px shown of 1334 needed** at 1500, **209 of 1334** on a supporting
+  function at 1100. **THE SHAPE IS §189'S AND IS NOT REBUILT**
+  (`textarea.fld.grow`, whose rules are declared once in `_shared.css`); what
+  is added is `vertical-align:top`, so a four-line note sits level with the row
+  it explains. **ITS OWN BUILDER (`noteBox`), NEVER `textOr`** — these two
+  fields are not bound through `FIELDS` at all: a note is written by a REPORTER
+  against a row id (`data-note` on a unit or a pillars function, `data-cnote`
+  on a capability function) and both handlers do more than set a value (§183).
+  **ENTER IS A NEWLINE HERE, WHICH REVERSES §229 FOR THIS FIELD ALONE** and
+  needed no code: that key handler lives in the `[data-fld]` branch these
+  fields do not pass through, so `grow` means *size yourself to your content*
+  and nothing about the key — **both ends asserted**, because a title and a
+  note now hold opposite rules one class apart. **AND THE BREAK MUST SURVIVE
+  BEING READ** (§161.3, one field over): HTML collapses a newline, so
+  `white-space:pre-line` on `.notetext` — through **one builder (`noteRead`)
+  for all six places that print a stored note**, because a class added at five
+  of them is the drift this exists to stop (§53.5, §104.7); scoped there and
+  never to `.why` at large, which is the platform's aside rather than a
+  reporter's words. The cycle note joins it: a `rows="3"` area has always taken
+  a paragraph key and had its breaks closed up on read. **ONE GROWER**
+  (`growBox`), where sizing-to-content was written out twice and this would
+  have been the third (§3b). **Nothing stored moves and nothing is migrated** —
+  and no workbook or `.pptx` carries a reported note at all, checked rather
+  than assumed, so there is no round trip for a newline to break. **The 95px
+  overrun at 900px is §249's recorded residue**, measured identical to the
+  pixel on the build before. Proved able to fail: **18 red**, printing the
+  reported symptom verbatim — **and one of the check's own failures was the
+  CHECK** (a stub not serving `sw.js`, §231.5), which is the same fault
+  §250.2 recorded as leaving `checks/report-saves.py` red on `main`, fixed in
+  the same edit.
 - **THE PRESENTATION READS WHAT WAS REPORTED (§252):** Islam — *"presentations
   doesn't change when the plan performance is done"*, and then *"the
   presentation should update on either save draft or submit."* **THE PROPOSED
@@ -4165,6 +4201,14 @@ python3 checks/report-saves.py  # reporting REACHES THE STORED PLAN and schedule
                                 # — over HTTP, because a save cannot be seen over file:// at
                                 # all; plus Save draft answering rather than sitting on
                                 # "Saving…" (§183)
+python3 checks/report-note-wrap.py # the reporting note is PROSE (§253): nothing clipped
+                                # sideways with a real sentence in it on all three shapes,
+                                # a real Enter making a line rather than committing, both
+                                # lines read back off the STORED row through each page's
+                                # own hook, the break kept wherever the note is READ —
+                                # the read-only cell and the projector — and a plan TITLE
+                                # asserted to still commit on Enter (§229 one class away).
+                                # 18 red on the shipped pre-§253 build
 python3 checks/project-dates.py # a project's Start and End are PICKED as `Jul 26`, and the
                                 # overrun warning reads them the platform's way — an EXACT set,
                                 # because Date.parse("Jul 26") is 26 July 2001 and any
@@ -4406,7 +4450,34 @@ prior sessions (on HR_ERP) accidentally reverted agreed-upon designs.
 
 ---
 
-*Last Updated: 2026-09-02 &mdash; **&sect;252: the presentation reads what was
+*Last Updated: 2026-09-02 &mdash; **&sect;253: the reporting note is prose, and
+had one line to say it in.** Islam: *"in the reporting the notes table needs to
+wrap around the text and enable multiple lines."* **&sect;189's fault on the one
+field the platform REQUIRES somebody to write** (&sect;105's Submit refusal): the
+note box was an `<input>`, which is ONE LINE by definition, so there was no wrap
+available to it at all &mdash; a long explanation ran off the end and you
+scrolled sideways inside it. Measured first, with the kind of sentence somebody
+actually writes when a figure is off track: **404px shown of 1334 needed** at
+1500, and **209 of 1334** on a supporting function at 1100, on all three shapes.
+It takes &sect;189's own `textarea.fld.grow` &mdash; not rebuilt, inherited
+&mdash; plus one line of its own, `vertical-align:top`, so a four-line note sits
+level with the row it explains. **Enter is a newline here, which reverses
+&sect;229 for this field alone**: that rule is about TITLES, and a note is a
+paragraph somebody is explaining themselves in &mdash; it needed no code (the key
+handler lives in a branch these fields do not pass through) and **both ends are
+asserted**, because the two rules now sit one class apart. **And the break has to
+survive being READ** (&sect;161.3, one field over): HTML collapses a newline, so
+without `pre-line` the box would promise a paragraph it never makes &mdash;
+through ONE builder for all six places that print a stored note, including the
+deck on a projector. Nothing stored moves, nothing is migrated, and no workbook
+carries a reported note at all (checked, not assumed). **18 red** on the shipped
+build, 0 after; the table's fit at 900px is unchanged to the pixel, so
+&sect;249's recorded residue stays recorded. And one of the new check's own
+failures was the CHECK &mdash; a stub not serving `sw.js` (&sect;231.5) &mdash;
+which is the fault &sect;250.2 recorded as leaving `checks/report-saves.py` red
+on `main`, fixed in the same edit.*
+
+*Earlier the same day: **&sect;252: the presentation reads what was
 reported.** Islam: *"presentations doesn't change when the plan performance is
 done"*, then *"the presentation should update on either save draft or submit."*
 **THE PROPOSED FIX WOULD HAVE CHANGED NOTHING** &mdash; the deck is assembled

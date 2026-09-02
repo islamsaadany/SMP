@@ -3117,7 +3117,6 @@
       });
     });
     document.querySelectorAll("[data-cnote]").forEach(function(el){
-      growBox(el);   /* §253, as on the unit's side */
       el.addEventListener("change", function(){
         var hit = capItemById(el.dataset.cnote);
         if (hit) { hit.obj.note = el.value.trim() || null; paint(); }
@@ -3499,10 +3498,6 @@
       });
     });
     document.querySelectorAll("[data-note]").forEach(function(el){
-      /* §253: the box follows what is being typed into it. Wired here rather
-         than in `growFields()` — that one sizes what a paint has just drawn,
-         and this is the listener for the keystrokes in between. */
-      growBox(el);
       el.addEventListener("change", function(){
         /* The same fault and the same fix as the figure beside it (§183): a
            note typed on a pillars function's reporting page threw and was
@@ -3920,7 +3915,12 @@
          `input` where a repaint would destroy the field being typed into
          (§35). Height is cleared first, or the box can only ever grow. */
       if (el.tagName === "TEXTAREA") {
-        growBox(el);   /* the one grower (§253) */
+        var fit = function(){
+          el.style.height = "auto";
+          el.style.height = (el.scrollHeight + 2) + "px";
+        };
+        el.addEventListener("input", fit);
+        fit();
         /* §229: ENTER COMMITS A ONE-LINE PROSE BOX. §189's own text promised
            it ("Enter blurs, which is what commits the value") and no code
            ever carried it out, so a stray newline could ride a title into the

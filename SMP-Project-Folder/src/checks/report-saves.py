@@ -41,6 +41,7 @@ ROOT = pathlib.Path(__file__).resolve().parents[3]
 HTML = pathlib.Path(os.environ.get("SMP_REPORT_HTML") or
                     (ROOT / "SMP-Project-Folder/src/strategy-management-platform.html")).read_bytes()
 BASE = json.loads((ROOT / "db/seed-state.json").read_text())
+SW = (ROOT / "sw.js").read_bytes()
 PERSON = {"key": "smo", "name": "Mohamed Essam", "role": "super"}
 POSTS = []
 bad = 0
@@ -66,6 +67,14 @@ class H(http.server.BaseHTTPRequestHandler):
             self._s(json.dumps({"ok": True, "person": PERSON}).encode()); return
         if self.path.startswith("/raya-trade"):
             self._s(HTML, "text/html; charset=utf-8"); return
+        # THE STUB SERVES THE WORKER (§253, closing §250.2's recorded red). The
+        # platform registers `sw.js` itself since §231.5, and this stub answered
+        # it as html — so `register()` rejected on a content type and all three
+        # shapes failed "nothing threw while reporting" on `main` and on the
+        # shipped file alike. §100.3: a stub that does not model the server is
+        # testing something the product does not do.
+        if self.path.startswith("/sw.js"):
+            self._s(SW, "text/javascript; charset=utf-8"); return
         self._s(b"<!doctype html><title>gate</title>", "text/html; charset=utf-8")
     def do_POST(self):
         n = int(self.headers.get("Content-Length") or 0)

@@ -803,20 +803,8 @@
     color:var(--ink)}
   input.field.filled{border-color:var(--good);background:var(--good-bg)}
   input.field:focus-visible{outline:2px solid var(--gold);outline-offset:1px}
-  /* A NOTE IS PROSE AND GETS AS MANY LINES AS IT NEEDS (§253). This was an
-     `<input>`, so a real explanation ran off the end of a 404px box; it is
-     `textarea.fld.grow` now — §189's shape, whose own rules (no resize grip,
-     no inner scrollbar, sized to fit) are declared once in `_shared.css` and
-     are not repeated here. What is left is what a NOTE wants and a title does
-     not: the top of the box level with the row it explains, so a four-line
-     note does not float in the middle of a cell beside a one-line figure. */
-  .notefld{width:100%;max-width:none;text-align:left;font-size:13px;vertical-align:top}
+  .notefld{width:100%;max-width:none;text-align:left;font-size:13px}
   .notefld.needed{border-color:var(--bad);background:var(--bad-bg)}
-  /* And the break survives being read (§253, §161.3): `pre-line` keeps the
-     newlines somebody typed and wraps everything else. On the READ-ONLY note
-     wherever it is printed — never on `.why` at large, which is the page's
-     quiet aside and is written by the platform, not by a reporter. */
-  .notetext{white-space:pre-line}
   tr.wantnote td:first-child{box-shadow:inset 3px 0 0 var(--bad)}
   .bad-note{border-left:3px solid var(--bad);background:var(--bad-bg)}
   .repcell{display:flex;align-items:center;gap:10px}

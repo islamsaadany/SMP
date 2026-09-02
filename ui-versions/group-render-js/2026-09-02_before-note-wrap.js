@@ -422,7 +422,7 @@ function measureRows(ms, opts){
                (on ? handle("Reorder " + m.name) : '') +
                '<span class="idx-n">' + (i+1) + '</span></td><td>' + esc(m.name) + hidChip(m) + fmark(m.id) +
                (m.horizon ? '<span class="why">measured at ' + esc(m.horizon) + '</span>' : '') +
-               noteRead(m.note) +
+               (m.note ? '<span class="why">' + esc(m.note) + '</span>' : '') +
                '</td><td class="num">' + dirCell(m.dir) + '</td><td class="num">' + esc(m.target) +
                '</td><td class="cc">' + compileCell(m.compile) + '</td>';
     if (opts.unscored) return head + '</tr>';
@@ -679,7 +679,7 @@ function tacticRows(ts, unitKey){
       '<span class="idx-n">' + (i+1) + '</span></td><td><b class="tacname">' +
       esc(t.name) + '</b>' + hidChip(t) +
       (t.description ? '<span class="why">' + esc(t.description) + '</span>' : '') +
-      noteRead(t.note) + '</td>' +
+      (t.note ? '<span class="why">' + esc(t.note) + '</span>' : '') + '</td>' +
       '<td>' + outcomeCell(t) + '</td>' +
       '<td>' + esc(t.owner) + '</td><td class="collabs">' + collabCell(t) + '</td>' +
       '<td>' + qs(t) + '</td><td class="cc">' + status + '</td>' + tail + '</tr>';
@@ -2386,23 +2386,11 @@ function fieldOr(page, value, cls, setter){
    beside SEARCHSEL.wire(), because these are rebuilt on every paint and a
    height measured before the row is laid out is a height measured against
    nothing. */
-function fitBox(t){
-  t.style.height = "auto";
-  t.style.height = (t.scrollHeight + 2) + "px";
-}
 function growFields(root){
-  (root || document).querySelectorAll("textarea.fld.grow").forEach(fitBox);
-}
-/* ONE GROWER, ASKED BY EVERY BOX THAT GROWS (§253, §53.5). Sizing to the
-   content was written out three times — here at the end of paint(), inline in
-   the shell's `[data-fld]` branch, and it would have been a third copy for the
-   reporting note. Growing is not a repaint: it sets the element's own height
-   and touches nothing else, so it is safe on `input`, where a repaint would
-   destroy the field being typed into (§35). The height is cleared first, or the
-   box can only ever grow. */
-function growBox(el){
-  el.addEventListener("input", function(){ fitBox(el); });
-  fitBox(el);
+  (root || document).querySelectorAll("textarea.fld.grow").forEach(function(t){
+    t.style.height = "auto";
+    t.style.height = (t.scrollHeight + 2) + "px";
+  });
 }
 function textOr(page, value, cls, setter){
   if (!EDIT_PAGE[page] || !setter)
@@ -2410,52 +2398,6 @@ function textOr(page, value, cls, setter){
   var i = FIELDS.push(setter) - 1;
   return '<textarea class="fld grow ' + (cls || '') + '" data-fld="' + i +
     '" rows="1">' + esc(value) + '</textarea>';
-}
-/* THE REPORTING NOTE IS PROSE AND HAD ONE LINE TO SAY IT IN (§253). Islam:
-   *"in the reporting the notes table needs to wrap around the text and enable
-   multiple lines."* This was an `<input>`, which is ONE LINE by definition, so
-   a real explanation ran off the end and you scrolled sideways inside it —
-   §189's fault on the plan's titles, on the one field the platform REQUIRES
-   somebody to write (§105: a figure at risk cannot be submitted without it).
-   Measured on the shipped build with a three-clause sentence in it: 404px
-   shown of 1334 needed at 1500, and 209 of 1334 on a supporting function at
-   1100.
-
-   IT IS ITS OWN BUILDER RATHER THAN `textOr`, because these two fields are not
-   bound through `FIELDS` at all: a note is written by a REPORTER against a row
-   id (`data-note` on a unit, `data-cnote` on a capability function), and the
-   two handlers do more than set a value. What is shared with §189 is the SHAPE
-   — `textarea.fld.grow`, sized to what is in it — so the two kinds of prose box
-   in the product read as one control.
-
-   AND ENTER IS A NEWLINE HERE, WHICH REVERSES §229 FOR THIS FIELD ALONE and is
-   the second half of what was asked ("enable multiple lines"). §229's rule is
-   about TITLES — a plan row's name is one line however long, and the tables,
-   the deck and both workbooks print it as one — and a note is a paragraph
-   somebody is explaining themselves in. Nothing is needed to get it: that key
-   handler is wired in the `[data-fld]` branch, which these fields do not pass
-   through, so `grow` here means "size yourself to your content" and nothing
-   about the key. */
-function noteBox(hook, id, value, want){
-  return '<textarea class="fld grow notefld' + (want ? " needed" : "") + '" data-' + hook +
-    '="' + esc(id) + '" rows="1" placeholder="' +
-    (want ? "Why, and what is being done" : "Note, if there is one") + '">' +
-    esc(value || "") + '</textarea>';
-}
-/* AND THE OTHER HALF: A LINE BREAK SOMEBODY TYPED HAS TO SURVIVE BEING READ
-   (§253, §161.3's fault one field over). HTML collapses a newline to a space,
-   so a note written as two paragraphs would run together everywhere it is
-   READ — the reporting pane to somebody without the grant, the Performance
-   page, a capability's tables — and the box would be promising a break it
-   never makes. `pre-line` keeps the breaks and wraps the rest.
-
-   ONE BUILDER, because there are six places that print a stored note and a
-   class added at five of them is the drift this exists to stop (§53.5,
-   §104.7). `tight` is the margin the cell wants, not a second kind of note. */
-function noteRead(note, tight){
-  if (!note) return "";
-  return '<span class="why notetext"' + (tight ? ' style="margin:0"' : '') + '>' +
-    esc(note) + '</span>';
 }
 function inputOr(page, value, cls, setter){
   if (!EDIT_PAGE[page] || !setter) return '<span class="' + (cls || '') + '">' + esc(value) + '</span>';
@@ -3864,9 +3806,12 @@ function renderReport(u){
       (unit ? '<span class="unitsuf">' + esc(unit) + '</span>' : '') + '</span>';
   };
   var noteCell = function(x){
+    var want = needsNote(x);
     return canEnterNote(u.ukey, x)
-      ? noteBox("note", x.id, x.obj.note, needsNote(x))
-      : noteRead(x.obj.note, true);
+      ? '<input class="fld notefld' + (want ? " needed" : "") + '" data-note="' + x.id + '" value="' +
+        esc(x.obj.note || "") + '" placeholder="' +
+        (want ? "Why, and what is being done" : "Note, if there is one") + '">'
+      : (x.obj.note ? '<span class="why" style="margin:0">' + esc(x.obj.note) + '</span>' : '');
   };
   var doneOf = function(list){
     var n = 0;
@@ -4033,12 +3978,7 @@ function renderReport(u){
       ? '<textarea class="fld" data-unote="' + u.ukey + '" rows="3" style="width:100%;max-width:none" ' +
         'placeholder="What the numbers do not say \u2014 what happened, what is being done, what to expect next.">' +
         esc(cycleNote(u.ukey)) + '</textarea>'
-      /* The same reader as the row notes above it (§253): this box is a
-         `rows="3"` area and has always taken a paragraph key, so a break typed
-         into it must not close up the moment somebody else reads the page.
-         "None." is a status rather than a note, so it keeps the plain span. */
-      : (cycleNote(u.ukey) ? noteRead(cycleNote(u.ukey), true)
-                           : '<span class="why" style="margin:0">None.</span>')) +
+      : '<span class="why" style="margin:0">' + (cycleNote(u.ukey) ? esc(cycleNote(u.ukey)) : "None.") + '</span>') +
     '</div>';
 
   /* A blocked Submit with no explanation is hostile. If the unit is waiting on
@@ -4566,7 +4506,7 @@ function capKOTable(c){
     miniTable(["#","Objective","Weight","Dir.","Target","Reported","Score"],
       c.keyObjectives.map(function(m, i){
         return '<tr><td class="idx">' + (i+1) + '</td><td>' + esc(m.name) +
-          noteRead(m.note) + '</td>' +
+          (m.note ? '<span class="why">' + esc(m.note) + '</span>' : '') + '</td>' +
           '<td class="cc">' + (m.weight == null ? "&mdash;" : m.weight + "%") + '</td>' +
           '<td class="cc">' + dirCell(m.dir) + '</td>' +
           '<td class="num">' + (m.target ? esc(m.target) : '<span class="missing">Missing</span>') + '</td>' +
@@ -4592,7 +4532,7 @@ function projPerformanceBody(p, fk){
     var done = d ? statusReads(o) === 100 : (o.actual != null && o.actual !== "");
     return '<tr' + (notDue && !has ? ' class="notdue"' : '') + '>' +
       '<td class="idx">' + (i+1) + '</td><td>' + esc(o.name) + lateNote(when, done) +
-        noteRead(o.note) + '</td>' +
+        (o.note ? '<span class="why">' + esc(o.note) + '</span>' : '') + '</td>' +
       '<td class="cc">' + dxType(row) + '</td>' +
       '<td class="num">' + dxTarget(row) + '</td>' +
       '<td class="cc">' + got + '</td>' +
@@ -5106,15 +5046,11 @@ function capPctBox(x, may, label){
     '" placeholder="\u2014" aria-label="Per cent complete for ' + esc(label) + '">' +
     '<span class="unitsuf">%</span></span>';
 }
-/* THROUGH `noteBox` (§253), or the two halves of one product's reporting go on
-   being fine differently (§53.5, A15): the fault this fixes was on both pages
-   and a fix to one of them is how they drift. This side asks for no note, so
-   `want` is false and the placeholder is the quiet one — which is a difference
-   in what is OWED, not in the control. */
 function capNoteBox(x, may){
   return may
-    ? noteBox("cnote", x.id, x.note, false)
-    : noteRead(x.note, true);
+    ? '<input class="fld notefld" data-cnote="' + x.id + '" value="' + esc(x.note || "") +
+      '" placeholder="Note, if there is one">'
+    : (x.note ? '<span class="why" style="margin:0">' + esc(x.note) + '</span>' : '');
 }
 function capPickBox(x, may, opts, val){
   if (!may) return '<span class="mono">' + (val ? esc(val) : "\u2014") + '</span>';

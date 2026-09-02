@@ -286,8 +286,13 @@
    bytes behind the name differ — caught by §94.16's confirmation immediately
    before the push, never by the merge. Checked against origin/main serving
    "smp-shell-v4.26-unit-before-number"; confirm again immediately before the
-   push. */
-const SHELL = "smp-shell-v4.27-outcome-on-the-deck";
+   push.
+
+   §253: the reporting note is a growing textarea and a typed break survives
+   being read — the built file's bytes changed, so the name does too. Checked
+   against origin/main serving "smp-shell-v4.27-outcome-on-the-deck"; confirm
+   again immediately before the push (§94.16). */
+const SHELL = "smp-shell-v4.28-note-wrap";
 const ASSETS = [
   "/",
   "/index.html",

@@ -5664,7 +5664,12 @@ function measureScore(m){
    These five ride in the tactic's `extra` (§177's road), so there is no
    schema change either. */
 function outcomeOf(t){
+  /* A NUMBER, not merely a non-empty string. The unit is stored on its own
+     while the office is still choosing one — `outTarget` holds "%" before it
+     holds "90%" — so a truthiness test would call that a target and start
+     scoring a row against nothing. */
   if (!t || !t.outTarget) return null;
+  if (isNaN(parseFloat(String(t.outTarget).replace(/[^0-9.]/g, "")))) return null;
   return { dir: t.outDir || "\u2265", target: t.outTarget,
            compile: t.outCompile, actual: t.outActual };
 }

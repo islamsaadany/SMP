@@ -470,12 +470,19 @@ console errors (in this cloud environment, run it via a wrapper that points Play
   office's and a fillable name with an unfillable target is §205. **FOUR EQUAL
   BOXES IN ONE CELL** (his): `--tw` is 96px, what a select needs for *Average*,
   measured — the width handed back goes to the prose columns and the rows get
-  SHORTER (149 → 131). **AND §158 DOES NOT BEND**: the description is drawn
-  TWICE and CSS picks (column above 1000, a line under the name below), the
-  target folds the same way below 880, **neither folds while the pen is open**
-  (§61's trap, walked into and caught by measuring both modes at four widths),
-  and the head folds only when its cells do — decided where `ed` is known,
-  never with `:nth-child`. **The workbook carries the three new facts** or a
+  SHORTER (149 → 131). **THE DESCRIPTION IS UNDER THE TACTIC'S NAME** — his choice
+  between two drawn shapes, and the first build got it wrong and shipped a
+  column; he caught it from the running page. §158 comes free with it (seven
+  columns fit everywhere), so only the TARGET folds, below 880, and **never
+  while the pen is open** (§61: the four controls are the only way to set it);
+  the head folds with its cells, decided where `ed` is known, never with
+  `:nth-child`. **AND THE UNIT PICKER IS ALWAYS DRAWN** — hiding it until a
+  target exists is right in a column and wrong inside four equal boxes, where
+  the hole reads as a control that failed to render. A unit is held ALONE until
+  a number joins it (`outTarget` is `"#"`, then `"6#"`; clearing the number
+  keeps the unit), which needed `outUnitOf()`: `targetParts` falls back to
+  `{value: the whole string, unit: ""}`, so a truthiness test threw the unit
+  away on the first keystroke. **The workbook carries the three new facts** or a
   round trip drops every target (§22), with Q1–Q4 moving G:J → J:M because a
   validation range is a POSITION (§65). **`outActual` joins `REPORT.tactic`**
   in the same edit as the box that writes it (§42, §147). Proved able to fail:

@@ -1781,7 +1781,16 @@ td.tgtcell { width:1px; white-space:nowrap; }
 /* `.fld` is width:100% in this stylesheet, so without this the first control
    on a row asks for the whole line and takes it — measured at 224px with its
    neighbour squeezed to 18. Every box says its own width instead. */
-.tgrid > * { width:var(--tw) !important; min-width:0 !important; box-sizing:border-box; }
+/* `:not(.ss-native)` because a searchable select leaves its NATIVE element in
+   place, absolutely positioned and clipped to a pixel (§45.5) — and a blanket
+   width would blow it back up to 96px inside a grid it is not part of. */
+.tgrid > *:not(.ss-native) { width:var(--tw) !important; min-width:0 !important;
+                             box-sizing:border-box; }
+/* And the native one keeps the pixel it is meant to be: `.fld` is width:100%
+   at the same specificity and wins on source order, so without this it grows
+   to the pane's width — out of flow and invisible, and still a box that big
+   sitting in a table cell. */
+.tgrid > .ss-native { width:1px !important; }
 .tgrid > .why { display:flex; align-items:center; justify-content:center; }
 
 /* A second fact under a headline one inside a data cell — the whole-year
@@ -1795,16 +1804,11 @@ td.tgtcell { width:1px; white-space:nowrap; }
          letter-spacing:0; text-transform:none; }
 th .subhd { font-weight:400; }
 
-/* THE DESCRIPTION HAS A COLUMN WHERE THERE IS ROOM AND A LINE WHERE THERE IS
-   NOT (§245, keeping §158). Measured: eight columns overflow the plan pane by
-   21px at a 960 window and 151px at 830 — and a plan table may not scroll
-   sideways. The column goes below 1000 and the same words appear under the
-   tactic's name instead, so nothing is lost at any width. */
-.narrowdesc, .narrowtgt { display:none; }
-@media (max-width: 1000px) {
-  .desccol { display:none; }
-  .narrowdesc { display:block; }
-}
+/* THE DESCRIPTION IS NOT A COLUMN — it sits under the tactic's name on all
+   three surfaces (§245, Islam's choice). What still folds is the TARGET,
+   below 880, where seven columns run 44px past a 515px pane and §158 does not
+   bend. */
+.narrowtgt { display:none; }
 /* And one step further down: below 880 the Target column goes too and its
    value rides under the outcome it belongs to. Never in edit mode — the four
    controls are the only way to set it, so hiding them would leave a field

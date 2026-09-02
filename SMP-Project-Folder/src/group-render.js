@@ -503,20 +503,40 @@ function setOr(row, field, v){
    over pairing the direction with the value it qualifies. The unit rides ON
    the target string exactly as a measure's does (§199), so there is no second
    convention for what a target looks like. */
+/* THE UNIT, WHETHER OR NOT A NUMBER IS THERE YET. `targetParts` reads a value
+   FOLLOWED BY a unit, so a bare "#" comes back as a value of "#" with no unit
+   — right for a target, wrong here, where the office may pick what a thing is
+   measured in before deciding how much of it. One field still (§53.5): with no
+   number the whole string IS the unit, and typing one joins them. */
+function outUnitOf(t){
+  var v = String((t && t.outTarget) || "").trim();
+  if (!v) return "";
+  var parts = splitTarget(v);
+  /* NUMERIC, not merely non-empty. `targetParts` falls back to `{value: the
+     whole string, unit: ""}` when it cannot see a number, so a bare "#" comes
+     back with a truthy value and an empty unit — and a truthiness test then
+     throws the unit away on the next keystroke. Measured: the unit vanished
+     the moment a number was typed. */
+  return /^-?[\d.,]+$/.test(parts.value) ? parts.unit : v;
+}
 function outcomeEdit(t){
-  var unit = splitTarget(t.outTarget || "").unit;
+  var unit = outUnitOf(t);
   return '<div class="tgrid">' +
     inputOr("plan", splitTarget(t.outTarget || "").value, "mono", function(v){
       var n = String(v == null ? "" : v).trim();
-      if (!n) delete t.outTarget;
-      else t.outTarget = joinTarget(t.outTarget || "", n, splitTarget(t.outTarget || "").unit);
+      var u = outUnitOf(t);
+      /* Cleared, the UNIT survives — somebody correcting a figure has not
+         changed their mind about what it is measured in. */
+      if (!n) { if (u) t.outTarget = u; else delete t.outTarget; }
+      else t.outTarget = joinTarget(t.outTarget || "", n, u);
     }) +
-    /* The unit is a PICK from the platform's own list, and setting it on a row
-       with no number yet is meaningless — the unit is written with the target
-       (§199), so there is nothing to write it onto. */
-    (t.outTarget
-      ? selectOr("plan", unit, targetUnitOpts(unit), "", function(v){ setTargetUnit2(t, v); })
-      : '<span class="why" title="Set a target first \u2014 the unit is written with it">\u2014</span>') +
+    /* THE UNIT PICKER IS ALWAYS THERE. The measures table hides it until a
+       target exists — right in a column of its own, and wrong inside a block
+       of four equal boxes, where the hole reads as a control that failed to
+       draw (Islam: "the target column is missing the unit drop down"). So the
+       unit can be chosen FIRST and is held on its own until a number arrives
+       to join it: `outTarget` is "%" for as long as it takes to type 90. */
+    selectOr("plan", unit, targetUnitOpts(unit), "", function(v){ setTargetUnit2(t, v); }) +
     selectOr("plan", t.outDir || "\u2265", ["\u2265", "\u2264"], "mono",
              function(v){ setOr(t, "outDir", v); }) +
     selectOr("plan", t.outCompile || "", ["", "Sum", "Latest", "Average"], "",
@@ -528,9 +548,14 @@ function outcomeEdit(t){
    second definition of how a unit joins a number (§53.5). */
 function setTargetUnit2(t, u){
   var want = String(u == null ? "" : u).trim();
-  var cur  = splitTarget(t.outTarget || "");
+  var val  = splitTarget(t.outTarget || "").value;
+  if (!/^-?[\d.,]+$/.test(val)) val = "";
+  var cur  = { value: val, unit: outUnitOf(t) };
   if (want === cur.unit) return;
-  if (!cur.value) return;
+  /* With no number yet the unit is stored alone and joins the moment one is
+     typed; emptied with no number, the key GOES (§50.6) rather than leaving a
+     row holding a target of "". */
+  if (!cur.value) { if (want) t.outTarget = want; else delete t.outTarget; return; }
   t.outTarget = joinTarget("", cur.value, want);
 }
 
@@ -5311,23 +5336,26 @@ function unitPlanBody(it, u, railed){
                     : '<b class="tacname">' + esc(t.name) + '</b>') +
         (ed ? eyeBtn(t, "plan", "u_plan") : hidChip(t)) +
         xb("tactics", t.id) +
-        /* §158 AND §245 MEETING: eight columns do not fit a 545px pane, and a
-           plan table that scrolls sideways is the fault §158 exists to stop.
-           So the description is drawn TWICE and CSS picks — a column where
-           there is room, a line under the name where there is not. Rendered
-           rather than decided in JavaScript, because a paint that depends on
-           the window's width needs a repaint on every resize and §28.3 has
-           already cost this project a day over exactly that. */
-        (!ed && t.description ? '<span class="why narrowdesc">' + esc(t.description) + '</span>' : '') +
+        /* THE DESCRIPTION SITS UNDER THE TACTIC'S OWN NAME, in the same cell,
+           on all three surfaces — Islam's choice between the two drawn
+           options, and the one that keeps every control on screen while a plan
+           is being written (a column made the editing table 1517px and pushed
+           Quarters off the right at a 1500 window). A column here would also
+           put the field in a different place on this page than on Reporting
+           and Performance, which have no width for one at all.
+
+           §158 comes free with it: seven columns fit the pane at every width,
+           so nothing has to fold and no plan table scrolls sideways. */
+        (ed ? textOr("plan", t.description || "", "tacdesc",
+                     function(v){ setOr(t, "description", v); })
+            : (t.description ? '<span class="why">' + esc(t.description) + '</span>' : '')) +
         '</td>' +
       /* WHAT IT IS FOR, and WHAT IT SHOULD PRODUCE (§245). Both `textOr`,
          because both are prose that must wrap (§189) — a title in an <input>
          is one line by definition and runs off the end. Neither is a counted
          gap: an empty one is quiet, so no existing plan gains 83 red words
          overnight. */
-      '<td class="' + (ed ? '' : 'desccol') + '">' + (ed ? textOr("plan", t.description || "", "",
-                            function(v){ setOr(t, "description", v); })
-                   : (t.description ? esc(t.description) : '<span class="nobody">&mdash;</span>')) + '</td>' +
+
       '<td>' + (ed ? textOr("plan", t.outcome || "", "",
                             function(v){ setOr(t, "outcome", v); })
                    : outcomeCell(t) +
@@ -5503,18 +5531,13 @@ function unitPlanBody(it, u, railed){
        displayed on NO screen at all and the outcome only as a grey line under
        the name. They are columns now, on the page where the plan is written.
        `addRow` spans one less than the head, as it always has. */
-    /* NEITHER COLUMN FOLDS WHILE THE PEN IS OPEN. Folding one hides the
-       only control that writes it, which is a field nobody can reach (§61) —
-       the trap this project keeps walking into. Editing scrolls sideways below
-       1000 instead, which is the cost we accepted: writing a plan is a desk
-       job, reading one fits everywhere. */
-    miniTable(["#","Tactic",{h:"Description", cls: ed ? "" : "desccol"},"Outcome",
-               /* THE HEAD FOLDS ONLY WHEN ITS CELLS DO, and CSS cannot see a
-                  row's mode from a header — so the class is decided here,
-                  where `ed` is known, rather than guessed at with a selector. */
-               {h:"Target", cls: ed ? "" : "tgtcol"},
+    /* THE TARGET FOLDS BELOW 880 AND THE HEAD FOLDS WITH ITS CELLS — decided
+       here, where `ed` is known, rather than guessed at with `:nth-child`.
+       Never while the pen is open: the four controls are the only way to set
+       the target, so hiding them leaves a field nobody can reach (§61). */
+    miniTable(["#","Tactic","Outcome",{h:"Target", cls: ed ? "" : "tgtcol"},
                "Owner","Collabs.","Quarters"],
-      tRows + addRow(7, "tactic", "Add a tactic"), sortAttr("tactics"));
+      tRows + addRow(6, "tactic", "Add a tactic"), sortAttr("tactics"));
 }
 function renderUnitPlan(u){
   var sel = unitRailPick(u);

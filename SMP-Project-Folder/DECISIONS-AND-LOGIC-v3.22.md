@@ -27056,17 +27056,30 @@ two rules below** — his grouping, over pairing the direction with the value it
 qualifies. The unit rides ON the target string exactly as a measure's does
 (§199).
 
-**AND §158 DOES NOT BEND.** Eight columns overflow a 545px pane by 151px, and a
-plan table that scrolls sideways is the fault §158 exists to stop. So the
-description is **drawn twice and CSS picks** — a column where there is room, a
-line under the name where there is not (below 1000) — and the target folds the
-same way below 880. Rendered rather than decided in JavaScript, because a paint
-that depends on the window's width needs a repaint on every resize and §28.3
-has already cost this project a day over exactly that. **Neither folds while
-the pen is open**, or the only control that writes the field is hidden (§61's
-trap, walked into once during this build and caught by measuring both modes at
-four widths). **The head folds only when its cells do**, decided where `ed` is
-known rather than guessed at with `:nth-child`.
+**THE DESCRIPTION SITS UNDER THE TACTIC'S NAME, and the first build got that
+wrong.** Two shapes were drawn — a column of its own, or the same cell as the
+name with the name in bold — and Islam chose the second. I built the first, and
+he caught it from the running page: *"that's not what we agreed on."* His choice
+is also the one that keeps every control on screen while a plan is written: a
+column made the editing table 1517px and pushed Quarters off the right at a 1500
+window, and it would have put the field in a different place here than on
+Reporting and Performance, which have no width for a column at all. **§158 comes
+free with it** — seven columns fit at every width, so only the TARGET folds,
+below 880, and never while the pen is open (§61: the four controls are the only
+way to set it). The head folds with its cells, decided where `ed` is known
+rather than guessed at with `:nth-child`.
+
+**AND THE UNIT PICKER IS ALWAYS DRAWN.** The measures table hides it until a
+target exists, which is right in a column of its own and wrong inside a block
+of four equal boxes, where the hole reads as a control that failed to render —
+Islam: *"the target column is missing the unit drop down."* So a unit can be
+chosen FIRST and is held alone until a number arrives to join it. **One field
+still**: `outTarget` is `"#"` for as long as it takes to type 6, then `"6#"`,
+and clearing the number keeps the unit. That needed `outUnitOf()`, because
+`targetParts` reads a value FOLLOWED BY a unit and falls back to
+`{value: the whole string, unit: ""}` — so a truthiness test threw the unit away
+on the first keystroke, measured. And `outcomeOf` now requires a NUMBER rather
+than a non-empty string, or a row would be scored against a bare unit.
 
 **THE WORKBOOK CARRIES THE THREE NEW FACTS**, or a download-and-re-upload would
 drop every target the office had set (§22: an upload AUTHORS). **A validation

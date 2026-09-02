@@ -44,7 +44,11 @@ with sync_playwright() as p:
     pg.goto("file://"+SRC); pg.wait_for_timeout(1200)
     open_plan(pg)
     h = heads(pg)
-    ck("the plan's tactics table names all three", h and all(x in h for x in ("Description","Outcome","Target")), h)
+    # THE DESCRIPTION IS NOT A COLUMN — Islam chose it under the tactic's own
+    # name, in the same cell, on all three surfaces. Asserting a column here
+    # would freeze the option he did not take.
+    ck("the plan's tactics table names the outcome and its target",
+       h and "Outcome" in h and "Target" in h and "Description" not in h, h)
     ck("no page error", not errs, errs[:2])
     # THE SHIPPED PLAN HAS NO OUTCOMES, so the quiet state is the one that ships.
     quiet = pg.evaluate("""()=>{
@@ -72,12 +76,17 @@ with sync_playwright() as p:
     open_plan(pg, edit=True)
     box = pg.evaluate("""()=>{ try{
       var g=document.querySelector('td.tgtcell .tgrid'); if(!g) return null;
-      var w=Array.from(g.children).map(c=>Math.round(c.getBoundingClientRect().width));
-      return {n:g.children.length, widths:w, equal:new Set(w).size===1,
+      /* the native half of a searchable select stays in the DOM, out of flow
+         and clipped (§45.5) — it is not one of the four boxes. */
+      var kids=Array.from(g.children).filter(c=>!c.classList.contains('ss-native'));
+      var w=kids.map(c=>Math.round(c.getBoundingClientRect().width));
+      return {n:kids.length, widths:w, equal:new Set(w).size===1,
+              hasUnit:!!g.querySelector('.ssbtn'),
               cell:Math.round(g.closest('td').getBoundingClientRect().width)};
       }catch(e){ return null; } }""")
     ck("the outcome's four controls are one cell", box and box["n"]==4, box)
     ck("and all four are the same width", box and box["equal"], box)
+    ck("the unit picker is there before any target is", box and box["hasUnit"], box)
     # write the name, then the target, then the unit, then the rules — and ASK THE DATA
     wrote = pg.evaluate("""()=>{ try{
       function t0(){ return UNITS.mobile.items[0].tactics[0]; }
@@ -89,7 +98,11 @@ with sync_playwright() as p:
       function fire(el,v){ if(el.tagName==='SELECT'){el.value=v;} else {el.value=v;}
         el.dispatchEvent(new Event('change',{bubbles:true})); }
       var out={};
-      fire(row.children[hd.indexOf('Description')].querySelector('textarea'), 'Why we chose it');
+      /* the description is the SECOND box in the tactic's own cell */
+      var tcell = row.children[hd.indexOf('Tactic')];
+      var boxes = tcell.querySelectorAll('textarea');
+      out.boxesInNameCell = boxes.length;
+      fire(boxes[boxes.length-1], 'Why we chose it');
       out.description = t0().description;
       fire(row.children[hd.indexOf('Outcome')].querySelector('textarea'), 'Stores opened');
       out.outcome = t0().outcome;
@@ -97,6 +110,7 @@ with sync_playwright() as p:
       fire(g.querySelector('input'), '6');
       out.targetAfterNumber = t0().outTarget;
       return out; }catch(e){ return {err:String(e)}; } }""")
+    ck("the description sits in the tactic's own cell", wrote.get("boxesInNameCell")==2, wrote)
     ck("the description reaches the plan", wrote.get("description")=="Why we chose it", wrote)
     ck("the outcome reaches the plan", wrote.get("outcome")=="Stores opened", wrote)
     ck("the target reaches the plan", wrote.get("targetAfterNumber") not in (None,""), wrote)
@@ -124,6 +138,20 @@ with sync_playwright() as p:
     ck("the unit joins the target the platform's way", rest.get("target") in ("6#","6 #"), rest)
     ck("the direction reaches the plan", rest.get("dir")=="≤", rest)
     ck("the compile rule reaches the plan", rest.get("compile")=="Sum", rest)
+    order = pg.evaluate("""()=>{ try{
+      function t0(){ return UNITS.mobile.items[0].tactics[1]; }
+      var rows=Array.from(document.querySelectorAll('td.tgtcell')); var g=rows[1].querySelector('.tgrid');
+      function fire(el,v){ el.value=v; el.dispatchEvent(new Event('change',{bubbles:true})); }
+      var uni=Array.from(g.querySelectorAll('select')).filter(s=>Array.from(s.options).some(o=>o.text==='M EGP'))[0];
+      var out={};
+      fire(uni,'#');                       out.unitFirst = t0().outTarget; out.scoredOnUnitAlone = tacticOutcomeScore(t0());
+      fire(g.querySelector('input'),'6');  out.joined    = t0().outTarget;
+      fire(g.querySelector('input'),'');   out.unitKept  = t0().outTarget;
+      return out; }catch(e){ return {err:String(e)}; } }""")
+    ck("a unit can be chosen before the number", order.get("unitFirst")=="#", order)
+    ck("and a unit alone is not a target", order.get("scoredOnUnitAlone") is None, order)
+    ck("the number joins it", order.get("joined")=="6#", order)
+    ck("and clearing the number keeps the unit", order.get("unitKept")=="#", order)
     ck("with no figure yet it is NOT scored", rest.get("score") is None, rest)
     ck("and it still reads the way it did", rest.get("reads")==rest.get("reads"), rest)
     ck("no page error while writing", not errs, errs[:2])

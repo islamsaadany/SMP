@@ -1,0 +1,34 @@
+-- EVERYBODY SIGNS IN AGAIN, ONCE — onto the fixed build
+--
+-- Islam, during live reporting: a person was refused with "you cannot report
+-- for admin / hr" while filling their own report, and on refresh some tabs
+-- open on the baked-in example page. Both are the mark of a tab still running
+-- an OLDER build's JavaScript.
+--
+-- The "cannot report for admin/hr" refusal is the whole-submission fault
+-- (§216/§234): an old tab still posts more of the graph than the person
+-- touched, so a difference somebody else made to another function is judged
+-- as theirs and refused, naming a function they never opened. That fault is
+-- fixed in the current build AND in the file the server now serves (the
+-- REVIEW_PER_TARGET / SUB_TARGET split is present) — but a fix in the code
+-- does nothing for a tab that has not reloaded since it shipped.
+--
+-- ENDING THE SESSIONS IS THE ONLY LEVER THAT REACHES AN ALREADY-OPEN TAB
+-- (§208, §210.2, a third time): the tab's next request comes back 401,
+-- `sync.js` sends it to the gate (`location.replace("/")`), and signing in
+-- loads the page fresh. The service worker is network-first for the shell, so
+-- that fresh load fetches the current build — the one that posts only what
+-- changed and cannot produce the cross-function refusal.
+--
+-- WHAT IT COSTS, STATED: everybody signs in again, once, on the next
+-- deployment — the office included. `credentials` is untouched, so this is a
+-- sign-in, not a reset: nobody needs a new password issued. Anybody with an
+-- edit that has not yet reached the server when their tab is turned away loses
+-- that edit; the window is small (the autosave sends the first change of a
+-- burst immediately, §170) and it is the smaller risk against leaving tabs on
+-- the build that can refuse — and overwrite — other people's work.
+--
+-- IT RUNS ONCE. Migrations are recorded in `_sql_migrations` and never
+-- re-applied, so this does not sign people out on every deploy. To force
+-- another sign-in later, add the next-numbered migration like this one.
+DELETE FROM sessions;

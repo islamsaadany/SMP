@@ -4455,6 +4455,19 @@ python3 checks/access-header.py # the matrix header: two lines at four widths, c
                                 # offered to a role that could never hold it (§174)
 python3 checks/stay-put.py      # a refresh stays where you are, and a NEW session still
                                 # opens where §94.6 says (§173)
+python3 checks/safety-banners.py # the page warns BEFORE a save can be lost (§256):
+                                # the tab asks the server about its own page since it
+                                # loaded (the stub records the ask), a landing by
+                                # somebody else is drawn and NAMED, never twice, Dismiss
+                                # hides it, Reload & keep mine POSTs this tab's change
+                                # first and reloads only when it landed (a 500 keeps
+                                # the page and §171's banner), the version caution
+                                # outranks it, both themes measured, and file:// draws
+                                # nothing and asks nothing — 20 red on the build before
+node scripts/test-safety-peek.js # ...and the server half against a real Postgres: who
+                                # else, when, the asker excluded, a function under
+                                # fn:<key>, and every malformed ask falling through to
+                                # the ordinary read
 python3 checks/save-said.py     # a save that FAILS says so on the page: a server
                                 # error naming its status, an unreachable server, a
                                 # remembered refusal, and demo data — seven states
@@ -4603,6 +4616,37 @@ prior sessions (on HR_ERP) accidentally reverted agreed-upon designs.
 4. Update the relevant **`specs/`** feature spec if product behavior changed.
 
 ---
+
+*Last Updated: 2026-09-02 &mdash; **&sect;256: the page warns before a save
+can be lost.** Islam, after a reporting round in which people lost work twice
+over: *"can we have some sort of mid page warning like the error and network
+issue in case the person is saving with someone opening the same thing … with
+clear action so we can know what to do?"* &mdash; then *"BOTH"* of the two
+cautions drawn, and *"for the safety banner let's build them on the branch."*
+**THE TWO WAYS WORK WAS LOST WERE MEASURED FIRST AND NEITHER WAS THE WRITER**:
+every loss reproduced as a STALE TAB posting the pre-&sect;234 shape and being
+refused all-or-nothing (&sect;184), which migration 040 ended once and nothing
+prevented next time; and two people on ONE number, where &sect;210 merges
+different fields and the same field is last-write-wins. **Two cautions, one
+family**, in the refusal's own slot on the ATTENTION ground &mdash; nothing has
+gone wrong yet (&sect;168). **A newer version is ready**: `sw.js` claims its
+clients on activate, so an open tab hears of a deploy through
+`controllerchange`; the registration is asked for a newer worker on a clock and
+on coming back, and only when there was a controller BEFORE (first install is
+nobody stale). **Somebody else updated this page**: `change_log` already holds
+who and when (&sect;42), so `GET /api/state?since=&target=` answers from it
+&mdash; one indexed query, never the graph (&sect;98), the asker excluded &mdash;
+and the caution NAMES them. **"Reload &amp; keep mine" is &sect;210 doing the
+work**: flush this tab's change first, reload only when it landed; a flush that
+fails keeps the page and &sect;171's banner. **The check said the button failed
+contrast** (`--attn` under white, 3.25:1 &mdash; &sect;38.4 for the seventh
+time), so it wears `--attn-tx`, &sect;94.8's own pair. Never `paint()`, never
+over `file://`, every browser call guarded. `checks/safety-banners.py` **20 red**
+on the build before (and its first run died rather than reported, &sect;215);
+`scripts/test-safety-peek.js` against a real Postgres; full sweep, 472/0,
+126/0, round trip PASS. **On the branch, not merged.** Recorded, not done: a
+same-field collision inside one 20s peek is still last-write-wins, and the
+worker half's first real proof is the next production deploy.*
 
 *Last Updated: 2026-09-02 &mdash; **&sect;255: a reported note is named as one.**
 Islam, from his own Performance page: *"the perofmrance is showing hte notes

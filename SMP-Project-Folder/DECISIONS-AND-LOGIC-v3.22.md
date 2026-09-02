@@ -28494,3 +28494,112 @@ The deck is untouched: it separated these two facts from the day it was built.
 `checks/plan-wrap.py` is red at 1100 with five clipped fields — byte-identical
 before and after this change, on a page this change does not touch, and the
 residue §249.2 already records.
+
+## §256 — THE PAGE WARNS BEFORE A SAVE CAN BE LOST (2026-09-02)
+
+Islam, after a reporting round in which people lost work twice over — a CF
+custodian refused for a function they never opened, the Marketing plan reverted
+under the hands that had just filled it, a compile cell that would not take
+three times running: *"can we have some sort of mid page warning like the error
+and network issue in case the person is saving with someone opening the same
+thing as an example or any other case that might impact the loss of data with
+clear action so we can know what to do? think of it."* Then, of the two
+cautions drawn (`design-mockups/data-loss-warnings/
+2026-09-02_save-safety-banners.html`): *"BOTH"*, and *"for the safety banner
+let's build them on the branch."*
+
+**THE TWO WAYS WORK WAS ACTUALLY LOST WERE MEASURED FIRST, AND NEITHER WAS THE
+WRITER.** Every one of the day's losses reproduced as a **stale tab**: a browser
+still running the build from before §234 shipped posted the whole `review` map
+and was refused naming a function nobody had opened — and a refusal is all or
+nothing (§184), so every field in that post reverted. Migration 040 signed the
+fleet out once to end that round; what nothing did was tell the NEXT stale tab
+before it posted. The second way is two people on one number: different fields
+already merge (§210 lays each change over the stored graph), the same field is
+last-write-wins, and the person about to lose is the one who cannot see it
+coming.
+
+**SO THERE ARE TWO CAUTIONS AND THEY ARE ONE FAMILY.** Both ride the slot the
+refusal already keeps above the chrome (`#refused`, §32/§171) — a sibling
+`#safety`, so "something about saving" is said in one place — and both wear the
+**attention** ground, never the alarm red: nothing has gone wrong yet, and
+telling somebody to act is not telling them they failed (§168, §190).
+
+**1 · A NEWER VERSION IS READY.** The service worker is the one thing that
+changes on every content deploy (§91: `SHELL` is bumped whenever the built
+bytes change), and `sw.js` claims its clients on activate — so an OPEN tab can
+hear of a deploy through `controllerchange`. `safety.js` asks the registration
+to look for a newer worker on a clock (60s) and on coming back to the tab, and
+when one takes over it says *"A newer version of the platform is ready — Reload
+to get it; your work is safe and already saved"* with one control, Reload.
+**Only when there was a controller before**: `controllerchange` also fires on
+the very first install, when nobody is stale, and warning then would greet
+every new browser with "reload" (§61's empty hand, reversed). A stale tab is
+told BEFORE it can lose a save, which is the whole point.
+
+**2 · SOMEBODY ELSE UPDATED THIS PAGE.** The server already writes every landed
+change to `change_log` with who and when (§42), so the tab asks — lightly, only
+while visible, every 20s and on coming back — *"did anyone else land a change
+on the page I am on since I loaded it?"* `GET /api/state?since=&target=` answers
+from that log: the asker excluded, oldest first, **never the graph** (§98: a
+poll is paid for in database round trips; this one is a single indexed query
+and carries no state). The target is the page's own `TARGET` (`mobile`,
+`fn:cf`), compared exactly as the log stores it; Setup is not a page anybody
+edits alongside somebody else and is not asked about. An unparseable `since`
+falls through to the ordinary read rather than to a 500. The caution NAMES them
+— *"Hala Ibrahim updated this page while you were working"* — and the same
+landing is never announced twice: the newest `at` seen becomes the next
+`since`.
+
+**"RELOAD & KEEP MINE" IS §210 DOING THE WORK.** The one useful act is to bring
+their update in without losing yours, and the platform can already do that: the
+button flushes this tab's own pending change FIRST (`SYNC.saveNow`), the server
+lays it over theirs, and the page reloads only when the flush landed — `saved`,
+or `clean` when there was nothing to send. **A flush that fails does not
+reload**: §171's banner is already on the page saying why, and reloading over it
+would throw away the one explanation; the control comes back live. Dismiss is
+the other way out, for somebody who knows the two edits do not touch. Chosen
+over the alternative drawn (a plain "reload and lose unsaved" with a warning),
+and stated as an assumption rather than as his pick: he said *"BOTH"* of the
+two cautions and did not choose between the two wordings of this button.
+
+**THE FILL IS THE TYPE-GRADE AMBER, AND THE CHECK IS WHAT SAID SO.** The first
+build painted the button `--attn` with `--surface` ink — 3.25:1 in the light
+palette, §38.4 for the seventh time (*a colour that works as a fill fails as
+type*). It is `--attn-tx` now, the same hue at the weight white can sit on
+(5.0 light; dark is dark-on-yellow), the pair §94.8 built for the orange
+Report button. The mockup's ghost button carried `.85` opacity and the build
+does not, for §255's reason.
+
+**NEVER `paint()`, NEVER OVER `file://`, AND EVERY BROWSER CALL IS GUARDED.**
+Nothing here repaints (§35, §71.2); over `file://` no slot is mounted, no
+listener armed and no peek sent (§94.11 — there is no server to be stale
+against); a missing service worker or a failed registration is not this
+feature's to complain about (§231.5). It is loaded before `sync.js` so the slot
+exists before the first paint could need it, and `build.py`'s hashed CSP takes
+it up like every other block (§238).
+
+**PROVED, AND PROVED ABLE TO FAIL.** `checks/safety-banners.py` over an HTTP
+stub that RECORDS every peek — so *"it asked, about this page, since it
+loaded"* is a measurement — draws, dismisses, re-draws on a newer landing,
+presses Reload & keep mine and counts the POST landing before the reload,
+presses it again against a 500 and counts NO reload, calls the version caution
+by name (a stub cannot install a worker) and asserts it outranks the edit one,
+measures every word in both themes with the sweep's arithmetic, and asks
+`file://` for the four absences. **20 red** against the file shipped before
+this — and its first run **died rather than reported** at the second assertion
+(§215), so every evaluate degrades and every press has a two-second patience.
+`scripts/test-safety-peek.js` drives the real handler against a real Postgres
+16: told, told who, told when, the asker excluded, another page silent, a
+function's page told under `fn:<key>`, and three malformed asks falling through
+to the full read. Full `qa.py` sweep ERRORS none; `test-authorize` 472/0;
+`test-graph-diff` 126/0; round trip PASS.
+
+**RECORDED, NOT DONE.** The edit caution can only ever be as fresh as its last
+peek (20s), so two people saving the same field inside the same twenty seconds
+still resolve last-write-wins with nobody warned — the residue §215 already
+records, narrowed rather than closed. The service-worker half cannot be driven
+from a stub and is asserted as *armed*; its first proof is the next production
+deploy, watched from an open tab. Built on the branch and **not merged**: `main`
+is Islam's call (rule 4), and the incremental writer stays off until its own
+staged rollout.

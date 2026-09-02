@@ -324,32 +324,6 @@
   .refused-keep:hover { background:color-mix(in srgb, currentColor 10%, transparent); }
   .refused-keep:focus-visible { outline:2px solid currentColor; outline-offset:2px; }
   .banner.refused ul { margin:4px 0 0; padding-left:18px; }
-  /* ── THE SAVE-SAFETY CAUTIONS (§256) ──────────────────────────────────
-     Same slot and shape as the refusal above, on the ATTENTION ground rather
-     than the alarm red (§168, §190): nothing has gone wrong yet, and the
-     person is being told what to do to keep it that way. Tint + text twin,
-     never the solid fill as type (§38.4). Left-aligned with the action on the
-     right: this banner carries a control, and a centred sentence with a button
-     floating after it reads as two things. */
-  .banner.safety { background:var(--attn-bg); color:var(--attn-tx); display:flex;
-                   justify-content:flex-start; align-items:center; gap:12px;
-                   text-align:left; border-bottom:2px solid var(--attn); }
-  .banner.safety strong { color:inherit; display:block; font-weight:700; }
-  .banner.safety .safety-msg { flex:1; min-width:0; display:flex; flex-direction:column; gap:1px; }
-  .banner.safety .safety-msg span { opacity:.9; }
-  .banner.safety .safety-ic { flex:none; width:20px; height:20px; color:var(--attn); }
-  .banner.safety .safety-acts { flex:none; display:flex; align-items:center; gap:8px; }
-  .safety-btn { font:inherit; font-size:var(--fs-small); font-weight:700; border-radius:7px;
-                padding:6px 13px; cursor:pointer; white-space:nowrap;
-                /* THE TYPE-GRADE AMBER AS THE FILL (§38.4, §94.8's --cta pair):
-                   --attn works as a mark and carries white at 3.25:1; --attn-tx
-                   is the same hue at a weight white can sit on (light 5.0, dark
-                   is dark-on-yellow), measured by checks/safety-banners.py. */
-                background:var(--attn-tx); color:var(--surface); border:1px solid var(--attn-tx); }
-  .safety-btn.ghost { background:transparent; color:inherit; border-color:currentColor; }
-  .safety-btn:disabled { opacity:.6; cursor:default; }
-  .safety-btn:focus-visible { outline:2px solid currentColor; outline-offset:2px; }
-  @media (max-width:680px){ .banner.safety { flex-wrap:wrap; } .banner.safety .safety-acts { width:100%; } }
   .banner.refused li { margin:2px 0; }
 
   /* ── A PROSE FIELD IN A PLAN (§189) ─────────────────────────────────

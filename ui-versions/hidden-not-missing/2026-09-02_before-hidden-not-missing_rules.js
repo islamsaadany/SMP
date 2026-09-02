@@ -1171,44 +1171,6 @@ var GAP_OPTIONAL = { tactic: ["collaborators"],
     return !!GAP_ANY[field];
   }
   function gapMissing(kind, row) {
-    /* ── A HIDDEN ROW OWES NOTHING (§250) ─────────────────────────────
-       Islam, from the running platform: *"for the hidden tactics or measures
-       they needs to be removed from the missing for the user and they don't
-       count as missing on the pillar card as well."*
-
-       §233 settled that a hidden row is NOT COUNTED — in any score, in any
-       reporting ask, anywhere — and taught `gapMap()` on the way. It did not
-       teach THIS function, and this is the one every other reader of "what
-       does this row owe" calls directly: the pillar's rail row, the
-       Foundation bar, the "Nothing missing here" note, the projects rail and
-       a function's Overview. So the band and the pillar beside it answered
-       two different numbers about the same rows.
-
-       MEASURED on the shipped build before it was written: with the five
-       owing tactics of Mobile's MB01 hidden, the band read 34 Missing and
-       dropped MB01's chip while the pillar's own row went on reading
-       "10 Missing" — and only a fill landing somewhere else, which rewrites
-       the rail from `gapMap()` (gapBandRefresh), corrected it to a tick.
-       §116.2's rule exactly: the count and the list it points at are ONE
-       list, and they had stopped being one.
-
-       IT GOES HERE AND NOT IN THE SIX CALLERS, for §53.5's reason — six
-       places each having to remember is how they came apart in the first
-       place, and the seventh reader written tomorrow would not know either.
-       `gapMap()` keeps its own guard on top: that one also closes the
-       FILLABLE branch (§223's door), which this list does not reach.
-
-       THE SERVER IS UNTOUCHED AND THAT IS DELIBERATE. `lib/authorize.js`
-       classifies a fill from `GAP_FILLABLE` and `gapEmpty()`, never from
-       this list, so nothing about which saves are accepted moves — and it
-       must not: the office's own pen still writes a hidden row, and hiding
-       is their mark. What changes is only what the platform ASKS FOR.
-
-       THE COST WAS STATED AND ACCEPTED: a gap on a hidden row no longer
-       blocks Submit (§221 reads this same map), so hiding a row is now also
-       a way to clear a blocker. That is what "not counted" means, and it is
-       the office's own mark — nobody else can set it. */
-    if (isHidden(row)) return [];
     return (GAP_FIELDS[kind] || []).filter(function (f) {
       /* §249.2: A MARK ON A VALUE THAT IS STILL EMPTY DOES NOT ANSWER IT.
          A pending fill is answered, not missing — true of a fill that put

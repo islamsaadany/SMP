@@ -268,7 +268,17 @@
    Name checked against origin/main serving
    "smp-shell-v4.21-office-starts-a-conversation"; confirm again immediately
    before the push (§94.16). */
-const SHELL = "smp-shell-v4.24-outcome-missing-audit";
+/* v4.26-hidden-owes-nothing — §250: a hidden row is not counted, so it is no
+   longer counted as MISSING either. `gapMissing()` returns nothing for it, so
+   the pillar's own rail row stops disagreeing with the band above it, and the
+   red word gives way to the platform's dash on a row nobody is asking about.
+   THE NAME IS AHEAD OF BOTH SIDES, which needed checking rather than assuming
+   (§94.12): this branch is serving v4.24 and origin/main v4.25-tactic-window-
+   proration, so the branch's own number is BEHIND main's — picking the next
+   one off the branch would have re-served a name main has already used, with
+   different bytes behind it, which is exactly the collision §94.12 records.
+   Confirm again immediately before any merge push (§94.16). */
+const SHELL = "smp-shell-v4.26-hidden-owes-nothing";
 const ASSETS = [
   "/",
   "/index.html",

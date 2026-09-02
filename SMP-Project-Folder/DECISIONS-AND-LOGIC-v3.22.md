@@ -27608,3 +27608,114 @@ how it is measured while being measured — and it is recorded here as his call 
 the arbitrariness of the line (the filler writes the target but not the
 direction) is a decision somebody made rather than an accident of where the gap
 list happened to stop.
+
+---
+
+## §250 — A HIDDEN ROW OWES NOTHING (2026-09-02)
+
+Islam, from the running platform:
+
+> *"for the hidden tactics or measures they needs to be removed from the
+> missing for the user and they don't count as missing on the pillar card as
+> well."*
+
+**§233 SETTLED THIS AND ONLY HALF THE PLATFORM WAS TOLD.** That section's rule
+is one sentence — *hidden is NOT counted, on every surface at once* — and its
+own text says why the predicate is shared: *a score that includes a row the
+slide does not show is a number nobody can defend.* It taught the scores, the
+reporting asks, the deck, the workbook and `gapMap()`. It did not teach
+`gapMissing()`, which is the function every OTHER reader of *"what does this row
+owe"* calls directly: the pillar's rail row, the Foundation bar, the *"Nothing
+missing in this pillar"* note, the projects rail and a supporting function's
+Overview.
+
+**MEASURED ON THE SHIPPED BUILD BEFORE A LINE WAS WRITTEN**, on Mobile as the
+SMO, hiding the five tactics of MB01 that owed something:
+
+| | before | after hiding |
+|---|---|---|
+| the band's total | 44 Missing | **34 Missing** |
+| MB01's chip | `MB01 10` | **gone** |
+| **MB01's own rail row** | `10 Missing` | **`10 Missing`** |
+| **red `Missing` on the hidden rows** | — | **15** |
+
+So two numbers about the same five rows sat on one screen disagreeing, and the
+rail row only corrected itself to a tick when a fill landed *somewhere else* —
+because `gapBandRefresh()` rewrites it from `gapMap()`, which had been taught.
+**§116.2 exactly**: the count and the list it points at are ONE list, and they
+had stopped being one.
+
+And on the row itself the product argued with itself in a single line:
+
+> *Clean and standardize customer and SKU base* · **Hidden — not counted** ·
+> **Missing Missing Missing**
+
+**IT GOES IN `gapMissing()`, NOT IN THE SIX CALLERS** (§53.5). Six places each
+having to remember is how they came apart in the first place, and the seventh
+reader written next month would not know either. `gapMap()` keeps its own guard
+on top, and that is not a duplicate: that one also closes the **fillable**
+branch (§223's door), which this list does not reach.
+
+**THE RED WORD GIVES WAY TO THE PLATFORM'S OWN DASH.** Islam, asked, confirmed:
+*"yes dashed not red word correct"*. This is **§214.4 with the same sign** —
+that section printed a red `Missing` over a count of nought and answered it with
+the em-dash the Weight column beside it already drew — and the answer is the
+same because the fault is the same. `missWord(row)` is one function taking the
+ROW, because the word is printed at a dozen call sites across the plan, the
+objectives, the focus board and the project panes, and a guard written into some
+of them is precisely how the rail row and the band came apart. A call site with
+no row to hand keeps the word: nothing it draws can be hidden.
+
+**THE SERVER IS UNTOUCHED, AND THAT WAS CHECKED RATHER THAN ASSUMED.**
+`lib/authorize.js` classifies a fill from `GAP_FILLABLE` and `gapEmpty()`, never
+from this list, so no save changes its answer — 472/0 on `test-authorize.js`,
+126/0 on `test-graph-diff.js`, and the generated seed byte-identical. It must
+stay untouched: the office's own pen still writes a hidden row, because hiding
+is *their* mark and their edit settles.
+
+**THE COST WAS STATED BEFORE IT WAS BUILT.** A gap on a hidden row no longer
+blocks Submit — §221 reads this same map — so hiding a row is now also a way to
+clear a blocker. That is what *not counted* means, and the mark can only be set
+by somebody holding the authoring pen, which is the office's (§94).
+
+**ONE DEAD BUILDER WENT WITH IT** (§24): `unitPlanBody`'s local `cell()` had had
+no caller since §249 moved every gap-bearing column in that table through
+`gapCell`, and it was the last place there printing the red word without asking
+whose row it was.
+
+**PROVED ABLE TO FAIL BEFORE THE GREEN WAS BELIEVED** (§94.5).
+`checks/hide-element.py` §7 makes the state (the demo ships nothing hidden),
+presses the platform's own eye rather than writing the mark, and asserts the
+**agreement** between the pillar's row and its chip rather than a number
+(§94.8) — a check written against 10 and 34 would need rewriting the day anybody
+edits the seed. Against the pre-§250 build it reports **2 failures**, printing
+`p:01 = '10 Missing'` beside a chip list that no longer holds `p:01`, and
+`redHidden: 15`.
+
+**AND ONE OF ITS OWN FIRST-RUN FAILURES WAS THE CHECK** (§100.3, and §94.2 from
+the inside). *"A shown row still says Missing"* failed — because every owing
+tactic in that pillar had just been hidden, so the pane honestly held none. The
+assertion was measuring the wrong pane, in a state the check had made itself; it
+walks the rail to the next owing pillar now. A second assertion **could not
+fail** as first written (§113.8): it asked whether the hidden row held a
+`.nobody` dash, and the pre-§250 row already held one for its empty
+collaborators. It asks for a dash **per row** and for **no empty cell**,
+because dropping the word outright would satisfy the first reading and leave a
+row of blank boxes (§45.2).
+
+**RECORDED, NOT FIXED.** Two things were found on the way past and are not this
+change's to make:
+
+  · **the Performance project pane does not mark a hidden row at all** — the
+    deliverables/outcomes and milestones tables there carry neither `hidCls`
+    nor `hidChip`, so a hidden milestone is drawn looking exactly like a
+    counted one. §233's chip reached the plan panes and the objectives and
+    stopped;
+  · **a capability's reporting table draws every key objective**, `shown()`
+    included or not, so a hidden capability objective may still be asked for a
+    figure. §233 filtered `reportItems` (the count) and this table builds its
+    rows from `c.keyObjectives` directly.
+
+Both are §233's own rule reaching one surface short, both want a decision about
+what a hidden row should look like on a page that is *about* figures, and
+neither was named in the ask.

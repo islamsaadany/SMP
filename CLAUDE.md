@@ -365,6 +365,40 @@ console errors (in this cloud environment, run it via a wrapper that points Play
   `node scripts/test-door.js <smo-password>` against a running dev-server
   after touching `api/auth.js` or `lib/auth.js` (it ends by rate-limiting the
   SMO on purpose — `DELETE FROM login_attempts;` clears it).
+- **A HIDDEN ROW OWES NOTHING (§250):** Islam — *"for the hidden tactics or
+  measures they needs to be removed from the missing for the user and they
+  don't count as missing on the pillar card as well."* **§233 SETTLED THIS AND
+  TOLD HALF THE PLATFORM**: it taught the scores, the asks, the deck and
+  `gapMap()`, and not `gapMissing()` — which is what the pillar's rail row, the
+  Foundation bar, the *"Nothing missing here"* note, the projects rail and a
+  function's Overview all call directly. **MEASURED FIRST**: with MB01's five
+  owing tactics hidden, the band read **34** and dropped MB01's chip while the
+  pillar's own row still read **10 Missing**, correcting itself only when a
+  fill landed elsewhere and rewrote it from `gapMap()` (§116.2 — the count and
+  the list it points at are one list, and they had stopped being one). **THE
+  GUARD GOES IN `gapMissing()`, NOT IN THE SIX CALLERS** (§53.5); `gapMap()`
+  keeps its own on top, because that one also closes the FILLABLE branch
+  (§223's door), which this list does not reach. **AND THE ROW STOPS ARGUING
+  WITH ITSELF** — *"Hidden — not counted"* beside three red `Missing` —
+  **§214.4 with the same sign**, answered the same way: `missWord(row)` asks
+  the ROW, so a hidden row wears the platform's dash. One function, because the
+  word is printed at a dozen call sites and a guard written into some of them
+  is exactly how the rail row and the band came apart. **THE SERVER IS
+  UNTOUCHED AND IT WAS CHECKED**: `lib/authorize.js` classifies a fill from
+  `GAP_FILLABLE` and `gapEmpty()`, never from this list — 472/0, 126/0, seed
+  byte-identical — and it must stay so, because the office's pen still writes a
+  hidden row. **THE COST WAS STATED**: a gap on a hidden row no longer blocks
+  Submit (§221 reads this map), so hiding is now also a way to clear a blocker;
+  the mark is the office's alone. `unitPlanBody`'s local `cell()` went with it
+  (§24 — callerless since §249). **2 red** on the pre-§250 build. **AND TWO OF
+  THE CHECK'S OWN FAILURES WERE THE CHECK**: *"a shown row still says
+  Missing"* measured the pane whose owing rows it had just hidden (§94.2 from
+  the inside), and the dash assertion **could not fail**, because the old row
+  already held a `.nobody` for its empty collaborators (§113.8). **RECORDED,
+  NOT FIXED**: the Performance project pane marks a hidden row not at all (no
+  `hidCls`, no `hidChip`), and a capability's reporting table still draws every
+  key objective — §233's rule one surface short in two places, both wanting a
+  decision about what a hidden row looks like on a page about figures.
 - **THE PLAN'S TITLES COULD NOT WRAP AT ALL (§189):** Islam — *"wrap the
   content of the plans edit boxes across pillars and functions, specially for
   the titles and descriptions."* Not a bad wrap: every title and description
@@ -4071,6 +4105,13 @@ python3 checks/ytd-proration.py # YTD is measured against the part of the year t
 python3 checks/gap-walk.py      # the band's chips and Next gap actually go somewhere:
                                 # a unit AND a function, as the filler AND the office,
                                 # every place the band names reached (§177.2)
+python3 checks/hide-element.py  # hiding an element from the presentation (§233), and
+                                # since §250 that a hidden row owes NOTHING: the eye
+                                # pressed rather than the mark written, the pillar's own
+                                # row asserted to AGREE with its chip (never a number,
+                                # §94.8), no red word on a hidden row and no empty cell
+                                # either, a shown row still saying Missing, and both
+                                # ends — showing them again brings all three back
 python3 checks/viewer-line.py   # the Viewing-as line: the roles and where each is
                                 # held, of EVERY person — no em-dashes, the seat never
                                 # repeated, and the whole line on a hover (§178)
@@ -4259,7 +4300,29 @@ prior sessions (on HR_ERP) accidentally reverted agreed-upon designs.
 
 ---
 
-*Last Updated: 2026-09-02 &mdash; **&sect;249.4: the direction and the compile
+*Last Updated: 2026-09-02 &mdash; **&sect;250: a hidden row owes nothing.**
+Islam, from the running platform: *"for the hidden tactics or measures they
+needs to be removed from the missing for the user and they don't count as
+missing on the pillar card as well."* &sect;233 settled that a hidden row is not
+counted and taught the scores, the asks, the deck and `gapMap()` &mdash; and not
+`gapMissing()`, which the pillar's rail row, the Foundation bar, the projects
+rail and a function's Overview all call directly. **Measured before a line was
+written**: with MB01's five owing tactics hidden the band read 34 and dropped
+MB01's chip while the pillar's own row still read **10 Missing**, and the rows
+carried **15 red `Missing`** beside their own *Hidden &mdash; not counted* chip.
+The guard goes in `gapMissing()` rather than in the six callers (&sect;53.5),
+and `missWord(row)` asks the ROW so a hidden row wears the platform's dash
+(&sect;214.4's answer to the same fault). **The server is untouched and it was
+checked** &mdash; the authoriser reads `GAP_FILLABLE`, never this list: 472/0,
+126/0, seed byte-identical, full `qa.py` ERRORS none. **The cost was stated**: a
+gap on a hidden row no longer blocks Submit, so hiding is also a way to clear a
+blocker &mdash; and only the office can hide. **2 red** on the pre-&sect;250
+build; two of the check's own first failures were the CHECK (a pane whose owing
+rows it had just hidden, and a dash assertion that could not fail). **Recorded,
+not fixed**: the Performance project pane does not mark a hidden row at all, and
+a capability's reporting table still draws every key objective.*
+
+*Earlier the same day: **&sect;249.4: the direction and the compile
 rule stay the office's.** Islam, from the running platform: *"I viewed as Ali
 Reda from corporate, I can't adjust the direction or the compiling. is that ment
 to be?"* It is &mdash; neither is a gap, so a filler writing one is AUTHORING,

@@ -615,14 +615,10 @@ function nextTargetUnit(t, u){
    Performance beside it calls the same row answered (§53.5). The plan's own
    cell reaches this through gapCell's `read` hook, which is what keeps the
    fill lifecycle in one place. */
-/* §250: AND A HIDDEN TACTIC IS NOT ONE OF THE THREE. `missWord` answers for
-   the row rather than for the field, so the same cell that says Missing on a
-   counted tactic says the platform's dash on one nobody is asking about —
-   which is what the count beside it has said since §233. */
 function outcomeCell(t){
   return t && t.outcome
     ? '<b>' + esc(t.outcome) + '</b>'
-    : missWord(t);
+    : '<span class="missing">Missing</span>';
 }
 /* The reported figure written the platform's own way, so `7` against a target
    in `#` reads `7#` and one in `M EGP` reads `7 M EGP` — never joined by hand
@@ -1573,7 +1569,7 @@ function renderGroupPerformance(){
             c.keyObjectives.map(function(m, i){
               return '<tr><td class="idx">' + (i+1) + '</td><td>' + esc(m.name) + '</td>' +
                 '<td class="num">' + dirCell(m.dir) + '</td>' +
-                '<td class="num">' + (m.target ? esc(m.target) : missWord(m)) + '</td>' +
+                '<td class="num">' + (m.target ? esc(m.target) : '<span class="missing">Missing</span>') + '</td>' +
                 '<td class="num">' + figShown(m) + '</td>' +
                 '<td class="num final" style="color:' + bandInk(m.progress) + '">' + pct(m.progress) + '</td></tr>';
             }).join("")) +
@@ -1833,7 +1829,7 @@ function renderTemple(){
 
   var cell = function(m){
     return '<div class="ns-item"><span class="ns-label">' + esc(m.name) + '</span>' +
-           '<span class="ns-target">' + (m.target ? esc(m.target) : missWord(m)) + '</span>' +
+           '<span class="ns-target">' + (m.target ? esc(m.target) : '<span class="missing">Missing</span>') + '</span>' +
            /* A SENTENCE, NOT A COLUMN (§149, §99.8's rule). The hover words
               belong on the table cells somebody runs an eye down; this line
               already reads "≥ · latest" as prose, and half of it wearing a
@@ -1947,7 +1943,7 @@ function focusStrip(u){
     var st = focusStanding(x.m.progress);
     return '<tr><td>' + esc(x.m.name) + '</td>' +
       '<td class="cc"><span class="why" style="margin:0">' + esc(x.src) + '</span></td>' +
-      '<td class="num">' + (x.m.target ? esc(x.m.target) : missWord(x.m)) + '</td>' +
+      '<td class="num">' + (x.m.target ? esc(x.m.target) : '<span class="missing">Missing</span>') + '</td>' +
       '<td class="num">' + esc(x.m.actual) + '</td>' +
       /* Uncoloured here on purpose. The band scale answers "is this on plan";
          the standing answers "does this earn". A measure can be 88% and green
@@ -3019,16 +3015,9 @@ function gapCell(page, acKey, row, field, opts){
      `open && !blank` IS THE WHOLE CONDITION — a blank falls to the branch
      above, and `open` is only ever wider than `blank` for a date (§184's
      GAP_WHEN), so no other kind of field can reach this. */
-  /* \u00A7250: AND A HIDDEN ROW SAYS NEITHER OF THEM. Its blanks are not gaps \u2014
-     gapMissing() returns nothing for it and the controls above never open \u2014
-     so the red word here would be the page arguing with every count on it.
-     The unreadable-date branch goes with it: there is nothing to correct on
-     a row nobody is asking about, so the value simply shows as typed (\u00A796.2
-     is satisfied by showing it, not by shouting over it). */
-  var hid = SMPRules.isHidden(row);
   var text = blank
-    ? (opts.readEmpty !== undefined && !hid ? opts.readEmpty : missWord(row))
-    : (open && !hid)
+    ? (opts.readEmpty !== undefined ? opts.readEmpty : '<span class="missing">Missing</span>')
+    : open
       ? '<span class="missing">Missing</span>' +
         '<span class="wasval"> \u2014 currently \u201C' + esc(val) + '\u201D</span>'
     : (opts.read ? opts.read(val)
@@ -3234,6 +3223,7 @@ function targetUnitOpts(cur){
 
 function koView(list, isGroup, acKey){
   var near = isGroup || SHOW_KO_THIS_YEAR;
+  var miss = '<span class="missing">Missing</span>';
   /* §145: every pending mark on the row, chips beside the values it shows —
      including a pending direction or compile, which have no column here, or
      the office would have nothing to confirm them from in read mode. */
@@ -3271,11 +3261,8 @@ function koView(list, isGroup, acKey){
       return '<div class="orow' + (near ? '' : ' one') +
         (SMPRules.isHidden(m) ? ' hiddenrow' : '') + '"><span class="on">' + esc(m.name) +
         hidChip(m) + chips(m) + '</span>' +
-        /* §250: the word is asked OF THE ROW, so a hidden objective — which
-           the counts stopped counting at §233 — reads a dash beside its own
-           "Hidden — not counted" chip rather than arguing with it. */
-        '<span class="ot h">' + (m.target3y ? esc(m.target3y) : missWord(m)) + '</span>' +
-        (near ? '<span class="ot">' + (m.target ? esc(m.target) : missWord(m)) + '</span>' : '') + '</div>';
+        '<span class="ot h">' + (m.target3y ? esc(m.target3y) : miss) + '</span>' +
+        (near ? '<span class="ot">' + (m.target ? esc(m.target) : miss) + '</span>' : '') + '</div>';
     }).join("");
 }
 /* The far column says WHICH year when the tenant has set one — "By 2028" reads
@@ -3333,29 +3320,6 @@ function hidChip(row){
     ? '<span class="hidchip">Hidden \u2014 not counted</span>' : '';
 }
 function hidCls(row){ return SMPRules.isHidden(row) ? ' class="hiddenrow"' : ''; }
-/* ── THE WORD A BLANK WEARS, AND A HIDDEN ROW DOES NOT WEAR IT (§250) ──
-   Islam, on a hidden tactic: three red `Missing` on the same line as the
-   amber *Hidden — not counted* chip, with every count on the page already
-   agreeing that the row owes nothing. §214.4's fault with the sign
-   reversed — that one printed the alarm over a count of nought and was
-   answered with the em-dash the Weight column beside it already drew — and
-   this is the same answer for the same reason.
-
-   THE DASH IS THE PLATFORM'S OWN WORD FOR ABSENT (§15.1), and `.nobody` is
-   the class the milestone owner and the collaborators columns already use
-   for it, so a hidden row's blanks read the way every other unanswered
-   thing reads rather than in a fifth vocabulary.
-
-   ONE FUNCTION, TAKING THE ROW, because the word is printed at a dozen
-   call sites across the plan, the objectives and the project panes, and a
-   guard written into some of them is how the pillar's rail row and the
-   band came to disagree in the first place (§53.5). A site with no row to
-   hand keeps the word: nothing there can be hidden. */
-function missWord(row){
-  return SMPRules.isHidden(row)
-    ? '<span class="nobody">&mdash;</span>'
-    : '<span class="missing">Missing</span>';
-}
 
 function koEdit(list, page, acKey, owner){
   var editing = authoring(page, acKey), pg = editing ? page : null;
@@ -3664,7 +3628,7 @@ function renderFocusBoard(){
                    '</td>' : '') +
         '<td>' + esc(x.m.name) + '</td>' +
         '<td class="cc"><span class="why" style="margin:0">' + esc(x.src) + '</span></td>' +
-        '<td class="num">' + (x.m.target ? esc(x.m.target) : missWord(x.m)) + '</td>' +
+        '<td class="num">' + (x.m.target ? esc(x.m.target) : '<span class="missing">Missing</span>') + '</td>' +
         '<td class="num">' + esc(x.m.actual) + '</td>' +
         '<td class="num final">' + pct(x.m.progress) + '</td>' +
         '<td class="cc"><span class="badge b-' + st.key + '">' + st.label + '</span></td></tr>';
@@ -3802,7 +3766,7 @@ function renderReport(u){
         '<td class="idx">' + (i+1) + '</td>' +
         '<td>' + esc(x.obj.name) + fmark(x.id) + '</td>' +
         '<td class="num">' + esc(x.obj.dir) + '</td>' +
-        '<td class="num">' + (x.obj.target ? esc(x.obj.target) : missWord(x.obj)) + '</td>' +
+        '<td class="num">' + (x.obj.target ? esc(x.obj.target) : '<span class="missing">Missing</span>') + '</td>' +
         '<td class="cc">' + entry(x) + '</td>' +
         '<td class="notecol">' + noteCell(x) + '</td></tr>';
     }).join(""));
@@ -3834,7 +3798,7 @@ function renderReport(u){
               '<td class="idx">' + (i+1) + '</td>' +
               '<td>' + esc(x.obj.name) + fmark(x.id) + '</td>' +
               '<td class="num">' + esc(x.obj.dir) + '</td>' +
-              '<td class="num">' + (x.obj.target ? esc(x.obj.target) : missWord(x.obj)) + '</td>' +
+              '<td class="num">' + (x.obj.target ? esc(x.obj.target) : '<span class="missing">Missing</span>') + '</td>' +
               '<td class="cc">' + entry(x) + '</td>' +
               '<td class="notecol">' + noteCell(x) + '</td></tr>';
           }).join(""))
@@ -4295,7 +4259,7 @@ function dxType(row){
 function dxDir(row){ return dxIsDeliv(row) ? '<span class="fixedval">=</span>' : esc(row.obj.dir || ""); }
 function dxTarget(row){
   return dxIsDeliv(row) ? '<span class="fixedval">Y/N</span>'
-                        : (row.obj.target ? esc(row.obj.target) : missWord(row.obj));
+                        : (row.obj.target ? esc(row.obj.target) : '<span class="missing">Missing</span>');
 }
 /* ONE WORD FOR WHEN. A deliverable stores `due`, an outcome `measureAt` and a
    milestone `finish` -- three spellings for one question, kept because a
@@ -4322,12 +4286,8 @@ function lateNote(v, done){
     ? '<span class="why lateval" style="margin:0">Overdue &mdash; was due ' + esc(v) + '</span>'
     : "";
 }
-/* §250: `row` is optional and is only ever the milestone the date belongs
-   to — the word a blank wears is a fact about the ROW (is anybody asking for
-   this?), not about the field, so it has to be handed in. A caller with no
-   row keeps today's word; nothing it draws can be hidden. */
-function dxDate(v, done, row){
-  var t = v ? esc(v) : missWord(row);
+function dxDate(v, done){
+  var t = v ? esc(v) : '<span class="missing">Missing</span>';
   if (!dueThisCycle(v)) return '<span class="soonval">' + t + '</span>';
   if (overdue(v, done)) return '<span class="lateval">' + t +
     '<span class="latenote">overdue</span></span>';
@@ -4484,7 +4444,7 @@ function capKOTable(c){
           (m.note ? '<span class="why">' + esc(m.note) + '</span>' : '') + '</td>' +
           '<td class="cc">' + (m.weight == null ? "&mdash;" : m.weight + "%") + '</td>' +
           '<td class="cc">' + dirCell(m.dir) + '</td>' +
-          '<td class="num">' + (m.target ? esc(m.target) : missWord(m)) + '</td>' +
+          '<td class="num">' + (m.target ? esc(m.target) : '<span class="missing">Missing</span>') + '</td>' +
           '<td class="num">' + (m.actual == null || m.actual === "" ? "&mdash;" : figShown(m)) + '</td>' +
           '<td class="num final" style="color:' + bandInk(m.progress) + '">' + pct(m.progress) + '</td></tr>';
       }).join(""));
@@ -4524,7 +4484,7 @@ function projPerformanceBody(p, fk){
       /* \u00a7224: the same read the tactics table gives Performance \u2014 who supports
          the row, em-dash when nobody (\u00a715.1: absent, never an alarm). */
       '<td class="collabs">' + collabCell(m) + '</td>' +
-      '<td class="cc">' + dxDate(m.finish, m.status === "done", m) + '</td>' +
+      '<td class="cc">' + dxDate(m.finish, m.status === "done") + '</td>' +
       '<td class="cc">' + (quiet ? notDueCell() : msPill(m)) + '</td>' +
       '<td class="num final">' + (statusPending(m) ? needsPct()
         : quiet ? notDueCell() : (v == null ? "&mdash;" : v + "%")) +
@@ -5090,7 +5050,7 @@ function projReportBody(p, fk){
     var mayM = mayRow(m);
     return '<tr' + (quiet ? ' class="notdue"' : '') + '><td class="idx">' + (i+1) + '</td>' +
       '<td>' + esc(m.name) + '</td>' +
-      '<td class="cc">' + dxDate(m.finish, m.status === "done", m) + '</td>' +
+      '<td class="cc">' + dxDate(m.finish, m.status === "done") + '</td>' +
       '<td class="cc">' + capPickBox(m, mayM, MS_WORDS, m.status) + '</td>' +
       '<td class="cc">' + (m.status === "wip"
         ? capPctBox(m, mayM, m.name) + (statusPending(m) ? needsPct() : "")
@@ -5123,7 +5083,7 @@ function capReportBody(c){
   var kRows = c.keyObjectives.map(function(m, i){
     return '<tr><td class="idx">' + (i+1) + '</td><td>' + esc(m.name) + '</td>' +
       '<td class="cc">' + dirCell(m.dir) + '</td>' +
-      '<td class="num">' + (m.target ? esc(m.target) : missWord(m)) + '</td>' +
+      '<td class="num">' + (m.target ? esc(m.target) : '<span class="missing">Missing</span>') + '</td>' +
       '<td class="cc">' + capEntryBox(m, splitTarget(String(m.target)).unit, may, m.name) + '</td>' +
       '<td class="notecol">' + capNoteBox(m, may) + '</td></tr>';
   }).join("");
@@ -5324,11 +5284,10 @@ function unitPlanBody(it, u, railed){
   var ed = EDIT_PAGE.plan && mayEditPlan();
   var showHead = !railed || ed;
   var code = pillarCode(u, u.items.indexOf(it));
-  /* §250: the local `cell` helper is GONE, not left standing — §249 moved
-     every gap-bearing column in this table through `gapCell`, so nothing has
-     called it since, and a builder nobody calls is one the next reader takes
-     for load-bearing (§24). It was also the last place here that printed the
-     red word without asking whose row it was. */
+  var cell = function(v, setter, cls){
+    return ed ? inputOr("plan", v == null ? "" : v, cls || "", setter)
+              : (v ? esc(v) : '<span class="missing">Missing</span>');
+  };
   var on = arranging("unit", u.ukey);
   var pi = u.items.indexOf(it);
   /* The tbody carries the pillar it belongs to. On Performance the shell found
@@ -5497,11 +5456,8 @@ function unitPlanBody(it, u, railed){
            narrow window the only column that could show it is the column that
            has gone. It says Missing here instead. */
         (!ed && !tgtOpen ? '<span class="subhd narrowtgt">' +
-           /* \u00a7250: and the fold says what the wide column says \u2014 `missWord`
-              asks the ROW, so a hidden tactic reads a dash here too rather
-              than shouting a gap that nothing counts. */
            (SMPRules.gapEmpty("outTarget", t)
-             ? missWord(t)
+             ? '<span class="missing">Missing</span>'
              : esc(t.outDir || "\u2265") + ' ' + esc(t.outTarget)) + '</span>' : '') +
         '</td>' +
       /* THE OUTCOME'S TARGET: reading says the target, writing gives each of
@@ -5515,10 +5471,7 @@ function unitPlanBody(it, u, railed){
          mode alike. */
       '<td>' + gapCell("plan", "u_plan", t, "owner", {
         ctx:pctx(t),
-        /* §250: asked of the row, so a hidden tactic's empty owner reads a
-           dash — gapCell overrides this anyway, and the two agreeing here is
-           what stops the next reader taking the literal for the rule. */
-        readEmpty: missWord(t),
+        readEmpty:'<span class="missing">Missing</span>',
         control: function(set, pendCls){
           return selectOr("plan", t.owner == null ? "" : t.owner,
             ownerChoices(t.owner, true), "ownersel " + (pendCls || ""), set);

@@ -208,6 +208,145 @@ with sync_playwright() as p:
          return !("hide" in c.projects[0].milestones.filter(x => x.id === id)[0]);
        }""", fn["id"]))
 
+    # ── 7 · A HIDDEN ROW OWES NOTHING, AND SAYS SO (§250) ───────────────
+    #
+    # Islam, from the running platform: *"for the hidden tactics or measures
+    # they needs to be removed from the missing for the user and they don't
+    # count as missing on the pillar card as well."*
+    #
+    # §233 taught `gapMap()` and stopped, so the six readers that call
+    # `gapMissing()` directly — the pillar's rail row above all — went on
+    # counting hidden rows. MEASURED on the pre-§250 build: with the five
+    # owing tactics of Mobile's MB01 hidden, the band read 34 and dropped
+    # MB01's chip while the pillar's own row still read "10 Missing", and
+    # the rows carried 15 red `Missing` beside their own "Hidden — not
+    # counted" chip.
+    #
+    # ASSERTED AS AGREEMENT, NEVER AS A NUMBER (§94.8): whatever the demo
+    # plan happens to owe, the pillar's row and the band's chip must say the
+    # same thing about the same pillar. A check written against 10 and 34
+    # would have to be rewritten the day anybody edits the seed.
+    #
+    # BOTH ENDS (§94.2): the state is MADE, because the demo ships nothing
+    # hidden, and it is put back — a build that simply stopped counting
+    # everything would pass every "it went" assertion and fail these.
+    for _ in range(3):
+        on = pg.eval_on_selector_all("#units .navswitch .nsw.on",
+                                     "e=>e.map(x=>x.textContent.trim())")
+        if on and on[0] == "Units": break
+        pg.click("#units .navswitch"); pg.wait_for_timeout(150)
+    pg.click('#units button[data-u="mobile"]'); pg.wait_for_timeout(600)
+
+    def board():
+        """What the page says about missing, in the three places that say it."""
+        return pg.evaluate("""() => {
+          const rail = {}, chip = {};
+          document.querySelectorAll('[data-rgap]').forEach(e =>
+            rail[e.dataset.rgap] = e.textContent.trim());
+          document.querySelectorAll('.missbar .mchip').forEach(e =>
+            chip[e.dataset.gkey] = e.textContent.trim());
+          return { rail, chip, total: gapTotal(TARGET), all: gapTotalAll(TARGET),
+                   red: document.querySelectorAll('#panel .missing').length,
+                   redHidden: document.querySelectorAll('#panel .hiddenrow .missing').length };
+        }""")
+
+    before = board()
+    owed = pg.evaluate("""() => {
+      const p = UNITS.mobile.items.filter(p =>
+        (p.tactics || []).some(t => SMPRules.gapMissing('tactic', t).length))[0];
+      return { code: p.code, key: 'p:' + p.code,
+               n: (p.tactics || []).reduce((a, t) =>
+                    a + SMPRules.gapMissing('tactic', t).length, 0),
+               ids: (p.tactics || []).filter(t =>
+                    SMPRules.gapMissing('tactic', t).length).map(t => t.id) };
+    }""")
+    ck("the demo has a pillar owing something to hide", owed["n"] > 0, owed)
+    ck("...and it is drawn on the pillar's own row AND on the band's chip",
+       owed["key"] in before["rail"] and owed["key"] in before["chip"], before)
+
+    # hide every owing tactic in that pillar, through the platform's own eye
+    pg.click('#units button[data-u="mobile"]'); pg.wait_for_timeout(400)
+    press(pg, '.ptitle.edhead .penbtn, .pband.edband .penbtn, .pane .paneact .penbtn[data-page="plan"]')
+    pg.wait_for_timeout(500)
+    pressed = 0
+    for rid in owed["ids"]:
+        el = pg.query_selector('.eyebtn[data-hiderow="%s"]' % rid)
+        if el: el.click(); pg.wait_for_timeout(200); pressed += 1
+    ck("every owing tactic has an eye to press", pressed == len(owed["ids"]),
+       (pressed, len(owed["ids"])))
+    ck("...and the eye is what wrote the mark",
+       pg.evaluate("""(ids) => ids.every(id =>
+         SMPRules.isHidden(hideableById(id)))""", owed["ids"]))
+    # out of the pen, so the read surface is what is being measured
+    press(pg, '.ptitle.edhead .penbtn, .pband.edband .penbtn, .pane .paneact .penbtn[data-page="plan"]')
+    pg.wait_for_timeout(500)
+
+    after = board()
+    ck("the band's total drops by exactly what the hidden rows owed",
+       after["total"] == before["total"] - owed["n"], (before, after, owed))
+    ck("...and Submit's own count with it (the viewer-blind one)",
+       after["all"] == before["all"] - owed["n"], (before, after, owed))
+    ck("the pillar card stops counting them — it agrees with its own chip",
+       after["rail"].get(owed["key"], "") == after["chip"].get(owed["key"], "")
+       or (owed["key"] not in after["rail"] and owed["key"] not in after["chip"]),
+       after)
+    ck("every OTHER pillar is untouched, on the row and on the chip",
+       all(after["rail"].get(k) == v for k, v in before["rail"].items()
+           if k != owed["key"])
+       and all(after["chip"].get(k) == v for k, v in before["chip"].items()
+               if k != owed["key"]),
+       (before, after))
+    ck("no hidden row wears the red word", after["redHidden"] == 0, after)
+    # A DASH AND AN EMPTY CELL ARE NOT THE SAME THING. Dropping the word
+    # outright would satisfy the assertion above and leave a row of blank
+    # boxes, which reads as a table that failed to render (§45.2). So the
+    # cells that lost the word are asked to hold the platform's own mark for
+    # absent, and no cell in the row is allowed to be empty.
+    dash = pg.evaluate("""() => {
+      const rows = [...document.querySelectorAll('#panel tr.hiddenrow')];
+      return { rows: rows.length,
+               nobody: rows.reduce((a, r) => a + r.querySelectorAll('.nobody').length, 0),
+               emptyCells: rows.reduce((a, r) => a +
+                 [...r.querySelectorAll('td')].filter(td =>
+                   !td.textContent.trim() && !td.children.length).length, 0) };
+    }""")
+    ck("...and it is a dash it wears instead — never an empty cell",
+       dash["rows"] > 0 and dash["nobody"] >= dash["rows"] and dash["emptyCells"] == 0,
+       dash)
+    # THE WORD MUST STILL BE SOMEWHERE, or a build that deleted it outright
+    # passes every assertion above. It cannot be asked of THIS pane: every
+    # owing tactic in this pillar has just been hidden, so the pane honestly
+    # holds none — the first run said FAIL here and the CHECK was what was
+    # wrong (§100.3, and §94.2 from the inside: a state I had made myself).
+    # The rail's next owing pillar is where a shown row lives.
+    other = [k for k in after["rail"] if k != owed["key"]]
+    ck("another pillar still owes something to look at", bool(other), after)
+    if other:
+        pg.click('[data-urail="mobile|%s"]' % other[0].split(":", 1)[1])
+        pg.wait_for_timeout(400)
+        red = pg.evaluate("""() => ({
+          red: document.querySelectorAll('#panel .missing').length,
+          hidden: document.querySelectorAll('#panel tr.hiddenrow').length })""")
+        ck("a SHOWN row still says Missing — the word did not simply go",
+           red["red"] > 0 and red["hidden"] == 0, red)
+        pg.click('[data-urail="mobile|%s"]' % owed["code"]); pg.wait_for_timeout(400)
+
+    # ── and back, or "not counted" would be indistinguishable from "gone"
+    press(pg, '.ptitle.edhead .penbtn, .pband.edband .penbtn, .pane .paneact .penbtn[data-page="plan"]')
+    pg.wait_for_timeout(500)
+    for rid in owed["ids"]:
+        el = pg.query_selector('.eyebtn[data-hiderow="%s"]' % rid)
+        if el: el.click(); pg.wait_for_timeout(200)
+    press(pg, '.ptitle.edhead .penbtn, .pband.edband .penbtn, .pane .paneact .penbtn[data-page="plan"]')
+    pg.wait_for_timeout(500)
+    back = board()
+    ck("showing them again brings the count, the row and the word back",
+       back["total"] == before["total"] and back["rail"] == before["rail"]
+       and back["red"] == before["red"], (before, back))
+    ck("...and leaves no mark behind (§50.6)",
+       pg.evaluate("""(ids) => ids.every(id => !("hide" in hideableById(id)))""",
+                   owed["ids"]))
+
     ck("no console errors", not errs, errs[:3])
     b.close()
 print(("\n%d FAILED" % bad) if bad else "\nall passed")

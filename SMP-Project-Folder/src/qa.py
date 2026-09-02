@@ -431,17 +431,27 @@ with sync_playwright() as p:
           const cards = [...el.querySelector(".scores").querySelectorAll(":scope > .card")]
             .map(c => ({ h:c.querySelector("h4").textContent.trim(),
                          big:c.querySelector(".big").textContent.trim() }));
-          /* Nothing scored anywhere: the middle number must be a dash. */
-          const keep = u.items.map(p => (p.measures || []).map(m => m.progress));
+          /* Nothing scored anywhere: the middle number must be a dash.
+
+             §235: IT IS THE ACTUAL THAT IS BLANKED NOW, not `progress`. The
+             score used to BE the stored `progress`, so clearing it modelled
+             "nobody reported"; it is derived from the actual against a
+             prorated target since §235, so clearing `progress` alone leaves
+             every measure perfectly scoreable and this asserted nothing. The
+             method depended on where the number came from -- §51.11's fault
+             one layer in, the check's own machinery rather than its
+             selectors. Both are cleared, because a row with a stored progress
+             and no actual is not a state the product can produce. */
+          const keep = u.items.map(p => (p.measures || []).map(m => ({ p:m.progress, a:m.actual })));
           const by = u.items.map(p => p.by);
           u.items.forEach(p => { delete p.by;
-            (p.measures || []).forEach(m => { m.progress = null; }); });
+            (p.measures || []).forEach(m => { m.progress = null; m.actual = ""; }); });
           const bare = document.createElement("div");
           bare.innerHTML = renderUnitPerformance(u);
           const blank = [...bare.querySelector(".scores").querySelectorAll(":scope > .card")][1]
             .querySelector(".big").textContent.trim();
           u.items.forEach((p, i) => { if (by[i]) p.by = by[i];
-            (p.measures || []).forEach((m, j) => { m.progress = keep[i][j]; }); });
+            (p.measures || []).forEach((m, j) => { m.progress = keep[i][j].p; m.actual = keep[i][j].a; }); });
           return { cards:cards, computed:unitPillars(u), blank:blank };
         }""", dest)
         if len(three["cards"]) != 3:
@@ -1016,17 +1026,21 @@ with sync_playwright() as p:
                  heads: oh ? [...oh.querySelectorAll('span')].map(e=>e.textContent.trim()) : null,
                  chip: (document.querySelector('.ochip') || {}).innerText || null };
       };
+      /* §243: there is ONE layout now (Islam: "remove it and make the view in
+         table only"), so nothing selects one and the chips half of this trial
+         has nothing to measure. Its two assertions are REWRITTEN below rather
+         than deleted (§218) — what they were guarding is that the toggle
+         changes what is SHOWN, and that is still asserted, of the layout that
+         exists. */
       const out = { toggle: !!document.querySelector('[data-koyear]') };
-      KO_VIEW = "cols"; setKoThisYear(false); paint();
+      setKoThisYear(false); paint();
       out.colsOff = read();
       setKoThisYear(true); paint();
       out.colsOn = read();
-      KO_VIEW = "chips"; setKoThisYear(false); paint();
-      out.chipsOff = read();
-      setKoThisYear(true); paint();
-      out.chipsOn = read();
       out.stored = localStorage.getItem("smp.ko.year2");
-      setKoThisYear(false); KO_VIEW = "chips"; paint();
+      out.chipsGone = !document.querySelector('.ochip');
+      out.switchGone = !document.querySelector('[data-kov]');
+      setKoThisYear(false); paint();
       return out;
     }""")
     if not ko["toggle"]:
@@ -1049,12 +1063,13 @@ with sync_playwright() as p:
     if ko["colsOff"].get("heads") and "This year" in ko["colsOff"]["heads"]:
         errs.append("KO YEAR: with the toggle off This year is still drawn (%r)"
                     % ko["colsOff"]["heads"])
-    if not ko["chipsOn"]["chip"] or "3-year" not in ko["chipsOn"]["chip"]:
-        errs.append("KO YEAR: the chips view does not carry both horizons when on (%r)"
-                    % ko["chipsOn"]["chip"])
-    if ko["chipsOff"]["chip"] and "3-year" in ko["chipsOff"]["chip"]:
-        errs.append("KO YEAR: the chips view still carries both when off (%r)"
-                    % ko["chipsOff"]["chip"])
+    # §243: the chip layout and the switch that chose it are GONE, and that is
+    # asserted rather than assumed — an absence nothing checks is one a later
+    # build brings back (§24, §51.11).
+    if not ko["chipsGone"]:
+        errs.append("KO YEAR: the chip layout is still drawn — §243 removed it")
+    if not ko["switchGone"]:
+        errs.append("KO YEAR: the cards/table switch is still on the page — §243 removed it")
     if ko["stored"] != "1":
         errs.append("KO YEAR: the choice is not remembered in localStorage (%r)" % ko["stored"])
     show_units(pg)

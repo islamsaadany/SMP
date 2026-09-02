@@ -169,6 +169,18 @@ var SYNC = (function () {
     if (typeof fnPruneNulls === "function") {
       (window.FUNCTION_KEYS || []).forEach(function (k) { fnPruneNulls(window.FUNCTIONS[k]); });
     }
+    /* §242: A KEY OBJECTIVE STORED WITH NO ID IS **NOT** HEALED HERE, AND THE
+       REASON IS WORTH THE LINES. The obvious fix — mint the missing ones on
+       arrival, as fnPruneNulls heals above — is a trap: `lastSaved` is taken
+       after this, so a minted id joins the BASELINE and never travels, while
+       every later row edit is addressed AT that id. `applyChanges()` resolves
+       a row edit against the STORED graph by id and refuses one it cannot
+       find ("a row edit names a row that is not here") — and a refused path
+       fails the WHOLE save, taking unrelated work with it (§215).
+
+       So the heal is a MIGRATION (039), where the id lands in the database
+       and both sides agree about it. §191's own answer to the same fault on
+       the group's six objectives, for the same reason. */
     /* A tenant that predates the company level has neither, and an empty
        company list is a valid answer: every unit is then its own. */
     window.COMPANY_KEYS = state.companyKeys || [];
@@ -972,11 +984,53 @@ var SYNC = (function () {
   });
   window.addEventListener("pagehide", flushLeave);
 
+  /* ── A VIEW-AS SESSION STARTS WHERE THEIR SESSION WOULD START (§237) ──
+     Islam: *"viewing as needs to have the same server connection and
+     relation and not inherit my SMO abilities … so I get the errors."*
+     The JUDGING half has been the viewed person's since §185, and §234.2
+     records what stayed the SMO's: the TAB — its baseline, its history,
+     its leftovers flushed as the SMO by the switch's own §204 flush. So a
+     switch now re-fetches the server's graph and rebases the tab on it,
+     which is exactly what happens when that person signs in: nothing of
+     the SMO tab's past can ride into a save judged as them, and what the
+     simulated session sees is what the server holds at that moment.
+
+     REUSES THE BOOT'S OWN `hydrate` — a second way of applying a fetched
+     graph is §53.5's drift. `LIVE` is refreshed too, or leaving demo data
+     after a rebase would put the boot-time snapshot back on screen.
+
+     ONLY WHERE THERE IS A SERVER AND ONLY IN LIVE MODE: `file://` has
+     nothing to fetch and demo data is deliberately not the server's. A
+     fetch that fails leaves the tab exactly as it was and answers false —
+     the switch still happens, judged correctly (§185), on the old
+     baseline: the honest fallback, never a blocked way home (§209). */
+  function rebase(done) {
+    done = done || function () {};
+    if (!live || isDemoMode() || saving) return done(false);
+    fetch("/api/state", { cache: "no-store" })
+      .then(function (r) {
+        if (r.status === 401 || r.status === 403) { location.replace("/"); throw new Error("sign in"); }
+        if (!r.ok) throw new Error("HTTP " + r.status);
+        return r.json();
+      })
+      .then(function (data) {
+        if (!data.ok || !data.state) throw new Error(data.error || "bad payload");
+        hydrate(data.state);
+        LIVE = clone(data.state);
+        lastSaved = serialize();
+        done(true);
+      })
+      .catch(function () { done(false); });
+  }
+
   return {
     isLive: function () { return live; },
     /* Flush now rather than on the next 800ms tick, and say what happened.
        The ONLY caller is a button somebody pressed; nothing schedules it. */
     saveNow: function (done) { save(done); },
+    /* Take the server's current graph as the tab's new truth (§237). The
+       caller is the viewer switch and nothing else schedules it. */
+    rebase: function (done) { rebase(done); },
     isDemo: function () { return isDemoMode(); },
     /* Which of the two, for anything that needs to tell them apart. */
     demoMode: function () { return isDemoMode() ? mode : null; },

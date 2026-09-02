@@ -94,9 +94,21 @@ with sync_playwright() as p:
     # false: the CHECK carried the old assumption, not the product (§108.16).
     ck("in progress is the remainder, not a third count",
        src["prog"] == src["units"] - src["sub"] - src["none"], src)
-    ck("and the board counts the supporting functions too (§105)",
-       src["units"] == pg.evaluate("activeKeys().length + boardFunctionKeys().length")
+    # §244 WIDENED THE UNIT HALF and this assertion carried the old formula —
+    # the second time this line has held a stale copy of the board's own
+    # membership (the comment above records the first). It asks the PRODUCT
+    # which subjects are on the board now, rather than rebuilding the answer
+    # from a list of parts that keeps changing.
+    ck("and the board counts every subject on it, functions of both shapes too",
+       src["units"] == pg.evaluate("boardUnitTargets().length + boardFunctionKeys().length")
        and src["units"] > pg.evaluate("activeKeys().length"), src)
+    # §245 moved those rows to the function list; the ASSERTION is unchanged in
+    # substance — a function that plans in pillars is counted — and asks the
+    # product where it lives rather than naming a half (§94.8).
+    ck("...including a function that plans in pillars, wherever the board lists it",
+       pg.evaluate("boardUnitTargets().concat(boardFunctionTargets())"
+                   ".filter(t=>{const k=fnKeyOfTarget(t);"
+                   "return k && fnPlansInPillars(FUNCTIONS[k]||{});}).length") > 0)
     ck("the strip is a way through, not a control",
        pg.eval_on_selector(".ovcyc-go", "e=>e.dataset.setupgo") == "cycle")
 
@@ -213,21 +225,26 @@ with sync_playwright() as p:
     full = pg.evaluate("""()=>{REVIEW.from='Jan 2026';REVIEW.to='Jun 2026';
       REVIEW.due='15 Jul 2026';REVIEW.endsQuarter=2;currentSub='overview';paint();
       return document.querySelector('.ovsmeta').textContent.trim();}""")
-    ck("with dates, it reads as a span", full == "Jan 2026 to Jun 2026 \u00b7 due 15 Jul 2026 \u00b7 as of Q2", full)
+    # §239: THE SENTENCE NO LONGER CARRIES THE REVIEW POINT. It used to end
+    # "as of Q" + endsQuarter -- the words of one field over the value of
+    # another -- and the review point is now a control on the cycle strip, so
+    # printing it here as well would say one thing twice and let the two
+    # disagree the moment one is edited.
+    ck("with dates, it reads as a span", full == "Jan 2026 to Jun 2026 \u00b7 due 15 Jul 2026", full)
     bare = pg.evaluate("""()=>{REVIEW.from='';REVIEW.to='';REVIEW.due='';
       REVIEW.endsQuarter=4;paint();
       return document.querySelector('.ovsmeta').textContent.trim();}""")
-    ck("with none, it says the dates are not set", bare == "Dates not set \u00b7 as of Q4", bare)
+    ck("with none, it says the dates are not set", bare == "Dates not set", bare)
     ck("and never prints a bare separator",
        " \u00b7  \u00b7 " not in bare and not bare.startswith("\u00b7"), bare)
     onCycle = pg.evaluate("""()=>{currentSub='cycle';paint();
-      return document.querySelector('.fstrip-meta').textContent.trim();}""")
+      return document.querySelector('.fstrip-meta:not(.asof)').textContent.trim();}""")
     ck("the Reporting cycle page says exactly the same", onCycle == bare, (bare, onCycle))
     # ONE END IS NOT A SPAN: "Jan 2026 to" is worse than saying nothing.
     half = pg.evaluate("""()=>{REVIEW.from='Jan 2026';REVIEW.to='';REVIEW.due='';
       currentSub='overview';paint();
       return document.querySelector('.ovsmeta').textContent.trim();}""")
-    ck("one end alone is reported on its own terms", half == "from Jan 2026 \u00b7 as of Q4", half)
+    ck("one end alone is reported on its own terms", half == "from Jan 2026", half)
     pg.evaluate("""()=>{REVIEW.from='Jan 2026';REVIEW.to='Jun 2026';
       REVIEW.due='15 Jul 2026';REVIEW.endsQuarter=2;paint();}""")
     pg.wait_for_timeout(200)

@@ -118,7 +118,6 @@ var EDIT_PAGE = { foundation:false, analysis:false, temple:false };
 
 /* How the objectives box reads. A view preference, not stored on the object —
    it changes nothing about the strategy, only how one box is laid out. */
-var KO_VIEW = "chips";
 
 /* Configuration screens open read-only. Editing is entered deliberately, which
    is what makes a change to a weight or a threshold an act rather than a slip. */
@@ -3770,10 +3769,10 @@ function capById(id){
 
 function capKOScore(c){
   /* Pending confirmation leaves the average (§145), as everywhere. */
-  var list = (c.keyObjectives || []).filter(function(m){ return m.progress != null; });
+  var list = (c.keyObjectives || []).filter(function(m){ return measureScore(m) != null; });
   if (!list.length) return null;
   var tw = 0, sum = 0;
-  list.forEach(function(m){ var w = m.weight == null ? 1 : m.weight; tw += w; sum += m.progress * w; });
+  list.forEach(function(m){ var w = m.weight == null ? 1 : m.weight; tw += w; sum += measureScore(m) * w; });
   return tw ? Math.round(sum / tw) : null;
 }
 
@@ -4268,12 +4267,43 @@ function fnDeleteBlockers(fk){
     "it instead of deleting it"));
   return out;
 }
+/* ── THE CYCLE NOTE IS A LINE SOMEBODY WROTE, OR IT IS NOT THERE (§246) ──
+   Islam: *"for functions who already didn't fill the notes an achievments
+   slide it's still appearing."*
+
+   §243 MADE THAT SLIDE CONDITIONAL AND THE CONDITION IS RIGHT; what it read
+   was not. The deck's own note box is `contenteditable` and wrote
+   `box.textContent` straight into `REVIEW.note` on every keystroke — and until
+   §243 that box was drawn on EVERY deck — so anybody who clicked into it and
+   pressed space, or typed a word and deleted it, left a note made of
+   whitespace. Whitespace is truthy, so the slide came back for a note nobody
+   had written. §104.10's trap in a third place: the falsy test is not the
+   same question as "did somebody say something".
+
+   ONE READER AND ONE WRITER. Five places read this value and two wrote it, and
+   a definition of *there is a note* that lives in five places is one that
+   disagrees with itself the first time somebody tightens one of them (§53.5).
+
+   TRIMMED ON READ AS WELL AS ON WRITE, so the notes already sitting in a
+   client's database behave correctly today and nothing is migrated — and the
+   emptied key is DELETED (§50.6), so a note never written and one written and
+   cleared are the same absence rather than two states nothing distinguishes. */
+function cycleNote(target){
+  var v = (REVIEW.note || {})[target];
+  return typeof v === "string" ? v.trim() : "";
+}
+function setCycleNote(target, text){
+  if (!REVIEW.note) REVIEW.note = {};
+  var v = String(text == null ? "" : text).trim();
+  if (v) REVIEW.note[target] = v;
+  else delete REVIEW.note[target];
+}
 /* Has this function ever been part of a cycle. Submitted, noted, snapshotted
    or archived — any one of them makes it history. */
 function fnEverReported(fk){
   var t = "fn:" + fk;
   if (REVIEW.submitted && REVIEW.submitted[t]) return true;
-  if (REVIEW.note && REVIEW.note[t]) return true;
+  if (cycleNote(t)) return true;
   if (REVIEW.slides && REVIEW.slides[t]) return true;
   if ((ARCHIVES || []).some(function(a){ return a.key === t; })) return true;
   /* A closed cycle carries a score per subject, and a score whose subject has
@@ -4726,7 +4756,10 @@ function reportedCount(u){
 function rowReads(x){
   if (x.kind === "tactic") return tacticRatio(x.obj);
   if (x.kind === "deliverable" || x.kind === "milestone") return statusReads(x.obj);
-  return x.obj.progress;
+  /* §239: the prorated score, so a unit is asked to explain a figure that is
+     actually behind rather than one that only looks behind against a whole
+     year. The note rule and the Submit gate both hang off this. */
+  return measureScore(x.obj);
 }
 function needsNote(x){
   var p = rowReads(x);
@@ -4807,11 +4840,51 @@ function reportClosed(target){
   return reportParked(target) ||
          !!((REVIEW.submitted || {})[String(target || "")]);
 }
+/* ── WHAT A SUBJECT IS ASKED FOR, BY ITS SHAPE (§242) ────────────────────
+   Islam, from a live client: *"the key objectives reporting wasn't done and
+   the button of submit to smo was allowed."* Both halves of that were true and
+   the second is this function. It asked by PREFIX — every `fn:` target went to
+   `fnAskedItems()`, which walks CAPABILITIES — and a function that plans in
+   pillars has none. So the submit gate looked at an empty list, found nothing
+   owed, and opened the button.
+
+   Measured on Merchandising with every figure stripped:
+
+       the reporting page   0 of 10 entered
+       the submit gate      0 of  0  — nothing in the way
+       a unit, same state   0 of 41  — "41 figures still to enter"
+
+   §59's rule in the last place still asking by prefix, and the same fault
+   §224 fixed on the Present button: THE FORMAT DECIDES, NOT THE PREFIX. A
+   pillars function's plan is unit-shaped, so it is asked the unit's question
+   through `unitLike()`, exactly as its Report page already draws it.
+
+   It was never only the count. `submitBlockers` reads its ROWS from the same
+   list, so the note rule (§105) and the In-progress rule (§104.10) had never
+   once run on a function that plans in pillars either.
+
+   ONE READER, because the welcome screen asks the same question one line
+   before it asks this one, and two answers to "what does this subject owe"
+   is how a screen comes to disagree with the button on it (§53.5).
+
+   A pillars function is never ALSO asked for capabilities: the format cannot
+   be switched while the other side holds anything (§59), so the two lists are
+   exclusive by construction rather than by a rule here. */
+function subjectAsked(target){
+  var t = String(target || ""), u = plansInPillars(t) ? unitLike(t) : null;
+  if (u) return askedItems(u);
+  var fk = fnKeyOfTarget(t);
+  return fk && FUNCTIONS[fk] ? fnAskedItems(fk) : [];
+}
+function subjectReported(target){
+  var t = String(target || ""), u = plansInPillars(t) ? unitLike(t) : null;
+  if (u) return reportedCount(u);
+  var fk = fnKeyOfTarget(t);
+  return fk && FUNCTIONS[fk] ? fnReportedCount(fk) : { done:0, total:0 };
+}
 function submitBlockers(target){
-  var t = String(target || ""), fn = t.indexOf("fn:") === 0;
-  var rows = fn ? fnAskedItems(t.slice(3)) : askedItems(UNITS[t] || { keyObjectives:[], items:[] });
-  var counted = fn ? fnReportedCount(t.slice(3))
-                   : reportedCount(UNITS[t] || { keyObjectives:[], items:[] });
+  var t = String(target || "");
+  var rows = subjectAsked(t), counted = subjectReported(t);
   return { notes: rows.filter(needsNote),
            pending: rows.filter(function(x){ return statusPending(x.obj); }),
            /* §221, Islam: *"remove the ability of people to submit a report
@@ -4882,10 +4955,65 @@ function reportState(c, key){
    The filter was written inline in renderCycle(); the totals need exactly the
    same list, and two copies of it is how a board and its own summary come to
    disagree about how many things were asked for. */
+/* ── WHO IS ON THE CYCLE BOARD (§244, placed by §245) ────────────
+   Islam, told that a function planning in pillars appears nowhere on the
+   board: *"put them on the unit half."* Then, having looked at it:
+   *"merch and marketing and cf should be with functions not units"*, and
+   *"don't split functions planning in pillars from functions planning in
+   projects — they are functions reporting."*
+
+   §244 FOUND THE HOLE AND PUT THE ROWS IN THE WRONG PLACE. They were filtered
+   off BOTH halves: the function half asks for capabilities
+   (`capsOfFunction(fk).length`), which a pillars function has none of by
+   construction (§59), and the unit half read `activeKeys()`, which is units —
+   so Consumer Finance could be a week late and the page the office watches
+   would carry no row for it. That much was right and is unchanged.
+
+   THE PLACEMENT IS HIS, AND THE COLUMN HEADING IS THE ARGUMENT: that block
+   sits under **Business unit**, which a supporting function is not. §244
+   reasoned from the three COUNT columns and answered a question nobody was
+   asking — this board is scanned for *who owes a report*, and a function owes
+   one as a function whatever shape its plan takes.
+
+   AND THE FORMAT IS NOT A GROUPING. Two bands were drawn and he refused them:
+   how a function plans is a fact about its own pages, not about its place on
+   this board, and splitting the list by it makes somebody looking for
+   Marketing decide which half to look in first. ONE band, one list, in the
+   register's own order — the shape decides only which counters a row is read
+   with, inside the builder, where nobody scanning the page has to know.
+
+   TWO LISTS, because the totals must have exactly the membership the rows
+   have: §108.1's miscount is the parts growing while the divisor did not. */
+function boardUnitTargets(){
+  return activeKeys();
+}
+/* Every supporting function that can be asked for a report, in ONE list and in
+   the register's own order. A pillars function has no capabilities to count, so
+   what it must have instead is a plan of its own -- a row for a subject nobody
+   can report on is a row nobody can clear (§61). */
+function boardFunctionTargets(){
+  return boardFunctionKeys().map(function(fk){ return "fn:" + fk; });
+}
+/* Who the board names against a subject: the custodian, then the head — the
+   same order and the same two roles on a unit and on a function (§53.5). */
+function boardWho(target){
+  var fk = fnKeyOfTarget(target);
+  var r = fk ? (FUNCTIONS[fk] || {}) : (UNIT_ROLES[target] || {});
+  return personName(r.custodian) || personName(r.head) || "\u2014";
+}
 function boardFunctionKeys(){
   return Object.keys(FUNCTIONS).filter(function(fk){
-    return fnShows(fk) && !fnPlansInPillars(FUNCTIONS[fk]) && capsOfFunction(fk).length;
+    if (!fnShows(fk)) return false;
+    return fnPlansInPillars(FUNCTIONS[fk]) ? true : !!capsOfFunction(fk).length;
   });
+}
+/* Which counters a board row is read with: the FORMAT decides, never the `fn:`
+   prefix (§59, and §224's own fault on the Present button). This is the only
+   place the shape matters -- the list above and the band below know nothing
+   about it, which is what lets the two formats sit in one list (§245). */
+function boardPlansLikeUnit(target){
+  var fk = fnKeyOfTarget(target);
+  return !fk || fnPlansInPillars(FUNCTIONS[fk] || {});
 }
 
 /* ── WHAT A CYCLE SAYS ABOUT ITSELF (§120.1) ──────────────────────────
@@ -4918,8 +5046,11 @@ function cycleMeta(){
   else if (to)    bits.push("until " + to);
   if (due) bits.push("due " + due);
   if (!bits.length) bits.push("Dates not set");
-  if (REVIEW.endsQuarter != null && REVIEW.endsQuarter !== "")
-    bits.push("as of Q" + REVIEW.endsQuarter);
+  /* §239: THE REVIEW POINT IS NOT PRINTED HERE ANY MORE. It used to read
+     "as of Q" + endsQuarter -- the words of `GROUP.asOfQuarter` over the value
+     of a different field -- and it is now a control on the strip beside this,
+     so printing it here as well would say one thing twice and let the two
+     disagree the moment one is edited (§53.5). */
   return bits.join(" \u00b7 ");
 }
 
@@ -4931,11 +5062,20 @@ function cycleTotals(){
     if (st.key === "late") t.none++;
     t.units++;
   }
-  activeKeys().forEach(function(k){ add(reportedCount(UNITS[k]), unitState(UNITS[k])); });
-  /* THE FUNCTIONS COUNT TOO (§105). They report, they submit, and they are on
-     the board — so leaving them out of the headline would say 6 of 10 on a
-     page listing fifteen rows. */
-  boardFunctionKeys().forEach(function(fk){ add(fnReportedCount(fk), fnState(fk)); });
+  /* ONE WALK OVER EXACTLY WHAT THE BOARD DRAWS (§244, §245). Both lists, and
+     each subject read with the counters its own row is read with -- the FORMAT
+     decides that, never the `fn:` prefix (§59). Leaving a pillars function out
+     would say "14 of 15" on a page listing fifteen rows, which is §108.1's
+     miscount by another road; counting it twice is the same fault mirrored. */
+  boardUnitTargets().concat(boardFunctionTargets()).forEach(function(target){
+    if (boardPlansLikeUnit(target)) {
+      var u = unitLike(target);
+      if (u) add(reportedCount(u), unitState(u));
+    } else {
+      var fk = fnKeyOfTarget(target);
+      if (fk) add(fnReportedCount(fk), fnState(fk));
+    }
+  });
   /* DERIVED, NEVER COUNTED: in progress is whatever is neither submitted nor
      untouched, so it cannot disagree with the other two. It also FIXES a real
      miscount — the inline version divided by `activeKeys().length` while
@@ -5162,22 +5302,126 @@ function mayMarkFocus(){
    equal-weighted, which is the default nobody has to defend. */
 var KO_WEIGHTS = { mobile: [40, 25, 20, 15] };
 
+/* ── A FIGURE READ AT ITS TARGET'S SCALE (§243) ─────────────────────────
+   Islam, of a unit's objectives table: *"actual revenue is reported in details
+   by the unit — it needs to be squeezed to follow the target format like 3.59,
+   not the full number."* His row reads target **3.59B EGP** against actual
+   **3,590,800,500**. Both are right; they are written at different scales, so
+   the row cannot be read across, and on a slide the long one is what the eye
+   lands on.
+
+   DISPLAY ONLY. What was reported is stored exactly as it was entered and
+   nothing is rounded away — this is a reading of a value, not a rewriting of
+   one, so the full figure stays in the hover and in the workbook.
+
+   THE RULE HAS TO NOT MISFIRE ON THE ORDINARY CASE, which is the whole
+   difficulty: §199.6 says a bare number inherits its row's unit, so "8"
+   against a target of "6 M EGP" means eight MILLION and must be left alone.
+   The only reading under which a bare number is a full figure rather than a
+   figure in the target's unit is when it is ABSURDLY larger than the target —
+   so the gate is **1000x**, which is not a taste: it is one whole magnitude
+   step (K, M, B are each 1000 apart), and a figure genuinely a thousand times
+   its target would be a performance of 100,000%, which no report contains.
+   Below that nothing is touched, so every real figure in the demo is
+   unchanged and it is asserted.
+
+   The decimals follow the TARGET's, so the two line up in the column, and the
+   unit is rejoined with the target's own spacing (`joinTarget`). A target with
+   no magnitude, an actual that carries its own unit, or anything unparseable
+   returns the value exactly as stored. */
+var FIGURE_MAGNITUDES = { B: 1e9, M: 1e6, K: 1e3 };
+function figureScaled(target, actual){
+  var raw = actual == null ? "" : String(actual).trim();
+  if (!raw) return raw;
+  var t = splitTarget(target), a = splitTarget(raw);
+  if (a.unit || !t.unit) return raw;                      /* already carries one */
+  var mag = FIGURE_MAGNITUDES[t.unit.charAt(0).toUpperCase()];
+  if (!mag) return raw;
+  var av = parseFloat(a.value.replace(/,/g, ""));
+  var tv = parseFloat(String(t.value).replace(/,/g, ""));
+  if (isNaN(av) || isNaN(tv) || !tv) return raw;
+  if (Math.abs(av) < Math.abs(tv) * 1000) return raw;     /* a figure in the target's own unit */
+  var dp = (String(t.value).split(".")[1] || "").length;
+  return joinTarget(target, (av / mag).toFixed(dp), t.unit);
+}
+/* The same figure as a title, so the full number is never lost to the reader
+   who wants it — empty when nothing was shortened, which is what lets a caller
+   hand it straight to `title=""` without deciding anything. */
+function figureFull(target, actual){
+  var raw = actual == null ? "" : String(actual).trim();
+  return figureScaled(target, raw) === raw ? "" : raw;
+}
+
+/* ── WHAT EACH OBJECTIVE WEIGHS (§243) ──────────────────────────────────
+   Islam: *"there is no weighting on the objectives in units it needs to be
+   added, and in the functions planning as pillars it's there but if it's
+   missing it should be considered equally weighted objectives not 0."*
+
+   THE SECOND HALF IS THE BUG, and it is one of the two mechanisms that put a
+   dash where a reported figure should be. `koScore()` read
+   `weights[i] == null ? 0 : weights[i]` — so a blank weight counted at
+   NOTHING, and where every reported row was blank the total came to nought
+   and the whole headline returned null. Measured: the same objectives read
+   **90%** equally weighted and **a dash** on that weighting.
+
+   THE RULE, IN ONE SENTENCE: a blank weight counts as the average of the
+   weights that WERE set; if none were set at all, every objective counts
+   equally. So a blank can never be worth nothing, never dominate, and a
+   half-filled column behaves like a sensible reading of a half-filled column
+   rather than like a scoring decision nobody made.
+
+   TWO PLACES HOLD A WEIGHT AND THAT IS WHY THIS TAKES BOTH. A capability's
+   and a function's objectives carry `weight` ON THE ROW; a unit's have lived
+   in `KO_WEIGHTS[ukey]` as an array BY POSITION since long before rows had
+   ids — which is §48's own hazard (a row removed from the middle shifts every
+   weight below it onto the wrong objective). The row wins where it is set, so
+   the unit's new column writes the row and the stored array stays readable
+   for a tenant that has one. Nothing is migrated and nothing is rewritten. */
+function koWeights(list, legacy){
+  var raw = (list || []).map(function(m, i){
+    var w = (m && m.weight != null && m.weight !== "") ? Number(m.weight) : null;
+    if (w == null && legacy && legacy[i] != null) w = Number(legacy[i]);
+    return (w == null || isNaN(w)) ? null : w;
+  });
+  var set = raw.filter(function(w){ return w != null; });
+  if (!set.length) return null;                       /* nothing weighted at all */
+  var mean = set.reduce(function(a, b){ return a + b; }, 0) / set.length;
+  return raw.map(function(w){ return w == null ? mean : w; });
+}
+/* Whether this list is weighted at all — what a table asks before drawing a
+   Weight column nobody has filled in (§243, Islam: *"if there is no weights
+   submitted the table shouldn't show weights"*). */
+function koWeighted(list, legacy){ return !!koWeights(list, legacy); }
 function koScore(list, weights){
   /* §218: an objective counts as soon as it has a figure — nothing waits
      on the office any more. */
   /* §233: hidden is not counted, weighted or not. */
-  var vals = list.filter(function(m){ return !SMPRules.isHidden(m) && !m.milestone && m.progress != null; });
+  /* §239 + §243, and NEITHER SIDE ALONE IS RIGHT. main replaced the stored
+     `progress` with `measureScore()` — one reader for every average in the
+     product, so a headline and the row it expands to cannot disagree — and
+     still read `weights[i] == null ? 0`, which is the very fault Islam asked
+     to have fixed here: a blank weight counted at NOTHING, so where every
+     reported row was blank the total came to nought and the headline returned
+     null. The merged version keeps main's reader and this branch's rule. */
+  var counts = function(m){
+    return !SMPRules.isHidden(m) && !m.milestone && measureScore(m) != null;
+  };
+  var vals = (list || []).filter(counts);
   if (!vals.length) return null;
-  if (!weights) {
-    return Math.round(vals.reduce(function(a, m){ return a + m.progress; }, 0) / vals.length);
-  }
+  var flat = function(){
+    return Math.round(vals.reduce(function(a, m){ return a + measureScore(m); }, 0) / vals.length);
+  };
+  var ws = koWeights(list, weights);
+  if (!ws) return flat();
   var tot = 0, acc = 0;
   list.forEach(function(m, i){
-    if (SMPRules.isHidden(m) || m.milestone || m.progress == null) return;
-    var w = weights[i] == null ? 0 : weights[i];
-    acc += m.progress * w; tot += w;
+    if (!counts(m)) return;
+    acc += measureScore(m) * ws[i]; tot += ws[i];
   });
-  return tot ? Math.round(acc / tot) : null;
+  /* Every weight that was set is a literal zero — an answer, but not one a
+     score can be divided by. Equal weighting rather than a dash: a figure that
+     is in must be seen (§243). */
+  return tot ? Math.round(acc / tot) : flat();
 }
 
 /* ── Weighting factors: configurable from the start ───────────────────────
@@ -5323,21 +5567,182 @@ function bandOf(v){
 function quartersOf(t){
   return [t.q1, t.q2, t.q3, t.q4].map(function(x){ return x ? 1 : 0; });
 }
+
+/* ── THE REVIEW POINT (§239) ──────────────────────────────────────────────
+   HOW FAR THROUGH THE PLAN YEAR ARE WE. One answer, asked by everything that
+   compares a figure with a benchmark: a measure's prorated target, a tactic's
+   expected delivery, and the quarter pips.
+
+   IT IS A MONTH AND NOT A QUARTER, and that is Islam's own case rather than a
+   preference: "we might be reporting till month 8 in the year then it's an 8
+   months review cycle." A quarter cannot say eight months.
+
+   BEFORE THIS THERE WERE TWO FIELDS AND THEY DISAGREED. `REVIEW.endsQuarter`
+   is the quarter the CYCLE ends in and was what `tacticPlanned()` read;
+   `GROUP.asOfQuarter` is named for the review point ("H1 means Q1 and Q2 have
+   passed") and was read by the pips alone. In the worked example both are 2,
+   so they agree and nobody ever saw it. On a year-long cycle reported in-year
+   they diverge completely: measured over the 84 demo tactics, a cycle ending
+   Q4 makes every single one read "due at 100%" -- one distinct value, a column
+   that cannot vary -- while the pips two columns away correctly show Q2. Same
+   row, two answers. §53.5, in the arithmetic rather than the layout.
+
+   THE FALLBACK IS WHAT MAKES THIS SAFE TO SHIP. A tenant that has never been
+   asked keeps EXACTLY today's behaviour, because an unset review point falls
+   back to the quarter the cycle ends in -- which is what this used to mean.
+   Nobody's score moves until the office sets a month. And the fallback NEVER
+   WRITES: a reader that creates the field it looked for puts a phantom change
+   into every save (§42, §50.6). */
+function reviewAsOf(){
+  var m = REVIEW.asOfMonth ? monthsOf(REVIEW.asOfMonth) : null;
+  if (m != null) return m;
+  var y = cycleYear();
+  if (y == null) return null;
+  var q = Number(REVIEW.endsQuarter);
+  if (!q || q < 1 || q > 4) q = 4;
+  return y * 12 + (q * 3 - 1);   /* the LAST month of that quarter */
+}
+/* The review point written the way a month is written everywhere else. Falls
+   back to the derived quarter-end so a tenant that has never set one still
+   reads a true sentence rather than a dash. */
+function reviewAsOfLabel(){
+  var t = reviewAsOf();
+  if (t == null) return "\u2014";
+  return monthValue(((t % 12) + 12) % 12, Math.floor(t / 12));
+}
+/* WHICH YEAR THE REVIEW POINT IS IN (§239.3).
+
+   Islam, from the deployment after §239 shipped: *"I adjusted the reporting
+   cycle to august but the ytd is calculating against the full year target ..
+   the ytd target in the tactics the target is still the 100%."*
+
+   REPRODUCED, AND IT IS §239.1's OWN FAULT COMMITTED BY §239.1's OWN FIX.
+   `reviewAsOf()` reads "Aug 26", which CARRIES ITS OWN YEAR -- and then
+   `elapsedMonths()` and `tacticPlanned()` threw that away and asked
+   `cycleYear()` instead, which scrapes a four-digit year out of the cycle's
+   `to`, `name` and `due`. A cycle written "Annual Plan / Jan / Dec" has none,
+   so `cycleYear()` is null, elapsed is null, the share is null, and EVERYTHING
+   FALLS BACK: measures stop prorating and every tactic reads 100% again. Two
+   fields answering one question, which is the exact fault §239.1 exists to
+   have removed.
+
+   The review point is now the authority on its own year and `cycleYear()` is
+   only the fallback for a cycle where nobody has picked a month yet. */
+function reviewYear(){
+  if (REVIEW.asOfMonth) {
+    var t = monthsOf(REVIEW.asOfMonth);
+    if (t != null) return Math.floor(t / 12);
+  }
+  return cycleYear();
+}
+/* Months of the plan year already passed, 1 to 12. The plan year runs January
+   to December (Islam, asked outright), so the count is from the cycle's year. */
+function elapsedMonths(){
+  var a = reviewAsOf(), y = reviewYear();
+  if (a == null || y == null) return null;
+  return Math.max(0, Math.min(12, a - y * 12 + 1));
+}
+/* Is this quarter behind us? A quarter counts as passed when its LAST month
+   has, which is what `asOfQuarter` meant before it became a month (H1 means Q1
+   and Q2 have passed). The quarter fallback is kept for a cycle whose year
+   cannot be read, exactly as tacticPlanned() keeps it. */
+function quarterPast(i){
+  var a = reviewAsOf(), y = reviewYear();
+  if (a == null || y == null) return (i + 1) <= (Number(REVIEW.endsQuarter) || 4);
+  return y * 12 + i * 3 + 2 <= a;
+}
+function elapsedShare(){
+  var m = elapsedMonths();
+  return m == null ? null : m / 12;
+}
+/* WHICH MEASURES PRORATE, and the plan already answers it. `compile` says what
+   kind of number this is: "Sum" adds up across the period, so six months of
+   accumulation against twelve months of target is the wrong comparison;
+   "Latest" is a rate or a share at a point in time and "Average" is already
+   normalised, so neither has anything to prorate -- and with no baseline
+   stored, prorating them would be inventing a glide path. Measured on the
+   shipped tenant: 32 of 137 rows are Sum. */
+function prorates(m){ return String(m && m.compile || "").toLowerCase() === "sum"; }
+/* The number this row is actually measured against right now.
+   PRORATE THE TARGET, THEN COMPARE -- never the ratio. Dividing a score by the
+   elapsed share is right for "more is better" and exactly backwards for "less
+   is better", so the share goes on the target and one expression serves both
+   directions. */
+function measureDue(m){
+  if (!m || !m.target) return null;
+  var t = parseFloat(String(m.target).replace(/[^0-9.]/g, ""));
+  if (isNaN(t)) return null;
+  if (!prorates(m)) return t;
+  var s = elapsedShare();
+  return s == null ? t : t * s;
+}
+/* WHAT THE ROW SCORES. Derived, never stored -- `m.progress` goes on holding
+   the raw actual-against-the-ANNUAL-target ratio exactly as it always has, so
+   every archive and every closed cycle still reads as it did and nothing is
+   migrated. The Focus board reads that raw figure on purpose (§239: reward
+   stays a year-end judgement); everything else reads this. */
+function measureScore(m){
+  if (!m) return null;
+  var due = measureDue(m);
+  if (due == null || !due) return null;
+  var a = parseFloat(String(m.actual == null ? "" : m.actual).replace(/[^0-9.]/g, ""));
+  if (isNaN(a)) return null;
+  /* NOUGHT ON A "LESS IS BETTER" MEASURE IS THE BEST POSSIBLE ANSWER, NOT AN
+     UNSCORABLE ONE (§239.4). Zero duplicates against a target of "at most 1%"
+     is perfect, and the arithmetic divides BY the actual -- so a guard written
+     to avoid dividing by zero turned the best result in the table into "Not
+     scored". Islam's own row: `Data duplicate rate ≤ 1%, 0%` read 150% before
+     §239 and stopped being scored after it. It is the cap, which is where the
+     old expression landed anyway (1/0 is Infinity, clamped to 150). */
+  if (m.dir === "\u2264" && !a) return 150;
+  return Math.max(0, Math.min(150, Math.round((m.dir === "\u2264" ? due / a : a / due) * 100)));
+}
+/* What a prorated row is measured against, written the way the target is --
+   drawn as the quiet half of the YTD actual cell. Null where there is nothing
+   worth saying. */
+function measureDueLabel(m){
+  var due = measureDue(m);
+  if (due == null) return null;
+  /* JOINED THE PLATFORM'S OWN WAY, never by hand: `18B EGP` keeps its spelling,
+     so the benchmark reads `9B EGP` beside it rather than `9 B EGP`. One
+     joiner, the same one the reporting page uses to put a typed figure back
+     together (§53.5). */
+  return joinTarget(String(m.target), String(Math.round(due * 100) / 100),
+                    splitTarget(String(m.target)).unit || "");
+}
 function tacticPlanned(t){
-  /* §218: A FILLED QUARTER COUNTS AT ONCE. This used to return null while
+  /* §218: A FILLED QUARTER COUNTS AT ONCE -- this used to return null while
      the quarters waited on the office, so a tactic whose timeline had just
-     been filled in read as NOT DUE — and a row that is not due is not
-     asked, so it vanished from the report under the words "Not asked —
-     outside this cycle". Measured on one tactic with its quarters
-     unchanged: settled 41 rows asked, pending 40, tick removed 41 again.
-     That is what Consumer Finance was looking at — nine tactics filled in
-     and none of them reportable. With no approval there is nothing to
-     wait for. */
-  var q = quartersOf(t), total = 0, elapsed = 0;
+     been filled in read as NOT DUE, vanished from the report under "Not asked
+     -- outside this cycle", and could never be reported on.
+
+     §239: AND IT COUNTS MONTHS, NOT WHOLE QUARTERS. The review point is a
+     month, so a tactic standing in a half-finished quarter gets credit for the
+     part that has actually happened (Islam, asked outright). A tactic running
+     Q2-Q4 reviewed at August has had 5 of its 9 months. Whole quarters would
+     say a tactic planned for the quarter we are standing in has not started.
+
+     The quarter arithmetic is kept as the fallback for a cycle whose year
+     cannot be read: returning null there would make every tactic "not asked"
+     and empty the reporting page, which is a far worse failure than a coarse
+     answer. */
+  var q = quartersOf(t), y = reviewYear(), a = reviewAsOf();
+  if (y == null || a == null) {
+    var tot = 0, el = 0;
+    for (var j = 0; j < 4; j++) {
+      if (!q[j]) continue;
+      tot++;
+      if (j + 1 <= REVIEW.endsQuarter) el++;
+    }
+    return tot ? Math.round(el / tot * 100) : null;
+  }
+  var total = 0, elapsed = 0;
   for (var i = 0; i < 4; i++) {
     if (!q[i]) continue;
-    total++;
-    if (i + 1 <= REVIEW.endsQuarter) elapsed++;
+    for (var k = 0; k < 3; k++) {
+      total++;
+      if (y * 12 + i * 3 + k <= a) elapsed++;
+    }
   }
   if (!total) return null;
   return Math.round(elapsed / total * 100);
@@ -5833,10 +6238,10 @@ function viaCarrier(p, own, roll){
 /* §233: a hidden row leaves every average — the same skip on every reader,
    through the one shared predicate (SMPRules.isHidden), or the deck and the
    page would disagree about one number. */
-function scorableMeasures(p){ return (p.measures || []).filter(function(m){ return !SMPRules.isHidden(m) && m.target && m.progress != null; }); }
+function scorableMeasures(p){ return (p.measures || []).filter(function(m){ return !SMPRules.isHidden(m) && m.target && measureScore(m) != null; }); }
 function pillarPerf(p){
   return viaCarrier(p,
-    function(){ return avg(scorableMeasures(p).map(function(m){ return m.progress; })); },
+    function(){ return avg(scorableMeasures(p).map(measureScore)); },
     function(f){ return avg(fnItems(f).map(pillarPerf)); });
 }
 function dueTactics(p){ return SMPRules.shown(p.tactics).filter(tacticDue); }

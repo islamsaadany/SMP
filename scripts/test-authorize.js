@@ -630,6 +630,24 @@ console.log("\n7 · a retired person");
 })();
 
 /* ── 8 · Picture slides are the unit's, not a row's (§50.5) ────── */
+/* ── §239: THE REVIEW POINT IS THE OFFICE'S ──────────────────────────────
+   It is a new field (`review.asOfMonth`, riding the review row's `extra`) and
+   it decides what EVERY figure in the tenant is measured against -- a target
+   that adds up is compared with the share of it due by then, and a tactic
+   whose span has not started is not asked at all. So it must be the office's,
+   and asserted BOTH WAYS: a rule that refuses everybody is not a rule that
+   protects anything, and a new value the authoriser has never been offered is
+   exactly what §172 records going wrong four layers down. */
+console.log("\n8a · the review point (§239)");
+(function () {
+  const setAsOf = function (s) {
+    s.review = Object.assign({}, s.review, { asOfMonth: "Aug 26" });
+  };
+  allows("smo", setAsOf, "the SMO moves the review point");
+  refuses(headKey, setAsOf, "a unit's head cannot move it");
+  refuses(custKey, setAsOf, "nor can a strategy custodian");
+})();
+
 console.log("\n8 · the review's picture slides");
 (function () {
   const slide = { id: "psTEST", title: "Site visit", at: "cover", layout: 1,

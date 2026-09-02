@@ -386,7 +386,7 @@ body.presenting .chatdock { display:none; }
    already use (§168, §190): the conversations are fine, the connection is not,
    and an alarm colour here would say the opposite. Wider than the empty state,
    because it is a sentence rather than a phrase. */
-/* ── THE OFFICE STARTS A CONVERSATION (§234) ────────────────────────────
+/* ── THE OFFICE STARTS A CONVERSATION (§247) ────────────────────────────
    Islam's placement A: in the column it acts on, beside the search. `.chqtop`
    was a single input; it is a row now, and the search flexes so the button
    never wraps below it. */

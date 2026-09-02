@@ -2,10 +2,18 @@
    Labels · Roles & access · and the factor editor that extends Weighting.
    ─────────────────────────────────────────────────────────────────────── */
 
+/* ── THE TENANT'S LABEL COMES OUT CLEANED (2026-09-01 security sweep) ────
+   A label (the word for Pillar / Measure / Aspiration …) is editable text and
+   was rendered RAW at ~43 sites — and, through recipeText(), spliced raw into
+   the knowledge base. A label of `<img src=x onerror=…>` therefore ran as code
+   for every reader in the tenant. Escaping HERE fixes both at once, because
+   every reader goes through L(). Safe: L()'s 88 uses are all display-only
+   (verified — no comparison, key, or data-attribute read back), and a normal
+   label has no special characters, so cleaning it changes nothing on screen. */
 function L(key, scope){
   var e = LABELS.entries.filter(function(x){ return x.key === key; })[0];
-  if (!e) return key;
-  return (scope === "group" ? e.group : e.bu) || e.internal;
+  if (!e) return esc(key);
+  return esc((scope === "group" ? e.group : e.bu) || e.internal);
 }
 
 /* ── Labels ─────────────────────────────────────────────────────────── */
@@ -5193,10 +5201,23 @@ function renderCycle(){
   var can = grant("c_cycle") === "edit";
   var open = REVIEW.state === "open";
 
-  var rows = activeKeys().map(function(k){
-    var u = UNITS[k], c = reportedCount(u), st = unitState(u);
-    var r = UNIT_ROLES[k] || {};
-    var who = personName(r.custodian) || personName(r.head) || "\u2014";
+  /* §244: THE UNIT HALF CARRIES A PILLARS FUNCTION TOO (Islam: "put them on
+     the unit half"). One builder over a TARGET rather than a second copy of
+     the row — the two halves of this board already drifted once (§105.4's
+     "1 need notes", right on one half and wrong on the other for as long as
+     the column existed), and a third near-identical row builder is how that
+     happens again (§53.5).
+
+     THE NAME COMES FROM `placeLabel()`, which is the navigation's own
+     vocabulary and already answers the one real collision: this tenant has a
+     unit called Care AND a function called Care, and that function alone reads
+     "Care (function)" (§65, §93.12). Inventing a tag here would be a second
+     naming for a question the product has already answered. */
+  var boardRow = function(t){
+    var u = unitLike(t);
+    if (!u) return "";
+    var c = reportedCount(u), st = unitState(u);
+    var who = boardWho(t);
     var pctD = c.total ? Math.round(c.done / c.total * 100) : 0;
     var miss = missingNotes(u).length;
     var by = { obj:[0,0], mea:[0,0], tac:[0,0] };
@@ -5205,7 +5226,7 @@ function renderCycle(){
       by[slot][1]++;
       if (x.obj.actual != null && x.obj.actual !== "") by[slot][0]++;
     });
-    return '<tr><td><b>' + esc(u.name) + '</b></td>' +
+    return '<tr><td><b>' + esc(placeLabel(t)) + '</b></td>' +
       '<td class="why" style="margin:0">' + esc(who) + '</td>' +
       '<td><div class="repcell"><span class="repbar' + (pctD < 100 ? " part" : "") + '">' +
         '<i style="width:' + pctD + '%"></i></span>' +
@@ -5215,20 +5236,31 @@ function renderCycle(){
       '<td class="num">' + by.tac[0] + '/' + by.tac[1] + '</td>' +
       '<td class="cc">' + (miss ? '<span class="badge b-late">' + notesOwed(miss) + '</span>' : '') + '</td>' +
       '<td class="cc"><span class="badge b-' + st.key + '">' + st.label + '</span></td></tr>';
-  }).join("");
+  };
+  var rows = boardUnitTargets().map(boardRow).join("");
 
-  /* ── THE FUNCTIONS ARE ON THE BOARD TOO (§105) ────────────────────
+  /* ── THE FUNCTIONS ARE ON THE BOARD TOO (§105), ALL OF THEM (§245) ──
      A submission the SMO cannot see anywhere is half a feature. They go in the
      SAME table rather than a second one, because "who has reported" is one
-     question -- but a function's three counts are its own vocabulary (key
-     objectives, deliverables and outcomes, milestones) and a unit's are not,
-     so the half opens with a band and a quiet column strip. §99's answer to
-     exactly this problem, and the reason nothing about the unit half changes:
-     the two vocabularies never share a heading. */
-  var fnKeys = Object.keys(FUNCTIONS).filter(function(fk){
-    return fnShows(fk) && !fnPlansInPillars(FUNCTIONS[fk]) && capsOfFunction(fk).length;
-  });
+     question -- under a band, because a function planning in projects counts
+     its own vocabulary (key objectives, outcomes, deliverables and milestones)
+     where a unit counts objectives, measures and tactics, and the two must
+     never share a heading unannounced (§99, §105.2).
+
+     §245: ONE BAND FOR BOTH FORMATS. Islam, of the two bands drawn for
+     sign-off: *"don't split functions planning in pillars from functions
+     planning in projects -- they are functions reporting."* So the list is the
+     register's own order and the shape decides only which builder draws the
+     row. The band therefore stops naming ONE vocabulary: it cannot, with both
+     under it, and a sentence that is true of some of the rows beneath it is
+     worse than none (§35). What it names is the count -- and the mapped
+     columns keep the per-cell hovers that already explained them (§124). */
+  var fnKeys = boardFunctionKeys();
   var fnRows = fnKeys.map(function(fk){
+    /* §245: a function that plans in pillars is READ like a unit and LISTED
+       like a function -- `boardRow()` is that reading, already written and
+       already agreeing with its own Reporting page (§53.5, §59). */
+    if (fnPlansInPillars(FUNCTIONS[fk] || {})) return boardRow("fn:" + fk);
     var c = fnReportedCount(fk), st = fnState(fk);
     var f = FUNCTIONS[fk] || {};
     /* Custodian first, head second -- the same order the unit row asks in, so
@@ -5265,7 +5297,13 @@ function renderCycle(){
     });
     var tacTitle = plural(deliv, "deliverable") + " \u00b7 " + plural(mile, "milestone") +
       ", asked this cycle";
-    return '<tr><td><b>' + esc(f.name) + '</b></td>' +
+    /* §244: `placeLabel()`, NOT `f.name` — found by the new board check and
+       older than the change that found it. This tenant has a unit called Care
+       AND a function called Care, so the board printed "Care" twice with
+       nothing to tell the two rows apart, on the page the office uses to chase
+       people. `placeLabel()` adds the suffix only where the clash is real
+       (§65, §93.12) and is what the unit half beside it now uses (§53.5). */
+    return '<tr><td><b>' + esc(placeLabel("fn:" + fk)) + '</b></td>' +
       '<td class="why" style="margin:0">' + esc(who) + '</td>' +
       '<td><div class="repcell"><span class="repbar' + (pctD < 100 ? " part" : "") + '">' +
         '<i style="width:' + pctD + '%"></i></span>' +
@@ -5279,11 +5317,18 @@ function renderCycle(){
   if (fnRows) {
     /* `dxband` is §99's own rule, orphaned when §99.7 removed the split that
        used it (§24 would have had it deleted). It is the right shape for
-       exactly this and it is used again. Its `em` slot carries the vocabulary,
-       which is the one place in this table wide enough to hold it. */
+       exactly this and it is used again.
+
+       §245: THE `em` SLOT SAYS HOW MANY, AND NOTHING ELSE. It used to name one
+       vocabulary -- "reporting in capabilities -- key objectives, outcomes,
+       and deliverables and milestones" -- which was true of every row beneath
+       it until a function planning in pillars joined the list, and a sentence
+       true of only some of the rows under it is worse than no sentence (§35,
+       and 1b-ii: a line that merely describes what the reader can see is
+       furniture). The mapped columns still explain themselves where the
+       mapping is not obvious, on the cells' own hovers (§124). */
     fnRows = '<tr class="dxband"><th colspan="8">Supporting functions' +
-        '<em>' + plural(fnKeys.length, "function") + ' reporting in capabilities \u2014 ' +
-        'key objectives, outcomes, and deliverables and milestones</em></th></tr>' + fnRows;
+        '<em>' + plural(fnKeys.length, "function") + ' reporting</em></th></tr>' + fnRows;
   }
 
   /* ONE ANSWER, TWO PAGES (§108.1). The totals were computed inline here and
@@ -5296,6 +5341,42 @@ function renderCycle(){
     '<div class="fstrip" style="margin-bottom:20px"><div class="fstrip-head">' +
       '<span class="fstrip-t">' + esc(REVIEW.name) + '</span>' +
       '<span class="fstrip-meta">' + esc(cycleMeta()) + '</span>' +
+      /* ── THE REVIEW POINT, EDITABLE WHILE THE CYCLE RUNS (§239) ──────
+         Islam: "if I will set the cycle dates you need to give me the ability
+         to set this on opening the cycle and ability to edit this in an open
+         cycle." Before this there was NO control anywhere -- the value could
+         only ever be whatever the seed left, which is how a tenant came to be
+         reporting in Q2 against a platform that thought the year was over.
+
+         It is a MONTH because a quarter cannot say "eight months in", and it
+         is the platform's own month picker rather than a box, for §177's own
+         reason: with no box there is nothing to mistype and the picker can
+         only produce a shape `monthsOf()` already reads. */
+      '<span class="fstrip-meta asof">reported as of ' +
+        /* THE BUTTON SHOWS WHAT IS ACTUALLY IN USE, not what is stored. With
+           no month picked the platform still has an answer -- the cycle's own
+           quarter end -- so showing the picker's "Missing" would print an
+           alarm over something that is not owed (§177, §214.4) while the note
+           beside it reported a real number. The note says whether it was
+           chosen or inherited. */
+        (can && open
+          ? monthBtnHtml(REVIEW.asOfMonth || reviewAsOfLabel(), "asofbtn", function(v){
+              if (v) REVIEW.asOfMonth = v; else delete REVIEW.asOfMonth;
+            })
+          : esc(REVIEW.asOfMonth || reviewAsOfLabel())) +
+        /* §239.3: AND IT SAYS WHAT THE MONTH MEANS. Islam could not tell
+           whether the month he picked had taken -- "can you check if the cycle
+           adjustment is saved" -- because the strip showed the value and
+           nothing showed the consequence. `8 of 12 months` is the number every
+           figure on the platform is actually prorated by, so a review point
+           that is not working says so on the page rather than being inferred
+           from a table reading 100%. */
+        (elapsedMonths() != null
+          ? ' <span class="why" style="margin:0">&middot; ' + elapsedMonths() +
+            ' of 12 months' + (REVIEW.asOfMonth ? '' : ', taken from the cycle\u2019s end') +
+            '</span>'
+          : ' <span class="why" style="margin:0">&middot; the year is not set, so every ' +
+            'figure is measured against a whole one</span>') + '</span>' +
       '<span class="badge b-' + (open ? "open" : "none") + '">' + (open ? "Open" : "Closed") + '</span>' +
       (can
         ? (open
@@ -5327,14 +5408,14 @@ function renderCycle(){
             esc(NEWCYCLE.to) + '" placeholder="Jun 2027"></label>' +
           '<label><span>Reports due</span><input class="fld" id="nc-due" value="' +
             esc(NEWCYCLE.due) + '" placeholder="15 Jul 2027"></label>' +
-          '<label><span>Ends in quarter</span><select class="fld" id="nc-q">' +
-            [1,2,3,4].map(function(q){
-              return '<option value="' + q + '"' +
-                (Number(NEWCYCLE.endsQuarter) === q ? " selected" : "") + '>Q' + q + '</option>';
-            }).join("") + '</select></label>' +
+          '<label><span>Reporting as of</span>' +
+            monthBtnHtml(NEWCYCLE.asOfMonth || "", "asofbtn", function(v){
+              if (v) NEWCYCLE.asOfMonth = v; else delete NEWCYCLE.asOfMonth;
+            }) + '</label>' +
         '</div>' +
-        '<div class="nc-why"><b>The quarter decides which tactics are asked for.</b> ' +
-          'A tactic whose span has not started yet is not counted as unreported.</div>' +
+        '<div class="nc-why"><b>The month decides what every figure is measured against.</b> ' +
+          'A target that adds up across the year is compared with the share of it due by then, ' +
+          'and a tactic whose span has not started yet is not asked for.</div>' +
         '<div class="nc-act">' +
           '<button class="editbtn" data-nc-go="1">Open this cycle</button>' +
           '<button class="linkbu" data-nc-cancel="1">Cancel</button></div></div>'

@@ -161,7 +161,7 @@ class H(http.server.BaseHTTPRequestHandler):
         # §231: THE STUB MODELS THE SERVER. A device says yes and the row is
         # kept here, so the check can read back what the browser actually
         # posted rather than trusting that it meant to.
-        # §234: the office's own message. Recorded so the check can read what
+        # §247: the office's own message. Recorded so the check can read what
         # the page actually POSTED — `start` is the whole of what this feature
         # adds to the server, and a build that dropped it would look identical
         # on screen (§135's `greet`, found the same way).
@@ -1537,7 +1537,7 @@ with sync_playwright() as p:
     ck("...naming the device it reached", "sent to 1 device" in said.lower(), said[:160])
     pg.click("[data-chsetmenu]"); pg.wait_for_timeout(300)
 
-    # ── 19 · THE OFFICE STARTS A CONVERSATION (§234) ─────────────────────
+    # ── 19 · THE OFFICE STARTS A CONVERSATION (§247) ─────────────────────
     # Until now the office could only ever ANSWER: with nobody having written
     # in there was no way to reach them from the Inbox at all. Islam picked
     # placement A — the control in the column it acts on — from two drawn in

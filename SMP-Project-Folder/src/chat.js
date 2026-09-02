@@ -101,7 +101,7 @@ var CHAT = (function(){
                  an empty list and a list nobody could fetch are two different
                  things and only one of them is about the data. */
               err: null, asked: false,
-              /* §234: writing to somebody who has not written in. `new` is the
+              /* §247: writing to somebody who has not written in. `new` is the
                  mode, `newWho` the person chosen — one flag rather than a
                  second pane, because it IS the thread pane, showing the one
                  thing a conversation that does not exist yet can show. */
@@ -1454,7 +1454,7 @@ var CHAT = (function(){
         'changes nothing about it.</div>' +
       '<div class="chinbox" id="chinbox">' +
         '<div class="chq">' +
-          /* §234: THE CONTROL IS IN THE COLUMN IT ACTS ON — Islam's A, chosen
+          /* §247: THE CONTROL IS IN THE COLUMN IT ACTS ON — Islam's A, chosen
              from two placements drawn in this very page. The list it adds to
              is directly below it, and a conversation started here appears
              there. The cost was stated before he chose: the search box gives
@@ -1667,7 +1667,7 @@ var CHAT = (function(){
 
   function drawThread(){
     var pane = el("chthread"); if (!pane) return;
-    /* ── WRITING TO SOMEBODY WHO HAS NOT WRITTEN IN (§234) ────────────
+    /* ── WRITING TO SOMEBODY WHO HAS NOT WRITTEN IN (§247) ────────────
        It is the THREAD pane, not a dialog: this is where a conversation is
        read and answered, and starting one is the same act with the name still
        to be chosen. Drawn first, because it replaces whatever was open. */
@@ -1933,7 +1933,7 @@ var CHAT = (function(){
     }, 10000);
   }
 
-  /* THE SAME SEND AS A REPLY, with `start` on it (§234). Everything that
+  /* THE SAME SEND AS A REPLY, with `start` on it (§247). Everything that
      happens to a message from the office — the conversation leaving the
      waiting list, the email chase, the box on their screen — is written once,
      on the server, in the reply path; this only has to say who it is for and
@@ -2284,7 +2284,7 @@ var CHAT = (function(){
     root.addEventListener("click", function(e){
       var pick = e.target.closest("[data-chpick]");
       if (pick) {
-        /* Opening a conversation leaves the new-message form (§234) — the two
+        /* Opening a conversation leaves the new-message form (§247) — the two
            are the same pane, and a half-written message is not worth keeping
            behind a screen that has moved on. */
         box.new = false; box.newWho = "";
@@ -2330,7 +2330,7 @@ var CHAT = (function(){
         if (box.person) boxLoadThread(box.person);
         return;
       }
-      /* ── STARTING ONE (§234) ────────────────────────────────────── */
+      /* ── STARTING ONE (§247) ────────────────────────────────────── */
       if (e.target.closest("#chqnew")) {
         box.new = true; box.newWho = ""; box.person = null; box.data = null;
         drawQueue(); drawThread();

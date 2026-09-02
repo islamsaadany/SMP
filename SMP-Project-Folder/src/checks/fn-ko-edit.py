@@ -250,7 +250,14 @@ with sync_playwright() as p:
         ck("no band and two cards while reading (" + fk + ")",
            not r["band"] and r["cards"] >= 2, r)
 
-    print("\n-- 8 · the unit side is untouched (Islam: 'don't touch the unit side')")
+    # §243 REVERSES HALF OF THIS, AT ISLAM'S OWN INSTRUCTION: *"there is no
+    # weighting on the objectives in units it needs to be added."* The
+    # assertion is REWRITTEN rather than deleted (§218's rule), because what it
+    # was protecting is still worth protecting — a unit authors a 3-year target
+    # and a function does not, and the two tables must not quietly converge.
+    # So: the unit keeps the columns a function has never had, gains the one
+    # Islam asked for, and keeps its one-line name box.
+    print("\n-- 8 · the unit keeps what is its own, and gains the weight column (§243)")
     pg.evaluate("""(smo) => { VIEWER=smo; leaveModes(); current='mobile';
       currentSub='strategy'; CURSEC.strategy='found';
       EDIT_PAGE.foundation=true; paint(); }""", w["smo"])
@@ -262,9 +269,12 @@ with sync_playwright() as p:
         heads: [...tbl.querySelectorAll('thead th')].map(t=>t.textContent.trim()),
         name: (tbl.querySelector('tbody tr td:first-child .fld')||{}).tagName };
     }""")
-    ck("koEdit keeps its 3-year column",
-       bool(um) and um["heads"] == ["Objective", "Dir.", "Unit", "3-year", "This year", "Compile", ""],
+    ck("koEdit keeps its 3-year column, which a function has no equivalent of",
+       bool(um) and um["heads"] ==
+       ["Objective", "Dir.", "Unit", "3-year", "This year", "Compile", "Weight %", ""],
        um)
+    ck("...and the weight column Islam asked for is on it (§243)",
+       bool(um) and "Weight %" in um["heads"], um)
     ck("...and its one-line name box", bool(um) and um["name"] == "INPUT", um)
 
     ck("no console errors anywhere in the run", not errs, errs)

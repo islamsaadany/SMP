@@ -859,7 +859,7 @@ module.exports = async function handler(req, res) {
       let t = (await client.query(
         "SELECT here_at FROM chat_threads WHERE person_key = $1", [who])).rows[0];
 
-      /* ── THE OFFICE STARTS ONE (§234) ─────────────────────────────
+      /* ── THE OFFICE STARTS ONE (§247) ─────────────────────────────
          Islam: "from the platform inbox allow the smo to initiate a message
          with someone." Until now the office could only ever ANSWER: with
          nobody having written in there was no way to reach them from here at

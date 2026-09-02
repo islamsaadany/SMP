@@ -6,7 +6,18 @@
      Performance  = the score from a pillar's KEY MEASURES. Primary.
      Execution    = the score from its TACTICS. Secondary, never blended in. */
 
-function esc(s){ return String(s).replace(/&/g,"&amp;").replace(/</g,"&lt;"); }
+/* ── ONE ESCAPER, SAFE IN BOTH CONTEXTS (2026-09-01 security sweep) ──────
+   This was a TEXT-NODE escaper (`&` and `<` only) and it is used inside
+   double-quoted HTML attributes ~226 times — where a literal " in tenant data
+   breaks out of the attribute and, because the CSP allows inline handlers, an
+   injected onfocus=/onerror= runs in the reader's browser (an SMO's, with full
+   SMO authority). Two call sites had hand-patched .replace(/"/g,"&quot;") on
+   top of esc(); those become harmless no-ops now that esc() escapes the quote
+   itself. Escaping >, " and ' as well is INERT in a text node — an entity
+   renders as the character — so nothing that displays normally changes; only a
+   payload is neutralised. Verified: esc()'s output is only ever concatenated
+   into innerHTML, never compared, stored as a key, or read back. */
+function esc(s){ return String(s).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;").replace(/'/g,"&#39;"); }
 /* Four bands. 70 and 50 match the platform's existing STATUS_THRESHOLDS so
    the strategy layer and the functional layer never disagree about a colour;
    85 is the added top edge that splits on-track from needs-attention. */
@@ -273,7 +284,11 @@ function chartLegend(){
 function qs(t){
   var q = quartersOf(t), out = "";
   for (var i = 0; i < 4; i++) {
-    var cls = q[i] ? (i + 1 <= GROUP.asOfQuarter ? "on past" : "on") : "";
+    /* §239: ONE ANSWER TO "HOW FAR ARE WE". This read `GROUP.asOfQuarter`
+       while the figures beside it read `REVIEW.endsQuarter` -- two fields, one
+       meaning, disagreeing on the same row the moment a cycle is not reported
+       at its own end. Both now go through the review point. */
+    var cls = q[i] ? (quarterPast(i) ? "on past" : "on") : "";
     out += '<i class="' + cls + '">' + (i + 1) + "</i>";
   }
   return '<span class="qs">' + out + "</span>";
@@ -390,25 +405,39 @@ function measureRows(ms, opts){
     /* §218: nothing is held back for the office any more — a filled target
        or direction is live, so a measure is scored the moment it has a
        figure to score. */
-    var scored = m.target && m.progress != null;
+    /* §239: the score is the PRORATED one; `m.progress` stays the stored raw
+       ratio and is what the Focus board reads (reward is a year-end
+       judgement). */
+    var sc = measureScore(m), scored = m.target && sc != null;
     var head = '<tr data-oi="' + i + '"' +
                (SMPRules.isHidden(m) ? ' class="hiddenrow"'
                 : isFocus(m.id) ? ' class="focusrow"' : '') + '><td class="idx">' +
                (on ? handle("Reorder " + m.name) : '') +
                '<span class="idx-n">' + (i+1) + '</span></td><td>' + esc(m.name) + hidChip(m) + fmark(m.id) +
                (m.horizon ? '<span class="why">measured at ' + esc(m.horizon) + '</span>' : '') +
+               (m.note ? '<span class="why">' + esc(m.note) + '</span>' : '') +
                '</td><td class="num">' + dirCell(m.dir) + '</td><td class="num">' + esc(m.target) +
                '</td><td class="cc">' + compileCell(m.compile) + '</td>';
     if (opts.unscored) return head + '</tr>';
-    return head + '<td class="num">' + esc(m.actual) + '</td>' +
+    /* §239 + §243: main's benchmark rides inside the figure's cell, and this
+       branch's figure is read at its target's scale. Both, or a long figure
+       loses its scale and a scaled one loses what it is measured against. */
+    var dueLab = measureDueLabel(m);
+    var actCell = (m.actual == null || m.actual === "") ? '&mdash;'
+      : dueLab ? '<span class="pair"><b>' + figShown(m) + '</b> <i>/ ' + esc(dueLab) + '</i></span>'
+               : figShown(m);
+    return head + '<td class="num">' + actCell + '</td>' +
            (scored
-             ? '<td class="num final" style="color:' + bandInk(m.progress) + '">' + m.progress + '%</td>'
+             ? '<td class="num final" style="color:' + bandInk(sc) + '">' + sc + '%</td>'
              : '<td class="cc"><span class="pill none">Not scored</span></td>') + '</tr>';
   }).join("");
 }
 function measureHead(unscored){
-  return '<thead><tr><th class="idx">#</th><th>Measure</th><th class="cc">Dir.</th><th class="cc">Target</th>' +
-    '<th class="cc">Compile</th>' + (unscored ? '' : '<th class="cc">H1 actual</th><th class="cc">Progress</th>') +
+  /* §239: "Annual target" says outright that it is the year's number, which
+     is what makes the quiet figure beside the actual make sense. And "YTD
+     actual" replaces a hardcoded "H1 actual" that read H1 in every cycle. */
+  return '<thead><tr><th class="idx">#</th><th>Measure</th><th class="cc">Dir.</th><th class="cc">Annual target</th>' +
+    '<th class="cc">Compile</th>' + (unscored ? '' : '<th class="cc">YTD actual</th><th class="cc">Progress</th>') +
     '</tr></thead>';
 }
 
@@ -460,28 +489,35 @@ function tacticRows(ts, unitKey){
                                      : '<span class="pill warn">' + esc(t.status) + '</span>';
     /* Three distinct states, and they must not look alike: not yet due, due
        but unreported, and reported. */
+    /* §239: BOTH HALVES ARE PER CENTS of this tactic's own plan and the sign
+       is written, because "45 / 50" reads as a count of things -- and the same
+       cell has always printed "due at 50%" WITH the sign in its unreported
+       state, so one cell spelt one unit two ways. */
     var tail = !due
-      ? '<td class="cc" colspan="3"><span class="pill kind">Not yet due</span></td>'
+      ? '<td class="cc" colspan="2"><span class="pill kind">Not yet due</span></td>'
       : t.actual == null
-      ? '<td class="cc" colspan="3"><span class="pill none">Not reported</span>' +
+      ? '<td class="cc" colspan="2"><span class="pill none">Not reported</span>' +
         '<span class="why" style="margin:2px 0 0">due at ' + pl + '%</span></td>'
-      : '<td class="num"><span class="pair"><b>' + t.actual + '</b> / ' + pl + '</span></td>' +
-        '<td class="num">' + varCell(t.actual, pl) + '</td>' +
+      : '<td class="num"><span class="pair"><b>' + t.actual + '%</b> <i>/ ' + pl + '%</i></span></td>' +
         '<td class="num final" style="color:' + bandInk(r) + '">' + pct(r) + '</td>';
     return '<tr data-oi="' + i + '"' +
       (SMPRules.isHidden(t) ? ' class="hiddenrow"'
         : due && t.actual != null ? '' : ' class="notdue"') + '><td class="idx">' +
       (on ? handle("Reorder " + t.name) : '') +
       '<span class="idx-n">' + (i+1) + '</span></td><td>' + esc(t.name) + hidChip(t) +
-      (t.outcome ? '<span class="why">' + esc(t.outcome) + '</span>' : '') + '</td>' +
+      (t.outcome ? '<span class="why">' + esc(t.outcome) + '</span>' : '') +
+      (t.note ? '<span class="why">' + esc(t.note) + '</span>' : '') + '</td>' +
       '<td>' + esc(t.owner) + '</td><td class="collabs">' + collabCell(t) + '</td>' +
       '<td>' + qs(t) + '</td><td class="cc">' + status + '</td>' + tail + '</tr>';
   }).join("");
 }
 function tacticHead(){
   return '<thead><tr><th class="idx">#</th><th>Tactic</th><th>Owner</th><th>Collabs.</th><th>Quarters</th>' +
-    '<th class="cc">Status</th><th class="cc">Deliv. / plan</th><th class="cc">Var.</th>' +
-    '<th class="cc">Of plan</th></tr></thead>';
+    /* §239: VARIANCE GOES -- the pair beside it already shows it, and the
+       column was spending width to restate a subtraction. "Of plan" becomes
+       "Progress" so both tables on the page end in the same word. */
+    '<th class="cc">Status</th><th class="cc">YTD delivery</th>' +
+    '<th class="cc">Progress</th></tr></thead>';
 }
 
 
@@ -1140,7 +1176,7 @@ function unitCards(keys){
     var pd = miniTable(["Key objective","Direction","Target","H1 actual","Progress"],
       u.keyObjectives.map(function(m){
         return '<tr><td>' + esc(m.name) + '</td><td class="num">' + dirCell(m.dir) + '</td>' +
-          '<td class="num">' + esc(m.target) + '</td><td class="num">' + esc(m.actual) +
+          '<td class="num">' + esc(m.target) + '</td><td class="num">' + figShown(m) +
           '</td><td class="num">' + m.progress + '%</td></tr>';
       }).join("")) +
       '<p class="sub">Headline: <b>' + unitObjectives(u) + '%</b> &mdash; ' + (KO_WEIGHTS[u.ukey] ? 'weighted' : 'equal weight') + ' across its Key Objectives. Contributes at <b>' +
@@ -1279,7 +1315,7 @@ function renderGroupPerformance(){
     GROUP.keyObjectives.map(function(m){
       return '<tr><td>' + (m.group ? esc(m.group) + " &mdash; " : "") + esc(m.name) + '</td>' +
         '<td class="num">' + dirCell(m.dir) + '</td><td class="num">' + esc(m.target) + '</td>' +
-        '<td>' + compileCell(m.compile) + '</td><td class="num">' + esc(m.actual) + '</td>' +
+        '<td>' + compileCell(m.compile) + '</td><td class="num">' + figShown(m) + '</td>' +
         '<td class="num">' + m.progress + '%</td></tr>';
     }).join("")) +
     '<p class="sub">Mean of the ' + GROUP.keyObjectives.length + ': <b>' +
@@ -1360,7 +1396,7 @@ function renderGroupPerformance(){
               return '<tr><td class="idx">' + (i+1) + '</td><td>' + esc(m.name) + '</td>' +
                 '<td class="num">' + dirCell(m.dir) + '</td>' +
                 '<td class="num">' + (m.target ? esc(m.target) : '<span class="missing">Missing</span>') + '</td>' +
-                '<td class="num">' + esc(m.actual) + '</td>' +
+                '<td class="num">' + figShown(m) + '</td>' +
                 '<td class="num final" style="color:' + bandInk(m.progress) + '">' + pct(m.progress) + '</td></tr>';
             }).join("")) +
           '<p class="sub">Weighted across <b>' + c.keyObjectives.length + '</b> objectives: <b>' + pct(ko) + '</b>.</p>') +
@@ -1763,7 +1799,13 @@ function renderUnitPerformance(u){
                            .map(function(m){ return m.progress; });
   var koHi = kps.length ? Math.max.apply(null, kps) : null;
   var koLo = kps.length ? Math.min.apply(null, kps) : null;
-  var ws = KO_WEIGHTS[u.ukey];
+  /* §243: THE RESOLVED WEIGHTS, never the raw array. A row's own `weight`
+     wins, a blank takes the average of the ones that were set, and a list
+     nobody has weighted answers null — so this table shows the two extra
+     columns exactly when the score is actually weighted, and the number in
+     them is the number koScore() divided by (§53.5: a breakdown that
+     disagrees with the headline it sits under is worse than none). */
+  var ws = koWeights(u.keyObjectives, KO_WEIGHTS[u.ukey]);
 
   /* The unit's Key Objectives are authored on its Foundation, but they are what
      this page scores — so the breakdown opens from the headline rather than
@@ -1772,11 +1814,11 @@ function renderUnitPerformance(u){
     '<p class="sub" style="margin:0 0 14px">' + TIP_PERF + '</p>' +
     miniTable(["#", L("keyobj","bu"), "Dir.", "Target", "H1 actual", "Progress"].concat(ws ? ["Weight","Contribution"] : []),
       u.keyObjectives.map(function(m, i){
-        var w = ws ? (ws[i] == null ? 0 : ws[i]) : null;
+        var w = ws ? Math.round(ws[i] * 10) / 10 : null;
         return '<tr' + (isFocus(m.id) ? ' class="focusrow"' : '') + '><td class="idx">' + (i+1) + '</td>' +
           '<td>' + esc(m.name) + fmark(m.id) + '</td>' +
           '<td class="num">' + dirCell(m.dir) + '</td><td class="num">' + esc(m.target) + '</td>' +
-          '<td class="num">' + esc(m.actual) + '</td>' +
+          '<td class="num">' + figShown(m) + '</td>' +
           '<td class="num final" style="color:' + bandInk(m.progress) + '">' + pct(m.progress) + '</td>' +
           (ws ? '<td class="num">' + w + '%</td><td class="num">' +
                 (Math.round(m.progress * w) / 100).toFixed(1) + '</td>' : '') + '</tr>';
@@ -2243,6 +2285,15 @@ function monthPickOr(page, value, cls, setter){
   var shown = value == null ? "" : String(value);
   if (!EDIT_PAGE[page] || !setter)
     return shown ? esc(shown) : '<span class="missing">Missing</span>';
+  return monthBtnHtml(shown, cls, setter);
+}
+/* THE BUTTON ITSELF, drawn for anybody who may set the value (§239). The plan
+   pages reach it through `monthPickOr` and its edit-mode gate; the reporting
+   cycle has no edit mode and reaches it directly, because the office either
+   may change the review point or is not offered a control at all. One builder,
+   because two would drift about what a month looks like (§53.5). */
+function monthBtnHtml(value, cls, setter){
+  var shown = value == null ? "" : String(value);
   var i = FIELDS.push(setter) - 1;
   var p = monthParts(shown);
   return '<button type="button" class="monthbtn ' + (cls || '') + '" data-month="' + i + '"' +
@@ -2799,11 +2850,7 @@ function koYearToggle(){
     ' title="' + (SHOW_KO_THIS_YEAR ? "Hide this year\u2019s target" : "Show this year\u2019s target") +
     '">This year</button>';
 }
-function koToggle(){
-  return '<span class="minisw" role="group" aria-label="Objectives layout">' +
-    '<button data-kov="cols"  aria-pressed="' + (KO_VIEW === "cols")  + '" title="Columns">&#9776;</button>' +
-    '<button data-kov="chips" aria-pressed="' + (KO_VIEW === "chips") + '" title="Chips">&#9632;&#9632;</button></span>';
-}
+
 
 /* `isGroup` decides whether the near horizon is shown: it is hidden on a
    UNIT's objectives and kept on the group's (§51.16). The chips view drops the
@@ -2960,7 +3007,14 @@ function fillUnitCell(page, acKey, m, ctx){
    dropdown that could not show them would either display the row wrong or
    drop the unit on the first repaint, and both are worse than one extra
    entry. Nothing is rewritten by this list — only what the pen writes next. */
-var TARGET_UNITS = ["", "%", "#", "EGP", "M EGP", "B EGP", "SQM", "d", "h"];
+/* §239.5: DOLLARS JOIN THE LIST, at Islam's instruction — the plan holds
+   figures in USD as well as EGP (a regional hub's revenue among them) and the
+   pen could only offer Egyptian pounds, so a stored `M USD` was kept and
+   offered by the rule below and could never be CHOSEN for a new row. K and M
+   only, which is what he asked for; `B USD` and `K EGP` are deliberately not
+   invented alongside them. */
+var TARGET_UNITS = ["", "%", "#", "EGP", "M EGP", "B EGP",
+                    "K USD", "M USD", "SQM", "d", "h"];
 /* WRITTEN AGAINST THE NUMBER, OR AFTER A SPACE — and it is the PLAN's own
    habit, read off the shipped data rather than invented: `30%`, `100#` and
    `6.2B EGP` are written tight, while `28 EGP`, `4 d` and `24 h` take a space.
@@ -2970,7 +3024,10 @@ var TARGET_UNITS = ["", "%", "#", "EGP", "M EGP", "B EGP", "SQM", "d", "h"];
    tight, a word takes a space" gets `EGP` right and `B EGP` wrong, and the
    difference is convention, not grammar. Nine entries is cheaper to read than
    a predicate nobody can quite state. */
-var TIGHT_UNITS = { "%":1, "#":1, "M EGP":1, "B EGP":1 };
+/* A SCALED CURRENCY IS ONE TOKEN whichever currency it is, so the dollars
+   join their Egyptian twins here and read `8M USD`, not `8 M USD` — the same
+   convention the plan already uses for `6.2B EGP`. */
+var TIGHT_UNITS = { "%":1, "#":1, "M EGP":1, "B EGP":1, "K USD":1, "M USD":1 };
 function targetUnitOpts(cur){
   var opts = TARGET_UNITS.slice();
   if (cur && opts.indexOf(cur) < 0) opts.splice(1, 0, cur);
@@ -2986,16 +3043,19 @@ function koView(list, isGroup, acKey){
   var chips = function(m){
     return "";
   };
-  if (KO_VIEW === "chips") {
-    return '<div class="ochips">' + list.map(function(m){
-      var far = m.target3y ? esc(m.target3y) : miss;
-      return '<div class="ochip' + (SMPRules.isHidden(m) ? ' hiddenrow' : '') +
-        '"><b>' + esc(m.name) + '</b>' + hidChip(m) +
-        (near ? '<div class="v">' + (m.target ? esc(m.target) : miss) + '</div>' +
-                '<div class="h">3-year ' + far + '</div>'
-              : '<div class="v">' + far + '</div>') + chips(m) + '</div>';
-    }).join("") + '</div>';
-  }
+  /* §243: THE OBJECTIVES READ AS A TABLE, AND THE LAYOUT SWITCH IS GONE.
+     Islam: *"the other toggle that shows the objective in table or cards —
+     remove it and make the view in table only."*
+
+     The cards gave each objective its own box with the 3-year figure beneath
+     it in small grey type; the table lines the targets up in a column an eye
+     can run down, which is what reading a plan actually needs. The chips
+     branch, `koToggle()`, `KO_VIEW`, its click handler and the `.ochips` /
+     `.ochip` rules are DELETED rather than left unreachable (§24) — CSS left
+     behind is what a later reader takes for load-bearing, and a mockup drawn
+     from the stylesheet then draws something the product does not have
+     (§41.9's own scar).
+
   /* §199.4: THE READING VIEW KEEPS THE UNIT ON THE FIGURE. §199 split it into
      a column of its own and Islam looked at it: *"let the unit be set in the
      edit table, but in the view attach the unit to the target."*
@@ -3080,9 +3140,22 @@ function koEdit(list, page, acKey, owner){
      hand in two different arrays (the group's and a unit's) — so the table
      registers its own, exactly as a field registers its own setter. */
   var li = KOLISTS.push({ list: list, owner: owner }) - 1;
+  /* §243: A UNIT'S OBJECTIVES GET A WEIGHT COLUMN, which reverses §226's
+     "the unit side is untouched" at Islam's own instruction: *"there is no
+     weighting on the objectives in units it needs to be added."* Recorded as
+     a reversal rather than overwritten — that earlier note is why this table
+     was left behind when the function's gained the column.
+
+     IT WRITES THE ROW, not `KO_WEIGHTS`. The stored array is positional
+     (§48: remove the middle row and every weight below it lands on the wrong
+     objective), and a capability's and a function's objectives have carried
+     `weight` on the row all along — so the column the office now sees on all
+     three writes one field and `koWeights()` resolves the old array behind it
+     for a tenant that already has one. */
   return '<div class="scroll"><table><thead><tr><th>Objective</th><th class="cc">Dir.</th>' +
     '<th class="cc">Unit</th>' +
-    '<th class="cc">3-year</th><th class="cc">This year</th><th class="cc">Compile</th><th></th></tr></thead><tbody>' +
+    '<th class="cc">3-year</th><th class="cc">This year</th><th class="cc">Compile</th>' +
+    '<th class="cc">Weight %</th><th></th></tr></thead><tbody>' +
     list.map(function(m, i){
       /* \u00a7130: the four gap-fillable columns go through gapCell \u2014 in the
          office's edit they are the same bound fields as before (with the
@@ -3111,6 +3184,12 @@ function koEdit(list, page, acKey, owner){
           { kind:"input", cls:"mono", parse: unitInherit(m) }) + '</td>' +
         '<td class="cc">' + gapCell(page, acKey, m, "compile",
           { kind:"select", opts:["Sum", "Latest", "Average"] }) + '</td>' +
+        /* §243: the same cell the capability's table already draws — one
+           column, one field, one answer on all three surfaces (§53.5). Left
+           blank it is not nought: koWeights() gives it the average of the
+           weights that were set. */
+        '<td class="cc">' + gapCell(page, acKey, m, "weight",
+          { kind:"input", cls:"mono", num:true }) + '</td>' +
         '<td class="cc">' + (editing
           ? eyeBtn(m, page, acKey) +
             ' <button class="rmbtn" data-korm="' + li + '|' + i + '">Remove</button>' : '') +
@@ -3249,7 +3328,7 @@ function koBlock(objectives, page, acKey, owner, isGroup, editing){
          and there is nothing there to toggle (§51.16). Hidden in edit for the
          same reason the layout switch is: authoring shows every field there is,
          so a control that hides one would be lying about what is stored. */
-      (editing ? '' : (isGroup ? '' : koYearToggle()) + koToggle()) + '</div>' +
+      (editing ? '' : (isGroup ? '' : koYearToggle())) + '</div>' +
     (editing ? koEdit(objectives, page, acKey, owner) : koView(objectives, isGroup, acKey));
 }
 
@@ -3532,7 +3611,7 @@ function renderReport(u){
 
     var tTable = ts.length
       ? '<h4 class="mini">Tactics</h4>' +
-        miniTable(["#", "Tactic", "Owner", "Quarters", "Due at", "Reported", "Note"],
+        miniTable(["#", "Tactic", "Owner", "Quarters", "YTD Target", "Reported", "Note"],
           ts.map(function(x, i){
             if (!x.asked) {
               return '<tr class="notdue"><td class="idx">' + (i+1) + '</td>' +
@@ -3620,8 +3699,8 @@ function renderReport(u){
     '<div class="card" style="padding:14px 16px">' + (mayAll
       ? '<textarea class="fld" data-unote="' + u.ukey + '" rows="3" style="width:100%;max-width:none" ' +
         'placeholder="What the numbers do not say \u2014 what happened, what is being done, what to expect next.">' +
-        esc(REVIEW.note[u.ukey] || "") + '</textarea>'
-      : '<span class="why" style="margin:0">' + (REVIEW.note[u.ukey] ? esc(REVIEW.note[u.ukey]) : "None.") + '</span>') +
+        esc(cycleNote(u.ukey)) + '</textarea>'
+      : '<span class="why" style="margin:0">' + (cycleNote(u.ukey) ? esc(cycleNote(u.ukey)) : "None.") + '</span>') +
     '</div>';
 
   /* A blocked Submit with no explanation is hostile. If the unit is waiting on
@@ -4153,7 +4232,7 @@ function capKOTable(c){
           '<td class="cc">' + (m.weight == null ? "&mdash;" : m.weight + "%") + '</td>' +
           '<td class="cc">' + dirCell(m.dir) + '</td>' +
           '<td class="num">' + (m.target ? esc(m.target) : '<span class="missing">Missing</span>') + '</td>' +
-          '<td class="num">' + (m.actual == null || m.actual === "" ? "&mdash;" : esc(m.actual)) + '</td>' +
+          '<td class="num">' + (m.actual == null || m.actual === "" ? "&mdash;" : figShown(m)) + '</td>' +
           '<td class="num final" style="color:' + bandInk(m.progress) + '">' + pct(m.progress) + '</td></tr>';
       }).join(""));
 }
@@ -5506,10 +5585,27 @@ function renderFnFoundation(fnKey){
    the whole reason §211 cost a day. The empty line is the caller's, because
    what an empty list MEANS differs: a capability with none is judged by its
    projects; a function with none is judged by its pillars. */
+/* ONE CELL, EVERYWHERE A FIGURE IS READ AGAINST ITS TARGET (§243). The
+   shortened form is what is shown and the full one is on the hover, so nothing
+   a unit reported is ever out of reach — and the decision about WHETHER to
+   shorten is made once, in `figureScaled()`, rather than at nine call sites
+   that would drift (§53.5). */
+function figShown(m){
+  var s = figureScaled(m.target, m.actual), full = figureFull(m.target, m.actual);
+  return full ? '<span title="' + esc(full) + '">' + esc(s) + '</span>' : esc(s);
+}
 function koReadBlock(list, emptyLine){
   if (!(list || []).length)
     return '<p class="sub" style="margin:0">' + emptyLine + '</p>';
-  return '<div class="ohead"><span>Objective</span><span>This year</span><span>Weight</span></div>' +
+  /* §243, Islam: *"in the functions overview if there is no weights submitted
+     the table shouldn't show weights."* A column of em-dashes says nothing
+     except that a question was asked and not answered — and since §243 a blank
+     weight is not nought but an equal share, so the column would also be
+     stating a value nobody set. `.one` is the two-column shape `koView()`
+     already uses when it drops a column; there is no second layout here. */
+  var wtd = koWeighted(list);
+  return '<div class="ohead' + (wtd ? '' : ' one') + '"><span>Objective</span>' +
+      '<span>This year</span>' + (wtd ? '<span>Weight</span>' : '') + '</div>' +
     list.map(function(m){
       /* §145: the pending chips, including a direction or compile that has no
          column here — read mode is where the office's tick is. */
@@ -5519,13 +5615,14 @@ function koReadBlock(list, emptyLine){
          own fault with the sign reversed (there the page said missing and the
          count said nothing was). The em-dash is what the Weight column beside
          it has always drawn for an absent optional value. */
-      return '<div class="orow' + (SMPRules.isHidden(m) ? ' hiddenrow' : '') +
+      return '<div class="orow' + (wtd ? '' : ' one') +
+          (SMPRules.isHidden(m) ? ' hiddenrow' : '') +
           '"><span class="on">' + esc(m.name) + hidChip(m) +
           '</span>' +
         '<span class="ot">' + (m.target ? esc(m.target) : '&mdash;') +
           '</span>' +
-        '<span class="ot h">' + (m.weight == null ? "&mdash;" : m.weight + "%") +
-          '</span></div>';
+        (wtd ? '<span class="ot h">' + (m.weight == null ? "&mdash;" : m.weight + "%") +
+          '</span>' : '') + '</div>';
     }).join("");
 }
 /* The capability objectives editor — koEdit's shape with the WEIGHT column a

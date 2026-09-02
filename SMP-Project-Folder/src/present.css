@@ -123,7 +123,20 @@
   .leadstats b.plain { color:var(--ink-2); font-size:56px; }
 
   .headgrid { display:grid; grid-template-columns:1fr 1fr; gap:70px; flex:1; align-content:center; }
+  /* §243: THREE NUMBERS, AND THE TYPE COMES DOWN TO FIT THEM. The slide is a
+     fixed 1600x900 stage, so a third column is 70px of gutter and a third of
+     the width — 168px digits then overrun their own cell on a figure like
+     "107%". Measured at the stage's real size rather than guessed, and the
+     gap tightens with it so the three read as one row. */
+  .headgrid.three { grid-template-columns:repeat(3,1fr); gap:44px; }
   .headcell b { display:block; font:400 168px/.95 var(--serif); letter-spacing:-.02em; margin:10px 0 14px; }
+  .headgrid.three .headcell b { font-size:118px; }
+  /* §243: the quarters read as the four boxes every screen already draws
+     (`qs()`), at a size a projector can see — the page's 18px mark sits
+     beside 13px type, and a slide's type is far larger, so the same box would
+     read as decoration rather than as a mark. */
+  .dslide .qs { gap:5px; }
+  .dslide .qs i { width:30px; height:30px; font-size:15px; border-width:2px; }
   .headsub { display:block; color:var(--ink-3); font-size:22px; }
   .headfoot { color:var(--ink-3); font-size:20px; margin:0; padding-top:26px; border-top:1px solid var(--line); }
   .ddelta { font-family:var(--mono); font-weight:600; }

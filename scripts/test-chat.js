@@ -395,12 +395,12 @@ async function signIn(who, password) {
     await client.query("DELETE FROM push_subscriptions");
     await setChat({});
 
-    /* ── THE OFFICE STARTS A CONVERSATION (§234) ────────────────────
+    /* ── THE OFFICE STARTS A CONVERSATION (§247) ────────────────────
        Islam: "from the platform inbox allow the smo to initiate a message
        with someone." It is a FLAG on the reply, not an action of its own —
        everything a message from the office does is written once, here — so
        what is proved is the one thing starting adds. */
-    console.log("\nTHE OFFICE STARTS A CONVERSATION (§234).");
+    console.log("\nTHE OFFICE STARTS A CONVERSATION (§247).");
     await setChat({});
     /* A conversation that does not exist yet. */
     await client.query("DELETE FROM chat_messages WHERE person_key = $1", [OTHER.key]);

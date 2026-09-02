@@ -116,7 +116,7 @@ with sync_playwright() as pw:
     # reader could not take apart again would be a plan the pen had broken.
     rt = pg.evaluate("""() => {
       const bad = [];
-      TARGET_UNITS.concat(["M USD"]).forEach(u => {
+      TARGET_UNITS.concat(["B USD"]).forEach(u => {
         const m = {target:"6.2B EGP"}; setTargetUnit(m, u);
         const s = splitTarget(m.target);
         if (joinTarget(m.target, s.value, s.unit) !== m.target) bad.push(["rejoin", u, m.target]);
@@ -144,7 +144,8 @@ with sync_playwright() as pw:
     pg.click('[data-u="logistics"]'); pg.wait_for_timeout(400)
     pg.click('[data-s="strategy"]'); pg.wait_for_timeout(300)
     pg.click('[data-sub2="found"]'); pg.wait_for_timeout(600)
-    pg.evaluate("() => { KO_VIEW='cols'; SHOW_KO_THIS_YEAR = true; paint(); }")
+    # §243: there is one layout now, so nothing selects it.
+    pg.evaluate("() => { SHOW_KO_THIS_YEAR = true; paint(); }")
     pg.wait_for_timeout(500)
     v = pg.evaluate("""() => {
       const h = document.querySelector('.ohead');
@@ -161,12 +162,26 @@ with sync_playwright() as pw:
     ck("...and so is a percentage",
        any(c.endswith("%") for r in v["rows"] for c in r), v["rows"])
 
-    print("\n── 6 · the chip layout is deliberately untouched")
-    chips = pg.evaluate("""() => { KO_VIEW='chips'; paint();
-      const c = document.querySelector('.ochip .v');
-      return c ? c.textContent.trim() : null; }""")
-    ck("a chip still carries the whole figure", chips and "EGP" in chips, chips)
-    pg.evaluate("() => { KO_VIEW='cols'; paint(); }"); pg.wait_for_timeout(300)
+    # §243 DELETED THE CHIP LAYOUT at Islam's instruction: *"the other toggle
+    # that shows the objective in table or cards — remove it and make the view
+    # in table only."* This asserted that the chips still carried the whole
+    # figure; what it was protecting — that the unit stays ON the figure and is
+    # not split into a column of its own (§199.4) — is still true and is now
+    # asserted of the only layout there is. §51.11 in the other direction: a
+    # check keyed on markup that has gone must be REWRITTEN, not deleted, or
+    # nothing guards what it was guarding.
+    print("\n── 6 · one layout, and it carries the whole figure (§243)")
+    lay = pg.evaluate("""() => { paint();
+      return { chipsGone: !document.querySelector('.ochip'),
+               switchGone: !document.querySelector('[data-kov]'),
+               noGlobal: typeof KO_VIEW === 'undefined',
+               figure: (()=>{ const c=document.querySelector('.orow .ot');
+                              return c ? c.textContent.trim() : null; })() }; }""")
+    ck("the chip layout is gone", lay["chipsGone"], lay)
+    ck("...and so is the switch that chose it", lay["switchGone"] and lay["noGlobal"], lay)
+    ck("the table's figure still carries its unit (§199.4)",
+       lay["figure"] and "EGP" in lay["figure"], lay)
+    pg.wait_for_timeout(300)
 
     print("\n── 7 · the editor writes the plan, and only the office's pen has it")
     pg.evaluate("() => { EDIT_PAGE['foundation'] = true; paint(); }")
@@ -200,11 +215,22 @@ with sync_playwright() as pw:
        w.get("now") == ["1.6 SQM", "2.4 SQM"], w)
 
     print("\n── 7b · a unit the list does not offer is kept (§96.2, §114)")
-    keep = pg.evaluate("() => targetUnitOpts('M USD')")
-    ck("'M USD' is offered because a row holds it",
-       "M USD" in keep and keep.index("M USD") == 1, keep)
+    # §239.5 MOVED THIS ASSERTION'S EXAMPLE. It was keyed on "M USD", which
+    # was the shipped plan's own outsider -- and dollars are now ON the list at
+    # Islam's instruction, so the assertion would have gone on passing while
+    # guarding nothing (§51.11). It asks about a unit that is genuinely outside
+    # now, and asserts the dollars are offered outright.
+    keep = pg.evaluate("() => targetUnitOpts('B USD')")
+    ck("a stored unit the list does not carry is still offered",
+       "B USD" in keep and keep.index("B USD") == 1, keep)
     ck("...and the standard list is still all there",
        all(u in keep for u in ["%", "#", "EGP", "M EGP", "B EGP"]), keep)
+    offered = pg.evaluate("() => targetUnitOpts('')")
+    ck("the dollars are on the list to be CHOSEN, not merely kept (§239.5)",
+       "K USD" in offered and "M USD" in offered, offered)
+    ck("...and read as one token, like their Egyptian twins",
+       pg.evaluate("""() => { const m = {target:"6.2B EGP"};
+         setTargetUnit(m, "M USD"); return m.target; }""") == "6.2M USD")
 
     print("\n── 7d · a number typed into a row INHERITS its unit (§199.6)")
     # Islam, from a group objective reading `3-year 30` with no unit at all:

@@ -25878,6 +25878,1215 @@ milestone-fill, submit-gate, objective-unit, fn-ko-edit, enter-commits,
 foundation-objectives, plan-builder, repeat-project, table-fit,
 pillar-project-remove — and the full `qa.py` sweep green.
 
+## §234 — ONE FUNCTION'S SUBMIT MUST NOT CARRY EVERYBODY'S REPORT STATE (2026-09-01)
+
+Islam, from a live client session, with the screenshot on screen: *"emergency
+error that we fixed 100 times before"* — a CF strategy custodian refused with
+**"You cannot report for admin. … customerexperi. … hr. … logistics."**, four
+supporting functions he had never opened, and the only control on the banner
+*Discard everything and reload*. Then, naming the shape himself: *"so every
+section reported is separate from the other functions so we don't send the
+whole reports for all plans in the same time"* — and the slides the same
+morning: *"someone was adding the slides and signed out and in and they lost
+progress."*
+
+**HE IS RIGHT THAT IT IS THE SAME FAULT, AND IT IS §216'S, ONE PART OVER.**
+§210 split the four keyed maps, §215 split a unit's plan row by row, §216
+split the group's capabilities — and `review` was never touched. It is ONE
+top-level part carrying four maps keyed by TARGET for the WHOLE tenant
+(`submitted` · `parked` · `note` · `slides`), so the moment anybody submits,
+parks, writes the cycle note or adds a slide, their tab's ENTIRE stale copy
+of everyone's report state travels as `set.review`, is applied onto the
+stored graph, and reverts every submission, park, note and slide written
+since that tab loaded. The authoriser then rightly judges those reversions
+as this person's — the per-target loop mints one `reportState` change per
+reverted target, and a custodian holds none of them. **Reproduced before a
+line was written**: base = his tab, stored = base plus four functions'
+submissions, next = base plus his own — the change list read `set.review`
+(the whole envelope), applying it read `fn:admin submitted → gone`, and the
+classifier answered `reportState fn:admin | fn:customerexperi | fn:hr |
+fn:logistics | fn:cf`. The screenshot, in code.
+
+**AND THE SLIDES ARE THE SAME WOUND FROM THE OTHER SIDE.** His refusal is
+the case where the victim's rights STOP the save; the office's own save is
+ACCEPTED, so when the office (or anybody allowed everything) saved from a
+stale tab, the wipe went through silently — which is exactly "adding slides,
+signed out and in, progress gone". A fault that refuses the powerless and
+silently robs the powerful is one fault, not two.
+
+**THE FIX IS THE SPLIT THE OTHER PARTS ALREADY HAVE.** `graph-diff.js`
+learns `SUB_TARGET = { review: REVIEW_PER_TARGET }`: a SUB_TARGET part is
+compared FIELD BY FIELD (`review.state` when the office moves the cycle),
+and its per-target maps ENTRY BY ENTRY — one submit travels as
+`review.submitted.fn:cf` and nothing else, one slide set as
+`review.slides.mobile`, a reopen as a DELETE of one key (§50.6: the key
+goes, never a false left behind). Applying creates the field's map when the
+tenant has never held one, so the first park still lands. **The apply
+side's paths stay an allow-list, never a walk** (§215's rule): three
+segments are accepted ONLY as `review.<one of the four>.<target>`; a scalar
+field with an entry path, four segments, or three segments outside the
+review are refused by name. **The honest fallbacks stay** (§210: the fine
+path is an optimisation, never the only way): a target key that cannot be a
+path segment (a dot inside it — no key the platform mints has one) sends
+its whole FIELD, and a review that is not a map on both sides travels whole
+exactly as before.
+
+**ONE LIST, EXPORTED** (§53.5). The authoriser's per-target loop and the
+differ's split must agree about which review fields are keyed by target —
+a field joining one and not the other would travel whole through the
+differ while the classifier splits it, which is this fault reborn. So
+`REVIEW_PER_TARGET` lives in `graph-diff.js`, exported, and
+`lib/authorize.js` requires it; the old duplicate literal is gone.
+
+**THE RESIDUE IS STATED, AS §210 STATED ITS OWN**: two people acting on the
+SAME target's report state at the same moment still resolve last-write-wins
+on that one entry (two people adding slides to one unit, say). Different
+targets no longer touch each other at all — which is the whole of what was
+reported.
+
+**PROVED, AND PROVED ABLE TO FAIL** (§94.5). `test-graph-diff.js` §234:
+the incident replayed (the submit travels as ONE entry, the four other
+submissions SURVIVE), the reopen-deletes-one-key case, the first park into
+a map that never existed, the last slide deleting the field, the office's
+scalar beside a meanwhile-submission, a full mixed round trip asserted as a
+FIXED POINT, both fallbacks, and the allow-list from both directions —
+refused paths refused AND the split's own paths accepted, because a differ
+emitting what the server refuses fails every save it touches. Against the
+pre-§234 module: **11 red**, the incident assertion among them. And
+end-to-end through the REAL reader, writer, authoriser and change-applier
+against a real Postgres 16 (`test-two-tabs.js` §234): a unit custodian
+submits from a tab loaded before the office submitted another unit's report
+and hung a slide on it — accepted, his submission landed, the other unit's
+submission and slides SURVIVE; under `SMP_WHOLE_GRAPH=1` it fails with
+**"You cannot report for retailstores."**, the reported sentence to the
+word, on a unit he never opened. The §234 check block itself threw on its
+first run (a detail expression on a SUCCESSFUL save — `JSON.stringify` of
+nothing has no `.slice`) and was fixed as the check, §192's rule that a
+harness must report a broken trial rather than die on it. 124/0 on the
+differ, 451/0 on the authoriser, 24/0 on two-tabs, round trip PASS on a
+virgin database (clean slate included — its one FAIL on the way was the
+check re-run against a database the previous run had already written back,
+not the product), `report-saves` and `save-fidelity` green over HTTP
+(median save 164 bytes against a 297,662-byte graph), full `qa.py` sweep
+green.
+
+**NOT CLAIMED**: whether Abd El Moniem's exact tab was also stale in other
+parts, and whether every "lost progress" report this morning was this one
+fault — the slides case fits it and was not separately reproduced from his
+account. **The way out for tabs already open**: a tab running the previous
+build still posts what it posts; the refusal machinery already answers it,
+and a reload picks up the split.
+
+---
+
+## §235 — One escaper, safe in an attribute (2026-09-01 security sweep)
+
+A security review found the platform's main text-cleaner `esc()` escaped only
+`&` and `<` — correct for text between tags, unsafe inside an HTML attribute,
+where a literal `"` in tenant data breaks out of the quotes. It is used inside
+double-quoted attributes ~226 times, and because the CSP allows
+`'unsafe-inline'`, an injected `onfocus=`/`onerror=` **executes** in the
+reader's browser — the SMO's, with full SMO authority (role changes, password
+resets). The attacker input is anything editable: a person's name, a plan
+note, a renamed label, a cell in an uploaded `.xlsx`. Two sites had
+hand-patched `.replace(/"/g,"&quot;")`, which is the gap being noticed and
+never generalised. Separately, the tenant's LABELS were rendered RAW at ~43
+sites and, via `recipeText()`, spliced raw into the knowledge base, so a
+relabelled Pillar of `<img onerror=…>` ran for every reader.
+
+**THE FIX IS THREE ONE-LINERS, AND IT IS INERT FOR NORMAL CONTENT.** `esc()`
+(and `welcome.js`'s `wesc()`) now also escape `>`, `"` and `'`; an entity
+renders as its character, so nothing displayed normally changes — verified
+that `esc()`'s output is only ever concatenated into innerHTML (never compared,
+keyed, or read back), and the two hand-patches become harmless no-ops. `L()`
+now returns through `esc()`, which closes the 43 raw label sites AND the
+knowledge-base substitution in one place because every reader goes through
+`L()`; its 88 uses are all display-only. The KB's deliberate `<b>` markup is
+untouched (the answer template is trusted; only the spliced label was not), and
+the raw-`<p>` render is deliberately left alone to preserve formatting.
+
+**COST, STATED NOT HIDDEN:** a label CONTAINING `& < > " '` (none of the 8
+real labels do) would show as an entity in a couple of double-cleaned spots —
+cosmetic, never a broken flow, access, or figure.
+
+**PROVED NOT TO DAMAGE ANYTHING:** `qa.py` clean (every page, every viewer),
+and `report-saves`, `gap-fill`, `submit-gate`, `knowledge-base` and
+`fn-ko-edit` all green — reporting a figure and a note reaches the stored plan,
+filling and submitting and editing all behave exactly as before. Numbers
+contain none of these characters, so reporting is byte-for-byte unchanged.
+
+**STILL OPEN, recorded rather than done here:** the `'unsafe-inline'` → hashed
+CSP backstop that would neutralise any future escaping gap (the page has no
+inline handlers, so it is achievable), and a `.vercelignore` so `db/`, `lib/`
+and `scripts/` are not served as static files (no secrets are exposed today —
+this is attack-surface hygiene).
+
+
+## §236 — ADD SLIDE AFTER: THE BUTTON SAYS WHERE THE SLIDE LANDS (2026-09-01)
+
+Islam, on Manage slides: *"for the button add slide let's make it add slide
+after. so people can understand that the empty slide will be added after the
+slide they are stopping on. or shall we add as well a rearrange of slides but
+valid only for the added slides while the original slides flow stays intact
+but he can rearrange around?"*
+
+**THE SECOND HALF WAS ALREADY BUILT, AND SAYING SO IS THE ANSWER** (§160.2:
+read what exists before calling something a build). The rearrange he describes
+is §51.10's `slidesMove()`, shipped since v3.22's ancestry: the ▲▼ pair in a
+selected slide's control row moves an ADDED slide over its neighbour — over a
+generated slide too, which is how a picture travels from the pillars to the
+SWOT without naming an anchor — and only added slides move, because the
+generated order is the deck's own and not ours to shuffle. Exactly the design
+he proposed, already in force. That he proposed it as new is itself a
+finding about the arrows' findability, recorded below as a question rather
+than answered with an unasked redesign (rule 1c).
+
+**THE LABEL CHANGE IS HIS, IN HIS WORDS**: `+ Add a slide` → **`+ Add slide
+after`**. The insert-after behaviour is unchanged — `slidesAdd()` has spliced
+after the selection since §51.8 — what changes is that the button now SAYS the
+one fact about itself that a first-time presenter cannot see: where the slide
+will land. **The hint under it re-divides rather than repeats**: it read
+*"after the one selected"*, and with "after" now on the button the two would
+have said the word twice in one breath — so the hint keeps only its half of
+the sentence (*"the one selected"* / *"the slide selected below"*), and the
+pair reads as one line: *Add slide after — the one selected.* The read-mode
+pane's prose names the control by its new name in the same edit, because a
+sentence pointing at a button that is not there any more is §87's twins in
+prose (§51.11 from the wording side).
+
+**Verified by driving it**, not by reading: the button pressed on Mobile's
+deck with slide 3 selected — the new slide lands at position 4, arrives
+selected, the arrows still step it over a generated neighbour, a generated
+slide still offers no arrows, no console errors. **The probe's one red was the
+probe**: `.editbtn` uppercases by CSS, so the rendered text is `+ ADD SLIDE
+AFTER` and an exact-case compare called a correct build broken (§97.9's
+rendered-case lesson, again).
+
+**Open, his call**: if he had not found the ▲▼ arrows, making them more
+visible is a design change and goes through a mockup first.
+
+## §236.2 — A PICTURE SLIDE CAN TRAVEL THE WHOLE DECK (2026-09-01)
+
+Islam, answering §236's open question by using the arrows: *"the rearrange of
+slides doesn't move around the fixed slides of the main flow"* — and, offered
+the honest-jump fix with its stated cost, *"1 is better and the slide can be
+set between the measures and tactics because that's a valid place to be."*
+
+**HE FOUND THE ARROWS, AND THEY WERE MOSTLY DEAD.** Measured before anything
+was written: a slide added at the top of Mobile's deck and Move down pressed
+28 times moved **3 times and then sat at position 4 for 25 straight presses**;
+on a function's deck it never moved at all. §236's claim that the arrows "step
+over generated neighbours" was true only where the neighbour happened to carry
+an anchor — my one-step probe landed on exactly such a spot and I generalised
+from it (§94.2's lesson wearing a green tick: a probe that samples one
+position proves that position).
+
+**THE FAULT IS THE STEP, NOT THE STORE.** A stored position is an ANCHOR plus
+a place among that anchor's own slides (§50.3), so the set of places a slide
+can live is the set of anchors — and `slidesMove()` stepped blindly one row.
+Wherever the next row carried no anchor, the press recomputed the SAME
+position and repainted in place: a button that does nothing, silently (§61's
+family — present, enabled, and answering every DOM probe).
+
+**TWO CHANGES, BOTH HIS:**
+
+1. **The arrows walk the places that exist.** A press goes to the nearest row
+   that IS a place — an anchored slide, or another picture slide (which keeps
+   sibling reordering one step at a time) — over the whole run of fixed slides
+   in one visible hop. A slide whose next row carries the same anchor is a
+   fit-pass continuation's parent, so the walk passes the clones and lands
+   after the last of them (a wrinkle the OLD tactics anchor already had on a
+   split table, closed for both). The ceiling is after the cover, the floor is
+   before Thank you (§128: the deck closes on it), and at either end the press
+   does nothing rather than wrapping.
+
+2. **Between the two halves of a subject is a place** — his ruling, verbatim.
+   Each pillar's KEY MEASURES slide takes an anchor of its own
+   (`p<CODE>m`, lowercase suffix so it can never collide with the tactics
+   anchor `p<CODE>` that stored slides already name), and — §53.5, one
+   product — a project's DELIVERABLES & OUTCOMES slide takes `dx<projectId>`
+   on the function's deck, so a picture sits between a project's deliverables
+   and its milestones too. The anchors ride the pillar code and the project
+   id, the same stability class as the anchors beside them; nothing stored
+   moves, no migration, and the PROJECTOR honours the new places for free
+   because `insertPictureSlides()` is the one placement both surfaces use.
+
+**Deliberately NOT anchored**: the SWOT run (its comment has said since §50.3
+that "after SWOT" means after all four, on purpose), the section dividers, and
+the gap between a divider and its first table — the arrows now hop those
+honestly instead of pretending. Anchors are consumed BEFORE `deckFitPass()`
+clones anything, in both `openDeckWith()` and `slidesAssemble()`, so the
+duplicate-anchor trap the §50.3 comment warns about stays closed.
+
+`checks/slide-move.py` walks a slide DOWN the whole deck and UP again, on a
+unit AND a function, asserting the problem and never a layout (§94.8): no
+silent press until the floor, the floor reached, a stop between the two halves
+of one subject, the position surviving a repaint, the fixed flow untouched,
+and the store emptied on remove (§50.6). **Proved able to fail first: 5 red
+on the pre-§236.2 build** — the unit stuck at 4, the function stuck at 1,
+reproducing his report before a source was touched. Neighbourhood green:
+hide-element, project-tables, repeat-project, and the full qa.py sweep.
+
+## §236.3 — SLIDE BY SLIDE, AND ONLY THE ORIGINALS ARE PINNED (2026-09-01)
+
+Islam, testing §236.2: *"I tested but the slides jump from slide 9 to 13 one jump
+.. the added slides can move slide by slide the prohipted slides from the
+movement are the original slides form the ferformance as is now."*
+
+**HE IS RIGHT AND §236.2 HALF-SOLVED IT.** That section replaced the silent dead
+press with an honest jump and drew its list of landing places from the anchors
+that happened to exist — the SWOT run, the section dividers and the pillar
+title pages had none, so a press hopped four slides at once. Reproduced on his
+numbers before anything was written: the walk read **1, 2, 3, 4, 9, 10, 12, 13,
+15, 16, 18…**, and the 4→9 hop is the SWOT run, the 10→12 the pillar divider.
+*A fix that removes the lie is not the same as a fix that grants the ability* —
+§236.2's own "deliberately NOT anchored" list is what he is objecting to, and it
+was mine to propose, not to keep.
+
+**THE RULE IS NOW ONE SENTENCE**: every ORIGINAL slide is a landing place;
+what is pinned is the originals' own order. So an added slide moves one slide
+per press, top to bottom, and nothing in the generated flow can be reordered —
+which is the shape he asked for in §236 and has now had to ask for twice.
+
+**EVERY FIXED SLIDE CARRIES AN ANCHOR.** Added on the unit's deck: the SWOT
+title page, the first three SWOT categories, and each pillar's title page;
+on the function's: a capability's cover, its key-objectives table, a project's
+title page and its milestones table. **THE EXISTING KEYS DO NOT MOVE** (§30.2's
+rule, applied to anchors): the last SWOT category keeps `swot`, a pillar's
+tactics slide keeps `p<CODE>`, a capability keeps `cap<id>` — so every picture
+slide already placed in a live tenant sits exactly where it sat. The new keys
+are derived from the pillar code and the capability's or project's id, the same
+stability class as the ones beside them; nothing stored moves and there is no
+migration.
+
+**ONE GROUPING SURVIVES, AND IT IS NOT A GAP**: the parts of a table split by
+`deckFitPass()` share their parent's anchor, so a run of them is ONE stop, after
+the last part — a picture cannot live between a table and its own continuation,
+which is not a place. The check asserts that too, by requiring a repeated
+anchor to be adjacent: **a repeat anywhere else would silently merge two gaps
+into one position**.
+
+**§50.3's "after SWOT means after all four" is REVERSED for the arrows and kept
+for the KEY** — the label on `swot` still reads *After the SWOT section*, and it
+is now the last of five places rather than the only one. Recorded as a reversal
+rather than overwritten: that sentence was right when the only way to name a
+position was to pick it from a list of a dozen, and it is wrong now that the
+arrows walk.
+
+`checks/slide-move.py` gains the assertions that make this falsifiable: every
+fixed slide is a landing place, every place has its OWN key, and the walk's
+stops equal the deck's own slide list — down and back up, on a unit AND a
+function (§53.5). **Proved able to fail first: 6 red on the pre-§236.3 build**,
+printing his jump verbatim. hide-element, project-tables, repeat-project and
+the full qa.py sweep green after.
+
+---
+
+### §234.2 — WHY VIEW-AS COULD NEVER SHOW THE SMO THIS ERROR (2026-09-01)
+
+Islam, after §234 shipped: *"THE ERROR THAT ABDEL MONEM GOT I NEVER GOT IN
+THE VIEW AS."* He is right, and it is structural, not timing luck — the
+first two explanations offered (tab age, figures-not-submit) were true and
+incomplete, and the complete one was found in `shell.html`'s own §204
+machinery.
+
+**THE PRE-§234 BUG HAD TWO FACES, AND THE SMO ONLY EVER MET THE SILENT
+ONE.** The stale review envelope riding a save was REFUSED when the acting
+person's rights were narrow (the custodian's wall) and **ACCEPTED when they
+were not** — the SMO may change anything, so the same collision landed as a
+silent overwrite of everyone else's submissions, parks, notes and slides.
+Same fault, no alarm. That silent face IS the lost slides.
+
+**AND VIEW-AS POSTS FROM THE SMO'S OWN TAB.** Every autosave the SMO made
+as themselves — and above all the flush `switchViewer()` runs AT THE MOMENT
+OF SWITCHING into a view (§204: work done as yourself is saved as yourself,
+which is correct and stays) — was judged as the SMO and accepted, forcing
+the server to match the SMO's tab. By the time any save was judged as the
+simulated person, the staleness the refusal needed had been erased **by the
+act of entering view-as**. The error was unreachable from the SMO's testing
+method by construction: the identity that tests is the identity that was
+allowed to commit the crime silently.
+
+**MEASURED, NOT ARGUED**: (1) direct-vs-view-as verdicts are IDENTICAL on
+allowed and refused acts, sentence for sentence (§185 holds); (2) on the
+pre-§234 module, the same stale tab + Submit under view-as DOES produce the
+four refusals — identity was never the missing variable; (3) driven in a
+real browser through the real switcher, a 403 under view-as draws the
+banner, names the functions and says who it was judged as — the screen
+hides nothing.
+
+**NOTHING MORE TO FIX**: §234's split closes both faces at once — nothing
+stale travels for anybody, so the refusal face cannot fire and the silent
+face cannot overwrite. What remains true and is stated as the method's
+honest limit: view-as changes who is JUDGED, never which tab's history does
+the posting — a bug that lives in somebody else's timeline needs two real
+sessions, which is what `test-two-tabs.js` automates against a real
+Postgres, the §234 incident verbatim among its cases.
+
+## §237 — A VIEW-AS SESSION STARTS WHERE THEIR SESSION WOULD START (2026-09-01)
+
+Islam, closing §234.2's finding with a requirement: *"viewing as needs to
+have the same server connection and relation and not inherit my SMO
+abilities to be honest and show me errors … it should forget my smo role and
+just act like abodul menem permissions and abilities so I get the errors."*
+
+**HALF OF THAT HAS BEEN TRUE SINCE §185 AND IS NOT TOUCHED**: every save
+under view-as is judged with the viewed person's rights only — measured
+again for §234.2, verdicts identical sentence for sentence. What §234.2
+found still the SMO's was the TAB: its baseline, its history, its unsaved
+leftovers flushed as the SMO by the switch's own §204 flush — so the
+simulated person was being judged fairly on a tab whose past was somebody
+else's.
+
+**THE SWITCH REBASES NOW.** After §204's flush lands clean, `switchViewer`
+calls `SYNC.rebase()`: one GET of `/api/state`, the boot's own `hydrate()`
+(§53.5 — never a second way of applying a fetched graph), `LIVE` refreshed
+(or leaving demo data after a rebase would put the boot-time snapshot back),
+and `lastSaved` reset to the server's copy. From that moment the simulated
+session is what a fresh sign-in by that person would be: the server's
+current truth on screen, their rights on every save, and nothing of the SMO
+tab's past able to ride into a save judged as them.
+
+**THREE PATHS DELIBERATELY DO NOT REBASE**, each with §-numbered reasons:
+`file://` and demo mode (nothing of the server's to take — `rebase` answers
+false and the switch proceeds); a fetch that fails (the honest fallback is
+the old baseline, judged correctly either way, never a blocked way — §209);
+and **the refused-or-failed way home** (§209's path): taking the server's
+copy there would silently destroy the refused work §184's banner is offering
+to put back — measured in the check, because that is the path a careless
+rebase turns into data loss.
+
+**WHAT THIS STILL CANNOT DO IS STATED**: time. A view-as session opened now
+cannot wear a tab that had been open for three hours — to feel a staleness
+bug by hand you leave the view-as window open the way its person would, and
+that class is guarded automatically by `test-two-tabs.js` either way.
+Messages and chat still leave as the real signed-in person (§185's three
+deliberate real-session reads stand — view-as must never put words in a
+colleague's mouth), and the change log still names who signed in.
+
+`checks/viewas-fresh.py` drives the real switcher over HTTP against a stub
+whose dataset MOVES mid-run — the only way staleness can exist — and
+asserts the property, never the mechanism: the switch fetches and the
+screen holds work saved after the tab loaded; the first save under the view
+carries ONLY the view's own act (`review.submitted.mobile` and nothing
+else); the refused way home keeps the work on screen with zero fetches.
+Proved able to fail: **4 red** on the pre-§237 build. `viewer-switch.py`
+(§204/§209's own check), `welcome`, `refusal-keeps-work`, `save-flush`,
+`boot-skeleton`, `save-fidelity`, `report-saves`, `gap-fill`, `submit-gate`,
+the differ (126/0), the authoriser (451/0) and the full `qa.py` sweep green
+on the same build.
+## §239
+
+**YTD IS MEASURED AGAINST THE PART OF THE YEAR THAT HAS PASSED.**
+
+Islam, of a live reporting round: *"the reporting of YTD is being compared
+with the full year target without proration which is the wrong practice ..
+the tactics are compared to the dates and same for the milestones but the
+measures and objectives we need to consider this proration approach."*
+
+**HE IS RIGHT, AND THE PLATFORM HAD THREE ANSWERS TO ONE QUESTION.** A tactic
+was compared with the share of its own quarters already elapsed; a milestone
+with its due date; and a measure with its **whole-year target**, flat, however
+far into the year the round was. Measured on the shipped tenant: of the 26 Sum
+measures carrying a reported actual, the median read **45 points low**, and
+**18 of 26 crossed out of Off track** once the benchmark was the target due by
+now. The group's own headline revenue read **43%** — Off track, red, a written
+explanation demanded before the unit could submit — for 7.8B EGP banked at the
+half year against an 18B EGP year. It is 87%.
+
+**THE PLAN ALREADY SAID WHICH ROWS PRORATE, which is what made this cheap.**
+`compile` is the discriminator: *Sum* adds up across the period, so six months
+of accumulation against twelve months of target is the wrong comparison;
+*Latest* is a rate or a share at a point in time and *Average* is already
+normalised, so neither has anything to prorate — and with no baseline stored,
+prorating them would be inventing a glide path nobody agreed. 32 of 137 rows
+are Sum. No new field, and the client's own plan decides.
+
+**PRORATE THE TARGET, THEN COMPARE — NEVER THE RATIO.** Dividing a score by the
+elapsed share is right for "more is better" and exactly backwards for "less is
+better", so the share goes on the target and one expression serves both
+directions. The demo carries no ≤ Sum measure, so `checks/ytd-proration.py`
+MAKES one (§94.2) and asserts the **125%** only the correct arithmetic
+produces; the divided-ratio build reads 150% and the check goes red.
+
+**THE STORED FIGURE DOES NOT MOVE.** `progress` goes on holding the raw
+actual-against-the-annual-target ratio and the score is DERIVED
+(`measureScore()`), which is the tactic's own shape moved over — `tacticPlanned`
+has been derived rather than stored since the quarters model. So every archive
+and every closed cycle reads exactly as it did, **nothing is migrated**, and the
+Focus board keeps reading the raw figure on purpose: Islam chose that **reward
+stays a year-end judgement**, so "Earning" still means 100% of the whole target.
+One number for standing, one for pace, and each falls out where it belongs.
+
+### §239.1 — the review point was two fields, and they disagreed
+
+Shown the fix, Islam sent a screenshot of a supporting function's reporting
+screen: every tactic reading **"Due at 100%"**. *"noting that due at is what we
+are measured against 100% is confusing."*
+
+**THE NUMBER WAS WRONG, NOT THE WORD.** `tacticPlanned()` read
+`REVIEW.endsQuarter` — the quarter the CYCLE ends in — while the quarter pips
+two columns to the left read `GROUP.asOfQuarter`, whose own comment says *"The
+review point. H1 means Q1 and Q2 have passed."* **In the worked example both
+are 2**, so they agree, and nobody had ever seen it. On a year-long cycle
+reported in-year they diverge completely: measured over the 84 demo tactics, a
+cycle ending Q4 makes **every single one read 100% — one distinct value, a
+column that cannot vary**, while the pips on the same row correctly show Q2.
+§53.5 in the arithmetic rather than the layout. And `GROUP.asOfQuarter` had
+**no editor anywhere in the product**, so it sat wherever the seed left it.
+
+**IT NEARLY COST THE WHOLE FIX.** Prorating by `endsQuarter / 4` is 4/4 on his
+tenant — the change would have shipped and **done nothing on the deployment
+that reported the bug.** Found before building, which is the only reason it was
+cheap.
+
+**IT IS A MONTH, BECAUSE HIS CYCLES ARE.** *"cycles are customized it depends on
+the month of reporting. so we might be reporting till month 8 in the year then
+it's an 8 months review cycle."* A quarter cannot say eight months.
+`REVIEW.asOfMonth` rides the review row's **`extra`**, so there is no migration
+(§177's own road); the plan year runs January to December, asked outright.
+
+**THREE THINGS MAKE IT SAFE TO SHIP.** The fallback: an unset review point falls
+back to the quarter the cycle ends in, which is what this used to mean, so
+**nobody's tactic figure moves until the office sets a month** — and on his
+tenant, where the fallback is Q4, no measure prorates either until he does.
+The fallback **never writes** (§42, §50.6: a reader that creates the field it
+looked for puts a phantom change into every save). And clearing the picker
+**deletes the key**, so an unasked cycle and one set and cleared are
+byte-identical.
+
+**TACTICS COUNT MONTHS** (his choice, put to him with the alternatives): a
+tactic standing in a half-finished quarter gets credit for the part that has
+happened — Q2–Q4 reviewed at August is 5 of 9 months. Whole quarters would say
+a tactic planned for the quarter we are standing in has not started. The
+quarter arithmetic survives as the fallback for a cycle whose year cannot be
+read, because returning null there would empty every reporting page.
+
+**AND THE GATE THAT ALREADY EXISTED COMES BACK.** A tactic whose span has not
+begun says *"Not asked — outside this cycle"* and nobody is chased. On his
+tenant that was defeated: rows that had not started were being asked for
+figures and told 100% was due.
+
+### §239.2 — what the tables say
+
+Settled over five mockup revisions built from the running page, not from the
+stylesheet (§41.9). Each of these is Islam's own wording or his own decision:
+
+* **Target → Annual target**, so the column says outright that it is the year's
+  number, which is what makes the quiet figure beside the actual make sense.
+* **H1 actual → YTD actual**, carrying what is due by now inside the cell,
+  smaller and in the quiet ink — the benchmark, not the answer, so it steps
+  back the way a repeated Compile rule already does (§149). The rename also
+  removes a wrong word: `"H1 actual"` was a **hardcoded literal** that read H1
+  in a Q3 cycle too.
+* **Variance goes** from both Performance tables — the pair already shows it.
+* **`Deliv. / plan` → `YTD delivery`, and both halves carry the per cent sign.**
+  Islam: *"what is 45/50? what is this unit?"* Both are per cents of that
+  tactic's own plan and the product never printed the sign — **while the same
+  cell has always printed "due at 50%" WITH it in its unreported state**. One
+  cell, two spellings of one unit, which is the evidence rather than a taste.
+* **`Of plan` → `Progress`**, so both tables on the page end in the same word.
+* **`Due at` → `YTD Target`, KEPT on the reporting screen.** This **reverses**
+  his own previous round ("take it off the reporting screen"), recorded as a
+  reversal rather than done quietly: the number was the fault, not the column.
+* **The reporter's note reaches Performance**, under the row's name rather than
+  in a column of its own — which is not a new idea: `capKOTable()` has shown
+  notes exactly that way all along, so the unit's page was the one out of step
+  (§53.5), and the deck already carries a Note column on five tables. It costs
+  **no width**, measured, which matters because §158 has these tables cut off
+  on a narrow pane already.
+* **Direction comes off the slides** (his call: obvious to an audience).
+  **Smaller than it looked, and checked before agreeing**: `Compile` appears in
+  `present.js` **zero** times — the deck has never shown it — and the only
+  other place either word survives is `pptx.js`, whose button has returned `''`
+  above its own gate since §145.9, so nobody can reach it. Left alone rather
+  than editing something invisible.
+
+**THE SERVER NEEDED NOTHING**, and that is checked rather than assumed: a
+change to `review.asOfMonth` is not in `REVIEW_PER_TARGET`, so it classifies as
+`cycle` and lands on `edits(w, person, "a_cycle", "group")` — the office —
+which is exactly right for a value that decides what every figure in the tenant
+is measured against. Asserted **both ways** (§94.2), and proved able to fail:
+taking the field out of what the authoriser compares turns the two refusals
+green-to-red.
+
+**PROVED ABLE TO FAIL THREE WAYS** before the green run was believed (§94.5):
+nothing prorating → **4 red**; the review point ignoring the month the office
+picked → **2 red**; the ratio prorated instead of the target → **3 red**.
+
+**AND THE SWEEP'S OWN METHOD HAD TO CHANGE.** `qa.py` modelled "nothing
+reported" by blanking `progress`, which was sound while the score WAS that
+stored value and asserts nothing now that it is derived from the actual —
+§51.11's fault one layer in, the check's machinery rather than its selectors.
+It clears the actual too, and the two SCORES assertions go red without it.
+`setup-overview.py` moved with `cycleMeta()`, which no longer prints the review
+point (the strip carries the control, and saying it twice is how two things
+start to disagree); `repeat-project.py` learned to pick a month, because a
+cycle now refuses to open without one — §47.8 removed a hard-coded end quarter
+because *"a wrong guess silently changes every unit's execution score"*, and
+defaulting this would put that guess straight back.
+
+**RECORDED AND NOT DONE.** `GROUP.asOfQuarter` now has no reader in the product
+and `REVIEW.endsQuarter` is read only as the fallback; both should be retired
+in a follow-up migration together, and neither is dead-code-by-accident — they
+are named here so the next reader knows. **Still to sweep, at Islam's own
+instruction** (*"after that we make the sweep other tables"*): the group's,
+a company's and a unit's drill tables still say `Of plan`, `H1 actual`,
+`Delivered / Planned / Var.` and read `m.progress` directly rather than the
+prorated score. And the two he has not yet answered: whether the quiet figure
+should be drawn on a rate row at all, where it repeats the annual target
+exactly; and whether `Of plan` should become `Progress` everywhere.
+
+### §239.3 — the review point had to know its own year
+
+Islam, from the deployment within an hour of §239 shipping: *"I adjusted the
+reporting cycle to august but the ytd is calculating against the full year
+target .. and the case is the same in the ytd target in the tactics the target
+is still the 100%."*
+
+**HE IS RIGHT, AND IT IS §239.1's OWN FAULT COMMITTED BY §239.1's OWN FIX.**
+`reviewAsOf()` reads the month the office picked — **"Aug 26", which carries
+its own year** — and then `elapsedMonths()`, `quarterPast()` and
+`tacticPlanned()` all threw that away and asked `cycleYear()` instead, which
+scrapes a four-digit year out of the cycle's `to`, `name` and `due`. A cycle
+written *"Annual Plan / Jan / Dec"* has none. So `cycleYear()` answered null,
+the elapsed share answered null, and **everything fell back**: measures stopped
+prorating and every tactic read 100% again — with the month sitting there,
+plainly set, on the strip above them. Two fields answering one question, which
+is precisely the fault §239.1 exists to have removed.
+
+**REPRODUCED BEFORE ANYTHING WAS CHANGED**, across four cycle shapes: with a
+year in the name, 8 of 12 months and a tactic at 83%; with no year anywhere,
+**null, null, and 100%** — his three symptoms exactly, including the measure
+still measured against 18B EGP. The review point is the authority on its own
+year now, and `cycleYear()` is only the fallback for a cycle where nobody has
+picked a month yet.
+
+**ONE OF HIS THREE SCREENSHOTS WAS NOT A BUG AND IS SAID SO.** The Key
+measures table he sent carries four rows and **all four compile by `Latest`** —
+a rate or a share at a point in time, which by decision does not prorate (§239).
+`0% / 1%`, `20% / 90%`, `30% / 50%` are correct: the benchmark for a Latest row
+IS the annual target, and the quiet grey figure repeating it is the thing put
+to him as an open question and not yet answered.
+
+**AND HE COULD NOT TELL WHETHER THE MONTH HAD TAKEN** — *"can you check if the
+cycle adjustment is saved"* — because the strip showed the VALUE and nothing
+showed the CONSEQUENCE. It reads **"reported as of Aug 26 · 8 of 12 months"**
+now: the number every figure is actually prorated by, so a review point that is
+not working says so on the page instead of being inferred from a table reading
+100%. With none picked it says **"· 6 of 12 months, taken from the cycle's
+end"**, and the button shows the month **actually in use** rather than the
+picker's word *Missing* — an alarm over something that is not owed is §177 and
+§214.4's fault, and the fallback is working.
+
+**PROVED ABLE TO FAIL**: putting the year back on `cycleYear()` — the shipped
+bug — turns the new "a cycle with NO year anywhere answers exactly the same"
+assertion red. The check MAKES both cycle shapes, because the demo carries a
+year and cannot produce his (§94.2), and asserts the two as an **agreement**
+rather than as numbers. Full `qa.py` sweep, `setup-overview`,
+`repeat-project`, `submit-gate`, 454/0 and 126/0 all green.
+
+---
+
+## §240 — Saves take turns, so two at once cannot lose data (2026-09-01)
+
+Islam, on the performance sweep: *"what if people submit saves together —
+would that lose data?"* Right to ask. A save is a read-modify-write — read the
+stored graph, lay this client's changes over it (§210), authorise, write — and
+there was NO lock around those three steps. Two saves that OVERLAP both read
+the same starting state before either writes, so the later writer overwrote the
+earlier one's change. Silent, and most likely at a reporting deadline when many
+people save at once. §210's diff shrank the envelope and made refusals
+accurate; it did NOT close this, because the server still writes the whole
+applied graph, so the later write clobbers the earlier one's row.
+
+**Sequential saves were already safe** (a stale tab saving after another save
+completed reads the fresh state and merges — proved by `test-two-tabs`); only
+TRULY CONCURRENT saves lost data.
+
+**THE FIX: ONE TRANSACTION, ONE TRANSACTION-SCOPED LOCK.** The whole
+read-modify-write runs in a single transaction with `pg_advisory_xact_lock` at
+the top of it. The second concurrent save blocks there until the first COMMITs,
+then reads the first's committed result and merges onto it. Nobody is
+overwritten.
+
+**IT MUST BE TRANSACTION-SCOPED, NOT SESSION-SCOPED.** Production is Neon behind
+PgBouncer transaction pooling, where a session-level advisory lock can sit on a
+backend the next statement is never routed to — so it would not serialise
+anything. A transaction-scoped lock lives and dies with the transaction, on the
+one backend the transaction is pinned to, which is exactly the guarantee
+pooling gives. (The first draft used a session lock; it passed on a direct
+local Postgres and would have been a no-op on production — §100.3, a test must
+model the server.)
+
+`writeState` gained an `{ inTransaction: true }` option so it runs inside the
+caller's transaction instead of opening its own — a nested BEGIN warns and the
+inner COMMIT would end the caller's transaction early, releasing the lock
+mid-write. Every other caller (the seed, the tests) passes nothing and keeps
+the self-contained transaction it always had.
+
+**Only the write path locks.** A GET needs none: `writeState`'s transaction
+makes a concurrent read see all-old or all-new, never a torn half.
+
+**PROVED, AND PROVED ABLE TO FAIL** on a real Postgres 16.
+`scripts/test-concurrent-saves.js` drives the REAL handler (real connections,
+real lock) with 8 genuinely concurrent saves, each changing a different unit
+from one shared baseline: with the lock, 8 of 8 survive; with
+`SMP_NO_SAVE_LOCK=1`, 6 of 8 are lost. `test-roundtrip` (writer still lossless)
+and `test-two-tabs` (sequential §210/§215 intact) both stay green.
+
+**The cost, stated:** concurrent saves queue for well under a second each —
+they were already partly serialised by `writeState`'s TRUNCATE, so the throughput
+change is negligible. The larger "write only the changed rows instead of
+rewriting every table" optimisation is a separate, riskier piece and is NOT
+done here; the acute cost it targeted was already removed by §195's batching.
+---
+
+## §242 — A SUPPORTING FUNCTION'S REPORT IS ASKED FOR, AND ITS OBJECTIVES CAN BE ANSWERED (2026-09-01)
+
+Islam, from a live client session: *"for the functions planning in pillars the
+key objectives reporting wasn't done and the button of submit to smo was allowed
+and the input there wasn't saved."*
+
+**THREE FAULTS WEARING ONE COAT**, and each needed a different fix. All three
+were reproduced on the shipped build before a line was changed.
+
+### 1 · The submit gate was blind to the whole plan
+
+`submitBlockers()` asked **by prefix**: every `fn:` target went to
+`fnAskedItems()` / `fnReportedCount()`, which walk **capabilities**. A function
+that plans in pillars has none, so the gate looked at an empty list, found
+nothing owed, and opened the button. Measured on Merchandising with every
+figure stripped:
+
+| | the reporting page says | the submit gate says | the refusal |
+|---|---|---|---|
+| the pillars function | 0 of **10** entered | 0 of **0** | *(nothing in the way)* |
+| a business unit, same state | 0 of 41 | 0 of 41 | "41 figures still to enter." |
+
+**§59's rule in the last place still asking by prefix**, and the same fault
+§224 fixed on the Present button: *the format decides the deck, not the
+prefix*. A pillars function's plan is unit-shaped, so it is asked the unit's
+question through `unitLike()` — exactly as its Report page already draws it.
+
+**IT WAS NEVER ONLY THE COUNT.** `submitBlockers` reads its *rows* from the
+same list, so the note rule (§105) and the In-progress rule (§104.10) had
+**never once run** on this format either. With the fix, Merchandising's own
+demo data immediately produces a real blocker it had never shown: *"2 figures
+are at risk or off track with no note."*
+
+**ONE READER, `subjectAsked()` / `subjectReported()`**, because the welcome
+screen asks the same question one line before it asks this one and had the
+identical prefix test (§53.5: two answers to *what does this subject owe* is
+how a screen comes to disagree with the button on it).
+
+**A pillars function is never also asked for capabilities**, and that is by
+construction rather than by a rule here: the format cannot be switched while
+the other side holds anything (§59), so the two lists are exclusive.
+
+### 2 · A key objective added to a function had no id
+
+Every "add a row" control in the product mints one — `addMeasure()`,
+`addTactic()`, `addProject()`, and for a **unit's** objectives `koSettle()`
+since §96.4. The one behind `data-capkoadd`, which serves a **capability** and
+a **pillars function's Overview**, pushed `{name, dir, target, compile, weight,
+actual, progress}` and no id at all.
+
+So the reporting page drew that row's box carrying the string `"undefined"`,
+`findById()` matched nothing, and the handler returned without writing — **no
+error, no console, the figure gone.** §51.10 exactly: *the code that CREATES a
+field has to be found as well as the code that reads it.*
+
+**IT IS WORSE ON A CAPABILITY, AND THE SCHEMA IS WHAT SAYS SO.**
+`cap_key_objectives.id` is a PRIMARY KEY, so a capability's id-less objective
+could never be stored at all — that save failed outright, which is §172's shape
+where one refused value then poisons every later save. A pillars function keeps
+its objectives in `functions.extra`, which is jsonb and holds anything, which
+is precisely why these survived to be reported against and could not be.
+
+Fixed with `mintRowId(h.list, (h.cap ? h.cap.id : h.target) + "-KO")` — the
+same helper and the same **from the maximum, never from the count** rule
+(§96.2) the other minters use.
+
+### 3 · The rows already in a client's database — and why the heal is NOT in the browser
+
+**The first build healed them at the hydration door**, beside `fnPruneNulls`
+(§118), and it was reverted. `lastSaved` is taken *after* hydration, so a
+minted id joins the save **baseline** and never travels — while every later row
+edit is addressed **at** that id, and `applyChanges()` resolves a row edit
+against the **stored** graph and refuses one it cannot find (*"a row edit names
+a row that is not here"*), which fails the **whole** save and takes unrelated
+work with it (§215).
+
+So the heal is **migration 039**, which is §191's own answer to the same fault
+on the group's six objectives. It fills only blanks, never rewrites an id
+already written (that is what a reported figure, a focus mark and a cycle
+snapshot are keyed on — §48.1), and **continues past the highest already
+present** rather than counting from position, which is the duplicate §191
+nearly shipped.
+
+### Proved able to fail
+
+- `checks/fn-report-gate.py`: **16 red** against the shipped pre-§242 build,
+  among them `boxId: 'undefined'` — the reported fault verbatim. 0 after.
+- **Two of its own assertions could not fail when first written** and were
+  tightened: the id-uniqueness check counted one row holding `undefined` and
+  passed (§113.8), and the gate/page agreement was measured on the demo's
+  *fully reported* function, where a gate counting nothing agrees with a page
+  counting ten (§94.2 — the state is stripped first now).
+- **And the check crashed rather than failing**, which read as zero failures
+  until it was guarded — §215's lesson, paid again: *a throw is a failure.*
+- `scripts/test-ko-ids.js`: **15 assertions** against a real Postgres 16 —
+  every blank named, an existing id and its figure untouched, `""` treated as
+  an absence, the numbering clearing an existing `KO7`, other keys in `extra`
+  surviving, a second run byte-identical, and the fault itself reproduced.
+- Round trip on a **virgin** database with 039 in place: PASS.
+- `test-authorize` 451/0 · `test-graph-diff` 126/0 · `submit-gate`,
+  `fn-pillars`, `fn-ko-edit`, `gap-fill`, `objective-unit`, `welcome`,
+  `report-saves` all green · full `qa.py` sweep clean.
+
+### Recorded, not fixed
+
+**The SMO's cycle board leaves pillars functions off entirely** —
+`boardFunctionKeys()` filters on `!fnPlansInPillars(...) && capsOfFunction(k).length`
+— so the office cannot see whether such a function has reported. Their
+vocabulary is a *unit's* (key objectives, measures, tactics), so they belong on
+the board's unit half rather than its function half (§105.2: the two
+vocabularies must never share a heading). That is a visible change and is its
+own decision.
+
+---
+
+## §243 — THE REVIEW DECK, AND THE WEIGHTS ITS OBJECTIVES ARE SCORED BY (2026-09-01)
+
+Islam, going through a client's decks and screens. Settled from a mockup built
+out of the real platform (`design-mockups/functions-planning-presentations/`)
+and signed off item by item; every decision below is his.
+
+### A supporting function aims at its objectives, and nothing else
+
+*"There is a slide named what we are aiming at which is ok as a start, but it
+has a title of winning aspiration and it shouldn't show this as they don't have
+it … remove the by 2027 and the direction."*
+
+Measured on the demo's pillars function before anything was written: the slide
+printed **Winning Aspiration** over an empty paragraph, then a table headed
+`# · Objective · Dir. · By 2027 · This year` in which two columns held nothing
+but em-dashes. Both are §213 working exactly as designed — a supporting
+function inherits its aspiration and its SWOT from the unit it plans under and
+never authors either, and its objectives carry a **weight** and no 3-year
+target — and nobody had asked what that leaves on the slide.
+
+**THE THIS-YEAR COLUMN IS UNCONDITIONAL HERE**, which is not a detail:
+`SHOW_KO_THIS_YEAR` is a per-viewer setting (§66), so on a function — whose
+only target this is — a viewer who had turned it off would get a table of
+objectives with no target at all. Islam settled the reason himself: *"the
+functions has no 3 years objectives."*
+
+**A BUSINESS UNIT'S SLIDE IS UNTOUCHED AND IT IS ASSERTED.** A unit authors an
+aspiration and carries a 3-year target, so nothing there is redundant.
+
+### No SWOT slides on a function
+
+*"The functions has no swot, remove from the slides."* Five slides of
+twenty-one — a section cover reading **0 · 0 · 0 · 0** and four empty
+categories.
+
+**A UNIT WITH AN EMPTY SWOT STILL DRAWS ITS SECTION**, deliberately: there it is
+a plan that has not been analysed yet, which is worth saying out loud (§45.2).
+The test is whether the subject **authors** a SWOT, never whether this one
+happens to be empty — and both ends are asserted, or a build that dropped the
+section for everybody would pass (§113.8).
+
+### Three headline numbers, and the heading names its subject
+
+*"Where the units stands needs to show the 3 main numbers not only 2"* — and,
+of the same slide on a function, *"where merchandizing stands."*
+
+**THE MIDDLE NUMBER IS NOT NEW.** §64 gave a unit's Performance page three
+headline figures and `unitPillars()` has existed since the scoring model did.
+Only the SLIDE was left at two, so every review deck since has shown two thirds
+of a reading the screen behind it shows in full. Asserted as **agreement with
+what that page computes**, never as a figure (§53.5, §94.8).
+
+The heading names the function on a function and still says *the unit* on a
+unit, which is right as it stands and is not changed for tidiness.
+
+### The quarters are the four boxes
+
+*"The quarters view in the slides changed — why isn't the boxes that we have in
+the performance there?"* He is right and there was **no decision behind the
+difference**: the text form arrived through a merge. The deck draws `qs()` now,
+at a size a projector can read — the page's 18px mark sits beside 13px type and
+a slide's type is far larger, so the same box would read as decoration.
+
+### The notes slide follows the note
+
+*"Make the notes and achievements slide optional and they can add it when they
+need."* Drawn only when a note is written — no switch to remember and nothing
+new stored, on **both** decks (§53.5). **The cost was stated before it was
+accepted** and he accepted it: the box is editable in the room, so a note that
+already exists can still be corrected on the projector, and one that does not
+has no box to start it in.
+
+### A blank weight is never nought — and it is one of the two dash mechanisms
+
+*"There is no weighting on the objectives in units, it needs to be added; and
+in the functions planning as pillars it's there, but if it's missing it should
+be considered equally weighted objectives not 0."*
+
+`koScore()` read `weights[i] == null ? 0 : weights[i]`, so a blank weight
+counted at **nothing** — and where every reported row was blank the total came
+to nought and the whole headline returned null. Measured: the same objectives
+read **90%** equally weighted and **a dash** on that weighting. That is one of
+the two mechanisms behind his *"the objectives already are reported but not
+showing the performance"*.
+
+**THE RULE, IN ONE SENTENCE**: a blank weight counts as the average of the
+weights that WERE set; if none were set at all, every objective counts equally;
+and if every weight that was set is a literal zero, the score falls back to
+equal rather than to a dash. So a blank can never be worth nothing, never
+dominate, and a figure that is in is always seen.
+
+**TWO PLACES HOLD A WEIGHT, WHICH IS WHY THIS TOOK BOTH.** A capability's and a
+function's objectives carry `weight` ON THE ROW; a unit's have lived in
+`KO_WEIGHTS[ukey]` as an array BY POSITION since before rows had ids — §48's
+own hazard, since removing a row from the middle shifts every weight below it
+onto the wrong objective. The unit's new column writes the **row**, the stored
+array stays readable for a tenant that has one, and the row wins where both
+exist. **Nothing is migrated and nothing is rewritten.**
+
+**§226's "the unit side is untouched" IS REVERSED HERE, at Islam's own
+instruction**, and recorded as a reversal rather than overwritten — that note is
+precisely why this table was left behind when the function's gained the column.
+Its check assertion was **rewritten rather than deleted** (§218's rule): what it
+was protecting is still worth protecting, so it now asserts that the unit keeps
+the 3-year column a function has no equivalent of AND carries the new one.
+
+### A function's read table drops a column nobody filled
+
+*"In the functions overview, if there is no weights submitted the table
+shouldn't show weights."* A column of em-dashes says only that a question was
+asked and not answered — and since this section a blank weight is an equal
+share rather than nought, so the column would also be stating a value nobody
+set. `.one` is the two-column shape `koView()` already uses.
+
+### One layout for the objectives, and the switch goes
+
+*"The other toggle that shows the objective in table or cards — remove it and
+make the view in table only."* The chips branch, `koToggle()`, `KO_VIEW`, its
+click handler and the `.ochips` / `.ochip` rules are **DELETED rather than left
+unreachable** (§24): CSS left behind is what a later reader takes for
+load-bearing, and a mockup drawn from the stylesheet then draws something the
+product does not have — §41.9's own scar.
+
+### The unit is never written twice
+
+*"An actual number is showing the measure twice — M EGP M EGP — despite being
+reported 8 only."* Reproduced exactly: `joinTarget("", "8 M EGP", "M EGP")`
+returned `"8 M EGP M EGP"`. The reporting box holds the bare number and shows
+the unit beside it as a suffix, and the unit is rejoined on save — which is
+right, and assumes nobody types it in. Into an EMPTY box, typing "8 M EGP" is
+the natural thing to do.
+
+**A DIFFERENT unit is LEFT EXACTLY AS TYPED rather than replaced.** Somebody
+entering "8 B EGP" against a target in M EGP has said something specific, and
+quietly rewriting it would change a figure by a thousandfold without saying so.
+Doubling is a display fault; that would be a data one.
+
+### A long figure is read at its target's scale
+
+*"Actual revenue is reported in details by the unit — it needs to be squeezed to
+follow the target format like 3.59, not the full number."* His row: target
+**3.59B EGP** against actual **3,590,800,500**.
+
+**DISPLAY ONLY** — what was reported is stored exactly as entered, the full
+figure is on the hover, and nothing is rounded away.
+
+**THE GATE IS 1000x, AND IT IS NOT A TASTE.** §199.6 says a bare number inherits
+its row's unit, so "8" against a target of "6 M EGP" means eight MILLION and
+must be left alone; the only reading under which a bare number is a full figure
+is when it is absurdly larger than its target. One whole magnitude step (K, M
+and B are each 1000 apart) is that line, and a figure genuinely a thousand times
+its target would be a performance of 100,000%, which no report contains.
+**Not one figure in the shipped plan moves, and that is asserted.**
+
+### Proved able to fail
+
+`checks/deck-and-weights.py`: **22 red** against the pre-§243 build, 0 after.
+`test-authorize` 451/0 · `test-graph-diff` 126/0 · `fn-report-gate`,
+`fn-pillars`, `fn-ko-edit`, `foundation-objectives`, `submit-gate`, `gap-fill`,
+`plan-fields`, `no-wrap`, `table-fit`, `objective-unit`, `hide-element` green ·
+full `qa.py` sweep clean.
+
+**TWO CHECKS HELD ASSERTIONS THAT ISLAM HAD DELIBERATELY REVERSED**, and both
+were rewritten rather than deleted (§218): `fn-ko-edit`'s "the unit side is
+untouched", and `objective-unit`'s "the chip layout is deliberately untouched",
+which now asserts that the chip layout is GONE and that the one remaining
+layout still keeps the unit on the figure (§199.4) — the thing that assertion
+was really guarding. **And one of them was failing because of the check
+itself**: two files still set `KO_VIEW`, which in sloppy mode CREATED the global
+they were asserting the absence of (§51.11 from the other side).
+
+### Recorded, not done
+
+The **second** mechanism behind a reported-but-unscored figure is untouched:
+`applyProgress()` leaves `progress` unchanged where the target holds no usable
+number, so an uploaded figure against a target like "no target" is stored and
+silently left unscored. Deriving it wherever it is missing but computable would
+**move existing scores**, which is why it was put to Islam separately and is not
+in this section.
+### §239.4 — nought on a "less is better" measure is the best answer
+
+Islam's own row, in the screenshot that followed §239.3: **Data duplicate rate,
+≤ 1%, actual 0%** — reading **"Not scored"**.
+
+**A REGRESSION §239 INTRODUCED, and it is the best result in the table.** Zero
+duplicates against a target of *at most 1%* is perfect. The arithmetic divides
+**by** the actual on a "less is better" row, so `measureScore()` carried a
+guard against dividing by zero and returned null — while the expression it
+replaced landed on the cap by accident (`1/0` is `Infinity`, clamped to 150).
+So the row read **150%** before §239 and stopped being scored after it.
+
+It returns the cap, deliberately rather than by arithmetic accident. Asserted
+for a rate and for a row that prorates, with a real overshoot beside them
+(4% against ≤ 1% → 25%) so a build returning 150 for everything fails.
+
+**AND THE REST OF THAT TABLE IS THE RULE WORKING, NOT A FAULT.** All four of
+his measures compile by `Latest`, which by §239's decision does not prorate:
+`20% / 90%` and `30% / 50%` are correct, and the strip above them reading
+*"reported as of Aug 26 · 8 of 12 months"* is the evidence §239.3 landed.
+**What that exposes is the COST of the rule on his plan** — his measures are
+adoption and coverage rates almost throughout, so "Sum only" moves very little
+for him. Put to him as a decision with the arithmetic attached rather than
+answered here: prorating a rate assumes a straight line from zero, which is
+reasonable for *App coverage rate* and meaningless for *Data duplicate rate*,
+and the platform stores no baseline to ramp from.
+
+---
+
+## §244 — EVERY SUBJECT THAT REPORTS IS ON THE CYCLE BOARD (2026-09-01)
+
+Islam, told that a function planning in pillars appears nowhere on the SMO's
+board: *"put them on the unit half."*
+
+**IT WAS FILTERED OFF BOTH HALVES**, and neither filter was wrong on its own.
+The function half asks for capabilities (`capsOfFunction(fk).length`), which a
+pillars function has none of *by construction* (§59); the unit half read
+`activeKeys()`, which is units. Two correct tests, and the subject that
+satisfies neither falls through the gap between them. So Consumer Finance
+could be a week late and the page the office watches to chase people would not
+have a row for it — §105's own argument, *"a submission the SMO cannot see
+anywhere is half a feature"*, with one format left out of the feature that
+answered it.
+
+**THE UNIT HALF IS WHERE IT BELONGS, AND THE COLUMNS ARE WHY.** §105.2 settled
+that the two halves may not share a heading when they name different things —
+and a pillars function names the SAME three things a unit does: key
+objectives, measures, tactics. It is drawn by the unit's own pages for exactly
+that reason (§59). So this needed no new column, no second vocabulary and no
+band: the counts line up down the page and are comparable, which is the whole
+point of a board.
+
+**ONE ROW BUILDER, OVER A TARGET.** The two halves of this board have already
+drifted once — §105.4's *"1 need notes"* was right on one half and wrong on
+the other for as long as that column existed — and a third near-identical row
+builder is how that happens again (§53.5). The unit half's row is now one
+function taking a target, resolved through `unitLike()`.
+
+**COUNTED ONCE IN THE HEADLINE.** `cycleTotals()` walks `boardUnitTargets()`
+rather than `activeKeys()`, so a pillars function is added exactly once and
+through the same readers its own row uses. Leaving it out would say *"10 of
+11"* on a page listing eleven rows, which is §108.1's miscount by another
+road.
+
+### And the check found a fault older than the change
+
+**THE BOARD PRINTED "CARE" TWICE.** This tenant has a unit called Care AND a
+supporting function called Care, and the function half rendered `f.name`
+directly — so two rows carried the same word with nothing to tell them apart,
+on the page the office uses to decide who to chase. `placeLabel()` has
+answered that question since §65 and adds the suffix ONLY where the clash is
+real (§93.12), so nothing new was invented and no tenant without a clash is
+made to carry one. Both halves ask it now.
+
+It was found because the new check asserts the board against *who may be asked
+to report* rather than against a row count — the form that notices a subject
+that is present but unidentifiable, as well as one that is missing.
+
+### Proved able to fail
+
+`checks/cycle-board.py`: **7 red** on the build before, 0 after. It asserts the
+AGREEMENT between who can be asked and who has a row, that a pillars function
+is on the unit half and not also on the function half, that its figure and its
+state are its own reporting page's, that the headline counts it once, and
+§88's one line per row.
+
+**AND `setup-overview.py` WENT RED AND WAS RIGHT TO**: it asserted the board's
+size as `activeKeys().length + boardFunctionKeys().length`, a copy of the
+board's membership that this section made incomplete. Its own comment records
+the same line carrying a stale assumption once before (§108.16). It asks
+`boardUnitTargets()` now — the product's answer rather than a rebuilt one.
+
+`test-authorize` 454/0; `deck-and-weights`, `fn-report-gate`, `setup-header`
+and `no-wrap` green.
+
+### §239.5 — dollars join the unit list
+
+Islam: *"please add to the units M USD and K USD."*
+
+`TARGET_UNITS` carried Egyptian pounds only (`EGP`, `M EGP`, `B EGP`), so a
+plan holding a figure in dollars — a regional hub's revenue among them — could
+be **kept and displayed** by §96.2's rule but never **chosen** for a new row.
+The pen offered no way to say USD at all.
+
+`K USD` and `M USD`, and deliberately not `B USD` or `K EGP` alongside them:
+§199.4's whole argument for a fixed list is that it is a vocabulary somebody
+agreed rather than one that grows by inference, and inventing two more because
+they would be symmetrical is exactly that growth.
+
+They join `TIGHT_UNITS`, so a scaled currency is one token whichever currency
+it is — **`6.2M USD`**, the same shape as `6.2B EGP`, read off the plan's own
+habit rather than invented. Proved as a **fixed point**: what the pen writes
+splits and rejoins to itself for every unit on the list, which is the property
+the whole feature rests on.
+
+**AND THE CHECK'S EXAMPLE HAD TO MOVE.** `objective-unit.py` §7b asserted that
+`"M USD"` — the shipped plan's own outsider — is offered even though the list
+does not carry it. Dollars are on the list now, so that assertion would have
+gone on passing while guarding nothing (§51.11). It asks about `B USD`, which
+is genuinely outside, and asserts the dollars are offered **outright**.
+
+### §239.6 — the doubled unit was already fixed, and the question it leaves
+
+Islam, of `8 M EGP M EGP` on a reported figure: *"the unit is already covered
+so the measure should be a clean number and if added by mistake the system
+should only grab the number and follow the unit."*
+
+**ALREADY DONE, by §243 from another session, and merged in before he asked.**
+The reporting box holds the bare number and rejoins the unit on save; typing
+the unit in as well added it twice. A unit already on the value is no longer
+added again, compared case-insensitively and with spacing ignored, because
+`8 m egp` and `8  M EGP` are the same answer typed by a person.
+
+**ONE CASE IT DELIBERATELY DOES NOT DO, and it is worth him knowing.** A
+*different* unit is left exactly as typed rather than rewritten: somebody
+entering `8 B EGP` against a target in `M EGP` has said something specific, and
+quietly restating it as `M EGP` would change the figure a thousandfold without
+saying so. Doubling is a display fault; that would be a data one.
+
+**AND A VALUE ALREADY STORED DOUBLED STAYS DOUBLED** — the fix stops new ones
+and cleans nothing, so the row in his screenshot reads `8 M EGP M EGP` until
+the figure is entered again. Said rather than swept up: a migration over
+reported figures is not something to do on the way past.
+---
+
+## §245 — THE FUNCTIONS ARE ON THE FUNCTION HALF, IN ONE LIST (2026-09-01)
+
+Islam, looking at what §244 shipped: ***"merch and marketing and cf should be
+with functions not units"***, and, of the two bands drawn for sign-off:
+***"don't split functions planning in pillars from functions planning in
+projects they are functions reporting."***
+
+**§244 FOUND THE HOLE AND PUT THE ROWS IN THE WRONG PLACE.** That a supporting
+function planning in pillars had no row at all is unchanged and was real: the
+function half asks for capabilities, which such a function has none of by
+construction (§59), and the unit half read `activeKeys()`, which is units — so
+Consumer Finance could be a week late and the page the office watches would
+carry no row for it.
+
+**THE PLACEMENT IS HIS AND THE COLUMN HEADING IS THE ARGUMENT.** That block
+sits under **Business unit**, which a supporting function is not. §244 reasoned
+from the three COUNT columns — a pillars function counts objectives, measures
+and tactics exactly as a unit does, so no new column, no second vocabulary, no
+band — and every word of that is true and answers a question nobody was asking.
+**This board is scanned for *who owes a report*, and a function owes one as a
+function whatever shape its plan takes.** *A correct argument about the columns
+is not an argument about the place.*
+
+**AND THE FORMAT IS NOT A GROUPING.** Two bands were drawn — *planning in
+pillars* and *planning in projects*, each naming its own vocabulary — and he
+refused them. He is right: how a function plans is a fact about its own pages,
+not about its place on this board, and splitting the list by it makes somebody
+looking for Marketing decide which half to look in first. **ONE band, one list,
+in the register's own order.** The shape decides only which builder draws the
+row — `boardRow()` for a pillars function, the capability row for the rest —
+inside the builder, where nobody scanning the page has to know about it (§59:
+the FORMAT decides, never the `fn:` prefix).
+
+**SO THE BAND STOPPED NAMING ONE VOCABULARY.** It read *"N functions reporting
+in capabilities — key objectives, outcomes, and deliverables and milestones"*,
+which was true of every row beneath it until a pillars function joined the
+list. **A sentence true of only some of the rows under it is worse than no
+sentence** (§35), and describing what the reader can already see is furniture
+(1b-ii). It says **"N functions reporting"** — his own words. The mapped
+columns keep the per-cell hovers that already explained them (§124), which is
+where that explanation belonged in the first place.
+
+**TWO LISTS BEHIND IT, because the totals must have exactly the membership the
+rows have** — §108.1's miscount is the parts growing while the divisor did not.
+`boardUnitTargets()` is units; `boardFunctionTargets()` is every function that
+can be asked; `cycleTotals()` walks both and reads each subject with its own
+counters through `boardPlansLikeUnit()`.
+
+**AND THE MOCKUP WAS DRAWN FROM THE PROTOTYPE, WHICH HE COULD NOT READ.** It
+carried a `Care (function)` row, and his tenant has no such function — so the
+one screen he was being asked to sign off was populated with names that mean
+nothing to him. Recorded because the instruction that followed is general:
+***"stop showing mockups in the prototupe work on the client."***
+
+`checks/cycle-board.py` asserts the placement AND that there is exactly ONE
+band — a build that grouped the two formats satisfies every "it is with the
+functions" assertion on its own — plus that the function list is the register's
+own order with both shapes genuinely present (§113.8). **8 red** on §244's
+build. `setup-overview.py`'s board-size assertion moved with it, asking where
+the product lists a pillars function rather than naming a half (§94.8).
+
+---
+
+## §246 — THE CYCLE NOTE IS A LINE SOMEBODY WROTE, OR IT IS NOT THERE (2026-09-01)
+
+Islam, having had §243's optional notes slide: ***"for functions who already
+didn't fill the notes an achievments slide it's still appearing. should we add
+a hide button there for this slide as an extra fix?"***
+
+**THE GATE WAS RIGHT AND WHAT IT READ WAS NOT.** §243 draws that slide only
+`if (unote)`, and measured on the demo it behaves perfectly: delete the note,
+15 slides and no notes slide; write one, 16 and one. What it reads is
+`REVIEW.note[key]`, and **the deck's own note box is `contenteditable` and
+wrote `box.textContent` into that map on every keystroke** — with no trim and
+no delete. Until §243 that box was drawn on **every** deck, so anybody who
+clicked into it and pressed space, or typed a word and deleted it, left a note
+made of whitespace. **Whitespace is truthy.** §104.10's trap in a third place:
+*the falsy test is not the same question as "did somebody say something".*
+
+**ONE READER AND ONE WRITER.** Five places read this value and two wrote it,
+and a definition of *there is a note* living in five places is one that
+disagrees with itself the first time somebody tightens one of them (§53.5).
+`cycleNote()` and `setCycleNote()` in `lib`-side `config-data.js`; the deck
+box, the reporting page's textarea, the Performance card, both deck builders
+and `fnEverReported()` all go through them.
+
+**TRIMMED ON READ AS WELL AS ON WRITE**, so the notes already sitting in a
+client's database behave correctly today and **nothing is migrated** — this is
+a value that is only ever displayed. **And the emptied key is DELETED** (§50.6),
+so a note never written and one written and cleared are the same absence rather
+than two states nothing distinguishes.
+
+**NO HIDE BUTTON, AND THE REASON IS THAT IT WOULD BE A SECOND ANSWER.** The
+slide already appears only when there is something on it; a control to hide a
+slide that is only drawn when it has content is a switch for a state that
+cannot occur (§61 from the other side). What is genuinely missing is named
+rather than built: **§233 hides ROWS from the presentation and nothing hides a
+generated SLIDE.** That is a feature with a real question inside it — which
+slides may be hidden, and whether hiding one hides what it counts — and it is
+not this fix.
+
+`checks/notes-slide.py` measures all three deck shapes (a unit, a function
+planning in pillars, a function planning in projects) with the note absent,
+with a space, a newline and tabs-and-spaces, and with a real note — the last so
+a build that never drew the slide at all cannot pass (§113.8). **10 red** on
+the build before.
 ### §231.5 — THE PLATFORM REGISTERS ITS OWN WORKER, AND A HANG IS NOT A SILENCE
 
 Islam, testing §231 on a second account: *"the notifications are not working
@@ -25950,7 +27159,7 @@ having tried.
 
 ---
 
-## §234 — THE OFFICE STARTS A CONVERSATION
+## §247 — THE OFFICE STARTS A CONVERSATION
 
 Islam: *"from the platform inbox allow the smo to initiate a message with
 someone."*

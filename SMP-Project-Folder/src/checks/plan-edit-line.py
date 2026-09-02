@@ -86,6 +86,13 @@ FIT = """() => {
 }"""
 
 
+def has249(pg):
+    """§215: a build without §249 must FAIL these, not kill the run — a suite
+    that throws at the first trial reports zero failures for everything after
+    it, which is a falsification that looks like a pass."""
+    return pg.evaluate("()=>typeof secPagesOpen === 'function'")
+
+
 def viewer(pg, key):
     pg.select_option("#asWho", key); pg.wait_for_timeout(420)
 
@@ -165,8 +172,10 @@ with sync_playwright() as pw:
             if not press(pg):
                 ck("%s/%s · it can be pressed" % (key, s), False); continue
             o = pg.evaluate(STATE)
+            # §249: the press opens the whole tab, so this asks only that the
+            # mode THIS page reads is among what opened — §1b asserts the set.
             ck("%s/%s · pressing it opens the mode the page reads" % (key, s),
-               o["edit"] == [a["rowPage"]], (a["rowPage"], o["edit"]))
+               a["rowPage"] in o["edit"], (a["rowPage"], o["edit"]))
             ck("%s/%s · ...and the page gains editable fields" % (key, s),
                o["flds"] > 0, o["flds"])
             ck("%s/%s · one way out, not two (§248)" % (key, s), o["fdone"] == 0, o)
@@ -174,6 +183,130 @@ with sync_playwright() as pw:
             c = pg.evaluate(STATE)
             ck("%s/%s · pressing it again closes the mode" % (key, s),
                c["edit"] == [], c["edit"])
+
+    # ── 1b · ONE EDIT, ONE DONE (§249) ───────────────────────────────
+    print("\n1b · one press opens the whole tab, one press closes it")
+    for kind, key, tb, secs in (("unit", "mobile", "strategy", ["found", "swot", "plan"]),
+                                ("fn", "finance", "fnstrat", ["found", "proj"])):
+        (units if kind == "unit" else fns)(pg)
+        if not dest(pg, key if kind == "unit" else "fn:" + key):
+            continue
+        tab(pg, tb); sec(pg, secs[0])
+        if not has249(pg):
+            ck("%s · one press opens every section this person may author" % key,
+               False, "secPagesOpen() is not in this build")
+            continue
+        press(pg)
+        want = pg.evaluate("()=>secPagesOpen().slice().sort()")
+        got = pg.evaluate("()=>Object.keys(EDIT_PAGE).filter(k=>EDIT_PAGE[k]).sort()")
+        ck("%s · one press opens every section this person may author" % key,
+           got == want and len(want) > 1, {"want": want, "got": got})
+        # THE WORD MUST AGREE WHEREVER YOU STAND — the fault §249 removes is a
+        # control reading `Done editing` on one section and `Edit` on the one
+        # beside it, which is what per-section flags gave.
+        words, flds = [], []
+        for s2 in secs:
+            sec(pg, s2)
+            words.append(pg.evaluate("()=>{const b=document.querySelector("
+                                     "'#secrow-in .secpen'); return b?b.textContent.trim():null}"))
+            flds.append(pg.evaluate("()=>document.querySelectorAll("
+                                    "'#panel .fld, #panel [data-fld]').length"))
+        ck("%s · ...and every section says Done editing" % key,
+           words == ["Done editing"] * len(secs), words)
+        ck("%s · ...with fields open on each of them" % key,
+           all(n > 0 for n in flds), dict(zip(secs, flds)))
+        press(pg)
+        ck("%s · one press closes them all" % key,
+           pg.evaluate("()=>Object.keys(EDIT_PAGE).filter(k=>EDIT_PAGE[k])") == [],
+           pg.evaluate("()=>Object.keys(EDIT_PAGE).filter(k=>EDIT_PAGE[k])"))
+
+    # ── 1c · AND IT OPENS ONLY WHAT THIS PERSON MAY AUTHOR ───────────
+    # MEASURED FIRST, AND THE FIRST VERSION OF THIS CLAIMED SOMETHING FALSE.
+    # A unit's three pages share the area `unit_strat`, so they can never
+    # disagree — checked over every person against every unit, not one pair
+    # differs. The filter earns its place on a FUNCTION, whose Overview asks
+    # `k_found` (`fn_strat`) and whose Plan asks `u_plan` (`unit_strat`, the
+    # pairing §248 kept so no rights would move): two different columns.
+    #
+    # So this asserts the AGREEMENT rather than a made-up split (§94.8): every
+    # page one press opens is a page `mayAuthorPage` allows, and every page it
+    # allows on this tab is opened. Both directions, so a build that opened
+    # everything and a build that opened nothing both fail.
+    print("\n1c · what one press opens is exactly what the rule allows")
+    for kind, key, tb in (("unit", "mobile", "strategy"), ("fn", "finance", "fnstrat")):
+        (units if kind == "unit" else fns)(pg)
+        if not dest(pg, key if kind == "unit" else "fn:" + key):
+            continue
+        tab(pg, tb)
+        if not has249(pg):
+            ck("%s · the set matches the shared rule, both ways" % key,
+               False, "secPagesOpen() is not in this build")
+            continue
+        agree = pg.evaluate("""() => {
+          const open = secPagesOpen();
+          const may = [], seen = {};
+          Object.keys(SEC_PENS).map(k => secPagePair(k)).filter(Boolean).forEach(p => {
+            if (!seen[p[0]] && SMPRules.mayAuthorPage(world(), viewer(), p[1], TARGET)) {
+              seen[p[0]] = 1; may.push(p[0]); }
+          });
+          return { open: open.slice().sort(), may: may.sort() };
+        }""")
+        ck("%s · the set matches the shared rule, both ways" % key,
+           agree["open"] == agree["may"] and len(agree["open"]) > 0, agree)
+        # ...and it is the rule doing the work, not a coincidence: with the
+        # rule forced false for one page, that page must drop out of the set.
+        drop = pg.evaluate("""() => {
+          const real = SMPRules.mayAuthorPage;
+          const pair = secPagePair(Object.keys(SEC_PENS).filter(k => secPagePair(k))[0]);
+          SMPRules.mayAuthorPage = function(w, p, k, t){
+            return k === pair[1] ? false : real(w, p, k, t); };
+          const got = secPagesOpen();
+          SMPRules.mayAuthorPage = real;
+          return { blocked: pair[0], got: got };
+        }""")
+        ck("%s · ...and a page the rule refuses drops out of it" % key,
+           drop["blocked"] not in drop["got"], drop)
+
+    # ── 1d · A FILL-GRANT HOLDER STILL HAS A WAY OUT (§61) ───────────
+    # §248 removed the corner control a filler used to close fill mode with,
+    # and the bar draws `Next gap` instead of `Done filling` while anything is
+    # still missing — so for one build a custodian with gaps left was in a mode
+    # with no way to leave it. Caught by gap-fill.py timing out on a control
+    # that was no longer drawn, not by reading. Asserted here in BOTH states:
+    # gaps remaining, and none.
+    print("\n1d · a filler can always leave fill mode")
+    cust = pg.evaluate("""() => {
+      const u = 'mobile';
+      ACCESS['custodian'] = ACCESS['custodian'] || {};
+      ACCESS['custodian'].a_unit_own_strat = 'fill';
+      const k = (UNIT_ROLES[u] || {}).custodian;
+      if (!k) return null;
+      VIEWER = k; leaveModes();
+      current = u; currentSub = 'strategy'; CURSEC.strategy = 'plan';
+      /* MAKE a gap, because the demo's plan may owe nothing (§94.2). */
+      UNITS[u].items[0].measures[0].target = '';
+      paint(); return k; }""")
+    pg.wait_for_timeout(500)
+    if cust:
+        door = pg.query_selector('#secrow-in [data-fillcta]')
+        ck("the filler is offered a way in", door is not None)
+        if door:
+            door.click(); pg.wait_for_timeout(800)
+            st = pg.evaluate("""() => ({
+              gaps: gapTotal(TARGET),
+              inFill: Object.keys(EDIT_PAGE).filter(k => EDIT_PAGE[k]),
+              out: document.querySelectorAll('#secrow-in .fdone').length,
+              pen: document.querySelectorAll('#secrow-in .secpen').length })""")
+            ck("...the mode is open with gaps still owing", st["gaps"] > 0 and st["inFill"], st)
+            ck("...and Done filling is drawn WHILE gaps remain", st["out"] == 1, st)
+            ck("...and they get no author's pen (their control is the bar's)",
+               st["pen"] == 0, st)
+            pg.click('#secrow-in .fdone'); pg.wait_for_timeout(600)
+            ck("...and it closes the mode",
+               pg.evaluate("()=>Object.keys(EDIT_PAGE).filter(k=>EDIT_PAGE[k])") == [],
+               pg.evaluate("()=>Object.keys(EDIT_PAGE).filter(k=>EDIT_PAGE[k])"))
+    viewer(pg, "smo")
+    pg.reload(); pg.wait_for_timeout(900); viewer(pg, "smo")
 
     # ── 2 · IT IS THE ONLY ONE, where there used to be several ────────
     print("\n2 · a function with two projects carries one control, not two")

@@ -2076,75 +2076,12 @@ function paneActs(page, acKey){
    `who` (Strategy › Who enters) answers null: it has no edit mode at all, it
    has `canName()`, so the slot is empty there rather than holding a control
    that opens nothing (§61). */
-/* A TABLE, SO THE KEYS AND THE PAIRS ARE ONE THING. `secPagesOpen()` below
-   walks it to answer "every section of this tab", and a section listed in one
-   place and not the other is how the pen and the mode come to disagree — the
-   very drift §248 removed between this map and `fillPageForSec()`. A unit has
-   no `proj` section and a function no `plan`, so carrying both under both
-   costs nothing and means the table need not know which side spells it which
-   way (§59's `unitLike()` argument, one surface out). */
-var SEC_PENS = {
-  found: { unit: ["foundation", "u_found"], fn: ["capfoundation", "k_found"] },
-  swot:  { unit: ["analysis",   "u_anal"] },
-  plan:  { unit: ["plan",       "u_plan"], fn: ["plan", "u_plan"] },
-  proj:  { unit: ["plan",       "u_plan"], fn: ["plan", "u_plan"] }
-};
 function secPagePair(sec){
-  var e = SEC_PENS[sec];
-  if (!e) return null;
-  return e[String(TARGET || "").indexOf("fn:") === 0 ? "fn" : "unit"] || null;
-}
-
-/* ── ONE EDIT, ONE DONE (§249) ──────────────────────────────────────
-   Islam: *"the edit opens all so I don't need to edit each tab and then save
-   for each — it's one edit and one save?"*
-
-   AND WHAT WAS THERE WAS WORSE THAN THREE PRESSES. `EDIT_PAGE` held a flag per
-   SECTION and `leaveModes()` clears it on a TAB or DESTINATION change and not
-   on a section one — so opening Foundation and walking to SWOT left Foundation
-   OPEN with the line reading `Edit`, and opening the Plan as well gave two open
-   modes whose one shared control could only ever close the one you were
-   standing on. Measured: `open: ["foundation","plan"]`, the button saying
-   *Done editing* on those two and *Edit* on the SWOT beside them. A control
-   whose word is true of one section and false of its neighbour is not a
-   control anybody can trust.
-
-   THE MODE IS THE TAB'S, NOT THE PAGE'S — which is what a plan is. One press
-   opens every section of it, one press closes them all, and the word reads the
-   same wherever you stand.
-
-   ONLY WHAT THIS PERSON MAY AUTHOR, and the reason is measured rather than
-   assumed. A UNIT's three pages (`u_found`, `u_anal`, `u_plan`) all resolve to
-   the area `unit_strat`, so they can NEVER disagree — over every person against
-   every unit in the tenant, not one pair differs. On a unit, then, opening all
-   three is opening exactly what the one Strategy grant says, and never a page
-   more. A FUNCTION is where the filter earns its place: its Overview asks
-   `k_found` (`fn_strat`) and its Plan asks `u_plan` (`unit_strat`, the pairing
-   §248 kept to the letter so nobody's rights would move), which are two
-   different columns of the matrix — so a tenant that opens one and not the
-   other must get one section and not the other. Asked of `mayAuthor()` per
-   page, which is the shared rule (§42): the screen can never open a page the
-   save would refuse. Nothing here grants anything; it draws fields.
-
-   RECORDED AND NOT FIXED: that `u_plan` is also §217's remaining drift on the
-   SCREEN. §217 made the SERVER judge a supporting function's plan by
-   `strategyPageOf()` — `k_proj` — while `projEditing()` still asks
-   `mayEditPlan()`, i.e. `u_plan`. Measured across every person and every
-   function on this tenant the two never disagree, so nothing is broken today;
-   correcting it would MOVE who may author a function's plan, which is a
-   decision and not a tidy-up (§248 deliberately moved no rights).
-
-   DEDUPED, because `plan` and `proj` name one page and a unit's list would
-   otherwise open it twice. */
-function secPagesOpen(){
-  var seen = {}, out = [];
-  Object.keys(SEC_PENS).forEach(function(k){
-    var p = secPagePair(k);
-    if (!p || seen[p[0]] || !mayAuthor(p[1])) return;
-    seen[p[0]] = 1;
-    out.push(p[0]);
-  });
-  return out;
+  var t = String(TARGET || ""), fn = t.indexOf("fn:") === 0;
+  if (sec === "found") return fn ? ["capfoundation", "k_found"] : ["foundation", "u_found"];
+  if (sec === "swot")  return fn ? null : ["analysis", "u_anal"];
+  if (sec === "plan" || sec === "proj") return ["plan", "u_plan"];
+  return null;
 }
 function curSec(){
   return (typeof CURSEC !== "undefined" && typeof currentSub !== "undefined")
@@ -2172,13 +2109,8 @@ function secActs(){
   var p = secPenPair();
   if (!p) return '';
   var on = !!EDIT_PAGE[p[0]];
-  /* §249: `data-page` still names THIS section's page — it is what the word
-     is read from and what every check presses — and `data-pageset` is what the
-     press acts on. Two attributes because they answer two things: which page
-     this control belongs to, and which pages one press moves. */
   return '<button class="secpen' + (on ? ' on' : '') + '" data-page="' +
-    esc(p[0]) + '" data-pageset="' + esc(secPagesOpen().join("|")) + '">' +
-    (on ? 'Done editing' : 'Edit') + '</button>';
+    esc(p[0]) + '">' + (on ? 'Done editing' : 'Edit') + '</button>';
 }
 
 /* ── THE PLAN LEAVES AS SLIDES (§117) ─────────────────────────────
@@ -2698,27 +2630,16 @@ function missBarCta(total){
   var inFill = EDIT_PAGE.plan || EDIT_PAGE.foundation || EDIT_PAGE.capfoundation;
   /* §223: WITH NOTHING OWED THE WALK HAS NOTHING TO WALK, so the door stays
      a door and does not offer to take you to a next gap that is not there. */
-  /* §248: NOT A SECOND WAY OUT, AND NOT NO WAY OUT EITHER. The section line
-     carries *Done editing* for whoever may author this page, so drawing
-     *Done filling* beside it would be two close controls on one line — and the
-     wrong word for the office, who are editing rather than filling. A
-     fill-grant holder authors nothing, so `secPenPair()` is null for them and
-     this is their only way out.
-
-     IT IS DRAWN WHILE GAPS REMAIN TOO, which the first build of §248 got
-     wrong: the way out used to be the corner button `penBtn()` drew for a
-     filler at all times, and with that gone the bar offered *Next gap* alone —
-     so a custodian with anything still missing was in a mode with no way to
-     leave it but changing tab (§61, introduced by the section that was
-     removing a duplicate). Found by `gap-fill.py` timing out on a control that
-     was no longer drawn, not by reading. */
-  var done = (inFill && !secPenPair())
-    ? '<button class="editbtn fdone" data-page="' +
-      esc(fillPageForSec(curSec())) + '">Done filling</button>'
-    : '';
   if (inFill && total) return '<button type="button" class="fillcta" data-nextgap="1">' +
-    'Next gap &rarr;&nbsp;<span class="ngleft">' + total + ' left</span></button>' + done;
-  if (inFill) return done;
+    'Next gap &rarr;&nbsp;<span class="ngleft">' + total + ' left</span></button>';
+  /* §248: NOT A SECOND WAY OUT. The section line now carries *Done editing*
+     for whoever may author this page, so drawing *Done filling* beside it is
+     two close controls on one line — and the wrong word for the office, who
+     are editing rather than filling. A fill-grant holder authors nothing, so
+     `secPenPair()` is null for them and this stays their only way out. */
+  if (inFill) return secPenPair() ? '' :
+    '<button class="editbtn fdone" data-page="' +
+    esc(fillPageForSec(curSec())) + '">Done filling</button>';
   var sec = curSec();
   return '<button type="button" class="fillcta" data-fillcta="' +
     esc(fillPageForSec(sec)) + '">' +

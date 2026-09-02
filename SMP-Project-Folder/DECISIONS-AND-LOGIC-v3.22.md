@@ -27400,3 +27400,126 @@ pre-existing, both left alone rather than quietly widened into this change.
 while its own mode is open, because `missBarCta`'s `inFill` does not name
 `analysis` — true before this change and after it, and harmless, since the SWOT
 is not a fillable page and the button walks to gaps that are genuinely elsewhere.
+
+---
+
+## §249 — ONE EDIT, ONE DONE (2026-09-02)
+
+Islam, on §248: *"how about the editing button when I navigate the foundation
+swot or plan or in case of functions the over view and project or oveviw and
+plan the edit opens all so I don't need to edit each tab and then save for each
+it's one edit and one save?"*
+
+**HE IS RIGHT, AND WHAT WAS THERE WAS WORSE THAN THREE PRESSES.** Measured on the
+§248 build before anything was written. `EDIT_PAGE` holds a flag per SECTION, and
+`leaveModes()` clears it on a TAB or a DESTINATION change and **not on a section
+one** — so:
+
+* open Foundation, walk to SWOT and to Plan: `open: ["foundation"]` the whole
+  way, with the line reading **Edit** on both of them. Foundation stayed open
+  behind you and nothing on screen said so.
+* open the Plan as well: `open: ["foundation", "plan"]`, the control reading
+  *Done editing* on those two and *Edit* on the SWOT between them.
+* press *Done editing* on the Plan: it closes the Plan and leaves Foundation
+  open, again silently.
+
+**A control whose word is true of one section and false of the one beside it is
+not a control anybody can trust.** So this is not only convenience: the mode was
+already crossing sections, it was simply doing it invisibly and one page at a
+time. §248 made that visible by putting the word on a line you can see from every
+section, which is what surfaced it.
+
+### The shape
+
+**THE MODE IS THE TAB'S, NOT THE PAGE'S** — which is what a plan is. One press
+opens every section of it, one press closes them all, and the word reads the same
+wherever you stand.
+
+**ONLY WHAT THIS PERSON MAY AUTHOR, AND THE REASON IS MEASURED RATHER THAN
+ASSUMED.** The first draft of this comment claimed §117 lets the SMO open a
+role's Strategy cell one page at a time. **That is false**, and the measurement
+said so: a unit's `u_found`, `u_anal` and `u_plan` all resolve to the area
+`unit_strat`, so over every person against every unit in the tenant **not one
+pair differs**. On a unit, opening all three is opening exactly what the single
+Strategy grant says and never a page more. The filter earns its place on a
+**function**, whose Overview asks `k_found` (`fn_strat`) and whose Plan asks
+`u_plan` (`unit_strat` — the pairing §248 kept to the letter so no rights would
+move): two different columns, so a tenant that opens one and not the other gets
+one section and not the other. Asked of `mayAuthor()` per page, which is the
+shared rule (§42), so the screen can never open a page the save would refuse.
+Nothing here grants anything; it draws fields.
+
+**`SEC_PENS` BECOMES A TABLE**, so the section keys and the page pairs are one
+thing rather than a list walked in one place and a switch written in another —
+the exact drift §248 had just removed between its own map and `fillPageForSec()`.
+A unit has no `proj` section and a function no `plan`, so carrying both under
+both costs nothing and means the table need not know which side spells it which
+way.
+
+**TWO ATTRIBUTES, BECAUSE THEY ANSWER TWO THINGS.** `data-page` still names the
+control's own page — it is what the word is read from, what decides the
+direction, and what every check presses — and `data-pageset` is what one press
+moves. A control with no set (the group's Foundation pen, its Temple bar, the
+fill bar's *Done filling*) moves its own page and nothing else, which is the
+behaviour those have always had.
+
+**AND BOTH DOORS OPEN THE SAME MODE.** `enterFillMode()` — the red button and the
+gap walk — now also opens what the Edit button would, for an author. Leaving the
+two opening different amounts of one mode would put the tab in a state the Edit
+button cannot describe. For a fill-grant holder `secPagesOpen()` is empty, so
+they get exactly what they had: the one page they asked for, with §145's walk
+carrying the mode across places on its own.
+
+### The regression §248 introduced, found by a check timing out
+
+**A FILL-GRANT HOLDER HAD NO WAY OUT WHILE GAPS REMAINED.** §248 removed the
+corner control `penBtn()` drew for a filler — right, because the bar carries the
+same control in the same row — and the bar only draws *Done filling* when
+`inFill && !total`; while anything is still missing it draws *Next gap* instead.
+So for one build a custodian with gaps left was in a mode they could only leave
+by changing tab. **§61, introduced by the section that was removing a
+duplicate.** It surfaced as `gap-fill.py` timing out on a control that was no
+longer drawn, not by anybody reading the code. The way out is drawn beside *Next
+gap* now, and `plan-edit-line.py` §1d asserts it in **both** states — gaps
+remaining, and none.
+
+**AND THE SWEEP MISSED IT BECAUSE THE SWEEP WAS FOR THE WRONG WORD.** §248 grep'd
+the checks for `.penbtn`; the filler's corner control is a `.fillcta`, and two
+presses and a paint assertion in `gap-fill.py` were keyed on
+`.pane .paneact .fillcta`. §51.11's instruction is to grep for the CONTROL that
+moved, and a control that moved has more than one class.
+
+**ONE MORE ASSERTION HAD TO CHANGE ITS MEANING**: `gap-fill.py` proved §145.14's
+specificity trap by comparing the bar's button with the corner's. With the corner
+gone that comparison is satisfied by both sides vanishing (§113.8), so it asserts
+the problem instead — a solid ground of its own, a real border, and ink that is
+not the tab row's.
+
+### Proof
+
+`checks/plan-edit-line.py` §1b–§1d. Falsified twice, because the first
+falsification was weak: against the §248 build the new assertions failed only
+because `secPagesOpen()` did not exist (4 red, and the check now **degrades**
+rather than throwing — §215: a suite that dies at the first trial reports zero
+failures for everything after it). So the BEHAVIOUR was broken instead, leaving
+the function in place: **8 red**, printing the old fault verbatim —
+`['Done editing', 'Edit', 'Edit']` across the three sections, and
+`['foundation', 'plan']` still open after a press that said it closed.
+
+Both directions asserted, and the rule proved to be doing the work: with
+`mayAuthorPage` stubbed false for one page, that page must drop out of the set.
+Twenty checks green, full `qa.py` sweep clean with ERRORS none, `test-authorize`
+454/0, `test-graph-diff` 126/0, build byte-identical.
+
+**RECORDED AND NOT FIXED**, both pre-existing and neither in this ask:
+
+* The screen asks `u_plan` for a supporting function's plan while §217 made the
+  SERVER ask `k_proj`. Measured across every person and every function on this
+  tenant the two never disagree, so nothing is broken today — but correcting it
+  would MOVE who may author a function's plan, which is a decision and not a
+  tidy-up.
+* On the SWOT in edit mode the remove × sits on its own line under each field.
+  §114.4 fixed exactly that with a selector scoped to TABLE cells
+  (`td:has(> .fld + .xbtn)`), and the SWOT's fields are in `<li>`s, so they were
+  never covered. Visible now only because one press opens the SWOT where before
+  you had to go and open it.

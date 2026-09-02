@@ -365,6 +365,40 @@ console errors (in this cloud environment, run it via a wrapper that points Play
   `node scripts/test-door.js <smo-password>` against a running dev-server
   after touching `api/auth.js` or `lib/auth.js` (it ends by rate-limiting the
   SMO on purpose — `DELETE FROM login_attempts;` clears it).
+- **ONE EDIT, ONE DONE (§249):** Islam — *"the edit opens all so I don't need
+  to edit each tab and then save for each — it's one edit and one save?"*
+  **WHAT WAS THERE WAS WORSE THAN THREE PRESSES**: `EDIT_PAGE` is per SECTION
+  and `leaveModes()` clears it on a TAB or DESTINATION change and **not on a
+  section one**, so opening Foundation and walking to SWOT left it OPEN with the
+  line reading `Edit`, and opening the Plan too gave `["foundation","plan"]`
+  whose one control could only close the section you stood on. *A control whose
+  word is true of one section and false of its neighbour is not a control
+  anybody can trust.* **THE MODE IS THE TAB'S** — one press opens every section,
+  one closes them all, same word everywhere. **ONLY WHAT THIS PERSON MAY
+  AUTHOR, and the first draft of this comment was FALSE**: a unit's three pages
+  all resolve to `unit_strat`, so over every person × unit **not one pair
+  differs** — opening all three IS the one grant. The filter earns its place on
+  a FUNCTION, whose Overview asks `k_found` (`fn_strat`) and Plan asks `u_plan`
+  (`unit_strat`, §248's kept pairing): two columns. **`SEC_PENS` IS A TABLE**, so
+  the keys and the pairs are one thing. **TWO ATTRIBUTES**: `data-page` is the
+  control's own page (the word, the direction, what checks press),
+  `data-pageset` is what one press moves — no set means one page, which is what
+  the group's pen and the fill bar's Done have always had. **BOTH DOORS OPEN THE
+  SAME MODE** (`enterFillMode` opens the author's set too, and is a no-op for a
+  filler). **AND §248 HAD TAKEN THE FILLER'S WAY OUT**: the bar draws
+  *Done filling* only at zero gaps, and §248 removed the corner copy — so a
+  custodian with anything missing could leave fill mode only by changing tab
+  (§61, introduced by the section removing a duplicate). Found by `gap-fill.py`
+  TIMING OUT, not by reading; drawn beside *Next gap* now and asserted in both
+  states. **AND THE §248 SWEEP MISSED IT BECAUSE IT GREP'D THE WRONG WORD** —
+  the filler's control is a `.fillcta`, not a `.penbtn`: §51.11 means grep for
+  the CONTROL, and a control that moved has more than one class. Falsified
+  twice, because the first was weak (absent function → 4 red; behaviour broken
+  → **8 red**, printing `['Done editing','Edit','Edit']` verbatim), and the
+  check DEGRADES rather than throwing (§215). **Recorded, not fixed**: the
+  screen still asks `u_plan` where §217 made the server ask `k_proj` (never
+  disagreeing on this tenant, and correcting it MOVES rights); and the SWOT's
+  remove × wraps, because §114.4's fix is scoped to `td` and these are `<li>`s.
 - **THE STRATEGY PEN LIVES ON THE SECTION LINE (§248):** Islam — *"the edit
   button of the plans can you make it in the same line of the foundation sowt
   and plan? … verifying that it's only in the startegy anyway."* **HALF OF IT
@@ -3995,7 +4029,11 @@ python3 checks/plan-edit-line.py # the strategy pen is ON the section line (§24
                                 # body; both ends (an author has it, a unit head and a CEO
                                 # do not, agreeing with the shared rule); the GROUP's own
                                 # Foundation and Temple untouched; one way out, not two; and
-                                # one line at six widths. 48 red on the build before
+                                # one line at six widths; and §249's one edit and one
+                                # done — the whole tab opening and closing on one
+                                # press, matching the shared rule both ways, and a
+                                # fill holder keeping a way out WHILE gaps remain.
+                                # 48 red on the §247 build, 8 on the §248 one
 python3 checks/plan-builder.py  # building a plan ON the platform: the door, the chooser,
                                 # the band's map, every row form asked of the DATA, and the
                                 # empty-state fixes — proved able to fail twice (§129)
@@ -4159,25 +4197,26 @@ prior sessions (on HR_ERP) accidentally reverted agreed-upon designs.
 ---
 
 *Last Updated: 2026-09-02 &mdash; **&sect;248: the strategy pen lives on the
-section line.** Islam &mdash; *"the edit button of the plans can you make it in
-the same line of the foundation sowt and plan? as it's a better placement for
-opening and savng? verifying that it's only in the startegy anyway and not
-anywhere else."* Checked first, and the check said more than the ask did: with
-the plan open the line ALREADY rendered a control &mdash; `Done filling`, the
-wrong word for the office and stripped of its button dress by `.tabs button`
-(&sect;145.14's own trap, on the one control it missed) &mdash; while the way IN
-was genuinely absent. The pen sat at four different heights by section and TWICE
-on a two-project function, one copy below the fold, both throwing one flag
-(&sect;94.15). Islam picked **A** and the **whole Strategy tab** from three
-placements drawn into the real page. One map now answers which page a section's
-pen is, which corrected a bug nobody had reported: a pillars function's Overview
-button named `foundation` while the page reads `capfoundation` since &sect;213,
-so it opened **0 fields**, rendering perfectly (&sect;96). The GROUP's Foundation
-and Temple are untouched &mdash; tabs with no section line &mdash; which is the
-second half of the ask answered. **NOT `Save`**, asked and answered: the platform
-writes as you type. `checks/plan-edit-line.py`: **48 red** on the build before;
-full `qa.py` sweep clean. **And the check sweep was most of the work**
-(&sect;51.11): fourteen files and `qa.py` pressed the moved pen.*
+section line; &sect;249: one edit, one done.** Islam &mdash; *"the edit button of
+the plans can you make it in the same line of the foundation sowt and plan?"*,
+then *"the edit opens all so I don't need to edit each tab and then save for each
+&mdash; it's one edit and one save?"* Both checked before building, and both
+times the measurement said more than the ask did. &sect;248: the line ALREADY
+carried the way out, as `Done filling` &mdash; the wrong word for the office and
+undressed by `.tabs button` (&sect;145.14's own trap) &mdash; while the way IN was
+absent; the pen sat at four heights and TWICE on a two-project function. &sect;249:
+the mode was per SECTION and `leaveModes()` does not clear it on a section change,
+so Foundation stayed open behind you with the line saying `Edit`, and two open
+modes shared one control that could close only the one you stood on. The mode is
+the TAB's now, filtered to what the person may author &mdash; and the claim that a
+unit's three sections can differ was measured and found FALSE, so opening all
+three is opening the one grant. **&sect;248 had also taken the fill holder's way
+out** while gaps remained (&sect;61, found by a check timing out, not by reading);
+restored and asserted. `checks/plan-edit-line.py`: 48 red on the build before
+&sect;248, 8 more with &sect;249's behaviour broken. Full `qa.py` sweep clean;
+454/0 and 126/0 on the server. **Both sweeps were most of the work** &mdash;
+&sect;248 grep'd `.penbtn` and the filler's control is a `.fillcta` (&sect;51.11:
+grep for the CONTROL, not one of its classes).*
 
 *Earlier: 2026-09-01 &mdash; **&sect;245: the functions are on the
 function half, in one list; &sect;246: the cycle note is a line somebody

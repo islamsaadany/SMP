@@ -2612,15 +2612,6 @@
      the SWOT), the walk itself finds the first place that owes. */
   function enterFillMode(page){
     if (page) EDIT_PAGE[page] = true;
-    /* §249: AND FOR AN AUTHOR THIS DOOR OPENS WHAT THE OTHER ONE DOES. The
-       red button and the section line are two ways into one mode, so leaving
-       them opening different amounts of it would put the tab in a state the
-       Edit button cannot describe. `secPagesOpen()` answers with the pages
-       this person may AUTHOR, so a fill-grant holder — who authors nothing —
-       gets exactly what they got before: the one page they asked for, and
-       §145's walk still carries the mode across places on its own. */
-    if (typeof secPagesOpen === "function")
-      secPagesOpen().forEach(function(p){ EDIT_PAGE[p] = true; });
     paint();
     /* THE WALK WAITS FOR THE PAINT IT NEEDS. On a real press, paint() is HELD
        until the click has landed (§30.1's CLICKING guard, released by a timer
@@ -3946,17 +3937,7 @@
     });
     document.querySelectorAll("[data-page]").forEach(function(b){
       b.addEventListener("click", function(){
-        /* §249: ONE EDIT, ONE DONE. `data-page` is the control's OWN page and
-           decides the direction — the word on the button and the state it is
-           reversing; `data-pageset` is what the press moves, which for the
-           Strategy line is every section of the tab this person may author
-           (§248's `secPagesOpen()`). A control with no set — the group's
-           Foundation pen, its Temple bar, the fill bar's Done — moves its own
-           page and nothing else, which is the behaviour they have always had. */
-        var k = b.dataset.page, on = !EDIT_PAGE[k];
-        var set = b.dataset.pageset ? b.dataset.pageset.split("|") : [k];
-        set.forEach(function(pg){ if (pg) EDIT_PAGE[pg] = on; });
-        paint();
+        var k = b.dataset.page; EDIT_PAGE[k] = !EDIT_PAGE[k]; paint();
       });
     });
     /* The plan as slides (§117): builds and saves, repaints nothing — a

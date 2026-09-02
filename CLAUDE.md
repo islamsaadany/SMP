@@ -499,6 +499,50 @@ console errors (in this cloud environment, run it via a wrapper that points Play
   different targets never touch. Proved able to fail: 11 red on the differ's
   pre-build, and end-to-end on a real Postgres the whole-graph flag fails
   with the reported sentence to the word.
+- **WHAT AUDITING §249 FOUND (§249.2, §249.3):** Islam, the same day —
+  *"double check if this made any problems with the input or the saving or the
+  reporting or the accessibility ... as the platform is live."* Two refusals,
+  one mine and one older than mine and made routine by it. **§249.2 — A VALUE
+  THAT IS STILL A GAP IS NOT A FILL**: §248 lets the unit be chosen before the
+  number, so `outTarget` holds `"%"` on the way to `"90%"` — non-blank and
+  still empty by the gap rule — and the first build **stamped** it (and
+  `gapMissing` treats a marked field as ANSWERED, so the row would have left
+  the count, the walk and Submit's refusal with an unusable target) and the
+  server **refused** it (no mark on either side, so the gap pass skipped the
+  field and it fell through to `unitPlan` — §184's shape, where one
+  unclassified row costs every fill in the same post). The mark is written
+  only for a value the platform can use; a gap moved to another gap is the
+  filler's, and nothing is gained by it. **§249.3 — KEY ORDER IS NOT CONTENT,
+  AND IT IS NOT ONLY `pend`**: §145 made the MARKS compare canonically because
+  jsonb reorders `{by, at}`; the same fault sits on the ROW. The gap pass
+  clears by ASSIGNING onto the stored clone, which APPENDS a key the stored row
+  lacked, and `same()` is stringify-based — so two fills of absent keys in ONE
+  post leave the clone spelling the row differently, the residual diff calls it
+  `unitPlan`, and the save is refused. **It predates §249 and was measured on
+  the build before it** (refused with both keys absent, accepted with both
+  present-but-empty); §249 makes it the COMMON case, because §248's five fields
+  are absent on every existing tactic and two of them are what a filler is now
+  asked for — *the outcome and its target, filled together, would have been
+  refused every time*. The repair is `sameCanon` generalised from the marks to
+  the row, and that guard is the safety argument: it only re-spells rows whose
+  CONTENT is already identical, asserted with a rename and a direction change
+  smuggled in beside the fills and still refused. **AND THE REST OF THE AUDIT
+  IS MEASUREMENT, NOT REASSURANCE**: round trip on a virgin Postgres 16, clean
+  slate, two tabs 24/0, eight concurrent saves none lost, the incremental
+  writer byte-identical — and the five §248 fields plus a mark on them
+  round-trip through jsonb (**the first comparison said FAIL and the COMPARISON
+  was wrong**, jsonb reordering the mark's keys: §145's lesson landing on the
+  person quoting it). Reporting unchanged and a figure still enters. Contrast
+  measured with the sweep's OWN function in both themes: Plan 0, Performance 0,
+  Reporting 6 — **and the pre-§249 build reports the same 6**, same selector,
+  same ratio. Reading mode is clean 1600 → 768; the pen's overflow below 1100
+  is byte-identical to the build before. **RECORDED, NOT FIXED**: in FILL mode
+  below 1000px the tactics table runs past its pane (20px at 1000, 120px at
+  900, 45px at 768) because the cell keeps `.tgtcell` wherever it holds
+  controls (§61) — it SCROLLS rather than clipping and every control was driven
+  and writes, but §158's rule is *fit, never "and it scrolls"*, and every way of
+  reclaiming the width changes a control's drawn shape, which wants a mockup
+  (rule 1c) rather than a quiet widening.
 - **THE OUTCOME AND ITS TARGET ARE OWED (§249, reversing §248's own
   exclusion):** Islam — *"the tactics outcome and target are not counting
   missing in the units plans. they should count as missing."* §248 left it
@@ -4195,7 +4239,50 @@ prior sessions (on HR_ERP) accidentally reverted agreed-upon designs.
 
 ---
 
-*Last Updated: 2026-09-02 &mdash; **&sect;249: the outcome and its target are
+*Last Updated: 2026-09-02 &mdash; **&sect;249.2 / &sect;249.3: what auditing
+&sect;249 found.** Islam, the same day: *"double check if this made any problems
+with the input or the saving or the reporting or the accessibility ... as the
+platform is live."* Two refusals, one mine and one older than mine and made
+routine by it. **&sect;249.2** &mdash; &sect;248 lets the unit be chosen before
+the number, so `outTarget` holds `"%"` on the way to `"90%"`: non-blank and
+still empty by the gap rule. The first build STAMPED it (and a marked field
+reads as ANSWERED, so the row would have left the count, the walk and Submit's
+refusal with an unusable target) and the server REFUSED it (no mark either
+side, so the gap pass skipped the field and it fell through to `unitPlan` &mdash;
+&sect;184's shape, where one unclassified row costs every fill in the same
+post). The mark is now written only for a value the platform can use, and a gap
+moved to another gap is the filler's. **&sect;249.3** &mdash; &sect;145 made the
+MARKS compare canonically because jsonb reorders `{by, at}`; the same fault sits
+on the ROW. The gap pass clears by ASSIGNING onto the stored clone, which
+APPENDS a key the stored row lacked, and `same()` is stringify-based &mdash; so
+two fills of absent keys in ONE post leave the clone spelling the row
+differently, the residual diff calls it `unitPlan`, and the save is refused.
+**It predates &sect;249 and was measured on the build before it**; &sect;249
+makes it the COMMON case, because &sect;248's five fields are absent on every
+existing tactic and two are now what a filler is asked for &mdash; *the outcome
+and its target, filled together, would have been refused every time.* The repair
+is `sameCanon` generalised to the row, and that guard is the safety argument:
+only rows whose CONTENT is already identical are re-spelled, asserted with a
+rename and a direction change smuggled in beside the fills and still refused.
+**THE REST IS MEASUREMENT, NOT REASSURANCE**: round trip on a virgin Postgres
+16, clean slate, two tabs 24/0, eight concurrent saves none lost, the
+incremental writer byte-identical, and the five &sect;248 fields plus a mark on
+them round-tripping through jsonb &mdash; **the first comparison said FAIL and
+the COMPARISON was wrong**, jsonb reordering the mark's keys, which is
+&sect;145's lesson landing on the person quoting it. Reporting unchanged, a
+figure still enters, no page error. Contrast measured with the sweep's OWN
+function in both themes: Plan 0, Performance 0, Reporting 6 &mdash; **and the
+pre-&sect;249 build reports the same 6**, same selector, same ratio. Reading
+mode clean 1600 &rarr; 768; the pen's overflow below 1100 byte-identical to
+before. 472/0 authoriser &middot; 126/0 differ &middot; full `qa.py` ERRORS
+none. **RECORDED, NOT FIXED**: in FILL mode below 1000px the tactics table runs
+past its pane (20px at 1000, 120px at 900, 45px at 768) because the cell keeps
+`.tgtcell` wherever it holds controls (&sect;61) &mdash; it SCROLLS rather than
+clipping and every control was driven and writes, but &sect;158's rule is *fit,
+never "and it scrolls"*, and every way of reclaiming the width changes a
+control's drawn shape, which wants a mockup (rule 1c).*
+
+*Earlier the same day: **&sect;249: the outcome and its target are
 owed.** Islam, on the shipped &sect;248: *"the tactics outcome and target are
 not counting missing in the units plans. they should count as missing."* That
 section left it undone deliberately and said whose call it was &mdash; *"one

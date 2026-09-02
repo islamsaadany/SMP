@@ -2626,6 +2626,92 @@ console.log("\n26 \u00b7 a tactic's outcome and its target are owed (\u00a7249)"
   });
   check("\u00a7249 REFUSED: nor is the compile rule", !r.ok, "was ALLOWED");
 
+  /* \u00a7249.2: THE UNIT-FIRST WALK, END TO END. \u00a7248 lets what a thing is
+     measured in be chosen before how much of it, so `outTarget` legitimately
+     holds "%" on the way to "90%" \u2014 a value that is non-blank and STILL a gap.
+     The first build of \u00a7249 refused exactly that save, which is the CX
+     refusal's shape (\u00a7184): one unclassified row costs every fill posted with
+     it. Each step is asserted, because the walk is only usable if all of them
+     land. */
+  let w = base(); T(w).outTarget = "%";
+  r = fromStored(base(), CUST, function (i) { T(i).outTarget = "%"; });
+  check("\u00a7249.2 FILL: the unit may be picked before the number", r.ok,
+        (r.refusals || []).join(" / "));
+  r = fromStored(w, CUST, function (i) {
+    const t = T(i); t.outTarget = "90%"; t.pend = { outTarget: MARK3 };
+  });
+  check("\u00a7249.2 FILL: ...and the number then joins it", r.ok,
+        (r.refusals || []).join(" / "));
+  w = base(); T(w).outTarget = "90%"; T(w).pend = { outTarget: MARK3 };
+  r = fromStored(w, CUST, function (i) {
+    const t = T(i); t.outTarget = "%"; delete t.pend;
+  });
+  check("\u00a7249.2 FILL: ...and taking the number back off is theirs too", r.ok,
+        (r.refusals || []).join(" / "));
+  /* AND IT REACHES ONLY WHAT IS ALREADY A GAP. The widening is "a gap moved to
+     another gap"; a value the platform CAN use is settled and stays the
+     office's, or this would be a hole in \u00a794 rather than a fill. */
+  w = base(); T(w).owner = "Somebody Accountable";
+  r = fromStored(w, CUST, function (i) { T(i).owner = "Somebody Else"; });
+  check("\u00a7249.2 REFUSED: a settled value is not 'still a gap'", !r.ok, "was ALLOWED");
+
+  /* AND THE COUNT IS NOT QUIETENED BY THE MARK. `gapMissing` treats a pending
+     field as answered; a mark sitting on a value that is still empty must not
+     buy that, or a row leaves the count, the walk and Submit's refusal with
+     its target unusable. */
+  check("\u00a7249.2: an unusable target is counted even when marked",
+        R.gapMissing("tactic", { owner: "A", q1: 1, outcome: "O",
+                                 outTarget: "%", pend: { outTarget: MARK3 } })
+          .indexOf("outTarget") > -1,
+        R.gapMissing("tactic", { owner: "A", q1: 1, outcome: "O",
+                                 outTarget: "%", pend: { outTarget: MARK3 } }));
+  check("\u00a7249.2: ...and a usable one marked is not",
+        R.gapMissing("tactic", { owner: "A", q1: 1, outcome: "O",
+                                 outTarget: "90%", pend: { outTarget: MARK3 } })
+          .indexOf("outTarget") === -1);
+
+  /* \u00a7249.3: TWO FILLS IN ONE POST, WHERE NEITHER KEY EXISTS YET. The gap
+     pass clears what it classifies by ASSIGNING onto the stored clone, which
+     APPENDS a key the stored row did not have \u2014 and `same()` is
+     stringify-based, so two appends in a different order from the incoming
+     row's leave the clone spelling the same row differently. The residual diff
+     then sees a change it cannot attribute, calls it `unitPlan`, and refuses
+     the whole save with every fill in it (\u00a7184).
+
+     IT PREDATES \u00a7249 and is asserted here because \u00a7249 makes it the COMMON
+     case: \u00a7248's five fields are absent on every tactic written before them,
+     and two of them are now what a filler is asked for. Measured on the build
+     before \u00a7249: the same two fills are REFUSED with both keys absent and
+     ACCEPTED with both present-but-empty. */
+  w = base();
+  const T2 = function (i) { return i.units[UK].items[0].tactics[0]; };
+  delete T2(w).outcome; delete T2(w).outTarget; delete T2(w).pend;
+  r = fromStored(w, CUST, function (i) {
+    const t = T2(i);
+    t.outcome = "A thing"; t.outTarget = "6 #";
+    t.pend = { outcome: MARK3, outTarget: MARK3 };
+  });
+  check("\u00a7249.3 FILL: the outcome and its target in ONE post", r.ok,
+        (r.refusals || []).join(" / "));
+  /* AND THE SAME POST WITH ONE FIELD THE FILLER MAY NOT TOUCH IS STILL
+     REFUSED \u2014 the re-spelling only ever runs on rows whose CONTENT is already
+     identical, so it can never mask a real change. Asserted, because a fix
+     that made every save pass would satisfy the line above. */
+  r = fromStored(w, CUST, function (i) {
+    const t = T2(i);
+    t.outcome = "A thing"; t.outTarget = "6 #"; t.name = "Renamed by a filler";
+    t.pend = { outcome: MARK3, outTarget: MARK3 };
+  });
+  check("\u00a7249.3 REFUSED: ...but not with a rename smuggled in beside them",
+        !r.ok, "was ALLOWED");
+  r = fromStored(w, CUST, function (i) {
+    const t = T2(i);
+    t.outcome = "A thing"; t.outTarget = "6 #"; t.outDir = "\u2264";
+    t.pend = { outcome: MARK3, outTarget: MARK3 };
+  });
+  check("\u00a7249.3 REFUSED: ...nor with the direction changed beside them",
+        !r.ok, "was ALLOWED");
+
   /* AND THE OFFICE AUTHORS ALL FOUR FREELY \u2014 locking something down proves
      nothing unless the right person stayed open (\u00a7102). */
   r = fromStored(base(), "smo", function (i) {

@@ -368,6 +368,43 @@ with sync_playwright() as p:
     left = pg.evaluate("""(w) => SMPRules.gapMissing(
       "tactic", UNITS[w.unit].items[0].tactics[0])""", who)
     ck("...so neither is still owed", "outcome" not in left and "outTarget" not in left, left)
+
+    # §249.2: THE UNIT MAY BE PICKED BEFORE THE NUMBER, AND THAT IS NOT A FILL.
+    # §248 lets what a thing is measured in be chosen first, so `outTarget`
+    # holds "%" on the way to "90%" — non-blank, and still a gap. Two things
+    # must be true of that half-answer, and the first build of §249 got both
+    # wrong: the mark must NOT be stamped (a marked field reads as answered, so
+    # the row would leave the count, the walk and Submit's refusal with its
+    # target unusable), and the save must still be the filler's (it was
+    # refused, which is the CX refusal's shape — one unclassified row costs
+    # every fill posted with it, §184).
+    half = pg.evaluate("""(w) => {
+      const t = UNITS[w.unit].items[0].tactics[0];
+      delete t.outTarget; if (t.pend) delete t.pend.outTarget;
+      paint();
+      const grid = document.querySelector('.pane td.tgtcell .tgrid');
+      const uni = [...grid.querySelectorAll('select')].filter(
+        s => [...s.options].some(o => o.text === 'M EGP'))[0];
+      if (!uni) return { nouni: true };
+      uni.value = '%'; uni.dispatchEvent(new Event('change', { bubbles: true }));
+      return { stored: t.outTarget, marked: !!(t.pend && t.pend.outTarget),
+               missing: SMPRules.gapMissing('tactic', t).indexOf('outTarget') > -1 };
+    }""", who)
+    ck("a unit picked before the number is kept", half.get("stored") == "%", half)
+    ck("...and is NOT stamped as a fill", half.get("marked") is False, half)
+    ck("...and the row still says the target is missing", half.get("missing"), half)
+    # PUT THE STATE BACK (§94.2's neighbour). This section deliberately leaves
+    # the row holding a half-answer, and the sections below were written
+    # against a row that owes nothing here — a check that changes the world
+    # and walks away makes the NEXT one measure something nobody chose.
+    pg.evaluate("""(w) => {
+      const t = UNITS[w.unit].items[0].tactics[0];
+      t.outcome = "Something measurable"; t.outTarget = "6 #";
+      if (t.pend) { delete t.pend.outcome; delete t.pend.outTarget;
+                    if (!Object.keys(t.pend).length) delete t.pend; }
+      paint();
+    }""", who)
+    pg.wait_for_timeout(300)
     pg.click('.pane .paneact .fdone[data-page="plan"]'); pg.wait_for_timeout(300)
 
     # ── 9 · THE COUNTS THAT FIND YOU (§145.14) ──────────────────────────
@@ -457,7 +494,15 @@ with sync_playwright() as p:
       if (inp.tagName === "SELECT") {
         const o = [...inp.options].filter(o => o.value)[0];
         if (inp.multiple) o.selected = true; else inp.value = o.value;
-      } else inp.value = "Somebody Named";
+      /* §249: A TARGET IS ANSWERED WITH A NUMBER. The outcome's target is four
+         controls in one cell and the number is one of them, so a trial that
+         types a NAME into it writes a value the platform cannot read — the
+         field stays a gap, the count rightly does not move, and the check
+         reports a working build as broken. The lesson is the one this trial's
+         own comment already records for a picker: answer the control you
+         landed on. */
+      } else if (inp.closest(".tgrid")) inp.value = "6";
+      else inp.value = "Somebody Named";
       inp.dispatchEvent(new Event('change', { bubbles: true }));
       const after = chip.textContent.trim();
       const totalWord = document.querySelector('[data-gapband] .secmiss').textContent;

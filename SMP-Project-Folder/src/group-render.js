@@ -2965,6 +2965,19 @@ function gapCell(page, acKey, row, field, opts){
         if (opts.del) delete row[field]; else row[field] = empty();
         gapLift(row, field);
       }
+      /* §249.2: A VALUE THAT IS STILL A GAP IS NOT A FILL, AND MUST NOT WEAR
+         THE MARK. §248 lets the unit be chosen before the number, so a filler
+         picking "%" writes a field that is non-blank and still holds nothing
+         the platform can use — and `gapMissing` treats a MARKED field as
+         answered, so stamping here would take the row out of the count, out
+         of the walk and out of Submit's refusal while its target was still
+         unusable. The value is kept (the unit survives, which is the whole
+         point of being able to pick it first) and the mark is not written.
+         `gapEmptyValue` is the same test the count and the server ask, so
+         the three cannot disagree about one string (§42, §205). */
+      else if (SMPRules.gapEmptyValue(field, nv)) {
+        row[field] = nv; gapLift(row, field);
+      }
       else { row[field] = nv; gapStamp(row, field); }
       gapBandRefresh();
       /* §192.4: `gapwalk` ONLY WHERE THE FIELD IS ACTUALLY COUNTED. The walk

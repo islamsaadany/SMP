@@ -27479,3 +27479,89 @@ to a seven-column slide is a layout change and wants a mockup (rule 1c) rather
 than a quiet widening. And `plan-wrap.py` fails *"a unit's Plan @1100 nothing is
 cut off"* with five clipped fields — **reproduced on the untouched build**, so
 it is not this change and is not fixed here.
+
+---
+
+## §249.2 / §249.3 — WHAT THE AUDIT OF §249 FOUND (2026-09-02)
+
+Islam, the same day: *"I want you to double check if this bill made any
+problems with the input or the saving or the reporting or the accessibility or
+any glitch or errors as the platform is life."* Right to ask, and it found two
+refusals — one of them mine, one of them older than mine and made routine by it.
+
+**§249.2 — A VALUE THAT IS STILL A GAP IS NOT A FILL.** §248 lets what a thing
+is measured in be chosen before how much of it: `outTarget` holds `"%"` for as
+long as it takes to type 90. That value is **non-blank and still empty by the
+gap rule**, and §249's first build got both halves of it wrong.
+
+  · The screen STAMPED it, and `gapMissing` treats a marked field as answered —
+    so the row would have left the count, the walk and Submit's refusal with
+    its target unusable. The mark is now written only when the value is one the
+    platform can use; the value itself is kept, which is the whole point of
+    being able to pick the unit first.
+  · The server REFUSED it: with no mark on either side the gap pass skipped the
+    field and the change fell through to `unitPlan`. Measured against the real
+    authoriser: *"A plan is corrected by the SMO."* **That is the CX refusal's
+    shape (§184) — a save is all or nothing, so one unclassified row costs
+    every fill posted with it.** A gap moved to another gap is now the
+    filler's: nothing is gained by it (both sides are values the platform
+    cannot use, so the row is still counted, still unscored, still refuses
+    Submit), and what it buys is that the half-answer can be saved at all.
+
+**§249.3 — KEY ORDER IS NOT CONTENT, AND IT IS NOT ONLY `pend`.** §145 recorded
+that Postgres jsonb stores `{by, at}` back as `{at, by}` and that marks must
+therefore be compared canonically. The same fault sits one level up, on the
+ROW. The gap pass clears what it classifies by ASSIGNING onto the stored clone,
+which **appends** any key the stored row did not have, while the incoming row
+carries those keys in its own order — and `same()` is stringify-based. Fill two
+fields whose keys are absent from the stored row **in one post** and the clone
+ends up spelling the same row differently: the residual diff sees a change it
+cannot attribute, calls it `unitPlan`, and refuses the save.
+
+**IT PREDATES §249 AND WAS MEASURED ON THE BUILD BEFORE IT** — a filler writing
+an owner and a collaborator together is REFUSED with both keys absent and
+ACCEPTED with both present-but-empty. It was rare because an imported plan
+writes `""` for the fields it does not fill, so the keys usually exist. **§249
+makes it the common case**: §248's five fields are absent on every tactic
+written before them, and two of them are now exactly what a filler is asked
+for — so *the outcome and its target, filled together, would have been refused
+every time.*
+
+The repair is the canonical comparison generalised from the marks to the row,
+and `sameCanon` is the whole safety argument: it only ever re-spells rows whose
+CONTENT is already identical, so a real difference anywhere leaves it alone.
+Asserted at both ends — the two fills land, and the same post with a rename or
+a changed direction smuggled in beside them is still refused.
+
+**WHAT THE REST OF THE AUDIT MEASURED, and it is the part worth keeping.**
+
+  · **Saving, on a real Postgres 16.** Round trip on a virgin database PASS ·
+    clean-slate parity PASS · two tabs 24/0 · eight concurrent saves, none lost
+    · the incremental writer byte-identical to the full rewrite. The five §248
+    fields AND a pending mark on them round-trip through jsonb (the first
+    comparison said FAIL and **the comparison was wrong** — jsonb reorders the
+    mark's keys, which is §145's own lesson landing on the person quoting it).
+  · **Reporting.** A figure still enters, the notes and tallies are unchanged,
+    no page error. `report-saves` fails only on *"nothing threw"* with a
+    service-worker MIME error from the check's own stub — **identical on the
+    pre-§249 build**.
+  · **Accessibility.** Every surface the red word newly appears on, measured
+    with the contrast sweep's OWN function in both themes: Plan **0**,
+    Performance **0**, Reporting **6** — and the pre-§249 build reports the
+    same **6**, same selector (`.rtally.full`), same ratio (4.27). *This change
+    adds no contrast failure.*
+  · **Widths.** Reading mode is clean at 1600 → 768: nothing cut, nothing
+    scrolls. The pen overflows below 1100 and that is byte-identical to the
+    build before (832/762px at every width) — pre-existing.
+
+**RECORDED, NOT FIXED — FILL MODE BELOW 1000px.** The Target cell keeps
+`.tgtcell` wherever it holds controls (§61: the fold must not take the only way
+to set a target off the screen), so in FILL mode the tactics table now runs past
+its pane where before §249 it did not: **20px at 1000, 120px at 900, 45px at
+768.** The box scrolls rather than clipping and the controls were driven at all
+three widths — reachable, clickable and they write — so nothing is unreachable,
+but §158's rule is *fit, never "and it scrolls"*. Every way of reclaiming it
+changes the drawn shape of a control (a single-column grid, a narrower `--tw`,
+dropping the two read-only facts), which is a design decision and wants a
+mockup (rule 1c) rather than a quiet widening. Reading mode, which is what most
+people see, is untouched.

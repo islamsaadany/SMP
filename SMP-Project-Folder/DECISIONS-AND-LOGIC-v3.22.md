@@ -27981,3 +27981,129 @@ records the same for the plan slides). And a deck **already open on a
 projector** still does not redraw while somebody saves in another tab: put to
 Islam and deliberately left, because slides changing under a presenter
 mid-sentence is worse than a deck that is right as of when it opened.
+
+---
+
+## §253 — A TITLE IS ONE LINE, AND THE BOX WAS THE ONLY PLACE THAT SAID OTHERWISE (2026-09-02)
+
+Islam, with a screenshot of a client's plan and the pen open: a tactic's name
+box **643px tall holding one sentence**, the description under it 280px, the
+outcome beside it 130px, and the eye and the × floating in the middle of the
+empty space. *"check this visual issue."*
+
+**NOTHING WAS WRONG WITH THE BOX, AND THAT WAS WORTH ESTABLISHING BEFORE
+TOUCHING A LAYOUT.** §189 sizes a growing box to what is IN it — that is the
+whole of what it does — and what was in it was **blank lines**. Reproduced on
+the demo before a line was written: thirty of them make a **643px box and a
+962px row**, which is his screenshot to the pixel, and the description and the
+outcome fall out of the same arithmetic at twelve and five. Every plausible
+layout cause was disproved by that one measurement: the columns were right, the
+pane was right, nothing was stretching anything.
+
+**AND THEY ARE INVISIBLE EVERYWHERE ELSE, WHICH IS WHY THIS LOOKED LIKE A
+SUDDEN FAULT AND IS NOT ONE.** The same row in reading mode measures **42px**,
+because HTML collapses a line break inside a `<span>`; the deck prints these
+fields on one line; both workbooks write them into one cell. So a value can
+carry thirty blank lines for weeks and **only the pen will ever show it** — the
+data was quietly wrong and the screen that finally said so was the screen
+somebody was working in.
+
+**WHERE THEY CAME FROM — TWO ROUTES, BOTH MEASURED.** Enter added one per press
+and did nothing else visible until §229 stopped it three days ago, so somebody
+expecting *save* or *next field* presses it again, and again; §229's own text
+says *"nothing stored is scrubbed"*, and this is the bill for that sentence. And
+a **PASTE**, which §229 does not reach and which nothing intercepts: a paste of
+two lines and three blank ones was measured storing `"Line one\nLine two\n\n\n"`
+verbatim, on today's build, before this change.
+
+**THE RULE IS ABOUT THE VALUE, SO IT LIVES IN `lib/rules.js` (§42).** Three
+places need the same answer to *what may live in a one-line field* — the
+builder that draws the box, the commit that stores what was typed, and the heal
+of what a tenant already holds — and three copies of it is how the box comes to
+show something the save did not store. `SMPRules.oneLine()`: a run of
+whitespace containing a line break becomes ONE SPACE, and the ends are trimmed.
+
+**IT KEEPS EVERY WORD, and that is asserted rather than assumed.** Two
+paragraphs become one sentence-and-a-half; blank lines vanish; no character of
+anybody's text is lost, and ordinary spacing is left exactly as typed (§96.2) —
+this is about line breaks, not about tidying somebody's spelling out.
+
+**IT IS NOT FOR EVERY BOX, AND THE SEPARATION ALREADY EXISTED.** `.grow` is
+§189's mark for *one line of prose*, and `rows="2"` is the paragraph box — an
+aspiration, an end in mind, a capability's definition, a reporter's note.
+§229 drew exactly that line for Enter and this uses the same one, so there is no
+second list of fields to keep up to date (§104.7) and a paragraph box is
+untouched at both ends of the change.
+
+**THREE TOUCHES, EACH WITH ITS OWN REASON — never one mechanism doing three
+jobs:**
+
+1. **`textOr()` DRAWS ONE LINE, whatever is stored.** This is what closes the
+   fault for good, because it does not care how the breaks got there: a value
+   typed before §229, pasted, or arriving in an Excel cell with an alt-enter
+   all draw as the one line every other surface already prints (§53.5). It
+   **stores nothing** — the stored value is untouched until somebody commits
+   that box.
+2. **THE COMMIT STORES ONE LINE.** At the `data-fld` door every bound field
+   goes through, so a paste is cleaned where it is saved rather than in a list
+   of call sites. **Written back into the box**, never only into the graph:
+   seeing the lines close up is the explanation (§124), and a box left showing
+   what was NOT stored is §96 with the sign reversed.
+3. **THE HEAL OF WHAT A TENANT ALREADY HOLDS**, once, recorded in the same
+   registry the SQL migrations use (`040-a-title-is-one-line.js`). Without it
+   the workbook download, the archive and every export go on carrying the
+   breaks invisibly until somebody happens to edit that exact field.
+
+**IT COULD NOT BE A `.sql` FILE, for §43.1's reason in a different shape.** A
+supporting function's whole plan is ONE JSON blob in `functions.extra` (§118)
+and a tactic's description and outcome ride in `tactics.extra` (§248), so the
+fields sit at four depths in three shapes — and a blanket replace over the
+blob's text would flatten a capability's definition and an aspiration, which are
+paragraphs and must keep their breaks. It reads the graph, cleans the named
+fields, writes it back, and **writes nothing at all when there is nothing to
+clean**, which is every fresh deployment.
+
+**THE WALK IS STRUCTURAL, NEVER "ANY KEY CALLED `name`".** The graph is full of
+names that are not plan prose — a person, a unit, a band, a weighting factor —
+and a walk by key alone would reach every one of them. A unit and a pillars
+function go through **one** walk, because they are one plan shape (§59) and
+healing the two halves differently is A15 exactly.
+
+**ARCHIVES ARE DELIBERATELY NOT TOUCHED.** `plan_archives` is the record of what
+was uploaded or replaced (§22, §49.2), and a record somebody tidied is no longer
+the record. A restored archive draws as one line like everything else and is
+cleaned the moment it is committed.
+
+**PROVED ABLE TO FAIL, IN BOTH DIRECTIONS (§94.5, §113.8).**
+`scripts/test-one-line-heal.js` runs against a real Postgres 16 through the same
+`ensureReady` a deployment runs it through, on the worked example rather than on
+hand-built rows — a guessed row shape fails as a database error rather than as a
+finding. With the heal stubbed out: **14 red**. With it made over-eager, so that
+it flattens every string it can see: **3 red**, and all three are the
+paragraphs — *the worse of the two failures, and the one a check that only
+looked for one-line titles would have applauded.* It also asserts the heal runs
+**once**: a break typed back in afterwards is still there on the next boot,
+because the registry row is what stops it and not the absence of work to do.
+
+`checks/one-line-titles.py` measures the screen, on **a unit and a function**
+(A15), and asserts **AGREEMENT rather than a pixel count** (§94.8): every box is
+measured against a clone of itself holding the same words with no breaks, so a
+later change to the metrics stays green and a build that sizes to the blank
+lines does not. It reports **5 red** against the shipped pre-§253 file,
+including `'stored': 'Line one\nLine two\n\n\n'` — the paste, verbatim.
+
+**THE REST IS MEASUREMENT.** Full `qa.py` sweep: ERRORS none. `test-authorize`
+472/0, `test-graph-diff` 126/0, `test-kb-audience` clear. On virgin Postgres
+16 databases: round trip PASS (clean slate, deep-equal and fixed point), clean
+parity PASS, two tabs 24/0. `plan-fields`, `enter-commits`, `plan-edit-head`,
+`fn-ko-edit` and `gap-fill` all green. `plan-wrap.py`'s one failure — five
+fields clipped at 1100 — **reproduces identically on the pre-§253 build** and is
+§249.2's recorded item, not this.
+
+**RECORDED, NOT DONE.** A workbook cell holding an alt-enter INSIDE a title
+still arrives with it (the reader trims the ends of every cell, so the thirty
+trailing lines cannot arrive that way, but one break in the middle can). It
+draws as one line and is cleaned the moment anybody commits it, so it is
+invisible; cleaning it at the upload door instead would mean naming the prose
+fields a third time, in a reader that must not flatten a SWOT item or an
+aspiration — its own change, with its own check.

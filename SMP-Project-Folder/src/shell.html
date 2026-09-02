@@ -3898,7 +3898,23 @@
            the rest — silently, which is the shape §96 exists to stop. Asked of
            the element rather than of the setter: `multiple` is undefined on an
            input and on a textarea, so every other field is untouched. */
+        /* AND A ONE-LINE BOX STORES ONE LINE (§253). §229 stopped Enter from
+           putting a break in here; nothing stopped a PASTE, and a paste of
+           four lines was measured storing them verbatim — after which the box
+           is as tall as what was pasted and every other surface goes on
+           printing the value on one line. Cleaned at the door it is stored
+           through, so there is no list of fields to keep up to date: the
+           `.grow` class IS the decision that this field is one line of prose,
+           and a rows-2 paragraph box never reaches this branch.
+
+           WRITTEN BACK INTO THE BOX, never only into the graph — seeing the
+           lines close up is the whole explanation (§124), and a box left
+           showing what was NOT stored is §96 with the sign reversed. */
         if (fn) {
+          if (el.classList.contains("grow") && typeof SMPRules !== "undefined") {
+            var one = SMPRules.oneLine(el.value);
+            if (one !== el.value) { el.value = one; fitGrow(el); }
+          }
           fn(el.multiple
             ? Array.prototype.filter.call(el.options, function(o){ return o.selected; })
                 .map(function(o){ return o.value; })
@@ -3915,10 +3931,9 @@
          `input` where a repaint would destroy the field being typed into
          (§35). Height is cleared first, or the box can only ever grow. */
       if (el.tagName === "TEXTAREA") {
-        var fit = function(){
-          el.style.height = "auto";
-          el.style.height = (el.scrollHeight + 2) + "px";
-        };
+        /* §253: through `fitGrow`, the one sizer the paint also uses — the
+           three lines were written twice and had to stay in step by hand. */
+        var fit = function(){ fitGrow(el); };
         el.addEventListener("input", fit);
         fit();
         /* §229: ENTER COMMITS A ONE-LINE PROSE BOX. §189's own text promised

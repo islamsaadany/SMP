@@ -2386,18 +2386,32 @@ function fieldOr(page, value, cls, setter){
    beside SEARCHSEL.wire(), because these are rebuilt on every paint and a
    height measured before the row is laid out is a height measured against
    nothing. */
+/* ONE SIZER, asked by the paint and by every keystroke (§53.5). The two were
+   the same three lines written twice, and a box sized one way on arrival and
+   another way while being typed into is exactly the drift that produces "it
+   was fine until I touched it". */
+function fitGrow(t){
+  t.style.height = "auto";
+  t.style.height = (t.scrollHeight + 2) + "px";
+}
 function growFields(root){
-  (root || document).querySelectorAll("textarea.fld.grow").forEach(function(t){
-    t.style.height = "auto";
-    t.style.height = (t.scrollHeight + 2) + "px";
-  });
+  (root || document).querySelectorAll("textarea.fld.grow").forEach(fitGrow);
 }
 function textOr(page, value, cls, setter){
   if (!EDIT_PAGE[page] || !setter)
     return '<span class="' + (cls || '') + '">' + esc(value) + '</span>';
   var i = FIELDS.push(setter) - 1;
+  /* DRAWN AS ONE LINE, WHATEVER IS STORED (§253). The box is sized to what is
+     in it, so a value carrying blank lines — typed before §229 stopped Enter,
+     pasted, or arrived in a workbook cell — drew a 643px box holding one
+     sentence, with the eye and the × floating in the middle of the empty
+     space. Every other surface already prints this value on one line, so the
+     box now says what the page beside it says (§53.5).
+
+     IT STORES NOTHING. The stored value is untouched until somebody commits
+     this box; the heal below is what corrects the tenant's own copy. */
   return '<textarea class="fld grow ' + (cls || '') + '" data-fld="' + i +
-    '" rows="1">' + esc(value) + '</textarea>';
+    '" rows="1">' + esc(SMPRules.oneLine(value)) + '</textarea>';
 }
 function inputOr(page, value, cls, setter){
   if (!EDIT_PAGE[page] || !setter) return '<span class="' + (cls || '') + '">' + esc(value) + '</span>';

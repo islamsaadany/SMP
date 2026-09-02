@@ -365,6 +365,47 @@ console errors (in this cloud environment, run it via a wrapper that points Play
   `node scripts/test-door.js <smo-password>` against a running dev-server
   after touching `api/auth.js` or `lib/auth.js` (it ends by rate-limiting the
   SMO on purpose — `DELETE FROM login_attempts;` clears it).
+- **A TITLE IS ONE LINE, AND THE BOX WAS THE ONLY PLACE THAT SAID OTHERWISE
+  (§253):** Islam, with a screenshot of a client's plan and the pen open — a
+  tactic's name box **643px tall holding one sentence**. **NOTHING WAS WRONG
+  WITH THE BOX**: §189 sizes a growing box to what is IN it, and what was in it
+  was **blank lines** — thirty of them reproduce his screenshot to the pixel
+  (643px box, 962px row). **INVISIBLE EVERYWHERE ELSE**, which is why it reads
+  as a sudden layout fault: the same row is **42px** in reading mode because
+  HTML collapses a break, and the deck and both workbooks print these on one
+  line — so a value carries them for weeks and only the pen shows it. **TWO
+  ROUTES, BOTH MEASURED**: Enter added one per press until §229 stopped it
+  (*"nothing stored is scrubbed"* — this is that bill), and a **paste**, which
+  §229 does not reach and which stored `"Line one\nLine two\n\n\n"` verbatim.
+  **THE RULE IS ABOUT THE VALUE, SO IT IS `SMPRules.oneLine()`** (§42): a run of
+  whitespace containing a break becomes ONE SPACE, ends trimmed, **every word
+  kept** and ordinary spacing untouched (§96.2). **`.grow` IS THE DECISION** —
+  §229 drew that line for Enter and this uses the same one, so a rows-2
+  paragraph box (an aspiration, a definition, a note) is untouched and there is
+  no second list to forget (§104.7). **THREE TOUCHES, THREE REASONS**:
+  `textOr()` DRAWS one line whatever is stored (which closes it for good — it
+  does not care how the breaks got there) and stores nothing; the **commit**
+  stores one line at the one `data-fld` door, **written back into the box**
+  because seeing the lines close up is the explanation (§124); and a **one-off
+  heal** (`040-a-title-is-one-line.js`) of what a tenant already holds, or the
+  workbook, the archive and every export go on carrying them. **IT COULD NOT BE
+  A `.sql` FILE** (§43.1's reason, different shape): a pillars function's plan
+  is one JSON blob (§118) and a tactic's description and outcome ride in
+  `extra` (§248), so the fields sit at four depths in three shapes — and a
+  blanket replace over the blob would flatten the paragraphs. **THE WALK IS
+  STRUCTURAL, never "any key called `name`"** (the graph is full of names that
+  are not plan prose), and a unit and a pillars function go through ONE walk
+  (§59, A15). **ARCHIVES ARE DELIBERATELY NOT TOUCHED** (§22, §49.2: a record
+  somebody tidied is no longer the record). Proved able to fail both ways —
+  heal stubbed **14 red**, heal made over-eager **3 red and all three are the
+  paragraphs**, which is the worse failure and the one a one-sided check would
+  have applauded — and `checks/one-line-titles.py` is **5 red** on the shipped
+  build, asserting AGREEMENT with a break-free clone of each box rather than a
+  pixel count (§94.8). **RECORDED, NOT DONE**: an alt-enter INSIDE a workbook
+  cell still arrives (the reader trims the ends, so the thirty trailing lines
+  cannot), draws as one line and is cleaned on the next commit; cleaning it at
+  the upload door would name the prose fields a third time in a reader that
+  must not flatten a SWOT item.
 - **THE PRESENTATION READS WHAT WAS REPORTED (§252):** Islam — *"presentations
   doesn't change when the plan performance is done"*, and then *"the
   presentation should update on either save draft or submit."* **THE PROPOSED
@@ -4199,6 +4240,13 @@ python3 checks/ytd-proration.py # YTD is measured against the part of the year t
                                 # score; and every deck row is counted against its own
                                 # header, because dropping a column from a header and not
                                 # from the row is this change's easiest mistake
+python3 checks/one-line-titles.py # a title is one line and the box says so (§253):
+                                # a stored value carrying blank lines drawn as ONE
+                                # line on a unit AND a function, asserted as
+                                # agreement with a break-free clone of each box and
+                                # never as a pixel count; a pasted value read back
+                                # from the DATA; and both ends — a rows-2 paragraph
+                                # box keeps its breaks (5 red on the shipped build)
 python3 checks/deck-outcome.py  # the presentation reads what was reported (§252): the
                                 # tactics slide's nine columns, its figures asserted as
                                 # AGREEMENT with the Performance page rather than as
@@ -4373,6 +4421,10 @@ it must go red):
 The mail half needs a database and a password (it spawns its own dev-server):
 `DATABASE_URL=… node scripts/test-email-greeting.js <smo-password>` (§142.6), and
 `DATABASE_URL=… node scripts/test-test-copies.js <smo-password>` (§146).
+The one-off heal of a tenant's stored titles needs a database (it runs through
+the real `ensureReady` on the worked example, and asserts BOTH ends — the
+titles healed, the paragraphs untouched):
+`DATABASE_URL=… node scripts/test-one-line-heal.js` (§253).
 In this cloud image, run any sweep through the wrapper so Playwright finds the
 Chromium that is already here:
 `SMP_CHROME=/opt/pw-browsers/chromium-1194/chrome-linux/chrome python3 qa-run.py <file>`.
@@ -4406,7 +4458,42 @@ prior sessions (on HR_ERP) accidentally reverted agreed-upon designs.
 
 ---
 
-*Last Updated: 2026-09-02 &mdash; **&sect;252: the presentation reads what was
+*Last Updated: 2026-09-02 &mdash; **&sect;253: a title is one line, and the box
+was the only place that said otherwise.** Islam, with a screenshot of a client's
+plan and the pen open: a tactic's name box **643px tall holding one sentence**,
+the description and the outcome the same, the eye and the &times; floating in
+the middle of the empty space. **NOTHING WAS WRONG WITH THE BOX** &mdash;
+&sect;189 sizes a growing box to what is IN it, and what was in it was **blank
+lines**: thirty of them reproduce his screenshot to the pixel (643px box, 962px
+row), which disproved every layout cause in one measurement. **THEY ARE
+INVISIBLE EVERYWHERE ELSE**, which is why it reads as a sudden fault: the same
+row is **42px** in reading mode because HTML collapses a break, and the deck and
+both workbooks print these fields on one line &mdash; so a value can carry them
+for weeks and only the pen will ever show it. **TWO ROUTES, BOTH MEASURED**:
+Enter added one per press until &sect;229 stopped it three days ago (whose own
+text says *"nothing stored is scrubbed"* &mdash; this is that bill), and a
+**paste**, which &sect;229 does not reach and which was measured storing
+`"Line one\nLine two\n\n\n"` verbatim. **THE RULE IS ABOUT THE VALUE**, so it
+lives in `lib/rules.js` where the three places that need it can ask one function
+(&sect;42), it **keeps every word**, and **`.grow` is the decision** &mdash;
+&sect;229 drew that line for Enter and this uses the same one, so a paragraph
+box is untouched and there is no second list to forget. **THREE TOUCHES**:
+`textOr()` draws one line whatever is stored (which is what closes it for good,
+because it does not care how the breaks got there) and stores nothing; the
+commit stores one line and **writes it back into the box**, because seeing the
+lines close up is the explanation (&sect;124); and a one-off **heal** of what a
+tenant already holds, which could not be a `.sql` file because a pillars
+function's plan is one JSON blob (&sect;118) and a blanket replace would flatten
+the paragraphs. **Proved able to fail both ways**: the heal stubbed **14 red**,
+the heal made over-eager **3 red and all three are the paragraphs** &mdash; the
+worse failure, and the one a check that only looked for one-line titles would
+have applauded. `checks/one-line-titles.py` is **5 red** on the shipped build,
+asserting agreement with a break-free clone of each box rather than a pixel
+count (&sect;94.8). Full `qa.py` ERRORS none &middot; 472/0 &middot; 126/0
+&middot; round trip, clean parity and two tabs green on virgin Postgres 16.
+`plan-wrap.py`'s one failure reproduces on the untouched build (&sect;249.2).*
+
+*Earlier the same day: **&sect;252: the presentation reads what was
 reported.** Islam: *"presentations doesn't change when the plan performance is
 done"*, then *"the presentation should update on either save draft or submit."*
 **THE PROPOSED FIX WOULD HAVE CHANGED NOTHING** &mdash; the deck is assembled

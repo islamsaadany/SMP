@@ -499,6 +499,26 @@ console errors (in this cloud environment, run it via a wrapper that points Play
   different targets never touch. Proved able to fail: 11 red on the differ's
   pre-build, and end-to-end on a real Postgres the whole-graph flag fails
   with the reported sentence to the word.
+- **THE DIRECTION AND THE COMPILE RULE STAY THE OFFICE'S (§249.4):** Islam,
+  from the running platform — *"I viewed as Ali Reda from corporate, I can't
+  adjust the direction or the compiling. is that ment to be?"* It is: neither
+  is a gap (both carry a working default), so a filler writing one is
+  AUTHORING, the server refuses it, and a save is all or nothing (§184).
+  **THE GRANT DECIDES, AND IT WAS MEASURED RATHER THAN READ OFF A
+  SCREENSHOT** — asked of `mayAuthorPage`/`mayFillPage` at each state of the
+  own-Strategy cell: **view** draws read-only text, **fill** two controls and
+  two read-only facts, **edit** all four. So there is no defect; somebody who
+  needs those two is given Edit, not Fill gaps. *My first reading came from a
+  screenshot of a tenant I cannot see and Islam corrected it — the answer only
+  became worth trusting when it came from the rule.* **THE COST WAS STATED
+  BEFORE HE CHOSE**: the direction stays `≥`, so a *less is better* outcome
+  scores BACKWARDS until the office corrects it (2 against 5 reads 40%), and a
+  blank compile compares against the WHOLE year (50 against 100% reads 50
+  where Sum at eight months reads 75). He kept both the office's — consistent
+  with §99.8, *how a thing is measured is a plan decision, not a reporting
+  one*, and recorded as his call so the line (the filler writes the target but
+  not the direction) is a decision rather than where the gap list happened to
+  stop.
 - **WHAT AUDITING §249 FOUND (§249.2, §249.3):** Islam, the same day —
   *"double check if this made any problems with the input or the saving or the
   reporting or the accessibility ... as the platform is live."* Two refusals,
@@ -4239,7 +4259,23 @@ prior sessions (on HR_ERP) accidentally reverted agreed-upon designs.
 
 ---
 
-*Last Updated: 2026-09-02 &mdash; **&sect;249.2 / &sect;249.3: what auditing
+*Last Updated: 2026-09-02 &mdash; **&sect;249.4: the direction and the compile
+rule stay the office's.** Islam, from the running platform: *"I viewed as Ali
+Reda from corporate, I can't adjust the direction or the compiling. is that ment
+to be?"* It is &mdash; neither is a gap, so a filler writing one is AUTHORING,
+the server refuses it, and a save is all or nothing (&sect;184). **THE GRANT
+DECIDES, AND IT WAS MEASURED RATHER THAN READ OFF A SCREENSHOT**: **view** draws
+read-only text, **fill** two controls and two read-only facts, **edit** all
+four &mdash; so there is no defect, and somebody who needs those two is given
+Edit. *My first reading came from a screenshot of a tenant I cannot see and he
+corrected it; the answer only became worth trusting when it came from the rule.*
+**THE COST WAS STATED BEFORE HE CHOSE**: the direction stays `&ge;`, so a *less
+is better* outcome scores BACKWARDS until the office corrects it, and a blank
+compile compares against the WHOLE year with no proration. He kept both the
+office's, consistent with &sect;99.8 (*how a thing is measured is a plan
+decision, not a reporting one*), recorded as his call.*
+
+*Earlier the same day: **&sect;249.2 / &sect;249.3: what auditing
 &sect;249 found.** Islam, the same day: *"double check if this made any problems
 with the input or the saving or the reporting or the accessibility ... as the
 platform is live."* Two refusals, one mine and one older than mine and made

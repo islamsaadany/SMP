@@ -27565,3 +27565,46 @@ changes the drawn shape of a control (a single-column grid, a narrower `--tw`,
 dropping the two read-only facts), which is a design decision and wants a
 mockup (rule 1c) rather than a quiet widening. Reading mode, which is what most
 people see, is untouched.
+
+---
+
+## §249.4 — THE DIRECTION AND THE COMPILE RULE STAY THE OFFICE'S (2026-09-02)
+
+Islam, from the running platform: *"I viewed as Ali Reda from corporate — I
+can't adjust the direction or the compiling. Is that meant to be?"*
+
+**IT IS, AND IT WAS PUT BACK TO HIM AS A DECISION RATHER THAN DEFENDED.**
+§249's fill mode draws the outcome's target and its unit as controls and the
+direction and compile rule as read-only facts, because neither of the latter is
+a gap — both carry a working default — so a filler writing one is AUTHORING,
+which the server refuses, and a save is all or nothing (§184).
+
+**THE GRANT IS WHAT DECIDES IT, and that was measured rather than inferred from
+a screenshot:** asked of `mayAuthorPage`/`mayFillPage` for the same person at
+each of the three states of the own-Strategy cell —
+
+  · **view** — read-only text;
+  · **fill** — two controls and two read-only facts (what Ali sees);
+  · **edit** — all four controls, the direction and the compile rule included.
+
+So there is no defect: somebody who needs to set those two is given **Edit**, not
+Fill gaps. *The first reading of this was mine and it was reached from a
+screenshot of a tenant I cannot see; the answer only became worth trusting when
+it came from the rule.*
+
+**THE COST WAS STATED BEFORE HE CHOSE**, because it is not free:
+
+  · the direction stays `≥`, so an outcome that is really *less is better*
+    scores **backwards** — an actual of 2 against a target of 5 reads 40% when
+    it is excellent — until the office corrects it;
+  · a blank compile rule compares against the **whole year** with no proration
+    (§239), so a cumulative outcome reported at 50 against 100% reads **50**
+    where *Sum* at eight months reads **75**.
+
+Islam chose to **keep both the office's**. That is consistent with a rule this
+document has already settled twice — §99.8: *how a thing is measured is a plan
+decision, not a reporting one*, and letting the reporter pick lets a unit change
+how it is measured while being measured — and it is recorded here as his call so
+the arbitrariness of the line (the filler writes the target but not the
+direction) is a decision somebody made rather than an accident of where the gap
+list happened to stop.

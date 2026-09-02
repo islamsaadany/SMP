@@ -365,6 +365,64 @@ console errors (in this cloud environment, run it via a wrapper that points Play
   `node scripts/test-door.js <smo-password>` against a running dev-server
   after touching `api/auth.js` or `lib/auth.js` (it ends by rate-limiting the
   SMO on purpose — `DELETE FROM login_attempts;` clears it).
+- **A FIGURE IS READ AGAINST WHAT IT IS MEASURED BY (§254):** eight things
+  Islam sent from the live deck in one afternoon, all mocked up first
+  (`design-mockups/deck-review-round/`). **THE BENCHMARK, AND THE COLUMN THAT
+  NAMES IT** — his row read `6#` against `4#` at 133% with nothing saying why;
+  §239 has prorated a `Sum` measure since it was written and the deck never
+  printed what is due so far, so **nothing new is computed** and the shape is
+  §252's own (figure bold, benchmark behind a slash), through **one builder
+  `figVsDue()`** the three tables ask. *Annual target* is Performance's word
+  (§239.2) — the **aim slide keeps *This year***, where it contrasts with the
+  3-year column and is doing different work.
+  **§254.1 — A SCALED CURRENCY IS ONE TOKEN WHEREVER IT IS DRAWN**: the
+  convention existed and was only ever applied ON THE WAY IN, so a value that
+  ARRIVED with a space was never tightened (§96.2 forbids rewriting what
+  somebody wrote). **That rule is about what is STORED and it stands** —
+  `unitTight()` is display only, asserted by building every deck and comparing
+  every stored figure byte for byte. **The test is a magnitude letter, not a
+  list** (`K`/`M`/`B` + exactly one word), so `K EGP` reads right the day a
+  tenant types it though the picker does not offer it, while `M EGP B EGP` —
+  typing, not a unit — keeps its space. **The first draft closed the wrong gap**
+  and produced `8MEGP`: *tight* is a fact about the SEPARATOR, never about the
+  unit, and the check caught it. The **doubling is healed on reporting and
+  save** (his choice): the box is filled from the healed value AND `joinTarget`
+  is handed the healed string to take its separator from, which is what makes
+  *heal on save* true rather than *heal on screen* — with the cost stated, that
+  a row nobody re-enters keeps its doubled string in the database and the
+  workbook.
+  **§254.2 — ONE QUESTION DECIDES THE WHOLE ROW, narrowing §248**: `2% / 2#`
+  reproduced, and **nine states through the scorer all score with a figure in
+  the outcome** — so the figure the deck could see was not in the outcome, and
+  one path produces it exactly: the reporting box asks for the OUTCOME's figure
+  only once the outcome has a target, so **a figure reported before that target
+  was added sits in `actual` for ever** while the benchmark switches. §248
+  switched on target AND figure deliberately; **the target alone decides now, at
+  Islam's direction**, chosen from three behaviours with the cost of each — such
+  a row leaves every average, stops counting as reported and refuses Submit,
+  and it is the only one of the three that never states a figure nobody reported
+  (§35). **0 of 78 demo tactics are in that state**, so nothing in the worked
+  example moves and the check MAKES it.
+  **§254.3** a not-due tactic is not dimmed (the cell says it in words).
+  **§254.4** the deck ends on its numbers — the score table then the three
+  readings, both built where they were, **anchors travelling with them**
+  (§236.3). **§254.5** the pillars are NAMED before they are scored: his
+  concept, the platform's treatment (one gold rule across the row, not a hue
+  per card — §41's budget), **the CODE as the number**, and **the two pillar
+  slides cannot share a name** — the score table takes the deck's own existing
+  *"— where we stand"* rather than a new form of words (§87's twins on a
+  projector, and two identical rows in Manage slides' rail).
+  `checks/deck-figures.py`: **33 red** on the build before. **AND THREE CHECKS
+  HELD SOMETHING THESE DECISIONS MOVED** (§214.3) — `deck-blank-slides.py`,
+  written ONE SECTION EARLIER, searched for *"where we stand"* and went red on a
+  correct build; `tactic-proration.py` asserted the demo HELD a carried pillar,
+  true until §253.2 cut it, **rewritten to MAKE one** (§218); and
+  `submit-gate.py` filled `actual` to model a complete report while its own
+  §249 block gave eighteen tactics a target with no figure — reading *23 of 41*
+  on a build behaving exactly as decided. **RECORDED, NOT DONE**: `K EGP` on the
+  picker's list, the missing deck marks (a function can never have one, and
+  there is no group mark to fall back on), and whether the notes slide keeps the
+  last word.
 - **A TABLE WITH NO ROWS IS NOT A SLIDE (§253):** Islam — *"slides are
   showing blank pages for the merchandizing."* Measured before anything was
   proposed: **four** slides in the whole product draw a heading, a navy column
@@ -4271,6 +4329,15 @@ python3 checks/ytd-proration.py # YTD is measured against the part of the year t
                                 # score; and every deck row is counted against its own
                                 # header, because dropping a column from a header and not
                                 # from the row is this change's easiest mistake
+python3 checks/deck-figures.py   # a figure is read against what it is measured by
+                                # (§254): the benchmark asserted as AGREEMENT with
+                                # measureDueLabel and never as a literal, every
+                                # tight-unit case INCLUDING the two that must not
+                                # change, every stored figure byte-identical after
+                                # building every deck (§96.2), §254.2's three states
+                                # MADE and the row put back, and the slide order with
+                                # the two pillar headings asserted different — 33 red
+                                # on the build before
 python3 checks/deck-blank-slides.py # a table with no rows is not a slide (§253):
                                 # every deck swept through the builder its own Present
                                 # button would call, the state MADE on a business unit
@@ -4489,7 +4556,35 @@ prior sessions (on HR_ERP) accidentally reverted agreed-upon designs.
 
 ---
 
-*Last Updated: 2026-09-02 &mdash; **&sect;253: a table with no rows is not a
+*Last Updated: 2026-09-02 &mdash; **&sect;254: a figure is read against what it
+is measured by.** Eight things Islam sent from the live deck in one afternoon,
+every one mocked up from the running deck before anything was built. **The
+benchmark and the column that names it**: his row read `6#` against `4#` at 133%
+with nothing saying why &mdash; &sect;239 has prorated a Sum measure since it was
+written and the deck never printed it, so nothing new is computed and the shape
+is &sect;252's own, through ONE builder the three tables ask; the column takes
+Performance's *Annual target* (&sect;239.2). **&sect;254.1**: a scaled currency
+is one token wherever it is DRAWN, the test a magnitude letter rather than a
+list (so `K EGP` reads right though the picker does not offer it) &mdash; display
+only, asserted by comparing every stored figure byte for byte, and **the first
+draft closed the wrong gap** and produced `8MEGP`, because *tight* is a fact
+about the separator and not about the unit. The doubling is healed **on
+reporting and save**, his choice, with the residue stated. **&sect;254.2**:
+`2% / 2#` reproduced &mdash; nine states through the scorer all score with a
+figure in the outcome, so a figure reported BEFORE the outcome's target was added
+sits in the old field for ever while the benchmark switches; the target alone
+decides now, **narrowing &sect;248 at his direction** from three behaviours with
+the cost of each, and it is the only one that never states a figure nobody
+reported. **&sect;254.3** a not-due tactic is not dimmed. **&sect;254.4** the
+deck ends on its numbers. **&sect;254.5** the pillars are named before they are
+scored &mdash; his concept, the platform's treatment, the CODE as the number, and
+the two pillar slides given different names (&sect;87's twins). 33 red on the
+build before &mdash; **and three checks held something these decisions moved**,
+one of them written a single section earlier and going red on a correct build.
+**Recorded, not done**: `K EGP` on the picker, the missing deck marks, and where
+the notes slide sits.*
+
+*Earlier the same day: **&sect;253: a table with no rows is not a
 slide.** Islam: *"slides are showing blank pages for the merchandizing."*
 Measured before anything was proposed — **four** slides in the whole product
 draw a heading, a column strip and a whole empty page, and **all four are

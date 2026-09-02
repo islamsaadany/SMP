@@ -176,13 +176,20 @@ with sync_playwright() as p:
          pillars keep their tables, so "no head says Key measures" is false on
          a correct build and "none in the first six" is TRUE on the broken one
          — it passed on the pre-§253 build, which is what §94.5 is for. */
-      return { key: k, name: u.name, code: pillarCode(u, 0), stripped, restored };
+      return { key: k, name: u.name, code: pillarCode(u, 0),
+               koWord: L("keyobj", "bu"), stripped, restored };
     }""")
     if isinstance(made, dict) and "stripped" in made:
         s, r = made["stripped"], made["restored"]
         ok("a unit stripped bare draws no empty table", s["blank"] == 0, s)
+        # §254 RENAMED THE PILLAR SCORE SLIDE to "<Pillars> — where we stand",
+        # the deck's own existing phrasing, which this assertion then matched:
+        # it went red on a correct build (§51.11, in the check written one
+        # section earlier). It names the OBJECTIVES slide now — the tenant's
+        # word for a key objective, which is what this fixture strips.
+        koWord = (made.get("koWord") or "Key Objectives")
         ok("its objectives slide is gone",
-           not any("where we stand" in h for h in s["heads"]), s["heads"])
+           not any(h.startswith(koWord) for h in s["heads"]), s["heads"])
         code = made.get("code") or ""
         mine = [h for h in s["heads"] if h.startswith(code)]
         ok("and the stripped pillar's two tables with it (" + code + ")",
@@ -194,7 +201,7 @@ with sync_playwright() as p:
         ok("carrying the unit's aspiration", s["asp"] is True, s)
         print("\n── 3 · put back, the slides come back (§113.8)")
         ok("the objectives slide returns",
-           any("where we stand" in h for h in r["heads"]), r["heads"])
+           any(h.startswith(koWord) for h in r["heads"]), r["heads"])
         back = [h for h in r["heads"] if h.startswith(code)]
         ok("the stripped pillar's measures and tactics return",
            any("Key measures" in h for h in back)

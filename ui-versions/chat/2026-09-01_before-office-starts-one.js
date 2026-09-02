@@ -100,12 +100,7 @@ var CHAT = (function(){
                  answer arrives, and a sentence once one has failed — because
                  an empty list and a list nobody could fetch are two different
                  things and only one of them is about the data. */
-              err: null, asked: false,
-              /* §234: writing to somebody who has not written in. `new` is the
-                 mode, `newWho` the person chosen — one flag rather than a
-                 second pane, because it IS the thread pane, showing the one
-                 thing a conversation that does not exist yet can show. */
-              new: false, newWho: "" };
+              err: null, asked: false };
 
   function servable(){ return location.protocol !== "file:"; }
   function el(id){ return document.getElementById(id); }
@@ -1454,19 +1449,9 @@ var CHAT = (function(){
         'changes nothing about it.</div>' +
       '<div class="chinbox" id="chinbox">' +
         '<div class="chq">' +
-          /* §234: THE CONTROL IS IN THE COLUMN IT ACTS ON — Islam's A, chosen
-             from two placements drawn in this very page. The list it adds to
-             is directly below it, and a conversation started here appears
-             there. The cost was stated before he chose: the search box gives
-             up about 60px. */
           '<div class="chqtop">' +
             '<input type="search" id="chqfind" placeholder="Search a name or a word…" ' +
               'aria-label="Search the conversations">' +
-            '<button class="chqnew" id="chqnew" type="button" ' +
-              'title="Write to somebody who has not written in">' +
-              '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" ' +
-              'stroke-linecap="round" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg>' +
-              "<span>New</span></button>" +
           "</div>" +
           /* THREE FILTERS OVER ONE LIST, never three kinds of list. Flagged is
              a conversation carrying a flagged message, so the row a person
@@ -1532,25 +1517,6 @@ var CHAT = (function(){
     if (t.title) bits.push(t.title);
     if (t.gone) bits.push("no longer on the register");
     return bits.filter(Boolean).join(" · ");
-  }
-
-  /* THE ACTIVE REGISTER, with the place each person sits — the same two facts
-     the plan's own owner picker shows (§130.9), read through the same
-     functions so a name here is the name everywhere else (§53.5). A RETIRED
-     person is left out: they cannot sign in, so a conversation with them is
-     one nobody can read (§35). */
-  function chatWhoChoices(){
-    var out = [];
-    try {
-      var dn = displayNames();
-      PEOPLE.forEach(function(p){
-        if (!personActive(p)) return;
-        var at = personAt(p);
-        out.push({ key: p.key, name: knownName(p, dn),
-                   where: at && at !== "group" ? placeLabel(at) : "" });
-      });
-    } catch (e) { return []; }
-    return out.sort(function(x, y){ return x.name.localeCompare(y.name); });
   }
 
   function drawQueue(){
@@ -1667,48 +1633,6 @@ var CHAT = (function(){
 
   function drawThread(){
     var pane = el("chthread"); if (!pane) return;
-    /* ── WRITING TO SOMEBODY WHO HAS NOT WRITTEN IN (§234) ────────────
-       It is the THREAD pane, not a dialog: this is where a conversation is
-       read and answered, and starting one is the same act with the name still
-       to be chosen. Drawn first, because it replaces whatever was open. */
-    if (box.new) {
-      var who = chatWhoChoices();
-      var opts = who.map(function(x){
-        return '<option value="' + esc2(x.key) + '"' +
-               (x.key === box.newWho ? " selected" : "") +
-               (x.where ? ' data-hint="' + esc2(x.where) + '"' : "") + ">" +
-               esc2(x.name) + "</option>";
-      }).join("");
-      pane.innerHTML =
-        '<div class="chnew">' +
-          '<div class="chnew-h">A new conversation</div>' +
-          '<div class="chnew-f">' +
-            '<label class="chnew-l" for="chnewwho">To</label>' +
-            '<select id="chnewwho" class="chnew-sel">' +
-              '<option value="">Choose somebody…</option>' + opts +
-            "</select>" +
-          "</div>" +
-          '<div class="chnew-f chnew-grow">' +
-            '<label class="chnew-l" for="chnewsay">Message</label>' +
-            '<textarea id="chnewsay" class="chnew-ta" rows="5" ' +
-              'placeholder="Write to them…"></textarea>' +
-          "</div>" +
-          '<div class="chnew-acts">' +
-            '<button class="chsend" type="button" data-chnewsend="1">Send</button>' +
-            '<button class="chnew-x" type="button" data-chnewcancel="1">Cancel</button>' +
-          "</div>" +
-          '<div class="chnote" id="chnewnote">' +
-            "They will see it in the corner, get a box on their screen if they " +
-            "have notifications on, and an email if they are away." +
-          "</div>" +
-        "</div>";
-      /* The platform's own searchable dropdown, wired here because this pane
-         is redrawn outside paint() (§45.5, §29.5: whoever rewrites the markup
-         re-wires it). */
-      try { if (typeof SEARCHSEL !== "undefined") SEARCHSEL.wire(); } catch (e) {}
-      return;
-    }
-
     var d = box.data;
     if (!d) {
       /* AND HERE TOO: "pick somebody on the left" is an invitation, and an
@@ -1931,70 +1855,6 @@ var CHAT = (function(){
       boxLoadQueue();
       if (box.person) boxLoadThread(box.person);
     }, 10000);
-  }
-
-  /* THE SAME SEND AS A REPLY, with `start` on it (§234). Everything that
-     happens to a message from the office — the conversation leaving the
-     waiting list, the email chase, the box on their screen — is written once,
-     on the server, in the reply path; this only has to say who it is for and
-     that the conversation may not exist yet. */
-  function newSend(){
-    var sel = el("chnewwho"), ta = el("chnewsay"), note = el("chnewnote");
-    var who = sel ? sel.value : "";
-    var text = ta ? ta.value.trim() : "";
-    var say = function(t, bad){
-      if (!note) return;
-      note.className = "chnote" + (bad ? " bad" : "");
-      note.textContent = t;
-    };
-    /* SAID, NOT DISABLED. A Send that is dimmed for a reason nobody states is
-       the fault §221 records; this says which half is missing. */
-    if (!who) { say("Choose who this is for.", true); if (sel) sel.focus(); return; }
-    if (!text) { say("Write something to send.", true); if (ta) ta.focus(); return; }
-
-    var btn = document.querySelector("[data-chnewsend]");
-    if (btn) btn.disabled = true;
-    say("Sending\u2026");
-
-    var payload = { action:"reply", person:who, body:text, start:true };
-    /* THE HTML IS BUILT BY THE ONE BUILDER (§72.3) and the server decides
-       whether it goes and to whom — content, never a recipient (§74.2). */
-    try {
-      var sh = commsShape(), c = comms();
-      payload.fromName = c.fromName || sh.org;
-      payload.replyTo = c.replyTo || "";
-      payload.subject = "A message from the Strategy Office";
-      payload.html = MAIL.html({
-        org: sh.org, accent: sh.accent, panel: sh.panel, footer: sh.footer,
-        eyebrow: sh.eyebrow,
-        title: "A message from the Strategy Office",
-        preheader: text.slice(0, 140),
-        body: text + "\n\nOpen the platform to answer.",
-        cta: { label: "Open the platform", href: sh.href || "" }
-      });
-    } catch (e) { /* no mail builder here is not a reason to refuse the message */ }
-
-    post(payload, function(err, j){
-      if (btn) btn.disabled = false;
-      if (err) { say(err === NO_ANSWER
-        ? "No answer from the server. The message may still have gone \u2014 " +
-          "their conversation will show it if it did."
-        : err, err !== NO_ANSWER); return; }
-      /* AND IT LANDS IN THE CONVERSATION IT JUST MADE, which is the only way
-         to see that it actually went (§144's rule: a send lands on the
-         record). The queue is reloaded too, because the row is new. */
-      box.new = false; box.newWho = "";
-      box.person = who;
-      box.note = { text:
-        j && j.here ? "Sent. They are on the platform and will see it now."
-        : j && j.mailed && j.mailed.sent ? "Sent, and emailed to " + j.mailed.to + "."
-        : j && j.mailed && j.mailed.why ? "Sent. No email went out \u2014 " + j.mailed.why + "."
-        : "Sent." };
-      if (typeof window !== "undefined" && typeof window.OVQUEUE !== "undefined")
-        window.OVQUEUE = null;
-      boxLoadQueue();
-      boxLoadThread(who);
-    });
   }
 
   function replySend(who){
@@ -2284,10 +2144,6 @@ var CHAT = (function(){
     root.addEventListener("click", function(e){
       var pick = e.target.closest("[data-chpick]");
       if (pick) {
-        /* Opening a conversation leaves the new-message form (§234) — the two
-           are the same pane, and a half-written message is not worth keeping
-           behind a screen that has moved on. */
-        box.new = false; box.newWho = "";
         box.person = pick.dataset.chpick; box.note = null;
         drawQueue(); boxLoadThread(box.person); return;
       }
@@ -2330,20 +2186,6 @@ var CHAT = (function(){
         if (box.person) boxLoadThread(box.person);
         return;
       }
-      /* ── STARTING ONE (§234) ────────────────────────────────────── */
-      if (e.target.closest("#chqnew")) {
-        box.new = true; box.newWho = ""; box.person = null; box.data = null;
-        drawQueue(); drawThread();
-        var sel0 = el("chnewwho"); if (sel0) sel0.focus();
-        return;
-      }
-      if (e.target.closest("[data-chnewcancel]")) {
-        box.new = false; box.newWho = "";
-        drawThread();
-        return;
-      }
-      if (e.target.closest("[data-chnewsend]")) { newSend(); return; }
-
       var tab = e.target.closest("[data-chtab]");
       if (tab) {
         box.tab = tab.dataset.chtab;

@@ -161,6 +161,16 @@ class H(http.server.BaseHTTPRequestHandler):
         # §231: THE STUB MODELS THE SERVER. A device says yes and the row is
         # kept here, so the check can read back what the browser actually
         # posted rather than trusting that it meant to.
+        # §234: the office's own message. Recorded so the check can read what
+        # the page actually POSTED — `start` is the whole of what this feature
+        # adds to the server, and a build that dropped it would look identical
+        # on screen (§135's `greet`, found the same way).
+        if body.get("action") == "reply":
+            CHAT["said"].append(body)
+            self._send(200, json.dumps({"ok": True, "here": False,
+                "mailed": {"sent": True, "to": "someone@example.com"}}).encode(),
+                "application/json")
+            return
         if body.get("action") == "pushTest":
             self._send(200, json.dumps({"ok": True, "steps": PUSHSTEPS}).encode(),
                        "application/json")
@@ -1526,6 +1536,91 @@ with sync_playwright() as p:
     ck("and a working chain says it is working", said.lower().startswith("it is working"), said[:80])
     ck("...naming the device it reached", "sent to 1 device" in said.lower(), said[:160])
     pg.click("[data-chsetmenu]"); pg.wait_for_timeout(300)
+
+    # ── 19 · THE OFFICE STARTS A CONVERSATION (§234) ─────────────────────
+    # Until now the office could only ever ANSWER: with nobody having written
+    # in there was no way to reach them from the Inbox at all. Islam picked
+    # placement A — the control in the column it acts on — from two drawn in
+    # this very page.
+    print("\n19 · the office starts a conversation")
+    pg.evaluate("() => { try { sessionStorage.removeItem('smp.where'); } catch (e) {} }")
+    pg.goto(URL, wait_until="networkidle")
+    pg.wait_for_timeout(1200)
+    pg.click('[data-md="setup"]'); pg.wait_for_timeout(800)
+    pg.click('[data-setupgo="chat"]'); pg.wait_for_timeout(1800)
+    ck("there is a way to start one", pg.query_selector("#chqnew") is not None)
+    # PRESSABLE, NOT MERELY PRESENT (§70, §93.4).
+    hit = pg.evaluate("""() => { const b = document.getElementById('chqnew');
+        if (!b) return 'missing'; const r = b.getBoundingClientRect();
+        const e = document.elementFromPoint(r.left + r.width / 2, r.top + r.height / 2);
+        return e && e.closest('#chqnew') ? 'new' : (e ? e.tagName : 'nothing'); }""")
+    ck("a click at its centre reaches it", hit == "new", hit)
+    # AND IT DID NOT PUSH THE SEARCH ONTO A SECOND LINE. One row is not one
+    # `top` (§122.4) — two controls of two heights have two tops — so the
+    # MIDDLES are what agree.
+    row = pg.evaluate("""() => { const t = document.querySelector('.chqtop');
+        const m = [...t.children].map(c => { const r = c.getBoundingClientRect();
+          return Math.round(r.top + r.height / 2); });
+        return { mids: m, spread: Math.max(...m) - Math.min(...m) }; }""")
+    ck("the search keeps its line", row["spread"] <= 2, row)
+
+    pg.click("#chqnew"); pg.wait_for_timeout(700)
+    ck("pressing it opens the form", pg.query_selector("#chnewwho") is not None)
+    n = pg.eval_on_selector_all("#chnewwho option", "o => o.length")
+    ck("...offering the register to write to (%d)" % n, n > 5, n)
+    # A RETIRED PERSON CANNOT SIGN IN, so a conversation with them is one
+    # nobody can read — they are left out, and it is asserted rather than
+    # assumed (§94.2: both ends).
+    live = pg.evaluate("""() => {
+        const keys = [...document.querySelectorAll('#chnewwho option')]
+          .map(o => o.value).filter(Boolean);
+        const dead = (window.PEOPLE || []).filter(p => p.active === false).map(p => p.key);
+        return { offered: keys.length, deadOffered: dead.filter(k => keys.includes(k)),
+                 deadOnRegister: dead.length }; }""")
+    ck("...and never somebody who has been retired",
+       len(live["deadOffered"]) == 0, live)
+
+    # SAID, NOT DISABLED (§221): a Send that is dead for an unstated reason is
+    # a control nobody can act on.
+    pg.click("[data-chnewsend]"); pg.wait_for_timeout(400)
+    said = pg.inner_text("#chnewnote").strip()
+    ck("sending with nobody chosen says which half is missing",
+       "who" in said.lower(), said)
+    pg.select_option("#chnewwho", index=2); pg.wait_for_timeout(300)
+    pg.click("[data-chnewsend]"); pg.wait_for_timeout(400)
+    said = pg.inner_text("#chnewnote").strip()
+    ck("...and with nothing written, the other half", "write" in said.lower(), said)
+
+    # AND WHAT IT ACTUALLY POSTS. `start` is the whole of what this feature
+    # adds to the server — everything else a message from the office does is
+    # already written once, in the reply path (§53.5).
+    del CHAT["said"][:]
+    pg.fill("#chnewsay", "Could you look at the CX definition when you have a moment?")
+    pg.click("[data-chnewsend]"); pg.wait_for_timeout(1800)
+    sent = [x for x in CHAT["said"] if x.get("action") == "reply"]
+    ck("sending posts a reply that may start the conversation", len(sent) == 1, sent)
+    if sent:
+        ck("...naming the person and carrying start",
+           bool(sent[0].get("person")) and sent[0].get("start") is True, sent[0])
+        ck("...with the words that were typed",
+           "CX definition" in (sent[0].get("body") or ""), sent[0].get("body"))
+    # A SEND LANDS ON THE RECORD (§144's rule): the form is gone and the
+    # conversation it just made is open, which is the only way to see it went.
+    ck("and it lands in the conversation it made",
+       pg.query_selector("#chnewwho") is None)
+
+    # CANCEL LEAVES IT, and opening a conversation leaves it too — the two are
+    # one pane, and a form left standing behind an open thread is a second
+    # thing on screen claiming to be the thread.
+    pg.click("#chqnew"); pg.wait_for_timeout(500)
+    pg.click("[data-chnewcancel]"); pg.wait_for_timeout(400)
+    ck("Cancel puts the form away", pg.query_selector("#chnewwho") is None)
+    pg.click("#chqnew"); pg.wait_for_timeout(500)
+    row1 = pg.query_selector("[data-chpick]")
+    if row1:
+        row1.click(); pg.wait_for_timeout(900)
+        ck("...and so does opening a conversation",
+           pg.query_selector("#chnewwho") is None)
 
     # ── 7 · AND A SESSION THE SERVER REFUSES, LAST ON PURPOSE ────────────
     # A refused session takes the corner away rather than leaving a control

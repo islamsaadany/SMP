@@ -856,8 +856,46 @@ module.exports = async function handler(req, res) {
       const text = str(body.body);
       if (!who) return send(res, 400, { ok: false, error: "Which conversation?" });
       if (!text) return send(res, 400, { ok: false, error: "Nothing to send." });
-      const t = (await client.query(
+      let t = (await client.query(
         "SELECT here_at FROM chat_threads WHERE person_key = $1", [who])).rows[0];
+
+      /* ── THE OFFICE STARTS ONE (§234) ─────────────────────────────
+         Islam: "from the platform inbox allow the smo to initiate a message
+         with someone." Until now the office could only ever ANSWER: with
+         nobody having written in there was no way to reach them from here at
+         all.
+
+         IT IS A FLAG ON THE REPLY, NOT AN ACTION OF ITS OWN. Everything a
+         message from the office does — marking the conversation answered
+         (§71), chasing by email when they are away (§97.5), the box on their
+         screen (§231) — is already written once, here. A second endpoint
+         would be a second copy of all of it, and the two would drift (§53.5).
+         What starting adds is exactly one thing: the conversation may not
+         exist yet.
+
+         AND THE PERSON MUST BE ONE. `ensureThread` will happily mint a row
+         for any string, so a typo would create a conversation with nobody,
+         visible in the queue for ever and answerable by no one — checked
+         against the STORED register, never against what the browser sent
+         (§74.2), and against the ACTIVE register, because a retired person
+         cannot sign in to read it (§35's rule about writing somewhere nobody
+         can reach).
+
+         ONE CONVERSATION PER PERSON SURVIVES UNTOUCHED (§97): starting one
+         with somebody who has already written in finds their thread on the
+         line above and simply carries on into it. This can never make a
+         second — `chat_threads.person_key` is the primary key. */
+      if (!t && body.start === true) {
+        const p = (await client.query(
+          "SELECT key, name FROM people WHERE key = $1 " +
+          "  AND COALESCE(extra->>'active','true') <> 'false'", [who])).rows[0];
+        if (!p) {
+          return send(res, 404, { ok: false, error: "There is no such person on the register." });
+        }
+        await ensureThread(client, p.key, p.name);
+        t = (await client.query(
+          "SELECT here_at FROM chat_threads WHERE person_key = $1", [who])).rows[0];
+      }
       if (!t) return send(res, 404, { ok: false, error: "No conversation with that person." });
 
       /* THE ID COMES BACK, because §188 marks THIS message once the email

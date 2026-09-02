@@ -25947,3 +25947,62 @@ diagnostic becomes the thing that broke it.
 it HOLDS, so a browser that allowed notifications and never registered would
 otherwise be told *none of your devices is registered* without the platform
 having tried.
+
+---
+
+## §234 — THE OFFICE STARTS A CONVERSATION
+
+Islam: *"from the platform inbox allow the smo to initiate a message with
+someone."*
+
+Until now the office could only ever **answer**. With nobody having written in
+there was no way to reach them from the Inbox at all — the one direction the
+whole page is built for was missing its other half.
+
+**IT IS A FLAG ON THE REPLY, NOT AN ACTION OF ITS OWN.** Everything a message
+from the office does is already written once, in the reply path: the
+conversation leaving the waiting list by the act rather than by remembering
+(§71), the email chase when they are away (§97.5), the box on their screen
+(§231). A second endpoint would be a second copy of all of it, and two copies of
+one rule drift (§53.5). What starting adds is exactly one thing — the
+conversation may not exist yet — so that is exactly what the flag does.
+
+**AND THE PERSON MUST BE ONE.** `ensureThread` will happily mint a row for any
+string, so a typo would create a conversation with nobody: visible in the queue
+for ever, answerable by no one. Checked against the **stored** register, never
+against what the browser sent (§74.2), and against the **active** register,
+because a retired person cannot sign in to read it.
+
+**ONE CONVERSATION PER PERSON SURVIVES UNTOUCHED** (§97). Starting one with
+somebody who has already written in finds their thread and carries on into it.
+This can never make a second — `chat_threads.person_key` is the primary key —
+and it is asserted rather than assumed.
+
+**THE CONTROL IS IN THE COLUMN IT ACTS ON**, Islam's A, chosen from two
+placements drawn in this very page (§41.9). The list it adds to is directly
+below it, and a conversation started here appears there. The alternative — the
+page header, where every other Setup page puts its buttons (§130) — sits above
+the split, so it reads as belonging to the whole page and is the furthest point
+on the screen from the list it adds to. **The cost was stated before he chose**:
+the search box gives up about 60px, and it is asserted that it keeps its line.
+
+**IT IS THE THREAD PANE, NOT A DIALOG.** That pane is where a conversation is
+read and answered; starting one is the same act with the name still to be
+chosen. So opening a conversation leaves the form, and so does Cancel — one
+pane, one thing on it.
+
+**SAID, NOT DISABLED** (§221): pressing Send with nobody chosen, or with nothing
+written, says **which half is missing** rather than sitting dead for a reason
+nobody states.
+
+**A SEND LANDS ON THE RECORD** (§144's rule): the form closes and the
+conversation it just made opens, which is the only way to see that it went.
+
+**THE COST IS SAID ON THE MOCKUP RATHER THAN DISCOVERED LATER**: somebody who is
+not on the platform that day receives an email. That is what a reply already
+does, and it means starting a conversation is not a quiet act.
+
+**AND ONE OF THE FIRST PROBE'S FAILURES WAS THE PROBE.** It reported the search
+and the button on two lines by comparing their `top` values — two controls of
+two heights on one line have two tops (§122.4, already written down once). The
+middles are what agree, and the check asserts those.

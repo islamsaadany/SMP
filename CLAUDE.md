@@ -384,6 +384,28 @@ console errors (in this cloud environment, run it via a wrapper that points Play
   remove × onto a second line — `inline-block` restores it, and it was found
   by `checks/plan-fields.py` GOING RED, not by reading the cascade, which is
   the argument for that check existing.
+- **THE OFFICE STARTS A CONVERSATION (§234):** Islam — *"from the platform
+  inbox allow the smo to initiate a message with someone."* Until now the office
+  could only ever ANSWER: with nobody having written in there was no way to
+  reach them from the Inbox at all. **IT IS A FLAG ON THE REPLY, NOT AN ACTION
+  OF ITS OWN** — leaving the waiting list by the act (§71), the email chase
+  (§97.5) and the box on their screen (§231) are all written once in the reply
+  path, and a second endpoint would be a second copy of every one of them
+  (§53.5); what starting adds is that the conversation may not exist yet.
+  **AND THE PERSON MUST BE ONE**: `ensureThread` mints a row for any string, so
+  a typo would leave a conversation with nobody in the queue for ever —
+  checked against the STORED, ACTIVE register (§74.2), a retired person refused
+  because they cannot sign in to read it. **ONE CONVERSATION PER PERSON
+  SURVIVES** (§97): starting one with somebody who has written in carries on
+  into their thread, and `person_key` being the primary key is what makes a
+  second impossible. **THE CONTROL IS IN THE COLUMN IT ACTS ON** (Islam's A,
+  from two placements drawn in the real page, §41.9) — the search gives up ~60px
+  and it is asserted that it keeps its line. **IT IS THE THREAD PANE, NOT A
+  DIALOG**, so opening a conversation leaves the form and so does Cancel.
+  **SAID, NOT DISABLED** (§221): Send names which half is missing. **A SEND
+  LANDS ON THE RECORD** (§144). **AND THE FIRST PROBE'S FAILURE WAS THE PROBE**
+  — it compared the two controls' `top` values, and one row is not one top
+  (§122.4).
 - **THE PLATFORM REGISTERS ITS OWN WORKER, AND A HANG IS NOT A SILENCE
   (§231.5):** Islam, testing on a second account — *"the notifications are not
   working despite I accepted it."* One console line settled it: his main account

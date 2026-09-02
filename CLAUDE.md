@@ -380,11 +380,26 @@ console errors (in this cloud environment, run it via a wrapper that points Play
   (§248) — while **the unit picker stays live, being the only way back out**
   (§61). **THE LIST NARROWS ON A BLANK ROW** to blank and `Y/N`, because a
   brand-new "did it happen" row has no number to type and the em-dash made the
-  one unit needing none the one unit unreachable. **§251.2, found by driving
-  it**: a bound field writes WITHOUT repainting (§71.2 — right for typing,
-  wrong for a control that changes the row's SHAPE), so picking Y/N changed the
-  plan and nothing visibly happened; safe to repaint only because these are
-  SINGLE selects (§30.1, and §130.1 for why a ticking list is not).
+  one unit needing none the one unit unreachable. **§251.2, HIS CORRECTION AND THE
+  BETTER MODEL**: the first build made a row yes/no by DESTROYING its number,
+  caught on a row reading `100 · Y/N · ≥ · Latest` with nothing dimmed — *"even
+  they are set before they need to be dimmed even by keeping the values but as
+  if they are not counted anymore."* The outcome's picker KEEPS the figure (so
+  `outTarget` was `100 Y/N`) while the dimming test asked whether the WHOLE
+  STRING was `Y/N`, so the tables disagreed with the outcome beside them
+  (§53.5 inside one feature); and destroying a figure is unlike every other
+  unit and makes changing your mind cost what somebody typed. `Y/N` is written
+  BESIDE the value now, `isYesNo` reads the unit off the end through
+  `targetParts` (`outUnitOf`'s §248 rule), the dimmed boxes SHOW what they
+  keep, and `100 B EGP` → `100 Y/N` → `100 B EGP` round trips. **The corrected
+  check then found two more**: leaving Y/N blanked the value instead of handing
+  it back, and `measureDue` parsed the kept 100 out of `100 Y/N` and printed
+  *"due at 100 Y/N"* beside a Yes/No control. **6 red** on the build he was
+  looking at; six assertions REWRITTEN, not deleted (§218). **§251.2a, found by
+  driving it**: a bound field writes WITHOUT repainting (§71.2 — right for
+  typing, wrong for a control that changes the row's SHAPE), so picking Y/N
+  changed the plan and nothing visibly happened; safe to repaint only because
+  these are SINGLE selects (§30.1, and §130.1 for why a ticking list is not).
   **§251.3**: leaving Y/N writes a bare unit `splitTarget` cannot read back, so
   `targetUnitOf` learned `outUnitOf`'s §248 rule — **narrowed to units the
   picker offers**, or a target reading `TBD` becomes a unit nobody chose
@@ -4353,10 +4368,26 @@ always empty. **AND IT IS A COMPLETE ANSWER, NEVER A GAP**: one line before
 The direction and the compile rule are dimmed alongside the target &mdash; mine,
 put to him with the reasoning and confirmed &mdash; **drawn and `disabled`,
 never merely dimmed** (&sect;220), with the unit picker left live because it is
-the only way back out (&sect;61). **&sect;251.2, found by driving it**: a bound
-field writes WITHOUT repainting (&sect;71.2, right for typing), so picking Y/N
-changed the plan and **nothing visibly happened** &mdash; every assertion short
-of pressing the control passed. **&sect;251.3**: leaving Y/N writes a bare unit,
+the only way back out (&sect;61). **&sect;251.2 IS HIS CORRECTION, AND THE
+BETTER MODEL**: the first build made a row yes/no by DESTROYING its number, and
+he caught it on a row reading `100 &middot; Y/N &middot; &ge; &middot; Latest`
+with nothing dimmed &mdash; *"even they are set before they need to be dimmed
+even by keeping the values but as if they are not counted anymore."* The
+outcome's picker KEEPS the figure, so `outTarget` was `100 Y/N` while the
+dimming test asked whether the WHOLE STRING was `Y/N` &mdash; so the tables
+disagreed with the outcome beside them (&sect;53.5 inside one feature) &mdash;
+and destroying a figure is unlike every other unit and makes changing your mind
+cost what somebody typed. `Y/N` is written BESIDE the value now, `isYesNo`
+reads the unit off the end through `targetParts` (`outUnitOf`'s &sect;248
+rule), the dimmed boxes SHOW what they keep, and `100 B EGP` &rarr; `100 Y/N`
+&rarr; `100 B EGP` round trips. **The corrected check then found two more**:
+leaving Y/N blanked the value instead of handing it back, and `measureDue`
+parsed the kept 100 out of `100 Y/N` and printed *"due at 100 Y/N"* beside a
+Yes/No control. **6 red** on the build he was looking at; six assertions
+REWRITTEN, not deleted (&sect;218). **&sect;251.2a, found by driving it**: a
+bound field writes WITHOUT repainting (&sect;71.2, right for typing), so
+picking Y/N changed the plan and **nothing visibly happened** &mdash; every
+assertion short of pressing the control passed. **&sect;251.3**: leaving Y/N writes a bare unit,
 which `splitTarget` cannot read back, so `targetUnitOf` learned the rule
 `outUnitOf` has had since &sect;248 &mdash; narrowed to units the picker itself
 offers, or a target reading `TBD` would be read as a unit nobody chose.

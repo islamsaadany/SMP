@@ -5682,6 +5682,13 @@ function prorates(m){ return String(m && m.compile || "").toLowerCase() === "sum
    empty the column for a plan whose timelines were never filled in. */
 function measureDue(m, share){
   if (!m || !m.target) return null;
+  /* §251.2: A YES/NO ROW HAS NOTHING TO BE DUE. It may still be CARRYING a
+     figure — picking Y/N keeps whatever number was there and simply stops
+     counting it — so the digits are still in the string and `parseFloat`
+     would happily pull them out, printing "due at 100 Y/N" beside a control
+     offering Yes and No. The unit is what decides, not whether a number can
+     be found (found by the check, not by reading). */
+  if (SMPRules.isYesNo(m.target)) return null;
   var t = parseFloat(String(m.target).replace(/[^0-9.]/g, ""));
   if (isNaN(t)) return null;
   if (!prorates(m)) return t;

@@ -140,10 +140,17 @@ with sync_playwright() as pw:
       setTargetUnit(m, "%");                       /* and back out again */
       return { after: after, out: [m.target, m.target3y, targetUnitOf(m)] };
     }""")
-    ck("Y/N replaces the number outright, on both horizons",
-       yn["after"] == ["Y/N", "Y/N", "Y/N"], yn["after"])
-    ck("...and leaving it leaves no number behind — never 'Y/NB EGP'",
-       yn["out"] == ["%", "%", "%"], yn["out"])
+    # §251.2 REVERSED §251's OWN FIRST BUILD, at Islam's instruction — *"even
+    # they are set before they need to be dimmed even by keeping the values
+    # but as if they are not counted anymore"* — so these two are REWRITTEN
+    # rather than deleted (§218), and the reversal is recorded here where a
+    # later build would otherwise drift back through them unnoticed. Y/N is
+    # written like every other unit: beside the figure, which stops being
+    # counted and is not destroyed.
+    ck("Y/N is written BESIDE the figure, on both horizons — nothing destroyed",
+       yn["after"] == ["6.2 Y/N", "9.0 Y/N", "Y/N"], yn["after"])
+    ck("...and changing your mind hands the figure straight back",
+       yn["out"] == ["6.2%", "9.0%", "%"], yn["out"])
 
     print("\n── 3 · an unchanged unit writes NOTHING (§50.6)")
     same = pg.evaluate("""() => {

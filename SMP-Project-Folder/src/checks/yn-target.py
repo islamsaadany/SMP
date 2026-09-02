@@ -123,7 +123,11 @@ with sync_playwright() as pw:
 
     print("\n── 1 · the rule, shared by the screen, the score and the server")
     r = ev(pg, """() => ({
+      /* §251.2: the UNIT is what says it — a row keeps its figure and stops
+         being counted, so "100 Y/N" is a yes/no row exactly as a bare "Y/N"
+         is. Reading only the whole string is the fault Islam caught. */
       reads:  [SMPRules.isYesNo("Y/N"), SMPRules.isYesNo(" y/n "),
+               SMPRules.isYesNo("100 Y/N"), SMPRules.isYesNo("100Y/N"),
                SMPRules.isYesNo("Y/NO"), SMPRules.isYesNo("6.2B EGP"),
                SMPRules.isYesNo(""), SMPRules.isYesNo(null)],
       score:  [SMPRules.ynScore("Yes"), SMPRules.ynScore("No"),
@@ -135,7 +139,7 @@ with sync_playwright() as pw:
       gapNone:SMPRules.gapEmptyValue("outTarget", "")
     })""")
     ck("Y/N is read, trimmed and case-insensitively, and nothing else is",
-       r["reads"] == [True, True, False, False, False, False], r["reads"])
+       r["reads"] == [True, True, True, True, False, False, False, False], r["reads"])
     ck("yes scores 100, no scores 0, and silence is NOT SCORED",
        r["score"] == [100, 0, 100, None, None, None], r["score"])
     ck("A Y/N TARGET IS NOT A GAP — the assertion the feature stands on",
@@ -152,23 +156,26 @@ with sync_playwright() as pw:
         from:  go(mk("6.2B EGP","9.0B EGP"), SMPRules.YN_UNIT),
         blank: go(mk("",""),                 SMPRules.YN_UNIT),
         noFar: go(mk("100#",""),             SMPRules.YN_UNIT),
-        back:  go(mk("Y/N","Y/N"),           "%"),
-        clear: go(mk("Y/N","Y/N"),           "")
+        back:  go(mk("100 Y/N","100 Y/N"),   "%"),
+        bare:  go(mk("Y/N",""),              "%"),
+        clear: go(mk("Y/N",""),              "")
       };
     }""")
-    ck("picking Y/N replaces the number on both horizons",
-       t["from"] == ["Y/N", "Y/N", "Y/N"], t["from"])
+    ck("PICKING Y/N KEEPS THE FIGURE — it stops counting, nothing is destroyed",
+       t["from"] == ["6.2 Y/N", "9.0 Y/N", "Y/N"], t["from"])
     ck("A BLANK ROW CAN BECOME ONE — that is how a yes/no row is created",
        t["blank"] == ["Y/N", "", "Y/N"], t["blank"])
     ck("...and an absent 3-year target is not minted behind the office's back",
-       t["noFar"] == ["Y/N", "", "Y/N"], t["noFar"])
-    ck("leaving Y/N leaves no number behind — never 'Y/NB EGP'",
-       t["back"] == ["%", "%", "%"], t["back"])
+       t["noFar"] == ["100 Y/N", "", "Y/N"], t["noFar"])
+    ck("...AND CHANGING YOUR MIND GIVES THE FIGURE BACK — never 'Y/N%'",
+       t["back"] == ["100%", "100%", "%"], t["back"])
+    ck("a row that never had a figure leaves Y/N with none",
+       t["bare"] == ["%", "", "%"], t["bare"])
     ck("...and clearing it clears the row", t["clear"][2] == "", t["clear"])
 
     print("\n── 3 · a bare number never inherits Y/N (it would store '5Y/N')")
     inh = ev(pg, """() => {
-      const yn = unitInherit({target:"Y/N"})("5");
+      const yn = unitInherit({target:"100 Y/N"})("5");
       const eg = unitInherit({target:"6.2B EGP"})("5");
       return [yn, eg]; }""")
     ck("a yes/no row hands a typed 5 straight back", inh[0] == "5", inh)
@@ -179,6 +186,9 @@ with sync_playwright() as pw:
       yes:  measureScore({target:"Y/N", actual:"Yes"}),
       no:   measureScore({target:"Y/N", actual:"No"}),
       none: measureScore({target:"Y/N", actual:""}),
+      /* a KEPT figure is not counted — 100 against "Yes" is still 100, and
+         against "No" still 0; the number in the box decides nothing */
+      kept: measureScore({target:"100 Y/N", actual:"No", dir:"\\u2265"}),
       /* the share is irrelevant: there is no partial yes to prorate (§250) */
       half: measureScore({target:"Y/N", actual:"Yes", compile:"Sum"}, 0.5),
       /* and a measured row is UNTOUCHED by any of this */
@@ -186,6 +196,8 @@ with sync_playwright() as pw:
       due:  measureDueLabel({target:"Y/N", actual:"Yes"})
     })""")
     ck("yes is 100 and no is 0", [sc["yes"], sc["no"]] == [100, 0], sc)
+    ck("a KEPT figure is ignored — the row is judged by the answer alone",
+       sc["kept"] == 0, sc)
     ck("unanswered is not scored", sc["none"] is None, sc)
     ck("a Sum yes/no is not prorated to 50", sc["half"] == 100, sc)
     ck("a measured row scores exactly as it did", sc["keep"] == 50, sc)
@@ -193,7 +205,7 @@ with sync_playwright() as pw:
 
     print("\n── 5 · a tactic's outcome is admitted and scored (§248's shape)")
     oc = ev(pg, """() => {
-      const t = {outTarget:"Y/N", outActual:"Yes"};
+      const t = {outTarget:"100 Y/N", outActual:"Yes"};   /* a kept figure */
       const n = {outTarget:"Y/N", outActual:"No"};
       const q = {outTarget:"Y/N"};
       const p = {outTarget:"%"};                     /* §249: still a gap */

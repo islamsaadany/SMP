@@ -27798,7 +27798,45 @@ such a row (blank and `Y/N` only) rather than the control vanishing, so what
 is on offer is what can actually be stored and nothing takes an answer and
 discards it.
 
-**THE DEFECT FOUND BY DRIVING IT, NOT BY READING IT (§251.2).** A bound field
+**§251.2 — THE VALUES ARE KEPT, AND THE UNIT IS WHAT STOPS THEM COUNTING
+(REVERSING §251's OWN FIRST BUILD).** Islam, from the running page, with a
+tactic outcome reading `100` · `Y/N` · `≥` · `Latest` and not one of them
+dimmed: *"Y/N didn't dim the surrounding as you can see even they are set
+before they need to be dimmed even by keeping the values but as if they are
+not counted anymore."*
+
+**TWO THINGS WERE WRONG AND THE SECOND IS THE DESIGN.** The defect: the
+outcome's picker goes through `nextTargetUnit`, which KEEPS the figure — so
+`outTarget` became `100 Y/N` — while the dimming test asked whether the WHOLE
+STRING was `Y/N`, which that fails. Every surface therefore stayed live on
+exactly the rows a person would actually convert, and the measures and
+objectives tables (which went through `setTargetUnit`, and destroyed the
+number) behaved differently from the outcome beside them — §53.5 inside one
+feature.
+
+**And his correction is the better model, so it is taken rather than
+patched.** The first build made a row yes/no by DESTROYING its number, which
+is unlike every other unit in the product and made changing your mind cost
+somebody the figure they had typed, with no undo. Now `Y/N` is written
+exactly as `B EGP` is — beside whatever the row already held — and the row
+stops being measured because of its UNIT. `100 B EGP` becomes `100 Y/N` and
+back to `100 B EGP`; the dimmed boxes SHOW the values they are keeping;
+nothing is thrown away. `isYesNo` reads the unit off the end of the string
+through `targetParts`, which is `outUnitOf`'s own §248 rule, so a bare `Y/N`
+(a row that never had a figure) and `100 Y/N` (one that did) are the same
+kind of row.
+
+**AND THE CORRECTED CHECK IMMEDIATELY FOUND TWO MORE** — both real, both
+invisible under the old model because the number was gone. Leaving Y/N
+blanked the value rather than handing it back (the guard was written for a
+string that WAS "Y/N", and now reads a number out of "100 Y/N"); and
+`measureDue` happily parsed the kept 100 out of `100 Y/N`, so the reporting
+page printed *"due at 100 Y/N"* beside a control offering Yes and No. **6 red
+on the build he was looking at.** Two assertions in `checks/objective-unit.py`
+and four in `checks/yn-target.py` were REWRITTEN rather than deleted (§218),
+with the reversal recorded in them.
+
+**THE DEFECT FOUND BY DRIVING IT, NOT BY READING IT (§251.2a).** A bound field
 writes WITHOUT repainting, deliberately — a repaint under a typing hand
 destroys the box being typed into (§71.2, §35) — and that is right for every
 field whose value is the only thing that changes and wrong for this one:

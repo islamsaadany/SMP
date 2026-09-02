@@ -554,7 +554,9 @@ function outcomeEdit(t, set, pendCls, fillOnly){
      the control that SET this state would leave the row stuck in it (§61). */
   var yn = SMPRules.isYesNo(t.outTarget);
   return '<div class="tgrid">' +
-    (yn ? offInput("—")
+    /* §251.2: the figure it already held is SHOWN, greyed and dead — the
+       row is not counted by it any more, and nothing was thrown away. */
+    (yn ? offInput(splitTarget(t.outTarget || "").value)
         : inputOr("plan", splitTarget(t.outTarget || "").value, "mono " + (pendCls || ""),
             function(v){
       var n = String(v == null ? "" : v).trim();
@@ -578,7 +580,7 @@ function outcomeEdit(t, set, pendCls, fillOnly){
       /* A yes/no outcome's direction and compile rule are drawn dead in BOTH
          modes — the filler already sees them as facts, and for the office
          they have stopped being decisions. */
-      ? offSelect(t.outDir || "≥") + offSelect("—")
+      ? offSelect(t.outDir || "≥") + offSelect(t.outCompile || "—")
       : fillOnly
       /* `.why` on BOTH, because `.tgrid > .why` is what centres a plain span
          inside a `--tw` column — without it the direction sits left of the box
@@ -3190,30 +3192,40 @@ function setTargetUnit(m, u){
      feature rests on: joinTarget reads the separator back out of the stored
      string, so a value written here splits and rejoins to itself, and the
      check asserts that over everything the plan holds. */
-  /* ── §251: Y/N REPLACES THE NUMBER OUTRIGHT ─────────────────────────
-     Every other unit is written BESIDE a figure; this one says there is no
-     figure, so picking it is the act that turns a measured row into a
-     yes/no row. `target` is written whether or not it held anything — that
-     is how a Y/N row is created, and the alternative is asking somebody to
-     type a number they do not have before they can say the row has none.
-     A 3-year target is only rewritten where it HELD something: a measures
-     table has no such column, and minting one behind the office's back
-     would put a field in the plan nobody asked for (§50.6). */
-  if (want === SMPRules.YN_UNIT) {
+  /* ── §251.2: Y/N KEEPS THE NUMBER, IT JUST STOPS COUNTING IT ─────────
+     Islam, correcting the first build: *"even they are set before they need
+     to be dimmed even by keeping the values but as if they are not counted
+     anymore."* So this is NOT a special case at all — Y/N is written exactly
+     as every other unit is, beside whatever figure the row already held, and
+     the row stops being measured because of its UNIT rather than because
+     something was destroyed. `100 B EGP` becomes `100 Y/N` and back again,
+     and nobody has to retype a number to change their mind.
+
+     THE ONE THING IT DOES NEED is a row with nothing to attach it to: the
+     loop below skips an empty field (there is no figure to write a unit
+     beside), which would make a brand-new "did it happen" row impossible to
+     mark. Held alone, exactly as §248 holds an outcome's unit before a
+     number joins it. */
+  if (want === SMPRules.YN_UNIT &&
+      SMPRules.gapBlank(m.target) && SMPRules.gapBlank(m.target3y)) {
     m.target = SMPRules.YN_UNIT;
-    if (!SMPRules.gapBlank(m.target3y)) m.target3y = SMPRules.YN_UNIT;
     return;
   }
   var sep = want && !TIGHT_UNITS[want] ? " " : "";
   ["target", "target3y"].forEach(function(f){
     var v = m[f];
     if (v == null || v === "") return;   /* nothing to attach it to */
-    /* LEAVING Y/N LEAVES NO NUMBER BEHIND. `splitTarget("Y/N")` answers with
-       a value of "Y/N" (no number to find), so without this the row would
-       read "Y/NB EGP" — the unit picker writing nonsense into the field it
-       is meant to be a view of. The row goes back to holding the new unit
-       alone, which is §248's own "held on its own until a number arrives". */
-    var val = SMPRules.isYesNo(v) ? "" : splitTarget(v).value;
+    /* THE VALUE IS TAKEN ONLY WHERE THERE IS A NUMBER TO TAKE. A bare unit —
+       `Y/N` on a row that never had a figure, or `%` held alone before one
+       is typed — answers `splitTarget` with a VALUE of the whole string
+       (there is no number for it to find), so without this the row would
+       read "Y/NB EGP": the unit picker writing nonsense into the field it is
+       meant to be a view of.
+       §251.2: and a row that DID have a figure gives it straight back —
+       `100 Y/N` returns to `100%`, which is the whole of why picking Y/N is
+       safe to change your mind about. */
+    var raw = splitTarget(v).value;
+    var val = /^-?[\d.,]+$/.test(raw) ? raw : "";
     m[f] = val ? val + (want ? sep + want : "") : want;
   });
 }
@@ -3499,13 +3511,13 @@ function koEdit(list, page, acKey, owner){
               targetUnitOpts(targetUnitOf(m), !hasTargetToHoldAUnit(m)), "",
               function(v){ setTargetUnitAndRepaint(m, v); })
           : (fillUnitCell(page, acKey, m) || esc(targetUnitOf(m)))) + '</td>' +
-        '<td class="cc">' + (pg && yn ? offInput("\u2014")
+        '<td class="cc">' + (pg && yn ? offInput(splitTarget(m.target3y || "").value)
           : gapCell(page, acKey, m, "target3y",
           { kind:"input", cls:"mono", parse: unitInherit(m), read: targetShown })) + '</td>' +
-        '<td class="cc">' + (pg && yn ? offInput("\u2014")
+        '<td class="cc">' + (pg && yn ? offInput(splitTarget(m.target || "").value)
           : gapCell(page, acKey, m, "target",
           { kind:"input", cls:"mono", parse: unitInherit(m), read: targetShown })) + '</td>' +
-        '<td class="cc">' + (pg && yn ? offSelect("\u2014")
+        '<td class="cc">' + (pg && yn ? offSelect(m.compile || "\u2014")
           : gapCell(page, acKey, m, "compile",
           { kind:"select", opts:["Sum", "Latest", "Average"] })) + '</td>' +
         /* §243: the same cell the capability's table already draws — one
@@ -5535,7 +5547,7 @@ function unitPlanBody(it, u, railed){
         ? '<td class="cc">' + (fillUnitCell("plan", "u_plan", m, pctx(m))
             || esc(targetUnitOf(m))) + '</td>'
         : '') +
-      '<td class="num">' + (ed && isYesNoRow(m) ? offInput("—")
+      '<td class="num">' + (ed && isYesNoRow(m) ? offInput(splitTarget(m.target || "").value)
         : gapCell("plan", "u_plan", m, "target",
         { ctx:pctx(m), kind:"input", cls:"mono", parse: unitInherit(m),
           read: targetShown })) + '</td>' +
@@ -5546,7 +5558,7 @@ function unitPlanBody(it, u, railed){
          and keep theirs. `target3y` is still stored and still travels through
          import, export and the archive — this removes a column, not a field,
          so nothing a plan already carries is lost. */
-      '<td class="cc">' + (ed && isYesNoRow(m) ? offSelect("\u2014")
+      '<td class="cc">' + (ed && isYesNoRow(m) ? offSelect(m.compile || "\u2014")
         : gapCell("plan", "u_plan", m, "compile",
         { ctx:pctx(m), kind:"select", opts:["Sum","Latest","Average"],
           readEmpty:"\u2014", read:compileCell })) + '</td></tr>';

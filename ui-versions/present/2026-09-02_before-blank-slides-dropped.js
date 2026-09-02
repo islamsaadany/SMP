@@ -31,36 +31,9 @@ function anch(key, label, where){
 /* The anchors of a deck, in the order they appear in it. Built by rendering
    the deck into a detached element — nothing is shown, and the answer is
    therefore the real deck's rather than a description of it. */
-/* ── ONE ANSWER TO "WHICH DECK DOES THIS TARGET GET" (§253.3) ─────────
-   Islam, on the live deployment: *"the manage presentation show this"* — the
-   Manage slides editor open on `fn:merchandizing`, its bar drawn and the rail
-   and the stage completely empty.
-
-   §224 IS THE SAME FAULT AND IT WAS FIXED ON ONE SURFACE OF THREE. That
-   section made the Present button branch on the function's FORMAT rather than
-   on the `fn:` prefix, because a function that plans in PILLARS has no
-   capabilities at all and the capability deck therefore has nothing to say
-   about it. `slidesAssemble()` and `deckAnchors()` were both still asking by
-   prefix, so Manage slides assembled a deck of ONE useless cover reading
-   "Capability review · 0 capabilities" (measured on the demo), and the
-   anchors it offers a picture came from that same wrong deck. §53.5: a
-   question with three call sites and two answers.
-
-   THE PAIRING IS NAMED ONCE NOW and the three surfaces ask it, so the next
-   surface to want a deck cannot get a different one. `unitLike()` resolves a
-   unit key and an `fn:` key in one place, exactly as the Present button has
-   done since §224. */
-function deckHtmlFor(target){
-  var t = String(target || "");
-  var fk = t.indexOf("fn:") === 0 ? t.slice(3) : null;
-  if (fk && !fnPlansInPillars(FUNCTIONS[fk])) return deckSlidesFn(fk);
-  var u = unitLike(t);
-  return u ? deckSlides(u) : "";
-}
-
 function deckAnchors(kind, key){
   var box = document.createElement("div");
-  box.innerHTML = deckHtmlFor(kind === "fn" ? "fn:" + key : key);
+  box.innerHTML = kind === "fn" ? deckSlidesFn(key) : deckSlides(UNITS[key]);
   var seen = {}, out = [];
   [].forEach.call(box.querySelectorAll("[data-anchor]"), function(el){
     var a = el.dataset.anchor;
@@ -70,42 +43,6 @@ function deckAnchors(kind, key){
   });
   return out;
 }
-
-/* ── A TABLE WITH NO ROWS IS NOT A SLIDE (§253) ───────────────────────
-   Islam: *"slides are showing blank pages for the merchandizing."* Measured
-   on the demo before anything was changed: FOUR slides in the whole product
-   render a heading, a navy column strip and then a whole empty page, and all
-   four of them are Merchandising — its own deck's two objectives slides
-   (a supporting function judged by its pillars legitimately carries none,
-   §214.2, and the deck never learned it) and Retail's RS04, the pillar
-   carried by that function, which by construction holds no measures and no
-   tactics of its own.
-
-   THE PRODUCT ALREADY KNEW THE ANSWER AND APPLIED IT TO ONE HALF.
-   `deckSlidesFn` has guarded its objectives slide on
-   `SMPRules.shown(c.keyObjectives).length` since it was written, which is why
-   Marketing — whose two capabilities also carry no objectives — has always
-   been right. The unit deck, which a pillars function goes through since
-   §224, had no such guard. §53.5: one question, two answers, and the half
-   left behind is the half Islam was looking at.
-
-   ISLAM RULED IT FOR ANY SUBJECT, not only a function: *"drop them on any
-   subject with none"*, reversing the narrower rule recommended to him (that a
-   unit keep its empty slides, because a unit AUTHORS objectives and an empty
-   table there is a plan not yet written — §243's own test for SWOT). Recorded
-   as his: the cost is that a unit that has left its objectives blank is no
-   longer told so from the projector, and is still told so on every screen
-   that counts gaps.
-
-   IT DROPS THE TABLE, AND THE SLIDE ONLY WHERE THAT LEAVES NOTHING. The aim
-   slide carries a unit's aspiration and end-in-mind ABOVE its table, and
-   neither is a table with no rows — dropping the whole slide there would
-   remove an aspiration nobody asked to remove. On a function that half is
-   already absent (§243), so an empty table empties the slide and it goes.
-
-   AN ANCHOR GOES WITH ITS SLIDE, and that is §50.3's existing behaviour
-   rather than a new cost: a picture placed after a slide that is no longer
-   drawn lands at the end of the deck instead of being dropped. */
 
 function deckSlides(u){
   var S = [];
@@ -168,7 +105,7 @@ function deckSlides(u){
         ? '<td class="num">' + (m.target ? esc(m.target) : '<span class="missing">Missing</span>') + '</td>'
         : '') + '</tr>';
   }).join("");
-  if (aimRows || !fnAim) S.push('<section class="dslide"' + anch("aim", "After \u201cWhat we are aiming at\u201d") +
+  S.push('<section class="dslide"' + anch("aim", "After \u201cWhat we are aiming at\u201d") +
     '><h2>What we are aiming at</h2>' +
     (fnAim ? '' :
       '<div class="aimtop"><div><span class="dlab">' + L("aspiration","bu") + '</span>' +
@@ -176,16 +113,13 @@ function deckSlides(u){
       (u.endInMind
         ? '<div><span class="dlab">End in mind</span><p class="asp3">' + esc(u.endInMind) + '</p></div>'
         : '') + '</div>') +
-    (aimRows
-      ? '<div class="aimbottom">' +
-          (fnAim ? '' : '<span class="dlab">' + L("keyobj","bu") + horizonBy() + '</span>') +
-          '<table class="zebra dbig"><thead><tr><th class="idx">#</th><th>Objective</th>' +
-          (fnAim ? '' : '<th class="num">' + horizonColLabel() + '</th>') +
-          (aimNear ? '<th class="num">This year</th>' : '') +
-          '</tr></thead><tbody>' + aimRows + '</tbody></table>' +
-        '</div>'
-      : '') +
-    '</section>');
+    '<div class="aimbottom">' +
+      (fnAim ? '' : '<span class="dlab">' + L("keyobj","bu") + horizonBy() + '</span>') +
+      '<table class="zebra dbig"><thead><tr><th class="idx">#</th><th>Objective</th>' +
+      (fnAim ? '' : '<th class="num">' + horizonColLabel() + '</th>') +
+      (aimNear ? '<th class="num">This year</th>' : '') +
+      '</tr></thead><tbody>' + aimRows + '</tbody></table>' +
+    '</div></section>');
 
   /* ── 3 · THE THREE READINGS, AT THE SIZE THEY DESERVE (§243) ───────
      Islam: *"where the units stands needs to show the 3 main numbers not only
@@ -205,35 +139,14 @@ function deckSlides(u){
      unit: a supporting function's review opened by calling itself a business
      unit, which is the one place this slide was plainly wrong. A unit's
      wording is right as it stands and is not changed for tidiness. */
-  /* ── AND THE READING NOBODY TOOK IS NOT DRAWN AT ALL (§253) ────────
-     Islam, of the first of these three cells on Merchandising: drop it, *"and
-     this applies to any function without key objectives like marekting as
-     well."* Measured, it read a grey dash under *"no earlier cycle to
-     compare"* — a whole column of nothing beside two real numbers, which
-     reads as a cell that failed to render rather than as an absence (§45.2,
-     §15.1).
-
-     MARKETING IS ALREADY RIGHT, and that is the evidence this is one rule and
-     not two: a capability function's cover guards this same cell on the same
-     test, so the fix brings the unit deck up to the half of the product that
-     never had the fault.
-
-     THE SHAPE COSTS NO NEW CSS. `.headgrid` without `.three` is the
-     two-column shape this slide wore before §243 added the third number, so
-     the surviving figures simply grow back into the room they had.
-
-     AND THE FOOTNOTE LOSES THE CLAUSE THAT NAMES THE MISSING NUMBER, or the
-     slide explains a reading it is not showing. */
-  var pl = unitPillars(u), koShown = SMPRules.shown(u.keyObjectives).length;
+  var pl = unitPillars(u);
   S.push('<section class="dslide d-head"' + anch("stand", "After \u201cWhere the unit stands\u201d") +
     '><h2>Where ' + (u.fnKey ? esc(u.name) : "the unit") + ' stands</h2>' +
-    '<div class="headgrid' + (koShown ? ' three' : '') + '">' +
-      (koShown
-        ? '<div class="headcell"><span class="dlab">' + L("keyobj","bu") + ' performance</span>' +
-          '<b class="' + dBand(ko) + '">' + dPct(ko) + '</b>' +
-          '<span class="headsub">' + (dtag ? dtag + " against the last cycle" : "no earlier cycle to compare") +
-          '</span></div>'
-        : '') +
+    '<div class="headgrid three">' +
+      '<div class="headcell"><span class="dlab">' + L("keyobj","bu") + ' performance</span>' +
+        '<b class="' + dBand(ko) + '">' + dPct(ko) + '</b>' +
+        '<span class="headsub">' + (dtag ? dtag + " against the last cycle" : "no earlier cycle to compare") +
+        '</span></div>' +
       '<div class="headcell"><span class="dlab">' + L("pillar","bu") + ' performance</span>' +
         '<b class="' + dBand(pl) + '">' + dPct(pl) + '</b>' +
         '<span class="headsub">' + u.items.length + ' ' + esc(L("pillar","bu").toLowerCase()) +
@@ -242,8 +155,7 @@ function deckSlides(u){
         '<b class="' + dBand(ex) + '">' + dPct(ex) + '</b>' +
         '<span class="headsub">' + dPct(unitExec(u)) + ' delivered against ' +
           dPct(unitPlan(u)) + ' planned</span></div>' +
-    '</div><p class="headfoot">' +
-    (koShown ? 'Objectives measure what was committed to. ' : '') +
+    '</div><p class="headfoot">Objectives measure what was committed to. ' +
     esc(L("pillar","bu")) + ' measure how the work set against them is going. ' +
     'Execution measures whether that work is landing on time.</p></section>');
 
@@ -255,7 +167,7 @@ function deckSlides(u){
       '<td class="num">' + figShown(m) + '</td>' +
       '<td class="num final ' + dBand(measureScore(m)) + '">' + dPct(measureScore(m)) + '</td></tr>';
   }).join("");
-  if (oRows) S.push('<section class="dslide"' + anch("objectives", L("keyobj","bu") + " \u2014 after the table") +
+  S.push('<section class="dslide"' + anch("objectives", L("keyobj","bu") + " \u2014 after the table") +
     '><h2>' + L("keyobj","bu") + ' &mdash; where we stand</h2>' +
     '<table class="zebra dbig"><thead><tr><th class="idx">#</th><th>Objective</th>' +
     '<th class="num">This year</th><th class="num">Actual</th>' +
@@ -347,7 +259,7 @@ function deckSlides(u){
        because that's a valid place to be." The lowercase suffix keeps the key
        clear of the tactics anchor below ("p" + code), which stored slides
        already name. */
-    if (mRows) S.push('<section class="dslide" data-split="' + pillarCode(u, pi) + 'M"' +
+    S.push('<section class="dslide" data-split="' + pillarCode(u, pi) + 'M"' +
       anch("p" + pillarCode(u, pi) + "m", "After " + pillarCode(u, pi) + " — key measures") + '>' +
       deckPillarHead(u, p, pi, "Key measures") +
       '<table class="zebra withnote"><thead><tr><th class="idx">#</th><th>Measure</th>' +
@@ -409,7 +321,7 @@ function deckSlides(u){
         '<td class="num final ' + dBand(r) + '">' + dPct(r) + '</td>' +
         note + '</tr>';
     }).join("");
-    if (tRows) S.push('<section class="dslide" data-split="' + pillarCode(u, pi) + 'T"' +
+    S.push('<section class="dslide" data-split="' + pillarCode(u, pi) + 'T"' +
       anch("p" + pillarCode(u, pi), "After " + pillarCode(u, pi) + " \u2014 " + p.name) + '>' +
       deckPillarHead(u, p, pi, "Tactics") +
       '<table class="zebra withnote"><thead><tr><th class="idx">#</th><th>Tactic</th>' +
@@ -606,7 +518,7 @@ function deckSlidesFn(fk){
           '<td class="num">' + (msReads(m) == null ? "&mdash;" : msReads(m) + "%") + '</td>' +
           (m.note ? '<td class="dnote">' + esc(m.note) + '</td>' : '<td class="dnote empty">&mdash;</td>') + '</tr>';
       }).join("");
-      if (mRows) S.push('<section class="dslide" data-split="' + esc(p.id) + 'M"' +
+      S.push('<section class="dslide" data-split="' + esc(p.id) + 'M"' +
         anch("ms" + p.id, "After " + p.name + " — milestones") + '>' +
         '<h2>' + esc(p.name) + '<span class="dwhich">Milestones &middot; ' + mst.done + ' of ' + mst.total + ' completed</span></h2>' +
         '<table class="zebra withnote"><thead><tr><th class="idx">#</th><th>Milestone</th>' +
@@ -726,17 +638,12 @@ function openDeckWith(titleHtml, slides, target){
   deckScale();
   root.focus();
 }
-/* THE TWO OPENERS STAY, AND BOTH GO THROUGH THE ONE READER (§253.3). They
-   are two doors onto one question — Present on a unit, Present on a function —
-   and `deckHtmlFor()` is what decides which deck each gets, so a pillars
-   function opened through either lands on the same slides. */
 function openDeck(u){
-  openDeckWith("<b>" + esc(u.name) + "</b> &middot; " + esc(REVIEW.name),
-    deckHtmlFor(u.ukey), u.ukey);
+  openDeckWith("<b>" + esc(u.name) + "</b> &middot; " + esc(REVIEW.name), deckSlides(u), u.ukey);
 }
 function openDeckFn(fk){
   openDeckWith("<b>" + esc(FUNCTIONS[fk].name) + "</b> &middot; " + esc(REVIEW.name),
-    deckHtmlFor("fn:" + fk), "fn:" + fk);
+    deckSlidesFn(fk), "fn:" + fk);
 }
 function closeDeck(){
   var root = document.getElementById("deckroot");

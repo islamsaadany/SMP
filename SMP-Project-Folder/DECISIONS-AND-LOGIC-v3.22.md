@@ -27981,3 +27981,193 @@ records the same for the plan slides). And a deck **already open on a
 projector** still does not redraw while somebody saves in another tab: put to
 Islam and deliberately left, because slides changing under a presenter
 mid-sentence is worse than a deck that is right as of when it opened.
+
+---
+
+## §253 — A TABLE WITH NO ROWS IS NOT A SLIDE (2026-09-02)
+
+Islam: *"slides are showing blank pages for the merchandizing."*
+
+**MEASURED BEFORE ANYTHING WAS PROPOSED, AND THE MEASUREMENT IS THE FINDING.**
+A sweep of every deck in the product — each subject through the builder its own
+Present button would call — returned **four** slides holding a table with no
+rows, and **all four are Merchandising**:
+
+| Deck | Slide | Why it is empty |
+|---|---|---|
+| Merchandising | *What we are aiming at* | the function carries no key objectives |
+| Merchandising | *Key Objectives — where we stand* | the same |
+| Retail Stores | *RS04 Merchandising · Key measures* | the pillar is carried by that function |
+| Retail Stores | *RS04 Merchandising · Tactics* | the same |
+
+Each drew a heading, the navy column strip, and then a whole empty page. The
+Retail pair is the worse of the two: it printed **93% / 60% / 61%** across the
+top of a slide with nothing at all behind those numbers.
+
+**THE PRODUCT ALREADY KNEW THE ANSWER AND APPLIED IT TO ONE HALF.**
+`deckSlidesFn` — a capability function's deck — has guarded its objectives
+slide on `SMPRules.shown(c.keyObjectives).length` since it was written, which
+is why **Marketing** (whose two capabilities also carry no objectives) has
+always been right, and why Islam's instinct that the rule must reach it was
+correct in aim and already satisfied in fact. The **unit** deck, which a
+pillars function goes through since §224, had no such guard. §53.5 exactly:
+one question, two answers, and the half left behind is the half he was looking
+at. The empty state was never a mistake in the data — §214.2 settled that a
+function judged by its pillars **legitimately** carries no key objectives and
+stopped counting them as missing; the deck never learned it.
+
+**ISLAM RULED IT FOR ANY SUBJECT, REVERSING THE NARROWER RECOMMENDATION.**
+I recommended dropping the slides on a **function** only, on §243's own test —
+a unit AUTHORS its objectives, so an empty table there is a plan not yet
+written and worth saying out loud, the same reason a unit with an empty SWOT
+still draws its section. He chose *"drop them on any subject with none"*, and
+it is recorded as his with the cost named: a unit that has left its objectives
+blank is no longer told so **from the projector**, and is still told so on
+every screen that counts gaps.
+
+**IT DROPS THE TABLE, AND THE SLIDE ONLY WHERE THAT LEAVES NOTHING.** The aim
+slide carries a unit's aspiration and end-in-mind **above** its table, and
+neither of those is a table with no rows — dropping the whole slide there would
+remove an aspiration nobody asked to remove. On a function that half is already
+absent (§243), so an empty table empties the slide and it goes. The rule
+reaches a project's **milestones** table on the function deck too, which the
+demo happens not to exercise: the fault is the shape, not the one subject that
+showed it.
+
+**AN ANCHOR GOES WITH ITS SLIDE**, and that is §50.3's existing behaviour
+rather than a new cost — a picture placed after a slide that is no longer drawn
+lands at the **end** of the deck instead of being dropped.
+
+### §253.1 — The reading nobody took is not drawn at all
+
+Islam, of the first of the three headline cells on *Where Merchandising
+stands*: drop it, *"and this applies to any function without key objectives
+like marekting as well."* It read a grey dash under *"no earlier cycle to
+compare"* — a whole column of nothing beside two real numbers, which reads as a
+cell that failed to render rather than as an absence (§45.2, §15.1).
+
+**THE SHAPE COSTS NO NEW CSS.** `.headgrid` without `.three` is the two-column
+shape this slide wore before §243 added the third number, so the surviving
+figures simply grow back into the room they used to have. Settled from a mockup
+made of the **real** deck (§41.9, `design-mockups/deck-empty-slides/`), both
+sides the same build.
+
+**AND THE MOCKUP EARNED ITS PLACE**: shooting it exposed that the footnote
+still opens *"Objectives measure what was committed to"* — explaining a number
+that would no longer be on the slide. The clause goes with the cell, or the
+slide argues with itself. Nothing in the sources had been touched when that was
+found.
+
+### §253.2 — The pointer from Retail to Merchandising is cut
+
+Islam: *"drop the merchandizing connection with the retail stores."*
+
+`by: "merchandising"` on Retail's fourth pillar is spec 010's worked example —
+his own: the function broke that pillar into three of its own, and their
+collective performance stood in for it. **The FEATURE is untouched**:
+`pillarCarrier()` / `viaCarrier()` and the `by` field are the product and still
+work; what is cut is this tenant's use of it.
+
+**THE COST IS STATED RATHER THAN DISCOVERED.** The demo no longer **shows** a
+carried pillar anywhere, so spec 010 is described and not visible — §45.2's
+argument accepted with its price named. Retail's own numbers move, because the
+pillar now scores as what it is (a pillar with nothing in it yet) rather than
+borrowing the function's. **Measured across every unit, before and after:**
+
+| | before | after |
+|---|---|---|
+| Retail Stores · execution | 102 | **104** |
+| Retail Stores · planned | 57 | **56** |
+| RS04 · measures / delivered / planned | 93 / 60 / 61 | **— / — / —** |
+| every other unit, and the group | — | **unchanged** |
+
+Retail's objectives (105) and pillar performance (94) do not move at all.
+RS04's title slide now honestly reads three dashes where it read a score with
+nothing behind it, and its two empty tables are gone by §253's own rule.
+
+One consequence worth naming: with the pointer cut, `fnDeleteBlockers()` no
+longer lists Retail against Merchandising, so the function becomes deletable
+where it was refused before (§62's refusal, correctly, following the data).
+
+### §253.3 — One answer to which deck a target gets
+
+Islam, on the live deployment, minutes after the three decisions above:
+*"the manage presentation show this"* — the Manage slides editor open on
+`fn:merchandizing`, its blue bar drawn and the rail and the stage
+**completely empty**.
+
+**§224 IS THE SAME FAULT AND IT WAS FIXED ON ONE SURFACE OF THREE.** That
+section made the Present button branch on the function's FORMAT rather than on
+the `fn:` prefix, because a function that plans in PILLARS has no capabilities
+at all. `slidesAssemble()` and `deckAnchors()` were both still asking by
+prefix. Measured on the demo, the editor for a pillars function assembled
+**two** slides — a cover reading *"Capability review · 0 capabilities"* and
+*Thank you* — where its own Present button opens thirteen; and the anchors
+offered for a picture came from that same wrong deck, so a picture could only
+ever be placed in one of two positions in a deck that has thirteen.
+
+**THE PAIRING IS NAMED ONCE NOW.** `deckHtmlFor(target)` is the one reader,
+and Present, Manage slides and the anchors all ask it — including
+`openDeckFn()`, which went from **2 slides to 13** for a pillars function, so
+even a caller reaching the function opener directly now gets the right deck.
+The capability deck is asserted **unchanged** in the same breath (Marketing:
+15 slides before and after), or a build that sent everything through the unit
+deck would satisfy every assertion about the function.
+
+**AND THE FAILURE HAD NO VOICE, WHICH IS WHY IT READ AS A DEAD SCREEN.**
+`slidesAssemble()` had a `try/finally` and **no catch**, and `slidesPaint()`
+opened `if (!all.length) return;` — so a throw anywhere in the builder, or a
+deck that came back empty, left the editor's bar drawn over a blank rail and a
+blank stage, with nothing said and nothing a person could see. §32's rule (a
+refusal is visible where the act was) and §171's (a silent failure is
+indistinguishable from a success), on the one surface that had neither. A
+throw is now kept and reported in the editor's own error line, and an empty
+deck says so where the rail would be.
+
+**WHAT IS NOT CLAIMED** (§171: a diagnostic is not a fix, and which it is has
+to be said). On the demo the pre-fix editor draws **two** slides; Islam's
+screenshot shows **none**. The prefix branch is certainly a defect, certainly
+on that surface, and certainly makes the editor useless for a pillars
+function — but whether it is *exactly* what emptied his rail cannot be proved
+from here, because his tenant's data is not visible. That is why the failure
+was given a voice in the same change: if something in his data is throwing, he
+now gets a sentence instead of a blank screen, and the sentence names it.
+
+### What proves it
+
+`checks/deck-blank-slides.py` — **14 red** against the build before, its first
+failure printing the four blank slides by name, exactly as reported. It
+asserts:
+
+- **no deck in the product draws a table with no rows**, swept over every unit
+  and every active function through the builder each one's own Present button
+  would call (§224);
+- **the state is MADE, never waited for** (§94.2) — a business unit is stripped
+  of its objectives and its first pillar of its measures and tactics in memory,
+  so the rule is proved on a unit and not only on the one function the demo
+  ships empty;
+- **and put back, the slides come back** (§113.8) — a build that drew no tables
+  at all would satisfy every absence above;
+- **a unit keeps the aspiration it never asked to lose**;
+- **the headline slide's two shapes**, cells and footnote at both ends;
+- **one reader decides which deck a target gets** — a pillars function
+  through it equals the unit deck built directly, a capability function equals
+  the capability deck built directly (§113.8), the editor draws the whole deck
+  rather than one useless cover, its rail never comes back empty with nothing
+  said, and the anchors come from the same deck as the slides;
+- **the pointer is cut and the feature is not**.
+
+**AND ONE OF ITS OWN ASSERTIONS PASSED ON THE BROKEN BUILD** (§94.5, and it is
+the reason falsification is run rather than assumed): *"and its first pillar's
+two tables with it"* searched the first six headings, and on the unstripped
+deck a pillar's tables sit at index 11 — so it was true of the fault it existed
+to catch. It names the stripped pillar by its **code** now, because the other
+pillars legitimately keep their tables and a blanket search cannot separate the
+two. 10 red became 11.
+
+**RECORDED, NOT DONE.** A pillars function's deck now opens
+cover → *Where X stands* → *Pillars*, with no *What we are aiming at* at all
+where the function has no objectives. That is correct and it is also the first
+deck in the product with no aim slide; whether such a function should instead
+open on something of its own is a decision about what a review says, not a
+blank page, and it has not been put to Islam.

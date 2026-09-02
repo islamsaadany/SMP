@@ -236,18 +236,6 @@ var SLED = { target:null, kind:null, key:null, sel:null, err:"" };
    the one that is unambiguously measurable (§3.2's lesson from the other end).
    `inert` and `aria-hidden`, because a full deck of slides in the accessibility
    tree behind the editor is a screen reader walking the whole review twice. */
-/* A DECK THAT CANNOT BE BUILT SAYS SO (§253.3). `slidesAssemble()` had a
-   `try/finally` and no catch, and `slidesPaint()` opened `if (!all.length)
-   return;` — so a throw anywhere in the builder, or a deck that came back
-   empty, left the editor's bar drawn over a blank rail and a blank stage with
-   nothing said and nothing in the console the person could see. That is the
-   screen Islam sent. §32's rule (a refusal must be visible where the act was)
-   and §171's (a failure that is silent is indistinguishable from a success),
-   on the one surface that had neither.
-
-   THE CAUSE IS FIXED ABOVE and this is the net under it, said as such: it
-   makes an invisible failure visible, it does not claim to have found the
-   cause of any particular one. */
 function slidesAssemble(){
   var host = document.createElement("div");
   host.className = "slmeasure";
@@ -258,9 +246,7 @@ function slidesAssemble(){
   host.appendChild(box);
   document.body.appendChild(host);
   try {
-    /* §253.3: the FORMAT decides the deck, never the `fn:` prefix — asked
-       through the one reader Present and the anchors also ask. */
-    box.innerHTML = deckHtmlFor(SLED.target);
+    box.innerHTML = SLED.kind === "fn" ? deckSlidesFn(SLED.key) : deckSlides(UNITS[SLED.key]);
     insertPictureSlides(box, SLED.target, true);
     /* The same order openDeckWith() uses, and the order matters both ways:
        AFTER the picture slides so a custodian's own slide is footed too, and
@@ -278,12 +264,6 @@ function slidesAssemble(){
       var id = el.getAttribute("data-ps");
       el.dataset.ed = id ? "ps:" + id : "gen:" + (g++);
     });
-  } catch (e) {
-    /* Kept, not rethrown: the editor is already open, and the person needs a
-       sentence rather than a blank screen. `slidesPaint()` reads it. */
-    SLED.err = "This deck could not be built. Nothing has been lost — your "
-             + "pictures are saved with the cycle. " + (e && e.message ? e.message : "");
-    box.innerHTML = "";
   } finally {
     /* Detached before it is read from, so a failure anywhere above cannot
        leave a full deck parked in the document for the rest of the session. */
@@ -349,18 +329,7 @@ var SL_THUMB = 0.105;
 function slidesPaint(){
   var box = slidesAssemble();
   var all = [].slice.call(box.querySelectorAll(".dslide"));
-  if (!all.length) {
-    /* NEVER A SILENT RETURN (§253.3). This left the bar over an empty rail and
-       an empty stage — the screen Islam reported — so an empty deck now says
-       what happened where the act was. */
-    document.getElementById("slidelist").innerHTML =
-      '<p class="picsub">Nothing to show here yet.</p>';
-    document.getElementById("slidepane").innerHTML =
-      '<p class="picerr" role="alert">' + esc(SLED.err ||
-        "This review has no slides to manage yet. A plan with nothing in it "
-        + "produces no deck, so there is nowhere to put a picture.") + '</p>';
-    return;
-  }
+  if (!all.length) return;
   /* Keep the selection if it still exists; otherwise take the first picture
      slide, and failing that the first slide. */
   var keys = all.map(function(el){ return el.dataset.ed; });

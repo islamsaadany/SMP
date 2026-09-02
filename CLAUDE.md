@@ -365,6 +365,78 @@ console errors (in this cloud environment, run it via a wrapper that points Play
   `node scripts/test-door.js <smo-password>` against a running dev-server
   after touching `api/auth.js` or `lib/auth.js` (it ends by rate-limiting the
   SMO on purpose — `DELETE FROM login_attempts;` clears it).
+- **A TABLE WITH NO ROWS IS NOT A SLIDE (§253):** Islam — *"slides are
+  showing blank pages for the merchandizing."* Measured before anything was
+  proposed: **four** slides in the whole product draw a heading, a navy column
+  strip and then a whole empty page, and **all four are Merchandising** — its
+  own deck's two objectives slides (a supporting function judged by its pillars
+  legitimately carries none, §214.2, and the deck never learned it) and
+  Retail's **RS04**, the pillar carried by that function, which printed
+  **93% / 60% / 61%** across the top of a slide with nothing at all behind those
+  numbers. **THE PRODUCT ALREADY KNEW THE ANSWER AND APPLIED IT TO ONE HALF**:
+  `deckSlidesFn` has guarded its objectives slide since it was written, which is
+  why **Marketing** — whose two capabilities also carry no objectives — has
+  always been right; the unit deck, which a pillars function goes through since
+  §224, had no such guard (§53.5). **ISLAM RULED IT FOR ANY SUBJECT**, reversing
+  the narrower rule recommended to him (a unit AUTHORS objectives, so §243's
+  SWOT test would have kept its empty slides) — recorded as his, with the cost
+  named: a unit that has left its objectives blank is no longer told so from the
+  projector, and still is on every screen that counts gaps. **IT DROPS THE
+  TABLE, AND THE SLIDE ONLY WHERE THAT LEAVES NOTHING** — the aim slide carries
+  a unit's aspiration ABOVE its table and that is not a table with no rows, so
+  a unit keeps the slide and a function (whose half §243 already removed) loses
+  it. **An anchor goes with its slide**, which is §50.3's existing behaviour: a
+  picture placed after it lands at the END rather than being dropped.
+  **§253.1 — THE READING NOBODY TOOK IS NOT DRAWN AT ALL**: the headline slide's
+  objectives cell read a grey dash under *"no earlier cycle to compare"*, which
+  is a control that failed to render rather than an absence (§45.2, §15.1). It
+  goes for any subject with none, **at no CSS cost** — `.headgrid` without
+  `.three` is the shape that slide wore before §243 added the third number.
+  Settled from a mockup made of the REAL deck (§41.9), **and the mockup earned
+  its place**: shooting it exposed that the footnote still opened *"Objectives
+  measure what was committed to"*, explaining a number that would no longer be
+  there. **§253.2 — THE POINTER IS CUT**: *"drop the merchandizing connection
+  with the retail stores."* `by:"merchandising"` leaves Retail's fourth pillar;
+  **the FEATURE is untouched** (`pillarCarrier`/`viaCarrier` still answer), and
+  the cost is stated rather than discovered — the demo no longer SHOWS a carried
+  pillar anywhere, so spec 010 is described and not visible. **Measured across
+  every unit**: Retail execution 102→104 and planned 57→56, RS04's three figures
+  93/60/61 → three dashes, **and nothing else in the tenant moves** — Retail's
+  objectives (105) and pillar performance (94) included. `checks/deck-blank-slides.py`:
+  **11 red** on the build before, its first failure printing the four blank
+  slides by name. **AND ONE OF ITS OWN ASSERTIONS PASSED ON THE BROKEN BUILD**
+  (§94.5) — it searched the first six headings and a pillar's tables sit at
+  index 11, so it was true of the fault it existed to catch; it names the
+  stripped pillar by its CODE now, because the other pillars legitimately keep
+  their tables. **RECORDED, NOT DONE**: a pillars function's deck now opens
+  cover → *Where X stands* → *Pillars* with no aim slide at all, which is correct
+  and is the first deck in the product without one — whether it should open on
+  something of its own is a decision about what a review says, and has not been
+  put to Islam.
+  **§253.3 — ONE ANSWER TO WHICH DECK A TARGET GETS**: Islam, on the live
+  deployment — *"the manage presentation show this"*, the Manage slides editor
+  open on `fn:merchandizing` with its bar drawn and the rail and stage
+  **completely empty**. **§224 IS THE SAME FAULT AND IT WAS FIXED ON ONE
+  SURFACE OF THREE**: that section made the Present button branch on the
+  function's FORMAT rather than the `fn:` prefix, and `slidesAssemble()` and
+  `deckAnchors()` were both still asking by prefix — so the editor assembled
+  **2** slides (*"Capability review · 0 capabilities"* + Thank you) where the
+  Present button opens **13**, and a picture could be placed in one of two
+  positions in a deck that has thirteen. **`deckHtmlFor(target)` is the one
+  reader** and all three surfaces ask it; `openDeckFn()` on a pillars function
+  goes **2 → 13**, and the CAPABILITY deck is asserted unchanged in the same
+  breath (Marketing 15 before and after) or a build routing everything through
+  the unit deck would pass every assertion about the function.
+  **AND THE FAILURE HAD NO VOICE**: `slidesAssemble()` had a `try/finally` and
+  **no catch**, and `slidesPaint()` opened `if (!all.length) return;` — so a
+  throw, or an empty deck, left the bar over a blank rail with nothing said
+  (§32, §171, on the one surface that had neither). Both speak now.
+  **WHAT IS NOT CLAIMED**: the demo's pre-fix editor draws TWO slides and
+  Islam's screenshot shows NONE, so the prefix branch is certainly a defect and
+  certainly makes that editor useless for a pillars function, and whether it is
+  exactly what emptied HIS rail cannot be proved from here — which is why the
+  failure was given a voice in the same change (§171: a diagnostic is not a
+  fix, and which it is has to be said).
 - **THE PRESENTATION READS WHAT WAS REPORTED (§252):** Islam — *"presentations
   doesn't change when the plan performance is done"*, and then *"the
   presentation should update on either save draft or submit."* **THE PROPOSED
@@ -4199,6 +4271,17 @@ python3 checks/ytd-proration.py # YTD is measured against the part of the year t
                                 # score; and every deck row is counted against its own
                                 # header, because dropping a column from a header and not
                                 # from the row is this change's easiest mistake
+python3 checks/deck-blank-slides.py # a table with no rows is not a slide (§253):
+                                # every deck swept through the builder its own Present
+                                # button would call, the state MADE on a business unit
+                                # (§94.2) and put back again (§113.8), a unit keeping the
+                                # aspiration it never asked to lose, the headline slide's
+                                # two shapes at both ends, and the Retail pointer cut with
+                                # the FEATURE asserted still to answer — 11 red on the
+                                # build before, its first failure naming the four blank
+                                # slides Islam reported — and §6 covers §253.3, the one
+                                # reader Present, Manage slides and the anchors all ask,
+                                # with the CAPABILITY deck asserted unchanged beside it
 python3 checks/deck-outcome.py  # the presentation reads what was reported (§252): the
                                 # tactics slide's nine columns, its figures asserted as
                                 # AGREEMENT with the Performance page rather than as
@@ -4406,7 +4489,44 @@ prior sessions (on HR_ERP) accidentally reverted agreed-upon designs.
 
 ---
 
-*Last Updated: 2026-09-02 &mdash; **&sect;252: the presentation reads what was
+*Last Updated: 2026-09-02 &mdash; **&sect;253: a table with no rows is not a
+slide.** Islam: *"slides are showing blank pages for the merchandizing."*
+Measured before anything was proposed — **four** slides in the whole product
+draw a heading, a column strip and a whole empty page, and **all four are
+Merchandising**: its own deck's two objectives slides (a function judged by its
+pillars legitimately carries none, &sect;214.2) and Retail's **RS04**, the
+pillar carried by that function, which printed **93% / 60% / 61%** over nothing
+at all. **THE PRODUCT ALREADY KNEW THE ANSWER AND APPLIED IT TO ONE HALF** —
+`deckSlidesFn` has guarded its objectives slide since it was written, which is
+why **Marketing** has always been right; the unit deck, which a pillars function
+goes through since &sect;224, had no such guard (&sect;53.5). **Islam ruled it
+for any subject**, reversing the narrower rule recommended to him, with the cost
+recorded as his. It drops the TABLE, and the slide only where that leaves
+nothing, so a unit keeps the aspiration above it. **&sect;253.1**: the headline
+slide's objectives cell goes for any subject with none — no new CSS, because
+`.headgrid` without `.three` is the shape it wore before &sect;243 — and the
+**mockup earned its place**, exposing a footnote that would have gone on
+explaining a number no longer on the slide. **&sect;253.2**: the Retail →
+Merchandising pointer is cut at his instruction; the FEATURE is untouched, and
+the price is stated rather than discovered (the demo no longer SHOWS a carried
+pillar, so spec 010 is described and not visible). Measured across every unit:
+Retail execution 102&rarr;104, planned 57&rarr;56, RS04's three figures to three
+dashes, **nothing else moves**. `checks/deck-blank-slides.py` **11 red** on the
+build before — **and one of its own assertions passed on the broken build**
+(&sect;94.5), searching six headings where a pillar's tables sit at index 11;
+it names the stripped pillar by its code now. **&sect;253.3, from the live
+deployment mid-build**: *"the manage presentation show this"* &mdash; Manage
+slides on a pillars function, bar drawn, rail and stage empty. &sect;224's
+fault on two more surfaces (`slidesAssemble()` and `deckAnchors()` still asked
+by the `fn:` prefix), so the editor assembled **2** slides where Present opens
+**13**. `deckHtmlFor()` is the one reader now and all three ask it; the
+capability deck is asserted unchanged. **And the failure had no voice** &mdash;
+no catch, and a silent `return` on an empty deck &mdash; so both speak now
+(&sect;32, &sect;171). **Not claimed**: the demo's pre-fix editor draws two
+slides and his screenshot shows none, so whether the prefix branch is exactly
+what emptied HIS rail cannot be proved from here. 14 red.*
+
+*Earlier the same day: **&sect;252: the presentation reads what was
 reported.** Islam: *"presentations doesn't change when the plan performance is
 done"*, then *"the presentation should update on either save draft or submit."*
 **THE PROPOSED FIX WOULD HAVE CHANGED NOTHING** &mdash; the deck is assembled

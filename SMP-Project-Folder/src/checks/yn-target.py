@@ -345,8 +345,14 @@ with sync_playwright() as pw:
         # rendered short in a column an eye runs down.
         w = ev(pg, """() => {
           const yn  = document.querySelector('select.ynfield');
-          const num = [...document.querySelectorAll('span.entry')]
-                        .find(e => e.querySelector('input.field'));
+          /* AGAINST A `%` ENTRY, deliberately. An entry's width follows its
+             unit chip — `B EGP` is legitimately wider than `%` — so
+             comparing against whichever happened to come first is what made
+             §251.4 set this too big. `%` is what a tactic's rows carry. */
+          const all = [...document.querySelectorAll('span.entry')]
+                        .filter(e => e.querySelector('input.field'));
+          const num = all.find(e => (e.querySelector('.unitsuf')||{}).textContent === '%')
+                      || all[0];
           const box = yn ? (yn.closest('.entry') || yn) : null;
           const r = e => { const b = e.getBoundingClientRect();
             return [Math.round(b.width), Math.round(b.height)]; };
@@ -357,7 +363,7 @@ with sync_playwright() as pw:
            w["yn"] and w["num"], w)
         # ASSERTED AS AGREEMENT, never as a number — a later change to the
         # reporting box must move both or fail here (§94.8, §122.5).
-        ck("the yes/no picker is the same width as a number entry",
+        ck("the yes/no picker is the same width as a % number entry",
            w["yn"] and w["num"] and abs(w["yn"][0] - w["num"][0]) <= 2, w)
         # HEIGHT TOO, and it is the half that was actually wrong: `input.field`
         # is ELEMENT-scoped, so the <select> received none of its box and stood
@@ -392,8 +398,11 @@ with sync_playwright() as pw:
           const without = reportedCount(u).done;
           t.outActual = 'Yes';
           const withYes = reportedCount(u).done;
+          /* CLEARED, with the row's legacy per cent still on it — the exact
+             state Islam hit, and the one that used to keep it counted. */
           const alsoOld = (function(){ delete t.outActual; t.actual = keep;
-            const n = reportedCount(u).done; t.outActual = 'Yes'; return n; })();
+            const n = reportedCount(u).done;
+            delete t.actual; t.outActual = 'Yes'; return n; })();
           return { withYes: withYes, without: without, alsoOld: alsoOld,
                    field: reportField({kind:'tactic', obj:t}) }; }""")
         ck("a tactic reports its outcome into outActual",
@@ -404,8 +413,14 @@ with sync_playwright() as pw:
         # still counts, so giving an existing row an outcome cannot make a
         # report that was complete suddenly owe figures (measured at 18 rows
         # when this was got wrong).
-        ck("...and a row answered only the OLD way still counts",
-           cnt.get("alsoOld") == cnt.get("without") + 1, cnt)
+        # §251.6, Islam: *"a - is not an entry so the card should turn to
+        # 3/4."* A row is answered in the field it is ASKED in and nowhere
+        # else — a per cent typed before the outcome existed is not an answer
+        # to what the outcome produced. Measured both ways, because with a
+        # legacy figure present the tally did NOT drop and that is the case
+        # he hit; without one it already did.
+        ck("...and clearing it drops the tally again — a dash is not an entry",
+           cnt.get("alsoOld") == cnt.get("without"), cnt)
 
     ck("no console errors", not errs, errs[:3])
     b.close()

@@ -275,7 +275,7 @@
    its own disk (§91). Checked against origin/main serving
    "smp-shell-v4.24-outcome-missing-audit"; confirmed again immediately before
    the push (§94.16). */
-const SHELL = "smp-shell-v4.30-yn-box-and-rail";
+const SHELL = "smp-shell-v4.33-yn-width-and-dash";
 const ASSETS = [
   "/",
   "/index.html",

@@ -4765,22 +4765,32 @@ function askedItems(u){
 function reportField(x){
   return (x && x.kind === "tactic" && outcomeOf(x.obj)) ? "outActual" : "actual";
 }
-/* ANSWERED IN EITHER FIELD, AND THAT SECOND HALF IS LOAD-BEARING.
-   Reading only the field a row is asked in TODAY is stricter than what came
-   before, not looser: a tactic that has carried `actual` since long before
-   outcomes existed would read as unreported the moment somebody gives it an
-   outcome — 18 rows in the worked example, measured, and Submit refused for
-   every one of them. That is exactly the "changes what Submit demands of
-   every existing tactic" this was flagged for, arriving by the back door.
+/* ── A DASH IS NOT AN ENTRY (§251.6) ────────────────────────────────────
+   Islam, having cleared a Y/N answer and watched the card stay at 4/4: *"a -
+   is not an entry so the card should turn to 3/4."*
 
-   So a row is answered if EITHER field carries a figure. It mirrors §248's
-   own rule — a tactic is read the old way until its outcome has a figure —
-   and it can only ever be MORE generous than the count that came before,
-   which is the property that makes it safe to ship into an open cycle. */
+   §251.4 counted a row answered if EITHER field carried a figure, to avoid
+   making Submit stricter for tactics carrying an `actual` from before
+   outcomes existed. Measured, that is what kept his row counted: it holds a
+   legacy per cent, so emptying the outcome's answer changed nothing. With
+   no legacy figure the tally already dropped correctly — which is how the
+   cause was identified rather than guessed.
+
+   THE ROW IS ANSWERED IN THE FIELD IT IS ASKED IN, and nowhere else. A
+   tactic given an outcome is asked what the outcome produced; a per cent
+   delivered, typed before that question existed, is not an answer to it.
+
+   THE COST IS REAL AND IS ISLAM'S, TAKEN HERE: a tactic that gains an
+   outcome reads as owing a figure until somebody enters one, even where it
+   carries an old per cent — so Submit refuses until they do. It is opt-in
+   per row (only rows the office actually gives an outcome), and it is the
+   behaviour he asked for in the sentence above. §248's fallback for SCORING
+   is untouched: `tacticReads` still reads the old way until the outcome has
+   a figure, so no score moves. This decides only what COUNTS as entered. */
 function reportedIn(x){
   if (!x || !x.obj) return false;
-  var told = function(v){ return v != null && v !== ""; };
-  return told(x.obj[reportField(x)]) || told(x.obj.actual);
+  var v = x.obj[reportField(x)];
+  return v != null && v !== "";
 }
 function reportedCount(u){
   var a = askedItems(u), n = 0;

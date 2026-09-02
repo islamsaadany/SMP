@@ -96,14 +96,12 @@
        checks/yn-target.py §9, so a later change to the box moves both or
        goes red. */
     height:var(--rep-h); }
-  /* THE WHOLE BOX, suffix included. A number entry is `--rep-w` of field plus
-     a unit chip beside it, and MEASURED that comes to `--rep-w-full` — so a
-     control with no suffix has to take the total, or it sits ~30px short of
-     every neighbour in a column an eye runs down. The honest limit: a number
-     entry's width follows its unit, so `M EGP` is wider than `%`; this
-     matches the common case rather than pretending one number fits all, and
-     `checks/yn-target.py` §9 asserts the two stay level. */
-  .entry .field.ynfield { width:var(--rep-w-full); }
+  /* §251.6: THE SAME WIDTH AS A NUMBER BOX, which is `--rep-w`. §251.4 set
+     this to the width of an entry carrying a WIDE unit chip ("M EGP"), and
+     the rows beside it in a real plan carry "%" — so it came out too big.
+     A `%` entry is 78px of field plus its chip, which comes to exactly the
+     width a bare number box already has, so one token answers both. */
+  .entry .field.ynfield { width:var(--rep-w); }
   .big-field { font-family:var(--serif); font-size:15px; }
   .swot .fld { font-size:13px; }
   td.horizon { color:var(--ink-3); }
@@ -850,7 +848,7 @@
      suffix and takes the whole box — read off the same token rather than a
      second 104 somebody has to remember to keep in step (§122.5: a guessed
      constant goes stale silently). */
-  :root{--rep-w:104px; --rep-w-full:135px; --rep-h:32px}
+  :root{--rep-w:104px; --rep-h:32px}
   input.field{font:inherit;font-family:var(--mono);font-size:13px;padding:6px 10px;width:var(--rep-w);height:var(--rep-h);
     border:1px solid var(--line);border-radius:var(--r);text-align:right;background:var(--surface);
     color:var(--ink)}

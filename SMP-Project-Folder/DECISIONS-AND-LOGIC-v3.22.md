@@ -27983,3 +27983,47 @@ was on another session's shell throughout (`v4.27-outcome-on-the-deck`, then
 `v4.29-annual-target`), and the branch preview lags each push — so "same issues"
 was partly true and partly bytes. The one-step check is
 `curl <url>/sw.js | grep SHELL` (§91.5: read the live site, never the dashboard).
+
+
+## §251.6 — A DASH IS NOT AN ENTRY, AND THE BOX IS A NUMBER BOX (2026-09-02)
+
+Islam, on the shipped §251.5: *"too big .. make it the same width like the
+other boxes please"*, and *"when I turned it to dash the card board stayed at
+4/4 this is a bug a - is not an entry so the card should turn to 3/4."*
+
+**THE WIDTH WAS MEASURED AGAINST THE WRONG NEIGHBOUR.** §251.4 sized the picker
+to `--rep-w-full` (135px), which is what an entry carrying a WIDE unit chip
+comes to — `B EGP`. The rows beside it in a real plan carry `%`, and a `%`
+entry is **106px**, which is what a bare number box already is. So the control
+that had been too small became too big. It reads `--rep-w` now and measures
+106 against 106, exactly; the `B EGP` row is legitimately wider and is
+supposed to be. **The check compares against a `%` entry deliberately** rather
+than whichever entry comes first — comparing against an arbitrary peer is what
+produced the wrong number twice.
+
+**AND A DASH IS NOT AN ENTRY — HIS RULE, AND IT REVERSES §251.4's OWN
+GENEROSITY.** That section counted a row answered if EITHER field carried a
+figure, deliberately, to avoid making Submit stricter for tactics carrying an
+`actual` from before outcomes existed. **Measured, that is exactly what kept
+his row counted**: it holds a legacy per cent, so emptying the outcome's answer
+changed nothing — 8/8 with a legacy figure, 7/8 without one, which is how the
+cause was identified rather than guessed.
+
+**A ROW IS ANSWERED IN THE FIELD IT IS ASKED IN, AND NOWHERE ELSE.** A tactic
+given an outcome is asked what that outcome produced; a per cent typed before
+the question existed is not an answer to it.
+
+**THE COST IS REAL, IS STATED, AND IS HIS**: a tactic that gains an outcome
+reads as owing a figure until somebody enters one, even where it carries an old
+per cent — so Submit refuses until they do. It is opt-in per row (only rows the
+office actually gives an outcome), and it is the behaviour the sentence above
+asks for. **§248's fallback for SCORING is untouched** — `tacticReads` still
+reads the old way until the outcome has a figure, so no score moves. This
+decides only what counts as ENTERED.
+
+**AND THE CHECK'S FIXTURE WAS HOLDING THE STALE METHOD** (§51.11, with the
+check keeping an out-of-date way of FILLING rather than an out-of-date
+selector): `submit-gate.py` handed every tactic an outcome and then filled only
+`actual`, so it stopped answering the question it was asking, and read a
+deliberate decision as a regression. It fills the asked field now — which is
+what a person does when they use the page.

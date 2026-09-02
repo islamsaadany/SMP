@@ -152,6 +152,15 @@ with sync_playwright() as p:
       (u.items || []).forEach(p => (p.tactics || []).forEach(t => {
         if (!t.outcome)   t.outcome   = "Something measurable";
         if (!t.outTarget) t.outTarget = "6 #";
+        /* §251.6: AND THE FIGURE THE PAGE ACTUALLY ASKS FOR. Giving a tactic
+           an outcome moves the question — the box asks for `outActual`, and a
+           per cent typed before that question existed is not an answer to it
+           (Islam: *"a - is not an entry"*). This fixture filled `actual` and
+           then handed every row an outcome, so it stopped answering what it
+           was asking; the assertion below then read a deliberate decision as
+           a regression, which is §51.11 with the CHECK holding the stale
+           method rather than a stale selector. */
+        if (t.outActual == null || t.outActual === "") t.outActual = 6;
       }));
       paint();
     }""")

@@ -76,7 +76,26 @@
      other reporting input cells."* It was — `.entry .field` is 78px because a
      number leaves room for the unit beside it, and this control has none, so
      it rendered 26px short in a column an eye runs down. */
-  select.field.ynfield { font-family:var(--sans); text-align:left; }
+  /* THE BOX ITSELF, because `input.field` above is ELEMENT-SCOPED and a
+     <select> receives none of it — no padding, no size, no ground. That is
+     what "small input space" was: measured, the picker stood 19px tall
+     beside a number entry's 34px, which is a far louder difference than the
+     width I first went after. Every box property is mirrored here rather
+     than the input rule being widened to `.field`, which would reach the
+     note fields and the plan's own boxes too. */
+  select.field.ynfield { font-family:var(--sans); text-align:left;
+    font-size:13px; padding:6px 10px; background:var(--surface);
+    color:var(--ink);
+    /* AND THE HEIGHT IS STATED, NOT INFERRED. Matching the padding still
+       left it 3px short, because a <select> lays a shorter line box than a
+       13px mono input and — measured — does not take `line-height` for its
+       own box at all: the declaration computed to `normal`. So the height
+       is a named property of a reporting box, exactly as the width is, and
+       both controls read the same token instead of arriving at the same
+       number by two different routes (§53.5). Asserted as EQUAL HEIGHT in
+       checks/yn-target.py §9, so a later change to the box moves both or
+       goes red. */
+    height:var(--rep-h); }
   /* THE WHOLE BOX, suffix included. A number entry is `--rep-w` of field plus
      a unit chip beside it, and MEASURED that comes to `--rep-w-full` — so a
      control with no suffix has to take the total, or it sits ~30px short of
@@ -831,8 +850,8 @@
      suffix and takes the whole box — read off the same token rather than a
      second 104 somebody has to remember to keep in step (§122.5: a guessed
      constant goes stale silently). */
-  :root{--rep-w:104px; --rep-w-full:135px}
-  input.field{font:inherit;font-family:var(--mono);font-size:13px;padding:6px 10px;width:var(--rep-w);
+  :root{--rep-w:104px; --rep-w-full:135px; --rep-h:32px}
+  input.field{font:inherit;font-family:var(--mono);font-size:13px;padding:6px 10px;width:var(--rep-w);height:var(--rep-h);
     border:1px solid var(--line);border-radius:var(--r);text-align:right;background:var(--surface);
     color:var(--ink)}
   input.field.filled{border-color:var(--good);background:var(--good-bg)}

@@ -4036,16 +4036,26 @@ function renderReport(u){
 
   /* Entries given of asked, per pillar \u2014 what the rail rows and the pane pill
      both read, so they can never disagree. */
+  /* §251.4: THE THIRD COPY OF THE COUNT, and the one Islam was looking at —
+     the rail read 3/4 while the band above it read 4/4 for the same pillar,
+     because this walked the rows itself and asked `actual` while the pane
+     had been taught to ask the field the box actually writes.
+
+     The comment above said the rail and the pane "can never disagree", and
+     it had stopped being true: a sentence describing an intention the code
+     no longer carries out is worth less than nothing, because it is what
+     stops the next person checking (§104.8). It is true again by
+     construction now — both go through `reportedIn`, which is also what
+     `entry()` asks when it decides which field to draw. */
   var pillarTally = function(p){
     var done = 0, total = 0;
+    var count = function(x){ total++; if (reportedIn(x)) done++; };
     SMPRules.shown(p.measures).forEach(function(m){
-      total++;
-      if (m.actual != null && m.actual !== "") done++;
+      count({ obj: m, kind: "measure" });
     });
     SMPRules.shown(p.tactics).forEach(function(t){
       if (!tacticDue(t)) return;
-      total++;
-      if (t.actual != null && t.actual !== "") done++;
+      count({ obj: t, kind: "tactic" });
     });
     return { done: done, total: total };
   };

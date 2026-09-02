@@ -27943,3 +27943,43 @@ the tally, and a row answered only the old way still counts.
 
 `checks/report-saves.py`'s 3 failures were verified to reproduce on the previous
 build (the `sw.js` MIME stub, already recorded at §250.2) — not caused here.
+
+
+## §251.5 — THE RAIL, AND THE HALF OF THE BOX I MEASURED (2026-09-02)
+
+Islam, twice: *"same issues small input space and not counted in the card."*
+Both were still true after §251.4, and both because I had fixed the neighbour
+of the thing he was pointing at.
+
+**THE RAIL IS A THIRD COPY OF THE COUNT.** His own screenshot settles it: the
+band reads **4/4** and the rail beside it reads **3/4**, for one pillar. §251.4
+taught `reportedCount` (the unit) and `doneOf` (the pane), and `pillarTally` —
+which draws the RAIL, and which is what "the card of the pillars" means — walked
+the rows itself asking `actual`. Its own comment said the rail and the pane
+"can never disagree"; that had stopped being true, and **a sentence describing
+an intention the code no longer carries out is worth less than nothing, because
+it is what stops the next person checking** (§104.8 again). All three go through
+`reportedIn` now, which is also what `entry()` asks when it decides which field
+to draw, so the claim is true by construction rather than by assertion.
+
+**AND "SMALL INPUT SPACE" WAS THE HEIGHT, NOT THE WIDTH.** §251.4 measured one
+dimension, found 106 against 135, fixed it, and called the control level. It was
+not: measured properly, the picker stood **19px tall against a number entry's
+34**. The cause is that `input.field` is **element-scoped**, so a `<select>`
+carrying the same class receives none of its box — no padding, no size, no
+ground. *Measuring one dimension and declaring a control level is how a fix goes
+to the wrong axis.*
+
+**THE HEIGHT IS STATED, NOT INFERRED.** Mirroring the padding still left 3px,
+and `line-height` computed to `normal` — a `<select>` does not take it for its
+own box. So the height joins the width as a named property of a reporting box
+(`--rep-h`), read by both controls, rather than the two arriving at one number
+by different routes (§53.5). `checks/yn-target.py` §9 asserts **width, height
+AND the rail-against-band agreement**, all as equality rather than as numbers
+(§94.8), so a later change to the box moves both or goes red.
+
+**AND THE DEPLOYMENT IS WHY THE FIRST TWO ROUNDS LOOKED UNCHANGED.** Production
+was on another session's shell throughout (`v4.27-outcome-on-the-deck`, then
+`v4.29-annual-target`), and the branch preview lags each push — so "same issues"
+was partly true and partly bytes. The one-step check is
+`curl <url>/sw.js | grep SHELL` (§91.5: read the live site, never the dashboard).

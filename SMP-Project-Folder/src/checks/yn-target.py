@@ -348,14 +348,27 @@ with sync_playwright() as pw:
           const num = [...document.querySelectorAll('span.entry')]
                         .find(e => e.querySelector('input.field'));
           const box = yn ? (yn.closest('.entry') || yn) : null;
-          return { yn:  box ? Math.round(box.getBoundingClientRect().width) : null,
-                   num: num ? Math.round(num.getBoundingClientRect().width) : null }; }""")
+          const r = e => { const b = e.getBoundingClientRect();
+            return [Math.round(b.width), Math.round(b.height)]; };
+          return { yn: box ? r(box) : null, num: num ? r(num) : null,
+                   rail: [...document.querySelectorAll('.rail .rtally')].map(e=>e.textContent),
+                   band: (document.querySelector('.pane .rtally')||{}).textContent }; }""")
         ck("both shapes are present to compare",
            w["yn"] and w["num"], w)
-        # ASSERTED AS AGREEMENT, never as 104 — a later change to the box's
-        # width must move both or fail here (§94.8, §122.5).
+        # ASSERTED AS AGREEMENT, never as a number — a later change to the
+        # reporting box must move both or fail here (§94.8, §122.5).
         ck("the yes/no picker is the same width as a number entry",
-           w["yn"] and w["num"] and abs(w["yn"] - w["num"]) <= 2, w)
+           w["yn"] and w["num"] and abs(w["yn"][0] - w["num"][0]) <= 2, w)
+        # HEIGHT TOO, and it is the half that was actually wrong: `input.field`
+        # is ELEMENT-scoped, so the <select> received none of its box and stood
+        # 19px against 34. Measuring one dimension and calling it level is how
+        # the first fix went to the wrong axis.
+        ck("...and the same HEIGHT — the half the first fix missed",
+           w["yn"] and w["num"] and abs(w["yn"][1] - w["num"][1]) <= 2, w)
+        # THREE TALLIES OF ONE PILLAR, and the rail is the one Islam was
+        # looking at: it read 3/4 beside a band reading 4/4.
+        ck("the rail and the band agree about the pillar",
+           w["band"] and w["band"] in (w["rail"] or []), w)
 
         # THE TALLY: §248 sends an outcome's figure to `outActual` and the
         # counts read `actual`, so an answer given through the box the page

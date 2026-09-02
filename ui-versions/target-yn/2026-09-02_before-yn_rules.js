@@ -1118,54 +1118,6 @@ var GAP_OPTIONAL = { tactic: ["collaborators"],
   function targetHasNumber(v) {
     return !isNaN(parseFloat(String(v == null ? "" : v).replace(/[^0-9.]/g, "")));
   }
-
-  /* ── A TARGET THAT IS A YES OR A NO (§251) ─────────────────────────
-     Islam: *"for the target we need to add a Y/N in the units which dims the
-     target itself."* Some rows are not measured, they either happened or
-     they did not — a certification achieved, an agreement signed, a
-     warehouse open. Until now the plan had no way to write one: every
-     target box wants a number, so such a row was left blank and read as a
-     gap for ever.
-
-     IT IS A UNIT, NOT A SECOND FIELD, and that is the whole of why it
-     costs no migration. §199 put the unit ON the target string ("6.2B EGP"
-     is one field), so `Y/N` is simply the unit whose value part is always
-     empty: the target reads exactly `Y/N`, `target`/`outTarget` go on
-     holding the whole string, and every one of the places that read them
-     keeps working. A second field would have been a second source of truth
-     and the two would have drifted the first time anything wrote one of
-     them (§53.5).
-
-     AND IT IS A COMPLETE ANSWER, NEVER A GAP. §249 made a target holding
-     only a unit read as Missing, which is exactly right for `%` on its way
-     to `90%` and exactly wrong here: `Y/N` is not a target half-typed, it
-     is the finished target of a row that has no number. Without this line
-     every Y/N row would wear the red word for ever and refuse Submit
-     (§221) — a hole nobody could close, because there is nothing to fill.
-
-     THE COMPARISON IS CASE-INSENSITIVE AND TRIMMED, because this string
-     also arrives from an uploaded workbook (§22), where somebody has typed
-     it into a cell. What the PEN writes is always the canonical `Y/N`. */
-  var YN_UNIT = "Y/N";
-  function isYesNo(v) {
-    return String(v == null ? "" : v).trim().toUpperCase() === YN_UNIT;
-  }
-  /* WHAT A YES OR A NO SCORES: 100 or 0, Islam's own choice, so the row
-     counts in the pillar's and the unit's averages exactly as a measured
-     row does. Anything else — blank, or a value from before this existed —
-     is NOT SCORED rather than nought (§35: absent is not zero, and §104.10
-     in the same shape). One reader for the screen and the score alike, or
-     the page and the average would disagree about one word. */
-  function ynAnswer(v) {
-    var s = String(v == null ? "" : v).trim().toLowerCase();
-    if (s === "yes" || s === "y") return true;
-    if (s === "no" || s === "n") return false;
-    return null;
-  }
-  function ynScore(v) {
-    var a = ynAnswer(v);
-    return a == null ? null : (a ? 100 : 0);
-  }
   /* IS THIS FIELD A GAP — the ONE test the screen, the counts, the deck and
      the server all ask. A gap is a place holding nothing the platform can
      USE, which for a date includes a value it cannot read: a milestone due
@@ -1176,10 +1128,7 @@ var GAP_OPTIONAL = { tactic: ["collaborators"],
      and a filler who tried had the whole save refused. */
   function gapEmptyValue(field, v) {
     if (gapBlank(v)) return true;
-    /* §251: a Y/N target is a finished answer with no number in it, so it
-       is answered BEFORE the numeric test — which would otherwise call
-       every yes/no row a gap and block Submit with nothing to fill. */
-    if (gapNumField(field)) return !isYesNo(v) && !targetHasNumber(v);
+    if (gapNumField(field)) return !targetHasNumber(v);
     return gapWhenField(field) && !whenReadable(v);
   }
   function gapEmpty(field, row) {
@@ -2271,7 +2220,6 @@ var GAP_OPTIONAL = { tactic: ["collaborators"],
     GAP_WHEN: GAP_WHEN, gapWhenField: gapWhenField,
     GAP_NUM: GAP_NUM, gapNumField: gapNumField,
     targetHasNumber: targetHasNumber,
-    YN_UNIT: YN_UNIT, isYesNo: isYesNo, ynAnswer: ynAnswer, ynScore: ynScore,
     actingFor: actingFor,
     gapEmptyValue: gapEmptyValue, gapEmpty: gapEmpty,
     pendOf: pendOf, mayFillPage: mayFillPage,

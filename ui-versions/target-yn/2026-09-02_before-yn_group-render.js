@@ -423,13 +423,8 @@ function measureRows(ms, opts){
                '<span class="idx-n">' + (i+1) + '</span></td><td>' + esc(m.name) + hidChip(m) + fmark(m.id) +
                (m.horizon ? '<span class="why">measured at ' + esc(m.horizon) + '</span>' : '') +
                (m.note ? '<span class="why">' + esc(m.note) + '</span>' : '') +
-               /* §251: a yes/no row says so where its target goes, and says
-                  nothing where its direction and compile rule would — both
-                  are meaningless without a number and printing them would
-                  invite somebody to read `≥` as part of the target. */
-               '</td><td class="num">' + (isYesNoRow(m) ? '<span class="nobody">—</span>' : dirCell(m.dir)) +
-               '</td><td class="num">' + targetShown(m.target) +
-               '</td><td class="cc">' + (isYesNoRow(m) ? '<span class="nobody">—</span>' : compileCell(m.compile)) + '</td>';
+               '</td><td class="num">' + dirCell(m.dir) + '</td><td class="num">' + esc(m.target) +
+               '</td><td class="cc">' + compileCell(m.compile) + '</td>';
     if (opts.unscored) return head + '</tr>';
     /* §239 + §243: main's benchmark rides inside the figure's cell, and this
        branch's figure is read at its target's scale. Both, or a long figure
@@ -549,13 +544,8 @@ function outcomeEdit(t, set, pendCls, fillOnly){
      "Next gap" steps through (§177.2), and one gap wearing it twice would
      cost two presses to walk one blank. */
   var quiet = String(pendCls || "").replace(/\bgapwalk\b/g, "").trim();
-  /* §251: three of the four go dead on a yes/no outcome. The unit picker is
-     the one that stays live, because it is the only way back out — dimming
-     the control that SET this state would leave the row stuck in it (§61). */
-  var yn = SMPRules.isYesNo(t.outTarget);
   return '<div class="tgrid">' +
-    (yn ? offInput("—")
-        : inputOr("plan", splitTarget(t.outTarget || "").value, "mono " + (pendCls || ""),
+    inputOr("plan", splitTarget(t.outTarget || "").value, "mono " + (pendCls || ""),
             function(v){
       var n = String(v == null ? "" : v).trim();
       var u = outUnitOf(t);
@@ -563,7 +553,7 @@ function outcomeEdit(t, set, pendCls, fillOnly){
          changed their mind about what it is measured in. */
       if (!n) put(u || "");
       else put(joinTarget(t.outTarget || "", n, u));
-    })) +
+    }) +
     /* THE UNIT PICKER IS ALWAYS THERE. The measures table hides it until a
        target exists — right in a column of its own, and wrong inside a block
        of four equal boxes, where the hole reads as a control that failed to
@@ -571,15 +561,8 @@ function outcomeEdit(t, set, pendCls, fillOnly){
        unit can be chosen FIRST and is held on its own until a number arrives
        to join it: `outTarget` is "%" for as long as it takes to type 90. */
     selectOr("plan", unit, targetUnitOpts(unit), quiet,
-             /* §251: and the outcome's picker repaints for the same reason —
-                three of its four boxes change state on this one press. */
-             function(v){ put(nextTargetUnit(t, v)); paint(); }) +
-    (yn
-      /* A yes/no outcome's direction and compile rule are drawn dead in BOTH
-         modes — the filler already sees them as facts, and for the office
-         they have stopped being decisions. */
-      ? offSelect(t.outDir || "≥") + offSelect("—")
-      : fillOnly
+             function(v){ put(nextTargetUnit(t, v)); }) +
+    (fillOnly
       /* `.why` on BOTH, because `.tgrid > .why` is what centres a plain span
          inside a `--tw` column — without it the direction sits left of the box
          above it and the block stops reading as four equal ones, which is the
@@ -648,13 +631,7 @@ function outcomeShown(t){
 /* The target as it is written on the plan — the whole year's number, unit and
    all. `tacticBenchmark` gives what it is measured against RIGHT NOW, which
    for a Sum row is a part of this. */
-/* §251: `Y/N` is stored and "Yes / No" is read, here as everywhere. This one
-   answers with TEXT rather than html — its caller escapes — so it cannot use
-   `targetShown`, and the two are kept in step by both asking `isYesNo`. */
-function outcomeTargetShown(t){
-  if (!t || !t.outTarget) return null;
-  return SMPRules.isYesNo(t.outTarget) ? "Yes / No" : String(t.outTarget);
-}
+function outcomeTargetShown(t){ return t && t.outTarget ? String(t.outTarget) : null; }
 
 /* Tactic, owner and quarters read left; the rest centres. A tactic whose
    quarters have not begun is not behind \u2014 it is not yet due, and scoring it
@@ -1373,7 +1350,7 @@ function unitCards(keys){
     var pd = miniTable(["Key objective","Direction","Target","H1 actual","Progress"],
       u.keyObjectives.map(function(m){
         return '<tr><td>' + esc(m.name) + '</td><td class="num">' + dirCell(m.dir) + '</td>' +
-          '<td class="num">' + targetShown(m.target) + '</td><td class="num">' + figShown(m) +
+          '<td class="num">' + esc(m.target) + '</td><td class="num">' + figShown(m) +
           '</td><td class="num">' + m.progress + '%</td></tr>';
       }).join("")) +
       '<p class="sub">Headline: <b>' + unitObjectives(u) + '%</b> &mdash; ' + (KO_WEIGHTS[u.ukey] ? 'weighted' : 'equal weight') + ' across its Key Objectives. Contributes at <b>' +
@@ -1511,7 +1488,7 @@ function renderGroupPerformance(){
   var koDrill = miniTable(["Objective","Direction","Target","Compile","H1 actual","Progress"],
     GROUP.keyObjectives.map(function(m){
       return '<tr><td>' + (m.group ? esc(m.group) + " &mdash; " : "") + esc(m.name) + '</td>' +
-        '<td class="num">' + dirCell(m.dir) + '</td><td class="num">' + targetShown(m.target) + '</td>' +
+        '<td class="num">' + dirCell(m.dir) + '</td><td class="num">' + esc(m.target) + '</td>' +
         '<td>' + compileCell(m.compile) + '</td><td class="num">' + figShown(m) + '</td>' +
         '<td class="num">' + m.progress + '%</td></tr>';
     }).join("")) +
@@ -1592,7 +1569,7 @@ function renderGroupPerformance(){
             c.keyObjectives.map(function(m, i){
               return '<tr><td class="idx">' + (i+1) + '</td><td>' + esc(m.name) + '</td>' +
                 '<td class="num">' + dirCell(m.dir) + '</td>' +
-                '<td class="num">' + (m.target ? targetShown(m.target) : '<span class="missing">Missing</span>') + '</td>' +
+                '<td class="num">' + (m.target ? esc(m.target) : '<span class="missing">Missing</span>') + '</td>' +
                 '<td class="num">' + figShown(m) + '</td>' +
                 '<td class="num final" style="color:' + bandInk(m.progress) + '">' + pct(m.progress) + '</td></tr>';
             }).join("")) +
@@ -1852,7 +1829,7 @@ function renderTemple(){
 
   var cell = function(m){
     return '<div class="ns-item"><span class="ns-label">' + esc(m.name) + '</span>' +
-           '<span class="ns-target">' + (m.target ? targetShown(m.target) : '<span class="missing">Missing</span>') + '</span>' +
+           '<span class="ns-target">' + (m.target ? esc(m.target) : '<span class="missing">Missing</span>') + '</span>' +
            /* A SENTENCE, NOT A COLUMN (§149, §99.8's rule). The hover words
               belong on the table cells somebody runs an eye down; this line
               already reads "≥ · latest" as prose, and half of it wearing a
@@ -2014,7 +1991,7 @@ function renderUnitPerformance(u){
         var w = ws ? Math.round(ws[i] * 10) / 10 : null;
         return '<tr' + (isFocus(m.id) ? ' class="focusrow"' : '') + '><td class="idx">' + (i+1) + '</td>' +
           '<td>' + esc(m.name) + fmark(m.id) + '</td>' +
-          '<td class="num">' + dirCell(m.dir) + '</td><td class="num">' + targetShown(m.target) + '</td>' +
+          '<td class="num">' + dirCell(m.dir) + '</td><td class="num">' + esc(m.target) + '</td>' +
           '<td class="num">' + figShown(m) + '</td>' +
           '<td class="num final" style="color:' + bandInk(m.progress) + '">' + pct(m.progress) + '</td>' +
           (ws ? '<td class="num">' + w + '%</td><td class="num">' +
@@ -3093,72 +3070,8 @@ function koYearToggle(){
    platform deciding something nobody said (§96.2). */
 function targetUnitOf(m){
   if (!m) return "";
-  /* §251: `Y/N` is the unit whose value part is always empty, so it cannot be
-     read off `splitTarget` — that function looks for a number FOLLOWED BY a
-     unit and answers `{value:"Y/N", unit:""}` here, which would leave the
-     picker blank on a row that plainly has one. Either horizon saying it
-     makes the row a yes/no row; the two cannot disagree, because the pen
-     writes both together. */
-  if (SMPRules.isYesNo(m.target) || SMPRules.isYesNo(m.target3y)) return SMPRules.YN_UNIT;
-  var u = splitTarget(m.target).unit || splitTarget(m.target3y).unit || "";
-  if (u) return u;
-  /* ── A UNIT HELD ALONE, BEFORE A NUMBER JOINS IT (§251, §248's shape) ──
-     `splitTarget` looks for a number FOLLOWED BY a unit, so a target holding
-     nothing but `%` reads back as no unit at all — which did not matter
-     while nothing could write one, and does now: leaving Y/N for a
-     number-carrying unit leaves exactly that, and without this the picker
-     would come back blank on the row somebody had just set.
-
-     ONLY A UNIT THE PICKER ITSELF OFFERS. A target reading "TBD" is prose
-     and must not be read as a unit nobody chose (§96.2: never reinterpret
-     what somebody wrote), so the test is membership of the list rather than
-     "it has no number in it". Index > 0 skips the empty first entry. */
-  var near = String(m.target == null ? "" : m.target).trim();
-  var far  = String(m.target3y == null ? "" : m.target3y).trim();
-  if (TARGET_UNITS.indexOf(near) > 0) return near;
-  if (TARGET_UNITS.indexOf(far) > 0) return far;
-  return "";
-}
-/* Is this row judged by a yes or a no? Asked by every surface that has to
-   decide whether to draw a number, so none of them decides it separately
-   (§53.5). */
-function isYesNoRow(m){ return targetUnitOf(m) === SMPRules.YN_UNIT; }
-/* THE TARGET AS SOMEBODY READS IT. `Y/N` is how the platform stores it and
-   is not how a plan should say it — the row is asking a question, and
-   "Yes / No" is the answer somebody will be choosing between. Returns HTML,
-   escaped, because that is what every caller concatenates. */
-function targetShown(v){
-  return SMPRules.isYesNo(v) ? "Yes / No" : esc(v);
-}
-/* ── PICKING A UNIT REDRAWS THE ROW (§251) ─────────────────────────────
-   A bound field writes WITHOUT repainting, deliberately — a repaint under a
-   typing hand destroys the box being typed into (§71.2, §35). That is right
-   for every field whose value is the only thing that changes, and wrong for
-   this one: `Y/N` changes the SHAPE of the row, dimming three controls
-   beside it, so without a repaint the office picks it and nothing visibly
-   happens until some later paint catches up. Found by driving the real page,
-   not by reading it — every assertion short of pressing the control passes.
-
-   SAFE ON A SINGLE SELECT AND ONLY ON ONE: a searchable select is unhooked
-   BEFORE it fires `change` (§30.1), so the popup is already gone; a TICKING
-   list stays open and a paint there kills it under the pointer (§130.1). */
-function setTargetUnitAndRepaint(m, v){
-  setTargetUnit(m, v);
-  paint();
-}
-/* A control that is DRAWN AND DOES NOTHING, because the row's own unit has
-   made it meaningless (§251: with no number there is nothing for a direction
-   to point at, nothing for a compile rule to add up, and no figure to aim
-   for). Drawn rather than dropped, which is §248's ruling about the unit
-   picker applied to its neighbours: inside a block of equal boxes a hole
-   reads as a control that failed to render, not as one somebody else owns.
-   `disabled` and not merely dimmed — a look is not a lock, and the keyboard
-   walks straight past a control that is only faded (§220). */
-function offInput(txt){
-  return '<input class="fld mono off" disabled value="' + esc(txt) + '">';
-}
-function offSelect(txt){
-  return '<select class="fld off" disabled><option>' + esc(txt) + '</option></select>';
+  var u = splitTarget(m.target).unit;
+  return u || splitTarget(m.target3y).unit || "";
 }
 /* WRITING THE UNIT WRITES THE TARGETS, because that is where it lives (§199).
    Both horizons take it: a row whose 3-year target is measured in one thing
@@ -3190,31 +3103,11 @@ function setTargetUnit(m, u){
      feature rests on: joinTarget reads the separator back out of the stored
      string, so a value written here splits and rejoins to itself, and the
      check asserts that over everything the plan holds. */
-  /* ── §251: Y/N REPLACES THE NUMBER OUTRIGHT ─────────────────────────
-     Every other unit is written BESIDE a figure; this one says there is no
-     figure, so picking it is the act that turns a measured row into a
-     yes/no row. `target` is written whether or not it held anything — that
-     is how a Y/N row is created, and the alternative is asking somebody to
-     type a number they do not have before they can say the row has none.
-     A 3-year target is only rewritten where it HELD something: a measures
-     table has no such column, and minting one behind the office's back
-     would put a field in the plan nobody asked for (§50.6). */
-  if (want === SMPRules.YN_UNIT) {
-    m.target = SMPRules.YN_UNIT;
-    if (!SMPRules.gapBlank(m.target3y)) m.target3y = SMPRules.YN_UNIT;
-    return;
-  }
   var sep = want && !TIGHT_UNITS[want] ? " " : "";
   ["target", "target3y"].forEach(function(f){
     var v = m[f];
     if (v == null || v === "") return;   /* nothing to attach it to */
-    /* LEAVING Y/N LEAVES NO NUMBER BEHIND. `splitTarget("Y/N")` answers with
-       a value of "Y/N" (no number to find), so without this the row would
-       read "Y/NB EGP" — the unit picker writing nonsense into the field it
-       is meant to be a view of. The row goes back to holding the new unit
-       alone, which is §248's own "held on its own until a number arrives". */
-    var val = SMPRules.isYesNo(v) ? "" : splitTarget(v).value;
-    m[f] = val ? val + (want ? sep + want : "") : want;
+    m[f] = splitTarget(v).value + (want ? sep + want : "");
   });
 }
 /* A unit with no target to sit inside cannot be stored, so the field says so
@@ -3244,11 +3137,7 @@ function unitInherit(m){
     var t = String(v == null ? "" : v).trim();
     if (!t || !/^-?[\d.,]+$/.test(t)) return v;   /* not a bare number */
     var u = targetUnitOf(m);
-    /* §251: a yes/no row has no unit a number can inherit — joining them
-       would write "5Y/N", a target the platform cannot read and the score
-       would silently drop. The box is disabled on such a row, so this
-       guards the paths that do not go through it (fill mode, an upload). */
-    if (!u || u === SMPRules.YN_UNIT) return v;
+    if (!u) return v;
     return t + (TIGHT_UNITS[u] ? "" : " ") + u;
   };
 }
@@ -3311,11 +3200,7 @@ function fillUnitCell(page, acKey, m, ctx){
    offered by the rule below and could never be CHOSEN for a new row. K and M
    only, which is what he asked for; `B USD` and `K EGP` are deliberately not
    invented alongside them. */
-/* §251: `Y/N` SITS WITH `#`, not with the currencies, because it belongs to
-   the same half of the list — what a row is counted in, rather than what it
-   is valued in. It is the one entry that says "this row carries no number at
-   all", which is why it is next to the most generic thing that does. */
-var TARGET_UNITS = ["", "%", "#", "Y/N", "EGP", "M EGP", "B EGP",
+var TARGET_UNITS = ["", "%", "#", "EGP", "M EGP", "B EGP",
                     "K USD", "M USD", "SQM", "d", "h"];
 /* WRITTEN AGAINST THE NUMBER, OR AFTER A SPACE — and it is the PLAN's own
    habit, read off the shipped data rather than invented: `30%`, `100#` and
@@ -3330,21 +3215,8 @@ var TARGET_UNITS = ["", "%", "#", "Y/N", "EGP", "M EGP", "B EGP",
    join their Egyptian twins here and read `8M USD`, not `8 M USD` — the same
    convention the plan already uses for `6.2B EGP`. */
 var TIGHT_UNITS = { "%":1, "#":1, "M EGP":1, "B EGP":1, "K USD":1, "M USD":1 };
-/* ── A ROW WITH NO TARGET IS OFFERED THE ONE UNIT THAT NEEDS NONE (§251) ──
-   Every unit but this one is written BESIDE a figure, so on a row that has
-   no target yet there is nothing to attach them to — which is why the pen
-   drew an em-dash and a hover saying "set a target first". That is right for
-   `B EGP` and it made `Y/N` unreachable exactly where it is most wanted: a
-   brand-new "did it happen" row has no number to type, so there was no way
-   in at all (§61 — a feature you can only reach by first pretending the row
-   is something else is a feature nobody finds).
-
-   THE LIST NARROWS RATHER THAN THE CONTROL VANISHING. What is on offer is
-   what can actually be stored, so nothing takes an answer and discards it,
-   and the em-dash's explanation is no longer needed because the control
-   itself now says what is possible. */
-function targetUnitOpts(cur, noTarget){
-  var opts = noTarget ? ["", SMPRules.YN_UNIT] : TARGET_UNITS.slice();
+function targetUnitOpts(cur){
+  var opts = TARGET_UNITS.slice();
   if (cur && opts.indexOf(cur) < 0) opts.splice(1, 0, cur);
   return opts;
 }
@@ -3389,8 +3261,8 @@ function koView(list, isGroup, acKey){
       return '<div class="orow' + (near ? '' : ' one') +
         (SMPRules.isHidden(m) ? ' hiddenrow' : '') + '"><span class="on">' + esc(m.name) +
         hidChip(m) + chips(m) + '</span>' +
-        '<span class="ot h">' + (m.target3y ? targetShown(m.target3y) : miss) + '</span>' +
-        (near ? '<span class="ot">' + (m.target ? targetShown(m.target) : miss) + '</span>' : '') + '</div>';
+        '<span class="ot h">' + (m.target3y ? esc(m.target3y) : miss) + '</span>' +
+        (near ? '<span class="ot">' + (m.target ? esc(m.target) : miss) + '</span>' : '') + '</div>';
     }).join("");
 }
 /* The far column says WHICH year when the tenant has set one — "By 2028" reads
@@ -3477,37 +3349,28 @@ function koEdit(list, page, acKey, owner){
          setter lifting a pending mark, since correcting confirms); in fill
          mode only a blank or still-pending one opens. The NAME never does:
          a row that exists is named, and renaming is authoring. */
-      /* \u00a7251: a yes/no row has no number, so the direction, both targets and
-         the compile rule are drawn and dead \u2014 there is nothing for a `\u2265` to
-         point at and nothing for `Sum` to add up. Only while the pen is
-         open: read mode says "Yes / No" in the target columns, which is the
-         whole fact, and dimming a value somebody is only reading says
-         nothing. */
-      var yn = isYesNoRow(m);
       return '<tr' + hidCls(m) + '><td>' + inputOr(pg, m.name, "", function(v){ m.name = v; }) +
         (pg ? '' : hidChip(m)) + '</td>' +
-        '<td class="cc">' + (pg && yn ? offSelect(m.dir || "\u2265")
-          : gapCell(page, acKey, m, "dir",
-          { kind:"select", opts:["\u2265", "\u2264"] })) + '</td>' +
+        '<td class="cc">' + gapCell(page, acKey, m, "dir",
+          { kind:"select", opts:["\u2265", "\u2264"] }) + '</td>' +
         /* §199: THE OFFICE'S, NOT THE FILLER'S. A unit is not a gap — 46 of
            the 178 targets in the shipped plan carry none and are complete
            without one — so it does not go through gapCell and does not join
            the count. It is `inputOr` like the NAME beside it: a fact about
            how the objective is written, which is authoring. */
         '<td class="cc">' + (pg
-          ? selectOr(pg, targetUnitOf(m),
-              targetUnitOpts(targetUnitOf(m), !hasTargetToHoldAUnit(m)), "",
-              function(v){ setTargetUnitAndRepaint(m, v); })
+          ? (hasTargetToHoldAUnit(m)
+              ? selectOr(pg, targetUnitOf(m), targetUnitOpts(targetUnitOf(m)), "",
+                  function(v){ setTargetUnit(m, v); })
+              : '<span class="why" title="Set a target first \u2014 the unit is ' +
+                'written with it">\u2014</span>')
           : (fillUnitCell(page, acKey, m) || esc(targetUnitOf(m)))) + '</td>' +
-        '<td class="cc">' + (pg && yn ? offInput("\u2014")
-          : gapCell(page, acKey, m, "target3y",
-          { kind:"input", cls:"mono", parse: unitInherit(m), read: targetShown })) + '</td>' +
-        '<td class="cc">' + (pg && yn ? offInput("\u2014")
-          : gapCell(page, acKey, m, "target",
-          { kind:"input", cls:"mono", parse: unitInherit(m), read: targetShown })) + '</td>' +
-        '<td class="cc">' + (pg && yn ? offSelect("\u2014")
-          : gapCell(page, acKey, m, "compile",
-          { kind:"select", opts:["Sum", "Latest", "Average"] })) + '</td>' +
+        '<td class="cc">' + gapCell(page, acKey, m, "target3y",
+          { kind:"input", cls:"mono", parse: unitInherit(m) }) + '</td>' +
+        '<td class="cc">' + gapCell(page, acKey, m, "target",
+          { kind:"input", cls:"mono", parse: unitInherit(m) }) + '</td>' +
+        '<td class="cc">' + gapCell(page, acKey, m, "compile",
+          { kind:"select", opts:["Sum", "Latest", "Average"] }) + '</td>' +
         /* §243: the same cell the capability's table already draws — one
            column, one field, one answer on all three surfaces (§53.5). Left
            blank it is not nought: koWeights() gives it the average of the
@@ -3860,16 +3723,7 @@ function renderReport(u){
     var fld = oc ? "outActual" : "actual";
     var unit = oc ? splitTarget(oc.target).unit : (isT ? "%" : splitTarget(x.obj.target).unit);
     var cur = x.obj[fld], has = cur != null && cur !== "";
-    /* §251: A YES OR A NO IS PICKED, NEVER TYPED. The row's target says the
-       answer is one of two words, so a free box would invite "done", "y",
-       "TRUE" and a dozen spellings of the same fact — and `ynScore` would
-       score only some of them. One control, in the one cell shape every
-       reportable row already goes through (§53.5), so a measure, an
-       objective and a tactic's outcome are all asked the same way. */
-    var ynRow = SMPRules.isYesNo(oc ? oc.target : x.obj.target);
-    var shown = !has ? ""
-      : ynRow ? String(cur)
-      : ((isT && !oc) ? String(cur) : splitTarget(cur).value || String(cur));
+    var shown = !has ? "" : ((isT && !oc) ? String(cur) : splitTarget(cur).value || String(cur));
     /* Per ROW, not per page. A contributor is limited to the lines they are
        named on (spec 006 §7.2); a figure with a SOURCE is entered by that
        source and by nobody in the unit (§16.7). Both are refused by the
@@ -3880,17 +3734,6 @@ function renderReport(u){
         (has ? esc(cur) + ((isT && !oc) ? "%" : "") : "\u2014") + '</span>' +
         (src ? ' <span class="srcby" title="Set by ' + esc(lab) + '">' + esc(lab) + '</span>' : '');
     }
-    /* THE UNIT IS NOT SENT WITH A YES OR A NO. `data-unit` is what the save
-       handler rejoins onto a typed figure, and joining here would store
-       "YesY/N" \u2014 so it is deliberately empty and the word is stored whole. */
-    if (ynRow)
-      return '<span class="entry' + (has ? " filled" : "") + '">' +
-        '<select class="field ynfield" data-rep="' + x.id + '" data-fld="' + fld +
-        '" data-unit="" aria-label="Report ' + esc(x.obj.name) + '">' +
-        ["", "Yes", "No"].map(function(o){
-          return '<option value="' + esc(o) + '"' + (shown === o ? " selected" : "") +
-                 '>' + (o || "\u2014") + '</option>';
-        }).join("") + '</select></span>';
     return '<span class="entry' + (has ? " filled" : "") + '">' +
       '<input class="field" data-rep="' + x.id + '" data-fld="' + fld +
       '" data-unit="' + esc(unit) + '" value="' + esc(shown) +
@@ -3923,7 +3766,7 @@ function renderReport(u){
         '<td class="idx">' + (i+1) + '</td>' +
         '<td>' + esc(x.obj.name) + fmark(x.id) + '</td>' +
         '<td class="num">' + esc(x.obj.dir) + '</td>' +
-        '<td class="num">' + (x.obj.target ? targetShown(x.obj.target) : '<span class="missing">Missing</span>') + '</td>' +
+        '<td class="num">' + (x.obj.target ? esc(x.obj.target) : '<span class="missing">Missing</span>') + '</td>' +
         '<td class="cc">' + entry(x) + '</td>' +
         '<td class="notecol">' + noteCell(x) + '</td></tr>';
     }).join(""));
@@ -3955,7 +3798,7 @@ function renderReport(u){
               '<td class="idx">' + (i+1) + '</td>' +
               '<td>' + esc(x.obj.name) + fmark(x.id) + '</td>' +
               '<td class="num">' + esc(x.obj.dir) + '</td>' +
-              '<td class="num">' + (x.obj.target ? targetShown(x.obj.target) : '<span class="missing">Missing</span>') + '</td>' +
+              '<td class="num">' + (x.obj.target ? esc(x.obj.target) : '<span class="missing">Missing</span>') + '</td>' +
               '<td class="cc">' + entry(x) + '</td>' +
               '<td class="notecol">' + noteCell(x) + '</td></tr>';
           }).join(""))
@@ -4601,7 +4444,7 @@ function capKOTable(c){
           (m.note ? '<span class="why">' + esc(m.note) + '</span>' : '') + '</td>' +
           '<td class="cc">' + (m.weight == null ? "&mdash;" : m.weight + "%") + '</td>' +
           '<td class="cc">' + dirCell(m.dir) + '</td>' +
-          '<td class="num">' + (m.target ? targetShown(m.target) : '<span class="missing">Missing</span>') + '</td>' +
+          '<td class="num">' + (m.target ? esc(m.target) : '<span class="missing">Missing</span>') + '</td>' +
           '<td class="num">' + (m.actual == null || m.actual === "" ? "&mdash;" : figShown(m)) + '</td>' +
           '<td class="num final" style="color:' + bandInk(m.progress) + '">' + pct(m.progress) + '</td></tr>';
       }).join(""));
@@ -5240,7 +5083,7 @@ function capReportBody(c){
   var kRows = c.keyObjectives.map(function(m, i){
     return '<tr><td class="idx">' + (i+1) + '</td><td>' + esc(m.name) + '</td>' +
       '<td class="cc">' + dirCell(m.dir) + '</td>' +
-      '<td class="num">' + (m.target ? targetShown(m.target) : '<span class="missing">Missing</span>') + '</td>' +
+      '<td class="num">' + (m.target ? esc(m.target) : '<span class="missing">Missing</span>') + '</td>' +
       '<td class="cc">' + capEntryBox(m, splitTarget(String(m.target)).unit, may, m.name) + '</td>' +
       '<td class="notecol">' + capNoteBox(m, may) + '</td></tr>';
   }).join("");
@@ -5505,12 +5348,8 @@ function unitPlanBody(it, u, railed){
          mode carries the chip and the office's tick. \u00a7114's prepend rule for
          an out-of-list stored value lives inside gapCell now, and \u00a7148's
          hover words come back through `read`. */
-      /* \u00a7251: the same three go dead on a yes/no measure as on a yes/no
-         objective \u2014 one decision, both tables, or the two would answer
-         differently about the same kind of row (\u00a753.5). */
-      '<td class="cc">' + (ed && isYesNoRow(m) ? offSelect(m.dir || "\u2265")
-        : gapCell("plan", "u_plan", m, "dir",
-        { ctx:pctx(m), kind:"select", opts:["\u2265","\u2264"], cls:"mono", read:dirCell })) + '</td>' +
+      '<td class="cc">' + gapCell("plan", "u_plan", m, "dir",
+        { ctx:pctx(m), kind:"select", opts:["\u2265","\u2264"], cls:"mono", read:dirCell }) + '</td>' +
       /* §199.5: THE SAME UNIT PICKER AS A KEY OBJECTIVE'S. Islam, of the
          measures: *"let's do the same fix."* They have the identical shape —
          76 of them across the plan, the unit typed into the target — so they
@@ -5524,9 +5363,11 @@ function unitPlanBody(it, u, railed){
          READING table (measureRows) is untouched — it prints `esc(m.target)`,
          the whole string, which is where §199.4 put the unit back. */
       (ed
-        ? '<td class="cc">' + selectOr("plan", targetUnitOf(m),
-            targetUnitOpts(targetUnitOf(m), !hasTargetToHoldAUnit(m)), "",
-            function(v){ setTargetUnitAndRepaint(m, v); }) + '</td>'
+        ? '<td class="cc">' + (hasTargetToHoldAUnit(m)
+            ? selectOr("plan", targetUnitOf(m), targetUnitOpts(targetUnitOf(m)), "",
+                function(v){ setTargetUnit(m, v); })
+            : '<span class="why" title="Set a target first \u2014 the unit is ' +
+              'written with it">\u2014</span>') + '</td>'
         : unitCol
         /* §201.2: fill mode. The COLUMN is decided once for the whole table
            (unitCol, below) or the header and the rows stop agreeing about
@@ -5535,10 +5376,8 @@ function unitPlanBody(it, u, railed){
         ? '<td class="cc">' + (fillUnitCell("plan", "u_plan", m, pctx(m))
             || esc(targetUnitOf(m))) + '</td>'
         : '') +
-      '<td class="num">' + (ed && isYesNoRow(m) ? offInput("—")
-        : gapCell("plan", "u_plan", m, "target",
-        { ctx:pctx(m), kind:"input", cls:"mono", parse: unitInherit(m),
-          read: targetShown })) + '</td>' +
+      '<td class="num">' + gapCell("plan", "u_plan", m, "target",
+        { ctx:pctx(m), kind:"input", cls:"mono", parse: unitInherit(m) }) + '</td>' +
       /* NO 3-YEAR COLUMN. Islam, 2026-08-22: "in the direction plans the key
          measures are for 1 year only". A pillar's key measures carry one
          target and it is this year's; the three-year horizon belongs to the
@@ -5546,10 +5385,9 @@ function unitPlanBody(it, u, railed){
          and keep theirs. `target3y` is still stored and still travels through
          import, export and the archive — this removes a column, not a field,
          so nothing a plan already carries is lost. */
-      '<td class="cc">' + (ed && isYesNoRow(m) ? offSelect("\u2014")
-        : gapCell("plan", "u_plan", m, "compile",
+      '<td class="cc">' + gapCell("plan", "u_plan", m, "compile",
         { ctx:pctx(m), kind:"select", opts:["Sum","Latest","Average"],
-          readEmpty:"\u2014", read:compileCell })) + '</td></tr>';
+          readEmpty:"\u2014", read:compileCell }) + '</td></tr>';
   }).join("");
   var tRows = it.tactics.map(function(t, i){
     /* §249: THE CELL ASKS WHETHER IT DREW THE FOUR BOXES, rather than
@@ -5563,10 +5401,6 @@ function unitPlanBody(it, u, railed){
     var tgtOpen = false;
     var tgtCell = gapCell("plan", "u_plan", t, "outTarget", {
       ctx: pctx(t), del: true, fillKind: "tactic",
-      /* §251: read mode says "Yes / No", never the stored `Y/N` — the plan
-         is asking a question and that is the answer somebody will pick
-         between. One formatter for every surface (§53.5). */
-      read: targetShown,
       control: function(set, pendCls){
         tgtOpen = true;
         return outcomeEdit(t, set, pendCls, !ed);
@@ -5624,9 +5458,6 @@ function unitPlanBody(it, u, railed){
         (!ed && !tgtOpen ? '<span class="subhd narrowtgt">' +
            (SMPRules.gapEmpty("outTarget", t)
              ? '<span class="missing">Missing</span>'
-             /* \u00a7251: no direction on a yes/no outcome \u2014 there is nothing for
-                it to point at, and `\u2265 Yes / No` reads as a comparison. */
-             : SMPRules.isYesNo(t.outTarget) ? targetShown(t.outTarget)
              : esc(t.outDir || "\u2265") + ' ' + esc(t.outTarget)) + '</span>' : '') +
         '</td>' +
       /* THE OUTCOME'S TARGET: reading says the target, writing gives each of
@@ -6080,7 +5911,7 @@ function koReadBlock(list, emptyLine){
           (SMPRules.isHidden(m) ? ' hiddenrow' : '') +
           '"><span class="on">' + esc(m.name) + hidChip(m) +
           '</span>' +
-        '<span class="ot">' + (m.target ? targetShown(m.target) : '&mdash;') +
+        '<span class="ot">' + (m.target ? esc(m.target) : '&mdash;') +
           '</span>' +
         (wtd ? '<span class="ot h">' + (m.weight == null ? "&mdash;" : m.weight + "%") +
           '</span>' : '') + '</div>';
@@ -6118,7 +5949,7 @@ function capKoEdit(c){
         '<td class="cc">' + (ed
           ? (hasTargetToHoldAUnit(m)
               ? selectOr(pg, targetUnitOf(m), targetUnitOpts(targetUnitOf(m)), "",
-                  function(v){ setTargetUnitAndRepaint(m, v); })
+                  function(v){ setTargetUnit(m, v); })
               : '<span class="why" title="Set a target first — the unit is ' +
                 'written with it">—</span>')
           : (fillUnitCell(pg, "k_found", m) || esc(targetUnitOf(m)))) + '</td>' +

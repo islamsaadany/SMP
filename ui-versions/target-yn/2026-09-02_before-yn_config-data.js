@@ -5695,20 +5695,6 @@ function measureDue(m, share){
    stays a year-end judgement); everything else reads this. */
 function measureScore(m, share){
   if (!m) return null;
-  /* ── A YES OR A NO SCORES 100 OR 0 (§251) ──────────────────────────
-     BEFORE the arithmetic, and that ordering is the whole of it: a Y/N
-     target carries no number, so `measureDue` answers null and every row
-     would fall out of the score unscored. Islam chose 100/0 over "shown but
-     never scored", so the row lands in the pillar's and the unit's averages
-     like any other.
-
-     NOTHING SAID IS NOT A NO. An unanswered Y/N row scores null and leaves
-     every average, exactly as an empty number box does — reading silence as
-     a failure would mark a unit down for a row nobody has been asked about
-     yet (§35, §104.10). The share is not consulted: there is no partial
-     yes, so proration has nothing to divide (§250 prorates a TARGET, and
-     this row has no number to prorate). */
-  if (SMPRules.isYesNo(m.target)) return SMPRules.ynScore(m.actual);
   var due = measureDue(m, share);
   if (due == null || !due) return null;
   var a = parseFloat(String(m.actual == null ? "" : m.actual).replace(/[^0-9.]/g, ""));
@@ -5757,11 +5743,7 @@ function outcomeOf(t){
      row comes to be counted as missing while quietly being scored (§53.5,
      §42). The test is unchanged; only its home moved. */
   if (!t || !t.outTarget) return null;
-  /* §251: a Y/N outcome is a real target with no number in it, so it is
-     admitted here or the tactic goes on being read the old way and the
-     answer somebody gave is scored by nothing. `measureScore` takes it from
-     here — one arithmetic for every scored row, as §248 settled. */
-  if (!SMPRules.isYesNo(t.outTarget) && !SMPRules.targetHasNumber(t.outTarget)) return null;
+  if (!SMPRules.targetHasNumber(t.outTarget)) return null;
   return { dir: t.outDir || "\u2265", target: t.outTarget,
            compile: t.outCompile, actual: t.outActual };
 }

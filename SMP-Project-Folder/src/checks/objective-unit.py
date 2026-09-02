@@ -114,17 +114,36 @@ with sync_playwright() as pw:
     # THE LICENCE AGAIN, from the writing side. §1 proves it of what is stored;
     # this proves it of what this feature will store from now on — a value the
     # reader could not take apart again would be a plan the pen had broken.
+    # §251 MOVED THIS ASSERTION'S SCOPE, and it is REWRITTEN rather than
+    # dropped (§218, §214.3 — a check left asserting a rule a decision has
+    # deliberately reversed is how a build drifts back through it unnoticed).
+    # Every unit but one is written BESIDE a number and so must survive
+    # splitTarget/joinTarget; `Y/N` is the unit whose value part is always
+    # empty, so splitTarget cannot read it back BY DESIGN and the function
+    # that answers for it is `targetUnitOf`. Both are asserted, or the
+    # exemption would be a hole rather than a rule.
     rt = pg.evaluate("""() => {
       const bad = [];
-      TARGET_UNITS.concat(["B USD"]).forEach(u => {
+      TARGET_UNITS.concat(["B USD"]).filter(u => u !== SMPRules.YN_UNIT).forEach(u => {
         const m = {target:"6.2B EGP"}; setTargetUnit(m, u);
         const s = splitTarget(m.target);
         if (joinTarget(m.target, s.value, s.unit) !== m.target) bad.push(["rejoin", u, m.target]);
         if (s.unit !== String(u).trim()) bad.push(["read back", u, s.unit]);
       });
       return bad; }""")
-    ck("every unit the picker offers writes a value that reads back as itself",
+    ck("every NUMBER-carrying unit the picker offers writes a value that reads back as itself",
        not rt, rt)
+    yn = pg.evaluate("""() => {
+      const m = {target:"6.2B EGP", target3y:"9.0B EGP"};
+      setTargetUnit(m, SMPRules.YN_UNIT);
+      const after = [m.target, m.target3y, targetUnitOf(m)];
+      setTargetUnit(m, "%");                       /* and back out again */
+      return { after: after, out: [m.target, m.target3y, targetUnitOf(m)] };
+    }""")
+    ck("Y/N replaces the number outright, on both horizons",
+       yn["after"] == ["Y/N", "Y/N", "Y/N"], yn["after"])
+    ck("...and leaving it leaves no number behind — never 'Y/NB EGP'",
+       yn["out"] == ["%", "%", "%"], yn["out"])
 
     print("\n── 3 · an unchanged unit writes NOTHING (§50.6)")
     same = pg.evaluate("""() => {

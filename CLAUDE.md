@@ -365,6 +365,32 @@ console errors (in this cloud environment, run it via a wrapper that points Play
   `node scripts/test-door.js <smo-password>` against a running dev-server
   after touching `api/auth.js` or `lib/auth.js` (it ends by rate-limiting the
   SMO on purpose — `DELETE FROM login_attempts;` clears it).
+- **A TARGET THAT IS A YES OR A NO (§251):** Islam — *"for the target we need
+  to add a Y/N in the units which dims the target itself."* **IT IS A UNIT, NOT
+  A SECOND FIELD**, and that is why it costs no migration: §199 put the unit ON
+  the target string, so `Y/N` is the unit whose value part is always empty and
+  `target`/`target3y`/`outTarget` go on holding the whole string. **A COMPLETE
+  ANSWER, NEVER A GAP** — one line before §249's numeric test, or every yes/no
+  row wears the red word for ever and refuses Submit (§221) with nothing to
+  fill. **100 or 0, and silence is NOT SCORED** (§35: absent is not zero), both
+  his calls, taken before anything was built, across all three places the picker
+  appears. The direction and the compile rule are dimmed with the target —
+  **drawn and `disabled`, never merely dimmed** (§220), all four boxes kept
+  because a hole among equal boxes reads as a control that failed to render
+  (§248) — while **the unit picker stays live, being the only way back out**
+  (§61). **THE LIST NARROWS ON A BLANK ROW** to blank and `Y/N`, because a
+  brand-new "did it happen" row has no number to type and the em-dash made the
+  one unit needing none the one unit unreachable. **§251.2, found by driving
+  it**: a bound field writes WITHOUT repainting (§71.2 — right for typing,
+  wrong for a control that changes the row's SHAPE), so picking Y/N changed the
+  plan and nothing visibly happened; safe to repaint only because these are
+  SINGLE selects (§30.1, and §130.1 for why a ticking list is not).
+  **§251.3**: leaving Y/N writes a bare unit `splitTarget` cannot read back, so
+  `targetUnitOf` learned `outUnitOf`'s §248 rule — **narrowed to units the
+  picker offers**, or a target reading `TBD` becomes a unit nobody chose
+  (§96.2). The workbook carries it or a round trip drops every yes/no target
+  (§22). **18 red** on the shipped build; one check held a rule this reverses
+  and was REWRITTEN, not deleted (§218, §214.3).
 - **THE PLAN'S TITLES COULD NOT WRAP AT ALL (§189):** Islam — *"wrap the
   content of the plans edit boxes across pillars and functions, specially for
   the titles and descriptions."* Not a bad wrap: every title and description
@@ -4310,7 +4336,42 @@ prior sessions (on HR_ERP) accidentally reverted agreed-upon designs.
 
 ---
 
-*Last Updated: 2026-09-02 &mdash; **&sect;250: a tactic's outcome is measured
+*Last Updated: 2026-09-02 &mdash; **&sect;251: a target that is a yes or a
+no.** Islam: *"for the target we need to add a Y/N in the units which dims the
+target itself."* Some rows are not measured &mdash; a certification achieved, an
+agreement signed, a warehouse open &mdash; and the plan had no way to write one:
+every target box wants a number, so such a row was left blank and, since
+&sect;249, wore the red word for ever and refused Submit with nothing anybody
+could fill. **BOTH DECISIONS ARE HIS AND WERE TAKEN BEFORE ANYTHING WAS BUILT**:
+a Y/N row scores **100 or 0** (so it counts in every average), and it applies in
+**all three** places the unit picker appears. **IT IS A UNIT, NOT A SECOND
+FIELD**, which is the whole of why it costs no migration &mdash; &sect;199 put
+the unit ON the target string, so `Y/N` is simply the unit whose value part is
+always empty. **AND IT IS A COMPLETE ANSWER, NEVER A GAP**: one line before
+&sect;249's numeric test, or the feature ships every yes/no row blocking Submit.
+**Nothing said is not a no** (unanswered scores null and leaves the average).
+The direction and the compile rule are dimmed alongside the target &mdash; mine,
+put to him with the reasoning and confirmed &mdash; **drawn and `disabled`,
+never merely dimmed** (&sect;220), with the unit picker left live because it is
+the only way back out (&sect;61). **&sect;251.2, found by driving it**: a bound
+field writes WITHOUT repainting (&sect;71.2, right for typing), so picking Y/N
+changed the plan and **nothing visibly happened** &mdash; every assertion short
+of pressing the control passed. **&sect;251.3**: leaving Y/N writes a bare unit,
+which `splitTarget` cannot read back, so `targetUnitOf` learned the rule
+`outUnitOf` has had since &sect;248 &mdash; narrowed to units the picker itself
+offers, or a target reading `TBD` would be read as a unit nobody chose.
+**Proved able to fail: 18 red** on the shipped build; its first falsification
+run DIED rather than reported (&sect;215), so every probe degrades now. One
+check held a rule this reverses and was REWRITTEN, not deleted (&sect;218).
+472/0 authoriser &middot; 126/0 differ &middot; thirteen neighbouring checks
+&middot; full `qa.py` sweep ERRORS none. **RECORDED, NOT DONE**: a Y/N measure
+stores no `progress`, so the Focus board shows nothing for one (a reward
+decision, &sect;239); and `reportedCount` reads `actual` for every kind, so a
+tactic reporting into `outActual` is never counted done &mdash; that predates
+this and is measured as no worse for it, and fixing it changes what Submit
+demands of every existing tactic, which is Islam's call.*
+
+*Earlier: 2026-09-02 &mdash; **&sect;250: a tactic's outcome is measured
 against its own window.** Islam, of a tactic marked Q2 and Q3: *"that's a 6
 months project from april till september .. now we are reporting till august so
 the proration how should it be calauclated? because it's different than the

@@ -27735,3 +27735,125 @@ and the check's page-error listener reports it. Reproduced on the shipped build
 with this branch's changes removed. §100.3 again: *a stand-in that models less
 than the thing it stands in for reports a working build as broken.* Not fixed
 here — it is another check's machinery and this branch was not asked to touch it.
+
+## §251 — A TARGET THAT IS A YES OR A NO (2026-09-02)
+
+Islam: *"for the target we need to add a Y/N in the units which dims the
+target itself."*
+
+**SOME ROWS ARE NOT MEASURED, THEY EITHER HAPPENED OR THEY DID NOT** — a
+certification achieved, an agreement signed, a warehouse open — and the plan
+had no way to write one. Every target box wants a number, so such a row was
+left blank, and since §249 a blank target is a counted gap: it wore the red
+word for ever and refused Submit with nothing anybody could fill.
+
+**BOTH DECISIONS ARE HIS AND WERE TAKEN BEFORE ANYTHING WAS BUILT**, which is
+why the build is small. Asked what a Y/N row does when it is reported, he
+chose **100 or 0** over "shown but never scored", so the row lands in the
+pillar's and the unit's averages like any other; and asked where it applies,
+**all three** places the unit picker appears — a unit's key objectives, a
+pillar's key measures, and a tactic's outcome.
+
+**IT IS A UNIT, NOT A SECOND FIELD, AND THAT IS THE WHOLE OF WHY IT COSTS NO
+MIGRATION.** §199 put the unit ON the target string (`6.2B EGP` is one
+field), so `Y/N` is simply the unit whose value part is always empty: the
+target reads exactly `Y/N`, `target`/`target3y`/`outTarget` go on holding the
+whole string, and all 103 places that read them keep working. A second field
+would have been a second source of truth and the two would have drifted the
+first time anything wrote one of them (§53.5). Nothing stored moves, and it
+is asserted of the whole worked example rather than of one row: **no row in
+the demo tenant is silently read as yes/no.**
+
+**AND IT IS A COMPLETE ANSWER, NEVER A GAP.** §249 made a target holding only
+a unit read as Missing, which is exactly right for `%` on its way to `90%`
+and exactly wrong here — `Y/N` is not a target half-typed, it is the finished
+target of a row that has no number. One line in `gapEmptyValue` before the
+numeric test; without it the feature would ship every Y/N row wearing the red
+word and blocking Submit (§221), a hole nobody could close.
+
+**NOTHING SAID IS NOT A NO.** An unanswered Y/N row scores null and leaves
+every average, exactly as an empty number box does. Reading silence as a
+failure would mark a unit down for a question nobody has been asked yet
+(§35's rule, and §104.10's in the same shape).
+
+**THE DIRECTION AND THE COMPILE RULE ARE DIMMED ALONGSIDE THE TARGET**, and
+that is mine rather than his — put to him with the reasoning and confirmed.
+With no number there is nothing for a `≥` to point at and nothing for `Sum`
+to add up, and a live control that changes nothing is worse than one that is
+not there (§61). **All four boxes stay DRAWN**: a hole among equal boxes
+reads as a control that failed to render, which is §248's own ruling about
+the unit picker applied to its neighbours. **`disabled`, never merely
+dimmed** — a look is not a lock and the keyboard walks straight past
+something only faded (§220).
+
+**THE UNIT PICKER IS THE ONE THAT STAYS LIVE**, because it is the only way
+back out: dimming the control that SET this state would leave the row stuck
+in it (§61 from the other side).
+
+**AND IT HAD TO BE REACHABLE ON A BLANK ROW.** The pen drew an em-dash and a
+hover saying *"set a target first"* until a target existed — right for
+`B EGP`, and it made `Y/N` unreachable exactly where it is most wanted, since
+a brand-new "did it happen" row has no number to type. The list NARROWS on
+such a row (blank and `Y/N` only) rather than the control vanishing, so what
+is on offer is what can actually be stored and nothing takes an answer and
+discards it.
+
+**THE DEFECT FOUND BY DRIVING IT, NOT BY READING IT (§251.2).** A bound field
+writes WITHOUT repainting, deliberately — a repaint under a typing hand
+destroys the box being typed into (§71.2, §35) — and that is right for every
+field whose value is the only thing that changes and wrong for this one:
+`Y/N` changes the SHAPE of the row. So the office picked it and **nothing
+visibly happened** until some later paint caught up. Every assertion short of
+pressing the control passed. `setTargetUnitAndRepaint` is the fix, and it is
+safe only because these are SINGLE selects, which are unhooked before they
+fire `change` (§30.1); a ticking list repainted this way dies under the
+pointer (§130.1).
+
+**AND LEAVING Y/N EXPOSED A HOLE §248 HAD ALREADY FILLED ON ITS OWN SIDE
+(§251.3).** `splitTarget` looks for a number FOLLOWED BY a unit, so a target
+holding nothing but `%` reads back as no unit at all — which did not matter
+while nothing could write one, and does now, because leaving Y/N for a
+number-carrying unit leaves exactly that. `targetUnitOf` learned the rule
+`outUnitOf` has had since §248, **narrowed to units the picker itself
+offers**: a target reading `TBD` is prose and must not be read as a unit
+nobody chose (§96.2).
+
+**THE WORKBOOK CARRIES IT** or a plan authored on the platform and downloaded
+would come back with every yes/no target unrecognised — an upload AUTHORS the
+plan (§22), so a unit the template cannot say is a unit the round trip
+destroys.
+
+**PROVED ABLE TO FAIL: 18 red** on the shipped build, green on this one —
+and its first falsification run **died rather than reported** (§215, exactly
+as §248's did), so every probe degrades to a shape the assertions can still
+read and the red count is honest. `checks/objective-unit.py` §2c held a rule
+this decision deliberately reverses (every unit must survive
+`splitTarget`/`joinTarget`, which `Y/N` cannot by design) and was **REWRITTEN
+rather than deleted** (§218, §214.3), with Y/N's own round trip asserted
+beside the exemption so it is a rule and not a hole.
+
+Green after: `objective-unit`, `tactic-outcome`, `tactic-proration`,
+`ytd-proration`, `gap-fill`, `submit-gate`, `fn-pillars`, `fn-ko-edit`,
+`table-fit`, `plan-fields`, `project-tables`, `deck-and-weights`,
+`hide-element`; `test-authorize` 472/0, `test-graph-diff` 126/0, and the full
+`qa.py` sweep ERRORS none.
+
+**RECORDED, NOT DONE.** Three, each stated rather than quietly absorbed:
+
+1. **A Y/N measure stores no `progress`.** The figure is derived by
+   `measureScore`, and `progress` is the raw actual-against-annual ratio,
+   which a word cannot produce — so the **Focus board**, which reads that raw
+   figure on purpose (§239: reward stays a year-end judgement), shows nothing
+   for a yes/no row. Whether a yes on the Focus board should read as 100 is a
+   reward decision, not a reporting one.
+
+2. **A tactic reporting into `outActual` is not counted as done.**
+   `reportedCount` reads `x.obj.actual` for every kind, and §248 sends an
+   outcome's figure to `outActual` — so such a tactic can never satisfy the
+   tally or the Submit gate. **This predates §251 and is not made worse by
+   it** (measured: it is true of every §248 outcome, whatever its unit), and
+   fixing it changes what Submit demands of every existing tactic, which is
+   Islam's call and not a detail to slip in beside this.
+
+3. **The review deck still ignores an outcome entirely** — §250.2's own
+   recorded omission, unchanged here.

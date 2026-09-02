@@ -102,7 +102,7 @@ function deckSlides(u){
       (fnAim ? '' : '<td class="num big3">' +
         (m.target3y ? esc(m.target3y) : "&mdash;") + '</td>') +
       (aimNear
-        ? '<td class="num">' + (m.target ? esc(m.target) : '<span class="missing">Missing</span>') + '</td>'
+        ? '<td class="num">' + (m.target ? targetShown(m.target) : '<span class="missing">Missing</span>') + '</td>'
         : '') + '</tr>';
   }).join("");
   S.push('<section class="dslide"' + anch("aim", "After \u201cWhat we are aiming at\u201d") +
@@ -163,7 +163,7 @@ function deckSlides(u){
   var oRows = SMPRules.shown(u.keyObjectives).map(function(m, i){
     return '<tr><td class="idx">' + (i+1) + '</td>' +
       '<td class="lead">' + esc(m.name) + fmark(m.id) + '</td>' +
-      '<td class="num">' + (m.target ? esc(m.target) : "&mdash;") + '</td>' +
+      '<td class="num">' + (m.target ? targetShown(m.target) : "&mdash;") + '</td>' +
       '<td class="num">' + figShown(m) + '</td>' +
       '<td class="num final ' + dBand(measureScore(m)) + '">' + dPct(measureScore(m)) + '</td></tr>';
   }).join("");
@@ -249,7 +249,7 @@ function deckSlides(u){
     var mRows = SMPRules.shown(p.measures).map(function(m, i){
       return '<tr><td class="idx">' + (i+1) + '</td>' +
         '<td class="lead">' + esc(m.name) + fmark(m.id) + '</td>' +
-        '<td class="num">' + (m.target ? esc(m.target) : '<span class="missing">Missing</span>') + '</td>' +
+        '<td class="num">' + (m.target ? targetShown(m.target) : '<span class="missing">Missing</span>') + '</td>' +
         '<td class="num">' + figShown(m) + '</td>' +
         '<td class="num final ' + dBand(measureScore(m)) + '">' + dPct(measureScore(m)) + '</td>' +
         (m.note ? '<td class="dnote">' + esc(m.note) + '</td>' : '<td class="dnote empty">&mdash;</td>') +
@@ -383,7 +383,7 @@ function deckSlidesFn(fk){
         return '<tr><td class="idx">' + (i+1) + '</td>' +
           '<td class="lead">' + esc(m.name) + '</td>' +
           '<td class="num">' + (m.weight == null ? "&mdash;" : m.weight + "%") + '</td>' +
-          '<td class="num">' + (m.target ? esc(m.target) : '<span class="missing">Missing</span>') + '</td>' +
+          '<td class="num">' + (m.target ? targetShown(m.target) : '<span class="missing">Missing</span>') + '</td>' +
           '<td class="num">' + (m.actual == null || m.actual === "" ? "&mdash;" : figShown(m)) + '</td>' +
           '<td class="num final ' + dBand(measureScore(m)) + '">' + dPct(measureScore(m)) + '</td>' +
           (m.note ? '<td class="dnote">' + esc(m.note) + '</td>' : '<td class="dnote empty">&mdash;</td>') + '</tr>';

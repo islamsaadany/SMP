@@ -266,7 +266,7 @@ function deckSlides(u){
       '<th class="num">Target</th><th class="num">Actual</th>' +
       '<th class="num">Progress</th><th>Note</th></tr></thead><tbody>' + mRows + '</tbody></table></section>');
 
-    /* ── 6 · A TACTIC IS SHOWN BY WHAT IT PRODUCED (§251) ──────────────
+    /* ── 6 · A TACTIC IS SHOWN BY WHAT IT PRODUCED (§252) ──────────────
        Islam: *"presentations doesn't change when the plan performance is
        done."* Measured on Mobile before a line was written: a tactic reported
        through its outcome read **&mdash; / 50%** and **&mdash;** here, while

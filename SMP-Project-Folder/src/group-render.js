@@ -643,7 +643,7 @@ function tacticRows(ts, unitKey){
     /* §248: an outcome answers with its own score and its own benchmark; a
        tactic without one is read exactly as it was. `tacticRatio` stays the
        reader for the second case so nothing about it moves. */
-    /* §251: the ternary that used to sit here is `tacticProgress()` now --
+    /* §252: the ternary that used to sit here is `tacticProgress()` now --
        it was the only copy in the product and the deck needed it too. */
     var oc = onOutcome(t), bench = tacticBenchmark(t);
     var r = tacticProgress(t);
@@ -665,7 +665,7 @@ function tacticRows(ts, unitKey){
         (bench ? ' <i>/ ' + esc(bench) + '</i>' : '') + '</span></td>' +
         '<td class="num final" style="color:' + bandInk(r) + '">' + pct(r) + '</td>';
     return '<tr data-oi="' + i + '"' +
-      /* §251: `tacticAnswered`, or a row answered through its outcome is
+      /* §252: `tacticAnswered`, or a row answered through its outcome is
          dimmed as though nobody had reported it -- while the two cells at the
          end of that same row print the figure and its score. */
       (SMPRules.isHidden(t) ? ' class="hiddenrow"'
@@ -3755,7 +3755,7 @@ function renderReport(u){
   };
   var doneOf = function(list){
     var n = 0;
-    list.forEach(function(x){ if (rowAnswered(x)) n++; });   /* §251 */
+    list.forEach(function(x){ if (rowAnswered(x)) n++; });   /* §252 */
     return n;
   };
   var tally = function(done, total){
@@ -3874,7 +3874,7 @@ function renderReport(u){
     SMPRules.shown(p.tactics).forEach(function(t){
       if (!tacticDue(t)) return;
       total++;
-      if (tacticAnswered(t)) done++;   /* §251 */
+      if (tacticAnswered(t)) done++;   /* §252 */
     });
     return { done: done, total: total };
   };

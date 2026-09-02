@@ -276,12 +276,12 @@
    "smp-shell-v4.24-outcome-missing-audit"; confirmed again immediately before
    the push (§94.16).
 
-   §251: the review deck's tactics slide reads the outcome's figure, and five
+   §252: the review deck's tactics slide reads the outcome's figure, and five
    counters stopped looking in the old box — the built file's bytes changed, so
    the name does too. Checked against origin/main serving
    "smp-shell-v4.25-tactic-window-proration" AFTER merging it into this branch;
    confirm again immediately before the push (§94.16). */
-const SHELL = "smp-shell-v4.26-outcome-on-the-deck";
+const SHELL = "smp-shell-v4.27-outcome-on-the-deck";
 const ASSETS = [
   "/",
   "/index.html",

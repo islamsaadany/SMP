@@ -7,7 +7,7 @@ version (rules A2 / A11, changed 2026-08-20) — those go only when asked for.
 **Where it runs:** Vercel, production tracks `main`. Static files plus two
 serverless functions (`/api/state`, `/api/auth`) against Neon Postgres.
 **Latest version:** §250 on `main` (a tactic's outcome measured against its
-own window); §251 on this branch (the presentation reads what was reported).
+own window); §252 on this branch (the presentation reads what was reported).
 
 *(This line read v3.58 while the section below it ran to v3.65: a documentation
 drift, flagged before it was corrected rather than quietly realigned.)*
@@ -79,7 +79,7 @@ Nothing proceeds past this line without an answer.
 
 ## Built and verified
 
-### §251 — the presentation reads what was reported (2026-09-02, branch `claude/presentations-plan-performance-update-7a94p2`)
+### §252 — the presentation reads what was reported (2026-09-02, branch `claude/presentations-plan-performance-update-7a94p2`)
 
 Islam: *"presentations doesn't change when the plan performance is done"*, and
 then *"the presentation should update on either save draft or submit."* **The

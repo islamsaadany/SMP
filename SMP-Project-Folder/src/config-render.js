@@ -5224,7 +5224,7 @@ function renderCycle(){
     askedItems(u).forEach(function(x){
       var slot = x.kind === "objective" ? "obj" : x.kind === "measure" ? "mea" : "tac";
       by[slot][1]++;
-      /* §251: through `rowAnswered`, or the board's tactics column disagrees
+      /* §252: through `rowAnswered`, or the board's tactics column disagrees
          with the progress bar beside it, which counts the same rows. */
       if (rowAnswered(x)) by[slot][0]++;
     });
@@ -5293,7 +5293,7 @@ function renderCycle(){
       if (x.kind === "deliverable") deliv++;
       if (x.kind === "milestone") mile++;
       by[slot][1]++;
-      if (rowAnswered(x)) by[slot][0]++;   /* §251: one predicate, not a third copy */
+      if (rowAnswered(x)) by[slot][0]++;   /* §252: one predicate, not a third copy */
     });
     var tacTitle = plural(deliv, "deliverable") + " \u00b7 " + plural(mile, "milestone") +
       ", asked this cycle";

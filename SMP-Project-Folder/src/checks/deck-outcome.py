@@ -1,4 +1,4 @@
-"""§251 — the presentation reads what was reported.
+"""§252 — the presentation reads what was reported.
 
    Islam: *"presentations doesn't change when the plan performance is done."*
    A tactic reported through its OUTCOME (§248) puts its figure in `outActual`,

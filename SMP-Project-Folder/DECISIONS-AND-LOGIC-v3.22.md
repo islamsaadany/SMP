@@ -27738,7 +27738,7 @@ here — it is another check's machinery and this branch was not asked to touch 
 
 ---
 
-## §251 — THE PRESENTATION READS WHAT WAS REPORTED (2026-09-02)
+## §252 — THE PRESENTATION READS WHAT WAS REPORTED (2026-09-02)
 
 Islam, of the review deck: *"presentations doesn't change when the plan
 performance is done."*
@@ -27830,7 +27830,7 @@ AGREEMENT rather than literals (§94.8) — the slide must say what the Performa
 page says about the same tactic, and every count must agree with the rule behind
 it, so a later change to the review point keeps it green and a build where both
 surfaces are wrong together does not slip past. It reports **19 red** against
-the shipped pre-§251 file and 0 after. **Its own first run DIED rather than
+the shipped pre-§252 file and 0 after. **Its own first run DIED rather than
 reported** (§215): every probe calls the two new shared readers, so on a build
 without them the run ended in a `ReferenceError` and printed a failure count of
 **zero** — a falsification that looks like a pass. It asks for both by name

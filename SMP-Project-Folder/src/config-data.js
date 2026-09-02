@@ -4313,7 +4313,7 @@ function fnEverReported(fk){
   if (f) {
     var reported = fnItems(f).some(function(p){
       return (p.measures || []).some(function(m){ return m.actual !== "" && m.actual != null; }) ||
-             /* §251: `tacticAnswered`, or a function whose tactics all report
+             /* §252: `tacticAnswered`, or a function whose tactics all report
                 through their outcomes reads as never having reported -- and
                 this is what stands between it and being deleted (§62). */
              (p.tactics  || []).some(tacticAnswered);
@@ -4742,7 +4742,7 @@ function reportItems(u){
 function askedItems(u){
   return reportItems(u).filter(function(x){ return x.kind !== "tactic" || x.asked; });
 }
-/* ── HAS THIS ROW BEEN ANSWERED? (§251) ────────────────────────────
+/* ── HAS THIS ROW BEEN ANSWERED? (§252) ────────────────────────────
    One predicate, because six places were asking it and five of them were
    asking `x.obj.actual` -- which is the wrong box for a tactic measured by
    its outcome (§248). Measured on Mobile: entering the outcome's figure took
@@ -4775,7 +4775,7 @@ function reportedCount(u){
    everything else carries `progress`. One reader, because the note rule and
    the board both ask and two copies would disagree about a deliverable. */
 function rowReads(x){
-  /* §251: through `tacticProgress`, or the note rule cannot see an outcome at
+  /* §252: through `tacticProgress`, or the note rule cannot see an outcome at
      all -- a tactic reporting 2 of a target of 10 read null, so nobody was
      ever asked to explain it and Submit let it through unexplained. */
   if (x.kind === "tactic") return tacticProgress(x.obj);
@@ -4838,7 +4838,7 @@ function fnAskedItems(fk){
 }
 function fnReportedCount(fk){
   var a = fnAskedItems(fk), n = 0;
-  /* §251: the same predicate the unit's count asks. A function has no
+  /* §252: the same predicate the unit's count asks. A function has no
      tactics, so nothing here moves -- what goes is the second copy. */
   a.forEach(function(x){ if (rowAnswered(x)) n++; });
   return { done:n, total:a.length };
@@ -5800,7 +5800,7 @@ function tacticBenchmark(t){
    Asked by the three panes so none of them decides it separately. */
 function onOutcome(t){ return tacticOutcomeScore(t) != null; }
 
-/* ── WHAT A TACTIC READS, AS A PER CENT (§251) ─────────────────────
+/* ── WHAT A TACTIC READS, AS A PER CENT (§252) ─────────────────────
    Islam, of the review deck: *"presentations doesn't change when the plan
    performance is done."*
 
@@ -6740,7 +6740,7 @@ function unitSnapshotCounts(s){
   (s.items || []).forEach(function(p){
     m += (p.measures || []).length; t += (p.tactics || []).length;
     (p.measures || []).forEach(function(x){ if (x.progress != null) rep++; });
-    /* §251: an archived tactic answered by its outcome was reported, and a
+    /* §252: an archived tactic answered by its outcome was reported, and a
        snapshot that says otherwise is a count of the wrong box. */
     (p.tactics  || []).forEach(function(x){ if (tacticAnswered(x)) rep++; });
   });

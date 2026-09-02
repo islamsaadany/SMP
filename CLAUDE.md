@@ -365,7 +365,7 @@ console errors (in this cloud environment, run it via a wrapper that points Play
   `node scripts/test-door.js <smo-password>` against a running dev-server
   after touching `api/auth.js` or `lib/auth.js` (it ends by rate-limiting the
   SMO on purpose — `DELETE FROM login_attempts;` clears it).
-- **THE PRESENTATION READS WHAT WAS REPORTED (§251):** Islam — *"presentations
+- **THE PRESENTATION READS WHAT WAS REPORTED (§252):** Islam — *"presentations
   doesn't change when the plan performance is done"*, and then *"the
   presentation should update on either save draft or submit."* **THE PROPOSED
   FIX WOULD HAVE CHANGED NOTHING** — `openDeck()` calls `deckSlides()` on the
@@ -4156,13 +4156,13 @@ python3 checks/ytd-proration.py # YTD is measured against the part of the year t
                                 # score; and every deck row is counted against its own
                                 # header, because dropping a column from a header and not
                                 # from the row is this change's easiest mistake
-python3 checks/deck-outcome.py  # the presentation reads what was reported (§251): the
+python3 checks/deck-outcome.py  # the presentation reads what was reported (§252): the
                                 # tactics slide's nine columns, its figures asserted as
                                 # AGREEMENT with the Performance page rather than as
                                 # literals, a tactic with no outcome untouched, "Not
                                 # reported" where a figure is owed, and every count and
                                 # the note rule agreeing with the rule behind them —
-                                # 19 red against the shipped pre-§251 file, and it asks
+                                # 19 red against the shipped pre-§252 file, and it asks
                                 # for the two shared readers BY NAME first, or a build
                                 # without them dies and reports zero failures (§215)
 python3 checks/gap-walk.py      # the band's chips and Next gap actually go somewhere:
@@ -4356,7 +4356,7 @@ prior sessions (on HR_ERP) accidentally reverted agreed-upon designs.
 
 ---
 
-*Last Updated: 2026-09-02 &mdash; **&sect;251: the presentation reads what was
+*Last Updated: 2026-09-02 &mdash; **&sect;252: the presentation reads what was
 reported.** Islam: *"presentations doesn't change when the plan performance is
 done"*, then *"the presentation should update on either save draft or submit."*
 **THE PROPOSED FIX WOULD HAVE CHANGED NOTHING** &mdash; the deck is assembled

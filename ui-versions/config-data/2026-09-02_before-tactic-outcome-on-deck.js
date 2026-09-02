@@ -4313,10 +4313,7 @@ function fnEverReported(fk){
   if (f) {
     var reported = fnItems(f).some(function(p){
       return (p.measures || []).some(function(m){ return m.actual !== "" && m.actual != null; }) ||
-             /* §251: `tacticAnswered`, or a function whose tactics all report
-                through their outcomes reads as never having reported -- and
-                this is what stands between it and being deleted (§62). */
-             (p.tactics  || []).some(tacticAnswered);
+             (p.tactics  || []).some(function(x){ return x.actual != null; });
     });
     if (reported) return true;
   }
@@ -4742,30 +4739,12 @@ function reportItems(u){
 function askedItems(u){
   return reportItems(u).filter(function(x){ return x.kind !== "tactic" || x.asked; });
 }
-/* ── HAS THIS ROW BEEN ANSWERED? (§251) ────────────────────────────
-   One predicate, because six places were asking it and five of them were
-   asking `x.obj.actual` -- which is the wrong box for a tactic measured by
-   its outcome (§248). Measured on Mobile: entering the outcome's figure took
-   the report from 41 of 41 to 40 of 41, so the reporting page, the SMO's
-   cycle board and the welcome screen all said a unit still owed a figure it
-   had just entered, and Submit refused it with "1 figure still to enter".
-
-   The ternary this replaces had the SAME expression in both branches -- the
-   tactic branch had been written and then never filled in, which is as close
-   to a note saying "this is the one that differs" as code gets. */
-function rowAnswered(x){
-  var o = x && (x.obj || x);
-  if (!o) return false;
-  if (x.kind === "tactic") return tacticAnswered(o);
-  /* A deliverable and a milestone say how far they have got rather than
-     carrying a figure (§104.10) -- unchanged, and gathered here so the
-     question has one answer rather than three. */
-  if (x.kind === "deliverable" || x.kind === "milestone") return statusGiven(o);
-  return o.actual != null && o.actual !== "";
-}
 function reportedCount(u){
   var a = askedItems(u), n = 0;
-  a.forEach(function(x){ if (rowAnswered(x)) n++; });
+  a.forEach(function(x){
+    var v = x.kind === "tactic" ? x.obj.actual : x.obj.actual;
+    if (v != null && v !== "") n++;
+  });
   return { done:n, total:a.length };
 }
 /* A note is required where a figure lands in the bottom two bands. A red
@@ -4775,10 +4754,7 @@ function reportedCount(u){
    everything else carries `progress`. One reader, because the note rule and
    the board both ask and two copies would disagree about a deliverable. */
 function rowReads(x){
-  /* §251: through `tacticProgress`, or the note rule cannot see an outcome at
-     all -- a tactic reporting 2 of a target of 10 read null, so nobody was
-     ever asked to explain it and Submit let it through unexplained. */
-  if (x.kind === "tactic") return tacticProgress(x.obj);
+  if (x.kind === "tactic") return tacticRatio(x.obj);
   if (x.kind === "deliverable" || x.kind === "milestone") return statusReads(x.obj);
   /* §239: the prorated score, so a unit is asked to explain a figure that is
      actually behind rather than one that only looks behind against a whole
@@ -4838,9 +4814,10 @@ function fnAskedItems(fk){
 }
 function fnReportedCount(fk){
   var a = fnAskedItems(fk), n = 0;
-  /* §251: the same predicate the unit's count asks. A function has no
-     tactics, so nothing here moves -- what goes is the second copy. */
-  a.forEach(function(x){ if (rowAnswered(x)) n++; });
+  a.forEach(function(x){
+    if (x.kind === "deliverable" || x.kind === "milestone") { if (statusGiven(x.obj)) n++; }
+    else if (x.obj.actual != null && x.obj.actual !== "") n++;
+  });
   return { done:n, total:a.length };
 }
 function fnMissingNotes(fk){ return fnAskedItems(fk).filter(needsNote); }
@@ -5784,23 +5761,6 @@ function tacticBenchmark(t){
    Asked by the three panes so none of them decides it separately. */
 function onOutcome(t){ return tacticOutcomeScore(t) != null; }
 
-/* ── WHAT A TACTIC READS, AS A PER CENT (§251) ─────────────────────
-   Islam, of the review deck: *"presentations doesn't change when the plan
-   performance is done."*
-
-   §248 gave a tactic a SECOND box for its figure, and every surface that had
-   to be taught about it was taught one at a time. This expression --
-   `onOutcome(t) ? tacticReads(t) : tacticRatio(t)` -- was written out in the
-   Performance pane and NOWHERE else, so the deck went on asking `tacticRatio`
-   alone and printed an em-dash for a row it had already counted in the
-   heading three inches above it (§53.5: one product, two surfaces, and they
-   must not disagree about one number).
-
-   An outcome answers with its own score against the target due so far; a
-   tactic without one answers with the share of its plan it has delivered,
-   byte for byte as before. */
-function tacticProgress(t){ return onOutcome(t) ? tacticReads(t) : tacticRatio(t); }
-
 /* What a prorated row is measured against, written the way the target is --
    drawn as the quiet half of the YTD actual cell. Null where there is nothing
    worth saying. */
@@ -6698,9 +6658,7 @@ function unitSnapshotCounts(s){
   (s.items || []).forEach(function(p){
     m += (p.measures || []).length; t += (p.tactics || []).length;
     (p.measures || []).forEach(function(x){ if (x.progress != null) rep++; });
-    /* §251: an archived tactic answered by its outcome was reported, and a
-       snapshot that says otherwise is a count of the wrong box. */
-    (p.tactics  || []).forEach(function(x){ if (tacticAnswered(x)) rep++; });
+    (p.tactics  || []).forEach(function(x){ if (x.actual != null) rep++; });
   });
   (s.keyObjectives || []).forEach(function(x){ if (x.progress != null) rep++; });
   return { pillars:(s.items || []).length, measures:m, tactics:t,

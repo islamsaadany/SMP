@@ -266,68 +266,31 @@ function deckSlides(u){
       '<th class="num">Target</th><th class="num">Actual</th>' +
       '<th class="num">Progress</th><th>Note</th></tr></thead><tbody>' + mRows + '</tbody></table></section>');
 
-    /* ── 6 · A TACTIC IS SHOWN BY WHAT IT PRODUCED (§251) ──────────────
-       Islam: *"presentations doesn't change when the plan performance is
-       done."* Measured on Mobile before a line was written: a tactic reported
-       through its outcome read **&mdash; / 50%** and **&mdash;** here, while
-       the Performance page read **4# / 3 #** and **133%** for that same row --
-       and the heading three inches above it on this very slide already said
-       **Delivered 98%**, a number that COUNTS the outcome the table under it
-       was calling empty. The deck was reading `t.actual`, and §248 puts the
-       figure in `outActual`.
-
-       THE OUTCOME TAKES A COLUMN OF ITS OWN, Islam's pick from three drawn in
-       the real deck (design-mockups/tactic-outcome-slide/). It is what the
-       figure beside it is measured against, so it belongs on the line where an
-       audience can run an eye down it -- the same shape the Performance page
-       has worn since §248, because a projector must not say something
-       different from the page behind it (§53.5). The cost was measured and
-       accepted: Mobile's deck goes from 24 slides to 27, all of them
-       continuations of a table the deck already splits (§69.5).
-
-       AND THE TWO HEADINGS TAKE PERFORMANCE'S WORDS -- *YTD actual* and
-       *Progress* -- for §239.2's own reason: "delivery" is wrong for a row
-       measured in stores or in EGP, and one number should not have two names.
-
-       A ROW THAT IS OWED A FIGURE SAYS SO. It printed the same em-dash as an
-       unmeasurable row, so a review could not tell "nobody has entered this"
-       from "there is nothing to enter" (§35). */
     var tRows = SMPRules.shown(p.tactics).map(function(t, i){
-      var lead = '<td class="idx">' + (i+1) + '</td>' +
-        '<td class="lead">' + esc(t.name) + '</td>' +
-        '<td>' + outcomeCell(t) + '</td>' +
-        '<td>' + esc(t.owner) + '</td>' +
+      if (!tacticDue(t)) {
+        return '<tr class="dim"><td class="idx">' + (i+1) + '</td>' +
+          '<td class="lead">' + esc(t.name) + '</td><td>' + esc(t.owner) + '</td>' +
+          '<td class="collabs">' + collabCell(t) + '</td>' +
+          '<td class="cc">' + qs(t) + '</td>' +
+          '<td colspan="2" class="cc">Outside this cycle</td>' +
+          '<td class="dnote empty">&mdash;</td></tr>';
+      }
+      return '<tr><td class="idx">' + (i+1) + '</td>' +
+        '<td class="lead">' + esc(t.name) + '</td><td>' + esc(t.owner) + '</td>' +
         '<td class="collabs">' + collabCell(t) + '</td>' +
-        '<td class="cc">' + qs(t) + '</td>';
-      var note = t.note ? '<td class="dnote">' + esc(t.note) + '</td>'
-                        : '<td class="dnote empty">&mdash;</td>';
-      if (!tacticDue(t))
-        return '<tr class="dim">' + lead +
-          '<td colspan="2" class="cc">Outside this cycle</td>' + note + '</tr>';
-      /* What this row is measured against RIGHT NOW: an outcome answers with
-         its own target, prorated where it compiles by Sum; everything else
-         with the share of its plan that is due (\u00a7239). One function, so the
-         slide and the page cannot differ about it. */
-      var bench = tacticBenchmark(t);
-      if (!tacticAnswered(t))
-        return '<tr>' + lead + '<td colspan="2" class="cc">Not reported' +
-          (bench ? ' <i>&middot; due at ' + esc(bench) + '</i>' : '') + '</td>' +
-          note + '</tr>';
-      var r = tacticProgress(t);
-      var shown = onOutcome(t) ? outcomeShown(t) : t.actual + "%";
-      return '<tr>' + lead +
-        '<td class="num"><b>' + esc(shown) + '</b>' +
-          (bench ? ' <i>/ ' + esc(bench) + '</i>' : '') + '</td>' +
-        '<td class="num final ' + dBand(r) + '">' + dPct(r) + '</td>' +
-        note + '</tr>';
+        '<td class="cc">' + qs(t) + '</td>' +
+        '<td class="num">' + (t.actual == null ? "&mdash;" : t.actual + "%") +
+          ' / ' + tacticPlanned(t) + '%</td>' +
+        '<td class="num final ' + dBand(tacticRatio(t)) + '">' + dPct(tacticRatio(t)) + '</td>' +
+        (t.note ? '<td class="dnote">' + esc(t.note) + '</td>' : '<td class="dnote empty">&mdash;</td>') +
+        '</tr>';
     }).join("");
     S.push('<section class="dslide" data-split="' + pillarCode(u, pi) + 'T"' +
       anch("p" + pillarCode(u, pi), "After " + pillarCode(u, pi) + " \u2014 " + p.name) + '>' +
       deckPillarHead(u, p, pi, "Tactics") +
-      '<table class="zebra withnote"><thead><tr><th class="idx">#</th><th>Tactic</th>' +
-      '<th>Outcome</th><th>Owner</th>' +
+      '<table class="zebra withnote"><thead><tr><th class="idx">#</th><th>Tactic</th><th>Owner</th>' +
       '<th>Collabs.</th>' +
-      '<th class="num">Quarters</th><th class="num">YTD actual</th><th class="num">Progress</th>' +
+      '<th class="num">Quarters</th><th class="num">Deliv. / due</th><th class="num">Of plan</th>' +
       '<th>Note</th></tr></thead><tbody>' + tRows + '</tbody></table></section>');
   });
 

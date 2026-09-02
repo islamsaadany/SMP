@@ -27608,3 +27608,112 @@ how it is measured while being measured — and it is recorded here as his call 
 the arbitrariness of the line (the filler writes the target but not the
 direction) is a decision somebody made rather than an accident of where the gap
 list happened to stop.
+
+---
+
+## §251 — THE PRESENTATION READS WHAT WAS REPORTED (2026-09-02)
+
+Islam, of the review deck: *"presentations doesn't change when the plan
+performance is done."*
+
+**AND THE FIX HE PROPOSED WOULD HAVE CHANGED NOTHING, WHICH IS WHY THE FIRST
+MOVE WAS TO MEASURE RATHER THAN TO BUILD.** His next message said it plainly:
+*"the presentation should update on either save draft or submit. so the
+presentation updates upon updates."* But `openDeck()` calls `deckSlides()` at
+the moment the button is pressed — the deck is assembled fresh every time it
+opens, there is no stored copy of one anywhere in the product, and §51.8 says
+so in as many words. Wiring a refresh to Save draft and Submit would have
+attached a trigger to something with nothing stale to clear, shipped, and left
+the dash exactly where it was. *A reported symptom names where somebody was
+standing, not what they were standing on.*
+
+**WHAT IS ACTUALLY WRONG IS THAT FIVE READERS ARE LOOKING IN THE OLD BOX.**
+§248 gave a tactic an OUTCOME with its own target and unit, and the figure for
+such a tactic is entered into `outActual` — never into `actual`, which has
+meant "% delivered" since the scoring model existed and is what every archive
+and every closed cycle hold. That decision is right and is not revisited here.
+What was never done is teach the rest of the product to ask. Measured on
+Mobile before a line was written, with one tactic given an outcome of `6 #` and
+a figure of `4`:
+
+  · the deck's tactics slide read **`— / 50%`** and **`—`**, while the
+    Performance page read **`4# / 3 #`** and **`133%`** for that same row;
+  · the heading on that same slide read **`Delivered 98%`** — a number that
+    already COUNTS the outcome the table under it was calling empty, so the
+    slide was arguing with itself three inches apart;
+  · `reportedCount` went from **41 of 41 to 40 of 41** the moment the figure
+    moved into the outcome's box, so the reporting page, the SMO's cycle board,
+    the unit's status badge and the welcome screen all said a unit owed a figure
+    it had just entered;
+  · `submitBlockers().owed` reads that count, so **Submit refused a finished
+    report** with *"1 figure still to enter"* — §221's gate, shut by a reader
+    rather than by a hole;
+  · `rowReads` returned **null**, so the note rule never saw an outcome at all
+    and a badly missed one could be submitted with no explanation;
+  · and on Performance the row wore `.notdue`, dimmed as though nobody had
+    reported it, while the two cells at the end of that same row printed the
+    figure and its score.
+
+**THE EXPRESSION EXISTED AND WAS WRITTEN OUT EXACTLY ONCE.** `onOutcome(t) ?
+tacticReads(t) : tacticRatio(t)` sat inline in the Performance pane and nowhere
+else; it is **`tacticProgress()`** now, and the pane, the deck and the note rule
+all ask it (§53.5). Beside it, **`rowAnswered(x)`** answers *has this row been
+answered* for every kind of row — the question six places were asking and five
+were getting wrong. The ternary it replaces in `reportedCount` had **the same
+expression in both branches** (`x.kind === "tactic" ? x.obj.actual :
+x.obj.actual`): the tactic branch had been written and never filled in, which is
+as close as code comes to a note saying *this is the one that differs*.
+
+**THE SLIDE'S SHAPE IS ISLAM'S, PICKED FROM THREE DRAWN IN THE REAL DECK**
+(`design-mockups/tactic-outcome-slide/2026-09-02_tactics-slide-outcome.html`,
+published as an artifact for sign-off, rule 1c). Every option was shot out of
+the running platform with MB01 set up to show the four states a tactic can be
+in, so each wore the deck's own design rather than a stylesheet's idea of it
+(§41.9). He chose **A — the outcome takes a column of its own**, between Tactic
+and Owner, the same shape the Performance page has worn since §248: it is what
+the figure beside it is measured against, so it belongs on the line where an
+audience can run an eye down it, and a projector must not say something
+different from the page behind it. **B** (the outcome as a quiet line under the
+name) and **C** (A's column paid for by dropping Collabs. from the slide) were
+drawn and refused — B because §248 deliberately moved the outcome OUT from under
+the name for that very reason, C because it looks free only on a demo where
+nobody is named as a collaborator.
+
+**THE COST WAS MEASURED BEFORE HE CHOSE, NOT DISCOVERED AFTER:** with 12 of
+Mobile's 22 tactics carrying an outcome its deck goes from **24 slides to 27**
+(B and C would have been 26). Every extra one is a continuation of a table the
+deck already splits (§69.5), so this is more of something it does rather than
+something new.
+
+**TWO HEADINGS TAKE PERFORMANCE'S WORDS** — *Deliv. / due* → **YTD actual** and
+*Of plan* → **Progress** — for §239.2's own reason: "delivery" is wrong for a
+row measured in stores or in EGP, and one number should not carry two names in
+one product (§87's twins).
+
+**AND A ROW THAT IS OWED A FIGURE NOW SAYS SO.** It printed the same em-dash as
+a row with nothing to report, so a review could not tell *nobody has entered
+this* from *there is nothing here to enter* (§35). It reads **"Not reported ·
+due at 4 min"**, against the same benchmark the reporting page shows.
+
+**NOTHING STORED MOVES**, and a tactic with no outcome is byte-for-byte what it
+was: `62% / 100%` and `62%`, asserted in both directions.
+
+**PROVED ABLE TO FAIL FIRST (§94.5).** `checks/deck-outcome.py` asserts
+AGREEMENT rather than literals (§94.8) — the slide must say what the Performance
+page says about the same tactic, and every count must agree with the rule behind
+it, so a later change to the review point keeps it green and a build where both
+surfaces are wrong together does not slip past. It reports **19 red** against
+the shipped pre-§251 file and 0 after. **Its own first run DIED rather than
+reported** (§215): every probe calls the two new shared readers, so on a build
+without them the run ended in a `ReferenceError` and printed a failure count of
+**zero** — a falsification that looks like a pass. It asks for both by name
+first and stands in for them after, so a missing reader is a failure and the
+rest of the file still runs.
+
+**RECORDED, NOT DONE.** The plan download (`.pptx`) has no outcome column
+either — a different deck with a different job, carrying the plan rather than
+the figures, so it is its own decision and wants its own mockup (§249 already
+records the same for the plan slides). And a deck **already open on a
+projector** still does not redraw while somebody saves in another tab: put to
+Islam and deliberately left, because slides changing under a presenter
+mid-sentence is worse than a deck that is right as of when it opened.

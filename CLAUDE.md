@@ -365,6 +365,43 @@ console errors (in this cloud environment, run it via a wrapper that points Play
   `node scripts/test-door.js <smo-password>` against a running dev-server
   after touching `api/auth.js` or `lib/auth.js` (it ends by rate-limiting the
   SMO on purpose — `DELETE FROM login_attempts;` clears it).
+- **THE PRESENTATION READS WHAT WAS REPORTED (§251):** Islam — *"presentations
+  doesn't change when the plan performance is done"*, and then *"the
+  presentation should update on either save draft or submit."* **THE PROPOSED
+  FIX WOULD HAVE CHANGED NOTHING** — `openDeck()` calls `deckSlides()` on the
+  press, so a deck is assembled fresh every time it opens and there is no
+  stored copy to go stale (§51.8); a refresh wired to Save draft would have
+  shipped and left the dash exactly where it was. *A reported symptom names
+  where somebody was standing, not what they were standing on.* **THE FAULT IS
+  FIVE READERS LOOKING IN THE OLD BOX**: §248 puts a tactic's outcome figure in
+  `outActual`, and measured on Mobile the slide read **`— / 50%`** and **`—`**
+  where Performance read **`4# / 3 #`** and **`133%`**, under a heading on that
+  same slide already saying **`Delivered 98%`**; `reportedCount` went **41 of 41
+  → 40 of 41**, so **Submit refused a finished report** with *"1 figure still to
+  enter"*; `rowReads` returned null, so the note rule never saw an outcome at
+  all; and the row wore `.notdue` while its own last two cells printed the
+  figure. **THE EXPRESSION EXISTED AND WAS WRITTEN OUT ONCE** — inline in the
+  Performance pane — so it is **`tacticProgress()`** now, with **`rowAnswered()`**
+  beside it answering *has this row been answered* for every kind of row (§53.5);
+  the ternary it replaces in `reportedCount` had **the same expression in both
+  branches**, a tactic case written and never filled in. **THE SLIDE'S SHAPE IS
+  ISLAM'S**, picked from three shot out of the REAL deck (§41.9,
+  `design-mockups/tactic-outcome-slide/`): the **outcome takes a column of its
+  own**, as on Performance, because a projector must not say something different
+  from the page behind it — B (under the name) refused because §248 deliberately
+  moved it out from there, C (dropping Collabs.) because it looks free only on a
+  demo where nobody is named. **THE COST WAS MEASURED BEFORE HE CHOSE**: Mobile's
+  deck 24 → 27 slides with 12 of 22 tactics carrying an outcome, every extra one
+  a continuation the deck already makes. **Two headings take Performance's
+  words** (*YTD actual* · *Progress*, §239.2), **a row owed a figure says "Not
+  reported · due at …"** rather than printing the em-dash that means *nothing to
+  report* (§35), and **a tactic with no outcome is byte-for-byte what it was**,
+  asserted both ways. **Proved able to fail: 19 red** on the shipped file — and
+  the check's own first run **died rather than reported** (§215), so it asks for
+  the two shared readers by name before using them. **RECORDED, NOT DONE**: the
+  `.pptx` plan download has no outcome column (its own mockup), and a deck
+  already open on a projector still does not redraw mid-presentation, put to
+  Islam and deliberately left.
 - **THE PLAN'S TITLES COULD NOT WRAP AT ALL (§189):** Islam — *"wrap the
   content of the plans edit boxes across pillars and functions, specially for
   the titles and descriptions."* Not a bad wrap: every title and description
@@ -4068,6 +4105,15 @@ python3 checks/ytd-proration.py # YTD is measured against the part of the year t
                                 # score; and every deck row is counted against its own
                                 # header, because dropping a column from a header and not
                                 # from the row is this change's easiest mistake
+python3 checks/deck-outcome.py  # the presentation reads what was reported (§251): the
+                                # tactics slide's nine columns, its figures asserted as
+                                # AGREEMENT with the Performance page rather than as
+                                # literals, a tactic with no outcome untouched, "Not
+                                # reported" where a figure is owed, and every count and
+                                # the note rule agreeing with the rule behind them —
+                                # 19 red against the shipped pre-§251 file, and it asks
+                                # for the two shared readers BY NAME first, or a build
+                                # without them dies and reports zero failures (§215)
 python3 checks/gap-walk.py      # the band's chips and Next gap actually go somewhere:
                                 # a unit AND a function, as the filler AND the office,
                                 # every place the band names reached (§177.2)
@@ -4259,7 +4305,32 @@ prior sessions (on HR_ERP) accidentally reverted agreed-upon designs.
 
 ---
 
-*Last Updated: 2026-09-02 &mdash; **&sect;249.4: the direction and the compile
+*Last Updated: 2026-09-02 &mdash; **&sect;251: the presentation reads what was
+reported.** Islam: *"presentations doesn't change when the plan performance is
+done"*, then *"the presentation should update on either save draft or submit."*
+**THE PROPOSED FIX WOULD HAVE CHANGED NOTHING** &mdash; the deck is assembled
+fresh on the press (&sect;51.8), so there is nothing stale for a refresh to
+clear. The fault is that **five readers were still looking in the old box**:
+&sect;248 puts a tactic's outcome figure in `outActual`, and measured on Mobile
+the slide read `&mdash; / 50%` and `&mdash;` where Performance read `4# / 3 #`
+and `133%` &mdash; under a heading on that same slide already reading
+`Delivered 98%`. `reportedCount` went **41 of 41 &rarr; 40 of 41**, so
+**Submit refused a finished report**; the note rule could not see an outcome at
+all; and the row was dimmed as unreported beside its own printed figure. The
+expression that answers this existed and was written out **once**, inline in the
+Performance pane &mdash; it is `tacticProgress()` now, with `rowAnswered()`
+beside it, asked by every surface (&sect;53.5). **The slide's shape is Islam's**,
+picked from three shot out of the real deck (`design-mockups/tactic-outcome-slide/`):
+the outcome takes a **column of its own**, with the cost measured before he chose
+(Mobile's deck 24 &rarr; 27 slides). Two headings take Performance's words
+(*YTD actual* &middot; *Progress*), a row owed a figure says **"Not reported
+&middot; due at &hellip;"**, and a tactic with no outcome is byte-for-byte what
+it was. **19 red** on the shipped file, 0 after &mdash; and the check's own
+first run died rather than reported (&sect;215). **Recorded, not done**: the
+`.pptx` plan download still has no outcome column, and a deck already open on a
+projector does not redraw mid-presentation.*
+
+*Earlier the same day: **&sect;249.4: the direction and the compile
 rule stay the office's.** Islam, from the running platform: *"I viewed as Ali
 Reda from corporate, I can't adjust the direction or the compiling. is that ment
 to be?"* It is &mdash; neither is a gap, so a filler writing one is AUTHORING,

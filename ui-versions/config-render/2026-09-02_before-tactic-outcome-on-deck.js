@@ -5224,9 +5224,7 @@ function renderCycle(){
     askedItems(u).forEach(function(x){
       var slot = x.kind === "objective" ? "obj" : x.kind === "measure" ? "mea" : "tac";
       by[slot][1]++;
-      /* §251: through `rowAnswered`, or the board's tactics column disagrees
-         with the progress bar beside it, which counts the same rows. */
-      if (rowAnswered(x)) by[slot][0]++;
+      if (x.obj.actual != null && x.obj.actual !== "") by[slot][0]++;
     });
     return '<tr><td><b>' + esc(placeLabel(t)) + '</b></td>' +
       '<td class="why" style="margin:0">' + esc(who) + '</td>' +
@@ -5293,7 +5291,9 @@ function renderCycle(){
       if (x.kind === "deliverable") deliv++;
       if (x.kind === "milestone") mile++;
       by[slot][1]++;
-      if (rowAnswered(x)) by[slot][0]++;   /* §251: one predicate, not a third copy */
+      var got = (x.kind === "deliverable" || x.kind === "milestone")
+        ? statusGiven(x.obj) : (x.obj.actual != null && x.obj.actual !== "");
+      if (got) by[slot][0]++;
     });
     var tacTitle = plural(deliv, "deliverable") + " \u00b7 " + plural(mile, "milestone") +
       ", asked this cycle";

@@ -1,0 +1,226 @@
+<title>The Offline Save Message</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Source+Sans+3:ital,wght@0,300..700;1,400&display=swap">
+<style>
+  /* THE TOKENS ARE THE PRODUCT'S OWN (forefront palette, _shared.css) — a
+     mockup wearing a second vocabulary is a mockup of a different product. */
+  :root {
+    --panel:#16325C; --panel-ink:#FFFFFF;
+    --gold:#C9A24D; --gold-deep:#8A6B22;
+    --ground:#F7F8FA; --surface:#FFFFFF; --surface-2:#EFF2F6;
+    --line:#D6DCE5; --line-soft:#E6EAF0;
+    --ink:#171B22; --ink-2:#414A58; --ink-3:#636C79;
+    --bad:#B04434; --bad-bg:#FBEDEB; --bad-tx:#8C3327;
+    --good-tx:#1F6248;
+    --sans:'Source Sans 3', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    /* 1000px of shot plus the page's own 24px gutters — so a banner shot at a
+       1000px window is shown at exactly the size it is, never 48px short of
+       it with the end of the sentence scrolled off. */
+    --col:660px; --wide:1048px;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --panel:#0E1014; --panel-ink:#EAF0FA;
+      --gold:#D9B665; --gold-deep:#C9A24D;
+      --ground:#14161A; --surface:#1C2027; --surface-2:#242932;
+      --line:#333A45; --line-soft:#2A303A;
+      --ink:#E9ECF1; --ink-2:#B4BCC8; --ink-3:#949DAA;
+      --bad:#C4584A; --bad-bg:#2B1B18; --bad-tx:#F0A99E;
+      --good-tx:#6FBF9B;
+    }
+  }
+  :root[data-theme="dark"] {
+    --panel:#0E1014; --panel-ink:#EAF0FA;
+    --gold:#D9B665; --gold-deep:#C9A24D;
+    --ground:#14161A; --surface:#1C2027; --surface-2:#242932;
+    --line:#333A45; --line-soft:#2A303A;
+    --ink:#E9ECF1; --ink-2:#B4BCC8; --ink-3:#949DAA;
+    --bad:#C4584A; --bad-bg:#2B1B18; --bad-tx:#F0A99E;
+    --good-tx:#6FBF9B;
+  }
+
+  * { box-sizing:border-box; }
+  body { margin:0; background:var(--ground); color:var(--ink);
+         font-family:var(--sans); font-size:16px; line-height:1.55;
+         -webkit-font-smoothing:antialiased; }
+
+  .top { background:var(--panel); color:var(--panel-ink);
+         border-bottom:3px solid var(--gold); padding:34px 24px 30px; }
+  .top .in { max-width:var(--wide); margin:0 auto; }
+  .eyebrow { font-size:11px; font-weight:600; letter-spacing:.13em;
+             text-transform:uppercase; color:var(--gold); margin:0 0 10px; }
+  h1 { font-size:31px; line-height:1.18; font-weight:600; margin:0 0 12px;
+       text-wrap:balance; letter-spacing:-.01em; }
+  .top p { margin:0; max-width:62ch; color:#C7D2E4; font-size:16px; }
+  :root[data-theme="dark"] .top p { color:#A9B4C6; }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) .top p { color:#A9B4C6; }
+  }
+
+  main { max-width:var(--wide); margin:0 auto; padding:8px 24px 72px; }
+  section { padding:34px 0 6px; }
+  section + section { border-top:1px solid var(--line); }
+  .col { max-width:var(--col); }
+  h2 { font-size:13px; font-weight:700; letter-spacing:.1em;
+       text-transform:uppercase; color:var(--ink-3); margin:0 0 14px; }
+  h3 { font-size:20px; font-weight:600; margin:0 0 6px; letter-spacing:-.005em; }
+  p { margin:0 0 14px; color:var(--ink-2); }
+  p.lede { color:var(--ink); }
+  strong { font-weight:600; color:var(--ink); }
+  em { font-style:italic; }
+
+  /* THE SHOT PLATE. The banner is 1000 CSS px wide at 2x, so it is shown at
+     true size and never scaled down until the sentence being decided is
+     unreadable. Below 1000px it scrolls in its own box rather than shrinking
+     the page (§27.2: sideways scroll drags every sticky element with it). */
+  .plate { margin:0 0 8px; overflow-x:auto; background:var(--surface);
+           border:1px solid var(--line); border-radius:8px; }
+  .plate img { display:block; width:1000px; max-width:none; }
+  .cap { font-size:13.5px; color:var(--ink-3); margin:0 0 26px; max-width:72ch; }
+  .cap b { color:var(--ink-2); font-weight:600; }
+
+  .tag { display:inline-block; font-size:11px; font-weight:700;
+         letter-spacing:.09em; text-transform:uppercase; padding:3px 9px;
+         border-radius:999px; margin:0 0 10px; }
+  .tag.now { color:var(--bad-tx); background:var(--bad-bg);
+             border:1px solid var(--bad); }
+  .tag.pick { color:var(--panel-ink); background:var(--panel); }
+  .tag.alt { color:var(--ink-2); background:var(--surface-2);
+             border:1px solid var(--line); }
+
+  ul { margin:0 0 18px; padding:0; list-style:none; max-width:var(--col); }
+  li { position:relative; padding:0 0 0 20px; margin:0 0 9px;
+       color:var(--ink-2); }
+  li::before { content:""; position:absolute; left:2px; top:.62em;
+               width:6px; height:6px; border-radius:2px; background:var(--gold); }
+  li b { color:var(--ink); font-weight:600; }
+
+  .ask { background:var(--surface); border:1px solid var(--line);
+         border-left:4px solid var(--gold); border-radius:8px;
+         padding:20px 22px; max-width:var(--col); }
+  .ask h3 { margin-bottom:8px; }
+  .ask p:last-child { margin-bottom:0; }
+
+  .rule { color:var(--good-tx); font-weight:600; }
+</style>
+
+<div class="top">
+  <div class="in">
+    <p class="eyebrow">Mockup &middot; 2 September 2026 &middot; not built yet</p>
+    <h1>Say &ldquo;you are offline&rdquo; when you are offline</h1>
+    <p>Every banner below is the platform&rsquo;s own, shot out of the built file
+      with the words written into the live element. Nothing here is drawn.</p>
+  </div>
+</div>
+
+<main>
+
+<section>
+  <div class="col">
+    <span class="tag now">What you see today</span>
+    <h3>The browser&rsquo;s words, not the platform&rsquo;s</h3>
+  </div>
+  <div class="plate"><img src="{{today-offline-light}}" alt="Today's banner: Not saved. The platform could not reach the server (Failed to fetch)."></div>
+  <p class="cap">The exact banner you photographed, reproduced at a 1000&nbsp;px window.</p>
+  <ul>
+    <li><b>It does not say the one thing you need.</b> You are offline, and the
+      sentence talks about the server &mdash; which sends you to look at
+      something that is working perfectly.</li>
+    <li><b>&ldquo;Failed to fetch&rdquo; is the browser talking.</b> It is not a
+      status number anybody can act on, and it names nothing.</li>
+    <li><b>The advice is backwards while you are offline.</b> It tells you to
+      reload, and reloading is exactly what would throw the work away.</li>
+    <li><b>The two sentences run into each other.</b>
+      <em>&hellip;(Failed to fetch).Your change&hellip;</em> &mdash; no space, on
+      every failure the platform has ever reported, not only this one.</li>
+  </ul>
+</section>
+
+<section>
+  <div class="col">
+    <span class="tag pick">Option A &middot; recommended</span>
+    <h3>Plain words, and the advice reversed</h3>
+    <p>The voice you settled for the slow-start message: no
+      &ldquo;server&rdquo;, no &ldquo;database&rdquo;, short lines.</p>
+  </div>
+  <div class="plate"><img src="{{offline-a-light}}" alt="Option A: You are offline — not saved yet. Your work is safe on screen. It will save by itself the moment you are back online. Do not reload while you are offline."></div>
+  <p class="cap"><b>Why this one.</b> The heading answers the question before you
+    read a word of the second line, and the second line is the whole of what to
+    do &mdash; which is nothing. It is also the only version that is true for
+    somebody who does not know what a server is.</p>
+
+  <div class="col">
+    <span class="tag alt">Option B</span>
+    <h3>The banner&rsquo;s existing voice, made honest</h3>
+    <p>Same fact, keeping the words the other two failures use.</p>
+  </div>
+  <div class="plate"><img src="{{offline-b-light}}" alt="Option B: Not saved — you are offline. Your change is still on screen and will be sent as soon as you are back online. Do not reload while you are offline — what is on screen has not reached the database yet."></div>
+  <p class="cap"><b>What it costs.</b> Two lines that say the same thing twice,
+    and it still ends on the word <em>database</em> &mdash; which is what you
+    called too technical last time.</p>
+</section>
+
+<section>
+  <div class="col">
+    <h2>The other two ways a save fails</h2>
+    <p class="lede">A save fails three ways and only one of them is being
+      offline. They are shown together because a person meets one at a time and
+      has to be able to tell them apart.</p>
+  </div>
+  <div class="plate"><img src="{{unreached-light}}" alt="Online but no answer: Not saved. The platform reached the internet but the server did not answer."></div>
+  <p class="cap"><b>Online, and the server did not answer.</b> The browser&rsquo;s
+    &ldquo;Failed to fetch&rdquo; goes; it moves to the console, where the one
+    person who can act on it looks.</p>
+  <div class="plate"><img src="{{server-light}}" alt="Server error: Not saved. The server answered HTTP 500."></div>
+  <p class="cap"><b>The server answered with an error.</b> Unchanged except for
+    the missing space. The number stays deliberately &mdash; it is what sends
+    somebody to the right place.</p>
+</section>
+
+<section>
+  <div class="col">
+    <h2>The dark palette</h2>
+    <p class="lede">Both banners in the dark palette, because the colours are
+      themed and a sentence measured in one is not measured in the other.</p>
+  </div>
+  <div class="plate"><img src="{{today-offline-dark}}" alt="Today's banner in the dark palette."></div>
+  <p class="cap"><b>Today</b>, dark.</p>
+  <div class="plate"><img src="{{offline-a-dark}}" alt="Option A in the dark palette."></div>
+  <p class="cap"><b>Option&nbsp;A</b>, dark. Same tokens as the light one, so
+    nothing new was picked and nothing needs measuring.</p>
+</section>
+
+<section>
+  <div class="col">
+    <h2>What this does not change</h2>
+  </div>
+  <ul>
+    <li><b>Nothing about saving.</b> Only the sentence on the banner. No change
+      to the data, the server, or what is stored.</li>
+    <li><b>The banner still clears itself.</b> The platform retries every five
+      seconds while the tab is open, and a save that lands hides it &mdash; so
+      when you come back online it goes away on its own, within about five
+      seconds. Nothing to press.</li>
+    <li><b>The work is genuinely waiting, not lost.</b>
+      <span class="rule">Measured, not assumed:</span> the retry runs for as
+      long as the tab stays open. Closing the tab while offline still loses it,
+      which is why the banner says not to reload.</li>
+    <li><b>The chat corner is left alone.</b> It has the same blind spot in its
+      own message. You named the save banner, so it is flagged here rather than
+      widened quietly.</li>
+  </ul>
+</section>
+
+<section>
+  <div class="ask">
+    <h3>What I need from you</h3>
+    <p><b>A or B</b>, and whether the run-together sentences should be split on
+      all three failures or only on the offline one.</p>
+    <p>Then it is one small function in the save code, an offline case added to
+      the check that already drives the other failure states, and proof that it
+      fails on today&rsquo;s build first.</p>
+  </div>
+</section>
+
+</main>

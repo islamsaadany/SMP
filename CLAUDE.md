@@ -402,6 +402,57 @@ console errors (in this cloud environment, run it via a wrapper that points Play
   `.pptx` plan download has no outcome column (its own mockup), and a deck
   already open on a projector still does not redraw mid-presentation, put to
   Islam and deliberately left.
+- **A SLIDE THE OFFICE DOES NOT PRESENT (§253):** Islam — *"allow the smo to
+  hide presentation slides of any unit or function."* §246 named this and left
+  it, with the question inside it: *which slides may be hidden, and whether
+  hiding one hides what it counts.* **IT CHANGES NO NUMBER, AND THAT IS THE
+  ANSWER** — §233 hides a ROW and takes it out of every score; this hides a
+  generated SLIDE and takes it out of **nothing** (still reported, still asked
+  for, still scored, still on the page). Two switches, two jobs: one that did
+  both would mean tidying a deck before a board meeting silently moved a unit's
+  figures. Asserted FIRST, off the platform's own functions, byte-identical
+  either side of the press. **IT LASTS** (so not in `REVIEW`, which the cycle
+  clears — §50), the cost stated before he chose and guarded by the rail always
+  saying **"N slides hidden"** with one press back. **THE OFFICE'S ALONE**, and
+  a custodian SEES the marks and the count and gets no eye — seeing a state is
+  not setting it, asserted at both ends (§94.2). **NAMED BY ITS ANCHOR, NEVER
+  BY ITS POSITION** (§48, §236.3): every generated slide has carried one since
+  the picture placer needed somewhere to land, so the nameable slides ARE the
+  deck; it rides `units[k].extra`/`functions[k].extra` (§52, §213) so **no
+  migration**, is stored as an ABSENCE (§50.6) and is **sorted**, or two
+  spellings of one fact report a change that is not one. **THE ORDER OF THE
+  PASS IS ITS CORRECTNESS** — after the pictures (a picture anchored to a
+  hidden slide is still evidence) and before the fit pass (a continuation
+  carries its parent's anchor, so removing the parent first takes a long table
+  whole). **THE EDITOR MARKS WHAT THE PROJECTOR REMOVES**, or a hidden slide
+  could never be brought back (§61). **A DECK CANNOT BE EMPTIED**, refused on
+  the PRESS rather than in the pass (§53.5) and `aria-disabled`, never
+  `disabled` (§163, §221). **Quiet, never amber** (§187). The server's
+  `deckHide` is its own kind so the refusal names Manage slides and not Setup
+  (§16.7), reads its field name from `lib/rules.js` (§234), and is deliberately
+  **not** gated on the cycle lock — pruning the deck the morning of the meeting
+  is when this is used. Drawn in the real page first (rule 1c, §41.9): Islam
+  picked the dimmed treatment; **struck-through lost because a slide's name
+  wraps and the rule runs through the gap**, and the camera found that
+  **`.sl-lab` is `-webkit-line-clamp:2`**, which ATE the first draft's tag on
+  exactly the rows whose names are longest. Proved able to fail: **33 red** on
+  the build before, five falsifications on the server.
+  **§253.1 — AND THE FIRST RUN DIED RATHER THAN REPORTING** (§215, §252 one
+  section earlier): with no `hiddenSlides` and no `deckHidePass` the first probe
+  threw and `grep -c FAIL` read ZERO, on precisely the build the file exists to
+  see. Every probe degrades now.
+  **§253.2 — THE EDITOR AND THE PROJECTOR WERE BUILDING TWO DIFFERENT DECKS**,
+  and it is older than this feature: §63.4 and §224 both fixed the **Present
+  button** and both left `slidesAssemble()` asking `kind === "fn"`, so a pillars
+  function's Manage slides showed **2 slides where its projector showed 15** —
+  §69.5's fault, which made the editor run the same PASSES and could not make it
+  assemble the same SLIDES. One predicate now (`deckCapShaped`, with
+  `openDeckFor`/`deckHtmlFor`), the branch gone from `shell.html`, asserted as
+  the two AGREEING rather than as a number. Fixed here rather than recorded,
+  because a rail listing slides the projector does not show is a control acting
+  on the wrong thing. **§253.3 — RECORDED, NOT DONE:** `deckAnchors()` has no
+  callers at all (§236 replaced the position dropdown and left the builder),
+  and §24 says that is how the next reader takes dead code for load-bearing.
 - **THE PLAN'S TITLES COULD NOT WRAP AT ALL (§189):** Islam — *"wrap the
   content of the plans edit boxes across pillars and functions, specially for
   the titles and descriptions."* Not a bad wrap: every title and description
@@ -4297,6 +4348,15 @@ python3 checks/setup-rail.py    # the Setup rail fits the window, every entry is
 python3 checks/cycle-board.py    # every subject that reports has a row, the functions are
                                 # in ONE list under one band, and the headline counts each
                                 # exactly once (§244, §245)
+python3 checks/hide-slide.py    # the office hides a slide and the projector skips it (§253):
+                                # every headline number byte-identical either side of the
+                                # press (§246's question, answered), the eye HOVERED and
+                                # pressed, a picture anchored to a hidden slide still there,
+                                # a hidden table taking its continuations, the emptied key
+                                # DELETED, the last slide standing refused, the custodian
+                                # seeing the marks and getting no control — and the editor
+                                # and the projector proved to build ONE deck (§253.2).
+                                # 33 red on the build before; every probe degrades (§215)
 python3 checks/notes-slide.py   # the notes slide appears when somebody wrote a note — and
                                 # whitespace is not a note, on all three deck shapes (§246)
 python3 checks/setup-overview.py      # the Overview agrees with the pages it summarises; it

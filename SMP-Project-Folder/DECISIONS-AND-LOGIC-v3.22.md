@@ -27981,3 +27981,154 @@ records the same for the plan slides). And a deck **already open on a
 projector** still does not redraw while somebody saves in another tab: put to
 Islam and deliberately left, because slides changing under a presenter
 mid-sentence is worse than a deck that is right as of when it opened.
+
+## §253 — A SLIDE THE OFFICE DOES NOT PRESENT (2026-09-02)
+
+Islam: *"allow the smo to hide presentation slides of any unit or function."*
+
+**§246 NAMED THIS AND DID NOT BUILD IT**, and named the question inside it:
+*"§233 hides ROWS from the presentation and nothing hides a generated SLIDE.
+That is a feature with a real question inside it — which slides may be hidden,
+and whether hiding one hides what it counts."* Both halves were put to Islam
+before anything was drawn, with the cost of each stated, and both answers are
+his.
+
+**IT CHANGES NO NUMBER, AND THAT IS THE ANSWER TO §246's QUESTION.** §233 hides
+a ROW and takes it out of every score, on every surface at once; this hides a
+generated SLIDE and takes it out of **nothing**. The figures on a hidden slide
+are still reported, still asked for, still scored, still on the page. Two
+switches, two clearly different jobs — one that did both would mean tidying a
+deck before a board meeting silently moved a unit's figures, which is the one
+thing a strategy platform may never do. The check asserts it as its FIRST
+section, before anything about how the rail looks: every headline number read
+off the platform's own functions, byte-identical either side of the press.
+
+**IT LASTS.** Picture slides are cleared when a cycle closes (§50) because a
+picture is evidence for one review; the SHAPE of a subject's deck is not this
+quarter's evidence, so hiding does not live in `REVIEW`. The cost is real and
+was stated before he chose: a slide hidden in March is still hidden in
+September. The guard is that the rail says **"N slides hidden"** on every
+visit, with one press to show them all — a state that can be forgotten needs
+something on the screen that refuses to forget it.
+
+**THE OFFICE'S ALONE**, his word. The cost is stated too: a strategy custodian
+and a unit owner reach Manage slides for their own pictures, and they SEE what
+the office has hidden and cannot change it. Seeing the state is not the same
+act as setting it, so the marks and the count are drawn for everybody and only
+the eye and *Show all* are the office's — asserted at both ends, because "the
+custodian has no eye" passes on a build that draws it for nobody.
+
+**A SLIDE IS NAMED BY ITS ANCHOR, NEVER BY ITS POSITION** (§48, §236.3). Every
+generated slide has carried one since §236.3 gave the picture placer somewhere
+to land, so the list of nameable slides IS the deck and the two cannot drift; a
+stored number would hide a different slide the day a pillar is added upstream.
+It rides `units[k].extra` / `functions[k].extra`, which both already carry
+(§52, §213) — **no migration** — stored as an ABSENCE (§50.6), so never hidden
+and hidden-then-shown-again are the same bytes. **Sorted**, or hiding A then B
+and B then A leave two spellings of one fact and the second reports a change to
+the server that is not one (§145's lesson at the array).
+
+**THE ORDER OF THE PASS IS THE WHOLE OF ITS CORRECTNESS.** `deckHidePass()`
+runs AFTER the pictures are placed and BEFORE the fit pass. After, because a
+picture anchored to a hidden slide is still the custodian's evidence and
+hiding its neighbour must not swallow it. Before, because `deckFitPass()`
+CLONES a long table to continue it and the clone carries its parent's anchor —
+so removing the parent first means no continuation is ever made, and a hidden
+table goes whole rather than leaving its second half standing. Both are
+asserted; a picture slide carries no anchor at all, so the pass cannot reach
+one, and removing one is `Remove slide`, which already exists (§24).
+
+**THE EDITOR MARKS WHAT THE PROJECTOR REMOVES.** `slidesAssemble()`
+deliberately does not run the pass: this mode exists to show the whole deck,
+and a hidden slide that vanished from the rail could never be brought back
+(§61). It is stamped instead, after the fit pass, so a hidden table long enough
+to continue marks both its parts.
+
+**A DECK CANNOT BE EMPTIED**, and the refusal is on the PRESS rather than in
+the pass — a pass that quietly declined to remove what it was told to remove
+would be a second answer to the same question (§53.5) and the person pressing
+would never learn why. `aria-disabled`, never `disabled`, or the sentence
+explaining the refusal cannot be reached by hover or by focus (§163, §221).
+Nothing else is carved out: the cover and Thank you can be hidden like
+anything else, because which slides a review shows is the office's judgement.
+
+**QUIET, NEVER AMBER** (§187, §168). Hidden slides are a decision somebody made
+on purpose, not something outstanding, and an alarm ground over a healthy state
+is how a product teaches people to stop reading its colours. The way back is a
+text button and not a second gold pill beside Add slide after (§41's budget).
+
+**THE SERVER**: `deckHide` is its own kind rather than a setting, and the
+reason is §16.7's — both land on the office, so it changes no permission; it
+changes the REFUSAL, which must not send somebody to Setup for a control that
+lives in Manage slides. The field is named from `lib/rules.js` and never spelt
+again (§234). Deliberately **not** gated on the cycle lock: a locked cycle has
+stopped taking figures, and pruning the deck the morning of the meeting is
+exactly when this is used. Proved able to fail five ways — the rule opened
+(5 red), each classification removed (2 and 3 red), the field added to
+`UNIT_CONFIG` and `FN_SEEN` reverted (1 red each).
+
+**DRAWN IN THE REAL PAGE BEFORE A SOURCE WAS TOUCHED** (rule 1c, §41.9):
+`checks/hide-slide-mockup.py` opens the built platform, walks to Manage slides,
+stands on the slide the proposal hides and injects each candidate into the LIVE
+rail and pane, so both sides of every picture are the same build in the same
+state. Islam picked **A** from two: the thumbnail carries the state and the
+word confirms it. **B struck the label through and lost** — a slide's name
+wraps to two lines and the rule then runs through the gap between them. The
+camera also found the fault a reading would not: **`.sl-lab` is
+`-webkit-line-clamp:2`**, so the first draft's tag, written inside it, was
+EATEN on exactly the rows whose names are longest, which is where the state
+matters most. The existing `em` — *"your pictures"* — has that fault and keeps
+it: recorded, not fixed here.
+
+**`checks/hide-slide.py`: 42 assertions, 33 red on the build before.** Every
+claim is driven and read back out of the stored graph, never off the screen;
+the eye is HOVERED and pressed, because it is `display:none` until its row is
+pointed at and forcing the click would pass on a build nobody could use (§70).
+Two of its own faults are worth keeping: it first asserted a **projects**
+function by the string `"projects"`, which is ABSENT on 7 of the 8 in the seed
+(§59 asks `String(format) === "pillars"`), and reported a working build as
+untestable; and every absence assertion now also insists the deck HAS slides,
+because *"the slide is gone"* is true of a deck that failed to build (§113.8).
+
+### §253.1 — AND THE FIRST RUN DIED RATHER THAN REPORTING
+
+§215, and §252's own first run one section earlier. On a build without this
+feature there is no `SMPRules.hiddenSlides` and no `deckHidePass`, so the first
+probe threw, the run ended in a stack trace, and `grep -c FAIL` read **zero** —
+a falsification that looks like a pass, on precisely the build the file most
+has to be able to see. Every probe degrades now: a throw becomes a value the
+assertions fail on, reported once, and the run continues to the end.
+
+### §253.2 — THE EDITOR AND THE PROJECTOR WERE BUILDING TWO DIFFERENT DECKS
+
+Found by this feature and **older than it**. §63.4 fixed that a pillars
+function could not be presented at all; §224 fixed that routing every `fn:` to
+the capability deck showed it a review reading *"0 capabilities"*. Both fixed
+the **Present button**, and both left `slidesAssemble()` asking the older
+question — `kind === "fn"`.
+
+So a function that plans in pillars has been shown, in Manage slides, a deck
+nobody would ever project. Measured on the demo's own before a line was
+changed: **the editor 2 slides, the projector 15.** §69.5's fault exactly —
+that section made the editor run the same PASSES as the projector and could
+not make it assemble the same SLIDES, because the difference was one branch two
+files apart.
+
+It is one predicate now, asked once: `deckCapShaped()`, with `openDeckFor()`
+and `deckHtmlFor()` as the two things anybody wants from it, so the branch is
+gone from `shell.html` and a third format would change one line. Asserted as
+the two AGREEING (§94.8) rather than as a number, so a deliberate change to
+either deck keeps it green.
+
+**It had to be fixed here rather than recorded**: this feature lets the office
+prune a deck from that rail, and a rail listing slides the projector does not
+show would have been a control acting on the wrong thing.
+
+### §253.3 — RECORDED, NOT DONE
+
+`deckAnchors()` in `present.js` has **no callers at all** — §236 replaced the
+position dropdown with placement by position in the assembled deck and left the
+builder standing. §24 says a builder nobody calls is one the next reader takes
+for load-bearing, and its comment still explains how the picture picker is
+built. Deleting it is not this change (rule 1b), and it is named here so the
+next person does not read it as live.

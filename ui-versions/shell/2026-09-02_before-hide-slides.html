@@ -3078,10 +3078,10 @@
            place still asking by prefix: a pillars function's plan is
            unit-shaped, so it takes the unit deck through `unitLike()`, which
            resolves both kinds of key in one place. */
-        /* §253.2: the branch that used to sit here is `openDeckFor()` now, so
-           the editor cannot ask this question differently — which is exactly
-           what it had been doing. */
-        openDeckFor(this.dataset.present);
+        var t = this.dataset.present;
+        var fk = t.indexOf("fn:") === 0 ? t.slice(3) : null;
+        if (fk && !fnPlansInPillars(FUNCTIONS[fk])) openDeckFn(fk);
+        else openDeck(unitLike(t));
       });
     });
     /* Picture slides — beside Present, because it is the deck they go into

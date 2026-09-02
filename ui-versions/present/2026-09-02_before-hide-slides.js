@@ -596,41 +596,6 @@ function insertPictureSlides(deck, target, blank){
   });
 }
 
-/* ── THE SLIDES THE OFFICE DOES NOT PRESENT (§253) ────────────────────────
-   The stored subject behind a deck target. Deliberately NOT `unitLike()`:
-   that returns a fresh reading view for a pillars function (§61's frozen
-   empties), and what is wanted here is the object the office's press writes
-   to. One resolver, asked by the projector, the editor and the writer, so
-   the three cannot disagree about whose list they are reading (§53.5). */
-function deckSubject(target){
-  if (!target) return null;
-  return target.indexOf("fn:") === 0 ? FUNCTIONS[target.slice(3)] : UNITS[target];
-}
-
-/* AFTER THE PICTURES ARE PLACED, AND BEFORE THE FIT PASS. Both halves of
-   that order are load-bearing.
-
-   After, because a picture anchored to a hidden slide is still the
-   custodian's evidence: hiding the neighbour it was placed against must not
-   swallow it. `insertPictureSlides()` has already run, so the picture is in
-   the deck on its own account and only the anchor slide leaves.
-
-   Before, because `deckFitPass()` CLONES a long table to continue it and the
-   clone carries its parent's anchor (§236.3). Removing the parent first means
-   no continuation is ever made, so a hidden table goes whole rather than
-   leaving its second half standing — which is what removing afterwards would
-   have to remember to do.
-
-   Picture slides carry no `data-anchor` at all, so they cannot be reached by
-   this pass. Removing one is `Remove slide`, which already exists. */
-function deckHidePass(deck, target){
-  var hid = SMPRules.hiddenSlides(deckSubject(target));
-  if (!hid.length) return;
-  [].forEach.call(deck.querySelectorAll(".dslide[data-anchor]"), function(s){
-    if (hid.indexOf(s.dataset.anchor) >= 0) s.remove();
-  });
-}
-
 /* ── The unit's own mark on the deck (§52.9) ──────────────────────────
    Large on the cover in place of the group's name, small in the footer of
    every other slide. A unit with no mark keeps the eyebrow and gets no
@@ -661,7 +626,6 @@ function openDeckWith(titleHtml, slides, target){
   var root = document.getElementById("deckroot");
   root.querySelector(".deck").innerHTML = slides;
   if (target) insertPictureSlides(root.querySelector(".deck"), target);
-  if (target) deckHidePass(root.querySelector(".deck"), target);
   if (target && target.indexOf("fn:") !== 0 && UNITS[target]) {
     deckFootMarks(root.querySelector(".deck"), UNITS[target]);
   }
@@ -680,37 +644,6 @@ function openDeck(u){
 function openDeckFn(fk){
   openDeckWith("<b>" + esc(FUNCTIONS[fk].name) + "</b> &middot; " + esc(REVIEW.name),
     deckSlidesFn(fk), "fn:" + fk);
-}
-
-/* ── WHICH DECK A TARGET HAS, ASKED IN ONE PLACE (§253.2, closing §224) ────
-   §63.4 found that a pillars function could not be presented at all, and
-   §224 found that routing every `fn:` to the capability deck showed it a
-   review reading "0 capabilities" — both fixed the PRESENT button, and both
-   left `slidesAssemble()` asking the older question, `kind === "fn"`.
-
-   So Manage slides has been showing a pillars function a deck nobody would
-   ever project. Measured on the demo's own before this was written: the
-   editor 2 slides, the projector 15. §69.5's fault exactly — that section
-   made the editor run the same passes as the projector and could not make it
-   assemble the same SLIDES, because the difference is one branch two files
-   apart.
-
-   The predicate is the answer, and it is asked once. `openDeckFor` and
-   `deckHtmlFor` are the two things anybody wants from it — open it, or build
-   its html — so neither caller repeats the branch and a third format would
-   change one line. */
-function deckCapShaped(target){
-  var t = String(target || "");
-  var fk = t.indexOf("fn:") === 0 ? t.slice(3) : null;
-  return !!fk && !fnPlansInPillars(FUNCTIONS[fk]);
-}
-function deckHtmlFor(target){
-  return deckCapShaped(target) ? deckSlidesFn(String(target).slice(3))
-                               : deckSlides(unitLike(target));
-}
-function openDeckFor(target){
-  return deckCapShaped(target) ? openDeckFn(String(target).slice(3))
-                               : openDeck(unitLike(target));
 }
 function closeDeck(){
   var root = document.getElementById("deckroot");

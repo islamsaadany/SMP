@@ -2723,5 +2723,90 @@ console.log("\n26 \u00b7 a tactic's outcome and its target are owed (\u00a7249)"
         r.ok, (r.refusals || []).join(" / "));
 })();
 
+console.log("\n27 · which slides a review shows is the office's (§253)");
+(function () {
+  /* Islam: *"allow the smo to hide presentation slides of any unit or
+     function."* The screen draws the eye for the office alone; this is the
+     other end of that one question (§42) — a screen that hides a control the
+     server would have accepted, or offers one it refuses, is the drift
+     `lib/rules.js` exists to prevent.
+
+     BOTH SIDES OF EVERY ASSERTION. A test that only proves the custodian is
+     refused passes just as happily on a build that refuses EVERYBODY, which
+     would be a feature nobody can use (§94.2, §94.5). */
+  function fromStored(stored, who, mutate) {
+    const inc = clone(stored); mutate(inc);
+    return A.authorize(stored, inc, personOf(stored, who));
+  }
+  const UK = Object.keys(SEED.units)[0];
+  const CUST = SEED.unitRoles && SEED.unitRoles[UK] && SEED.unitRoles[UK].custodian;
+  const FNK = Object.keys(SEED.functions || {})[0];
+  check("§253: the seed holds a unit, a custodian and a function to test with",
+        !!(UK && CUST && FNK), [UK, CUST, FNK].join(" / "));
+  if (!(UK && CUST && FNK)) return;
+
+  /* — a business unit — */
+  let r = fromStored(SEED, "smo", function (i) { i.units[UK].hideSlides = ["swot"]; });
+  check("§253: the office hides a slide on a unit", r.ok, (r.refusals || []).join(" / "));
+
+  r = fromStored(SEED, CUST, function (i) { i.units[UK].hideSlides = ["swot"]; });
+  check("§253 REFUSED: the unit's own custodian cannot", !r.ok, "was ALLOWED");
+  check("§253: and the refusal names Manage slides, never Setup",
+        !r.ok && /Manage slides/.test((r.refusals || []).join(" ")),
+        (r.refusals || []).join(" / "));
+
+  /* SHOWING ONE AGAIN IS THE SAME ACT, and the emptied key is DELETED (§50.6)
+     — a build that classified the write and not the removal would let anybody
+     un-hide what only the office could hide. */
+  const hidden = clone(SEED); hidden.units[UK].hideSlides = ["swot"];
+  r = fromStored(hidden, CUST, function (i) { delete i.units[UK].hideSlides; });
+  check("§253 REFUSED: nor can they show it again", !r.ok, "was ALLOWED");
+  r = fromStored(hidden, "smo", function (i) { delete i.units[UK].hideSlides; });
+  check("§253: the office shows it again", r.ok, (r.refusals || []).join(" / "));
+
+  /* — a supporting function, BOTH FORMATS —
+     `asUnit()` builds a fresh object from named fields, so a function's list
+     never reaches the unit pass at all. If this were classified there and not
+     in collectFunction(), a pillars function's hidden slides would be seen by
+     nothing and therefore allowed to everybody (§191). */
+  ["pillars", "projects"].forEach(function (fmt) {
+    const s = clone(SEED); s.functions[FNK].format = fmt;
+    let x = fromStored(s, "smo", function (i) { i.functions[FNK].hideSlides = ["notes"]; });
+    check("§253: the office hides a slide on a " + fmt + " function",
+          x.ok, (x.refusals || []).join(" / "));
+    x = fromStored(s, CUST, function (i) { i.functions[FNK].hideSlides = ["notes"]; });
+    check("§253 REFUSED: a unit custodian cannot, on a " + fmt + " function",
+          !x.ok, "was ALLOWED");
+  });
+
+  /* IT PRODUCES EXACTLY ONE SENTENCE. The field sits in UNIT_KNOWN and in no
+     other list, and in FN_SEEN and not FN_KNOWN, precisely so a press does not
+     also report "the unit's settings" or "a supporting function" — two
+     sentences for one act is how somebody is sent to the wrong screen. */
+  /* ASKED OF `collect` BY NAME, never behind a guard. The first draft of this
+     assertion read `A.classify ? … : null` — and `classify` is not an export,
+     so it never ran at all while the suite printed it as passed (§54.5, and
+     §94.5 one file over: a check that asks whether it can run is a check that
+     passes). */
+  const kindsOf = function (mutate) {
+    const inc = clone(SEED); mutate(inc);
+    return A.collect(SEED, inc, A.worldOf ? A.worldOf(SEED) : SEED)
+            .map(function (c) { return c.kind; });
+  };
+  let kinds = kindsOf(function (i) { i.units[UK].hideSlides = ["swot"]; });
+  check("§253: a hidden slide classifies as deckHide and nothing else",
+        kinds.length === 1 && kinds[0] === "deckHide", kinds.join(",") || "(nothing)");
+  kinds = kindsOf(function (i) { i.functions[FNK].hideSlides = ["notes"]; });
+  check("§253: and on a function, the same one sentence",
+        kinds.length === 1 && kinds[0] === "deckHide", kinds.join(",") || "(nothing)");
+
+  /* A LOCKED CYCLE STILL TAKES IT, deliberately (§253): a locked cycle has
+     stopped taking FIGURES, and the deck is presented after it locks. */
+  const lock = clone(SEED); lock.cycle = Object.assign({}, lock.cycle, { locked: true });
+  r = fromStored(lock, "smo", function (i) { i.units[UK].hideSlides = ["swot"]; });
+  check("§253: a locked cycle does not stop the office pruning the deck",
+        r.ok, (r.refusals || []).join(" / "));
+})();
+
 console.log("\n" + pass + " passed, " + fail + " failed");
 process.exit(fail ? 1 : 0);

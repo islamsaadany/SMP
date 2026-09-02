@@ -19,8 +19,10 @@
         and its box does not scroll sideways.
      2. The Dir. select can show its value (the broken build measured 34px).
      3. The Unit column exists and is §199's: picking writes the stored
-        target, a bare number typed after it INHERITS it, a row with no
-        target says why there is nothing to pick.
+        target, and a bare number typed after it INHERITS it. §251 reversed
+        the third clause — a row with no target used to say why there was
+        nothing to pick, and now gets the picker like every other row, with
+        the unit held alone until a number joins it.
      4. The Objective name is prose: a long name WRAPS and typing writes the
         DATA (§96: a control wired to nothing renders identically).
      5. Led by opens for the OFFICE with the pen — Setup's own picker writing
@@ -119,8 +121,13 @@ with sync_playwright() as p:
       const td = document.querySelector('.koband tbody tr td:nth-child(3)');
       return { sel: !!td.querySelector('select'), why: !!td.querySelector('.why') };
     }""")
-    ck("a row with no target has nothing to pick, and says why",
-       not why["sel"] and why["why"], why)
+    # §251 REVERSED THIS ONE, so it is REWRITTEN rather than deleted (§218):
+    # a row with no target used to have nothing to pick and a `.why` span
+    # saying so, and Islam asked for the picker to be there whether or not a
+    # target is — the unit is held alone until a number joins it. Left as it
+    # was, this would have gone on demanding the dead end it was written for.
+    ck("a row with no target STILL gets the picker — the unit is held alone",
+       why["sel"] and not why["why"], why)
     typed = pg.evaluate("""(k) => {
       const m = FUNCTIONS[k].keyObjectives[0];
       const i = document.querySelector('.koband tbody tr td:nth-child(4) input');

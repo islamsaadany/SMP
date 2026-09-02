@@ -536,6 +536,49 @@ console errors (in this cloud environment, run it via a wrapper that points Play
   different targets never touch. Proved able to fail: 11 red on the differ's
   pre-build, and end-to-end on a real Postgres the whole-graph flag fails
   with the reported sentence to the word.
+- **THE UNIT IS THERE BEFORE THE NUMBER IS (§251, reversing §248's own
+  carve-out):** Islam, from his own plan with the pen open — *"In the edit I
+  can't set the unit for a measure."* Two of his four Key measures had no target
+  yet, and **there is no unit FIELD**: the unit lives inside the target string
+  (§199), so a row with no target had nowhere to keep one and the column drew an
+  em-dash with *"Set a target first"*. **THE TARGET HOLDS THE UNIT ALONE** until
+  a number joins it — §248's own answer for a tactic's outcome (`"%"`, then
+  `"90%"`), whose carve-out for the measures column (*"right in a column of its
+  own"*) is reversed here at his instruction. **HE WAS ASKED WHERE AND ANSWERED
+  "all 4 places"**: a pillar's Key measures, a unit's Overview objectives, the
+  group's Foundation and a supporting function's Overview on BOTH formats — one
+  cell, two shared builders, and fixing one is how the halves drift (§53.5).
+  **THE ONE COST IS WHY `GAP_NUM` GREW**: a target holding `"%"` is non-blank
+  and unusable, so `target`/`target3y` join `outTarget` — screen and server
+  through the shared module — or the red Missing vanishes the moment a unit is
+  picked, the count drops and Submit stops refusing (§249.2, one field over).
+  Measured first: **208 non-blank targets in the shipped plan, 0 non-numeric**,
+  so nothing in the demo moves; a tenant that typed a target as words gains the
+  red word, and that is stated rather than discovered. **PROSE IS THE GUARD**:
+  `targetParts` falls back to the WHOLE STRING when it sees no number, so
+  reading any non-number as the unit would append *"Maintain share"* to the next
+  bare number typed — the test is a unit the platform OFFERS (§199.4's fixed
+  list), which is exactly what this control can ever have written, and anything
+  else is kept as typed (§96.2). **ONE READER, ASKED BY BOTH** — `unitOfTarget`
+  / `targetKeep`, with `outUnitOf`/`nextTargetUnit` and `measureDue` asking them
+  rather than carrying a second copy of "is there a number in here" (§42). The
+  unit lands in **this year's** target and never the 3-year one (a pillar's
+  measures draw no such column, §51.16); **cleared, the key is DELETED** (§50.6).
+  **FILL MODE IS DELIBERATELY UNCHANGED AND ASSERTED** (§201.2), one line to
+  open. Proved able to fail twice: **16 red** with the em-dash put back, **6
+  red** with the numeric rule removed — and **five of the check's own first-run
+  failures were the CHECK**, among them a row searched by `textContent` when
+  `koEdit` draws the name in an `<input>` (invisible on two of four surfaces),
+  and the group's Foundation being a TAB rather than a section of Strategy.
+  One assertion in `fn-ko-edit.py` was **REWRITTEN, not deleted** (§218).
+  **AND THE CHECK FOUND A REAL ROUND-TRIP BREAK**: the workbook splits a target
+  with `splitTarget`, so a unit-only one landed in the **Value** column, and
+  `joinTarget` answers `""` for an empty value — the upload **dropped the unit**
+  (§22: an upload authors, so what the file loses the plan loses). Both halves
+  ask `targetPair` now and the rejoin is **`targetFromPair`, its own function on
+  purpose**: `joinTarget` also rebuilds a REPORTED figure (§243), where a unit
+  with no number is not an actual anybody entered. Asserted as a fixed point,
+  with the emptied reporting box asserted to stay empty beside it.
 - **THE DIRECTION AND THE COMPILE RULE STAY THE OFFICE'S (§249.4):** Islam,
   from the running platform — *"I viewed as Ali Reda from corporate, I can't
   adjust the direction or the compiling. is that ment to be?"* It is: neither
@@ -4181,6 +4224,13 @@ python3 checks/milestone-fill.py # a milestone is filled, and a bounded role fil
                                 # the count knows about, the month panel escapes the table's
                                 # scroll box, every pick read back from the DATA, and the
                                 # project beside his stays shut — both ends, three viewers
+python3 checks/unit-before-number.py # the unit is picked BEFORE the number (§251): the
+                                # picker drawn on a row with no target on all four
+                                # surfaces, the unit held alone in this year's target,
+                                # the row STILL saying Missing (the one cost), prose
+                                # never read as a unit, the workbook's Value/Unit pair
+                                # a fixed point, and fill mode asserted UNCHANGED —
+                                # proved able to fail twice (16 red / 6 red)
 python3 checks/gap-fill.py      # fill the gaps (§145): the third toggle where it belongs
                                 # and nowhere else, fill mode's fields AND absences, every
                                 # press read back from the DATA, the pending chip and the
@@ -4380,6 +4430,31 @@ it was. **19 red** on the shipped file, 0 after &mdash; and the check's own
 first run died rather than reported (&sect;215). **Recorded, not done**: the
 `.pptx` plan download still has no outcome column, and a deck already open on a
 projector does not redraw mid-presentation.*
+
+*Earlier the same day: **&sect;251: the unit is there before the
+number is.** Islam, from his own plan with the pen open: *"In the edit I can't
+set the unit for a measure."* Two of his four Key measures had no target yet,
+and the unit has no field of its own &mdash; it lives inside the target string
+(&sect;199) &mdash; so a row with no target had nowhere to keep one and drew an
+em-dash. The target holds the unit ALONE until a number joins it, which is
+&sect;248's own answer for a tactic's outcome, whose explicit carve-out for the
+measures column this reverses at his instruction. **A mockup was built first**
+(rule 1c) from his own four rows in the platform's own tokens, because the
+question he asked was WHERE; he answered **"all 4 places"** &mdash; a pillar's
+Key measures, a unit's Overview objectives, the group's Foundation and a
+supporting function's Overview on both formats. **The one cost was stated
+before it was built**: a target holding only a unit is unusable, so
+`target`/`target3y` join `GAP_NUM` and the row goes on saying Missing &mdash;
+without it the red word vanishes the instant a unit is picked and the count
+falls 46 &rarr; 45, measured. 208 non-blank targets in the shipped plan, 0
+non-numeric, so nothing in the demo moves. **Prose is the guard**: reading any
+non-number as the unit would have appended *"Maintain share"* to the next bare
+number typed, so the test is a unit the platform OFFERS. One reader for both
+sides (&sect;53.5), fill mode deliberately untouched and asserted, nothing
+stored that was not stored before and nothing migrated. Proved able to fail
+twice (16 red, 6 red); five of the new check's own first-run failures were the
+CHECK, and one assertion in `fn-ko-edit.py` was rewritten rather than deleted
+(&sect;218).*
 
 *Earlier the same day: **&sect;250: a tactic's outcome is measured
 against its own window.** Islam, of a tactic marked Q2 and Q3: *"that's a 6

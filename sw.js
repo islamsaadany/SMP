@@ -276,11 +276,17 @@
    "smp-shell-v4.24-outcome-missing-audit"; confirmed again immediately before
    the push (§94.16).
 
+   §251 (another session, on main): the unit picker is drawn before the number
+   is — "smp-shell-v4.26-unit-before-number".
+
    §252: the review deck's tactics slide reads the outcome's figure, and five
    counters stopped looking in the old box — the built file's bytes changed, so
-   the name does too. Checked against origin/main serving
-   "smp-shell-v4.25-tactic-window-proration" AFTER merging it into this branch;
-   confirm again immediately before the push (§94.16). */
+   the name does too. AND THE NAME COLLIDED AGAIN (§94.12): this branch and main
+   both independently wrote v4.26, which git merges without a word while the
+   bytes behind the name differ — caught by §94.16's confirmation immediately
+   before the push, never by the merge. Checked against origin/main serving
+   "smp-shell-v4.26-unit-before-number"; confirm again immediately before the
+   push. */
 const SHELL = "smp-shell-v4.27-outcome-on-the-deck";
 const ASSETS = [
   "/",

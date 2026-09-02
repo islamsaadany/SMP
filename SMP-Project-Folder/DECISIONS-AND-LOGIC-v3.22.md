@@ -27736,6 +27736,143 @@ with this branch's changes removed. §100.3 again: *a stand-in that models less
 than the thing it stands in for reports a working build as broken.* Not fixed
 here — it is another check's machinery and this branch was not asked to touch it.
 
+## §251 — THE UNIT IS THERE BEFORE THE NUMBER IS (2026-09-02)
+
+Islam, from his own plan with the pen open, four Key measures on screen:
+*"In the edit I can't set the unit for a measure."*
+
+**IT WAS A RULE, NOT A DEFECT, AND THE RULE'S REASON HAD EXPIRED.** Two of his
+four rows had no target yet, so the Unit column drew an em-dash with the hover
+*"Set a target first — the unit is written with it"*. §199 could not have done
+otherwise: **there is no unit FIELD**, the unit lives inside the target string
+(`37.5M EGP` is one value the column splits for display), so a row with no
+target had nowhere to keep one, and a picker that took a word and lost it on
+the next paint would have been worse than none (§61).
+
+So the fix is not a second home for the unit — that would be a second source of
+truth and the two would drift the first time anything wrote only one of them.
+**The target holds the unit ALONE until a number arrives to join it**, which is
+exactly what §248 settled one table over for a tactic's outcome: `outTarget` is
+`"%"` for as long as it takes to type 90. That section wrote the difference
+down deliberately — *"the measures table hides it until a target exists — right
+in a column of its own, and wrong inside a block of four equal boxes"* — and
+this **reverses that half at Islam's instruction**, recorded as a reversal
+rather than overwritten (Principle II).
+
+**HE WAS ASKED WHERE, AND ANSWERED "ALL 4 PLACES".** A mockup was built first
+(rule 1c) out of his own four rows and the platform's own tokens — never the
+demo tenant's names (§244) — because the question he asked was *where*, and the
+answer is one cell drawn by two shared builders:
+
+  · a business unit › Strategy › **Plan** › a pillar — Key measures (his table);
+  · a business unit › Strategy › **Overview** — Key objectives;
+  · the group › **Foundation** — the same table one level up;
+  · a supporting function › **Overview** — Key objectives, **both formats**.
+
+Fixing one and not the others is how the two halves of this product come to be
+fine *differently* (§53.5), which is the fault that cost §211 a day.
+
+**THE ONE COST WAS STATED BEFORE IT WAS BUILT, AND IT IS WHY `GAP_NUM` GREW.**
+A target holding `"%"` is non-blank and holds nothing anybody can be measured
+against. Without a numeric test the red **Missing** would vanish the instant a
+unit was picked, the gap count would drop, the Next-gap walk would step past
+the row and Submit would stop refusing on a plan with no target in it — §249.2's
+fault exactly, one field over. So `target` and `target3y` join `outTarget` in
+`GAP_NUM`, on the screen and on the server, because it is the shared module
+that both read. **Measured before it was added: 208 non-blank target fields
+across objectives, measures, capability objectives and project outcomes in the
+shipped plan, 0 of them non-numeric** — so not one row in the demo changes what
+it counts. On a tenant that has typed a target as words, that row starts saying
+Missing, and that is the thing to watch. Proved able to fail: with the line
+taken back out the check goes **6 red**, and the count falls **46 → 45** the
+moment a unit is picked, which is the regression in one number.
+
+**PROSE IS THE GUARD THAT MAKES THIS SHIPPABLE.** The obvious reading of
+"a target holding no number is a unit" is wrong and would have corrupted data:
+`targetParts` falls back to *the whole string* when it sees no number, so a
+target somebody typed as **"Maintain share"** would be read as this row's unit
+and appended to the next bare number typed into the other horizon —
+**"30 Maintain share"**, silently, exactly the shape of §248's own
+`outUnitOf` bug pointing the other way. The test is therefore **a unit the
+platform OFFERS** (§199.4's fixed list), which is precisely the set of values
+this control can ever have written; anything else is prose and is kept exactly
+as typed (§96.2). Picking a unit on such a row still gives `"TBD%"`, which is
+what this table has always done, and that is asserted rather than assumed.
+
+**ONE READER, ASKED BY BOTH.** `unitOfTarget` and `targetKeep` are the answers
+to *what unit is in this string* and *what survives in front of it*, and
+`outUnitOf`/`nextTargetUnit` now ask them instead of carrying their own copy.
+One behaviour narrows on the outcome side and it narrows deliberately: prose is
+no longer read as a unit there either, and — the other way — prose is now
+**kept** rather than dropped when a unit is picked, which is what the measures
+column has always done. Two functions answering "is this a unit" is how a row
+comes to be counted one way and scored another (§42, §53.5), which is also why
+`measureDue` now asks `SMPRules.targetHasNumber` rather than carrying the same
+expression a second time.
+
+**WHERE THE UNIT LANDS IS A DECISION, not an accident.** With nothing to attach
+it to it goes into **this year's** target and never the 3-year one: a pillar's
+measures draw no 3-year column at all (§51.16), so writing there would put a
+value into a field no screen shows. And cleared, **the key is deleted** (§50.6)
+— a row put back is byte-identical to one that never had a unit picked, or
+every visit to the table carries a phantom change into the next save and a
+non-office save is refused for the rest of the cycle (§42's own scar).
+
+**FILL MODE IS DELIBERATELY UNCHANGED** and it is asserted, so the limit is a
+decision somebody can find rather than a drift: a custodian still sets a unit
+only where a target exists (§201.2), and a blank row stays the office's — a gap
+moved to another gap is nothing gained (§249.2's ruling). One line opens it the
+day Islam asks.
+
+**AND THE CHECK FOUND A REAL ROUND-TRIP BREAK ON THE WAY PAST.** The workbook
+splits a target into a Value column and a Unit column with `splitTarget`, which
+reads *a value followed by a unit* — so a unit-only target would have been
+written into the **Value** column with Unit empty, and on the way back in
+`joinTarget` answers `""` for an empty value, which **DROPS the unit
+altogether**. §22's contract broken in the quietest way: an upload authors the
+plan, so what the file loses, the plan loses. Both halves now ask the same pair
+reader the screen does (`targetPair`), and the rejoin is `targetFromPair` —
+**its own function on purpose**, because `joinTarget` also rebuilds a REPORTED
+figure (§243) where a unit with no number is not an actual anybody entered and
+storing one would put a word where a figure belongs. Asserted as a fixed point,
+with the emptied reporting box asserted to stay empty beside it. *Found by the
+check going red, not by reading the file.*
+
+**Nothing is stored that was not stored before, nothing is migrated, and no
+score moves.** `checks/unit-before-number.py` drives every one of the four
+surfaces through the real controls and reads the plan back, and was proved able
+to fail twice before its green was believed (§94.5): **16 red** with the
+em-dash dead end put back, **6 red** with the numeric gap rule removed.
+
+**AND FIVE OF THE CHECK'S OWN FIRST-RUN FAILURES WERE THE CHECK** — worth
+recording, because every one of them reported a working build as broken:
+
+  · **a row is not found by its `textContent`.** `koEdit` draws an objective's
+    name with `inputOr`, and an `<input>` has no text content — so the search
+    silently matched nothing on two of the four surfaces while the measures and
+    a function's table (§189's growing textarea) matched perfectly. It reads
+    the fields' VALUES as well now.
+  · **the group's Foundation is a TAB, not a section of Strategy.** Asking for
+    `currentSub = "strategy"` there lands back on Performance, so the check
+    measured a page with no objectives table on it at all (§50.6, again).
+  · **the em-dash inside the picker is not the dead end.** `searchsel` labels an
+    unchosen value with a dash, which is what the mockup drew; the assertion
+    asks for the absence of the `.why` span and its hover, not of a character.
+  · **`"37.5 M EGP"` was invented.** A scaled currency is written tight
+    (§199.4), so the plan's own answer is `37.5M EGP` — the expectation was
+    wrong, not the build.
+  · **the baseline for "byte-identical" was a different row**: it was built
+    with `target = ""` where a row that never had a unit picked has the key
+    ABSENT, so `setOr`'s correct delete read as a difference.
+
+**One assertion elsewhere was REWRITTEN rather than deleted** (§218, and
+§214.3's lesson for the sixth time): `checks/fn-ko-edit.py` asserted that a row
+with no target *"has nothing to pick, and says why"* — true when §226 wrote it,
+and exactly the dead end Islam has now asked to be removed. Left alone it would
+have gone on demanding the thing this section takes away.
+
+---
+
 ---
 
 ## §252 — THE PRESENTATION READS WHAT WAS REPORTED (2026-09-02)

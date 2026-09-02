@@ -508,15 +508,17 @@ function setOr(row, field, v){
    — right for a target, wrong here, where the office may pick what a thing is
    measured in before deciding how much of it. One field still (§53.5): with no
    number the whole string IS the unit, and typing one joins them. */
-/* §251: ONE READER FOR BOTH. This was the first place the question was asked
-   and it answered it here; the measures column now asks the same question, so
-   the answer moved to `unitOfTarget` and this is the outcome's way in. The one
-   behaviour that narrows is deliberate: a value that is neither a number nor a
-   unit the platform offers is prose and is no longer read as this row's unit,
-   which stops it being appended to the next number typed (§251's own note).
-   Measured across the shipped plan before it moved: 208 non-blank target
-   fields, 0 of them non-numeric, so nothing in the demo reads differently. */
-function outUnitOf(t){ return unitOfTarget(t && t.outTarget); }
+function outUnitOf(t){
+  var v = String((t && t.outTarget) || "").trim();
+  if (!v) return "";
+  var parts = splitTarget(v);
+  /* NUMERIC, not merely non-empty. `targetParts` falls back to `{value: the
+     whole string, unit: ""}` when it cannot see a number, so a bare "#" comes
+     back with a truthy value and an empty unit — and a truthiness test then
+     throws the unit away on the next keystroke. Measured: the unit vanished
+     the moment a number was typed. */
+  return /^-?[\d.,]+$/.test(parts.value) ? parts.unit : v;
+}
 /* §249: THE TARGET IS A COUNTED GAP, SO THE BLOCK IS DRAWN THROUGH `gapCell`
    AND THE WRITE COMES BACK THROUGH IT. `set` is the wrapped setter — the
    office's lifts the pending mark, the filler's stamps one — and it is handed
@@ -586,10 +588,8 @@ function outcomeEdit(t, set, pendCls, fillOnly){
    `del` deletes the key (§50.6). */
 function nextTargetUnit(t, u){
   var want = String(u == null ? "" : u).trim();
-  /* §251: `targetKeep` is the same question the measures column asks — what
-     survives in front of the unit — so prose an outcome holds is KEPT rather
-     than dropped, which is what the measures table has always done with it. */
-  var val  = targetKeep(t.outTarget || "");
+  var val  = splitTarget(t.outTarget || "").value;
+  if (!/^-?[\d.,]+$/.test(val)) val = "";
   var cur  = { value: val, unit: outUnitOf(t) };
   if (want === cur.unit) return t.outTarget || "";
   /* With no number yet the unit is stored alone and joins the moment one is
@@ -643,10 +643,8 @@ function tacticRows(ts, unitKey){
     /* §248: an outcome answers with its own score and its own benchmark; a
        tactic without one is read exactly as it was. `tacticRatio` stays the
        reader for the second case so nothing about it moves. */
-    /* §252: the ternary that used to sit here is `tacticProgress()` now --
-       it was the only copy in the product and the deck needed it too. */
     var oc = onOutcome(t), bench = tacticBenchmark(t);
-    var r = tacticProgress(t);
+    var r = oc ? tacticReads(t) : tacticRatio(t);
     var shown = oc ? outcomeShown(t) : (t.actual == null ? null : t.actual + "%");
     var status = t.status === "Done" ? '<span class="pill good">Done</span>'
                                      : '<span class="pill warn">' + esc(t.status) + '</span>';
@@ -665,11 +663,8 @@ function tacticRows(ts, unitKey){
         (bench ? ' <i>/ ' + esc(bench) + '</i>' : '') + '</span></td>' +
         '<td class="num final" style="color:' + bandInk(r) + '">' + pct(r) + '</td>';
     return '<tr data-oi="' + i + '"' +
-      /* §252: `tacticAnswered`, or a row answered through its outcome is
-         dimmed as though nobody had reported it -- while the two cells at the
-         end of that same row print the figure and its score. */
       (SMPRules.isHidden(t) ? ' class="hiddenrow"'
-        : due && tacticAnswered(t) ? '' : ' class="notdue"') + '><td class="idx">' +
+        : due && t.actual != null ? '' : ' class="notdue"') + '><td class="idx">' +
       (on ? handle("Reorder " + t.name) : '') +
       /* §248: the NAME carries the weight now, because the description sits
          under it — two greys at one weight run together as a single block.
@@ -3073,55 +3068,10 @@ function koYearToggle(){
    the two disagree keeps both exactly as typed and shows the near one's,
    because inventing a single unit for a row that holds two would be the
    platform deciding something nobody said (§96.2). */
-/* ── THE UNIT IS THERE BEFORE THE NUMBER IS (§251) ─────────────────────
-   Islam, from his own plan with the pen open: *"In the edit I can't set the
-   unit for a measure."* Two of his four rows had no target yet, so the column
-   drew an em-dash and the hover *"Set a target first"* — the unit could only
-   ever be set AFTER the number, and setting it first is the obvious way round.
-
-   §199 could not do otherwise: there is no unit FIELD, the unit lives inside
-   the target string, and a row with no target had nowhere to keep one. So the
-   answer is not a second home for it — it is that the target holds the unit
-   ALONE until a number arrives to join it, which is exactly what §248 settled
-   for a tactic's outcome ("%", then "90%"). That section wrote down the
-   difference on purpose — *"the measures table hides it until a target
-   exists — right in a column of its own"* — and this reverses that half at
-   Islam's instruction, on all four surfaces at once (§53.5: one cell, drawn
-   by two shared builders, and fixing one is how the two drift apart).
-
-   `targetParts` READS A VALUE FOLLOWED BY A UNIT, so a bare "%" comes back as
-   a value of "%" with no unit — right for a target, wrong for this question.
-   `outUnitOf` already carried that correction for the outcome; it is one
-   function now, asked by both, or the two answer differently about one string.
-
-   A KNOWN UNIT, NOT MERELY A NON-NUMBER, and that guard is the whole of what
-   keeps prose safe. A target somebody typed as words is a real thing on a live
-   tenant, and reading "Maintain share" as this row's unit would append it to
-   the next bare number typed into the other horizon — "30 Maintain share",
-   silently. The list is the vocabulary the picker offers (§199.4), so it is
-   exactly the set of values this control can ever have written. */
-function knownUnit(s){ return TARGET_UNITS.indexOf(s) > 0; }
-function unitOfTarget(v){
-  var s = String(v == null ? "" : v).trim();
-  if (!s) return "";
-  var p = splitTarget(s);
-  if (/^-?[\d.,]+$/.test(p.value)) return p.unit;
-  return knownUnit(s) ? s : "";
-}
-/* What survives in FRONT of the unit when the unit is written. A number keeps
-   its number; a field holding nothing but a unit has no value half at all; and
-   anything else is KEPT EXACTLY AS TYPED (§96.2), which is what this table has
-   always done — "TBD" with "%" picked is "TBD %" today and stays so. */
-function targetKeep(v){
-  var s = String(v == null ? "" : v).trim();
-  if (!s) return "";
-  var p = splitTarget(s);
-  if (/^-?[\d.,]+$/.test(p.value)) return p.value;
-  return knownUnit(s) ? "" : s;
-}
 function targetUnitOf(m){
   if (!m) return "";
-  return unitOfTarget(m.target) || unitOfTarget(m.target3y) || "";
+  var u = splitTarget(m.target).unit;
+  return u || splitTarget(m.target3y).unit || "";
 }
 /* WRITING THE UNIT WRITES THE TARGETS, because that is where it lives (§199).
    Both horizons take it: a row whose 3-year target is measured in one thing
@@ -3154,30 +3104,15 @@ function setTargetUnit(m, u){
      string, so a value written here splits and rejoins to itself, and the
      check asserts that over everything the plan holds. */
   var sep = want && !TIGHT_UNITS[want] ? " " : "";
-  var held = false;
   ["target", "target3y"].forEach(function(f){
     var v = m[f];
-    if (v == null || v === "") return;
-    var keep = targetKeep(v);
-    /* Emptied on a field that held nothing but a unit, the KEY GOES (§50.6) —
-       a row put back to nothing must be byte-identical to one that never had
-       it, or every visit carries a phantom change into the next save. */
-    setOr(m, f, keep + (want ? (keep ? sep : "") + want : ""));
-    held = true;
+    if (v == null || v === "") return;   /* nothing to attach it to */
+    m[f] = splitTarget(v).value + (want ? sep + want : "");
   });
-  /* ── WITH NOTHING TO ATTACH IT TO, THE UNIT IS HELD ON ITS OWN (§251) ──
-     In THIS YEAR's target and never the 3-year one: a pillar's measures draw
-     no 3-year column at all (§51.16), so putting it there would write a value
-     into a field no screen shows — and the near horizon is the one every one
-     of these four tables carries. It stops being alone the moment a number is
-     typed, because `unitInherit` reads it back out and joins the two. */
-  if (!held && want) m.target = want;
 }
-/* §251 TOOK THIS QUESTION OFF THE EDIT PATH. It used to decide whether the
-   picker was drawn at all — a unit with no target to sit inside could not be
-   stored, so the column said so rather than accepting a word and losing it on
-   the next paint. The unit is held alone now, so the office is never asked;
-   what still asks is FILL MODE, deliberately (§201.2 below). */
+/* A unit with no target to sit inside cannot be stored, so the field says so
+   rather than accepting a word and losing it on the next paint (§61: a control
+   that takes input and discards it is worse than one that is not there). */
 /* ── A NUMBER TYPED INTO A ROW TAKES THAT ROW'S UNIT (§199.6) ──────────
    Islam, from a group objective reading `3-year 30` with no unit at all:
    *"the objectives need to inherit the unit automatically as they are entered
@@ -3423,12 +3358,12 @@ function koEdit(list, page, acKey, owner){
            without one — so it does not go through gapCell and does not join
            the count. It is `inputOr` like the NAME beside it: a fact about
            how the objective is written, which is authoring. */
-        /* \u00a7250: DRAWN WHETHER OR NOT A TARGET EXISTS. The em-dash and its
-           "Set a target first" hover are gone: the unit is held on its own
-           until a number joins it. */
         '<td class="cc">' + (pg
-          ? selectOr(pg, targetUnitOf(m), targetUnitOpts(targetUnitOf(m)), "",
-              function(v){ setTargetUnit(m, v); })
+          ? (hasTargetToHoldAUnit(m)
+              ? selectOr(pg, targetUnitOf(m), targetUnitOpts(targetUnitOf(m)), "",
+                  function(v){ setTargetUnit(m, v); })
+              : '<span class="why" title="Set a target first \u2014 the unit is ' +
+                'written with it">\u2014</span>')
           : (fillUnitCell(page, acKey, m) || esc(targetUnitOf(m)))) + '</td>' +
         '<td class="cc">' + gapCell(page, acKey, m, "target3y",
           { kind:"input", cls:"mono", parse: unitInherit(m) }) + '</td>' +
@@ -3815,7 +3750,7 @@ function renderReport(u){
   };
   var doneOf = function(list){
     var n = 0;
-    list.forEach(function(x){ if (rowAnswered(x)) n++; });   /* §252 */
+    list.forEach(function(x){ if (x.obj.actual != null && x.obj.actual !== "") n++; });
     return n;
   };
   var tally = function(done, total){
@@ -3934,7 +3869,7 @@ function renderReport(u){
     SMPRules.shown(p.tactics).forEach(function(t){
       if (!tacticDue(t)) return;
       total++;
-      if (tacticAnswered(t)) done++;   /* §252 */
+      if (t.actual != null && t.actual !== "") done++;
     });
     return { done: done, total: total };
   };
@@ -5427,13 +5362,12 @@ function unitPlanBody(it, u, railed){
          it does not go through gapCell and does not join the count. The
          READING table (measureRows) is untouched — it prints `esc(m.target)`,
          the whole string, which is where §199.4 put the unit back. */
-      /* \u00a7250: ALWAYS DRAWN. This is the table Islam was looking at \u2014 two of
-         his four measures had no target yet, so the only two rows that needed
-         a unit picking were the two that did not have one. */
       (ed
-        ? '<td class="cc">' +
-            selectOr("plan", targetUnitOf(m), targetUnitOpts(targetUnitOf(m)), "",
-                function(v){ setTargetUnit(m, v); }) + '</td>'
+        ? '<td class="cc">' + (hasTargetToHoldAUnit(m)
+            ? selectOr("plan", targetUnitOf(m), targetUnitOpts(targetUnitOf(m)), "",
+                function(v){ setTargetUnit(m, v); })
+            : '<span class="why" title="Set a target first \u2014 the unit is ' +
+              'written with it">\u2014</span>') + '</td>'
         : unitCol
         /* §201.2: fill mode. The COLUMN is decided once for the whole table
            (unitCol, below) or the header and the rows stop agreeing about
@@ -6012,11 +5946,12 @@ function capKoEdit(c){
         (ed ? '' : hidChip(m)) + '</td>' +
         '<td class="cc">' + gapCell(pg, "k_found", m, "dir",
           { kind:"select", opts:["≥", "≤"] }) + '</td>' +
-        /* §251: always drawn, on both function formats — this table and the
-           unit's are one cell asking one question (§53.5). */
         '<td class="cc">' + (ed
-          ? selectOr(pg, targetUnitOf(m), targetUnitOpts(targetUnitOf(m)), "",
-              function(v){ setTargetUnit(m, v); })
+          ? (hasTargetToHoldAUnit(m)
+              ? selectOr(pg, targetUnitOf(m), targetUnitOpts(targetUnitOf(m)), "",
+                  function(v){ setTargetUnit(m, v); })
+              : '<span class="why" title="Set a target first — the unit is ' +
+                'written with it">—</span>')
           : (fillUnitCell(pg, "k_found", m) || esc(targetUnitOf(m)))) + '</td>' +
         '<td class="cc">' + gapCell(pg, "k_found", m, "target",
           { kind:"input", cls:"mono", parse: unitInherit(m) }) + '</td>' +

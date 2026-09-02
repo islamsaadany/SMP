@@ -2083,26 +2083,16 @@ function paneActs(page, acKey){
    no `proj` section and a function no `plan`, so carrying both under both
    costs nothing and means the table need not know which side spells it which
    way (§59's `unitLike()` argument, one surface out). */
-/* §250: THE ACCESS KEY IS NAMED ONCE, ON THE UNIT SIDE, and resolved for a
-   function through the shared rule — never spelled twice. The first build of
-   this wrote `k_found` for a function's Overview and `u_plan` for its Plan,
-   which is what the old controls asked (§248 kept the pairs to the letter so
-   no rights would move) and what §217 had already corrected on the SERVER. A
-   table that spells the pairing itself is a second answer to a question
-   `strategyPageOf()` exists to answer (§53.5). What varies per side and is
-   NOT an access question is the render page: a unit's Foundation is
-   `foundation`, a function's Overview is `capfoundation` (§213). */
 var SEC_PENS = {
-  found: { unit: "foundation", fn: "capfoundation", ac: "u_found" },
-  swot:  { unit: "analysis",                        ac: "u_anal"  },
-  plan:  { unit: "plan",       fn: "plan",          ac: "u_plan"  },
-  proj:  { unit: "plan",       fn: "plan",          ac: "u_plan"  }
+  found: { unit: ["foundation", "u_found"], fn: ["capfoundation", "k_found"] },
+  swot:  { unit: ["analysis",   "u_anal"] },
+  plan:  { unit: ["plan",       "u_plan"], fn: ["plan", "u_plan"] },
+  proj:  { unit: ["plan",       "u_plan"], fn: ["plan", "u_plan"] }
 };
 function secPagePair(sec){
   var e = SEC_PENS[sec];
   if (!e) return null;
-  var page = String(TARGET || "").indexOf("fn:") === 0 ? e.fn : e.unit;
-  return page ? [page, e.ac] : null;
+  return e[String(TARGET || "").indexOf("fn:") === 0 ? "fn" : "unit"] || null;
 }
 
 /* ── ONE EDIT, ONE DONE (§249) ──────────────────────────────────────

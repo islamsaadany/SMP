@@ -27523,3 +27523,107 @@ Twenty checks green, full `qa.py` sweep clean with ERRORS none, `test-authorize`
   (`td:has(> .fld + .xbtn)`), and the SWOT's fields are in `<li>`s, so they were
   never covered. Visible now only because one press opens the SWOT where before
   you had to go and open it.
+
+---
+
+## §250 — THE SCREEN ASKS THE COLUMN THE SAVE ASKS, AND THE × GETS ITS SEAT (2026-09-02)
+
+Three things §248 and §249 recorded and did not do, put to Islam in plain words
+and answered: *"1. make the fix, noting that editing is only for the smo for now
+anyway 2. ok will see it later 3. ok."*
+
+### 1 · The screen and the save were asking two different questions
+
+**§217 FIXED THE SERVER AND THE SCREEN NEVER CAUGHT UP.** `lib/authorize.js`
+resolves every strategy question through `strategyPageOf()`, so a supporting
+function's plan is judged by the **function's** Strategy column. The browser went
+on passing the raw `u_found` / `u_anal` / `u_plan` at some twenty call sites,
+which on an `fn:` target reads the **business unit's** column instead. Two
+questions about one act — §42's drift, and in the direction that costs somebody
+their typing.
+
+**MEASURED BEFORE AND AFTER, AND ISLAM'S OWN POINT IS THE REASON IT WAS SAFE TO
+DO NOW.** On this tenant: **0 disagreements, 0 answers moved** — every role's two
+Strategy columns hold the same value, and editing is the office's in any case.
+Set them differently, which is precisely what §117's split exists to allow, and
+**6 people** are handed an Edit pen the save refuses (type, then lose it — §184's
+shape) or refused one it would have accepted. The trap was fixed before it was
+armed.
+
+**IN THE WRAPPERS, NOT AT THE CALL SITES.** The server resolves at each of its
+six; the browser has twenty and would acquire a twenty-first the day somebody
+adds a `gapCell`. `mayAuthor()`, `mayFill()` and `mayFillRow()` resolve once,
+through `strategyAc()` — so a call site cannot forget (§104.7). **Both halves,
+not one**: the authoriser judges a fill on a function through `planPageOf()` too,
+and fixing one half while leaving the other is how the two came to disagree in
+the first place (§53.5).
+
+**`strategyPageOf()` NOW PASSES AN UNMAPPED KEY THROUGH.** It used to fall back
+to `k_proj`, which was harmless while every caller was a unit-side strategy
+literal and unsafe the moment anything asked it of a key that is not one — and
+the wrappers ask it of every key as a matter of course, `c_people` and `u_perf`
+included. **A no-op for all four existing callers**, and the server's 454
+assertions hold it to that.
+
+**`SEC_PENS` NAMES THE ACCESS KEY ONCE**, on the unit side, and resolves through
+the same rule. §248 deliberately spelled the pairs out to move nobody's rights;
+with the rule now asked everywhere, a table spelling the pairing itself is a
+second answer to the question `strategyPageOf()` exists to answer. What still
+varies per side is the RENDER page, which is not an access question: a unit's
+Foundation is `foundation`, a function's Overview is `capfoundation` (§213).
+
+**FALSIFIED, AND THE FALSIFICATION IS THE POINT.** With `strategyAc()` reverted,
+the shipped tenant **still passes** — 264 person × function pairs, all agreeing,
+because the two columns hold the same value. Only the constructed tenants go red,
+6 each way. §94.2 in its purest form: a check that walks only the data in front
+of it would have blessed the broken build.
+
+### 2 · The remove × sits beside its field, on all three homes
+
+§114.4 seated it on a plan table and was scoped to `td`. Who we are's lines are
+`<dd>` and the SWOT's are `<li>`, so on those two pages it went on dropping to a
+line of its own: **6 of 6** and **23 of 23**, 14px each, about 400px of empty
+height across the two. Invisible until §249 made one press open all three
+sections, which is why it surfaced now.
+
+**AND THE SWOT NEEDED A COLUMN, NOT A WIDTH.** The first build gave all three the
+`calc(100% - 30px)` rule; Who we are went to 0 wrapped and **the SWOT stayed at
+23 of 23**, because `.swotlist li` is a two-column grid (`22px 1fr`) and a third
+child is placed on a second ROW whatever width the field is given. Measured, not
+reasoned — the check said so on the build that was supposed to have fixed it.
+A third column, and `align-items:start` rather than the reading line's
+`baseline`, because a growing box and a 22px button have no shared baseline worth
+aligning to.
+
+### 3 · Two checks that had been crying wolf
+
+**A test that is always red is one people stop reading**, and then a real failure
+goes unnoticed. Both were the check and not the product:
+
+* `strategy-office.py` §4 asserted that the reading-the-colours legend exists on
+  Performance. **§162/§163 removed it deliberately**, and `perf-line.py` asserts
+  its absence in so many words. Two checks arguing, and the wrong one still
+  speaking — §51.11 from the side where the CHECK is what went stale. Removed
+  rather than made to pass: the subject no longer exists and `perf-line.py` owns
+  what replaced it. What survives is the half still worth guarding, the Reporting
+  tab's fill and its contrast in both themes.
+* `report-saves.py`'s stub answered the catch-all `text/html` for `/sw.js`, so
+  the platform's own worker registration (§231.5) rejected on the content type
+  and the file's page-error listener counted it as the product throwing while
+  reporting. `checks/office-chat.py` already carried the three lines that fix it;
+  this is that fix in the file that needed it too. **§100.3, recorded once and
+  met again**: a stub that models less than the thing it stands in for reports a
+  working build as broken.
+
+### Proof
+
+`checks/plan-edit-line.py` §1c2 and §1e added; 25 checks green including the two
+that had been red; full `qa.py` sweep clean with **ERRORS: none**;
+`test-authorize` 454/0, `test-graph-diff` 126/0; build byte-identical.
+
+**AND ONE OF THE CHECK'S OWN ASSERTIONS BROKE BY BEING RIGHT.** §1c falsifies the
+grant filter by stubbing `mayAuthorPage` to refuse one page — keyed on the raw
+`u_found`, which after §250 is resolved to `k_found` before the call, so the stub
+blocked nothing on a function and reported a working build as broken. The stub
+resolves the same way now. *A check that stubs a rule has to stub it where the
+product actually asks it.*

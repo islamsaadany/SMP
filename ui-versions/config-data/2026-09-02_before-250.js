@@ -5229,35 +5229,9 @@ function reaches(unitKey){
    case of a general one and this function is that one asked about the plan.
    `SMPRules.mayAuthorPage()` holds the list of pages and the reasoning; the
    answer is the shared file's so the screen and the server cannot drift. */
-/* ── ASK THE COLUMN THE SAVE ASKS (§250, closing §217's other half) ──
-   §217 fixed the SERVER: `lib/authorize.js` resolves every strategy question
-   through `strategyPageOf()`, so a supporting function's plan is judged by the
-   FUNCTION's Strategy column. The SCREEN never caught up — it passed the raw
-   `u_found` / `u_anal` / `u_plan` at some twenty call sites, which on an `fn:`
-   target reads the BUSINESS UNIT's column instead. Two different questions
-   about one act, which is the drift `lib/rules.js` exists to prevent (§42).
-
-   MEASURED BEFORE AND AFTER, and today it costs nobody anything: every role's
-   two Strategy columns hold the same value on this tenant, so there are zero
-   disagreements and editing is the office's in any case. Set them differently
-   — which is the whole point of §117's split — and six people are handed an
-   Edit pen the save refuses, or refused one it would have accepted. This
-   closes the trap before it is armed.
-
-   IN THE WRAPPERS, NOT AT THE CALL SITES. The server resolves at each of its
-   six; the browser has twenty and would acquire a twenty-first the day
-   somebody adds a `gapCell`. One place, so a call site cannot forget (§104.7).
-   `strategyPageOf()` passes an unmapped key through untouched (§250), which is
-   what makes it safe to ask of every key rather than of a list somebody keeps.
-
-   NOTHING WIDENS: it can only ever move the screen onto the answer the save
-   was already giving. */
-function strategyAc(acKey, target){
-  return SMPRules.strategyPageOf(target === undefined ? TARGET : target, acKey);
-}
 function mayAuthor(acKey, target){
-  var t = target === undefined ? TARGET : target;
-  return SMPRules.mayAuthorPage(world(), viewer(), strategyAc(acKey, t), t);
+  return SMPRules.mayAuthorPage(world(), viewer(), acKey,
+    target === undefined ? TARGET : target);
 }
 function mayEditPlan(){ return mayAuthor("u_plan"); }
 /* MAY THIS PERSON FILL THIS PAGE'S GAPS (§145)? A wrapper, never a second
@@ -5265,19 +5239,15 @@ function mayEditPlan(){ return mayAuthor("u_plan"); }
    fill field the screen draws and the save the server accepts cannot
    disagree (§42). */
 function mayFill(acKey, target){
-  /* §250: the same resolution, because `lib/authorize.js` judges a fill on a
-     function through `planPageOf()` (its own `strategyPageOf`) — fixing one
-     half and leaving the other is how the two came to disagree in the first
-     place (§53.5). */
-  var t = target === undefined ? TARGET : target;
-  return SMPRules.mayFillPage(world(), viewer(), strategyAc(acKey, t), t);
+  return SMPRules.mayFillPage(world(), viewer(), acKey,
+    target === undefined ? TARGET : target);
 }
 /* §177: the same question about ONE ROW. `ctx` is §147.7's shape -- {row},
    {project} or {pillarOwner} -- so a project owner fills their own project
    and a pillar owner their own pillar, and nobody fills a neighbour's. */
 function mayFillRow(acKey, ctx, target){
-  var t = target === undefined ? TARGET : target;   /* §250, as mayFill */
-  return SMPRules.mayFillRow(world(), viewer(), strategyAc(acKey, t), t, ctx);
+  return SMPRules.mayFillRow(world(), viewer(), acKey,
+    target === undefined ? TARGET : target, ctx);
 }
 /* MAY THIS PERSON REORDER WHAT THEY ARE LOOKING AT (§101)? A wrapper, never a
    second copy — the answer is lib/rules.js's, asked for the person being viewed

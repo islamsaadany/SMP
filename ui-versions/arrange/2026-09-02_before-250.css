@@ -1273,28 +1273,8 @@
      border, deliberately: an × drawn inside an input is the search box's
      clear-the-text idiom, and this one removes the ROW. Keyed on the PAIR so
      it reaches every table using the pattern and nothing else. */
-  /* §250: AND THE TWO HOMES IT NEVER REACHED. §114.4 was written on a plan
-     table and scoped to `td`; the SWOT's lines are `<li>` and Who we are's are
-     `<dd>`, so on those two pages the × went on dropping to a line of its own
-     — measured with the pen open: 6 of 6 on Foundation and 23 of 23 on the
-     SWOT, 14px each, about 400px of empty height across the two. Invisible
-     until §249 made one press open all three sections, which is why it
-     surfaced now. Same rule, same pair, three seats. */
-  td:has(> .fld + .xbtn) > .fld,
-  dd:has(> .fld + .xbtn) > .fld { width: calc(100% - 30px); vertical-align: middle; }
-  td:has(> .fld + .xbtn) > .xbtn,
-  dd:has(> .fld + .xbtn) > .xbtn { vertical-align: middle; margin-left: 5px; }
-  /* THE SWOT'S LINE IS A GRID, SO THE × NEEDS A COLUMN AND NOT A WIDTH.
-     `.swotlist li` is `22px 1fr` — the number and the line — so a third child
-     is placed on a second ROW whatever width the field is given, which is why
-     the calc above fixed Who we are and left all 23 of these where they were.
-     Measured, not reasoned: the first build of §250 gave it the width rule and
-     the check still read 23 of 23 wrapped. A column of its own, and `start`
-     rather than the read line's `baseline`, because a growing box and a 22px
-     button have no shared baseline worth aligning to. */
-  .swotlist li:has(> .fld + .xbtn) { grid-template-columns: 22px 1fr auto;
-    align-items: start; }
-  .swotlist li:has(> .fld + .xbtn) > .swot-n { padding-top: 7px; }
+  td:has(> .fld + .xbtn) > .fld { width: calc(100% - 30px); vertical-align: middle; }
+  td:has(> .fld + .xbtn) > .xbtn { vertical-align: middle; margin-left: 5px; }
   /* ── HIDDEN FROM THE PRESENTATION (§233) ────────────────────────────
      The eye sits between the field and the × (the mockup's order), which
      the seat rule above cannot see — its `.fld + .xbtn` adjacency breaks —

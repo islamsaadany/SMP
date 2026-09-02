@@ -7,8 +7,9 @@ version (rules A2 / A11, changed 2026-08-20) — those go only when asked for.
 **Where it runs:** Vercel, production tracks `main`. Static files plus two
 serverless functions (`/api/state`, `/api/auth`) against Neon Postgres.
 **Latest version:** §232/§233 on `main` (removing a pillar or a project, and
-hiding an element from the presentation). **§248 and §249 — the strategy pen on the
-section line, and one edit for the whole tab — are built and pushed on
+hiding an element from the presentation). **§248, §249 and §250 — the strategy pen on the
+section line, one edit for the whole tab, and three loose ends — are built and
+pushed on
 `claude/plans-edit-button-placement-jxw8or`, not merged: `main` is Islam's call
 every time.**
 
@@ -72,6 +73,40 @@ Nothing proceeds past this line without an answer.
   is a true signal — do not silence it.
 
 ## Built and verified
+
+### §250 — three loose ends closed (2026-09-02, same branch)
+
+Islam, on the three things §248 and §249 had recorded and not done: *"1. make
+the fix, noting that editing is only for the smo for now anyway 2. ok will see
+it later 3. ok."*
+
+**The screen and the save were asking two different questions.** For a
+supporting function's plan, the save checks the *function's* Strategy setting
+and the screen checked the *business unit's*. Measured: **nothing changes on
+this tenant** — both settings hold the same value for every role, and editing is
+the office's anyway, which is exactly why it was safe to fix now. Set them
+differently, which is the whole point of having two, and **six people** would
+get an Edit button that refuses to save, or be refused one that would have
+worked. Fixed in the three places the browser asks, rather than at the twenty
+places that ask them.
+
+**The remove × sits beside its field again** on Who we are (6) and the SWOT
+(23) — about 400px of empty height between them. The SWOT needed a column
+rather than a width, which the check caught on the build that was meant to have
+fixed it.
+
+**And two automatic tests stopped crying wolf.** Neither was a real problem: one
+was looking for something deliberately removed weeks ago (with another test
+asserting its absence — two tests arguing), the other had a fault in its own
+setup. A test that is always red is one people stop reading.
+
+25 checks green including the two that were red, full sweep clean, server 454/0
+and 126/0, build byte-identical.
+
+*The falsification is worth keeping: with the permissions fix reverted, the
+shipped data still passes all 264 person × function pairs. Only a deliberately
+divergent tenant goes red — a check that walked only what is in front of it
+would have blessed the broken build.*
 
 ### §249 — one edit, one done (2026-09-02, same branch)
 

@@ -365,6 +365,37 @@ console errors (in this cloud environment, run it via a wrapper that points Play
   `node scripts/test-door.js <smo-password>` against a running dev-server
   after touching `api/auth.js` or `lib/auth.js` (it ends by rate-limiting the
   SMO on purpose — `DELETE FROM login_attempts;` clears it).
+- **THE SCREEN ASKS THE COLUMN THE SAVE ASKS (§250, closing §217):** §217 fixed
+  the SERVER — a supporting function's plan is judged by the FUNCTION's Strategy
+  column — and the browser went on passing the raw `u_found`/`u_anal`/`u_plan` at
+  ~20 call sites, which on an `fn:` target reads the BUSINESS UNIT's column.
+  **Measured: 0 disagreements and 0 answers moved on this tenant** (both columns
+  hold one value for every role, and editing is the office's — Islam's own
+  point, and why it was safe to do now); set them differently, which is what
+  §117's split is for, and **6 people** get a pen the save refuses or are
+  refused one it accepts. **IN THE WRAPPERS, NOT AT THE CALL SITES** —
+  `mayAuthor`/`mayFill`/`mayFillRow` resolve once through `strategyAc()`, so a
+  twenty-first call site cannot forget (§104.7) — and **both halves**, because
+  the authoriser judges a fill through `planPageOf()` too (§53.5).
+  **`strategyPageOf()` PASSES AN UNMAPPED KEY THROUGH** (it fell back to
+  `k_proj`, harmless while every caller was a strategy literal and unsafe once
+  the wrappers ask it of `c_people` too; a no-op for all four callers, held
+  there by 454 server assertions). **`SEC_PENS` names the access key ONCE** and
+  resolves through the rule; the RENDER page still varies per side, which is not
+  an access question (§213). **AND THE FALSIFICATION IS THE POINT**: with the
+  fix reverted the SHIPPED tenant still passes all 264 person × function pairs —
+  only the constructed divergent tenants go red, 6 each way (§94.2 in its purest
+  form). **The × got its seat on all three homes** — §114.4 was scoped to `td`,
+  so Who we are's `<dd>` (6 of 6) and the SWOT's `<li>` (23 of 23) still wrapped,
+  ~400px; **and the SWOT needed a COLUMN, not a width**, because `.swotlist li`
+  is a `22px 1fr` grid and a third child goes to a second ROW whatever width the
+  field is given — the first build fixed one and the check said the other was
+  untouched. **And two checks that had been crying wolf**: `strategy-office` §4
+  asserted a legend §162/§163 deliberately removed while `perf-line` asserts its
+  absence (two checks arguing — §51.11 with the CHECK stale, so removed rather
+  than made to pass), and `report-saves`' stub served `sw.js` as `text/html` so
+  §231.5's registration rejected and read as the product throwing (§100.3, the
+  three lines `office-chat` already had).
 - **ONE EDIT, ONE DONE (§249):** Islam — *"the edit opens all so I don't need
   to edit each tab and then save for each — it's one edit and one save?"*
   **WHAT WAS THERE WAS WORSE THAN THREE PRESSES**: `EDIT_PAGE` is per SECTION
@@ -4196,7 +4227,27 @@ prior sessions (on HR_ERP) accidentally reverted agreed-upon designs.
 
 ---
 
-*Last Updated: 2026-09-02 &mdash; **&sect;248: the strategy pen lives on the
+*Last Updated: 2026-09-02 &mdash; **&sect;250: the screen asks the column the
+save asks, the remove &times; gets its seat, and two checks stop crying wolf.**
+Three things &sect;248 and &sect;249 recorded and did not do, put to Islam in
+plain words and answered *"1. make the fix, noting that editing is only for the
+smo for now anyway 2. ok will see it later 3. ok."* **&sect;217 fixed the SERVER
+and the screen never caught up** &mdash; a supporting function's plan was judged
+by the function's Strategy column on save and the business unit's on screen, at
+~20 browser call sites. Measured: **0 disagreements today** (his point exactly),
+**6 people either way** the moment those two columns are set differently, which
+is what &sect;117's split is for. Resolved in the three WRAPPERS rather than at
+twenty call sites, both the author and the fill halves. **The falsification is
+the point**: with the fix reverted the shipped tenant still passes all 264
+person &times; function pairs &mdash; only the constructed divergent tenants go
+red (&sect;94.2 in its purest form). **The &times; got its seat** on Who we are
+(6 of 6) and the SWOT (23 of 23), ~400px &mdash; and the SWOT needed a grid
+COLUMN, not a width, which the check caught on the build that was meant to have
+fixed it. **And the two red checks were both the CHECK**: one asserted a legend
+&sect;162/&sect;163 deliberately removed, the other's stub served `sw.js` as
+html. 25 checks green, full sweep clean, 454/0 and 126/0.*
+
+*Earlier the same day: **&sect;248: the strategy pen lives on the
 section line; &sect;249: one edit, one done.** Islam &mdash; *"the edit button of
 the plans can you make it in the same line of the foundation sowt and plan?"*,
 then *"the edit opens all so I don't need to edit each tab and then save for each

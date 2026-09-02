@@ -258,14 +258,65 @@ with sync_playwright() as pw:
         drop = pg.evaluate("""() => {
           const real = SMPRules.mayAuthorPage;
           const pair = secPagePair(Object.keys(SEC_PENS).filter(k => secPagePair(k))[0]);
+          /* §250: THE RESOLVED KEY, not the raw one. `secPagesOpen()` goes
+             through `mayAuthor()`, which maps a unit-side strategy key onto the
+             function's column before asking — so a stub keyed on `u_found`
+             blocks nothing on a function and reports a working build as broken.
+             It did, on the first run after §250, which is the resolution being
+             proved rather than a fault. */
+          const blocked = SMPRules.strategyPageOf(TARGET, pair[1]);
           SMPRules.mayAuthorPage = function(w, p, k, t){
-            return k === pair[1] ? false : real(w, p, k, t); };
+            return k === blocked ? false : real(w, p, k, t); };
           const got = secPagesOpen();
           SMPRules.mayAuthorPage = real;
-          return { blocked: pair[0], got: got };
+          return { blocked: pair[0], key: blocked, got: got };
         }""")
         ck("%s · ...and a page the rule refuses drops out of it" % key,
            drop["blocked"] not in drop["got"], drop)
+
+    # ── 1c2 · THE SCREEN ASKS THE COLUMN THE SAVE ASKS (§250) ────────
+    # §217 fixed the SERVER: a supporting function's plan is judged by the
+    # FUNCTION's Strategy column. The screen went on passing the raw unit-side
+    # key, so on an `fn:` target it read the BUSINESS UNIT's column instead —
+    # two questions about one act (§42's drift).
+    #
+    # ASSERTED AS AGREEMENT, over every person against every function, and in
+    # a tenant where the two columns DIFFER — because on this one they hold the
+    # same value for every role, so a build with the fix reverted passes any
+    # test that only walks the shipped data (§94.2, and Islam's own point that
+    # editing is the office's for now anyway).
+    print("\n1c2 · the screen and the save ask the same column (§250)")
+    for label, cfg in (
+        ("as shipped", None),
+        ("unit Strategy open, function's shut",
+         {"custodian": {"a_unit_own_strat": "edit", "a_fn_own_strat": "view",
+                        "a_unit_other": "edit", "a_fn_other": "view"}}),
+        ("function's open, unit's shut",
+         {"custodian": {"a_unit_own_strat": "view", "a_fn_own_strat": "edit",
+                        "a_unit_other": "view", "a_fn_other": "edit"}})):
+        pg.reload(); pg.wait_for_timeout(900)
+        r = pg.evaluate("""(cfg) => {
+          if (cfg) Object.keys(cfg).forEach(role => {
+            ACCESS[role] = ACCESS[role] || {};
+            Object.keys(cfg[role]).forEach(k => ACCESS[role][k] = cfg[role][k]);
+          });
+          const keep = { v: VIEWER, t: TARGET };
+          let n = 0, pairs = 0, sample = null;
+          PEOPLE.forEach(p => Object.keys(FUNCTIONS).forEach(k => {
+            const t = 'fn:' + k;
+            VIEWER = p.key; TARGET = t;
+            pairs++;
+            const screen = mayAuthor('u_plan');
+            const save = SMPRules.mayAuthorPage(world(), p,
+                           SMPRules.strategyPageOf(t, 'u_plan'), t);
+            if (screen !== save) { n++; if (!sample) sample = {who: p.key, at: t, screen, save}; }
+          }));
+          VIEWER = keep.v; TARGET = keep.t;
+          return { n: n, pairs: pairs, sample: sample };
+        }""", cfg)
+        ck("%s · every person × function agrees (%d pairs)" % (label, r["pairs"]),
+           r["n"] == 0 and r["pairs"] > 0, r)
+    pg.reload(); pg.wait_for_timeout(900); viewer(pg, "smo")
 
     # ── 1d · A FILL-GRANT HOLDER STILL HAS A WAY OUT (§61) ───────────
     # §248 removed the corner control a filler used to close fill mode with,
@@ -307,6 +358,38 @@ with sync_playwright() as pw:
                pg.evaluate("()=>Object.keys(EDIT_PAGE).filter(k=>EDIT_PAGE[k])"))
     viewer(pg, "smo")
     pg.reload(); pg.wait_for_timeout(900); viewer(pg, "smo")
+
+    # ── 1e · THE REMOVE × SITS BESIDE ITS FIELD (§250) ───────────────
+    # §114.4 seated it on a plan TABLE and was scoped to `td`; the SWOT's lines
+    # are `<li>` and Who we are's are `<dd>`, so on those two pages it went on
+    # dropping to a line of its own — 6 of 6 and 23 of 23, 14px each. Measured
+    # as the RELATIONSHIP (is the button below the field it belongs to), never
+    # as a pixel position, and on all three homes so a fix to one that breaks
+    # another is caught (§53.5).
+    print("\n1e · the remove × shares its field's line, on all three homes")
+    viewer(pg, "smo"); units(pg); dest(pg, "mobile"); tab(pg, "strategy")
+    sec(pg, "plan"); press(pg)
+    seen = {}
+    for s2 in ("found", "swot", "plan"):
+        sec(pg, s2)
+        r = pg.evaluate("""() => {
+          const out = {};
+          document.querySelectorAll('#panel .xbtn').forEach(b => {
+            const f = b.previousElementSibling; if (!f) return;
+            const key = b.parentElement.tagName.toLowerCase();
+            out[key] = out[key] || { n: 0, wrapped: 0 };
+            out[key].n++;
+            if (b.getBoundingClientRect().top >= f.getBoundingClientRect().bottom - 2)
+              out[key].wrapped++;
+          });
+          return out; }""")
+        for k, v in r.items():
+            seen[k] = v
+            ck("%s · the × beside its field in <%s> (%d of them)" % (s2, k, v["n"]),
+               v["wrapped"] == 0 and v["n"] > 0, v)
+    ck("...and all three homes were actually measured",
+       sorted(seen) == ["dd", "li", "td"], sorted(seen))
+    press(pg)
 
     # ── 2 · IT IS THE ONLY ONE, where there used to be several ────────
     print("\n2 · a function with two projects carries one control, not two")

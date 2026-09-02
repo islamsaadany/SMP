@@ -338,6 +338,62 @@ with sync_playwright() as pw:
            got and got["actual"] == "Yes", got)
         ck("...and it scores 100", got and got["score"] == 100, got)
 
+        # §251.2, both from Islam using the running page.
+        print("\n── 9 · it is the same size as a number box, and it COUNTS")
+        # THE WIDTH: `.entry .field` is 78px because a number gives 26px back
+        # to the unit suffix beside it. This control has no suffix, so it
+        # rendered short in a column an eye runs down.
+        w = ev(pg, """() => {
+          const yn  = document.querySelector('select.ynfield');
+          const num = [...document.querySelectorAll('span.entry')]
+                        .find(e => e.querySelector('input.field'));
+          const box = yn ? (yn.closest('.entry') || yn) : null;
+          return { yn:  box ? Math.round(box.getBoundingClientRect().width) : null,
+                   num: num ? Math.round(num.getBoundingClientRect().width) : null }; }""")
+        ck("both shapes are present to compare",
+           w["yn"] and w["num"], w)
+        # ASSERTED AS AGREEMENT, never as 104 — a later change to the box's
+        # width must move both or fail here (§94.8, §122.5).
+        ck("the yes/no picker is the same width as a number entry",
+           w["yn"] and w["num"] and abs(w["yn"] - w["num"]) <= 2, w)
+
+        # THE TALLY: §248 sends an outcome's figure to `outActual` and the
+        # counts read `actual`, so an answer given through the box the page
+        # itself drew never counted. Asserted as the DIFFERENCE the answer
+        # makes, not as a number — the demo's totals are not this check's
+        # business (§94.8).
+        cnt = ev(pg, """() => {
+          const u = UNITS[current];
+          let t = null;
+          for (const p of u.items) for (const x of (p.tactics||[]))
+            if (SMPRules.isYesNo(x.outTarget)) { t = x; break; }
+          if (!t) return { none:true };
+          /* BOTH FIELDS CLEARED FIRST, or the trial measures nothing: the
+             demo's tactics carry an `actual` from long before outcomes
+             existed, and a row answered in EITHER field counts (that is the
+             rule that keeps this from getting stricter than what came
+             before). So the baseline has to be a row that has said nothing
+             at all — §94.2, make the state you mean to measure. */
+          const keep = t.actual;
+          delete t.actual; delete t.outActual;
+          const without = reportedCount(u).done;
+          t.outActual = 'Yes';
+          const withYes = reportedCount(u).done;
+          const alsoOld = (function(){ delete t.outActual; t.actual = keep;
+            const n = reportedCount(u).done; t.outActual = 'Yes'; return n; })();
+          return { withYes: withYes, without: without, alsoOld: alsoOld,
+                   field: reportField({kind:'tactic', obj:t}) }; }""")
+        ck("a tactic reports its outcome into outActual",
+           cnt.get("field") == "outActual", cnt)
+        ck("ANSWERING IT MOVES THE TALLY — the count reads the field the box writes",
+           cnt.get("withYes") == cnt.get("without") + 1, cnt)
+        # AND IT NEVER GETS STRICTER: a tactic carrying only the OLD field
+        # still counts, so giving an existing row an outcome cannot make a
+        # report that was complete suddenly owe figures (measured at 18 rows
+        # when this was got wrong).
+        ck("...and a row answered only the OLD way still counts",
+           cnt.get("alsoOld") == cnt.get("without") + 1, cnt)
+
     ck("no console errors", not errs, errs[:3])
     b.close()
 

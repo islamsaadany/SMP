@@ -3869,7 +3869,10 @@ function renderReport(u){
        closed cycle and every archive hold. Same box, different field, and the
        tactic falls back to the old question until its outcome has a target. */
     var oc  = isT ? outcomeOf(x.obj) : null;
-    var fld = oc ? "outActual" : "actual";
+    /* §251.2: READ FROM THE SHARED ANSWER, never decided again here — the
+       box and the counts disagreeing about where a figure lives is the
+       fault this replaces. */
+    var fld = reportField(x);
     var unit = oc ? splitTarget(oc.target).unit : (isT ? "%" : splitTarget(x.obj.target).unit);
     var cur = x.obj[fld], has = cur != null && cur !== "";
     /* §251: A YES OR A NO IS PICKED, NEVER TYPED. The row's target says the
@@ -3917,9 +3920,13 @@ function renderReport(u){
         (want ? "Why, and what is being done" : "Note, if there is one") + '">'
       : (x.obj.note ? '<span class="why" style="margin:0">' + esc(x.obj.note) + '</span>' : '');
   };
+  /* §251.2: the per-section tally asks the same question the box asks and
+     the unit's own count asks — three tallies of one thing, one reader
+     (§53.5). This one read `actual` alone, so a tactic answered through its
+     OUTCOME was never counted here either. */
   var doneOf = function(list){
     var n = 0;
-    list.forEach(function(x){ if (x.obj.actual != null && x.obj.actual !== "") n++; });
+    list.forEach(function(x){ if (reportedIn(x)) n++; });
     return n;
   };
   var tally = function(done, total){

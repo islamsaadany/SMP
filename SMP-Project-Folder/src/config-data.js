@@ -4739,12 +4739,52 @@ function reportItems(u){
 function askedItems(u){
   return reportItems(u).filter(function(x){ return x.kind !== "tactic" || x.asked; });
 }
+/* ── WHICH FIELD A ROW IS REPORTED INTO (§251.2) ────────────────────────
+   Islam, of a Y/N tactic answered Yes sitting under a tally reading 3/4:
+   *"it's not counted in the reporting on the card of the pillars."*
+
+   §248 sends a tactic measured by its OUTCOME to `outActual`, because
+   `actual` has always meant "% delivered" and every closed cycle holds it
+   that way. The reporting box was taught that and the COUNTS were not —
+   both of them read `actual` and nothing else, so an answer given through
+   the box the page itself drew could never satisfy the tally. (The line
+   this replaces asked `x.kind === "tactic" ? x.obj.actual : x.obj.actual`
+   — the same expression on both sides of the question, which is what a
+   half-made change looks like.)
+
+   ONE FUNCTION, ASKED BY THE BOX AND BY THE COUNTS. Two answers to "where
+   does this row's figure live" is exactly how they came to disagree
+   (§53.5), so `entry()` reads the field from here rather than deciding it
+   again. It PREDATES the Y/N work and is not caused by it — every §248
+   outcome tactic was uncounted, whatever its unit — and it is fixed here
+   because a yes/no row has no other way to be answered.
+
+   IT ONLY EVER CREDITS AN ANSWER SOMEBODY GAVE. Nothing new is demanded:
+   rows that were wrongly counted as owed stop being owed, so the tally and
+   Submit's own refusal (§221) get more correct and never stricter. */
+function reportField(x){
+  return (x && x.kind === "tactic" && outcomeOf(x.obj)) ? "outActual" : "actual";
+}
+/* ANSWERED IN EITHER FIELD, AND THAT SECOND HALF IS LOAD-BEARING.
+   Reading only the field a row is asked in TODAY is stricter than what came
+   before, not looser: a tactic that has carried `actual` since long before
+   outcomes existed would read as unreported the moment somebody gives it an
+   outcome — 18 rows in the worked example, measured, and Submit refused for
+   every one of them. That is exactly the "changes what Submit demands of
+   every existing tactic" this was flagged for, arriving by the back door.
+
+   So a row is answered if EITHER field carries a figure. It mirrors §248's
+   own rule — a tactic is read the old way until its outcome has a figure —
+   and it can only ever be MORE generous than the count that came before,
+   which is the property that makes it safe to ship into an open cycle. */
+function reportedIn(x){
+  if (!x || !x.obj) return false;
+  var told = function(v){ return v != null && v !== ""; };
+  return told(x.obj[reportField(x)]) || told(x.obj.actual);
+}
 function reportedCount(u){
   var a = askedItems(u), n = 0;
-  a.forEach(function(x){
-    var v = x.kind === "tactic" ? x.obj.actual : x.obj.actual;
-    if (v != null && v !== "") n++;
-  });
+  a.forEach(function(x){ if (reportedIn(x)) n++; });
   return { done:n, total:a.length };
 }
 /* A note is required where a figure lands in the bottom two bands. A red

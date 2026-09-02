@@ -436,31 +436,3 @@
            display:flex; align-items:center; padding-top:20px;
            border-top:1px solid var(--line-soft); }
   .dfootmark { display:block; width:150px; height:auto; opacity:.75; }
-
-/* ── THE PILLARS, NAMED BEFORE THEY ARE SCORED (§254.5) ────────────────
-   Islam's own concept from the Raya deck, in the platform's language: a row of
-   cards, one per pillar, the name given room and nothing measured yet.
-
-   ONE ACCENT ACROSS THE ROW, not one per card. His reference gives each card
-   its own hue, which spends three accents on a distinction that carries no
-   meaning — the pillars are peers, and colouring them apart says they are not
-   (§41's budget).
-
-   THE ROW DIVIDES BY HOW MANY THERE ARE (`--n`, set from the list), so two
-   pillars and eight both fill the line. `align-items:stretch` keeps the cards
-   one height however long a name runs, and the sub-line is pushed to the foot
-   so every one of them sits on the same baseline. */
-  .pcards{ display:grid; gap:22px; margin-top:34px;
-    grid-template-columns:repeat(var(--n,3),1fr); align-items:stretch; }
-  .pcard{ display:flex; flex-direction:column; gap:14px; padding:26px 22px 24px;
-    background:var(--surface-2); border-top:5px solid var(--gold); border-radius:2px; }
-  .pcard-c{ font-family:var(--mono); font-size:15px; letter-spacing:.1em;
-    font-weight:600; color:var(--gold-deep); }
-  .pcard-n{ font-size:26px; font-weight:700; line-height:1.2; color:var(--ink);
-    text-wrap:balance; }
-  .pcard-s{ font-size:15px; color:var(--ink-3); line-height:1.45; margin-top:auto; }
-
-/* The quiet half of a figure cell — what it is measured against so far
-   (§254). The same weight the tactics table has used since §252, so one
-   number does not read louder on one table than on another. */
-  .duehalf{ font-style:italic; color:var(--ink-3); font-weight:400; }

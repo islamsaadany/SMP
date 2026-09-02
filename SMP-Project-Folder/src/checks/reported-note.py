@@ -1,4 +1,4 @@
-"""§253 — a reported note is named as one.
+"""§255 — a reported note is named as one.
 
    Islam, from his own Performance page: *"the perofmrance is showing hte
    notes under the tactic name. what is this issue?"*, and then the
@@ -140,7 +140,7 @@ with sync_playwright() as p:
     ck("the row with nothing reported draws no key (§61)",
        quiet and quiet[0]["key"] is None and quiet[0]["plainGreys"] == 1, quiet)
     # ── `all([])` IS TRUE, AND THAT IS §113.8 (found by falsifying this file:
-    #    on the pre-§253 build these three went GREEN over an empty list —
+    #    on the pre-§255 build these three went GREEN over an empty list —
     #    an assertion preserved by the thing it measures VANISHING). Each one
     #    now requires the two rows to be there before it says anything.
     # A LABEL THAT IS IN THE MARKUP AND NOT ON THE SCREEN IS NOT A LABEL
@@ -171,7 +171,7 @@ with sync_playwright() as p:
        len(mrep) == 1 and mrep[0]["key"] is not None, mea["rows"])
     # NEVER INDEX INTO A LIST THE BUILD UNDER TEST DECIDES THE LENGTH OF
     # (§215): the first version wrote `reported[0]["key"]` and DIED here on
-    # the pre-§253 build — so the run reported four failures where there are
+    # the pre-§255 build — so the run reported four failures where there are
     # eight, and a suite counting FAIL lines would have undercounted a
     # thoroughly broken build.
     mkey = mrep[0]["key"] if mrep else None

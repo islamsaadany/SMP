@@ -399,9 +399,14 @@ var RECIPES = [
        "figures and clears the reporting fields, so each unit is asked again " +
        "rather than inheriting the last set of answers." },
   { id: "branding", q: "How do I set the colours and the logo?", who: "office",
-    a: "Go to Setup › Branding to set the platform colours and logo. Logos should " +
-       "be uploaded in PNG format; SVG files aren't supported for security " +
-       "reasons." },
+    a: "Go to Setup › Branding for both. The two colours are the accent and the " +
+       "navigation bar, and everything else is worked out from them.|The group's " +
+       "mark sits above them: it is shown on any review deck whose subject has no " +
+       "mark of its own — a business unit that has not uploaded one, and every " +
+       "supporting function, which never has one.|A business unit's own mark is " +
+       "uploaded separately, on Setup › Business units.|Marks must be PNG with a " +
+       "transparent background. SVG is not accepted, for security reasons, and a " +
+       "mark with white behind it paints a box around itself on a dark slide." },
   { id: "focus-switch", q: "How do I turn focus measures off?", who: "office",
     a: "Go to Setup › Focus measures and use the control in the page header to " +
        "turn them off. This hides focus measures across the platform without " +

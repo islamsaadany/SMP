@@ -287,7 +287,7 @@
    before the push, never by the merge. Checked against origin/main serving
    "smp-shell-v4.26-unit-before-number"; confirm again immediately before the
    push. */
-const SHELL = "smp-shell-v4.32-deck-round";
+const SHELL = "smp-shell-v4.33-blue-dividers";
 const ASSETS = [
   "/",
   "/index.html",

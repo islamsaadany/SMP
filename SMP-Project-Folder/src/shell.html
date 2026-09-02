@@ -3048,6 +3048,28 @@
         paint();
       });
     });
+    /* The GROUP's mark (§257), on Setup › Branding. The same intake, the
+       same page-level refusal and the same delete-don't-blank as a unit's
+       directly above — a second answer to "what may be uploaded" is how the
+       two would come to disagree (§53.5). */
+    document.querySelectorAll("input[data-glogo]").forEach(function(inp){
+      inp.addEventListener("change", function(){
+        var f = inp.files && inp.files[0];
+        inp.value = "";
+        if (!f) return;
+        LOGO_NOTE = "";
+        logoIntake(f).then(function(uri){
+          GROUP.logo = uri; LOGO_NOTE = ""; paint();
+        }, function(err){
+          LOGO_NOTE = GROUP.org + ": " + err.message; paint();
+        });
+      });
+    });
+    document.querySelectorAll("[data-glogoclear]").forEach(function(b){
+      b.addEventListener("click", function(){
+        delete GROUP.logo; LOGO_NOTE = ""; paint();
+      });
+    });
     wireImport();
     var lc = document.querySelector("[data-lockcycle]");
     if (lc) lc.addEventListener("click", function(){ CYCLE.locked = !CYCLE.locked; paint(); });

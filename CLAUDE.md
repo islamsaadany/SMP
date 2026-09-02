@@ -365,6 +365,60 @@ console errors (in this cloud environment, run it via a wrapper that points Play
   `node scripts/test-door.js <smo-password>` against a running dev-server
   after touching `api/auth.js` or `lib/auth.js` (it ends by rate-limiting the
   SMO on purpose — `DELETE FROM login_attempts;` clears it).
+- **THE GROUP HAS A MARK, AND THE DECK HAS SEPARATORS (§257):** Islam, in one
+  message — *"where can I upload the raya trade mark so it can be used? then
+  work on separators let's make teh serparators blue background like the client
+  brand colors"* — then four sections by number. **`--panel` IS THE BLUE AND IT
+  IS NOT A COLOUR OF THE DECK'S OWN**: it is the token Setup › Branding's
+  *Navigation bar* control sets, so a divider wears whatever blue the tenant
+  picked and moves the day they move it (§41.10 on a projector); no new token,
+  no literal (§25), and **the check proves it by REBRANDING the tenant mid-run
+  and asserting the dividers followed** — an assertion naming `#16325C` passes
+  on exactly the build that rules out (§94.8). The three inks already existed
+  (§38.5): `--panel-ink` · `--panel-quiet` · `--panel-accent`, 12.77 / 7.24 /
+  7.66:1 light and 16.63 / 7.73 / 11.42 dark. **THE FOUR SWOT HUES COULD NOT
+  SURVIVE THE MOVE, MEASURED NOT PREFERRED** — 2.55 / 2.26 / 3.49, and
+  *Opportunities* was drawn in `--panel` itself, **1.00:1 against its own
+  ground**; one rule across the row instead (§254.5's own answer for the pillar
+  cards), **the four category slides keeping their hues** and `.seccell.t-*`
+  DELETED with the classes it styled (§24), asserted at both ends. **NO FOOTER
+  MARK ON A DIVIDER** (his word), which removes a fault as well as a
+  decoration: the white plate that makes a navy lockup readable is switched on
+  by the PAGE being dark (§52), which a blue divider on a light page is not.
+  **A DIVIDER IS ONLY DRAWN IF ITS SECTION IS** (§253) — a unit 28 → 31 slides
+  with four, a pillars function two, **a capability function byte-for-byte what
+  it was**. **The roll-call stays WHITE and the Overall performance divider
+  carries NO NUMBERS**, both Islam's from two treatments drawn in the real deck,
+  the first reversing my recommendation with its cost named (one extra slide per
+  deck) and the second agreeing with it (§87's twins, in figures).
+  **§257.2 — THE GROUP'S MARK**: §52.9 gave every UNIT one and stopped, so a
+  supporting function showed nothing at all and the group had nowhere to go.
+  One upload on **Setup › Branding**, FIRST on the page (the three colour
+  sections under it are one argument read in order), through the **same
+  `logoIntake()`** as a unit's or there would be two answers to *what may be
+  uploaded* (§53.5). **`deckMark(u)`** is the one reader — the subject's own,
+  the group's otherwise. **No migration** (`org.extra`), reads without writing,
+  Remove DELETES the key (§50.6). **Classified `setup` and NAMED** so a refusal
+  says Branding (§16.7) — **and the two edits go together**: with only the
+  `add()` line removed and `"logo"` still in `gExtra` the field is neither
+  classified nor swept and **a unit head may set the group's mark**, 3 of 489
+  red. **The demo seed carries NO group mark, deliberately** (§54's rule: a
+  client must never inherit Raya's); the PNG is rendered from the vector the
+  repo already holds and handed over to upload. **And the knowledge base had
+  been wrong since the page was written** — it promised Branding set "the
+  colours and the logo" and that page set colours only (§104.8's family); it
+  became true today. `checks/deck-dividers.py`: **22 red** before, and **its
+  first two runs against that build DIED rather than reporting** (§215, twice
+  in one file) — an empty list index, then a 30s timeout on a control that does
+  not exist there. **Two of its own first failures were the CHECK** (a rebrand
+  through a function name the platform does not have; a data URI sliced one
+  character long), and one assertion was **unfalsifiable as written** — the
+  seed has no mark, so deleting it from the incoming graph is a no-op that
+  passes on every build (§94.5, its own example).
+  **AND THE SEED WAS STALE ON `main`**: §253.2 cut Retail's `by:"merchandising"`
+  in the sources and `db/seed-state.json` was never regenerated — *a seed that
+  disagrees with the sources it is generated from is a fault nothing else would
+  have found.*
 - **A REPORTED NOTE IS NAMED AS ONE (§255):** Islam — *"the perofmrance is
   showing hte notes under the tactic name. what is this issue?"*, then the
   correction that set the scope: *"notes is not in the desciption, notes is
@@ -4432,6 +4486,18 @@ python3 checks/deck-figures.py   # a figure is read against what it is measured 
                                 # MADE and the row put back, and the slide order with
                                 # the two pillar headings asserted different — 33 red
                                 # on the build before
+python3 checks/deck-dividers.py # the group's mark and the deck's four blue
+                                # section dividers (§257): the blue asserted as AGREEMENT
+                                # with `--panel` and never as a hex — it REBRANDS the
+                                # tenant mid-run and asserts the dividers followed — the
+                                # SWOT hues stripped on the divider AND kept on the
+                                # category slides, no footer mark on a divider AND one on
+                                # every content slide, a pillars function's two AND a
+                                # capability function's none, the state MADE for the
+                                # guards the demo cannot reach, and the upload driven with
+                                # a real PNG and read back. 22 red on the build before;
+                                # every probe degrades, because its first two runs there
+                                # DIED and reported six failures of twenty-two (§215)
 python3 checks/deck-blank-slides.py # a table with no rows is not a slide (§253):
                                 # every deck swept through the builder its own Present
                                 # button would call, the state MADE on a business unit
@@ -4670,7 +4736,43 @@ prior sessions (on HR_ERP) accidentally reverted agreed-upon designs.
 
 ---
 
-*Last Updated: 2026-09-02 &mdash; **&sect;254.7&ndash;.12: the deck round,
+*Last Updated: 2026-09-03 &mdash; **&sect;257: the group has a mark, and the
+deck has separators.** Islam in one message &mdash; *"where can I upload the
+raya trade mark so it can be used? then work on separators let's make teh
+serparators blue background like the client brand colors"* &mdash; then four
+sections by number. Both halves drawn in the REAL deck first and published as
+one artifact (rule 1c, &sect;41.9); two of his four answers are choices between
+treatments that only existed because they were drawn. **`--panel` IS THE BLUE
+AND IT IS NOT THE DECK'S OWN COLOUR**: it is what Setup &rsaquo; Branding's
+*Navigation bar* control sets, so a divider follows a tenant who rebrands
+&mdash; proved by rebranding one mid-run rather than by naming a hex
+(&sect;94.8). **THE FOUR SWOT HUES COULD NOT SURVIVE THE MOVE, AND THAT IS A
+MEASUREMENT**: 2.55 / 2.26 / 3.49 against the blue, and *Opportunities* was
+drawn in `--panel` itself &mdash; **1.00:1 against its own ground**. One rule
+across the row, the four category slides keeping their colours, and
+`.seccell.t-*` deleted with the classes it styled. **NO FOOTER MARK ON A
+DIVIDER**, his word, and it removes a fault as well as a decoration: the plate
+that keeps a navy lockup readable is switched on by the PAGE being dark, which
+a blue divider on a light page is not. **The roll-call stays white** (his,
+reversing my recommendation, one extra slide per deck named as its cost) and
+**the closing divider carries no numbers** (his, agreeing with it &mdash; the
+other printed the three headline readings two slides early and without their
+bands). **&sect;257.2**: the group's mark, one upload on Branding through the
+SAME intake as a unit's, `deckMark()` the one reader, no migration, the key
+DELETED on Remove, classified `setup` and NAMED so a refusal says Branding
+&mdash; **and the two server edits go together**, because with only the
+classification removed a unit head may set it (3 of 489 red). The demo seed
+carries none, deliberately. **The knowledge base had promised this page set
+"the colours and the logo" since it was written**, and that page set colours
+only; it became true today. `checks/deck-dividers.py` **22 red** before &mdash;
+and **its first two runs against that build DIED rather than reporting**
+(&sect;215, twice in one file), **two of its own first failures were the
+CHECK**, and one assertion was unfalsifiable as written (&sect;94.5, its own
+example). 489/0 authoriser, full `qa.py` sweep ERRORS none, nine neighbouring
+deck checks green. **And the seed was stale on `main`** &mdash; &sect;253.2's
+cut pointer had never been regenerated into `db/seed-state.json`.*
+
+*Earlier: 2026-09-02 &mdash; **&sect;254.7&ndash;.12: the deck round,
 finished.** Islam's four from the running deck, on top of the eight before them.
 **&sect;254.7** &mdash; a unit written twice *with or without a gap*: his stored
 `40 %%` survived &sect;254.1's collapse, which split the unit on WHITESPACE, and

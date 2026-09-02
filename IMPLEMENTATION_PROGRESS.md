@@ -6,9 +6,9 @@ version (rules A2 / A11, changed 2026-08-20) — those go only when asked for.
 
 **Where it runs:** Vercel, production tracks `main`. Static files plus two
 serverless functions (`/api/state`, `/api/auth`) against Neon Postgres.
-**Latest version:** §256 on `main` (§253–§256: the deck round, a reported note,
-and a slide the office does not present — §255 and §256 from another session);
-§254.7–.12 on this branch, going to `main` with this merge.
+**Latest version:** §254.7–.12 merged to `main` 2026-09-02 and live
+(`smp-shell-v4.32-deck-round`), together with §255 and §256 from another
+session. **§257 is on `claude/deck-separators-brand`, built and not merged.**
 
 *(This line read v3.58 while the section below it ran to v3.65: a documentation
 drift, flagged before it was corrected rather than quietly realigned.)*
@@ -79,6 +79,46 @@ Nothing proceeds past this line without an answer.
   is a true signal — do not silence it.
 
 ## Built and verified
+
+### §257 — the group's mark, and four blue section dividers (2026-09-03, branch `claude/deck-separators-brand`)
+
+Islam, in one message: *"where can I upload the raya trade mark so it can be
+used? then work on separators let's make teh serparators blue background like
+the client brand colors"* — then four sections by number. Both halves were
+drawn in the real deck and published as one artifact before a source was
+touched (rule 1c); two of his four answers are choices between treatments that
+only existed because they were drawn.
+
+**Built:**
+
+- **Four dividers on `--panel`** — Foundation (new), SWOT (recoloured),
+  Strategic pillars (new), Overall performance (new). The blue is the token
+  Setup › Branding's *Navigation bar* control sets, so a divider follows a
+  tenant who rebrands; the check proves it by rebranding one mid-run rather
+  than by naming a hex.
+- **The SWOT divider's four hues become one rule** — measured, not preferred:
+  2.55 / 2.26 / 3.49 against the blue, and *Opportunities* was `--panel` on
+  `--panel`. The four category slides keep their colours.
+- **No footer mark on a divider**, his word — and it removes a real fault, the
+  plate that keeps a navy lockup readable being switched on by the page being
+  dark, which a blue divider on a light page is not.
+- **The pillars roll-call stays white** (his, reversing my recommendation) and
+  **the closing divider carries no numbers** (his, agreeing with it).
+- **A group mark on Setup › Branding** — one upload, the same intake as a
+  unit's, `deckMark()` the one reader, no migration, the key deleted on Remove,
+  classified `setup` and named so a refusal says Branding. A supporting
+  function's deck wears a mark for the first time.
+- The knowledge base's branding answer, wrong since the page was written.
+
+**Verified:** `checks/deck-dividers.py` 22 red on the previous build and green
+after (every probe degrades — its first two runs there died rather than
+reporting); `test-authorize.js` 489/0 with the new rule falsified; full `qa.py`
+sweep ERRORS none; nine neighbouring deck checks green.
+
+**Waiting on Islam:** the Raya Trade PNG is rendered and in the repo at
+`clients/raya-trade/brand/raya-trade-group-mark.png` — he uploads it on
+Setup › Branding once this is merged. Whether the deck cover, Thank you and the
+four per-pillar covers should also go blue is asked and deliberately not done.
 
 ### §254.7–.12 — the deck round, finished (2026-09-02, same branch)
 

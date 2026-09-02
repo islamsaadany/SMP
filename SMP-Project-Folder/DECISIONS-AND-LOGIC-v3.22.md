@@ -28754,3 +28754,200 @@ section previously named `deckAnchors()` as dead code with no callers — true o
 the build it was written against, and **no longer true**. §253.3 gave it a
 caller in the same hours, routing it through `deckHtmlFor()` so a picture's
 landing places come from the deck that is actually shown.
+
+---
+
+## §257 — THE GROUP HAS A MARK, AND THE DECK HAS SEPARATORS (2026-09-03)
+
+Islam, in one message: *"where can I upload the raya trade mark so it can be
+used? then work on separators let's make teh serparators blue background like
+the client brand colors"* — and then four sections by number: *"1. is for the
+the foundation tand key bbjectives slides / 2. th swot already there but needs
+the coloring / 3. then the strategic pillars / 4. the a final ovrall
+performance before the pillars where we stand."*
+
+Both halves were drawn in the real deck first and published as one artifact
+(`design-mockups/deck-separators/2026-09-03_blue-dividers.html`, rule 1c) —
+every slide in it shot out of the running platform with Mobile's own plan in
+it, never drawn (§41.9). Two of his four answers are choices between treatments
+that only existed because they were drawn.
+
+### §257.1 — A section divider wears the tenant's own blue
+
+**`--panel` IS THE BLUE, AND IT IS NOT A COLOUR OF THE DECK'S OWN.** It is the
+token Setup › Branding's *Navigation bar* control sets, so a divider wears
+whatever blue the tenant picked for their own bar and moves the day they move
+it — §41.10's rule (*a surface on `--panel` wears the tenant's brand*) reaching
+the projector. No new token and no literal (§25), and **the check proves it by
+rebranding the tenant mid-run and asserting the dividers followed**: an
+assertion that named `#16325C` would pass on exactly the build this rules out
+(§94.8).
+
+**THE THREE INKS ALREADY EXISTED**, because §38.5 says a surface with its own
+ground needs its own ink: `--panel-ink` for the title, `--panel-quiet` for the
+sub-line and the cell labels, `--panel-accent` for the rule and the SECTION
+key. Measured on the shipped blue — 12.77 / 7.24 / 7.66:1 — and on the dark
+palette's own `--panel`, 16.63 / 7.73 / 11.42:1.
+
+**THE FOUR SWOT HUES COULD NOT SURVIVE THE MOVE, AND THAT IS A MEASUREMENT
+RATHER THAN A PREFERENCE.** Against the blue: green **2.55:1**, red **2.26:1**,
+orange **3.49:1** — and *Opportunities* was drawn in `--panel` itself, so
+**1.00:1 against its own ground**, invisible. Keeping them would have meant
+inventing four colours for one slide. One rule across the row instead, which is
+what §254.5 already settled for the pillar cards (one accent across a row,
+never one per card — §41's budget); the words under the counts say which cell
+is which, and **the four SWOT category slides keep their own hues untouched**,
+because that is where the colour carries meaning. `.seccell.t-good` and its
+three siblings are DELETED with the classes they styled (§24) — `.d-swot.t-good`
+is a different selector and is not touched — and the check asserts both ends,
+or a build that stripped the colour from the category slides too would pass.
+
+**NO FOOTER MARK ON A DIVIDER**, at Islam's word (*"remvoe the loggo footer
+from the blue pages ?"*, asked as a question and taken). It removes a fault as
+well as a decoration: **the white plate that makes a navy lockup readable on a
+dark slide is switched on by the PAGE being dark** (§52), which a blue divider
+on a light page is not — so RAYA DISTRIBUTION would have sat navy on navy. The
+alternative was an unconditional plate, which is a white rectangle in the corner
+of every otherwise clean divider. `deckFootMarks()` skips `.d-sect`; the mark is
+still on the cover and on every content slide, so nothing is lost.
+
+**THE FOUR, AND WHAT EACH IS GATED ON.** A divider is only drawn if its section
+is (§253 — a divider standing over nothing is that section's blank page with a
+heading on it):
+
+| Divider | Anchor | Drawn when |
+|---|---|---|
+| **Foundation** | `sfound` | the aim slide is (`aimRows \|\| !fnAim`) |
+| **SWOT** | `swothead` | the subject authors a SWOT — unchanged, §243 |
+| **Strategic pillars** | `spillars` | the subject has pillars |
+| **Overall performance** | `sperf` | always — the stand slide always draws |
+
+Measured on the demo: a business unit **28 → 31 slides** with four dividers; a
+pillars function **two** (no Foundation, because §253 already found it has no
+objectives, and no SWOT, because it authors none); a **capability function is
+byte-for-byte what it was**, asserted, because its sections are capabilities and
+projects and those are a different question nobody has asked.
+
+**THE FOUNDATION DIVIDER NAMES TWO THINGS ON A UNIT AND ONE ON A FUNCTION** —
+the objectives count and the horizon, and a supporting function's objectives
+carry a weight and no 3-year target (§243), so printing a horizon there would
+name something that appears nowhere after it. `.secgrid` gained `c1`/`c2`/`c3`
+so a divider says how many cells it holds rather than assuming SWOT's four.
+
+**§257.1a — THE PILLARS ROLL-CALL STAYS WHITE.** Two treatments were drawn: the
+roll-call itself turning blue and doing both jobs, or a divider in front of it
+with the roll-call unchanged. I recommended the first; **Islam chose the
+second** — *"the pillars page stay the same white backgoround as is just the
+divider withe the straegic pillars title"* — and it is recorded as his with its
+cost named: one extra slide in every deck. What it buys is that all four
+sections are announced the same way, and that the roll-call goes on reading as
+the content slide it is.
+
+**§257.1b — THE OVERALL PERFORMANCE DIVIDER CARRIES NO NUMBERS.** Two were
+drawn, and this is the one place my recommendation and his answer agreed:
+*"overall perfomrance title only."* The other printed 78% / 67% / 107% **two
+slides before the slide whose whole job is those three readings**, and printed
+them without their bands or the change on last cycle — the room reads them once
+flat and once properly and cannot tell which is the real one (§87's twins, in
+figures).
+
+### §257.2 — The group has a mark
+
+§52.9 gave every **unit** a mark and stopped there, so a unit that had not
+uploaded one showed its name, **every supporting function showed nothing at
+all**, and Raya Trade — which is the group — had nowhere to go. Islam had asked
+for this once already (*"supporting function get the raya trade logo"*, §254's
+round) and it was recorded as decided and not built.
+
+**ONE UPLOAD, ON SETUP › BRANDING**, at his instruction (*"add group mark to
+setup branding"*). It sits with the accent and the bar rather than on Business
+units because it is not a unit's fact: it is what the organisation looks like,
+which is the question that page answers. **FIRST on the page**, because the
+three colour sections beneath it are one argument read in order (the two
+colours, what follows from them, whether it is readable) and dropping a mark
+into the middle of that breaks the only sequence the page has.
+
+**THE SAME RULES AS A UNIT'S, THROUGH THE SAME `logoIntake()`** — PNG only
+(§52: an uploaded SVG is executable content in a page running `'unsafe-inline'`),
+transparent, capped, the refusal shown on the page — because a second intake
+would be a second answer to *what may be uploaded* (§53.5). **`deckMark(u)` is
+the one reader**: the subject's own mark if it has one, the group's otherwise.
+
+**NO MIGRATION.** `org` carries an `extra` JSONB and `lib/state-io.js` files
+every key it does not recognise there and reads it straight back — exactly as a
+unit's mark needed none. **It reads without writing** (§50.6): `""` for a group
+that has set none, never the key, and Remove **DELETES** it, so a group that
+never set one and a group that set and cleared one are the same shape.
+
+**THE SERVER CLASSIFIES IT AS SETUP, NAMED**, beside branding and comms rather
+than left to the unknown bucket — it is refused for everybody but the SMO either
+way, and what the naming buys is that a refusal says *Setup* and sends somebody
+to Branding (§16.7). **The two edits go together and the test proves it**: with
+only the `add()` line removed and `"logo"` still in `gExtra`, the field is
+neither classified nor swept and **a unit head may set the group's mark** — 3 of
+489 assertions go red, which is what that combination costs.
+
+**THE DEMO SEED CARRIES NO GROUP MARK, DELIBERATELY.** `mainbus` is stripped by
+migration 004 for exactly this reason (§54: *a client must never inherit Raya's
+departments*), and a group lockup is the same class of thing. The Raya Trade
+PNG is rendered from the vector the repository already holds
+(`clients/raya-trade/brand/raya-trade-group-mark.png`, 900px, transparent,
+19.1% ink) and handed to Islam to upload — one press, no migration, no
+inheritance problem for the next tenant.
+
+**AND THE KNOWLEDGE BASE HAD BEEN WRONG SINCE THE PAGE WAS WRITTEN.** Its
+answer read *"Go to Setup › Branding to set the platform colours and logo"* and
+that page set colours only — §104.8's family, a recorded intention nothing
+compares with the code. It became true today, and it now also says **where** a
+mark is used and that a unit's own is uploaded elsewhere, which is the question
+somebody asks next.
+
+### §257.3 — Proof
+
+`checks/deck-dividers.py`, **22 red** against the previous build and all green
+after. **Its first two runs against that build DIED rather than reporting**
+(§215, twice in one file): an empty divider list on `sect[1]`, and a 30-second
+timeout waiting for an upload control that does not exist there. Both probes
+degrade now — the second run printed six failures where there are twenty-two,
+which is a check calling a broken build almost clean.
+
+**Two of its own first failures were the CHECK, not the product**: it rebranded
+the tenant by calling a function name that does not exist (`applyBrand()` is the
+platform's own one door onto the tokens, and a check must press what the picker
+presses), and it sliced a data URI one character long. And the `delete
+GROUP.logo` assertion was **unfalsifiable as first written** — the seed carries
+no mark, so deleting it from the incoming graph is a no-op that passes on every
+build (§94.5, its own example); both graphs are built now, the stored one
+holding a mark.
+
+`test-authorize.js` 489/0 (3 new, falsified). Full `qa.py` sweep: **ERRORS:
+none**. `deck-figures`, `deck-blank-slides`, `deck-outcome`, `notes-slide`,
+`slide-move`, `hide-slide`, `reported-note`, `deck-and-weights`, `table-fit` all
+green.
+
+**AND THE SEED WAS STALE ON `main`.** §253.2 cut Retail's `by: "merchandising"`
+pointer in the sources and `db/seed-state.json` was never regenerated, so the
+database's copy of the demo still carried it. Regenerating it here is one
+deleted line and is not part of this feature; it is recorded because a seed that
+disagrees with the sources it is generated from is a fault nothing else would
+have found.
+
+### §257.4 — Recorded, not done
+
+- **Three headings in one deck now carry the tenant's pillar word**: the
+  divider (*Strategic pillars*), the roll-call (*Pillars*) and the score table
+  (*Pillars — where we stand*). The divider and the roll-call are adjacent, so
+  the roll-call's own heading is arguably redundant now — and Islam said *"stay
+  the same as is"*, which is an instruction not to touch it. Flagged rather than
+  quietly changed.
+- **The deck cover, Thank you and the four per-pillar covers stay white.** They
+  use the same cover shape and were deliberately left out: the first two are not
+  dividers, and colouring the four pillar covers would put eight blue slides in
+  a deck of thirty-one, which reads as the deck's colour rather than as its
+  punctuation. Any of them can go blue on his word; the pillar covers would want
+  a step lighter than the section dividers, so the two levels stay apart.
+- **A capability function's deck has no dividers**, because its sections are
+  capabilities and projects and what a divider would say there has not been
+  decided.
+- **A group mark is not offered to a COMPANY.** A company has a page (§68) and
+  no deck, so there is nothing yet for a company's own mark to appear on.

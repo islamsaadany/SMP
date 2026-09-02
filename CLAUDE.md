@@ -499,6 +499,53 @@ console errors (in this cloud environment, run it via a wrapper that points Play
   different targets never touch. Proved able to fail: 11 red on the differ's
   pre-build, and end-to-end on a real Postgres the whole-graph flag fails
   with the reported sentence to the word.
+- **A PROJECT OWNER REPORTS, AND THE BAR SAID VIEW ONLY (§250):** Islam —
+  *"a project owner is not able to report, despite being the project owner and
+  in the roles and access I allowed this."* **HE COULD, AND THE PAGE WAS
+  TELLING HIM HE COULD NOT**: measured in his own shape, **12 live, ENABLED
+  controls** on his project, a press writing the row, the server accepting the
+  save — under a bar reading **View only**. `repChrome`'s pill is drawn from
+  `canSpeakFor()`, which asks whether this person may SUBMIT: rightly false for
+  a bounded role, and the wrong two words for everything he can do — and
+  **Submit AND Save draft sit in that same branch**, so he had no control at
+  all. §147.6 recorded it and deferred it. **THE BAR SAYS WHAT IS TRUE**
+  (`ownStateChip`: `ADM02 · 0 of 3 entered` / `ADM02 · Done`, built from the
+  SAME tally the rail reads, §53.5) and **BOTH HALVES OF ITS GATE MATTER** —
+  drawn only for somebody who *can report here* AND *only through bounded
+  roles*, or a plain READER is told they report their own rows, this fault
+  pointing the other way; a reader still reads *View only* and it is asserted,
+  because a build that deleted the pill would pass everything else. **NEVER
+  `plural()` ON A TENANT'S LABEL** (§107.8 for the second time: *"2
+  pillarss"*). **THE CONTROL LEFT THE MOCKUP'S BAR FOR THE PROJECT'S OWN
+  BAND** — §190's general rule (*"the dismiss under the box with the issue"*),
+  and a reason the mockup could not show: a function draws EVERY capability at
+  once, so one control in the bar must guess which project it means and an
+  owner with two would find one unreachable (§147.7's own trade). No new CSS:
+  `Mark done` is the ordinary small button, and marked wears the
+  *Submitted · Reopen* pair. **KEYED BY THE PROJECT, NEVER BY THE SUBJECT, and
+  the round trip is what found it**: jsonb handed the mark back as `{at, by}`
+  where the client minted `{by, at}` (§145), and pulling that thread exposed
+  the real fault — keyed by target the map travels whole, so **two owners
+  marking two projects in one function collide**, the second reverting the
+  first and being refused for it (§234 one level finer, in the section quoting
+  §234). `review.done.cap1-P1` travels alone; ids are unique by construction
+  (§191) and one resolving to TWO containers is refused (§96.2). **No
+  migration** — proved on a real Postgres, and the emptied field is DELETED
+  (§50.6); nothing clears it on a new cycle because the shell replaces `REVIEW`
+  wholesale. **ONE RULE, BOTH SIDES** — `SMPRules.mayMarkDone`, the container's
+  **Owner** and deliberately NOT `boundedReach()`, whose contributor branch
+  reaches a project through its stakeholders (§147.8): right for a figure, wrong
+  for declaring the project finished. Classified `rowDone`, never `reportState`,
+  **with "still may not submit" and "nor write the note" asserted beside it**, or
+  a widening would hand them the submission. **A SIGNAL, NEVER A LOCK** (§220
+  closes a report), cost stated. Proved able to fail: **14 red** on the previous
+  build — **and its first run DIED rather than reported** (§215), printing 3
+  where there are 8, so every dependent step degrades now; 498/0 authoriser
+  falsified three ways (**the unknown-id guard needed an assertion of its own**,
+  being reachable only by somebody unbounded); 131/0 differ, falsified by
+  putting `done` back in the whole-review path, where the first owner's mark is
+  **destroyed**. **RECORDED, NOT DONE**: the rail does not show the mark — a
+  second surface for one fact wants a mockup, not a quiet widening.
 - **THE DIRECTION AND THE COMPILE RULE STAY THE OFFICE'S (§249.4):** Islam,
   from the running platform — *"I viewed as Ali Reda from corporate, I can't
   adjust the direction or the compiling. is that ment to be?"* It is: neither
@@ -4068,6 +4115,12 @@ python3 checks/ytd-proration.py # YTD is measured against the part of the year t
                                 # score; and every deck row is counted against its own
                                 # header, because dropping a column from a header and not
                                 # from the row is this change's easiest mistake
+python3 checks/project-done.py  # a project owner reports, and the bar stops saying
+                                # View only (§250): the chip built from the rail's own
+                                # tally, the mark PRESSED and read back from REVIEW.done,
+                                # the project beside theirs offering none — and a plain
+                                # reader still told View only, or a build that deleted
+                                # the pill would pass everything else
 python3 checks/gap-walk.py      # the band's chips and Next gap actually go somewhere:
                                 # a unit AND a function, as the filler AND the office,
                                 # every place the band names reached (§177.2)
@@ -4259,7 +4312,38 @@ prior sessions (on HR_ERP) accidentally reverted agreed-upon designs.
 
 ---
 
-*Last Updated: 2026-09-02 &mdash; **&sect;249.4: the direction and the compile
+*Last Updated: 2026-09-02 &mdash; **&sect;250: a project owner reports, and the
+bar said View only.** Islam, from the running platform: *"a project owner is not
+able to report, despite being the project owner and in the roles and access I
+allowed this."* **HE COULD, AND THE PAGE WAS TELLING HIM HE COULD NOT** &mdash;
+measured in his own shape before a line was written: **12 live, ENABLED
+controls** on his own project, a press writing the row, the server accepting the
+save, and the bar above all of it reading **View only**. `repChrome`'s pill is
+drawn from `canSpeakFor()`, which asks whether this person may SUBMIT: rightly
+false for a bounded role, and the wrong two words to describe everything he can
+do &mdash; with **Submit AND Save draft in that same branch**, so he had no
+control at all. &sect;147.6 wrote it down and deferred it. Settled from a mockup
+drawn in the running platform **in his own shape** (&sect;245), and he chose the
+fuller answer: say what is true, and give him a way to mark his project
+finished. **THE CONTROL LEFT THE MOCKUP'S BAR FOR THE PROJECT'S OWN BAND**
+&mdash; &sect;190's general rule, and a reason the mockup could not show: a
+function draws every capability at once, so one control in the bar must guess
+which project it means. **KEYED BY THE PROJECT AND NOT BY THE SUBJECT, and the
+round trip is what found it**: jsonb handed the mark back as `{at, by}` where
+the client minted `{by, at}` (&sect;145), and pulling that thread exposed the
+real fault &mdash; keyed by target, two owners marking two projects in one
+function collide, the second reverting the first and being refused for it
+(&sect;234 one level finer). **No migration**, proved on a real Postgres, the
+emptied field DELETED (&sect;50.6). **One rule both sides** (`mayMarkDone`, the
+container's Owner, deliberately not `boundedReach()`), classified `rowDone` with
+*"still may not submit"* asserted beside it. **A signal, never a lock.** Proved
+able to fail: **14 red** &mdash; and its first run DIED rather than reported
+(&sect;215), so every dependent step degrades now; 498/0 authoriser falsified
+three ways; 131/0 differ, falsified by putting `done` back in the whole-review
+path, where the first owner's mark is **destroyed**. **RECORDED, NOT DONE**: the
+rail does not show the mark.*
+
+*Earlier the same day: **&sect;249.4: the direction and the compile
 rule stay the office's.** Islam, from the running platform: *"I viewed as Ali
 Reda from corporate, I can't adjust the direction or the compiling. is that ment
 to be?"* It is &mdash; neither is a gap, so a filler writing one is AUTHORING,

@@ -27608,3 +27608,169 @@ how it is measured while being measured — and it is recorded here as his call 
 the arbitrariness of the line (the filler writes the target but not the
 direction) is a decision somebody made rather than an accident of where the gap
 list happened to stop.
+
+---
+
+## §250 — A PROJECT OWNER REPORTS, AND THE BAR SAID VIEW ONLY (2026-09-02)
+
+Islam, from the running platform, with a screenshot of Ahmed Abdel Azim on
+Shared Services: *"a project owner is not able to report, despite being the
+project owner and in the roles and access I allowed this."*
+
+**HE COULD REPORT, AND THE PAGE WAS TELLING HIM HE COULD NOT.** Measured on the
+shipped build before a line was written, in his own shape — a Project owner
+named on a project's Owner row with the own-function Reporting cell opened to
+edit:
+
+- **12 live, ENABLED controls** on his own project, and a press writes the row;
+- **0** on the project beside it, which is correct — it is not his;
+- the server accepts his save and refuses the other (472 assertions, 0 failed);
+- and the bar above all of it read **`4 of 7 · View only · Close`**.
+
+`repChrome`'s pill is drawn from `canSpeakFor()`, which asks whether this
+person may **submit**. Rightly false for a bounded role — submitting speaks for
+the whole function in front of whoever reads the review — and the wrong two
+words to describe everything he can do. **Submit AND Save draft sit inside that
+same branch**, so a project owner had no control at all: nothing to press, and
+no confirmation that anything had been recorded. §147.6 wrote this down as
+outstanding and deferred it; this is the section that settles it.
+
+**IT WAS SETTLED FROM A MOCKUP DRAWN IN THE RUNNING PLATFORM, IN HIS OWN
+SHAPE** — Shared Services, Cost Optimization, ADM01 and ADM02, never the Raya
+Trade example (§245: a mockup populated with names his tenant does not have is
+a screen he cannot read). Three states shot from the real bar, each a viewport
+shot clipped to the bar's measured box, because an element screenshot displaces
+the sticky rows inside it (§144.8). He chose the fuller of three offered
+answers: say what is true, **and** give him a control to mark his own project
+finished, so the custodian can see which projects are ready.
+
+### The bar says what is true
+
+For somebody who reports here through **bounded roles alone**, the pill is
+replaced by `ownStateChip()`: their own container named by the code the rail
+already shows, with the tally the rail already shows — `ADM02 · 0 of 3
+entered`, `ADM02 · Done` — or, where they own several, `Your 2 projects · 1 of
+2 done`. Built from the SAME `pillarTally()` / `projReported()` the rail rows
+read, so the chip and the rail can never disagree (§53.5).
+
+**BOTH HALVES OF THE GATE ARE LOAD-BEARING.** It is drawn only for
+`boundedReporter()` = *can report here* AND *only through bounded roles*.
+Without the first half a plain READER — for whom *View only* is the honest
+answer — would be told they report their own rows, which is this section's own
+fault pointing the other way. A reader still reads **View only**, and it is
+asserted; a build that simply deleted the pill would satisfy every other
+assertion in the file.
+
+**NEVER `plural()` ON A TENANT'S LABEL** (§107.8, §160.6 for the second time):
+`L("pillar","bu")` is *"Pillars"*, so `plural()` prints *"2 pillarss"*. The
+several-containers branch only runs at two or more, so the count and the label
+exactly as the tenant wrote it are always right.
+
+### The control sits on the box it is about
+
+**THE MOCKUP PUT IT IN THE BAR AND IT MOVED, and the reason is recorded rather
+than glossed.** §190 is Islam's own general instruction — *"make generally the
+dismiss under the box with the issue"* — and §192 said the same of a count that
+could not take you to what it counted. A finished mark is about ONE project.
+And the mockup could not show what forced it: **a supporting function draws
+every capability at once**, each with its own project rail, so one control in
+the bar would have to guess which project it meant, and somebody owning
+projects in two capabilities would find one of them unreachable — §147.7 names
+that trade exactly ("one `may` for the pane would either over-offer or
+under-offer"). In the project's own band there is nothing to guess.
+
+**NO NEW VOCABULARY AND NO NEW CSS**: `Mark done` is the ordinary small button
+every pen bar wears; marked reads as the pill-and-way-back pair the report
+already uses for *Submitted · Reopen*.
+
+### It is keyed by the PROJECT, and that is the decision worth reading
+
+`REVIEW.done[<project or pillar id>] = {by, at}`.
+
+The first build keyed it by TARGET, beside `submitted`, `parked`, `note` and
+`slides` — and **the round trip against a real Postgres is what exposed it**:
+jsonb handed the mark back as `{at, by}` where the client had minted `{by,
+at}`, which is §145's own lesson, and following that thread found the real
+fault underneath. Keyed by target, one function's map travels whole, so **two
+project owners marking their own projects in the same function collide**: the
+second tab, hydrated before the first's mark existed, reverts it, the server
+rightly judges that reversion as the second person's, and the save is refused
+with their own work in it. **§234's fault one level finer**, in the section
+that quotes §234.
+
+Keyed by the container, `review.done.cap1-P1` travels alone and the two never
+touch. **Proved and proved able to fail**: `test-graph-diff.js` runs the
+scenario end to end — with `done` keyed per project both marks survive; put
+back into the whole-review path, the first owner's mark is **destroyed** by the
+second's save and the check goes red on exactly that.
+
+Ids are unique across the tenant by construction (§191, measured 219 of 219),
+and **an id that resolves to two containers is refused rather than resolved**
+(§96.2): the platform mints them prefixed by their subject so it cannot happen
+by any route the product opens, and leaving it to walk order is the wrong shape
+of answer.
+
+**NO MIGRATION AND NO SCHEMA CHANGE**, claimed and then proved: the mark
+round-trips through the review row's `extra` jsonb on a real Postgres 16, and
+clearing it leaves the field ABSENT rather than an empty object (§50.6 — a
+reader that creates what it looked for puts a phantom change into every save
+after it). Nothing clears it on a new cycle because nothing has to: the shell
+replaces `REVIEW` wholesale, so an unmarked cycle and a fresh one are the same
+object.
+
+### One rule, both sides
+
+`SMPRules.mayMarkDone(w, person, area, target, owner)` — an unbounded role
+speaks for the whole subject and marks anything in it; a bounded role marks the
+container whose **Owner** names them, and nothing else.
+
+**IT IS DELIBERATELY NOT `boundedReach()`.** That function answers *may this
+person report this ROW*, and its contributor branch reaches a project through
+its stakeholder and collaborator lists (§147.8) — right for entering a figure
+somebody's name is against, and wrong for declaring the whole project finished,
+which is the owner's word.
+
+The owner is read from the **stored** container by both callers (§42): the
+screen to draw the control, the server to accept the save, so a project whose
+Owner the incoming save has just rewritten is never what decides whether that
+save was allowed. It is classified as its own kind (`rowDone`) rather than as
+`reportState`, because the bounded role that may **not** submit is exactly the
+one this exists for — and *"the project owner still may NOT submit"* and
+*"...nor write the function's note"* are asserted beside it, or a change that
+widened `reportState` would satisfy every other line and hand them the
+submission too. A **locked cycle takes no mark either**, riding the reporting
+gates rather than sitting beside them.
+
+### It is a signal, never a lock
+
+A project marked done still takes figures until the report itself is closed
+(§220 is what closes one). What the mark does is tell the person who submits
+which projects are ready. **The cost was stated before it was built**: the bar
+gains an item at every window, and a project marked done can still be edited.
+
+### Proved able to fail
+
+- `checks/project-done.py`: **14 red** on the pre-§250 build — and its first
+  run **died** on `mine[0]` rather than reporting, printing 3 failures where
+  there are 8. §215's own lesson: a falsification that undercounts itself. Every
+  step that depends on a control the old build does not draw now degrades and
+  is REPORTED, the `SMPRules.mayMarkDone` evaluate included, which throws
+  outright on a build without the rule.
+- `test-authorize.js` §27: 498/0, and falsified three ways — the rule forced
+  true fails the two "not theirs" assertions, forced false fails the three
+  "theirs" ones, and **the unknown-id guard needed an assertion of its own**,
+  because for a bounded role a stranger id is refused by the owner rule anyway
+  (nobody owns nothing) — it is only ever reached by somebody unbounded, so it
+  is asserted of the office or it is a branch nothing in the suite can enter.
+- `test-graph-diff.js`: 131/0, falsified by putting `done` back into the
+  whole-review path.
+- Round trip on a virgin Postgres 16 PASS, two tabs 24/0, and `project-custodian`,
+  `report-chrome`, `submit-gate`, `report-saves`, `gap-fill`, `milestone-fill`,
+  `fn-report-gate`, `table-fit`, `project-tables`, `cycle-board` all green.
+
+### Recorded, not done
+
+The **rail** does not yet show the mark: the custodian sees which projects are
+ready from the band as they scroll the panes, and not from the rail's own
+`3/3` · *Complete* line. Adding it there is a second surface for one fact and
+wants a mockup (rule 1c) rather than a quiet widening.

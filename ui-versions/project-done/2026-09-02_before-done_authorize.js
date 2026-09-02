@@ -291,37 +291,13 @@ function collect(stored, incoming, w) {
   const WHAT = { submitted: "submitting the report", parked: "closing the report",
                  note: "the report's note",
                  slides: "the review's picture slides" };
-  /* ── AND ONE OF THE FIVE IS NOT SPOKEN FOR THE WHOLE SUBJECT (§250) ───
-     `done` is a PROJECT's mark, written by the person who reports that
-     project — which is exactly the bounded role `reportState` refuses. It is
-     keyed by target like its four neighbours (so the differ splits it the
-     same way, §234) and classified apart, per ROW, so the reach rule that
-     decides whose figures those are decides whose mark this is too. */
-  const DONE = "done";
   perTarget.forEach(function (field) {
-    if (field === DONE) return;
     const a = sr[field] || {}, b = ir[field] || {};
     Object.keys(a).concat(Object.keys(b)).forEach(function (t) {
       if (same(a[t], b[t])) return;
       if (out.some(function (c) { return c.kind === "reportState" && c.target === t; })) return;
       add("reportState", t, WHAT[field]);
     });
-  });
-  /* ONE CHANGE PER PROJECT, and the project is looked up in the STORED graph
-     — which is what gives the refusal a subject to name and the rule an
-     owner to read (§42). An id the stored graph does not hold, or holds
-     twice, carries no container and is refused by the case below. */
-  const sd = sr[DONE] || {}, id_ = ir[DONE] || {};
-  const cidx = containerIndex(stored);
-  uniq(Object.keys(sd).concat(Object.keys(id_))).forEach(function (id) {
-    if (same(sd[id], id_[id])) return;
-    const c = cidx[String(id)] || null;
-    add("rowDone", c ? c.target : null, "marking " +
-        (c && c.name ? "“" + c.name + "”" : "a project") + " finished",
-        [{ id: id, name: c ? c.name : null, field: DONE,
-           had: sd[id] !== undefined,
-           from: sd[id] === undefined ? null : sd[id],
-           to: id_[id] === undefined ? null : id_[id] }], null, c);
   });
   if (!same(omit(sr, perTarget), omit(ir, perTarget))) add("cycle", null, "the review");
 
@@ -1013,45 +989,6 @@ function ctxOfFn(w, fnKey) {
   return out;
 }
 
-/* ── WHAT A "DONE" MARK CAN BE ABOUT (§250) ────────────────────────────
-   The containers a subject reports through, each with the Owner named on it:
-   a supporting function's PROJECTS (and, where it plans in pillars, its
-   pillars); a business unit's PILLARS. Built from the STORED graph, because
-   the owner is what decides whether the mark was this person's to write and a
-   save must never supply its own answer to that (§42).
-
-   An id this does not hold is refused rather than resolved — the same rule
-   §215 applies to a row edit, and for the same reason: a mark against
-   something that is not a container of this subject is the client describing
-   a plan that does not exist. */
-function containerIndex(stored) {
-  const out = {}, seen = {};
-  const take = function (list, target) {
-    (list || []).forEach(function (x) {
-      if (!x || x.id === undefined || x.id === null) return;
-      const k = String(x.id);
-      /* AN ID THAT NAMES TWO THINGS NAMES NEITHER (§96.2, §191). The platform
-         mints them prefixed with the subject, so this cannot happen by any
-         route the product opens — and a mark shared between two containers
-         would be authorised against whichever one this walk reached first,
-         which is the wrong shape of answer to leave to walk order. */
-      if (seen[k]) { out[k] = null; return; }
-      seen[k] = 1;
-      out[k] = { target: target, owner: x.owner, name: x.name || null };
-    });
-  };
-  Object.keys(stored.units || {}).forEach(function (uk) {
-    take((stored.units[uk] || {}).items, uk);
-  });
-  Object.keys(stored.functions || {}).forEach(function (fk) {
-    take((stored.functions[fk] || {}).items, "fn:" + fk);
-  });
-  ((stored.group || {}).capabilities || []).forEach(function (c) {
-    if (c && c.fn) take(c.projects, "fn:" + c.fn);
-  });
-  return out;
-}
-
 function authorize(stored, incoming, person) {
   const w = R.worldOf(stored);              /* THE STORED WORLD. Never the incoming one. */
   const smo = R.isSMO(w, person);
@@ -1282,35 +1219,6 @@ function authorize(stored, incoming, person) {
           no("Your role reports only its own rows — " + notMine.length +
              (notMine.length === 1 ? " figure" : " figures") + " in " +
              t.replace(/^fn:/, "") + " is not yours.");
-        return;
-      }
-
-      /* ── "I HAVE FINISHED MINE" (§250) ────────────────────────────────
-         The one thing a bounded reporter says about a whole container rather
-         than a row, and the reason it is not `reportState`: submitting speaks
-         for the subject in front of whoever reads the review, and this speaks
-         for one project to the person who submits. Same two gates as every
-         reporting change (the grant here, and a locked cycle), then the mark
-         itself, per id, through the ONE rule the screen draws from (§42). */
-      case "rowDone": {
-        const c = ch.ctx;
-        if (!c) {
-          no("A finished mark names something that is not in this plan.");
-          return;
-        }
-        const t = String(c.target || "");
-        const isFn = t.indexOf("fn:") === 0;
-        if (!edits(w, person, isFn ? "fn" : "unit", t)) {
-          no("You cannot report for " + t.replace(/^fn:/, "") + ".");
-          return;
-        }
-        if (locked && !office) {
-          no("This cycle is locked. Ask the SMO to reopen it before entering figures.");
-          return;
-        }
-        if (!R.mayMarkDone(w, person, isFn ? "fn" : "unit", t, c.owner))
-          no("Marking " + (c.name ? "“" + c.name + "”" : "a project") +
-             " finished is its owner's.");
         return;
       }
 

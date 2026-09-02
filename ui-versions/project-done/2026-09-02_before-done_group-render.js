@@ -940,11 +940,7 @@ function draftBtns(){
    with no box and a lighter weight — one family in two volumes, the act that
    ends the report against the act that parks it. Inside §41's accent budget:
    drawn only while a cycle is open, for somebody who may report. */
-/* `own` (§250) is what stands where the "View only" pill did, for somebody who
-   reports here through bounded roles alone — built by the caller through
-   ownStateChip(). Null for everybody else, and the pill is then the honest
-   answer it always was: they really are reading. */
-function repChrome(target, done, total, pct, mayAll, subd, parked, submitWhy, own){
+function repChrome(target, done, total, pct, mayAll, subd, parked, submitWhy){
   return '<div class="repchrome">' +
     '<span title="' + esc(REVIEW.name + " · due " + REVIEW.due) + '">' +
       '<span class="rc-n">' + done + '</span> ' +
@@ -967,7 +963,7 @@ function repChrome(target, done, total, pct, mayAll, subd, parked, submitWhy, ow
             '<button class="rc-draft" data-repsave="1">Save draft</button>'
           : '<button class="rc-submit" data-submit="' + esc(target) + '">Submit to the SMO</button>' +
             '<button class="rc-draft" data-repsave="1">Save draft</button>')
-      : (own || '<span class="pill none">View only</span>')) +
+      : '<span class="pill none">View only</span>') +
     /* §220: CLOSE, NOT CANCEL. The handler is `REPORTING = null; paint()` and
        nothing is discarded — figures are written as they are typed — so the
        old word promised a threat it never carried out. */
@@ -3858,9 +3854,7 @@ function renderReport(u){
         '<span class="pband-n">' + ms.length + ' measures &middot; ' +
         askedT.length + ' tactics asked' +
         (ts.length - askedT.length ? ' &middot; ' + (ts.length - askedT.length) + ' outside this cycle' : '') +
-        '</span>' + tally(done, total) +
-        /* §250: the finished mark, on the pillar it is about. */
-        doneCtl(u.ukey, p.id, p.owner)) +
+        '</span>' + tally(done, total)) +
       mTable + tTable;
   };
 
@@ -3909,16 +3903,8 @@ function renderReport(u){
   /* Published to the chrome rather than drawn here (§150): the shell reads
      REPORT_CHROME after this render and hangs it on the tab row, the same
      trip PAGE_TOOLS already makes. */
-  /* §250: what a bounded reporter is told in place of "View only" — built
-     from the SAME pillarTally() the rail rows read, so the chip and the rail
-     can never disagree about how much is entered. */
   REPORT_CHROME = repChrome(u.ukey, c.done, c.total, pctDone, mayAll, subd,
-                            reportParked(u.ukey), submitWhyShort(u.ukey),
-    !boundedReporter(u.ukey) ? null : ownStateChip(u.ukey, (u.items || []).map(function(p, pi){
-      var t = pillarTally(p);
-      return { id:p.id, code:pillarCode(u, pi), owner:p.owner,
-               done:t.done, total:t.total };
-    }), L("pillar","bu").toLowerCase()));
+                            reportParked(u.ukey), submitWhyShort(u.ukey));
   var bar = "";
 
   var summary =
@@ -5073,9 +5059,7 @@ function projReportBody(p, fk){
       '<td class="notecol">' + capNoteBox(m, mayM) + '</td></tr>';
   }).join("");
   return pillarBand(projCode(fk, p), p.name,
-      '<span class="pill ' + (r.done >= r.total ? "good" : "attn") + '">' + r.done + ' / ' + r.total + '</span>' +
-      /* §250: the finished mark, on the project it is about. */
-      doneCtl("fn:" + fk, p.id, p.owner)) +
+      '<span class="pill ' + (r.done >= r.total ? "good" : "attn") + '">' + r.done + ' / ' + r.total + '</span>') +
     '<h4 class="mini">' + DX_HEADING + '</h4>' +
     miniTable(["#","Deliverables &amp; outcomes","Type","Target","Status",DX_PCT,"Note"], dxr) +
     '<h4 class="mini">Milestones</h4>' +
@@ -5150,23 +5134,8 @@ function renderFnReport(fnKey){
   var mayAll = canSpeakFor(fnKeyTarget), subd = !!(REVIEW.submitted || {})[fnKeyTarget];
   /* The same box the unit's report publishes (§150, §53.5) — one builder, so
      the two sides cannot explain the same state differently. */
-  /* §250: the same chip the unit's bar carries, over this function's
-     projects. A function that plans in PILLARS never reaches here — it
-     returned above through `renderReport(fnAsUnit(fk))`, the unit's own path,
-     which carries the chip and the band control already (§59: one shape, one
-     answer, and no second copy of either). */
-  var ownList = [];
-  caps.forEach(function(c){
-    (c.projects || []).forEach(function(p){
-      var r = projReported(p);
-      ownList.push({ id:p.id, code:projCode(fk, p), owner:p.owner,
-                     done:r.done, total:r.total });
-    });
-  });
   REPORT_CHROME = repChrome(fnKeyTarget, done, total, pctDone, mayAll, subd,
-                            reportParked(fnKeyTarget), submitWhyShort(fnKeyTarget),
-    !boundedReporter(fnKeyTarget) ? null
-      : ownStateChip(fnKeyTarget, ownList, "projects"));
+                            reportParked(fnKeyTarget), submitWhyShort(fnKeyTarget));
   var bar = "";
   return bar + caps.map(function(c){
     return capBand(c) + '<div class="capbody">' + capReportBody(c) + '</div>';
@@ -5306,73 +5275,6 @@ function unitRailFor(u, sel){
    No border, deliberately — a bordered box inside a bordered pane reads as a
    control, and this is a label. Theme and owner stay gone: the rail card
    carries the owner, and the theme is a Strategy question. */
-/* ── THE CONTROL SITS ON THE BOX IT IS ABOUT (§250) ────────────────────
-   Islam, generally, in §190: *"make generally the dismiss under the box with
-   the issue"* — and §192 said the same of a count that could not take you to
-   what it counted. A finished mark is about ONE project, so it goes in that
-   project's own band, beside the tally it is a statement about.
-
-   THE MOCKUP PUT IT IN THE REPORTING BAR AND IT MOVED, for a reason the
-   mockup could not show: a supporting function draws EVERY capability at
-   once, each with its own project rail, so a single control in the bar would
-   have to guess which project it meant — and a person who owns projects in
-   two capabilities would find one of them unreachable (§147.7 names that
-   trade: one `may` for the pane either over-offers or under-offers). In the
-   band there is nothing to guess. The bar still stops lying; it carries the
-   state (`ownStateChip` below) and no longer the control.
-
-   NO NEW VOCABULARY: `Mark done` is the ordinary small button every pen bar
-   wears, and marked reads as the pill-and-way-back pair the report already
-   uses for Submitted · Reopen. Nothing new in the stylesheets. */
-function doneCtl(target, id, owner){
-  if (!mayMarkDoneOn(target, owner)) return "";
-  var on = !!doneMark(id);
-  var addr = esc(String(id));
-  return on
-    ? '<span class="pill good" title="Marked finished. The report is still open ' +
-      '— figures can still be entered.">Done</span>' +
-      '<button class="linkbu" data-rowdone="' + addr + '|0">Undo</button>'
-    : '<button class="editbtn" data-rowdone="' + addr + '|1" ' +
-      'title="Tells whoever submits the report that your part is finished. ' +
-      'It does not close anything.">Mark done</button>';
-}
-
-/* ── AND THE BAR STOPS SAYING "View only" TO SOMEBODY WHO REPORTS (§250) ──
-   `repChrome`'s pill is drawn from `canSpeakFor()` — may this person SUBMIT —
-   so a project owner with twelve live boxes beneath it was told the page was
-   read-only. This is what stands in that slot for anybody who reports here
-   through bounded roles alone: their own container's state where they own
-   one, a count where they own several, and the plain fact where they own none
-   but still report rows that name them.
-
-   `list` is `[{id, code, owner, done, total}]`, built by each caller from the
-   containers that caller already tallies, so the chip can never disagree with
-   the rail beside it (§53.5). */
-function ownStateChip(target, list, word){
-  var mine = (list || []).filter(function(c){ return mayMarkDoneOn(target, c.owner); });
-  var submits = String(target).indexOf("fn:") === 0 ? "function's" : "unit's";
-  var tip = 'You report your own rows. The ' + submits +
-            ' custodian submits the report.';
-  if (!mine.length)
-    return '<span class="pill none" title="' + esc(tip) + '">Your rows only</span>';
-  if (mine.length === 1) {
-    var c = mine[0];
-    return doneMark(c.id)
-      ? '<span class="rc-state done" title="' + esc(tip) + '">' +
-        esc(c.code) + ' · Done</span>'
-      : '<span class="rc-state draft" title="' + esc(tip) + '">' +
-        esc(c.code) + ' · ' + c.done + ' of ' + c.total + ' entered</span>';
-  }
-  var n = mine.filter(function(c){ return !!doneMark(c.id); }).length;
-  return '<span class="rc-state ' + (n >= mine.length ? "done" : "draft") +
-    /* NEVER `plural()` HERE (§107.8, and §160.6 for the second time): a
-       tenant's label is already plural — `L("pillar","bu")` is "Pillars" —
-       so plural() would print "2 pillarss". This branch only runs at two or
-       more, so the count and the label as given are always right. */
-    '" title="' + esc(tip) + '">Your ' + mine.length + ' ' + esc(word) +
-    ' · ' + n + ' of ' + mine.length + ' done</span>';
-}
-
 function pillarBand(code, name, right){
   return '<div class="pband"><span class="pband-code">' + esc(code) + '</span>' +
     '<span class="pband-name">' + esc(name) + '</span>' +

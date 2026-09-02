@@ -2723,5 +2723,114 @@ console.log("\n26 \u00b7 a tactic's outcome and its target are owed (\u00a7249)"
         r.ok, (r.refusals || []).join(" / "));
 })();
 
+console.log("\n27 · a project owner marks their own project finished (§250)");
+(function () {
+  const FN = "it", T = "fn:" + FN, UK = Object.keys(SEED.units)[0];
+  const capOf = function (s) {
+    return s.group.capabilities.filter(function (c) { return c.fn === FN; })[0];
+  };
+  /* THE SHAPE ISLAM REPORTED: named as one project's Owner, the Project owner
+     row opened to edit on its own function, attached to nothing (§147.7's two
+     conditions, and the register attachment is not one of them). The pillar
+     owner beside them is the other side of the switch (§53.5). */
+  const base = clone(SEED);
+  base.access.powner  = Object.assign({}, base.access.powner,  { a_fn_own: "edit" });
+  base.access.plowner = Object.assign({}, base.access.plowner, { a_unit_own: "edit" });
+  base.people.push({ key: "t250_own",  name: "Project Owner 250", active: true });
+  base.people.push({ key: "t250_pill", name: "Pillar Owner 250",  active: true });
+  const cap = capOf(base);
+  cap.projects[0].owner = "Project Owner 250";
+  base.units[UK].items[0].owner = "Pillar Owner 250";
+  const MINE = cap.projects[0].id, THEIRS = cap.projects[1].id;
+  const PILL = base.units[UK].items[0].id;
+  const MARK = { by: "t250_own", at: "2026-09-02" };
+
+  const same = function (a, b) { return JSON.stringify(a) === JSON.stringify(b); };
+  const run = function (stored, who, mutate) {
+    const inc = clone(stored); mutate(inc);
+    return { v: A.authorize(stored, inc, personOf(stored, who)),
+             moved: !same(stored, inc) };
+  };
+  const ok = function (name, r) {
+    check(name + " — the fixture actually changed something", r.moved);
+    check(name, r.v.ok, r.v.refusals.join(" / "));
+  };
+  const not = function (name, r) {
+    check(name + " — the fixture actually changed something", r.moved);
+    check(name, !r.v.ok, "was ALLOWED — " +
+      JSON.stringify(r.v.changes.map(function (c) { return c.kind + ":" + c.what; })));
+  };
+  /* KEYED BY THE CONTAINER, never by the subject (§250): keyed by target,
+     two owners marking two projects in one function would collide, and the
+     second would be refused for reverting the first (§234 one level finer). */
+  const mark = function (id, m) {
+    return function (s) {
+      s.review = Object.assign({}, s.review);
+      s.review.done = Object.assign({}, s.review.done);
+      if (m) s.review.done[id] = m;
+      else delete s.review.done[id];
+    };
+  };
+
+  /* IT IS CLASSIFIED APART FROM SUBMITTING, which is the whole point: the
+     bounded role that may NOT submit is exactly the one this is for. */
+  ok("the project owner marks their OWN project finished",
+     run(base, "t250_own", mark(MINE, MARK)));
+  not("...and NOT the project beside theirs",
+      run(base, "t250_own", mark(THEIRS, MARK)));
+  not("...nor an id that is not a project of this function",
+      run(base, "t250_own", mark("not-a-project", MARK)));
+  not("...nor a pillar in a unit they hold nothing in",
+      run(base, "t250_own", mark(PILL, MARK)));
+
+  /* TAKING IT OFF IS THEIRS TOO — a mark that could be set and not cleared
+     would be a lock, and this is a signal (§220 is what closes a report). */
+  const marked = clone(base);
+  marked.review = Object.assign({}, marked.review);
+  marked.review.done = {}; marked.review.done[MINE] = MARK;
+  ok("...and takes it off again", run(marked, "t250_own", mark(MINE, null)));
+
+  /* SUBMITTING IS STILL NOT THEIRS. Asserted beside the mark, because a
+     change that let them write `review.done` by widening `reportState` would
+     satisfy every line above and hand them the submission too. */
+  not("the project owner still may NOT submit the function",
+      run(base, "t250_own", function (s) {
+        s.review.submitted = Object.assign({}, s.review.submitted);
+        s.review.submitted[T] = true; }));
+  not("...nor write the function's note on the cycle",
+      run(base, "t250_own", function (s) {
+        s.review.note = Object.assign({}, s.review.note);
+        s.review.note[T] = "Mine to say."; }));
+
+  /* THE OTHER SIDE OF THE SWITCH (§53.5). */
+  ok("a pillar owner marks their own pillar finished",
+     run(base, "t250_pill", mark(PILL, { by: "t250_pill", at: "2026-09-02" })));
+  not("...and not a pillar beside it",
+      run(base, "t250_pill",
+          mark(base.units[UK].items[1].id, { by: "t250_pill", at: "2026-09-02" })));
+
+  /* AND THE UNBOUNDED ROLES ARE UNCHANGED — locking something down proves
+     nothing unless the right people stayed open (§102). */
+  const fnCust = (SEED.functions[FN] || {}).custodian;
+  if (fnCust && personOf(base, fnCust))
+    ok("the function's custodian marks any project in it",
+       run(base, fnCust, mark(THEIRS, { by: fnCust, at: "2026-09-02" })));
+  ok("the office marks anything", run(base, "smo", mark(THEIRS, MARK)));
+  /* ...ANYTHING THAT IS ACTUALLY THERE. For a bounded role a stranger id is
+     refused by the owner rule anyway (nobody owns nothing), so this guard is
+     only ever reached by somebody unbounded — which is exactly why it has to
+     be asserted of them, or it is a branch nothing in the suite can enter. */
+  not("...but not an id that is no project or pillar of this subject",
+      run(base, "smo", mark("not-a-project", MARK)));
+
+  /* A LOCKED CYCLE TAKES NO MARK, exactly as it takes no figure (spec 006
+     §7.1) — the mark rides the reporting gates rather than sitting beside
+     them. */
+  const locked = clone(base);
+  locked.cycle = Object.assign({}, locked.cycle, { locked: true });
+  not("a locked cycle takes no mark either",
+      run(locked, "t250_own", mark(MINE, MARK)));
+})();
+
 console.log("\n" + pass + " passed, " + fail + " failed");
 process.exit(fail ? 1 : 0);

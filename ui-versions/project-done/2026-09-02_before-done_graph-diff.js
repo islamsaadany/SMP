@@ -69,22 +69,7 @@
      THE AUTHORISER READS THIS SAME LIST (lib/authorize.js's per-target
      loop): two lists of "which review fields are keyed by target" is how a
      field joins one and silently travels whole through the other. */
-  /* §250 ADDS `done` — the "I have finished mine" mark — AND ITS KEY IS A
-     PROJECT, NOT A TARGET. That is the whole reason it is keyed the way it
-     is: keyed by target, one function's map would travel whole, and two
-     project owners marking their own projects in the same function would be
-     §234's fault one level finer — the second tab reverts the first's mark
-     and is refused for it, losing its own work with it (§184). Keyed by the
-     container's id, `review.done.cap1-P1` travels alone and two owners never
-     touch. Ids are unique across the tenant by construction (§191, measured
-     219 of 219), and the authoriser refuses one that resolves to two.
-
-     So this list means "maps split per KEY"; four of the five keys happen to
-     be targets. The authoriser reads the same list, and classifies `done`
-     apart from the other four — a bounded role may write it and may not
-     submit, which is a fact about who may write the field rather than about
-     how it is addressed. */
-  var REVIEW_PER_TARGET = ["submitted", "parked", "note", "slides", "done"];
+  var REVIEW_PER_TARGET = ["submitted", "parked", "note", "slides"];
   var SUB_TARGET = { review: REVIEW_PER_TARGET };
 
   /* ── ROW-LEVEL, FOR A PLAN (§215) ──────────────────────────────────────

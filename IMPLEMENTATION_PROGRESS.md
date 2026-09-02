@@ -7,7 +7,9 @@ version (rules A2 / A11, changed 2026-08-20) — those go only when asked for.
 **Where it runs:** Vercel, production tracks `main`. Static files plus two
 serverless functions (`/api/state`, `/api/auth`) against Neon Postgres.
 **Latest version:** §232/§233 on `main` (removing a pillar or a project,
-and hiding an element from the presentation).
+and hiding an element from the presentation). **§250 is on
+`claude/project-owner-reporting-access-uzze9s`, pushed and not merged** — a
+project owner's reporting bar, and the finished mark.
 
 *(This line read v3.58 while the section below it ran to v3.65: a documentation
 drift, flagged before it was corrected rather than quietly realigned.)*
@@ -69,6 +71,49 @@ Nothing proceeds past this line without an answer.
   is a true signal — do not silence it.
 
 ## Built and verified
+
+### §250 — a project owner reports, and the bar said View only (2026-09-02, branch `claude/project-owner-reporting-access-uzze9s`)
+
+Islam, from the running platform: *"a project owner is not able to report,
+despite being the project owner and in the roles and access I allowed this."*
+
+**He could, and the page was telling him he could not.** Measured in his own
+shape before anything was written: 12 live, ENABLED controls on his own project,
+a press writing the row, the server accepting the save — under a bar reading
+**View only**, with no Submit and no Save draft, so nothing acknowledged that
+anything had been entered. The pill is drawn from `canSpeakFor()` — may this
+person SUBMIT — which is rightly false for a bounded role and the wrong two
+words for everything he can do. §147.6 recorded it and deferred it.
+
+Settled from a mockup drawn in the running platform in **his own shape** —
+Shared Services, Cost Optimization, ADM01/ADM02, never the Raya Trade example
+(§245) — and he chose the fuller answer: say what is true, **and** a control to
+mark his own project finished so the custodian can see which are ready.
+
+- **The bar** carries his own container's state, built from the same tally the
+  rail reads; a plain reader still reads *View only*, and it is asserted.
+- **The control** moved from the mockup's bar to the project's own band, per
+  §190's general rule and because a function draws every capability at once, so
+  one control in the bar would have to guess which project it meant. Recorded
+  as a departure from the approved drawing, with the reason.
+- **Keyed by the project, not the subject** — the round trip against Postgres
+  exposed it (jsonb reorders `{by, at}`, §145), and following that thread found
+  that a target-keyed map makes two owners in one function collide, the second
+  reverting the first and being refused for it (§234 one level finer).
+- **No migration**, proved on a real Postgres 16; the emptied field is deleted.
+- **A signal, never a lock**: a marked project still takes figures until the
+  report is closed (§220).
+
+**Proved able to fail:** `checks/project-done.py` 14 red on the previous build
+(and its first run DIED rather than reported — §215 — so every dependent step
+degrades now); `test-authorize.js` 498/0 falsified three ways; `test-graph-diff.js`
+131/0, falsified by putting `done` back in the whole-review path, where the first
+owner's mark is destroyed. Round trip on a virgin Postgres PASS, two tabs 24/0,
+and the ten reporting/plan checks green.
+
+**Recorded, not done:** the rail does not show the mark — a second surface for
+one fact wants a mockup, not a quiet widening.
+
 
 ### §236.3 — slide by slide, only the originals pinned (2026-09-01, same branch)
 

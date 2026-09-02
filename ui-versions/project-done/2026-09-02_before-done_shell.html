@@ -3549,21 +3549,6 @@
         paint();
       });
     });
-    /* ── "I HAVE FINISHED MINE" (§250) ────────────────────────────────
-       The one control a bounded reporter has. The address carries the target
-       and the container's id because the band that drew it is inside a pane
-       that does not otherwise know which subject it belongs to — the same
-       reason §177.2's gap chips carry their own rail-and-code pair. The
-       DIRECTION is in the address too, read off the state at render time, so
-       the handler never has to work out which way it is toggling. */
-    document.querySelectorAll("[data-rowdone]").forEach(function(b){
-      b.addEventListener("click", function(){
-        var a = String(b.dataset.rowdone).split("|");
-        if (a.length < 2) return;
-        setDoneMark(a[0], a[1] === "1");
-        paint();
-      });
-    });
     /* Source of figures (§16.7, reshaped in §16.7a). WHO is chosen once at the
        top; each row is then a single mark. The half-set problem the first
        build had cannot arise: a mark is only offered once both ends are set,

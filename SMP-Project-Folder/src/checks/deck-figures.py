@@ -87,7 +87,12 @@ with sync_playwright() as p:
     tight = js(pg, """() => {
       const cases = ["8 M EGP", "8M EGP", "6 M EGP", "3.59B EGP", "8 M EGP M EGP",
                      "8 M EGP B EGP", "28 EGP", "243 days", "4#", "30%", "12 K USD",
-                     "5 SQM", "", "TBD"];
+                     "5 SQM", "", "TBD",
+                     /* §254.7: a unit written twice with NO gap — Islam's own
+                        `40 %%` — and the two that must survive it: a unit the
+                        platform does not know keeps the spelling it was given,
+                        and `mm` is not a doubled `m`. */
+                     "40 %%", "40%%", "5 ##", "8 M EGPM EGP", "5 mm", "12 mm"];
       const out = {};
       cases.forEach(c => { out[c] = unitTight(c); });
       return out;
@@ -96,7 +101,9 @@ with sync_playwright() as p:
             "3.59B EGP": "3.59B EGP", "8 M EGP M EGP": "8M EGP",
             "8 M EGP B EGP": "8 M EGP B EGP", "28 EGP": "28 EGP",
             "243 days": "243 days", "4#": "4#", "30%": "30%",
-            "12 K USD": "12K USD", "5 SQM": "5 SQM", "": "", "TBD": "TBD"}
+            "12 K USD": "12K USD", "5 SQM": "5 SQM", "": "", "TBD": "TBD",
+            "40 %%": "40%", "40%%": "40%", "5 ##": "5#",
+            "8 M EGPM EGP": "8M EGP", "5 mm": "5 mm", "12 mm": "12 mm"}
     for k, v in want.items():
         ok("unitTight(%r) is %r" % (k, v), tight.get(k) == v, tight.get(k))
 

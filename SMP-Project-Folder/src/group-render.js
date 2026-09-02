@@ -5992,13 +5992,21 @@ function unitTight(v){
   var sp = splitTarget(s);
   if (!sp.unit) return s;
   var u = sp.unit;
-  /* A unit repeated immediately, and nothing else. */
-  var w = u.split(/\s+/);
-  if (w.length % 2 === 0) {
-    var half = w.length / 2;
-    if (w.slice(0, half).join(" ") === w.slice(half).join(" "))
-      u = w.slice(0, half).join(" ");
-  }
+  /* ── A UNIT WRITTEN TWICE, WITH OR WITHOUT A GAP (§254.7) ───────────
+     Islam, of a per-cent row: *"same error of duplicated unit despite being
+     reported correctly in the reporting."* His stored figure is `40 %%` — the
+     same residue as `8 M EGP M EGP`, and §254.1's collapse could not see it,
+     because it split the unit on WHITESPACE and `%%` is one word. A rule that
+     only catches the spaced spelling catches half the fault.
+
+     THE HALVES MUST BE A UNIT THE PLATFORM KNOWS, and that guard is the whole
+     safety of it: `^(.+?)\s*\1$` alone reads `mm` as a doubled `m` and would
+     silently turn five millimetres into five metres. Only a repetition of
+     something on the offered list — or of a scaled currency, which is the one
+     shape the list deliberately does not enumerate — collapses. */
+  var rep = u.match(/^(.+?)\s*\1$/);
+  if (rep && (TARGET_UNITS.indexOf(rep[1]) > -1 || /^[KMB]\s+\S+$/.test(rep[1])))
+    u = rep[1];
   /* THE UNIT IS NEVER TOUCHED — only the gap between it and the number.
      The first draft closed the space INSIDE the unit and produced `8MEGP`,
      which is a fourth spelling rather than the one Islam asked for. The check
@@ -6008,8 +6016,15 @@ function unitTight(v){
      `K EGP` reads tight the day a tenant types it even though the picker does
      not offer it — while `M EGP B EGP`, which is somebody's typing rather than
      a unit, keeps its space and is left alone (§96.2). */
+  /* ── AND IT NEVER ADDS A SEPARATOR THAT WAS NOT THERE (§254.7) ──────
+     §254.1 rebuilt the string with a space for anything it did not recognise,
+     so `40%%` came out as `40 %%` — a value made WORSE by the function that
+     exists to tidy it. This reads a figure; it does not get to rewrite the
+     spelling of a unit it does not know. The gap it puts back is the gap it
+     found, and the only thing it ever does on its own is CLOSE one. */
+  var gap = /^-?[\d.,]+\s/.test(s) ? " " : "";
   var scaled = TIGHT_UNITS[u] || /^[KMB]\s+\S+$/.test(u);
-  return sp.value + (scaled ? "" : " ") + u;
+  return sp.value + (scaled ? "" : gap) + u;
 }
 /* A target as it should be READ. Every read-only cell that prints a target
    goes through this, or the deck and the page behind it spell one unit two

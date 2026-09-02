@@ -5667,8 +5667,20 @@ function prorates(m){ return String(m && m.compile || "").toLowerCase() === "sum
    PRORATE THE TARGET, THEN COMPARE -- never the ratio. Dividing a score by the
    elapsed share is right for "more is better" and exactly backwards for "less
    is better", so the share goes on the target and one expression serves both
-   directions. */
-function measureDue(m){
+   directions.
+
+   §250: THE SHARE MAY BE SUPPLIED, and that is the whole of this change.
+   A key objective and a pillar measure are the YEAR's, so they pass nothing and
+   read `elapsedShare()` exactly as they always have. A TACTIC'S OUTCOME belongs
+   to the tactic's own window -- April to September is six months, not twelve --
+   so it passes `tacticShare()`. One arithmetic, told which period it is
+   measuring; a second `outcomeDue()` would be two definitions of proration
+   drifting apart the first time either is corrected (§53.5).
+
+   ABSENT AND NULL BOTH MEAN "THE YEAR". A tactic with no quarters at all has no
+   window to prorate by, and answering null there rather than falling back would
+   empty the column for a plan whose timelines were never filled in. */
+function measureDue(m, share){
   if (!m || !m.target) return null;
   /* §251: THE COUNT AND THE SCORE ASK ONE FUNCTION. A target may now hold its
      unit before its number ("%"), so "is there a number in here" decides both
@@ -5681,7 +5693,7 @@ function measureDue(m){
   var t = parseFloat(String(m.target).replace(/[^0-9.]/g, ""));
   if (isNaN(t)) return null;
   if (!prorates(m)) return t;
-  var s = elapsedShare();
+  var s = share == null ? elapsedShare() : share;
   return s == null ? t : t * s;
 }
 /* WHAT THE ROW SCORES. Derived, never stored -- `m.progress` goes on holding
@@ -5689,9 +5701,9 @@ function measureDue(m){
    every archive and every closed cycle still reads as it did and nothing is
    migrated. The Focus board reads that raw figure on purpose (§239: reward
    stays a year-end judgement); everything else reads this. */
-function measureScore(m){
+function measureScore(m, share){
   if (!m) return null;
-  var due = measureDue(m);
+  var due = measureDue(m, share);
   if (due == null || !due) return null;
   var a = parseFloat(String(m.actual == null ? "" : m.actual).replace(/[^0-9.]/g, ""));
   if (isNaN(a)) return null;
@@ -5752,7 +5764,7 @@ function outcomeOf(t){
 function tacticOutcomeScore(t){
   var o = outcomeOf(t);
   if (!o || o.actual == null || o.actual === "") return null;
-  return measureScore(o);
+  return measureScore(o, tacticShare(t));
 }
 function tacticReads(t){
   var s = tacticOutcomeScore(t);
@@ -5760,10 +5772,14 @@ function tacticReads(t){
 }
 /* What this tactic's figure is compared against, for the quiet half of the
    YTD cell. An outcome answers with its own (prorated) target; everything
-   else answers with the share of its plan that is due, exactly as before. */
+   else answers with the share of its plan that is due, exactly as before.
+   §250: BOTH HALVES NOW SPEAK OF THE SAME PERIOD -- the share on the left is
+   the tactic's own window and so is the one on the right, where before a row
+   could read "83% delivered" beside a target prorated across the year. */
 function tacticBenchmark(t){
   var o = outcomeOf(t);
-  return o ? measureDueLabel(o) : (tacticPlanned(t) == null ? null : tacticPlanned(t) + "%");
+  return o ? measureDueLabel(o, tacticShare(t))
+           : (tacticPlanned(t) == null ? null : tacticPlanned(t) + "%");
 }
 /* Is this tactic being measured by its outcome rather than by an estimate?
    Asked by the three panes so none of them decides it separately. */
@@ -5772,8 +5788,8 @@ function onOutcome(t){ return tacticOutcomeScore(t) != null; }
 /* What a prorated row is measured against, written the way the target is --
    drawn as the quiet half of the YTD actual cell. Null where there is nothing
    worth saying. */
-function measureDueLabel(m){
-  var due = measureDue(m);
+function measureDueLabel(m, share){
+  var due = measureDue(m, share);
   if (due == null) return null;
   /* JOINED THE PLATFORM'S OWN WAY, never by hand: `18B EGP` keeps its spelling,
      so the benchmark reads `9B EGP` beside it rather than `9 B EGP`. One
@@ -5782,22 +5798,37 @@ function measureDueLabel(m){
   return joinTarget(String(m.target), String(Math.round(due * 100) / 100),
                     splitTarget(String(m.target)).unit || "");
 }
-function tacticPlanned(t){
-  /* §218: A FILLED QUARTER COUNTS AT ONCE -- this used to return null while
-     the quarters waited on the office, so a tactic whose timeline had just
-     been filled in read as NOT DUE, vanished from the report under "Not asked
-     -- outside this cycle", and could never be reported on.
+/* HOW FAR THROUGH THIS TACTIC'S OWN WINDOW WE ARE, as an exact fraction.
+   `elapsedShare()` answers the same question of the YEAR; this answers it of
+   the months the tactic actually runs, which is a different period and, for
+   64 of the 78 tactics in the worked example, a different number.
 
-     §239: AND IT COUNTS MONTHS, NOT WHOLE QUARTERS. The review point is a
-     month, so a tactic standing in a half-finished quarter gets credit for the
-     part that has actually happened (Islam, asked outright). A tactic running
-     Q2-Q4 reviewed at August has had 5 of its 9 months. Whole quarters would
-     say a tactic planned for the quarter we are standing in has not started.
+   §218: A FILLED QUARTER COUNTS AT ONCE -- this used to return null while the
+   quarters waited on the office, so a tactic whose timeline had just been
+   filled in read as NOT DUE, vanished from the report under "Not asked --
+   outside this cycle", and could never be reported on.
 
-     The quarter arithmetic is kept as the fallback for a cycle whose year
-     cannot be read: returning null there would make every tactic "not asked"
-     and empty the reporting page, which is a far worse failure than a coarse
-     answer. */
+   §239: AND IT COUNTS MONTHS, NOT WHOLE QUARTERS. The review point is a month,
+   so a tactic standing in a half-finished quarter gets credit for the part that
+   has actually happened (Islam, asked outright). A tactic running Q2-Q4
+   reviewed at August has had 5 of its 9 months. Whole quarters would say a
+   tactic planned for the quarter we are standing in has not started.
+
+   §250: IT IS A FRACTION, AND `tacticPlanned()` IS IT ROUNDED -- never the
+   other way round. Islam: a tactic in Q2 and Q3 "is a 6 months project from
+   april till september .. now we are reporting till august", so five of its six
+   months have passed. The first build of §250 read the share back OUT of the
+   rounded per cent, and 83/100 is not 5/6: a target of 12 read `9.96` instead
+   of `10`, and a WHOLE-YEAR tactic -- which must be untouched by this change --
+   moved from 88% to 87%. One value, computed once, with the per cent derived
+   from it (§53.5).
+
+   The quarter arithmetic is kept as the fallback for a cycle whose year cannot
+   be read: returning null there would make every tactic "not asked" and empty
+   the reporting page, which is a far worse failure than a coarse answer.
+   NULL MEANS "this tactic names no quarters" -- it has no window, so callers
+   fall back to the year rather than refusing to score it. */
+function tacticShare(t){
   var q = quartersOf(t), y = reviewYear(), a = reviewAsOf();
   if (y == null || a == null) {
     var tot = 0, el = 0;
@@ -5806,7 +5837,7 @@ function tacticPlanned(t){
       tot++;
       if (j + 1 <= REVIEW.endsQuarter) el++;
     }
-    return tot ? Math.round(el / tot * 100) : null;
+    return tot ? el / tot : null;
   }
   var total = 0, elapsed = 0;
   for (var i = 0; i < 4; i++) {
@@ -5816,8 +5847,13 @@ function tacticPlanned(t){
       if (y * 12 + i * 3 + k <= a) elapsed++;
     }
   }
-  if (!total) return null;
-  return Math.round(elapsed / total * 100);
+  return total ? elapsed / total : null;
+}
+/* The share of its plan a tactic is expected to have delivered by now, as the
+   per cent every surface prints. */
+function tacticPlanned(t){
+  var s = tacticShare(t);
+  return s == null ? null : Math.round(s * 100);
 }
 /* A tactic whose quarters have not begun is not behind — it is not yet due,
    and averaging a zero into execution would say otherwise. */
@@ -6313,7 +6349,13 @@ function viaCarrier(p, own, roll){
 function scorableMeasures(p){ return (p.measures || []).filter(function(m){ return !SMPRules.isHidden(m) && m.target && measureScore(m) != null; }); }
 function pillarPerf(p){
   return viaCarrier(p,
-    function(){ return avg(scorableMeasures(p).map(measureScore)); },
+    /* §250: WRAPPED, NEVER PASSED BY NAME. `measureScore` takes an optional
+       share now, and `Array.map` hands its callback the INDEX as a second
+       argument -- so a bare `.map(measureScore)` would prorate the first
+       measure of every pillar by 0 (unscorable), the second by the whole year,
+       the third by TWICE the year. Silent, and wrong only for the `Sum` rows,
+       which is the half nobody would think to check. */
+    function(){ return avg(scorableMeasures(p).map(function(m){ return measureScore(m); })); },
     function(f){ return avg(fnItems(f).map(pillarPerf)); });
 }
 function dueTactics(p){ return SMPRules.shown(p.tactics).filter(tacticDue); }

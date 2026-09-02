@@ -61,6 +61,15 @@ Nothing proceeds past this line without an answer.
 
 ## Known red, on purpose
 
+- **`checks/report-saves.py` — 3 × "nothing threw while reporting".** Not a
+  product defect and **red on `main` before this branch**, reproduced there with
+  §250's changes removed: the failure is
+  *"The script has an unsupported MIME type ('text/html')"* — the check's own
+  stub does not serve `sw.js`, so the platform's §231.5 registration rejects and
+  the page-error listener reports it. §100.3 exactly: *a stand-in that models
+  less than the thing it stands in for reports a working build as broken.* Every
+  other assertion in the file passes. Fix belongs in that check's stub.
+
 - **`checks/no-jump.py` — "sorting a column" (1 JUMPED).** Real defect,
   diagnosed 2026-08-26 (§109.5): with a register row open for editing, sorting
   collapses the page 1457px → 913px (the open row keeps its class, loses its
@@ -107,6 +116,45 @@ clean. One assertion in `fn-ko-edit.py` was REWRITTEN rather than deleted (§218
 branch carries §251 only, and main has moved to §250 meanwhile, so the merge
 needs the fetch-and-look, a rebuild, `node --check sw.js` and a SHELL name
 confirmed against `origin/main` immediately before the push (§91, §94.16).
+
+### §250 — a tactic's outcome is measured against its own window (2026-09-02, branch `claude/tactic-proration-calc-uyspmb`)
+
+Islam: a tactic marked Q2 and Q3 "is a 6 months project from april till
+september .. now we are reporting till august so the proration how should it be
+calauclated? because it's different than the proration of the measurs that
+prorate across the eyar." **Half of it was already true** — §239 gave the
+*% delivered* column the tactic's own months, so it read **5 of 6 = 83%** — and
+§248's OUTCOME still went through the YEAR's share, reading **88% for every one
+of ten window shapes** at August: one number for ten periods. The share is now
+supplied to the one arithmetic (`measureDue`/`measureScore`/`measureDueLabel`
+take an optional share; a measure passes nothing, a tactic's outcome passes
+`tacticShare(t)`), and it is an **exact fraction** — the first draft read it back
+out of the rounded per cent and moved a whole-year tactic from 88% to 87%.
+Islam's case: annual target 12 over Apr–Sep reads **10** at August, and 7 against
+it scores **70%** where it read 88%.
+
+**Nothing stored moves, measured not asserted:** 842–852 scores — ten units,
+their pillars, every measure and tactic, all eight capabilities, the group and
+both companies — read off the shipped build and this one at **six review points**
+including unset, identical at every one. **Proved able to fail: 15 red** on the
+shipped build, the reporting pane printing `8 # of 12 #`.
+
+**§250.1 — and it nearly shipped a silent disaster.** `pillarPerf` mapped
+`measureScore` point-free, and `Array.map` hands its callback the INDEX — so the
+new optional share would have been 0, then 1, then 2 down every pillar (one
+pillar **100 → not scored**, another **83 → 65**), wrong only for the `Sum` rows.
+Guarded by `checks/tactic-proration.py` §2b. The probe that should have caught it
+was itself blind, comparing two identical crash strings (§94.5).
+
+**§250.2 — recorded, not done:** the review deck still ignores an outcome
+entirely (`present.js` prints `t.actual` against `tacticPlanned`), measured
+byte-identical before and after — §248's omission, and correcting it is a
+decision about what a slide shows for a row measured in stores.
+
+Green: `tactic-proration` (33), `ytd-proration`, `tactic-outcome` (47),
+`submit-gate`, `table-fit`, `cycle-board`, `project-tables`, `plan-fields`,
+`gap-fill`, `gap-walk`, `save-fidelity`, the full `qa.py` sweep (ERRORS none),
+`test-authorize` 472/0, `test-graph-diff` 126/0.
 
 ### §236.3 — slide by slide, only the originals pinned (2026-09-01, same branch)
 

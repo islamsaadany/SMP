@@ -14,9 +14,8 @@
     --bad:#B04434; --bad-bg:#FBEDEB; --bad-tx:#8C3327;
     --good-tx:#1F6248;
     --sans:'Source Sans 3', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-    /* 1000px of shot plus the page's own 24px gutters — so a banner shot at a
-       1000px window is shown at exactly the size it is, never 48px short of
-       it with the end of the sentence scrolled off. */
+    /* 1000px of shot plus the page's own 24px gutters — so a window shot taken
+       at a 1000px window is shown at exactly the size it is. */
     --col:660px; --wide:1048px;
   }
   @media (prefers-color-scheme: dark) {
@@ -52,14 +51,14 @@
              text-transform:uppercase; color:var(--gold); margin:0 0 10px; }
   h1 { font-size:31px; line-height:1.18; font-weight:600; margin:0 0 12px;
        text-wrap:balance; letter-spacing:-.01em; }
-  .top p { margin:0; max-width:62ch; color:#C7D2E4; font-size:16px; }
+  .top p { margin:0; max-width:64ch; color:#C7D2E4; font-size:16px; }
   :root[data-theme="dark"] .top p { color:#A9B4C6; }
   @media (prefers-color-scheme: dark) {
     :root:not([data-theme="light"]) .top p { color:#A9B4C6; }
   }
 
   main { max-width:var(--wide); margin:0 auto; padding:8px 24px 72px; }
-  section { padding:34px 0 6px; }
+  section { padding:34px 0 10px; }
   section + section { border-top:1px solid var(--line); }
   .col { max-width:var(--col); }
   h2 { font-size:13px; font-weight:700; letter-spacing:.1em;
@@ -70,14 +69,19 @@
   strong { font-weight:600; color:var(--ink); }
   em { font-style:italic; }
 
-  /* THE SHOT PLATE. The banner is 1000 CSS px wide at 2x, so it is shown at
-     true size and never scaled down until the sentence being decided is
-     unreadable. Below 1000px it scrolls in its own box rather than shrinking
-     the page (§27.2: sideways scroll drags every sticky element with it). */
+  /* THE SHOT PLATES. Three sizes, because three kinds of thing are being
+     shown: a whole window, a full-width banner, and a 360px card. Each is
+     displayed at the size it really is — a card blown up to the page's width
+     is a picture of a control the product does not have. */
   .plate { margin:0 0 8px; overflow-x:auto; background:var(--surface);
            border:1px solid var(--line); border-radius:8px; }
-  .plate img { display:block; width:1000px; max-width:none; }
-  .cap { font-size:13.5px; color:var(--ink-3); margin:0 0 26px; max-width:72ch; }
+  .plate img { display:block; max-width:none; }
+  .plate.win { padding:0; }
+  .plate.win img, .plate.band img { width:1000px; }
+  .plate.card { display:inline-block; border:0; background:none;
+                border-radius:0; overflow:visible; }
+  .plate.card img { width:360px; }
+  .cap { font-size:13.5px; color:var(--ink-3); margin:0 0 26px; max-width:74ch; }
   .cap b { color:var(--ink-2); font-weight:600; }
 
   .tag { display:inline-block; font-size:11px; font-weight:700;
@@ -96,11 +100,17 @@
                width:6px; height:6px; border-radius:2px; background:var(--gold); }
   li b { color:var(--ink); font-weight:600; }
 
+  .cards { display:flex; flex-wrap:wrap; gap:26px; align-items:flex-start;
+           margin:0 0 10px; }
+  .cards > div { max-width:400px; }
+
   .ask { background:var(--surface); border:1px solid var(--line);
          border-left:4px solid var(--gold); border-radius:8px;
          padding:20px 22px; max-width:var(--col); }
   .ask h3 { margin-bottom:8px; }
-  .ask p:last-child { margin-bottom:0; }
+  .ask ul { margin-bottom:0; }
+  .ask li::before { background:var(--panel); }
+  :root[data-theme="dark"] .ask li::before { background:var(--gold); }
 
   .rule { color:var(--good-tx); font-weight:600; }
 </style>
@@ -108,9 +118,9 @@
 <div class="top">
   <div class="in">
     <p class="eyebrow">Mockup &middot; 2 September 2026 &middot; not built yet</p>
-    <h1>Say &ldquo;you are offline&rdquo; when you are offline</h1>
-    <p>Every banner below is the platform&rsquo;s own, shot out of the built file
-      with the words written into the live element. Nothing here is drawn.</p>
+    <h1>A pop-up that says you are offline</h1>
+    <p>Every screen below is the platform&rsquo;s own, shot out of the built file
+      with the message mounted on the live page. Nothing here is drawn.</p>
   </div>
 </div>
 
@@ -119,11 +129,13 @@
 <section>
   <div class="col">
     <span class="tag now">What you see today</span>
-    <h3>The browser&rsquo;s words, not the platform&rsquo;s</h3>
+    <h3>A strip across the top, in the browser&rsquo;s words</h3>
   </div>
-  <div class="plate"><img src="{{today-offline-light}}" alt="Today's banner: Not saved. The platform could not reach the server (Failed to fetch)."></div>
+  <div class="plate band"><img src="{{today-banner-light}}" alt="Today's banner: Not saved. The platform could not reach the server (Failed to fetch)."></div>
   <p class="cap">The exact banner you photographed, reproduced at a 1000&nbsp;px window.</p>
   <ul>
+    <li><b>It is a strip at the top of the page</b> &mdash; far from where you
+      were typing, and it pushes the page down as it arrives.</li>
     <li><b>It does not say the one thing you need.</b> You are offline, and the
       sentence talks about the server &mdash; which sends you to look at
       something that is working perfectly.</li>
@@ -139,88 +151,160 @@
 
 <section>
   <div class="col">
-    <span class="tag pick">Option A &middot; recommended</span>
-    <h3>Plain words, and the advice reversed</h3>
-    <p>The voice you settled for the slow-start message: no
-      &ldquo;server&rdquo;, no &ldquo;database&rdquo;, short lines.</p>
+    <span class="tag pick">Proposed</span>
+    <h3>The same card the chat corner is made of</h3>
+    <p>The platform already floats one card over the page &mdash; the Strategy
+      Office corner. This is that box: the same white, the same hairline, the
+      same corner radius and shadow. The only thing added is a red edge, which
+      is how the platform marks what kind of message something is without
+      turning the whole card into an alarm.</p>
   </div>
-  <div class="plate"><img src="{{offline-a-light}}" alt="Option A: You are offline — not saved yet. Your work is safe on screen. It will save by itself the moment you are back online. Do not reload while you are offline."></div>
-  <p class="cap"><b>Why this one.</b> The heading answers the question before you
-    read a word of the second line, and the second line is the whole of what to
-    do &mdash; which is nothing. It is also the only version that is true for
-    somebody who does not know what a server is.</p>
+  <div class="plate card"><img src="{{pop-a-light}}" alt="Pop-up: You are offline — not saved yet. Your work is safe on screen. It will save by itself the moment you are back online. Do not reload while you are offline."></div>
+  <p class="cap"><b>Shown at its real size</b> &mdash; 360&nbsp;px wide, which is
+    the chat panel&rsquo;s width. Three lines, and the heading answers the
+    question before you read any of them.</p>
+</section>
 
+<section>
   <div class="col">
-    <span class="tag alt">Option B</span>
-    <h3>The banner&rsquo;s existing voice, made honest</h3>
-    <p>Same fact, keeping the words the other two failures use.</p>
+    <h2>Where it sits &mdash; the one real question</h2>
+    <p class="lede">The bottom-right corner is already taken by the Strategy
+      Office bubble, so this cannot go where a pop-up normally goes. The bubble
+      is in every shot below.</p>
   </div>
-  <div class="plate"><img src="{{offline-b-light}}" alt="Option B: Not saved — you are offline. Your change is still on screen and will be sent as soon as you are back online. Do not reload while you are offline — what is on screen has not reached the database yet."></div>
-  <p class="cap"><b>What it costs.</b> Two lines that say the same thing twice,
-    and it still ends on the word <em>database</em> &mdash; which is what you
-    called too technical last time.</p>
+
+  <span class="tag pick">A &middot; bottom left &mdash; recommended</span>
+  <div class="plate win"><img src="{{place-bl}}" alt="The pop-up at the bottom-left of the window, with the chat bubble at the bottom-right."></div>
+  <p class="cap"><b>Why this one.</b> It is the mirror of the corner the product
+    already docks a card in, it never covers the chat bubble, and it stays out
+    of the middle of the table you are working in. The cost: on a wide screen
+    it is the furthest point from where your eyes are.</p>
+
+  <span class="tag alt">B &middot; bottom centre</span>
+  <div class="plate win"><img src="{{place-bc}}" alt="The pop-up centred at the bottom of the window."></div>
+  <p class="cap"><b>Hardest to miss</b>, and it sits over the middle of the work
+    &mdash; on a plan table that is the row you were about to type into. On a
+    narrow window it also drifts towards the chat bubble.</p>
+
+  <span class="tag alt">C &middot; top right, under the chrome</span>
+  <div class="plate win"><img src="{{place-tr}}" alt="The pop-up at the top right, below the navigation."></div>
+  <p class="cap"><b>Nearest to where the banner used to be.</b> It lands on the
+    page&rsquo;s own pinned title and its controls &mdash; the row carrying
+    Arrange, Bands, the pen &mdash; and covers them while it is up.</p>
+</section>
+
+<section>
+  <div class="col">
+    <h2>The wording, still open</h2>
+    <p class="lede">Both say you are offline. The difference is whose words they
+      are.</p>
+  </div>
+  <div class="cards">
+    <div>
+      <span class="tag pick">A &middot; recommended</span>
+      <div class="plate card"><img src="{{pop-a-light}}" alt="Wording A."></div>
+      <p class="cap">The plain voice you settled for the slow-start message: no
+        &ldquo;server&rdquo;, no &ldquo;database&rdquo;.</p>
+    </div>
+    <div>
+      <span class="tag alt">B</span>
+      <div class="plate card"><img src="{{pop-b-light}}" alt="Wording B."></div>
+      <p class="cap">The banner&rsquo;s existing voice. Four lines instead of
+        three, and it ends on the word <em>database</em>.</p>
+    </div>
+  </div>
 </section>
 
 <section>
   <div class="col">
     <h2>The other two ways a save fails</h2>
     <p class="lede">A save fails three ways and only one of them is being
-      offline. They are shown together because a person meets one at a time and
-      has to be able to tell them apart.</p>
+      offline. A person meets one at a time and has to tell them apart, so all
+      three wear the same card.</p>
   </div>
-  <div class="plate"><img src="{{unreached-light}}" alt="Online but no answer: Not saved. The platform reached the internet but the server did not answer."></div>
-  <p class="cap"><b>Online, and the server did not answer.</b> The browser&rsquo;s
-    &ldquo;Failed to fetch&rdquo; goes; it moves to the console, where the one
-    person who can act on it looks.</p>
-  <div class="plate"><img src="{{server-light}}" alt="Server error: Not saved. The server answered HTTP 500."></div>
-  <p class="cap"><b>The server answered with an error.</b> Unchanged except for
-    the missing space. The number stays deliberately &mdash; it is what sends
-    somebody to the right place.</p>
+  <div class="cards">
+    <div>
+      <div class="plate card"><img src="{{pop-unreached-light}}" alt="Not saved — the server did not answer."></div>
+      <p class="cap"><b>Online, and no answer.</b> The browser&rsquo;s
+        &ldquo;Failed to fetch&rdquo; goes to the console, where the one person
+        who can act on it looks.</p>
+    </div>
+    <div>
+      <div class="plate card"><img src="{{pop-server-light}}" alt="Not saved — the server answered HTTP 500."></div>
+      <p class="cap"><b>The server answered with an error.</b> The number stays
+        deliberately &mdash; it is what sends somebody to the right place.</p>
+    </div>
+  </div>
 </section>
 
 <section>
   <div class="col">
-    <h2>The dark palette</h2>
-    <p class="lede">Both banners in the dark palette, because the colours are
-      themed and a sentence measured in one is not measured in the other.</p>
+    <h2>What stays a banner</h2>
+    <p class="lede">A <em>refusal</em> is a different message: the server has
+      decided this person may not make one of these changes, and it names the
+      rows and offers two ways out.</p>
   </div>
-  <div class="plate"><img src="{{today-offline-dark}}" alt="Today's banner in the dark palette."></div>
-  <p class="cap"><b>Today</b>, dark.</p>
-  <div class="plate"><img src="{{offline-a-dark}}" alt="Option A in the dark palette."></div>
-  <p class="cap"><b>Option&nbsp;A</b>, dark. Same tokens as the light one, so
-    nothing new was picked and nothing needs measuring.</p>
+  <div class="plate band"><img src="{{refusal-banner-light}}" alt="The refusal banner, naming two rows and carrying two buttons."></div>
+  <p class="cap"><b>This one is not moved.</b> It carries a list that grows with
+    the number of rows and two controls that have to be read before either is
+    pressed &mdash; a 360&nbsp;px card in the corner is the wrong shape for it,
+    and a decision you must take should not sit where a passing notice sits.
+    <b>Say if you want it moved too</b> and it is drawn again.</p>
 </section>
 
 <section>
   <div class="col">
-    <h2>What this does not change</h2>
+    <h2>How it behaves</h2>
   </div>
   <ul>
-    <li><b>Nothing about saving.</b> Only the sentence on the banner. No change
-      to the data, the server, or what is stored.</li>
-    <li><b>The banner still clears itself.</b> The platform retries every five
-      seconds while the tab is open, and a save that lands hides it &mdash; so
-      when you come back online it goes away on its own, within about five
-      seconds. Nothing to press.</li>
+    <li><b>It appears when a save fails</b>, and stays while the work is
+      unsaved. It does not stack: one card, rewritten.</li>
+    <li><b>It goes by itself.</b> The platform retries every five seconds while
+      the tab is open, and a save that lands takes the card away &mdash; so
+      coming back online clears it within about five seconds. Nothing to
+      press.</li>
+    <li><b>No close button, recommended.</b> The card is the only thing saying
+      the work is not stored; a &times; would let it be dismissed while that is
+      still true. <b>Say if you want one</b> &mdash; the alternative is that
+      closing it shrinks it to a small marker rather than removing it.</li>
+    <li><b>Never on a projector.</b> Presentation mode drops it, the way it
+      already drops the chat bubble.</li>
     <li><b>The work is genuinely waiting, not lost.</b>
       <span class="rule">Measured, not assumed:</span> the retry runs for as
       long as the tab stays open. Closing the tab while offline still loses it,
-      which is why the banner says not to reload.</li>
+      which is why the card says not to reload.</li>
     <li><b>The chat corner is left alone.</b> It has the same blind spot in its
-      own message. You named the save banner, so it is flagged here rather than
+      own message. You named the save error, so it is flagged here rather than
       widened quietly.</li>
   </ul>
 </section>
 
 <section>
+  <div class="col">
+    <h2>The dark palette</h2>
+    <p class="lede">Same tokens as the light one, so nothing new was picked and
+      nothing needs measuring.</p>
+  </div>
+  <div class="plate card"><img src="{{pop-a-dark}}" alt="The pop-up in the dark palette."></div>
+  <p class="cap">Wording&nbsp;A, dark.</p>
+</section>
+
+<section>
   <div class="ask">
     <h3>What I need from you</h3>
-    <p><b>A or B</b>, and whether the run-together sentences should be split on
-      all three failures or only on the offline one.</p>
-    <p>Then it is one small function in the save code, an offline case added to
-      the check that already drives the other failure states, and proof that it
-      fails on today&rsquo;s build first.</p>
+    <ul>
+      <li><b>Placement</b> &mdash; A, B or C.</li>
+      <li><b>Wording</b> &mdash; A or B.</li>
+      <li><b>A close button</b> &mdash; none, or one that shrinks it to a
+        marker.</li>
+      <li><b>The refusal</b> &mdash; leave it a banner, or draw it as a card
+        too.</li>
+    </ul>
   </div>
+  <p class="cap" style="margin-top:14px">Then it is one small piece of the save
+    code, a check that drives every failure state, and proof that it fails on
+    today&rsquo;s build first. Nothing about saving itself changes &mdash; no
+    change to the data, the server, or what is stored.</p>
 </section>
 
 </main>

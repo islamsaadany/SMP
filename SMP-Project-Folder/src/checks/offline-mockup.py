@@ -1,22 +1,27 @@
-"""THE MOCKUP IS MADE OF THE REAL BANNER (§41.9, rule 1c).
+"""THE MOCKUP IS MADE OF THE REAL PLATFORM (§41.9, rule 1c).
 
 Not drawn from the stylesheet — driven. It opens the SHIPPED platform file (the
-bytes Islam is looking at, §105.6) and writes each candidate sentence into the
-LIVE `#refused` element, which is the same element `showFailed()` writes into
-and wears `.banner.refused` with its real tokens. So every picture is the same
-build, and what is agreed is what the product will look like rather than what
-its CSS could be made to say.
+bytes Islam is looking at, §105.6), writes each candidate sentence into the LIVE
+`#refused` element for the BEFORE shots, and mounts the proposed pop-up on the
+real page for the AFTER ones. Both sides of every picture are the same build.
 
-THE BANNER IS SHOT ALONE, deliberately. It spans the page, so an element shot
-is the whole control at its real width — and the page behind it is the baked
-worked example, whose invented units and names have no business in a mockup
-shown to a client (§245).
+THE POP-UP IS BUILT OUT OF THE ONE FLOATING-CARD IDIOM THE PRODUCT HAS: the
+chat panel (`.chatpanel`, chat.css) — `--surface`, 1px `--line`, 12px radius,
+`0 6px 26px rgba(0,0,0,.18)`, docked 18px from the window's edge. A second card
+vocabulary invented for this is exactly §53.5's drift, and it would be
+invisible in a mockup that had drawn one.
 
-BOTH PALETTES, because `--bad-bg` and `--bad-tx` are themed and a sentence
-measured in one is not measured in the other (§130.3).
+AND THE CORNER IS ALREADY OCCUPIED. `.chatdock` is `right:18px; bottom:18px`,
+which is why placement is a real question and not a preference — so the chat
+bubble is FORCED VISIBLE in the placement shots (over `file://` the corner is
+deliberately not drawn, §97, so a mockup without it would be a picture of a
+window that does not exist).
 
-Writes PNGs into design-mockups/offline-message/shots/. It measures nothing and
-asserts nothing: it is a camera, not a check. The check comes with the build.
+BOTH PALETTES, because every token here is themed (§130.3).
+
+Writes PNGs into design-mockups/offline-message/shots/ and assembles the page.
+It measures nothing and asserts nothing: it is a camera, not a check. The check
+comes with the build.
 """
 import base64, pathlib
 from playwright.sync_api import sync_playwright
@@ -26,59 +31,127 @@ FILE = ROOT / "SMP-Project-Folder/strategy-management-platform-v3.22.html"
 OUT = ROOT / "design-mockups/offline-message/shots"
 OUT.mkdir(parents=True, exist_ok=True)
 
-# ── THE SENTENCES ────────────────────────────────────────────────────────
+# ── WHAT IT SAYS TODAY ───────────────────────────────────────────────────
 # `showFailed()` builds two spans: the bold lead plus the reason, then the
-# advice. These are written in exactly that shape, or the mockup is of a
-# component the product does not have.
+# advice. Written in exactly that shape, or the mockup is of a component the
+# product does not have — including the missing space between them, which is
+# real: `.banner.refused` is display:block (it overrides `.banner`'s flex, and
+# its 10px gap with it) and the two spans are concatenated with no whitespace,
+# so EVERY failure the platform reports runs its sentences together.
 TODAY = ("<span><strong>Not saved.</strong> The platform could not reach the "
          "server (Failed to fetch).</span>"
          "<span>Your change is still on screen and the platform keeps trying. "
          "If it does not clear, reload before typing anything else — what "
          "is on screen has not reached the database.</span>")
 
-# ── AND THE TWO SENTENCES RUN INTO EACH OTHER TODAY ──────────────────────
-# `.banner.refused` is `display:block` (it overrides `.banner`'s flex, which
-# carried the 10px gap), and `showFailed()` concatenates `</span><span>` with
-# no whitespace between them — so every failure the platform has ever reported
-# reads "(Failed to fetch).Your change is still on screen". It is in Islam's
-# own screenshot. The advice is a second line here, which is the shape the
-# banner already implies: what happened, then what to do.
-WHY = '<span class="nsy" style="display:block;margin-top:3px">'
+# The §184 refusal, which is a DIFFERENT message and stays a banner: it names
+# the rows the server objected to and carries two controls. Drawn with the
+# product's own classes so the argument for leaving it where it is can be seen
+# rather than taken on trust.
+REFUSAL = ("<span><strong>Not saved.</strong> A project's milestones (CX) "
+           "cannot be changed here — a plan is corrected by the Strategy "
+           "Office.</span>"
+           "<ul><li>Mystery shopping wave 2 — Due date</li>"
+           "<li>Service recovery SLA — Owner</li></ul>"
+           "<span style='display:block;margin-top:8px'>"
+           "<button class='refused-keep'>Put those two back and save the rest"
+           "</button>"
+           "<button class='refused-undo'>Discard the change and reload</button>"
+           "</span>")
 
-# A — the plain voice §230.2 settled for the boot wall: no "server", no
-# "database", short lines, and the advice REVERSED, because telling somebody
-# offline to reload is telling them to throw the work away.
-OFFLINE_A = ("<span><strong>You are offline — not saved yet.</strong></span>"
-             + WHY + "Your work is safe on screen. It will save by itself the "
-             "moment you are back online. Do not reload while you are "
-             "offline.</span>")
+# ── THE POP-UP ───────────────────────────────────────────────────────────
+# The chat panel's own box, with one thing added: a 4px `--bad` edge, which is
+# the platform's way of saying which kind of message this is without tinting
+# the whole card (§41's accent budget — a tinted card is an alarm, an edge is a
+# mark). The heading is `--bad-tx`, never `--bad`: a colour that works as a
+# fill fails as type (§38.4, and it is measured against `--surface` here).
+POP_CSS = """
+.savedock { position:fixed; z-index:46; display:flex; }
+.savepop { width:360px; max-width:calc(100vw - 36px); background:var(--surface);
+           border:1px solid var(--line); border-left:4px solid var(--bad);
+           border-radius:12px; box-shadow:0 6px 26px rgba(0,0,0,.18);
+           padding:13px 16px 14px; }
+.savepop b { display:block; color:var(--bad-tx); font-size:var(--fs-body);
+             font-weight:700; line-height:1.3; }
+.savepop p { margin:5px 0 0; color:var(--ink-2); font-size:var(--fs-small);
+             line-height:1.5; }
+"""
 
-# B — the same fact in the banner's existing fuller voice, keeping the words
-# the other two failures use.
-OFFLINE_B = ("<span><strong>Not saved — you are offline.</strong></span>"
-             + WHY + "Your change is still on screen and will be sent as soon "
-             "as you are back online. Do not reload while you are offline — "
-             "what is on screen has not reached the database yet.</span>")
+# A — §230.2's plain voice: no "server", no "database", short lines, and the
+# advice REVERSED, because telling somebody offline to reload is telling them
+# to throw the work away.
+POP_A = ("<b>You are offline — not saved yet.</b>"
+         "<p>Your work is safe on screen. It will save by itself the moment "
+         "you are back online. Do not reload while you are offline.</p>")
+# B — the same fact in the banner's existing fuller voice.
+POP_B = ("<b>Not saved — you are offline.</b>"
+         "<p>Your change is still on screen and will be sent as soon as you "
+         "are back online. Do not reload while you are offline — what is on "
+         "screen has not reached the database yet.</p>")
+# The other two ways a save fails. The server's own status STAYS (§171 — a
+# number is not jargon to the one person who can act on it); what goes is the
+# browser's "Failed to fetch", which names nothing and moves to the console.
+POP_UNREACHED = ("<b>Not saved — the server did not answer.</b>"
+                 "<p>You are online, so this is the platform, not your "
+                 "connection. Your change is still on screen and it keeps "
+                 "trying.</p>")
+POP_SERVER = ("<b>Not saved — the server answered HTTP 500.</b>"
+              "<p>Your change is still on screen and the platform keeps "
+              "trying. If it does not clear, tell the Strategy Office that "
+              "number.</p>")
 
-# The other two ways a save fails, so the set is seen together. The server's
-# own status stays (§171: a number is not jargon to the one person who can act
-# on it); what goes is the browser's `Failed to fetch`, which names nothing.
-UNREACHED = ("<span><strong>Not saved.</strong> The platform reached the "
-             "internet but the server did not answer.</span>"
-             + WHY + "Your change is still on screen and the platform keeps "
-             "trying. If it does not clear, reload before typing anything else "
-             "— what is on screen has not reached the database.</span>")
+PLACES = {
+    # Clear of the chat corner, and the mirror of it — the product already
+    # docks one card 18px off a bottom corner, so this is the same shelf.
+    "bl": "left:18px; bottom:18px;",
+    # Hardest to miss, and it sits over the middle of the work.
+    "bc": "left:50%; transform:translateX(-50%); bottom:18px;",
+    # Where the banner used to be, as a card. It lands on the page's own
+    # pinned title and controls row (§130).
+    "tr": "right:18px; top:88px;",
+}
 
-SERVER = ("<span><strong>Not saved.</strong> The server answered HTTP 500."
-          "</span>"
-          + WHY + "Your change is still on screen and the platform keeps "
-          "trying. If it does not clear, reload before typing anything else "
-          "— what is on screen has not reached the database.</span>")
+MOUNT = """([css, body, place]) => {
+  document.querySelectorAll('.savedock, #savepopcss').forEach(e => e.remove());
+  const s = document.createElement('style');
+  s.id = 'savepopcss'; s.textContent = css;
+  document.head.appendChild(s);
+  const d = document.createElement('div');
+  d.className = 'savedock';
+  d.setAttribute('style', place);
+  d.innerHTML = '<div class="savepop">' + body + '</div>';
+  document.body.appendChild(d);
+  return true;
+}"""
 
-SHOTS = [("today-offline", TODAY), ("offline-a", OFFLINE_A),
-         ("offline-b", OFFLINE_B), ("unreached", UNREACHED), ("server", SERVER)]
+# THE CHAT CORNER IS PUT BACK. Over `file://` there is no server, so the corner
+# is never created at all (§97) — and a placement shot without it is a picture
+# of a corner that is empty in the mockup and occupied in the product, which is
+# the whole question. It is mounted from the product's own classes and its own
+# path data (chat.js), never a drawn stand-in.
+#
+# AND THE PROTOTYPE BANNER IS HIDDEN. The yellow "Prototype · group shape" strip
+# exists only in the worked example; a real deployment has no such row, so
+# leaving it in makes the shot LESS like the screen being decided about, not
+# more (§21).
+STAGE = """() => {
+  const b = document.getElementById('banner');
+  if (b) b.hidden = true;
+  document.querySelectorAll('.chatdock').forEach(e => e.remove());
+  const d = document.createElement('div');
+  d.className = 'chatdock';
+  d.innerHTML =
+    '<button class="chatbtn" type="button" aria-label="Message the Strategy Office">' +
+      '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" ' +
+      'stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">' +
+      '<path d="M21 11.5a8.4 8.4 0 0 1-9 8.4 9.7 9.7 0 0 1-2.7-.4L3 21l1.6-4.6A8.2 8.2 0 0 1 ' +
+      '3.6 11.5 8.4 8.4 0 0 1 12 3.1a8.4 8.4 0 0 1 9 8.4z"/></svg>' +
+    '</button>';
+  document.body.appendChild(d);
+  return true;
+}"""
 
-SHOW = """(html) => {
+BANNER = """(html) => {
   const el = document.getElementById('refused');
   if (!el) return false;
   el.innerHTML = html;
@@ -86,11 +159,28 @@ SHOW = """(html) => {
   return true;
 }"""
 
+HIDEBANNER = """() => {
+  const el = document.getElementById('refused');
+  if (el) { el.hidden = true; el.innerHTML = ''; }
+  return true;
+}"""
+
+
+def card(pg, name, body, theme):
+    """The card alone, at true size — what is being decided is the words and
+    the box, and the page behind it is not part of that question."""
+    pg.evaluate(MOUNT, [POP_CSS, body, PLACES["bl"]])
+    pg.wait_for_timeout(80)
+    pg.query_selector(".savepop").screenshot(
+        path=str(OUT / ("%s-%s.png" % (name, theme))))
+    print("  wrote %s-%s.png" % (name, theme))
+
+
 with sync_playwright() as p:
     br = p.chromium.launch()
     for theme in ("light", "dark"):
-        # 1000px is Islam's own laptop (§27.1's sweep exists because of it), and
-        # a banner shot at 2x is read at true size in the mockup rather than
+        # 1000px is Islam's own laptop (§27.1's sweep exists because of it),
+        # and a shot at 2x is read at true size in the mockup rather than
         # scaled down until the sentence being decided is unreadable.
         pg = br.new_page(viewport={"width": 1000, "height": 800},
                          device_scale_factor=2)
@@ -98,14 +188,36 @@ with sync_playwright() as p:
         pg.wait_for_timeout(400)
         pg.evaluate("(t) => document.documentElement.setAttribute('data-theme', t)",
                     theme)
-        for name, html in SHOTS:
-            if not pg.evaluate(SHOW, html):
-                print("  MISSING #refused")
-                break
+        pg.evaluate(STAGE)
+
+        # BEFORE: the banner as it is today, and the refusal that stays one.
+        pg.evaluate(BANNER, TODAY)
+        pg.wait_for_timeout(80)
+        pg.query_selector("#refused").screenshot(
+            path=str(OUT / ("today-banner-%s.png" % theme)))
+        print("  wrote today-banner-%s.png" % theme)
+        if theme == "light":
+            pg.evaluate(BANNER, REFUSAL)
             pg.wait_for_timeout(80)
-            el = pg.query_selector("#refused")
-            el.screenshot(path=str(OUT / ("%s-%s.png" % (name, theme))))
-            print("  wrote %s-%s.png" % (name, theme))
+            pg.query_selector("#refused").screenshot(
+                path=str(OUT / "refusal-banner-light.png"))
+            print("  wrote refusal-banner-light.png")
+        pg.evaluate(HIDEBANNER)
+
+        # AFTER: the card itself.
+        card(pg, "pop-a", POP_A, theme)
+        card(pg, "pop-b", POP_B, theme)
+        card(pg, "pop-unreached", POP_UNREACHED, theme)
+        card(pg, "pop-server", POP_SERVER, theme)
+
+        # WHERE IT SITS. Light only: placement is a question about the window,
+        # and answering it twice in two palettes says nothing new.
+        if theme == "light":
+            for key, place in PLACES.items():
+                pg.evaluate(MOUNT, [POP_CSS, POP_A, place])
+                pg.wait_for_timeout(120)
+                pg.screenshot(path=str(OUT / ("place-%s.png" % key)))
+                print("  wrote place-%s.png" % key)
         pg.close()
     br.close()
 

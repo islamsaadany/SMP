@@ -365,6 +365,43 @@ console errors (in this cloud environment, run it via a wrapper that points Play
   `node scripts/test-door.js <smo-password>` against a running dev-server
   after touching `api/auth.js` or `lib/auth.js` (it ends by rate-limiting the
   SMO on purpose — `DELETE FROM login_attempts;` clears it).
+- **A REPORTED NOTE IS NAMED AS ONE (§253):** Islam — *"the perofmrance is
+  showing hte notes under the tactic name. what is this issue?"*, then the
+  correction that set the scope: *"notes is not in the desciption, notes is
+  something relevant to the reporting and appears in performance as a separate
+  element. so it needs to be there so we can't drop."* **NEITHER PLACEMENT WAS
+  A MISTAKE** — §239.2 put the reporter's note under the name and §248 later put
+  the plan's DESCRIPTION in the same cell; both right on their own, and both
+  drawn as `.why` (12px, `--ink-3`), so a permanent statement and a this-cycle
+  statement render identically with nothing saying which is which. §248's own
+  comment saw the risk (*"two greys at one weight run together as a single
+  block"*) and answered it **only for the NAME**, by bolding it. **THE COST
+  DECIDED IT AND WAS MEASURED BEFORE HE CHOSE** (`design-mockups/
+  tactic-note-placement/`, drawn out of the running platform with his own two
+  tactics, §41.9/§245): a Note column of its own — what the deck has always had
+  — takes the Tactic column **790 → 209px at 1920** and starts running past the
+  pane at **1280px**, an ordinary laptop, where it fits today (§158: *fit, never
+  "and it scrolls"*); naming it in place costs **no width at any width the table
+  fits today**. **A RULE, NOT A SECOND SIZE OR COLOUR**: smaller or paler would
+  rank the note UNDER the description and it is the newer of the two, so it
+  keeps `.why`'s size and ink and is set apart sideways — 2px in `--line` (never
+  the accent, §41's budget) and one uppercase key. **ONE BUILDER, BOTH TABLES ON
+  THE PAGE** (§53.5): the tactics table he reported AND the key measures table
+  above it, which stacks the same two greys the moment a row has a horizon as
+  well as a note — nought in the demo, so latent rather than absent. **AND THE
+  MOCKUP'S `.85` OPACITY WAS DROPPED IN THE BUILD** — about 4.2:1 at 10px, §38.5
+  walked into while quoting it; without it **4.95 light / 5.53 dark**, measured
+  with the sweep's own arithmetic (§95). **THE DEMO CANNOT SHOW THIS FAULT** (0
+  of 84 tactics carry a note), so the check MAKES the state, including a row
+  reporting nothing (§61). Proved able to fail: **16 red** — and **two of that
+  count were the CHECK**, both found by falsifying rather than reading:
+  `all([])` is true, so three assertions went green over an empty list
+  (§113.8), and it **died rather than reported** on an empty list index (§215),
+  printing four failures where there are sixteen. **RECORDED, NOT DONE, AND A
+  DECISION**: four other surfaces draw a note as a plain grey and none stacks a
+  second one, so none has the collision — and `capKOTable` already carries a
+  column headed *Reported*, where a key under the name would say the word twice
+  (§87's twins).
 - **THE PRESENTATION READS WHAT WAS REPORTED (§252):** Islam — *"presentations
   doesn't change when the plan performance is done"*, and then *"the
   presentation should update on either save draft or submit."* **THE PROPOSED
@@ -4208,6 +4245,17 @@ python3 checks/deck-outcome.py  # the presentation reads what was reported (§25
                                 # 19 red against the shipped pre-§252 file, and it asks
                                 # for the two shared readers BY NAME first, or a build
                                 # without them dies and reports zero failures (§215)
+python3 checks/reported-note.py # a reported note is NAMED as one (§253): the note
+                                # keyed and the description left plain — a build that
+                                # named both closes nothing and passes every "the note
+                                # is named" assertion — the row reporting NOTHING drawing
+                                # no key, the key DRAWN rather than merely present, the
+                                # width unchanged at every width the table fits today
+                                # (the promise Islam chose this on), the contrast read
+                                # with the sweep's OWN arithmetic, and a pillars FUNCTION
+                                # asserted to use the same word. It MAKES the state: 0 of
+                                # 84 demo tactics carry a note, so every assertion here
+                                # passes on a build that lost the feature. 16 red before
 python3 checks/gap-walk.py      # the band's chips and Next gap actually go somewhere:
                                 # a unit AND a function, as the filler AND the office,
                                 # every place the band names reached (§177.2)
@@ -4406,7 +4454,38 @@ prior sessions (on HR_ERP) accidentally reverted agreed-upon designs.
 
 ---
 
-*Last Updated: 2026-09-02 &mdash; **&sect;252: the presentation reads what was
+*Last Updated: 2026-09-02 &mdash; **&sect;253: a reported note is named as one.**
+Islam, from his own Performance page: *"the perofmrance is showing hte notes
+under the tactic name. what is this issue?"* &mdash; then, correcting the first
+reading and setting the scope with it: *"notes is not in the desciption, notes
+is something relevant to the reporting and appears in performance as a separate
+element. so it needs to be there so we can't drop."* **NEITHER PLACEMENT WAS A
+MISTAKE**: &sect;239.2 put the reporter's note under the name and &sect;248
+later put the plan's DESCRIPTION in the same cell &mdash; both right on their
+own, both drawn as `.why`, so a permanent statement and a this-cycle statement
+render identically with nothing saying which is which. &sect;248's own comment
+saw the risk in the abstract and answered it **only for the NAME**, by bolding
+it. **THE COST WAS MEASURED BEFORE HE CHOSE**, out of the running platform with
+his own two tactics in it: a Note column of its own &mdash; what the deck has
+always had &mdash; takes the Tactic column **790 &rarr; 209px at 1920** and
+starts running past the pane at **1280px**, where it fits today; naming it in
+place costs no width at any width that fits. **A RULE, NOT A SECOND SIZE OR
+COLOUR**, because smaller or paler would rank the newer fact under the older
+one. **ONE BUILDER, BOTH TABLES ON THE PAGE** (&sect;53.5) &mdash; the key
+measures table stacks the same two greys the moment a row has a horizon, nought
+in the demo and therefore latent rather than absent. **THE MOCKUP'S OWN `.85`
+OPACITY WAS DROPPED IN THE BUILD** (about 4.2:1 at 10px &mdash; &sect;38.5
+walked into while quoting it; 4.95 / 5.53 without it). **THE DEMO CANNOT SHOW
+THIS FAULT** &mdash; 0 of 84 tactics carry a note &mdash; so the check MAKES the
+state, a row reporting nothing included. **16 red** on the build before, and
+**two of that count were the CHECK**: `all([])` is true, so three assertions
+went green over an empty list (&sect;113.8), and it **died rather than
+reported** (&sect;215), printing four failures where there are sixteen.
+**RECORDED, NOT DONE**: four other surfaces draw a note as a plain grey, none
+of them stacks a second one, and `capKOTable` already has a column headed
+*Reported*.*
+
+*Earlier the same day: **&sect;252: the presentation reads what was
 reported.** Islam: *"presentations doesn't change when the plan performance is
 done"*, then *"the presentation should update on either save draft or submit."*
 **THE PROPOSED FIX WOULD HAVE CHANGED NOTHING** &mdash; the deck is assembled

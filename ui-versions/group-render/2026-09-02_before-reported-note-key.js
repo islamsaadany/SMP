@@ -403,39 +403,6 @@ function compileCell(c){
   return noteSpan(c, note, c === "Latest" ? "cdefault" : "");
 }
 
-/* ── A REPORTED NOTE IS NAMED AS ONE (§253) ───────────────────────────────
-   Islam, from his own Performance page: *"the perofmrance is showing hte
-   notes under the tactic name. what is this issue?"* — and, correcting the
-   first reading, *"notes is not in the desciption, notes is something
-   relevant to the reporting and appears in performance as a separate
-   element."*
-
-   NEITHER PLACEMENT WAS A MISTAKE. §239.2 put the reporter's note under the
-   name ("costing no width") and §248 later put the plan's DESCRIPTION in the
-   same cell. Both were right on their own; what nobody asked is what they do
-   to each other. Both were drawn as `.why` — 12px, `--ink-3` — so a
-   permanent statement and a this-cycle statement rendered identically, one
-   under the other, with nothing saying which is which. §248's own comment
-   beside that line saw the risk ("two greys at one weight run together as a
-   single block") and answered it only for the NAME, by bolding it.
-
-   ONE BUILDER, ASKED BY BOTH TABLES ON THE PAGE (§53.5). A note labelled in
-   the tactics table and unlabelled in the key measures table directly above
-   it is the drift, and the measures cell stacks the same two greys the
-   moment a measure carries a horizon ("measured at Q4 2026") as well as a
-   note — nought in the demo today, so it is latent rather than absent.
-
-   THE RULE IS `--line`, NEVER THE ACCENT: this page already spends its gold
-   on Report and the scoring colours (§41's budget). And the key carries NO
-   opacity — the mockup's `.85` took `--ink-3` from 5.1:1 to about 4.4 at
-   10px, which is §38.5 walked into while quoting it. */
-function repNote(row){
-  return row && row.note
-    ? '<span class="repnote"><span class="repkey">Reported</span>' +
-      esc(row.note) + '</span>'
-    : '';
-}
-
 /* Measure name reads left; every figure centres under its column. Progress
    carries the band colour, since it is the row's conclusion. */
 function measureRows(ms, opts){
@@ -455,7 +422,7 @@ function measureRows(ms, opts){
                (on ? handle("Reorder " + m.name) : '') +
                '<span class="idx-n">' + (i+1) + '</span></td><td>' + esc(m.name) + hidChip(m) + fmark(m.id) +
                (m.horizon ? '<span class="why">measured at ' + esc(m.horizon) + '</span>' : '') +
-               repNote(m) +
+               (m.note ? '<span class="why">' + esc(m.note) + '</span>' : '') +
                '</td><td class="num">' + dirCell(m.dir) + '</td><td class="num">' + esc(m.target) +
                '</td><td class="cc">' + compileCell(m.compile) + '</td>';
     if (opts.unscored) return head + '</tr>';
@@ -712,10 +679,7 @@ function tacticRows(ts, unitKey){
       '<span class="idx-n">' + (i+1) + '</span></td><td><b class="tacname">' +
       esc(t.name) + '</b>' + hidChip(t) +
       (t.description ? '<span class="why">' + esc(t.description) + '</span>' : '') +
-      /* §253: the description stays a plain grey — it is the plan's, and the
-         name above it is what it belongs to. The NOTE is the one line in this
-         cell that was written this cycle, so it is the one that says so. */
-      repNote(t) + '</td>' +
+      (t.note ? '<span class="why">' + esc(t.note) + '</span>' : '') + '</td>' +
       '<td>' + outcomeCell(t) + '</td>' +
       '<td>' + esc(t.owner) + '</td><td class="collabs">' + collabCell(t) + '</td>' +
       '<td>' + qs(t) + '</td><td class="cc">' + status + '</td>' + tail + '</tr>';

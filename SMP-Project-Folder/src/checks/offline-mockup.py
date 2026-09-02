@@ -100,6 +100,86 @@ POP_SERVER = ("<b>Not saved — the server answered HTTP 500.</b>"
               "trying. If it does not clear, tell the Strategy Office that "
               "number.</p>")
 
+# ── THE DIALOG, IN THE MIDDLE OF THE PAGE ────────────────────────────────
+# Islam: "I want the location to be in the middle of the page like the error
+# popup. it's very critical." So it is the platform's OWN dialog — `.overlay` +
+# `.modal` + `.modal-h` + `.modal-b` (group-extra.css), the box the merge
+# wizard, the person dialog and the screenshot viewer all open in — and never a
+# centred version of the corner card.
+#
+# THE WIDTH IS MARKED ON THE OVERLAY, NEVER LOOSENED ON `.modal`, which every
+# dialog in the platform shares (§122's rule): `.modal` is min(940px,100%) and
+# 940px of dialog for three sentences is a wall, not a message.
+#
+# AND IT NEEDS AN OVERLAY OF ITS OWN, which is the one real cost of putting
+# this in the middle: `openModalHtml()` reuses THE overlay — one element, whose
+# body it overwrites — so raising this over an open person dialog or merge
+# wizard would destroy the dialog somebody was working in (§116.6: every way
+# out of a dialog is the same way out). Its own element, above the shared one.
+DLG_CSS = """
+.overlay.savedlg { display:flex; opacity:1; visibility:visible;
+                   pointer-events:auto; z-index:120; }
+.overlay.savedlg .modal { width:min(460px, 100%); }
+.overlay.savedlg .modal-h { border-bottom:0; padding-bottom:6px; }
+.overlay.savedlg .modal-h h3 { color:var(--bad-tx); }
+.overlay.savedlg .modal-b { padding-top:0; }
+.overlay.savedlg .modal-b p { margin:0 0 12px; color:var(--ink-2);
+                              font-size:var(--fs-body); line-height:1.5; }
+.overlay.savedlg .waiting { display:flex; align-items:center; gap:8px;
+                            font-size:var(--fs-small); color:var(--ink-3);
+                            border-top:1px solid var(--line-soft);
+                            padding-top:12px; margin-top:2px; }
+.overlay.savedlg .dot { width:8px; height:8px; border-radius:50%;
+                        background:var(--bad); flex:none; }
+.overlay.savedlg .foot { display:flex; justify-content:flex-end;
+                         margin-top:14px; }
+"""
+
+# The dialog carries the same three sentences the card carried — a bigger box
+# is not a licence to say more (§230.2) — plus the one line a centred dialog
+# owes somebody it is standing in front of: what it is waiting for.
+DLG_A = ("<p>Your work is safe on screen. It will save by itself the moment "
+         "you are back online.</p>"
+         "<p><strong>Do not reload while you are offline.</strong></p>")
+DLG_B = ("<p>Your change is still on screen and will be sent as soon as you "
+         "are back online.</p>"
+         "<p><strong>Do not reload while you are offline</strong> — what is "
+         "on screen has not reached the database yet.</p>")
+DLG_UNREACHED = ("<p>You are online, so this is the platform and not your "
+                 "connection. Your change is still on screen and it keeps "
+                 "trying.</p>")
+DLG_SERVER = ("<p>Your change is still on screen and the platform keeps "
+              "trying.</p>"
+              "<p>If it does not clear, tell the Strategy Office that "
+              "number.</p>")
+
+DIALOG = """([css, title, body, wait]) => {
+  document.querySelectorAll('.overlay.savedlg, #savedlgcss').forEach(e => e.remove());
+  const s = document.createElement('style');
+  s.id = 'savedlgcss'; s.textContent = css;
+  document.head.appendChild(s);
+  const o = document.createElement('div');
+  o.className = 'overlay savedlg';
+  o.innerHTML =
+    '<div class="modal" role="alertdialog" aria-modal="true">' +
+      '<div class="modal-h">' +
+        '<div><h3>' + title + '</h3></div>' +
+        '<button class="modal-x" type="button" aria-label="Close">\\u00D7</button>' +
+      '</div>' +
+      '<div class="modal-b">' + body +
+        (wait ? '<div class="waiting"><span class="dot"></span>' + wait + '</div>' : '') +
+        '<div class="foot"><button class="editbtn" type="button">Keep working</button></div>' +
+      '</div>' +
+    '</div>';
+  document.body.appendChild(o);
+  return true;
+}"""
+
+HIDEDIALOG = """() => {
+  document.querySelectorAll('.overlay.savedlg').forEach(e => e.remove());
+  return true;
+}"""
+
 PLACES = {
     # Clear of the chat corner, and the mirror of it — the product already
     # docks one card 18px off a bottom corner, so this is the same shelf.
@@ -204,20 +284,36 @@ with sync_playwright() as p:
             print("  wrote refusal-banner-light.png")
         pg.evaluate(HIDEBANNER)
 
-        # AFTER: the card itself.
-        card(pg, "pop-a", POP_A, theme)
-        card(pg, "pop-b", POP_B, theme)
-        card(pg, "pop-unreached", POP_UNREACHED, theme)
-        card(pg, "pop-server", POP_SERVER, theme)
+        # AFTER: the dialog, in the middle of the page, over the real page.
+        WAIT = "Waiting to reconnect — checking every few seconds"
+        for name, title, body, wait in [
+                ("dlg-a", "You are offline", DLG_A, WAIT),
+                ("dlg-b", "Not saved — you are offline", DLG_B, WAIT),
+                ("dlg-unreached", "Not saved — the server did not answer",
+                 DLG_UNREACHED, "Trying again — every few seconds"),
+                ("dlg-server", "Not saved — the server answered HTTP 500",
+                 DLG_SERVER, "Trying again — every few seconds")]:
+            pg.evaluate(DIALOG, [DLG_CSS, title, body, wait])
+            pg.wait_for_timeout(120)
+            pg.screenshot(path=str(OUT / ("%s-%s.png" % (name, theme))))
+            print("  wrote %s-%s.png" % (name, theme))
+            # And the box alone, so the words can be read at true size.
+            pg.query_selector(".overlay.savedlg .modal").screenshot(
+                path=str(OUT / ("%s-box-%s.png" % (name, theme))))
+            print("  wrote %s-box-%s.png" % (name, theme))
+        pg.evaluate(HIDEDIALOG)
 
-        # WHERE IT SITS. Light only: placement is a question about the window,
-        # and answering it twice in two palettes says nothing new.
+        # WHAT IS LEFT AFTER IT IS CLOSED. The dialog can be dismissed — you
+        # have to be able to carry on working, and being offline lasts as long
+        # as it lasts — so something quiet has to stay, or the work is unsaved
+        # and nothing says so (§171). It is round two's card, in the corner the
+        # chat bubble does not occupy.
+        card(pg, "pop-a", POP_A, theme)
         if theme == "light":
-            for key, place in PLACES.items():
-                pg.evaluate(MOUNT, [POP_CSS, POP_A, place])
-                pg.wait_for_timeout(120)
-                pg.screenshot(path=str(OUT / ("place-%s.png" % key)))
-                print("  wrote place-%s.png" % key)
+            pg.evaluate(MOUNT, [POP_CSS, POP_A, PLACES["bl"]])
+            pg.wait_for_timeout(120)
+            pg.screenshot(path=str(OUT / "place-bl.png"))
+            print("  wrote place-bl.png")
         pg.close()
     br.close()
 

@@ -69,18 +69,19 @@
   strong { font-weight:600; color:var(--ink); }
   em { font-style:italic; }
 
-  /* THE SHOT PLATES. Three sizes, because three kinds of thing are being
-     shown: a whole window, a full-width banner, and a 360px card. Each is
-     displayed at the size it really is — a card blown up to the page's width
-     is a picture of a control the product does not have. */
+  /* THE SHOT PLATES. Four sizes, because four kinds of thing are shown: a
+     whole window, a full-width banner, a 460px dialog and a 360px card. Each
+     is displayed at the size it really is — a dialog blown up to the page's
+     width is a picture of a control the product does not have. */
   .plate { margin:0 0 8px; overflow-x:auto; background:var(--surface);
            border:1px solid var(--line); border-radius:8px; }
   .plate img { display:block; max-width:none; }
   .plate.win { padding:0; }
   .plate.win img, .plate.band img { width:1000px; }
-  .plate.card { display:inline-block; border:0; background:none;
-                border-radius:0; overflow:visible; }
+  .plate.card, .plate.box { display:inline-block; border:0; background:none;
+                            border-radius:0; overflow:visible; }
   .plate.card img { width:360px; }
+  .plate.box img { width:460px; }
   .cap { font-size:13.5px; color:var(--ink-3); margin:0 0 26px; max-width:74ch; }
   .cap b { color:var(--ink-2); font-weight:600; }
 
@@ -100,9 +101,9 @@
                width:6px; height:6px; border-radius:2px; background:var(--gold); }
   li b { color:var(--ink); font-weight:600; }
 
-  .cards { display:flex; flex-wrap:wrap; gap:26px; align-items:flex-start;
+  .cards { display:flex; flex-wrap:wrap; gap:30px; align-items:flex-start;
            margin:0 0 10px; }
-  .cards > div { max-width:400px; }
+  .cards > div { max-width:470px; }
 
   .ask { background:var(--surface); border:1px solid var(--line);
          border-left:4px solid var(--gold); border-radius:8px;
@@ -112,15 +113,23 @@
   .ask li::before { background:var(--panel); }
   :root[data-theme="dark"] .ask li::before { background:var(--gold); }
 
+  .warn { background:var(--bad-bg); border:1px solid var(--bad);
+          border-radius:8px; padding:18px 20px; max-width:var(--col);
+          margin:0 0 22px; }
+  .warn h3 { color:var(--bad-tx); margin-bottom:6px; font-size:18px; }
+  .warn p { color:var(--ink-2); }
+  .warn p:last-child { margin-bottom:0; }
+  :root[data-theme="dark"] .warn p { color:var(--ink-2); }
+
   .rule { color:var(--good-tx); font-weight:600; }
 </style>
 
 <div class="top">
   <div class="in">
     <p class="eyebrow">Mockup &middot; 2 September 2026 &middot; not built yet</p>
-    <h1>A pop-up that says you are offline</h1>
+    <h1>Offline, in the middle of the page</h1>
     <p>Every screen below is the platform&rsquo;s own, shot out of the built file
-      with the message mounted on the live page. Nothing here is drawn.</p>
+      with the dialog mounted on the live page. Nothing here is drawn.</p>
   </div>
 </div>
 
@@ -135,7 +144,7 @@
   <p class="cap">The exact banner you photographed, reproduced at a 1000&nbsp;px window.</p>
   <ul>
     <li><b>It is a strip at the top of the page</b> &mdash; far from where you
-      were typing, and it pushes the page down as it arrives.</li>
+      were typing, and easy to carry on working underneath.</li>
     <li><b>It does not say the one thing you need.</b> You are offline, and the
       sentence talks about the server &mdash; which sends you to look at
       something that is working perfectly.</li>
@@ -143,54 +152,66 @@
       status number anybody can act on, and it names nothing.</li>
     <li><b>The advice is backwards while you are offline.</b> It tells you to
       reload, and reloading is exactly what would throw the work away.</li>
-    <li><b>The two sentences run into each other.</b>
-      <em>&hellip;(Failed to fetch).Your change&hellip;</em> &mdash; no space, on
-      every failure the platform has ever reported, not only this one.</li>
   </ul>
 </section>
 
 <section>
   <div class="col">
     <span class="tag pick">Proposed</span>
-    <h3>The same card the chat corner is made of</h3>
-    <p>The platform already floats one card over the page &mdash; the Strategy
-      Office corner. This is that box: the same white, the same hairline, the
-      same corner radius and shadow. The only thing added is a red edge, which
-      is how the platform marks what kind of message something is without
-      turning the whole card into an alarm.</p>
+    <h3>The platform&rsquo;s own dialog, in the centre</h3>
+    <p>Not a centred version of something new &mdash; this is the box the merge
+      wizard, the person dialog and the screenshot viewer already open in. The
+      page dims behind it and stops taking clicks, which is what makes it read
+      as critical rather than as a notice.</p>
   </div>
-  <div class="plate card"><img src="{{pop-a-light}}" alt="Pop-up: You are offline — not saved yet. Your work is safe on screen. It will save by itself the moment you are back online. Do not reload while you are offline."></div>
-  <p class="cap"><b>Shown at its real size</b> &mdash; 360&nbsp;px wide, which is
-    the chat panel&rsquo;s width. Three lines, and the heading answers the
-    question before you read any of them.</p>
+  <div class="plate win"><img src="{{dlg-a-light}}" alt="The offline dialog centred over a dimmed page, with the chat bubble at the bottom right."></div>
+  <p class="cap">Shot at a 1000&nbsp;px window. The dialog is narrowed to
+    460&nbsp;px for this message &mdash; the shared dialog is 940&nbsp;px wide,
+    and 940&nbsp;px for three sentences is a wall.</p>
+  <div class="plate box"><img src="{{dlg-a-box-light}}" alt="The dialog on its own, at true size."></div>
+  <p class="cap"><b>The box at its real size.</b> The title is the answer, the
+    two lines are what to do, and the line at the foot says what it is waiting
+    for &mdash; a centred dialog that stops your work owes you that.</p>
 </section>
 
 <section>
   <div class="col">
-    <h2>Where it sits &mdash; the one real question</h2>
-    <p class="lede">The bottom-right corner is already taken by the Strategy
-      Office bubble, so this cannot go where a pop-up normally goes. The bubble
-      is in every shot below.</p>
+    <h2>Being offline lasts as long as it lasts</h2>
   </div>
+  <div class="warn">
+    <h3>So it has to be closeable</h3>
+    <p>A dialog that cannot be dismissed means nobody can touch the platform
+      until the connection comes back &mdash; a tunnel, a lift, a hotel
+      wifi. The work is safe on screen and typing more of it is safe too, so
+      locking the page would cost real work to say something the page has
+      already said.</p>
+    <p><strong>Keep working</strong> and the &times; both close it. What they
+      must not do is leave the screen silent, because the work still is not
+      stored.</p>
+  </div>
+  <div class="plate win"><img src="{{place-bl}}" alt="After closing: a small card in the bottom-left corner."></div>
+  <p class="cap"><b>What is left after it is closed.</b> The small card from the
+    last round, in the one bottom corner the Strategy Office bubble does not
+    occupy. It stays until the work is saved, and it goes by itself when the
+    save lands.</p>
+</section>
 
-  <span class="tag pick">A &middot; bottom left &mdash; recommended</span>
-  <div class="plate win"><img src="{{place-bl}}" alt="The pop-up at the bottom-left of the window, with the chat bubble at the bottom-right."></div>
-  <p class="cap"><b>Why this one.</b> It is the mirror of the corner the product
-    already docks a card in, it never covers the chat bubble, and it stays out
-    of the middle of the table you are working in. The cost: on a wide screen
-    it is the furthest point from where your eyes are.</p>
-
-  <span class="tag alt">B &middot; bottom centre</span>
-  <div class="plate win"><img src="{{place-bc}}" alt="The pop-up centred at the bottom of the window."></div>
-  <p class="cap"><b>Hardest to miss</b>, and it sits over the middle of the work
-    &mdash; on a plan table that is the row you were about to type into. On a
-    narrow window it also drifts towards the chat bubble.</p>
-
-  <span class="tag alt">C &middot; top right, under the chrome</span>
-  <div class="plate win"><img src="{{place-tr}}" alt="The pop-up at the top right, below the navigation."></div>
-  <p class="cap"><b>Nearest to where the banner used to be.</b> It lands on the
-    page&rsquo;s own pinned title and its controls &mdash; the row carrying
-    Arrange, Bands, the pen &mdash; and covers them while it is up.</p>
+<section>
+  <div class="col">
+    <h2>The one real cost of the centre</h2>
+  </div>
+  <div class="warn">
+    <h3>The platform has exactly one dialog, and it may be in use</h3>
+    <p>Every dialog in the product opens in the <em>same</em> element &mdash;
+      opening one overwrites whatever was in it. So if a save fails while
+      somebody is halfway through the person dialog or the merge wizard, an
+      offline message using that element would <strong>destroy the dialog they
+      were working in</strong>.</p>
+    <p>The fix is not complicated and it is not free: this message gets an
+      overlay of its own that stacks above, and closing it must put the page
+      back the way it found it rather than releasing a page another dialog is
+      still holding.</p>
+  </div>
 </section>
 
 <section>
@@ -202,15 +223,17 @@
   <div class="cards">
     <div>
       <span class="tag pick">A &middot; recommended</span>
-      <div class="plate card"><img src="{{pop-a-light}}" alt="Wording A."></div>
+      <div class="plate box"><img src="{{dlg-a-box-light}}" alt="Wording A."></div>
       <p class="cap">The plain voice you settled for the slow-start message: no
-        &ldquo;server&rdquo;, no &ldquo;database&rdquo;.</p>
+        &ldquo;server&rdquo;, no &ldquo;database&rdquo;. The title alone answers
+        the question.</p>
     </div>
     <div>
       <span class="tag alt">B</span>
-      <div class="plate card"><img src="{{pop-b-light}}" alt="Wording B."></div>
-      <p class="cap">The banner&rsquo;s existing voice. Four lines instead of
-        three, and it ends on the word <em>database</em>.</p>
+      <div class="plate box"><img src="{{dlg-b-box-light}}" alt="Wording B."></div>
+      <p class="cap">The banner&rsquo;s existing voice. It says
+        <em>not saved</em> in the title and ends on the word
+        <em>database</em>.</p>
     </div>
   </div>
 </section>
@@ -220,17 +243,17 @@
     <h2>The other two ways a save fails</h2>
     <p class="lede">A save fails three ways and only one of them is being
       offline. A person meets one at a time and has to tell them apart, so all
-      three wear the same card.</p>
+      three wear the same dialog.</p>
   </div>
   <div class="cards">
     <div>
-      <div class="plate card"><img src="{{pop-unreached-light}}" alt="Not saved — the server did not answer."></div>
+      <div class="plate box"><img src="{{dlg-unreached-box-light}}" alt="Not saved — the server did not answer."></div>
       <p class="cap"><b>Online, and no answer.</b> The browser&rsquo;s
         &ldquo;Failed to fetch&rdquo; goes to the console, where the one person
         who can act on it looks.</p>
     </div>
     <div>
-      <div class="plate card"><img src="{{pop-server-light}}" alt="Not saved — the server answered HTTP 500."></div>
+      <div class="plate box"><img src="{{dlg-server-box-light}}" alt="Not saved — the server answered HTTP 500."></div>
       <p class="cap"><b>The server answered with an error.</b> The number stays
         deliberately &mdash; it is what sends somebody to the right place.</p>
     </div>
@@ -245,11 +268,9 @@
       rows and offers two ways out.</p>
   </div>
   <div class="plate band"><img src="{{refusal-banner-light}}" alt="The refusal banner, naming two rows and carrying two buttons."></div>
-  <p class="cap"><b>This one is not moved.</b> It carries a list that grows with
-    the number of rows and two controls that have to be read before either is
-    pressed &mdash; a 360&nbsp;px card in the corner is the wrong shape for it,
-    and a decision you must take should not sit where a passing notice sits.
-    <b>Say if you want it moved too</b> and it is drawn again.</p>
+  <p class="cap"><b>This one is not moved.</b> Its list grows with the number of
+    rows, and both buttons have to be read before either is pressed.
+    <b>Say if you want it centred too</b> and it is drawn again.</p>
 </section>
 
 <section>
@@ -257,22 +278,21 @@
     <h2>How it behaves</h2>
   </div>
   <ul>
-    <li><b>It appears when a save fails</b>, and stays while the work is
-      unsaved. It does not stack: one card, rewritten.</li>
-    <li><b>It goes by itself.</b> The platform retries every five seconds while
-      the tab is open, and a save that lands takes the card away &mdash; so
-      coming back online clears it within about five seconds. Nothing to
-      press.</li>
-    <li><b>No close button, recommended.</b> The card is the only thing saying
-      the work is not stored; a &times; would let it be dismissed while that is
-      still true. <b>Say if you want one</b> &mdash; the alternative is that
-      closing it shrinks it to a small marker rather than removing it.</li>
+    <li><b>It opens the moment a save fails</b>, wherever you are in the
+      platform.</li>
+    <li><b>Once, not every five seconds.</b> The platform retries constantly
+      while it is offline; the dialog is raised for the episode, not for each
+      attempt, or closing it would achieve nothing.</li>
+    <li><b>It closes itself when the save lands</b> &mdash; and so does the
+      corner card. Coming back online clears everything within about five
+      seconds, with nothing to press.</li>
+    <li><b>Escape closes it</b>, like every other dialog in the platform.</li>
     <li><b>Never on a projector.</b> Presentation mode drops it, the way it
       already drops the chat bubble.</li>
     <li><b>The work is genuinely waiting, not lost.</b>
       <span class="rule">Measured, not assumed:</span> the retry runs for as
       long as the tab stays open. Closing the tab while offline still loses it,
-      which is why the card says not to reload.</li>
+      which is why the dialog says not to reload.</li>
     <li><b>The chat corner is left alone.</b> It has the same blind spot in its
       own message. You named the save error, so it is flagged here rather than
       widened quietly.</li>
@@ -285,7 +305,7 @@
     <p class="lede">Same tokens as the light one, so nothing new was picked and
       nothing needs measuring.</p>
   </div>
-  <div class="plate card"><img src="{{pop-a-dark}}" alt="The pop-up in the dark palette."></div>
+  <div class="plate win"><img src="{{dlg-a-dark}}" alt="The offline dialog in the dark palette."></div>
   <p class="cap">Wording&nbsp;A, dark.</p>
 </section>
 
@@ -293,12 +313,13 @@
   <div class="ask">
     <h3>What I need from you</h3>
     <ul>
-      <li><b>Placement</b> &mdash; A, B or C.</li>
       <li><b>Wording</b> &mdash; A or B.</li>
-      <li><b>A close button</b> &mdash; none, or one that shrinks it to a
-        marker.</li>
-      <li><b>The refusal</b> &mdash; leave it a banner, or draw it as a card
-        too.</li>
+      <li><b>After it is closed</b> &mdash; the corner card, or nothing at
+        all.</li>
+      <li><b>When it opens</b> &mdash; the moment a save fails, or after a few
+        seconds, so a lift or a tunnel does not throw a dialog at somebody
+        mid-sentence.</li>
+      <li><b>The refusal</b> &mdash; leave it a banner, or centre it too.</li>
     </ul>
   </div>
   <p class="cap" style="margin-top:14px">Then it is one small piece of the save

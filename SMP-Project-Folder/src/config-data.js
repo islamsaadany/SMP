@@ -5723,9 +5723,15 @@ function outcomeOf(t){
   /* A NUMBER, not merely a non-empty string. The unit is stored on its own
      while the office is still choosing one — `outTarget` holds "%" before it
      holds "90%" — so a truthiness test would call that a target and start
-     scoring a row against nothing. */
+     scoring a row against nothing.
+
+     §249: ASKED OF THE SHARED RULE, because the same string now decides two
+     things — whether this row scores, and whether the plan still owes a
+     target — and two definitions of "is there a number in here" is how a
+     row comes to be counted as missing while quietly being scored (§53.5,
+     §42). The test is unchanged; only its home moved. */
   if (!t || !t.outTarget) return null;
-  if (isNaN(parseFloat(String(t.outTarget).replace(/[^0-9.]/g, "")))) return null;
+  if (!SMPRules.targetHasNumber(t.outTarget)) return null;
   return { dir: t.outDir || "\u2265", target: t.outTarget,
            compile: t.outCompile, actual: t.outActual };
 }

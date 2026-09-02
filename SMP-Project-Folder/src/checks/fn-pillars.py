@@ -281,6 +281,15 @@ with sync_playwright() as p:
             open_at(pg, t)
             pg.evaluate("()=>{ const d=document.querySelector('[data-fillcta]'); if(d) d.click(); }")
             pg.wait_for_timeout(400)
+            # §249: THE PRESS WALKS TO THE FIRST GAP, AND THE FIRST GAP MOVED.
+            # A tactic's outcome and its target are counted now, so on a
+            # pillars function the walk lands on the plan section and the
+            # Overview — where the Definition is — is no longer on screen: the
+            # probe found no row and reported a build that behaves correctly as
+            # broken. The section is named rather than inherited from wherever
+            # the walk stopped, which is what the claim was always about.
+            pg.evaluate("()=>{ CURSEC.fnstrat='found'; paint(); }")
+            pg.wait_for_timeout(400)
             defc = pg.evaluate("""()=>{
               const rows=[...document.querySelectorAll('#panel *')].filter(
                 e=>e.children.length===0 && /^Definition$/.test((e.textContent||'').trim()));

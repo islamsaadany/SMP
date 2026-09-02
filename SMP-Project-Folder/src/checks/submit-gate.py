@@ -141,11 +141,39 @@ with sync_playwright() as p:
         if (m.actual == null || m.actual === "") m.actual = m.target;
         m.note = m.note || "explained";
       });
+      /* §249 MADE A TACTIC'S OUTCOME AND ITS TARGET OWED, and the shipped
+         plan carries neither on any row — so "owing nothing" stopped being
+         true of this fixture the day that landed, and the assertion below
+         read a deliberate decision as a regression. The fixture writes them
+         the way it already writes every other missing figure: this section is
+         about the SUBMIT GATE, and the gate's own subject is a plan with
+         nothing left in it. That the two new fields DO shut the gate is
+         asserted on its own below. */
+      (u.items || []).forEach(p => (p.tactics || []).forEach(t => {
+        if (!t.outcome)   t.outcome   = "Something measurable";
+        if (!t.outTarget) t.outTarget = "6 #";
+      }));
       paint();
     }""")
     pg.wait_for_timeout(400)
     r = bar_state(pg)
     ck("a report owing nothing offers a live Submit", r["dim"] is None, r)
+
+    # §249: AND THE TWO NEW FIELDS SHUT IT THE SAME WAY, asserted here rather
+    # than trusted from the list — the gate reads gapMap, and a build that
+    # counted them everywhere except the submission gate would be the one
+    # exception the product does not have.
+    for fld, word in (("outcome", "outcome"), ("outTarget", "target")):
+        pg.evaluate("""(f) => { delete UNITS[current].items[0].tactics[0][f]; paint(); }""", fld)
+        pg.wait_for_timeout(300)
+        rr = bar_state(pg)
+        ck("a tactic with no %s shuts Submit (§249)" % word, rr["dim"] == "true", rr["tip"])
+        ck("...naming the plan", "missing in the plan" in rr["tip"], rr["tip"])
+        pg.evaluate("""(f) => { UNITS[current].items[0].tactics[0][f] =
+          f === "outcome" ? "Something measurable" : "6 #"; paint(); }""", fld)
+        pg.wait_for_timeout(300)
+    ck("...and putting them back opens it again", bar_state(pg)["dim"] is None,
+       bar_state(pg))
 
     # 3 - A GAP IN THE PLAN SHUTS IT AGAIN, WHOEVER IS LOOKING
     print("\n3 · a plan gap shuts Submit, and the count ignores the viewer")

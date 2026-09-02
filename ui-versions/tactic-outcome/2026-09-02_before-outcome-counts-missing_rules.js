@@ -836,30 +836,7 @@
        the machinery §145.10 built is untouched and one word gives it back.
        The `owner` stays, because a line nobody owns is a line nobody can
        report. */
-    /* §249: THE OUTCOME AND ITS TARGET ARE OWED, REVERSING §248's OWN
-       EXCLUSION. Islam: *"the tactics outcome and target are not counting
-       missing in the units plans. they should count as missing."*
-
-       §248 built both fields and deliberately kept them out of this list —
-       *"the risk was noise, so the default is quiet"* — because shipping
-       them counted would have put the red word on all 83 tactics in the
-       demo the day it landed. That was a judgement about the ROLLOUT and
-       he has now made the judgement about the PLAN: a tactic that names
-       nothing it should produce is a line nobody can measure, which is
-       the same argument that keeps `owner` here.
-
-       BOTH, and the target is the half that carries the arithmetic: an
-       outcome with no target scores nothing, and a target with no outcome
-       is a number with nothing to name it. Counting one and not the other
-       would leave a row half-owed with no way for the page to say which.
-
-       WHAT FOLLOWS FROM ONE LINE, stated because it is the cost he
-       accepted: they become FILLABLE (this list is the floor of
-       GAP_FILLABLE, §205), the band, the rail, the chips and the Next-gap
-       walk all count them (§116.2), and SUBMIT REFUSES while any tactic
-       still owes one (§221 reads the same map) — so no unit submits until
-       its plan is written through. */
-    tactic:  ["owner", "quarters", "outcome", "outTarget"],
+    tactic:  ["owner", "quarters"],
     /* §214.2: A FUNCTION'S KEY OBJECTIVES ARE NOT COUNTED (Islam: *"the key
        objectives should not count as missing in the functions in general.
        The definition is OK and the owner is OK, but the key objective
@@ -1099,25 +1076,6 @@ var GAP_OPTIONAL = { tactic: ["collaborators"],
      site having to remember which it is. */
   var GAP_WHEN = ["start", "end", "finish"];
   function gapWhenField(f) { return GAP_WHEN.indexOf(f) > -1; }
-
-  /* ── A TARGET IS A NUMBER, AND A UNIT ON ITS OWN IS NOT ONE (§249) ──
-     §248 lets the office pick what an outcome is measured in before
-     deciding how much of it — `outTarget` holds "%" for as long as it takes
-     to type 90 — so the field is legitimately non-blank while holding
-     nothing anybody can be measured against: `outcomeOf` refuses to score
-     it and the tactic goes on being read the old way.
-
-     A BLANK TEST WOULD THEREFORE CALL THAT ROW ANSWERED. §184's rule, with
-     a number in place of a date: a gap is a place holding nothing the
-     platform can USE, and a value the reader cannot parse is one. The
-     PRODUCT's own definition of "is there a number in here" is what is
-     asked (`outcomeOf` calls this too), or the count and the score would
-     disagree about the same string — the drift §42 exists to prevent. */
-  var GAP_NUM = ["outTarget"];
-  function gapNumField(f) { return GAP_NUM.indexOf(f) > -1; }
-  function targetHasNumber(v) {
-    return !isNaN(parseFloat(String(v == null ? "" : v).replace(/[^0-9.]/g, "")));
-  }
   /* IS THIS FIELD A GAP — the ONE test the screen, the counts, the deck and
      the server all ask. A gap is a place holding nothing the platform can
      USE, which for a date includes a value it cannot read: a milestone due
@@ -1128,7 +1086,6 @@ var GAP_OPTIONAL = { tactic: ["collaborators"],
      and a filler who tried had the whole save refused. */
   function gapEmptyValue(field, v) {
     if (gapBlank(v)) return true;
-    if (gapNumField(field)) return !targetHasNumber(v);
     return gapWhenField(field) && !whenReadable(v);
   }
   function gapEmpty(field, row) {
@@ -2209,8 +2166,6 @@ var GAP_OPTIONAL = { tactic: ["collaborators"],
     gapBlank: gapBlank, quartersBlank: quartersBlank,
     WHEN_MONTHS: WHEN_MONTHS, whenMonths: whenMonths, whenReadable: whenReadable,
     GAP_WHEN: GAP_WHEN, gapWhenField: gapWhenField,
-    GAP_NUM: GAP_NUM, gapNumField: gapNumField,
-    targetHasNumber: targetHasNumber,
     actingFor: actingFor,
     gapEmptyValue: gapEmptyValue, gapEmpty: gapEmpty,
     pendOf: pendOf, mayFillPage: mayFillPage,

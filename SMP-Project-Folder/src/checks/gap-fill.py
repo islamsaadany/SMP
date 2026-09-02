@@ -108,6 +108,16 @@ with sync_playwright() as p:
       x.items[0].tactics.slice(1).forEach(tt => {
         if (!(tt.collaborators || []).length) tt.collaborators = ["Somebody"];
       });
+      /* §249 made a tactic's outcome and its target counted gaps, and the
+         shipped plan has neither on any row — so every tactic on this pillar
+         is given both, exactly as the line above gives them a collaborator,
+         and the fixture goes on holding the gaps it MEANT to hold. The
+         outcome's own fill is proved on its own below, where the state is
+         made deliberately rather than inherited. */
+      x.items[0].tactics.forEach(tt => {
+        if (!tt.outcome)   tt.outcome   = "Something measurable";
+        if (!tt.outTarget) tt.outTarget = "6 #";
+      });
       x.keyObjectives[0].target = "";
       paint();
     }""", who["unit"])
@@ -296,6 +306,68 @@ with sync_playwright() as p:
       return SMPRules.namedOn(t, { key: "nh", name: name });
     }""", who)
     ck("...and counts the moment the mark lifts", r is True)
+    pg.click('.pane .paneact .fdone[data-page="plan"]'); pg.wait_for_timeout(300)
+
+    # ── 8b · THE OUTCOME AND ITS TARGET FILL, AND ONLY THOSE TWO (§249) ─
+    print("\n8b · a tactic's outcome and its target fill; the two beside them do not")
+    # §205's PAIRING, ASSERTED FROM THE SCREEN'S SIDE. The server half is in
+    # test-authorize.js §26; this is the half that opens the box. A build that
+    # counted these and never drew a control is §223 exactly — the server
+    # accepts a save the screen has no way of producing — and one that drew
+    # the direction and the compile rule beside them would offer a filler an
+    # edit the save refuses, costing the fills in the same post (§184).
+    pg.evaluate("""(w) => {
+      const t = UNITS[w.unit].items[0].tactics[0];
+      delete t.outcome; delete t.outTarget; delete t.outDir; delete t.outCompile;
+      if (t.pend) { delete t.pend.outcome; delete t.pend.outTarget; }
+      paint();
+    }""", who)
+    be(pg, who["cust"], who["unit"], "strategy", "plan")
+    # THE STATE IS ASSERTED BEFORE IT IS CLEARED, or every assertion below is
+    # satisfied by a build that never counted these at all: emptied, they must
+    # be OWED, and the point of the section is that filling them settles it.
+    owed = pg.evaluate("""(w) => SMPRules.gapMissing(
+      "tactic", UNITS[w.unit].items[0].tactics[0])""", who)
+    ck("an empty outcome and target are owed to start with",
+       "outcome" in owed and "outTarget" in owed, owed)
+    pg.click('.pane .paneact .fillcta[data-fillcta="plan"]'); pg.wait_for_timeout(400)
+    r = pg.evaluate("""(w) => {
+      const row = document.querySelector('.pane tbody tr');
+      const grid = document.querySelector('.pane td.tgtcell .tgrid');
+      if (!grid) return { nogrid: true };
+      const out = { boxes: [...grid.children].filter(c => !c.classList.contains('ss-native')).length,
+                    opens: grid.querySelectorAll('.fld').length,
+                    folds: !!document.querySelector('.pane td.tgtcell') };
+      const area = [...document.querySelectorAll('.pane textarea.fld.gapfld')]
+        .filter(a => a.closest('td') && a.closest('td').cellIndex === 2)[0];
+      if (area) { area.value = "Stores opened";
+                  area.dispatchEvent(new Event('change', { bubbles: true })); }
+      const num = grid.querySelector('input.fld');
+      if (num) { num.value = "6"; num.dispatchEvent(new Event('change', { bubbles: true })); }
+      const t = UNITS[w.unit].items[0].tactics[0];
+      out.outcome = t.outcome; out.target = t.outTarget;
+      out.marks = Object.keys(t.pend || {});
+      return out;
+    }""", who)
+    ck("the four boxes are still four in fill mode", r.get("boxes") == 4, r)
+    # TWO OF THE FOUR OPEN AND TWO READ. The direction and the compile rule
+    # carry working defaults, so they are not gaps — drawn read-only rather
+    # than dropped, because inside a block of four equal boxes a hole reads as
+    # a control that failed to render (§248's own ruling about the unit).
+    ck("...and exactly two of them open", r.get("opens") == 2, r)
+    # §61: the cell keeps `.tgtcell` while it holds controls, or below 880 the
+    # Target column folds away and takes the only way to set one with it.
+    ck("...in a cell the narrow layout cannot fold away", r.get("folds"), r)
+    ck("the outcome written by a filler reaches the plan",
+       r.get("outcome") == "Stores opened", r)
+    ck("...and so does the target", str(r.get("target", "")).startswith("6"), r)
+    ck("...both stamped with the fill mark",
+       "outcome" in (r.get("marks") or []) and "outTarget" in (r.get("marks") or []), r)
+    # AND THE ROW STOPS BEING COUNTED, or the page would go on asking for what
+    # it has just been given (§116.2: the count and the field are one list).
+    left = pg.evaluate("""(w) => SMPRules.gapMissing(
+      "tactic", UNITS[w.unit].items[0].tactics[0])""", who)
+    ck("...so neither is still owed", "outcome" not in left and "outTarget" not in left, left)
     pg.click('.pane .paneact .fdone[data-page="plan"]'); pg.wait_for_timeout(300)
 
     # ── 9 · THE COUNTS THAT FIND YOU (§145.14) ──────────────────────────

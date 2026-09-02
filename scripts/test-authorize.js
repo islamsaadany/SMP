@@ -1402,8 +1402,19 @@ console.log("\n16 · fill the gaps (§145, spec 023)");
         (v.refusals || []).join(" / "));
   check("...and is still NOT counted as missing",
         R.GAP_FIELDS.tactic.indexOf("collaborators") < 0, R.GAP_FIELDS.tactic);
-  check("...so a tactic owing nothing else counts 0",
-        R.gapMissing("tactic", { owner: "Somebody", q1: 1, collaborators: [] }).length === 0,
+  /* §249 MOVED THE TOTAL AND NOT THE POINT. This asserted that a tactic
+     owning nothing else counts ZERO, which was a fair vehicle for "an empty
+     collaborators list is not owed" while owner and quarters were the whole
+     list — and §249 added the outcome and its target, so the literal now
+     reports a deliberate decision as a regression (§214.3, the fourth time
+     this file has recorded a number outliving the decision behind it). What
+     it exists to say is that the EMPTY LIST adds nothing, so it asks exactly
+     that: the same row with and without the field counts the same. */
+  check("...so an empty collaborators list adds nothing to the count",
+        R.gapMissing("tactic", { owner: "Somebody", q1: 1, collaborators: [],
+                                 outcome: "O", outTarget: "6 #" }).length ===
+        R.gapMissing("tactic", { owner: "Somebody", q1: 1,
+                                 outcome: "O", outTarget: "6 #" }).length,
         R.gapMissing("tactic", { owner: "Somebody", q1: 1, collaborators: [] }));
   /* AND THE THING §187 ACTUALLY GUARDED IS UNTOUCHED: a list that already
      has somebody in it is not a gap and never opens to the filler. */
@@ -1423,9 +1434,11 @@ console.log("\n16 · fill the gaps (§145, spec 023)");
   check("...and collaborators is off the tactic's gap list",
         R.GAP_FIELDS.tactic.indexOf("collaborators") === -1,
         JSON.stringify(R.GAP_FIELDS.tactic));
-  check("...while a tactic owning nobody still owes nothing for it",
-        R.gapMissing("tactic", { owner: "A", q1: 1 }).length === 0,
-        JSON.stringify(R.gapMissing("tactic", { owner: "A", q1: 1 })));
+  check("...while a tactic owning nobody is not asked for one",
+        R.gapMissing("tactic", { owner: "A", q1: 1, outcome: "O", outTarget: "6 #" })
+          .indexOf("collaborators") === -1,
+        JSON.stringify(R.gapMissing("tactic", { owner: "A", q1: 1,
+                                                outcome: "O", outTarget: "6 #" })));
   /* THE OTHER END: the owner is still fillable, and is the reason it stayed —
      a line nobody owns is a line nobody can report. */
   s = gappy();
@@ -2524,6 +2537,104 @@ console.log("\n24 · the Overview is mandatory; its definition is the office's (
     r = fromStored(sf3, "smo", function (i) { i.functions[FNP].def = "The office's wording."; });
     check("§214: the office rewrites it freely", r.ok, r.refusals.join(" / "));
   }
+})();
+
+console.log("\n26 \u00b7 a tactic's outcome and its target are owed (\u00a7249)");
+(function () {
+  /* Islam: *"the tactics outcome and target are not counting missing in the
+     units plans. they should count as missing."* \u00a7248 built both fields and
+     deliberately left them out of the counted list; this is that reversal,
+     and what has to be true on the SERVER for it is that the fill grant can
+     now write them \u2014 counted and fillable are one list's floor (\u00a7205), so a
+     build that counted them here and refused the save would be \u00a7184 exactly:
+     a red chip, a control that opens, and a save that costs the fills beside
+     it. */
+  const MARK3 = { by: "own_it", at: "2026-09-02T00:00:00.000Z" };
+  /* The two helpers every fill section builds for itself \u2014 each IIFE in this
+     file keeps its own rather than hoisting them into a shared scope nothing
+     else expects. */
+  function withAccess(role, patch) {
+    const s = clone(SEED);
+    s.access = Object.assign({}, s.access,
+      { [role]: Object.assign({}, (s.access || {})[role], patch) });
+    return s;
+  }
+  function fromStored(stored, who, mutate) {
+    const inc = clone(stored); mutate(inc);
+    return A.authorize(stored, inc, personOf(stored, who));
+  }
+  const UK = Object.keys(SEED.units)[0];
+  const CUST = SEED.unitRoles && SEED.unitRoles[UK] && SEED.unitRoles[UK].custodian;
+  check("\u00a7249: the seed holds a unit custodian to test with", !!CUST, UK);
+  if (!CUST) return;
+  const base = function (patch) {
+    const s = withAccess("custodian", patch || { a_unit_own_strat: "fill" });
+    s.unitRoles = Object.assign({}, s.unitRoles,
+      { [UK]: Object.assign({}, (s.unitRoles || {})[UK], { custodian: CUST }) });
+    const t = s.units[UK].items[0].tactics[0];
+    delete t.outcome; delete t.outTarget; delete t.outDir; delete t.outCompile;
+    return s;
+  };
+  const T = function (i) { return i.units[UK].items[0].tactics[0]; };
+
+  /* BOTH FIELDS, SEPARATELY, because one of them passing says nothing about
+     the other \u2014 they take different paths on the screen (a growing text box
+     and a four-control block) and it is one list that has to carry both. */
+  let r = fromStored(base(), CUST, function (i) {
+    const t = T(i); t.outcome = "Share of wallet up"; t.pend = { outcome: MARK3 };
+  });
+  check("\u00a7249 FILL: an empty outcome is the custodian's to write",
+        r.ok, (r.refusals || []).join(" / "));
+  r = fromStored(base(), CUST, function (i) {
+    const t = T(i); t.outTarget = "6 #"; t.pend = { outTarget: MARK3 };
+  });
+  check("\u00a7249 FILL: ...and so is an empty target", r.ok, (r.refusals || []).join(" / "));
+
+  /* A UNIT ON ITS OWN IS NOT A TARGET (\u00a7249's numeric rule), so typing the
+     number that completes it is still a FILL and not an amend \u2014 which is what
+     lets the office pick the unit first without closing the box behind them. */
+  let s2 = base(); T(s2).outTarget = "%";
+  r = fromStored(s2, CUST, function (i) {
+    const t = T(i); t.outTarget = "90%"; t.pend = { outTarget: MARK3 };
+  });
+  check("\u00a7249 FILL: a target holding only a unit is still empty", r.ok,
+        (r.refusals || []).join(" / "));
+
+  /* AND THE OTHER END, or the assertions above are satisfied by a build that
+     accepts anything a filler sends. */
+  s2 = base(); T(s2).outcome = "Already written.";
+  r = fromStored(s2, CUST, function (i) {
+    const t = T(i); t.outcome = "Rewritten."; t.pend = { outcome: MARK3 };
+  });
+  check("\u00a7249 REFUSED: an outcome already written is the office's", !r.ok, "was ALLOWED");
+  s2 = base(); T(s2).outTarget = "6 #";
+  r = fromStored(s2, CUST, function (i) {
+    const t = T(i); t.outTarget = "9 #"; t.pend = { outTarget: MARK3 };
+  });
+  check("\u00a7249 REFUSED: ...and so is a target already set", !r.ok, "was ALLOWED");
+
+  /* THE TWO NEIGHBOURS ARE NOT GAPS, and this is why the screen draws them
+     read-only in fill mode: both carry a working default, so a filler writing
+     one is authoring \u2014 and a save is all or nothing, so it would cost the
+     fills beside it (\u00a7184). */
+  r = fromStored(base(), CUST, function (i) {
+    const t = T(i); t.outDir = "\u2264"; t.pend = { outDir: MARK3 };
+  });
+  check("\u00a7249 REFUSED: the direction is not a gap", !r.ok, "was ALLOWED");
+  r = fromStored(base(), CUST, function (i) {
+    const t = T(i); t.outCompile = "Sum"; t.pend = { outCompile: MARK3 };
+  });
+  check("\u00a7249 REFUSED: nor is the compile rule", !r.ok, "was ALLOWED");
+
+  /* AND THE OFFICE AUTHORS ALL FOUR FREELY \u2014 locking something down proves
+     nothing unless the right person stayed open (\u00a7102). */
+  r = fromStored(base(), "smo", function (i) {
+    const t = T(i);
+    t.outcome = "The office's wording."; t.outTarget = "12 #";
+    t.outDir = "\u2264"; t.outCompile = "Average";
+  });
+  check("\u00a7249: the office writes all four with no mark at all",
+        r.ok, (r.refusals || []).join(" / "));
 })();
 
 console.log("\n" + pass + " passed, " + fail + " failed");

@@ -27349,3 +27349,133 @@ and the *"+ Add a measure"* row on a plan with the pen open is **seven columns
 wide against a six-column header** — `addRow(cols)` emits `1 + cols` and §199.5
 passes 6 — reproduced on the untouched build, clamped by every browser, and
 outside what this was asked to touch.
+
+---
+
+## §249 — THE OUTCOME AND ITS TARGET ARE OWED (2026-09-02)
+
+Islam, on the shipped §248: *"the tactics outcome and target are not counting
+missing in the units plans. they should count as missing."*
+
+**§248 LEFT IT UNDONE ON PURPOSE, AND SAID WHOSE CALL IT WAS.** That section's
+own closing paragraph reads *"making the outcome a counted gap is one line and
+is Islam's to take"*, and its reasoning for the quiet default was about the
+**rollout**, not about the plan: the risk was noise, so an empty outcome drew a
+grey dash rather than putting the red word on all 83 tactics in the demo the
+day it landed. He has now made the judgement the other way, and it is recorded
+as his: a tactic that names nothing it should produce is a line nobody can
+measure, which is exactly the argument that has kept `owner` on the counted
+list since §145.
+
+**BOTH, BECAUSE HALF A ROW CANNOT BE SAID.** The target is the half that
+carries the arithmetic — an outcome with no target scores nothing — and the
+outcome is the half that names what the number is about. Counting one and not
+the other would leave a row half-owed with no way for the page to say which.
+
+**WHAT FOLLOWS FROM ONE LINE, PUT TO HIM BEFORE IT WAS WRITTEN.** `GAP_FIELDS`
+is the floor of `GAP_FILLABLE` (§205), and every count in the product reads the
+same map (§116.2), so adding two names to one array does four things at once:
+
+  · the plan says **Missing** where it said an em-dash;
+  · the band, the rail's per-pillar counts, the chips and the **Next gap** walk
+    all include them;
+  · they become **fillable**, so a custodian holding *Fill gaps* writes them —
+    which reverses §248's *"its target is the office's"*, and had to, because
+    counted-and-not-fillable would draw a red count with no control behind it
+    (§223) and the two lists cannot be separated in that direction;
+  · **Submit refuses** while any tactic still owes one (§221 reads the same
+    map), so no unit submits until its plans are written through.
+
+The last of those is the cost, it was stated with the arithmetic before a line
+was written, and he took it: *"count them fully."*
+
+**A TARGET HOLDING ONLY A UNIT IS STILL MISSING.** §248 deliberately lets the
+office pick what a thing is measured in before deciding how much of it —
+`outTarget` holds `"%"` for as long as it takes to type 90 — so a blank test
+would call that row answered while `outcomeOf` refuses to score it. §184's rule
+with a number in place of a date: a gap is a place holding nothing the platform
+can **use**. `GAP_NUM` names the field and `targetHasNumber()` is the test —
+**and `outcomeOf` now asks that same function**, because the same string
+decides two things and two definitions of *"is there a number in here"* is how
+a row comes to be counted as missing while quietly being scored (§42, §53.5).
+Its wording is unchanged from the one `outcomeOf` already had, so **no stored
+figure moves**: `EGP 500` scored before and scores now.
+
+**THE CELLS GO THROUGH `gapCell`, AND THE CONTROLS STAY THEIR OWN.** The
+outcome is prose that must wrap (§189) and the target is four boxes in one cell
+(§248) — neither is a plain input — so both use §130.1's control hook: the hook
+renders the control, gapCell keeps the pending mark, the red word and the walk
+mark. Three things fell out of building it:
+
+  · **`fillKind` had to be named**, or the cell opens to a filler whatever the
+    shared list says (§228.2). Without it the new section of `gap-fill.py`
+    passed on a build with the counting reverted — it was not yet a test.
+  · **The direction and the compile rule are drawn read-only in fill mode.**
+    Both carry a working default, so neither is a gap, and a filler writing one
+    would be authoring — refusing the whole save and costing the fills beside
+    it (§184). They are drawn rather than dropped: inside a block of four equal
+    boxes a hole reads as a control that failed to render, which is §248's own
+    ruling about the unit picker applied to its neighbours.
+  · **The cell keeps `.tgtcell` whenever it holds controls**, not only in the
+    pen. That class is what stops the Target column folding below 880 (§248),
+    and the fold must never take the only way to SET a target off the screen
+    (§61). It is read off the hook having run, never re-derived from gapCell's
+    own open-or-read decision, which would be a second copy of it (§53.5).
+
+**AND `outcomeCell` STOPPED SAYING DASH ON ALL THREE SURFACES.** §248 argued
+that em-dash straight from the count — *"it is not a counted gap, so saying
+Missing over a count of nought is §214.4's fault with the sign reversed"* — and
+the count is exactly what has changed, so the reason expired with it (§94.15: a
+decision resting on a sentence that has stopped being true does not get to
+stand on habit). One function serves the plan, Performance and Reporting, so
+the plan cannot call a row owed while Performance beside it calls the same row
+answered.
+
+**THE FOLD WAS HIDING THE NEW GAP.** Below 880 the Target column goes and its
+value rides under the outcome — drawn only where there was a target to show,
+which was harmless while an absent one said nothing. With the count naming the
+place, the one column that could show it is the column that has gone; it says
+Missing there instead.
+
+**PROVED ABLE TO FAIL, at both layers and in both halves.** With the two names
+taken back out of `GAP_FIELDS`: **3 red** in `test-authorize.js` §26 and **7
+red** in `gap-fill.py` §8b and **2 red** in `tactic-outcome.py` §1. With the
+numeric rule alone removed: **1 red**, the bare-unit case. 463/0 authoriser ·
+126/0 differ · 47/0 `tactic-outcome` · `gap-fill`, `gap-walk`, `submit-gate`,
+`table-fit`, `plan-fields`, `plan-columns`, `ytd-proration`, `hide-element`,
+`project-tables`, `plan-builder`, `milestone-fill`, `fn-pillars`,
+`deck-and-weights`, `fn-report-gate`, `project-custodian` green.
+
+**FOUR CHECKS HELD A LITERAL THIS DECISION MOVED** (§214.3, the fifth time this
+file has recorded one), and every one is **rewritten rather than deleted**
+(§218), so the reversal is deliberate and a later build cannot drift back
+through it unnoticed:
+
+  · `test-authorize.js` asserted that a tactic owing nothing else counts
+    **zero** — a fair vehicle for *"an empty collaborators list is not owed"*
+    while owner and quarters were the whole list. It asks the thing it is
+    about now: the same row with and without the field counts the same.
+  · `tactic-outcome.py` asserted the em-dash, and its sibling *"the missing
+    count is unchanged by it"* was `or True` — a no-op standing in for a claim.
+    Both now assert the count and the word AGREE, which is §177's own subject.
+  · `gap-fill.py`'s fixture makes exactly three gaps and hands every other row
+    a collaborator so the counts stay deterministic; it hands them an outcome
+    and a target the same way.
+  · `submit-gate.py` builds a report *"owing nothing"* — which stopped being
+    true of the shipped plan. It writes the two fields with the other figures,
+    and the claim that they DO shut the gate is asserted on its own beside it.
+  · `fn-pillars.py` pressed the fill door and read whatever was on screen. The
+    press walks to the first gap (§145.14) and the first gap moved, so on a
+    pillars function the walk lands on the plan and the Overview it was asking
+    about is no longer drawn — it names the section now. **A check that
+    reported a correct build as broken**, and the third time this file has
+    recorded one.
+
+**RECORDED, NOT DONE.** The **plan deck** (`pptx.js`) draws a tactic as
+Tactic · Owner · Collaborators · Q1–Q4 and has no column for either new field,
+so §119's rule — *the deck names what the plan owes* — is now true of six of a
+tactic's eight counted-or-shown facts and not of these two. Adding two columns
+to a seven-column slide is a layout change and wants a mockup (rule 1c) rather
+than a quiet widening. And `plan-wrap.py` fails *"a unit's Plan @1100 nothing is
+cut off"* with five clipped fields — **reproduced on the untouched build**, so
+it is not this change and is not fixed here.

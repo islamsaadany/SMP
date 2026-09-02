@@ -499,6 +499,47 @@ console errors (in this cloud environment, run it via a wrapper that points Play
   different targets never touch. Proved able to fail: 11 red on the differ's
   pre-build, and end-to-end on a real Postgres the whole-graph flag fails
   with the reported sentence to the word.
+- **THE OUTCOME AND ITS TARGET ARE OWED (§249, reversing §248's own
+  exclusion):** Islam — *"the tactics outcome and target are not counting
+  missing in the units plans. they should count as missing."* §248 left it
+  undone deliberately and said whose call it was (*"one line and is Islam's to
+  take"*): its quiet default answered a question about the ROLLOUT — the risk
+  was noise — not about the plan. **BOTH, because half a row cannot be said**:
+  the target carries the arithmetic, the outcome names what the number is
+  about. **ONE LINE DOES FOUR THINGS** and all four were put to him with the
+  arithmetic before it was written: the page says Missing, every count and the
+  Next-gap walk include them, they become FILLABLE (`GAP_FIELDS` is the floor
+  of `GAP_FILLABLE`, §205 — counted-and-not-fillable would be a red count with
+  no control behind it, §223), and **Submit refuses while any tactic still owes
+  one** (§221 reads the same map). That last is the cost, and he took it.
+  **A TARGET HOLDING ONLY A UNIT IS STILL MISSING** — §248 lets the office pick
+  what a thing is measured in before deciding how much of it, so `outTarget` is
+  `"%"` for as long as it takes to type 90 and a blank test would call that row
+  answered while `outcomeOf` refuses to score it (§184's rule with a number in
+  place of a date). `GAP_NUM` + `targetHasNumber()`, **and `outcomeOf` asks that
+  same function**, or the count and the score would disagree about one string
+  (§42, §53.5); the wording is the one it already had, so **no stored figure
+  moves**. **THE CELLS GO THROUGH `gapCell` AND THE CONTROLS STAY THEIR OWN**
+  (§130.1's hook: prose that wraps, and four boxes in one cell) — **`fillKind`
+  named**, or the cell opens whatever the shared list says and the new check
+  passes on a reverted build (§228.2, and it did); **the direction and compile
+  rule read-only in fill mode**, because both carry a default so neither is a
+  gap and a filler writing one would refuse the whole save (§184) — drawn, not
+  dropped, since a hole among four equal boxes reads as a control that failed
+  to render; and **`.tgtcell` kept wherever controls are drawn**, read off the
+  hook having run rather than re-derived, or below 880 the fold takes the only
+  way to set a target off the screen (§61). **`outcomeCell` stopped saying
+  dash on all three surfaces** — that em-dash was argued straight from the
+  count, so the reason expired with it (§94.15) — and **the narrow fold says
+  Missing** rather than hiding the one place the count names. Proved able to
+  fail: **3 / 7 / 2 red** with the names taken back out, **1 red** with the
+  numeric rule alone removed. **FOUR CHECKS HELD A LITERAL THIS MOVED**
+  (§214.3, fifth time), all REWRITTEN not deleted (§218) — including one that
+  was `or True` and one that **reported a correct build as broken**, because
+  the fill door walks to the first gap and the first gap moved. **RECORDED,
+  NOT DONE**: the plan deck has no column for either field, so §119's rule is
+  now true of six of a tactic's eight facts and not these two — two more
+  columns on a seven-column slide wants a mockup, not a quiet widening.
 - **A TACTIC IS JUDGED BY WHAT IT PRODUCED (§248):** Islam — *"the tactics
   have outcomes that we need to have in our tactics plan so we can measure the
   progress against"*, and *"the outcome needs to have a target and measuring
@@ -4154,7 +4195,53 @@ prior sessions (on HR_ERP) accidentally reverted agreed-upon designs.
 
 ---
 
-*Last Updated: 2026-09-02 &mdash; **&sect;248: a tactic is judged by what it
+*Last Updated: 2026-09-02 &mdash; **&sect;249: the outcome and its target are
+owed.** Islam, on the shipped &sect;248: *"the tactics outcome and target are
+not counting missing in the units plans. they should count as missing."* That
+section left it undone deliberately and said whose call it was &mdash; *"one
+line and is Islam's to take"* &mdash; because its quiet default answered a
+question about the ROLLOUT (the risk was noise, and 83 demo tactics would have
+gained the red word overnight) and not about the plan. **BOTH FIELDS, because
+half a row cannot be said**: the target carries the arithmetic, the outcome
+names what the number is about. **ONE LINE DOES FOUR THINGS**, all four put to
+him with the arithmetic before anything was written: the page says Missing
+where it said an em-dash, every count and the Next-gap walk include them, they
+become **fillable** (`GAP_FIELDS` is the floor of `GAP_FILLABLE`, &sect;205 &mdash;
+counted-and-not-fillable is a red count with no control behind it, &sect;223),
+and **Submit refuses while any tactic still owes one** (&sect;221 reads the same
+map). The last is the cost and he took it: *"count them fully."*
+**A TARGET HOLDING ONLY A UNIT IS STILL MISSING** &mdash; `outTarget` is `"%"`
+for as long as it takes to type 90, so a blank test would call that row
+answered while `outcomeOf` refuses to score it (&sect;184's rule with a number
+in place of a date); `GAP_NUM` + `targetHasNumber()`, **and `outcomeOf` asks
+that same function** or the count and the score disagree about one string
+(&sect;42, &sect;53.5) &mdash; its wording unchanged, so **no stored figure
+moves**. **THE CELLS GO THROUGH `gapCell` AND KEEP THEIR OWN CONTROLS**
+(&sect;130.1's hook): **`fillKind` named**, or the cell opens whatever the
+shared list says &mdash; and the new check duly passed on a reverted build
+until it was (&sect;228.2); **the direction and the compile rule read-only in
+fill mode**, drawn rather than dropped, because both carry a default so neither
+is a gap and a filler writing one would refuse the whole save (&sect;184);
+**`.tgtcell` kept wherever controls are drawn**, read off the hook having run
+rather than re-derived, or below 880 the fold takes the only way to set a
+target off the screen (&sect;61). **`outcomeCell` stopped saying dash on all
+three surfaces**, that em-dash having been argued straight from the count
+(&sect;94.15), and **the narrow fold says Missing** instead of hiding the one
+place the count names. Proved able to fail: **3 / 7 / 2 red** with the names
+taken back out, **1 red** with the numeric rule alone removed. 463/0 authoriser
+&middot; 126/0 differ &middot; 47/0 tactic-outcome &middot; fifteen other checks
+and the full `qa.py` sweep green. **FOUR CHECKS HELD A LITERAL THIS DECISION
+MOVED** (&sect;214.3, fifth time), every one REWRITTEN rather than deleted
+(&sect;218) &mdash; among them one whose assertion was `or True`, and one that
+**reported a correct build as broken** because the fill door walks to the first
+gap and the first gap moved. **RECORDED, NOT DONE**: the plan deck draws no
+column for either field, so &sect;119's *the deck names what the plan owes* is
+true of six of a tactic's eight facts and not these two &mdash; two more
+columns on a seven-column slide wants a mockup (rule 1c), not a quiet widening;
+and `plan-wrap.py`'s five clipped fields at 1100 reproduce on the untouched
+build.*
+
+*Earlier: 2026-09-02 &mdash; **&sect;248: a tactic is judged by what it
 produced.** Islam, from his own plan: *"the tactics have outcomes that we need
 to have in our tactics plan so we can measure the progress against"*, and
 *"the outcome needs to have a target and measuring unit so it can be reported

@@ -63,10 +63,38 @@ with sync_playwright() as p:
       return {rows:rows.length,
               reds:rows.filter(r=>r.children[i].querySelector('.missing')).length,
               dashes:rows.filter(r=>r.children[i].querySelector('.nobody')).length};}""")
-    ck("an empty outcome is QUIET, never the red word", quiet and quiet["reds"]==0 and quiet["dashes"]>0, quiet)
-    ck("the missing count is unchanged by it",
-       pg.evaluate("()=>{var b=document.querySelector('[data-fillopen],.missbar');return b?b.textContent:''}").find("Missing")<0
-       or True, "")
+    # §249 REVERSES §248's OWN QUIET STATE, at Islam's direction: *"the tactics
+    # outcome and target ... should count as missing"*. This asserted the
+    # em-dash and it is REWRITTEN rather than deleted (§218), so the reversal
+    # is deliberate and a later build cannot drift back through it unnoticed.
+    ck("an empty outcome says MISSING, not a dash",
+       quiet and quiet["reds"] > 0 and quiet["dashes"] == 0, quiet)
+    # AND THE COUNT AGREES WITH THE WORD. This used to be `or True` — a
+    # no-op standing in for a claim about a state that no longer exists — and
+    # it is the half §177 is about: the page saying Missing while the count
+    # says nothing is owed is the exact fault that feature was built to end.
+    counted = pg.evaluate("""()=>{ try{
+      var u=UNITS.mobile, n=0;
+      (u.items||[]).forEach(function(p){ (p.tactics||[]).forEach(function(t){
+        n += SMPRules.gapMissing('tactic', t).length; }); });
+      return {counted:n,
+              outcome:SMPRules.GAP_FIELDS.tactic.indexOf('outcome')>-1,
+              target:SMPRules.GAP_FIELDS.tactic.indexOf('outTarget')>-1};
+      }catch(e){ return {err:String(e)}; } }""")
+    ck("the outcome and its target are on the tactic's counted list",
+       counted.get("outcome") and counted.get("target"), counted)
+    ck("...so the plan's own count owes at least one per empty cell",
+       counted.get("counted", 0) >= quiet["reds"], (counted, quiet))
+    # A UNIT ON ITS OWN IS NOT A TARGET (§249): the office may pick what a
+    # thing is measured in before deciding how much of it, and a blank test
+    # would call that row answered while `outcomeOf` refuses to score it.
+    numrule = pg.evaluate("""()=>({
+      bare:  SMPRules.gapEmptyValue('outTarget','%'),
+      whole: SMPRules.gapEmptyValue('outTarget','90%'),
+      scored: outcomeOf({outTarget:'%'}) })""")
+    ck("a target holding only a unit is still missing",
+       numrule.get("bare") is True and numrule.get("whole") is False, numrule)
+    ck("...which is the same answer the score gives it", numrule.get("scored") is None, numrule)
     pg.close()
 
     # ── 2. the plan, writing — every control reaches the DATA ─────────

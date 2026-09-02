@@ -519,40 +519,16 @@ function outUnitOf(t){
      the moment a number was typed. */
   return /^-?[\d.,]+$/.test(parts.value) ? parts.unit : v;
 }
-/* §249: THE TARGET IS A COUNTED GAP, SO THE BLOCK IS DRAWN THROUGH `gapCell`
-   AND THE WRITE COMES BACK THROUGH IT. `set` is the wrapped setter — the
-   office's lifts the pending mark, the filler's stamps one — and it is handed
-   the finished `outTarget` string, because that one field is where the number
-   and its unit both live (§199, and §248's own reason for keeping it one
-   field). `set` absent keeps the old direct write, so a later caller that
-   knows nothing about the lifecycle still behaves as this always did.
-
-   `fillOnly` DRAWS THE OTHER TWO AND OPENS NEITHER. The direction and the
-   compile rule are not gaps — both carry a working default (§248: `≥`, and a
-   blank compile keeps the annual target) — so a filler writing one would be
-   authoring, and the save would refuse the WHOLE graph for it, costing the
-   fills beside it (§184). They are drawn read-only rather than dropped, which
-   is §248's own ruling about the unit picker applied to its neighbours:
-   inside a block of four equal boxes a hole reads as a control that failed to
-   render, not as one somebody else owns. */
-function outcomeEdit(t, set, pendCls, fillOnly){
+function outcomeEdit(t){
   var unit = outUnitOf(t);
-  var put  = set || function(v){
-    if (SMPRules.gapBlank(v)) delete t.outTarget; else t.outTarget = v;
-  };
-  /* THE WALK MARK GOES ON THE NUMBER AND NOWHERE ELSE. `gapwalk` is what
-     "Next gap" steps through (§177.2), and one gap wearing it twice would
-     cost two presses to walk one blank. */
-  var quiet = String(pendCls || "").replace(/\bgapwalk\b/g, "").trim();
   return '<div class="tgrid">' +
-    inputOr("plan", splitTarget(t.outTarget || "").value, "mono " + (pendCls || ""),
-            function(v){
+    inputOr("plan", splitTarget(t.outTarget || "").value, "mono", function(v){
       var n = String(v == null ? "" : v).trim();
       var u = outUnitOf(t);
       /* Cleared, the UNIT survives — somebody correcting a figure has not
          changed their mind about what it is measured in. */
-      if (!n) put(u || "");
-      else put(joinTarget(t.outTarget || "", n, u));
+      if (!n) { if (u) t.outTarget = u; else delete t.outTarget; }
+      else t.outTarget = joinTarget(t.outTarget || "", n, u);
     }) +
     /* THE UNIT PICKER IS ALWAYS THERE. The measures table hides it until a
        target exists — right in a column of its own, and wrong inside a block
@@ -560,65 +536,41 @@ function outcomeEdit(t, set, pendCls, fillOnly){
        draw (Islam: "the target column is missing the unit drop down"). So the
        unit can be chosen FIRST and is held on its own until a number arrives
        to join it: `outTarget` is "%" for as long as it takes to type 90. */
-    selectOr("plan", unit, targetUnitOpts(unit), quiet,
-             function(v){ put(nextTargetUnit(t, v)); }) +
-    (fillOnly
-      /* `.why` on BOTH, because `.tgrid > .why` is what centres a plain span
-         inside a `--tw` column — without it the direction sits left of the box
-         above it and the block stops reading as four equal ones, which is the
-         whole shape §248 settled. Quiet is also the honest colour: in this
-         mode they are facts, not controls. */
-      ? '<span class="why mono">' + esc(t.outDir || "\u2265") + '</span>' +
-        '<span class="why">' + esc(t.outCompile || "\u2014") + '</span>'
-      : selectOr("plan", t.outDir || "\u2265", ["\u2265", "\u2264"], "mono",
-                 function(v){ setOr(t, "outDir", v); }) +
-        selectOr("plan", t.outCompile || "", ["", "Sum", "Latest", "Average"], "",
-                 function(v){ setOr(t, "outCompile", v); })) +
+    selectOr("plan", unit, targetUnitOpts(unit), "", function(v){ setTargetUnit2(t, v); }) +
+    selectOr("plan", t.outDir || "\u2265", ["\u2265", "\u2264"], "mono",
+             function(v){ setOr(t, "outDir", v); }) +
+    selectOr("plan", t.outCompile || "", ["", "Sum", "Latest", "Average"], "",
+             function(v){ setOr(t, "outCompile", v); }) +
     '</div>';
 }
 /* `setTargetUnit` is written against a measure's `target`/`target3y` pair; the
    outcome has one field, so it asks the same question of that one — never a
-   second definition of how a unit joins a number (§53.5).
-
-   §249: IT ANSWERS WITH THE STRING AND WRITES NOTHING. The target is a
-   counted gap now, so every write to it goes through `gapCell`'s setter —
-   which stamps a filler's mark and lifts the office's — and a function that
-   assigned the field itself would slip past that lifecycle while looking
-   exactly like the one that does not. Emptied, it answers "" and the caller's
-   `del` deletes the key (§50.6). */
-function nextTargetUnit(t, u){
+   second definition of how a unit joins a number (§53.5). */
+function setTargetUnit2(t, u){
   var want = String(u == null ? "" : u).trim();
   var val  = splitTarget(t.outTarget || "").value;
   if (!/^-?[\d.,]+$/.test(val)) val = "";
   var cur  = { value: val, unit: outUnitOf(t) };
-  if (want === cur.unit) return t.outTarget || "";
+  if (want === cur.unit) return;
   /* With no number yet the unit is stored alone and joins the moment one is
-     typed; emptied with no number, the whole value goes. */
-  if (!cur.value) return want;
-  return joinTarget("", cur.value, want);
+     typed; emptied with no number, the key GOES (§50.6) rather than leaving a
+     row holding a target of "". */
+  if (!cur.value) { if (want) t.outTarget = want; else delete t.outTarget; return; }
+  t.outTarget = joinTarget("", cur.value, want);
 }
 
-/* ── A TACTIC'S OUTCOME, ON THE READING SURFACES (§248, §249) ──────
-   The outcome takes a column beside the figure it is judged by, on the plan,
-   on Performance and on Reporting.
-
-   §249: AN EMPTY ONE SAYS MISSING, REVERSING §248's OWN DASH. That dash was
-   argued from the count — *"it is not a counted gap, so saying Missing over a
-   count of nought is §214.4's fault with the sign reversed"* — and the count
-   is exactly what has changed, so the reason expired with it (§94.15's rule:
-   a decision resting on a sentence that has stopped being true does not get
-   to stand on habit). The other half of that sentence, that shipping it loud
-   would mark all 83 demo tactics at once, was a judgement about the rollout,
-   and Islam has now made it the other way.
-
-   ONE FUNCTION, THREE SURFACES, so the plan cannot call a row owed while
-   Performance beside it calls the same row answered (§53.5). The plan's own
-   cell reaches this through gapCell's `read` hook, which is what keeps the
-   fill lifecycle in one place. */
+/* ── A TACTIC'S OUTCOME, ON THE READING SURFACES (§248) ────────────
+   The outcome takes a column beside the figure it is judged by. An empty one
+   is a QUIET dash and never the red word: it is not a counted gap, so saying
+   "Missing" over a count of nought is §214.4's fault with the sign reversed —
+   and shipping it loud would put that word on every one of the 83 tactics
+   already in the demo the day this lands. */
 function outcomeCell(t){
   return t && t.outcome
     ? '<b>' + esc(t.outcome) + '</b>'
-    : '<span class="missing">Missing</span>';
+    /* `.nobody` is the platform's own em-dash for "nothing here", already
+       used by the collaborators cell — not a second vocabulary (§53.5). */
+    : '<span class="nobody">&mdash;</span>';
 }
 /* The reported figure written the platform's own way, so `7` against a target
    in `#` reads `7#` and one in `M EGP` reads `7 M EGP` — never joined by hand
@@ -5377,21 +5329,6 @@ function unitPlanBody(it, u, railed){
           readEmpty:"\u2014", read:compileCell }) + '</td></tr>';
   }).join("");
   var tRows = it.tactics.map(function(t, i){
-    /* §249: THE CELL ASKS WHETHER IT DREW THE FOUR BOXES, rather than
-       predicting it. `.tgtcell` is what stops the Target column folding below
-       880 (arrange.css) and the fold must never take the only way to SET a
-       target off the screen (§61) — which was true of the pen and is now true
-       of fill mode as well. Re-deriving gapCell's own open-or-read decision
-       here would be a second copy of it, and the two would drift the first
-       time either moved (§53.5); the control hook runs when and only when a
-       control is drawn, so it can simply say so. */
-    var tgtOpen = false;
-    var tgtCell = gapCell("plan", "u_plan", t, "outTarget", {
-      ctx: pctx(t), del: true, fillKind: "tactic",
-      control: function(set, pendCls){
-        tgtOpen = true;
-        return outcomeEdit(t, set, pendCls, !ed);
-      } });
     return '<tr data-oi="' + i + '"' + hidCls(t) + '><td class="idx">' +
       (on ? handle("Reorder " + t.name) : '') +
       '<span class="idx-n">' + (i+1) + '</span></td>' +
@@ -5413,45 +5350,27 @@ function unitPlanBody(it, u, railed){
                      function(v){ setOr(t, "description", v); })
             : (t.description ? '<span class="why">' + esc(t.description) + '</span>' : '')) +
         '</td>' +
-      /* WHAT IT SHOULD PRODUCE (§248), AND IT IS OWED (§249, reversing that
-         section's own exclusion at Islam's direction: *"the tactics outcome
-         and target ... should count as missing"*).
+      /* WHAT IT IS FOR, and WHAT IT SHOULD PRODUCE (§248). Both `textOr`,
+         because both are prose that must wrap (§189) — a title in an <input>
+         is one line by definition and runs off the end. Neither is a counted
+         gap: an empty one is quiet, so no existing plan gains 83 red words
+         overnight. */
 
-         `textOr` BEHIND THE HOOK, never instead of gapCell: the outcome is
-         prose that must wrap (§189) — a title in an <input> is one line by
-         definition and runs off the end — and it is a counted gap now, so the
-         CONTROL is the hook's while the lifecycle, the red word and the walk
-         mark stay gapCell's. §130.1's shape exactly, for its reason. */
-      '<td>' + gapCell("plan", "u_plan", t, "outcome", {
-        /* §228.2: NAMING THE KIND IS WHAT KEEPS THE TWO LISTS ONE. Without
-           it the cell opens to a filler whatever the shared list says, so a
-           later decision to stop counting these would leave the box open and
-           the save refusing it — §205's drift, latent until somebody used it. */
-        ctx: pctx(t), del: true, fillKind: "tactic",
-        read: function(v){ return '<b>' + esc(v) + '</b>'; },
-        control: function(set, pendCls){
-          return textOr("plan", t.outcome || "", pendCls || "", set);
-        } }) +
-        /* The same double-render as the description one column left: below
-           880 the Target column goes and its value appears here instead,
-           because seven columns still run 44px past a 515px pane and §158
-           does not bend.
-
-           §249: AND THE FOLD MUST NOT SWALLOW THE GAP. This line was drawn
-           only where there was a target to show, which was harmless while an
-           absent one said nothing — now that the count names the place, on a
-           narrow window the only column that could show it is the column that
-           has gone. It says Missing here instead. */
-        (!ed && !tgtOpen ? '<span class="subhd narrowtgt">' +
-           (SMPRules.gapEmpty("outTarget", t)
-             ? '<span class="missing">Missing</span>'
-             : esc(t.outDir || "\u2265") + ' ' + esc(t.outTarget)) + '</span>' : '') +
+      '<td>' + (ed ? textOr("plan", t.outcome || "", "",
+                            function(v){ setOr(t, "outcome", v); })
+                   : outcomeCell(t) +
+                     /* The same double-render as the description one column
+                        left: below 880 the Target column goes and its value
+                        appears here instead, because seven columns still run
+                        44px past a 515px pane and §158 does not bend. */
+                     (!ed && t.outTarget ? '<span class="subhd narrowtgt">' +
+                        esc(t.outDir || "\u2265") + ' ' + esc(t.outTarget) + '</span>' : '')) +
         '</td>' +
       /* THE OUTCOME'S TARGET: reading says the target, writing gives each of
-         its four facts a control of its own in one cell (Islam). §249 draws
-         it through gapCell, above, so the same cell serves the office's pen,
-         the filler's two boxes and the red word. */
-      '<td class="' + (tgtOpen ? 'tgtcell' : 'tgtcol num') + '">' + tgtCell + '</td>' +
+         its four facts a control of its own in one cell (Islam). */
+      '<td class="' + (ed ? 'tgtcell' : 'tgtcol num') + '">' +
+        (ed ? outcomeEdit(t) : (t.outTarget ? esc(t.outTarget)
+                                            : '<span class="nobody">&mdash;</span>')) + '</td>' +
       /* §145 MERGED WITH §130.1: gapCell keeps the pending lifecycle and
          the read-mode Missing word; the control hook renders the register-
          fed picker — an owner is PICKED, not typed, in the pen and in fill

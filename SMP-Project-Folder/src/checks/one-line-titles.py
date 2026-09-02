@@ -1,4 +1,4 @@
-"""A TITLE IS ONE LINE, AND THE BOX SAYS SO (§253).
+"""A TITLE IS ONE LINE, AND THE BOX SAYS SO (§255).
 
 Islam, from a client's plan with the pen open: a tactic's name box 643px tall
 holding one sentence, the description and the outcome the same, the eye and the
@@ -27,7 +27,7 @@ a check that opened only the unit would not see the other half drift.
 THE COMMIT IS ASKED OF THE DATA, never of the box (§96): a box that shows one
 line while the graph holds four is the same fault wearing a fix.
 
-PROVED ABLE TO FAIL: against the pre-§253 build the tall boxes are 8 assertions
+PROVED ABLE TO FAIL: against the pre-§255 build the tall boxes are 8 assertions
 red, and the pasted value is stored with its breaks.
 
 Run:  SMP_CHROME=/opt/pw-browsers/chromium python3 qa-run.py checks/one-line-titles.py

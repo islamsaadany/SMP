@@ -1,4 +1,4 @@
-/* THE BLANK LINES ALREADY IN A TENANT'S PLAN (§253) — the server half.
+/* THE BLANK LINES ALREADY IN A TENANT'S PLAN (§255) — the server half.
    ═══════════════════════════════════════════════════════════════════════
 
    Islam, from a client's plan with the pen open: a tactic's name box 643px
@@ -101,7 +101,7 @@ const words = (s) => String(s || "").split(/\s+/).filter(Boolean).join(" ");
 
     /* THE HEAL. Run through the same door the deployment runs it through:
        forget the memoised ready-state and let ensureReady do it. */
-    await client.query("DELETE FROM _sql_migrations WHERE name = '040-a-title-is-one-line.js'");
+    await client.query("DELETE FROM _sql_migrations WHERE name = '041-a-title-is-one-line.js'");
     io.forgetReady();
     await io.ensureReady(client);
     const s = await io.readState(client);

@@ -198,6 +198,24 @@ def main():
         pp = pg.evaluate("""()=>{
           REVIEW.asOfMonth = "Aug 26";
           var bad = [], sums = 0, seen = 0, carried = 0;
+          /* §254: THE STATE IS MADE, NOT WAITED FOR. This asserted that the
+             demo HELD a handed-over pillar, which it did until §253.2 cut the
+             Retail -> Merchandising pointer at Islam's instruction — so a
+             deliberate decision read as a regression (§214.3, and the rule is
+             earned by now: a check that names a fact about the demo's DATA
+             breaks the day somebody changes that data on purpose).
+
+             REWRITTEN, NOT DELETED (§218). What it exists to prove is that the
+             exclusion WORKS, so it makes one: the first pillar of the first
+             unit is handed to a pillars function for the length of this probe
+             and put back afterwards. That is stronger than the old assertion,
+             because it holds whatever the demo happens to ship. */
+          var fnKey = Object.keys(FUNCTIONS).filter(function(f){
+            return FUNCTIONS[f].active !== false && fnPlansInPillars(FUNCTIONS[f]);
+          })[0];
+          var lent = fnKey ? UNITS[Object.keys(UNITS)[0]].items[0] : null;
+          var hadBy = lent ? lent.by : undefined;
+          if (lent) lent.by = fnKey;
           Object.keys(UNITS).forEach(function(k){
             (UNITS[k].items || []).forEach(function(p, i){
               /* A HANDED-OVER PILLAR IS SCORED BY THE FUNCTION THAT CARRIES IT,
@@ -215,12 +233,17 @@ def main():
               if (got !== want) bad.push([k, i, want, got]);
             });
           });
-          return { bad: bad, sums: sums, seen: seen, carried: carried };
+          if (lent) { if (hadBy === undefined) delete lent.by; else lent.by = hadBy; }
+          return { bad: bad, sums: sums, seen: seen, carried: carried,
+                   madeOne: !!lent, putBack: !lent || lent.by === hadBy };
         }""")
         ck("there are Sum measures to get wrong", pp["sums"] > 0, pp["sums"])
         ck("...and pillars to check", pp["seen"] > 10, pp["seen"])
-        ck("...and a handed-over pillar was set aside, not counted as agreeing",
+        ck("...and a handed-over pillar was MADE to exercise the exclusion",
+           pp["madeOne"] is True, pp)
+        ck("...and it was set aside, not counted as agreeing",
            pp["carried"] > 0, pp["carried"])
+        ck("...and the pillar was put back (§94.2)", pp["putBack"] is True, pp)
         ck("every pillar's performance is its own measures' average", not pp["bad"], pp["bad"])
 
         # ── 3 · which compile rules move ──────────────────────────────────────

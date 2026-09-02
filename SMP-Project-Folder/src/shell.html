@@ -3119,9 +3119,7 @@
     document.querySelectorAll("[data-cnote]").forEach(function(el){
       el.addEventListener("change", function(){
         var hit = capItemById(el.dataset.cnote);
-        /* §254, as the unit's note beside it — `oneLine` trims too, so the
-           empty note still becomes null rather than "" (§50.6). */
-        if (hit) { hit.obj.note = SMPRules.oneLine(el.value) || null; paint(); }
+        if (hit) { hit.obj.note = el.value.trim() || null; paint(); }
       });
     });
     /* A DELIVERABLE AND A MILESTONE ARE PICKED THE SAME WAY NOW (§104): both
@@ -3466,7 +3464,7 @@
            and keeps every rule it had, so nothing already reported changes
            meaning when an outcome is added beside it. */
         if (el.dataset.fld === "outActual") {
-          if (v !== "" && unit) v = joinTarget(hit.obj.outActual || "", v, unit);
+          if (v !== "" && unit) v = joinTarget(unitTight(hit.obj.outActual || ""), v, unit);
           if (v === "") delete hit.obj.outActual; else hit.obj.outActual = v;
           /* The status still follows the work, and an outcome that has reached
              its target is done. `tacticOutcomeScore` is the one reader of that
@@ -3477,8 +3475,13 @@
           else if (hit.obj.status !== "Blocked") hit.obj.status = "WIP";
           paint(); return;   /* paint() ends in afterPaint() (§170) */
         }
+        /* §254.1: JOINED AGAINST THE HEALED STRING. `joinTarget` takes its
+           separator from the value it is replacing, so a stored
+           "8 M EGP M EGP" would hand its own doubling back to the next save.
+           Healing the value it reads from is what makes "heal on save" true
+           rather than merely "heal on screen". */
         if (hit.kind !== "TACTIC" && v !== "" && unit)
-          v = joinTarget(hit.obj.actual || hit.obj.target, v, unit);
+          v = joinTarget(unitTight(hit.obj.actual || hit.obj.target), v, unit);
         if (hit.kind === "TACTIC") {
           var n = parseInt(v.replace("%",""), 10);
           hit.obj.actual = v === "" ? null : Math.max(0, Math.min(100, isNaN(n) ? 0 : n));
@@ -3509,12 +3512,7 @@
         var subj = unitLike(current);
         if (!subj) return;
         var hit = findById(subj, el.dataset.note);
-        /* §254: the box is a growing one-line prose box now, so what it
-           stores is what an `<input>` could store — a paste is the only way a
-           break reaches it, and it is cleaned here, at the one door this
-           field writes through (§253). The repaint below redraws the box from
-           the stored value, so the two can never disagree. */
-        if (hit) { hit.obj.note = SMPRules.oneLine(el.value); paint(); }
+        if (hit) { hit.obj.note = el.value; paint(); }
       });
     });
     document.querySelectorAll("[data-unote]").forEach(function(el){
@@ -3905,7 +3903,7 @@
            the rest — silently, which is the shape §96 exists to stop. Asked of
            the element rather than of the setter: `multiple` is undefined on an
            input and on a textarea, so every other field is untouched. */
-        /* AND A ONE-LINE BOX STORES ONE LINE (§253). §229 stopped Enter from
+        /* AND A ONE-LINE BOX STORES ONE LINE (§255). §229 stopped Enter from
            putting a break in here; nothing stopped a PASTE, and a paste of
            four lines was measured storing them verbatim — after which the box
            is as tall as what was pasted and every other surface goes on
@@ -3937,12 +3935,27 @@
          element's own height and touches nothing else, so it is safe on
          `input` where a repaint would destroy the field being typed into
          (§35). Height is cleared first, or the box can only ever grow. */
-      /* §229's Enter and §51.1's growing box, through `wireGrowBox` — the one
-         place a growing prose box is given its behaviour, whichever hook the
-         page reached it by (§254). Blur, never a synthesised change (§219):
-         it is what the browser does when focus moves, so an already-committed
-         box fires nothing. */
-      if (el.tagName === "TEXTAREA") wireGrowBox(el);
+      if (el.tagName === "TEXTAREA") {
+        /* §255: through `fitGrow`, the one sizer the paint also uses — the
+           three lines were written twice and had to stay in step by hand. */
+        var fit = function(){ fitGrow(el); };
+        el.addEventListener("input", fit);
+        fit();
+        /* §229: ENTER COMMITS A ONE-LINE PROSE BOX. §189's own text promised
+           it ("Enter blurs, which is what commits the value") and no code
+           ever carried it out, so a stray newline could ride a title into the
+           workbook and the deck. Only `.grow` — a rows-2 area (a definition,
+           a note) is a paragraph and keeps its key. Blur, never a synthesised
+           change (§219): it is what the browser does when focus moves, so an
+           already-committed box fires nothing. Wired here, in the one branch
+           every bound textarea passes through, so a box added tomorrow is
+           covered without a list to forget (§104.7). */
+        if (el.classList.contains("grow")) {
+          el.addEventListener("keydown", function(e){
+            if (e.key === "Enter") { e.preventDefault(); el.blur(); }
+          });
+        }
+      }
     });
     document.querySelectorAll("[data-page]").forEach(function(b){
       b.addEventListener("click", function(){

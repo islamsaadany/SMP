@@ -287,7 +287,7 @@
    before the push, never by the merge. Checked against origin/main serving
    "smp-shell-v4.26-unit-before-number"; confirm again immediately before the
    push. */
-const SHELL = "smp-shell-v4.28-a-title-is-one-line";
+const SHELL = "smp-shell-v4.30-a-title-is-one-line";
 const ASSETS = [
   "/",
   "/index.html",

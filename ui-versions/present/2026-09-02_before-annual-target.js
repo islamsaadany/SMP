@@ -163,9 +163,9 @@ function deckSlides(u){
     return '<tr><td class="idx">' + (i+1) + '</td>' +
       '<td class="lead">' + esc(m.name) + fmark(m.id) + '</td>' +
       (fnAim ? '' : '<td class="num big3">' +
-        (m.target3y ? tgtShown(m.target3y) : "&mdash;") + '</td>') +
+        (m.target3y ? esc(m.target3y) : "&mdash;") + '</td>') +
       (aimNear
-        ? '<td class="num">' + (m.target ? tgtShown(m.target) : '<span class="missing">Missing</span>') + '</td>'
+        ? '<td class="num">' + (m.target ? esc(m.target) : '<span class="missing">Missing</span>') + '</td>'
         : '') + '</tr>';
   }).join("");
   if (aimRows || !fnAim) S.push('<section class="dslide"' + anch("aim", "After \u201cWhat we are aiming at\u201d") +
@@ -225,7 +225,7 @@ function deckSlides(u){
      AND THE FOOTNOTE LOSES THE CLAUSE THAT NAMES THE MISSING NUMBER, or the
      slide explains a reading it is not showing. */
   var pl = unitPillars(u), koShown = SMPRules.shown(u.keyObjectives).length;
-  var standSlide = ('<section class="dslide d-head"' + anch("stand", "After \u201cWhere the unit stands\u201d") +
+  S.push('<section class="dslide d-head"' + anch("stand", "After \u201cWhere the unit stands\u201d") +
     '><h2>Where ' + (u.fnKey ? esc(u.name) : "the unit") + ' stands</h2>' +
     '<div class="headgrid' + (koShown ? ' three' : '') + '">' +
       (koShown
@@ -247,38 +247,18 @@ function deckSlides(u){
     esc(L("pillar","bu")) + ' measure how the work set against them is going. ' +
     'Execution measures whether that work is landing on time.</p></section>');
 
-  /* ── AND IT IS SAID LAST (§254.4) ──────────────────────────────────────
-     Islam: *"where the units stands to be the last slide"*, and *"move the
-     pillars performance till the end before the where we stand slide."*
-
-     It opened the deck, before anything had been shown — three numbers as a
-     preview. Said last, with the score table immediately before it, the deck
-     ends on its reading: every pillar named, then worked through, then scored,
-     then the three headline figures. Both slides are built where they always
-     were, so nothing about what they SAY changes; only where they are pushed.
-
-     THE ANCHORS TRAVEL WITH THEM, which is §236.3's rule holding rather than a
-     new cost: a picture placed after "Where the unit stands" follows that
-     slide to the end, because the anchor is on the slide and not on a
-     position. */
-
   /* 4 — the objectives in detail. */
-  /* §254: THE ANNUAL TARGET, AND WHAT IS DUE SO FAR BESIDE THE FIGURE.
-     Islam: *"key objectives actual should show the proration as well"*, and of
-     the column, *"it's called annual target"* — which is Performance's own
-     word since §239.2, so the projector and the page behind it stop using two
-     names for one number. */
   var oRows = SMPRules.shown(u.keyObjectives).map(function(m, i){
     return '<tr><td class="idx">' + (i+1) + '</td>' +
       '<td class="lead">' + esc(m.name) + fmark(m.id) + '</td>' +
-      '<td class="num">' + (m.target ? tgtShown(m.target) : "&mdash;") + '</td>' +
-      '<td class="num">' + figVsDue(m) + '</td>' +
+      '<td class="num">' + (m.target ? esc(m.target) : "&mdash;") + '</td>' +
+      '<td class="num">' + figShown(m) + '</td>' +
       '<td class="num final ' + dBand(measureScore(m)) + '">' + dPct(measureScore(m)) + '</td></tr>';
   }).join("");
   if (oRows) S.push('<section class="dslide"' + anch("objectives", L("keyobj","bu") + " \u2014 after the table") +
     '><h2>' + L("keyobj","bu") + ' &mdash; where we stand</h2>' +
     '<table class="zebra dbig"><thead><tr><th class="idx">#</th><th>Objective</th>' +
-    '<th class="num">Annual target</th><th class="num">Actual</th>' +
+    '<th class="num">This year</th><th class="num">Actual</th>' +
     '<th class="num">Progress</th></tr></thead><tbody>' + oRows + '</tbody></table></section>');
 
 /* ── 5 · SWOT, AND A SUPPORTING FUNCTION HAS NONE (§243) ──────────────
@@ -322,37 +302,7 @@ function deckSlides(u){
     });
   }
 
-  /* ── 6 · THE PILLARS ARE NAMED BEFORE THEY ARE SCORED (§254.5) ────────
-     Islam: *"before the pillars performance we need 1 slide with just the 2
-     titles ... don't follow the same design but the concept of having the
-     pillars first"*, and of two treatments drawn in the real deck, *"option
-     A"* — the row.
-
-     A roll-call: what this unit committed to, in its own words, before a
-     single number. The concept is from his own Raya deck; the treatment is the
-     platform's, and the difference is deliberate — his reference gives each
-     card its own hue, which spends three accents on a distinction that means
-     nothing (§41's budget). One gold rule across the row instead.
-
-     THE CODE IS THE NUMBER. `RS01` is what every other surface calls that
-     pillar, so one mark identifies it AND orders it, where an invented `01`
-     would only order it — a structural device that encodes something true
-     rather than decorating the slide.
-
-     THE ROW DIVIDES FOR ANY NUMBER of pillars, so a unit with two and one with
-     eight both fill their line; `--n` is set from the list rather than assumed,
-     and the sub-line comes only where the pillar has one (§15.1). */
-  var pNames = u.items.map(function(p, i){
-    return '<div class="pcard"><span class="pcard-c">' + pillarCode(u, i) + '</span>' +
-      '<span class="pcard-n">' + esc(p.name) + '</span>' +
-      (p.sub ? '<span class="pcard-s">' + esc(p.sub) + '</span>' : '') + '</div>';
-  }).join("");
-  if (u.items.length) S.push('<section class="dslide"' +
-    anch("pillarnames", "After the " + L("pillar","bu").toLowerCase() + " names") +
-    '><h2>' + L("pillar","bu") + '</h2>' +
-    '<div class="pcards" style="--n:' + u.items.length + '">' + pNames + '</div></section>');
-
-  /* The score table, built here and pushed at the END (§254.4). */
+  /* 6 — the pillars, overview then one lead-in and two tables each. */
   var pRows = u.items.map(function(p, i){
     var r = pillarExec(p) && pillarPlan(p) ? Math.round(pillarExec(p) / pillarPlan(p) * 100) : null;
     return '<tr><td class="idx">' + (i+1) + '</td><td class="dirname">' +
@@ -361,17 +311,11 @@ function deckSlides(u){
       '<td class="num final ' + dBand(pillarPerf(p)) + '">' + dPct(pillarPerf(p)) + '</td>' +
       '<td class="num final ' + dBand(r) + '">' + dPct(r) + '</td></tr>';
   }).join("");
-  /* NAMED APART FROM THE ROLL-CALL (§254.5). With both slides headed by the
-     tenant's word for a pillar, the deck said "Pillars" twice — §87's twins on
-     a projector, and two rows in Manage slides' rail that read the same. The
-     scoring table takes the deck's OWN existing phrasing, the one the
-     objectives table has always worn, rather than a new form of words. */
-  var pillarScoreSlide = '<section class="dslide"' +
-    anch("pillars", "After the " + L("pillar","bu").toLowerCase() + " overview") +
-    '><h2>' + L("pillar","bu") + ' &mdash; where we stand</h2>' +
+  S.push('<section class="dslide"' + anch("pillars", "After the " + L("pillar","bu").toLowerCase() + " overview") +
+    '><h2>' + L("pillar","bu") + '</h2>' +
     '<table class="zebra dirs"><thead><tr><th class="idx">#</th><th>Pillar</th>' +
     '<th class="num">Measures</th><th class="num">Execution</th></tr></thead>' +
-    '<tbody>' + pRows + '</tbody></table></section>';
+    '<tbody>' + pRows + '</tbody></table></section>');
 
   u.items.forEach(function(p, pi){
     var r = pillarExec(p) && pillarPlan(p) ? Math.round(pillarExec(p) / pillarPlan(p) * 100) : null;
@@ -393,8 +337,8 @@ function deckSlides(u){
     var mRows = SMPRules.shown(p.measures).map(function(m, i){
       return '<tr><td class="idx">' + (i+1) + '</td>' +
         '<td class="lead">' + esc(m.name) + fmark(m.id) + '</td>' +
-        '<td class="num">' + (m.target ? tgtShown(m.target) : '<span class="missing">Missing</span>') + '</td>' +
-        '<td class="num">' + figVsDue(m) + '</td>' +
+        '<td class="num">' + (m.target ? esc(m.target) : '<span class="missing">Missing</span>') + '</td>' +
+        '<td class="num">' + figShown(m) + '</td>' +
         '<td class="num final ' + dBand(measureScore(m)) + '">' + dPct(measureScore(m)) + '</td>' +
         (m.note ? '<td class="dnote">' + esc(m.note) + '</td>' : '<td class="dnote empty">&mdash;</td>') +
         '</tr>';
@@ -407,7 +351,7 @@ function deckSlides(u){
       anch("p" + pillarCode(u, pi) + "m", "After " + pillarCode(u, pi) + " — key measures") + '>' +
       deckPillarHead(u, p, pi, "Key measures") +
       '<table class="zebra withnote"><thead><tr><th class="idx">#</th><th>Measure</th>' +
-      '<th class="num">Annual target</th><th class="num">Actual</th>' +
+      '<th class="num">Target</th><th class="num">Actual</th>' +
       '<th class="num">Progress</th><th>Note</th></tr></thead><tbody>' + mRows + '</tbody></table></section>');
 
     /* ── 6 · A TACTIC IS SHOWN BY WHAT IT PRODUCED (§252) ──────────────
@@ -445,13 +389,8 @@ function deckSlides(u){
         '<td class="cc">' + qs(t) + '</td>';
       var note = t.note ? '<td class="dnote">' + esc(t.note) + '</td>'
                         : '<td class="dnote empty">&mdash;</td>';
-      /* §254.3: NOT DIMMED. Islam: *"for a non due tactic don't dim it show it
-         normally it has the comment of not due this cycle anyway."* The cell
-         already says it in words, and dimming says it a second time in a way
-         that also costs the owner and the quarters their legibility on a
-         projector. */
       if (!tacticDue(t))
-        return '<tr>' + lead +
+        return '<tr class="dim">' + lead +
           '<td colspan="2" class="cc">Outside this cycle</td>' + note + '</tr>';
       /* What this row is measured against RIGHT NOW: an outcome answers with
          its own target, prorated where it compiles by Sum; everything else
@@ -494,7 +433,7 @@ function deckSlides(u){
      does not has no box to start it in, and is written where every other
      figure in the review is written. */
   var unote = cycleNote(u.ukey);
-  var noteSlide = !unote ? "" : ('<section class="dslide"' + anch("notes", "After \u201cNotes and achievements\u201d") +
+  if (unote) S.push('<section class="dslide"' + anch("notes", "After \u201cNotes and achievements\u201d") +
     '><h2>Notes and achievements</h2>' +
     '<div class="dnotebox" contenteditable="true" data-deckunote="' + u.ukey + '">' +
       esc(unote) + '</div>' +
@@ -509,20 +448,6 @@ function deckSlides(u){
      where what is being done gets said, in the unit's words. Its anchor
      ("attention") goes with it; a picture slide that named it lands at the
      end rather than being dropped (§50.3). */
-
-  /* ── §254.6 · THE LAST FOUR SLIDES, IN HIS ORDER ──────────────────────
-     The score table, the three readings, the note, then Thank you.
-
-     ISLAM PUT THE NOTE LAST, asked directly and answering *"notes before thank
-     you"* — which reverses the order §254.4 shipped in an hour earlier, and is
-     recorded as a reversal rather than overwritten. It also means the deck's
-     last content slide is the unit's own words rather than its numbers, which
-     sits against *"where the units stands to be the last slide"*: both cannot
-     be true at once, and this is the one he answered most recently and most
-     specifically. Swapping the two is one line if he wants it back. */
-  if (u.items.length) S.push(pillarScoreSlide);
-  S.push(standSlide);
-  if (noteSlide) S.push(noteSlide);
 
   S.push('<section class="dslide d-cover d-thanks"' + anch("end", "Last \u2014 before Thank you", "before") +
     '><h1 class="cover">Thank you</h1>' +
@@ -583,8 +508,8 @@ function deckSlidesFn(fk){
         return '<tr><td class="idx">' + (i+1) + '</td>' +
           '<td class="lead">' + esc(m.name) + '</td>' +
           '<td class="num">' + (m.weight == null ? "&mdash;" : m.weight + "%") + '</td>' +
-          '<td class="num">' + (m.target ? tgtShown(m.target) : '<span class="missing">Missing</span>') + '</td>' +
-          '<td class="num">' + (m.actual == null || m.actual === "" ? "&mdash;" : figVsDue(m)) + '</td>' +
+          '<td class="num">' + (m.target ? esc(m.target) : '<span class="missing">Missing</span>') + '</td>' +
+          '<td class="num">' + (m.actual == null || m.actual === "" ? "&mdash;" : figShown(m)) + '</td>' +
           '<td class="num final ' + dBand(measureScore(m)) + '">' + dPct(measureScore(m)) + '</td>' +
           (m.note ? '<td class="dnote">' + esc(m.note) + '</td>' : '<td class="dnote empty">&mdash;</td>') + '</tr>';
       }).join("");
@@ -592,7 +517,7 @@ function deckSlidesFn(fk){
         '><h2>Key objectives &mdash; where we stand' +
         '<span class="dwhich">' + esc(c.name) + '</span></h2>' +
         '<table class="zebra withnote"><thead><tr><th class="idx">#</th><th>Objective</th>' +
-        '<th class="num">Weight</th><th class="num">Annual target</th>' +
+        '<th class="num">Weight</th><th class="num">Target</th>' +
         '<th class="num">Actual</th><th class="num">Score</th><th>Note</th></tr></thead>' +
         '<tbody>' + kRows + '</tbody></table></section>');
     }

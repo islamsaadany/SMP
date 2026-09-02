@@ -365,6 +365,44 @@ console errors (in this cloud environment, run it via a wrapper that points Play
   `node scripts/test-door.js <smo-password>` against a running dev-server
   after touching `api/auth.js` or `lib/auth.js` (it ends by rate-limiting the
   SMO on purpose — `DELETE FROM login_attempts;` clears it).
+- **A SUMMARY IS MADE OF THE NUMBER IT SUMMARISES (§257):** Islam, from his own
+  Performance page — *"the key measure performance has a highest and lowest that
+  doesn't match the measure progress."* His row: headline **90%**, Progress
+  column **90%**, Highest and Lowest **60%**, and all three arithmetically
+  correct — of **two different questions**. **§239 MADE THE SCORE DERIVED AND
+  MOVED HALF THE READERS**: a `Sum` measure is judged against the share due by
+  now (3M against 5M at six months is 3 ÷ 3.33 = 90, not 3 ÷ 5 = 60), and that
+  section moved every reader that **AVERAGES** — `pillarPerf`, `koScore`, the
+  Progress column, the deck — and left every reader that **SUMMARISES** holding
+  `m.progress`. **SEVEN CELLS**: three Highest/Lowest pairs (a pillar's pane on
+  Performance, the same pillar on the Plan side, the unit's objectives card) and
+  four breakdown tables — and the breakdowns are the worse half, because each
+  opens FROM a headline to explain it and was printing rows that do not make the
+  number above them; **§243, three lines from the cell this changes, had already
+  written the rule** (*a breakdown that disagrees with the headline it sits
+  under is worse than none*) and nobody carried it the two inches across.
+  **IT SHIPPED BECAUSE ONLY `Sum` PRORATES**, so on a plan compiled by `Latest`
+  the two figures are byte-identical: measured, **30 rows** in the worked example
+  part, and every one of them is Sum. **NOTHING STORED MOVES** — `m.progress` is
+  not written, recomputed or migrated, archives and closed cycles are untouched,
+  and **the Focus board goes on reading the raw figure on purpose** (§239: reward
+  stays a year-end judgement), asserted at both ends or a build that swept every
+  reader would pass everything else. **ONE READER, SO A CARD CANNOT NAME A ROW
+  ITS OWN HEADLINE LEFT OUT**: `scoreSpread()` is handed **the very list the
+  average was taken over** — `scorableMeasures()` for a pillar, **`scorableKOs()`**
+  for objectives, which is new only in being NAMED (the test lived inside
+  `koScore`, which is how the card came to keep a looser rule of its own that
+  admits a hidden row and a milestone). **AND `measureScore` IS WRAPPED, NEVER
+  PASSED BY NAME** — §250.1's trap, and `scoreSpread` is exactly its shape.
+  **§257.1 — AND THE CHECK'S FIRST RED RUN WAS THE CHECK**: it leaned on the new
+  shared reader to MEASURE with, so against the build before it **died on the
+  missing name**, printed five failures and never reached one of the seven
+  surfaces (§215, inside the file written to guard against it). It carries its
+  own membership test now, used only where the product's is absent and asserted
+  to agree with it where it is not — **11 red** on the build before, 33 green
+  after. **§257.2 — RECORDED, NOT DONE**: a project's OUTCOMES are a different
+  model (a reported figure, not a measure against a prorated target) and are
+  left alone; whether they should prorate has not been put to Islam.
 - **A REPORTED NOTE IS NAMED AS ONE (§255):** Islam — *"the perofmrance is
   showing hte notes under the tactic name. what is this issue?"*, then the
   correction that set the scope: *"notes is not in the desciption, notes is
@@ -4414,6 +4452,18 @@ python3 checks/tactic-proration.py # a tactic's OUTCOME is measured against its 
                                 # asserted UNCHANGED, only Sum prorating, both panes
                                 # driven, and §2b guarding the index-leak that
                                 # `.map(measureScore)` would reintroduce
+python3 checks/measure-score-spread.py # a summary is made of the number it summarises
+                                # (§257): a card's Highest and Lowest, and the four
+                                # breakdown tables, read the SCORE the headline beside
+                                # them averaged — asserted as AGREEMENT with
+                                # measureScore() and never as a literal, on a pillar and
+                                # a unit FOUND at runtime whose extremes actually move
+                                # (a row where the two figures happen to agree passes on
+                                # the broken build, §113.8). Both ends: the stored
+                                # `progress` unchanged, and the Focus board still judging
+                                # reward on it. 11 red on the build before — and its own
+                                # first red run printed five and reached no cell at all,
+                                # having leaned on the new reader to measure with (§215)
 python3 checks/ytd-proration.py # YTD is measured against the part of the year that has
                                 # PASSED (§239): the review point is a month and the
                                 # office picks it; Sum prorates and Latest must not; the
@@ -4670,7 +4720,33 @@ prior sessions (on HR_ERP) accidentally reverted agreed-upon designs.
 
 ---
 
-*Last Updated: 2026-09-02 &mdash; **&sect;254.7&ndash;.12: the deck round,
+*Last Updated: 2026-09-02 &mdash; **&sect;257: a summary is made of the number
+it summarises.** Islam, from his own Performance page: *"the key measure
+performance has a highest and lowest that doesn't match the measure progress."*
+His row read a headline of 90%, a Progress of 90% and a Highest and Lowest of
+60%, and all three were correct &mdash; of **two different questions**.
+&sect;239 made the score DERIVED (a `Sum` measure is judged against the share of
+its target due by now) and moved every reader that AVERAGES, leaving every
+reader that SUMMARISES holding the stored raw ratio: three Highest/Lowest pairs
+and four breakdown tables, each breakdown opening FROM a headline built the
+other way. **&sect;243 had already written the rule three lines from the cell
+this changes** &mdash; *a breakdown that disagrees with the headline it sits
+under is worse than none* &mdash; and nobody carried it across to the next
+column. It shipped because only `Sum` prorates, so the two figures are
+byte-identical on a plan compiled by `Latest`; measured, **30 rows** of the
+worked example part and every one is Sum. **Nothing stored moves** &mdash; no
+write, no migration, archives and closed cycles untouched &mdash; and the Focus
+board goes on reading the raw figure on purpose (reward stays a year-end
+judgement), asserted at both ends. One reader, handed the very list the average
+was taken over, and `measureScore` **wrapped, never passed by name**
+(&sect;250.1's trap, and this is exactly its shape). **&sect;257.1: the check's
+own first red run was the check** &mdash; it leaned on the new shared reader to
+measure with, so against the build before it died on the missing name, printed
+five failures and reached not one of the seven surfaces (&sect;215, inside the
+file written to guard against it); **11 red** on that build now, 33 green after,
+with the whole sweep and eleven neighbouring checks clean.*
+
+*Earlier: 2026-09-02 &mdash; **&sect;254.7&ndash;.12: the deck round,
 finished.** Islam's four from the running deck, on top of the eight before them.
 **&sect;254.7** &mdash; a unit written twice *with or without a gap*: his stored
 `40 %%` survived &sect;254.1's collapse, which split the unit on WHITESPACE, and

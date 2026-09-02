@@ -5415,17 +5415,6 @@ function koWeights(list, legacy){
    Weight column nobody has filled in (§243, Islam: *"if there is no weights
    submitted the table shouldn't show weights"*). */
 function koWeighted(list, legacy){ return !!koWeights(list, legacy); }
-/* ── WHICH OBJECTIVES THE HEADLINE IS MADE OF, NAMED ONCE (§257) ──────
-   The card above a list of objectives prints a Highest and a Lowest, and those
-   have to be the extremes of EXACTLY the rows koScore() averaged. This test
-   lived inside koScore, so the card kept a second one of its own — and a second
-   membership test beside a headline is how a "highest" comes to name a row the
-   headline never counted (§53.5). `scorableMeasures()` is the same reader for a
-   pillar's measures; this is its twin for a list of key objectives. */
-function koCounts(m){
-  return !SMPRules.isHidden(m) && !m.milestone && measureScore(m) != null;
-}
-function scorableKOs(list){ return (list || []).filter(koCounts); }
 function koScore(list, weights){
   /* §218: an objective counts as soon as it has a figure — nothing waits
      on the office any more. */
@@ -5437,7 +5426,10 @@ function koScore(list, weights){
      to have fixed here: a blank weight counted at NOTHING, so where every
      reported row was blank the total came to nought and the headline returned
      null. The merged version keeps main's reader and this branch's rule. */
-  var vals = scorableKOs(list);
+  var counts = function(m){
+    return !SMPRules.isHidden(m) && !m.milestone && measureScore(m) != null;
+  };
+  var vals = (list || []).filter(counts);
   if (!vals.length) return null;
   var flat = function(){
     return Math.round(vals.reduce(function(a, m){ return a + measureScore(m); }, 0) / vals.length);
@@ -5446,7 +5438,7 @@ function koScore(list, weights){
   if (!ws) return flat();
   var tot = 0, acc = 0;
   list.forEach(function(m, i){
-    if (!koCounts(m)) return;
+    if (!counts(m)) return;
     acc += measureScore(m) * ws[i]; tot += ws[i];
   });
   /* Every weight that was set is a literal zero — an answer, but not one a

@@ -787,42 +787,6 @@ function pillarRow(it, i, u){
     '<span class="chev">&#9654;</span></button>' + pillarBody(it, u) + '</div>';
 }
 
-/* ── THE EXTREMES ARE THE EXTREMES OF WHAT THE HEADLINE AVERAGED (§257) ──
-   Islam, from his own Performance page: *"the key measure performance has a
-   highest and lowest that doesn't match the measure progress."* His row read a
-   headline of 90% and a Progress of 90% over a Highest and a Lowest of 60%,
-   and all three were arithmetically correct — of two DIFFERENT questions.
-
-   §239 made the score DERIVED: a `Sum` measure is judged against the share of
-   its target due by now, so 3M against 5M at six months of twelve is 3 ÷ 3.33
-   = 90%, not 3 ÷ 5 = 60%. That section moved every reader that AVERAGES —
-   `pillarPerf`, `koScore`, the Progress column, the deck — and left every
-   reader that SUMMARISES still holding `m.progress`, the stored raw ratio. The
-   two numbers agreed on every measure the demo had until a Sum row was
-   reported mid-year, which is why it shipped: 30 rows in the worked example
-   differ, and every one of them compiles by Sum.
-
-   THE STORED FIGURE IS NOT TOUCHED AND MUST NOT BE. `m.progress` goes on
-   holding the raw actual-against-the-ANNUAL-target ratio, so archives and
-   closed cycles read exactly as they did and nothing is migrated — and the
-   Focus board goes on reading it deliberately, because reward stays a year-end
-   judgement (§239). What changes is only which of the two a summary PRINTS.
-
-   ONE READER, so a card cannot name a row its own headline left out: the
-   spread is taken over the very list the average was taken over — a pillar's
-   `scorableMeasures()`, a list of objectives' `scorableKOs()` — rather than
-   over a second filter written beside it (§53.5). */
-function scoreSpread(rows){
-  /* WRAPPED, NEVER PASSED BY NAME (§250.1): `measureScore` takes an optional
-     share and `Array.map` hands its callback the INDEX, so a bare
-     `.map(measureScore)` would prorate the second row by the whole year and
-     the third by twice it. */
-  var v = rows.map(function(m){ return measureScore(m); });
-  return { n: v.length,
-           hi: v.length ? Math.max.apply(null, v) : null,
-           lo: v.length ? Math.min.apply(null, v) : null };
-}
-
 /* Compact score pair. Three figures laid across rather than stacked, so the
    card is a band rather than a column. Both headline and status word come from
    the same band function, so they can never contradict each other. */
@@ -852,13 +816,13 @@ function pillarBody(it, u){
   /* Highest and lowest read the scored measures only. Math.max over a list
      containing null treats null as zero, so an unscored measure was reporting
      a lowest of 0% \u2014 exactly the false failure the null rule exists to prevent. */
-  /* \u00a7257: and they read the SCORE, which is what the headline beside them and
-     the Progress column beneath them are made of. */
-  var sp = scoreSpread(scorableMeasures(it));
+  var scored = scorableMeasures(it).map(function(m){ return m.progress; });
   var uk = u && u.ukey;
   return '<div class="pbody" hidden>' +
     scorePair(pillarPerf(it), pillarExec(it), pillarPlan(it),
-              it.measures.length, sp.n, sp.hi, sp.lo) +
+              it.measures.length, scored.length,
+              scored.length ? Math.max.apply(null, scored) : null,
+              scored.length ? Math.min.apply(null, scored) : null) +
     '<h5 class="mini">' + L("measure","bu") + '</h5>' +
     '<div class="scroll"><table>' + measureHead() +
       '<tbody class="sortable" data-item="tr" data-kind="measures" data-u="' + uk + '">' +
@@ -1431,10 +1395,9 @@ function unitCards(keys){
     var u = UNITS[k];
     var pd = miniTable(["Key objective","Direction","Target","H1 actual","Progress"],
       u.keyObjectives.map(function(m){
-        /* §257: the score, so the rows add up to the "Headline:" line below. */
         return '<tr><td>' + esc(m.name) + '</td><td class="num">' + dirCell(m.dir) + '</td>' +
           '<td class="num">' + tgtShown(m.target) + '</td><td class="num">' + figShown(m) +
-          '</td><td class="num">' + pct(measureScore(m)) + '</td></tr>';
+          '</td><td class="num">' + m.progress + '%</td></tr>';
       }).join("")) +
       '<p class="sub">Headline: <b>' + unitObjectives(u) + '%</b> &mdash; ' + (KO_WEIGHTS[u.ukey] ? 'weighted' : 'equal weight') + ' across its Key Objectives. Contributes at <b>' +
       u.weight + '%</b> weight to the group.</p>' +
@@ -1570,13 +1533,10 @@ function renderGroupPerformance(){
 
   var koDrill = miniTable(["Objective","Direction","Target","Compile","H1 actual","Progress"],
     GROUP.keyObjectives.map(function(m){
-      /* §257: the score, so the rows average to the "Mean of the N" below —
-         and this is the one table in the product that prints the Compile rule
-         beside the figure, which is what decides whether the row prorates. */
       return '<tr><td>' + (m.group ? esc(m.group) + " &mdash; " : "") + esc(m.name) + '</td>' +
         '<td class="num">' + dirCell(m.dir) + '</td><td class="num">' + tgtShown(m.target) + '</td>' +
         '<td>' + compileCell(m.compile) + '</td><td class="num">' + figShown(m) + '</td>' +
-        '<td class="num">' + pct(measureScore(m)) + '</td></tr>';
+        '<td class="num">' + m.progress + '%</td></tr>';
     }).join("")) +
     '<p class="sub">Mean of the ' + GROUP.keyObjectives.length + ': <b>' +
       pct(groupKeyObjectives()) + '</b>. Every objective carries a target, so none is excluded from the average.</p>';
@@ -1653,14 +1613,11 @@ function renderGroupPerformance(){
         ? '<p class="sub">No key objectives of its own. This capability is judged by its projects.</p>'
         : miniTable(["#","Key objective","Direction","Target","Actual","Progress"],
             c.keyObjectives.map(function(m, i){
-              /* §257: the score, so the rows agree with the "Weighted across N
-                 objectives" line below, which is capKO()'s own figure. */
-              var sc = measureScore(m);
               return '<tr><td class="idx">' + (i+1) + '</td><td>' + esc(m.name) + '</td>' +
                 '<td class="num">' + dirCell(m.dir) + '</td>' +
                 '<td class="num">' + (m.target ? tgtShown(m.target) : '<span class="missing">Missing</span>') + '</td>' +
                 '<td class="num">' + figShown(m) + '</td>' +
-                '<td class="num final" style="color:' + bandInk(sc) + '">' + pct(sc) + '</td></tr>';
+                '<td class="num final" style="color:' + bandInk(m.progress) + '">' + pct(m.progress) + '</td></tr>';
             }).join("")) +
           '<p class="sub">Weighted across <b>' + c.keyObjectives.length + '</b> objectives: <b>' + pct(ko) + '</b>.</p>') +
       miniTable(["#","Project","Deliverables","Outcomes","Performance"],
@@ -2058,12 +2015,10 @@ function focusStrip(u){
 function renderUnitPerformance(u){
   var ko = unitObjectives(u);
   var r  = unitRatio(u);
-  /* §257: the same two questions the pillar card had. The membership comes from
-     `scorableKOs()` — koScore()'s own list — so the Highest can never name an
-     objective the headline above it left out, and the figure is the SCORE the
-     headline is made of rather than the stored raw ratio. */
-  var kosp = scoreSpread(scorableKOs(u.keyObjectives));
-  var koHi = kosp.hi, koLo = kosp.lo;
+  var kps = u.keyObjectives.filter(function(m){ return m.target && m.progress != null; })
+                           .map(function(m){ return m.progress; });
+  var koHi = kps.length ? Math.max.apply(null, kps) : null;
+  var koLo = kps.length ? Math.min.apply(null, kps) : null;
   /* §243: THE RESOLVED WEIGHTS, never the raw array. A row's own `weight`
      wins, a blank takes the average of the ones that were set, and a list
      nobody has weighted answers null — so this table shows the two extra
@@ -2080,20 +2035,13 @@ function renderUnitPerformance(u){
     miniTable(["#", L("keyobj","bu"), "Dir.", "Target", "H1 actual", "Progress"].concat(ws ? ["Weight","Contribution"] : []),
       u.keyObjectives.map(function(m, i){
         var w = ws ? Math.round(ws[i] * 10) / 10 : null;
-        /* §257: THE BREAKDOWN IS MADE OF THE NUMBER IT BREAKS DOWN. This table
-           opens from the headline to explain it, and it was printing the stored
-           raw ratio under a headline built from the score — so on a Sum
-           objective the rows did not add up to the number above them. Its own
-           neighbour (§243, on the weights) says a breakdown that disagrees with
-           its headline is worse than none; that argument applies here too. */
-        var sc = measureScore(m);
         return '<tr' + (isFocus(m.id) ? ' class="focusrow"' : '') + '><td class="idx">' + (i+1) + '</td>' +
           '<td>' + esc(m.name) + fmark(m.id) + '</td>' +
           '<td class="num">' + dirCell(m.dir) + '</td><td class="num">' + tgtShown(m.target) + '</td>' +
           '<td class="num">' + figShown(m) + '</td>' +
-          '<td class="num final" style="color:' + bandInk(sc) + '">' + pct(sc) + '</td>' +
+          '<td class="num final" style="color:' + bandInk(m.progress) + '">' + pct(m.progress) + '</td>' +
           (ws ? '<td class="num">' + w + '%</td><td class="num">' +
-                (Math.round(sc * w) / 100).toFixed(1) + '</td>' : '') + '</tr>';
+                (Math.round(m.progress * w) / 100).toFixed(1) + '</td>' : '') + '</tr>';
       }).join("")) +
     '<p class="sub">' + (ws
       ? 'Weighted mean across <b>' + u.keyObjectives.length + '</b> objectives: <b>' + ko + '%</b>. Weights are set on the unit\'s Foundation.'
@@ -4605,18 +4553,13 @@ function capKOTable(c){
   return '<h4 class="mini">Key objectives</h4>' +
     miniTable(["#","Objective","Weight","Dir.","Target","Reported","Score"],
       c.keyObjectives.map(function(m, i){
-        /* §257: the column is headed Score, and the score is the derived one —
-           the same number capKO() averages into the card above this table. The
-           Reported column beside it goes on showing what was actually entered,
-           which is the honest pair: what they said, and what it scores. */
-        var sc = measureScore(m);
         return '<tr><td class="idx">' + (i+1) + '</td><td>' + esc(m.name) +
           (m.note ? '<span class="why">' + esc(m.note) + '</span>' : '') + '</td>' +
           '<td class="cc">' + (m.weight == null ? "&mdash;" : m.weight + "%") + '</td>' +
           '<td class="cc">' + dirCell(m.dir) + '</td>' +
           '<td class="num">' + (m.target ? tgtShown(m.target) : '<span class="missing">Missing</span>') + '</td>' +
           '<td class="num">' + (m.actual == null || m.actual === "" ? "&mdash;" : figShown(m)) + '</td>' +
-          '<td class="num final" style="color:' + bandInk(sc) + '">' + pct(sc) + '</td></tr>';
+          '<td class="num final" style="color:' + bandInk(m.progress) + '">' + pct(m.progress) + '</td></tr>';
       }).join(""));
 }
 
@@ -6276,10 +6219,7 @@ function unitPerfRail(u){
    third telling. Nothing on this page is edited in it, so unlike the plan
    there is no edit case to keep it for — only the no-rail one. */
 function unitPerfPane(it, u, railed){
-  /* §257: the score, not the stored raw ratio — this is the pane Islam
-     reported, and its Highest and Lowest are the extremes of exactly the
-     measures `pillarPerf` averaged two lines below. */
-  var sp = scoreSpread(scorableMeasures(it));
+  var scored = scorableMeasures(it).map(function(m){ return m.progress; });
   var uk = u && u.ukey;
   var meta = pillarMeta(it);
   /* The same band as the Plan page, for the same reason and by the same
@@ -6292,7 +6232,9 @@ function unitPerfPane(it, u, railed){
       (meta ? '<div class="pmeta">' + meta + '</div>' : '') + '</div>' +
       '<span class="pill ' + band(pillarPerf(it)) + '">' + pct(pillarPerf(it)) + '</span></div>') +
     scorePair(pillarPerf(it), pillarExec(it), pillarPlan(it),
-              it.measures.length, sp.n, sp.hi, sp.lo) +
+              it.measures.length, scored.length,
+              scored.length ? Math.max.apply(null, scored) : null,
+              scored.length ? Math.min.apply(null, scored) : null) +
     '<h5 class="mini">' + L("measure","bu") + '</h5>' +
     '<div class="scroll"><table>' + measureHead() +
       '<tbody class="sortable" data-item="tr" data-kind="measures" data-u="' + uk + '">' +

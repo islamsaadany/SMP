@@ -28754,3 +28754,120 @@ section previously named `deckAnchors()` as dead code with no callers — true o
 the build it was written against, and **no longer true**. §253.3 gave it a
 caller in the same hours, routing it through `deckHtmlFor()` so a picture's
 landing places come from the deck that is actually shown.
+
+## §257 — A SUMMARY IS MADE OF THE NUMBER IT SUMMARISES (2026-09-02)
+
+Islam, from his own Performance page, of the CON02 pane: *"the key measure
+performance has a highest and lowest that doesn't match the measure
+progress."*
+
+**HIS SCREEN, MEASURED.** One measure — *After Sales Revenue*, `≥ 5M`,
+compiled by `Sum`, 3M reported. The card's headline read **90%**, the Progress
+column beneath it read **90%**, and Highest and Lowest both read **60%**. Every
+one of those three numbers is arithmetically correct. They are the answers to
+**two different questions**, printed six centimetres apart with nothing saying
+so.
+
+**§239 MADE THE SCORE DERIVED, AND MOVED HALF THE READERS.** That section is
+explicit about what it did: a `Sum` measure is judged against the share of its
+target due by now, so at six months of twelve, 3M against 5M is 3 ÷ 3.33 =
+**90%**, not 3 ÷ 5 = 60%; and `progress` **goes on holding the raw
+actual-against-the-annual-target ratio**, deliberately, so archives and closed
+cycles read as they did and nothing is migrated. It moved every reader that
+**AVERAGES** — `pillarPerf`, `koScore`, the Progress column, the deck — and
+left every reader that **SUMMARISES** exactly where it was.
+
+Seven cells, and the split runs cleanly along that line:
+
+| Where | The stale cell |
+| --- | --- |
+| `unitPerfPane` — a pillar's pane on Performance | Highest · Lowest ← **his screen** |
+| `pillarBody` — the same pillar's row on the Plan side | Highest · Lowest |
+| `renderUnitPerformance` — the unit's Key objectives card | Highest · Lowest |
+| the unit's *See the key objectives* breakdown | Progress **and** Contribution |
+| the group's Key Objectives breakdown | Progress |
+| a unit's card on the group and company pages | Progress |
+| a capability's breakdown, and `capKOTable`'s **Score** | Progress · Score |
+
+**THE FOUR BREAKDOWNS ARE THE WORSE HALF, AND THE PRODUCT HAD ALREADY WRITTEN
+DOWN WHY.** Each of them opens *from* a headline in order to explain it, and
+each was printing a column of numbers that do not make the number above them.
+§243, three lines from the cell this changes, states the rule for the weights:
+*"a breakdown that disagrees with the headline it sits under is worse than
+none"*. The same argument was never carried the two inches across to the figure
+in the next column.
+
+**IT SHIPPED BECAUSE THE TWO AGREE ON EVERY ROW THAT DOES NOT PRORATE.** Only
+`Sum` prorates (§239: *Latest* is a rate at a point in time, *Average* is
+normalised, and prorating either would invent a glide path). So on the whole of
+a plan compiled by `Latest` the two figures are byte-identical and the fault is
+invisible; it appears the first time a `Sum` row is reported mid-year. Measured
+across the worked example: **30 rows** where the two part — 17 pillar measures,
+10 unit objectives, 1 group objective, 2 capability objectives — and every
+single one compiles by `Sum`.
+
+**NOTHING STORED MOVES, AND THAT IS THE SAFETY ARGUMENT.** The fix is which of
+the two figures a summary **prints**. `m.progress` is not written, not
+recomputed and not migrated; every archive, every closed cycle and the
+`.xlsx` round trip are untouched. **The Focus board goes on reading the raw
+figure on purpose** — §239 settled that reward stays a year-end judgement — so
+that is asserted at both ends, or a build that swept every reader onto the
+score would satisfy everything else here and quietly change what earns.
+
+**ONE READER, SO A CARD CANNOT NAME A ROW ITS OWN HEADLINE LEFT OUT.**
+`scoreSpread(rows)` is the Highest/Lowest pair, and it is handed **the very
+list the average was taken over** — `scorableMeasures()` for a pillar,
+`scorableKOs()` for a list of objectives — rather than a second filter written
+beside it (§53.5). `scorableKOs()` is new only in the sense of being *named*:
+the test lived inside `koScore()`, which is exactly how the objectives card came
+to keep a membership rule of its own (`m.target && m.progress != null`), one
+that admits a hidden row and a milestone the headline excludes. It is lifted,
+not rewritten, and `koScore()` reads it.
+
+**AND `measureScore` IS WRAPPED, NEVER PASSED BY NAME.** §250.1's trap, and
+`scoreSpread` is precisely the shape that falls into it: `measureScore` takes an
+optional share and `Array.map` hands its callback the **index**, so a bare
+`.map(measureScore)` would prorate the first row by 0 (unscorable), the second
+by the whole year and the third by twice it — silent, and wrong only on the
+`Sum` rows, which is the half nobody would think to check.
+
+**AND ONE THING BESIDE THE NUMBER CHANGES, ON TWO TABLES.** The group's and the
+unit-card's breakdowns wrote the figure as `m.progress + '%'`, which prints
+**`null%`** for a row with nothing scored; going through `pct()` prints the
+em-dash the rest of the product uses for *nothing to report* (§35: absent is not
+nought). No row in the worked example is in that state, so nothing visibly
+moves — it is a latent case closed on the way past, and it is recorded rather
+than left to be discovered.
+
+**THE COST, STATED.** Thirty figures in the worked example change on screen, all
+upward and all of them the ones that were already being printed correctly one
+column to the left. A tenant's own numbers move the same way — the Highest on a
+mid-year `Sum` plan will now read higher than it did, because it has stopped
+being measured against a target that is not due yet.
+
+### §257.1 — AND THE CHECK'S FIRST RED RUN WAS THE CHECK
+
+`checks/measure-score-spread.py` was written red-first and its first run against
+the pre-fix build **died on the missing shared reader**: five failures, none of
+them about a cell, and not one of the seven surfaces ever measured. §215's fault
+committed inside the file written to guard against it. It carries its own
+membership test now — used **only** where the product's is absent, and asserted
+to agree with the product's wherever that exists — so it reports **11 failures**
+against the build before, each one naming a stale cell and the figure it should
+have held, and **33 green** after.
+
+Two of its assertions exist for §113.8's reason rather than for the fix: the
+demo must genuinely hold a pillar and a unit whose **extremes move**, not merely
+one holding a row that differs, because a pillar whose outlier happens to be
+unchanged passes every assertion above on the broken build. And the pillar and
+the unit are **found at runtime** rather than named, so the check survives a
+change to the worked example.
+
+### §257.2 — RECORDED, NOT DONE
+
+Two readers of `m.progress` are left exactly as they are, and both deliberately:
+the **Focus board** (above), and the **project outcomes** side of a capability's
+panes, which is a different model entirely — an outcome's reported figure, not a
+measure scored against a prorated target. Whether a project outcome should
+prorate at all is a decision about how projects are measured, not a
+disagreement between two cells, and it has not been put to Islam.

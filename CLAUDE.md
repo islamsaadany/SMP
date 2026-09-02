@@ -687,6 +687,49 @@ console errors (in this cloud environment, run it via a wrapper that points Play
   in the same edit as the box that writes it (§42, §147). Proved able to fail:
   **31 red** on the previous build — and its first run DIED rather than
   reported (§215), so every evaluate degrades now.
+- **A TACTIC'S OUTCOME IS MEASURED AGAINST ITS OWN WINDOW (§250):** Islam —
+  *"a tactic that is only in q2 and 3 so that's a 6 months project from april
+  till september .. now we are reporting till august so the proration how should
+  it be calauclated? because it's different than the proration of the measurs
+  that prorate across the eyar."* **HALF OF IT WAS ALREADY TRUE**: §239 gave
+  `tacticPlanned()` the tactic's own months, so *% delivered* read **5 of 6 =
+  83%**. What never reached it was §248's OUTCOME, which is shaped as a measure
+  on purpose and so went through `measureDue()` — the YEAR's share. Measured on
+  the shipped build at August, a Sum outcome of 12 against 7 read **88% for
+  every one of ten window shapes**: one number for ten periods, §239.1's fault
+  one part over. **THE SHARE IS SUPPLIED, NEVER RE-DERIVED** —
+  `measureDue`/`measureScore`/`measureDueLabel` take an optional share; a key
+  objective and a pillar measure pass nothing and read `elapsedShare()` exactly
+  as before, a tactic's outcome passes `tacticShare(t)`, and a second
+  `outcomeDue()` would be two definitions of proration drifting apart the first
+  time either is corrected (§53.5). **Absent and null both mean the year**, so a
+  tactic naming no quarters falls back rather than refusing to score.
+  **IT IS AN EXACT FRACTION AND THE FIRST BUILD PROVED WHY**: `tacticShare()` is
+  the value and `tacticPlanned()` is it ROUNDED, never the reverse — 83/100 is
+  not 5/6, so the first draft made a target of 12 read **`9.96`** and moved a
+  WHOLE-YEAR tactic from 88% to 87%. **THE MONTH BEING REPORTED IN COUNTS**, put
+  to him rather than assumed, because the year already says 8/12 and not 7/12.
+  Only `Sum` prorates; a `≤` outcome has its ALLOWANCE prorated and not its
+  score; §239.4's nought rule and the 150 cap hold; the unit survives
+  (`15B EGP`, `75%`, `5 #`). A NOT-STARTED tactic is never shown a target of
+  nothing — every surface reaches its own not-due branch first, asserted as
+  unreachable. **Nothing stored moves**: 842–852 scores read off the shipped
+  build and this one at six review points, identical at every one.
+  **§250.1 — AND IT NEARLY SHIPPED A SILENT DISASTER**: `Array.map` hands its
+  callback the INDEX, and `pillarPerf` mapped `measureScore` POINT-FREE — so the
+  first measure of every pillar would have been prorated by 0 (unscorable), the
+  second by the whole year, the third by TWICE it, wrong only for the `Sum` rows.
+  Measured: one pillar **100 → not scored**, another **83 → 65**. *Adding an
+  optional parameter is a change to every place that function is passed BY
+  NAME.* **AND THE PROBE THAT SHOULD HAVE CAUGHT IT WAS BLIND** — it called
+  `unitPillars(key)` where that takes an OBJECT, so it compared two identical
+  error strings and called it agreement (§94.5: two crashes agree perfectly).
+  **§250.2 — RECORDED, NOT DONE**: the review deck still ignores an outcome
+  entirely (`present.js` prints `t.actual` against `tacticPlanned` and has never
+  referenced `outActual`), measured byte-identical before and after, so it is
+  §248's omission and correcting it is a decision about what a slide shows;
+  and `checks/report-saves.py` is red on `main` for a stub that does not serve
+  `sw.js` (§100.3, §231.5), reproduced on the shipped build.
 - **YTD IS MEASURED AGAINST THE PART OF THE YEAR THAT HAS PASSED (§239):**
   Islam — *"the reporting of YTD is being compared with the full year target
   without proration which is the wrong practice."* Three answers to one
@@ -4096,6 +4139,14 @@ python3 checks/submit-gate.py  # Submit is shut until the report is complete and
                                 # draft and Submit both LOCK the report (controls
                                 # actually disabled, never a class) and one Reopen
                                 # unlocks either (§220, §221)
+python3 checks/tactic-proration.py # a tactic's OUTCOME is measured against its own
+                                # window, not the year (§250): the share asserted as
+                                # AGREEMENT with a month count the check works out for
+                                # itself, the exact fraction (a target of 12 over
+                                # Apr-Sep reads 10, never 9.96), a whole-year tactic
+                                # asserted UNCHANGED, only Sum prorating, both panes
+                                # driven, and §2b guarding the index-leak that
+                                # `.map(measureScore)` would reintroduce
 python3 checks/ytd-proration.py # YTD is measured against the part of the year that has
                                 # PASSED (§239): the review point is a month and the
                                 # office picks it; Sum prorates and Latest must not; the
@@ -4329,6 +4380,31 @@ it was. **19 red** on the shipped file, 0 after &mdash; and the check's own
 first run died rather than reported (&sect;215). **Recorded, not done**: the
 `.pptx` plan download still has no outcome column, and a deck already open on a
 projector does not redraw mid-presentation.*
+
+*Earlier the same day: **&sect;250: a tactic's outcome is measured
+against its own window.** Islam, of a tactic marked Q2 and Q3: *"that's a 6
+months project from april till september .. now we are reporting till august so
+the proration how should it be calauclated? because it's different than the
+proration of the measurs that prorate across the eyar."* Half of it was already
+true &mdash; &sect;239 gave the *% delivered* column the tactic's own months, so
+it read 5 of 6 = 83% &mdash; and &sect;248's OUTCOME went through the YEAR's
+share, reading **88% for every one of ten window shapes** at August. The share
+is SUPPLIED to the one arithmetic rather than re-derived beside it, it is an
+EXACT fraction (the first draft read it back out of the rounded per cent and
+moved a whole-year tactic from 88% to 87%), and the month being reported in
+counts, as the year already counts it. **Nothing stored moves**: 842&ndash;852
+scores read off the shipped build and this one at six review points, identical
+at every one. **&sect;250.1**: it nearly shipped a silent disaster &mdash;
+`pillarPerf` mapped `measureScore` POINT-FREE, and `Array.map` hands its
+callback the index, so the new optional share would have been 0, then 1, then 2
+down every pillar (one pillar 100 &rarr; not scored, another 83 &rarr; 65); and
+the probe that should have caught it was comparing two identical crash strings.
+**&sect;250.2, recorded not done**: the review deck still ignores an outcome
+entirely (&sect;248's omission, measured byte-identical before and after), and
+`checks/report-saves.py` is red on `main` for a stub that does not serve
+`sw.js`. 33 new assertions, proved able to fail **15 red** on the shipped build;
+eight neighbouring checks, the full `qa.py` sweep (ERRORS none), 472/0
+authoriser and 126/0 differ all green.*
 
 *Earlier the same day: **&sect;249.4: the direction and the compile
 rule stay the office's.** Islam, from the running platform: *"I viewed as Ali

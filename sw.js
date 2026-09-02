@@ -267,8 +267,21 @@
    v4.21, which git merges without a word while the bytes differ — so v4.22.
    Name checked against origin/main serving
    "smp-shell-v4.21-office-starts-a-conversation"; confirm again immediately
-   before the push (§94.16). */
-const SHELL = "smp-shell-v4.24-outcome-missing-audit";
+   before the push (§94.16).
+
+   §250: a tactic's outcome is measured against its own window rather than the
+   year, so the built file's bytes changed and the name must too — a returning
+   browser caches by NAME and would go on serving itself the old platform out of
+   its own disk (§91). Checked against origin/main serving
+   "smp-shell-v4.24-outcome-missing-audit"; confirmed again immediately before
+   the push (§94.16).
+
+   §251: the review deck's tactics slide reads the outcome's figure, and five
+   counters stopped looking in the old box — the built file's bytes changed, so
+   the name does too. Checked against origin/main serving
+   "smp-shell-v4.25-tactic-window-proration" AFTER merging it into this branch;
+   confirm again immediately before the push (§94.16). */
+const SHELL = "smp-shell-v4.26-outcome-on-the-deck";
 const ASSETS = [
   "/",
   "/index.html",

@@ -6,8 +6,8 @@ version (rules A2 / A11, changed 2026-08-20) — those go only when asked for.
 
 **Where it runs:** Vercel, production tracks `main`. Static files plus two
 serverless functions (`/api/state`, `/api/auth`) against Neon Postgres.
-**Latest version:** §232/§233 on `main` (removing a pillar or a project,
-and hiding an element from the presentation).
+**Latest version:** §250 on `main` (a tactic's outcome measured against its
+own window); §251 on this branch (the presentation reads what was reported).
 
 *(This line read v3.58 while the section below it ran to v3.65: a documentation
 drift, flagged before it was corrected rather than quietly realigned.)*
@@ -61,6 +61,15 @@ Nothing proceeds past this line without an answer.
 
 ## Known red, on purpose
 
+- **`checks/report-saves.py` — 3 × "nothing threw while reporting".** Not a
+  product defect and **red on `main` before this branch**, reproduced there with
+  §250's changes removed: the failure is
+  *"The script has an unsupported MIME type ('text/html')"* — the check's own
+  stub does not serve `sw.js`, so the platform's §231.5 registration rejects and
+  the page-error listener reports it. §100.3 exactly: *a stand-in that models
+  less than the thing it stands in for reports a working build as broken.* Every
+  other assertion in the file passes. Fix belongs in that check's stub.
+
 - **`checks/no-jump.py` — "sorting a column" (1 JUMPED).** Real defect,
   diagnosed 2026-08-26 (§109.5): with a register row open for editing, sorting
   collapses the page 1457px → 913px (the open row keeps its class, loses its
@@ -69,6 +78,94 @@ Nothing proceeds past this line without an answer.
   is a true signal — do not silence it.
 
 ## Built and verified
+
+### §251 — the presentation reads what was reported (2026-09-02, branch `claude/presentations-plan-performance-update-7a94p2`)
+
+Islam: *"presentations doesn't change when the plan performance is done"*, and
+then *"the presentation should update on either save draft or submit."* **The
+fix he proposed would have changed nothing** — `openDeck()` calls
+`deckSlides()` on the press, so a deck is assembled fresh every time it opens
+(§51.8) and there is nothing stale for a refresh to clear. **This closes
+§250.2**, which the branch beside this one recorded as not done.
+
+**The fault is five readers still looking in the old box.** §248 puts a
+tactic's outcome figure in `outActual`. Measured on Mobile before anything was
+written:
+
+| | Performance says | The slide said |
+|---|---|---|
+| a tactic reported through its outcome | `4# / 3 #` · `133%` | `— / 50%` · `—` |
+
+…under a heading on that same slide already reading **`Delivered 98%`** — a
+number that counts the row its own table was calling empty. Beside it:
+`reportedCount` went **41 of 41 → 40 of 41**, so **Submit refused a finished
+report** with *"1 figure still to enter"*; the note rule could not see an
+outcome at all; the cycle board's tactics column under-counted; and on
+Performance the row was dimmed as unreported next to its own printed figure.
+
+**One expression, named once.** `onOutcome(t) ? tacticReads(t) : tacticRatio(t)`
+existed inline in the Performance pane and nowhere else — it is
+`tacticProgress()` now, with `rowAnswered()` beside it answering *has this row
+been answered* for every kind of row (§53.5). The ternary it replaces in
+`reportedCount` had the same expression in both branches.
+
+**The slide's shape is Islam's**, picked from three drawn options shot out of
+the real deck (`design-mockups/tactic-outcome-slide/`, published as an artifact
+for sign-off): the **outcome takes a column of its own**, as on Performance.
+Cost measured before he chose: Mobile's deck **24 → 27 slides**, every extra one
+a continuation the deck already makes. Two headings take Performance's words
+(*YTD actual* · *Progress*, §239.2), a row owed a figure says **"Not reported ·
+due at …"** instead of the em-dash that means *nothing to report*, and a tactic
+with no outcome is byte-for-byte what it was.
+
+**Recorded, not done:** the `.pptx` plan download still has no outcome column
+(its own mockup), and a deck already open on a projector does not redraw
+mid-presentation — put to Islam and deliberately left.
+
+Green: `deck-outcome` (**19 red on the shipped file**, 0 after — and its own
+first run died rather than reported, §215), `tactic-proration` (33),
+`tactic-outcome` (47), `ytd-proration`, `submit-gate`, `cycle-board`,
+`notes-slide`, `project-tables`, `setup-overview`, `gap-fill`, the full `qa.py`
+sweep (ERRORS none), `test-authorize` 472/0, `test-graph-diff` 126/0.
+
+### §250 — a tactic's outcome is measured against its own window (2026-09-02, branch `claude/tactic-proration-calc-uyspmb`)
+
+Islam: a tactic marked Q2 and Q3 "is a 6 months project from april till
+september .. now we are reporting till august so the proration how should it be
+calauclated? because it's different than the proration of the measurs that
+prorate across the eyar." **Half of it was already true** — §239 gave the
+*% delivered* column the tactic's own months, so it read **5 of 6 = 83%** — and
+§248's OUTCOME still went through the YEAR's share, reading **88% for every one
+of ten window shapes** at August: one number for ten periods. The share is now
+supplied to the one arithmetic (`measureDue`/`measureScore`/`measureDueLabel`
+take an optional share; a measure passes nothing, a tactic's outcome passes
+`tacticShare(t)`), and it is an **exact fraction** — the first draft read it back
+out of the rounded per cent and moved a whole-year tactic from 88% to 87%.
+Islam's case: annual target 12 over Apr–Sep reads **10** at August, and 7 against
+it scores **70%** where it read 88%.
+
+**Nothing stored moves, measured not asserted:** 842–852 scores — ten units,
+their pillars, every measure and tactic, all eight capabilities, the group and
+both companies — read off the shipped build and this one at **six review points**
+including unset, identical at every one. **Proved able to fail: 15 red** on the
+shipped build, the reporting pane printing `8 # of 12 #`.
+
+**§250.1 — and it nearly shipped a silent disaster.** `pillarPerf` mapped
+`measureScore` point-free, and `Array.map` hands its callback the INDEX — so the
+new optional share would have been 0, then 1, then 2 down every pillar (one
+pillar **100 → not scored**, another **83 → 65**), wrong only for the `Sum` rows.
+Guarded by `checks/tactic-proration.py` §2b. The probe that should have caught it
+was itself blind, comparing two identical crash strings (§94.5).
+
+**§250.2 — recorded, not done:** the review deck still ignores an outcome
+entirely (`present.js` prints `t.actual` against `tacticPlanned`), measured
+byte-identical before and after — §248's omission, and correcting it is a
+decision about what a slide shows for a row measured in stores.
+
+Green: `tactic-proration` (33), `ytd-proration`, `tactic-outcome` (47),
+`submit-gate`, `table-fit`, `cycle-board`, `project-tables`, `plan-fields`,
+`gap-fill`, `gap-walk`, `save-fidelity`, the full `qa.py` sweep (ERRORS none),
+`test-authorize` 472/0, `test-graph-diff` 126/0.
 
 ### §236.3 — slide by slide, only the originals pinned (2026-09-01, same branch)
 

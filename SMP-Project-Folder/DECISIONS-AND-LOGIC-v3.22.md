@@ -27611,6 +27611,133 @@ list happened to stop.
 
 ---
 
+## §250 — A TACTIC'S OUTCOME IS MEASURED AGAINST ITS OWN WINDOW (2026-09-02)
+
+Islam, of a tactic marked Q2 and Q3: *"for the proration of tactics a tactic
+that is only in q2 and 3 so that's a 6 months project from april till september
+.. now we are reporting till august so the proration how should it be
+calauclated? because it's different than the proration of the measurs that
+prorate across the eyar."*
+
+**HE IS RIGHT, AND THE PLATFORM ONLY DID HALF OF IT.** §239 already gave
+`tacticPlanned()` the tactic's own months, so the *% delivered* column read
+**5 of 6 = 83%** at August and not 8/12. What it never reached was §248's
+**outcome** — the tactic's own direction, target, unit and compile rule — which
+is shaped as a measure on purpose and therefore went straight through
+`measureDue()`, which prorates by the **year**.
+
+**MEASURED ON THE SHIPPED BUILD BEFORE A LINE WAS WRITTEN**, review point
+August, a Sum outcome with an annual target of 12 and an actual of 7:
+
+| window | months | shipped | §250 |
+|---|---|---|---|
+| Q1 only | 3 | due 8 → 88% | due 12 → 58% (finished) |
+| Q2 only | 3 | due 8 → 88% | due 12 → 58% (finished) |
+| Q3 only | 3 | due 8 → 88% | due 8 → 88% |
+| Q4 only | 3 | due 8 → 88% | not yet due |
+| Q1+Q2 | 6 | due 8 → 88% | due 12 → 58% |
+| **Q2+Q3** | 6 | due 8 → **88%** | due **10** → **70%** |
+| Q3+Q4 | 6 | due 8 → 88% | due 4 → 150% |
+| Q1+Q2+Q3 | 9 | due 8 → 88% | due 10.67 → 66% |
+| Q2+Q3+Q4 | 9 | due 8 → 88% | due 6.67 → 105% |
+| Q1–Q4 | 12 | due 8 → 88% | due 8 → **88%, unchanged** |
+
+**Every window shape read 88%** — one number for ten different periods, a column
+that cannot vary. That is §239.1's own fault one part over: two things answering
+"how far are we" and only one of them asking about this row.
+
+**THE SHARE IS SUPPLIED, NEVER RE-DERIVED.** `measureDue`, `measureScore` and
+`measureDueLabel` take an optional share; a key objective and a pillar measure
+pass nothing and read `elapsedShare()` exactly as they always have, and a
+tactic's outcome passes `tacticShare(t)`. A second `outcomeDue()` would be two
+definitions of proration drifting apart the first time either was corrected
+(§53.5). **Absent and null both mean "the year"**, which is what makes a tactic
+naming no quarters safe: it has no window, so it falls back rather than refusing
+to be scored.
+
+**IT IS AN EXACT FRACTION, AND THE FIRST BUILD PROVED WHY.** `tacticShare()` is
+now the value and `tacticPlanned()` is it rounded — never the other way round.
+The first draft read the share back out of the rounded per cent, and 83/100 is
+not 5/6: a target of 12 read **`9.96`** instead of `10`, `18B EGP` read
+`14.94B EGP`, and a **whole-year tactic moved from 88% to 87%**. A rule that
+changes a whole-year tactic is not the rule that was agreed. Both are asserted.
+
+**THE CONVENTION WAS PUT TO HIM RATHER THAN ASSUMED**: the month being reported
+*in* counts as passed, so April–August is five of six. That is the same
+convention the year already uses (reporting till August is **8/12**, never
+7/12), so the two halves of one row cannot disagree about what "till August"
+means.
+
+**WHAT DOES NOT MOVE, and it is measured rather than asserted:** only `Sum`
+prorates (Latest is a rate at a point in time, Average is already normalised —
+§239); the `≤` direction has its **allowance** prorated and not its score, so
+spending exactly the allowance still reads 100%; nought against a `≤` outcome is
+still the cap (§239.4); the 150 cap holds; and the target keeps its unit through
+`joinTarget` (§199.4) — `15B EGP`, `75%`, `5 #`, `1.33M USD`.
+
+**A TACTIC THAT HAS NOT STARTED IS NOT ASKED**, and must never be shown a target
+of nothing. Its share is 0, and every surface already reaches its own not-due
+branch first — *Not yet due* on the plan and Performance panes, *Not asked —
+outside this cycle* on Reporting — so the zero is unreachable, and it is
+asserted as unreachable rather than argued.
+
+**NOTHING STORED MOVES AND THERE IS NO MIGRATION.** The score is derived; every
+archive, every closed cycle and `figuresSnapshot` are untouched. **Proved:** all
+842–852 scores in the worked example — ten units, their pillars, every measure
+and tactic, all eight capabilities, the group and both companies — read off the
+shipped build and this one at **six review points** including unset, and
+identical at every one.
+
+### §250.1 — THE DEFECT THIS CHANGE NEARLY SHIPPED
+
+`measureScore` gained an optional second argument, and **`Array.map` hands its
+callback the INDEX as a second argument**. `pillarPerf` mapped it point-free:
+
+```js
+avg(scorableMeasures(p).map(measureScore))   // measureScore(m, 0), (m, 1), (m, 2)…
+```
+
+so the first measure of every pillar was prorated by **0** (unscorable), the
+second by the **whole year**, the third by **twice** it. Silent, and wrong only
+for the `Sum` rows — the half nobody would think to spot-check. Measured against
+the shipped build it moved real figures: Consumer Electronics' pillar
+**100 → not scored**, Care **83 → 65**, Corporate **70 → 59**.
+
+*Adding an optional parameter to a function is a change to every place that
+function is passed BY NAME.* One call site in the product; wrapped, with the
+reason in the code. `checks/tactic-proration.py` §2b asserts the **agreement** —
+a pillar's performance is the average of its own measures' scores asked one at a
+time — and goes red on twelve pillars with the leak restored.
+
+**AND THE COMPARISON THAT SHOULD HAVE CAUGHT IT WAS BLIND.** Its first pass
+called `unitPillars(key)` where that function takes a unit **object**, so it
+compared two identical `ERR: cannot read items of undefined` strings across the
+two builds and reported them as agreement — §94.5's lesson in a probe rather
+than a test: *two crashes agree perfectly.* It refuses an error and refuses a
+run reading fewer than 200 numbers now, and it was proved able to fail by
+putting the leak back.
+
+### §250.2 — RECORDED, NOT DONE
+
+**The review deck still ignores an outcome entirely.** Measured on this build
+and on the shipped one, byte for byte the same: with a Q2+Q3 tactic scored by an
+outcome, the Performance pane reads **`7# / 10 #  70%`** and the projector reads
+**`40% / 83%  48%`** — `present.js` prints `t.actual` against `tacticPlanned`
+and has never referenced `outActual`, `tacticReads` or `tacticBenchmark`. That
+is §248's omission on the review deck, not this change's: it is identical before
+and after, and correcting it means deciding what a slide shows for a row
+measured in stores rather than per cent, which is a decision and not a tidy-up.
+
+**`checks/report-saves.py` is red on `main` and was before this branch.** Three
+failures, all *"The script has an unsupported MIME type ('text/html')"* — its
+stub does not serve `sw.js`, so the platform's own §231.5 registration rejects
+and the check's page-error listener reports it. Reproduced on the shipped build
+with this branch's changes removed. §100.3 again: *a stand-in that models less
+than the thing it stands in for reports a working build as broken.* Not fixed
+here — it is another check's machinery and this branch was not asked to touch it.
+
+---
+
 ## §251 — THE PRESENTATION READS WHAT WAS REPORTED (2026-09-02)
 
 Islam, of the review deck: *"presentations doesn't change when the plan

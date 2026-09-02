@@ -510,21 +510,42 @@
      row takes the space under the heading and centres itself in it — which is
      what "centered in the page" asks for, and it is also why the cards do not
      hang at the top on a unit with two of them. */
-  .pcards{ display:grid; gap:clamp(14px, calc(64px / var(--n,3)), 32px);
-    flex:1; align-content:center;
-    margin-top:clamp(28px, calc(120px / var(--n,3)), 56px);
-    grid-template-columns:repeat(var(--n,3),1fr); align-items:stretch; }
+/* §254.12: THE CARDS FILL THE SLIDE, NOT JUST ITS WIDTH. `--c` is how many
+   across and `--r` how many down, both worked out once in `pillarCols()` — the
+   layout decision lives in one place and the CSS only carries it out.
+
+   FLEX-WRAP RATHER THAN A GRID, because a ragged last row has to be CENTRED:
+   five in three columns leaves two underneath, and a grid would push them to
+   the left edge. The basis is the column share of the row, so the cards are
+   equal whatever the count.
+
+   EVERY SIZE IS A FUNCTION OF THE COLUMN COUNT, not of the total: what decides
+   how big a name can be is how wide its card is, and that is `--c`. The height
+   follows `--r`, so three rows of cards do not each demand the height one row
+   could have. */
+  .pcards{ display:flex; flex-wrap:wrap; justify-content:center; align-items:stretch;
+    align-content:center; flex:1;
+    gap:clamp(14px, calc(64px / var(--c,3)), 32px);
+    margin-top:clamp(24px, calc(120px / var(--c,3)), 56px); }
   .pcard{ display:flex; flex-direction:column; justify-content:center;
-    gap:clamp(10px, calc(48px / var(--n,3)), 22px);
-    padding:clamp(20px, calc(90px / var(--n,3)), 44px) clamp(18px, calc(76px / var(--n,3)), 38px);
-    min-height:clamp(180px, calc(700px / var(--n,3)), 340px);
+    flex:0 1 calc((100% - (var(--c,3) - 1) * clamp(14px, calc(64px / var(--c,3)), 32px))
+                  / var(--c,3));
+    gap:clamp(10px, calc(48px / var(--c,3)), 22px);
+    /* THE VERTICAL SIZES FOLLOW THE ROWS, THE HORIZONTAL ONES THE COLUMNS,
+       and getting that wrong is what made three rows overrun the slide by
+       84px: the first version sized the padding by `--c` alone, so nine cards
+       in three rows each demanded the height one row could afford. Swept from
+       one pillar to ten, and none overflows (§69.5's fit pass is a net, not a
+       layout). */
+    padding:clamp(10px, calc(48px / var(--r,1)), 36px) clamp(16px, calc(76px / var(--c,3)), 38px);
+    min-height:clamp(80px, calc(520px / var(--r,1)), 290px);
     background:var(--surface-2); border-top:5px solid var(--gold); border-radius:2px; }
   .pcard-c{ font-family:var(--mono); letter-spacing:.1em; font-weight:600;
-    font-size:clamp(13px, calc(40px / var(--n,3)), 19px); color:var(--gold-deep); }
+    font-size:clamp(13px, calc(40px / var(--c,3)), 19px); color:var(--gold-deep); }
   .pcard-n{ font-weight:700; line-height:1.14; color:var(--ink); text-wrap:balance;
-    font-size:clamp(21px, calc(10px + 88px / var(--n,3)), 52px); }
+    font-size:clamp(20px, calc(8px + 80px / var(--c,3)), 52px); }
   .pcard-s{ color:var(--ink-3); line-height:1.45;
-    font-size:clamp(14px, calc(6px + 26px / var(--n,3)), 19px); }
+    font-size:clamp(14px, calc(6px + 26px / var(--c,3)), 19px); }
 
 /* The quiet half of a figure cell — what it is measured against so far
    (§254). The same weight the tactics table has used since §252, so one

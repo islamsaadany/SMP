@@ -355,7 +355,10 @@ function deckSlides(u){
   if (u.items.length) S.push('<section class="dslide"' +
     anch("pillarnames", "After the " + L("pillar","bu").toLowerCase() + " names") +
     '><h2>' + L("pillar","bu") + '</h2>' +
-    '<div class="pcards" style="--n:' + u.items.length + '">' + pNames + '</div></section>');
+    '<div class="pcards" style="--n:' + u.items.length +
+      ';--c:' + pillarCols(u.items.length) +
+      ';--r:' + Math.ceil(u.items.length / pillarCols(u.items.length)) + '">' +
+    pNames + '</div></section>');
 
   /* The score table, built here and pushed at the END (§254.4). */
   var pRows = u.items.map(function(p, i){
@@ -533,6 +536,28 @@ function deckSlides(u){
     ' &middot; ' + esc(REVIEW.name) + '</p></section>');
 
   return S.join("");
+}
+
+/* ── HOW MANY ACROSS (§254.12) ─────────────────────────────────────────
+   Islam, looking at five in a row: *"the 5 pillars beside each other are very
+   small can we arrange them in the slide to fill better?"*
+
+   ONE ROW USES HALF A SLIDE. Five cards across a 1600px stage are 264px wide
+   and the name lands at 27.6px, with the whole lower half of the slide empty —
+   the layout was spending width it did not have and leaving height it did.
+
+   AND HIS OWN FIRST INSTRUCTION READS DIFFERENTLY NOW: *"4 can form a box"* is
+   two by two, which is what he meant and what a square arrangement of four
+   gives. Up to three stay in a row, because two rows for three is a shape
+   nobody would draw on purpose; above that it is the square-ish grid
+   `ceil(sqrt(n))` gives — 4 as 2x2, 5 and 6 as three across, 8 as three across
+   in three rows, ten as four.
+
+   A RAGGED LAST ROW IS CENTRED, which is why the cards lay out with flex-wrap
+   rather than a grid: five in three columns leaves two on the second row, and
+   a grid would push them left. */
+function pillarCols(n){
+  return n <= 3 ? Math.max(1, n) : Math.ceil(Math.sqrt(n));
 }
 
 function deckPillarHead(u, p, pi, which){

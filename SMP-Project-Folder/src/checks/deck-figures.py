@@ -278,7 +278,7 @@ with sync_playwright() as p:
       const u = UNITS[activeKeys()[0]], keep = JSON.stringify(u.items);
       const proto = JSON.parse(JSON.stringify(u.items[0]));
       const sizes = {};
-      [2, 4, 6].forEach(n => {
+      [1, 2, 3, 4, 5, 6, 7, 8, 9, 10].forEach(n => {
         u.items.length = 0;
         for (let i = 0; i < n; i++) { const c = JSON.parse(JSON.stringify(proto));
           c.name = "Pillar " + (i+1); c.sub = ""; u.items.push(c); }
@@ -290,9 +290,12 @@ with sync_playwright() as p:
         if (s) { s.classList.add("on");
           const c = s.querySelector(".pcard-n"), box = s.querySelector(".pcard");
           sizes[n] = { name: parseFloat(getComputedStyle(c).fontSize),
-                       row: s.querySelectorAll(".pcard").length,
-                       tops: new Set([...s.querySelectorAll(".pcard")]
-                         .map(x => Math.round(x.getBoundingClientRect().top))).size };
+                       cards: s.querySelectorAll(".pcard").length,
+                       rows: new Set([...s.querySelectorAll(".pcard")]
+                         .map(x => Math.round(x.getBoundingClientRect().top))).size,
+                       cols: parseInt(getComputedStyle(s.querySelector(".pcards"))
+                         .getPropertyValue("--c"), 10),
+                       over: s.scrollHeight - s.clientHeight };
           s.classList.remove("on"); }
         try { closeDeck(); } catch (e) {}
       });
@@ -349,11 +352,24 @@ with sync_playwright() as p:
     }""")
     if isinstance(late, dict) and late.get("sizes"):
         s = late["sizes"]
-        ok("the pillar name grows as the count falls (§254.8)",
-           s.get("2", {}).get("name", 0) > s.get("4", {}).get("name", 0)
-           > s.get("6", {}).get("name", 0), s)
-        ok("...and they stay on ONE row, whatever the count",
-           all(v["tops"] == 1 and v["row"] == int(k) for k, v in s.items()), s)
+        # §254.12 REVERSED "ONE ROW, WHATEVER THE COUNT" — Islam, seeing five
+        # across: "the 5 pillars beside each other are very small can we
+        # arrange them in the slide to fill better?" The assertion is
+        # REWRITTEN rather than deleted (§218), because what it exists to
+        # prove is that the layout is a function of the count and that
+        # nothing runs off the slide — not that the shape is a row.
+        ok("the pillar name grows as the card widens (§254.8)",
+           s.get("2", {}).get("name", 0) > s.get("5", {}).get("name", 0)
+           > s.get("10", {}).get("name", 0), s)
+        ok("...every card is drawn, at every count from 1 to 10",
+           all(v["cards"] == int(k) for k, v in s.items()), s)
+        ok("...the shape is square-ish rather than one long row (§254.12)",
+           s.get("4", {}).get("cols") == 2 and s.get("4", {}).get("rows") == 2
+           and s.get("5", {}).get("cols") == 3 and s.get("5", {}).get("rows") == 2
+           and s.get("3", {}).get("rows") == 1, s)
+        ok("...and NOTHING overflows the slide, at any count",
+           all(v["over"] <= 0 for v in s.values()),
+           {k: v["over"] for k, v in s.items() if v["over"] > 0})
         ok("the aim slide reads This year before the horizon (§254.9)",
            len(late["heads"]) >= 4 and late["heads"][2] == "This year", late["heads"])
         ok("...and the aspiration runs the width of the slide",

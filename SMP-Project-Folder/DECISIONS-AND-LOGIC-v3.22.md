@@ -28438,6 +28438,36 @@ their place, and both surfaces end up saying the same two things.
 Execution is made of, and are still explained in words on *Where the unit
 stands* — which he looked at and kept.
 
+### §254.12 — the cards fill the slide, not just its width *(reversing §254.8's row)*
+
+Islam, looking at five across: *"the 5 pillars beside each other are very small
+can we arrange them in the slide to fill better?"*
+
+**ONE ROW USES HALF A SLIDE.** Five cards across a 1600px stage are 264px wide
+with the name at 27.6px, and the whole lower half empty — the layout was
+spending width it did not have and leaving height it did.
+
+**AND HIS OWN FIRST INSTRUCTION READS DIFFERENTLY NOW**: *"4 can form a box"* is
+two by two, which is exactly what a square arrangement of four gives. Up to
+three stay in a row, because two rows for three is a shape nobody would draw on
+purpose; above that it is `ceil(sqrt(n))` — 4 as 2×2, 5 and 6 as three across,
+7–9 as three across in three rows, ten as four. **Five goes 264px / 27.6px →
+445px / 34.7px.**
+
+**FLEX-WRAP RATHER THAN A GRID**, because a ragged last row has to be CENTRED:
+five in three columns leaves two underneath, and a grid would push them left.
+
+**AND THE VERTICAL SIZES FOLLOW THE ROWS, THE HORIZONTAL ONES THE COLUMNS.**
+Getting that wrong is what made three rows overrun the slide by 84px: the first
+version sized the padding by the column count alone, so nine cards in three rows
+each demanded the height one row could afford. Swept from one pillar to ten and
+**none overflows** — the fit pass is a net, not a layout (§69.5).
+
+**The check's own assertion was REWRITTEN, not deleted** (§218): *"they stay on
+ONE row, whatever the count"* was true of §254.8 and is false of this, and what
+it exists to prove is that the layout is a function of the count and that
+nothing runs off the slide — never that the shape is a row.
+
 ### §254.11 — the sentence under Execution stays
 
 Put to him as the one thing I would leave alone: the grey line reading

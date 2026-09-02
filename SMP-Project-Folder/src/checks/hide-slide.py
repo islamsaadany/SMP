@@ -1,4 +1,4 @@
-"""THE OFFICE HIDES A SLIDE, AND THE PROJECTOR SKIPS IT (§253).
+"""THE OFFICE HIDES A SLIDE, AND THE PROJECTOR SKIPS IT (§256).
 
 Islam: *"allow the smo to hide presentation slides of any unit or function."*
 §246 recorded the question this answers and named the half that matters most —
@@ -79,7 +79,7 @@ def press(pg, i):
 
 def counts(pg, key):
     """The subject's headline numbers, read from the platform's OWN functions.
-    §253's claim is about what those return; a screen reading could pass on a
+    §256's claim is about what those return; a screen reading could pass on a
     build that merely stopped drawing them."""
     return ev(pg, """(k) => {
       const u = UNITS[k];
@@ -364,19 +364,24 @@ with sync_playwright() as pw:
                     box.innerHTML = deckHtmlFor('fn:' + a.k);
                     return box.querySelectorAll('.dslide').length;
                   }""", {"k": fk, "u": UNIT}, 0) > 4)
-        # §253.2: THE EDITOR AND THE PROJECTOR ASSEMBLE THE SAME DECK. This
+        # §256.2: THE EDITOR AND THE PROJECTOR ASSEMBLE THE SAME DECK. This
         # branched on the `fn:` prefix in one file and on the FORMAT in
         # another, so a pillars function's Manage slides showed 2 slides where
         # its projector showed 15 — asserted as their agreement, never as a
         # number, so a deliberate change to the deck keeps it green (§94.8).
+        # The PROJECTOR side is written the way shell.html's Present handler
+        # writes it, deliberately — that handler still branches for itself (it
+        # picks an OPENER, which differ only in their title), so this asserts
+        # the two surfaces agree rather than asserting that one calls the
+        # other. If the handler ever drifts from `deckHtmlFor`, this goes red.
         same = ev(pg, """(k) => {
           const n = (html) => { const d = document.createElement('div');
                                 d.innerHTML = html;
                                 return d.querySelectorAll('.dslide').length; };
-          return { editor: n(deckHtmlFor('fn:' + k)),
-                   /* what the Present button reaches, by its own rule */
-                   projector: n(deckCapShaped('fn:' + k) ? deckSlidesFn(k)
-                                                         : deckSlides(unitLike('fn:' + k))) };
+          const t = 'fn:' + k;
+          const cap = !fnPlansInPillars(FUNCTIONS[k]);
+          return { editor: n(deckHtmlFor(t)),
+                   projector: n(cap ? deckSlidesFn(k) : deckSlides(unitLike(t))) };
         }""", fk, THREW)
         check("the %s function's editor and projector build one deck" % fmt,
               isinstance(same, dict) and same["editor"] == same["projector"]

@@ -27982,7 +27982,519 @@ projector** still does not redraw while somebody saves in another tab: put to
 Islam and deliberately left, because slides changing under a presenter
 mid-sentence is worse than a deck that is right as of when it opened.
 
-## §253 — A SLIDE THE OFFICE DOES NOT PRESENT (2026-09-02)
+---
+
+## §253 — A TABLE WITH NO ROWS IS NOT A SLIDE (2026-09-02)
+
+Islam: *"slides are showing blank pages for the merchandizing."*
+
+**MEASURED BEFORE ANYTHING WAS PROPOSED, AND THE MEASUREMENT IS THE FINDING.**
+A sweep of every deck in the product — each subject through the builder its own
+Present button would call — returned **four** slides holding a table with no
+rows, and **all four are Merchandising**:
+
+| Deck | Slide | Why it is empty |
+|---|---|---|
+| Merchandising | *What we are aiming at* | the function carries no key objectives |
+| Merchandising | *Key Objectives — where we stand* | the same |
+| Retail Stores | *RS04 Merchandising · Key measures* | the pillar is carried by that function |
+| Retail Stores | *RS04 Merchandising · Tactics* | the same |
+
+Each drew a heading, the navy column strip, and then a whole empty page. The
+Retail pair is the worse of the two: it printed **93% / 60% / 61%** across the
+top of a slide with nothing at all behind those numbers.
+
+**THE PRODUCT ALREADY KNEW THE ANSWER AND APPLIED IT TO ONE HALF.**
+`deckSlidesFn` — a capability function's deck — has guarded its objectives
+slide on `SMPRules.shown(c.keyObjectives).length` since it was written, which
+is why **Marketing** (whose two capabilities also carry no objectives) has
+always been right, and why Islam's instinct that the rule must reach it was
+correct in aim and already satisfied in fact. The **unit** deck, which a
+pillars function goes through since §224, had no such guard. §53.5 exactly:
+one question, two answers, and the half left behind is the half he was looking
+at. The empty state was never a mistake in the data — §214.2 settled that a
+function judged by its pillars **legitimately** carries no key objectives and
+stopped counting them as missing; the deck never learned it.
+
+**ISLAM RULED IT FOR ANY SUBJECT, REVERSING THE NARROWER RECOMMENDATION.**
+I recommended dropping the slides on a **function** only, on §243's own test —
+a unit AUTHORS its objectives, so an empty table there is a plan not yet
+written and worth saying out loud, the same reason a unit with an empty SWOT
+still draws its section. He chose *"drop them on any subject with none"*, and
+it is recorded as his with the cost named: a unit that has left its objectives
+blank is no longer told so **from the projector**, and is still told so on
+every screen that counts gaps.
+
+**IT DROPS THE TABLE, AND THE SLIDE ONLY WHERE THAT LEAVES NOTHING.** The aim
+slide carries a unit's aspiration and end-in-mind **above** its table, and
+neither of those is a table with no rows — dropping the whole slide there would
+remove an aspiration nobody asked to remove. On a function that half is already
+absent (§243), so an empty table empties the slide and it goes. The rule
+reaches a project's **milestones** table on the function deck too, which the
+demo happens not to exercise: the fault is the shape, not the one subject that
+showed it.
+
+**AN ANCHOR GOES WITH ITS SLIDE**, and that is §50.3's existing behaviour
+rather than a new cost — a picture placed after a slide that is no longer drawn
+lands at the **end** of the deck instead of being dropped.
+
+### §253.1 — The reading nobody took is not drawn at all
+
+Islam, of the first of the three headline cells on *Where Merchandising
+stands*: drop it, *"and this applies to any function without key objectives
+like marekting as well."* It read a grey dash under *"no earlier cycle to
+compare"* — a whole column of nothing beside two real numbers, which reads as a
+cell that failed to render rather than as an absence (§45.2, §15.1).
+
+**THE SHAPE COSTS NO NEW CSS.** `.headgrid` without `.three` is the two-column
+shape this slide wore before §243 added the third number, so the surviving
+figures simply grow back into the room they used to have. Settled from a mockup
+made of the **real** deck (§41.9, `design-mockups/deck-empty-slides/`), both
+sides the same build.
+
+**AND THE MOCKUP EARNED ITS PLACE**: shooting it exposed that the footnote
+still opens *"Objectives measure what was committed to"* — explaining a number
+that would no longer be on the slide. The clause goes with the cell, or the
+slide argues with itself. Nothing in the sources had been touched when that was
+found.
+
+### §253.2 — The pointer from Retail to Merchandising is cut
+
+Islam: *"drop the merchandizing connection with the retail stores."*
+
+`by: "merchandising"` on Retail's fourth pillar is spec 010's worked example —
+his own: the function broke that pillar into three of its own, and their
+collective performance stood in for it. **The FEATURE is untouched**:
+`pillarCarrier()` / `viaCarrier()` and the `by` field are the product and still
+work; what is cut is this tenant's use of it.
+
+**THE COST IS STATED RATHER THAN DISCOVERED.** The demo no longer **shows** a
+carried pillar anywhere, so spec 010 is described and not visible — §45.2's
+argument accepted with its price named. Retail's own numbers move, because the
+pillar now scores as what it is (a pillar with nothing in it yet) rather than
+borrowing the function's. **Measured across every unit, before and after:**
+
+| | before | after |
+|---|---|---|
+| Retail Stores · execution | 102 | **104** |
+| Retail Stores · planned | 57 | **56** |
+| RS04 · measures / delivered / planned | 93 / 60 / 61 | **— / — / —** |
+| every other unit, and the group | — | **unchanged** |
+
+Retail's objectives (105) and pillar performance (94) do not move at all.
+RS04's title slide now honestly reads three dashes where it read a score with
+nothing behind it, and its two empty tables are gone by §253's own rule.
+
+One consequence worth naming: with the pointer cut, `fnDeleteBlockers()` no
+longer lists Retail against Merchandising, so the function becomes deletable
+where it was refused before (§62's refusal, correctly, following the data).
+
+### §253.3 — One answer to which deck a target gets
+
+Islam, on the live deployment, minutes after the three decisions above:
+*"the manage presentation show this"* — the Manage slides editor open on
+`fn:merchandizing`, its blue bar drawn and the rail and the stage
+**completely empty**.
+
+**§224 IS THE SAME FAULT AND IT WAS FIXED ON ONE SURFACE OF THREE.** That
+section made the Present button branch on the function's FORMAT rather than on
+the `fn:` prefix, because a function that plans in PILLARS has no capabilities
+at all. `slidesAssemble()` and `deckAnchors()` were both still asking by
+prefix. Measured on the demo, the editor for a pillars function assembled
+**two** slides — a cover reading *"Capability review · 0 capabilities"* and
+*Thank you* — where its own Present button opens thirteen; and the anchors
+offered for a picture came from that same wrong deck, so a picture could only
+ever be placed in one of two positions in a deck that has thirteen.
+
+**THE PAIRING IS NAMED ONCE NOW.** `deckHtmlFor(target)` is the one reader,
+and Present, Manage slides and the anchors all ask it — including
+`openDeckFn()`, which went from **2 slides to 13** for a pillars function, so
+even a caller reaching the function opener directly now gets the right deck.
+The capability deck is asserted **unchanged** in the same breath (Marketing:
+15 slides before and after), or a build that sent everything through the unit
+deck would satisfy every assertion about the function.
+
+**AND THE FAILURE HAD NO VOICE, WHICH IS WHY IT READ AS A DEAD SCREEN.**
+`slidesAssemble()` had a `try/finally` and **no catch**, and `slidesPaint()`
+opened `if (!all.length) return;` — so a throw anywhere in the builder, or a
+deck that came back empty, left the editor's bar drawn over a blank rail and a
+blank stage, with nothing said and nothing a person could see. §32's rule (a
+refusal is visible where the act was) and §171's (a silent failure is
+indistinguishable from a success), on the one surface that had neither. A
+throw is now kept and reported in the editor's own error line, and an empty
+deck says so where the rail would be.
+
+**WHAT IS NOT CLAIMED** (§171: a diagnostic is not a fix, and which it is has
+to be said). On the demo the pre-fix editor draws **two** slides; Islam's
+screenshot shows **none**. The prefix branch is certainly a defect, certainly
+on that surface, and certainly makes the editor useless for a pillars
+function — but whether it is *exactly* what emptied his rail cannot be proved
+from here, because his tenant's data is not visible. That is why the failure
+was given a voice in the same change: if something in his data is throwing, he
+now gets a sentence instead of a blank screen, and the sentence names it.
+
+### What proves it
+
+`checks/deck-blank-slides.py` — **14 red** against the build before, its first
+failure printing the four blank slides by name, exactly as reported. It
+asserts:
+
+- **no deck in the product draws a table with no rows**, swept over every unit
+  and every active function through the builder each one's own Present button
+  would call (§224);
+- **the state is MADE, never waited for** (§94.2) — a business unit is stripped
+  of its objectives and its first pillar of its measures and tactics in memory,
+  so the rule is proved on a unit and not only on the one function the demo
+  ships empty;
+- **and put back, the slides come back** (§113.8) — a build that drew no tables
+  at all would satisfy every absence above;
+- **a unit keeps the aspiration it never asked to lose**;
+- **the headline slide's two shapes**, cells and footnote at both ends;
+- **one reader decides which deck a target gets** — a pillars function
+  through it equals the unit deck built directly, a capability function equals
+  the capability deck built directly (§113.8), the editor draws the whole deck
+  rather than one useless cover, its rail never comes back empty with nothing
+  said, and the anchors come from the same deck as the slides;
+- **the pointer is cut and the feature is not**.
+
+**AND ONE OF ITS OWN ASSERTIONS PASSED ON THE BROKEN BUILD** (§94.5, and it is
+the reason falsification is run rather than assumed): *"and its first pillar's
+two tables with it"* searched the first six headings, and on the unstripped
+deck a pillar's tables sit at index 11 — so it was true of the fault it existed
+to catch. It names the stripped pillar by its **code** now, because the other
+pillars legitimately keep their tables and a blanket search cannot separate the
+two. 10 red became 11.
+
+**RECORDED, NOT DONE.** A pillars function's deck now opens
+cover → *Where X stands* → *Pillars*, with no *What we are aiming at* at all
+where the function has no objectives. That is correct and it is also the first
+deck in the product with no aim slide; whether such a function should instead
+open on something of its own is a decision about what a review says, not a
+blank page, and it has not been put to Islam.
+
+---
+
+## §254 — A FIGURE IS READ AGAINST WHAT IT IS MEASURED BY (2026-09-02)
+
+Eight things Islam sent from the live deck in one afternoon, all mocked up
+before anything was built (`design-mockups/deck-review-round/`) and six of them
+built here. The two he has not answered are recorded at the foot.
+
+### §254 — the benchmark, and the column that names it
+
+*"the actual should show the proration like the performance"*, and of the
+objectives, *"key objectives actual should show the proration as well"*, and of
+the column, *"it's called annual target"*.
+
+His row read **6#** against **4#** at **133%** and nothing on the slide said
+why. **NOTHING NEW IS COMPUTED**: §239 has prorated a `Sum` measure since it was
+written and the deck simply never printed what is due so far. The shape is the
+one the tactics table has worn since §252 — the figure in bold, the benchmark
+quiet behind a slash — so the deck gains no new vocabulary, and `figVsDue()` is
+the one builder the three tables ask (a unit's objectives, a pillar's measures,
+a capability's objectives), or the same cell drifts three ways.
+
+**The column takes Performance's own word.** *Annual target* is what §239.2
+named it on the page; two names for one number on two surfaces is §53.5. The
+**aim** slide deliberately keeps *This year*, because there the word contrasts
+with the 3-year column beside it and is doing different work.
+
+**Row 2 of the shot shows the rule working, not failing**: *Average sales*
+compiles by `Latest`, which by decision does not prorate, so its benchmark is
+the full-year figure while the `Sum` row above it is prorated. Two different
+numbers on one slide, for the right reason.
+
+### §254.1 — a scaled currency is one token, and a doubled unit is collapsed
+
+*"the number should be written 8M EGP the M is besie the number and this applies
+to the financial numbers in general like K EGP. or M USD etc."*
+
+**THE CONVENTION ALREADY EXISTED AND WAS ONLY EVER APPLIED ON THE WAY IN.**
+`TIGHT_UNITS` is what the unit picker writes with (§239.5), so anything set
+through the platform is already tight; what was never tightened is a value that
+ARRIVED with a space — typed, uploaded, or written before the convention
+existed — because §96.2 forbids rewriting what somebody wrote.
+
+**That rule is about what is STORED and it stands.** `unitTight()` is display
+only: nothing is written back, the workbook carries the spelling it was given,
+and it is asserted that building every deck leaves every stored target and
+figure byte-identical.
+
+**THE TEST IS A MAGNITUDE LETTER, NOT A LIST** — `K`, `M` or `B` and exactly one
+more word — so `K EGP` reads tight the day a tenant types it even though the
+picker does not offer it, while `M EGP B EGP`, which is somebody's typing rather
+than a unit, keeps its space and is left alone.
+
+**AND THE FIRST DRAFT CLOSED THE WRONG GAP.** It stripped the space INSIDE the
+unit and produced `8MEGP` — a fourth spelling rather than the one asked for.
+The check caught it, and the lesson is that *tight* is a fact about the
+**separator** between the number and the unit, never about the unit.
+
+**The doubling is healed in the same pass** (§254.1): nothing doubles a unit now
+— every combination through `joinTarget` produces one — but a value stored
+doubled before that fix stays so until it is re-entered, which §239.6 recorded
+as the case it could not reach. **Islam chose to heal it "on reporting and
+save"**, so the reporting box is filled from the healed value and `joinTarget`
+is given the healed string to take its separator from — which is what makes
+*heal on save* true rather than merely *heal on screen*. **The cost was stated
+and accepted**: a row nobody re-enters keeps its doubled string in the database
+and in the workbook, and reads clean only on a screen. Only an identical
+repetition collapses.
+
+### §254.2 — one question decides the whole row *(narrowing §248)*
+
+*"the ytd is showing 2% / 2# .. it's not 2% in the performance it's just 2 with
+a unit of #"*, and then *"the actual case the reported number is already 2# I
+don't know why it's not reported correctly."*
+
+**NINE STATES WERE PUT THROUGH THE SCORER AND EVERY ONE WITH A FIGURE IN THE
+OUTCOME SCORES.** So the figure the deck could see was not in the outcome, and
+there is exactly one path that produces his row: the reporting box asks for the
+OUTCOME's figure only once the outcome has a target, and asks the old question —
+per cent delivered — before that. **A figure reported before the target was
+added therefore sits in `actual` for ever**, and the moment the target appears
+`tacticBenchmark` answers with the outcome's target while the figure still comes
+from the old field. Two measures in one cell, and nobody did anything wrong.
+
+**§248 SWITCHED ON TARGET *AND* FIGURE, DELIBERATELY**, so that adding an
+outcome mid-round changed nothing until somebody typed. **That rule is narrowed
+here at Islam's direction.** He was offered three behaviours with what each
+costs and chose the first:
+
+- **A (taken)** — the target alone decides, and a row owing an outcome figure
+  says so: *Not reported · due at 3#*.
+- **B** — carry the old per cent across as the outcome's figure. Rejected: it
+  assumes `2` meant two stores rather than two per cent, and invents a figure
+  nobody reported.
+- **C** — both halves fall back to the old measure until the outcome is
+  reported. Rejected: the target somebody set is ignored until it is used.
+
+**THE COST IS REAL AND WAS STATED BEFORE HE CHOSE**: such a row leaves every
+average, stops counting as reported, and refuses Submit until the figure is
+entered — one number on the reporting page. It is the only one of the three that
+never states a figure nobody reported (§35).
+
+**Measured: the demo has 0 such tactics of 78**, so nothing in the worked
+example moves and the check MAKES the state (§94.2). On a tenant where the
+office added an outcome target after a round was reported, those rows will now
+ask for their figure.
+
+### §254.3 — a tactic outside this cycle is not dimmed
+
+*"for a non due tactic don't dim it show it normally it has the comment of not
+due this cycle anyway."* The cell already says it in words; dimming says it a
+second time and costs the owner and the quarters their legibility on a
+projector. One class removed, and the words are asserted still present, or a
+build that dropped both would pass.
+
+### §254.4 — the deck ends on its numbers
+
+*"where the units stands to be the last slide"*, and *"move the pillars
+performance till the end before the where we stand slide."*
+
+The three readings opened the deck, before anything had been shown. Said last,
+with the score table immediately before them, the deck ends on its reading:
+every pillar named, worked through, then scored. **Both slides are built where
+they always were** and only where they are pushed changes, so nothing about
+what they SAY moves. **The anchors travel with them**, which is §236.3 holding
+rather than a new cost: a picture placed after a slide follows that slide.
+
+### §254.5 — the pillars are named before they are scored
+
+*"before the pillars performance we need 1 slide with just the 2 titles ...
+don't follow the same design but the concept of having the pillars first"*, and
+of two treatments drawn in the real deck, ***"option A"*** — the row.
+
+A roll-call: what the unit committed to, in its own words, before a single
+number. **The concept is his, the treatment is the platform's**, and the
+difference is deliberate — his reference gives each card its own hue, which
+spends three accents on a distinction that means nothing (§41's budget). One
+gold rule across the row instead.
+
+**THE CODE IS THE NUMBER.** `RS01` is what every other surface calls that
+pillar, so one mark identifies it AND orders it, where an invented `01` would
+only order it. The row divides by how many pillars there are, so two and eight
+both fill the line.
+
+**AND THE TWO PILLAR SLIDES CANNOT SHARE A NAME.** Both were headed by the
+tenant's word for a pillar, which reads as a repeat on a projector and as two
+identical rows in Manage slides' rail (§87's twins). The scoring table takes the
+deck's OWN existing phrasing — *"— where we stand"*, which the objectives table
+has always worn — rather than a new form of words.
+
+### What proves it
+
+`checks/deck-figures.py` — **33 red** on the §253 build, all green after. It
+asserts the benchmark as AGREEMENT with `measureDueLabel` rather than as a
+literal (§94.8); every tight-unit case including the two that must NOT change;
+that building every deck leaves every stored figure byte-identical; the
+un-dimmed row at both ends; §254.2's three states MADE and the row put back
+byte-identical; and the slide order with the two pillar headings asserted
+different.
+
+**AND THREE CHECKS HELD SOMETHING THESE DECISIONS MOVED** (§214.3, and it is
+worth counting how ordinary this has become):
+
+1. **`deck-blank-slides.py`, written one section earlier**, asserted an
+   objectives slide was gone by searching for *"where we stand"* — which
+   §254.5 put on the pillar score slide. It went red on a correct build. It
+   names the objectives slide by the tenant's own word now (§51.11).
+2. **`tactic-proration.py`** asserted the demo HELD a handed-over pillar, true
+   until §253.2 cut that pointer at Islam's instruction. **Rewritten, not
+   deleted** (§218): it MAKES one and puts it back, which is stronger, because
+   what it exists to prove is that the exclusion works rather than that the
+   demo happens to contain a case.
+3. **`submit-gate.py`** filled `actual` on every tactic to model a complete
+   report — and §254.2 moved what complete MEANS. Worse, its own §249 block
+   ran afterwards and gave eighteen tactics an outcome target with no figure,
+   creating the very state that section makes incomplete: the fixture read
+   *23 of 41* on a build behaving exactly as decided. It fills whichever field
+   the row is actually asked for, through the product's own `outcomeOf`.
+
+### §254.6 — the note has the last word *(reversing §254.4, the same day)*
+
+Asked directly where the notes slide should sit, Islam: *"notes before thank
+you."* So the tail is the score table, the three readings, the note, then Thank
+you — and the deck's last content slide is the unit's own words rather than its
+numbers.
+
+**RECORDED AS A REVERSAL RATHER THAN OVERWRITTEN.** §254.4 shipped it the other
+way an hour earlier on my recommendation, and it sits against his own earlier
+*"where the units stands to be the last slide"*: both cannot be true at once,
+and this is the instruction he gave most recently and most specifically. One
+line to swap them back.
+
+**The check asserts it through the note's PRESENCE, never by index**, because a
+subject with no note draws no such slide at all (§246) — an index-based
+assertion would be true of exactly half the decks in the product.
+
+### Recorded, not done
+
+- **`K EGP` STAYS OFF THE LIST** — put to Islam, and *"K EGP is not to be
+  added."* `unitTight` still reads it correctly if a tenant types one, which is
+  the safe way round: the platform does not offer a unit nobody agreed, and does
+  not mangle one somebody wrote (§96.2).
+- **The deck marks are DECIDED and not yet built** — a group Raya Trade mark,
+  used wherever a unit has none, and **a supporting function takes that same
+  group mark** (his words: *"supporting function get the raya trade logo"*).
+  It needs a new control on a Setup page, so it wants its own mockup (rule 1c)
+  and is deliberately not rushed into the merge that fixes the blank pages.
+- **No mark on any deck** (his sixth). The machinery is there and is almost
+  certainly empty: a unit's mark is uploaded at Setup › Business units › Unit
+  marks, and the demo's are baked in, which is why they show there and not on
+  his deployment. Two real gaps behind it, both put to him and neither closed:
+  **a supporting function can never have one** (the upload lists units only,
+  and a function's deck never draws a footer mark at all), and **there is no
+  group mark to fall back on**, so one tenant lockup would put a mark on every
+  deck from a single upload.
+- *(The notes slide's position was open here and is now §254.6 above.)*
+## §255 — A REPORTED NOTE IS NAMED AS ONE (2026-09-02)
+
+Islam, from his own Performance page: *"the perofmrance is showing hte notes
+under the tactic name. what is this issue?"* — and then, correcting the first
+reading and settling the scope with it: *"notes is not in the desciption, notes
+is something relevant to the reporting and appears in performance as a separate
+element. so it needs to be there so we can't drop."*
+
+**NEITHER PLACEMENT WAS A MISTAKE, AND THAT IS THE WHOLE OF IT.** §239.2 put
+the reporter's note under the tactic's name — *"the reporter's note on
+Performance under the name, which `capKOTable()` has done all along, costing no
+width"* — and §248 later put the plan's **description** in that same cell, as
+Islam's own choice between two drawn shapes. Both are right on their own terms.
+What nobody asked is what they do to each other: both render as
+`<span class="why">`, 12px, `--ink-3`, so a **permanent** statement and a
+**this-cycle** statement are drawn identically, one directly under the other,
+with nothing saying which is which. §248's own comment beside that line saw the
+risk in the abstract — *"two greys at one weight run together as a single
+block"* — and answered it **only for the name**, by bolding it. Bolding the
+name tells you where the row starts; it says nothing about the two greys below.
+
+**THE ANSWER WAS PUT AS THREE AND HE PICKED FROM TWO.** Dropping the
+description from Performance was offered and he refused it in the sentence
+above — the note is reporting and belongs there — so the choice was between
+naming the note where it sits (**1**) and giving it a column of its own as the
+review deck already does (**3**, `present.js` has had a Note column since it was
+built). Both were drawn out of the **running platform** with his own two
+tactics in the rows (§41.9, §245), and the cost of each was measured before he
+chose (`design-mockups/tactic-note-placement/`).
+
+**THE COST DECIDED IT, AND IT IS RECORDED RATHER THAN RE-ARGUED.** A note is a
+paragraph, and a paragraph needs width, which it can only take from the one
+other flexible column — the one holding the tactic's name and description.
+Measured on a unit's Performance page: option 3 takes the Tactic column from
+**790 → 209px at 1920** and **514 → 156px at 1600** (the name wraps to three
+lines, the description becomes a ribbon), and starts running past the pane at
+**1280px**, which is an ordinary laptop and where the table fits today —
+§158's rule is *fit, never "and it scrolls"*. Option 1 costs **no width at any
+width the table fits today** and about 22px of row height. He chose 1.
+
+**ONE BUILDER, ASKED BY BOTH TABLES ON THE PAGE** (§53.5). `repNote()` replaces
+the inline span at both call sites on a unit's Performance page — the tactics
+table he reported **and the key measures table directly above it**, because a
+note named in one and unnamed in the other is exactly the drift §226 cost a day
+finding. The measures cell stacks the same two greys the moment a row carries a
+horizon (*"measured at Q4 2026"*) as well as a note: **nought in the demo**, so
+it is latent rather than absent, and the check makes that state or it goes
+unmeasured.
+
+**A RULE, NOT A SECOND SIZE OR A SECOND COLOUR.** Making the note smaller or
+paler would rank it *under* the plan's description, and it is the newer and the
+more urgent of the two. It keeps `.why`'s size and ink and is set apart
+**sideways** — a 2px rule in `--line`, a 10px indent, and one uppercase key
+reading **Reported** in the micro size the product already uses for column keys.
+`--line`, never the accent: this page spends its gold on Report and the scoring
+colours (§41's budget).
+
+**AND THE MOCKUP'S OWN `.85` OPACITY WAS DROPPED IN THE BUILD** — it measured
+about **4.2:1** on `--ink-3` at 10px, which is §38.5 walked into while quoting
+it. Without it: **4.95:1 light, 5.53:1 dark**, measured with the sweep's own
+arithmetic rather than a second copy of it (§95).
+
+**THE DEMO CANNOT SHOW THIS FAULT, WHICH IS WHY IT WAS NEVER CAUGHT HERE.**
+Measured before building: **0 of 84 tactics in the shipped plan carry a note at
+all**, and 0 measures carry a horizon *and* a note. Every assertion about this
+cell passes on a build that has lost the feature entirely, because there is
+nothing in the cell either way — so `checks/reported-note.py` **makes** the
+state (§94.2), including a third row that reports **nothing**, which is the
+state §61 is about: a row with no note must draw no key, and a check built only
+of rows that have notes cannot see a build that labels everything.
+
+**PROVED ABLE TO FAIL: 16 red** on the build before, with the reported rows
+reading `plainGreys: 2` — the fault reproduced in the check's own output. And
+**two of that count were the check** (§100.3, twice in one file), both found by
+falsifying it rather than by reading it:
+
+- **`all([])` is `True`** — three assertions went **green over an empty list**
+  on the broken build, which is §113.8 exactly: an assertion preserved by the
+  thing it measures *vanishing*. Each now requires the rows to be there before
+  it says anything.
+- **It DIED rather than reported** (§215): `reported[0]["key"]` on a build that
+  produces no such row raised `IndexError`, so the run printed **four**
+  failures where there are sixteen — a suite counting `FAIL` lines would have
+  called a thoroughly broken build lightly broken.
+
+**A UNIT AND A FUNCTION ARE THE SAME PRODUCT AND BOTH ARE MEASURED** (§53.5).
+A pillars function draws these two tables through the very same builders, so it
+gets this for free — which is a *claim*, and a claim is worth what measuring it
+is worth: the check drives Merchandising's own Performance page (`fnperf`,
+never `performance` — §59) and asserts its note is named **with the same word
+the unit uses**, as agreement rather than as a literal (§94.8), so a later
+change to the wording moves both and stays green.
+
+**RECORDED, NOT DONE — AND IT IS A DECISION, NOT AN OVERSIGHT.** Four other
+surfaces draw a reported note as a plain grey and are deliberately untouched: a
+capability's key objectives (`capKOTable`, 1 note in the demo), a project's
+outcomes and deliverables (8), and the two reporting-side readers. None of them
+stacks a second grey today, so none has the collision — and `capKOTable` already
+carries a column headed **Reported**, so a key under the name there would say
+the same word twice (§87's twins). They are Islam's to widen, in one line each.
+The deck is untouched: it separated these two facts from the day it was built.
+
+**AND THE PLAN PAGE'S OWN OVERFLOW IS UNCHANGED AND WAS MEASURED, NOT ASSUMED.**
+`checks/plan-wrap.py` is red at 1100 with five clipped fields — byte-identical
+before and after this change, on a page this change does not touch, and the
+residue §249.2 already records.
+## §256 — A SLIDE THE OFFICE DOES NOT PRESENT (2026-09-02)
 
 Islam: *"allow the smo to hide presentation slides of any unit or function."*
 
@@ -28090,7 +28602,7 @@ function by the string `"projects"`, which is ABSENT on 7 of the 8 in the seed
 untestable; and every absence assertion now also insists the deck HAS slides,
 because *"the slide is gone"* is true of a deck that failed to build (§113.8).
 
-### §253.1 — AND THE FIRST RUN DIED RATHER THAN REPORTING
+### §256.1 — AND THE FIRST RUN DIED RATHER THAN REPORTING
 
 §215, and §252's own first run one section earlier. On a build without this
 feature there is no `SMPRules.hiddenSlides` and no `deckHidePass`, so the first
@@ -28099,36 +28611,39 @@ a falsification that looks like a pass, on precisely the build the file most
 has to be able to see. Every probe degrades now: a throw becomes a value the
 assertions fail on, reported once, and the run continues to the end.
 
-### §253.2 — THE EDITOR AND THE PROJECTOR WERE BUILDING TWO DIFFERENT DECKS
+### §256.2 — TWO SESSIONS FOUND THE SAME FAULT ON THE SAME DAY
 
-Found by this feature and **older than it**. §63.4 fixed that a pillars
-function could not be presented at all; §224 fixed that routing every `fn:` to
-the capability deck showed it a review reading *"0 capabilities"*. Both fixed
-the **Present button**, and both left `slidesAssemble()` asking the older
-question — `kind === "fn"`.
+Building this feature found that a supporting function planning in PILLARS was
+shown, in Manage slides, a deck nobody would ever project: `slidesAssemble()`
+asked `kind === "fn"` while the Present button asked the FORMAT. Measured on
+the demo before anything was changed — **the editor 2 slides, the projector
+15.** §69.5's fault, which made the editor run the same PASSES as the projector
+and could not make it assemble the same SLIDES, because the difference was one
+branch two files apart.
 
-So a function that plans in pillars has been shown, in Manage slides, a deck
-nobody would ever project. Measured on the demo's own before a line was
-changed: **the editor 2 slides, the projector 15.** §69.5's fault exactly —
-that section made the editor run the same PASSES as the projector and could
-not make it assemble the same SLIDES, because the difference was one branch two
-files apart.
+**§253.3 HAD ALREADY FIXED IT, FROM ISLAM'S OWN REPORT OF THE SAME SCREEN**,
+in another session on the same day, and that fix is the better of the two: it
+also routes `deckAnchors()`, so the positions offered to a picture come from
+the same deck as well. That one stands; this branch's was removed on the merge.
 
-It is one predicate now, asked once: `deckCapShaped()`, with `openDeckFor()`
-and `deckHtmlFor()` as the two things anybody wants from it, so the branch is
-gone from `shell.html` and a third format would change one line. Asserted as
-the two AGREEING (§94.8) rather than as a number, so a deliberate change to
-either deck keeps it green.
+**AND THE REMOVAL WAS NOT OPTIONAL.** Both sessions wrote a function called
+`deckHtmlFor`, in the same file, four hundred lines apart — and **git merged
+them with no conflict at all**. Two declarations of one name: the later wins by
+hoisting, so the product would have run this branch's copy while main's sat
+dead with every comment still describing it as live. §146.2 and §56.7 exactly,
+and the reason `node --check` passing is not the same as a merge being correct:
+the file parses perfectly with both in it. Found by grepping the merged file
+for its own declarations, which is the thing to do after any merge touching a
+file both sides changed.
 
-**It had to be fixed here rather than recorded**: this feature lets the office
-prune a deck from that rail, and a rail listing slides the projector does not
-show would have been a control acting on the wrong thing.
+**§147.4's precedent, and the same conclusion**: a fetch before pushing found
+somebody else's answer to the same question already on main, so this feature
+rides that model whole rather than carrying a second one.
 
-### §253.3 — RECORDED, NOT DONE
+### §256.3 — RECORDED, NOT DONE
 
-`deckAnchors()` in `present.js` has **no callers at all** — §236 replaced the
-position dropdown with placement by position in the assembled deck and left the
-builder standing. §24 says a builder nobody calls is one the next reader takes
-for load-bearing, and its comment still explains how the picture picker is
-built. Deleting it is not this change (rule 1b), and it is named here so the
-next person does not read it as live.
+Nothing outstanding on the feature itself. One correction to the record: this
+section previously named `deckAnchors()` as dead code with no callers — true of
+the build it was written against, and **no longer true**. §253.3 gave it a
+caller in the same hours, routing it through `deckHtmlFor()` so a picture's
+landing places come from the deck that is actually shown.

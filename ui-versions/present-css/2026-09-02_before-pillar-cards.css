@@ -301,50 +301,6 @@
   .sthumb-in { display:block; position:relative; width:1600px; height:900px;
                transform:scale(.105); transform-origin:0 0; pointer-events:none; }
   .slrow.mine .sthumb { border-color:var(--gold); }
-
-  /* ── HIDDEN FROM THE REVIEW (§256) ─────────────────────────────────────
-     Treatment A of the two drawn in the real rail
-     (design-mockups/hide-slides/), Islam's pick. The thumbnail carries the
-     state and the word confirms it; B struck the label through and lost,
-     because a slide's name wraps to two lines and the rule then runs through
-     the gap between them.
-
-     THE TAG SITS OUTSIDE `.sl-lab`, which is `-webkit-line-clamp:2` — a tag
-     written inside it is EATEN on exactly the rows whose names are longest,
-     which is where the state matters most. (The `em` above has that fault
-     and keeps it: fixing "your pictures" is not this change.) */
-  .slrow { position:relative; }
-  .slhide { position:absolute; top:4px; right:4px; width:24px; height:24px;
-            display:none; align-items:center; justify-content:center; padding:0;
-            border:1px solid var(--line); border-radius:var(--r-sm);
-            background:var(--surface); color:var(--ink-3); cursor:pointer; }
-  /* Shown on the row being pointed at or selected, and ALWAYS on a hidden one:
-     the control that undoes a state must not itself be hidden (§61). */
-  .slrow:hover .slhide, .slrow.on .slhide, .slrow.off .slhide { display:flex; }
-  .slhide:hover { border-color:var(--ink-3); color:var(--ink-2); }
-  .slhide[aria-disabled="true"] { opacity:.45; cursor:default; }
-  .slrow.off .sthumb { opacity:.3; filter:grayscale(1); }
-  .slrow.off .sl-lab { color:var(--ink-3); }
-  .slrow.off .slhide { color:var(--ink-2); border-color:var(--ink-3); }
-  .sl-off { grid-column:2; font-size:var(--fs-micro); font-weight:700;
-            letter-spacing:var(--track); text-transform:uppercase;
-            color:var(--ink-2); margin-top:2px; }
-  /* Quiet, never an alarm ground (§187): a fact about the deck, not a warning
-     about it. The way back is a text button and not a second gold pill beside
-     Add slide after (§41's accent budget). */
-  .sl-hidden { display:flex; align-items:center; justify-content:space-between;
-               gap:6px; margin:0 0 6px; padding:5px 6px; border-radius:var(--r-sm);
-               background:var(--surface-2); font-size:var(--fs-micro);
-               color:var(--ink-2); }
-  .sl-hidden .lnk { background:none; border:0; padding:0; cursor:pointer;
-                    font:inherit; color:var(--ink-2); text-decoration:underline; }
-  .sl-hidden .lnk:hover { color:var(--ink); }
-  /* The stage says it too, or the pane's words sit under a slide that looks
-     exactly like every other slide. */
-  .sstage-off .sstage-in { opacity:.4; filter:grayscale(1); }
-  .slctl-off { margin-bottom:0; }
-  .slctl-off b { font-size:var(--fs-small); color:var(--ink); }
-  .slctl-off .editbtn { margin-left:auto; }
   /* Pinned, and above the list rather than below it: it is the first thing
      you came here to do. */
   .sl-add { position:sticky; top:-10px; z-index:2; background:var(--surface);
@@ -480,31 +436,3 @@
            display:flex; align-items:center; padding-top:20px;
            border-top:1px solid var(--line-soft); }
   .dfootmark { display:block; width:150px; height:auto; opacity:.75; }
-
-/* ── THE PILLARS, NAMED BEFORE THEY ARE SCORED (§254.5) ────────────────
-   Islam's own concept from the Raya deck, in the platform's language: a row of
-   cards, one per pillar, the name given room and nothing measured yet.
-
-   ONE ACCENT ACROSS THE ROW, not one per card. His reference gives each card
-   its own hue, which spends three accents on a distinction that carries no
-   meaning — the pillars are peers, and colouring them apart says they are not
-   (§41's budget).
-
-   THE ROW DIVIDES BY HOW MANY THERE ARE (`--n`, set from the list), so two
-   pillars and eight both fill the line. `align-items:stretch` keeps the cards
-   one height however long a name runs, and the sub-line is pushed to the foot
-   so every one of them sits on the same baseline. */
-  .pcards{ display:grid; gap:22px; margin-top:34px;
-    grid-template-columns:repeat(var(--n,3),1fr); align-items:stretch; }
-  .pcard{ display:flex; flex-direction:column; gap:14px; padding:26px 22px 24px;
-    background:var(--surface-2); border-top:5px solid var(--gold); border-radius:2px; }
-  .pcard-c{ font-family:var(--mono); font-size:15px; letter-spacing:.1em;
-    font-weight:600; color:var(--gold-deep); }
-  .pcard-n{ font-size:26px; font-weight:700; line-height:1.2; color:var(--ink);
-    text-wrap:balance; }
-  .pcard-s{ font-size:15px; color:var(--ink-3); line-height:1.45; margin-top:auto; }
-
-/* The quiet half of a figure cell — what it is measured against so far
-   (§254). The same weight the tactics table has used since §252, so one
-   number does not read louder on one table than on another. */
-  .duehalf{ font-style:italic; color:var(--ink-3); font-weight:400; }

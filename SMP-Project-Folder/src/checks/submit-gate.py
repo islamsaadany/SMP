@@ -130,7 +130,19 @@ with sync_playwright() as p:
     pg.evaluate("""() => {
       const u = UNITS[current];
       (u.items || []).forEach(p => (p.tactics || []).forEach(t => {
-        if (t.actual == null || t.actual === "") t.actual = 1;
+        /* §254.2 MOVED WHAT "REPORTED" MEANS FOR A TACTIC. A row whose outcome
+           carries a target is answered by the OUTCOME's figure and by nothing
+           else, at Islam's direction — so filling `actual` alone stopped being
+           a complete report the day that landed, and this fixture said 23 of
+           41 on a build that is working exactly as decided.
+
+           REWRITTEN, NOT LOOSENED (§218, §51.11 in a check's machinery rather
+           than its selectors): it fills whichever field the row is actually
+           asked for, through the product's own `outcomeOf`, so it stays true
+           the next time that rule moves. */
+        if (typeof outcomeOf === "function" && outcomeOf(t)) {
+          if (t.outActual == null || t.outActual === "") t.outActual = t.outTarget;
+        } else if (t.actual == null || t.actual === "") t.actual = 1;
         t.note = t.note || "explained";
       }));
       (u.items || []).forEach(p => (p.measures || []).forEach(m => {
@@ -152,6 +164,13 @@ with sync_playwright() as p:
       (u.items || []).forEach(p => (p.tactics || []).forEach(t => {
         if (!t.outcome)   t.outcome   = "Something measurable";
         if (!t.outTarget) t.outTarget = "6 #";
+        /* §254.2: AND IT HAS TO BE REPORTED, or this block creates the very
+           state that section makes incomplete — an outcome with a target and
+           no figure. It ran AFTER the fill above and gave eighteen tactics a
+           target, so the fixture read "23 of 41" on a build behaving exactly
+           as decided. Giving a row a target is giving it a question; a plan
+           with nothing left in it has answered that question too. */
+        if (t.outActual == null || t.outActual === "") t.outActual = t.outTarget;
       }));
       paint();
     }""")

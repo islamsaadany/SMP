@@ -4091,7 +4091,7 @@ function renderFocusSetup(){
     return '<tr' + (on ? ' class="fon"' : '') + '>' +
       '<td class="fmeas">' + esc(m.name) + '</td>' +
       '<td class="cc ftar">' +
-        (m.target ? esc(m.target) : '<span class="missing">Missing</span>') + '</td>' +
+        (m.target ? tgtShown(m.target) : '<span class="missing">Missing</span>') + '</td>' +
       '<td class="cc">' +
         (editable
           ? '<button class="fmark-btn' + (on ? ' on' : '') + '" data-focus="' + esc(m.id) + '" ' +
@@ -4611,7 +4611,7 @@ function renderUnitNaming(u){
       '<div class="pick ' + (m.src ? "on" : "off") + '">' +
         '<span>' + esc(m.name) + '</span>' +
         '<span class="num why" style="margin:0">' +
-          (m.target ? esc(m.target) : '<span class="missing">No target</span>') + '</span>' +
+          (m.target ? tgtShown(m.target) : '<span class="missing">No target</span>') + '</span>' +
         '<span style="text-align:right">' + who + '</span>' +
       '</div>';
   }).join("");

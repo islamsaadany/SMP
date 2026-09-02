@@ -2723,7 +2723,7 @@ console.log("\n26 \u00b7 a tactic's outcome and its target are owed (\u00a7249)"
         r.ok, (r.refusals || []).join(" / "));
 })();
 
-console.log("\n27 · which slides a review shows is the office's (§253)");
+console.log("\n27 · which slides a review shows is the office's (§256)");
 (function () {
   /* Islam: *"allow the smo to hide presentation slides of any unit or
      function."* The screen draws the eye for the office alone; this is the
@@ -2741,17 +2741,17 @@ console.log("\n27 · which slides a review shows is the office's (§253)");
   const UK = Object.keys(SEED.units)[0];
   const CUST = SEED.unitRoles && SEED.unitRoles[UK] && SEED.unitRoles[UK].custodian;
   const FNK = Object.keys(SEED.functions || {})[0];
-  check("§253: the seed holds a unit, a custodian and a function to test with",
+  check("§256: the seed holds a unit, a custodian and a function to test with",
         !!(UK && CUST && FNK), [UK, CUST, FNK].join(" / "));
   if (!(UK && CUST && FNK)) return;
 
   /* — a business unit — */
   let r = fromStored(SEED, "smo", function (i) { i.units[UK].hideSlides = ["swot"]; });
-  check("§253: the office hides a slide on a unit", r.ok, (r.refusals || []).join(" / "));
+  check("§256: the office hides a slide on a unit", r.ok, (r.refusals || []).join(" / "));
 
   r = fromStored(SEED, CUST, function (i) { i.units[UK].hideSlides = ["swot"]; });
-  check("§253 REFUSED: the unit's own custodian cannot", !r.ok, "was ALLOWED");
-  check("§253: and the refusal names Manage slides, never Setup",
+  check("§256 REFUSED: the unit's own custodian cannot", !r.ok, "was ALLOWED");
+  check("§256: and the refusal names Manage slides, never Setup",
         !r.ok && /Manage slides/.test((r.refusals || []).join(" ")),
         (r.refusals || []).join(" / "));
 
@@ -2760,9 +2760,9 @@ console.log("\n27 · which slides a review shows is the office's (§253)");
      un-hide what only the office could hide. */
   const hidden = clone(SEED); hidden.units[UK].hideSlides = ["swot"];
   r = fromStored(hidden, CUST, function (i) { delete i.units[UK].hideSlides; });
-  check("§253 REFUSED: nor can they show it again", !r.ok, "was ALLOWED");
+  check("§256 REFUSED: nor can they show it again", !r.ok, "was ALLOWED");
   r = fromStored(hidden, "smo", function (i) { delete i.units[UK].hideSlides; });
-  check("§253: the office shows it again", r.ok, (r.refusals || []).join(" / "));
+  check("§256: the office shows it again", r.ok, (r.refusals || []).join(" / "));
 
   /* — a supporting function, BOTH FORMATS —
      `asUnit()` builds a fresh object from named fields, so a function's list
@@ -2772,10 +2772,10 @@ console.log("\n27 · which slides a review shows is the office's (§253)");
   ["pillars", "projects"].forEach(function (fmt) {
     const s = clone(SEED); s.functions[FNK].format = fmt;
     let x = fromStored(s, "smo", function (i) { i.functions[FNK].hideSlides = ["notes"]; });
-    check("§253: the office hides a slide on a " + fmt + " function",
+    check("§256: the office hides a slide on a " + fmt + " function",
           x.ok, (x.refusals || []).join(" / "));
     x = fromStored(s, CUST, function (i) { i.functions[FNK].hideSlides = ["notes"]; });
-    check("§253 REFUSED: a unit custodian cannot, on a " + fmt + " function",
+    check("§256 REFUSED: a unit custodian cannot, on a " + fmt + " function",
           !x.ok, "was ALLOWED");
   });
 
@@ -2794,17 +2794,17 @@ console.log("\n27 · which slides a review shows is the office's (§253)");
             .map(function (c) { return c.kind; });
   };
   let kinds = kindsOf(function (i) { i.units[UK].hideSlides = ["swot"]; });
-  check("§253: a hidden slide classifies as deckHide and nothing else",
+  check("§256: a hidden slide classifies as deckHide and nothing else",
         kinds.length === 1 && kinds[0] === "deckHide", kinds.join(",") || "(nothing)");
   kinds = kindsOf(function (i) { i.functions[FNK].hideSlides = ["notes"]; });
-  check("§253: and on a function, the same one sentence",
+  check("§256: and on a function, the same one sentence",
         kinds.length === 1 && kinds[0] === "deckHide", kinds.join(",") || "(nothing)");
 
-  /* A LOCKED CYCLE STILL TAKES IT, deliberately (§253): a locked cycle has
+  /* A LOCKED CYCLE STILL TAKES IT, deliberately (§256): a locked cycle has
      stopped taking FIGURES, and the deck is presented after it locks. */
   const lock = clone(SEED); lock.cycle = Object.assign({}, lock.cycle, { locked: true });
   r = fromStored(lock, "smo", function (i) { i.units[UK].hideSlides = ["swot"]; });
-  check("§253: a locked cycle does not stop the office pruning the deck",
+  check("§256: a locked cycle does not stop the office pruning the deck",
         r.ok, (r.refusals || []).join(" / "));
 })();
 

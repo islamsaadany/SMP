@@ -5823,7 +5823,15 @@ function onOutcome(t){ return tacticOutcomeScore(t) != null; }
    An outcome answers with its own score against the target due so far; a
    tactic without one answers with the share of its plan it has delivered,
    byte for byte as before. */
-function tacticProgress(t){ return onOutcome(t) ? tacticReads(t) : tacticRatio(t); }
+/* §254.2: ASKED OF THE OUTCOME'S EXISTENCE, NOT OF ITS SCORE. `onOutcome`
+   answers "can this be scored on its outcome", which is the right question for
+   the score itself and the wrong one for "which measure is this row on" — and
+   the two being different is what put a per cent beside a count. A row that is
+   ON its outcome and has not reported one is NOT SCORED, which is what
+   `tacticOutcomeScore` already returns. */
+function tacticProgress(t){
+  return outcomeOf(t) ? tacticOutcomeScore(t) : tacticRatio(t);
+}
 
 /* What a prorated row is measured against, written the way the target is --
    drawn as the quiet half of the YTD actual cell. Null where there is nothing
@@ -6405,7 +6413,39 @@ function dueTactics(p){ return SMPRules.shown(p.tactics).filter(tacticDue); }
    figure is in, whichever box it came from. Written as one predicate so the
    three panes, the score and the note rule cannot disagree about whether a
    row has been answered (§53.5). */
-function tacticAnswered(t){ return t && (t.actual != null || tacticOutcomeScore(t) != null); }
+/* ── ONE QUESTION DECIDES THE WHOLE ROW (§254.2, narrowing §248) ───────
+   Islam, of a tactic reading `2% / 2#` on the deck: *"the ytd is showing 2% /
+   2# .. it's not 2% in the performance it's just 2 with a unit of #"*, and
+   then, of the cause: *"the reported number is already 2# I don't know why
+   it's not reported correctly."*
+
+   NINE STATES WERE PUT THROUGH THE SCORER AND EVERY ONE WITH A FIGURE IN THE
+   OUTCOME SCORES. So the figure the deck could see was not in the outcome, and
+   there is one path that produces exactly his row: the reporting box asks for
+   the OUTCOME's figure only once the outcome has a target, and asks the old
+   question — per cent delivered — before that. A figure reported before the
+   target was added therefore sits in `actual` for ever, and the moment the
+   target appears `tacticBenchmark` starts answering with the outcome's target
+   while the figure is still coming from the old field. Two measures in one
+   cell, and nobody did anything wrong.
+
+   §248 SWITCHED ON TARGET **AND** FIGURE, deliberately, so that adding an
+   outcome mid-round changed nothing until somebody typed. That rule is
+   narrowed here at Islam's direction — he was offered three behaviours with
+   what each costs and chose this one: **the target alone decides**, and a row
+   whose outcome has a target but no figure SAYS IT IS OWED ONE rather than
+   quietly reading its old per cent.
+
+   THE COST IS REAL AND WAS STATED BEFORE HE CHOSE: such a row leaves every
+   average, stops counting as reported, and refuses Submit until the figure is
+   entered — which is one number on the reporting page. It is the only one of
+   the three that never states a figure nobody reported (§35), and the two
+   alternatives were an invented figure (carrying the old per cent across) and
+   an ignored target. */
+function tacticAnswered(t){
+  if (!t) return false;
+  return outcomeOf(t) ? tacticOutcomeScore(t) != null : t.actual != null;
+}
 function reportedTactics(p){ return dueTactics(p).filter(tacticAnswered); }
 /* THE TWO SCORES PASS UP SEPARATELY AND STAY APART (Islam, asked). The child's
    measure performance becomes the pillar's performance and its execution

@@ -4241,6 +4241,38 @@ functions off entirely, so the office cannot see whether one has reported; and
 usable number, so an uploaded figure against an unusable target is stored and
 silently unscored &mdash; deriving it would MOVE existing scores, so it was put
 to Islam separately.*
+*Earlier: 2026-09-01 &mdash; **&sect;241: write only what changed
+&mdash; MERGED FLAG-OFF, OFF BY DEFAULT, NOT ON THE LIVE LINE.** The big performance
+item: every save still rewrites all 31 tables even for a one-word edit
+(&sect;195 already batched it, so this is scaling/efficiency, not the acute
+fire). Built on the work branch and MERGED FLAG-OFF after a safety review for
+Islam's presentation &mdash; it touches nothing existing until the env var is
+flipped, so merging changed no behaviour. `writeStateIncremental` in `lib/state-io.js` reads the change
+list the client already sends (&sect;210/&sect;215), works out which SUBJECTS
+changed &mdash; a business unit, a capability, a supporting function &mdash; and
+rewrites only those, using the SAME row builders as the full writer
+(`rowsOf`/`colsFor` lifted to module scope so a rewritten subject is
+byte-identical). It is **never wrong, only sometimes unoptimised**:
+`planSubjects` returns null for any shape it does not handle (settings, the
+register, a reorder, an add/remove, a group-own-field change, a whole-graph
+post) and the caller falls back to the full `writeState`. FK cascades make one
+DELETE clear a subject's subtree. **Gated behind `SMP_INCREMENTAL_WRITE=1`, OFF
+by default**, so merging it later changes nothing until the env var is flipped.
+**Proved byte-identical to the full rewrite** by
+`scripts/test-incremental-write.js` (17 change shapes, each written BOTH ways
+and compared; the optimised shapes asserted handled, the fallback shapes
+asserted fallen-back), and proved end-to-end through the real handler under the
+&sect;240 concurrency lock with the flag on. Round-trip, two-tabs and
+concurrent all stay green flag-off (the module-scope refactor changed no
+behaviour). **MERGED FLAG-OFF and re-verified before the merge**: the full DB
+suite (round-trip, two-tabs, concurrent) green BOTH flag-off and flag-on, the
+17-shape equivalence test byte-identical, and a 120-save concurrency stress lost
+nothing either way (flag-on ran ~4x faster). **NEXT, after the presentation:**
+set the env var on a test deployment, watch a few saves, then decide. Fully
+revertible &mdash; flag-off is dormant, so a `git revert` (or leaving the flag
+off) is a no-op on live behaviour. Not handled yet (falls back, correct):
+capability reorder/add-remove, group-own fields, all settings/register tables
+&mdash; each a safe future extension.*
 
 *Earlier: 2026-09-01 &mdash; **&sect;240: saves take turns, so two at
 once cannot lose data.** Islam, on the performance sweep: *"what if people

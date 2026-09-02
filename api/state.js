@@ -13,7 +13,7 @@
 
 const pg = require("pg");
 const io = require("../lib/state-io.js");
-const { writeState, readState, ensureReady } = io;
+const { writeState, writeStateIncremental, readState, ensureReady } = io;
 const auth = require("../lib/auth.js");
 const { authorize } = require("../lib/authorize.js");
 const R = require("../lib/rules.js");
@@ -92,6 +92,16 @@ const LOG_ROW_CAP = 200;
    SMP_NO_SAVE_LOCK=1 disables it, so the test can show the loss it prevents. */
 const SAVE_LOCK = 420043;
 const USE_SAVE_LOCK = process.env.SMP_NO_SAVE_LOCK !== "1";
+
+/* ── WRITE ONLY WHAT CHANGED — OFF BY DEFAULT (2026-09-01, dark) ──────────────
+   When SMP_INCREMENTAL_WRITE=1, a save that arrives as a change list is written
+   by rewriting only the subjects that changed (lib/state-io.js), instead of
+   rewriting all 31 tables. It falls back to the full rewrite for any shape it
+   does not handle, so turning it on can never write a wrong result — only a
+   faster one. Proved byte-identical to the full rewrite by
+   scripts/test-incremental-write.js. Left OFF so the deploy changes nothing;
+   flip the env var to test on a real deployment, after a cycle closes. */
+const USE_INCREMENTAL = process.env.SMP_INCREMENTAL_WRITE === "1";
 
 async function logChanges(client, person, changes) {
   if (!changes || !changes.length) return;
@@ -240,8 +250,15 @@ module.exports = async function handler(req, res) {
                           : { key: acting.key, name: acting.name || acting.key } } };
             } else {
               /* In OUR transaction — writeState must not open or close its own
-                 (see lib/state-io.js), or the lock would release mid-write. */
-              await writeState(client, state, { inTransaction: true });
+                 (see lib/state-io.js), or the lock would release mid-write.
+                 When the incremental writer is on and handles this change shape
+                 it writes only the changed subjects; otherwise (or when off) the
+                 full rewrite runs, exactly as before. */
+              let wrote = false;
+              if (USE_INCREMENTAL && changes) {
+                wrote = await writeStateIncremental(client, state, changes);
+              }
+              if (!wrote) await writeState(client, state, { inTransaction: true });
               logWho = me; logList = verdict.changes;
             }
           }

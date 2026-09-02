@@ -28351,12 +28351,34 @@ worth counting how ordinary this has become):
    *23 of 41* on a build behaving exactly as decided. It fills whichever field
    the row is actually asked for, through the product's own `outcomeOf`.
 
+### §254.6 — the note has the last word *(reversing §254.4, the same day)*
+
+Asked directly where the notes slide should sit, Islam: *"notes before thank
+you."* So the tail is the score table, the three readings, the note, then Thank
+you — and the deck's last content slide is the unit's own words rather than its
+numbers.
+
+**RECORDED AS A REVERSAL RATHER THAN OVERWRITTEN.** §254.4 shipped it the other
+way an hour earlier on my recommendation, and it sits against his own earlier
+*"where the units stands to be the last slide"*: both cannot be true at once,
+and this is the instruction he gave most recently and most specifically. One
+line to swap them back.
+
+**The check asserts it through the note's PRESENCE, never by index**, because a
+subject with no note draws no such slide at all (§246) — an index-based
+assertion would be true of exactly half the decks in the product.
+
 ### Recorded, not done
 
-- **`K EGP` is not on the offered unit list.** Islam named it; it was
-  deliberately left off when the dollars were added (§239.5: a fixed list is a
-  vocabulary somebody agreed). `unitTight` already reads it correctly if a
-  tenant types it; putting it in the picker is his word to give.
+- **`K EGP` STAYS OFF THE LIST** — put to Islam, and *"K EGP is not to be
+  added."* `unitTight` still reads it correctly if a tenant types one, which is
+  the safe way round: the platform does not offer a unit nobody agreed, and does
+  not mangle one somebody wrote (§96.2).
+- **The deck marks are DECIDED and not yet built** — a group Raya Trade mark,
+  used wherever a unit has none, and **a supporting function takes that same
+  group mark** (his words: *"supporting function get the raya trade logo"*).
+  It needs a new control on a Setup page, so it wants its own mockup (rule 1c)
+  and is deliberately not rushed into the merge that fixes the blank pages.
 - **No mark on any deck** (his sixth). The machinery is there and is almost
   certainly empty: a unit's mark is uploaded at Setup › Business units › Unit
   marks, and the demo's are baked in, which is why they show there and not on
@@ -28365,5 +28387,4 @@ worth counting how ordinary this has become):
   and a function's deck never draws a footer mark at all), and **there is no
   group mark to fall back on**, so one tenant lockup would put a mark on every
   deck from a single upload.
-- **Whether the notes slide should keep the last word** before Thank you,
-  rather than the two closing slides. Drawn the way it is built and put to him.
+- *(The notes slide's position was open here and is now §254.6 above.)*

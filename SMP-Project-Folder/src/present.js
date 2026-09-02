@@ -494,7 +494,7 @@ function deckSlides(u){
      does not has no box to start it in, and is written where every other
      figure in the review is written. */
   var unote = cycleNote(u.ukey);
-  if (unote) S.push('<section class="dslide"' + anch("notes", "After \u201cNotes and achievements\u201d") +
+  var noteSlide = !unote ? "" : ('<section class="dslide"' + anch("notes", "After \u201cNotes and achievements\u201d") +
     '><h2>Notes and achievements</h2>' +
     '<div class="dnotebox" contenteditable="true" data-deckunote="' + u.ukey + '">' +
       esc(unote) + '</div>' +
@@ -510,9 +510,19 @@ function deckSlides(u){
      ("attention") goes with it; a picture slide that named it lands at the
      end rather than being dropped (§50.3). */
 
-  /* §254.4: the score table, then the three readings, then Thank you. */
+  /* ── §254.6 · THE LAST FOUR SLIDES, IN HIS ORDER ──────────────────────
+     The score table, the three readings, the note, then Thank you.
+
+     ISLAM PUT THE NOTE LAST, asked directly and answering *"notes before thank
+     you"* — which reverses the order §254.4 shipped in an hour earlier, and is
+     recorded as a reversal rather than overwritten. It also means the deck's
+     last content slide is the unit's own words rather than its numbers, which
+     sits against *"where the units stands to be the last slide"*: both cannot
+     be true at once, and this is the one he answered most recently and most
+     specifically. Swapping the two is one line if he wants it back. */
   if (u.items.length) S.push(pillarScoreSlide);
   S.push(standSlide);
+  if (noteSlide) S.push(noteSlide);
 
   S.push('<section class="dslide d-cover d-thanks"' + anch("end", "Last \u2014 before Thank you", "before") +
     '><h1 class="cover">Thank you</h1>' +

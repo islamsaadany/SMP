@@ -241,9 +241,17 @@ with sync_playwright() as p:
     if isinstance(order, dict) and order.get("unit"):
         for who in ("unit", "fn"):
             h = order[who]
+            # §254.6: Islam moved the note last — "notes before thank you" —
+            # so the tail is score, readings, note (where there is one), Thank
+            # you. Asserted through the note's PRESENCE rather than by index,
+            # because a subject with no note draws no such slide (§246).
+            tail = [x for x in h if x != "Notes and achievements"]
             ok(who + ": the last three are score, readings, Thank you",
-               len(h) >= 3 and "where we stand" in h[-3] and "stands" in h[-2]
-               and h[-1] == "Thank you", h[-4:])
+               len(tail) >= 3 and "where we stand" in tail[-3]
+               and "stands" in tail[-2] and tail[-1] == "Thank you", h[-4:])
+            ok(who + ": and a note, where there is one, is last before Thank you",
+               "Notes and achievements" not in h
+               or h.index("Notes and achievements") == len(h) - 2, h[-4:])
             ok(who + ": the two pillar slides are not named the same",
                h[-3] != [x for x in h if x][0] and len(set(h)) == len(h)
                or h.count(h[-3]) == 1, [x for x in h if "illar" in x or "stand" in x])

@@ -365,6 +365,35 @@ console errors (in this cloud environment, run it via a wrapper that points Play
   `node scripts/test-door.js <smo-password>` against a running dev-server
   after touching `api/auth.js` or `lib/auth.js` (it ends by rate-limiting the
   SMO on purpose — `DELETE FROM login_attempts;` clears it).
+- **THE REPORTING NOTE WRAPS AND GROWS TO FIT (§254):** Islam, from a client's
+  reporting page — *"make the reporting note to grow to fit as well."* **IT WAS
+  A DIFFERENT FIELD FROM §253'S, and two things were true at once**: §253 was
+  fixed and **not deployed** (production was serving `smp-shell-v4.27` and the
+  file it served held no `oneLine` — the branch was deliberately unmerged), and
+  the box he pointed at was an `<input>`, one line by definition, so an
+  explanation ran off the end of its box — **3 of 12 notes clipped** on the
+  demo's own data, worst 185px, his row to the word. *A screenshot is evidence
+  of a screen, not of a build: ask the deployment what it serves before
+  answering for it.* **§189's fault on the one prose field that round did not
+  reach**, and not an incidental one: the note is what §105's submit refusal
+  REQUIRES when a figure is off track, so the product insists on it and would
+  not let them read it back. **THE SAME BOX THE PLAN'S PROSE USES** (§53.5):
+  `.grow`, wrapping, sized to what is in it, Enter committing (§229) — which is
+  exactly what the input already did, so **nothing about what a note may hold
+  changes**. **BOTH HOOKS** (`data-note` on a unit, `data-cnote` on a capability
+  function — one control, two builders, A15), both cleaned through
+  `SMPRules.oneLine` at their own door. **AND THE BEHAVIOUR MOVED OUT OF THE
+  `[data-fld]` LOOP** into `wireGrowBox()`, or a growing box reached by another
+  hook grows on the paint and then behaves differently under the hands typing
+  into it. **THE FIRST BUILD OF THAT GUARD BROKE §189 AND THE CHECK SAID SO**:
+  returning early when already wired also skipped the **re-fit at the end of
+  paint**, which is the whole reason §189 sizes there — a one-line title came
+  out two lines high. Wired once, **fitted every time**. Proved able to fail:
+  **8 red**, printing `'tags': ['INPUT']`; and two of the check's own first
+  failures were the CHECK (Playwright passes ONE argument, so a two-parameter
+  fixture stored an ARRAY and `needsNote` died on `.trim()`; and the read-only
+  assertion asked a viewer with no roles, who has no Reporting tab at all —
+  §222 — so it measured an empty pane and called it a finding).
 - **A TITLE IS ONE LINE, AND THE BOX WAS THE ONLY PLACE THAT SAID OTHERWISE
   (§253):** Islam, with a screenshot of a client's plan and the pen open — a
   tactic's name box **643px tall holding one sentence**. **NOTHING WAS WRONG
@@ -4240,6 +4269,13 @@ python3 checks/ytd-proration.py # YTD is measured against the part of the year t
                                 # score; and every deck row is counted against its own
                                 # header, because dropping a column from a header and not
                                 # from the row is this change's easiest mistake
+python3 checks/report-note.py   # the reporting note wraps and grows to fit (§254):
+                                # nothing cut off at two widths on a unit AND a
+                                # capability function, both ends (a short note is
+                                # still one line high), what is typed and pasted
+                                # read back from the DATA, Enter still commits, and
+                                # a reader who may not enter one still sees it —
+                                # 8 red on the build before, tags ['INPUT']
 python3 checks/one-line-titles.py # a title is one line and the box says so (§253):
                                 # a stored value carrying blank lines drawn as ONE
                                 # line on a unit AND a function, asserted as
@@ -4458,7 +4494,33 @@ prior sessions (on HR_ERP) accidentally reverted agreed-upon designs.
 
 ---
 
-*Last Updated: 2026-09-02 &mdash; **&sect;253: a title is one line, and the box
+*Last Updated: 2026-09-02 &mdash; **&sect;254: the reporting note wraps and
+grows to fit.** Islam, from a client's reporting page: *"make the reporting note
+to grow to fit as well."* **IT WAS A DIFFERENT FIELD FROM &sect;253'S**, and the
+first work was establishing that: the screenshot came under *"are you sure it's
+fixed?"*, and two things were true at once &mdash; &sect;253 was fixed and **not
+deployed** (production was serving `smp-shell-v4.27`, and the platform file it
+served held no `oneLine`, because the branch was deliberately unmerged) &mdash;
+and the box he was pointing at was an `<input>`, one line by definition, so a
+reporter's explanation ran off the end of its box: **3 of 12 notes clipped** on
+the demo's own data, the worst by 185px, his own row to the word. *A screenshot
+is evidence of a screen, not of a build.* It is **&sect;189's fault on the one
+prose field that round did not reach**, and not an incidental field: the note is
+what &sect;105's submit refusal REQUIRES when a figure is off track. It takes
+**the same box the plan's prose uses** &mdash; wrapping, sized to what is in it,
+Enter committing &mdash; which is exactly what the input already did, so nothing
+about what a note may hold changes; **both hooks** (a unit's and a capability
+function's), both cleaned at their own door. **The first build of the shared
+wiring broke &sect;189 and the check said so**: guarding the whole function on
+"already wired" also skipped the re-fit at the end of paint, and a one-line
+title came out two lines high &mdash; wired once, **fitted every time**. Proved
+able to fail **8 red**; two of the new check's own first failures were the
+CHECK. Full `qa.py` ERRORS none &middot; 472/0 &middot; 126/0 &middot; round trip
+and the &sect;253 heal green on virgin Postgres 16 &middot; twelve neighbouring
+checks green, and `report-saves.py`'s three known failures reproduce identically
+on the build before.*
+
+*Earlier the same day: **&sect;253: a title is one line, and the box
 was the only place that said otherwise.** Islam, with a screenshot of a client's
 plan and the pen open: a tactic's name box **643px tall holding one sentence**,
 the description and the outcome the same, the eye and the &times; floating in

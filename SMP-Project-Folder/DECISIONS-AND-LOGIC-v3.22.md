@@ -28107,3 +28107,95 @@ draws as one line and is cleaned the moment anybody commits it, so it is
 invisible; cleaning it at the upload door instead would mean naming the prose
 fields a third time, in a reader that must not flatten a SWOT item or an
 aspiration — its own change, with its own check.
+
+---
+
+## §254 — THE REPORTING NOTE WRAPS AND GROWS TO FIT (2026-09-02)
+
+Islam, from a client's reporting page, with a screenshot of the Key Measures
+table: *"make the reporting note to grow to fit as well."*
+
+**HE WAS POINTING AT A DIFFERENT FIELD FROM §253'S, AND ESTABLISHING THAT WAS
+THE FIRST WORK.** The screenshot arrived under the question *"are you sure it's
+fixed?"*, and two things were true at once: §253 was fixed and **not deployed**
+— production was still serving `smp-shell-v4.27` and the platform file it
+served contained no `oneLine` at all, because the branch had deliberately not
+been merged — and the box he was pointing at was not one of the boxes §253
+touched. *A screenshot is evidence of a screen, not of a build; ask the
+deployment what it is serving before answering for it.*
+
+**THE NOTE WAS AN `<input>`, WHICH IS ONE LINE BY DEFINITION.** So a reporter's
+explanation ran off the end of its box and could only be read by scrolling
+sideways inside it. Measured on the demo's own data before a line was written:
+**3 of 12 notes clipped** on one unit's reporting page, the worst by 185px, and
+his own row reproduced to the word — *"Completed for both managerial and
+supe…"*. On the pre-§254 build the new check reports clipping of up to **631px**
+at 1200px wide.
+
+**IT IS §189'S FAULT ON THE ONE PROSE FIELD THAT ROUND DID NOT REACH.** That
+section made the PLAN's titles and descriptions wrap — *"specially for the
+titles and descriptions"* — and the reporting note, which is the other place
+somebody writes a sentence in this product, stayed as it was. The note is also
+the half a reporter is REQUIRED to write when a figure is off track (§105's
+submit refusal), so it is not an incidental field: the product insists on it
+and then would not let them read it back.
+
+**THE SAME BOX THE PLAN'S PROSE USES (§53.5).** `.grow`, so it wraps, sizes
+itself to what is in it (§189), and Enter commits rather than opening a line
+(§229). That last is not a new rule imposed on notes — it is exactly what the
+`<input>` already did: an input cannot hold a line break, so **nothing about
+what may be stored in a note changes**, and a note that arrives from a workbook
+cell carrying one is drawn on one line (§253) and cleaned when it is next
+committed.
+
+**BOTH HOOKS, BECAUSE THERE ARE TWO PANES.** A unit's reporting page writes
+through `data-note` and a capability function's through `data-cnote`; they are
+one control drawn by two builders, and a change that reached only the first
+would leave the other half of the tenant with the fault (A15). Both are
+changed, both are asserted, and both clean the value through `SMPRules.oneLine`
+at the one door each writes through.
+
+**AND THE BEHAVIOUR MOVED OUT OF THE `[data-fld]` LOOP.** The sizing, the
+keystroke and the key that commits were wired inside that loop, so a growing
+box reached by any other hook would have grown on the paint and then behaved
+differently under the hands typing into it. `wireGrowBox()` is that behaviour,
+in one place, idempotent per rendered element.
+
+**THE FIRST BUILD OF THAT GUARD BROKE §189, AND THE CHECK SAID SO.** It
+returned early when the element was already wired — which also skipped the
+**re-fit at the end of paint**, and that re-fit is the whole reason §189 sizes
+there rather than during `wire()`: a height measured while the row is still
+being laid out is a height measured against nothing. A one-line title came out
+two lines high. `one-line-titles.py` went red on the exact assertion that
+exists for it — a box must be no taller than its own words need — and it was
+found by running the suite rather than by re-reading the diff. Wired once,
+**fitted every time.**
+
+**PROVED ABLE TO FAIL: 8 red** on the pre-§254 build, printing `'tags':
+['INPUT']` beside the clipped values. `checks/report-note.py` asserts the
+PROBLEM and not the control (§94.8) — nothing cut off, at two widths, on both
+panes — and **both ends** (§113.8): a SHORT note is still one line high, so the
+table does not spend a row's worth of height on every note in it. What is typed
+and what is pasted are read back from the DATA (§96), Enter is asserted not to
+open a line, and a reader who may not enter a note still sees it as text.
+
+**AND ONE OF THE CHECK'S OWN FIRST FAILURES WAS THE CHECK, TWICE.** Playwright
+passes ONE argument to `evaluate`, so a two-parameter fixture received the array
+as its first parameter and set a note to an ARRAY — `needsNote` then called
+`.trim()` on it and the page died mid-paint, which is a fault in the fixture and
+not in the product (nothing in the platform can store an array there). And the
+read-only assertion first asked a viewer with **no roles at all** for the
+Reporting page: they have no Reporting tab (§222), so it measured an empty pane
+and reported it as a finding. The group CEO — who reaches Mobile's reporting
+page and may not write its notes — is the case that actually exercises the read
+branch, found by asking the rule rather than by guessing at a person.
+
+**Full `qa.py` sweep ERRORS none · `test-authorize` 472/0 · `test-graph-diff`
+126/0 · round trip and the §253 heal green on virgin Postgres 16 ·
+`one-line-titles`, `submit-gate`, `notes-slide`, `project-tables`, `table-fit`,
+`plan-fields`, `enter-commits`, `gap-fill`, `fn-report-gate`, `deck-outcome`,
+`plan-edit-head` and `fn-ko-edit` all green.** `report-saves.py` reports its 3
+known failures — a stub that does not serve `sw.js` (§250.2) — **identically on
+the build before this**, and its three *"a note reaches the stored plan too"*
+assertions pass on all three shapes, which is the evidence the save path is
+untouched.

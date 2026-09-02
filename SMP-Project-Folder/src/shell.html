@@ -3119,7 +3119,9 @@
     document.querySelectorAll("[data-cnote]").forEach(function(el){
       el.addEventListener("change", function(){
         var hit = capItemById(el.dataset.cnote);
-        if (hit) { hit.obj.note = el.value.trim() || null; paint(); }
+        /* §254, as the unit's note beside it — `oneLine` trims too, so the
+           empty note still becomes null rather than "" (§50.6). */
+        if (hit) { hit.obj.note = SMPRules.oneLine(el.value) || null; paint(); }
       });
     });
     /* A DELIVERABLE AND A MILESTONE ARE PICKED THE SAME WAY NOW (§104): both
@@ -3507,7 +3509,12 @@
         var subj = unitLike(current);
         if (!subj) return;
         var hit = findById(subj, el.dataset.note);
-        if (hit) { hit.obj.note = el.value; paint(); }
+        /* §254: the box is a growing one-line prose box now, so what it
+           stores is what an `<input>` could store — a paste is the only way a
+           break reaches it, and it is cleaned here, at the one door this
+           field writes through (§253). The repaint below redraws the box from
+           the stored value, so the two can never disagree. */
+        if (hit) { hit.obj.note = SMPRules.oneLine(el.value); paint(); }
       });
     });
     document.querySelectorAll("[data-unote]").forEach(function(el){
@@ -3930,27 +3937,12 @@
          element's own height and touches nothing else, so it is safe on
          `input` where a repaint would destroy the field being typed into
          (§35). Height is cleared first, or the box can only ever grow. */
-      if (el.tagName === "TEXTAREA") {
-        /* §253: through `fitGrow`, the one sizer the paint also uses — the
-           three lines were written twice and had to stay in step by hand. */
-        var fit = function(){ fitGrow(el); };
-        el.addEventListener("input", fit);
-        fit();
-        /* §229: ENTER COMMITS A ONE-LINE PROSE BOX. §189's own text promised
-           it ("Enter blurs, which is what commits the value") and no code
-           ever carried it out, so a stray newline could ride a title into the
-           workbook and the deck. Only `.grow` — a rows-2 area (a definition,
-           a note) is a paragraph and keeps its key. Blur, never a synthesised
-           change (§219): it is what the browser does when focus moves, so an
-           already-committed box fires nothing. Wired here, in the one branch
-           every bound textarea passes through, so a box added tomorrow is
-           covered without a list to forget (§104.7). */
-        if (el.classList.contains("grow")) {
-          el.addEventListener("keydown", function(e){
-            if (e.key === "Enter") { e.preventDefault(); el.blur(); }
-          });
-        }
-      }
+      /* §229's Enter and §51.1's growing box, through `wireGrowBox` — the one
+         place a growing prose box is given its behaviour, whichever hook the
+         page reached it by (§254). Blur, never a synthesised change (§219):
+         it is what the browser does when focus moves, so an already-committed
+         box fires nothing. */
+      if (el.tagName === "TEXTAREA") wireGrowBox(el);
     });
     document.querySelectorAll("[data-page]").forEach(function(b){
       b.addEventListener("click", function(){

@@ -2394,8 +2394,36 @@ function fitGrow(t){
   t.style.height = "auto";
   t.style.height = (t.scrollHeight + 2) + "px";
 }
+/* A GROWING BOX BEHAVES THE SAME WAY WHEREVER IT IS DRAWN (§254). The
+   sizing, the keystroke and the key that commits were wired inside the
+   `[data-fld]` loop, so a growing box reached by any other hook — the
+   reporting note is `data-note` and `data-cnote` — would have grown on the
+   paint and then behaved differently under the hands typing into it.
+
+   WIRED ONCE, FITTED EVERY TIME, and the difference is §189's own reason for
+   sizing at the END of paint: a height measured while the row is still being
+   laid out is a height measured against nothing. The first build guarded the
+   whole function on the flag, so the box kept the height it was given during
+   `wire()` and a one-line title came out two lines high — found by
+   `one-line-titles.py` going red, not by reading this back.
+
+   Every paint builds new nodes, so the flag is gone the moment the element
+   is, and calling this twice cannot double-wire it (§24, §47.2). */
+function wireGrowBox(el){
+  if (!el.dataset.grown) {
+    el.dataset.grown = "1";
+    el.addEventListener("input", function(){ fitGrow(el); });
+    /* §229: Enter COMMITS a one-line prose box rather than opening a line in
+       it. Only `.grow` — a rows-2 area is a paragraph and keeps its key. */
+    if (el.classList.contains("grow"))
+      el.addEventListener("keydown", function(e){
+        if (e.key === "Enter") { e.preventDefault(); el.blur(); }
+      });
+  }
+  fitGrow(el);
+}
 function growFields(root){
-  (root || document).querySelectorAll("textarea.fld.grow").forEach(fitGrow);
+  (root || document).querySelectorAll("textarea.fld.grow").forEach(wireGrowBox);
 }
 function textOr(page, value, cls, setter){
   if (!EDIT_PAGE[page] || !setter)
@@ -3819,12 +3847,27 @@ function renderReport(u){
       '" placeholder="\u2014" aria-label="Report ' + esc(x.obj.name) + '">' +
       (unit ? '<span class="unitsuf">' + esc(unit) + '</span>' : '') + '</span>';
   };
+  /* ── THE NOTE WRAPS AND GROWS TO FIT (§254) ──────────────────────
+     Islam, from a client's reporting page: *"make the reporting note to grow
+     to fit as well."* It was an `<input>`, which is ONE LINE by definition, so
+     an explanation ran off the end of its box and could only be read by
+     scrolling sideways inside it — measured on the demo's own data, **3 of 12
+     notes clipped**, the worst by 185px. §189's fault on the one prose field
+     that round did not reach: it fixed the PLAN's titles and descriptions and
+     the reporting note stayed as it was.
+
+     THE SAME BOX THE PLAN'S PROSE USES (§53.5) — `.grow`, so it wraps, sizes
+     itself to what is in it, and Enter commits rather than opening a line
+     (§229). That is not a new rule for notes, it is exactly what the input
+     could already hold: an `<input>` can never carry a line break, so nothing
+     about what may be stored here changes. */
   var noteCell = function(x){
     var want = needsNote(x);
     return canEnterNote(u.ukey, x)
-      ? '<input class="fld notefld' + (want ? " needed" : "") + '" data-note="' + x.id + '" value="' +
-        esc(x.obj.note || "") + '" placeholder="' +
-        (want ? "Why, and what is being done" : "Note, if there is one") + '">'
+      ? '<textarea class="fld grow notefld' + (want ? " needed" : "") +
+        '" rows="1" data-note="' + x.id + '" placeholder="' +
+        (want ? "Why, and what is being done" : "Note, if there is one") + '">' +
+        esc(SMPRules.oneLine(x.obj.note || "")) + '</textarea>'
       : (x.obj.note ? '<span class="why" style="margin:0">' + esc(x.obj.note) + '</span>' : '');
   };
   var doneOf = function(list){
@@ -5060,10 +5103,15 @@ function capPctBox(x, may, label){
     '" placeholder="\u2014" aria-label="Per cent complete for ' + esc(label) + '">' +
     '<span class="unitsuf">%</span></span>';
 }
+/* §254, and it is the SAME box as a unit's — one page, one answer (A15). A
+   capability function's reporting page is where the other half of the tenant
+   writes its notes, and a check that only opened a unit would not have seen
+   this one stay an input. */
 function capNoteBox(x, may){
   return may
-    ? '<input class="fld notefld" data-cnote="' + x.id + '" value="' + esc(x.note || "") +
-      '" placeholder="Note, if there is one">'
+    ? '<textarea class="fld grow notefld" rows="1" data-cnote="' + x.id +
+      '" placeholder="Note, if there is one">' +
+      esc(SMPRules.oneLine(x.note || "")) + '</textarea>'
     : (x.note ? '<span class="why" style="margin:0">' + esc(x.note) + '</span>' : '');
 }
 function capPickBox(x, may, opts, val){

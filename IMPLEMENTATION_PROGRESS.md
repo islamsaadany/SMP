@@ -70,6 +70,44 @@ Nothing proceeds past this line without an answer.
 
 ## Built and verified
 
+### §251 — the unit is there before the number is (2026-09-02, branch `claude/measure-unit-edit-7klw9y`)
+
+Islam, from his own plan with the pen open: *"In the edit I can't set the unit
+for a measure."* Two of his four Key measures had no target yet, and the unit
+has no field of its own — it lives inside the target string (§199) — so a row
+with no target had nowhere to keep one and the column drew an em-dash. The
+target holds the unit ALONE until a number joins it, which is §248's own answer
+for a tactic's outcome; that section's explicit carve-out for the measures
+column is reversed here at his instruction.
+
+**Mockup first (rule 1c), published as an artifact**, built from his own four
+rows in the platform's own tokens — never the demo tenant's names (§244) —
+because the question he asked was WHERE. He answered **"all 4 places"**: a
+pillar's Key measures, a unit's Overview objectives, the group's Foundation, and
+a supporting function's Overview on both formats.
+
+**The one cost was stated before it was built and he was told it is not
+optional:** a target holding only a unit is unusable, so `target`/`target3y`
+join `GAP_NUM` — screen and server through the shared module — and the row goes
+on saying **Missing**. Measured: 208 non-blank targets in the shipped plan, 0
+non-numeric, so nothing in the demo moves; with the rule removed the count falls
+46 → 45 the instant a unit is picked. **Fill mode is deliberately unchanged**
+(§201.2) and asserted, one line to open when he asks.
+
+Nothing stored that was not stored before, no migration, no score moves.
+`checks/unit-before-number.py` drives all four surfaces through the real
+controls and reads the plan back — proved able to fail twice (16 red with the
+em-dash put back, 6 red with the numeric rule removed). `objective-unit`,
+`tactic-outcome`, `gap-fill`, `submit-gate`, `fn-pillars`, `fn-ko-edit`,
+`table-fit`, `plan-fields`, `ytd-proration`, `project-tables`,
+`deck-and-weights` green; 472/0 authoriser, 126/0 differ, full `qa.py` sweep
+clean. One assertion in `fn-ko-edit.py` was REWRITTEN rather than deleted (§218).
+
+**Not done, and recorded:** the merge to `main` is Islam's word (rule 4) — the
+branch carries §251 only, and main has moved to §250 meanwhile, so the merge
+needs the fetch-and-look, a rebuild, `node --check sw.js` and a SHELL name
+confirmed against `origin/main` immediately before the push (§91, §94.16).
+
 ### §236.3 — slide by slide, only the originals pinned (2026-09-01, same branch)
 
 Islam, testing §236.2: "the slides jump from slide 9 to 13 one jump .. the added

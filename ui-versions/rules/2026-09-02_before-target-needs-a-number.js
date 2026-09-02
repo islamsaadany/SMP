@@ -1113,26 +1113,7 @@ var GAP_OPTIONAL = { tactic: ["collaborators"],
      PRODUCT's own definition of "is there a number in here" is what is
      asked (`outcomeOf` calls this too), or the count and the score would
      disagree about the same string — the drift §42 exists to prevent. */
-  /* §251: AND `target` AND `target3y` JOIN IT, for the same reason one field
-     over. The office may now pick a measure's or an objective's unit before
-     its number (Islam: *"In the edit I can't set the unit for a measure"*), so
-     `target` holds "%" for as long as it takes to type 90 — non-blank, and
-     holding nothing anybody can be measured against. Without this line the red
-     Missing would vanish the instant a unit was picked, the gap count would
-     drop, the Next-gap walk would step past the row and Submit would stop
-     refusing on a plan with no target in it — §249.2's fault exactly, and the
-     one cost of §251, stated to Islam before it was built.
-
-     KEYED ON THE FIELD NAME, so it reaches a project OUTCOME's target too,
-     which carries no picker. That is the rule being consistent rather than an
-     accident: a target holding no number is unscorable there as well, and
-     `measureDue` — which every one of these rows is scored through — has
-     always returned null for one. Measured on the shipped plan before adding
-     it: **208 non-blank target fields across objectives, measures, capability
-     objectives and project outcomes, 0 of them non-numeric**, so not one row
-     in the demo changes what it counts. On a tenant that has typed a target
-     as words, that row starts saying Missing, which is the thing to watch. */
-  var GAP_NUM = ["outTarget", "target", "target3y"];
+  var GAP_NUM = ["outTarget"];
   function gapNumField(f) { return GAP_NUM.indexOf(f) > -1; }
   function targetHasNumber(v) {
     return !isNaN(parseFloat(String(v == null ? "" : v).replace(/[^0-9.]/g, "")));

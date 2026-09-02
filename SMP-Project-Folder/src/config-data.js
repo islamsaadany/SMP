@@ -5670,6 +5670,14 @@ function prorates(m){ return String(m && m.compile || "").toLowerCase() === "sum
    directions. */
 function measureDue(m){
   if (!m || !m.target) return null;
+  /* §251: THE COUNT AND THE SCORE ASK ONE FUNCTION. A target may now hold its
+     unit before its number ("%"), so "is there a number in here" decides both
+     whether the row is a counted gap and whether it can be scored at all —
+     and two definitions of it is how a row comes to be counted as missing
+     while quietly being scored (§249's own rule, on the field it named). The
+     test is unchanged; what changes is that this asks for it rather than
+     carrying its own copy of the same expression. */
+  if (!SMPRules.targetHasNumber(m.target)) return null;
   var t = parseFloat(String(m.target).replace(/[^0-9.]/g, ""));
   if (isNaN(t)) return null;
   if (!prorates(m)) return t;

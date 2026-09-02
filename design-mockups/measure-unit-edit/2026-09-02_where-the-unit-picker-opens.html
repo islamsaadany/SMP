@@ -1,0 +1,347 @@
+<title>Where the unit picker opens</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Source+Sans+3:ital,wght@0,400;0,600;0,700&display=swap">
+<style>
+  /* The platform's own tokens (Forefront palette, light and dark), so this
+     mockup is the product's colours rather than an approximation of them. */
+  :root{
+    --sans:'Source Sans 3',ui-sans-serif,system-ui,-apple-system,'Segoe UI',Roboto,Arial,sans-serif;
+    --mono:ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,'Liberation Mono',monospace;
+    --ground:#F7F8FA; --surface:#FFFFFF; --surface-2:#EFF2F6;
+    --line:#D6DCE5; --line-soft:#E6EAF0;
+    --ink:#171B22; --ink-2:#414A58; --ink-3:#636C79;
+    --panel:#16325C; --panel-ink:#FFFFFF; --panel-quiet:#C3D0E4;
+    --gold:#C9A24D; --gold-deep:#8A6B22; --on-fill:#FFFFFF;
+    --bad:#B04434; --bad-tx:#8C3327; --bad-bg:#F7E3E0;
+    --attn:#B8860B; --attn-tx:#7A5D1C; --attn-bg:#F7EFD6;
+    --good-tx:#1F6248; --good-bg:#E4F0EA;
+    --r-sm:6px; --r:8px; --r-md:12px; --r-lg:16px;
+  }
+  @media (prefers-color-scheme:dark){
+    :root:not([data-theme="light"]){
+      --ground:#14161A; --surface:#1C2027; --surface-2:#242932;
+      --line:#333A45; --line-soft:#2A303A;
+      --ink:#E9ECF1; --ink-2:#B4BCC8; --ink-3:#949DAA;
+      --panel:#0E1014; --panel-ink:#EAF0FA; --panel-quiet:#9BA6B6;
+      --gold:#D9B665; --gold-deep:#C9A24D; --on-fill:#14161A;
+      --bad:#D97066; --bad-tx:#E79A93; --bad-bg:#33201E;
+      --attn:#D9B23C; --attn-tx:#E8CA6A; --attn-bg:#332C16;
+      --good-tx:#8FD3B0; --good-bg:#1B3129;
+    }
+  }
+  :root[data-theme="dark"]{
+    --ground:#14161A; --surface:#1C2027; --surface-2:#242932;
+    --line:#333A45; --line-soft:#2A303A;
+    --ink:#E9ECF1; --ink-2:#B4BCC8; --ink-3:#949DAA;
+    --panel:#0E1014; --panel-ink:#EAF0FA; --panel-quiet:#9BA6B6;
+    --gold:#D9B665; --gold-deep:#C9A24D; --on-fill:#14161A;
+    --bad:#D97066; --bad-tx:#E79A93; --bad-bg:#33201E;
+    --attn:#D9B23C; --attn-tx:#E8CA6A; --attn-bg:#332C16;
+    --good-tx:#8FD3B0; --good-bg:#1B3129;
+  }
+
+  body{ background:var(--ground); color:var(--ink); font-family:var(--sans);
+        font-size:15px; line-height:1.55; }
+  .wrap{ max-width:1060px; margin:0 auto; padding:34px 24px 72px;
+         display:flex; flex-direction:column; gap:34px; }
+  h1{ font-size:29px; font-weight:700; margin:6px 0 0; letter-spacing:-.01em; text-wrap:balance; }
+  h2{ font-size:19px; font-weight:700; margin:0; letter-spacing:-.005em; }
+  p{ margin:0; max-width:74ch; }
+  .eyebrow{ font-size:10px; letter-spacing:.15em; text-transform:uppercase;
+            color:var(--ink-3); font-weight:700; }
+  .lede{ color:var(--ink-2); font-size:16px; }
+  .quiet{ color:var(--ink-3); font-size:13px; }
+  section{ display:flex; flex-direction:column; gap:14px; }
+  .rule{ height:1px; background:var(--line); }
+
+  /* ── the platform's table, reproduced ─────────────────────────── */
+  .scroll{ overflow-x:auto; border:1px solid var(--line); border-radius:var(--r-lg);
+           background:var(--surface); }
+  table{ width:100%; border-collapse:collapse; font-size:13px; min-width:660px; }
+  th,td{ text-align:left; padding:10px 13px; border-bottom:1px solid var(--line-soft);
+         vertical-align:middle; }
+  th+th, td+td{ border-left:1px solid var(--line-soft); }
+  thead th{ font-size:10.5px; letter-spacing:.09em; text-transform:uppercase;
+            font-weight:700; background:var(--panel); color:var(--panel-ink);
+            white-space:nowrap; border-bottom:0; }
+  tbody tr:last-child td{ border-bottom:0; }
+  td.idx{ color:var(--ink-3); font-family:var(--mono); width:56px; white-space:nowrap; }
+  td.cc{ text-align:center; }
+  .grip{ display:inline-flex; flex-direction:column; gap:3px; width:14px;
+         vertical-align:middle; margin-right:7px; }
+  .grip i{ display:block; height:2px; background:var(--ink-3); border-radius:1px; }
+
+  .fld{ font:inherit; font-size:14px; display:inline-block; padding:6px 9px;
+        border:1px solid var(--line); border-radius:var(--r);
+        background:var(--surface); color:var(--ink); }
+  .fld.name{ width:calc(100% - 62px); text-align:left; }
+  .fld.mono{ font-family:var(--mono); text-align:center; }
+  .fld.sel{ padding-right:24px; position:relative; }
+  .fld.tgt{ width:100%; font-family:var(--mono); text-align:center; }
+  .ph{ color:var(--ink-3); }
+  .caret{ color:var(--ink-3); font-size:10px; margin-left:6px; }
+  .iconbtn{ display:inline-flex; align-items:center; justify-content:center;
+            width:26px; height:24px; border-radius:var(--r-sm); color:var(--ink-3);
+            vertical-align:middle; }
+  .iconbtn.hid{ background:var(--attn-bg); color:var(--attn-tx); }
+  .xb{ color:var(--ink-3); margin-left:4px; }
+  .addrow td{ color:var(--gold-deep); }
+  .addrow a{ color:var(--gold-deep); text-decoration:underline; text-underline-offset:3px; }
+  .dash{ color:var(--ink-3); }
+
+  /* the one thing on the page that wears colour: the cell that changes */
+  .spot{ outline:2px solid var(--gold); outline-offset:-1px; border-radius:var(--r-sm);
+         background:color-mix(in srgb, var(--gold) 12%, transparent); }
+
+  .statecap{ display:flex; align-items:baseline; gap:10px; flex-wrap:wrap; }
+  .tag{ font-size:10px; letter-spacing:.12em; text-transform:uppercase; font-weight:700;
+        padding:3px 8px; border-radius:var(--r-sm); }
+  .tag.now{ background:var(--surface-2); color:var(--ink-2); border:1px solid var(--line); }
+  .tag.next{ background:var(--gold); color:var(--on-fill); }
+
+  /* ── the three-step sequence ──────────────────────────────────── */
+  .steps{ display:grid; grid-template-columns:repeat(auto-fit,minmax(210px,1fr)); gap:0;
+          border:1px solid var(--line); border-radius:var(--r-lg); overflow:hidden;
+          background:var(--surface); }
+  .step{ padding:16px 18px; display:flex; flex-direction:column; gap:9px;
+         border-left:1px solid var(--line-soft); }
+  .step:first-child{ border-left:0; }
+  .step .k{ font-size:10px; letter-spacing:.12em; text-transform:uppercase;
+            color:var(--ink-3); font-weight:700; }
+  .step .v{ font-family:var(--mono); font-size:14px; color:var(--ink); }
+  .step .n{ font-size:13px; color:var(--ink-3); }
+
+  /* ── where it lands ───────────────────────────────────────────── */
+  .places{ border:1px solid var(--line); border-radius:var(--r-lg);
+           background:var(--surface); overflow:hidden; }
+  .place{ display:grid; grid-template-columns:1.5fr 1fr auto; gap:16px 20px;
+          padding:15px 18px; border-top:1px solid var(--line-soft); align-items:center; }
+  .place:first-child{ border-top:0; }
+  .place .path{ font-size:13px; color:var(--ink-2); }
+  .place .path b{ color:var(--ink); font-weight:600; }
+  .place .what{ font-size:13px; color:var(--ink-3); }
+  .place .cell{ display:flex; align-items:center; gap:10px; white-space:nowrap; }
+  .arrow{ color:var(--ink-3); }
+  @media (max-width:720px){ .place{ grid-template-columns:1fr; } }
+
+  /* ── notes ────────────────────────────────────────────────────── */
+  .notes{ display:grid; grid-template-columns:repeat(auto-fit,minmax(280px,1fr)); gap:16px; }
+  .note{ border:1px solid var(--line); border-radius:var(--r-md); padding:15px 17px;
+         background:var(--surface); display:flex; flex-direction:column; gap:7px; }
+  .note.cost{ border-color:var(--attn); background:var(--attn-bg); }
+  .note.cost .h{ color:var(--attn-tx); }
+  .note .h{ font-size:10px; letter-spacing:.12em; text-transform:uppercase; font-weight:700;
+            color:var(--ink-3); }
+  .note p{ font-size:13.5px; color:var(--ink-2); }
+  .note.cost p{ color:var(--attn-tx); }
+  ul{ margin:0; padding-left:19px; display:flex; flex-direction:column; gap:6px;
+      font-size:14px; color:var(--ink-2); max-width:74ch; }
+  li b{ color:var(--ink); }
+  .miss{ color:var(--bad-tx); font-weight:700; font-style:italic; font-size:13px; }
+</style>
+
+<div class="wrap">
+
+  <header>
+    <div class="eyebrow">SMP &middot; mockup for sign-off &middot; 2 September 2026</div>
+    <h1>Where the unit picker opens</h1>
+    <p class="lede" style="margin-top:8px">A measure with no target yet shows an em&#8209;dash in the Unit column, so
+      the unit can only be set after the number. This is the change, and the four
+      places in the platform it lands.</p>
+  </header>
+
+  <section>
+    <div class="statecap"><h2>Your Key measures, as they are today</h2>
+      <span class="tag now">Today</span></div>
+    <p class="quiet">The screen you sent. Rows 1 and 2 have a target, so they get the picker;
+      rows 3 and 4 have none, so the column has nowhere to keep a unit and says so.</p>
+    <div class="scroll">
+      <table>
+        <thead><tr><th>#</th><th>Measure</th><th class="cc">Dir.</th><th class="cc">Unit</th>
+          <th class="cc">Target</th><th class="cc">Compiled</th></tr></thead>
+        <tbody>
+          <tr>
+            <td class="idx"><span class="grip"><i></i><i></i><i></i></span>1</td>
+            <td><span class="fld name">Non&#8209;Xerox monthly average revenue</span>
+              <span class="iconbtn">&#128065;</span><span class="xb">&times;</span></td>
+            <td class="cc"><span class="fld mono sel">&ge;<span class="caret">&#9662;</span></span></td>
+            <td class="cc"><span class="fld sel">M EGP<span class="caret">&#9662;</span></span></td>
+            <td class="cc"><span class="fld tgt">37.5M EGP</span></td>
+            <td class="cc"><span class="fld sel">Average<span class="caret">&#9662;</span></span></td>
+          </tr>
+          <tr>
+            <td class="idx"><span class="grip"><i></i><i></i><i></i></span>2</td>
+            <td><span class="fld name">Contribution margin</span>
+              <span class="iconbtn hid">&#128065;</span><span class="xb">&times;</span></td>
+            <td class="cc"><span class="fld mono sel">&ge;<span class="caret">&#9662;</span></span></td>
+            <td class="cc"><span class="fld sel">M EGP<span class="caret">&#9662;</span></span></td>
+            <td class="cc"><span class="fld tgt">50 M EGP</span></td>
+            <td class="cc"><span class="fld sel">Sum<span class="caret">&#9662;</span></span></td>
+          </tr>
+          <tr>
+            <td class="idx"><span class="grip"><i></i><i></i><i></i></span>3</td>
+            <td><span class="fld name">Revenue contribution per category</span>
+              <span class="iconbtn">&#128065;</span><span class="xb">&times;</span></td>
+            <td class="cc"><span class="fld mono sel">&ge;<span class="caret">&#9662;</span></span></td>
+            <td class="cc"><span class="dash spot" style="display:inline-block;padding:4px 12px"
+                  title="Set a target first &mdash; the unit is written with it">&mdash;</span></td>
+            <td class="cc"><span class="fld tgt"><span class="ph">Missing</span></span></td>
+            <td class="cc"><span class="fld sel">Latest<span class="caret">&#9662;</span></span></td>
+          </tr>
+          <tr>
+            <td class="idx"><span class="grip"><i></i><i></i><i></i></span>4</td>
+            <td><span class="fld name">Time to market for new brand launches</span>
+              <span class="iconbtn">&#128065;</span><span class="xb">&times;</span></td>
+            <td class="cc"><span class="fld mono sel">&le;<span class="caret">&#9662;</span></span></td>
+            <td class="cc"><span class="dash spot" style="display:inline-block;padding:4px 12px"
+                  title="Set a target first &mdash; the unit is written with it">&mdash;</span></td>
+            <td class="cc"><span class="fld tgt"><span class="ph">Missing</span></span></td>
+            <td class="cc"><span class="fld sel">Latest<span class="caret">&#9662;</span></span></td>
+          </tr>
+          <tr class="addrow"><td class="idx">+</td>
+            <td colspan="5"><a href="#nowhere" onclick="return false">Add a measure</a></td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <section>
+    <div class="statecap"><h2>The same table, proposed</h2>
+      <span class="tag next">Proposed</span></div>
+    <p class="quiet">The picker is always drawn. Nothing else in the row moves, and the control is
+      the one already sitting two rows above it &mdash; no new shape is introduced.</p>
+    <div class="scroll">
+      <table>
+        <thead><tr><th>#</th><th>Measure</th><th class="cc">Dir.</th><th class="cc">Unit</th>
+          <th class="cc">Target</th><th class="cc">Compiled</th></tr></thead>
+        <tbody>
+          <tr>
+            <td class="idx"><span class="grip"><i></i><i></i><i></i></span>1</td>
+            <td><span class="fld name">Non&#8209;Xerox monthly average revenue</span>
+              <span class="iconbtn">&#128065;</span><span class="xb">&times;</span></td>
+            <td class="cc"><span class="fld mono sel">&ge;<span class="caret">&#9662;</span></span></td>
+            <td class="cc"><span class="fld sel">M EGP<span class="caret">&#9662;</span></span></td>
+            <td class="cc"><span class="fld tgt">37.5M EGP</span></td>
+            <td class="cc"><span class="fld sel">Average<span class="caret">&#9662;</span></span></td>
+          </tr>
+          <tr>
+            <td class="idx"><span class="grip"><i></i><i></i><i></i></span>2</td>
+            <td><span class="fld name">Contribution margin</span>
+              <span class="iconbtn hid">&#128065;</span><span class="xb">&times;</span></td>
+            <td class="cc"><span class="fld mono sel">&ge;<span class="caret">&#9662;</span></span></td>
+            <td class="cc"><span class="fld sel">M EGP<span class="caret">&#9662;</span></span></td>
+            <td class="cc"><span class="fld tgt">50 M EGP</span></td>
+            <td class="cc"><span class="fld sel">Sum<span class="caret">&#9662;</span></span></td>
+          </tr>
+          <tr>
+            <td class="idx"><span class="grip"><i></i><i></i><i></i></span>3</td>
+            <td><span class="fld name">Revenue contribution per category</span>
+              <span class="iconbtn">&#128065;</span><span class="xb">&times;</span></td>
+            <td class="cc"><span class="fld mono sel">&ge;<span class="caret">&#9662;</span></span></td>
+            <td class="cc"><span class="fld sel spot">%<span class="caret">&#9662;</span></span></td>
+            <td class="cc"><span class="fld tgt"><span class="ph">Missing</span></span></td>
+            <td class="cc"><span class="fld sel">Latest<span class="caret">&#9662;</span></span></td>
+          </tr>
+          <tr>
+            <td class="idx"><span class="grip"><i></i><i></i><i></i></span>4</td>
+            <td><span class="fld name">Time to market for new brand launches</span>
+              <span class="iconbtn">&#128065;</span><span class="xb">&times;</span></td>
+            <td class="cc"><span class="fld mono sel">&le;<span class="caret">&#9662;</span></span></td>
+            <td class="cc"><span class="fld sel spot"><span class="ph">&mdash;</span><span class="caret">&#9662;</span></span></td>
+            <td class="cc"><span class="fld tgt"><span class="ph">Missing</span></span></td>
+            <td class="cc"><span class="fld sel">Latest<span class="caret">&#9662;</span></span></td>
+          </tr>
+          <tr class="addrow"><td class="idx">+</td>
+            <td colspan="5"><a href="#nowhere" onclick="return false">Add a measure</a></td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p class="quiet">Row 3 has had <b>%</b> picked, with no number typed yet. Row 4 has been left
+      alone: an unset picker still reads as an em&#8209;dash, so a row nobody has touched looks
+      almost exactly as it does today.</p>
+  </section>
+
+  <section>
+    <h2>What happens when you use it</h2>
+    <p>The unit has never been a field of its own &mdash; it lives inside the target
+      (<span style="font-family:var(--mono)">37.5M EGP</span> is one value the column splits for display).
+      So with no number yet, the unit is held on its own until one arrives to join it. This is
+      already how a tactic&rsquo;s outcome behaves.</p>
+    <div class="steps">
+      <div class="step"><div class="k">1 &middot; Pick the unit</div>
+        <div class="v">Target &nbsp;<span class="miss">Missing</span></div>
+        <div class="n">The row still owes a target. The count, the red word and Submit&rsquo;s
+          refusal are all unchanged.</div></div>
+      <div class="step"><div class="k">2 &middot; Type the number</div>
+        <div class="v">Target &nbsp;90</div>
+        <div class="n">The number takes the row&rsquo;s unit as you leave the box.</div></div>
+      <div class="step"><div class="k">3 &middot; Stored</div>
+        <div class="v">Target &nbsp;90%</div>
+        <div class="n">One value, spelt the way the plan has always spelt it. Nothing new is stored
+          and nothing is migrated.</div></div>
+    </div>
+  </section>
+
+  <section>
+    <h2>Where I am fixing it &mdash; four places, one cell</h2>
+    <p class="quiet">The same column, drawn by two shared builders. Changing it once changes all four;
+      changing one and not the others is how the two halves of the product drift apart.</p>
+    <div class="places">
+      <div class="place">
+        <div class="path"><b>A business unit</b> &rsaquo; Strategy &rsaquo; Plan &rsaquo; a pillar</div>
+        <div class="what">Key measures &mdash; the table you sent</div>
+        <div class="cell"><span class="dash">&mdash;</span><span class="arrow">&rarr;</span>
+          <span class="fld sel"><span class="ph">&mdash;</span><span class="caret">&#9662;</span></span></div>
+      </div>
+      <div class="place">
+        <div class="path"><b>A business unit</b> &rsaquo; Strategy &rsaquo; Overview</div>
+        <div class="what">Key objectives &mdash; 3&#8209;year and This year</div>
+        <div class="cell"><span class="dash">&mdash;</span><span class="arrow">&rarr;</span>
+          <span class="fld sel"><span class="ph">&mdash;</span><span class="caret">&#9662;</span></span></div>
+      </div>
+      <div class="place">
+        <div class="path"><b>The group</b> &rsaquo; Foundation</div>
+        <div class="what">Key objectives &mdash; the same table, one level up</div>
+        <div class="cell"><span class="dash">&mdash;</span><span class="arrow">&rarr;</span>
+          <span class="fld sel"><span class="ph">&mdash;</span><span class="caret">&#9662;</span></span></div>
+      </div>
+      <div class="place">
+        <div class="path"><b>A supporting function</b> &rsaquo; Overview</div>
+        <div class="what">Key objectives &mdash; both formats, pillars and capabilities</div>
+        <div class="cell"><span class="dash">&mdash;</span><span class="arrow">&rarr;</span>
+          <span class="fld sel"><span class="ph">&mdash;</span><span class="caret">&#9662;</span></span></div>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <h2>What does not change</h2>
+    <div class="notes">
+      <div class="note"><div class="h">Reading mode</div>
+        <p>Untouched. A target still prints as the whole value it always did, and a row with
+          nothing still says <span class="miss">Missing</span>.</p></div>
+      <div class="note"><div class="h">Filling gaps</div>
+        <p>A custodian filling gaps keeps today&rsquo;s rule: they set a unit where a target
+          exists, and a blank row stays the office&rsquo;s. Say the word if you want that too.</p></div>
+      <div class="note"><div class="h">Every stored figure</div>
+        <p>No score moves, nothing is migrated, and the workbook, the deck and the archives
+          read exactly as they read now.</p></div>
+      <div class="note cost"><div class="h">The one cost</div>
+        <p>A target holding only a unit is not a usable target, so it must keep counting as
+          <b>Missing</b> &mdash; on the page and on the server. On the demo plan that moves nothing
+          (0 of 274 targets are non&#8209;numeric). On your tenant, a target written as words
+          (<i>TBD</i>, <i>Maintain</i>) would start counting as Missing.</p></div>
+    </div>
+  </section>
+
+  <div class="rule"></div>
+
+  <section>
+    <h2>What I need from you</h2>
+    <ul>
+      <li><b>The four places</b> &mdash; all of them, or the measures table only?</li>
+      <li><b>The cost above</b> &mdash; a unit with no number still counts as Missing. Yes?</li>
+      <li><b>Fill gaps</b> &mdash; leave as it is today, or let a custodian pick a unit on a blank row too?</li>
+    </ul>
+  </section>
+
+</div>

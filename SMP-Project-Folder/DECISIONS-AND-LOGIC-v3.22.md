@@ -26979,9 +26979,245 @@ saying so. Doubling is a display fault; that would be a data one.
 and cleans nothing, so the row in his screenshot reads `8 M EGP M EGP` until
 the figure is entered again. Said rather than swept up: a migration over
 reported figures is not something to do on the way past.
+---
+
+## §245 — THE FUNCTIONS ARE ON THE FUNCTION HALF, IN ONE LIST (2026-09-01)
+
+Islam, looking at what §244 shipped: ***"merch and marketing and cf should be
+with functions not units"***, and, of the two bands drawn for sign-off:
+***"don't split functions planning in pillars from functions planning in
+projects they are functions reporting."***
+
+**§244 FOUND THE HOLE AND PUT THE ROWS IN THE WRONG PLACE.** That a supporting
+function planning in pillars had no row at all is unchanged and was real: the
+function half asks for capabilities, which such a function has none of by
+construction (§59), and the unit half read `activeKeys()`, which is units — so
+Consumer Finance could be a week late and the page the office watches would
+carry no row for it.
+
+**THE PLACEMENT IS HIS AND THE COLUMN HEADING IS THE ARGUMENT.** That block
+sits under **Business unit**, which a supporting function is not. §244 reasoned
+from the three COUNT columns — a pillars function counts objectives, measures
+and tactics exactly as a unit does, so no new column, no second vocabulary, no
+band — and every word of that is true and answers a question nobody was asking.
+**This board is scanned for *who owes a report*, and a function owes one as a
+function whatever shape its plan takes.** *A correct argument about the columns
+is not an argument about the place.*
+
+**AND THE FORMAT IS NOT A GROUPING.** Two bands were drawn — *planning in
+pillars* and *planning in projects*, each naming its own vocabulary — and he
+refused them. He is right: how a function plans is a fact about its own pages,
+not about its place on this board, and splitting the list by it makes somebody
+looking for Marketing decide which half to look in first. **ONE band, one list,
+in the register's own order.** The shape decides only which builder draws the
+row — `boardRow()` for a pillars function, the capability row for the rest —
+inside the builder, where nobody scanning the page has to know about it (§59:
+the FORMAT decides, never the `fn:` prefix).
+
+**SO THE BAND STOPPED NAMING ONE VOCABULARY.** It read *"N functions reporting
+in capabilities — key objectives, outcomes, and deliverables and milestones"*,
+which was true of every row beneath it until a pillars function joined the
+list. **A sentence true of only some of the rows under it is worse than no
+sentence** (§35), and describing what the reader can already see is furniture
+(1b-ii). It says **"N functions reporting"** — his own words. The mapped
+columns keep the per-cell hovers that already explained them (§124), which is
+where that explanation belonged in the first place.
+
+**TWO LISTS BEHIND IT, because the totals must have exactly the membership the
+rows have** — §108.1's miscount is the parts growing while the divisor did not.
+`boardUnitTargets()` is units; `boardFunctionTargets()` is every function that
+can be asked; `cycleTotals()` walks both and reads each subject with its own
+counters through `boardPlansLikeUnit()`.
+
+**AND THE MOCKUP WAS DRAWN FROM THE PROTOTYPE, WHICH HE COULD NOT READ.** It
+carried a `Care (function)` row, and his tenant has no such function — so the
+one screen he was being asked to sign off was populated with names that mean
+nothing to him. Recorded because the instruction that followed is general:
+***"stop showing mockups in the prototupe work on the client."***
+
+`checks/cycle-board.py` asserts the placement AND that there is exactly ONE
+band — a build that grouped the two formats satisfies every "it is with the
+functions" assertion on its own — plus that the function list is the register's
+own order with both shapes genuinely present (§113.8). **8 red** on §244's
+build. `setup-overview.py`'s board-size assertion moved with it, asking where
+the product lists a pillars function rather than naming a half (§94.8).
+
+---
+
+## §246 — THE CYCLE NOTE IS A LINE SOMEBODY WROTE, OR IT IS NOT THERE (2026-09-01)
+
+Islam, having had §243's optional notes slide: ***"for functions who already
+didn't fill the notes an achievments slide it's still appearing. should we add
+a hide button there for this slide as an extra fix?"***
+
+**THE GATE WAS RIGHT AND WHAT IT READ WAS NOT.** §243 draws that slide only
+`if (unote)`, and measured on the demo it behaves perfectly: delete the note,
+15 slides and no notes slide; write one, 16 and one. What it reads is
+`REVIEW.note[key]`, and **the deck's own note box is `contenteditable` and
+wrote `box.textContent` into that map on every keystroke** — with no trim and
+no delete. Until §243 that box was drawn on **every** deck, so anybody who
+clicked into it and pressed space, or typed a word and deleted it, left a note
+made of whitespace. **Whitespace is truthy.** §104.10's trap in a third place:
+*the falsy test is not the same question as "did somebody say something".*
+
+**ONE READER AND ONE WRITER.** Five places read this value and two wrote it,
+and a definition of *there is a note* living in five places is one that
+disagrees with itself the first time somebody tightens one of them (§53.5).
+`cycleNote()` and `setCycleNote()` in `lib`-side `config-data.js`; the deck
+box, the reporting page's textarea, the Performance card, both deck builders
+and `fnEverReported()` all go through them.
+
+**TRIMMED ON READ AS WELL AS ON WRITE**, so the notes already sitting in a
+client's database behave correctly today and **nothing is migrated** — this is
+a value that is only ever displayed. **And the emptied key is DELETED** (§50.6),
+so a note never written and one written and cleared are the same absence rather
+than two states nothing distinguishes.
+
+**NO HIDE BUTTON, AND THE REASON IS THAT IT WOULD BE A SECOND ANSWER.** The
+slide already appears only when there is something on it; a control to hide a
+slide that is only drawn when it has content is a switch for a state that
+cannot occur (§61 from the other side). What is genuinely missing is named
+rather than built: **§233 hides ROWS from the presentation and nothing hides a
+generated SLIDE.** That is a feature with a real question inside it — which
+slides may be hidden, and whether hiding one hides what it counts — and it is
+not this fix.
+
+`checks/notes-slide.py` measures all three deck shapes (a unit, a function
+planning in pillars, a function planning in projects) with the note absent,
+with a space, a newline and tabs-and-spaces, and with a real note — the last so
+a build that never drew the slide at all cannot pass (§113.8). **10 red** on
+the build before.
+### §231.5 — THE PLATFORM REGISTERS ITS OWN WORKER, AND A HANG IS NOT A SILENCE
+
+Islam, testing §231 on a second account: *"the notifications are not working
+despite I accepted it."* Asked to run one line in the console, his main account
+answered **REGISTERED** and the test account's promise **never settled at all**.
+
+**THAT PENDING PROMISE IS THE WHOLE FAULT.** `sw.js` is registered from the
+GATE only (§26: *one origin-wide scope covers both pages*) — true, and
+sufficient while the worker merely cached the shell, because the gate is the way
+in. It stopped being sufficient the moment a feature on the PLATFORM needed the
+worker to EXIST. A browser that has never completed a gate load — a fresh
+profile, a private window, a session that opened the platform directly (§32) —
+has no registration, and `navigator.serviceWorker.ready` on such a browser
+**never resolves**. Measured: **0 registrations, still pending after three
+seconds, and the bell reading ON the whole time.**
+
+**A HANG IS NOT A FAILURE, WHICH IS WHY IT WAS SILENT.** It does not reject, so
+the `.catch` never runs, and every caller believes it succeeded. §171's rule
+one layer down: a save that fails and says nothing is indistinguishable from one
+that worked, and so is a promise that never settles.
+
+Three things follow. The platform **registers the worker itself** — harmless
+twice, since the browser returns the existing registration, so it never needs to
+know whether the gate got there first. The wait is **raced against a clock**,
+because a promise that may never settle must never be the only thing an outcome
+depends on. And the bell gains a **fifth state**: allowed-but-not-registered,
+which said nothing before and now says what happened and offers to try again
+rather than switching off something that never came on (§61, §226.2's shape).
+
+**AND THE FIX'S OWN FIRST BUILD REPEATED THE FAULT IT WAS FIXING.** The
+`subscribe()` call had its own `.catch` that set a flag and said nothing, so the
+outer handler never saw the rejection and the bell went on reading ON and
+promising a box — measured, with the subscribe genuinely failing. §124 inside
+§231.5, found by driving it rather than by reading it.
+
+**TWO OF THE CHECK'S OWN FAILURES WERE THE CHECK** (§100.3, twice in one run):
+the stub did not serve `sw.js` at all, so `register()` rejected on a content
+type and a correct build reported as a browser that refused; and section 15's
+stand-in supplied only `ready`, not `getRegistration` — *a stand-in that models
+less than the thing it stands in for reports a working build as broken.* A
+third was a real assertion that had become wrong: *"pressing it again turns them
+back on"* read the bell's composite state and so conflated the PERSON'S switch
+with whether this DEVICE is registered, which are exactly the two facts this
+section separated.
+
+### §231.6 — IS IT WORKING?
+
+§123 built this for the assistant and gave the reason: *"it is not working"
+sends somebody to look at everything, and naming the step sends them to one
+page.* Notifications are the same shape and worse — four links, and **every one
+of them fails invisibly by design**: a device that never registered, a key never
+minted, a library that did not load (§231.3 made that quiet on purpose), a push
+service that refused. Until this existed neither the office nor I could tell
+them apart, and the only way to find out was a console command.
+
+**Test on this device** walks the chain and reports where it stops, in the panel
+that already holds *Test the assistant*, drawn by that button's own renderer
+(§53.5) and only while the switch is on (§61). **It makes a REAL send**, because
+a chain that is only inspected is a chain nobody has walked — a key can be
+present and refused, a device registered and long gone — and it goes to the
+asker's own devices and nobody else's: a diagnostic that could reach somebody
+else's screen is one nobody should press. **It stores nothing** (§35), and **it
+reads without repairing**, asserted: changing things from a diagnostic is how a
+diagnostic becomes the thing that broke it.
+
+**IT RE-REGISTERS THIS DEVICE BEFORE ASKING.** The server can only report what
+it HOLDS, so a browser that allowed notifications and never registered would
+otherwise be told *none of your devices is registered* without the platform
+having tried.
+
+---
+
+## §247 — THE OFFICE STARTS A CONVERSATION
+
+Islam: *"from the platform inbox allow the smo to initiate a message with
+someone."*
+
+Until now the office could only ever **answer**. With nobody having written in
+there was no way to reach them from the Inbox at all — the one direction the
+whole page is built for was missing its other half.
+
+**IT IS A FLAG ON THE REPLY, NOT AN ACTION OF ITS OWN.** Everything a message
+from the office does is already written once, in the reply path: the
+conversation leaving the waiting list by the act rather than by remembering
+(§71), the email chase when they are away (§97.5), the box on their screen
+(§231). A second endpoint would be a second copy of all of it, and two copies of
+one rule drift (§53.5). What starting adds is exactly one thing — the
+conversation may not exist yet — so that is exactly what the flag does.
+
+**AND THE PERSON MUST BE ONE.** `ensureThread` will happily mint a row for any
+string, so a typo would create a conversation with nobody: visible in the queue
+for ever, answerable by no one. Checked against the **stored** register, never
+against what the browser sent (§74.2), and against the **active** register,
+because a retired person cannot sign in to read it.
+
+**ONE CONVERSATION PER PERSON SURVIVES UNTOUCHED** (§97). Starting one with
+somebody who has already written in finds their thread and carries on into it.
+This can never make a second — `chat_threads.person_key` is the primary key —
+and it is asserted rather than assumed.
+
+**THE CONTROL IS IN THE COLUMN IT ACTS ON**, Islam's A, chosen from two
+placements drawn in this very page (§41.9). The list it adds to is directly
+below it, and a conversation started here appears there. The alternative — the
+page header, where every other Setup page puts its buttons (§130) — sits above
+the split, so it reads as belonging to the whole page and is the furthest point
+on the screen from the list it adds to. **The cost was stated before he chose**:
+the search box gives up about 60px, and it is asserted that it keeps its line.
+
+**IT IS THE THREAD PANE, NOT A DIALOG.** That pane is where a conversation is
+read and answered; starting one is the same act with the name still to be
+chosen. So opening a conversation leaves the form, and so does Cancel — one
+pane, one thing on it.
+
+**SAID, NOT DISABLED** (§221): pressing Send with nobody chosen, or with nothing
+written, says **which half is missing** rather than sitting dead for a reason
+nobody states.
+
+**A SEND LANDS ON THE RECORD** (§144's rule): the form closes and the
+conversation it just made opens, which is the only way to see that it went.
+
+**THE COST IS SAID ON THE MOCKUP RATHER THAN DISCOVERED LATER**: somebody who is
+not on the platform that day receives an email. That is what a reply already
+does, and it means starting a conversation is not a quiet act.
+
+**AND ONE OF THE FIRST PROBE'S FAILURES WAS THE PROBE.** It reported the search
+and the button on two lines by comparing their `top` values — two controls of
+two heights on one line have two tops (§122.4, already written down once). The
+middles are what agree, and the check asserts those.
 
 
-## §245 — A TACTIC IS JUDGED BY WHAT IT PRODUCED (2026-09-02)
+## §248 — A TACTIC IS JUDGED BY WHAT IT PRODUCED (2026-09-02)
 
 Islam, from his own plan: *"in the planning the tactics have outcomes that we
 need to have in our tactics plan so we can measure the progress against ...

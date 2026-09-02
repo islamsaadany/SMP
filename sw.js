@@ -260,7 +260,15 @@
    saved work, and a refusal can only name what actually travelled. Name checked
    against origin/main serving "smp-shell-v3.96-home-is-never-blocked"; confirm
    again immediately before the push (§94.16). */
-const SHELL = "smp-shell-v4.21-tactic-outcome";
+/* v4.22-tactic-outcome — §248: a tactic is judged by what it produced. The
+   outcome carries a direction, a target, a unit and a compile rule, reported
+   into its own field (outActual) so nothing already stored moves. THE NAME
+   COLLIDED (§94.12, again): this branch and main both independently wrote
+   v4.21, which git merges without a word while the bytes differ — so v4.22.
+   Name checked against origin/main serving
+   "smp-shell-v4.21-office-starts-a-conversation"; confirm again immediately
+   before the push (§94.16). */
+const SHELL = "smp-shell-v4.22-tactic-outcome";
 const ASSETS = [
   "/",
   "/index.html",

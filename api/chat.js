@@ -364,6 +364,101 @@ module.exports = async function handler(req, res) {
        to somebody else's conversation and read every reply that person is
        sent — the same rule that makes `/api/state` read the person off the
        session and never off the payload (§185). */
+    /* ── IS IT WORKING? (§231.6) ──────────────────────────────────────
+       §123 built exactly this for the assistant and gave the reason: "it is
+       not working" sends somebody to look at everything, and naming the step
+       sends them to one page. Notifications are the same shape and worse —
+       four links, every one of them failing invisibly by design.
+
+       IT MAKES A REAL SEND, because a chain that is only inspected is a chain
+       nobody has walked: a key can be present and refused, a device
+       registered and long gone. And it STORES NOTHING — it answers about this
+       moment, and a stored answer goes stale where nobody can see it (§35). */
+    if (action === "pushTest") {
+      const steps = [];
+      /* THE WORD IS THE STEP'S TO CHOOSE (§124): "present" is not "working",
+         and a row that says the second about the first is the fault that
+         section exists to record. */
+      const step = function (name, state, detail, word) {
+        steps.push({ name: name, state: state, detail: detail || null, word: word || null });
+      };
+
+      if (!cfg.on) {
+        step("The chat", "off", "The whole chat is switched off, so nothing is sent.");
+        return send(res, 200, { ok: true, steps: steps });
+      }
+      step("The chat", "ok", null, "on");
+
+      if (!cfg.popup) {
+        step("Notifications", "off",
+             "Switched off for the company on this page. Nobody is notified.");
+        return send(res, 200, { ok: true, steps: steps });
+      }
+      step("Notifications", "ok", "Switched on for the company.", "on");
+
+      const h = await push.health(client, me.key);
+
+      /* THE LIBRARY. It is loaded lazily precisely so its absence cannot take
+         the chat down (§231.3) — which means its absence is now silent, and
+         this is where it stops being silent. */
+      if (!h.library) {
+        step("The sending library", "fail",
+             (h.libraryWhy || "It did not load.") +
+             " Notifications cannot be sent until the deployment carries it.");
+        return send(res, 200, { ok: true, steps: steps });
+      }
+      step("The sending library", "ok", null, "loaded");
+
+      if (!h.key) {
+        step("This platform's key", "fail",
+             h.keyWhy || "No key pair could be made or read.");
+        return send(res, 200, { ok: true, steps: steps });
+      }
+      step("This platform's key", "ok",
+           (h.keyFrom === "env" ? "Set in the environment." : "Made by the platform itself.") +
+           " Sending as " + h.subject + ".", "present");
+
+      /* THIS DEVICE. A browser can allow notifications and still never have
+         registered — a hang rather than a refusal, which is what §231.5 was
+         about — so what is counted is what the SERVER holds, not what the
+         browser believes. */
+      if (!h.devices) {
+        step("Your devices", "fail",
+             (h.devicesWhy ? h.devicesWhy + " " : "") +
+             "None of your devices is registered here. Open the conversation " +
+             "in the corner and allow notifications, then press this again.");
+        return send(res, 200, { ok: true, steps: steps });
+      }
+      step("Your devices", "ok",
+           h.devices + (h.devices === 1 ? " device is registered." : " devices are registered."),
+           String(h.devices));
+
+      /* AND THE SEND ITSELF, to this person and nobody else — a diagnostic
+         that could reach somebody else's screen is a diagnostic nobody should
+         press. */
+      const out = await push.sendTo(client, await push.subsOf(client, me.key), {
+        title: "Strategy Office",
+        body: "This is a test. Notifications are working on this device.",
+        tag: "reply"
+      });
+      if (out.sent) {
+        step("A box on your screen", "ok",
+             "Sent to " + out.sent + (out.sent === 1 ? " device" : " devices") +
+             (out.dropped ? ", and " + out.dropped + " that no longer exists was forgotten." : ".") +
+             " If nothing appeared, the last step is your operating system: " +
+             "check that this browser is allowed to show notifications there.",
+             "sent");
+      } else {
+        step("A box on your screen", "fail",
+             (out.why ? out.why + " " : "") +
+             (out.dropped ? "Every registered device turned out to be gone and has been " +
+                            "forgotten — allow notifications again in the corner. "
+                          : "The push service would not take it. ") +
+             "Nothing reached you.");
+      }
+      return send(res, 200, { ok: true, steps: steps });
+    }
+
     if (action === "pushOn") {
       if (!cfg.on || !cfg.popup) {
         return send(res, 403, { ok: false, error: "Notifications are off for this platform." });
@@ -761,8 +856,46 @@ module.exports = async function handler(req, res) {
       const text = str(body.body);
       if (!who) return send(res, 400, { ok: false, error: "Which conversation?" });
       if (!text) return send(res, 400, { ok: false, error: "Nothing to send." });
-      const t = (await client.query(
+      let t = (await client.query(
         "SELECT here_at FROM chat_threads WHERE person_key = $1", [who])).rows[0];
+
+      /* ── THE OFFICE STARTS ONE (§247) ─────────────────────────────
+         Islam: "from the platform inbox allow the smo to initiate a message
+         with someone." Until now the office could only ever ANSWER: with
+         nobody having written in there was no way to reach them from here at
+         all.
+
+         IT IS A FLAG ON THE REPLY, NOT AN ACTION OF ITS OWN. Everything a
+         message from the office does — marking the conversation answered
+         (§71), chasing by email when they are away (§97.5), the box on their
+         screen (§231) — is already written once, here. A second endpoint
+         would be a second copy of all of it, and the two would drift (§53.5).
+         What starting adds is exactly one thing: the conversation may not
+         exist yet.
+
+         AND THE PERSON MUST BE ONE. `ensureThread` will happily mint a row
+         for any string, so a typo would create a conversation with nobody,
+         visible in the queue for ever and answerable by no one — checked
+         against the STORED register, never against what the browser sent
+         (§74.2), and against the ACTIVE register, because a retired person
+         cannot sign in to read it (§35's rule about writing somewhere nobody
+         can reach).
+
+         ONE CONVERSATION PER PERSON SURVIVES UNTOUCHED (§97): starting one
+         with somebody who has already written in finds their thread on the
+         line above and simply carries on into it. This can never make a
+         second — `chat_threads.person_key` is the primary key. */
+      if (!t && body.start === true) {
+        const p = (await client.query(
+          "SELECT key, name FROM people WHERE key = $1 " +
+          "  AND COALESCE(extra->>'active','true') <> 'false'", [who])).rows[0];
+        if (!p) {
+          return send(res, 404, { ok: false, error: "There is no such person on the register." });
+        }
+        await ensureThread(client, p.key, p.name);
+        t = (await client.query(
+          "SELECT here_at FROM chat_threads WHERE person_key = $1", [who])).rows[0];
+      }
       if (!t) return send(res, 404, { ok: false, error: "No conversation with that person." });
 
       /* THE ID COMES BACK, because §188 marks THIS message once the email

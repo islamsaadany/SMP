@@ -249,7 +249,7 @@ function splitCard(name, sub, perf, exec, planned, perfDrill, execDrill, ctx, ct
 /* A heading may carry a class as `{h, cls}` — a plain string still means what
    it always did, so every existing caller is untouched. It exists because a
    column that hides on a narrow window has to hide its HEAD with its cells
-   (§245), and `:nth-child` would silently point at the wrong column the day
+   (§248), and `:nth-child` would silently point at the wrong column the day
    somebody inserts one. */
 function miniTable(head, rows, sort){
   return '<div class="scroll"><table><thead><tr>' +
@@ -559,7 +559,7 @@ function setTargetUnit2(t, u){
   t.outTarget = joinTarget("", cur.value, want);
 }
 
-/* ── A TACTIC'S OUTCOME, ON THE READING SURFACES (§245) ────────────
+/* ── A TACTIC'S OUTCOME, ON THE READING SURFACES (§248) ────────────
    The outcome takes a column beside the figure it is judged by. An empty one
    is a QUIET dash and never the red word: it is not a counted gap, so saying
    "Missing" over a count of nought is §214.4's fault with the sign reversed —
@@ -592,7 +592,7 @@ function tacticRows(ts, unitKey){
   var on = arranging("unit", unitKey);
   return ts.map(function(t, i){
     var pl = tacticPlanned(t), due = tacticDue(t);
-    /* §245: an outcome answers with its own score and its own benchmark; a
+    /* §248: an outcome answers with its own score and its own benchmark; a
        tactic without one is read exactly as it was. `tacticRatio` stays the
        reader for the second case so nothing about it moves. */
     var oc = onOutcome(t), bench = tacticBenchmark(t);
@@ -618,7 +618,7 @@ function tacticRows(ts, unitKey){
       (SMPRules.isHidden(t) ? ' class="hiddenrow"'
         : due && t.actual != null ? '' : ' class="notdue"') + '><td class="idx">' +
       (on ? handle("Reorder " + t.name) : '') +
-      /* §245: the NAME carries the weight now, because the description sits
+      /* §248: the NAME carries the weight now, because the description sits
          under it — two greys at one weight run together as a single block.
          And the outcome leaves this cell for a column of its own: it is what
          the figure beside it is measured against, so it belongs on the line,
@@ -638,7 +638,7 @@ function tacticHead(){
     /* §239: VARIANCE GOES -- the pair beside it already shows it, and the
        column was spending width to restate a subtraction. "Of plan" becomes
        "Progress" so both tables on the page end in the same word. */
-    /* §245: "YTD delivery" becomes "YTD actual" — the word the key measures
+    /* §248: "YTD delivery" becomes "YTD actual" — the word the key measures
        table on this same page already uses, so one page stops having two names
        for the same kind of number, and "delivery" stops being wrong for a row
        measured in stores or in EGP. */
@@ -3653,7 +3653,7 @@ function renderReport(u){
      save so nothing downstream sees a bare number. */
   var entry = function(x){
     var isT = x.kind === "tactic";
-    /* §245: a tactic measured by its OUTCOME is asked for the outcome's
+    /* §248: a tactic measured by its OUTCOME is asked for the outcome's
        figure, in the outcome's own unit, and stores it in `outActual` — never
        in `actual`, which has always meant "% delivered" and is what every
        closed cycle and every archive hold. Same box, different field, and the
@@ -3745,7 +3745,7 @@ function renderReport(u){
 
     var tTable = ts.length
       ? '<h4 class="mini">Tactics</h4>' +
-        /* §245: the Outcome takes a column here too, so somebody entering a
+        /* §248: the Outcome takes a column here too, so somebody entering a
            figure can see what they are being measured against without leaving
            the page. It is a PLAN fact, so a row outside this cycle still shows
            its outcome — the cycle decides what is asked for, not what the plan
@@ -3851,8 +3851,8 @@ function renderReport(u){
     '<div class="card" style="padding:14px 16px">' + (mayAll
       ? '<textarea class="fld" data-unote="' + u.ukey + '" rows="3" style="width:100%;max-width:none" ' +
         'placeholder="What the numbers do not say \u2014 what happened, what is being done, what to expect next.">' +
-        esc(REVIEW.note[u.ukey] || "") + '</textarea>'
-      : '<span class="why" style="margin:0">' + (REVIEW.note[u.ukey] ? esc(REVIEW.note[u.ukey]) : "None.") + '</span>') +
+        esc(cycleNote(u.ukey)) + '</textarea>'
+      : '<span class="why" style="margin:0">' + (cycleNote(u.ukey) ? esc(cycleNote(u.ukey)) : "None.") + '</span>') +
     '</div>';
 
   /* A blocked Submit with no explanation is hostile. If the unit is waiting on
@@ -5350,7 +5350,7 @@ function unitPlanBody(it, u, railed){
                      function(v){ setOr(t, "description", v); })
             : (t.description ? '<span class="why">' + esc(t.description) + '</span>' : '')) +
         '</td>' +
-      /* WHAT IT IS FOR, and WHAT IT SHOULD PRODUCE (§245). Both `textOr`,
+      /* WHAT IT IS FOR, and WHAT IT SHOULD PRODUCE (§248). Both `textOr`,
          because both are prose that must wrap (§189) — a title in an <input>
          is one line by definition and runs off the end. Neither is a counted
          gap: an empty one is quiet, so no existing plan gains 83 red words
@@ -5526,7 +5526,7 @@ function unitPlanBody(it, u, railed){
                  : ["#","Measure","Dir.","Target","Compiled"],
       mRows + addRow((ed || unitCol) ? 6 : 5, "measure", "Add a measure"), sortAttr("measures")) +
     '<h4 class="mini">Tactics <em>\u2014 who carries it, who supports, and in which quarters</em></h4>' +
-    /* §245: Description and Outcome are stored on every tactic and the upload
+    /* §248: Description and Outcome are stored on every tactic and the upload
        has written both since the template existed — the description was
        displayed on NO screen at all and the outcome only as a grey line under
        the name. They are columns now, on the page where the plan is written.

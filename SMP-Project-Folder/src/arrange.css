@@ -1757,7 +1757,7 @@
     font:700 13.5px var(--sans); cursor:pointer; margin:4px 0 0; }
   .nosrv-btn:hover { filter:brightness(1.12); }
 
-/* ── A TACTIC'S OUTCOME (§245) ──────────────────────────────────────────────
+/* ── A TACTIC'S OUTCOME (§248) ──────────────────────────────────────────────
    THE NAME CARRIES THE WEIGHT, because the description now sits under it in
    the same cell on Reporting and Performance — two greys at one weight run
    together as a single block, which is what Islam saw. The Plan splits them
@@ -1805,7 +1805,7 @@ td.tgtcell { width:1px; white-space:nowrap; }
 th .subhd { font-weight:400; }
 
 /* THE DESCRIPTION IS NOT A COLUMN — it sits under the tactic's name on all
-   three surfaces (§245, Islam's choice). What still folds is the TARGET,
+   three surfaces (§248, Islam's choice). What still folds is the TARGET,
    below 880, where seven columns run 44px past a 515px pane and §158 does not
    bend. */
 .narrowtgt { display:none; }

@@ -3455,7 +3455,7 @@
            it. Rejoin them before storing, or every screen downstream reads a
            revenue of "2.7" where it expects "2.7B EGP". */
         var unit = el.dataset.unit || "";
-        /* ── §245: A TACTIC MEASURED BY ITS OUTCOME ───────────────────────
+        /* ── §248: A TACTIC MEASURED BY ITS OUTCOME ───────────────────────
            The box says which field it is for. `outActual` is a figure in the
            outcome's OWN unit — stores, EGP, a per cent — so it is joined with
            its unit and stored whole, exactly as a measure's actual is, and it
@@ -3511,7 +3511,7 @@
       });
     });
     document.querySelectorAll("[data-unote]").forEach(function(el){
-      el.addEventListener("change", function(){ REVIEW.note[el.dataset.unote] = el.value; });
+      el.addEventListener("change", function(){ setCycleNote(el.dataset.unote, el.value); });
     });
     /* ONE HANDLER FOR BOTH SUBMITS (§105). The attribute carries the TARGET --
        a unit key, or `fn:<key>` for a supporting function -- which is the same

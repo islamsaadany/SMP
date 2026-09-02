@@ -386,41 +386,6 @@ body.presenting .chatdock { display:none; }
    already use (§168, §190): the conversations are fine, the connection is not,
    and an alarm colour here would say the opposite. Wider than the empty state,
    because it is a sentence rather than a phrase. */
-/* ── THE OFFICE STARTS A CONVERSATION (§247) ────────────────────────────
-   Islam's placement A: in the column it acts on, beside the search. `.chqtop`
-   was a single input; it is a row now, and the search flexes so the button
-   never wraps below it. */
-.chqtop { display:flex; gap:8px; align-items:center; }
-.chqtop #chqfind { flex:1 1 auto; min-width:0; }
-.chqnew { flex:none; display:inline-flex; align-items:center; gap:6px;
-          border:1px solid var(--line); background:var(--surface); color:var(--ink);
-          border-radius:7px; padding:6px 11px; font-size:var(--fs-note);
-          font-weight:600; line-height:1.2; cursor:pointer; white-space:nowrap; }
-.chqnew:hover { border-color:var(--gold-deep); color:var(--gold-deep); }
-.chqnew:focus-visible { outline:2px solid var(--gold); outline-offset:2px; }
-.chqnew svg { width:14px; height:14px; }
-
-/* It IS the thread pane — this is where a conversation is read and answered,
-   and starting one is that act with the name still to be chosen. */
-.chnew { display:flex; flex-direction:column; gap:14px; padding:16px 18px;
-         height:100%; min-height:0; }
-.chnew-h { font-size:var(--fs-body); font-weight:650; }
-.chnew-f { display:flex; flex-direction:column; gap:5px; }
-.chnew-grow { flex:1 1 auto; min-height:0; }
-.chnew-l { font-size:var(--fs-micro); text-transform:uppercase; letter-spacing:.06em;
-           color:var(--ink-3); font-weight:700; }
-.chnew-sel, .chnew-ta { border:1px solid var(--line); border-radius:8px;
-                        background:var(--surface); color:var(--ink);
-                        font:inherit; font-size:var(--fs-note); padding:9px 11px; }
-.chnew-ta { flex:1 1 auto; min-height:110px; resize:none; line-height:1.5; }
-.chnew-sel:focus-visible, .chnew-ta:focus-visible { outline:2px solid var(--gold);
-                        outline-offset:1px; }
-.chnew-acts { display:flex; gap:8px; align-items:center; }
-.chnew-x { background:none; border:1px solid var(--line); color:var(--ink-2);
-           border-radius:7px; padding:8px 14px; font:inherit;
-           font-size:var(--fs-note); cursor:pointer; }
-.chnew-x:hover { border-color:var(--ink-3); color:var(--ink); }
-
 .chnothing.chqfail { color:var(--ink); max-width:44ch;
                      background:var(--warn-bg); border:1px solid var(--warn);
                      border-radius:8px; padding:14px 16px; }

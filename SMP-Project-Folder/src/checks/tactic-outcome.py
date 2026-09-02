@@ -1,4 +1,4 @@
-"""§245 — a tactic is judged by what it produced.
+"""§248 — a tactic is judged by what it produced.
 
    The claim this file exists to hold is NOT that the columns are drawn: it is
    that (a) nothing already reported changes meaning, and (b) every control
@@ -10,8 +10,10 @@ from playwright.sync_api import sync_playwright
 SRC = "/home/user/SMP/SMP-Project-Folder/src/strategy-management-platform.html"
 CHROME = os.environ.get("SMP_CHROME", "/opt/pw-browsers/chromium-1194/chrome-linux/chrome")
 FAILS = []
+RUN = []
 def ck(msg, cond, detail=""):
     print(("  ok  " if cond else "  FAIL ") + msg + ("" if cond else "  " + str(detail)))
+    RUN.append(msg)
     if not cond: FAILS.append(msg)
 
 def open_plan(pg, edit=False, tab=None):
@@ -255,6 +257,6 @@ with sync_playwright() as p:
     pg.close()
     b.close()
 
-print("\n%d checks, %d failed" % (0, len(FAILS)) if not FAILS else "\nFAILED: %d" % len(FAILS))
+print("\n%d checks, %d failed" % (len(RUN), len(FAILS)))
 for f in FAILS: print("   -", f)
 sys.exit(1 if FAILS else 0)

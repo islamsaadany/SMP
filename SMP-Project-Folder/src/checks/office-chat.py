@@ -47,6 +47,7 @@ def _no_tour(pg):
 
 ROOT = pathlib.Path(__file__).resolve().parents[3]
 HTML = (ROOT / "SMP-Project-Folder/src/strategy-management-platform.html").read_bytes()
+SW = (ROOT / "sw.js").read_bytes()
 SEED = json.loads((ROOT / "db/seed-state.json").read_text())
 PERSON = {"key": "smo", "name": "Mohamed Essam", "role": "super"}
 
@@ -57,6 +58,9 @@ VAPID = base64.urlsafe_b64encode(b"\x04" + bytes(range(64))).decode().rstrip("="
 # What the stub /api/chat answers with, and whether it answers at all.
 # What the browser has told the server about this device (§231).
 PUSH = {"subs": [], "off": []}
+# What the diagnostic answers with (§231.6). A list, so the check can set it
+# per trial the way the assistant's own test does.
+PUSHSTEPS = []
 
 CHAT = {"status": 200, "messages": [], "unread": 0, "thread": None, "polls": 0, "said": [],
         "test": None,
@@ -109,6 +113,12 @@ class H(http.server.BaseHTTPRequestHandler):
             self._send(200, json.dumps({"ok": True, "state": SEED, "person": PERSON}).encode(),
                        "application/json")
             return
+        # §231.5: THE WORKER IS A REAL FILE. Served as the gate would serve
+        # it, or `register()` rejects on the content type and a working build
+        # reports as a browser that refused (§100.3).
+        if self.path.startswith("/sw.js"):
+            self._send(200, SW, "application/javascript")
+            return
         if self.path.startswith("/raya-trade"):
             self._send(200, HTML, "text/html; charset=utf-8")
             return
@@ -151,6 +161,20 @@ class H(http.server.BaseHTTPRequestHandler):
         # §231: THE STUB MODELS THE SERVER. A device says yes and the row is
         # kept here, so the check can read back what the browser actually
         # posted rather than trusting that it meant to.
+        # §247: the office's own message. Recorded so the check can read what
+        # the page actually POSTED — `start` is the whole of what this feature
+        # adds to the server, and a build that dropped it would look identical
+        # on screen (§135's `greet`, found the same way).
+        if body.get("action") == "reply":
+            CHAT["said"].append(body)
+            self._send(200, json.dumps({"ok": True, "here": False,
+                "mailed": {"sent": True, "to": "someone@example.com"}}).encode(),
+                "application/json")
+            return
+        if body.get("action") == "pushTest":
+            self._send(200, json.dumps({"ok": True, "steps": PUSHSTEPS}).encode(),
+                       "application/json")
+            return
         if body.get("action") == "pushOn":
             PUSH["subs"].append(body.get("sub") or {})
             self._send(200, b'{"ok":true}', "application/json")
@@ -1037,8 +1061,15 @@ with sync_playwright() as p:
     # ── BACK ON, AND THE BOX SAYS WHO AND THE FIRST LINE (wording B) ─────
     pg.click("#chatbtn"); pg.wait_for_timeout(250)
     pg.click("#chatbell"); pg.wait_for_timeout(200)
-    ck("pressing it again turns them back on",
-       pg.eval_on_selector("#chatbell", "e => e.getAttribute('aria-pressed')") == "true")
+    # THE SWITCH AND THE DEVICE ARE TWO FACTS NOW (§231.5). This asserted the
+    # bell read `aria-pressed=true`, which conflated "they turned it back on"
+    # with "this device is registered" — and in this harness there is no route
+    # to a push service, so the second is legitimately false and the bell
+    # correctly says so. What belongs here is the PERSON'S switch.
+    ck("pressing it again turns their own switch back on",
+       pg.eval_on_selector("#chatbell", "e => e.getAttribute('aria-label')")
+         != "Notify me on this device",
+       pg.eval_on_selector("#chatbell", "e => e.getAttribute('aria-label')"))
     ck("...and the key is removed rather than set to something (§50.6)",
        pg.evaluate("() => localStorage.getItem('smp.chat.popup')") is None)
     pg.click("#chatclose")
@@ -1249,9 +1280,16 @@ with sync_playwright() as p:
                 return Promise.resolve(held);
               }
             };
+            // §231.5: the platform registers the worker itself now, so the
+            // stand-in has to answer `getRegistration` and `register` as well
+            // as `ready` — a stand-in that models less than the thing it
+            // stands in for reports a working build as broken (§100.3).
+            const reg = { pushManager: mgr };
             Object.defineProperty(navigator, "serviceWorker", {
               configurable: true,
-              get: () => ({ ready: Promise.resolve({ pushManager: mgr }) })
+              get: () => ({ ready: Promise.resolve(reg),
+                            getRegistration: () => Promise.resolve(reg),
+                            register: () => Promise.resolve(reg) })
             });
             window.__held = () => held; }""")
 
@@ -1408,6 +1446,181 @@ with sync_playwright() as p:
        all(c.strip().isdigit() for c in counts), counts)
     pg.goto(URL, wait_until="networkidle")
     pg.wait_for_selector("#chatdock:not([hidden])", timeout=10000)
+
+    # ── 17 · THE PLATFORM SETS ITSELF UP, AND SAYS WHEN IT CANNOT (§231.5)
+    # `sw.js` was registered from the GATE only (§26), and §226 built the whole
+    # feature on `navigator.serviceWorker.ready` — which on a browser that has
+    # never completed a gate load NEVER RESOLVES. Not a rejection, so no catch
+    # runs and nothing anywhere says so. Islam, on a test account: the promise
+    # came back pending and stayed pending, while the bell read ON.
+    print("\n17 · the platform sets itself up, and says when it cannot")
+    fresh = b.new_context(viewport={"width": 1200, "height": 800})
+    fp = fresh.new_page()
+    _no_tour(fp)
+    fp.add_init_script("(" + FAKE_JS + ")('granted');")
+    CHAT["cfg"] = dict(CHAT["cfg"], on=True, popup=True, beat=4000)
+    # STRAIGHT TO THE PLATFORM, never through the gate — which is what a
+    # returning session gets (§32) and what a fresh profile gets.
+    fp.goto(URL, wait_until="networkidle")
+    fp.wait_for_selector("#chatdock:not([hidden])", timeout=15000)
+    fp.click("#chatbtn"); fp.wait_for_timeout(2500)
+    regs = fp.evaluate("() => navigator.serviceWorker.getRegistrations().then(r => r.length)")
+    ck("a browser that never saw the gate still registers the worker", regs >= 1, regs)
+    settled = fp.evaluate("""() => Promise.race([
+        navigator.serviceWorker.ready.then(() => 'resolved'),
+        new Promise(r => setTimeout(() => r('pending'), 3000))])""")
+    ck("...so the wait for it actually finishes", settled == "resolved", settled)
+
+    # AND NOTHING READS AS ON WHILE IT IS NOT. Registering with the push
+    # service itself cannot succeed here (there is no route to one), so this is
+    # the honest place to measure what the bell says when a step fails.
+    fp.wait_for_timeout(11000)                       # past the 8s clock
+    st = fp.evaluate("""() => { const b = document.getElementById('chatbell');
+        return { pressed: b.getAttribute('aria-pressed'), tip: b.title }; }""")
+    ck("a device that could not be registered does not read as on",
+       st["pressed"] == "false", st)
+    ck("...and the hover says so rather than promising a box",
+       "could not" in (st["tip"] or "").lower() or
+       "not finished" in (st["tip"] or "").lower(), st["tip"])
+    ck("...and offers to try again", "try again" in (st["tip"] or "").lower(), st["tip"])
+    fresh.close()
+
+    # ── 18 · IS IT WORKING? (§231.6) ─────────────────────────────────────
+    # §123's shape, for the other feature whose every link fails invisibly.
+    # The stub answers as the real endpoint does, so what is measured is the
+    # button, its wiring and its rendering — the server's own walk is proved
+    # against a real database and a real push service in scripts/test-push.js.
+    print("\n18 · is it working?")
+    pg.evaluate("() => { try { sessionStorage.removeItem('smp.where'); } catch (e) {} }")
+    pg.goto(URL, wait_until="networkidle")
+    pg.wait_for_timeout(1200)
+    pg.click('[data-md="setup"]'); pg.wait_for_timeout(800)
+    pg.click('[data-setupgo="chat"]'); pg.wait_for_timeout(1600)
+    pg.click("[data-chsetmenu]"); pg.wait_for_timeout(500)
+    # THE ROW READS THE TENANT'S OWN SETTING, not the poll's copy of it — this
+    # panel is where the office CHANGES it — so the switch is pressed the way
+    # the office presses it rather than fed in through the stub.
+    pg.evaluate("""()=>{const b=[...document.querySelectorAll('[data-chset="popup"]')]
+        .find(x=>x.dataset.chval==='1'); if(b) b.click();}""")
+    pg.wait_for_timeout(800)
+    ck("the test button is on the Notifications row",
+       pg.evaluate("""() => { const t = document.querySelector('[data-chpoptest]');
+           const r = t && t.closest('.chset-row');
+           return !!r && r.querySelector('[data-chset="popup"]') !== null; }"""))
+    # PRESSABLE, NOT MERELY PRESENT (§70, §93.4) — and the assistant's own test
+    # button was once written into a `change` listener a <button> can never
+    # reach, so it rendered perfectly and did nothing (§123.4).
+    hit = pg.evaluate("""() => { const b = document.querySelector('[data-chpoptest]');
+        const r = b.getBoundingClientRect();
+        const e = document.elementFromPoint(r.left + r.width / 2, r.top + r.height / 2);
+        return e && e.closest('[data-chpoptest]') ? 'test' : (e ? e.tagName : 'nothing'); }""")
+    ck("a click at its centre reaches it", hit == "test", hit)
+    PUSHSTEPS[:] = [
+        {"name": "The chat", "state": "ok", "word": "on", "detail": None},
+        {"name": "Your devices", "state": "fail", "word": None,
+         "detail": "None of your devices is registered here."}]
+    pg.click("[data-chpoptest]"); pg.wait_for_timeout(2600)
+    said = pg.inner_text(".chtest").strip() if pg.query_selector(".chtest") else ""
+    ck("pressing it reports where the chain stops", "Your devices" in said, said[:120])
+    ck("...naming the failure rather than a general 'not working'",
+       "not working" in said.lower() and "your devices" in said.lower(), said[:160])
+    # AND THE GOOD END (§94.2): a check that only sees a failure reported
+    # passes on a build that reports one always.
+    PUSHSTEPS[:] = [
+        {"name": "The chat", "state": "ok", "word": "on", "detail": None},
+        {"name": "Your devices", "state": "ok", "word": "1", "detail": "1 device is registered."},
+        {"name": "A box on your screen", "state": "ok", "word": "sent",
+         "detail": "Sent to 1 device."}]
+    pg.click("[data-chpoptest]"); pg.wait_for_timeout(2600)
+    said = pg.inner_text(".chtest").strip() if pg.query_selector(".chtest") else ""
+    ck("and a working chain says it is working", said.lower().startswith("it is working"), said[:80])
+    ck("...naming the device it reached", "sent to 1 device" in said.lower(), said[:160])
+    pg.click("[data-chsetmenu]"); pg.wait_for_timeout(300)
+
+    # ── 19 · THE OFFICE STARTS A CONVERSATION (§247) ─────────────────────
+    # Until now the office could only ever ANSWER: with nobody having written
+    # in there was no way to reach them from the Inbox at all. Islam picked
+    # placement A — the control in the column it acts on — from two drawn in
+    # this very page.
+    print("\n19 · the office starts a conversation")
+    pg.evaluate("() => { try { sessionStorage.removeItem('smp.where'); } catch (e) {} }")
+    pg.goto(URL, wait_until="networkidle")
+    pg.wait_for_timeout(1200)
+    pg.click('[data-md="setup"]'); pg.wait_for_timeout(800)
+    pg.click('[data-setupgo="chat"]'); pg.wait_for_timeout(1800)
+    ck("there is a way to start one", pg.query_selector("#chqnew") is not None)
+    # PRESSABLE, NOT MERELY PRESENT (§70, §93.4).
+    hit = pg.evaluate("""() => { const b = document.getElementById('chqnew');
+        if (!b) return 'missing'; const r = b.getBoundingClientRect();
+        const e = document.elementFromPoint(r.left + r.width / 2, r.top + r.height / 2);
+        return e && e.closest('#chqnew') ? 'new' : (e ? e.tagName : 'nothing'); }""")
+    ck("a click at its centre reaches it", hit == "new", hit)
+    # AND IT DID NOT PUSH THE SEARCH ONTO A SECOND LINE. One row is not one
+    # `top` (§122.4) — two controls of two heights have two tops — so the
+    # MIDDLES are what agree.
+    row = pg.evaluate("""() => { const t = document.querySelector('.chqtop');
+        const m = [...t.children].map(c => { const r = c.getBoundingClientRect();
+          return Math.round(r.top + r.height / 2); });
+        return { mids: m, spread: Math.max(...m) - Math.min(...m) }; }""")
+    ck("the search keeps its line", row["spread"] <= 2, row)
+
+    pg.click("#chqnew"); pg.wait_for_timeout(700)
+    ck("pressing it opens the form", pg.query_selector("#chnewwho") is not None)
+    n = pg.eval_on_selector_all("#chnewwho option", "o => o.length")
+    ck("...offering the register to write to (%d)" % n, n > 5, n)
+    # A RETIRED PERSON CANNOT SIGN IN, so a conversation with them is one
+    # nobody can read — they are left out, and it is asserted rather than
+    # assumed (§94.2: both ends).
+    live = pg.evaluate("""() => {
+        const keys = [...document.querySelectorAll('#chnewwho option')]
+          .map(o => o.value).filter(Boolean);
+        const dead = (window.PEOPLE || []).filter(p => p.active === false).map(p => p.key);
+        return { offered: keys.length, deadOffered: dead.filter(k => keys.includes(k)),
+                 deadOnRegister: dead.length }; }""")
+    ck("...and never somebody who has been retired",
+       len(live["deadOffered"]) == 0, live)
+
+    # SAID, NOT DISABLED (§221): a Send that is dead for an unstated reason is
+    # a control nobody can act on.
+    pg.click("[data-chnewsend]"); pg.wait_for_timeout(400)
+    said = pg.inner_text("#chnewnote").strip()
+    ck("sending with nobody chosen says which half is missing",
+       "who" in said.lower(), said)
+    pg.select_option("#chnewwho", index=2); pg.wait_for_timeout(300)
+    pg.click("[data-chnewsend]"); pg.wait_for_timeout(400)
+    said = pg.inner_text("#chnewnote").strip()
+    ck("...and with nothing written, the other half", "write" in said.lower(), said)
+
+    # AND WHAT IT ACTUALLY POSTS. `start` is the whole of what this feature
+    # adds to the server — everything else a message from the office does is
+    # already written once, in the reply path (§53.5).
+    del CHAT["said"][:]
+    pg.fill("#chnewsay", "Could you look at the CX definition when you have a moment?")
+    pg.click("[data-chnewsend]"); pg.wait_for_timeout(1800)
+    sent = [x for x in CHAT["said"] if x.get("action") == "reply"]
+    ck("sending posts a reply that may start the conversation", len(sent) == 1, sent)
+    if sent:
+        ck("...naming the person and carrying start",
+           bool(sent[0].get("person")) and sent[0].get("start") is True, sent[0])
+        ck("...with the words that were typed",
+           "CX definition" in (sent[0].get("body") or ""), sent[0].get("body"))
+    # A SEND LANDS ON THE RECORD (§144's rule): the form is gone and the
+    # conversation it just made is open, which is the only way to see it went.
+    ck("and it lands in the conversation it made",
+       pg.query_selector("#chnewwho") is None)
+
+    # CANCEL LEAVES IT, and opening a conversation leaves it too — the two are
+    # one pane, and a form left standing behind an open thread is a second
+    # thing on screen claiming to be the thread.
+    pg.click("#chqnew"); pg.wait_for_timeout(500)
+    pg.click("[data-chnewcancel]"); pg.wait_for_timeout(400)
+    ck("Cancel puts the form away", pg.query_selector("#chnewwho") is None)
+    pg.click("#chqnew"); pg.wait_for_timeout(500)
+    row1 = pg.query_selector("[data-chpick]")
+    if row1:
+        row1.click(); pg.wait_for_timeout(900)
+        ck("...and so does opening a conversation",
+           pg.query_selector("#chnewwho") is None)
 
     # ── 7 · AND A SESSION THE SERVER REFUSES, LAST ON PURPOSE ────────────
     # A refused session takes the corner away rather than leaving a control

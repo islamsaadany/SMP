@@ -384,6 +384,63 @@ console errors (in this cloud environment, run it via a wrapper that points Play
   remove × onto a second line — `inline-block` restores it, and it was found
   by `checks/plan-fields.py` GOING RED, not by reading the cascade, which is
   the argument for that check existing.
+- **THE OFFICE STARTS A CONVERSATION (§247):** Islam — *"from the platform
+  inbox allow the smo to initiate a message with someone."* Until now the office
+  could only ever ANSWER: with nobody having written in there was no way to
+  reach them from the Inbox at all. **IT IS A FLAG ON THE REPLY, NOT AN ACTION
+  OF ITS OWN** — leaving the waiting list by the act (§71), the email chase
+  (§97.5) and the box on their screen (§231) are all written once in the reply
+  path, and a second endpoint would be a second copy of every one of them
+  (§53.5); what starting adds is that the conversation may not exist yet.
+  **AND THE PERSON MUST BE ONE**: `ensureThread` mints a row for any string, so
+  a typo would leave a conversation with nobody in the queue for ever —
+  checked against the STORED, ACTIVE register (§74.2), a retired person refused
+  because they cannot sign in to read it. **ONE CONVERSATION PER PERSON
+  SURVIVES** (§97): starting one with somebody who has written in carries on
+  into their thread, and `person_key` being the primary key is what makes a
+  second impossible. **THE CONTROL IS IN THE COLUMN IT ACTS ON** (Islam's A,
+  from two placements drawn in the real page, §41.9) — the search gives up ~60px
+  and it is asserted that it keeps its line. **IT IS THE THREAD PANE, NOT A
+  DIALOG**, so opening a conversation leaves the form and so does Cancel.
+  **SAID, NOT DISABLED** (§221): Send names which half is missing. **A SEND
+  LANDS ON THE RECORD** (§144). **AND THE FIRST PROBE'S FAILURE WAS THE PROBE**
+  — it compared the two controls' `top` values, and one row is not one top
+  (§122.4).
+- **THE PLATFORM REGISTERS ITS OWN WORKER, AND A HANG IS NOT A SILENCE
+  (§231.5):** Islam, testing on a second account — *"the notifications are not
+  working despite I accepted it."* One console line settled it: his main account
+  answered REGISTERED, the test account's promise **never settled at all**.
+  **`sw.js` IS REGISTERED FROM THE GATE ONLY (§26)** — true and sufficient while
+  the worker merely cached the shell, and not for a moment longer than that: a
+  browser that never completed a gate load (fresh profile, private window, a
+  session opening the platform directly, §32) has no registration, and
+  `navigator.serviceWorker.ready` there **never resolves**. Measured: 0
+  registrations, pending after 3s, bell reading ON throughout. **A HANG IS NOT A
+  FAILURE, WHICH IS WHY IT WAS SILENT** — it does not reject, so no catch runs
+  (§171 one layer down). The platform registers it ITSELF (harmless twice), the
+  wait is RACED AGAINST A CLOCK, and the bell gains a fifth state —
+  allowed-but-not-registered — which says what happened and offers to try again
+  rather than switching off what never came on (§61, §226.2's shape). **AND THE
+  FIX'S FIRST BUILD REPEATED THE FAULT**: `subscribe()`'s own `.catch` set a
+  flag and said nothing, so the bell went on promising a box with the subscribe
+  genuinely failing (§124 inside its own fix, found by driving it). **TWO OF THE
+  CHECK'S FAILURES WERE THE CHECK** (§100.3, twice in one run): the stub never
+  served `sw.js`, so `register()` rejected on a content type; and the stand-in
+  supplied `ready` but not `getRegistration` — *a stand-in that models less than
+  the thing it stands in for reports a working build as broken.*
+- **IS IT WORKING? (§231.6):** §123's argument for the other silent feature —
+  *"it is not working" sends somebody to look at everything, naming the step
+  sends them to one page.* Notifications have FOUR links and **every one fails
+  invisibly by design** (a device that never registered, a key never minted, a
+  library that did not load — §231.3 made that quiet on purpose — a push service
+  that refused). **Test on this device** walks the chain in the panel that
+  already holds *Test the assistant*, drawn by that button's own renderer
+  (§53.5), only while the switch is on (§61). **A REAL SEND**, because an
+  inspected chain is one nobody walked — to the asker's own devices and nobody
+  else's. **Stores nothing** (§35) and **reads without repairing**, asserted.
+  **It re-registers this device before asking**, or a browser that allowed
+  notifications and never registered is told *none of your devices is
+  registered* without the platform having tried.
 - **A FAILED ASK IS NOT AN ANSWER, AND THE INBOX SAID IT WAS (§231.4):** Islam,
   on the Platform Inbox with §231.3's endpoint down — *"all conversations are
   gone!! what happened?"* **NOTHING HAD.** `boxLoadQueue` opened
@@ -442,7 +499,7 @@ console errors (in this cloud environment, run it via a wrapper that points Play
   different targets never touch. Proved able to fail: 11 red on the differ's
   pre-build, and end-to-end on a real Postgres the whole-graph flag fails
   with the reported sentence to the word.
-- **A TACTIC IS JUDGED BY WHAT IT PRODUCED (§245):** Islam — *"the tactics
+- **A TACTIC IS JUDGED BY WHAT IT PRODUCED (§248):** Islam — *"the tactics
   have outcomes that we need to have in our tactics plan so we can measure the
   progress against"*, and *"the outcome needs to have a target and measuring
   unit so it can be reported in the reporting and measured in the performance
@@ -3985,6 +4042,11 @@ python3 checks/welcome.py       # the welcome screen (§148): three viewers over
 python3 checks/setup-rail.py    # the Setup rail fits the window, every entry is reachable
                                 # by scrolling the LIST, and the cap does not move --chrome-h
                                 # (§101.5 — that last one is what licenses the cap at all)
+python3 checks/cycle-board.py    # every subject that reports has a row, the functions are
+                                # in ONE list under one band, and the headline counts each
+                                # exactly once (§244, §245)
+python3 checks/notes-slide.py   # the notes slide appears when somebody wrote a note — and
+                                # whitespace is not a note, on all three deck shapes (§246)
 python3 checks/setup-overview.py      # the Overview agrees with the pages it summarises; it
                                       # MAKES the state, because the demo tenant is all-clear
 python3 checks/setup-overview-live.py # ...and its three server-backed rows, over HTTP, where
@@ -4092,7 +4154,116 @@ prior sessions (on HR_ERP) accidentally reverted agreed-upon designs.
 
 ---
 
-*Last Updated: 2026-09-01 &mdash; **&sect;242: a supporting function's report
+*Last Updated: 2026-09-02 &mdash; **&sect;248: a tactic is judged by what it
+produced.** Islam, from his own plan: *"the tactics have outcomes that we need
+to have in our tactics plan so we can measure the progress against"*, and
+*"the outcome needs to have a target and measuring unit so it can be reported
+in the reporting and measured in the performance accordingly."* **BOTH FIELDS
+ALREADY EXISTED AND WERE BEING SWALLOWED** &mdash; `description` and `outcome`
+are stored on every tactic and the workbook has read both since the template
+existed; the outcome rendered in ONE place and the description in NONE.
+**THE OUTCOME IS SHAPED AS A MEASURE**, so `measureDue`/`measureScore`/
+`measureDueLabel` serve it unchanged (&sect;239's rule, not a second copy).
+**THE FIGURE IS ITS OWN FIELD AND THAT IS THE WHOLE MIGRATION STORY** &mdash;
+`t.actual` has always meant "% delivered", so an outcome's number in that box
+would make a tactic at 45 read 750% against `&ge; 6 #`; it reports into
+**`outActual`**, the five fields ride in `extra`, so **no migration and no
+schema change**, and every closed cycle reads as it did. **THE SWITCH IS PER
+TACTIC, WHEN A HUMAN TYPES**: a tactic is asked and scored the old way until
+its outcome has both a target AND a figure. **Proved, not argued: 19 subjects
+read off the shipped build and this one, byte-identical.** **NOT A SETTING**
+(put to him, and refused): an empty outcome is an em-dash, never the red word,
+and is not a counted gap. **FOUR EQUAL BOXES IN ONE CELL** (his) at
+`--tw` 96px, measured; the description sits **under the tactic's name**, his
+choice between two drawn shapes, and the first build got it wrong and shipped a
+column. &sect;158 comes free (seven columns fit everywhere), so only the TARGET
+folds, below 880, and **never while the pen is open** (&sect;61). **AND THE
+UNIT PICKER IS ALWAYS DRAWN** &mdash; hiding it until a target exists reads as a
+control that failed to render; a unit is held ALONE until a number joins it,
+which needed `outUnitOf()`, because `targetParts` falls back to
+`{value: the whole string, unit: ""}` and a truthiness test threw the unit away
+on the first keystroke. The workbook carries the three new facts or a round trip
+drops every target (&sect;22), with Q1&ndash;Q4 moving G:J &rarr; J:M because a
+validation range is a POSITION (&sect;65). `outActual` joins `REPORT.tactic` in
+the same edit as the box that writes it (&sect;42). Proved able to fail: **31
+red** on the previous build &mdash; and its first run DIED rather than reported
+(&sect;215), so every evaluate degrades now. **AND THE MERGE FOUND
+&sect;94.12's COLLISION AGAIN**: this branch and main had both independently
+written shell `v4.21`, which git merges without a word while the bytes differ
+&mdash; `v4.22-tactic-outcome`, confirmed against `origin/main` immediately
+before the push. Renumbered &sect;245 &rarr; &sect;248 because main took that
+number and the two after it while this was being built. 44/44 on
+`checks/tactic-outcome.py` &middot; 454/0 authoriser &middot; 126/0 differ
+&middot; `ytd-proration`, `table-fit`, `cycle-board` green &middot; 19 subjects
+unmoved against main's own build &middot; full `qa.py` sweep ERRORS none.*
+
+
+*Earlier: 2026-09-01 &mdash; **&sect;245: the functions are on the
+function half, in one list; &sect;246: the cycle note is a line somebody
+wrote.** Islam, looking at what &sect;244 shipped &mdash; *"merch and marketing
+and cf should be with functions not units"* &mdash; and, of the two bands drawn
+for sign-off, *"don't split functions planning in pillars from functions
+planning in projects they are functions reporting."* **&sect;244 FOUND THE HOLE
+AND PUT THE ROWS IN THE WRONG PLACE**: that such a function had no row at all
+stands, and the placement was argued from the three COUNT columns &mdash; true,
+and an answer to a question nobody was asking. The board is scanned for *who
+owes a report*, that block sits under **Business unit**, and a function owes one
+as a function whatever shape its plan takes. **THE FORMAT IS NOT A GROUPING**:
+how a function plans is a fact about its own pages, and splitting the list by it
+makes somebody looking for Marketing decide which half to look in first &mdash;
+one band, one list, the register's own order, with the shape deciding only which
+builder draws the row (&sect;59). **So the band stopped naming one vocabulary**
+(*"reporting in capabilities &mdash; key objectives, outcomes, and deliverables
+and milestones"* was true of every row beneath it until a pillars function
+joined): it says *"N functions reporting"*, and the mapped columns keep the
+per-cell hovers that always explained them (&sect;35, &sect;124, 1b-ii).
+**Two lists behind it**, because the totals must have exactly the membership the
+rows have (&sect;108.1). **AND THE MOCKUP WAS DRAWN FROM THE PROTOTYPE, WHICH HE
+COULD NOT READ** &mdash; it carried a *Care (function)* row and his tenant has no
+such function, so the screen he was asked to sign off was populated with names
+that mean nothing to him: *"stop showing mockups in the prototupe work on the
+client."* `checks/cycle-board.py` asserts the placement AND that there is exactly
+ONE band (a build that grouped the formats passes every "it is with the
+functions" assertion on its own): **8 red** on &sect;244's build.
+**AND &sect;246, from the same session** &mdash; *"for functions who already
+didn't fill the notes an achievments slide it's still appearing."* &sect;243's
+gate is right and what it READ was not: the deck's note box is
+`contenteditable` and wrote `box.textContent` into `REVIEW.note` on every
+keystroke, untrimmed and never deleted, and until &sect;243 that box was drawn
+on EVERY deck &mdash; so a click and a space, or a word typed and deleted, left
+a note made of whitespace, **and whitespace is truthy** (&sect;104.10's trap in a
+third place: the falsy test is not the question *did somebody say something*).
+**ONE READER AND ONE WRITER** &mdash; `cycleNote()` / `setCycleNote()`, where
+five places read and two wrote (&sect;53.5) &mdash; **trimmed on READ as well as
+on write**, so what is already in a client's database behaves today and nothing
+is migrated, and **the emptied key is DELETED** (&sect;50.6). **No hide button**:
+a control to hide a slide only drawn when it has content is a switch for a state
+that cannot occur (&sect;61 from the other side); what is genuinely missing is
+named instead &mdash; &sect;233 hides ROWS and nothing hides a generated SLIDE,
+which is a feature with a real question inside it. `checks/notes-slide.py`:
+**10 red** on the build before.*
+
+*Earlier the same day: **&sect;244: every subject that reports is on
+the cycle board.** Told that a function planning in pillars appears nowhere on
+the page the office watches, Islam: *"put them on the unit half."* It was
+filtered off BOTH halves &mdash; the function half asks for capabilities, which
+a pillars function has none of by construction (&sect;59), and the unit half read
+`activeKeys()`, which is units &mdash; so such a function could be a week late
+and the board would carry no row for it. `boardUnitTargets()` is the one list
+the rows AND `cycleTotals()` walk, so the headline can never disagree with what
+is drawn (&sect;53.5, and &sect;108.1's miscount where the parts grew and the
+divisor did not); its counts come from `reportedCount(unitLike(t))`, the same
+function its own Reporting page draws from. **AND THE BOARD PRINTED "Care"
+TWICE** &mdash; this tenant has a unit and a function of that name, and the
+function half rendered `f.name` where `placeLabel()` already answers it
+(&sect;65, &sect;93.12); found by the new check, not by reading. **AND ONE
+CHECK HELD A COPY OF BOARD MEMBERSHIP**: `setup-overview.py` computed the board's
+size as `activeKeys().length + boardFunctionKeys().length`, which this change
+makes incomplete &mdash; it asks `boardUnitTargets()` now, the third time this
+file has recorded a literal outliving the decision behind it (&sect;214.3).
+`checks/cycle-board.py`: **7 red** on the pre-&sect;244 build.*
+
+*Earlier the same day: **&sect;242: a supporting function's report
 is asked for, and its objectives can be answered; &sect;243: the review deck,
 and the weights its objectives are scored by.** Islam, from a live client
 session: *"for the functions planning in pillars the key objectives reporting
@@ -4160,6 +4331,38 @@ functions off entirely, so the office cannot see whether one has reported; and
 usable number, so an uploaded figure against an unusable target is stored and
 silently unscored &mdash; deriving it would MOVE existing scores, so it was put
 to Islam separately.*
+*Earlier: 2026-09-01 &mdash; **&sect;241: write only what changed
+&mdash; MERGED FLAG-OFF, OFF BY DEFAULT, NOT ON THE LIVE LINE.** The big performance
+item: every save still rewrites all 31 tables even for a one-word edit
+(&sect;195 already batched it, so this is scaling/efficiency, not the acute
+fire). Built on the work branch and MERGED FLAG-OFF after a safety review for
+Islam's presentation &mdash; it touches nothing existing until the env var is
+flipped, so merging changed no behaviour. `writeStateIncremental` in `lib/state-io.js` reads the change
+list the client already sends (&sect;210/&sect;215), works out which SUBJECTS
+changed &mdash; a business unit, a capability, a supporting function &mdash; and
+rewrites only those, using the SAME row builders as the full writer
+(`rowsOf`/`colsFor` lifted to module scope so a rewritten subject is
+byte-identical). It is **never wrong, only sometimes unoptimised**:
+`planSubjects` returns null for any shape it does not handle (settings, the
+register, a reorder, an add/remove, a group-own-field change, a whole-graph
+post) and the caller falls back to the full `writeState`. FK cascades make one
+DELETE clear a subject's subtree. **Gated behind `SMP_INCREMENTAL_WRITE=1`, OFF
+by default**, so merging it later changes nothing until the env var is flipped.
+**Proved byte-identical to the full rewrite** by
+`scripts/test-incremental-write.js` (17 change shapes, each written BOTH ways
+and compared; the optimised shapes asserted handled, the fallback shapes
+asserted fallen-back), and proved end-to-end through the real handler under the
+&sect;240 concurrency lock with the flag on. Round-trip, two-tabs and
+concurrent all stay green flag-off (the module-scope refactor changed no
+behaviour). **MERGED FLAG-OFF and re-verified before the merge**: the full DB
+suite (round-trip, two-tabs, concurrent) green BOTH flag-off and flag-on, the
+17-shape equivalence test byte-identical, and a 120-save concurrency stress lost
+nothing either way (flag-on ran ~4x faster). **NEXT, after the presentation:**
+set the env var on a test deployment, watch a few saves, then decide. Fully
+revertible &mdash; flag-off is dormant, so a `git revert` (or leaving the flag
+off) is a no-op on live behaviour. Not handled yet (falls back, correct):
+capability reorder/add-remove, group-own fields, all settings/register tables
+&mdash; each a safe future extension.*
 
 *Earlier: 2026-09-01 &mdash; **&sect;240: saves take turns, so two at
 once cannot lose data.** Islam, on the performance sweep: *"what if people

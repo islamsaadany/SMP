@@ -518,7 +518,7 @@ function planWorkbook(u){
         return acc;
       }, []) },
 
-    /* §245: THE OUTCOME'S THREE FACTS TRAVEL WITH IT, or downloading a plan
+    /* §248: THE OUTCOME'S THREE FACTS TRAVEL WITH IT, or downloading a plan
        and uploading it back would silently drop every target the office had
        set — §22's contract is that an upload AUTHORS the plan, so a column the
        file does not carry is a column the plan loses.

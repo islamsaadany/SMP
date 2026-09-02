@@ -23,7 +23,7 @@
      end_in_mind   carried as its own ASPIRATION row, as the source file does
    ────────────────────────────────────────────────────────────────────── */
 
-/* §245: a tactic's outcome carries its own direction, target and compile rule,
+/* §248: a tactic's outcome carries its own direction, target and compile rule,
    so all three travel with the plan — an upload AUTHORS (§22), and a column the
    file does not carry is one the plan loses on a download-and-re-upload. */
 var PLAN_COLS = ["id","type","parent_id","source_slide","name","description","outcome",

@@ -395,6 +395,74 @@ async function signIn(who, password) {
     await client.query("DELETE FROM push_subscriptions");
     await setChat({});
 
+    /* ── THE OFFICE STARTS A CONVERSATION (§247) ────────────────────
+       Islam: "from the platform inbox allow the smo to initiate a message
+       with someone." It is a FLAG on the reply, not an action of its own —
+       everything a message from the office does is written once, here — so
+       what is proved is the one thing starting adds. */
+    console.log("\nTHE OFFICE STARTS A CONVERSATION (§247).");
+    await setChat({});
+    /* A conversation that does not exist yet. */
+    await client.query("DELETE FROM chat_messages WHERE person_key = $1", [OTHER.key]);
+    await client.query("DELETE FROM chat_threads WHERE person_key = $1", [OTHER.key]);
+    /* WITHOUT THE FLAG IT IS STILL REFUSED, which is what keeps that refusal
+       meaningful for a plain reply to a bad key (§94.2: both ends). */
+    r = await call(smo.cookie, { action: "reply", person: OTHER.key, body: "hello" });
+    ok(r.status === 404, "a reply into no conversation is still refused", r.status);
+    r = await call(smo.cookie, { action: "reply", person: OTHER.key, body: "First word.",
+                                 start: true });
+    ok(r.status === 200 && r.body.ok, "...and with `start` it goes", r.status);
+    let msgs = (await client.query(
+      "SELECT from_office, body FROM chat_messages WHERE person_key = $1 ORDER BY id",
+      [OTHER.key])).rows;
+    ok(msgs.length === 1 && msgs[0].from_office === true && msgs[0].body === "First word.",
+       "the conversation exists with the office's message in it", msgs);
+    /* IT IS NOT WAITING ON THE OFFICE — they just wrote it (§71: answered by
+       the act, never by remembering to set it). */
+    let th = (await client.query(
+      "SELECT waiting FROM chat_threads WHERE person_key = $1", [OTHER.key])).rows[0];
+    ok(th && th.waiting === false, "...and it is not waiting on the office", th);
+
+    /* ONE CONVERSATION PER PERSON SURVIVES (§97). Starting one with somebody
+       who already has a thread carries on into it — this can never make a
+       second, because person_key is the primary key. */
+    r = await call(smo.cookie, { action: "reply", person: OTHER.key, body: "Second word.",
+                                 start: true });
+    ok(r.status === 200, "starting again with the same person is accepted", r.status);
+    const threads = (await client.query(
+      "SELECT count(*)::int n FROM chat_threads WHERE person_key = $1", [OTHER.key])).rows[0].n;
+    ok(threads === 1, "...and there is still exactly one conversation", threads);
+    msgs = (await client.query(
+      "SELECT count(*)::int n FROM chat_messages WHERE person_key = $1", [OTHER.key])).rows[0];
+    ok(msgs.n === 2, "...with both messages in it", msgs.n);
+
+    /* A TYPO MUST NOT MAKE A CONVERSATION WITH NOBODY. `ensureThread` will
+       mint a row for any string, so this is checked against the STORED
+       register (§74.2) — and a row nobody can open would sit in the queue for
+       ever, answerable by no one. */
+    r = await call(smo.cookie, { action: "reply", person: "nobodyatall",
+                                 body: "hello?", start: true });
+    ok(r.status === 404, "a person who is not on the register is refused", r.status);
+    ok(((await client.query(
+      "SELECT count(*)::int n FROM chat_threads WHERE person_key = $1",
+      ["nobodyatall"])).rows[0]).n === 0, "...and no conversation is left behind");
+
+    /* AND A RETIRED PERSON CANNOT SIGN IN TO READ IT. */
+    await client.query(
+      "UPDATE people SET extra = COALESCE(extra,'{}'::jsonb) || '{\"active\":\"false\"}'::jsonb " +
+      "WHERE key = $1", [OTHER.key]);
+    await client.query("DELETE FROM chat_threads WHERE person_key = $1", [OTHER.key]);
+    r = await call(smo.cookie, { action: "reply", person: OTHER.key, body: "hello?",
+                                 start: true });
+    ok(r.status === 404, "a retired person is refused", r.status);
+    await client.query("UPDATE people SET extra = extra - 'active' WHERE key = $1", [OTHER.key]);
+
+    /* AND IT IS THE OFFICE'S ALONE — the endpoint already refuses everybody
+       else every action below `reply`, and this rides on that rather than
+       adding a gate of its own. */
+    r = await call(her.cookie, { action: "reply", person: "smo", body: "hi", start: true });
+    ok(r.status === 403, "and somebody who is not the office cannot start one", r.status);
+
     console.log("\nAND THE OFFICE'S POLL CARRIES WHAT IS WAITING (§225).");
     await setChat({});
     r = await call(smo.cookie, { action: "mine" });
